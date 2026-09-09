@@ -594,7 +594,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           ['methodology', t('upload.methodologyLabel')],
         ].map(([field, label]) => (
           <Box key={field}>
-            <TextField fullWidth label={label} multiline minRows={3}
+            <TextField fullWidth label={label} multiline rows={15}
               value={toLines(draft.paper[field as keyof UploadDraft['paper']] as string[] | undefined)}
               onChange={event => setPaperField(field as keyof UploadDraft['paper'], fromLines(event.target.value))} />
             <EvidenceNotes
