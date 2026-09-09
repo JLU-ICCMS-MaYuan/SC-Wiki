@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Card, CardContent, Chip, Collapse, FormControl,
   FormHelperText, InputLabel, MenuItem, Select, TextField, Typography,
@@ -144,6 +144,64 @@ interface MaterialStatesEditorProps {
   onError?: (message: string) => void
 }
 
+interface SpaceGroupAutocompleteProps {
+  value: string
+  options: SpaceGroupOption[]
+  label: string
+  onCommit: (value: string) => void
+  onSelect: (value: SpaceGroupOption) => void
+}
+
+const SpaceGroupAutocomplete: React.FC<SpaceGroupAutocompleteProps> = ({ value, options, label, onCommit, onSelect }) => {
+  const [inputValue, setInputValue] = useState(value)
+  const inputValueRef = useRef(value)
+  const committedValue = useRef(value)
+
+  useEffect(() => {
+    setInputValue(value)
+    inputValueRef.current = value
+    committedValue.current = value
+  }, [value])
+
+  const commit = (next: string) => {
+    if (next === committedValue.current) return
+    committedValue.current = next
+    onCommit(next)
+  }
+
+  return (
+    <Autocomplete<SpaceGroupOption | string, false, false, true>
+      freeSolo
+      options={options}
+      inputValue={inputValue}
+      value={value}
+      getOptionLabel={option => (typeof option === 'string' ? option : option.symbol)}
+      onChange={(_, selected) => {
+        if (selected && typeof selected !== 'string') {
+          committedValue.current = selected.symbol
+          setInputValue(selected.symbol)
+          inputValueRef.current = selected.symbol
+          onSelect(selected)
+          return
+        }
+        const next = selected || ''
+        setInputValue(next)
+        inputValueRef.current = next
+        commit(next)
+      }}
+      onInputChange={(_, next, reason) => {
+        if (reason === 'input' || reason === 'clear') {
+          setInputValue(next)
+          inputValueRef.current = next
+        }
+        if (reason === 'blur') commit(next)
+      }}
+      onClose={(_, reason) => { if (reason === 'blur') commit(inputValueRef.current) }}
+      renderInput={params => <TextField {...params} label={label} onBlur={event => commit(event.target.value)} />}
+    />
+  )
+}
+
 /**
  * 材料状态编辑区（受控组件）：上传校对页与管理端编辑弹窗共用。
  * 所有编辑逻辑（化学式、分类、元素种类数、维度、晶系与空间群联动、
@@ -166,12 +224,32 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   onError,
 }) => {
   const { t, lang, dict } = useLanguage()
+  const statesRef = useRef(states)
+  statesRef.current = states
   // 折叠状态与元素种类数编辑仅存在于浏览器会话内，不写入草稿、不参与自动保存
   const [collapsedStates, setCollapsedStates] = useState<Record<number, boolean>>({})
   const [elementCountEdits, setElementCountEdits] = useState<Record<number, { text: string; invalid: boolean }>>({})
   const [structureUploading, setStructureUploading] = useState<Record<number, boolean>>({})
   // 未分配候选的目标材料状态下标（纯 UI 态，不写入草稿）
   const [unassignedTarget, setUnassignedTarget] = useState<number | null>(null)
+  const cardCacheRef = useRef(new Map<number, {
+    state: DraftMaterialState
+    isCollapsed: boolean
+    uploading: boolean
+    element: React.ReactElement
+  }>())
+  const cardEnvironmentRef = useRef<{
+    catalogs: ClassificationCatalogs | null
+    catalogLoading: boolean
+    catalogError: string
+    structureCandidates?: StructureCandidate[]
+    spaceGroups: SpaceGroupOption[]
+    paperType?: string
+    issues?: ValidationIssue[]
+    readOnly: boolean
+    lang: 'zh' | 'en'
+    dict: ReturnType<typeof useLanguage>['dict']
+  } | null>(null)
 
   // 只读模式下任何编辑都不应触达父级：变更函数统一在此拦截
   const emitStates = (nextStates: DraftMaterialState[]) => {
@@ -179,7 +257,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   }
 
   const updateMaterialState = (index: number, field: keyof DraftMaterialState, value: unknown) => {
-    emitStates(states.map((item, itemIndex) =>
+    emitStates(statesRef.current.map((item, itemIndex) =>
       itemIndex === index ? { ...item, [field]: value } : item))
   }
 
@@ -187,7 +265,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   const changeSpaceGroupNumber = (index: number, raw: string) => {
     const trimmed = raw.trim()
     const parsed = trimmed === '' ? null : Number(trimmed)
-    emitStates(states.map((item, itemIndex) => {
+    emitStates(statesRef.current.map((item, itemIndex) => {
       if (itemIndex !== index) return item
       if (parsed != null && Number.isInteger(parsed) && parsed >= 1 && parsed <= 230) {
         return {
@@ -236,7 +314,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   const setAllCollapsed = (value: boolean) => {
     if (readOnly) return
     setCollapsedStates(value
-      ? Object.fromEntries(states.map((_, index) => [index, true]))
+      ? Object.fromEntries(statesRef.current.map((_, index) => [index, true]))
       : {})
   }
 
@@ -246,7 +324,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     const trimmed = raw.trim()
     if (trimmed === '') {
       setElementCountEdits(current => ({ ...current, [index]: { text: raw, invalid: false } }))
-      emitStates(states.map((item, itemIndex) =>
+      emitStates(statesRef.current.map((item, itemIndex) =>
         itemIndex === index ? { ...item, element_count: null, element_count_locked: false } : item))
       return
     }
@@ -256,7 +334,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
       return
     }
     setElementCountEdits(current => ({ ...current, [index]: { text: raw, invalid: false } }))
-    emitStates(states.map((item, itemIndex) =>
+    emitStates(statesRef.current.map((item, itemIndex) =>
       itemIndex === index ? { ...item, element_count: parsed, element_count_locked: true } : item))
   }
 
@@ -266,7 +344,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     field: 'lambda_ep' | 'omega_log_k' | 'mu_star',
     value: number | null,
   ) => {
-    emitStates(states.map((state, index) => index === stateIndex ? {
+    emitStates(statesRef.current.map((state, index) => index === stateIndex ? {
       ...state,
       tc_results: (state.tc_results || []).map((item, itemIndex) =>
         itemIndex === resultIndex
@@ -287,7 +365,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
   // 新增 Tc 必须先选择方法，不能从论文或材料状态类型推断计算上下文。
   const addTcResult = (index: number) => {
-    emitStates(states.map((item, itemIndex) => {
+    emitStates(statesRef.current.map((item, itemIndex) => {
       if (itemIndex !== index) return item
       const entry: DraftTcResult = {
         result_kind: 'theoretical',
@@ -299,13 +377,13 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   }
 
   const removeTcResult = (stateIndex: number, resultIndex: number) => {
-    emitStates(states.map((item, itemIndex) => itemIndex === stateIndex ? {
+    emitStates(statesRef.current.map((item, itemIndex) => itemIndex === stateIndex ? {
       ...item, tc_results: (item.tc_results || []).filter((_, tcIndex) => tcIndex !== resultIndex),
     } : item))
   }
 
   const updateTcResult = (stateIndex: number, resultIndex: number, field: keyof DraftTcResult, value: unknown) => {
-    emitStates(states.map((state, index) => index === stateIndex ? {
+    emitStates(statesRef.current.map((state, index) => index === stateIndex ? {
       ...state,
       tc_results: (state.tc_results || []).map((item, itemIndex) =>
         itemIndex !== resultIndex ? item : (() => {
@@ -328,7 +406,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   }
 
   const updateProperty = (stateIndex: number, propertyIndex: number, field: keyof DraftKeyProperty, value: unknown) => {
-    emitStates(states.map((state, index) => index === stateIndex ? {
+    emitStates(statesRef.current.map((state, index) => index === stateIndex ? {
       ...state,
       properties: (state.properties || []).map((item, itemIndex) =>
         itemIndex === propertyIndex ? { ...item, [field]: value } : item),
@@ -336,7 +414,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   }
 
   const addEnergyAboveHull = (index: number) => {
-    emitStates(states.map((item, itemIndex) => itemIndex === index ? {
+    emitStates(statesRef.current.map((item, itemIndex) => itemIndex === index ? {
       ...item,
       properties: [...(item.properties || []), {
         name: ENERGY_ABOVE_HULL_NAME, name_raw: ENERGY_ABOVE_HULL_NAME, value_raw: '', unit: 'eV/atom',
@@ -345,25 +423,25 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   }
 
   const addProperty = (index: number) => {
-    emitStates(states.map((item, itemIndex) => itemIndex === index ? {
+    emitStates(statesRef.current.map((item, itemIndex) => itemIndex === index ? {
       ...item,
       properties: [...(item.properties || []), { name: '', name_raw: '', value_raw: '', unit: '' }],
     } : item))
   }
 
   const removeProperty = (stateIndex: number, propertyIndex: number) => {
-    emitStates(states.map((item, itemIndex) => itemIndex === stateIndex ? {
+    emitStates(statesRef.current.map((item, itemIndex) => itemIndex === stateIndex ? {
       ...item, properties: (item.properties || []).filter((_, propIndex) => propIndex !== propertyIndex),
     } : item))
   }
 
   const deleteState = (index: number) => {
-    emitStates(states.filter((_, itemIndex) => itemIndex !== index))
+    emitStates(statesRef.current.filter((_, itemIndex) => itemIndex !== index))
   }
 
   // 新材料状态只写统一物性模块；旧字段仅保留给迁移前草稿的兼容编辑。
   const addState = () => {
-    emitStates([...states, {
+    emitStates([...statesRef.current, {
       material: '',
       structure_families: [],
       element_count: null,
@@ -453,6 +531,13 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     return <FormHelperText error>{issue.message}</FormHelperText>
   }
 
+  const environment = { catalogs, catalogLoading, catalogError, structureCandidates, spaceGroups, paperType, issues, readOnly, lang, dict }
+  const previousEnvironment = cardEnvironmentRef.current
+  if (!previousEnvironment || Object.entries(environment).some(([key, value]) => value !== previousEnvironment[key as keyof typeof previousEnvironment])) {
+    cardCacheRef.current.clear()
+    cardEnvironmentRef.current = environment
+  }
+
   return (
     <Box sx={readOnly ? { pointerEvents: 'none', '& .MuiButton-root': { display: 'none' } } : undefined}>
       <Box sx={{ mt: 3 }}>
@@ -471,8 +556,11 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
         <Box data-testid="material-states-list" sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 1.5, mt: 1.5 }}>
           {states.map((state, index) => {
-            const stateCandidates = (structureCandidates || []).filter(candidate => candidate.material_state_ref === `material_states[${index}]`)
             const isCollapsed = !readOnly && Boolean(collapsedStates[index])
+            const uploading = Boolean(structureUploading[index])
+            const cached = cardCacheRef.current.get(index)
+            if (cached && cached.state === state && cached.isCollapsed === isCollapsed && cached.uploading === uploading) return cached.element
+            const stateCandidates = (structureCandidates || []).filter(candidate => candidate.material_state_ref === `material_states[${index}]`)
             // 晶系未知时显示全部 230 条空间群，否则仅显示该晶系群号范围内的符号
             const crystalSystem = state.crystal_system || 'unknown'
             const spaceGroupOptions = crystalSystem === 'unknown'
@@ -480,7 +568,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
               : spaceGroups.filter(option => crystalSystemForNumber(option.number) === crystalSystem)
             const hasEnergyAboveHull = (state.properties || []).some(item =>
               [item.name, item.name_raw].some(value => String(value || '').trim().toLowerCase() === ENERGY_ABOVE_HULL_NAME))
-            return (
+            const element = (
               <Card key={index} variant="outlined" sx={{ width: '100%' }}>
                 <CardContent>
                   <Box
@@ -570,29 +658,17 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                         ))}
                       </Select>
                     </FormControl>
-                    <Autocomplete<SpaceGroupOption | string, false, false, true>
-                      freeSolo
-                      options={spaceGroupOptions}
-                      getOptionLabel={option => (typeof option === 'string' ? option : option.symbol)}
+                    <SpaceGroupAutocomplete
                       value={state.reported_space_group_symbol || ''}
-                      onChange={(_, value) => {
-                        if (value && typeof value !== 'string') {
-                          emitStates(states.map((item, itemIndex) => itemIndex === index ? {
-                            ...item,
-                            reported_space_group_symbol: value.symbol,
-                            reported_space_group_number: value.number,
-                            crystal_system: crystalSystemForNumber(value.number),
-                          } : item))
-                          return
-                        }
-                        updateMaterialState(index, 'reported_space_group_symbol', value || null)
-                      }}
-                      onInputChange={(_, value, reason) => {
-                        if (reason === 'input' || reason === 'clear') {
-                          updateMaterialState(index, 'reported_space_group_symbol', value || null)
-                        }
-                      }}
-                      renderInput={params => <TextField {...params} label={t('upload.spaceGroupSymbolField')} />}
+                      options={spaceGroupOptions}
+                      label={t('upload.spaceGroupSymbolField')}
+                      onCommit={value => updateMaterialState(index, 'reported_space_group_symbol', value || null)}
+                      onSelect={value => emitStates(statesRef.current.map((item, itemIndex) => itemIndex === index ? {
+                        ...item,
+                        reported_space_group_symbol: value.symbol,
+                        reported_space_group_number: value.number,
+                        crystal_system: crystalSystemForNumber(value.number),
+                      } : item))}
                     />
                     <TextField label={t('upload.spaceGroupNumberField')} type="number" value={state.reported_space_group_number ?? ''}
                       {...issueProps(`material_states[${index}].reported_space_group_number`)}
@@ -676,7 +752,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       readOnly={readOnly}
                       basePath={`material_states.${index}.property_modules`}
                       issues={(issues || []).map(item => ({ field: item.field.replace(/\[(\d+)\]/g, '.$1'), code: 'schema_validation_failed', message: item.message }))}
-                      onChange={(modules, deletion) => emitStates(states.map((item, itemIndex) => itemIndex === index ? {
+                      onChange={(modules, deletion) => emitStates(statesRef.current.map((item, itemIndex) => itemIndex === index ? {
                         ...item,
                         property_modules: modules,
                         deleted_record_keys: deletion?.deletedRecordKey
@@ -701,6 +777,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                 </CardContent>
               </Card>
             )
+            cardCacheRef.current.set(index, { state, isCollapsed, uploading, element })
+            return element
           })}
           {states.length === 0 && !readOnly && (
             <Alert severity="info">{t('upload.noMaterialStates')}</Alert>

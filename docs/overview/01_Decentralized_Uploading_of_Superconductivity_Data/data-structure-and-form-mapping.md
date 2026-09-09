@@ -59,6 +59,12 @@
 来源（空字符串也有效），同时保留旧字段和 Evidence，避免丢失原始信息。计算 Conditions 和参数仍使用
 原有结构化表单。（[Issue #94](../../specs/94-property-record-editor/spec.md)）
 
+材料状态编辑器按 `DraftMaterialState` 对象引用复用未修改卡片；修改一个状态时，其他状态的字段树不
+重新构造。空间群符号自由输入保存在输入控件本地，选择标准候选、清空或失焦时才写回草稿；候选选择
+仍同步写入空间群编号和晶系。物性记录编辑器按 `record_key` 隔离记录更新，动态 Schema 和客户端校验
+结果按定义与记录引用缓存，定义绑定只在记录定义身份变化时重新加载或绑定。上述优化不改变 Redis 草稿
+字段、自动保存时机、校验语义和提交接口。（[Issue #96](../../specs/96-upload-form-performance/spec.md)）
+
 数值、范围、文本和布尔值通过固定核心列表达；`payload_json` 只保存定义声明的 Conditions、参数和
 预留扩展字段。`0` 与 `false` 是有效值，不能按空值丢弃。每条记录绑定不可变的
 `definition_key + definition_version`，后端依据该版本执行 JSON Schema、JSON Pointer 和业务规则校验。
@@ -160,3 +166,4 @@ Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖�
 
 - [Feature #90：MaterialState 模块化物性与动态表单](../../specs/90-unified-superconductor-properties/spec.md)
 - [Feature #94：物性记录标题、实验条件文本与独立折叠](../../specs/94-property-record-editor/spec.md)
+- [Bug #96：上传解析记录表单选项编辑延迟](../../specs/96-upload-form-performance/spec.md)

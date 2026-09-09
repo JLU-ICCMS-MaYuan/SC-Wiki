@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import {
   Alert, Box, Button, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField, Typography,
 } from '@mui/material'
@@ -132,7 +132,8 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   onDelete,
   onClone,
 }) => {
-  const issues = [...validateRecordClient(record, definition), ...externalIssues]
+  const issues = useMemo(() => [...validateRecordClient(record, definition), ...externalIssues], [record, definition, externalIssues])
+  const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type), [definition, record.record_type])
   const issue = (field: string) => issues.find(item => item.field === field || item.field.endsWith(`.${field}`))?.message
   const fieldPath = (field: string) => basePath ? `${basePath}.${field}` : field
   const update = (patch: Partial<PropertyRecordDraft>) => onChange({ ...record, ...patch })
@@ -255,7 +256,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       {record.value_kind === 'text' && <TextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
       {(record.record_type === 'predicted_tc' || record.record_type === 'measured_tc') && <FormControlLabel control={<Checkbox checked={Boolean(record.is_representative)} disabled={readOnly} onChange={event => update({ is_representative: event.target.checked })} />} label="代表结果" />}
-      {Object.entries(effectivePayloadSchema(definition, record.record_type).properties || {}).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
+      {Object.entries(payloadSchema.properties || {}).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
       {!readOnly && <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
         {onClone && <Button onClick={onClone}>复制记录</Button>}
         {onDelete && <Button color="error" startIcon={<DeleteIcon />} onClick={onDelete}>删除记录</Button>}
