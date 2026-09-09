@@ -92,6 +92,11 @@ const stateIndexFromMessage = (message: string): number | undefined => {
   return Number.isSafeInteger(ordinal) && ordinal > 0 ? ordinal - 1 : undefined
 }
 
+const normalizeIssueField = (field: string): string => field.replace(
+  /\.([0-9]+)(?=\.|$)/g,
+  '[$1]',
+)
+
 const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   taskId, onSubmitted, draftOverride, readOnly = false, statusNote,
 }) => {
@@ -370,13 +375,18 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       if (apiError.status === 409 && apiError.existingPaperId) {
         setError(t('upload.doiExists', { id: apiError.existingPaperId }))
       } else {
-        setError(failureMessage(t, 'submit', reason, t('upload.submitReviewFailed')))
+        const issueMessages = apiError.issues?.map(issue => issue.message).filter(Boolean) || []
+        const feedbackReason = issueMessages.length > 0
+          ? { detail: { code: apiError.code, message: issueMessages.join(t('upload.sentenceSeparator')) } }
+          : reason
+        setError(failureMessage(t, 'submit', feedbackReason, t('upload.submitReviewFailed')))
         if (apiError.issues?.length) {
-          revealIssues(apiError.issues.map(issue => ({
-            field: issue.field,
+          const normalizedIssues = apiError.issues.map(issue => ({
+            field: normalizeIssueField(issue.field),
             stateIndex: stateIndexFromMessage(issue.field),
             message: issue.message,
-          })))
+          }))
+          revealIssues(normalizedIssues)
           return
         }
         // 后端独有的校验规则（材料家族、压强区间等）也要能定位到卡片

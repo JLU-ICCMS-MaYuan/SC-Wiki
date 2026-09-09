@@ -34,6 +34,38 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.clearAllMocks(); clearFormDefinitionCache() })
 
 describe('Issue #94 记录表单', () => {
+  it('定义切换会清理标准记录的自定义键，并在切回时保留原自定义身份', async () => {
+    const customDefinition = {
+      ...definitions.find(item => item.property_code === 'custom')!,
+      module_code: 'superconductive_properties',
+      definition_key: 'record.superconductive_properties.custom',
+    }
+    vi.mocked(api.get).mockImplementation(async path => {
+      if (path.startsWith('/api/form-definitions?')) return [measuredDefinition, customDefinition] as never
+      return [measuredDefinition, customDefinition].find(item => path.includes(encodeURIComponent(item.definition_key))) as never
+    })
+    const customKey = 'custom-property-original'
+    const customRecord: PropertyRecordDraft = {
+      ...measured('custom', 1), record_type: 'property', property_code: 'custom',
+      custom_property_key: customKey, definition_key: customDefinition.definition_key,
+      method_code: null, name_raw: 'lambda', payload: {},
+    }
+    const changed = vi.fn()
+    const Harness = () => {
+      const [modules, setModules] = useState<PropertyModuleDraft[]>([{ ...initialModules()[0], records: [customRecord] }])
+      return <PropertyModuleEditor modules={modules} onChange={next => { changed(next); setModules(next) }} />
+    }
+    render(<Harness />)
+    const select = await screen.findByRole('combobox', { name: '记录定义' })
+    fireEvent.mouseDown(select)
+    fireEvent.click(await screen.findByRole('option', { name: '测量 Tc · resistivity', exact: true }))
+    const standard = changed.mock.calls.at(-1)![0][0].records[0]
+    expect(standard.custom_property_key).toBeNull()
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: '记录定义' }))
+    fireEvent.click(await screen.findByRole('option', { name: '自定义性质', exact: true }))
+    expect(changed.mock.calls.at(-1)![0][0].records[0].custom_property_key).toEqual(expect.stringMatching(/^custom-property-/))
+  })
+
   it('实验条件只有一个多行框，旧字段和 Evidence 在编辑后保留', () => {
     const legacy = { sample: 'Hg', preparation_method: 'annealed', measurement_method: 'four probe', apparatus: 'DAC', external_field_t: 0, pressure_uncertainty_gpa: 0.2, extensions: [{ name_raw: 'contact', value_raw: 'Pt', evidences: [{ paper_evidence_id: 9 }] }] }
     const record = { ...measured('old', 4.2), payload: { experimental_conditions: legacy } }

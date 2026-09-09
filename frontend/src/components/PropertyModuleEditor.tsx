@@ -296,7 +296,11 @@ const PropertyModuleEditor: React.FC<Props> = ({
                 const recordError = definitionErrors[record.record_key] || recordIssues[0]?.message
                 return (
                   <Accordion key={record.record_key} defaultExpanded sx={{ mb: 1 }}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-label={`记录 ${recordIndex + 1} · ${summary}`}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-label={`记录 ${recordIndex + 1} · ${summary}`}
+                      data-issue-field={recordIssues[0] ? `${recordBasePath}.${recordIssues[0].field}` : undefined}
+                    >
                       <Box sx={{ minWidth: 0 }}>
                         <Typography sx={{ overflowWrap: 'anywhere' }}>{summary}</Typography>
                         {recordError && <Typography color="error" variant="caption">{recordError}</Typography>}

@@ -115,3 +115,32 @@ def test_missing_material_contract_names_chemical_formula(client):
     assert re.fullmatch(r"第 \d+ 个材料状态缺少化学式", detail["message"]), detail["message"]
     # 序号前缀必须保留，供前端解析并定位到出错卡片
     assert detail["message"].startswith("第 1 个材料状态")
+
+
+def test_issue97_property_error_contains_complete_material_module_record_path():
+    from backend.api.rag import _validate_draft
+
+    draft = {
+        "paper": {"title": "测试论文", "paper_type": "experimental", "material_families": [{"id": 1, "name": "氢基超导体"}]},
+        "material_states": [{
+            "material": "Pb",
+            "property_modules": [{
+                "module_key": "module-superconductive_properties",
+                "module_code": "superconductive_properties",
+                "records": [{
+                    "record_key": "tc-1", "record_type": "measured_tc", "property_code": "tc",
+                    "custom_property_key": "stale-key", "definition_key": "record.superconductive_properties.measured_tc.resistivity",
+                    "definition_version": 1, "name_raw": "Tc", "value_kind": "number", "value_raw": "203 K",
+                    "value_number": 203, "canonical_unit": "K", "method_code": "resistivity",
+                    "payload": {"experimental_conditions": {}},
+                }],
+            }],
+        }],
+    }
+
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_draft(draft)
+
+    issue = exc_info.value.detail["issues"][0]
+    assert issue["field"] == "material_states[0].property_modules[0].records[0].custom_property_key"
+    assert issue["message"] == "规范性质不能携带自定义键"

@@ -276,17 +276,20 @@ def validate_record(
     return item
 
 
-def normalize_module(module: dict[str, Any], *, paper_id: int, paper_revision: int) -> dict[str, Any]:
+def normalize_module(
+    module: dict[str, Any], *, paper_id: int, paper_revision: int, path: str | None = None,
+) -> dict[str, Any]:
     item = deepcopy(module)
     code = str(item.get("module_code") or "").strip()
+    module_path = path or f"module[{code}]"
     if code not in MODULE_CODES:
-        raise PropertyValidationError([_issue("module_code", "unknown_module", "未注册的物性模块")])
+        raise PropertyValidationError([_issue(f"{module_path}.module_code", "unknown_module", "未注册的物性模块")])
     item["module_code"] = code
     item["module_key"] = str(item.get("module_key") or f"module-{code}").strip()
     item["paper_id"] = paper_id
     item["paper_revision"] = paper_revision
     item["display_order"] = max(0, int(item.get("display_order") or 0))
-    item["records"] = [validate_record({**record, "module_code": code}, path=f"module[{code}].records[{index}]") for index, record in enumerate(item.get("records") or []) if isinstance(record, dict)]
+    item["records"] = [validate_record({**record, "module_code": code}, path=f"{module_path}.records[{index}]") for index, record in enumerate(item.get("records") or []) if isinstance(record, dict)]
     return item
 
 

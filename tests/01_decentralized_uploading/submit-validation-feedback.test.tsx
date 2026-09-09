@@ -74,6 +74,40 @@ afterEach(() => {
 })
 
 describe('提交失败的必填定位与原因展示（Issue #58）', () => {
+  it('模块化物性错误汇总具体消息并展开定位到对应记录', async () => {
+    const failure = Object.assign(new Error('科学数据校验失败'), {
+      status: 400,
+      code: 'schema_validation_failed',
+      detail: '科学数据校验失败',
+      issues: [{
+        field: 'material_states[0].property_modules[0].records[0].custom_property_key',
+        code: 'schema_validation_failed',
+        message: '规范性质不能携带自定义键',
+      }],
+    }) as ApiError
+    mockedApi.post.mockRejectedValue(failure)
+    const record = {
+      record_key: 'tc-1', module_code: 'superconductive_properties', record_type: 'measured_tc', property_code: 'tc',
+      custom_property_key: 'stale-key', definition_key: 'record.superconductive_properties.measured_tc.resistivity',
+      definition_version: 1, name_raw: 'Tc', value_kind: 'number', value_raw: '203 K', value_number: 203,
+      canonical_unit: 'K', method_code: 'resistivity', payload: { experimental_conditions: {} },
+    }
+    render(<UploadTaskEditor
+      taskId={'7'.repeat(32)}
+      onSubmitted={vi.fn()}
+      draftOverride={makeDraft([makeState({ property_modules: [{
+        module_key: 'module-superconductive_properties', module_code: 'superconductive_properties',
+        definition_key: 'module.superconductive_properties', definition_version: 1, display_order: 0, records: [record],
+      }] })])}
+    />)
+
+    await clickSubmit()
+
+    const banner = await screen.findByRole('alert')
+    expect(banner).toHaveTextContent('规范性质不能携带自定义键')
+    await waitFor(() => expect(document.querySelector('[data-issue-field="material_states.0.property_modules.0.records.0.custom_property_key"]')).not.toBeNull())
+  })
+
   it('多处缺失时横幅汇总全部项而不是只报第一条，且不发起提交请求', async () => {
     render(<UploadTaskEditor
       taskId={'a'.repeat(32)}

@@ -474,7 +474,12 @@ def _validate_property_module_contract(
                             "物性模块必须是对象",
                         )
                     ])
-                normalized = normalize_module(module, paper_id=0, paper_revision=1)
+                normalized = normalize_module(
+                    module,
+                    paper_id=0,
+                    paper_revision=1,
+                    path=f"material_states[{state_index}].property_modules[{module_index}]",
+                )
                 module_key = normalized["module_key"]
                 module_code = normalized["module_code"]
                 if module_key in seen_keys or module_code in seen_codes:

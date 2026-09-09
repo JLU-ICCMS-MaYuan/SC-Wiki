@@ -88,6 +88,17 @@ export const clonePropertyRecord = (record: PropertyRecordDraft): PropertyRecord
   custom_property_key: record.custom_property_key ? newStableKey('custom-property') : record.custom_property_key,
 })
 
+export const normalizePropertyRecordIdentity = (record: PropertyRecordDraft): PropertyRecordDraft => {
+  const normalized = structuredClone(record)
+  const isCustom = normalized.record_type === 'property' && normalized.property_code === 'custom'
+  normalized.custom_property_key = isCustom
+    ? normalized.custom_property_key || (normalized.record_key
+      ? `custom-property-${normalized.record_key}`
+      : newStableKey('custom-property'))
+    : null
+  return normalized
+}
+
 const numberParameter = (value: unknown, unit: string) => (
   typeof value === 'number' ? { value_raw: String(value), value_number: value, unit_raw: unit } : undefined
 )
@@ -99,7 +110,9 @@ export function convertLegacyPropertyModules(state: Record<string, any>): Proper
       definition_key: module.definition_key || `module.${module.module_code}`,
       definition_version: module.definition_version || 1,
       display_order: index,
-      records: Array.isArray(module.records) ? module.records : [],
+      records: Array.isArray(module.records)
+        ? module.records.map(record => normalizePropertyRecordIdentity(record))
+        : [],
     }))
   }
 

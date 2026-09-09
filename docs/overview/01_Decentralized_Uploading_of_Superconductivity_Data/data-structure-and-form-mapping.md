@@ -49,6 +49,11 @@
 显示类型、方法、名称及原始值，服务端校验或定义加载错误仍可见。新增、复制、删除其他条目不会
 改变原记录的折叠状态，折叠也不会修改科学数据。
 
+自定义性质使用 `record_type=property`、`property_code=custom` 和非空
+`custom_property_key` 作为论文内稳定身份；预测 Tc、测量 Tc 及其他规范性质的
+`custom_property_key` 始终为空。编辑器切换定义和加载历史 v2 草稿时会清理标准记录上的残留键，
+自定义记录缺少键时补足稳定键；记录值、Conditions、Evidence、`record_key` 和定义版本保持不变。
+
 “添加记录”的选项来自该物性模块已发布的记录定义，每个定义键取最新已发布版本；定义列表不可用时
 使用内置候选引用，实际表单仍需加载对应定义。选项数量不由 AI 从当前论文或材料状态识别出的方法数决定。
 同一状态可以保存多条相同或不同方法的 Tc，以及自定义性质；每条记录独立保存结果与条件。
@@ -129,6 +134,8 @@ flowchart TD
 正式提交先校验完整草稿和所有定义，再在事务中写入论文 revision、材料状态、结构、模块、记录和
 Evidence 关联。任一校验失败都不会留下部分正式科研数据。旧缓存草稿只在输入边界单向转换为
 Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖，正式持久化不再双写旧科学表。
+模块化物性校验错误返回完整的 `material_states[i].property_modules[j].records[k]` 字段路径和
+`issues[]` 具体消息，上传页面会汇总全部问题并展开、标记和聚焦首个可用错误位置。
 
 ## 关键约束
 
@@ -150,6 +157,8 @@ Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖�
 - `backend/ingest/scientific_drafts.py`：正式提交事务。
 - `backend/services/form_definition_service.py`：定义生命周期和校验。
 - `frontend/src/components/PropertyModuleEditor.tsx`：模块与记录编辑器。
+- `frontend/src/lib/propertyModules.ts`：物性记录身份归一化与历史草稿兼容。
+- `frontend/src/components/UploadTaskEditor.tsx`：提交错误汇总和问题定位。
 - `frontend/src/components/SchemaDrivenRecordForm.tsx`：定义驱动表单。
 - `frontend/src/lib/formDefinitions.ts`：记录定义加载、版本筛选及实验条件文本校验。
 - `tests/01_decentralized_uploading/property-record-editor.test.tsx`：单框、标题、独立折叠与原始信息保留验证。

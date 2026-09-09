@@ -1,0 +1,48 @@
+# 物性定义切换与提交错误定位修复
+
+关联 [Issue #97](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/97)。本 Feature 修复 #90 模块化物性表单在定义切换和提交失败反馈上的行为缺陷。
+
+## 背景与设计来源
+
+`custom_property_key` 于 2026-09-07 的 Issue #90“模块化物性、Schema 驱动表单与分阶段数据迁移”中引入。它为论文内自定义性质提供跨编辑、复制、审核和管理员提升的稳定身份；标准 Tc 与其他规范性质不应携带该键。
+
+本次真实故障来自一条记录先选择“自定义性质”后切换为“测量 Tc”。编辑器保留了旧键，提交校验在 `custom_property_key` 上拒绝了标准记录。后端错误又缺少材料状态、模块和记录索引，前端无法把问题定位到具体记录。
+
+## 用户故事
+
+- **US1（P1）定义切换不残留身份**：用户把自定义性质改为标准 Tc 后，可以直接保存和提交；切回自定义性质时记录仍拥有合法稳定键。
+- **US2（P1）旧草稿可恢复**：用户打开包含残留自定义键的历史 v2 Redis 草稿时，系统清理标准记录上的非法键并保留科学值、Evidence 和记录身份。
+- **US3（P1）提交错误可操作**：用户提交失败时能看到每一条具体校验原因、完整字段路径，并能展开和聚焦对应材料状态及物性记录。
+
+## 功能需求
+
+- **FR-001**：记录定义为 `record_type != property` 或 `property_code != custom` 时，载荷中的 `custom_property_key` 必须为 `null`；切换操作不得保留旧值。
+- **FR-002**：记录为 `record_type=property` 且 `property_code=custom` 时，若缺少自定义键，编辑器和草稿兼容层必须按 `record_key` 派生稳定、非空的键；已有键必须保留。
+- **FR-003**：历史 v2 草稿在前端加载归一化和后端提交/保存边界均执行有界的身份清理，不修改记录值、条件、Evidence、`record_key` 或定义版本。
+- **FR-004**：模块化物性校验错误的字段路径必须形如 `material_states[i].property_modules[j].records[k].<field>`，模块和记录级错误也必须带完整前缀。
+- **FR-005**：提交错误响应保留 `detail`、`code` 和 `issues[]`，`issues[]` 中每个问题包含完整 `field`、机器可读 `code` 和中文 `message`。
+- **FR-006**：前端提交失败横幅汇总所有具体问题；存在完整字段路径时展开对应材料状态和记录，标记错误并聚焦第一处可用输入。
+- **FR-007**：修复不得删除 `custom_property_key` 模型字段、改变 #90 自定义性质提升语义或引入数据库迁移。
+
+## 成功标准
+
+- **SC-001**：自定义性质→测量 Tc→自定义性质的真实编辑流程中，标准记录键为空，切回后自定义记录重新拥有非空稳定键，提交载荷通过后端校验。
+- **SC-002**：含标准记录残留键的历史 v2 草稿归一化后可提交，除该键外科学数据深比较保持不变。
+- **SC-003**：残留键故障返回的第一个问题路径至少包含 `material_states[0].property_modules[0].records[0].custom_property_key`，前端展示具体消息并展开对应记录。
+- **SC-004**：多条模块校验问题全部在一次提交反馈中显示，修复后可重新提交；现有 #90、#94 上传和只读行为保持通过。
+
+## 范围与非目标
+
+范围包括前端记录编辑器和草稿归一化、后端草稿兼容与模块校验错误路径、上传提交错误展示及相关测试和 Overview。
+
+非目标包括删除或重命名 `custom_property_key`、修改数据库表或迁移历史正式记录、改变 FormDefinition 发布治理、改变错误码体系、修改无关的旧 `tc_results/properties` 业务规则。
+
+## 依赖与约束
+
+- 依赖 #90 的模块化物性与定义版本契约，以及 #94 的记录编辑器。
+- Redis 草稿是临时输入；兼容清理必须是输入边界的深拷贝操作。
+- 正式提交仍由后端定义校验作为权威；前端只负责提前提示和定位。
+
+## 追踪
+
+实现方案见 [plan.md](plan.md)，数据与接口见 [data-model.md](data-model.md) 和 [contracts/property-record.md](contracts/property-record.md)、[contracts/submit-errors.md](contracts/submit-errors.md)，执行步骤见 [tasks.md](tasks.md)。
