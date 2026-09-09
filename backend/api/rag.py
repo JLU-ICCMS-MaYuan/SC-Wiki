@@ -60,6 +60,200 @@ def _upload_error(status_code: int, code: str, message: str, **extra: Any) -> HT
     return HTTPException(status_code=status_code, detail=detail)
 
 
+def _scientific_integrity_error(exc: IntegrityError, draft: dict[str, Any]) -> HTTPException:
+    """将数据库完整性异常转换为可操作的表单问题。
+
+    约束名只用于服务端分类，绝不把驱动异常原文返回给客户端。数据库错误可能来自
+    不同驱动，因此同时检查 ``constraint_name`` 和受控的异常文本标识。
+    """
+    original = getattr(exc, "orig", None)
+    constraint = str(getattr(original, "constraint_name", "") or "").lower()
+    error_text = str(original or exc).lower()
+    haystack = f"{constraint} {error_text}"
+
+    states = [item for item in draft.get("material_states") or [] if isinstance(item, dict)]
+    records: list[tuple[int, int, dict[str, Any]]] = []
+    modules: list[tuple[int, int, dict[str, Any]]] = []
+    for state_index, state in enumerate(states):
+        for module_index, module in enumerate(state.get("property_modules") or []):
+            if not isinstance(module, dict):
+                continue
+            modules.append((state_index, module_index, module))
+            for record_index, record in enumerate(module.get("records") or []):
+                if isinstance(record, dict):
+                    records.append((state_index, module_index, record_index, record))
+
+    def issue(field: str, code: str, message: str) -> HTTPException:
+        return _upload_error(
+            409,
+            "scientific_data_integrity_error",
+            message,
+            issues=[{"field": field, "code": code, "message": message}],
+        )
+
+    def state_issue(state_index: int, field: str, message: str) -> HTTPException:
+        return issue(f"material_states[{state_index}].{field}", "integrity_constraint", message)
+
+    def record_issue(
+        state_index: int, module_index: int, record_index: int, field: str, message: str
+    ) -> HTTPException:
+        return issue(
+            f"material_states[{state_index}].property_modules[{module_index}].records[{record_index}].{field}",
+            "integrity_constraint",
+            message,
+        )
+
+    if "ck_material_states_pressure_range" in haystack:
+        for state_index, state in enumerate(states):
+            try:
+                pressure_min = float(state.get("pressure_min_gpa"))
+                pressure_max = float(state.get("pressure_max_gpa"))
+            except (TypeError, ValueError):
+                continue
+            if pressure_min > pressure_max:
+                return state_issue(
+                    state_index,
+                    "pressure_min_gpa",
+                    f"第 {state_index + 1} 个材料状态的压强下限不能大于上限，请检查 pressure min/max",
+                )
+
+    state_constraint_fields = {
+        "ck_material_states_nonnegative": (
+            ("pressure_value_gpa", "压强"),
+            ("pressure_min_gpa", "压强下限"),
+            ("temperature_value_k", "温度"),
+            ("magnetic_field_t", "磁场"),
+        ),
+        "ck_material_states_reported_space_group": (("reported_space_group_number", "空间群号"),),
+        "ck_material_states_element_count": (("element_count", "元素数"),),
+    }
+    for constraint_name, fields in state_constraint_fields.items():
+        if constraint_name not in haystack:
+            continue
+        for state_index, state in enumerate(states):
+            for field, label in fields:
+                value = state.get(field)
+                invalid = False
+                if constraint_name == "ck_material_states_nonnegative":
+                    try:
+                        invalid = value is not None and float(value) < 0
+                    except (TypeError, ValueError):
+                        invalid = False
+                elif constraint_name == "ck_material_states_reported_space_group":
+                    try:
+                        invalid = value is not None and not 1 <= int(value) <= 230
+                    except (TypeError, ValueError):
+                        invalid = value not in (None, "")
+                else:
+                    try:
+                        invalid = value is not None and not 1 <= int(value) <= 118
+                    except (TypeError, ValueError):
+                        invalid = value not in (None, "")
+                if invalid:
+                    return state_issue(
+                        state_index,
+                        field,
+                        f"第 {state_index + 1} 个材料状态的{label}不符合范围约束，请填写有效值",
+                    )
+
+    if "ck_property_records_custom_identity" in haystack:
+        for state_index, module_index, record_index, record in records:
+            is_custom = record.get("property_code") == "custom"
+            has_key = bool(str(record.get("custom_property_key") or "").strip())
+            if (is_custom and record.get("record_type") != "property") or (is_custom and not has_key) or (not is_custom and has_key):
+                return record_issue(
+                    state_index,
+                    module_index,
+                    record_index,
+                    "custom_property_key",
+                    "该物性记录的自定义性质身份不完整，请选择自定义性质并填写名称，或清空自定义键",
+                )
+        if records:
+            state_index, module_index, record_index, _record = records[0]
+            return record_issue(
+                state_index,
+                module_index,
+                record_index,
+                "custom_property_key",
+                "该物性记录的自定义性质身份不完整，请选择自定义性质并填写名称，或清空自定义键",
+            )
+
+    record_constraint_fields = {
+        "ck_property_records_condition_type": (
+            "payload",
+            "Tc 记录的 Conditions 类型与结果类型不一致，请检查实验/计算 Conditions",
+        ),
+        "ck_property_records_value_shape": (
+            "value_kind",
+            "物性记录的值类型与实际填写的规范值不一致，请检查 value kind 和对应数值",
+        ),
+        "ck_property_records_range": (
+            "value_max",
+            "范围值的上限不能小于下限，请检查 value min/max",
+        ),
+        "ck_property_records_uncertainty": (
+            "uncertainty",
+            "不确定度不能为负数，请填写有效值或留空",
+        ),
+        "ck_property_records_tc_identity": (
+            "property_code",
+            "Tc 记录必须使用 Tc 物性及有效方法，请检查 property code 和 method",
+        ),
+    }
+    for constraint_name, (field, message) in record_constraint_fields.items():
+        if constraint_name in haystack and records:
+            state_index, module_index, record_index, _record = records[0]
+            return record_issue(state_index, module_index, record_index, field, message)
+
+    if "uq_property_records_module_key" in haystack or "uq_property_records_source" in haystack:
+        seen: set[tuple[int, str]] = set()
+        for state_index, module_index, record_index, record in records:
+            key = (module_index, str(record.get("record_key") or ""))
+            if key in seen:
+                return record_issue(
+                    state_index,
+                    module_index,
+                    record_index,
+                    "record_key",
+                    "同一物性模块中的记录键重复，请修改记录标识后再提交",
+                )
+            seen.add(key)
+
+    if "uq_property_modules_state_code" in haystack or "uq_property_modules_state_key" in haystack:
+        seen: set[str] = set()
+        for state_index, module_index, module in modules:
+            key = str(module.get("module_code") or module.get("module_key") or "")
+            if key in seen:
+                field = "module_code" if "state_code" in haystack else "module_key"
+                return issue(
+                    f"material_states[{state_index}].property_modules[{module_index}].{field}",
+                    "integrity_constraint",
+                    "同一材料状态中的物性模块重复，请保留一个模块或修改模块标识",
+                )
+            seen.add(key)
+
+    if "uq_material_states_paper_state_key" in haystack:
+        seen_states: set[str] = set()
+        for state_index, state in enumerate(states):
+            key = str(state.get("state_key") or "")
+            if key in seen_states:
+                return state_issue(
+                    state_index,
+                    "state_key",
+                    "材料状态标识重复，请修改该材料状态的标识",
+                )
+            seen_states.add(key)
+
+    # 无法从驱动稳定取得约束名时，仍返回用户能执行的检查范围；不暴露 SQL 或内部表名。
+    field = "material_states" if states else "paper"
+    message = (
+        "科学数据之间存在不一致，请检查材料状态的化学式、压强、空间群和物性记录的必填字段后重新提交"
+        if states
+        else "论文基础信息存在不一致，请检查标题、年份、论文类型和材料家族等必填字段后重新提交"
+    )
+    return issue(field, "integrity_constraint", message)
+
+
 def _is_admin(user: User) -> bool:
     return user.role in {"admin", "superadmin"} and user.is_approved
 
@@ -1428,7 +1622,7 @@ async def _create_pending_paper(
                 paper_id = paper.id
         return paper_id
     except IntegrityError as exc:
-        raise _upload_error(409, "scientific_data_integrity_error", "科学数据不满足完整性约束") from exc
+        raise _scientific_integrity_error(exc, draft) from exc
     except Exception as exc:
         from backend.ingest.property_modules import PropertyValidationError
 

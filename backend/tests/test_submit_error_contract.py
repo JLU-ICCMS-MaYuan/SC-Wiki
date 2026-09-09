@@ -144,3 +144,52 @@ def test_issue97_property_error_contains_complete_material_module_record_path():
     issue = exc_info.value.detail["issues"][0]
     assert issue["field"] == "material_states[0].property_modules[0].records[0].custom_property_key"
     assert issue["message"] == "规范性质不能携带自定义键"
+
+
+def test_scientific_integrity_error_points_to_record_field_without_leaking_database_details():
+    from sqlalchemy.exc import IntegrityError
+
+    from backend.api.rag import _scientific_integrity_error
+
+    draft = {
+        "material_states": [{
+            "material": "Pb",
+            "property_modules": [{
+                "module_code": "superconductive_properties",
+                "records": [{
+                    "record_type": "measured_tc",
+                    "property_code": "tc",
+                    "custom_property_key": "stale-key",
+                }],
+            }],
+        }],
+    }
+    exc = IntegrityError(
+        "INSERT ...",
+        {},
+        RuntimeError("ck_property_records_custom_identity: CHECK failed for property_records"),
+    )
+
+    response = _scientific_integrity_error(exc, draft)
+
+    assert response.status_code == 409
+    detail = response.detail
+    assert detail["code"] == "scientific_data_integrity_error"
+    assert detail["issues"][0]["field"] == "material_states[0].property_modules[0].records[0].custom_property_key"
+    assert "填写" in detail["issues"][0]["message"]
+    assert "property_records" not in str(detail)
+    assert "INSERT" not in str(detail)
+
+
+def test_scientific_integrity_error_has_actionable_fallback_when_constraint_is_unknown():
+    from sqlalchemy.exc import IntegrityError
+
+    from backend.api.rag import _scientific_integrity_error
+
+    exc = IntegrityError("INSERT ...", {}, RuntimeError("driver-specific failure"))
+    response = _scientific_integrity_error(exc, {"material_states": [{"material": "Pb"}]})
+
+    issue = response.detail["issues"][0]
+    assert issue["field"] == "material_states"
+    assert "化学式" in issue["message"]
+    assert "重新提交" in issue["message"]
