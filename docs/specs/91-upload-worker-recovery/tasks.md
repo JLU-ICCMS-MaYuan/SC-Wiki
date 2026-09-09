@@ -52,7 +52,7 @@
 
 - [x] T007 运行 `docs/specs/91-upload-worker-recovery/quickstart.md` 中的定向与回归测试
 - [x] T008 使用 `big-project-overview-maintainer` 更新 `docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md`
-- [ ] T009 回写 Issue #91 的 Spec、验证与 Documentation Impact，满足关闭门槛后关闭 Issue
+- [x] T009 回写 Issue #91 的 Spec、验证与 Documentation Impact，满足关闭门槛后关闭 Issue
 
 ## 依赖与执行顺序
 
