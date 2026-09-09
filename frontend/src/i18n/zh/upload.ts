@@ -116,6 +116,7 @@ export default {
   cleanupHours: '{hours}小时{minutes}分后删除',
   cleanupMinutes: '{minutes}分{seconds}秒后删除',
   recordsLoadFailed: '上传解析记录加载失败',
+  taskUnavailable: '该解析任务已过期或被清理，任务列表已刷新。',
   cancelTaskConfirm: '确定取消这个任务吗？当前 LLM 请求可能需要等待完成或超时。',
   recordsTitle: '上传解析记录',
   noActiveTasks: '暂无活动任务',

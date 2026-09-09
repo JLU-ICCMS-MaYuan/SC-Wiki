@@ -70,7 +70,7 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
       } catch (reason: any) {
         if (!stopped) {
           setError(reason.message || t('upload.detailLoadFailed'))
-          timer = window.setTimeout(poll, 2000)
+          if (![401, 403, 404].includes(reason.status)) timer = window.setTimeout(poll, 2000)
         }
       }
     }

@@ -100,7 +100,8 @@ const UploadPage: React.FC = () => {
     setActiveTaskId(task.task_id)
     setTaskState(task)
     if (taskStorageKey) localStorage.setItem(taskStorageKey, task.task_id)
-    void api.post(`/api/upload-tasks/${task.task_id}/activity`)
+    // 任务可能已在其他页面提交；状态查询负责恢复入口，活动上报失败不能变成未处理异常。
+    void api.post(`/api/upload-tasks/${task.task_id}/activity`).catch(() => undefined)
   }
 
   useEffect(() => {
@@ -128,10 +129,17 @@ const UploadPage: React.FC = () => {
         if (state.processing_status === 'processing') timer = window.setTimeout(poll, 2000)
       } catch (reason: any) {
         if (stopped || reason.name === 'AbortError') return
+        if (reason.code === 'UPLOAD_TASK_SUBMITTED' && Number.isSafeInteger(reason.submittedPaperId) && reason.submittedPaperId > 0) {
+          setTaskCenterTick(value => value + 1)
+          openExistingPaper(reason.submittedPaperId)
+          return
+        }
         if (reason.status === 401 || reason.status === 403 || reason.status === 404) {
           localStorage.removeItem(taskStorageKey)
           setActiveTaskId(null)
           setTaskState(null)
+          setTaskCenterTick(value => value + 1)
+          setError(reason.status === 404 ? t('upload.taskUnavailable') : (reason.message || t('upload.progressQueryFailed')))
         } else {
           setError(reason.message || t('upload.progressQueryFailed'))
           timer = window.setTimeout(poll, 2000)

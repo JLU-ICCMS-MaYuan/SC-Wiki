@@ -13,6 +13,31 @@ from backend import models
 from backend.api import rag
 
 
+def test_cleaned_submitted_task_resolves_paper_for_owner_only(monkeypatch):
+    from types import SimpleNamespace
+    from unittest.mock import MagicMock
+    from fastapi import HTTPException
+    from backend.api import upload_tasks as api
+    from backend.ingest import upload_tasks
+    from backend import database
+
+    monkeypatch.setattr(upload_tasks, "get_state", lambda _: None)
+    session = MagicMock()
+    session.__enter__.return_value = session
+    session.scalar.return_value = SimpleNamespace(id=29, uploaded_by_user_id=7)
+    monkeypatch.setattr(database, "SessionLocal", lambda: session)
+    for user, expected in [(SimpleNamespace(id=7, role="user", is_approved=True), 409),
+                           (SimpleNamespace(id=8, role="user", is_approved=True), 404)]:
+        with pytest.raises(HTTPException) as error:
+            api.get_upload_task("a" * 32, touch=False, current_user=user)
+        assert error.value.status_code == expected
+        if expected == 409:
+            assert error.value.detail["code"] == "UPLOAD_TASK_SUBMITTED"
+            assert error.value.detail["paper_id"] == 29
+        else:
+            assert "paper_id" not in error.value.detail
+
+
 def test_source_conflict_is_a_system_error_not_a_record_key_error():
     draft = {"material_states": [
         {"property_modules": [{"records": [{"record_key": "legacy-tc-0"}]}]},

@@ -2,6 +2,7 @@
 // 推导，缺键或多键会在 `tsc -b` 阶段报错。处理阶段/任务状态/文件角色/晶胞表示等
 // 枚举标签与后端 value 对齐，仅展示文案随语言变化。
 export default {
+  taskUnavailable: 'This parsing task has expired or been removed. The task list has been refreshed.',
   // ── Processing stages (PROCESSING_STAGES.key → label) ──
   step: {
     saving_file: 'Saving source file',
