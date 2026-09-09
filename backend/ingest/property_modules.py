@@ -465,6 +465,14 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
             if record["record_key"] in deleted_record_keys:
                 continue
             db_record = existing_records.get((module["module_key"], record["record_key"]))
+            # 局部记录键可在不同状态/模块中复用；缺省身份必须包含完整作用域。
+            # 已有记录（含历史来源指纹）编辑时保留身份，不能随科学值或导出载荷变化。
+            source_fingerprint = (
+                db_record.source_fingerprint if db_record is not None
+                else record.get("source_fingerprint") or hashlib.sha256(canonical_json([
+                    material_state_id, module["module_key"], record["record_key"],
+                ]).encode("utf-8")).hexdigest()
+            )
             values = {
                 "record_key": record["record_key"], "paper_id": paper_id, "paper_revision": paper_revision,
                 "material_state_id": material_state_id, "module_id": db_module.id,
@@ -478,7 +486,7 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
                 "unit_raw": record.get("unit_raw"), "canonical_unit": record.get("canonical_unit"), "method_code": record.get("method_code"),
                 "method_raw": record.get("method_raw"), "criterion_code": record.get("criterion_code"), "criterion_raw": record.get("criterion_raw"),
                 "is_representative": bool(record.get("is_representative", False)), "structure_key": record.get("structure_key"),
-                "payload_json": record["payload"], "source_fingerprint": record.get("source_fingerprint") or hashlib.sha256(record["record_key"].encode()).hexdigest(),
+                "payload_json": record["payload"], "source_fingerprint": source_fingerprint,
                 "record_checksum": record["record_checksum"],
             }
             if db_record is None:

@@ -109,6 +109,11 @@
 执行并写审计事件，不会在读取时自动改写。管理员可将已批准的论文内自定义性质提升为全站定义；
 提升不改变源记录、Evidence 或历史定义绑定。
 
+`record_key` 在所属模块内标识记录，可以在不同材料状态或模块间复用。新记录未显式携带
+`source_fingerprint` 时，后端按材料状态主键、模块键、记录键生成指纹；已有记录编辑时保留原指纹。
+指纹用于记录身份去重，不代表论文或段落：多个记录可以共享论文和同一 Evidence，也不会因此被合并。
+科学值变化由 `record_checksum` 表达，不改变已有来源身份。
+
 ## 提交流程
 
 ```mermaid
@@ -136,6 +141,8 @@ Evidence 关联。任一校验失败都不会留下部分正式科研数据。�
 Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖，正式持久化不再双写旧科学表。
 模块化物性校验错误返回完整的 `material_states[i].property_modules[j].records[k]` 字段路径和
 `issues[]` 具体消息，上传页面会汇总全部问题并展开、标记和聚焦首个可用错误位置。
+来源指纹唯一约束冲突单独返回 `source_identity_conflict` 问题，明确说明内部身份冲突、无需修改科学数据，
+不再误报局部记录键重复。相关修复与验收见 [Issue #98 Spec](../../specs/98-scoped-record-fingerprint/spec.md)。
 
 ## 关键约束
 

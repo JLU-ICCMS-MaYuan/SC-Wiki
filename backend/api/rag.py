@@ -72,7 +72,7 @@ def _scientific_integrity_error(exc: IntegrityError, draft: dict[str, Any]) -> H
     haystack = f"{constraint} {error_text}"
 
     states = [item for item in draft.get("material_states") or [] if isinstance(item, dict)]
-    records: list[tuple[int, int, dict[str, Any]]] = []
+    records: list[tuple[int, int, int, dict[str, Any]]] = []
     modules: list[tuple[int, int, dict[str, Any]]] = []
     for state_index, state in enumerate(states):
         for module_index, module in enumerate(state.get("property_modules") or []):
@@ -205,32 +205,39 @@ def _scientific_integrity_error(exc: IntegrityError, draft: dict[str, Any]) -> H
             state_index, module_index, record_index, _record = records[0]
             return record_issue(state_index, module_index, record_index, field, message)
 
-    if "uq_property_records_module_key" in haystack or "uq_property_records_source" in haystack:
-        seen: set[tuple[int, str]] = set()
+    if "uq_property_records_source" in haystack:
+        return issue(
+            "material_states",
+            "source_identity_conflict",
+            "系统保存物性记录时发生内部身份冲突，无法完成提交。无需修改已填写的科学数据，请联系管理员处理。",
+        )
+
+    if "uq_property_records_module_key" in haystack:
+        seen_record_keys: set[tuple[int, int, str]] = set()
         for state_index, module_index, record_index, record in records:
-            key = (module_index, str(record.get("record_key") or ""))
-            if key in seen:
+            key = (state_index, module_index, str(record.get("record_key") or ""))
+            if key in seen_record_keys:
                 return record_issue(
                     state_index,
                     module_index,
                     record_index,
                     "record_key",
-                    "同一物性模块中的记录键重复，请修改记录标识后再提交",
+                    "同一物性模块中的两条记录使用了相同的内部标识，请联系管理员修复记录身份，无需修改科学数据。",
                 )
-            seen.add(key)
+            seen_record_keys.add(key)
 
     if "uq_property_modules_state_code" in haystack or "uq_property_modules_state_key" in haystack:
-        seen: set[str] = set()
+        seen_module_keys: set[tuple[int, str]] = set()
+        field = "module_code" if "uq_property_modules_state_code" in haystack else "module_key"
         for state_index, module_index, module in modules:
-            key = str(module.get("module_code") or module.get("module_key") or "")
-            if key in seen:
-                field = "module_code" if "state_code" in haystack else "module_key"
+            key = (state_index, str(module.get(field) or ""))
+            if key in seen_module_keys:
                 return issue(
                     f"material_states[{state_index}].property_modules[{module_index}].{field}",
                     "integrity_constraint",
                     "同一材料状态中的物性模块重复，请保留一个模块或修改模块标识",
                 )
-            seen.add(key)
+            seen_module_keys.add(key)
 
     if "uq_material_states_paper_state_key" in haystack:
         seen_states: set[str] = set()
