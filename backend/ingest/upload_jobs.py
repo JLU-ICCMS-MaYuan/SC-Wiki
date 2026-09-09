@@ -80,9 +80,11 @@ referenced_materials 仅作为后台排除误判的临时候选，不进入用�
 通讯作者只能根据星号说明、通讯邮箱或 correspondence 声明识别；共同第一作者只能根据
 equal contribution、contributed equally 等明确声明识别。证据不足时返回空数组，不得按作者顺序猜测。
 
+issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测，未报告则为 null。
+
 返回结构：
 {
-  "metadata": {"title": null, "doi": null, "authors": [], "corresponding_authors": [], "co_first_authors": [], "journal": null, "year": null, "abstract": null},
+  "metadata": {"title": null, "doi": null, "authors": [], "corresponding_authors": [], "co_first_authors": [], "journal": null, "issue_number": null, "volume": null, "pages": null, "year": null, "abstract": null},
   "paper_type_evidence": [{"candidate": "theoretical|experimental|review|unknown", "scope": "current_paper|referenced_work", "page": 1, "quote": "原文"}],
   "research_materials": [],
   "referenced_materials": [],
@@ -164,11 +166,13 @@ knowledge_graph_title 用于知识图谱节点显示，必须用 10-15 个英文
   - "Iron-based superconductor LaFeAsO" → "Iron-Based Superconductivity in LaFeAsO"
 key_finding 保留原有格式，提供完整的核心发现描述。
 
+issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测，未报告则为 null。
+
 返回结构：
 {
   "paper": {
     "title": "", "doi": null, "authors": [], "corresponding_authors": [], "co_first_authors": [],
-    "journal": null, "volume": null, "pages": null,
+    "journal": null, "issue_number": null, "volume": null, "pages": null,
     "year": null, "abstract": null, "summary": "", "paper_type": "theoretical|experimental|review|unknown",
     "theoretical_subtype": null,
     "superconductor_kind": "conventional|unconventional|unknown",
@@ -606,7 +610,7 @@ def _build_candidate_draft(chunks: list[dict[str, Any]]) -> dict[str, Any]:
         if not isinstance(result, dict):
             continue
         metadata = result.get("metadata") if isinstance(result.get("metadata"), dict) else {}
-        for field in ("title", "doi", "journal", "year", "abstract"):
+        for field in ("title", "doi", "journal", "issue_number", "volume", "pages", "year", "abstract"):
             if paper.get(field) in (None, "") and metadata.get(field) not in (None, ""):
                 paper[field] = metadata[field]
         for field in ("authors", "corresponding_authors", "co_first_authors"):
@@ -1210,6 +1214,7 @@ def _normalize_draft(
         "corresponding_authors": _normalize_author_roles(raw_paper.get("corresponding_authors"), authors),
         "co_first_authors": _normalize_author_roles(raw_paper.get("co_first_authors"), authors),
         "journal": raw_paper.get("journal") or parsed.paper.get("journal"),
+        "issue_number": parsed.paper.get("issue_number"),
         "volume": raw_paper.get("volume"),
         "pages": raw_paper.get("pages"),
         "year": raw_paper.get("year") or parsed.paper.get("year"),

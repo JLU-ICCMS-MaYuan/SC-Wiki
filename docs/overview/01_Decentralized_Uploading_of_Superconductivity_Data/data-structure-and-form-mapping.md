@@ -28,7 +28,7 @@
 
 | 表单分组 | 关键字段 | 是否可重复 | 落库去向 |
 | --- | --- | --- | --- |
-| 论文基本信息 | DOI、标题、期刊、卷页、年份、摘要、作者 | 否 | `papers` |
+| 论文基本信息 | 标题、期刊名、年份、期号、卷号、起始页码、DOI、摘要、作者 | 否 | `papers` |
 | 论文分类与 AI 摘要 | 论文类型、超导体类别、材料家族、摘要、关键词、方法、主要发现、研究动机 | 材料家族可多选 | `papers`、`material_families`、`paper_material_families` |
 | 上传文件 | 文件角色、原文件名、存储路径、SHA-256、大小、媒体类型、排序 | 是 | `paper_files` |
 | 材料状态 | 化学式、元素数、材料维度、晶系、压力、温度、磁场、状态类型、报告空间群、备注 | 是，核心重复单元 | `chemical_systems`、`superconductors`、`material_states` |
@@ -38,6 +38,12 @@
 | 物性记录 | 类型、物性代码、原始值、规范值、单位、方法、代表标记、定义版本 | 每个模块可有多条 | `property_records` |
 | Conditions 与参数 | 计算或实验 Conditions、lambda、omega log、mu*、网格、展宽及预留扩展字段 | 每条记录独立拥有 | `property_records.payload_json` |
 | 论文证据 | 字段路径、章节、页码范围、原文引句 | 是 | `paper_chunks`、`paper_evidences`、`property_record_evidences` |
+
+上传校对与管理员编辑共用书目行，顺序为期刊名、年份、期号、卷号、起始页码、DOI。
+六列宽度比例为 4:1:1:1:1:4；窄屏保持一行并可在行内横向滚动。期号使用独立可空文本
+`issue_number`（最长 100 字符），支持 `S1`、`3-4`，解析未报告时留空，不从年份或卷号猜测。
+草稿归一化、保存重载和正式提交均保留期号。“起始页码”沿用 `pages` 文本，历史页码范围与
+文章编号原样保留，DOI 校验及错误定位保持有效。（[Issue #99](../../specs/99-paper-metadata-row/spec.md)）
 
 首批物性模块为 `superconductive_properties`、`dynamical_properties`、
 `thermodynamic_properties` 和 `electronic_properties`。模块只在用户实际添加时提交；记录通过

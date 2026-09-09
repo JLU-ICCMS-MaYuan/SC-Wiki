@@ -90,6 +90,8 @@ def _import_papers(db: Session, papers: list[dict[str, Any]]) -> int:
         paper.title = item.get("title")
         paper.authors = item.get("authors")
         paper.journal = item.get("journal")
+        if "issue_number" in item:
+            paper.issue_number = item.get("issue_number")
         paper.volume = item.get("volume")
         paper.pages = item.get("pages")
         paper.year = item.get("year")

@@ -331,6 +331,7 @@ class Paper(Base):
     doi = Column(String(255), nullable=True)
     title = Column(Text, nullable=True)
     journal = Column(String(255))
+    issue_number = Column(String(100), nullable=True)
     volume = Column(String(100))
     pages = Column(String(100))
     year = Column(Integer, index=True, nullable=False)

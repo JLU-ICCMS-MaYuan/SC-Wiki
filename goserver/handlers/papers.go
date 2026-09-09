@@ -533,6 +533,7 @@ func paperToDict(p models.Paper) gin.H {
 		"title":                 p.Title,
 		"authors":               p.Authors,
 		"journal":               p.Journal,
+		"issue_number":          p.IssueNumber,
 		"volume":                p.Volume,
 		"pages":                 p.Pages,
 		"year":                  p.Year,

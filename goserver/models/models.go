@@ -90,6 +90,7 @@ type Paper struct {
 	DOI               *string    `gorm:"size:255" json:"doi"`
 	Title             *string    `json:"title"`
 	Journal           *string    `json:"journal"`
+	IssueNumber       *string    `gorm:"size:100" json:"issue_number"`
 	Volume            *string    `json:"volume"`
 	Pages             *string    `json:"pages"`
 	Year              *int       `json:"year"`

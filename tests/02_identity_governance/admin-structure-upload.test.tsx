@@ -129,6 +129,20 @@ async function openEditDialog() {
 }
 
 describe('T032：论文结构补传（契约 C2）', () => {
+  it('管理员书目行保存文本期号，保留原页码范围', async () => {
+    await openEditDialog()
+    expect(Array.from(screen.getByTestId('paper-metadata-row').querySelectorAll('label')).map(label => label.textContent)).toEqual([
+      '期刊名', '年份', '期号', '卷号', '起始页码', 'DOI',
+    ])
+    expect(screen.getByLabelText('期号')).toHaveValue('')
+    fireEvent.change(screen.getByLabelText('期号'), { target: { value: '3-4' } })
+    fireEvent.change(screen.getByLabelText('起始页码'), { target: { value: '100-108' } })
+    fireEvent.click(screen.getByRole('button', { name: '保存修改' }))
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalledWith('/api/admin/papers/88', expect.objectContaining({
+      issue_number: '3-4', pages: '100-108',
+    })))
+  })
+
   it('上传结构附件调用论文结构端点（multipart），候选出现在材料状态下', async () => {
     await openEditDialog()
 

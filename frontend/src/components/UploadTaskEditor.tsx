@@ -13,6 +13,7 @@ import {
 import { useLanguage } from '../context/LanguageContext'
 import MaterialStatesEditor, { EvidenceNotes, SpaceGroupOption, ValidationIssue } from './MaterialStatesEditor'
 import CitationExtractionPanel from './CitationExtractionPanel'
+import PaperMetadataRow from './PaperMetadataRow'
 import {
   UploadDraft, normalizeUploadDraft, unwrapData,
 } from '../lib/paperProcessing'
@@ -459,17 +460,12 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
       <Box sx={readOnly ? { pointerEvents: 'none', '& .MuiButton-root': { display: 'none' } } : undefined}>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, '& > *': { minWidth: 0 } }}>
-        <Box>
+        <Box sx={{ gridColumn: '1 / -1' }}>
           <TextField fullWidth label={t('upload.title')} value={draft.paper.title || ''}
             {...issueProps('paper.title')}
             onChange={event => setPaperField('title', event.target.value)} />
         </Box>
-        <Box>
-          <TextField fullWidth label="DOI" value={draft.paper.doi || ''}
-            {...issueProps('paper.doi')}
-            onChange={event => setPaperField('doi', event.target.value.trim())} />
-        </Box>
-        <Box>
+        <Box sx={{ gridColumn: '1 / -1' }}>
           <Autocomplete
             multiple
             freeSolo
@@ -523,18 +519,23 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
             ))}
           </Menu>
         </Box>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: '2fr 1fr 1fr 1fr' }, gap: 1 }}>
-          <TextField label={t('upload.journal')} value={draft.paper.journal || ''}
-            onChange={event => setPaperField('journal', event.target.value)} />
-          <TextField label={t('upload.year')} type="number" value={draft.paper.year ?? ''}
-            onChange={event => setPaperField('year', event.target.value ? Number(event.target.value) : null)} />
-          <TextField label={t('upload.volume')} value={draft.paper.volume || ''}
-            onChange={event => setPaperField('volume', event.target.value)} />
-          <TextField label={t('upload.pages')} value={draft.paper.pages || ''}
-            onChange={event => setPaperField('pages', event.target.value)} />
-          <Box sx={{ gridColumn: '1 / -1' }}>
-          </Box>
-        </Box>
+        <PaperMetadataRow
+          journal={<TextField label={t('upload.journal')} value={draft.paper.journal || ''}
+            onChange={event => setPaperField('journal', event.target.value)} />}
+          year={<TextField label={t('upload.year')} type="number" value={draft.paper.year ?? ''}
+            onChange={event => setPaperField('year', event.target.value ? Number(event.target.value) : null)} />}
+          issueNumber={<TextField label={t('upload.issueNumber')} value={draft.paper.issue_number || ''}
+            {...issueProps('paper.issue_number')}
+            slotProps={{ htmlInput: { maxLength: 100 } }}
+            onChange={event => setPaperField('issue_number', event.target.value)} />}
+          volume={<TextField label={t('upload.volume')} value={draft.paper.volume || ''}
+            onChange={event => setPaperField('volume', event.target.value)} />}
+          pages={<TextField label={t('upload.pages')} value={draft.paper.pages || ''}
+            onChange={event => setPaperField('pages', event.target.value)} />}
+          doi={<TextField label="DOI" value={draft.paper.doi || ''}
+            {...issueProps('paper.doi')}
+            onChange={event => setPaperField('doi', event.target.value.trim())} />}
+        />
       </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mt: 2, '& > *': { minWidth: 0 } }}>

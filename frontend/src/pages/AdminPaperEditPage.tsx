@@ -13,6 +13,7 @@ import {
 } from '../lib/classifications'
 import { DraftMaterialState, StructureCandidate, unwrapData } from '../lib/paperProcessing'
 import MaterialStatesEditor, { SpaceGroupOption } from '../components/MaterialStatesEditor'
+import PaperMetadataRow from '../components/PaperMetadataRow'
 import { useLanguage } from '../context/LanguageContext'
 import { convertLegacyPropertyModules, PROPERTY_SCHEMA_VERSION } from '../lib/propertyModules'
 import { textLinesToList, toTextList } from '../lib/paperTextLists'
@@ -432,20 +433,21 @@ const AdminPaperEditPage: React.FC = () => {
 
           <TextField label={t('admin.fieldTitle')} size="small" fullWidth multiline rows={2}
             value={editForm.title || ''} onChange={e => setEditForm({ ...editForm, title: e.target.value })} />
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1.5 }}>
-            <TextField label={t('admin.fieldDoi')} size="small" value={editForm.doi || ''}
-              onChange={e => setEditForm({ ...editForm, doi: e.target.value })} />
-            <TextField label={t('admin.fieldJournal')} size="small" value={editForm.journal || ''}
-              onChange={e => setEditForm({ ...editForm, journal: e.target.value })} />
-            <TextField label={t('admin.fieldYear')} size="small" type="number" value={editForm.year || ''}
-              onChange={e => setEditForm({ ...editForm, year: e.target.value ? Number(e.target.value) : null })} />
-          </Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1.5 }}>
-            <TextField label={t('admin.fieldVolume')} size="small" value={editForm.volume || ''}
-              onChange={e => setEditForm({ ...editForm, volume: e.target.value })} />
-            <TextField label={t('admin.fieldPages')} size="small" value={editForm.pages || ''}
-              onChange={e => setEditForm({ ...editForm, pages: e.target.value })} />
-          </Box>
+          <PaperMetadataRow
+            journal={<TextField label={t('admin.fieldJournal')} size="small" value={editForm.journal || ''}
+              onChange={e => setEditForm({ ...editForm, journal: e.target.value })} />}
+            year={<TextField label={t('admin.fieldYear')} size="small" type="number" value={editForm.year ?? ''}
+              onChange={e => setEditForm({ ...editForm, year: e.target.value ? Number(e.target.value) : null })} />}
+            issueNumber={<TextField label={t('admin.fieldIssueNumber')} size="small" value={editForm.issue_number || ''}
+              slotProps={{ htmlInput: { maxLength: 100 } }}
+              onChange={e => setEditForm({ ...editForm, issue_number: e.target.value })} />}
+            volume={<TextField label={t('admin.fieldVolume')} size="small" value={editForm.volume || ''}
+              onChange={e => setEditForm({ ...editForm, volume: e.target.value })} />}
+            pages={<TextField label={t('admin.fieldPages')} size="small" value={editForm.pages || ''}
+              onChange={e => setEditForm({ ...editForm, pages: e.target.value })} />}
+            doi={<TextField label={t('admin.fieldDoi')} size="small" value={editForm.doi || ''}
+              onChange={e => setEditForm({ ...editForm, doi: e.target.value })} />}
+          />
           <Autocomplete
             multiple freeSolo forcePopupIcon={false} options={[] as string[]}
             value={editAuthors}

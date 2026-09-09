@@ -472,6 +472,10 @@ def _validate_draft(
     if isinstance(year, bool) or not isinstance(year, int):
         raise _upload_error(400, "year_required", "论文年份不能为空且必须是整数")
 
+    issue_number = paper.get("issue_number")
+    if issue_number is not None and (not isinstance(issue_number, str) or len(issue_number) > 100):
+        raise _upload_error(400, "invalid_issue_number", "期号必须是最长 100 字符的文本", field="paper.issue_number")
+
     doi = str(paper.get("doi") or "").strip()
     if doi and not DOI_PATTERN.match(doi):
         raise _upload_error(400, "invalid_doi", "DOI 格式不正确")
@@ -1474,6 +1478,7 @@ async def _create_pending_paper(
                     title=str(paper_data.get("title")).strip(),
                     authors=paper_data.get("authors") or None,
                     journal=paper_data.get("journal"),
+                    issue_number=paper_data.get("issue_number"),
                     volume=paper_data.get("volume"),
                     pages=paper_data.get("pages"),
                     year=paper_data.get("year"),

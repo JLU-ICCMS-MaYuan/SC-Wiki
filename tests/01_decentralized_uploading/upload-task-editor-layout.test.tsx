@@ -104,6 +104,25 @@ afterEach(() => {
 })
 
 describe('上传校对页布局与材料状态折叠', () => {
+  it('六项书目信息按序显示，文本期号和历史页码保存后可重载', async () => {
+    const draft = makeDraft([])
+    draft.paper.pages = '100-108'
+    const view = render(<UploadTaskEditor taskId={'e'.repeat(32)} onSubmitted={vi.fn()} draftOverride={draft} />)
+    const row = await screen.findByTestId('paper-metadata-row')
+    expect(Array.from(row.querySelectorAll('label')).map(label => label.textContent)).toEqual([
+      '期刊名', '年份', '期号', '卷号', '起始页码', 'DOI',
+    ])
+    fireEvent.change(screen.getByLabelText('期号'), { target: { value: 'S1' } })
+    fireEvent.click(screen.getByRole('button', { name: '立即保存' }))
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalled())
+    const saved = mockedApi.put.mock.calls[0][1] as UploadDraft
+    expect(saved.paper).toMatchObject({ issue_number: 'S1', pages: '100-108' })
+    view.unmount()
+    render(<UploadTaskEditor taskId={'e'.repeat(32)} onSubmitted={vi.fn()} draftOverride={saved} />)
+    expect(await screen.findByLabelText('期号')).toHaveValue('S1')
+    expect(screen.getByLabelText('起始页码')).toHaveValue('100-108')
+  })
+
   it('历史建议副本不显示，正式表单值保持英文', async () => {
     const draft = makeDraft([makeState()])
     const legacyDraft = {

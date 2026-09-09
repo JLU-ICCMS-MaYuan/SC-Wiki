@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"scwiki/server/cache"
 	"scwiki/server/database"
@@ -33,7 +34,7 @@ var (
 		reviewStatusPending: {}, reviewStatusApproved: {}, reviewStatusRejected: {},
 	}
 	paperUpdateFields = []string{
-		"doi", "title", "authors", "journal", "volume", "pages", "year", "abstract",
+		"doi", "title", "authors", "journal", "issue_number", "volume", "pages", "year", "abstract",
 		"summary", "paper_type", "theoretical_subtype", "keywords_tags",
 		"superconductor_kind",
 		"methodology", "key_finding", "research_motivation", "research_materials",
@@ -169,6 +170,13 @@ func UpdatePaper(c *gin.Context) {
 
 	// 审核状态只能通过 ReviewPaper 修改，避免普通编辑绕过审核动作。
 	updates := paperUpdatesFromBody(body)
+	if value, exists := updates["issue_number"]; exists && value != nil {
+		issueNumber, ok := value.(string)
+		if !ok || utf8.RuneCountInString(issueNumber) > 100 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "期号必须是最长 100 字符的文本", "code": "invalid_issue_number"})
+			return
+		}
+	}
 	historyOperationID, historyOperationProvided := body["history_operation_id"]
 	historyOperation := ""
 	if historyOperationProvided {
