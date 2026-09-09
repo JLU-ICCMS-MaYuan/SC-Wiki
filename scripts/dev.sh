@@ -167,13 +167,25 @@ start_frontend() {
   ok "frontend http://127.0.0.1:$VITE_PORT  ← 浏览器入口"
 }
 
-start_news_worker()    { pid_alive news-worker && return
+start_news_worker() {
+  if pid_alive news-worker; then
+    ok "news-worker 已在运行"
+    return
+  fi
   ( cd "$REPO_ROOT" && spawn news-worker "$PY_BIN/python" -m backend.news worker )
   sleep 2
   pid_alive news-worker || die "news-worker 启动失败，见 $LOG_DIR/news-worker.log"
-  ok "news-worker"; }
-start_news_scheduler() { pid_alive news-scheduler && return
-  ( cd "$REPO_ROOT" && spawn news-scheduler "$PY_BIN/python" -m backend.news schedule ); ok "news-scheduler"; }
+  ok "news-worker"
+}
+
+start_news_scheduler() {
+  if pid_alive news-scheduler; then
+    ok "news-scheduler 已在运行"
+    return
+  fi
+  ( cd "$REPO_ROOT" && spawn news-scheduler "$PY_BIN/python" -m backend.news schedule )
+  ok "news-scheduler"
+}
 
 # ── 停止 ────────────────────────────────────────────────────
 
