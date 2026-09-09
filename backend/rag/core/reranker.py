@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import json
 from typing import Any
+from openai import APIStatusError
 
 from backend.rag.llm_client import get_llm_client
-from backend.rag.llm_context import get_llm_config
+from backend.rag.llm_context import UserCredentialError, get_llm_config
 from backend.rag.core.prompts import RERANK_SYSTEM_PROMPT
 
 
@@ -86,7 +87,14 @@ async def rerank_chunks(
 
         return scored_chunks[:top_k]
 
+    except UserCredentialError:
+        raise
     except Exception as e:
+        if isinstance(e, APIStatusError) and e.status_code in {401, 403} and get_llm_config().user_supplied:
+            # 不携带可能包含密钥的上游异常链，也不改用服务端凭据重试。
+            raise UserCredentialError(
+                "你配置的 AI 供应商认证失败，请检查 API Key 和权限，或在顶栏切回默认模型。"
+            ) from None
         # 评分失败时，保留原始结果
-        print(f"    [Rerank] 评分失败，保留原始顺序: {e}")
+        print("    [Rerank] 评分失败，保留原始顺序")
         return chunks[:top_k]

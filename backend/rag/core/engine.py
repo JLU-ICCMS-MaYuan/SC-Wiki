@@ -607,8 +607,8 @@ async def ask_stream(
             if delta and delta.content:
                 full_answer += delta.content
                 yield {"type": "token", "data": delta.content}
-    except Exception as e:
-        full_answer = f"抱歉，回答生成时出现错误：{e}"
+    except Exception:
+        full_answer = "抱歉，回答生成时出现错误，请检查模型配置或稍后重试。"
         yield {"type": "token", "data": full_answer}
 
     # ── 5. Paper 元信息 ──

@@ -107,6 +107,14 @@ POST /api/rag/llm/test-connection
 **测试请求形态**：向目标端点发一次最小 `chat.completions` 调用（`max_tokens` 取 1），
 读超时 15 秒，`max_retries=0`。不使用 `/models` 列表接口，因为部分中转站不实现该接口。
 
+成功必须有可解析的 ChatCompletion 结构及非空 `choices[0].message.content`；HTML、缺少 choices
+或空正文返回 `502 LLM_UNREACHABLE`，不回显上游内容。思考模型在 1 Token 输出额度内未产生正文
+不等于凭据无效，但不能报告本次验证成功；不自动扩大额度或重试。
+
+Reranker 使用用户配置收到 401/403 时抛出固定安全提示的 `LLM_USER_CREDENTIAL_FAILED`，不返回
+未排序结果掩盖认证失败。其他评分失败保留降级排序，但不打印上游异常原文。RAG 通用内部错误响应、
+普通流式生成错误文本和 JSON 重试日志同样不拼接上游错误原文；此局部保护不代替生产日志审计。
+
 ## 5. AI 响应的供应商回显
 
 受影响端点：`POST /api/rag/chat`、`POST /api/rag/chat/stream`、上传解析任务状态。

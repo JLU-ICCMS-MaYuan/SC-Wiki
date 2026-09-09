@@ -869,9 +869,8 @@ def _map_internal_error(exc: Exception) -> HTTPException:
         return _service_error(503, "LLM 问答未配置")
     if isinstance(exc, service.RagNotFoundError):
         return _service_error(404, str(exc) or "资源不存在")
-    if isinstance(exc, service.RagInternalError):
-        return _service_error(502, "AI 文献助手返回错误", str(exc))
-    return _service_error(502, "AI 文献助手返回错误", str(exc))
+    # 上游异常消息是不可信输入，可能回显凭据；内部错误不向客户端透传。
+    return _service_error(502, "AI 文献助手返回错误")
 
 
 @router.post("/llm/test-connection")
@@ -884,11 +883,17 @@ def test_llm_connection():
         })
     started = time.perf_counter()
     try:
-        get_llm_client(read_timeout=15).chat.completions.create(
+        response = get_llm_client(read_timeout=15).chat.completions.create(
             model=config.model,
             messages=[{"role": "user", "content": "ping"}],
             max_tokens=1,
         )
+        # HTTP 200 也可能是网关首页或空生成结果，不能据此证明模型可用。
+        choices = getattr(response, "choices", None)
+        message = getattr(choices[0], "message", None) if isinstance(choices, list) and choices else None
+        content = getattr(message, "content", None)
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError("LLM 未返回有效正文")
     except APITimeoutError as exc:
         raise HTTPException(status_code=504, detail={
             "code": "LLM_TIMEOUT", "message": "连接测试超时，请重试",

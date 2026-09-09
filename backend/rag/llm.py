@@ -78,6 +78,6 @@ def complete_json(
             last_error = exc
             if attempt >= retries:
                 break
-            print(f"  [LLM] 请求中断（{exc}），{attempt + 1}/{retries} 次重试")
+            print(f"  [LLM] 请求中断，{attempt + 1}/{retries} 次重试")
     assert last_error is not None
     raise last_error
