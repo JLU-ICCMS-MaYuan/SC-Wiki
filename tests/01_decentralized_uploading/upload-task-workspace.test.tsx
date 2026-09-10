@@ -637,7 +637,7 @@ describe('论文上传工作区', () => {
     const stickyTaskActions = screen.getByRole('region', { name: '当前解析任务操作' })
     expect(stickyTaskActions).toHaveStyle({
       position: 'sticky',
-      top: '80px',
+      top: '8px',
     })
     expect(stickyTaskActions.closest('.MuiCard-root')).toHaveStyle({ overflow: 'visible' })
 

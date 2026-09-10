@@ -8,6 +8,8 @@ export default {
   rag: 'Chat',
   tcPredict: 'Predict',
 
+  collapseSidebar: 'Collapse sidebar',
+  expandSidebar: 'Expand sidebar',
   accountMenu: 'Open account menu',
   logout: 'Sign out',
   login: 'Sign in',
@@ -25,6 +27,7 @@ export default {
   langZhShort: 'CH',
   langEnShort: 'EN',
 
+  llmSwitch: 'Switch model',
   llmDefault: 'Default model',
   llmServerDefault: 'Server default',
   llmCurrentServer: 'Current server default: {provider} · {model}',

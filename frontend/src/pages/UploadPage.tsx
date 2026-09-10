@@ -427,7 +427,7 @@ const UploadPage: React.FC = () => {
               <Card variant="outlined" sx={{ overflow: 'visible' }}>
                 <CardContent>
                   <Box role="region" aria-label={t('upload.taskActionsAria')} sx={{
-                    position: 'sticky', top: '80px', zIndex: theme => theme.zIndex.appBar - 1,
+                    position: 'sticky', top: '8px', zIndex: theme => theme.zIndex.appBar - 1,
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2,
                     mx: -2, mt: -2, mb: 2, px: 2, py: 1.5,
                     bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider',

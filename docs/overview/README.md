@@ -6,6 +6,12 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 
 当前能力覆盖超导数据去中心化上传（PDF 解析管线）、数据维护与审核验证、本地与外部材料检索、知识图谱、RAG 文献问答、实验性 Tc 估算和研究者社区。部分能力依赖 MySQL、Redis、Neo4j、Qdrant、外部数据文件和 LLM/Embedding 配置，具体边界见各功能文档。生产部署使用 Docker Compose，本地开发运行在宿主机进程上（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)），两条链路的服务组成与启动方式见[部署与运行时](02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。
 
+## 全局导航
+
+所有角色与访客共享左侧导航，页面不再保留全宽顶部栏。SC-Wiki 位于最上方，点击返回默认热点页；下方依次为热点、探索、脉络、社区、上传、对话、预测。底部留白后依次提供模型配置、中文/英文、角色入口或访客登录。
+
+侧栏展开为 216px，可向左收起为 64px 图标栏；小于 900px 的窗口默认收起，按钮可随时展开。每个功能有图标与可访问名称，收起后悬停可查看全名。侧栏在页面滚动时保持可见，低高度时可以内部滚动。折叠只改变布局，保留当前页面输入和已选文件；该选择保留于当前页面会话。正文使用侧栏右侧剩余宽度，具体页面仍保留自身排版约束。详见 [Feature #101](../specs/101-unified-collapsible-sidebar/spec.md) 与[使用验收说明](../specs/101-unified-collapsible-sidebar/quickstart.md)。
+
 ## 大功能目录
 
 | 大功能 | 职责 | 主要依赖 |
@@ -53,7 +59,7 @@ flowchart LR
 - Tc 估算由代码明确标记为实验页面，不构成模型科学有效性的保证。
 - 引用发展图不依赖 Neo4j：GROBID 在上传 Worker 中解析参考文献，MySQL 保存原始记录和匹配状态，Go API 直接查询公开引用图。旧 Neo4j 图谱仍供历史材料/作者关系功能使用。
 - 账号身份与分级工作台变更已通过 Go 全量测试、Vitest、前端生产构建和 Alembic MySQL 离线迁移 SQL 生成；真实 SMTP、持久化 MySQL 与完整部署链路仍需在目标环境验收。
-- 界面支持简体中文与英文切换：顶栏头像左侧 `CH / EN` 控件，偏好存浏览器 `localStorage`（键 `sc-wiki.language`），默认中文，未登录也可切换；仅界面文案与固定枚举标签跟随语言。六个 LLM 叙述字段（`summary`、`keywords_tags`、`methodology`、`key_finding`、`research_motivation`、`knowledge_graph_title`）在数据层统一为英文存储，不随界面语言变化，无双语列。（[Issue #74](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/74)）
+- 界面支持简体中文与英文切换：侧栏底部模型配置下方的 `中文 / English` 控件，收起后通过语言图标打开选择菜单。偏好存浏览器 `localStorage`（键 `sc-wiki.language`），默认中文，未登录也可切换；仅界面文案与固定枚举标签跟随语言。六个 LLM 叙述字段（`summary`、`keywords_tags`、`methodology`、`key_finding`、`research_motivation`、`knowledge_graph_title`）在数据层统一为英文存储，不随界面语言变化，无双语列。（[Issue #74](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/74)、[布局更新 #101](../specs/101-unified-collapsible-sidebar/spec.md)）
 
 ## 文档维护
 

@@ -46,9 +46,9 @@ describe('Issue #73 FR-024：默认模型可见性', () => {
     expect(document.body.textContent).not.toContain('secret-key')
   })
 
-  it('展示八个选项，预设 placeholder 可变，清除后回到服务端默认', async () => {
+  it.each([false, true])('收起状态 %s：展示八个选项，预设 placeholder 可变，清除后回到服务端默认', async collapsed => {
     const user = userEvent.setup()
-    render(<LanguageProvider><LlmProviderSwitcher /></LanguageProvider>)
+    render(<LanguageProvider><LlmProviderSwitcher collapsed={collapsed} /></LanguageProvider>)
 
     await user.click(await screen.findByRole('button', { name: '配置 AI 供应商' }))
     await user.click(screen.getByRole('combobox'))

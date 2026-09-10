@@ -62,8 +62,8 @@ describe('身份与工作台导航', () => {
     const navigation = screen.getByRole('navigation', { name: '主导航' })
     expect(navigation).toHaveStyle({
       position: 'sticky',
-      top: '72px',
-      height: 'calc(100vh - 72px)',
+      top: '0px',
+      height: '100dvh',
       overflowY: 'auto',
     })
     expect(screen.getByRole('button', { name: '用户' })).toBeInTheDocument()
