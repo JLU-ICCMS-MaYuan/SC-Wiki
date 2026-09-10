@@ -236,6 +236,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     state: DraftMaterialState
     isCollapsed: boolean
     uploading: boolean
+    elementCountEdit: { text: string; invalid: boolean } | undefined
     element: React.ReactElement
   }>())
   const cardEnvironmentRef = useRef<{
@@ -558,8 +559,9 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
           {states.map((state, index) => {
             const isCollapsed = !readOnly && Boolean(collapsedStates[index])
             const uploading = Boolean(structureUploading[index])
+            const elementCountEdit = elementCountEdits[index]
             const cached = cardCacheRef.current.get(index)
-            if (cached && cached.state === state && cached.isCollapsed === isCollapsed && cached.uploading === uploading) return cached.element
+            if (cached && cached.state === state && cached.isCollapsed === isCollapsed && cached.uploading === uploading && cached.elementCountEdit === elementCountEdit) return cached.element
             const stateCandidates = (structureCandidates || []).filter(candidate => candidate.material_state_ref === `material_states[${index}]`)
             // 晶系未知时显示全部 230 条空间群，否则仅显示该晶系群号范围内的符号
             const crystalSystem = state.crystal_system || 'unknown'
@@ -777,7 +779,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                 </CardContent>
               </Card>
             )
-            cardCacheRef.current.set(index, { state, isCollapsed, uploading, element })
+            cardCacheRef.current.set(index, { state, isCollapsed, uploading, elementCountEdit, element })
             return element
           })}
           {states.length === 0 && !readOnly && (

@@ -54,6 +54,19 @@ afterEach(() => {
 })
 
 describe('Issue #96 上传表单性能回归', () => {
+  it('非法元素种类数即时更新当前卡片，不写草稿且不重绘其他卡片', () => {
+    const onChange = vi.fn()
+    render(<MaterialStatesEditor states={Array.from({ length: 5 }, (_, index) => makeState(index))} onChange={onChange} catalogs={null} spaceGroups={spaceGroups} />)
+    counters.cardPanels = 0
+
+    fireEvent.change(screen.getAllByLabelText('不同元素种类数')[0], { target: { value: '0' } })
+
+    expect(screen.getAllByLabelText('不同元素种类数')[0]).toHaveValue('0')
+    expect(screen.getByText('请输入 1–118 的整数')).toBeVisible()
+    expect(onChange).not.toHaveBeenCalled()
+    expect(counters.cardPanels).toBe(1)
+  })
+
   it('修改一个材料状态时不重新渲染其他状态卡片', async () => {
     const Harness = () => {
       const [states, setStates] = useState(() => Array.from({ length: 5 }, (_, index) => makeState(index)))

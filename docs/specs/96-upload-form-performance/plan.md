@@ -81,3 +81,6 @@ tests/01_decentralized_uploading/upload-task-editor-layout.test.tsx
 |------------|------------|--------------------------|
 | 材料状态卡片组件边界 | 只有真实的组件边界才能阻止未修改卡片执行 JSX 和 MUI 树渲染 | 仅在父组件加 `useMemo` 仍会因整个 `states` 数组变化而失效 |
 | 空间群本地输入 | 受控父级每字符更新是自由输入卡顿的直接来源 | 只增加 `useMemo` 不能消除每字符状态传播 |
+# 2026-09-10 局部修复计划
+
+[Issue #102](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/102) 保持本 Plan 的状态所有权：`elementCountEdits[index]` 仍是 `MaterialStatesEditor` 的会话内状态，作为对应卡片缓存的必要输入。FR-001、FR-005 由新增 T012–T014 覆盖，验证非法值提示、草稿原值保存及其他四张卡片渲染计数不增加。

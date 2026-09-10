@@ -76,6 +76,9 @@
 结果按定义与记录引用缓存，定义绑定只在记录定义身份变化时重新加载或绑定。上述优化不改变 Redis 草稿
 字段、自动保存时机、校验语义和提交接口。（[Issue #96](../../specs/96-upload-form-performance/spec.md)）
 
+材料状态缓存同时比较当前卡片的元素种类数临时输入；非法输入即时显示原有错误提示，但不写入草稿，
+也不使其他材料状态卡片重新渲染。（[Issue #102](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/102)）
+
 数值、范围、文本和布尔值通过固定核心列表达；`payload_json` 只保存定义声明的 Conditions、参数和
 预留扩展字段。`0` 与 `false` 是有效值，不能按空值丢弃。每条记录绑定不可变的
 `definition_key + definition_version`，后端依据该版本执行 JSON Schema、JSON Pointer 和业务规则校验。
