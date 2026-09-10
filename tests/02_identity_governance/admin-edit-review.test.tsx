@@ -73,6 +73,23 @@ async function openEditDialog() {
 }
 
 describe('编辑页内审核', () => {
+  it('批准使用当前编辑分类，提示不再要求改用列表入口', async () => {
+    const user = await openEditDialog()
+    expect(screen.getByText(/通过时使用当前材料分类选择/)).toBeVisible()
+    expect(screen.queryByText(/此处只处理拒绝与退回/)).not.toBeInTheDocument()
+    await user.click(screen.getByRole('combobox', { name: '超导类型' }))
+    await user.click(screen.getByRole('option', { name: '非常规超导体' }))
+    await user.click(screen.getByRole('combobox', { name: '审核结果' }))
+    expect(screen.getAllByRole('option').map(option => option.getAttribute('data-value'))).toEqual(['approved', 'pending', 'rejected'])
+    await user.click(screen.getByRole('option', { name: /通过/ }))
+    await user.click(screen.getByRole('button', { name: '提交审核' }))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/api/admin/papers/88/review', expect.objectContaining({
+      status: 'approved', superconductor_kind: 'unconventional',
+      material_families: [{ id: 1, name: '氢基超导体' }], material_states: [],
+    })))
+    expect(mockedApi.put).not.toHaveBeenCalled()
+  })
+
   it('编辑弹窗顶部提供审核结果与审核意见控件', async () => {
     await openEditDialog()
 

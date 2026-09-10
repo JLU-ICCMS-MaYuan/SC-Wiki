@@ -9,10 +9,11 @@ import AdminPage from '../../frontend/src/pages/AdminPage'
 import { api } from '../../frontend/src/lib/api'
 import { LanguageProvider } from '../../frontend/src/context/LanguageContext'
 
+const reviewer = vi.hoisted(() => ({ role: 'admin' }))
 
 vi.mock('../../frontend/src/context/AuthContext', () => ({
   useAuth: () => ({
-    user: { id: 7, username: 'reviewer', role: 'admin', is_admin: true, is_superadmin: false },
+    user: { id: 7, username: 'reviewer', role: reviewer.role, is_admin: true, is_superadmin: reviewer.role === 'superadmin' },
     replaceUser: vi.fn(),
   }),
 }))
@@ -51,6 +52,7 @@ vi.mock('../../frontend/src/components/UsernameField', () => ({ default: () => n
 const mockedApi = vi.mocked(api)
 
 beforeEach(() => {
+  reviewer.role = 'admin'
   mockedApi.get.mockImplementation(async (path: string) => {
     if (path.startsWith('/api/admin/papers/all')) {
       return {
@@ -66,6 +68,7 @@ beforeEach(() => {
     if (path === '/api/admin/papers/51') {
       return {
         id: 51,
+        review_status: 'pending',
         material_families: [],
         material_states: [{
           id: 501,
@@ -138,7 +141,86 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe('论文快速审核弹窗仅处理拒绝与退回', () => {
+describe('论文快速审核三状态', () => {
+  const openApproval = async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: '论文审核' }))
+    await screen.findByText('Hydride paper')
+    await user.click(screen.getByRole('button', { name: '审核' }))
+    await user.click(screen.getByRole('combobox', { name: '审核结果' }))
+    await user.click(screen.getByRole('option', { name: /通过/ }))
+    return user
+  }
+
+  it('读取失败不发起批准，审核失败保留输入，提交中不能重复点击', async () => {
+    const originalGet = mockedApi.get.getMockImplementation()!
+    mockedApi.get.mockImplementation(async (path, ...args) => {
+      if (path === '/api/rag/papers/51/review-artifact') throw Object.assign(new Error('读取服务失败'), { status: 500 })
+      return originalGet(path, ...args)
+    })
+    const user = await openApproval()
+    await user.type(screen.getByLabelText('审核意见'), '已核对')
+    await user.click(screen.getByRole('button', { name: '确认审核' }))
+    expect(await screen.findByText(/读取服务失败/)).toBeVisible()
+    expect(mockedApi.post).not.toHaveBeenCalled()
+    expect(screen.getByLabelText('审核意见')).toHaveValue('已核对')
+    mockedApi.get.mockImplementation(originalGet)
+    let rejectRequest!: (reason: Error) => void
+    mockedApi.post.mockImplementationOnce(() => new Promise((_, reject) => { rejectRequest = reject }))
+    await user.click(screen.getByRole('button', { name: '确认审核' }))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledTimes(1))
+    expect(screen.getByRole('button', { name: '确认审核' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '取消' })).toBeDisabled()
+    rejectRequest(new Error('物性记录缺少可解析 Evidence'))
+    expect(await screen.findByText(/物性记录缺少可解析 Evidence/)).toBeVisible()
+    expect(screen.getByLabelText('审核意见')).toHaveValue('已核对')
+    expect(screen.getByRole('combobox', { name: '审核结果' })).toHaveTextContent('通过')
+  })
+
+  it.each(['approved', 'pending'])('正式分类可直接用于批准，缺少快照不阻断（%s）', async status => {
+    const originalGet = mockedApi.get.getMockImplementation()!
+    mockedApi.get.mockImplementation(async (path, ...args) => {
+      if (path === '/api/admin/papers/51') return {
+        id: 51, review_status: status, superconductor_kind: 'conventional',
+        material_families: [{ id: 7, name_zh: '重费米子超导体' }],
+        material_states: [{ id: 501, material_dimensionality: 'three_dimensional',
+          structure_families: [{ structure_family_id: 2, structure_family: { name: '笼状结构' }, is_primary: true }] }],
+      }
+      if (path === '/api/rag/papers/51/review-artifact') throw Object.assign(new Error('没有快照'), { status: 404 })
+      return originalGet(path, ...args)
+    })
+    const user = await openApproval()
+    await user.click(screen.getByRole('button', { name: '确认审核' }))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/api/admin/papers/51/review', expect.objectContaining({
+      superconductor_kind: 'conventional', material_families: [{ id: 7, name: '重费米子超导体' }],
+      material_states: [{ id: 501, material_dimensionality: 'three_dimensional', structure_families: [{ id: 2, name: '笼状结构', is_primary: true }] }],
+    })))
+    if (status === 'approved') expect(mockedApi.get.mock.calls.some(([path]) => String(path).includes('review-artifact'))).toBe(false)
+  })
+
+  it.each([
+    ['admin', 'zh'], ['superadmin', 'zh'], ['admin', 'en'], ['superadmin', 'en'],
+  ] as const)('%s 工作台提供三个状态并携带已保存分类批准（%s）', async (mode, lang) => {
+    reviewer.role = mode
+    localStorage.setItem('sc-wiki.language', lang)
+    const user = userEvent.setup()
+    render(<LanguageProvider><MemoryRouter><AdminPage mode={mode} /></MemoryRouter></LanguageProvider>)
+    await user.click(screen.getByRole('button', { name: lang === 'zh' ? '论文审核' : 'Paper Review' }))
+    await screen.findByText('Hydride paper')
+    await user.click(screen.getByRole('button', { name: lang === 'zh' ? '审核' : 'Review' }))
+    await user.click(screen.getByRole('combobox', { name: lang === 'zh' ? '审核结果' : 'Review Result' }))
+    expect(screen.getAllByRole('option').map(option => option.getAttribute('data-value'))).toEqual(['approved', 'pending', 'rejected'])
+    await user.click(screen.getAllByRole('option')[0])
+    await user.click(screen.getByRole('button', { name: lang === 'zh' ? '确认审核' : 'Confirm Review' }))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/api/admin/papers/51/review', expect.objectContaining({
+      status: 'approved', superconductor_kind: 'unknown',
+      material_families: [{ id: 1, name: '氢基超导体' }],
+      material_states: [{ id: 501, material_dimensionality: 'three_dimensional', structure_families: [] }],
+    })))
+    expect(mockedApi.put).not.toHaveBeenCalled()
+  })
+
   it.each(['zh', 'en'])('历史名称覆盖审核、修改、未知上传者和空意见（%s）', async lang => {
     localStorage.setItem('sc-wiki.language', lang)
     const originalGet = mockedApi.get.getMockImplementation()!
@@ -192,7 +274,7 @@ describe('论文快速审核弹窗仅处理拒绝与退回', () => {
     expect(historyDialog).toHaveTextContent('已通过 · 证据充分')
   })
 
-  it('不显示分类或批准入口，只提交退回结果和审核意见', async () => {
+  it('保留简洁弹窗，选择退回时只提交结果和审核意见', async () => {
     const user = userEvent.setup()
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
 
@@ -207,7 +289,7 @@ describe('论文快速审核弹窗仅处理拒绝与退回', () => {
     expect(screen.queryByRole('combobox', { name: 'LaH10 的材料家族' })).not.toBeInTheDocument()
 
     fireEvent.mouseDown(screen.getByRole('combobox', { name: '审核结果' }))
-    expect(screen.queryByRole('option', { name: /通过/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('option', { name: /通过/ })).toBeVisible()
     await user.click(await screen.findByRole('option', { name: /退回待审核/ }))
     await user.click(screen.getByRole('button', { name: '确认审核' }))
 
@@ -221,7 +303,7 @@ describe('论文快速审核弹窗仅处理拒绝与退回', () => {
     expect(mockedApi.put).not.toHaveBeenCalled()
   })
 
-  it('审核弹窗不触发详情或审核产物加载', async () => {
+  it.each(['pending', 'rejected'])('非批准审核不触发详情或审核产物加载（%s）', async status => {
     const user = userEvent.setup()
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
     await user.click(screen.getByRole('button', { name: '论文审核' }))
@@ -229,10 +311,12 @@ describe('论文快速审核弹窗仅处理拒绝与退回', () => {
     await user.click(screen.getByRole('button', { name: '审核' }))
 
     fireEvent.mouseDown(screen.getByRole('combobox', { name: '审核结果' }))
-    await user.click(await screen.findByRole('option', { name: /退回待审核/ }))
+    await user.click(await screen.findByRole('option', { name: status === 'pending' ? /退回待审核/ : /拒绝/ }))
     await user.click(screen.getByRole('button', { name: '确认审核' }))
 
     await waitFor(() => expect(mockedApi.post).toHaveBeenCalledTimes(1))
+    expect(mockedApi.post.mock.calls[0][1]).toMatchObject({ status })
+    expect(mockedApi.post.mock.calls[0][1]).not.toHaveProperty('material_families')
     expect(mockedApi.get.mock.calls.some(([path]) => String(path).includes('/review-artifact'))).toBe(false)
     expect(mockedApi.get.mock.calls.some(([path]) => String(path).includes('/api/admin/papers/51'))).toBe(false)
   })

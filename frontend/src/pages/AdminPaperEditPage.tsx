@@ -5,6 +5,8 @@ import {
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useNavigate, useParams } from 'react-router-dom'
+import PaperReviewStatusSelect from '../components/PaperReviewStatusSelect'
+import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, type ReviewClassifications } from '../lib/paperReview'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -25,7 +27,9 @@ import { textLinesToList, toTextList } from '../lib/paperTextLists'
  * 需要转成编辑器的 {id, name, status, is_primary} 选择形态。
  * （原 AdminPage.tsx 弹窗逻辑迁移，Issue #78。）
  */
-const materialStateFromDetail = (state: Record<string, any>): DraftMaterialState => {
+const materialStateFromDetail = (
+  state: Record<string, any>, classification: ReviewClassifications['materialStates'][number],
+): DraftMaterialState => {
   const stateWithoutLegacyProperties = { ...state }
   delete stateWithoutLegacyProperties.superconductor_kind
   delete stateWithoutLegacyProperties.tc_results
@@ -36,15 +40,9 @@ const materialStateFromDetail = (state: Record<string, any>): DraftMaterialState
   delete stateWithoutLegacyProperties.key_properties
   return {
     ...stateWithoutLegacyProperties,
+    ...classification,
     material: state.superconductor?.chemical_formula || state.material || '',
-    structure_families: (state.structure_families || []).map((item: any) => ({
-      id: item.id ?? item.structure_family_id,
-      name: item.structure_family?.name || item.name || '',
-      name_zh: item.structure_family?.name_zh || item.structure_family?.name || item.name || '',
-      name_en: item.structure_family?.name_en || item.name_en || '',
-      status: 'confirmed',
-      is_primary: Boolean(item.is_primary),
-    })),
+    structure_families: classification.structure_families || [],
     property_modules: convertLegacyPropertyModules(state),
     deleted_record_keys: [],
     deleted_module_keys: [],
@@ -188,40 +186,18 @@ const AdminPaperEditPage: React.FC = () => {
     const loadDetail = async () => {
       setEditLoading(true)
       try {
-        const detail = await api.get<Record<string, any>>(`/api/admin/papers/${paperId}`)
+        const { detail, pendingValues } = await loadPaperReviewSource(paperId)
+        const classifications = resolveReviewClassifications(detail, pendingValues)
         setAuthorInput('')
         setEditListText({})
-        let pendingValues: Record<string, any> | null = null
-        if (detail.review_status === 'pending') {
-          try {
-            const artifact = await api.get<{ data?: { user_values?: Record<string, any> } }>(
-              `/api/rag/papers/${paperId}/review-artifact`,
-            )
-            pendingValues = artifact?.data?.user_values || null
-          } catch {
-            // 手工创建或已清理临时证据的待审论文没有 artifact，继续使用正式详情。
-          }
-        }
         setEditForm({
           ...detail,
           key_properties: [],
-          superconductor_kind: pendingValues?.paper?.superconductor_kind
-            ?? detail.superconductor_kind
-            ?? 'unknown',
+          superconductor_kind: classifications.superconductorKind,
         })
-        const pendingFamilies = pendingValues?.paper?.material_families
-        const materialFamilies = Array.isArray(pendingFamilies)
-          ? pendingFamilies
-          : (detail.material_families || [])
-        setEditMaterialFamilies(materialFamilies.map((family: any) => ({
-          id: family.id ?? null,
-          name: family.name || family.name_zh || '',
-          name_zh: family.name_zh || family.name || '',
-          name_en: family.name_en || '',
-          status: family.status === 'pending' ? 'pending' : 'confirmed',
-        })))
+        setEditMaterialFamilies(classifications.materialFamilies)
         // 已通过论文重新编辑时默认退回待审核，避免无修改地重复批准。
-        setEditReviewStatus(detail.review_status === 'rejected' ? 'rejected' : 'pending')
+        setEditReviewStatus(initialPaperReviewStatus(detail.review_status))
         setEditReviewComment(detail.review_comment || '')
         // 科学数据：Go 详情行转成共享编辑器形态；既有结构并入候选（整体替换语义，T020）
         const detailStates: Array<Record<string, any>> = detail.material_states || []
@@ -229,15 +205,11 @@ const AdminPaperEditPage: React.FC = () => {
           ? pendingValues.material_states
           : []
         const materialStates = detailStates.map((state, index) => {
-          const normalized = materialStateFromDetail(state)
+          const normalized = materialStateFromDetail(state, classifications.materialStates[index])
           const pendingState = pendingStates[index]
           if (!pendingState) return normalized
           return {
             ...normalized,
-            material_dimensionality: pendingState.material_dimensionality || normalized.material_dimensionality,
-            structure_families: Array.isArray(pendingState.structure_families)
-              ? pendingState.structure_families
-              : normalized.structure_families,
             property_modules: Array.isArray(pendingState.property_modules)
               ? convertLegacyPropertyModules(pendingState)
               : normalized.property_modules,
@@ -249,7 +221,7 @@ const AdminPaperEditPage: React.FC = () => {
         setEditMaterialStates(materialStates)
         setEditStructureCandidates(structureCandidates)
         setEditHadScientificData(
-          materialStates.length > 0 || structureCandidates.length > 0 || materialFamilies.length > 0,
+          materialStates.length > 0 || structureCandidates.length > 0 || classifications.materialFamilies.length > 0,
         )
         // 已落库结构表示：异步拉取完整表示并入候选，不阻塞表单渲染
         void loadStructureRepresentations(detailStates)
@@ -266,25 +238,12 @@ const AdminPaperEditPage: React.FC = () => {
   const handleEditReview = async () => {
     setEditReviewSaving(true)
     try {
-      const materialStates = editMaterialStates.map(state => ({
-        id: (state as DraftMaterialState & { id?: number }).id,
-        material_dimensionality: state.material_dimensionality || 'unknown',
-        structure_families: (state.structure_families || []).map(item => ({
-          id: item.id || null,
-          name: item.name || '',
-          is_primary: Boolean(item.is_primary),
-        })),
-      }))
-      await api.post(`/api/admin/papers/${paperId}/review`, {
-        status: editReviewStatus,
-        comment: editReviewComment,
-        review_request_id: crypto.randomUUID(),
-        ...(editReviewStatus === 'approved' ? {
-          superconductor_kind: editForm.superconductor_kind || 'unknown',
-          material_families: editMaterialFamilies.map(family => ({ id: family.id || null, name: family.name })),
-          material_states: materialStates,
-        } : {}),
-      })
+      await api.post(`/api/admin/papers/${paperId}/review`,
+        paperReviewPayload(editReviewStatus, editReviewComment, {
+          superconductorKind: editForm.superconductor_kind || 'unknown',
+          materialFamilies: editMaterialFamilies,
+          materialStates: editMaterialStates,
+        }))
       navigate(workspacePath)
     } catch (e: unknown) {
       setSnackbar(t('admin.reviewFailed', { reason: (e as Error).message }))
@@ -406,21 +365,12 @@ const AdminPaperEditPage: React.FC = () => {
           }}>
             <Typography variant="subtitle2" fontWeight={700} gutterBottom>{t('admin.editReviewSection')}</Typography>
             <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-              <FormControl size="small" sx={{ minWidth: 170 }}>
-                <InputLabel id="edit-review-status-label">{t('admin.reviewResult')}</InputLabel>
-                <Select
-                  labelId="edit-review-status-label"
-                  value={editReviewStatus}
-                  label={t('admin.reviewResult')}
-                  onChange={e => setEditReviewStatus(e.target.value)}
-                >
-                  <MenuItem value="approved">{t('admin.reviewApprove')}</MenuItem>
-                  <MenuItem value="rejected">{t('admin.reviewReject')}</MenuItem>
-                  <MenuItem value="pending">{t('admin.reviewBackToPending')}</MenuItem>
-                </Select>
-              </FormControl>
+              <Box sx={{ minWidth: 170 }}>
+                <PaperReviewStatusSelect id="edit-review-status" value={editReviewStatus}
+                  onChange={setEditReviewStatus} disabled={editReviewSaving} />
+              </Box>
               <TextField label={t('admin.reviewComment')} size="small" multiline rows={2} sx={{ flex: 1, minWidth: 240 }}
-                value={editReviewComment} onChange={e => setEditReviewComment(e.target.value)} />
+                disabled={editReviewSaving} value={editReviewComment} onChange={e => setEditReviewComment(e.target.value)} />
               <Button variant="contained" size="small" disabled={editReviewSaving}
                 onClick={handleEditReview} sx={{ mt: 0.5 }}>
                 {t('admin.submitReview')}
