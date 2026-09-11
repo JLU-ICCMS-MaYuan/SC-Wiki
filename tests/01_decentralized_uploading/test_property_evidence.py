@@ -80,3 +80,37 @@ def test_page_propagates_across_chunks():
     result=ev.source_chunks(text,'main')
     assert len(result)>1
     assert all(c['page_start']==5 and c['page_end']==5 for c in result)
+
+
+def test_worker_reports_completed_batches_only_after_model_returns(monkeypatch):
+    import json
+    from types import SimpleNamespace
+    from backend.ingest import upload_tasks
+    from backend.rag import llm
+    from backend.api.evidence import get_job
+
+    sources = [dict(file_id='main', chunk_index=i, content=f'quote {i} '+ 'x'*24000) for i in range(2)]
+    record = dict(key='47', claim={}, evidences=[])
+    job = dict(id='test-job', owner=1, status='queued', cached={}, snapshot={
+        'target': 'paper', 'target_id': '29', 'version': 'v', 'records': [record], 'chunks': sources})
+    observations = []
+    class RedisStub:
+        def get(self, _key): return json.dumps(job)
+        def setex(self, *_args): pass
+    monkeypatch.setattr(upload_tasks, 'redis_client', RedisStub)
+    monkeypatch.setattr(upload_tasks, 'load_llm_config', lambda _id: SimpleNamespace(model='test'))
+    monkeypatch.setattr(upload_tasks, 'delete_llm_config', lambda _id: None)
+    monkeypatch.setattr(ev, 'read_job', lambda *_args: job)
+    monkeypatch.setattr(ev, 'update_job', lambda _id, **changes: job.update(changes))
+    def complete(_system, prompt, **_kwargs):
+        public = get_job('test-job', SimpleNamespace(id=1))
+        observations.append((public['completed_batches'], public['total_batches'], public['current_batch']))
+        source = json.loads(prompt)['sources'][0]
+        return {'results': [{'key': '47', 'status': 'supported', 'reason': '原文支持', 'evidences': [
+            {'file_id': 'main', 'chunk_index': source['chunk_index'], 'quote': f"quote {source['chunk_index']}"}]}]}
+    monkeypatch.setattr(llm, 'complete_json', complete)
+    ev.run_evidence_job('test-job')
+    assert observations == [(0, 2, 1), (1, 2, 2)]
+    public = get_job('test-job', SimpleNamespace(id=1))
+    assert public['status'] == 'completed'
+    assert public['completed_batches'] == public['total_batches'] == 2

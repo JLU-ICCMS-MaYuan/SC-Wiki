@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Alert, Box, Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from '@mui/material'
 import { api } from '../lib/api'
 import { useLanguage } from '../context/LanguageContext'
 
 export interface EvidenceSource { file_id: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
 export interface EvidenceRecord { key: string; field: string; label: string; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; evidences: EvidenceSource[] }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[] }
-interface Job { id: string; status: string; progress?: string; records?: EvidenceRecord[]; error?: { code: string; message: string } }
+interface Job { id: string; status: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
 export interface EvidenceTarget { target: 'upload' | 'paper'; target_id: string }
-interface View { phase: 'checking' | 'countdown' | 'running' | 'issues' | 'error'; seconds?: number; message?: string; records?: EvidenceRecord[] }
+interface View { phase: 'checking' | 'countdown' | 'running' | 'issues' | 'error'; seconds?: number; message?: string; records?: EvidenceRecord[]; job?: Job }
 const base = '/api/rag/evidence'
 
 // 一次 run 对应一次用户动作；取消、卸载和迟到响应由 generation 隔离。
@@ -17,6 +17,15 @@ export function useEvidenceWorkflow() {
   const { t } = useLanguage()
   const [view, setView] = useState<View | null>(null)
   const [reasons, setReasons] = useState<Record<string, string>>({})
+  const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const waiting = view?.phase === 'checking' || view?.phase === 'running'
+  useEffect(() => {
+    setElapsedSeconds(0)
+    if (!waiting) return
+    const started = Date.now()
+    const interval = setInterval(() => setElapsedSeconds(Math.floor((Date.now() - started) / 1000)), 1000)
+    return () => clearInterval(interval)
+  }, [waiting])
   const generation = useRef(0)
   const jobID = useRef<string | undefined>(undefined)
   const pending = useRef<((value: EvidencePayload | null) => void) | undefined>(undefined)
@@ -78,7 +87,7 @@ export function useEvidenceWorkflow() {
         if (result.status === 'failed') throw new Error(result.error?.message || t('evidence.failed'))
         if (result.status === 'cancelled') { finish(null); return }
         if (Date.now() > deadline) throw new Error(t('evidence.timeout'))
-        setView({ phase: 'running', message: result.progress || t('evidence.running') })
+        setView({ phase: 'running', job: result, message: result.status === 'queued' ? t('evidence.queued') : result.progress || t('evidence.running') })
         await pause(1000)
       }
     } catch (error) {
@@ -97,12 +106,25 @@ export function useEvidenceWorkflow() {
   }
 
   const disputed = view?.records?.filter(r => r.status !== 'supported') || []
+  const total = view?.job?.total_batches || 0
+  const completed = Math.min(total, Math.max(0, view?.job?.completed_batches || 0))
+  const percent = total > 0 ? Math.floor(completed / total * 100) : undefined
+  const currentBatch = view?.job?.current_batch || 0
+  const progressMessage = total > 0 && currentBatch > completed
+    ? t('evidence.currentBatch', { current: currentBatch, total }) : view?.message
   const canResolve = targetRef.current?.target === 'paper' && disputed.length > 0 && disputed.every(r => r.status !== 'missing' && reasons[r.key]?.trim())
   const dialog = <Dialog open={view !== null} onClose={() => finish(null)} fullWidth maxWidth="md" aria-labelledby="evidence-workflow-title">
     <DialogTitle id="evidence-workflow-title">{t('evidence.title')}</DialogTitle>
     <DialogContent>
       {view?.phase === 'countdown' && <Alert severity="info">{t('evidence.countdown', { seconds: view.seconds || 0 })}{view.message}</Alert>}
-      {(view?.phase === 'checking' || view?.phase === 'running') && <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}><CircularProgress size={22} /><Typography>{view.message}</Typography></Box>}
+      {waiting && <Box sx={{ py: 1 }}>
+        <Typography role="status" sx={{ mb: 2 }}>{progressMessage}</Typography>
+        <LinearProgress aria-label={t('evidence.progressLabel')} variant={percent === undefined ? 'indeterminate' : 'determinate'} value={percent} sx={{ height: 8, borderRadius: 4 }} />
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mt: 1 }}>
+          <Typography variant="body2" color="text.secondary">{percent === undefined ? t('evidence.waitingHint') : t('evidence.batchProgress', { completed, total, percent })}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0 }}>{t('evidence.elapsed', { minutes: Math.floor(elapsedSeconds / 60), seconds: elapsedSeconds % 60 })}</Typography>
+        </Box>
+      </Box>}
       {view?.phase === 'error' && <Alert severity="error">{view.message}</Alert>}
       {view?.phase === 'issues' && <>
         <Alert severity="warning" sx={{ mb: 2 }}>{t('evidence.issues')}</Alert>

@@ -332,6 +332,7 @@ def run_evidence_job(job_id: str):
             size += len(c['content'])
         if batch:
             batches.append(batch)
+        update_job(job_id, completed_batches=0, total_batches=len(batches), current_batch=0)
         candidates = {r['key']: [] for r in records}
         location_errors = {r['key']: [] for r in records}
         started = time.monotonic()
@@ -340,6 +341,7 @@ def run_evidence_job(job_id: str):
                 return
             if time.monotonic() - started > 480:
                 raise TimeoutError('evidence deadline')
+            update_job(job_id, current_batch=index + 1, progress=f'正在核对第 {index+1}/{len(batches)} 组原文')
             def on_partial(_content):
                 if read_job(job_id, job['owner'])['status'] == 'cancelled':
                     raise InterruptedError('cancelled')
@@ -362,7 +364,7 @@ def run_evidence_job(job_id: str):
                         candidates[key].append(result)
             if seen != set(by_key):
                 raise ValueError('incomplete result schema')
-            update_job(job_id, progress=f'已核对 {index+1}/{len(batches)} 组原文')
+            update_job(job_id, completed_batches=index + 1, progress=f'已核对 {index+1}/{len(batches)} 组原文')
         for r in records:
             items = candidates[r['key']]
             # 有相互冲突的证据不自动批准；保留双方原文交由人工裁决。
@@ -375,7 +377,7 @@ def run_evidence_job(job_id: str):
                         evs.append(e)
             reasons = [i['reason'] for i in items] if items else location_errors[r['key']]
             results[r['key']] = dict(status=status, reason='；'.join(dict.fromkeys(reasons)) or '当前论文及附件中未找到可定位的相关原文，可让系统重新查找或返回修改此条记录', evidences=evs, model=config.model)
-        update_job(job_id, status='completed', results=results, progress='核对完成')
+        update_job(job_id, status='completed', results=results, progress='核对完成', completed_batches=len(batches), current_batch=0)
         if read_job(job_id, job['owner'])['status'] == 'completed':
             from backend.ingest.upload_tasks import TASK_TTL
             redis_client().setex(cache_key(snapshot, job['owner']), TASK_TTL, job_id)

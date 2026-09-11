@@ -77,7 +77,7 @@ def create_job(body: Target, user=Depends(get_current_user)):
 @router.get('/jobs/{job_id}')
 def get_job(job_id: str, user=Depends(get_current_user)):
     job = ev.read_job(job_id, user.id)
-    result = {k: job.get(k) for k in ('id', 'status', 'progress', 'error')}
+    result = {k: job.get(k) for k in ('id', 'status', 'progress', 'error', 'completed_batches', 'total_batches', 'current_batch')}
     if job['status'] == 'completed':
         result['records'] = [ev.checked_result(r, job['results'][r['key']], job['snapshot']['chunks']) for r in job['snapshot']['records']]
     return result
