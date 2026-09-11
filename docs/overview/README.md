@@ -22,8 +22,8 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 | [超导数据搜索与数据库发现](03_Superconductivity_Data_Search_and_Database_Discovery/README.md) | 本地材料检索、结果分享导出、代表结构下载、Tc 统计图表 | Go API、主业务数据库 |
 | [超导论文引用发展知识图谱](04_Superconductivity_Development_Knowledge_Graph/README.md) | 基于 MySQL 引用事实的分类概览、搜索和分页展开 | Go API、Python Worker、GROBID、MySQL |
 | [检索增强 AI 问答](05_Retrieval-Augmented_AI_Question_Answering/README.md) | 混合检索、流式问答、证据展示和灵感探索 | Python FastAPI、MySQL、Qdrant、LLM 配置 |
-| [AI 辅助 Tc 估算](06_AI_Assisted_Tc_Estimation/README.md) | 根据 CONTCAR 与 PDOS 文件计算实验性 Tc 估算和解释特征 | pymatgen、NumPy、上传文件 |
-| [研究者社区论坛](07_Researcher_Community_Forum/README.md) | 注册登录身份体系与研究者贡献排行 | Go API、JWT、Redis |
+| [研究者社区论坛](06_Researcher_Community_Forum/README.md) | 注册登录身份体系与研究者贡献排行 | Go API、JWT、Redis |
+| [AI 辅助 Tc 估算](07_AI_Assisted_Tc_Estimation/README.md) | 根据 CONTCAR 与 PDOS 文件计算实验性 Tc 估算和解释特征 | pymatgen、NumPy、上传文件 |
 
 ## 整体关系
 
@@ -42,8 +42,8 @@ flowchart LR
     DB --> RV["02 审核与维护"]
     RV --> Q["03 检索与发现"]
     RV --> PUB["发布向量索引"] --> QD
-    DB --> V["07 社区贡献排行"]
-    F["CONTCAR 与 PDOS"] --> T["06 Tc 估算"]
+    DB --> V["06 社区贡献排行"]
+    F["CONTCAR 与 PDOS"] --> T["07 Tc 估算"]
 ```
 
 主业务数据库是上传、审核、检索、结构和统计能力的共同事实来源。Go 服务负责大部分用户可见 API、缓存和权限路由，未匹配请求转发到 Python 服务；Python 服务继续承担 RAG、结构 API、Tc 估算和 Neo4j 工具接口。Tc 估算只处理用户上传的计算文件，不会自动回写主业务数据。
