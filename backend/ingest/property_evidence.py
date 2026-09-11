@@ -349,7 +349,7 @@ def run_evidence_job(job_id: str):
                     raise TimeoutError('evidence deadline')
             parsed = complete_json(SYSTEM_PROMPT, json.dumps(
                 {'records': [{'key': r['key'], 'claim': r['claim'], 'existing_evidences': r['evidences']} for r in records],
-                 'sources': chunks}, ensure_ascii=False, default=str), on_partial=on_partial, retries=0)
+                 'sources': chunks}, ensure_ascii=False, default=str), on_partial=on_partial, retries=1)
             if not isinstance(parsed.get('results'), list):
                 raise ValueError('invalid result schema')
             by_key = {r['key']: r for r in records}
@@ -390,6 +390,10 @@ def run_evidence_job(job_id: str):
             error = dict(code='evidence_model_config', message='模型凭据或权限无效，请检查模型配置后重试')
         elif isinstance(exc, (TimeoutError, APITimeoutError)):
             error = dict(code='evidence_model_timeout', message='模型核对超时，原操作未继续，请重试')
+        elif isinstance(exc, (json.JSONDecodeError, RuntimeError)):
+            error = dict(code='evidence_model_format', message='模型返回的核对结果不完整或格式错误，系统已重试但仍无法解析；原操作未继续')
+        elif isinstance(exc, ValueError) and str(exc) in {'invalid result schema', 'incomplete result schema'}:
+            error = dict(code='evidence_model_format', message='模型返回的核对结果缺少必要记录或格式不完整，原操作未继续')
         else:
             error = dict(code='evidence_model_service', message='模型服务异常或返回格式不完整，原操作未继续，请重试')
         update_job(job_id, status='failed', error=error)

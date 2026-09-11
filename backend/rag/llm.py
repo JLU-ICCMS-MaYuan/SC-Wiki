@@ -74,10 +74,10 @@ def complete_json(
                 system_prompt, user_prompt,
                 on_partial=on_partial, read_timeout=read_timeout,
             )
-        except (APITimeoutError, APIConnectionError) as exc:
+        except (APITimeoutError, APIConnectionError, json.JSONDecodeError, RuntimeError) as exc:
             last_error = exc
             if attempt >= retries:
                 break
-            print(f"  [LLM] 请求中断，{attempt + 1}/{retries} 次重试")
+            print(f"  [LLM] 请求或响应格式异常，{attempt + 1}/{retries} 次重试")
     assert last_error is not None
     raise last_error

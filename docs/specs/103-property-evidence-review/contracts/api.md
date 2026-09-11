@@ -24,6 +24,9 @@ evidence_resolutions 为以正式记录 key 为键的理由映射，每条最多
 evidence_queue_error 和 evidence_worker_failed；Go 无法访问核对服务时返回 evidence_service_unavailable。
 这些错误均保留原操作状态，不解释为用户科学表单填写错误。
 
+`evidence_model_format` 表示模型响应 JSON 截断、无法解析或缺少完整结果。后台会自动重试一次；仍失败时任务
+进入 failed，原操作不继续。该错误提示用户是模型输出格式问题，可稍后重试，不要求修改表单。
+
 任务查询另返回 completed_batches、total_batches、current_batch。排队或旧任务尚未提供计数时为 null；
 分组后 completed_batches 从 0 开始，仅在每组模型响应完成且通过结果校验后递增。current_batch 从 1
 开始标识正在核对的一组，完成后置 0。前端按完成组数/总组数显示百分比，未知总量使用动态进度条，
