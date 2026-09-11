@@ -68,7 +68,7 @@ def locate(evidence: dict, chunks: list[dict]) -> dict | None:
 def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None, str | None]:
     quote = str(evidence.get('quote') or '').strip()
     if not quote:
-        return None, '证据没有原文引句，请选择来源片段并填写引句'
+        return None, '证据没有原文引句，请让系统重新查找'
     if not chunks:
         return None, '当前论文及附件没有可读取的来源文本，请检查文件解析结果'
     candidates = chunks
@@ -76,7 +76,7 @@ def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None,
     if file_id is not None and str(file_id):
         candidates = [c for c in candidates if str(c['file_id']) == str(file_id)]
         if not candidates:
-            return None, f'来源文件 {file_id} 不在当前论文及附件中，请重新选择文件'
+            return None, '证据指向的来源文件不在当前论文及附件中，请让系统重新查找'
     matching = [c for c in candidates if normalized_text(quote) in normalized_text(c['content'])]
     if not matching:
         return None, '原文引句未在所选来源文本中找到，请核对引句、文件或文件解析结果'
@@ -91,12 +91,12 @@ def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None,
             try:
                 page = int(page)
             except (TypeError, ValueError):
-                return None, '证据页码不是有效整数，请重新选择来源片段'
+                return None, '证据页码不是有效整数，系统未能确认原文位置，请重新查找'
             matching = [c for c in matching if c.get('page_start') is not None and c['page_start'] <= page <= (c.get('page_end') or c['page_start'])]
             if not matching:
-                return None, '引句存在于多个片段，但所填页码无法定位，请明确选择文件和片段'
+                return None, '引句存在于多处，但证据页码无法定位，请让系统重新查找'
     if len(matching) != 1:
-        return None, '原文引句匹配多个来源片段，请明确选择文件和片段'
+        return None, '原文引句匹配多个位置，系统尚未确认具体出处，请重新查找'
     c = matching[0]
     return {k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'section')} | {'quote': quote}, None
 
@@ -374,7 +374,7 @@ def run_evidence_job(job_id: str):
                     if e not in evs:
                         evs.append(e)
             reasons = [i['reason'] for i in items] if items else location_errors[r['key']]
-            results[r['key']] = dict(status=status, reason='；'.join(dict.fromkeys(reasons)) or '当前论文及附件中未找到可定位的相关原文，请关联原文或修改此条记录', evidences=evs, model=config.model)
+            results[r['key']] = dict(status=status, reason='；'.join(dict.fromkeys(reasons)) or '当前论文及附件中未找到可定位的相关原文，可让系统重新查找或返回修改此条记录', evidences=evs, model=config.model)
         update_job(job_id, status='completed', results=results, progress='核对完成')
         if read_job(job_id, job['owner'])['status'] == 'completed':
             from backend.ingest.upload_tasks import TASK_TTL
@@ -419,7 +419,7 @@ def resolve_results(snapshot: dict, cached: dict, user_id: int, job_id: str | No
         records.append(checked_result(r, results[r['key']], snapshot['chunks']))
     missing = [r for r in records if r['status'] == 'missing']
     if missing:
-        fail('evidence_missing', '部分物性没有有效出处，请关联原文或修改记录', issues=[{'field': r['field'], 'message': r['label']+'：'+r['reason']} for r in missing], records=missing)
+        fail('evidence_missing', '部分物性没有有效出处，请让系统重新查找或返回修改记录', issues=[{'field': r['field'], 'message': r['label']+'：'+r['reason']} for r in missing], records=missing)
     return records
 
 

@@ -57,7 +57,7 @@ def test_model_cannot_forge_source_to_approve():
 def test_location_errors_distinguish_missing_file_quote_and_ambiguity():
     assert '没有原文引句' in ev.locate_with_reason({}, chunks())[1]
     assert '没有可读取' in ev.locate_with_reason({'quote': 'q'}, [])[1]
-    assert '来源文件 other' in ev.locate_with_reason({'file_id': 'other', 'quote': 'q'}, chunks())[1]
+    assert '来源文件不在当前论文' in ev.locate_with_reason({'file_id': 'other', 'quote': 'q'}, chunks())[1]
     duplicate = chunks() + [{**chunks()[1], 'file_id': 'attachment'}]
     assert '匹配多个' in ev.locate_with_reason({'quote': chunks()[1]['content']}, duplicate)[1]
     assert '页码不是有效整数' in ev.locate_with_reason({'quote': chunks()[1]['content'], 'page': 'invalid'}, duplicate)[1]

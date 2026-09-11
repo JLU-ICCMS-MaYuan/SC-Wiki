@@ -16,3 +16,5 @@
 - [x] T012 回写 Overview、Issue 并规范提交，docs/overview/
 
 验收证据及运行方式见 [验证路径](quickstart.md)。当前功能说明从 [Overview](../../overview/README.md) 导航；Issue 保有协作状态，本文不作为发布状态副本。
+
+- [x] T013 [US1] [US2] 去除手动选片段和编辑引句，自动复用找到的证据；重试真正重查未解决记录；同步可读提示、回归和真实页面验收，并回写文档与 Issue。[FR-009 / SC-004]

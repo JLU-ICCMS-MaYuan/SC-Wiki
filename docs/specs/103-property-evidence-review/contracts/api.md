@@ -23,3 +23,7 @@ evidence_resolutions 为以正式记录 key 为键的理由映射，每条最多
 模型任务错误码区分 evidence_model_config、evidence_model_timeout、evidence_model_service、
 evidence_queue_error 和 evidence_worker_failed；Go 无法访问核对服务时返回 evidence_service_unavailable。
 这些错误均保留原操作状态，不解释为用户科学表单填写错误。
+
+当前上传及审核界面不发送 candidates，不向用户提供来源选择；由后台自动搜索与选择证据。
+原 candidates 参数保留接口兼容及确定性来源校验，不作为用户操作步骤。用户主动重试时，即使预检查有旧疑点
+结果，也重新创建任务；后台仅复用已支持记录。人工裁决仍使用已找到的原文与 evidence_resolutions。
