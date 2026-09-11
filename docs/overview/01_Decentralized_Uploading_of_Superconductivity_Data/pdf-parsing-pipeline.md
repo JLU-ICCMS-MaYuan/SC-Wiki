@@ -59,13 +59,31 @@
 
 ## 用户校对与提交落库
 
-- 用户在前端校对编辑草稿后调用 `POST /api/upload-tasks/{task_id}/submit`（`backend/api/rag.py`），全程持有任务锁，重复提交按已提交结果幂等返回。
+- 用户校对后先保存草稿，再执行共享的物性证据预检查；正式提交调用 `POST /api/rag/upload-tasks/{task_id}/submit`（`backend/api/rag.py`）。保存与提交共用任务锁，重复提交按已提交结果幂等返回。创建、文件上传和任务状态查询仍使用 `/api/upload-tasks`。
 - `_create_pending_paper` 在一个数据库事务内完成：
   - 创建 `Paper`（`review_status=pending`、`content_revision=1`、`upload_task_id` 关联任务、论文级 `superconductor_kind`）与 `PaperFile`（角色、存储路径、SHA-256、排序）。
-  - `persist_scientific_draft`（`backend/ingest/scientific_drafts.py`）把草稿落成科学实体图：`superconductors` → `material_states` → `structure_models`（含经用户确认的原生 CIF/POSCAR 附件，服务端重新 ASE 校验并以常规晶胞 CIF 为规范表示，不信任浏览器提交的校验/哈希字段）→ `calculation_contexts` / `experimental_contexts` → `tc_results` → `superconductor_properties`，并返回证据链接目标。
-  - `chunk_paper` 对正文重新分段写入 `paper_chunks`；草稿证据按 `(file_id, chunk_index)` 或页码范围匹配到具体 chunk，写入 `paper_evidences` 并挂接 `add_scientific_evidence_link`。
+  - `persist_scientific_draft`（`backend/ingest/scientific_drafts.py`）把草稿落成科学实体图：`superconductors` → `material_states` → `structure_models`（含经用户确认的原生 CIF/POSCAR 附件，服务端重新 ASE 校验并以常规晶胞 CIF 为规范表示，不信任浏览器提交的校验/哈希字段）及 `property_modules` → `property_records`，并返回证据链接目标。计算和实验条件保存在各记录的 `payload_json`。
+  - 预检查和正式提交共用 `source_chunks` 分段及页码传播；按文件、片段、页码和原文引句联合定位，写入 `paper_chunks`、`paper_evidences` 并挂接 `add_scientific_evidence_link`。同页多个片段通过引句区分，过时片段编号可由同文件唯一引句重新定位；不能唯一定位时返回记录路径与具体原因。
+  - 经核对的多条证据及模型结论随论文事务保存到 `property_evidence_checks`；保存摘要前重载数据库实际数值精度，避免同一科学值因浮点与十进制表示差异使缓存失效。
   - 违反完整性约束时整体回滚，返回 409 `scientific_data_integrity_error`。
 - `_record_submitted_upload` 把 `ai_values / user_values / evidence` 快照写回 `result.json`，`cleanup_transient_data` 清理临时数据但保留审核快照；任务状态置为 `submitted`。
+
+## 提交前补证与核对
+
+上传与管理员批准共用 `/api/rag/evidence` 的预检查、任务创建、查询和取消接口。没有可复用结果时，
+前端显示可取消的 3 秒倒计时，结束后才用发起用户当前模型配置创建 RQ 任务。模型只阅读当前论文及附件，
+核对材料状态、物性类型、数值、单位和条件；不会修改用户科学数据。引句必须能在来源文本中复核。
+
+- 原文支持结论：自动继续原提交一次。
+- 有有效出处但存在冲突或歧义：自动提交为待审核，核对结论随正式记录保存，供管理员逐条裁决。
+- 没有有效出处：保留草稿，显示具体材料、物性、数值和原因，可选择来源片段、填写原文引句后重新查找，或返回修改记录。
+- 模型配置、超时、服务或队列失败：单独提示服务原因，原操作不继续，不归为表单填写错误。
+
+等待期间冻结表单并暂停自动保存；取消或离页取消当前任务并阻止迟到响应续提。任务只保存候选结果，
+提交服务端在任务锁内重新校验归属和内容版本，结果与论文原事务一起应用。未变化的已完成任务可在 Redis
+有效期内复用；正式核对结果按内容、来源和规则版本复用。历史论文只在下次提交或批准时按需核对。
+管理员的人工裁决及审核历史见[论文与记录审核](../02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
+（[Issue #103](../../specs/103-property-evidence-review/spec.md)）
 
 ## 审核通过与向量发布
 
@@ -96,3 +114,4 @@
 - 解析主流程：`backend/ingest/upload_jobs.py`；任务状态与存储：`backend/ingest/upload_tasks.py`、`upload_contracts.py`。
 - 提取与分段：`pdf_extractor.py`、`chunker.py`、`extractor.py`；结构候选：`structure_extractor.py`；落库：`scientific_drafts.py`；向量化：`embedder.py`。
 - 测试：`backend/tests/test_upload_workflow.py`、`tests/01_decentralized_uploading/`；其中 `test_issue91_upload_worker_recovery.py` 使用隔离 Redis 和真实 RQ Worker 覆盖入口导入失败边界。
+- 共享核对：`backend/ingest/property_evidence.py`、`backend/api/evidence.py`、`frontend/src/components/EvidenceWorkflow.tsx`。现有 sc-wiki MySQL、真实模型及页面验收记录见 [#103 验证路径](../../specs/103-property-evidence-review/quickstart.md)。

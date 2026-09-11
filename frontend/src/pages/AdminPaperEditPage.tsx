@@ -1,3 +1,4 @@
+import { useEvidenceWorkflow } from '../components/EvidenceWorkflow'
 import React, { useEffect, useMemo, useState } from 'react'
 import {
   Alert, Autocomplete, Box, Button, Checkbox, Chip, CircularProgress, Container, FormControl, FormControlLabel, IconButton,
@@ -123,6 +124,7 @@ const AdminPaperEditPage: React.FC = () => {
   const [editReviewStatus, setEditReviewStatus] = useState('')
   const [editReviewComment, setEditReviewComment] = useState('')
   const [editReviewSaving, setEditReviewSaving] = useState(false)
+  const evidenceWorkflow = useEvidenceWorkflow()
 
   /* ── 科学数据（Issue #76）：材料状态与结构候选受控于共享编辑器，保存时随 C1 提交 ─ */
   const [editMaterialStates, setEditMaterialStates] = useState<DraftMaterialState[]>([])
@@ -201,20 +203,9 @@ const AdminPaperEditPage: React.FC = () => {
         setEditReviewComment(detail.review_comment || '')
         // 科学数据：Go 详情行转成共享编辑器形态；既有结构并入候选（整体替换语义，T020）
         const detailStates: Array<Record<string, any>> = detail.material_states || []
-        const pendingStates: Array<Record<string, any>> = Array.isArray(pendingValues?.material_states)
-          ? pendingValues.material_states
-          : []
-        const materialStates = detailStates.map((state, index) => {
-          const normalized = materialStateFromDetail(state, classifications.materialStates[index])
-          const pendingState = pendingStates[index]
-          if (!pendingState) return normalized
-          return {
-            ...normalized,
-            property_modules: Array.isArray(pendingState.property_modules)
-              ? convertLegacyPropertyModules(pendingState)
-              : normalized.property_modules,
-          }
-        })
+        // 科学值与永久 Evidence 以数据库详情为准，不能被上传时的旧快照覆盖。
+        const materialStates = detailStates.map((state, index) =>
+          materialStateFromDetail(state, classifications.materialStates[index]))
         const structureCandidates = detailStates.flatMap((state, index) =>
           (state.structures || []).map((model: any) =>
             candidateFromStructureModel(model, `material_states[${index}]`)))
@@ -238,12 +229,13 @@ const AdminPaperEditPage: React.FC = () => {
   const handleEditReview = async () => {
     setEditReviewSaving(true)
     try {
-      await api.post(`/api/admin/papers/${paperId}/review`,
-        paperReviewPayload(editReviewStatus, editReviewComment, {
-          superconductorKind: editForm.superconductor_kind || 'unknown',
-          materialFamilies: editMaterialFamilies,
-          materialStates: editMaterialStates,
-        }))
+      const payload = paperReviewPayload(editReviewStatus, editReviewComment, {
+        superconductorKind: editForm.superconductor_kind || 'unknown',
+        materialFamilies: editMaterialFamilies, materialStates: editMaterialStates,
+      })
+      const evidence = editReviewStatus === 'approved' ? await evidenceWorkflow.run({ target: 'paper', target_id: String(paperId) }) : {}
+      if (!evidence) return
+      await api.post(`/api/admin/papers/${paperId}/review`, { ...payload, ...evidence })
       navigate(workspacePath)
     } catch (e: unknown) {
       setSnackbar(t('admin.reviewFailed', { reason: (e as Error).message }))
@@ -341,7 +333,7 @@ const AdminPaperEditPage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 3 }}>
+    <Container component="fieldset" disabled={editReviewSaving} maxWidth="lg" sx={{ py: 3, border: 0, minWidth: 0 }}>
       {/* 标题栏 + 返回列表 */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
         <IconButton aria-label={t('admin.editBackToList')} onClick={() => navigate(workspacePath)}>
@@ -363,6 +355,7 @@ const AdminPaperEditPage: React.FC = () => {
             position: 'sticky', top: 0, zIndex: 2, bgcolor: 'background.paper',
             pb: 1.5, mb: 0.5, borderBottom: '1px solid', borderColor: 'divider',
           }}>
+            {evidenceWorkflow.dialog}
             <Typography variant="subtitle2" fontWeight={700} gutterBottom>{t('admin.editReviewSection')}</Typography>
             <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <Box sx={{ minWidth: 170 }}>

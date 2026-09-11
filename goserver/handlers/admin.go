@@ -330,14 +330,17 @@ func applyPaperReview(tx *gorm.DB, paper *models.Paper, reviewer *models.User, s
 func ReviewPaper(c *gin.Context) {
 	id := c.Param("id")
 	var body struct {
-		Status                string                         `json:"status"`
-		Comment               string                         `json:"comment"`
-		ReviewRequestID       string                         `json:"review_request_id"`
-		AdminInternalNote     *string                        `json:"admin_internal_note"`
-		SuperconductorKind    string                         `json:"superconductor_kind"`
-		MaterialFamilies      []classificationSelection      `json:"material_families"`
-		MaterialStates        []materialClassificationUpdate `json:"material_states"`
-		ClassificationContext json.RawMessage                `json:"classification_context"`
+		Status                  string                         `json:"status"`
+		Comment                 string                         `json:"comment"`
+		ReviewRequestID         string                         `json:"review_request_id"`
+		AdminInternalNote       *string                        `json:"admin_internal_note"`
+		SuperconductorKind      string                         `json:"superconductor_kind"`
+		MaterialFamilies        []classificationSelection      `json:"material_families"`
+		MaterialStates          []materialClassificationUpdate `json:"material_states"`
+		ClassificationContext   json.RawMessage                `json:"classification_context"`
+		EvidenceJobID           string                         `json:"evidence_job_id"`
+		ExpectedEvidenceVersion string                         `json:"expected_evidence_version"`
+		EvidenceResolutions     map[string]string              `json:"evidence_resolutions"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		if errors.Is(err, errLegacyClassificationContract) {
@@ -403,6 +406,13 @@ func ReviewPaper(c *gin.Context) {
 		}
 		var classificationSnapshot json.RawMessage
 		if body.Status == reviewStatusApproved {
+			evidenceRecords, err := preparePaperEvidence(tx, &paper, c.GetHeader("Authorization"), body.EvidenceJobID, body.ExpectedEvidenceVersion, body.EvidenceResolutions)
+			if err != nil {
+				return err
+			}
+			if err := applyPaperEvidence(tx, &paper, evidenceRecords); err != nil {
+				return err
+			}
 			snapshot, err := applyPaperClassifications(
 				tx, &paper, user.ID, body.SuperconductorKind, body.MaterialFamilies, body.MaterialStates,
 			)
@@ -420,11 +430,13 @@ func ReviewPaper(c *gin.Context) {
 				context = json.RawMessage(`{}`)
 			}
 			classificationSnapshot, err = json.Marshal(struct {
+				EvidenceReview     []evidenceReviewRecord        `json:"evidence_review"`
 				Context            json.RawMessage               `json:"context"`
 				SuperconductorKind string                        `json:"superconductor_kind"`
 				MaterialFamilies   []classificationSnapshotTerm  `json:"material_families"`
 				MaterialStates     []classificationSnapshotState `json:"material_states"`
 			}{
+				EvidenceReview:     evidenceRecords,
 				Context:            context,
 				SuperconductorKind: snapshot.SuperconductorKind,
 				MaterialFamilies:   snapshot.MaterialFamilies,
@@ -443,6 +455,11 @@ func ReviewPaper(c *gin.Context) {
 		}
 		return nil
 	}); err != nil {
+		var evidenceErr *evidencePrepareError
+		if errors.As(err, &evidenceErr) {
+			c.JSON(evidenceErr.Status, gin.H{"detail": evidenceErr.Detail})
+			return
+		}
 		var incomplete *classificationIncompleteError
 		if errors.As(err, &incomplete) {
 			c.JSON(http.StatusConflict, gin.H{

@@ -111,6 +111,7 @@
 | `property_modules` | 关联一个 `material_state`；模块代码在该状态内唯一 | 按需挂载的模块及排序 |
 | `property_records` | 关联模块、材料状态、论文 revision 和定义版本 | 固定检索列、值、单位、方法、代表标记和 `payload_json` |
 | `property_record_evidences` | `property_record_id` ↔ `paper_evidence_id`，要求同 revision | 记录级或字段路径级来源 |
+| `property_evidence_checks` | 关联当前论文 revision 与物性记录；记录删除时级联清理 | 内容和来源摘要、规则版本、模型结论与理由、证据快照 |
 | `form_definitions` | `definition_key + version` 唯一 | JSON Schema、UI 提示、规则、状态和校验和 |
 | `form_definition_audit_events` | 关联定义及操作者 | 发布、停用、升级、回滚和管理员提升审计 |
 
@@ -123,6 +124,19 @@
 指纹用于记录身份去重，不代表论文或段落：多个记录可以共享论文和同一 Evidence，也不会因此被合并。
 科学值变化由 `record_checksum` 表达，不改变已有来源身份。
 
+### 证据保留与核对结果
+
+解析草稿的单个 `evidence` 与多条 `evidences` 在表单边界合并、去重；空数组不会覆盖已有单证据。
+编辑和保存保留原文来源，复制保留候选来源，新记录须重新核对。正式关联按材料状态、模块和记录联合
+定位，不用全论文范围的 `record_key` 查找目标，允许不同状态或模块使用相同局部键。
+
+`property_evidence_checks` 保存 `supported`、`uncertain` 或 `unsupported`、模型名、理由和证据快照。
+来源缺失不能正式提交。核对摘要包含材料状态、记录值、条件、相关结构及来源；任一变化或规则版本变化后
+不再复用旧结果。Redis 同时短期缓存已完成但尚未入库的任务，任务归属与目标版本必须一致。
+上传核对结果随正式提交保存，使用落库后数据计算摘要；科学数据整体重建时由外键清理旧记录的核对结果。
+管理员编辑以正式详情的物性和永久 Evidence 为准，旧上传快照只供既有分类回填与历史查看，不覆盖正式物性。
+（[Issue #103](../../specs/103-property-evidence-review/spec.md)）
+
 ## 提交流程
 
 ```mermaid
@@ -131,7 +145,9 @@ flowchart TD
     B --> C[Parse Draft]
     C --> D[Review Form]
     D --> E[Validate Definitions and Records]
-    E -->|valid| F[Persist Paper Revision]
+    E -->|valid| Q[核对原文证据]
+    Q -->|支持或存在语义疑点| F[Persist Paper Revision]
+    Q -->|无有效出处或服务失败| D
     E -->|invalid| D
     F --> G[Persist Material States and Structures]
     G --> H[Persist Property Modules and Records]
@@ -145,8 +161,9 @@ flowchart TD
     I --> V[(paper evidences and record links)]
 ```
 
-正式提交先校验完整草稿和所有定义，再在事务中写入论文 revision、材料状态、结构、模块、记录和
-Evidence 关联。任一校验失败都不会留下部分正式科研数据。旧缓存草稿只在输入边界单向转换为
+正式提交校验完整草稿、定义和物性证据核对结果，再在事务中写入论文 revision、材料状态、结构、模块、记录、
+Evidence 关联与核对快照。有出处但存在语义疑点时进入待审；无出处或内容版本变化时停止提交。
+任一校验失败都不会留下部分正式科研数据。旧缓存草稿只在输入边界单向转换为
 Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖，正式持久化不再双写旧科学表。
 模块化物性校验错误返回完整的 `material_states[i].property_modules[j].records[k]` 字段路径和
 `issues[]` 具体消息，上传页面会汇总全部问题并展开、标记和聚焦首个可用错误位置。
@@ -161,7 +178,7 @@ Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖�
 - 一个材料状态可关联多个结构家族，但最多一个主结构家族。
 - 非空物性模块不能隐式级联删除；先显式处理记录，再删除模块。
 - 每个“论文 revision + MaterialState + Tc 记录类型 + 方法”最多一条代表 Tc。
-- 新批准或重新批准的记录至少关联一条当前 revision 的 Evidence；历史迁移不伪造缺失证据。
+- 新提交、新批准或重新批准的记录至少关联一条当前 revision 内可复核引句的 Evidence；语义疑点须由审核员逐条填写理由才能批准，历史迁移不伪造缺失证据。
 - 自定义字段只能出现在定义预留分组中，不能覆盖固定核心字段或系统键。
 
 ## 代码依据
@@ -192,3 +209,4 @@ Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖�
 - [Feature #90：MaterialState 模块化物性与动态表单](../../specs/90-unified-superconductor-properties/spec.md)
 - [Feature #94：物性记录标题、实验条件文本与独立折叠](../../specs/94-property-record-editor/spec.md)
 - [Bug #96：上传解析记录表单选项编辑延迟](../../specs/96-upload-form-performance/spec.md)
+- [Feature #103：物性证据保留、自动补证与人工裁决](../../specs/103-property-evidence-review/spec.md)

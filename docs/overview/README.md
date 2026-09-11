@@ -52,7 +52,7 @@ flowchart LR
 
 - Docker 部署入口使用 Nginx 前端、Go API、Python RAG、上传 Worker、MySQL、Redis、Neo4j、Qdrant、GROBID 和迁移服务；本地直接运行 Python FastAPI 时只包含 Python 注册的接口。
 - 本地开发已移除 Docker 依赖：八个服务跑在宿主机，由 `make start` 编排，前端/Python/goserver 均支持热重载，数据存放仓库内 `.data/`。本地链路以 Vite 代理替代 Nginx；由于生产镜像会重新构建源码，本地改动不会因此丢失，但 nginx 特有的上传体积与缓冲配置、以及仅构建期生效的分包与预取优化在本地不成立，两条链路的行为差异见[部署与运行时](02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。使用说明见 `docs/local-dev.md`。
-- `backend/main.py` 当前 include `tc_predict`、`structures`、`rag`、`upload_tasks`、`kg` 五类 Python 路由；canonical `/api/upload-tasks` 由 Go 未匹配路由转发到 Python。邮箱验证、用户中心、公开资料与管理员治理由 Go 直接承载；图表组合导入/导出/复制/搜索等前端调用仍需按实际部署链路继续核验。
+- `backend/main.py` 注册 Tc、结构、RAG、上传任务、证据核对、知识图谱、内部管理、表单定义与材料状态导出等 Python 路由；canonical `/api/upload-tasks` 和 `/api/rag/evidence` 由 Go 未匹配路由转发到 Python。邮箱验证、用户中心、公开资料与管理员治理由 Go 直接承载；图表组合导入/导出/复制/搜索等前端调用仍需按实际部署链路继续核验。
 - RAG 已从 Chroma 迁移到 Qdrant 封装，但部分兼容命名仍保留 `chroma` 字样。
 - 晶体结构后端 API 已实现，前端在论文详情中按材料状态下的 `structures`（来自 `structure_models`）展示结构，完整结构审核工作台仍未从当前路由中确认。当前全库无结构模型记录，只验证过空态。（[Issue #57](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/57)）
 - “社区”当前是公共图表、图表组合、贡献榜单和论文详情抽屉，不包含帖子、评论或关注等论坛能力。
@@ -62,5 +62,9 @@ flowchart LR
 - 界面支持简体中文与英文切换：侧栏底部模型配置下方的 `中文 / English` 控件，收起后通过语言图标打开选择菜单。偏好存浏览器 `localStorage`（键 `sc-wiki.language`），默认中文，未登录也可切换；仅界面文案与固定枚举标签跟随语言。六个 LLM 叙述字段（`summary`、`keywords_tags`、`methodology`、`key_finding`、`research_motivation`、`knowledge_graph_title`）在数据层统一为英文存储，不随界面语言变化，无双语列。（[Issue #74](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/74)、[布局更新 #101](../specs/101-unified-collapsible-sidebar/spec.md)）
 
 ## 文档维护
+
+上传提交和两工作台批准共用物性证据保留与核对：支持结论可自动续提，有有效出处的语义疑点由审核员逐条裁决。
+操作流程见[PDF 解析管线](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md)与
+[论文与记录审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 
 本目录只记录当前代码、配置和测试文件能够支持的已落地事实。未来方案位于 `future-plan/`，不作为当前能力依据。无法从当前实现确认的内容在相应文档中标记为“待核验”。

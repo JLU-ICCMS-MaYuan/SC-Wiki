@@ -179,3 +179,10 @@ describe('Issue #94 记录表单', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 })
+
+it('旧 Tc 与自定义物性转换保留单条证据，即使同时存在空 evidences 数组', async () => {
+  const { convertLegacyPropertyModules } = await import('../../frontend/src/lib/propertyModules')
+  const quote = { file_id: 'main', page: 5, quote: 'Original text' }
+  const modules = convertLegacyPropertyModules({ tc_results: [{ result_kind: 'experimental', tc_method: 'experimental', tc_value_k: 4.2, evidence: quote, evidences: [] }] })
+  expect(modules[0].records[0].evidences).toEqual([quote])
+})

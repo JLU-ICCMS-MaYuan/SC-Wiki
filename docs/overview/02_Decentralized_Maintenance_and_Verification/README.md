@@ -13,7 +13,7 @@
 | [数据库初始化与迁移](database-initialization-and-migrations.md) | 建表、填充周期表并执行版本迁移 | Alembic、Docker Compose、启动脚本 |
 | [数据导入与导出](data-import-and-export.md) | 离线交换用户、论文、记录和结构数据 | JSON、主业务数据库 |
 | [部署与运行时](deployment-and-runtime.md) | Docker 服务编排、配置和运行时边界 | Docker Compose、Nginx、Go、Python |
-| [论文与记录审核](literature-and-record-review.md) | 管理员论文审核与超级管理员的图表、快讯和治理工作台 | 分级权限、论文与关键物性模型 |
+| [论文与记录审核](literature-and-record-review.md) | 两工作台三状态审核、物性自动补证与人工裁决，以及超级管理员治理 | 分级权限、共享证据服务、论文与物性模型 |
 | [角色与管理员审批](roles-and-administrator-approval.md) | 用户中心、公开资料、管理员资格申请和账号治理 | 账户 API、超级管理员 API、审计模型 |
 | [格式校验与存储](format-validation-and-storage.md) | 解析结构文本、计算摘要并保存元数据 | pymatgen、结构模型 |
 
@@ -30,3 +30,5 @@
 ## 关联关系
 
 领域模型是所有主业务 API 的共同数据契约。01 上传提交的论文在此完成审核决策；审核通过的论文经发布后进入 03 检索与 05 问答。Go 服务通过 GORM 读取 MySQL 并提供主要公开 API；Python 服务通过 SQLAlchemy 承担 RAG、结构、Tc 估算和部分工具接口。
+
+物性核对与 01 上传共用 Python/Redis/RQ 能力；Go 保有最终审核事务，原文支持程度有疑点时由审核员逐条填写理由，证据与裁决一并留痕。

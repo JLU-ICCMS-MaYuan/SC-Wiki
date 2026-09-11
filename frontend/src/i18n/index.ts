@@ -8,6 +8,8 @@
  * 按功能域分文件而非单文件：全站约 2400 条文案集中在一处会使冲突与检索都困难，
  * 分域也与 frontend/src/pages/ 的模块边界对齐。
  */
+import zhEvidence from './zh/evidence'
+import enEvidence from './en/evidence'
 import zhCommon from './zh/common'
 import zhEnums from './zh/enums'
 import zhNav from './zh/nav'
@@ -41,6 +43,7 @@ export const LANGS: readonly Lang[] = ['zh', 'en'] as const
 export const DEFAULT_LANG: Lang = 'zh'
 
 const zh = {
+  evidence: zhEvidence,
   common: zhCommon,
   enums: zhEnums,
   nav: zhNav,
@@ -71,6 +74,7 @@ type Widen<T> = T extends string ? string
 export type Dictionary = Widen<typeof zh>
 
 const en: Dictionary = {
+  evidence: enEvidence,
   common: enCommon,
   enums: enEnums,
   nav: enNav,

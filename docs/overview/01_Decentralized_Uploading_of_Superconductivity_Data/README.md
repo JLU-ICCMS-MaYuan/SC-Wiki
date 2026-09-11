@@ -8,10 +8,10 @@
 
 | 小功能 | 职责 | 依赖 |
 | --- | --- | --- |
-| [PDF 解析管线](pdf-parsing-pipeline.md) | 五阶段解析状态机、提交落库与向量发布主链路 | RQ Worker、Redis、LLM、MySQL、Qdrant |
+| [PDF 解析管线](pdf-parsing-pipeline.md) | 五阶段解析、提交前自动补证与核对、落库与向量发布 | RQ Worker、Redis、LLM、MySQL、Qdrant |
 | [PDF 摄入](pdf-ingestion.md) | 校验并摄入上传的 PDF/TXT/MD | 上传目录、摄入流水线 |
 | [上传、审核与默认结构](upload-review-and-default-selection.md) | 管理晶体结构 pending/approved/rejected 状态和默认项 | 用户认证、管理员权限 |
-| [上传数据结构与表单映射](data-structure-and-form-mapping.md) | 模块化记录、实验条件文本、记录折叠及草稿与 MySQL 的映射 | 上传任务、科学数据模型 |
+| [上传数据结构与表单映射](data-structure-and-form-mapping.md) | 模块化记录、多证据保留、核对结果及草稿与 MySQL 的映射 | 上传任务、科学数据模型 |
 | [数据表关系与内容说明](table-relationships-AI-writed.md) | 核心地图、39 张数据表、表单定义及本地数据快照 | MySQL、科学数据模型、版本化表单 |
 
 ## 功能组成
@@ -27,3 +27,5 @@
 ## 关联关系
 
 用户从前端 `/upload` 进入，文件与任务状态存 Redis，解析由 RQ worker 异步执行；提交后论文进入待审核队列，审核通过并发布向量索引后可被 03 检索与 05 问答使用。
+
+上传与两个管理员工作台共享物性证据核对。有有效出处的语义疑点随提交进入待审，审核员在 02 的审核流程中逐条裁决；没有有效出处时保留草稿。

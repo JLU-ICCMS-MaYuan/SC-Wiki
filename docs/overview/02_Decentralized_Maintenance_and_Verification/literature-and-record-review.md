@@ -20,7 +20,7 @@
 - 独立编辑页顶部有固定的审核区域，可一边修改字段和分类一边提交审核；元数据区显示论文 ID 和创建时间，不显示物性记录数量。管理工作台论文列表每行操作区域显示可点击进入 `/users/:username` 的上传者，并提供仅显示历史图标的入口；只有管理员和超级管理员可从此读取按时间排序的上传、修改、审核记录。审核事件保留当时操作者和每次审核意见，历史导入论文显示“历史导入，上传者未知”。审核结果统一提供「通过」「拒绝」「↩️ 退回待审核」三个状态。选择「通过」时，页面会把当前论文级 family、Superconductor type 和材料状态分类随审核请求提交，无需先单独保存，后端继续执行分类完整性校验。审核请求成功后立即返回当前角色工作台：管理员回 `/admin`，超级管理员回 `/superadmin`。（[Issue #87](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/87)）
 - 论文列表和快速审核弹窗不展示物性记录数量；管理员与超级管理员的小锤子快速审核、独立编辑页共用三状态选择器，顺序为「通过」「退回待审核」「拒绝」。快速批准读取最新正式详情，并在 pending 时按既有规则使用提交快照回填论文级 family、Superconductor type 和状态分类；编辑页批准提交当前分类选择。两入口共用分类解析及审核请求构造，均执行现有后端校验。快照 404 时使用正式详情，其他读取错误中止批准并显示原因；拒绝和退回不依赖分类读取。快速审核提交中禁用重复操作，失败保留选项和意见，成功刷新列表及统计。提示明确区分已保存数据和当前编辑选择，需要修改时进入编辑页。弹窗保留标题、DOI、年份和意见，不恢复 AI 三列对照、原文证据引文或候选附件列表。（[Issue #100](../../specs/100-quick-review-status/spec.md)）
 - 目录不提供独立建议队列、重命名、停用、合并或超级管理员二次治理。新名称只在论文批准事务中创建，拒绝或退回不会污染正式目录。
-- 批准论文前检查当前 revision 至少有一个论文级 Material family，并校验各材料状态的元素种类数与主结构唯一性；不完整时返回 `409 classification_incomplete`。批准事务还逐条检查 `property_records` 是否关联当前论文 revision 内可解析的 Evidence，缺失时返回 `409 evidence_incomplete` 和对应 `record_keys`。任一检查失败时论文状态及目录均不改变。批准事件保存 AI 上下文、全部论文 family 与状态级标签的最终目录 ID 快照。历史迁移中已经批准且缺少 Evidence 的记录不被自动改写，但编辑升版后必须补齐 Evidence 才能重新批准。
+- 批准论文前检查当前 revision 至少有一个论文级 Material family，并校验各材料状态的元素种类数与主结构唯一性；不完整时返回 `409 classification_incomplete`。物性证据先经共享核对流程，批准事务内应用候选与人工裁决，再由原有 `validatePaperEvidenceComplete` 检查关联完整性。无有效出处返回 `evidence_missing`，未核对返回 `evidence_check_required`，语义疑点未填写理由返回 `evidence_review_required`，内容变化返回 `evidence_stale`；关联层仍保留 `evidence_incomplete` 防线。任一检查失败时论文状态及目录均不改变。批准事件保存分类及证据核对快照。历史数据不自动改写，下次批准时按需核对。
 - `paper_history_events` 是上传、修改和审核的唯一追加式历史来源：新上传与论文创建同事务写入 `uploaded`；有实际业务变化的保存写入一条 `modified`；每次实际审核写入 `reviewed` 并保留审核意见。同一次编辑页保存的 Go/Python 两段请求共享 `history_operation_id`，同值保存和同一操作重试不产生重复事件；审核贡献统计仅计 `reviewed`。
 - 论文历史弹窗为每条事件显示 `YYYY-MM-DD-HH-mm-vN-审核人-审核简介` 格式的名称。时间沿用浏览器本地时区、精确到分钟；审核人和意见来自该事件快照，空意见显示“未填写审核意见”。上传和修改条目对应位置使用实际操作者及事件类型，历史导入保留上传者未知提示。长意见在名称中合并连续空白并自动换行，原评论正文保留。名称只用于展示，不作为唯一版本标识，也不写回数据库。前端工作台守卫及 `GET /api/admin/papers/:id/history` 均限制管理员和超级管理员，普通用户为 403、未登录 API 请求为 401。（[Issue #93](../../specs/93-paper-version-visibility-and-naming/spec.md)）
 - 批量接口不允许批准论文，避免绕过逐篇材料分类确认；批量拒绝和退回仍可使用。
@@ -31,6 +31,27 @@
 - `/superadmin` 页面标题为“超级管理员工作台”，复用同一 `AdminPage` 审核状态和业务逻辑，显示六张卡片：用户与权限、论文审核、待审批管理员、图表管理、快讯管理、当前角色；并额外组合图表管理、快讯管理、管理员申请、用户与权限、账号治理和三类审计面板。
 - 图表组合和快讯公开读取保持不变，创建、修改、删除和公开状态切换只允许超级管理员。
 
+## 物性补证与人工裁决
+
+管理员、超级管理员的快速审核与独立编辑页共用 `EvidenceWorkflow`，与上传页使用同一后台核对能力。
+只有选择「通过」才触发预检查；已有核对结果且内容、来源、规则版本未变时复用，否则显示可取消的
+3 秒倒计时，结束后使用当前操作者模型配置在 RQ 中核对。退回待审核和拒绝不启动补证。
+
+模型搜索范围仅为当前论文及附件，不自动改写材料、物性数值或条件。原文支持结论时自动续提一次；
+有有效出处但存在语义疑点时暂停自动批准，逐条展示材料、物性、数值、原文和解释，审核员填写每条理由后
+可人工通过。没有有效出处时不允许通过，可手动选择来源片段和原文引句重新核对，或返回编辑记录。
+文件不匹配、引句不存在和匹配多个片段会提示具体原因。页码未知时展示片段编号，不伪造历史页码。
+
+等待期间冻结当前操作；取消或离页阻止旧响应自动提交，任务结果未应用时不修改正式数据。服务端验证管理员
+权限、禁止自审、任务归属及预期内容版本。Go 在论文行锁与原审核事务内调用 Python 的只读准备接口，
+随后一起保存 Evidence、核对结果、分类、审核状态和历史；模型调用发生在该事务之前。重复审核请求继续使用
+原 `review_request_id` 幂等机制。模型配置、超时和服务失败分别提示，不报成表单填写错误。
+
+审核历史的 `evidence_review` 保留逐条模型结论、理由、原文和人工裁决理由，操作者与时间沿用审核事件。
+科学数据编辑以正式详情为准，旧解析快照不会覆盖已保存的物性和证据；分类仍沿既有规则回填。
+用户需先保存科学数据修改再批准，批准请求随同提交当前分类选择。
+（[Issue #103](../../specs/103-property-evidence-review/spec.md)）
+
 ## 论文物理删除
 
 超级管理员通过 `DELETE /api/admin/papers/:id`（单篇）和 `POST /api/admin/papers/batch-delete`（批量）执行删除。删除是物理删除：论文行从 MySQL 移除，不写软删除标记，无法恢复。（[Issue #60](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/60)）
@@ -38,6 +59,7 @@
 - 同一事务内级联清理 15 张关联表，顺序为：`tc_result_evidences`、`structure_model_evidences`、`superconductor_property_evidences`、`tc_results`、`superconductor_properties`、`calculation_contexts`、`experimental_contexts`、`structure_models`、`material_state_structure_families`、`material_states`、`paper_material_families`、`paper_evidences`、`paper_chunks`、`paper_files`、`paper_history_events`，最后删除 `papers`。
 - 删除顺序按 `information_schema` 实测的外键依赖拓扑逆序，不可随意调整：例如 `superconductor_properties` 引用 `calculation_contexts`，必须先删前者，否则 MySQL 抛 `Error 1451` 并回滚整个事务，表现为“提示删除成功但数据仍在”。`structure_models` 自引用 `parent_structure_id`，删除前先置空。`material_state_structure_families` 没有 `paper_id` 列，按本论文的 `material_states` 子查询删除。
 - 跨论文共享的目录数据不删除：`superconductors`、`material_families`、`structure_families`、`property_definitions`。
+- 模块化记录的 `property_evidence_checks` 通过 `record_id` 外键随记录删除清理，不保留指向已删除科学记录的核对缓存。
 - MySQL 事务提交后，Go 调用 Python 内部端点 `DELETE /api/internal/papers/{id}/vectors` 与 `DELETE /api/internal/papers/{id}/graph` 清理 Qdrant 向量与 Neo4j 节点。该清理是 best-effort：失败只写日志，不回滚、不改变 HTTP 结果——MySQL 行此时已不可恢复，强制回滚只会制造更严重的不一致。Go 通过 `PYTHON_BACKEND_URL` 定位 Python 服务。
 - 批量删除逐篇独立处理，单篇失败不影响其余。存在失败时返回 `206` 与 `failed_ids`；`206` 落在 2xx 内不会触发前端的错误分支，因此前端按 `failed_ids` 判定并提示失败篇数与 ID，而非仅凭 HTTP 成功即报完成。
 - 删除成功后清理 `chart:*`、`search:*`、`community:contributions:*` 缓存。
@@ -57,6 +79,9 @@
 ## 代码与测试
 
 - `goserver/handlers/admin.go`
+- `goserver/handlers/paper_evidence.go`、`backend/api/evidence.py`、`backend/ingest/property_evidence.py`
+- `frontend/src/components/EvidenceWorkflow.tsx`
+- `goserver/handlers/paper_evidence_mysql_test.go`、`tests/01_decentralized_uploading/evidence-workflow.test.tsx`
 - `goserver/handlers/paper_deletion.go`
 - `goserver/handlers/paper_deletion_test.go`
 - `goserver/handlers/stats.go`
@@ -92,6 +117,7 @@
 - [Issue #78：管理端审核编辑页独立化并功能对齐提交页](../../specs/78-admin-edit-page/spec.md)
 - [Issue #94：物性记录标题、实验条件文本与独立折叠](../../specs/94-property-record-editor/spec.md)
 - [Issue #95：管理端论文作者、关键词与研究方法的可读编辑](../../specs/95-admin-paper-list-fields/spec.md)
+- [Issue #103：物性证据保留、自动补证与人工裁决](../../specs/103-property-evidence-review/spec.md)
 
 ## 已知问题
 

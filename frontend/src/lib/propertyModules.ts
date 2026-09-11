@@ -37,6 +37,7 @@ export interface PropertyRecordDraft {
   is_representative?: boolean
   structure_key?: string | null
   payload: Record<string, unknown>
+  evidence?: Record<string, unknown> | null
   evidences?: unknown[]
 }
 
@@ -103,6 +104,18 @@ const numberParameter = (value: unknown, unit: string) => (
   typeof value === 'number' ? { value_raw: String(value), value_number: value, unit_raw: unit } : undefined
 )
 
+// 旧草稿可能同时携带单证据和空数组，不能让空数组覆盖有效来源。
+const legacyEvidenceList = (source: Record<string, any>): unknown[] => {
+  const candidates = [source.evidence, source.evidences].flatMap(value => Array.isArray(value) ? value : value == null ? [] : [value])
+  const seen = new Set<string>()
+  return structuredClone(candidates.filter(value => {
+    const identity = JSON.stringify(value)
+    if (seen.has(identity)) return false
+    seen.add(identity)
+    return true
+  }))
+}
+
 export function convertLegacyPropertyModules(state: Record<string, any>): PropertyModuleDraft[] {
   if (Array.isArray(state.property_modules)) {
     return state.property_modules.map((module: PropertyModuleDraft, index: number) => ({
@@ -150,7 +163,7 @@ export function convertLegacyPropertyModules(state: Record<string, any>): Proper
       payload: experimental
         ? { experimental_conditions: structuredClone(state.experimental_context || {}) }
         : { calculation_conditions: structuredClone(context.conditions || {}), parameters },
-      evidences: structuredClone(result.evidences || result.evidence || []),
+      evidences: legacyEvidenceList(result),
     })
   }
 
@@ -166,7 +179,7 @@ export function convertLegacyPropertyModules(state: Record<string, any>): Proper
       value_number: isNumber ? Number(property.value_number ?? property.value) : null,
       value_text: isNumber ? null : String(rawValue),
       unit_raw: property.unit || property.unit_raw || null,
-      evidences: structuredClone(property.evidences || property.evidence || []),
+      evidences: legacyEvidenceList(property),
     })
   }
 

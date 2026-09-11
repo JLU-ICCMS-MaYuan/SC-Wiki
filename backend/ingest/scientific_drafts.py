@@ -397,12 +397,14 @@ async def persist_scientific_draft(
             deleted_record_keys=state_data.get("deleted_record_keys"),
             deleted_module_keys=state_data.get("deleted_module_keys"),
         )
-        records_by_key = {record.record_key: record for record in records}
+        from backend.ingest.property_evidence import evidence_list
+        records_by_key = {(record.module_id, record.record_key): record for record in records}
+        module_rows = (await session.execute(select(models.PropertyModule).where(models.PropertyModule.material_state_id == state.id))).scalars().all()
+        module_ids = {module.module_key: module.id for module in module_rows}
         for module_index, module in enumerate(property_modules):
             for record_index, item in enumerate(module.get("records") or []):
-                evidence = item.get("evidence")
-                entity = records_by_key.get(item.get("record_key"))
-                if entity is not None and isinstance(evidence, dict):
+                entity = records_by_key.get((module_ids.get(module.get("module_key")), item.get("record_key")))
+                for evidence in evidence_list(item) if entity is not None else []:
                     targets.append(ScientificEvidenceTarget(
                         f"{state_path}.property_modules[{module_index}].records[{record_index}]",
                         evidence, "property_record", entity,

@@ -1,3 +1,4 @@
+import { useEvidenceWorkflow } from './EvidenceWorkflow'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Alert, Autocomplete, Box, Button, Checkbox, Chip, CircularProgress,
@@ -107,6 +108,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const evidenceWorkflow = useEvidenceWorkflow()
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
   const [error, setError] = useState('')
   // 本次提交发现的校验问题；驱动字段错误态与定位，提交成功或重新加载草稿时清空
@@ -246,10 +248,10 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }, [dirty, draft, saving, taskId, readOnly, t, lang])
 
   useEffect(() => {
-    if (!dirty || !draft || saving) return
+    if (!dirty || !draft || saving || submitting) return
     const timer = window.setTimeout(() => { void saveDraft(false) }, 5000)
     return () => window.clearTimeout(timer)
-  }, [dirty, draft, saveDraft, saving])
+  }, [dirty, draft, saveDraft, saving, submitting])
 
   // 返回全部问题而不是遇到第一条就退出：用户需要一次看清所有待补字段，
   // 而不是每修一条再提交一次才发现下一条
@@ -359,15 +361,17 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     setSubmitting(true)
     try {
       if (!(await saveDraft(false))) return
+      const evidencePayload = await evidenceWorkflow.run({ target: 'upload', target_id: taskId })
+      if (!evidencePayload) return
       let response: SubmitResponse | { data: SubmitResponse }
       try {
-        response = await api.post<SubmitResponse | { data: SubmitResponse }>(`/api/rag/upload-tasks/${taskId}/submit`)
+        response = await api.post<SubmitResponse | { data: SubmitResponse }>(`/api/rag/upload-tasks/${taskId}/submit`, evidencePayload)
       } catch (reason) {
         const apiError = reason as ApiError
         if (apiError.code !== 'consistency_ack_required' || !window.confirm(t('upload.consistencyConfirm'))) throw reason
         response = await api.post<SubmitResponse | { data: SubmitResponse }>(
           `/api/rag/upload-tasks/${taskId}/submit`,
-          { consistency_acknowledged: true },
+          { ...evidencePayload, consistency_acknowledged: true },
         )
       }
       onSubmitted(unwrapData(response).paper_id)
@@ -431,7 +435,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const classificationEvidence = draft.classification_evidence || []
 
   return (
-    <Box sx={{ mt: 3 }}>
+    <Box component="fieldset" disabled={submitting} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
+      {evidenceWorkflow.dialog}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
         <Box>
           <Typography variant="h6" fontWeight={700}>{readOnly ? t('upload.aiDraftTitle') : t('upload.checkAiDraftTitle')}</Typography>
@@ -640,7 +645,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         catalogs={catalogs}
         catalogLoading={catalogLoading}
         catalogError={catalogError}
-        readOnly={readOnly}
+        readOnly={readOnly || submitting}
         issues={issues}
         structureCandidates={draft.structure_candidates || []}
         onStructureCandidatesChange={next => setDraftField('structure_candidates', next)}

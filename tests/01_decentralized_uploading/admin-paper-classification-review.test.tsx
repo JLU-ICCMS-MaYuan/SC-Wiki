@@ -132,7 +132,9 @@ beforeEach(() => {
     if (path === '/api/rag/papers/51/candidate-attachments') return { data: [] } as never
     throw new Error(`unexpected GET ${path}`)
   })
-  mockedApi.post.mockResolvedValue({ message: '审核完成' } as never)
+  mockedApi.post.mockImplementation(async path => path === '/api/rag/evidence/preflight'
+    ? { version: 'checked-version', needs_check: false, records: [], sources: [] } as never
+    : { message: '审核完成' } as never)
 })
 
 afterEach(() => {
@@ -167,9 +169,11 @@ describe('论文快速审核三状态', () => {
     expect(screen.getByLabelText('审核意见')).toHaveValue('已核对')
     mockedApi.get.mockImplementation(originalGet)
     let rejectRequest!: (reason: Error) => void
-    mockedApi.post.mockImplementationOnce(() => new Promise((_, reject) => { rejectRequest = reject }))
+    mockedApi.post.mockImplementation(path => path === '/api/rag/evidence/preflight'
+      ? Promise.resolve({ version: 'checked-version', needs_check: false, records: [], sources: [] } as never)
+      : new Promise((_, reject) => { rejectRequest = reject }))
     await user.click(screen.getByRole('button', { name: '确认审核' }))
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))).toHaveLength(1))
     expect(screen.getByRole('button', { name: '确认审核' })).toBeDisabled()
     expect(screen.getByRole('button', { name: '取消' })).toBeDisabled()
     rejectRequest(new Error('物性记录缺少可解析 Evidence'))

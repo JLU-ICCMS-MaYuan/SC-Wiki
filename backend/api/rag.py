@@ -45,6 +45,8 @@ DOI_PATTERN = re.compile(r"^10\.\d{4,9}/\S+$", re.IGNORECASE)
 
 class SubmitUploadOptions(BaseModel):
     consistency_acknowledged: bool = False
+    evidence_job_id: str | None = None
+    expected_evidence_version: str | None = None
 
 
 class DefaultLlmConfigRequest(BaseModel):
@@ -1226,26 +1228,31 @@ async def put_upload_draft(
     from backend.ingest.upload_tasks import get_draft, save_draft
     from backend.rag.database import async_session_factory
 
-    state = _task_for_user(task_id, current_user)
-    if state.get("paper_id"):
-        raise _upload_error(409, "draft_already_submitted", "该草稿已经提交审核")
-    if state.get("duplicate"):
-        raise _upload_error(
-            409,
-            "duplicate_doi",
-            "该论文已经存在",
-            existing_paper_id=state.get("existing_paper_id"),
-        )
-    _reject_legacy_classification_contract(draft)
-    previous = get_draft(task_id) or {}
-    normalized = _normalize_draft(draft)
-    # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。
-    normalized["citation_extraction"] = previous.get("citation_extraction")
-    async with async_session_factory() as session:
-        await _resolve_draft_classifications(session, normalized)
-    _validate_draft(normalized, partial=True)
-    saved = save_draft(task_id, normalized)
-    return {"ok": True, "data": saved, "saved_at": int(time.time())}
+    from backend.ingest.upload_tasks import upload_task_lock
+    try:
+        with upload_task_lock(task_id):
+            state = _task_for_user(task_id, current_user)
+            if state.get("paper_id"):
+                raise _upload_error(409, "draft_already_submitted", "该草稿已经提交审核")
+            if state.get("duplicate"):
+                raise _upload_error(
+                    409,
+                    "duplicate_doi",
+                    "该论文已经存在",
+                    existing_paper_id=state.get("existing_paper_id"),
+                )
+            _reject_legacy_classification_contract(draft)
+            previous = get_draft(task_id) or {}
+            normalized = _normalize_draft(draft)
+            # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。
+            normalized["citation_extraction"] = previous.get("citation_extraction")
+            async with async_session_factory() as session:
+                await _resolve_draft_classifications(session, normalized)
+            _validate_draft(normalized, partial=True)
+            saved = save_draft(task_id, normalized)
+            return {"ok": True, "data": saved, "saved_at": int(time.time())}
+    except TimeoutError as exc:
+        raise _upload_error(409, 'submission_in_progress', '该草稿正在提交，请稍后重试') from exc
 
 
 @router.post("/upload-tasks/{task_id}/structure-candidates")
@@ -1416,12 +1423,12 @@ async def _create_pending_paper(
     task_id: str,
     state: dict[str, Any],
     draft: dict[str, Any],
+    evidence_checks: list[dict] | None = None,
 ) -> int:
     # 先拒绝旧客户端契约，再加载科学数据处理依赖；这样非法请求不会被无关的
     # PDF/晶体学可选依赖阻断，也不会进入任何持久化准备步骤。
     _reject_legacy_classification_contract(draft)
 
-    from backend.ingest.chunker import chunk_paper
     from backend.ingest.scientific_drafts import (
         add_scientific_evidence_link,
         persist_scientific_draft,
@@ -1563,28 +1570,24 @@ async def _create_pending_paper(
                     (item for item in paper_files.values() if item.role == "main"),
                     None,
                 )
+                from backend.ingest.property_evidence import source_chunks, locate_with_reason
+                source_locations = []
                 for file_id, source_markdown in chunk_sources:
-                    for chunk in chunk_paper(source_markdown, paper.id):
-                        page_match = re.search(r"<!--\s*page:\s*(\d+)\s*-->", chunk.content)
-                        page = int(page_match.group(1)) if page_match else None
+                    for chunk in source_chunks(source_markdown, file_id):
                         paper_file = paper_files.get(file_id) or main_paper_file
                         if paper_file is None:
                             continue
                         paper_chunk = PaperChunk(
-                            paper_id=paper.id,
-                            paper_revision=paper.content_revision,
-                            paper_file_id=paper_file.id,
-                            chunk_index=chunk.chunk_index,
-                            section_name=_fit_column(chunk.section_name, 500),
-                            heading=_fit_column(chunk.heading, 500),
-                            content=chunk.content,
-                            token_count=chunk.token_count,
-                            page_start=page,
-                            page_end=page,
+                            paper_id=paper.id, paper_revision=paper.content_revision,
+                            paper_file_id=paper_file.id, chunk_index=chunk['chunk_index'],
+                            section_name=_fit_column(chunk['section'], 500), heading=_fit_column(chunk['heading'], 500),
+                            content=chunk['content'], token_count=len(chunk['content']) // 4,
+                            page_start=chunk['page_start'], page_end=chunk['page_end'],
                         )
                         session.add(paper_chunk)
                         await session.flush()
-                        paper_chunks[(str(file_id), int(chunk.chunk_index))] = paper_chunk
+                        paper_chunks[(str(file_id), chunk['chunk_index'])] = paper_chunk
+                        source_locations.append(chunk)
 
                 evidence_groups = [
                     ("classification", draft.get("classification_evidence") or []),
@@ -1595,32 +1598,15 @@ async def _create_pending_paper(
                     for evidence in evidences:
                         if not isinstance(evidence, dict) or not str(evidence.get("quote") or "").strip():
                             continue
-                        file_id = str(evidence.get("file_id") or "")
-                        chunk_index = evidence.get("chunk_index")
-                        paper_chunk = None
-                        if chunk_index is not None:
-                            paper_chunk = paper_chunks.get((file_id, int(chunk_index)))
-                            if paper_chunk is None:
-                                matches = [
-                                    item
-                                    for (_source_file_id, source_index), item in paper_chunks.items()
-                                    if source_index == int(chunk_index)
-                                ]
-                                if len(matches) == 1:
-                                    paper_chunk = matches[0]
-                        page = evidence.get("page") or evidence.get("page_start")
-                        if paper_chunk is None and page is not None:
-                            matches = [
-                                item
-                                for item in paper_chunks.values()
-                                if item.page_start is not None
-                                and item.page_end is not None
-                                and item.page_start <= int(page) <= item.page_end
-                            ]
-                            if len(matches) == 1:
-                                paper_chunk = matches[0]
-                        if paper_chunk is None:
+                        located, location_error = locate_with_reason(evidence, source_locations)
+                        if located is None:
+                            if field_path in targets_by_path:
+                                raise _upload_error(409, 'evidence_missing', location_error,
+                                    issues=[{'field': field_path, 'message': location_error}])
                             continue
+                        paper_chunk = paper_chunks[(located['file_id'], located['chunk_index'])]
+                        evidence = located
+                        page = located.get('page_start')
                         paper_evidence = PaperEvidence(
                             paper_id=paper.id,
                             paper_revision=paper.content_revision,
@@ -1636,6 +1622,24 @@ async def _create_pending_paper(
                         target = targets_by_path.get(field_path)
                         if target is not None:
                             add_scientific_evidence_link(session, target, paper_evidence)
+                if evidence_checks is not None:
+                    from backend.ingest.property_evidence import paper_snapshot, RULE_VERSION
+                    await session.flush()
+                    persisted_paper_id = paper.id
+                    target_paths = {t.entity.id: t.field_path for t in scientific_targets if t.kind == 'property_record'}
+                    # 摘要采用数据库实际精度/默认值，不用尚未重载的浮点对象。
+                    session.expire_all()
+                    persisted = await session.run_sync(lambda sync: paper_snapshot(sync, persisted_paper_id, 0, '', check_access=False))
+                    checks_by_path = {c['field']: c for c in evidence_checks}
+                    checks_by_id = {record_id: checks_by_path.get(path) for record_id, path in target_paths.items()}
+                    for r in persisted['records']:
+                        check = checks_by_id.get(r['record_id'])
+                        if check:
+                            session.add(models.PropertyEvidenceCheck(
+                                paper_id=paper.id, paper_revision=paper.content_revision, record_id=r['record_id'],
+                                content_hash=r['content_hash'], source_hash=r['source_hash'], rule_version=RULE_VERSION,
+                                status=check['status'], reason=check['reason'], model=check['model'], evidence_snapshot=r['evidences'],
+                            ))
                 paper_id = paper.id
         return paper_id
     except IntegrityError as exc:
@@ -1744,11 +1748,11 @@ async def submit_upload_draft(
         from backend.ingest.upload_tasks import upload_task_lock
 
         with upload_task_lock(task_id):
-            if options and options.consistency_acknowledged:
-                return await _submit_upload_draft_locked(
-                    task_id, current_user, consistency_acknowledged=True,
-                )
-            return await _submit_upload_draft_locked(task_id, current_user)
+            return await _submit_upload_draft_locked(
+                task_id, current_user, consistency_acknowledged=bool(options and options.consistency_acknowledged),
+                evidence_job_id=options.evidence_job_id if options else None,
+                expected_evidence_version=options.expected_evidence_version if options else None,
+            )
     except TimeoutError as exc:
         raise _upload_error(409, "submission_in_progress", "该上传任务正在提交，请稍后重试") from exc
 
@@ -1758,6 +1762,8 @@ async def _submit_upload_draft_locked(
     current_user: User,
     *,
     consistency_acknowledged: bool = False,
+    evidence_job_id: str | None = None,
+    expected_evidence_version: str | None = None,
 ) -> dict[str, Any]:
     from backend.ingest.upload_contracts import CleanupContext
     from backend.ingest.upload_tasks import cleanup_transient_data, get_draft, update_state
@@ -1794,10 +1800,25 @@ async def _submit_upload_draft_locked(
     if draft is None:
         raise _upload_error(409, "draft_not_found", "草稿不存在或已过期")
 
+    from backend.ingest.property_evidence import upload_snapshot, resolve_results
+    from backend.ingest.scientific_drafts import _property_modules_for_state
+    import copy
+    snapshot = upload_snapshot(task_id, current_user.id)
+    evidence_checks = resolve_results(snapshot, {}, current_user.id, evidence_job_id, expected_evidence_version)
+    draft = copy.deepcopy(draft)
+    for state_data in draft.get('material_states') or []:
+        state_data['property_modules'] = _property_modules_for_state(state_data)
+    for result in evidence_checks:
+        state_data = draft['material_states'][result['state_index']]
+        module = next(m for m in state_data['property_modules'] if m['module_key'] == result['module_key'])
+        record = next(r for r in module['records'] if r['record_key'] == result['record_key'])
+        record.pop('evidence', None)
+        record['evidences'] = result['evidences']
+
     cleanup_context = CleanupContext.from_state(task_id, state)
     update_state(task_id, status="submitting", submission_status="submitting")
     try:
-        paper_id = await _create_pending_paper(task_id, state, draft)
+        paper_id = await _create_pending_paper(task_id, state, draft, evidence_checks=evidence_checks)
     except Exception:
         # 提交失败必须回滚为 ready，否则任务卡在 submitting、详情页只剩空白只读预览
         try:
@@ -2112,7 +2133,7 @@ async def _rewrite_paper_scientific_draft_in_tx(
         raise _upload_error(400, "invalid_history_operation_id", "history_operation_id 过长")
     _reject_legacy_classification_contract({"material_states": material_states})
 
-    paper = await session.get(models.Paper, paper_id)
+    paper = await session.scalar(select(models.Paper).where(models.Paper.id == paper_id).with_for_update())
     if paper is None:
         raise _upload_error(404, "paper_not_found", "论文不存在")
     if paper.review_status != "pending" and paper.review_status != "approved":
@@ -2157,7 +2178,9 @@ async def _rewrite_paper_scientific_draft_in_tx(
     await delete_scientific_entities(session, paper.id)
     if bumped:
         await bump_paper_revision(session, paper)
-    await persist_scientific_draft(session, paper, full_draft)
+    targets = await persist_scientific_draft(session, paper, full_draft)
+    from backend.ingest.property_evidence import persist_existing_paper_targets
+    await persist_existing_paper_targets(session, paper, targets)
     if citation_extraction is not None:
         from backend.services.citation_graph import persist_reference_extraction
 

@@ -1,3 +1,4 @@
+import { useEvidenceWorkflow } from '../components/EvidenceWorkflow'
 import React, { useState, useEffect, useCallback } from 'react'
 import {
   Box, Typography, Card, CardActionArea, CardContent, Button, Chip,
@@ -56,7 +57,7 @@ type PaperHistoryEvent = {
   paper_revision: number
   actor: { username: string | null; unknown: boolean }
   occurred_at: string
-  review: { status: 'approved' | 'rejected' | 'pending'; comment: string | null } | null
+  review: { status: 'approved' | 'rejected' | 'pending'; comment: string | null; evidence_review?: Array<{ key: string; label: string; reason: string; resolution: string; evidences: Array<{quote: string; page_start?: number}> }> } | null
 }
 
 /* ── Helpers ──────────────────────────────────── */
@@ -131,6 +132,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
   const [reviewDlg, setReviewDlg] = useState<{paper:PaperRecord,open:boolean}>({paper:null!,open:false})
   const [reviewStatus, setReviewStatus] = useState('')
   const [reviewSaving, setReviewSaving] = useState(false)
+  const evidenceWorkflow = useEvidenceWorkflow()
   const [reviewComment, setReviewComment] = useState('')
   const [historyPaper, setHistoryPaper] = useState<PaperRecord | null>(null)
   const [historyLoading, setHistoryLoading] = useState(false)
@@ -225,8 +227,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
         const { detail, pendingValues } = await loadPaperReviewSource(reviewDlg.paper.id)
         classifications = resolveReviewClassifications(detail, pendingValues)
       }
-      await api.post(`/api/admin/papers/${reviewDlg.paper.id}/review`,
-        paperReviewPayload(reviewStatus, reviewComment, classifications))
+      const payload = paperReviewPayload(reviewStatus, reviewComment, classifications)
+      const evidence = reviewStatus === 'approved' ? await evidenceWorkflow.run({ target: 'paper', target_id: String(reviewDlg.paper.id) }) : {}
+      if (!evidence) return
+      await api.post(`/api/admin/papers/${reviewDlg.paper.id}/review`, { ...payload, ...evidence })
       setSnackbar(t('admin.reviewDone'))
       setReviewDlg({paper:null!,open:false})
       loadPapers()
@@ -731,6 +735,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
       )}
 
       {/* ═══════════════════════════════════════════ */}
+      {evidenceWorkflow.dialog}
       {/* Review Dialog */}
       {/* ═══════════════════════════════════════════ */}
       <Dialog open={reviewDlg.open} onClose={()=>{ if (!reviewSaving) setReviewDlg({paper:null!,open:false}) }} maxWidth="md" fullWidth>
@@ -781,6 +786,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
                 {event.review && (
                   <Typography variant="body2" sx={{ mt: 0.5 }}>
                     {reviewStatus} · {event.review.comment?.trim() || t('admin.historyNoReviewComment')}
+                    {event.review.evidence_review?.filter(r => r.resolution).map(r => <Box component="span" key={r.key} sx={{ display: 'block', mt: 1 }}>
+                      {r.label}：{r.reason}<br />{t('evidence.humanReason')}：{r.resolution}
+                      {r.evidences.map((e, i) => <Box component="span" key={i} sx={{ display: 'block', whiteSpace: 'pre-wrap' }}>{e.page_start ? t('evidence.page', { page: e.page_start }) : t('evidence.original')}：{e.quote}</Box>)}
+                    </Box>)}
                   </Typography>
                 )}
               </Box>

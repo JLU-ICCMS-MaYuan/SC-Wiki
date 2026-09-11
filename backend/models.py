@@ -2199,3 +2199,24 @@ class SuperconductorStructure(LegacyBase):
 
 # Temporary import compatibility for code that has not moved to the new name yet.
 KeyProperty = SuperconductorProperty
+
+
+class PropertyEvidenceCheck(Base):
+    """核对结果只对指定物性内容、来源和规则版本有效。"""
+    __tablename__ = 'property_evidence_checks'
+    __table_args__ = (
+        Index('ix_evidence_check_record_hash', 'record_id', 'content_hash', 'source_hash', 'rule_version'),
+        CheckConstraint("status IN ('supported','uncertain','unsupported')", name='ck_evidence_check_status'),
+    )
+    id = Column(BIGINT_ID, primary_key=True, autoincrement=True)
+    paper_id = Column(Integer, nullable=False)
+    paper_revision = Column(Integer, nullable=False)
+    record_id = Column(BIGINT_ID, ForeignKey('property_records.id', ondelete='CASCADE'), nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    source_hash = Column(String(64), nullable=False)
+    rule_version = Column(String(64), nullable=False)
+    status = Column(String(20), nullable=False)
+    reason = Column(Text, nullable=False)
+    model = Column(String(200), nullable=False)
+    evidence_snapshot = Column(JSON, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
