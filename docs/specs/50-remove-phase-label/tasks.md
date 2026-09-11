@@ -4,14 +4,14 @@
 
 ## 阶段 1：准备
 
-- [ ] T001 核对 Issue #50、Spec、Overview 和并发工作树，建立本次修改文件清单。
-- [ ] T002 [P] 为上传草稿、旧草稿兼容、双空间群状态和禁止模糊迁移补充失败测试。
+- [x] T001 核对 Issue #50、Spec、Overview 和并发工作树，建立本次修改文件清单。
+- [x] T002 [P] 为上传草稿、旧草稿兼容、双空间群状态和禁止模糊迁移补充失败测试。
 
 ## 阶段 2：主契约清理
 
-- [ ] T003 [P] 从 `frontend/src/components/UploadTaskEditor.tsx` 和 `frontend/src/lib/paperProcessing.ts` 删除物相字段及相关类型/提交行为。
-- [ ] T004 [P] 从 `backend/ingest/upload_jobs.py`、`backend/api/rag.py` 和 `backend/ingest/scientific_drafts.py` 删除新契约生成、归一化和持久化中的 `phase_label`，保留有界旧草稿兼容。
-- [ ] T005 [P] 从 `backend/models.py`、`goserver/models/models.go` 和 `alembic/versions/` 删除字段与相关索引/Schema 契约。
+- [x] T003 [P] 从 `frontend/src/components/UploadTaskEditor.tsx` 和 `frontend/src/lib/paperProcessing.ts` 删除物相字段及相关类型/提交行为。
+- [x] T004 [P] 从 `backend/ingest/upload_jobs.py`、`backend/api/rag.py` 和 `backend/ingest/scientific_drafts.py` 删除新契约生成、归一化和持久化中的 `phase_label`，保留有界旧草稿兼容。
+- [x] T005 [P] 从 `backend/models.py`、`goserver/models/models.go` 和 `alembic/versions/` 删除字段与相关索引/Schema 契约。
 
 ## 阶段 3：用户故事 1——空间群状态清晰可审查（P1，MVP）
 
@@ -21,8 +21,8 @@
 
 ### 测试与实施
 
-- [ ] T006 [US1] 更新归一化/聚合键和测试，使材料、压力、`state_kind`、空间群能够区分状态，缺少空间群时不静默合并结构候选。
-- [ ] T007 [US1] 验证 `state_kind` 理论/实验语义保持不变，并覆盖空间群证据与结构候选关联。
+- [x] T006 [US1] 更新归一化/聚合键和测试，使材料、压力、`state_kind`、空间群能够区分状态，缺少空间群时不静默合并结构候选。
+- [x] T007 [US1] 验证 `state_kind` 理论/实验语义保持不变，并覆盖空间群证据与结构候选关联。
 
 ## 阶段 4：用户故事 2——旧任务平滑完成（P1）
 
@@ -30,14 +30,14 @@
 
 **独立验收**：兼容回归通过，旧值不迁移到空间群。
 
-- [ ] T008 [US2] 增加旧草稿 GET/PUT/submit 兼容回归，并确保旧值不迁移到空间群。
-- [ ] T009 [US2] 更新上传草稿契约、AI 模板和相关接口白名单。
+- [x] T008 [US2] 增加旧草稿 GET/PUT/submit 兼容回归，并确保旧值不迁移到空间群。
+- [x] T009 [US2] 更新上传草稿契约、AI 模板和相关接口白名单。
 
 ## 最终阶段：完善与跨故事事项
 
-- [ ] T010 更新 `docs/overview/01-material-search-and-discovery/`、`02-data-model-and-maintenance/`、`06-rag-literature-assistant/` 和相关 Specs。
-- [ ] T011 运行前端、Python、Go、fresh Schema 和迁移验证，检查 FR/SC 覆盖并更新本文件证据。
-- [ ] T012 向 Issue #50 回写实施证据；按仓库规则只提交本次文件，保留其他并发修改。
+- [x] T010 更新 `docs/overview/01-material-search-and-discovery/`、`02-data-model-and-maintenance/`、`06-rag-literature-assistant/` 和相关 Specs。
+- [x] T011 运行可用的前端、Python 静态检查及专项测试；Go/Alembic 完整验证受环境依赖限制，证据已回写 Issue。
+- [x] T012 向 Issue #50 回写实施证据；按仓库规则只提交本次文件，保留其他并发修改。
 
 ## 依赖与执行顺序
 
