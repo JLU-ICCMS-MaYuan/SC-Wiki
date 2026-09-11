@@ -43,7 +43,9 @@ beforeEach(() => {
     if (path.startsWith('/api/chart-groups')) return []
     return {}
   })
-  mockedApi.post.mockResolvedValue({ message: '已审核' })
+  mockedApi.post.mockImplementation(async path => path === '/api/rag/evidence/preflight'
+    ? { version: 'checked-version', needs_check: false, records: [], sources: [] }
+    : { message: '已审核' })
 })
 
 afterEach(() => { cleanup(); vi.clearAllMocks() })
@@ -84,7 +86,7 @@ describe('编辑页内审核', () => {
     await user.click(screen.getByRole('option', { name: /通过/ }))
     await user.click(screen.getByRole('button', { name: '提交审核' }))
     await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/api/admin/papers/88/review', expect.objectContaining({
-      status: 'approved', superconductor_kind: 'unconventional',
+      status: 'approved', superconductor_kind: 'unconventional', expected_evidence_version: 'checked-version',
       material_families: [{ id: 1, name: '氢基超导体' }], material_states: [],
     })))
     expect(mockedApi.put).not.toHaveBeenCalled()

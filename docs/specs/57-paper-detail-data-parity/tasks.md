@@ -82,7 +82,7 @@
   - 证据：`/api/papers/search/records` 连续请求均 200，goserver 日志 `doesn't exist|no such column` 计数为 0（修复前每次请求必报 `Table 'scwiki.key_properties' doesn't exist`）；新 JOIN 在真实 MySQL 上返回 23 行真实记录，全部列可解析，接口返回空仅因全库无 `approved` 论文（spec 假设已声明）
 - [x] T027 按 [quickstart.md](quickstart.md) 场景 6 人工验收：权限判定、图表分组编辑、分享页、空数据论文均无回归（FR-010）
   - 证据：匿名访问 `pending` 论文 403、不存在论文 404、无效 ID 400（#56 逐篇鉴权未变）；`/api/papers/stats/chart-data` 200；`/api/papers/search/all` 200；Go 四包与前端 8 文件 65 用例全绿、`tsc` 无输出
-  - 遗留（**与本 Feature 无关，不构成回归**）：`external.go:182` 与 `papers.go:838` 分别报 `alexandria_element_idx`、`htsc2025_materials` 表不存在。两张外部数据集表在库中本就不存在，`external.go` 本次未改动，`searchHTSCAll` 也未被本 Feature 触及；属独立的外部数据集缺失问题
+  - 历史验收曾记录独立外部数据集缺表问题；对应数据源及聚合检索现已退役，无需补装数据集。
 - [x] T028 使用 `big-project-overview-maintainer` 将「论文详情的读取契约与可见字段」「记录搜索的记录主体」回写 `docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-ingestion.md`，并在相关变更记录追加 Issue #57 链接
   - 实际回写 10 个文档：读取契约迁移使多处 Overview 成为错误的当前事实，一并纠正。含 `mysql-schema-catalog.md`（原称 `key_properties` 为「当前主要物性表约 1101 条」，实测该表不存在，已替换为 `superconductor_properties` 真实字段表并更新关系图）、`paper-and-property-results.md`（原称「新旧契约并存，待把 Go 搜索/详情投影切换到条件化表」，本 Feature 已完成该切换）、`local-material-search.md`、`literature-and-record-review.md`、`format-validation-and-storage.md`、`tc-history-and-pressure-charts.md` 及两处 README 导航
   - 标记「待核验」而非断言：`/api/structures/by-property/{kp_id}`（Python 侧，需登录未实测）与 `chart_group_items.key_property_id`（组合项 0 条，无非空场景可测）

@@ -102,7 +102,6 @@ func main() {
 		papers.GET("/:id/material-states/:stateKey/export", handlers.ExportMaterialState)
 		papers.PATCH("/:id", handlers.PatchPaper)
 		papers.POST("/search/records", handlers.SearchRecords)
-		papers.POST("/search/all", handlers.SearchAll)
 	}
 
 	// 知识图谱 API（替代 Python /api/knowledge-graph/*）
@@ -113,10 +112,6 @@ func main() {
 		kg.GET("/search", handlers.KGSearch)
 		kg.GET("/stats", handlers.KGStats)
 	}
-
-	// 外部数据源 API（替代 Python /api/alexandria/* + /api/htsc2025/*）
-	r.POST("/api/alexandria/search", handlers.SearchAlexandria)
-	r.POST("/api/htsc2025/search", handlers.SearchHTSC)
 
 	// 图表组合 API（替代 Python /api/chart-groups/*）
 	cg := r.Group("/api/chart-groups")

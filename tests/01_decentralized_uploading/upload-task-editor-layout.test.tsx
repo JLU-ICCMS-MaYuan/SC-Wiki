@@ -38,6 +38,8 @@ vi.mock('../../frontend/src/components/StructureCandidatePanel', () => ({
 }))
 
 const mockedApi = vi.mocked(api)
+// 预检与最终提交是两个不同端点；错误用例只控制最终提交响应。
+const submitRequest = vi.fn()
 
 const makeState = (overrides: Partial<DraftMaterialState> = {}): DraftMaterialState => ({
   material: 'LaH10',
@@ -95,7 +97,14 @@ beforeEach(() => {
     return Promise.resolve({ ok: true, data: makeDraft([makeState()]) } as never)
   })
   mockedApi.put.mockResolvedValue({ ok: true } as never)
-  mockedApi.post.mockResolvedValue({ ok: true, paper_id: 99, review_status: 'pending' } as never)
+  submitRequest.mockReset().mockResolvedValue({ ok: true, paper_id: 99, review_status: 'pending' })
+  mockedApi.post.mockImplementation(async (path, body) => {
+    if (path === '/api/rag/evidence/preflight') {
+      return { version: 'checked-version', needs_check: false, records: [], sources: [] } as never
+    }
+    if (path.endsWith('/submit')) return submitRequest(body)
+    throw new Error(`unexpected POST ${path}`)
+  })
 })
 
 afterEach(() => {
@@ -442,7 +451,7 @@ describe('保存/提交失败的后端错误提示', () => {
   it('提交失败且响应无 detail 时回退通用文案', async () => {
     const apiError = new Error('Internal Server Error') as ApiError
     apiError.status = 500
-    mockedApi.post.mockRejectedValueOnce(apiError)
+    submitRequest.mockRejectedValueOnce(apiError)
 
     render(<UploadTaskEditor taskId={'f'.repeat(32)} onSubmitted={vi.fn()} draftOverride={makeDraft([makeState()])} />)
     fireEvent.click(await screen.findByRole('button', { name: '提交审核' }))

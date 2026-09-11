@@ -324,15 +324,6 @@
           <aside class="card">
             <h2>筛选</h2>
             <div class="filter-stack">
-              <div>
-                <label class="demo-muted">数据来源</label>
-                <div class="toolbar" style="margin-top:8px">
-                  <button class="chip primary" data-source="Local">本地数据库</button>
-                  <button class="chip" data-source="Alexandria">Alexandria</button>
-                  <button class="chip" data-source="HTSC-2025">HTSC-2025</button>
-                  <button class="chip" data-source="All">全部来源</button>
-                </div>
-              </div>
               <div class="field"><label for="filter-formula">Formula</label><input id="filter-formula" class="demo-input" data-filter-default="LaH10" value="LaH10"></div>
               <div>
                 <label class="demo-muted">代表 Tc / K</label>
@@ -393,7 +384,6 @@
                   <option value="Approved">Approved</option>
                   <option value="Pending">Pending</option>
                   <option value="Rejected">Rejected</option>
-                  <option value="External">External</option>
                 </select>
               </div>
               <button class="chip primary" id="filter-chart-toggle" data-chart-default="true" data-chart-active="true">进入默认图表</button>
@@ -492,8 +482,6 @@ loop_
     const records = [
       { sourceSystem: "local", sourceRecordId: "123", formula: "LaH10", year: 2019, type: "Hydride", pressureValue: 200, pressure: "200 GPa", tcValue: 250, tc: "250 K", tcField: "experimental_tc", source: "Local", status: "Approved", doi: "10.1038/s41586-demo", journal: "Nature", title: "High-pressure superconductivity in lanthanum hydride", spaceGroupNumber: 225, spaceGroup: "Fm-3m", showInChart: true, lambda: "3.41", omegaLog: "1120 K", nef: "0.48", method: "DFT + EPC", software: "Quantum ESPRESSO", note: "Mock record for future-plan demo." },
       { sourceSystem: "local", sourceRecordId: "124", formula: "H3S", year: 2015, type: "Hydride", pressureValue: 155, pressure: "155 GPa", tcValue: 203, tc: "203 K", tcField: "experimental_tc", source: "Local", status: "Approved", doi: "10.1038/s41586-demo2", journal: "Nature", title: "Conventional superconductivity at 203 kelvin", spaceGroupNumber: 229, spaceGroup: "Im-3m", showInChart: true, lambda: "2.19", omegaLog: "1010 K", nef: "0.36", method: "Experiment + DFT", software: "VASP", note: "Classic sulfur hydride benchmark." },
-      { sourceSystem: "htsc2025", sourceRecordId: "456", formula: "YH9", year: 2024, type: "Hydride", pressureValue: 180, pressure: "180 GPa", tcValue: 185, tc: "185 K", tcField: "allen_dynes_tc", source: "HTSC-2025", status: "External", doi: "-", journal: "External dataset", title: "Predicted high-Tc yttrium hydride", spaceGroupNumber: 194, spaceGroup: "P63/mmc", showInChart: false, lambda: "1.87", omegaLog: "930 K", nef: "0.31", method: "Screening", software: "Dataset", note: "External source, not locally reviewed." },
-      { sourceSystem: "alexandria", sourceRecordId: "mp-demo", formula: "MgB2", year: 2001, type: "Conventional", pressureValue: 0, pressure: "0 GPa", tcValue: 39, tc: "39 K", tcField: "experimental_tc", source: "Alexandria", status: "External", doi: "-", journal: "External dataset", title: "Magnesium diboride benchmark", spaceGroupNumber: 191, spaceGroup: "P6/mmm", showInChart: true, lambda: "0.73", omegaLog: "620 K", nef: "0.21", method: "Dataset", software: "Alexandria", note: "External mock benchmark." },
     ];
 
     const state = {
@@ -502,7 +490,6 @@ loop_
       currentStage: "explore",
       selectedRecord: records[0],
       detailSheetOpen: false,
-      source: "Local",
       visibleRecords: [...records],
       loadingTimer: null,
     };
@@ -577,7 +564,6 @@ loop_
       const chartOnly = qs("#filter-chart-toggle").dataset.chartActive === "true";
 
       return records
-        .filter((record) => state.source === "All" || record.source === state.source || state.source === "Local" && record.source === "Local")
         .filter((record) => !formula || record.formula.toLowerCase().includes(formula))
         .filter((record) => record.tcValue >= tcMin && record.tcValue <= tcMax)
         .filter((record) => record.pressureValue >= pressureMin && record.pressureValue <= pressureMax)
@@ -772,8 +758,6 @@ loop_
     }
 
     function resetFilters() {
-      state.source = "Local";
-      qsa("[data-source]").forEach((item) => item.classList.toggle("primary", item.dataset.source === "Local"));
       qsa("[data-filter-default]").forEach((input) => { input.value = input.dataset.filterDefault; });
       const chartToggle = qs("#filter-chart-toggle");
       chartToggle.dataset.chartActive = chartToggle.dataset.chartDefault;
@@ -784,14 +768,6 @@ loop_
     }
 
     function bindFilterControls() {
-      qsa("[data-source]").forEach((button) => {
-        button.addEventListener("click", () => {
-          qsa("[data-source]").forEach((item) => item.classList.remove("primary"));
-          button.classList.add("primary");
-          state.source = button.dataset.source;
-          renderResults();
-        });
-      });
       qsa("#filter-formula, #filter-tc-min, #filter-tc-max, #filter-pressure-min, #filter-pressure-max, #filter-year-min, #filter-year-max").forEach((input) => {
         input.addEventListener("input", renderResults);
       });

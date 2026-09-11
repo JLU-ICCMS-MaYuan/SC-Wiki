@@ -128,7 +128,9 @@ beforeEach(() => {
     return {}
   })
   mockedApi.put.mockResolvedValue({ ok: true, data: { revision_bumped: false } })
-  mockedApi.post.mockResolvedValue({ message: '已审核' })
+  mockedApi.post.mockImplementation(async path => path === '/api/rag/evidence/preflight'
+    ? { version: 'checked-version', needs_check: false, records: [], sources: [] }
+    : { message: '已审核' })
 })
 
 afterEach(() => {
@@ -302,8 +304,10 @@ describe('Issue #78：管理端论文编辑独立页', () => {
     await user.click(await screen.findByRole('option', { name: '✅ 通过' }))
     await user.click(screen.getByRole('button', { name: '提交审核' }))
 
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledTimes(1))
-    expect(mockedApi.post.mock.calls[0][1]).toMatchObject({
+    await waitFor(() => expect(mockedApi.post.mock.calls.filter(([path]) => path === '/api/admin/papers/88/review')).toHaveLength(1))
+    const reviewBody = mockedApi.post.mock.calls.find(([path]) => path === '/api/admin/papers/88/review')![1]
+    expect(reviewBody).toMatchObject({
+      expected_evidence_version: 'checked-version',
       status: 'approved',
       superconductor_kind: 'conventional',
       material_families: [{ id: 8, name: '单质超导体' }],
@@ -359,8 +363,10 @@ describe('Issue #78：管理端论文编辑独立页', () => {
     await user.click(await screen.findByRole('option', { name: '✅ 通过' }))
     await user.click(screen.getByRole('button', { name: '提交审核' }))
 
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledTimes(1))
-    expect(mockedApi.post.mock.calls[0][1]).toMatchObject({
+    await waitFor(() => expect(mockedApi.post.mock.calls.filter(([path]) => path === '/api/admin/papers/88/review')).toHaveLength(1))
+    const reviewBody = mockedApi.post.mock.calls.find(([path]) => path === '/api/admin/papers/88/review')![1]
+    expect(reviewBody).toMatchObject({
+      expected_evidence_version: 'checked-version',
       material_families: [
         { id: null, name: '待建家族' },
         { id: 1, name: '氢基超导体' },

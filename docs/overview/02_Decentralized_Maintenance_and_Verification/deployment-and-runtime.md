@@ -10,7 +10,7 @@
 
 - 生产编排文件为 `docker/compose.yaml`，包含 frontend、goserver、python、worker、mysql、redis、neo4j、qdrant 和 grobid 服务；GROBID 通过 `/api/isalive` 健康检查后才允许 Python/Worker 启动。
 - frontend 使用 Nginx 提供前端静态资源并反向代理；Go 服务提供主要公开 API；未匹配的 Python 能力通过 Go 转发到 Python 服务。
-- Go 服务挂载 `graph.json`、`htsc2025.json`、`clean_results` 和持久化头像目录 `/data/avatars`；Python/Worker 服务挂载上传文件、富化结果和属性映射缓存，并通过 `GROBID_URL=http://grobid:8070` 调用引用解析服务。
+- Go 服务挂载 `graph.json`、`clean_results` 和持久化头像目录 `/data/avatars`；Python/Worker 服务挂载上传文件、富化结果和属性映射缓存，并通过 `GROBID_URL=http://grobid:8070` 调用引用解析服务。
 - MySQL、Redis、Neo4j、Qdrant 和 GROBID 使用 Docker volume 或数据目录持久化。服务通过 healthcheck 和 `depends_on` 控制启动顺序。
 - 当前仓库只包含 `docker/compose.yaml`；源码构建可分别使用 `docker/*.Dockerfile`，不存在 `docker/compose.dev.yaml`。
 

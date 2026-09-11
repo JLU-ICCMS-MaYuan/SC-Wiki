@@ -29,6 +29,8 @@ vi.mock('../../frontend/src/components/StructureCandidatePanel', () => ({
 }))
 
 const mockedApi = vi.mocked(api)
+// 预检与最终提交是两个不同端点；错误用例只控制最终提交响应。
+const submitRequest = vi.fn()
 
 const makeState = (overrides: Partial<DraftMaterialState> = {}): DraftMaterialState => ({
   material: 'LaH10',
@@ -65,7 +67,14 @@ beforeEach(() => {
     return Promise.resolve({ ok: true, data: makeDraft([makeState()]) } as never)
   })
   mockedApi.put.mockResolvedValue({ ok: true } as never)
-  mockedApi.post.mockResolvedValue({ ok: true, paper_id: 99, review_status: 'pending' } as never)
+  submitRequest.mockReset().mockResolvedValue({ ok: true, paper_id: 99, review_status: 'pending' })
+  mockedApi.post.mockImplementation(async (path, body) => {
+    if (path === '/api/rag/evidence/preflight') {
+      return { version: 'checked-version', needs_check: false, records: [], sources: [] } as never
+    }
+    if (path.endsWith('/submit')) return submitRequest(body)
+    throw new Error(`unexpected POST ${path}`)
+  })
 })
 
 afterEach(() => {
@@ -85,7 +94,7 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
         message: '规范性质不能携带自定义键',
       }],
     }) as ApiError
-    mockedApi.post.mockRejectedValue(failure)
+    submitRequest.mockRejectedValue(failure)
     const record = {
       record_key: 'tc-1', module_code: 'superconductive_properties', record_type: 'measured_tc', property_code: 'tc',
       custom_property_key: 'stale-key', definition_key: 'record.superconductive_properties.measured_tc.resistivity',
@@ -173,7 +182,7 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
       code: 'invalid_pressure_range',
       detail: { code: 'invalid_pressure_range', message: '第 2 个材料状态的压强区间 min 不能大于 max' },
     }) as ApiError
-    mockedApi.post.mockRejectedValue(failure)
+    submitRequest.mockRejectedValue(failure)
 
     render(<UploadTaskEditor
       taskId={'d'.repeat(32)}
@@ -204,7 +213,7 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
       code: 'title_required',
       detail: { code: 'title_required', message: '论文标题不能为空' },
     }) as ApiError
-    mockedApi.post.mockRejectedValue(failure)
+    submitRequest.mockRejectedValue(failure)
 
     render(<UploadTaskEditor
       taskId={'e'.repeat(32)}
@@ -223,7 +232,7 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
       code: 'internal_error',
       detail: { code: 'internal_error', message: '服务器内部错误，请稍后重试' },
     }) as ApiError
-    mockedApi.post.mockRejectedValue(failure)
+    submitRequest.mockRejectedValue(failure)
 
     render(<UploadTaskEditor
       taskId={'f'.repeat(32)}
@@ -253,6 +262,10 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
 
     await waitFor(() => {
       expect(onSubmitted).toHaveBeenCalledWith(99)
+      expect(submitRequest).toHaveBeenCalledTimes(1)
+      expect(submitRequest).toHaveBeenCalledWith(expect.objectContaining({
+        expected_evidence_version: 'checked-version',
+      }))
     })
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
@@ -263,7 +276,7 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
       code: 'state_material_required',
       detail: { code: 'state_material_required', message: '第 2 个材料状态缺少化学式' },
     }) as ApiError
-    mockedApi.post.mockRejectedValue(failure)
+    submitRequest.mockRejectedValue(failure)
 
     render(<UploadTaskEditor
       taskId={'9'.repeat(32)}

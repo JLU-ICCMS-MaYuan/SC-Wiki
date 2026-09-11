@@ -2,9 +2,9 @@
 
 ## 项目说明
 
-SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前代码以 React/Vite 提供单页应用，以 Go Gin 服务作为主要公开 API 聚合层，并将未覆盖的接口反向代理到 Python FastAPI 服务；数据库侧同时使用 GORM 与 SQLAlchemy 模型访问 MySQL 中的用户、论文、材料、物性记录、晶体结构、外部数据和图表组合数据。
+SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前代码以 React/Vite 提供单页应用，以 Go Gin 服务作为主要公开 API 聚合层，并将未覆盖的接口反向代理到 Python FastAPI 服务；数据库侧同时使用 GORM 与 SQLAlchemy 模型访问 MySQL 中的用户、论文、材料、物性记录、晶体结构和图表组合数据。
 
-当前能力覆盖超导数据去中心化上传（PDF 解析管线）、数据维护与审核验证、本地与外部材料检索、知识图谱、RAG 文献问答、实验性 Tc 估算和研究者社区。部分能力依赖 MySQL、Redis、Neo4j、Qdrant、外部数据文件和 LLM/Embedding 配置，具体边界见各功能文档。生产部署使用 Docker Compose，本地开发运行在宿主机进程上（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)），两条链路的服务组成与启动方式见[部署与运行时](02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。
+当前能力覆盖超导数据去中心化上传（PDF 解析管线）、数据维护与审核验证、本地材料检索、知识图谱、RAG 文献问答、实验性 Tc 估算和研究者社区。部分能力依赖 MySQL、Redis、Neo4j、Qdrant和 LLM/Embedding 配置，具体边界见各功能文档。生产部署使用 Docker Compose，本地开发运行在宿主机进程上（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)），两条链路的服务组成与启动方式见[部署与运行时](02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。
 
 ## 全局导航
 
@@ -19,7 +19,7 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 | [超导快讯与最新论文](news.md) | 官方来源每日采集、稳定标识去重、独立资讯列表与来源状态 | Python、独立 RQ 队列、Redis、MySQL、Go API |
 | [超导数据去中心化上传](01_Decentralized_Uploading_of_Superconductivity_Data/README.md) | PDF/TXT/MD 与结构附件的上传、五阶段 AI 解析、校对提交落库 | RQ Worker、Redis、LLM、MySQL、Qdrant |
 | [去中心化维护与验证](02_Decentralized_Maintenance_and_Verification/README.md) | 领域模型、迁移、导入导出、部署，论文审核、管理员审批、结构校验 | GORM、SQLAlchemy、Alembic、MySQL |
-| [超导数据搜索与数据库发现](03_Superconductivity_Data_Search_and_Database_Discovery/README.md) | 本地与外部材料检索、结果分享导出、代表结构下载、Tc 统计图表 | Go API、主业务数据库、外部数据表 |
+| [超导数据搜索与数据库发现](03_Superconductivity_Data_Search_and_Database_Discovery/README.md) | 本地材料检索、结果分享导出、代表结构下载、Tc 统计图表 | Go API、主业务数据库 |
 | [超导论文引用发展知识图谱](04_Superconductivity_Development_Knowledge_Graph/README.md) | 基于 MySQL 引用事实的分类概览、搜索和分页展开 | Go API、Python Worker、GROBID、MySQL |
 | [检索增强 AI 问答](05_Retrieval-Augmented_AI_Question_Answering/README.md) | 混合检索、流式问答、证据展示和灵感探索 | Python FastAPI、MySQL、Qdrant、LLM 配置 |
 | [AI 辅助 Tc 估算](06_AI_Assisted_Tc_Estimation/README.md) | 根据 CONTCAR 与 PDOS 文件计算实验性 Tc 估算和解释特征 | pymatgen、NumPy、上传文件 |

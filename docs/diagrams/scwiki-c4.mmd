@@ -11,7 +11,6 @@ flowchart TB
     NewsAPI["/api/news — 首页快讯"]
     ChartGroupsAPI["/api/chart-groups — 图表组合 CRUD"]
     KGAPI["/api/knowledge-graph/* — 知识图谱"]
-    ExternalAPI["/api/alexandria + /api/htsc2025 — 外部数据源"]
     AdminAPI["/api/admin/* — 管理员 API (JWT+AdminRequired)"]
     AuthAPI["/api/auth — 登录注册 (bcrypt)"]
     GzipMW["Gzip 压缩中间件 (API -87%)"]
@@ -33,8 +32,6 @@ flowchart TB
   subgraph External["☁️ 外部服务"]
     DeepSeek[DeepSeek API — LLM 对话/提取/富化]
     OpenAI[OpenAI API — Embedding 向量化]
-    Alexandria[Alexandria — 外部超导数据]
-    HTSC[HTSC-2025 — 外部数据集]
     CDN[jsDelivr CDN — vis-network/3Dmol]
   end
 
@@ -47,7 +44,5 @@ flowchart TB
   PythonBackend --> Qdrant
   PythonBackend --> DeepSeek
   PythonBackend --> OpenAI
-  ExternalAPI --> Alexandria
-  ExternalAPI --> HTSC
   StatsAPI --> RedisCache
   Browser -.-> CDN
