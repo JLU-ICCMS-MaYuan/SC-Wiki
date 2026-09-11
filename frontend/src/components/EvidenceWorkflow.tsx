@@ -17,6 +17,7 @@ export function useEvidenceWorkflow() {
   const { t } = useLanguage()
   const [view, setView] = useState<View | null>(null)
   const [reasons, setReasons] = useState<Record<string, string>>({})
+  const completedJob = useRef(false)
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const waiting = view?.phase === 'checking' || view?.phase === 'running'
   useEffect(() => {
@@ -42,7 +43,7 @@ export function useEvidenceWorkflow() {
     timerDone.current = undefined
     const id = jobID.current
     jobID.current = undefined
-    if (value === null && id) void api.del(`${base}/jobs/${id}`).catch(() => undefined)
+    if (value === null && id && !completedJob.current) void api.del(`${base}/jobs/${id}`).catch(() => undefined)
     pending.current?.(value)
     pending.current = undefined
     setView(null)
@@ -83,7 +84,11 @@ export function useEvidenceWorkflow() {
       while (active()) {
         const result = await api.get<Job>(`${base}/jobs/${job.id}`)
         if (!active()) return
-        if (result.status === 'completed') { showResults(result.records || [], preflight); return }
+        if (result.status === 'completed') {
+          completedJob.current = true
+          if (target.target === 'upload') await api.post(`${base}/jobs/${job.id}/save-draft`)
+          showResults(result.records || [], preflight); return
+        }
         if (result.status === 'failed') throw new Error(result.error?.message || t('evidence.failed'))
         if (result.status === 'cancelled') { finish(null); return }
         if (Date.now() > deadline) throw new Error(t('evidence.timeout'))
@@ -101,6 +106,7 @@ export function useEvidenceWorkflow() {
   const run = (target: EvidenceTarget): Promise<EvidencePayload | null> => {
     if (pending.current) return Promise.resolve(null)
     targetRef.current = target
+    completedJob.current = false
     setReasons({})
     return new Promise(resolve => { pending.current = resolve; void execute(target) })
   }

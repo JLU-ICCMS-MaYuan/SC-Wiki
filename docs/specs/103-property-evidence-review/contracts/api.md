@@ -8,6 +8,7 @@
 | `POST /jobs` | id、version、status；可携带以记录 key 为键的 candidates 多证据数组，手动原文仍须在当前来源唯一定位 |
 | `GET /jobs/{id}` | id、status、progress、error；completed 时返回 records，包含 key、field、label、status、reason、evidences 与 model |
 | `DELETE /jobs/{id}` | status=cancelled；只允许任务所有者操作，取消不应用候选 |
+| `POST /jobs/{id}/save-draft` | 仅上传目标可用；将已完成且已定位的证据写回 Redis 草稿，不写 MySQL。缺失出处不写入；正式提交时再原子落库 |
 
 记录 key 在上传时为材料状态序号/模块键/记录键，在正式论文中为记录主键；field 提供具体记录路径。
 证据含文件、片段、页码范围和原文引句。定位失败返回具体原因及记录字段；无有效出处的结果为 missing，不能人工绕过。

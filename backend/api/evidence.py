@@ -9,7 +9,7 @@ from backend.database import SessionLocal
 from backend.security import get_current_user, get_current_admin
 from backend.rag.llm_context import request_llm_config, get_llm_config
 from backend.ingest import property_evidence as ev
-from backend.ingest.upload_tasks import redis_client, upload_queue, save_llm_config, TASK_TTL
+from backend.ingest.upload_tasks import redis_client, upload_queue, save_llm_config, TASK_TTL, get_draft, save_draft, upload_task_lock
 
 router = APIRouter(prefix='/api/rag/evidence', tags=['evidence'], dependencies=[Depends(request_llm_config)])
 
@@ -81,6 +81,42 @@ def get_job(job_id: str, user=Depends(get_current_user)):
     if job['status'] == 'completed':
         result['records'] = [ev.checked_result(r, job['results'][r['key']], job['snapshot']['chunks']) for r in job['snapshot']['records']]
     return result
+
+
+@router.post('/jobs/{job_id}/save-draft')
+def save_upload_evidence_draft(job_id: str, user=Depends(get_current_user)):
+    """将已完成的自动证据临时写回 Redis 草稿；不创建或修改正式论文。"""
+    job = ev.read_job(job_id, user.id)
+    if job.get('snapshot', {}).get('target') != 'upload':
+        ev.fail('evidence_target_invalid', '只有上传草稿可以临时保存自动找到的证据')
+    if job.get('status') != 'completed':
+        ev.fail('evidence_task_not_complete', '证据核对尚未完成，暂时不能保存结果')
+    task_id = job['snapshot']['target_id']
+    with upload_task_lock(task_id):
+        draft = get_draft(task_id)
+        state = job['snapshot']
+        if draft is None:
+            ev.fail('draft_not_ready', '上传草稿不存在或已过期')
+        from backend.ingest.scientific_drafts import _property_modules_for_state
+        draft = json.loads(json.dumps(draft, ensure_ascii=False))
+        for result_key, result in job.get('results', {}).items():
+            if result.get('status') == 'missing':
+                continue
+            record = next((r for r in job['snapshot']['records'] if r['key'] == result_key), None)
+            if record is None:
+                continue
+            state_data = draft['material_states'][record['state_index']]
+            modules = _property_modules_for_state(state_data)
+            state_data['property_modules'] = modules
+            module = next((m for m in modules if m.get('module_key') == record['module_key']), None)
+            if module is None:
+                continue
+            target = next((r for r in module.get('records', []) if r.get('record_key') == record['record_key']), None)
+            if target is not None:
+                target.pop('evidence', None)
+                target['evidences'] = result.get('evidences') or []
+        save_draft(task_id, draft)
+    return {'status': 'saved', 'target': 'upload', 'target_id': task_id}
 
 
 @router.delete('/jobs/{job_id}')
