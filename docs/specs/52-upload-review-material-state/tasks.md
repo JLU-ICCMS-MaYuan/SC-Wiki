@@ -111,3 +111,11 @@
 1. 完成 T001–T009 基础能力。
 2. 实施 US1（T010–T012）、US2（T013–T014）、US3（T015–T016）即达 MVP：布局、元素数、超导类型 Tc。
 3. 依次叠加 US4、US5、US6；每个故事测试通过后保持可提交状态。
+
+## 阶段 9：收敛（2026-09-14）
+
+- [x] T026 修正 `spec.md`、`quickstart.md`、`checklists/requirements.md` 中已确认的 #53 主项替代与 FR-004 元素数锁定口径，并回写 Overview。
+- [ ] T027 [差距：冲突] 确认 #80、#84、#90 对原 US3、US6、FR-009～012、FR-015 的替代关系，再同步全部设计产物和 Issue；旧表及旧控件存在与否不能作为当前验收标准。
+- [ ] T028 [差距：部分完成] 按确认后的场景完成 T024 的浏览器与隔离 fresh MySQL 验收；本轮自动化测试不能代替该项。
+
+本轮证据：前端 `upload-task-editor-layout.test.tsx` 与 `upload-task-editor-classification.test.tsx` 共 25 项通过；后端 `test_space_groups.py`、`test_upload_jobs.py`、`test_scientific_drafts.py`、`test_classification_catalog.py` 共 75 项通过。测试运行于当前工作树（含原有未提交修改），未调用真实 LLM。T024 保持未勾选，#52 尚未完成关闭验收。
