@@ -497,6 +497,8 @@ def test_submit_failure_rolls_state_back_to_ready(monkeypatch):
     monkeypatch.setattr(
         upload_contracts.CleanupContext, "from_state", staticmethod(lambda _task_id, _state: None)
     )
+    # 证据快照读取同一上传任务，不能绕过真实快照权限检查。
+    monkeypatch.setattr(upload_tasks, "get_state", lambda key: rag._task_for_user(key, None))
 
     state_calls = []
 
@@ -505,7 +507,8 @@ def test_submit_failure_rolls_state_back_to_ready(monkeypatch):
 
     monkeypatch.setattr(upload_tasks, "update_state", _update_state)
 
-    async def _boom(_task_id, _state, _draft):
+    async def _boom(_task_id, _state, _draft, *, evidence_checks):
+        assert evidence_checks == []
         raise RuntimeError("模拟提交写入失败")
 
     monkeypatch.setattr(rag, "_create_pending_paper", _boom)

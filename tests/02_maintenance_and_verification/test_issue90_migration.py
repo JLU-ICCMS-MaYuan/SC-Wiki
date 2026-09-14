@@ -568,7 +568,6 @@ def test_repair_revision_normalizes_legacy_structure_reference(
         migration.run_migration(connection, "copy")
         checkpoint = service.load_checkpoint(connection)
         for target, flags in (
-            (service.MigrationPhase.COPY, {}),
             (service.MigrationPhase.RECONCILE, {"reconcile_ok": True}),
             (service.MigrationPhase.READ_SWITCH, {}),
             (service.MigrationPhase.WRITE_SWITCH, {}),
