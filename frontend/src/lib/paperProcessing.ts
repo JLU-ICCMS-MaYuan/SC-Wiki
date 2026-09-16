@@ -131,6 +131,7 @@ export type CrystalSystem = typeof CRYSTAL_SYSTEM_VALUES[number]
 
 export interface DraftMaterialState {
   state_key?: string
+  material_name?: string | null
   material?: string
   structure_families?: StructureFamilySelection[]
   crystal_system?: CrystalSystem

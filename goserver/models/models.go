@@ -324,6 +324,7 @@ type MaterialState struct {
 	PaperID                uint   `gorm:"not null;index:ix_material_states_paper_revision,priority:1;uniqueIndex:uq_material_states_identity_revision,priority:2;uniqueIndex:uq_material_states_paper_state_key,priority:1" json:"paper_id"`
 	PaperRevision          uint   `gorm:"not null;index:ix_material_states_paper_revision,priority:2;uniqueIndex:uq_material_states_identity_revision,priority:3;uniqueIndex:uq_material_states_paper_state_key,priority:2" json:"paper_revision"`
 	SuperconductorID       uint   `gorm:"not null;index" json:"superconductor_id"`
+	MaterialName           *string `gorm:"size:255" json:"material_name"`
 	ElementCount           *int16 `json:"element_count"`
 	MaterialDimensionality string `gorm:"size:32;not null;default:unknown" json:"material_dimensionality"`
 	CrystalSystem          string `gorm:"size:32;not null;default:unknown" json:"crystal_system"`

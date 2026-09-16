@@ -1,3 +1,4 @@
+import { changedScientificFields } from '../lib/evidenceFields'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Card, CardContent, Chip, Collapse, FormControl,
@@ -18,6 +19,7 @@ import {
 import { useLanguage } from '../context/LanguageContext'
 import StructureCandidatePanel from './StructureCandidatePanel'
 import PropertyModuleEditor from './PropertyModuleEditor'
+import PressureEditor from './PressureEditor'
 import { PROPERTY_SCHEMA_VERSION } from '../lib/propertyModules'
 import {
   CRYSTAL_SYSTEM_VALUES, CrystalSystem, DraftKeyProperty, DraftMaterialState, DraftTcResult, SourceEvidence,
@@ -114,6 +116,7 @@ interface MaterialStatesEditorProps {
   states: DraftMaterialState[]
   /** 材料状态数组整体变更回调：任何编辑都传出完整的新状态数组（T017） */
   onChange: (nextStates: DraftMaterialState[]) => void
+  onScientificEdit?: (field: string) => void
   /** 分类目录（材料家族/结构家族/维度），加载中可为 null */
   catalogs: ClassificationCatalogs | null
   /** 只读模式：仍渲染全部内容但不可编辑、不可折叠交互，卡片恒展开 */
@@ -148,11 +151,12 @@ interface SpaceGroupAutocompleteProps {
   value: string
   options: SpaceGroupOption[]
   label: string
+  issueField?: string
   onCommit: (value: string) => void
   onSelect: (value: SpaceGroupOption) => void
 }
 
-const SpaceGroupAutocomplete: React.FC<SpaceGroupAutocompleteProps> = ({ value, options, label, onCommit, onSelect }) => {
+const SpaceGroupAutocomplete: React.FC<SpaceGroupAutocompleteProps> = ({ value, options, label, onCommit, onSelect, issueField }) => {
   const [inputValue, setInputValue] = useState(value)
   const inputValueRef = useRef(value)
   const committedValue = useRef(value)
@@ -170,7 +174,7 @@ const SpaceGroupAutocomplete: React.FC<SpaceGroupAutocompleteProps> = ({ value, 
   }
 
   return (
-    <Autocomplete<SpaceGroupOption | string, false, false, true>
+    <Autocomplete<SpaceGroupOption | string, false, false, true> data-issue-field={issueField}
       freeSolo
       options={options}
       inputValue={inputValue}
@@ -210,6 +214,7 @@ const SpaceGroupAutocomplete: React.FC<SpaceGroupAutocompleteProps> = ({ value, 
 const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   states,
   onChange,
+  onScientificEdit,
   catalogs,
   readOnly = false,
   issues,
@@ -254,7 +259,10 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
   // 只读模式下任何编辑都不应触达父级：变更函数统一在此拦截
   const emitStates = (nextStates: DraftMaterialState[]) => {
-    if (!readOnly) onChange(nextStates)
+    if (!readOnly) {
+      if (onScientificEdit) changedScientificFields(statesRef.current, nextStates, 'material_states').forEach(field => onScientificEdit(field))
+      onChange(nextStates)
+    }
   }
 
   const updateMaterialState = (index: number, field: keyof DraftMaterialState, value: unknown) => {
@@ -443,6 +451,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   // 新材料状态只写统一物性模块；旧字段仅保留给迁移前草稿的兼容编辑。
   const addState = () => {
     emitStates([...statesRef.current, {
+      material_name: '',
       material: '',
       structure_families: [],
       element_count: null,
@@ -571,7 +580,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
             const hasEnergyAboveHull = (state.properties || []).some(item =>
               [item.name, item.name_raw].some(value => String(value || '').trim().toLowerCase() === ENERGY_ABOVE_HULL_NAME))
             const element = (
-              <Card key={index} variant="outlined" sx={{ width: '100%' }}>
+              <Card data-state-key={state.state_key || `state-${index+1}`} key={state.state_key || index} variant="outlined" sx={{ width: '100%' }}>
                 <CardContent>
                   <Box
                     role="button"
@@ -586,6 +595,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                         transition: 'transform 180ms ease',
                       }} />
                       <Typography variant="subtitle2" fontWeight={700}>{t('upload.materialStateNumber', { index: index + 1 })}</Typography>
+                      {(issues || []).filter(issue => issue.field.startsWith(`material_states[${index}].`)).length > 0 && <Chip size="small" color="error" label={(issues || []).filter(issue => issue.field.startsWith(`material_states[${index}].`)).length} />}
                       {state.material?.trim() && (
                         <Typography variant="body2" color="text.secondary" noWrap>{state.material}</Typography>
                       )}
@@ -599,17 +609,20 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   <Collapse in={!isCollapsed} timeout="auto" id={`material-state-${index}-content`}>
                   <Box>
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' }, gap: 1.5 }}>
+                    <TextField label={t('upload.materialNameField')} value={state.material_name || ''}
+                      {...issueProps(`material_states[${index}].material_name`)}
+                      onChange={event => updateMaterialState(index, 'material_name', event.target.value)} />
                     <TextField label={t('upload.materialField')} value={state.material || ''}
                       {...issueProps(`material_states[${index}].material`)}
                       onChange={event => updateMaterialState(index, 'material', event.target.value)} />
                     <TextField
-                      label={t('upload.elementCountField')}
+                      label={t('upload.elementCountField')} data-issue-field={`material_states[${index}].element_count`}
                       value={elementCountEdits[index]?.text ?? (state.element_count ?? '')}
                       error={Boolean(elementCountEdits[index]?.invalid)}
                       helperText={elementCountEdits[index]?.invalid ? t('upload.elementCountInvalid') : t('upload.elementCountAuto')}
                       onChange={event => changeElementCount(index, event.target.value)}
                     />
-                    <FormControl fullWidth>
+                    <FormControl fullWidth data-issue-field={`material_states[${index}].material_dimensionality`}>
                       <InputLabel id={`material-dimensionality-${index}-label`}>{t('upload.materialDimensionalityField')}</InputLabel>
                       <Select
                         labelId={`material-dimensionality-${index}-label`}
@@ -622,7 +635,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                         ))}
                       </Select>
                     </FormControl>
-                    <Autocomplete<ClassificationTerm | string, true, false, true>
+                    <Autocomplete<ClassificationTerm | string, true, false, true> data-issue-field={`material_states[${index}].structure_families`}
                       multiple
                       freeSolo
                       options={catalogs?.structure_families || []}
@@ -645,9 +658,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       }}
                       renderInput={params => <TextField {...params} label={t('upload.structureFamiliesField')} error={Boolean(catalogError)} />}
                     />
-                    <TextField label={t('upload.pressureField')} type="number" value={state.pressure_value_gpa ?? ''} helperText={state.pressure_value_gpa == null && state.pressure_raw ? t('upload.pressureRaw', { raw: state.pressure_raw, unit: state.pressure_unit_raw || '' }) : undefined}
-                      onChange={event => updateMaterialState(index, 'pressure_value_gpa', event.target.value ? Number(event.target.value) : null)} />
-                    <FormControl fullWidth>
+                    <PressureEditor state={state} index={index} onChange={patch => emitStates(statesRef.current.map((item, i) => i === index ? {...item, ...patch} : item))} />
+                    <FormControl fullWidth data-issue-field={`material_states[${index}].crystal_system`}>
                       <InputLabel id={`crystal-system-${index}-label`}>{t('upload.crystalSystemField')}</InputLabel>
                       <Select
                         labelId={`crystal-system-${index}-label`}
@@ -660,7 +672,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                         ))}
                       </Select>
                     </FormControl>
-                    <SpaceGroupAutocomplete
+                    <SpaceGroupAutocomplete issueField={`material_states[${index}].reported_space_group_symbol`}
                       value={state.reported_space_group_symbol || ''}
                       options={spaceGroupOptions}
                       label={t('upload.spaceGroupSymbolField')}
@@ -797,7 +809,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   const sourceName = candidate.sources?.find?.(item => item && typeof item === 'object' && 'filename' in item)
                     ?.filename as string | undefined
                   return (
-                    <Card key={candidate.candidate_id} variant="outlined" sx={{ p: 1.5 }}>
+                    <Card data-scientific-structure data-structure-hash={candidate.validation?.structure_hash} key={candidate.candidate_id} variant="outlined" sx={{ p: 1.5 }}>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
                         <Typography variant="body2" fontWeight={600} sx={{ minWidth: 0, flex: '1 1 180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {sourceName || candidate.candidate_id}

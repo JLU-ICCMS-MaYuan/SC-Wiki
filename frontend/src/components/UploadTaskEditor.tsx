@@ -1,9 +1,11 @@
+import { evidenceIssuesForStates } from '../lib/evidenceFields'
 import { useEvidenceWorkflow } from './EvidenceWorkflow'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Alert, Autocomplete, Box, Button, Checkbox, Chip, CircularProgress,
   FormControl, FormHelperText, InputLabel, ListItemText, Menu, MenuItem, Select, TextField, Typography,
 } from '@mui/material'
+import { applyEvidencePatches } from '../lib/evidenceProposals'
 import SaveIcon from '@mui/icons-material/Save'
 import SendIcon from '@mui/icons-material/Send'
 import { api, ApiError } from '../lib/api'
@@ -19,6 +21,7 @@ import {
   UploadDraft, normalizeUploadDraft, unwrapData,
 } from '../lib/paperProcessing'
 import { validateRecordClient } from '../lib/formDefinitions'
+import EvidenceFieldMarkers from './EvidenceFieldMarkers'
 
 interface UploadTaskEditorProps {
   taskId: string
@@ -108,11 +111,13 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
-  const evidenceWorkflow = useEvidenceWorkflow()
+  const evidenceWorkflow = useEvidenceWorkflow({ target: readOnly ? undefined : { target: 'upload', target_id: taskId } })
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
   const [error, setError] = useState('')
   // 本次提交发现的校验问题；驱动字段错误态与定位，提交成功或重新加载草稿时清空
-  const [issues, setIssues] = useState<ValidationIssue[]>([])
+  const [validationIssues, setIssues] = useState<ValidationIssue[]>([])
+  const issues = [...new Map([...validationIssues, ...evidenceIssuesForStates(evidenceWorkflow.issues, draft?.material_states || [])]
+    .map(issue => [`${issue.field}:${issue.message}`, issue])).values()]
   const [authorMenu, setAuthorMenu] = useState<{ author: string; anchorEl: HTMLElement } | null>(null)
   const [authorInput, setAuthorInput] = useState('')
   const [catalogs, setCatalogs] = useState<ClassificationCatalogs | null>(null)
@@ -185,6 +190,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }, [])
 
   const setPaperField = (field: keyof UploadDraft['paper'], value: unknown) => {
+    evidenceWorkflow.invalidate(`paper.${field}`)
     changeDraft(current => ({ ...current, paper: { ...current.paper, [field]: value } }))
   }
 
@@ -278,8 +284,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     }
     draft.material_states.forEach((state, stateIndex) => {
       const label = t('upload.materialStateLabel', { index: stateIndex + 1 })
-      if (!state.material?.trim()) {
-        issues.push({ stateIndex, field: `material_states[${stateIndex}].material`, message: t('upload.missingMaterial', { label }) })
+      if (!state.material?.trim() && !state.material_name?.trim()) {
+        issues.push({ stateIndex, field: `material_states[${stateIndex}].material_name`, message: t('upload.missingMaterial', { label }) })
       }
       if (state.reported_space_group_number != null &&
         (state.reported_space_group_number < 1 || state.reported_space_group_number > 230)) {
@@ -361,7 +367,14 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     setSubmitting(true)
     try {
       if (!(await saveDraft(false))) return
-      const evidencePayload = await evidenceWorkflow.run({ target: 'upload', target_id: taskId })
+      if (!(await evidenceWorkflow.applyAccepted({ target: 'upload', target_id: taskId }, async (patches, preparationId) => {
+        if (!draft) return false
+        const changed = applyEvidencePatches(draft, patches)
+        await api.put(`/api/rag/upload-tasks/${taskId}/draft`, { ...changed, evidence_preparation_id: preparationId })
+        setDraft(changed); setDirty(false)
+        return true
+      }))) return
+      const evidencePayload = await evidenceWorkflow.gate({ target: 'upload', target_id: taskId })
       if (!evidencePayload) return
       let response: SubmitResponse | { data: SubmitResponse }
       try {
@@ -435,8 +448,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const classificationEvidence = draft.classification_evidence || []
 
   return (
-    <Box component="fieldset" disabled={submitting} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
+    <Box component="fieldset" data-evidence-scope="upload-editor" disabled={submitting && evidenceWorkflow.busy} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
       {evidenceWorkflow.dialog}
+      <EvidenceFieldMarkers records={evidenceWorkflow.records} scope="upload-editor" onOpen={evidenceWorkflow.openIssue} onChange={evidenceWorkflow.invalidate} />
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
         <Box>
           <Typography variant="h6" fontWeight={700}>{readOnly ? t('upload.aiDraftTitle') : t('upload.checkAiDraftTitle')}</Typography>
@@ -451,6 +465,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           <Typography variant="caption" color={error ? 'error' : 'text.secondary'}>
             {saving ? t('common.saving') : dirty ? t('upload.autoSaveHint') : lastSavedAt ? t('upload.savedAt', { time: lastSavedAt }) : t('upload.draftLoaded')}
           </Typography>
+          <Button variant="outlined" disabled={saving || submitting || evidenceWorkflow.busy} onClick={async () => { if (await saveDraft(false)) void evidenceWorkflow.run({ target: 'upload', target_id: taskId }) }}>{t('evidence.audit')}</Button>
           <Button variant="outlined" startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
             disabled={saving || submitting} onClick={() => void saveDraft(true)}>{t('upload.saveNow')}</Button>
           <Button variant="contained" startIcon={submitting ? <CircularProgress size={16} /> : <SendIcon />}
@@ -610,7 +625,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           ['methodology', t('upload.methodologyLabel')],
         ].map(([field, label]) => (
           <Box key={field}>
-            <TextField fullWidth label={label} multiline rows={15}
+            <TextField fullWidth label={label} multiline rows={15} data-issue-field={`paper.${field}`}
               value={toLines(draft.paper[field as keyof UploadDraft['paper']] as string[] | undefined)}
               onChange={event => setPaperField(field as keyof UploadDraft['paper'], fromLines(event.target.value))} />
             <EvidenceNotes
@@ -626,20 +641,21 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         ['key_finding', t('upload.keyFindingLabel'), 3],
       ].map(([field, label, rows]) => (
         <Box key={String(field)} sx={{ mt: 2 }}>
-          <TextField fullWidth label={String(label)} multiline minRows={Number(rows)}
+          <TextField fullWidth label={String(label)} multiline minRows={Number(rows)} data-issue-field={`paper.${field}`}
             value={String(draft.paper[field as keyof UploadDraft['paper']] || '')}
             onChange={event => setPaperField(field as keyof UploadDraft['paper'], event.target.value)} />
         </Box>
       ))}
 
       <Box sx={{ mt: 2 }}>
-        <TextField fullWidth label={t('upload.researchMotivationLabel')} multiline minRows={3}
-          value={draft.research_motivation || ''}
-          onChange={event => setDraftField('research_motivation', event.target.value)} />
+        <TextField fullWidth label={t('upload.researchMotivationLabel')} multiline minRows={3} data-issue-field="paper.research_motivation"
+          value={draft.paper.research_motivation || ''}
+          onChange={event => setPaperField('research_motivation', event.target.value)} />
         <EvidenceNotes evidence={classificationEvidence} />
       </Box>
 
       <MaterialStatesEditor
+        onScientificEdit={evidenceWorkflow.invalidate}
         states={draft.material_states}
         onChange={nextStates => setDraftField('material_states', nextStates)}
         catalogs={catalogs}

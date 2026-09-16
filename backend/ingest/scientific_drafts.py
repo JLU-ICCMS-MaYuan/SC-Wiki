@@ -266,6 +266,7 @@ async def persist_scientific_draft(
     candidates_by_state = _confirmed_candidates_by_state(draft)
     for state_index, state_data in enumerate(draft.get("material_states") or []):
         material = str(state_data.get("material") or "").strip()
+        material_name = str(state_data.get("material_name") or "").strip() or None
         superconductor = await _get_or_create_superconductor(session, paper, material)
         dimensionality = str(state_data.get("material_dimensionality") or "unknown")
         if dimensionality not in MATERIAL_DIMENSIONALITIES:
@@ -281,6 +282,7 @@ async def persist_scientific_draft(
             crystal_system = "unknown"
         state = models.MaterialState(
             state_key=str(state_data.get("state_key") or f"state-{state_index + 1}"),
+            material_name=material_name,
             paper_id=paper.id,
             paper_revision=paper.content_revision,
             superconductor_id=superconductor.id,

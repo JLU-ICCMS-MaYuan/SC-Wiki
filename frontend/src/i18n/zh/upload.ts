@@ -260,7 +260,7 @@ export default {
   addMaterialState: '添加材料状态',
   materialStateNumber: '材料状态 #{index}',
   applyToSameMaterial: '应用到同材料',
-  materialField: '化学式',
+    materialField: '化学式', materialNameField: '材料名',
   materialFamilyField: '材料家族',
   materialFamilyRequired: '请至少选择一个论文级材料家族',
   elementCountField: '不同元素种类数',

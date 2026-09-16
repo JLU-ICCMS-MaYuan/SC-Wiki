@@ -258,7 +258,7 @@ export default {
   addMaterialState: 'Add material state',
   materialStateNumber: 'Material state #{index}',
   applyToSameMaterial: 'Apply to same material',
-  materialField: 'Chemical formula',
+    materialField: 'Chemical formula', materialNameField: 'Material name',
   materialFamilyField: 'Material family',
   materialFamilyRequired: 'Select at least one paper-level material family',
   elementCountField: 'Distinct element count',

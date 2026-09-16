@@ -515,8 +515,8 @@ def _validate_draft(
     if paper_type != "review" and not material_states:
         raise _upload_error(400, "material_state_required", "非综述论文至少需要一个材料状态")
     for state_index, state in enumerate(material_states):
-        if not str(state.get("material") or "").strip():
-            raise _upload_error(400, "state_material_required", f"第 {state_index + 1} 个材料状态缺少化学式")
+        if not (str(state.get("material_name") or "").strip() or str(state.get("material") or "").strip()):
+            raise _upload_error(400, "state_material_required", f"第 {state_index + 1} 个材料状态至少需要材料名或化学式")
         structures = [item for item in state.get("structure_families") or [] if isinstance(item, dict)]
         if sum(bool(item.get("is_primary")) for item in structures) > 1:
             raise _upload_error(400, "multiple_primary_structure_families", "一个材料状态只能有一个主结构家族")
@@ -896,7 +896,7 @@ def test_llm_connection():
         )
         # HTTP 200 也可能是网关首页或空生成结果，不能据此证明模型可用。
         choices = getattr(response, "choices", None)
-        message = getattr(choices[0], "message", None) if isinstance(choices, list) and choices else None
+        message = getattr(choices[0], "message", None) if choices else None
         content = getattr(message, "content", None)
         if not isinstance(content, str) or not content.strip():
             raise ValueError("LLM 未返回有效正文")
@@ -1242,6 +1242,12 @@ async def put_upload_draft(
                     existing_paper_id=state.get("existing_paper_id"),
                 )
             _reject_legacy_classification_contract(draft)
+            preparation_id = draft.pop('evidence_preparation_id', None)
+            if preparation_id:
+                from backend.ingest import evidence_proposals as proposals, property_evidence as evidence
+                from backend.database import SessionLocal
+                with SessionLocal() as evidence_session:
+                    proposals.validate_save(evidence_session, evidence.upload_snapshot(task_id, current_user.id), current_user.id, preparation_id, 'upload')
             previous = get_draft(task_id) or {}
             normalized = _normalize_draft(draft)
             # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。
@@ -1313,6 +1319,11 @@ async def upload_structure_candidate(
         )
     except (StructureCandidateError, ValueError) as exc:
         raise _upload_error(400, "structure_validation_failed", str(exc)) from exc
+
+    from backend.database import SessionLocal
+    from backend.ingest.scientific_evidence import register_structure_origin
+    with SessionLocal.begin() as origin_session:
+        register_structure_origin(origin_session, 'upload', task_id, candidate, current_user.id, current_user.username, filename, raw)
 
     destination = task_directory(task_id) / f"{file_id}{Path(filename).suffix or '.POSCAR'}"
     destination.write_bytes(raw)
@@ -1623,23 +1634,31 @@ async def _create_pending_paper(
                         if target is not None:
                             add_scientific_evidence_link(session, target, paper_evidence)
                 if evidence_checks is not None:
-                    from backend.ingest.property_evidence import paper_snapshot, RULE_VERSION
+                    from backend.ingest.property_evidence import paper_snapshot, locate
+                    from backend.ingest import scientific_evidence as science
+                    from sqlalchemy import update as sql_update, delete as sql_delete
                     await session.flush()
-                    persisted_paper_id = paper.id
-                    target_paths = {t.entity.id: t.field_path for t in scientific_targets if t.kind == 'property_record'}
-                    # 摘要采用数据库实际精度/默认值，不用尚未重载的浮点对象。
-                    session.expire_all()
-                    persisted = await session.run_sync(lambda sync: paper_snapshot(sync, persisted_paper_id, 0, '', check_access=False))
-                    checks_by_path = {c['field']: c for c in evidence_checks}
-                    checks_by_id = {record_id: checks_by_path.get(path) for record_id, path in target_paths.items()}
+                    # 在论文事务内转接服务端来源和稳定核对项，不依赖 Redis job 存活。
+                    await session.execute(sql_update(models.ScientificStructureOrigin).where(
+                        models.ScientificStructureOrigin.target == 'upload', models.ScientificStructureOrigin.target_id == task_id,
+                    ).values(target='paper', target_id=str(paper.id)))
+                    persisted = await session.run_sync(lambda sync: paper_snapshot(sync, paper.id, 0, '', check_access=False))
+                    by_item = {r['item_key']: r for r in evidence_checks}
+                    transferred = {}
                     for r in persisted['records']:
-                        check = checks_by_id.get(r['record_id'])
-                        if check:
-                            session.add(models.PropertyEvidenceCheck(
-                                paper_id=paper.id, paper_revision=paper.content_revision, record_id=r['record_id'],
-                                content_hash=r['content_hash'], source_hash=r['source_hash'], rule_version=RULE_VERSION,
-                                status=check['status'], reason=check['reason'], model=check['model'], evidence_snapshot=r['evidences'],
-                            ))
+                        old = by_item.get(r['item_key'])
+                        if old and old['content_hash'] == r['content_hash']:
+                            # 新 chunk ID 由同原文重新定位。来源限定以服务端来源记录为准。
+                            updated = dict(old)
+                            updated['evidences'] = r['evidences'] or [
+                                located for e in old.get('evidences', [])
+                                if (located := locate({'quote': e['quote']}, persisted['chunks']))
+                            ]
+                            transferred[r['key']] = updated
+                    await session.run_sync(lambda sync: science.save_results(sync, persisted, transferred, int(state['user_id'])))
+                    await session.execute(sql_delete(models.ScientificEvidenceCheck).where(
+                        models.ScientificEvidenceCheck.target == 'upload', models.ScientificEvidenceCheck.target_id == task_id))
+                    await session.execute(sql_delete(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == task_id))
                 paper_id = paper.id
         return paper_id
     except IntegrityError as exc:
@@ -1804,11 +1823,17 @@ async def _submit_upload_draft_locked(
     from backend.ingest.scientific_drafts import _property_modules_for_state
     import copy
     snapshot = upload_snapshot(task_id, current_user.id)
-    evidence_checks = resolve_results(snapshot, {}, current_user.id, evidence_job_id, expected_evidence_version)
+    from backend.database import SessionLocal
+    from backend.ingest.scientific_evidence import load_results
+    with SessionLocal() as check_session:
+        cached = load_results(check_session, snapshot, current_user.id)
+    evidence_checks = resolve_results(snapshot, cached, current_user.id, evidence_job_id, expected_evidence_version)
     draft = copy.deepcopy(draft)
     for state_data in draft.get('material_states') or []:
         state_data['property_modules'] = _property_modules_for_state(state_data)
     for result in evidence_checks:
+        if result.get('kind') != 'property':
+            continue
         state_data = draft['material_states'][result['state_index']]
         module = next(m for m in state_data['property_modules'] if m['module_key'] == result['module_key'])
         record = next(r for r in module['records'] if r['record_key'] == result['record_key'])
@@ -1911,7 +1936,7 @@ async def paper_structure_candidate(
     filename = Path(file.filename or "structure.cif").name
     async with async_session_factory() as session:
         return await _build_paper_structure_candidate(
-            session, paper_id, material_state_index, filename, raw
+            session, paper_id, material_state_index, filename, raw, current_user=_current_user
         )
 
 
@@ -1921,6 +1946,7 @@ async def _build_paper_structure_candidate(
     material_state_index: int,
     filename: str,
     raw: bytes,
+    current_user=None,
 ) -> dict[str, Any]:
     """C2 的实现（不管理 session），便于测试直接调用。"""
     from backend.ingest.upload_contracts import structure_format_for_filename
@@ -1966,6 +1992,11 @@ async def _build_paper_structure_candidate(
         )
     except (StructureCandidateError, ValueError) as exc:
         raise _upload_error(400, "structure_validation_failed", str(exc)) from exc
+
+    if current_user is not None:
+        from backend.ingest.scientific_evidence import register_structure_origin
+        await session.run_sync(lambda sync: register_structure_origin(sync, 'paper', str(paper_id), candidate, current_user.id, current_user.username, filename, raw))
+        await session.commit()
 
     return {
         "ok": True,
@@ -2141,6 +2172,10 @@ async def _rewrite_paper_scientific_draft_in_tx(
             409, "paper_status_not_editable", "当前状态的论文不可编辑，请先退回待审核"
         )
 
+    if draft.get('evidence_preparation_id'):
+        from backend.ingest import evidence_proposals as proposals, property_evidence as evidence
+        await session.run_sync(lambda sync: proposals.validate_save(sync, evidence.paper_snapshot(sync, paper_id, current_user.id, current_user.role), current_user.id, draft['evidence_preparation_id'], 'scientific'))
+
     # 复用上传提交的既有校验（FR-020）：论文级字段来自数据库，
     # 请求体只携带科学数据部分（契约 C1 的形态）。
     full_draft = {
@@ -2245,7 +2280,7 @@ async def publish_approved_paper(
 
     async with async_session_factory() as session:
         paper = await session.scalar(
-            select(Paper).where(Paper.id == paper_id, Paper.review_status == "approved")
+            select(Paper).where(Paper.id == paper_id, Paper.review_status == "approved", Paper.approved_revision == Paper.content_revision)
         )
         if paper is None:
             raise _upload_error(409, "paper_not_approved", "论文尚未审核通过，不能发布向量索引")
@@ -2253,6 +2288,9 @@ async def publish_approved_paper(
             select(PaperChunk).where(PaperChunk.paper_id == paper_id).order_by(PaperChunk.chunk_index)
         )
         chunks = list(result.scalars())
+        from backend.rag.scientific_sources import source_chunk
+        science_chunks = [source_chunk(source) for source in (await session.scalars(select(models.ScientificEvidenceSource).where(
+            models.ScientificEvidenceSource.paper_id == paper_id, models.ScientificEvidenceSource.paper_revision == paper.content_revision))).all()]
 
     # 引用匹配只使用 GROBID 已保存的字段。它与向量发布独立，因此不会用 LLM
     # 的 builds_on 文本制造图边。
@@ -2276,7 +2314,7 @@ async def publish_approved_paper(
         }
         for chunk in chunks
     ]
-    indexed = await asyncio.to_thread(embed_and_index_chunks, chunk_data)
+    indexed = await asyncio.to_thread(embed_and_index_chunks, [*chunk_data, *science_chunks])
 
     # 同步到 Neo4j 知识图谱
     kg_sync_result = {"success": False, "error": None}

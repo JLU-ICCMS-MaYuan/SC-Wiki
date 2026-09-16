@@ -579,6 +579,8 @@ func materialFamiliesToDict(links []models.PaperMaterialFamily) []gin.H {
 func materialStatesToDict(states []models.MaterialState) []gin.H {
 	result := make([]gin.H, 0, len(states))
 	for _, state := range states {
+		material := ""
+		if state.Superconductor.ID != 0 { material = state.Superconductor.ChemicalFormula }
 		structures := make([]gin.H, 0, len(state.StructureFamilyLinks))
 		for _, link := range state.StructureFamilyLinks {
 			structures = append(structures, gin.H{
@@ -588,7 +590,7 @@ func materialStatesToDict(states []models.MaterialState) []gin.H {
 			})
 		}
 		result = append(result, gin.H{
-			"id": state.ID, "material": state.Superconductor.ChemicalFormula,
+			"id": state.ID, "material": material, "material_name": state.MaterialName,
 			"structure_families": structures,
 			"element_count":      state.ElementCount, "material_dimensionality": state.MaterialDimensionality,
 			"crystal_system": state.CrystalSystem,
