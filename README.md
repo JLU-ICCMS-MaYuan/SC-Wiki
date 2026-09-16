@@ -93,3 +93,27 @@ Go 提供 `GET /api/news/feed`，旧 `GET /api/news` 保持人工快讯数组格
 Phys.org 只能补回当前 RSS 窗口；Crossref 不转载摘要；该版本不计算热度或生成 AI 摘要。
 
 完整测试、启动、恢复说明见 [Quickstart](docs/specs/88-networked-superconductivity-discovery/quickstart.md)，当前行为见 [资讯功能总览](docs/overview/news.md)。
+
+## 注册邮箱验证码配置
+
+新账号完成邮箱验证码验证后自动登录。验证码为 6 位、5 分钟有效；重发间隔 60 秒，
+每邮箱/IP 每小时最多尝试发送 5 次、UTC 每天最多 10 次。历史已验证账号不受影响。
+
+在本机私密 `.env` 配置网易发件邮箱：
+
+```dotenv
+SMTP_HOST=smtp.163.com
+SMTP_PORT=465
+SMTP_USER=sc_wiki@163.com
+SMTP_FROM=sc_wiki@163.com
+SMTP_TLS_MODE=implicit
+SMTP_PASSWORD=
+```
+
+`SMTP_PASSWORD` 填网易客户端授权码，不是邮箱登录密码；不要提交真实值。
+`SMTP_USERNAME` 非空时优先于 `SMTP_USER`。本地运行用 `scripts/dev.sh restart goserver`
+重新加载配置；Docker 部署需构建本次源码的镜像后重新创建 Go 服务，不能只重启旧镜像。
+
+发送失败会明确报错，账号保持未验证；可用原邮箱和密码登录继续验证，再请求重发。
+配置后仍需实际收信验收，参见
+[邮箱注册验收说明](docs/specs/39-email-verified-registration/quickstart.md)。

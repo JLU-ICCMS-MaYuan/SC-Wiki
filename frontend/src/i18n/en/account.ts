@@ -97,4 +97,12 @@ export default {
   sessionExpired: 'Your session has expired',
   usernameUpdateFailed: 'Failed to update username',
   networkError: 'Network error. Please try again later.',
+  continueVerificationBefore: 'Verify your email',
+  continueVerificationAfter: '. Enter a code you received, or request a new one below.',
+  verificationRateLimited: 'Too many requests. Wait for the countdown before retrying.',
+  invalidOrExpiredCode: 'Invalid or expired code. Check it or request a new one.',
+  verificationAttemptsExceeded: 'Too many incorrect attempts. Request a new code.',
+  verificationUnavailable: 'Verification is unavailable. Request a new code later.',
+  invalidEmail: 'Enter a valid email address.',
+  accountInactive: 'This account is unavailable.',
 } as const

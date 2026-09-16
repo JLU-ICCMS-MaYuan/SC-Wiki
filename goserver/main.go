@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -63,6 +64,9 @@ func main() {
 	// 4. 创建路由引擎
 	// gin.Default() = 带 Logger + Recovery 中间件
 	r := gin.Default()
+	if err := configureTrustedProxies(r, os.Getenv("TRUSTED_PROXIES")); err != nil {
+		log.Fatal(err)
+	}
 
 	// 5. 初始化知识图谱（动态 Neo4j）
 	handlers.InitKnowledgeGraph()
@@ -222,4 +226,17 @@ func registerAdminRoutes(admin *gin.RouterGroup) {
 	admin.POST("/news", middleware.SuperAdminRequired, handlers.CreateNews)
 	admin.PUT("/news/:id", middleware.SuperAdminRequired, handlers.UpdateNews)
 	admin.DELETE("/news/:id", middleware.SuperAdminRequired, handlers.DeleteNews)
+}
+
+// configureTrustedProxies 只接受明确的代理来源，防止客户端伪造 IP 绕过发送额度。
+func configureTrustedProxies(r *gin.Engine, proxies string) error {
+	r.RemoteIPHeaders = []string{"X-Real-IP"}
+	if proxies == "" {
+		proxies = "127.0.0.1,::1"
+	}
+	trusted := strings.Split(proxies, ",")
+	for i := range trusted {
+		trusted[i] = strings.TrimSpace(trusted[i])
+	}
+	return r.SetTrustedProxies(trusted)
 }

@@ -21,11 +21,11 @@ export interface AuthState {
   token: string | null
   loading: boolean
   login: (email: string, password: string) => Promise<{ needApproval?: boolean }>
-  register: (email: string, password: string, username: string, realName: string) => Promise<{ requiresEmailVerification: boolean }>
+  register: (email: string, password: string, username: string, realName: string) => Promise<{ requiresEmailVerification: boolean; resendAfterSeconds?: number }>
   updateUsername: (username: string) => Promise<void>
   replaceUser: (user: User) => void
   verifyEmail: (email: string, code: string) => Promise<void>
-  resendVerification: (email: string) => Promise<void>
+  resendVerification: (email: string, password: string) => Promise<number>
   logout: () => void
 }
 
@@ -38,7 +38,7 @@ const AuthContext = createContext<AuthState>({
   updateUsername: async () => {},
   replaceUser: () => {},
   verifyEmail: async () => {},
-  resendVerification: async () => {},
+  resendVerification: async () => 60,
   logout: () => {},
 })
 
@@ -85,11 +85,24 @@ const SERVER_DETAIL_TO_CODE: Record<string, string> = {
   '登录已失效': 'sessionExpired',
 }
 
-async function responseError(res: Response, fallback: string): Promise<Error> {
+export class AuthRequestError extends Error {
+  constructor(message: string, public code?: string, public resendAfterSeconds = 0, public requiresEmailVerification = false) {
+    super(message)
+  }
+}
+
+async function responseError(res: Response, fallback: string): Promise<AuthRequestError> {
   const data = await res.json().catch(() => ({}))
+  const codes: Record<string, string> = {
+    invalid_credentials: 'invalidCredentials', email_not_verified: 'emailNotVerified', verification_send_failed: 'sendCodeFailed',
+    verification_rate_limited: 'verificationRateLimited', invalid_verification_code: 'invalidOrExpiredCode',
+    verification_attempts_exceeded: 'verificationAttemptsExceeded', verification_unavailable: 'verificationUnavailable',
+    invalid_email: 'invalidEmail', account_inactive: 'accountInactive',
+  }
   const detail = data.error || data.detail
-  const code = typeof detail === 'string' ? SERVER_DETAIL_TO_CODE[detail] : undefined
-  return new Error(code || fallback)
+  const message = codes[data.code] || (typeof detail === 'string' ? SERVER_DETAIL_TO_CODE[detail] : undefined)
+  const retry = Number(res.headers.get('Retry-After') || data.resend_after_seconds || 0)
+  return new AuthRequestError(message || fallback, data.code, Number.isFinite(retry) ? Math.max(0, retry) : 0, data.requires_email_verification === true)
 }
 
 /** 包装 fetch：网络层失败（TypeError）统一归类为机器键，避免浏览器英文原文透出。 */
@@ -168,7 +181,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       throw await responseError(res, 'registerFailed')
     }
     const data = await res.json()
-    return { requiresEmailVerification: Boolean(data.requires_email_verification) }
+    return { requiresEmailVerification: Boolean(data.requires_email_verification), resendAfterSeconds: data.resend_after_seconds ?? 60 }
   }, [])
 
   const replaceUser = useCallback((nextUser: User) => {
@@ -205,13 +218,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(data.user)
   }, [])
 
-  const resendVerification = useCallback(async (email: string) => {
+  const resendVerification = useCallback(async (email: string, password: string) => {
     const res = await authFetch('/api/auth/resend-verification', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, password }),
     })
     if (!res.ok) throw await responseError(res, 'resendFailed')
+    const data = await res.json()
+    return Number(data.resend_after_seconds ?? 60)
   }, [])
 
   const logout = useCallback(() => {

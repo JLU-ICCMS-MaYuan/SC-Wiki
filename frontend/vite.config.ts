@@ -35,6 +35,12 @@ export default defineConfig({
       '/api': {
         target: 'http://127.0.0.1:8080',
         changeOrigin: true,
+        configure(proxy) {
+          proxy.on('proxyReq', (proxyReq, req) => {
+            proxyReq.setHeader('X-Real-IP', req.socket.remoteAddress || '127.0.0.1')
+            proxyReq.removeHeader('X-Forwarded-For')
+          })
+        },
       },
     },
   },

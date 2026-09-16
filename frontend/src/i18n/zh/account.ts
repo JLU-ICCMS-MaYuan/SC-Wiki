@@ -108,4 +108,12 @@ export default {
   sessionExpired: '登录状态已失效',
   usernameUpdateFailed: '用户名修改失败',
   networkError: '网络异常，请稍后重试',
+  continueVerificationBefore: '请验证邮箱',
+  continueVerificationAfter: '。可以填写已收到的验证码，或点击下方按钮重新发送。',
+  verificationRateLimited: '发送过于频繁，请等待倒计时结束后重试',
+  invalidOrExpiredCode: '验证码无效或已过期，请检查或重新获取',
+  verificationAttemptsExceeded: '验证码尝试次数已用完，请重新获取',
+  verificationUnavailable: '验证服务暂不可用，请稍后重新获取验证码',
+  invalidEmail: '请输入有效的邮箱地址',
+  accountInactive: '账号不可用',
 } as const

@@ -30,7 +30,7 @@
 
 ### 生产部署
 
-1. 准备 Compose 读取的 `.env`，填写数据库、JWT、Neo4j、LLM、Embedding 和 SMTP 配置；SMTP 至少需要主机与发件人，账号密码按服务商要求提供。
+1. 准备 Compose 读取的 `.env`，填写数据库、JWT、Neo4j、LLM、Embedding 和 SMTP 配置；SMTP 需要主机、端口、发件人、账号、授权码和 TLS 模式；网易示例使用 smtp.163.com:465、implicit TLS 与 sc_wiki@163.com。
 2. 准备 `data/` 下的图谱快照、外部数据、上传目录、富化结果和 Qdrant 存储。
 3. 使用 `docker compose -f docker/compose.yaml up -d` 启动服务；首次部署的数据导入和 Neo4j dump 恢复遵循 `docker/deploy/README.md`。
 4. 通过 frontend 入口访问站点；Go 的 `/health` 和 Python/RAG 健康接口用于分别核验服务状态。
@@ -109,3 +109,6 @@
 - 首屏预取与 chunk 划分只在 `vite build` 后成立，本地 dev 模式不可见，相关回归需在生产构建产物上核验。
 - 尚未引入生产构建校验命令或本地 nginx 层。当前依赖「重建镜像时源码会被重新构建」这一事实保证改动不丢失，两条链路的行为差异作为观察项，暂不额外投入。
 - `scripts/migrate-from-docker.sh` 仍需 Docker（用一次性容器读卷）。属一次性脚本，原卷清理后可连同删除。
+
+- Go 默认只信任本机代理提供的 X-Real-IP；Docker 使用 TRUSTED_PROXIES 指定代理网络（默认 172.16.0.0/12，自定义网络需调整）。Nginx 和 Vite 覆盖来自客户端的 IP 头；Go 端口不得绕过代理公开。
+- SMTP 支持 implicit TLS 和强制 STARTTLS，总 IO 期限 20 秒；真实网易收信仍待私密配置后的验收。
