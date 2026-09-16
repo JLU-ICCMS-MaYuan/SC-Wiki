@@ -10,7 +10,7 @@
 - Go 服务从 `DATABASE_URL` 解析 MySQL DSN，缺少 `DATABASE_URL` 或 `JWT_SECRET_KEY` 会直接拒绝启动。
 - Python 服务仍通过 `backend/database.py` 与 Alembic 使用 `DATABASE_URL`，并保留 `Base.metadata.create_all` 和周期表元素初始化脚本。
 - Alembic 环境允许 `DATABASE_URL` 覆盖配置文件连接串。
-- 当前 Alembic head 为 `20260911_0103`，已在本次现有 sc-wiki MySQL 验证环境应用。论文上传模型包含唯一 `papers.upload_task_id`、多来源 `paper_files`、带来源文件和页码范围的 `paper_chunks`，以及永久 `paper_evidences`；`papers.admin_internal_note` 与面向上传者的 `review_comment` 分开保存。
+- 本地 MySQL 当前迁移版本为 `20260916_0105` 与并行分支 `20260914_0052`。材料名迁移新增可空的 `material_states.material_name VARCHAR(255)`，不回填历史值；科学保存和重读已通过回滚夹具验证。热重载不会执行迁移，必须核验实际列；详见 [缺列修复记录](../../specs/103-property-evidence-review/material-name-migration-fix.md)。这不表示仅填材料名的完整功能已经验收。论文上传模型包含唯一 `papers.upload_task_id`、多来源 `paper_files`、带来源文件和页码范围的 `paper_chunks`，以及永久 `paper_evidences`；`papers.admin_internal_note` 与面向上传者的 `review_comment` 分开保存。
 - `20260911_0103` 在 `20260909_0099` 后新增 `property_evidence_checks`，保存物性核对的内容摘要、来源摘要、规则版本、结论、模型与理由；记录外键使用 `ON DELETE CASCADE`。迁移不扫描或回填历史证据，历史数据在后续提交或批准时按需核对。
 
 ## 工作流程
