@@ -200,6 +200,7 @@ async def run_stream(question: str, prev_messages: list | None = None):
         msgs = [SystemMessage(content=SYSTEM_PROMPT), HumanMessage(content=question)]
 
     state = {"messages": msgs, "iteration": 0, "tool_results": {}}
+    answer = ""
 
     async for event in _graph.astream_events(state, version="v2"):
         kind = event.get("event", "")
@@ -215,6 +216,14 @@ async def run_stream(question: str, prev_messages: list | None = None):
             chunk = event.get("data", {}).get("chunk")
             if chunk and hasattr(chunk, "content") and chunk.content:
                 yield {"type": "token", "data": chunk.content}
+
+        elif kind == "on_chain_end" and not event.get("parent_ids"):
+            # 以最终图状态为准；供应商可能不支持 token 流，工具前的思考文本也不是最终回答。
+            output = event.get("data", {}).get("output") or {}
+            for message in reversed(output.get("messages", [])):
+                if isinstance(message, AIMessage) and message.content and not message.tool_calls:
+                    answer = message.content
+                    break
 
         elif kind == "on_tool_start":
             raw_name = event.get("name", "")
@@ -239,7 +248,7 @@ async def run_stream(question: str, prev_messages: list | None = None):
                 },
             }
 
-    yield {"type": "done", "data": {}}
+    yield {"type": "done", "data": {"answer": answer}}
 
 
 # ═══════════════════════════════════════════════

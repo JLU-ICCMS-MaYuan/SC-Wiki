@@ -17,7 +17,7 @@ from backend.rag.llm_context import UserCredentialError, get_llm_config
 
 
 class RagDataUnavailableError(RuntimeError):
-    """Raised when the RAG database or Chroma data is unavailable."""
+    """Raised when the RAG database or Qdrant data is unavailable."""
 
 
 class RagChatUnavailableError(RuntimeError):
@@ -33,8 +33,10 @@ class RagNotFoundError(RuntimeError):
 
 
 def _loads_json(value: str | None, fallback: Any) -> Any:
-    if not value:
+    if value is None:
         return fallback
+    if not isinstance(value, str):
+        return value
     try:
         return json.loads(value)
     except json.JSONDecodeError:
@@ -115,32 +117,11 @@ async def chat(
     rerank_top_k: int = 5,
     history: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
-    _ensure_chat_available()
-    try:
-        from backend.rag.agent import run
-
-        from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
-        prev_msgs = None
-        if history:
-            prev_msgs = []
-            for h in history[-20:]:
-                role = h.get("role", "user")
-                content = h.get("content", "")
-                if role == "assistant":
-                    prev_msgs.append(AIMessage(content=content))
-                elif role == "system":
-                    prev_msgs.append(SystemMessage(content=content))
-                else:
-                    prev_msgs.append(HumanMessage(content=content))
-
-        result = run(question, prev_messages=prev_msgs)
-        result.setdefault("provider", get_llm_config().provider)
-        result.setdefault("model", get_llm_config().model)
-        return result
-    except (RagDataUnavailableError, RagChatUnavailableError, UserCredentialError):
-        raise
-    except Exception as exc:
-        raise RagInternalError(str(exc)) from exc
+    # 普通问答与流式问答共享 Mentor 路径，避免进入另一套探索流程。
+    async for event in chat_stream(question, top_k=top_k, rerank_top_k=rerank_top_k, history=history):
+        if event.get("type") == "done":
+            return dict(event.get("data") or {})
+    raise RagInternalError("问答未返回完成结果")
 
 
 async def chat_stream(
@@ -232,17 +213,18 @@ async def stats() -> dict[str, Any]:
     _ensure_data_available()
     try:
         from backend.rag.database import async_session_factory
-        from backend.models import ChemicalSystem, KeyProperty, Paper, PaperChunk, Superconductor
+        from backend.models import Paper, PaperChunk
         from backend.rag.vectordb import collection_stats
+        from backend.rag.search.property_records import approved_paper_conditions, database_counts
 
         async with async_session_factory() as session:
-            paper_count = (await session.execute(select(func.count()).select_from(Paper))).scalar() or 0
-            sc_count = (await session.execute(select(func.count()).select_from(Superconductor))).scalar() or 0
-            record_count = (await session.execute(select(func.count()).select_from(KeyProperty))).scalar() or 0
-            chunk_count = (await session.execute(select(func.count()).select_from(PaperChunk))).scalar() or 0
-            sys_count = (await session.execute(select(func.count()).select_from(ChemicalSystem))).scalar() or 0
+            counts = await database_counts(session)
+            chunk_count = await session.scalar(
+                select(func.count(PaperChunk.id)).join(Paper, Paper.id == PaperChunk.paper_id)
+                .where(*approved_paper_conditions())
+            )
             paper_type_rows = (await session.execute(
-                select(Paper.paper_type, func.count()).group_by(Paper.paper_type)
+                select(Paper.paper_type, func.count()).where(*approved_paper_conditions()).group_by(Paper.paper_type)
             )).all()
 
         try:
@@ -251,12 +233,12 @@ async def stats() -> dict[str, Any]:
             qdrant_chunks = 0
 
         return {
-            "papers": paper_count,
-            "superconductors": sc_count,
-            "records": record_count,
+            "papers": counts["papers"],
+            "superconductors": counts["superconductors"],
+            "records": counts["records"],
             "chunks": chunk_count,
             "qdrant_chunks": qdrant_chunks,
-            "chemical_systems": sys_count,
+            "chemical_systems": counts["chemical_systems"],
             "paper_types": {row[0] or "unknown": row[1] for row in paper_type_rows},
         }
     except Exception as exc:
@@ -269,6 +251,7 @@ async def list_papers(keyword: str | None = None, limit: int = 20) -> list[dict[
         from backend.rag.database import async_session_factory
         from backend.models import Paper
         from backend.rag.search.sql_search import search_papers
+        from backend.rag.search.property_records import approved_paper_conditions
 
         async with async_session_factory() as session:
             if keyword:
@@ -276,7 +259,7 @@ async def list_papers(keyword: str | None = None, limit: int = 20) -> list[dict[
 
             result = await session.execute(
                 select(Paper)
-                .where(Paper.review_status == "approved")
+                .where(*approved_paper_conditions())
                 .order_by(desc(Paper.year), desc(Paper.id))
                 .limit(limit)
             )
@@ -324,7 +307,8 @@ async def search_superconductors(
     try:
         from backend.rag.database import async_session_factory
         from backend.models import Superconductor
-        from backend.rag.search.sql_search import search_by_elements_exact, search_by_formula
+        from backend.rag.search.sql_search import search_by_elements_exact, search_by_formula, _format_superconductors
+        from backend.rag.search.property_records import approved_materials_statement
 
         async with async_session_factory() as session:
             if formula:
@@ -333,19 +317,8 @@ async def search_superconductors(
                 parsed = [part.strip() for part in elements.replace(",", "-").split("-") if part.strip()]
                 return await search_by_elements_exact(session, parsed)
 
-            result = await session.execute(select(Superconductor).limit(limit))
-            return [
-                {
-                    "type": "superconductor",
-                    "id": sc.id,
-                    "chemical_formula": sc.chemical_formula,
-                    "formula_normalized": sc.formula_normalized,
-                    "display_name": sc.display_name,
-                    "composition": _loads_json(sc.composition, {}),
-                    "element_ratio": _loads_json(sc.element_ratio, {}),
-                }
-                for sc in result.scalars()
-            ]
+            result = await session.execute(approved_materials_statement().order_by(Superconductor.id).limit(limit))
+            return await _format_superconductors(session, result.scalars().all())
     except Exception as exc:
         raise RagInternalError(str(exc)) from exc
 
@@ -354,16 +327,16 @@ async def superconductor_detail(superconductor_id: int) -> dict[str, Any]:
     _ensure_data_available()
     try:
         from backend.rag.database import async_session_factory
-        from backend.models import KeyProperty, Superconductor
-        from backend.rag.search.sql_search import _format_property
+        from backend.models import Superconductor
+        from backend.rag.search.sql_search import get_superconductor_records
+        from backend.rag.search.property_records import approved_materials_statement
 
         async with async_session_factory() as session:
             result = await session.execute(
-                select(Superconductor)
+                approved_materials_statement()
                 .where(Superconductor.id == superconductor_id)
                 .options(
                     joinedload(Superconductor.chemical_system),
-                    joinedload(Superconductor.key_properties).joinedload(KeyProperty.paper),
                 )
             )
             sc = result.unique().scalar_one_or_none()
@@ -381,11 +354,7 @@ async def superconductor_detail(superconductor_id: int) -> dict[str, Any]:
                 "elements_list": _loads_json(sc.elements_list, []),
                 "composition": _loads_json(sc.composition, {}),
                 "element_ratio": _loads_json(sc.element_ratio, {}),
-                "properties": [
-                    _format_property(kp)
-                    for kp in sc.key_properties
-                    if kp.paper is None or kp.paper.review_status == "approved"
-                ],
+                "properties": await get_superconductor_records(session, sc.id),
             }
     except RagNotFoundError:
         raise

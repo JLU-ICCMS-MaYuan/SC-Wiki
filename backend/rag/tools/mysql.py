@@ -1,195 +1,113 @@
-"""
-knowledge_graph.py — 知识图谱查询模块。
-
-使用 SQLAlchemy async 查询 key_properties / superconductors / papers。
-支持 MySQL 和 SQLite，由 RAG_DATABASE_URL 配置决定。
-
-v2 起数据源为通用物性表 key_properties（每行一条物性），
-谓词映射到规范物性名（backend/prop_names.py），并保留数值范围、单位与条件。
-"""
+"""RAG 物性查询服务：统一读取当前已批准的 PropertyRecord。"""
 
 from __future__ import annotations
 
-import json
+from decimal import Decimal, InvalidOperation
 
-from sqlalchemy import delete, select
-from sqlalchemy.sql import func
+from sqlalchemy import func, or_
 
-from backend.ingest.prop_names import PROP_LABELS
+from backend.models import MaterialState, PropertyRecord, Superconductor
 from backend.rag.database import async_session_factory
-from backend.models import KeyProperty, Paper
+from backend.rag.search.property_records import (
+    database_counts, format_property_record, property_records_statement,
+)
+from backend.rag.search.sql_search import _normalize_formula
 
-# 中文谓词 → 规范物性名
-PREDICATE_MAP = {
-    "超导温度(AD)": "critical_temperature",
-    "超导温度": "critical_temperature",
-    "临界温度": "critical_temperature",
-    "电声耦合lambda": "electron_phonon_coupling",
-    "电声耦合": "electron_phonon_coupling",
-    "德拜温度": "debye_temperature",
-    "上临界磁场": "upper_critical_field",
-    "超导能隙": "superconducting_gap",
+# 对外别名只在此处转换，避免 Agent 与数据库层重复维护映射。
+PROPERTY_ALIASES = {
+    "Tc": "tc", "critical_temperature": "tc", "超导温度(AD)": "tc",
+    "超导温度": "tc", "临界温度": "tc",
+    "lambda": "electron_phonon_coupling", "电声耦合lambda": "electron_phonon_coupling",
+    "电声耦合": "electron_phonon_coupling", "德拜温度": "debye_temperature",
+    "上临界磁场": "upper_critical_field", "超导能隙": "superconducting_gap",
+    "压力": "pressure",
 }
 
 
-async def query(
-    predicate: str,
+async def search_property_records(
+    predicate: str | None = None,
     operator: str = "=",
     value: str | None = None,
+    *,
+    material: str | None = None,
 ) -> list[dict]:
-    """查询知识图谱。
+    """按物性名称/代码、数值条件和材料读取记录。
 
-    predicate 映射到 key_properties 的规范物性名：
-      "超导温度(AD)" → name='critical_temperature'
-      "电声耦合lambda"   → name='electron_phonon_coupling'
-      "压力"         → key_properties.pressure_gpa（条件列，特判）
-
-    Returns:
-        类型化物性记录，包含数值范围、单位、压力、温度和完整条件。
+    不传 value 时保留数值、范围、文本和布尔记录。范围按上界比较，返回完整范围；
+    pressure 筛选材料状态的压力，不将压力误写成物性值。参数仍属于各自记录的 payload。
     """
-    if predicate == "压力":
-        # 压力是物性的条件列而非独立物性行
-        field = KeyProperty.pressure_gpa
-        name_filter = None
-    else:
-        canonical = PREDICATE_MAP.get(predicate)
-        if canonical is None:
-            return []
-        field = KeyProperty.value_max
-        name_filter = canonical
+    if operator not in {"=", ">", "<", ">=", "<="}:
+        raise ValueError("比较条件只支持 =、>、<、>=、<=")
+    threshold = None
+    if value is not None:
+        try:
+            threshold = Decimal(str(value))
+        except InvalidOperation as exc:
+            raise ValueError("比较条件必须包含有效数值") from exc
+        if not threshold.is_finite():
+            raise ValueError("比较条件必须包含有限数值")
 
+    canonical = PROPERTY_ALIASES.get(predicate, predicate)
+    stmt = property_records_statement()
+    numeric = func.coalesce(PropertyRecord.value_number, PropertyRecord.value_max)
+    if canonical == "pressure":
+        numeric = func.coalesce(MaterialState.pressure_value_gpa, MaterialState.pressure_max_gpa)
+        stmt = stmt.where(numeric.isnot(None))
+    elif canonical:
+        stmt = stmt.where(or_(
+            PropertyRecord.property_code == canonical,
+            PropertyRecord.name_raw == canonical,
+            PropertyRecord.custom_property_key == canonical,
+        ))
+    if threshold is not None:
+        if canonical != "pressure":
+            stmt = stmt.where(PropertyRecord.value_kind.in_(("number", "range")))
+        comparison = {
+            "=": numeric == threshold, ">": numeric > threshold, "<": numeric < threshold,
+            ">=": numeric >= threshold, "<=": numeric <= threshold,
+        }[operator]
+        stmt = stmt.where(comparison)
+    if material:
+        matches = [Superconductor.chemical_formula == material,
+                   Superconductor.display_name == material, MaterialState.material_name == material]
+        normalized = _normalize_formula(material)
+        if normalized:
+            matches.append(Superconductor.formula_normalized == normalized)
+        stmt = stmt.where(or_(*matches))
+    stmt = stmt.order_by(numeric.desc(), PropertyRecord.id)
     async with async_session_factory() as session:
-        stmt = (
-            select(
-                KeyProperty.material,
-                KeyProperty.name,
-                KeyProperty.value_min,
-                KeyProperty.value_max,
-                KeyProperty.value_raw,
-                KeyProperty.unit,
-                KeyProperty.pressure_gpa,
-                KeyProperty.temperature_k,
-                KeyProperty.condition_json,
-                KeyProperty.condition_note,
-                Paper.id,
-                Paper.title,
-            )
-            .select_from(KeyProperty)
-            .join(Paper, Paper.id == KeyProperty.paper_id)
-            .where(field.isnot(None))
-            .where(Paper.review_status == "approved")
-        )
-        if name_filter:
-            stmt = stmt.where(KeyProperty.name == name_filter)
-
-        if operator in (">", "<", ">=", "<=") and value is not None:
-            try:
-                val = float(value)
-            except ValueError:
-                return []
-            if operator == ">":
-                stmt = stmt.where(field > val)
-            elif operator == "<":
-                stmt = stmt.where(field < val)
-            elif operator == ">=":
-                stmt = stmt.where(field >= val)
-            elif operator == "<=":
-                stmt = stmt.where(field <= val)
-        elif operator == "=" and value:
-            try:
-                val = float(value)
-            except ValueError:
-                return []
-            stmt = stmt.where(field == val)
-
-        stmt = stmt.order_by(field.desc()).distinct()
-
-        result = await session.execute(stmt)
-        rows = result.all()
-
-    records = []
+        rows = (await session.execute(stmt)).all()
+    result = []
     for row in rows:
-        condition = row.condition_json
-        if isinstance(condition, str):
-            try:
-                condition = json.loads(condition)
-            except json.JSONDecodeError:
-                pass
-        records.append({
-            "subject": row.material,
-            "predicate": predicate,
-            "property_name": row.name,
-            "value_min": row.value_min,
-            "value_max": row.value_max,
-            "value_raw": row.value_raw,
-            "unit": row.unit,
-            "pressure_gpa": row.pressure_gpa,
-            "temperature_k": row.temperature_k,
-            "condition": condition,
-            "condition_note": row.condition_note,
-            "paper_id": row.id,
-            "paper_title": row.title,
-        })
-    return records
+        item = format_property_record(*row)
+        item.update(subject=item["material"], predicate=predicate or item["label"],
+                    property_name=item["property_code"], object=item["display_value"])
+        if canonical == "pressure":
+            pressure = item["pressure_gpa"]
+            if pressure is None:
+                item["object"] = f"{item['pressure_min_gpa']}–{item['pressure_max_gpa']}"
+            else:
+                item["object"] = str(pressure)
+            item["queried_unit"] = "GPa"
+        result.append(item)
+    return result
 
 
 async def get_all_properties(subject: str) -> list[dict]:
-    """获取某超导体/材料的全部物性（每行一条，含条件与备注）。"""
-    async with async_session_factory() as session:
-        stmt = (
-            select(KeyProperty)
-            .join(Paper, Paper.id == KeyProperty.paper_id)
-            .where(KeyProperty.material == subject)
-            .where(Paper.review_status == "approved")
-        )
-        result = await session.execute(stmt)
-        props = result.scalars().all()
-
-    out = []
-    for kp in props:
-        if kp.value_max is None and not kp.value_raw:
-            continue
-        if kp.value_min is not None and kp.value_min != kp.value_max:
-            value = f"{kp.value_min}-{kp.value_max}"
-        else:
-            value = str(kp.value_max) if kp.value_max is not None else kp.value_raw
-        obj = f"{value} {kp.unit}" if kp.unit else value
-        if kp.pressure_gpa is not None:
-            obj += f" @ {kp.pressure_gpa} GPa"
-        out.append({
-            "predicate": PROP_LABELS.get(kp.name, kp.name),
-            "object": obj,
-            "note": kp.name_note,
-        })
-    return out
+    """保留材料全部记录及各自来源、条件与类型，不再折叠为无来源的字符串。"""
+    return await search_property_records(material=subject)
 
 
-async def delete_paper_triples(paper_id: int) -> int:
-    """删除某篇论文的数据。"""
-    async with async_session_factory() as session:
-        stmt = delete(KeyProperty).where(KeyProperty.paper_id == paper_id)
-        result = await session.execute(stmt)
-        await session.commit()
-        return result.rowcount
+async def get_material_context(formula: str) -> dict:
+    """材料工具与知识图谱材料接口共用权威物性来源。"""
+    records = await search_property_records(material=formula)
+    papers = {r["paper_id"]: {"id": r["paper_id"], "title": r["paper_title"],
+                             "year": r["paper_year"]} for r in records}
+    return {"formula": formula, "papers": list(papers.values()), "properties": records}
 
 
 async def stats() -> dict:
-    """返回知识图谱统计信息。"""
+    """兼容既有统计键；数量来自当前已批准的统一记录。"""
     async with async_session_factory() as session:
-        subj_stmt = (
-            select(func.count(func.distinct(KeyProperty.material)))
-            .select_from(KeyProperty)
-            .join(Paper, Paper.id == KeyProperty.paper_id)
-            .where(Paper.review_status == "approved")
-        )
-        subjects = (await session.execute(subj_stmt)).scalar() or 0
-
-        prop_stmt = (
-            select(func.count())
-            .select_from(KeyProperty)
-            .join(Paper, Paper.id == KeyProperty.paper_id)
-            .where(Paper.review_status == "approved")
-        )
-        triples = (await session.execute(prop_stmt)).scalar() or 0
-
-    return {"subjects": subjects, "triples": triples}
+        counts = await database_counts(session)
+    return {"subjects": counts["superconductors"], "triples": counts["records"]}

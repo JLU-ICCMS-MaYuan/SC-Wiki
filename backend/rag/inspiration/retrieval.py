@@ -175,23 +175,6 @@ async def execute_retrieval(
 
     # ── KG 查询 (暂时禁用) ──
     kg_results: list[dict] = []
-    # TODO: 重新启用 KG 时取消注释
-    # if strategy.kg_enabled:
-    #     try:
-    #         from backend.rag.tools.mysql import query as kg_query
-    #         if strategy.kg_filter:
-    #             if "max_pressure" in strategy.kg_filter:
-    #                 kg_results = await kg_query("压力", operator="<",
-    #                                             value=str(strategy.kg_filter["max_pressure"]))
-    #             else:
-    #                 kg_results = await kg_query("超导温度(AD)", operator=">", value="0")
-    #                 kg_results.sort(
-    #                     key=lambda r: float(r["object"]) if r["object"].replace(".", "", 1).isdigit() else 0,
-    #                     reverse=True,
-    #                 )
-    #                 kg_results = kg_results[:20]
-    #     except Exception:
-    #         pass
 
     return {
         "chunks": chunks or [],

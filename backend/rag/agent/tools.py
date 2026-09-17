@@ -5,12 +5,11 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from langchain_core.tools import tool
+from langchain_core.tools import StructuredTool, tool
 
 from backend.rag.tools.neo4j import (
     search_papers as neo4j_search_papers,
     get_paper_context,
-    get_material_context,
     traverse_graph,
     find_path,
 )
@@ -38,12 +37,24 @@ def paper_context(paper_id: int) -> str:
     return json.dumps(ctx, ensure_ascii=False, indent=2, default=str)
 
 
-@tool
-def material_info(formula: str) -> str:
-    """获取一种超导材料的研究全貌：哪些论文研究过它、关键物性参数（Tc、压力等）。
-    当用户询问某种具体材料时使用，如 LaH10、H3S。"""
-    ctx = get_material_context(formula)
-    return json.dumps(ctx, ensure_ascii=False, indent=2, default=str)
+async def _material_info(formula: str) -> str:
+    from backend.rag.tools.mysql import get_material_context
+
+    try:
+        return json.dumps(await get_material_context(formula), ensure_ascii=False, default=str)
+    except Exception:
+        return "材料数据查询失败，请稍后重试；不能据此判断没有材料记录。"
+
+
+def _material_info_sync(formula: str) -> str:
+    import asyncio
+    return asyncio.run(_material_info(formula))
+
+
+material_info = StructuredTool.from_function(
+    func=_material_info_sync, coroutine=_material_info, name="material_info",
+    description="获取材料的当前已批准物性记录及来源论文，保留各记录的压力、条件和参数。输入材料名或化学式，如 LaH10。",
+)
 
 
 @tool
@@ -102,40 +113,39 @@ def search_literature(question: str, top_k: int = 10) -> str:
         return f"搜索失败: {e}"
 
 
-@tool
-def query_properties(predicate: str, condition: str = ">0") -> str:
-    """查询超导材料的物性数据表。支持的属性：
-    - 'Tc' 或 '超导温度' (单位 K)
-    - 'pressure' 或 '压力' (单位 GPa)
-    - 'lambda' 或 '电声耦合' (无量纲)
-    condition 格式如 '>200' 或 '<100'。"""
+async def _query_properties(predicate: str, condition: str = "", material: str | None = None) -> str:
     import re
+    from backend.rag.tools.mysql import search_property_records
 
-    FIELD_MAP = {
-        "Tc": "超导温度(AD)", "超导温度": "超导温度(AD)",
-        "pressure": "压力", "压力": "压力",
-        "lambda": "电声耦合lambda", "电声耦合": "电声耦合lambda",
-    }
-    predicate = FIELD_MAP.get(predicate, predicate)
-
-    m = re.match(r"([><]=?)\s*([\d.]+)", condition)
-    op = m.group(1) if m else ">"
-    val = m.group(2) if m else "0"
-
-    # 同步调用异步函数
-    import asyncio
-    async def _run():
-        from backend.rag.tools.mysql import query as kg_query
-        return await kg_query(predicate, operator=op, value=val)
-
+    operator, value = "=", None
+    if condition.strip():
+        match = re.fullmatch(r"\s*(>=|<=|>|<|=)\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*", condition)
+        if not match:
+            return "查询失败：条件格式无效，请使用 >200、<=100 或 =0；不筛选数值时留空。"
+        operator, value = match.groups()
     try:
-        results = asyncio.run(_run())
-    except Exception as e:
-        return f"查询失败: {e}"
-
+        results = await search_property_records(predicate, operator=operator, value=value, material=material)
+    except ValueError as exc:
+        return f"查询失败：{exc}"
+    except Exception:
+        return "物性数据库查询失败，请稍后重试；不能据此判断没有匹配数据。"
     if not results:
-        return "未找到匹配的数据。"
-    return json.dumps(results[:20], ensure_ascii=False, indent=2, default=str)
+        return "未找到匹配的当前已批准物性记录。"
+    return json.dumps(results[:20], ensure_ascii=False, default=str)
+
+
+def _query_properties_sync(predicate: str, condition: str = "", material: str | None = None) -> str:
+    import asyncio
+    return asyncio.run(_query_properties(predicate, condition, material))
+
+
+query_properties = StructuredTool.from_function(
+    func=_query_properties_sync, coroutine=_query_properties, name="query_properties",
+    description=("查询当前已批准的物性记录。predicate 支持 Tc/超导温度、pressure/压力、"
+                 "lambda/电声耦合，以及其他物性代码或名称。condition 如 >200、<=100、=0，"
+                 "留空返回所有值类型；范围按上界比较并保留完整范围。material 可限定材料名或化学式。"
+                 "Tc 单位 K，压力 GPa。lambda 查询独立物性记录，Tc 自带参数保留在其 payload 中。"),
+)
 
 
 # 所有可用 tool 列表

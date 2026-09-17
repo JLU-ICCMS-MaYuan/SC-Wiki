@@ -54,6 +54,7 @@ flowchart LR
 - 本地开发已移除 Docker 依赖：八个服务跑在宿主机，由 `make start` 编排，前端/Python/goserver 均支持热重载，数据存放仓库内 `.data/`。本地链路以 Vite 代理替代 Nginx；由于生产镜像会重新构建源码，本地改动不会因此丢失，但 nginx 特有的上传体积与缓冲配置、以及仅构建期生效的分包与预取优化在本地不成立，两条链路的行为差异见[部署与运行时](02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。使用说明见 `docs/local-dev.md`。
 - `backend/main.py` 注册 Tc、结构、RAG、上传任务、证据核对、知识图谱、内部管理、表单定义与材料状态导出等 Python 路由；canonical `/api/upload-tasks` 和 `/api/rag/evidence` 由 Go 未匹配路由转发到 Python。邮箱验证、用户中心、公开资料与管理员治理由 Go 直接承载；图表组合导入/导出/复制/搜索等前端调用仍需按实际部署链路继续核验。
 - RAG 已从 Chroma 迁移到 Qdrant 封装，但部分兼容命名仍保留 `chroma` 字样。
+- RAG 结构化物性工具、材料详情、检索和统计统一读取当前已批准的 `property_records`；普通流式/非流式问答共用 Mentor。读取规则及外部索引边界见[混合检索](05_Retrieval-Augmented_AI_Question_Answering/hybrid-retrieval.md)。
 - 晶体结构后端 API 已实现，前端在论文详情中按材料状态下的 `structures`（来自 `structure_models`）展示结构，完整结构审核工作台仍未从当前路由中确认。当前全库无结构模型记录，只验证过空态。（[Issue #57](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/57)）
 - “社区”展开排行榜、Tc~X 演变和讨论；[科研交流](06_Researcher_Community_Forum/community-discussion.md)包含问答、体系与论文评论、弹幕、站内通知及举报管理。旧 `/share` 进入图表，图表组合的编辑入口在管理页。
 - Tc 估算由代码明确标记为实验页面，不构成模型科学有效性的保证。

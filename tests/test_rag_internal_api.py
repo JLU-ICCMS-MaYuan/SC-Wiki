@@ -9,7 +9,7 @@ def test_rag_health_uses_internal_service(monkeypatch):
     monkeypatch.setattr(service, "health", lambda: {
         "available": True,
         "database_available": True,
-        "chroma_available": True,
+        "qdrant_available": True,
         "chat_available": False,
         "message": "RAG 检索可用，LLM 问答未配置",
     })
@@ -91,7 +91,7 @@ def test_rag_chat_internal_success_with_history(monkeypatch):
 
 
 def test_rag_chat_stream_sse(monkeypatch):
-    async def fake_chat_stream(question, top_k=15, rerank_top_k=5, history=None):
+    async def fake_chat_stream(question, top_k=15, rerank_top_k=5, history=None, explore=False):
         assert question == "继续"
         assert history == [{"role": "assistant", "content": "上一答"}]
         yield {"type": "token", "data": "答"}
@@ -117,7 +117,7 @@ def test_rag_chat_stream_sse(monkeypatch):
 
 def test_rag_stats_and_details_routes(monkeypatch):
     async def fake_stats():
-        return {"papers": 1, "superconductors": 2, "records": 3, "chunks": 4, "chroma_chunks": 5, "chemical_systems": 6}
+        return {"papers": 1, "superconductors": 2, "records": 3, "chunks": 4, "qdrant_chunks": 5, "chemical_systems": 6}
 
     async def fake_papers(keyword=None, limit=20):
         assert keyword == "LaH10"
@@ -153,7 +153,10 @@ def test_rag_stats_and_details_routes(monkeypatch):
     anyio.run(run)
 
 
-def test_rag_upload_pdf_rejects_non_pdf():
+def test_rag_upload_pdf_rejects_non_pdf(monkeypatch):
+    from types import SimpleNamespace
+    from backend.security import get_current_user
+    monkeypatch.setitem(app.dependency_overrides, get_current_user, lambda: SimpleNamespace(id=1))
     async def run():
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://testserver") as client:
@@ -162,7 +165,7 @@ def test_rag_upload_pdf_rejects_non_pdf():
                 files={"file": ("note.txt", b"hello", "text/plain")},
             )
         assert response.status_code == 400
-        assert response.json()["detail"] == "只支持 PDF 文件"
+        assert response.json()["detail"]["message"] == "只支持 PDF 文件"
 
     anyio.run(run)
 

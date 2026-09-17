@@ -37,3 +37,6 @@ flowchart LR
 ```
 
 问答可检索的语料来自 01 上传、02 审核通过并经发布向量索引的论文 chunks。
+
+结构化物性统一来自当前已批准版本的 `property_records`；AI 工具、材料详情、检索与统计共用读取规则。
+普通问答的流式和非流式接口共用 Mentor，详见[混合检索](hybrid-retrieval.md)与[流式问答](streaming-qa-and-evidence.md)。
