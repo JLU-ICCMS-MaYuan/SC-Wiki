@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>SC-Wiki · 科学数据统一展示 Demo</title>
-  <!-- Issue #103 布局原型：所有数据与核对操作均为内存中的示例，不请求业务接口。 -->
+  <!-- Issue #103 布局原型：所有数据与核对操作均为内存中的示例，不请求业务接口。
+       3Dmol 使用仓库已安装的本地浏览器构建；晶体解析与坐标换算复用该库。 -->
   <style>
     :root { color-scheme: light; --bg:#f8fafc; --paper:#fff; --ink:#1f2937; --muted:#64748b; --line:#dce3eb; --primary:#4f46e5; --teal:#087f8c; --error:#b3261e; --success:#15803d; --warning:#946200; font-family:Inter,Roboto,"Segoe UI","Microsoft YaHei",sans-serif; font-size:14px; color:var(--ink); background:var(--bg); }
     * { box-sizing:border-box; letter-spacing:0; }
@@ -103,9 +104,28 @@
     .structure { margin:6px 0 20px; border-top:1px solid var(--line); padding-top:15px; }
     .structure-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
     .structure-title { font-weight:650; font-size:13px; }
-    .structure-body { display:grid; grid-template-columns:minmax(190px,1fr) minmax(0,2.5fr); gap:20px; align-items:center; }
+    .structure-body { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; align-items:start; }
+    .structure-visual,.structure-data { min-width:0; }
+    .crystal-slot,.crystal-host { position:relative; width:100%; height:440px; }
+    .crystal-host canvas { display:block; max-width:100%; touch-action:none; }
+    .viewer-tools { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--line); }
+    .element-legend { display:flex; align-items:center; gap:12px; flex-wrap:wrap; font-size:12px; }
+    .element-legend span { display:inline-flex; gap:6px; align-items:center; }
+    .element-swatch { width:12px; height:12px; border:1px solid #64748b55; border-radius:50%; }
+    .structure-data { border-left:1px solid var(--line); padding-left:24px; }
+    .data-group + .data-group { margin-top:20px; padding-top:16px; border-top:1px solid var(--line); }
+    .data-heading { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+    .data-heading h4 { font-size:13px; margin:0; font-weight:650; }
+    .data-table { width:100%; border-collapse:collapse; table-layout:fixed; font-size:12px; font-variant-numeric:tabular-nums; }
+    .data-table th,.data-table td { text-align:right; padding:6px 8px; border-bottom:1px solid #e7edf3; white-space:nowrap; }
+    .data-table th { color:var(--muted); font-weight:500; }
+    .data-table th:first-child,.data-table td:first-child { width:58px; text-align:left; padding-left:0; }
+    .coordinate-mode { display:flex; gap:0; border:1px solid var(--line); border-radius:4px; }
+    .coordinate-mode button { border:0; background:none; padding:4px 8px; font-size:11px; }
+    .coordinate-mode button[aria-pressed="true"] { background:#e9f4f5; color:var(--teal); font-weight:650; }
+    .structure-error { padding:25px 0; font-size:13px; color:var(--error); }
     .file-name { font-size:13px; margin-bottom:6px; overflow-wrap:anywhere; }
-    .cell-values { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; margin:0; }
+    .cell-values { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin:0; }
     .cell-values dt { color:var(--muted); font-size:12px; }
     .cell-values dd { font-size:14px; font-variant-numeric:tabular-nums; margin:5px 0 0; white-space:nowrap; }
     .empty { padding:12px 0; color:var(--muted); font-size:13px; }
@@ -137,7 +157,7 @@
     .structure-choice input { width:17px; min-height:17px; margin:3px 0 0; flex-shrink:0; }
     .structure-choice strong { display:block; font-size:13px; margin-bottom:5px; }
     #toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); max-width:calc(100% - 32px); background:#243442; color:#fff; border-radius:6px; padding:11px 18px; box-shadow:0 4px 16px #0002; z-index:10; font-size:13px; pointer-events:none; }
-    @media(max-width:850px) { .field-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .cell-values { grid-template-columns:repeat(3,minmax(0,1fr)); } .structure-body { grid-template-columns:1fr 1.4fr; } .relations th:first-child { width:145px; } .relations th:nth-child(3) { width:95px; } }
+    @media(max-width:850px) { .field-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .structure-body { grid-template-columns:1fr; } .structure-data { border-left:0; padding-left:0; } .relations th:first-child { width:145px; } .relations th:nth-child(3) { width:95px; } }
     @media(max-width:600px) {
       main { padding:20px 16px 0; } .topbar-inner { padding:12px 16px; } .topbar-right .muted { display:none; } .page-heading { align-items:flex-start; } h1 { font-size:22px; } .tabs { gap:0; } .tab { flex:1; padding:12px 4px; }
       .review-strip { flex-direction:column; } .metadata { grid-template-columns:1fr 1fr; } .materials { grid-template-columns:1fr; } .material-item { padding:10px 12px; } .section { padding:21px 0; } .section-head { align-items:flex-start; }
@@ -172,6 +192,7 @@
     <form id="structure-form"><div class="modal-content" id="structure-options"></div><div class="drawer-footer"><button class="btn" type="button" data-action="close-structure">取消</button><button class="btn primary" type="submit">使用此结构</button></div></form>
   </dialog>
   <div id="toast" role="status" hidden></div>
+  <script src="../frontend/node_modules/3dmol/build/3Dmol-min.js"></script>
   <script>
     'use strict';
     // 使用项目现有 @mui/icons-material 的图标路径，保持单文件可离线打开。
@@ -183,6 +204,10 @@
       expand:'M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z',
       arrow:'m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z',
       science:'M13 11.33 18 18H6l5-6.67V6h2m2.96-2H8.04c-.42 0-.65.48-.39.81L9 6.5v4.17L3.2 18.4c-.49.66-.02 1.6.8 1.6h16c.82 0 1.29-.94.8-1.6L15 10.67V6.5l1.35-1.69c.26-.33.03-.81-.39-.81',
+      zoomIn:'M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14M12 10h-2v2H9v-2H7V9h2V7h1v2h2z',
+      zoomOut:'M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14M7 9h5v1H7z',
+      fit:'M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4m-7 7H3v4c0 1.1.9 2 2 2h4v-2H5zM5 5h4V3H5c-1.1 0-2 .9-2 2v4h2zm14-2h-4v2h4v4h2V5c0-1.1-.9-2-2-2m0 16h-4v2h4c1.1 0 2-.9 2-2v-4h-2z',
+      rotate:'M15.55 5.55 11 1v3.07C7.06 4.56 4 7.92 4 12s3.05 7.44 7 7.93v-2.02c-2.84-.48-5-2.94-5-5.91s2.16-5.43 5-5.91V10zM19.93 11c-.17-1.39-.72-2.73-1.62-3.89l-1.42 1.42c.54.75.88 1.6 1.02 2.47zM13 17.9v2.02c1.39-.17 2.74-.71 3.9-1.61l-1.44-1.44c-.75.54-1.59.89-2.46 1.03m3.89-2.42 1.42 1.41c.9-1.16 1.45-2.5 1.62-3.89h-2.02c-.14.87-.48 1.72-1.02 2.48',
     };
     const icon = (name, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]}"></path></svg>`;
     const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -197,6 +222,64 @@
       'pb-b':{id:'pb-b',family:'Pb',file:'Pb-example-B.cif',elements:'Pb',atoms:4,system:'立方',params:[4.96,4.96,4.96,90,90,90]},
       'snhg-a':{id:'snhg-a',family:'SnHg',file:'SnHg-illustrative.cif',elements:'Sn, Hg',atoms:2,system:'立方（示例）',params:[4.8,4.8,4.8,90,90,90]},
     };
+    const sites = {
+      Sn:[['Sn',0,0,0],['Sn',0,.5,.25],['Sn',.5,.5,.5],['Sn',.5,0,.75]],
+      Pb:[['Pb',0,0,0],['Pb',0,.5,.5],['Pb',.5,0,.5],['Pb',.5,.5,0]],
+      SnHg:[['Sn',0,0,0],['Hg',.5,.5,.5]],
+    };
+    // 示例位点逐个列出，以 P1 读取，避免再次按空间群扩展同一组原子。
+    function structureCif(f) {
+      const names=['length_a','length_b','length_c','angle_alpha','angle_beta','angle_gamma'];
+      return [`data_${f.id.replaceAll('-','_')}`,...f.params.map((v,i)=>`_cell_${names[i]} ${v}`),
+        "_symmetry_space_group_name_H-M 'P 1'",'_symmetry_Int_Tables_number 1',
+        'loop_','_atom_site_label','_atom_site_type_symbol','_atom_site_fract_x','_atom_site_fract_y','_atom_site_fract_z',
+        ...sites[f.family].map(([element,x,y,z],i)=>`${element}${i+1} ${element} ${x} ${y} ${z}`),''].join('\n');
+    }
+    const crystalViews=new Map(), coordinateModes=new Map();
+    const fixed=value=>(Math.abs(value)<.000005?0:value).toFixed(4);
+    function structureDataMarkup(id, entry) {
+      const cryst=entry.model.getCrystData(), matrix=cryst.matrix.elements, atoms=entry.model.selectedAtoms({});
+      const cartesian=coordinateModes.get(id)==='cartesian';
+      const inverse=new $3Dmol.Matrix3().getInverse3(cryst.matrix);
+      return `<div class="data-group"><div class="data-heading"><h4>晶格参数</h4><span class="muted">晶胞体积 ${fixed(cryst.matrix.getDeterminant())} Å³</span></div><dl class="cell-values">${['a','b','c','alpha','beta','gamma'].map((key,i)=>`<div><dt>${['a','b','c','α','β','γ'][i]} (${i<3?'Å':'°'})</dt><dd>${fixed(cryst[key])}</dd></div>`).join('')}</dl></div>
+        <div class="data-group"><div class="data-heading"><h4>晶格矩阵</h4><span class="muted">晶格向量按行 · Å</span></div><table class="data-table lattice-table" aria-label="${id} 晶格矩阵"><thead><tr><th scope="col">向量</th><th scope="col">x</th><th scope="col">y</th><th scope="col">z</th></tr></thead><tbody>${['a','b','c'].map((name,i)=>`<tr><th scope="row">${name}</th>${[0,1,2].map(j=>`<td>${fixed(matrix[i*3+j])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+        <div class="data-group"><div class="data-heading"><h4>原子位置 <span class="muted">${atoms.length} 个</span></h4><div class="coordinate-mode" role="group" aria-label="${id} 原子坐标类型">${[['fractional','分数坐标'],['cartesian','直角坐标 (Å)']].map(([value,label])=>`<button type="button" data-coordinates="${value}" data-id="${id}" aria-pressed="${cartesian===(value==='cartesian')}">${label}</button>`).join('')}</div></div><table class="data-table atom-table" aria-label="${id} 原子位置"><thead><tr><th scope="col">原子</th>${(cartesian?['x (Å)','y (Å)','z (Å)']:['u','v','w']).map(label=>`<th scope="col">${label}</th>`).join('')}</tr></thead><tbody>${atoms.map((atom,i)=>{
+          const pos=new $3Dmol.Vector3(atom.x,atom.y,atom.z);if(!cartesian)pos.applyMatrix3(inverse);
+          return `<tr><th scope="row">${esc(atom.elem)}${i+1}</th>${[pos.x,pos.y,pos.z].map(v=>`<td>${fixed(v)}</td>`).join('')}</tr>`;
+        }).join('')}</tbody></table></div>`;
+    }
+    function mountCrystalViews() {
+      document.querySelectorAll('[data-crystal-slot]').forEach(slot=>{
+        const id=slot.dataset.crystalSlot, f=structureFiles[stateById(id).structure];
+        try {
+          if(!window.$3Dmol)throw new Error('本地 3Dmol 库未加载，请先安装 frontend 依赖。');
+          let entry=crystalViews.get(id);
+          if(!entry) {
+            const host=document.createElement('div');host.className='crystal-host';slot.append(host);
+            const viewer=$3Dmol.createViewer(host,{backgroundColor:'#f8fafc',orthographic:true,antialias:true});
+            entry={host,viewer,structureId:null,baseView:viewer.getView()};crystalViews.set(id,entry);
+            entry.observer=new ResizeObserver(()=>{if(host.isConnected&&host.clientWidth&&host.clientHeight){viewer.resize();viewer.render();}});
+            entry.observer.observe(host);
+          } else slot.append(entry.host);
+          if(entry.structureId!==f.id) {
+            entry.viewer.clear();
+            entry.model=entry.viewer.addModel(structureCif(f),'cif');
+            entry.viewer.setStyle({},{sphere:{scale:.38,colorscheme:'Jmol'},stick:{radius:.10,colorscheme:'Jmol'}});
+            entry.viewer.addUnitCell(entry.model,{box:{color:'#49858e',linewidth:2},alabel:'a',blabel:'b',clabel:'c'});
+            entry.viewer.setView(entry.baseView);entry.viewer.zoomTo();entry.viewer.rotate(22,'y');entry.viewer.rotate(18,'x');entry.viewer.zoom(1.3);
+            entry.initialView=entry.viewer.getView();entry.structureId=f.id;
+          }
+          if(entry.host.clientWidth){entry.viewer.resize();entry.viewer.render();}
+          const canvas=entry.viewer.getCanvas();canvas.setAttribute('aria-label',`${f.family} 可旋转晶体结构`);canvas.setAttribute('role','img');
+          document.querySelector(`[data-structure-data="${id}"]`).innerHTML=structureDataMarkup(id,entry);
+          const elements=[...new Set(entry.model.selectedAtoms({}).map(atom=>atom.elem))];
+          document.querySelector(`[data-legend="${id}"]`).innerHTML=elements.map(element=>`<span><i class="element-swatch" style="background:#${Number($3Dmol.elementColors.Jmol[element]??0x909090).toString(16).padStart(6,'0')}"></i>${esc(element)}</span>`).join('');
+        } catch(error) {
+          slot.innerHTML=`<p class="structure-error">${esc(error.message||'结构预览暂不可用')}</p>`;
+          document.querySelector(`[data-structure-data="${id}"]`).innerHTML='<p class="empty">结构解析未完成，无法显示矩阵与原子位置。</p>';
+        }
+      });
+    }
     const initial = {
       states:[
         {id:'sn',name:'锡',formula:'Sn',kind:'experimental',pressure:'常压',tc:'3.72 K',method:'电阻测量',structure:'sn-a'},
@@ -261,12 +344,14 @@
     function structureMarkup(s) {
       const f=structureFiles[s.structure], key=`structure:${s.id}:${s.structure}`;
       const title=f?evidenceButton(key,'晶体结构与晶格参数',`${s.formula} 晶体结构与晶格参数`):'晶体结构与晶格参数';
-      return `<section class="structure" aria-label="${esc(s.formula)} 结构附件"><div class="structure-head"><div><h3 class="structure-title">${title}</h3>${f?`<div data-badge="${key}" style="margin-top:6px">${badge(key)}</div>`:''}</div>${readOnly()?'':`<button class="btn" data-action="choose-structure" data-id="${s.id}">${icon('add')}${f?'更换结构':'添加结构'}</button>`}</div>${f?`<div class="structure-body"><div><div class="file-name">${esc(f.file)}</div><div class="muted">元素 ${esc(f.elements)} · ${f.atoms} 个原子 · ${esc(f.system)}晶胞</div><div class="muted">结构文件提供 · 示例参数</div></div><dl class="cell-values">${f.params.map((v,i)=>`<div><dt>${['a','b','c','α','β','γ'][i]} (${i<3?'Å':'°'})</dt><dd>${Number(v).toFixed(i<3?4:1)}</dd></div>`).join('')}</dl></div>`:'<p class="empty">未提供结构文件，晶格参数未知</p>'}</section>`;
+      return `<section class="structure" aria-label="${esc(s.formula)} 结构附件"><div class="structure-head"><div><h3 class="structure-title">${title}</h3>${f?`<div data-badge="${key}" style="margin-top:6px">${badge(key)}</div>`:''}</div>${readOnly()?'':`<button class="btn" data-action="choose-structure" data-id="${s.id}">${icon('add')}${f?'更换结构':'添加结构'}</button>`}</div>${f?`<div class="file-name">${esc(f.file)} <span class="muted">· ${esc(f.system)}晶胞 · 示例结构</span></div><div class="structure-body"><div class="structure-visual"><div class="crystal-slot" data-crystal-slot="${s.id}"></div><div class="viewer-tools"><div class="element-legend" data-legend="${s.id}"></div><div class="actions">${[['rotate','旋转','rotate'],['zoom-in','放大','zoomIn'],['zoom-out','缩小','zoomOut'],['reset','重置视角','fit']].map(([action,label,glyph])=>`<button class="btn icon-btn subtle" data-viewer-action="${action}" data-id="${s.id}" title="${label}" aria-label="${s.formula} ${label}">${icon(glyph)}</button>`).join('')}</div></div></div><div class="structure-data" data-structure-data="${s.id}"></div></div>`:'<p class="empty">未提供结构文件，晶格参数、晶格矩阵与原子位置未知</p>'}</section>`;
     }
     function statesMarkup() {
       return draft.states.map((s,i)=>`<article class="state" id="material-${s.id}"><header class="state-heading"><button class="state-toggle" aria-expanded="${!collapsed.has(s.id)}" aria-controls="state-body-${s.id}" data-action="toggle-state" data-id="${s.id}">${icon('expand')}<span><span class="state-name" data-name-for="${s.id}">${esc(stateLabel(s))}</span><span class="state-subtitle"> · 状态 ${String(i+1).padStart(2,'0')}</span></span></button><span class="badge" data-kind-for="${s.id}">${kinds[s.kind]}</span></header><div class="state-body" id="state-body-${s.id}" ${collapsed.has(s.id)?'hidden':''}><div class="field-grid">${fieldMarkup(s,'name','材料名称')}<div class="field"><div class="field-header"><span class="muted">化学式</span></div><div class="field-value">${esc(s.formula)}</div></div>${fieldMarkup(s,'kind','材料状态类型')}<div class="field"><div class="field-header"><span class="muted">压强条件</span></div><div class="field-value">${esc(s.pressure)}</div></div></div><div class="property-row"><div><span>超导体类别</span>常规超导体</div><div><span>Tc</span>${esc(s.tc)}</div><div><span>测量方法</span>${esc(s.method)}</div></div>${structureMarkup(s)}</div></article>`).join('');
     }
     function render() {
+      // 复用画布和 WebGL 上下文，切换视图与保存时不反复创建查看器。
+      crystalViews.forEach(entry=>entry.host.remove());
       document.getElementById('page-title').textContent=modes[mode][0];
       document.getElementById('breadcrumb-view').textContent=modes[mode][0];
       document.getElementById('role-badge').textContent=modes[mode][1];
@@ -281,6 +366,7 @@
         <footer class="footer"><span class="save-state" id="save-state" aria-live="polite"></span>${readOnly()?'<span class="muted">只读详情</span>':`<div class="actions"><button class="btn" data-action="cancel">取消修改</button><button class="btn primary" data-action="save">${icon('save')}保存修改</button></div>`}</footer>`;
       updateSaveState();
       sizeRelations();
+      mountCrystalViews();
     }
     function sizeRelations() {
       document.querySelectorAll('.relation-text').forEach(node=>{node.style.height='auto';node.style.height=(node.scrollHeight+2)+'px';});
@@ -390,6 +476,21 @@
     });
     document.addEventListener('click',event=>{
       const node=event.target.closest('button,a');if(!node)return;
+      if(node.dataset.coordinates) {
+        coordinateModes.set(node.dataset.id,node.dataset.coordinates);
+        const target=document.querySelector(`[data-structure-data="${node.dataset.id}"]`);
+        target.innerHTML=structureDataMarkup(node.dataset.id,crystalViews.get(node.dataset.id));
+        target.querySelector(`[data-coordinates="${node.dataset.coordinates}"]`).focus({preventScroll:true});return;
+      }
+      if(node.dataset.viewerAction) {
+        const entry=crystalViews.get(node.dataset.id);if(!entry)return;
+        const action=node.dataset.viewerAction;
+        if(action==='rotate')entry.viewer.rotate(30,'y');
+        else if(action==='zoom-in')entry.viewer.zoom(1.2);
+        else if(action==='zoom-out')entry.viewer.zoom(1/1.2);
+        else entry.viewer.setView(entry.initialView);
+        entry.viewer.render();return;
+      }
       if(node.dataset.mode) {mode=node.dataset.mode;render();return;}
       if(node.dataset.evidence) {openEvidence(node.dataset.evidence,node);return;}
       if(node.dataset.jump) {
