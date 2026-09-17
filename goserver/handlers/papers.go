@@ -591,6 +591,7 @@ func materialStatesToDict(states []models.MaterialState) []gin.H {
 		}
 		result = append(result, gin.H{
 			"id": state.ID, "material": material, "material_name": state.MaterialName,
+			"system_key": state.Superconductor.ChemicalSystem.SystemKey,
 			"structure_families": structures,
 			"element_count":      state.ElementCount, "material_dimensionality": state.MaterialDimensionality,
 			"crystal_system": state.CrystalSystem,

@@ -80,11 +80,16 @@ describe('全角色统一侧栏', () => {
     expect(main.parentElement).toHaveStyle({ gridTemplateColumns: '216px minmax(0, 1fr)' })
     expect(mounted).toHaveBeenCalledTimes(1)
     await user.click(screen.getByRole('button', { name: '收起侧栏' }))
-    for (const [label, path] of [['热点', '/news'], ['探索', '/search'], ['脉络', '/knowledge'], ['社区', '/share'], ['上传', '/upload'], ['对话', '/rag'], ['预测', '/tc-predict']]) {
+    for (const [label, path] of [['热点', '/news'], ['探索', '/search'], ['脉络', '/knowledge'], ['上传', '/upload'], ['对话', '/rag'], ['预测', '/tc-predict']]) {
       await user.click(screen.getByRole('button', { name: label }))
       expect(screen.getByLabelText('当前地址')).toHaveTextContent(path)
       expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-current', 'page')
     }
+    await user.click(screen.getByRole('button', { name: '社区' }))
+    expect(screen.getByRole('menuitem', { name: '排行榜' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Tc~X 演变' })).toBeInTheDocument()
+    await user.click(screen.getByRole('menuitem', { name: '讨论' }))
+    expect(screen.getByLabelText('当前地址')).toHaveTextContent('/share/discussions')
   })
 
   it.each([

@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import {
   Box, Typography, Card, CardContent, Chip, Button,
   Snackbar, Alert, LinearProgress, Select, MenuItem,
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import PeriodicTable from '../components/PeriodicTable'
+import PaperCommunity from '../components/community/PaperCommunity'
 import StructureViewer3D from '../components/StructureViewer3D'
 import { ELEMENTS } from '../lib/periodicElements'
 import { api } from '../lib/api'
@@ -349,6 +350,7 @@ const SearchPage: React.FC = () => {
             <Typography variant="overline">Layer 2 · Data Table</Typography>
             <Typography variant="h1">{t('search.systemResults', { system: selected.size ? [...selected].sort().join('-') : formulaQuery })}</Typography>
             <Typography variant="body2" sx={{ mt:1 }}>{t('search.resultHint')}</Typography>
+            {selected.size > 0 && <Button component={RouterLink} to={`/systems/${[...selected].sort().join('-')}`} sx={{ mt: 1 }}>{t('community.systemDiscussion', { key: [...selected].sort().join('-') })}</Button>}
           </Box>
         </Box>
 
@@ -642,6 +644,7 @@ const SearchPage: React.FC = () => {
           </CardContent>
         </Card>
       </Box>
+      {paperDetail && <PaperCommunity key={paperDetail.id} paper={paperDetail} />}
       <Snackbar open={!!snackbar} autoHideDuration={2200} onClose={()=>setSnackbar('')}><Alert severity="success" variant="filled">{snackbar}</Alert></Snackbar>
     </Box>
   )

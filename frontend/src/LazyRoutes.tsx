@@ -1,5 +1,5 @@
 import React, { Suspense, lazy } from 'react'
-import { Route, Routes } from 'react-router-dom'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import { Box, CircularProgress } from '@mui/material'
 
 const SearchPage = lazy(() => import('./pages/SearchPage'))
@@ -16,6 +16,10 @@ const AccountPage = lazy(() => import('./pages/AccountPage'))
 const PublicUserPage = lazy(() => import('./pages/PublicUserPage'))
 const SuperAdminPage = lazy(() => import('./pages/SuperAdminPage'))
 const RoleRoute = lazy(() => import('./components/RoleRoute'))
+const DiscussionPage = lazy(() => import('./pages/DiscussionPage'))
+const SystemCommunityPage = lazy(() => import('./pages/SystemCommunityPage'))
+const CommunityNotificationsPage = lazy(() => import('./pages/CommunityNotificationsPage'))
+const CommunityModerationPage = lazy(() => import('./pages/CommunityModerationPage'))
 
 const Spin: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <Suspense fallback={
@@ -30,7 +34,14 @@ const Spin: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 const LazyRoutes: React.FC = () => (
   <Routes>
     <Route path="/search" element={<Spin><SearchPage /></Spin>} />
-    <Route path="/share" element={<Spin><SharePage /></Spin>} />
+    <Route path="/share" element={<Navigate to="/share/charts" replace />} />
+    <Route path="/share/charts" element={<Spin><SharePage section="charts" /></Spin>} />
+    <Route path="/share/rankings" element={<Spin><SharePage section="rankings" /></Spin>} />
+    <Route path="/share/discussions" element={<Spin><DiscussionPage /></Spin>} />
+    <Route path="/share/discussions/:id" element={<Spin><DiscussionPage /></Spin>} />
+    <Route path="/systems/:systemKey" element={<Spin><SystemCommunityPage /></Spin>} />
+    <Route path="/account/notifications" element={<Spin><RoleRoute allow={['user', 'admin', 'superadmin']}><CommunityNotificationsPage /></RoleRoute></Spin>} />
+    <Route path="/admin/community" element={<Spin><RoleRoute allow={['admin', 'superadmin']}><CommunityModerationPage /></RoleRoute></Spin>} />
     <Route path="/upload" element={<Spin><UploadPage /></Spin>} />
     {/* 论文可见性按论文状态与归属逐篇由后端裁决，因此不包裹 RoleRoute */}
     <Route path="/papers/:id" element={<Spin><PaperDetailPage /></Spin>} />

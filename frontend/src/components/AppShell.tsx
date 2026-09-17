@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Avatar, Box, ButtonBase, IconButton, ListItemIcon, Menu, MenuItem, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
+import { Avatar, Box, ButtonBase, Collapse, IconButton, ListItemIcon, Menu, MenuItem, Tooltip, Typography, useMediaQuery, useTheme } from '@mui/material'
 import {
   AccountTreeOutlined, AdminPanelSettingsOutlined, AutoAwesomeOutlined, ChatBubbleOutline,
   ChevronLeft, ChevronRight, CloudUploadOutlined, ExploreOutlined, GroupsOutlined,
@@ -12,6 +12,7 @@ import AuthDialog from './AuthDialog'
 import LanguageSwitcher from './LanguageSwitcher'
 import LlmProviderSwitcher from './LlmProviderSwitcher'
 import SidebarButton from './SidebarButton'
+import CommunityNotificationLink from './community/CommunityNotificationLink'
 
 // path 是业务路由契约，文案与图标仅负责呈现。
 const NAV_ITEMS = [
@@ -37,6 +38,13 @@ const AppShell: React.FC = () => {
   const collapsed = collapseChoice ?? smallScreen
   const [authOpen, setAuthOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [communityOpen, setCommunityOpen] = useState(location.pathname.startsWith('/share/'))
+  const [communityAnchor, setCommunityAnchor] = useState<HTMLElement | null>(null)
+  const communityItems = [
+    { key: 'community.rankings', path: '/share/rankings' },
+    { key: 'community.charts', path: '/share/charts' },
+    { key: 'community.title', path: '/share/discussions' },
+  ]
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(`${path}/`)
   const accountActive = ['/account', '/admin', '/superadmin'].some(isActive)
   const RoleIcon = user ? ROLE_ICONS[user.role] : PersonOutline
@@ -75,7 +83,11 @@ const AppShell: React.FC = () => {
         </Box>
 
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, flexShrink: 0 }}>
-          {NAV_ITEMS.map(item => <SidebarButton
+          {NAV_ITEMS.map(item => item.path === '/share' ? <React.Fragment key={item.path}>
+            <SidebarButton icon={<GroupsOutlined />} label={t(item.key)} collapsed={collapsed} selected={isActive('/share')} aria-expanded={collapsed ? Boolean(communityAnchor) : communityOpen}
+              onClick={event => collapsed ? setCommunityAnchor(event.currentTarget) : setCommunityOpen(value => !value)} />
+            {!collapsed && <Collapse in={communityOpen}><Box sx={{ pl: 2 }}>{communityItems.map(child => <SidebarButton key={child.path} icon={<ChevronRight />} label={t(child.key)} selected={isActive(child.path)} onClick={() => navigate(child.path)} />)}</Box></Collapse>}
+          </React.Fragment> : <SidebarButton
             key={item.path} icon={<item.icon />} label={t(item.key)} collapsed={collapsed}
             selected={isActive(item.path)} onClick={() => navigate(item.path)}
           />)}
@@ -86,6 +98,9 @@ const AppShell: React.FC = () => {
             <LlmProviderSwitcher collapsed={collapsed} />
             <LanguageSwitcher collapsed={collapsed} />
             {user ? (
+              <>
+              <CommunityNotificationLink collapsed={collapsed} />
+              {['admin', 'superadmin'].includes(user.role) && <SidebarButton icon={<AdminPanelSettingsOutlined />} label={t('community.moderation')} collapsed={collapsed} selected={isActive('/admin/community')} onClick={() => navigate('/admin/community')} />}
               <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: collapsed ? 'column' : 'row', gap: 0.5, mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
                 <SidebarButton icon={<RoleIcon />} label={t(`enums.role.${user.role}`)} detail={user.username} collapsed={collapsed} selected={accountActive} onClick={() => navigate('/account')} />
                 <Tooltip title={t('nav.accountMenu')} placement="right" arrow>
@@ -96,6 +111,7 @@ const AppShell: React.FC = () => {
                   </IconButton>
                 </Tooltip>
               </Box>
+              </>
             ) : <SidebarButton icon={<PersonOutline />} label={t('nav.login')} collapsed={collapsed} onClick={() => setAuthOpen(true)} />}
           </Box>
         </Box>
@@ -111,6 +127,9 @@ const AppShell: React.FC = () => {
         </MenuItem>
       </Menu>
       <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
+      <Menu anchorEl={communityAnchor} open={Boolean(communityAnchor)} onClose={() => setCommunityAnchor(null)}>
+        {communityItems.map(item => <MenuItem key={item.path} selected={isActive(item.path)} onClick={() => { setCommunityAnchor(null); navigate(item.path) }}>{t(item.key)}</MenuItem>)}
+      </Menu>
     </Box>
   )
 }

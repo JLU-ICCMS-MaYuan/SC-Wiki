@@ -5,6 +5,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { api } from '../lib/api'
 import type { ApiError } from '../lib/api'
 import PaperEditView from '../components/PaperEditView'
+import PaperCommunity from '../components/community/PaperCommunity'
 import { useLanguage } from '../context/LanguageContext'
 
 // 论文可见性完全由后端 GET /api/papers/{id} 逐篇裁决（canViewPaper）。
@@ -83,7 +84,7 @@ const PaperDetailPage: React.FC = () => {
     )
   }
 
-  return <PaperEditView paper={paper} onBack={handleBack} onOpenMyPapers={handleOpenMyPapers} />
+  return <><PaperEditView paper={paper} onBack={handleBack} onOpenMyPapers={handleOpenMyPapers} /><PaperCommunity key={paper.id} paper={paper} /></>
 }
 
 export default PaperDetailPage
