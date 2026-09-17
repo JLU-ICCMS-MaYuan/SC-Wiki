@@ -58,7 +58,7 @@ python tests/07_researcher_community_forum/verify-community.py --browser
 - 2026-09-17 经用户明确确认，本地 `scwiki` 数据库已应用 `20260917_0107`；既有 Go 和 Vite 热重载进程已加载社区代码，本次无须重启。
 - 新迁移依赖当前工作区前置迁移 `20260916_0106`，该前置迁移及其他任务原有修改不纳入本次提交。部署时必须先确认前置链完整，并明确执行目标 revision，保留并行分支。
 - 其他环境应用迁移仍须先核对目标与前置链，再执行 `alembic upgrade 20260917_0107`，配套更新 Go 与前端；本地恢复不代表生产服务器已部署。
-- 未推送。Issue #106 保持开放，等待当前账号实际发布成功的反馈；没有使用用户身份代发测试问题。
+- 未推送。用户已确认当前账号在原页面实际发布成功；没有使用用户身份代发测试问题。Issue #106 的协作状态不等同于生产部署状态。
 
 ## 本地启用与缺表故障恢复（2026-09-17）
 
@@ -73,3 +73,7 @@ python tests/07_researcher_community_forum/verify-community.py --browser
 - 当前本地服务使用含其他任务未提交修改的工作区，不等同于只从社区提交构建的独立生产制品；本次没有更换服务或修改其他功能。
 
 本机证据：`/tmp/scwiki-community-live-migration.json`、`/tmp/scwiki-community-live-api.json`、`/tmp/scwiki-community-live-write-check.json`、`/tmp/scwiki-community-live-browser.json`、`/tmp/scwiki-community-live-discussions.png` 与 `/tmp/scwiki-community-live-build.txt`。此前失败的问题未保存，原页面保留草稿时可直接重新发布；列表可单独点击重试。
+
+## 当前账号实际发布确认（2026-09-17）
+
+复核 #100—#106 时，用户对“原页面用当前账号发布问题是否成功”明确回复“已经发布成功”。因此本地缺表恢复后的实际发布验收已完成，不再保留待反馈事项。本条证据来自用户操作反馈，不冒充代理代发或新一轮自动化端到端验证；此前隔离测试记录、未推送及其他环境部署边界保持不变。
