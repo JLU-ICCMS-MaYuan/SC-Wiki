@@ -94,9 +94,6 @@ func communityEntries(c *gin.Context) {
 			return
 		}
 	}
-	if kind == "danmaku" {
-		order = "id DESC"
-	}
 	// 通知定位只展示目标答案或评论线程；普通列表仍正常分页。
 	if raw := c.Query("focus_id"); raw != "" {
 		id, parseErr := communityID(raw)
@@ -239,8 +236,6 @@ func communityText(kind, title, body string) error {
 	case "answer":
 	case "comment":
 		max = 2000
-	case "danmaku":
-		max = 120
 	default:
 		return communityBad()
 	}
@@ -262,7 +257,7 @@ func communityCreate(c *gin.Context) {
 		return
 	}
 	category := "content"
-	if body.Kind == "question" || body.Kind == "danmaku" {
+	if body.Kind == "question" {
 		category = body.Kind
 	}
 	if err := communityLimit(c, category); err != nil {
@@ -394,9 +389,6 @@ func communityEdit(c *gin.Context) {
 		return
 	}
 	communityMutate(c, func(tx *gorm.DB, e *models.CommunityEntry) error {
-		if e.Kind == "danmaku" {
-			return communityBad()
-		}
 		if body.Title != nil {
 			e.Title = strings.TrimSpace(*body.Title)
 		}
@@ -438,11 +430,11 @@ func communityVote(c *gin.Context) {
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&e, id).Error; err != nil {
 			return err
 		}
-		if e.Kind != "answer" {
-			return communityBad()
-		}
 		if err := communityAccess(communityCurrent(tx), e, u, false); err != nil {
 			return err
+		}
+		if e.Kind != "answer" {
+			return communityBad()
 		}
 		if c.Request.Method == "DELETE" {
 			return tx.Where("entry_id = ? AND user_id = ?", id, u.ID).Delete(&models.CommunityVote{}).Error

@@ -10,7 +10,7 @@ export default {
   deleted: 'This content was deleted', hidden: 'This content was hidden by a moderator', deactivated: 'Deactivated user', banned: 'Account banned',
   report: 'Report', reportReason: 'Reason (at least 5 characters)', reportSent: 'Report submitted',
   system: '{key} system', systemDiscussion: 'Discuss {key}', systemHint: 'Each element combination shares a discussion. Papers have their own comments.', papers: 'Related public papers', noPapers: 'No public papers yet. You can still join the discussion.',
-  paperComments: 'Paper discussion', systemLinks: 'Related system discussions', danmaku: 'Scrolling messages', danmakuHint: 'Up to 120 characters. Updates about every 3 seconds.', animation: 'Show messages', history: 'Message history', refresh: 'Refresh',
+  paperComments: 'Paper discussion', systemLinks: 'Related system discussions', refresh: 'Refresh',
   notifications: 'Notifications', unread: '{count} unread', markRead: 'Mark as read', markAllRead: 'Mark all as read',
   noticeAnswer: 'answered your question', noticeComment: 'commented on your answer', noticeReply: 'replied to your comment', open: 'View content',
   moderation: 'Community moderation', pending: 'Pending reports', resolved: 'Resolved reports', hide: 'Hide content', restore: 'Restore content', dismiss: 'Dismiss report', reason: 'Reason (at least 5 characters)', audit: 'Moderation history',

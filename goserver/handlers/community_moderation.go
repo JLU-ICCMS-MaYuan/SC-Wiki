@@ -64,7 +64,8 @@ func communityReports(c *gin.Context) {
 		communityFail(c, communityBad())
 		return
 	}
-	q := database.DB.Model(&models.CommunityReport{}).Where("status = ?", status)
+	activeEntries := database.DB.Model(&models.CommunityEntry{}).Select("id").Where("kind IN ?", []string{"question", "answer", "comment"})
+	q := database.DB.Model(&models.CommunityReport{}).Where("status = ?", status).Where("entry_id IN (?)", activeEntries)
 	var total int64
 	if err = q.Count(&total).Error; err != nil {
 		communityFail(c, err)
@@ -126,6 +127,9 @@ func communityModerate(c *gin.Context) {
 		var entry models.CommunityEntry
 		if err := tx.First(&entry, id).Error; err != nil {
 			return err
+		}
+		if !communitySupportedKind(entry.Kind) {
+			return gorm.ErrRecordNotFound
 		}
 		// 管理写入与发布使用相同祖先锁顺序；恢复不要求祖先当前可见。
 		if err := communityLockTarget(tx, communityTargetOf(entry)); err != nil {

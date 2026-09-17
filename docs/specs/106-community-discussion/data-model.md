@@ -13,11 +13,12 @@ system_key 为主键，保存规范化元素组合；created_at 为首次互动�
 | question | 无 | title 必填，body 可空 |
 | answer | question_id | body 必填 |
 | comment | answer_id / paper_id / system_key 三选一 | parent_id 指向根评论，reply_to_id 保留具体回复对象 |
-| danmaku | paper_id / system_key 二选一 | 纯文本，不可编辑 |
 
 status 为 visible、deleted、hidden。删除和隐藏状态不暴露正文；只有 hidden 可由管理员恢复。问题/答案状态影响全部后代，评论状态保留占位和已有回复但不能继续回复。关联论文、问题、答案的外键物理删除级联，parent/reply_to 删除置空。用户外键不物理删除。
 
-索引覆盖目标、kind、status、id 和问题活跃时间。列表每页默认 20，最大 50。标题 3–200 字，问题/答案正文最多 20000 字，评论 2000 字，弹幕 120 字，举报和处置原因 5–1000 字；按 Unicode 字符计数。
+索引覆盖目标、kind、status、id 和问题活跃时间。列表每页默认 20，最大 50。标题 3–200 字，问题/答案正文最多 20000 字，评论 2000 字，举报和处置原因 5–1000 字；按 Unicode 字符计数。
+
+历史 kind=danmaku 仅作为退役数据保留，不能创建、读取、编辑、删除、举报或管理，也不进入通知列表和计数。当前三个类型以应用层允许列表约束，不改写现有通用 kind 列或历史迁移。
 
 ## 点赞、举报、处置与通知
 

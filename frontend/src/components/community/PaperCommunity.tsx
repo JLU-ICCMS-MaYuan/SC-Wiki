@@ -3,7 +3,6 @@ import { Link as RouterLink } from 'react-router-dom'
 import { Box, Chip, Stack, Typography } from '@mui/material'
 import { useLanguage } from '../../context/LanguageContext'
 import CommentPanel from './CommentPanel'
-import DanmakuPanel from './DanmakuPanel'
 
 interface PaperContext { id: number; chemical_systems?: Array<{ system_key?: string }>; material_states?: Array<{ system_key?: string; superconductor?: { chemical_system?: { system_key?: string } } }> }
 export default function PaperCommunity({ paper }: { paper: PaperContext }) {
@@ -12,7 +11,6 @@ export default function PaperCommunity({ paper }: { paper: PaperContext }) {
   return <Box sx={{ mt: 4 }}>
     <Typography variant="h2">{t('community.paperComments')}</Typography>
     {keys.length > 0 && <Stack direction="row" flexWrap="wrap" gap={1} sx={{ my: 2 }}>{keys.map(key => <Chip key={key} label={t('community.systemDiscussion', { key })} component={RouterLink} to={`/systems/${encodeURIComponent(key)}`} clickable />)}</Stack>}
-    <DanmakuPanel key={`danmaku-${paper.id}`} target={{ paper_id: paper.id }} />
     <CommentPanel key={`comments-${paper.id}`} target={{ paper_id: paper.id }} />
   </Box>
 }

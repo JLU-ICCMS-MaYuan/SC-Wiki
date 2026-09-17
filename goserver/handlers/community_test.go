@@ -154,28 +154,103 @@ func TestCommunityTargetsPermissionsAndGovernance(t *testing.T) {
 	}
 	f.request("POST", "/entries", map[string]any{"kind": "comment", "system_key": "Hg", "body": "禁用账号"}, 1, 401)
 }
-func TestCommunityValidationDanmakuAndRateLimits(t *testing.T) {
+func TestCommunityValidationAndRateLimits(t *testing.T) {
 	f := newCommunityFixture(t)
 	f.request("POST", "/entries", map[string]any{"kind": "question", "title": "匿名不能发布"}, -1, 401)
 	f.request("POST", "/entries", map[string]any{"kind": "question", "title": "禁止伪造身份", "author_id": 99}, 0, 400)
 	f.db.Model(&models.User{}).Where("id = ?", f.users[0].ID).Update("is_email_verified", false)
 	f.request("POST", "/entries", map[string]any{"kind": "question", "title": "必须邮箱验证"}, 0, 403)
 	f.db.Model(&models.User{}).Where("id = ?", f.users[0].ID).Update("is_email_verified", true)
-	f.request("POST", "/entries", map[string]any{"kind": "danmaku", "system_key": "Hg", "body": strings.Repeat("字", 121)}, 0, 400)
-	for i := 0; i < 12; i++ {
-		f.create(map[string]any{"kind": "danmaku", "system_key": "Hg", "body": fmt.Sprintf("短消息 %d", i)}, 0)
+	f.request("POST", "/entries", map[string]any{"kind": "comment", "system_key": "Hg", "body": strings.Repeat("字", 2001)}, 0, 400)
+	for i := 0; i < 30; i++ {
+		f.create(map[string]any{"kind": "comment", "system_key": "Hg", "body": fmt.Sprintf("评论 %d", i)}, 0)
 	}
-	f.request("POST", "/entries", map[string]any{"kind": "danmaku", "system_key": "Hg", "body": "超限"}, 0, 429)
+	f.request("POST", "/entries", map[string]any{"kind": "comment", "system_key": "Hg", "body": "超限"}, 0, 429)
 	f.redis.FastForward(time.Minute)
-	last := f.create(map[string]any{"kind": "danmaku", "system_key": "Hg", "body": "窗口已重置"}, 0)
-	f.request("PATCH", fmt.Sprintf("/entries/%d", last), map[string]any{"body": "不可编辑"}, 0, 400)
+	last := f.create(map[string]any{"kind": "comment", "system_key": "Hg", "body": "窗口已重置"}, 0)
+	f.request("PATCH", fmt.Sprintf("/entries/%d", last), map[string]any{"body": "编辑评论"}, 0, 200)
 	f.request("DELETE", fmt.Sprintf("/entries/%d", last), nil, 0, 200)
-	list := f.request("GET", "/entries?kind=danmaku&system_key=Hg&limit=50", nil, -1, 200)
-	if list["total"] != float64(12) {
+	list := f.request("GET", "/entries?kind=comment&system_key=Hg&limit=50", nil, -1, 200)
+	if list["total"] != float64(31) || list["items"].([]any)[30].(map[string]any)["body"] != "" {
 		t.Fatal(list)
 	}
 	f.redis.Close()
 	f.request("POST", "/entries", map[string]any{"kind": "comment", "system_key": "Hg", "body": "Redis 不可用"}, 0, 503)
+}
+
+func TestCommunityRetiredDanmakuUnavailable(t *testing.T) {
+	f := newCommunityFixture(t)
+	root := f.create(map[string]any{"kind": "comment", "system_key": "Hg", "body": "保留的评论"}, 0)
+	reply := f.create(map[string]any{"kind": "comment", "system_key": "Hg", "reply_to_id": root, "body": "保留的回复"}, 1)
+	key := "Hg"
+	// 直接构造升级前的记录，验证退役接口不会读取、修改或清除历史数据。
+	legacy := models.CommunityEntry{Kind: "danmaku", Body: "历史弹幕留库", AuthorID: f.users[0].ID, SystemKey: &key, Status: "visible"}
+	if err := f.db.Create(&legacy).Error; err != nil {
+		t.Fatal(err)
+	}
+	for i, status := range []string{"pending", "resolved"} {
+		if err := f.db.Create(&models.CommunityReport{EntryID: legacy.ID, ReporterID: f.users[i].ID, Reason: "历史弹幕举报", Status: status}).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := f.db.Create(&models.CommunityNotification{EntryID: legacy.ID, RecipientID: f.users[0].ID, ActorID: f.users[1].ID, Kind: "danmaku"}).Error; err != nil {
+		t.Fatal(err)
+	}
+	for _, method := range []string{"GET", "POST"} {
+		path := "/entries"
+		if method == "GET" {
+			path += "?kind=danmaku&system_key=Hg"
+		}
+		if got := f.request(method, path, map[string]any{"kind": "danmaku", "system_key": "Hg", "body": "不能再发布"}, 0, 400); got["code"] != "invalid_community_input" {
+			t.Fatal(got)
+		}
+	}
+	path := fmt.Sprintf("/entries/%d", legacy.ID)
+	for _, call := range []struct {
+		method, path string
+		body         any
+		user         int
+	}{
+		{"GET", path, nil, -1},
+		{"GET", path, nil, 2},
+		{"PATCH", path, map[string]any{"body": "不能修改"}, 0},
+		{"DELETE", path, nil, 0},
+		{"PUT", path + "/vote", nil, 1},
+		{"DELETE", path + "/vote", nil, 1},
+		{"POST", path + "/reports", map[string]any{"reason": "不能举报历史弹幕"}, 1},
+		{"POST", path + "/moderate", map[string]any{"action": "hide", "reason": "不能管理历史弹幕"}, 2},
+		{"POST", path + "/moderate", map[string]any{"action": "restore", "reason": "不能恢复历史弹幕"}, 2},
+		{"GET", fmt.Sprintf("/entries?kind=comment&system_key=Hg&focus_id=%d", legacy.ID), nil, -1},
+	} {
+		if got := f.request(call.method, call.path, call.body, call.user, 404); got["code"] != "content_unavailable" {
+			t.Fatal(got)
+		}
+	}
+	for _, status := range []string{"pending", "resolved"} {
+		f.request("POST", fmt.Sprintf("/entries/%d/reports", root), map[string]any{"reason": "普通评论仍可处理"}, 1, 200)
+		if status == "resolved" {
+			f.request("POST", fmt.Sprintf("/entries/%d/moderate", root), map[string]any{"action": "dismiss", "reason": "普通评论举报驳回"}, 2, 204)
+		}
+		got := f.request("GET", "/moderation/reports?status="+status, nil, 2, 200)
+		items := got["items"].([]any)
+		if got["total"] != float64(1) || len(items) != 1 || entryID(items[0].(map[string]any)["entry"].(map[string]any)) != root {
+			t.Fatal(got)
+		}
+	}
+	notices := f.request("GET", "/notifications", nil, 0, 200)
+	if notices["total"] != float64(1) || notices["items"].([]any)[0].(map[string]any)["entry_id"] != float64(reply) {
+		t.Fatal(notices)
+	}
+	if f.request("GET", "/notifications/unread", nil, 0, 200)["count"] != float64(1) {
+		t.Fatal("retired content leaked into unread count")
+	}
+	if f.request("GET", "/entries?kind=comment&system_key=Hg", nil, -1, 200)["total"] != float64(2) {
+		t.Fatal("comments or replies changed")
+	}
+	var retained models.CommunityEntry
+	if err := f.db.First(&retained, legacy.ID).Error; err != nil || retained.Body != legacy.Body || retained.Kind != legacy.Kind || retained.Status != legacy.Status {
+		t.Fatal("historical data was changed", retained, err)
+	}
 }
 
 func TestCommunityCommentThreadsAndDeepNotificationFocus(t *testing.T) {

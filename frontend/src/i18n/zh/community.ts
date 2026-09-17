@@ -10,7 +10,7 @@ export default {
   deleted: '这条内容已删除', hidden: '这条内容已被管理员隐藏', deactivated: '已注销用户', banned: '账号已封禁',
   report: '举报', reportReason: '举报原因（至少 5 个字）', reportSent: '举报已提交',
   system: '{key} 体系', systemDiscussion: '{key} 体系讨论', systemHint: '同一元素组合共享评论，不同论文拥有各自的评论区。', papers: '相关公开论文', noPapers: '该体系暂无公开论文，仍可参与讨论。',
-  paperComments: '论文交流', systemLinks: '相关体系讨论', danmaku: '弹幕', danmakuHint: '短消息最多 120 字，约每 3 秒更新。', animation: '显示弹幕', history: '历史弹幕', refresh: '刷新',
+  paperComments: '论文交流', systemLinks: '相关体系讨论', refresh: '刷新',
   notifications: '消息通知', unread: '未读 {count}', markRead: '标为已读', markAllRead: '全部已读',
   noticeAnswer: '回答了你的问题', noticeComment: '评论了你的答案', noticeReply: '回复了你的评论', open: '查看内容',
   moderation: '社区管理', pending: '待处理举报', resolved: '已处理举报', hide: '隐藏内容', restore: '恢复内容', dismiss: '驳回举报', reason: '处置原因（至少 5 个字）', audit: '处理记录',

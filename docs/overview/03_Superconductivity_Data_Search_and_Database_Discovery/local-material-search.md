@@ -15,7 +15,7 @@
 - 只返回 `papers.review_status = approved` 的记录，这是公开数据边界。
 - `/search` 页面仅查询本地数据，支持分页、Formula/关键词、Tc 范围、压强范围、年份范围、超导类型、审核状态和图表可见性筛选；默认每页 50 条。
 - Go 层对本地搜索结果使用完整请求体的 SHA-256 生成缓存键，筛选及分页参数均参与缓存。
-- 选中元素后可进入对应 `/systems/:systemKey` 体系讨论，例如 Hg。该入口使用选中元素的精确组合，不改变检索模式；评论、弹幕和公开论文列表见[社区交流](../06_Researcher_Community_Forum/community-discussion.md)。
+- 选中元素后可进入对应 `/systems/:systemKey` 体系讨论，例如 Hg。该入口使用选中元素的精确组合，不改变检索模式；评论、回复和公开论文列表见[社区交流](../06_Researcher_Community_Forum/community-discussion.md)。
 
 ## 工作流程
 

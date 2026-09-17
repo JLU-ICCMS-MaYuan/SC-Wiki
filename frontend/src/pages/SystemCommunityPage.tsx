@@ -4,7 +4,6 @@ import { Alert, Box, Button, CircularProgress, Link, Stack, Typography } from '@
 import { useLanguage } from '../context/LanguageContext'
 import { useCommunityLoad } from '../lib/community'
 import CommentPanel from '../components/community/CommentPanel'
-import DanmakuPanel from '../components/community/DanmakuPanel'
 
 interface SystemDetail { system_key: string; papers: Array<{ id: number; title: string; year?: number }>; total: number }
 function SystemDetailView({ systemKey }: { systemKey: string }) {
@@ -17,7 +16,6 @@ function SystemDetailView({ systemKey }: { systemKey: string }) {
     <Typography variant="h2">{t('community.papers')}</Typography>
     {data.papers.length ? <Stack gap={1} sx={{ my: 2 }}>{data.papers.map(p => <Link key={p.id} component={RouterLink} to={`/papers/${p.id}`}>{p.title} {p.year ? `(${p.year})` : ''}</Link>)}</Stack> : <Typography sx={{ my: 2 }}>{t('community.noPapers')}</Typography>}
     {data.total > 20 && <Stack direction="row"><Button disabled={!offset} onClick={() => setOffset(v => v - 20)}>{t('community.previous')}</Button><Button disabled={offset + 20 >= data.total} onClick={() => setOffset(v => v + 20)}>{t('community.next')}</Button></Stack>}
-    <DanmakuPanel key={`danmaku-${data.system_key}`} target={{ system_key: data.system_key }} />
     <CommentPanel key={`comments-${data.system_key}`} target={{ system_key: data.system_key }} />
   </Box>
 }

@@ -24,7 +24,7 @@
   `formula`、`type`、`pressure`、`tc`、`space_group`、`source`、`status` 和 `doi` 的扁平列表行。
 - `/search` 页面按 `paper_id` 请求论文详情。结构预览读取材料状态下的 `structures`，物性展示统一读取
   `property_modules`。Tc 排在关键物性最前，其后展示记录内参数和其他物性；空值不生成表格行。
-- 独立详情、搜索详情与图表抽屉共用按论文 ID 关联的[评论和弹幕](../06_Researcher_Community_Forum/community-discussion.md)，版本更新不会丢失评论。材料状态响应中的 `system_key` 用于跳转跨论文共享的体系讨论；没有元素组合时不生成体系入口。
+- 独立详情、搜索详情与图表抽屉共用按论文 ID 关联的[评论与回复](../06_Researcher_Community_Forum/community-discussion.md)，版本更新不会丢失评论。材料状态响应中的 `system_key` 用于跳转跨论文共享的体系讨论；没有元素组合时不生成体系入口。
 - 探索页默认不预选元素，Formula 输入框默认为空；只有 URL 显式包含 `elements` 时才预选。
 - 论文总结和核心发现以纯文本 `pre-wrap` 显示，保留用户录入的换行，不进行 Markdown 再解释。
 - 详情区块中，标签使用紧凑 caption；长文本使用较轻的正文层级，短值字段保持适合扫描的强调层级。

@@ -120,8 +120,6 @@ func communityLimit(c *gin.Context, category string) error {
 	switch category {
 	case "question":
 		max, window = 10, time.Hour
-	case "danmaku":
-		max = 12
 	case "action":
 		max = 60
 	}
@@ -239,10 +237,6 @@ func (t *communityTarget) validate(db *gorm.DB, kind string, user *models.User) 
 		if t.QuestionID != nil {
 			return communityBad()
 		}
-	case "danmaku":
-		if t.PaperID == nil && t.SystemKey == nil {
-			return communityBad()
-		}
 	default:
 		return communityBad()
 	}
@@ -283,11 +277,17 @@ func (t *communityTarget) validate(db *gorm.DB, kind string, user *models.User) 
 	return nil
 }
 func communityAccess(db *gorm.DB, entry models.CommunityEntry, user *models.User, placeholder bool) error {
+	if !communitySupportedKind(entry.Kind) {
+		return gorm.ErrRecordNotFound
+	}
 	if entry.Status != "visible" && !(placeholder && entry.Kind == "comment") {
 		return gorm.ErrRecordNotFound
 	}
 	t := communityTargetOf(entry)
 	return t.validate(db, entry.Kind, user)
+}
+func communitySupportedKind(kind string) bool {
+	return kind == "question" || kind == "answer" || kind == "comment"
 }
 func communitySameTarget(a, b models.CommunityEntry) bool {
 	aa, _ := json.Marshal(communityTargetOf(a))
@@ -391,6 +391,6 @@ func communityDTO(db *gorm.DB, e models.CommunityEntry, u *models.User) gin.H {
 	return gin.H{"id": e.ID, "kind": e.Kind, "title": e.Title, "body": e.Body, "status": e.Status, "author": author,
 		"question_id": e.QuestionID, "answer_id": e.AnswerID, "paper_id": e.PaperID, "system_key": e.SystemKey,
 		"parent_id": e.ParentID, "reply_to_id": e.ReplyToID, "votes": votes, "voted": voted > 0, "answer_count": replies,
-		"can_edit": editable && e.Kind != "danmaku", "can_delete": editable, "can_reply": e.Status == "visible",
+		"can_edit": editable, "can_delete": editable, "can_reply": e.Status == "visible",
 		"created_at": e.CreatedAt, "updated_at": e.UpdatedAt, "url": communityURL(db, e)}
 }

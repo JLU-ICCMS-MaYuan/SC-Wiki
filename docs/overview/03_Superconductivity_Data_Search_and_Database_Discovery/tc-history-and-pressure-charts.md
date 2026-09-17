@@ -30,7 +30,7 @@
 
 ## 工作流程
 
-`/share/charts` 页面先加载材料家族目录确定图例与多选项，再按两张图各自的 `tc_field` 请求公共数据并渲染散点；压力图在同一坐标系计算品质因子等值线与色带，年份图渲染温度渐变。用户点击点后用 `paper_id` 请求 `/api/papers/:id` 并在抽屉中查看论文基础信息、关键物性和研究方法，以及与其他论文详情入口共用的[评论和弹幕](../06_Researcher_Community_Forum/community-discussion.md)。社区页不再请求 `/api/chart-groups`。
+`/share/charts` 页面先加载材料家族目录确定图例与多选项，再按两张图各自的 `tc_field` 请求公共数据并渲染散点；压力图在同一坐标系计算品质因子等值线与色带，年份图渲染温度渐变。用户点击点后用 `paper_id` 请求 `/api/papers/:id` 并在抽屉中查看论文基础信息、关键物性和研究方法，以及与其他论文详情入口共用的[评论与回复](../06_Researcher_Community_Forum/community-discussion.md)。社区页不再请求 `/api/chart-groups`。
 
 ## 约束
 

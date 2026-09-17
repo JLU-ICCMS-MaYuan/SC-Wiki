@@ -24,7 +24,7 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 | [超导数据搜索与数据库发现](03_Superconductivity_Data_Search_and_Database_Discovery/README.md) | 本地材料检索、结果分享导出、代表结构下载、Tc 统计图表 | Go API、主业务数据库 |
 | [超导论文引用发展知识图谱](04_Superconductivity_Development_Knowledge_Graph/README.md) | 基于 MySQL 引用事实的分类概览、搜索和分页展开 | Go API、Python Worker、GROBID、MySQL |
 | [检索增强 AI 问答](05_Retrieval-Augmented_AI_Question_Answering/README.md) | 混合检索、流式问答、证据展示和灵感探索 | Python FastAPI、MySQL、Qdrant、LLM 配置 |
-| [研究者社区论坛](06_Researcher_Community_Forum/README.md) | 注册登录、贡献排行、问答、体系与论文评论、弹幕、通知及举报管理 | Go API、JWT、MySQL、Redis |
+| [研究者社区论坛](06_Researcher_Community_Forum/README.md) | 注册登录、贡献排行、问答、体系与论文评论、通知及举报管理 | Go API、JWT、MySQL、Redis |
 | [AI 辅助 Tc 估算](07_AI_Assisted_Tc_Estimation/README.md) | 根据 CONTCAR 与 PDOS 文件计算实验性 Tc 估算和解释特征 | pymatgen、NumPy、上传文件 |
 
 ## 整体关系
@@ -58,7 +58,7 @@ flowchart LR
 - RAG 已从 Chroma 迁移到 Qdrant 封装，但部分兼容命名仍保留 `chroma` 字样。
 - RAG 结构化物性工具、材料详情、检索和统计统一读取当前已批准的 `property_records`；普通流式/非流式问答共用 Mentor。读取规则及外部索引边界见[混合检索](05_Retrieval-Augmented_AI_Question_Answering/hybrid-retrieval.md)。
 - 晶体结构后端 API 已实现，前端在论文详情中按材料状态下的 `structures`（来自 `structure_models`）展示结构，完整结构审核工作台仍未从当前路由中确认。当前全库无结构模型记录，只验证过空态。（[Issue #57](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/57)）
-- “社区”展开排行榜、Tc~X 演变和讨论；[科研交流](06_Researcher_Community_Forum/community-discussion.md)包含问答、体系与论文评论、弹幕、站内通知及举报管理。旧 `/share` 进入图表，图表组合的编辑入口在管理页。
+- “社区”展开排行榜、Tc~X 演变和讨论；[科研交流](06_Researcher_Community_Forum/community-discussion.md)包含问答、体系与论文评论、站内通知及举报管理。旧 `/share` 进入图表，图表组合的编辑入口在管理页。
 - Tc 估算由代码明确标记为实验页面，不构成模型科学有效性的保证。
 - 引用发展图不依赖 Neo4j：GROBID 在上传 Worker 中解析参考文献，MySQL 保存原始记录和匹配状态，Go API 直接查询公开引用图。旧 Neo4j 图谱仍供历史材料/作者关系功能使用。
 - 账号身份与分级工作台变更已通过 Go 全量测试、Vitest、前端生产构建和 Alembic MySQL 离线迁移 SQL 生成；真实 SMTP、持久化 MySQL 与完整部署链路仍需在目标环境验收。

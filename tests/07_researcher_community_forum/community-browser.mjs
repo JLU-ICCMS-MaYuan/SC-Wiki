@@ -7,7 +7,7 @@ const base = process.env.COMMUNITY_BASE_URL
 const fixture = JSON.parse(await readFile(process.env.COMMUNITY_BROWSER_FIXTURE, 'utf8'))
 const artifacts = process.env.COMMUNITY_ARTIFACT_DIR
 const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH, args: ['--no-sandbox'] })
-const errors = [], checks = []
+const errors = [], checks = [], retiredRequests = []
 const check = name => { checks.push(name); console.log(`PASS ${name}`) }
 try {
   const pages = []
@@ -20,9 +20,17 @@ try {
     }, identity)
     const page = await context.newPage()
     page.on('pageerror', error => errors.push(error.message))
+    page.on('request', request => { if (request.url().includes('danmaku')) retiredRequests.push(request.url()) })
     pages.push(page)
   }
   const [alice, bob, moderator] = pages
+  const commentsOnly = async page => {
+    await page.getByRole('textbox', { name: /评论|Comment/ }).waitFor()
+    assert.equal(await page.getByRole('textbox').count(), 1, 'detail should have one comment composer')
+    assert.equal(await page.getByTestId('danmaku-stage').count(), 0)
+    assert.equal(await page.getByRole('switch', { name: /显示弹幕|Show messages/ }).count(), 0)
+    assert.equal(await page.getByRole('button', { name: /历史弹幕|Message history/ }).count(), 0)
+  }
   const createFrom = async (page, textbox, content) => {
     await textbox.fill(content)
     const response = page.waitForResponse(r => r.url() === `${base}/api/community/entries` && r.request().method() === 'POST')
@@ -76,33 +84,35 @@ try {
   const systemComment = await createFrom(alice, alice.getByRole('textbox', { name: /评论/ }), 'Hg 体系共享评论验收。')
   await bob.goto(base + '/systems/Hg')
   await bob.getByText(systemComment.body, { exact: true }).waitFor()
-  const message = await createFrom(alice, alice.getByRole('textbox', { name: /内容/ }).first(), '汞体系弹幕同步验收')
-  await bob.getByTestId('danmaku-stage').getByText(message.body, { exact: true }).waitFor({ timeout: 10000 })
-  assert.equal(await bob.getByTestId('danmaku-stage').getByText(message.body, { exact: true }).count(), 1)
+  await commentsOnly(alice)
+  await commentsOnly(bob)
+  await bob.locator(`#entry-${systemComment.id}`).getByRole('button', { name: '回复', exact: true }).click()
+  const systemReply = await createFrom(bob, bob.getByRole('textbox', { name: new RegExp(`回复 #${systemComment.id}`) }), '体系评论可以继续回复。')
+  await alice.reload()
+  await alice.getByText(systemReply.body, { exact: true }).waitFor()
   await alice.screenshot({ path: path.join(artifacts, 'system-desktop.png'), fullPage: true })
-  await bob.getByRole('switch', { name: '显示弹幕' }).click()
-  assert.equal(await bob.getByTestId('danmaku-stage').count(), 0)
-  await bob.getByRole('button', { name: '历史弹幕', exact: true }).click()
-  await bob.getByText(message.body, { exact: true }).waitFor()
-  check('periodic search, shared system comments, two-browser rolling messages and history')
+  check('periodic search and shared system comments with replies, without scrolling messages')
 
-  await bob.getByRole('button', { name: '历史弹幕', exact: true }).click()
-  await bob.getByRole('switch', { name: '显示弹幕' }).click()
-  await api(1, 'POST', `/entries/${message.id}/reports`, { reason: '隔离浏览器举报测试' })
+  await api(1, 'POST', `/entries/${systemComment.id}/reports`, { reason: '隔离浏览器举报测试' })
   await moderator.goto(base + '/admin/community')
   await moderator.getByText('隔离浏览器举报测试', { exact: true }).waitFor()
   await moderator.getByRole('button', { name: '隐藏内容', exact: true }).click()
-  await moderator.getByRole('textbox', { name: '处置原因（至少 5 个字）' }).fill('确认隐藏此条测试弹幕')
+  await moderator.getByRole('textbox', { name: '处置原因（至少 5 个字）' }).fill('确认隐藏此条测试评论')
   await moderator.getByRole('button', { name: '保存', exact: true }).click()
   await moderator.getByText('还没有内容，欢迎发起交流。').waitFor()
-  await bob.waitForFunction(id => !document.querySelector(`[data-testid="danmaku-stage"] [data-entry-id="${id}"]`), message.id, { timeout: 10000 })
-  check('report moderation hides an already delivered message')
+  await bob.reload()
+  await bob.locator(`#entry-${systemComment.id}`).getByText('这条内容已被管理员隐藏', { exact: true }).waitFor()
+  assert.equal(await bob.getByText(systemComment.body, { exact: true }).count(), 0)
+  await bob.getByText(systemReply.body, { exact: true }).waitFor()
+  check('report moderation hides a comment while preserving its existing replies')
 
   await alice.goto(base + `/papers/${fixture.paper_id}`)
   await alice.getByRole('heading', { name: '论文交流', exact: true }).waitFor()
+  await commentsOnly(alice)
   const paperComment = await createFrom(alice, alice.getByRole('textbox', { name: /评论/ }), '只属于这篇论文的评论。')
   await bob.goto(base + `/search?paper_id=${fixture.paper_id}`)
   await bob.getByText(paperComment.body, { exact: true }).waitFor()
+  await commentsOnly(bob)
   assert.equal(await bob.getByText(systemComment.body, { exact: true }).count(), 0)
   check('standalone and search paper details share comments without mixing system comments')
 
@@ -114,6 +124,7 @@ try {
   await point.click()
   await bob.getByRole('heading', { name: '论文交流', exact: true }).waitFor()
   await bob.getByText(paperComment.body, { exact: true }).waitFor()
+  await commentsOnly(bob)
   check('chart drawer reads the same paper comment as the other two entry points')
 
   await alice.goto(base + '/share/rankings')
@@ -141,20 +152,16 @@ try {
   check('network failure preserves draft and allows retry')
 
   await bob.setViewportSize({ width: 1280, height: 900 })
-  await bob.emulateMedia({ reducedMotion: 'reduce' })
-  const staticMessage = await api(0, 'POST', '/entries', { kind: 'danmaku', system_key: 'Hg', body: '减少动画设置的静态消息' })
   await bob.goto(base + '/systems/Hg')
-  const staticLine = bob.getByTestId('danmaku-stage').getByText(staticMessage.body, { exact: true })
-  await staticLine.waitFor()
-  assert.equal(await staticLine.evaluate(element => getComputedStyle(element).animationName), 'none')
   await bob.getByRole('button', { name: '切换为英文' }).click()
   await bob.getByRole('heading', { name: 'Hg system', exact: true }).waitFor()
-  await bob.getByRole('switch', { name: 'Show messages' }).waitFor()
+  await commentsOnly(bob)
   await bob.keyboard.press('Tab')
   assert.ok(await bob.evaluate(() => document.activeElement !== document.body), 'keyboard focus was lost')
-  check('English interface, keyboard focus and reduced-motion messages')
+  check('English interface and keyboard focus with comments only')
+  assert.deepEqual(retiredRequests, [], 'retired scrolling message requests must stop')
   assert.deepEqual(errors, [])
-  await writeFile(path.join(artifacts, 'browser-results.json'), JSON.stringify({ checks, errors }, null, 2))
+  await writeFile(path.join(artifacts, 'browser-results.json'), JSON.stringify({ checks, errors, retiredRequests }, null, 2))
 } finally {
   await browser.close()
 }

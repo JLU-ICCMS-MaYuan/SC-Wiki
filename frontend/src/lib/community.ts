@@ -6,7 +6,7 @@ export const COMMUNITY_API = '/api/community'
 export interface CommunityTarget { question_id?: number; answer_id?: number; paper_id?: number; system_key?: string }
 export interface CommunityAuthor { username: string; avatar_url?: string; banned?: boolean; deactivated?: boolean }
 export interface CommunityEntry extends CommunityTarget {
-  id: number; kind: 'question' | 'answer' | 'comment' | 'danmaku'; title: string; body: string
+  id: number; kind: 'question' | 'answer' | 'comment'; title: string; body: string
   status: 'visible' | 'deleted' | 'hidden'; author: CommunityAuthor | null
   parent_id: number | null; reply_to_id: number | null; votes: number; voted: boolean; answer_count: number
   can_edit: boolean; can_delete: boolean; can_reply: boolean; created_at: string; updated_at: string; url: string
