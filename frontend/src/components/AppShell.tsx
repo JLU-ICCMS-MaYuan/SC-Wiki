@@ -86,7 +86,7 @@ const AppShell: React.FC = () => {
           {NAV_ITEMS.map(item => item.path === '/share' ? <React.Fragment key={item.path}>
             <SidebarButton icon={<GroupsOutlined />} label={t(item.key)} collapsed={collapsed} selected={isActive('/share')} aria-expanded={collapsed ? Boolean(communityAnchor) : communityOpen}
               onClick={event => collapsed ? setCommunityAnchor(event.currentTarget) : setCommunityOpen(value => !value)} />
-            {!collapsed && <Collapse in={communityOpen}><Box sx={{ pl: 2 }}>{communityItems.map(child => <SidebarButton key={child.path} icon={<ChevronRight />} label={t(child.key)} selected={isActive(child.path)} onClick={() => navigate(child.path)} />)}</Box></Collapse>}
+            {!collapsed && <Collapse in={communityOpen}><Box sx={{ pl: 2 }}>{communityItems.map(child => <SidebarButton key={child.path} icon={null} label={t(child.key)} selected={isActive(child.path)} onClick={() => navigate(child.path)} />)}</Box></Collapse>}
           </React.Fragment> : <SidebarButton
             key={item.path} icon={<item.icon />} label={t(item.key)} collapsed={collapsed}
             selected={isActive(item.path)} onClick={() => navigate(item.path)}
