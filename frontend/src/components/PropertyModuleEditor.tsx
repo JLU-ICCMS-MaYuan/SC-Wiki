@@ -10,7 +10,7 @@ import {
   loadFormDefinition, loadModuleDefinitions, type FormDefinition, type FormIssue,
 } from '../lib/formDefinitions'
 import {
-  PROPERTY_MODULES, clonePropertyRecord, emptyPropertyModule, emptyPropertyRecord,
+  PROPERTY_MODULES, clonePropertyRecord, emptyPropertyModule, emptyPropertyRecord, propertyRecordSummaryValue,
   normalizePropertyRecordIdentity, type PropertyModuleCode, type PropertyModuleDraft, type PropertyRecordDraft,
 } from '../lib/propertyModules'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
@@ -292,7 +292,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                   ? choices
                   : [boundDefinitions[record.record_key], ...choices].filter(Boolean)
                 const recordLabel = definitionLabel(record)
-                const summary = [recordLabel, record.name_raw, record.value_raw].filter(Boolean).join(' · ')
+                const summary = [recordLabel, record.name_raw, propertyRecordSummaryValue(record)].filter(Boolean).join(' · ')
                 const recordError = definitionErrors[record.record_key] || recordIssues[0]?.message
                 return (
                   <Accordion key={record.record_key} defaultExpanded sx={{ mb: 1 }}>

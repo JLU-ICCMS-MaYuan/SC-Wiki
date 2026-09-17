@@ -1,5 +1,5 @@
 import { api } from './api'
-import type { PropertyRecordDraft } from './propertyModules'
+import { normalizeCurrentTcValue, type PropertyRecordDraft } from './propertyModules'
 
 export interface JsonSchema {
   type?: 'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'
@@ -154,7 +154,17 @@ export function validateRecordClient(record: PropertyRecordDraft, definition?: F
   const issues: FormIssue[] = []
   if (!record.record_key.trim()) addIssue(issues, 'record_key', '记录键不能为空')
   if (!record.name_raw.trim()) addIssue(issues, 'name_raw', '名称不能为空')
-  if (!record.value_raw.trim()) addIssue(issues, 'value_raw', '原始值不能为空')
+  if (record.record_type === 'property' && !record.value_raw.trim()) addIssue(issues, 'value_raw', '原始值不能为空')
+  if (record.record_type === 'predicted_tc' || record.record_type === 'measured_tc') {
+    const fields = record.value_kind === 'number' ? ['value_number'] as const
+      : record.value_kind === 'range' ? ['value_min', 'value_max'] as const : []
+    for (const field of fields) {
+      const value = record[field]
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) addIssue(issues, field, '请输入完整的非负 Tc 数值')
+    }
+    if (record.value_kind === 'text' && !record.value_text?.trim()) addIssue(issues, 'value_text', '请输入当前文本值')
+    if (record.value_kind === 'boolean' && typeof record.value_boolean !== 'boolean') addIssue(issues, 'value_boolean', '请选择当前布尔值')
+  }
   const calculation = record.payload.calculation_conditions
   const experimental = record.payload.experimental_conditions
   if (experimental && typeof experimental === 'object' && 'description' in experimental && typeof experimental.description !== 'string') {
@@ -171,8 +181,17 @@ export function validateRecordClient(record: PropertyRecordDraft, definition?: F
     issues.push({ field: 'definition_key', code: 'definition_not_available', message: '定义版本不可用于该记录' })
   }
   if (definition) {
-    validateSchema(record, definition.core_schema || {}, '', issues)
+    validateSchema(normalizeCurrentTcValue(record), definition.core_schema || {}, '', issues)
     validateSchema(record.payload, definition.json_schema || {}, 'payload', issues)
   }
   return issues
+}
+
+/** 保存按钮和自动保存共用校验，不能只依赖浏览器原生 form submit。 */
+export function validateTcRecords(states: Array<{ property_modules?: { records: PropertyRecordDraft[] }[] }>): FormIssue[] {
+  return states.flatMap((state, stateIndex) => (state.property_modules || []).flatMap((module, moduleIndex) =>
+    module.records.flatMap((record, recordIndex) => record.record_type === 'property' ? [] : validateRecordClient(record).map(issue => ({
+      ...issue, field: `material_states[${stateIndex}].property_modules.${moduleIndex}.records.${recordIndex}.${issue.field}`,
+    }))),
+  ))
 }

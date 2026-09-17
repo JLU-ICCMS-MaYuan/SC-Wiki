@@ -19,6 +19,7 @@ import MaterialStatesEditor, { SpaceGroupOption } from '../components/MaterialSt
 import PaperMetadataRow from '../components/PaperMetadataRow'
 import { useLanguage } from '../context/LanguageContext'
 import { convertLegacyPropertyModules, PROPERTY_SCHEMA_VERSION } from '../lib/propertyModules'
+import { validateTcRecords } from '../lib/formDefinitions'
 import { textLinesToList, toTextList } from '../lib/paperTextLists'
 
 /**
@@ -247,6 +248,8 @@ const AdminPaperEditPage: React.FC = () => {
   // （如无材料状态的综述）不需要触发整体替换。
   const handleEditSave = async () => {
     try {
+      const tcIssue = validateTcRecords(editMaterialStates)[0]
+      if (tcIssue) { setSnackbar(tcIssue.message); return false }
       const historyOperationId = crypto.randomUUID()
       const payload: Record<string, any> = { ...editForm, history_operation_id: historyOperationId }
       if (authorInput.trim()) {

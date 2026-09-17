@@ -20,7 +20,7 @@ import PaperMetadataRow from './PaperMetadataRow'
 import {
   UploadDraft, normalizeUploadDraft, unwrapData,
 } from '../lib/paperProcessing'
-import { validateRecordClient } from '../lib/formDefinitions'
+import { validateRecordClient, validateTcRecords } from '../lib/formDefinitions'
 import EvidenceFieldMarkers from './EvidenceFieldMarkers'
 
 interface UploadTaskEditorProps {
@@ -237,6 +237,11 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
   const saveDraft = useCallback(async (showResult = false): Promise<boolean> => {
     if (!draft || saving || readOnly) return !dirty
+    const tcIssues = validateTcRecords(draft.material_states)
+    if (tcIssues.length) {
+      if (showResult) { setError(tcIssues[0].message); setIssues(tcIssues) }
+      return false
+    }
     const revision = revisionRef.current
     setSaving(true)
     try {

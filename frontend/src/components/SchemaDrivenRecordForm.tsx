@@ -4,9 +4,10 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
+import TcRecordFields from './TcRecordFields'
 import type { FormDefinition, FormIssue, JsonSchema } from '../lib/formDefinitions'
 import { getAtPath, setAtPath, validateRecordClient } from '../lib/formDefinitions'
-import { newStableKey, type PropertyRecordDraft, type PropertyValueKind } from '../lib/propertyModules'
+import { newStableKey, normalizeCurrentTcValue, type PropertyRecordDraft, type PropertyValueKind } from '../lib/propertyModules'
 
 interface Props {
   record: PropertyRecordDraft
@@ -134,10 +135,14 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
 }) => {
   const issues = useMemo(() => [...validateRecordClient(record, definition), ...externalIssues], [record, definition, externalIssues])
   const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type), [definition, record.record_type])
-  const issue = (field: string) => issues.find(item => item.field === field || item.field.endsWith(`.${field}`))?.message
+  const isTc = record.record_type === 'predicted_tc' || record.record_type === 'measured_tc'
+  const currentValueField = { number: 'value_number', range: 'value_min', text: 'value_text', boolean: 'value_boolean' }[record.value_kind]
+  const issue = (field: string) => issues.find(item => item.field === field || item.field.endsWith(`.${field}`)
+    || (isTc && field === currentValueField && /(?:^|\.)(value_raw|unit_raw|canonical_unit)$/.test(item.field)))?.message
   const fieldPath = (field: string) => basePath ? `${basePath}.${field}` : field
-  const update = (patch: Partial<PropertyRecordDraft>) => onChange({ ...record, ...patch })
-  const updatePath = (path: string, value: unknown) => onChange(setAtPath(record, path, value))
+  const update = (patch: Partial<PropertyRecordDraft>) => onChange(normalizeCurrentTcValue({ ...record, ...patch }))
+  const updatePath = (path: string, value: unknown) => onChange(normalizeCurrentTcValue(setAtPath(record, path, value)))
+  const tcProps = { record, readOnly, issue, fieldPath, update }
 
   const renderExtensions = (path: string, schema: JsonSchema) => {
     const items = getAtPath(record, path)
@@ -240,8 +245,9 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   }
 
   return (
-    <Box data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, mb: 1 }}>
+    <Box data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, minWidth: 0, containerType: isTc ? 'inline-size' : undefined, containerName: isTc ? 'tc-record' : undefined, gridTemplateColumns: isTc ? 'minmax(0, 1fr)' : { xs: '1fr', sm: 'repeat(2, 1fr)' }, p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, mb: 1 }}>
       {definitionError && <Alert severity="error" sx={{ gridColumn: '1 / -1' }}>{definitionError}</Alert>}
+      {isTc ? <TcRecordFields {...tcProps} /> : <>
       <TextField label="名称" value={record.name_raw} disabled={readOnly} data-issue-field={fieldPath('name_raw')} error={Boolean(issue('name_raw'))} helperText={issue('name_raw')} onChange={event => update({ name_raw: event.target.value })} />
       <FormControl>
         <InputLabel>值类型</InputLabel>
@@ -255,7 +261,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       {record.value_kind === 'range' && <><TextField label="下界" type="number" value={record.value_min ?? ''} disabled={readOnly} data-issue-field={fieldPath('value_min')} error={Boolean(issue('value_min'))} helperText={issue('value_min')} onChange={event => update({ value_min: event.target.value === '' ? null : Number(event.target.value) })} /><TextField label="上界" type="number" value={record.value_max ?? ''} disabled={readOnly} onChange={event => update({ value_max: event.target.value === '' ? null : Number(event.target.value) })} /></>}
       {record.value_kind === 'text' && <TextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
-      {(record.record_type === 'predicted_tc' || record.record_type === 'measured_tc') && <FormControlLabel control={<Checkbox checked={Boolean(record.is_representative)} disabled={readOnly} onChange={event => update({ is_representative: event.target.checked })} />} label="代表结果" />}
+      </>}
       {Object.entries(payloadSchema.properties || {}).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
       {!readOnly && <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
         {onClone && <Button onClick={onClone}>复制记录</Button>}

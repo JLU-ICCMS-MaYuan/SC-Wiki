@@ -143,7 +143,7 @@ describe('T018：管理员查看完整超导性质', () => {
     expect(screen.getByText('超导性质')).toBeVisible()
     const tcRecord = screen.getByTestId('property-record-record-tc')
     expect(tcRecord).toBeVisible()
-    expect(within(tcRecord).getByLabelText('数值')).toHaveValue(3.78)
+    expect(within(tcRecord).getByLabelText('Tc 值')).toHaveValue('3.78')
 
     // 物性区：标题与原始值回填
     const propertyRecord = screen.getByTestId('property-record-record-current')
