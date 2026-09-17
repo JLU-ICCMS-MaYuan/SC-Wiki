@@ -10,10 +10,10 @@
 - Go 服务从 `DATABASE_URL` 解析 MySQL DSN，缺少 `DATABASE_URL` 或 `JWT_SECRET_KEY` 会直接拒绝启动。
 - Python 服务仍通过 `backend/database.py` 与 Alembic 使用 `DATABASE_URL`，并保留 `Base.metadata.create_all` 和周期表元素初始化脚本。
 - Alembic 环境允许 `DATABASE_URL` 覆盖配置文件连接串。
-- 本地 MySQL 当前迁移版本为 `20260916_0105` 与并行分支 `20260914_0052`。材料名迁移新增可空的 `material_states.material_name VARCHAR(255)`，不回填历史值；科学保存和重读已通过回滚夹具验证。热重载不会执行迁移，必须核验实际列；详见 [缺列修复记录](../../specs/103-property-evidence-review/material-name-migration-fix.md)。这不表示仅填材料名的完整功能已经验收。论文上传模型包含唯一 `papers.upload_task_id`、多来源 `paper_files`、带来源文件和页码范围的 `paper_chunks`，以及永久 `paper_evidences`；`papers.admin_internal_note` 与面向上传者的 `review_comment` 分开保存。
+- 本地 MySQL 当前迁移版本为 `20260917_0107` 与并行分支 `20260914_0052`。材料名迁移新增可空的 `material_states.material_name VARCHAR(255)`，不回填历史值；科学保存和重读已通过回滚夹具验证。热重载不会执行迁移，必须核验实际列；详见 [缺列修复记录](../../specs/103-property-evidence-review/material-name-migration-fix.md)。这不表示仅填材料名的完整功能已经验收。论文上传模型包含唯一 `papers.upload_task_id`、多来源 `paper_files`、带来源文件和页码范围的 `paper_chunks`，以及永久 `paper_evidences`；`papers.admin_internal_note` 与面向上传者的 `review_comment` 分开保存。
 - `20260911_0103` 在 `20260909_0099` 后新增 `property_evidence_checks`，保存物性核对的内容摘要、来源摘要、规则版本、结论、模型与理由；记录外键使用 `ON DELETE CASCADE`。迁移不扫描或回填历史证据，历史数据在后续提交或批准时按需核对。
 
-- 社区迁移 `20260917_0107` 依赖 `20260916_0106`，新增体系讨论空间、内容、点赞、举报、处理事件和站内通知六张表；不回填历史数据。SQLAlchemy 元数据由 Alembic 与初始化入口显式导入。迁移在隔离 MySQL 验证，现有数据库是否应用须按部署单独核验，不能据代码存在推定已生效；见[社区验收](../../specs/106-community-discussion/quickstart.md)。
+- 社区迁移 `20260917_0107` 依赖 `20260916_0106`，新增体系讨论空间、内容、点赞、举报、处理事件和站内通知六张表；不回填历史数据。SQLAlchemy 元数据由 Alembic 与初始化入口显式导入。2026-09-17 经用户确认，已应用至本地 `scwiki` 并保留并行分支 `20260914_0052`；运行中的社区读取接口、页面和实际数据库回滚写入检查通过。其他环境部署仍须单独核验；见[社区验收](../../specs/106-community-discussion/quickstart.md)。
 
 ## 工作流程
 
