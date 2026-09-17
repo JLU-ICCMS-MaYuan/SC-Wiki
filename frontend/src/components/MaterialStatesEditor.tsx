@@ -270,6 +270,18 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
       itemIndex === index ? { ...item, [field]: value } : item))
   }
 
+  const changeCrystalSystem = (index: number, value: CrystalSystem) => {
+    // 明确选择未知时一次清空报告空间群；不改结构附件，也不在加载历史数据时清理。
+    emitStates(statesRef.current.map((item, itemIndex) => itemIndex === index ? {
+      ...item,
+      crystal_system: value,
+      ...(value === 'unknown' ? {
+        reported_space_group_symbol: null,
+        reported_space_group_number: null,
+      } : {}),
+    } : item))
+  }
+
   // 群号合法（1–230）时按标准表反查符号并按范围表改写晶系（群号权威）；非法输入只保存原值不联动
   const changeSpaceGroupNumber = (index: number, raw: string) => {
     const trimmed = raw.trim()
@@ -665,10 +677,14 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                         labelId={`crystal-system-${index}-label`}
                         label={t('upload.crystalSystemField')}
                         value={crystalSystem}
-                        onChange={event => updateMaterialState(index, 'crystal_system', event.target.value)}
+                        onChange={event => changeCrystalSystem(index, event.target.value as CrystalSystem)}
                       >
                         {CRYSTAL_SYSTEM_VALUES.map(value => (
-                          <MenuItem key={value} value={value}>{dict.enums.crystalSystem[value]}</MenuItem>
+                          <MenuItem key={value} value={value}
+                            // MUI 同值选择不触发 onChange；再次激活未知也须清空残留空间群。
+                            onClick={value === 'unknown' && crystalSystem === 'unknown'
+                              ? () => changeCrystalSystem(index, 'unknown') : undefined}
+                          >{dict.enums.crystalSystem[value]}</MenuItem>
                         ))}
                       </Select>
                     </FormControl>
