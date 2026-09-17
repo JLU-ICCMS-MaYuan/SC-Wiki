@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SC-Wiki · 科学数据统一展示 Demo</title>
+  <!-- Issue #103 布局原型：所有数据与核对操作均为内存中的示例，不请求业务接口。 -->
+  <style>
+    :root { color-scheme: light; --bg:#f8fafc; --paper:#fff; --ink:#1f2937; --muted:#64748b; --line:#dce3eb; --primary:#4f46e5; --teal:#087f8c; --error:#b3261e; --success:#15803d; --warning:#946200; font-family:Inter,Roboto,"Segoe UI","Microsoft YaHei",sans-serif; font-size:14px; color:var(--ink); background:var(--bg); }
+    * { box-sizing:border-box; letter-spacing:0; }
+    body { margin:0; line-height:1.55; }
+    button,input,select,textarea { font:inherit; color:inherit; }
+    button,a,input,select,textarea { -webkit-tap-highlight-color:transparent; }
+    button { cursor:pointer; }
+    button:disabled { cursor:default; opacity:.5; }
+    a { color:var(--primary); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    :focus-visible { outline:3px solid #a5b4fc; outline-offset:3px; }
+    button { touch-action:manipulation; }
+    h1,h2,h3,p { margin:0; }
+    h1 { font-size:25px; line-height:1.4; font-weight:700; }
+    h2 { font-size:18px; font-weight:700; }
+    h3 { font-size:15px; font-weight:700; }
+    [hidden] { display:none !important; }
+    .icon { width:20px; height:20px; fill:currentColor; flex-shrink:0; vertical-align:middle; }
+    .topbar { border-bottom:1px solid var(--line); background:var(--paper); }
+    .topbar-inner { min-height:62px; max-width:1240px; padding:10px 28px; margin:auto; display:flex; align-items:center; justify-content:space-between; gap:16px; }
+    .brand { display:flex; gap:10px; align-items:center; font-size:20px; font-weight:750; }
+    .brand-mark { color:var(--teal); width:28px; height:28px; }
+    .prototype-tag { font-size:12px; color:#586579; background:#f1f5f9; border:1px solid var(--line); padding:3px 9px; border-radius:4px; }
+    .topbar-right { display:flex; align-items:center; gap:16px; font-size:12px; color:var(--muted); }
+    main { max-width:1184px; margin:0 auto; padding:26px 28px 0; }
+    .breadcrumb { display:flex; gap:8px; color:var(--muted); font-size:12px; margin-bottom:16px; }
+    .page-heading { display:flex; justify-content:space-between; align-items:center; gap:18px; margin-bottom:20px; }
+    .subline { color:var(--muted); font-size:13px; margin-top:5px; }
+    .tabs { display:flex; gap:24px; border-bottom:1px solid var(--line); margin-bottom:24px; }
+    .tab { background:none; border:0; border-bottom:3px solid transparent; padding:12px 2px; color:var(--muted); min-height:47px; font-weight:600; }
+    .tab[aria-selected="true"] { color:var(--primary); border-bottom-color:var(--primary); }
+    .btn { display:inline-flex; align-items:center; justify-content:center; gap:7px; border:1px solid var(--line); background:var(--paper); min-height:38px; border-radius:6px; padding:8px 13px; font-weight:600; font-size:13px; line-height:1.4; }
+    .btn:hover:not(:disabled) { background:#f1f5f9; border-color:#b8c3d1; }
+    .btn.primary { color:#fff; background:var(--primary); border-color:var(--primary); }
+    .btn.primary:hover:not(:disabled) { background:#4338ca; }
+    .btn.subtle { border-color:transparent; background:transparent; color:var(--muted); }
+    .btn.danger { color:var(--error); }
+    .icon-btn { width:36px; height:36px; padding:7px; flex-shrink:0; }
+    .actions { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .badge { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600; line-height:1.5; background:#f1f5f9; color:#566579; white-space:nowrap; }
+    .badge.supported { color:var(--success); background:#ecf8ef; }
+    .badge.human { color:var(--teal); background:#e8f6f7; }
+    .badge.uncertain,.badge.missing,.badge.stale { color:var(--error); background:#fff0ed; }
+    .badge.adopted { color:#4338ca; background:#eeedff; }
+    .review-strip { display:flex; justify-content:space-between; gap:16px; padding:14px 0 18px; border-bottom:1px solid var(--line); margin-bottom:6px; align-items:flex-start; }
+    .review-strip-title { font-weight:650; margin-bottom:7px; }
+    .review-strip-items { display:flex; gap:8px; flex-wrap:wrap; }
+    .section { padding:24px 0; border-bottom:1px solid var(--line); }
+    .section-head { display:flex; align-items:center; justify-content:space-between; gap:14px; margin-bottom:17px; }
+    .section-title { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+    .step { color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+    .muted { color:var(--muted); font-size:12px; }
+    .paper-title { font-size:17px; line-height:1.65; max-width:860px; font-weight:600; margin-bottom:16px; }
+    .metadata { display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:16px; }
+    .meta-label { display:block; color:var(--muted); font-size:12px; margin-bottom:5px; }
+    .meta-value { font-size:13px; overflow-wrap:anywhere; }
+    .materials { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+    .material-item { border:1px solid var(--line); border-radius:6px; padding:13px 15px; display:flex; align-items:center; gap:12px; background:var(--paper); min-width:0; }
+    .element { width:43px; height:45px; display:grid; place-content:center; color:var(--teal); border:1px solid #b9dce0; border-radius:4px; background:#eff9fa; font-weight:700; flex-shrink:0; }
+    .material-name { font-weight:650; font-size:14px; overflow-wrap:anywhere; }
+    .material-info { min-width:0; flex:1; }
+    .state-links { display:flex; gap:8px; flex-wrap:wrap; margin-top:3px; font-size:12px; }
+    .evidence-title { background:none; border:0; padding:0; color:inherit; text-align:left; font-weight:inherit; line-height:inherit; }
+    .evidence-title:hover { text-decoration:underline; text-underline-offset:3px; }
+    .evidence-title.problem { color:var(--error); }
+    .evidence-title .icon { width:15px; height:15px; margin-left:5px; opacity:.7; }
+    .relations { width:100%; border-collapse:collapse; table-layout:fixed; font-size:13px; }
+    .relations th { color:var(--muted); background:#f0f4f8; font-size:12px; text-align:left; padding:9px 12px; font-weight:600; }
+    .relations td { padding:13px 12px; border-bottom:1px solid var(--line); vertical-align:top; overflow-wrap:anywhere; }
+    .relations th:first-child { width:180px; }
+    .relations th:nth-child(3) { width:120px; }
+    .relations th:last-child { width:50px; }
+    .relation-text { width:100%; min-height:44px; resize:vertical; line-height:1.6; overflow:hidden; }
+    .relation-title { display:block; font-size:12px; margin-bottom:6px; }
+    input,select,textarea { width:100%; border:1px solid #c5cedb; border-radius:5px; background:var(--paper); padding:9px 11px; min-width:0; }
+    input,select { min-height:41px; }
+    input:hover,select:hover,textarea:hover { border-color:#94a3b8; }
+    input:focus,select:focus,textarea:focus { border-color:var(--primary); outline:2px solid #dedbff; outline-offset:0; }
+    .state { border-top:1px solid var(--line); padding:21px 0 8px; scroll-margin-top:20px; }
+    .state:first-of-type { border-top:0; padding-top:0; }
+    .state-heading { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:16px; }
+    .state-toggle { display:flex; align-items:center; gap:10px; min-width:0; border:0; background:none; padding:0; text-align:left; }
+    .state-toggle .icon { transition:transform .15s; }
+    .state-toggle[aria-expanded="false"] .icon { transform:rotate(-90deg); }
+    .state-name { font-size:16px; font-weight:700; overflow-wrap:anywhere; }
+    .state-subtitle { font-size:12px; color:var(--muted); font-weight:400; }
+    .state-body { padding-left:30px; }
+    .field-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+    .field { min-width:0; }
+    .field-header { display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:7px; min-height:20px; font-size:12px; }
+    .field-header label { color:var(--muted); }
+    .field.problem input,.field.problem select { border-color:var(--error); }
+    .field-value { min-height:41px; padding:9px 0; overflow-wrap:anywhere; }
+    .property-row { display:flex; gap:24px; flex-wrap:wrap; font-size:13px; padding:15px 0; margin-top:2px; }
+    .property-row span { color:var(--muted); margin-right:8px; font-size:12px; }
+    .structure { margin:6px 0 20px; border-top:1px solid var(--line); padding-top:15px; }
+    .structure-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; }
+    .structure-title { font-weight:650; font-size:13px; }
+    .structure-body { display:grid; grid-template-columns:minmax(190px,1fr) minmax(0,2.5fr); gap:20px; align-items:center; }
+    .file-name { font-size:13px; margin-bottom:6px; overflow-wrap:anywhere; }
+    .cell-values { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; margin:0; }
+    .cell-values dt { color:var(--muted); font-size:12px; }
+    .cell-values dd { font-size:14px; font-variant-numeric:tabular-nums; margin:5px 0 0; white-space:nowrap; }
+    .empty { padding:12px 0; color:var(--muted); font-size:13px; }
+    .footer { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:23px 0 28px; }
+    .save-state { display:flex; gap:7px; align-items:center; color:var(--muted); font-size:12px; }
+    .dirty { color:var(--warning); }
+    .footer-note { font-size:11px; color:var(--muted); border-top:1px solid var(--line); padding:14px 0 20px; }
+    dialog { border:0; padding:0; background:var(--paper); color:var(--ink); box-shadow:-6px 0 28px #18223124; max-width:100%; max-height:100%; }
+    dialog::backdrop { background:#1118274d; }
+    #evidence-dialog { position:fixed; inset:0 0 0 auto; width:470px; height:100dvh; margin:0; }
+    .drawer-shell { height:100%; display:flex; flex-direction:column; }
+    .drawer-header { display:flex; gap:12px; justify-content:space-between; align-items:flex-start; padding:22px 22px 18px; border-bottom:1px solid var(--line); }
+    .drawer-kicker { font-size:12px; color:var(--muted); margin-bottom:7px; }
+    .drawer-title { font-size:18px; line-height:1.5; }
+    .drawer-body { padding:22px; overflow:auto; flex:1; }
+    .drawer-section { padding-bottom:23px; }
+    .drawer-section h3 { font-size:13px; margin-bottom:10px; }
+    .current-value { background:#f3f6fa; border-left:3px solid #b9c6d6; padding:12px 14px; font-size:14px; overflow-wrap:anywhere; white-space:pre-wrap; }
+    .reason { font-size:13px; margin-top:10px; line-height:1.8; }
+    .source { border-top:1px solid var(--line); border-bottom:1px solid var(--line); padding:13px 0; font-size:13px; }
+    .source summary { cursor:pointer; color:var(--primary); font-weight:600; }
+    .source blockquote { margin:14px 0; padding-left:12px; border-left:2px solid #b3d7dd; line-height:1.8; overflow-wrap:anywhere; }
+    .drawer-footer { border-top:1px solid var(--line); padding:16px 22px; display:flex; justify-content:flex-end; gap:9px; flex-wrap:wrap; }
+    .error-text { color:var(--error); font-size:12px; margin-top:6px; }
+    #reason-input { min-height:108px; resize:vertical; }
+    #structure-dialog { width:520px; border-radius:8px; }
+    .modal-content { padding:22px; }
+    .structure-choice { display:flex; gap:12px; padding:15px 0; align-items:flex-start; border-bottom:1px solid var(--line); cursor:pointer; }
+    .structure-choice input { width:17px; min-height:17px; margin:3px 0 0; flex-shrink:0; }
+    .structure-choice strong { display:block; font-size:13px; margin-bottom:5px; }
+    #toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%); max-width:calc(100% - 32px); background:#243442; color:#fff; border-radius:6px; padding:11px 18px; box-shadow:0 4px 16px #0002; z-index:10; font-size:13px; pointer-events:none; }
+    @media(max-width:850px) { .field-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .cell-values { grid-template-columns:repeat(3,minmax(0,1fr)); } .structure-body { grid-template-columns:1fr 1.4fr; } .relations th:first-child { width:145px; } .relations th:nth-child(3) { width:95px; } }
+    @media(max-width:600px) {
+      main { padding:20px 16px 0; } .topbar-inner { padding:12px 16px; } .topbar-right .muted { display:none; } .page-heading { align-items:flex-start; } h1 { font-size:22px; } .tabs { gap:0; } .tab { flex:1; padding:12px 4px; }
+      .review-strip { flex-direction:column; } .metadata { grid-template-columns:1fr 1fr; } .materials { grid-template-columns:1fr; } .material-item { padding:10px 12px; } .section { padding:21px 0; } .section-head { align-items:flex-start; }
+      .relations,.relations tbody,.relations tr,.relations td { display:block; width:100%; } .relations thead { display:none; } .relations tr { position:relative; padding:12px 0; border-bottom:1px solid var(--line); } .relations td { border:0; padding:5px 0; } .relations td:first-child { padding-right:46px; } .relations td:last-child { position:absolute; top:12px; right:0; width:auto; } .relations td:nth-child(3) { padding-top:8px; }
+      .state-body { padding-left:0; } .state-heading { align-items:flex-start; } .state-name { font-size:15px; } .state-heading > .badge { margin-top:2px; } .field-grid { gap:12px; } .field-header { flex-wrap:wrap; } .structure-body { grid-template-columns:1fr; gap:14px; } .structure-head { align-items:flex-start; } .cell-values { gap:10px; } .property-row { gap:10px 20px; } .footer { flex-wrap:wrap; } .footer .actions { margin-left:auto; } .drawer-header { padding:18px; } .drawer-body { padding:18px; } .drawer-footer { padding:14px 18px; }
+    }
+    @media(prefers-reduced-motion:reduce) { * { scroll-behavior:auto !important; transition:none !important; } }
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="topbar-inner"><div class="brand"><span id="brand-icon"></span>SC-Wiki</div><div class="topbar-right"><span class="muted">科学数据 · 文献管理</span><span class="prototype-tag">Demo · 示例数据</span></div></div></header>
+  <main>
+    <div class="breadcrumb"><span>文献管理</span><span>/</span><span id="breadcrumb-view">审核编辑</span></div>
+    <div class="page-heading"><div><h1 id="page-title">审核编辑</h1><p class="subline">锡、铅与锡汞体系的超导现象研究</p></div><span class="badge" id="role-badge">管理员</span></div>
+    <nav class="tabs" role="tablist" aria-label="页面视图">
+      <button class="tab" id="tab-upload" role="tab" aria-controls="workspace" aria-selected="false" tabindex="-1" data-mode="upload">上传校对</button>
+      <button class="tab" id="tab-review" role="tab" aria-controls="workspace" aria-selected="true" data-mode="review">审核编辑</button>
+      <button class="tab" id="tab-detail" role="tab" aria-controls="workspace" aria-selected="false" tabindex="-1" data-mode="detail">论文详情</button>
+    </nav>
+    <div id="workspace" role="tabpanel" aria-labelledby="tab-review"></div>
+    <div class="footer-note">交互演示 · 样例论文、结构与核对结果仅用于布局预览 · 不连接真实服务</div>
+  </main>
+  <dialog id="evidence-dialog" aria-labelledby="drawer-title">
+    <div class="drawer-shell">
+      <header class="drawer-header"><div><div class="drawer-kicker" id="drawer-context"></div><h2 class="drawer-title" id="drawer-title"></h2></div><button class="btn icon-btn subtle" data-action="close-evidence" aria-label="关闭来源核对" title="关闭来源核对" data-icon="close"></button></header>
+      <div class="drawer-body" id="drawer-body"></div>
+      <footer class="drawer-footer" id="drawer-actions"></footer>
+    </div>
+  </dialog>
+  <dialog id="structure-dialog" aria-labelledby="structure-dialog-title">
+    <div class="drawer-header"><div><div class="drawer-kicker">示例结构文件</div><h2 id="structure-dialog-title">选择结构</h2></div><button class="btn icon-btn subtle" data-action="close-structure" aria-label="关闭结构选择" title="关闭结构选择" data-icon="close"></button></div>
+    <form id="structure-form"><div class="modal-content" id="structure-options"></div><div class="drawer-footer"><button class="btn" type="button" data-action="close-structure">取消</button><button class="btn primary" type="submit">使用此结构</button></div></form>
+  </dialog>
+  <div id="toast" role="status" hidden></div>
+  <script>
+    'use strict';
+    // 使用项目现有 @mui/icons-material 的图标路径，保持单文件可离线打开。
+    const paths = {
+      close:'M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z',
+      add:'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z',
+      delete:'M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6zM8 9h8v10H8zm7.5-5-1-1h-5l-1 1H5v2h14V4z',
+      save:'M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7zm2 16H5V5h11.17L19 7.83zm-7-7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3M6 6h9v4H6z',
+      expand:'M16.59 8.59 12 13.17 7.41 8.59 6 10l6 6 6-6z',
+      arrow:'m12 4-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z',
+      science:'M13 11.33 18 18H6l5-6.67V6h2m2.96-2H8.04c-.42 0-.65.48-.39.81L9 6.5v4.17L3.2 18.4c-.49.66-.02 1.6.8 1.6h16c.82 0 1.29-.94.8-1.6L15 10.67V6.5l1.35-1.69c.26-.33.03-.81-.39-.81',
+    };
+    const icon = (name, cls='') => `<svg class="icon ${cls}" viewBox="0 0 24 24" aria-hidden="true"><path d="${paths[name]}"></path></svg>`;
+    const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const clone = value => JSON.parse(JSON.stringify(value));
+    const kinds = {experimental:'实验',theoretical:'理论',mixed:'理论与实验',unknown:'未知'};
+    const statuses = {unchecked:'未核对',uncertain:'待确认',missing:'缺少来源',stale:'修改后待核对',supported:'AI 通过',human:'人工确认',adopted:'已采纳建议'};
+    const modes = {upload:['上传校对','贡献者'],review:['审核编辑','管理员'],detail:['论文详情','只读']};
+    const structureFiles = {
+      'sn-a':{id:'sn-a',family:'Sn',file:'Sn-example-A.cif',elements:'Sn',atoms:4,system:'四方',params:[5.8316,5.8316,3.1819,90,90,90]},
+      'sn-b':{id:'sn-b',family:'Sn',file:'Sn-example-B.cif',elements:'Sn',atoms:4,system:'四方',params:[5.84,5.84,3.19,90,90,90]},
+      'pb-a':{id:'pb-a',family:'Pb',file:'Pb-example-A.cif',elements:'Pb',atoms:4,system:'立方',params:[4.95,4.95,4.95,90,90,90]},
+      'pb-b':{id:'pb-b',family:'Pb',file:'Pb-example-B.cif',elements:'Pb',atoms:4,system:'立方',params:[4.96,4.96,4.96,90,90,90]},
+      'snhg-a':{id:'snhg-a',family:'SnHg',file:'SnHg-illustrative.cif',elements:'Sn, Hg',atoms:2,system:'立方（示例）',params:[4.8,4.8,4.8,90,90,90]},
+    };
+    const initial = {
+      states:[
+        {id:'sn',name:'锡',formula:'Sn',kind:'experimental',pressure:'常压',tc:'3.72 K',method:'电阻测量',structure:'sn-a'},
+        {id:'pb',name:'铅',formula:'Pb',kind:'experimental',pressure:'常压',tc:'7.19 K',method:'电阻测量',structure:'pb-a'},
+        {id:'snhg',name:'锡汞体系',formula:'SnHg',kind:'experimental',pressure:'常压',tc:'尚未确认',method:'电阻测量',structure:null},
+      ],
+      relations:[
+        {id:'r-sn',stateId:'sn',text:'研究锡在低温下的电阻变化，报告其进入超导状态的实验现象。'},
+        {id:'r-pb',stateId:'pb',text:'以铅作为独立研究对象，测量其电阻消失的温度，并与锡的实验结果进行比较。'},
+        {id:'r-snhg',stateId:'snhg',text:'研究汞齐化锡箔在沸腾液氦中的电阻行为；观察到普通电阻消失，但原文没有明确给出独立的临界温度数值，需要区分实验温度与超导转变温度。'},
+      ],
+      evidence:{
+        'materials':{status:'supported'},
+        'rel:r-sn':{status:'supported'}, 'rel:r-pb':{status:'supported'}, 'rel:r-snhg':{status:'uncertain'},
+        'state:sn:name':{status:'supported'}, 'state:pb:name':{status:'supported'}, 'state:snhg:name':{status:'supported'},
+        'state:sn:kind':{status:'supported'}, 'state:pb:kind':{status:'unchecked'}, 'state:snhg:kind':{status:'uncertain'},
+        'structure:sn:sn-a':{status:'uncertain'}, 'structure:pb:pb-a':{status:'supported'},
+      },
+    };
+    let draft=clone(initial), saved=clone(initial), mode='review', relationSequence=0, savedTime='尚未保存';
+    let activeEvidence=null, evidenceOpener=null, structureState=null, structureOpener=null, toastTimer;
+    const collapsed=new Set();
+    const workspace=document.getElementById('workspace');
+    const drawer=document.getElementById('evidence-dialog');
+    const structureDialog=document.getElementById('structure-dialog');
+    const readOnly=()=>mode==='detail';
+    const stateById=id=>draft.states.find(s=>s.id===id);
+    const stateLabel=s=>`${s.name.trim() || '未命名材料'} · ${s.formula}`;
+    const evidence=key=>draft.evidence[key] || {status:'unchecked'};
+    const problem=key=>['uncertain','missing','stale'].includes(evidence(key).status);
+    const badge=key=>`<span class="badge ${esc(evidence(key).status)}">${esc(statuses[evidence(key).status])}</span>`;
+    function evidenceButton(key, label, context='') {
+      return `<button type="button" class="evidence-title ${problem(key)?'problem':''}" data-evidence="${esc(key)}" title="${esc(context || label)}：查看来源核对" aria-label="${esc(context || label)}：查看来源核对">${esc(label)}</button>`;
+    }
+    function visibleEvidenceKeys() {
+      return ['materials',...draft.relations.map(r=>'rel:'+r.id),...draft.states.flatMap(s=>[
+        `state:${s.id}:name`,`state:${s.id}:kind`,...(s.structure?[`structure:${s.id}:${s.structure}`]:[]),
+      ])];
+    }
+    function summaryMarkup() {
+      const counts={};
+      visibleEvidenceKeys().forEach(key=>{const status=evidence(key).status; counts[status]=(counts[status]||0)+1;});
+      return Object.entries(statuses).filter(([status])=>counts[status]).map(([status,label])=>`<span class="badge ${status}">${label} ${counts[status]}</span>`).join('');
+    }
+    function materialsMarkup() {
+      return draft.states.map((s,i)=>`<div class="material-item"><span class="element">${esc(s.formula)}</span><div class="material-info"><div class="material-name">${esc(s.name.trim()||'未命名材料')}</div><div class="state-links"><a href="#material-${s.id}" data-jump="${s.id}">材料状态 ${String(i+1).padStart(2,'0')} ${icon('arrow')}</a></div></div></div>`).join('');
+    }
+    function relationsMarkup() {
+      if (!draft.relations.length) return '<p class="empty">暂无材料关系</p>';
+      return `<table class="relations"><thead><tr><th scope="col">材料</th><th scope="col">论文与材料的关系</th><th scope="col">来源核对</th><th scope="col"><span class="muted">${readOnly()?'':'操作'}</span></th></tr></thead><tbody>${draft.relations.map(r=>{
+        const s=stateById(r.stateId), key='rel:'+r.id;
+        return `<tr data-relation="${r.id}"><td>${readOnly()?`<strong>${esc(stateLabel(s))}</strong>`:`<select aria-label="${esc(s.formula)} 关系的材料" data-relation-field="stateId" data-id="${r.id}">${draft.states.map(item=>`<option value="${item.id}" ${item.id===r.stateId?'selected':''}>${esc(stateLabel(item))}</option>`).join('')}</select>`}</td><td><div class="relation-title">${evidenceButton(key,'材料关系',`${s.formula} 材料关系`)}</div>${readOnly()?`<div>${esc(r.text||'未填写')}</div>`:`<textarea class="relation-text" rows="2" aria-label="${esc(s.formula)} 材料关系" data-relation-field="text" data-id="${r.id}">${esc(r.text)}</textarea>`}</td><td data-badge="${key}">${badge(key)}</td><td>${readOnly()?'':`<button class="btn icon-btn subtle danger" data-action="delete-relation" data-id="${r.id}" title="删除 ${esc(s.formula)} 材料关系" aria-label="删除 ${esc(s.formula)} 材料关系">${icon('delete')}</button>`}</td></tr>`;
+      }).join('')}</tbody></table>`;
+    }
+    function fieldMarkup(s, field, label) {
+      const key=`state:${s.id}:${field}`, value=field==='kind'?kinds[s.kind]:s.name;
+      const control=readOnly()?`<div class="field-value">${esc(value||'未填写')}</div>`:field==='kind'
+        ?`<select id="${s.id}-${field}" aria-label="${esc(s.formula)} ${label}" data-state-field="${field}" data-id="${s.id}">${Object.entries(kinds).map(([value,text])=>`<option value="${value}" ${s.kind===value?'selected':''}>${text}</option>`).join('')}</select>`
+        :`<input id="${s.id}-${field}" aria-label="${esc(s.formula)} ${label}" data-state-field="${field}" data-id="${s.id}" value="${esc(s.name)}">`;
+      return `<div class="field ${problem(key)?'problem':''}" data-field-key="${key}"><div class="field-header">${evidenceButton(key,label,`${s.formula} ${label}`)}</div>${control}<div data-badge="${key}" style="margin-top:6px">${badge(key)}</div></div>`;
+    }
+    function structureMarkup(s) {
+      const f=structureFiles[s.structure], key=`structure:${s.id}:${s.structure}`;
+      const title=f?evidenceButton(key,'晶体结构与晶格参数',`${s.formula} 晶体结构与晶格参数`):'晶体结构与晶格参数';
+      return `<section class="structure" aria-label="${esc(s.formula)} 结构附件"><div class="structure-head"><div><h3 class="structure-title">${title}</h3>${f?`<div data-badge="${key}" style="margin-top:6px">${badge(key)}</div>`:''}</div>${readOnly()?'':`<button class="btn" data-action="choose-structure" data-id="${s.id}">${icon('add')}${f?'更换结构':'添加结构'}</button>`}</div>${f?`<div class="structure-body"><div><div class="file-name">${esc(f.file)}</div><div class="muted">元素 ${esc(f.elements)} · ${f.atoms} 个原子 · ${esc(f.system)}晶胞</div><div class="muted">结构文件提供 · 示例参数</div></div><dl class="cell-values">${f.params.map((v,i)=>`<div><dt>${['a','b','c','α','β','γ'][i]} (${i<3?'Å':'°'})</dt><dd>${Number(v).toFixed(i<3?4:1)}</dd></div>`).join('')}</dl></div>`:'<p class="empty">未提供结构文件，晶格参数未知</p>'}</section>`;
+    }
+    function statesMarkup() {
+      return draft.states.map((s,i)=>`<article class="state" id="material-${s.id}"><header class="state-heading"><button class="state-toggle" aria-expanded="${!collapsed.has(s.id)}" aria-controls="state-body-${s.id}" data-action="toggle-state" data-id="${s.id}">${icon('expand')}<span><span class="state-name" data-name-for="${s.id}">${esc(stateLabel(s))}</span><span class="state-subtitle"> · 状态 ${String(i+1).padStart(2,'0')}</span></span></button><span class="badge" data-kind-for="${s.id}">${kinds[s.kind]}</span></header><div class="state-body" id="state-body-${s.id}" ${collapsed.has(s.id)?'hidden':''}><div class="field-grid">${fieldMarkup(s,'name','材料名称')}<div class="field"><div class="field-header"><span class="muted">化学式</span></div><div class="field-value">${esc(s.formula)}</div></div>${fieldMarkup(s,'kind','材料状态类型')}<div class="field"><div class="field-header"><span class="muted">压强条件</span></div><div class="field-value">${esc(s.pressure)}</div></div></div><div class="property-row"><div><span>超导体类别</span>常规超导体</div><div><span>Tc</span>${esc(s.tc)}</div><div><span>测量方法</span>${esc(s.method)}</div></div>${structureMarkup(s)}</div></article>`).join('');
+    }
+    function render() {
+      document.getElementById('page-title').textContent=modes[mode][0];
+      document.getElementById('breadcrumb-view').textContent=modes[mode][0];
+      document.getElementById('role-badge').textContent=modes[mode][1];
+      document.querySelectorAll('[data-mode]').forEach(tab=>{tab.setAttribute('aria-selected',String(tab.dataset.mode===mode));tab.tabIndex=tab.dataset.mode===mode?0:-1;});
+      workspace.setAttribute('aria-labelledby','tab-'+mode);
+      workspace.innerHTML=`
+        <section class="review-strip" aria-label="来源核对概况"><div><div class="review-strip-title">来源核对 <span class="muted">· 示例结果</span></div><div class="review-strip-items" id="review-counts">${summaryMarkup()}</div></div><span class="muted">${readOnly()?'当前草稿预览':mode==='review'?'待审核':'上传草稿'}</span></section>
+        <section class="section"><div class="section-head"><div class="section-title"><span class="step">01</span><h2>论文基本信息</h2></div><span class="badge">实验论文</span></div><p class="paper-title">锡、铅与锡汞体系的超导现象研究</p><div class="metadata"><div><span class="meta-label">作者</span><div class="meta-value">示例研究团队</div></div><div><span class="meta-label">文献来源</span><div class="meta-value">示例文献</div></div><div><span class="meta-label">研究方法</span><div class="meta-value">低温电阻测量</div></div><div><span class="meta-label">材料状态</span><div class="meta-value">3 项</div></div></div></section>
+        <section class="section"><div class="section-head"><div class="section-title"><span class="step">02</span><h2>${evidenceButton('materials','研究材料')}</h2><span data-badge="materials">${badge('materials')}</span></div><span class="muted">由材料状态汇总</span></div><div class="materials" id="materials-summary">${materialsMarkup()}</div></section>
+        <section class="section"><div class="section-head"><div class="section-title"><span class="step">03</span><h2>材料关系</h2></div>${readOnly()?'':`<button class="btn" data-action="add-relation">${icon('add')}添加关系</button>`}</div><div id="relations-region">${relationsMarkup()}</div></section>
+        <section class="section" style="border-bottom:0"><div class="section-head"><div class="section-title"><span class="step">04</span><h2>材料状态与结构</h2></div><div class="actions"><button class="btn subtle" data-action="expand-all">全部展开</button><button class="btn subtle" data-action="collapse-all">全部折叠</button></div></div><div id="states-region">${statesMarkup()}</div></section>
+        <footer class="footer"><span class="save-state" id="save-state" aria-live="polite"></span>${readOnly()?'<span class="muted">只读详情</span>':`<div class="actions"><button class="btn" data-action="cancel">取消修改</button><button class="btn primary" data-action="save">${icon('save')}保存修改</button></div>`}</footer>`;
+      updateSaveState();
+      sizeRelations();
+    }
+    function sizeRelations() {
+      document.querySelectorAll('.relation-text').forEach(node=>{node.style.height='auto';node.style.height=(node.scrollHeight+2)+'px';});
+    }
+    function updateSaveState() {
+      const dirty=JSON.stringify(draft)!==JSON.stringify(saved), node=document.getElementById('save-state');
+      node.classList.toggle('dirty',dirty);
+      node.textContent=dirty?'有未保存的修改':savedTime==='尚未保存'?'当前为初始示例':`示例快照已保存 · ${savedTime}`;
+    }
+    function refreshAnnotations() {
+      document.querySelectorAll('[data-evidence]').forEach(node=>node.classList.toggle('problem',problem(node.dataset.evidence)));
+      document.querySelectorAll('[data-badge]').forEach(node=>node.innerHTML=badge(node.dataset.badge));
+      document.querySelectorAll('[data-field-key]').forEach(node=>node.classList.toggle('problem',problem(node.dataset.fieldKey)));
+      document.getElementById('review-counts').innerHTML=summaryMarkup();
+      updateSaveState();
+    }
+    function invalidate(key) {
+      const old=evidence(key);
+      draft.evidence[key]={status:'stale',previousStatus:old.status==='stale'?old.previousStatus:old.status};
+    }
+    function notify(message) {
+      const toast=document.getElementById('toast');clearTimeout(toastTimer);toast.textContent=message;toast.hidden=false;
+      toastTimer=setTimeout(()=>{toast.hidden=true;},2800);
+    }
+    function keyInfo(key) {
+      if (key==='materials') return {label:'研究材料',context:'论文级信息',value:draft.states.map(stateLabel).join('\n'),reason:'材料清单来自三个材料状态。示例核对已确认材料归属。',quote:'示例引文：本研究分别考察锡、铅以及锡汞体系。'};
+      if (key.startsWith('rel:')) {
+        const r=draft.relations.find(item=>item.id===key.slice(4)), s=stateById(r.stateId);
+        return {label:'材料关系',context:stateLabel(s),value:r.text||'未填写',reason:r.stateId==='snhg'?'实验温度不能直接当作临界温度。关系描述应保留原文能够支持的范围。':'核对论文对该材料的研究结论，避免把背景引用写成本论文发现。',quote:`示例引文：${s.formula} 样品在低温实验中接受电阻测量。`,suggestion:r.stateId==='snhg'?'研究汞齐化锡箔在液氦中的电阻消失现象；该段没有报告独立的 Tc 数值。':null};
+      }
+      const [,id,field]=key.split(':'), s=stateById(id);
+      if (key.startsWith('structure:')) {
+        const f=structureFiles[field];
+        return {label:'晶体结构与晶格参数',context:stateLabel(s),value:`${f.file}\na = ${f.params[0]} Å · b = ${f.params[1]} Å · c = ${f.params[2]} Å\nα = ${f.params[3]}° · β = ${f.params[4]}° · γ = ${f.params[5]}°`,reason:'参数由示例结构文件解析。论文没有提供该组参数的直接出处，不能将其表述为作者报告的结构。',source:'示例结构文件 · 演示提供者',quote:null};
+      }
+      return {label:field==='kind'?'材料状态类型':'材料名称',context:stateLabel(s),value:field==='kind'?kinds[s.kind]:(s.name||'未填写'),reason:field==='kind'?'确认该材料状态来自实验、理论计算或两者结合。此分类与常规／非常规超导体类别分别记录。':'核对材料名称与实验样品是否一致。',quote:`示例引文：对 ${s.formula} 样品开展低温电阻测量。`,suggestion:field==='kind'?'experimental':null};
+    }
+    function renderDrawer() {
+      const key=activeEvidence, info=keyInfo(key), record=evidence(key), stale=record.status==='stale';
+      document.getElementById('drawer-title').textContent=info.label;
+      document.getElementById('drawer-context').textContent=info.context;
+      const reason=stale?'当前值已经修改，先前的核对结果与人工确认已失效。':info.reason;
+      document.getElementById('drawer-body').innerHTML=`
+        <section class="drawer-section"><h3>当前值</h3><div class="current-value">${esc(info.value)}</div></section>
+        <section class="drawer-section"><h3>来源核对</h3>${badge(key)}<p class="reason">${esc(reason)}</p>${record.status==='human'?`<p class="reason"><strong>人工确认理由</strong><br>${esc(record.reason)}</p><p class="muted">确认人：演示管理员 · 原核对状态：${esc(statuses[record.originalStatus])}</p>`:''}</section>
+        <section class="drawer-section"><details class="source"><summary>${info.quote?'查看示例原文':'查看结构来源'}</summary><p class="muted" style="margin-top:12px">${esc(info.source||'示例文献 · 演示片段，无真实页码')}</p>${info.quote?`<blockquote>${esc(info.quote)}</blockquote>`:'<p class="reason">来自演示结构文件，不代表该论文报告的晶体结构。提供者为虚构演示身份。</p>'}</details></section>
+        ${info.suggestion&&!stale&&!['human','adopted'].includes(record.status)?`<section class="drawer-section"><h3>示例建议</h3><div class="current-value">${esc(key.endsWith(':kind')?kinds[info.suggestion]:info.suggestion)}</div>${readOnly()?'':`<button class="btn" data-action="adopt" style="margin-top:12px">采纳示例建议</button>`}</section>`:''}
+        ${mode==='review'?`<section class="drawer-section"><label for="reason-input"><h3>人工确认理由</h3></label><textarea id="reason-input" placeholder="填写判断依据" aria-describedby="reason-error">${esc(record.reason||record.draftReason||'')}</textarea><p class="error-text" id="reason-error" hidden>请填写人工确认理由。</p></section>`:''}`;
+      document.getElementById('drawer-actions').innerHTML=`${!readOnly()&&['human','adopted'].includes(record.status)?'<button class="btn" data-action="undo-decision">撤销接受</button>':''}<button class="btn" data-action="close-evidence">关闭</button>${mode==='review'?'<button class="btn primary" data-action="confirm-evidence">确认当前值</button>':''}`;
+    }
+    function openEvidence(key,opener) {
+      activeEvidence=key;evidenceOpener=opener;renderDrawer();drawer.showModal();
+      drawer.querySelector('[data-action="close-evidence"]').focus({preventScroll:true});
+    }
+    function closeEvidence() { drawer.close(); }
+    drawer.addEventListener('close',()=>{
+      const oldKey=activeEvidence;
+      const target=evidenceOpener?.isConnected?evidenceOpener:document.querySelector(`[data-evidence="${oldKey}"]`);
+      target?.focus({preventScroll:true});activeEvidence=null;
+    });
+    drawer.addEventListener('click',event=>{if(event.target===drawer) {const rect=drawer.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right)closeEvidence();}});
+    function openStructure(id,opener) {
+      structureState=id;structureOpener=opener;
+      const s=stateById(id), files=Object.values(structureFiles).filter(f=>f.family===s.formula);
+      document.getElementById('structure-dialog-title').textContent=`${s.formula} · ${s.structure?'更换':'添加'}结构`;
+      document.getElementById('structure-options').innerHTML=files.map((f,i)=>`<label class="structure-choice"><input type="radio" name="structure" value="${f.id}" ${(s.structure===f.id||(!s.structure&&i===0))?'checked':''}><span><strong>${esc(f.file)}</strong><span class="muted">${f.system} · ${f.atoms} 个原子<br>a ${f.params[0]} Å · b ${f.params[1]} Å · c ${f.params[2]} Å</span></span></label>`).join('');
+      structureDialog.showModal();
+    }
+    structureDialog.addEventListener('close',()=>{
+      const target=structureOpener?.isConnected?structureOpener:document.querySelector(`[data-action="choose-structure"][data-id="${structureState}"]`);
+      target?.focus({preventScroll:true});structureState=null;
+    });
+    document.getElementById('structure-form').addEventListener('submit',event=>{
+      event.preventDefault();if(readOnly())return;
+      const selected=new FormData(event.target).get('structure'), s=stateById(structureState);
+      if (selected && selected!==s.structure) {s.structure=selected;invalidate(`structure:${s.id}:${selected}`);render();notify('已更新结构，晶格参数随文件更新');}
+      structureDialog.close();
+    });
+    document.addEventListener('input',event=>{
+      const node=event.target;
+      if(readOnly())return;
+      if(node.id==='reason-input') {draft.evidence[activeEvidence]={...evidence(activeEvidence),draftReason:node.value};document.getElementById('reason-error').hidden=true;updateSaveState();return;}
+      if(node.dataset.stateField==='name') {
+        const s=stateById(node.dataset.id);if(s.name===node.value)return;s.name=node.value;
+        visibleEvidenceKeys().filter(key=>key===`state:${s.id}:name`||key===`state:${s.id}:kind`||key.startsWith(`structure:${s.id}:`)||draft.relations.some(r=>'rel:'+r.id===key&&r.stateId===s.id)).forEach(invalidate);
+        invalidate('materials');
+        document.querySelector(`[data-name-for="${s.id}"]`).textContent=stateLabel(s);
+        document.getElementById('materials-summary').innerHTML=materialsMarkup();
+        document.getElementById('relations-region').innerHTML=relationsMarkup();
+        sizeRelations();
+        refreshAnnotations();
+      }
+      if(node.dataset.relationField==='text') {
+        const r=draft.relations.find(r=>r.id===node.dataset.id);if(r.text===node.value)return;r.text=node.value;invalidate('rel:'+r.id);sizeRelations();refreshAnnotations();
+      }
+    });
+    document.addEventListener('change',event=>{
+      const node=event.target;if(readOnly())return;
+      if(node.dataset.stateField==='kind') {
+        const s=stateById(node.dataset.id);s.kind=node.value;invalidate(`state:${s.id}:kind`);
+        document.querySelector(`[data-kind-for="${s.id}"]`).textContent=kinds[s.kind];refreshAnnotations();
+      }
+      if(node.dataset.relationField==='stateId') {
+        const r=draft.relations.find(r=>r.id===node.dataset.id);r.stateId=node.value;invalidate('rel:'+r.id);
+        document.getElementById('relations-region').innerHTML=relationsMarkup();sizeRelations();refreshAnnotations();
+      }
+    });
+    document.addEventListener('click',event=>{
+      const node=event.target.closest('button,a');if(!node)return;
+      if(node.dataset.mode) {mode=node.dataset.mode;render();return;}
+      if(node.dataset.evidence) {openEvidence(node.dataset.evidence,node);return;}
+      if(node.dataset.jump) {
+        event.preventDefault();const id=node.dataset.jump;collapsed.delete(id);render();
+        document.getElementById('material-'+id).scrollIntoView({block:'start'});
+        document.querySelector(`[data-action="toggle-state"][data-id="${id}"]`).focus({preventScroll:true});return;
+      }
+      const action=node.dataset.action, id=node.dataset.id;
+      if(action==='toggle-state') {collapsed.has(id)?collapsed.delete(id):collapsed.add(id);const body=document.getElementById('state-body-'+id);body.hidden=collapsed.has(id);node.setAttribute('aria-expanded',String(!body.hidden));return;}
+      if(action==='expand-all'||action==='collapse-all') {draft.states.forEach(s=>action==='collapse-all'?collapsed.add(s.id):collapsed.delete(s.id));render();document.querySelector(`[data-action="${action}"]`).focus({preventScroll:true});return;}
+      if(action==='close-evidence') {closeEvidence();return;}
+      if(action==='close-structure') {structureDialog.close();return;}
+      if(readOnly())return;
+      if(action==='save') {
+        saved=clone(draft);savedTime=new Date().toLocaleTimeString('zh-CN',{hour12:false});updateSaveState();notify('已保存到当前页面的示例快照');
+      } else if(action==='cancel') {draft=clone(saved);render();notify('已恢复上次保存的示例快照');}
+      else if(action==='add-relation') {
+        const relation={id:'new-'+(++relationSequence),stateId:'sn',text:''};draft.relations.push(relation);draft.evidence['rel:'+relation.id]={status:'unchecked'};
+        render();document.querySelector(`[data-relation="${relation.id}"] textarea`).focus();
+      } else if(action==='delete-relation') {
+        draft.relations=draft.relations.filter(r=>r.id!==id);delete draft.evidence['rel:'+id];render();document.querySelector('[data-action="add-relation"]').focus({preventScroll:true});notify('已删除关系，保存前可取消恢复');
+      } else if(action==='choose-structure') {openStructure(id,node);}
+      else if(action==='confirm-evidence'&&mode==='review') {
+        const reason=document.getElementById('reason-input').value.trim();
+        if(!reason) {document.getElementById('reason-error').hidden=false;document.getElementById('reason-input').focus();return;}
+        const old=evidence(activeEvidence);draft.evidence[activeEvidence]={status:'human',reason,originalStatus:old.originalStatus||old.status};
+        refreshAnnotations();closeEvidence();notify('已人工确认当前值，尚未保存主表单');
+      } else if(action==='adopt') {
+        const key=activeEvidence, info=keyInfo(key), previousValue=key.startsWith('rel:')?draft.relations.find(r=>'rel:'+r.id===key).text:stateById(key.split(':')[1]).kind;
+        if(key.startsWith('rel:'))draft.relations.find(r=>'rel:'+r.id===key).text=info.suggestion;
+        else stateById(key.split(':')[1]).kind=info.suggestion;
+        const old=evidence(key);draft.evidence[key]={status:'adopted',originalStatus:old.originalStatus||old.status,previousValue};
+        render();renderDrawer();document.querySelector('#drawer-actions [data-action="close-evidence"]').focus({preventScroll:true});notify('已采纳示例建议，尚未保存主表单');
+      } else if(action==='undo-decision') {
+        const key=activeEvidence, old=evidence(key);
+        if(old.status==='adopted'&&old.previousValue!==undefined) {
+          if(key.startsWith('rel:'))draft.relations.find(r=>'rel:'+r.id===key).text=old.previousValue;
+          else stateById(key.split(':')[1]).kind=old.previousValue;
+        }
+        draft.evidence[key]={status:old.originalStatus||'unchecked'};render();renderDrawer();
+        drawer.querySelector('[data-action="close-evidence"]').focus({preventScroll:true});notify('已撤销接受');
+      }
+    });
+    document.querySelector('.tabs').addEventListener('keydown',event=>{
+      const tabs=[...document.querySelectorAll('[data-mode]')], index=tabs.indexOf(document.activeElement);
+      if(index<0||!['ArrowLeft','ArrowRight','Home','End'].includes(event.key))return;
+      event.preventDefault();const next=event.key==='Home'?0:event.key==='End'?2:(index+(event.key==='ArrowRight'?1:2))%3;
+      mode=tabs[next].dataset.mode;render();tabs[next].focus();
+    });
+    document.getElementById('brand-icon').innerHTML=icon('science','brand-mark');
+    document.querySelectorAll('[data-icon]').forEach(node=>node.innerHTML=icon(node.dataset.icon));
+    window.addEventListener('resize',sizeRelations);
+    render();
+  </script>
+</body>
+</html>
