@@ -285,7 +285,7 @@ describe('论文上传工作区', () => {
                   record_key: 'record-tc', module_code: 'superconductive_properties', record_type: 'predicted_tc',
                   property_code: 'tc', definition_key: 'record.superconductive_properties.predicted_tc.mcmillan',
                   definition_version: 1, name_raw: 'critical temperature', value_kind: 'number',
-                  value_raw: '', value_number: null, unit_raw: 'K', method_code: 'mcmillan', payload: {
+                  value_raw: '300', value_number: 300, unit_raw: 'K', method_code: 'mcmillan', payload: {
                     calculation_conditions: {}, parameters: { lambda_ep: 3.35, omega_log: null },
                   },
                 }],
@@ -302,7 +302,7 @@ describe('论文上传工作区', () => {
 
     expect(await screen.findByRole('textbox', { name: '化学式' })).toHaveValue('Li2MgH16')
     expect(screen.queryByRole('textbox', { name: '物相' })).not.toBeInTheDocument()
-    expect(screen.getByRole('spinbutton', { name: '压强 (GPa)' })).toHaveValue(300)
+    expect(screen.getByRole('textbox', { name: '压强 (GPa)' })).toHaveValue('300')
     expect(screen.getByRole('combobox', { name: '空间群符号' })).toHaveValue('Fd-3m')
     expect(screen.getByRole('spinbutton', { name: '空间群号' })).toHaveValue(227)
     expect(screen.getByRole('spinbutton', { name: '电声耦合强度 λ' })).toHaveValue(3.35)

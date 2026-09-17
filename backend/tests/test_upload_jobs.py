@@ -320,13 +320,13 @@ def test_submission_rejects_unknown_paper_type_but_accepts_pending_material_fami
             "title": "Example",
             "year": 2024,
             "paper_type": "experimental",
-            "research_materials": ["Example2H3"],
+            "research_materials": ["LaH10"],
             "material_families": [
                 {"id": None, "name": "new_family", "status": "pending"}
             ],
         },
         "material_states": [{
-            "material": "Example2H3",
+            "material": "LaH10",
             "tc_results": [{"tc_value_k": 42, "result_kind": "experimental"}],
         }],
     })
@@ -335,6 +335,7 @@ def test_submission_rejects_unknown_paper_type_but_accepts_pending_material_fami
     with pytest.raises(Exception) as exc_info:
         _validate_draft(draft)
     assert getattr(exc_info.value, "status_code", None) == 400
+    assert exc_info.value.detail["code"] == "paper_type_required"
 
 
 def test_submission_requires_paper_year():

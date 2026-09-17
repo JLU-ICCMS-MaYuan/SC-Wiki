@@ -22,6 +22,7 @@ from backend.ingest.scientific_drafts import (
     _number,
     _property_modules_for_state,
     count_formula_elements,
+    material_state_values,
 )
 from backend.services.space_groups import CRYSTAL_SYSTEMS
 from backend.models import Paper
@@ -358,8 +359,12 @@ async def scientific_draft_matches_current_revision(
         requested.append({
             "state_key": str(raw_state.get("state_key") or f"state-{index + 1}"),
             "material": str(raw_state.get("material") or "").strip(),
-            "pressure_value_gpa": _number(raw_state.get("pressure_value_gpa")),
-            "state_kind": raw_state.get("state_kind") or "unknown",
+            **material_state_values(raw_state),
+            "structure_families": sorted(
+                (int(item["id"]), bool(item.get("is_primary")))
+                for item in raw_state.get("structure_families") or []
+                if isinstance(item, dict) and item.get("id") is not None
+            ),
             "property_modules": _canonical_value(sorted(
                 (_module_snapshot(module) for module in modules),
                 key=lambda item: str(item["module_key"]),
@@ -368,7 +373,7 @@ async def scientific_draft_matches_current_revision(
     revision = paper.content_revision or 1
     rows = (await session.execute(
         select(models.MaterialState, models.Superconductor.chemical_formula)
-        .join(models.Superconductor, models.Superconductor.id == models.MaterialState.superconductor_id)
+        .outerjoin(models.Superconductor, models.Superconductor.id == models.MaterialState.superconductor_id)
         .where(models.MaterialState.paper_id == paper.id, models.MaterialState.paper_revision == revision)
     )).all()
     stored = []
@@ -393,7 +398,13 @@ async def scientific_draft_matches_current_revision(
             })
         stored.append({
             "state_key": state.state_key, "material": str(formula or "").strip(),
-            "pressure_value_gpa": _number(state.pressure_value_gpa), "state_kind": state.state_kind,
+            **{key: getattr(state, key) for key in material_state_values({})},
+            "structure_families": sorted(
+                (link.structure_family_id, bool(link.is_primary))
+                for link in (await session.scalars(select(models.MaterialStateStructureFamily).where(
+                    models.MaterialStateStructureFamily.material_state_id == state.id
+                ))).all()
+            ),
             "property_modules": _canonical_value(sorted(
                 module_values,
                 key=lambda item: str(item["module_key"]),

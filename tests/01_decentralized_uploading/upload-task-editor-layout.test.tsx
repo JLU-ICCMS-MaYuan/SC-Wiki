@@ -99,6 +99,7 @@ beforeEach(() => {
   mockedApi.put.mockResolvedValue({ ok: true } as never)
   submitRequest.mockReset().mockResolvedValue({ ok: true, paper_id: 99, review_status: 'pending' })
   mockedApi.post.mockImplementation(async (path, body) => {
+    if (path === '/api/rag/evidence/proposals/prepare') return {patches:[]} as never
     if (path === '/api/rag/evidence/preflight') {
       return { version: 'checked-version', needs_check: false, records: [], sources: [] } as never
     }
@@ -222,7 +223,7 @@ describe('上传校对页布局与材料状态折叠', () => {
   })
 
   // 重度交互用例：并行下实测约 3s，默认 5s 上限余量不足
-  it('多于 2 张卡片时默认仅展开第一张，支持全部折叠/全部展开与单卡折叠', { timeout: 15000 }, async () => {
+  it('所有材料默认展开，支持全部折叠/全部展开与单卡折叠', { timeout: 15000 }, async () => {
     render(<UploadTaskEditor taskId={'b'.repeat(32)} onSubmitted={vi.fn()} draftOverride={makeDraft([
       makeState({ material: 'LaH10' }),
       makeState({ material: 'H3S' }),
@@ -231,8 +232,8 @@ describe('上传校对页布局与材料状态折叠', () => {
 
     await screen.findByText('材料状态 #1')
     expect(collapseContent(0)).toHaveClass('MuiCollapse-entered')
-    expect(collapseContent(1)).not.toHaveClass('MuiCollapse-entered')
-    expect(collapseContent(2)).not.toHaveClass('MuiCollapse-entered')
+    expect(collapseContent(1)).toHaveClass('MuiCollapse-entered')
+    expect(collapseContent(2)).toHaveClass('MuiCollapse-entered')
 
     fireEvent.click(screen.getByRole('button', { name: '全部折叠' }))
     await waitFor(() => expect(collapseContent(0)).not.toHaveClass('MuiCollapse-entered'))
@@ -295,7 +296,7 @@ describe('超导类型与条件化 Tc 字段', () => {
 
     fireEvent.mouseDown(await screen.findByRole('combobox', { name: '添加记录' }))
     fireEvent.click(await screen.findByRole('option', { name: /测量 Tc · resistivity/ }))
-    expect(await screen.findByLabelText('数值')).toBeInTheDocument()
+    expect(await screen.findByLabelText('Tc 值')).toBeInTheDocument()
     expect(screen.queryByLabelText('电声耦合强度 λ')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('ωlog (K)')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('μ*')).not.toBeInTheDocument()

@@ -38,6 +38,11 @@ var ErrPaperNotFound = errors.New("论文不存在")
 //
 // superconductors 与 material_families 是跨论文共享的目录数据，不在此删除。
 func cascadeDeleteInDB(tx *gorm.DB, paperID uint) error {
+	for _, table := range []string{"scientific_evidence_checks", "scientific_structure_origins"} {
+		if err := tx.Exec("DELETE FROM "+table+" WHERE target = ? AND target_id = ?", "paper", fmt.Sprint(paperID)).Error; err != nil {
+			return err
+		}
+	}
 	// 引用事实同时可能以本论文为源端或目标端；先删记录才不会被
 	// paper_references.cited_paper_id 的 RESTRICT 外键拦住。
 	if err := tx.Where("paper_id = ? OR cited_paper_id = ?", paperID, paperID).Delete(&models.PaperReference{}).Error; err != nil {

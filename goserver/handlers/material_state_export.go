@@ -173,7 +173,11 @@ func loadBoundDefinitions(tx *gorm.DB, state models.MaterialState) ([]models.For
 }
 
 func validateExportCompleteness(paper models.Paper, state models.MaterialState, definitions []models.FormDefinition) error {
-	if state.Superconductor.ID == 0 || state.Superconductor.ChemicalSystem.ID == 0 {
+	if state.SuperconductorID == nil && state.Superconductor.ID == 0 {
+		if state.MaterialName == nil || strings.TrimSpace(*state.MaterialName) == "" {
+			return fmt.Errorf("%w: material name or formula required", errExportIncomplete)
+		}
+	} else if state.Superconductor.ID == 0 || state.Superconductor.ChemicalSystem.ID == 0 {
 		return fmt.Errorf("%w: material ownership", errExportIncomplete)
 	}
 	if len(state.PropertyModules) > 0 && len(definitions) == 0 {
@@ -207,6 +211,12 @@ func materialStateExportPayload(paper models.Paper, state models.MaterialState, 
 	statePayload := materialStatesToDict([]models.MaterialState{state})[0]
 	statePayload["state_key"] = state.StateKey
 	statePayload["structures"] = exportStructures(state.Structures)
+	var superconductor any
+	var chemicalSystem any
+	if state.Superconductor.ID != 0 {
+		superconductor = state.Superconductor
+		chemicalSystem = state.Superconductor.ChemicalSystem
+	}
 
 	return gin.H{
 		"export_version": 1,
@@ -215,8 +225,8 @@ func materialStateExportPayload(paper models.Paper, state models.MaterialState, 
 			"title": paper.Title, "year": paper.Year,
 		},
 		"material": gin.H{
-			"chemical_system": state.Superconductor.ChemicalSystem,
-			"superconductor":  state.Superconductor,
+			"chemical_system": chemicalSystem,
+			"superconductor":  superconductor,
 		},
 		"material_state":   statePayload,
 		"form_definitions": definitions,

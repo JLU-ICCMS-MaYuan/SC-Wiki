@@ -7,6 +7,7 @@ engine.py — RAG 问答引擎主模块。
 """
 
 from __future__ import annotations
+from backend.rag.scientific_sources import citation as scientific_citation
 
 import json
 from typing import Any
@@ -278,7 +279,7 @@ async def ask(
     ] if kg_results else []
 
     return {"answer": resp.choices[0].message.content, "chunks_used": len(rag_chunks),
-            "chunks": rag_chunks, "citations": [{"paper_id": ch.get("paper_id")} for ch in rag_chunks],
+            "chunks": rag_chunks, "citations": [scientific_citation(ch) for ch in rag_chunks],
             "model": model or get_llm_config().model, "source": source,
             "papers": papers_dict, "top10": top10}
 
@@ -444,7 +445,7 @@ async def ask_stream(
         _sys.stderr.write(f"  === ANSWER (last 300) ===\n...{answer[-300:]}\n=== END ANSWER ===\n\n")
         _sys.stderr.flush()
         yield {"type": "done", "data": {
-            "citations": [{"paper_id": pid} for pid in paper_ids],
+            "citations": [scientific_citation(c) for c in retrieval_result.get("chunks", [])],
             "answer": answer,
             "source": f"inspire_{is_session.current_mode}",
             "papers": papers_dict,
@@ -499,7 +500,7 @@ async def ask_stream(
         source = "rag"
 
     if rag_chunks:
-        yield {"type": "chunks", "data": [{"paper_id": c["paper_id"]} for c in rag_chunks]}
+        yield {"type": "chunks", "data": [scientific_citation(c) for c in rag_chunks]}
     if kg_results and source == "hybrid":
         yield {"type": "fusion", "data": {"source": "hybrid", "kg_count": len(kg_results), "chunk_count": len(rag_chunks)}}
 
@@ -550,7 +551,7 @@ async def ask_stream(
     ] if kg_results else []
 
     yield {"type": "done", "data": {
-        "citations": [{"paper_id": c["paper_id"]} for c in rag_chunks],
+        "citations": [scientific_citation(c) for c in rag_chunks],
         "answer": full_answer, "source": source,
         "papers": papers_dict, "top10": top10,
     }}

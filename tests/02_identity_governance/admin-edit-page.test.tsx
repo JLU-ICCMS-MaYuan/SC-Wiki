@@ -128,7 +128,7 @@ beforeEach(() => {
     return {}
   })
   mockedApi.put.mockResolvedValue({ ok: true, data: { revision_bumped: false } })
-  mockedApi.post.mockImplementation(async path => path === '/api/rag/evidence/preflight'
+  mockedApi.post.mockImplementation(async path => path === '/api/rag/evidence/proposals/prepare' ? {patches:[]} as never : path === '/api/rag/evidence/preflight'
     ? { version: 'checked-version', needs_check: false, records: [], sources: [] }
     : { message: '已审核' })
 })
@@ -204,7 +204,10 @@ describe('Issue #78：管理端论文编辑独立页', () => {
     expect(await screen.findByText('管理员工作台')).toBeVisible()
 
     cleanup()
-    mockedApi.post.mockRejectedValueOnce(new Error('网络错误'))
+    mockedApi.post.mockImplementation(async path => {
+      if (path.endsWith('/review')) throw new Error('网络错误')
+      return { version: 'checked-version', needs_check: false, records: [], sources: [] } as never
+    })
     renderPage()
 
     await user.click(await screen.findByRole('button', { name: '提交审核' }))

@@ -2,6 +2,28 @@
 // 推导，缺键或多键会在 `tsc -b` 阶段报错。处理阶段/任务状态/文件角色/晶胞表示等
 // 枚举标签与后端 value 对齐，仅展示文案随语言变化。
 export default {
+  researchMaterialsTitle: 'Research materials',
+  materialRelationsTitle: 'Material relations',
+  relationMaterial: 'Related material',
+  relationDescription: 'Relationship between this paper and the material',
+  addRelation: 'Add material relation',
+  removeRelation: 'Delete material relation',
+  noRelations: 'No material relations provided',
+  invalidRelations: 'The existing relations could not be read. Check the source; the original data has been preserved.',
+  stateKindField: 'Material state type',
+  structureDataUnavailable: 'No readable unit cell or atomic positions are available for this structure.',
+  latticeMatrixTitle: 'Lattice matrix',
+  latticeRows: 'Lattice vectors a, b, c as rows · Å',
+  latticeVector: 'Vector',
+  atomicPositionsTitle: 'Atomic positions ({count})',
+  atomLabel: 'Atom',
+  coordinateType: 'Coordinate type',
+  fractionalCoordinates: 'Fractional',
+  cartesianCoordinates: 'Cartesian (Å)',
+  rotateStructure: 'Rotate structure',
+  zoomInStructure: 'Zoom in',
+  zoomOutStructure: 'Zoom out',
+  resetStructureView: 'Reset view',
   taskUnavailable: 'This parsing task has expired or been removed. The task list has been refreshed.',
   // ── Processing stages (PROCESSING_STAGES.key → label) ──
   step: {
@@ -217,7 +239,7 @@ export default {
   theoreticalSubtypeRequired: 'A theoretical paper must have a theoretical subtype',
   materialStateRequired: 'A non-review paper needs at least one material state',
   materialStateLabel: 'Material state {index}',
-  missingMaterial: '{label} is missing a chemical formula',
+  missingMaterial: '{label} needs a material name or chemical formula',
   spaceGroupRangeInvalid: 'The space group number of {label} must be between 1 and 230',
   negativeCalcParam: 'The calculation parameters of {label} cannot be negative',
   tcMissingValue: 'Tc entry {n} of {label} is missing a value',

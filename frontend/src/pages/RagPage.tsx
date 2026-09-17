@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react'
-import { Box, Typography, Button, IconButton, Chip, TextField, Paper, CircularProgress } from '@mui/material'
+import { Alert, Box, Typography, Button, IconButton, Chip, TextField, Paper, CircularProgress } from '@mui/material'
 import SendIcon from '@mui/icons-material/Send'
 import { useStreamingChat } from '../lib/useStreamingChat'
 import MarkdownMessage from '../components/MarkdownMessage'
@@ -168,6 +168,7 @@ const RagPage: React.FC = () => {
                         bgcolor: 'background.paper', border: 1, borderColor: 'divider',
                       }}>
                         <MarkdownMessage content={msg.content} papers={papers} paperSeqMap={paperSeqMap} />
+                        {msg.citations?.filter(c => c.attribution).map((c, i) => <Alert key={i} severity="info" sx={{ mt: 1 }}>{c.attribution}</Alert>)}
                       </Paper>
                     )}
 

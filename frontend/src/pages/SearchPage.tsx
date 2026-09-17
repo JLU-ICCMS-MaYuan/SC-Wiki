@@ -10,6 +10,7 @@ import PaperCommunity from '../components/community/PaperCommunity'
 import StructureViewer3D from '../components/StructureViewer3D'
 import { ELEMENTS } from '../lib/periodicElements'
 import { api } from '../lib/api'
+import { materialLabel } from '../lib/materialIdentity'
 import { collectPropertyRows, collectStructures, viewerFormat } from '../lib/paperDetailView'
 import { useLanguage } from '../context/LanguageContext'
 
@@ -212,7 +213,7 @@ const SearchPage: React.FC = () => {
             sourceRecordId: String(rec.record_id || rec.id || ''),
             record_id: rec.record_id,
             paper_id: rec.paper_id,
-            formula: isFlat ? rec.formula : (rec.formula || rec.chemical_formula || paper?.chemical_formula || '-'),
+            formula: materialLabel({ material_name: rec.material_name, material: isFlat ? rec.formula : (rec.formula || rec.chemical_formula || paper?.chemical_formula) }) || '-',
             year: isFlat ? rec.year : (rec.year || paper?.year || 1900),
             type: isFlat ? rec.type : t(`search.scType.${paper?.superconductor_types?.[0] || rec.type || 'unknown'}`),
             pressureValue: isFlat ? parseFloat(rec.pressure) || 0 : (Number(rec.pressure_gpa ?? rec.pressure) || 0),

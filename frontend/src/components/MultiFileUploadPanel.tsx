@@ -5,6 +5,7 @@ import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { getStoredToken } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import { api } from '../lib/api'
+import { buildLlmHeaders } from '../lib/llmProvider'
 import { UploadTaskState, unwrapData } from '../lib/paperProcessing'
 
 // 单文件大小上限（字节）。界面上的「每个最大 50 MB」提示由 zh 字典 upload.limit 提供；
@@ -27,6 +28,7 @@ function uploadOne(
     xhr.open('PUT', `/api/upload-tasks/${taskId}/files/${item.clientId}`)
     const token = getStoredToken()
     if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+    Object.entries(buildLlmHeaders()).forEach(([key, value]) => xhr.setRequestHeader(key, value))
     xhr.upload.onprogress = event => event.lengthComputable && progress(Math.round(event.loaded / event.total * 100))
     xhr.onerror = () => reject(new Error(t('upload.networkError')))
     xhr.onload = () => {

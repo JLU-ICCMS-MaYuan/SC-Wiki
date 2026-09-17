@@ -180,7 +180,7 @@ export interface PaperDraftFields {
   key_finding?: string
   research_motivation?: string
   research_materials?: string[]
-  material_relations?: unknown[]
+  material_relations?: import('./paperMaterials').MaterialRelation[] | string
   builds_on?: unknown[]
 }
 

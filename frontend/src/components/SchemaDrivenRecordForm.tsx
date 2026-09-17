@@ -245,7 +245,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   }
 
   return (
-    <Box data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, minWidth: 0, containerType: isTc ? 'inline-size' : undefined, containerName: isTc ? 'tc-record' : undefined, gridTemplateColumns: isTc ? 'minmax(0, 1fr)' : { xs: '1fr', sm: 'repeat(2, 1fr)' }, p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, mb: 1 }}>
+    <Box data-issue-field={basePath} data-record-key={record.record_key} data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, minWidth: 0, containerType: isTc ? 'inline-size' : undefined, containerName: isTc ? 'tc-record' : undefined, gridTemplateColumns: isTc ? 'minmax(0, 1fr)' : { xs: '1fr', sm: 'repeat(2, 1fr)' }, p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, mb: 1 }}>
       {definitionError && <Alert severity="error" sx={{ gridColumn: '1 / -1' }}>{definitionError}</Alert>}
       {isTc ? <TcRecordFields {...tcProps} /> : <>
       <TextField label="名称" value={record.name_raw} disabled={readOnly} data-issue-field={fieldPath('name_raw')} error={Boolean(issue('name_raw'))} helperText={issue('name_raw')} onChange={event => update({ name_raw: event.target.value })} />

@@ -5,12 +5,14 @@ import {
 } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import DownloadIcon from '@mui/icons-material/Download'
-import StructureViewer3D from './StructureViewer3D'
+import CrystalStructureView from './CrystalStructureView'
+import PaperMaterialsSection from './PaperMaterialsSection'
 import { useLanguage } from '../context/LanguageContext'
 import { familyName } from '../lib/classifications'
 import { api } from '../lib/api'
 import PropertyModuleEditor from './PropertyModuleEditor'
 import { toTextList } from '../lib/paperTextLists'
+import { materialLabel } from '../lib/materialIdentity'
 
 interface PaperEditViewProps {
   // 论文数据与加载/错误分流由路由页面壳 PaperDetailPage 负责，本组件只负责展示。
@@ -53,7 +55,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
       const url = URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `${state.material || 'material-state'}-revision-${paper.content_revision || paper.revision || 1}.json`
+      link.download = `${materialLabel(state) || 'material-state'}-revision-${paper.content_revision || paper.revision || 1}.json`
       link.click()
       URL.revokeObjectURL(url)
     } catch (reason) {
@@ -85,21 +87,8 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
   const methodologyList = toTextList(paper?.methodology)
   const keywordList = toTextList(paper?.keywords_tags)
 
-  // 结构数据来自 structure_models（挂在材料状态下），物性表没有结构文本列。
-  const structures = (paper?.material_states || []).flatMap((state: any) =>
-    (state.structures || [])
-      .filter((item: any) => item.structure_text)
-      .map((item: any) => ({
-        structure_text: item.structure_text,
-        structure_format: item.structure_format || 'cif',
-        material: state.material,
-        name_note: item.space_group_symbol,
-        pressure_gpa: state.pressure_value_gpa,
-      }))
-  )
-
   return (
-    <Box>
+    <Box data-paper-detail>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 3 }}>
         <Box>
@@ -118,7 +107,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
       <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.submittedNotice')}</Alert>
 
       <Box sx={{
-        display: 'grid', gridTemplateColumns: '1fr 360px', gap: 3, alignItems: 'start',
+        display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 3, alignItems: 'start',
         '@media (max-width:1180px)': { gridTemplateColumns: '1fr' },
       }}>
         {/* Main content */}
@@ -196,6 +185,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
               </Box>
             </Box>
 
+            <PaperMaterialsSection states={paper.material_states || []} relations={paper.material_relations} historicalMaterials={paper.research_materials} />
             {/* 材料状态 */}
             {(paper.material_states || []).length > 0 ? (
               <Box component="details" open sx={{
@@ -206,19 +196,23 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
                 </Box>
                 <Box sx={{ px: 2, pb: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', flexDirection: 'column', gap: 3 }}>
                   {(paper.material_states || []).map((state: any, index: number) => (
-                    <Box key={state.id || index} sx={{
+                    <Box key={state.state_key || state.id || index} data-material-state-index={index} data-state-key={state.state_key} tabIndex={-1} sx={{
                       p: 2, borderRadius: 2, bgcolor: 'grey.50', border: '1px solid', borderColor: 'divider',
                     }}>
                       {/* 分类区 */}
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, mb: 1.5 }}>
                         <Typography variant="subtitle2" fontWeight={700}>
-                          {state.material || t('paperDetail.materialStateFallback', { n: index + 1 })}
+                          {materialLabel(state) || t('paperDetail.materialStateFallback', { n: index + 1 })}
                         </Typography>
                         {state.state_key && <Button size="small" startIcon={<DownloadIcon />} onClick={() => void downloadMaterialState(state)}>导出材料状态</Button>}
                       </Box>
                       {exportError && <Alert severity="error" sx={{ mb: 1 }}>{exportError}</Alert>}
 
                       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1.5, mb: 2 }}>
+                        <Box>
+                          <Typography variant="caption" color="text.secondary">{t('upload.stateKindField')}</Typography>
+                          <Typography variant="body2">{(dict.enums.stateKind as Record<string, string>)[state.state_kind || 'unknown'] || state.state_kind}</Typography>
+                        </Box>
                         {state.element_count != null && (
                           <Box>
                             <Typography variant="caption" color="text.secondary">{t('paperDetail.fieldElementCount')}</Typography>
@@ -288,6 +282,13 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
                       )}
 
                       <PropertyModuleEditor modules={state.property_modules || []} readOnly onChange={() => undefined} />
+                      <Box sx={{ mt: 2, borderTop: 1, borderColor: 'divider', pt: 2 }}>
+                        <Typography variant="subtitle2" fontWeight={700} gutterBottom>{materialLabel(state)} · {t('upload.structureAttachmentTitle')}</Typography>
+                        {(state.structures || []).filter((structure: any) => structure.structure_text).length ? (state.structures || []).filter((structure: any) => structure.structure_text).map((structure: any, structureIndex: number) => <Box key={structure.id || structureIndex} sx={{ mt: 2 }}>
+                          <Typography variant="body2" fontWeight={600} gutterBottom>{structure.filename || `${materialLabel(state)} · ${t('paperDetail.structureIndex', { n: structureIndex + 1 })}`} ({structure.structure_format || 'cif'})</Typography>
+                          <CrystalStructureView data={structure.structure_text} format={structure.structure_format || 'cif'} />
+                        </Box>) : <Typography variant="body2" color="text.secondary">{t('paperDetail.noStructure')}</Typography>}
+                      </Box>
                     </Box>
                   ))}
                 </Box>
@@ -350,51 +351,6 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
               </Box>
             )}
 
-            {structures.length > 0 ? (
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {structures.map((s: any, i: number) => (
-                  <Box key={i} sx={{ borderRadius: 2, overflow: 'hidden', border: '1px solid', borderColor: 'divider' }}>
-                    <Box sx={{ p: 1.5, borderBottom: '1px solid', borderColor: 'divider', bgcolor: 'grey.50' }}>
-                      <Typography variant="caption" color="text.secondary">{t('paperDetail.structureIndex', { n: i + 1 })}</Typography>
-                      <Typography variant="body2" fontWeight={700}>{s.material}</Typography>
-                      {s.name_note && (
-                        <Typography variant="caption" color="text.secondary">{s.name_note}</Typography>
-                      )}
-                      {s.pressure_gpa != null && (
-                        <Chip label={`${s.pressure_gpa} GPa`} size="small" sx={{ ml: 1 }} />
-                      )}
-                    </Box>
-                    <Box sx={{ height: 280, bgcolor: 'grey.100' }}>
-                      <StructureViewer3D data={s.structure_text} format={s.structure_format} />
-                    </Box>
-                    <Box component="pre" sx={{
-                      mt: 1, p: 1.5, borderRadius: 2, bgcolor: 'grey.50',
-                      maxHeight: 200, overflow: 'auto', fontFamily: '"Roboto Mono",monospace', fontSize: 11,
-                    }}>
-                      {s.structure_text.slice(0, 1500)}
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
-            ) : (
-              <Box sx={{
-                minHeight: 240, borderRadius: 2, border: '1px solid', borderColor: 'divider',
-                background: `radial-gradient(circle at 22% 28%, #4f46e5 0 9px, transparent 10px),
-                  radial-gradient(circle at 66% 34%, #0891b2 0 9px, transparent 10px),
-                  radial-gradient(circle at 42% 70%, #4f46e5 0 9px, transparent 10px),
-                  linear-gradient(145deg, #fff, #f1f5f9)`,
-                position: 'relative', overflow: 'hidden',
-                '&::before,&::after': {
-                  content: '""', position: 'absolute', left: '25%', right: '25%',
-                  top: '34%', height: 2, bgcolor: '#cbd5e1', transform: 'rotate(18deg)',
-                },
-                '&::after': { top: '58%', transform: 'rotate(-25deg)' },
-              }}>
-                <Typography variant="body2" sx={{ position: 'absolute', bottom: 12, left: 12, color: 'text.secondary' }}>
-                  {t('paperDetail.noStructure')}
-                </Typography>
-              </Box>
-            )}
           </CardContent>
         </Card>
       </Box>

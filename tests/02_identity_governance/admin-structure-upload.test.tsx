@@ -32,10 +32,20 @@ vi.mock('../../frontend/src/components/ChartGroupEditor', () => ({ default: () =
 vi.mock('../../frontend/src/components/NewsManager', () => ({ default: () => null }))
 vi.mock('../../frontend/src/components/SuperAdminGovernance', () => ({ default: () => null }))
 vi.mock('../../frontend/src/components/UsernameField', () => ({ default: () => null }))
-// 结构面板保留真实上传交互；3D 预览以占位替换，避免 jsdom 中 3dmol 动态加载
-vi.mock('../../frontend/src/components/StructureViewer3D', () => ({
-  default: () => <div data-testid="structure-viewer-3d" />,
-}))
+// 仅替换 WebGL 画布；解析回调仍驱动共享参数区，解析算法另有真实 3Dmol 回归。
+vi.mock('../../frontend/src/components/StructureViewer3D', async () => {
+  const { useEffect } = await import('react')
+  return { default: ({ onStructureData }: { onStructureData: (value: unknown) => void }) => {
+    useEffect(() => {
+      onStructureData({ parameters: [5, 5, 5, 90, 90, 90], lattice: [[5, 0, 0], [0, 5, 0], [0, 0, 5]], volume: 125,
+        atoms: [[0, 0, 0], [0.5, 0.5, 0], [0.5, 0, 0.5], [0, 0.5, 0.5]].map(fractional => ({
+          element: 'Sn', fractional, cartesian: fractional.map(value => value * 5),
+        })),
+      })
+    }, [onStructureData])
+    return <div data-testid="structure-viewer-3d" />
+  } }
+})
 
 const mockedApi = vi.mocked(api)
 
@@ -68,6 +78,23 @@ const detailWithState = {
 }
 
 // C2 端点返回的候选：只含校验与表示，不含 material_state_ref/confirmation（由前端补充）
+const snCif = `data_Sn
+_cell_length_a 5
+_cell_length_b 5
+_cell_length_c 5
+_cell_angle_alpha 90
+_cell_angle_beta 90
+_cell_angle_gamma 90
+loop_
+_atom_site_type_symbol
+_atom_site_fract_x
+_atom_site_fract_y
+_atom_site_fract_z
+Sn 0 0 0
+Sn 0.5 0.5 0
+Sn 0.5 0 0.5
+Sn 0 0.5 0.5
+`
 const candidateResponse = {
   ok: true,
   data: {
@@ -77,8 +104,8 @@ const candidateResponse = {
     structure_format: 'cif',
     validation: { ase_valid: true, atom_count: 4, elements: ['Sn'] },
     representations: {
-      conventional: { cif: { text: 'data_Sn', available: true } },
-      primitive: { cif: { text: 'data_Sn', available: true } },
+      conventional: { cif: { text: snCif, available: true } },
+      primitive: { cif: { text: snCif, available: true } },
     },
   },
 }
@@ -98,7 +125,11 @@ beforeEach(() => {
     }
     return {}
   })
-  mockedApi.post.mockResolvedValue(candidateResponse)
+  mockedApi.post.mockImplementation(async path => {
+    if (path === '/api/rag/evidence/preflight') return { version: 'v1', needs_check: false, records: [], sources: [] }
+    if (path === '/api/rag/papers/88/structure-candidates') return candidateResponse
+    throw new Error(`unexpected POST ${path}`)
+  })
   mockedApi.put.mockResolvedValue({ ok: true, data: { revision_bumped: false } })
 })
 
@@ -153,18 +184,18 @@ describe('T032：论文结构补传（契约 C2）', () => {
     fireEvent.change(input, { target: { files: [file] } })
 
     // C2：POST 论文结构端点，multipart 含材料状态下标与文件
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledTimes(1))
-    const [path, body] = mockedApi.post.mock.calls[0]
+    const uploads = () => mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/structure-candidates'))
+    await waitFor(() => expect(uploads()).toHaveLength(1))
+    const [path, body] = uploads()[0]
     expect(path).toBe('/api/rag/papers/88/structure-candidates')
     expect(body).toBeInstanceOf(FormData)
     const formData = body as FormData
     expect(formData.get('material_state_index')).toBe('0')
     expect((formData.get('file') as File).name).toBe('sn.cif')
 
-    // 候选显示在对应材料状态下：文件名与原子数可见，3D 预览占位出现
-    // （atomCount 与元素在同一 Typography 内拼接，用正则匹配）
+    // 原子数来自当前结构解析，显示在右侧原子位置表标题中。
     expect(await screen.findByText('sn.cif')).toBeVisible()
-    expect(screen.getByText(/4 个原子/)).toBeVisible()
+    expect(screen.getByRole('table', { name: '原子位置（4）' })).toBeVisible()
     expect(screen.getByTestId('structure-viewer-3d')).toBeInTheDocument()
   })
 

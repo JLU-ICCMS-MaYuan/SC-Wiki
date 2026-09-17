@@ -446,11 +446,11 @@ async def _resolve_draft_classifications(session, draft: dict[str, Any]) -> None
 
 
 def _derived_research_materials(material_states: list[dict[str, Any]]) -> list[str]:
-    """按出现顺序汇总材料状态中的化学式，去空白、去重。"""
+    """按出现顺序汇总材料名或化学式，去空白、去重。"""
     seen: set[str] = set()
     derived: list[str] = []
     for state in material_states:
-        material = str(state.get("material") or "").strip()
+        material = str(state.get("material_name") or "").strip() or str(state.get("material") or "").strip()
         if material and material not in seen:
             seen.add(material)
             derived.append(material)
@@ -505,6 +505,20 @@ def _validate_draft(
             raise _upload_error(400, "invalid_material_family", "已确认材料家族缺少目录 ID")
         if status == "pending" and family.get("id") not in (None, ""):
             raise _upload_error(400, "invalid_material_family", "待确认材料家族不能包含目录 ID")
+    for state_index, state in enumerate(material_states):
+        for key, label in (("material_name", "材料名"), ("material", "化学式")):
+            value = state.get(key)
+            if value is not None and (not isinstance(value, str) or len(value) > 255):
+                raise _upload_error(400, "invalid_material_identity", f"{label}必须是最长 255 字符的文本", field=f"material_states[{state_index}].{key}")
+        formula = str(state.get("material") or "").strip()
+        if not (str(state.get("material_name") or "").strip() or formula):
+            raise _upload_error(400, "state_material_required", f"第 {state_index + 1} 个材料状态至少需要材料名或化学式", field=f"material_states[{state_index}].material_name")
+        if formula:
+            from backend.db_helpers import normalize_formula
+            try:
+                normalize_formula(formula)
+            except ValueError as exc:
+                raise _upload_error(400, "invalid_chemical_formula", "化学式无法解析；如只有材料名称，请填入材料名并清空化学式", field=f"material_states[{state_index}].material") from exc
     if (
         paper_type != "review"
         and not paper.get("research_materials")
@@ -515,8 +529,6 @@ def _validate_draft(
     if paper_type != "review" and not material_states:
         raise _upload_error(400, "material_state_required", "非综述论文至少需要一个材料状态")
     for state_index, state in enumerate(material_states):
-        if not (str(state.get("material_name") or "").strip() or str(state.get("material") or "").strip()):
-            raise _upload_error(400, "state_material_required", f"第 {state_index + 1} 个材料状态至少需要材料名或化学式")
         structures = [item for item in state.get("structure_families") or [] if isinstance(item, dict)]
         if sum(bool(item.get("is_primary")) for item in structures) > 1:
             raise _upload_error(400, "multiple_primary_structure_families", "一个材料状态只能有一个主结构家族")
@@ -1250,6 +1262,8 @@ async def put_upload_draft(
                     proposals.validate_save(evidence_session, evidence.upload_snapshot(task_id, current_user.id), current_user.id, preparation_id, 'upload')
             previous = get_draft(task_id) or {}
             normalized = _normalize_draft(draft)
+            if "material_states" in draft:
+                normalized["paper"]["research_materials"] = _derived_research_materials(normalized["material_states"])
             # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。
             normalized["citation_extraction"] = previous.get("citation_extraction")
             async with async_session_factory() as session:
@@ -2083,11 +2097,14 @@ async def rewrite_paper_scientific_draft(
     """
     from backend.rag.database import async_session_factory
 
-    async with async_session_factory() as session:
-        async with session.begin():
-            return await _rewrite_paper_scientific_draft_in_tx(
-                session, paper_id, draft, current_user
-            )
+    try:
+        async with async_session_factory() as session:
+            async with session.begin():
+                return await _rewrite_paper_scientific_draft_in_tx(
+                    session, paper_id, draft, current_user
+                )
+    except IntegrityError as exc:
+        raise _scientific_integrity_error(exc, draft) from exc
 
 
 async def _reextract_main_pdf_references(session, paper: Paper) -> dict[str, Any]:
@@ -2207,6 +2224,8 @@ async def _rewrite_paper_scientific_draft_in_tx(
         }
 
     paper.superconductor_kind = full_draft["paper"]["superconductor_kind"]
+    # 仅在用户保存科学数据时同步汇总，不在读取历史论文时回填。
+    paper.research_materials = _derived_research_materials(full_draft["material_states"])
 
     bumped = paper.review_status == "approved"
     citation_extraction = await _reextract_main_pdf_references(session, paper) if bumped else None

@@ -4,6 +4,28 @@
 // PROCESSING_STAGES（处理阶段）与 UploadTaskStatus（任务状态）的显示标签，
 // 键与后端 value 对齐；`role` 是上传文件角色，`cell` 是晶胞表示。
 export default {
+  researchMaterialsTitle: '研究材料',
+  materialRelationsTitle: '材料关系',
+  relationMaterial: '关系涉及的材料',
+  relationDescription: '论文与该材料的关系',
+  addRelation: '添加材料关系',
+  removeRelation: '删除材料关系',
+  noRelations: '未填写材料关系',
+  invalidRelations: '现有材料关系格式无法识别，请先核对来源；原始数据已保留。',
+  stateKindField: '材料状态类型',
+  structureDataUnavailable: '当前结构未提供可解析的晶胞与原子位置。',
+  latticeMatrixTitle: '晶格矩阵',
+  latticeRows: 'a、b、c 晶格向量按行排列 · Å',
+  latticeVector: '向量',
+  atomicPositionsTitle: '原子位置（{count}）',
+  atomLabel: '原子',
+  coordinateType: '坐标类型',
+  fractionalCoordinates: '分数坐标',
+  cartesianCoordinates: '直角坐标 (Å)',
+  rotateStructure: '旋转结构',
+  zoomInStructure: '放大结构',
+  zoomOutStructure: '缩小结构',
+  resetStructureView: '重置视角',
   // ── 处理阶段（PROCESSING_STAGES.key → 标签） ──
   step: {
     saving_file: '保存原始文件',
@@ -219,7 +241,7 @@ export default {
   theoreticalSubtypeRequired: '理论文章必须选择理论二级类型',
   materialStateRequired: '非综述文章至少需要一个材料状态',
   materialStateLabel: '第 {index} 个材料状态',
-  missingMaterial: '{label}缺少化学式',
+  missingMaterial: '{label}至少需要材料名或化学式',
   spaceGroupRangeInvalid: '{label}的空间群号必须在 1–230 之间',
   negativeCalcParam: '{label}的计算参数不能为负数',
   tcMissingValue: '{label}的第 {n} 条 Tc 缺少数值',

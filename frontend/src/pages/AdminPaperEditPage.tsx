@@ -1,3 +1,10 @@
+import { currentEvidenceField, evidenceIssuesForStates } from '../lib/evidenceFields'
+import { materialIdentityMissing } from '../lib/materialIdentity'
+import { materialStateFromDetail, candidateFromStructureModel } from '../lib/paperEditing'
+import { applyEvidencePatches, type EvidencePatch } from '../lib/evidenceProposals'
+import EvidenceFieldMarkers from '../components/EvidenceFieldMarkers'
+import PaperMaterialsSection from '../components/PaperMaterialsSection'
+import { researchMaterials } from '../lib/paperMaterials'
 import { useEvidenceWorkflow } from '../components/EvidenceWorkflow'
 import React, { useEffect, useMemo, useState } from 'react'
 import {
@@ -22,73 +29,12 @@ import { convertLegacyPropertyModules, PROPERTY_SCHEMA_VERSION } from '../lib/pr
 import { validateTcRecords } from '../lib/formDefinitions'
 import { textLinesToList, toTextList } from '../lib/paperTextLists'
 
-/**
- * Go 详情行的材料状态 → 共享编辑器（MaterialStatesEditor）的 DraftMaterialState（T020）。
- * Go 侧返回的是模型序列化：化学式在 superconductor.chemical_formula，
- * structure_families 是 {id, is_primary, structure_family:{...}} 的链接行，
- * 需要转成编辑器的 {id, name, status, is_primary} 选择形态。
- * （原 AdminPage.tsx 弹窗逻辑迁移，Issue #78。）
- */
-const materialStateFromDetail = (
-  state: Record<string, any>, classification: ReviewClassifications['materialStates'][number],
-): DraftMaterialState => {
-  const stateWithoutLegacyProperties = { ...state }
-  delete stateWithoutLegacyProperties.superconductor_kind
-  delete stateWithoutLegacyProperties.tc_results
-  delete stateWithoutLegacyProperties.calculation_contexts
-  delete stateWithoutLegacyProperties.calculation_context
-  delete stateWithoutLegacyProperties.experimental_context
-  delete stateWithoutLegacyProperties.properties
-  delete stateWithoutLegacyProperties.key_properties
-  return {
-    ...stateWithoutLegacyProperties,
-    ...classification,
-    material: state.superconductor?.chemical_formula || state.material || '',
-    structure_families: classification.structure_families || [],
-    property_modules: convertLegacyPropertyModules(state),
-    deleted_record_keys: [],
-    deleted_module_keys: [],
-    schema_version: PROPERTY_SCHEMA_VERSION,
-  }
-}
-
 const SUPERCONDUCTOR_KIND_VALUES = ['conventional', 'unconventional', 'unknown'] as const
 
 const appendAuthor = (authors: string[], input: string): string[] => {
   const name = input.trim()
   return name && !authors.includes(name) ? [...authors, name] : authors
 }
-
-/**
- * Go 已落库的结构模型 → 已确认候选（T020）。
- * 科学数据保存是整体替换（契约 C1）：既有结构必须并入候选列表，
- * 否则保存时会被整体删除重建流程丢掉。
- * （原 AdminPage.tsx 弹窗逻辑迁移，Issue #78。）
- */
-const candidateFromStructureModel = (model: Record<string, any>, ref: string): StructureCandidate => ({
-  candidate_id: `structure_${model.id}`,
-  material_state_ref: ref,
-  source_kind: 'attachment',
-  status: 'confirmed',
-  confirmation: 'confirmed',
-  original_format: model.structure_format || 'cif',
-  original_text: model.structure_text || null,
-  validation: {
-    structure_format: model.structure_format || 'cif',
-    atom_count: model.atom_count ?? undefined,
-    volume: model.volume_angstrom3 ?? undefined,
-    cell_parameters: model.cell_parameters || undefined,
-  },
-  representations: model.structure_text ? {
-    // Python 端只把惯用胞 CIF 作为规范表示落库（scientific_drafts.py），统一放 cif 槽位
-    conventional: { cif: { text: model.structure_text, available: true } },
-  } : undefined,
-  sources: [{
-    file_id: `structure_${model.id}`,
-    filename: model.source_locator || `structure_${model.id}.cif`,
-    role: 'attachment',
-  }],
-})
 
 /**
  * 管理端论文编辑独立页（Issue #78，路由 /admin/papers/:id/edit）。
@@ -125,11 +71,15 @@ const AdminPaperEditPage: React.FC = () => {
   const [editReviewStatus, setEditReviewStatus] = useState('')
   const [editReviewComment, setEditReviewComment] = useState('')
   const [editReviewSaving, setEditReviewSaving] = useState(false)
-  const evidenceWorkflow = useEvidenceWorkflow()
 
   /* ── 科学数据（Issue #76）：材料状态与结构候选受控于共享编辑器，保存时随 C1 提交 ─ */
   const [editMaterialStates, setEditMaterialStates] = useState<DraftMaterialState[]>([])
   const [editMaterialFamilies, setEditMaterialFamilies] = useState<FamilySelection[]>([])
+  const evidenceWorkflow = useEvidenceWorkflow({
+    target: paperId ? { target: 'paper', target_id: String(paperId) } : undefined,
+    getCurrentValue: record => currentEvidenceField(record, {...editForm, material_families: editMaterialFamilies}, editMaterialStates),
+    saveCurrent: () => handleEditSave([], undefined, undefined, false),
+  })
   const [editStructureCandidates, setEditStructureCandidates] = useState<StructureCandidate[]>([])
   const [editSpaceGroups, setEditSpaceGroups] = useState<SpaceGroupOption[]>([])
   // 论文原本是否有科学数据：有才在保存时走科学数据段（契约 C4 第二步）
@@ -166,14 +116,14 @@ const AdminPaperEditPage: React.FC = () => {
       (state.structures || []).map(async (model: any) => {
         const structureId: number = model.id
         try {
-          const response = await api.get<{ ok: boolean; data: { representations?: StructureCandidate['representations'] } }>(
+          const response = await api.get<{ ok: boolean; data: { representations?: StructureCandidate['representations']; validation?: StructureCandidate['validation'] } }>(
             `/api/rag/papers/${paperId}/structures/${structureId}/representations`,
           )
           const representations = response?.data?.representations
           if (representations) {
             setEditStructureCandidates(current => current.map(candidate =>
               candidate.candidate_id === `structure_${structureId}`
-                ? { ...candidate, representations: { ...candidate.representations, ...representations } }
+                ? { ...candidate, validation: { ...candidate.validation, ...response.data.validation }, representations: { ...candidate.representations, ...representations } }
                 : candidate))
           }
         } catch {
@@ -230,11 +180,15 @@ const AdminPaperEditPage: React.FC = () => {
   const handleEditReview = async () => {
     setEditReviewSaving(true)
     try {
-      const payload = paperReviewPayload(editReviewStatus, editReviewComment, {
-        superconductorKind: editForm.superconductor_kind || 'unknown',
-        materialFamilies: editMaterialFamilies, materialStates: editMaterialStates,
-      })
-      const evidence = editReviewStatus === 'approved' ? await evidenceWorkflow.run({ target: 'paper', target_id: String(paperId) }) : {}
+      let classifications: ReviewClassifications | undefined
+      if (editReviewStatus === 'approved') {
+        if ((!evidenceWorkflow.hasAccepted || evidenceWorkflow.hasUnsavedChanges()) && !(await handleEditSave())) return
+        if (!(await evidenceWorkflow.applyAccepted({ target: 'paper', target_id: String(paperId) }, handleEditSave))) return
+        const { detail, pendingValues } = await loadPaperReviewSource(Number(paperId))
+        classifications = resolveReviewClassifications(detail, pendingValues)
+      }
+      const payload = paperReviewPayload(editReviewStatus, editReviewComment, classifications)
+      const evidence = editReviewStatus === 'approved' ? await evidenceWorkflow.gate({ target: 'paper', target_id: String(paperId) }) : {}
       if (!evidence) return
       await api.post(`/api/admin/papers/${paperId}/review`, { ...payload, ...evidence })
       navigate(workspacePath)
@@ -246,18 +200,30 @@ const AdminPaperEditPage: React.FC = () => {
   // 两段保存（契约 C4）：先论文级（Go，低风险），后科学数据（Python，整体替换）。
   // 科学数据段仅当论文原本有科学数据或当前编辑区有内容时执行——纯论文级编辑
   // （如无材料状态的综述）不需要触发整体替换。
-  const handleEditSave = async () => {
+  const handleEditSave = async (patches: EvidencePatch[] = [], preparationId?: string, resumeStage?: 'scientific' | 'finalize', refreshEvidence = true) => {
+    const revision = evidenceWorkflow.getEditRevision()
+    const invalidPressure = Array.from(document.querySelectorAll<HTMLInputElement>('[data-evidence-scope="paper-edit"] [data-pressure-input]')).find(input => !input.checkValidity())
+    if (invalidPressure) { invalidPressure.reportValidity(); setSnackbar(t('evidence.invalidPressure')); return false }
     try {
       const tcIssue = validateTcRecords(editMaterialStates)[0]
       if (tcIssue) { setSnackbar(tcIssue.message); return false }
       const historyOperationId = crypto.randomUUID()
-      const payload: Record<string, any> = { ...editForm, history_operation_id: historyOperationId }
+      const paper: Record<string, any> = { ...editForm, material_families: editMaterialFamilies }
+      const changed = applyEvidencePatches({ paper, material_states: editMaterialStates }, patches)
+      const missingIdentity = changed.material_states.findIndex(materialIdentityMissing)
+      if (missingIdentity >= 0) throw new Error(t('upload.missingMaterial', {label:t('upload.materialStateLabel', {index:missingIdentity+1})}))
+      const payload: Record<string, any> = { ...changed.paper, history_operation_id: historyOperationId, evidence_preparation_id: preparationId }
+      // 科学段可能失败；汇总与材料状态由同一 Python 事务保存，避免第一段先写入未来值。
+      if (editHadScientificData || changed.material_states.length) delete payload.research_materials
+      for (const field of ['research_materials', 'material_relations']) {
+        if (Array.isArray(payload[field])) payload[field] = JSON.stringify(payload[field])
+      }
       if (authorInput.trim()) {
         payload.authors = JSON.stringify(appendAuthor(toTextList(editForm.authors), authorInput))
       }
       // Go 文本列不接收数组；只转换数组和用户编辑过的字段，原字符串/空值保持不变。
       for (const field of ['authors', 'keywords_tags', 'methodology'] as const) {
-        if (field !== 'authors' && editListText[field] !== undefined) {
+        if (field !== 'authors' && editListText[field] !== undefined && !patches.some(p => p.field === `paper.${field}`)) {
           payload[field] = JSON.stringify(textLinesToList(editListText[field]!))
         } else if (Array.isArray(payload[field])) {
           payload[field] = JSON.stringify(payload[field])
@@ -276,7 +242,8 @@ const AdminPaperEditPage: React.FC = () => {
         }))
       }
       // 第一步：论文级字段保存（Go）。失败在此终止，不调用科学数据段。
-      await api.put(`/api/admin/papers/${paperId}`, payload)
+      if (resumeStage !== 'scientific') await api.put(`/api/admin/papers/${paperId}`, payload)
+      if (patches.length) { setEditForm(changed.paper); setEditListText({}) }
       if (editHadScientificData || editMaterialFamilies.length > 0 || editMaterialStates.length > 0 || editStructureCandidates.length > 0) {
         try {
           // 第二步：科学数据整体替换（Python，契约 C1）。
@@ -285,12 +252,12 @@ const AdminPaperEditPage: React.FC = () => {
           const response = await api.put<{ ok: boolean; data: { revision_bumped?: boolean } }>(
             `/api/rag/papers/${paperId}/scientific-draft`,
             {
-              paper_type: editForm.paper_type || '',
-              superconductor_kind: editForm.superconductor_kind || 'unknown',
-              material_families: editMaterialFamilies,
-              material_states: editMaterialStates,
+              paper_type: changed.paper.paper_type || '',
+              superconductor_kind: changed.paper.superconductor_kind || 'unknown',
+              material_families: changed.paper.material_families,
+              material_states: changed.material_states,
               structure_candidates: editStructureCandidates.filter(candidate => candidate.confirmation === 'confirmed'),
-              history_operation_id: historyOperationId,
+              history_operation_id: historyOperationId, evidence_preparation_id: preparationId,
             },
           )
           // 升版成功（T045）：论文已退回待审核，明确提示审核通过前不对外公开
@@ -300,12 +267,17 @@ const AdminPaperEditPage: React.FC = () => {
         } catch (e: unknown) {
           // FR-019：论文级已保存成功，只需重试科学数据部分；不离开编辑页
           setSnackbar(t('admin.scientificSaveFailed', { reason: (e as Error).message }))
-          return
+          return false
         }
       } else {
         setSnackbar(t('common.saved'))
       }
-    } catch (e: unknown) { setSnackbar(t('admin.saveFailedReason', { reason: (e as Error).message })) }
+      if (patches.length) {
+        setEditForm(changed.paper); setEditMaterialFamilies(changed.paper.material_families); setEditMaterialStates(changed.material_states); setEditListText({})
+      }
+      if (!preparationId && refreshEvidence) await evidenceWorkflow.refreshAfterSave(revision)
+      return true
+    } catch (e: unknown) { setSnackbar(t('admin.saveFailedReason', { reason: (e as Error).message })); return false }
   }
 
   // 论文结构补传（契约 C2）：只产出并校验候选、不落库；成功后并入本地候选，
@@ -336,7 +308,7 @@ const AdminPaperEditPage: React.FC = () => {
   }
 
   return (
-    <Container component="fieldset" disabled={editReviewSaving} maxWidth="lg" sx={{ py: 3, border: 0, minWidth: 0 }}>
+    <Container component="fieldset" disabled={editReviewSaving} maxWidth="lg" sx={{ py: 3, px: { xs: 0, sm: 3 }, border: 0, minWidth: 0 }}>
       {/* 标题栏 + 返回列表 */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
         <IconButton aria-label={t('admin.editBackToList')} onClick={() => navigate(workspacePath)}>
@@ -352,20 +324,22 @@ const AdminPaperEditPage: React.FC = () => {
       )}
 
       {editForm.id != null ? (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-          {/* 审核区固定在顶部：编辑页表单很长，随内容滚走的审核控件等于没有。 */}
+        <Box data-evidence-scope="paper-edit" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          {/* 核对提示和审核操作随页面滚动，避免遮挡下方表单。 */}
           <Box sx={{
-            position: 'sticky', top: 0, zIndex: 2, bgcolor: 'background.paper',
+            bgcolor: 'background.paper',
             pb: 1.5, mb: 0.5, borderBottom: '1px solid', borderColor: 'divider',
           }}>
             {evidenceWorkflow.dialog}
+            <EvidenceFieldMarkers records={evidenceWorkflow.records} scope="paper-edit" onOpen={evidenceWorkflow.openIssue} onChange={evidenceWorkflow.invalidate} />
             <Typography variant="subtitle2" fontWeight={700} gutterBottom>{t('admin.editReviewSection')}</Typography>
             <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-              <Box sx={{ minWidth: 170 }}>
+              <Button variant="outlined" disabled={editReviewSaving || evidenceWorkflow.busy} onClick={async () => { if (await handleEditSave()) void evidenceWorkflow.run({ target: 'paper', target_id: String(paperId) }) }}>{t('evidence.audit')}</Button>
+          <Box sx={{ minWidth: 170 }}>
                 <PaperReviewStatusSelect id="edit-review-status" value={editReviewStatus}
                   onChange={setEditReviewStatus} disabled={editReviewSaving} />
               </Box>
-              <TextField label={t('admin.reviewComment')} size="small" multiline rows={2} sx={{ flex: 1, minWidth: 240 }}
+              <TextField label={t('admin.reviewComment')} size="small" multiline rows={2} sx={{ flex: 1, minWidth: 180 }}
                 disabled={editReviewSaving} value={editReviewComment} onChange={e => setEditReviewComment(e.target.value)} />
               <Button variant="contained" size="small" disabled={editReviewSaving}
                 onClick={handleEditReview} sx={{ mt: 0.5 }}>
@@ -420,23 +394,24 @@ const AdminPaperEditPage: React.FC = () => {
                 placeholder={t('upload.authorPlaceholder')} />
             )}
           />
+          <PaperMaterialsSection states={editMaterialStates} relations={editForm.material_relations} historicalMaterials={editForm.research_materials} onChange={values => { evidenceWorkflow.invalidate('paper.material_relations'); setEditForm(current => ({ ...current, material_relations: values })) }} />
           <TextField label={t('admin.fieldAbstract')} size="small" fullWidth multiline rows={3}
-            value={editForm.abstract || ''} onChange={e => setEditForm({ ...editForm, abstract: e.target.value })} />
+            data-issue-field="paper.abstract" value={editForm.abstract || ''} onChange={e => setEditForm({ ...editForm, abstract: e.target.value })} />
           <TextField label={t('admin.fieldLlmSummary')} size="small" fullWidth multiline rows={2}
-            value={editForm.summary || ''} onChange={e => setEditForm({ ...editForm, summary: e.target.value })} />
-          <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1.5 }}>
-            <TextField label={t('admin.fieldPaperType')} size="small" value={editForm.paper_type || ''}
+            data-issue-field="paper.summary" value={editForm.summary || ''} onChange={e => setEditForm({ ...editForm, summary: e.target.value })} />
+          <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(3, minmax(0, 1fr))' }, gap: 1.5 }}>
+            <TextField label={t('admin.fieldPaperType')} size="small" data-issue-field="paper.paper_type" value={editForm.paper_type || ''}
               onChange={e => setEditForm({ ...editForm, paper_type: e.target.value })} />
-            <FormControl size="small">
+            <FormControl size="small" data-issue-field="paper.superconductor_kind">
               <InputLabel id="paper-superconductor-kind-label">{t('upload.superconductorKindField')}</InputLabel>
               <Select labelId="paper-superconductor-kind-label" label={t('upload.superconductorKindField')} value={editForm.superconductor_kind || 'unknown'}
-                onChange={e => setEditForm({ ...editForm, superconductor_kind: e.target.value })}>
+                onChange={e => { evidenceWorkflow.invalidate('paper.superconductor_kind'); setEditForm({ ...editForm, superconductor_kind: e.target.value }) }}>
                 {SUPERCONDUCTOR_KIND_VALUES.map(value => (
                   <MenuItem key={value} value={value}>{value === 'unknown' ? dict.enums.superconductorKind.unknown : dict.enums.superconductorKind[value]}</MenuItem>
                 ))}
               </Select>
             </FormControl>
-            <Autocomplete<ClassificationTerm | string, true, false, true>
+            <Autocomplete<ClassificationTerm | string, true, false, true> data-issue-field="paper.material_families"
               multiple
               freeSolo
               options={classificationCatalogs?.material_families || []}
@@ -449,9 +424,9 @@ const AdminPaperEditPage: React.FC = () => {
               isOptionEqualToValue={(option, value) => (
                 typeof option !== 'string' && typeof value !== 'string' && option.id === value.id
               )}
-              onChange={(_, values) => setEditMaterialFamilies(values.map(value => (
+              onChange={(_, values) => { evidenceWorkflow.invalidate('paper.material_families'); setEditMaterialFamilies(values.map(value => (
                 typeof value === 'string' ? pendingSelection(value) : selectionForTerm(value)
-              )).filter((value): value is FamilySelection => Boolean(value)))}
+              )).filter((value): value is FamilySelection => Boolean(value))) }}
               renderInput={params => (
                 <TextField
                   {...params}
@@ -467,7 +442,7 @@ const AdminPaperEditPage: React.FC = () => {
           </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1.5 }}>
             {(['keywords_tags', 'methodology'] as const).map(field => (
-              <TextField key={field}
+              <TextField key={field} data-issue-field={`paper.${field}`}
                 label={t(field === 'keywords_tags' ? 'admin.fieldKeywordsTags' : 'admin.fieldMethodology')}
                 size="small" fullWidth multiline minRows={3}
                 helperText={t('admin.listOnePerLine')}
@@ -476,11 +451,11 @@ const AdminPaperEditPage: React.FC = () => {
             ))}
           </Box>
           <TextField label={t('admin.fieldKeyFinding')} size="small" fullWidth multiline rows={2}
-            value={editForm.key_finding || ''} onChange={e => setEditForm({ ...editForm, key_finding: e.target.value })} />
+            data-issue-field="paper.key_finding" value={editForm.key_finding || ''} onChange={e => setEditForm({ ...editForm, key_finding: e.target.value })} />
           <TextField label={t('admin.fieldResearchMotivation')} size="small" fullWidth multiline rows={2}
-            value={editForm.research_motivation || ''} onChange={e => setEditForm({ ...editForm, research_motivation: e.target.value })} />
+            data-issue-field="paper.research_motivation" value={editForm.research_motivation || ''} onChange={e => setEditForm({ ...editForm, research_motivation: e.target.value })} />
           {/* 知识图谱标题：单栏英文输入，随 editForm 一并提交（T046）。 */}
-          <TextField label={t('admin.fieldKnowledgeGraphTitle')} size="small" fullWidth
+          <TextField data-issue-field="paper.knowledge_graph_title" label={t('admin.fieldKnowledgeGraphTitle')} size="small" fullWidth
             value={editForm.knowledge_graph_title || ''} onChange={e => setEditForm({ ...editForm, knowledge_graph_title: e.target.value })} />
           {/* 非编辑元数据 */}
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mt: 0.5 }}>
@@ -591,8 +566,14 @@ const AdminPaperEditPage: React.FC = () => {
               数据来自 /api/admin/papers/:id 的 material_states（含 property_modules/structures），
               编辑结果随保存时的 C1 请求整体替换（T020/T030/T034）。 */}
           <MaterialStatesEditor
+            onScientificEdit={evidenceWorkflow.invalidate}
+            issues={evidenceIssuesForStates(evidenceWorkflow.issues, editMaterialStates)}
             states={editMaterialStates}
-            onChange={setEditMaterialStates}
+            onChange={states => {
+              if (JSON.stringify(researchMaterials(editMaterialStates)) !== JSON.stringify(researchMaterials(states))) evidenceWorkflow.invalidate('paper.research_materials')
+              setEditMaterialStates(states)
+              setEditForm(current => ({ ...current, research_materials: researchMaterials(states) }))
+            }}
             catalogs={classificationCatalogs}
             catalogLoading={!classificationCatalogs && !classificationCatalogError}
             catalogError={classificationCatalogError}
@@ -607,7 +588,7 @@ const AdminPaperEditPage: React.FC = () => {
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
             <Button variant="outlined" onClick={() => navigate(workspacePath)}>{t('common.cancel')}</Button>
-            <Button variant="contained" onClick={handleEditSave}>{t('admin.saveChanges')}</Button>
+            <Button variant="contained" onClick={() => void handleEditSave()}>{t('admin.saveChanges')}</Button>
           </Box>
         </Box>
       ) : (

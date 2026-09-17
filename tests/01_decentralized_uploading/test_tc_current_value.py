@@ -2,6 +2,7 @@
 import pytest
 
 from backend.ingest.property_modules import PropertyValidationError, validate_record
+from backend.ingest import evidence_proposals, scientific_evidence
 
 
 def tc_record(**patch):
@@ -63,3 +64,21 @@ def test_current_only_record_accepts_omitted_raw():
 def test_ordinary_property_still_keeps_its_own_contract():
     record = tc_record(record_type="property", property_code="custom", custom_property_key="property", payload={})
     assert validate_record(record)["value_raw"] == "wrong 3.78 mK"
+
+
+def test_tc_review_does_not_offer_a_second_raw_value_editor():
+    record = {"kind": "property", "claim": {"record": tc_record()}}
+    fields = {field["path"] for field in evidence_proposals.editable_fields(record)}
+    assert "value_number" in fields
+    assert not fields.intersection({"value_raw", "unit_raw", "canonical_unit"})
+
+
+@pytest.mark.parametrize("values", [{"value_number": 8.5}, {}])
+def test_prepared_review_matches_normalized_saved_tc(values):
+    # expected_claim 是 prepare/finalize 的精确内容边界；兼容列变化不能导致确认失败。
+    before = tc_record()
+    record = {"kind": "property", "claim": scientific_evidence.record_claim(before, {"material": "Sn"})}
+    expected = evidence_proposals.expected_claim(record, values)
+    saved = scientific_evidence.record_claim(validate_record({**before, **values}), {"material": "Sn"})
+    assert scientific_evidence.canonical(expected) == scientific_evidence.canonical(saved)
+    assert record["claim"]["record"]["value_raw"] == "wrong 3.78 mK"

@@ -1,4 +1,5 @@
 import { changedScientificFields } from '../lib/evidenceFields'
+import { materialIdentityMissing, materialLabel } from '../lib/materialIdentity'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Card, CardContent, Chip, Collapse, FormControl,
@@ -518,7 +519,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     setCollapsedStates(current => {
       const next: Record<number, boolean> = {}
       for (let index = 0; index < materialStateCount; index += 1) {
-        next[index] = current[index] ?? (materialStateCount > 2 && index !== 0)
+        next[index] = current[index] ?? false
       }
       return next
     })
@@ -592,10 +593,13 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
             const hasEnergyAboveHull = (state.properties || []).some(item =>
               [item.name, item.name_raw].some(value => String(value || '').trim().toLowerCase() === ENERGY_ABOVE_HULL_NAME))
             const element = (
-              <Card data-state-key={state.state_key || `state-${index+1}`} key={state.state_key || index} variant="outlined" sx={{ width: '100%' }}>
-                <CardContent>
+              <Card data-state-key={state.state_key || `state-${index+1}`} data-state-label={materialLabel(state)} data-material-state-index={index} key={state.state_key || index} variant="outlined" sx={{ width: '100%', minWidth: 0 }}>
+                <CardContent sx={{ p: { xs: 1, sm: 2 }, '&:last-child': { pb: { xs: 1, sm: 2 } } }}>
                   <Box
                     role="button"
+                    data-state-toggle
+                    tabIndex={0}
+                    onKeyDown={event => { if (event.target === event.currentTarget && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); event.currentTarget.click() } }}
                     aria-expanded={!isCollapsed}
                     aria-controls={`material-state-${index}-content`}
                     onClick={() => { if (!readOnly) setCollapsedStates(current => ({ ...current, [index]: !current[index] })) }}
@@ -608,8 +612,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       }} />
                       <Typography variant="subtitle2" fontWeight={700}>{t('upload.materialStateNumber', { index: index + 1 })}</Typography>
                       {(issues || []).filter(issue => issue.field.startsWith(`material_states[${index}].`)).length > 0 && <Chip size="small" color="error" label={(issues || []).filter(issue => issue.field.startsWith(`material_states[${index}].`)).length} />}
-                      {state.material?.trim() && (
-                        <Typography variant="body2" color="text.secondary" noWrap>{state.material}</Typography>
+                      {materialLabel(state) && (
+                        <Typography variant="body2" color="text.secondary" noWrap>{materialLabel(state)}</Typography>
                       )}
                     </Box>
                     <Button size="small" color="error" startIcon={<DeleteIcon />}
@@ -623,10 +627,19 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' }, gap: 1.5 }}>
                     <TextField label={t('upload.materialNameField')} value={state.material_name || ''}
                       {...issueProps(`material_states[${index}].material_name`)}
+                      error={materialIdentityMissing(state) || Boolean(issueOf(`material_states[${index}].material_name`))}
+                      helperText={materialIdentityMissing(state) ? t('upload.missingMaterial', {label:t('upload.materialStateLabel', {index:index+1})}) : issueOf(`material_states[${index}].material_name`)?.message}
                       onChange={event => updateMaterialState(index, 'material_name', event.target.value)} />
                     <TextField label={t('upload.materialField')} value={state.material || ''}
                       {...issueProps(`material_states[${index}].material`)}
                       onChange={event => updateMaterialState(index, 'material', event.target.value)} />
+                    <FormControl fullWidth data-issue-field={`material_states[${index}].state_kind`}>
+                      <InputLabel id={`state-kind-${index}`}>{t('upload.stateKindField')}</InputLabel>
+                      <Select labelId={`state-kind-${index}`} label={t('upload.stateKindField')} value={state.state_kind || 'unknown'} onChange={event => updateMaterialState(index, 'state_kind', event.target.value)}>
+                        {(['experimental', 'theoretical', 'mixed', 'unknown'] as const).map(kind => <MenuItem key={kind} value={kind}>{dict.enums.stateKind[kind]}</MenuItem>)}
+                        {state.state_kind && !['experimental', 'theoretical', 'mixed', 'unknown'].includes(state.state_kind) && <MenuItem value={state.state_kind}>{state.state_kind}</MenuItem>}
+                      </Select>
+                    </FormControl>
                     <TextField
                       label={t('upload.elementCountField')} data-issue-field={`material_states[${index}].element_count`}
                       value={elementCountEdits[index]?.text ?? (state.element_count ?? '')}
@@ -797,6 +810,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   </Box>
 
                   <StructureCandidatePanel
+                    materialName={`${state.material_name || state.material || t('common.notProvided')} · ${t('upload.materialStateNumber', { index: index + 1 })}`}
                     candidates={stateCandidates}
                     uploading={Boolean(structureUploading[index])}
                     onUpload={file => void uploadStructureForState(index, file)}
@@ -857,7 +871,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                               {states.map((state, index) => (
                                 <MenuItem key={index} value={index}>
                                   {t('upload.materialStateNumber', { index: index + 1 })}
-                                  {state.material?.trim() ? ` · ${state.material}` : ''}
+                                  {materialLabel(state) ? ` · ${materialLabel(state)}` : ''}
                                 </MenuItem>
                               ))}
                             </Select>

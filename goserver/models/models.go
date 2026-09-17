@@ -319,15 +319,15 @@ type StructureFamilyAlias struct {
 
 // MaterialState 一篇论文当前 revision 中材料的条件化状态。
 type MaterialState struct {
-	ID                     uint64 `gorm:"primaryKey;uniqueIndex:uq_material_states_identity_revision,priority:1" json:"id"`
-	StateKey               string `gorm:"size:96;not null;uniqueIndex:uq_material_states_paper_state_key,priority:3" json:"state_key"`
-	PaperID                uint   `gorm:"not null;index:ix_material_states_paper_revision,priority:1;uniqueIndex:uq_material_states_identity_revision,priority:2;uniqueIndex:uq_material_states_paper_state_key,priority:1" json:"paper_id"`
-	PaperRevision          uint   `gorm:"not null;index:ix_material_states_paper_revision,priority:2;uniqueIndex:uq_material_states_identity_revision,priority:3;uniqueIndex:uq_material_states_paper_state_key,priority:2" json:"paper_revision"`
-	SuperconductorID       uint   `gorm:"not null;index" json:"superconductor_id"`
+	ID                     uint64  `gorm:"primaryKey;uniqueIndex:uq_material_states_identity_revision,priority:1" json:"id"`
+	StateKey               string  `gorm:"size:96;not null;uniqueIndex:uq_material_states_paper_state_key,priority:3" json:"state_key"`
+	PaperID                uint    `gorm:"not null;index:ix_material_states_paper_revision,priority:1;uniqueIndex:uq_material_states_identity_revision,priority:2;uniqueIndex:uq_material_states_paper_state_key,priority:1" json:"paper_id"`
+	PaperRevision          uint    `gorm:"not null;index:ix_material_states_paper_revision,priority:2;uniqueIndex:uq_material_states_identity_revision,priority:3;uniqueIndex:uq_material_states_paper_state_key,priority:2" json:"paper_revision"`
+	SuperconductorID       *uint   `gorm:"index" json:"superconductor_id"`
 	MaterialName           *string `gorm:"size:255" json:"material_name"`
-	ElementCount           *int16 `json:"element_count"`
-	MaterialDimensionality string `gorm:"size:32;not null;default:unknown" json:"material_dimensionality"`
-	CrystalSystem          string `gorm:"size:32;not null;default:unknown" json:"crystal_system"`
+	ElementCount           *int16  `json:"element_count"`
+	MaterialDimensionality string  `gorm:"size:32;not null;default:unknown" json:"material_dimensionality"`
+	CrystalSystem          string  `gorm:"size:32;not null;default:unknown" json:"crystal_system"`
 	// 必须显式指定列名：GORM 默认命名策略会把 GPa 拆成 g_pa，
 	// 生成 pressure_value_g_pa 这类并不存在的列，导致压强字段读不出来。
 	PressureValueGPa         *float64                       `gorm:"column:pressure_value_gpa" json:"pressure_value_gpa"`

@@ -1,4 +1,5 @@
 import { evidenceIssuesForStates } from '../lib/evidenceFields'
+import { materialIdentityMissing } from '../lib/materialIdentity'
 import { useEvidenceWorkflow } from './EvidenceWorkflow'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
@@ -22,6 +23,8 @@ import {
 } from '../lib/paperProcessing'
 import { validateRecordClient, validateTcRecords } from '../lib/formDefinitions'
 import EvidenceFieldMarkers from './EvidenceFieldMarkers'
+import PaperMaterialsSection from './PaperMaterialsSection'
+import { researchMaterials } from '../lib/paperMaterials'
 
 interface UploadTaskEditorProps {
   taskId: string
@@ -232,7 +235,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }
 
   const setDraftField = (field: keyof UploadDraft, value: unknown) => {
-    changeDraft(current => ({ ...current, [field]: value }))
+    if (field === 'material_states' && JSON.stringify(researchMaterials(draft?.material_states || [])) !== JSON.stringify(researchMaterials(value as UploadDraft['material_states']))) evidenceWorkflow.invalidate('paper.research_materials')
+    changeDraft(current => ({ ...current, [field]: value, ...(field === 'material_states' ? { paper: { ...current.paper, research_materials: researchMaterials(value as UploadDraft['material_states']) } } : {}) }))
   }
 
   const saveDraft = useCallback(async (showResult = false): Promise<boolean> => {
@@ -289,7 +293,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     }
     draft.material_states.forEach((state, stateIndex) => {
       const label = t('upload.materialStateLabel', { index: stateIndex + 1 })
-      if (!state.material?.trim() && !state.material_name?.trim()) {
+      if (materialIdentityMissing(state)) {
         issues.push({ stateIndex, field: `material_states[${stateIndex}].material_name`, message: t('upload.missingMaterial', { label }) })
       }
       if (state.reported_space_group_number != null &&
@@ -562,6 +566,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
             onChange={event => setPaperField('doi', event.target.value.trim())} />}
         />
       </Box>
+
+      <PaperMaterialsSection states={draft.material_states} relations={draft.paper.material_relations} historicalMaterials={draft.paper.research_materials} onChange={readOnly ? undefined : values => setPaperField('material_relations', values)} />
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mt: 2, '& > *': { minWidth: 0 } }}>
         <FormControl fullWidth error={hasIssue('paper.paper_type')} data-issue-field="paper.paper_type">

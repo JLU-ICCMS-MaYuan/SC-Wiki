@@ -16,6 +16,7 @@ import UploadTaskCenter from '../components/UploadTaskCenter'
 import MultiFileUploadPanel from '../components/MultiFileUploadPanel'
 import UploadParsingDetail from '../components/UploadParsingDetail'
 import { api } from '../lib/api'
+import { buildLlmHeaders } from '../lib/llmProvider'
 import {
   PROCESSING_STAGES, UploadAcceptedResponse, UploadTaskState, unwrapData,
 } from '../lib/paperProcessing'
@@ -231,6 +232,7 @@ const UploadPage: React.FC = () => {
     uploadXhr.current = xhr
     xhr.open('POST', url)
     if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+    Object.entries(buildLlmHeaders()).forEach(([key, value]) => xhr.setRequestHeader(key, value))
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
@@ -319,6 +321,7 @@ const UploadPage: React.FC = () => {
       setTaskState(current => current ? {
         ...current, stage: 'ready', stage_index: 5, processing_status: 'succeeded', processing_error: null,
       } : current)
+      setTaskPollTick(value => value + 1)
       setSnackbar(t('upload.manualDraftOpened'))
     } catch (reason: any) {
       setError(reason.message || t('upload.manualDraftFailed'))
@@ -518,7 +521,7 @@ const UploadPage: React.FC = () => {
                       {taskState.duplicate_reason || t('upload.duplicateExisting')}
                     </Alert>
                   )}
-                  {activeTaskId && <UploadParsingDetail taskId={activeTaskId} onSubmitted={handleTaskSubmitted} />}
+                  {activeTaskId && <UploadParsingDetail key={`${activeTaskId}:${taskPollTick}`} taskId={activeTaskId} onSubmitted={handleTaskSubmitted} />}
                 </CardContent>
               </Card>
             </Box>

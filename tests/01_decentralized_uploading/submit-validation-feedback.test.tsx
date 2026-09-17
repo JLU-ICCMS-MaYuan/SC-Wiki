@@ -54,6 +54,10 @@ const makeDraft = (states: DraftMaterialState[], paper: Record<string, unknown> 
 } as UploadDraft)
 
 const collapseContent = (index: number) => document.getElementById(`material-state-${index}-content`)
+const collapseState = async (index: number) => {
+  fireEvent.click(document.querySelector(`[data-material-state-index="${index}"] [data-state-toggle]`)!)
+  await waitFor(() => expect(collapseContent(index)).not.toHaveClass('MuiCollapse-entered'))
+}
 
 const clickSubmit = async () => {
   fireEvent.click(await screen.findByRole('button', { name: '提交审核' }))
@@ -72,6 +76,7 @@ beforeEach(() => {
     if (path === '/api/rag/evidence/preflight') {
       return { version: 'checked-version', needs_check: false, records: [], sources: [] } as never
     }
+    if (path === '/api/rag/evidence/proposals/prepare') return { preparation_id: null, patches: [] } as never
     if (path.endsWith('/submit')) return submitRequest(body)
     throw new Error(`unexpected POST ${path}`)
   })
@@ -131,11 +136,13 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
 
     const banner = await screen.findByRole('alert')
     expect(banner).toHaveTextContent('标题不能为空')
-    expect(banner).toHaveTextContent('第 3 个材料状态缺少化学式')
-    expect(mockedApi.post).not.toHaveBeenCalled()
+    expect(banner).toHaveTextContent('第 3 个材料状态至少需要材料名或化学式')
+    expect(submitRequest).not.toHaveBeenCalled()
+    expect(mockedApi.put).not.toHaveBeenCalled()
+    expect(mockedApi.post.mock.calls.every(([path]) => path === '/api/rag/evidence/preflight')).toBe(true)
   })
 
-  it('出错字段位于默认折叠的卡片内时展开该卡片并显示字段错误提示', async () => {
+  it('出错字段位于手动折叠的卡片内时展开该卡片并显示字段错误提示', async () => {
     render(<UploadTaskEditor
       taskId={'b'.repeat(32)}
       onSubmitted={vi.fn()}
@@ -147,17 +154,16 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
     />)
 
     await screen.findByText('材料状态 #1')
-    // 卡片数 >2，默认仅第一张展开
-    expect(collapseContent(2)).not.toHaveClass('MuiCollapse-entered')
+    await collapseState(2)
 
     await clickSubmit()
 
     await waitFor(() => {
       expect(collapseContent(2)).toHaveClass('MuiCollapse-entered')
     })
-    const anchor = document.querySelector('[data-issue-field="material_states[2].material"]')
+    const anchor = document.querySelector('[data-issue-field="material_states[2].material_name"]')
     expect(anchor).not.toBeNull()
-    expect(anchor).toHaveTextContent('第 3 个材料状态缺少化学式')
+    expect(anchor).toHaveTextContent('第 3 个材料状态至少需要材料名或化学式')
   })
 
   it('空间群号越界时定位到该字段并展示区间提示', async () => {
@@ -195,7 +201,7 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
     />)
 
     await screen.findByText('材料状态 #1')
-    expect(collapseContent(1)).not.toHaveClass('MuiCollapse-entered')
+    await collapseState(1)
 
     await clickSubmit()
 
@@ -255,7 +261,7 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
     />)
 
     await clickSubmit()
-    expect(await screen.findByRole('alert')).toHaveTextContent('第 1 个材料状态缺少化学式')
+    expect(await screen.findByRole('alert')).toHaveTextContent('第 1 个材料状态至少需要材料名或化学式')
 
     fireEvent.change(screen.getByLabelText('化学式'), { target: { value: 'LaH10' } })
     await clickSubmit()
@@ -281,13 +287,16 @@ describe('提交失败的必填定位与原因展示（Issue #58）', () => {
     render(<UploadTaskEditor
       taskId={'9'.repeat(32)}
       onSubmitted={vi.fn()}
-      draftOverride={makeDraft([makeState({ material: 'LaH10' }), makeState({ material: '' })])}
+      draftOverride={makeDraft([makeState({ material: 'LaH10' }), makeState({ material: 'H3S' })])}
     />)
 
+    await screen.findByText('材料状态 #1')
+    await collapseState(1)
     await clickSubmit()
 
     const banner = await screen.findByRole('alert')
     expect(banner).toHaveTextContent('第 2 个材料状态缺少化学式')
+    expect(submitRequest).toHaveBeenCalledTimes(1)
 
     // 序号前缀仍被解析：第二张卡片展开并挂上字段错误锚点
     await waitFor(() => {

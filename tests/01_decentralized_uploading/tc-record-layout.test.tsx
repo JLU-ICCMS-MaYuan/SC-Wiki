@@ -4,7 +4,9 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import SchemaDrivenRecordForm from '../../frontend/src/components/SchemaDrivenRecordForm'
+import EvidenceFieldMarkers from '../../frontend/src/components/EvidenceFieldMarkers'
 import { validateRecordClient } from '../../frontend/src/lib/formDefinitions'
+import { applyEvidencePatches } from '../../frontend/src/lib/evidenceProposals'
 import { normalizePropertyRecordIdentity, type PropertyRecordDraft } from '../../frontend/src/lib/propertyModules'
 
 afterEach(cleanup)
@@ -135,4 +137,31 @@ describe('Issue #94 Tc 紧凑输入', () => {
     expect(normalized.record_key).toBe(original.record_key)
   })
 
+  it('应用核对建议后立即同步当前值，不把旧候选的 raw 留给下次保存', () => {
+    const draft = { paper: {}, material_states: [{ state_key: 'tin', property_modules: [{ module_key: 'tc', records: [record()] }] }] }
+    const updated = applyEvidencePatches(draft, [{ key: 'tc', item_key: 'tc', field: 'record',
+      state_key: 'tin', module_key: 'tc', record_key: 'tc-one', values: { value_number: 8.5, value_raw: 'outdated', unit_raw: 'mK' } }])
+    expect(updated.material_states[0].property_modules[0].records[0]).toMatchObject({ value_number: 8.5, value_raw: '8.5', unit_raw: 'K' })
+    expect(draft.material_states[0].property_modules[0].records[0].value_number).toBe(3.78)
+  })
+
+  it('旧原始字段的核对定位到当前 Tc，不生成重复区域，数字仍可直接编辑', async () => {
+    const open = vi.fn()
+    render(<div data-evidence-scope="tc-test">
+      <div data-state-key="tin"><div data-module-key="module-tc">
+        <SchemaDrivenRecordForm record={record()} basePath="material_states[0].property_modules.0.records.0" onChange={vi.fn()} />
+      </div></div>
+      <EvidenceFieldMarkers scope="tc-test" records={[{
+        key: 'raw-tc', field: 'material_states[0].property_modules[0].records[0]',
+        fields: ['material_states[0].property_modules[0].records[0].unit_raw'],
+        state_key: 'tin', module_key: 'module-tc', record_key: 'tc-one', label: 'Tc',
+        status: 'uncertain', current_value: record(), reason: '旧单位需要核对', evidences: [],
+      }]} onOpen={open} onChange={vi.fn()} />
+    </div>)
+    const label = await screen.findByRole('button', { name: 'Tc 值', exact: true })
+    await userEvent.click(screen.getByLabelText('Tc 值'))
+    expect(open).not.toHaveBeenCalled()
+    await userEvent.click(label)
+    expect(open).toHaveBeenCalledWith('raw-tc', ['raw-tc'])
+  })
 })

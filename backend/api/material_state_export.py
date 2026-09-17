@@ -34,10 +34,10 @@ def build_material_state_export(db: Session, *, paper_id: int, state_key: str, u
     if state is None:
         raise HTTPException(status_code=404, detail={"code": "export_incomplete", "message": "材料状态不存在"})
     material = db.query(models.Superconductor).filter_by(id=state.superconductor_id, paper_id=paper_id, paper_revision=revision).first()
-    if material is None:
+    if material is None and (state.superconductor_id is not None or not state.material_name):
         raise _incomplete("材料状态所属材料不存在")
-    chemical_system = db.query(models.ChemicalSystem).filter_by(id=material.chemical_system_id, paper_id=paper_id, paper_revision=revision).first()
-    if chemical_system is None:
+    chemical_system = db.query(models.ChemicalSystem).filter_by(id=material.chemical_system_id, paper_id=paper_id, paper_revision=revision).first() if material else None
+    if material is not None and chemical_system is None:
         raise _incomplete("材料所属化学体系不存在")
 
     structures = db.query(models.StructureModel).filter_by(material_state_id=state.id, paper_id=paper_id, paper_revision=revision).order_by(models.StructureModel.id).all()
@@ -125,10 +125,12 @@ def build_material_state_export(db: Session, *, paper_id: int, state_key: str, u
     payload = {
         "export_version": 1,
         "paper": {"id": paper.id, "revision": revision, "doi": paper.doi, "title": paper.title, "journal": paper.journal, "year": paper.year},
-        "chemical_system": {"system_key": chemical_system.system_key, "elements_list": chemical_system.elements_list, "element_count": chemical_system.element_count},
-        "material": {"chemical_formula": material.chemical_formula, "formula_normalized": material.formula_normalized, "composition_key": material.composition_key, "isotope_signature": material.isotope_signature, "display_name": material.display_name, "elements_list": material.elements_list, "composition": material.composition, "element_ratio": material.element_ratio},
+        "chemical_system": {"system_key": chemical_system.system_key, "elements_list": chemical_system.elements_list, "element_count": chemical_system.element_count} if chemical_system else None,
+        "material": {"chemical_formula": material.chemical_formula, "formula_normalized": material.formula_normalized, "composition_key": material.composition_key, "isotope_signature": material.isotope_signature, "display_name": material.display_name, "elements_list": material.elements_list, "composition": material.composition, "element_ratio": material.element_ratio} if material else None,
         "material_state": {
             "id": state.id, "paper_id": state.paper_id, "paper_revision": state.paper_revision,
+            "state_key": state.state_key, "material_name": state.material_name,
+            "material": material.chemical_formula if material else '',
             "element_count": state.element_count, "material_dimensionality": state.material_dimensionality,
             "pressure_value_gpa": state.pressure_value_gpa, "pressure_min_gpa": state.pressure_min_gpa,
             "pressure_max_gpa": state.pressure_max_gpa, "pressure_raw": state.pressure_raw,

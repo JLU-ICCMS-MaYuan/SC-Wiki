@@ -206,6 +206,6 @@ def format_rag_context(retrieval_result: dict[str, Any]) -> str:
         parts.append("\n【相关文献片段】")
         for c in chunks[:5]:
             pid = f" [PID_{c['paper_id']}]" if c.get("paper_id") else ""
-            parts.append(f"  {c['content'][:300]}{pid}")
+            parts.append(f"  {c.get('attribution', '')}\n{c['content'][:300]}{pid}")
 
     return "\n".join(parts) if parts else ""

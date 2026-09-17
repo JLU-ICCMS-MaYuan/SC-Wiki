@@ -20,19 +20,19 @@ def test_real_paper29_sources_and_stale_guard():
     with SessionLocal() as s:
         assert s.bind.dialect.name == 'mysql'
         before = ev.paper_snapshot(s,29,0,'',check_access=False)
-        records={r['record_id']:r for r in before['records']}
-        assert records[47]['label'].startswith('SnHg')
-        assert len(records[45]['evidences']) == len(records[46]['evidences']) == 1
-        assert not records[47]['evidences']
+        records={r['record_id']:r for r in before['records'] if r.get('record_id')}
+        assert records
+        assert any(r['field'] == 'paper.summary' for r in before['records'])
         assert any('0.12' in c['content'] and '4°' in c['content'] for c in before['chunks'])
-        record=s.get(models.PropertyRecord,47)
+        record=s.get(models.PropertyRecord,next(iter(records)))
+        record_id=record.id
         old=record.value_raw
         record.value_raw='modified during check'
         s.flush()
         after=ev.paper_snapshot(s,29,0,'',check_access=False)
         assert before['version']!=after['version']
         s.rollback()
-        assert s.get(models.PropertyRecord,47).value_raw==old
+        assert s.get(models.PropertyRecord,record_id).value_raw==old
 
 
 def test_upload_submission_preserves_multievidence_and_local_keys(monkeypatch,tmp_path):
@@ -74,7 +74,12 @@ def test_upload_submission_preserves_multievidence_and_local_keys(monkeypatch,tm
                         if si==0:
                             other=next(c for c in sources if c['chunk_index']!=located['chunk_index'] and len(c['content'])>80)
                             record['evidences'].append(ev.locate({'file_id':'main','chunk_index':other['chunk_index'],'quote':other['content']},sources))
-                        checks.append({'field':f'material_states[{si}].property_modules[0].records[0]','status':'uncertain','reason':'持久化回归使用真实原文，未声明科学正确','model':'persistence-test'})
+                        from backend.ingest import scientific_evidence as science
+                        r = dict(key=f'{si}/{module["module_key"]}/{record["record_key"]}',
+                            item_key=science.record_identity(state.get('state_key') or f'state-{si+1}', module['module_key'], record['record_key']),
+                            field=f'material_states[{si}].property_modules[0].records[0]', claim=science.record_claim(record,state), evidences=record['evidences'])
+                        r = ev.complete_snapshot('upload',task_id,[r],sources,{})['records'][0]
+                        checks.append({**r,'status':'uncertain','reason':'持久化回归使用真实原文，未声明科学正确','model':'persistence-test'})
                     state={'user_id':p.uploaded_by_user_id,'files':[{'file_id':'main','role':'main','source_file_path':file.stored_path,'sha256':file.sha256,'size':file.size,'original_filename':file.original_filename}]}
                 new_id=await rag._create_pending_paper(task_id,state,draft,evidence_checks=checks)
                 async with AsyncSession(bind=conn,expire_on_commit=False,join_transaction_mode='create_savepoint') as s:

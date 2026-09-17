@@ -219,7 +219,7 @@ const chartApprovedJoin = `
 	FROM property_records t
 	JOIN property_modules pm ON pm.id = t.module_id
 	JOIN material_states ms ON ms.id = t.material_state_id
-	JOIN superconductors sc ON sc.id = ms.superconductor_id
+	LEFT JOIN superconductors sc ON sc.id = ms.superconductor_id
 	JOIN papers p ON p.id = t.paper_id
 		AND p.review_status = 'approved'
 		AND t.paper_revision = p.content_revision
@@ -295,7 +295,7 @@ func TcPressureChart(c *gin.Context) {
 	var rows []row
 	predicate, args := chartTcPredicate(tcField, tcMethod)
 	query := fmt.Sprintf(`
-		SELECT sc.chemical_formula AS material,
+		SELECT COALESCE(NULLIF(ms.material_name, ''), sc.chemical_formula, '') AS material,
 			%s AS y, CAST(ms.pressure_value_gpa AS DOUBLE) AS x,
 			%s AS family_ids,
 				t.record_type AS type,
@@ -374,7 +374,7 @@ func TcYearChart(c *gin.Context) {
 		SELECT p.year AS x, %s AS y,
 				t.record_type AS type,
 			%s AS family_ids,
-			sc.chemical_formula AS formula, COALESCE(p.doi,'') AS doi,
+			COALESCE(NULLIF(ms.material_name, ''), sc.chemical_formula, '') AS formula, COALESCE(p.doi,'') AS doi,
 			t.paper_id AS paper_id, CAST(ms.pressure_value_gpa AS DOUBLE) AS pressure_gpa
 		%s
 			WHERE t.property_code = 'tc'

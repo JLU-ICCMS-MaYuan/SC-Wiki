@@ -1072,7 +1072,7 @@ class MaterialState(Base):
     state_key = Column(String(96), nullable=False)
     paper_id = Column(Integer, nullable=False)
     paper_revision = Column(Integer, nullable=False)
-    superconductor_id = Column(Integer, nullable=False)
+    superconductor_id = Column(Integer, nullable=True)
     element_count = Column(SmallInteger)
     material_dimensionality = Column(
         String(32),

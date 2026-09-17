@@ -49,7 +49,7 @@ def test_semantic_dispute_keeps_valid_source_but_not_supported():
 
 
 def test_model_cannot_forge_source_to_approve():
-    result=ev.checked_result({'key':'47'}, {'status':'supported','evidences':[{'quote':'Tc is 4.29 K'}]},chunks())
+    result=ev.checked_result({'key':'47', 'field':'records[47]'}, {'status':'supported','evidences':[{'quote':'Tc is 4.29 K'}]},chunks())
     assert result['status']=='missing'
     assert '引句未在所选来源文本中找到' in result['reason']
 
@@ -90,7 +90,7 @@ def test_worker_reports_completed_batches_only_after_model_returns(monkeypatch):
     from backend.api.evidence import get_job
 
     sources = [dict(file_id='main', chunk_index=i, content=f'quote {i} '+ 'x'*24000) for i in range(2)]
-    record = dict(key='47', claim={}, evidences=[])
+    record = dict(key='47', item_key='47', field='records[47]', claim={}, evidences=[])
     job = dict(id='test-job', owner=1, status='queued', cached={}, snapshot={
         'target': 'paper', 'target_id': '29', 'version': 'v', 'records': [record], 'chunks': sources})
     observations = []
@@ -101,6 +101,9 @@ def test_worker_reports_completed_batches_only_after_model_returns(monkeypatch):
     monkeypatch.setattr(upload_tasks, 'load_llm_config', lambda _id: SimpleNamespace(model='test'))
     monkeypatch.setattr(upload_tasks, 'delete_llm_config', lambda _id: None)
     monkeypatch.setattr(ev, 'read_job', lambda *_args: job)
+    monkeypatch.setattr(ev, 'persist_completed_results', lambda *_args: None)
+    from backend.api import evidence
+    monkeypatch.setattr(evidence, 'snapshot_for', lambda *_args: (job['snapshot'], job.get('results', {})))
     monkeypatch.setattr(ev, 'update_job', lambda _id, **changes: job.update(changes))
     def complete(_system, prompt, **_kwargs):
         public = get_job('test-job', SimpleNamespace(id=1))

@@ -748,6 +748,19 @@ def _as_list(value: Any) -> list[Any]:
     return value if isinstance(value, list) else [value]
 
 
+def _material_relations(value: Any) -> Any:
+    """兼容历史 JSON 字符串；无法解析时保留，不能保存其他字段时丢失来源。"""
+    if value is None or value == "":
+        return []
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, list) else value
+        except (ValueError, TypeError):
+            return value
+    return value
+
+
 def _normalize_text_items(value: Any, *keys: str) -> tuple[list[str], list[dict[str, Any]]]:
     texts: list[str] = []
     evidence: list[dict[str, Any]] = []
@@ -1047,12 +1060,13 @@ def _normalize_material_states(value: Any) -> list[dict[str, Any]]:
             dimensionality = "unknown"
         state["material_dimensionality"] = dimensionality
         pressure_value, pressure_min, pressure_max, pressure_raw, pressure_unit = _condition_pressure(state)
-        state["pressure_value_gpa"] = _numeric_value(state.get("pressure_value_gpa")) if state.get("pressure_value_gpa") not in (None, "") else pressure_value
-        state["pressure_min_gpa"] = _numeric_value(state.get("pressure_min_gpa")) if state.get("pressure_min_gpa") not in (None, "") else pressure_min
-        state["pressure_max_gpa"] = _numeric_value(state.get("pressure_max_gpa")) if state.get("pressure_max_gpa") not in (None, "") else pressure_max
-        state["pressure_raw"] = state.get("pressure_raw") or pressure_raw
-        state["pressure_unit_raw"] = state.get("pressure_unit_raw") or pressure_unit
-        if state["pressure_raw"] in (None, "") and state["pressure_value_gpa"] is not None:
+        explicit_raw = "pressure_raw" in state
+        # 仅缺失字段读取旧契约；显式 null 是用户清空，不能回填历史条件。
+        for field, fallback in (("pressure_value_gpa", pressure_value), ("pressure_min_gpa", pressure_min), ("pressure_max_gpa", pressure_max)):
+            state[field] = _numeric_value(state[field]) if field in state else fallback
+        state["pressure_raw"] = (state["pressure_raw"] or None) if explicit_raw else pressure_raw
+        state["pressure_unit_raw"] = (state["pressure_unit_raw"] or None) if "pressure_unit_raw" in state else pressure_unit
+        if not explicit_raw and state["pressure_raw"] in (None, "") and state["pressure_value_gpa"] is not None:
             state["pressure_raw"] = str(state["pressure_value_gpa"])
             state["pressure_unit_raw"] = state["pressure_unit_raw"] or "GPa"
         state.setdefault("state_kind", "unknown")
@@ -1233,7 +1247,7 @@ def _normalize_draft(
         "key_finding": raw_paper.get("key_finding") or "",
         "research_motivation": raw_paper.get("research_motivation") or "",
         "research_materials": research_materials,
-        "material_relations": _as_list(raw_paper.get("material_relations")),
+        "material_relations": _material_relations(raw_paper.get("material_relations")),
         "builds_on": _as_list(raw_paper.get("builds_on")),
     }
     properties = _flatten_properties(raw.get("key_properties"))
@@ -1501,6 +1515,11 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                             material_state_ref=f"unassigned:{file_item['file_id']}",
                             source=source_info,
                         ))
+                        from backend.ingest.scientific_evidence import register_structure_origin
+                        from backend.models import User
+                        with SessionLocal.begin() as origin_session:
+                            uploader = origin_session.get(User, int(state['user_id']))
+                            register_structure_origin(origin_session, 'upload', task_id, structure_candidates[-1], uploader.id, uploader.username, source_info['filename'], structure_text.encode('utf-8'))
                         structure_ok = True
                     except (OSError, UnicodeDecodeError, StructureCandidateError) as structure_exc:
                         structure_candidates.append({

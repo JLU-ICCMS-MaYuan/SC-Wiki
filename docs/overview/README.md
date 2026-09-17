@@ -8,6 +8,8 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 
 ## 全局导航
 
+上传与管理员编辑共用材料名/化学式至少一项规则；命名材料可没有化学式，当前编辑保存后可逐项填写人工理由确认。详见[上传数据结构](01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md)与[论文审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
+
 所有角色与访客共享左侧导航，页面不再保留全宽顶部栏。SC-Wiki 位于最上方，点击返回默认热点页；下方依次为热点、探索、脉络、社区、上传、对话、预测。底部留白后依次提供模型配置、中文/英文、角色入口或访客登录。
 
 侧栏展开为 216px，可向左收起为 64px 图标栏；小于 900px 的窗口默认收起，按钮可随时展开。每个功能有图标与可访问名称，收起后悬停可查看全名。侧栏在页面滚动时保持可见，低高度时可以内部滚动。折叠只改变布局，保留当前页面输入和已选文件；该选择保留于当前页面会话。正文使用侧栏右侧剩余宽度，具体页面仍保留自身排版约束。详见 [Feature #101](../specs/101-unified-collapsible-sidebar/spec.md) 与[使用验收说明](../specs/101-unified-collapsible-sidebar/quickstart.md)。
@@ -64,7 +66,7 @@ flowchart LR
 
 ## 文档维护
 
-上传提交和两工作台批准共用物性证据保留与核对：支持结论可自动续提，有有效出处的语义疑点由审核员逐条裁决。
+上传提交和两工作台批准共用科学数据来源核对：核对与提交独立，管理员可对当前内容逐条说明理由确认；编辑页先保存新值，再将人工确认绑定当前版本。
 操作流程见[PDF 解析管线](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md)与
 [论文与记录审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 

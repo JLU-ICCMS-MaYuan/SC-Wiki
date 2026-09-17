@@ -99,6 +99,8 @@ def build_rag_prompt(
     context_parts = []
     for i, chunk in enumerate(chunks):
         content = chunk.get("content", "")
+        if chunk.get("attribution"):
+            content = "来源限定（回答必须保留，不得错误归因）：" + chunk["attribution"] + "\n" + content
         section = chunk.get("section_name", "")
         paper_id = chunk.get("paper_id", "?")
         header = f"--- [PID_{paper_id}]"
@@ -202,6 +204,8 @@ def build_fusion_prompt(
         context_parts = ["\n=== 文献片段（来自论文全文） ==="]
         for i, chunk in enumerate(rag_chunks):
             content = chunk.get("content", "")
+            if chunk.get("attribution"):
+                content = "来源限定（回答必须保留，不得错误归因）：" + chunk["attribution"] + "\n" + content
             section = chunk.get("section_name", "")
             paper_id = chunk.get("paper_id", "?")
             header = f"--- [PID_{paper_id}]"

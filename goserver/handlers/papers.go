@@ -258,8 +258,8 @@ func SearchRecords(c *gin.Context) {
 
 	// 元素匹配 → 查 superconductors 表
 	scIDs := getSuperconductorIDs(body.Elements, body.Mode, body.Formula)
-	if len(scIDs) == 0 && len(body.Elements) > 0 {
-		// 有元素查询但无匹配 → 返回空
+	if len(scIDs) == 0 && (len(body.Elements) > 0 || (body.Mode == "formula_search" && strings.TrimSpace(body.Formula) != "")) {
+		// 有元素或化学式查询但无匹配 → 返回空
 		c.JSON(http.StatusOK, gin.H{"items": []interface{}{}, "total": 0})
 		return
 	}
@@ -274,8 +274,8 @@ func SearchRecords(c *gin.Context) {
 	if body.Keyword != "" {
 		like := "%" + body.Keyword + "%"
 		query = query.Where(
-			"(papers.title LIKE ? OR papers.doi LIKE ? OR papers.journal LIKE ? OR superconductors.chemical_formula LIKE ?)",
-			like, like, like, like,
+			"(papers.title LIKE ? OR papers.doi LIKE ? OR papers.journal LIKE ? OR superconductors.chemical_formula LIKE ? OR material_states.material_name LIKE ?)",
+			like, like, like, like, like,
 		)
 	}
 	if body.YearMin != nil {
@@ -344,12 +344,13 @@ func approvedRecordSearchQuery(db *gorm.DB) *gorm.DB {
 			material_states.pressure_value_gpa AS pressure_value_gpa,
 			material_states.reported_space_group_symbol AS reported_space_group_symbol,
 			material_states.state_kind AS state_kind,
+			material_states.material_name AS material_name,
 			superconductors.chemical_formula AS chemical_formula,
 			papers.id AS paper_id, papers.year AS year, papers.review_status AS review_status,
 			papers.doi AS doi`).
 		Joins("JOIN property_modules ON property_modules.id = property_records.module_id").
 		Joins("JOIN material_states ON material_states.id = property_records.material_state_id").
-		Joins("JOIN superconductors ON superconductors.id = material_states.superconductor_id").
+		Joins("LEFT JOIN superconductors ON superconductors.id = material_states.superconductor_id").
 		Joins("JOIN papers ON papers.id = property_records.paper_id AND papers.content_revision = property_records.paper_revision").
 		Where("property_records.property_code = ?", "tc").
 		Where("property_records.record_type IN ?", []string{"predicted_tc", "measured_tc"}).
@@ -580,7 +581,9 @@ func materialStatesToDict(states []models.MaterialState) []gin.H {
 	result := make([]gin.H, 0, len(states))
 	for _, state := range states {
 		material := ""
-		if state.Superconductor.ID != 0 { material = state.Superconductor.ChemicalFormula }
+		if state.Superconductor.ID != 0 {
+			material = state.Superconductor.ChemicalFormula
+		}
 		structures := make([]gin.H, 0, len(state.StructureFamilyLinks))
 		for _, link := range state.StructureFamilyLinks {
 			structures = append(structures, gin.H{
@@ -590,7 +593,7 @@ func materialStatesToDict(states []models.MaterialState) []gin.H {
 			})
 		}
 		result = append(result, gin.H{
-			"id": state.ID, "material": material, "material_name": state.MaterialName,
+			"id": state.ID, "state_key": state.StateKey, "material": material, "material_name": state.MaterialName,
 			"system_key": state.Superconductor.ChemicalSystem.SystemKey,
 			"structure_families": structures,
 			"element_count":      state.ElementCount, "material_dimensionality": state.MaterialDimensionality,
@@ -677,6 +680,7 @@ type recordSearchRow struct {
 	ReportedSpaceGroupSymbol *string  `gorm:"column:reported_space_group_symbol"`
 	StateKind                string   `gorm:"column:state_kind"`
 	ChemicalFormula          string   `gorm:"column:chemical_formula"`
+	MaterialName             *string  `gorm:"column:material_name"`
 	PaperID                  uint     `gorm:"column:paper_id"`
 	Year                     *int     `gorm:"column:year"`
 	ReviewStatus             string   `gorm:"column:review_status"`
@@ -716,17 +720,18 @@ func flatRecordToDict(row recordSearchRow) gin.H {
 	}
 
 	return gin.H{
-		"record_id":   row.RecordKey,
-		"record_key":  row.RecordKey,
-		"paper_id":    row.PaperID,
-		"year":        year,
-		"formula":     row.ChemicalFormula,
-		"type":        row.StateKind,
-		"pressure":    pressure,
-		"tc":          tc,
-		"space_group": spaceGroup,
-		"source":      "Local",
-		"status":      status,
-		"doi":         row.DOI,
+		"record_id":     row.RecordKey,
+		"record_key":    row.RecordKey,
+		"paper_id":      row.PaperID,
+		"year":          year,
+		"formula":       row.ChemicalFormula,
+		"material_name": row.MaterialName,
+		"type":          row.StateKind,
+		"pressure":      pressure,
+		"tc":            tc,
+		"space_group":   spaceGroup,
+		"source":        "Local",
+		"status":        status,
+		"doi":           row.DOI,
 	}
 }

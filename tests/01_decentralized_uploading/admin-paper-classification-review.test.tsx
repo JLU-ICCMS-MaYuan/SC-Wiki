@@ -132,7 +132,7 @@ beforeEach(() => {
     if (path === '/api/rag/papers/51/candidate-attachments') return { data: [] } as never
     throw new Error(`unexpected GET ${path}`)
   })
-  mockedApi.post.mockImplementation(async path => path === '/api/rag/evidence/preflight'
+  mockedApi.post.mockImplementation(async path => path === '/api/rag/evidence/proposals/prepare' ? {patches:[]} as never : path === '/api/rag/evidence/preflight'
     ? { version: 'checked-version', needs_check: false, records: [], sources: [] } as never
     : { message: '审核完成' } as never)
 })
@@ -165,11 +165,11 @@ describe('论文快速审核三状态', () => {
     await user.type(screen.getByLabelText('审核意见'), '已核对')
     await user.click(screen.getByRole('button', { name: '确认审核' }))
     expect(await screen.findByText(/读取服务失败/)).toBeVisible()
-    expect(mockedApi.post).not.toHaveBeenCalled()
+    expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))).toHaveLength(0)
     expect(screen.getByLabelText('审核意见')).toHaveValue('已核对')
     mockedApi.get.mockImplementation(originalGet)
     let rejectRequest!: (reason: Error) => void
-    mockedApi.post.mockImplementation(path => path === '/api/rag/evidence/preflight'
+    mockedApi.post.mockImplementation(path => path === '/api/rag/evidence/proposals/prepare' ? {patches:[]} as never : path === '/api/rag/evidence/preflight'
       ? Promise.resolve({ version: 'checked-version', needs_check: false, records: [], sources: [] } as never)
       : new Promise((_, reject) => { rejectRequest = reject }))
     await user.click(screen.getByRole('button', { name: '确认审核' }))
@@ -297,8 +297,8 @@ describe('论文快速审核三状态', () => {
     await user.click(await screen.findByRole('option', { name: /退回待审核/ }))
     await user.click(screen.getByRole('button', { name: '确认审核' }))
 
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledTimes(1))
-    const [path, body] = mockedApi.post.mock.calls[0]
+    await waitFor(() => expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))).toHaveLength(1))
+    const [path, body] = mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))[0]
     expect(path).toBe('/api/admin/papers/51/review')
     expect(body).toMatchObject({
       status: 'pending',
@@ -318,9 +318,9 @@ describe('论文快速审核三状态', () => {
     await user.click(await screen.findByRole('option', { name: status === 'pending' ? /退回待审核/ : /拒绝/ }))
     await user.click(screen.getByRole('button', { name: '确认审核' }))
 
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledTimes(1))
-    expect(mockedApi.post.mock.calls[0][1]).toMatchObject({ status })
-    expect(mockedApi.post.mock.calls[0][1]).not.toHaveProperty('material_families')
+    await waitFor(() => expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))).toHaveLength(1))
+    expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))[0][1]).toMatchObject({ status })
+    expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))[0][1]).not.toHaveProperty('material_families')
     expect(mockedApi.get.mock.calls.some(([path]) => String(path).includes('/review-artifact'))).toBe(false)
     expect(mockedApi.get.mock.calls.some(([path]) => String(path).includes('/api/admin/papers/51'))).toBe(false)
   })

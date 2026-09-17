@@ -266,7 +266,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
         const moduleBasePath = basePath ? `${basePath}.${moduleIndex}` : String(moduleIndex)
         const choices = choicesFor(module.module_code)
         return (
-          <Accordion key={module.module_key} defaultExpanded data-testid={`property-module-${module.module_code}`}>
+          <Accordion key={module.module_key} data-module-key={module.module_key} defaultExpanded data-testid={`property-module-${module.module_code}`}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ flex: 1 }}>
               <Typography>{PROPERTY_MODULES.find(item => item.code === module.module_code)?.label || module.module_code}</Typography>

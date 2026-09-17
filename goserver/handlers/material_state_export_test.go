@@ -159,7 +159,7 @@ func TestPropertyModuleKeyIsScopedToMaterialState(t *testing.T) {
 	seedPaperFour(t, db, reviewStatusApproved)
 	if err := db.Create(&models.MaterialState{
 		ID: 2, StateKey: "state-lah10-200gpa", PaperID: 4, PaperRevision: 1,
-		SuperconductorID: 1, MaterialDimensionality: "bulk", CrystalSystem: "cubic", StateKind: "theoretical",
+		SuperconductorID: uintPtr(1), MaterialDimensionality: "bulk", CrystalSystem: "cubic", StateKind: "theoretical",
 	}).Error; err != nil {
 		t.Fatal(err)
 	}
