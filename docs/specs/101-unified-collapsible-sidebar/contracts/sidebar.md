@@ -8,3 +8,5 @@
 - 展开语言选择通过 `aria-pressed` 标记；收起语言菜单通过选中项标记当前语言。均调用现有 LanguageContext，不刷新页面。
 - 账户头像只打开退出菜单；访客登录仍打开 AuthDialog。弹出层由 MUI portal 定位，不能被侧栏 overflow 裁切。
 - 本契约替代 #48、#73、#74 的顶部栏位置约束；API、存储键、权限及业务状态所有权不变。
+
+后续 [#106](../../106-community-discussion/spec.md) 已调整社区与底部组：社区展开 `/share/rankings`、`/share/charts`、`/share/discussions`，收起时显示选择菜单；旧 `/share` 重定向图表。登录后语言与角色之间增加通知，管理员及超级管理员另有举报管理。上述位置变化以 #106 为准，其余侧栏契约不变。
