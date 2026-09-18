@@ -22,7 +22,8 @@
 - 上游：当前论文的参考文献目标，即当前论文引用的来源。
 - 下游：目标为当前论文的来源论文，即谁引用了当前论文。
 - 每次请求默认最多返回 5 篇，可用 `offset` 继续加载；服务端不递归展开整棵树。
-- 数据库不强制 DAG。真实文献关系即使形成环也不删除；遍历使用访问集和节点去重。年份异常或循环关系应由管理员核验。
+- 数据库不强制引用图无环。真实文献关系即使形成环也不删除；查询按单方向分页返回，前端合并时去重，不递归加载整图。
+- 当前没有对引用年份异常或循环关系自动检测、标记及交由管理员核验的流程。现有管理员标记只包括 `origin` 和 `breakthrough`，不表示引用异常已核验。
 
 ## 不属于引用边的关系
 
@@ -34,3 +35,7 @@
 - 前端去重：`frontend/src/pages/KnowledgeGraphPage.tsx`
 - 解析和匹配：`backend/services/citation_graph.py`
 - 查询测试：`goserver/handlers/knowledge_graph_test.go`
+
+## 已知问题
+
+- 引用异常核验要求见 [Issue #81](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/81) 与 [Spec FR-010](../../specs/81-citation-graph/spec.md)。保留原始引用、节点去重和避免递归查询，不能替代异常核验流程。

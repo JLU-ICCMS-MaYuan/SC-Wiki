@@ -12,7 +12,7 @@
 - 服务层在缺少数据或 LLM 时返回明确的不可用错误或降级信息。
 - 侧栏底部的“切换模型”可配置服务端默认、DeepSeek、Kimi、GLM、Qwen、OpenAI、Claude 或自定义的 OpenAI 兼容端点。展开时显示当前供应商与模型摘要，收起时通过图标提示查看完整名称，点击打开同一配置弹窗；该入口位于语言切换上方。
   用户配置通过 `X-LLM-Provider`、`X-LLM-Base-URL`、`X-LLM-Model`、`X-LLM-Api-Key` 传递，
-  仅保存在浏览器 `localStorage`，服务端不把 API key 写入数据库或公开任务状态。
+  个人配置保存在浏览器 `localStorage`，调用时随请求头传给服务端。上传后台任务另以带 TTL 的 Redis 凭据键短暂传递配置，终态删除，详见[上传解析管线](../01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md)；服务端不把用户 API key 写入数据库或公开任务状态。
 - 个人 API Key 输入默认掩码；用户可在当前表单内显式显示或隐藏它，关闭面板后仍只以掩码摘要展示。
 
 ## 工作流程
@@ -56,3 +56,5 @@ Worker 共用的 `/data/runtime/default_llm.json`，后续调用立即生效。�
 ## 已知问题
 
 - 外部数据目录的部署和同步流程待核验。
+- [Issue #73](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/73) 的六家供应商真实兼容性、部署环境四条 AI 调用链路与上传 Worker 生命周期、生产数据库及应用/Nginx 日志密钥泄露审计和完整回归仍待验收。现有[专项验证记录](../../specs/73-user-llm-provider-switch/validation.md)使用假密钥与模拟上游响应，不能证明上述环境验收已通过。
+- #73 的旧验收脚本仍称“顶栏”；当前全局入口已由 #101 调整为侧栏底部的“切换模型”，实际页面核对应使用此入口。

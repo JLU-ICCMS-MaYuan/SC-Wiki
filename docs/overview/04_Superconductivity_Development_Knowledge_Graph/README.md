@@ -20,10 +20,13 @@
 - 箭头方向为“引用论文 → 被引论文”。点击节点后，上游和下游分别按被引次数排序，每次最多请求 5 篇，并显示剩余数量。
 - 通过 GROBID 保存 DOI、题名、作者、年份和原始引文。未匹配引文保留在数据库，目标论文以后审核通过时自动重试。
 - 管理员和超级管理员可以人工维护 `origin`（源头）与 `breakthrough`（突破）标记；系统不会用引用数自动认定里程碑。
+- 节点优先显示论文短标题，缺失时回退原标题；管理员可在论文编辑页修订短标题，具体生成规则与边界见[节点标题](knowledge-graph-node-titles.md)。
 
 ## 数据与兼容边界
 
 MySQL 是引用事实和公开图查询的唯一来源。旧 Neo4j、`graph.json`、`builds_on`、`RELATES_TO` 和材料/作者关系仍可能服务于历史功能，但不参与本引用图的边生成、计数或公开查询。图查询不要求数据库无环，而是在遍历和前端数据集内按 `paper_id` 去重并避免重复展开。
+
+当前没有引用年份异常和循环关系的自动标记及管理员核验流程；分页与去重不代表异常已核验。具体边界见[知识图谱边关系](knowledge-graph-edges.md)。
 
 ## 相关实现
 
@@ -31,4 +34,4 @@ MySQL 是引用事实和公开图查询的唯一来源。旧 Neo4j、`graph.json
 - Python 解析与匹配：`backend/services/citation_graph.py`、`backend/ingest/upload_jobs.py`
 - 前端：`frontend/src/pages/KnowledgeGraphPage.tsx`
 - Schema：`alembic/versions/20260902_0004_paper_citation_graph.py`
-- 规格：`docs/specs/81-citation-graph/`
+- 规格：[引用图谱 #81](../../specs/81-citation-graph/spec.md)、[节点标题 #70](../../specs/70-knowledge-graph-title/spec.md)
