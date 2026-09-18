@@ -71,7 +71,7 @@
 自定义性质使用 `record_type=property`、`property_code=custom` 和非空
 `custom_property_key` 作为论文内稳定身份；预测 Tc、测量 Tc 及其他规范性质的
 `custom_property_key` 始终为空。编辑器切换定义和加载历史 v2 草稿时会清理标准记录上的残留键，
-自定义记录缺少键时补足稳定键；记录值、Conditions、Evidence、`record_key` 和定义版本保持不变。
+自定义记录缺少键时优先从 `record_key` 补足稳定键；记录值、Conditions、Evidence、`record_key` 和定义版本保持不变。定义切换、旧草稿兼容及错误定位的验收入口见 [Issue #97](../../specs/97-property-definition-switch-cleanup/quickstart.md)。
 
 “添加记录”的选项来自该物性模块已发布的记录定义，每个定义键取最新已发布版本；定义列表不可用时
 使用内置候选引用，实际表单仍需加载对应定义。选项数量不由 AI 从当前论文或材料状态识别出的方法数决定。
@@ -212,7 +212,7 @@ Evidence 关联与核对快照。有出处但存在语义疑点时进入待审�
 任一校验失败都不会留下部分正式科研数据。旧缓存草稿只在输入边界单向转换为
 Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖，正式持久化不再双写旧科学表。
 模块化物性校验错误返回完整的 `material_states[i].property_modules[j].records[k]` 字段路径和
-`issues[]` 具体消息，上传页面会汇总全部问题并展开、标记和聚焦首个可用错误位置。
+`issues[]` 具体消息，上传页面会汇总全部问题并展开、标记和聚焦首个可用错误位置。数据库完整性错误转为脱敏的可操作提示，不返回 SQL 或表名；无法确定具体记录时定位到可确认的表单范围，不伪造唯一记录位置。
 来源指纹唯一约束冲突单独返回 `source_identity_conflict` 问题，明确说明内部身份冲突、无需修改科学数据，
 不再误报局部记录键重复。相关修复与验收见 [Issue #98 Spec](../../specs/98-scoped-record-fingerprint/spec.md)。
 
