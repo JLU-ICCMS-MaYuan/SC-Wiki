@@ -11,7 +11,7 @@
 | [PDF 解析管线](pdf-parsing-pipeline.md) | 五阶段解析、提交前自动补证与核对、落库与向量发布 | RQ Worker、Redis、LLM、MySQL、Qdrant |
 | [PDF 摄入](pdf-ingestion.md) | 校验并摄入上传的 PDF/TXT/MD | 上传目录、摄入流水线 |
 | [上传、审核与默认结构](upload-review-and-default-selection.md) | 管理晶体结构 pending/approved/rejected 状态和默认项 | 用户认证、管理员权限 |
-| [上传数据结构与表单映射](data-structure-and-form-mapping.md) | 三入口统一材料字段、固定尺寸双栏结构与附件折叠、模块化记录、Tc 输入及草稿与 MySQL 的映射 | 上传任务、科学数据模型 |
+| [上传数据结构与表单映射](data-structure-and-form-mapping.md) | 三入口统一材料字段、晶系未知清空空间群、紧凑可折叠结构、模块化记录及草稿与 MySQL 的映射 | 上传任务、科学数据模型 |
 | [数据表关系与内容说明](table-relationships-AI-writed.md) | 核心地图、39 张数据表、表单定义及本地数据快照 | MySQL、科学数据模型、版本化表单 |
 
 ## 功能组成
