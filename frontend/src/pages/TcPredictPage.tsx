@@ -88,7 +88,7 @@ const TcPredictPage: React.FC = () => {
 
         {/* Right: Result card */}
         <Paper sx={{
-          p: 2.5, borderRadius: 4, alignSelf: 'start', position: 'sticky', top: 96,
+          p: 2.5, borderRadius: 4, alignSelf: 'start', position: 'sticky', top: 24,
           boxShadow: '0 6px 16px rgba(15,23,42,.16), 0 10px 24px rgba(15,23,42,.10)',
         }}>
           <Typography variant="h2" gutterBottom>{t('tcPredict.result')}</Typography>

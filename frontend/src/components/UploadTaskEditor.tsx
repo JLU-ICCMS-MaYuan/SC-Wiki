@@ -1,8 +1,12 @@
+import { currentEvidenceField, evidenceIssuesForStates } from '../lib/evidenceFields'
+import { materialIdentityMissing } from '../lib/materialIdentity'
+import { useEvidenceWorkflow, type EvidenceTarget } from './EvidenceWorkflow'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
   Alert, Autocomplete, Box, Button, Checkbox, Chip, CircularProgress,
   FormControl, FormHelperText, InputLabel, ListItemText, Menu, MenuItem, Select, TextField, Typography,
 } from '@mui/material'
+import { applyEvidencePatches } from '../lib/evidenceProposals'
 import SaveIcon from '@mui/icons-material/Save'
 import SendIcon from '@mui/icons-material/Send'
 import { api, ApiError } from '../lib/api'
@@ -13,10 +17,14 @@ import {
 import { useLanguage } from '../context/LanguageContext'
 import MaterialStatesEditor, { EvidenceNotes, SpaceGroupOption, ValidationIssue } from './MaterialStatesEditor'
 import CitationExtractionPanel from './CitationExtractionPanel'
+import PaperMetadataRow from './PaperMetadataRow'
 import {
   UploadDraft, normalizeUploadDraft, unwrapData,
 } from '../lib/paperProcessing'
-import { validateRecordClient } from '../lib/formDefinitions'
+import { validateRecordClient, validateTcRecords } from '../lib/formDefinitions'
+import EvidenceFieldMarkers from './EvidenceFieldMarkers'
+import PaperMaterialsSection from './PaperMaterialsSection'
+import { researchMaterials } from '../lib/paperMaterials'
 
 interface UploadTaskEditorProps {
   taskId: string
@@ -24,6 +32,17 @@ interface UploadTaskEditorProps {
   draftOverride?: UploadDraft | null
   readOnly?: boolean
   statusNote?: string
+  revisionPaperId?: number
+}
+
+interface RevisionDraftResponse {
+  ok: boolean
+  data: UploadDraft
+  revision_id: string
+  draft_version: number
+  review_comment?: string
+  warnings?: string[]
+  conflict?: boolean
 }
 
 interface SubmitResponse {
@@ -92,8 +111,13 @@ const stateIndexFromMessage = (message: string): number | undefined => {
   return Number.isSafeInteger(ordinal) && ordinal > 0 ? ordinal - 1 : undefined
 }
 
+const normalizeIssueField = (field: string): string => field.replace(
+  /\.([0-9]+)(?=\.|$)/g,
+  '[$1]',
+)
+
 const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
-  taskId, onSubmitted, draftOverride, readOnly = false, statusNote,
+  taskId, onSubmitted, draftOverride, readOnly = false, statusNote, revisionPaperId,
 }) => {
   const { t, lang, dict } = useLanguage()
   const [draft, setDraft] = useState<UploadDraft | null>(null)
@@ -101,10 +125,44 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [revision, setRevision] = useState<RevisionDraftResponse | null>(null)
+  const revisionMeta = useRef<RevisionDraftResponse | null>(null)
+  const draftUrl = revisionPaperId ? `/api/rag/papers/${revisionPaperId}/revision-draft` : `/api/rag/upload-tasks/${taskId}/draft`
+  const submitUrl = revisionPaperId ? `${draftUrl}/submit` : `/api/rag/upload-tasks/${taskId}/submit`
+  const evidenceTarget: EvidenceTarget | undefined = readOnly ? undefined : revisionPaperId
+    ? revision ? { target: 'revision', target_id: revision.revision_id } : undefined
+    : { target: 'upload', target_id: taskId }
+  const evidenceWorkflow = useEvidenceWorkflow({ target: evidenceTarget,
+    getCurrentValue: record => draft ? currentEvidenceField(record, { ...draft.paper }, draft.material_states) : undefined,
+  })
+  const revisionIdentity = () => revisionMeta.current
+    ? { revision_id: revisionMeta.current.revision_id, draft_version: revisionMeta.current.draft_version } : {}
+  const persistDraft = useCallback(async (value: UploadDraft, preparationId?: string) => {
+    if (revisionPaperId) {
+      if (!revisionMeta.current) throw new Error(t('upload.draftMissing'))
+      let result: RevisionDraftResponse
+      try {
+        result = await api.put<RevisionDraftResponse>(draftUrl, {
+          ...revisionIdentity(), draft: value, evidence_preparation_id: preparationId,
+        })
+      } catch (reason) {
+        if (['revision_conflict', 'revision_draft_conflict', 'revision_status_changed'].includes((reason as ApiError).code || '')) {
+          setRevision(current => current ? { ...current, conflict: true } : current)
+        }
+        throw reason
+      }
+      revisionMeta.current = result
+      setRevision(result)
+    } else {
+      await api.put(draftUrl, { ...value, ...(preparationId ? { evidence_preparation_id: preparationId } : {}) })
+    }
+  }, [draftUrl, revisionPaperId, t])
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
   const [error, setError] = useState('')
   // 本次提交发现的校验问题；驱动字段错误态与定位，提交成功或重新加载草稿时清空
-  const [issues, setIssues] = useState<ValidationIssue[]>([])
+  const [validationIssues, setIssues] = useState<ValidationIssue[]>([])
+  const issues = [...new Map([...validationIssues, ...evidenceIssuesForStates(evidenceWorkflow.issues, draft?.material_states || [])]
+    .map(issue => [`${issue.field}:${issue.message}`, issue])).values()]
   const [authorMenu, setAuthorMenu] = useState<{ author: string; anchorEl: HTMLElement } | null>(null)
   const [authorInput, setAuthorInput] = useState('')
   const [catalogs, setCatalogs] = useState<ClassificationCatalogs | null>(null)
@@ -154,20 +212,29 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       return undefined
     }
     const controller = new AbortController()
+    let cancelled = false
     setLoading(true)
-    api.get<{ ok: boolean; data: UploadDraft }>(
-      `/api/rag/upload-tasks/${taskId}/draft`,
-      { signal: controller.signal },
-    ).then(response => {
+    setDraft(null)
+    revisionMeta.current = null
+    setRevision(null)
+    const request = revisionPaperId
+      ? api.post<RevisionDraftResponse>(draftUrl)
+      : api.get<{ ok: boolean; data: UploadDraft }>(draftUrl, { signal: controller.signal })
+    request.then(response => {
+      if (cancelled) return
+      if (revisionPaperId) {
+        revisionMeta.current = response as RevisionDraftResponse
+        setRevision(response as RevisionDraftResponse)
+      }
       const normalized = normalizeUploadDraft(unwrapData(response))
       setDraft(normalized)
       setDirty(false)
       setError('')
     }).catch((reason: Error) => {
-      if (reason.name !== 'AbortError') setError(reason.message || t('upload.draftLoadFailed'))
-    }).finally(() => setLoading(false))
-    return () => controller.abort()
-  }, [taskId, draftOverride])
+      if (!cancelled && reason.name !== 'AbortError') setError(reason.message || t('upload.draftLoadFailed'))
+    }).finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true; controller.abort() }
+  }, [taskId, draftOverride, draftUrl, revisionPaperId])
 
   const changeDraft = useCallback((updater: (current: UploadDraft) => UploadDraft) => {
     setDraft(current => current ? updater(current) : current)
@@ -177,6 +244,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }, [])
 
   const setPaperField = (field: keyof UploadDraft['paper'], value: unknown) => {
+    evidenceWorkflow.invalidate(`paper.${field}`)
     changeDraft(current => ({ ...current, paper: { ...current.paper, [field]: value } }))
   }
 
@@ -218,16 +286,22 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }
 
   const setDraftField = (field: keyof UploadDraft, value: unknown) => {
-    changeDraft(current => ({ ...current, [field]: value }))
+    if (field === 'material_states' && JSON.stringify(researchMaterials(draft?.material_states || [])) !== JSON.stringify(researchMaterials(value as UploadDraft['material_states']))) evidenceWorkflow.invalidate('paper.research_materials')
+    changeDraft(current => ({ ...current, [field]: value, ...(field === 'material_states' ? { paper: { ...current.paper, research_materials: researchMaterials(value as UploadDraft['material_states']) } } : {}) }))
   }
 
   const saveDraft = useCallback(async (showResult = false): Promise<boolean> => {
-    if (!draft || saving || readOnly) return !dirty
-    const revision = revisionRef.current
+    if (!draft || saving || readOnly || revision?.conflict) return false
+    const tcIssues = validateTcRecords(draft.material_states)
+    if (tcIssues.length) {
+      if (showResult) { setError(tcIssues[0].message); setIssues(tcIssues) }
+      return false
+    }
+    const editVersion = revisionRef.current
     setSaving(true)
     try {
-      await api.put(`/api/rag/upload-tasks/${taskId}/draft`, draft)
-      if (revision === revisionRef.current) setDirty(false)
+      await persistDraft(draft)
+      if (editVersion === revisionRef.current) setDirty(false)
       setLastSavedAt(new Date().toLocaleTimeString(lang === 'zh' ? 'zh-CN' : 'en-US', { hour: '2-digit', minute: '2-digit' }))
       if (showResult) setError('')
       return true
@@ -237,13 +311,13 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     } finally {
       setSaving(false)
     }
-  }, [dirty, draft, saving, taskId, readOnly, t, lang])
+  }, [dirty, draft, saving, readOnly, t, lang, persistDraft, revision?.conflict])
 
   useEffect(() => {
-    if (!dirty || !draft || saving) return
+    if (!dirty || !draft || saving || submitting || revision?.conflict) return
     const timer = window.setTimeout(() => { void saveDraft(false) }, 5000)
     return () => window.clearTimeout(timer)
-  }, [dirty, draft, saveDraft, saving])
+  }, [dirty, draft, saveDraft, saving, submitting, revision?.conflict])
 
   // 返回全部问题而不是遇到第一条就退出：用户需要一次看清所有待补字段，
   // 而不是每修一条再提交一次才发现下一条
@@ -270,8 +344,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     }
     draft.material_states.forEach((state, stateIndex) => {
       const label = t('upload.materialStateLabel', { index: stateIndex + 1 })
-      if (!state.material?.trim()) {
-        issues.push({ stateIndex, field: `material_states[${stateIndex}].material`, message: t('upload.missingMaterial', { label }) })
+      if (materialIdentityMissing(state)) {
+        issues.push({ stateIndex, field: `material_states[${stateIndex}].material_name`, message: t('upload.missingMaterial', { label }) })
       }
       if (state.reported_space_group_number != null &&
         (state.reported_space_group_number < 1 || state.reported_space_group_number > 230)) {
@@ -343,6 +417,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }
 
   const submit = async () => {
+    if (!evidenceTarget) return
     const validationIssues = validate()
     if (validationIssues.length > 0) {
       setError(validationIssues.map(item => item.message).join(t('upload.sentenceSeparator')))
@@ -353,15 +428,24 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     setSubmitting(true)
     try {
       if (!(await saveDraft(false))) return
+      if (!(await evidenceWorkflow.applyAccepted(evidenceTarget, async (patches, preparationId) => {
+        if (!draft) return false
+        const changed = applyEvidencePatches(draft, patches)
+        await persistDraft(changed, preparationId)
+        setDraft(changed); setDirty(false)
+        return true
+      }))) return
+      const evidencePayload = await evidenceWorkflow.gate(evidenceTarget)
+      if (!evidencePayload) return
       let response: SubmitResponse | { data: SubmitResponse }
       try {
-        response = await api.post<SubmitResponse | { data: SubmitResponse }>(`/api/rag/upload-tasks/${taskId}/submit`)
+        response = await api.post<SubmitResponse | { data: SubmitResponse }>(submitUrl, { ...evidencePayload, ...revisionIdentity() })
       } catch (reason) {
         const apiError = reason as ApiError
         if (apiError.code !== 'consistency_ack_required' || !window.confirm(t('upload.consistencyConfirm'))) throw reason
         response = await api.post<SubmitResponse | { data: SubmitResponse }>(
-          `/api/rag/upload-tasks/${taskId}/submit`,
-          { consistency_acknowledged: true },
+          submitUrl,
+          { ...evidencePayload, ...revisionIdentity(), consistency_acknowledged: true },
         )
       }
       onSubmitted(unwrapData(response).paper_id)
@@ -370,13 +454,18 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       if (apiError.status === 409 && apiError.existingPaperId) {
         setError(t('upload.doiExists', { id: apiError.existingPaperId }))
       } else {
-        setError(failureMessage(t, 'submit', reason, t('upload.submitReviewFailed')))
+        const issueMessages = apiError.issues?.map(issue => issue.message).filter(Boolean) || []
+        const feedbackReason = issueMessages.length > 0
+          ? { detail: { code: apiError.code, message: issueMessages.join(t('upload.sentenceSeparator')) } }
+          : reason
+        setError(failureMessage(t, 'submit', feedbackReason, t('upload.submitReviewFailed')))
         if (apiError.issues?.length) {
-          revealIssues(apiError.issues.map(issue => ({
-            field: issue.field,
+          const normalizedIssues = apiError.issues.map(issue => ({
+            field: normalizeIssueField(issue.field),
             stateIndex: stateIndexFromMessage(issue.field),
             message: issue.message,
-          })))
+          }))
+          revealIssues(normalizedIssues)
           return
         }
         // 后端独有的校验规则（材料家族、压强区间等）也要能定位到卡片
@@ -420,10 +509,16 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const classificationEvidence = draft.classification_evidence || []
 
   return (
-    <Box sx={{ mt: 3 }}>
+    <Box component="fieldset" data-evidence-scope="upload-editor" disabled={submitting || Boolean(revision?.conflict)} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
+      {revision && <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.revisionNotice')}</Alert>}
+      {revision?.review_comment && <Alert severity="warning" sx={{ mb: 2 }}>{revision.review_comment}</Alert>}
+      {revision?.warnings?.map(warning => <Alert key={warning} severity="warning" sx={{ mb: 2 }}>{warning}</Alert>)}
+      {revision?.conflict && <Alert severity="error" sx={{ mb: 2 }}>{t('paperDetail.revisionConflict')}</Alert>}
+      {evidenceWorkflow.dialog}
+      <EvidenceFieldMarkers records={evidenceWorkflow.records} scope="upload-editor" onOpen={evidenceWorkflow.openIssue} onChange={evidenceWorkflow.invalidate} />
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
         <Box>
-          <Typography variant="h6" fontWeight={700}>{readOnly ? t('upload.aiDraftTitle') : t('upload.checkAiDraftTitle')}</Typography>
+          <Typography variant="h6" fontWeight={700}>{revisionPaperId ? t('paperDetail.revisionTitle') : readOnly ? t('upload.aiDraftTitle') : t('upload.checkAiDraftTitle')}</Typography>
           <Typography variant="body2" color="text.secondary">
             {readOnly ? (statusNote || t('upload.defaultNote')) : t('upload.editorSubtitle')}
           </Typography>
@@ -435,31 +530,28 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           <Typography variant="caption" color={error ? 'error' : 'text.secondary'}>
             {saving ? t('common.saving') : dirty ? t('upload.autoSaveHint') : lastSavedAt ? t('upload.savedAt', { time: lastSavedAt }) : t('upload.draftLoaded')}
           </Typography>
+          <Button variant="outlined" disabled={saving || submitting || evidenceWorkflow.busy || Boolean(revision?.conflict)} onClick={async () => { if (evidenceTarget && await saveDraft(false)) void evidenceWorkflow.run(evidenceTarget) }}>{t('evidence.audit')}</Button>
           <Button variant="outlined" startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
-            disabled={saving || submitting} onClick={() => void saveDraft(true)}>{t('upload.saveNow')}</Button>
+            disabled={saving || submitting || Boolean(revision?.conflict)} onClick={() => void saveDraft(true)}>{t('upload.saveNow')}</Button>
           <Button variant="contained" startIcon={submitting ? <CircularProgress size={16} /> : <SendIcon />}
-            disabled={saving || submitting} onClick={() => void submit()}>{t('upload.submitReview')}</Button>
+            disabled={saving || submitting || Boolean(revision?.conflict)} onClick={() => void submit()}>{revisionPaperId ? t('paperDetail.resubmit') : t('upload.submitReview')}</Button>
         </Box>
         )}
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
+      {draft.field_suggestions_error && evidenceWorkflow.records.some(r => r.status === 'unchecked') && <Alert severity="warning" sx={{ mb: 2 }}>{t('evidence.generationFailed')}</Alert>}
 
       {draft.citation_extraction && <CitationExtractionPanel extraction={draft.citation_extraction} />}
 
       <Box sx={readOnly ? { pointerEvents: 'none', '& .MuiButton-root': { display: 'none' } } : undefined}>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, '& > *': { minWidth: 0 } }}>
-        <Box>
+        <Box sx={{ gridColumn: '1 / -1' }}>
           <TextField fullWidth label={t('upload.title')} value={draft.paper.title || ''}
             {...issueProps('paper.title')}
             onChange={event => setPaperField('title', event.target.value)} />
         </Box>
-        <Box>
-          <TextField fullWidth label="DOI" value={draft.paper.doi || ''}
-            {...issueProps('paper.doi')}
-            onChange={event => setPaperField('doi', event.target.value.trim())} />
-        </Box>
-        <Box>
+        <Box sx={{ gridColumn: '1 / -1' }}>
           <Autocomplete
             multiple
             freeSolo
@@ -488,7 +580,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
               )
             })}
             renderInput={params => (
-              <TextField {...params} label={t('upload.authorsField')} placeholder={(draft.paper.authors || []).length ? '' : t('upload.authorPlaceholder')} onKeyDown={event => { if ((event.key === 'Enter' || event.key === ',' || event.key === '，') && authorInput.trim()) { event.preventDefault(); commitAuthorInput() } }} />
+              <TextField {...params} data-issue-field="paper.authors" label={t('upload.authorsField')} placeholder={(draft.paper.authors || []).length ? '' : t('upload.authorPlaceholder')} onKeyDown={event => { if ((event.key === 'Enter' || event.key === ',' || event.key === '，') && authorInput.trim()) { event.preventDefault(); commitAuthorInput() } }} />
             )}
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -513,19 +605,26 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
             ))}
           </Menu>
         </Box>
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr 1fr', sm: '2fr 1fr 1fr 1fr' }, gap: 1 }}>
-          <TextField label={t('upload.journal')} value={draft.paper.journal || ''}
-            onChange={event => setPaperField('journal', event.target.value)} />
-          <TextField label={t('upload.year')} type="number" value={draft.paper.year ?? ''}
-            onChange={event => setPaperField('year', event.target.value ? Number(event.target.value) : null)} />
-          <TextField label={t('upload.volume')} value={draft.paper.volume || ''}
-            onChange={event => setPaperField('volume', event.target.value)} />
-          <TextField label={t('upload.pages')} value={draft.paper.pages || ''}
-            onChange={event => setPaperField('pages', event.target.value)} />
-          <Box sx={{ gridColumn: '1 / -1' }}>
-          </Box>
-        </Box>
+        <PaperMetadataRow
+          journal={<TextField data-issue-field="paper.journal" label={t('upload.journal')} value={draft.paper.journal || ''}
+            onChange={event => setPaperField('journal', event.target.value)} />}
+          year={<TextField data-issue-field="paper.year" label={t('upload.year')} type="number" value={draft.paper.year ?? ''}
+            onChange={event => setPaperField('year', event.target.value ? Number(event.target.value) : null)} />}
+          issueNumber={<TextField label={t('upload.issueNumber')} value={draft.paper.issue_number || ''}
+            {...issueProps('paper.issue_number')}
+            slotProps={{ htmlInput: { maxLength: 100 } }}
+            onChange={event => setPaperField('issue_number', event.target.value)} />}
+          volume={<TextField data-issue-field="paper.volume" label={t('upload.volume')} value={draft.paper.volume || ''}
+            onChange={event => setPaperField('volume', event.target.value)} />}
+          pages={<TextField data-issue-field="paper.pages" label={t('upload.pages')} value={draft.paper.pages || ''}
+            onChange={event => setPaperField('pages', event.target.value)} />}
+          doi={<TextField label="DOI" value={draft.paper.doi || ''}
+            {...issueProps('paper.doi')}
+            onChange={event => setPaperField('doi', event.target.value.trim())} />}
+        />
       </Box>
+
+      <PaperMaterialsSection states={draft.material_states} relations={draft.paper.material_relations} historicalMaterials={draft.paper.research_materials} onChange={readOnly ? undefined : values => setPaperField('material_relations', values)} />
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mt: 2, '& > *': { minWidth: 0 } }}>
         <FormControl fullWidth error={hasIssue('paper.paper_type')} data-issue-field="paper.paper_type">
@@ -594,7 +693,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           ['methodology', t('upload.methodologyLabel')],
         ].map(([field, label]) => (
           <Box key={field}>
-            <TextField fullWidth label={label} multiline minRows={3}
+            <TextField fullWidth label={label} multiline rows={15} data-issue-field={`paper.${field}`}
               value={toLines(draft.paper[field as keyof UploadDraft['paper']] as string[] | undefined)}
               onChange={event => setPaperField(field as keyof UploadDraft['paper'], fromLines(event.target.value))} />
             <EvidenceNotes
@@ -610,31 +709,41 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         ['key_finding', t('upload.keyFindingLabel'), 3],
       ].map(([field, label, rows]) => (
         <Box key={String(field)} sx={{ mt: 2 }}>
-          <TextField fullWidth label={String(label)} multiline minRows={Number(rows)}
+          <TextField fullWidth label={String(label)} multiline minRows={Number(rows)} data-issue-field={`paper.${field}`}
             value={String(draft.paper[field as keyof UploadDraft['paper']] || '')}
             onChange={event => setPaperField(field as keyof UploadDraft['paper'], event.target.value)} />
         </Box>
       ))}
 
       <Box sx={{ mt: 2 }}>
-        <TextField fullWidth label={t('upload.researchMotivationLabel')} multiline minRows={3}
-          value={draft.research_motivation || ''}
-          onChange={event => setDraftField('research_motivation', event.target.value)} />
+        <TextField fullWidth label={t('upload.researchMotivationLabel')} multiline minRows={3} data-issue-field="paper.research_motivation"
+          value={draft.paper.research_motivation || ''}
+          onChange={event => setPaperField('research_motivation', event.target.value)} />
         <EvidenceNotes evidence={classificationEvidence} />
       </Box>
 
       <MaterialStatesEditor
+        onScientificEdit={evidenceWorkflow.invalidate}
         states={draft.material_states}
         onChange={nextStates => setDraftField('material_states', nextStates)}
         catalogs={catalogs}
         catalogLoading={catalogLoading}
         catalogError={catalogError}
-        readOnly={readOnly}
+        readOnly={readOnly || submitting}
         issues={issues}
         structureCandidates={draft.structure_candidates || []}
         onStructureCandidatesChange={next => setDraftField('structure_candidates', next)}
         spaceGroups={spaceGroups}
         taskId={taskId}
+        onUploadStructure={revisionPaperId ? async (index, file) => {
+          if (!draft || !(await saveDraft(false)) || !revisionMeta.current) return
+          const body = new FormData()
+          body.append('file', file)
+          body.append('material_state_index', String(index))
+          body.append('revision_id', revisionMeta.current.revision_id)
+          const result = await api.post<{ ok: boolean; data: import('../lib/paperProcessing').StructureCandidate }>(`${draftUrl}/structure-candidates`, body)
+          changeDraft(current => ({ ...current, structure_candidates: [...(current.structure_candidates || []), unwrapData(result)] }))
+        } : undefined}
         paperType={draft.paper.paper_type}
         superconductorKind={draft.paper.superconductor_kind}
         onError={setError}

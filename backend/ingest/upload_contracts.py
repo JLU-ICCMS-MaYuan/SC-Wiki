@@ -191,6 +191,19 @@ def convert_legacy_state(state: dict[str, Any]) -> dict[str, Any]:
             )
         for legacy_key in ("tc_results", "properties", "calculation_contexts", "experimental_contexts"):
             result.pop(legacy_key, None)
+        for module in result.get("property_modules") or []:
+            if not isinstance(module, dict):
+                continue
+            for record in module.get("records") or []:
+                if not isinstance(record, dict):
+                    continue
+                is_custom = record.get("record_type") == "property" and record.get("property_code") == "custom"
+                if is_custom:
+                    record["custom_property_key"] = str(
+                        record.get("custom_property_key") or f"legacy-custom-{record.get('record_key') or 'record'}"
+                    ).strip()
+                else:
+                    record["custom_property_key"] = None
         result["schema_version"] = SCIENTIFIC_DRAFT_SCHEMA_VERSION
         return result
     modules: dict[str, list[dict[str, Any]]] = {}
@@ -218,6 +231,7 @@ def convert_legacy_state(state: dict[str, Any]) -> dict[str, Any]:
             "module_code": "superconductive_properties",
             "record_type": "measured_tc" if experimental else "predicted_tc",
             "property_code": "tc",
+            "custom_property_key": None,
             "definition_key": f"record.superconductive_properties.{'measured_tc' if experimental else 'predicted_tc'}.{method}",
             "definition_version": 1,
             "name_raw": "critical temperature",

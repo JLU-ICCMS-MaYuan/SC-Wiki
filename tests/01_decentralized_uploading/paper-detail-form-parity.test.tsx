@@ -56,7 +56,7 @@ describe('只读详情页与校对表单字段一致（Issue #59）', () => {
     render(<PaperEditView paper={paper} onBack={() => {}} />)
 
     // 材料状态分类与论文级类型断言
-    expect(screen.getAllByText('LaH10')).toHaveLength(2)
+    expect(screen.getAllByText('LaH10')).toHaveLength(3)
     expect(screen.getByText('氢化物')).toBeInTheDocument()
     expect(screen.getByText('不同元素种类数')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()
@@ -143,7 +143,7 @@ describe('只读详情页与校对表单字段一致（Issue #59）', () => {
 
     // Tc 可见
     const measured = screen.getByTestId('property-record-record-measured')
-    expect(within(measured).getByLabelText('数值')).toHaveValue(274)
+    expect(within(measured).getByLabelText('Tc 值')).toHaveValue('274')
     expect(screen.getByText(/测量 Tc · resistivity/)).toBeInTheDocument()
 
     // λ=2.56 与 μ*=0.1 可见（关键断言：如果只取首条，这些值不会出现）
@@ -285,15 +285,17 @@ describe('只读详情页与校对表单字段一致（Issue #59）', () => {
     const paperNoStructures = {
       id: 2,
       title: '测试论文2',
-      material_states: [],
+      material_states: [{ material: 'Sn', structures: [] }],
     }
 
     // 有结构数据
-    const { unmount: unmount1 } = render(<PaperEditView paper={paperWithStructures} onBack={() => {}} />)
-    expect(screen.getByText(/data_LaH10/)).toBeInTheDocument()
+    const { unmount: unmount1, container } = render(<PaperEditView paper={paperWithStructures} onBack={() => {}} />)
+    expect(container.querySelector('[data-material-state-index="0"] [data-crystal-layout]')).toBeInTheDocument()
+    expect(screen.queryByText(/data_LaH10/)).not.toBeInTheDocument()
     unmount1()
 
-    // 无结构数据：断言空态文案存在（侧边栏可能也有）
+    // 无结构数据：空态属于对应材料，不用示意图冒充结构。
+    render(<PaperEditView paper={paperNoStructures} onBack={() => {}} />)
     const emptyMessages = screen.getAllByText(/该记录暂无结构数据/)
     expect(emptyMessages.length).toBeGreaterThanOrEqual(1)
   })

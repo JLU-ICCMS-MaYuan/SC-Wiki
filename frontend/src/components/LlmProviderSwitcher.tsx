@@ -12,6 +12,7 @@ import {
   saveLlmConfig, validateLlmBaseUrl,
 } from '../lib/llmProvider'
 import { api } from '../lib/api'
+import SidebarButton from './SidebarButton'
 
 const DEFAULT_ID = 'server-default'
 
@@ -22,7 +23,7 @@ interface CurrentLlm {
   source: 'browser' | 'server'
 }
 
-const LlmProviderSwitcher: React.FC = () => {
+const LlmProviderSwitcher: React.FC<{ collapsed?: boolean }> = ({ collapsed = false }) => {
   const { lang } = useLanguage()
   const [open, setOpen] = useState(false)
   const [saved, setSaved] = useState(readStoredLlmConfig)
@@ -117,9 +118,7 @@ const LlmProviderSwitcher: React.FC = () => {
   }
 
   return <>
-    <Button size="small" startIcon={<SmartToyIcon fontSize="small" />} onClick={openPanel} aria-label={t('nav.llmConfigure')} sx={{ textTransform: 'none', minWidth: 0 }}>
-      {current}
-    </Button>
+    <SidebarButton icon={<SmartToyIcon />} label={t('nav.llmSwitch')} detail={current} collapsed={collapsed} onClick={openPanel} aria-label={t('nav.llmConfigure')} aria-haspopup="dialog" />
     <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
       <DialogTitle>{t('nav.llmTitle')}</DialogTitle>
       <DialogContent>

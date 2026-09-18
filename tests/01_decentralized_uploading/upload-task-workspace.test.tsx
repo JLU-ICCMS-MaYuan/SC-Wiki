@@ -2,7 +2,7 @@ import React from 'react'
 import '@testing-library/jest-dom/vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 
 import MultiFileUploadPanel from '../../frontend/src/components/MultiFileUploadPanel'
 import UploadParsingDetail from '../../frontend/src/components/UploadParsingDetail'
@@ -47,6 +47,36 @@ const seedAuthenticatedUser = () => {
 }
 
 describe('论文上传工作区', () => {
+  it.each([true, false])('旧任务入口在已提交=%s 时跳转论文或明确提示并刷新列表', async (submitted) => {
+    seedAuthenticatedUser()
+    const oldTask = task('z'.repeat(32), '旧任务.pdf')
+    let listRequests = 0
+    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input)
+      let status = 200
+      let body: unknown = { ok: true }
+      if (url === '/api/auth/me') body = { user: authenticatedUser }
+      else if (url === '/api/upload-tasks') body = { ok: true, data: ++listRequests === 1 ? [oldTask] : [] }
+      else if (url === `/api/upload-tasks/${oldTask.task_id}`) {
+        status = submitted ? 409 : 404
+        body = { detail: submitted
+          ? { code: 'UPLOAD_TASK_SUBMITTED', message: '已提交', paper_id: 29 }
+          : { code: 'UPLOAD_TASK_NOT_FOUND', message: '已过期' } }
+      } else if (url.includes(oldTask.task_id)) {
+        status = 404
+        body = { detail: { code: 'UPLOAD_TASK_NOT_FOUND', message: '已过期' } }
+      }
+      return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
+    }))
+    const Location = () => <div data-testid="location">{useLocation().pathname}</div>
+    render(<MemoryRouter><AuthProvider><Location /><UploadPage /></AuthProvider></MemoryRouter>)
+    fireEvent.click(await screen.findByRole('button', { name: '查看 旧任务.pdf 的解析详情' }))
+    if (submitted) await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/papers/29'))
+    else expect(await screen.findByText('该解析任务已过期或被清理，任务列表已刷新。')).toBeVisible()
+    await waitFor(() => expect(screen.queryByRole('button', { name: '查看 旧任务.pdf 的解析详情' })).not.toBeInTheDocument())
+    expect(localStorage.getItem('scwiki_active_upload_task:7')).toBeNull()
+  })
+
   it('只展示未提交任务，不请求或显示旧版 MySQL 上传记录', async () => {
     seedAuthenticatedUser()
     const requested: string[] = []
@@ -255,7 +285,7 @@ describe('论文上传工作区', () => {
                   record_key: 'record-tc', module_code: 'superconductive_properties', record_type: 'predicted_tc',
                   property_code: 'tc', definition_key: 'record.superconductive_properties.predicted_tc.mcmillan',
                   definition_version: 1, name_raw: 'critical temperature', value_kind: 'number',
-                  value_raw: '', value_number: null, unit_raw: 'K', method_code: 'mcmillan', payload: {
+                  value_raw: '300', value_number: 300, unit_raw: 'K', method_code: 'mcmillan', payload: {
                     calculation_conditions: {}, parameters: { lambda_ep: 3.35, omega_log: null },
                   },
                 }],
@@ -272,7 +302,7 @@ describe('论文上传工作区', () => {
 
     expect(await screen.findByRole('textbox', { name: '化学式' })).toHaveValue('Li2MgH16')
     expect(screen.queryByRole('textbox', { name: '物相' })).not.toBeInTheDocument()
-    expect(screen.getByRole('spinbutton', { name: '压强 (GPa)' })).toHaveValue(300)
+    expect(screen.getByRole('textbox', { name: '压强 (GPa)' })).toHaveValue('300')
     expect(screen.getByRole('combobox', { name: '空间群符号' })).toHaveValue('Fd-3m')
     expect(screen.getByRole('spinbutton', { name: '空间群号' })).toHaveValue(227)
     expect(screen.getByRole('spinbutton', { name: '电声耦合强度 λ' })).toHaveValue(3.35)
@@ -607,7 +637,7 @@ describe('论文上传工作区', () => {
     const stickyTaskActions = screen.getByRole('region', { name: '当前解析任务操作' })
     expect(stickyTaskActions).toHaveStyle({
       position: 'sticky',
-      top: '80px',
+      top: '8px',
     })
     expect(stickyTaskActions.closest('.MuiCard-root')).toHaveStyle({ overflow: 'visible' })
 

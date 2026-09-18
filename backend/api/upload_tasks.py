@@ -105,7 +105,27 @@ def get_upload_task(
 ):
     from backend.ingest.upload_tasks import touch_user_activity
 
-    state = _owned_state(task_id, current_user)
+    try:
+        state = _owned_state(task_id, current_user)
+    except HTTPException as exc:
+        if exc.status_code != 404:
+            raise
+        # 仅在临时任务缺失时回溯正式论文，处理另一页面/进程已提交后的旧入口。
+        # 不重建 Redis 草稿；先鉴权再返回论文位置，避免泄露他人的待审核论文。
+        from sqlalchemy import select
+        from backend.database import SessionLocal
+        from backend.models import Paper
+
+        with SessionLocal() as session:
+            paper = session.scalar(select(Paper).where(Paper.upload_task_id == task_id))
+            is_admin = current_user.role in {"admin", "superadmin"} and current_user.is_approved
+            if paper is not None and (paper.uploaded_by_user_id == current_user.id or is_admin):
+                raise HTTPException(status_code=409, detail={
+                    "code": "UPLOAD_TASK_SUBMITTED",
+                    "message": "该论文已提交审核，解析任务已归档，请查看论文详情。",
+                    "paper_id": paper.id,
+                }) from exc
+        raise
     if touch:
         state = touch_user_activity(task_id)
     return {"ok": True, "data": _versioned_public_state(state)}

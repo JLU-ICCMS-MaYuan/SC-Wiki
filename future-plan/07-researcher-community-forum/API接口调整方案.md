@@ -134,7 +134,7 @@ API 接收的 `tc_field` 只能是以下字段之一：
 
 `GET /api/chart-points/search`
 
-用途：在当前图表下搜索本地数据库中可添加的数据点。该接口只搜索本地 `superconductor_records`，不搜索 Alexandria，不搜索 HTSC-2025。
+用途：在当前图表下搜索本地数据库中可添加的数据点。该接口只搜索本地 `superconductor_records`。
 
 请求参数：
 

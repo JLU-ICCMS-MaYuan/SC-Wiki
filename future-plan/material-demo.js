@@ -4,7 +4,6 @@ const demoState = {
   records: [
     { year: 2019, formula: "LaH10", type: "Hydride", pressure: "200 GPa", tc: "250 K", source: "Local", status: "Approved", doi: "10.1038/s41586-demo" },
     { year: 2015, formula: "H3S", type: "Hydride", pressure: "155 GPa", tc: "203 K", source: "Local", status: "Approved", doi: "10.1038/s41586-demo2" },
-    { year: 2024, formula: "YH9", type: "Hydride", pressure: "180 GPa", tc: "185 K", source: "HTSC-2025", status: "External", doi: "-" },
   ],
 };
 

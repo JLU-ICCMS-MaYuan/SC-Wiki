@@ -7,9 +7,14 @@ engine.py — RAG 问答引擎主模块。
 """
 
 from __future__ import annotations
+from backend.rag.scientific_sources import citation as scientific_citation
 
 import json
 from typing import Any
+from sqlalchemy import select
+
+from backend.models import Paper
+from backend.rag.database import async_session_factory
 
 from backend.rag.llm_client import get_llm_client
 from backend.rag.llm_context import get_llm_config
@@ -22,6 +27,7 @@ from backend.rag.inspiration.evidence import build_evidence_stream
 from backend.rag.inspiration.reviewer import review_stream
 from backend.rag.core.reranker import rerank_chunks
 from backend.rag.search.engine import search_semantic_only
+from backend.rag.search.property_records import approved_paper_conditions
 
 GREETING_RESPONSE = "你好！我是氢化物超导文献助手，可以问我关于超导材料的问题，例如「LaH10 的超导温度是多少？」或「哪些氢化物 Tc 超过 200K？」"
 
@@ -56,47 +62,33 @@ def _try_restore_is_session(history: list[dict] | None, user_message: str = "") 
     return None
 
 
-def _group_kg_results(results: list[dict]) -> list[dict]:
-    """按化合物分组，每组只保留 Tc 最高的记录，并收集 paper_id 列表。
+async def _query_intent_records(intent: dict) -> list[dict]:
+    """两个问答入口共用查询，保留各论文、状态和方法的完整记录。"""
+    from backend.rag.tools.mysql import search_property_records
 
-    Args:
-        results: KG 查询原始结果（可能多个相同 formula 不同 tc 的条目）
+    if intent["intent"] not in ("list_overview", "numeric_compare", "property_query"):
+        return []
+    predicates = intent.get("predicates") or [None]
+    materials = intent.get("subjects") or [None]
+    operator, value = "=", None
+    if intent["intent"] == "numeric_compare":
+        operator = intent.get("operator") or ">"
+        value = intent.get("value") or "0"
+    records = {}
+    for predicate in predicates:
+        for material in materials:
+            for record in await search_property_records(predicate, operator, value, material=material):
+                records[(record["id"], record["predicate"])] = record
+    return list(records.values())
 
-    Returns:
-        每组一条记录，包含 paper_ids 聚合列表，按 tc 降序
-    """
-    groups: dict[str, dict] = {}
-    for r in results:
-        formula = r["subject"]
-        try:
-            tc_val = float(r["object"])
-        except (ValueError, TypeError):
-            tc_val = 0.0
-        pid = r.get("paper_id")
 
-        if formula in groups:
-            existing = groups[formula]
-            existing_tc = float(existing.get("object", "0"))
-            if tc_val > existing_tc:
-                existing["object"] = r["object"]
-                existing["paper_id"] = pid
-            if pid and pid not in existing.get("_paper_ids", []):
-                existing.setdefault("_paper_ids", []).append(pid)
-        else:
-            groups[formula] = {
-                "subject": formula,
-                "predicate": r["predicate"],
-                "object": r["object"],
-                "paper_id": pid,
-                "_paper_ids": [pid] if pid else [],
-            }
+async def _database_context() -> str:
+    from backend.rag.database import async_session_factory
+    from backend.rag.search.property_records import database_counts
 
-    grouped = sorted(
-        groups.values(),
-        key=lambda x: float(x["object"]) if x["object"].replace(".", "", 1).isdigit() else 0,
-        reverse=True,
-    )
-    return grouped
+    async with async_session_factory() as session:
+        counts = await database_counts(session)
+    return _format_db_context(counts["papers"], counts["superconductors"], counts["records"])
 
 
 def _extract_intent(question: str) -> dict:
@@ -197,41 +189,8 @@ async def ask(
         print(f"[阶段1] 意图解析 ({_t1 - _t0:.1f}s) → intent={intent['intent']} subjects={intent['subjects']}")
 
     # ── 2. 并行执行 KG + RAG ──
-    from backend.rag.tools.mysql import query as kg_query, get_all_properties
-
-    kg_results: list[dict] = []
+    kg_results = await _query_intent_records(intent)
     rag_chunks: list[dict] = []
-
-    # KG 查询
-    if intent["intent"] in ("list_overview", "numeric_compare", "property_query"):
-        try:
-            if intent["predicates"]:
-                predicate = intent["predicates"][0]
-                if intent["intent"] == "numeric_compare":
-                    op = intent.get("operator", ">") or ">"
-                    val = intent.get("value", "0") or "0"
-                    kg_results = await kg_query(predicate, operator=op, value=val)
-                else:
-                    kg_results = await kg_query(predicate, operator=">", value="0")
-                if intent["intent"] == "property_query" and intent["subjects"]:
-                    kg_results = [r for r in kg_results if r["subject"] == intent["subjects"][0]]
-                kg_results.sort(
-                    key=lambda r: float(r["object"]) if r["object"].replace(".", "", 1).isdigit() else 0,
-                    reverse=True,
-                )
-            elif intent["subjects"]:
-                for subj in intent["subjects"]:
-                    props = await get_all_properties(subj)
-                    for p in props:
-                        kg_results.append({
-                            "subject": subj,
-                            "predicate": p["predicate"],
-                            "object": p["object"],
-                        })
-        except Exception as e:
-            if verbose:
-                print(f"    [KG] 查询异常: {e}")
-            kg_results = []
 
     # RAG 检索（除非意图明确是纯数值查询且 KG 已有结果）
     is_numeric_only = (intent["question_type"] == "factual"
@@ -249,10 +208,10 @@ async def ask(
     if verbose:
         print(f"[阶段2] KG={len(kg_results)}条 RAG={len(rag_chunks)}块 ({_t2 - _t1:.1f}s)")
 
-    # 按化合物分组 KG 结果（相同 formula 只保留最高 Tc）
-    grouped_kg = _group_kg_results(kg_results) if kg_results else []
+    # 同名材料的不同记录保留各自论文、条件和方法。
+    grouped_kg = kg_results
     if verbose:
-        print(f"  [分组] 原始 {len(kg_results)} 条 → 分组后 {len(grouped_kg)} 个化合物")
+        print(f"  [物性] 保留 {len(grouped_kg)} 条独立记录及其条件")
 
     # ── 降级判断 ──
     if not kg_results and not rag_chunks:
@@ -261,14 +220,7 @@ async def ask(
                 "model": model or get_llm_config().model, "source": "rag"}
 
     # ── 3. 构造 Prompt ──
-    from sqlalchemy import select, func as sa_func
-    from backend.rag.database import async_session_factory
-    from backend.models import KeyProperty, Paper, Superconductor
-    async with async_session_factory() as sess:
-        p_cnt = (await sess.execute(sa_func.count(Paper.id))).scalar() or 0
-        r_cnt = (await sess.execute(sa_func.count(KeyProperty.id))).scalar() or 0
-        s_cnt = (await sess.execute(sa_func.count(Superconductor.id))).scalar() or 0
-    db_context = _format_db_context(papers=p_cnt, superconductors=s_cnt, records=r_cnt)
+    db_context = await _database_context()
 
     if grouped_kg and rag_chunks:
         prompt = build_fusion_prompt(question, kg_results=grouped_kg, rag_chunks=rag_chunks,
@@ -311,7 +263,7 @@ async def ask(
     papers_dict = {}
     if paper_ids:
         async with async_session_factory() as sess:
-            q = await sess.execute(select(Paper).where(Paper.id.in_(paper_ids)))
+            q = await sess.execute(select(Paper).where(Paper.id.in_(paper_ids), *approved_paper_conditions()))
             for p in q.scalars():
                 papers_dict[p.id] = {
                     "title": p.title,
@@ -327,7 +279,7 @@ async def ask(
     ] if kg_results else []
 
     return {"answer": resp.choices[0].message.content, "chunks_used": len(rag_chunks),
-            "chunks": rag_chunks, "citations": [{"paper_id": ch.get("paper_id")} for ch in rag_chunks],
+            "chunks": rag_chunks, "citations": [scientific_citation(ch) for ch in rag_chunks],
             "model": model or get_llm_config().model, "source": source,
             "papers": papers_dict, "top10": top10}
 
@@ -350,14 +302,7 @@ async def ask_stream(
         return
 
     # ── DB 上下文（探索模式和普通模式共用） ──
-    from sqlalchemy import select, func as sa_func
-    from backend.rag.database import async_session_factory
-    from backend.models import KeyProperty, Paper, Superconductor
-    async with async_session_factory() as sess:
-        p_cnt = (await sess.execute(sa_func.count(Paper.id))).scalar() or 0
-        r_cnt = (await sess.execute(sa_func.count(KeyProperty.id))).scalar() or 0
-        s_cnt = (await sess.execute(sa_func.count(Superconductor.id))).scalar() or 0
-    db_ctx = _format_db_context(papers=p_cnt, superconductors=s_cnt, records=r_cnt)
+    db_ctx = await _database_context()
 
     # ── Inspiration: 探索模式路由 ──
     is_session: InspirationSession | None = _try_restore_is_session(history, question)
@@ -443,7 +388,8 @@ async def ask_stream(
             from backend.models import PaperChunk
             async with async_session_factory() as sess:
                 r = await sess.execute(
-                    select(PaperChunk).where(PaperChunk.paper_id.in_(list(idea_pids)))
+                    select(PaperChunk).join(Paper, Paper.id == PaperChunk.paper_id)
+                    .where(PaperChunk.paper_id.in_(list(idea_pids)), *approved_paper_conditions())
                     .order_by(PaperChunk.paper_id, PaperChunk.chunk_index)
                 )
                 paper_texts: dict[int, list[str]] = {}
@@ -472,10 +418,9 @@ async def ask_stream(
                 paper_ids.add(c["paper_id"])
         papers_dict = {}
         if paper_ids:
-            from backend.models import Paper
             async with async_session_factory() as sess:
                 q = await sess.execute(
-                    select(Paper).where(Paper.id.in_(list(paper_ids)))
+                    select(Paper).where(Paper.id.in_(list(paper_ids)), *approved_paper_conditions())
                 )
                 for p in q.scalars():
                     papers_dict[p.id] = {"title": p.title, "doi": p.doi,
@@ -500,7 +445,7 @@ async def ask_stream(
         _sys.stderr.write(f"  === ANSWER (last 300) ===\n...{answer[-300:]}\n=== END ANSWER ===\n\n")
         _sys.stderr.flush()
         yield {"type": "done", "data": {
-            "citations": [{"paper_id": pid} for pid in paper_ids],
+            "citations": [scientific_citation(c) for c in retrieval_result.get("chunks", [])],
             "answer": answer,
             "source": f"inspire_{is_session.current_mode}",
             "papers": papers_dict,
@@ -515,35 +460,8 @@ async def ask_stream(
     intent = _extract_intent(question)
 
     # ── 2. 并行 KG + RAG ──
-    from backend.rag.tools.mysql import query as kg_query, get_all_properties
-
-    kg_results: list[dict] = []
+    kg_results = await _query_intent_records(intent)
     rag_chunks: list[dict] = []
-
-    if intent["intent"] in ("list_overview", "numeric_compare", "property_query"):
-        yield {"type": "status", "data": {"action": "searching_kg", "message": "正在查询超导材料结构化数据..."}}
-        try:
-            if intent["predicates"]:
-                predicate = intent["predicates"][0]
-                if intent["intent"] == "numeric_compare":
-                    op = intent.get("operator", ">") or ">"
-                    val = intent.get("value", "0") or "0"
-                    kg_results = await kg_query(predicate, operator=op, value=val)
-                else:
-                    kg_results = await kg_query(predicate, operator=">", value="0")
-                if intent["intent"] == "property_query" and intent["subjects"]:
-                    kg_results = [r for r in kg_results if r["subject"] == intent["subjects"][0]]
-                kg_results.sort(
-                    key=lambda r: float(r["object"]) if r["object"].replace(".", "", 1).isdigit() else 0,
-                    reverse=True,
-                )
-            elif intent["subjects"]:
-                for subj in intent["subjects"]:
-                    props = await get_all_properties(subj)
-                    for p in props:
-                        kg_results.append({"subject": subj, "predicate": p["predicate"], "object": p["object"]})
-        except Exception:
-            kg_results = []
 
     if kg_results:
         yield {"type": "kg_data", "data": {"count": len(kg_results)}}
@@ -561,7 +479,7 @@ async def ask_stream(
                 rag_chunks = chunks[:rerank_top_k]
 
     # 按化合物分组 KG 结果
-    grouped_kg = _group_kg_results(kg_results) if kg_results else []
+    grouped_kg = kg_results
 
     if not kg_results and not rag_chunks:
         yield {"type": "token", "data": "抱歉，在已有文献中没有找到与您问题相关的信息。"}
@@ -582,7 +500,7 @@ async def ask_stream(
         source = "rag"
 
     if rag_chunks:
-        yield {"type": "chunks", "data": [{"paper_id": c["paper_id"]} for c in rag_chunks]}
+        yield {"type": "chunks", "data": [scientific_citation(c) for c in rag_chunks]}
     if kg_results and source == "hybrid":
         yield {"type": "fusion", "data": {"source": "hybrid", "kg_count": len(kg_results), "chunk_count": len(rag_chunks)}}
 
@@ -607,8 +525,8 @@ async def ask_stream(
             if delta and delta.content:
                 full_answer += delta.content
                 yield {"type": "token", "data": delta.content}
-    except Exception as e:
-        full_answer = f"抱歉，回答生成时出现错误：{e}"
+    except Exception:
+        full_answer = "抱歉，回答生成时出现错误，请检查模型配置或稍后重试。"
         yield {"type": "token", "data": full_answer}
 
     # ── 5. Paper 元信息 ──
@@ -622,7 +540,7 @@ async def ask_stream(
     papers_dict = {}
     if paper_ids:
         async with async_session_factory() as sess:
-            q = await sess.execute(select(Paper).where(Paper.id.in_(paper_ids)))
+            q = await sess.execute(select(Paper).where(Paper.id.in_(paper_ids), *approved_paper_conditions()))
             for p in q.scalars():
                 papers_dict[p.id] = {"title": p.title, "doi": p.doi, "journal": p.journal, "year": p.year}
 
@@ -633,7 +551,7 @@ async def ask_stream(
     ] if kg_results else []
 
     yield {"type": "done", "data": {
-        "citations": [{"paper_id": c["paper_id"]} for c in rag_chunks],
+        "citations": [scientific_citation(c) for c in rag_chunks],
         "answer": full_answer, "source": source,
         "papers": papers_dict, "top10": top10,
     }}

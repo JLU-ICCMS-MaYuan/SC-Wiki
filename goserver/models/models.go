@@ -90,6 +90,7 @@ type Paper struct {
 	DOI               *string    `gorm:"size:255" json:"doi"`
 	Title             *string    `json:"title"`
 	Journal           *string    `json:"journal"`
+	IssueNumber       *string    `gorm:"size:100" json:"issue_number"`
 	Volume            *string    `json:"volume"`
 	Pages             *string    `json:"pages"`
 	Year              *int       `json:"year"`
@@ -318,14 +319,15 @@ type StructureFamilyAlias struct {
 
 // MaterialState 一篇论文当前 revision 中材料的条件化状态。
 type MaterialState struct {
-	ID                     uint64 `gorm:"primaryKey;uniqueIndex:uq_material_states_identity_revision,priority:1" json:"id"`
-	StateKey               string `gorm:"size:96;not null;uniqueIndex:uq_material_states_paper_state_key,priority:3" json:"state_key"`
-	PaperID                uint   `gorm:"not null;index:ix_material_states_paper_revision,priority:1;uniqueIndex:uq_material_states_identity_revision,priority:2;uniqueIndex:uq_material_states_paper_state_key,priority:1" json:"paper_id"`
-	PaperRevision          uint   `gorm:"not null;index:ix_material_states_paper_revision,priority:2;uniqueIndex:uq_material_states_identity_revision,priority:3;uniqueIndex:uq_material_states_paper_state_key,priority:2" json:"paper_revision"`
-	SuperconductorID       uint   `gorm:"not null;index" json:"superconductor_id"`
-	ElementCount           *int16 `json:"element_count"`
-	MaterialDimensionality string `gorm:"size:32;not null;default:unknown" json:"material_dimensionality"`
-	CrystalSystem          string `gorm:"size:32;not null;default:unknown" json:"crystal_system"`
+	ID                     uint64  `gorm:"primaryKey;uniqueIndex:uq_material_states_identity_revision,priority:1" json:"id"`
+	StateKey               string  `gorm:"size:96;not null;uniqueIndex:uq_material_states_paper_state_key,priority:3" json:"state_key"`
+	PaperID                uint    `gorm:"not null;index:ix_material_states_paper_revision,priority:1;uniqueIndex:uq_material_states_identity_revision,priority:2;uniqueIndex:uq_material_states_paper_state_key,priority:1" json:"paper_id"`
+	PaperRevision          uint    `gorm:"not null;index:ix_material_states_paper_revision,priority:2;uniqueIndex:uq_material_states_identity_revision,priority:3;uniqueIndex:uq_material_states_paper_state_key,priority:2" json:"paper_revision"`
+	SuperconductorID       *uint   `gorm:"index" json:"superconductor_id"`
+	MaterialName           *string `gorm:"size:255" json:"material_name"`
+	ElementCount           *int16  `json:"element_count"`
+	MaterialDimensionality string  `gorm:"size:32;not null;default:unknown" json:"material_dimensionality"`
+	CrystalSystem          string  `gorm:"size:32;not null;default:unknown" json:"crystal_system"`
 	// 必须显式指定列名：GORM 默认命名策略会把 GPa 拆成 g_pa，
 	// 生成 pressure_value_g_pa 这类并不存在的列，导致压强字段读不出来。
 	PressureValueGPa         *float64                       `gorm:"column:pressure_value_gpa" json:"pressure_value_gpa"`
@@ -646,49 +648,6 @@ type ChartGroupItem struct {
 	CustomArticleType *string  `gorm:"size:10" json:"custom_article_type"`
 	CustomYear        *int     `json:"custom_year"`
 }
-
-// AlexandriaEntry Alexandria 外部数据集
-type AlexandriaEntry struct {
-	ID           uint     `gorm:"primaryKey" json:"id"`
-	MatID        string   `gorm:"size:100" json:"mat_id"`
-	Formula      *string  `gorm:"size:200" json:"formula"`
-	Elements     *string  `json:"elements"`
-	NSites       *int     `json:"nsites"`
-	SPG          *int     `json:"spg"`
-	LambdaVal    *float64 `json:"lambda_val"`
-	TcMax        *float64 `json:"tc_max"`
-	TcMcMillan   *float64 `json:"tc_mcmillan"`
-	TcAllenDynes *float64 `json:"tc_allen_dynes"`
-	TcEliashberg *float64 `json:"tc_eliashberg"`
-	WLog         *float64 `json:"wlog"`
-	DosEf        *float64 `json:"dos_ef"`
-	BandGap      *float64 `json:"band_gap"`
-	EAboveHull   *float64 `json:"e_above_hull"`
-	StructureCIF *string  `json:"structure_cif"`
-}
-
-func (AlexandriaEntry) TableName() string { return "alexandria_entries" }
-
-// AlexandriaElementIdx 元素→Alexandria 条目映射
-type AlexandriaElementIdx struct {
-	Element string `gorm:"size:5;primaryKey" json:"element"`
-	EntryID uint   `gorm:"primaryKey" json:"entry_id"`
-}
-
-func (AlexandriaElementIdx) TableName() string { return "alexandria_element_idx" }
-
-// HTSCMaterial HTSC-2025 外部数据集
-type HTSCMaterial struct {
-	ID          uint     `gorm:"primaryKey" json:"id"`
-	Name        *string  `gorm:"size:200" json:"name"`
-	Formula     *string  `gorm:"size:200" json:"formula"`
-	ClassName   *string  `gorm:"size:100" json:"class_name"`
-	Tc          *float64 `json:"tc"`
-	Elements    string   `gorm:"type:json" json:"elements"`
-	Composition string   `gorm:"type:json" json:"composition"`
-}
-
-func (HTSCMaterial) TableName() string { return "htsc2025_materials" }
 
 // NewsItem 快讯
 type NewsItem struct {

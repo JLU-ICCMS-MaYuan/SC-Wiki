@@ -96,6 +96,33 @@ def test_issue90_scientific_draft_conversion_upgrades_every_state():
     )
 
 
+def test_issue97_v2_draft_clears_standard_custom_key_without_changing_scientific_data():
+    source = {
+        "schema_version": SCIENTIFIC_DRAFT_SCHEMA_VERSION,
+        "property_modules": [{
+            "module_key": "module-superconductive_properties",
+            "module_code": "superconductive_properties",
+            "records": [{
+                "record_key": "tc-1", "record_type": "measured_tc", "property_code": "tc",
+                "custom_property_key": "stale-key", "name_raw": "Tc", "value_raw": "203 K",
+                "value_kind": "number", "value_number": 203,
+                "definition_key": "record.superconductive_properties.measured_tc.resistivity",
+                "definition_version": 1,
+                "payload": {"experimental_conditions": {"description": "four probe"}},
+                "evidences": [{"page": 4}],
+            }],
+        }],
+    }
+
+    converted = convert_legacy_state(source)
+    record = converted["property_modules"][0]["records"][0]
+
+    assert record["custom_property_key"] is None
+    assert record["value_number"] == 203
+    assert record["payload"] == {"experimental_conditions": {"description": "four probe"}}
+    assert record["evidences"] == [{"page": 4}]
+    assert source["property_modules"][0]["records"][0]["custom_property_key"] == "stale-key"
+
 def test_issue90_current_state_discards_stale_legacy_arrays():
     converted = convert_legacy_state({
         "schema_version": SCIENTIFIC_DRAFT_SCHEMA_VERSION,

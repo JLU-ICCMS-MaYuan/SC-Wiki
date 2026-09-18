@@ -7,6 +7,8 @@
 
 本文以 2026-08-21 对运行中 MySQL 的 `information_schema` 只读盘点为依据。记录数来自 MySQL 元数据，只用于表达当前数据规模，可能与精确 `COUNT(*)` 略有差异。
 
+已退役数据集的表说明不再列入维护范围。本次代码清理没有执行数据库删表或数据删除；下列规模与版本是历史盘点值，不代表当前部署的实时状态。
+
 > 注意：Feature #32/#33 已在代码库中落地并通过隔离空 MySQL 验证，但没有部署到本文盘点的
 > 现有数据库，也没有迁移其历史数据。因此本文继续保留旧表事实，不用 fresh 目标表覆盖实测结果。
 
@@ -23,7 +25,6 @@
 | 论文、文件与审核 | `papers`、`paper_files`、`paper_chunks`、`paper_evidences`、`paper_review_events` |
 | 用户与内容 | `users`、`news_items` |
 | 旧图表组合 | `chart_groups`、`chart_group_items` |
-| 外部数据集 | `alexandria_entries`、`alexandria_element_idx`、`htsc2025_materials` |
 | 数据库版本 | `alembic_version` |
 
 ## 元素、材料与物性
@@ -219,26 +220,6 @@ Chunk 是可重建派生数据，Evidence 是字段级证据快照，Review Even
 字段为 `id`、`group_id`、`key_property_id`、`sort_order`、`custom_label`、`custom_tc`、`custom_pressure`、`custom_type`、`custom_article_type`、`custom_year`。`group_id` 关联 `chart_groups.id`；`key_property_id` 沿用旧命名，指向物性记录，但旧 `key_properties` 表已不存在（当前物性表为 `superconductor_properties`），该引用的有效性属**待核验**——组合项当前 0 条，未实测过非空场景。
 
 当前存在组合定义但没有组合项，选择组合后可能得到空图。组合名称不能等同于 `superconductor_type`；“近室温”“常压”等数值条件也不是材料类型。
-
-## 外部数据集
-
-### `alexandria_entries`
-
-Alexandria 外部计算数据，当前约 18832 条。
-
-字段为 `id`、唯一 `mat_id`、`filename`、`formula`、`elements`、`nsites`、`spg`、`lambda_val`、`tc_max`、`imag`、`band_gap`、`dos_ef`、`e_above_hull`、`e_form`、`energy_total`、`tc_mcmillan`、`tc_allen_dynes`、`tc_eliashberg`、`wlog`、`integral_a2f`、`stress_xx`、`stress_yy`、`stress_zz`、`data_json`、`structure_cif`。
-
-### `alexandria_element_idx`
-
-Alexandria 元素倒排索引，当前约 66286 条。
-
-字段为联合主键 `element` 和 `entry_id`。`entry_id` 在业务语义上指向 `alexandria_entries.id`，但当前 schema 未声明数据库外键。
-
-### `htsc2025_materials`
-
-HTSC-2025 外部材料数据，当前约 140 条。
-
-字段为 `id`、`name`、`formula`、`class_name`、`tc`、`elements`、`composition`。
 
 ## 数据库版本
 

@@ -1,15 +1,17 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { Alert, Box, Button, Chip, CircularProgress, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material'
+import { Alert, Box, Button, ButtonBase, Chip, CircularProgress, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import DownloadIcon from '@mui/icons-material/Download'
 import BlockIcon from '@mui/icons-material/Block'
 import RestoreIcon from '@mui/icons-material/Restore'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
-import StructureViewer3D from './StructureViewer3D'
+import CrystalStructureView from './CrystalStructureView'
 import { StructureCandidate } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
 
 interface Props {
+  materialName?: string
   candidates: StructureCandidate[]
   uploading: boolean
   onUpload: (file: File) => void
@@ -19,7 +21,7 @@ interface Props {
 type CellKind = 'primitive' | 'conventional'
 type StructureFormat = 'cif' | 'poscar'
 
-const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, onUpload, onChange }) => {
+const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, uploading, onUpload, onChange }) => {
   const { t } = useLanguage()
   const preferredCandidate = useMemo(
     () => [...candidates].reverse().find(candidate => candidate.confirmation !== 'excluded') || candidates.at(-1),
@@ -28,6 +30,8 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, onUpl
   const [selectedCandidateId, setSelectedCandidateId] = useState(preferredCandidate?.candidate_id || '')
   const [cell, setCell] = useState<CellKind>('conventional')
   const [format, setFormat] = useState<StructureFormat>('cif')
+  const [expanded, setExpanded] = useState(true)
+  const contentId = useId()
   const cellLabelId = useId()
   const formatLabelId = useId()
   const previousCandidateCount = useRef(candidates.length)
@@ -38,6 +42,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, onUpl
     if (candidateAdded || selectionMissing) {
       setSelectedCandidateId(preferredCandidate?.candidate_id || '')
     }
+    if (candidateAdded) setExpanded(true)
     previousCandidateCount.current = candidates.length
   }, [candidates, preferredCandidate, selectedCandidateId])
 
@@ -75,34 +80,37 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, onUpl
   const formatLabel = format === 'cif' ? 'CIF' : 'POSCAR'
 
   return (
-    <Box sx={{ mt: 2, p: { xs: 1.5, sm: 2 }, borderRadius: 1, bgcolor: 'action.hover' }}>
+    <Box data-structure-attachment sx={{ mt: 2, p: { xs: 1.5, sm: 2 }, borderRadius: 1, bgcolor: 'action.hover' }}>
       <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }} spacing={1}>
         <Box sx={{ minWidth: 0 }}>
-          <Typography variant="subtitle2" fontWeight={700}>{t('upload.structureAttachmentTitle')}</Typography>
-          <Typography variant="caption" color="text.secondary">{t('upload.structureAttachmentHint')}</Typography>
+          <ButtonBase aria-expanded={expanded} aria-controls={contentId} onClick={() => setExpanded(value => !value)} sx={{ maxWidth: '100%', textAlign: 'left', gap: 0.5, borderRadius: 0.5, '&.Mui-focusVisible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 } }}>
+            <ExpandMoreIcon sx={{ flexShrink: 0, transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
+            <Typography component="span" variant="subtitle2" fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>{materialName ? `${materialName} · ` : ''}{t('upload.structureAttachmentTitle')}</Typography>
+          </ButtonBase>
         </Box>
         <Button component="label" size="small" variant="outlined" startIcon={uploading ? <CircularProgress size={16} /> : <UploadFileIcon />} disabled={uploading}>
           {uploading ? t('upload.validating') : t('upload.uploadStructure')}
           <input hidden type="file" accept=".cif,.poscar,.vasp,POSCAR,CONTCAR" onChange={event => {
             const selected = event.target.files?.[0]
             event.target.value = ''
-            if (selected) onUpload(selected)
+            if (selected) { setExpanded(true); onUpload(selected) }
           }} />
         </Button>
       </Stack>
 
+      {!candidate && <Typography id={contentId} hidden={!expanded} variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>{t('paperDetail.noStructure')}</Typography>}
+
       {candidate && (
-        <Box sx={{ mt: 1.5 }}>
+        <Box data-scientific-structure data-structure-hash={candidate.validation?.structure_hash} data-structure-id={candidate.candidate_id} sx={{ mt: 1.5 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1}>
             <Box sx={{ minWidth: 0 }}>
               <Typography variant="subtitle2" fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>{filename || candidate.candidate_id}</Typography>
-              <Typography variant="caption" color="text.secondary">
-                {t('upload.atomCount', { count: candidate.validation?.atom_count ?? t('common.notProvided') })} · {(candidate.validation?.elements || []).join(', ') || t('upload.elementsUnknown')}
-              </Typography>
             </Box>
             <Chip size="small" label={statusLabel} color={blocked ? 'warning' : candidate.confirmation === 'confirmed' ? 'success' : 'default'} />
           </Stack>
 
+          {/* 隐藏而不卸载，保留画布、视角和选择；文件标题始终可用于来源核对。 */}
+          <Box id={contentId} hidden={!expanded}>
           {candidates.length > 1 && (
             <Select fullWidth size="small" value={candidate.candidate_id} aria-label={t('upload.candidateSelectAria')} onChange={event => setSelectedCandidateId(String(event.target.value))} sx={{ mt: 1.5 }}>
               {candidates.map(item => (
@@ -118,7 +126,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, onUpl
             : preview
               ? (
                   <Box sx={{ mt: 1.5 }}>
-                    <StructureViewer3D data={preview.text} format={preview.format} height={320} />
+                    <CrystalStructureView data={preview.text} format={preview.format} />
                     <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.75 }}>
                       {t('upload.currentDisplay', { cell: cellLabel, format: formatLabel })}
                     </Typography>
@@ -129,24 +137,15 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, onUpl
           {!blocked && (
             <>
               <Divider sx={{ my: 1.5 }} />
-              <Box component="details">
-                <Box component="summary" sx={{ cursor: 'pointer', fontWeight: 700, fontSize: '0.875rem' }}>{t('upload.crystalParamsTitle')}</Box>
-                <Box sx={{ mt: 1, display: 'grid', gap: 0.75 }}>
-                  <Typography variant="body2">{t('upload.elementLine', { elements: (candidate.validation?.elements || []).join(t('upload.listSeparator')) || t('common.notProvided') })}</Typography>
-                  <Typography variant="body2">{t('upload.atomLine', { count: candidate.validation?.atom_count ?? t('common.notProvided') })}</Typography>
-                  <Typography variant="body2">{t('upload.volumeLine', { volume: candidate.validation?.volume == null ? t('common.notProvided') : String(candidate.validation.volume) + ' Å³' })}</Typography>
-                  <Typography variant="body2">{t('upload.cellParamsLine', { params: candidate.validation?.cell_parameters ? JSON.stringify(candidate.validation.cell_parameters) : t('common.notProvided') })}</Typography>
-                </Box>
-              </Box>
               <Stack direction="row" spacing={1} useFlexGap flexWrap="wrap" sx={{ mt: 1.5 }}>
-                <FormControl size="small">
+                <FormControl size="small" sx={{ minWidth: 104 }}>
                   <InputLabel id={cellLabelId}>{t('upload.cellRepresentation')}</InputLabel>
                   <Select labelId={cellLabelId} label={t('upload.cellRepresentation')} value={cell} onChange={event => setCell(event.target.value as CellKind)}>
                     <MenuItem value="conventional">{t('upload.cell.conventional')}</MenuItem>
                     <MenuItem value="primitive">{t('upload.cell.primitive')}</MenuItem>
                   </Select>
                 </FormControl>
-                <FormControl size="small">
+                <FormControl size="small" sx={{ minWidth: 104 }}>
                   <InputLabel id={formatLabelId}>{t('upload.structureFormat')}</InputLabel>
                   <Select labelId={formatLabelId} label={t('upload.structureFormat')} value={format} onChange={event => setFormat(event.target.value as StructureFormat)}>
                     <MenuItem value="cif">CIF</MenuItem>
@@ -169,6 +168,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, onUpl
               </Stack>
             </>
           )}
+          </Box>
         </Box>
       )}
     </Box>

@@ -45,3 +45,23 @@
 ## MVP 与增量策略
 
 先交付不可注入角色且可完成验证的注册闭环，再增加重发体验和完整额度反馈。
+
+## 阶段 6：恢复与收敛（2026-09-16）
+
+旧 T001–T012 的勾选仅代表历史记录；当前注册绕过验证、冷却与真实 SMTP 验收仍有缺口，以下任务覆盖纠正，不改写历史勾选。
+
+- [x] T013 [US1] 在 `goserver/handlers/auth_identity_test.go` 和 `goserver/handlers/auth.go` 恢复新账号验证、登录拦截、失败恢复与账号状态保护。[contradicts，FR-001/002/006/007]
+- [x] T014 [US2] 在 `goserver/cache/verification.go` 和对应测试补充原子冷却、限额、新码发布和并发单次消费。[partial，FR-003/004/005/009/010]
+- [x] T015 [US1] 在 `goserver/services/email.go` 和对应测试补充 SMTP 配置校验、TLS、总超时及 MIME 编码；在 `docker/.env.example` 提供网易配置。[partial，FR-002/010]
+- [x] T016 [US1] 在 `frontend/src/context/AuthContext.tsx`、`frontend/src/components/AuthDialog.tsx`、中英文字典及 `tests/02_identity_governance/email-registration.test.tsx` 实现真实响应倒计时、失败恢复和自动登录。[partial，FR-006/008]
+- [x] T017 [US2] 运行 Go、前端与 SMTP 协议测试，更新 `quickstart.md`、根 README 和认证 Overview；检查需求覆盖。[partial，SC-001–004]
+- [ ] T018 [US1] 使用用户私密配置的网易授权码，通过真实注册邮件、验证码和登录完成验收并记录 Issue #39 关闭依据。[missing，SC-001、真实 SMTP 边界]
+
+依赖：T013–T016 完成后执行 T017；T018 依赖私密运行配置和用户指定的收件邮箱。
+
+## 2026-09-16 验证证据
+
+- Go 全量测试通过；Redis/SMTP race 检查通过。真实本地 TLS SMTP 服务覆盖 implicit/STARTTLS、中文 MIME、认证拒绝、收件拒绝、DATA 拒绝、证书与超时。
+- 前端注册/身份测试共 12 项通过，TypeScript 与 Vite 生产构建通过；验证码交互测试使用真实 AuthContext 和 HTTP 响应契约。
+- Compose 配置静态验证与 diff 空白检查通过。SQLite/miniredis 测试证明 HTTP 和状态编排，不能替代目标 MySQL/Redis/网易部署的 T018。
+- 本机未配置 SMTP，未向外部邮箱发测试邮件；T018 保持未完成。

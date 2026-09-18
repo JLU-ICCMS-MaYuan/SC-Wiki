@@ -31,9 +31,29 @@ def test_issue90_record_checksum_is_stable_and_payload_is_copied():
     assert len(result["record_checksum"]) == 64
 
 
+def test_issue97_normalize_module_preserves_full_validation_path():
+    from backend.ingest.property_modules import normalize_module
+
+    with pytest.raises(PropertyValidationError) as error:
+        normalize_module({
+            "module_key": "module-superconductive_properties",
+            "module_code": "superconductive_properties",
+            "records": [{
+                **_tc(custom_property_key="stale-key"),
+                "record_type": "measured_tc",
+                "method_code": "resistivity",
+                "payload": {"experimental_conditions": {}},
+            }],
+        }, paper_id=0, paper_revision=1,
+           path="material_states[0].property_modules[0]")
+
+    assert error.value.issues[0].field == (
+        "material_states[0].property_modules[0].records[0].custom_property_key"
+    )
+
+
 def test_issue90_legacy_conversion_is_single_direction_and_non_mutating():
     old = {"tc_results": [{"tc_method": "allen_dynes", "tc_value_k": 250, "value_raw": "250"}], "properties": []}
     converted = convert_legacy_state(old)
     assert "property_modules" not in old
     assert converted["property_modules"][0]["records"][0]["record_type"] == "predicted_tc"
-

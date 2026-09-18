@@ -10,6 +10,7 @@
  * （如 share.tsx，由 i18n 转换任务组负责接入）行为不变。
  */
 import { dictionaries } from '../i18n'
+import { materialLabel } from './materialIdentity'
 
 /** 文案解析函数，与 useLanguage 返回的 t 签名对齐。 */
 export type TranslateFn = (key: string) => string
@@ -122,7 +123,7 @@ export function collectPropertyRows(paper: any, t?: TranslateFn): PaperPropertyR
   const states: any[] = Array.isArray(paper?.material_states) ? paper.material_states : []
 
   for (const state of states) {
-    const material = textOrNull(state?.material) || '-'
+    const material = materialLabel(state) || '-'
     const condition = conditionOf(state)
 
     for (const module of (Array.isArray(state?.property_modules) ? state.property_modules : [])) {
@@ -181,7 +182,7 @@ export function collectStructures(paper: any): PaperStructureItem[] {
       .map(item => ({
         structure_text: String(item.structure_text),
         structure_format: textOrNull(item?.structure_format) || 'cif',
-        material: textOrNull(state?.material) || '-',
+        material: materialLabel(state) || '-',
         name_note: textOrNull(item?.space_group_symbol),
         pressure_gpa: state?.pressure_value_gpa ?? null,
       }))

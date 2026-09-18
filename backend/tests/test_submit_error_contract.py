@@ -82,9 +82,8 @@ def test_existing_http_exception_contract_is_not_rewritten(client):
     assert detail["message"] == "论文标题不能为空"
 
 
-def test_missing_material_contract_names_chemical_formula(client):
-    """#75-1：化学式缺失的错误契约——code 为 state_material_required，
-    message 指明缺少化学式且保留「第 N 个材料状态」序号前缀（FR-006、FR-007）。"""
+def test_missing_material_contract_names_identity_fields(client):
+    """名称与化学式皆空时保留状态序号，并返回可定位的字段错误。"""
     import re
 
     from backend.api.rag import _validate_draft
@@ -112,6 +111,85 @@ def test_missing_material_contract_names_chemical_formula(client):
     assert exc_info.value.status_code == 400
     detail = exc_info.value.detail
     assert detail["code"] == "state_material_required"
-    assert re.fullmatch(r"第 \d+ 个材料状态缺少化学式", detail["message"]), detail["message"]
+    assert re.fullmatch(r"第 \d+ 个材料状态至少需要材料名或化学式", detail["message"]), detail["message"]
+    assert detail['field'] == 'material_states[0].material_name'
     # 序号前缀必须保留，供前端解析并定位到出错卡片
     assert detail["message"].startswith("第 1 个材料状态")
+
+
+def test_issue97_property_error_contains_complete_material_module_record_path():
+    from backend.api.rag import _validate_draft
+
+    draft = {
+        "paper": {"title": "测试论文", "paper_type": "experimental", "material_families": [{"id": 1, "name": "氢基超导体"}]},
+        "material_states": [{
+            "material": "Pb",
+            "property_modules": [{
+                "module_key": "module-superconductive_properties",
+                "module_code": "superconductive_properties",
+                "records": [{
+                    "record_key": "tc-1", "record_type": "measured_tc", "property_code": "tc",
+                    "custom_property_key": "stale-key", "definition_key": "record.superconductive_properties.measured_tc.resistivity",
+                    "definition_version": 1, "name_raw": "Tc", "value_kind": "number", "value_raw": "203 K",
+                    "value_number": 203, "canonical_unit": "K", "method_code": "resistivity",
+                    "payload": {"experimental_conditions": {}},
+                }],
+            }],
+        }],
+    }
+
+    with pytest.raises(HTTPException) as exc_info:
+        _validate_draft(draft)
+
+    issue = exc_info.value.detail["issues"][0]
+    assert issue["field"] == "material_states[0].property_modules[0].records[0].custom_property_key"
+    assert issue["message"] == "规范性质不能携带自定义键"
+
+
+def test_scientific_integrity_error_points_to_record_field_without_leaking_database_details():
+    from sqlalchemy.exc import IntegrityError
+
+    from backend.api.rag import _scientific_integrity_error
+
+    draft = {
+        "material_states": [{
+            "material": "Pb",
+            "property_modules": [{
+                "module_code": "superconductive_properties",
+                "records": [{
+                    "record_type": "measured_tc",
+                    "property_code": "tc",
+                    "custom_property_key": "stale-key",
+                }],
+            }],
+        }],
+    }
+    exc = IntegrityError(
+        "INSERT ...",
+        {},
+        RuntimeError("ck_property_records_custom_identity: CHECK failed for property_records"),
+    )
+
+    response = _scientific_integrity_error(exc, draft)
+
+    assert response.status_code == 409
+    detail = response.detail
+    assert detail["code"] == "scientific_data_integrity_error"
+    assert detail["issues"][0]["field"] == "material_states[0].property_modules[0].records[0].custom_property_key"
+    assert "填写" in detail["issues"][0]["message"]
+    assert "property_records" not in str(detail)
+    assert "INSERT" not in str(detail)
+
+
+def test_scientific_integrity_error_has_actionable_fallback_when_constraint_is_unknown():
+    from sqlalchemy.exc import IntegrityError
+
+    from backend.api.rag import _scientific_integrity_error
+
+    exc = IntegrityError("INSERT ...", {}, RuntimeError("driver-specific failure"))
+    response = _scientific_integrity_error(exc, {"material_states": [{"material": "Pb"}]})
+
+    issue = response.detail["issues"][0]
+    assert issue["field"] == "material_states"
+    assert "化学式" in issue["message"]
+    assert "重新提交" in issue["message"]

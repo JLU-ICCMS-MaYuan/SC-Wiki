@@ -1,5 +1,7 @@
 # 实施计划：上传校对页布局重构与材料状态卡片完善
 
+> 2026-09-14 已确认后续设计优先：#80 将超导类型改为论文级，#84 以 Tc 方法控制字段，#90 使用记录内条件参数和物性模块替代旧 Context/Tc 表、状态参数预填与 energy above hull 预置按钮。本文原实现方案保留为历史记录，不再用作恢复旧表或旧字段的依据；当前验收见 [Spec](spec.md) 和 [快速验收](quickstart.md)。
+
 **GitHub Issue**：[#52](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/52)
 
 **日期**：2026-08-26

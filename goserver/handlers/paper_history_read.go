@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -18,8 +19,9 @@ type paperHistoryActorResponse struct {
 }
 
 type paperHistoryReviewResponse struct {
-	Status  string  `json:"status"`
-	Comment *string `json:"comment"`
+	EvidenceReview []evidenceReviewRecord `json:"evidence_review,omitempty"`
+	Status         string                 `json:"status"`
+	Comment        *string                `json:"comment"`
 }
 
 type paperHistoryEventResponse struct {
@@ -66,8 +68,13 @@ func GetPaperHistory(c *gin.Context) {
 			OccurredAt: event.OccurredAt,
 		}
 		if event.EventType == paperHistoryReviewed && event.ReviewStatus != nil {
+			var snapshot struct {
+				EvidenceReview []evidenceReviewRecord `json:"evidence_review"`
+			}
+			_ = json.Unmarshal(event.ClassificationSnapshot, &snapshot)
 			item.Review = &paperHistoryReviewResponse{
-				Status: *event.ReviewStatus, Comment: event.ReviewComment,
+				EvidenceReview: snapshot.EvidenceReview,
+				Status:         *event.ReviewStatus, Comment: event.ReviewComment,
 			}
 		}
 		response = append(response, item)

@@ -134,7 +134,7 @@ describe('T027：待审核论文科学数据原地编辑', () => {
     // 可编辑模式：输入框可修改（readOnly 下不会出现可编辑输入）
     const formula = screen.getByLabelText('化学式')
     expect(formula).toHaveValue('Sn')
-    expect(within(screen.getByTestId('property-record-record-tc')).getByLabelText('数值')).toHaveValue(3.78)
+    expect(within(screen.getByTestId('property-record-record-tc')).getByLabelText('Tc 值')).toHaveValue('3.78')
     expect(screen.getByDisplayValue('threshold current')).toBeVisible()
   })
 
@@ -145,7 +145,7 @@ describe('T027：待审核论文科学数据原地编辑', () => {
     const formula = screen.getByLabelText('化学式')
     await user.clear(formula)
     await user.type(formula, 'H3S')
-    const tcValue = within(screen.getByTestId('property-record-record-tc')).getByLabelText('数值')
+    const tcValue = within(screen.getByTestId('property-record-record-tc')).getByLabelText('Tc 值')
     await user.clear(tcValue)
     await user.type(tcValue, '250')
     const rawValue = within(screen.getByTestId('property-record-record-current')).getByLabelText('原始值')

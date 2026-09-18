@@ -14,7 +14,7 @@ import json
 import re
 from typing import Any
 
-from sqlalchemy import and_, select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql import func
 
@@ -24,6 +24,11 @@ from backend.models import (
     Paper,
     PropertyRecord,
     Superconductor,
+)
+
+from backend.rag.search.property_records import (
+    approved_materials_statement, approved_paper_conditions,
+    format_property_record, property_records_statement,
 )
 
 _FORMULA_RE = re.compile(r"([A-Z][a-z]?)(\d*\.?\d*)")
@@ -52,7 +57,7 @@ async def search_by_formula(
     返回该超导体的所有物性记录（含 paper 信息）。
     """
     r = await session.execute(
-        select(Superconductor)
+        approved_materials_statement()
         .where(Superconductor.chemical_formula.ilike(formula))
     )
     superconductors = r.unique().scalars().all()
@@ -61,36 +66,12 @@ async def search_by_formula(
         # 归一化后按 formula_normalized 匹配（chemical_formula 可能带相/掺杂注记，如 "LaH10 (fcc phase)"）
         normalized = _normalize_formula(formula)
         r = await session.execute(
-            select(Superconductor)
+            approved_materials_statement()
             .where(Superconductor.formula_normalized.ilike(normalized))
         )
         superconductors = r.unique().scalars().all()
 
-    result = []
-    for sc in superconductors:
-        rows = (await session.execute(
-            select(PropertyRecord, MaterialState, Paper)
-            .join(MaterialState, MaterialState.id == PropertyRecord.material_state_id)
-            .join(Paper, and_(Paper.id == PropertyRecord.paper_id, Paper.content_revision == PropertyRecord.paper_revision))
-            .where(MaterialState.superconductor_id == sc.id, Paper.review_status == "approved")
-        )).all()
-        props = [_format_record(record, state, paper, sc) for record, state, paper in rows]
-        result.append({
-            "type": "superconductor",
-            "id": sc.id,
-            "chemical_formula": sc.chemical_formula,
-            "formula_normalized": sc.formula_normalized,
-            "display_name": sc.display_name,
-            "composition": (
-                json.loads(sc.composition)
-                if isinstance(sc.composition, str)
-                else sc.composition or {}
-            ),
-            "element_ratio": json.loads(sc.element_ratio) if sc.element_ratio else {},
-            "properties": props,
-        })
-
-    return result
+    return await _format_superconductors(session, superconductors)
 
 
 async def search_by_elements_exact(
@@ -105,13 +86,13 @@ async def search_by_elements_exact(
     system_key = "-".join(sorted_elements)
 
     r = await session.execute(
-        select(Superconductor)
+        approved_materials_statement()
         .join(ChemicalSystem)
         .where(ChemicalSystem.system_key == system_key)
     )
     superconductors = r.scalars().all()
 
-    return _format_superconductors(session, superconductors)
+    return await _format_superconductors(session, superconductors)
 
 
 async def search_by_elements_combination(
@@ -131,12 +112,12 @@ async def search_by_elements_combination(
         for subset in combinations(sorted_input, r_len):
             system_key = "-".join(subset)
             r = await session.execute(
-                select(Superconductor)
+                approved_materials_statement()
                 .join(ChemicalSystem)
                 .where(ChemicalSystem.system_key == system_key)
             )
             scs = r.scalars().all()
-            results.extend(_format_superconductors(session, scs))
+            results.extend(await _format_superconductors(session, scs))
 
     return results
 
@@ -157,7 +138,10 @@ async def search_by_elements_contained(
     conditions = []
     for elem in sorted_input:
         # system_key 格式是 "H-La-S"，每个元素前后有 -
-        conditions.append(ChemicalSystem.system_key.like(f"%{elem}%"))
+        conditions.append(or_(ChemicalSystem.system_key == elem,
+                              ChemicalSystem.system_key.like(f"{elem}-%"),
+                              ChemicalSystem.system_key.like(f"%-{elem}-%"),
+                              ChemicalSystem.system_key.like(f"%-{elem}")))
 
     r = await session.execute(
         select(ChemicalSystem)
@@ -169,11 +153,11 @@ async def search_by_elements_contained(
     results = []
     for sys in systems:
         r2 = await session.execute(
-            select(Superconductor)
+            approved_materials_statement()
             .where(Superconductor.chemical_system_id == sys.id)
         )
         scs = r2.scalars().all()
-        results.extend(_format_superconductors(session, scs))
+        results.extend(await _format_superconductors(session, scs))
 
     return results
 
@@ -192,7 +176,7 @@ async def search_papers(
              | Paper.abstract.ilike(pattern)
              | Paper.summary.ilike(pattern)
              | Paper.authors.ilike(pattern))
-            & (Paper.review_status == "approved")
+            & and_(*approved_paper_conditions())
         )
         .limit(limit)
     )
@@ -219,29 +203,25 @@ async def get_superconductor_records(
     superconductor_id: int,
 ) -> list[dict]:
     """获取某个超导体的所有物性记录。"""
-    r = await session.execute(
-        select(PropertyRecord, MaterialState, Paper, Superconductor)
-        .join(MaterialState, MaterialState.id == PropertyRecord.material_state_id)
-        .join(Superconductor, Superconductor.id == MaterialState.superconductor_id)
-        .join(Paper, and_(Paper.id == PropertyRecord.paper_id, Paper.content_revision == PropertyRecord.paper_revision))
-        .where(MaterialState.superconductor_id == superconductor_id, Paper.review_status == "approved")
-    )
-    return [_format_record(record, state, paper, material) for record, state, paper, material in r.all()]
+    rows = (await session.execute(
+        property_records_statement().where(MaterialState.superconductor_id == superconductor_id)
+        .order_by(PropertyRecord.id)
+    )).all()
+    return [format_property_record(*row) for row in rows]
 
 
 async def get_paper_detail(session: AsyncSession, paper_id: int) -> dict | None:
     """获取论文详情（含当前材料状态的物性记录数）。"""
     r = await session.execute(
         select(Paper)
-        .where(Paper.id == paper_id, Paper.review_status == "approved")
+        .where(Paper.id == paper_id, *approved_paper_conditions())
     )
     paper = r.unique().scalar_one_or_none()
     if not paper:
         return None
     record_count = await session.scalar(
-        select(func.count(PropertyRecord.id)).where(
-            PropertyRecord.paper_id == paper.id,
-            PropertyRecord.paper_revision == paper.content_revision,
+        select(func.count()).select_from(
+            property_records_statement().where(PropertyRecord.paper_id == paper.id).subquery()
         )
     )
 
@@ -260,37 +240,32 @@ async def get_paper_detail(session: AsyncSession, paper_id: int) -> dict | None:
     }
 
 
-def _format_record(record: PropertyRecord, state: MaterialState, paper: Paper, material: Superconductor) -> dict:
-    """统一记录转为搜索/RAG 使用的稳定投影。"""
-    from backend.ingest.prop_names import PROP_LABELS
-    value = record.value_number
-    if value is None and record.value_min is not None and record.value_max is not None:
-        value = (record.value_min + record.value_max) / 2
-    return {
-        "id": record.id, "record_key": record.record_key,
-        "superconductor_id": material.id, "paper_id": record.paper_id,
-        "material": material.chemical_formula, "name": record.property_code,
-        "label": PROP_LABELS.get(record.property_code, record.name_raw), "name_raw": record.name_raw,
-        "value_min": record.value_min, "value_max": record.value_max,
-        "value": value, "value_raw": record.value_raw, "unit": record.unit_raw,
-        "pressure_gpa": state.pressure_value_gpa, "temperature_k": state.temperature_value_k,
-        "condition_note": None, "is_primary": record.is_representative,
-        "superconductor_type": state.state_kind, "article_type": paper.paper_type,
-        "source_label": "SC-Wiki", "payload": record.payload_json,
-        "paper_doi": paper.doi, "paper_title": paper.title, "paper_year": paper.year,
-    }
-
-
-def _format_superconductors(session, superconductors) -> list[dict]:
-    """（同步函数包装，仅用于内部格式化）"""
+async def _format_superconductors(session, superconductors) -> list[dict]:
+    """批量加载物性，各搜索模式使用同一输出契约。"""
+    if not superconductors:
+        return []
+    ids = [sc.id for sc in superconductors]
+    rows = (await session.execute(
+        property_records_statement().where(MaterialState.superconductor_id.in_(ids))
+        .order_by(PropertyRecord.id)
+    )).all()
+    grouped = {sid: [] for sid in ids}
+    for row in rows:
+        item = format_property_record(*row)
+        grouped[item["superconductor_id"]].append(item)
     return [
         {
-            "type": "superconductor",
-            "id": sc.id,
+            "type": "superconductor", "id": sc.id,
             "chemical_formula": sc.chemical_formula,
             "formula_normalized": sc.formula_normalized,
             "display_name": sc.display_name,
-            "composition": json.loads(sc.composition) if sc.composition else {},
+            "composition": _json_value(sc.composition, {}),
+            "element_ratio": _json_value(sc.element_ratio, {}),
+            "properties": grouped[sc.id],
         }
         for sc in superconductors
     ]
+
+
+def _json_value(value, fallback):
+    return json.loads(value) if isinstance(value, str) else value if value is not None else fallback

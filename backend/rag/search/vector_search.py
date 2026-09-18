@@ -20,10 +20,11 @@ async def _approved_results(results: list[dict]) -> list[dict]:
     paper_ids = {int(item.get("paper_id") or 0) for item in results}
     async with async_session_factory() as session:
         rows = await session.execute(
-            select(Paper.id).where(Paper.id.in_(paper_ids), Paper.review_status == "approved")
+            select(Paper.id, Paper.content_revision).where(Paper.id.in_(paper_ids), Paper.review_status == "approved", Paper.approved_revision == Paper.content_revision)
         )
-        approved_ids = set(rows.scalars())
-    return [item for item in results if int(item.get("paper_id") or 0) in approved_ids]
+        approved_ids = dict(rows.all())
+    return [item for item in results if int(item.get("paper_id") or 0) in approved_ids
+            and (not item.get("source_kind") or item.get("paper_revision") == approved_ids[int(item["paper_id"])])]
 
 
 async def search_by_semantics(

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, IconButton, MenuItem, Select, Tooltip, Typography,
 } from '@mui/material'
@@ -10,8 +10,8 @@ import {
   loadFormDefinition, loadModuleDefinitions, type FormDefinition, type FormIssue,
 } from '../lib/formDefinitions'
 import {
-  PROPERTY_MODULES, clonePropertyRecord, emptyPropertyModule, emptyPropertyRecord,
-  type PropertyModuleCode, type PropertyModuleDraft, type PropertyRecordDraft,
+  PROPERTY_MODULES, clonePropertyRecord, emptyPropertyModule, emptyPropertyRecord, propertyRecordSummaryValue,
+  normalizePropertyRecordIdentity, type PropertyModuleCode, type PropertyModuleDraft, type PropertyRecordDraft,
 } from '../lib/propertyModules'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
 
@@ -85,7 +85,7 @@ const recordForDefinition = (
     delete payload.experimental_conditions
     delete payload.parameters
   }
-  return {
+  return normalizePropertyRecordIdentity({
     ...current,
     record_type: recordType,
     property_code: definition.property_code || (recordType === 'property' ? 'custom' : 'tc'),
@@ -96,10 +96,53 @@ const recordForDefinition = (
     unit_raw: current.unit_raw || (recordType === 'property' ? null : 'K'),
     canonical_unit: recordType === 'property' ? current.canonical_unit : 'K',
     payload,
-  }
+  })
 }
 
 const normalizeOrder = (modules: PropertyModuleDraft[]) => modules.map((module, index) => ({ ...module, display_order: index }))
+
+interface PropertyRecordEditorProps {
+  record: PropertyRecordDraft
+  definition?: FormDefinition
+  definitionError?: string
+  issues: FormIssue[]
+  basePath: string
+  readOnly: boolean
+  onChange: (record: PropertyRecordDraft) => void
+  onClone?: () => void
+  onDelete?: () => void
+}
+
+const sameIssues = (left: FormIssue[], right: FormIssue[]) => (
+  left.length === right.length && left.every((item, index) => {
+    const other = right[index]
+    return item.field === other.field && item.code === other.code && item.message === other.message
+  })
+)
+
+const PropertyRecordEditor = React.memo<PropertyRecordEditorProps>(
+  ({ record, definition, definitionError, issues, basePath, readOnly, onChange, onClone, onDelete }) => (
+    <SchemaDrivenRecordForm
+      record={record}
+      definition={definition}
+      definitionError={definitionError}
+      issues={issues}
+      basePath={basePath}
+      readOnly={readOnly}
+      onChange={onChange}
+      onClone={onClone}
+      onDelete={onDelete}
+    />
+  ),
+  (previous, next) => (
+    previous.record === next.record
+    && previous.definition === next.definition
+    && previous.definitionError === next.definitionError
+    && previous.basePath === next.basePath
+    && previous.readOnly === next.readOnly
+    && sameIssues(previous.issues, next.issues)
+  ),
+)
 
 const PropertyModuleEditor: React.FC<Props> = ({
   modules,
@@ -112,6 +155,13 @@ const PropertyModuleEditor: React.FC<Props> = ({
   const [boundDefinitions, setBoundDefinitions] = useState<Record<string, FormDefinition>>({})
   const [definitionErrors, setDefinitionErrors] = useState<Record<string, string>>({})
   const moduleCodes = useMemo(() => [...new Set(modules.map(module => module.module_code))], [modules])
+  const modulesRef = useRef(modules)
+  modulesRef.current = modules
+  const onChangeRef = useRef(onChange)
+  onChangeRef.current = onChange
+  const recordBindingSignature = useMemo(() => modules.flatMap(module => module.records.map(record => (
+    `${record.record_key}|${record.module_code}|${record.definition_key}@${record.definition_version}`
+  ))).join('||'), [modules])
 
   useEffect(() => {
     let active = true
@@ -129,21 +179,30 @@ const PropertyModuleEditor: React.FC<Props> = ({
       const identity = `${record.definition_key}@${record.definition_version}`
       const listed = definitions[record.module_code]?.find(item => definitionIdentity(item) === identity)
       if (listed) {
-        setBoundDefinitions(current => ({ ...current, [record.record_key]: listed }))
+        setBoundDefinitions(current => current[record.record_key] === listed
+          ? current
+          : { ...current, [record.record_key]: listed })
+        setDefinitionErrors(current => current[record.record_key] === ''
+          ? current
+          : { ...current, [record.record_key]: '' })
         return
       }
       loadFormDefinition(record.definition_key, record.definition_version)
         .then(item => {
           if (!active) return
-          setBoundDefinitions(current => ({ ...current, [record.record_key]: item }))
-          setDefinitionErrors(current => ({ ...current, [record.record_key]: '' }))
+          setBoundDefinitions(current => current[record.record_key] === item
+            ? current
+            : { ...current, [record.record_key]: item })
+          setDefinitionErrors(current => current[record.record_key] === ''
+            ? current
+            : { ...current, [record.record_key]: '' })
         })
         .catch(() => {
           if (active) setDefinitionErrors(current => ({ ...current, [record.record_key]: '定义版本不可用，当前记录不能安全提交' }))
         })
     })
     return () => { active = false }
-  }, [modules, definitions])
+  }, [recordBindingSignature, definitions])
 
   const addModule = (code: PropertyModuleCode) => {
     if (modules.some(item => item.module_code === code)) return
@@ -170,11 +229,26 @@ const PropertyModuleEditor: React.FC<Props> = ({
     onChange(modules.map((item, index) => index === moduleIndex ? { ...item, records: [...item.records, record] } : item))
   }
 
-  const updateRecord = (moduleIndex: number, recordIndex: number, record: PropertyRecordDraft) => {
-    onChange(modules.map((item, index) => index === moduleIndex
-      ? { ...item, records: item.records.map((current, currentIndex) => currentIndex === recordIndex ? record : current) }
-      : item))
-  }
+  const updateRecordByKey = useCallback((moduleKey: string, recordKey: string, record: PropertyRecordDraft) => {
+    onChangeRef.current(modulesRef.current.map(module => module.module_key !== moduleKey
+      ? module
+      : { ...module, records: module.records.map(current => current.record_key === recordKey ? record : current) }))
+  }, [])
+
+  const cloneRecordByKey = useCallback((moduleKey: string, recordKey: string) => {
+    const currentModule = modulesRef.current.find(module => module.module_key === moduleKey)
+    const currentRecord = currentModule?.records.find(record => record.record_key === recordKey)
+    if (!currentModule || !currentRecord) return
+    onChangeRef.current(modulesRef.current.map(module => module.module_key === moduleKey
+      ? { ...module, records: [...module.records, clonePropertyRecord(currentRecord)] }
+      : module))
+  }, [])
+
+  const deleteRecordByKey = useCallback((moduleKey: string, recordKey: string) => {
+    onChangeRef.current(modulesRef.current.map(module => module.module_key === moduleKey
+      ? { ...module, records: module.records.filter(record => record.record_key !== recordKey) }
+      : module), { deletedRecordKey: recordKey })
+  }, [])
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -192,7 +266,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
         const moduleBasePath = basePath ? `${basePath}.${moduleIndex}` : String(moduleIndex)
         const choices = choicesFor(module.module_code)
         return (
-          <Accordion key={module.module_key} defaultExpanded data-testid={`property-module-${module.module_code}`}>
+          <Accordion key={module.module_key} data-module-key={module.module_key} defaultExpanded data-testid={`property-module-${module.module_code}`}>
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ flex: 1 }}>
               <Typography>{PROPERTY_MODULES.find(item => item.code === module.module_code)?.label || module.module_code}</Typography>
@@ -218,11 +292,15 @@ const PropertyModuleEditor: React.FC<Props> = ({
                   ? choices
                   : [boundDefinitions[record.record_key], ...choices].filter(Boolean)
                 const recordLabel = definitionLabel(record)
-                const summary = [recordLabel, record.name_raw, record.value_raw].filter(Boolean).join(' · ')
+                const summary = [recordLabel, record.name_raw, propertyRecordSummaryValue(record)].filter(Boolean).join(' · ')
                 const recordError = definitionErrors[record.record_key] || recordIssues[0]?.message
                 return (
                   <Accordion key={record.record_key} defaultExpanded sx={{ mb: 1 }}>
-                    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-label={`记录 ${recordIndex + 1} · ${summary}`}>
+                    <AccordionSummary
+                      expandIcon={<ExpandMoreIcon />}
+                      aria-label={`记录 ${recordIndex + 1} · ${summary}`}
+                      data-issue-field={recordIssues[0] ? `${recordBasePath}.${recordIssues[0].field}` : undefined}
+                    >
                       <Box sx={{ minWidth: 0 }}>
                         <Typography sx={{ overflowWrap: 'anywhere' }}>{summary}</Typography>
                         {recordError && <Typography color="error" variant="caption">{recordError}</Typography>}
@@ -233,21 +311,21 @@ const PropertyModuleEditor: React.FC<Props> = ({
                         <Select fullWidth size="small" inputProps={{ 'aria-label': '记录定义' }} value={`${record.definition_key}@${record.definition_version}`}
                           onChange={event => {
                             const definition = allChoices.find(item => definitionIdentity(item) === event.target.value)
-                            if (definition) updateRecord(moduleIndex, recordIndex, recordForDefinition(record, definition))
+                            if (definition) updateRecordByKey(module.module_key, record.record_key, recordForDefinition(record, definition))
                           }} sx={{ mb: 1 }}>
                           {allChoices.map(definition => <MenuItem key={definitionIdentity(definition)} value={definitionIdentity(definition)}>{definitionLabel(definition)}</MenuItem>)}
                         </Select>
                       )}
-                      <SchemaDrivenRecordForm
+                      <PropertyRecordEditor
                         record={record}
                         definition={boundDefinitions[record.record_key] || definitions[record.module_code]?.find(item => definitionIdentity(item) === `${record.definition_key}@${record.definition_version}`)}
                         definitionError={definitionErrors[record.record_key]}
                         issues={recordIssues}
                         basePath={recordBasePath}
                         readOnly={readOnly}
-                        onChange={next => updateRecord(moduleIndex, recordIndex, next)}
-                        onClone={readOnly ? undefined : () => onChange(modules.map((item, index) => index === moduleIndex ? { ...item, records: [...item.records, clonePropertyRecord(record)] } : item))}
-                        onDelete={readOnly ? undefined : () => onChange(modules.map((item, index) => index === moduleIndex ? { ...item, records: item.records.filter((_, currentIndex) => currentIndex !== recordIndex) } : item), { deletedRecordKey: record.record_key })}
+                        onChange={next => updateRecordByKey(module.module_key, record.record_key, next)}
+                        onClone={readOnly ? undefined : () => cloneRecordByKey(module.module_key, record.record_key)}
+                        onDelete={readOnly ? undefined : () => deleteRecordByKey(module.module_key, record.record_key)}
                       />
                     </AccordionDetails>
                   </Accordion>

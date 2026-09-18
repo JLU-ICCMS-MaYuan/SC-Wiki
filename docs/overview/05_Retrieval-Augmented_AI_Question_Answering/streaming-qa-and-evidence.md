@@ -7,9 +7,13 @@
 ## 当前行为
 
 - `/api/rag/chat/stream` 使用 `text/event-stream` 返回流式事件。
+- 普通 `/chat` 与 `/chat/stream` 共用 Mentor 工具调用路径；仅显式 `explore=true` 进入灵感探索。`done` 事件携带最终答案，即使模型没有输出增量 token 也可获取完整结果。
+- 物性工具的同步和异步调用共用 `search_property_records`；提供材料筛选并保留每条记录的条件、方法及论文版本。旧 `core/engine.py` 问答入口同样读取统一记录，不再按化学式只保留最高 Tc。
 - 问答引擎先检索上下文，再调用 OpenAI 兼容的 LLM 接口生成回答。
 - 事件包含回答增量、引文、证据、Top 结果及灵感模式相关数据。
 - React hook `useStreamingChat` 消费 SSE，并在浏览器本地保存多个会话、证据、想法和评审元数据。
+
+- 发布到向量库的正式科学来源携带 source_kind、来源身份、论文 revision 与归因说明；问答和灵感引用保留这些字段。提供者结构明确显示实际提交者和“论文未明确支持”，不能写成论文报告的结论；派生值注明计算规则。React 会话保存并展示来源限定。
 
 ## 工作流程
 
@@ -26,14 +30,20 @@
 - `backend/api/rag.py`
 - `backend/rag/service.py`
 - `backend/rag/core/engine.py`
+- `backend/rag/agent/mentor.py`
+- `backend/rag/agent/tools.py`
 - `frontend/src/pages/RagPage.tsx`
 - `frontend/src/lib/useStreamingChat.ts`
 - `tests/05_rag_question_answering/`
 
 ## 相关变更记录
 
-当前未发现可链接的已完成 Feature 或 Debug 记录。
+- [Issue #107：修复 RAG 多入口读取与普通问答路径](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/107)。
 
 ## 已知问题
 
 - 外部 LLM 的可用性、费用和响应稳定性不由本项目保证。
+
+语义检索的正式科学来源支持 human_review：保存管理员身份、理由与版本，引用和上下文明确标注人工判断及论文未直接支持，不表述为论文报告或 AI 已验证；融合提示逐个保留来源片段及各自归因。
+
+采用论文推断或通用知识推测后，正式来源同时保留 `adopted_basis` 与管理员人工理由。发布及检索上下文明确标注“根据论文推断”或“通用知识推测”，人工批准和 AI 认可不会把它改成论文直接报告。空可选字段与未采用的无当前值建议不发布为科学结论。参见 [#109](../../specs/109-field-evidence-and-ai-suggestions/spec.md)。

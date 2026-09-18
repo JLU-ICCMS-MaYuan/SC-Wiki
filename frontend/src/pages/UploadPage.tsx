@@ -16,6 +16,7 @@ import UploadTaskCenter from '../components/UploadTaskCenter'
 import MultiFileUploadPanel from '../components/MultiFileUploadPanel'
 import UploadParsingDetail from '../components/UploadParsingDetail'
 import { api } from '../lib/api'
+import { buildLlmHeaders } from '../lib/llmProvider'
 import {
   PROCESSING_STAGES, UploadAcceptedResponse, UploadTaskState, unwrapData,
 } from '../lib/paperProcessing'
@@ -100,7 +101,8 @@ const UploadPage: React.FC = () => {
     setActiveTaskId(task.task_id)
     setTaskState(task)
     if (taskStorageKey) localStorage.setItem(taskStorageKey, task.task_id)
-    void api.post(`/api/upload-tasks/${task.task_id}/activity`)
+    // 任务可能已在其他页面提交；状态查询负责恢复入口，活动上报失败不能变成未处理异常。
+    void api.post(`/api/upload-tasks/${task.task_id}/activity`).catch(() => undefined)
   }
 
   useEffect(() => {
@@ -128,10 +130,17 @@ const UploadPage: React.FC = () => {
         if (state.processing_status === 'processing') timer = window.setTimeout(poll, 2000)
       } catch (reason: any) {
         if (stopped || reason.name === 'AbortError') return
+        if (reason.code === 'UPLOAD_TASK_SUBMITTED' && Number.isSafeInteger(reason.submittedPaperId) && reason.submittedPaperId > 0) {
+          setTaskCenterTick(value => value + 1)
+          openExistingPaper(reason.submittedPaperId)
+          return
+        }
         if (reason.status === 401 || reason.status === 403 || reason.status === 404) {
           localStorage.removeItem(taskStorageKey)
           setActiveTaskId(null)
           setTaskState(null)
+          setTaskCenterTick(value => value + 1)
+          setError(reason.status === 404 ? t('upload.taskUnavailable') : (reason.message || t('upload.progressQueryFailed')))
         } else {
           setError(reason.message || t('upload.progressQueryFailed'))
           timer = window.setTimeout(poll, 2000)
@@ -223,6 +232,7 @@ const UploadPage: React.FC = () => {
     uploadXhr.current = xhr
     xhr.open('POST', url)
     if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`)
+    Object.entries(buildLlmHeaders()).forEach(([key, value]) => xhr.setRequestHeader(key, value))
 
     xhr.upload.onprogress = (e) => {
       if (e.lengthComputable) {
@@ -311,6 +321,7 @@ const UploadPage: React.FC = () => {
       setTaskState(current => current ? {
         ...current, stage: 'ready', stage_index: 5, processing_status: 'succeeded', processing_error: null,
       } : current)
+      setTaskPollTick(value => value + 1)
       setSnackbar(t('upload.manualDraftOpened'))
     } catch (reason: any) {
       setError(reason.message || t('upload.manualDraftFailed'))
@@ -419,7 +430,7 @@ const UploadPage: React.FC = () => {
               <Card variant="outlined" sx={{ overflow: 'visible' }}>
                 <CardContent>
                   <Box role="region" aria-label={t('upload.taskActionsAria')} sx={{
-                    position: 'sticky', top: '80px', zIndex: theme => theme.zIndex.appBar - 1,
+                    position: 'sticky', top: '8px', zIndex: theme => theme.zIndex.appBar - 1,
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2,
                     mx: -2, mt: -2, mb: 2, px: 2, py: 1.5,
                     bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider',
@@ -510,7 +521,7 @@ const UploadPage: React.FC = () => {
                       {taskState.duplicate_reason || t('upload.duplicateExisting')}
                     </Alert>
                   )}
-                  {activeTaskId && <UploadParsingDetail taskId={activeTaskId} onSubmitted={handleTaskSubmitted} />}
+                  {activeTaskId && <UploadParsingDetail key={`${activeTaskId}:${taskPollTick}`} taskId={activeTaskId} onSubmitted={handleTaskSubmitted} />}
                 </CardContent>
               </Card>
             </Box>

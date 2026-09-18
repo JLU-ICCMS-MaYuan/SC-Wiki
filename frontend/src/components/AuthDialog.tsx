@@ -42,6 +42,7 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
   // verify
   const [verifyCode, setVerifyCode] = useState('')
   const [resendSeconds, setResendSeconds] = useState(60)
+  const [codeSent, setCodeSent] = useState(false)
 
   // shared
   const [step, setStep] = useState<Step>('form')
@@ -55,6 +56,8 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
     setLoginEmail(''); setLoginPassword(''); setShowLoginPw(false)
     setRegEmail(''); setRegPassword(''); setRegUsername(''); setRegRealName(''); setShowRegPw(false)
     setVerifyCode('')
+    setCodeSent(false)
+    setResendSeconds(0)
     setError('')
     setDoneMessage('')
   }
@@ -95,6 +98,14 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
         handleClose()
       }
     } catch (e: unknown) {
+      if ((e as { code?: string }).code === 'email_not_verified') {
+        setRegEmail(loginEmail)
+        setRegPassword(loginPassword)
+        setVerifyCode('')
+        setCodeSent(false)
+        setResendSeconds(0)
+        setStep('verify')
+      }
       setError(errorText(e) || t('account.loginFailed'))
     } finally {
       setLoading(false)
@@ -110,7 +121,8 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
     try {
       const result = await register(regEmail, regPassword, regUsername, regRealName)
       if (result.requiresEmailVerification) {
-        setResendSeconds(60)
+        setResendSeconds(result.resendAfterSeconds ?? 60)
+        setCodeSent(true)
         setStep('verify')
       } else {
         await login(regEmail, regPassword)
@@ -118,6 +130,12 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
         navigate('/account')
       }
     } catch (e: unknown) {
+      const failure = e as { requiresEmailVerification?: boolean; resendAfterSeconds?: number }
+      if (failure.requiresEmailVerification) {
+        setCodeSent(false)
+        setResendSeconds(failure.resendAfterSeconds ?? 60)
+        setStep('verify')
+      }
       setError(errorText(e) || t('account.registerFailed'))
     } finally {
       setLoading(false)
@@ -126,7 +144,7 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
 
   const handleVerify = async () => {
     setError('')
-    if (!verifyCode) { setError(t('account.enterCode')); return }
+    if (!/^\d{6}$/.test(verifyCode)) { setError(t('account.enterCode')); return }
     setLoading(true)
     try {
       await verifyEmail(regEmail, verifyCode)
@@ -145,6 +163,7 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
   const loginForm = (
     <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}
          onSubmit={e => { e.preventDefault(); handleLogin() }}>
+      <fieldset disabled={loading} style={{ border: 0, padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
       <TextField
         label={t('account.email')} type="email" autoFocus fullWidth size="small"
         value={loginEmail} onChange={e => setLoginEmail(e.target.value)}
@@ -169,12 +188,14 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
       >
         {t('nav.login')}
       </Button>
+      </fieldset>
     </Box>
   )
 
   const registerForm = (
     <Box component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}
          onSubmit={e => { e.preventDefault(); handleRegister() }}>
+      <fieldset disabled={loading} style={{ border: 0, padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 16 }}>
       <UsernameField value={regUsername} onChange={setRegUsername} autoFocus />
       <TextField
         label={t('account.realNameOptional')} fullWidth size="small"
@@ -205,18 +226,19 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
       >
         {t('account.register')}
       </Button>
+      </fieldset>
     </Box>
   )
 
   const verifyStep = (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1, alignItems: 'center' }}>
       <Alert severity="info" sx={{ width: '100%' }}>
-        {t('account.codeSentBefore')} <strong>{regEmail}</strong>{t('account.codeSentAfter')}
+        {codeSent ? t('account.codeSentBefore') : t('account.continueVerificationBefore')} <strong>{regEmail}</strong>{codeSent ? t('account.codeSentAfter') : t('account.continueVerificationAfter')}
       </Alert>
       <TextField
-        label={t('account.codeLabel')} autoFocus fullWidth size="small"
+        disabled={loading} label={t('account.codeLabel')} autoFocus fullWidth size="small"
         value={verifyCode} onChange={e => setVerifyCode(e.target.value)}
-        inputProps={{ maxLength: 6 }}
+        inputProps={{ maxLength: 6, inputMode: 'numeric', autoComplete: 'one-time-code' }}
         sx={{ maxWidth: 220 }}
       />
       {error && <Alert severity="error" sx={{ py: 0, width: '100%' }}>{error}</Alert>}
@@ -234,9 +256,11 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
           setError('')
           setLoading(true)
           try {
-            await resendVerification(regEmail)
-            setResendSeconds(60)
+            const seconds = await resendVerification(regEmail, regPassword)
+            setResendSeconds(seconds)
+            setCodeSent(true)
           } catch (e: unknown) {
+            setResendSeconds((e as { resendAfterSeconds?: number }).resendAfterSeconds ?? 0)
             setError(errorText(e) || t('account.resendFailed'))
           } finally {
             setLoading(false)
@@ -259,12 +283,12 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
 
   // ═══════════════════════════════════════════════════
   return (
-    <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+    <Dialog open={open} onClose={() => { if (!loading) handleClose() }} maxWidth="xs" fullWidth>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', pb: 0, fontSize: '1.25rem', fontWeight: 600 }}>
         <Box component="span">
           {step === 'verify' ? t('account.verifyEmailTitle') : step === 'done' ? t('account.done') : t('account.authTitle')}
         </Box>
-        <IconButton size="small" onClick={handleClose}><Close fontSize="small" /></IconButton>
+        <IconButton size="small" disabled={loading} onClick={handleClose}><Close fontSize="small" /></IconButton>
       </DialogTitle>
 
       <DialogContent>
@@ -272,8 +296,8 @@ const AuthDialog: React.FC<Props> = ({ open, onClose }) => {
           <>
             <Tabs value={tab} onChange={(_, v) => { setTab(v); setError('') }}
                   variant="fullWidth" sx={{ mb: 1 }}>
-              <Tab label={t('nav.login')} />
-              <Tab label={t('account.register')} />
+              <Tab disabled={loading} label={t('nav.login')} />
+              <Tab disabled={loading} label={t('account.register')} />
             </Tabs>
             {tab === 0 ? loginForm : registerForm}
           </>

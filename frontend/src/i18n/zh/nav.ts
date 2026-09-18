@@ -1,4 +1,4 @@
-// 顶栏与侧边导航文案。
+// 全局侧栏与导航文案。
 export default {
   // 侧边导航项。文案短，与 NAV_ITEMS 的 path 一一对应。
   news: '热点',
@@ -9,7 +9,9 @@ export default {
   rag: '对话',
   tcPredict: '预测',
 
-  // 顶栏
+  // 全局侧栏
+  collapseSidebar: '收起侧栏',
+  expandSidebar: '展开侧栏',
   accountMenu: '打开账户菜单',
   logout: '退出登录',
   login: '登录',
@@ -28,6 +30,7 @@ export default {
   langZhShort: 'CH',
   langEnShort: 'EN',
 
+  llmSwitch: '切换模型',
   llmDefault: '默认模型',
   llmServerDefault: '服务端默认',
   llmCurrentServer: '当前服务端默认：{provider} · {model}',

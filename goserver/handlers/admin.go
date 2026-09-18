@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"scwiki/server/cache"
 	"scwiki/server/database"
@@ -33,7 +34,7 @@ var (
 		reviewStatusPending: {}, reviewStatusApproved: {}, reviewStatusRejected: {},
 	}
 	paperUpdateFields = []string{
-		"doi", "title", "authors", "journal", "volume", "pages", "year", "abstract",
+		"doi", "title", "authors", "journal", "issue_number", "volume", "pages", "year", "abstract",
 		"summary", "paper_type", "theoretical_subtype", "keywords_tags",
 		"superconductor_kind",
 		"methodology", "key_finding", "research_motivation", "research_materials",
@@ -71,14 +72,14 @@ func GetPapers(c *gin.Context) {
 		like := "%" + material + "%"
 		query = query.Where(`EXISTS (
 			SELECT 1 FROM material_states ms
-			JOIN superconductors sc
+			LEFT JOIN superconductors sc
 			  ON sc.id = ms.superconductor_id
 			 AND sc.paper_id = ms.paper_id
 			 AND sc.paper_revision = ms.paper_revision
 			WHERE ms.paper_id = papers.id
 			  AND ms.paper_revision = papers.content_revision
-			  AND (sc.chemical_formula LIKE ? OR sc.formula_normalized LIKE ? OR sc.display_name LIKE ?)
-		)`, like, like, like)
+			  AND (sc.chemical_formula LIKE ? OR sc.formula_normalized LIKE ? OR sc.display_name LIKE ? OR ms.material_name LIKE ?)
+		)`, like, like, like, like)
 	}
 	if yearMin != "" {
 		query = query.Where("year >= ?", yearMin)
@@ -169,6 +170,13 @@ func UpdatePaper(c *gin.Context) {
 
 	// 审核状态只能通过 ReviewPaper 修改，避免普通编辑绕过审核动作。
 	updates := paperUpdatesFromBody(body)
+	if value, exists := updates["issue_number"]; exists && value != nil {
+		issueNumber, ok := value.(string)
+		if !ok || utf8.RuneCountInString(issueNumber) > 100 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "期号必须是最长 100 字符的文本", "code": "invalid_issue_number"})
+			return
+		}
+	}
 	historyOperationID, historyOperationProvided := body["history_operation_id"]
 	historyOperation := ""
 	if historyOperationProvided {
@@ -208,8 +216,13 @@ func UpdatePaper(c *gin.Context) {
 
 	var paper models.Paper
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
-		if err := tx.First(&paper, id).Error; err != nil {
+		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&paper, id).Error; err != nil {
 			return err
+		}
+		if preparation, ok := body["evidence_preparation_id"].(string); ok && preparation != "" {
+			if err := validatePaperProposalSave(paper.ID, c.GetHeader("Authorization"), preparation); err != nil {
+				return err
+			}
 		}
 		paperChanged := paperUpdatesChanged(paper, updates)
 		if len(updates) > 0 {
@@ -239,6 +252,11 @@ func UpdatePaper(c *gin.Context) {
 		return
 	}
 	if err != nil {
+		var evidenceErr *evidencePrepareError
+		if errors.As(err, &evidenceErr) {
+			c.JSON(evidenceErr.Status, gin.H{"detail": evidenceErr.Detail})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存论文失败"})
 		return
 	}
@@ -322,14 +340,17 @@ func applyPaperReview(tx *gorm.DB, paper *models.Paper, reviewer *models.User, s
 func ReviewPaper(c *gin.Context) {
 	id := c.Param("id")
 	var body struct {
-		Status                string                         `json:"status"`
-		Comment               string                         `json:"comment"`
-		ReviewRequestID       string                         `json:"review_request_id"`
-		AdminInternalNote     *string                        `json:"admin_internal_note"`
-		SuperconductorKind    string                         `json:"superconductor_kind"`
-		MaterialFamilies      []classificationSelection      `json:"material_families"`
-		MaterialStates        []materialClassificationUpdate `json:"material_states"`
-		ClassificationContext json.RawMessage                `json:"classification_context"`
+		Status                  string                         `json:"status"`
+		Comment                 string                         `json:"comment"`
+		ReviewRequestID         string                         `json:"review_request_id"`
+		AdminInternalNote       *string                        `json:"admin_internal_note"`
+		SuperconductorKind      string                         `json:"superconductor_kind"`
+		MaterialFamilies        []classificationSelection      `json:"material_families"`
+		MaterialStates          []materialClassificationUpdate `json:"material_states"`
+		ClassificationContext   json.RawMessage                `json:"classification_context"`
+		EvidenceJobID           string                         `json:"evidence_job_id"`
+		ExpectedEvidenceVersion string                         `json:"expected_evidence_version"`
+		EvidenceResolutions     map[string]string              `json:"evidence_resolutions"`
 	}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		if errors.Is(err, errLegacyClassificationContract) {
@@ -395,6 +416,13 @@ func ReviewPaper(c *gin.Context) {
 		}
 		var classificationSnapshot json.RawMessage
 		if body.Status == reviewStatusApproved {
+			evidenceRecords, err := preparePaperEvidence(tx, &paper, c.GetHeader("Authorization"), body.EvidenceJobID, body.ExpectedEvidenceVersion, body.EvidenceResolutions, map[string]interface{}{"superconductor_kind": body.SuperconductorKind, "material_families": body.MaterialFamilies, "material_states": body.MaterialStates})
+			if err != nil {
+				return err
+			}
+			if err := applyPaperEvidence(tx, &paper, evidenceRecords); err != nil {
+				return err
+			}
 			snapshot, err := applyPaperClassifications(
 				tx, &paper, user.ID, body.SuperconductorKind, body.MaterialFamilies, body.MaterialStates,
 			)
@@ -404,7 +432,7 @@ func ReviewPaper(c *gin.Context) {
 			if err := validatePaperClassificationComplete(tx, &paper); err != nil {
 				return err
 			}
-			if err := validatePaperEvidenceComplete(tx, &paper); err != nil {
+			if err := validatePaperEvidenceComplete(tx, &paper, evidenceRecords); err != nil {
 				return err
 			}
 			context := body.ClassificationContext
@@ -412,11 +440,13 @@ func ReviewPaper(c *gin.Context) {
 				context = json.RawMessage(`{}`)
 			}
 			classificationSnapshot, err = json.Marshal(struct {
+				EvidenceReview     []evidenceReviewRecord        `json:"evidence_review"`
 				Context            json.RawMessage               `json:"context"`
 				SuperconductorKind string                        `json:"superconductor_kind"`
 				MaterialFamilies   []classificationSnapshotTerm  `json:"material_families"`
 				MaterialStates     []classificationSnapshotState `json:"material_states"`
 			}{
+				EvidenceReview:     evidenceRecords,
 				Context:            context,
 				SuperconductorKind: snapshot.SuperconductorKind,
 				MaterialFamilies:   snapshot.MaterialFamilies,
@@ -435,6 +465,11 @@ func ReviewPaper(c *gin.Context) {
 		}
 		return nil
 	}); err != nil {
+		var evidenceErr *evidencePrepareError
+		if errors.As(err, &evidenceErr) {
+			c.JSON(evidenceErr.Status, gin.H{"detail": evidenceErr.Detail})
+			return
+		}
 		var incomplete *classificationIncompleteError
 		if errors.As(err, &incomplete) {
 			c.JSON(http.StatusConflict, gin.H{
@@ -515,13 +550,25 @@ func (err *evidenceIncompleteError) Error() string {
 	return "物性记录缺少可解析 Evidence"
 }
 
-func validatePaperEvidenceComplete(tx *gorm.DB, paper *models.Paper) error {
+func validatePaperEvidenceComplete(tx *gorm.DB, paper *models.Paper, prepared ...[]evidenceReviewRecord) error {
 	revision := paper.ContentRevision
 	if revision == 0 {
 		revision = 1
 	}
 	var missing []string
-	err := tx.Model(&models.PropertyRecord{}).
+	query := tx.Model(&models.PropertyRecord{})
+	var humanRecords []uint
+	for _, records := range prepared {
+		for _, record := range records {
+			if record.RecordID != 0 && validHumanEvidence(record) {
+				humanRecords = append(humanRecords, record.RecordID)
+			}
+		}
+	}
+	if len(humanRecords) > 0 {
+		query = query.Where("property_records.id NOT IN ?", humanRecords)
+	}
+	err := query.
 		Where("property_records.paper_id = ? AND property_records.paper_revision = ?", paper.ID, revision).
 		Where(`NOT EXISTS (
 			SELECT 1
@@ -696,8 +743,12 @@ func GetMyUploads(c *gin.Context) {
 		Limit(limit).Offset(offset).
 		Find(&papers)
 
+	items := make([]gin.H, 0, len(papers))
+	for _, paper := range papers {
+		items = append(items, paperForViewer(paper, &user))
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"items":     papers,
+		"items":     items,
 		"total":     total,
 		"page_size": limit,
 	})

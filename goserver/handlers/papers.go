@@ -144,7 +144,8 @@ func paperForViewer(paper models.Paper, user *models.User) gin.H {
 		result["uploaded_by_user_id"] = paper.UploadedBy
 		result["reviewed_by_user_id"] = paper.ReviewedBy
 	}
-	result["can_edit"] = paperOwner(&paper, user) || paperAdmin(user)
+	result["can_edit"] = (paperOwner(&paper, user) && paper.ReviewStatus != reviewStatusRejected) || paperAdmin(user)
+	result["can_revise"] = paperOwner(&paper, user) && paper.ReviewStatus == reviewStatusRejected
 	return result
 }
 
@@ -197,6 +198,10 @@ func PatchPaper(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "无权修改该论文"})
 		return
 	}
+	if !paperAdmin(user) && paper.ReviewStatus == reviewStatusRejected {
+		c.JSON(http.StatusConflict, gin.H{"code": "revision_required", "error": "请通过返修草稿修改已拒绝论文，再重新提交审核"})
+		return
+	}
 	var body map[string]interface{}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "参数错误"})
@@ -207,9 +212,21 @@ func PatchPaper(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "没有可修改字段"})
 		return
 	}
-	if err := database.DB.Model(&paper).Updates(updates).Error; err != nil {
+	query := database.DB.Model(&paper)
+	if !paperAdmin(user) {
+		query = query.Where("review_status <> ?", reviewStatusRejected)
+	}
+	result := query.Updates(updates)
+	if err := result.Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存失败"})
 		return
+	}
+	if result.RowsAffected == 0 && !paperAdmin(user) {
+		database.DB.First(&paper, paper.ID)
+		if paper.ReviewStatus == reviewStatusRejected {
+			c.JSON(http.StatusConflict, gin.H{"code": "revision_required", "error": "论文已被拒绝，请通过返修草稿修改"})
+			return
+		}
 	}
 	database.DB.First(&paper, paper.ID)
 	c.JSON(http.StatusOK, paperForViewer(paper, user))
@@ -258,8 +275,8 @@ func SearchRecords(c *gin.Context) {
 
 	// 元素匹配 → 查 superconductors 表
 	scIDs := getSuperconductorIDs(body.Elements, body.Mode, body.Formula)
-	if len(scIDs) == 0 && len(body.Elements) > 0 {
-		// 有元素查询但无匹配 → 返回空
+	if len(scIDs) == 0 && (len(body.Elements) > 0 || (body.Mode == "formula_search" && strings.TrimSpace(body.Formula) != "")) {
+		// 有元素或化学式查询但无匹配 → 返回空
 		c.JSON(http.StatusOK, gin.H{"items": []interface{}{}, "total": 0})
 		return
 	}
@@ -274,8 +291,8 @@ func SearchRecords(c *gin.Context) {
 	if body.Keyword != "" {
 		like := "%" + body.Keyword + "%"
 		query = query.Where(
-			"(papers.title LIKE ? OR papers.doi LIKE ? OR papers.journal LIKE ? OR superconductors.chemical_formula LIKE ?)",
-			like, like, like, like,
+			"(papers.title LIKE ? OR papers.doi LIKE ? OR papers.journal LIKE ? OR superconductors.chemical_formula LIKE ? OR material_states.material_name LIKE ?)",
+			like, like, like, like, like,
 		)
 	}
 	if body.YearMin != nil {
@@ -344,12 +361,13 @@ func approvedRecordSearchQuery(db *gorm.DB) *gorm.DB {
 			material_states.pressure_value_gpa AS pressure_value_gpa,
 			material_states.reported_space_group_symbol AS reported_space_group_symbol,
 			material_states.state_kind AS state_kind,
+			material_states.material_name AS material_name,
 			superconductors.chemical_formula AS chemical_formula,
 			papers.id AS paper_id, papers.year AS year, papers.review_status AS review_status,
 			papers.doi AS doi`).
 		Joins("JOIN property_modules ON property_modules.id = property_records.module_id").
 		Joins("JOIN material_states ON material_states.id = property_records.material_state_id").
-		Joins("JOIN superconductors ON superconductors.id = material_states.superconductor_id").
+		Joins("LEFT JOIN superconductors ON superconductors.id = material_states.superconductor_id").
 		Joins("JOIN papers ON papers.id = property_records.paper_id AND papers.content_revision = property_records.paper_revision").
 		Where("property_records.property_code = ?", "tc").
 		Where("property_records.record_type IN ?", []string{"predicted_tc", "measured_tc"}).
@@ -533,6 +551,7 @@ func paperToDict(p models.Paper) gin.H {
 		"title":                 p.Title,
 		"authors":               p.Authors,
 		"journal":               p.Journal,
+		"issue_number":          p.IssueNumber,
 		"volume":                p.Volume,
 		"pages":                 p.Pages,
 		"year":                  p.Year,
@@ -578,6 +597,10 @@ func materialFamiliesToDict(links []models.PaperMaterialFamily) []gin.H {
 func materialStatesToDict(states []models.MaterialState) []gin.H {
 	result := make([]gin.H, 0, len(states))
 	for _, state := range states {
+		material := ""
+		if state.Superconductor.ID != 0 {
+			material = state.Superconductor.ChemicalFormula
+		}
 		structures := make([]gin.H, 0, len(state.StructureFamilyLinks))
 		for _, link := range state.StructureFamilyLinks {
 			structures = append(structures, gin.H{
@@ -587,7 +610,8 @@ func materialStatesToDict(states []models.MaterialState) []gin.H {
 			})
 		}
 		result = append(result, gin.H{
-			"id": state.ID, "material": state.Superconductor.ChemicalFormula,
+			"id": state.ID, "state_key": state.StateKey, "material": material, "material_name": state.MaterialName,
+			"system_key":         state.Superconductor.ChemicalSystem.SystemKey,
 			"structure_families": structures,
 			"element_count":      state.ElementCount, "material_dimensionality": state.MaterialDimensionality,
 			"crystal_system": state.CrystalSystem,
@@ -658,252 +682,6 @@ func structureModelsToDict(structures []models.StructureModel) []gin.H {
 	return output
 }
 
-// SearchAll 跨源聚合搜索（替代 Python POST /api/papers/search/all）
-func SearchAll(c *gin.Context) {
-	var body struct {
-		Elements []string `json:"elements"`
-		Mode     string   `json:"mode"`
-		Limit    int      `json:"limit"`
-		Offset   int      `json:"offset"`
-	}
-	if err := c.ShouldBindJSON(&body); err != nil || len(body.Elements) == 0 {
-		c.JSON(http.StatusOK, gin.H{"items": []any{}, "total": 0})
-		return
-	}
-	if body.Limit <= 0 {
-		body.Limit = 30
-	}
-
-	// 1. Local
-	items := searchLocalAll(body.Elements, body.Mode)
-	// 2. Alexandria
-	items = append(items, searchAlexandriaAll(body.Elements, body.Mode)...)
-	// 3. HTSC
-	items = append(items, searchHTSCAll(body.Elements, body.Mode)...)
-
-	// 4. 按 compound 分组
-	type compoundGroup struct {
-		key   string
-		items []gin.H
-	}
-	groups := make(map[string]*compoundGroup)
-	var order []string
-	for _, item := range items {
-		key := ""
-		if src, _ := item["_source"].(string); src == "local" {
-			if f, ok := item["compound_symbols"].(string); ok && f != "" {
-				key = f
-			}
-		}
-		if key == "" {
-			src, _ := item["_source"].(string)
-			if src == "" {
-				src = "unknown"
-			}
-			f := ""
-			switch v := item["formula"].(type) {
-			case string:
-				f = v
-			case *string:
-				if v != nil {
-					f = *v
-				}
-			}
-			key = f + "-" + src
-		}
-		if groups[key] == nil {
-			groups[key] = &compoundGroup{key: key}
-			order = append(order, key)
-		}
-		groups[key].items = append(groups[key].items, item)
-	}
-
-	// 5. 组内按 Tc 降序
-	for _, g := range groups {
-		sort.Slice(g.items, func(i, j int) bool {
-			return tcFromItem(g.items[i]) > tcFromItem(g.items[j])
-		})
-	}
-
-	// 6. 组间：本地优先，然后按 Tc 降序
-	sort.SliceStable(order, func(i, j int) bool {
-		a, b := groups[order[i]], groups[order[j]]
-		aLocal := countLocal(a.items)
-		bLocal := countLocal(b.items)
-		if aLocal != bLocal {
-			return aLocal > bLocal
-		}
-		return tcFromItem(a.items[0]) > tcFromItem(b.items[0])
-	})
-
-	// 7. 展平
-	type itemWithType struct {
-		Type string `json:"_type,omitempty"`
-		gin.H
-	}
-	flat := make([]any, 0)
-	for _, key := range order {
-		g := groups[key]
-		flat = append(flat, gin.H{"_type": "section", "key": key, "count": len(g.items)})
-		for _, item := range g.items {
-			flat = append(flat, item)
-		}
-	}
-
-	start := body.Offset
-	if start > len(flat) {
-		start = len(flat)
-	}
-	end := start + body.Limit
-	if end > len(flat) {
-		end = len(flat)
-	}
-
-	total := 0
-	for _, it := range flat {
-		if m, ok := it.(gin.H); !ok || m["_type"] == nil {
-			total++
-		}
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"items":       flat[start:end],
-		"total":       total,
-		"total_pages": (total + body.Limit - 1) / max(body.Limit, 1),
-	})
-}
-
-func searchLocalAll(elements []string, mode string) []gin.H {
-	scIDs := getSuperconductorIDs(elements, mode, "")
-	if len(scIDs) == 0 {
-		return nil
-	}
-
-	// 材料归属在 material_states.superconductor_id；key_properties 表已不存在。
-	var papers []models.Paper
-	targetPaperGraphQuery(database.DB).
-		Where("review_status = ?", reviewStatusApproved).
-		Where("id IN (SELECT DISTINCT paper_id FROM material_states WHERE superconductor_id IN ?)", scIDs).
-		Find(&papers)
-
-	result := make([]gin.H, 0)
-	for _, p := range papers {
-		d := paperToDict(p)
-		d["_source"] = "local"
-		d["compound_symbols"] = ""
-		// 化学式取自材料状态关联的超导体，物性的 material_raw 只作回退。
-		for _, state := range p.MaterialStates {
-			if state.Superconductor.ChemicalFormula != "" {
-				d["compound_symbols"] = state.Superconductor.ChemicalFormula
-				break
-			}
-		}
-		result = append(result, d)
-	}
-	return result
-}
-
-func searchAlexandriaAll(elements []string, mode string) []gin.H {
-	entryIDs := alexEntryIDs(elements, mode)
-	if len(entryIDs) == 0 {
-		return nil
-	}
-
-	var entries []models.AlexandriaEntry
-	database.DB.Where("id IN ? AND imag = ?", entryIDs, false).
-		Where("(tc_max IS NOT NULL OR tc_allen_dynes IS NOT NULL)").Find(&entries)
-
-	result := make([]gin.H, 0)
-	for _, e := range entries {
-		tc := e.TcMax
-		if tc == nil {
-			tc = e.TcAllenDynes
-		}
-		elems := parseElementsList(*e.Elements)
-		elemSlice := make([]string, 0, len(elems))
-		for k := range elems {
-			elemSlice = append(elemSlice, k)
-		}
-		sort.Strings(elemSlice)
-
-		result = append(result, gin.H{
-			"_source":        "alexandria",
-			"mat_id":         e.MatID,
-			"formula":        e.Formula,
-			"elements":       elemSlice,
-			"tc_max":         e.TcMax,
-			"tc_allen_dynes": e.TcAllenDynes,
-			"spg":            e.SPG,
-		})
-	}
-	return result
-}
-
-func searchHTSCAll(elements []string, mode string) []gin.H {
-	var mats []models.HTSCMaterial
-	database.DB.Where("tc IS NOT NULL").Find(&mats)
-
-	selected := stringSet(elements)
-	result := make([]gin.H, 0)
-	for _, m := range mats {
-		matElems := parseElementsList(m.Elements)
-		if len(matElems) == 0 || !matchesElements(matElems, selected, mode) {
-			continue
-		}
-
-		elemSlice := make([]string, 0, len(matElems))
-		for k := range matElems {
-			elemSlice = append(elemSlice, k)
-		}
-		sort.Strings(elemSlice)
-
-		result = append(result, gin.H{
-			"_source":    "htsc2025",
-			"formula":    m.Formula,
-			"name":       m.Name,
-			"tc":         m.Tc,
-			"elements":   elemSlice,
-			"class_name": m.ClassName,
-		})
-	}
-	return result
-}
-
-func tcFromItem(item gin.H) float64 {
-	if src, _ := item["_source"].(string); src == "htsc2025" {
-		if v, ok := item["tc"].(float64); ok {
-			return v
-		}
-	}
-	if v, ok := item["tc_allen_dynes"].(*float64); ok && v != nil {
-		return *v
-	}
-	if v, ok := item["tc_max"].(*float64); ok && v != nil {
-		return *v
-	}
-	if v, ok := item["tc_max"].(float64); ok {
-		return v
-	}
-	return 0
-}
-
-func countLocal(items []gin.H) int {
-	n := 0
-	for _, it := range items {
-		if src, _ := it["_source"].(string); src == "local" {
-			n++
-		}
-	}
-	return n
-}
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
-
 // recordSearchRow 承接统一 Tc 记录及其所属状态和论文的公开搜索投影。
 type recordSearchRow struct {
 	RecordKey                string   `gorm:"column:record_key"`
@@ -919,6 +697,7 @@ type recordSearchRow struct {
 	ReportedSpaceGroupSymbol *string  `gorm:"column:reported_space_group_symbol"`
 	StateKind                string   `gorm:"column:state_kind"`
 	ChemicalFormula          string   `gorm:"column:chemical_formula"`
+	MaterialName             *string  `gorm:"column:material_name"`
 	PaperID                  uint     `gorm:"column:paper_id"`
 	Year                     *int     `gorm:"column:year"`
 	ReviewStatus             string   `gorm:"column:review_status"`
@@ -958,17 +737,18 @@ func flatRecordToDict(row recordSearchRow) gin.H {
 	}
 
 	return gin.H{
-		"record_id":   row.RecordKey,
-		"record_key":  row.RecordKey,
-		"paper_id":    row.PaperID,
-		"year":        year,
-		"formula":     row.ChemicalFormula,
-		"type":        row.StateKind,
-		"pressure":    pressure,
-		"tc":          tc,
-		"space_group": spaceGroup,
-		"source":      "Local",
-		"status":      status,
-		"doi":         row.DOI,
+		"record_id":     row.RecordKey,
+		"record_key":    row.RecordKey,
+		"paper_id":      row.PaperID,
+		"year":          year,
+		"formula":       row.ChemicalFormula,
+		"material_name": row.MaterialName,
+		"type":          row.StateKind,
+		"pressure":      pressure,
+		"tc":            tc,
+		"space_group":   spaceGroup,
+		"source":        "Local",
+		"status":        status,
+		"doi":           row.DOI,
 	}
 }

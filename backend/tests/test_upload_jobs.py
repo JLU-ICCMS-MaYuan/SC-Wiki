@@ -320,13 +320,13 @@ def test_submission_rejects_unknown_paper_type_but_accepts_pending_material_fami
             "title": "Example",
             "year": 2024,
             "paper_type": "experimental",
-            "research_materials": ["Example2H3"],
+            "research_materials": ["LaH10"],
             "material_families": [
                 {"id": None, "name": "new_family", "status": "pending"}
             ],
         },
         "material_states": [{
-            "material": "Example2H3",
+            "material": "LaH10",
             "tc_results": [{"tc_value_k": 42, "result_kind": "experimental"}],
         }],
     })
@@ -335,6 +335,7 @@ def test_submission_rejects_unknown_paper_type_but_accepts_pending_material_fami
     with pytest.raises(Exception) as exc_info:
         _validate_draft(draft)
     assert getattr(exc_info.value, "status_code", None) == 400
+    assert exc_info.value.detail["code"] == "paper_type_required"
 
 
 def test_submission_requires_paper_year():
@@ -608,7 +609,7 @@ def test_crystal_system_keeps_ai_value_when_space_group_number_missing():
     assert draft["material_states"][0]["crystal_system"] == "hexagonal"
 
 
-def test_methodology_inference_mcmillan_marks_conventional_and_fills_tc_method():
+def test_methodology_inference_mcmillan_does_not_prefill_unadopted_values():
     draft = _normalize_draft({
         "paper": {"paper_type": "theoretical", "methodology": ["McMillan equation"]},
         "material_states": [{
@@ -618,9 +619,9 @@ def test_methodology_inference_mcmillan_marks_conventional_and_fills_tc_method()
         }],
     })
 
-    assert draft["paper"]["superconductor_kind"] == "conventional"
+    assert draft["paper"]["superconductor_kind"] == "unknown"
     state = draft["material_states"][0]
-    assert _module_records(state)[0]["method_code"] == "mcmillan"
+    assert _module_records(state)[0]["method_code"] == "unknown"
 
 
 def test_methodology_inference_multiple_methods_keep_tc_method_unknown():
@@ -635,7 +636,7 @@ def test_methodology_inference_multiple_methods_keep_tc_method_unknown():
         }],
     })
 
-    assert draft["paper"]["superconductor_kind"] == "conventional"
+    assert draft["paper"]["superconductor_kind"] == "unknown"
     state = draft["material_states"][0]
     assert _module_records(state)[0]["method_code"] == "unknown"
 
@@ -678,7 +679,7 @@ def test_methodology_inference_leaves_experimental_tc_untouched():
     assert _module_records(draft["material_states"][0])[0]["method_code"] == "resistivity"
 
 
-def test_methodology_inference_allen_dynes_wins_over_mcmillan():
+def test_methodology_inference_allen_dynes_stays_pending_adoption():
     draft = _normalize_draft({
         "paper": {"paper_type": "theoretical", "methodology": ["Allen-Dynes modified McMillan"]},
         "material_states": [{
@@ -687,9 +688,9 @@ def test_methodology_inference_allen_dynes_wins_over_mcmillan():
         }],
     })
 
-    assert draft["paper"]["superconductor_kind"] == "conventional"
+    assert draft["paper"]["superconductor_kind"] == "unknown"
     state = draft["material_states"][0]
-    assert _module_records(state)[0]["method_code"] == "allen_dynes"
+    assert _module_records(state)[0]["method_code"] == "unknown"
 
 
 def test_methodology_inference_never_creates_tc_results():
@@ -698,7 +699,7 @@ def test_methodology_inference_never_creates_tc_results():
         "material_states": [{"material": "LaH10"}],
     })
 
-    assert draft["paper"]["superconductor_kind"] == "conventional"
+    assert draft["paper"]["superconductor_kind"] == "unknown"
     state = draft["material_states"][0]
     assert _module_records(state) == []
 

@@ -7,6 +7,7 @@ export interface ApiError extends Error {
   detail?: unknown
   issues?: Array<{ field: string; code?: string; message: string }>
   existingPaperId?: number
+  submittedPaperId?: number
 }
 
 function authHeaders(): HeadersInit {
@@ -42,6 +43,7 @@ async function request<T>(url: string, init?: RequestInit): Promise<T> {
       ? body.issues
       : (Array.isArray(detail?.issues) ? detail.issues : undefined)
     error.existingPaperId = detail?.existing_paper_id || body?.existing_paper_id
+    error.submittedPaperId = detail?.code === 'UPLOAD_TASK_SUBMITTED' ? detail.paper_id : undefined
     throw error
   }
   if (response.status === 204) return undefined as T

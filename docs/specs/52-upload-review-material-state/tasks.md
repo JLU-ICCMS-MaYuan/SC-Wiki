@@ -111,3 +111,13 @@
 1. 完成 T001–T009 基础能力。
 2. 实施 US1（T010–T012）、US2（T013–T014）、US3（T015–T016）即达 MVP：布局、元素数、超导类型 Tc。
 3. 依次叠加 US4、US5、US6；每个故事测试通过后保持可提交状态。
+
+## 阶段 9：收敛（2026-09-14）
+
+- [x] T026 修正 `spec.md`、`quickstart.md`、`checklists/requirements.md` 中已确认的 #53 主项替代与 FR-004 元素数锁定口径，并回写 Overview。
+- [x] T027 [差距：冲突] 确认 #80、#84、#90 对原 US3、US6、FR-009～012、FR-015 的替代关系，再同步全部设计产物和 Issue；旧表及旧控件存在与否不能作为当前验收标准。
+- [ ] T028 [差距：部分完成] 按确认后的场景完成 T024 的浏览器与隔离 fresh MySQL 验收；本轮自动化测试不能代替该项。
+
+本轮证据：前端 `upload-task-editor-layout.test.tsx` 与 `upload-task-editor-classification.test.tsx` 共 25 项通过；后端 `test_space_groups.py`、`test_upload_jobs.py`、`test_scientific_drafts.py`、`test_classification_catalog.py` 共 75 项通过。测试运行于当前工作树（含原有未提交修改），未调用真实 LLM。T024 保持未勾选，#52 尚未完成关闭验收。
+
+后续验证：上传工作流、#90 物性与模块持久化专项 27 项通过；修正了提交失败回滚测试中缺少任务快照和新参数的夹具。真实 MySQL 8.4 分阶段迁移套件首次 6 通过、1 失败；修正重复推进 COPY 的测试夹具后，该失败项重跑通过。测试仅创建并清理 `scwiki_issue90_test_` 前缀的隔离库，未操作现有业务库；这些测试覆盖迁移至 #90 Contract、审计清理及数据修复，不能宣称全链最新 head 启动已验收。Chromium 已打开本地应用及登录弹窗，尚无登录后的草稿保存、刷新和提交证据；T024/T028 保持未完成。

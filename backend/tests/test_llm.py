@@ -72,3 +72,14 @@ def test_complete_json_gives_up_after_single_retry(monkeypatch):
     with pytest.raises(APIConnectionError):
         llm.complete_json("sys", "user", retries=1)
     assert completions.calls == 2
+
+
+def test_complete_json_retries_after_truncated_json(monkeypatch):
+    completions = _FakeCompletions([
+        ['{"results": [{"key": "47"}'],
+        ['{"results": []}'],
+    ])
+    _install_client(monkeypatch, completions)
+
+    assert llm.complete_json("sys", "user", retries=1) == {"results": []}
+    assert completions.calls == 2

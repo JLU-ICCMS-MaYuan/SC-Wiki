@@ -10,7 +10,7 @@
 
 - 生产编排文件为 `docker/compose.yaml`，包含 frontend、goserver、python、worker、mysql、redis、neo4j、qdrant 和 grobid 服务；GROBID 通过 `/api/isalive` 健康检查后才允许 Python/Worker 启动。
 - frontend 使用 Nginx 提供前端静态资源并反向代理；Go 服务提供主要公开 API；未匹配的 Python 能力通过 Go 转发到 Python 服务。
-- Go 服务挂载 `graph.json`、`htsc2025.json`、`clean_results` 和持久化头像目录 `/data/avatars`；Python/Worker 服务挂载上传文件、富化结果和属性映射缓存，并通过 `GROBID_URL=http://grobid:8070` 调用引用解析服务。
+- Go 服务挂载 `graph.json`、`clean_results` 和持久化头像目录 `/data/avatars`；Python/Worker 服务挂载上传文件、富化结果和属性映射缓存，并通过 `GROBID_URL=http://grobid:8070` 调用引用解析服务。
 - MySQL、Redis、Neo4j、Qdrant 和 GROBID 使用 Docker volume 或数据目录持久化。服务通过 healthcheck 和 `depends_on` 控制启动顺序。
 - 当前仓库只包含 `docker/compose.yaml`；源码构建可分别使用 `docker/*.Dockerfile`，不存在 `docker/compose.dev.yaml`。
 
@@ -30,7 +30,7 @@
 
 ### 生产部署
 
-1. 准备 Compose 读取的 `.env`，填写数据库、JWT、Neo4j、LLM、Embedding 和 SMTP 配置；SMTP 至少需要主机与发件人，账号密码按服务商要求提供。
+1. 准备 Compose 读取的 `.env`，填写数据库、JWT、Neo4j、LLM、Embedding 和 SMTP 配置；SMTP 需要主机、端口、发件人、账号、授权码和 TLS 模式；网易示例使用 smtp.163.com:465、implicit TLS 与 sc_wiki@163.com。
 2. 准备 `data/` 下的图谱快照、外部数据、上传目录、富化结果和 Qdrant 存储。
 3. 使用 `docker compose -f docker/compose.yaml up -d` 启动服务；首次部署的数据导入和 Neo4j dump 恢复遵循 `docker/deploy/README.md`。
 4. 通过 frontend 入口访问站点；Go 的 `/health` 和 Python/RAG 健康接口用于分别核验服务状态。
@@ -109,3 +109,6 @@
 - 首屏预取与 chunk 划分只在 `vite build` 后成立，本地 dev 模式不可见，相关回归需在生产构建产物上核验。
 - 尚未引入生产构建校验命令或本地 nginx 层。当前依赖「重建镜像时源码会被重新构建」这一事实保证改动不丢失，两条链路的行为差异作为观察项，暂不额外投入。
 - `scripts/migrate-from-docker.sh` 仍需 Docker（用一次性容器读卷）。属一次性脚本，原卷清理后可连同删除。
+
+- Go 默认只信任本机代理提供的 X-Real-IP；Docker 使用 TRUSTED_PROXIES 指定代理网络（默认 172.16.0.0/12，自定义网络需调整）。Nginx 和 Vite 覆盖来自客户端的 IP 头；Go 端口不得绕过代理公开。
+- SMTP 支持 implicit TLS 和强制 STARTTLS，总 IO 期限 20 秒；真实网易收信仍待私密配置后的验收。

@@ -2,6 +2,7 @@
 prompts.py — RAG 系统的 Prompt 模板。
 """
 
+import json
 import re
 
 RAG_SYSTEM_PROMPT = """你是一个材料科学专家，专注于超导材料研究。
@@ -98,6 +99,8 @@ def build_rag_prompt(
     context_parts = []
     for i, chunk in enumerate(chunks):
         content = chunk.get("content", "")
+        if chunk.get("attribution"):
+            content = "来源限定（回答必须保留，不得错误归因）：" + chunk["attribution"] + "\n" + content
         section = chunk.get("section_name", "")
         paper_id = chunk.get("paper_id", "?")
         header = f"--- [PID_{paper_id}]"
@@ -191,34 +194,18 @@ def build_fusion_prompt(
 
     # 结构化数据表格
     if kg_results:
-        # 根据 predicate 动态决定列名
-        first_pred = kg_results[0].get("predicate", "")
-        if "压力" in first_pred:
-            col_name = "压力(GPa)"
-        elif "lambda" in first_pred or "电声" in first_pred:
-            col_name = "λ"
-        elif "Tc" in first_pred or "温度" in first_pred or "超导" in first_pred:
-            col_name = "Tc(K)"
-        else:
-            col_name = "数值"
-        table_lines = ["\n=== 结构化数据（来自数据库） ==="]
-        table_lines.append(f"| 化合物 | {col_name} | 论文ID |")
-        table_lines.append("|--------|" + "-" * len(col_name) + "|--------|")
-        for r in kg_results:
-            formula = r.get("formula", r.get("subject", "?"))
-            tc = r.get("tc", r.get("object", ""))
-            paper_id = r.get("paper_id")
-            pid_str = f"[PID_{paper_id}]" if paper_id else "—"
-            table_lines.append(
-                f"| {formula} | {tc} | {pid_str} |"
-            )
-        parts.append("\n".join(table_lines))
+        parts.append("\n=== 结构化数据（来自当前已批准记录） ===")
+        parts.append("每条记录独立对应论文版本、方法和条件。范围不是单一测量值，禁止合并同名材料的条件或参数。")
+        for record in kg_results:
+            parts.append(f"[PID_{record.get('paper_id', '?')}] " + json.dumps(record, ensure_ascii=False, default=str))
 
     # 文献片段
     if rag_chunks:
         context_parts = ["\n=== 文献片段（来自论文全文） ==="]
         for i, chunk in enumerate(rag_chunks):
             content = chunk.get("content", "")
+            if chunk.get("attribution"):
+                content = "来源限定（回答必须保留，不得错误归因）：" + chunk["attribution"] + "\n" + content
             section = chunk.get("section_name", "")
             paper_id = chunk.get("paper_id", "?")
             header = f"--- [PID_{paper_id}]"

@@ -205,11 +205,16 @@ def create_task(
 
 def get_state(task_id: str) -> dict[str, Any] | None:
     raw = redis_client().get(task_key(task_id))
-    return json.loads(raw) if raw else None
+    if raw:
+        return json.loads(raw)
+    from backend.ingest.scientific_evidence import restore_upload
+    return restore_upload(task_id)
 
 
 def save_state(task_id: str, state: dict[str, Any]) -> dict[str, Any]:
     state["updated_at"] = int(time.time())
+    from backend.ingest.scientific_evidence import persist_upload_state
+    persist_upload_state(task_id, state)
     client = redis_client()
     _store_state(client, task_id, state)
     if state.get("user_id"):
@@ -241,6 +246,8 @@ def update_state(task_id: str, **changes: Any) -> dict[str, Any]:
                     else:
                         pipeline.zadd(index_key, {task_id: state["updated_at"]})
                 pipeline.execute()
+                from backend.ingest.scientific_evidence import persist_upload_state
+                persist_upload_state(task_id, state)
                 return state
             except Exception as exc:
                 if exc.__class__.__name__ == "WatchError":
@@ -285,6 +292,8 @@ def handle_upload_job_failure(
 
 def list_user_tasks(user_id: int) -> list[dict[str, Any]]:
     """按最近活动返回用户任务，并顺手清除失效索引成员。"""
+    from backend.ingest.scientific_evidence import restore_user_uploads
+    restore_user_uploads(user_id)
     client = redis_client()
     index_key = user_tasks_key(user_id)
     task_ids = client.zrevrange(index_key, 0, -1)
@@ -408,6 +417,10 @@ def lock_uploaded_manifest(task_id: str) -> tuple[dict[str, Any], bool]:
 
 def get_draft(task_id: str) -> dict[str, Any] | None:
     raw = redis_client().get(draft_key(task_id))
+    if not raw:
+        from backend.ingest.scientific_evidence import restore_upload
+        restore_upload(task_id)
+        raw = redis_client().get(draft_key(task_id))
     return convert_legacy_scientific_draft(json.loads(raw)) if raw else None
 
 
@@ -423,6 +436,13 @@ def save_draft(task_id: str, draft: dict[str, Any]) -> dict[str, Any]:
         pipeline.setex(task_key(task_id), ttl, _encoded(state))
         pipeline.setex(draft_key(task_id), ttl, json.dumps(draft, ensure_ascii=False))
         pipeline.execute()
+    from backend.database import SessionLocal
+    from backend.ingest.scientific_evidence import has_upload_checks, persist_upload
+    with SessionLocal.begin() as session:
+        if has_upload_checks(session, task_id):
+            persist_upload(session, task_id, state, draft)
+            client.persist(task_key(task_id))
+            client.persist(draft_key(task_id))
     return draft
 
 
@@ -551,6 +571,10 @@ def cleanup_task_files(task_id: str) -> None:
     cleanup_transient_data(task_id, context=context, preserve_review_snapshot=False)
     cleanup_unsubmitted_files(task_id)
     cleanup_duplicate_candidate(task_id, context.existing_paper_id)
+    from backend.database import SessionLocal
+    from backend.ingest.scientific_evidence import delete_target
+    with SessionLocal.begin() as session:
+        delete_target(session, 'upload', task_id)
 
 
 def submitted_paper_id(task_id: str) -> int | None:
@@ -600,6 +624,11 @@ def cleanup_upload_task(
     task_id = context.task_id
     try:
         with upload_task_lock(task_id):
+            from backend.database import SessionLocal
+            from backend.ingest.scientific_evidence import has_upload_checks
+            with SessionLocal() as session:
+                if has_upload_checks(session, task_id):
+                    return
             state = get_state(task_id)
             if state and int(state.get("updated_at", 0)) != context.expected_updated_at:
                 cleanup_at = state.get("cleanup_at")

@@ -73,9 +73,10 @@ class FakeResult:
 
 
 class FakeAsyncSession:
-    def __init__(self, scalar_value=None, execute_values=None):
+    def __init__(self, scalar_value=None, execute_values=None, science_sources=None):
         self.scalar_value = scalar_value
         self.execute_values = execute_values or []
+        self.science_sources = science_sources or []
         self.statement = None
         self.statements = []
 
@@ -94,6 +95,10 @@ class FakeAsyncSession:
         self.statement = statement
         self.statements.append(statement)
         return FakeResult(self.execute_values)
+
+    async def scalars(self, statement):
+        self.statements.append(statement)
+        return FakeResult(self.science_sources)
 
 
 def test_save_draft_refreshes_state_and_draft_atomically(monkeypatch):
@@ -168,32 +173,63 @@ def test_public_sql_detail_requires_approved_and_hides_file_path():
 
 
 def test_vector_results_only_keep_approved_papers(monkeypatch):
-    session = FakeAsyncSession(execute_values=[2])
+    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
     import backend.rag.database as rag_database
 
-    monkeypatch.setattr(rag_database, "async_session_factory", lambda: session)
-    results = asyncio.run(vector_search._approved_results([
-        {"paper_id": 1, "content": "pending"},
-        {"paper_id": 2, "content": "approved"},
-    ]))
-    assert results == [{"paper_id": 2, "content": "approved"}]
+    async def check():
+        engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+        try:
+            async with engine.begin() as connection:
+                await connection.run_sync(Paper.__table__.create)
+            sessions = async_sessionmaker(engine)
+            async with sessions.begin() as session:
+                session.add_all([
+                    Paper(id=1, title="pending", year=2026, review_status="pending", content_revision=1),
+                    Paper(id=2, title="approved", year=2026, review_status="approved", content_revision=2, approved_revision=2),
+                    Paper(id=3, title="changed", year=2026, review_status="pending", content_revision=2, approved_revision=None),
+                ])
+            monkeypatch.setattr(rag_database, "async_session_factory", sessions)
+            current = {"paper_id": 2, "content": "current", "source_kind": "human_review", "paper_revision": 2}
+            plain = {"paper_id": 2, "content": "approved"}
+            results = await vector_search._approved_results([
+                {"paper_id": 1, "content": "pending"}, plain,
+                {"paper_id": 3, "content": "unapproved revision"},
+                {**current, "paper_revision": 1}, current,
+            ])
+            assert results == [plain, current]
+        finally:
+            await engine.dispose()
+    asyncio.run(check())
 
 
-def test_publish_uses_committed_chunk_ids(monkeypatch):
-    paper = SimpleNamespace(id=42, review_status="approved")
+@pytest.mark.parametrize("with_science", [False, True])
+def test_publish_uses_committed_chunk_ids(monkeypatch, with_science):
+    paper = SimpleNamespace(id=42, review_status="approved", content_revision=2)
     chunks = [SimpleNamespace(id=501, chunk_index=0, section_name="Results", content="text")]
-    session = FakeAsyncSession(scalar_value=paper, execute_values=chunks)
+    sources = [SimpleNamespace(id=8, paper_id=42, paper_revision=2, field_path="structure", result={
+        "current_value": "Sn", "provenance": {"kind": "contributor_structure", "submitted_by_name": "fixture", "filename": "Sn.cif"},
+    })] if with_science else []
+    session = FakeAsyncSession(scalar_value=paper, execute_values=chunks, science_sources=sources)
     import backend.rag.database as rag_database
     import backend.ingest.embedder as embedder
 
     captured = []
     monkeypatch.setattr(rag_database, "async_session_factory", lambda: session)
     monkeypatch.setattr(embedder, "embed_and_index_chunks", lambda values: captured.extend(values) or len(values))
+    import backend.database as database
+    monkeypatch.setattr(database, "SessionLocal", lambda: SimpleNamespace(
+        execute=lambda *_args: SimpleNamespace(fetchone=lambda: None), close=lambda: None,
+    ))
 
     result = asyncio.run(rag.publish_approved_paper(42, None))
 
-    assert result["indexed_chunks"] == 1
+    assert result["indexed_chunks"] == 1 + len(sources)
     assert captured[0]["id"] == "501"
+    if with_science:
+        assert captured[1]["paper_revision"] == 2
+        assert captured[1]["source_kind"] == "contributor_structure"
+        assert "fixture" in captured[1]["attribution"]
+        assert "不得表述为该论文报告" in captured[1]["attribution"]
 
 
 def test_publish_rejects_pending_paper(monkeypatch):
@@ -497,6 +533,8 @@ def test_submit_failure_rolls_state_back_to_ready(monkeypatch):
     monkeypatch.setattr(
         upload_contracts.CleanupContext, "from_state", staticmethod(lambda _task_id, _state: None)
     )
+    # 证据快照读取同一上传任务，不能绕过真实快照权限检查。
+    monkeypatch.setattr(upload_tasks, "get_state", lambda key: rag._task_for_user(key, None))
 
     state_calls = []
 
@@ -505,7 +543,8 @@ def test_submit_failure_rolls_state_back_to_ready(monkeypatch):
 
     monkeypatch.setattr(upload_tasks, "update_state", _update_state)
 
-    async def _boom(_task_id, _state, _draft):
+    async def _boom(_task_id, _state, _draft, *, evidence_checks):
+        assert evidence_checks == []
         raise RuntimeError("模拟提交写入失败")
 
     monkeypatch.setattr(rag, "_create_pending_paper", _boom)

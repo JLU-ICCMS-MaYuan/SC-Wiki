@@ -141,31 +141,6 @@ def get_paper_context(paper_id: int) -> dict[str, Any]:
 
 
 # ═══════════════════════════════════════════════
-# Tool 3: 材料上下文
-# ═══════════════════════════════════════════════
-
-def get_material_context(formula: str) -> dict[str, Any]:
-    """材料完整上下文：研究论文 + 物性参数"""
-    with _driver().session() as s:
-        papers = s.run(
-            "MATCH (p:Paper)-[r:STUDIES]->(m:Material {formula: $f}) "
-            "RETURN p.paper_id AS id, p.title AS title, p.year AS year, "
-            "r.role AS role ORDER BY p.year DESC LIMIT 20",
-            f=formula,
-        ).data()
-
-        props = s.run(
-            "MATCH (m:Material {formula: $f})-[:HAS_PROPERTY]->(prop:Property) "
-            "RETURN prop.name AS name, prop.value AS value, prop.unit AS unit, "
-            "prop.pressure_gpa AS pressure "
-            "ORDER BY prop.value DESC LIMIT 15",
-            f=formula,
-        ).data()
-
-    return {"formula": formula, "papers": papers, "properties": props}
-
-
-# ═══════════════════════════════════════════════
 # Tool 4: 图遍历
 # ═══════════════════════════════════════════════
 
@@ -284,18 +259,6 @@ TOOL_DEFINITIONS = [
         },
     },
     {
-        "name": "get_material_context",
-        "description": "获取一种超导材料的完整上下文：哪些论文研究过它、关键物性参数（Tc、压力等）。"
-                       "当用户询问某种具体材料的超导性质时使用。",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "formula": {"type": "string", "description": "材料化学式，如 LaH10、H3S"},
-            },
-            "required": ["formula"],
-        },
-    },
-    {
         "name": "traverse_graph",
         "description": "从一篇论文出发，在知识图谱中多跳遍历，发现关联论文和材料。"
                        "当用户询问研究脉络、发展方向、相关工作时使用。",
@@ -330,7 +293,6 @@ TOOL_DEFINITIONS = [
 TOOL_EXECUTORS = {
     "search_papers": search_papers,
     "get_paper_context": get_paper_context,
-    "get_material_context": get_material_context,
     "traverse_graph": traverse_graph,
     "find_path": find_path,
 }

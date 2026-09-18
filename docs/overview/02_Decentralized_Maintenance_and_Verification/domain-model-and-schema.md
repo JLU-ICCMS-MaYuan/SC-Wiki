@@ -163,3 +163,13 @@ Material family 属于论文当前 revision，通过 `paper_material_families(pa
 - 重新分块的单代事务和 Qdrant 删除后重建属于论文/RAG 生命周期，不由 #90 的关系型物性迁移代替。
 - `chemical_systems.elements_list` 与 `superconductors.elements_list` 存在有意保留的查询冗余；非标准化学式
   仍需人工复核，但不通过合并表或删除字段解决。
+
+## 科学来源核对与批准
+
+材料状态独立保存可空 `material_name`，与化学式至少填写一项。无化学式时 `superconductor_id` 可空，不创建假化学体系；有化学式时仍验证原关联归属。名称不改变 state_key 的身份含义，只改变本状态相关核对上下文。持久化与同值比较共用状态字段规则，结构家族关联随重建保存；历史名称为空时继续显示化学式。
+
+`scientific_evidence_checks` 保存 upload/paper 目标的全部科学判断、版本和按审核员隔离的裁决草稿。`scientific_upload_drafts` 保存已核对上传的状态与草稿；`scientific_structure_origins` 保存认证提交者及原始结构来源。正式批准由 Go 同事务写 `scientific_evidence_sources`、`paper_evidences` 和审核历史，再删除临时判断。永久来源区分论文引句、提供者附件和程序派生，上传到论文按稳定 item_key 转接，详情见 [#103 数据模型](../../specs/103-property-evidence-review/data-model.md)。
+
+核对规则 v3 增加类型化 `proposal` 和独立 `decision`；旧 v2 结果在原科学覆盖范围内继续复用，不将说明文字当作替换值。`scientific_evidence_checks.resolutions` 的按用户命名空间保存候选、接受状态、理由、原 AI 判断和分阶段提交准备，无额外表迁移。写入前检查准备版本，保存后精确比对实际断言及来源；成功批准才将决定转入永久来源与审核历史并清理临时项。
+
+规则 v4 允许创建 status=unchecked 的理由/候选草稿，读取 v2/v3 原覆盖范围。decision.human_confirmed、accepted、actor_user_id、reason 与 final_content_hash/source_hash 表达独立人工来源；不把未核对或 missing 原 AI 状态改成 supported。人工来源永久保存并以 human_review 发布到 RAG。未核对占位不跳过后续模型任务；规则升级和后台结果不清除已有用户草稿或人工决定。

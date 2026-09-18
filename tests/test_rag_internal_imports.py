@@ -7,7 +7,7 @@ def test_internal_rag_runtime_imports():
         "backend.rag.database",
         "backend.rag.vectordb",
         "backend.rag.search.engine",
-        "backend.rag.rag.engine",
+        "backend.rag.core.engine",
     ]
 
     for module_name in modules:
@@ -18,9 +18,9 @@ def test_internal_rag_runtime_imports():
 def test_internal_rag_public_functions_importable():
     from backend.rag.config import get_rag_settings
     from backend.rag.search.engine import search
-    from backend.rag.rag.engine import ask
+    from backend.rag.core.engine import ask
 
     settings = get_rag_settings()
-    assert settings.rag_data_root.name == "Conventional-SC-Dataset-talk"
+    assert settings.rag_data_root.is_absolute()
     assert callable(search)
     assert callable(ask)

@@ -47,6 +47,7 @@ def build_export_payload(db: Session) -> dict[str, Any]:
                 "title": paper.title,
                 "authors": paper.authors,
                 "journal": paper.journal,
+                "issue_number": paper.issue_number,
                 "volume": paper.volume,
                 "pages": paper.pages,
                 "year": paper.year,

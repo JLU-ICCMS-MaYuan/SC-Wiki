@@ -37,13 +37,24 @@ const paper = {
 }
 
 beforeEach(() => {
+  let savedPaper = { ...paper, key_properties: [], material_states: [] }
   mockedApi.get.mockImplementation(async (path: string) => {
     if (path.startsWith('/api/admin/papers/all')) return { items: [paper], total: 1 }
-    if (path === '/api/admin/papers/88') return { ...paper, key_properties: [], material_states: [] }
+    if (path === '/api/admin/papers/88') return savedPaper
     if (path.startsWith('/api/chart-groups')) return []
     return {}
   })
-  mockedApi.post.mockResolvedValue({ message: '已审核' })
+  mockedApi.put.mockImplementation(async (path, body) => {
+    if (path === '/api/admin/papers/88') savedPaper = { ...savedPaper, ...body }
+    else if (path !== '/api/rag/papers/88/scientific-draft') throw new Error(`unexpected PUT ${path}`)
+    return { ok: true, data: { revision_bumped: false } }
+  })
+  mockedApi.post.mockImplementation(async path => {
+    if (path === '/api/rag/evidence/preflight') return { version: 'checked-version', needs_check: false, records: [], sources: [] }
+    if (path === '/api/rag/evidence/proposals/prepare') return { preparation_id: null, patches: [] }
+    if (path === '/api/admin/papers/88/review') return { message: '已审核' }
+    throw new Error(`unexpected POST ${path}`)
+  })
 })
 
 afterEach(() => { cleanup(); vi.clearAllMocks() })
@@ -73,6 +84,30 @@ async function openEditDialog() {
 }
 
 describe('编辑页内审核', () => {
+  it('批准使用当前编辑分类，提示不再要求改用列表入口', async () => {
+    const user = await openEditDialog()
+    expect(screen.getByText(/通过时使用当前材料分类选择/)).toBeVisible()
+    expect(screen.queryByText(/此处只处理拒绝与退回/)).not.toBeInTheDocument()
+    await user.click(screen.getByRole('combobox', { name: '超导类型' }))
+    await user.click(screen.getByRole('option', { name: '非常规超导体' }))
+    await user.click(screen.getByRole('combobox', { name: '审核结果' }))
+    expect(screen.getAllByRole('option').map(option => option.getAttribute('data-value'))).toEqual(['approved', 'pending', 'rejected'])
+    await user.click(screen.getByRole('option', { name: /通过/ }))
+    await user.click(screen.getByRole('button', { name: '提交审核' }))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/api/admin/papers/88/review', expect.objectContaining({
+      status: 'approved', superconductor_kind: 'unconventional', expected_evidence_version: 'checked-version',
+      material_families: [{ id: 1, name: '氢基超导体' }], material_states: [],
+    })))
+    expect(mockedApi.put.mock.calls.map(([path]) => path)).toEqual([
+      '/api/admin/papers/88', '/api/rag/papers/88/scientific-draft',
+    ])
+    expect(mockedApi.put.mock.calls[0][1]).toMatchObject({ superconductor_kind: 'unconventional' })
+    const prepareIndex = mockedApi.post.mock.calls.findIndex(([path]) => path.endsWith('/proposals/prepare'))
+    const reviewIndex = mockedApi.post.mock.calls.findIndex(([path]) => path.endsWith('/review'))
+    expect(mockedApi.put.mock.invocationCallOrder[1]).toBeLessThan(mockedApi.post.mock.invocationCallOrder[prepareIndex])
+    expect(mockedApi.post.mock.invocationCallOrder[prepareIndex]).toBeLessThan(mockedApi.post.mock.invocationCallOrder[reviewIndex])
+  })
+
   it('编辑弹窗顶部提供审核结果与审核意见控件', async () => {
     await openEditDialog()
 
@@ -84,17 +119,31 @@ describe('编辑页内审核', () => {
     expect(screen.getByRole('textbox', { name: 'DOI' })).toBeVisible()
   })
 
-  it('提交拒绝时按既有契约调用审核接口', async () => {
+  it('退回待审核时按既有契约调用审核接口，不额外保存科学数据', async () => {
     const user = await openEditDialog()
 
     await user.type(screen.getByRole('textbox', { name: '审核意见' }), '缺少关键实验数据')
     await user.click(screen.getByRole('button', { name: '提交审核' }))
 
-    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledTimes(1))
-    const [path, body] = mockedApi.post.mock.calls[0]
+    const reviews = () => mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))
+    await waitFor(() => expect(reviews()).toHaveLength(1))
+    const [path, body] = reviews()[0]
     expect(path).toBe('/api/admin/papers/88/review')
     expect(body).toMatchObject({ status: 'pending', comment: '缺少关键实验数据' })
     expect(body).toHaveProperty('review_request_id')
+    expect(mockedApi.put).not.toHaveBeenCalled()
+  })
+
+  it('批准前保存失败时留在编辑页，不调用审核接口', async () => {
+    const user = await openEditDialog()
+    mockedApi.put.mockRejectedValueOnce(new Error('保存失败'))
+    await user.click(screen.getByRole('combobox', { name: '审核结果' }))
+    await user.click(screen.getByRole('option', { name: /通过/ }))
+    await user.click(screen.getByRole('button', { name: '提交审核' }))
+    expect(await screen.findByText(/保存失败/)).toBeVisible()
+    expect(mockedApi.put).toHaveBeenCalledTimes(1)
+    expect(mockedApi.post.mock.calls.some(([path]) => path.endsWith('/review'))).toBe(false)
+    expect(screen.getByText('编辑论文')).toBeVisible()
   })
 
   it('审核结果提供批准、拒绝与退回', async () => {

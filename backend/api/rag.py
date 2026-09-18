@@ -45,6 +45,8 @@ DOI_PATTERN = re.compile(r"^10\.\d{4,9}/\S+$", re.IGNORECASE)
 
 class SubmitUploadOptions(BaseModel):
     consistency_acknowledged: bool = False
+    evidence_job_id: str | None = None
+    expected_evidence_version: str | None = None
 
 
 class DefaultLlmConfigRequest(BaseModel):
@@ -58,6 +60,207 @@ def _upload_error(status_code: int, code: str, message: str, **extra: Any) -> HT
     detail = {"code": code, "message": message}
     detail.update(extra)
     return HTTPException(status_code=status_code, detail=detail)
+
+
+def _scientific_integrity_error(exc: IntegrityError, draft: dict[str, Any]) -> HTTPException:
+    """将数据库完整性异常转换为可操作的表单问题。
+
+    约束名只用于服务端分类，绝不把驱动异常原文返回给客户端。数据库错误可能来自
+    不同驱动，因此同时检查 ``constraint_name`` 和受控的异常文本标识。
+    """
+    original = getattr(exc, "orig", None)
+    constraint = str(getattr(original, "constraint_name", "") or "").lower()
+    error_text = str(original or exc).lower()
+    haystack = f"{constraint} {error_text}"
+
+    states = [item for item in draft.get("material_states") or [] if isinstance(item, dict)]
+    records: list[tuple[int, int, int, dict[str, Any]]] = []
+    modules: list[tuple[int, int, dict[str, Any]]] = []
+    for state_index, state in enumerate(states):
+        for module_index, module in enumerate(state.get("property_modules") or []):
+            if not isinstance(module, dict):
+                continue
+            modules.append((state_index, module_index, module))
+            for record_index, record in enumerate(module.get("records") or []):
+                if isinstance(record, dict):
+                    records.append((state_index, module_index, record_index, record))
+
+    def issue(field: str, code: str, message: str) -> HTTPException:
+        return _upload_error(
+            409,
+            "scientific_data_integrity_error",
+            message,
+            issues=[{"field": field, "code": code, "message": message}],
+        )
+
+    def state_issue(state_index: int, field: str, message: str) -> HTTPException:
+        return issue(f"material_states[{state_index}].{field}", "integrity_constraint", message)
+
+    def record_issue(
+        state_index: int, module_index: int, record_index: int, field: str, message: str
+    ) -> HTTPException:
+        return issue(
+            f"material_states[{state_index}].property_modules[{module_index}].records[{record_index}].{field}",
+            "integrity_constraint",
+            message,
+        )
+
+    if "ck_material_states_pressure_range" in haystack:
+        for state_index, state in enumerate(states):
+            try:
+                pressure_min = float(state.get("pressure_min_gpa"))
+                pressure_max = float(state.get("pressure_max_gpa"))
+            except (TypeError, ValueError):
+                continue
+            if pressure_min > pressure_max:
+                return state_issue(
+                    state_index,
+                    "pressure_min_gpa",
+                    f"第 {state_index + 1} 个材料状态的压强下限不能大于上限，请检查 pressure min/max",
+                )
+
+    state_constraint_fields = {
+        "ck_material_states_nonnegative": (
+            ("pressure_value_gpa", "压强"),
+            ("pressure_min_gpa", "压强下限"),
+            ("temperature_value_k", "温度"),
+            ("magnetic_field_t", "磁场"),
+        ),
+        "ck_material_states_reported_space_group": (("reported_space_group_number", "空间群号"),),
+        "ck_material_states_element_count": (("element_count", "元素数"),),
+    }
+    for constraint_name, fields in state_constraint_fields.items():
+        if constraint_name not in haystack:
+            continue
+        for state_index, state in enumerate(states):
+            for field, label in fields:
+                value = state.get(field)
+                invalid = False
+                if constraint_name == "ck_material_states_nonnegative":
+                    try:
+                        invalid = value is not None and float(value) < 0
+                    except (TypeError, ValueError):
+                        invalid = False
+                elif constraint_name == "ck_material_states_reported_space_group":
+                    try:
+                        invalid = value is not None and not 1 <= int(value) <= 230
+                    except (TypeError, ValueError):
+                        invalid = value not in (None, "")
+                else:
+                    try:
+                        invalid = value is not None and not 1 <= int(value) <= 118
+                    except (TypeError, ValueError):
+                        invalid = value not in (None, "")
+                if invalid:
+                    return state_issue(
+                        state_index,
+                        field,
+                        f"第 {state_index + 1} 个材料状态的{label}不符合范围约束，请填写有效值",
+                    )
+
+    if "ck_property_records_custom_identity" in haystack:
+        for state_index, module_index, record_index, record in records:
+            is_custom = record.get("property_code") == "custom"
+            has_key = bool(str(record.get("custom_property_key") or "").strip())
+            if (is_custom and record.get("record_type") != "property") or (is_custom and not has_key) or (not is_custom and has_key):
+                return record_issue(
+                    state_index,
+                    module_index,
+                    record_index,
+                    "custom_property_key",
+                    "该物性记录的自定义性质身份不完整，请选择自定义性质并填写名称，或清空自定义键",
+                )
+        if records:
+            state_index, module_index, record_index, _record = records[0]
+            return record_issue(
+                state_index,
+                module_index,
+                record_index,
+                "custom_property_key",
+                "该物性记录的自定义性质身份不完整，请选择自定义性质并填写名称，或清空自定义键",
+            )
+
+    record_constraint_fields = {
+        "ck_property_records_condition_type": (
+            "payload",
+            "Tc 记录的 Conditions 类型与结果类型不一致，请检查实验/计算 Conditions",
+        ),
+        "ck_property_records_value_shape": (
+            "value_kind",
+            "物性记录的值类型与实际填写的规范值不一致，请检查 value kind 和对应数值",
+        ),
+        "ck_property_records_range": (
+            "value_max",
+            "范围值的上限不能小于下限，请检查 value min/max",
+        ),
+        "ck_property_records_uncertainty": (
+            "uncertainty",
+            "不确定度不能为负数，请填写有效值或留空",
+        ),
+        "ck_property_records_tc_identity": (
+            "property_code",
+            "Tc 记录必须使用 Tc 物性及有效方法，请检查 property code 和 method",
+        ),
+    }
+    for constraint_name, (field, message) in record_constraint_fields.items():
+        if constraint_name in haystack and records:
+            state_index, module_index, record_index, _record = records[0]
+            return record_issue(state_index, module_index, record_index, field, message)
+
+    if "uq_property_records_source" in haystack:
+        return issue(
+            "material_states",
+            "source_identity_conflict",
+            "系统保存物性记录时发生内部身份冲突，无法完成提交。无需修改已填写的科学数据，请联系管理员处理。",
+        )
+
+    if "uq_property_records_module_key" in haystack:
+        seen_record_keys: set[tuple[int, int, str]] = set()
+        for state_index, module_index, record_index, record in records:
+            key = (state_index, module_index, str(record.get("record_key") or ""))
+            if key in seen_record_keys:
+                return record_issue(
+                    state_index,
+                    module_index,
+                    record_index,
+                    "record_key",
+                    "同一物性模块中的两条记录使用了相同的内部标识，请联系管理员修复记录身份，无需修改科学数据。",
+                )
+            seen_record_keys.add(key)
+
+    if "uq_property_modules_state_code" in haystack or "uq_property_modules_state_key" in haystack:
+        seen_module_keys: set[tuple[int, str]] = set()
+        field = "module_code" if "uq_property_modules_state_code" in haystack else "module_key"
+        for state_index, module_index, module in modules:
+            key = (state_index, str(module.get(field) or ""))
+            if key in seen_module_keys:
+                return issue(
+                    f"material_states[{state_index}].property_modules[{module_index}].{field}",
+                    "integrity_constraint",
+                    "同一材料状态中的物性模块重复，请保留一个模块或修改模块标识",
+                )
+            seen_module_keys.add(key)
+
+    if "uq_material_states_paper_state_key" in haystack:
+        seen_states: set[str] = set()
+        for state_index, state in enumerate(states):
+            key = str(state.get("state_key") or "")
+            if key in seen_states:
+                return state_issue(
+                    state_index,
+                    "state_key",
+                    "材料状态标识重复，请修改该材料状态的标识",
+                )
+            seen_states.add(key)
+
+    # 无法从驱动稳定取得约束名时，仍返回用户能执行的检查范围；不暴露 SQL 或内部表名。
+    field = "material_states" if states else "paper"
+    message = (
+        "科学数据之间存在不一致，请检查材料状态的化学式、压强、空间群和物性记录的必填字段后重新提交"
+        if states
+        else "论文基础信息存在不一致，请检查标题、年份、论文类型和材料家族等必填字段后重新提交"
+    )
+    return issue(field, "integrity_constraint", message)
 
 
 def _is_admin(user: User) -> bool:
@@ -243,11 +446,11 @@ async def _resolve_draft_classifications(session, draft: dict[str, Any]) -> None
 
 
 def _derived_research_materials(material_states: list[dict[str, Any]]) -> list[str]:
-    """按出现顺序汇总材料状态中的化学式，去空白、去重。"""
+    """按出现顺序汇总材料名或化学式，去空白、去重。"""
     seen: set[str] = set()
     derived: list[str] = []
     for state in material_states:
-        material = str(state.get("material") or "").strip()
+        material = str(state.get("material_name") or "").strip() or str(state.get("material") or "").strip()
         if material and material not in seen:
             seen.add(material)
             derived.append(material)
@@ -270,6 +473,10 @@ def _validate_draft(
     year = paper.get("year")
     if isinstance(year, bool) or not isinstance(year, int):
         raise _upload_error(400, "year_required", "论文年份不能为空且必须是整数")
+
+    issue_number = paper.get("issue_number")
+    if issue_number is not None and (not isinstance(issue_number, str) or len(issue_number) > 100):
+        raise _upload_error(400, "invalid_issue_number", "期号必须是最长 100 字符的文本", field="paper.issue_number")
 
     doi = str(paper.get("doi") or "").strip()
     if doi and not DOI_PATTERN.match(doi):
@@ -298,6 +505,20 @@ def _validate_draft(
             raise _upload_error(400, "invalid_material_family", "已确认材料家族缺少目录 ID")
         if status == "pending" and family.get("id") not in (None, ""):
             raise _upload_error(400, "invalid_material_family", "待确认材料家族不能包含目录 ID")
+    for state_index, state in enumerate(material_states):
+        for key, label in (("material_name", "材料名"), ("material", "化学式")):
+            value = state.get(key)
+            if value is not None and (not isinstance(value, str) or len(value) > 255):
+                raise _upload_error(400, "invalid_material_identity", f"{label}必须是最长 255 字符的文本", field=f"material_states[{state_index}].{key}")
+        formula = str(state.get("material") or "").strip()
+        if not (str(state.get("material_name") or "").strip() or formula):
+            raise _upload_error(400, "state_material_required", f"第 {state_index + 1} 个材料状态至少需要材料名或化学式", field=f"material_states[{state_index}].material_name")
+        if formula:
+            from backend.db_helpers import normalize_formula
+            try:
+                normalize_formula(formula)
+            except ValueError as exc:
+                raise _upload_error(400, "invalid_chemical_formula", "化学式无法解析；如只有材料名称，请填入材料名并清空化学式", field=f"material_states[{state_index}].material") from exc
     if (
         paper_type != "review"
         and not paper.get("research_materials")
@@ -308,8 +529,6 @@ def _validate_draft(
     if paper_type != "review" and not material_states:
         raise _upload_error(400, "material_state_required", "非综述论文至少需要一个材料状态")
     for state_index, state in enumerate(material_states):
-        if not str(state.get("material") or "").strip():
-            raise _upload_error(400, "state_material_required", f"第 {state_index + 1} 个材料状态缺少化学式")
         structures = [item for item in state.get("structure_families") or [] if isinstance(item, dict)]
         if sum(bool(item.get("is_primary")) for item in structures) > 1:
             raise _upload_error(400, "multiple_primary_structure_families", "一个材料状态只能有一个主结构家族")
@@ -474,7 +693,12 @@ def _validate_property_module_contract(
                             "物性模块必须是对象",
                         )
                     ])
-                normalized = normalize_module(module, paper_id=0, paper_revision=1)
+                normalized = normalize_module(
+                    module,
+                    paper_id=0,
+                    paper_revision=1,
+                    path=f"material_states[{state_index}].property_modules[{module_index}]",
+                )
                 module_key = normalized["module_key"]
                 module_code = normalized["module_code"]
                 if module_key in seen_keys or module_code in seen_codes:
@@ -663,9 +887,8 @@ def _map_internal_error(exc: Exception) -> HTTPException:
         return _service_error(503, "LLM 问答未配置")
     if isinstance(exc, service.RagNotFoundError):
         return _service_error(404, str(exc) or "资源不存在")
-    if isinstance(exc, service.RagInternalError):
-        return _service_error(502, "AI 文献助手返回错误", str(exc))
-    return _service_error(502, "AI 文献助手返回错误", str(exc))
+    # 上游异常消息是不可信输入，可能回显凭据；内部错误不向客户端透传。
+    return _service_error(502, "AI 文献助手返回错误")
 
 
 @router.post("/llm/test-connection")
@@ -678,11 +901,17 @@ def test_llm_connection():
         })
     started = time.perf_counter()
     try:
-        get_llm_client(read_timeout=15).chat.completions.create(
+        response = get_llm_client(read_timeout=15).chat.completions.create(
             model=config.model,
             messages=[{"role": "user", "content": "ping"}],
             max_tokens=1,
         )
+        # HTTP 200 也可能是网关首页或空生成结果，不能据此证明模型可用。
+        choices = getattr(response, "choices", None)
+        message = getattr(choices[0], "message", None) if choices else None
+        content = getattr(message, "content", None)
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError("LLM 未返回有效正文")
     except APITimeoutError as exc:
         raise HTTPException(status_code=504, detail={
             "code": "LLM_TIMEOUT", "message": "连接测试超时，请重试",
@@ -1011,26 +1240,39 @@ async def put_upload_draft(
     from backend.ingest.upload_tasks import get_draft, save_draft
     from backend.rag.database import async_session_factory
 
-    state = _task_for_user(task_id, current_user)
-    if state.get("paper_id"):
-        raise _upload_error(409, "draft_already_submitted", "该草稿已经提交审核")
-    if state.get("duplicate"):
-        raise _upload_error(
-            409,
-            "duplicate_doi",
-            "该论文已经存在",
-            existing_paper_id=state.get("existing_paper_id"),
-        )
-    _reject_legacy_classification_contract(draft)
-    previous = get_draft(task_id) or {}
-    normalized = _normalize_draft(draft)
-    # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。
-    normalized["citation_extraction"] = previous.get("citation_extraction")
-    async with async_session_factory() as session:
-        await _resolve_draft_classifications(session, normalized)
-    _validate_draft(normalized, partial=True)
-    saved = save_draft(task_id, normalized)
-    return {"ok": True, "data": saved, "saved_at": int(time.time())}
+    from backend.ingest.upload_tasks import upload_task_lock
+    try:
+        with upload_task_lock(task_id):
+            state = _task_for_user(task_id, current_user)
+            if state.get("paper_id"):
+                raise _upload_error(409, "draft_already_submitted", "该草稿已经提交审核")
+            if state.get("duplicate"):
+                raise _upload_error(
+                    409,
+                    "duplicate_doi",
+                    "该论文已经存在",
+                    existing_paper_id=state.get("existing_paper_id"),
+                )
+            _reject_legacy_classification_contract(draft)
+            preparation_id = draft.pop('evidence_preparation_id', None)
+            if preparation_id:
+                from backend.ingest import evidence_proposals as proposals, property_evidence as evidence
+                from backend.database import SessionLocal
+                with SessionLocal() as evidence_session:
+                    proposals.validate_save(evidence_session, evidence.upload_snapshot(task_id, current_user.id), current_user.id, preparation_id, 'upload')
+            previous = get_draft(task_id) or {}
+            normalized = _normalize_draft(draft)
+            if "material_states" in draft:
+                normalized["paper"]["research_materials"] = _derived_research_materials(normalized["material_states"])
+            # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。
+            normalized["citation_extraction"] = previous.get("citation_extraction")
+            async with async_session_factory() as session:
+                await _resolve_draft_classifications(session, normalized)
+            _validate_draft(normalized, partial=True)
+            saved = save_draft(task_id, normalized)
+            return {"ok": True, "data": saved, "saved_at": int(time.time())}
+    except TimeoutError as exc:
+        raise _upload_error(409, 'submission_in_progress', '该草稿正在提交，请稍后重试') from exc
 
 
 @router.post("/upload-tasks/{task_id}/structure-candidates")
@@ -1091,6 +1333,11 @@ async def upload_structure_candidate(
         )
     except (StructureCandidateError, ValueError) as exc:
         raise _upload_error(400, "structure_validation_failed", str(exc)) from exc
+
+    from backend.database import SessionLocal
+    from backend.ingest.scientific_evidence import register_structure_origin
+    with SessionLocal.begin() as origin_session:
+        register_structure_origin(origin_session, 'upload', task_id, candidate, current_user.id, current_user.username, filename, raw)
 
     destination = task_directory(task_id) / f"{file_id}{Path(filename).suffix or '.POSCAR'}"
     destination.write_bytes(raw)
@@ -1201,12 +1448,12 @@ async def _create_pending_paper(
     task_id: str,
     state: dict[str, Any],
     draft: dict[str, Any],
+    evidence_checks: list[dict] | None = None,
 ) -> int:
     # 先拒绝旧客户端契约，再加载科学数据处理依赖；这样非法请求不会被无关的
     # PDF/晶体学可选依赖阻断，也不会进入任何持久化准备步骤。
     _reject_legacy_classification_contract(draft)
 
-    from backend.ingest.chunker import chunk_paper
     from backend.ingest.scientific_drafts import (
         add_scientific_evidence_link,
         persist_scientific_draft,
@@ -1263,6 +1510,7 @@ async def _create_pending_paper(
                     title=str(paper_data.get("title")).strip(),
                     authors=paper_data.get("authors") or None,
                     journal=paper_data.get("journal"),
+                    issue_number=paper_data.get("issue_number"),
                     volume=paper_data.get("volume"),
                     pages=paper_data.get("pages"),
                     year=paper_data.get("year"),
@@ -1347,28 +1595,24 @@ async def _create_pending_paper(
                     (item for item in paper_files.values() if item.role == "main"),
                     None,
                 )
+                from backend.ingest.property_evidence import source_chunks, locate_with_reason
+                source_locations = []
                 for file_id, source_markdown in chunk_sources:
-                    for chunk in chunk_paper(source_markdown, paper.id):
-                        page_match = re.search(r"<!--\s*page:\s*(\d+)\s*-->", chunk.content)
-                        page = int(page_match.group(1)) if page_match else None
+                    for chunk in source_chunks(source_markdown, file_id):
                         paper_file = paper_files.get(file_id) or main_paper_file
                         if paper_file is None:
                             continue
                         paper_chunk = PaperChunk(
-                            paper_id=paper.id,
-                            paper_revision=paper.content_revision,
-                            paper_file_id=paper_file.id,
-                            chunk_index=chunk.chunk_index,
-                            section_name=_fit_column(chunk.section_name, 500),
-                            heading=_fit_column(chunk.heading, 500),
-                            content=chunk.content,
-                            token_count=chunk.token_count,
-                            page_start=page,
-                            page_end=page,
+                            paper_id=paper.id, paper_revision=paper.content_revision,
+                            paper_file_id=paper_file.id, chunk_index=chunk['chunk_index'],
+                            section_name=_fit_column(chunk['section'], 500), heading=_fit_column(chunk['heading'], 500),
+                            content=chunk['content'], token_count=len(chunk['content']) // 4,
+                            page_start=chunk['page_start'], page_end=chunk['page_end'],
                         )
                         session.add(paper_chunk)
                         await session.flush()
-                        paper_chunks[(str(file_id), int(chunk.chunk_index))] = paper_chunk
+                        paper_chunks[(str(file_id), chunk['chunk_index'])] = paper_chunk
+                        source_locations.append(chunk)
 
                 evidence_groups = [
                     ("classification", draft.get("classification_evidence") or []),
@@ -1379,32 +1623,15 @@ async def _create_pending_paper(
                     for evidence in evidences:
                         if not isinstance(evidence, dict) or not str(evidence.get("quote") or "").strip():
                             continue
-                        file_id = str(evidence.get("file_id") or "")
-                        chunk_index = evidence.get("chunk_index")
-                        paper_chunk = None
-                        if chunk_index is not None:
-                            paper_chunk = paper_chunks.get((file_id, int(chunk_index)))
-                            if paper_chunk is None:
-                                matches = [
-                                    item
-                                    for (_source_file_id, source_index), item in paper_chunks.items()
-                                    if source_index == int(chunk_index)
-                                ]
-                                if len(matches) == 1:
-                                    paper_chunk = matches[0]
-                        page = evidence.get("page") or evidence.get("page_start")
-                        if paper_chunk is None and page is not None:
-                            matches = [
-                                item
-                                for item in paper_chunks.values()
-                                if item.page_start is not None
-                                and item.page_end is not None
-                                and item.page_start <= int(page) <= item.page_end
-                            ]
-                            if len(matches) == 1:
-                                paper_chunk = matches[0]
-                        if paper_chunk is None:
+                        located, location_error = locate_with_reason(evidence, source_locations)
+                        if located is None:
+                            if field_path in targets_by_path:
+                                raise _upload_error(409, 'evidence_missing', location_error,
+                                    issues=[{'field': field_path, 'message': location_error}])
                             continue
+                        paper_chunk = paper_chunks[(located['file_id'], located['chunk_index'])]
+                        evidence = located
+                        page = located.get('page_start')
                         paper_evidence = PaperEvidence(
                             paper_id=paper.id,
                             paper_revision=paper.content_revision,
@@ -1420,10 +1647,33 @@ async def _create_pending_paper(
                         target = targets_by_path.get(field_path)
                         if target is not None:
                             add_scientific_evidence_link(session, target, paper_evidence)
+                if evidence_checks is not None:
+                    from backend.ingest.property_evidence import paper_snapshot
+                    from backend.ingest import scientific_evidence as science
+                    from sqlalchemy import update as sql_update, delete as sql_delete
+                    await session.flush()
+                    # 在论文事务内转接服务端来源和稳定核对项，不依赖 Redis job 存活。
+                    await session.execute(sql_update(models.ScientificStructureOrigin).where(
+                        models.ScientificStructureOrigin.target == 'upload', models.ScientificStructureOrigin.target_id == task_id,
+                    ).values(target='paper', target_id=str(paper.id)))
+                    persisted = await session.run_sync(lambda sync: paper_snapshot(sync, paper.id, 0, '', check_access=False))
+                    by_item = {r['item_key']: r for r in evidence_checks}
+                    transferred = {}
+                    for r in persisted['records']:
+                        old = by_item.get(r['item_key'])
+                        if old:
+                            # 新 chunk ID 由同原文重新定位。来源限定以服务端来源记录为准。
+                            updated = science.transfer_result(r, old, persisted['chunks'], {key: file.id for key, file in paper_files.items()})
+                            if updated is not None:
+                                transferred[r['key']] = updated
+                    await session.run_sync(lambda sync: science.save_results(sync, persisted, transferred, int(state['user_id'])))
+                    await session.execute(sql_delete(models.ScientificEvidenceCheck).where(
+                        models.ScientificEvidenceCheck.target == 'upload', models.ScientificEvidenceCheck.target_id == task_id))
+                    await session.execute(sql_delete(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == task_id))
                 paper_id = paper.id
         return paper_id
     except IntegrityError as exc:
-        raise _upload_error(409, "scientific_data_integrity_error", "科学数据不满足完整性约束") from exc
+        raise _scientific_integrity_error(exc, draft) from exc
     except Exception as exc:
         from backend.ingest.property_modules import PropertyValidationError
 
@@ -1528,11 +1778,11 @@ async def submit_upload_draft(
         from backend.ingest.upload_tasks import upload_task_lock
 
         with upload_task_lock(task_id):
-            if options and options.consistency_acknowledged:
-                return await _submit_upload_draft_locked(
-                    task_id, current_user, consistency_acknowledged=True,
-                )
-            return await _submit_upload_draft_locked(task_id, current_user)
+            return await _submit_upload_draft_locked(
+                task_id, current_user, consistency_acknowledged=bool(options and options.consistency_acknowledged),
+                evidence_job_id=options.evidence_job_id if options else None,
+                expected_evidence_version=options.expected_evidence_version if options else None,
+            )
     except TimeoutError as exc:
         raise _upload_error(409, "submission_in_progress", "该上传任务正在提交，请稍后重试") from exc
 
@@ -1542,6 +1792,8 @@ async def _submit_upload_draft_locked(
     current_user: User,
     *,
     consistency_acknowledged: bool = False,
+    evidence_job_id: str | None = None,
+    expected_evidence_version: str | None = None,
 ) -> dict[str, Any]:
     from backend.ingest.upload_contracts import CleanupContext
     from backend.ingest.upload_tasks import cleanup_transient_data, get_draft, update_state
@@ -1578,10 +1830,31 @@ async def _submit_upload_draft_locked(
     if draft is None:
         raise _upload_error(409, "draft_not_found", "草稿不存在或已过期")
 
+    from backend.ingest.property_evidence import upload_snapshot, resolve_results
+    from backend.ingest.scientific_drafts import _property_modules_for_state
+    import copy
+    snapshot = upload_snapshot(task_id, current_user.id)
+    from backend.database import SessionLocal
+    from backend.ingest.scientific_evidence import load_results
+    with SessionLocal() as check_session:
+        cached = load_results(check_session, snapshot, current_user.id)
+    evidence_checks = resolve_results(snapshot, cached, current_user.id, evidence_job_id, expected_evidence_version)
+    draft = copy.deepcopy(draft)
+    for state_data in draft.get('material_states') or []:
+        state_data['property_modules'] = _property_modules_for_state(state_data)
+    for result in evidence_checks:
+        if result.get('kind') != 'property':
+            continue
+        state_data = draft['material_states'][result['state_index']]
+        module = next(m for m in state_data['property_modules'] if m['module_key'] == result['module_key'])
+        record = next(r for r in module['records'] if r['record_key'] == result['record_key'])
+        record.pop('evidence', None)
+        record['evidences'] = result['evidences']
+
     cleanup_context = CleanupContext.from_state(task_id, state)
     update_state(task_id, status="submitting", submission_status="submitting")
     try:
-        paper_id = await _create_pending_paper(task_id, state, draft)
+        paper_id = await _create_pending_paper(task_id, state, draft, evidence_checks=evidence_checks)
     except Exception:
         # 提交失败必须回滚为 ready，否则任务卡在 submitting、详情页只剩空白只读预览
         try:
@@ -1615,6 +1888,19 @@ async def get_paper_review_artifact(
         raise _upload_error(404, "paper_not_found", "论文不存在")
     if context["review_status"] != "pending":
         raise _upload_error(409, "review_artifact_not_pending", "论文已不在待审核状态")
+    # 返修的分类选择与送审事务一起持久化，不依赖已清理的原上传快照。
+    from backend.database import SessionLocal
+    with SessionLocal() as session:
+        event = session.scalar(select(models.PaperHistoryEvent).where(
+            models.PaperHistoryEvent.paper_id == paper_id,
+            models.PaperHistoryEvent.paper_revision == context['paper_revision'],
+            models.PaperHistoryEvent.event_type == 'modified',
+            models.PaperHistoryEvent.operation_id.like('revision:%'),
+        ).order_by(models.PaperHistoryEvent.id.desc()).limit(1))
+        submitted = (event.classification_snapshot or {}).get('revision_submission') if event else None
+    if submitted is not None:
+        return {'ok': True, 'data': {'task_id': context.get('task_id'), 'paper_id': paper_id,
+            'paper_revision': context['paper_revision'], 'ai_values': {}, 'user_values': submitted, 'evidence': {}}}
     found = _artifact_by_paper_id(paper_id, context.get("task_id"))
     if not found:
         raise _upload_error(404, "review_artifact_not_found", "该论文没有待审 AI 证据")
@@ -1674,7 +1960,7 @@ async def paper_structure_candidate(
     filename = Path(file.filename or "structure.cif").name
     async with async_session_factory() as session:
         return await _build_paper_structure_candidate(
-            session, paper_id, material_state_index, filename, raw
+            session, paper_id, material_state_index, filename, raw, current_user=_current_user
         )
 
 
@@ -1684,6 +1970,7 @@ async def _build_paper_structure_candidate(
     material_state_index: int,
     filename: str,
     raw: bytes,
+    current_user=None,
 ) -> dict[str, Any]:
     """C2 的实现（不管理 session），便于测试直接调用。"""
     from backend.ingest.upload_contracts import structure_format_for_filename
@@ -1729,6 +2016,11 @@ async def _build_paper_structure_candidate(
         )
     except (StructureCandidateError, ValueError) as exc:
         raise _upload_error(400, "structure_validation_failed", str(exc)) from exc
+
+    if current_user is not None:
+        from backend.ingest.scientific_evidence import register_structure_origin
+        await session.run_sync(lambda sync: register_structure_origin(sync, 'paper', str(paper_id), candidate, current_user.id, current_user.username, filename, raw))
+        await session.commit()
 
     return {
         "ok": True,
@@ -1815,11 +2107,14 @@ async def rewrite_paper_scientific_draft(
     """
     from backend.rag.database import async_session_factory
 
-    async with async_session_factory() as session:
-        async with session.begin():
-            return await _rewrite_paper_scientific_draft_in_tx(
-                session, paper_id, draft, current_user
-            )
+    try:
+        async with async_session_factory() as session:
+            async with session.begin():
+                return await _rewrite_paper_scientific_draft_in_tx(
+                    session, paper_id, draft, current_user
+                )
+    except IntegrityError as exc:
+        raise _scientific_integrity_error(exc, draft) from exc
 
 
 async def _reextract_main_pdf_references(session, paper: Paper) -> dict[str, Any]:
@@ -1896,13 +2191,17 @@ async def _rewrite_paper_scientific_draft_in_tx(
         raise _upload_error(400, "invalid_history_operation_id", "history_operation_id 过长")
     _reject_legacy_classification_contract({"material_states": material_states})
 
-    paper = await session.get(models.Paper, paper_id)
+    paper = await session.scalar(select(models.Paper).where(models.Paper.id == paper_id).with_for_update())
     if paper is None:
         raise _upload_error(404, "paper_not_found", "论文不存在")
     if paper.review_status != "pending" and paper.review_status != "approved":
         raise _upload_error(
             409, "paper_status_not_editable", "当前状态的论文不可编辑，请先退回待审核"
         )
+
+    if draft.get('evidence_preparation_id'):
+        from backend.ingest import evidence_proposals as proposals, property_evidence as evidence
+        await session.run_sync(lambda sync: proposals.validate_save(sync, evidence.paper_snapshot(sync, paper_id, current_user.id, current_user.role), current_user.id, draft['evidence_preparation_id'], 'scientific'))
 
     # 复用上传提交的既有校验（FR-020）：论文级字段来自数据库，
     # 请求体只携带科学数据部分（契约 C1 的形态）。
@@ -1935,13 +2234,17 @@ async def _rewrite_paper_scientific_draft_in_tx(
         }
 
     paper.superconductor_kind = full_draft["paper"]["superconductor_kind"]
+    # 仅在用户保存科学数据时同步汇总，不在读取历史论文时回填。
+    paper.research_materials = _derived_research_materials(full_draft["material_states"])
 
     bumped = paper.review_status == "approved"
     citation_extraction = await _reextract_main_pdf_references(session, paper) if bumped else None
     await delete_scientific_entities(session, paper.id)
     if bumped:
         await bump_paper_revision(session, paper)
-    await persist_scientific_draft(session, paper, full_draft)
+    targets = await persist_scientific_draft(session, paper, full_draft)
+    from backend.ingest.property_evidence import persist_existing_paper_targets
+    await persist_existing_paper_targets(session, paper, targets)
     if citation_extraction is not None:
         from backend.services.citation_graph import persist_reference_extraction
 
@@ -2006,7 +2309,7 @@ async def publish_approved_paper(
 
     async with async_session_factory() as session:
         paper = await session.scalar(
-            select(Paper).where(Paper.id == paper_id, Paper.review_status == "approved")
+            select(Paper).where(Paper.id == paper_id, Paper.review_status == "approved", Paper.approved_revision == Paper.content_revision)
         )
         if paper is None:
             raise _upload_error(409, "paper_not_approved", "论文尚未审核通过，不能发布向量索引")
@@ -2014,6 +2317,10 @@ async def publish_approved_paper(
             select(PaperChunk).where(PaperChunk.paper_id == paper_id).order_by(PaperChunk.chunk_index)
         )
         chunks = list(result.scalars())
+        from backend.rag.scientific_sources import source_chunk
+        science_chunks = [chunk for source in (await session.scalars(select(models.ScientificEvidenceSource).where(
+            models.ScientificEvidenceSource.paper_id == paper_id, models.ScientificEvidenceSource.paper_revision == paper.content_revision))).all()
+            if (chunk := source_chunk(source)) is not None]
 
     # 引用匹配只使用 GROBID 已保存的字段。它与向量发布独立，因此不会用 LLM
     # 的 builds_on 文本制造图边。
@@ -2037,7 +2344,7 @@ async def publish_approved_paper(
         }
         for chunk in chunks
     ]
-    indexed = await asyncio.to_thread(embed_and_index_chunks, chunk_data)
+    indexed = await asyncio.to_thread(embed_and_index_chunks, [*chunk_data, *science_chunks])
 
     # 同步到 Neo4j 知识图谱
     kg_sync_result = {"success": False, "error": None}

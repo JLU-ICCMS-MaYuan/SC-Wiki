@@ -2,6 +2,8 @@
 
 **Feature**：[spec.md](spec.md) ／ **日期**：2026-08-26
 
+**2026-09-14 验收修订**：已确认保留 #53、#80、#84、#90 的后续设计，以以下场景验收当前实现。真实 LLM 调用不属于本轮授权测试；预置解析结果只能验证解析后的链路，不能证明真实模型提取质量。
+
 ## 前置条件
 
 - 后端依赖已安装（含新增 spglib）：`pip install -r requirements.txt`
@@ -18,7 +20,7 @@ python -m pytest backend/tests/test_upload_jobs.py backend/tests/test_scientific
 cd frontend && npm run test:upload-ui
 ```
 
-预期：全部通过；新增用例覆盖元素数锁定/宽松解析、空间群全表映射、提交逐条 CalculationContext、research_materials 汇总、超导类型条件化渲染。
+预期：全部通过；覆盖元素数锁定/宽松解析、空间群全表映射、逐条物性记录条件参数、research_materials 汇总与按 Tc 方法控制字段。
 
 ## 端到端场景
 
@@ -33,15 +35,15 @@ cd frontend && npm run test:upload-ui
 1. 材料化学式填 `LaHx (x = 1–12) 150 GPa`，停止编辑 5 秒自动保存。
 2. 预期：元素种类数显示 2。
 3. 手动改为 3 → 保存 → 刷新页面 → 仍为 3（不被重算覆盖）。
-4. 解锁场景：把化学式改为 `CeCu2Si2` 且未手动改过数字 → 保存后显示 3。
+4. 另取未手动编辑数字的状态，把化学式改为 `CeCu2Si2` → 保存后显示 3；已锁定状态改化学式仍保留手动值。
 
 ### 场景 3：超导类型与 Tc（US3）
 
-1. 某材料状态超导类型选「常规 (BCS)」→ 点击「添加 Tc」。
-2. 预期：条目含 λ、ωlog、μ\*、Tc 数值、方法下拉（McMillan / Allen-Dynes-McMillan / isotropic Migdal-Eliashberg / anisotropic Migdal-Eliashberg / SCDFT / 其他）。
-3. 方法选「其他」→ 出现自定义文本框，填 `my-method` → 保存刷新后仍在。
-4. 类型切为「非常规」→ 再「添加 Tc」→ 新条目仅 Tc 数值框；原常规条目不消失。
-5. 提交 → 管理员审核页：该状态显示超导类型；每条 theoretical Tc 关联各自的 λ/ωlog/μ\*。
+1. 论文基础信息区选择超导类型；材料状态不显示重复的类型控件。
+2. 在超导物性模块新增两条预测 Tc，各自填写方法、数值、条件、λ、ωlog、μ\* 与证据；修改一条后另一条不变。
+3. 方法选「其他」，填 `my-method`，保存刷新后仍在。
+4. 新增测量 Tc，实验方法不显示也不保存计算参数。更改论文超导类型不改变已有 Tc 的字段集。
+5. 提交后从管理详情读取物性模块，核对每条记录参数、条件与证据完整且独立；不查询已退役的 Tc/Context 表。
 
 ### 场景 4：空间群（US4）
 
@@ -51,13 +53,13 @@ cd frontend && npm run test:upload-ui
 ### 场景 5：文案与顺序（US5）
 
 1. 页面显示「压强 (GPa)」，无「压力」标签。
-2. 未选结构家族时主结构家族禁用并显示说明；选择两个结构家族后可指定唯一主项。
+2. 页面无主结构家族控件；可选择多个类型标签，保存后全部保留且编辑器不写主项标记（#53 替代原要求）。
 3. 结构附件模块在卡片最底端（Tc 与其他普通物性之下）。
 
 ### 场景 6：energy above hull（US6）
 
-1. 上传明确声明 thermodynamically stable 的论文 → 对应材料状态普通物性含 energy above hull = 0（eV/atom）。
-2. 手动场景：点击「＋ energy above hull」→ 生成空值条目；再次点击不重复添加。
+1. 使用明确声明 thermodynamically stable 的原文及固定解析结果，核对 energy above hull = 0（eV/atom）在物性模块内保存、提交和读取后完整保留；此场景不验证真实 LLM。
+2. 手动场景：在电子性质模块新增自定义 energy above hull 记录；有同名目标记录时自动补全应原位回填，不重复添加。不要求旧预置按钮存在。
 
 ### 场景 7：提交回归
 

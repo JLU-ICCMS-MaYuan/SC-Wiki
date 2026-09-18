@@ -24,6 +24,7 @@
   `formula`、`type`、`pressure`、`tc`、`space_group`、`source`、`status` 和 `doi` 的扁平列表行。
 - `/search` 页面按 `paper_id` 请求论文详情。结构预览读取材料状态下的 `structures`，物性展示统一读取
   `property_modules`。Tc 排在关键物性最前，其后展示记录内参数和其他物性；空值不生成表格行。
+- 独立详情、搜索详情与图表抽屉共用按论文 ID 关联的[评论与回复](../06_Researcher_Community_Forum/community-discussion.md)，版本更新不会丢失评论。材料状态响应中的 `system_key` 用于跳转跨论文共享的体系讨论；没有元素组合时不生成体系入口。
 - 探索页默认不预选元素，Formula 输入框默认为空；只有 URL 显式包含 `elements` 时才预选。
 - 论文总结和核心发现以纯文本 `pre-wrap` 显示，保留用户录入的换行，不进行 Markdown 再解释。
 - 详情区块中，标签使用紧凑 caption；长文本使用较轻的正文层级，短值字段保持适合扫描的强调层级。
@@ -40,7 +41,7 @@
 ## 工作流程
 
 材料检索先按规范化字段确定候选材料和论文。Go API 以目标 `property_records` 的 Tc 固定列关联材料
-状态与论文并生成扁平结果，前端把本地与外部来源适配为统一视图。详情阶段按论文 ID 加载完整论文、
+状态与论文并生成扁平结果，前端展示本地记录。详情阶段按论文 ID 加载完整论文、
 结构和按材料状态嵌套的模块记录，供详情、结构预览、审核编辑和图表点击抽屉复用。
 
 ```mermaid
@@ -64,7 +65,6 @@ flowchart LR
 - 已批准论文的 MaterialState 完整导出要求每条物性记录至少有一条当前 revision 的 Evidence；记录的
   `structure_key` 必须精确匹配同状态导出结构的 `structure-{id}`，否则返回 `409 export_incomplete`。
 - `superconductor_records` 不属于当前运行模型，任何读取路径都不得查询该表。
-- 外部来源详情字段与本地论文不完全等价，前端按来源能力降级显示缺失字段。
 
 ## 代码与测试
 
@@ -97,5 +97,4 @@ flowchart LR
 ## 已知问题
 
 - 本地列表行的空间群字段当前为占位值，完整结构字段需要从详情或结构接口继续读取。
-- 外部数据源不保证提供本地 `property_modules` 的完整定义和 Evidence，前端按来源能力降级展示。
 - 仓库测试能验证 Contract 后正常读取不依赖旧表，但不表示任一生产数据库已经执行迁移。

@@ -49,7 +49,7 @@
 - [x] T022 [P] [US1] 新增 `frontend/src/i18n/{zh,en}/rag.ts` 并替换 `frontend/src/pages/RagPage.tsx`、`frontend/src/lib/useStreamingChat.ts`、`frontend/src/components/MarkdownMessage.tsx` 文案
 - [x] T023 [P] [US1] 新增 `frontend/src/i18n/{zh,en}/kg.ts` 并替换 `frontend/src/pages/KnowledgeGraphPage.tsx`（42 处）文案
 - [x] T024 [P] [US1] 新增 `frontend/src/i18n/{zh,en}/tcPredict.ts` 并替换 `frontend/src/pages/TcPredictPage.tsx` 文案
-- [x] T025 [P] [US1] 替换外部数据源组件文案：`frontend/src/components/AlexandriaDetail.tsx`（46 处）、`frontend/src/components/HtscDetail.tsx`、`frontend/src/components/PeriodicTable.tsx`、`frontend/src/lib/paperProcessing.ts`、`frontend/src/components/ClassificationAutocomplete.tsx`
+- [x] T025 [P] [US1] 替换组件文案（历史外部数据源详情组件已退役）：`frontend/src/components/PeriodicTable.tsx`、`frontend/src/lib/paperProcessing.ts`、`frontend/src/components/ClassificationAutocomplete.tsx`
 - [x] T026 [US1] 在 `tests/03_data_search_and_database_discovery/english-ui-sweep.test.tsx` 新增巡检测试：英文模式下渲染各页面主视图，断言无中日韩字符（SC-001）
 
 ## 阶段 4：用户故事 2——枚举与分类目录双语（P1）

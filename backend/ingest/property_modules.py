@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 import hashlib
 import json
+import math
 from typing import Any, Iterable
 
 from sqlalchemy import select
@@ -188,6 +189,49 @@ def _validate_value_shape(record: dict[str, Any], path: str, issues: list[Proper
         issues.append(_issue(f"{path}.uncertainty", "schema_validation_failed", "不确定度不能为负"))
 
 
+def _tc_number_text(value: int | float | Decimal) -> str:
+    """与表单的数字字符串保持一致，不保留初次提取的写法。"""
+    if value == 0:
+        return "0"
+    decimal = Decimal(str(value))
+    if Decimal("1e-6") <= decimal < Decimal("1e21"):
+        text = format(decimal, "f")
+        return text.rstrip("0").rstrip(".") if "." in text else text
+    mantissa, exponent = format(decimal, "e").split("e")
+    mantissa = mantissa.rstrip("0").rstrip(".") if "." in mantissa else mantissa
+    return f"{mantissa}e{int(exponent):+d}"
+
+
+def normalize_current_tc_value(record: dict[str, Any], path: str = "record") -> dict[str, Any]:
+    """当前 Tc 派生兼容文本；保存与核对预期使用同一规则。"""
+    if record.get("record_type") not in {"predicted_tc", "measured_tc"}:
+        return record
+    item = dict(record)
+    issues: list[PropertyIssue] = []
+    kind = item.get("value_kind")
+    for field in ("value_number", "value_min", "value_max", "uncertainty"):
+        value = item.get(field)
+        if value is not None and (isinstance(value, bool) or not isinstance(value, (int, float, Decimal)) or not math.isfinite(value) or value < 0):
+            issues.append(_issue(f"{path}.{field}", "schema_validation_failed", "Tc 数值必须是有限的非负数字"))
+    if kind == "text" and (not isinstance(item.get("value_text"), str) or not item["value_text"].strip()):
+        issues.append(_issue(f"{path}.value_text", "schema_validation_failed", "请输入当前文本值"))
+    if kind == "boolean" and not isinstance(item.get("value_boolean"), bool):
+        issues.append(_issue(f"{path}.value_boolean", "schema_validation_failed", "请选择当前布尔值"))
+    if issues:
+        raise PropertyValidationError(issues)
+    item["value_raw"] = ""
+    item["unit_raw"] = "K" if kind in {"number", "range"} else None
+    if kind == "number" and item.get("value_number") is not None:
+        item["value_raw"] = _tc_number_text(item["value_number"])
+    elif kind == "range" and item.get("value_min") is not None and item.get("value_max") is not None:
+        item["value_raw"] = f'{_tc_number_text(item["value_min"])}–{_tc_number_text(item["value_max"])}'
+    elif kind == "text":
+        item["value_raw"] = item["value_text"]
+    elif kind == "boolean":
+        item["value_raw"] = str(item["value_boolean"]).lower()
+    return item
+
+
 def validate_record(
     record: dict[str, Any],
     definition: models.FormDefinition | None = None,
@@ -216,7 +260,7 @@ def validate_record(
         issues.append(_issue(f"{path}.record_key", "schema_validation_failed", "record_key 不能为空"))
     if not item["name_raw"]:
         issues.append(_issue(f"{path}.name_raw", "schema_validation_failed", "名称不能为空"))
-    if not item["value_raw"]:
+    if record_type not in {"predicted_tc", "measured_tc"} and not item["value_raw"]:
         issues.append(_issue(f"{path}.value_raw", "schema_validation_failed", "原始值不能为空"))
     if record_type in {"predicted_tc", "measured_tc"}:
         if property_code != "tc":
@@ -235,9 +279,10 @@ def validate_record(
                 issues.append(_issue(f"{path}.payload", "invalid_condition_type", "测量 Tc 必须使用实验 Conditions"))
         if item.get("canonical_unit") != "K":
             issues.append(_issue(f"{path}.canonical_unit", "schema_validation_failed", "Tc 规范单位必须为 K"))
-        for value_field in ("value_number", "value_min", "value_max", "uncertainty"):
-            if item.get(value_field) is not None and item[value_field] < 0:
-                issues.append(_issue(f"{path}.{value_field}", "schema_validation_failed", "Tc 数值不能为负"))
+        try:
+            item = normalize_current_tc_value(item, path)
+        except PropertyValidationError as error:
+            raise PropertyValidationError([*issues, *error.issues]) from error
     elif item.get("is_representative"):
         issues.append(_issue(f"{path}.is_representative", "schema_validation_failed", "只有 Tc 记录可以标记为代表结果"))
     if property_code == "custom":
@@ -276,17 +321,20 @@ def validate_record(
     return item
 
 
-def normalize_module(module: dict[str, Any], *, paper_id: int, paper_revision: int) -> dict[str, Any]:
+def normalize_module(
+    module: dict[str, Any], *, paper_id: int, paper_revision: int, path: str | None = None,
+) -> dict[str, Any]:
     item = deepcopy(module)
     code = str(item.get("module_code") or "").strip()
+    module_path = path or f"module[{code}]"
     if code not in MODULE_CODES:
-        raise PropertyValidationError([_issue("module_code", "unknown_module", "未注册的物性模块")])
+        raise PropertyValidationError([_issue(f"{module_path}.module_code", "unknown_module", "未注册的物性模块")])
     item["module_code"] = code
     item["module_key"] = str(item.get("module_key") or f"module-{code}").strip()
     item["paper_id"] = paper_id
     item["paper_revision"] = paper_revision
     item["display_order"] = max(0, int(item.get("display_order") or 0))
-    item["records"] = [validate_record({**record, "module_code": code}, path=f"module[{code}].records[{index}]") for index, record in enumerate(item.get("records") or []) if isinstance(record, dict)]
+    item["records"] = [validate_record({**record, "module_code": code}, path=f"{module_path}.records[{index}]") for index, record in enumerate(item.get("records") or []) if isinstance(record, dict)]
     return item
 
 
@@ -462,6 +510,14 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
             if record["record_key"] in deleted_record_keys:
                 continue
             db_record = existing_records.get((module["module_key"], record["record_key"]))
+            # 局部记录键可在不同状态/模块中复用；缺省身份必须包含完整作用域。
+            # 已有记录（含历史来源指纹）编辑时保留身份，不能随科学值或导出载荷变化。
+            source_fingerprint = (
+                db_record.source_fingerprint if db_record is not None
+                else record.get("source_fingerprint") or hashlib.sha256(canonical_json([
+                    material_state_id, module["module_key"], record["record_key"],
+                ]).encode("utf-8")).hexdigest()
+            )
             values = {
                 "record_key": record["record_key"], "paper_id": paper_id, "paper_revision": paper_revision,
                 "material_state_id": material_state_id, "module_id": db_module.id,
@@ -475,7 +531,7 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
                 "unit_raw": record.get("unit_raw"), "canonical_unit": record.get("canonical_unit"), "method_code": record.get("method_code"),
                 "method_raw": record.get("method_raw"), "criterion_code": record.get("criterion_code"), "criterion_raw": record.get("criterion_raw"),
                 "is_representative": bool(record.get("is_representative", False)), "structure_key": record.get("structure_key"),
-                "payload_json": record["payload"], "source_fingerprint": record.get("source_fingerprint") or hashlib.sha256(record["record_key"].encode()).hexdigest(),
+                "payload_json": record["payload"], "source_fingerprint": source_fingerprint,
                 "record_checksum": record["record_checksum"],
             }
             if db_record is None:

@@ -131,6 +131,7 @@ export type CrystalSystem = typeof CRYSTAL_SYSTEM_VALUES[number]
 
 export interface DraftMaterialState {
   state_key?: string
+  material_name?: string | null
   material?: string
   structure_families?: StructureFamilySelection[]
   crystal_system?: CrystalSystem
@@ -164,6 +165,7 @@ export interface PaperDraftFields {
   corresponding_authors?: string[]
   co_first_authors?: string[]
   journal?: string
+  issue_number?: string | null
   volume?: string
   pages?: string
   year?: number | null
@@ -178,11 +180,12 @@ export interface PaperDraftFields {
   key_finding?: string
   research_motivation?: string
   research_materials?: string[]
-  material_relations?: unknown[]
+  material_relations?: import('./paperMaterials').MaterialRelation[] | string
   builds_on?: unknown[]
 }
 
 export interface UploadDraft {
+  field_suggestions_error?: string | null
   paper: PaperDraftFields
   material_states: DraftMaterialState[]
   citation_extraction?: CitationExtraction | null
@@ -242,7 +245,7 @@ export function emptyUploadDraft(): UploadDraft {
   return {
     paper: {
       title: '', doi: '', authors: [], corresponding_authors: [], co_first_authors: [],
-      journal: '', volume: '', pages: '', year: null,
+      journal: '', issue_number: '', volume: '', pages: '', year: null,
       abstract: '', summary: '', paper_type: 'unknown', theoretical_subtype: null,
       material_families: [], superconductor_kind: 'unknown',
       keywords_tags: [], methodology: [], key_finding: '', research_motivation: '',
@@ -411,6 +414,7 @@ export function normalizeUploadDraft(value: unknown): UploadDraft {
       ? raw.classification_evidence
       : [],
     field_evidence: fieldEvidence,
+    field_suggestions_error: raw.field_suggestions_error || null,
   }
 }
 

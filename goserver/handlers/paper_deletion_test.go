@@ -63,6 +63,12 @@ func newDeletionTestDB(t *testing.T) *gorm.DB {
 		t.Fatalf("迁移失败: %v", err)
 	}
 
+	// 新的临时结果按目标清理；生产结构由 Alembic 管理。
+	for _, table := range []string{"scientific_evidence_checks", "scientific_structure_origins"} {
+		if err := db.Exec("CREATE TABLE " + table + " (id INTEGER PRIMARY KEY, target TEXT NOT NULL, target_id TEXT NOT NULL)").Error; err != nil {
+			t.Fatal(err)
+		}
+	}
 	prev := database.DB
 	database.DB = db
 	t.Cleanup(func() { database.DB = prev })
@@ -108,7 +114,7 @@ func seedPaperGraph(t *testing.T, db *gorm.DB, doi string) (uint, uint) {
 
 	state := models.MaterialState{
 		StateKey: "state-" + fmt.Sprint(paper.ID), PaperID: paper.ID,
-		PaperRevision: 1, SuperconductorID: sc.ID,
+		PaperRevision: 1, SuperconductorID: &sc.ID,
 	}
 	if err := db.Create(&state).Error; err != nil {
 		t.Fatalf("创建 material_state 失败: %v", err)

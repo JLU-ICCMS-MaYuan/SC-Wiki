@@ -3,6 +3,12 @@
 //
 // 六个叙述字段的内容是英文数据，渲染时原样展示，不随界面语言变化（FR-014）。
 export default {
+  revise: 'Revise and resubmit',
+  revisionTitle: 'Revise paper',
+  resubmit: 'Resubmit for review',
+  revisionAvailable: 'This paper was rejected. You can revise it and submit it for review again.',
+  revisionNotice: 'Changes are saved in a persistent revision draft. Saving does not change the paper. Resubmitting creates a new version for review.',
+  revisionConflict: 'The paper has changed or been reviewed again. Your draft is preserved. Return to the paper to check the latest content.',
   // ── Page frame ──
   backToUpload: 'Back to upload list',
   myPapers: 'My papers',

@@ -250,6 +250,25 @@ async def _create_calculation_context(session, paper, state, structure, calculat
     return calculation
 
 
+def material_state_values(data: dict[str, Any]) -> dict[str, Any]:
+    """持久化与同值比较共用规则，避免可编辑条件被遗漏。"""
+    dimensionality = str(data.get('material_dimensionality') or 'unknown')
+    if dimensionality not in MATERIAL_DIMENSIONALITIES:
+        raise ValueError('材料维度无效')
+    count = data.get('element_count')
+    crystal = data.get('crystal_system') or 'unknown'
+    return {
+        'material_name': str(data.get('material_name') or '').strip() or None,
+        'element_count': count if isinstance(count, int) and not isinstance(count, bool) else count_formula_elements(str(data.get('material') or '')),
+        'material_dimensionality': dimensionality,
+        'crystal_system': crystal if crystal in CRYSTAL_SYSTEMS else 'unknown',
+        'state_kind': data.get('state_kind') or 'unknown',
+        **{key: _number(data.get(key)) for key in ('pressure_value_gpa', 'pressure_min_gpa', 'pressure_max_gpa', 'temperature_value_k', 'magnetic_field_t')},
+        **{key: data.get(key) for key in ('pressure_raw', 'pressure_unit_raw', 'reported_space_group_symbol',
+            'reported_space_group_number', 'temperature_raw', 'temperature_unit_raw', 'note')},
+    }
+
+
 async def persist_scientific_draft(
     session,
     paper: models.Paper,
@@ -266,40 +285,13 @@ async def persist_scientific_draft(
     candidates_by_state = _confirmed_candidates_by_state(draft)
     for state_index, state_data in enumerate(draft.get("material_states") or []):
         material = str(state_data.get("material") or "").strip()
-        superconductor = await _get_or_create_superconductor(session, paper, material)
-        dimensionality = str(state_data.get("material_dimensionality") or "unknown")
-        if dimensionality not in MATERIAL_DIMENSIONALITIES:
-            raise ValueError("材料维度无效")
-        draft_element_count = state_data.get("element_count")
-        element_count = (
-            draft_element_count
-            if isinstance(draft_element_count, int) and not isinstance(draft_element_count, bool)
-            else count_formula_elements(material)
-        )
-        crystal_system = state_data.get("crystal_system") or "unknown"
-        if crystal_system not in CRYSTAL_SYSTEMS:
-            crystal_system = "unknown"
+        superconductor = await _get_or_create_superconductor(session, paper, material) if material else None
         state = models.MaterialState(
             state_key=str(state_data.get("state_key") or f"state-{state_index + 1}"),
             paper_id=paper.id,
             paper_revision=paper.content_revision,
-            superconductor_id=superconductor.id,
-            element_count=element_count,
-            material_dimensionality=dimensionality,
-            pressure_value_gpa=_number(state_data.get("pressure_value_gpa")),
-            pressure_min_gpa=_number(state_data.get("pressure_min_gpa")),
-            pressure_max_gpa=_number(state_data.get("pressure_max_gpa")),
-            pressure_raw=state_data.get("pressure_raw"),
-            pressure_unit_raw=state_data.get("pressure_unit_raw"),
-            reported_space_group_symbol=state_data.get("reported_space_group_symbol"),
-            reported_space_group_number=state_data.get("reported_space_group_number"),
-            temperature_value_k=_number(state_data.get("temperature_value_k")),
-            temperature_raw=state_data.get("temperature_raw"),
-            temperature_unit_raw=state_data.get("temperature_unit_raw"),
-            magnetic_field_t=_number(state_data.get("magnetic_field_t")),
-            state_kind=state_data.get("state_kind") or "unknown",
-            crystal_system=crystal_system,
-            note=state_data.get("note"),
+            superconductor_id=superconductor.id if superconductor else None,
+            **material_state_values(state_data),
         )
         session.add(state)
         await session.flush()
@@ -311,6 +303,17 @@ async def persist_scientific_draft(
         ]
         if sum(bool(item.get("is_primary")) for item in structure_selections) > 1:
             raise ValueError("一个材料状态只能有一个主结构家族")
+        linked_families = set()
+        for selection in structure_selections:
+            family_id = selection.get("id")
+            if family_id is None or family_id in linked_families:
+                continue
+            linked_families.add(family_id)
+            session.add(models.MaterialStateStructureFamily(
+                material_state_id=state.id,
+                structure_family_id=family_id,
+                is_primary=bool(selection.get("is_primary")),
+            ))
         space_group_evidence = state_data.get("space_group_evidence")
         if isinstance(space_group_evidence, dict):
             targets.append(ScientificEvidenceTarget(
@@ -397,12 +400,14 @@ async def persist_scientific_draft(
             deleted_record_keys=state_data.get("deleted_record_keys"),
             deleted_module_keys=state_data.get("deleted_module_keys"),
         )
-        records_by_key = {record.record_key: record for record in records}
+        from backend.ingest.property_evidence import evidence_list
+        records_by_key = {(record.module_id, record.record_key): record for record in records}
+        module_rows = (await session.execute(select(models.PropertyModule).where(models.PropertyModule.material_state_id == state.id))).scalars().all()
+        module_ids = {module.module_key: module.id for module in module_rows}
         for module_index, module in enumerate(property_modules):
             for record_index, item in enumerate(module.get("records") or []):
-                evidence = item.get("evidence")
-                entity = records_by_key.get(item.get("record_key"))
-                if entity is not None and isinstance(evidence, dict):
+                entity = records_by_key.get((module_ids.get(module.get("module_key")), item.get("record_key")))
+                for evidence in evidence_list(item) if entity is not None else []:
                     targets.append(ScientificEvidenceTarget(
                         f"{state_path}.property_modules[{module_index}].records[{record_index}]",
                         evidence, "property_record", entity,

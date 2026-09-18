@@ -55,6 +55,7 @@ tests/web_test
 # 环境变量
 .env
 .env.local
+.env.issue73.local
 
 # 操作系统
 .DS_Store

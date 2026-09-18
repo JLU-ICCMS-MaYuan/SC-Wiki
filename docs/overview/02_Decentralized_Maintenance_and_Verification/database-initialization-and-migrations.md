@@ -10,7 +10,11 @@
 - Go 服务从 `DATABASE_URL` 解析 MySQL DSN，缺少 `DATABASE_URL` 或 `JWT_SECRET_KEY` 会直接拒绝启动。
 - Python 服务仍通过 `backend/database.py` 与 Alembic 使用 `DATABASE_URL`，并保留 `Base.metadata.create_all` 和周期表元素初始化脚本。
 - Alembic 环境允许 `DATABASE_URL` 覆盖配置文件连接串。
-- 当前 Alembic head 为 `20260820_0005`。论文上传模型包含唯一 `papers.upload_task_id`、多来源 `paper_files`、带来源文件和页码范围的 `paper_chunks`，以及永久 `paper_evidences`；`papers.admin_internal_note` 与面向上传者的 `review_comment` 分开保存。
+- 本地 MySQL 当前迁移版本为 `20260917_0107` 与并行分支 `20260914_0052`。`0105` 新增可空的 `material_states.material_name VARCHAR(255)`；`0106` 允许 `superconductor_id` 为空以保存没有化学式的命名材料，不回填或改写历史数据。存在无化学式状态时拒绝直接降级恢复必填关联。热重载不会执行迁移，必须核验实际列；详见 [保存闭环与迁移验收](../../specs/103-property-evidence-review/material-name-save-flow.md)。论文上传模型包含唯一 `papers.upload_task_id`、多来源 `paper_files`、带来源文件和页码范围的 `paper_chunks`，以及永久 `paper_evidences`；`papers.admin_internal_note` 与面向上传者的 `review_comment` 分开保存。
+- `20260911_0103` 在 `20260909_0099` 后新增 `property_evidence_checks`，保存物性核对的内容摘要、来源摘要、规则版本、结论、模型与理由；记录外键使用 `ON DELETE CASCADE`。迁移不扫描或回填历史证据，历史数据在后续提交或批准时按需核对。
+
+- `20260915_0103` 和 `20260915_0104` 从 `20260911_0103` 增量新增科学临时核对、永久来源、结构提交来源与持久上传草稿四张表；不扫描或回填历史数据。并行迁移分支使用明确 revision 执行，不能假定工作区只有一个 head。
+- 社区迁移 `20260917_0107` 依赖 `20260916_0106`，新增体系讨论空间、内容、点赞、举报、处理事件和站内通知六张表；不回填历史数据。SQLAlchemy 元数据由 Alembic 与初始化入口显式导入。2026-09-17 经用户确认，已应用至本地 `scwiki` 并保留并行分支 `20260914_0052`；运行中的社区读取接口、页面和实际数据库回滚写入检查通过。其他环境部署仍须单独核验；见[社区验收](../../specs/106-community-discussion/quickstart.md)。
 
 ## 工作流程
 
@@ -33,11 +37,12 @@ Docker 部署时先启动数据库、缓存、图数据库和向量数据库，�
 - `goserver/main.go`
 - `alembic/env.py`、`alembic/versions/`
 - `alembic/versions/20260820_0005_add_multifile_uploads.py`
+- `alembic/versions/20260911_0103_property_evidence_checks.py`
 - `tests/02_maintenance_and_verification/`
 
 ## 相关变更记录
 
-当前未发现可链接的已完成 Feature 或 Debug 记录。
+- [Issue #103：物性证据保留、自动补证与人工裁决](../../specs/103-property-evidence-review/spec.md)
 
 ## 已知问题
 

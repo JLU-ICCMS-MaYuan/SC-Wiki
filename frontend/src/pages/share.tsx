@@ -19,6 +19,7 @@ import { ClassificationTerm, familyName, loadClassificationCatalogs } from '../l
 import { useLanguage } from '../context/LanguageContext'
 import ChartScatter from '../components/ChartScatter'
 import StructureViewer3D from '../components/StructureViewer3D'
+import PaperCommunity from '../components/community/PaperCommunity'
 import { collectPropertyRows, collectStructures, viewerFormat } from '../lib/paperDetailView'
 import {
   clearChartPreferences, DEFAULT_CHART_PREFERENCES, FamilySelection, readChartPreferences,
@@ -77,7 +78,7 @@ const FAMILY_SUMMARY_MAX_CHARS = 10
 const CHART_CONTROLS_HEIGHT = 56
 
 // ═══════════════════════════════════════════════════════
-const SharePage: React.FC = () => {
+const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) => {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { t, lang } = useLanguage()
@@ -125,10 +126,11 @@ const SharePage: React.FC = () => {
   }, [t])
 
   useEffect(() => {
+    if (section === 'charts') return
     void loadContributions()
     const timer = window.setInterval(() => { void loadContributions() }, 60 * 60 * 1000)
     return () => window.clearInterval(timer)
-  }, [user?.id, loadContributions])
+  }, [user?.id, loadContributions, section])
 
   useEffect(() => {
     const preferences = user ? readChartPreferences(user.id) : DEFAULT_CHART_PREFERENCES
@@ -160,22 +162,24 @@ const SharePage: React.FC = () => {
   }, [])
 
   useEffect(() => {
+    if (section === 'rankings') return
     setPressureLoading(true)
     setPressureError('')
     api.get<any>(`/api/papers/stats/tc-pressure?tc_field=${encodeURIComponent(pressureTcField)}`)
       .then(data => setPressureData(Array.isArray(data) ? data : []))
       .catch(() => { setPressureData([]); setPressureError(t('share.tcPressureLoadFailed')) })
       .finally(() => setPressureLoading(false))
-  }, [pressureTcField, t])
+  }, [pressureTcField, t, section])
 
   useEffect(() => {
+    if (section === 'rankings') return
     setYearLoading(true)
     setYearError('')
     api.get<any>(`/api/papers/stats/tc-year?tc_field=${encodeURIComponent(yearTcField)}`)
       .then(data => setYearData(Array.isArray(data) ? data : []))
       .catch(() => { setYearData([]); setYearError(t('share.tcYearLoadFailed')) })
       .finally(() => setYearLoading(false))
-  }, [yearTcField, t])
+  }, [yearTcField, t, section])
 
   // ── Fetch paper detail when paperId changes ──
   useEffect(() => {
@@ -432,13 +436,13 @@ const SharePage: React.FC = () => {
       <Typography variant="overline">Community</Typography>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: { xs: 'flex-start', sm: 'center' }, gap: 2, mb: 2, flexDirection: { xs: 'column', sm: 'row' } }}>
         <Box>
-          <Typography variant="h1">{t('share.title')}</Typography>
+          <Typography variant="h1">{t(section === 'rankings' ? 'community.rankings' : section === 'charts' ? 'community.charts' : 'share.title')}</Typography>
           <Typography color="text.secondary">{t('share.subtitle')}</Typography>
         </Box>
-        <Button variant="outlined" onClick={restoreDefaults}>{t('share.restoreDefaults')}</Button>
+        {section !== 'rankings' && <Button variant="outlined" onClick={restoreDefaults}>{t('share.restoreDefaults')}</Button>}
       </Box>
 
-      <Card sx={{ mb: 3 }}>
+      {section !== 'charts' && <Card sx={{ mb: 3 }}>
         <CardContent>
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap', mb: 2 }}>
             <Box>
@@ -471,9 +475,9 @@ const SharePage: React.FC = () => {
             </>
           )}
         </CardContent>
-      </Card>
+      </Card>}
 
-      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' }, gap: 2.5, alignItems: 'start' }}>
+      {section !== 'rankings' && <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' }, gap: 2.5, alignItems: 'start' }}>
 
       {/* ═══ Tc-Pressure Scatter ═══ */}
       <Card sx={{ minWidth: 0 }}>
@@ -545,6 +549,7 @@ const SharePage: React.FC = () => {
       </Card>
       </Box>
 
+      }
       {/* ═══ Paper Detail Drawer ═══ */}
       <Drawer
         anchor="right"
@@ -690,6 +695,7 @@ const SharePage: React.FC = () => {
               </Box>
             </>
           )}
+          {paperDetail && !detailLoading && <PaperCommunity key={paperDetail.id} paper={paperDetail} />}
         </Box>
       </Drawer>
 

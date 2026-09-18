@@ -331,6 +331,7 @@ class Paper(Base):
     doi = Column(String(255), nullable=True)
     title = Column(Text, nullable=True)
     journal = Column(String(255))
+    issue_number = Column(String(100), nullable=True)
     volume = Column(String(100))
     pages = Column(String(100))
     year = Column(Integer, index=True, nullable=False)
@@ -984,6 +985,7 @@ class StructureFamilyAlias(Base):
 
 class MaterialState(Base):
     __tablename__ = "material_states"
+    material_name = Column(String(255), nullable=True)
     __table_args__ = (
         ForeignKeyConstraint(
             ["paper_id", "paper_revision"],
@@ -1070,7 +1072,7 @@ class MaterialState(Base):
     state_key = Column(String(96), nullable=False)
     paper_id = Column(Integer, nullable=False)
     paper_revision = Column(Integer, nullable=False)
-    superconductor_id = Column(Integer, nullable=False)
+    superconductor_id = Column(Integer, nullable=True)
     element_count = Column(SmallInteger)
     material_dimensionality = Column(
         String(32),
@@ -2198,3 +2200,95 @@ class SuperconductorStructure(LegacyBase):
 
 # Temporary import compatibility for code that has not moved to the new name yet.
 KeyProperty = SuperconductorProperty
+
+
+class PropertyEvidenceCheck(Base):
+    """核对结果只对指定物性内容、来源和规则版本有效。"""
+    __tablename__ = 'property_evidence_checks'
+    __table_args__ = (
+        Index('ix_evidence_check_record_hash', 'record_id', 'content_hash', 'source_hash', 'rule_version'),
+        CheckConstraint("status IN ('supported','uncertain','unsupported')", name='ck_evidence_check_status'),
+    )
+    id = Column(BIGINT_ID, primary_key=True, autoincrement=True)
+    paper_id = Column(Integer, nullable=False)
+    paper_revision = Column(Integer, nullable=False)
+    record_id = Column(BIGINT_ID, ForeignKey('property_records.id', ondelete='CASCADE'), nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    source_hash = Column(String(64), nullable=False)
+    rule_version = Column(String(64), nullable=False)
+    status = Column(String(20), nullable=False)
+    reason = Column(Text, nullable=False)
+    model = Column(String(200), nullable=False)
+    evidence_snapshot = Column(JSON, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+
+class ScientificEvidenceCheck(Base):
+    """与目标稳定身份和科学版本绑定的待处理核对结果，不使用 TTL。"""
+    __tablename__ = 'scientific_evidence_checks'
+    __table_args__ = (UniqueConstraint('target', 'target_id', 'item_key', 'content_hash', 'source_hash', 'rule_version', name='uq_scientific_check_version'),)
+    id = Column(BIGINT_ID, primary_key=True, autoincrement=True)
+    target = Column(String(16), nullable=False)
+    target_id = Column(String(64), nullable=False)
+    item_key = Column(String(64), nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    source_hash = Column(String(64), nullable=False)
+    rule_version = Column(String(64), nullable=False)
+    result = Column(JSON, nullable=False)
+    resolutions = Column(JSON, nullable=False, default=dict)
+    actor_user_id = Column(Integer, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+
+class ScientificEvidenceSource(Base):
+    """正式科学出处：论文引句、提交者结构或可复核推导。"""
+    __tablename__ = 'scientific_evidence_sources'
+    __table_args__ = (UniqueConstraint('paper_id', 'paper_revision', 'item_key', name='uq_scientific_source_item'),)
+    id = Column(BIGINT_ID, primary_key=True, autoincrement=True)
+    paper_id = Column(Integer, ForeignKey('papers.id', ondelete='CASCADE'), nullable=False)
+    paper_revision = Column(Integer, nullable=False)
+    item_key = Column(String(64), nullable=False)
+    field_path = Column(String(500), nullable=False)
+    content_hash = Column(String(64), nullable=False)
+    source_hash = Column(String(64), nullable=False)
+    rule_version = Column(String(64), nullable=False)
+    result = Column(JSON, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+
+class ScientificStructureOrigin(Base):
+    """服务端记录实际提交者，不能使用浏览器声明的作者身份。"""
+    __tablename__ = 'scientific_structure_origins'
+    __table_args__ = (UniqueConstraint('target', 'target_id', 'structure_hash', name='uq_scientific_structure_origin'),)
+    id = Column(BIGINT_ID, primary_key=True, autoincrement=True)
+    target = Column(String(16), nullable=False)
+    target_id = Column(String(64), nullable=False)
+    structure_hash = Column(String(64), nullable=False)
+    provenance = Column(JSON, nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+
+class PaperRevisionDraft(Base):
+    """正式论文的独立返修草稿；提交前不修改正式内容，不设置到期时间。"""
+    __tablename__ = 'paper_revision_drafts'
+    __table_args__ = (UniqueConstraint('revision_id', name='uq_paper_revision_draft_id'),)
+    paper_id = Column(Integer, ForeignKey('papers.id', ondelete='CASCADE'), primary_key=True)
+    owner_id = Column(Integer, ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
+    revision_id = Column(String(32), nullable=False)
+    base_revision = Column(Integer, nullable=False)
+    base_fingerprint = Column(String(64), nullable=False)
+    draft_version = Column(Integer, nullable=False, default=1)
+    draft = Column(JSON)
+    submitted_revision = Column(Integer)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+
+class ScientificUploadDraft(Base):
+    """有核对结果的上传草稿及运行元数据，供 Redis 丢失后恢复。"""
+    __tablename__ = 'scientific_upload_drafts'
+    task_id = Column(String(64), primary_key=True)
+    owner_id = Column(Integer, nullable=False)
+    draft = Column(JSON, nullable=False)
+    state = Column(JSON, nullable=False)
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())

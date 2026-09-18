@@ -37,6 +37,7 @@ export interface PropertyRecordDraft {
   is_representative?: boolean
   structure_key?: string | null
   payload: Record<string, unknown>
+  evidence?: Record<string, unknown> | null
   evidences?: unknown[]
 }
 
@@ -47,6 +48,15 @@ export interface PropertyModuleDraft {
   definition_version: number
   display_order: number
   records: PropertyRecordDraft[]
+}
+
+/** Tc 摘要使用当前规范值，不能以旧原文回填已清空的数值。 */
+export function propertyRecordSummaryValue(record: PropertyRecordDraft): string {
+  if (record.record_type === 'property') return record.value_raw
+  if (record.value_kind === 'number') return record.value_number == null ? '待填写 Tc' : `${record.value_number} K`
+  if (record.value_kind === 'range') return `${record.value_min ?? '待填写'}–${record.value_max ?? '待填写'} K`
+  if (record.value_kind === 'text') return record.value_text || '待填写 Tc'
+  return record.value_boolean == null ? '待填写 Tc' : record.value_boolean ? '是' : '否'
 }
 
 let fallbackKeySequence = 0
@@ -88,9 +98,47 @@ export const clonePropertyRecord = (record: PropertyRecordDraft): PropertyRecord
   custom_property_key: record.custom_property_key ? newStableKey('custom-property') : record.custom_property_key,
 })
 
+/** Tc 的 raw 列仅为当前值的兼容表示，不能作为另一份可编辑数据。 */
+export function normalizeCurrentTcValue(record: PropertyRecordDraft): PropertyRecordDraft {
+  if (record.record_type !== 'measured_tc' && record.record_type !== 'predicted_tc') return record
+  const numberText = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? String(value) : ''
+  let raw = ''
+  if (record.value_kind === 'number') raw = numberText(record.value_number)
+  if (record.value_kind === 'range') {
+    const min = numberText(record.value_min), max = numberText(record.value_max)
+    if (min && max) raw = `${min}–${max}`
+  }
+  if (record.value_kind === 'text') raw = record.value_text ?? ''
+  if (record.value_kind === 'boolean' && typeof record.value_boolean === 'boolean') raw = String(record.value_boolean)
+  return { ...record, value_raw: raw, unit_raw: ['number', 'range'].includes(record.value_kind) ? 'K' : null }
+}
+
+export const normalizePropertyRecordIdentity = (record: PropertyRecordDraft): PropertyRecordDraft => {
+  const normalized = normalizeCurrentTcValue(structuredClone(record))
+  const isCustom = normalized.record_type === 'property' && normalized.property_code === 'custom'
+  normalized.custom_property_key = isCustom
+    ? normalized.custom_property_key || (normalized.record_key
+      ? `custom-property-${normalized.record_key}`
+      : newStableKey('custom-property'))
+    : null
+  return normalized
+}
+
 const numberParameter = (value: unknown, unit: string) => (
   typeof value === 'number' ? { value_raw: String(value), value_number: value, unit_raw: unit } : undefined
 )
+
+// 旧草稿可能同时携带单证据和空数组，不能让空数组覆盖有效来源。
+const legacyEvidenceList = (source: Record<string, any>): unknown[] => {
+  const candidates = [source.evidence, source.evidences].flatMap(value => Array.isArray(value) ? value : value == null ? [] : [value])
+  const seen = new Set<string>()
+  return structuredClone(candidates.filter(value => {
+    const identity = JSON.stringify(value)
+    if (seen.has(identity)) return false
+    seen.add(identity)
+    return true
+  }))
+}
 
 export function convertLegacyPropertyModules(state: Record<string, any>): PropertyModuleDraft[] {
   if (Array.isArray(state.property_modules)) {
@@ -99,7 +147,9 @@ export function convertLegacyPropertyModules(state: Record<string, any>): Proper
       definition_key: module.definition_key || `module.${module.module_code}`,
       definition_version: module.definition_version || 1,
       display_order: index,
-      records: Array.isArray(module.records) ? module.records : [],
+      records: Array.isArray(module.records)
+        ? module.records.map(record => normalizePropertyRecordIdentity(record))
+        : [],
     }))
   }
 
@@ -137,7 +187,7 @@ export function convertLegacyPropertyModules(state: Record<string, any>): Proper
       payload: experimental
         ? { experimental_conditions: structuredClone(state.experimental_context || {}) }
         : { calculation_conditions: structuredClone(context.conditions || {}), parameters },
-      evidences: structuredClone(result.evidences || result.evidence || []),
+      evidences: legacyEvidenceList(result),
     })
   }
 
@@ -153,11 +203,11 @@ export function convertLegacyPropertyModules(state: Record<string, any>): Proper
       value_number: isNumber ? Number(property.value_number ?? property.value) : null,
       value_text: isNumber ? null : String(rawValue),
       unit_raw: property.unit || property.unit_raw || null,
-      evidences: structuredClone(property.evidences || property.evidence || []),
+      evidences: legacyEvidenceList(property),
     })
   }
 
   return records.length > 0
-    ? [{ ...emptyPropertyModule('superconductive_properties', 0), records }]
+    ? [{ ...emptyPropertyModule('superconductive_properties', 0), records: records.map(normalizeCurrentTcValue) }]
     : []
 }

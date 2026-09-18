@@ -3,6 +3,7 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from backend import models
+from backend.community import models as community_models  # noqa: F401
 from backend.database import Base, SessionLocal, engine
 
 

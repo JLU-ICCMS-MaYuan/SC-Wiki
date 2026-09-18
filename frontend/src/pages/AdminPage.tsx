@@ -1,3 +1,6 @@
+import { saveQuickReviewProposals } from '../lib/paperProposalSave'
+import { EvidenceRecordList } from '../components/EvidenceFieldMarkers'
+import { useEvidenceWorkflow } from '../components/EvidenceWorkflow'
 import React, { useState, useEffect, useCallback } from 'react'
 import {
   Box, Typography, Card, CardActionArea, CardContent, Button, Chip,
@@ -16,6 +19,8 @@ import {
 } from '@mui/icons-material'
 import { type User, useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
+import PaperReviewStatusSelect from '../components/PaperReviewStatusSelect'
+import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload } from '../lib/paperReview'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import ChartGroupEditor from '../components/ChartGroupEditor'
 import NewsManager from '../components/NewsManager'
@@ -54,7 +59,7 @@ type PaperHistoryEvent = {
   paper_revision: number
   actor: { username: string | null; unknown: boolean }
   occurred_at: string
-  review: { status: 'approved' | 'rejected' | 'pending'; comment: string | null } | null
+  review: { status: 'approved' | 'rejected' | 'pending'; comment: string | null; evidence_review?: Array<{ key: string; label: string; reason: string; resolution: string; evidences: Array<{quote: string; page_start?: number}> }> } | null
 }
 
 /* ── Helpers ──────────────────────────────────── */
@@ -128,6 +133,8 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
   const [filterTick, setFilterTick] = useState(0)
   const [reviewDlg, setReviewDlg] = useState<{paper:PaperRecord,open:boolean}>({paper:null!,open:false})
   const [reviewStatus, setReviewStatus] = useState('')
+  const [reviewSaving, setReviewSaving] = useState(false)
+  const evidenceWorkflow = useEvidenceWorkflow()
   const [reviewComment, setReviewComment] = useState('')
   const [historyPaper, setHistoryPaper] = useState<PaperRecord | null>(null)
   const [historyLoading, setHistoryLoading] = useState(false)
@@ -209,20 +216,34 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
   /* ── Review actions ──────────────────────────── */
   const openReview = async (paper: PaperRecord) => {
     setReviewDlg({ paper, open: true })
-    setReviewStatus(paper.review_status === 'rejected' ? 'rejected' : 'pending')
+    setReviewStatus(initialPaperReviewStatus(paper.review_status))
     setReviewComment(paper.review_comment || '')
+    void evidenceWorkflow.restore({ target: 'paper', target_id: String(paper.id) })
   }
 
   const handleReview = async () => {
-    if (!reviewDlg.paper) return
+    if (!reviewDlg.paper || reviewSaving) return
+    setReviewSaving(true)
     try {
-      await api.post(`/api/admin/papers/${reviewDlg.paper.id}/review`, {
-        status: reviewStatus, comment: reviewComment, review_request_id: crypto.randomUUID(),
-      })
+      let classifications
+      if (reviewStatus === 'approved') {
+        if (!(await evidenceWorkflow.applyAccepted({ target: 'paper', target_id: String(reviewDlg.paper.id) }, (patches, preparationId, resumeStage) => saveQuickReviewProposals(reviewDlg.paper.id, patches, preparationId, resumeStage)))) return
+        const { detail, pendingValues } = await loadPaperReviewSource(reviewDlg.paper.id)
+        classifications = resolveReviewClassifications(detail, pendingValues)
+      }
+      const payload = paperReviewPayload(reviewStatus, reviewComment, classifications)
+      const evidence = reviewStatus === 'approved' ? await evidenceWorkflow.gate({ target: 'paper', target_id: String(reviewDlg.paper.id) }) : {}
+      if (!evidence) return
+      await api.post(`/api/admin/papers/${reviewDlg.paper.id}/review`, { ...payload, ...evidence })
       setSnackbar(t('admin.reviewDone'))
       setReviewDlg({paper:null!,open:false})
       loadPapers()
-    } catch (e: unknown) { setSnackbar(t('admin.failed', { reason: (e as Error).message })) }
+      loadStats()
+    } catch (e: unknown) {
+      setSnackbar(t('admin.reviewFailed', { reason: (e as Error).message }))
+    } finally {
+      setReviewSaving(false)
+    }
   }
 
   const loadPaperHistory = async (paperID: number) => {
@@ -718,9 +739,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
       )}
 
       {/* ═══════════════════════════════════════════ */}
+      {evidenceWorkflow.dialog}
       {/* Review Dialog */}
       {/* ═══════════════════════════════════════════ */}
-      <Dialog open={reviewDlg.open} onClose={()=>setReviewDlg({paper:null!,open:false})} maxWidth="md" fullWidth>
+      <Dialog open={reviewDlg.open} onClose={()=>{ if (!reviewSaving) setReviewDlg({paper:null!,open:false}) }} maxWidth="md" fullWidth>
         <DialogTitle>{t('admin.reviewTitle')}</DialogTitle>
         <DialogContent sx={{ display:'flex',flexDirection:'column',gap:2,mt:1 }}>
           <Typography variant="body2" fontWeight={600} noWrap>
@@ -730,25 +752,17 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
             <Chip size="small" label={t('admin.doiChip', { value: reviewDlg.paper?.doi || '-' })} variant="outlined" />
             <Chip size="small" label={t('admin.yearChip', { value: reviewDlg.paper?.year || '-' })} variant="outlined" />
           </Box>
-          <FormControl fullWidth size="small">
-            <InputLabel id="paper-review-status-label">{t('admin.reviewResult')}</InputLabel>
-            <Select
-              labelId="paper-review-status-label"
-              id="paper-review-status"
-              value={reviewStatus}
-              label={t('admin.reviewResult')}
-              onChange={e=>setReviewStatus(e.target.value)}
-            >
-              <MenuItem value="rejected">{t('admin.reviewReject')}</MenuItem>
-              <MenuItem value="pending">{t('admin.reviewBackToPending')}</MenuItem>
-            </Select>
-          </FormControl>
+          <Button variant="outlined" disabled={reviewSaving || evidenceWorkflow.busy} onClick={() => void evidenceWorkflow.run({ target: 'paper', target_id: String(reviewDlg.paper.id) })}>{t('evidence.audit')}</Button>
+          <EvidenceRecordList records={evidenceWorkflow.records} onOpen={evidenceWorkflow.openIssue} />
+          <PaperReviewStatusSelect id="paper-review-status" value={reviewStatus}
+            onChange={setReviewStatus} disabled={reviewSaving} />
+          <Typography variant="caption" color="text.secondary">{t('admin.quickReviewHint')}</Typography>
           <TextField label={t('admin.reviewComment')} multiline rows={3} size="small" fullWidth
-            value={reviewComment} onChange={e=>setReviewComment(e.target.value)} />
+            disabled={reviewSaving} value={reviewComment} onChange={e=>setReviewComment(e.target.value)} />
         </DialogContent>
         <DialogActions>
-          <Button onClick={()=>setReviewDlg({paper:null!,open:false})}>{t('common.cancel')}</Button>
-          <Button variant="contained" onClick={handleReview}>{t('admin.confirmReview')}</Button>
+          <Button disabled={reviewSaving} onClick={()=>setReviewDlg({paper:null!,open:false})}>{t('common.cancel')}</Button>
+          <Button variant="contained" disabled={reviewSaving} onClick={handleReview}>{t('admin.confirmReview')}</Button>
         </DialogActions>
       </Dialog>
 
@@ -778,6 +792,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
                 {event.review && (
                   <Typography variant="body2" sx={{ mt: 0.5 }}>
                     {reviewStatus} · {event.review.comment?.trim() || t('admin.historyNoReviewComment')}
+                    {event.review.evidence_review?.filter(r => r.resolution).map(r => <Box component="span" key={r.key} sx={{ display: 'block', mt: 1 }}>
+                      {r.label}：{r.reason}<br />{t('evidence.humanReason')}：{r.resolution}
+                      {r.evidences.map((e, i) => <Box component="span" key={i} sx={{ display: 'block', whiteSpace: 'pre-wrap' }}>{e.page_start ? t('evidence.page', { page: e.page_start }) : t('evidence.original')}：{e.quote}</Box>)}
+                    </Box>)}
                   </Typography>
                 )}
               </Box>

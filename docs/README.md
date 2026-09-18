@@ -11,8 +11,8 @@
 | 超导数据搜索与数据库发现 | [`overview/03_Superconductivity_Data_Search_and_Database_Discovery/README.md`](overview/03_Superconductivity_Data_Search_and_Database_Discovery/README.md) |
 | 超导发展知识图谱 | [`overview/04_Superconductivity_Development_Knowledge_Graph/README.md`](overview/04_Superconductivity_Development_Knowledge_Graph/README.md) |
 | 检索增强 AI 问答 | [`overview/05_Retrieval-Augmented_AI_Question_Answering/README.md`](overview/05_Retrieval-Augmented_AI_Question_Answering/README.md) |
-| AI 辅助 Tc 估算 | [`overview/06_AI_Assisted_Tc_Estimation/README.md`](overview/06_AI_Assisted_Tc_Estimation/README.md) |
-| 研究者社区论坛 | [`overview/07_Researcher_Community_Forum/README.md`](overview/07_Researcher_Community_Forum/README.md) |
+| 研究者社区论坛 | [`overview/06_Researcher_Community_Forum/README.md`](overview/06_Researcher_Community_Forum/README.md) |
+| AI 辅助 Tc 估算 | [`overview/07_AI_Assisted_Tc_Estimation/README.md`](overview/07_AI_Assisted_Tc_Estimation/README.md) |
 
 ## 规格与部署
 

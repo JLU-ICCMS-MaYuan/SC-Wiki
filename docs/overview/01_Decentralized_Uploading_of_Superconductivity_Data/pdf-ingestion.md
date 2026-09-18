@@ -13,9 +13,21 @@
 5. 文本提取后、分段 LLM 前，系统用 DOI、标题页和开头文本检查正文与附件的一致性。信息缺失不阻塞；明确冲突显示警告并要求用户在提交前确认。
 6. Markdown 保存到 `/data/parsed_markdown`；每个分段先建立状态清单，结果采用临时文件加原子替换保存。任务详情提供“AI 临时表单”和“分段解析与证据”页签；无分段时显示提取或等待状态。后台分类证据用 `current_paper` 和 `referenced_work` 区分本文工作与被引用工作，普通草稿只返回本文研究对象；引用材料不再作为普通字段或最终科学数据输出。
 7. 解析中的临时表单只读并持续合并结果。`reading` 和 `summarizing` 阶段的分类字段显示“候选尚未汇总”，不把正常的分段差异标成正式冲突；标题、DOI 等非分类单值字段出现不同候选时仍标记“有冲突”并并列显示，不静默覆盖。内容超过统一展示高度的字段卡片默认收起，短字段直接完整显示；每张长卡片可通过文字按钮独立展开或收起，完整候选和来源证据始终保留，轮询更新与窗口变化会重新判断溢出，任务切换不会继承前一任务的展开状态。任务进入 `ready` 后同一页签原地切换为可编辑最终草稿。（[Issue #47](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/47)）
-8. 用户停止编辑 5 秒后自动保存，也可立即保存。草稿保存只做结构性检查，半成品以及空的论文级 `material_families[]` 可以正常落盘，业务字段的完整校验留到提交时执行；提交要求所有 Paper type 至少选择一个论文级 Material family，Paper type 及理论子分类规则不变。论文基本信息区还保存单选 `superconductor_kind`（`conventional`、`unconventional`、`unknown`）；材料状态卡片不再重复设置 family 或 Superconductor type，只保留结构家族 `structure_families[]`（界面中的 `More type labels`）、不同元素种类数、压力和材料维度。目录候选由数据库驱动，界面统一显示规范中文名。AI 分类只进入审核上下文，不在提交阶段写正式目录 ID。元素种类数由服务器根据化学式重算。论文只报告空间群而没有完整 CIF/POSCAR 时，符号与国际群号分别保存在 reported 字段；`phase_label` 不再生成或写入；λ 和 ωlog 属于 `calculation_context`；Tc 属于 `tc_results`；其余数据才进入普通 `properties`。点击提交后，一篇论文、全部 `paper_files`、正式文本块、Evidence 和条件化科学实体图在一个 MySQL 事务中写入并进入 `pending`。提交写入失败时任务状态回滚为 `ready` 并保留 `submission_status=failed`，草稿不丢失、详情页恢复可编辑表单，用户可修正后重新提交，不会卡在 `submitting`。（[Issue #55](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/55)、[Issue #79](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/79)、[Issue #80](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/80)）
+8. 用户停止编辑 5 秒后自动保存，也可立即保存。草稿保存只做结构性检查，半成品以及空的论文级 `material_families[]` 可以正常落盘，业务字段的完整校验留到提交时执行；提交要求所有 Paper type 至少选择一个论文级 Material family，Paper type 及理论子分类规则不变。论文基本信息区还保存单选 `superconductor_kind`（`conventional`、`unconventional`、`unknown`）；材料状态卡片不再重复设置 family 或 Superconductor type，只保留结构家族 `structure_families[]`（界面中的 `More type labels`）、不同元素种类数、压力和材料维度。目录候选由数据库驱动，界面统一显示规范中文名。AI 分类只进入审核上下文，不在提交阶段写正式目录 ID。元素种类数由服务器根据化学式重算；用户手动编辑后通过 `element_count_locked` 锁定，后续读写保留手动值。未锁定时随化学式重算，严格解析失败回退宽松元素提取，再失败则保留已有值（#52 FR-004）。论文只报告空间群而没有完整 CIF/POSCAR 时，符号与国际群号分别保存在 reported 字段；`phase_label` 不再生成或写入；λ 和 ωlog 属于 `calculation_context`；Tc 属于 `tc_results`；其余数据才进入普通 `properties`。点击提交后，一篇论文、全部 `paper_files`、正式文本块、Evidence 和条件化科学实体图在一个 MySQL 事务中写入并进入 `pending`。提交写入失败时任务状态回滚为 `ready` 并保留 `submission_status=failed`，草稿不丢失、详情页恢复可编辑表单，用户可修正后重新提交，不会卡在 `submitting`。（[Issue #55](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/55)、[Issue #79](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/79)、[Issue #80](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/80)）
 9. MySQL 事务成功后，系统保留 PDF、附件、组合及分文件 Markdown 和精简 `result.json` 审核快照；删除 Redis state/draft、用户任务索引、RQ 处理 Job、分段 JSON 和其他 LLM 中间产物。快照写入失败时不执行该临时清理，以便后续恢复。
 10. 管理员对照 AI 建议、用户值和原文证据审核，在同一页面认可建议、改选已有分类或输入新名称。只有批准事务会写入人工确认的材料/结构家族 ID，必要的新目录项也在该事务中创建；审核事件保存分类上下文和最终选择快照。快照同时绑定 `task_id`、`paper_id` 和 `paper_revision`，只有与论文当前 revision 一致的 pending 快照可以读取。`approved` 会同步发布 Qdrant 后幂等删除临时快照；`rejected` 幂等删除临时快照；`pending` 保留临时快照。
+
+## 已拒绝论文返修
+
+原上传者可从“我的论文”或详情的“修改并重新提交”进入 `/papers/:id/revise`，查看拒绝意见，复用上传表单修改书目、材料状态、物性模块和结构。返修使用独立的 MySQL `paper_revision_drafts`，停止输入后自动保存，也可立即保存；草稿不设 24 小时到期时间，暂存不改变正式内容、版本及 `rejected` 状态。
+
+初始化从正式论文、科学实体、文件及正文片段读取，不依赖已清理的 Redis 任务或 `result.json`。没有正式保存的旧材料家族提示重新选择；旧通讯作者及共同第一作者标记没有正式列，原快照清理后无法恢复，本次返修填写的标记随送审历史保存。原结构的格式、物理元数据及未修改结构的证据关联保留。
+
+用户先保存并进行来源核对，再明确点击“重新提交审核”。服务端在同一事务中更新同一个论文 ID，版本加一并回到 `pending`；详情恢复只读。来源文件、正文、证据及原审核历史保留；旧记录定义变更事件随返修历史存档。修改过的断言或来源不能沿用失效核对，上传者不能执行管理员人工裁决。
+
+后端检查原上传者、拒绝状态、正式内容摘要及草稿版本。管理员编辑、审核或其他窗口保存导致冲突时不覆盖新值，页面保留输入；提交失败回滚并保留草稿，重复请求和并发重试只升版一次。再次拒绝后可开启新一轮。不支持替换原论文文件或回滚历史版本。
+
+实现入口为 `backend/services/paper_revisions.py`、`backend/api/paper_revisions.py` 和共享 `UploadTaskEditor`；接口及隔离验收见 [#108 Spec](../../specs/108-rejected-paper-revision/spec.md)。
 
 ## 分类规则
 
@@ -54,7 +66,8 @@
 - `GET /api/upload-tasks` 从 Redis 恢复当前用户活动任务，不依赖浏览器保存的单个 task ID，也不为 duplicate 刷新查询 Paper 表。未知状态契约版本返回稳定错误，不静默猜测权限。
 - 列表在解析记录旁显示服务端 `cleanup_at` 驱动的倒计时；少于一小时显示分秒，到期待 Worker 执行时显示“等待清理”。
 - 每个任务行提供明确的“查看解析/收起解析”按钮并标识当前任务；同一时刻只展开一个任务详情，切换任务不清空上传区尚未提交的本地文件。
-- 当前解析详情顶部提供随详情滚动保持可达的操作栏，显示当前文件名、处理阶段和加载状态，并提供“收起解析”。收起只清除浏览器中的当前详情选择及对应活动任务键，不取消或删除后台任务，也不清空上传区尚未提交的本地文件。
+- 当前解析详情顶部提供随详情滚动保持可达的操作栏，显示当前文件名、处理阶段和加载状态，并提供“收起解析”。全局顶栏移除后，操作栏在距视口顶部 8px 处悬浮。收起解析只清除浏览器中的当前详情选择及对应活动任务键，不取消或删除后台任务，也不清空上传区尚未提交的本地文件；全局侧栏的收起/展开只改变正文宽度，不操作任务状态。
+- 提交后临时任务已清理时，旧页面的解析入口通过单任务状态查询回溯正式论文；仅所有者或已批准管理员获得论文位置，页面自动打开论文详情。真正过期或被清理且没有可访问论文的任务会明确提示并刷新列表，解析轮询遇到 401/403/404 即停止。活动任务列表仍只读取 Redis，不混入已提交论文。
 - 运行任务可请求取消，Worker 在文件、分段和汇总边界停止；当前阻塞的 LLM 请求允许完成或超时。
 - 单项和批量清理只处理失败、重复和已取消任务，运行中或正在提交的任务会被跳过。
 - 对外任务和解析 DTO 使用字段白名单，不返回绝对路径、RQ job ID、Redis key、提示词或原始 LLM 响应。
@@ -69,7 +82,7 @@
 
 ## 失败语义
 
-- 上传、抽取、LLM 和数据库错误必须返回或记录明确原因，前端不得显示假成功。
+- 上传、抽取、LLM 和数据库错误必须返回或记录明确原因，前端不得显示假成功。提交事务触发科学数据完整性约束时，后端保留 `scientific_data_integrity_error` 并返回 `issues[]`：可识别的约束定位到材料状态或物性记录字段，无法精确识别时返回材料状态/论文基础信息范围及应检查的字段；响应不泄露 SQL、表名、驱动名或堆栈。
 - 草稿保存或提交失败时，横幅区分「保存失败/提交失败」并展示后端 `detail.message` 及错误码；后端未返回结构化 detail 时才回退通用文案。
 - 未预期异常也有结构化原因：后端统一异常处理器返回 `{"detail": {"code": "internal_error", "message": "<中文说明>"}}`，不再由框架返回纯文本 500 让前端只能显示无信息量文案。响应体不含驱动名、表名列名、SQL 语句和容器路径，完整异常信息只写服务端日志。（[Issue #58](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/58)）
 - 提交前的必填校验一次性收集全部问题而非遇到第一条就中断：横幅聚合列出所有缺失项，出错的材料状态卡片自动展开，页面滚动并聚焦到首个出错字段，字段本身显示错误态与说明。后端专属规则返回的 400（如 `invalid_pressure_range`）按消息中的「第 N 个材料状态」定位到对应卡片，与前端校验共用同一套定位反馈；再次提交成功后错误态与横幅一并清除。（[Issue #58](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/58)）

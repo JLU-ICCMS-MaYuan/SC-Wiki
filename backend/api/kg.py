@@ -1,4 +1,4 @@
-"""RAG 知识图谱 API — 前端/Agent 调用入口，逻辑委托给 backend.rag.tools.neo4j"""
+"""RAG 知识图谱 API；关系来自 Neo4j，物性来自统一记录。"""
 
 from __future__ import annotations
 
@@ -7,10 +7,10 @@ from fastapi import APIRouter, Query, HTTPException
 from backend.rag.tools.neo4j import (
     search_papers,
     get_paper_context,
-    get_material_context,
     traverse_graph,
     find_path,
 )
+from backend.rag.tools.mysql import get_material_context
 
 router = APIRouter(prefix="/api/kg", tags=["kg"])
 
@@ -65,9 +65,9 @@ def around_paper(
 
 
 @router.get("/material/{formula}")
-def material_context(formula: str):
+async def material_context(formula: str):
     """材料上下文：哪些论文研究过、关键参数"""
-    return get_material_context(formula)
+    return await get_material_context(formula)
 
 
 @router.get("/search")

@@ -81,7 +81,7 @@ func seedPaperFour(t *testing.T, db *gorm.DB, reviewStatus string) {
 		t.Fatal(err)
 	}
 	if err := db.Create(&models.MaterialState{
-		ID: 1, StateKey: "state-lah10-170gpa", PaperID: 4, PaperRevision: 1, SuperconductorID: 1,
+		ID: 1, StateKey: "state-lah10-170gpa", PaperID: 4, PaperRevision: 1, SuperconductorID: uintPtr(1),
 		MaterialDimensionality: "bulk",
 		CrystalSystem:          "cubic", StateKind: "theoretical",
 		PressureValueGPa: f64Ptr(250), PressureMinGPa: f64Ptr(200), PressureMaxGPa: nil,
@@ -254,7 +254,7 @@ func TestPaperDetailTargetPreloadsHaveBoundedQueryCount(t *testing.T) {
 	oneStateQueries := atomic.LoadInt64(&queries)
 
 	if err := db.Create(&models.MaterialState{
-		ID: 2, StateKey: "state-lah10-200gpa", PaperID: 4, PaperRevision: 1, SuperconductorID: 1,
+		ID: 2, StateKey: "state-lah10-200gpa", PaperID: 4, PaperRevision: 1, SuperconductorID: uintPtr(1),
 		MaterialDimensionality: "bulk", CrystalSystem: "cubic", StateKind: "theoretical",
 	}).Error; err != nil {
 		t.Fatal(err)
@@ -362,7 +362,7 @@ func TestPaperDetailUsesEmptyArraysWhenNoScientificData(t *testing.T) {
 		t.Fatal(err)
 	}
 	if err := db.Create(&models.MaterialState{
-		ID: 9, StateKey: "state-h3s", PaperID: 7, PaperRevision: 1, SuperconductorID: 2,
+		ID: 9, StateKey: "state-h3s", PaperID: 7, PaperRevision: 1, SuperconductorID: uintPtr(2),
 		MaterialDimensionality: "bulk",
 		CrystalSystem:          "unknown", StateKind: "unknown",
 	}).Error; err != nil {

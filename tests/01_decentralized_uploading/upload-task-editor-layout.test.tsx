@@ -38,6 +38,8 @@ vi.mock('../../frontend/src/components/StructureCandidatePanel', () => ({
 }))
 
 const mockedApi = vi.mocked(api)
+// 预检与最终提交是两个不同端点；错误用例只控制最终提交响应。
+const submitRequest = vi.fn()
 
 const makeState = (overrides: Partial<DraftMaterialState> = {}): DraftMaterialState => ({
   material: 'LaH10',
@@ -95,7 +97,15 @@ beforeEach(() => {
     return Promise.resolve({ ok: true, data: makeDraft([makeState()]) } as never)
   })
   mockedApi.put.mockResolvedValue({ ok: true } as never)
-  mockedApi.post.mockResolvedValue({ ok: true, paper_id: 99, review_status: 'pending' } as never)
+  submitRequest.mockReset().mockResolvedValue({ ok: true, paper_id: 99, review_status: 'pending' })
+  mockedApi.post.mockImplementation(async (path, body) => {
+    if (path === '/api/rag/evidence/proposals/prepare') return {patches:[]} as never
+    if (path === '/api/rag/evidence/preflight') {
+      return { version: 'checked-version', needs_check: false, records: [], sources: [] } as never
+    }
+    if (path.endsWith('/submit')) return submitRequest(body)
+    throw new Error(`unexpected POST ${path}`)
+  })
 })
 
 afterEach(() => {
@@ -104,6 +114,25 @@ afterEach(() => {
 })
 
 describe('上传校对页布局与材料状态折叠', () => {
+  it('六项书目信息按序显示，文本期号和历史页码保存后可重载', async () => {
+    const draft = makeDraft([])
+    draft.paper.pages = '100-108'
+    const view = render(<UploadTaskEditor taskId={'e'.repeat(32)} onSubmitted={vi.fn()} draftOverride={draft} />)
+    const row = await screen.findByTestId('paper-metadata-row')
+    expect(Array.from(row.querySelectorAll('label')).map(label => label.textContent)).toEqual([
+      '期刊名', '年份', '期号', '卷号', '起始页码', 'DOI',
+    ])
+    fireEvent.change(screen.getByLabelText('期号'), { target: { value: 'S1' } })
+    fireEvent.click(screen.getByRole('button', { name: '立即保存' }))
+    await waitFor(() => expect(mockedApi.put).toHaveBeenCalled())
+    const saved = mockedApi.put.mock.calls[0][1] as UploadDraft
+    expect(saved.paper).toMatchObject({ issue_number: 'S1', pages: '100-108' })
+    view.unmount()
+    render(<UploadTaskEditor taskId={'e'.repeat(32)} onSubmitted={vi.fn()} draftOverride={saved} />)
+    expect(await screen.findByLabelText('期号')).toHaveValue('S1')
+    expect(screen.getByLabelText('起始页码')).toHaveValue('100-108')
+  })
+
   it('历史建议副本不显示，正式表单值保持英文', async () => {
     const draft = makeDraft([makeState()])
     const legacyDraft = {
@@ -194,7 +223,7 @@ describe('上传校对页布局与材料状态折叠', () => {
   })
 
   // 重度交互用例：并行下实测约 3s，默认 5s 上限余量不足
-  it('多于 2 张卡片时默认仅展开第一张，支持全部折叠/全部展开与单卡折叠', { timeout: 15000 }, async () => {
+  it('所有材料默认展开，支持全部折叠/全部展开与单卡折叠', { timeout: 15000 }, async () => {
     render(<UploadTaskEditor taskId={'b'.repeat(32)} onSubmitted={vi.fn()} draftOverride={makeDraft([
       makeState({ material: 'LaH10' }),
       makeState({ material: 'H3S' }),
@@ -203,8 +232,8 @@ describe('上传校对页布局与材料状态折叠', () => {
 
     await screen.findByText('材料状态 #1')
     expect(collapseContent(0)).toHaveClass('MuiCollapse-entered')
-    expect(collapseContent(1)).not.toHaveClass('MuiCollapse-entered')
-    expect(collapseContent(2)).not.toHaveClass('MuiCollapse-entered')
+    expect(collapseContent(1)).toHaveClass('MuiCollapse-entered')
+    expect(collapseContent(2)).toHaveClass('MuiCollapse-entered')
 
     fireEvent.click(screen.getByRole('button', { name: '全部折叠' }))
     await waitFor(() => expect(collapseContent(0)).not.toHaveClass('MuiCollapse-entered'))
@@ -267,7 +296,7 @@ describe('超导类型与条件化 Tc 字段', () => {
 
     fireEvent.mouseDown(await screen.findByRole('combobox', { name: '添加记录' }))
     fireEvent.click(await screen.findByRole('option', { name: /测量 Tc · resistivity/ }))
-    expect(await screen.findByLabelText('数值')).toBeInTheDocument()
+    expect(await screen.findByLabelText('Tc 值')).toBeInTheDocument()
     expect(screen.queryByLabelText('电声耦合强度 λ')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('ωlog (K)')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('μ*')).not.toBeInTheDocument()
@@ -423,7 +452,7 @@ describe('保存/提交失败的后端错误提示', () => {
   it('提交失败且响应无 detail 时回退通用文案', async () => {
     const apiError = new Error('Internal Server Error') as ApiError
     apiError.status = 500
-    mockedApi.post.mockRejectedValueOnce(apiError)
+    submitRequest.mockRejectedValueOnce(apiError)
 
     render(<UploadTaskEditor taskId={'f'.repeat(32)} onSubmitted={vi.fn()} draftOverride={makeDraft([makeState()])} />)
     fireEvent.click(await screen.findByRole('button', { name: '提交审核' }))

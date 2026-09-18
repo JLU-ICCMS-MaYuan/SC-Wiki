@@ -6,6 +6,7 @@ import { useLanguage } from '../context/LanguageContext'
 interface Message {
   role: 'user' | 'assistant'
   content: string
+  citations?: Array<{ paper_id: number; source_kind?: string; attribution?: string }>
 }
 
 export interface Conversation {
@@ -208,6 +209,7 @@ export function useStreamingChat() {
       title: c.messages.length === 0 ? q.slice(0, 20) : c.title,
     } : c))
 
+    let receivedCitations: Message['citations'] = []
     let fullAnswer = ''
     let firstToken = true
     let receivedPapers: Record<string, PaperInfo> = {}
@@ -293,6 +295,7 @@ export function useStreamingChat() {
               flushSync(() => { setStatusLog(prev => [...prev, msg]) })
               setInspiration(prev => prev.active ? { ...prev, statusMessage: msg } : prev)
             } else if (eventType === 'done') {
+              if (Array.isArray(data.citations)) receivedCitations = data.citations
               if (data.papers) { receivedPapers = data.papers; setPapers(data.papers) }
               if (data.top10) { receivedTop10 = data.top10; setTop10(data.top10) }
               if (data.ideas && Array.isArray(data.ideas) && data.ideas.length > 0) {
@@ -356,7 +359,7 @@ export function useStreamingChat() {
       ...c,
       messages: c.messages.map((m, i) =>
         i === c.messages.length - 1 && m.role === 'assistant'
-          ? { ...m, content: fullAnswer }
+          ? { ...m, content: fullAnswer, ...(receivedCitations?.length ? { citations: receivedCitations } : {}) }
           : m
       ),
     } : c))

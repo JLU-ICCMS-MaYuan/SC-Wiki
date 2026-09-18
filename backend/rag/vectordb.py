@@ -82,6 +82,7 @@ def add_chunks(
             "paper_id": str(c["paper_id"]),
             "chunk_index": c["chunk_index"],
             "section_name": c.get("section_name", ""),
+            **{k: c[k] for k in ("paper_revision", "source_kind", "source_id", "attribution") if k in c},
         }
         point_id = int(cid) if cid.isdigit() else abs(hash(cid)) % (10 ** 15)
         points.append(PointStruct(id=point_id, vector=embeddings[i], payload=payload))
@@ -140,6 +141,7 @@ def search_chunks(
             "chunk_index": payload.get("chunk_index", 0),
             "section_name": payload.get("section_name", ""),
             "content": payload.get("document", ""),
+            **{k: payload[k] for k in ("paper_revision", "source_kind", "source_id", "attribution") if k in payload},
             "score": r.score if r.score is not None else 0.0,
         })
 

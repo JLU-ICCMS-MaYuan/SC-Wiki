@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 import shutil
 import time
@@ -80,9 +81,11 @@ referenced_materials 仅作为后台排除误判的临时候选，不进入用�
 通讯作者只能根据星号说明、通讯邮箱或 correspondence 声明识别；共同第一作者只能根据
 equal contribution、contributed equally 等明确声明识别。证据不足时返回空数组，不得按作者顺序猜测。
 
+issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测，未报告则为 null。
+
 返回结构：
 {
-  "metadata": {"title": null, "doi": null, "authors": [], "corresponding_authors": [], "co_first_authors": [], "journal": null, "year": null, "abstract": null},
+  "metadata": {"title": null, "doi": null, "authors": [], "corresponding_authors": [], "co_first_authors": [], "journal": null, "issue_number": null, "volume": null, "pages": null, "year": null, "abstract": null},
   "paper_type_evidence": [{"candidate": "theoretical|experimental|review|unknown", "scope": "current_paper|referenced_work", "page": 1, "quote": "原文"}],
   "research_materials": [],
   "referenced_materials": [],
@@ -138,9 +141,9 @@ referenced_materials 仅用于帮助区分本文对象与背景对象，最终�
 calculation_context，Tc 只写入 tc_results。压力优先换算为 GPa，同时保留 pressure_raw 和
 pressure_unit_raw；无法可靠换算或原文没有报告时保留原文并将规范数值设为 null。
 晶系 crystal_system 依据论文明确表述或由空间群推断填写，只能取给定枚举，无法确定填 unknown。
-paper.superconductor_kind 必须判断：Tc 由电声耦合机制/BCS 理论计算给出
-（如 McMillan、Allen-Dynes、Eliashberg、SCDFT 求 Tc）判 conventional；论文明确为非电声耦合机制
-（如非常规配对）判 unconventional；无法判断判 unknown。
+paper.superconductor_kind 仅在论文明确报告常规或非常规机制时填写；仅依据 McMillan、Allen-Dynes、Eliashberg、SCDFT 等方法推断时保留 unknown，由后续字段建议单独提出。
+所有字段仅提取论文直接记载或忠实概括的内容；需要额外推断或通用知识猜测的值保留为空或 unknown，后续作为待采用建议生成。
+论文级方法不能自动套用为每条 Tc 的方法；逐条缺少明确对应证据时保留 unknown。
 tc_method 只能取给定枚举；论文方法无法归入枚举时填 other，并在 tc_method_custom 写入论文中的
 方法原文，其余情况 tc_method_custom 必须为 null。
 properties 需提取 energy above hull：name 固定为 "energy above hull"，unit 固定为 "eV/atom"；
@@ -164,11 +167,13 @@ knowledge_graph_title 用于知识图谱节点显示，必须用 10-15 个英文
   - "Iron-based superconductor LaFeAsO" → "Iron-Based Superconductivity in LaFeAsO"
 key_finding 保留原有格式，提供完整的核心发现描述。
 
+issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测，未报告则为 null。
+
 返回结构：
 {
   "paper": {
     "title": "", "doi": null, "authors": [], "corresponding_authors": [], "co_first_authors": [],
-    "journal": null, "volume": null, "pages": null,
+    "journal": null, "issue_number": null, "volume": null, "pages": null,
     "year": null, "abstract": null, "summary": "", "paper_type": "theoretical|experimental|review|unknown",
     "theoretical_subtype": null,
     "superconductor_kind": "conventional|unconventional|unknown",
@@ -606,7 +611,7 @@ def _build_candidate_draft(chunks: list[dict[str, Any]]) -> dict[str, Any]:
         if not isinstance(result, dict):
             continue
         metadata = result.get("metadata") if isinstance(result.get("metadata"), dict) else {}
-        for field in ("title", "doi", "journal", "year", "abstract"):
+        for field in ("title", "doi", "journal", "issue_number", "volume", "pages", "year", "abstract"):
             if paper.get(field) in (None, "") and metadata.get(field) not in (None, ""):
                 paper[field] = metadata[field]
         for field in ("authors", "corresponding_authors", "co_first_authors"):
@@ -742,6 +747,19 @@ def _as_list(value: Any) -> list[Any]:
     if value is None:
         return []
     return value if isinstance(value, list) else [value]
+
+
+def _material_relations(value: Any) -> Any:
+    """兼容历史 JSON 字符串；无法解析时保留，不能保存其他字段时丢失来源。"""
+    if value is None or value == "":
+        return []
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            return parsed if isinstance(parsed, list) else value
+        except (ValueError, TypeError):
+            return value
+    return value
 
 
 def _normalize_text_items(value: Any, *keys: str) -> tuple[list[str], list[dict[str, Any]]]:
@@ -1043,12 +1061,13 @@ def _normalize_material_states(value: Any) -> list[dict[str, Any]]:
             dimensionality = "unknown"
         state["material_dimensionality"] = dimensionality
         pressure_value, pressure_min, pressure_max, pressure_raw, pressure_unit = _condition_pressure(state)
-        state["pressure_value_gpa"] = _numeric_value(state.get("pressure_value_gpa")) if state.get("pressure_value_gpa") not in (None, "") else pressure_value
-        state["pressure_min_gpa"] = _numeric_value(state.get("pressure_min_gpa")) if state.get("pressure_min_gpa") not in (None, "") else pressure_min
-        state["pressure_max_gpa"] = _numeric_value(state.get("pressure_max_gpa")) if state.get("pressure_max_gpa") not in (None, "") else pressure_max
-        state["pressure_raw"] = state.get("pressure_raw") or pressure_raw
-        state["pressure_unit_raw"] = state.get("pressure_unit_raw") or pressure_unit
-        if state["pressure_raw"] in (None, "") and state["pressure_value_gpa"] is not None:
+        explicit_raw = "pressure_raw" in state
+        # 仅缺失字段读取旧契约；显式 null 是用户清空，不能回填历史条件。
+        for field, fallback in (("pressure_value_gpa", pressure_value), ("pressure_min_gpa", pressure_min), ("pressure_max_gpa", pressure_max)):
+            state[field] = _numeric_value(state[field]) if field in state else fallback
+        state["pressure_raw"] = (state["pressure_raw"] or None) if explicit_raw else pressure_raw
+        state["pressure_unit_raw"] = (state["pressure_unit_raw"] or None) if "pressure_unit_raw" in state else pressure_unit
+        if not explicit_raw and state["pressure_raw"] in (None, "") and state["pressure_value_gpa"] is not None:
             state["pressure_raw"] = str(state["pressure_value_gpa"])
             state["pressure_unit_raw"] = state["pressure_unit_raw"] or "GPa"
         state.setdefault("state_kind", "unknown")
@@ -1122,39 +1141,6 @@ def _legacy_state_superconductor_kind(material_states: list[dict[str, Any]]) -> 
     return next(iter(non_unknown)) if len(non_unknown) == 1 else "unknown"
 
 
-def _apply_methodology_inference(
-    methodology: list[str], paper: dict[str, Any], material_states: list[dict[str, Any]],
-) -> None:
-    """按论文级 methodology 单向补全论文分类与理论 Tc 方法。
-
-    命中任一方法映射且论文级 superconductor_kind 为 unknown 时置 conventional
-    （不覆盖 unconventional）；去重后恰好一个方法时，补 tc_method 为 unknown 的理论 Tc 条目；
-    多个方法不补；任何情况都不创建新 Tc 条目。
-    """
-    methods: set[str] = set()
-    for entry in methodology:
-        text = str(entry or "").lower()
-        # Allen-Dynes 优先于 McMillan 匹配，每条文本只取首个命中。
-        if "allen-dynes" in text:
-            methods.add("allen_dynes")
-        elif "mcmillan" in text:
-            methods.add("mcmillan")
-        elif "eliashberg" in text:
-            methods.add("anisotropic_eliashberg" if "anisotropic" in text else "isotropic_eliashberg")
-        elif "scdft" in text or "superconducting density functional" in text:
-            methods.add("scdft")
-    if not methods:
-        return
-    inferred_method = next(iter(methods)) if len(methods) == 1 else None
-    if paper.get("superconductor_kind") == "unknown":
-        paper["superconductor_kind"] = "conventional"
-    for state in material_states:
-        if inferred_method:
-            for result in state.get("tc_results") or []:
-                if result.get("result_kind") == "theoretical" and result.get("tc_method") == "unknown":
-                    result["tc_method"] = inferred_method
-
-
 def _normalize_draft(
     raw: dict[str, Any], *, preserve_citation_extraction: bool = True,
 ) -> dict[str, Any]:
@@ -1210,6 +1196,7 @@ def _normalize_draft(
         "corresponding_authors": _normalize_author_roles(raw_paper.get("corresponding_authors"), authors),
         "co_first_authors": _normalize_author_roles(raw_paper.get("co_first_authors"), authors),
         "journal": raw_paper.get("journal") or parsed.paper.get("journal"),
+        "issue_number": parsed.paper.get("issue_number"),
         "volume": raw_paper.get("volume"),
         "pages": raw_paper.get("pages"),
         "year": raw_paper.get("year") or parsed.paper.get("year"),
@@ -1228,7 +1215,7 @@ def _normalize_draft(
         "key_finding": raw_paper.get("key_finding") or "",
         "research_motivation": raw_paper.get("research_motivation") or "",
         "research_materials": research_materials,
-        "material_relations": _as_list(raw_paper.get("material_relations")),
+        "material_relations": _material_relations(raw_paper.get("material_relations")),
         "builds_on": _as_list(raw_paper.get("builds_on")),
     }
     properties = _flatten_properties(raw.get("key_properties"))
@@ -1259,7 +1246,6 @@ def _normalize_draft(
 
     if not material_states and properties:
         material_states = _legacy_properties_to_material_states(properties)
-    _apply_methodology_inference(paper["methodology"], paper, material_states)
 
     normalized = {
         "paper": paper,
@@ -1496,6 +1482,11 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                             material_state_ref=f"unassigned:{file_item['file_id']}",
                             source=source_info,
                         ))
+                        from backend.ingest.scientific_evidence import register_structure_origin
+                        from backend.models import User
+                        with SessionLocal.begin() as origin_session:
+                            uploader = origin_session.get(User, int(state['user_id']))
+                            register_structure_origin(origin_session, 'upload', task_id, structure_candidates[-1], uploader.id, uploader.username, source_info['filename'], structure_text.encode('utf-8'))
                         structure_ok = True
                     except (OSError, UnicodeDecodeError, StructureCandidateError) as structure_exc:
                         structure_candidates.append({
@@ -1629,6 +1620,20 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         if existing:
             return _handle_duplicate(task_id, current_state, existing)
 
+        # 候选单独持久保存，不能把推断或通用知识写进提取值。
+        from backend.ingest.property_evidence import generate_upload_suggestions
+        update_state(task_id, suggestions_status='running', suggestions_error=None)
+        try:
+            generate_upload_suggestions(task_id, draft, int(current_state.get('user_id') or 0),
+                on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total))
+            draft['field_suggestions_error'] = None
+            update_state(task_id, suggestions_status='completed')
+        except UploadCancelled:
+            raise
+        except Exception as suggestion_error:
+            logging.getLogger(__name__).warning('字段建议生成失败 task=%s type=%s', task_id, type(suggestion_error).__name__)
+            draft['field_suggestions_error'] = '建议生成失败，已提取内容已保留；可点击 AI 审核重试。'
+            update_state(task_id, suggestions_status='failed', suggestions_error=draft['field_suggestions_error'])
         ai_values = json.loads(json.dumps(draft, ensure_ascii=False))
         artifact_path(task_id).write_text(
             json.dumps(
