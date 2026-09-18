@@ -332,7 +332,7 @@ const AdminPaperEditPage: React.FC = () => {
           }}>
             {evidenceWorkflow.dialog}
             <EvidenceFieldMarkers records={evidenceWorkflow.records} scope="paper-edit" onOpen={evidenceWorkflow.openIssue} onChange={evidenceWorkflow.invalidate} />
-            <Typography variant="subtitle2" fontWeight={700} gutterBottom>{t('admin.editReviewSection')}</Typography>
+            <Box data-evidence-ignore><Typography variant="subtitle2" fontWeight={700} gutterBottom>{t('admin.editReviewSection')}</Typography>
             <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
               <Button variant="outlined" disabled={editReviewSaving || evidenceWorkflow.busy} onClick={async () => { if (await handleEditSave()) void evidenceWorkflow.run({ target: 'paper', target_id: String(paperId) }) }}>{t('evidence.audit')}</Button>
           <Box sx={{ minWidth: 170 }}>
@@ -348,24 +348,24 @@ const AdminPaperEditPage: React.FC = () => {
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
               {t('admin.editReviewHint')}
-            </Typography>
+            </Typography></Box>
           </Box>
 
-          <TextField label={t('admin.fieldTitle')} size="small" fullWidth multiline rows={2}
+          <TextField data-issue-field="paper.title" label={t('admin.fieldTitle')} size="small" fullWidth multiline rows={2}
             value={editForm.title || ''} onChange={e => setEditForm({ ...editForm, title: e.target.value })} />
           <PaperMetadataRow
-            journal={<TextField label={t('admin.fieldJournal')} size="small" value={editForm.journal || ''}
+            journal={<TextField data-issue-field="paper.journal" label={t('admin.fieldJournal')} size="small" value={editForm.journal || ''}
               onChange={e => setEditForm({ ...editForm, journal: e.target.value })} />}
-            year={<TextField label={t('admin.fieldYear')} size="small" type="number" value={editForm.year ?? ''}
+            year={<TextField data-issue-field="paper.year" label={t('admin.fieldYear')} size="small" type="number" value={editForm.year ?? ''}
               onChange={e => setEditForm({ ...editForm, year: e.target.value ? Number(e.target.value) : null })} />}
-            issueNumber={<TextField label={t('admin.fieldIssueNumber')} size="small" value={editForm.issue_number || ''}
+            issueNumber={<TextField data-issue-field="paper.issue_number" label={t('admin.fieldIssueNumber')} size="small" value={editForm.issue_number || ''}
               slotProps={{ htmlInput: { maxLength: 100 } }}
               onChange={e => setEditForm({ ...editForm, issue_number: e.target.value })} />}
-            volume={<TextField label={t('admin.fieldVolume')} size="small" value={editForm.volume || ''}
+            volume={<TextField data-issue-field="paper.volume" label={t('admin.fieldVolume')} size="small" value={editForm.volume || ''}
               onChange={e => setEditForm({ ...editForm, volume: e.target.value })} />}
-            pages={<TextField label={t('admin.fieldPages')} size="small" value={editForm.pages || ''}
+            pages={<TextField data-issue-field="paper.pages" label={t('admin.fieldPages')} size="small" value={editForm.pages || ''}
               onChange={e => setEditForm({ ...editForm, pages: e.target.value })} />}
-            doi={<TextField label={t('admin.fieldDoi')} size="small" value={editForm.doi || ''}
+            doi={<TextField data-issue-field="paper.doi" label={t('admin.fieldDoi')} size="small" value={editForm.doi || ''}
               onChange={e => setEditForm({ ...editForm, doi: e.target.value })} />}
           />
           <Autocomplete
@@ -390,7 +390,7 @@ const AdminPaperEditPage: React.FC = () => {
               setAuthorInput('')
             }}
             renderInput={params => (
-              <TextField {...params} label={t('admin.fieldAuthors')} size="small"
+              <TextField {...params} data-issue-field="paper.authors" label={t('admin.fieldAuthors')} size="small"
                 placeholder={t('upload.authorPlaceholder')} />
             )}
           />

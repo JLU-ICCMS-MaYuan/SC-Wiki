@@ -1,4 +1,4 @@
-import { evidenceIssuesForStates } from '../lib/evidenceFields'
+import { currentEvidenceField, evidenceIssuesForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
 import { useEvidenceWorkflow, type EvidenceTarget } from './EvidenceWorkflow'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -132,7 +132,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const evidenceTarget: EvidenceTarget | undefined = readOnly ? undefined : revisionPaperId
     ? revision ? { target: 'revision', target_id: revision.revision_id } : undefined
     : { target: 'upload', target_id: taskId }
-  const evidenceWorkflow = useEvidenceWorkflow({ target: evidenceTarget })
+  const evidenceWorkflow = useEvidenceWorkflow({ target: evidenceTarget,
+    getCurrentValue: record => draft ? currentEvidenceField(record, { ...draft.paper }, draft.material_states) : undefined,
+  })
   const revisionIdentity = () => revisionMeta.current
     ? { revision_id: revisionMeta.current.revision_id, draft_version: revisionMeta.current.draft_version } : {}
   const persistDraft = useCallback(async (value: UploadDraft, preparationId?: string) => {
@@ -538,6 +540,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
+      {draft.field_suggestions_error && evidenceWorkflow.records.some(r => r.status === 'unchecked') && <Alert severity="warning" sx={{ mb: 2 }}>{t('evidence.generationFailed')}</Alert>}
 
       {draft.citation_extraction && <CitationExtractionPanel extraction={draft.citation_extraction} />}
 
@@ -577,7 +580,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
               )
             })}
             renderInput={params => (
-              <TextField {...params} label={t('upload.authorsField')} placeholder={(draft.paper.authors || []).length ? '' : t('upload.authorPlaceholder')} onKeyDown={event => { if ((event.key === 'Enter' || event.key === ',' || event.key === '，') && authorInput.trim()) { event.preventDefault(); commitAuthorInput() } }} />
+              <TextField {...params} data-issue-field="paper.authors" label={t('upload.authorsField')} placeholder={(draft.paper.authors || []).length ? '' : t('upload.authorPlaceholder')} onKeyDown={event => { if ((event.key === 'Enter' || event.key === ',' || event.key === '，') && authorInput.trim()) { event.preventDefault(); commitAuthorInput() } }} />
             )}
             sx={{
               '& .MuiOutlinedInput-root': {
@@ -603,17 +606,17 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           </Menu>
         </Box>
         <PaperMetadataRow
-          journal={<TextField label={t('upload.journal')} value={draft.paper.journal || ''}
+          journal={<TextField data-issue-field="paper.journal" label={t('upload.journal')} value={draft.paper.journal || ''}
             onChange={event => setPaperField('journal', event.target.value)} />}
-          year={<TextField label={t('upload.year')} type="number" value={draft.paper.year ?? ''}
+          year={<TextField data-issue-field="paper.year" label={t('upload.year')} type="number" value={draft.paper.year ?? ''}
             onChange={event => setPaperField('year', event.target.value ? Number(event.target.value) : null)} />}
           issueNumber={<TextField label={t('upload.issueNumber')} value={draft.paper.issue_number || ''}
             {...issueProps('paper.issue_number')}
             slotProps={{ htmlInput: { maxLength: 100 } }}
             onChange={event => setPaperField('issue_number', event.target.value)} />}
-          volume={<TextField label={t('upload.volume')} value={draft.paper.volume || ''}
+          volume={<TextField data-issue-field="paper.volume" label={t('upload.volume')} value={draft.paper.volume || ''}
             onChange={event => setPaperField('volume', event.target.value)} />}
-          pages={<TextField label={t('upload.pages')} value={draft.paper.pages || ''}
+          pages={<TextField data-issue-field="paper.pages" label={t('upload.pages')} value={draft.paper.pages || ''}
             onChange={event => setPaperField('pages', event.target.value)} />}
           doi={<TextField label="DOI" value={draft.paper.doi || ''}
             {...issueProps('paper.doi')}

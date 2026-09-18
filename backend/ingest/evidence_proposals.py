@@ -19,7 +19,9 @@ from . import scientific_evidence as science
 PREFIX = 'proposal:'
 NUMBERS = {'value_number', 'value_min', 'value_max', 'uncertainty', 'pressure_value_gpa',
            'pressure_min_gpa', 'pressure_max_gpa', 'temperature_value_k', 'magnetic_field_t'}
-INTEGERS = {'element_count', 'reported_space_group_number'}
+INTEGERS = {'element_count', 'reported_space_group_number', 'year'}
+LIST_FIELDS = {'authors', 'co_first_authors', 'corresponding_authors', 'methodology', 'keywords_tags', 'research_materials', 'material_families', 'structure_families'}
+BASIS_KINDS = {'paper_quote', 'paper_inference', 'general_knowledge'}
 ENUMS = {'superconductor_kind': ['conventional', 'unconventional', 'unknown'],
          'material_dimensionality': sorted(MATERIAL_DIMENSIONALITIES), 'crystal_system': sorted(CRYSTAL_SYSTEMS),
          'state_kind': ['theoretical', 'experimental', 'mixed', 'unknown'],
@@ -31,6 +33,17 @@ IMMUTABLE = {'is_representative', 'record_key', 'record_type', 'property_code', 
 
 def schema_for(value, name=''):
     schema = {'type': 'string'}
+    if name in {'calculation_context', 'experimental_context'}:
+        from sqlalchemy import Boolean, Numeric, Integer
+        model = models.CalculationContext if name == 'calculation_context' else models.ExperimentalContext
+        excluded = {'id', 'paper_id', 'paper_revision', 'material_state_id', 'structure_id', 'created_at', 'updated_at', 'parameters_json'}
+        return {'type': 'object', 'required': [], 'additionalProperties': False, 'properties': {
+            column.name: {'type': 'boolean' if isinstance(column.type, Boolean) else 'number' if isinstance(column.type, Numeric) else 'integer' if isinstance(column.type, Integer) else 'string', 'nullable': True}
+            for column in model.__table__.columns if column.name not in excluded}}
+    if name == 'material_relations':
+        return {'type': 'array', 'items': {'type': 'object', 'required': ['material', 'relation'], 'additionalProperties': False,
+                'properties': {'material': {'type': 'string'}, 'relation': {'type': 'string'},
+                               'page': {'type': 'integer', 'nullable': True}, 'quote': {'type': 'string'}}}}
     if name in ENUMS:
         schema['enum'] = ENUMS[name]
     elif name in INTEGERS:
@@ -39,7 +52,8 @@ def schema_for(value, name=''):
         schema = {'type': 'number'}
     elif isinstance(value, bool):
         schema = {'type': 'boolean'}
-    elif isinstance(value, list):
+    elif name in LIST_FIELDS or isinstance(value, list):
+        value = value if isinstance(value, list) else []
         schema = {'type': 'array', 'items': schema_for(value[0]) if value else {'type': 'string'}}
     elif isinstance(value, dict):
         schema = {'type': 'object', 'properties': {k: schema_for(v, k) for k, v in value.items()}, 'additionalProperties': False}
@@ -48,6 +62,9 @@ def schema_for(value, name=''):
 
 def editable_fields(record):
     if record.get('kind') in {'structure', 'derived'}:
+        return []
+    # 条件已归属于物性记录；旧状态级汇总只供查阅，通过原物性入口修改。
+    if record.get('kind') == 'field' and record['field'].rsplit('.', 1)[-1] in {'calculation_context', 'experimental_context'}:
         return []
     if record.get('kind') == 'property':
         current = record['claim']['record']
@@ -62,7 +79,7 @@ def editable_fields(record):
 def valid_value(value, schema):
     kind = schema['type']
     if value is None:
-        return False
+        return schema.get('nullable', False)
     if 'enum' in schema and value not in schema['enum']:
         return False
     if kind in {'number', 'integer'}:
@@ -75,7 +92,8 @@ def valid_value(value, schema):
     if kind == 'array':
         return isinstance(value, list) and len(value) <= 1000 and all(valid_value(v, schema['items']) for v in value)
     if kind == 'object':
-        return isinstance(value, dict) and set(value) == set(schema['properties']) and all(valid_value(v, schema['properties'][k]) for k, v in value.items())
+        return (isinstance(value, dict) and set(schema.get('required', schema['properties'])) <= set(value)
+                and set(value) <= set(schema['properties']) and all(valid_value(v, schema['properties'][k]) for k, v in value.items()))
     return False
 
 
@@ -96,11 +114,16 @@ def checked_proposal(record, raw, chunks):
         values = validate_values(record, raw['values'])
     except HTTPException:
         return None
-    sources = [ev.locate(e, chunks) for e in raw.get('evidences', [])]
-    if not sources or not all(sources):
+    basis = raw.get('basis_kind', 'paper_quote')
+    explanation = str(raw.get('explanation') or '').strip()
+    if basis not in BASIS_KINDS or (basis != 'paper_quote' and not explanation):
+        return None
+    sources = [ev.locate(e, chunks) for e in raw.get('evidences', []) if isinstance(e, dict)]
+    if len(sources) != len(raw.get('evidences', [])) or not all(sources) or (not sources and basis != 'general_knowledge'):
         return None
     return {'version': ev.RULE_VERSION, 'values': values, 'evidences': sources,
-            'supported': raw.get('supported') is True, 'content_hash': record['content_hash'],
+            'basis_kind': basis, 'explanation': explanation,
+            'supported': basis == 'paper_quote' and raw.get('supported') is True, 'content_hash': record['content_hash'],
             'source_hash': record['source_hash']}
 
 
@@ -115,6 +138,12 @@ def check_source(record, result, chunks, human_draft=None):
             located.append(found)
     origin = record.get('provenance') or {}
     if human_draft and human_draft.get('human_confirmed') and human_draft.get('accepted') and human_draft.get('actor_user_id') and str(human_draft.get('reason') or '').strip():
+        return located
+    candidate = checked_proposal(record, proposal, chunks)
+    if (human_draft and human_draft.get('accepted') and candidate and
+            candidate['basis_kind'] in {'paper_inference', 'general_knowledge'} and
+            human_draft.get('basis_kind') == candidate['basis_kind'] and
+            ev.digest(human_draft.get('values')) == ev.digest(candidate['values'])):
         return located
     if not located and not (record.get('kind') == 'structure' and origin.get('verified') and origin.get('submitted_by_user_id')):
         ev.fail('evidence_missing', '没有可核验来源，不能接受或批准；请重新查找或返回补充来源')
@@ -149,18 +178,23 @@ def save_draft(session, snapshot, actor, key, values, accepted, reason):
     proposal = result.get('proposal') or {}
     supported = bool(proposal.get('supported') and ev.digest(values) == ev.digest(proposal.get('values')))
     unchanged = all(science.canonical(f['value']) == science.canonical(values.get(f['path'], f['value'])) for f in editable_fields(record))
-    supported = supported or (unchanged and result['status'] == 'supported')
+    matches_proposal = bool(proposal and ev.digest(values) == ev.digest(proposal.get('values')))
+    supported = supported if matches_proposal else (unchanged and result['status'] == 'supported')
+    basis_kind = proposal.get('basis_kind', 'paper_quote') if matches_proposal else (result.get('adopted_basis') or 'paper_quote')
+    if basis_kind != 'paper_quote':
+        supported = False
     human = bool(accepted and snapshot['target'] == 'paper' and not supported and reason.strip())
     if accepted:
         validate_domain_values(session, record, values)
         if snapshot['target'] == 'paper' and not supported and not reason.strip():
             ev.fail('evidence_review_required', '保留存疑内容或人工改写时，请说明判断依据')
         if not human:
-            if result['status'] == 'unchecked':
+            if result['status'] == 'unchecked' and not (matches_proposal and basis_kind != 'paper_quote'):
                 ev.fail('evidence_check_required', '该项目尚未核对，请先完成来源核对')
-            check_source(record, result, snapshot['chunks'])
+            check_source(record, result, snapshot['chunks'], {'accepted': accepted, 'values': values, 'basis_kind': basis_kind})
     prior = (row.resolutions or {}).get(PREFIX + str(actor), {})
     draft = {'values': copy.deepcopy(values), 'accepted': accepted, 'reason': reason.strip(),
+             'basis_kind': basis_kind,
              'supported': supported, 'human_confirmed': human, 'actor_user_id': actor, 'updated_at': datetime.now(timezone.utc).isoformat(),
              'base_version': snapshot['version'], 'original_value': record.get('current_value'),
              'ai_proposal': copy.deepcopy(proposal), 'ai_status': result['status'], 'ai_reason': result['reason'],
@@ -192,18 +226,30 @@ def expected_claim(record, values):
     return claim
 
 
+def validate_applied_review(snapshot, rows, row, record, draft):
+    """失败恢复不能用旧摘要上的接受资格覆盖保存后新内容的反对结论。"""
+    if not draft.get('supported') or draft.get('human_confirmed') or not record or row_matches(row, record):
+        return
+    latest = next((candidate for candidate in reversed(rows) if row_matches(candidate, record)), None)
+    if latest is not None and ev.checked_result(record, latest.result, snapshot['chunks'])['status'] != 'supported':
+        ev.fail('evidence_review_required', '已保存内容的新复核不再支持旧建议，请重新核对并说明依据')
+
+
 def prepare(session, snapshot, actor):
     prepared_id = uuid.uuid4().hex
     records = {r['item_key']: r for r in snapshot['records']}
     patches = []
     selected = {}
-    for row in rows_for(session, snapshot, True):
+    rows = rows_for(session, snapshot, True)
+    for row in rows:
         draft = (row.resolutions or {}).get(PREFIX + str(actor))
         if draft and draft.get('accepted'):
             record = records.get(row.item_key)
             if not record or (not row_matches(row, record) and not draft.get('preparation')):
                 continue
             selected[row.item_key] = (row, draft)
+    for item_key, (row, draft) in selected.items():
+        validate_applied_review(snapshot, rows, row, records.get(item_key), draft)
     current = {r['item_key']: [r['content_hash'], r['source_hash']] for r in snapshot['records']}
     if selected:
         previous = [d.get('preparation') for _, d in selected.values()]
@@ -241,7 +287,14 @@ def prepare(session, snapshot, actor):
             ev.fail('evidence_stale', '接受建议后数据已变化，请刷新核对结果后重试')
         validate_values(record, draft['values'])
         validate_domain_values(session, record, draft['values'])
-        check_source(record, row.result, snapshot['chunks'], draft if snapshot['target'] == 'paper' else None)
+        current = ev.checked_result(record, row.result, snapshot['chunks'])
+        proposal = current.get('proposal') or {}
+        unchanged = all(science.canonical(f['value']) == science.canonical(draft['values'].get(f['path'], f['value'])) for f in editable_fields(record))
+        matches_proposal = bool(proposal and ev.digest(proposal.get('values')) == ev.digest(draft['values']))
+        still_supported = proposal.get('supported') if matches_proposal else unchanged and current['status'] == 'supported'
+        if draft.get('supported') and not still_supported:
+            ev.fail('evidence_review_required', 'AI 复核已改变支持判断，请重新确认建议并说明依据')
+        check_source(record, row.result, snapshot['chunks'], draft)
         updated = copy.deepcopy(draft)
         updated['preparation'] = {'id': prepared_id, 'expected_claim': science.canonical(projected_claim(record, draft['values'])),
                                   'source_hash': record['source_hash'], 'before': before, 'after_paper': after_paper}
@@ -253,7 +306,8 @@ def prepare(session, snapshot, actor):
 def finalize(session, snapshot, actor, preparation_id):
     records = {r['item_key']: r for r in snapshot['records']}
     matched = []
-    for row in rows_for(session, snapshot, True):
+    rows = rows_for(session, snapshot, True)
+    for row in rows:
         draft = (row.resolutions or {}).get(PREFIX + str(actor), {})
         preparation = draft.get('preparation') or {}
         if preparation.get('id') != preparation_id:
@@ -261,12 +315,14 @@ def finalize(session, snapshot, actor, preparation_id):
         record = records.get(row.item_key)
         if not draft.get('accepted') or not record or record['source_hash'] != preparation['source_hash'] or science.canonical(record['claim']) != science.canonical(preparation['expected_claim']):
             ev.fail('evidence_stale', '保存内容与接受建议不一致，未绑定人工决定；已保存修改保留待审')
-        sources = check_source(record, row.result, snapshot['chunks'], draft if snapshot['target'] == 'paper' else None)
+        validate_applied_review(snapshot, rows, row, record, draft)
+        sources = check_source(record, row.result, snapshot['chunks'], draft)
         decision = {k: copy.deepcopy(v) for k, v in draft.items() if k != 'preparation'}
         decision.update(final_value=record.get('current_value'), final_content_hash=record['content_hash'],
                         source_hash=record['source_hash'], preparation_id=preparation_id)
         result = {**record, **{k: row.result.get(k) for k in ('status', 'reason', 'suggestion', 'model')},
                   'evidences': sources, 'decision': decision, 'proposal': row.result.get('proposal'),
+                  'adopted_basis': draft.get('basis_kind', 'paper_quote'),
                   'status': 'supported' if draft['supported'] else draft.get('ai_status') or row.result.get('status'),
                   'source_kind': 'human_review' if draft.get('human_confirmed') else row.result.get('source_kind')}
         # 明确保留 AI 原判断，放行资格由独立的人工决定或支持过的采纳建议产生。
@@ -276,7 +332,7 @@ def finalize(session, snapshot, actor, preparation_id):
             return {'status': 'saved', 'version': snapshot['version']}
         ev.fail('evidence_stale', '建议申请不存在、已撤销或属于其他用户')
     for old, record, result, draft in matched:
-        science.save_results(session, snapshot, {record['key']: result}, actor)
+        science.save_results(session, snapshot, {record['key']: result}, actor, update_decision=True)
         # 不再把已应用的旧版本草稿用于下一次准备；历史仍保留在 result.decision。
         resolutions = dict(old.resolutions or {})
         resolutions.pop(PREFIX + str(actor), None)

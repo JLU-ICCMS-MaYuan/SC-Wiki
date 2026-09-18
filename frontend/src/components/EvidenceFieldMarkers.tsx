@@ -6,10 +6,10 @@ import type { EvidenceRecord } from './EvidenceWorkflow'
 interface Props {
   records: EvidenceRecord[]
   scope: string
-  onOpen: (key: string, keys?: string[]) => void
+  onOpen: (key: string, keys?: string[], fallback?: EvidenceRecord) => void
   onChange: (field: string, pathKind?: 'current' | 'snapshot') => void
 }
-const normalize = (field: string) => field.replace(/^user_values\./, '')
+const normalize = (field: string) => field.replace(/^user_values\./, '').replace(/^paper\.(co_first_authors|corresponding_authors)$/, 'paper.authors')
 const valueText = (value: unknown) => typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value ?? '')
 
 function recordOwner(record: EvidenceRecord, scope: string) {
@@ -20,10 +20,11 @@ function recordOwner(record: EvidenceRecord, scope: string) {
   return [name, index == null ? `材料状态 ${record.state_key}` : `材料状态 ${Number(index) + 1}${state ? '' : '（已移除）'}`].filter(Boolean).join(' · ')
 }
 
-export const evidenceProblem = (record: EvidenceRecord) => Boolean(record.stale || (record.status !== 'supported' && !record.proposal_draft?.accepted && !record.human_confirmed && !record.resolution?.trim()))
+export const evidenceProblem = (record: EvidenceRecord) => record.required !== false && Boolean(record.stale || (record.status !== 'supported' && !record.proposal_draft?.accepted && !record.human_confirmed && !record.resolution?.trim()))
 
 /** 优先复用控件自己的标签，不把整个输入框变成按钮。 */
 function fieldCaption(node: HTMLElement) {
+  if (node.hasAttribute('data-evidence-readonly')) return node
   if (node.matches('.MuiInputBase-root')) {
     return node.closest('.MuiFormControl-root')?.querySelector<HTMLElement>('.MuiInputLabel-root') || null
   }
@@ -44,7 +45,7 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
       node.prepend(host)
       return () => host.remove()
     }
-    // 问题解决或卸载后恢复原标签语义及默认聚焦行为。
+    // 重新绑定或卸载后恢复原标签语义及默认聚焦行为。
     const attributes = {
       role: 'button', tabindex: '0', 'aria-description': label,
       title: label, 'aria-haspopup': 'dialog', 'data-evidence-key': records[0].key, 'data-evidence-caption': 'true',
@@ -55,7 +56,8 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
       event.preventDefault()
       event.stopPropagation()
       target.focus()
-      onOpen(records[0].key, records.map(r => r.key))
+      if (records[0].placeholder) onOpen(records[0].key, [records[0].key], records[0])
+      else onOpen(records[0].key, records.map(r => r.key))
     }
     const keydown = (event: KeyboardEvent) => {
       if (event.key === 'Enter' || event.key === ' ') activate(event)
@@ -71,7 +73,7 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
       }
     }
   }, [host, node, records, onOpen, label, names])
-  return caption ? null : createPortal(<Button data-evidence-key={records[0].key} color="error" size="small" aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); onOpen(records[0].key, records.map(r => r.key)) }}>{names}</Button>, host)
+  return caption ? null : createPortal(<Button data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : 'primary'} size="small" aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], records[0]); else onOpen(records[0].key, records.map(r => r.key)) }}>{names}</Button>, host)
 }
 
 /** 在现有表单的字段锚点附加标记，避免复制动态表单和科学校验。 */
@@ -87,7 +89,7 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
       const nextOwners = Object.fromEntries(records.map(record => [record.key, recordOwner(record, scope)]))
       setOwners(old => JSON.stringify(old) === JSON.stringify(nextOwners) ? old : nextOwners)
       const nodes = Array.from(root.querySelectorAll<HTMLElement>('[data-issue-field]')).filter(node => !node.closest('[data-evidence-fallback]'))
-      const next = records.filter(evidenceProblem).flatMap(record => {
+      const next = records.flatMap(record => {
         let area: HTMLElement = root
         if (record.state_key) {
           const state = Array.from(root.querySelectorAll<HTMLElement>('[data-state-key]')).find(n => n.dataset.stateKey === record.state_key)
@@ -120,7 +122,38 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
           return control ? [{ record, node: control }] : []
         })
       })
-      setTargets(old => old.length === next.length && old.every((x, i) => x.node === next[i].node && x.record === next[i].record) ? old : next)
+      // 每个实际控件都保留查看入口；无后端记录时只读展示当前值，不创造核对资格。
+      for (const node of root.querySelectorAll<HTMLElement>('.MuiInputBase-root')) {
+        if (node.closest('[data-evidence-ignore],.evidence-review-drawer') || next.some(x => x.node === node)) continue
+        const caption = fieldCaption(node)
+        if (!caption) continue
+        const input = node.querySelector<HTMLInputElement | HTMLTextAreaElement>('input,textarea')
+        const anchor = node.closest<HTMLElement>('[data-issue-field]')
+        const owner = node.closest<HTMLElement>('[data-record-key],[data-scientific-structure]')
+        const associated = next.filter(x => x.node.contains(node) && (!owner || owner.contains(x.node) || x.node === owner))
+        if (associated.length) {
+          for (const x of associated) next.push({record:x.record,node})
+          continue
+        }
+        const field = anchor?.dataset.issueField || `view:${caption.id || input?.id || caption.textContent}`
+        const record: EvidenceRecord = {key:`view:${scope}:${field}:${caption.id}`, field, label:caption.textContent || '',
+          current_value:input?.value ?? node.querySelector('[role="combobox"]')?.textContent ?? '', status:'unchecked',
+          reason:'', evidences:[], required:false, placeholder:true}
+        next.push({record,node})
+      }
+      for (const node of root.querySelectorAll<HTMLElement>('[data-evidence-readonly]')) {
+        const owner = node.closest<HTMLElement>('[data-scientific-structure]')
+        const associated = owner && next.filter(x => x.node === owner)
+        if (associated && associated.length) {
+          for (const x of associated) next.push({record:x.record,node})
+        } else {
+          const record: EvidenceRecord = {key:`view:${scope}:readonly:${node.textContent}`, field:'view:readonly',
+            label:node.textContent || '', current_value:node.parentElement?.textContent || '', status:'unchecked',
+            reason:'', evidences:[], required:false, placeholder:true}
+          next.push({record,node})
+        }
+      }
+      setTargets(old => old.length === next.length && old.every((x, i) => x.node === next[i].node && (x.record === next[i].record || (x.record.placeholder && JSON.stringify(x.record) === JSON.stringify(next[i].record)))) ? old : next)
     }
     find()
     const observer = new MutationObserver(() => { clearTimeout(frame); frame = setTimeout(find, 0) })
@@ -167,13 +200,14 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
       [data-evidence-problem="true"] {outline: 2px solid #d32f2f; outline-offset: 2px; position: relative; border-radius: 8px;}
       [data-evidence-problem="true"].MuiOutlinedInput-root {outline: none;}
       [data-evidence-problem="true"].MuiOutlinedInput-root > .MuiOutlinedInput-notchedOutline {border-color: #d32f2f; border-width: 2px;}
-      [data-evidence-caption="true"] {color: #d32f2f !important; cursor: pointer; pointer-events: auto !important;}
+      [data-evidence-caption="true"] {cursor: pointer; pointer-events: auto !important;}
+      [data-evidence-problem="true"] [data-evidence-caption="true"] {color: #d32f2f !important;}
       [data-evidence-caption="true"]:hover {text-decoration: underline;}
       [data-evidence-caption="true"]:focus-visible {outline: 2px solid #d32f2f; outline-offset: 2px; border-radius: 2px;}
     `}</style>
     {[...groups].map(([node, group], i) => <FieldTrigger key={`${group[0].key}-${i}`} records={group} node={node} onOpen={onOpen} />)}
-    {missing.length > 0 && <Box data-evidence-fallback sx={{ my: 1, borderLeft: 2, borderColor: 'warning.main', pl: 1.5 }}>
-      <Typography variant="caption" color="text.secondary">待定位的来源核对（{missing.length}）</Typography>
+    {missing.length > 0 && <Box component="details" data-evidence-fallback sx={{ my: 1, borderLeft: 2, borderColor: 'warning.main', pl: 1.5 }}>
+      <Typography component="summary" variant="caption" color="text.secondary">待定位的来源核对（{missing.length}）</Typography>
       {missing.map(record => <Box key={record.key}>
         <Button size="small" color="error" data-evidence-key={record.key} aria-haspopup="dialog" onClick={() => onOpen(record.key)} sx={{ textAlign: 'left', whiteSpace: 'normal', overflowWrap: 'anywhere' }}>
           {owners[record.key] || '论文'} · {record.provenance?.filename ? `${record.provenance.filename} · ` : record.structure_hash ? `结构 #${Number(record.field.match(/(?:structures|structure_candidates)\[(\d+)\]/)?.[1] || 0) + 1} · ` : ''}{record.label}：查看来源核对

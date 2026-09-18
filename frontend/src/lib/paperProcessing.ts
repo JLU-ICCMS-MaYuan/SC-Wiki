@@ -185,6 +185,7 @@ export interface PaperDraftFields {
 }
 
 export interface UploadDraft {
+  field_suggestions_error?: string | null
   paper: PaperDraftFields
   material_states: DraftMaterialState[]
   citation_extraction?: CitationExtraction | null
@@ -413,6 +414,7 @@ export function normalizeUploadDraft(value: unknown): UploadDraft {
       ? raw.classification_evidence
       : [],
     field_evidence: fieldEvidence,
+    field_suggestions_error: raw.field_suggestions_error || null,
   }
 }
 

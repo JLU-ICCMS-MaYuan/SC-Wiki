@@ -25,27 +25,31 @@ type evidenceCitation struct {
 	PageEnd    *int    `json:"page_end"`
 }
 type evidenceReviewRecord struct {
-	Proposal     json.RawMessage    `json:"proposal"`
-	Decision     json.RawMessage    `json:"decision"`
-	SourceKind   string             `json:"source_kind"`
-	ItemKey      string             `json:"item_key"`
-	Kind         string             `json:"kind"`
-	Suggestion   string             `json:"suggestion"`
-	CurrentValue json.RawMessage    `json:"current_value"`
-	Provenance   json.RawMessage    `json:"provenance"`
-	Fields       []string           `json:"fields"`
-	Key          string             `json:"key"`
-	RecordID     uint               `json:"record_id"`
-	Field        string             `json:"field"`
-	Label        string             `json:"label"`
-	ContentHash  string             `json:"content_hash"`
-	SourceHash   string             `json:"source_hash"`
-	RuleVersion  string             `json:"rule_version"`
-	Status       string             `json:"status"`
-	Reason       string             `json:"reason"`
-	Model        string             `json:"model"`
-	Resolution   string             `json:"resolution"`
-	Evidences    []evidenceCitation `json:"evidences"`
+	History        json.RawMessage    `json:"history,omitempty"`
+	Required       *bool              `json:"required,omitempty"`
+	AdoptedBasis   string             `json:"adopted_basis,omitempty"`
+	ProposalReview json.RawMessage    `json:"proposal_review,omitempty"`
+	Proposal       json.RawMessage    `json:"proposal"`
+	Decision       json.RawMessage    `json:"decision"`
+	SourceKind     string             `json:"source_kind"`
+	ItemKey        string             `json:"item_key"`
+	Kind           string             `json:"kind"`
+	Suggestion     string             `json:"suggestion"`
+	CurrentValue   json.RawMessage    `json:"current_value"`
+	Provenance     json.RawMessage    `json:"provenance"`
+	Fields         []string           `json:"fields"`
+	Key            string             `json:"key"`
+	RecordID       uint               `json:"record_id"`
+	Field          string             `json:"field"`
+	Label          string             `json:"label"`
+	ContentHash    string             `json:"content_hash"`
+	SourceHash     string             `json:"source_hash"`
+	RuleVersion    string             `json:"rule_version"`
+	Status         string             `json:"status"`
+	Reason         string             `json:"reason"`
+	Model          string             `json:"model"`
+	Resolution     string             `json:"resolution"`
+	Evidences      []evidenceCitation `json:"evidences"`
 }
 type evidencePrepareError struct {
 	Status int
@@ -129,6 +133,14 @@ func preparePaperEvidence(tx *gorm.DB, paper *models.Paper, auth, jobID, version
 	}
 	seen := map[string]bool{}
 	for _, r := range result.Records {
+		if r.ItemKey == "" || seen[r.ItemKey] {
+			return nil, errors.New("证据核对项目身份无效")
+		}
+		seen[r.ItemKey] = true
+		// 空字段和未采用建议仍归档，但不作为科学断言批准。
+		if r.Required != nil && !*r.Required && r.RecordID == 0 && r.AdoptedBasis == "" {
+			continue
+		}
 		var origin struct {
 			Kind        string `json:"kind"`
 			Verified    bool   `json:"verified"`
@@ -137,10 +149,9 @@ func preparePaperEvidence(tx *gorm.DB, paper *models.Paper, auth, jobID, version
 		_ = json.Unmarshal(r.Provenance, &origin)
 		hasOrigin := origin.Kind == "contributor_structure" && origin.Verified && origin.SubmittedBy != 0 && strings.TrimSpace(r.Resolution) != ""
 		human := validHumanEvidence(r)
-		if r.ItemKey == "" || seen[r.ItemKey] || (len(r.Evidences) == 0 && !hasOrigin && !human) || ((r.Status == "missing" || r.Status == "unchecked") && !human) || (r.Status != "supported" && strings.TrimSpace(r.Resolution) == "") {
+		if (r.AdoptedBasis == "general_knowledge" && !human) || (len(r.Evidences) == 0 && !hasOrigin && !human) || ((r.Status == "missing" || r.Status == "unchecked") && !human) || (r.Status != "supported" && strings.TrimSpace(r.Resolution) == "") {
 			return nil, errors.New("证据核对结果无效")
 		}
-		seen[r.ItemKey] = true
 		if r.RecordID == 0 {
 			continue
 		}

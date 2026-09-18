@@ -1,6 +1,7 @@
 """共享证据核对入口。后台任务只读科学数据，应用结果由原提交/审核事务负责。"""
 import json
 import uuid
+from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -24,6 +25,7 @@ class Target(BaseModel):
     expected_version: str | None = None
     candidates: dict[str, list[dict]] = Field(default_factory=dict)
     retry_keys: list[str] | None = None
+    purpose: Literal['check', 'review_all'] = 'check'
 
 
 def snapshot_for(body, user):
@@ -52,6 +54,8 @@ def preflight(body: Target, user=Depends(get_current_user)):
 @router.post('/jobs')
 def create_job(body: Target, user=Depends(get_current_user)):
     snapshot, cached = snapshot_for(body, user)
+    if body.purpose == 'review_all' and (body.target != 'paper' or user.role not in {'admin', 'superadmin'}):
+        raise HTTPException(403, detail='全量复核仅用于管理员论文审核')
     if body.expected_version != snapshot['version']:
         ev.fail('evidence_stale', '内容或来源已发生变化，请重新核对')
     retry_keys = set(body.retry_keys or [])
@@ -62,7 +66,8 @@ def create_job(body: Target, user=Depends(get_current_user)):
         dependency = by_item.get(record.get('dependency'))
         if dependency and (record['key'] in retry_keys or dependency['key'] in retry_keys):
             retry_keys.update((record['key'], dependency['key']))
-    cached = {k: v for k, v in cached.items() if not v.get('stale') and k not in retry_keys and
+    prior = dict(cached)
+    cached = {} if body.purpose == 'review_all' else {k: v for k, v in cached.items() if not v.get('stale') and k not in retry_keys and
               (v.get('status') != 'unchecked' or science.human_confirmed(v))}
     for record in snapshot['records']:
         if record['key'] in body.candidates:
@@ -80,7 +85,8 @@ def create_job(body: Target, user=Depends(get_current_user)):
     if not config.api_key:
         ev.fail('evidence_model_config', '尚未配置模型，请先填写模型配置')
     job_id = uuid.uuid4().hex
-    job = dict(id=job_id, owner=user.id, snapshot=snapshot, cached=cached, requested_keys=sorted(retry_keys) or None, status='queued', progress='等待后台核对')
+    job = dict(id=job_id, owner=user.id, snapshot=snapshot, cached=cached, prior=prior, purpose=body.purpose,
+               requested_keys=None if body.purpose == 'review_all' else sorted(retry_keys) or None, status='queued', progress='等待后台核对')
     redis_client().setex(ev.task_key(job_id), TASK_TTL, json.dumps(job, ensure_ascii=False, default=str))
     save_llm_config(job_id, config)
     try:
@@ -141,6 +147,8 @@ def prepare_review(body: PrepareReview, user=Depends(get_current_admin)):
             science.validate_review_classifications(session, body.paper_id, body.classifications)
         records = ev.resolve_results(snapshot, science.load_results(session, snapshot, user.id), user.id, body.job_id, body.expected_version)
         for record in records:
+            if not record.get('required', True):
+                continue
             reason = body.resolutions.get(record['key'], record.get('resolution', '')).strip()
             if len(reason) > 4000:
                 ev.fail('evidence_resolution_invalid', '人工裁决理由不能超过 4000 字')

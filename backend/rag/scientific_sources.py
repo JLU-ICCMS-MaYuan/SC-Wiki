@@ -4,6 +4,8 @@ import json
 
 def source_chunk(source):
     result = source.result
+    if result.get('required') is False and (result.get('status') != 'supported' or not result.get('current_value')):
+        return None
     origin = result.get('provenance') or {}
     quotes = result.get('evidences') or []
     from backend.ingest.scientific_evidence import human_confirmed
@@ -17,6 +19,9 @@ def source_chunk(source):
         attribution = f"程序派生数据；计算依据：{origin.get('rule') or '见来源记录'}。"
     else:
         attribution = '来源为当前论文及附件的可核验引句。'
+    basis = result.get('adopted_basis') or (result.get('decision') or {}).get('basis_kind')
+    if basis in {'general_knowledge', 'paper_inference'}:
+        attribution = ('建议最初来自通用知识推测。' if basis == 'general_knowledge' else '建议来自根据论文内容的推断。') + attribution
     value = result.get('current_value', result.get('claim', ''))
     content = f"{attribution}\n{result.get('label', source.field_path)}：{json.dumps(value, ensure_ascii=False)}\n"
     content += '\n'.join(f"第 {e.get('page_start') or '未知'} 页：{e.get('quote', '')}" for e in quotes)

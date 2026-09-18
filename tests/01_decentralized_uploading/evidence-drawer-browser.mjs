@@ -42,7 +42,7 @@ try {
     await page.waitForTimeout(500)
     await input.evaluate(el=>el.scrollIntoView({block:'center'}))
     await page.waitForTimeout(500)
-    const label=page.getByRole('button',{name:'压强 (GPa)',exact:true})
+    const label=page.locator('[data-state-key="state-4"]').getByRole('button',{name:'压强 (GPa)',exact:true})
     const initialLoads=pageLoads
     const position=()=>input.evaluate(el=>({top:el.getBoundingClientRect().top,scroll:window.scrollY}))
     const stable=async(before,action)=>{
@@ -72,7 +72,8 @@ try {
       requestAnimationFrame(sample)
     })
     await page.getByRole('button',{name:'完成',exact:true}).click()
-    await page.waitForFunction(()=>!!document.querySelector('button[data-evidence-key="pressure"]'))
+    await page.getByRole('dialog').waitFor({state:'detached'})
+    assert.equal(await page.locator('button[data-evidence-key="pressure"]').count(),0,'不再产生顶部已接受列表')
     await page.waitForTimeout(450)
     const remained=await page.getByRole('dialog').count()
     if(remained){failures.push({role,action:'complete-stayed-open'});await page.getByLabel('关闭来源详情').click()}

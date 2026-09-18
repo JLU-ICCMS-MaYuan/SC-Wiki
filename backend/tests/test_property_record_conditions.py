@@ -46,6 +46,9 @@ def test_worker_prompts_and_storage_keep_each_measurement_conditions(tmp_path, m
     state = {"task_id": "e" * 32, "file_path": str(source), "file_kind": "md", "status": "queued"}
     saved = {}
     prompts = []
+    generated = []
+    monkeypatch.setattr('backend.ingest.property_evidence.generate_upload_suggestions',
+                        lambda task, draft, owner, on_progress=None: generated.append(deepcopy(draft)))
     monkeypatch.setattr(upload_jobs, "get_state", lambda _: state)
     monkeypatch.setattr(upload_jobs, "markdown_path", lambda _: source)
     monkeypatch.setattr(upload_jobs, "artifact_directory", lambda _: artifact_dir)
@@ -77,6 +80,8 @@ def test_worker_prompts_and_storage_keep_each_measurement_conditions(tmp_path, m
     monkeypatch.setattr(upload_jobs, "complete_json", complete_json)
     result = upload_jobs._process_upload_task(state["task_id"])
     assert result["status"] == "ready"
+    assert len(generated) == 1
+    assert generated[0]['material_states'] == saved['material_states']
     assert prompts == [upload_jobs.CHUNK_SYSTEM_PROMPT, upload_jobs.SUMMARY_SYSTEM_PROMPT]
     modules = saved["material_states"][0]["property_modules"]
     assert [record["payload"]["experimental_conditions"]["description"] for record in modules[0]["records"]] == DESCRIPTIONS

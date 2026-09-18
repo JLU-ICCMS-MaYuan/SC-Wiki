@@ -1,4 +1,16 @@
 export default {
+  "historyLabel": "历史记录",
+  "historyReadonly": "内容或来源已变化，以下记录仅供参考，不用于当前批准。",
+
+  "generationFailed": "建议生成失败，已提取内容已保留；可点击 AI 审核重试。",
+  "emptySources": "暂无证据或建议",
+  "proposalReview": "AI 对建议的复核",
+  "savedHumanReason": "已保存的人工判断依据",
+  "basis": {
+    "paper_quote": "原文直接记载",
+    "paper_inference": "根据论文推断：建议需人工采用，不等于原文直接记载。",
+    "general_knowledge": "依据通用知识推测：缺少本论文直接支持，正式批准需要管理员说明依据。"
+  },
   "beforeEditValue": "修改前的值",
   "pressureConditions": "原始压强、单位与范围",
   "pressureRaw": "原始压强",

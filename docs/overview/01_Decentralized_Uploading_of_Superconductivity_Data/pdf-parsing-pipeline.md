@@ -46,7 +46,7 @@
 ### 第 4 步：AI 汇总草稿（summarizing）
 
 - `_summary_classification_candidates` 先过滤掉非当前论文的过期证据，再把分段候选交给 `complete_json(SUMMARY_SYSTEM_PROMPT, ...)` 汇总为一份结构化草稿。
-- 汇总 prompt（`SUMMARY_SYSTEM_PROMPT`）与正文提取（`extractor.py`）都要求以英文产出六个叙述字段（`summary`、`keywords_tags`、`methodology`、`key_finding`、`research_motivation`、`knowledge_graph_title`）；汇总归一化后、写入草稿和审核快照前会再次拒绝这些生成字段中的中日韩字符。标题、摘要、作者、原始数值、单位和 `quote` 保持来源语言。Worker 以验证后的英文 canonical draft 预填选项框和输入框；审核表单不生成或显示逐字段 AI 建议，只有非空 `quote` 才作为默认折叠的“论文片段”显示。某字段无来源依据时保持为空，不编造内容。（[Issue #74](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/74)、[#85](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/85)）
+- 汇总 prompt（`SUMMARY_SYSTEM_PROMPT`）与正文提取（`extractor.py`）都要求以英文产出六个叙述字段（`summary`、`keywords_tags`、`methodology`、`key_finding`、`research_motivation`、`knowledge_graph_title`）；汇总归一化后、写入草稿和审核快照前会再次拒绝这些生成字段中的中日韩字符。标题、摘要、作者、原始数值、单位和 `quote` 保持来源语言。Worker 以验证后的英文 canonical draft 预填选项框和输入框；字段建议在提取后单独生成，通过字段名打开侧栏查看；只有非空且能定位的 `quote` 才作为论文片段显示。某字段无来源依据时保持为空，不编造内容。（[Issue #74](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/74)、[#85](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/85)）
 - 正文 PDF 在 Worker 中额外提交给本地 GROBID 的 `processFulltextDocument` 接口。GROBID 返回的 TEI `biblStruct` 会提取 DOI、题名、作者、年份和原始引文，随论文版本保存到 `paper_references`；GROBID 不可用或解析不完整时保存状态，不由 LLM 猜造引用边。（[Issue #81](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/81)）
 - `_normalize_draft` 把草稿归一化为当前数据契约：论文元信息（含单选 `superconductor_kind` 和多选 Material family）、`material_states`（材料、压强/温度/磁场、计算与实验上下文、`tc_results`、More type labels）、分类证据等。旧草稿的状态级 `superconductor_kind` 只在读取时一次性提升：唯一的非 `unknown` 值保留，冲突时回退 `unknown`；新提交拒绝该旧字段。
 - 汇总后执行查重：先按归一化 DOI（`normalize_doi`）查 `papers`，再按原始文件 SHA-256 查；命中即进入 `_handle_duplicate`，任务以 `duplicate` 状态短路结束。
@@ -76,14 +76,14 @@
 
 - 原文支持结论：核对完成后由用户点击提交，不自动续提。
 - 有有效出处但存在冲突或歧义：允许用户提交为待审核，核对结论随正式记录保存，供管理员逐条裁决。
-- 没有有效出处：保留草稿，显示具体材料、物性、数值和原因，可让系统重新查找或返回修改记录。来源搜索、选择和关联由系统完成，不要求用户选择片段或编辑原文引句。
+- 没有有效出处且没有采用可用建议：保留草稿，显示具体材料、物性、数值和原因，可让系统重新查找或返回修改记录。上传者明确采用标记为论文推断或通用知识推测的建议后，可以提交待审；管理员批准推测必须逐项说明依据。来源搜索、选择和关联由系统完成，不要求用户选择片段或编辑原文引句。
 - 模型配置、超时、服务或队列失败：单独提示服务原因，原操作不继续，不归为表单填写错误。
 
-来源核对由独立按钮启动，提交只检查结果、不调用模型；取消或离页均不自动提交，后台已完成结果继续保存。全量结果（包括未找到）在 MySQL 按科学内容、来源和规则版本复用，不依赖 Redis 任务有效期。重试只处理指定问题及派生依赖，已完成的其他项目不重复调用模型。历史论文不扫描或批量改写。
+上传解析自动生成字段建议；独立按钮可继续核对，管理员按钮重新复核全部字段、既有判断和候选，已有通过缓存不跳过。提交只检查结果、不调用模型；取消或离页均不自动提交，后台已完成结果继续保存。全量结果（包括未找到和未采用建议）在 MySQL 按科学内容、来源和规则版本保存，不依赖 Redis 任务有效期。重试只处理指定问题及派生依赖，已完成的其他项目不重复调用模型。历史论文不扫描或批量改写。
 管理员的人工裁决及审核历史见[论文与记录审核](../02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 （[Issue #103](../../specs/103-property-evidence-review/spec.md)）
 
-问题在对应科学字段标红，每个控件的现有中英文说明文字聚合全部问题，不显示红点；无浮动标签时使用区域标题或文字入口。折叠状态显示去重问题数量；点击或键盘激活说明文字打开右侧覆盖抽屉，关闭后焦点返回。抽屉依次展示原内容、问题与方向、可编辑的建议，来源文件、页码和原文默认折叠。点击完成仅保存接受草稿，提交时才覆盖原值；支持刷新恢复和撤销接受。上传者只能采纳草稿，不具备管理员裁决权限；缺少来源不能提交。结构附件显示真实提交者、原始文件及解析依据，不要求手动选择片段或编辑引句。
+所有数据字段名均可点击，包括书目、空字段及只读结构参数；无记录显示“暂无证据或建议”。只有未解决的科学问题标红，每个控件的现有中英文说明文字聚合相关记录，不显示红点；无浮动标签时使用区域标题或文字入口。折叠状态显示去重问题数量；点击或键盘激活说明文字打开右侧覆盖抽屉，关闭后焦点返回。抽屉依次展示原内容、问题与方向、可编辑的建议，来源文件、页码和原文默认折叠。点击完成仅保存接受草稿，提交时才覆盖原值；支持刷新恢复和撤销接受。上传者只能采纳草稿，不具备管理员裁决权限；通用知识推测可无论文引句，但必须标明简要依据，不得伪造来源。结构附件显示真实提交者、原始文件及解析依据，不要求手动选择片段或编辑引句。
 
 后台保存已定位证据并自动回写上传草稿；未找到证据的判断也持久保存。已核对草稿及必要原文不按普通 TTL 清理，刷新、离页和缓存丢失后均可恢复。正式提交仍按版本和权限重新校验。
 
@@ -121,4 +121,6 @@
 - 测试：`backend/tests/test_upload_workflow.py`、`tests/01_decentralized_uploading/`；其中 `test_issue91_upload_worker_recovery.py` 使用隔离 Redis 和真实 RQ Worker 覆盖入口导入失败边界。
 - 共享核对：`backend/ingest/property_evidence.py`、`backend/api/evidence.py`、`frontend/src/components/EvidenceWorkflow.tsx`。现有 sc-wiki MySQL、真实模型及页面验收记录见 [#103 验证路径](../../specs/103-property-evidence-review/quickstart.md)。
 
-共享抽屉区分未核对和 AI 未找到来源；理由/候选连续输入合并保存，失败暂停自动重试并保留输入。管理员能按当前版本逐条说明推理或专业判断依据，完成后作为人工来源放行；上传者仍仅能保存和采纳有来源草稿，无管理员裁决权限。未核对草稿不会让后台漏查。
+共享抽屉区分未核对和 AI 未找到来源；理由/候选连续输入合并保存，失败暂停自动重试并保留输入。管理员能按当前版本逐条说明推理或专业判断依据，完成后作为人工来源放行；上传者可以采用已标注依据类型的建议进入待审，无管理员裁决权限。未核对草稿不会让后台漏查。
+
+字段建议按 `paper_quote`、`paper_inference`、`general_knowledge` 区分直接记载、论文推断与通用知识推测；后两类不自动填值。侧栏保留待提交、已确认和撤销操作，顶部不再逐项铺开已接受记录。内容或来源变化后历史只读可查，批准后仍保留来源类别和人工理由。详见 [#109 设计与验收](../../specs/109-field-evidence-and-ai-suggestions/quickstart.md)。

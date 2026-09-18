@@ -10,7 +10,16 @@ import { useLanguage } from '../context/LanguageContext'
 
 export interface EvidenceSource { file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
 export interface ProposalDraft { values: Record<string, unknown>; accepted: boolean; reason: string; supported?: boolean }
-export interface EvidenceRecord { human_confirmed?: boolean; source_kind?: string; proposal?: { values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported: boolean }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; verified?: boolean; paper_supported?: boolean } }
+export type EvidenceBasis = 'paper_quote' | 'paper_inference' | 'general_knowledge'
+export interface EvidenceHistory {
+  current_value?: unknown
+  reason?: string
+  adopted_basis?: EvidenceBasis
+  evidences?: EvidenceSource[]
+  proposal?: EvidenceRecord['proposal']
+  decision?: EvidenceRecord['decision']
+}
+export interface EvidenceRecord { history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[] }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
@@ -29,6 +38,7 @@ export function useEvidenceWorkflow(options?: {
   const [view, setView] = useState<View | null>(null)
   const [records, setRecords] = useState<EvidenceRecord[]>([])
   const [selected, setSelected] = useState<string | null>(null)
+  const [fallbackRecord, setFallbackRecord] = useState<EvidenceRecord | undefined>()
   const [reasons, setReasons] = useState<Record<string, string>>({})
   const [saveError, setSaveError] = useState('')
   const [saving, setSaving] = useState(false)
@@ -87,9 +97,10 @@ export function useEvidenceWorkflow(options?: {
     const origin = drawerReturn.current
     if (origin?.anchor.isConnected && origin.scroller) origin.scroller.scrollTop += origin.anchor.getBoundingClientRect().top - origin.top
   }
-  // 接受列表增高时在绘制前保持阅读位置，避免关闭动画期间先下移再跳回。
+  // 核对记录变化时在绘制前保持阅读位置，避免关闭动画期间先下移再跳回。
   useLayoutEffect(() => { preserveDrawerPosition() }, [records])
-  const openIssue = (key: string, keys?: string[]) => {
+  const openIssue = (key: string, keys?: string[], fallback?: EvidenceRecord) => {
+    setFallbackRecord(fallback)
     drawerSession.current += 1
     const trigger = document.activeElement
     if (trigger instanceof HTMLElement && !trigger.closest('.evidence-review-drawer')) {
@@ -189,8 +200,8 @@ export function useEvidenceWorkflow(options?: {
     targetRef.current = target
     setRecords(result.records)
     setReasons(Object.fromEntries(result.records.map(r => [r.key, r.proposal_draft?.reason ?? r.resolution ?? ''])))
-    const unresolved = result.records.filter(r => r.stale || (!r.human_confirmed && (r.status === 'unchecked' || r.status === 'missing'))
-      || (target.target === 'paper' && r.status !== 'supported' && !r.resolution?.trim()))
+    const unresolved = result.records.filter(r => r.required !== false && !(target.target === 'upload' && r.decision?.accepted && ['paper_inference', 'general_knowledge'].includes(r.adopted_basis || '')) && (r.stale || (!r.human_confirmed && (r.status === 'unchecked' || r.status === 'missing'))
+      || (target.target === 'paper' && r.status !== 'supported' && !r.human_confirmed && !r.resolution?.trim())))
     if (result.needs_check || unresolved.length) {
       if (unresolved.length) openIssue(unresolved[0].key)
       setSaveError(t('evidence.checkRequired'))
@@ -242,14 +253,14 @@ export function useEvidenceWorkflow(options?: {
         retryKeys = preflight.records.filter(r => retryItems.has(r.item_key || r.key)).map(r => r.key)
         if (!retryKeys.length) { showResults(preflight.records, preflight); return }
       }
-      if (!retryKeys && !preflight.needs_check) { jobID.current = preflight.job_id; completed.current = true; showResults(preflight.records, preflight); return }
+      if (target.target !== 'paper' && !retryKeys && !preflight.needs_check && !preflight.records.some(r => r.status === 'unchecked')) { jobID.current = preflight.job_id; completed.current = true; showResults(preflight.records, preflight); return }
       for (let seconds = 3; seconds > 0; seconds--) {
         setView({ phase: 'countdown', seconds, message: t('evidence.startHint') })
         await pause(1000)
         if (!active()) return
       }
       setView({ phase: 'running', message: t('evidence.starting') })
-      const job = await api.post<Job>(`${base}/jobs`, { ...target, expected_version: preflight.version, ...(retryKeys ? { retry_keys: retryKeys } : {}) })
+      const job = await api.post<Job>(`${base}/jobs`, { ...target, expected_version: preflight.version, purpose: target.target === 'paper' && !retryKeys ? 'review_all' : 'check', ...(retryKeys ? { retry_keys: retryKeys } : {}) })
       if (!active()) { if (cancelLateJob.current) void api.del(`${base}/jobs/${job.id}`).catch(() => undefined); return }
       jobID.current = job.id
       const deadline = Date.now() + ((job.timeout_seconds || 600) + 60) * 1000
@@ -370,7 +381,7 @@ export function useEvidenceWorkflow(options?: {
     setRecords(next)
   }, [])
   const issues = useMemo(() => records.filter(problematic), [records])
-  const activeRecord = records.find(r => r.key === selected)
+  const activeRecord = records.find(r => r.key === selected) || (fallbackRecord?.key === selected ? fallbackRecord : undefined)
   const restoreDrawerFocus = () => {
     if (!mounted.current || activeRecord || view) return
     const origin = drawerReturn.current
@@ -388,7 +399,7 @@ export function useEvidenceWorkflow(options?: {
   const done = Math.min(total, Math.max(0, view?.job?.completed_batches || 0))
   const percent = total > 0 ? Math.floor(done / total * 100) : undefined
   const batch = view?.job?.current_batch || 0
-  const activeGroup = records.filter(r => selectedKeys.includes(r.key) || r.key === selected)
+  const activeGroup = activeRecord?.placeholder ? [activeRecord] : records.filter(r => selectedKeys.includes(r.key) || r.key === selected)
   const accepted = activeGroup.length > 0 && activeGroup.every(r => r.proposal_draft?.accepted)
   const draftSaveFailed = Boolean(targetRef.current && queueFor(targetRef.current).error())
   const editCurrent = (record: EvidenceRecord) => {
@@ -402,7 +413,6 @@ export function useEvidenceWorkflow(options?: {
     }, 320)
   }
   const dialog = <>
-    {records.some(r => r.proposal_draft?.accepted) && <Box sx={{ my: 1 }}>{records.filter(r => r.proposal_draft?.accepted).map(r => <Button data-evidence-key={r.key} key={r.key} color="success" onClick={() => openIssue(r.key)}>{r.label} · {t('evidence.acceptedPending')}</Button>)}</Box>}
 
     <Dialog open={view !== null} onClose={() => finish(null)} fullWidth maxWidth="md" aria-labelledby="evidence-workflow-title">
       <DialogTitle id="evidence-workflow-title">{t('evidence.title')}</DialogTitle>
@@ -430,9 +440,10 @@ export function useEvidenceWorkflow(options?: {
           const value = options?.getCurrentValue?.(r)?.value ?? (options?.getCurrentValue?.(r) ? null : r.current_value)
           return <Typography key={r.key} sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', my: 1 }}>{value == null || value === '' ? t('evidence.emptyValue') : typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}</Typography>
         })}
-        {options?.getCurrentValue && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
+        {options?.getCurrentValue && !activeRecord.placeholder && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
         {dirty.current && options?.saveCurrent && <Alert severity="info">{t('evidence.saveBeforeConfirm')}</Alert>}
-        <Typography fontWeight={600} sx={{ mt: 2 }}>{t('evidence.problemsDirections')}</Typography>
+        {activeGroup.every(r => !r.evidences.length && !r.proposal && !r.decision && !r.proposal_draft && (r.placeholder || r.status === 'unchecked')) && <Alert severity="info" sx={{ mt: 2 }}>{t('evidence.emptySources')}</Alert>}
+        {!activeRecord.placeholder && <><Typography fontWeight={600} sx={{ mt: 2 }}>{t('evidence.problemsDirections')}</Typography>
         {activeGroup.map(r => <Box key={r.key} sx={{ my: 1 }}>
           {r.stale && <Alert severity="warning">{t('evidence.staleResult')}</Alert>}
           <Alert severity={r.human_confirmed ? 'success' : r.status === 'unchecked' ? 'info' : r.status === 'supported' ? 'success' : 'error'}>{r.human_confirmed ? t('evidence.humanConfirmed') : r.status === 'unchecked' ? t('evidence.uncheckedHint') : r.reason}</Alert>
@@ -440,6 +451,10 @@ export function useEvidenceWorkflow(options?: {
         </Box>)}
         <Typography fontWeight={600} sx={{ my: 2 }}>{t('evidence.suggestionLabel')}</Typography>
         {activeGroup.map(r => <Box key={r.key} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
+          {(r.adopted_basis || r.proposal?.basis_kind) && <Alert severity="info">{t(`evidence.basis.${r.adopted_basis || r.proposal?.basis_kind}`)}</Alert>}
+          {r.proposal?.explanation && <Typography sx={{ whiteSpace: 'pre-wrap' }}>{r.proposal.explanation}</Typography>}
+          {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
+          {r.decision?.reason && <Typography>{t('evidence.savedHumanReason')}：{r.decision.reason}</Typography>}
           {!r.proposal && <Alert severity="info">{t('evidence.noReplacement')}</Alert>}
           {(r.editable_fields || []).map(field => <EvidenceValueEditor key={field.path} label={r.stale ? `${field.label} · ${t('evidence.beforeEditValue')}` : field.label} schema={field.schema}
             value={Object.hasOwn(valuesFor(r), field.path) ? valuesFor(r)[field.path] : field.value} disabled={r.stale || Boolean(r.proposal_draft?.accepted)}
@@ -447,8 +462,17 @@ export function useEvidenceWorkflow(options?: {
           {targetRef.current?.target === 'paper' && <TextField multiline minRows={2} label={t('evidence.humanReason')} value={reasons[r.key] ?? r.proposal_draft?.reason ?? ''}
             disabled={confirming || (!r.stale && Boolean(r.proposal_draft?.accepted))} onChange={event => updateReason(r, event.target.value)} helperText={t('evidence.reasonConditional')} />}
         </Box>)}
-        {accepted && <Alert severity="success">{t('evidence.acceptedPending')}</Alert>}
+        {accepted && <Alert severity="success">{t('evidence.acceptedPending')}</Alert>}</>}
 
+        {activeGroup.some(r => r.history?.length) && <Box component="details" sx={{ my: 2 }}><Typography component="summary">{t('evidence.historyLabel')}</Typography>{activeGroup.flatMap(r => r.history || []).map((entry, index) => <Box key={index} sx={{ my: 2, overflowWrap: 'anywhere' }}>
+          <Alert severity="info">{t('evidence.historyReadonly')}</Alert>
+          <Typography sx={{ whiteSpace: 'pre-wrap' }}>{typeof entry.current_value === 'object' ? JSON.stringify(entry.current_value, null, 2) : String(entry.current_value ?? '')}</Typography>
+          <Typography>{entry.reason}</Typography>
+          {(entry.adopted_basis || entry.proposal?.basis_kind) && <Typography>{t(`evidence.basis.${entry.adopted_basis || entry.proposal?.basis_kind}`)}</Typography>}
+          {entry.proposal && <><Typography>{JSON.stringify(entry.proposal.values)}</Typography><Typography>{entry.proposal.explanation}</Typography></>}
+          {entry.decision?.reason && <Typography>{t('evidence.savedHumanReason')}：{entry.decision.reason}</Typography>}
+          {[...(entry.evidences || []), ...(entry.proposal?.evidences || [])].map((source, i) => <Typography key={i}>{source.source_name || source.file_id} · {source.page_start} — {source.quote}</Typography>)}
+        </Box>)}</Box>}
         {activeRecord.provenance?.kind === 'contributor_structure' && <Alert severity="info" sx={{ mb: 2 }}>
           {activeRecord.evidences.length === 0 && <Typography>{t('evidence.noPaperSupport')}</Typography>}
           <Typography>{t('evidence.providerLabel')}：{activeRecord.provenance.submitted_by_name || t('evidence.unknownProvider')}</Typography>
@@ -461,11 +485,11 @@ export function useEvidenceWorkflow(options?: {
         {saveError && <Alert severity="error" sx={{ mt: 1 }} action={draftSaveFailed ? <Button disabled={saving} onClick={() => void retryDrafts().catch(() => undefined)}>{t('evidence.retrySave')}</Button> : undefined}>{saveError} {draftSaveFailed && t('evidence.saveFailureRetained')}</Alert>}
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', my: 2 }}>
           <Button onClick={closeDrawer}>{t('evidence.back')}</Button>
-          <Button disabled={confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)} onClick={() => { setDraftValues({}); void execute(targetRef.current!, activeGroup.map(r => r.key)) }}>{t('evidence.retry')}</Button>
+          {!activeRecord.placeholder && <><Button disabled={confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)} onClick={() => { setDraftValues({}); void execute(targetRef.current!, activeGroup.map(r => r.key)) }}>{t('evidence.retry')}</Button>
           <Button variant="contained" disabled={saving || confirming || activeGroup.some(r => targetRef.current?.target === 'paper'
             ? ((dirty.current && !options?.saveCurrent) || ((r.stale || (r.status !== 'supported' && !r.proposal?.supported)) && !(reasons[r.key] ?? r.proposal_draft?.reason ?? '').trim()))
-            : (r.stale || r.status === 'unchecked' || (!r.evidences.length && !r.proposal?.evidences.length && !r.provenance?.verified))) || accepted} onClick={() => void accept(activeGroup)}>{t('evidence.complete')}</Button>
-          {accepted && <Button disabled={saving} onClick={() => { for (const r of activeGroup) void saveProposal(r, valuesFor(r), false, reasons[r.key] || r.proposal_draft?.reason || '', true).catch(() => undefined) }}>{t('evidence.revise')}</Button>}
+            : (r.stale || ((!r.proposal || r.proposal.basis_kind === 'paper_quote' || !r.proposal.basis_kind) && (r.status === 'unchecked' || (!r.evidences.length && !r.proposal?.evidences.length && !r.provenance?.verified))))) || accepted} onClick={() => void accept(activeGroup)}>{t('evidence.complete')}</Button>
+          {accepted && <Button disabled={saving} onClick={() => { for (const r of activeGroup) void saveProposal(r, valuesFor(r), false, reasons[r.key] || r.proposal_draft?.reason || '', true).catch(() => undefined) }}>{t('evidence.revise')}</Button>}</>}
         </Box>
         {issues.length > 1 && <Box>{issues.map(r => <Button key={r.key} color="error" onClick={() => openIssue(r.key)}>{r.label}</Button>)}</Box>}
       </>}

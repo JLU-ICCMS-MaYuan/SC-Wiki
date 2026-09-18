@@ -1,4 +1,16 @@
 export default {
+  "historyLabel": "History",
+  "historyReadonly": "Content or sources changed. These records are reference only and cannot approve the current value.",
+
+  "generationFailed": "Suggestion generation failed. Extracted values are retained; run AI review to retry.",
+  "emptySources": "No evidence or suggestions yet",
+  "proposalReview": "AI review of the suggestion",
+  "savedHumanReason": "Saved human judgement",
+  "basis": {
+    "paper_quote": "Directly stated in the source",
+    "paper_inference": "Inferred from the paper; requires explicit adoption.",
+    "general_knowledge": "General-knowledge conjecture; not directly supported by this paper. Approval requires a reviewer rationale."
+  },
   "beforeEditValue": "Value before editing",
   "pressureMismatch": "The current pressure differs from the converted original value or range. Check the original conditions or explain your basis in the manual review reason.",
   "pressureConditions": "Original pressure, unit and range",

@@ -37,7 +37,7 @@ def test_scientific_fields_exclude_bibliography_and_empty_claims():
         'title': 'Bibliography', 'key_finding': 'Tc is 10 K', 'summary': '',
         'superconductor_kind': 'unknown', 'methodology': ['resistivity'],
     }, science.PAPER_FIELDS)
-    assert {r['field'] for r in rows} == {'paper.key_finding', 'paper.methodology'}
+    assert {r['field'] for r in rows if r.get('required', True)} == {'paper.key_finding', 'paper.methodology'}
 
 
 def test_evidence_insertion_does_not_change_scientific_version():

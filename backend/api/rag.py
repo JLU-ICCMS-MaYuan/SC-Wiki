@@ -1648,7 +1648,7 @@ async def _create_pending_paper(
                         if target is not None:
                             add_scientific_evidence_link(session, target, paper_evidence)
                 if evidence_checks is not None:
-                    from backend.ingest.property_evidence import paper_snapshot, locate
+                    from backend.ingest.property_evidence import paper_snapshot
                     from backend.ingest import scientific_evidence as science
                     from sqlalchemy import update as sql_update, delete as sql_delete
                     await session.flush()
@@ -1661,14 +1661,11 @@ async def _create_pending_paper(
                     transferred = {}
                     for r in persisted['records']:
                         old = by_item.get(r['item_key'])
-                        if old and old['content_hash'] == r['content_hash']:
+                        if old:
                             # 新 chunk ID 由同原文重新定位。来源限定以服务端来源记录为准。
-                            updated = dict(old)
-                            updated['evidences'] = r['evidences'] or [
-                                located for e in old.get('evidences', [])
-                                if (located := locate({'quote': e['quote']}, persisted['chunks']))
-                            ]
-                            transferred[r['key']] = updated
+                            updated = science.transfer_result(r, old, persisted['chunks'], {key: file.id for key, file in paper_files.items()})
+                            if updated is not None:
+                                transferred[r['key']] = updated
                     await session.run_sync(lambda sync: science.save_results(sync, persisted, transferred, int(state['user_id'])))
                     await session.execute(sql_delete(models.ScientificEvidenceCheck).where(
                         models.ScientificEvidenceCheck.target == 'upload', models.ScientificEvidenceCheck.target_id == task_id))
@@ -2321,8 +2318,9 @@ async def publish_approved_paper(
         )
         chunks = list(result.scalars())
         from backend.rag.scientific_sources import source_chunk
-        science_chunks = [source_chunk(source) for source in (await session.scalars(select(models.ScientificEvidenceSource).where(
-            models.ScientificEvidenceSource.paper_id == paper_id, models.ScientificEvidenceSource.paper_revision == paper.content_revision))).all()]
+        science_chunks = [chunk for source in (await session.scalars(select(models.ScientificEvidenceSource).where(
+            models.ScientificEvidenceSource.paper_id == paper_id, models.ScientificEvidenceSource.paper_revision == paper.content_revision))).all()
+            if (chunk := source_chunk(source)) is not None]
 
     # 引用匹配只使用 GROBID 已保存的字段。它与向量发布独立，因此不会用 LLM
     # 的 builds_on 文本制造图边。

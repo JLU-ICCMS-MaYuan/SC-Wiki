@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 import shutil
 import time
@@ -140,9 +141,9 @@ referenced_materials 仅用于帮助区分本文对象与背景对象，最终�
 calculation_context，Tc 只写入 tc_results。压力优先换算为 GPa，同时保留 pressure_raw 和
 pressure_unit_raw；无法可靠换算或原文没有报告时保留原文并将规范数值设为 null。
 晶系 crystal_system 依据论文明确表述或由空间群推断填写，只能取给定枚举，无法确定填 unknown。
-paper.superconductor_kind 必须判断：Tc 由电声耦合机制/BCS 理论计算给出
-（如 McMillan、Allen-Dynes、Eliashberg、SCDFT 求 Tc）判 conventional；论文明确为非电声耦合机制
-（如非常规配对）判 unconventional；无法判断判 unknown。
+paper.superconductor_kind 仅在论文明确报告常规或非常规机制时填写；仅依据 McMillan、Allen-Dynes、Eliashberg、SCDFT 等方法推断时保留 unknown，由后续字段建议单独提出。
+所有字段仅提取论文直接记载或忠实概括的内容；需要额外推断或通用知识猜测的值保留为空或 unknown，后续作为待采用建议生成。
+论文级方法不能自动套用为每条 Tc 的方法；逐条缺少明确对应证据时保留 unknown。
 tc_method 只能取给定枚举；论文方法无法归入枚举时填 other，并在 tc_method_custom 写入论文中的
 方法原文，其余情况 tc_method_custom 必须为 null。
 properties 需提取 energy above hull：name 固定为 "energy above hull"，unit 固定为 "eV/atom"；
@@ -1140,39 +1141,6 @@ def _legacy_state_superconductor_kind(material_states: list[dict[str, Any]]) -> 
     return next(iter(non_unknown)) if len(non_unknown) == 1 else "unknown"
 
 
-def _apply_methodology_inference(
-    methodology: list[str], paper: dict[str, Any], material_states: list[dict[str, Any]],
-) -> None:
-    """按论文级 methodology 单向补全论文分类与理论 Tc 方法。
-
-    命中任一方法映射且论文级 superconductor_kind 为 unknown 时置 conventional
-    （不覆盖 unconventional）；去重后恰好一个方法时，补 tc_method 为 unknown 的理论 Tc 条目；
-    多个方法不补；任何情况都不创建新 Tc 条目。
-    """
-    methods: set[str] = set()
-    for entry in methodology:
-        text = str(entry or "").lower()
-        # Allen-Dynes 优先于 McMillan 匹配，每条文本只取首个命中。
-        if "allen-dynes" in text:
-            methods.add("allen_dynes")
-        elif "mcmillan" in text:
-            methods.add("mcmillan")
-        elif "eliashberg" in text:
-            methods.add("anisotropic_eliashberg" if "anisotropic" in text else "isotropic_eliashberg")
-        elif "scdft" in text or "superconducting density functional" in text:
-            methods.add("scdft")
-    if not methods:
-        return
-    inferred_method = next(iter(methods)) if len(methods) == 1 else None
-    if paper.get("superconductor_kind") == "unknown":
-        paper["superconductor_kind"] = "conventional"
-    for state in material_states:
-        if inferred_method:
-            for result in state.get("tc_results") or []:
-                if result.get("result_kind") == "theoretical" and result.get("tc_method") == "unknown":
-                    result["tc_method"] = inferred_method
-
-
 def _normalize_draft(
     raw: dict[str, Any], *, preserve_citation_extraction: bool = True,
 ) -> dict[str, Any]:
@@ -1278,7 +1246,6 @@ def _normalize_draft(
 
     if not material_states and properties:
         material_states = _legacy_properties_to_material_states(properties)
-    _apply_methodology_inference(paper["methodology"], paper, material_states)
 
     normalized = {
         "paper": paper,
@@ -1653,6 +1620,20 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         if existing:
             return _handle_duplicate(task_id, current_state, existing)
 
+        # 候选单独持久保存，不能把推断或通用知识写进提取值。
+        from backend.ingest.property_evidence import generate_upload_suggestions
+        update_state(task_id, suggestions_status='running', suggestions_error=None)
+        try:
+            generate_upload_suggestions(task_id, draft, int(current_state.get('user_id') or 0),
+                on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total))
+            draft['field_suggestions_error'] = None
+            update_state(task_id, suggestions_status='completed')
+        except UploadCancelled:
+            raise
+        except Exception as suggestion_error:
+            logging.getLogger(__name__).warning('字段建议生成失败 task=%s type=%s', task_id, type(suggestion_error).__name__)
+            draft['field_suggestions_error'] = '建议生成失败，已提取内容已保留；可点击 AI 审核重试。'
+            update_state(task_id, suggestions_status='failed', suggestions_error=draft['field_suggestions_error'])
         ai_values = json.loads(json.dumps(draft, ensure_ascii=False))
         artifact_path(task_id).write_text(
             json.dumps(

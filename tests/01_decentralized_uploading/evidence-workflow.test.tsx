@@ -5,6 +5,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { useEvidenceWorkflow } from '../../frontend/src/components/EvidenceWorkflow'
 import { api } from '../../frontend/src/lib/api'
 import EvidenceFieldMarkers from '../../frontend/src/components/EvidenceFieldMarkers'
+import { TextField } from '@mui/material'
 vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn(), post: vi.fn(), del: vi.fn() } }))
 const done = vi.fn()
 const record = { key:'47', field:'records[47]', label:'SnHg Tc 4.29 K', status:'supported', reason:'原文支持', evidences:[{ file_id:'main',chunk_index:1,quote:'source' }] }
@@ -16,6 +17,27 @@ beforeEach(()=>{
  vi.mocked(api.del).mockResolvedValue({})
 })
 afterEach(()=>{cleanup();vi.useRealTimers();vi.clearAllMocks()})
+
+it('无核对记录的字段标签仍可查看空侧栏，不触发模型或保存', async () => {
+  vi.mocked(api.post).mockResolvedValue({version:'empty',needs_check:false,records:[]})
+  function Empty() {
+    const f=useEvidenceWorkflow({target:{target:'upload',target_id:'empty'}})
+    return <div data-evidence-scope="empty"><TextField label="期号" value="" onChange={()=>{}} />
+      <EvidenceFieldMarkers records={f.records} scope="empty" onOpen={f.openIssue} onChange={f.invalidate}/>{f.dialog}</div>
+  }
+  await act(async()=>render(<Empty/>))
+  await act(async()=>fireEvent.click(screen.getByRole('button',{name:'期号'})))
+  expect(screen.getByText('暂无证据或建议')).toBeInTheDocument()
+  expect(screen.queryByRole('button',{name:'完成',exact:true})).not.toBeInTheDocument()
+  expect(api.post).toHaveBeenCalledTimes(1)
+})
+
+it('已接受记录只在字段侧栏显示待提交状态，顶部不再堆放按钮', async () => {
+  vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[{...record,proposal_draft:{values:{},accepted:true,reason:'确认'}}]})
+  function Accepted() {const f=useEvidenceWorkflow({target:{target:'paper',target_id:'29'}});return <>{f.dialog}</>}
+  await act(async()=>render(<Accepted/>))
+  expect(screen.queryByText(/已接受，待提交/)).not.toBeInTheDocument()
+})
 
 it('关闭右侧抽屉保留红框，重新打开保留理由且不调用模型', async () => {
   vi.mocked(api.post).mockImplementation(async path => path.endsWith('preflight')
@@ -100,8 +122,8 @@ it('管理员可对未核对项填写理由完成，连续输入合并且失败�
 })
 it('服务失败不提交并可重试',async()=>{vi.mocked(api.get).mockResolvedValue({status:'failed',error:{message:'模型服务异常'}});render(<Harness/>);await start();await advance();expect(screen.getByText('模型服务异常')).toBeInTheDocument();expect(done).not.toHaveBeenCalled()})
 it('离页停止续提但后台继续持久保存',async()=>{vi.mocked(api.get).mockResolvedValue({status:'running'});const {unmount}=render(<Harness/>);await start();await advance();await act(async()=>unmount());expect(api.del).not.toHaveBeenCalled();expect(done).toHaveBeenCalledWith(null)})
-it('缓存有效无需倒计时或调用模型',async()=>{vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[record],sources:[]});render(<Harness/>);await start();expect(api.post).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledTimes(1)})
-it('复用尚未落库的任务结果仍携带服务端任务身份',async()=>{vi.mocked(api.post).mockResolvedValue({job_id:'cached-job',version:'v1',needs_check:false,records:[record],sources:[]});render(<Harness/>);await start();expect(api.post).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledWith(expect.objectContaining({evidence_job_id:'cached-job'}))})
+it('缓存有效无需倒计时或调用模型',async()=>{vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[record],sources:[]});render(<Harness target="upload"/>);await start();expect(api.post).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledTimes(1)})
+it('复用尚未落库的任务结果仍携带服务端任务身份',async()=>{vi.mocked(api.post).mockResolvedValue({job_id:'cached-job',version:'v1',needs_check:false,records:[record],sources:[]});render(<Harness target="upload"/>);await start();expect(api.post).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledWith(expect.objectContaining({evidence_job_id:'cached-job'}))})
 it('请求返回前离页也会取消迟到的后台任务',async()=>{
  let deliver!: (value: unknown) => void
  vi.mocked(api.post).mockImplementation(async path=>path.endsWith('preflight')?{version:'v1',needs_check:true,records:[record],sources:[]} as never:new Promise(resolve=>{deliver=resolve}) as never)
@@ -117,7 +139,7 @@ it('已有原文直接用于裁决，不要求选择片段或编辑引句', asyn
   expect(screen.getAllByRole('textbox')).toHaveLength(1)
   expect(screen.getByText('查看系统找到的原文').closest('details')).not.toHaveAttribute('open')
   expect(screen.queryByText(/片段 2|文件 main/)).not.toBeInTheDocument()
-  expect(api.post).toHaveBeenCalledWith('/api/rag/evidence/jobs', { target: 'paper', target_id: '29', expected_version: 'v1' })
+  expect(api.post).toHaveBeenCalledWith('/api/rag/evidence/jobs', { target: 'paper', target_id: '29', expected_version: 'v1', purpose: 'review_all' })
 })
 
 it('上传没有出处时只提示重新查找或修改记录，不要求手选证据', async () => {
@@ -150,7 +172,7 @@ it('重新查找绕过旧疑点缓存，找到证据后仍等待手动提交', a
 
 it('重新查找的倒计时仍可取消，不创建任务或自动续提', async () => {
   vi.mocked(api.post).mockResolvedValue({ job_id: 'old-job', version: 'v1', needs_check: false, records: [{ ...record, status: 'unsupported' }] })
-  render(<Harness />)
+  render(<Harness target="upload" />)
   await start()
   await act(async () => fireEvent.click(screen.getByText('让系统重新查找')))
   await act(async () => fireEvent.click(screen.getByText('取消')))

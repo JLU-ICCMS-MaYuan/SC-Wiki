@@ -8,6 +8,26 @@ import type { EvidenceRecord } from '../../frontend/src/components/EvidenceWorkf
 
 afterEach(cleanup)
 
+it('作者标签合并作者角色证据，隐藏菜单不使证据失去入口', async () => {
+  const onOpen=vi.fn()
+  const record: EvidenceRecord={key:'roles',field:'paper.corresponding_authors',label:'通讯作者',status:'supported',reason:'原文声明',evidences:[]}
+  render(<div data-evidence-scope="authors"><TextField label="作者" data-issue-field="paper.authors" />
+    <EvidenceFieldMarkers records={[record]} scope="authors" onOpen={onOpen} onChange={()=>{}} /></div>)
+  fireEvent.click(await screen.findByRole('button',{name:'作者'}))
+  expect(onOpen).toHaveBeenCalledWith('roles',['roles'])
+})
+
+it('结构参数只读标签使用精确结构来源并支持键盘', async () => {
+  const onOpen = vi.fn()
+  const record: EvidenceRecord = {key:'structure',state_key:'Sn',structure_hash:'hash',field:'material_states[0].structures[0]',label:'结构',status:'supported',reason:'来源已核验',evidences:[]}
+  render(<div data-evidence-scope="structure"><div data-state-key="Sn"><div data-scientific-structure data-structure-hash="hash">
+    <h3>文件</h3><dl><dt data-evidence-readonly>a (Å)</dt><dd>5</dd></dl>
+  </div></div><EvidenceFieldMarkers records={[record]} scope="structure" onOpen={onOpen} onChange={()=>{}} /></div>)
+  const label = await screen.findByRole('button',{name:'a (Å)'})
+  fireEvent.keyDown(label,{key:'Enter'})
+  expect(onOpen).toHaveBeenCalledWith('structure',['structure'])
+})
+
 it.each(['text', 'multiline', 'select', 'readonly'])('红框使用 %s 控件的标签缺口，解除问题恢复正常边框', async kind => {
   const record: EvidenceRecord = { key: 'border', field: 'value', label: '内容', status: 'missing', reason: '没有证据', evidences: [] }
   const form = (records: EvidenceRecord[]) => <div data-evidence-scope="border">
@@ -69,7 +89,7 @@ it('科学差异忽略排序和补证，只失效被编辑记录', async () => {
 })
 
 
-it('同框重复字段和不同问题聚合为一个文字入口，已接受后移除', async () => {
+it('同框问题聚合为一个文字入口，已接受后仍可查看', async () => {
   const onOpen = vi.fn()
   const first: EvidenceRecord = { key:'a',field:'paper.summary',fields:['paper.summary','paper.summary'],label:'总结',status:'uncertain',reason:'条件冲突',evidences:[] }
   const second: EvidenceRecord = {...first,key:'b',reason:'结论歧义'}
@@ -82,11 +102,11 @@ it('同框重复字段和不同问题聚合为一个文字入口，已接受后�
   fireEvent.click(button)
   expect(onOpen).toHaveBeenCalledWith('a',['a','b'])
   view.rerender(form([first,second].map(r=>({...r,proposal_draft:{values:{},accepted:true,reason:'确认'}}))))
-  await waitFor(()=>expect(screen.queryByRole('button')).not.toBeInTheDocument())
+  await waitFor(()=>expect(screen.getByRole('button')).toBeInTheDocument())
   expect(screen.getByTestId('field')).not.toHaveAttribute('data-evidence-problem')
 })
 
-it.each(['总结', 'Summary'])('复用现有 %s 浮动标签，点击和键盘打开全部问题，解决后恢复标签', async label => {
+it.each(['总结', 'Summary'])('复用现有 %s 浮动标签，点击和键盘打开全部问题，解决后保留查看入口', async label => {
   const onOpen = vi.fn()
   const record: EvidenceRecord = { key: 'summary', field: 'paper.summary', label, status: 'uncertain', evidences: [] }
   const form = (records: EvidenceRecord[]) => <div data-evidence-scope="label">
@@ -109,12 +129,12 @@ it.each(['总结', 'Summary'])('复用现有 %s 浮动标签，点击和键盘�
   fireEvent.click(screen.getByRole('textbox'))
   expect(onOpen).toHaveBeenCalledTimes(3)
   view.rerender(form([{ ...record, status: 'supported' }]))
-  await waitFor(() => expect(trigger).not.toHaveAttribute('role'))
-  expect(trigger).not.toHaveAttribute('tabindex')
-  expect(trigger).not.toHaveAttribute('data-evidence-key')
+  await waitFor(() => expect(trigger).toHaveAttribute('role', 'button'))
+  expect(trigger).toHaveAttribute('tabindex', '0')
+  expect(trigger).toHaveAttribute('data-evidence-key', 'summary')
   expect(trigger).toHaveAttribute('for', 'summary')
   fireEvent.click(trigger)
-  expect(onOpen).toHaveBeenCalledTimes(3)
+  expect(onOpen).toHaveBeenCalledTimes(4)
 })
 
 it('选择框复用自己的标签，区域问题使用标题，快速审核仅保留标题按钮', async () => {

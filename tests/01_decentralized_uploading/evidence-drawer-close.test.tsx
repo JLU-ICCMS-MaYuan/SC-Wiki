@@ -37,7 +37,8 @@ it('完成保存成功后自动关闭，重新打开仍可撤销接受',async()=
   await act(async()=>fireEvent.click(screen.getByRole('button',{name:'完成',exact:true})))
   await exitTransition()
   expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  const accepted=screen.getByRole('button',{name:/压强 · 已接受/})
+  expect(screen.queryByRole('button',{name:/压强 · 已接受/})).not.toBeInTheDocument()
+  const accepted=screen.getByRole('button',{name:'压强',exact:true})
   await act(async()=>fireEvent.click(accepted))
   expect(screen.getByRole('button',{name:'撤销接受并修改'})).toBeVisible()
   expect(screen.getByLabelText('人工核对理由')).toHaveValue('已核验原始条件')
@@ -52,9 +53,9 @@ it('关闭回到原字段并禁止焦点滚动，不跳到顶部已接受按钮'
   if(close) await act(async()=>fireEvent.click(close))
   const focus=vi.spyOn(HTMLElement.prototype,'focus')
   await exitTransition()
-  expect(screen.getByLabelText('压强')).toHaveFocus()
+  expect(screen.getByRole('button',{name:'压强',exact:true})).toHaveFocus()
   expect(focus).toHaveBeenCalledWith({preventScroll:true})
-  expect(screen.getByRole('button',{name:/压强 · 已接受/})).not.toHaveFocus()
+  expect(screen.queryByRole('button',{name:/压强 · 已接受/})).not.toBeInTheDocument()
 })
 
 it('保存失败保留抽屉和理由，重试成功才关闭',async()=>{

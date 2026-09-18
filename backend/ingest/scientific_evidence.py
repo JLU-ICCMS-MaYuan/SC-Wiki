@@ -10,7 +10,13 @@ from sqlalchemy.dialects.mysql import insert
 
 from backend import models
 
+BIBLIOGRAPHY_FIELDS = {
+    'title': '标题', 'authors': '作者', 'co_first_authors': '共同第一作者',
+    'corresponding_authors': '通讯作者', 'journal': '期刊', 'year': '年份',
+    'issue_number': '期号', 'volume': '卷号', 'pages': '页码', 'doi': 'DOI',
+}
 PAPER_FIELDS = {
+    **BIBLIOGRAPHY_FIELDS,
     'abstract': '摘要', 'summary': '论文总结', 'methodology': '研究方法',
     'key_finding': '主要发现', 'research_motivation': '研究动机',
     'keywords_tags': '科学关键词', 'paper_type': '论文类型',
@@ -30,7 +36,16 @@ STATE_FIELDS = {
     'calculation_context': '计算条件', 'experimental_context': '实验条件',
 }
 
-COMPATIBLE_RULES = {'scientific-evidence-v2', 'scientific-evidence-v3', 'scientific-evidence-v4'}
+COMPATIBLE_RULES = {'scientific-evidence-v2', 'scientific-evidence-v3', 'scientific-evidence-v4', 'scientific-evidence-v5'}
+
+
+def adopted_suggestion(record):
+    """采用只表示用户选择了候选，不能授予管理员确认权限。"""
+    decision = record.get('decision') or {}
+    return bool(decision.get('accepted') and decision.get('actor_user_id') and
+                decision.get('basis_kind') in {'paper_inference', 'general_knowledge'} and
+                decision.get('final_content_hash') == record.get('content_hash') and
+                decision.get('source_hash') == record.get('source_hash') and not record.get('stale'))
 
 
 def human_confirmed(record, decision=None):
@@ -72,20 +87,19 @@ def field_records(identity, path, data, fields, context=None):
         value = data.get(name)
         if name in {'calculation_context', 'experimental_context'} and isinstance(value, dict):
             value = {k: v for k, v in canonical(value).items() if populated(v)}
-        if name in {'methodology', 'keywords_tags', 'research_materials', 'material_relations'} and isinstance(value, str):
+        if name in {'authors', 'co_first_authors', 'corresponding_authors', 'methodology', 'keywords_tags', 'research_materials', 'material_relations'} and isinstance(value, str):
             try:
                 value = json.loads(value)
             except (ValueError, TypeError):
                 pass
         if name in {'material_families', 'structure_families'} and isinstance(value, list):
             value = sorted(str(x.get('name') or x.get('name_zh') or '') if isinstance(x, dict) else str(x) for x in value)
-        if not populated(value):
-            continue
         key = item_identity(identity, name)
         rows.append(dict(key=key, item_key=key, field=f'{path}.{name}', fields=[f'{path}.{name}'],
                          label=label, current_value=value, claim={'value': value, 'field': label, 'context': context or {}},
+                         required=populated(value) and not (path == 'paper' and name in BIBLIOGRAPHY_FIELDS),
                          evidences=[], kind='field'))
-    return rows
+    return sorted(rows, key=lambda r: not r['required'])
 
 
 def record_identity(state_key, module_key, record_key):
@@ -124,7 +138,7 @@ def state_records(state, index):
         row['state_key'] = state_key
         name = row['field'].rsplit('.', 1)[-1]
         conversion = converted_state_value(state, name)
-        if conversion:
+        if conversion and populated(state.get(name)):
             raw_field, expected, rule = conversion
             row.update(kind='derived', dependency=item_identity(item_identity('state', state_key), raw_field),
                        provenance={'kind': 'derived', 'rule': rule, 'input': state[raw_field],
@@ -233,6 +247,18 @@ def augment_upload(draft, records, origins):
 def load_results(session, snapshot, actor_id=None, include_stale=False):
     current = {r['item_key']: r for r in snapshot['records']}
     found = {}
+    histories = {}
+    def remember(row, record):
+        items = histories.setdefault(record['key'], [])
+        for entry in row.result.get('history') or []:
+            if entry not in items:
+                items.append(copy.deepcopy(entry))
+        if row.content_hash == record['content_hash'] and row.source_hash == record['source_hash']:
+            return
+        entry = {name: copy.deepcopy(row.result.get(name)) for name in ('current_value', 'status', 'reason', 'evidences', 'proposal', 'decision', 'adopted_basis')}
+        entry.update(content_hash=row.content_hash, source_hash=row.source_hash)
+        if entry not in items:
+            items.append(entry)
     query = select(models.ScientificEvidenceCheck).where(
         models.ScientificEvidenceCheck.target == snapshot['target'],
         models.ScientificEvidenceCheck.target_id == snapshot['target_id'],
@@ -241,8 +267,9 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
         r = current.get(row.item_key)
         if not r:
             continue
+        remember(row, r)
         valid = row.content_hash == r['content_hash'] and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES
-        if valid or (include_stale and r['key'] not in found):
+        if valid or (include_stale and (r['key'] not in found or found[r['key']].get('stale'))):
             result = copy.deepcopy(row.result)
             result['stale'] = not valid
             result['resolution'] = (row.resolutions or {}).get(str(actor_id), '') if valid else ''
@@ -257,12 +284,46 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
         for row in session.scalars(select(models.ScientificEvidenceSource).where(
                 models.ScientificEvidenceSource.paper_id == int(snapshot['target_id']))):
             r = current.get(row.item_key)
-            if r and r['key'] not in found and row.content_hash == r['content_hash'] and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES:
+            if r:
+                remember(row, r)
+            if r and (r['key'] not in found or found[r['key']].get('stale')) and row.content_hash == r['content_hash'] and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES:
                 found[r['key']] = copy.deepcopy(row.result)
+    for key, history in histories.items():
+        if history and key not in found and include_stale:
+            found[key] = {'status': 'unchecked', 'reason': '内容或来源已变化，请重新核对', 'stale': True}
+        elif history and key not in found and not next(r for r in snapshot['records'] if r['key'] == key).get('required', True):
+            found[key] = {'status': 'unchecked', 'reason': '当前为空或可选字段；历史记录仅供参考'}
+        if key in found:
+            found[key]['history'] = history
     return found
 
 
-def save_results(session, snapshot, results, actor_id):
+def transfer_result(record, result, chunks, file_ids=None):
+    """上传落库后重定位所有嵌套引句；文件 ID 变化不能抹掉候选或人工来源。"""
+    from .property_evidence import locate
+    if result.get('content_hash') != record['content_hash'] or result.get('source_hash') != record['source_hash']:
+        history = [{name: copy.deepcopy(result.get(name)) for name in ('current_value', 'status', 'reason', 'evidences', 'proposal', 'decision', 'adopted_basis', 'content_hash', 'source_hash')}]
+        return {**record, 'status': 'unchecked', 'reason': '上传值与保存后的内容或来源不同，请重新核对',
+                'history': [*(result.get('history') or []), *history]}
+    def relocate(source):
+        mapped = (file_ids or {}).get(str(source.get('file_id')))
+        locator = {k: source.get(k) for k in ('quote', 'page_start')}
+        if mapped is not None:
+            locator.update(file_id=str(mapped), chunk_index=source.get('chunk_index'))
+        return locate(locator, chunks)
+    def rebind(value):
+        if isinstance(value, list):
+            return [rebind(item) for item in value]
+        if not isinstance(value, dict):
+            return value
+        return {key: ([found for source in item if isinstance(source, dict) and
+                       (found := relocate(source))]
+                      if key == 'evidences' and isinstance(item, list) else rebind(item)) for key, item in value.items()}
+    rebound = rebind(copy.deepcopy(result))
+    return {**rebound, **record, 'evidences': record.get('evidences') or rebound.get('evidences', [])}
+
+
+def save_results(session, snapshot, results, actor_id, *, update_decision=False):
     for record in snapshot['records']:
         if record['key'] not in results:
             continue
@@ -271,15 +332,33 @@ def save_results(session, snapshot, results, actor_id):
             models.ScientificEvidenceCheck.target == snapshot['target'], models.ScientificEvidenceCheck.target_id == snapshot['target_id'],
             models.ScientificEvidenceCheck.item_key == record['item_key'], models.ScientificEvidenceCheck.content_hash == record['content_hash'],
             models.ScientificEvidenceCheck.source_hash == record['source_hash'], models.ScientificEvidenceCheck.rule_version.in_(COMPATIBLE_RULES)).order_by(models.ScientificEvidenceCheck.id.desc()).limit(1).with_for_update())
-        if existing is not None and not result.get('decision') and existing.result.get('decision'):
-            continue
+        if existing is not None and not update_decision and existing.result.get('decision'):
+            result['decision'] = copy.deepcopy(existing.result['decision'])
+            result['adopted_basis'] = existing.result.get('adopted_basis')
+        if existing is not None and existing.result.get('history') and not result.get('history'):
+            result['history'] = copy.deepcopy(existing.result['history'])
+        resolutions = copy.deepcopy((existing.resolutions or {}) if existing is not None else {})
+        if not update_decision:
+            from .evidence_proposals import editable_fields
+            from .property_evidence import digest
+            proposal = result.get('proposal') or {}
+            for key, draft in resolutions.items():
+                if not key.startswith('proposal:') or not isinstance(draft, dict) or not draft.get('accepted') or not draft.get('supported') or draft.get('human_confirmed'):
+                    continue
+                values = draft.get('values') or {}
+                unchanged = all(canonical(f['value']) == canonical(values.get(f['path'], f['value'])) for f in editable_fields(record))
+                matches_proposal = bool(proposal and digest(values) == digest(proposal.get('values')))
+                still_supported = proposal.get('supported') if matches_proposal else unchanged and result.get('status') == 'supported'
+                if not still_supported:
+                    # 保留输入，但撤回尚未提交的旧通过资格；正式人工决定不受模型改写。
+                    draft.update(accepted=False, supported=False, previous_review={'status': draft.get('ai_status'), 'reason': draft.get('ai_reason')})
         stmt = insert(models.ScientificEvidenceCheck).values(
             target=snapshot['target'], target_id=snapshot['target_id'], item_key=record['item_key'],
             content_hash=record['content_hash'], source_hash=record['source_hash'], rule_version=snapshot['rule_version'],
             result=json.loads(json.dumps(result, default=str)), resolutions={}, actor_user_id=actor_id)
-        session.execute(stmt.on_duplicate_key_update(result=stmt.inserted.result, resolutions=(existing.resolutions or {}) if existing is not None else {}, actor_user_id=actor_id))
+        session.execute(stmt.on_duplicate_key_update(result=stmt.inserted.result, resolutions=resolutions, actor_user_id=actor_id))
         if existing is not None:
-            session.expire(existing, ['result'])
+            session.expire(existing, ['result', 'resolutions'])
 
 
 def save_resolutions(session, snapshot, actor_id, reasons):
@@ -370,8 +449,16 @@ def apply_derived(records):
             decision.update(final_content_hash=record['content_hash'], source_hash=record['source_hash'],
                             derived_from=source['item_key'], reason='由人工确认的输入计算：' + record['provenance']['rule'] + '；输入确认理由：' + decision['reason'])
             record.update(decision=decision, human_confirmed=True, source_kind='human_review',
+                          adopted_basis=source.get('adopted_basis'),
                           resolution=decision['reason'] if source.get('resolution') else '',
                           reason='计算一致；输入依据为管理员人工确认', evidences=source.get('evidences', []))
+        elif source and adopted_suggestion(source):
+            decision = copy.deepcopy(source['decision'])
+            decision.update(final_content_hash=record['content_hash'], source_hash=record['source_hash'],
+                            derived_from=source['item_key'], human_confirmed=False)
+            record.update(decision=decision, human_confirmed=False, adopted_basis=decision['basis_kind'],
+                          status='uncertain', reason='计算一致；输入为已采用的建议，仍需管理员核验',
+                          evidences=source.get('evidences', []))
         elif source and source['status'] == 'supported' and not source.get('stale'):
             record.update(status='supported', reason='由已核验输入确定性计算得到：' + record['provenance']['rule'],
                           suggestion='无需修改', evidences=source['evidences'])
