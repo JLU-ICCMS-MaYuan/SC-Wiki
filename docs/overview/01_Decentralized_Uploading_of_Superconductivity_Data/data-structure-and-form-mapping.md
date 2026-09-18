@@ -54,6 +54,9 @@
 `issue_number`（最长 100 字符），支持 `S1`、`3-4`，解析未报告时留空，不从年份或卷号猜测。
 草稿归一化、保存重载和正式提交均保留期号。“起始页码”沿用 `pages` 文本，历史页码范围与
 文章编号原样保留，DOI 校验及错误定位保持有效。（[Issue #99](../../specs/99-paper-metadata-row/spec.md)）
+书目行的内部最小宽度为 1080px，横向滚动限制在该行容器内，不强制扩宽整个页面。
+管理员保存期号时，非文本或超过 100 字符返回 `invalid_issue_number`；旧论文为空仍可编辑，
+清空后重载保持空态。真实保存、详情与布局的验收边界见 [书目信息验收](../../specs/99-paper-metadata-row/validation.md)。
 
 首批物性模块为 `superconductive_properties`、`dynamical_properties`、
 `thermodynamic_properties` 和 `electronic_properties`。模块只在用户实际添加时提交；记录通过
