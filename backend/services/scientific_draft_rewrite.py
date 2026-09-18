@@ -346,6 +346,18 @@ async def scientific_draft_matches_current_revision(
     draft: dict[str, Any],
 ) -> bool:
     """返回请求是否与当前科学数据语义相同，不做任何写入。"""
+    paper_data = draft.get("paper") or {}
+    if paper_data.get("superconductor_kind", "unknown") != paper.superconductor_kind:
+        return False
+    families = paper_data.get("material_families") or []
+    if any(item.get("id") is None for item in families):
+        return False
+    stored_families = set(await session.scalars(select(models.PaperMaterialFamily.material_family_id).where(
+        models.PaperMaterialFamily.paper_id == paper.id,
+        models.PaperMaterialFamily.paper_revision == (paper.content_revision or 1),
+    )))
+    if {int(item["id"]) for item in families} != stored_families:
+        return False
     requested = []
     for index, raw_state in enumerate(draft.get("material_states") or []):
         modules = [

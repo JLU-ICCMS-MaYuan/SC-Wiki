@@ -184,8 +184,8 @@ const AdminPaperEditPage: React.FC = () => {
       if (editReviewStatus === 'approved') {
         if ((!evidenceWorkflow.hasAccepted || evidenceWorkflow.hasUnsavedChanges()) && !(await handleEditSave())) return
         if (!(await evidenceWorkflow.applyAccepted({ target: 'paper', target_id: String(paperId) }, handleEditSave))) return
-        const { detail, pendingValues } = await loadPaperReviewSource(Number(paperId))
-        classifications = resolveReviewClassifications(detail, pendingValues)
+        const { detail } = await loadPaperReviewSource(Number(paperId))
+        classifications = resolveReviewClassifications(detail)
       }
       const payload = paperReviewPayload(editReviewStatus, editReviewComment, classifications)
       const evidence = editReviewStatus === 'approved' ? await evidenceWorkflow.gate({ target: 'paper', target_id: String(paperId) }) : {}
@@ -213,6 +213,8 @@ const AdminPaperEditPage: React.FC = () => {
       const missingIdentity = changed.material_states.findIndex(materialIdentityMissing)
       if (missingIdentity >= 0) throw new Error(t('upload.missingMaterial', {label:t('upload.materialStateLabel', {index:missingIdentity+1})}))
       const payload: Record<string, any> = { ...changed.paper, history_operation_id: historyOperationId, evidence_preparation_id: preparationId }
+      // 分类由科学保存原子写入，避免第一段先改类型使第二段误判为同值。
+      if (editHadScientificData || changed.paper.material_families?.length || changed.material_states.length || editStructureCandidates.length) delete payload.superconductor_kind
       // 科学段可能失败；汇总与材料状态由同一 Python 事务保存，避免第一段先写入未来值。
       if (editHadScientificData || changed.material_states.length) delete payload.research_materials
       for (const field of ['research_materials', 'material_relations']) {
@@ -244,7 +246,7 @@ const AdminPaperEditPage: React.FC = () => {
       // 第一步：论文级字段保存（Go）。失败在此终止，不调用科学数据段。
       if (resumeStage !== 'scientific') await api.put(`/api/admin/papers/${paperId}`, payload)
       if (patches.length) { setEditForm(changed.paper); setEditListText({}) }
-      if (editHadScientificData || editMaterialFamilies.length > 0 || editMaterialStates.length > 0 || editStructureCandidates.length > 0) {
+      if (editHadScientificData || changed.paper.material_families?.length || changed.material_states.length || editStructureCandidates.length) {
         try {
           // 第二步：科学数据整体替换（Python，契约 C1）。
           // structure_candidates 只提交已确认候选：未确认（unreviewed）与已排除（excluded）

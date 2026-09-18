@@ -163,7 +163,8 @@ def test_submission_keeps_classification_in_review_artifact_until_approval(tmp_p
         "three_dimensional",
         "three_dimensional",
     ]
-    assert link_count == 0
+    # 已有结构目录会建立关联；自由输入的新名称只留在待审快照，不建目录。
+    assert link_count == 1
 
     snapshot_path = tmp_path / "review_artifacts" / task_id / "result.json"
     snapshot = json.loads(snapshot_path.read_text(encoding="utf-8"))

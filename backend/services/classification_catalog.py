@@ -4,12 +4,14 @@ from __future__ import annotations
 
 from copy import deepcopy
 from dataclasses import dataclass
+import hashlib
 import re
 import unicodedata
 from typing import Any, Mapping
 
-from sqlalchemy import or_, select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.orm import selectinload
+from sqlalchemy.exc import IntegrityError
 
 from backend import models
 from backend.db_helpers import normalize_formula
@@ -208,7 +210,7 @@ async def load_active_catalogs(session) -> dict[str, Any]:
     }
 
 
-async def resolve_material_family(session, value: Any):
+async def resolve_material_family(session, value: Any, *, creator_user_id: int | None = None):
     normalized = normalize_classification_name(value)
     if not normalized:
         return None
@@ -224,10 +226,13 @@ async def resolve_material_family(session, value: Any):
         )
         .distinct()
     )
-    return result.scalar_one_or_none()
+    term = result.scalar_one_or_none()
+    if term is None and creator_user_id is not None:
+        term = await _create_family(session, models.MaterialFamily, value, normalized, creator_user_id)
+    return term
 
 
-async def resolve_structure_family(session, value: Any):
+async def resolve_structure_family(session, value: Any, *, creator_user_id: int | None = None):
     normalized = normalize_classification_name(value)
     if not normalized:
         return None
@@ -243,4 +248,40 @@ async def resolve_structure_family(session, value: Any):
         )
         .distinct()
     )
-    return result.scalar_one_or_none()
+    term = result.scalar_one_or_none()
+    if term is None and creator_user_id is not None:
+        term = await _create_family(session, models.StructureFamily, value, normalized, creator_user_id)
+    return term
+
+
+async def _create_family(session, model, value, normalized, creator_user_id):
+    """复用 Go 目录编码与唯一约束；并发创建同名项时复用已提交目录。"""
+    name = str(value).strip()
+    if not normalized or len(name) > 100 or len(normalized) > 160:
+        raise ValueError("家族名称不能为空且不能超过 100 个字符")
+    term = model(code="custom_" + hashlib.sha256(normalized.encode()).hexdigest()[:20],
+                 name_zh=name, normalized_name=normalized, created_by_user_id=creator_user_id)
+    try:
+        async with session.begin_nested():
+            session.add(term)
+            await session.flush()
+    except IntegrityError:
+        term = await session.scalar(select(model).where(model.normalized_name == normalized).with_for_update())
+        if term is None:
+            raise ValueError("家族名称与已有目录冲突") from None
+    return term
+
+
+async def save_paper_material_families(session, paper, selections):
+    """管理员科学保存同步已经解析或创建的目录关联。"""
+    if any(item.get("id") is None for item in selections):
+        raise ValueError("保存材料家族前必须完成目录解析")
+    revision = paper.content_revision or 1
+    await session.execute(delete(models.PaperMaterialFamily).where(
+        models.PaperMaterialFamily.paper_id == paper.id,
+        models.PaperMaterialFamily.paper_revision == revision,
+    ))
+    session.add_all([models.PaperMaterialFamily(
+        paper_id=paper.id, paper_revision=revision, material_family_id=identifier,
+    ) for identifier in sorted({int(item["id"]) for item in selections})])
+    await session.flush()

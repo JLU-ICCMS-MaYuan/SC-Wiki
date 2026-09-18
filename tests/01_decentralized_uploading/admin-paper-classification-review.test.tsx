@@ -69,7 +69,7 @@ beforeEach(() => {
       return {
         id: 51,
         review_status: 'pending',
-        material_families: [],
+        material_families: [{ id: 1, name: '氢基超导体', status: 'confirmed' }],
         material_states: [{
           id: 501,
           superconductor: { chemical_formula: 'LaH10' },
@@ -182,6 +182,29 @@ describe('论文快速审核三状态', () => {
     expect(screen.getByRole('combobox', { name: '审核结果' })).toHaveTextContent('通过')
   })
 
+  it('同版本旧快照不能覆盖已保存分类或按位置串换材料状态', async () => {
+    const originalGet = mockedApi.get.getMockImplementation()!
+    mockedApi.get.mockImplementation(async (path, ...args) => {
+      if (path === '/api/admin/papers/51') return {
+        id: 51, content_revision: 1, review_status: 'pending', superconductor_kind: 'unconventional',
+        material_families: [{ id: 7, name: '已保存家族' }],
+        material_states: [{ id: 502, material_dimensionality: 'two_dimensional', structure_families: [] }],
+      }
+      if (path === '/api/rag/papers/51/review-artifact') return { data: { user_values: {
+        paper: { superconductor_kind: 'conventional', material_families: [{ id: 1, name: '旧家族' }] },
+        material_states: [{ id: 501, material_dimensionality: 'three_dimensional',
+          structure_families: [{ id: 2, name: '旧结构', is_primary: true }] }],
+      } } }
+      return originalGet(path, ...args)
+    })
+    const user = await openApproval()
+    await user.click(screen.getByRole('button', { name: '确认审核' }))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/api/admin/papers/51/review', expect.objectContaining({
+      superconductor_kind: 'unconventional', material_families: [{ id: 7, name: '已保存家族' }],
+      material_states: [{ id: 502, material_dimensionality: 'two_dimensional', structure_families: [] }],
+    })))
+  })
+
   it.each(['approved', 'pending'])('正式分类可直接用于批准，缺少快照不阻断（%s）', async status => {
     const originalGet = mockedApi.get.getMockImplementation()!
     mockedApi.get.mockImplementation(async (path, ...args) => {
@@ -201,6 +224,40 @@ describe('论文快速审核三状态', () => {
       material_states: [{ id: 501, material_dimensionality: 'three_dimensional', structure_families: [{ id: 2, name: '笼状结构', is_primary: true }] }],
     })))
     if (status === 'approved') expect(mockedApi.get.mock.calls.some(([path]) => String(path).includes('review-artifact'))).toBe(false)
+  })
+
+  it.each([false, true])('首次快速批准先保存家族，保存失败不发审核请求（失败=%s）', async fail => {
+    const originalGet = mockedApi.get.getMockImplementation()!
+    let saved = false
+    mockedApi.get.mockImplementation(async (path, ...args) => {
+      if (path === '/api/admin/papers/51') return {
+        id: 51, paper_type: 'review', review_status: 'pending', superconductor_kind: 'unknown',
+        material_families: saved ? [{ id: 21, name: '新家族' }] : [], material_states: [],
+      }
+      if (path === '/api/rag/papers/51/review-artifact') return { data: { user_values: {
+        paper: { material_families: [{ name: '新家族', status: 'pending' }] }, material_states: [],
+      } } }
+      return originalGet(path, ...args)
+    })
+    mockedApi.put.mockImplementation(async (path, body: any) => {
+      expect(path).toBe('/api/rag/papers/51/scientific-draft')
+      expect(body.material_families[0].name).toBe('新家族')
+      if (fail) throw new Error('目录保存失败')
+      saved = true
+      return { ok: true, data: {} }
+    })
+    const user = await openApproval()
+    await user.click(screen.getByRole('button', { name: '确认审核' }))
+    if (fail) {
+      expect(await screen.findByText(/目录保存失败/)).toBeVisible()
+      expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))).toHaveLength(0)
+    } else {
+      await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/api/admin/papers/51/review', expect.objectContaining({
+        material_families: [{ id: 21, name: '新家族' }],
+      })))
+      const reviewIndex = mockedApi.post.mock.calls.findIndex(([path]) => path.endsWith('/review'))
+      expect(mockedApi.put.mock.invocationCallOrder[0]).toBeLessThan(mockedApi.post.mock.invocationCallOrder[reviewIndex])
+    }
   })
 
   it.each([

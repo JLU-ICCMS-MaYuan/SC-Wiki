@@ -323,8 +323,19 @@ describe('Issue #78：管理端论文编辑独立页', () => {
 
   it('待审正式关联为空时从审核产物回填论文 family 与 More type labels', async () => {
     const user = userEvent.setup()
+    let saved: any = null
+    mockedApi.put.mockImplementation(async (path, body: any) => {
+      if (path.endsWith('/scientific-draft')) saved = {
+        ...detailWithStructures,
+        material_families: body.material_families.map((family: any) => ({ ...family, id: family.id || 21, status: 'confirmed' })),
+        material_states: body.material_states.map((state: any) => ({ ...state, id: 31,
+          structure_families: state.structure_families.map((family: any) => ({ structure_family: family, structure_family_id: family.id, is_primary: family.is_primary })) })),
+      }
+      return { ok: true, data: {} }
+    })
     mockedApi.get.mockImplementation(async (path: string) => {
       if (path === '/api/admin/papers/88') {
+        if (saved) return saved
         return {
           ...detailWithStructures,
           material_families: [],
@@ -342,6 +353,7 @@ describe('Issue #78：管理端论文编辑独立页', () => {
             { id: 1, name: '氢基超导体', status: 'confirmed' },
           ] },
           material_states: [{
+            material: 'Sn',
             material_dimensionality: 'three_dimensional',
             structure_families: [{ id: 10, name: '笼状结构', status: 'confirmed', is_primary: false }],
           }],
@@ -371,11 +383,11 @@ describe('Issue #78：管理端论文编辑独立页', () => {
     expect(reviewBody).toMatchObject({
       expected_evidence_version: 'checked-version',
       material_families: [
-        { id: null, name: '待建家族' },
+        { id: 21, name: '待建家族' },
         { id: 1, name: '氢基超导体' },
       ],
       material_states: [{
-        id: 11,
+        id: 31,
         structure_families: [{ id: 10, name: '笼状结构', is_primary: false }],
       }],
     })

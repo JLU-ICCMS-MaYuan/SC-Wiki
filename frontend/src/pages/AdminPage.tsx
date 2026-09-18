@@ -1,4 +1,4 @@
-import { saveQuickReviewProposals } from '../lib/paperProposalSave'
+import { saveInitialReviewClassifications, saveQuickReviewProposals } from '../lib/paperProposalSave'
 import { EvidenceRecordList } from '../components/EvidenceFieldMarkers'
 import { useEvidenceWorkflow } from '../components/EvidenceWorkflow'
 import React, { useState, useEffect, useCallback } from 'react'
@@ -227,9 +227,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
     try {
       let classifications
       if (reviewStatus === 'approved') {
+        await saveInitialReviewClassifications(reviewDlg.paper.id)
         if (!(await evidenceWorkflow.applyAccepted({ target: 'paper', target_id: String(reviewDlg.paper.id) }, (patches, preparationId, resumeStage) => saveQuickReviewProposals(reviewDlg.paper.id, patches, preparationId, resumeStage)))) return
-        const { detail, pendingValues } = await loadPaperReviewSource(reviewDlg.paper.id)
-        classifications = resolveReviewClassifications(detail, pendingValues)
+        const { detail } = await loadPaperReviewSource(reviewDlg.paper.id)
+        classifications = resolveReviewClassifications(detail)
       }
       const payload = paperReviewPayload(reviewStatus, reviewComment, classifications)
       const evidence = reviewStatus === 'approved' ? await evidenceWorkflow.gate({ target: 'paper', target_id: String(reviewDlg.paper.id) }) : {}

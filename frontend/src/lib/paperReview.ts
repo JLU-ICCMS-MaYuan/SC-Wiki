@@ -34,12 +34,14 @@ export async function loadPaperReviewSource(paperId: number | string) {
 }
 
 export function resolveReviewClassifications(
-  detail: Record<string, any>, pendingValues: Record<string, any> | null,
+  detail: Record<string, any>,
+  pendingValues?: Record<string, any> | null,
 ): ReviewClassifications {
-  const pendingFamilies = pendingValues?.paper?.material_families
-  const families = Array.isArray(pendingFamilies) ? pendingFamilies : (detail.material_families || [])
+  // 首次送审家族尚未落库；管理员保存后家族必定非空，旧快照不再参与回填。
+  const initial = needsReviewClassificationSave(detail, pendingValues)
+  const families = initial ? pendingValues!.paper.material_families : detail.material_families || []
   return {
-    superconductorKind: pendingValues?.paper?.superconductor_kind ?? detail.superconductor_kind ?? 'unknown',
+    superconductorKind: detail.superconductor_kind ?? 'unknown',
     materialFamilies: families.map((family: any) => ({
       id: family.id ?? null,
       name: family.name || family.name_zh || '',
@@ -47,24 +49,42 @@ export function resolveReviewClassifications(
       name_en: family.name_en || '',
       status: family.status === 'pending' ? 'pending' : 'confirmed',
     })),
-    materialStates: (detail.material_states || []).map((state: any, index: number) => {
-      const pending = pendingValues?.material_states?.[index]
-      const structureFamilies = Array.isArray(pending?.structure_families)
-        ? pending.structure_families
-        : (state.structure_families || []).map((link: any) => ({
-          id: link.id ?? link.structure_family_id,
-          name: link.structure_family?.name || link.name || '',
-          name_zh: link.structure_family?.name_zh || link.structure_family?.name || link.name || '',
-          name_en: link.structure_family?.name_en || link.name_en || '',
-          status: 'confirmed', is_primary: Boolean(link.is_primary),
-        }))
+    materialStates: (detail.material_states || []).map((state: any) => {
+      const structureFamilies = (state.structure_families || []).map((link: any) => ({
+        id: link.structure_family_id ?? link.structure_family?.id ?? link.id,
+        name: link.structure_family?.name || link.name || '',
+        name_zh: link.structure_family?.name_zh || link.structure_family?.name || link.name || '',
+        name_en: link.structure_family?.name_en || link.name_en || '',
+        status: 'confirmed', is_primary: Boolean(link.is_primary),
+      }))
+      if (initial) {
+        const states: Record<string, any>[] = pendingValues?.material_states || []
+        const formula = state.superconductor?.chemical_formula || state.material
+        let matches = state.state_key ? states.filter(candidate => candidate.state_key === state.state_key) : []
+        if (!matches.length && formula) {
+          const sameFormula = (detail.material_states || []).filter((item: any) => (item.superconductor?.chemical_formula || item.material) === formula)
+          if (sameFormula.length === 1) matches = states.filter(candidate => candidate.material === formula && (!state.state_key || !candidate.state_key))
+        }
+        if (matches.length === 1) {
+          for (const family of matches[0].structure_families || []) {
+            if (!structureFamilies.some((saved: any) => family.id ? saved.id === family.id : saved.name === family.name)) {
+              structureFamilies.push(family)
+            }
+          }
+        }
+      }
       return {
         id: state.id,
-        material_dimensionality: pending?.material_dimensionality || state.material_dimensionality || 'unknown',
+        material_dimensionality: state.material_dimensionality || 'unknown',
         structure_families: structureFamilies,
       }
     }),
   }
+}
+
+export function needsReviewClassificationSave(detail: Record<string, any>, pendingValues?: Record<string, any> | null) {
+  return detail.review_status === 'pending' && !detail.material_families?.length
+    && Boolean(pendingValues?.paper?.material_families?.length)
 }
 
 export function paperReviewPayload(status: string, comment: string, classifications?: ReviewClassifications) {

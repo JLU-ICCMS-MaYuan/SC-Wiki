@@ -46,6 +46,7 @@ beforeEach(() => {
   })
   mockedApi.put.mockImplementation(async (path, body) => {
     if (path === '/api/admin/papers/88') savedPaper = { ...savedPaper, ...body }
+    else if (path === '/api/rag/papers/88/scientific-draft') savedPaper = { ...savedPaper, ...body }
     else if (path !== '/api/rag/papers/88/scientific-draft') throw new Error(`unexpected PUT ${path}`)
     return { ok: true, data: { revision_bumped: false } }
   })
@@ -101,11 +102,34 @@ describe('编辑页内审核', () => {
     expect(mockedApi.put.mock.calls.map(([path]) => path)).toEqual([
       '/api/admin/papers/88', '/api/rag/papers/88/scientific-draft',
     ])
-    expect(mockedApi.put.mock.calls[0][1]).toMatchObject({ superconductor_kind: 'unconventional' })
+    expect(mockedApi.put.mock.calls[0][1]).not.toHaveProperty('superconductor_kind')
+    expect(mockedApi.put.mock.calls[1][1]).toMatchObject({ superconductor_kind: 'unconventional' })
     const prepareIndex = mockedApi.post.mock.calls.findIndex(([path]) => path.endsWith('/proposals/prepare'))
     const reviewIndex = mockedApi.post.mock.calls.findIndex(([path]) => path.endsWith('/review'))
     expect(mockedApi.put.mock.invocationCallOrder[1]).toBeLessThan(mockedApi.post.mock.invocationCallOrder[prepareIndex])
     expect(mockedApi.post.mock.invocationCallOrder[prepareIndex]).toBeLessThan(mockedApi.post.mock.invocationCallOrder[reviewIndex])
+  })
+
+  it('保存新分类后批准及重新打开均不读回同版本旧快照', async () => {
+    const originalGet = mockedApi.get.getMockImplementation()!
+    mockedApi.get.mockImplementation(async (path, ...args) => {
+      if (path === '/api/rag/papers/88/review-artifact') return { data: { user_values: {
+        paper: { superconductor_kind: 'conventional', material_families: [{ id: 1, name: '氢基超导体' }] },
+      } } }
+      return originalGet(path, ...args)
+    })
+    const user = await openEditDialog()
+    await user.click(screen.getByRole('combobox', { name: '超导类型' }))
+    await user.click(screen.getByRole('option', { name: '非常规超导体' }))
+    await user.click(screen.getByRole('combobox', { name: '审核结果' }))
+    await user.click(screen.getByRole('option', { name: /通过/ }))
+    await user.click(screen.getByRole('button', { name: '提交审核' }))
+    await waitFor(() => expect(mockedApi.post).toHaveBeenCalledWith('/api/admin/papers/88/review', expect.objectContaining({
+      status: 'approved', superconductor_kind: 'unconventional',
+    })))
+    await user.click(await screen.findByRole('button', { name: '论文审核' }))
+    await user.click(await screen.findByRole('button', { name: '编辑' }))
+    expect(await screen.findByRole('combobox', { name: '超导类型' })).toHaveTextContent('非常规超导体')
   })
 
   it('编辑弹窗顶部提供审核结果与审核意见控件', async () => {

@@ -368,11 +368,12 @@ def _reject_legacy_classification_contract(draft: dict[str, Any]) -> None:
         )
 
 
-async def _resolve_draft_classifications(session, draft: dict[str, Any]) -> None:
+async def _resolve_draft_classifications(session, draft: dict[str, Any], *, creator_user_id: int | None = None) -> None:
     from backend.services.classification_catalog import (
         MATERIAL_DIMENSIONALITIES,
         resolve_material_family,
         resolve_structure_family,
+        normalize_classification_name,
     )
 
     paper = draft.get("paper") if isinstance(draft.get("paper"), dict) else {}
@@ -390,7 +391,7 @@ async def _resolve_draft_classifications(session, draft: dict[str, Any]) -> None
             if term is None:
                 raise _upload_error(404, "classification_not_found", "材料家族目录项不存在")
         else:
-            term = await resolve_material_family(session, family.get("name"))
+            term = await resolve_material_family(session, family.get("name"), creator_user_id=creator_user_id)
         resolved = (
             {"id": term.id, "name": term.name_zh, "status": "confirmed"}
             if term is not None
@@ -398,7 +399,7 @@ async def _resolve_draft_classifications(session, draft: dict[str, Any]) -> None
         )
         if isinstance(family.get("evidence"), dict):
             resolved["evidence"] = family["evidence"]
-        key = f"id:{resolved['id']}" if resolved["id"] is not None else f"name:{resolved['name'].casefold()}"
+        key = f"id:{resolved['id']}" if resolved["id"] is not None else f"name:{normalize_classification_name(resolved['name'])}"
         if key not in seen_family_keys:
             seen_family_keys.add(key)
             resolved_families.append(resolved)
@@ -430,7 +431,7 @@ async def _resolve_draft_classifications(session, draft: dict[str, Any]) -> None
                 if term is None:
                     raise _upload_error(404, "classification_not_found", "结构家族目录项不存在")
             else:
-                term = await resolve_structure_family(session, selection.get("name"))
+                term = await resolve_structure_family(session, selection.get("name"), creator_user_id=creator_user_id)
             if term is not None:
                 if term.id in seen_ids:
                     continue
@@ -2215,7 +2216,9 @@ async def _rewrite_paper_scientific_draft_in_tx(
         "structure_candidates": draft.get("structure_candidates") or [],
     }
     _validate_draft(full_draft)
-    await _resolve_draft_classifications(session, full_draft)
+    if current_user.role not in {"admin", "superadmin"}:
+        raise _upload_error(403, "admin_required", "需要管理员权限")
+    await _resolve_draft_classifications(session, full_draft, creator_user_id=current_user.id)
 
     # 同值保存不能重建实体图、更改 approved 状态或追加“修改”历史。比较采用与
     # persist_scientific_draft 相同的持久化语义，而不是浏览器请求的字面 JSON，避免
@@ -2243,6 +2246,8 @@ async def _rewrite_paper_scientific_draft_in_tx(
     if bumped:
         await bump_paper_revision(session, paper)
     targets = await persist_scientific_draft(session, paper, full_draft)
+    from backend.services.classification_catalog import save_paper_material_families
+    await save_paper_material_families(session, paper, full_draft["paper"]["material_families"])
     from backend.ingest.property_evidence import persist_existing_paper_targets
     await persist_existing_paper_targets(session, paper, targets)
     if citation_extraction is not None:
