@@ -14,6 +14,7 @@ interface MyPaper {
   year: number | null
   review_status: string | null
   created_at: string | null
+  can_revise?: boolean
 }
 
 // 审核状态的颜色映射；标签文案按 value 查 dict.enums.reviewStatus。
@@ -104,6 +105,9 @@ const MyPapersList: React.FC = () => {
               color={STATUS_COLORS[paper.review_status || ''] || 'default'}
             />
           </Stack>
+          {paper.can_revise && <Button size="small" onClick={event => {
+            event.stopPropagation(); navigate(`/papers/${paper.id}/revise`)
+          }} onKeyDown={event => event.stopPropagation()}>{t('paperDetail.revise')}</Button>}
         </Box>
       ))}
     </Stack>

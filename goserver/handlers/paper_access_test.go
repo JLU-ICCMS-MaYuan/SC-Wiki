@@ -34,6 +34,20 @@ func TestCanViewPaperMatrix(t *testing.T) {
 	}
 }
 
+func TestPaperRevisionPermission(t *testing.T) {
+	ownerID := uint(7)
+	for _, status := range []string{"rejected", "pending", "approved"} {
+		for _, id := range []uint{7, 8} {
+			paper := models.Paper{ReviewStatus: status, UploadedBy: &ownerID}
+			user := &models.User{ID: id, Role: "user", IsApproved: true}
+			want := status == "rejected" && id == 7
+			if paperForViewer(paper, user)["can_revise"] != want {
+				t.Fatalf("status=%s user=%d: expected can_revise=%v", status, id, want)
+			}
+		}
+	}
+}
+
 func TestPaperForViewerFiltersReviewFields(t *testing.T) {
 	ownerID := uint(7)
 	comment, internal := "请补充页码", "内部风控备注"
@@ -71,10 +85,10 @@ func TestRevisionBumpedPaperIsNotPublic(t *testing.T) {
 	ownerID := uint(7)
 	owner := &models.User{ID: ownerID, Role: "user", IsApproved: true}
 	bumped := &models.Paper{
-		ReviewStatus:    reviewStatusPending,
+		ReviewStatus:     reviewStatusPending,
 		ApprovedRevision: nil,
-		ContentRevision: 2,
-		UploadedBy:      &ownerID,
+		ContentRevision:  2,
+		UploadedBy:       &ownerID,
 	}
 
 	if canViewPaper(bumped, nil) {

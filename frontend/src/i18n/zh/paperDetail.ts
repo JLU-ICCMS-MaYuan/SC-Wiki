@@ -4,6 +4,12 @@
 // research_motivation、knowledge_graph_title）的内容是英文数据，渲染时原样展示，
 // 绝不经过 t() 或语言判断（FR-014）；本字典只收录这些字段的「标签」。
 export default {
+  revise: '修改并重新提交',
+  revisionTitle: '论文返修',
+  resubmit: '重新提交审核',
+  revisionAvailable: '论文已被拒绝。你可以修改后重新提交审核。',
+  revisionNotice: '修改会长期保存在返修草稿中。保存不会改变原论文；点击重新提交审核后，才生成待审核的新版本。',
+  revisionConflict: '论文已被修改或重新审核。你的草稿仍保留，请先返回详情核对最新内容。',
   // ── 页面框架 ──
   backToUpload: '返回上传列表',
   myPapers: '我的论文',

@@ -27,6 +27,11 @@ class Target(BaseModel):
 
 
 def snapshot_for(body, user):
+    if body.target == 'revision':
+        from backend.services.paper_revisions import revision_snapshot
+        with SessionLocal() as session:
+            snapshot = revision_snapshot(session, body.target_id, user.id)
+            return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
     if body.target == 'upload':
         snapshot = ev.upload_snapshot(body.target_id, user.id)
         with SessionLocal() as session:
@@ -192,6 +197,12 @@ def proposal_operation(body, user, operation, require_version=True):
             if body.target == 'paper' and body.target_id.isdigit():
                 session.scalar(select(models.Paper).where(models.Paper.id == int(body.target_id)).with_for_update())
                 snapshot = ev.paper_snapshot(session, int(body.target_id), user.id, user.role)
+            elif body.target == 'revision':
+                from backend.services.paper_revisions import revision_snapshot
+                paper_id = session.scalar(select(models.PaperRevisionDraft.paper_id).where(models.PaperRevisionDraft.revision_id == body.target_id))
+                if paper_id is not None:
+                    session.scalar(select(models.Paper).where(models.Paper.id == paper_id).with_for_update())
+                snapshot = revision_snapshot(session, body.target_id, user.id)
             elif body.target == 'upload':
                 snapshot = ev.upload_snapshot(body.target_id, user.id)
             else:

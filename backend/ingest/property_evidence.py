@@ -154,6 +154,16 @@ def upload_snapshot(task_id: str, user_id: int) -> dict:
             chunks.extend({**c, 'source_name': source.get('original_filename') or source.get('filename')} for c in source_chunks(source_path.read_text(encoding='utf-8'), file_id))
     if not chunks and path.is_file():
         chunks = [{**c, 'source_name': state.get('filename')} for c in source_chunks(path.read_text(encoding='utf-8'), 'main')]
+    from backend.database import SessionLocal
+    with SessionLocal() as session:
+        origins = science.origins_for(session, 'upload', task_id)
+    return complete_snapshot('upload', task_id, draft_records(draft, origins), chunks, draft)
+
+
+def draft_records(draft, origins):
+    """上传与返修草稿共用断言构造，保持字段定位及核对规则一致。"""
+    from backend.ingest.scientific_drafts import _property_modules_for_state
+    from . import scientific_evidence as science
     records = []
     for si, state_data in enumerate(draft.get('material_states') or []):
         for mi, module in enumerate(_property_modules_for_state(state_data)):
@@ -164,11 +174,8 @@ def upload_snapshot(task_id: str, user_id: int) -> dict:
                     label=f'{state_data.get("material_name") or state_data.get("material") or state_data.get("display_name") or "材料状态 " + str(si+1)} · {record.get("name_raw")} · {record.get("value_raw")} {record.get("unit_raw") or ""}',
                     item_key=science.record_identity(state_data.get('state_key') or f'state-{si+1}', module['module_key'], record['record_key']),
                     state_key=state_data.get('state_key') or f'state-{si+1}', kind='property', claim=science.record_claim(record, state_data), evidences=evidence_list(record)))
-    from backend.database import SessionLocal
-    with SessionLocal() as session:
-        origins = science.origins_for(session, 'upload', task_id)
     science.augment_upload(draft, records, origins)
-    return complete_snapshot('upload', task_id, records, chunks, draft)
+    return records
 
 
 def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_access: bool = True) -> dict:
@@ -585,6 +592,14 @@ def persist_completed_results(snapshot, results, owner):
             paper = session.scalar(select(models.Paper).where(models.Paper.id == int(snapshot['target_id'])).with_for_update())
             if not paper or (paper.review_status == 'approved' and snapshot.get('review_state') != [paper.review_status, str(paper.reviewed_at), paper.content_revision]):
                 fail('evidence_stale', '论文已被批准或删除，旧任务结果不再应用')
+        if snapshot['target'] == 'revision':
+            from backend.services.paper_revisions import revision_snapshot
+            paper_id = session.scalar(select(models.PaperRevisionDraft.paper_id).where(models.PaperRevisionDraft.revision_id == snapshot['target_id']))
+            if paper_id is not None:
+                session.scalar(select(models.Paper).where(models.Paper.id == paper_id).with_for_update())
+            current = revision_snapshot(session, snapshot['target_id'], owner)
+            if current['version'] != snapshot['version'] or current['draft_version'] != snapshot.get('draft_version'):
+                fail('evidence_stale', '返修草稿已变化，旧核对结果未应用，请重新核对')
         save_results(session, snapshot, results, owner)
 
 

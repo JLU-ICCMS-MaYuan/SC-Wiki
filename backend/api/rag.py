@@ -1891,6 +1891,19 @@ async def get_paper_review_artifact(
         raise _upload_error(404, "paper_not_found", "论文不存在")
     if context["review_status"] != "pending":
         raise _upload_error(409, "review_artifact_not_pending", "论文已不在待审核状态")
+    # 返修的分类选择与送审事务一起持久化，不依赖已清理的原上传快照。
+    from backend.database import SessionLocal
+    with SessionLocal() as session:
+        event = session.scalar(select(models.PaperHistoryEvent).where(
+            models.PaperHistoryEvent.paper_id == paper_id,
+            models.PaperHistoryEvent.paper_revision == context['paper_revision'],
+            models.PaperHistoryEvent.event_type == 'modified',
+            models.PaperHistoryEvent.operation_id.like('revision:%'),
+        ).order_by(models.PaperHistoryEvent.id.desc()).limit(1))
+        submitted = (event.classification_snapshot or {}).get('revision_submission') if event else None
+    if submitted is not None:
+        return {'ok': True, 'data': {'task_id': context.get('task_id'), 'paper_id': paper_id,
+            'paper_revision': context['paper_revision'], 'ai_values': {}, 'user_values': submitted, 'evidence': {}}}
     found = _artifact_by_paper_id(paper_id, context.get("task_id"))
     if not found:
         raise _upload_error(404, "review_artifact_not_found", "该论文没有待审 AI 证据")

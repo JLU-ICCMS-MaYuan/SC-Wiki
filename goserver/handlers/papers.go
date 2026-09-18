@@ -144,7 +144,8 @@ func paperForViewer(paper models.Paper, user *models.User) gin.H {
 		result["uploaded_by_user_id"] = paper.UploadedBy
 		result["reviewed_by_user_id"] = paper.ReviewedBy
 	}
-	result["can_edit"] = paperOwner(&paper, user) || paperAdmin(user)
+	result["can_edit"] = (paperOwner(&paper, user) && paper.ReviewStatus != reviewStatusRejected) || paperAdmin(user)
+	result["can_revise"] = paperOwner(&paper, user) && paper.ReviewStatus == reviewStatusRejected
 	return result
 }
 
@@ -197,6 +198,10 @@ func PatchPaper(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "无权修改该论文"})
 		return
 	}
+	if !paperAdmin(user) && paper.ReviewStatus == reviewStatusRejected {
+		c.JSON(http.StatusConflict, gin.H{"code": "revision_required", "error": "请通过返修草稿修改已拒绝论文，再重新提交审核"})
+		return
+	}
 	var body map[string]interface{}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "参数错误"})
@@ -207,9 +212,21 @@ func PatchPaper(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "没有可修改字段"})
 		return
 	}
-	if err := database.DB.Model(&paper).Updates(updates).Error; err != nil {
+	query := database.DB.Model(&paper)
+	if !paperAdmin(user) {
+		query = query.Where("review_status <> ?", reviewStatusRejected)
+	}
+	result := query.Updates(updates)
+	if err := result.Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "保存失败"})
 		return
+	}
+	if result.RowsAffected == 0 && !paperAdmin(user) {
+		database.DB.First(&paper, paper.ID)
+		if paper.ReviewStatus == reviewStatusRejected {
+			c.JSON(http.StatusConflict, gin.H{"code": "revision_required", "error": "论文已被拒绝，请通过返修草稿修改"})
+			return
+		}
 	}
 	database.DB.First(&paper, paper.ID)
 	c.JSON(http.StatusOK, paperForViewer(paper, user))
@@ -594,7 +611,7 @@ func materialStatesToDict(states []models.MaterialState) []gin.H {
 		}
 		result = append(result, gin.H{
 			"id": state.ID, "state_key": state.StateKey, "material": material, "material_name": state.MaterialName,
-			"system_key": state.Superconductor.ChemicalSystem.SystemKey,
+			"system_key":         state.Superconductor.ChemicalSystem.SystemKey,
 			"structure_families": structures,
 			"element_count":      state.ElementCount, "material_dimensionality": state.MaterialDimensionality,
 			"crystal_system": state.CrystalSystem,

@@ -743,8 +743,12 @@ func GetMyUploads(c *gin.Context) {
 		Limit(limit).Offset(offset).
 		Find(&papers)
 
+	items := make([]gin.H, 0, len(papers))
+	for _, paper := range papers {
+		items = append(items, paperForViewer(paper, &user))
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"items":     papers,
+		"items":     items,
 		"total":     total,
 		"page_size": limit,
 	})

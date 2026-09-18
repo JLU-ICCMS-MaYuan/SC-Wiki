@@ -14,7 +14,7 @@ export interface EvidenceRecord { human_confirmed?: boolean; source_kind?: strin
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[] }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
-export interface EvidenceTarget { target: 'upload' | 'paper'; target_id: string }
+export interface EvidenceTarget { target: 'upload' | 'paper' | 'revision'; target_id: string }
 interface View { phase: 'checking' | 'countdown' | 'running' | 'error'; seconds?: number; message?: string; job?: Job }
 const base = '/api/rag/evidence'
 const problematic = evidenceProblem

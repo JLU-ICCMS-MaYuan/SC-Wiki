@@ -2268,6 +2268,22 @@ class ScientificStructureOrigin(Base):
     created_at = Column(DateTime, nullable=False, server_default=func.now())
 
 
+class PaperRevisionDraft(Base):
+    """正式论文的独立返修草稿；提交前不修改正式内容，不设置到期时间。"""
+    __tablename__ = 'paper_revision_drafts'
+    __table_args__ = (UniqueConstraint('revision_id', name='uq_paper_revision_draft_id'),)
+    paper_id = Column(Integer, ForeignKey('papers.id', ondelete='CASCADE'), primary_key=True)
+    owner_id = Column(Integer, ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
+    revision_id = Column(String(32), nullable=False)
+    base_revision = Column(Integer, nullable=False)
+    base_fingerprint = Column(String(64), nullable=False)
+    draft_version = Column(Integer, nullable=False, default=1)
+    draft = Column(JSON)
+    submitted_revision = Column(Integer)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+
 class ScientificUploadDraft(Base):
     """有核对结果的上传草稿及运行元数据，供 Redis 丢失后恢复。"""
     __tablename__ = 'scientific_upload_drafts'

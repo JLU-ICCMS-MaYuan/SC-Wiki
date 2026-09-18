@@ -31,6 +31,8 @@ const Spin: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   </Suspense>
 )
 
+const PaperRevisionPage = React.lazy(() => import('./pages/PaperRevisionPage'))
+
 const LazyRoutes: React.FC = () => (
   <Routes>
     <Route path="/search" element={<Spin><SearchPage /></Spin>} />
@@ -45,6 +47,7 @@ const LazyRoutes: React.FC = () => (
     <Route path="/upload" element={<Spin><UploadPage /></Spin>} />
     {/* 论文可见性按论文状态与归属逐篇由后端裁决，因此不包裹 RoleRoute */}
     <Route path="/papers/:id" element={<Spin><PaperDetailPage /></Spin>} />
+    <Route path="/papers/:id/revise" element={<Spin><RoleRoute allow={['user', 'admin', 'superadmin']}><PaperRevisionPage /></RoleRoute></Spin>} />
     <Route path="/rag" element={<Spin><RagPage /></Spin>} />
     <Route path="/tc-predict" element={<Spin><TcPredictPage /></Spin>} />
     <Route path="/knowledge" element={<Spin><KnowledgeGraphPage /></Spin>} />

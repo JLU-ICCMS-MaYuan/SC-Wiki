@@ -13,6 +13,7 @@ import { api } from '../lib/api'
 import PropertyModuleEditor from './PropertyModuleEditor'
 import { toTextList } from '../lib/paperTextLists'
 import { materialLabel } from '../lib/materialIdentity'
+import { Link } from 'react-router-dom'
 
 interface PaperEditViewProps {
   // 论文数据与加载/错误分流由路由页面壳 PaperDetailPage 负责，本组件只负责展示。
@@ -104,7 +105,11 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
         )}
       </Box>
 
-      <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.submittedNotice')}</Alert>
+      {paper.can_revise ? <Box sx={{ mb: 2 }}>
+        <Alert severity="info" sx={{ mb: 1 }}>{t('paperDetail.revisionAvailable')}</Alert>
+        {paper.review_comment && <Alert severity="warning" sx={{ mb: 1 }}>{paper.review_comment}</Alert>}
+        <Button component={Link} variant="contained" to={`/papers/${paper.id}/revise`}>{t('paperDetail.revise')}</Button>
+      </Box> : <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.submittedNotice')}</Alert>}
 
       <Box sx={{
         display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 3, alignItems: 'start',
