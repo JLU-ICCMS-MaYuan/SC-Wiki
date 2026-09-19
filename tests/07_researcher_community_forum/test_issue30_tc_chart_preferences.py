@@ -202,17 +202,13 @@ def test_both_charts_share_one_tc_domain_of_500k():
     assert share.count("yDomain={EMPTY_TC_DOMAIN}") == 2
 
 
-def test_chart_controls_and_legend_have_fixed_size():
-    """对齐靠固定尺寸：控件文本长度不得影响图表纵向位置。
-
-    宽度与高度必须同时固定 —— 只固定高度会让长文本在定高容器里被裁切。
-    """
+def test_chart_controls_share_responsive_layout():
+    """#111：控件共用尺寸并可换行，图例增长不裁切；真实对齐由浏览器测试验收。"""
     share = read_source("frontend/src/pages/share.tsx")
     chart = read_source("frontend/src/components/ChartScatter.tsx")
 
-    # 控件区定高，且两图都用同一常量
-    assert "CHART_CONTROLS_HEIGHT" in share
-    assert share.count("height: CHART_CONTROLS_HEIGHT") == 2
+    assert share.count("sx={CHART_CONTROLS_SX}") == 2
+    assert "flexWrap: 'wrap'" in share
 
     # 家族选择框固定宽度而非 minWidth，且不超过 200 px
     assert "minWidth: 220" not in share
@@ -222,13 +218,12 @@ def test_chart_controls_and_legend_have_fixed_size():
     assert "width: FAMILY_SELECTOR_WIDTH" in share
 
     # 超长折叠 + 空值提示；displayEmpty 是必需的，否则 MUI 跳过 renderValue
-    assert "已选 ${ids.length} 项" in share
-    assert "'未选择'" in share
+    assert "t('share.selectedCount', { n: ids.length })" in share
+    assert "t('share.unselected')" in share
     assert "displayEmpty" in share
 
-    # 图例区定高，否则家族项数变化会把两张卡片底边推错位
-    assert "LEGEND_AREA_HEIGHT" in chart
-    assert "height: LEGEND_AREA_HEIGHT" in chart
+    assert "minHeight: LEGEND_MIN_HEIGHT" in chart
+    assert "height: LEGEND_AREA_HEIGHT" not in chart
 
 
 def test_community_page_has_no_chart_group_selector():

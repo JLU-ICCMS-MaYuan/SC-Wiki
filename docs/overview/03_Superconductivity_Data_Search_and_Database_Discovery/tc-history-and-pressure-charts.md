@@ -13,7 +13,8 @@
 - 查询失败返回 HTTP 503 且不写缓存，不再返回空数组——静默空结果会把 schema 漂移伪装成「暂无数据」。
 - 分类维度是论文级材料家族标签（`material_families` 目录），由 `/api/classification-catalogs` 动态提供，含用户自建家族；API 为每个数据点返回所属论文的 `family_ids[]`，没有论文级 family 时归入 ID 0 的「其他」。
 - `/share/charts` 页面在宽屏并排、窄屏单列显示 Tc-Pressure 与 Tc-Year；两张图可独立选择 Tc 字段与材料家族多选组合，并分别呈现加载失败状态。旧 `/share` 重定向到此页面。
-- 两张图恒对齐：控件区与图例区高度固定，材料家族选择框宽度固定（190 px），因此选中项数量与文本长度不影响图表纵向位置。选中项名称过长时折叠为「已选 N 项」，全选显示「全部」，一个不选显示「未选择」。
+- 两图包含坐标轴的绘图容器统一保持宽∶高 = 4∶3，宽度随卡片空间变化，高度按比例计算；调整窗口和侧栏后自动重绘，文字与散点不整体拉伸。标题、控件、字段提示和图例不计入比例，加载占位也采用相同比例。
+- 并排时两图绘图区等宽等高、上下对齐。控件共用标准宽度（Tc 字段 210 px、材料家族 190 px），不足时换行且不超过卡片宽度。字段提示保持单行，完整内容可通过标题或选择器读取；图例可换行增长，不裁掉家族项目。选中项名称过长时折叠为「已选 N 项」，全选显示「全部」，一个不选显示「未选择」。
 - 每张图有独立的材料家族多选下拉，默认全选，与图例点击双向同步；多个家族可组合显示在同一张图里。筛选任一 family 时，命中论文的全部材料结果都纳入，单个数据点即使同时命中多个已选 family 也只绘制一次。社区页不再提供图表组合入口，材料家族多选已承担论文标签筛选职责。
 - 登录用户的字段与家族偏好按 `user.id` 隔离保存在浏览器 `localStorage`（键名 `scwiki_chart_preferences:v2:<id>`），恢复默认只清除当前用户配置；匿名用户不持久化。家族选择存 `null` 表示「全部」，因此后续新增的家族自动可见。
 - 没有数据点时仍渲染坐标系与背景分区，只在图内提示无数据点。压力图横轴固定 0–400 GPa，年份图横轴固定 1900–次年；纵轴由两图共用，固定 0–500 K，以便并排直接比对 Tc 高度。
@@ -24,7 +25,7 @@
 - 视觉编码分两个通道：材料家族定形状与描边色（7 种符号 × 8 色按目录顺序确定性分配），实验/计算定实心/空心。家族数量可由用户增长，配色必然循环撞色，因此形状承担区分职责。新增家族追加在目录末尾，不改变既有家族外观。
 - 两个下拉都带 `labelId`，具备可访问名；材料家族下拉设 `displayEmpty`，否则值为空时 MUI 会跳过 `renderValue` 而显示空控件，「未选择」提示不会出现。
 - `Tc 字段` 下拉的五个选项与图上方的纵轴提示均为英文（`Experimental Tc`、`Anisotropic Eliashberg Tc`、`Isotropic Eliashberg Tc`、`Allen-Dynes Tc`、`McMillan Tc`）；`tc_field` 键名属 API 契约，不随标签变化。
-- 点击点后打开右侧论文详情抽屉。
+- 点击数据散点后打开右侧论文详情抽屉；事件直接绑定数据散点，点击背景或等值线不打开详情。
 - 图表组合（chart group）功能本身保留，但入口只在管理页（`AdminPage` 的 `ChartGroupEditor`）：组合 API 支持列表、详情、创建、更新、删除和公开状态切换；组合点可以引用物性记录或使用自定义点字段，压强取自所属材料状态，分类取材料家族 id（沿用既有 `custom_type` 列存储，不新增表结构）。（[Issue #57](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/57)、[Issue #72](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/72)）
 - 未登录用户的本地图表组合（`scwiki_local_groups`）合并只发生在组合编辑器中，社区页不再读取该存储。
 
@@ -52,12 +53,14 @@
 - `goserver/handlers/stats_test.go`
 - `tests/07_researcher_community_forum/test_issue30_tc_chart_preferences.py`（源码契约断言）
 - `tests/07_researcher_community_forum/community-charts.test.tsx`（渲染行为，含空数据背景、两图对齐、家族多选）
+- `tests/07_researcher_community_forum/chart-aspect-ratio-browser.mjs`（真实浏览器验证 4:3、五种窗口宽度、连续缩放、侧栏、中英文可读性及图表交互；API 使用隔离夹具）
 
 ## 相关变更记录
 
 - [Feature #30：社区 Tc 双图个人配置与品质因子](../../specs/30-community-tc-chart-preferences/spec.md)
 - [Feature #72：图表数据源迁移到条件化模型并恢复背景分区与家族筛选](../../specs/72-chart-data-source-and-family-filter/spec.md)
 - [Feature #79：论文级 Material family 多选分类](../../specs/79-paper-material-families/spec.md)
+- [Feature #111：社区 Tc 双图固定 4:3 比例](../../specs/111-tc-chart-aspect-ratio/spec.md)
 
 ## 已知问题
 

@@ -100,6 +100,7 @@ const routeApi = (overrides: Record<string, unknown> = {}) => {
     if (url.startsWith('/api/papers/stats/tc-year')) {
       return Promise.resolve(overrides.year ?? [])
     }
+    if (url === '/api/papers/9') return Promise.resolve({ id: 9, title: 'Hg 点击详情回归', year: 1911, key_properties: [], material_states: [] })
     return Promise.resolve([])
   })
 }
@@ -407,6 +408,22 @@ describe('背景填充与英文标签（US6）', () => {
 })
 
 describe('已审核数据能上图', () => {
+  it('点击真实散点打开对应论文，点击网格不打开详情', async () => {
+    routeApi({ pressure: [HG_POINT], year: [HG_YEAR_POINT] })
+    renderShare()
+    const point = await waitFor(() => {
+      const node = document.querySelector<SVGPathElement>('.recharts-scatter-symbol path')
+      expect(node).not.toBeNull()
+      return node!
+    })
+    const user = userEvent.setup()
+    await user.click(document.querySelector('.recharts-cartesian-grid')!)
+    expect(mockedApi.get).not.toHaveBeenCalledWith('/api/papers/9')
+    await user.click(point)
+    expect(await screen.findByText('Hg 点击详情回归')).toBeInTheDocument()
+    expect(mockedApi.get).toHaveBeenCalledWith('/api/papers/9')
+  })
+
   it('Hg 数据点在两张图上各渲染一个散点', async () => {
     routeApi({ pressure: [HG_POINT], year: [HG_YEAR_POINT] })
     renderShare()

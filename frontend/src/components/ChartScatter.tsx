@@ -13,9 +13,9 @@ import {
   TEMPERATURE_LOW_COLOR, TEMPERATURE_MID_COLOR,
 } from '../lib/scatterConfig'
 
-// 图例区定高：家族项数随可见性变化会改变行数，进而把两张卡片的底边推错位。
-// 定高让行数变化被容器吸收（与控件区定高同理，见 share.tsx 的 CHART_CONTROLS_HEIGHT）。
-const LEGEND_AREA_HEIGHT = 92
+// 比例只约束含坐标轴的绘图容器，字段提示与图例在其外部排版。
+export const CHART_ASPECT_RATIO = 4 / 3
+const LEGEND_MIN_HEIGHT = 92
 
 interface DataPoint {
   x: number
@@ -48,7 +48,6 @@ interface Props {
   temperatureBands?: boolean
   referenceLines?: boolean
   emptyHint?: string
-  minHeight?: number
 }
 
 const CustomTooltip: React.FC<{ active?: boolean; payload?: any[]; xLabel: string; tooltipFormatter?: (point: DataPoint) => React.ReactNode }> = ({ active, payload, xLabel, tooltipFormatter }) => {
@@ -172,7 +171,7 @@ const ChartScatter: React.FC<Props> = ({
   tooltipFormatter, onPointClick,
   tcFieldLabel, qualityFactorContours = false, temperatureBands = false,
   referenceLines = true,
-  emptyHint, minHeight = 320,
+  emptyHint,
 }) => {
   const { t } = useLanguage()
   const visibleData = data.flatMap(point => {
@@ -225,18 +224,15 @@ const ChartScatter: React.FC<Props> = ({
   return (
     <Box>
       {tcFieldLabel && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+        <Typography variant="caption" color="text.secondary" noWrap
+          title={t('share.yAxisCaption', { field: tcFieldLabel })}
+          sx={{ display: 'block', mb: 0.5 }}>
           {t('share.yAxisCaption', { field: tcFieldLabel })}
         </Typography>
       )}
-      <Box sx={{ position: 'relative' }}>
-        <ResponsiveContainer width="100%" height={minHeight}>
-          <ScatterChart margin={{ top: 10, right: 10, bottom: 30, left: 0 }}
-            onClick={(e: any) => {
-              if (e?.activePayload?.[0]?.payload?.material) {
-                onPointClick?.(e.activePayload[0].payload as DataPoint)
-              }
-            }}>
+      <Box sx={{ position: 'relative', width: '100%', aspectRatio: CHART_ASPECT_RATIO }}>
+        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+          <ScatterChart margin={{ top: 10, right: 10, bottom: 30, left: 8 }}>
             {/* 分区在网格之下，避免色带盖住刻度线 */}
             {qualityFactorContours && <Customized component={QualityFactorBands} />}
             {temperatureBands && <Customized component={TemperatureBands} />}
@@ -250,8 +246,8 @@ const ChartScatter: React.FC<Props> = ({
 
             {/* 不能用 Fragment 包裹：recharts 按子元素类型分派渲染，
                 包在 Fragment 里的 ReferenceLine 不会被识别，参考线会静默消失。 */}
-            {referenceLines && <ReferenceLine y={77} stroke="#d81b60" strokeDasharray="5 4" label={{ value: t('share.liquidNitrogen', { temp: 77 }), position: 'insideTopRight', fill: '#ad1457' }} />}
-            {referenceLines && <ReferenceLine y={300} stroke="#d81b60" strokeDasharray="5 4" label={{ value: t('share.roomTemperature', { temp: 300 }), position: 'insideTopRight', fill: '#ad1457' }} />}
+            {referenceLines && <ReferenceLine y={77} stroke="#d81b60" strokeDasharray="5 4" label={{ value: t('share.liquidNitrogen', { temp: 77 }), position: 'insideTopRight', fill: '#ad1457', fontSize: 12 }} />}
+            {referenceLines && <ReferenceLine y={300} stroke="#d81b60" strokeDasharray="5 4" label={{ value: t('share.roomTemperature', { temp: 300 }), position: 'insideTopRight', fill: '#ad1457', fontSize: 12 }} />}
             {contours.map(contour => (
               <Scatter key={`quality-${contour.s}`} name={`S=${contour.s}`} data={contour.points}
                 line={{ stroke: '#4f6f52', strokeWidth: 1, strokeDasharray: '4 4' }}
@@ -262,6 +258,7 @@ const ChartScatter: React.FC<Props> = ({
 
             {series.map(s => (
               <Scatter key={s.key} name={s.key} data={s.data}
+                onClick={point => onPointClick?.(point.payload)}
                 fill={s.fill} stroke={s.stroke} opacity={0.9} shape={s.shape} />
             ))}
           </ScatterChart>
@@ -280,12 +277,11 @@ const ChartScatter: React.FC<Props> = ({
         )}
       </Box>
 
-      {/* 图例 — 家族可点击切换可见性。
-          定高：家族项数变化会改变行数，否则两张卡片底边错位。 */}
+      {/* 图例保留最低高度，窄屏和长名称自然换行，不裁掉可点击的家族。 */}
       <Box sx={{
         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
         gap: 1.5, flexWrap: 'wrap', mt: 1, fontSize: 13,
-        height: LEGEND_AREA_HEIGHT, overflow: 'hidden',
+        minHeight: LEGEND_MIN_HEIGHT,
       }}>
         {legendFamilies.map(style => {
           const isVisible = visibleFamilies.has(style.id)
@@ -297,6 +293,7 @@ const ChartScatter: React.FC<Props> = ({
               onClick={() => onToggleFamily(style.id)}
               sx={{
                 display: 'flex', alignItems: 'center', gap: 0.5,
+                maxWidth: '100%', minWidth: 0, overflowWrap: 'anywhere',
                 cursor: 'pointer', opacity: isVisible ? 1 : 0.35,
                 userSelect: 'none',
               }}

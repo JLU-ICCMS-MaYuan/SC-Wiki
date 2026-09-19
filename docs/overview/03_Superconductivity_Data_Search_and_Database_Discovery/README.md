@@ -12,7 +12,7 @@
 | [论文与物性结果](paper-and-property-results.md) | 组织论文、关键物性、结构预览和搜索结果 | 本地材料检索、论文关系 |
 | [分享与导出](share-and-export.md) | 输出 JSON、RIS 等分享数据 | 论文与物性结果 |
 | [代表结构查询与下载](representative-query-and-download.md) | 匹配超导记录、选取代表结构并控制下载 | 已批准结构、访问权限 |
-| [Tc 历史与压力图表](tc-history-and-pressure-charts.md) | 生成并展示 Tc-year 与 P-Tc 数据及图表 | `property_records`、`material_states`、`material_families`、Recharts |
+| [Tc 历史与压力图表](tc-history-and-pressure-charts.md) | 生成并展示 Tc-year 与 P-Tc 数据，两图保持 4:3 并适配窗口 | `property_records`、`material_states`、`material_families`、Recharts |
 
 ## 功能组成
 

@@ -17,7 +17,7 @@ import {
 } from '../lib/scatterConfig'
 import { ClassificationTerm, familyName, loadClassificationCatalogs } from '../lib/classifications'
 import { useLanguage } from '../context/LanguageContext'
-import ChartScatter from '../components/ChartScatter'
+import ChartScatter, { CHART_ASPECT_RATIO } from '../components/ChartScatter'
 import StructureViewer3D from '../components/StructureViewer3D'
 import PaperCommunity from '../components/community/PaperCommunity'
 import { collectPropertyRows, collectStructures, viewerFormat } from '../lib/paperDetailView'
@@ -64,18 +64,15 @@ const contributionBarWidth = (count: number, maxCount: number): number => {
   return Math.min(100, Math.max(0, (count / maxCount) * 100))
 }
 
-// ── 两图对齐用的固定尺寸 ──
-//
-// 错位的根因是控件显示文本的长度会影响布局高度：家族多选框文本变长后换行撑高控件，
-// 把下方图表整体下推，左右两图坐标系就不在同一水平线。
-//
-// 「同步两图选择内容」的方案与两图独立选择的设计冲突，因此改为固定容器尺寸，
-// 让内容长度变化被容器吸收。固定高度必须与固定宽度 + 超长折叠配套，
-// 否则长文本在定高容器里会被裁切。
+// 两图共用控件标准宽度和换行规则。选中项摘要不改变控件宽度，
+// 因此同宽卡片的行数一致；窄屏允许增加高度，避免内容被裁切。
 const TC_FIELD_SELECTOR_WIDTH = 210
 const FAMILY_SELECTOR_WIDTH = 190
 const FAMILY_SUMMARY_MAX_CHARS = 10
-const CHART_CONTROLS_HEIGHT = 56
+const CHART_CONTROLS_SX = {
+  display: 'flex', gap: 1, flexWrap: 'wrap', minHeight: 56,
+  py: 1, boxSizing: 'border-box', alignItems: 'center',
+} as const
 
 // ═══════════════════════════════════════════════════════
 const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) => {
@@ -264,7 +261,7 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
     onChange: (field: TcField) => void,
   ) => (
     // labelId 让下拉有可访问名，否则屏幕阅读器只能读到当前值而不知这是什么字段
-    <FormControl size="small" sx={{ width: TC_FIELD_SELECTOR_WIDTH, flexShrink: 0 }}>
+    <FormControl size="small" sx={{ width: TC_FIELD_SELECTOR_WIDTH, maxWidth: '100%', flexShrink: 0 }}>
       <InputLabel id={`${id}-label`}>{t('share.tcField')}</InputLabel>
       <Select
         labelId={`${id}-label`}
@@ -341,7 +338,7 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
   ) => (
     // 固定宽度而非 minWidth：MUI Select 的显示宽度由 renderValue 结果撑开，
     // 只设下限时选中项越多控件越宽，两图控件不等宽且会把图表推错位。
-    <FormControl size="small" sx={{ width: FAMILY_SELECTOR_WIDTH, flexShrink: 0 }}>
+    <FormControl size="small" sx={{ width: FAMILY_SELECTOR_WIDTH, maxWidth: '100%', flexShrink: 0 }}>
       <InputLabel id={`${id}-label`}>{label}</InputLabel>
       <Select
         multiple
@@ -477,7 +474,7 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
         </CardContent>
       </Card>}
 
-      {section !== 'rankings' && <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' }, gap: 2.5, alignItems: 'start' }}>
+      {section !== 'rankings' && <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' }, gap: 2.5, alignItems: 'stretch' }}>
 
       {/* ═══ Tc-Pressure Scatter ═══ */}
       <Card sx={{ minWidth: 0 }}>
@@ -485,14 +482,14 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
           <Typography variant="h6" gutterBottom>
             {t('share.chartPressureTitle')}
           </Typography>
-          {/* 定高且不换行：控件内容长度不得影响图表纵向位置（两图对齐） */}
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'nowrap', height: CHART_CONTROLS_HEIGHT, alignItems: 'center' }}>
+          {/* 两图共用控件尺寸；空间不足时换行，选中项摘要不改变控件宽度。 */}
+          <Box sx={CHART_CONTROLS_SX}>
             {renderTcFieldSelector('pressure-tc-field', pressureTcField, changePressureTcField)}
             {renderFamilySelector('pressure-families', t('share.materialFamily'), visiblePressureFamilies, changePressureFamilies)}
           </Box>
           <Box sx={{ mt: 1 }}>
             {/* 空数据仍渲染坐标系与品质因子分区，只在图内提示无数据点 */}
-            {pressureLoading ? <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 360 }}><CircularProgress /></Box>
+            {pressureLoading ? <Box sx={{ display: 'grid', placeItems: 'center', aspectRatio: CHART_ASPECT_RATIO }}><CircularProgress /></Box>
             : pressureError ? <Alert severity="error">{pressureError}</Alert>
             : <ChartScatter
               data={chart1Data}
@@ -500,7 +497,6 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
               yLabel="Tc (K)"
               tcFieldLabel={TC_FIELD_LABELS[pressureTcField]}
               qualityFactorContours
-              minHeight={390}
               xDomain={EMPTY_PRESSURE_DOMAIN}
               yDomain={EMPTY_TC_DOMAIN}
               familyStyles={localizedFamilyStyles}
@@ -520,20 +516,19 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
           <Typography variant="h6" gutterBottom>
             {t('share.chartYearTitle')}
           </Typography>
-          <Box sx={{ display: 'flex', gap: 1, flexWrap: 'nowrap', height: CHART_CONTROLS_HEIGHT, alignItems: 'center' }}>
+          <Box sx={CHART_CONTROLS_SX}>
             {renderTcFieldSelector('year-tc-field', yearTcField, changeYearTcField)}
             {renderFamilySelector('year-families', t('share.materialFamily'), visibleYearFamilies, changeYearFamilies)}
           </Box>
           <Box sx={{ mt: 1 }}>
             {/* 年份图不画品质因子分区：S 依赖压强，在年份轴上无物理意义 */}
-            {yearLoading ? <Box sx={{ display: 'grid', placeItems: 'center', minHeight: 360 }}><CircularProgress /></Box>
+            {yearLoading ? <Box sx={{ display: 'grid', placeItems: 'center', aspectRatio: CHART_ASPECT_RATIO }}><CircularProgress /></Box>
             : yearError ? <Alert severity="error">{yearError}</Alert>
             : <ChartScatter
               data={chart2Data}
               xLabel={t('share.axisYear')}
               yLabel="Tc (K)"
               tcFieldLabel={TC_FIELD_LABELS[yearTcField]}
-              minHeight={390}
               temperatureBands
               xDomain={EMPTY_YEAR_DOMAIN}
               yDomain={EMPTY_TC_DOMAIN}
