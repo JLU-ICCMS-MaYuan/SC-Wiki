@@ -51,11 +51,11 @@
 
 这里有三个容易混淆的概念：
 
-| 概念 | 通俗解释 | 对应本项目 |
-| --- | --- | --- |
-| LLM 结构化提取 | 读一段文字，按指定格式交出答案 | 从论文中提取 Tc、压力、方法和原文引句 |
-| RAG（检索增强生成） | 先找相关资料，再把资料交给模型回答 | 问答通过工具检索站内论文片段和物性记录 |
-| Agent | 围绕目标，按结果选择工具和下一步行动 | 问答 Mentor 可以选择检索工具，读结果后再继续回答 |
+| 概念                | 通俗解释                             | 对应本项目                                       |
+| ------------------- | ------------------------------------ | ------------------------------------------------ |
+| LLM 结构化提取      | 读一段文字，按指定格式交出答案       | 从论文中提取 Tc、压力、方法和原文引句            |
+| RAG（检索增强生成） | 先找相关资料，再把资料交给模型回答   | 问答通过工具检索站内论文片段和物性记录           |
+| Agent               | 围绕目标，按结果选择工具和下一步行动 | 问答 Mentor 可以选择检索工具，读结果后再继续回答 |
 
 **当前上传主流程不是典型的“向量检索 → 回答”，而是逐段遍历的文档提取工作流。** 它不在生成草稿前调用 Qdrant 找前几个相关片段。来源核对同样扫描当前论文及附件的来源片段。广义上两者都在给模型提供证据，但其执行方式与问答 RAG 不同。
 
@@ -176,13 +176,13 @@ flowchart TB
 
 适合保留的职责划分是：
 
-| 部分 | 建议承担的责任 |
-| --- | --- |
-| 上传任务 | 文件身份、任务进度、缓存、取消和错误恢复 |
-| 文献处理能力 | 提取文本、读指定片段、查找原文、解析附件 |
-| LLM 提取与判断 | 识别事实、整理候选、解释歧义 |
+| 部分           | 建议承担的责任                           |
+| -------------- | ---------------------------------------- |
+| 上传任务       | 文件身份、任务进度、缓存、取消和错误恢复 |
+| 文献处理能力   | 提取文本、读指定片段、查找原文、解析附件 |
+| LLM 提取与判断 | 识别事实、整理候选、解释歧义             |
 | 数据契约与验证 | 字段类型、单位、状态归属、版本、来源定位 |
-| 校对与提交 | 用户修改、采纳建议、权限校验和事务落库 |
+| 校对与提交     | 用户修改、采纳建议、权限校验和事务落库   |
 
 #### 1.3.2 第二层：在确实需要时增加有限的自主行动
 
@@ -211,15 +211,15 @@ flowchart TB
 
 ### 1.4 上传和网站问答，哪些相同，哪些不同？
 
-| 维度 | 当前上传 | 当前普通问答 |
-| --- | --- | --- |
-| 目标 | 生成可校对、可提交的结构化数据 | 回答用户的问题 |
-| 输入范围 | 本次论文正文及附件 | 用户问题、对话历史、可用站内资料 |
-| 如何取得内容 | 按程序安排逐段遍历，核对时按批扫描 | Mentor 可选择物性、文献或图谱工具 |
-| 下一步由谁决定 | 上传 Worker 和核对程序 | 模型工具调用与 LangGraph 路由共同决定 |
-| 输出 | 草稿、记录、来源及核对结果 | 自然语言回答及相关工具结果 |
-| 写入责任 | 经用户提交进入待审核数据 | 普通问答工具提供查询能力 |
-| 公网搜索 | 当前主流程未接入 | 当前 Mentor 工具列表未提供公网搜索工具 |
+| 维度           | 当前上传                           | 当前普通问答                           |
+| -------------- | ---------------------------------- | -------------------------------------- |
+| 目标           | 生成可校对、可提交的结构化数据     | 回答用户的问题                         |
+| 输入范围       | 本次论文正文及附件                 | 用户问题、对话历史、可用站内资料       |
+| 如何取得内容   | 按程序安排逐段遍历，核对时按批扫描 | Mentor 可选择物性、文献或图谱工具      |
+| 下一步由谁决定 | 上传 Worker 和核对程序             | 模型工具调用与 LangGraph 路由共同决定  |
+| 输出           | 草稿、记录、来源及核对结果         | 自然语言回答及相关工具结果             |
+| 写入责任       | 经用户提交进入待审核数据           | 普通问答工具提供查询能力               |
+| 公网搜索       | 当前主流程未接入                   | 当前 Mentor 工具列表未提供公网搜索工具 |
 
 普通问答入口 `rag/service.py` 最终调用 `rag/agent/mentor.py`。它已经使用 LangGraph，基本循环是：
 
@@ -279,7 +279,7 @@ PDF 由 `pdf_extractor.py` 使用 PyMuPDF 提取文本，并插入 `<!-- page: N
 
 `chunker.py` 按章节和段落切分，默认以约 800 tokens 为目标，用字符数粗略估算；这不是严格的 token 上限。`_chunks_with_preamble` 另外补上首页与摘要，并附上来源页码。
 
-`_read_chunk` 对每段调用一次 LLM。每次输入相当于：
+*`_read_chunk` 对每段调用一次 LLM。每次输入相当于：*
 
 ```text
 固定规则：你要提取哪些事实、返回什么 JSON、怎样保留证据。
@@ -359,10 +359,10 @@ PDF 由 `pdf_extractor.py` 使用 PyMuPDF 提取文本，并插入 `<!-- page: N
 
 这两个检查解决不同问题：
 
-| 检查 | 回答什么 | 不能单独证明什么 |
-| --- | --- | --- |
-| 程序定位原文 | 引句确实存在于这份来源里吗？ | 这句话真的支持所填科学结论吗？ |
-| LLM 判断语义 | 这句话说的是该材料、该条件下的这个物性吗？ | 模型判断一定正确吗？ |
+| 检查         | 回答什么                                   | 不能单独证明什么               |
+| ------------ | ------------------------------------------ | ------------------------------ |
+| 程序定位原文 | 引句确实存在于这份来源里吗？               | 这句话真的支持所填科学结论吗？ |
+| LLM 判断语义 | 这句话说的是该材料、该条件下的这个物性吗？ | 模型判断一定正确吗？           |
 
 有原文但存在语义冲突的记录，可以保留疑点进入待审核流程；没有有效来源且未采用可用建议的上传内容会被相应检查拦下；明确采用的通用知识推测可进入待审，正式批准仍需管理员逐项说明理由。用户仍需决定修改、采纳建议或提交，管理员承担后续裁决。详细操作见[PDF 解析管线](pdf-parsing-pipeline.md)。
 
@@ -401,25 +401,25 @@ PDF 由 `pdf_extractor.py` 使用 PyMuPDF 提取文本，并插入 `<!-- page: N
 
 #### 2.3.1 当前主链路实际使用的提示词
 
-| 位置 | 调用时机 | 模型看到什么 | 主要输出 |
-| --- | --- | --- | --- |
-| `upload_jobs.py::CHUNK_SYSTEM_PROMPT` | 逐段阅读 | 单个分段及章节、页码 | 候选事实、范围标记、引句 |
-| `upload_jobs.py::SUMMARY_SYSTEM_PROMPT` | 所有分段处理后 | 筛选后的分段候选 JSON | 整篇论文分类及科学数据草稿 |
-| `upload_jobs.py::EXPERIMENTAL_CONDITIONS_PROMPT` | 拼接进上述两种提示词 | 随各阶段输入一起发送 | 每条实验 Tc 的条件描述；它不是第三次独立调用 |
+| 位置                                             | 调用时机             | 模型看到什么          | 主要输出                                     |
+| ------------------------------------------------ | -------------------- | --------------------- | -------------------------------------------- |
+| `upload_jobs.py::CHUNK_SYSTEM_PROMPT`            | 逐段阅读             | 单个分段及章节、页码  | 候选事实、范围标记、引句                     |
+| `upload_jobs.py::SUMMARY_SYSTEM_PROMPT`          | 所有分段处理后       | 筛选后的分段候选 JSON | 整篇论文分类及科学数据草稿                   |
+| `upload_jobs.py::EXPERIMENTAL_CONDITIONS_PROMPT` | 拼接进上述两种提示词 | 随各阶段输入一起发送  | 每条实验 Tc 的条件描述；它不是第三次独立调用 |
 | `property_evidence.py::SYSTEM_PROMPT` 与 `SUGGESTION_PROMPT` | 汇总后的字段建议生成，以及用户启动的来源核对 | 待处理记录、来源批次和必要的旧结果 | 核对结果、引句、理由及区分依据类型的可选建议 |
 
 它们合起来像一份拆成几个环节的工作说明：每个环节只要求模型交出该环节需要的结果。
 
 #### 2.3.2 提示词包含的六类约束
 
-| 约束 | 实际作用 | 项目例子 |
-| --- | --- | --- |
-| 任务和输入范围 | 告诉模型现在负责哪一步 | 分段只提候选，汇总才确定论文整体类型 |
-| 输出结构 | 让程序能读取答案 | `material_states`、`tc_results`、`evidence` |
-| 领域含义 | 防止提取数值却认错物性 | 测量时温度不等于临界温度 Tc |
-| 分类与归属 | 防止把不同对象混在一起 | 本文与前人工作分开，不同压力状态分开 |
-| 缺失处理 | 允许模型承认没有依据 | 返回 `null`、空数组或 `unknown` |
-| 表达和证据 | 保留可追溯内容并统一生成文字 | AI 归纳字段用英文，原文 `quote` 保持来源语言 |
+| 约束           | 实际作用                     | 项目例子                                     |
+| -------------- | ---------------------------- | -------------------------------------------- |
+| 任务和输入范围 | 告诉模型现在负责哪一步       | 分段只提候选，汇总才确定论文整体类型         |
+| 输出结构       | 让程序能读取答案             | `material_states`、`tc_results`、`evidence`  |
+| 领域含义       | 防止提取数值却认错物性       | 测量时温度不等于临界温度 Tc                  |
+| 分类与归属     | 防止把不同对象混在一起       | 本文与前人工作分开，不同压力状态分开         |
+| 缺失处理       | 允许模型承认没有依据         | 返回 `null`、空数组或 `unknown`              |
+| 表达和证据     | 保留可追溯内容并统一生成文字 | AI 归纳字段用英文，原文 `quote` 保持来源语言 |
 
 例如，实验条件提示词要求从样品、制备方式、测量方法、装置、外场、压力不确定度六方面阅读，但没有要求六项必须齐全。它希望模型识别信息，不希望模型为了填满表格而补造条件。
 
@@ -851,12 +851,12 @@ lookup_publication_metadata 是建议工具名。工具返回格式、权限和�
 
 用户在 2026-09-19 明确了更窄的联网边界：只为出版信息核实和术语理解提供联网能力；不联网查找 Tc，也不联网寻找或下载未上传的补充材料。下表是设计要求，尚未接入当前上传流程：
 
-| 情形 | 可考虑的联网用途 | 对草稿的处理建议 |
-| --- | --- | --- |
-| PDF 缺少完整出版信息 | 查出版社或 DOI 元数据 | 保留外部来源，并确认是同一论文及版本 |
+| 情形                     | 可考虑的联网用途       | 对草稿的处理建议                     |
+| ------------------------ | ---------------------- | ------------------------------------ |
+| PDF 缺少完整出版信息     | 查出版社或 DOI 元数据  | 保留外部来源，并确认是同一论文及版本 |
 | 正文指向未上传的补充材料 | 不联网查找或下载 | 仅处理用户提供的附件；未提供则明确标记缺失 |
 | 本文没有给出某个 Tc | 不联网查询 Tc | 保持缺失，禁止从其他论文、网页或模型常识补值 |
-| 文中术语难以理解 | 查背景或方法资料 | 辅助解释，不把背景知识标成本文原文 |
+| 文中术语难以理解         | 查背景或方法资料       | 辅助解释，不把背景知识标成本文原文   |
 
 例如，在网上找到另一篇关于同一材料的 220 K 结果，不能用来填补当前论文缺失的 Tc。材料相同，不代表压力、结构、样品、方法和论文归属相同。
 
@@ -941,21 +941,21 @@ enrich_papers.py 本身也是旧流程，包含旧 key_properties 输出、数�
 
 以下链接用于继续查阅实现；本文只做了代码、现有测试内容及文档链接核对，没有运行上传流程、调用外部模型，也没有重新测量提取准确率。
 
-| 想确认的内容 | 代码入口 |
-| --- | --- |
-| 上传步骤、两阶段提示词和规则归一化 | [upload_jobs.py](../../../backend/ingest/upload_jobs.py)：`_process_upload_task`、`_read_chunk`、`_normalize_draft` |
-| PDF 文本和分段输入 | [pdf_extractor.py](../../../backend/ingest/pdf_extractor.py)、[chunker.py](../../../backend/ingest/chunker.py) |
-| JSON 调用参数和重试 | [llm.py](../../../backend/rag/llm.py)、[llm_client.py](../../../backend/rag/llm_client.py) |
-| AI 生成字段语言检查 | [language_contract.py](../../../backend/ingest/language_contract.py) |
-| Tc 到模块化记录的转换 | [upload_contracts.py](../../../backend/ingest/upload_contracts.py)：`convert_legacy_state` |
-| 物性字段和定义校验 | [property_modules.py](../../../backend/ingest/property_modules.py) |
-| 来源核对和引句定位 | [property_evidence.py](../../../backend/ingest/property_evidence.py)：`SYSTEM_PROMPT`、`run_evidence_job`、`locate_with_reason` |
-| 结构候选和参考文献支路 | [structure_extractor.py](../../../backend/ingest/structure_extractor.py)、[citation_graph.py](../../../backend/services/citation_graph.py) |
-| 表单取值与展示 | [UploadTaskEditor.tsx](../../../frontend/src/components/UploadTaskEditor.tsx)、[MaterialStatesEditor.tsx](../../../frontend/src/components/MaterialStatesEditor.tsx) |
-| 提交与发布 | [rag.py](../../../backend/api/rag.py)：`submit_upload_draft`、`publish_approved_paper` |
-| 普通问答与工具循环 | [service.py](../../../backend/rag/service.py)、[mentor.py](../../../backend/rag/agent/mentor.py)、[tools.py](../../../backend/rag/agent/tools.py) |
-| 分段、范围过滤及规则推导的测试 | [test_upload_jobs.py](../../../backend/tests/test_upload_jobs.py) |
-| 引句定位、伪造来源及过期结果的测试 | [test_property_evidence.py](../../../tests/01_decentralized_uploading/test_property_evidence.py) |
+| 想确认的内容                       | 代码入口                                                                                                                                                             |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 上传步骤、两阶段提示词和规则归一化 | [upload_jobs.py](../../../backend/ingest/upload_jobs.py)：`_process_upload_task`、`_read_chunk`、`_normalize_draft`                                                  |
+| PDF 文本和分段输入                 | [pdf_extractor.py](../../../backend/ingest/pdf_extractor.py)、[chunker.py](../../../backend/ingest/chunker.py)                                                       |
+| JSON 调用参数和重试                | [llm.py](../../../backend/rag/llm.py)、[llm_client.py](../../../backend/rag/llm_client.py)                                                                           |
+| AI 生成字段语言检查                | [language_contract.py](../../../backend/ingest/language_contract.py)                                                                                                 |
+| Tc 到模块化记录的转换              | [upload_contracts.py](../../../backend/ingest/upload_contracts.py)：`convert_legacy_state`                                                                           |
+| 物性字段和定义校验                 | [property_modules.py](../../../backend/ingest/property_modules.py)                                                                                                   |
+| 来源核对和引句定位                 | [property_evidence.py](../../../backend/ingest/property_evidence.py)：`SYSTEM_PROMPT`、`run_evidence_job`、`locate_with_reason`                                      |
+| 结构候选和参考文献支路             | [structure_extractor.py](../../../backend/ingest/structure_extractor.py)、[citation_graph.py](../../../backend/services/citation_graph.py)                           |
+| 表单取值与展示                     | [UploadTaskEditor.tsx](../../../frontend/src/components/UploadTaskEditor.tsx)、[MaterialStatesEditor.tsx](../../../frontend/src/components/MaterialStatesEditor.tsx) |
+| 提交与发布                         | [rag.py](../../../backend/api/rag.py)：`submit_upload_draft`、`publish_approved_paper`                                                                               |
+| 普通问答与工具循环                 | [service.py](../../../backend/rag/service.py)、[mentor.py](../../../backend/rag/agent/mentor.py)、[tools.py](../../../backend/rag/agent/tools.py)                    |
+| 分段、范围过滤及规则推导的测试     | [test_upload_jobs.py](../../../backend/tests/test_upload_jobs.py)                                                                                                    |
+| 引句定位、伪造来源及过期结果的测试 | [test_property_evidence.py](../../../tests/01_decentralized_uploading/test_property_evidence.py)                                                                     |
 
 上述测试文件能帮助理解系统预期约束，但模拟模型响应的测试不能证明真实 LLM 在任意论文上都会正确提取。后续若评估 Agent 方案，应使用同一批标注论文比较字段正确率、记录遗漏、来源定位、条件混淆、人工修正量以及调用成本。
 
