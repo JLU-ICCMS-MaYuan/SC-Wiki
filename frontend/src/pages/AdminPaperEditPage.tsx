@@ -1,12 +1,12 @@
 import { currentEvidenceField, evidenceIssuesForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
-import { materialStateFromDetail, candidateFromStructureModel } from '../lib/paperEditing'
+import { materialStateFromDetail, candidateFromStructureModel, remapScientificIdentities, type ScientificIdentityMap } from '../lib/paperEditing'
 import { applyEvidencePatches, type EvidencePatch } from '../lib/evidenceProposals'
 import EvidenceFieldMarkers from '../components/EvidenceFieldMarkers'
 import PaperMaterialsSection from '../components/PaperMaterialsSection'
 import { researchMaterials } from '../lib/paperMaterials'
 import { useEvidenceWorkflow } from '../components/EvidenceWorkflow'
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Alert, Autocomplete, Box, Button, Checkbox, Chip, CircularProgress, Container, FormControl, FormControlLabel, IconButton,
   InputLabel, MenuItem, Select, Snackbar, TextField, Typography,
@@ -81,6 +81,7 @@ const AdminPaperEditPage: React.FC = () => {
     saveCurrent: () => handleEditSave([], undefined, undefined, false),
   })
   const [editStructureCandidates, setEditStructureCandidates] = useState<StructureCandidate[]>([])
+  const scientificIdentityMap = useRef<ScientificIdentityMap>({})
   const [editSpaceGroups, setEditSpaceGroups] = useState<SpaceGroupOption[]>([])
   // 论文原本是否有科学数据：有才在保存时走科学数据段（契约 C4 第二步）
   const [editHadScientificData, setEditHadScientificData] = useState(false)
@@ -137,6 +138,7 @@ const AdminPaperEditPage: React.FC = () => {
   // 详情加载：论文级字段 + 科学数据转共享编辑器形态 + 已落库结构并入候选
   useEffect(() => {
     const loadDetail = async () => {
+      scientificIdentityMap.current = {}
       setEditLoading(true)
       try {
         const { detail, pendingValues } = await loadPaperReviewSource(paperId)
@@ -248,20 +250,27 @@ const AdminPaperEditPage: React.FC = () => {
       if (patches.length) { setEditForm(changed.paper); setEditListText({}) }
       if (editHadScientificData || changed.paper.material_families?.length || changed.material_states.length || editStructureCandidates.length) {
         try {
+          const identities = remapScientificIdentities(changed.material_states, editStructureCandidates, scientificIdentityMap.current)
           // 第二步：科学数据整体替换（Python，契约 C1）。
           // structure_candidates 只提交已确认候选：未确认（unreviewed）与已排除（excluded）
           // 的候选不落库，与上传链路「先确认后保存」的语义一致（契约 C1/C2）。
-          const response = await api.put<{ ok: boolean; data: { revision_bumped?: boolean } }>(
+          const response = await api.put<{ ok: boolean; data: ScientificIdentityMap & { revision_bumped?: boolean } }>(
             `/api/rag/papers/${paperId}/scientific-draft`,
             {
               paper_type: changed.paper.paper_type || '',
               superconductor_kind: changed.paper.superconductor_kind || 'unknown',
               material_families: changed.paper.material_families,
-              material_states: changed.material_states,
-              structure_candidates: editStructureCandidates.filter(candidate => candidate.confirmation === 'confirmed'),
+              material_states: identities.states,
+              structure_candidates: identities.candidates.filter(candidate => candidate.confirmation === 'confirmed'),
               history_operation_id: historyOperationId, evidence_preparation_id: preparationId,
             },
           )
+          scientificIdentityMap.current = {
+            structure_candidate_id_map: { ...scientificIdentityMap.current.structure_candidate_id_map, ...response?.data?.structure_candidate_id_map },
+            structure_key_map: { ...scientificIdentityMap.current.structure_key_map, ...response?.data?.structure_key_map },
+          }
+          setEditMaterialStates(current => remapScientificIdentities(current, [], scientificIdentityMap.current).states)
+          setEditStructureCandidates(current => remapScientificIdentities([], current, scientificIdentityMap.current).candidates)
           // 升版成功（T045）：论文已退回待审核，明确提示审核通过前不对外公开
           setSnackbar(response?.data?.revision_bumped
             ? t('admin.scientificSavedRevisionBumped')
@@ -275,7 +284,8 @@ const AdminPaperEditPage: React.FC = () => {
         setSnackbar(t('common.saved'))
       }
       if (patches.length) {
-        setEditForm(changed.paper); setEditMaterialFamilies(changed.paper.material_families); setEditMaterialStates(changed.material_states); setEditListText({})
+        setEditForm(changed.paper); setEditMaterialFamilies(changed.paper.material_families)
+        setEditMaterialStates(remapScientificIdentities(changed.material_states, [], scientificIdentityMap.current).states); setEditListText({})
       }
       if (!preparationId && refreshEvidence) await evidenceWorkflow.refreshAfterSave(revision)
       return true

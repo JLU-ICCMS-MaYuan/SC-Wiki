@@ -2,7 +2,7 @@
 
 **GitHub Issue**：[#76](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/76)
 
-**日期**：2026-09-01
+**日期**：2026-09-01；2026-09-19 补充 [#110](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/110) 保存保留与回归验收。
 
 **Spec**：[../spec.md](../spec.md)　**数据模型**：[../data-model.md](../data-model.md)
 
@@ -57,7 +57,9 @@
 | `structure_candidates` | `array` | 否 | 已确认的结构候选，形态同上传草稿 |
 | `paper_type` | `string` | 是 | 用于校验分支——非综述论文要求至少一个材料状态且每个状态有材料家族 |
 
-**语义**：整体替换而非增量更新。服务端删除该论文当前的全部科学实体后按请求体重建（[../data-model.md](../data-model.md) 的删除顺序）。
+**语义**：有实际变化时整体替换。服务端先快照既有结构和定义事件，再删除该论文当前科学实体并按请求体重建，最后恢复应保留的关联与审计链；全部处于同一事务（[../data-model.md](../data-model.md) 的删除顺序）。无变化请求直接返回 `unchanged: true`。
+
+上方示例保留最初的 `tc_results` / `properties` 兼容形态；当前编辑器使用 `property_modules[].records[]`，并提交论文级 `superconductor_kind`、`material_families`。#110 的保留与回滚验收使用当前形态。
 
 **为何是整体替换**：材料状态、Tc、物性、结构、上下文之间有多重外键与生成列约束，增量更新需为每种实体维护独立的匹配与差异计算逻辑；整体替换复用已验证的 `persist_scientific_draft`，语义简单且与提交链路产出一致（[../research.md](../research.md) R1）。
 
@@ -82,6 +84,9 @@
 | `review_status` | 保存后的审核状态 |
 | `revision_bumped` | 是否发生了升版；`true` 表示论文已从公开状态退回待审核 |
 | `material_state_count` | 重建后的材料状态数量 |
+| `unchanged` | 是否与当前科学数据相同；为 `true` 时不重建、不升版、不新增修改历史 |
+| `structure_candidate_id_map` | 实际重建时返回候选身份到新 `structure_<id>` 的映射，用于同页连续保存 |
+| `structure_key_map` | 实际重建时返回旧 `structure-<id>` 到新结构引用的映射；删除的结构映射为 `null` |
 
 前端据 `revision_bumped` 决定提示文案：`true` 时告知管理员论文已退回待审核并暂不公开。
 
@@ -104,12 +109,33 @@
 | 403 | — | 非管理员（`get_current_admin` 抛出） |
 | 404 | `paper_not_found` | 论文不存在 |
 | 409 | `paper_status_not_editable` | 论文为 `rejected` 状态 |
+| 409 | `structure_reference_stale` | 既有结构候选引用其他论文、旧结构身份或重复引用同一结构 |
 
 **校验错误的定位契约**：错误 message 保留「第 N 个材料状态」前缀，与上传校对页共用同一定位机制（`frontend/src/components/UploadTaskEditor.tsx:148` 的正则）。Issue #75 会把该文案的后半句改为「缺少化学式」，前缀不变。
 
 **事务性**：全部写入在单一事务内。任一步失败则论文的版本号、审核状态与科学数据完全保持保存前状态，且已批准论文仍然对外公开（FR-018、SC-006）。
 
-**幂等性**：不幂等。对已批准论文重复调用会连续升版（N → N+1 → N+2）。这是显式的管理员动作，符合预期；前端应在保存成功后关闭弹窗或刷新状态，避免误重复提交。
+**重复保存**：以当前详情或服务端返回的身份映射再次保存相同内容时，不重建、不升版、不重复写历史。`approved` 论文只有实际修改才升版并退回 `pending`。重放带旧结构 ID 的请求返回 409，前端应刷新或应用成功响应中的映射，不能沿用失效身份。结构删除参与无变化比较，不能因其余字段相同而漏保存。
+
+## 保存保留与回归验收（#110）
+
+- 既有 CIF/POSCAR 按真实格式传回；服务端将 POSCAR 转成校验用 CIF。预览生成的标准 CIF 仍可识别为同一未编辑结构，保存保留原格式、原文、计算方法、参数与来源。
+- 管理员科学保存和上传者返修共用 `scientific_graph_preservation.py`。按候选身份映射结构、父子关系和物性引用；旧 `state.structure` 仅在同状态、同原文及可写字段一致时保留。新附件即使文本相同，也不能冒用旧结构的来源。
+- 定义变更原事件完整归档到论文历史。`pending` 同版本且记录快照未变时，活动事件保留原 ID、前序事件关系并更新记录与结构引用；升版、记录编辑或删除后只保留历史，不恢复旧回滚资格。定义回滚额外比较完整当前快照，过期时返回 409 `definition_rollback_stale`。
+- Go 元数据保存与 Python 科学保存共用操作 ID；第二段补齐原定义事件与最终版本。服务端检查论文、操作者、事件类型和版本，拒绝借用其他操作的审计记录。
+- 前端成功后只同步结构身份，保留等待保存期间的后续输入、候选和删除选择。来源准备、权限和失败回滚规则保持有效。
+
+2026-09-19 提交前验证：
+
+| 验证范围 | 结果与证据 |
+| --- | --- |
+| Python 与真实存储 | `test_admin_scientific_preservation.py`、`test_paper_revisions.py`、`test_form_definitions.py`、`test_scientific_drafts.py`、`test_scientific_evidence.py` 共 69 项通过，无跳过；覆盖真实 HTTP/JWT、MySQL 事务、CIF/POSCAR、定义回滚、重排序、删除、旧身份、权限、无变化、升版及跨 Go 再审核 |
+| 前端 | `admin-scientific-preservation.test.tsx` 与 `admin-edit-page.test.tsx` 共 14 项通过，覆盖快速审核转换、同页连续保存及等待期间输入保留 |
+| Go 与构建 | `go test ./handlers -count=1` 及前端 `npm run build` 通过；显式连接隔离 MySQL 的 `TestCurrentMySQLQuickReview`、`TestCurrentMySQLPaperMetadata` 也通过，覆盖两种管理员角色 |
+
+数据库为新建本地 MySQL 8 隔离库 `scwiki_commit_test`，仅绑定 `127.0.0.1:3318`。从空库按 #90 真实迁移脚本完成切换后，显式升级到 `20260918_0108`。仓库既有两个迁移头导致 `upgrade head` 无法选择；本次未修改该迁移分支，也不将定向升级表述为全迁移链通过。无变化用例已修正为读取已持久化的同一材料家族，避免将新增家族误当作无变化。
+
+这些结果只证明本地修复与回归通过；没有回填业务数据、调用外部模型、推送或部署。
 
 ## C2：为论文补传结构附件
 

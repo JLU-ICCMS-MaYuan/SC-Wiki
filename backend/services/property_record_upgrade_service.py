@@ -6,13 +6,16 @@ from copy import deepcopy
 import hashlib
 from typing import Any
 
+from fastapi.encoders import jsonable_encoder
+
 from backend import models
 from backend.ingest.form_definitions import definition_checksum, definition_payload
 from backend.ingest.property_modules import canonical_json, record_checksum, validate_record, PropertyValidationError, PropertyIssue
 
 
 def record_snapshot(record: models.PropertyRecord) -> dict[str, Any]:
-    return {
+    # MySQL 数值列读取为 Decimal；审计 JSON 与 HTTP 预览必须使用同一可序列化快照。
+    return jsonable_encoder({
         "record_key": record.record_key, "module_code": record.module.module_code if record.module else None,
         "record_type": record.record_type, "property_code": record.property_code,
         "custom_property_key": record.custom_property_key, "definition_key": record.definition_key,
@@ -23,7 +26,7 @@ def record_snapshot(record: models.PropertyRecord) -> dict[str, Any]:
         "method_code": record.method_code, "method_raw": record.method_raw, "criterion_code": record.criterion_code,
         "criterion_raw": record.criterion_raw, "is_representative": record.is_representative,
         "structure_key": record.structure_key, "payload": deepcopy(record.payload_json or {}),
-    }
+    })
 
 
 def preview_upgrade(record: models.PropertyRecord, target: models.FormDefinition, payload: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -84,7 +87,8 @@ def apply_upgrade(db, record: models.PropertyRecord, target: models.FormDefiniti
 
 def rollback(db, record: models.PropertyRecord, event: models.PropertyRecordDefinitionEvent, actor_id: int, expected_checksum: str) -> models.PropertyRecordDefinitionEvent:
     latest = db.query(models.PropertyRecordDefinitionEvent).filter_by(record_id=record.id).order_by(models.PropertyRecordDefinitionEvent.id.desc()).first()
-    if record.record_checksum != expected_checksum or event.operation != "upgrade" or latest is None or latest.id != event.id:
+    if (record.record_checksum != expected_checksum or event.operation != "upgrade" or latest is None
+            or latest.id != event.id or record_snapshot(record) != event.after_snapshot):
         raise PropertyValidationError([PropertyIssue("record_checksum", "definition_rollback_stale", "记录或事件已过期")])
     snapshot = deepcopy(event.before_snapshot)
     source_definition = db.query(models.FormDefinition).filter_by(definition_key=snapshot["definition_key"], version=snapshot["definition_version"]).first()

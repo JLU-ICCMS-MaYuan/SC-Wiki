@@ -60,7 +60,8 @@ class UpgradeRollbackPayload(BaseModel):
 
 
 def _error(exc: PropertyValidationError) -> HTTPException:
-    return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=exc.as_dict())
+    code = status.HTTP_409_CONFLICT if any(issue.code == 'definition_rollback_stale' for issue in exc.issues) else status.HTTP_400_BAD_REQUEST
+    return HTTPException(status_code=code, detail=exc.as_dict())
 
 
 @router.get("")

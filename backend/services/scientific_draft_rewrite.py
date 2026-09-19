@@ -422,7 +422,9 @@ async def scientific_draft_matches_current_revision(
                 key=lambda item: str(item["module_key"]),
             )),
         })
-    return _sorted_snapshot(requested) == _sorted_snapshot(stored)
+    from backend.services.scientific_graph_preservation import structures_match_current
+    return (_sorted_snapshot(requested) == _sorted_snapshot(stored)
+            and await structures_match_current(session, paper, draft))
 
 
 async def delete_scientific_entities(session: AsyncSession, paper_id: int) -> None:

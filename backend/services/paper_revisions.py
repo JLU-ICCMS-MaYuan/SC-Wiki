@@ -12,6 +12,7 @@ from sqlalchemy import delete, select
 
 from backend import models
 from backend.ingest import property_evidence as ev, scientific_evidence as science
+from backend.services.scientific_graph_preservation import preserve_structure_metadata, snapshot_structures
 
 PAPER_FIELDS = (
     'title', 'doi', 'authors', 'journal', 'year', 'volume', 'issue_number', 'pages',
@@ -258,7 +259,7 @@ async def submit_draft(session, paper_id, user, payload):
             record = next(r for r in module['records'] if r['record_key'] == result['record_key'])
             record.pop('evidence', None)
             record['evidences'] = result['evidences']
-    old_structures = await session.run_sync(lambda s: [ev.row_dict(r) for r in rows(s, models.StructureModel, paper.id)])
+    old_structures = await snapshot_structures(session, paper.id)
     old_structure_evidence = [ev.row_dict(r) for r in (await session.scalars(select(models.StructureModelEvidence)
         .where(models.StructureModelEvidence.paper_id == paper.id))).all()]
     # 整体重建会删除记录级定义迁移事件；在论文历史中保存原始事件，包含被主动删除的记录。
@@ -307,49 +308,3 @@ async def submit_draft(session, paper_id, user, payload):
     await session.run_sync(lambda s: science.delete_target(s, 'revision', saved.revision_id))
     await session.flush()
     return dict(ok=True, paper_id=paper.id, content_revision=paper.content_revision, review_status='pending')
-
-
-async def preserve_structure_metadata(session, paper, draft, originals, evidence_links):
-    """现有结构重新入库后保留未编辑的物理元数据，并重新绑定结构引用。"""
-    from backend.ingest.scientific_drafts import _candidate_state_index, _candidate_conventional_representation
-    states = (await session.scalars(select(models.MaterialState).where(models.MaterialState.paper_id == paper.id).order_by(models.MaterialState.id))).all()
-    old_by_id = {f'structure_{s["id"]}': s for s in originals}
-    id_map, unchanged = {}, set()
-    used_ids = set()
-    for candidate in draft.get('structure_candidates') or []:
-        old = old_by_id.get(candidate.get('candidate_id'))
-        index = _candidate_state_index(candidate)
-        representation = _candidate_conventional_representation(candidate)
-        if not old or index is None or index >= len(states) or not representation or candidate.get('confirmation') != 'confirmed':
-            continue
-        new = await session.scalar(select(models.StructureModel).where(models.StructureModel.material_state_id == states[index].id,
-            models.StructureModel.structure_text == representation[0], models.StructureModel.id.not_in(used_ids)).order_by(models.StructureModel.id))
-        if new is not None:
-            used_ids.add(new.id)
-            id_map[old['id']] = new
-            original_text = old['structure_text']
-            if old['structure_format'].lower() != 'cif':
-                from backend.services.structure_candidates import read_atoms, export_representations
-                original_text = export_representations(read_atoms(old['structure_format'], original_text))['conventional']['cif']['text']
-            if original_text == new.structure_text:
-                unchanged.add(old['id'])
-                for key in ('structure_format', 'structure_text', 'structure_hash', 'space_group_symbol', 'space_group_number',
-                            'cell_parameters', 'volume_angstrom3', 'atom_count', 'geometry_method', 'nuclear_treatment',
-                            'exchange_correlation', 'calculation_code', 'method_parameters', 'source_locator'):
-                    setattr(new, key, old[key])
-    for old in originals:
-        if old['id'] in id_map and old['parent_structure_id'] in id_map:
-            id_map[old['id']].parent_structure_id = id_map[old['parent_structure_id']].id
-    for record in (await session.scalars(select(models.PropertyRecord).where(models.PropertyRecord.paper_id == paper.id))).all():
-        if record.structure_key and record.structure_key.startswith('structure-'):
-            target = id_map.get(int(record.structure_key.removeprefix('structure-'))) if record.structure_key.removeprefix('structure-').isdigit() else None
-            record.structure_key = f'structure-{target.id}' if target else None
-            from backend.ingest.property_modules import validate_record
-            module = await session.get(models.PropertyModule, record.module_id)
-            record.record_checksum = validate_record({**values(record),
-                'module_code': module.module_code, 'payload': record.payload_json or {}})['record_checksum']
-    for link in evidence_links:
-        if link['structure_id'] in unchanged:
-            session.add(models.StructureModelEvidence(structure_id=id_map[link['structure_id']].id,
-                paper_id=paper.id, paper_revision=paper.content_revision,
-                paper_evidence_id=link['paper_evidence_id'], evidence_role=link['evidence_role']))

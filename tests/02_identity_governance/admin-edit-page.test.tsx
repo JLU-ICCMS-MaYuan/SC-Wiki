@@ -150,6 +150,27 @@ const renderPage = () => render(
 )
 
 describe('Issue #78：管理端论文编辑独立页', () => {
+  it('科学重建后在同页继续保存使用最新结构身份', async () => {
+    const user = userEvent.setup()
+    const withLink = structuredClone(detailWithStructures)
+    Object.assign(withLink.material_states[0].property_modules[0].records[0], { structure_key: 'structure-1' })
+    const originalGet = mockedApi.get.getMockImplementation()!
+    mockedApi.get.mockImplementation(async (path: string) => path === '/api/admin/papers/88' ? withLink : originalGet(path))
+    mockedApi.put.mockImplementation(async path => path.includes('scientific-draft')
+      ? { ok: true, data: { structure_candidate_id_map: { structure_1: 'structure_21' }, structure_key_map: { 'structure-1': 'structure-21' } } }
+      : { ok: true })
+    renderPage()
+    await screen.findByRole('textbox', { name: '知识图谱标题 (knowledge_graph_title)' })
+    await user.click(screen.getByRole('button', { name: '保存修改' }))
+    await waitFor(() => expect(mockedApi.put.mock.calls.filter(([path]) => path.includes('scientific-draft'))).toHaveLength(1))
+    await screen.findByText('已保存')
+    await user.click(screen.getByRole('button', { name: '保存修改' }))
+    await waitFor(() => expect(mockedApi.put.mock.calls.filter(([path]) => path.includes('scientific-draft'))).toHaveLength(2))
+    const body = mockedApi.put.mock.calls.filter(([path]) => path.includes('scientific-draft'))[1][1] as any
+    expect(body.structure_candidates[0].candidate_id).toBe('structure_21')
+    expect(body.material_states[0].property_modules[0].records[0].structure_key).toBe('structure-21')
+  })
+
   it('渲染论文级字段（含 knowledge_graph_title）、材料状态区与审核区', async () => {
     const user = userEvent.setup()
     renderPage()

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
+from fastapi.encoders import jsonable_encoder
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
@@ -2077,7 +2078,7 @@ async def _structure_representations(
     try:
         atoms = read_atoms(str(structure.structure_format or "cif"), structure_text)
         representations = export_representations(atoms)
-        validation = validate_structure_text("cif", structure_text)
+        validation = validate_structure_text(str(structure.structure_format or "cif"), structure_text)
     except (StructureCandidateError, ValueError) as exc:
         raise _upload_error(400, "structure_representation_failed", str(exc)) from exc
 
@@ -2177,6 +2178,10 @@ async def _rewrite_paper_scientific_draft_in_tx(
         delete_scientific_entities,
         scientific_draft_matches_current_revision,
     )
+    from backend.services.scientific_graph_preservation import (
+        snapshot_rows, snapshot_structures, snapshot_records, prepare_existing_structure_candidates,
+        preserve_structure_metadata, restore_definition_events,
+    )
 
     paper_type = str(draft.get("paper_type") or "").strip()
     if paper_type not in PAPER_TYPES:
@@ -2215,6 +2220,8 @@ async def _rewrite_paper_scientific_draft_in_tx(
         "material_states": material_states,
         "structure_candidates": draft.get("structure_candidates") or [],
     }
+    old_structures = await snapshot_structures(session, paper.id)
+    prepare_existing_structure_candidates(full_draft, old_structures)
     _validate_draft(full_draft)
     if current_user.role not in {"admin", "superadmin"}:
         raise _upload_error(403, "admin_required", "需要管理员权限")
@@ -2242,6 +2249,9 @@ async def _rewrite_paper_scientific_draft_in_tx(
 
     bumped = paper.review_status == "approved"
     citation_extraction = await _reextract_main_pdf_references(session, paper) if bumped else None
+    old_structure_evidence = await snapshot_rows(session, models.StructureModelEvidence, paper.id)
+    definition_history = await snapshot_rows(session, models.PropertyRecordDefinitionEvent, paper.id)
+    old_records = await snapshot_records(session, paper.id) if definition_history else {}
     await delete_scientific_entities(session, paper.id)
     if bumped:
         await bump_paper_revision(session, paper)
@@ -2250,6 +2260,11 @@ async def _rewrite_paper_scientific_draft_in_tx(
     await save_paper_material_families(session, paper, full_draft["paper"]["material_families"])
     from backend.ingest.property_evidence import persist_existing_paper_targets
     await persist_existing_paper_targets(session, paper, targets)
+    candidate_id_map = {}
+    structure_id_map = await preserve_structure_metadata(session, paper, full_draft, old_structures, old_structure_evidence,
+                                                        candidate_id_map=candidate_id_map)
+    if not bumped:
+        await restore_definition_events(session, paper, definition_history, old_records, structure_id_map)
     if citation_extraction is not None:
         from backend.services.citation_graph import persist_reference_extraction
 
@@ -2264,6 +2279,7 @@ async def _rewrite_paper_scientific_draft_in_tx(
         actor_user_id=current_user.id,
         actor_username_snapshot=current_user.username,
         operation_id=history_operation_id,
+        classification_snapshot=jsonable_encoder({'previous_definition_events': definition_history}) if definition_history else None,
     )
 
     return {
@@ -2275,6 +2291,9 @@ async def _rewrite_paper_scientific_draft_in_tx(
             "revision_bumped": bumped,
             "material_state_count": len(full_draft["material_states"]),
             "unchanged": False,
+            "structure_candidate_id_map": candidate_id_map,
+            "structure_key_map": {f'structure-{s["id"]}': f'structure-{structure_id_map[s["id"]]}'
+                                  if s['id'] in structure_id_map else None for s in old_structures},
         },
     }
 

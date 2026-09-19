@@ -53,12 +53,40 @@ export const candidateFromStructureModel = (model: Record<string, any>, ref: str
     cell_parameters: model.cell_parameters || undefined,
   },
   representations: model.structure_text ? {
-    // Python 端只把惯用胞 CIF 作为规范表示落库（scientific_drafts.py），统一放 cif 槽位
-    conventional: { cif: { text: model.structure_text, available: true } },
+    // 既有 POSCAR 由服务端转换后校验，原文不能冒充 CIF。
+    conventional: { [String(model.structure_format || 'cif').toLowerCase()]: { text: model.structure_text, available: true } },
   } : undefined,
   sources: [{
     file_id: `structure_${model.id}`,
-    filename: model.source_locator || `structure_${model.id}.cif`,
+    filename: model.source_locator || `structure_${model.id}.${String(model.structure_format || 'cif').toLowerCase()}`,
     role: 'attachment',
   }],
 })
+
+export interface ScientificIdentityMap {
+  structure_candidate_id_map?: Record<string, string>
+  structure_key_map?: Record<string, string | null>
+}
+
+/** 只同步重建产生的身份，保留保存等待期间新增的值、候选及删除操作。 */
+export function remapScientificIdentities(states: DraftMaterialState[], candidates: StructureCandidate[], maps: ScientificIdentityMap) {
+  const resolve = (key: string, mapping: Record<string, string | null> = {}): string | null => {
+    const seen = new Set<string>()
+    let current: string | null = key
+    while (current && Object.hasOwn(mapping, current) && !seen.has(current)) {
+      seen.add(current)
+      current = mapping[current]
+    }
+    return current
+  }
+  return {
+    states: states.map(state => ({ ...state, property_modules: state.property_modules?.map(module => ({
+      ...module, records: module.records.map(record => ({ ...record,
+        structure_key: record.structure_key ? resolve(record.structure_key, maps.structure_key_map) : record.structure_key,
+      })),
+    })) })),
+    candidates: candidates.map(candidate => ({ ...candidate,
+      candidate_id: resolve(candidate.candidate_id, maps.structure_candidate_id_map) || candidate.candidate_id,
+    })),
+  }
+}

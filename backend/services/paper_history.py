@@ -51,9 +51,21 @@ async def append_paper_history_event(
 
     if operation_id:
         existing = await session.scalar(
-            select(PaperHistoryEvent.id).where(PaperHistoryEvent.operation_id == operation_id)
+            select(PaperHistoryEvent).where(PaperHistoryEvent.operation_id == operation_id)
         )
         if existing is not None:
+            # 两段保存共用操作 ID：第二段科学保存补齐第一段尚未持有的审计快照。
+            # 不覆盖已经记录的快照，也不允许其他论文或操作者借用此操作。
+            if (existing.paper_id != paper_id or existing.actor_user_id != actor_user_id
+                    or existing.event_type != event_type
+                    or paper_revision not in (existing.paper_revision, existing.paper_revision + 1)):
+                raise ValueError('历史操作已关联其他内容，不能覆盖审计快照')
+            existing.paper_revision = paper_revision
+            if classification_snapshot is not None:
+                if existing.classification_snapshot not in (None, classification_snapshot):
+                    raise ValueError('历史操作已有不同的审计快照')
+                existing.classification_snapshot = classification_snapshot
+            await session.flush()
             return False
 
     event = PaperHistoryEvent(
