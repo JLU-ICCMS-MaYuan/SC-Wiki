@@ -18,6 +18,7 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 
 | 大功能 | 职责 | 主要依赖 |
 | --- | --- | --- |
+| [部署技术分析](00_deploy_technical/README.md) | 当前 Docker 存储与开发部署边界，以及明确区分的服务器部署建议 | Docker Compose、本地运行脚本、持久化存储 |
 | [超导快讯与最新论文](news.md) | 官方来源每日采集、稳定标识去重、独立资讯列表与来源状态 | Python、独立 RQ 队列、Redis、MySQL、Go API |
 | [超导数据去中心化上传](01_Decentralized_Uploading_of_Superconductivity_Data/README.md) | PDF/TXT/MD 与结构附件的上传、五阶段 AI 解析、校对提交落库 | RQ Worker、Redis、LLM、MySQL、Qdrant |
 | [去中心化维护与验证](02_Decentralized_Maintenance_and_Verification/README.md) | 领域模型、迁移、导入导出、部署，论文审核、管理员审批、结构校验 | GORM、SQLAlchemy、Alembic、MySQL |
@@ -53,7 +54,7 @@ flowchart LR
 ## 当前边界
 
 - Docker 部署入口使用 Nginx 前端、Go API、Python RAG、上传 Worker、MySQL、Redis、Neo4j、Qdrant、GROBID 和迁移服务；本地直接运行 Python FastAPI 时只包含 Python 注册的接口。
-- 本地开发已移除 Docker 依赖：八个服务跑在宿主机，由 `make start` 编排，前端/Python/goserver 均支持热重载，数据存放仓库内 `.data/`。本地链路以 Vite 代理替代 Nginx；由于生产镜像会重新构建源码，本地改动不会因此丢失，但 nginx 特有的上传体积与缓冲配置、以及仅构建期生效的分包与预取优化在本地不成立，两条链路的行为差异见[部署与运行时](02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。使用说明见 `docs/local-dev.md`。
+- 本地应用和主要数据库运行在宿主机，由 `make start` 编排；GROBID 仍使用 Docker。前端/Python/goserver 和上传 Worker 支持代码变更重载，数据存放仓库内 `.data/`。本地链路以 Vite 代理替代 Nginx；由于生产镜像会重新构建源码，本地改动不会因此丢失，但 nginx 特有的上传体积与缓冲配置、以及仅构建期生效的分包与预取优化在本地不成立，两条链路的行为差异见[部署与运行时](02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。使用说明见 `docs/local-dev.md`。
 - `backend/main.py` 注册 Tc、结构、RAG、上传任务、证据核对、知识图谱、内部管理、表单定义与材料状态导出等 Python 路由；canonical `/api/upload-tasks` 和 `/api/rag/evidence` 由 Go 未匹配路由转发到 Python。邮箱验证、用户中心、公开资料与管理员治理由 Go 直接承载；图表组合导入/导出/复制/搜索等前端调用仍需按实际部署链路继续核验。
 - RAG 已从 Chroma 迁移到 Qdrant 封装，但部分兼容命名仍保留 `chroma` 字样。
 - RAG 结构化物性工具、材料详情、检索和统计统一读取当前已批准的 `property_records`；普通流式/非流式问答共用 Mentor。读取规则及外部索引边界见[混合检索](05_Retrieval-Augmented_AI_Question_Answering/hybrid-retrieval.md)。
@@ -71,3 +72,5 @@ flowchart LR
 [论文与记录审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 
 本目录只记录当前代码、配置和测试文件能够支持的已落地事实。未来方案位于 `future-plan/`，不作为当前能力依据。无法从当前实现确认的内容在相应文档中标记为“待核验”。
+
+按用户要求，[部署技术分析](00_deploy_technical/README.md) 同时讨论后续部署建议；其中建议与当前事实分开标明，不作为已实现能力或任务完成状态。

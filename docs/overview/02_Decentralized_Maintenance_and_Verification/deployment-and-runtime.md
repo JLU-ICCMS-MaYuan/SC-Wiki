@@ -4,21 +4,23 @@
 
 说明 SC-Wiki 的生产 Docker 部署与本地开发运行时两条链路：服务组成、配置入口、数据挂载和启动边界。本文不替代部署包中的数据导入操作说明。
 
+镜像积累原因、只读占用快照、清理边界和服务器开发建议见[部署技术分析](../00_deploy_technical/docker-storage-and-development.md)。
+
 ## 当前行为
 
 ### 生产：Docker Compose
 
-- 生产编排文件为 `docker/compose.yaml`，包含 frontend、goserver、python、worker、mysql、redis、neo4j、qdrant 和 grobid 服务；GROBID 通过 `/api/isalive` 健康检查后才允许 Python/Worker 启动。
+- 生产编排文件为 `docker/compose.yaml`，包含 frontend、goserver、python、migrate、worker、news-worker、news-scheduler、mysql、redis、neo4j、qdrant 和 grobid 共 12 个服务，使用 8 类镜像；Python API、迁移和三个后台任务服务共用 Python 镜像。GROBID 通过 `/api/isalive` 健康检查后才允许 Python/Worker 启动，应用启动还受迁移任务成功完成的约束。
 - frontend 使用 Nginx 提供前端静态资源并反向代理；Go 服务提供主要公开 API；未匹配的 Python 能力通过 Go 转发到 Python 服务。
 - Go 服务挂载 `graph.json`、`clean_results` 和持久化头像目录 `/data/avatars`；Python/Worker 服务挂载上传文件、富化结果和属性映射缓存，并通过 `GROBID_URL=http://grobid:8070` 调用引用解析服务。
-- MySQL、Redis、Neo4j、Qdrant 和 GROBID 使用 Docker volume 或数据目录持久化。服务通过 healthcheck 和 `depends_on` 控制启动顺序。
+- MySQL、Redis、Neo4j 使用命名卷，Qdrant 使用宿主机数据目录持久化；当前 GROBID 未配置持久化挂载。服务通过 healthcheck 和 `depends_on` 控制启动顺序。
 - 当前仓库只包含 `docker/compose.yaml`；源码构建可分别使用 `docker/*.Dockerfile`，不存在 `docker/compose.dev.yaml`。
 
 ### 本地开发：宿主机进程（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)）
 
 - 本地开发的应用服务运行在宿主机，由 `scripts/dev.sh` 编排，入口为 `Makefile`（`make start` / `stop` / `status` / `logs`）。GROBID 是唯一容器化例外，固定使用 `lfoppiano/grobid:0.8.1` 并仅绑定 `127.0.0.1:8070`，避免本地维护 Java 模型。
 - 请求链路为浏览器 → Vite 5173 →（`/api` 代理）→ goserver 8080 →（未匹配路由反代）→ uvicorn 8000。两段代理均为既有实现，本地化未修改 `backend/` 与 `goserver/` 源码。
-- 三个应用服务支持热重载：前端 Vite HMR、Python `uvicorn --reload`、goserver 由 `watchfiles` 触发重编译（增量约 1 秒）。Go 编译失败时保留旧进程继续服务。`rq worker` 无热重载，改队列任务代码须手动重启。
+- 前端 Vite HMR、Python `uvicorn --reload`、goserver 文件监听重编译和上传 Worker 的 `watchfiles` 包装支持代码变更重载。Go 编译失败时保留旧进程继续服务。资讯 Worker 和 Scheduler 无热重载包装，修改代码后须重启相应进程。
 - 四个基础服务来自本机安装而非容器：MySQL 8.4.2、Redis 8.10.1 与 Neo4j 所需的 OpenJDK 21 均来自 conda 环境 `sc-wiki`；Neo4j 5.26.29 与 Qdrant 1.19.0 为 `.local/` 下的独立安装。应用 Python 依赖也使用该环境。
 - MySQL 监听 3307 而非 3306：宿主机 3306 已被与本项目无关的系统级 MySQL 占用。
 - 全部数据存放于仓库内 `.data/`（四个数据库的数据目录、上传文件、解析产物、头像），运行时产物在 `.local/`（二进制、MySQL 配置、pid、日志）。两者均已 gitignore。
@@ -39,7 +41,7 @@
 
 1. `make setup` 一次性安装：在既有 conda 环境 `sc-wiki` 安装 MySQL、Redis、OpenJDK 与 Python 依赖，安装 Neo4j 与 Qdrant 到 `.local/`，下载 Go 工具链到 `~/.local/go`，并建立 `.data/` 目录骨架与 MySQL 配置。
 2. `make migrate` 从既有 Docker 卷迁移数据（仅首次）。原卷保持只读，不删除不修改。
-3. `make start` 启动全部服务，按依赖顺序逐个等待健康检查通过。命令幂等，已运行的服务会跳过。
+3. `make start` 启动全部服务，按依赖顺序逐个等待健康检查通过。已运行的服务会跳过；启动 Python 前会执行数据库迁移，因此必须先确认连接目标是本地开发库。
 4. 浏览器访问 `http://127.0.0.1:5173`。`make status` 查看各服务状态，`make logs S=<服务>` 跟踪日志。
 
 ### 本地改动如何进入 Docker 部署
