@@ -33,7 +33,7 @@
 本地进程（全部 conda / 二进制，无容器）
 ├─ mysqld        127.0.0.1:3307   sc-wiki-infra
 ├─ redis-server  127.0.0.1:6379   sc-wiki-infra
-├─ neo4j         127.0.0.1:7687   .local/neo4j + sc-wiki-infra 的 jdk21
+├─ neo4j         127.0.0.1:17687  .local/neo4j + sc-wiki-infra 的 jdk21
 ├─ qdrant        127.0.0.1:6333   .local/bin/qdrant
 ├─ uvicorn       127.0.0.1:8000   sc-wiki 环境，--reload
 ├─ rq worker                       sc-wiki 环境

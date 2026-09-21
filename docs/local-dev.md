@@ -58,7 +58,7 @@ sudo systemctl disable --now ufw
 | worker (rq) | — | conda `sc-wiki` | 无（改队列任务需 `make restart`） |
 | mysql | 127.0.0.1:**3307** | conda `sc-wiki` | — |
 | redis | 127.0.0.1:6379 | conda `sc-wiki` | — |
-| neo4j | bolt://127.0.0.1:7687 | `.local/neo4j` | — |
+| neo4j | bolt://127.0.0.1:17687 | `.local/neo4j` | — |
 | qdrant | 127.0.0.1:6333 | `.local/bin/qdrant` | — |
 | grobid | 127.0.0.1:8070 | `lfoppiano/grobid:0.8.1` 容器 | — |
 

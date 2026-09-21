@@ -55,6 +55,7 @@ setup_neo4j() {
     echo ""
     echo "# ── 本地开发覆盖（scripts/setup-local.sh 追加）──"
     echo "server.bolt.listen_address=127.0.0.1:$NEO4J_BOLT_PORT"
+    echo "server.bolt.advertised_address=127.0.0.1:$NEO4J_BOLT_PORT"
     echo "server.http.listen_address=127.0.0.1:$NEO4J_HTTP_PORT"
     # 独立 run 目录：Neo4j 自己也写 neo4j.pid，与 dev.sh 的包装进程 pid 文件同名，
     # 放在一起会让 Neo4j 读到包装进程的 pid 而误判"已在运行"并拒绝启动。

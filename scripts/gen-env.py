@@ -19,7 +19,7 @@ MYSQL_PORT = 3307
 HOST_REWRITES = {
     "mysql": f"127.0.0.1:{MYSQL_PORT}",
     "redis": "127.0.0.1:6379",
-    "neo4j": "127.0.0.1:7687",
+    "neo4j": "127.0.0.1:17687",
     "qdrant": "127.0.0.1",
 }
 
@@ -32,7 +32,7 @@ def rewrite(key: str, value: str) -> str:
     if key == "REDIS_URL":
         return re.sub(r"://[^/]+", "://127.0.0.1:6379", value)
     if key == "NEO4J_URI":
-        return "bolt://127.0.0.1:7687"
+        return "bolt://127.0.0.1:17687"
     if key == "QDRANT_HOST":
         return "127.0.0.1"
     if key == "PYTHON_BACKEND_URL":
@@ -45,7 +45,7 @@ def rewrite(key: str, value: str) -> str:
 # 本地环境必须存在、旧 .env 里可能缺失的项
 DEFAULTS = {
     "REDIS_URL": "redis://127.0.0.1:6379/0",
-    "NEO4J_URI": "bolt://127.0.0.1:7687",
+    "NEO4J_URI": "bolt://127.0.0.1:17687",
     "QDRANT_HOST": "127.0.0.1",
     "QDRANT_PORT": "6333",
     "SC_WIKI_DATA_DIR": str(DATA_DIR),
