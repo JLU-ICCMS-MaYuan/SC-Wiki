@@ -54,6 +54,7 @@ sc-wiki/
 | 应用文件 | `uploads`、`upload_PDFs`、`parsed_markdown`、`review_artifacts`、`clean_results`、`avatars` 及 `prop_name_ai_cache.json`；还须检查所有被引用文件是否属于已登记映射。 |
 | 模型运行配置 | 排除 `runtime/default_llm.json`；允许记录不含密钥的供应商、模型和 Base URL 元数据供目标重新配置。 |
 | 日志、PID、缓存、旧二进制、Conda 环境、node_modules | 不打包，目标按源码依赖重新安装。 |
+| `backups`、`tmp` | 历史 SQL 备份和测试临时文件不属于当前业务快照，明确排除；其他未知目录仍拒绝。 |
 
 不依赖 `.gitignore` 作为唯一过滤器。出现未知业务目录或根目录外的引用时列出路径并阻断，直到显式登记映射；不自动把整个外部目录复制进包。
 

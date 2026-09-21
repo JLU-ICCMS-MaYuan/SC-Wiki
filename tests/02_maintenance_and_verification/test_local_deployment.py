@@ -203,6 +203,67 @@ def test_deploy_port_check_still_rejects_foreign_grobid(monkeypatch, tmp_path):
         runtime.Runtime(tmp_path, tmp_path, {}).check_ports()
 
 
+def test_source_restart_does_not_inherit_unrelated_debug_mode(monkeypatch, tmp_path):
+    monkeypatch.setenv('DEBUG', 'release')
+    runtime = module('runtime')
+    assert runtime.Runtime(tmp_path, tmp_path, {}).env['DEBUG'] == 'false'
+    assert runtime.Runtime(tmp_path, tmp_path, {'DEBUG': 'true'}).env['DEBUG'] == 'true'
+
+
+def test_file_export_excludes_old_backups_and_scratch_but_rejects_unknown_data(tmp_path):
+    storage = module('storage')
+    source, target = tmp_path / 'source', tmp_path / 'target'
+    for folder in ('backups', 'tmp', 'uploads'):
+        (source / folder).mkdir(parents=True)
+        (source / folder / 'fixture.txt').write_text(folder)
+    storage.copy_files(source, target)
+    assert sorted(p.name for p in target.iterdir()) == ['uploads']
+    assert (target / 'uploads/fixture.txt').read_text() == 'uploads'
+    (source / 'unregistered-business').mkdir()
+    with pytest.raises(ValueError, match='未登记'):
+        storage.check_file_layout(source)
+
+
+@pytest.mark.parametrize('scheduler,enabled,workers,privileged,same_instance,error', [
+    ('ON', 0, 0, True, True, None),
+    ('ON', 1, 0, True, True, '启用事件'),
+    ('OFF', 1, 0, True, True, None),
+    ('OFF', 0, 1, True, True, '正在执行'),
+    ('ON', 0, 0, False, True, '全局 EVENT'),
+    ('ON', 0, 0, True, False, '同一 MySQL'),
+])
+def test_mysql_event_guard_checks_actual_risk(monkeypatch, scheduler, enabled, workers, privileged, same_instance, error):
+    storage = module('storage')
+    class Cursor:
+        def __init__(self, admin): self.admin = admin
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def execute(self, sql):
+            assert sql.startswith(('SELECT ', 'SHOW ')), '检查必须只读'
+            self.sql = sql
+        def fetchone(self):
+            if '@@server_uuid' in self.sql:
+                return ('source' if not self.admin or same_instance else 'other',)
+            if '@@event_scheduler' in self.sql: return (scheduler,)
+            if 'performance_schema.threads' in self.sql: return (workers,)
+            if 'information_schema.EVENTS' in self.sql: return (enabled,)
+            return (0,)
+        def fetchall(self):
+            assert self.sql == 'SHOW GRANTS'
+            return [('GRANT ALL PRIVILEGES ON *.* TO user',)] if privileged else [('GRANT EVENT ON project.* TO user',)]
+    class Connection:
+        def __init__(self, admin=False): self.admin = admin
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def cursor(self): return Cursor(self.admin)
+    monkeypatch.setattr(storage, 'mysql_connection', lambda url: Connection())
+    if error:
+        with pytest.raises(ValueError, match=error):
+            storage.check_mysql_export('unused', inspection_connection=lambda: Connection(True))
+    else:
+        storage.check_mysql_export('unused', inspection_connection=lambda: Connection(True))
+
+
 def test_archive_rejects_escape_links_and_duplicates_before_writing(tmp_path):
     bundle = module('bundle')
     for names in [['../escape'], ['/absolute'], ['sc-wiki/a', 'sc-wiki/a']]:
@@ -463,8 +524,12 @@ def test_mysql_native_dump_roundtrip_including_constraints_and_binary(tmp_path):
     output = tmp_path / 'dump.sql'
     with storage.mysql_connection(source) as conn, conn.cursor() as cursor:
         cursor.execute('SET GLOBAL event_scheduler=ON')
-        with pytest.raises(ValueError, match='事件调度器'):
+        # 调度 ON，但只有禁用事件，不应误拒绝。
+        storage.check_mysql_export(source)
+        cursor.execute('ALTER EVENT test_event ENABLE')
+        with pytest.raises(ValueError, match='启用事件'):
             storage.export_mysql(source, binary / 'mysqldump', output)
+        cursor.execute('ALTER EVENT test_event DISABLE')
         cursor.execute('SET GLOBAL event_scheduler=OFF')
     expected = storage.export_mysql(source, binary / 'mysqldump', output)
     storage.restore_mysql(target, binary / 'mysql', output)

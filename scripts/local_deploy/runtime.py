@@ -32,11 +32,21 @@ class Runtime:
         self.data = data or root / '.data'
         self.local = root / '.local'
         self.env = {**os.environ, **values, 'JAVA_HOME': str(prefix), 'PYTHONNOUSERSITE': '1',
+                    'DEBUG': values.get('DEBUG', 'false'),
                     'PATH': f'{prefix}/bin:{self.local}/go/bin:' + os.environ.get('PATH', ''),
                     'SCWIKI_DEPLOY_DATA_DIR': str(self.data)}
 
     def dev(self, action, *services):
         run(['bash', self.root / 'scripts/dev.sh', action, *services], cwd=self.root, env=self.env, timeout=900)
+
+    def mysql_inspection_connection(self):
+        """使用项目已有客户端配置，只供全实例事件元数据检查。"""
+        import pymysql
+        path = self.local / 'my.cnf'
+        if not path.is_file() or path.is_symlink():
+            raise ValueError('缺少项目 MySQL 客户端配置，无法完整检查事件')
+        return pymysql.connect(read_default_file=str(path), user='root',
+                               connect_timeout=10, read_timeout=30, autocommit=True)
 
     def check_ports(self, *, check_grobid=True):
         ports = {'mysql': (3307,), 'redis': (6379,), 'neo4j': (17687, 7474), 'qdrant': (6333, 6334),

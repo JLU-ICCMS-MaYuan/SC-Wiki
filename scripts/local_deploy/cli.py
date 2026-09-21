@@ -257,6 +257,8 @@ def pack(root: Path, args):
     runtime.check_ports(check_grobid=False)
     if any(runtime.owned_pid(name) is None for name in ('mysql', 'redis', 'neo4j', 'qdrant')):
         raise ValueError('打包需要确认四个基础服务均由当前项目运行')
+    storage.check_mysql_export(values['DATABASE_URL'], inspection_connection=runtime.mysql_inspection_connection)
+    storage.check_file_layout(Path(values['SC_WIKI_DATA_DIR']).resolve())
     destination = Path(args.output).expanduser().resolve() if args.output else root / 'dist' / f'sc-wiki-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{commit[:8]}.tar.gz'
     if destination.exists():
         raise ValueError('输出已存在，拒绝覆盖')
@@ -272,7 +274,8 @@ def pack(root: Path, args):
             source = Path(values['SC_WIKI_DATA_DIR']).resolve()
             mappings = storage.relocate_mysql(values['DATABASE_URL'], source, source, check_files=True)
             mappings += storage.relocate_files(source, source, source, check_files=True)
-            components['mysql'] = storage.export_mysql(values['DATABASE_URL'], prefix / 'bin/mysqldump', payload / 'mysql/business.sql')
+            components['mysql'] = storage.export_mysql(values['DATABASE_URL'], prefix / 'bin/mysqldump', payload / 'mysql/business.sql',
+                                                      inspection_connection=runtime.mysql_inspection_connection)
             components['redis'] = storage.export_redis(storage.redis_connection(values))
             # 校验草稿引用，不更改源数据。
             from .paths import relocate, references
@@ -297,6 +300,7 @@ def pack(root: Path, args):
             manifest = bundle.seal(stage, {'source_commit': commit, 'source_data_root': str(source),
                                           'services': environment.versions(root), 'components': components})
             bundle.verify(stage)
+            storage.check_mysql_export(values['DATABASE_URL'], inspection_connection=runtime.mysql_inspection_connection)
             bundle.publish(stage, destination)
         report(root, 'pack', '打包成功，源服务已恢复', path=str(destination), bundle_id=manifest['bundle_id'], source_commit=commit)
     return 0

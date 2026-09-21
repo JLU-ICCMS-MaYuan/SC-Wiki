@@ -164,17 +164,40 @@ def mysql_defaults(url: str):
         yield path
 
 
-def export_mysql(url: str, binary: Path, output: Path):
-    output.parent.mkdir(parents=True, exist_ok=True)
+def check_mysql_export(url: str, *, inspection_connection=None):
+    """只读确认完整事件可见性及实际写入风险，不修改调度开关。"""
     with mysql_connection(url) as connection, connection.cursor() as cursor:
-        cursor.execute('SELECT @@event_scheduler')
-        if str(cursor.fetchone()[0]).upper() == 'ON':
-            raise ValueError('MySQL 事件调度器仍可写入，拒绝一致性打包')
+        cursor.execute('SELECT @@server_uuid')
+        server_uuid = cursor.fetchone()[0]
         cursor.execute('SELECT COUNT(*) FROM information_schema.KEY_COLUMN_USAGE '
                        'WHERE TABLE_SCHEMA=DATABASE() AND REFERENCED_TABLE_SCHEMA IS NOT NULL '
                        'AND REFERENCED_TABLE_SCHEMA<>DATABASE()')
         if cursor.fetchone()[0]:
             raise ValueError('业务库存在跨库外键，不能独立迁移')
+    factory = inspection_connection or (lambda: mysql_connection(url))
+    with factory() as connection, connection.cursor() as cursor:
+        cursor.execute('SELECT @@server_uuid')
+        if cursor.fetchone()[0] != server_uuid:
+            raise ValueError('事件检查连接与业务库不是同一 MySQL 实例')
+        cursor.execute('SHOW GRANTS')
+        privileges = [row[0].split(' ON *.* ', 1)[0].removeprefix('GRANT ').split(', ')
+                      for row in cursor.fetchall() if ' ON *.* ' in row[0]]
+        if not any('ALL PRIVILEGES' in grant or 'EVENT' in grant for grant in privileges):
+            raise ValueError('事件检查需要全局 EVENT 可见权限，不能把不可见事件当作不存在')
+        cursor.execute('SELECT @@event_scheduler')
+        scheduler = str(cursor.fetchone()[0]).upper()
+        cursor.execute("SELECT COUNT(*) FROM information_schema.EVENTS WHERE STATUS='ENABLED'")
+        enabled = cursor.fetchone()[0]
+        cursor.execute("SELECT COUNT(*) FROM performance_schema.threads WHERE NAME='thread/sql/event_worker'")
+        if cursor.fetchone()[0]:
+            raise ValueError('MySQL 事件正在执行，请等待结束后再冻结')
+        if scheduler == 'ON' and enabled:
+            raise ValueError(f'MySQL 存在 {enabled} 个启用事件，无法保证冻结期间不写入；请先确认其计划')
+
+
+def export_mysql(url: str, binary: Path, output: Path, *, inspection_connection=None):
+    check_mysql_export(url, inspection_connection=inspection_connection)
+    output.parent.mkdir(parents=True, exist_ok=True)
     before = mysql_inventory(url)
     with mysql_defaults(url) as defaults, output.open('wb') as stream:
         result = subprocess.run([str(binary), f'--defaults-file={defaults}', '--single-transaction',
@@ -183,6 +206,7 @@ def export_mysql(url: str, binary: Path, output: Path):
                                 stdout=stream, stderr=subprocess.PIPE, timeout=1800)
         if result.returncode:
             raise ValueError('MySQL 导出失败；未发布迁移包')
+    check_mysql_export(url, inspection_connection=inspection_connection)
     if mysql_inventory(url) != before:
         raise ValueError('MySQL 导出期间发生写入，拒绝发布包')
     return before
@@ -280,11 +304,16 @@ def _relocate_mysql(url: str, source: Path, target: Path, *, check_files=False):
     return mappings
 
 
-def copy_files(source: Path, target: Path):
-    excluded = {'mysql', 'neo4j', 'redis', 'qdrant', 'runtime', '.deployment-owner.json'}
+def check_file_layout(source: Path):
+    # 历史 SQL 备份可能含旧凭据，测试临时文件也不属于当前业务快照。
+    excluded = {'mysql', 'neo4j', 'redis', 'qdrant', 'runtime', 'backups', 'tmp', '.deployment-owner.json'}
     unknown = {p.name for p in source.iterdir()} - set(FILE_DIRS) - set(FILE_NAMES) - excluded
     if unknown:
         raise ValueError('发现未登记的数据目录：' + ', '.join(sorted(unknown)))
+
+
+def copy_files(source: Path, target: Path):
+    check_file_layout(source)
     target.mkdir(parents=True, exist_ok=True)
     for name in (*FILE_DIRS, *FILE_NAMES):
         path = source / name
