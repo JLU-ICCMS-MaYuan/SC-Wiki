@@ -2,6 +2,17 @@
 
 **关联**：[Issue #112](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/112)、[Spec](spec.md)、[Tasks](tasks.md)
 
+## 本地部署命令更名（2026-09-21）
+
+按用户要求，当前入口由 `make locallydeploy` 改为 `make deploy`；保留内部
+`scripts/locallydeploy.sh`，部署行为、`BUNDLE` 和 `CHECK_ONLY` 参数不变。
+下文历史执行记录保留当时的命令名，不代表旧 Make 目标仍可使用。
+
+- 部署工具回归：32 项通过、4 项真实存储测试因未配置隔离实例而跳过。
+- `make -n deploy CHECK_ONLY=1`、Bash 语法和差异检查通过；Make 参数安全用例覆盖新入口。
+- 实际 `make deploy CHECK_ONLY=1` 已进入部署预检，因当前实例端口/回环监听配置与目标
+  部署契约不一致退出 2；未进行安装或数据恢复，不将此结果报告为完整部署成功。
+
 ## 验证环境与边界
 
 2026-09-21，在 Ubuntu 22.04.5 / WSL2、Linux x86_64 上验证。源码基于 `mayuan`，
@@ -55,7 +66,7 @@ PYTHONNOUSERSITE=1 /测试环境/envs/sc-wiki/bin/python \
 
 ## 尚未完成的验收
 
-- 无 Conda 的干净机器从 `make locallydeploy` 入口贯通完整自动安装。
+- 无 Conda 的干净机器从 `make deploy` 入口贯通完整自动安装。
 - 不同系统用户名、路径含空格的完整迁移，以及全部故障阶段的中断注入矩阵。
 - 完整真实业务样本中的审核历史、结构候选附件下载及所有指纹兼容性；当前人工样本与针对性回归不能替代全场景业务验收。
 - 外部模型、Embedding 和真实 SMTP 调用；部署报告始终单列未配置/未实际验收。

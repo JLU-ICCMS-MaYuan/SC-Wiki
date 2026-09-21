@@ -18,17 +18,17 @@ make pack OUTPUT="/目标目录/sc-wiki-backup.tar.gz"
 - 打包会短暂停止本项目应用写入并恢复原服务状态；检查到活动/排队作业或不可确认的外部写入时不发布包。首次使用的说明必须提示这一停写行为。
 - 成功输出包路径、源码提交、数据类别/数量、大小、校验文件以及目标端下一步；不打印连接串和密码。
 
-## `make locallydeploy`
+## `make deploy`
 
 ```bash
 # 在解压后的 sc-wiki/ 或源码根目录执行
-make locallydeploy
+make deploy
 
 # 可选：在与包内源码匹配的目录显式选择一个包
-make locallydeploy BUNDLE="/备份目录/sc-wiki-backup.tar.gz"
+make deploy BUNDLE="/备份目录/sc-wiki-backup.tar.gz"
 
 # 只检查，不安装、不创建配置、不启动服务
-make locallydeploy CHECK_ONLY=1
+make deploy CHECK_ONLY=1
 ```
 
 - 自动发现 `.deployment/manifest.json`，存在即进入恢复模式；损坏时失败。确实没有包才初始化空实例。
@@ -70,6 +70,6 @@ AI/Embedding：未配置，需要补充目标机器凭据
 
 - 不新增 HTTP API 或修改业务请求/响应类型。
 - `.env` 保留现有键名，新增本机部署记录而非复制环境变量到多个配置文件。
-- `make setup` 委托共享安装器；`make start` 在未初始化时输出 `make locallydeploy` 指引，不隐式导入数据。
+- `make setup` 委托共享安装器；`make start` 在未初始化时输出 `make deploy` 指引，不隐式导入数据。
 - 新记录只约束本 Feature 管理的实例。旧实例没有记录时继续既有启动路径；若要迁入便携实例，先打包到新目录恢复。
 - CLI 参数、包格式和部署记录版本分别校验，未知版本明确失败。

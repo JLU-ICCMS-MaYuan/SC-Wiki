@@ -40,7 +40,7 @@
 
 ### 本地开发
 
-1. 首次部署使用 `make locallydeploy`，寻找实际 Conda 前缀并复用兼容的 `sc-wiki`；缺失则创建，无 Conda 时安装项目私有 Miniforge。依赖版本和下载摘要由 `scripts/local-deploy-versions.json` 管理；Go、Neo4j 和 Qdrant 位于 `.local/`。`make setup` 委托同一安装器，仅准备依赖和配置。
+1. 首次部署使用 `make deploy`，寻找实际 Conda 前缀并复用兼容的 `sc-wiki`；缺失则创建，无 Conda 时安装项目私有 Miniforge。依赖版本和下载摘要由 `scripts/local-deploy-versions.json` 管理；Go、Neo4j 和 Qdrant 位于 `.local/`。`make setup` 委托同一安装器，仅准备依赖和配置。
 2. 无包时生成本机 `.env` 并初始化空库；解压包有 `.deployment/manifest.json` 时校验并恢复到临时目录，验证后提升为 `.data`。已有不属于该部署的数据会阻断，成功后的重跑不重复导入。`make migrate` 保留为旧 Docker 卷迁移入口。
 3. `make start` 启动全部服务，按依赖顺序等待健康检查。便携实例核验进程归属和真实 schema，只核验、不升级数据库；没有便携记录的旧实例保留原迁移启动路径。
 4. 浏览器访问 `http://127.0.0.1:5173`。`make status` 查看各服务状态，`make logs S=<服务>` 跟踪日志。

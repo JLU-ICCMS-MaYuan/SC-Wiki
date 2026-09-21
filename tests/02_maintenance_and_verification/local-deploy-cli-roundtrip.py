@@ -156,7 +156,7 @@ def main():
                        input='\0'.join(paths).encode(), check=True)
         run(['git', '-c', 'user.name=Portable fixture', '-c', 'user.email=fixture@example.test',
              'commit', '-qm', 'Isolated deployment fixture'], source, env)
-        run(['make', 'locallydeploy'], source, env)
+        run(['make', 'deploy'], source, env)
         paper_id = seed(source)
         values = config.read_config(source)
         # 新闻进程的首次运行可能尚在收尾；只等待自然结束，绝不清队列。
@@ -171,13 +171,13 @@ def main():
         stop(source, prefix)
         bundle.extract_archive(archive, workspace / 'target')
         dependencies(target, args.tools_from.resolve(), prefix)
-        run(['make', 'locallydeploy'], target, env)
+        run(['make', 'deploy'], target, env)
         verify(target, ports[5173], paper_id, values)
         original_config = (target / '.env').read_bytes()
-        run(['make', 'locallydeploy'], target, env)
+        run(['make', 'deploy'], target, env)
         assert (target / '.env').read_bytes() == original_config
         run(['bash', 'scripts/dev.sh', 'stop'], target, env)
-        run(['make', 'locallydeploy'], target, env)
+        run(['make', 'deploy'], target, env)
         verify(target, ports[5173], paper_id, values)
         print('PASS: 真实 CLI 打包、异目录恢复、账号/表单/附件/草稿/图/向量、重跑及停止后重启')
     finally:

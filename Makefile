@@ -1,5 +1,6 @@
 # SC-Wiki 本地开发。应用服务跑在宿主机；GROBID 使用仅绑定回环地址的容器。
 #
+#   make deploy    首次本地部署或恢复迁移包
 #   make setup     一次性安装（conda 环境、Neo4j、Qdrant、Go、Python 依赖）
 #   make migrate   从 Docker 卷迁移数据到 .data/
 #   make start     启动全部服务
@@ -7,12 +8,12 @@
 #   make status    查看状态
 #   make logs S=python   跟踪某服务日志
 
-.PHONY: setup locallydeploy pack migrate start stop restart status logs test test-go clean-docker
+.PHONY: setup deploy pack migrate start stop restart status logs test test-go clean-docker
 
 # 使用环境变量传参，避免路径被解释成 shell 语句。
 export OUTPUT BUNDLE CHECK_ONLY
 
-locallydeploy:
+deploy:
 	@bash scripts/locallydeploy.sh
 
 pack:

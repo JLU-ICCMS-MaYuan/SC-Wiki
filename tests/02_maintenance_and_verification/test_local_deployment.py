@@ -316,11 +316,12 @@ def test_cli_check_only_does_not_create_runtime_files(tmp_path):
     assert 'Traceback' not in result.stderr
 
 
-def test_make_entrypoints_do_not_interpolate_shell_arguments(tmp_path):
+@pytest.mark.parametrize(('target', 'parameter'), [('pack', 'OUTPUT'), ('deploy', 'BUNDLE')])
+def test_make_entrypoints_do_not_interpolate_shell_arguments(tmp_path, target, parameter):
     marker = tmp_path / 'injected'
-    result = subprocess.run(['make', '-n', 'pack', f'OUTPUT=x; touch {marker}'],
+    result = subprocess.run(['make', '-n', target, f'{parameter}=x; touch {marker}'],
                             cwd=ROOT, capture_output=True, text=True)
-    assert result.returncode == 0, 'make pack missing'
+    assert result.returncode == 0, f'make {target} missing'
     assert str(marker) not in result.stdout
     assert not marker.exists()
 

@@ -52,7 +52,7 @@ def parse_env(text: str) -> dict[str, str]:
 def read_config(root: Path) -> dict[str, str]:
     path = root / '.env'
     if not path.is_file() or path.is_symlink():
-        raise ValueError('缺少普通文件 .env，请先执行 make locallydeploy')
+        raise ValueError('缺少普通文件 .env，请先执行 make deploy')
     return parse_env(path.read_text(encoding='utf-8'))
 
 

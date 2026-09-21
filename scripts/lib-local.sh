@@ -63,7 +63,7 @@ die()   { printf '\033[0;31m  ✗\033[0m %s\n' "$*" >&2; exit 1; }
 # 不能只依赖 pydantic 的 env_file。
 load_env() {
   local f="$REPO_ROOT/.env"
-  [[ -f "$f" ]] || die "缺少 .env，请先执行 make locallydeploy"
+  [[ -f "$f" ]] || die "缺少 .env，请先执行 make deploy"
   local entries=() loader_pid
   mapfile -d '' -t entries < <(python3 "$REPO_ROOT/scripts/local_deploy/config.py" "$REPO_ROOT")
   loader_pid=$!

@@ -28,7 +28,7 @@
 - [ ] T008 [US1] 在 `scripts/local_deploy/environment.py`、`scripts/setup-local.sh` 实现固定依赖安装与校验、Python 关键模块导入、pip check、npm ci、Go 模块验证和 GROBID Docker 预检；旧 setup 委托共享安装逻辑。
 - [x] T009 [US1] 在 `backend/scripts/run_migrations.py` 实现显式空库初始化与便携实例只读 schema 核验；调整 `tests/02_maintenance_and_verification/test_fresh_mysql_schema.py` 的单头假设，并在真实空 MySQL 上执行全部受测 revision 和元素初始化。
 - [x] T010 [US1] 在 `scripts/local_deploy/cli.py`、`scripts/dev.sh`、`scripts/lib-local.sh` 实现统一环境路径、进程归属检查、便携实例启动路径和回环监听；未知端口占用不能当成本项目健康实例。
-- [x] T011 [US1] 在 `Makefile`、`scripts/locallydeploy.sh` 接入 locallydeploy、CHECK_ONLY 和稳定报告；缺初始化的 start/setup 错误改为新入口指引，报告空实例管理员创建方法。
+- [x] T011 [US1] 在 `Makefile`、`scripts/locallydeploy.sh` 接入 deploy、CHECK_ONLY 和稳定报告；缺初始化的 start/setup 错误改为新入口指引，报告空实例管理员创建方法。
 
 ## 阶段 4：US2——生成迁移包（P1）
 

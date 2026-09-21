@@ -4,14 +4,14 @@
 
 ## 本地部署与搬迁（#112）
 
-新机器或迁移包解压目录使用 `make locallydeploy`：自动寻找/创建 Conda `sc-wiki`、
+新机器或迁移包解压目录使用 `make deploy`：自动寻找/创建 Conda `sc-wiki`、
 安装依赖、生成本机 `.env`、初始化或恢复数据并启动。需要联网的 Linux x86_64 / WSL2
 Ubuntu，以及预先可用的 Docker 和系统基础工具。
-首次运行建议先执行 `make locallydeploy CHECK_ONLY=1`；Docker 缺失或不可用时，
+首次运行建议先执行 `make deploy CHECK_ONLY=1`；Docker 缺失或不可用时，
 按报告中的 `next_steps` 准备好 Docker，再重新预检。部署脚本不自动安装系统 Docker。
 
 源机器使用 `make pack OUTPUT="/备份目录/sc-wiki.tar.gz"` 打包已提交源码及业务数据库、
-草稿和附件；复制并解压到目标空目录，再执行 `make locallydeploy`。打包会短暂停止
+草稿和附件；复制并解压到目标空目录，再执行 `make deploy`。打包会短暂停止
 应用写入，目标拒绝覆盖已有数据；模型和邮件密钥在目标重新配置。
 
 详细步骤见[本地开发指南](docs/local-dev.md)，当前验证范围及待验收项见

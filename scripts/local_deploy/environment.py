@@ -22,11 +22,11 @@ def preflight_guidance(problems: list[str]) -> list[str]:
     """为可修复的前置失败提供不涉及凭据的下一步提示。"""
     guidance = []
     if '缺少系统前置工具 docker' in problems:
-        guidance.append('Docker 用于提取 Neo4j 安装文件和运行 GROBID；请按 https://docs.docker.com/engine/install/ 安装并启动 Docker，使用 docker info 验证后重跑 make locallydeploy CHECK_ONLY=1')
+        guidance.append('Docker 用于提取 Neo4j 安装文件和运行 GROBID；请按 https://docs.docker.com/engine/install/ 安装并启动 Docker，使用 docker info 验证后重跑 make deploy CHECK_ONLY=1')
     if 'Docker 未运行或当前用户无访问权限' in problems:
         guidance.append('请启动 Docker daemon，并确认当前用户有 Docker socket 权限；可先运行 docker info 验证')
     if any(problem.startswith('缺少系统前置工具 ') for problem in problems if problem != '缺少系统前置工具 docker'):
-        guidance.append('请先安装报告中缺少的系统工具，再重新运行 make locallydeploy CHECK_ONLY=1')
+        guidance.append('请先安装报告中缺少的系统工具，再重新运行 make deploy CHECK_ONLY=1')
     if any(problem.startswith('端口 ') for problem in problems):
         guidance.append('请用 ss -ltnp 确认端口占用者，确认可以停止对应服务后再处理冲突并重新预检')
     if '可用磁盘不足 8 GiB，无法准备依赖与临时数据' in problems:
@@ -97,7 +97,7 @@ def runtime_prefix(root: Path) -> Path:
         return prefix
     _, prefix = find_environment(root)
     if prefix is None:
-        raise ValueError('缺少 sc-wiki 环境，请执行 make locallydeploy')
+        raise ValueError('缺少 sc-wiki 环境，请执行 make deploy')
     return prefix
 
 

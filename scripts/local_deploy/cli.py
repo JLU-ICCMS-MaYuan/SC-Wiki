@@ -150,7 +150,7 @@ def deploy(root: Path, args):
         try:
             if args.setup_only:
                 state.save('configured')
-                report(root, 'setup', '依赖与配置已就绪', next_step='make locallydeploy')
+                report(root, 'setup', '依赖与配置已就绪', next_step='make deploy')
                 return 0
             if not state.promoted:
                 state.save('configured')

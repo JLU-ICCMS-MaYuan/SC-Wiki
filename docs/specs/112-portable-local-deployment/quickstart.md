@@ -17,8 +17,8 @@
 在包含已实现 #112 代码的干净源码目录执行：
 
 ```bash
-make locallydeploy CHECK_ONLY=1
-make locallydeploy
+make deploy CHECK_ONLY=1
+make deploy
 make status
 ```
 
@@ -48,8 +48,8 @@ sha256sum -c "/tmp/sc-wiki-migration.tar.gz.sha256"
 mkdir -p "$HOME/scwiki deployment test"
 tar -xzf "/tmp/sc-wiki-migration.tar.gz" -C "$HOME/scwiki deployment test"
 cd "$HOME/scwiki deployment test/sc-wiki"
-make locallydeploy CHECK_ONLY=1
-make locallydeploy
+make deploy CHECK_ONLY=1
+make deploy
 make status
 ```
 
