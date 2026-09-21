@@ -1,114 +1,82 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-env/
-venv/
-ENV/
-build/
-develop-eggs/
+# 目录：本地数据、运行环境与迁移包
+/.data/
+/.local/
+/.deployment/
 dist/
-downloads/
-eggs/
-.eggs/
-/lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
+
+# 目录：依赖、虚拟环境与 Python 缓存
+node_modules/
+.venv/
+venv/
+env/
+ENV/
+__pycache__/
+.pytest_cache/
 *.egg-info/
-.installed.cfg
-*.egg
-.agents/*
-!.agents/skills/
-.agents/skills/*
-!.agents/skills/big-project-overview-maintainer/
-!.agents/skills/big-project-overview-maintainer/**
-!.agents/skills/big-project-issue-manager/
-!.agents/skills/big-project-issue-manager/**
-!.agents/skills/big-project-spec-runner/
-!.agents/skills/big-project-spec-runner/**
-!.agents/skills/big-project-planer/
-!.agents/skills/big-project-planer/**
-!.agents/skills/big-project-contractor/
-!.agents/skills/big-project-contractor/**
-!.agents/skills/big-project-translator/
-!.agents/skills/big-project-translator/**
 
+# 目录：构建产物与前端缓存
+build/
+wheels/
+.vite/
+/frontend/static/
 
+# 目录：本地 Docker 部署副本和演示产物
+/docker/
+/demo/
 
-# IDE
+# 目录：编辑器、工作区与本地辅助工具
 .vscode/
 .idea/
-*.swp
-*.swo
-*~
-
-# 日志
-*.log
-.play*
-tests/web_test
-
-# 环境变量
-.env
-.env.local
-.env.issue73.local
-
-# 操作系统
-.DS_Store
-Thumbs.db
-
-# 临时文件
-bak
-tmp/
-temp/
-*.tmp
-frontend/node_modules/
-*:Zone.Identifier
-
-# 遗留代码
-legacy/
-
-#AI
-CLI_GUIDE.md
-INSTALL.md
-
-# 本地并行开发工作区
 /.worktree/
 .worktrees/
 .claude
+.superpowers/
+.play*
 
-# 数据库
-hydride_literature_image_ai.db
-.data/
-docs/local-mysql-import.md
+# 目录：临时数据
+tmp/
+temp/
 
-# 本地开发运行时（Neo4j/Qdrant 二进制、pid、日志、MySQL 配置）
-.local/
-.deployment/
+# 项目技能白名单：忽略本地 Agent 配置，仅保留以下共享技能
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/big-project-contractor/
+!.agents/skills/big-project-issue-manager/
+!.agents/skills/big-project-overview-maintainer/
+!.agents/skills/big-project-planer/
+!.agents/skills/big-project-spec-runner/
+!.agents/skills/big-project-translator/
 
-# React 构建产物
-/.vite/
-frontend/.vite/
-frontend_build/
-frontend/static/assets/
-frontend/*.tsbuildinfo
-frontend_old
+# 文件：私有环境配置；允许提交 .env.example 等模板
+.env
+.env.local
+.env.*.local
 
-# 测试截图 & 快照
+# 文件：Python 编译产物与分发包
+*.py[cod]
+*$py.class
+*.so
+*.egg
+
+# 文件：Go 二进制与 TypeScript 构建信息
+/goserver/goserver
+/frontend/*.tsbuildinfo
+
+# 文件：日志、编辑器备份与临时文件
+*.log
+*.swp
+*.swo
+*~
+*.tmp
+
+# 文件：图片和浏览器测试快照（沿用全仓 PNG 忽略规则）
 *.png
 *-snapshot.yml
 *-page.yml
 *-current.yml
-.superpowers/
-frontend/static/index.html
-node_modules/
-goserver/goserver
-frontend/static/
 
-# Docker 部署产物（大文件 + 冗余副本）
-/docker
-/demo/
+# 文件：操作系统元数据
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
