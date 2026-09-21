@@ -50,7 +50,7 @@
 状态显示“未检查”，不能据此推断需要创建环境。此阶段只输出报告，不创建配置或运行数据。
 Docker 仍是提取 Neo4j 安装文件和运行 GROBID 的前置条件，安装器不自动安装系统 Docker。
 
-`make pack` 以干净 HEAD 的源码和业务数据生成迁移包。外部凭据不进入包；源端停写后
+`make fronze` 以干净 HEAD 的源码和业务数据生成迁移包。外部凭据不进入包；源端停写后
 导出 MySQL、Neo4j、Qdrant 和 Redis 上传草稿，结束后恢复应用。Redis 草稿恢复会同步
 落盘，便携实例正常停止也会保存。实现已进入真实隔离验证，干净 Ubuntu 22.04
 和另一台机器的完整安装验收尚未完成，见 [#112 验证记录](../../specs/112-portable-local-deployment/validation.md)。

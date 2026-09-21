@@ -31,7 +31,7 @@ make status
 在隔离源实例导入测试数据，确认没有待执行、执行中或延迟重试作业；记录基准清单和运行服务。提交全部源码变更后执行：
 
 ```bash
-make pack OUTPUT="/tmp/sc-wiki-migration.tar.gz"
+make fronze OUTPUT="/tmp/sc-wiki-migration.tar.gz"
 sha256sum -c "/tmp/sc-wiki-migration.tar.gz.sha256"
 ```
 

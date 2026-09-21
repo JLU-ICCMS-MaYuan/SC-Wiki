@@ -6,7 +6,7 @@
 
 ## 快速开始
 
-首次在新机器部署，或恢复 `make pack` 生成的包：
+首次在新机器部署，或恢复 `make fronze` 生成的包：
 
 ```bash
 make deploy CHECK_ONLY=1  # 只检查前置条件，不写配置或数据
@@ -28,7 +28,7 @@ WSL2 也可使用开启对应发行版集成的 Docker Desktop。若报告 Docke
 源机器在源码已提交、后台任务结束后执行：
 
 ```bash
-make pack OUTPUT="/备份目录/sc-wiki.tar.gz"
+make fronze OUTPUT="/备份目录/sc-wiki.tar.gz"
 # 把压缩包和同名 .sha256 文件复制到新机器
 cd "/备份目录"
 sha256sum -c "sc-wiki.tar.gz.sha256"
