@@ -59,6 +59,15 @@ rag界面
 
 源码及隔离环境验收不表示现有数据库已经迁移或服务已经部署。操作路径、测试命令和验收边界见 [社区 Spec](docs/specs/106-community-discussion/spec.md) 与[验收记录](docs/specs/106-community-discussion/quickstart.md)。
 
+## 本地 Neo4j 连接（#113）
+
+本地开发的 Neo4j 使用 `bolt://127.0.0.1:17687`，管理界面仍为 `http://127.0.0.1:7474`。
+该调整用于避开 Windows 向日葵占用 7687 导致的 WSL 本地启动失败；Docker 生产端口不变。
+已有安装需要同时更新 `.env` 的 `NEO4J_URI` 与 `.local/neo4j/conf/neo4j.conf` 的
+`server.bolt.listen_address`、`server.bolt.advertised_address`，并让服务及客户端重新加载配置。
+本机已完成端口调整与连接验证，其他已有安装按[验证说明](docs/specs/113-local-neo4j-port/quickstart.md)核对。
+本地启动流程见[本地开发指南](docs/local-dev.md)。
+
 ## 自动资讯采集（Feature #63 / #88）
 
 `/news` 定时从 arXiv、Crossref、OpenAlex、Phys.org 和 Google News RSS 发现超导资讯，按类型筛选和分页；保留人工快讯与诺贝尔奖里程碑。APS、ACS、Nature、Science、NSR、CPL、CPB、Materials Today 当前经 Crossref DOI 前缀补充发现，页面保留聚合发现来源与出版商原文来源，不将其表述为出版社官方 API/RSS 直连。

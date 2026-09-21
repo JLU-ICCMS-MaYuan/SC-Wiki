@@ -23,6 +23,7 @@
 - 前端 Vite HMR、Python `uvicorn --reload`、goserver 文件监听重编译和上传 Worker 的 `watchfiles` 包装支持代码变更重载。Go 编译失败时保留旧进程继续服务。资讯 Worker 和 Scheduler 无热重载包装，修改代码后须重启相应进程。
 - 四个基础服务来自本机安装而非容器：MySQL 8.4.2、Redis 8.10.1 与 Neo4j 所需的 OpenJDK 21 均来自 conda 环境 `sc-wiki`；Neo4j 5.26.29 与 Qdrant 1.19.0 为 `.local/` 下的独立安装。应用 Python 依赖也使用该环境。
 - MySQL 监听 3307 而非 3306：宿主机 3306 已被与本项目无关的系统级 MySQL 占用。
+- 本地 Neo4j 的 Bolt 连接使用 `127.0.0.1:17687`，HTTP 管理入口保持 `127.0.0.1:7474`；客户端连接地址、监听地址与公布地址一致。该约定避开本机曾发生的 Windows 向日葵占用 7687 问题，不改变 Docker 生产端口。
 - 全部数据存放于仓库内 `.data/`（四个数据库的数据目录、上传文件、解析产物、头像），运行时产物在 `.local/`（二进制、MySQL 配置、pid、日志）。两者均已 gitignore。
 - `make start` 默认启动 `news-worker` 与 `news-scheduler`；两者分别消费资讯队列和检查资讯日程，Worker 在 Redis 连接异常后重建连接继续运行。
 - 测试可在宿主机直接运行（`scripts/run-tests.sh`，含 backend / go / frontend 三目标），不再需要挂载仓库的一次性容器。
@@ -43,6 +44,11 @@
 2. `make migrate` 从既有 Docker 卷迁移数据（仅首次）。原卷保持只读，不删除不修改。
 3. `make start` 启动全部服务，按依赖顺序逐个等待健康检查通过。已运行的服务会跳过；启动 Python 前会执行数据库迁移，因此必须先确认连接目标是本地开发库。
 4. 浏览器访问 `http://127.0.0.1:5173`。`make status` 查看各服务状态，`make logs S=<服务>` 跟踪日志。
+
+已有 Neo4j 安装切换到 17687 时，需要同步 `.env` 的 `NEO4J_URI` 与
+`.local/neo4j/conf/neo4j.conf` 中的 Bolt 监听、公布地址，并让服务及客户端重新加载配置。
+本次修复已直接同步现有本机配置，无需重新安装数据库。
+单服务启动和只读验证见 [#113 验证说明](../../specs/113-local-neo4j-port/quickstart.md)。
 
 ### 本地改动如何进入 Docker 部署
 
@@ -101,6 +107,7 @@
 
 - [Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)：本地化开发环境，移除 Docker 依赖（`docs/specs/71-local-dev-no-docker/`）
 - [Issue #89](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/89)：WSL mirrored 与宝塔防火墙的本地开发兼容性（[Spec](../../specs/89-local-dev-firewall-compatibility/spec.md)）
+- [Issue #113](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/113)：本地 Neo4j Bolt 端口调整为 17687（[Spec](../../specs/113-local-neo4j-port/spec.md)）
 
 ## 已知问题
 
