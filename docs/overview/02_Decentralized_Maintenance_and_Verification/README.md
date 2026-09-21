@@ -13,7 +13,7 @@
 | [数据库初始化与迁移](database-initialization-and-migrations.md) | 建表、填充周期表并执行版本迁移 | Alembic、Docker Compose、启动脚本 |
 | [数据导入与导出](data-import-and-export.md) | 离线交换用户、论文、记录和结构数据 | JSON、主业务数据库 |
 | [部署与运行时](deployment-and-runtime.md) | Docker 服务编排、配置和运行时边界 | Docker Compose、Nginx、Go、Python |
-| [论文与记录审核](literature-and-record-review.md) | 两工作台三状态审核、统一材料与紧凑可折叠结构、原位来源核对与人工裁决，以及超级管理员治理 | 分级权限、共享证据服务、论文与物性模型 |
+| [论文与记录审核](literature-and-record-review.md) | 两工作台三状态审核、科学保存的结构来源与审计保留、原位来源核对与人工裁决，以及超级管理员治理 | 分级权限、共享证据服务、论文与物性模型 |
 | [角色与管理员审批](roles-and-administrator-approval.md) | 用户中心、公开资料、管理员资格申请和账号治理 | 账户 API、超级管理员 API、审计模型 |
 | [格式校验与存储](format-validation-and-storage.md) | 解析结构文本、计算摘要并保存元数据 | pymatgen、结构模型 |
 
@@ -42,3 +42,5 @@
 材料名与化学式至少填写一项，只填材料名也能保存和人工确认。单独修改名称或条件不会被误判为同值；重建状态保留结构家族。改名使本状态相关核对失效，删除字段后移除该核对项。
 
 来源核对区分未核对与无出处；连续输入合并保存、失败暂停重试。管理员可逐条说明推理或专业判断理由完成确认，永久记录独立人工来源；上传者不具备管理员裁决权限。
+
+科学数据保存保留未修改结构的来源、计算元数据和父子关系，重映射物性结构引用；同版本且记录未改变时保留合法定义回滚链。编辑页使用保存返回的新身份继续保存，CIF/POSCAR 按实际格式处理。具体约束见[论文与记录审核](literature-and-record-review.md)。

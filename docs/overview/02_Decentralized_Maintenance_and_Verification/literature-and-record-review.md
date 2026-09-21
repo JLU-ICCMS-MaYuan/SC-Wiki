@@ -133,6 +133,11 @@
 
 ## 代码与测试
 
+- `backend/services/scientific_graph_preservation.py`、`backend/services/scientific_draft_rewrite.py`
+- `backend/services/paper_history.py`、`backend/services/property_record_upgrade_service.py`
+- `backend/api/rag.py`、`backend/api/form_definitions.py`、`frontend/src/lib/paperEditing.ts`
+- `backend/tests/test_admin_scientific_preservation.py`、`tests/02_identity_governance/admin-scientific-preservation.test.tsx`
+
 - `goserver/handlers/admin.go`
 - `goserver/handlers/paper_evidence.go`、`backend/api/evidence.py`、`backend/ingest/property_evidence.py`
 - `frontend/src/components/EvidenceWorkflow.tsx`
@@ -163,6 +168,8 @@
 - `tests/02_identity_governance/admin-workspace-cards.test.tsx`
 
 ## 相关变更记录
+
+- [Issue #110：科学保存保留结构来源、关联与定义审计历史](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/110)；[保存契约与回归验收](../../specs/76-review-scientific-data-editing/contracts/scientific-draft-api.md#保存保留与回归验收110)
 
 - [Epic #37：用户身份、账户安全与分级管理工作台](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/37)
 - [Issue #57：物性写入收敛为真实列，不再接受无对应列的字段](../../specs/57-paper-detail-data-parity/spec.md)
