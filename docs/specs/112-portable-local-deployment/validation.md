@@ -2,6 +2,29 @@
 
 **关联**：[Issue #112](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/112)、[Spec](spec.md)、[Tasks](tasks.md)
 
+## 当前机器本地依赖与存储验证（2026-09-21 晚间）
+
+本轮基于 `a8a69eb`，环境为 Ubuntu 26.04 x86_64。已在用户的 Conda 安装
+`/home/mayuan/soft/miniconda3` 下创建 `sc-wiki`，实际验证 Python 3.12.14、MySQL 8.4.2、
+Redis 8.10.1、Java 21.0.9、Node 22.21.1；安装 `docker/requirements.txt` 和 pytest，
+`PYTHONNOUSERSITE=1 python -m pip check` 通过。这里的 requirements 路径是依赖清单，
+不表示这些服务在 Docker 内运行。
+
+使用临时目录 `/tmp/scwiki-112-native-tests-fAFKzk` 中的独立 MySQL、Redis 宿主进程，
+动态分配回环端口，执行 `tests/02_maintenance_and_verification/test_local_deployment.py`：
+**43 项通过、1 项跳过**。真实验证包括空库全部迁移及元素种子、返修路径和指纹、
+MySQL 原生导出恢复/事件检查、Redis 草稿与凭据排除；Qdrant 无隔离实例故跳过。
+测试日志为该目录 `pytest.log`，结束后两个测试进程均已正常停止，人工数据保留供检查。
+
+当前报错原因已核验：Docker 服务为 active，系统组已包含 mayuan，但当前会话的附加组
+不包含 Docker socket 所属组，无法访问权限为 0660 的 socket。Docker Hub 连接仍超时；
+Qdrant 官方制品下载重试三次也超时，Neo4j 官方归档地址返回 403。
+
+用户强调 `make deploy` 应支持本机源码热更新。现有前端、Python、Go 已采用宿主热更新
+启动命令，但本机尚未完成整套服务启动及热更新实测。是否把 GROBID 容器和 Neo4j 镜像提取
+一起改为完全无 Docker 路径，尚待澄清；本次没有删除 Docker 检查，也未启动独立前端。
+上述存储测试不表示 `make deploy` 已修复或 Issue 已完成，原未完成验收保持未完成。
+
 ## 当前实例冻结检查修复（2026-09-21）
 
 本轮用户明确授权实际执行当前实例的 `make frozen`。首次真实执行触发旧事件检查后，
