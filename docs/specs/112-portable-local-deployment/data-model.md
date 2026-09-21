@@ -14,7 +14,7 @@ sc-wiki/
     ├── checksums.sha256
     ├── mysql/business.sql
     ├── neo4j/neo4j.dump
-    ├── qdrant/collections/ 与 aliases.json
+    ├── qdrant/inventory.json 与 <序号>.snapshot
     ├── redis/upload-drafts.json
     └── files/ 及 paths.json
 ```
@@ -28,17 +28,16 @@ sc-wiki/
 | 字段 | 含义与约束 |
 | --- | --- |
 | `format_version`、`bundle_id`、`created_at` | 格式版本、随机 UUID、UTC 导出时间；包标识不因复制而改变。 |
-| `source_commit`、`source_files` | 40 位 Git 提交及源码相对路径/大小/SHA-256；排除制品自身，防止递归散列。 |
-| `platform`、`services` | 支持平台、服务版本、使用的镜像摘要和依赖清单摘要，不保存源机器环境前缀。 |
-| `mysql` | 原业务库名、全部 revision 的有序集合、逐表行数、规范化 DDL 摘要、对象清单、dump 文件信息。 |
-| `neo4j` | 业务数据库名、版本、节点数、关系数、索引/约束定义摘要及 dump。 |
-| `qdrant` | 每集合名称、配置摘要、精确点数、快照文件及别名映射。 |
-| `redis` | 导出时刻、状态/草稿计数、原始业务索引关系和最早/最晚有效期统计。 |
-| `files`、`path_mappings` | 文件相对路径、大小、SHA-256，以及受支持字段的路径映射；不保存文件内容到清单。 |
-| `exclusions` | 已知被排除类别、数量和原因，如凭据配置、运行任务、过期草稿。未知必需数据不能列为排除后继续。 |
+| `source_commit`、`files` | 40 位 Git 提交；源码和 payload 共用相对路径/大小/SHA-256 清单，排除清单自身。 |
+| `services` | 版本清单全文，含支持平台、服务版本和镜像摘要，不保存源机器环境前缀。 |
+| `components.mysql` | 原业务库名、全部 revision、逐表行数、规范化 DDL 摘要及对象清单。 |
+| `components.neo4j` | 节点数、关系数、索引/约束定义；业务库固定为 neo4j。 |
+| `components.qdrant` | 每集合名称、配置、精确点数、快照文件及别名映射。 |
+| `components.redis` | 任务数量；导出时刻、每条状态/草稿及到期时刻位于 `redis/upload-drafts.json`。 |
+| `source_data_root`、`paths.json` | 原数据根及受支持字段的路径映射；不保存源凭据。 |
 | `capacity` | 文件与各组件恢复估算字节数，用于预检目标空间。 |
 
-每个 payload 文件必须出现在校验清单，清单不允许重复路径、绝对路径、`..`、设备文件或越界链接。组件状态是 `present` 或 `empty`；不可达和权限失败不是 `empty`。外部 SHA-256 用于传输完整性，不宣称提供发布者身份认证；只接受部署者信任的私有包。
+每个 payload 文件必须出现在校验清单，清单不允许重复路径、绝对路径、`..`、设备文件或链接。组件必须有明确清单，空组件以零计数/空集合表示；不可达和权限失败直接失败。外部 SHA-256 用于传输完整性，不宣称提供发布者身份认证；只接受部署者信任的私有包。
 
 ## 数据纳入规则
 
@@ -71,9 +70,14 @@ sc-wiki/
 
 MySQL 行数与结构摘要不受路径转换影响；内容一致性验证应对允许变更的路径字段做规范化，而不是要求原始 SQL 字节一致。
 
+返修并发基线包含 `PaperFile.stored_path`。目标临时库先确认哪些草稿在源路径下仍有效，
+然后转换路径并只更新这些草稿的 `base_fingerprint`；不更新本就陈旧的草稿，不改变科学
+核对指纹、审批或历史。这一恢复适配使用现有 `paper_revisions.fingerprint/assert_current`
+进行真实回归验证，详见 [Research](research.md#实现核验补充返修草稿的路径与冲突基线)。
+
 ## 本机部署记录
 
-路径为 `.local/deployment-state.json`，权限 0600。字段包含记录版本、操作 ID、包摘要/无包源码摘要、目标根、环境前缀、实际服务版本、阶段、各组件完成摘要和不含密钥的错误码。
+路径为 `.local/deployment-state.json`，权限 0600。字段包含记录版本、操作 ID、包标识/无包源码摘要、目标根、阶段和恢复草稿计数。环境前缀与实际 Conda 包版本独立保存在 `deployment-environment.json`；结果与错误码保存在 `deployment-report.json`。三者不含密钥。
 
 阶段按 `preflight → environment → configured → restoring/initializing → verified → promoted → started → complete` 顺序推进；错误记录 `failed_stage`，不覆盖最后成功阶段。临时目录带相同操作 ID，目录内的完成标记与记录共同判断归属。
 

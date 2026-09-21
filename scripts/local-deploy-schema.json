@@ -1,0 +1,3729 @@
+{
+  "schema_heads": [
+    "20260914_0052",
+    "20260918_0108"
+  ],
+  "tables": {
+    "admin_applications": {
+      "checks": [
+        "(statusin('pending','withdrawn','approved','rejected'))"
+      ],
+      "columns": {
+        "affiliation_snapshot": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "orcid_snapshot": {
+          "nullable": true,
+          "type": "varchar(19)"
+        },
+        "pending_guard": {
+          "nullable": true,
+          "type": "tinyint"
+        },
+        "real_name_snapshot": {
+          "nullable": false,
+          "type": "varchar(100)"
+        },
+        "rejection_reason": {
+          "nullable": true,
+          "type": "text"
+        },
+        "research_interests_snapshot": {
+          "nullable": true,
+          "type": "json"
+        },
+        "reviewed_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "reviewed_by_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "submitted_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "user_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "withdrawn_at": {
+          "nullable": true,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "reviewed_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "user_id",
+          "pending_guard"
+        ]
+      ]
+    },
+    "alembic_version": {
+      "checks": [],
+      "columns": {
+        "version_num": {
+          "nullable": false,
+          "type": "varchar(32)"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "version_num"
+      ],
+      "unique": []
+    },
+    "chart_group_items": {
+      "checks": [],
+      "columns": {
+        "custom_article_type": {
+          "nullable": true,
+          "type": "varchar(10)"
+        },
+        "custom_label": {
+          "nullable": true,
+          "type": "text"
+        },
+        "custom_pressure": {
+          "nullable": true,
+          "type": "float"
+        },
+        "custom_tc": {
+          "nullable": true,
+          "type": "float"
+        },
+        "custom_type": {
+          "nullable": true,
+          "type": "varchar(20)"
+        },
+        "custom_year": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "group_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "key_property_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "sort_order": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "group_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "chart_groups"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "chart_groups": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "created_by": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "description": {
+          "nullable": true,
+          "type": "text"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "is_preset": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "is_public": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "name": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "updated_at": {
+          "nullable": true,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "chemical_systems": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "element_count": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "elements_list": {
+          "nullable": false,
+          "type": "json"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "system_key": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "content_revision"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "paper_id",
+          "paper_revision"
+        ],
+        [
+          "paper_id",
+          "paper_revision",
+          "system_key"
+        ]
+      ]
+    },
+    "community_entries": {
+      "checks": [],
+      "columns": {
+        "activity_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "answer_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "author_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "body": {
+          "nullable": false,
+          "type": "mediumtext"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "kind": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "paper_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "parent_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "question_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "reply_to_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "system_key": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "title": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "answer_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "author_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "paper_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "papers"
+        },
+        {
+          "columns": [
+            "parent_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "question_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "reply_to_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "system_key"
+          ],
+          "references": [
+            "system_key"
+          ],
+          "table": "community_systems"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "community_moderation_events": {
+      "checks": [],
+      "columns": {
+        "action": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "actor_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "entry_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "reason": {
+          "nullable": false,
+          "type": "text"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "entry_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "community_notifications": {
+      "checks": [],
+      "columns": {
+        "actor_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "entry_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "kind": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "read_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "recipient_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "entry_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "recipient_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "community_reports": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "entry_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "reason": {
+          "nullable": false,
+          "type": "text"
+        },
+        "reporter_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "resolved_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(16)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "entry_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "reporter_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "entry_id",
+          "reporter_id"
+        ]
+      ]
+    },
+    "community_systems": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "system_key": {
+          "nullable": false,
+          "type": "varchar(100)"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "system_key"
+      ],
+      "unique": []
+    },
+    "community_votes": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "entry_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "user_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "entry_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "entry_id",
+        "user_id"
+      ],
+      "unique": []
+    },
+    "form_definitions": {
+      "checks": [
+        "(statusin('draft','published','retired'))",
+        "(target_kindin('property_module','property_record'))",
+        "(version>=1)"
+      ],
+      "columns": {
+        "checksum": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "core_schema": {
+          "nullable": false,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "created_by": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "definition_key": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "json_schema": {
+          "nullable": false,
+          "type": "json"
+        },
+        "method_code": {
+          "nullable": true,
+          "type": "varchar(64)"
+        },
+        "module_code": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "property_code": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "published_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "published_by": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "record_type": {
+          "nullable": true,
+          "type": "varchar(64)"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "target_kind": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "ui_schema": {
+          "nullable": false,
+          "type": "json"
+        },
+        "version": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "created_by"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "published_by"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "definition_key",
+          "version"
+        ]
+      ]
+    },
+    "material_families": {
+      "checks": [],
+      "columns": {
+        "code": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "created_by_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "name_en": {
+          "nullable": true,
+          "type": "varchar(160)"
+        },
+        "name_zh": {
+          "nullable": false,
+          "type": "varchar(100)"
+        },
+        "normalized_name": {
+          "nullable": false,
+          "type": "varchar(160)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "created_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "code"
+        ],
+        [
+          "name_zh"
+        ],
+        [
+          "normalized_name"
+        ]
+      ]
+    },
+    "material_family_aliases": {
+      "checks": [
+        "(languagein('zh','en','code','other'))"
+      ],
+      "columns": {
+        "alias": {
+          "nullable": false,
+          "type": "varchar(160)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "created_by_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "language": {
+          "nullable": false,
+          "type": "varchar(10)"
+        },
+        "material_family_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "normalized_alias": {
+          "nullable": false,
+          "type": "varchar(160)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "created_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "material_family_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "material_families"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "normalized_alias"
+        ]
+      ]
+    },
+    "material_state_structure_families": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "is_primary": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "material_state_id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "primary_marker": {
+          "nullable": true,
+          "type": "bigint"
+        },
+        "structure_family_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "material_state_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "material_states"
+        },
+        {
+          "columns": [
+            "structure_family_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "structure_families"
+        }
+      ],
+      "primary_key": [
+        "material_state_id",
+        "structure_family_id"
+      ],
+      "unique": [
+        [
+          "primary_marker"
+        ]
+      ]
+    },
+    "material_states": {
+      "checks": [
+        "(((pressure_value_gpaisnull)or(pressure_value_gpa>=0))and((pressure_min_gpaisnull)or(pressure_min_gpa>=0))and((temperature_value_kisnull)or(temperature_value_k>=0))and((magnetic_field_tisnull)or(magnetic_field_t>=0)))",
+        "((element_countisnull)or(element_countbetween1and118))",
+        "((pressure_min_gpaisnull)or(pressure_max_gpaisnull)or(pressure_min_gpa<=pressure_max_gpa))",
+        "((reported_space_group_numberisnull)or(reported_space_group_numberbetween1and230))",
+        "(crystal_systemin('triclinic','monoclinic','orthorhombic','tetragonal','trigonal','hexagonal','cubic','unknown'))",
+        "(material_dimensionalityin('zero_dimensional','one_dimensional','two_dimensional','three_dimensional','quasi_one_dimensional','quasi_two_dimensional','unknown'))",
+        "(state_kindin('theoretical','experimental','mixed','unknown'))"
+      ],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "crystal_system": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "element_count": {
+          "nullable": true,
+          "type": "smallint"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "magnetic_field_t": {
+          "nullable": true,
+          "type": "decimal(14, 6)"
+        },
+        "material_dimensionality": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "material_name": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "note": {
+          "nullable": true,
+          "type": "text"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "pressure_max_gpa": {
+          "nullable": true,
+          "type": "decimal(14, 6)"
+        },
+        "pressure_min_gpa": {
+          "nullable": true,
+          "type": "decimal(14, 6)"
+        },
+        "pressure_raw": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "pressure_unit_raw": {
+          "nullable": true,
+          "type": "varchar(50)"
+        },
+        "pressure_value_gpa": {
+          "nullable": true,
+          "type": "decimal(14, 6)"
+        },
+        "reported_space_group_number": {
+          "nullable": true,
+          "type": "smallint"
+        },
+        "reported_space_group_symbol": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "state_key": {
+          "nullable": false,
+          "type": "varchar(96)"
+        },
+        "state_kind": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "superconductor_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "temperature_raw": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "temperature_unit_raw": {
+          "nullable": true,
+          "type": "varchar(50)"
+        },
+        "temperature_value_k": {
+          "nullable": true,
+          "type": "decimal(14, 6)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "content_revision"
+          ],
+          "table": "papers"
+        },
+        {
+          "columns": [
+            "superconductor_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "superconductors"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "paper_id",
+          "paper_revision"
+        ],
+        [
+          "paper_id",
+          "paper_revision",
+          "state_key"
+        ]
+      ]
+    },
+    "news_feed_identities": {
+      "checks": [],
+      "columns": {
+        "item_id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "key": {
+          "nullable": false,
+          "type": "varchar(64)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "item_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "news_feed_items"
+        }
+      ],
+      "primary_key": [
+        "key"
+      ],
+      "unique": []
+    },
+    "news_feed_items": {
+      "checks": [],
+      "columns": {
+        "arxiv_id": {
+          "nullable": false,
+          "type": "varchar(100)"
+        },
+        "authors": {
+          "nullable": false,
+          "type": "text"
+        },
+        "content_type": {
+          "nullable": false,
+          "type": "varchar(24)"
+        },
+        "date_precision": {
+          "nullable": false,
+          "type": "varchar(10)"
+        },
+        "discovery_source": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "display_kind": {
+          "nullable": false,
+          "type": "varchar(24)"
+        },
+        "doi": {
+          "nullable": false,
+          "type": "varchar(500)"
+        },
+        "first_seen_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "journal": {
+          "nullable": false,
+          "type": "text"
+        },
+        "kind": {
+          "nullable": false,
+          "type": "varchar(24)"
+        },
+        "last_seen_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "links": {
+          "nullable": false,
+          "type": "text"
+        },
+        "original_source": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "published_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "relevance_evidence": {
+          "nullable": false,
+          "type": "varchar(500)"
+        },
+        "source": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "source_updated_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "summary": {
+          "nullable": false,
+          "type": "text"
+        },
+        "summary_source": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "title": {
+          "nullable": false,
+          "type": "text"
+        },
+        "url": {
+          "nullable": false,
+          "type": "text"
+        },
+        "version": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "news_feed_sources": {
+      "checks": [],
+      "columns": {
+        "accepted": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "error_code": {
+          "nullable": false,
+          "type": "varchar(40)"
+        },
+        "fetched": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "last_finished_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "last_started_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "last_success_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "source": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(16)"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "source"
+      ],
+      "unique": []
+    },
+    "news_items": {
+      "checks": [],
+      "columns": {
+        "event_date": {
+          "nullable": true,
+          "type": "varchar(20)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "link": {
+          "nullable": true,
+          "type": "varchar(1000)"
+        },
+        "summary": {
+          "nullable": true,
+          "type": "text"
+        },
+        "title": {
+          "nullable": false,
+          "type": "varchar(500)"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "paper_chunks": {
+      "checks": [
+        "(((page_startisnull)and(page_endisnull))or((page_startisnotnull)and(page_endisnotnull)and(page_start>=1)and(page_end>=page_start)))",
+        "((token_countisnull)or(token_count>=0))",
+        "(chunk_index>=0)"
+      ],
+      "columns": {
+        "chunk_index": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "content": {
+          "nullable": false,
+          "type": "longtext"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "heading": {
+          "nullable": true,
+          "type": "varchar(500)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "page_end": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "page_start": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "paper_file_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "section_name": {
+          "nullable": true,
+          "type": "varchar(500)"
+        },
+        "token_count": {
+          "nullable": true,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_file_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "paper_files"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "paper_id",
+          "paper_revision"
+        ],
+        [
+          "paper_file_id",
+          "chunk_index"
+        ]
+      ]
+    },
+    "paper_evidences": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "field_path": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "page_end": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "page_start": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "paper_chunk_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "quote": {
+          "nullable": false,
+          "type": "longtext"
+        },
+        "section": {
+          "nullable": true,
+          "type": "varchar(500)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_chunk_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "paper_chunks"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "paper_id",
+          "paper_revision"
+        ]
+      ]
+    },
+    "paper_files": {
+      "checks": [
+        "(rolein('main','supplementary','attachment'))",
+        "(size>=0)",
+        "(sort_order>=0)"
+      ],
+      "columns": {
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "main_marker": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "media_type": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "original_filename": {
+          "nullable": false,
+          "type": "varchar(500)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "role": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "sha256": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "size": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "sort_order": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "stored_path": {
+          "nullable": false,
+          "type": "varchar(500)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "content_revision"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "paper_id",
+          "paper_revision"
+        ],
+        [
+          "paper_id",
+          "main_marker"
+        ],
+        [
+          "paper_id",
+          "sort_order"
+        ],
+        [
+          "paper_id",
+          "stored_path"
+        ]
+      ]
+    },
+    "paper_graph_marks": {
+      "checks": [
+        "(mark_typein('origin','breakthrough'))"
+      ],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "created_by_user_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "mark_type": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "created_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "paper_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "paper_id",
+        "mark_type"
+      ],
+      "unique": []
+    },
+    "paper_history_events": {
+      "checks": [
+        "(((event_type='reviewed')and(review_statusin('approved','rejected','pending')))or((event_typein('uploaded','modified'))and(review_statusisnull)and(review_commentisnull)))",
+        "(paper_revision>=1)"
+      ],
+      "columns": {
+        "actor_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "actor_username_snapshot": {
+          "nullable": true,
+          "type": "varchar(32)"
+        },
+        "classification_snapshot": {
+          "nullable": true,
+          "type": "json"
+        },
+        "event_type": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "occurred_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "operation_id": {
+          "nullable": true,
+          "type": "varchar(64)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "review_comment": {
+          "nullable": true,
+          "type": "text"
+        },
+        "review_status": {
+          "nullable": true,
+          "type": "varchar(50)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "paper_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "operation_id"
+        ]
+      ]
+    },
+    "paper_material_families": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "material_family_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "material_family_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "material_families"
+        },
+        {
+          "columns": [
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "content_revision"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "paper_id",
+        "paper_revision",
+        "material_family_id"
+      ],
+      "unique": []
+    },
+    "paper_reference_extractions": {
+      "checks": [
+        "(statusin('succeeded','partial','failed','unavailable'))"
+      ],
+      "columns": {
+        "error_message": {
+          "nullable": true,
+          "type": "text"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "parser_name": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "parser_version": {
+          "nullable": true,
+          "type": "varchar(64)"
+        },
+        "processed_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(20)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "content_revision"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "paper_id",
+        "paper_revision"
+      ],
+      "unique": []
+    },
+    "paper_references": {
+      "checks": [
+        "(((match_status='matched')and(cited_paper_idisnotnull)and(match_methodisnotnull))or((match_statusin('unmatched','ambiguous'))and(cited_paper_idisnull)and(match_methodisnull)))",
+        "((match_methodisnull)or(match_methodin('doi','title_year','manual')))",
+        "(match_statusin('matched','unmatched','ambiguous'))",
+        "(reference_index>=0)"
+      ],
+      "columns": {
+        "authors": {
+          "nullable": true,
+          "type": "json"
+        },
+        "cited_paper_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "doi": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "match_checked_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "match_method": {
+          "nullable": true,
+          "type": "varchar(20)"
+        },
+        "match_status": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "normalized_title": {
+          "nullable": true,
+          "type": "varchar(512)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "raw_citation": {
+          "nullable": false,
+          "type": "longtext"
+        },
+        "reference_index": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "title": {
+          "nullable": true,
+          "type": "text"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "year": {
+          "nullable": true,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "cited_paper_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "papers"
+        },
+        {
+          "columns": [
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "content_revision"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "paper_id",
+          "paper_revision",
+          "reference_index"
+        ]
+      ]
+    },
+    "paper_revision_drafts": {
+      "checks": [],
+      "columns": {
+        "base_fingerprint": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "base_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "draft": {
+          "nullable": true,
+          "type": "json"
+        },
+        "draft_version": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "owner_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "revision_id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "submitted_revision": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "owner_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "paper_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "paper_id"
+      ],
+      "unique": [
+        [
+          "revision_id"
+        ]
+      ]
+    },
+    "papers": {
+      "checks": [
+        "((content_revision>=1)and(((review_status='approved')and(approved_revision=content_revision))or((review_statusin('pending','rejected'))and(approved_revisionisnull))))",
+        "(superconductor_kindin('conventional','unconventional','unknown'))"
+      ],
+      "columns": {
+        "abstract": {
+          "nullable": true,
+          "type": "text"
+        },
+        "admin_internal_note": {
+          "nullable": true,
+          "type": "text"
+        },
+        "approved_revision": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "authors": {
+          "nullable": true,
+          "type": "json"
+        },
+        "builds_on": {
+          "nullable": true,
+          "type": "json"
+        },
+        "content_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "doi": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "issue_number": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "journal": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "key_finding": {
+          "nullable": true,
+          "type": "text"
+        },
+        "keywords_tags": {
+          "nullable": true,
+          "type": "text"
+        },
+        "knowledge_graph_title": {
+          "nullable": true,
+          "type": "varchar(200)"
+        },
+        "material_relations": {
+          "nullable": true,
+          "type": "json"
+        },
+        "methodology": {
+          "nullable": true,
+          "type": "text"
+        },
+        "pages": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "paper_type": {
+          "nullable": true,
+          "type": "varchar(20)"
+        },
+        "research_materials": {
+          "nullable": true,
+          "type": "json"
+        },
+        "research_motivation": {
+          "nullable": true,
+          "type": "text"
+        },
+        "review_comment": {
+          "nullable": true,
+          "type": "text"
+        },
+        "review_status": {
+          "nullable": false,
+          "type": "varchar(50)"
+        },
+        "reviewed_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "reviewed_by_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "summary": {
+          "nullable": true,
+          "type": "text"
+        },
+        "superconductor_kind": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "theoretical_subtype": {
+          "nullable": true,
+          "type": "varchar(20)"
+        },
+        "title": {
+          "nullable": true,
+          "type": "text"
+        },
+        "updated_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "upload_task_id": {
+          "nullable": true,
+          "type": "varchar(32)"
+        },
+        "uploaded_by_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "volume": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "year": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "reviewed_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "uploaded_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "doi"
+        ],
+        [
+          "id",
+          "content_revision"
+        ],
+        [
+          "upload_task_id"
+        ]
+      ]
+    },
+    "periodic_table_elements": {
+      "checks": [],
+      "columns": {
+        "atomic_mass": {
+          "nullable": true,
+          "type": "float"
+        },
+        "atomic_number": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "category": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "chinese_name": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "english_name": {
+          "nullable": false,
+          "type": "varchar(100)"
+        },
+        "group_number": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "period_number": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "symbol": {
+          "nullable": false,
+          "type": "varchar(8)"
+        },
+        "updated_at": {
+          "nullable": true,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "atomic_number"
+        ],
+        [
+          "symbol"
+        ]
+      ]
+    },
+    "profile_change_audit_events": {
+      "checks": [
+        "(field_namein('real_name','affiliation'))"
+      ],
+      "columns": {
+        "changed_by_user_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "field_name": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "new_value": {
+          "nullable": true,
+          "type": "text"
+        },
+        "old_value": {
+          "nullable": true,
+          "type": "text"
+        },
+        "target_user_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "changed_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "target_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "property_definition_promotion_events": {
+      "checks": [],
+      "columns": {
+        "actor_user_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "operation_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "source_paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "source_paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "source_record_key": {
+          "nullable": false,
+          "type": "varchar(96)"
+        },
+        "source_snapshot": {
+          "nullable": false,
+          "type": "json"
+        },
+        "target_checksum": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "target_definition_key": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "target_definition_version": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "operation_id"
+        ],
+        [
+          "source_paper_id",
+          "source_paper_revision",
+          "source_record_key"
+        ]
+      ]
+    },
+    "property_definitions": {
+      "checks": [
+        "(lower(code)notin('tc','critical_temperature','experimental','anisotropic_eliashberg','isotropic_eliashberg','allen_dynes','mcmillan'))",
+        "(value_kindin('number','range','text','boolean'))"
+      ],
+      "columns": {
+        "canonical_unit": {
+          "nullable": true,
+          "type": "varchar(50)"
+        },
+        "code": {
+          "nullable": false,
+          "type": "varchar(100)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "description": {
+          "nullable": true,
+          "type": "text"
+        },
+        "display_name": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "is_active": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "value_kind": {
+          "nullable": false,
+          "type": "varchar(20)"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "code"
+        ]
+      ]
+    },
+    "property_evidence_checks": {
+      "checks": [
+        "(statusin('supported','uncertain','unsupported'))"
+      ],
+      "columns": {
+        "content_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "evidence_snapshot": {
+          "nullable": false,
+          "type": "json"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "model": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "reason": {
+          "nullable": false,
+          "type": "text"
+        },
+        "record_id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "rule_version": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "source_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(20)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "record_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "property_records"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "property_modules": {
+      "checks": [
+        "(display_order>=0)",
+        "(module_codein('superconductive_properties','dynamical_properties','thermodynamical_properties','electronic_properties'))"
+      ],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "definition_key": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "definition_version": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "display_order": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "material_state_id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "metadata_json": {
+          "nullable": false,
+          "type": "json"
+        },
+        "module_code": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "module_key": {
+          "nullable": false,
+          "type": "varchar(96)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "material_state_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "material_states"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "material_state_id",
+          "paper_id",
+          "paper_revision"
+        ],
+        [
+          "material_state_id",
+          "module_code"
+        ],
+        [
+          "material_state_id",
+          "module_key"
+        ]
+      ]
+    },
+    "property_record_definition_events": {
+      "checks": [],
+      "columns": {
+        "actor_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "after_snapshot": {
+          "nullable": false,
+          "type": "json"
+        },
+        "before_snapshot": {
+          "nullable": false,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "from_definition_key": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "from_definition_version": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "operation": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "previous_event_id": {
+          "nullable": true,
+          "type": "bigint"
+        },
+        "record_id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "record_key": {
+          "nullable": false,
+          "type": "varchar(96)"
+        },
+        "request_checksum": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "to_definition_key": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "to_definition_version": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "record_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "property_records"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "property_record_evidences": {
+      "checks": [],
+      "columns": {
+        "evidence_role": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "field_path": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "paper_evidence_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "record_id": {
+          "nullable": false,
+          "type": "bigint"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_evidence_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "paper_evidences"
+        },
+        {
+          "columns": [
+            "record_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "property_records"
+        }
+      ],
+      "primary_key": [
+        "record_id",
+        "paper_evidence_id"
+      ],
+      "unique": [
+        [
+          "record_id",
+          "paper_evidence_id"
+        ]
+      ]
+    },
+    "property_records": {
+      "checks": [
+        "(((property_code='custom')and(record_type='property')and(custom_property_keyisnotnull))or((property_code<>'custom')and(custom_property_keyisnull)))",
+        "(((record_type<>'predicted_tc')or((json_extract(payload_json,'$.calculation_conditions')isnotnull)and(json_extract(payload_json,'$.experimental_conditions')isnull)))and((record_type<>'measured_tc')or((json_extract(payload_json,'$.experimental_conditions')isnotnull)and(json_extract(payload_json,'$.calculation_conditions')isnull))))",
+        "(((value_kind<>'number')or(value_numberisnotnull))and((value_kind<>'range')or((value_minisnotnull)and(value_maxisnotnull)))and((value_kind<>'text')or(value_textisnotnull))and((value_kind<>'boolean')or(value_booleanisnotnull)))",
+        "(((value_minisnull)and(value_maxisnull))or((value_minisnotnull)and(value_maxisnotnull)and(value_min<=value_max)))",
+        "((record_typenotin('predicted_tc','measured_tc'))or((property_code='tc')and(method_codeisnotnull)))",
+        "((uncertaintyisnull)or(uncertainty>=0))",
+        "(record_typein('predicted_tc','measured_tc','property'))",
+        "(value_kindin('number','range','text','boolean'))"
+      ],
+      "columns": {
+        "canonical_unit": {
+          "nullable": true,
+          "type": "varchar(50)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "criterion_code": {
+          "nullable": true,
+          "type": "varchar(64)"
+        },
+        "criterion_raw": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "custom_property_key": {
+          "nullable": true,
+          "type": "varchar(96)"
+        },
+        "definition_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "definition_key": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "definition_version": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "is_representative": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "material_state_id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "method_code": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "method_raw": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "module_id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "name_raw": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "payload_json": {
+          "nullable": false,
+          "type": "json"
+        },
+        "property_code": {
+          "nullable": false,
+          "type": "varchar(100)"
+        },
+        "record_checksum": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "record_key": {
+          "nullable": false,
+          "type": "varchar(96)"
+        },
+        "record_type": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "source_fingerprint": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "structure_key": {
+          "nullable": true,
+          "type": "varchar(96)"
+        },
+        "uncertainty": {
+          "nullable": true,
+          "type": "decimal(30, 12)"
+        },
+        "unit_raw": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "value_boolean": {
+          "nullable": true,
+          "type": "tinyint"
+        },
+        "value_kind": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "value_max": {
+          "nullable": true,
+          "type": "decimal(30, 12)"
+        },
+        "value_min": {
+          "nullable": true,
+          "type": "decimal(30, 12)"
+        },
+        "value_number": {
+          "nullable": true,
+          "type": "decimal(30, 12)"
+        },
+        "value_raw": {
+          "nullable": false,
+          "type": "text"
+        },
+        "value_text": {
+          "nullable": true,
+          "type": "text"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "definition_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "form_definitions"
+        },
+        {
+          "columns": [
+            "module_id",
+            "material_state_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "material_state_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "property_modules"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "paper_id",
+          "paper_revision"
+        ],
+        [
+          "module_id",
+          "record_key"
+        ],
+        [
+          "paper_id",
+          "paper_revision",
+          "source_fingerprint"
+        ]
+      ]
+    },
+    "scientific_evidence_checks": {
+      "checks": [],
+      "columns": {
+        "actor_user_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "content_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "item_key": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "resolutions": {
+          "nullable": false,
+          "type": "json"
+        },
+        "result": {
+          "nullable": false,
+          "type": "json"
+        },
+        "rule_version": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "source_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "target": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "target_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "target",
+          "target_id",
+          "item_key",
+          "content_hash",
+          "source_hash",
+          "rule_version"
+        ]
+      ]
+    },
+    "scientific_evidence_sources": {
+      "checks": [],
+      "columns": {
+        "content_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "field_path": {
+          "nullable": false,
+          "type": "varchar(500)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "item_key": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "result": {
+          "nullable": false,
+          "type": "json"
+        },
+        "rule_version": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "source_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "paper_id",
+          "paper_revision",
+          "item_key"
+        ]
+      ]
+    },
+    "scientific_structure_origins": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "provenance": {
+          "nullable": false,
+          "type": "json"
+        },
+        "structure_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "target": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "target_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "target",
+          "target_id",
+          "structure_hash"
+        ]
+      ]
+    },
+    "scientific_upload_drafts": {
+      "checks": [],
+      "columns": {
+        "draft": {
+          "nullable": false,
+          "type": "json"
+        },
+        "owner_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "state": {
+          "nullable": false,
+          "type": "json"
+        },
+        "task_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "task_id"
+      ],
+      "unique": []
+    },
+    "structure_families": {
+      "checks": [],
+      "columns": {
+        "code": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "created_by_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "name_en": {
+          "nullable": true,
+          "type": "varchar(160)"
+        },
+        "name_zh": {
+          "nullable": false,
+          "type": "varchar(100)"
+        },
+        "normalized_name": {
+          "nullable": false,
+          "type": "varchar(160)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "created_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "code"
+        ],
+        [
+          "name_zh"
+        ],
+        [
+          "normalized_name"
+        ]
+      ]
+    },
+    "structure_family_aliases": {
+      "checks": [
+        "(languagein('zh','en','code','other'))"
+      ],
+      "columns": {
+        "alias": {
+          "nullable": false,
+          "type": "varchar(160)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "created_by_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "language": {
+          "nullable": false,
+          "type": "varchar(10)"
+        },
+        "normalized_alias": {
+          "nullable": false,
+          "type": "varchar(160)"
+        },
+        "structure_family_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "created_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "structure_family_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "structure_families"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "normalized_alias"
+        ]
+      ]
+    },
+    "structure_model_evidences": {
+      "checks": [],
+      "columns": {
+        "evidence_role": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "paper_evidence_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "structure_id": {
+          "nullable": false,
+          "type": "bigint"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_evidence_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "paper_evidences"
+        },
+        {
+          "columns": [
+            "structure_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "structure_models"
+        }
+      ],
+      "primary_key": [],
+      "unique": [
+        [
+          "structure_id",
+          "paper_evidence_id"
+        ]
+      ]
+    },
+    "structure_models": {
+      "checks": [
+        "((atom_countisnull)or(atom_count>=0))",
+        "((space_group_numberisnull)or(space_group_numberbetween1and230))",
+        "((volume_angstrom3isnull)or(volume_angstrom3>=0))",
+        "(nuclear_treatmentin('classical_static','harmonic','quasi_harmonic','anharmonic_classical','anharmonic_quantum','experimental','unknown'))"
+      ],
+      "columns": {
+        "atom_count": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "calculation_code": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "cell_parameters": {
+          "nullable": true,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "exchange_correlation": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "geometry_method": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "material_state_id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "method_parameters": {
+          "nullable": true,
+          "type": "json"
+        },
+        "nuclear_treatment": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "parent_structure_id": {
+          "nullable": true,
+          "type": "bigint"
+        },
+        "source_locator": {
+          "nullable": true,
+          "type": "varchar(500)"
+        },
+        "space_group_number": {
+          "nullable": true,
+          "type": "smallint"
+        },
+        "space_group_symbol": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "structure_format": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "structure_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "structure_text": {
+          "nullable": false,
+          "type": "longtext"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "volume_angstrom3": {
+          "nullable": true,
+          "type": "decimal(20, 8)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "material_state_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "material_states"
+        },
+        {
+          "columns": [
+            "parent_structure_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "structure_models"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "material_state_id",
+          "paper_id",
+          "paper_revision"
+        ],
+        [
+          "id",
+          "paper_id",
+          "paper_revision"
+        ]
+      ]
+    },
+    "superconductors": {
+      "checks": [],
+      "columns": {
+        "chemical_formula": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "chemical_system_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "composition": {
+          "nullable": false,
+          "type": "json"
+        },
+        "composition_key": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "display_name": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "element_ratio": {
+          "nullable": false,
+          "type": "json"
+        },
+        "elements_list": {
+          "nullable": false,
+          "type": "json"
+        },
+        "formula_normalized": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "isotope_signature": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "chemical_system_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "chemical_systems"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "paper_id",
+          "paper_revision"
+        ],
+        [
+          "paper_id",
+          "paper_revision",
+          "composition_key"
+        ]
+      ]
+    },
+    "user_governance_audit_events": {
+      "checks": [],
+      "columns": {
+        "actor_user_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "event_type": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "new_role": {
+          "nullable": true,
+          "type": "varchar(50)"
+        },
+        "new_status": {
+          "nullable": true,
+          "type": "varchar(20)"
+        },
+        "old_role": {
+          "nullable": true,
+          "type": "varchar(50)"
+        },
+        "old_status": {
+          "nullable": true,
+          "type": "varchar(20)"
+        },
+        "reason": {
+          "nullable": false,
+          "type": "text"
+        },
+        "target_user_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "target_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "username_change_audit_events": {
+      "checks": [],
+      "columns": {
+        "changed_by_user_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "new_username": {
+          "nullable": false,
+          "type": "varchar(32) collate \"ascii_bin\""
+        },
+        "old_username": {
+          "nullable": false,
+          "type": "varchar(32) collate \"ascii_bin\""
+        },
+        "reason": {
+          "nullable": false,
+          "type": "varchar(500)"
+        },
+        "target_user_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "changed_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "target_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
+    "users": {
+      "checks": [
+        "(account_statusin('active','banned','deactivated'))"
+      ],
+      "columns": {
+        "account_status": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "affiliation": {
+          "nullable": true,
+          "type": "varchar(255)"
+        },
+        "approved_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "approved_by_user_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "avatar_key": {
+          "nullable": true,
+          "type": "varchar(500)"
+        },
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "email": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "is_approved": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "is_email_verified": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "orcid": {
+          "nullable": true,
+          "type": "varchar(19)"
+        },
+        "password_hash": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "real_name": {
+          "nullable": false,
+          "type": "varchar(100)"
+        },
+        "research_interests": {
+          "nullable": true,
+          "type": "json"
+        },
+        "role": {
+          "nullable": false,
+          "type": "varchar(50)"
+        },
+        "session_version": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "updated_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "username": {
+          "nullable": false,
+          "type": "varchar(32) collate \"ascii_bin\""
+        },
+        "username_change_allowed": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "verification_code": {
+          "nullable": true,
+          "type": "varchar(16)"
+        },
+        "verification_expires": {
+          "nullable": true,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "approved_by_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "email"
+        ],
+        [
+          "orcid"
+        ],
+        [
+          "username"
+        ]
+      ]
+    }
+  }
+}

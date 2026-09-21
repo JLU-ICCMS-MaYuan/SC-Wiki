@@ -202,7 +202,7 @@ func main() {
 
 	// 8. 启动
 	log.Printf("Go server starting on :%s (Python backend: 8000)", cfg.Port)
-	r.Run(":" + cfg.Port) // 默认监听 0.0.0.0:8080
+	r.Run(os.Getenv("BIND_HOST") + ":" + cfg.Port) // 本地部署可限制到回环地址，未配置时沿用原监听行为。
 }
 
 // registerAdminRoutes 保持管理员路由集中注册，使路由冲突可在无需启动数据库的测试中覆盖。

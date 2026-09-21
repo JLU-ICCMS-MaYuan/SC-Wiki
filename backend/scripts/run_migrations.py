@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import os
+import argparse
+from pathlib import Path
 
 from alembic import command
 from alembic.config import Config
@@ -14,9 +16,19 @@ ISSUE90_SAFE_HEAD = "issue90_copy_v1"
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument('--fresh-local', action='store_true', help='仅对全新空本地库执行完整部署迁移')
+    modes.add_argument('--verify-local', action='store_true', help='只核验便携部署 schema，不执行迁移')
+    args = parser.parse_args()
     database_url = os.environ.get("DATABASE_URL")
     if not database_url:
         raise RuntimeError("DATABASE_URL 环境变量未设置")
+    if args.fresh_local or args.verify_local:
+        from scripts.local_deploy.schema import initialize, verify_schema
+        root = Path(__file__).resolve().parents[2]
+        (initialize if args.fresh_local else verify_schema)(root, database_url)
+        return
 
     engine = create_engine(database_url, pool_pre_ping=True)
     try:

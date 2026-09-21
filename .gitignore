@@ -88,6 +88,7 @@ docs/local-mysql-import.md
 
 # 本地开发运行时（Neo4j/Qdrant 二进制、pid、日志、MySQL 配置）
 .local/
+.deployment/
 
 # React 构建产物
 /.vite/

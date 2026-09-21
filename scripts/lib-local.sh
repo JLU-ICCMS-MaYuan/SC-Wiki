@@ -13,7 +13,8 @@ LOG_DIR="$LOCAL_DIR/log"
 
 # ── conda 环境 ──────────────────────────────────────────────
 CONDA_ROOT="${CONDA_ROOT:-$HOME/miniconda3}"
-SC_WIKI_ENV="$CONDA_ROOT/envs/sc-wiki"  # 应用与本地基础服务共用环境
+# 便携部署保存实际环境前缀；旧实例也通过 Conda 的 JSON 清单定位。
+SC_WIKI_ENV="$(cd "$REPO_ROOT" && python3 -m scripts.local_deploy.environment "$REPO_ROOT")"
 PY_BIN="$SC_WIKI_ENV/bin"
 INFRA_BIN="$SC_WIKI_ENV/bin"
 INFRA_ENV="$SC_WIKI_ENV"
@@ -22,6 +23,7 @@ INFRA_ENV="$SC_WIKI_ENV"
 NEO4J_HOME="$LOCAL_DIR/neo4j"
 QDRANT_BIN="$LOCAL_DIR/bin/qdrant"
 GO_ROOT="$HOME/.local/go"
+[[ -x "$LOCAL_DIR/go/bin/go" ]] && GO_ROOT="$LOCAL_DIR/go"
 GO_BIN="$GO_ROOT/bin/go"
 GOSERVER_BIN="$LOCAL_DIR/bin/goserver"
 
@@ -61,11 +63,22 @@ die()   { printf '\033[0;31m  ✗\033[0m %s\n' "$*" >&2; exit 1; }
 # 不能只依赖 pydantic 的 env_file。
 load_env() {
   local f="$REPO_ROOT/.env"
-  [[ -f "$f" ]] || die "缺少 $f，请先执行 scripts/setup-local.sh"
-  set -a
-  # shellcheck disable=SC1090
-  . "$f"
-  set +a
+  [[ -f "$f" ]] || die "缺少 .env，请先执行 make locallydeploy"
+  local entries=() loader_pid
+  mapfile -d '' -t entries < <(python3 "$REPO_ROOT/scripts/local_deploy/config.py" "$REPO_ROOT")
+  loader_pid=$!
+  wait "$loader_pid" || die ".env 格式无效"
+  if (( ${#entries[@]} )); then export "${entries[@]}"; fi
+  export PATH="$PY_BIN:$GO_ROOT/bin:$PATH"
+  export PYTHONNOUSERSITE=1
+  if [[ -n ${SCWIKI_DEPLOY_DATA_DIR:-} ]]; then
+    DATA_DIR="$SCWIKI_DEPLOY_DATA_DIR"
+    export SC_WIKI_DATA_DIR="$DATA_DIR" AVATAR_DIR="$DATA_DIR/avatars"
+  fi
+  if [[ -f "$LOCAL_DIR/deployment-state.json" ]]; then
+    GROBID_IMAGE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["grobid"]["image"])' "$REPO_ROOT/scripts/local-deploy-versions.json")"
+    GROBID_CONTAINER="scwiki-grobid-$(printf '%s' "$REPO_ROOT" | sha256sum | cut -c1-12)"
+  fi
 }
 
 # 端口是否已被监听

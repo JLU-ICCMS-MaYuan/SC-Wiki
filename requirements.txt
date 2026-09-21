@@ -12,7 +12,7 @@ jinja2>=3.1
 # ── 数据库 ──────────────────────────────────────────────────
 SQLAlchemy==2.0.52
 alembic>=1.13
-PyMySQL==1.2.0        # MySQL (生产 sync)
+PyMySQL[rsa]==1.2.0   # MySQL 8 caching_sha2_password 认证需要 RSA 支持
 asyncmy>=0.2           # MySQL (异步，RAG)
 aiosqlite>=0.20        # SQLite (开发)
 

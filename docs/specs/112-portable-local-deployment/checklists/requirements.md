@@ -28,7 +28,7 @@
 
 - [x] CHK013 每个 FR、SC 都映射到设计和实施/验证任务。[Plan 映射；Tasks 需求覆盖]
 - [x] CHK014 无新增 Web API 或业务数据表；CLI 与包格式有契约。[contracts/cli.md；data-model.md]
-- [x] CHK015 Quickstart 明确为待实现验收步骤，未把规划写入当前功能 Overview。[范围外事项；SC-006]
+- [x] CHK015 Quickstart 区分完整验收要求与实际证据，Overview 不把尚未验证的跨机器安装写成完成。[范围外事项；SC-006]
 - [x] CHK016 独立 Feature、#71 关系、文档影响及关闭条件明确。[Issue #112；Tasks T024–T025]
 - [x] CHK017 全部实施任务仍未勾选；真实干净机器演练不能由 mock 或语法检查代替。[FR-017；Quickstart]
 

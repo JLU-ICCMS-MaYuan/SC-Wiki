@@ -7,7 +7,16 @@
 #   make status    查看状态
 #   make logs S=python   跟踪某服务日志
 
-.PHONY: setup migrate start stop restart status logs test test-go clean-docker
+.PHONY: setup locallydeploy pack migrate start stop restart status logs test test-go clean-docker
+
+# 使用环境变量传参，避免路径被解释成 shell 语句。
+export OUTPUT BUNDLE CHECK_ONLY
+
+locallydeploy:
+	@bash scripts/locallydeploy.sh
+
+pack:
+	@bash scripts/pack.sh
 
 setup:
 	@bash scripts/setup-local.sh

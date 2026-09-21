@@ -1,0 +1,25 @@
+{
+  "format_version": 1,
+  "platform": "linux-x86_64",
+  "python": "3.12",
+  "conda_packages": ["python=3.12", "pip", "mysql-server=8.4.2", "mysql-client=8.4.2", "redis-server=8.10.1", "openjdk=21.0.9", "nodejs=22"],
+  "schema_heads": ["20260914_0052", "20260918_0108"],
+  "miniforge": {
+    "version": "26.7.2-0",
+    "url": "https://github.com/conda-forge/miniforge/releases/download/26.7.2-0/Miniforge3-26.7.2-0-Linux-x86_64.sh",
+    "sha256": "281b0ac7d550802efc81af633225a5e6116d29ae72f3ab4eae7168c3931a4c05"
+  },
+  "go": {
+    "version": "1.25.14",
+    "url": "https://go.dev/dl/go1.25.14.linux-amd64.tar.gz",
+    "sha256": "a21ae5633a269bcd7e90cf767e48225633795e99d831742cbf3397064fee7712"
+  },
+  "qdrant": {
+    "version": "1.19.0",
+    "image": "qdrant/qdrant@sha256:057ee3a8da769fe7310dd3537b4dc7583bf87a95ce8ac43c0af5a46bc580d1fc",
+    "url": "https://github.com/qdrant/qdrant/releases/download/v1.19.0/qdrant-x86_64-unknown-linux-musl.tar.gz",
+    "sha256": "9ec667456443463eee390e43cd36988af6b730c6db807b4e39f57c303d0264a3"
+  },
+  "neo4j": {"version": "5.26.29", "image": "neo4j@sha256:037cf5756f0135cbfd66b739b6df7c7c4bb100f9ce11602f6f9538e17e02c74d"},
+  "grobid": {"version": "0.8.1", "image": "lfoppiano/grobid@sha256:820a623a0234cda235d5eb83e924934162c5f0554a843cf665c339da8b51f900"}
+}

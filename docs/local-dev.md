@@ -6,11 +6,37 @@
 
 ## 快速开始
 
+首次在新机器部署，或恢复 `make pack` 生成的包：
+
 ```bash
-make setup     # 一次性安装
-make migrate   # 从 Docker 卷迁移数据（仅首次）
-make start     # 启动全部服务
+make locallydeploy CHECK_ONLY=1  # 只检查前置条件，不写配置或数据
+make locallydeploy               # 准备环境、配置和数据，再启动
 ```
+
+首版面向联网 Linux x86_64 / WSL2 Ubuntu。提前准备 Bash、Make、Python 3、curl、tar、
+ss、setsid，以及当前用户可调用的 Docker。脚本复用兼容的 Conda `sc-wiki`，没有则创建；
+找不到 Conda 时在 `.local/miniforge` 安装，不修改 shell 初始化文件。已有 `.env` 不覆盖，
+缺少时生成本机随机数据库和 JWT 凭据。安装完成后 `make start/stop/status` 继续可用。
+
+源机器在源码已提交、后台任务结束后执行：
+
+```bash
+make pack OUTPUT="/备份目录/sc-wiki.tar.gz"
+# 把压缩包和同名 .sha256 文件复制到新机器
+cd "/备份目录"
+sha256sum -c "sc-wiki.tar.gz.sha256"
+tar -xzf "sc-wiki.tar.gz" -C "/空的部署目录"
+cd "/空的部署目录/sc-wiki"
+make locallydeploy
+```
+
+打包期间会暂停当前项目的应用写入，完成或失败后恢复原运行状态。包包含业务库全部表、
+Neo4j、Qdrant、上传草稿及附件，不包含旧环境、`.env` 或外部模型/邮件密钥。
+目标必须为空；不支持合并覆盖或跨版本升级。AI、Embedding 和邮件需在目标另行配置，
+基础部署成功不代表外部调用已验收。无包时创建空实例，并提示管理员创建命令。
+
+`make setup` 只准备共享依赖和配置；`make migrate` 仍是旧 Docker 卷迁移脚本，不是
+跨机器包恢复入口。实现与真实机器验收的边界见 [#112 验证记录](specs/112-portable-local-deployment/validation.md)。
 
 浏览器打开 http://127.0.0.1:5173
 
@@ -53,7 +79,7 @@ sudo systemctl disable --now ufw
 | 服务 | 地址 | 来源 | 热重载 |
 |---|---|---|---|
 | frontend (vite) | 127.0.0.1:5173 | `frontend/node_modules` | HMR |
-| goserver | 127.0.0.1:8080 | `~/.local/go` 编译 | 有（约 1s） |
+| goserver | 127.0.0.1:8080 | 便携实例 `.local/go`，旧实例兼容 `~/.local/go` | 有（约 1s） |
 | python (uvicorn) | 127.0.0.1:8000 | conda `sc-wiki` | 有 |
 | worker (rq) | — | conda `sc-wiki` | 无（改队列任务需 `make restart`） |
 | mysql | 127.0.0.1:**3307** | conda `sc-wiki` | — |

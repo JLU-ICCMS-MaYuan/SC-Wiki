@@ -57,8 +57,7 @@ redis_ready() { "$INFRA_BIN/redis-cli" -p "$REDIS_PORT" ping </dev/null 2>/dev/n
 start_redis() {
   redis_ready && { ok "redis 已在运行"; return; }
   port_busy "$REDIS_PORT" && die "端口 $REDIS_PORT 已被占用"
-  # appendonly no：AOF 增量文件易在异常退出后损坏（Docker 栈已踩过），
-  # 开发环境 Redis 只存队列与缓存，RDB 快照足够。
+  # Redis 还保存上传草稿；便携实例停止时必须完成 RDB 保存。
   spawn redis "$INFRA_BIN/redis-server" \
     --dir "$DATA_DIR/redis" --port "$REDIS_PORT" --bind 127.0.0.1 \
     --appendonly no --save '300 10' --daemonize no
@@ -72,7 +71,7 @@ start_neo4j() {
   neo4j_ready && { ok "neo4j 已在运行"; return; }
   port_busy "$NEO4J_BOLT_PORT" && die "端口 $NEO4J_BOLT_PORT 已被占用"
   # 首次启动前设置初始密码，使 .env 中的 NEO4J_PASSWORD 生效。
-  if [[ ! -d "$DATA_DIR/neo4j/data/dbms" ]]; then
+  if [[ ! -d "$DATA_DIR/neo4j/data/dbms" && ! -f "$LOCAL_DIR/deployment-state.json" ]]; then
     info "设置 Neo4j 初始密码"
     JAVA_HOME="$INFRA_ENV" NEO4J_HOME="$NEO4J_HOME" \
       "$NEO4J_HOME/bin/neo4j-admin" dbms set-initial-password "$NEO4J_PASSWORD" \
@@ -80,6 +79,10 @@ start_neo4j() {
   fi
   spawn neo4j env JAVA_HOME="$INFRA_ENV" NEO4J_HOME="$NEO4J_HOME" "$NEO4J_HOME/bin/neo4j" console
   wait_for 120 "neo4j" neo4j_ready || die "neo4j 启动失败，见 $LOG_DIR/neo4j.log"
+  if [[ -f "$LOCAL_DIR/deployment-state.json" ]]; then
+    ( cd "$REPO_ROOT" && "$PY_BIN/python" -c 'from pathlib import Path; from scripts.local_deploy.config import read_config; from scripts.local_deploy.storage import initialize_neo4j_password; initialize_neo4j_password(read_config(Path.cwd()))' ) \
+      >>"$LOG_DIR/neo4j.log" 2>&1 || die "Neo4j 本机认证初始化失败"
+  fi
   ok "neo4j  bolt://127.0.0.1:$NEO4J_BOLT_PORT"
 }
 
@@ -114,6 +117,7 @@ start_grobid() {
   fi
   port_busy "$GROBID_PORT" && die "端口 $GROBID_PORT 已被占用"
   docker run --detach --name "$GROBID_CONTAINER" \
+    --label "scwiki.root=$REPO_ROOT" \
     --env "JAVA_TOOL_OPTIONS=$GROBID_JAVA_TOOL_OPTIONS" \
     --publish "127.0.0.1:$GROBID_PORT:8070" "$GROBID_IMAGE" \
     >>"$LOG_DIR/grobid.log" 2>&1 || die "GROBID 容器创建失败"
@@ -126,10 +130,14 @@ py_ready() { local_curl -sf --max-time 3 "http://127.0.0.1:$PYTHON_PORT/health" 
 start_python() {
   py_ready && { ok "python 已在运行"; return; }
   port_busy "$PYTHON_PORT" && die "端口 $PYTHON_PORT 已被占用"
-  info "运行数据库迁移"
-  ( cd "$REPO_ROOT" && "$PY_BIN/python" -m backend.scripts.run_migrations ) \
-    >>"$LOG_DIR/migrate.log" 2>&1 || die "迁移失败，见 $LOG_DIR/migrate.log"
-  ok "迁移完成"
+  if [[ -f "$LOCAL_DIR/deployment-state.json" ]]; then
+    ( cd "$REPO_ROOT" && "$PY_BIN/python" -c 'from pathlib import Path; import os; from scripts.local_deploy.schema import verify_schema; verify_schema(Path.cwd(), os.environ["DATABASE_URL"])' ) \
+      >>"$LOG_DIR/migrate.log" 2>&1 || die "数据库结构核验失败，见 $LOG_DIR/migrate.log"
+  elif [[ ${SCWIKI_DEPLOY_SKIP_MIGRATIONS:-0} != 1 ]]; then
+    info "运行数据库迁移"
+    ( cd "$REPO_ROOT" && "$PY_BIN/python" -m backend.scripts.run_migrations ) \
+      >>"$LOG_DIR/migrate.log" 2>&1 || die "迁移失败，见 $LOG_DIR/migrate.log"
+  fi
   # --reload 依赖 watchfiles；只监听 backend/ 避免 .data 写入触发重启。
   ( cd "$REPO_ROOT" && spawn python "$PY_BIN/uvicorn" backend.main:app \
       --host 127.0.0.1 --port "$PYTHON_PORT" --reload --reload-dir backend )
@@ -161,7 +169,11 @@ start_frontend() {
   pid_alive frontend && { ok "frontend 已在运行"; return; }
   port_busy "$VITE_PORT" && die "端口 $VITE_PORT 已被占用"
   [[ -d "$REPO_ROOT/frontend/node_modules" ]] || die "缺少 frontend/node_modules，先执行 npm ci"
-  ( cd "$REPO_ROOT/frontend" && spawn frontend npm run dev )
+  if [[ -f "$LOCAL_DIR/deployment-state.json" ]]; then
+    ( cd "$REPO_ROOT/frontend" && spawn frontend npm run dev -- --host 127.0.0.1 --strictPort )
+  else
+    ( cd "$REPO_ROOT/frontend" && spawn frontend npm run dev )
+  fi
   wait_for 60 "frontend" local_curl -sf --max-time 3 "http://127.0.0.1:$VITE_PORT/" \
     || die "frontend 启动失败，见 $LOG_DIR/frontend.log"
   ok "frontend http://127.0.0.1:$VITE_PORT  ← 浏览器入口"
@@ -198,7 +210,15 @@ stop_mysql() {
 }
 
 stop_redis() {
-  "$INFRA_BIN/redis-cli" -p "$REDIS_PORT" shutdown nosave </dev/null >/dev/null 2>&1 || true
+  if ! port_busy "$REDIS_PORT"; then
+    stop_pid redis; ok "redis 已停止"; return
+  fi
+  if [[ -f "$LOCAL_DIR/deployment-state.json" ]]; then
+    "$INFRA_BIN/redis-cli" -p "$REDIS_PORT" shutdown save </dev/null >/dev/null 2>&1 \
+      || die "Redis 草稿保存或停止失败，拒绝继续"
+  else
+    "$INFRA_BIN/redis-cli" -p "$REDIS_PORT" shutdown nosave </dev/null >/dev/null 2>&1 || true
+  fi
   stop_pid redis; ok "redis 已停止"
 }
 
@@ -260,6 +280,10 @@ main() {
 
   case "$action" in
     start)
+      if [[ -f "$LOCAL_DIR/deployment-state.json" ]]; then
+        ( cd "$REPO_ROOT" && "$PY_BIN/python" -m scripts.local_deploy.runtime "$REPO_ROOT" ) \
+          || die "服务端口归属检查失败"
+      fi
       local targets=("$@")
       [[ ${#targets[@]} -eq 0 ]] && targets=("${ALL_SERVICES[@]}")
       for s in "${targets[@]}"; do "start_${s//-/_}"; done
