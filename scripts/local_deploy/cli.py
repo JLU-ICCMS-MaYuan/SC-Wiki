@@ -253,7 +253,8 @@ def pack(root: Path, args):
     reexec(prefix)
     schema.verify_schema(root, values['DATABASE_URL'])
     runtime = Runtime(root, prefix, values, Path(values['SC_WIKI_DATA_DIR']).resolve())
-    runtime.check_ports()
+    # 打包不启停或导出 GROBID；旧实例的解析容器名称不影响业务数据快照。
+    runtime.check_ports(check_grobid=False)
     if any(runtime.owned_pid(name) is None for name in ('mysql', 'redis', 'neo4j', 'qdrant')):
         raise ValueError('打包需要确认四个基础服务均由当前项目运行')
     destination = Path(args.output).expanduser().resolve() if args.output else root / 'dist' / f'sc-wiki-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{commit[:8]}.tar.gz'

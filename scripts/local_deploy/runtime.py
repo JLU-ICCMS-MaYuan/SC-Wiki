@@ -38,7 +38,7 @@ class Runtime:
     def dev(self, action, *services):
         run(['bash', self.root / 'scripts/dev.sh', action, *services], cwd=self.root, env=self.env, timeout=900)
 
-    def check_ports(self):
+    def check_ports(self, *, check_grobid=True):
         ports = {'mysql': (3307,), 'redis': (6379,), 'neo4j': (17687, 7474), 'qdrant': (6333, 6334),
                  'python': (8000,), 'goserver': (8080,), 'frontend': (5173,)}
         import re
@@ -55,7 +55,7 @@ class Runtime:
                 group = os.getpgid(pid)
                 if any(os.getpgid(p) != group for p in listening_pids):
                     raise ValueError(f'端口 {number} 属于其他进程')
-        if port_occupied(8070):
+        if check_grobid and port_occupied(8070):
             import hashlib
             name = 'scwiki-grobid-' + hashlib.sha256(str(self.root).encode()).hexdigest()[:12]
             label = run(['docker', 'inspect', '--format', '{{index .Config.Labels "scwiki.root"}}', name], capture=True).strip()

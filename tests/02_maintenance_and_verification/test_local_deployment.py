@@ -175,6 +175,34 @@ def test_port_check_handles_listener_without_connecting():
     assert not runtime.port_occupied(port)
 
 
+def test_pack_port_check_does_not_require_grobid_container(monkeypatch, tmp_path):
+    runtime = module('runtime')
+    monkeypatch.setattr(runtime, 'port_occupied', lambda port: port == 8070)
+
+    def run(args, **kwargs):
+        assert args == ['ss', '-ltnp'], '打包不应查询或操作无业务数据的 GROBID 容器'
+        return ''
+
+    monkeypatch.setattr(runtime, 'run', run)
+    runtime.Runtime(tmp_path, tmp_path, {}).check_ports(check_grobid=False)
+
+
+def test_pack_port_check_still_rejects_unknown_database(monkeypatch, tmp_path):
+    runtime = module('runtime')
+    monkeypatch.setattr(runtime, 'port_occupied', lambda port: port == 3307)
+    monkeypatch.setattr(runtime, 'run', lambda *args, **kwargs: '')
+    with pytest.raises(ValueError, match='3307 归属不明'):
+        runtime.Runtime(tmp_path, tmp_path, {}).check_ports(check_grobid=False)
+
+
+def test_deploy_port_check_still_rejects_foreign_grobid(monkeypatch, tmp_path):
+    runtime = module('runtime')
+    monkeypatch.setattr(runtime, 'port_occupied', lambda port: port == 8070)
+    monkeypatch.setattr(runtime, 'run', lambda args, **kwargs: '' if args[0] == 'ss' else '/another/project')
+    with pytest.raises(ValueError, match='GROBID 容器不属于当前项目'):
+        runtime.Runtime(tmp_path, tmp_path, {}).check_ports()
+
+
 def test_archive_rejects_escape_links_and_duplicates_before_writing(tmp_path):
     bundle = module('bundle')
     for names in [['../escape'], ['/absolute'], ['sc-wiki/a', 'sc-wiki/a']]:
