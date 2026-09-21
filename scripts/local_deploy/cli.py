@@ -108,13 +108,16 @@ def deploy(root: Path, args):
         problems.append('目标已有数据，必须使用新的空部署目录')
     if (root / '.env').exists():
         config.validate_local(config.read_config(root), root, target=True)
-    conda, prefix = environment.find_environment(root) if not problems else (None, None)
+    environment_checked = not problems
+    conda, prefix = environment.find_environment(root) if environment_checked else (None, None)
     if manifest and shutil.disk_usage(root).free < manifest['capacity'] * 2.4 + 8 * 1024**3:
         problems.append('空间不足以同时保存依赖、包和临时恢复数据')
     if args.check_only or problems:
         report(root, 'deploy', 'blocked' if problems else 'check-passed', persist=False,
                problems=problems, conda=str(conda) if conda else None,
-               environment=str(prefix) if prefix else '将创建 sc-wiki', mode='restore' if manifest else 'empty')
+               environment=(str(prefix) if prefix else '将创建 sc-wiki') if environment_checked else '未检查（系统或目标预检未通过）',
+               mode='restore' if manifest else 'empty', next_steps=environment.preflight_guidance(problems),
+               **({'error_code': 'preflight_failed', 'phase': 'preflight'} if problems else {}))
         return 2 if problems else 0
     with operation_lock(root):
         identity = manifest['bundle_id'] if manifest else source_identity(root)

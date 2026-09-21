@@ -18,6 +18,22 @@ from .bundle import digest, write_json
 PORTS = (3307, 6379, 17687, 7474, 6333, 6334, 8000, 8080, 5173, 8070)
 
 
+def preflight_guidance(problems: list[str]) -> list[str]:
+    """为可修复的前置失败提供不涉及凭据的下一步提示。"""
+    guidance = []
+    if '缺少系统前置工具 docker' in problems:
+        guidance.append('Docker 用于提取 Neo4j 安装文件和运行 GROBID；请按 https://docs.docker.com/engine/install/ 安装并启动 Docker，使用 docker info 验证后重跑 make locallydeploy CHECK_ONLY=1')
+    if 'Docker 未运行或当前用户无访问权限' in problems:
+        guidance.append('请启动 Docker daemon，并确认当前用户有 Docker socket 权限；可先运行 docker info 验证')
+    if any(problem.startswith('缺少系统前置工具 ') for problem in problems if problem != '缺少系统前置工具 docker'):
+        guidance.append('请先安装报告中缺少的系统工具，再重新运行 make locallydeploy CHECK_ONLY=1')
+    if any(problem.startswith('端口 ') for problem in problems):
+        guidance.append('请用 ss -ltnp 确认端口占用者，确认可以停止对应服务后再处理冲突并重新预检')
+    if '可用磁盘不足 8 GiB，无法准备依赖与临时数据' in problems:
+        guidance.append('请释放至少 8 GiB 可用磁盘空间后再重试')
+    return guidance
+
+
 def run(args, *, cwd=None, env=None, timeout=1800, capture=False):
     result = subprocess.run([str(a) for a in args], cwd=cwd, env=env, timeout=timeout,
                             text=True, stdout=subprocess.PIPE if capture else None,

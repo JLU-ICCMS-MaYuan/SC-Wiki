@@ -82,6 +82,17 @@ make status
 
 ## 自动化验证入口（实现后）
 
+尚未安装应用依赖时，可使用带 pytest 的隔离 Python 环境执行部署工具回归：
+
+```bash
+python -m pytest --confcutdir="tests/02_maintenance_and_verification" \
+  "tests/02_maintenance_and_verification/test_local_deployment.py" -q -rs
+```
+
+`--confcutdir` 仅排除上层依赖 SQLAlchemy 的通用测试配置；本文件不使用其中的数据库
+fixture。没有显式隔离数据库时，四项真实存储测试会跳过，不能作为数据恢复验收证据。
+Docker 缺失/不可用的入口测试、真实端口占用和其他不依赖数据库的回归仍执行。
+
 ```bash
 bash -n "scripts/locallydeploy.sh" "scripts/pack.sh" "scripts/setup-local.sh" "scripts/lib-local.sh" "scripts/dev.sh"
 conda run -n sc-wiki python -m pytest "tests/02_maintenance_and_verification/test_local_deployment.py" -q

@@ -33,6 +33,7 @@ make locallydeploy CHECK_ONLY=1
 - 自动发现 `.deployment/manifest.json`，存在即进入恢复模式；损坏时失败。确实没有包才初始化空实例。
 - `BUNDLE` 覆盖自动发现，但不能与已存在的部署记录对应不同包；同时发现多个候选包时不自行选最新。
 - `CHECK_ONLY=1` 仅输出现状、所需空间及阻塞项，不下载、建环境、导入或改数据库；已解压包和压缩包均需只读验证。
+- 前置检查汇总阻塞报告保留 `problems` 字符串列表，新增 `next_steps` 处理建议列表；Docker 缺失和不可用分别提示安装、启动及 `docker info` 验证。阻塞时包含 `error_code=preflight_failed` 和 `phase=preflight`；Conda 未检查时明确显示“未检查”，不报告“将创建”。此报告无论普通部署还是只读模式均不写入运行目录。
 - 可通过显式 `CONDA_EXE` 选择现有 Conda；已有 `CONDA_ROOT` 配置保持兼容。检测多处同名环境且结果不唯一时失败并提示显式选择。
 - 默认保留已有 `.env`；首次生成随机 JWT、MySQL 和 Neo4j 凭据。本机连接统一回环地址。外部密钥由目标 `.env` 或既有管理界面补充，不从包内执行配置脚本。
 - 只接受空目标或本操作的中间状态；不提供 `FORCE`、`OVERWRITE`、`CLEAR` 参数。

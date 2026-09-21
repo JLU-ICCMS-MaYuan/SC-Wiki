@@ -4,6 +4,8 @@ import io
 import json
 import os
 from pathlib import Path
+import shutil
+import socket
 import subprocess
 import sys
 import tarfile
@@ -54,6 +56,107 @@ def test_environment_selects_actual_prefix_and_rejects_ambiguity(tmp_path):
     assert env.select_prefix([]) is None
     with pytest.raises(ValueError, match='多个'):
         env.select_prefix([str(prefix), '/another/envs/sc-wiki'])
+
+
+@pytest.fixture
+def preflight_root(tmp_path, monkeypatch):
+    env = module('environment')
+    root = tmp_path / 'source with spaces'
+    (root / 'scripts').mkdir(parents=True)
+    shutil.copy2(ROOT / 'scripts/local-deploy-versions.json', root / 'scripts')
+    monkeypatch.setattr(env.platform, 'system', lambda: 'Linux')
+    monkeypatch.setattr(env.platform, 'machine', lambda: 'x86_64')
+    monkeypatch.setattr(env.shutil, 'disk_usage', lambda _: shutil._ntuple_diskusage(32 * 1024**3, 0, 32 * 1024**3))
+    monkeypatch.setattr(env.shutil, 'which', lambda name: '/usr/bin/' + name)
+    monkeypatch.setattr(env, 'run', lambda *args, **kwargs: '28.0.0\n')
+    return root
+
+
+@pytest.mark.parametrize('failure', [None, ValueError('private daemon output'), subprocess.TimeoutExpired('docker', 15)])
+def test_preflight_docker_available_failed_or_timed_out(preflight_root, monkeypatch, failure):
+    env = module('environment')
+
+    def docker_info(args, **kwargs):
+        assert args == ['docker', 'info', '--format', '{{.ServerVersion}}']
+        assert kwargs == {'capture': True, 'timeout': 15}
+        if failure:
+            raise failure
+        return '28.0.0\n'
+
+    monkeypatch.setattr(env, 'run', docker_info)
+    problems = env.preflight(preflight_root, occupied_ok=True)
+    assert problems == (['Docker 未运行或当前用户无访问权限'] if failure else [])
+    guidance = env.preflight_guidance(problems)
+    assert ('docker info' in ' '.join(guidance)) == bool(failure)
+    assert 'private daemon output' not in ' '.join(problems + guidance)
+
+
+@pytest.mark.parametrize('check_only', [False, True])
+@pytest.mark.parametrize('docker_present', [False, True])
+def test_real_cli_docker_block_is_read_only(tmp_path, check_only, docker_present):
+    root = tmp_path / 'source with spaces'
+    (root / 'scripts').mkdir(parents=True)
+    shutil.copy2(ROOT / 'scripts/local-deploy-versions.json', root / 'scripts')
+    bindir = tmp_path / 'bin'
+    bindir.mkdir()
+    for tool in ('bash', 'make', 'curl', 'tar', 'setsid', 'ss', 'dirname'):
+        executable = shutil.which(tool)
+        if not executable:
+            pytest.skip(f'真实入口测试需要 {tool}')
+        (bindir / tool).symlink_to(executable)
+    (bindir / 'python3').symlink_to(sys.executable)
+    if docker_present:
+        docker = bindir / 'docker'
+        docker.write_text('#!/bin/bash\necho private-daemon-output >&2\nexit 1\n')
+        docker.chmod(0o755)
+    args = ['bash', str(ROOT / 'scripts/locallydeploy.sh'), '--root', str(root)]
+    if check_only:
+        args.append('--check-only')
+    process_env = {key: value for key, value in os.environ.items() if key not in ('BUNDLE', 'CHECK_ONLY')}
+    result = subprocess.run(args, env={**process_env, 'PATH': str(bindir)}, capture_output=True, text=True, timeout=30)
+    assert result.returncode == 2, result.stderr
+    assert result.stdout, result.stderr
+    report = json.loads(result.stdout)
+    assert report['result'] == 'blocked'
+    assert report['error_code'] == 'preflight_failed'
+    assert report['phase'] == 'preflight'
+    assert ('Docker 未运行或当前用户无访问权限' if docker_present else '缺少系统前置工具 docker') in report['problems']
+    assert report['environment'].startswith('未检查')
+    assert report['conda'] is None
+    assert 'docker info' in ' '.join(report['next_steps'])
+    assert 'private-daemon-output' not in result.stdout + result.stderr
+    assert sorted(str(p.relative_to(root)) for p in root.rglob('*')) == ['scripts', 'scripts/local-deploy-versions.json']
+
+
+def test_preflight_rejects_real_port_conflict_and_low_space(preflight_root, monkeypatch):
+    env = module('environment')
+    monkeypatch.setattr(env.shutil, 'disk_usage', lambda _: shutil._ntuple_diskusage(8 * 1024**3, 1, 8 * 1024**3 - 1))
+    with socket.socket() as listener:
+        listener.bind(('127.0.0.1', 0))
+        listener.listen()
+        port = listener.getsockname()[1]
+        monkeypatch.setattr(env, 'PORTS', (port,))
+        problems = env.preflight(preflight_root)
+        assert problems == [f'端口 {port} 已被占用，不能复用未知服务', '可用磁盘不足 8 GiB，无法准备依赖与临时数据']
+        assert len(env.preflight_guidance(problems)) == 2
+
+
+@pytest.mark.parametrize('failure', [None, ValueError('offline'), subprocess.TimeoutExpired('curl', 1200)])
+def test_failed_download_preserves_cache_and_removes_partial(tmp_path, monkeypatch, failure):
+    env = module('environment')
+    target = tmp_path / 'installer'
+    target.write_bytes(b'existing cache')
+
+    def failed_download(args, **kwargs):
+        Path(args[args.index('--output') + 1]).write_bytes(b'corrupt or partial download')
+        if failure:
+            raise failure
+
+    monkeypatch.setattr(env, 'run', failed_download)
+    with pytest.raises((ValueError, subprocess.TimeoutExpired)):
+        env.download({'sha256': '0' * 64, 'url': 'https://example.invalid/installer'}, target)
+    assert target.read_bytes() == b'existing cache'
+    assert not target.with_name('installer.partial').exists()
 
 
 def test_port_check_handles_listener_without_connecting():

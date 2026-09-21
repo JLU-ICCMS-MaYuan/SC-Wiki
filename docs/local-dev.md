@@ -14,7 +14,14 @@ make locallydeploy               # 准备环境、配置和数据，再启动
 ```
 
 首版面向联网 Linux x86_64 / WSL2 Ubuntu。提前准备 Bash、Make、Python 3、curl、tar、
-ss、setsid，以及当前用户可调用的 Docker。脚本复用兼容的 Conda `sc-wiki`，没有则创建；
+ss、setsid，以及当前用户可调用且已启动的 Docker。Docker 是硬依赖：部署需要用容器准备
+Neo4j 文件并运行 GROBID，不能在缺少 Docker 时安全跳过。若预检报告“缺少系统前置工具
+docker”，请参照 [Docker 安装说明](https://docs.docker.com/engine/install/) 准备 Docker；
+WSL2 也可使用开启对应发行版集成的 Docker Desktop。若报告 Docker 未运行，请启动服务
+并确认当前用户有访问权限，执行 `docker info` 验证后重新运行 `make locallydeploy CHECK_ONLY=1`。
+报告中的 `next_steps` 提供处理建议；系统或目标检查失败时显示环境“未检查”，不代表 Conda
+不存在。预检阻塞不会创建 `.env`、`.local` 或 `.data`，脚本不自动执行系统安装或修改权限。
+脚本复用兼容的 Conda `sc-wiki`，没有则创建；
 找不到 Conda 时在 `.local/miniforge` 安装，不修改 shell 初始化文件。已有 `.env` 不覆盖，
 缺少时生成本机随机数据库和 JWT 凭据。安装完成后 `make start/stop/status` 继续可用。
 

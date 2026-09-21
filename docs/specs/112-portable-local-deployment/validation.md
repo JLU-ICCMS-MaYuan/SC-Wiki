@@ -67,3 +67,40 @@ Issue 保持开放；未执行项不勾选，不据此宣称跨机器交付已�
 2026-09-21，用户明确表示不需要 Ubuntu 24.04 验收，并要求先提交 Git 记录。
 该平台测试已从必需验收中移除；此前镜像拉取的代理超时不再作为阻塞。本次依据上述
 已通过的验证提交当前实现与文档，其余验收继续由 Issue #112 跟踪，不推送、不关闭 Issue。
+
+## Docker 前置失败回归（2026-09-21）
+
+本轮机器是 Ubuntu 26.04 x86_64，系统 Python 3.14.4；没有 Docker、Conda 或此前记录的
+隔离测试实例。前文 Ubuntu 22.04 / WSL2 证据属于先前环境，不是本轮重新运行的结果。
+本轮不改变 SC-001 的平台验收基线，也不声称已验收 Ubuntu 26.04 完整应用栈。
+
+修改对应 FR-002/014/017：系统工具和 Docker 检查由 `environment.py` 负责，CLI 仅汇总
+`problems`、`next_steps`、错误码和实际检查状态。Conda 因前置阻塞未检查时，不再显示
+“将创建 sc-wiki”。沿用 Docker 为系统前置条件的 Research/Plan 决策。
+
+测试依赖仅安装在 `/tmp/scwiki-112-regression-QBsSBV/venv`，没有修改系统 Python。
+执行命令：
+
+```bash
+/tmp/scwiki-112-regression-QBsSBV/venv/bin/python -m pytest \
+  --confcutdir="tests/02_maintenance_and_verification" \
+  "tests/02_maintenance_and_verification/test_local_deployment.py" -q -rs
+```
+
+结果：**28 项通过，4 项跳过**。跳过项分别为真实空 MySQL 迁移、Redis 草稿恢复、MySQL
+原生导出恢复和 Qdrant 快照恢复；缺少显式隔离存储实例，未把跳过计为通过。
+上层通用测试配置依赖尚未安装的 SQLAlchemy，故按 Quickstart 使用 `--confcutdir`，
+本次测试不使用上层 fixture。
+
+- 真实 Bash/Python 子进程入口：在含空格的临时目标目录和受控 PATH 下，覆盖 Docker
+  命令缺失及返回失败（模拟不可用）的四种组合，普通部署与 `--check-only` 都退出 2，
+  不创建配置/状态/数据，不泄漏模拟 Docker 错误输出。
+- 本机实际执行 `make locallydeploy` 和 `make locallydeploy CHECK_ONLY=1`，均因缺少
+  Docker 阻塞，包含操作建议及 `preflight_failed`，没有进入依赖安装或数据初始化。
+- 单元故障注入：Docker 查询超时、低磁盘空间、下载损坏/离线/中断；失败下载保留原缓存、
+  清除本次 `.partial`。端口冲突使用真实回环监听；不把注入测试当作真实断网或满盘演练。
+- Bash 语法与 `git diff --check` 通过。原有配置保护、归档校验、路径转换和操作锁回归通过。
+
+完整安装、服务健康、原生存储往返、换用户名及审核/结构附件场景仍待 Docker 和隔离依赖
+就绪后执行。系统安装和权限变更需另行授权。本轮只更新本地实现及验证产物，没有更新或关闭
+远端 Issue #112，也没有推送。

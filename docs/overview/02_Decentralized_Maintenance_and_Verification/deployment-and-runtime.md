@@ -45,6 +45,11 @@
 3. `make start` 启动全部服务，按依赖顺序等待健康检查。便携实例核验进程归属和真实 schema，只核验、不升级数据库；没有便携记录的旧实例保留原迁移启动路径。
 4. 浏览器访问 `http://127.0.0.1:5173`。`make status` 查看各服务状态，`make logs S=<服务>` 跟踪日志。
 
+部署前置检查区分 Docker 命令缺失与服务不可用，阻塞报告通过 `next_steps` 提供处理建议，
+并包含 `error_code=preflight_failed`、`phase=preflight`。系统或目标预检阻塞时，Conda
+状态显示“未检查”，不能据此推断需要创建环境。此阶段只输出报告，不创建配置或运行数据。
+Docker 仍是提取 Neo4j 安装文件和运行 GROBID 的前置条件，安装器不自动安装系统 Docker。
+
 `make pack` 以干净 HEAD 的源码和业务数据生成迁移包。外部凭据不进入包；源端停写后
 导出 MySQL、Neo4j、Qdrant 和 Redis 上传草稿，结束后恢复应用。Redis 草稿恢复会同步
 落盘，便携实例正常停止也会保存。实现已进入真实隔离验证，干净 Ubuntu 22.04
