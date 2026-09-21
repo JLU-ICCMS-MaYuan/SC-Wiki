@@ -245,7 +245,7 @@ def pack(root: Path, args):
     from . import schema, storage
     from .runtime import Runtime
     if environment.run(['git', 'status', '--porcelain'], cwd=root, capture=True).strip():
-        raise ValueError('源码有未提交改动；请完成提交后再执行 make fronze')
+        raise ValueError('源码有未提交改动；请完成提交后再执行 make frozen')
     commit = environment.run(['git', 'rev-parse', 'HEAD'], cwd=root, capture=True).strip()
     values = config.read_config(root)
     config.validate_local(values, root)

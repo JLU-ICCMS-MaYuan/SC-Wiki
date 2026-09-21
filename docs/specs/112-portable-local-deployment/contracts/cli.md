@@ -4,11 +4,11 @@
 
 以下命令由 #112 实现；适用平台和实际验收边界见 [验证记录](../validation.md)。
 
-## `make fronze`
+## `make frozen`
 
 ```bash
-make fronze
-make fronze OUTPUT="/目标目录/sc-wiki-backup.tar.gz"
+make frozen
+make frozen OUTPUT="/目标目录/sc-wiki-backup.tar.gz"
 ```
 
 - 从当前仓库对应的本地实例打包；源码必须干净且已提交，Git 必须可用。
@@ -42,7 +42,7 @@ make deploy CHECK_ONLY=1
 
 ## 拟新增 `make dockerdeploy`（待设计确认与实现）
 
-从本地 `make fronze` 生成的同一包恢复 Docker 目标；自动发现 `.deployment`，并支持
+从本地 `make frozen` 生成的同一包恢复 Docker 目标；自动发现 `.deployment`，并支持
 `BUNDLE`、`CHECK_ONLY`。本轮 Docker 入口只处理包恢复；无包时明确失败并说明原因。
 宿主机需要 Docker Compose、基础脚本工具和源码构建网络，不需要 Conda。
 空目标、版本、凭据排除、清单核验和重复执行规则与本地目标一致；目标生成容器连接配置。

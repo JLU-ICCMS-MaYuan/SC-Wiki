@@ -316,7 +316,7 @@ def test_cli_check_only_does_not_create_runtime_files(tmp_path):
     assert 'Traceback' not in result.stderr
 
 
-@pytest.mark.parametrize(('target', 'parameter'), [('fronze', 'OUTPUT'), ('deploy', 'BUNDLE')])
+@pytest.mark.parametrize(('target', 'parameter'), [('frozen', 'OUTPUT'), ('deploy', 'BUNDLE')])
 def test_make_entrypoints_do_not_interpolate_shell_arguments(tmp_path, target, parameter):
     marker = tmp_path / 'injected'
     result = subprocess.run(['make', '-n', target, f'{parameter}=x; touch {marker}'],

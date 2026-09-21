@@ -10,7 +10,7 @@ Ubuntu，以及预先可用的 Docker 和系统基础工具。
 首次运行建议先执行 `make deploy CHECK_ONLY=1`；Docker 缺失或不可用时，
 按报告中的 `next_steps` 准备好 Docker，再重新预检。部署脚本不自动安装系统 Docker。
 
-源机器使用 `make fronze OUTPUT="/备份目录/sc-wiki.tar.gz"` 打包已提交源码及业务数据库、
+源机器使用 `make frozen OUTPUT="/备份目录/sc-wiki.tar.gz"` 打包已提交源码及业务数据库、
 草稿和附件；复制并解压到目标空目录，再执行 `make deploy`。打包会短暂停止
 应用写入，目标拒绝覆盖已有数据；模型和邮件密钥在目标重新配置。
 

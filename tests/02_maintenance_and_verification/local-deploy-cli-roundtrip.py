@@ -167,7 +167,7 @@ def main():
             except ValueError:
                 time.sleep(1)
         archive = workspace / 'portable.tar.gz'
-        run(['make', 'fronze', f'OUTPUT={archive}'], source, env)
+        run(['make', 'frozen', f'OUTPUT={archive}'], source, env)
         stop(source, prefix)
         bundle.extract_archive(archive, workspace / 'target')
         dependencies(target, args.tools_from.resolve(), prefix)
