@@ -20,6 +20,24 @@
     "url": "https://github.com/qdrant/qdrant/releases/download/v1.19.0/qdrant-x86_64-unknown-linux-musl.tar.gz",
     "sha256": "9ec667456443463eee390e43cd36988af6b730c6db807b4e39f57c303d0264a3"
   },
-  "neo4j": {"version": "5.26.29", "image": "neo4j@sha256:037cf5756f0135cbfd66b739b6df7c7c4bb100f9ce11602f6f9538e17e02c74d"},
-  "grobid": {"version": "0.8.1", "image": "lfoppiano/grobid@sha256:820a623a0234cda235d5eb83e924934162c5f0554a843cf665c339da8b51f900"}
+  "neo4j": {
+    "version": "5.26.29",
+    "image": "neo4j@sha256:037cf5756f0135cbfd66b739b6df7c7c4bb100f9ce11602f6f9538e17e02c74d",
+    "url": "https://dist.neo4j.org/neo4j-community-5.26.29-unix.tar.gz",
+    "fallback_urls": ["https://s3.eu-west-1.amazonaws.com/dist.neo4j.org/neo4j-community-5.26.29-unix.tar.gz"],
+    "sha256": "a45ca9644100d995500f7ea7f5bb4874e16e588891fdfbdff65d21321331caa2"
+  },
+  "grobid": {
+    "version": "0.8.1",
+    "image": "lfoppiano/grobid@sha256:820a623a0234cda235d5eb83e924934162c5f0554a843cf665c339da8b51f900",
+    "url": "https://codeload.github.com/grobidOrg/grobid/tar.gz/refs/tags/0.8.1",
+    "sha256": "8458082c409f98247ce853e8286082c36033dfd656c55c87fa9e616f68c85a69",
+    "java_version": "17.0.18",
+    "conda_packages": ["openjdk=17.0.18", "libxml2", "fontconfig"],
+    "gradle": {
+      "version": "7.6.4",
+      "url": "https://downloads.gradle.org/distributions/gradle-7.6.4-bin.zip",
+      "sha256": "bed1da33cca0f557ab13691c77f38bb67388119e4794d113e051039b80af9bb1"
+    }
+  }
 }

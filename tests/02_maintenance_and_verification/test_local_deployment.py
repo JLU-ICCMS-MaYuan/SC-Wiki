@@ -9,6 +9,8 @@ import socket
 import subprocess
 import sys
 import tarfile
+import time
+import zipfile
 
 import pytest
 
@@ -58,6 +60,23 @@ def test_environment_selects_actual_prefix_and_rejects_ambiguity(tmp_path):
         env.select_prefix([str(prefix), '/another/envs/sc-wiki'])
 
 
+def test_go_install_and_runtime_share_defaults_and_overrides(monkeypatch):
+    env = module('environment')
+    for key in ('GOPATH', 'GOCACHE', 'GOPROXY'):
+        monkeypatch.delenv(key, raising=False)
+    defaults = env.go_environment()
+    assert defaults == {'GOPATH': str(Path.home() / '.local/gopath'),
+                        'GOCACHE': str(Path.home() / '.cache/go-build'),
+                        'GOPROXY': 'https://goproxy.cn,direct'}
+    monkeypatch.setenv('GOPATH', '/custom path/gopath')
+    monkeypatch.setenv('GOPROXY', 'https://proxy.golang.org,direct')
+    expected = {**defaults, 'GOPATH': '/custom path/gopath', 'GOPROXY': 'https://proxy.golang.org,direct'}
+    assert env.go_environment() == expected
+    result = subprocess.run([sys.executable, '-m', 'scripts.local_deploy.environment', str(ROOT), '--go-env'],
+                            cwd=ROOT, capture_output=True, text=True, check=True)
+    assert dict(row.split('=', 1) for row in result.stdout.split('\0') if row) == expected
+
+
 @pytest.fixture
 def preflight_root(tmp_path, monkeypatch):
     env = module('environment')
@@ -72,34 +91,33 @@ def preflight_root(tmp_path, monkeypatch):
     return root
 
 
-@pytest.mark.parametrize('failure', [None, ValueError('private daemon output'), subprocess.TimeoutExpired('docker', 15)])
-def test_preflight_docker_available_failed_or_timed_out(preflight_root, monkeypatch, failure):
+@pytest.mark.parametrize('docker_present', [False, True])
+def test_preflight_never_requires_or_calls_docker(preflight_root, monkeypatch, docker_present):
     env = module('environment')
 
-    def docker_info(args, **kwargs):
-        assert args == ['docker', 'info', '--format', '{{.ServerVersion}}']
-        assert kwargs == {'capture': True, 'timeout': 15}
-        if failure:
-            raise failure
-        return '28.0.0\n'
+    def unexpected_command(*args, **kwargs):
+        pytest.fail('本地预检不应调用 Docker')
 
-    monkeypatch.setattr(env, 'run', docker_info)
+    monkeypatch.setattr(env, 'run', unexpected_command)
+    monkeypatch.setattr(env.shutil, 'which', lambda name: None if name == 'docker' and not docker_present else '/usr/bin/' + name)
     problems = env.preflight(preflight_root, occupied_ok=True)
-    assert problems == (['Docker 未运行或当前用户无访问权限'] if failure else [])
-    guidance = env.preflight_guidance(problems)
-    assert ('docker info' in ' '.join(guidance)) == bool(failure)
-    assert 'private daemon output' not in ' '.join(problems + guidance)
+    assert problems == []
 
 
 @pytest.mark.parametrize('check_only', [False, True])
 @pytest.mark.parametrize('docker_present', [False, True])
-def test_real_cli_docker_block_is_read_only(tmp_path, check_only, docker_present):
+def test_real_cli_without_docker_and_unrelated_failure_are_read_only(tmp_path, check_only, docker_present):
+    runtime = module('runtime')
+    if any(runtime.port_occupied(port) for port in module('environment').PORTS):
+        pytest.skip('真实预检成功场景需要空闲部署端口，不停止已有本地实例')
     root = tmp_path / 'source with spaces'
     (root / 'scripts').mkdir(parents=True)
     shutil.copy2(ROOT / 'scripts/local-deploy-versions.json', root / 'scripts')
     bindir = tmp_path / 'bin'
     bindir.mkdir()
     for tool in ('bash', 'make', 'curl', 'tar', 'setsid', 'ss', 'dirname'):
+        if tool == 'curl' and not check_only:
+            continue  # 普通部署使用独立缺项阻断，避免测试安装到用户环境。
         executable = shutil.which(tool)
         if not executable:
             pytest.skip(f'真实入口测试需要 {tool}')
@@ -114,16 +132,17 @@ def test_real_cli_docker_block_is_read_only(tmp_path, check_only, docker_present
         args.append('--check-only')
     process_env = {key: value for key, value in os.environ.items() if key not in ('BUNDLE', 'CHECK_ONLY')}
     result = subprocess.run(args, env={**process_env, 'PATH': str(bindir)}, capture_output=True, text=True, timeout=30)
-    assert result.returncode == 2, result.stderr
+    assert result.returncode == (0 if check_only else 2), result.stdout + result.stderr
     assert result.stdout, result.stderr
     report = json.loads(result.stdout)
-    assert report['result'] == 'blocked'
-    assert report['error_code'] == 'preflight_failed'
-    assert report['phase'] == 'preflight'
-    assert ('Docker 未运行或当前用户无访问权限' if docker_present else '缺少系统前置工具 docker') in report['problems']
-    assert report['environment'].startswith('未检查')
-    assert report['conda'] is None
-    assert 'docker info' in ' '.join(report['next_steps'])
+    assert report['result'] == ('check-passed' if check_only else 'blocked')
+    assert not any('docker' in p.lower() for p in report['problems'] + report['next_steps'])
+    if not check_only:
+        assert report['error_code'] == 'preflight_failed'
+        assert report['phase'] == 'preflight'
+        assert report['problems'] == ['缺少系统前置工具 curl']
+        assert report['environment'].startswith('未检查')
+        assert report['conda'] is None
     assert 'private-daemon-output' not in result.stdout + result.stderr
     assert sorted(str(p.relative_to(root)) for p in root.rglob('*')) == ['scripts', 'scripts/local-deploy-versions.json']
 
@@ -157,6 +176,37 @@ def test_failed_download_preserves_cache_and_removes_partial(tmp_path, monkeypat
         env.download({'sha256': '0' * 64, 'url': 'https://example.invalid/installer'}, target)
     assert target.read_bytes() == b'existing cache'
     assert not target.with_name('installer.partial').exists()
+
+
+def test_download_fallback_requires_same_pinned_digest(tmp_path, monkeypatch):
+    import hashlib
+    env = module('environment')
+    payload = b'official artifact'
+    spec = {'url': 'https://primary.invalid/tool', 'fallback_urls': ['https://fallback.invalid/tool'],
+            'sha256': hashlib.sha256(payload).hexdigest()}
+    called = []
+    def download(args, **kwargs):
+        called.append(args[-1])
+        target = Path(args[args.index('--output') + 1])
+        if args[-1] == spec['url']:
+            target.write_bytes(b'partial')
+            raise ValueError('HTTP 403')
+        target.write_bytes(payload)
+    monkeypatch.setattr(env, 'run', download)
+    env.download(spec, tmp_path / 'tool')
+    assert called == [spec['url'], spec['fallback_urls'][0]]
+    assert (tmp_path / 'tool').read_bytes() == payload
+    called.clear()
+    env.download(spec, tmp_path / 'tool')
+    assert called == []  # 已校验缓存不再访问网络。
+    def corrupt(args, **kwargs):
+        called.append(args[-1])
+        Path(args[args.index('--output') + 1]).write_bytes(b'corrupt')
+    monkeypatch.setattr(env, 'run', corrupt)
+    with pytest.raises(ValueError, match='下载校验失败'):
+        env.download(spec, tmp_path / 'other-tool')
+    assert called == [spec['url']]  # 摘要错误不能用备用源掩盖。
+    assert not (tmp_path / 'other-tool').exists()
 
 
 def test_port_check_handles_listener_without_connecting():
@@ -195,12 +245,192 @@ def test_pack_port_check_still_rejects_unknown_database(monkeypatch, tmp_path):
         runtime.Runtime(tmp_path, tmp_path, {}).check_ports(check_grobid=False)
 
 
-def test_deploy_port_check_still_rejects_foreign_grobid(monkeypatch, tmp_path):
+@pytest.mark.parametrize('port', [8070, 8071])
+def test_deploy_port_check_still_rejects_foreign_grobid(monkeypatch, tmp_path, port):
     runtime = module('runtime')
-    monkeypatch.setattr(runtime, 'port_occupied', lambda port: port == 8070)
-    monkeypatch.setattr(runtime, 'run', lambda args, **kwargs: '' if args[0] == 'ss' else '/another/project')
-    with pytest.raises(ValueError, match='GROBID 容器不属于当前项目'):
+    monkeypatch.setattr(runtime, 'port_occupied', lambda number: number == port)
+    def listeners(args, **kwargs):
+        assert args == ['ss', '-ltnp']
+        return ''
+    monkeypatch.setattr(runtime, 'run', listeners)
+    with pytest.raises(ValueError, match=f'{port} 归属不明'):
         runtime.Runtime(tmp_path, tmp_path, {}).check_ports()
+
+
+@pytest.mark.parametrize('port', [8070, 8071])
+def test_grobid_port_ownership_uses_real_process_group(tmp_path, port):
+    runtime = module('runtime')
+    if runtime.port_occupied(port):
+        pytest.skip(f'隔离测试端口 {port} 被占用，不停止原进程')
+    process = subprocess.Popen([sys.executable, '-m', 'http.server', str(port), '--bind', '127.0.0.1'],
+                               cwd=tmp_path, start_new_session=True,
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    manager = runtime.Runtime(tmp_path, tmp_path, {})
+    (tmp_path / '.local/run').mkdir(parents=True)
+    (tmp_path / '.local/run/grobid.pid').write_text(str(process.pid))
+    try:
+        for _ in range(100):
+            if runtime.port_occupied(port):
+                break
+            assert process.poll() is None
+            time.sleep(0.02)
+        assert runtime.port_occupied(port)
+        manager.check_ports()
+        assert manager.owned_pid('grobid') == process.pid
+    finally:
+        process.terminate()
+        process.wait(timeout=10)
+    assert not runtime.port_occupied(port)
+
+
+def test_native_zip_rejects_escape_and_preserves_executable(tmp_path):
+    native = module('native')
+    archive = tmp_path / 'tool.zip'
+    with zipfile.ZipFile(archive, 'w') as bundle:
+        script = zipfile.ZipInfo('gradle/bin/gradle')
+        script.external_attr = 0o100755 << 16
+        bundle.writestr(script, '#!/bin/sh\nexit 0\n')
+    native.extract_zip(archive, tmp_path / 'output')
+    assert os.access(tmp_path / 'output/gradle/bin/gradle', os.X_OK)
+    with zipfile.ZipFile(archive, 'w') as bundle:
+        bundle.writestr('../escaped', 'bad')
+    with pytest.raises(ValueError, match='不安全'):
+        native.extract_zip(archive, tmp_path / 'output')
+    assert not (tmp_path / 'escaped').exists()
+
+
+def test_native_grobid_configuration_binds_both_interfaces(tmp_path):
+    native = module('native')
+    config = tmp_path / 'grobid-home/config/grobid.yaml'
+    config.parent.mkdir(parents=True)
+    config.write_text('server:\n    applicationConnectors:\n    - type: http\n      port: 8070\n'
+                      '    adminConnectors:\n    - type: http\n      port: 8071\n')
+    native.configure_grobid(tmp_path)
+    assert config.read_text().count('bindHost: 127.0.0.1') == 2
+
+
+def test_native_install_failure_does_not_publish_or_overwrite(tmp_path, monkeypatch):
+    native = module('native')
+    java = tmp_path / '.local/grobid-java/conda-meta/history'
+    java.parent.mkdir(parents=True)
+    java.touch()
+    monkeypatch.setattr(native, 'run', lambda *a, **k: 'openjdk 17.0.18-internal 2026-01-20\n')
+    def failed_download(*args):
+        raise ValueError('download unavailable')
+    monkeypatch.setattr(native, 'download', failed_download)
+    spec = module('environment').versions(ROOT)
+    with pytest.raises(ValueError, match='download unavailable'):
+        native.install_grobid(tmp_path, Path('/conda'), spec['grobid'])
+    assert not (tmp_path / '.local/grobid').exists()
+    with pytest.raises(ValueError, match='download unavailable'):
+        native.install_neo4j(tmp_path, Path('/java'), spec['neo4j'])
+    assert not (tmp_path / '.local/neo4j').exists()
+    unknown = tmp_path / '.local/grobid/user-file'
+    unknown.parent.mkdir()
+    unknown.write_text('preserve me')
+    with pytest.raises(ValueError, match='不覆盖'):
+        native.install_grobid(tmp_path, Path('/conda'), spec['grobid'])
+    assert unknown.read_text() == 'preserve me'
+
+
+def test_native_build_failure_cleans_staging_and_keeps_cache(tmp_path, monkeypatch):
+    native = module('native')
+    java = tmp_path / '.local/grobid-java/conda-meta/history'
+    java.parent.mkdir(parents=True)
+    java.touch()
+    spec = module('environment').versions(ROOT)['grobid']
+    def command(args, **kwargs):
+        if Path(args[0]).name == 'java':
+            return 'openjdk 17.0.18-internal 2026-01-20\n'
+        assert Path(args[0]).name == 'gradle'
+        assert args[-1] == ':grobid-service:distZip'
+        raise ValueError('build failed')
+    def cached_download(item, target):
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(b'cached download')
+    monkeypatch.setattr(native, 'run', command)
+    monkeypatch.setattr(native, 'download', cached_download)
+    monkeypatch.setattr(native, 'extract_tool', lambda archive, target: (target / 'grobid-0.8.1').mkdir())
+    monkeypatch.setattr(native, 'extract_zip', lambda *args: None)
+    with pytest.raises(ValueError, match='build failed'):
+        native.install_grobid(tmp_path, Path('/conda'), spec)
+    assert not (tmp_path / '.local/grobid').exists()
+    assert not list((tmp_path / '.local').glob('grobid-install-*'))
+    assert (tmp_path / '.local/downloads/grobid.tar.gz').read_bytes() == b'cached download'
+
+
+def test_dependency_install_failure_records_environment_phase(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    cli = module('cli')
+    monkeypatch.setattr(cli, 'source_identity', lambda root: 'test-source')
+    monkeypatch.setattr(cli.environment, 'preflight', lambda *a, **k: [])
+    monkeypatch.setattr(cli.environment, 'find_environment', lambda root: (None, None))
+    def failed_install(root):
+        state = json.loads((root / '.local/deployment-state.json').read_text())
+        assert state['phase'] == 'environment'
+        raise ValueError('network unavailable')
+    monkeypatch.setattr(cli.environment, 'install', failed_install)
+    with pytest.raises(ValueError, match='network unavailable'):
+        cli.deploy(tmp_path, SimpleNamespace(bundle=None, check_only=False))
+    assert not (tmp_path / '.env').exists() and not (tmp_path / '.data').exists()
+
+
+def test_real_native_grobid_lifecycle_and_parsing():
+    """仅操作明确标记的人工安装，真实验证 Java、模型、PDF 与 Bash 启停。"""
+    location = os.environ.get('SCWIKI_TEST_GROBID_ROOT')
+    if not location:
+        pytest.skip('需要显式隔离 GROBID 本机安装')
+    root = Path(location).resolve()
+    assert (root / '.scwiki-test-instance').read_text().strip() == 'grobid-native-test'
+    assert root != ROOT and not (root / '.data').exists()
+    runtime = module('runtime')
+    assert not runtime.port_occupied(8070) and not runtime.port_occupied(8071)
+    shutil.copytree(ROOT / 'scripts', root / 'scripts', dirs_exist_ok=True)
+    module('bundle').write_json(root / '.local/deployment-environment.json', {'prefix': sys.prefix})
+    module('config').ensure_config(root)
+    manager = runtime.Runtime(root, Path(sys.prefix), {})
+    assert manager.owned_pid('grobid') is None
+    # PATH 中的 Docker 一旦被调用就留下标记；无需停止系统 Docker。
+    bindir = root / 'test-bin'
+    bindir.mkdir(exist_ok=True)
+    docker = bindir / 'docker'
+    docker.write_text('#!/bin/sh\ntouch "' + str(root / 'docker-called') + '"\nexit 99\n')
+    docker.chmod(0o755)
+    env = {**os.environ, 'PATH': str(bindir) + ':' + os.environ.get('PATH', '')}
+    def dev(action):
+        return subprocess.run(['bash', str(root / 'scripts/dev.sh'), action, 'grobid'],
+                              env=env, capture_output=True, text=True, timeout=220)
+    try:
+        result = dev('start')
+        assert result.returncode == 0, result.stdout + result.stderr
+        pid = manager.owned_pid('grobid')
+        assert pid
+        manager.check_ports()
+        result = dev('start')
+        assert result.returncode == 0, result.stdout + result.stderr
+        assert manager.owned_pid('grobid') == pid
+        import httpx
+        import fitz
+        with httpx.Client(trust_env=False, timeout=90) as client:
+            assert client.get('http://127.0.0.1:8070/api/isalive').text == 'true'
+            response = client.post('http://127.0.0.1:8070/api/processCitation', data={
+                'citations': 'J. Bardeen, L. N. Cooper, and J. R. Schrieffer. Theory of Superconductivity. Physical Review 108, 1175 (1957).',
+                'consolidateCitations': '0'})
+            assert response.status_code == 200 and 'Bardeen' in response.text
+            with fitz.open() as pdf:
+                page = pdf.new_page()
+                page.insert_text((72, 72), 'Local Deployment Test\n\nAn artificial superconductivity document.\n\nReferences\n'
+                                 'J. Bardeen, L. N. Cooper, and J. R. Schrieffer.\nTheory of Superconductivity. Physical Review 108, 1175 (1957).')
+                content = pdf.tobytes()
+            response = client.post('http://127.0.0.1:8070/api/processFulltextDocument',
+                                   files={'input': ('test.pdf', content, 'application/pdf')},
+                                   data={'consolidateHeader': '0', 'consolidateCitations': '0'})
+            assert response.status_code == 200 and '<TEI' in response.text, response.text[:500]
+    finally:
+        result = dev('stop')
+        assert result.returncode == 0, result.stdout + result.stderr
+    assert not runtime.port_occupied(8070) and not runtime.port_occupied(8071)
+    assert not (root / 'docker-called').exists()
 
 
 def test_source_restart_does_not_inherit_unrelated_debug_mode(monkeypatch, tmp_path):

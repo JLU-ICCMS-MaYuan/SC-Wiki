@@ -2,6 +2,72 @@
 
 **关联**：[Issue #112](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/112)、[Spec](spec.md)、[Tasks](tasks.md)
 
+## 完全本机部署与热重载修复（2026-09-22）
+
+用户明确取消本地部署的 Docker 依赖。本轮在 `mayuan` 的 `f24e504` 基础上修改，
+部署使用本轮工作树；完成提交前属于“运行环境领先于 Git”，不据此关闭整个 Issue。
+
+### 实现与来源
+
+- 预检、Neo4j 安装、GROBID 安装/启停与进程归属检查均不再调用 Docker；没有跳过必要服务。
+- Neo4j 5.26.29 使用官方发行归档与官方 Dockerfile 声明的 SHA-256。CDN 返回 403 后，
+  从发行对象存储下载成功，摘要为 `a45ca9644100d995500f7ea7f5bb4874e16e588891fdfbdff65d21321331caa2`；
+  该地址已加入固定备用来源，仅传输失败回退，摘要失败直接拒绝。
+- GROBID 0.8.1 官方源码、Wapiti 模型及原生库使用项目私有 Java 17.0.18、Gradle 7.6.4
+  构建。实测 `installDist` 遇到重复依赖，改用上游已配置重复处理的 `distZip` 后通过。
+  Java 17 不替换应用环境的 Java 21；API 8070 和管理接口 8071 均监听回环地址。
+- 实测发现安装器与 Go 启动脚本的 GOPATH/GOPROXY 不一致，导致安装后重复下载；现已
+  共用 `environment.go_environment()`，保留原运行脚本的模块源与缓存默认值、尊重显式覆盖。
+  不修改全局 Go 配置或系统代理，不关闭 TLS/模块校验。
+
+### 自动化与真实进程证据
+
+- 通用回归：`pytest-unit.log` 记录 **48 通过、4 跳过、1 未选择**；四项跳过为未配置的隔离
+  MySQL/Redis/Qdrant 测试，未选择项为单独执行的 GROBID 实测。之后新增 Go 配置回归，
+  Go/安装失败阶段/备用源专项 **3 通过**（其中两项是复验，不能重复计数）。
+- 显式人工 GROBID 实例：**1 通过**。真实构建、引用解析、PDF 转 TEI、双端口进程归属、
+  重复启动复用同一 PID、停止释放端口通过；PATH 中放置会失败的 Docker 命令，确认未调用。
+- 新增测试还覆盖 Docker 缺失/不可用不影响真实 CLI 预检、下载与构建失败不发布半成品、
+  未知目录不覆盖、ZIP 越界拒绝、备用源同摘要与缓存复用、安装失败正确记录 environment 阶段。
+- Bash 语法、`git diff --check`、受影响文档相对链接检查通过。
+
+### 当前机器完整部署
+
+环境为 Ubuntu 26.04 x86_64，使用已有 `/home/mayuan/soft/miniconda3/envs/sc-wiki`。
+起始不存在项目 `.env`、`.data` 或运行实例。本轮实际执行完整部署，结果为退出 0、
+`基础部署成功`、阶段 `complete`，而非只启动独立前端。
+
+- Python 依赖导入/`pip check`、npm 安装、Go 模块校验、全部本机基础服务安装通过。
+  首次 Go 官方源超时，单次命令指定项目原有模块镜像后通过；之后已修复共享 Go 配置。
+- MySQL 完整空库迁移建立 51 张表，保留 `20260914_0052`、`20260918_0108` 两个分支，
+  元素种子与真实 schema 核验通过；临时数据验证后提升为正式 `.data`。
+- `make status` 的 11 个服务均运行；数据库认证/查询、GROBID、前端 → Go → Python 的
+  `/api/form-definitions` 链路、上传 Worker 注册和资讯进程检查通过。访问入口为
+  `http://localhost:5173`（实际监听 `127.0.0.1:5173`）。
+- 在 Docker 命令被替换为失败桩的环境再次执行 `make deploy`，退出 0，没有调用 Docker；
+  `.env` SHA-256 与 operation_id 前后相同，没有重复初始化或旋转凭据。
+- 对 `frontend/src/App.tsx`、`backend/main.py`、`goserver/main.go` 临时添加注释探针：
+  收到 Vite WebSocket 的真实 `js-update`；Uvicorn 更换服务进程、Go 重编译启动、上传
+  Worker 更换进程并重新注册，随后健康检查恢复 200。移除探针后，三文件 SHA-256 与测试前
+  完全相同，没有把测试改动留进业务代码。
+
+本机诊断目录为 `/tmp/scwiki-native-112-HRYz9n`，主要日志为 `build-distzip.log`、
+`pytest.log`、`pytest-unit.log`、`deploy-native.log`、`redeploy.log`。人工实例已停止；
+仓库内正式新实例保留运行。第一次失败安装的状态文件只移到该临时目录保存，未清理用户数据。
+
+### 验收边界
+
+- 浏览器技能连接返回无可用浏览器，列表为空；没有执行页面点击/视觉验收，HTTP 和 HMR
+  协议测试不冒充浏览器验收。AI、Embedding、SMTP 未配置，没有调用付费模型或发送邮件。
+- 本机仓库位于 `fuseblk`，MySQL 初始化及迁移明显较慢；该挂载未呈现逐文件 0600 权限
+  （显示 0755），上层 `/home/mayuan` 为 0750。不能把本机结果当作多用户生产权限验收；
+  原生 Linux 文件系统权限与 Ubuntu 22.04/WSL2 干净环境矩阵仍由原任务跟踪。
+- 根 `README.md` 标明禁止 AI 自动编辑，已保留。人工修订建议：将本地部署章节的 Docker
+  前置说明替换为“所有组件在本机运行，依赖下载需要网络”，并继续链接已更新的本地指南。
+- npm 安装报告既有依赖审计告警；本次未执行会改变依赖契约的 `npm audit fix --force`。
+- 未完成跨用户名/跨机器完整搬迁、全故障矩阵及独立 Docker 目标恢复；T023、T026–T028、
+  T031–T033 等原未完成项保持未完成，Issue #112 不关闭。
+
 ## 当前机器本地依赖与存储验证（2026-09-21 晚间）
 
 本轮基于 `a8a69eb`，环境为 Ubuntu 26.04 x86_64。已在用户的 Conda 安装

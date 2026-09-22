@@ -39,9 +39,9 @@ PYTHON_PORT=8000
 GOSERVER_PORT=8080
 VITE_PORT=5173
 GROBID_PORT=8070
-GROBID_CONTAINER=scwiki-grobid
-GROBID_IMAGE=lfoppiano/grobid:0.8.1
-GROBID_JAVA_TOOL_OPTIONS=-XX:-UseContainerSupport
+GROBID_ADMIN_PORT=8071
+GROBID_HOME="$LOCAL_DIR/grobid"
+GROBID_JAVA_HOME="$LOCAL_DIR/grobid-java"
 
 # MySQL socket 与配置：必须与系统 MySQL 完全隔离。
 # /etc/mysql/my.cnf 含 user=mysql 与 log_error=/var/log/mysql/error.log，
@@ -69,15 +69,16 @@ load_env() {
   loader_pid=$!
   wait "$loader_pid" || die ".env 格式无效"
   if (( ${#entries[@]} )); then export "${entries[@]}"; fi
+  local go_entries=() go_loader_pid
+  mapfile -d '' -t go_entries < <(cd "$REPO_ROOT" && python3 -m scripts.local_deploy.environment "$REPO_ROOT" --go-env)
+  go_loader_pid=$!
+  wait "$go_loader_pid" || die "Go 环境配置读取失败"
+  export "${go_entries[@]}"
   export PATH="$PY_BIN:$GO_ROOT/bin:$PATH"
   export PYTHONNOUSERSITE=1
   if [[ -n ${SCWIKI_DEPLOY_DATA_DIR:-} ]]; then
     DATA_DIR="$SCWIKI_DEPLOY_DATA_DIR"
     export SC_WIKI_DATA_DIR="$DATA_DIR" AVATAR_DIR="$DATA_DIR/avatars"
-  fi
-  if [[ -f "$LOCAL_DIR/deployment-state.json" ]]; then
-    GROBID_IMAGE="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["grobid"]["image"])' "$REPO_ROOT/scripts/local-deploy-versions.json")"
-    GROBID_CONTAINER="scwiki-grobid-$(printf '%s' "$REPO_ROOT" | sha256sum | cut -c1-12)"
   fi
 }
 

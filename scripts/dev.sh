@@ -104,23 +104,25 @@ start_qdrant() {
   ok "qdrant 127.0.0.1:$QDRANT_PORT"
 }
 
-# GROBID 使用项目已固定版本的 Docker 镜像，但仅绑定本机回环地址。
-# 其余本地开发服务仍使用宿主机进程；该镜像避免额外维护 Java 模型安装。
+# GROBID 与其他服务一样使用本机进程，独立 Java 不影响 Neo4j。
 grobid_ready() { local_curl -sf --max-time 3 "http://127.0.0.1:$GROBID_PORT/api/isalive" >/dev/null 2>&1; }
 
 start_grobid() {
-  grobid_ready && { ok "grobid 已在运行"; return; }
-  command -v docker >/dev/null 2>&1 || die "缺少 Docker，无法启动 GROBID"
-  if docker container inspect "$GROBID_CONTAINER" >/dev/null 2>&1; then
-    # GROBID 不保存状态；删除已停止实例可确保 Java 运行参数变更立即生效。
-    docker rm --force "$GROBID_CONTAINER" >>"$LOG_DIR/grobid.log" 2>&1 || die "旧 GROBID 容器清理失败"
+  # 旧实例也检查归属，不能仅凭 /isalive 接管其他服务。
+  ( cd "$REPO_ROOT" && "$PY_BIN/python" -m scripts.local_deploy.runtime "$REPO_ROOT" ) \
+    || die "GROBID 启动前端口归属检查失败"
+  if pid_alive grobid; then
+    grobid_ready || die "GROBID 进程存在但未就绪，见 $LOG_DIR/grobid.log"
+    ok "grobid 已在运行"; return
   fi
+  [[ -x "$GROBID_HOME/grobid-service/bin/grobid-service" && -x "$GROBID_JAVA_HOME/bin/java" ]] \
+    || die "缺少本机 GROBID，请执行 make deploy"
   port_busy "$GROBID_PORT" && die "端口 $GROBID_PORT 已被占用"
-  docker run --detach --name "$GROBID_CONTAINER" \
-    --label "scwiki.root=$REPO_ROOT" \
-    --env "JAVA_TOOL_OPTIONS=$GROBID_JAVA_TOOL_OPTIONS" \
-    --publish "127.0.0.1:$GROBID_PORT:8070" "$GROBID_IMAGE" \
-    >>"$LOG_DIR/grobid.log" 2>&1 || die "GROBID 容器创建失败"
+  port_busy "$GROBID_ADMIN_PORT" && die "端口 $GROBID_ADMIN_PORT 已被占用"
+  ( cd "$GROBID_HOME" && spawn grobid env JAVA_HOME="$GROBID_JAVA_HOME" \
+      LD_LIBRARY_PATH="$GROBID_JAVA_HOME/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+      GROBID_SERVICE_OPTS="-Xmx2g -Djava.library.path=grobid-home/lib/lin-64 --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED" \
+      "$GROBID_HOME/grobid-service/bin/grobid-service" )
   wait_for 180 "grobid" grobid_ready || die "GROBID 启动失败，见 $LOG_DIR/grobid.log"
   ok "grobid 127.0.0.1:$GROBID_PORT"
 }
@@ -231,9 +233,9 @@ stop_neo4j() {
 }
 
 stop_grobid() {
-  if command -v docker >/dev/null 2>&1 && docker container inspect "$GROBID_CONTAINER" >/dev/null 2>&1; then
-    docker stop "$GROBID_CONTAINER" >>"$LOG_DIR/grobid.log" 2>&1 || true
-  fi
+  ( cd "$REPO_ROOT" && "$PY_BIN/python" -c 'from pathlib import Path; from scripts.local_deploy.runtime import Runtime; Runtime(Path.cwd(), Path.cwd(), {}).owned_pid("grobid")' ) \
+    || die "GROBID PID 归属不明，拒绝停止"
+  stop_pid grobid
   ok "grobid 已停止"
 }
 

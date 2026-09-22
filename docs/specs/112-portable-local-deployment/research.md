@@ -27,17 +27,35 @@
 
 ## 决策及理由
 
-### 1. 保留宿主机应用和 GROBID 容器
+### 1. 全部本地组件使用宿主机进程（2026-09-22 修正）
 
-本地目标复用 `dev.sh` 的服务编排，修正环境定位和初始化边界，满足复用 `sc-wiki` 的要求。保留本地部署的 Docker 前置检查，不自动安装系统服务。用户现已确认同包还须支持 Docker 目标，相关适配见下文，不能继续将 Docker 恢复排除在需求之外。Node 采用 22 LTS，Python 采用 3.12，Java 采用 21，MySQL 采用 8.4 系列；具体构建版本统一进入受测版本清单。
+用户已明确取消本地 Docker 依赖。复用 `dev.sh` 的服务编排，Neo4j 从官方发行包安装，
+GROBID 从官方 0.8.1 源码构建，使用源码默认 Wapiti 模型、pdfalto 和原生库；不改变解析 API。
+官方 `Dockerfile.crf` 同样采用 Java 17 构建及运行这些资源，因此项目私有 Java 17 用于
+GROBID，Java 21 继续供 Neo4j 使用；Gradle 固定为支持 Java 17 的 7.6.4。
+不替换系统 Java、不修改用户 shell、不引入 Docker 命令回退。
+Node 22、Python 3.12、MySQL 8.4 及其余存储版本保持原契约。
+同包 Docker 目标仍属于独立待实现范围，不能与本地部署前置条件混合。
 
 采用 Go 1.25.14、Neo4j 5.26.29、Qdrant 1.19.0、GROBID 0.8.1。实现已固定官方来源与
 SHA-256/镜像摘要，Miniforge、Go 和 Qdrant 的实际下载校验通过；完整安装入口和平台
 矩阵仍单独验收。不使用浮动 `latest` 或未经校验的代理下载。
 
+新安装来源的证据为官方 `neo4j/docker-neo4j-publish` 的 5.26.29 Dockerfile 中的发行包
+URL/SHA-256、GROBID 0.8.1 标签源码与 Gradle 官方摘要。官方地址不可达仍须明确失败，
+不跳过校验、不假装部署完成；旧容器不会被本地启停命令删除或接管。
+
+当前机器 Neo4j CDN 返回 403，但 `s3.eu-west-1.amazonaws.com/dist.neo4j.org/` 的同名
+发行对象可下载，已验证其 SHA-256 与官方 Dockerfile 声明完全相同。将此地址列为该
+制品的备用来源，只有传输失败才回退，摘要错误直接失败；不修改 DNS、系统代理或 TLS 校验。
+
 ### 2. 一份部署配置事实来源
 
 Conda 查找顺序为显式 `CONDA_EXE`、`PATH`、已有 `CONDA_ROOT`、常见安装位置、项目私有安装。通过 `conda env list --json` 获取环境前缀；多处同名且无法唯一定位时要求显式选择，不猜路径。所有 Python/pip 调用使用选定环境的绝对路径；Node、Java、MySQL、Redis 优先在同一环境提供，Go/Neo4j/Qdrant 放项目运行目录。
+
+Go 安装检查与 `goserver-run.sh` 共用 `environment.go_environment()`，避免两阶段使用
+不同 GOPATH/GOPROXY 重复下载。默认保留原运行脚本的 `~/.local/gopath`、
+`~/.cache/go-build` 和 `https://goproxy.cn,direct`；显式进程配置优先，不写全局设置。
 
 配置生成器使用标准库解析和渲染，拒绝命令替换、反引号和任意 shell 代码；保留普通 dotenv 的引号与 `${NAME}` 引用语义。服务启动同样改用解析后的环境，不继续 `source .env`。新 `.env` 权限为 0600，旧 `.env` 字节保持不变；不兼容配置需要用户修正后重试。
 

@@ -13,7 +13,7 @@ Makefile 保留薄入口；Bash 负责最初的系统检查与 Conda 引导，Py
 ## 技术上下文
 
 - **语言**：Bash、Python 3.12；现有 Go 服务要求 Go 1.25 系列；前端 React 19/Vite 5，使用 Node 22 LTS。
-- **存储**：MySQL 8.4、Redis、Neo4j 5.26.29、Qdrant 1.19.0；GROBID 0.8.1 容器。
+- **存储**：MySQL 8.4、Redis、Neo4j 5.26.29、Qdrant 1.19.0；GROBID 0.8.1 本机 Java 服务。
 - **依赖入口**：`docker/requirements.txt`、`frontend/package-lock.json`、`goserver/go.mod` 与 `go.sum`。补充本地部署的版本与校验清单，不复制整套依赖定义。
 - **平台**：Ubuntu 22.04 x86_64 为验收基线，含 WSL2；用户已取消 Ubuntu 24.04 的必需验收，不把该平台测试作为提交门槛。
 - **测试**：pytest、现有隔离 MySQL 迁移测试、Shell 语法检查、真实数据库导出恢复、浏览器/API 冒烟和干净机器演练。
@@ -39,6 +39,7 @@ Makefile 保留薄入口；Bash 负责最初的系统检查与 Conda 引导，Py
 | --- | --- |
 | `Makefile`、`scripts/locallydeploy.sh`、`scripts/pack.sh` | 参数转交、最早预检、引导解释器；不在 Make 配方拼接数据或密钥。 |
 | `scripts/local_deploy/` | `cli.py` 编排；`environment.py` 环境发现与版本检查；`config.py` 安全配置；`bundle.py` 清单/归档；`storage.py` 导出恢复；`paths.py` 字段级路径转换；`state.py` 幂等与失败恢复。 |
+| `scripts/local_deploy/native.py` | Neo4j 官方归档安装、GROBID 本机构建与 Java 隔离；共用下载校验，不引入另一套运行编排。 |
 | `scripts/local-deploy-versions.json` | 经验证的版本、下载源、摘要、平台、源码迁移头集合。 |
 | `scripts/local-deploy-schema.json`、`schema.py` | 保存真实完整迁移的受测结构快照；核验各表列、主外键、唯一和检查约束。 |
 | `scripts/local_deploy/runtime.py` | 确认进程归属、配置临时数据库、停写与恢复原运行状态。 |
@@ -50,11 +51,11 @@ Makefile 保留薄入口；Bash 负责最初的系统检查与 Conda 引导，Py
 
 ## 环境与配置流程
 
-1. 检查系统前置条件、平台、目标状态及包完整性，汇总错误。Docker 必须存在且当前用户可调用；不修改系统用户组。
+1. 检查系统前置条件、平台、目标状态及包完整性，汇总错误。本地流程不检查、调用或安装 Docker；不修改系统用户组。
 2. 按 Research 的顺序定位 Conda；无 Conda 时将经校验的 Miniforge 安装到 `.local/miniforge`。环境创建和依赖安装只操作选中的 `sc-wiki`；已有 Python 非 3.12 则失败。
 3. 验证/安装固定版本基础服务，Python 使用选定环境的 `python -m pip`，前端使用 `npm ci`，Go 使用模块校验。完成后执行 `pip check`、关键模块导入和各服务版本检查；把实际版本写入部署记录。
 4. 缺少 `.env` 时，生成独立 MySQL/Neo4j/JWT 凭据和本机绝对数据目录；`DATABASE_URL` 与 `RAG_DATABASE_URL` 指向同一业务库，分别使用同步/异步驱动。URL 密码正确编码，凭据不进入进程参数或普通日志。
-5. 保持当前默认端口，不自动寻找替代端口：MySQL 3307、Redis 6379、Neo4j 17687/7474、Qdrant 6333/6334、Python 8000、Go 8080、前端 5173、GROBID 8070。端口冲突应明确阻断；即使健康端点返回成功，也要验证进程/容器属于本项目。
+5. 保持当前默认端口，不自动寻找替代端口：MySQL 3307、Redis 6379、Neo4j 17687/7474、Qdrant 6333/6334、Python 8000、Go 8080、前端 5173、GROBID 8070/8071（后者为管理接口）。端口冲突应明确阻断；即使健康端点返回成功，也要验证进程组属于本项目。
 6. 便携部署的应用与数据库监听回环地址；前端通过启动参数覆盖现有 Vite `0.0.0.0` 默认。不改防火墙、系统 PATH 或 shell 初始化文件。
 
 ## 打包流程
@@ -71,8 +72,22 @@ MySQL 事件及跨库外键检查在停服务前执行，导出前后复用相�
 5. 源码来自 `git archive HEAD`，归档顶层为 `sc-wiki/`，数据在该目录的 `.deployment/`。先写临时产物，所有组件成功后原子发布压缩包及外部 SHA-256 文件。
 6. 无论成功或失败，尝试恢复原运行状态；不得调用旧迁移步骤改变源库。源恢复失败返回非零，输出已生成包的位置和服务失败清单，避免把“包存在”误报为整个操作成功。
 
-打包不检查 GROBID 容器名称或归属：GROBID 无迁移业务数据，打包不启停该服务。
-数据库与应用进程归属仍必须验证；部署启动仍检查 GROBID 归属，不能借此复用未知容器。
+打包不检查 GROBID 归属：GROBID 无迁移业务数据，打包不启停该服务。
+数据库与应用进程归属仍必须验证；部署启动检查 GROBID 的本机进程组，不能复用未知监听者。
+
+### 无 Docker 本地安装修正（2026-09-22）
+
+Neo4j 改用官方发行 tar.gz 和官方固定 SHA-256；CDN 无法访问时使用版本清单中的发行
+对象存储地址，同一 SHA-256 约束不变，摘要错误则直接拒绝。GROBID 使用官方 0.8.1 源码归档、原有
+Wapiti 模型和原生库构建发行目录；Gradle 7.6.4 与项目私有 Java 17 运行该构建及服务，
+Neo4j 继续使用 `sc-wiki` 中的 Java 21，避免相互替换。版本、来源和摘要集中在版本清单。
+只在临时目录完整构建、核验后发布 `.local/grobid`；失败不留下看似安装成功的目录。
+GROBID API 与管理接口都绑定回环地址，使用既有 PID/日志/进程组机制启停。
+端口被旧容器或其他进程占用时明确拒绝，不自动停止未知服务。
+
+需求映射：FR-002/004/019 → 本机安装器、共享启停和进程归属 → T035–T037 →
+无 Docker 的真实 CLI 预检、本机 GROBID 生命周期与解析验证、下载失败保护。
+CHK019 仅阻断 Docker 目标 T031–T033，不属于本次用户已确认的本地修复。
 
 ## Docker 目标适配方案（待设计确认与实现）
 

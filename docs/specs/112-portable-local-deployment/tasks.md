@@ -133,3 +133,14 @@ T004/T007/T008/T012/T017 的剩余项以实际矩阵为准，不因相关代码�
 两种目标需求已确认，Docker 具体适配设计与实现仍待完成。
 
 - [x] T034 [US2] 修复 MySQL 调度 ON 但无事件时误拒绝；停服务前只读核验全实例事件与线程、管理员可见性和实例 UUID，导出前后与发布前复核。补齐无事件/禁用/启用/运行中/权限不足/错误实例回归，并实际执行用户当前实例 `make frozen`、检查包与源服务恢复。来源 FR-009/014/017；40 项回归、独立 MySQL 原生往返及当前实例完整冻结/逐文件校验/服务健康均通过，证据见 validation.md。
+
+## 阶段 9：本地部署彻底移除 Docker 依赖
+
+用户于 2026-09-22 明确确认本机部署范围；以下任务替代 T008/T029 中已过时的 Docker
+前置设计，不把原诊断改进当作本次修复证据。FR-019 同时覆盖 US1/US3。
+
+- [x] T035 [US1] 在 `tests/02_maintenance_and_verification/test_local_deployment.py` 验证 Docker 缺失或不可用均不影响真实本地 CLI 预检，补充本机 GROBID 双端口归属、启停及安装失败保护测试。来源 FR-002/004/014/017/019；通用回归与真实本机 GROBID 引用/PDF 解析、启停通过，证据见 validation.md。
+- [x] T036 [US1] 在 `scripts/local_deploy/environment.py`、`native.py`、`scripts/local-deploy-versions.json`、`scripts/dev.sh`、`scripts/lib-local.sh`、`scripts/local_deploy/runtime.py` 实现官方校验的 Neo4j/GROBID 本机安装、Java 隔离、回环监听与 PID 管理；不调用 Docker，保留源码重载和完整健康检查。来源 FR-002/004/015/019；本机完整部署、重跑和前端/Python/Go/上传 Worker 重载均通过。
+- [x] T037 [US1] 在 `docs/specs/112-portable-local-deployment/validation.md` 记录真实安装、GROBID 解析、完整部署和重跑结果；同步 `docs/local-dev.md`、CLI/Quickstart 和 Overview；根 `README.md` 遵循禁止自动编辑标记，只记录人工修订建议。区分代码、局部测试、完整部署及外部网络阻塞，不替代 T023 平台矩阵。来源 FR-017/019、SC-001/004/006。
+
+依赖：T035 → T036 → T037；不依赖 Docker 目标 T031–T033，不扩大本轮为 Docker 恢复实现。

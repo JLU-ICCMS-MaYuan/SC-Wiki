@@ -18,10 +18,10 @@
 
 ### 本地开发：宿主机进程（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)）
 
-- 本地开发的应用服务运行在宿主机，由 `scripts/dev.sh` 编排，入口为 `Makefile`（`make start` / `stop` / `status` / `logs`）。GROBID 是唯一容器化例外，固定使用 `lfoppiano/grobid:0.8.1` 并仅绑定 `127.0.0.1:8070`，避免本地维护 Java 模型。
+- 本地服务全部运行在宿主机，由 `scripts/dev.sh` 编排，入口为 `Makefile`（`make start` / `stop` / `status` / `logs`）。GROBID 0.8.1 从官方源码、默认 Wapiti 模型及原生库构建，使用 `.local/grobid-java` 中独立 Java 17，API 8070 和管理接口 8071 均绑定回环地址；本地安装与启停不调用 Docker。
 - 请求链路为浏览器 → Vite 5173 →（`/api` 代理）→ goserver 8080 →（未匹配路由反代）→ uvicorn 8000。两段代理均为既有实现，本地化未修改 `backend/` 与 `goserver/` 源码。
 - 前端 Vite HMR、Python `uvicorn --reload`、goserver 文件监听重编译和上传 Worker 的 `watchfiles` 包装支持代码变更重载。Go 编译失败时保留旧进程继续服务。资讯 Worker 和 Scheduler 无热重载包装，修改代码后须重启相应进程。
-- 四个基础服务来自本机安装而非容器：MySQL 8.4.2、Redis 8.10.1 与 Neo4j 所需的 OpenJDK 21 均来自 conda 环境 `sc-wiki`；Neo4j 5.26.29 与 Qdrant 1.19.0 为 `.local/` 下的独立安装。应用 Python 依赖也使用该环境。
+- 四个存储服务来自本机安装而非容器：MySQL 8.4.2、Redis 8.10.1 与 Neo4j 所需的 OpenJDK 21 均来自 conda 环境 `sc-wiki`；Neo4j 5.26.29 使用官方发行归档，和 Qdrant 1.19.0 一样安装在 `.local/`。应用 Python 依赖也使用 `sc-wiki`。
 - MySQL 监听 3307 而非 3306：宿主机 3306 已被与本项目无关的系统级 MySQL 占用。
 - 本地 Neo4j 的 Bolt 连接使用 `127.0.0.1:17687`，HTTP 管理入口保持 `127.0.0.1:7474`；客户端连接地址、监听地址与公布地址一致。该约定避开本机曾发生的 Windows 向日葵占用 7687 问题，不改变 Docker 生产端口。
 - 全部数据存放于仓库内 `.data/`（四个数据库的数据目录、上传文件、解析产物、头像），运行时产物在 `.local/`（二进制、MySQL 配置、pid、日志）。两者均已 gitignore。
@@ -45,10 +45,18 @@
 3. `make start` 启动全部服务，按依赖顺序等待健康检查。便携实例核验进程归属和真实 schema，只核验、不升级数据库；没有便携记录的旧实例保留原迁移启动路径。
 4. 浏览器访问 `http://127.0.0.1:5173`。`make status` 查看各服务状态，`make logs S=<服务>` 跟踪日志。
 
-部署前置检查区分 Docker 命令缺失与服务不可用，阻塞报告通过 `next_steps` 提供处理建议，
+部署前置检查不要求 Docker，阻塞报告通过 `next_steps` 提供处理建议，
 并包含 `error_code=preflight_failed`、`phase=preflight`。系统或目标预检阻塞时，Conda
 状态显示“未检查”，不能据此推断需要创建环境。此阶段只输出报告，不创建配置或运行数据。
-Docker 仍是提取 Neo4j 安装文件和运行 GROBID 的前置条件，安装器不自动安装系统 Docker。
+Neo4j/GROBID 来源和摘要由统一版本清单固定；网络下载失败不会转用 Docker 或跳过服务。
+本机 GROBID 的真实引用/PDF 解析、重复启动和停止已验证；Neo4j CDN 返回 403 时可使用
+版本清单中的发行对象存储备用地址，仍验证同一个官方 SHA-256。当前 Ubuntu 26.04
+机器已完成整套无 Docker 空库部署、重复部署和源码重载验证；预检通过仍不代表后续网络
+安装必然成功，也不能替代其他平台或跨机器恢复验收。
+
+Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既有模块镜像，
+显式进程配置优先；不修改全局 Go 设置，保留模块校验。GROBID 单独使用 Java 17，
+不会替换 Neo4j 的 Java 21。
 
 `make frozen` 以干净 HEAD 的源码和业务数据生成迁移包。外部凭据不进入包；源端停写后
 导出 MySQL、Neo4j、Qdrant 和 Redis 上传草稿，结束后恢复应用。Redis 草稿恢复会同步
@@ -87,7 +95,7 @@ Docker 仍是提取 Neo4j 安装文件和运行 GROBID 的前置条件，安装�
 - 密钥只能通过环境变量注入，文档不记录实际凭据。Go 邮件配置支持 `SMTP_HOST`、`SMTP_PORT`、`SMTP_USER`/`SMTP_USERNAME`、`SMTP_PASSWORD`、`SMTP_FROM` 和 `SMTP_TLS_MODE`。
 - `AVATAR_DIR` 默认为数据目录下 `avatars`，Compose 固定为 `/data/avatars` 并挂载宿主 `docker/data/avatars`；部署备份需包含该目录。
 - `docker/deploy/README.md` 中的镜像标签、归档文件和导入命令属于交付包说明，发布前需要按实际归档核验。
-- 本地开发环境只使用 conda 环境 `sc-wiki`；其 Python、MySQL、Redis 和 OpenJDK 包均由 conda 统一管理。
+- 本地应用 Python、MySQL、Redis 和 OpenJDK 21 由 conda 环境 `sc-wiki` 管理；GROBID Java 17 位于项目私有前缀，不替换系统 Java 或应用环境的 Java 21。
 - 本地 MySQL 客户端命令必须带 `--defaults-file`：系统 `/etc/mysql/my.cnf` 含 `user = mysql` 与指向 `/var/log/mysql/` 的错误日志路径，以普通用户启动会失败。
 - 本地开发链路不含 nginx，`docker/nginx.conf` 中的 `client_max_body_size`、`proxy_request_buffering off` 与 `Accept-Encoding` 清空均不生效；`vite build` 期生效的 `removeHeavyPreloads` 与 `manualChunks` 在 dev 模式下同样不走。这不影响改动进入镜像（镜像内会重新构建源码），但同一份代码在两条链路下的上传与首屏行为可能不同，详见「本地改动如何进入 Docker 部署」。
 - 当前 WSL `networkingMode=mirrored` 本地开发环境中，UFW 必须保持停止且禁止开机启动。宝塔安装器启用 UFW 并设置默认拒绝策略后，`loopback0` 上的 localhost TCP 流量会被拦截，导致 VS Code Remote WSL 和 Windows 访问本地服务失败。该约束只适用于当前 WSL 本地开发环境，不改变生产服务器的防火墙策略（[Issue #89](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/89)）。
@@ -105,6 +113,8 @@ Docker 仍是提取 Neo4j 安装文件和运行 GROBID 的前置条件，安装�
 - `Makefile`
 - `scripts/lib-local.sh`
 - `scripts/setup-local.sh`
+- `scripts/local_deploy/native.py`
+- `scripts/local_deploy/environment.py`
 - `scripts/dev.sh`
 - `scripts/goserver-watch.sh`
 - `scripts/goserver-run.sh`

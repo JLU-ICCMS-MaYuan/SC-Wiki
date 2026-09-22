@@ -75,7 +75,7 @@ Python API、迁移和后台任务已经共用镜像，不需要为每个进程�
 
 ### 3.2 本地开发
 
-现有入口是 `make start`、`make stop`、`make status` 和 `make logs S=python`。应用及主要数据库使用宿主机进程，GROBID 仍使用固定版本的 Docker 镜像。
+首次准备使用 `make deploy`，日常入口是 `make start`、`make stop`、`make status` 和 `make logs S=python`。应用、数据库和 GROBID 全部使用宿主机进程，本地安装与启停不需要 Docker；官方依赖下载仍需要可用网络。
 
 - 前端使用 Vite 热更新；Python API 使用 Uvicorn 自动重载；Go 由文件监听触发重编译。
 - 上传 Worker 使用 `watchfiles` 监听 Python 代码；资讯 Worker 和 Scheduler 没有同样的重载包装，修改后需要重启相应进程。
@@ -177,7 +177,7 @@ ssh -N -L 15173:127.0.0.1:5173 devuser@dev-host
 | 端口、容器名和运行目录 | 防止启动、健康检查和停止操作命中另一套服务 |
 | 凭据与外部调用 | 开发邮件、模型调用和定时任务应使用明确的开发配置，避免误发及额外费用 |
 
-**当前仓库尚未提供完整的同机多环境隔离。** `scripts/lib-local.sh` 固定了 MySQL 3307、Redis 6379、Python 8000、Go 8080、Vite 5173 等端口，以及 GROBID 容器名 `scwiki-grobid`。`scripts/gen-env.py` 也使用本地连接配置；仅复制仓库或换 `.env` 不能保证两套服务独立。GROBID 启动逻辑可能重建同名容器，因此共用 Docker daemon 时还要避免容器名冲突。
+**当前仓库尚未提供完整的同机多环境隔离。** `scripts/lib-local.sh` 固定了 MySQL 3307、Redis 6379、Python 8000、Go 8080、Vite 5173 和 GROBID 8070/8071 等端口。`scripts/gen-env.py` 也使用本地连接配置；仅复制仓库或换 `.env` 不能保证两套服务独立。本地 GROBID 已改用 PID/进程组管理，未知监听者会阻断启动，不再重建同名容器。
 
 Compose 的 `-p` 项目名通常能分开默认网络与命名卷，但**不能自动分开相同的宿主机绑定目录和端口**。当前 Compose 发布 `80`、`3306`、`7474`、`7687`、`6333`，没有限定 `127.0.0.1`；在服务器上应按实际访问需求收窄数据库端口，不能直接把开发数据库暴露到公网。
 

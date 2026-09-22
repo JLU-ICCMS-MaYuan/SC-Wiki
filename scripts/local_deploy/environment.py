@@ -10,22 +10,16 @@ import socket
 import subprocess
 import tarfile
 import tempfile
-import urllib.request
-import uuid
 
 from .bundle import digest, write_json
 
-PORTS = (3307, 6379, 17687, 7474, 6333, 6334, 8000, 8080, 5173, 8070)
+PORTS = (3307, 6379, 17687, 7474, 6333, 6334, 8000, 8080, 5173, 8070, 8071)
 
 
 def preflight_guidance(problems: list[str]) -> list[str]:
     """为可修复的前置失败提供不涉及凭据的下一步提示。"""
     guidance = []
-    if '缺少系统前置工具 docker' in problems:
-        guidance.append('Docker 用于提取 Neo4j 安装文件和运行 GROBID；请按 https://docs.docker.com/engine/install/ 安装并启动 Docker，使用 docker info 验证后重跑 make deploy CHECK_ONLY=1')
-    if 'Docker 未运行或当前用户无访问权限' in problems:
-        guidance.append('请启动 Docker daemon，并确认当前用户有 Docker socket 权限；可先运行 docker info 验证')
-    if any(problem.startswith('缺少系统前置工具 ') for problem in problems if problem != '缺少系统前置工具 docker'):
+    if any(problem.startswith('缺少系统前置工具 ') for problem in problems):
         guidance.append('请先安装报告中缺少的系统工具，再重新运行 make deploy CHECK_ONLY=1')
     if any(problem.startswith('端口 ') for problem in problems):
         guidance.append('请用 ss -ltnp 确认端口占用者，确认可以停止对应服务后再处理冲突并重新预检')
@@ -101,10 +95,22 @@ def runtime_prefix(root: Path) -> Path:
     return prefix
 
 
+def go_environment() -> dict[str, str]:
+    """安装器与源码重载共用 Go 缓存/模块源，显式配置优先。"""
+    defaults = {'GOPATH': str(Path.home() / '.local/gopath'),
+                'GOCACHE': str(Path.home() / '.cache/go-build'),
+                'GOPROXY': 'https://goproxy.cn,direct'}
+    return {key: os.environ.get(key) or value for key, value in defaults.items()}
+
+
 if __name__ == '__main__':
     import sys
     try:
-        print(runtime_prefix(Path(sys.argv[1])))
+        if sys.argv[2:] == ['--go-env']:
+            for key, value in go_environment().items():
+                sys.stdout.write(f'{key}={value}\0')
+        else:
+            print(runtime_prefix(Path(sys.argv[1])))
     except (ValueError, OSError) as exc:
         print(str(exc), file=sys.stderr)
         raise SystemExit(2)
@@ -114,16 +120,11 @@ def preflight(root: Path, *, occupied_ok=False) -> list[str]:
     problems = []
     if platform.system() != 'Linux' or platform.machine() not in ('x86_64', 'amd64'):
         problems.append('首版只支持 Linux x86_64 / WSL2 Ubuntu')
-    for name in ('bash', 'make', 'curl', 'tar', 'docker', 'setsid', 'ss'):
+    for name in ('bash', 'make', 'curl', 'tar', 'setsid', 'ss'):
         if not shutil.which(name):
             problems.append(f'缺少系统前置工具 {name}')
     if not (root / 'scripts/local-deploy-versions.json').is_file():
         problems.append('目标不是包含部署脚本的完整源码目录')
-    if shutil.which('docker'):
-        try:
-            run(['docker', 'info', '--format', '{{.ServerVersion}}'], capture=True, timeout=15)
-        except (ValueError, subprocess.TimeoutExpired):
-            problems.append('Docker 未运行或当前用户无访问权限')
     if not os.access(root, os.W_OK):
         problems.append('目标目录不可写')
     if not occupied_ok:
@@ -145,8 +146,17 @@ def download(item: dict, target: Path):
     target.parent.mkdir(parents=True, exist_ok=True)
     temporary = target.with_name(target.name + '.partial')
     try:
-        run(['curl', '--fail', '--location', '--proto', '=https', '--connect-timeout', '20',
-             '--max-time', '1200', '--retry', '2', '--output', temporary, item['url']])
+        print(f'下载并校验本机依赖：{target.name}', flush=True)
+        urls = [item['url'], *item.get('fallback_urls', [])]
+        for index, url in enumerate(urls):
+            try:
+                run(['curl', '--fail', '--location', '--proto', '=https', '--connect-timeout', '20',
+                     '--max-time', '1200', '--retry', '2', '--output', temporary, url])
+                break
+            except (ValueError, subprocess.TimeoutExpired) as exc:
+                if index == len(urls) - 1:
+                    raise ValueError(f'{target.name} 下载失败；请检查官方源的网络可达性，或将相同版本的官方文件放到 {target} 后重试（仍校验 SHA-256）') from exc
+                print(f'{target.name} 主下载地址不可达，尝试版本清单内的备用地址', flush=True)
         if digest(temporary) != item['sha256']:
             raise ValueError('下载校验失败，拒绝执行安装文件')
         os.replace(temporary, target)
@@ -178,7 +188,8 @@ def install(root: Path) -> Path:
              *spec['conda_packages']])
     if prefix is None:
         raise ValueError('sc-wiki 环境创建后无法定位')
-    process_env = {**os.environ, 'PYTHONNOUSERSITE': '1', 'PATH': f'{prefix}/bin:' + os.environ.get('PATH', '')}
+    process_env = {**os.environ, **go_environment(), 'PYTHONNOUSERSITE': '1',
+                   'PATH': f'{prefix}/bin:' + os.environ.get('PATH', '')}
     run([prefix / 'bin/python', '-m', 'pip', 'install', '-r', root / 'docker/requirements.txt'], env=process_env)
     run([prefix / 'bin/python', '-m', 'pip', 'check'], env=process_env)
     run([prefix / 'bin/python', '-c', 'import fastapi,pymysql,redis,rq,neo4j,qdrant_client,pymatgen,alembic,watchfiles'], env=process_env)
@@ -204,25 +215,9 @@ def install(root: Path) -> Path:
                     shutil.copy2(Path(temporary) / 'qdrant', binary)
     run([local / 'go/bin/go', 'mod', 'download'], cwd=root / 'goserver', env=process_env)
     run([local / 'go/bin/go', 'mod', 'verify'], cwd=root / 'goserver', env=process_env)
-    neo = local / 'neo4j'
-    if not (neo / 'bin/neo4j').exists():
-        image = spec['neo4j']['image']
-        run(['docker', 'pull', image])
-        name = 'scwiki-install-' + uuid.uuid4().hex[:12]
-        run(['docker', 'create', '--name', name, image], capture=True)
-        try:
-            with tempfile.TemporaryDirectory(dir=local) as temporary:
-                run(['docker', 'cp', name + ':/var/lib/neo4j', temporary])
-                shutil.move(str(Path(temporary) / 'neo4j'), neo)
-                for directory in ('data', 'logs'):
-                    if (neo / directory).is_symlink():
-                        (neo / directory).unlink()
-        finally:
-            run(['docker', 'rm', name], capture=True)
-    actual = run([neo / 'bin/neo4j', '--version'], env={**process_env, 'JAVA_HOME': str(prefix)}, capture=True)
-    if spec['neo4j']['version'] not in actual:
-        raise ValueError('Neo4j 版本不兼容')
-    run(['docker', 'pull', spec['grobid']['image']])
+    from .native import install_neo4j, install_grobid
+    install_neo4j(root, prefix, spec['neo4j'])
+    install_grobid(root, conda, spec['grobid'])
     actual_packages = json.loads(run([conda, 'list', '-p', prefix, '--json'], capture=True))
     write_json(local / 'deployment-environment.json', {'prefix': str(prefix), 'conda': str(conda),
                'versions_digest': digest(root / 'scripts/local-deploy-versions.json'),

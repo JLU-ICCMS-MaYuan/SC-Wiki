@@ -1,8 +1,7 @@
 # 本地开发环境
 
-应用服务跑在宿主机，改代码立即生效。GROBID 是唯一例外：它以
-`lfoppiano/grobid:0.8.1` 容器运行，并且只绑定 `127.0.0.1:8070`，避免在本机
-维护 Java 模型与运行时。
+全部本地服务（包括 GROBID）使用宿主机进程，不需要安装或启动 Docker。
+前端、Python、Go 与上传 Worker 支持源码重载；资讯 Worker/Scheduler 修改后需重启。
 
 ## 快速开始
 
@@ -14,16 +13,26 @@ make deploy               # 准备环境、配置和数据，再启动
 ```
 
 首版面向联网 Linux x86_64 / WSL2 Ubuntu。提前准备 Bash、Make、Python 3、curl、tar、
-ss、setsid，以及当前用户可调用且已启动的 Docker。Docker 是硬依赖：部署需要用容器准备
-Neo4j 文件并运行 GROBID，不能在缺少 Docker 时安全跳过。若预检报告“缺少系统前置工具
-docker”，请参照 [Docker 安装说明](https://docs.docker.com/engine/install/) 准备 Docker；
-WSL2 也可使用开启对应发行版集成的 Docker Desktop。若报告 Docker 未运行，请启动服务
-并确认当前用户有访问权限，执行 `docker info` 验证后重新运行 `make deploy CHECK_ONLY=1`。
+ss、setsid。Neo4j 从官方发行归档安装，GROBID 使用官方源码和模型在本机构建；
+版本及 SHA-256 固定在 `scripts/local-deploy-versions.json`。
+首次安装需要访问 Conda、PyPI、npm、Go、GitHub、Gradle/Maven 与 Neo4j 官方下载服务。
+若下载失败，先处理相应来源的网络访问；脚本不会退回 Docker 或跳过必需组件。
 报告中的 `next_steps` 提供处理建议；系统或目标检查失败时显示环境“未检查”，不代表 Conda
 不存在。预检阻塞不会创建 `.env`、`.local` 或 `.data`，脚本不自动执行系统安装或修改权限。
 脚本复用兼容的 Conda `sc-wiki`，没有则创建；
 找不到 Conda 时在 `.local/miniforge` 安装，不修改 shell 初始化文件。已有 `.env` 不覆盖，
 缺少时生成本机随机数据库和 JWT 凭据。安装完成后 `make start/stop/status` 继续可用。
+
+安装器与 Go 热重载共用 `GOPATH`、`GOCACHE`、`GOPROXY`；默认沿用项目已有的
+`https://goproxy.cn,direct` 模块镜像，避免安装与启动重复下载。可按网络条件为本次命令
+显式指定其他模块源，例如在官方源可达的机器上：
+
+```bash
+GOPROXY="https://proxy.golang.org,direct" make deploy
+```
+
+这不是系统 HTTP 代理，不写入全局 Go 配置；仍使用仓库 `go.sum` 与模块校验。
+不要关闭 TLS 或设置 `GOSUMDB=off` 绕过真实性检查。
 
 源机器在源码已提交、后台任务结束后执行：
 
@@ -88,12 +97,12 @@ sudo systemctl disable --now ufw
 | frontend (vite) | 127.0.0.1:5173 | `frontend/node_modules` | HMR |
 | goserver | 127.0.0.1:8080 | 便携实例 `.local/go`，旧实例兼容 `~/.local/go` | 有（约 1s） |
 | python (uvicorn) | 127.0.0.1:8000 | conda `sc-wiki` | 有 |
-| worker (rq) | — | conda `sc-wiki` | 无（改队列任务需 `make restart`） |
+| worker (rq) | — | conda `sc-wiki` | 有（watchfiles） |
 | mysql | 127.0.0.1:**3307** | conda `sc-wiki` | — |
 | redis | 127.0.0.1:6379 | conda `sc-wiki` | — |
 | neo4j | bolt://127.0.0.1:17687 | `.local/neo4j` | — |
 | qdrant | 127.0.0.1:6333 | `.local/bin/qdrant` | — |
-| grobid | 127.0.0.1:8070 | `lfoppiano/grobid:0.8.1` 容器 | — |
+| grobid | 127.0.0.1:8070，管理接口 8071 | `.local/grobid`、独立 Java 17 | — |
 
 请求链路：浏览器 → vite（`/api` 代理）→ goserver →（未命中路由反代）→ uvicorn。
 
@@ -113,10 +122,9 @@ GROBID_URL=http://127.0.0.1:8070
 ```
 
 `make start` 会在启动 Python/Worker 前启动 GROBID；单独维护时可使用
-`bash scripts/dev.sh start grobid`、`status` 或 `stop grobid`。首次拉取镜像会占用
-较多磁盘和内存，但端口不暴露给局域网。在当前 WSL cgroup 环境中，脚本会为该
-容器设置 `JAVA_TOOL_OPTIONS=-XX:-UseContainerSupport`，避免 Java 容器资源探测异常；
-该选项不影响生产 Compose。
+`bash scripts/dev.sh start grobid`、`status` 或 `stop grobid`。首次构建会下载模型与 Maven
+依赖，占用较多磁盘和内存。API 和管理端口均只绑定回环地址，PID 和日志使用既有运行目录。
+旧容器或其他服务占用端口时拒绝启动，不自动删除容器或接管未知服务。
 
 ## 使用 DBeaver 连接本地数据库
 
@@ -141,6 +149,9 @@ GROBID_URL=http://127.0.0.1:8070
 （mysqld、redis-server、openjdk 21、mysql 客户端）。运行 `make setup` 时会在该环境内
 安装缺失的基础服务依赖。
 
+GROBID 的 Java 17 由 Conda 安装到项目私有 `.local/grobid-java`，构建使用固定 Gradle；
+不修改 `sc-wiki` 的 Java 21 或系统 Java，不新增另一套应用 Python 环境。
+
 ## 目录
 
 ```
@@ -151,7 +162,10 @@ GROBID_URL=http://127.0.0.1:8070
 └── prop_name_ai_cache.json
 
 .local/         # 运行时，已 gitignore
-├── neo4j/          从 neo4j:5 镜像提取的 Neo4j 5.26.29
+├── neo4j/          官方发行包安装的 Neo4j 5.26.29
+├── grobid/         本机 GROBID 0.8.1 服务、模型及原生库
+├── grobid-java/    项目私有 Java 17
+├── gradle-cache/   GROBID 构建依赖缓存
 ├── bin/            qdrant 与编译产出的 goserver
 ├── my.cnf          MySQL 配置（与系统 MySQL 完全隔离）
 ├── run/ log/       pid 与日志
@@ -210,10 +224,11 @@ nginx 剩下的 `/api` 代理职责 `vite.config.ts` 已经在做，再叠一层
 
 这些都是实测结果，改动相关配置前值得先读一遍。
 
-**Neo4j 官方源全部返回 403。** `dist.neo4j.org`、`debian.neo4j.com`，以及
-aliyun / tuna / ustc / 腾讯 / 华为镜像，带完整浏览器头也一样被 CDN 地域封锁。
-因此 `setup-local.sh` 从 `neo4j:5` 镜像提取——它就是个纯 Java 应用。
-这是一次性动作，提取完镜像即可删除。
+**Neo4j 官方下载可能返回 403。** 当前机器访问固定的 `dist.neo4j.org` 归档曾被拒绝。
+旧安装器曾通过镜像提取，本次已按要求移除这条 Docker 路径。CDN 不可达时自动尝试版本
+清单内的发行对象存储地址，两处均使用相同的官方 SHA-256。也可在能访问官方源的机器
+下载同版本归档，放到 `.local/downloads/neo4j.tar.gz` 再重试；安装器仍核对固定 SHA-256。
+不要用任意镜像包替代或关闭校验。预检通过只表示本机前置检查通过，不保证后续下载可达。
 
 **Neo4j 的 pid 文件会与包装进程的 pid 文件撞名。** 两者都叫 `neo4j.pid`。
 放同一目录时 Neo4j 会读到包装进程的 pid，误判"已在运行"并拒绝启动。

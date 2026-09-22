@@ -51,6 +51,8 @@ class Runtime:
     def check_ports(self, *, check_grobid=True):
         ports = {'mysql': (3307,), 'redis': (6379,), 'neo4j': (17687, 7474), 'qdrant': (6333, 6334),
                  'python': (8000,), 'goserver': (8080,), 'frontend': (5173,)}
+        if check_grobid:
+            ports['grobid'] = (8070, 8071)
         import re
         listeners = run(['ss', '-ltnp'], capture=True)
         for service, numbers in ports.items():
@@ -65,12 +67,6 @@ class Runtime:
                 group = os.getpgid(pid)
                 if any(os.getpgid(p) != group for p in listening_pids):
                     raise ValueError(f'端口 {number} 属于其他进程')
-        if check_grobid and port_occupied(8070):
-            import hashlib
-            name = 'scwiki-grobid-' + hashlib.sha256(str(self.root).encode()).hexdigest()[:12]
-            label = run(['docker', 'inspect', '--format', '{{index .Config.Labels "scwiki.root"}}', name], capture=True).strip()
-            if label != str(self.root):
-                raise ValueError('GROBID 容器不属于当前项目')
 
     def owned_pid(self, name):
         path = self.local / 'run' / (name + '.pid')

@@ -7,9 +7,6 @@
 load_env
 
 export PATH="$GO_ROOT/bin:$PATH"
-export GOPATH="${GOPATH:-$HOME/.local/gopath}"
-export GOCACHE="${GOCACHE:-$HOME/.cache/go-build}"
-export GOPROXY="${GOPROXY:-https://goproxy.cn,direct}"
 
 cd "$REPO_ROOT/goserver"
 

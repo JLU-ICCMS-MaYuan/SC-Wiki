@@ -131,6 +131,7 @@ def deploy(root: Path, args):
             if json.loads(env_record.read_text())['versions_digest'] != bundle.digest(root / 'scripts/local-deploy-versions.json'):
                 raise ValueError('依赖版本清单发生变化，拒绝隐式升级')
         else:
+            state.save('environment')
             prefix = environment.install(root)
         state.save('environment' if not state.promoted else state.record['phase'])
     # 数据库客户端只在已经准备好的 sc-wiki 解释器下导入。
