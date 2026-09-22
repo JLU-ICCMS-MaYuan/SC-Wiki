@@ -56,7 +56,7 @@
 
 ## 阶段 6：跨故事验证与文档
 
-- [ ] T022 在 `tests/02_maintenance_and_verification/local-deploy-roundtrip.sh` 建立真实 MySQL/Redis/Neo4j/Qdrant 的隔离导出恢复演练，覆盖换用户名/路径、空数据库、已存在环境、故障注入和源码归档无 .git 的部署。
+- [ ] T022 在 `tests/02_maintenance_and_verification/local-deploy-roundtrip.sh` 建立真实 MySQL/Redis/Neo4j/Qdrant 的隔离导出恢复演练，覆盖换用户名/路径、空数据库、已存在环境、故障注入和 Git clone 后仅数据包的部署。
 - [ ] T023 按 `docs/specs/112-portable-local-deployment/quickstart.md` 完成 Ubuntu 22.04 与 WSL2 干净环境验收，记录机器/源码/包版本、实际服务与页面检查结果；未执行的外部调用明确保留未验收。Ubuntu 24.04 按用户要求不再作为必需验收项。
 - [x] T024 使用 Overview 维护技能更新 `docs/overview/02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md`、`database-initialization-and-migrations.md`、`data-import-and-export.md` 及相关入口；同步 `README.md` 和 `docs/local-dev.md`，仅描述已实现行为。
 - [ ] T025 对照 `docs/specs/112-portable-local-deployment/` 全部需求检查实现和证据，同步 #112 验收项及 Documentation Impact；用户已明确授权先按现有验证提交本次实现，剩余验收继续追踪，满足关闭条件后再关闭 Issue。
@@ -126,7 +126,7 @@ T004/T007/T008/T012/T017 的剩余项以实际矩阵为准，不因相关代码�
 
 - [x] T030 [US2] 修复打包误查新名称 GROBID 容器的问题；打包不检查不参与导出的 GROBID，部署仍检查，数据库归属拒绝行为保持。来源 FR-008/009/017；回归与本机只读证据见 validation.md。
 - [ ] T031 [US4] 按用户已确认的“本地打包 → 本地或 Docker 目标”核对并确认 Plan/Research 的 Docker 恢复适配设计、CLI 和路径契约；同步 Issue #112 的新增范围及 Documentation Impact。
-- [ ] T032 [US4] 在 T031 完成后实现 Docker 恢复入口、Compose 运行适配、包内源码构建、共享存储/路径校验、只读迁移核验、凭据与空目标/中断/重跑保护；复用既有包格式，不实现 Docker 源打包。来源 FR-018、FR-010–FR-015。
+- [ ] T032 [US4] 在 T031 完成后实现 Docker 恢复入口、Compose 运行适配、目标端 Git 源码构建、共享存储/路径校验、只读迁移核验、凭据与空目标/中断/重跑保护；复用既有数据包格式，不实现 Docker 源打包。来源 FR-018、FR-010–FR-015。
 - [ ] T033 [US4] 同一人工数据包分别恢复至本地和 Docker 隔离目标，验证 SC-002/003/007 及拒绝覆盖、中断、重跑；同步 README、Docker 部署说明和 Overview，记录实际证据后再勾选。
 
 依赖：T030 独立修复；T031 → T032 → T033。FR-018/SC-007 映射 T031–T033，
@@ -152,9 +152,9 @@ T004/T026 中无 Conda 自动安装的旧要求；不重新勾选那些包含其
 
 - [x] T038 [US1] 在 `tests/02_maintenance_and_verification/test_local_environment.py`、`test_local_deployment.py` 和 `scripts/local_deploy/environment.py`、`cli.py` 实现并验证缺少/不可用 Conda 时真实 Make 入口只读阻断，非默认前缀复用、命名环境创建的命令作用域、base 别名拒绝和安装器不下载 Conda。来源：用户确认、FR-003/014/017；新增 17 项通过，未冒称本轮重新安装全新环境，见 validation.md。
 - [x] T039 [US1] 更新 `docs/local-dev.md`、`Makefile` 注释、相关 Overview 与 `validation.md`，列明人工准备和脚本下载的完整分工；本机预检与真实部署重跑成功，base 包清单/历史及配置摘要不变，未对当前实例恢复备份。来源：FR-003/019、SC-004/006。
-- [ ] T040 [US3] 根据用户要求澄清自动选择 `dist` 最新备份时的源码/数据兼容边界，确认后更新本目录 Spec、Plan、CLI 和恢复测试任务；在设计明确前不放宽包源码校验、不覆盖已有数据。来源：用户最终需求，FR-006/011/012/017。
+- [x] T040 [US3] 根据用户要求澄清 `dist` 唯一备份与 Git 源码的兼容边界：冻结包不含源码，清单记录 `source_commit`/`source_identity`，部署校验当前源码后再恢复；不覆盖已有数据。来源：用户最终需求，FR-006/011/012/017。
 
-依赖：T038 → T039；T040 单独等待源码兼容决策，不阻断已确认的 Conda 分工实现。
+依赖：T038 → T039；T040 已完成源码兼容决策，不阻断已确认的 Conda 分工实现。
 
 ## 阶段 11：`dist` 唯一包自动发现与恢复入口收敛
 

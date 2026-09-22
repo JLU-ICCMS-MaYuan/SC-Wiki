@@ -23,7 +23,7 @@ sc-wiki/
     └── files/ 及 paths.json
 ```
 
-业务数据库或集合为空时仍有明确的组件状态和零值清单，不能以文件缺失表示空数据。源码不带 `.git`；解压后部署不依赖 Git。压缩包及其外部 SHA-256 文件默认放源仓库的 `dist/`。
+业务数据库或集合为空时仍有明确的组件状态和零值清单，不能以文件缺失表示空数据。冻结包不包含源码；目标部署前必须在源码目录通过 Git 获取兼容版本。压缩包及其外部 SHA-256 文件默认放源仓库的 `dist/`。
 
 ## 部署清单
 
@@ -32,7 +32,7 @@ sc-wiki/
 | 字段 | 含义与约束 |
 | --- | --- |
 | `format_version`、`bundle_id`、`created_at` | 格式版本、随机 UUID、UTC 导出时间；包标识不因复制而改变。 |
-| `source_commit`、`files` | 40 位 Git 提交；源码和 payload 共用相对路径/大小/SHA-256 清单，排除清单自身。 |
+| `source_commit`、`source_identity`、`files` | 40 位 Git 提交和依赖/迁移文件摘要；`files` 只登记 `.deployment/` 数据文件及其大小/SHA-256，排除清单自身。 |
 | `services` | 版本清单全文，含支持平台、服务版本和镜像摘要，不保存源机器环境前缀。 |
 | `components.mysql` | 原业务库名、全部 revision、逐表行数、规范化 DDL 摘要及对象清单。 |
 | `components.neo4j` | 节点数、关系数、索引/约束定义；业务库固定为 neo4j。 |

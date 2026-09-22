@@ -45,7 +45,7 @@ Conda 本身由用户安装，脚本复用兼容的 `sc-wiki`，没有则创建�
 | curl、CA 证书、tar、gzip | HTTPS 下载、校验来源和压缩包处理。 |
 | iproute2、util-linux、procps | 提供 `ss`、`setsid`、`ps` 等端口和进程工具。 |
 | coreutils、grep、sed、awk、findutils | 文件操作、SHA-256 校验、文本处理及构建脚本调用的 `find`/`xargs`。 |
-| Git | 获取源码及 `make frozen` 打包；从完整包解压后部署本身不依赖 Git。 |
+| Git | 源端记录冻结包对应提交；目标端先 clone 并切换到兼容提交，再执行 `make deploy`。 |
 
 | 脚本下载／安装／配置 | 位置或方式 |
 | --- | --- |

@@ -32,7 +32,7 @@ make deploy
 - 人工 tar 包实际封装、解压、摘要核验、重复准备、显式来源及 `.deployment` 回退通过；
   `.env` 保留原字节。没有改动数据库导入器，也未把 `SELECT 1` 测试文件的解压称为完整数据库恢复。
 - 当前真实包 `dist/sc-wiki-20260921T101043Z-6e17f649.tar.gz` 被普通与只读 Make 入口自动选中，
-  报告 `mode=restore` 及包路径，随后以“当前源码与包不一致”在预检退出 2。
+  报告 `mode=restore` 及包路径，随后以“当前 Git 源码与数据包不兼容”在预检退出 2。
   包来自 `6e17f649`；本轮修改前即有 23 个源码文件不同，Neo4j/GROBID 服务安装描述也不同。
 - 实测前后 `.env`、`.local/deployment-state.json`、`.local/deployment-report.json`、
   `.local/my.cnf`、`.data/.deployment-owner.json`、原备份和 `sc-wiki` 环境历史摘要相同。
@@ -238,8 +238,8 @@ SQL 导出/恢复（约束、触发器、例程、事件、中文及二进制）
 
 2026-09-21，在 Ubuntu 22.04.5 / WSL2、Linux x86_64 上验证。源码基于 `mayuan`，
 验证时实现位于工作区；隔离测试使用临时源码副本和人工数据库，不操作当前开发实例。
-测试副本使用独立端口、目录、PID 和 GROBID 容器；临时 Git 提交仅用于测试
-`git archive HEAD`，不表示主仓库功能已经提交或推送。
+测试副本使用独立端口、目录、PID 和 GROBID 容器；临时 Git 提交仅用于验证源码身份，
+不表示主仓库功能已经推送。
 
 ## 已通过的验证
 

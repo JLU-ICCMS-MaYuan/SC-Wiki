@@ -27,7 +27,9 @@ def report(root, operation, result, *, persist=True, **details):
 
 
 def source_identity(root):
-    paths = ['scripts/local-deploy-versions.json', 'scripts/local-deploy-schema.json', 'docker/requirements.txt',
+    paths = ['Makefile', 'scripts/local-deploy.py', 'scripts/local-deploy-versions.json', 'scripts/local-deploy-schema.json',
+             'scripts/local_deploy/cli.py', 'scripts/local_deploy/bundle.py', 'scripts/local_deploy/state.py',
+             'docker/requirements.txt',
              'frontend/package-lock.json', 'goserver/go.mod', 'goserver/go.sum']
     paths += [p.relative_to(root).as_posix() for p in sorted((root / 'alembic/versions').glob('*.py'))]
     return hashlib.sha256(''.join(bundle.digest(root / p) for p in paths).encode()).hexdigest()

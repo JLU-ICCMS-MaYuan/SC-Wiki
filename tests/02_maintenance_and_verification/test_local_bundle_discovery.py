@@ -35,7 +35,8 @@ def make_archive(root, tmp_path, name='only backup.tar.gz'):
     payload = seed / '.deployment/mysql/business.sql'
     payload.parent.mkdir(parents=True)
     payload.write_text('SELECT 1;\n')
-    manifest = bundle.seal(seed, {'source_commit': 'a' * 40, 'services': environment.versions(root),
+    manifest = bundle.seal(seed, {'source_commit': 'a' * 40, 'source_identity': cli.source_identity(root),
+                                  'services': environment.versions(root),
                                   'components': {'mysql': {'database': 'scwiki'}}})
     archive = root / 'dist' / name
     bundle.publish(seed, archive)
