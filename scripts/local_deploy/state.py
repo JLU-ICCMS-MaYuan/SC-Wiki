@@ -33,6 +33,13 @@ class DeploymentState:
 
     @classmethod
     def open(cls, root: Path, identity: str):
+        result = cls.inspect(root, identity)
+        result.save()
+        return result
+
+    @classmethod
+    def inspect(cls, root: Path, identity: str):
+        """预检与真正写入复用同一归属规则；本方法不创建任何文件。"""
         root = root.resolve()
         path = root / '.local/deployment-state.json'
         if path.exists():
@@ -50,7 +57,6 @@ class DeploymentState:
         result = cls(root, record)
         if (root / '.data').exists() and any((root / '.data').iterdir()) and not result.promoted:
             raise ValueError('目标已有不属于本操作的数据')
-        result.save()
         return result
 
     @property

@@ -10,6 +10,7 @@ from pathlib import Path
 import shutil
 import subprocess
 import sys
+import tarfile
 import tempfile
 
 from . import bundle, config, environment
@@ -40,28 +41,39 @@ def reexec(prefix: Path):
 
 
 def prepare_bundle(root, path, *, check_only=False):
+    discovered = bundle.discover_archive(root)
+    path = path or discovered
+    destination = root / '.deployment'
+    if destination.is_symlink():
+        raise ValueError('已解压数据目录不能是符号链接')
     if not path:
-        if (root / '.deployment').exists():
+        if destination.exists():
             return root, bundle.verify(root)
         return None, None
-    archive = Path(path).expanduser().resolve()
-    # 显式压缩包需要临时解压以校验，但 CHECK_ONLY 不创建任何目标运行文件。
+    archive = Path(path).expanduser().absolute()
+    if archive.is_symlink() or not archive.is_file():
+        raise ValueError('数据库压缩包必须是存在的普通文件，不能是符号链接')
+    if not archive.name.lower().endswith(('.tar', '.tar.gz', '.tgz', '.tar.bz2', '.tbz', '.tbz2', '.tar.xz', '.txz')):
+        raise ValueError('不支持的数据库压缩包格式；请使用 make frozen 生成的 tar 迁移包，不支持 ZIP 或裸 SQL 压缩文件')
+    # 自动发现与显式压缩包共用临时校验；CHECK_ONLY 不创建目标运行文件。
     with tempfile.TemporaryDirectory(prefix='scwiki-bundle-check-') as temp:
-        unpacked = bundle.extract_archive(archive, Path(temp) / 'unpacked')
+        try:
+            unpacked = bundle.extract_archive(archive, Path(temp) / 'unpacked')
+        except (tarfile.TarError, EOFError):
+            raise ValueError('数据库压缩包损坏或不是受支持的 tar 迁移包') from None
         manifest = bundle.verify(unpacked)
         for name, info in manifest['files'].items():
             if not name.startswith('.deployment/'):
                 file = root / name
                 if not file.is_file() or bundle.digest(file) != info['sha256']:
                     raise ValueError('当前源码与包不一致，请在包的解压目录执行部署')
-        if check_only:
-            return None, manifest
-        destination = root / '.deployment'
         if destination.exists():
             current = bundle.verify(root)
-            if current['bundle_id'] != manifest['bundle_id']:
-                raise ValueError('目标已有其他包，拒绝覆盖')
-        else:
+            if current != manifest:
+                raise ValueError('压缩包与已解压数据的清单不一致，拒绝覆盖；请使用同一包或新的空部署目录')
+        if check_only:
+            return None, manifest
+        if not destination.exists():
             shutil.copytree(unpacked / '.deployment', destination)
         return root, manifest
 
@@ -99,9 +111,27 @@ def health(runtime):
 
 def deploy(root: Path, args):
     # 在检查已有目标之前不得复制包或创建配置。
-    _, manifest = prepare_bundle(root, args.bundle, check_only=True)
-    if manifest and manifest.get('services') != environment.versions(root):
-        raise ValueError('包的服务版本与源码不一致，不支持跨版本恢复')
+    manifest = None
+    selected = None
+    try:
+        selected = args.bundle or bundle.discover_archive(root)
+        _, manifest = prepare_bundle(root, selected, check_only=True)
+        if manifest:
+            if manifest.get('services') != environment.versions(root):
+                raise ValueError('包的服务版本与源码不一致，不支持跨版本恢复')
+            state = DeploymentState.inspect(root, manifest['bundle_id'])
+            if ('source_identity' in state.record
+                    and state.record['source_identity'] != source_identity(root)):
+                raise ValueError('源码依赖或迁移发生变化，首版不支持原地升级')
+    except (ValueError, OSError, KeyError) as exc:
+        # 包选择/校验失败属于预检；普通部署也不能覆盖旧实例的状态和报告。
+        report(root, 'deploy', 'blocked', persist=False,
+               problems=[str(exc)], conda=None, environment='未检查（包或目标预检未通过）',
+               mode='restore' if selected or manifest else 'undetermined',
+               bundle=str(selected) if selected else None,
+               next_steps=['请检查 dist 唯一迁移包、源码兼容性及目标归属；已有实例不能直接覆盖恢复'],
+               error_code='preflight_failed', phase='preflight')
+        return 2
     existing = root / '.local/deployment-state.json'
     problems = environment.preflight(root, occupied_ok=existing.is_file())
     if (root / '.data').exists() and any((root / '.data').iterdir()) and not existing.is_file():
@@ -128,6 +158,7 @@ def deploy(root: Path, args):
         report(root, 'deploy', 'blocked' if problems else 'check-passed', persist=False,
                problems=problems, conda=str(conda) if conda else None,
                environment=environment_status,
+               bundle=str(selected) if selected else None,
                mode='restore' if manifest else 'empty', next_steps=environment.preflight_guidance(problems),
                **({'error_code': 'preflight_failed', 'phase': 'preflight'} if problems else {}))
         return 2 if problems else 0
@@ -152,7 +183,9 @@ def deploy(root: Path, args):
     from .runtime import Runtime
     with operation_lock(root):
         state = DeploymentState.open(root, identity)
-        _, manifest = prepare_bundle(root, args.bundle)
+        _, manifest = prepare_bundle(root, selected)
+        if manifest and manifest['bundle_id'] != identity:
+            raise ValueError('预检后迁移包发生变化，请重新执行部署')
         database = manifest['components']['mysql']['database'] if manifest else 'scwiki'
         values = config.ensure_config(root, database)
         config.validate_local(values, root, target=True)

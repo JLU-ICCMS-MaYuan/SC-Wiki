@@ -11,6 +11,27 @@ import tarfile
 import uuid
 
 
+def discover_archive(root: Path) -> Path | None:
+    """只检查直接子项；多包不得根据时间、文件名或显式参数静默取舍。"""
+    directory = root / 'dist'
+    if directory.is_symlink() or (directory.exists() and not directory.is_dir()):
+        raise ValueError('dist 必须为本项目的普通目录，不能是符号链接')
+    if not directory.exists():
+        return None
+    suffixes = ('.tar', '.gz', '.tgz', '.bz2', '.tbz', '.tbz2', '.xz', '.txz',
+                '.zst', '.tzst', '.zip', '.7z', '.rar')
+    candidates = sorted(p for p in directory.iterdir() if p.name.lower().endswith(suffixes))
+    if len(candidates) > 1:
+        raise ValueError(f'dist 中发现 {len(candidates)} 个压缩包，必须只能保留一个数据库压缩包；'
+                         '请移走多余压缩包后重试（.sha256 校验文件不计数）')
+    if not candidates:
+        return None
+    archive = candidates[0]
+    if archive.is_symlink() or not archive.is_file():
+        raise ValueError('dist 中的数据库压缩包必须是普通文件，不能是目录或符号链接')
+    return archive
+
+
 def digest(path: Path) -> str:
     result = hashlib.sha256()
     with path.open('rb') as stream:
@@ -103,8 +124,10 @@ def verify(root: Path) -> dict:
     if path.is_symlink() or not path.is_file():
         raise ValueError('缺少迁移清单')
     manifest = json.loads(path.read_text())
-    if manifest.get('format_version') != 1 or not isinstance(manifest.get('files'), dict):
-        raise ValueError('不支持的迁移包格式')
+    if (not isinstance(manifest, dict) or manifest.get('format_version') != 1
+            or not isinstance(manifest.get('files'), dict)
+            or not isinstance(manifest.get('bundle_id'), str)):
+        raise ValueError('不支持的迁移包清单格式')
     uuid.UUID(manifest['bundle_id'])
     for name, expected in manifest['files'].items():
         safe_relative(name)

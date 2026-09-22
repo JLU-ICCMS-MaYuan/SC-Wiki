@@ -41,7 +41,7 @@
 ### 本地开发
 
 1. 用户先准备 Conda 和系统基础工具；`make deploy` 寻找其实际前缀并复用兼容的 `sc-wiki`，环境缺失则创建。脚本不安装或升级 Conda，不修改 base；缺少/不可用 Conda 或 `sc-wiki` 实际指向 base 时在预检阶段拒绝，可用 `CONDA_EXE` 指定安装位置。依赖版本和下载摘要由 `scripts/local-deploy-versions.json` 管理；Go、Neo4j 和 Qdrant 位于 `.local/`。`make setup` 委托同一安装器，仅准备依赖和配置；完整分工见[本地开发说明](../../local-dev.md#工具和配置分工)。
-2. 无包时生成本机 `.env` 并初始化空库；解压包有 `.deployment/manifest.json` 时校验并恢复到临时目录，验证后提升为 `.data`。已有不属于该部署的数据会阻断，成功后的重跑不重复导入。`make migrate` 保留为旧 Docker 卷迁移入口。
+2. `make deploy` 自动检查 `dist/` 的直接子项：只有一个压缩包时自动校验解压，多于一个明确要求只能保留一个，`.sha256` 不计数。显式 `BUNDLE` 可以指定来源但不绕过多包限制。压缩包与已有 `.deployment/manifest.json` 须一致；完全无包才初始化空库。有包时沿用当前源码/服务版本一致性、空目标和数据完整性检查，恢复到临时目录后提升为 `.data`。已有不属于该部署的数据（包括另一空库部署的实例）会阻断，成功后的重跑不重复导入。`make migrate` 保留为旧 Docker 卷迁移入口。
 3. `make start` 启动全部服务，按依赖顺序等待健康检查。便携实例核验进程归属和真实 schema，只核验、不升级数据库；没有便携记录的旧实例保留原迁移启动路径。
 4. 浏览器访问 `http://127.0.0.1:5173`。`make status` 查看各服务状态，`make logs S=<服务>` 跟踪日志。
 
@@ -50,6 +50,10 @@
 状态显示“未检查”，不能据此推断需要创建环境。此阶段只输出报告，不创建配置或运行数据。
 Conda 自身检查失败时状态为“未就绪（Conda 预检未通过）”；只有找到可用 Conda 且没有
 `sc-wiki` 时才显示“将创建 sc-wiki”。安装器保留缺失 Conda 的第二道拒绝检查，不自动引导 Miniforge。
+多包、坏包、源码不兼容或包/部署记录冲突时，普通部署和只读预检均在安装前退出，
+不改写现有配置、数据和部署报告。自动恢复只接受现有可校验 tar 迁移包，不是任意 ZIP
+或裸 SQL 导入；自动发现成功不代表旧版本备份已恢复，当前跨源码兼容边界见
+[#112](../../specs/112-portable-local-deployment/validation.md)。
 Neo4j/GROBID 来源和摘要由统一版本清单固定；网络下载失败不会转用 Docker 或跳过服务。
 本机 GROBID 的真实引用/PDF 解析、重复启动和停止已验证；Neo4j CDN 返回 403 时可使用
 版本清单中的发行对象存储备用地址，仍验证同一个官方 SHA-256。当前 Ubuntu 26.04
@@ -117,6 +121,9 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 - `scripts/setup-local.sh`
 - `scripts/local_deploy/native.py`
 - `scripts/local_deploy/environment.py`
+- `scripts/local_deploy/bundle.py`
+- `scripts/local_deploy/cli.py`
+- `tests/02_maintenance_and_verification/test_local_bundle_discovery.py`
 - `scripts/dev.sh`
 - `scripts/goserver-watch.sh`
 - `scripts/goserver-run.sh`

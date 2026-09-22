@@ -66,6 +66,21 @@ make status
 
 ## 场景 D：重复执行与失败保护
 
+### `dist` 唯一包入口
+
+在与包内源码一致、尚未部署的隔离源码目录，将场景 B 的压缩包和 `.sha256` 放入根目录
+`dist/`，不手动解压、不传 `BUNDLE`，执行 `make deploy CHECK_ONLY=1` 和 `make deploy`。
+预期报告 `mode=restore` 和选中的 `bundle` 路径；复用场景 C 的完整数据验收。
+成功重跑不导入新增数据，`.env` 和包保持不变。
+
+把另一个压缩包也放入 `dist/`，普通与只读入口均须先报“必须只能保留一个”，不能按最新
+时间选择，也不能用显式 `BUNDLE` 绕过。再分别验证损坏包、ZIP、裸 SQL 压缩文件、
+源码差异、已解压清单不同但包 ID 相同、已有空库部署、符号链接等输入；均不得覆盖
+配置、源码、数据或旧报告，不回退空库。`.sha256`、说明文件及嵌套目录中的包不计数。
+只有两个包来源都不存在时，才允许原无包初始化路径。
+
+此验收不授权替换当前业务实例，也不把跨源码版本兼容视为已实现。
+
 | 场景 | 操作与期望 |
 | --- | --- |
 | 成功后重跑 | 增加一条目标测试业务数据后再次部署；新数据保留，原包不重导，`.env` 不变。 |
@@ -86,6 +101,8 @@ make status
 
 ```bash
 python -m pytest --confcutdir="tests/02_maintenance_and_verification" \
+  "tests/02_maintenance_and_verification/test_local_bundle_discovery.py" \
+  "tests/02_maintenance_and_verification/test_local_environment.py" \
   "tests/02_maintenance_and_verification/test_local_deployment.py" -q -rs
 ```
 

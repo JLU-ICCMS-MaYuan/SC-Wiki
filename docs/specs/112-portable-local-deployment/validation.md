@@ -2,6 +2,54 @@
 
 **关联**：[Issue #112](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/112)、[Spec](spec.md)、[Tasks](tasks.md)
 
+## `dist` 唯一包自动发现（2026-09-22）
+
+本轮基于 `mayuan` 的 `f7a9dad`，按用户最新要求将“选择最新包”改为“只能保留一个包”。
+`make deploy` 自动发现 `dist/` 直接子项的唯一压缩包，与显式 `BUNDLE` 共用安全解包、
+清单验证及后续恢复路径；多个时先报错，`.sha256` 不计数，不删除包或回退空库。
+普通入口和只读模式均在包错误时保留已有报告、配置和数据。状态归属检查从写入方法中
+拆出只读 `DeploymentState.inspect()`，复用原有规则，不引入覆盖恢复。
+
+### 验证
+
+```bash
+PYTHONNOUSERSITE=1 /home/mayuan/soft/miniconda3/envs/sc-wiki/bin/python -m pytest \
+  --confcutdir="tests/02_maintenance_and_verification" \
+  "tests/02_maintenance_and_verification/test_local_bundle_discovery.py" \
+  "tests/02_maintenance_and_verification/test_local_environment.py" \
+  "tests/02_maintenance_and_verification/test_local_deployment.py" -q -rs
+make deploy CHECK_ONLY=1
+make deploy
+```
+
+- 新增 **31 项全部通过**；总回归 **91 通过、11 跳过**。首轮新增测试曾出现 23 失败、2 通过，
+  复现未扫描 `dist`、错误落入空库路径及普通失败改写报告的问题；后补畸形清单的 4 项也先失败，
+  修复后通过。11 项跳过原因与 Conda 修正轮相同：占用端口或缺少显式隔离存储/GROBID，
+  未停止当前服务，不把跳过当作通过。
+- 临时目录真实 Make/Bash/Python 子进程覆盖多包、单包/零包、坏包、格式不支持、源码差异、
+  同 ID 不同清单、已有空库实例及链接拒绝；对比目标目录全部文件，预检均保持字节不变。
+  成功预检使用受控 Conda 替身，故只证明入口与模式选择，不证明本轮重新安装依赖。
+- 人工 tar 包实际封装、解压、摘要核验、重复准备、显式来源及 `.deployment` 回退通过；
+  `.env` 保留原字节。没有改动数据库导入器，也未把 `SELECT 1` 测试文件的解压称为完整数据库恢复。
+- 当前真实包 `dist/sc-wiki-20260921T101043Z-6e17f649.tar.gz` 被普通与只读 Make 入口自动选中，
+  报告 `mode=restore` 及包路径，随后以“当前源码与包不一致”在预检退出 2。
+  包来自 `6e17f649`；本轮修改前即有 23 个源码文件不同，Neo4j/GROBID 服务安装描述也不同。
+- 实测前后 `.env`、`.local/deployment-state.json`、`.local/deployment-report.json`、
+  `.local/my.cnf`、`.data/.deployment-owner.json`、原备份和 `sc-wiki` 环境历史摘要相同。
+  未重启服务、修改密码、创建恢复记录或导入当前业务备份。
+- Bash 语法、`git diff --check` 及受影响文档相对链接检查通过。
+
+### 交付边界
+
+T041–T043 对应唯一包发现及安全拒绝，不表示 T040 的跨源码兼容或当前实例切换已经完成。
+当前包仍不能直接恢复到已有实例；按 `big-project-spec-runner` 的高影响决策门，
+“保留当前源码，仅恢复兼容数据”的扩展等待用户确认，现阶段不放宽保护、不称为数据已部署。
+本轮未重跑原生存储全链路、干净机器或 Docker 目标验收。
+
+用户指南、CLI、Spec/Plan/Research/Tasks 和两份 Overview 已同步可验证行为；根 README
+保留禁止自动编辑标记。GitHub #112 只读核验为 OPEN、`type:feature`，远端旧标题/正文
+未在本轮更新，不关闭 Issue、不推送，不提交 `.env` 或私有备份。
+
 ## 用户准备 Conda 的职责修正（2026-09-22）
 
 本轮基于 `mayuan` 的 `b1b1760`，按用户确认取消自动安装 Conda，只创建或复用

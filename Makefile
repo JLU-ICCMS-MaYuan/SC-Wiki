@@ -1,7 +1,7 @@
 # SC-Wiki 本地开发。所有服务在本机运行，不依赖 Docker；Conda 由用户准备。
 #
 #   make frozen    冻结并打包当前实例的源码与业务数据
-#   make deploy    首次本地部署或恢复迁移包
+#   make deploy    配置本机环境并恢复 dist 唯一迁移包；多包拒绝，无包初始化
 #   make setup     一次性安装（conda 环境、Neo4j、Qdrant、Go、Python 依赖）
 #   make migrate   从 Docker 卷迁移数据到 .data/
 #   make start     启动全部服务
