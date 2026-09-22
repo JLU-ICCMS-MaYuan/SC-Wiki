@@ -114,8 +114,16 @@ def deploy(root: Path, args):
         if manifest:
             if manifest.get('services') != environment.versions(root):
                 raise ValueError('包的服务版本与源码不一致，不支持跨版本恢复')
-            if manifest.get('source_identity') != source_identity(root):
+            if (manifest.get('source_identity') is not None
+                    and manifest['source_identity'] != source_identity(root)):
                 raise ValueError('当前 Git 源码与数据包不兼容，请切换到生成该包的提交或兼容版本')
+            if manifest.get('source_identity') is None:
+                try:
+                    current_commit = environment.run(['git', 'rev-parse', 'HEAD'], cwd=root, capture=True).strip()
+                except (OSError, subprocess.SubprocessError):
+                    current_commit = None
+                if current_commit and manifest.get('source_commit') not in (None, current_commit):
+                    raise ValueError('当前 Git 源码与数据包不兼容，请切换到生成该包的提交或兼容版本')
             state = DeploymentState.inspect(root, manifest['bundle_id'])
             if ('source_identity' in state.record
                     and state.record['source_identity'] != source_identity(root)):
