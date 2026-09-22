@@ -21,6 +21,8 @@ def preflight_guidance(problems: list[str]) -> list[str]:
     guidance = []
     if any(problem.startswith('缺少系统前置工具 ') for problem in problems):
         guidance.append('请先安装报告中缺少的系统工具，再重新运行 make deploy CHECK_ONLY=1')
+    if any('Conda' in problem for problem in problems):
+        guidance.append('Conda 由用户准备；请用 conda --version 和 conda env list 验证，必要时设置 CONDA_EXE=/实际安装目录/bin/conda 后重跑 make deploy CHECK_ONLY=1；脚本不会安装或升级 Conda，也不会向 base 安装项目依赖')
     if any(problem.startswith('端口 ') for problem in problems):
         guidance.append('请用 ss -ltnp 确认端口占用者，确认可以停止对应服务后再处理冲突并重新预检')
     if '可用磁盘不足 8 GiB，无法准备依赖与临时数据' in problems:
@@ -52,15 +54,16 @@ def select_prefix(prefixes) -> Path | None:
 def find_conda(root: Path) -> Path | None:
     explicit = os.environ.get('CONDA_EXE')
     if explicit:
-        if not Path(explicit).is_file():
-            raise ValueError('CONDA_EXE 不存在')
+        if not Path(explicit).is_file() or not os.access(explicit, os.X_OK):
+            raise ValueError('CONDA_EXE 不存在或不可执行')
         return Path(explicit).resolve()
     candidates = [shutil.which('conda')]
     if os.environ.get('CONDA_ROOT'):
         candidates.append(str(Path(os.environ['CONDA_ROOT']) / 'bin/conda'))
     candidates += [str(Path.home() / name / 'bin/conda') for name in ('miniconda3', 'miniforge3', 'anaconda3')]
     candidates.append(str(root / '.local/miniforge/bin/conda'))
-    return next((Path(p).resolve() for p in candidates if p and Path(p).is_file()), None)
+    return next((Path(p).resolve() for p in candidates
+                 if p and Path(p).is_file() and os.access(p, os.X_OK)), None)
 
 
 def find_environment(root: Path) -> tuple[Path | None, Path | None]:
@@ -76,6 +79,11 @@ def find_environment(root: Path) -> tuple[Path | None, Path | None]:
             candidates = [str(named)]
     prefix = select_prefix(candidates)
     if prefix:
+        base = Path(run([conda, 'info', '--base'], capture=True, timeout=45).strip())
+        if not base.is_absolute():
+            raise ValueError('Conda 未返回有效的 base 路径')
+        if prefix.resolve() == base.resolve():
+            raise ValueError('sc-wiki 指向 Conda base，拒绝安装项目依赖')
         version = run([prefix / 'bin/python', '-c', 'import sys; print("%d.%d" % sys.version_info[:2])'], capture=True).strip()
         if version != versions(root)['python']:
             raise ValueError(f'已有 sc-wiki Python {version} 不兼容；不会删除或重建环境')
@@ -175,10 +183,7 @@ def install(root: Path) -> Path:
     cache = local / 'downloads'
     conda, prefix = find_environment(root)
     if conda is None:
-        installer = cache / 'miniforge.sh'
-        download(spec['miniforge'], installer)
-        run(['bash', installer, '-b', '-p', local / 'miniforge'])
-        conda = local / 'miniforge/bin/conda'
+        raise ValueError('缺少用户准备的 Conda；请先安装并设置 CONDA_EXE，脚本不会自动安装 Conda')
     if prefix is None:
         run([conda, 'create', '-y', '-n', 'sc-wiki', '--override-channels', '-c', 'conda-forge',
              *spec['conda_packages']])

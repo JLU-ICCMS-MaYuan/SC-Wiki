@@ -108,14 +108,26 @@ def deploy(root: Path, args):
         problems.append('目标已有数据，必须使用新的空部署目录')
     if (root / '.env').exists():
         config.validate_local(config.read_config(root), root, target=True)
-    environment_checked = not problems
-    conda, prefix = environment.find_environment(root) if environment_checked else (None, None)
+    conda, prefix = None, None
+    environment_status = '未检查（系统或目标预检未通过）'
+    if not problems:
+        environment_status = '未就绪（Conda 预检未通过）'
+        try:
+            conda, prefix = environment.find_environment(root)
+            if conda is None:
+                problems.append('缺少用户准备的 Conda')
+            else:
+                environment_status = str(prefix) if prefix else '将创建 sc-wiki'
+        except ValueError as exc:
+            problems.append(f'Conda 环境检查失败：{exc}')
+        except (OSError, subprocess.SubprocessError, KeyError, TypeError):
+            problems.append('Conda 环境查询失败，请检查 Conda 是否可用')
     if manifest and shutil.disk_usage(root).free < manifest['capacity'] * 2.4 + 8 * 1024**3:
         problems.append('空间不足以同时保存依赖、包和临时恢复数据')
     if args.check_only or problems:
         report(root, 'deploy', 'blocked' if problems else 'check-passed', persist=False,
                problems=problems, conda=str(conda) if conda else None,
-               environment=(str(prefix) if prefix else '将创建 sc-wiki') if environment_checked else '未检查（系统或目标预检未通过）',
+               environment=environment_status,
                mode='restore' if manifest else 'empty', next_steps=environment.preflight_guidance(problems),
                **({'error_code': 'preflight_failed', 'phase': 'preflight'} if problems else {}))
         return 2 if problems else 0

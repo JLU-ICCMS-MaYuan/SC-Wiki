@@ -7,7 +7,7 @@
 ## 前置条件
 
 - 使用可丢弃的 Ubuntu 22.04 x86_64 或 WSL2 Ubuntu 测试实例，能联网下载依赖，当前用户可写部署目录。用户已取消 Ubuntu 24.04 必需验收。
-- 准备 Bash、Make、Python 3、curl、tar、ss、setsid；源端有 Git。本地目标不需要 Docker；只有场景 E 的独立 Docker 目标需要它。
+- 用户准备 Conda、Bash、Make、Python 3、curl 与 CA 证书、tar/gzip、ss、setsid 和基础文件/文本/进程工具；源端有 Git。本地目标不需要 Docker；只有场景 E 的独立 Docker 目标需要它。
 - 禁止用正式数据库做故障注入；每组演练使用独立目录、数据库进程及其测试端口空间，不能和当前工作实例混用。
 - 使用人工构造的测试数据：两个角色账号、公开/待审/驳回论文、动态表单与物性、持久草稿与 Redis 草稿、审核历史、结构附件、PDF、头像、Neo4j 节点/关系和 Qdrant 点/别名。
 - 仅使用假 API Key、假 SMTP/JWT 值进行排除检查。真实业务迁移包包含账户及未公开论文，按私有数据保存，不上传 GitHub。
@@ -22,9 +22,9 @@ make deploy
 make status
 ```
 
-预期：首次检查给出真实缺项而不写文件；部署准备私有 Conda 和 `sc-wiki`、全部依赖、新 `.env`、空业务库及 118 个元素。网页入口为 `http://127.0.0.1:5173`。没有默认网站账号，部署输出指向既有 `backend.scripts.create_superadmin`，并提供在已加载本机环境中调用它的方法。
+预期：首次检查给出真实缺项而不写文件；部署使用用户已有 Conda 准备 `sc-wiki`、全部依赖、新 `.env`、空业务库及 118 个元素，不修改 base。网页入口为 `http://127.0.0.1:5173`。没有默认网站账号，部署输出指向既有 `backend.scripts.create_superadmin`，并提供在已加载本机环境中调用它的方法。
 
-第二次部署不得改变 `.env` 摘要或重复初始化。保存两个环境样本：无 Conda；已有非默认前缀且兼容的 `sc-wiki`，后者必须复用原前缀。
+第二次部署不得改变 `.env` 摘要或重复初始化。保存三个环境样本：缺少 Conda 时只读阻断；已有 Conda 而无 `sc-wiki` 时创建；已有非默认前缀且兼容的 `sc-wiki` 时复用。另测不可执行的 `CONDA_EXE`、查询失败、base 被命名或链接为 `sc-wiki` 均拒绝，且不修改 base。
 
 ## 场景 B：源端打包
 

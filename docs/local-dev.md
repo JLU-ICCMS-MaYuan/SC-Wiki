@@ -12,16 +12,52 @@ make deploy CHECK_ONLY=1  # 只检查前置条件，不写配置或数据
 make deploy               # 准备环境、配置和数据，再启动
 ```
 
-首版面向联网 Linux x86_64 / WSL2 Ubuntu。提前准备 Bash、Make、Python 3、curl、tar、
-ss、setsid。Neo4j 从官方发行归档安装，GROBID 使用官方源码和模型在本机构建；
+首版面向联网 Linux x86_64 / WSL2 Ubuntu。提前准备 Conda、Bash、Make、Python 3、curl、tar、
+ss、setsid 等基础工具，完整分工见下表。Neo4j 从官方发行归档安装，GROBID 使用官方源码和模型在本机构建；
 版本及 SHA-256 固定在 `scripts/local-deploy-versions.json`。
 首次安装需要访问 Conda、PyPI、npm、Go、GitHub、Gradle/Maven 与 Neo4j 官方下载服务。
 若下载失败，先处理相应来源的网络访问；脚本不会退回 Docker 或跳过必需组件。
 报告中的 `next_steps` 提供处理建议；系统或目标检查失败时显示环境“未检查”，不代表 Conda
 不存在。预检阻塞不会创建 `.env`、`.local` 或 `.data`，脚本不自动执行系统安装或修改权限。
-脚本复用兼容的 Conda `sc-wiki`，没有则创建；
-找不到 Conda 时在 `.local/miniforge` 安装，不修改 shell 初始化文件。已有 `.env` 不覆盖，
+Conda 本身由用户安装，脚本复用兼容的 `sc-wiki`，没有则创建；
+找不到或不能使用 Conda 时只报告阻塞，不下载 Miniforge，不修改 base 或 shell 初始化文件。
+已有 `.env` 不覆盖，
 缺少时生成本机随机数据库和 JWT 凭据。安装完成后 `make start/stop/status` 继续可用。
+
+### 工具和配置分工
+
+| 用户／操作系统提前准备 | 用途 |
+| --- | --- |
+| Conda | 提供环境管理命令；不要求提前创建 `sc-wiki`，无需激活它。 |
+| Bash、GNU Make、可运行的 Python 3 | 启动部署脚本；`python3` 可来自系统或 Conda base，应用另用 Python 3.12。 |
+| curl、CA 证书、tar、gzip | HTTPS 下载、校验来源和压缩包处理。 |
+| iproute2、util-linux、procps | 提供 `ss`、`setsid`、`ps` 等端口和进程工具。 |
+| coreutils、grep、sed、awk、findutils | 文件操作、SHA-256 校验、文本处理及构建脚本调用的 `find`/`xargs`。 |
+| Git | 获取源码及 `make frozen` 打包；从完整包解压后部署本身不依赖 Git。 |
+
+| 脚本下载／安装／配置 | 位置或方式 |
+| --- | --- |
+| Python 3.12、pip、Node.js 22/npm | 用户 Conda 管理的 `sc-wiki`；不装入 base。 |
+| MySQL 服务和客户端、Redis、Java 21 | `sc-wiki`，数据库使用项目专属目录和配置，不接管系统数据库。 |
+| Python、前端、Go 项目依赖 | 分别使用 `docker/requirements.txt`、`frontend/package-lock.json`、`goserver/go.mod` 与 `go.sum`；requirements 所在目录不表示使用 Docker。 |
+| Go、Neo4j、Qdrant | 项目 `.local/` 中的固定版本制品，下载后验证摘要。 |
+| GROBID、Wapiti 模型、pdfalto 和原生库 | `.local/grobid`；以官方源码和配套资源构建。 |
+| GROBID Java 17、libxml2、fontconfig、Gradle及构建依赖 | 独立 `.local/grobid-java` 和构建缓存，不替换系统 Java 或 `sc-wiki` 的 Java 21。 |
+| `.env`、数据库连接、随机服务凭据 | 首次生成，重跑保留；AI、Embedding、SMTP 账号密钥由用户另行提供。 |
+
+具体软件版本与摘要以 `scripts/local-deploy-versions.json` 为准。Docker、Nginx 不属于本地
+开发前置条件；部分含 SQLite/CGO 的 Go 测试另需 C 编译器，不把它与日常部署混为一谈。
+依赖下载需要网络，脚本不自动配置系统代理、关闭 TLS 校验或安装系统软件。
+
+Conda 装在非默认位置时，可以只为本次命令指定路径：
+
+```bash
+CONDA_EXE="/实际安装目录/bin/conda" make deploy CHECK_ONLY=1
+CONDA_EXE="/实际安装目录/bin/conda" make deploy
+```
+
+脚本检测已存在的 Conda，不执行 `conda init`、`conda update`，不升级 base Python；选中
+的 `sc-wiki` 若实际指向 base（含符号链接别名），在安装前拒绝。已有不兼容环境不会被删除重建。
 
 安装器与 Go 热重载共用 `GOPATH`、`GOCACHE`、`GOPROXY`；默认沿用项目已有的
 `https://goproxy.cn,direct` 模块镜像，避免安装与启动重复下载。可按网络条件为本次命令

@@ -37,6 +37,7 @@ make deploy CHECK_ONLY=1
 - `CHECK_ONLY=1` 仅输出现状、所需空间及阻塞项，不下载、建环境、导入或改数据库；已解压包和压缩包均需只读验证。
 - 全部服务在本机运行，本地预检、安装和启停均不调用 Docker。前置检查汇总 `problems` 字符串列表与 `next_steps` 处理建议；阻塞时包含 `error_code=preflight_failed` 和 `phase=preflight`；Conda 未检查时明确显示“未检查”，不报告“将创建”。此报告无论普通部署还是只读模式均不写入运行目录。只读预检不保证后续官方依赖下载可达。
 - 可通过显式 `CONDA_EXE` 选择现有 Conda；已有 `CONDA_ROOT` 配置保持兼容。检测多处同名环境且结果不唯一时失败并提示显式选择。
+- Conda 由用户准备；缺失、不可执行、环境查询失败或选中 base 时，普通部署与 `CHECK_ONLY=1` 均只输出预检阻断，不下载 Conda、不写 `.env`/`.local`/`.data`。缺少 `sc-wiki` 且 Conda 可用时才报告“将创建 sc-wiki”；脚本创建或复用该环境并安装依赖，不修改 base。
 - 默认保留已有 `.env`；首次生成随机 JWT、MySQL 和 Neo4j 凭据。本机连接统一回环地址。外部密钥由目标 `.env` 或既有管理界面补充，不从包内执行配置脚本。
 - 只接受空目标或本操作的中间状态；不提供 `FORCE`、`OVERWRITE`、`CLEAR` 参数。
 - 已部署成功后重跑不导入、不清表、不生成新口令；普通 `make start/stop/status` 可继续使用相同环境和本机数据。

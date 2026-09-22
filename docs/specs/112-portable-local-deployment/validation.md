@@ -2,6 +2,50 @@
 
 **关联**：[Issue #112](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/112)、[Spec](spec.md)、[Tasks](tasks.md)
 
+## 用户准备 Conda 的职责修正（2026-09-22）
+
+本轮基于 `mayuan` 的 `b1b1760`，按用户确认取消自动安装 Conda，只创建或复用
+`sc-wiki` 并安装项目依赖。缺少或不可执行 Conda、查询失败、不兼容 Python、环境实际
+指向 base 时在预检拒绝；安装器没有自动下载 Miniforge 的分支。历史版本清单字段保留，
+不改变当前实例版本摘要或触发依赖升级。
+
+### 验证
+
+```bash
+PYTHONNOUSERSITE=1 /home/mayuan/soft/miniconda3/envs/sc-wiki/bin/python -m pytest \
+  --confcutdir="tests/02_maintenance_and_verification" \
+  "tests/02_maintenance_and_verification/test_local_environment.py" \
+  "tests/02_maintenance_and_verification/test_local_deployment.py" -q -rs
+make deploy CHECK_ONLY=1
+make deploy
+```
+
+- 回归 **60 通过、11 跳过**。新增 17 项全部通过，包括真实 Make/Bash/Python 子进程
+  中缺失/不可执行/失败的 Conda、base 符号链接、不兼容 Python 的普通和只读预检，以及
+  非默认前缀复用、待创建报告、安装器无 Conda 不下载和安装命令的环境作用域。
+- Make 测试使用临时源码、受控 PATH 与 Conda 测试替身，只读检查实际 CLI 报告及文件
+  字节不变；创建/安装测试核验命令参数，不把替身测试称为本轮全新 Conda 环境安装。
+- 11 项跳过分别为 4 项需要空闲部署端口、2 项需要空闲 GROBID 端口、1 项未提供的
+  隔离 GROBID 实例、4 项未提供的隔离存储实例；没有为测试停止当前服务。
+- 本机真实预检找到用户已有 `/home/mayuan/soft/miniconda3/bin/conda` 和
+  `/home/mayuan/soft/miniconda3/envs/sc-wiki`，返回 0。真实 `make deploy` 重跑返回 0、
+  “基础部署成功”，11 个服务继续运行，地址为 `http://localhost:5173`。
+- 实测前后 `.env`、Conda base 的 `conda-meta/history` 与 `conda list --json` 摘要相同。
+  没有安装或升级 Conda、修改 base、导入 `dist`、覆盖现有数据或轮换凭据。
+- Bash 语法、差异检查及本次文档相对链接检查纳入提交前验证。
+
+### 文档与未完成边界
+
+Spec/Plan/Research/CLI/Quickstart 已同步用户分工，T038–T039 对应本轮验证。
+`docs/local-dev.md` 列明人工准备、脚本安装、外部凭据和非部署测试依赖；Overview 只记录
+已实现行为。根 `README.md` 的禁止 AI 编辑标记保持，建议人工将旧 Docker 前置说明改为
+“用户准备 Conda 与系统基础工具；脚本准备 sc-wiki 与本机服务，不需要 Docker”。
+
+自动选择 `dist` 最新备份仍由 T040 澄清源码兼容规则，没有绕过原源码校验或导入当前
+真实备份。既有跨机器、全业务恢复及 Docker 目标验收不据此完成，Issue #112 不关闭。
+远端 Issue 正文尚含旧命令和自动 Conda/Docker 前置说明，本轮只读核验其 `type:feature`
+与 OPEN 状态；当前没有 GitHub 写连接器或 `gh`，未修改远端正文、未推送。
+
 ## 完全本机部署与热重载修复（2026-09-22）
 
 用户明确取消本地部署的 Docker 依赖。本轮在 `mayuan` 的 `f24e504` 基础上修改，

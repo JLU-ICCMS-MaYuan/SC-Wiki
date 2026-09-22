@@ -51,7 +51,11 @@ URL/SHA-256、GROBID 0.8.1 标签源码与 Gradle 官方摘要。官方地址不
 
 ### 2. 一份部署配置事实来源
 
-Conda 查找顺序为显式 `CONDA_EXE`、`PATH`、已有 `CONDA_ROOT`、常见安装位置、项目私有安装。通过 `conda env list --json` 获取环境前缀；多处同名且无法唯一定位时要求显式选择，不猜路径。所有 Python/pip 调用使用选定环境的绝对路径；Node、Java、MySQL、Redis 优先在同一环境提供，Go/Neo4j/Qdrant 放项目运行目录。
+Conda 由用户预先安装，不再自动下载 Miniforge 或升级 Conda。查找顺序为显式 `CONDA_EXE`、`PATH`、已有 `CONDA_ROOT`、常见安装位置、已有项目私有安装；最后一项仅复用历史安装。通过 `conda env list --json` 获取环境前缀；多处同名且无法唯一定位时要求显式选择，不猜路径。用 `conda info --base` 校验选中环境不指向 base；不兼容或查询失败在写入前阻断。所有 Python/pip 调用使用选定环境的绝对路径；Node、Java、MySQL、Redis 优先在同一环境提供，Go/Neo4j/Qdrant 放项目运行目录。
+
+用户于 2026-09-22 确认这一分工。保留版本清单中历史 Miniforge 元数据只为避免改变
+既有包/实例的版本摘要，不代表继续支持自动安装；没有 Conda 时由预检和安装器分别拒绝。
+不采用自动 `conda init`、修改 base Python 或自动安装系统软件的方案。
 
 Go 安装检查与 `goserver-run.sh` 共用 `environment.go_environment()`，避免两阶段使用
 不同 GOPATH/GOPROXY 重复下载。默认保留原运行脚本的 `~/.local/gopath`、

@@ -40,7 +40,7 @@
 
 ### 本地开发
 
-1. 首次部署使用 `make deploy`，寻找实际 Conda 前缀并复用兼容的 `sc-wiki`；缺失则创建，无 Conda 时安装项目私有 Miniforge。依赖版本和下载摘要由 `scripts/local-deploy-versions.json` 管理；Go、Neo4j 和 Qdrant 位于 `.local/`。`make setup` 委托同一安装器，仅准备依赖和配置。
+1. 用户先准备 Conda 和系统基础工具；`make deploy` 寻找其实际前缀并复用兼容的 `sc-wiki`，环境缺失则创建。脚本不安装或升级 Conda，不修改 base；缺少/不可用 Conda 或 `sc-wiki` 实际指向 base 时在预检阶段拒绝，可用 `CONDA_EXE` 指定安装位置。依赖版本和下载摘要由 `scripts/local-deploy-versions.json` 管理；Go、Neo4j 和 Qdrant 位于 `.local/`。`make setup` 委托同一安装器，仅准备依赖和配置；完整分工见[本地开发说明](../../local-dev.md#工具和配置分工)。
 2. 无包时生成本机 `.env` 并初始化空库；解压包有 `.deployment/manifest.json` 时校验并恢复到临时目录，验证后提升为 `.data`。已有不属于该部署的数据会阻断，成功后的重跑不重复导入。`make migrate` 保留为旧 Docker 卷迁移入口。
 3. `make start` 启动全部服务，按依赖顺序等待健康检查。便携实例核验进程归属和真实 schema，只核验、不升级数据库；没有便携记录的旧实例保留原迁移启动路径。
 4. 浏览器访问 `http://127.0.0.1:5173`。`make status` 查看各服务状态，`make logs S=<服务>` 跟踪日志。
@@ -48,6 +48,8 @@
 部署前置检查不要求 Docker，阻塞报告通过 `next_steps` 提供处理建议，
 并包含 `error_code=preflight_failed`、`phase=preflight`。系统或目标预检阻塞时，Conda
 状态显示“未检查”，不能据此推断需要创建环境。此阶段只输出报告，不创建配置或运行数据。
+Conda 自身检查失败时状态为“未就绪（Conda 预检未通过）”；只有找到可用 Conda 且没有
+`sc-wiki` 时才显示“将创建 sc-wiki”。安装器保留缺失 Conda 的第二道拒绝检查，不自动引导 Miniforge。
 Neo4j/GROBID 来源和摘要由统一版本清单固定；网络下载失败不会转用 Docker 或跳过服务。
 本机 GROBID 的真实引用/PDF 解析、重复启动和停止已验证；Neo4j CDN 返回 403 时可使用
 版本清单中的发行对象存储备用地址，仍验证同一个官方 SHA-256。当前 Ubuntu 26.04

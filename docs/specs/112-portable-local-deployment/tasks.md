@@ -144,3 +144,14 @@ T004/T007/T008/T012/T017 的剩余项以实际矩阵为准，不因相关代码�
 - [x] T037 [US1] 在 `docs/specs/112-portable-local-deployment/validation.md` 记录真实安装、GROBID 解析、完整部署和重跑结果；同步 `docs/local-dev.md`、CLI/Quickstart 和 Overview；根 `README.md` 遵循禁止自动编辑标记，只记录人工修订建议。区分代码、局部测试、完整部署及外部网络阻塞，不替代 T023 平台矩阵。来源 FR-017/019、SC-001/004/006。
 
 依赖：T035 → T036 → T037；不依赖 Docker 目标 T031–T033，不扩大本轮为 Docker 恢复实现。
+
+## 阶段 10：用户准备 Conda 与最新备份需求澄清
+
+用户已确认 Conda 由其准备、脚本创建或复用 `sc-wiki` 且不修改 base。以下任务替代
+T004/T026 中无 Conda 自动安装的旧要求；不重新勾选那些包含其他未验收项的历史任务。
+
+- [x] T038 [US1] 在 `tests/02_maintenance_and_verification/test_local_environment.py`、`test_local_deployment.py` 和 `scripts/local_deploy/environment.py`、`cli.py` 实现并验证缺少/不可用 Conda 时真实 Make 入口只读阻断，非默认前缀复用、命名环境创建的命令作用域、base 别名拒绝和安装器不下载 Conda。来源：用户确认、FR-003/014/017；新增 17 项通过，未冒称本轮重新安装全新环境，见 validation.md。
+- [x] T039 [US1] 更新 `docs/local-dev.md`、`Makefile` 注释、相关 Overview 与 `validation.md`，列明人工准备和脚本下载的完整分工；本机预检与真实部署重跑成功，base 包清单/历史及配置摘要不变，未对当前实例恢复备份。来源：FR-003/019、SC-004/006。
+- [ ] T040 [US3] 根据用户要求澄清自动选择 `dist` 最新备份时的源码/数据兼容边界，确认后更新本目录 Spec、Plan、CLI 和恢复测试任务；在设计明确前不放宽包源码校验、不覆盖已有数据。来源：用户最终需求，FR-006/011/012/017。
+
+依赖：T038 → T039；T040 单独等待源码兼容决策，不阻断已确认的 Conda 分工实现。

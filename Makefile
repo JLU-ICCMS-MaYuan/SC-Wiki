@@ -1,4 +1,4 @@
-# SC-Wiki 本地开发。应用服务跑在宿主机；GROBID 使用仅绑定回环地址的容器。
+# SC-Wiki 本地开发。所有服务在本机运行，不依赖 Docker；Conda 由用户准备。
 #
 #   make frozen    冻结并打包当前实例的源码与业务数据
 #   make deploy    首次本地部署或恢复迁移包

@@ -364,7 +364,7 @@ def test_dependency_install_failure_records_environment_phase(tmp_path, monkeypa
     cli = module('cli')
     monkeypatch.setattr(cli, 'source_identity', lambda root: 'test-source')
     monkeypatch.setattr(cli.environment, 'preflight', lambda *a, **k: [])
-    monkeypatch.setattr(cli.environment, 'find_environment', lambda root: (None, None))
+    monkeypatch.setattr(cli.environment, 'find_environment', lambda root: (Path('/user/conda'), None))
     def failed_install(root):
         state = json.loads((root / '.local/deployment-state.json').read_text())
         assert state['phase'] == 'environment'
