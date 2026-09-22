@@ -62,11 +62,6 @@ def prepare_bundle(root, path, *, check_only=False):
         except (tarfile.TarError, EOFError):
             raise ValueError('数据库压缩包损坏或不是受支持的 tar 迁移包') from None
         manifest = bundle.verify(unpacked)
-        for name, info in manifest['files'].items():
-            if not name.startswith('.deployment/'):
-                file = root / name
-                if not file.is_file() or bundle.digest(file) != info['sha256']:
-                    raise ValueError('当前源码与包不一致，请在包的解压目录执行部署')
         if destination.exists():
             current = bundle.verify(root)
             if current != manifest:
@@ -119,6 +114,8 @@ def deploy(root: Path, args):
         if manifest:
             if manifest.get('services') != environment.versions(root):
                 raise ValueError('包的服务版本与源码不一致，不支持跨版本恢复')
+            if manifest.get('source_identity') != source_identity(root):
+                raise ValueError('当前 Git 源码与数据包不兼容，请切换到生成该包的提交或兼容版本')
             state = DeploymentState.inspect(root, manifest['bundle_id'])
             if ('source_identity' in state.record
                     and state.record['source_identity'] != source_identity(root)):
@@ -310,9 +307,9 @@ def pack(root: Path, args):
         raise ValueError('输出已存在，拒绝覆盖')
     with operation_lock(root), tempfile.TemporaryDirectory(prefix='pack-', dir=root / '.local') as tmp:
         temporary = Path(tmp)
-        archive = temporary / 'source.tar'
-        environment.run(['git', 'archive', '--format=tar', '--prefix=sc-wiki/', '-o', archive, commit], cwd=root)
-        stage = bundle.extract_archive(archive, temporary / 'source')
+        # frozen 只发布运行数据；目标机器通过 Git 获取源码，避免在备份包内复制旧源码。
+        stage = temporary / 'source' / 'sc-wiki'
+        stage.mkdir(parents=True)
         payload = stage / '.deployment'
         payload.mkdir()
         components = {}
@@ -343,7 +340,8 @@ def pack(root: Path, args):
             components['qdrant'] = storage.export_qdrant(values, payload / 'qdrant')
             storage.copy_files(source, payload / 'files')
             check_secrets(stage, values)
-            manifest = bundle.seal(stage, {'source_commit': commit, 'source_data_root': str(source),
+            manifest = bundle.seal(stage, {'source_commit': commit, 'source_identity': source_identity(root),
+                                          'source_data_root': str(source),
                                           'services': environment.versions(root), 'components': components})
             bundle.verify(stage)
             storage.check_mysql_export(values['DATABASE_URL'], inspection_connection=runtime.mysql_inspection_connection)

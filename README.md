@@ -10,9 +10,10 @@ Ubuntu，以及预先可用的 Docker 和系统基础工具。
 首次运行建议先执行 `make deploy CHECK_ONLY=1`；Docker 缺失或不可用时，
 按报告中的 `next_steps` 准备好 Docker，再重新预检。部署脚本不自动安装系统 Docker。
 
-源机器使用 `make frozen OUTPUT="/备份目录/sc-wiki.tar.gz"` 打包已提交源码及业务数据库、
-草稿和附件；复制并解压到目标空目录，再执行 `make deploy`。打包会短暂停止
-应用写入，目标拒绝覆盖已有数据；模型和邮件密钥在目标重新配置。
+源机器使用 `make frozen OUTPUT="/备份目录/sc-wiki.tar.gz"` 仅打包业务数据库、
+草稿、图/向量数据和附件，不包含源码；目标机器先 `git clone` 并切换到与数据包兼容的
+提交，再把数据包放入源码根目录的 `dist/`，执行 `make deploy`。打包会短暂停止应用写入，
+目标拒绝覆盖已有数据；模型和邮件密钥在目标重新配置。
 
 详细步骤见[本地开发指南](docs/local-dev.md)，当前验证范围及待验收项见
 [#112 验证记录](docs/specs/112-portable-local-deployment/validation.md)。

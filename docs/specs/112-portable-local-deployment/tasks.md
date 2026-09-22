@@ -32,7 +32,7 @@
 
 ## 阶段 4：US2——生成迁移包（P1）
 
-**目标**：导出一致、完整、不含外部凭据的源码与数据包。
+**目标**：导出一致、完整、不含外部凭据的数据包；源码通过 Git 单独迁移。
 
 **独立验收**：使用含账户、表单、审核、附件、图、向量和未提交草稿的测试实例生成包，所有清单和摘要通过。
 
@@ -40,7 +40,7 @@
 - [x] T013 [US2] 在 `scripts/local_deploy/storage.py`、`scripts/dev.sh` 实现 300 秒宽限期、应用/新闻调度/Worker 停写和原状态恢复；禁止复用强杀活动任务或自动迁移源库的路径。
 - [x] T014 [US2] 在 `scripts/local_deploy/storage.py` 实现 MySQL 全业务库逻辑导出、对象/结构/revision 清单、Neo4j 业务 dump、Qdrant 集合快照与别名；源结构不兼容或组件失败必须阻断发布。
 - [x] T015 [US2] 在 `scripts/local_deploy/storage.py`、`scripts/local_deploy/paths.py` 实现 Redis 状态/草稿白名单、有效期、文件引用登记、凭据排除和原路径映射；以植入的假密钥检测包与日志，禁止输出真实凭据。
-- [x] T016 [US2] 在 `scripts/pack.sh`、`scripts/local_deploy/bundle.py`、`Makefile` 实现干净 HEAD 源码归档、OUTPUT 参数、完整清单和原子发布；更新 `.gitignore` 排除 `.deployment/` 制品，明确不提交数据包。
+- [x] T016 [US2] 在 `scripts/pack.sh`、`scripts/local_deploy/bundle.py`、`Makefile` 实现干净 HEAD 数据冻结、OUTPUT 参数、完整清单和原子发布；包仅含 `.deployment/` 数据，不复制源码，目标由 Git 获取兼容源码。
 
 ## 阶段 5：US3——恢复与故障重试（P1）
 
