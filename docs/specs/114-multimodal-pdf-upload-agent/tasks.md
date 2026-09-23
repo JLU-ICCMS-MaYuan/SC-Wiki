@@ -1,0 +1,99 @@
+# 实施任务：多模态 PDF 解析与证据驱动上传 Agent
+
+**输入**：[spec.md](spec.md)、[plan.md](plan.md)、[research.md](research.md)、[data-model.md](data-model.md)、[contracts/](contracts/)
+
+## 阶段 1：准备
+
+- [ ] T001 [US1] 核对 Docling、MinerU 附加许可证、Python/镜像兼容性并固定 requirements.txt、docker/requirements.txt 版本。
+- [ ] T002 [US1] 建立至少 50 篇论文的脱敏评测清单、标注格式和基线输出，保存到 tests/fixtures/issue114/README.md（不提交受限制论文文件）。
+- [ ] T003 [P] [US5] 增加解析链路配置、能力探测和 Shadow/灰度/默认开关，保存到 backend/rag/config.py 与 backend/ingest/parser_rollout.py。
+
+## 阶段 2：基础能力
+
+- [ ] T004 [P] [US1] 定义 backend/ingest/document_ir.py 的 Pydantic/TypedDict 模型、枚举、哈希和几何校验。
+- [ ] T005 [P] [US1] 定义 backend/ingest/document_parsers.py 的 DocumentParser、DocumentSource、ParserDecision、ParserRun 和统一错误。
+- [ ] T006 [P] [US2] 定义 backend/ingest/claim_evidence.py 的 Claim、EvidenceLocator、来源分类和定位校验器。
+- [ ] T007 [P] [US3] 定义 backend/ingest/coverage_audit.py 的 CoverageReport、表格行/结果段落/截断信号检查。
+- [ ] T008 [P] [US3] 为 T004–T007 先写契约测试 tests/01_decentralized_uploading/test_issue114_multimodal_pdf_agent.py。
+
+## 阶段 3：用户故事 1——解析复杂论文（P1，MVP）
+
+**独立验收**：数字、扫描、双栏、表格和公式样例都能生成合法 Document IR；解析器不可用时产生可观察 fallback。
+
+- [ ] T009 [US1] 实现 PyMuPDF fallback，补齐文本块、图片块、页边界、内容哈希和降级元数据。
+- [ ] T010 [US1] 实现 DoclingParser 的可选导入、版本记录、块/表格/公式/图像映射和失败降级。
+- [ ] T011 [US1] 实现 MinerUParser 的 tier 配置、版本记录、稳定 block ID 和失败降级。
+- [ ] T012 [US1] 实现 NativePdfLlmParser 适配器：接收供应商 PDF/页面输入，输出只含 Claim/IR 候选的结构化响应，不直接写库。
+- [ ] T013 [US1] 在 backend/ingest/upload_jobs.py 接入 parser adapter，保留旧 Markdown 缓存读取和旧链路 fallback。
+- [ ] T014 [US1] 增加数字 PDF、扫描页、复杂表格、公式、双栏和补充材料的真实/合成集成测试。
+
+## 阶段 4：用户故事 2——有证据的科学 Claim（P1）
+
+**独立验收**：Claim 通过定位后才能转换为现有草稿；不能定位的结果显示不确定并保留原因。
+
+- [ ] T015 [US2] 将 Document IR 块和表格单元接入现有分段/汇总提示输入，输出版本化 Claim。
+- [ ] T016 [US2] 在 upload_jobs.py 中调用 Claim 定位校验并映射现有 field_path、basis_kind、source_kind 和 Evidence。
+- [ ] T017 [US2] 增加 Claim 无效、跨文件、错误页码、越界 bbox、OCR 来源和旧 quote fallback 测试。
+- [ ] T018 [US2] 建立 Alembic 文档块/解析运行迁移，并在 backend/models.py、goserver/models/models.go 中加入只读映射。
+- [ ] T019 [US2] 在提交事务和 revision 服务中复制/清理文档定位数据，补齐真实数据库回归。
+
+## 阶段 5：用户故事 3——覆盖审计与安全降级（P1）
+
+**独立验收**：覆盖不足、预算耗尽、解析器失败和 RQ 入口失败都不会形成假完成。
+
+- [ ] T020 [US3] 把 CoverageReport 接入上传任务状态、artifact manifest 和前端进度详情。
+- [ ] T021 [US3] 实现 AgentToolRegistry、ActionBudget 和 read_page/read_region/extract_table/inspect_figure/search/validate/check_coverage 工具。
+- [ ] T022 [US3] 接入有限 Agent 循环、取消、超时、重试和“需要人工”停止状态，不保存思维链。
+- [ ] T023 [US3] 增加解析器不可用、模型超时、GPU 缺失、输出截断、工具超限和 RQ 失败收敛集成测试。
+
+## 阶段 6：用户故事 4——区域证据（P2）
+
+**独立验收**：上传者和审核员可从字段进入页码、区域和引句；区域失败仍有文本证据。
+
+- [ ] T024 [US4] 增加文档 Evidence API，返回文件、PDF/印刷页码、bbox、多边形、块关系和降级信息。
+- [ ] T025 [US4] 增加按原 PDF 页码和 bbox 的按需渲染接口，限制文件归属和页面范围。
+- [ ] T026 [US4] 修改 EvidenceWorkflow、UploadTaskEditor 和审核页面，显示区域证据、OCR 标记和渲染失败提示。
+- [ ] T027 [US4] 增加桌面/窄屏/键盘、刷新恢复、旧 Evidence 和无区域数据前端测试。
+
+## 阶段 7：用户故事 5——渐进上线（P2）
+
+**独立验收**：Shadow/灰度/默认均可配置，质量门未通过不能默认，新链路失败可回退旧链路。
+
+- [ ] T028 [US5] 实现 Shadow 结果存储、旧/新结果对照摘要和不影响用户草稿的任务分支。
+- [ ] T029 [US5] 实现灰度比例/允许名单、任务级 fallback 和安全审计日志。
+- [ ] T030 [US5] 建立 50 篇论文基准运行器和报告，计算 SC-001～SC-003 指标。
+- [ ] T031 [US5] 增加默认切换质量门、配置拒绝和回滚测试，不提供用户解析器选择。
+
+## 最终阶段：完善与跨故事事项
+
+- [ ] T032 [P] 更新 docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md、data-structure-and-form-mapping.md 和 upload-llm-workflow-and-agent-analysis.md。
+- [ ] T033 [P] 更新 README.md、部署依赖、模型资源和无 GPU 降级说明。
+- [ ] T034 运行 Python、前端、Go、迁移、RQ、浏览器和 50 篇基准验证，记录 docs/specs/114-multimodal-pdf-upload-agent/validation.md。
+- [ ] T035 使用 big-project-overview-maintainer 回写已落地行为；只写已实现事实，不写未来设计。
+- [ ] T036 核对 Issue/Spec 双向链接、Documentation Impact、git status/diff，按 AGENTS.md 只提交本 Feature 文件。
+
+## 依赖与执行顺序
+
+- T001–T008 阻断所有用户故事。
+- T009–T014 完成后才可接入 Claim；T015–T019 完成后才可做正式提交。
+- T020–T023 依赖 IR 和 Claim；T024–T027 依赖正式定位数据；T028–T031 依赖前述链路可运行。
+- 同一文件上的任务串行；仅 T003/T004/T005/T006/T007/T008/T032/T033 可在依赖满足后并行。
+
+## 需求覆盖
+
+| 来源 | 任务 | 说明 |
+| --- | --- | --- |
+| FR-001～FR-004 / US1 | T004–T014 | 适配器、IR、页面/块/表格/公式和 fallback |
+| FR-005～FR-006 / US2 | T006、T015–T019 | Claim、Evidence、定位和正式保存 |
+| FR-007～FR-010 / US3 | T007、T020–T023 | 覆盖、工具预算、失败收敛和人工状态 |
+| FR-011 / US5 | T003、T028–T031 | Shadow、灰度、默认和质量门 |
+| FR-012 / US4 | T018、T019、T024–T027 | 迁移、revision 和区域证据 |
+| FR-013～FR-014 | T015、T019、T024、T032–T035 | 联网隔离、既有提交/审核/发布兼容 |
+| SC-001～SC-008 | T014、T017、T019、T023、T027、T030、T031、T034 | 指标、回归、端到端和上线门禁 |
+
+## MVP 与增量策略
+
+1. MVP：T001–T019，完成可定位 IR、Claim 和正式定位数据，旧链路仍为默认。
+2. 第二阶段：T020–T027，加入覆盖审计、有限 Agent 和区域证据。
+3. 第三阶段：T028–T031，完成基准、Shadow、灰度和默认门禁。
+4. 收尾：T032–T036，完成文档、验证、Overview 和 Issue 关闭准备。

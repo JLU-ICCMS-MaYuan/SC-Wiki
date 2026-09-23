@@ -1,0 +1,69 @@
+# 研究记录：多模态 PDF 解析与证据驱动上传 Agent
+
+**GitHub Issue**：[ #114](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/114)
+
+## 当前事实
+
+- `backend/ingest/pdf_extractor.py` 使用 PyMuPDF 提取文本块，图片只写 Markdown 占位符，不把图像内容送入模型。
+- `backend/ingest/upload_jobs.py` 采用分段提取、全文汇总和字段建议；草稿和 Evidence 已有稳定来源与版本边界。
+- `paper_chunks`/`paper_evidences` 当前主要以页码、片段和 quote 定位，没有 bbox、表格单元或解析器版本。
+- GROBID 已作为参考文献和论文结构支路使用，不替代完整页面视觉解析。
+- RQ/Redis、上传任务失败收敛、旧缓存兼容和审核事务已有稳定约束。
+
+## 决策记录
+
+### D-001：统一适配器而不是在 Worker 中直接调用供应商
+
+- **决定**：所有解析器实现 `DocumentParser`，只返回 `DocumentIR`。
+- **理由**：隔离 Docling、MinerU、PyMuPDF 和 PDF LLM 的安装、版本和错误差异；便于测试和回退。
+- **备选**：在 `upload_jobs.py` 中直接分支调用；拒绝，因为会让任务编排承担解析细节。
+
+### D-002：Docling 默认，MinerU 可切换，PyMuPDF fallback
+
+- **决定**：普通数字 PDF 默认 Docling；复杂页面可切换 MinerU；无能力时 PyMuPDF。
+- **理由**：Docling 的统一文档对象和 MIT 许可证适合作为基础；MinerU 的分层解析和 Agent 阅读适合作为复杂样本竞争路径；PyMuPDF 保持无 GPU 可用。
+- **备选**：只使用一个解析器；拒绝，因为无法验证复杂论文和部署资源差异。
+
+### D-003：PDF 原生多模态 LLM 只能作为受控适配器
+
+- **决定**：允许模型直接读取 PDF 或页面图像，输出 Claim 候选；程序必须用 IR 校验 Evidence，模型不能写库。
+- **理由**：模型擅长跨页语义、图表和复杂 OCR，但长文档漏读和定位不稳定，不能承担事实写入权威。
+- **备选**：整篇 PDF 一次调用直接生成最终表单；拒绝，因为无法保证覆盖、定位和 JSON 完整性。
+
+### D-004：正式保存定位，不保存截图为事实
+
+- **决定**：MySQL 保存文件哈希、页码、bbox/多边形、块 ID、quote、解析器和版本；截图从原 PDF 按需渲染。
+- **理由**：支持长期复核、revision 和审计，同时避免截图副本膨胀和截图与 PDF 版本漂移。
+- **备选**：只保存页码和 quote；拒绝，因为无法支持表格单元和区域高亮。
+
+### D-005：正确性优先，至少 50 篇基准，Shadow → 灰度 → 默认
+
+- **决定**：新链路必须先与旧链路比较，再小范围启用，质量门通过后默认；旧链路保留回退。
+- **理由**：解析质量不能从工具 README 的 SOTA 声称推断，必须以超导论文标注集测量。
+- **备选**：完成后直接默认；拒绝，因为真实分布外论文风险不可控。
+
+### D-006：联网严格隔离
+
+- **决定**：联网只返回出版元数据、研究背景和术语解释，独立标记，不进入科学 Claim。
+- **理由**：避免外部论文或附件的 Tc/压力等事实混入当前上传记录；兼容 #67 的非阻塞复用。
+- **备选**：联网补科学字段；拒绝，因为来源和版本匹配难以保证，且违反上传来源边界。
+
+## 外部调研依据
+
+- [Docling Technical Report](https://arxiv.org/abs/2408.09869)：版面分析、TableFormer、统一文档表示和本地运行能力。
+- [Docling 项目](https://github.com/docling-project/docling)：支持表格、公式、OCR、VLM、MCP 和区域结构；本项目不直接采信其自报准确率。
+- [MinerU 技术报告](https://arxiv.org/abs/2409.18839)：PDF-Extract-Kit 和高精度文档内容抽取。
+- [MinerU2.5](https://arxiv.org/abs/2509.22186)：全局版面分析与局部高分辨率识别的两阶段思路。
+- [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)：文档 OCR、表格、公式和图表视觉解析；本 Feature 首期不把它作为基础解析器。
+- [olmOCR-Bench](https://github.com/allenai/olmocr)：约 1,400 篇文档和 7,000 多个测试用例的 OCR/PDF 评测思路，可借鉴其类别划分。
+- [GROBID](https://github.com/grobidOrg/grobid)：科学论文元数据、章节、参考文献和坐标抽取，继续作为专用支路。
+- [Lost in the Middle](https://arxiv.org/abs/2307.03172)：长输入位置效应，支持覆盖审计和分区阅读的必要性。
+
+## 许可证和部署注意
+
+Docling 为 MIT；PaddleOCR 为 Apache-2.0；MinerU 使用 Apache-2.0 加附加条款，实际部署前需将其许可证随依赖清单和发布镜像一起核对。Docling/MinerU 可以有 CPU 路径，但复杂视觉模型需要更高资源；本 Feature 不把 GPU 作为服务启动条件。
+
+## 未决但不阻塞事项
+
+- 具体 PDF LLM 供应商由现有 LLM 配置和能力探测决定，不在本 Feature 固定厂商。
+- 50 篇论文标注集的来源和标注工具需在 T003 中登记，未登记前不能宣布质量门通过。
