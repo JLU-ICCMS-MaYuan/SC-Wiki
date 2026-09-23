@@ -7,7 +7,7 @@
 ## 当前行为
 
 - `make deploy` 的新空库路径执行全部受测迁移分支，当前头为 `20260914_0052`、`20260918_0108`，并填充 118 个元素；只允许空库进入初始化，不使用 `create_all + stamp` 代替迁移。
-- 便携包恢复后和普通启动前，共用 `scripts/local_deploy/schema.py` 检查全部 revision 及受测结构。恢复过程不升级源库、不重放旧迁移。便携实例的结构基线不表示现有开发库或其他机器已迁移，验证范围见 [#112](../../specs/112-portable-local-deployment/validation.md)。
+- 便携包恢复后和普通启动前，共用 `scripts/local_deploy/schema.py` 检查全部 revision 及受测结构。恢复过程不升级源库、不重放旧迁移。便携实例的结构基线不自动升级源库；#112 已通过用户手动跨机器验收验证目标实例的结构与运行链路，详细范围见 [#112](../../specs/112-portable-local-deployment/validation.md)。
 - Docker Compose 定义 `frontend`、`goserver`、`python`、`mysql`、`redis`、`neo4j`、`qdrant` 七类服务，Go 服务依赖 MySQL 与 Redis 健康检查，Python 服务依赖 MySQL 与 Qdrant 健康检查。
 - Go 服务从 `DATABASE_URL` 解析 MySQL DSN，缺少 `DATABASE_URL` 或 `JWT_SECRET_KEY` 会直接拒绝启动。
 - Python 服务仍通过 `backend/database.py` 与 Alembic 使用 `DATABASE_URL`，并保留 `Base.metadata.create_all` 和周期表元素初始化脚本。

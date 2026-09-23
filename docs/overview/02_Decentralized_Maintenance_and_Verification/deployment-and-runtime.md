@@ -57,8 +57,9 @@ Conda 自身检查失败时状态为“未就绪（Conda 预检未通过）”�
 Neo4j/GROBID 来源和摘要由统一版本清单固定；网络下载失败不会转用 Docker 或跳过服务。
 本机 GROBID 的真实引用/PDF 解析、重复启动和停止已验证；Neo4j CDN 返回 403 时可使用
 版本清单中的发行对象存储备用地址，仍验证同一个官方 SHA-256。当前 Ubuntu 26.04
-机器已完成整套无 Docker 空库部署、重复部署和源码重载验证；预检通过仍不代表后续网络
-安装必然成功，也不能替代其他平台或跨机器恢复验收。
+机器已完成整套无 Docker 空库部署、重复部署和源码重载验证；用户另已完成从 WSL 到
+Ubuntu 的手动跨机器验收，当前机器上的 SC-Wiki 即按该流程部署运行。预检通过仍不代表
+后续网络安装必然成功，外部 AI/SMTP 能力仍需按目标环境配置。
 
 Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既有模块镜像，
 显式进程配置优先；不修改全局 Go 设置，保留模块校验。GROBID 单独使用 Java 17，
@@ -66,8 +67,8 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 
 `make frozen` 以干净 HEAD 的源码和业务数据生成迁移包。外部凭据不进入包；源端停写后
 导出 MySQL、Neo4j、Qdrant 和 Redis 上传草稿，结束后恢复应用。Redis 草稿恢复会同步
-落盘，便携实例正常停止也会保存。实现已进入真实隔离验证，干净 Ubuntu 22.04
-和另一台机器的完整安装验收尚未完成，见 [#112 验证记录](../../specs/112-portable-local-deployment/validation.md)。
+落盘，便携实例正常停止也会保存。实现已完成真实隔离验证，并由用户完成 WSL 到 Ubuntu 的手动跨机器验收；当前机器实例
+即为该流程的部署结果。详细证据见 [#112 验证记录](../../specs/112-portable-local-deployment/validation.md)。
 
 已有 Neo4j 安装切换到 17687 时，需要同步 `.env` 的 `NEO4J_URI` 与
 `.local/neo4j/conf/neo4j.conf` 中的 Bolt 监听、公布地址，并让服务及客户端重新加载配置。

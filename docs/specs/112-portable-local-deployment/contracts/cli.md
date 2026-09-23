@@ -43,10 +43,9 @@ make deploy CHECK_ONLY=1
 - 只接受空目标或本操作的中间状态；不提供 `FORCE`、`OVERWRITE`、`CLEAR` 参数。
 - 已部署成功后重跑不导入、不清表、不生成新口令；普通 `make start/stop/status` 可继续使用相同环境和本机数据。
 
-## 拟新增 `make dockerdeploy`（待设计确认与实现）
+## Docker 目标恢复 CLI（已移出 #112）
 
-从本地 `make frozen` 生成的同一包恢复 Docker 目标；自动发现 `.deployment`，并支持
-`BUNDLE`、`CHECK_ONLY`。本轮 Docker 入口只处理包恢复；无包时明确失败并说明原因。
+Docker 目标恢复 CLI 已移出 #112；未来独立 Issue 如重新纳入需求，应另行定义入口和契约。
 宿主机需要 Docker Compose、基础脚本工具和源码构建网络，不需要 Conda。
 空目标、版本、凭据排除、清单核验和重复执行规则与本地目标一致；目标生成容器连接配置。
 现有 `docker compose up` 不具备读取本包的功能，不能用它替代该恢复步骤。

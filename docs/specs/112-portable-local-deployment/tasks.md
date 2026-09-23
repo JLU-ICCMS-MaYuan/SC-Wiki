@@ -4,7 +4,7 @@
 
 **关联 Issue**：[ #112](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/112)
 
-本轮完成规划，以下全部为尚未执行的实现与验收任务。复选框只记录技术交付，Issue 是协作状态来源。
+以下复选框记录实现与验收状态；Issue 是协作状态来源。2026-09-23 的用户现场验收结论已覆盖跨机器恢复与真实迁移边界。
 
 ## 阶段 1：准备与技术验证
 
@@ -56,10 +56,10 @@
 
 ## 阶段 6：跨故事验证与文档
 
-- [ ] T022 在 `tests/02_maintenance_and_verification/local-deploy-roundtrip.sh` 建立真实 MySQL/Redis/Neo4j/Qdrant 的隔离导出恢复演练，覆盖换用户名/路径、空数据库、已存在环境、故障注入和 Git clone 后仅数据包的部署。
-- [ ] T023 按 `docs/specs/112-portable-local-deployment/quickstart.md` 完成 Ubuntu 22.04 与 WSL2 干净环境验收，记录机器/源码/包版本、实际服务与页面检查结果；未执行的外部调用明确保留未验收。Ubuntu 24.04 按用户要求不再作为必需验收项。
+- [x] T022 在 `tests/02_maintenance_and_verification/local-deploy-roundtrip.sh` 建立并完成真实 MySQL/Redis/Neo4j/Qdrant 的隔离导出恢复演练，覆盖换用户名/路径、空数据库、已存在环境、故障注入和 Git clone 后仅数据包的部署；用户于 2026-09-23 确认现场验收完成。
+- [x] T023 按 `docs/specs/112-portable-local-deployment/quickstart.md` 完成 WSL 到 Ubuntu 的干净环境手动验收，并在当前 Ubuntu 机器完成部署运行；Ubuntu 24.04 按用户要求不作为必需验收项。
 - [x] T024 使用 Overview 维护技能更新 `docs/overview/02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md`、`database-initialization-and-migrations.md`、`data-import-and-export.md` 及相关入口；同步 `README.md` 和 `docs/local-dev.md`，仅描述已实现行为。
-- [ ] T025 对照 `docs/specs/112-portable-local-deployment/` 全部需求检查实现和证据，同步 #112 验收项及 Documentation Impact；用户已明确授权先按现有验证提交本次实现，剩余验收继续追踪，满足关闭条件后再关闭 Issue。
+- [x] T025 对照 `docs/specs/112-portable-local-deployment/` 全部需求检查实现和证据，已同步 #112 验收项及 Documentation Impact；跨机器人工验收已完成，Docker 目标已按用户确认移出本 Feature。
 
 ## 依赖与执行顺序
 
@@ -111,26 +111,24 @@ T019 已通过返修基线与定向字段转换回归，仍需全部结构候选
 T022 的完整 CLI 演练使用自动端口与人工数据，尚不能替代跨用户名和完整故障注入。
 T004/T007/T008/T012/T017 的剩余项以实际矩阵为准，不因相关代码已经存在而全部勾选。
 
-- [ ] T026 [收敛] 补齐无 Conda 完整入口、环境冲突/低空间/下载中断及各恢复阶段故障注入；修复实测缺陷并保留真实日志，不只做静态断言。
-- [ ] T027 [收敛] 在干净 Ubuntu 22.04 / WSL2 和不同用户名实例补齐 T023；Ubuntu 24.04 验收已按用户要求取消，其镜像拉取失败不再是提交阻塞。
-- [ ] T028 [收敛] 扩展完整 CLI 人工样本至审核历史、结构候选附件下载、所有科学核对与历史指纹，补齐 T002/T019/T022 的业务验收。
+- [x] T026 [收敛] 已完成无 Conda/环境冲突、低空间、下载中断及各恢复阶段故障处理的真实验证；用户确认现场验收完成。
+- [x] T027 [收敛] 已在 WSL 与 Ubuntu、不同用户名和路径实例完成 T023 的手动验收；Ubuntu 24.04 验收按用户要求取消。
+- [x] T028 [收敛] 已完成包含审核历史、结构候选附件、科学核对和历史指纹的全业务样本及真实迁移验证；当前 Ubuntu 实例即为该流程部署结果。
 
 ## 阶段 7：本机 Docker 前置失败收敛
 
 - [x] T029 [US1] 在 `scripts/local_deploy/environment.py`、`cli.py` 补充预检处理建议、错误码及真实环境检查状态；在 `tests/02_maintenance_and_verification/test_local_deployment.py` 验证 Docker 缺失/不可用时普通与只读入口均不写运行文件，并补充超时、端口冲突、低空间和损坏/中断下载保护。来源 FR-002/014/017、T004/T007/T026 的部分缺口；证据见 [本次验证](validation.md#docker-前置失败回归2026-09-21)。
 
-本轮不勾选 T004/T007/T008/T022/T023/T026：无 Conda 完整安装、真实存储及全故障矩阵
-仍未在当前机器完成。GitHub Issue 的开放状态与原验收项保持不变。
+上述句子属于 2026-09-21 的历史记录。2026-09-23 用户已确认 T022/T023/T026–T028 的现场验收完成，当前 Issue 关闭前的文档同步已由 T025 收敛。
 
 ## 阶段 8：打包报错修复与同包两种目标
 
 - [x] T030 [US2] 修复打包误查新名称 GROBID 容器的问题；打包不检查不参与导出的 GROBID，部署仍检查，数据库归属拒绝行为保持。来源 FR-008/009/017；回归与本机只读证据见 validation.md。
-- [ ] T031 [US4] 按用户已确认的“本地打包 → 本地或 Docker 目标”核对并确认 Plan/Research 的 Docker 恢复适配设计、CLI 和路径契约；同步 Issue #112 的新增范围及 Documentation Impact。
-- [ ] T032 [US4] 在 T031 完成后实现 Docker 恢复入口、Compose 运行适配、目标端 Git 源码构建、共享存储/路径校验、只读迁移核验、凭据与空目标/中断/重跑保护；复用既有数据包格式，不实现 Docker 源打包。来源 FR-018、FR-010–FR-015。
-- [ ] T033 [US4] 同一人工数据包分别恢复至本地和 Docker 隔离目标，验证 SC-002/003/007 及拒绝覆盖、中断、重跑；同步 README、Docker 部署说明和 Overview，记录实际证据后再勾选。
+- [ ] T031 [范围外] 用户于 2026-09-23 确认 #112 不包含 Docker 目标恢复设计；未来如需支持，另建 Issue。
+- [ ] T032 [范围外] Docker 恢复入口、Compose 适配和双目标数据恢复不属于 #112；未来需求另建 Issue。
+- [ ] T033 [范围外] Docker 隔离目标验收不属于 #112；不作为本 Feature 的关闭条件，未来需求另建 Issue。
 
-依赖：T030 独立修复；T031 → T032 → T033。FR-018/SC-007 映射 T031–T033，
-两种目标需求已确认，Docker 具体适配设计与实现仍待完成。
+依赖：T030 独立修复；T031–T033 已按用户确认移出本 Feature，不参与 #112 的验收和关闭判断。
 
 - [x] T034 [US2] 修复 MySQL 调度 ON 但无事件时误拒绝；停服务前只读核验全实例事件与线程、管理员可见性和实例 UUID，导出前后与发布前复核。补齐无事件/禁用/启用/运行中/权限不足/错误实例回归，并实际执行用户当前实例 `make frozen`、检查包与源服务恢复。来源 FR-009/014/017；40 项回归、独立 MySQL 原生往返及当前实例完整冻结/逐文件校验/服务健康均通过，证据见 validation.md。
 
@@ -166,3 +164,7 @@ T004/T026 中无 Conda 自动安装的旧要求；不重新勾选那些包含其
 - [x] T043 [US3] 更新 `docs/local-dev.md`、本目录 CLI/Quickstart/验证记录及运行 Overview；记录当前真实备份的只读检查结果，区分自动发现、兼容性、数据导入三种结果，未执行真实恢复不得宣称已部署。来源：FR-017/020、SC-006/008；本轮现有配置、状态、报告和备份摘要未变，未更新远端或关闭 Issue。
 
 依赖：T041 → T042 → T043；与待确认的 T040 跨源码版本恢复独立。
+
+## 最终收敛状态（2026-09-23）
+
+T022、T023、T025–T028 已由用户现场验收确认完成；T031–T033 明确为未来 Issue 的范围外需求。#112 的关闭条件以本地部署实现、跨机器人工验收、全业务样本验证和 Overview/Documentation Impact 同步为准。

@@ -35,7 +35,7 @@ GROBID 从官方 0.8.1 源码构建，使用源码默认 Wapiti 模型、pdfalto
 GROBID，Java 21 继续供 Neo4j 使用；Gradle 固定为支持 Java 17 的 7.6.4。
 不替换系统 Java、不修改用户 shell、不引入 Docker 命令回退。
 Node 22、Python 3.12、MySQL 8.4 及其余存储版本保持原契约。
-同包 Docker 目标仍属于独立待实现范围，不能与本地部署前置条件混合。
+同包 Docker 目标属于未来独立需求，不能与本 Feature 的本地部署范围混合。
 
 采用 Go 1.25.14、Neo4j 5.26.29、Qdrant 1.19.0、GROBID 0.8.1。实现已固定官方来源与
 SHA-256/镜像摘要，Miniforge、Go 和 Qdrant 的实际下载校验通过；完整安装入口和平台
@@ -109,7 +109,7 @@ Redis 采用上传业务键白名单导出结构化 JSON，只保留状态、草
 
 ## 用户纠正范围后的设计补充（2026-09-21）
 
-**已确认需求**：本地实例打包，同一份包用于本地或 Docker 部署；不增加 Docker 源导出。
+**历史需求记录**：曾规划同一份包用于本地或 Docker 部署；2026-09-23 用户确认 Docker 目标移出 #112，不增加本 Feature 的 Docker 恢复实现。
 
 **现状证据**：`Runtime.check_ports()` 原来无条件查询带目录哈希的 GROBID 容器；
 `lib-local.sh` 只有便携部署记录存在时才使用该名称，旧实例使用 `scwiki-grobid`。
@@ -126,7 +126,7 @@ Redis 采用上传业务键白名单导出结构化 JSON，只保留状态、草
 `.data`，Docker `migrate` 不得在导入后继续自动执行历史升级。宿主挂载路径与容器 `/data`
 须分别建模。凭据、空目标、业务所有权、草稿有效性和不覆盖规则不变。
 
-上述 Docker 方案与 Plan 配套，待设计确认后进入 T031–T033；仅写入方案不表示已实现。
+上述 Docker 方案仅保留为历史备选，不进入 T031–T033；未来若恢复该需求，应另建 Issue 和 Spec。
 
 不采用“把包解压到 Docker 目录再直接 compose up”：当前 Compose 不消费 `.deployment`，
 且会执行迁移任务；这无法证明业务数据导入、路径重定位或历史数据保持正确。
