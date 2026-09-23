@@ -18,6 +18,13 @@ from backend.db_helpers import extract_formula_elements_loose, normalize_formula
 from backend.ingest.chunker import Chunk, chunk_paper
 from backend.ingest.extractor import _parse_result
 from backend.ingest.pdf_extractor import extract_text_from_pdf
+from backend.ingest.document_parsers import (
+    DocumentSource,
+    ParseOptions,
+    ParserError,
+    ParserProfile,
+    parse_with_profile,
+)
 from backend.ingest.upload_tasks import (
     artifact_directory,
     artifact_path,
@@ -261,8 +268,59 @@ def _original_path(state: dict[str, Any]) -> Path:
     return path
 
 
+def _ir_to_markdown(ir) -> str:
+    """把 IR 的文本块转换为旧分段器可读取的带页标记 Markdown。"""
+    parts: list[str] = []
+    current_page: int | None = None
+    for block in sorted(ir.blocks, key=lambda item: (item.pdf_page, item.reading_order)):
+        if block.pdf_page != current_page:
+            current_page = block.pdf_page
+            parts.append(f"\n<!-- page: {current_page} -->\n")
+        if block.text.strip():
+            parts.append(block.text.strip())
+    return "\n\n".join(parts)
+
+
+def _save_document_ir(task_id: str, file_id: str, ir) -> None:
+    path = artifact_directory(task_id) / "document_ir" / f"{file_id}.json"
+    _atomic_write_json(path, ir.model_dump(mode="json"))
+
+
 def _extract_markdown(state: dict[str, Any], source: Path) -> str:
     if state.get("file_kind") == "pdf":
+        profile = str(state.get("parser_profile") or "legacy")
+        if profile != "legacy":
+            source_info = DocumentSource(
+                path=source,
+                file_id=str(state.get("file_id") or "main"),
+                sha256=state.get("file_sha256"),
+            )
+            try:
+                ir, run = parse_with_profile(source_info, ParseOptions(profile=profile))
+            except ParserError as exc:
+                raise ValueError(f"解析方案 {profile} 不可用：{exc.message}") from exc
+            task_id = str(state.get("task_id") or "")
+            if task_id:
+                _save_document_ir(task_id, source_info.file_id, ir)
+                previous_runs = list((get_state(task_id) or {}).get("parser_runs") or [])
+                previous_runs = [item for item in previous_runs if item.get("file_id") != source_info.file_id]
+                update_state(
+                    task_id,
+                    reading_state=run.reading_state,
+                    parser_runs=previous_runs + [{
+                        "file_id": source_info.file_id,
+                        "profile": run.profile,
+                        "parser": run.parser,
+                        "version": run.version,
+                        "status": run.status,
+                        "reading_state": run.reading_state,
+                        "error_code": run.error_code,
+                    }],
+                )
+            text = _ir_to_markdown(ir)
+            if len(text.strip()) < 50:
+                raise ValueError(f"解析方案 {profile} 未生成足够文本，需重新选择方案或转人工")
+            return text
         text = extract_text_from_pdf(source)
         if len(text.strip()) < 50:
             raise ValueError("PDF 文本提取失败，可能为扫描件，请上传可搜索文本的 PDF")
@@ -1458,7 +1516,12 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         for file_item in sources:
             _ensure_not_cancelled(task_id)
             file_source = Path(str(file_item.get("stored_path") or source))
-            file_state = {**state, "file_kind": file_item.get("kind") or file_source.suffix.lstrip(".")}
+            file_state = {
+                **state,
+                "file_id": file_item.get("file_id") or "main",
+                "file_sha256": file_item.get("sha256") or state.get("file_sha256"),
+                "file_kind": file_item.get("kind") or file_source.suffix.lstrip("."),
+            }
             file_md = extracted_root / f"{file_item['file_id']}.md"
             structure_format = _structure_format_for_file(file_item, file_source)
             if multi_file:

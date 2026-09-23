@@ -6,25 +6,25 @@
 
 - [ ] T001 [US1] 核对 Docling、MinerU 附加许可证、Python/镜像兼容性并固定 requirements.txt、docker/requirements.txt 版本。
 - [ ] T002 [US1] 建立至少 50 篇论文的脱敏评测清单、标注格式和基线输出，保存到 tests/fixtures/issue114/README.md（不提交受限制论文文件）。
-- [ ] T003 [P] [US5] 增加解析方案配置（`text`、`layout`、`ocr`、`vision`、`native_pdf_llm`）、能力探测和 Shadow/灰度/默认开关，保存到 backend/rag/config.py 与 backend/ingest/parser_rollout.py。
+- [x] T003 [P] [US5] 增加解析方案配置（`text`、`layout`、`ocr`、`vision`、`native_pdf_llm`）、能力探测和 Shadow/灰度/默认开关，保存到 backend/rag/config.py 与 backend/ingest/parser_rollout.py。
 
 ## 阶段 2：基础能力
 
-- [ ] T004 [P] [US1] 定义 backend/ingest/document_ir.py 的 Pydantic/TypedDict 模型、枚举、哈希和几何校验。
-- [ ] T005 [P] [US1] 定义 backend/ingest/document_parsers.py 的 DocumentParser、DocumentSource、ParserDecision、ParserRun、解析方案和统一错误；ParserRun 记录 `reading` 子状态。
-- [ ] T006 [P] [US2] 定义 backend/ingest/claim_evidence.py 的 Claim、EvidenceLocator、来源分类和定位校验器。
-- [ ] T007 [P] [US3] 定义 backend/ingest/coverage_audit.py 的 CoverageReport、表格行/结果段落/截断信号检查。
-- [ ] T008 [P] [US3] 为 T004–T007 先写契约测试 tests/01_decentralized_uploading/test_issue114_multimodal_pdf_agent.py。
+- [x] T004 [P] [US1] 定义 backend/ingest/document_ir.py 的 Pydantic/TypedDict 模型、枚举、哈希和几何校验。
+- [x] T005 [P] [US1] 定义 backend/ingest/document_parsers.py 的 DocumentParser、DocumentSource、ParserDecision、ParserRun、解析方案和统一错误；ParserRun 记录 `reading` 子状态。
+- [x] T006 [P] [US2] 定义 backend/ingest/claim_evidence.py 的 Claim、EvidenceLocator、来源分类和定位校验器。
+- [x] T007 [P] [US3] 定义 backend/ingest/coverage_audit.py 的 CoverageReport、表格行/结果段落/截断信号检查。
+- [x] T008 [P] [US3] 为 T004–T007 先写契约测试 tests/01_decentralized_uploading/test_issue114_multimodal_pdf_agent.py。
 
 ## 阶段 3：用户故事 1——解析复杂论文（P1，MVP）
 
 **独立验收**：数字、扫描、双栏、表格和公式样例按指定解析方案生成合法 Document IR；方案不可用时产生可观察失败、重试或人工状态，不自动切换方案。
 
-- [ ] T009 [US1] 实现 PyMuPDF 文本解析方案，补齐文本块、图片块、页边界、内容哈希和方案元数据；不可用时返回明确错误。
+- [x] T009 [US1] 实现 PyMuPDF 文本解析方案，补齐文本块、图片块、页边界、内容哈希和方案元数据；不可用时返回明确错误。
 - [ ] T010 [US1] 实现 DoclingParser 的可选导入、版本记录、块/表格/公式/图像映射和方案不可用错误。
 - [ ] T011 [US1] 实现 MinerUParser 的 tier 配置、版本记录、稳定 block ID 和方案不可用错误。
 - [ ] T012 [US1] 实现 NativePdfLlmParser 适配器：接收供应商 PDF/页面输入，只输出合法 Document IR，不直接写库；Claim 候选由独立步骤生成。
-- [ ] T013 [US1] 在 backend/ingest/upload_jobs.py 接入解析方案路由：PDF 进入选定方案，TXT/MD 保留直接读取，CIF/POSCAR 保留 ASE 结构候选和用户确认，旧 Markdown 缓存继续可读。
+- [x] T013 [US1] 在 backend/ingest/upload_jobs.py 接入解析方案路由：PDF 进入选定方案，TXT/MD 保留直接读取，CIF/POSCAR 保留 ASE 结构候选和用户确认，旧 Markdown 缓存继续可读。
 - [ ] T014 [US1] 增加数字 PDF、扫描页、复杂表格、公式、双栏和补充材料的真实/合成集成测试，覆盖不同解析方案选择和方案不可用时的显式失败。
 
 ## 阶段 4：用户故事 2——有证据的科学 Claim（P1）

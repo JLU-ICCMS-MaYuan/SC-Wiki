@@ -25,6 +25,8 @@ langchain-core>=0.3,<2
 langchain-openai>=0.3,<2
 langgraph>=0.2,<2
 PyMuPDF>=1.24,<2
+docling==2.130.0       # MIT；PDF 版面、表格和公式结构化解析
+mineru==4.0.6         # Apache-2.0 及上游附加条款；复杂版面/OCR 解析方案
 
 # ── 数据校验 ────────────────────────────────────────────────
 pydantic>=2.5

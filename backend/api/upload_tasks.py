@@ -34,6 +34,7 @@ class FileDeclaration(BaseModel):
 
 class CreateUploadTask(BaseModel):
     files: list[FileDeclaration] = Field(min_length=1)
+    parser_profile: Literal["legacy", "text", "layout", "ocr", "vision", "native_pdf_llm"] = "legacy"
 
 
 def _error(status: int, code: str, message: str) -> HTTPException:
@@ -77,6 +78,7 @@ def create_upload_task(
         state = create_task(
             current_user.id,
             files=[item.model_dump() for item in body.files],
+            parser_profile=body.parser_profile,
         )
     except ValueError as exc:
         message = str(exc)

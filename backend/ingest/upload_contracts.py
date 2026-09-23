@@ -20,7 +20,7 @@ FIXED_TERMINAL_STATUSES = {"failed", "duplicate", "cancelled"}
 FINAL_STATUSES = FIXED_TERMINAL_STATUSES | {"submitted"}
 FILE_ROLES = {"main", "supplementary", "attachment"}
 FILE_SUFFIXES = {".pdf", ".txt", ".md", ".cif", ".poscar", ".vasp"}
-PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total"}
+PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state"}
 PUBLIC_FILE_FIELDS = {"file_id", "role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
 
 @dataclass(frozen=True)

@@ -513,6 +513,98 @@ class PaperFile(Base):
     )
 
 
+class PaperDocumentParserRun(Base):
+    """当前论文 revision 中一次正式文档解析运行的审计元数据。"""
+
+    __tablename__ = "paper_document_parser_runs"
+    __table_args__ = (
+        UniqueConstraint("id", "paper_id", "paper_revision", "paper_file_id", name="uq_document_parser_runs_identity"),
+        ForeignKeyConstraint(
+            ["paper_id", "paper_revision"], ["papers.id", "papers.content_revision"],
+            name="fk_document_parser_runs_paper_revision", ondelete="RESTRICT", onupdate="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["paper_file_id", "paper_id", "paper_revision"],
+            ["paper_files.id", "paper_files.paper_id", "paper_files.paper_revision"],
+            name="fk_document_parser_runs_file_revision", ondelete="RESTRICT", onupdate="CASCADE",
+        ),
+        Index("ix_document_parser_runs_file_revision", "paper_file_id", "paper_id", "paper_revision"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    paper_id = Column(Integer, nullable=False, index=True)
+    paper_revision = Column(Integer, nullable=False, default=1, server_default="1")
+    paper_file_id = Column(Integer, nullable=False, index=True)
+    parse_profile = Column(String(32), nullable=False)
+    parser_name = Column(String(64), nullable=False)
+    parser_version = Column(String(128), nullable=False)
+    mode = Column(String(16), nullable=False)
+    status = Column(String(32), nullable=False)
+    reading_state = Column(String(32))
+    capabilities_json = Column(JSON)
+    error_code = Column(String(64))
+    error_summary = Column(String(500))
+    model_version = Column(String(128))
+    ir_schema_version = Column(String(32), nullable=False, default="1", server_default="1")
+    rule_version = Column(String(32), nullable=False, default="1", server_default="1")
+    started_at = Column(DateTime(timezone=True))
+    ended_at = Column(DateTime(timezone=True))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+
+class PaperDocumentBlock(Base):
+    """Document IR 中可被 Evidence 定位的稳定块。"""
+
+    __tablename__ = "paper_document_blocks"
+    __table_args__ = (
+        UniqueConstraint(
+            "paper_id", "paper_revision", "paper_file_id", "parser_run_id", "block_id",
+            name="uq_document_blocks_run_block",
+        ),
+        UniqueConstraint(
+            "id", "paper_id", "paper_revision", "paper_file_id", "parser_run_id",
+            name="uq_document_blocks_identity",
+        ),
+        ForeignKeyConstraint(
+            ["paper_id", "paper_revision"], ["papers.id", "papers.content_revision"],
+            name="fk_document_blocks_paper_revision", ondelete="RESTRICT", onupdate="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["paper_file_id", "paper_id", "paper_revision"],
+            ["paper_files.id", "paper_files.paper_id", "paper_files.paper_revision"],
+            name="fk_document_blocks_file_revision", ondelete="RESTRICT", onupdate="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["parser_run_id", "paper_id", "paper_revision", "paper_file_id"],
+            ["paper_document_parser_runs.id", "paper_document_parser_runs.paper_id", "paper_document_parser_runs.paper_revision", "paper_document_parser_runs.paper_file_id"],
+            name="fk_document_blocks_parser_run", ondelete="CASCADE", onupdate="CASCADE",
+        ),
+        Index("ix_document_blocks_page", "paper_file_id", "paper_revision", "pdf_page"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    paper_id = Column(Integer, nullable=False, index=True)
+    paper_revision = Column(Integer, nullable=False, default=1, server_default="1")
+    paper_file_id = Column(Integer, nullable=False, index=True)
+    parser_run_id = Column(Integer, nullable=False, index=True)
+    block_id = Column(String(255), nullable=False)
+    block_type = Column(String(32), nullable=False)
+    pdf_page = Column(Integer, nullable=False)
+    printed_page = Column(Integer)
+    reading_order = Column(Integer, nullable=False, default=0, server_default="0")
+    text = Column(LONG_TEXT, nullable=False, default="", server_default="")
+    bbox_json = Column(JSON)
+    polygon_json = Column(JSON)
+    table_id = Column(String(128))
+    figure_id = Column(String(128))
+    confidence = Column(Float)
+    content_hash = Column(String(64), nullable=False)
+    metadata_json = Column(JSON)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+
 class PaperChunk(Base):
     """Current-revision text chunk; vectors are a rebuildable projection."""
 
@@ -658,6 +750,54 @@ class PaperEvidence(Base):
         back_populates="evidences",
         overlaps="evidences,paper",
     )
+
+
+
+class PaperEvidenceLocator(Base):
+    """现有 PaperEvidence 到 Document IR 区域块的正式关联。"""
+
+    __tablename__ = "paper_evidence_locators"
+    __table_args__ = (
+        UniqueConstraint("locator_hash", name="uq_paper_evidence_locators_hash"),
+        ForeignKeyConstraint(
+            ["paper_id", "paper_revision"], ["papers.id", "papers.content_revision"],
+            name="fk_paper_evidence_locators_paper_revision", ondelete="RESTRICT", onupdate="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["paper_evidence_id", "paper_id", "paper_revision"],
+            ["paper_evidences.id", "paper_evidences.paper_id", "paper_evidences.paper_revision"],
+            name="fk_paper_evidence_locators_evidence", ondelete="CASCADE", onupdate="CASCADE",
+        ),
+        ForeignKeyConstraint(
+            ["document_block_id", "paper_id", "paper_revision", "paper_file_id", "parser_run_id"],
+            ["paper_document_blocks.id", "paper_document_blocks.paper_id", "paper_document_blocks.paper_revision", "paper_document_blocks.paper_file_id", "paper_document_blocks.parser_run_id"],
+            name="fk_paper_evidence_locators_block", ondelete="CASCADE", onupdate="CASCADE",
+        ),
+        Index("ix_paper_evidence_locators_evidence", "paper_evidence_id"),
+        Index("ix_paper_evidence_locators_page", "paper_file_id", "paper_revision", "pdf_page"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    paper_evidence_id = Column(Integer, nullable=False)
+    paper_id = Column(Integer, nullable=False, index=True)
+    paper_revision = Column(Integer, nullable=False, default=1, server_default="1")
+    paper_file_id = Column(Integer, nullable=False, index=True)
+    parser_run_id = Column(Integer, nullable=False, index=True)
+    document_block_id = Column(Integer, nullable=False, index=True)
+    pdf_page = Column(Integer, nullable=False)
+    printed_page = Column(Integer)
+    bbox_json = Column(JSON)
+    polygon_json = Column(JSON)
+    table_id = Column(String(128))
+    figure_id = Column(String(128))
+    quote = Column(LONG_TEXT, nullable=False, default="", server_default="")
+    source_kind = Column(String(32), nullable=False, default="text_layer", server_default="text_layer")
+    parser_name = Column(String(64), nullable=False)
+    parser_version = Column(String(128), nullable=False)
+    source_version = Column(Integer, nullable=False, default=1, server_default="1")
+    locator_hash = Column(String(64), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
 
 
 class PaperHistoryEvent(Base):

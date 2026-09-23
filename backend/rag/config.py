@@ -22,6 +22,9 @@ class RagSettings(BaseSettings):
     upload_stale_seconds: int = 60 * 60
     upload_active_task_limit: int = 100
     upload_llm_concurrency: int = 2
+    upload_parser_stage: str = "legacy"
+    upload_parser_default_profile: str = "layout"
+    upload_parser_gray_ratio: float = 0.0
 
     # Qdrant 配置
     qdrant_host: str = "127.0.0.1"

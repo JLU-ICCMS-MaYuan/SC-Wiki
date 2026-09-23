@@ -153,8 +153,12 @@ def create_task(
     file_kind: str | None = None,
     *,
     files: list[dict[str, Any]] | None = None,
+    parser_profile: str = "legacy",
 ) -> dict[str, Any]:
     task_id = uuid.uuid4().hex
+    if parser_profile == "legacy":
+        from backend.ingest.parser_rollout import configured_rollout, select_profile
+        parser_profile = select_profile(configured_rollout(), task_id=task_id, user_id=user_id)
     now = int(time.time())
     manifest = validate_manifest(files) if files is not None else []
     state = {
@@ -177,6 +181,9 @@ def create_task(
         "cleanup_at": None,
         "revision": 1,
         "state_schema_version": UPLOAD_STATE_SCHEMA_VERSION,
+        "parser_profile": parser_profile,
+        "parser_runs": [],
+        "reading_state": None,
     }
     client = redis_client()
     index_key = user_tasks_key(user_id)
