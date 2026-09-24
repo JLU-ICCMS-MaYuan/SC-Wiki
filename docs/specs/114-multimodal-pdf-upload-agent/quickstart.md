@@ -38,5 +38,22 @@ python -m pytest -q tests/01_decentralized_uploading/test_scientific_evidence.py
 
 离线比较命令和输入见 [人工标注与评测说明](../../../tests/fixtures/issue114/README.md)。
 `python -m backend.ingest.pdf_benchmark` 读取人工标注、新旧结果及独立验收四份 JSON，
-输出版本 1 逐论文报告；不启动完整上传，不代替模型运行或人工标注。当前尚无真实
+输出版本 1 逐论文报告，不代替人工标注。批量执行上传及导出使用
+`python -m backend.ingest.pdf_benchmark_runner`，具体命令见评测说明。当前尚无真实
 50 篇报告，不开启默认新链路。
+
+## 隔离端到端验收
+
+在已安装项目依赖的 Python 环境运行：
+
+```bash
+python "scripts/run_issue114_integration.py"
+```
+
+需要同环境的 mysqld、redis-server 和项目 `.local/go/bin/go`（或 SCWIKI_TEST_GO）。
+脚本新建临时 MySQL，仅开放 Unix socket；实际执行迁移和旧 #90 空库转换阶段门，
+不连接业务数据库。测试启动独立 Redis，运行 HTTP/JWT、真实 RQ、上传提交、Go 审核、
+返修升版和区域读取；外部模型使用固定响应，向量发布用测试替身。测试结束清理实例。
+
+部署这轮代码前执行后续增量 `python -m alembic upgrade 20260924_0114`，补齐方法定义；
+不要修改已经部署的 `20260923_0114`。这是部署步骤，不等同于已在所有实例执行。

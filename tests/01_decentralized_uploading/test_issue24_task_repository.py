@@ -3,6 +3,15 @@ import pytest
 from backend.ingest import upload_tasks
 
 
+@pytest.fixture(autouse=True)
+def isolate_durable_uploads(monkeypatch):
+    """本文件只验证内存 Redis 仓库；持久恢复另由真实 MySQL 验收。"""
+    from backend.ingest import scientific_evidence
+    monkeypatch.setattr(scientific_evidence, "persist_upload_state", lambda *_: None)
+    monkeypatch.setattr(scientific_evidence, "restore_user_uploads", lambda *_: None)
+    monkeypatch.setattr(scientific_evidence, "restore_upload", lambda *_: None)
+
+
 class MemoryRedis:
     def __init__(self):
         self.values = {}

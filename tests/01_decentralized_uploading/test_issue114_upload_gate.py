@@ -43,6 +43,20 @@ def test_upload_pipeline_never_reports_ready_with_unlocated_claim(tmp_path,monke
         calls.append(system)
         if system.startswith("Repair"):
             return {"done":True}
+        from backend.ingest.domain_extraction import DOMAIN_SYSTEM_PROMPT
+        if system == DOMAIN_SYSTEM_PROMPT:
+            context = json.loads(prompt[prompt.index("{"):])
+            block = context["pages"][0]["blocks"][0]
+            evidence = {"file_id":"main","pdf_page":1,"block_id":block["block_id"],"quote":text}
+            return {"extraction_version":"1","metadata":{"title":"Paper"},"material_states":[{
+                "scope":"current_paper","material":"LaH10","state_kind":"theoretical","pressure_value_gpa":150,
+                "evidences":[evidence],"property_modules":[{"module_code":"superconductive_properties","records":[{
+                    "module_code":"superconductive_properties","record_type":"predicted_tc","property_code":"tc",
+                    "name_raw":"critical temperature","value_kind":"number","value_number":200,
+                    "value_raw":"200 K","canonical_unit":"K","method_code":"unknown",
+                    "payload":{"calculation_conditions":{}},"evidences":[evidence | {"quote":"200 K" if valid else "999 K"}],
+                }]}],
+            }]}
         if system==upload_jobs.CHUNK_SYSTEM_PROMPT:
             return {"metadata":{"title":"Paper"},"material_states":[copy.deepcopy(material)]}
         return {"paper":{"title":"Paper","paper_type":"theoretical","year":2026},"material_states":[copy.deepcopy(material)]}
@@ -52,6 +66,8 @@ def test_upload_pipeline_never_reports_ready_with_unlocated_claim(tmp_path,monke
         assert result["status"]=="ready"
         assert result["reading_state"]=="coverage_checked"
         assert saved
+        record=saved[0]["material_states"][0]["property_modules"][0]["records"][0]
+        assert record["method_code"] == "unknown" and record["value_number"] == 200
         assert json.loads((artifacts/"final_claims.json").read_text())
     else:
         with pytest.raises(ParserError,match="无法定位"):

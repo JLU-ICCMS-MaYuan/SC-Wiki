@@ -45,7 +45,7 @@ def _owned_state(task_id: str, user: User) -> dict[str, Any]:
     from backend.ingest.upload_tasks import get_state
 
     state = get_state(task_id)
-    if not state:
+    if not state or state.get("is_shadow"):
         raise _error(404, "UPLOAD_TASK_NOT_FOUND", "上传任务不存在或已过期")
     is_admin = user.role in {"admin", "superadmin"} and user.is_approved
     if int(state.get("user_id") or 0) != user.id and not is_admin:

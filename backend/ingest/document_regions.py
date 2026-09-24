@@ -16,7 +16,7 @@ def region_document(session, target, target_id, file_id, user):
     if target == "upload":
         from backend.ingest.upload_tasks import get_state, data_path
         state = get_state(target_id)
-        if not state:
+        if not state or state.get("is_shadow"):
             raise HTTPException(404, detail="上传任务不存在")
         if state.get("user_id") != user.id and not (user.role in {"admin","superadmin"} and user.is_approved):
             raise HTTPException(403, detail="无权查看此文档")

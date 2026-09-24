@@ -102,6 +102,9 @@ class FakeAsyncSession:
 
 
 def test_save_draft_refreshes_state_and_draft_atomically(monkeypatch):
+    from backend.ingest import scientific_evidence
+    # 本例只检查 Redis 原子更新；真实证据持久化由 MySQL 工作流覆盖。
+    monkeypatch.setattr(scientific_evidence, "has_upload_checks", lambda *_: False)
     task_id = "a" * 32
     client = FakeRedis({
         upload_tasks.task_key(task_id): json.dumps({"task_id": task_id, "updated_at": 1}),
@@ -323,7 +326,7 @@ def test_validate_draft_rejects_when_materials_missing_everywhere():
         rag._validate_draft(draft)
     except HTTPException as exc:
         assert exc.status_code == 400
-        assert exc.detail["code"] == "research_material_required"
+        assert exc.detail["code"] == "state_material_required"
     else:
         raise AssertionError("paper 与材料状态均为空时必须拒绝")
 
@@ -511,6 +514,10 @@ def test_submit_rejects_same_half_filled_draft():
 
 def test_submit_failure_rolls_state_back_to_ready(monkeypatch):
     from backend.ingest import upload_contracts
+    from backend.ingest import scientific_evidence
+    # 没有科学记录的纯状态测试，不依赖外部来源表或核对缓存。
+    monkeypatch.setattr(scientific_evidence, "origins_for", lambda *_: {})
+    monkeypatch.setattr(scientific_evidence, "load_results", lambda *_: {})
 
     task_id = "e" * 32
     draft = {"paper": {"title": "t"}, "material_states": []}
@@ -544,7 +551,8 @@ def test_submit_failure_rolls_state_back_to_ready(monkeypatch):
     monkeypatch.setattr(upload_tasks, "update_state", _update_state)
 
     async def _boom(_task_id, _state, _draft, *, evidence_checks):
-        assert evidence_checks == []
+        # 共享核对现在也返回非必需的书目项，不能把这些项目误当作科学提交门。
+        assert all(not item.get("required", True) for item in evidence_checks)
         raise RuntimeError("模拟提交写入失败")
 
     monkeypatch.setattr(rag, "_create_pending_paper", _boom)

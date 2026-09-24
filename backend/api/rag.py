@@ -272,7 +272,7 @@ def _task_for_user(task_id: str, user: User) -> dict[str, Any]:
     from backend.ingest.upload_tasks import get_state
 
     state = get_state(task_id)
-    if not state:
+    if not state or state.get("is_shadow"):
         raise _upload_error(404, "upload_task_not_found", "上传任务不存在或已过期")
     if int(state.get("user_id") or 0) != user.id and not _is_admin(user):
         raise _upload_error(403, "upload_task_forbidden", "无权访问该上传任务")
@@ -1452,6 +1452,8 @@ async def _create_pending_paper(
     draft: dict[str, Any],
     evidence_checks: list[dict] | None = None,
 ) -> int:
+    if state.get("is_shadow"):
+        raise _upload_error(403, "shadow_not_submittable", "对照任务不能提交科学数据")
     # 先拒绝旧客户端契约，再加载科学数据处理依赖；这样非法请求不会被无关的
     # PDF/晶体学可选依赖阻断，也不会进入任何持久化准备步骤。
     _reject_legacy_classification_contract(draft)

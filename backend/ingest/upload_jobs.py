@@ -239,6 +239,10 @@ def _ensure_not_cancelled(task_id: str) -> dict[str, Any]:
     state = get_state(task_id)
     if not state:
         raise UploadCancelled("上传任务已被清理")
+    if state.get("is_shadow"):
+        from .document_shadow import parent_cancelled
+        if parent_cancelled(state):
+            state = update_state(task_id, status="cancelling")
     if state.get("status") in {"cancelling", "cancelled"}:
         if state.get("status") == "cancelling":
             cancelled = update_state(
@@ -246,7 +250,7 @@ def _ensure_not_cancelled(task_id: str) -> dict[str, Any]:
                 processing_error=None,
             )
             _schedule_terminal_cleanup(task_id)
-            return cancelled
+            raise UploadCancelled("上传任务已取消")
         raise UploadCancelled("上传任务已取消")
     return state
 
@@ -408,6 +412,11 @@ def _read_chunk(
 ) -> dict[str, Any]:
     result_path = _chunk_result_path(task_id, chunk.chunk_index, file_id)
     profile = (source or {}).get("parser_profile", "legacy")
+    structured = profile != "legacy" and (source or {}).get("kind") == "pdf"
+    system_prompt = CHUNK_SYSTEM_PROMPT
+    if structured:
+        from backend.ingest.domain_extraction import DOMAIN_SYSTEM_PROMPT, normalize_extraction
+        system_prompt = DOMAIN_SYSTEM_PROMPT
     signature = None
     model_metadata = None
     if profile != "legacy":
@@ -416,7 +425,7 @@ def _read_chunk(
         model_metadata = {"provider": config.provider, "model": config.model}
         signature = hashlib.sha256(json.dumps({
             "profile": profile, "content": chunk.content, "model": model_metadata,
-            "endpoint": config.base_url, "prompt": CHUNK_SYSTEM_PROMPT,
+            "endpoint": config.base_url, "prompt": system_prompt,
         }, sort_keys=True).encode("utf-8")).hexdigest()
 
     if result_path.exists():
@@ -428,7 +437,16 @@ def _read_chunk(
         f"章节：{chunk.section_name or '正文'}\n页码：{getattr(chunk, 'source_page', None) or '未知'}\n"
         f"分段编号：{chunk.chunk_index}\n\n{chunk.content}"
     )
-    result = complete_json(CHUNK_SYSTEM_PROMPT, prompt)
+    result = complete_json(system_prompt, prompt)
+    if structured:
+        context = json.loads(chunk.content)
+        allowed = {(context["file_id"], block["pdf_page"], block["block_id"])
+                   for page in context["pages"] for block in page["blocks"]}
+        try:
+            result = normalize_extraction(result, allowed_blocks=allowed)
+        except ValueError as exc:
+            raise ParserError("domain_invalid_output", "科学提取格式、条件或来源范围不符合契约，请重试或人工核对",
+                              profile=profile, parser="domain_extractor") from exc
     validate_chunk_generated_english(result)
     result["_schema_version"] = CHUNK_RESULT_SCHEMA_VERSION
     result["_document_signature"] = signature
@@ -441,7 +459,7 @@ def _read_chunk(
         "chunk_index": chunk.chunk_index,
         "section": chunk.section_name or "正文",
         "page_start": getattr(chunk, "source_page", None),
-        "page_end": getattr(chunk, "source_page", None),
+        "page_end": getattr(chunk, "source_page_end", getattr(chunk, "source_page", None)),
     }
     _atomic_write_json(result_path, result)
     return result
@@ -1473,11 +1491,25 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
 
     config = load_llm_config(task_id)
     token = set_llm_config(config or resolve_llm_config())
+    started = time.monotonic()
+    cpu_started = time.process_time()
     try:
         return _process_upload_task(task_id)
     finally:
+        try:
+            from .document_run_metadata import save_run_metadata
+            from backend.rag.llm_context import get_llm_config
+            save_run_metadata(task_id, get_state(task_id) or {}, get_llm_config(),
+                              latency=time.monotonic()-started, cpu=time.process_time()-cpu_started)
+        except Exception:
+            logging.getLogger(__name__).warning("解析运行元数据保存失败 task=%s", task_id)
         delete_llm_config(task_id)
         reset_llm_config(token)
+        try:
+            from .document_shadow import refresh_comparison
+            refresh_comparison(task_id)
+        except Exception:
+            logging.getLogger(__name__).warning("Shadow 对照更新失败 task=%s", task_id)
 
 
 def _process_upload_task(task_id: str) -> dict[str, Any]:
@@ -1488,7 +1520,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
     try:
         _ensure_not_cancelled(task_id)
         source = _original_path(state)
-        existing_by_hash = _find_existing_by_hash(state)
+        existing_by_hash = None if state.get("is_shadow") else _find_existing_by_hash(state)
         if existing_by_hash:
             return _handle_duplicate(task_id, state, existing_by_hash)
         md_path = markdown_path(task_id)
@@ -1560,9 +1592,10 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                         ))
                         from backend.ingest.scientific_evidence import register_structure_origin
                         from backend.models import User
-                        with SessionLocal.begin() as origin_session:
-                            uploader = origin_session.get(User, int(state['user_id']))
-                            register_structure_origin(origin_session, 'upload', task_id, structure_candidates[-1], uploader.id, uploader.username, source_info['filename'], structure_text.encode('utf-8'))
+                        if not state.get("is_shadow"):
+                            with SessionLocal.begin() as origin_session:
+                                uploader = origin_session.get(User, int(state['user_id']))
+                                register_structure_origin(origin_session, 'upload', task_id, structure_candidates[-1], uploader.id, uploader.username, source_info['filename'], structure_text.encode('utf-8'))
                         structure_ok = True
                     except (OSError, UnicodeDecodeError, StructureCandidateError) as structure_exc:
                         structure_candidates.append({
@@ -1620,7 +1653,14 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             )
             identities.append(_lightweight_identity(file_item, markdown))
             if not structure_format:
-                for chunk in _chunks_with_preamble(markdown):
+                if file_state["file_kind"] == "pdf" and file_item["parser_profile"] != "legacy":
+                    from backend.ingest.document_ir import DocumentIR
+                    from backend.ingest.domain_extraction import structured_chunks
+                    ir = DocumentIR.model_validate_json((artifact_directory(task_id) / "document_ir" / f"{file_item['file_id']}.json").read_text(encoding="utf-8"))
+                    chunks = structured_chunks(ir)
+                else:
+                    chunks = _chunks_with_preamble(markdown)
+                for chunk in chunks:
                     all_chunks.append((file_item, chunk))
         md_path.write_text("".join(combined_markdown), encoding="utf-8")
         update_state(task_id, consistency=compare_file_identities(identities))
@@ -1635,7 +1675,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 "index": chunk.chunk_index,
                 "section": chunk.section_name or "正文",
                 "page_start": getattr(chunk, "source_page", None),
-                "page_end": getattr(chunk, "source_page", None),
+                "page_end": getattr(chunk, "source_page_end", getattr(chunk, "source_page", None)),
                 "status": "waiting",
                 "error": None,
                 "cache_file_id": item["file_id"] if multi_file else None,
@@ -1730,12 +1770,21 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             partial_write["last_at"] = now
             update_state(task_id, partial_draft=partial_draft)
 
+        summary_prompt = SUMMARY_SYSTEM_PROMPT
+        if document_set:
+            from backend.ingest.domain_extraction import SUMMARY_BOUNDARY, merge_scientific_candidates
+            summary_prompt += SUMMARY_BOUNDARY
         raw_draft = complete_json(
-            SUMMARY_SYSTEM_PROMPT,
+            summary_prompt,
             json.dumps(summary_candidates, ensure_ascii=False),
             on_partial=_on_summary_partial,
         )
-        draft = _normalize_draft(raw_draft, preserve_citation_extraction=False)
+        if document_set:
+            # 全文汇总只负责叙述和书目，科学记录由已校验候选确定性组装。
+            draft = _normalize_draft({**raw_draft, "material_states": [], "key_properties": []}, preserve_citation_extraction=False)
+            draft["material_states"] = merge_scientific_candidates(candidates)
+        else:
+            draft = _normalize_draft(raw_draft, preserve_citation_extraction=False)
         if document_set:
             carry_state_evidence(draft, claims)
             final_claims = claims_from_candidates(draft, document_set, legacy_sources=legacy_sources)
@@ -1752,7 +1801,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         draft["structure_candidates"] = structure_candidates
         draft["citation_extraction"] = citation_extraction
         current_state = get_state(task_id) or state
-        existing = _find_existing_paper(draft["paper"].get("doi")) or _find_existing_by_hash(current_state)
+        existing = None if state.get("is_shadow") else (_find_existing_paper(draft["paper"].get("doi")) or _find_existing_by_hash(current_state))
         if existing:
             return _handle_duplicate(task_id, current_state, existing)
 
@@ -1760,8 +1809,9 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         from backend.ingest.property_evidence import generate_upload_suggestions
         update_state(task_id, suggestions_status='running', suggestions_error=None)
         try:
-            generate_upload_suggestions(task_id, draft, int(current_state.get('user_id') or 0),
-                on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total))
+            if not state.get("is_shadow"):
+                generate_upload_suggestions(task_id, draft, int(current_state.get('user_id') or 0),
+                    on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total))
             draft['field_suggestions_error'] = None
             update_state(task_id, suggestions_status='completed')
         except UploadCancelled:

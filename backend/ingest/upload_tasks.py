@@ -156,9 +156,14 @@ def create_task(
     parser_profile: str | None = None,
 ) -> dict[str, Any]:
     task_id = uuid.uuid4().hex
+    rollout = None
     if parser_profile is None:
         from backend.ingest.parser_rollout import configured_rollout, select_profile
-        parser_profile = select_profile(configured_rollout(), task_id=task_id, user_id=user_id)
+        rollout = configured_rollout()
+        parser_profile = select_profile(rollout, task_id=task_id, user_id=user_id)
+    elif settings.upload_parser_stage == "shadow":
+        from backend.ingest.parser_rollout import configured_rollout
+        rollout = configured_rollout()
     now = int(time.time())
     manifest = validate_manifest(files) if files is not None else []
     state = {
@@ -185,6 +190,8 @@ def create_task(
         "parser_runs": [],
         "reading_state": None,
     }
+    if rollout and rollout.stage == "shadow" and parser_profile == "legacy":
+        state["shadow_profile"] = rollout.default_profile
     client = redis_client()
     index_key = user_tasks_key(user_id)
     while True:
@@ -221,10 +228,11 @@ def get_state(task_id: str) -> dict[str, Any] | None:
 def save_state(task_id: str, state: dict[str, Any]) -> dict[str, Any]:
     state["updated_at"] = int(time.time())
     from backend.ingest.scientific_evidence import persist_upload_state
-    persist_upload_state(task_id, state)
+    if not state.get("is_shadow"):
+        persist_upload_state(task_id, state)
     client = redis_client()
     _store_state(client, task_id, state)
-    if state.get("user_id"):
+    if state.get("user_id") and not state.get("is_shadow"):
         client.zadd(user_tasks_key(int(state["user_id"])), {task_id: state["updated_at"]})
     return state
 
@@ -246,7 +254,7 @@ def update_state(task_id: str, **changes: Any) -> dict[str, Any]:
                     pipeline.setex(key, max(1, int(cleanup_at) - int(time.time())), _encoded(state))
                 else:
                     pipeline.set(key, _encoded(state))
-                if state.get("user_id"):
+                if state.get("user_id") and not state.get("is_shadow"):
                     index_key = user_tasks_key(int(state["user_id"]))
                     if state.get("status") == "submitted":
                         pipeline.zrem(index_key, task_id)
@@ -254,7 +262,8 @@ def update_state(task_id: str, **changes: Any) -> dict[str, Any]:
                         pipeline.zadd(index_key, {task_id: state["updated_at"]})
                 pipeline.execute()
                 from backend.ingest.scientific_evidence import persist_upload_state
-                persist_upload_state(task_id, state)
+                if not state.get("is_shadow"):
+                    persist_upload_state(task_id, state)
                 return state
             except Exception as exc:
                 if exc.__class__.__name__ == "WatchError":
@@ -291,6 +300,8 @@ def handle_upload_job_failure(
             partial_draft=None,
         )
         schedule_cleanup(task_id)
+        from .document_shadow import refresh_comparison
+        refresh_comparison(task_id)
     except Exception:
         # 回调失败不能遮蔽原始 job 异常或阻断 RQ 的 FailedJobRegistry 写入。
         log.exception("无法同步上传任务的 Worker 失败状态: task_id=%s", task_id)
@@ -443,6 +454,8 @@ def save_draft(task_id: str, draft: dict[str, Any]) -> dict[str, Any]:
         pipeline.setex(task_key(task_id), ttl, _encoded(state))
         pipeline.setex(draft_key(task_id), ttl, json.dumps(draft, ensure_ascii=False))
         pipeline.execute()
+    if state.get("is_shadow"):
+        return draft
     from backend.database import SessionLocal
     from backend.ingest.scientific_evidence import has_upload_checks, persist_upload
     with SessionLocal.begin() as session:
@@ -504,7 +517,7 @@ def cleanup_transient_data(
     artifact_root = data_path("review_artifacts") / task_id
     if artifact_root.is_dir():
         for child in artifact_root.iterdir():
-            if preserve_review_snapshot and child.name == "result.json":
+            if preserve_review_snapshot and child.name in {"result.json", "shadow-comparison.json"}:
                 continue
             if child.is_dir() and not child.is_symlink():
                 shutil.rmtree(child, ignore_errors=True)
@@ -564,10 +577,18 @@ def enqueue_processing(task_id: str) -> str:
         result_ttl=TASK_TTL,
         failure_ttl=TASK_TTL,
     )
-    update_state(
+    state = update_state(
         task_id, job_id=job.id, processing_status="processing", processing_error=None,
         llm_provider=config.provider,
     )
+    if (state or {}).get("shadow_profile"):
+        try:
+            from .document_shadow import enqueue_shadow
+            enqueue_shadow(task_id, config)
+        except Exception:
+            # 对照任务失败不能使用户旧链路排队失败；只保留稳定错误码。
+            log.warning("Shadow 排队失败 task=%s", task_id)
+            update_state(task_id, shadow_status="failed", shadow_error_code="shadow_enqueue_failed")
     return job.id
 
 

@@ -76,7 +76,7 @@ PDF 页码从 1 起，不用印刷页码替代；标注不依赖解析器 block 
 资源字段：`latency_seconds`、`input_tokens`、`output_tokens`、`cpu_seconds`、
 `gpu_seconds`、`cost_usd`、`human_edits`。未实测时省略或 null，不能冒充 0。
 报告保存逐论文资源、实测论文数和总量。当前需从固定的新旧上传结果导出这些输入；
-自动启动完整 RQ 上传、捕获结果并导出的驱动器尚未实现。
+也可使用下述运行驱动自动启动完整 RQ 上传并导出结果。
 
 ### checks.json：独立验收
 
@@ -123,3 +123,60 @@ python -m backend.ingest.pdf_benchmark \
 定位率≥95%、无依据正式写入为 0、独立恢复/兼容验收通过。合成集不能通过。
 只填汇总数字的旧报告不再接受，须重新生成版本 1 逐论文报告。此门不替代 Shadow、
 真实供应商、人工标注真实性审查及整个 Feature 验收。
+
+## 批量运行实际上传链路
+
+`pdf_benchmark_runner` 通过本机服务的公开 API 创建任务、上传文件、轮询真实 Worker，
+然后从同一服务的 artifact 目录读取 `result.json.ai_values` 和 IR。只生成草稿，不提交、
+批准或发布论文；每完成一篇就原子保存结果，后续失败不抹掉已完成记录。没有运行的
+论文仍会被评分器计为 missing。建议使用独立评测实例，并预留上传任务额度；导出后
+不会自动删除任务或原始产物。若正式论文库已有相同文件，明确拒绝用重复任务结果评分。
+
+准备 `sources.json`，将 corpus 中每个 paper_id 映射到本机文件及角色，例如：
+
+```json
+{
+  "paper-001": [
+    {"path": "/path/to/main.pdf", "role": "main"},
+    {"path": "/path/to/supplement.pdf", "role": "supplementary"}
+  ]
+}
+```
+
+启动前逐个核对文件摘要与标注来源，正文必须唯一且匹配 main_sha256。中途换文件、
+模型或源码会被拒绝。`SCWIKI_BENCHMARK_TOKEN` 是 **SC-Wiki 测试账号的登录令牌**，
+不是 GitHub Token；只在本机配置环境变量，不写入标注、日志或报告。
+
+```bash
+python -m backend.ingest.pdf_benchmark_runner \
+  --corpus "/path/to/corpus.json" --sources "/path/to/sources.json" \
+  --base-url "http://127.0.0.1:8080" \
+  --artifact-root "/path/to/sc-wiki-data/review_artifacts" \
+  --profile legacy --output "/path/to/legacy.json"
+
+python -m backend.ingest.pdf_benchmark_runner \
+  --corpus "/path/to/corpus.json" --sources "/path/to/sources.json" \
+  --base-url "http://127.0.0.1:8080" \
+  --artifact-root "/path/to/sc-wiki-data/review_artifacts" \
+  --profile layout --output "/path/to/new.json"
+```
+
+每篇默认等待 1800 秒；`--timeout` 可设置 0～7200 秒之间的正值。超时请求取消任务，
+该篇作为 timeout 输出，不把部分候选计为成功记录。需要可用模型配置与在线 Worker；
+此命令不会把没有凭据的测试替身当成真实模型。
+
+自动导出的固定字段如下，人工标注必须独立遵循同一字段集合、保留未知字段的 null：
+
+- fields：material、material_name、record_type、property_code、name_raw、value_kind、
+  value_number、value_min、value_max、value_text、value_boolean、canonical_unit、
+  method_code、method_raw、criterion_code、criterion_raw、uncertainty。
+- conditions：pressure_value_gpa、pressure_min_gpa、pressure_max_gpa、temperature_value_k、
+  magnetic_field_t、state_kind、reported_space_group_number，以及逐记录的 payload。
+- evidences：仅从同一上传文件 IR 验证并归一化后的区域。旧链路缺少 IR 时不伪造区域。
+
+上面的 tc_k/pressure_gpa 简例用于说明评分格式；使用自动导出时按本节字段名标注。
+不能把模型导出值直接复制为标准答案，必须独立核对完整原文及所有应提取记录。
+
+运行产物记录模型、供应商、实现文件 SHA-256 指纹、实际解析时延和 Worker 自身 CPU
+时间；CPU 值不包含解析子进程、GPU 或远端模型资源。Token/GPU/费用没有实测时为空，
+不是 0。完整人工标注与独立写入/恢复审计仍是默认切换的前置条件。

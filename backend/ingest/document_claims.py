@@ -12,7 +12,7 @@ def _locators(raw_evidences, documents, default_file=None):
     located = []
     for evidence in raw_evidences:
         if not isinstance(evidence, dict):
-            continue
+            return []
         file_id = evidence.get("file_id") or default_file
         quote = str(evidence.get("quote") or "")
         requested_page = evidence.get("pdf_page", evidence.get("page", evidence.get("page_start")))
@@ -31,7 +31,7 @@ def _locators(raw_evidences, documents, default_file=None):
         parent_ids = {b.parent_block_id for _, b in candidates if b.parent_block_id}
         candidates = [(ir, b) for ir, b in candidates if b.block_id not in parent_ids]
         if len(candidates) != 1:
-            continue
+            return []
         ir, block = candidates[0]
         # 模型未返回几何时可从 IR 回填；返回了错误的定位不能被自动修正。
         kind = block.metadata.get("source_kind") or {"text":"text_layer", "ocr":"ocr", "vlm":"vision"}[ir.parser["mode"]]
@@ -43,7 +43,7 @@ def _locators(raw_evidences, documents, default_file=None):
         try:
             located.append(EvidenceLocator.model_validate(raw))
         except ValueError:
-            continue
+            return []
     return located
 
 
@@ -86,7 +86,10 @@ def claims_from_candidates(candidate: dict, documents: dict[str, DocumentIR], *,
         # 材料状态条件也必须有来源，不能只核对 Tc 数字。
         if "material_states[" in path and not any(key in path for key in ("property_modules[","tc_results[","properties[")):
             values = {key:node[key] for key in ("material","material_name","pressure_value_gpa","pressure_min_gpa",
-                "pressure_max_gpa","temperature_value_k","magnetic_field_value_t","reported_space_group_number")
+                "pressure_max_gpa","pressure_raw","pressure_unit_raw","state_kind","temperature_value_k",
+                "magnetic_field_t","magnetic_field_value_t","temperature_raw","temperature_unit_raw","note",
+                "reported_space_group_number","reported_space_group_symbol",
+                "material_dimensionality","material_family","structure_families")
                 if node.get(key) is not None and node.get(key) != ""}
             if values:
                 add(path, values, node, own)

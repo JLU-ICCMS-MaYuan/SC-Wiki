@@ -42,7 +42,7 @@ def test_alembic_has_declared_local_deployment_heads():
     script = ScriptDirectory.from_config(_config())
 
     # #52 表单定义与主分支并行，部署必须核验完整集合，不能选择任意一个 head。
-    assert set(script.get_heads()) == {'20260914_0052', '20260918_0108'}
+    assert set(script.get_heads()) == {'20260914_0052', '20260924_0114'}
     assert script.get_revision("experimental_tc_context").down_revision == "paper_citation_graph"
     assert script.get_revision("revision_cascade_chain").down_revision == "add_kg_title"
     assert script.get_revision("add_kg_title").down_revision == "20260831_0066"

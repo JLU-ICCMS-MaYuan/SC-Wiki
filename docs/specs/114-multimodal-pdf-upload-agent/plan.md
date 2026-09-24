@@ -124,3 +124,15 @@ T010/T011 使用 `pdf_parser_worker.py` 隔离重型 SDK，`structured_pdf.py` �
 公开上传 API 尚未暴露这些细粒度选项。原生 PDF LLM、完整 Claim 提取、迁移和上线门禁
 继续按后续任务实现，不能用本轮适配测试代替整条链路验收。T002 的人工标注基准是默认
 上线门，独立适配器的实现和合成 PDF 验证可先行。
+
+## 领域提取与端到端补齐
+
+FR-005～FR-007 / T015、T016 由 `domain_extraction.py` 定义版本化结构化输入和模块化
+科学候选，`document_claims.py` 校验来源，`upload_jobs.py` 只编排。科学候选由程序
+精确去重和组装，汇总模型只负责书目与叙述，避免不同条件被全文汇总吞并。
+字段验证复用 `property_modules.validate_record`，最终写入仍用既有表单定义与提交事务。
+
+FR-012、FR-014 / T019、T023、T024 通过隔离数据库、Redis/RQ 与 HTTP 流程验证。
+返修及管理员编辑如采用新的原文引句，共享 `persist_existing_paper_targets` 在当前
+IR 重新生成定位关联；没有 IR 的旧论文保持原页码/引句读取。测试模型输出固定注入，
+真实科学提取质量仍由 50 篇人工基准验收，不用功能测试代替质量指标。

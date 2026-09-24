@@ -67,6 +67,7 @@ def test_transient_cleanup_deletes_upload_llm_config(monkeypatch):
     redis = FakeRedis()
     monkeypatch.setattr(upload_tasks, "redis_client", lambda: redis)
     monkeypatch.setattr(upload_tasks, "_delete_processing_job", lambda _job_id: None)
+    monkeypatch.setattr(upload_tasks, "get_state", lambda _: None)
 
     upload_tasks.cleanup_transient_data(task_id)
 

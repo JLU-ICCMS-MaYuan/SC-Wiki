@@ -203,14 +203,17 @@ python -m pip check
 #114 的定位持久化需要配套增量迁移（不要用单一 `head` 假定仓库不存在分支）：
 
 ```bash
-python -m alembic upgrade 20260923_0114
+python -m alembic upgrade 20260924_0114
 ```
 
 `UPLOAD_PARSER_STAGE=default` 还要求 `UPLOAD_PARSER_QUALITY_REPORT` 指向通过
-至少 50 篇人工标注评测的质量报告；当前仍缺该评测，原生 PDF LLM 和完整 Shadow
-也未完成。请按验证记录区分已有能力与尚未完成的验收。
+至少 50 篇人工标注评测的质量报告；当前仍缺该真实评测和原生 PDF LLM 供应商验收。
+Shadow 已使用独立 RQ 作业与文件快照生成对照，禁止提交或改动用户草稿。
+请按验证记录区分已有能力与尚未完成的验收。
 
 离线评测使用 `python -m backend.ingest.pdf_benchmark`，输入人工标注、成对运行输出与
 独立验收记录，生成带逐论文计数的版本 1 报告；仅汇总数字的旧报告不再接受。
 数据格式、指标及命令见 [评测说明](tests/fixtures/issue114/README.md)。合成测试不会
-开启默认门；完整批量上传运行驱动和真实 50 篇标注仍待完成。
+开启默认门。`python -m backend.ingest.pdf_benchmark_runner` 可通过本机 API 批量上传并
+导出实际 AI 产物；需要同一服务的 artifact 目录、模型配置和本机环境变量中的登录令牌。
+真实 50 篇人工标注尚未就绪。新增方法定义迁移只补缺项，不覆盖已发布定义。

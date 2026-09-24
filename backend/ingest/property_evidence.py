@@ -144,7 +144,7 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
     from backend.ingest.scientific_drafts import _property_modules_for_state
     from . import scientific_evidence as science
     state, draft = get_state(task_id), parsing_draft if parsing_draft is not None else get_draft(task_id)
-    if not state or int(state.get('user_id') or 0) != user_id:
+    if not state or state.get('is_shadow') or int(state.get('user_id') or 0) != user_id:
         raise HTTPException(403, detail='只有上传者可以核对该草稿')
     if not draft or state.get('paper_id') or (parsing_draft is None and (state.get('stage') != 'ready' or state.get('processing_status') != 'succeeded')):
         fail('draft_not_ready', '草稿尚未准备完成或已经提交')
@@ -637,6 +637,22 @@ async def persist_existing_paper_targets(session, paper, targets):
         if not linked:
             add_scientific_evidence_link(session,target,existing)
             await session.flush()
+        # 返修或管理员编辑可能采用新的原文引句；必须在当前 IR 中重建区域关联。
+        from backend.ingest.document_storage import link_document_evidence
+        chunk = await session.get(models.PaperChunk, existing.paper_chunk_id)
+        runs = (await session.scalars(select(models.PaperDocumentParserRun).where(
+            models.PaperDocumentParserRun.paper_id == paper.id,
+            models.PaperDocumentParserRun.paper_revision == paper.content_revision,
+            models.PaperDocumentParserRun.paper_file_id == chunk.paper_file_id,
+            models.PaperDocumentParserRun.status == 'succeeded',
+        ))).all()
+        for run in runs:
+            blocks = (await session.scalars(select(models.PaperDocumentBlock).where(
+                models.PaperDocumentBlock.parser_run_id == run.id,
+                models.PaperDocumentBlock.paper_revision == paper.content_revision,
+            ))).all()
+            await link_document_evidence(session, existing, chunk, run,
+                {block.block_id: block for block in blocks}, block_id=located.get('block_id'))
 
 
 def save_completed_upload(snapshot, results, owner, *, locked=False):

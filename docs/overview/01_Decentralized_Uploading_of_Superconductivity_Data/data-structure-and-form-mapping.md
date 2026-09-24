@@ -247,6 +247,15 @@ Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖�
 
 ## 当前边界
 
+#114 的可选 PDF 新链路直接输出模块化物性记录，按材料、压力、方法、判据和每条
+记录的 payload 保留区别；后端组装科学候选，全文汇总不再重写这些值。未知实验方法
+保持 unknown，不因属于实验结果就填为 resistivity；部署需后续方法定义迁移
+`20260924_0114`。Claim 定位通过不替代既有科学语义核对和人工审核。
+
+当前 revision 的 PDF 结构与区域定位另存于文档表，通过 `paper_evidence_locators`
+关联原 Evidence。返修或管理员编辑采用新引句时重新定位，升版后归新当前 revision；
+旧版仍只保留既有修改历史，不承诺旧全文档案。流程见 [PDF 解析管线](pdf-parsing-pipeline.md)。
+
 - 解析运行态由 Redis 管理，已核对草稿另有 MySQL 恢复快照，正式提交后通过 `papers.upload_task_id` 回溯来源任务。
 - 结构附件只有经用户确认后才持久化为 `structure_models`；浏览器中的结构候选不等于正式记录。
 - 本文描述应用当前目标契约和隔离 MySQL 已验证行为，不表示任一生产数据库已经执行迁移。
