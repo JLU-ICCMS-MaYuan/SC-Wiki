@@ -38,7 +38,7 @@ def content_hash(*parts: Any) -> str:
 
 
 class PageGeometry(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     pdf_page: int = Field(ge=1)
     printed_page: int | None = None
@@ -47,7 +47,7 @@ class PageGeometry(BaseModel):
 
 
 class DocumentBlock(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     block_id: str = Field(min_length=1, max_length=255)
     block_type: BlockType
@@ -93,7 +93,7 @@ class DocumentBlock(BaseModel):
 
 
 class TableCell(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     cell_id: str = Field(min_length=1)
     row_index: int = Field(ge=0)
@@ -104,7 +104,7 @@ class TableCell(BaseModel):
 
 
 class DocumentTable(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     table_id: str = Field(min_length=1)
     pdf_page: int = Field(ge=1)
@@ -115,7 +115,7 @@ class DocumentTable(BaseModel):
 
 
 class DocumentIR(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+    model_config = ConfigDict(extra="forbid", allow_inf_nan=False)
 
     document_id: str = Field(min_length=1)
     source_file_id: str = Field(min_length=1)
@@ -133,19 +133,24 @@ class DocumentIR(BaseModel):
     @model_validator(mode="after")
     def validate_blocks(self):
         page_map = {page.pdf_page: page for page in self.pages}
+        if len(page_map) != len(self.pages):
+            raise ValueError("重复 PDF 页码")
         block_ids: set[str] = set()
         for block in self.blocks:
             if block.block_id in block_ids:
                 raise ValueError(f"重复 block_id：{block.block_id}")
             block_ids.add(block.block_id)
             page = page_map.get(block.pdf_page)
-            if page is not None:
-                if block.printed_page is None:
-                    block.printed_page = page.printed_page
-                if block.page_width is None:
-                    block.page_width = page.width
-                if block.page_height is None:
-                    block.page_height = page.height
+            if page is None:
+                raise ValueError("块引用了不存在的 PDF 页面")
+            if block.printed_page is None:
+                block.printed_page = page.printed_page
+            # 只用文档页面尺寸验证，不能被块中自报的尺寸绕过。
+            block.page_width, block.page_height = page.width, page.height
+            block.validate_geometry()
+        for block in self.blocks:
+            if block.parent_block_id and block.parent_block_id not in block_ids:
+                raise ValueError("块的父引用不存在")
         return self
 
     def block(self, block_id: str) -> DocumentBlock | None:

@@ -115,3 +115,12 @@ tests/01_decentralized_uploading/
 | Claim 校验与覆盖审计 | “已有值有引句”不能证明没有漏值 | 只做二次 LLM 核对可能重复同一种错误 |
 | 受控 PDF LLM | 跨页理解和复杂视觉需要多模态能力 | 让模型直接写库不可审计、不可回滚 |
 | Shadow/灰度/回退 | 新解析器存在真实论文分布外风险 | 一次性替换旧链路会放大错误影响 |
+
+
+## 本轮适配实现边界
+
+T010/T011 使用 `pdf_parser_worker.py` 隔离重型 SDK，`structured_pdf.py` 统一输出映射。
+默认 Docling CPU；MinerU basic OCR；调用方可用 ParseOptions 显式指定 MinerU 档位，
+公开上传 API 尚未暴露这些细粒度选项。原生 PDF LLM、完整 Claim 提取、迁移和上线门禁
+继续按后续任务实现，不能用本轮适配测试代替整条链路验收。T002 的人工标注基准是默认
+上线门，独立适配器的实现和合成 PDF 验证可先行。

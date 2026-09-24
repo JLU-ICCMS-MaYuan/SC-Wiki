@@ -17,3 +17,15 @@
 ## 兼容
 
 解析器输出必须能转换成统一 IR；旧 Markdown 缓存没有 parser 信息时标记为 `legacy_text`，不能伪装成视觉解析。
+
+## 已实现的本地方案
+
+- `text` → PyMuPDF；`layout` → Docling CPU（文本层、表格）；`ocr` → MinerU basic OCR。
+- `vision` 尚未注册，`native_pdf_llm` 尚未接入供应商；不能把它们标记为可用。
+- 重型 SDK 在与 Worker 相同 Python 环境的独立进程运行。默认超时 300 秒，服务端
+  `ParseOptions.parser_options.timeout_seconds` 可设为大于零且不超过 1800 的有限数值。
+  超时返回 `parser_timeout` 并终止进程组，不返回部分 IR。
+- MinerU 档位参数仅允许 `mineru_tier=flash/basic/standard/advanced`，读取模式仅允许
+  `mineru_parse_mode=txt/ocr`；显式选择 flash/txt 时解析元数据必须记录 text。
+- 首次运行需要下载模型或事先准备对应缓存；安装成功与模型可用分开判定。
+- 模型或依赖失败不返回内部路径、供应商响应、堆栈；主任务仍进入既有 failed 终态。

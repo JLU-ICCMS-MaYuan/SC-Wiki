@@ -67,3 +67,31 @@ Docling 为 MIT；PaddleOCR 为 Apache-2.0；MinerU 使用 Apache-2.0 加附加�
 
 - 具体 PDF LLM 供应商由现有 LLM 配置和能力探测决定，不在本 Feature 固定厂商。
 - 50 篇论文标注集的来源和标注工具需在 T002 中登记，未登记前不能宣布质量门通过。
+
+## 2026-09-24：真实版本适配与安装核验
+
+本轮落实 FR-001～FR-004、FR-010 对应 T010/T011：解析器只输出 IR，独立进程
+运行供应商 SDK，超时终止进程组；无法解析时返回稳定错误，不调用其他解析器。
+
+- Docling 2.130.0 的分发包依赖 `docling-slim[standard]`，使用 `DocumentConverter`
+  和 `PdfPipelineOptions`。`layout` 明确走 CPU、文本层与表格结构，不启用 OCR
+  或远端服务；公式/图像项保留类型，未识别的图像内容不视为已读取。
+- MinerU 4.0.6 使用公开 `parse(path, tier, ocr_mode, ...)`，并输出 DocVortex
+  Middle JSON；旧版 pipeline API 不适用于本次锁定版本。`ocr` 使用 `basic/ocr`；
+  适配器级选项可显式指定 `flash/basic/standard/advanced` 和 `txt/ocr`，不自动换档。
+  `flash/txt` 的数字 PDF 成功不能作为 OCR 验收。standard/advanced 尚未完成真实模型验收。
+- Docling bbox 按原点转换为左上原点 PDF 点坐标；MinerU 4 bbox 为 0～1 归一化值，
+  乘原 PDF 页面尺寸。表格 HTML 没有单元格 bbox 时仅保存行列和跨度，并记录限制。
+- 数据块稳定键包含文件身份、哈希、解析器版本、方案、页码与顺序；数据库运行身份
+  仍独立管理，不把随机运行编号放入内容哈希。
+- 项目 Conda `sc-wiki`（Python 3.12.14）安装了 Docling 2.130.0、MinerU 4.0.6、
+  PyTorch 2.10.0+cpu；保留 NumPy 1.26.4，由依赖求解选择 OpenCV 4.11.0.86。
+  `pip check` 通过。另建隔离环境先行验证；未升级数据库、重启服务或开启默认新链路。
+- Hugging Face 直连失败，镜像下载最初遇到 Xet 401；测试进程使用
+  `HF_ENDPOINT=https://hf-mirror.com`、`HF_HUB_DISABLE_XET=1` 下载相同模型。
+  该设置没有写入系统或应用环境配置。下载可用不等于所有目标部署环境可用。
+
+许可证依据为已下载 wheel 的 METADATA 和随包 LICENSE：Docling 为 MIT；MinerU
+声明 `LicenseRef-MinerU-Open-Source-License`，含 Apache-2.0 及附加条款：在线服务需
+显著注明使用 MinerU，合并月活超过一亿或月收入超过两千万美元需要单独商业许可。
+根 README 已增加归因。模型权重许可及完整 Docker 镜像仍需分别核验，T001 不据此全部完成。

@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import hashlib
 import importlib
-import inspect
+from importlib.metadata import PackageNotFoundError, version
+from importlib.util import find_spec
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -37,11 +38,8 @@ class RuntimeCapabilities:
     def detect(cls) -> "RuntimeCapabilities":
         installed: set[str] = set()
         for package in ("fitz", "docling", "mineru"):
-            try:
-                importlib.import_module(package)
-            except Exception:
-                continue
-            installed.add(package)
+            if find_spec(package) is not None:
+                installed.add(package)
         gpu = False
         try:
             torch = importlib.import_module("torch")
@@ -142,12 +140,16 @@ class DocumentParser(Protocol):
 
 
 def _profile_for_mode(profile: str) -> str:
-    return ParseMode.VLM.value if profile in {ParserProfile.VISION, ParserProfile.NATIVE_PDF_LLM} else ParseMode.TEXT.value
+    if profile in {ParserProfile.VISION, ParserProfile.NATIVE_PDF_LLM}:
+        return ParseMode.VLM.value
+    return ParseMode.OCR.value if profile == ParserProfile.OCR else ParseMode.TEXT.value
 
 
 class PyMuPDFParser:
     name = "pymupdf"
-    version = "optional"
+    @property
+    def version(self) -> str:
+        return package_version("PyMuPDF")
 
     def can_parse(self, source: DocumentSource, capabilities: RuntimeCapabilities) -> ParserDecision:
         if source.media_type != "application/pdf":
@@ -164,35 +166,34 @@ class PyMuPDFParser:
         except Exception as exc:
             raise ParserError("parser_dependency_unavailable", "PyMuPDF 不可用", profile=options.profile, parser=self.name) from exc
         try:
-            doc = fitz.open(str(source.path))
-            pages: list[PageGeometry] = []
-            blocks: list[DocumentBlock] = []
-            order = 0
-            for page_number, page in enumerate(doc, start=1):
-                rect = page.rect
-                pages.append(PageGeometry(pdf_page=page_number, width=float(rect.width), height=float(rect.height)))
-                for raw in page.get_text("dict").get("blocks", []):
-                    if raw.get("type") == 0:
-                        lines = ["".join(span.get("text", "") for span in line.get("spans", [])) for line in raw.get("lines", [])]
-                        text = " ".join(line.strip() for line in lines if line.strip())
-                        block_type = BlockType.PARAGRAPH
-                    elif raw.get("type") == 1:
-                        text = ""
-                        block_type = BlockType.FIGURE
-                    else:
-                        continue
-                    if not text and block_type is BlockType.PARAGRAPH:
-                        continue
-                    bbox = tuple(float(value) for value in raw.get("bbox", (0, 0, 0, 0)))
-                    block_id = f"{source.file_id}:{source.source_version}:{page_number}:{order}:{content_hash(block_type.value, text, bbox)[:16]}"
-                    blocks.append(DocumentBlock(
-                        block_id=block_id, block_type=block_type, pdf_page=page_number,
-                        reading_order=order, text=text, bbox=bbox,
-                        page_width=float(rect.width), page_height=float(rect.height),
-                        content_hash=content_hash(block_type.value, text, bbox),
-                    ))
-                    order += 1
-            doc.close()
+            with fitz.open(str(source.path)) as doc:
+                pages: list[PageGeometry] = []
+                blocks: list[DocumentBlock] = []
+                order = 0
+                for page_number, page in enumerate(doc, start=1):
+                    rect = page.rect
+                    pages.append(PageGeometry(pdf_page=page_number, width=float(rect.width), height=float(rect.height)))
+                    for raw in page.get_text("dict").get("blocks", []):
+                        if raw.get("type") == 0:
+                            lines = ["".join(span.get("text", "") for span in line.get("spans", [])) for line in raw.get("lines", [])]
+                            text = " ".join(line.strip() for line in lines if line.strip())
+                            block_type = BlockType.PARAGRAPH
+                        elif raw.get("type") == 1:
+                            text = ""
+                            block_type = BlockType.FIGURE
+                        else:
+                            continue
+                        if not text and block_type is BlockType.PARAGRAPH:
+                            continue
+                        bbox = tuple(float(value) for value in raw.get("bbox", (0, 0, 0, 0)))
+                        block_id = f"{source.file_id}:{source.source_version}:{page_number}:{order}:{content_hash(block_type.value, text, bbox)[:16]}"
+                        blocks.append(DocumentBlock(
+                            block_id=block_id, block_type=block_type, pdf_page=page_number,
+                            reading_order=order, text=text, bbox=bbox,
+                            page_width=float(rect.width), page_height=float(rect.height),
+                            content_hash=content_hash(block_type.value, text, bbox),
+                        ))
+                        order += 1
         except ParserError:
             raise
         except Exception as exc:
@@ -206,29 +207,56 @@ class PyMuPDFParser:
         )
 
 
-class OptionalParser:
-    """Docling/MinerU 的受控可选适配器骨架。
+def package_version(distribution: str) -> str:
+    try:
+        return version(distribution)
+    except PackageNotFoundError:
+        return "unavailable"
 
-    依赖未安装或供应商 API 不兼容时返回明确错误，绝不调用另一解析器。
-    """
 
-    def __init__(self, *, name: str, package: str, profile: str, mode: str = "text"):
-        self.name, self.package, self.profile, self.mode = name, package, profile, mode
-        self.version = "optional"
+class StructuredPdfParser:
+    """独立进程执行本地解析；模型失败和超时均不切换解析器。"""
+
+    name: str
+    profile: str
+    mode: str
+
+    @property
+    def version(self) -> str:
+        return package_version(self.name)
 
     def can_parse(self, source: DocumentSource, capabilities: RuntimeCapabilities) -> ParserDecision:
-        if source.media_type != "application/pdf":
-            return ParserDecision(False, self.profile, self.mode, "仅支持 PDF")
-        if self.package not in capabilities.installed:
-            return ParserDecision(False, self.profile, self.mode, f"{self.name} 依赖不可用", (self.package,))
-        return ParserDecision(True, self.profile, self.mode, "可用")
+        supported = source.media_type == "application/pdf" and self.name in capabilities.installed
+        reason = "可用；模型资源在执行时检查" if supported else "指定解析依赖或文件类型不可用"
+        return ParserDecision(supported, self.profile, self.mode, reason, (self.name,))
 
     def parse(self, source: DocumentSource, options: ParseOptions) -> DocumentIR:
+        if source.media_type != "application/pdf":
+            raise ParserError("parser_unsupported_media", "所选解析器仅支持 PDF", profile=options.profile, parser=self.name)
+        if options.profile != self.profile:
+            raise ParserError("parser_profile_unavailable", "解析器与所选方案不匹配", profile=options.profile, parser=self.name)
+        if self.version == "unavailable":
+            raise ParserError("parser_dependency_unavailable", "解析依赖未安装", profile=options.profile, parser=self.name)
+        from .structured_pdf import convert_docling, convert_mineru, run_parser_worker
+
+        output = run_parser_worker(self.name, source.path, options)
         try:
-            importlib.import_module(self.package)
-        except Exception as exc:
-            raise ParserError("parser_dependency_unavailable", f"{self.name} 依赖不可用", profile=options.profile, parser=self.name) from exc
-        raise ParserError("parser_invalid_output", f"{self.name} 适配器尚未实现供应商输出映射", profile=options.profile, parser=self.name)
+            convert = convert_docling if self.name == "docling" else convert_mineru
+            return convert(output, source, options, self.version)
+        except (ValueError, KeyError, TypeError, AttributeError) as exc:
+            raise ParserError("parser_invalid_output", "解析器输出未通过文档结构校验", profile=options.profile, parser=self.name) from exc
+
+
+class DoclingParser(StructuredPdfParser):
+    name = "docling"
+    profile = ParserProfile.LAYOUT
+    mode = "text"
+
+
+class MinerUParser(StructuredPdfParser):
+    name = "mineru"
+    profile = ParserProfile.OCR
+    mode = "ocr"
 
 
 class NativePdfLlmParser:
@@ -254,10 +282,10 @@ class NativePdfLlmParser:
 
 class ParserRegistry:
     def __init__(self, parsers: list[DocumentParser] | None = None):
-        self.parsers = parsers or [
+        self.parsers = parsers if parsers is not None else [
             PyMuPDFParser(),
-            OptionalParser(name="docling", package="docling", profile=ParserProfile.LAYOUT),
-            OptionalParser(name="mineru", package="mineru", profile=ParserProfile.OCR),
+            DoclingParser(),
+            MinerUParser(),
             NativePdfLlmParser(),
         ]
 
@@ -275,10 +303,11 @@ def parse_with_profile(source: DocumentSource, options: ParseOptions, *, registr
     registry = registry or ParserRegistry()
     capabilities = capabilities or RuntimeCapabilities.detect()
     parser = registry.choose(options.profile, source, capabilities)
-    run = ParserRun(None, source.file_id, options.profile, parser.name, parser.version, _profile_for_mode(options.profile))
+    run = ParserRun(options.task_id, source.file_id, options.profile, parser.name, parser.version, _profile_for_mode(options.profile))
     run.start()
     try:
         ir = parser.parse(source, options)
+        run.mode = ir.parser.get("mode", run.mode)
         run.finish("succeeded", "ir_ready")
         return ir, run
     except ParserError as exc:

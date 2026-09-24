@@ -22,7 +22,6 @@ from backend.ingest.document_parsers import (
     DocumentSource,
     ParseOptions,
     ParserError,
-    ParserProfile,
     parse_with_profile,
 )
 from backend.ingest.upload_tasks import (
@@ -283,6 +282,7 @@ def _ir_to_markdown(ir) -> str:
 
 def _save_document_ir(task_id: str, file_id: str, ir) -> None:
     path = artifact_directory(task_id) / "document_ir" / f"{file_id}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
     _atomic_write_json(path, ir.model_dump(mode="json"))
 
 
@@ -295,10 +295,7 @@ def _extract_markdown(state: dict[str, Any], source: Path) -> str:
                 file_id=str(state.get("file_id") or "main"),
                 sha256=state.get("file_sha256"),
             )
-            try:
-                ir, run = parse_with_profile(source_info, ParseOptions(profile=profile))
-            except ParserError as exc:
-                raise ValueError(f"解析方案 {profile} 不可用：{exc.message}") from exc
+            ir, run = parse_with_profile(source_info, ParseOptions(profile=profile, task_id=state.get("task_id")))
             task_id = str(state.get("task_id") or "")
             if task_id:
                 _save_document_ir(task_id, source_info.file_id, ir)
@@ -306,7 +303,6 @@ def _extract_markdown(state: dict[str, Any], source: Path) -> str:
                 previous_runs = [item for item in previous_runs if item.get("file_id") != source_info.file_id]
                 update_state(
                     task_id,
-                    reading_state=run.reading_state,
                     parser_runs=previous_runs + [{
                         "file_id": source_info.file_id,
                         "profile": run.profile,
@@ -411,9 +407,12 @@ def _read_chunk(
     source: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     result_path = _chunk_result_path(task_id, chunk.chunk_index, file_id)
+    profile = (source or {}).get("parser_profile", "legacy")
+    signature = hashlib.sha256((profile + "\n" + chunk.content).encode("utf-8")).hexdigest() if profile != "legacy" else None
     if result_path.exists():
         cached = json.loads(result_path.read_text(encoding="utf-8"))
-        if cached.get("_schema_version") == CHUNK_RESULT_SCHEMA_VERSION:
+        if (cached.get("_schema_version") == CHUNK_RESULT_SCHEMA_VERSION
+                and cached.get("_document_signature") == signature):
             return cached
     prompt = (
         f"章节：{chunk.section_name or '正文'}\n页码：{getattr(chunk, 'source_page', None) or '未知'}\n"
@@ -422,8 +421,9 @@ def _read_chunk(
     result = complete_json(CHUNK_SYSTEM_PROMPT, prompt)
     validate_chunk_generated_english(result)
     result["_schema_version"] = CHUNK_RESULT_SCHEMA_VERSION
+    result["_document_signature"] = signature
     result["_source"] = {
-        "file_id": file_id,
+        "file_id": file_id or (source or {}).get("file_id"),
         "filename": (source or {}).get("original_filename"),
         "file_role": (source or {}).get("role"),
         "chunk_index": chunk.chunk_index,
@@ -1514,12 +1514,13 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         identities: list[dict[str, Any]] = []
         structure_candidates: list[dict[str, Any]] = []
         for file_item in sources:
+            file_item["parser_profile"] = state.get("parser_profile") or "legacy"
             _ensure_not_cancelled(task_id)
             file_source = Path(str(file_item.get("stored_path") or source))
             file_state = {
                 **state,
                 "file_id": file_item.get("file_id") or "main",
-                "file_sha256": file_item.get("sha256") or state.get("file_sha256"),
+                "file_sha256": file_item.get("sha256") if multi_file else state.get("file_sha256"),
                 "file_kind": file_item.get("kind") or file_source.suffix.lstrip("."),
             }
             file_md = extracted_root / f"{file_item['file_id']}.md"
@@ -1576,9 +1577,9 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                         if structure_ok else
                         f"<!-- 结构附件 {file_item.get('original_filename') or file_source.name} 校验失败，等待人工处理 -->"
                     )
-                elif not multi_file and md_path.exists():
+                elif state.get("parser_profile", "legacy") == "legacy" and not multi_file and md_path.exists():
                     markdown = md_path.read_text(encoding="utf-8")
-                elif file_md.exists():
+                elif state.get("parser_profile", "legacy") == "legacy" and file_md.exists():
                     markdown = file_md.read_text(encoding="utf-8")
                 else:
                     markdown = _extract_markdown(file_state, file_source)
@@ -1642,6 +1643,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             try:
                 if multi_file:
                     candidates.append(_read_chunk(task_id, chunk, file_item["file_id"], file_item))
+                elif state.get("parser_profile", "legacy") != "legacy":
+                    candidates.append(_read_chunk(task_id, chunk, source=file_item))
                 else:
                     candidates.append(_read_chunk(task_id, chunk))
                 manifest[completed - 1]["status"] = "completed"
@@ -1751,7 +1754,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         current = get_state(task_id) or state
         update_state(
             task_id, status="failed", processing_status="failed", processing_error=str(exc),
-            error_code="paper_processing_failed", failed_stage=current.get("stage"), partial_draft=None,
+            error_code=exc.code if isinstance(exc, ParserError) else "paper_processing_failed",
+            failed_stage=current.get("stage"), partial_draft=None,
         )
         _schedule_terminal_cleanup(task_id)
         raise

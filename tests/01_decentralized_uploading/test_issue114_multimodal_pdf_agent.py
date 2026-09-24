@@ -124,3 +124,51 @@ def test_rollout_profile_is_stable_and_explicit():
     config = RolloutConfig(stage=RolloutStage.DEFAULT, default_profile=ParserProfile.LAYOUT)
     assert select_profile(config, task_id="a" * 32) == ParserProfile.LAYOUT
     assert select_profile(config, task_id="a" * 32, requested_profile=ParserProfile.TEXT) == ParserProfile.TEXT
+
+
+def test_upload_text_parser_creates_ir_directory_and_keeps_file_hash(tmp_path, monkeypatch):
+    import pymupdf
+    from backend.ingest import upload_jobs
+    path = tmp_path / "supplement.pdf"
+    with pymupdf.open() as document:
+        page = document.new_page()
+        page.insert_text((40, 80), "Supplement reports a critical temperature of 200 K under pressure.")
+        document.save(path)
+    artifacts = tmp_path / "artifacts"
+    artifacts.mkdir()
+    updates = []
+    monkeypatch.setattr(upload_jobs, "artifact_directory", lambda _: artifacts)
+    monkeypatch.setattr(upload_jobs, "get_state", lambda _: {"parser_runs": [{"file_id": "main"}]})
+    monkeypatch.setattr(upload_jobs, "update_state", lambda *args, **kwargs: updates.append(kwargs))
+    markdown = upload_jobs._extract_markdown({
+        "file_kind": "pdf", "parser_profile": "text", "file_id": "supplement", "task_id": "a" * 32,
+    }, path)
+    import json
+    result = json.loads((artifacts / "document_ir" / "supplement.json").read_text())
+    assert "200 K" in markdown
+    assert result["source_file_id"] == "supplement"
+    assert result["source_sha256"] == upload_jobs.sha256_file(path)
+    assert [run["file_id"] for run in updates[-1]["parser_runs"]] == ["main", "supplement"]
+    assert "reading_state" not in updates[-1]  # extracting 不写 reading 子状态
+
+
+def test_read_chunk_does_not_reuse_other_parser_cache(tmp_path, monkeypatch):
+    import json
+    from backend.ingest import upload_jobs
+    from backend.ingest.chunker import Chunk
+    cache = tmp_path / "chunk.json"
+    cache.write_text(json.dumps({"_schema_version": upload_jobs.CHUNK_RESULT_SCHEMA_VERSION, "metadata": {"title": "old"}}))
+    monkeypatch.setattr(upload_jobs, "_chunk_result_path", lambda *args, **kwargs: cache)
+    calls = []
+    def complete(*args):
+        calls.append(args)
+        return {"metadata": {"title": "new"}}
+    monkeypatch.setattr(upload_jobs, "complete_json", complete)
+    chunk = Chunk(0, 0, "Results", None, "Tc reaches 200 K.", 8)
+    source = {"parser_profile": "layout"}
+    assert upload_jobs._read_chunk("a" * 32, chunk, source=source)["metadata"]["title"] == "new"
+    upload_jobs._read_chunk("a" * 32, chunk, source=source)
+    assert len(calls) == 1
+    source["parser_profile"] = "ocr"
+    upload_jobs._read_chunk("a" * 32, chunk, source=source)
+    assert len(calls) == 2

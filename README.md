@@ -175,3 +175,25 @@ SMTP_PASSWORD=
 发送失败会明确报错，账号保持未验证；可用原邮箱和密码登录继续验证，再请求重发。
 配置后仍需实际收信验收，参见
 [邮箱注册验收说明](docs/specs/39-email-verified-registration/quickstart.md)。
+
+### PDF 结构化解析依赖（#114，实施中）
+
+**本项目使用 [Docling](https://github.com/docling-project/docling) 与
+[MinerU](https://github.com/opendatalab/MinerU) 提供可选 PDF 结构化解析。**
+Docling 采用 MIT 许可；MinerU 采用 Apache-2.0 及其
+[附加许可条款](https://github.com/opendatalab/MinerU/blob/master/LICENSE.md)。
+
+在项目 Python 3.12 环境安装基础 requirements；无 GPU 的机器可先安装 CPU PyTorch，
+避免下载 CUDA 运行库：
+
+```bash
+python -m pip install "torch==2.10.0+cpu" "torchvision==0.25.0+cpu" --index-url https://download.pytorch.org/whl/cpu
+python -m pip install -r "requirements.txt"
+python -m pip check
+```
+
+创建上传任务的 `parser_profile` 可显式指定 `text`（PyMuPDF）、`layout`（Docling）或
+`ocr`（MinerU basic）。默认仍为旧链路；页面上的解析方案选择、完整 Claim 提取和区域证据
+展示尚未完成。解析方案不可用时报告失败，不自动切换。首次 Docling/MinerU 运行需要模型
+下载或预先准备缓存；安装库不等于模型已就绪。真实解析验证范围见
+[#114 验证记录](docs/specs/114-multimodal-pdf-upload-agent/validation.md)。
