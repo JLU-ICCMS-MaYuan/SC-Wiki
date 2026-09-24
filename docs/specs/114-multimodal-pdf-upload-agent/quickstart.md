@@ -35,3 +35,8 @@ python -m pytest -q tests/01_decentralized_uploading/test_scientific_evidence.py
 ## 基准验收
 
 对至少 50 篇标注论文分别记录：关键记录 Precision/Recall/F1、条件关联准确率、Evidence 定位率、漏记录率、无依据字段率、人工修改量、处理时延、Token、CPU/GPU 时间和成本。新链路只有在 SC-001～SC-008 全部满足时才能切换默认。
+
+离线比较命令和输入见 [人工标注与评测说明](../../../tests/fixtures/issue114/README.md)。
+`python -m backend.ingest.pdf_benchmark` 读取人工标注、新旧结果及独立验收四份 JSON，
+输出版本 1 逐论文报告；不启动完整上传，不代替模型运行或人工标注。当前尚无真实
+50 篇报告，不开启默认新链路。

@@ -98,12 +98,13 @@ def test_default_rollout_requires_complete_quality_report():
         RolloutConfig(stage=RolloutStage.DEFAULT)
     report=dict(annotated_papers=50,new_f1=.9,legacy_f1=.89,new_complex_recall=.9,legacy_complex_recall=.8,
         evidence_location_rate=.96,unsupported_writes=0,failure_recovery_passed=True,legacy_revision_review_passed=True)
-    assert quality_gate_passed(report)
+    # 只有汇总数字的旧报告不能再用于默认切换，必须附逐论文/逐类别计数。
+    assert not quality_gate_passed(report)
     for change in ({"annotated_papers":49},{"new_f1":.7},{"new_complex_recall":.8},
                    {"evidence_location_rate":.94},{"unsupported_writes":1},{"new_f1":float("nan")},
                    {"failure_recovery_passed":False}):
         assert not quality_gate_passed(report|change)
-    config=RolloutConfig(stage=RolloutStage.DEFAULT,quality_report=report)
+    config=RolloutConfig(stage=RolloutStage.GRAY,gray_ratio=1)
     assert select_profile(config,task_id="t",requested_profile="legacy")=="legacy"
 
 

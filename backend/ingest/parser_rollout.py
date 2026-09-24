@@ -82,7 +82,9 @@ def quality_gate_passed(report: dict | None) -> bool:
     if any(isinstance(report.get(k), bool) or not isinstance(report.get(k), (float,int))
            or not math.isfinite(report[k]) or not 0 <= report[k] <= 1 for k in numeric):
         return False
-    return (report["new_f1"] >= report["legacy_f1"]
+    from .pdf_benchmark import detailed_gate_passed
+    return (detailed_gate_passed(report)
+            and report["new_f1"] >= report["legacy_f1"]
             and report["new_complex_recall"] > report["legacy_complex_recall"]
             and report["evidence_location_rate"] >= .95
             and type(report.get("unsupported_writes")) is int and report["unsupported_writes"] == 0

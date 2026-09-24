@@ -209,3 +209,8 @@ python -m alembic upgrade 20260923_0114
 `UPLOAD_PARSER_STAGE=default` 还要求 `UPLOAD_PARSER_QUALITY_REPORT` 指向通过
 至少 50 篇人工标注评测的质量报告；当前仍缺该评测，原生 PDF LLM 和完整 Shadow
 也未完成。请按验证记录区分已有能力与尚未完成的验收。
+
+离线评测使用 `python -m backend.ingest.pdf_benchmark`，输入人工标注、成对运行输出与
+独立验收记录，生成带逐论文计数的版本 1 报告；仅汇总数字的旧报告不再接受。
+数据格式、指标及命令见 [评测说明](tests/fixtures/issue114/README.md)。合成测试不会
+开启默认门；完整批量上传运行驱动和真实 50 篇标注仍待完成。
