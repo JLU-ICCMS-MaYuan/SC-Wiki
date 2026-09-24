@@ -24,6 +24,25 @@ export default {
   rankDetail: '第 {rank} 名 · {count} {unit}',
   noRankDetail: '暂无排名 · 0 {unit}',
 
+  // ── 材料家族发文统计 ──
+  publicationTitle: '材料家族论文数量',
+  publicationScope: '仅统计本站当前审核通过的论文。同一论文涉及多个材料家族时，各家族分别计 1 篇，因此各柱数量之和可能超过去重论文总数。',
+  publicationRefresh: '刷新论文统计',
+  publicationRetry: '重试',
+  publicationFailed: '论文统计加载失败，请重试；已有数据保留为上次成功结果。',
+  publicationLoading: '正在加载论文统计…',
+  publicationEmpty: '暂无已审核通过的论文',
+  publicationFamilyEmpty: '该家族暂无已审核通过的论文',
+  publicationNoYears: '暂无有效发表年份',
+  publicationUnclassified: '未分类',
+  publicationAnnualTitle: '{name} · 年度发文量',
+  publicationUnknownYear: '年份未知：{count} 篇',
+  publicationCollapse: '收起年度图',
+  publicationCountAxis: '论文数量（篇）',
+  publicationYearAxis: '发表年份',
+  publicationColumnLabel: '{name}：{count} 篇',
+  publicationSelectHint: '点击柱子或家族名称查看年度发文量；再次点击可收起。',
+
   // ── 图表控件与坐标轴 ──
   chartPressureTitle: 'Tc-Pressure 分布',
   chartYearTitle: 'Tc-Year 演变',

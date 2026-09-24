@@ -24,6 +24,25 @@ export default {
   rankDetail: '#{rank} · {count} {unit}',
   noRankDetail: 'Not ranked · 0 {unit}',
 
+  // ── 材料家族发文统计 ──
+  publicationTitle: 'Publications by material family',
+  publicationScope: 'Only currently approved papers in SC-Wiki are counted. A paper covering multiple families counts once in each family, so the sum of the bars may exceed the number of distinct papers.',
+  publicationRefresh: 'Refresh publication statistics',
+  publicationRetry: 'Retry',
+  publicationFailed: 'Failed to load publication statistics. Please retry; any displayed data is from the last successful update.',
+  publicationLoading: 'Loading publication statistics…',
+  publicationEmpty: 'No approved papers yet',
+  publicationFamilyEmpty: 'No approved papers in this family yet',
+  publicationNoYears: 'No valid publication years available',
+  publicationUnclassified: 'Unclassified',
+  publicationAnnualTitle: '{name} · Annual publications',
+  publicationUnknownYear: 'Unknown year: {count} papers',
+  publicationCollapse: 'Collapse annual chart',
+  publicationCountAxis: 'Number of papers',
+  publicationYearAxis: 'Publication year',
+  publicationColumnLabel: '{name}: {count} papers',
+  publicationSelectHint: 'Select a bar or family name to view annual publications; select it again to collapse.',
+
   // ── Chart controls & axes ──
   chartPressureTitle: 'Tc-Pressure Distribution',
   chartYearTitle: 'Tc-Year Evolution',

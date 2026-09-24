@@ -20,6 +20,7 @@ import { useLanguage } from '../context/LanguageContext'
 import ChartScatter, { CHART_ASPECT_RATIO } from '../components/ChartScatter'
 import StructureViewer3D from '../components/StructureViewer3D'
 import PaperCommunity from '../components/community/PaperCommunity'
+import PublicationStats from '../components/community/PublicationStats'
 import { collectPropertyRows, collectStructures, viewerFormat } from '../lib/paperDetailView'
 import {
   clearChartPreferences, DEFAULT_CHART_PREFERENCES, FamilySelection, readChartPreferences,
@@ -102,6 +103,7 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
   const [contributions, setContributions] = useState<ContributionSnapshot | null>(null)
   const [contributionsLoading, setContributionsLoading] = useState(true)
   const [contributionsError, setContributionsError] = useState('')
+  const [publicationRefreshToken, setPublicationRefreshToken] = useState(0)
 
   // ── Paper detail drawer ──
   const [selectedPaperId, setSelectedPaperId] = useState<number | null>(null)
@@ -448,7 +450,10 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
               {contributions?.generated_at && <Typography variant="caption" color="text.secondary">{t('share.lastUpdated', { time: new Date(contributions.generated_at).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US') })}</Typography>}
             </Box>
             <Button variant="outlined" startIcon={contributionsLoading ? <CircularProgress size={16} /> : <Refresh />}
-              disabled={contributionsLoading} onClick={() => void loadContributions(true)}>{t('share.refreshLeaderboard')}</Button>
+              disabled={contributionsLoading} onClick={() => {
+                void loadContributions(true)
+                setPublicationRefreshToken(token => token + 1)
+              }}>{t('share.refreshLeaderboard')}</Button>
           </Box>
           {contributionsError && <Alert severity="warning" sx={{ mb: 2 }}>{contributionsError}</Alert>}
           {contributionsLoading && !contributions ? (
@@ -473,6 +478,8 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
           )}
         </CardContent>
       </Card>}
+
+      {section === 'rankings' && <PublicationStats refreshToken={publicationRefreshToken} />}
 
       {section !== 'rankings' && <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'repeat(2, minmax(0, 1fr))' }, gap: 2.5, alignItems: 'stretch' }}>
 

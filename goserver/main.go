@@ -176,6 +176,7 @@ func main() {
 
 	// 统计 API
 	r.GET("/api/community/contributions", middleware.OptionalAuth, handlers.CommunityContributions)
+	r.GET("/api/community/publication-stats", handlers.CommunityPublicationStats)
 	handlers.RegisterCommunityRoutes(r)
 	r.GET("/api/papers/stats/tc-pressure", handlers.TcPressureChart)
 	r.GET("/api/papers/stats/tc-year", handlers.TcYearChart)

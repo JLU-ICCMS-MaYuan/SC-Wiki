@@ -2,7 +2,7 @@
 
 ## 功能说明
 
-根据审核通过的论文上传和不可变审核历史汇总研究者贡献，在社区页面公开展示参与规模、上传榜、审核榜和登录用户个人排名。
+根据审核通过的论文上传和不可变审核历史汇总研究者贡献，在社区页面公开展示参与规模、上传榜、审核榜和登录用户个人排名；下方按材料家族展示本站收录论文数量及可展开的年度发文量。
 
 ## 当前行为
 
@@ -17,6 +17,15 @@
 - 桌面宽度下“我的排名”、上传排名和审核排名位于同一行，两个榜单并排；窄屏时个人排名允许自然换行，两个榜单改为纵向排列且页面无横向溢出。
 - 公共榜单快照缓存一小时；页面保持打开时每小时自动重新获取。
 
+### 材料家族论文统计
+
+- 公开接口 `GET /api/community/publication-stats` 返回所有材料家族的篇数、年度数组、未知年份数量及快照时间。按篇数降序、家族 ID 升序展示，不限制 Top 20，零篇目录项和“未分类”（ID 0）均保留。
+- 仅统计 `review_status = approved` 的论文，家族关联限制为 `paper_revision = content_revision`。每家族按论文 ID 去重，多家族论文分别计数，因此各柱之和可能大于论文总数。没有 Tc 或其他物性数据的论文仍计入。
+- 年度取论文发表年份 `papers.year`，有效范围沿用 1–9999；缺失或范围外年份归入“年份未知”。最早至最晚有效年份之间补零，年度数量之和加未知年份数量等于家族总量。
+- 点击柱子或家族名称，在下方展开年度柱图并高亮所选家族；点击其他家族切换，再次点击当前家族或“收起年度图”关闭。零篇列可通过名称及键盘选择；全未知年份或无论文时显示对应提示。
+- 图表说明本站收录与跨家族计数口径。支持中文、英文及名称回退；窄屏在图表内部横向滚动，不扩展页面宽度。
+- 新统计拥有独立的一小时公共缓存及自动刷新；“刷新榜单”和统计卡片中的“刷新论文统计”均可强制重建统计快照。总量及年度明细来自同一 SQL 结果和同一响应，刷新保留仍存在的选择，失败保留旧结果并提供重试。
+
 ## 工作流程
 
 管理员提交单篇或批量审核时，Go 服务在更新论文当前审核状态的同一数据库事务中逐篇写入 `reviewed` 历史事件。排行榜分别聚合审核通过论文和该类事件，按贡献数降序、达到当前累计数的时间升序、用户 ID 升序形成稳定全量排名，再裁剪公开 Top 20 并按登录身份附加本人排名。普通请求读取一小时 Redis 快照，`refresh=true` 绕过缓存并重建快照。
@@ -28,6 +37,7 @@
 - 历史账号由迁移生成不含邮箱或实名片段的 `sc_` 随机用户名；注册姓名即使为“管理员”也不会再作为榜单身份显示。
 - 匿名用户没有个人排名；有效登录用户零贡献项显示 0 次且没有虚构名次。
 - Redis 不可用时直接查询数据库；数据库聚合失败时不返回不完整榜单。
+- 论文统计使用独立缓存键 `community:publication-stats:v1`，数据库写入最多延迟一小时或由手动刷新体现；不扩展审核写链路。接口只返回聚合数字和家族名称，不返回论文明细或用户信息。
 - 本功能不包含积分奖励、周期榜、排名趋势、帖子、评论、关注、私信或 WebSocket 推送。
 
 ## 代码与测试
@@ -44,6 +54,11 @@
 - `tests/07_researcher_community_forum/test_issue31_ranking_visuals.py`
 - `tests/07_researcher_community_forum/test_issue31_public_username.py`
 - `goserver/handlers/contribution_ranking_test.go`
+- `goserver/handlers/publication_stats.go`
+- `goserver/handlers/publication_stats_test.go`
+- `frontend/src/components/community/PublicationStats.tsx`
+- `tests/07_researcher_community_forum/publication-stats.test.tsx`
+- `scripts/run_issue115_integration.py`
 
 ## 相关变更记录
 
@@ -51,7 +66,9 @@
 - [Feature #31：贡献榜身份与可视化优化](../../specs/31-community-ranking-visuals/spec.md)
 - [GitHub Issue #29](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/29)
 - [GitHub Issue #31](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/31)
+- [Feature #115：材料家族论文统计](../../specs/115-material-family-publication-stats/spec.md)
 
 ## 已知问题
 
 - 榜单与身份 UI 纳入 Vitest，公开资料与注销/封禁映射同时有 Go 行为测试；真实数据库聚合仍需随部署数据验收。
+- 材料家族统计已通过隔离 MySQL 8.4.2 的 SQL/HTTP/缓存测试及连接真实统计接口的浏览器验收；业务运行环境是否加载新版需在部署时核对。
