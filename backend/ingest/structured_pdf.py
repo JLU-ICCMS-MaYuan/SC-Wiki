@@ -89,7 +89,7 @@ class IrBuilder:
                               reading_order=len(self.blocks), text=text, bbox=bbox,
                               page_width=geometry.width, page_height=geometry.height,
                               parent_block_id=parent, content_hash=digest,
-                              metadata={"source_kind": "ocr" if self.mode == "ocr" else "text_layer", **(metadata or {})})
+                              metadata={"source_kind": {"text": "text_layer", "ocr": "ocr", "vlm": "vision"}[self.mode], **(metadata or {})})
         self.blocks.append(block)
         if kind == "figure":
             block.figure_id = block_id

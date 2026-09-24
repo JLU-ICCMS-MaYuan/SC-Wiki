@@ -12,8 +12,8 @@
 
 - [x] T004 [P] [US1] 定义 backend/ingest/document_ir.py 的 Pydantic/TypedDict 模型、枚举、哈希和几何校验。
 - [x] T005 [P] [US1] 定义 backend/ingest/document_parsers.py 的 DocumentParser、DocumentSource、ParserDecision、ParserRun、解析方案和统一错误；ParserRun 记录 `reading` 子状态。
-- [ ] T006 [P] [US2] 定义 backend/ingest/claim_evidence.py 的 Claim、EvidenceLocator、来源分类和定位校验器。
-- [ ] T007 [P] [US3] 定义 backend/ingest/coverage_audit.py 的 CoverageReport、表格行/结果段落/截断信号检查。
+- [x] T006 [P] [US2] 定义 backend/ingest/claim_evidence.py 的 Claim、EvidenceLocator、来源分类和定位校验器。
+- [x] T007 [P] [US3] 定义 backend/ingest/coverage_audit.py 的 CoverageReport、表格行/结果段落/截断信号检查。
 - [x] T008 [P] [US3] 为 T004–T007 先写契约测试 tests/01_decentralized_uploading/test_issue114_multimodal_pdf_agent.py。
 
 ## 阶段 3：用户故事 1——解析复杂论文（P1，MVP）
@@ -33,15 +33,15 @@
 
 - [ ] T015 [US2] 将 Document IR 块和表格单元接入现有分段/汇总提示输入，输出版本化 Claim。
 - [ ] T016 [US2] 在 upload_jobs.py 中调用 Claim 定位校验并映射现有 field_path、basis_kind、source_kind 和 Evidence。
-- [ ] T017 [US2] 增加 Claim 无效、跨文件、错误页码、越界 bbox、OCR 来源和旧 quote 兼容定位测试。
-- [ ] T018 [US2] 建立 Alembic 文档块、解析运行和 `paper_evidence_locators` 定位关联迁移，并在 backend/models.py、goserver/models/models.go 中加入只读映射。
+- [x] T017 [US2] 增加 Claim 无效、跨文件、错误页码、越界 bbox、OCR 来源和旧 quote 兼容定位测试。
+- [x] T018 [US2] 建立 Alembic 文档块、解析运行和 `paper_evidence_locators` 定位关联迁移，并在 backend/models.py、goserver/models/models.go 中加入只读映射。
 - [ ] T019 [US2] 在提交事务和 revision 服务中把文档定位复制到新的当前 revision，保持旧 revision 不作为完整文档打开，并补齐真实数据库回归。
 
 ## 阶段 5：用户故事 3——覆盖审计与安全停止（P1）
 
 **独立验收**：覆盖不足、预算耗尽、解析器失败和 RQ 入口失败都不会形成假完成。
 
-- [ ] T020 [US3] 把 CoverageReport 和 `reading` 子状态接入上传任务 artifact manifest 与前端进度详情，不扩展既有五阶段主状态。
+- [x] T020 [US3] 把 CoverageReport 和 `reading` 子状态接入上传任务 artifact manifest 与前端进度详情，不扩展既有五阶段主状态。
 - [ ] T021 [US3] 实现 AgentToolRegistry、ActionBudget 和 read_page/read_region/extract_table/inspect_figure/search/validate/check_coverage 工具。
 - [ ] T022 [US3] 接入有限 Agent 循环、取消、超时、重试和“需要人工”停止状态，不保存思维链。
 - [ ] T023 [US3] 增加指定解析方案不可用、模型超时、GPU 缺失、输出截断、工具超限和 RQ 失败收敛集成测试，确认不会静默换方案。
@@ -51,8 +51,8 @@
 **独立验收**：上传者和审核员可从字段进入页码、区域和引句；区域失败仍有文本证据。
 
 - [ ] T024 [US4] 增加文档 Evidence API，返回文件、PDF/印刷页码、bbox、多边形、块关系、解析方案和 `paper_evidence_locators` 关联信息。
-- [ ] T025 [US4] 增加按原 PDF 页码和 bbox 的按需渲染接口，限制文件归属和页面范围。
-- [ ] T026 [US4] 修改 EvidenceWorkflow、UploadTaskEditor 和审核页面，显示区域证据、OCR 标记和渲染失败提示。
+- [x] T025 [US4] 增加按原 PDF 页码和 bbox 的按需渲染接口，限制文件归属和页面范围。
+- [x] T026 [US4] 修改 EvidenceWorkflow、UploadTaskEditor 和审核页面，显示区域证据、OCR 标记和渲染失败提示。
 - [ ] T027 [US4] 增加桌面/窄屏/键盘、刷新恢复、旧 Evidence 和无区域数据前端测试。
 
 ## 阶段 7：用户故事 5——渐进上线（P2）
@@ -106,3 +106,17 @@ T003 的配置选择尚无质量门和 Shadow 运行；T006/T007 的早期检查
 严格 Claim 定位与漏记录检测；T013 的文本兼容桥虽已修复目录及缓存，仍需完整
 上传任务和后续 Claim/覆盖门禁验证，因此撤回其先前完成标记。T001 的库安装已验证，
 模型许可与 Docker 验收未完成；T002 尚无 50 篇人工标注评测集。
+
+
+## 2026-09-24：证据、覆盖与区域查看收敛
+
+- T006/T007/T017：严格校验文件、页码、解析器版本、来源类别、区域与引句；独立统计
+  未读页、疑似结果块、未覆盖表格行和图像/公式。人工推断不自动标为 validated。
+- T018：修复未部署的初版迁移；真实独立 MySQL 8.4 验证增量建表、升版、事务回滚、
+  删除与降级。随后仅将该增量应用到本机数据库，三张定位表仍为空。
+- T020/T025/T026：保持既有主阶段，展示 reading 子状态；校对抽屉按需请求区域 PNG，
+  失败和旧来源保留页码/引句；上传时可选择已支持的解析方案。
+- T015/T016/T019/T021/T022/T024 已有接入代码和定向验证，但完整领域契约、正式审核/
+  返修/权限端到端与真实模型验收仍待完成，不据此全部勾选。
+- T031 已拒绝缺失/失败报告的默认切换；T028/T029/T030 尚无完整 Shadow/基准验收。
+  50 篇人工标注集尚未提供。详细证据见 [验证记录](validation.md)。

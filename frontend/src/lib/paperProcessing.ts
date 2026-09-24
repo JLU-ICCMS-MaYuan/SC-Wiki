@@ -200,6 +200,8 @@ export interface UploadTaskState {
   task_id: string
   filename?: string
   stage: ProcessingStage
+  parser_profile?: string
+  reading_state?: string | null
   stage_index: number
   stage_total: number
   processing_status: ProcessingStatus

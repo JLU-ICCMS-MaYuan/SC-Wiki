@@ -2,6 +2,12 @@
 // 推导，缺键或多键会在 `tsc -b` 阶段报错。处理阶段/任务状态/文件角色/晶胞表示等
 // 枚举标签与后端 value 对齐，仅展示文案随语言变化。
 export default {
+  readingStates: {"ir_ready": "Document structure is ready", "claims_ready": "Scientific candidates are ready; checking sources", "coverage_checked": "Source and coverage checks completed", "needs_review": "Some content is unlocated or uncovered; review before retrying"},
+
+  parserProfile: "PDF parsing method",
+  parserProfileHelp: "Unavailable methods report a failure without switching. Text and structure attachments keep their existing handling.",
+  parserProfiles: {"legacy": "Compatibility", "text": "Fast text (PyMuPDF)", "layout": "Document layout (Docling)", "ocr": "Scanned text (MinerU)"},
+
   researchMaterialsTitle: 'Research materials',
   materialRelationsTitle: 'Material relations',
   relationMaterial: 'Related material',

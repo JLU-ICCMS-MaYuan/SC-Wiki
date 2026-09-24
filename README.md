@@ -193,7 +193,19 @@ python -m pip check
 ```
 
 创建上传任务的 `parser_profile` 可显式指定 `text`（PyMuPDF）、`layout`（Docling）或
-`ocr`（MinerU basic）。默认仍为旧链路；页面上的解析方案选择、完整 Claim 提取和区域证据
-展示尚未完成。解析方案不可用时报告失败，不自动切换。首次 Docling/MinerU 运行需要模型
+`ocr`（MinerU basic）。默认仍为旧链路；上传页可选择解析方案，证据侧栏可按需查看当前 PDF 区域。
+新链路接入出处定位和覆盖检查，不能替代现有科学语义核对与人工审核。解析方案不可用时
+报告失败，不自动切换。首次 Docling/MinerU 运行需要模型
 下载或预先准备缓存；安装库不等于模型已就绪。真实解析验证范围见
 [#114 验证记录](docs/specs/114-multimodal-pdf-upload-agent/validation.md)。
+
+
+#114 的定位持久化需要配套增量迁移（不要用单一 `head` 假定仓库不存在分支）：
+
+```bash
+python -m alembic upgrade 20260923_0114
+```
+
+`UPLOAD_PARSER_STAGE=default` 还要求 `UPLOAD_PARSER_QUALITY_REPORT` 指向通过
+至少 50 篇人工标注评测的质量报告；当前仍缺该评测，原生 PDF LLM 和完整 Shadow
+也未完成。请按验证记录区分已有能力与尚未完成的验收。

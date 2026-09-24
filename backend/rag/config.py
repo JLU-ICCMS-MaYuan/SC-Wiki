@@ -25,6 +25,8 @@ class RagSettings(BaseSettings):
     upload_parser_stage: str = "legacy"
     upload_parser_default_profile: str = "layout"
     upload_parser_gray_ratio: float = 0.0
+    upload_parser_quality_report: str = ""
+    upload_native_pdf_models: list[str] = []
 
     # Qdrant 配置
     qdrant_host: str = "127.0.0.1"

@@ -520,13 +520,9 @@ class PaperDocumentParserRun(Base):
     __table_args__ = (
         UniqueConstraint("id", "paper_id", "paper_revision", "paper_file_id", name="uq_document_parser_runs_identity"),
         ForeignKeyConstraint(
-            ["paper_id", "paper_revision"], ["papers.id", "papers.content_revision"],
-            name="fk_document_parser_runs_paper_revision", ondelete="RESTRICT", onupdate="CASCADE",
-        ),
-        ForeignKeyConstraint(
             ["paper_file_id", "paper_id", "paper_revision"],
             ["paper_files.id", "paper_files.paper_id", "paper_files.paper_revision"],
-            name="fk_document_parser_runs_file_revision", ondelete="RESTRICT", onupdate="CASCADE",
+            name="fk_document_parser_runs_file_revision", ondelete="CASCADE", onupdate="CASCADE",
         ),
         Index("ix_document_parser_runs_file_revision", "paper_file_id", "paper_id", "paper_revision"),
     )
@@ -542,6 +538,7 @@ class PaperDocumentParserRun(Base):
     status = Column(String(32), nullable=False)
     reading_state = Column(String(32))
     capabilities_json = Column(JSON)
+    document_json = Column(JSON, nullable=False)
     error_code = Column(String(64))
     error_summary = Column(String(500))
     model_version = Column(String(128))
@@ -563,17 +560,8 @@ class PaperDocumentBlock(Base):
             name="uq_document_blocks_run_block",
         ),
         UniqueConstraint(
-            "id", "paper_id", "paper_revision", "paper_file_id", "parser_run_id",
+            "id", "paper_id", "paper_file_id", "parser_run_id",
             name="uq_document_blocks_identity",
-        ),
-        ForeignKeyConstraint(
-            ["paper_id", "paper_revision"], ["papers.id", "papers.content_revision"],
-            name="fk_document_blocks_paper_revision", ondelete="RESTRICT", onupdate="CASCADE",
-        ),
-        ForeignKeyConstraint(
-            ["paper_file_id", "paper_id", "paper_revision"],
-            ["paper_files.id", "paper_files.paper_id", "paper_files.paper_revision"],
-            name="fk_document_blocks_file_revision", ondelete="RESTRICT", onupdate="CASCADE",
         ),
         ForeignKeyConstraint(
             ["parser_run_id", "paper_id", "paper_revision", "paper_file_id"],
@@ -593,7 +581,7 @@ class PaperDocumentBlock(Base):
     pdf_page = Column(Integer, nullable=False)
     printed_page = Column(Integer)
     reading_order = Column(Integer, nullable=False, default=0, server_default="0")
-    text = Column(LONG_TEXT, nullable=False, default="", server_default="")
+    text = Column(LONG_TEXT, nullable=False, default="")
     bbox_json = Column(JSON)
     polygon_json = Column(JSON)
     table_id = Column(String(128))
@@ -760,17 +748,13 @@ class PaperEvidenceLocator(Base):
     __table_args__ = (
         UniqueConstraint("locator_hash", name="uq_paper_evidence_locators_hash"),
         ForeignKeyConstraint(
-            ["paper_id", "paper_revision"], ["papers.id", "papers.content_revision"],
-            name="fk_paper_evidence_locators_paper_revision", ondelete="RESTRICT", onupdate="CASCADE",
-        ),
-        ForeignKeyConstraint(
             ["paper_evidence_id", "paper_id", "paper_revision"],
             ["paper_evidences.id", "paper_evidences.paper_id", "paper_evidences.paper_revision"],
             name="fk_paper_evidence_locators_evidence", ondelete="CASCADE", onupdate="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["document_block_id", "paper_id", "paper_revision", "paper_file_id", "parser_run_id"],
-            ["paper_document_blocks.id", "paper_document_blocks.paper_id", "paper_document_blocks.paper_revision", "paper_document_blocks.paper_file_id", "paper_document_blocks.parser_run_id"],
+            ["document_block_id", "paper_id", "paper_file_id", "parser_run_id"],
+            ["paper_document_blocks.id", "paper_document_blocks.paper_id", "paper_document_blocks.paper_file_id", "paper_document_blocks.parser_run_id"],
             name="fk_paper_evidence_locators_block", ondelete="CASCADE", onupdate="CASCADE",
         ),
         Index("ix_paper_evidence_locators_evidence", "paper_evidence_id"),
@@ -790,7 +774,7 @@ class PaperEvidenceLocator(Base):
     polygon_json = Column(JSON)
     table_id = Column(String(128))
     figure_id = Column(String(128))
-    quote = Column(LONG_TEXT, nullable=False, default="", server_default="")
+    quote = Column(LONG_TEXT, nullable=False, default="")
     source_kind = Column(String(32), nullable=False, default="text_layer", server_default="text_layer")
     parser_name = Column(String(64), nullable=False)
     parser_version = Column(String(128), nullable=False)

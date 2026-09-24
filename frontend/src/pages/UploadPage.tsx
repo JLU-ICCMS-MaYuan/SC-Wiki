@@ -461,6 +461,11 @@ const UploadPage: React.FC = () => {
                     </Box>
                   </Box>
 
+                  {taskState?.reading_state && ['ir_ready', 'claims_ready', 'coverage_checked', 'needs_review'].includes(taskState.reading_state) &&
+                    <Alert severity={taskState.reading_state === 'needs_review' ? 'warning' : 'info'} sx={{ mb: 1 }}>
+                      {t(`upload.readingStates.${taskState.reading_state}`)}
+                    </Alert>}
+
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(5, minmax(0, 1fr))' }, gap: 1 }}>
                     {PROCESSING_STAGES.map((item, index) => {
                       const current = Math.max(0, (taskState?.stage_index || 1) - 1)

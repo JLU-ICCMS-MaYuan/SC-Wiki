@@ -1,3 +1,4 @@
+import { EvidenceRegion } from './EvidenceRegion'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, TextField, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -8,7 +9,7 @@ import { createEvidenceDraftQueue } from '../lib/evidenceDraftQueue'
 import { evidenceFieldAffected } from '../lib/evidenceFields'
 import { useLanguage } from '../context/LanguageContext'
 
-export interface EvidenceSource { file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
+export interface EvidenceSource { block_id?: string; file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
 export interface ProposalDraft { values: Record<string, unknown>; accepted: boolean; reason: string; supported?: boolean }
 export type EvidenceBasis = 'paper_quote' | 'paper_inference' | 'general_knowledge'
 export interface EvidenceHistory {
@@ -480,7 +481,7 @@ export function useEvidenceWorkflow(options?: {
           {activeRecord.provenance.original_text && <Box component="details"><Box component="summary">原始结构文件</Box><Typography component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{activeRecord.provenance.original_text}</Typography></Box>}
         </Alert>}
         {activeGroup.some(r => r.evidences.length > 0 || r.proposal?.evidences.length) && <Box component="details" sx={{ my: 2 }}><Box component="summary" sx={{ cursor: 'pointer' }}>{t('evidence.foundSources')}</Box>
-          {activeGroup.flatMap(r => [...r.evidences, ...(r.proposal?.evidences || [])]).filter((e, i, all) => all.findIndex(x => x.file_id === e.file_id && x.quote === e.quote) === i).map((e, i) => <Typography key={i} sx={{ whiteSpace: 'pre-wrap', my: 1 }}>{e.source_name && `${e.source_name} · `}{e.page_start ? t('evidence.page', { page: e.page_start }) : t('evidence.pageUnknown')}：{e.quote || e.content}</Typography>)}
+          {activeGroup.flatMap(r => [...r.evidences, ...(r.proposal?.evidences || [])]).filter((e, i, all) => all.findIndex(x => x.file_id === e.file_id && x.quote === e.quote) === i).map((e, i) => <EvidenceRegion key={`${e.file_id}:${e.page_start}:${i}`} target={targetRef.current} source={e} />)}
         </Box>}
         {saveError && <Alert severity="error" sx={{ mt: 1 }} action={draftSaveFailed ? <Button disabled={saving} onClick={() => void retryDrafts().catch(() => undefined)}>{t('evidence.retrySave')}</Button> : undefined}>{saveError} {draftSaveFailed && t('evidence.saveFailureRetained')}</Alert>}
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', my: 2 }}>

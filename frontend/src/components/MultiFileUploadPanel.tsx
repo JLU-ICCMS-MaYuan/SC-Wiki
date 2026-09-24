@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { Alert, Box, Button, Card, CardContent, IconButton, LinearProgress, MenuItem, Select, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Card, CardContent, IconButton, LinearProgress, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material'
 import CloudUploadOutlinedIcon from '@mui/icons-material/CloudUploadOutlined'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import { getStoredToken } from '../context/AuthContext'
@@ -51,6 +51,7 @@ const MultiFileUploadPanel: React.FC<Props> = ({ onCreated }) => {
   const [busy, setBusy] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const [error, setError] = useState('')
+  const [parserProfile, setParserProfile] = useState('legacy')
 
   const choose = (files: FileList | File[] | null) => {
     if (!files) return
@@ -93,6 +94,7 @@ const MultiFileUploadPanel: React.FC<Props> = ({ onCreated }) => {
     setBusy(true); setError('')
     try {
       const created = await api.post<{ ok: boolean; data: UploadTaskState }>('/api/upload-tasks', {
+        parser_profile: parserProfile,
         files: items.map(item => ({
           client_id: item.clientId, role: item.role, filename: item.file.name,
           size: item.file.size, media_type: item.file.type || null,
@@ -127,6 +129,12 @@ const MultiFileUploadPanel: React.FC<Props> = ({ onCreated }) => {
       <CardContent>
         <Typography variant="h6" fontWeight={700}>{t('upload.newTaskTitle')}</Typography>
         <Typography variant="body2" color="text.secondary">{t('upload.newTaskHint')}</Typography>
+        <TextField select size="small" label={t('upload.parserProfile')} value={parserProfile}
+          disabled={busy} onChange={event => setParserProfile(event.target.value)}
+          helperText={t('upload.parserProfileHelp')} sx={{ mt: 2, minWidth: 240, maxWidth: '100%' }}>
+          {['legacy', 'text', 'layout', 'ocr'].map(profile => <MenuItem key={profile} value={profile}>{t(`upload.parserProfiles.${profile}`)}</MenuItem>)}
+        </TextField>
+
         <Box
           aria-label={t('upload.dropZoneAria')}
           onClick={() => !busy && input.current?.click()}

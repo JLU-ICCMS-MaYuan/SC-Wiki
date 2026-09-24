@@ -1575,6 +1575,22 @@ async def _create_pending_paper(
                     await session.flush()
                     paper_files[str(source.get("file_id") or index)] = paper_file
 
+                document_runs = {}
+                if state.get("parser_profile", "legacy") != "legacy":
+                    from backend.ingest.document_ir import DocumentIR
+                    from backend.ingest.document_storage import persist_document
+                    from backend.ingest.upload_tasks import artifact_directory
+                    for upload_file_id, paper_file in paper_files.items():
+                        ir_path = artifact_directory(task_id) / "document_ir" / f"{upload_file_id}.json"
+                        if not ir_path.exists():
+                            if paper_file.original_filename.lower().endswith(".pdf"):
+                                raise _upload_error(409, "document_ir_missing", "PDF 解析定位缺失，请重新解析")
+                            continue  # TXT/MD 与结构附件没有 PDF IR。
+                        ir = DocumentIR.model_validate_json(ir_path.read_text(encoding="utf-8"))
+                        if ir.source_file_id != upload_file_id:
+                            raise _upload_error(409, "document_source_mismatch", "解析文档来源不一致")
+                        document_runs[paper_file.id] = await persist_document(session, paper, paper_file, ir)
+
                 scientific_targets = await persist_scientific_draft(session, paper, draft)
                 from backend.services.citation_graph import persist_reference_extraction
 
@@ -1646,6 +1662,10 @@ async def _create_pending_paper(
                         )
                         session.add(paper_evidence)
                         await session.flush()
+                        if paper_chunk.paper_file_id in document_runs:
+                            from backend.ingest.document_storage import link_document_evidence
+                            run, blocks = document_runs[paper_chunk.paper_file_id]
+                            await link_document_evidence(session, paper_evidence, paper_chunk, run, blocks, block_id=evidence.get("block_id"))
                         target = targets_by_path.get(field_path)
                         if target is not None:
                             add_scientific_evidence_link(session, target, paper_evidence)

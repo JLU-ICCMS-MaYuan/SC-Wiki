@@ -34,7 +34,7 @@ class FileDeclaration(BaseModel):
 
 class CreateUploadTask(BaseModel):
     files: list[FileDeclaration] = Field(min_length=1)
-    parser_profile: Literal["legacy", "text", "layout", "ocr", "vision", "native_pdf_llm"] = "legacy"
+    parser_profile: Literal["legacy", "text", "layout", "ocr", "vision", "native_pdf_llm"] | None = None
 
 
 def _error(status: int, code: str, message: str) -> HTTPException:

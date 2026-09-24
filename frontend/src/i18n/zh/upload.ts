@@ -4,6 +4,12 @@
 // PROCESSING_STAGES（处理阶段）与 UploadTaskStatus（任务状态）的显示标签，
 // 键与后端 value 对齐；`role` 是上传文件角色，`cell` 是晶胞表示。
 export default {
+  readingStates: {"ir_ready": "文档结构已就绪", "claims_ready": "科学候选已生成，正在核对来源", "coverage_checked": "来源定位与覆盖检查已完成", "needs_review": "存在无法定位或未覆盖的内容，需要核对后重试"},
+
+  parserProfile: "PDF 解析方案",
+  parserProfileHelp: "方案不可用时会报告失败，不会自动切换；TXT/MD 和结构附件保持原处理方式。",
+  parserProfiles: {"legacy": "兼容方案", "text": "快速文本（PyMuPDF）", "layout": "版面结构（Docling）", "ocr": "扫描识别（MinerU）"},
+
   researchMaterialsTitle: '研究材料',
   materialRelationsTitle: '材料关系',
   relationMaterial: '关系涉及的材料',

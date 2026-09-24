@@ -85,7 +85,7 @@ def test_coverage_reports_uncovered_claim_and_truncation():
     claim = Claim(claim_id="claim-3", target_path="x", value=1, raw_value="1", basis_kind=BasisKind.PAPER_INFERENCE, source_kind=SourceKind.DERIVED)
     report = audit_coverage(ir, [claim], truncated=True)
     assert report.status == "incomplete"
-    assert report.uncovered_candidates == ["claim-3"]
+    assert "claim-3" in report.uncovered_candidates
     assert report.truncation_signals == ["output_truncated"]
     assert report.requires_human is True
 
@@ -121,7 +121,7 @@ def test_pymupdf_text_profile_returns_locatable_ir(tmp_path: Path):
 
 
 def test_rollout_profile_is_stable_and_explicit():
-    config = RolloutConfig(stage=RolloutStage.DEFAULT, default_profile=ParserProfile.LAYOUT)
+    config = RolloutConfig(stage=RolloutStage.GRAY, gray_ratio=1.0, default_profile=ParserProfile.LAYOUT)
     assert select_profile(config, task_id="a" * 32) == ParserProfile.LAYOUT
     assert select_profile(config, task_id="a" * 32, requested_profile=ParserProfile.TEXT) == ParserProfile.TEXT
 

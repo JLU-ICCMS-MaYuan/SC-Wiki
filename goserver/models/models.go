@@ -204,7 +204,8 @@ type PaperDocumentParserRun struct {
 	Mode            string     `gorm:"size:16;not null" json:"mode"`
 	Status          string     `gorm:"size:32;not null" json:"status"`
 	ReadingState    *string    `gorm:"size:32" json:"reading_state"`
-	Capabilities    *string    `gorm:"type:json" json:"capabilities"`
+	Capabilities    *string    `gorm:"column:capabilities_json;type:json" json:"capabilities"`
+	DocumentJSON    *string    `gorm:"column:document_json;type:json" json:"-"`
 	ErrorCode       *string    `gorm:"size:64" json:"error_code"`
 	ErrorSummary    *string    `json:"error_summary"`
 	ModelVersion    *string    `gorm:"size:128" json:"model_version"`
@@ -228,38 +229,38 @@ type PaperDocumentBlock struct {
 	PrintedPage   *int      `json:"printed_page"`
 	ReadingOrder  int       `gorm:"not null;default:0" json:"reading_order"`
 	Text          string    `gorm:"type:longtext;not null" json:"text"`
-	BBox          *string   `gorm:"type:json" json:"bbox"`
-	Polygon       *string   `gorm:"type:json" json:"polygon"`
+	BBox          *string   `gorm:"column:bbox_json;type:json" json:"bbox"`
+	Polygon       *string   `gorm:"column:polygon_json;type:json" json:"polygon"`
 	TableID       *string   `gorm:"size:128" json:"table_id"`
 	FigureID      *string   `gorm:"size:128" json:"figure_id"`
 	Confidence    *float64  `json:"confidence"`
 	ContentHash   string    `gorm:"size:64;not null" json:"content_hash"`
-	Metadata      *string   `gorm:"type:json" json:"metadata"`
+	Metadata      *string   `gorm:"column:metadata_json;type:json" json:"metadata"`
 	CreatedAt     time.Time `json:"created_at"`
 }
 
 // PaperEvidenceLocator 将已有 PaperEvidence 连接到 IR 区域。
 type PaperEvidenceLocator struct {
-	ID             uint      `gorm:"primaryKey" json:"id"`
-	PaperEvidenceID uint     `gorm:"not null;index" json:"paper_evidence_id"`
-	PaperID        uint      `gorm:"not null;index" json:"paper_id"`
-	PaperRevision  uint      `gorm:"not null;default:1;index" json:"paper_revision"`
-	PaperFileID    uint      `gorm:"not null;index" json:"paper_file_id"`
-	ParserRunID    uint      `gorm:"not null;index" json:"parser_run_id"`
-	DocumentBlockID uint     `gorm:"not null;index" json:"document_block_id"`
-	PDFPage        int       `gorm:"not null" json:"pdf_page"`
-	PrintedPage    *int      `json:"printed_page"`
-	BBox           *string   `gorm:"type:json" json:"bbox"`
-	Polygon        *string   `gorm:"type:json" json:"polygon"`
-	TableID        *string   `gorm:"size:128" json:"table_id"`
-	FigureID       *string   `gorm:"size:128" json:"figure_id"`
-	Quote          string    `gorm:"type:longtext;not null" json:"quote"`
-	SourceKind     string    `gorm:"size:32;not null;default:text_layer" json:"source_kind"`
-	ParserName     string    `gorm:"size:64;not null" json:"parser_name"`
-	ParserVersion  string    `gorm:"size:128;not null" json:"parser_version"`
-	SourceVersion  uint      `gorm:"not null;default:1" json:"source_version"`
-	LocatorHash    string    `gorm:"size:64;not null;uniqueIndex:uq_paper_evidence_locators_hash" json:"locator_hash"`
-	CreatedAt      time.Time `json:"created_at"`
+	ID              uint      `gorm:"primaryKey" json:"id"`
+	PaperEvidenceID uint      `gorm:"not null;index" json:"paper_evidence_id"`
+	PaperID         uint      `gorm:"not null;index" json:"paper_id"`
+	PaperRevision   uint      `gorm:"not null;default:1;index" json:"paper_revision"`
+	PaperFileID     uint      `gorm:"not null;index" json:"paper_file_id"`
+	ParserRunID     uint      `gorm:"not null;index" json:"parser_run_id"`
+	DocumentBlockID uint      `gorm:"not null;index" json:"document_block_id"`
+	PDFPage         int       `gorm:"not null" json:"pdf_page"`
+	PrintedPage     *int      `json:"printed_page"`
+	BBox            *string   `gorm:"column:bbox_json;type:json" json:"bbox"`
+	Polygon         *string   `gorm:"column:polygon_json;type:json" json:"polygon"`
+	TableID         *string   `gorm:"size:128" json:"table_id"`
+	FigureID        *string   `gorm:"size:128" json:"figure_id"`
+	Quote           string    `gorm:"type:longtext;not null" json:"quote"`
+	SourceKind      string    `gorm:"size:32;not null;default:text_layer" json:"source_kind"`
+	ParserName      string    `gorm:"size:64;not null" json:"parser_name"`
+	ParserVersion   string    `gorm:"size:128;not null" json:"parser_version"`
+	SourceVersion   uint      `gorm:"not null;default:1" json:"source_version"`
+	LocatorHash     string    `gorm:"size:64;not null;uniqueIndex:uq_paper_evidence_locators_hash" json:"locator_hash"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 // PaperChunk 当前论文 revision 的文本块。

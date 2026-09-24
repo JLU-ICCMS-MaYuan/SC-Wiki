@@ -1,4 +1,10 @@
 export default {
+  'viewRegion': '查看原 PDF 区域',
+  'regionLoading': '正在加载原文区域',
+  'regionUnavailable': '区域暂不可用，请继续核对页码和原文。',
+  'printedPage': '印刷页码 {page}',
+  'regionImage': '原 PDF 页面与证据区域高亮',
+
   "historyLabel": "历史记录",
   "historyReadonly": "内容或来源已变化，以下记录仅供参考，不用于当前批准。",
 

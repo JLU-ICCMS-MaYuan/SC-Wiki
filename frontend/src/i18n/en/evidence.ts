@@ -1,4 +1,10 @@
 export default {
+  'viewRegion': 'View PDF region',
+  'regionLoading': 'Loading source region',
+  'regionUnavailable': 'Region unavailable; page and quote remain available.',
+  'printedPage': 'Printed page {page}',
+  'regionImage': 'PDF page with highlighted evidence',
+
   "historyLabel": "History",
   "historyReadonly": "Content or sources changed. These records are reference only and cannot approve the current value.",
 

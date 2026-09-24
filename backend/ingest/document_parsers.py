@@ -46,7 +46,12 @@ class RuntimeCapabilities:
             gpu = bool(torch.cuda.is_available())
         except Exception:
             pass
-        return cls(gpu=gpu, installed=frozenset(installed))
+        from .native_pdf import native_pdf_available
+        try:
+            native = native_pdf_available()
+        except (ValueError, OSError):
+            native = False
+        return cls(gpu=gpu, installed=frozenset(installed), native_pdf_llm=native)
 
 
 @dataclass(frozen=True)
@@ -261,21 +266,37 @@ class MinerUParser(StructuredPdfParser):
 
 class NativePdfLlmParser:
     name = "native_pdf_llm"
-    version = "adapter"
+    version = "1"
 
     def __init__(self, parse_document: Callable[..., DocumentIR] | None = None):
         self._parse_document = parse_document
 
     def can_parse(self, source: DocumentSource, capabilities: RuntimeCapabilities) -> ParserDecision:
-        supported = source.media_type == "application/pdf" and capabilities.native_pdf_llm and self._parse_document is not None
+        from .native_pdf import native_pdf_available
+        available = capabilities.native_pdf_llm if self._parse_document else native_pdf_available()
+        supported = source.media_type == "application/pdf" and capabilities.native_pdf_llm and available
         reason = "可用" if supported else "PDF 原生 LLM 适配器不可用"
         return ParserDecision(supported, ParserProfile.NATIVE_PDF_LLM, ParseMode.VLM.value, reason, ("native_pdf_llm",))
 
     def parse(self, source: DocumentSource, options: ParseOptions) -> DocumentIR:
-        if self._parse_document is None:
-            raise ParserError("parser_model_unavailable", "PDF 原生 LLM 适配器不可用", profile=options.profile, parser=self.name)
-        result = self._parse_document(source, options)
-        if not isinstance(result, DocumentIR):
+        if source.media_type != "application/pdf":
+            raise ParserError("parser_unsupported_media", "原生 PDF 方案只支持 PDF", profile=options.profile, parser=self.name)
+        from .native_pdf import parse_native_pdf
+        if options.profile != ParserProfile.NATIVE_PDF_LLM:
+            raise ParserError("parser_profile_unavailable", "解析方案不匹配", profile=options.profile, parser=self.name)
+        try:
+            result = (self._parse_document or parse_native_pdf)(source, options)
+            if not isinstance(result, DocumentIR):
+                raise ValueError("expected IR")
+            result = DocumentIR.model_validate(result.model_dump(mode="json"))
+        except ParserError:
+            raise
+        except Exception as exc:
+            raise ParserError("parser_invalid_output", "原生 PDF 输出不是合法 IR", profile=options.profile, parser=self.name) from exc
+        if (not isinstance(result, DocumentIR) or result.source_file_id != source.file_id
+                or result.source_sha256 != source.resolved_sha256() or result.source_version != source.source_version
+                or result.parse_profile != options.profile or result.parser.get("name") != self.name
+                or result.parser.get("mode") != "vlm"):
             raise ParserError("parser_invalid_output", "PDF 原生 LLM 必须返回 DocumentIR", profile=options.profile, parser=self.name)
         return result
 
@@ -300,6 +321,12 @@ class ParserRegistry:
 
 
 def parse_with_profile(source: DocumentSource, options: ParseOptions, *, registry: ParserRegistry | None = None, capabilities: RuntimeCapabilities | None = None) -> tuple[DocumentIR, ParserRun]:
+    try:
+        actual_hash = DocumentSource(path=source.path, file_id=source.file_id).resolved_sha256()
+    except OSError as exc:
+        raise ParserError("parser_source_unavailable", "来源文件不可读取", profile=options.profile, parser="registry") from exc
+    if source.sha256 is not None and source.sha256 != actual_hash:
+        raise ParserError("parser_source_changed", "来源文件内容已变化，请重新上传", profile=options.profile, parser="registry")
     registry = registry or ParserRegistry()
     capabilities = capabilities or RuntimeCapabilities.detect()
     parser = registry.choose(options.profile, source, capabilities)
@@ -308,6 +335,7 @@ def parse_with_profile(source: DocumentSource, options: ParseOptions, *, registr
     try:
         ir = parser.parse(source, options)
         run.mode = ir.parser.get("mode", run.mode)
+        run.model_version = ir.parser.get("model")
         run.finish("succeeded", "ir_ready")
         return ir, run
     except ParserError as exc:

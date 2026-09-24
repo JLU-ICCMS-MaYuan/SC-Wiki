@@ -153,10 +153,10 @@ def create_task(
     file_kind: str | None = None,
     *,
     files: list[dict[str, Any]] | None = None,
-    parser_profile: str = "legacy",
+    parser_profile: str | None = None,
 ) -> dict[str, Any]:
     task_id = uuid.uuid4().hex
-    if parser_profile == "legacy":
+    if parser_profile is None:
         from backend.ingest.parser_rollout import configured_rollout, select_profile
         parser_profile = select_profile(configured_rollout(), task_id=task_id, user_id=user_id)
     now = int(time.time())

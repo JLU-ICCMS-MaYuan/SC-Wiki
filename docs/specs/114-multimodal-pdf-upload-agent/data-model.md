@@ -100,3 +100,15 @@ parsing → ir_ready → claims_ready → coverage_checked
 3. Claim 不直接持有数据库科学实体 ID；转换后由现有草稿稳定键生成。
 4. 正式科学字段没有有效 Evidence 时不得自动写入；人工推断必须保留来源类别和理由。
 5. 页面截图不是持久事实，截图失败不删除文本定位。
+
+
+## 当前事务实现
+
+`paper_document_parser_runs.document_json` 保存当前 IR 的页面、表格和区域快照，正式
+保存时 file_id 转为 paper_files 的 ID。创建论文的原事务同时保存运行、块和定位关联，
+任一步失败整体回滚。引句有歧义时保留旧文本证据，不生成虚假区域。
+
+升版约束采用单一更新路径：File → ParserRun → DocumentBlock；Evidence → Locator。
+Locator 另以不含重复 revision 列的不可变块身份外键连接 DocumentBlock。两条链都归属
+同一论文当前 revision，避免 MySQL 多路径更新同一 revision 列；同一来源文件与引句
+一致性由关联服务再次校验。截图不落盘。旧 revision 不新增全文归档。

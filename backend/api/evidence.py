@@ -248,3 +248,22 @@ def validate_proposal_save(body: ProposalSaveValidation, user=Depends(get_curren
     with SessionLocal() as session:
         proposals.validate_save(session, snapshot, user.id, body.preparation_id, body.stage)
     return {'status': 'valid'}
+
+
+class RegionRequest(BaseModel):
+    target: Literal["upload", "paper", "revision"]
+    target_id: str = Field(min_length=1, max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
+    file_id: str = Field(min_length=1, max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
+    quote: str = Field(min_length=1, max_length=10000)
+    pdf_page: int | None = Field(default=None, ge=1)
+    block_id: str | None = Field(default=None, min_length=1, max_length=255)
+
+
+@router.post("/region")
+def document_region(body: RegionRequest, user=Depends(get_current_user)):
+    from backend.ingest.document_regions import region_document, render_region
+    if not body.quote.strip():
+        raise HTTPException(400, detail="原文引句不能为空")
+    with SessionLocal() as session:
+        ir, path, digest = region_document(session, body.target, body.target_id, body.file_id, user)
+    return render_region(ir, path, digest, quote=body.quote, pdf_page=body.pdf_page, block_id=body.block_id)

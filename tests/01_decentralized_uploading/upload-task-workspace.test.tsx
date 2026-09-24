@@ -121,7 +121,8 @@ describe('论文上传工作区', () => {
 
     expect(screen.getByText('paper.pdf')).toBeVisible()
     expect(screen.getByText('notes.md')).toBeVisible()
-    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+    expect(screen.getByRole('combobox', { name: 'PDF 解析方案' })).toBeVisible()
+    expect(screen.getAllByRole('combobox')).toHaveLength(3)
 
     fireEvent.click(screen.getByRole('button', { name: '清空' }))
 

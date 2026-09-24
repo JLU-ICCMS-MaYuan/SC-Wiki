@@ -81,6 +81,12 @@ def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None,
     matching = [c for c in candidates if normalized_text(quote) in normalized_text(c['content'])]
     if not matching:
         return None, '原文引句未在所选来源文本中找到，请核对引句、文件或文件解析结果'
+    if evidence.get("block_id"):
+        marker = "<!-- block: " + str(evidence["block_id"]) + " -->"
+        marked = [c for c in matching if marker in c["content"]]
+        if len(marked) == 1:
+            matching = marked
+    # block_id 只是线索；正式区域还必须通过 Document IR 校验。
     # 身份与原文必须同时成立；过时 chunk_index 可由同文件原文唯一匹配修复。
     exact = [c for c in matching if (evidence.get('chunk_id', evidence.get('paper_chunk_id')) == c.get('chunk_id') and c.get('chunk_id') is not None)
              or (evidence.get('chunk_index') is not None and c['chunk_index'] == evidence.get('chunk_index'))]
@@ -99,7 +105,7 @@ def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None,
     if len(matching) != 1:
         return None, '原文引句匹配多个位置，系统尚未确认具体出处，请重新查找'
     c = matching[0]
-    return {k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'section', 'source_name')} | {'quote': quote}, None
+    return {k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'section', 'source_name')} | {'quote': quote} | ({'block_id': evidence['block_id']} if isinstance(evidence.get('block_id'), str) else {}), None
 
 
 def row_dict(row) -> dict:
