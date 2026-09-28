@@ -134,7 +134,7 @@ drop, complete or rewrite any scientific record, method, pressure or condition. 
 """
 
 
-def structured_chunks(ir: DocumentIR, *, max_chars: int = 60000) -> list[Chunk]:
+def structured_chunks(ir: DocumentIR, *, max_chars: int = 500000) -> list[Chunk]:
     """按连续页打包完整块与表格；不截断单元格，过大单页明确失败。"""
     pages = []
     for page in ir.pages:
