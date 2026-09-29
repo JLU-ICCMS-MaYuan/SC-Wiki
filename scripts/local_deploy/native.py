@@ -12,7 +12,7 @@ import zipfile
 
 from .bundle import write_json
 from .host import java_home
-from .environment import download, extract_tool, run
+from .environment import download, extract_tool, grobid_java_prefix, run
 
 
 def install_neo4j(root: Path, prefix: Path, spec: dict):
@@ -69,11 +69,25 @@ def verify_grobid(target: Path, spec: dict):
             raise ValueError(f'GROBID 安装不完整：{name}')
 
 
-def install_grobid(root: Path, conda: Path, spec: dict):
+def configure_grobid_build(source: Path, spec: dict):
+    """官方 0.8.1 的报告开关适配 Gradle 8，不修改解析源码。"""
+    if int(spec['gradle']['version'].split('.')[0]) < 8:
+        return
+    path = source / 'build.gradle'
+    text = path.read_text()
+    for kind in ('xml', 'html', 'csv'):
+        original = f'{kind}.enabled true'
+        if text.count(original) != 1:
+            raise ValueError('GROBID 构建配置结构变化，拒绝应用未知兼容修改')
+        text = text.replace(original, f'{kind}.required = true')
+    path.write_text(text)
+
+
+def install_grobid(root: Path, conda: Path, spec: dict, *, prefix: Path | None = None):
     local = root / '.local'
     local.mkdir(parents=True, exist_ok=True)
     target = local / 'grobid'
-    java = local / 'grobid-java'
+    java = grobid_java_prefix(root, prefix, spec)
     marker = target / 'native-install.json'
     # 不根据单个启动文件猜测构建完成，也不覆盖用户放置的未知目录。
     if target.exists():
@@ -81,6 +95,8 @@ def install_grobid(root: Path, conda: Path, spec: dict):
             raise ValueError('已有 GROBID 安装来源或版本不兼容，不覆盖')
         verify_grobid(target, spec)
     if not (java / 'conda-meta/history').is_file():
+        if spec.get('java_environment') == 'sc-wiki':
+            raise ValueError('缺少受 Conda 管理的 sc-wiki 环境，不创建独立 Java 环境')
         if java.exists():
             raise ValueError('GROBID Java 目录归属不明，不覆盖')
         run([conda, 'create', '-y', '-p', java, '--override-channels', '-c', 'conda-forge',
@@ -103,6 +119,7 @@ def install_grobid(root: Path, conda: Path, spec: dict):
         extract_zip(gradle_archive, stage)
         source = stage / ('grobid-' + spec['version'])
         gradle = stage / ('gradle-' + spec['gradle']['version']) / 'bin/gradle'
+        configure_grobid_build(source, spec)
         # 使用上游已配置重复依赖处理的 distZip，与官方发行构建保持一致。
         run([gradle, '--no-daemon', '--console=plain', ':grobid-service:distZip'],
             cwd=source, env=env, timeout=1800)

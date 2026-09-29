@@ -23,6 +23,13 @@ def test_mac_manifest_keeps_service_versions(monkeypatch):
     assert spec['go']['url'].endswith('darwin-arm64.tar.gz')
     assert spec['qdrant']['url'].endswith('aarch64-apple-darwin.tar.gz')
     assert spec['schema_heads'] == ['20260914_0052', '20260924_0114']
+    assert spec['grobid']['java_environment'] == 'sc-wiki'
+    assert spec['grobid']['java_version'] == '21.0.9'
+    assert spec['grobid']['version'] == '0.8.1'
+    overrides = json.loads((ROOT / 'scripts/local-deploy-macos.json').read_text())['arm64']
+    # Merging GROBID must preserve other services in existing bundle manifests.
+    assert spec['go'] == overrides['go']
+    assert spec['qdrant'] == overrides['qdrant']
     monkeypatch.setattr(environment.platform, 'system', lambda: 'Linux')
     assert environment.versions(ROOT) == json.loads((ROOT / 'scripts/local-deploy-versions.json').read_text())
 
@@ -135,3 +142,66 @@ def test_deployment_report_recognizes_numbered_credentials():
     report = capabilities({'LLM1_API_KEY': 'private-test-value'})
     assert report['AI'] == '已配置，尚未实际调用验收'
     assert 'private-test-value' not in json.dumps(report)
+
+
+def test_shared_java_install_reuses_main_environment(tmp_path, monkeypatch):
+    from scripts.local_deploy import native
+    prefix = tmp_path / 'sc-wiki'
+    history = prefix / 'conda-meta/history'
+    history.parent.mkdir(parents=True)
+    history.touch()
+    spec = {'version': '0.8.1', 'java_environment': 'sc-wiki', 'java_version': '21.0.9'}
+    target = tmp_path / '.local/grobid'
+    target.mkdir(parents=True)
+    (target / 'native-install.json').write_text(json.dumps(spec))
+    monkeypatch.setattr(native, 'verify_grobid', lambda *args: None)
+    commands = []
+    def run(args, **kwargs):
+        commands.append(args)
+        assert args == [prefix / 'bin/java', '--version']
+        return 'openjdk 21.0.9 2025-10-21\n'
+    monkeypatch.setattr(native, 'run', run)
+    native.install_grobid(tmp_path, Path('/must-not-run-conda'), spec, prefix=prefix)
+    assert len(commands) == 1
+    assert not (tmp_path / '.local/grobid-java').exists()
+
+
+def test_shared_java_missing_environment_never_creates_fallback(tmp_path, monkeypatch):
+    from scripts.local_deploy import native
+    spec = {'java_environment': 'sc-wiki', 'java_version': '21.0.9'}
+    monkeypatch.setattr(native, 'run', lambda *args, **kwargs: pytest.fail('must not install Java'))
+    with pytest.raises(ValueError, match='sc-wiki'):
+        native.install_grobid(tmp_path, Path('/conda'), spec, prefix=tmp_path / 'missing')
+    with pytest.raises(ValueError, match='前缀'):
+        native.install_grobid(tmp_path, Path('/conda'), spec)
+    assert not (tmp_path / '.local/grobid-java').exists()
+
+
+def test_shared_java_wrong_version_is_rejected(tmp_path, monkeypatch):
+    from scripts.local_deploy import native
+    prefix = tmp_path / 'sc-wiki'
+    history = prefix / 'conda-meta/history'
+    history.parent.mkdir(parents=True)
+    history.touch()
+    spec = {'java_environment': 'sc-wiki', 'java_version': '21.0.9'}
+    monkeypatch.setattr(native, 'run', lambda *a, **k: 'openjdk 17.0.18\n')
+    with pytest.raises(ValueError, match='Java 版本不兼容'):
+        native.install_grobid(tmp_path, Path('/conda'), spec, prefix=prefix)
+
+
+def test_legacy_java_selection_remains_isolated(tmp_path):
+    assert environment.grobid_java_prefix(tmp_path, tmp_path / 'main', {}) == tmp_path / '.local/grobid-java'
+
+
+def test_gradle8_patch_changes_only_report_switches(tmp_path):
+    from scripts.local_deploy.native import configure_grobid_build
+    path = tmp_path / 'build.gradle'
+    path.write_text('reports {\nxml.enabled true\nhtml.enabled true\ncsv.enabled true\n}\n')
+    spec = {'gradle': {'version': '8.5'}}
+    configure_grobid_build(tmp_path, spec)
+    assert path.read_text() == 'reports {\nxml.required = true\nhtml.required = true\ncsv.required = true\n}\n'
+    with pytest.raises(ValueError, match='结构变化'):
+        configure_grobid_build(tmp_path, spec)
+    path.write_text('unchanged Linux build')
+    configure_grobid_build(tmp_path, {'gradle': {'version': '7.6.4'}})
+    assert path.read_text() == 'unchanged Linux build'

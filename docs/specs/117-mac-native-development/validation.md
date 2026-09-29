@@ -31,3 +31,17 @@
 本机 .local/mac-native-verification.json、mac-pdf-smoke-report.json、mac-reload-verification.json、mac-roundtrip-verification.json、mac-cleanup-verification.json 保留汇总证据。备份说明在 .local/backups/README.md；这些运行产物与凭据均不进入 Git。
 
 Issue #117 已记录本地交付结果；由于未获推送授权，代码与 Spec 尚未发布到远端，Issue 保持开放供后续审阅，不将本地完成混写成服务器部署完成。
+
+
+## Java 21 环境合并验收
+
+2026-09-29 追加：Mac GROBID 已改为与 Neo4j 共用 sc-wiki 的 Java 21.0.9；Linux Java 17 配置未变。
+
+- 原有 GROBID 0.8.1 在独立端口使用 Java21 启动、引用/PDF 解析通过。
+- 使用官方 0.8.1 标签构建源码（763 个所需文件按 Git 对象摘要核对）和 571 个已核对的模型/原生资源，采用 Gradle 8.5、Java21 完整执行 distZip 成功。Gradle 制品 SHA-256 与官方一致。
+- 上游 build.gradle 的 xml/html/csv 三处报告 enabled 开关不兼容 Gradle8；安装器定向改为 required，解析源码不变。新产物在独立端口通过引用、PDF 全文和参考文献提取。
+- 已切换正常 GROBID 服务至新产物，实际 Java 可执行文件为 sc-wiki/lib/jvm/bin/java。通过 Conda 移除旧 .local/grobid-java 后，再次重启、解析和 make deploy 均成功。
+- 定向回归 96 通过、24 跳过；覆盖不创建重复环境、主环境缺失、版本不符、Gradle 配置适配和 Linux 原清单保持。跳过项仍为此前明确的隔离环境或平台条件，不计为通过。
+- 定向迁移只更新当前实例的 GROBID 工具链、环境摘要和源码摘要；原元数据备份至 .local/backups/java21-consolidation/。数据库结构/行数清单保持一致，其他服务清单不变，历史冻结包原样保留。
+- 独立 Java17 约 362 MB 已释放；本次源码、构建工具、缓存、下载文件和旧 GROBID 制品副本均已删除。未向主 Conda 环境复制不需要的 libxml2/fontconfig 文件，也未修改系统 Java 或 Conda base。
+- 本机汇总证据：.local/java21-consolidation-verification.json。外部 LLM、SMTP、真实 OCR 和生产镜像未新增验收。

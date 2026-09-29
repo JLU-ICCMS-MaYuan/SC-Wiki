@@ -42,7 +42,7 @@ VITE_PORT=5173
 GROBID_PORT=8070
 GROBID_ADMIN_PORT=8071
 GROBID_HOME="$LOCAL_DIR/grobid"
-GROBID_JAVA_HOME="$LOCAL_DIR/grobid-java"
+GROBID_JAVA_HOME="$(cd "$REPO_ROOT" && python3 -m scripts.local_deploy.environment "$REPO_ROOT" --grobid-java-prefix)"
 
 # MySQL socket 与配置：必须与系统 MySQL 完全隔离。
 # /etc/mysql/my.cnf 含 user=mysql 与 log_error=/var/log/mysql/error.log，

@@ -318,7 +318,7 @@ def test_native_install_failure_does_not_publish_or_overwrite(tmp_path, monkeypa
     def failed_download(*args):
         raise ValueError('download unavailable')
     monkeypatch.setattr(native, 'download', failed_download)
-    spec = module('environment').versions(ROOT)
+    spec = json.loads((ROOT / 'scripts/local-deploy-versions.json').read_text())
     with pytest.raises(ValueError, match='download unavailable'):
         native.install_grobid(tmp_path, Path('/conda'), spec['grobid'])
     assert not (tmp_path / '.local/grobid').exists()
@@ -338,7 +338,7 @@ def test_native_build_failure_cleans_staging_and_keeps_cache(tmp_path, monkeypat
     java = tmp_path / '.local/grobid-java/conda-meta/history'
     java.parent.mkdir(parents=True)
     java.touch()
-    spec = module('environment').versions(ROOT)['grobid']
+    spec = json.loads((ROOT / 'scripts/local-deploy-versions.json').read_text())['grobid']
     def command(args, **kwargs):
         if Path(args[0]).name == 'java':
             return 'openjdk 17.0.18-internal 2026-01-20\n'
@@ -799,6 +799,8 @@ def test_corrupt_configuration_has_no_shell_side_effects_in_real_loader(tmp_path
     scripts.mkdir()
     import shutil
     shutil.copy2(ROOT / 'scripts/lib-local.sh', scripts / 'lib-local.sh')
+    for name in ('local-deploy-versions.json', 'local-deploy-macos.json'):
+        shutil.copy2(ROOT / 'scripts' / name, scripts / name)
     shutil.copytree(ROOT / 'scripts/local_deploy', scripts / 'local_deploy', ignore=shutil.ignore_patterns('__pycache__'))
     local = tmp_path / '.local'
     local.mkdir()

@@ -18,7 +18,7 @@
 
 ### 本地开发：宿主机进程（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)）
 
-- 本地服务全部运行在宿主机，由 `scripts/dev.sh` 编排，入口为 `Makefile`（`make start` / `stop` / `status` / `logs`）。GROBID 0.8.1 从官方源码、默认 Wapiti 模型及原生库构建，使用 `.local/grobid-java` 中独立 Java 17，API 8070 和管理接口 8071 均绑定回环地址；本地安装与启停不调用 Docker。
+- 本地服务全部运行在宿主机，由 `scripts/dev.sh` 编排，入口为 `Makefile`（`make start` / `stop` / `status` / `logs`）。GROBID 0.8.1 从官方源码、默认 Wapiti 模型及原生库构建，Mac 共用 `sc-wiki` 的 Java 21，Linux 使用 `.local/grobid-java` 中独立 Java 17，API 8070 和管理接口 8071 均绑定回环地址；本地安装与启停不调用 Docker。
 - 请求链路为浏览器 → Vite 5173 →（`/api` 代理）→ goserver 8080 →（未匹配路由反代）→ uvicorn 8000。两段代理均为既有实现，本地化未修改 `backend/` 与 `goserver/` 源码。
 - 前端 Vite HMR、Python `uvicorn --reload`、goserver 文件监听重编译和上传 Worker 的 `watchfiles` 包装支持代码变更重载。Go 编译失败时保留旧进程继续服务。资讯 Worker 和 Scheduler 无热重载包装，修改代码后须重启相应进程。
 - 四个存储服务来自本机安装而非容器：MySQL 8.4.2、Redis 8.10.1 与 Neo4j 所需的 OpenJDK 21 均来自 conda 环境 `sc-wiki`；Neo4j 5.26.29 使用官方发行归档，和 Qdrant 1.19.0 一样安装在 `.local/`。应用 Python 依赖也使用 `sc-wiki`。
@@ -32,11 +32,12 @@
 ### macOS 原生开发（[Issue #117](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/117)）
 
 - Apple Silicon Mac 通过根 Makefile 自动加载独立 `Makefile.mac`，提供 `deploy/setup/start/stop/restart/status/logs/frozen/test/test-go`。Linux 仍使用原有目标；Mac 启动不依赖 Lima 或 Docker。
-- 共用本地配置、状态、数据冻结/恢复及服务编排；`scripts/local-deploy-macos.json` 固定 Mac 的 Go、Qdrant 制品摘要和受测迁移头，Linux 清单保持独立。GROBID 使用官方 `mac_arm-64` 的 Wapiti、pdfalto 与独立 Java 17。
+- 共用本地配置、状态、数据冻结/恢复及服务编排；`scripts/local-deploy-macos.json` 固定 Mac 的 Go、Qdrant 制品摘要和受测迁移头，Linux 清单保持独立。GROBID 使用官方 `mac_arm-64` 的 Wapiti、pdfalto，与 Neo4j 共用主环境 Java 21.0.9。Mac 构建采用 Gradle 8.5，安装器仅将上游三处报告开关从 enabled 适配为 required，下载制品校验官方 SHA-256。
 - 兼容系统 Bash 3.2，配置采用 NUL 分隔安全导出；由 Python 创建独立进程组，使用 ps/lsof 核验进程工作目录、进程组与端口归属。端口检查允许关闭后的 TCP 等待状态，不将其当作活跃服务。
 - Python、Go 和前端直接使用当前工作区，文件变更已通过真实重载验证。网站入口仍是 `http://127.0.0.1:5173`，数据为 `.data/`，本机运行依赖为 `.local/`，私密配置为根 `.env`。
 - 当前机器从旧容器逻辑备份恢复到本机存储，已核对表结构、数量、图谱、向量配置及 PDF/Markdown 摘要。历史包兼容性检查仍然保留，不能把 Mac 与 Linux 的平台清单差异视为无条件可恢复。
 - 本次 Mac 实例已完成真实冻结包的独立目录恢复验证；旧 Lima 虚拟机、专用工具和容器源码副本已删除，业务数据及备份保留在 `.data/` 和 `.local/backups/`。
+- Java 21 合并已验证重新构建、引用/PDF 全文与参考文献解析、启停及重复部署；Mac 不再创建独立 `.local/grobid-java`，旧环境删除后服务仍可启动。版本清单变化仍受恢复保护约束，旧备份不被自动改写。
 - 原生 GROBID 已通过合成 PDF 的真实参考文献解析；外部模型、SMTP 发件、Docling/MinerU 模型及真实 OCR 验收不由基础服务启动保证。
 
 ## 工作流程
@@ -72,8 +73,7 @@ Ubuntu 的手动跨机器验收，当前机器上的 SC-Wiki 即按该流程部�
 后续网络安装必然成功，外部 AI/SMTP 能力仍需按目标环境配置。
 
 Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既有模块镜像，
-显式进程配置优先；不修改全局 Go 设置，保留模块校验。GROBID 单独使用 Java 17，
-不会替换 Neo4j 的 Java 21。
+显式进程配置优先；不修改全局 Go 设置，保留模块校验。Mac 的 GROBID 和 Neo4j 共用主环境 Java 21；Linux 仍单独使用 GROBID Java 17，不替换 Neo4j 的 Java 21。
 
 `make frozen` 以干净 HEAD 的源码和业务数据生成迁移包。外部凭据不进入包；源端停写后
 导出 MySQL、Neo4j、Qdrant 和 Redis 上传草稿，结束后恢复应用。Redis 草稿恢复会同步
@@ -112,7 +112,7 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 - 密钥只能通过环境变量注入，文档不记录实际凭据。Go 邮件配置支持 `SMTP_HOST`、`SMTP_PORT`、`SMTP_USER`/`SMTP_USERNAME`、`SMTP_PASSWORD`、`SMTP_FROM` 和 `SMTP_TLS_MODE`。
 - `AVATAR_DIR` 默认为数据目录下 `avatars`，Compose 固定为 `/data/avatars` 并挂载宿主 `docker/data/avatars`；部署备份需包含该目录。
 - `docker/deploy/README.md` 中的镜像标签、归档文件和导入命令属于交付包说明，发布前需要按实际归档核验。
-- 本地应用 Python、MySQL、Redis 和 OpenJDK 21 由 conda 环境 `sc-wiki` 管理；GROBID Java 17 位于项目私有前缀，不替换系统 Java 或应用环境的 Java 21。
+- 本地应用 Python、MySQL、Redis 和 OpenJDK 21 由 conda 环境 `sc-wiki` 管理；Mac GROBID 复用同一个 Java 21；Linux GROBID Java 17 仍位于项目私有前缀，不替换系统 Java。
 - 本地 MySQL 客户端命令必须带 `--defaults-file`：系统 `/etc/mysql/my.cnf` 含 `user = mysql` 与指向 `/var/log/mysql/` 的错误日志路径，以普通用户启动会失败。
 - 本地开发链路不含 nginx，`docker/nginx.conf` 中的 `client_max_body_size`、`proxy_request_buffering off` 与 `Accept-Encoding` 清空均不生效；`vite build` 期生效的 `removeHeavyPreloads` 与 `manualChunks` 在 dev 模式下同样不走。这不影响改动进入镜像（镜像内会重新构建源码），但同一份代码在两条链路下的上传与首屏行为可能不同，详见「本地改动如何进入 Docker 部署」。
 - 当前 WSL `networkingMode=mirrored` 本地开发环境中，UFW 必须保持停止且禁止开机启动。宝塔安装器启用 UFW 并设置默认拒绝策略后，`loopback0` 上的 localhost TCP 流量会被拦截，导致 VS Code Remote WSL 和 Windows 访问本地服务失败。该约束只适用于当前 WSL 本地开发环境，不改变生产服务器的防火墙策略（[Issue #89](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/89)）。

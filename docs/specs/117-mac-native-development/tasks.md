@@ -33,3 +33,9 @@
 ## 收尾证据
 
 真实冻结包已在独立目录完整恢复；旧 Lima 及临时验证副本已删除，原生 11 个服务运行正常。实现提交 765b05d、竞态修复 b437dbc；验证细节见 [validation.md](validation.md)。GitHub Issue 暂保留开放，代码尚未推送，远端 Spec 链接待发布后可审阅。
+
+## 阶段 7：共用 Java 21
+
+- [x] T007 [US1] 在 .local/java21-check/ 验证共享 Java21 的 GROBID 构建、引用和全文解析，记录 validation.md（FR-007/SC-005）。
+- [x] T008 [US1] 更新 scripts/local-deploy-macos.json、scripts/local_deploy/native.py、environment.py、lib-local.sh，共用主环境 JDK，并在 tests/02_maintenance_and_verification/test_mac_native.py 验证不创建独立环境（FR-007）。
+- [x] T009 [US1] 核对 .local/ 部署元数据后完成当前实例迁移，删除旧 Java17 及临时文件，验证启停/重复部署并回写 docs/local-dev.md、Overview 和 Issue #117（SC-005）。

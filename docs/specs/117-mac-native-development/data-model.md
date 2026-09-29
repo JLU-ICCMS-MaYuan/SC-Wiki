@@ -5,3 +5,5 @@
 - 进程：.local/run/<服务>.pid 指向独立进程组；操作前验证工作目录或命令、会话与监听者，不接管外部服务。
 - 数据包：沿用 .deployment 清单及摘要；只接受匹配源码/服务约束的包，不复用 Linux 数据库物理目录。
 - 迁移备份：.local/backups/ 下保留从旧实例导出的逻辑数据及核对报告。生命周期为导出→校验→原生恢复→核对→清理旧环境；失败停在当前阶段，备份不删除。
+
+Mac Java 来源由 GROBID 清单的 java_environment=sc-wiki 声明，主环境前缀由 deployment-environment.json 定位。独立 grobid-java 不再属于 Mac 实例状态；原记录保留在定向迁移备份，业务实体及库结构不变。

@@ -20,3 +20,5 @@
 已验证冻结包保存在 .local/backups/scwiki-macos-117.tar.gz。新备份建议显式指定 OUTPUT
 到独立备份目录，避免把新生成的不同包放入 dist 后与已有 .deployment 的恢复归属产生冲突。
 不要把本次迁移留档当成任意版本的通用恢复包。
+
+Mac 的 GROBID 现在共用 sc-wiki 环境中的 Java 21，已删除 .local/grobid-java。日常命令不变。GROBID 重新安装使用 Gradle 8.5 和同一个 JDK；Linux 仍保留原工具链。合并前的冻结包保留其原始版本清单，恢复时使用对应源码，不直接交给新清单覆盖当前实例。

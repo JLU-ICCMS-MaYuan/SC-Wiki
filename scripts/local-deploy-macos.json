@@ -13,6 +13,19 @@
       "version": "1.19.0",
       "url": "https://github.com/qdrant/qdrant/releases/download/v1.19.0/qdrant-aarch64-apple-darwin.tar.gz",
       "sha256": "4e279a80cc1ebe73e859318ff86375af54c123887dd7ae46605c0eb6cb7c44e8"
+    },
+    "grobid": {
+      "java_environment": "sc-wiki",
+      "java_version": "21.0.9",
+      "conda_packages": [],
+      "gradle": {
+        "version": "8.5",
+        "url": "https://downloads.gradle.org/distributions/gradle-8.5-bin.zip",
+        "sha256": "9d926787066a081739e8200858338b4a69e837c3a821a33aca9db09dd4a41026",
+        "fallback_urls": [
+          "https://repo.huaweicloud.com/gradle/gradle-8.5-bin.zip"
+        ]
+      }
     }
   }
 }

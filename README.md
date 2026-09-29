@@ -20,6 +20,7 @@ make frozen OUTPUT="/备份目录/sc-wiki.tar.gz"
 Conda 与系统开发工具，脚本将依赖安装到独立 `sc-wiki` 环境及项目 `.local/`。
 业务数据位于 `.data/`，凭据位于根 `.env`，网站为 `http://127.0.0.1:5173`。
 Python、前端和 Go 直接使用当前工作区；无需复制源码到构建副本。
+Mac 的 GROBID 与 Neo4j 共用 `sc-wiki` 的 Java 21，不另建 Java 环境。
 
 `deploy` 保留已有实例和旧包的兼容性检查；`frozen` 要求工作区已提交。
 Mac 与 Linux 使用平台专属制品清单，当前不承诺二者的冻结包可直接互换，也不支持用

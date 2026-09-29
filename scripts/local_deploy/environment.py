@@ -47,7 +47,8 @@ def versions(root: Path) -> dict:
         machine = platform.machine()
         if machine not in overrides:
             raise ValueError('当前 Mac 原生部署仅支持已验证的 Apple Silicon arm64')
-        spec.update(overrides[machine])
+        for name, value in overrides[machine].items():
+            spec[name] = {**spec[name], **value} if name == 'grobid' else value
         spec['platform'] = 'darwin-' + machine
         spec['schema_heads'] = overrides['schema_heads']
     return spec
@@ -127,12 +128,25 @@ def go_environment() -> dict[str, str]:
     return {key: os.environ.get(key) or value for key, value in defaults.items()}
 
 
+def grobid_java_prefix(root: Path, prefix: Path | None, spec: dict) -> Path:
+    """安装与启动共用 Java 环境选择，不复制或覆盖 Conda 包。"""
+    source = spec.get('java_environment', 'isolated')
+    if source == 'isolated':
+        return root / '.local/grobid-java'
+    if source != 'sc-wiki' or prefix is None:
+        raise ValueError('GROBID 共用 Java 必须提供 sc-wiki 环境前缀')
+    return prefix
+
+
 if __name__ == '__main__':
     import sys
     try:
         if sys.argv[2:] == ['--go-env']:
             for key, value in go_environment().items():
                 sys.stdout.write(f'{key}={value}\0')
+        elif sys.argv[2:] == ['--grobid-java-prefix']:
+            root = Path(sys.argv[1])
+            print(grobid_java_prefix(root, runtime_prefix(root), versions(root)['grobid']))
         else:
             print(runtime_prefix(Path(sys.argv[1])))
     except (ValueError, OSError) as exc:
@@ -241,7 +255,7 @@ def install(root: Path) -> Path:
     run([local / 'go/bin/go', 'mod', 'verify'], cwd=root / 'goserver', env=process_env)
     from .native import install_neo4j, install_grobid
     install_neo4j(root, prefix, spec['neo4j'])
-    install_grobid(root, conda, spec['grobid'])
+    install_grobid(root, conda, spec['grobid'], prefix=prefix)
     actual_packages = json.loads(run([conda, 'list', '-p', prefix, '--json'], capture=True))
     write_json(local / 'deployment-environment.json', {'prefix': str(prefix), 'conda': str(conda),
                'versions_digest': versions_digest(root),

@@ -73,7 +73,7 @@ Conda 本身由用户安装，脚本复用兼容的 `sc-wiki`，没有则创建�
 | Python、前端、Go 项目依赖 | 分别使用 `docker/requirements.txt`、`frontend/package-lock.json`、`goserver/go.mod` 与 `go.sum`；requirements 所在目录不表示使用 Docker。 |
 | Go、Neo4j、Qdrant | 项目 `.local/` 中的固定版本制品，下载后验证摘要。 |
 | GROBID、Wapiti 模型、pdfalto 和原生库 | `.local/grobid`；以官方源码和配套资源构建。 |
-| GROBID Java 17、libxml2、fontconfig、Gradle及构建依赖 | 独立 `.local/grobid-java` 和构建缓存，不替换系统 Java 或 `sc-wiki` 的 Java 21。 |
+| GROBID Java 与构建依赖 | Mac 共用 `sc-wiki` 的 Java 21，构建使用 Gradle 8.5；Linux 保留独立 `.local/grobid-java` 的 Java 17 与原 Gradle。 |
 | `.env`、数据库连接、随机服务凭据 | 首次生成，重跑保留；AI、Embedding、SMTP 账号密钥由用户另行提供。 |
 
 具体软件版本与摘要以 `scripts/local-deploy-versions.json` 为准。Docker、Nginx 不属于本地
@@ -169,7 +169,7 @@ sudo systemctl disable --now ufw
 | redis | 127.0.0.1:6379 | conda `sc-wiki` | — |
 | neo4j | bolt://127.0.0.1:17687 | `.local/neo4j` | — |
 | qdrant | 127.0.0.1:6333 | `.local/bin/qdrant` | — |
-| grobid | 127.0.0.1:8070，管理接口 8071 | `.local/grobid`、独立 Java 17 | — |
+| grobid | 127.0.0.1:8070，管理接口 8071 | `.local/grobid`；Mac 共用 Java 21，Linux 独立 Java 17 | — |
 
 请求链路：浏览器 → vite（`/api` 代理）→ goserver →（未命中路由反代）→ uvicorn。
 
@@ -216,8 +216,11 @@ GROBID_URL=http://127.0.0.1:8070
 （mysqld、redis-server、openjdk 21、mysql 客户端）。运行 `make setup` 时会在该环境内
 安装缺失的基础服务依赖。
 
-GROBID 的 Java 17 由 Conda 安装到项目私有 `.local/grobid-java`，构建使用固定 Gradle；
-不修改 `sc-wiki` 的 Java 21 或系统 Java，不新增另一套应用 Python 环境。
+Mac 的 GROBID 与 Neo4j 共用 `sc-wiki` 中的 Java 21.0.9，不再创建 `.local/grobid-java`。
+GROBID 0.8.1 在 Java 21/Gradle 8.5 下构建；安装器只适配上游三处报告开关语法，
+不修改解析代码。Gradle 下载备用源仍校验官方 SHA-256。Linux 保留独立 Java 17 与原构建配置。
+不能直接把两个 Conda 环境的库互相复制。已有实例更改版本清单仍须受控迁移，
+旧冻结包不会因此自动获得跨版本恢复能力。
 
 ## 目录
 
@@ -231,7 +234,7 @@ GROBID 的 Java 17 由 Conda 安装到项目私有 `.local/grobid-java`，构建
 .local/         # 运行时，已 gitignore
 ├── neo4j/          官方发行包安装的 Neo4j 5.26.29
 ├── grobid/         本机 GROBID 0.8.1 服务、模型及原生库
-├── grobid-java/    项目私有 Java 17
+├── grobid-java/    仅 Linux：项目私有 Java 17；Mac 不创建
 ├── gradle-cache/   GROBID 构建依赖缓存
 ├── bin/            qdrant 与编译产出的 goserver
 ├── my.cnf          MySQL 配置（与系统 MySQL 完全隔离）

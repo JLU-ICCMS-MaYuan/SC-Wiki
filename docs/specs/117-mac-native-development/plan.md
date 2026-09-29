@@ -4,7 +4,7 @@
 
 ## 摘要与技术上下文
 
-GNU Make、系统 Bash 3.2、Python 3.12；Conda 管理 MySQL 8.4.2、Redis 8.10.1、Java 21 与 Node 22。项目私有 Go 1.25.14、Qdrant 1.19.0、Neo4j 5.26.29、GROBID 0.8.1/Java 17。目标为当前 macOS arm64，保留 Linux x86_64。复用 scripts/local_deploy 的配置、状态、存储、冻结与恢复职责，不复制业务逻辑。
+GNU Make、系统 Bash 3.2、Python 3.12；Conda 管理 MySQL 8.4.2、Redis 8.10.1、Java 21 与 Node 22。项目私有 Go 1.25.14、Qdrant 1.19.0、Neo4j 5.26.29、GROBID 0.8.1；Mac 共用 Java 21/Gradle 8.5，Linux 保留 Java 17。目标为当前 macOS arm64，保留 Linux x86_64。复用 scripts/local_deploy 的配置、状态、存储、冻结与恢复职责，不复制业务逻辑。
 
 ## 质量门
 
@@ -41,3 +41,7 @@ T001 → T002 → T003 → T004 → T005 → T006。数据清理必须等待恢�
 ## 复杂度说明
 
 只对平台不同的进程检查、制品和本地动态库作适配；数据包仍沿用既有严格版本兼容，不承诺任意历史包跨平台直接恢复。现有 dist 历史包通过本次定向迁移保留，不绕过常规 deploy 检查。
+
+## Java 21 合并增量计划
+
+FR-007/SC-005 → T007～T009。Mac 的 GROBID 配置由版本清单声明 Java 环境来源，安装器复用显式传入的主环境前缀；启动脚本读取同一配置。使用官方 Gradle 8.5，适配上游 build.gradle 的三处报告 enabled→required 语法，验证 Java 21 构建，避免运行与重建条件分离。真实重建产物通过解析验收后替换旧制品，保存旧部署元数据到私密备份；定向更新当前实例的清单、源码摘要和环境摘要，不修改数据库。停止旧 GROBID 后切到共享 JDK，最后删除旧 Java17、下载及构建临时文件。
