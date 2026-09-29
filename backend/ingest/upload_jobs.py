@@ -1490,6 +1490,13 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
     from backend.rag.llm_context import reset_llm_config, resolve_llm_config, set_llm_config
 
     config = load_llm_config(task_id)
+    if config is None and str((get_state(task_id) or {}).get("llm_provider", "")).startswith("server:"):
+        message = "所选服务端模型的任务配置已失效，请重新发起解析"
+        update_state(task_id, status="failed", processing_status="failed", processing_error=message,
+                     error_code="llm_task_config_expired")
+        delete_llm_config(task_id)
+        _schedule_terminal_cleanup(task_id)
+        raise RuntimeError(message)
     token = set_llm_config(config or resolve_llm_config())
     started = time.monotonic()
     cpu_started = time.process_time()

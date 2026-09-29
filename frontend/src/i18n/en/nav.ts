@@ -47,4 +47,8 @@ export default {
   llmConnected: 'Connected in {latency} ms',
   llmDefaultActive: 'The server default is active',
   llmConnectionFailed: 'Connection failed',
+  llmServerModel: 'Server model',
+  llmServerKeyHint: 'Use a model configured by the deployment owner. No API key is needed.',
+  llmCatalogFailed: 'Could not load server models. Reopen this panel to retry.',
+  llmCatalogUnavailable: 'Sign in and select an available server model',
 } as const

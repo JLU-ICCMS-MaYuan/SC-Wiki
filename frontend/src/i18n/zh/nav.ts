@@ -50,4 +50,8 @@ export default {
   llmConnected: '连接成功，耗时 {latency} ms',
   llmDefaultActive: '当前使用服务端默认模型',
   llmConnectionFailed: '连接失败',
+  llmServerModel: '服务端模型',
+  llmServerKeyHint: '使用部署者配置的模型，无需填写 API Key。',
+  llmCatalogFailed: '服务端模型列表加载失败，请稍后重新打开。',
+  llmCatalogUnavailable: '请登录并重新选择可用的服务端模型',
 } as const

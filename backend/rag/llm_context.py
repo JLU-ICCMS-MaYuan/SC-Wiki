@@ -7,12 +7,13 @@ import ipaddress
 import json
 import os
 import socket
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from urllib.parse import urlparse
 from fastapi import HTTPException, Request
 
 from backend.rag.config import settings
+from backend.rag.llm_catalog import CatalogConfigError, get_catalog
 
 
 class UserCredentialError(RuntimeError):
@@ -28,8 +29,10 @@ class LlmConfig:
     provider: str
     base_url: str
     model: str
-    api_key: str
+    api_key: str = field(repr=False)
     user_supplied: bool = False
+    catalog_id: str = ""
+    provider_name: str = ""
 
 
 _current_config: contextvars.ContextVar[LlmConfig | None] = contextvars.ContextVar(
@@ -61,11 +64,24 @@ def _default_config_path() -> Path:
 
 
 def _environment_default_config() -> LlmConfig:
+    catalog = get_catalog()
+    if catalog.items:
+        return catalog_config(catalog.default_id)
     return LlmConfig(
         provider="server-default",
         base_url=settings.completion_base_url,
         model=settings.completion_model,
         api_key=settings.completion_api_key,
+    )
+
+
+def catalog_config(identifier: str) -> LlmConfig:
+    item = get_catalog().find(identifier)
+    if item is None:
+        raise UserCredentialError("所选服务端模型不存在，请重新选择", code="LLM_CONFIG_NOT_FOUND")
+    return LlmConfig(
+        provider=f"server:{item.id}", base_url=item.base_url, model=item.model,
+        api_key=item.api_key, catalog_id=item.id, provider_name=item.name,
     )
 
 
@@ -90,6 +106,12 @@ def get_server_default_config() -> LlmConfig:
 def server_default_metadata() -> dict[str, str | bool]:
     """Return safe-to-display settings for the superadmin configuration panel."""
     config = get_server_default_config()
+    if config.catalog_id:
+        return {
+            "provider_name": config.provider_name, "model": config.model,
+            "base_url": config.base_url, "api_key_configured": bool(config.api_key),
+            "source": "environment",
+        }
     path = _default_config_path()
     provider_name = ""
     try:
@@ -194,7 +216,9 @@ def llm_display_metadata(config: LlmConfig | None = None) -> dict[str, str]:
     """Return safe-to-display LLM metadata without endpoint or credential fields."""
     resolved = config or get_llm_config()
     host = (urlparse(resolved.base_url).hostname or "").lower().rstrip(".")
-    if resolved.user_supplied:
+    if resolved.provider_name:
+        provider_name = resolved.provider_name
+    elif resolved.user_supplied:
         provider_name = _PROVIDER_NAMES_BY_ID.get(resolved.provider, resolved.provider)
     elif config is None:
         provider_name = str(server_default_metadata()["provider_name"])
@@ -211,12 +235,27 @@ def llm_display_metadata(config: LlmConfig | None = None) -> dict[str, str]:
 async def request_llm_config(request: Request):
     """FastAPI dependency which scopes header-derived config to one request."""
     try:
-        config = resolve_llm_config(
+        identifier = request.headers.get("X-LLM-Config-ID", "").strip()
+        personal = [
             request.headers.get("X-LLM-Provider"),
             request.headers.get("X-LLM-Base-URL"),
             request.headers.get("X-LLM-Model"),
             request.headers.get("X-LLM-Api-Key"),
+        ]
+        personal = [str(value or "").strip() for value in personal]
+        # 目录管理不依赖浏览器上一次选择，删除旧 ID 后仍可获取新目录。
+        if request.url.path in {"/api/rag/llm/catalog", "/api/rag/llm/default-config"}:
+            identifier, personal = "", [None] * 4
+        if identifier and any(personal):
+            raise UserCredentialError("服务端模型与个人配置不能同时提交", code="LLM_CONFIG_AMBIGUOUS")
+        catalog = get_catalog()
+        public_read = request.method == "GET" and (
+            request.url.path in {"/api/rag/health", "/api/rag/llm/current", "/api/rag/stats", "/api/rag/papers", "/api/rag/superconductors"}
+            or request.url.path.startswith(("/api/rag/papers/", "/api/rag/superconductors/"))
         )
+        if identifier or (catalog.items and not all(personal) and not public_read):
+            await require_catalog_user(request)
+        config = catalog_config(identifier) if identifier else resolve_llm_config(*personal)
         if any("\n" in value or "\r" in value for value in (
             request.headers.get("X-LLM-Provider") or "",
             request.headers.get("X-LLM-Base-URL") or "",
@@ -224,6 +263,8 @@ async def request_llm_config(request: Request):
             request.headers.get("X-LLM-Api-Key") or "",
         )):
             raise UserCredentialError("LLM 配置不能包含换行符", code="LLM_HEADER_INVALID")
+    except CatalogConfigError as exc:
+        raise HTTPException(status_code=503, detail={"code": "LLM_CATALOG_INVALID", "message": str(exc)}) from None
     except UserCredentialError as exc:
         raise HTTPException(status_code=400, detail={"code": exc.code, "message": str(exc)}) from exc
     token = set_llm_config(config)
@@ -231,3 +272,20 @@ async def request_llm_config(request: Request):
         yield config
     finally:
         reset_llm_config(token)
+
+
+async def require_catalog_user(request: Request):
+    """验证真实账号与会话；不把请求头存在当成登录成功。"""
+    from backend.database import get_db
+    from backend.security import get_current_user, security_optional
+
+    credentials = await security_optional(request)
+    if credentials is None:
+        raise HTTPException(status_code=401, detail={
+            "code": "LLM_LOGIN_REQUIRED", "message": "请登录后使用服务端模型",
+        })
+    session = get_db()
+    try:
+        return await get_current_user(credentials=credentials, db=next(session))
+    finally:
+        session.close()

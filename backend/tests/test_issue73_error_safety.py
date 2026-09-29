@@ -121,6 +121,9 @@ def test_stream_generation_error_does_not_echo_upstream(monkeypatch, scoped_conf
         async def execute(self, *args):
             return SimpleNamespace(scalar=lambda: 0, scalars=lambda: [])
 
+        async def scalar(self, *args):
+            return 0
+
     async def search(*args, **kwargs):
         return {"chunks": [{"paper_id": 1, "content": "synthetic"}]}
 
@@ -131,6 +134,7 @@ def test_stream_generation_error_does_not_echo_upstream(monkeypatch, scoped_conf
         raise RuntimeError(SECRET)
 
     monkeypatch.setattr(database, "async_session_factory", Session)
+    monkeypatch.setattr(engine, "async_session_factory", Session)
     monkeypatch.setattr(engine, "_extract_intent", lambda _: {
         "intent": "mechanism", "question_type": "mechanism", "subjects": [], "predicates": [],
     })

@@ -51,7 +51,7 @@ def _enqueue_shadow_locked(parent_id, config):
             file_sha256=main["sha256"], source_file_path=main["source_file_path"],
             parser_profile=parent["shadow_profile"], parser_runs=[], reading_state=None,
             status="queued", stage="saving_file", stage_index=1, stage_total=5,
-            processing_status="processing", state_schema_version=1, revision=1,
+            processing_status="processing", state_schema_version=1, revision=1, llm_provider=config.provider,
             created_at=now, updated_at=now, cleanup_at=None)
         # 不调用 create_task，避免进入用户任务索引和占用用户可编辑任务额度。
         tasks.redis_client().set(tasks.task_key(shadow_id), json.dumps(shadow))

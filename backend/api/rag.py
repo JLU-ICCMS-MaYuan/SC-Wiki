@@ -24,9 +24,11 @@ from backend import models
 from backend.models import Paper, PaperChunk, PaperEvidence, PaperFile, User
 from backend.rag import service
 from backend.rag.llm_client import get_llm_client
+from backend.rag.llm_catalog import get_catalog
 from backend.rag.llm_context import (
     get_llm_config, llm_display_metadata, request_llm_config, save_server_default_config,
     server_default_metadata, UserCredentialError,
+    require_catalog_user,
 )
 from backend.security import get_current_admin, get_current_superadmin, get_current_user
 
@@ -949,6 +951,12 @@ def test_llm_connection():
 def current_llm():
     """Expose only the effective provider/model metadata needed by the top bar."""
     return {"ok": True, "data": llm_display_metadata()}
+
+
+@router.get("/llm/catalog")
+def llm_catalog(_: User = Depends(require_catalog_user)):
+    """部署目录只返回可展示的字段；密钥始终留在服务端。"""
+    return {"ok": True, "data": {"items": [item.public() for item in get_catalog().items]}}
 
 
 @router.get("/llm/default-config")

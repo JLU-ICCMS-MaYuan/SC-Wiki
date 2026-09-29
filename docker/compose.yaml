@@ -43,6 +43,9 @@ services:
   # ────── Python RAG ──────
   python:
     image: mayuanmark/scwiki-python:mayuan
+    env_file:
+      - path: ${SC_WIKI_LLM_ENV_FILE:-../.env}
+        required: false
     environment:
       DATABASE_URL: ${DATABASE_URL}
       RAG_DATABASE_URL: ${RAG_DATABASE_URL}
@@ -102,6 +105,9 @@ services:
   # ────── 论文上传任务 Worker（与 Python API 使用同一镜像） ──────
   worker:
     image: mayuanmark/scwiki-python:mayuan
+    env_file:
+      - path: ${SC_WIKI_LLM_ENV_FILE:-../.env}
+        required: false
     command: ["python", "-m", "backend.scripts.run_upload_workers"]
     environment:
       DATABASE_URL: ${DATABASE_URL}

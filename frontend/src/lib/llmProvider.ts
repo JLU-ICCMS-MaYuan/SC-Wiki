@@ -1,9 +1,21 @@
+import { getStoredToken } from '../context/AuthContext'
+
 export interface LlmProviderConfig {
   provider: string
   baseUrl: string
   model: string
   apiKey: string
 }
+
+export interface ServerLlmModel { id: string; name: string; model: string }
+export interface ServerLlmConfig {
+  provider: string
+  serverId: string
+  providerName: string
+  model: string
+}
+export type LlmSelection = LlmProviderConfig | ServerLlmConfig
+export const isServerLlm = (config: LlmSelection): config is ServerLlmConfig => 'serverId' in config
 
 export interface ProviderPreset {
   id: string
@@ -25,11 +37,16 @@ export const PROVIDER_PRESETS: readonly ProviderPreset[] = [
   { id: 'custom', label: '自定义', baseUrl: '', model: '' },
 ]
 
-export function readStoredLlmConfig(): LlmProviderConfig | null {
+export function readStoredLlmConfig(): LlmSelection | null {
   try {
     const raw = localStorage.getItem(LLM_PROVIDER_STORAGE_KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw) as Partial<LlmProviderConfig>
+    const parsed = JSON.parse(raw)
+    if (parsed?.serverId && /^LLM[1-9]\d*$/.test(parsed.serverId)
+      && typeof parsed.providerName === 'string' && typeof parsed.model === 'string') {
+      return { provider: `server:${parsed.serverId}`, serverId: parsed.serverId,
+        providerName: parsed.providerName, model: parsed.model }
+    }
     if (!parsed.provider || !parsed.baseUrl || !parsed.model || !parsed.apiKey) return null
     return { provider: parsed.provider, baseUrl: parsed.baseUrl, model: parsed.model, apiKey: parsed.apiKey }
   } catch {
@@ -37,8 +54,11 @@ export function readStoredLlmConfig(): LlmProviderConfig | null {
   }
 }
 
-export function saveLlmConfig(config: LlmProviderConfig): void {
-  localStorage.setItem(LLM_PROVIDER_STORAGE_KEY, JSON.stringify(config))
+export function saveLlmConfig(config: LlmSelection): void {
+  const value = isServerLlm(config)
+    ? { provider: `server:${config.serverId}`, serverId: config.serverId, providerName: config.providerName, model: config.model }
+    : config
+  localStorage.setItem(LLM_PROVIDER_STORAGE_KEY, JSON.stringify(value))
 }
 
 export function clearLlmConfig(): void {
@@ -54,6 +74,9 @@ export function maskApiKey(value: string): string {
 export function buildLlmHeaders(): Record<string, string> {
   const config = readStoredLlmConfig()
   if (!config) return {}
+  if (isServerLlm(config)) {
+    return getStoredToken() ? { 'X-LLM-Config-ID': config.serverId } : {}
+  }
   return {
     'X-LLM-Provider': config.provider,
     'X-LLM-Base-URL': config.baseUrl,

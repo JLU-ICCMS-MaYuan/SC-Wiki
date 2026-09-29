@@ -82,6 +82,8 @@ def save_llm_config(task_id: str, config: LlmConfig) -> None:
     payload = json.dumps({
         "provider": config.provider, "base_url": config.base_url,
         "model": config.model, "api_key": config.api_key,
+        "user_supplied": config.user_supplied,
+        "catalog_id": config.catalog_id, "provider_name": config.provider_name,
     }, ensure_ascii=False)
     client.setex(llm_config_key(task_id), max(1, int(settings.upload_task_ttl_seconds)), payload)
 
@@ -100,7 +102,9 @@ def load_llm_config(task_id: str) -> LlmConfig | None:
             raise ValueError("LLM 配置字段不完整")
         return LlmConfig(
             provider=provider, base_url=base_url, model=model, api_key=api_key,
-            user_supplied=True,
+            user_supplied=bool(data.get("user_supplied", True)),
+            catalog_id=str(data.get("catalog_id") or ""),
+            provider_name=str(data.get("provider_name") or ""),
         )
     except (KeyError, TypeError, ValueError, json.JSONDecodeError, UserCredentialError):
         # 凭据键是短生命周期的瞬态数据，损坏时删除并让任务回退服务端配置。

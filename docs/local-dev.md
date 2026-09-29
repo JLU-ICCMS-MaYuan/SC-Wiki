@@ -307,3 +307,43 @@ MySQL 拒绝打开高版本 datadir。必须走 `mysqldump` 逻辑导出，`migr
 - `tests/07_researcher_community_forum/news-feed.test.tsx` 中一个用例失败。在干净的 `HEAD` 上同样失败，与本地化无关。
 - 数据库里 `papers.knowledge_graph_title` 列已存在但 `alembic_version` 未记录该 revision
   （Docker 库里也一样，说明是手工加的列）。已用 `alembic stamp head` 对齐。
+
+## 编号 LLM 模型目录（#116）
+
+在私有 `.env` 按下列格式填写；每组四项都填齐才生效，全空组忽略。编号可有间隔，同一供应商可配置多个型号，无需填写模型数量。
+
+```dotenv
+LLM1_NAME=我的第一个模型
+LLM1_BASE_URL=https://your-gateway.example.com/v1
+LLM1_MODEL=your-model
+LLM1_API_KEY=
+
+LLM2_NAME=我的第二个模型
+LLM2_BASE_URL=https://another-gateway.example.com/v1
+LLM2_MODEL=another-model
+LLM2_API_KEY=
+
+# 可选；不写时使用最小编号。管理员运行时默认仍优先。
+LLM_DEFAULT=LLM1
+```
+
+真实 API Key 只保存在目标机器的私有配置文件。启动后，已登录用户可在侧栏“模型配置”选择“服务端模型”，无需再填写部署者密钥；原个人自带密钥入口仍可用。启用编号目录后，使用默认服务端模型同样需要登录。Embedding 与 SMTP 继续独立配置。
+
+宿主机进程加载环境后需重启 API 与 Worker。仓库 Docker Compose 的 Python 与 Worker 默认读取仓库根 `.env`；使用其他配置文件时，在执行 Compose 的环境中设置 `SC_WIKI_LLM_ENV_FILE` 为其绝对路径。Compose 需支持可选 `env_file.required`。例如：
+
+```bash
+SC_WIKI_LLM_ENV_FILE="/绝对路径/SC-Wiki/.env" \
+  docker compose --env-file "/绝对路径/SC-Wiki/.env" -f "docker/compose.yaml" up -d python worker
+```
+
+这是加载配置的命令，不会把尚未构建的代码更新放入旧镜像。先构建包含 #116 的应用版本；同一版本只修改 `.env` 时，重新执行 `up -d` 即可更新容器环境，`restart` 不会读取新变量。
+
+对类似 Mac Lima 的独立运行目录，可导出仅含编号项的环境文件，再把该文件加入 Python 和 Worker 的 `env_file`。这样无需复制源 `.env` 中的数据库或邮箱密码：
+
+```bash
+python3 "scripts/export-llm-env.py" "/源码目录/.env" "/运行目录/llm-catalog.env"
+```
+
+输出按 Compose 规则转义 `$` 和引号，权限为 0600。重新导出会移除已从源文件删除的编号组；源文件缺失、格式错误或源目标相同则拒绝改写。后续仍需重新创建应用容器环境。
+
+删除网页当前选择的编号后，会明确要求重新选择；不会自动切换到另一家付费模型。已入队的任务保留原有效快照，快照失效则失败并提示重试。具体权限和验证证据见 [#116 使用验收](specs/116-env-llm-catalog/quickstart.md)。

@@ -151,3 +151,11 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 
 - Go 默认只信任本机代理提供的 X-Real-IP；Docker 使用 TRUSTED_PROXIES 指定代理网络（默认 172.16.0.0/12，自定义网络需调整）。Nginx 和 Vite 覆盖来自客户端的 IP 头；Go 端口不得绕过代理公开。
 - SMTP 支持 implicit TLS 和强制 STARTTLS，总 IO 期限 20 秒；真实网易收信仍待私密配置后的验收。
+
+### 编号模型配置传递（#116）
+
+当前 Docker 编排的 Python API 和上传 Worker 均读取可选环境文件 `SC_WIKI_LLM_ENV_FILE`，默认是仓库根 `.env`，以支持 `LLM1_*` 到任意编号。原显式数据库、Redis、Neo4j 等环境映射保持优先；迁移包不携带这些服务商凭据。
+
+独立容器运行目录可使用 `python3 scripts/export-llm-env.py <私有源.env> <专用输出.env>`，只导出编号组和 `LLM_DEFAULT`，输出文件权限为 0600，替换旧目录项但不触碰其他凭据。Compose 接收导出文件后，需重新创建 Python/Worker 容器以加载新值。
+
+这项配置传递不改变 #112 的操作系统范围、数据包兼容性门或当前 Makefile，也不自动修复已经缺失的运行目录。详细使用方式见[编号模型使用验收](../../specs/116-env-llm-catalog/quickstart.md)。

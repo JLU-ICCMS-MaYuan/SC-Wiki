@@ -10,9 +10,11 @@ import { useLanguage } from '../context/LanguageContext'
 import {
   clearLlmConfig, maskApiKey, PROVIDER_PRESETS, readStoredLlmConfig,
   saveLlmConfig, validateLlmBaseUrl,
+  isServerLlm, type ServerLlmModel,
 } from '../lib/llmProvider'
 import { api } from '../lib/api'
 import SidebarButton from './SidebarButton'
+import { useAuth } from '../context/AuthContext'
 
 const DEFAULT_ID = 'server-default'
 
@@ -25,22 +27,26 @@ interface CurrentLlm {
 
 const LlmProviderSwitcher: React.FC<{ collapsed?: boolean }> = ({ collapsed = false }) => {
   const { lang } = useLanguage()
+  const { user: authUser } = useAuth()
   const [open, setOpen] = useState(false)
   const [saved, setSaved] = useState(readStoredLlmConfig)
   const [provider, setProvider] = useState(saved?.provider || DEFAULT_ID)
-  const [baseUrl, setBaseUrl] = useState(saved?.baseUrl || '')
+  const [baseUrl, setBaseUrl] = useState(saved && !isServerLlm(saved) ? saved.baseUrl : '')
   const [model, setModel] = useState(saved?.model || '')
-  const [apiKey, setApiKey] = useState(saved?.apiKey || '')
+  const [apiKey, setApiKey] = useState(saved && !isServerLlm(saved) ? saved.apiKey : '')
   const [showApiKey, setShowApiKey] = useState(false)
   const [error, setError] = useState('')
   const [connection, setConnection] = useState('')
   const [testing, setTesting] = useState(false)
   const [serverDefault, setServerDefault] = useState<CurrentLlm | null>(null)
+  const [catalog, setCatalog] = useState<ServerLlmModel[]>([])
+  const [catalogError, setCatalogError] = useState('')
 
   const { t } = useLanguage()
   const current = useMemo(
     () => {
       if (saved) {
+        if (isServerLlm(saved)) return `${saved.providerName} · ${saved.model}`
         const label = PROVIDER_PRESETS.find(item => item.id === saved.provider)?.label || saved.provider
         return `${label} · ${saved.model}`
       }
@@ -52,6 +58,17 @@ const LlmProviderSwitcher: React.FC<{ collapsed?: boolean }> = ({ collapsed = fa
   )
   const selected = PROVIDER_PRESETS.find(item => item.id === provider) || PROVIDER_PRESETS[0]
   const isDefault = provider === DEFAULT_ID
+  const isCatalog = provider.startsWith('server:')
+  const catalogItem = catalog.find(item => `server:${item.id}` === provider)
+
+  useEffect(() => {
+    if (!authUser) { setCatalog([]); setCatalogError(''); return }
+    let active = true
+    api.get<{ data: { items: ServerLlmModel[] } }>('/api/rag/llm/catalog')
+      .then(result => { if (active) { setCatalog(result.data.items); setCatalogError('') } })
+      .catch(() => { if (active) setCatalogError(t('nav.llmCatalogFailed')) })
+    return () => { active = false }
+  }, [authUser, open, t])
 
   useEffect(() => {
     if (saved) return
@@ -66,9 +83,9 @@ const LlmProviderSwitcher: React.FC<{ collapsed?: boolean }> = ({ collapsed = fa
     const config = readStoredLlmConfig()
     setSaved(config)
     setProvider(config?.provider || DEFAULT_ID)
-    setBaseUrl(config?.baseUrl || '')
+    setBaseUrl(config && !isServerLlm(config) ? config.baseUrl : '')
     setModel(config?.model || '')
-    setApiKey(config?.apiKey || '')
+    setApiKey(config && !isServerLlm(config) ? config.apiKey : '')
     setShowApiKey(false)
     setError('')
     setConnection('')
@@ -91,6 +108,11 @@ const LlmProviderSwitcher: React.FC<{ collapsed?: boolean }> = ({ collapsed = fa
     if (isDefault) {
       clearLlmConfig(); setSaved(null); setOpen(false); return
     }
+    if (isCatalog) {
+      if (!authUser || !catalogItem) { setError(t('nav.llmCatalogUnavailable')); return }
+      const next = { provider, serverId: catalogItem.id, providerName: catalogItem.name, model: catalogItem.model }
+      saveLlmConfig(next); setSaved(next); setOpen(false); return
+    }
     const finalBaseUrl = baseUrl.trim() || selected.baseUrl
     const finalModel = model.trim() || selected.model
     const urlError = validateLlmBaseUrl(finalBaseUrl)
@@ -102,6 +124,21 @@ const LlmProviderSwitcher: React.FC<{ collapsed?: boolean }> = ({ collapsed = fa
 
   const testConnection = async () => {
     if (isDefault) { setConnection(t('nav.llmDefaultActive')); return }
+    if (isCatalog) {
+      if (!authUser || !catalogItem) { setError(t('nav.llmCatalogUnavailable')); return }
+      const prior = readStoredLlmConfig()
+      saveLlmConfig({ provider, serverId: catalogItem.id, providerName: catalogItem.name, model: catalogItem.model })
+      setTesting(true); setError(''); setConnection('')
+      try {
+        const result = await api.post<{ data: { latency_ms: number } }>('/api/rag/llm/test-connection')
+        setConnection(t('nav.llmConnected', { latency: result.data.latency_ms }))
+      } catch (err: any) { setError(err.message || t('nav.llmConnectionFailed')) }
+      finally {
+        if (prior) saveLlmConfig(prior); else clearLlmConfig()
+        setTesting(false)
+      }
+      return
+    }
     const finalBaseUrl = baseUrl.trim() || selected.baseUrl
     const urlError = validateLlmBaseUrl(finalBaseUrl)
     if (urlError || !model.trim() || !apiKey.trim()) { setError(urlError || t('nav.llmKeyRequired')); return }
@@ -124,12 +161,20 @@ const LlmProviderSwitcher: React.FC<{ collapsed?: boolean }> = ({ collapsed = fa
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
           <Select value={provider} onChange={event => selectProvider(event.target.value)} fullWidth aria-label={lang === 'en' ? 'AI provider' : 'AI 供应商'}>
+            {catalog.map(item => <MenuItem key={item.id} value={`server:${item.id}`}>{t('nav.llmServerModel')} · {item.name} · {item.model}</MenuItem>)}
+            {isCatalog && !catalogItem && <MenuItem value={provider} disabled>{t('nav.llmCatalogUnavailable')}</MenuItem>}
             {PROVIDER_PRESETS.map(item => <MenuItem key={item.id} value={item.id}>{item.id === 'server-default' ? t('nav.llmServerDefault') : item.label}</MenuItem>)}
           </Select>
           {isDefault && serverDefault?.model && <Typography variant="body2" color="text.secondary">
             {t('nav.llmCurrentServer', { provider: serverDefault.provider_name, model: serverDefault.model })}
           </Typography>}
-          {!isDefault && <>
+          {catalogError && <Alert severity="warning">{catalogError}</Alert>}
+          {isCatalog && <>
+            <Alert severity={authUser && catalogItem ? 'info' : 'warning'}>{authUser && catalogItem ? t('nav.llmServerKeyHint') : t('nav.llmCatalogUnavailable')}</Alert>
+            {error && <Alert severity="error">{error}</Alert>}
+            {connection && <Alert severity="success">{connection}</Alert>}
+          </>}
+          {!isDefault && !isCatalog && <>
             <TextField label="Base URL" value={baseUrl} onChange={event => setBaseUrl(event.target.value)} placeholder={selected.baseUrl || 'https://your-gateway.example.com/v1'} fullWidth />
             <TextField label={t('nav.llmModel')} value={model} onChange={event => setModel(event.target.value)} placeholder={selected.model || 'model-name'} fullWidth />
             <TextField
