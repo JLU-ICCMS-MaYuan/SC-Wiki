@@ -98,3 +98,21 @@ def test_missing_server_snapshot_fails_task_instead_of_changing_model(monkeypatc
         upload_jobs.process_upload_task("d" * 32)
     assert changes[0]["status"] == "failed"
     assert changes[0]["error_code"] == "llm_task_config_expired"
+
+
+@pytest.mark.parametrize("status", ["completed", "submitted", "cancelled", "failed", "duplicate"])
+def test_replayed_terminal_catalog_task_keeps_its_result(monkeypatch, status):
+    state = {"status": status, "llm_provider": "server:LLM3"}
+    monkeypatch.setattr(upload_jobs, "load_llm_config", lambda _: None)
+    monkeypatch.setattr(upload_jobs, "get_state", lambda _: state)
+    monkeypatch.setattr(upload_jobs, "update_state", lambda *a, **kw: pytest.fail("不能覆盖终态"))
+    assert upload_jobs.process_upload_task("e" * 32) == state
+
+
+def test_expired_snapshot_does_not_override_requested_cancellation(monkeypatch):
+    state = {"status": "cancelling", "llm_provider": "server:LLM3"}
+    monkeypatch.setattr(upload_jobs, "load_llm_config", lambda _: None)
+    monkeypatch.setattr(upload_jobs, "get_state", lambda _: state)
+    monkeypatch.setattr(upload_jobs, "update_state", lambda _, **kw: {**state, **kw})
+    monkeypatch.setattr(upload_jobs, "_schedule_terminal_cleanup", lambda _: None)
+    assert upload_jobs.process_upload_task("f" * 32)["status"] == "cancelled"

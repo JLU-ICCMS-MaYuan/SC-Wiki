@@ -333,8 +333,10 @@ LLM_DEFAULT=LLM1
 
 ```bash
 SC_WIKI_LLM_ENV_FILE="/绝对路径/SC-Wiki/.env" \
-  docker compose --env-file "/绝对路径/SC-Wiki/.env" -f "docker/compose.yaml" up -d python worker
+  docker compose --env-file "/运行配置/docker.env" -f "docker/compose.yaml" up -d python worker
 ```
+
+`docker.env` 应包含该 Docker 实例实际使用的数据库等连接信息，可与模型配置来源文件不同；不要用宿主机的 localhost 数据库地址覆盖容器连接。
 
 这是加载配置的命令，不会把尚未构建的代码更新放入旧镜像。先构建包含 #116 的应用版本；同一版本只修改 `.env` 时，重新执行 `up -d` 即可更新容器环境，`restart` 不会读取新变量。
 

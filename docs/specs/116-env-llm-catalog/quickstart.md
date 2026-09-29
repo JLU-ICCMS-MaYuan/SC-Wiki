@@ -13,8 +13,8 @@
 
 2026-09-29 验证：
 
-- 后端 55 项通过：目录、真实 JWT/账号状态/会话版本、双 HTTP 上游选择、SSE、旧默认配置、错误脱敏及上传凭据回归。命令范围为 `backend/tests/test_llm_catalog*.py`、`test_llm_env_export.py`、`test_llm_context.py`、`test_llm_request_paths.py`、`test_llm_client_coverage.py`、`test_default_llm_config_api.py`、`test_issue73_error_safety.py` 及上传凭据测试。
-- RQ 验证使用独立 Redis 和真实 fork Worker：两份编号快照发送到指定 HTTP 上游、TTL 存在、完成后凭据删除，未调用默认配置。不是仅用 FakeRedis 推定通过。
+- 后端 61 项通过：目录、真实 JWT/账号状态/会话版本、双 HTTP 上游选择、SSE、旧默认配置、错误脱敏及上传凭据回归。命令范围为 `backend/tests/test_llm_catalog*.py`、`test_llm_env_export.py`、`test_llm_context.py`、`test_llm_request_paths.py`、`test_llm_client_coverage.py`、`test_default_llm_config_api.py`、`test_issue73_error_safety.py` 及上传凭据测试。
+- RQ 验证使用独立 Redis 和真实 fork Worker：两份编号快照发送到指定 HTTP 上游、TTL 存在、完成后凭据删除，未调用默认配置；另外覆盖了终态重复执行保持原结果和取消请求优先。不只用 FakeRedis 推定通过。
 - 前端 6 项通过：原个人入口、目录选择、失效 ID、浏览器无服务端密钥、退出登录不再发送编号。命令：`NODE_OPTIONS=--no-experimental-webstorage frontend/node_modules/.bin/vitest run --config vitest.config.ts tests/01_decentralized_uploading/llm-provider-switcher.test.tsx tests/01_decentralized_uploading/llm-catalog-switcher.test.tsx`。宿主 Node 26 的实验 localStorage 会干扰旧 Vitest，按命令关闭该特性，未修改项目依赖版本。
 - `npm --prefix frontend run build` 通过，保留既有大分包提示。
 - 真实 Compose 容器确认导出密钥中的美元符、引号和反斜杠原样传递，且数据库/SMTP 密码未导出。
