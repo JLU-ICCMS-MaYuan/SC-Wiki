@@ -1,0 +1,18 @@
+{
+  "schema_heads": [
+    "20260914_0052",
+    "20260924_0114"
+  ],
+  "arm64": {
+    "go": {
+      "version": "1.25.14",
+      "url": "https://go.dev/dl/go1.25.14.darwin-arm64.tar.gz",
+      "sha256": "5b26c0b6f308240fca2614fb02f622cfcc8c0cc3b69c78bba4845489a4590259"
+    },
+    "qdrant": {
+      "version": "1.19.0",
+      "url": "https://github.com/qdrant/qdrant/releases/download/v1.19.0/qdrant-aarch64-apple-darwin.tar.gz",
+      "sha256": "4e279a80cc1ebe73e859318ff86375af54c123887dd7ae46605c0eb6cb7c44e8"
+    }
+  }
+}

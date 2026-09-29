@@ -5,12 +5,14 @@ from contextlib import contextmanager
 import json
 import os
 from pathlib import Path
+import platform
 import signal
 import socket
 import subprocess
 import time
 
 from .environment import run
+from .host import java_home, listening_pids, process_info
 
 APPS = ('news-scheduler', 'frontend', 'goserver', 'worker', 'news-worker', 'python')
 
@@ -31,7 +33,7 @@ class Runtime:
         self.root, self.prefix, self.values = root, prefix, values
         self.data = data or root / '.data'
         self.local = root / '.local'
-        self.env = {**os.environ, **values, 'JAVA_HOME': str(prefix), 'PYTHONNOUSERSITE': '1',
+        self.env = {**os.environ, **values, 'JAVA_HOME': str(java_home(prefix)), 'PYTHONNOUSERSITE': '1',
                     'DEBUG': values.get('DEBUG', 'false'),
                     'PATH': f'{prefix}/bin:{self.local}/go/bin:' + os.environ.get('PATH', ''),
                     'SCWIKI_DEPLOY_DATA_DIR': str(self.data)}
@@ -54,18 +56,18 @@ class Runtime:
         if check_grobid:
             ports['grobid'] = (8070, 8071)
         import re
-        listeners = run(['ss', '-ltnp'], capture=True)
+        listeners = run(['ss', '-ltnp'], capture=True) if platform.system() != 'Darwin' else ''
         for service, numbers in ports.items():
             for number in numbers:
                 if not port_occupied(number):
                     continue
                 pid = self.owned_pid(service)
                 lines = [line for line in listeners.splitlines() if re.search(rf':{number}\s', line)]
-                listening_pids = {int(p) for line in lines for p in re.findall(r'pid=(\d+)', line)}
-                if pid is None or not listening_pids:
+                owners = listening_pids(number) if platform.system() == 'Darwin' else {int(p) for line in lines for p in re.findall(r'pid=(\d+)', line)}
+                if pid is None or not owners:
                     raise ValueError(f'端口 {number} 归属不明，拒绝复用')
                 group = os.getpgid(pid)
-                if any(os.getpgid(p) != group for p in listening_pids):
+                if any(os.getpgid(p) != group for p in owners):
                     raise ValueError(f'端口 {number} 属于其他进程')
 
     def owned_pid(self, name):
@@ -74,12 +76,12 @@ class Runtime:
             return None
         try:
             pid = int(path.read_text().strip())
-            if Path(f'/proc/{pid}/stat').read_text().split(') ', 1)[1].startswith('Z'):
-                return None
-            cmd = Path(f'/proc/{pid}/cmdline').read_bytes().replace(b'\0', b' ').decode()
-            cwd = Path(f'/proc/{pid}/cwd').resolve()
         except (OSError, ValueError):
+            raise ValueError(f'{name} PID 文件无效，拒绝操作') from None
+        info = process_info(pid)
+        if info is None:
             return None
+        cmd, cwd = info
         if pid <= 1 or (str(self.root) not in cmd and self.root not in (cwd, *cwd.parents)):
             raise ValueError(f'{name} PID 文件不属于当前项目')
         if os.getpgid(pid) != pid:
@@ -94,11 +96,7 @@ class Runtime:
         os.killpg(os.getpgid(pid), signal.SIGTERM)
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
-            try:
-                stat = Path(f'/proc/{pid}/stat').read_text().split(') ', 1)[1]
-                if stat.startswith('Z'):
-                    break
-            except OSError:
+            if process_info(pid) is None:
                 break
             time.sleep(0.25)
         else:

@@ -16,11 +16,15 @@ ALL_SERVICES=("${INFRA_SERVICES[@]}" "${APP_SERVICES[@]}")
 
 # ── 通用进程管理 ────────────────────────────────────────────
 
-# spawn <名称> <命令...>  以 setsid 启动后台进程并记录 pid
+# spawn <名称> <命令...>  创建独立进程会话并记录 pid
 spawn() {
   local name=$1; shift
-  setsid "$@" >>"$LOG_DIR/$name.log" 2>&1 &
-  echo $! > "$RUN_DIR/$name.pid"
+  if [[ $(uname -s) == Darwin ]]; then
+    "$PY_BIN/python" "$REPO_ROOT/scripts/local_deploy/host.py" spawn "$RUN_DIR/$name.pid" "$LOG_DIR/$name.log" "$@"
+  else
+    setsid "$@" >>"$LOG_DIR/$name.log" 2>&1 &
+    echo $! > "$RUN_DIR/$name.pid"
+  fi
 }
 
 # 优雅停止：先 TERM，超时再 KILL
@@ -30,7 +34,12 @@ stop_pid() {
   local name=$1
   local f="$RUN_DIR/$name.pid"
   [[ -f "$f" ]] || return 0
-  local p; p=$(cat "$f" 2>/dev/null || true)
+  local p
+  if [[ $(uname -s) == Darwin ]]; then
+    p=$(cd "$REPO_ROOT" && "$PY_BIN/python" -c 'from pathlib import Path; import sys; from scripts.local_deploy.runtime import Runtime; print(Runtime(Path.cwd(), Path.cwd(), {}).owned_pid(sys.argv[1]) or "")' "$name") || die "$name PID 归属检查失败"
+  else
+    p=$(cat "$f" 2>/dev/null || true)
+  fi
   if [[ -n "$p" ]] && kill -0 "$p" 2>/dev/null; then
     kill -TERM "-$p" 2>/dev/null || kill -TERM "$p" 2>/dev/null || true
     local i=0
@@ -73,11 +82,11 @@ start_neo4j() {
   # 首次启动前设置初始密码，使 .env 中的 NEO4J_PASSWORD 生效。
   if [[ ! -d "$DATA_DIR/neo4j/data/dbms" && ! -f "$LOCAL_DIR/deployment-state.json" ]]; then
     info "设置 Neo4j 初始密码"
-    JAVA_HOME="$INFRA_ENV" NEO4J_HOME="$NEO4J_HOME" \
+    JAVA_HOME="$NEO4J_JAVA_HOME" NEO4J_HOME="$NEO4J_HOME" \
       "$NEO4J_HOME/bin/neo4j-admin" dbms set-initial-password "$NEO4J_PASSWORD" \
       >>"$LOG_DIR/neo4j.log" 2>&1 || warn "初始密码设置失败（可能已设置过）"
   fi
-  spawn neo4j env JAVA_HOME="$INFRA_ENV" NEO4J_HOME="$NEO4J_HOME" "$NEO4J_HOME/bin/neo4j" console
+  spawn neo4j env JAVA_HOME="$NEO4J_JAVA_HOME" NEO4J_HOME="$NEO4J_HOME" "$NEO4J_HOME/bin/neo4j" console
   wait_for 120 "neo4j" neo4j_ready || die "neo4j 启动失败，见 $LOG_DIR/neo4j.log"
   if [[ -f "$LOCAL_DIR/deployment-state.json" ]]; then
     ( cd "$REPO_ROOT" && "$PY_BIN/python" -c 'from pathlib import Path; from scripts.local_deploy.config import read_config; from scripts.local_deploy.storage import initialize_neo4j_password; initialize_neo4j_password(read_config(Path.cwd()))' ) \
@@ -115,13 +124,17 @@ start_grobid() {
     grobid_ready || die "GROBID 进程存在但未就绪，见 $LOG_DIR/grobid.log"
     ok "grobid 已在运行"; return
   fi
-  [[ -x "$GROBID_HOME/grobid-service/bin/grobid-service" && -x "$GROBID_JAVA_HOME/bin/java" ]] \
+  [[ -x "$GROBID_HOME/grobid-service/bin/grobid-service" ]] \
     || die "缺少本机 GROBID，请执行 make deploy"
   port_busy "$GROBID_PORT" && die "端口 $GROBID_PORT 已被占用"
   port_busy "$GROBID_ADMIN_PORT" && die "端口 $GROBID_ADMIN_PORT 已被占用"
-  ( cd "$GROBID_HOME" && spawn grobid env JAVA_HOME="$GROBID_JAVA_HOME" \
+  local native_lib=lin-64 grobid_java_home
+  if [[ $(uname -s) == Darwin ]]; then native_lib=mac_arm-64; fi
+  grobid_java_home="$(python3 "$REPO_ROOT/scripts/local_deploy/host.py" java-home "$GROBID_JAVA_HOME")"
+  [[ -x "$grobid_java_home/bin/java" ]] || die "缺少 GROBID Java，请执行 make deploy"
+  ( cd "$GROBID_HOME" && spawn grobid env JAVA_HOME="$grobid_java_home" \
       LD_LIBRARY_PATH="$GROBID_JAVA_HOME/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
-      GROBID_SERVICE_OPTS="-Xmx2g -Djava.library.path=grobid-home/lib/lin-64 --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED" \
+      GROBID_SERVICE_OPTS="-Xmx2g -Djava.library.path=grobid-home/lib/$native_lib --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED" \
       "$GROBID_HOME/grobid-service/bin/grobid-service" )
   wait_for 180 "grobid" grobid_ready || die "GROBID 启动失败，见 $LOG_DIR/grobid.log"
   ok "grobid 127.0.0.1:$GROBID_PORT"
@@ -226,7 +239,7 @@ stop_redis() {
 
 stop_neo4j() {
   if [[ -x "$NEO4J_HOME/bin/neo4j" ]]; then
-    JAVA_HOME="$INFRA_ENV" NEO4J_HOME="$NEO4J_HOME" "$NEO4J_HOME/bin/neo4j" stop \
+    JAVA_HOME="$NEO4J_JAVA_HOME" NEO4J_HOME="$NEO4J_HOME" "$NEO4J_HOME/bin/neo4j" stop \
       >>"$LOG_DIR/neo4j.log" 2>&1 || true
   fi
   stop_pid "neo4j"; ok "neo4j 已停止"
@@ -282,7 +295,7 @@ main() {
 
   case "$action" in
     start)
-      if [[ -f "$LOCAL_DIR/deployment-state.json" ]]; then
+      if [[ -f "$LOCAL_DIR/deployment-state.json" || $(uname -s) == Darwin ]]; then
         ( cd "$REPO_ROOT" && "$PY_BIN/python" -m scripts.local_deploy.runtime "$REPO_ROOT" ) \
           || die "服务端口归属检查失败"
       fi
@@ -291,6 +304,9 @@ main() {
       for s in "${targets[@]}"; do "start_${s//-/_}"; done
       ;;
     stop)
+      if [[ $(uname -s) == Darwin ]]; then
+        ( cd "$REPO_ROOT" && "$PY_BIN/python" -m scripts.local_deploy.runtime "$REPO_ROOT" ) || die "服务端口归属检查失败"
+      fi
       local targets=("$@")
       if [[ ${#targets[@]} -eq 0 ]]; then
         # 逆序停止：先应用后基础设施

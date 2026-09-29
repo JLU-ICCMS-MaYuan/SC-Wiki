@@ -3,6 +3,24 @@
 全部本地服务（包括 GROBID）使用宿主机进程，不需要安装或启动 Docker。
 前端、Python、Go 与上传 Worker 支持源码重载；资讯 Worker/Scheduler 修改后需重启。
 
+## Mac 与 Linux 的入口
+
+根 Makefile 自动识别 macOS 并加载 `Makefile.mac`；也可显式执行
+`make -f Makefile.mac start`。Linux 继续执行原来的 Makefile 目标。
+Mac 当前支持 arm64，使用系统 Bash 3.2；Go 构建需要已安装的 Xcode Command Line Tools。
+
+所有服务均在宿主机直接运行，工作区即源码来源。`make start` 启动 MySQL、Redis、
+Neo4j、Qdrant、GROBID、Python、上传 Worker、资讯 Worker/Scheduler、Go 和前端。
+网页入口为 `http://127.0.0.1:5173`。`make restart` 重启全部服务；修改资讯进程代码后需重启。
+Mac 不提供旧 Docker 卷迁移命令；恢复使用符合当前版本约束的数据包。
+
+Mac Java 的实际目录由安装环境解析，不需要修改系统 JAVA_HOME。依赖与构建缓存保存在
+`.local/`，数据库和附件保存在 `.data/`；两者都不进入 Git。
+`.env` 的数据路径必须是当前项目的绝对路径，不能沿用另一台 Linux 机器的路径。
+
+平台制品和服务清单仍参与恢复校验，因此当前不承诺 Mac 与 Linux 冻结包直接互换。
+源码同步、原生依赖和生产镜像测试是不同环节；本功能不运行生产镜像发布验收。
+
 ## 快速开始
 
 首次在新机器部署，或恢复 `make frozen` 生成的包：
@@ -24,9 +42,10 @@ make deploy               # 准备环境、配置和数据，再启动
 本入口目前仍要求源码与包一致、恢复目标为空。**自动发现不等于允许覆盖当前实例或用新源码
 直接运行旧版备份**；当前实例最初即使是空库，也不能直接被另一个备份替换。
 
-首版面向联网 Linux x86_64 / WSL2 Ubuntu。提前准备 Conda、Bash、Make、Python 3、curl、tar、
-ss、setsid 等基础工具，完整分工见下表。Neo4j 从官方发行归档安装，GROBID 使用官方源码和模型在本机构建；
-版本及 SHA-256 固定在 `scripts/local-deploy-versions.json`。
+支持联网 Linux x86_64 / WSL2 Ubuntu 与 macOS Apple Silicon（arm64）。提前准备 Conda、Bash、Make、Python 3、curl、tar；
+Linux 使用 ss、setsid，Mac 使用系统 ps、lsof 和 Python 独立进程会话，完整分工见下表。Neo4j 从官方发行归档安装，GROBID 使用官方源码和模型在本机构建；
+公共版本及 Linux 制品的 SHA-256 固定在 `scripts/local-deploy-versions.json`；
+Mac 制品与迁移头覆盖保存在 `scripts/local-deploy-macos.json`。
 首次安装需要访问 Conda、PyPI、npm、Go、GitHub、Gradle/Maven 与 Neo4j 官方下载服务。
 若下载失败，先处理相应来源的网络访问；脚本不会退回 Docker 或跳过必需组件。
 报告中的 `next_steps` 提供处理建议；系统或目标检查失败时显示环境“未检查”，不代表 Conda
@@ -43,7 +62,7 @@ Conda 本身由用户安装，脚本复用兼容的 `sc-wiki`，没有则创建�
 | Conda | 提供环境管理命令；不要求提前创建 `sc-wiki`，无需激活它。 |
 | Bash、GNU Make、可运行的 Python 3 | 启动部署脚本；`python3` 可来自系统或 Conda base，应用另用 Python 3.12。 |
 | curl、CA 证书、tar、gzip | HTTPS 下载、校验来源和压缩包处理。 |
-| iproute2、util-linux、procps | 提供 `ss`、`setsid`、`ps` 等端口和进程工具。 |
+| Linux：iproute2、util-linux、procps；Mac：系统 ps、lsof | 核验端口与进程归属，拒绝接管其他实例。 |
 | coreutils、grep、sed、awk、findutils | 文件操作、SHA-256 校验、文本处理及构建脚本调用的 `find`/`xargs`。 |
 | Git | 源端记录冻结包对应提交；目标端先 clone 并切换到兼容提交，再执行 `make deploy`。 |
 

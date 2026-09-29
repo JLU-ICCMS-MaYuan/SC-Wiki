@@ -19,7 +19,7 @@ def project(tmp_path):
     root = tmp_path / 'project with spaces'
     shutil.copytree(ROOT / 'scripts/local_deploy', root / 'scripts/local_deploy',
                     ignore=shutil.ignore_patterns('__pycache__'))
-    for name in ('Makefile', 'scripts/local-deploy.py', 'scripts/locallydeploy.sh',
+    for name in ('Makefile', 'Makefile.mac', 'scripts/local-deploy-macos.json', 'scripts/local-deploy.py', 'scripts/locallydeploy.sh',
                  'scripts/local-deploy-versions.json', 'scripts/local-deploy-schema.json',
                  'docker/requirements.txt', 'frontend/package-lock.json',
                  'goserver/go.mod', 'goserver/go.sum'):

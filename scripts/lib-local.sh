@@ -18,6 +18,7 @@ SC_WIKI_ENV="$(cd "$REPO_ROOT" && python3 -m scripts.local_deploy.environment "$
 PY_BIN="$SC_WIKI_ENV/bin"
 INFRA_BIN="$SC_WIKI_ENV/bin"
 INFRA_ENV="$SC_WIKI_ENV"
+NEO4J_JAVA_HOME="$(python3 "$REPO_ROOT/scripts/local_deploy/host.py" java-home "$INFRA_ENV")"
 
 # ── 本地安装的服务 ──────────────────────────────────────────
 NEO4J_HOME="$LOCAL_DIR/neo4j"
@@ -59,21 +60,26 @@ ok()    { printf '\033[0;32m  ✓\033[0m %s\n' "$*"; }
 warn()  { printf '\033[0;33m  !\033[0m %s\n' "$*" >&2; }
 die()   { printf '\033[0;31m  ✗\033[0m %s\n' "$*" >&2; exit 1; }
 
+# 只导出解析器产生的数据，不执行配置中的 shell 文本。
+export_entries() {
+  local entry complete=0
+  while IFS= read -r -d '' entry; do
+    if [[ -z "$entry" ]]; then complete=1; else export "$entry"; fi
+  done < <("$@" && printf '\0')
+  [[ "$complete" == 1 ]]
+}
+
 # 加载 .env 到环境变量。backend/database.py 与 goserver 都从 os.environ 读取，
 # 不能只依赖 pydantic 的 env_file。
 load_env() {
   local f="$REPO_ROOT/.env"
   [[ -f "$f" ]] || die "缺少 .env，请先执行 make deploy"
-  local entries=() loader_pid
-  mapfile -d '' -t entries < <(python3 "$REPO_ROOT/scripts/local_deploy/config.py" "$REPO_ROOT")
-  loader_pid=$!
-  wait "$loader_pid" || die ".env 格式无效"
-  if (( ${#entries[@]} )); then export "${entries[@]}"; fi
-  local go_entries=() go_loader_pid
-  mapfile -d '' -t go_entries < <(cd "$REPO_ROOT" && python3 -m scripts.local_deploy.environment "$REPO_ROOT" --go-env)
-  go_loader_pid=$!
-  wait "$go_loader_pid" || die "Go 环境配置读取失败"
-  export "${go_entries[@]}"
+  # Bash 3.2 不能可靠 wait 进程替换；成功哨兵同时保留 NUL 分隔和错误检测。
+  export_entries python3 "$REPO_ROOT/scripts/local_deploy/config.py" "$REPO_ROOT" || die ".env 格式无效"
+  local original_dir="$PWD"
+  cd "$REPO_ROOT"
+  export_entries python3 -m scripts.local_deploy.environment "$REPO_ROOT" --go-env || die "Go 环境配置读取失败"
+  cd "$original_dir"
   export PATH="$PY_BIN:$GO_ROOT/bin:$PATH"
   export PYTHONNOUSERSITE=1
   if [[ -n ${SCWIKI_DEPLOY_DATA_DIR:-} ]]; then
@@ -84,7 +90,7 @@ load_env() {
 
 # 端口是否已被监听
 port_busy() {
-  ss -ltn 2>/dev/null | grep -q ":$1[[:space:]]"
+  python3 "$REPO_ROOT/scripts/local_deploy/host.py" port-busy "$1"
 }
 
 # 等待条件成立，超时返回 1。用法: wait_for <秒数> <描述> <命令...>

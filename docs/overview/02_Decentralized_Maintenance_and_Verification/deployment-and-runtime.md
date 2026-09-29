@@ -29,6 +29,15 @@
 - 测试可在宿主机直接运行（`scripts/run-tests.sh`，含 backend / go / frontend 三目标），不再需要挂载仓库的一次性容器。
 - 使用说明与实施过程中的环境约束记录见 `docs/local-dev.md`。
 
+### macOS 原生开发（[Issue #117](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/117)）
+
+- Apple Silicon Mac 通过根 Makefile 自动加载独立 `Makefile.mac`，提供 `deploy/setup/start/stop/restart/status/logs/frozen/test/test-go`。Linux 仍使用原有目标；Mac 启动不依赖 Lima 或 Docker。
+- 共用本地配置、状态、数据冻结/恢复及服务编排；`scripts/local-deploy-macos.json` 固定 Mac 的 Go、Qdrant 制品摘要和受测迁移头，Linux 清单保持独立。GROBID 使用官方 `mac_arm-64` 的 Wapiti、pdfalto 与独立 Java 17。
+- 兼容系统 Bash 3.2，配置采用 NUL 分隔安全导出；由 Python 创建独立进程组，使用 ps/lsof 核验进程工作目录、进程组与端口归属。端口检查允许关闭后的 TCP 等待状态，不将其当作活跃服务。
+- Python、Go 和前端直接使用当前工作区，文件变更已通过真实重载验证。网站入口仍是 `http://127.0.0.1:5173`，数据为 `.data/`，本机运行依赖为 `.local/`，私密配置为根 `.env`。
+- 当前机器从旧容器逻辑备份恢复到本机存储，已核对表结构、数量、图谱、向量配置及 PDF/Markdown 摘要。历史包兼容性检查仍然保留，不能把 Mac 与 Linux 的平台清单差异视为无条件可恢复。
+- 原生 GROBID 已通过合成 PDF 的真实参考文献解析；外部模型、SMTP 发件、Docling/MinerU 模型及真实 OCR 验收不由基础服务启动保证。
+
 ## 工作流程
 
 ### 生产部署
@@ -41,7 +50,7 @@
 ### 本地开发
 
 1. 用户先准备 Conda 和系统基础工具；`make deploy` 寻找其实际前缀并复用兼容的 `sc-wiki`，环境缺失则创建。脚本不安装或升级 Conda，不修改 base；缺少/不可用 Conda 或 `sc-wiki` 实际指向 base 时在预检阶段拒绝，可用 `CONDA_EXE` 指定安装位置。依赖版本和下载摘要由 `scripts/local-deploy-versions.json` 管理；Go、Neo4j 和 Qdrant 位于 `.local/`。`make setup` 委托同一安装器，仅准备依赖和配置；完整分工见[本地开发说明](../../local-dev.md#工具和配置分工)。
-2. `make deploy` 自动检查 `dist/` 的直接子项：只有一个压缩包时自动校验解压，多于一个明确要求只能保留一个，`.sha256` 不计数。显式 `BUNDLE` 可以指定来源但不绕过多包限制。压缩包与已有 `.deployment/manifest.json` 须一致；完全无包才初始化空库。有包时沿用当前源码/服务版本一致性、空目标和数据完整性检查，恢复到临时目录后提升为 `.data`。已有不属于该部署的数据（包括另一空库部署的实例）会阻断，成功后的重跑不重复导入。`make migrate` 保留为旧 Docker 卷迁移入口。
+2. `make deploy` 自动检查 `dist/` 的直接子项：只有一个压缩包时自动校验解压，多于一个明确要求只能保留一个，`.sha256` 不计数。显式 `BUNDLE` 可以指定来源但不绕过多包限制。压缩包与已有 `.deployment/manifest.json` 须一致；完全无包才初始化空库。有包时沿用当前源码/服务版本一致性、空目标和数据完整性检查，恢复到临时目录后提升为 `.data`。已有不属于该部署的数据（包括另一空库部署的实例）会阻断，成功后的重跑不重复导入。Linux 的 `make migrate` 保留为旧 Docker 卷迁移入口；Mac 明确提示使用符合版本约束的 `make deploy BUNDLE=...`。
 3. `make start` 启动全部服务，按依赖顺序等待健康检查。便携实例核验进程归属和真实 schema，只核验、不升级数据库；没有便携记录的旧实例保留原迁移启动路径。
 4. 浏览器访问 `http://127.0.0.1:5173`。`make status` 查看各服务状态，`make logs S=<服务>` 跟踪日志。
 
@@ -117,7 +126,9 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 - `docker/deploy/README.md`
 - `goserver/main.go`
 - `backend/main.py`
-- `Makefile`
+- `Makefile`、`Makefile.mac`
+- `scripts/local-deploy-macos.json`、`scripts/local_deploy/host.py`
+- `tests/02_maintenance_and_verification/test_mac_native.py`
 - `scripts/lib-local.sh`
 - `scripts/setup-local.sh`
 - `scripts/local_deploy/native.py`
@@ -134,6 +145,8 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 - `docs/local-dev.md`
 
 ## 相关变更记录
+
+- [Issue #117](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/117)：Mac 原生开发入口与平台适配（[Spec](../../specs/117-mac-native-development/spec.md)）。
 
 - [Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)：本地化开发环境，移除 Docker 依赖（`docs/specs/71-local-dev-no-docker/`）
 - [Issue #89](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/89)：WSL mirrored 与宝塔防火墙的本地开发兼容性（[Spec](../../specs/89-local-dev-firewall-compatibility/spec.md)）

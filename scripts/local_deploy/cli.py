@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -31,6 +32,8 @@ def source_identity(root):
              'scripts/local_deploy/cli.py', 'scripts/local_deploy/bundle.py', 'scripts/local_deploy/state.py',
              'docker/requirements.txt',
              'frontend/package-lock.json', 'goserver/go.mod', 'goserver/go.sum']
+    if environment.platform.system() == 'Darwin':
+        paths += ['Makefile.mac', 'scripts/local-deploy-macos.json']
     paths += [p.relative_to(root).as_posix() for p in sorted((root / 'alembic/versions').glob('*.py'))]
     return hashlib.sha256(''.join(bundle.digest(root / p) for p in paths).encode()).hexdigest()
 
@@ -76,8 +79,10 @@ def prepare_bundle(root, path, *, check_only=False):
 
 
 def capabilities(values):
+    llm_configured = values.get('LLM_API_KEY') or values.get('DEEPSEEK_API_KEY') or any(
+        value for key, value in values.items() if re.fullmatch(r'LLM[1-9]\d*_API_KEY', key))
     return {
-        'AI': '已配置，尚未实际调用验收' if values.get('LLM_API_KEY') or values.get('DEEPSEEK_API_KEY') else '未配置',
+        'AI': '已配置，尚未实际调用验收' if llm_configured else '未配置',
         'Embedding': '已配置，尚未实际调用验收' if values.get('EMBEDDING_API_KEY') or values.get('OPENAI_API_KEY') else '未配置',
         'SMTP': '已配置，尚未发送验收邮件' if values.get('SMTP_PASSWORD') else '未配置',
     }
@@ -178,7 +183,7 @@ def deploy(root: Path, args):
         env_record = root / '.local/deployment-environment.json'
         if env_record.exists():
             prefix = environment.runtime_prefix(root)
-            if json.loads(env_record.read_text())['versions_digest'] != bundle.digest(root / 'scripts/local-deploy-versions.json'):
+            if json.loads(env_record.read_text())['versions_digest'] != environment.versions_digest(root):
                 raise ValueError('依赖版本清单发生变化，拒绝隐式升级')
         else:
             state.save('environment')

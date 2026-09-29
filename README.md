@@ -2,6 +2,30 @@
 
 # SC-Wiki 各页面介绍
 
+## macOS 原生本地开发（#117）
+
+Apple Silicon Mac 在项目根目录直接使用以下命令，无需 Lima 或 Docker：
+
+```bash
+make deploy CHECK_ONLY=1
+make deploy
+make start
+make status
+make logs S=python
+make stop
+make frozen OUTPUT="/备份目录/sc-wiki.tar.gz"
+```
+
+根 `Makefile` 在 macOS 自动加载 `Makefile.mac`；Linux 沿用原有入口。用户提前准备
+Conda 与系统开发工具，脚本将依赖安装到独立 `sc-wiki` 环境及项目 `.local/`。
+业务数据位于 `.data/`，凭据位于根 `.env`，网站为 `http://127.0.0.1:5173`。
+Python、前端和 Go 直接使用当前工作区；无需复制源码到构建副本。
+
+`deploy` 保留已有实例和旧包的兼容性检查；`frozen` 要求工作区已提交。
+Mac 与 Linux 使用平台专属制品清单，当前不承诺二者的冻结包可直接互换，也不支持用
+任意新版本源码覆盖旧库。完整操作、数据保留及验证边界见
+[本地开发指南](docs/local-dev.md)和 [#117 验证说明](docs/specs/117-mac-native-development/quickstart.md)。
+
 ## 本地部署与搬迁（#112）
 
 新机器或迁移包解压目录使用 `make deploy`：自动寻找/创建 Conda `sc-wiki`、

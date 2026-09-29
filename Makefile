@@ -1,3 +1,6 @@
+ifeq ($(shell uname -s),Darwin)
+include Makefile.mac
+else
 # SC-Wiki 本地开发。所有服务在本机运行，不依赖 Docker；Conda 由用户准备。
 #
 #   make frozen    冻结并打包当前实例的业务数据（源码由 Git 迁移）
@@ -65,3 +68,5 @@ clean-docker:
 	@echo
 	@echo "当前占用："
 	@docker system df 2>/dev/null || echo "  (Docker 未运行)"
+
+endif

@@ -41,7 +41,23 @@ def run(args, *, cwd=None, env=None, timeout=1800, capture=False):
 
 
 def versions(root: Path) -> dict:
-    return json.loads((root / 'scripts/local-deploy-versions.json').read_text())
+    spec = json.loads((root / 'scripts/local-deploy-versions.json').read_text())
+    if platform.system() == 'Darwin':
+        overrides = json.loads((root / 'scripts/local-deploy-macos.json').read_text())
+        machine = platform.machine()
+        if machine not in overrides:
+            raise ValueError('当前 Mac 原生部署仅支持已验证的 Apple Silicon arm64')
+        spec.update(overrides[machine])
+        spec['platform'] = 'darwin-' + machine
+        spec['schema_heads'] = overrides['schema_heads']
+    return spec
+
+
+def versions_digest(root: Path) -> str:
+    if platform.system() != 'Darwin':
+        return digest(root / 'scripts/local-deploy-versions.json')
+    import hashlib
+    return hashlib.sha256(json.dumps(versions(root), sort_keys=True).encode()).hexdigest()
 
 
 def select_prefix(prefixes) -> Path | None:
@@ -126,9 +142,12 @@ if __name__ == '__main__':
 
 def preflight(root: Path, *, occupied_ok=False) -> list[str]:
     problems = []
-    if platform.system() != 'Linux' or platform.machine() not in ('x86_64', 'amd64'):
-        problems.append('首版只支持 Linux x86_64 / WSL2 Ubuntu')
-    for name in ('bash', 'make', 'curl', 'tar', 'setsid', 'ss'):
+    mac = platform.system() == 'Darwin'
+    if not ((mac and platform.machine() == 'arm64') or
+            (platform.system() == 'Linux' and platform.machine() in ('x86_64', 'amd64'))):
+        problems.append('仅支持 Linux x86_64 / WSL2 Ubuntu 与 macOS arm64')
+    tools = ('bash', 'make', 'curl', 'tar', 'lsof', 'ps') if mac else ('bash', 'make', 'curl', 'tar', 'setsid', 'ss')
+    for name in tools:
         if not shutil.which(name):
             problems.append(f'缺少系统前置工具 {name}')
     if not (root / 'scripts/local-deploy-versions.json').is_file():
@@ -225,6 +244,6 @@ def install(root: Path) -> Path:
     install_grobid(root, conda, spec['grobid'])
     actual_packages = json.loads(run([conda, 'list', '-p', prefix, '--json'], capture=True))
     write_json(local / 'deployment-environment.json', {'prefix': str(prefix), 'conda': str(conda),
-               'versions_digest': digest(root / 'scripts/local-deploy-versions.json'),
+               'versions_digest': versions_digest(root),
                'packages': [{k: row[k] for k in ('name', 'version', 'build_string')} for row in actual_packages]})
     return prefix

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 import os
+import platform
 from pathlib import Path
 import shutil
 import stat
@@ -10,13 +11,14 @@ import tempfile
 import zipfile
 
 from .bundle import write_json
+from .host import java_home
 from .environment import download, extract_tool, run
 
 
 def install_neo4j(root: Path, prefix: Path, spec: dict):
     local = root / '.local'
     target = local / 'neo4j'
-    env = {**os.environ, 'JAVA_HOME': str(prefix)}
+    env = {**os.environ, 'JAVA_HOME': str(java_home(prefix))}
     if not target.exists():
         archive = local / 'downloads/neo4j.tar.gz'
         download(spec, archive)
@@ -57,10 +59,12 @@ def configure_grobid(target: Path):
 
 
 def verify_grobid(target: Path, spec: dict):
+    native = 'mac_arm-64' if platform.system() == 'Darwin' else 'lin-64'
+    library = 'libwapiti.dylib' if platform.system() == 'Darwin' else 'libwapiti.so'
     for name in ('grobid-service/bin/grobid-service',
                  f'grobid-service/lib/grobid-core-{spec["version"]}.jar',
                  'grobid-home/config/grobid.yaml', 'grobid-home/models/citation/model.wapiti',
-                 'grobid-home/lib/lin-64/libwapiti.so', 'grobid-home/pdfalto/lin-64/pdfalto'):
+                 f'grobid-home/lib/{native}/{library}', f'grobid-home/pdfalto/{native}/pdfalto'):
         if not (target / name).is_file():
             raise ValueError(f'GROBID 安装不完整：{name}')
 
@@ -81,7 +85,7 @@ def install_grobid(root: Path, conda: Path, spec: dict):
             raise ValueError('GROBID Java 目录归属不明，不覆盖')
         run([conda, 'create', '-y', '-p', java, '--override-channels', '-c', 'conda-forge',
              *spec['conda_packages']])
-    actual = run([java / 'bin/java', '--version'], capture=True)
+    actual = run([java_home(java) / 'bin/java', '--version'], capture=True)
     fields = actual.split()
     if len(fields) < 2 or fields[0] != 'openjdk' or fields[1].split('-')[0] != spec['java_version']:
         raise ValueError('GROBID Java 版本不兼容，不覆盖')
@@ -91,7 +95,7 @@ def install_grobid(root: Path, conda: Path, spec: dict):
     source_archive, gradle_archive = cache / 'grobid.tar.gz', cache / 'gradle.zip'
     download(spec, source_archive)
     download(spec['gradle'], gradle_archive)
-    env = {**os.environ, 'JAVA_HOME': str(java), 'GRADLE_USER_HOME': str(local / 'gradle-cache'),
+    env = {**os.environ, 'JAVA_HOME': str(java_home(java)), 'GRADLE_USER_HOME': str(local / 'gradle-cache'),
            'PATH': f'{java}/bin:' + os.environ.get('PATH', '')}
     with tempfile.TemporaryDirectory(prefix='grobid-install-', dir=local) as temporary:
         stage = Path(temporary)

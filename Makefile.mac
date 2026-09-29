@@ -1,0 +1,24 @@
+# macOS 原生开发：复用本地服务编排，无 Docker/Lima。Conda 由用户准备。
+# 从根目录直接 make start；也可显式 make -f Makefile.mac start。
+.DEFAULT_GOAL := deploy
+.PHONY: deploy setup frozen start stop restart status logs test test-go migrate
+export OUTPUT BUNDLE CHECK_ONLY S
+export PYTHONDONTWRITEBYTECODE := 1
+
+deploy:
+	@bash "scripts/locallydeploy.sh"
+setup:
+	@bash "scripts/setup-local.sh"
+frozen:
+	@bash "scripts/pack.sh"
+start stop restart status:
+	@bash "scripts/dev.sh" "$@"
+logs:
+	@bash "scripts/dev.sh" logs "$${S:-python}"
+test:
+	@bash "scripts/run-tests.sh"
+test-go:
+	@bash "scripts/run-tests.sh" go
+migrate:
+	@echo "Mac 原生恢复使用 make deploy BUNDLE=/路径/数据包；不接管 Docker 数据卷。" >&2
+	@exit 2
