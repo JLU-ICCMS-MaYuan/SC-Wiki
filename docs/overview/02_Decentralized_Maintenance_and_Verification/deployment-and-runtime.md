@@ -99,10 +99,9 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 | --- | --- | --- | --- |
 | `client_max_body_size` | 50M / 51M | 无上限 | 本地不会触发体积拒绝 |
 | `proxy_request_buffering off` | 有 | 无 | 影响大文件上传的流式行为 |
-| `proxy_set_header Accept-Encoding ""` | 有 | 无 | 影响响应压缩链路，曾致上传响应 JSON 截断 |
 | `removeHeavyPreloads` 插件、`manualChunks` 分包 | 生效 | 不生效 | 仅构建期生效，dev 模式不走，故首屏预取与 chunk 划分问题本地不可见 |
 
-上表前三项只在改动上传相关功能时才有实际意义；第四项影响首屏加载表现。当前的处置是先不引入额外机制，把这些差异作为已知观察项记录（见「已知问题」）。若日后需要收敛，两条候选路径是：新增一个只跑生产构建、不产镜像的校验命令（可覆盖类型错误、构建期插件与依赖缺失等多数「本地好使、镜像挂掉」的情形）；或把 nginx 置于 Vite 之前而非替代之，以复现上表前三项配置，代价是多一层调试面且 HMR 的 WebSocket 经代理偶有连接问题。
+上表前两项只在改动上传相关功能时才有实际意义；第三项影响首屏加载表现。Python 与 Go 均不压缩 HTTP 响应，两条链路的响应编码一致（[Issue #118](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/118)）。当前的处置是先不引入额外机制，把这些差异作为已知观察项记录（见「已知问题」）。若日后需要收敛，两条候选路径是：新增一个只跑生产构建、不产镜像的校验命令（可覆盖类型错误、构建期插件与依赖缺失等多数「本地好使、镜像挂掉」的情形）；或把 nginx 置于 Vite 之前而非替代之，以复现上表前两项配置，代价是多一层调试面且 HMR 的 WebSocket 经代理偶有连接问题。
 
 ## 约束
 
@@ -114,7 +113,7 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 - `docker/deploy/README.md` 中的镜像标签、归档文件和导入命令属于交付包说明，发布前需要按实际归档核验。
 - 本地应用 Python、MySQL、Redis 和 OpenJDK 21 由 conda 环境 `sc-wiki` 管理；Mac GROBID 复用同一个 Java 21；Linux GROBID Java 17 仍位于项目私有前缀，不替换系统 Java。
 - 本地 MySQL 客户端命令必须带 `--defaults-file`：系统 `/etc/mysql/my.cnf` 含 `user = mysql` 与指向 `/var/log/mysql/` 的错误日志路径，以普通用户启动会失败。
-- 本地开发链路不含 nginx，`docker/nginx.conf` 中的 `client_max_body_size`、`proxy_request_buffering off` 与 `Accept-Encoding` 清空均不生效；`vite build` 期生效的 `removeHeavyPreloads` 与 `manualChunks` 在 dev 模式下同样不走。这不影响改动进入镜像（镜像内会重新构建源码），但同一份代码在两条链路下的上传与首屏行为可能不同，详见「本地改动如何进入 Docker 部署」。
+- 本地开发链路不含 nginx，`docker/nginx.conf` 中的 `client_max_body_size` 与 `proxy_request_buffering off` 均不生效；`vite build` 期生效的 `removeHeavyPreloads` 与 `manualChunks` 在 dev 模式下同样不走。这不影响改动进入镜像（镜像内会重新构建源码），但同一份代码在两条链路下的上传与首屏行为可能不同，详见「本地改动如何进入 Docker 部署」。
 - 当前 WSL `networkingMode=mirrored` 本地开发环境中，UFW 必须保持停止且禁止开机启动。宝塔安装器启用 UFW 并设置默认拒绝策略后，`loopback0` 上的 localhost TCP 流量会被拦截，导致 VS Code Remote WSL 和 Windows 访问本地服务失败。该约束只适用于当前 WSL 本地开发环境，不改变生产服务器的防火墙策略（[Issue #89](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/89)）。
 
 ## 代码与测试

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"compress/gzip"
-	"io"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -18,37 +16,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-
-// gzipMiddleware 对大于 1KB 的 JSON/HTML 响应启用 gzip 压缩
-func gzipMiddleware(c *gin.Context) {
-	if !strings.Contains(c.GetHeader("Accept-Encoding"), "gzip") {
-		c.Next()
-		return
-	}
-	c.Writer.Header().Set("Content-Encoding", "gzip")
-	c.Writer.Header().Del("Content-Length")
-
-	gz := gzip.NewWriter(c.Writer)
-	defer gz.Close()
-
-	c.Writer = &gzipWriter{ResponseWriter: c.Writer, Writer: gz}
-	c.Next()
-}
-
-type gzipWriter struct {
-	gin.ResponseWriter
-	Writer io.Writer
-}
-
-func (w *gzipWriter) Write(data []byte) (int, error) {
-	w.Header().Del("Content-Length")
-	return w.Writer.Write(data)
-}
-
-func (w *gzipWriter) WriteHeader(code int) {
-	w.Header().Del("Content-Length")
-	w.ResponseWriter.WriteHeader(code)
-}
 
 func main() {
 	// 1. 加载配置
@@ -72,9 +39,6 @@ func main() {
 	handlers.InitKnowledgeGraph()
 
 	// 6. 注册路由
-	// Gzip 压缩
-	r.Use(gzipMiddleware)
-
 	// CORS
 	r.Use(func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")

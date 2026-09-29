@@ -74,7 +74,6 @@ func TestCurrentMySQLEvidenceReview(t *testing.T) {
 		if r.URL.Path == "/api/rag/evidence/prepare-review" {
 			req, _ := http.NewRequest(http.MethodPost, "http://127.0.0.1:8000"+r.URL.Path, r.Body)
 			req.Header = r.Header.Clone()
-			req.Header.Del("Accept-Encoding")
 			resp, err := http.DefaultClient.Do(req)
 			if err != nil {
 				t.Error(err)

@@ -275,19 +275,17 @@ nginx 剩下的 `/api` 代理职责 `vite.config.ts` 已经在做，再叠一层
 |---|---|---|
 | `client_max_body_size` | 50M / 51M | 无上限 |
 | `proxy_request_buffering off` | 有 | 无 |
-| `Accept-Encoding` 清空 | 有 | 无 |
 | `removeHeavyPreloads` / `manualChunks` | 生效 | 不生效（仅构建期） |
 
-前三项只在改上传相关功能时才有意义；第四项影响首屏加载和 chunk 划分，本地永远看不出来。
-`Accept-Encoding` 那条值得留意，因为 `backend/main.py` 装了 `GZipMiddleware`，
-压缩行为在两条链路上确实不同 —— 当初加这条就是为了修上传响应 JSON 截断。
+前两项只在改上传相关功能时才有意义；第三项影响首屏加载和 chunk 划分，本地永远看不出来。
+Python 与 Go 均不压缩 HTTP 响应（[#118](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/118)），两条链路的响应编码一致。
 
 当前**不引入额外机制**，把这些差异当观察项。改上传功能或排查首屏性能时，
 直接起一次生产 compose 验证，比在本地维护半真半假的 nginx 层更可靠。
 
 日后若要收敛，两条候选路径：加一个只跑生产构建、不产镜像的校验命令
 （能覆盖类型错误、构建期插件、依赖缺失等多数「本地好使、镜像挂掉」的情形）；
-或把 nginx 放在 Vite **前面**而非替代它（能复现前三项配置，代价是多一层调试面，
+或把 nginx 放在 Vite **前面**而非替代它（能复现前两项配置，代价是多一层调试面，
 且 HMR 的 WebSocket 走代理偶发连接问题）。
 
 ## 实施过程中踩到的坑
