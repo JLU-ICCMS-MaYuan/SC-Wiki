@@ -65,6 +65,15 @@ async def _collect_events(stream):
             400,
             "LLM_MODEL_NOT_FOUND",
         ),
+        (
+            APIStatusError(
+                "no available channel",
+                response=httpx.Response(503, request=httpx.Request("POST", "https://llm.example.com")),
+                body={"code": "model_not_found", "type": "new_api_error"},
+            ),
+            400,
+            "LLM_MODEL_NOT_FOUND",
+        ),
     ],
 )
 def test_connection_error_mapping(monkeypatch, error, expected_status, expected_code):

@@ -73,4 +73,15 @@ Worker 共用的 `/data/runtime/default_llm.json`，后续调用立即生效。�
 
 API 与 Worker 重启后重新加载配置。Docker Compose 使用可选的 `SC_WIKI_LLM_ENV_FILE`（默认仓库根 `.env`）接收动态编号；独立运行目录可用 `scripts/export-llm-env.py` 导出仅含编号项的私有文件，保留目标数据库/邮箱配置。改变容器配置需要重新创建容器环境，单纯 restart 不会加载新变量。
 
+连接测试发送固定简短文本，单次输出上限为 256 token，读取超时为 30 秒，不自动重试或切换模型。
+必须收到非空正文才报告成功；只返回思考内容且输出额度用尽时返回 LLM_OUTPUT_LIMIT，
+HTML 网页或空响应返回 LLM_RESPONSE_INVALID。上游 model_not_found 即使伴随 HTTP503
+也提示模型不存在。返回结果不包含思考内容、凭据或上游原始异常。
+
+当前 Mac 原生实例已加载编号配置，网站代理和登录边界通过验证；两个实际模型已通过
+连接测试，另一用户配置的网关仍返回 HTML，其协议确认由 [Issue #116](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/116)
+追踪。真实供应商验证范围见 [验证记录](../../specs/116-env-llm-catalog/quickstart.md)，
+健康状态可用不代表每个目录项都已完成模型调用。
+
+
 实现与验证见 [#116 Spec](../../specs/116-env-llm-catalog/spec.md) 和[使用验收](../../specs/116-env-llm-catalog/quickstart.md)。隔离 JWT、HTTP、Redis/RQ 与前端验证不等于每个真实供应商已经完成兼容性验收。

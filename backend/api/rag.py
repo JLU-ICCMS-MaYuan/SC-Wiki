@@ -905,17 +905,26 @@ def test_llm_connection():
         })
     started = time.perf_counter()
     try:
-        response = get_llm_client(read_timeout=15).chat.completions.create(
+        response = get_llm_client(read_timeout=30).chat.completions.create(
             model=config.model,
-            messages=[{"role": "user", "content": "ping"}],
-            max_tokens=1,
+            messages=[{"role": "user", "content": "Reply with just OK."}],
+            # 推理也消耗输出额度；单 token 会把可用模型误判为连接失败。
+            max_tokens=256,
         )
         # HTTP 200 也可能是网关首页或空生成结果，不能据此证明模型可用。
         choices = getattr(response, "choices", None)
         message = getattr(choices[0], "message", None) if choices else None
         content = getattr(message, "content", None)
         if not isinstance(content, str) or not content.strip():
-            raise ValueError("LLM 未返回有效正文")
+            if choices and getattr(choices[0], "finish_reason", None) == "length":
+                raise HTTPException(status_code=502, detail={
+                    "code": "LLM_OUTPUT_LIMIT", "message": "模型已响应，但测试输出额度用尽，尚未生成正文",
+                })
+            raise HTTPException(status_code=502, detail={
+                "code": "LLM_RESPONSE_INVALID", "message": "服务未返回有效模型正文，请检查 Base URL 和模型配置",
+            })
+    except HTTPException:
+        raise
     except APITimeoutError as exc:
         raise HTTPException(status_code=504, detail={
             "code": "LLM_TIMEOUT", "message": "连接测试超时，请重试",
@@ -930,7 +939,8 @@ def test_llm_connection():
         if status in {401, 403} or "api key" in message or "authentication" in message:
             code, text = "LLM_AUTH_FAILED", "API Key 无效或已过期"
             response_status = 400
-        elif status == 404 or "model" in message and ("not found" in message or "does not exist" in message):
+        elif (status == 404 or getattr(exc, "code", None) == "model_not_found"
+              or "model" in message and ("not found" in message or "does not exist" in message)):
             code, text = "LLM_MODEL_NOT_FOUND", "模型名不存在"
             response_status = 400
         else:

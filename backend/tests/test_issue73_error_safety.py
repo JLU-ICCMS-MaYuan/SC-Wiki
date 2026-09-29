@@ -53,7 +53,51 @@ def test_connection_checks_sdk_response(monkeypatch, scoped_config, body, expect
         assert response.status_code == expected
         assert SECRET not in response.text
         assert len(requests) == 1
-        assert json.loads(requests[0].content)["max_tokens"] == 1
+        assert json.loads(requests[0].content)["max_tokens"] == 256
+
+
+@pytest.mark.parametrize("body,code", [
+    ({"choices": [{"finish_reason": "length", "message": {
+        "role": "assistant", "content": "", "reasoning_content": "internal reasoning"}}]}, "LLM_OUTPUT_LIMIT"),
+    ({"choices": [{"finish_reason": "stop", "message": {
+        "role": "assistant", "content": None}}]}, "LLM_RESPONSE_INVALID"),
+    ("<html>gateway</html>", "LLM_RESPONSE_INVALID"),
+])
+def test_connection_empty_reply_explains_failure_without_leaking(monkeypatch, scoped_config, body, code):
+    def respond(request):
+        return httpx.Response(200, text=body) if isinstance(body, str) else httpx.Response(200, json=body)
+    with OpenAI(api_key=SECRET, base_url="https://example.invalid/v1",
+                http_client=httpx.Client(transport=httpx.MockTransport(respond))) as sdk:
+        monkeypatch.setattr(rag, "get_llm_client", lambda **kwargs: sdk)
+        app = FastAPI()
+        app.post("/probe")(rag.test_llm_connection)
+        with TestClient(app) as client:
+            response = client.post("/probe")
+        assert response.status_code == 502
+        assert response.json()["detail"]["code"] == code
+        assert SECRET not in response.text
+        assert "internal reasoning" not in response.text
+
+
+def test_reasoning_probe_gets_enough_budget_for_visible_reply(monkeypatch, scoped_config):
+    requests = []
+    def respond(request):
+        payload = json.loads(request.content)
+        requests.append(payload)
+        # 模拟推理消耗后才返回正文的上游，使用真实 SDK 解析结果。
+        enough = payload["max_tokens"] >= 128
+        return httpx.Response(200, json={"choices": [{"finish_reason": "stop" if enough else "length",
+            "message": {"role": "assistant", "content": "OK" if enough else "",
+                        "reasoning_content": "internal reasoning"}}]})
+    with OpenAI(api_key=SECRET, base_url="https://example.invalid/v1",
+                http_client=httpx.Client(transport=httpx.MockTransport(respond))) as sdk:
+        monkeypatch.setattr(rag, "get_llm_client", lambda **kwargs: sdk)
+        app = FastAPI()
+        app.post("/probe")(rag.test_llm_connection)
+        with TestClient(app) as client:
+            response = client.post("/probe")
+        assert response.status_code == 200
+        assert len(requests) == 1
 
 
 @pytest.mark.parametrize("status", [401, 403])

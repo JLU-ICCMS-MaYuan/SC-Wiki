@@ -64,12 +64,13 @@ def test_upload_llm_config_has_ttl_and_worker_cleans_it(monkeypatch, outcome):
     assert key not in redis.values
 
 
-def test_transient_cleanup_deletes_upload_llm_config(monkeypatch):
+def test_transient_cleanup_deletes_upload_llm_config(monkeypatch, tmp_path):
     task_id = "b" * 32
     redis = FakeRedis()
     monkeypatch.setattr(upload_tasks, "redis_client", lambda: redis)
     monkeypatch.setattr(upload_tasks, "_delete_processing_job", lambda _job_id: None)
     monkeypatch.setattr(upload_tasks, "get_state", lambda _: None)
+    monkeypatch.setattr(upload_tasks.settings, "sc_wiki_data_dir", tmp_path)
 
     upload_tasks.cleanup_transient_data(task_id)
 

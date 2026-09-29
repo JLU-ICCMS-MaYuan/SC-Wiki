@@ -27,6 +27,26 @@ Mac 与 Linux 使用平台专属制品清单，当前不承诺二者的冻结包
 任意新版本源码覆盖旧库。完整操作、数据保留及验证边界见
 [本地开发指南](docs/local-dev.md)和 [#117 验证说明](docs/specs/117-mac-native-development/quickstart.md)。
 
+## 编号服务端模型配置（#116）
+
+在私有 `.env` 中按 `LLM1_NAME/BASE_URL/MODEL/API_KEY`、`LLM2_*` 等填写多组
+OpenAI 兼容模型，无需数量字段，编号可以不连续；同一供应商可配置不同型号。
+四字段须全部填写，全空组忽略。可用 `LLM_DEFAULT=LLM1` 指定默认项。
+
+Mac/Linux 原生开发修改配置后执行：
+
+```bash
+bash "scripts/dev.sh" restart python worker news-worker news-scheduler
+```
+
+登录后在侧栏模型配置中选择“服务端模型”。浏览器只保存模型编号，不接收部署者密钥；
+原个人自带密钥入口保留，Embedding 和 SMTP 独立配置。连接测试会发送简短文本，
+可能产生少量模型用量；测试无效不会自动改用其他模型。Base URL 与模型 ID 必须按
+网关实际的 OpenAI 兼容接口填写，不能把网页地址或其他协议接口当作生成接口。
+
+详情见[本地开发指南](docs/local-dev.md#编号-llm-模型目录116)和
+[#116 使用与验证记录](docs/specs/116-env-llm-catalog/quickstart.md)。
+
 ## 本地部署与搬迁（#112）
 
 新机器或迁移包解压目录使用 `make deploy`：自动寻找/创建 Conda `sc-wiki`、
