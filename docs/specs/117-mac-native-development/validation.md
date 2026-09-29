@@ -18,8 +18,16 @@
 
 .env 已保留全部非空凭据，修正旧 Linux 数据目录、删除重复空 SMTP 占位，并将旧 LLM<n>_PROVIDER_NAME 改为 #116 已实现契约的 LLM<n>_NAME；3 组编号配置可解析。原文件以私密权限备份于 .local/backups/environment-before-mac.env。
 
-## 收尾验收
+## 收尾验收（已完成）
 
-- make frozen 的未提交源码拒绝门槛已验证；真实冻结包和隔离恢复将在实现提交后验收，当前不能据此宣称完成。
-- 业务备份位于 .local/backups/lima-migration-117/；Lima 专用资产尚待最终清理，其中存在 #116 临时验证容器，已询问其清理范围。
+- make frozen 的未提交源码拒绝门槛已验证。实现提交后真实生成 .local/backups/scwiki-macos-117.tar.gz（约 7.8 MB，73 个载荷文件），完整摘要校验通过，源应用服务自动恢复。初次实测发现 ps/lsof 之间进程退出的竞态，b437dbc 修复后原生专项 12 通过、1 跳过，真实冻结重试成功。
+- 使用 Git 提交源码的独立目录和全新配置，真实运行 make deploy 恢复该冻结包；54 表/3595 行、图谱和向量配置一致，恢复 1 条有效草稿。验证目录服务全部停止后切回原实例，再删除验证目录。没有绕过部署版本、归属、数据完整性或凭据保护。
+- 业务备份位于 .local/backups/lima-migration-117/，删除旧环境前再次核对全部备份摘要。检查发现 #116 临时容器已被其任务清理，旧 VM 不再被其他任务占用；因此按用户原授权删除专用 scwiki 虚拟机、~/.scwiki-lima/、.local/mac-deploy/、.local/scwiki-runtime/，并清理已结束的验证副本、归档和本次一次性脚本。
+- 清理后 make status 显示 11 个原生服务运行；主页及核心 API 正常，代码已本地提交且未推送。旧 Linux 包与业务备份保留；原子移动/导出/恢复过程中未清空业务数据。
 - 未实际调用外部 LLM/Embedding、SMTP 发件；Docling/MinerU 的模型下载和真实 OCR 不在本次验收范围。
+
+## 证据位置
+
+本机 .local/mac-native-verification.json、mac-pdf-smoke-report.json、mac-reload-verification.json、mac-roundtrip-verification.json、mac-cleanup-verification.json 保留汇总证据。备份说明在 .local/backups/README.md；这些运行产物与凭据均不进入 Git。
+
+Issue #117 已记录本地交付结果；由于未获推送授权，代码与 Spec 尚未发布到远端，Issue 保持开放供后续审阅，不将本地完成混写成服务器部署完成。
