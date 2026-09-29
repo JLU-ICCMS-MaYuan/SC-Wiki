@@ -71,6 +71,17 @@ def test_invalid_pid_is_rejected_before_signalling(tmp_path, value):
         Runtime(tmp_path, Path(sys.prefix), {}).stop_gracefully('worker', timeout=1)
 
 
+def test_process_exiting_between_ps_and_lsof_is_stopped(monkeypatch):
+    from scripts.local_deploy import host
+    monkeypatch.setattr(host.platform, 'system', lambda: 'Darwin')
+    replies = iter([(0, 'S python worker'), (1, ''), (1, '')])
+    def run(args, **kwargs):
+        code, output = next(replies)
+        return subprocess.CompletedProcess(args, code, stdout=output)
+    monkeypatch.setattr(host.subprocess, 'run', run)
+    assert host.process_info(12345) is None
+
+
 def test_unknown_listener_is_not_adopted(tmp_path):
     with socket.socket() as sock:
         try:

@@ -33,6 +33,11 @@ def process_info(pid: int):
     cwd = next((Path(line[1:]).resolve() for line in result.stdout.splitlines()
                 if line.startswith('n')), None)
     if cwd is None:
+        # 进程可能在 ps 和 lsof 之间退出；重新确认，不能误报归属失败。
+        state = subprocess.run(['ps', '-p', str(pid), '-o', 'stat='],
+                               capture_output=True, text=True, timeout=10)
+        if (state.returncode == 1 and not state.stdout.strip()) or state.stdout.strip().startswith('Z'):
+            return None
         raise ValueError('无法核对本机进程工作目录')
     return command, cwd
 
