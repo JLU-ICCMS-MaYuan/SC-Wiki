@@ -78,10 +78,12 @@ API 与 Worker 重启后重新加载配置。Docker Compose 使用可选的 `SC_
 HTML 网页或空响应返回 LLM_RESPONSE_INVALID。上游 model_not_found 即使伴随 HTTP503
 也提示模型不存在。返回结果不包含思考内容、凭据或上游原始异常。
 
-当前 Mac 原生实例已加载编号配置，网站代理和登录边界通过验证；两个实际模型已通过
-连接测试，另一用户配置的网关仍返回 HTML，其协议确认由 [Issue #116](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/116)
-追踪。真实供应商验证范围见 [验证记录](../../specs/116-env-llm-catalog/quickstart.md)，
-健康状态可用不代表每个目录项都已完成模型调用。
+Base URL 需指向网关实际的 OpenAI 兼容根路径（常见为带 `/v1` 的地址），系统在其后拼接
+`/chat/completions`，不会自动补全或改写路径；指向网页根地址时连接测试返回 LLM_RESPONSE_INVALID。
+
+当前 Mac 原生实例已加载编号配置，网站代理和登录边界通过验证；目录中的两个编号模型均已
+通过网站连接测试，已从配置删除的编号被拒绝且不回退其他模型。真实供应商验证范围见
+[验证记录](../../specs/116-env-llm-catalog/quickstart.md)，健康状态可用不代表每个目录项都已完成模型调用。
 
 
 实现与验证见 [#116 Spec](../../specs/116-env-llm-catalog/spec.md) 和[使用验收](../../specs/116-env-llm-catalog/quickstart.md)。隔离 JWT、HTTP、Redis/RQ 与前端验证不等于每个真实供应商已经完成兼容性验收。

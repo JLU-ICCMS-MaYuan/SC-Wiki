@@ -18,7 +18,7 @@
 
 - [x] T009 [US2] 在 backend/tests/test_issue73_error_safety.py、test_llm_request_paths.py 覆盖推理模型连接测试额度、截断/空响应和上游 model_not_found 的真实 SDK 边界。
 - [x] T010 [US2] 修复 backend/api/rag.py 的单次连接测试：256 token 上限、30 秒读取超时；截断无正文、响应格式错误和模型不存在分别返回安全提示，不重试或切换模型。
-- [ ] T011 [US3] 在当前 Mac 原生实例重新加载用户保存的 .env，通过实际代理/认证链验证编号目录及真实供应商；仅发送最小测试文本，不写业务论文或输出密钥。
-- [ ] T012 [US3] 更新 README.md、docs/local-dev.md、Overview 与本 Spec 验证记录，补齐 Epic #21 关系并按实际结果收尾 Issue #116。
+- [x] T011 [US3] 在当前 Mac 原生实例重新加载用户保存的 .env，通过实际代理/认证链验证编号目录及真实供应商；仅发送最小测试文本，不写业务论文或输出密钥。
+- [x] T012 [US3] 更新 README.md、docs/local-dev.md、Overview 与本 Spec 验证记录，补齐 Epic #21 关系并按实际结果收尾 Issue #116。
 
-T011 已完成当前部署、目录脱敏、真实身份拒绝、LLM1/LLM3 调用；LLM2 保持用户指定地址，返回 HTML，协议待确认，因此不勾选完成。T012 的 README、指南、Overview 及 Epic 原生父子关系核对已完成，Issue 关闭等待 T011。
+T011 首轮 LLM2 因 Base URL 缺少 /v1 返回 HTML；用户修正地址并删除原 LLM3 后，LLM1/LLM2 真实连接测试均通过，已删除编号被拒绝，详见 [验证记录](quickstart.md#llm2-地址修正后的最终验收2026-09-29)。T012 文档与 Epic 关系核对完成，Issue 可关闭。

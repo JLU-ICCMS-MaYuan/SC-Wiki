@@ -32,7 +32,7 @@
 
 - 匿名和伪造登录的连接测试返回 401；有效账号的短期测试凭据只驻留进程内存，不写入文件。
 - 已登录目录返回 3 个配置项，只包含 id/name/model，响应不包含真实密钥或地址。
-- LLM1 的 deepseek-v4-pro 和 LLM3 的 gpt-6-sol 均通过网站连接测试，响应模型与选择一致。
+- 当时的 LLM1 deepseek-v4-pro 和 LLM3 gpt-6-sol 均通过网站连接测试，响应模型与选择一致。
 - LLM2 的 claude-opus-5-5 保持用户指定的不带 /v1 的 Base URL。实际
   POST /chat/completions 返回 HTTP 200、text/html，内容是网页，不是模型响应；
   网站明确返回 502 / LLM_RESPONSE_INVALID，未自动修改路径或切换模型。
@@ -52,6 +52,17 @@ LLM_RESPONSE_INVALID；网关以 HTTP503 携带 model_not_found 时按模型不�
 不写入当前实例的业务数据。修正旧清理测试使用 /data 的宿主路径依赖，
 测试自身明确使用 tmp_path。前端未修改，实现阶段生产构建通过的记录仍见上文。
 
-当前唯一未完成项是 LLM2 网关协议/有效生成接口确认。#116 保持开放，
-不把 HTML 网页响应或健康元数据冒充真实模型调用成功。
-本机脱敏证据位于 .local/issue116-live-verification.json。
+## LLM2 地址修正后的最终验收（2026-09-29）
+
+网关直接探测表明，同一主机的根路径 /chat/completions 返回网页，而 /v1/chat/completions
+返回标准 OpenAI 兼容 JSON，因此原问题是 Base URL 缺少 /v1，不需要新增协议。用户随后将
+LLM2 改为带 /v1 的地址与 gpt-6-sol，并删除原 LLM3。重启 API 与三个 Worker/Scheduler 后，
+经 http://127.0.0.1:5173 的 Vite→Go→Python 链复验：
+
+- 匿名、伪造登录的目录请求及匿名连接测试均返回 401。
+- 已登录目录返回 2 项（LLM1 deepseek-v4-pro、LLM2 gpt-6-sol），仅含 id/name/model，不含密钥或地址。
+- LLM1、LLM2 连接测试均返回 200，响应型号与所选编号一致。
+- 已删除的 LLM3 返回 400，未回退到其他模型。
+
+上方旧 LLM2 记录保留为问题轨迹。本机脱敏证据位于 .local/issue116-live-verification.json。
+#116 全部验收项完成。
