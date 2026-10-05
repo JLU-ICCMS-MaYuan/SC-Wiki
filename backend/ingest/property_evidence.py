@@ -379,7 +379,21 @@ SYSTEM_PROMPT = '''你是当前论文的科学数据来源核对助手。论文�
 输出 JSON {"results":[{"key":"输入记录key","status":"supported|unsupported|uncertain|missing","reason":"简体中文解释具体原因，指出物性/数值/条件差异","suggestion":"解释问题的改进方向，不作为替换值","fields":["输入 field 或其子字段"],"evidences":[{"file_id":"...","chunk_index":0,"quote":"原文逐字引句"}]}]}。
 可选 proposal 格式为 {"values":{"editable_fields中的path":"可直接采用的值，遵循schema类型"},"supported":true,"evidences":[{"file_id":"...","chunk_index":0,"quote":"逐字原文"}]}。文本候选应是完整替换内容，不含操作指令。仅使用 editable_fields 中的路径；无可靠候选省略 proposal，结构不生成替换。
 unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，missing 表示本段找不到相关出处。必须覆盖每个输入 key。
-有相关测量温度/相近数值但不支持 Tc 时返回 unsupported 及其原文，不能伪装 supported，也不要丢弃原文。'''
+有相关测量温度/相近数值但不支持 Tc 时返回 unsupported 及其原文，不能伪装 supported，也不要丢弃原文。
+
+判定口径（按科学含义核对，而非字符串是否逐字出现）：
+- 等价表示视为一致：化学计量等价的写法（(H2S)2H2 与 H3S、La0.5Ce0.5H9 与 (La,Ce)H9 的同一组成）、
+  排版差异（Im-3m/Im3̄m/Im3m、Å/A˚、16×16×24/16 3 16 3 24）、单位换算（GPa/kbar、K/°C）、同义术语
+  （Allen-Dynes modified McMillan 与 allen_dynes）。文本层乱码导致的差异不是科学不一致。
+- 结构化字段只核对值本身：state_kind、材料维度、晶系、结构家族等分类字段，原文内容足以判断即为 supported；
+  不要求原文逐字写出枚举词。压力原文与单位、压力上下界只要与原文报告的压力或区间一致即 supported。
+- 叙述字段（summary、key_finding、methodology、keywords_tags、research_motivation、knowledge_graph_title、
+  paper_type、research_materials、material_families）是对全文的忠实概括：主要内容均能在原文找到依据即 supported，
+  并给出最能代表的 1–3 条引句；只有包含原文没有的事实或数值时才判 unsupported 或 uncertain。
+- 材料状态上下文：记录所属状态的材料、相、压力与原文一致时再判 supported；材料写成反应物或前驱体
+  （把 H3S 的相写成 H2S）属于真实错误，判 unsupported 并在 proposal 中给出正确值。
+- 只看到部分来源时，若本组来源与该记录无关，返回 missing 且不给 evidences；不要因为“本组片段未提及”
+  把其他位置已报告的内容判为 unsupported。参考文献列表只代表他人工作。'''
 
 
 
@@ -438,10 +452,29 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
     return [results[r['key']] for r in records]
 
 
+SOURCE_BATCH_CHARS = 120000
+# 整篇来源较长，每次调用多核对几项以控制重复输入的成本。
+RECORD_BATCH = 20
+REFERENCE_HEADING = re.compile(r'^\s*(#+\s*)?(references|bibliography|参考文献|references and notes)\s*$', re.IGNORECASE | re.MULTILINE)
+
+
+def evidence_source_chunks(chunks):
+    """参考文献列表只描述他人工作，不参与本文字段核对，避免“片段未提及”式的伪不确定。"""
+    kept = []
+    for chunk in chunks:
+        heading = ' '.join(str(chunk.get(k) or '') for k in ('section', 'heading'))
+        if REFERENCE_HEADING.search(heading) or REFERENCE_HEADING.match(str(chunk.get('content') or '')[:40]):
+            continue
+        kept.append(chunk)
+    return kept or chunks
+
+
 def source_batches(chunks):
+    # 主流模型上下文足以容纳整篇正文与补充材料；尽量整篇核对，只有超长时才分批。
+    chunks = evidence_source_chunks(chunks)
     batches, batch, size = [], [], 0
     for chunk in chunks:
-        if batch and size + len(chunk['content']) > 24000:
+        if batch and size + len(chunk['content']) > SOURCE_BATCH_CHARS:
             batches.append(batch); batch, size = [], 0
         batch.append(chunk); size += len(chunk['content'])
     if batch:
@@ -455,7 +488,7 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None):
     from backend.ingest.upload_jobs import _ensure_not_cancelled
     snapshot = upload_snapshot(task_id, owner, parsing_draft=draft)
     records = [r for r in snapshot['records'] if r.get('kind') != 'derived']
-    batches = [(records[start:start + 8], chunks) for start in range(0, len(records), 8) for chunks in source_batches(snapshot['chunks'])]
+    batches = [(records[start:start + RECORD_BATCH], chunks) for start in range(0, len(records), RECORD_BATCH) for chunks in source_batches(snapshot['chunks'])]
     candidates = {r['key']: [] for r in records}
     errors = {r['key']: [] for r in records}
     for index, (rows, chunks) in enumerate(batches):
@@ -500,7 +533,7 @@ def run_evidence_job(job_id: str):
         # 完整扫描来源，按上下文大小分批，不以检索排名截断整篇论文。
         batches = source_batches(snapshot['chunks']) if records else []
         source_batch_count = len(batches)
-        batches = [(source_batch, records[start:start + 8]) for start in range(0, len(records), 8) for source_batch in batches]
+        batches = [(source_batch, records[start:start + RECORD_BATCH]) for start in range(0, len(records), RECORD_BATCH) for source_batch in batches]
         deadline_seconds = min(1740, max(480, len(batches) * 150))
         processed = {r['key']: 0 for r in records}
         update_job(job_id, completed_batches=0, total_batches=len(batches), current_batch=0)
@@ -715,9 +748,11 @@ def aggregate_candidates(records, candidates, location_errors, model):
     results = {}
     for record in records:
         all_items = candidates[record['key']]
-        items = [i for i in all_items if i['evidences'] or (i.get('proposal') or {}).get('evidences')] or all_items
+        # 每批只看到部分来源；“本批未提及”不能抵消其他批次已定位的判断。
+        located = [i for i in all_items if i['evidences']]
+        items = located or [i for i in all_items if (i.get('proposal') or {}).get('evidences')] or all_items
         statuses = {i['status'] for i in items}
-        status = 'uncertain' if len(statuses) > 1 else next(iter(statuses), 'missing')
+        status ='uncertain' if len(statuses) > 1 else next(iter(statuses), 'missing')
         evidences = []
         for item in items:
             for evidence in item['evidences']:

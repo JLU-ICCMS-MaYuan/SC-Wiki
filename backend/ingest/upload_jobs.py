@@ -14,7 +14,7 @@ from typing import Any
 from sqlalchemy import and_, func
 
 from backend.database import SessionLocal
-from backend.db_helpers import extract_formula_elements_loose, normalize_formula
+from backend.db_helpers import FORMULA_NON_ELEMENT_TOKENS, extract_formula_elements_loose, normalize_formula
 from backend.ingest.chunker import Chunk, chunk_paper
 from backend.ingest.extractor import _parse_result
 from backend.ingest.pdf_extractor import extract_text_from_pdf
@@ -84,6 +84,18 @@ referenced_materials 仅作为后台排除误判的临时候选，不进入用�
 每个压力条件单独建立 material_state；压力同时保留换算后的 GPa 数值和论文原始文本/单位。
 空间群必须拆为 Hermann–Mauguin 符号与国际群号。λ 写入 lambda_ep，ωlog 写入 omega_log_k（K）；
 原文未报告的字段必须为 null。Tc 写入 tc_results，不得混入普通 properties。
+
+你的职责是修正解析文本并提炼事实，而不是照抄乱码：
+- PDF 文本层常把下标、负号、乘号、等号拆坏（如 "H 3 S"、"Im 3m"、"16 3 16 3 24"、"A˚"）。字段值写成规范形式
+  （H3S、Im-3m、16×16×24、Å），但 quote 必须逐字复制解析文本中的原样片段，不得改写、拼接或加省略号。
+- material 写论文研究对象的完整化学式，保留论文写法：(H2S)2H2 不得截成 H2S；替代式合金写 (La,Ce)H9 或
+  La0.5Ce0.5H9；论文把同一物质写成两种形式（如 (H2S)2H2 与 H3S）时，以本文正文主要使用的写法为准并保持一致。
+  反应物、分解产物、前驱体（如 H2S 之于 H3S、LaH3 之于 LaH10）不是本文研究材料，不建立 material_state。
+- 同一相在同一压力下只建立一个 material_state；一个相跨压力报告多个 Tc 时，每个压力一个状态。
+  相的稳定压力区间（如 "stable above 180 GPa"）写入 pressure_raw，不要为此单独再建一个无 Tc 的状态。
+- 实验论文：只采用本文样品的测量结果；Tc 保留判据（onset、midpoint、zero resistance）写入 value_raw 或条件描述。
+  理论论文：每条 Tc 对应的 μ*、方法（McMillan、Allen-Dynes、Eliashberg、SCDFT）必须来自同一句或同一表格。
+- 数值只取原文明确写出的值；“约”“~”“above” 等限定写入 value_raw，不得把范围端点或近似值改成精确值。
 通讯作者只能根据星号说明、通讯邮箱或 correspondence 声明识别；共同第一作者只能根据
 equal contribution、contributed equally 等明确声明识别。证据不足时返回空数组，不得按作者顺序猜测。
 
@@ -116,7 +128,7 @@ issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测�
 
 CHUNK_SYSTEM_PROMPT += EXPERIMENTAL_CONDITIONS_PROMPT
 
-CHUNK_RESULT_SCHEMA_VERSION = 8
+CHUNK_RESULT_SCHEMA_VERSION = 9
 
 PUBLIC_CHUNK_RESULT_FIELDS = {
     "metadata", "paper_type_evidence", "research_materials",
@@ -143,6 +155,17 @@ referenced_materials 仅用于帮助区分本文对象与背景对象，最终�
 论文整体 paper_type 与每条物性的 article_type 必须分别判断，article_type 只允许 e 或 t。
 每个关键分类和物性保留 section/page/quote 证据；无法确定就返回 unknown 或空值，不要编造。
 通讯作者和共同第一作者必须来自 authors；仅在分段候选包含明确声明时保留，不能根据作者顺序猜测。
+你是最终的提炼与修正环节：分段候选来自互不相连的片段，可能重复、碎片化或带有解析乱码。
+必须主动完成以下工作，而不是把候选原样拼接：
+- 合并：同一材料、同一相（空间群）、同一压力的候选合并为一个 material_state，Tc、λ、ωlog、μ*、方法、条件
+  归并到这一状态；某候选只给出相而没有压力、另一候选给出该相在具体压力下的 Tc 时，把它们合并到有压力的状态，
+  不要保留一个空壳状态。
+- 统一材料：material 在全文使用一致的完整化学式；排除反应物、分解产物和前人工作中的材料。
+  material_name 只在论文使用常用名或替代式无法写成单一化学式时填写，否则为 null。
+- 修正：把解析乱码写成规范值（Im-3m、16×16×24、Å、负号），数值与原文一致；不同分段对同一字段给出
+  不同值时，采用证据最直接（表格、方法段、正文结果句）的一个，不要取平均或拼接。
+- 证据：每条保留的事实选用分段候选中已有的最直接 quote；不得新写、改写或拼接 quote。
+- 空值：原文确实未报告的字段保持 null/unknown，不要为了“完整”编造；可由空间群符号查表得到的群号可以填写。
 按材料、压力、state_kind 和报告空间群区分 material_states。空间群符号与群号必须分开；λ、ωlog 只写入
 calculation_context，Tc 只写入 tc_results。压力优先换算为 GPa，同时保留 pressure_raw 和
 pressure_unit_raw；无法可靠换算或原文没有报告时保留原文并将规范数值设为 null。
@@ -355,8 +378,24 @@ def _lightweight_identity(file_item: dict[str, Any], markdown: str) -> dict[str,
     }
 
 
+# 提取窗口：相、压力、Tc、λ 常分布在相邻段落，过小的分段会丢失对应关系并拆碎材料状态。
+EXTRACTION_WINDOW_CHARS = 12000
+
+
+def _merge_extraction_windows(chunks: list[Chunk]) -> list[Chunk]:
+    windows: list[Chunk] = []
+    for chunk in chunks:
+        previous = windows[-1] if windows else None
+        if previous is not None and len(previous.content) + len(chunk.content) <= EXTRACTION_WINDOW_CHARS:
+            previous.content = f"{previous.content}\n\n{chunk.content}"
+            previous.token_count += chunk.token_count
+        else:
+            windows.append(Chunk(chunk.paper_id, len(windows), chunk.section_name, chunk.heading, chunk.content, chunk.token_count))
+    return windows
+
+
 def _chunks_with_preamble(markdown: str) -> list[Chunk]:
-    chunks = chunk_paper(markdown, paper_id=0)
+    chunks = _merge_extraction_windows(chunk_paper(markdown, paper_id=0))
     if not chunks:
         return []
     sample = chunks[0].content[:120]
@@ -373,12 +412,12 @@ def _chunks_with_preamble(markdown: str) -> list[Chunk]:
             offset = markdown.find(sample)
         if offset >= 0:
             cursor = offset + len(sample)
-            local_marker = re.search(r"<!--\s*page:\s*(\d+)\s*-->", chunk.content)
-            if local_marker:
-                chunk.source_page = int(local_marker.group(1))
-            else:
-                markers = list(re.finditer(r"<!--\s*page:\s*(\d+)\s*-->", markdown[:offset]))
-                chunk.source_page = int(markers[-1].group(1)) if markers else None
+            # 窗口可能从上一页中部开始：优先取窗口之前最后一个页标记，而非窗口内首个标记。
+            leading = re.match(r"\s*<!--\s*page:\s*(\d+)\s*-->", chunk.content)
+            before = list(re.finditer(r"<!--\s*page:\s*(\d+)\s*-->", markdown[:offset]))
+            inside = re.search(r"<!--\s*page:\s*(\d+)\s*-->", chunk.content)
+            marker = leading or (before[-1] if before else inside)
+            chunk.source_page = int(marker.group(1)) if marker else None
         else:
             chunk.source_page = None
     return chunks
@@ -901,18 +940,18 @@ def _formula_from_material(value: Any) -> str:
         return text
     except ValueError:
         pass
-    candidates = [
-        token
-        for token in re.split(r"[^A-Za-z0-9.]+", text)
-        if re.fullmatch(r"(?:[A-Z][a-z]?(?:\d+(?:\.\d+)?)?)+", token or "")
-    ]
-    for candidate in sorted(candidates, key=len, reverse=True):
+    # 仅从“化学式 + 描述词”（如 H3S (Im-3m)）中取出唯一的完整化学式；不截取词内片段，
+    # 否则 (La,Ce)H9 会变成 H9，改变材料身份。无法确定时返回空，原文由调用方保留为材料名。
+    candidates = set()
+    for token in re.split(r"[\s,;/]+", text):
+        if not token or token in FORMULA_NON_ELEMENT_TOKENS:
+            continue
         try:
-            normalize_formula(candidate)
-            return candidate
+            normalize_formula(token)
+            candidates.add(token)
         except ValueError:
             continue
-    return text
+    return candidates.pop() if len(candidates) == 1 else ""
 
 
 def _condition_pressure(item: dict[str, Any]) -> tuple[float | None, float | None, float | None, str | None, str | None]:
@@ -960,7 +999,7 @@ def _numeric_range(value: Any) -> tuple[float | None, float | None, float | None
 def _legacy_properties_to_material_states(properties: list[dict[str, Any]]) -> list[dict[str, Any]]:
     states: dict[tuple[Any, ...], dict[str, Any]] = {}
     for item in properties:
-        material = _formula_from_material(item.get("material"))
+        material = _formula_from_material(item.get("material")) or str(item.get("material") or "").strip()
         pressure_value, pressure_min, pressure_max, pressure_raw, pressure_unit = _condition_pressure(item)
         article_type = item.get("article_type")
         state_kind = "theoretical" if article_type == "t" else "experimental" if article_type == "e" else "unknown"
@@ -1108,7 +1147,11 @@ def _normalize_material_states(value: Any) -> list[dict[str, Any]]:
             continue
         state = dict(raw)
         state.pop("scope", None)
-        state["material"] = _formula_from_material(state.get("material"))
+        raw_material = str(state.get("material") or "").strip()
+        state["material"] = _formula_from_material(raw_material)
+        if raw_material and not state["material"] and not str(state.get("material_name") or "").strip():
+            # 不能解析为化学式的论文写法保留为材料名，由用户决定规范化学式。
+            state["material_name"] = raw_material[:255]
         if state.get("element_count_locked"):
             state["element_count"] = _int_or_none(state.get("element_count"))
         else:
@@ -1116,7 +1159,8 @@ def _normalize_material_states(value: Any) -> list[dict[str, Any]]:
                 _normalized_formula, elements, _composition, _ratios = normalize_formula(state["material"])
                 element_count = len(elements) or None
             except ValueError:
-                element_count = len(extract_formula_elements_loose(state["material"])) or None
+                # 替代式 (La,Ce)H9 的括号是组分而非注释，按分隔符读取元素。
+                element_count = len(extract_formula_elements_loose(re.sub(r"[()\[\],]", " ", raw_material))) or None
             if element_count is None:
                 element_count = _int_or_none(state.get("element_count"))
             state["element_count"] = element_count

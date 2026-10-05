@@ -32,12 +32,21 @@ def test_parse_formula_composition_rejects_trailing_garbage():
     raise AssertionError("expected trailing garbage to raise ValueError")
 
 
-def test_parse_formula_composition_rejects_parentheses():
-    try:
-        parse_formula_composition("La(OH)2")
-    except ValueError:
-        return
-    raise AssertionError("expected parentheses to raise ValueError")
+def test_parse_formula_composition_expands_groups_and_subscripts():
+    # #120：分组写法不能被截成其中一段而改变材料身份。
+    assert parse_formula_composition("La(OH)2") == {"La": Decimal("1"), "O": Decimal("2"), "H": Decimal("2")}
+    assert parse_formula_composition("(H2S)2H2") == {"H": Decimal("6"), "S": Decimal("2")}
+    assert parse_formula_composition("(H₂S)₂H₂") == {"H": Decimal("6"), "S": Decimal("2")}
+    assert normalize_formula("(H2S)2H2")[1] == ["H", "S"]
+
+
+def test_parse_formula_composition_rejects_unbalanced_or_alternative_groups():
+    for formula in ("(H2S", "H2S)", "(La,Ce)H9", "()H2"):
+        try:
+            parse_formula_composition(formula)
+        except ValueError:
+            continue
+        raise AssertionError(f"expected {formula} to raise ValueError")
 
 
 def test_parse_formula_composition_rejects_zero_amounts():

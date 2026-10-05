@@ -53,29 +53,59 @@ FORMULA_NON_ELEMENT_TOKENS = {
 }
 
 
+FORMULA_SUBSCRIPTS = str.maketrans("₀₁₂₃₄₅₆₇₈₉", "0123456789")
+FORMULA_AMOUNT_RE = re.compile(r"\d+(?:\.\d+)?")
+FORMULA_GROUPS = {"(": ")", "[": "]"}
+
+
 def parse_formula_composition(formula: str) -> dict[str, Decimal]:
+    """解析化学式组成，支持 (H2S)2H2 这类分组写法与 Unicode 下标。"""
     if not formula or not formula.strip():
         raise ValueError("chemical formula is required")
-    value = formula.strip()
-    composition: dict[str, Decimal] = {}
-    cursor = 0
-    while cursor < len(value):
-        match = FORMULA_TOKEN_RE.match(value, cursor)
+    value = formula.strip().translate(FORMULA_SUBSCRIPTS)
+
+    def amount_at(cursor: int) -> tuple[Decimal, int]:
+        match = FORMULA_AMOUNT_RE.match(value, cursor)
         if not match:
-            raise ValueError(f"invalid chemical formula: {formula}")
-        symbol, amount_text = match.groups()
-        if symbol not in VALID_ELEMENT_SYMBOLS:
-            raise ValueError(f"unknown element symbol in formula: {symbol}")
-        amount = Decimal(amount_text) if amount_text else Decimal("1")
+            return Decimal("1"), cursor
+        amount = Decimal(match.group())
         if amount <= 0:
             raise ValueError(f"invalid chemical formula amount: {formula}")
-        if symbol in composition:
+        return amount, match.end()
+
+    def parse(cursor: int, closing: str | None) -> tuple[dict[str, Decimal], int]:
+        composition: dict[str, Decimal] = {}
+
+        def add(symbol: str, amount: Decimal) -> None:
             with localcontext() as ctx:
                 ctx.prec = max(50, len(value) + 10)
-                composition[symbol] += amount
-        else:
-            composition[symbol] = amount
-        cursor = match.end()
+                composition[symbol] = composition.get(symbol, Decimal("0")) + amount
+
+        while cursor < len(value):
+            char = value[cursor]
+            if char == closing:
+                return composition, cursor + 1
+            if char in FORMULA_GROUPS:
+                inner, cursor = parse(cursor + 1, FORMULA_GROUPS[char])
+                if not inner:
+                    raise ValueError(f"empty group in chemical formula: {formula}")
+                multiplier, cursor = amount_at(cursor)
+                for symbol, amount in inner.items():
+                    add(symbol, amount * multiplier)
+                continue
+            match = FORMULA_TOKEN_RE.match(value, cursor)
+            if not match:
+                raise ValueError(f"invalid chemical formula: {formula}")
+            symbol = match.group(1)
+            if symbol not in VALID_ELEMENT_SYMBOLS:
+                raise ValueError(f"unknown element symbol in formula: {symbol}")
+            amount, cursor = amount_at(match.start(2) if match.group(2) else match.end())
+            add(symbol, amount)
+        if closing is not None:
+            raise ValueError(f"unbalanced chemical formula: {formula}")
+        return composition, cursor
+
+    composition, _cursor = parse(0, None)
     if not composition:
         raise ValueError(f"invalid chemical formula: {formula}")
     return composition

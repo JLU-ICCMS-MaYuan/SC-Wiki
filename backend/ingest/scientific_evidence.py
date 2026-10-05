@@ -137,6 +137,13 @@ def state_records(state, index):
     for row in rows:
         row['state_key'] = state_key
         name = row['field'].rsplit('.', 1)[-1]
+        symmetry = derived_symmetry_value(state, name)
+        if symmetry and populated(state.get(name)):
+            # 群号与晶系由报告符号查表得到，核对依赖符号本身，不要求论文逐字写出。
+            row.update(kind='derived', dependency=item_identity(item_identity('state', state_key), 'reported_space_group_symbol'),
+                       provenance={'kind': 'derived', 'rule': symmetry, 'input': state.get('reported_space_group_symbol'),
+                                   'expected': str(state.get(name)), 'verified': True})
+            continue
         conversion = converted_state_value(state, name)
         if conversion and populated(state.get(name)):
             raw_field, expected, rule = conversion
@@ -144,6 +151,19 @@ def state_records(state, index):
                        provenance={'kind': 'derived', 'rule': rule, 'input': state[raw_field],
                                    'expected': str(expected), 'verified': abs(Decimal(str(state[name])) - expected) <= Decimal('0.000001')})
     return rows
+
+
+def derived_symmetry_value(state, name):
+    """仅当群号/晶系与报告空间群符号的标准对应完全一致时视为派生值。"""
+    if name not in {'reported_space_group_number', 'crystal_system'}:
+        return None
+    from backend.services.space_groups import crystal_system_for_number, lookup_number
+    number = lookup_number(str(state.get('reported_space_group_symbol') or ''))
+    if number is None:
+        return None
+    if name == 'reported_space_group_number':
+        return '空间群符号查国际表得到群号' if str(state.get(name)) == str(number) else None
+    return '空间群符号 → 群号 → 晶系' if state.get(name) == crystal_system_for_number(number) else None
 
 
 def converted_state_value(state, name):

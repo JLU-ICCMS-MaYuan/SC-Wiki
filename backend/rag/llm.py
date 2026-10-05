@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import json
+import time
 from collections.abc import Callable
 from typing import Any
 
+import httpx
 from openai import APIConnectionError, APITimeoutError, OpenAI
 from backend.rag.llm_client import get_llm_client
 from backend.rag.llm_context import get_llm_config
@@ -64,7 +66,7 @@ def complete_json(
     *,
     on_partial: Callable[[str], None] | None = None,
     read_timeout: float = 90.0,
-    retries: int = 1,
+    retries: int = 2,
 ) -> dict[str, Any]:
     """流式请求 LLM 并解析 JSON。连接中断或读超时最多额外重试 retries 次。"""
     last_error: Exception | None = None
@@ -74,10 +76,12 @@ def complete_json(
                 system_prompt, user_prompt,
                 on_partial=on_partial, read_timeout=read_timeout,
             )
-        except (APITimeoutError, APIConnectionError, json.JSONDecodeError, RuntimeError) as exc:
+        # 流式响应中途断开（httpx.TransportError）不经 OpenAI 包装，同样按可重试处理。
+        except (APITimeoutError, APIConnectionError, httpx.TransportError, json.JSONDecodeError, RuntimeError) as exc:
             last_error = exc
             if attempt >= retries:
                 break
             print(f"  [LLM] 请求或响应格式异常，{attempt + 1}/{retries} 次重试")
+            time.sleep(min(2 ** attempt, 8))
     assert last_error is not None
     raise last_error

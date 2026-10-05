@@ -89,7 +89,7 @@ def test_worker_reports_completed_batches_only_after_model_returns(monkeypatch):
     from backend.rag import llm
     from backend.api.evidence import get_job
 
-    sources = [dict(file_id='main', chunk_index=i, content=f'quote {i} '+ 'x'*24000) for i in range(2)]
+    sources = [dict(file_id='main', chunk_index=i, content=f'quote {i} '+ 'x'*ev.SOURCE_BATCH_CHARS) for i in range(2)]
     record = dict(key='47', item_key='47', field='records[47]', claim={}, evidences=[])
     job = dict(id='test-job', owner=1, status='queued', cached={}, snapshot={
         'target': 'paper', 'target_id': '29', 'version': 'v', 'records': [record], 'chunks': sources})
