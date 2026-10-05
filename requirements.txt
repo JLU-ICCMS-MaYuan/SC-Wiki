@@ -11,6 +11,7 @@ jinja2>=3.1
 
 # ── 数据库 ──────────────────────────────────────────────────
 SQLAlchemy==2.0.52
+greenlet==3.5.6        # 异步引擎依赖；SQLAlchemy 在 macOS arm64 上不自动安装
 alembic>=1.13
 PyMySQL[rsa]==1.2.0   # MySQL 8 caching_sha2_password 认证需要 RSA 支持
 asyncmy>=0.2           # MySQL (异步，RAG)

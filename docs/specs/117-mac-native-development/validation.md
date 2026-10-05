@@ -45,3 +45,11 @@ Issue #117 已记录本地交付结果；由于未获推送授权，代码与 Sp
 - 定向迁移只更新当前实例的 GROBID 工具链、环境摘要和源码摘要；原元数据备份至 .local/backups/java21-consolidation/。数据库结构/行数清单保持一致，其他服务清单不变，历史冻结包原样保留。
 - 独立 Java17 约 362 MB 已释放；本次源码、构建工具、缓存、下载文件和旧 GROBID 制品副本均已删除。未向主 Conda 环境复制不需要的 libxml2/fontconfig 文件，也未修改系统 Java 或 Conda base。
 - 本机汇总证据：.local/java21-consolidation-verification.json。外部 LLM、SMTP、真实 OCR 和生产镜像未新增验收。
+
+## greenlet 依赖漏检补记
+
+2026-09-29 追加（[#119](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/119)）：Mac 原生环境打开上传解析草稿返回 500，日志为 `No module named 'greenlet'`。
+
+- 原因：SQLAlchemy 2.0.52 仅在 `aarch64`、`x86_64` 等 `platform_machine` 上自动依赖 greenlet，macOS Apple Silicon 为 `arm64`；依赖清单未显式声明，原安装验证只导入同步组件，未覆盖异步会话。
+- 修复：`docker/requirements.txt` 与 `requirements.txt` 固定 `greenlet==3.5.6`；`scripts/local_deploy/environment.py` 安装后导入检查加入 greenlet。
+- 验证：本机 `sc-wiki` 安装后 `pip check` 无冲突；重启 python、worker 后异步会话查询成功，H3S 任务草稿接口返回 81086 字节。

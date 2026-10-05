@@ -230,7 +230,7 @@ def install(root: Path) -> Path:
                    'PATH': f'{prefix}/bin:' + os.environ.get('PATH', '')}
     run([prefix / 'bin/python', '-m', 'pip', 'install', '-r', root / 'docker/requirements.txt'], env=process_env)
     run([prefix / 'bin/python', '-m', 'pip', 'check'], env=process_env)
-    run([prefix / 'bin/python', '-c', 'import fastapi,pymysql,redis,rq,neo4j,qdrant_client,pymatgen,alembic,watchfiles'], env=process_env)
+    run([prefix / 'bin/python', '-c', 'import fastapi,pymysql,redis,rq,neo4j,qdrant_client,pymatgen,alembic,watchfiles,greenlet'], env=process_env)
     run([prefix / 'bin/npm', 'ci'], cwd=root / 'frontend', env=process_env)
     for name in ('go', 'qdrant'):
         binary = local / ('go/bin/go' if name == 'go' else 'bin/qdrant')
