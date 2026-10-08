@@ -153,6 +153,13 @@ export default {
   viewDetail: '查看解析',
   cancel: '取消',
   clean: '清理',
+  selectAll: '全选',
+  selectedCount: '已选 {n} 条',
+  batchDelete: '批量删除',
+  batchDeleteConfirm: '确定删除选中的 {n} 条解析记录吗？运行中的任务将被终止并清理；已提交的记录仅清理解析数据，不影响正式论文。',
+  batchDeleteDone: '已删除 {n} 条解析记录',
+  batchDeletePartialFailed: '已删除 {n} 条，部分失败：{reason}',
+  toggleSelectAria: '选择 {filename} 的解析记录',
 
   // ── UploadParsingDetail ──
   detailLoadFailed: '解析详情加载失败',

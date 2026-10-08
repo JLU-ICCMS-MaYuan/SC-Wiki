@@ -151,6 +151,13 @@ export default {
   viewDetail: 'View details',
   cancel: 'Cancel',
   clean: 'Clean up',
+  selectAll: 'Select all',
+  selectedCount: '{n} selected',
+  batchDelete: 'Delete selected',
+  batchDeleteConfirm: 'Delete {n} selected parsing records? Running tasks will be terminated and cleared; submitted records only clear parsing data and never touch formal papers.',
+  batchDeleteDone: 'Deleted {n} parsing records',
+  batchDeletePartialFailed: 'Deleted {n}; some failed: {reason}',
+  toggleSelectAria: 'Select parsing record of {filename}',
 
   // ── UploadParsingDetail ──
   detailLoadFailed: 'Failed to load parsing details',

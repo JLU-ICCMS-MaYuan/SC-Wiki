@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { Alert, Box, Button, Card, CardContent, Chip, CircularProgress, Typography } from '@mui/material'
+import { Alert, Box, Button, Card, CardContent, Checkbox, Chip, CircularProgress, Typography } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import { api } from '../lib/api'
@@ -41,12 +41,22 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey, activeTaskId, onToggle 
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [now, setNow] = useState(Date.now())
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [batchDeleting, setBatchDeleting] = useState(false)
+  const [notice, setNotice] = useState('')
 
   const load = async () => {
     setLoading(true)
     try {
       const response = await api.get<{ ok: boolean; data: UploadTaskState[] }>('/api/upload-tasks')
-      setTasks(unwrapData(response))
+      const next = unwrapData(response)
+      setTasks(next)
+      // 清除已被清理或过期的选中项，避免向批量接口提交无效 ID。
+      setSelectedIds(prev => {
+        const alive = new Set(next.map(task => task.task_id))
+        const pruned = [...prev].filter(id => alive.has(id))
+        return pruned.length === prev.size ? prev : new Set(pruned)
+      })
       setError('')
     } catch (reason: any) {
       setError(reason.message || t('upload.recordsLoadFailed'))
@@ -76,13 +86,72 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey, activeTaskId, onToggle 
     await load()
   }
 
+  const allSelected = tasks.length > 0 && tasks.every(task => selectedIds.has(task.task_id))
+  const someSelected = selectedIds.size > 0
+
+  const toggleSelect = (taskId: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(taskId)) next.delete(taskId)
+      else next.add(taskId)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    setSelectedIds(allSelected ? new Set() : new Set(tasks.map(task => task.task_id)))
+  }
+
+  const batchDelete = async () => {
+    if (!someSelected || batchDeleting) return
+    if (!window.confirm(t('upload.batchDeleteConfirm', { n: selectedIds.size }))) return
+    setBatchDeleting(true)
+    setNotice('')
+    try {
+      const result = await api.post<{ deleted: { task_id: string }[]; failed: { task_id: string; reason: string }[] }>(
+        '/api/upload-tasks/batch-delete', { task_ids: [...selectedIds] },
+      )
+      const deleted = result?.deleted?.length || 0
+      const failed = result?.failed || []
+      setNotice(failed.length > 0
+        ? t('upload.batchDeletePartialFailed', { n: deleted, reason: failed.map(item => item.reason).join('；') })
+        : t('upload.batchDeleteDone', { n: deleted }))
+      setSelectedIds(new Set())
+      await load()
+    } catch (reason: any) {
+      setError(reason.message || t('upload.operationFailed'))
+    } finally {
+      setBatchDeleting(false)
+    }
+  }
+
   return (
     <Box sx={{ mb: 3 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1.5, gap: 1, flexWrap: 'wrap' }}>
         <Typography variant="h6" fontWeight={700}>{t('upload.recordsTitle')} <Chip size="small" label={`${activeCount}/100`} /></Typography>
-        <Button size="small" onClick={() => void load()} disabled={loading}>{t('common.refresh')}</Button>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, flexWrap: 'wrap' }}>
+          <Box component="label" sx={{ display: 'flex', alignItems: 'center', gap: 0.5, cursor: tasks.length > 0 ? 'pointer' : 'default' }}>
+            <Checkbox
+              size="small"
+              checked={allSelected}
+              indeterminate={someSelected && !allSelected}
+              disabled={tasks.length === 0}
+              onChange={toggleSelectAll}
+              inputProps={{ 'aria-label': t('upload.selectAll') }}
+            />
+            <Typography variant="body2" color="text.secondary">{t('upload.selectAll')}</Typography>
+          </Box>
+          {someSelected && (
+            <>
+              <Chip size="small" color="primary" label={t('upload.selectedCount', { n: selectedIds.size })} onDelete={() => setSelectedIds(new Set())} />
+              <Button size="small" color="error" variant="outlined" disabled={batchDeleting} onClick={() => void batchDelete()}>{t('upload.batchDelete')}</Button>
+            </>
+          )}
+          <Button size="small" onClick={() => void load()} disabled={loading}>{t('common.refresh')}</Button>
+        </Box>
       </Box>
       {error && <Alert severity="error" sx={{ mb: 1 }}>{error}</Alert>}
+      {notice && <Alert severity="success" sx={{ mb: 1 }}>{notice}</Alert>}
       {loading && tasks.length === 0 && <CircularProgress size={22} />}
       {tasks.length === 0 && !loading && <Typography color="text.secondary">{t('upload.noActiveTasks')}</Typography>}
       <Box sx={{ display: 'grid', gap: 1 }}>
@@ -97,6 +166,13 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey, activeTaskId, onToggle 
           return (
             <Card key={task.task_id} variant="outlined" sx={{ borderColor: selected ? 'primary.main' : 'divider', bgcolor: selected ? 'action.selected' : 'background.paper' }}>
               <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 }, display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+                <Checkbox
+                  size="small"
+                  sx={{ p: 0.5 }}
+                  checked={selectedIds.has(task.task_id)}
+                  onChange={() => toggleSelect(task.task_id)}
+                  inputProps={{ 'aria-label': t('upload.toggleSelectAria', { filename: task.filename || task.files?.[0]?.original_filename || task.task_id }) }}
+                />
                 <Box sx={{ minWidth: 0, flex: 1 }}>
                   <Typography fontWeight={700} noWrap>{task.filename || task.files?.[0]?.original_filename || task.task_id}</Typography>
                   <Typography variant="caption" color="text.secondary">
