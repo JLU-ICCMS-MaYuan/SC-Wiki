@@ -16,7 +16,7 @@ from decimal import Decimal
 
 from backend import models
 
-RULE_VERSION = 'scientific-evidence-v5'
+RULE_VERSION = 'scientific-evidence-v6'
 TERMINAL = {'completed', 'failed', 'cancelled'}
 
 
@@ -263,16 +263,25 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             errors.append(error)
         if located and located not in evs:
             evs.append(located)
+    # 模型复述引句偶发走样（逐字匹配失败）；此时回退用提取阶段已通过逐字校验的
+    # 记录自带证据再定位一次。定位规则本身不放宽，只是复用已验证的证据。
+    if not evs:
+        for e in record.get('evidences') or []:
+            located, _ = locate_with_reason(e, chunks)
+            if located and located not in evs:
+                evs.append(located)
+    # 概括/推测字段（check_mode=synthesis）不依赖引句逐字定位：只要模型整体判断成立
+    # 就保留其 status；定位错误不进入理由，也不把 supported 降级。
+    synthesis = record.get('check_mode') == 'synthesis'
     status = result.get('status')
     if status == 'unchecked':
         pass
-    elif not evs:
+    elif not evs and not synthesis:
         status = 'missing'
     elif status not in {'supported', 'unsupported', 'uncertain'}:
         status = 'uncertain'
-    elif errors and status == 'supported':
-        status = 'uncertain'
-    reason = '；'.join([*errors, str(result.get('reason') or '尚未找到能支持这条科学数据的有效出处')])
+    reason_errors = [] if (evs or synthesis) else errors
+    reason = '；'.join([*reason_errors, str(result.get('reason') or '尚未找到能支持这条科学数据的有效出处')])
     provenance = record.get('provenance') or {}
     if not evs and provenance.get('kind') == 'contributor_structure' and provenance.get('verified') and provenance.get('submitted_by_user_id'):
         status = 'uncertain'
@@ -376,6 +385,7 @@ SYSTEM_PROMPT = '''你是当前论文的科学数据来源核对助手。论文�
 特别区分临界温度 Tc、测量时温度、在某温度仍然超导、阈值电流测量温度：后面三者不证明精确 Tc。
 例如“在 4.29 K 测得阈值电流 0.12 A”不支持“Tc=4.29 K”；“约6 K”不支持“7.19 K”。
 识别本文实验与引用他人的工作。不直接修改用户数据。可以给出单独标记依据类型的 proposal；建议的语义也必须核对。引用必须逐字复制给定片段（允许排版空白差异）。
+evidences 中的 quote 必须从 sources 或 existing_evidences 中原样复制整句：不得改写、缩写、增删任何字符，不得调整词序或转换写法。无法找到能逐字复制的原句时，省略该条 evidences，不要凭记忆重写。
 输出 JSON {"results":[{"key":"输入记录key","status":"supported|unsupported|uncertain|missing","reason":"简体中文解释具体原因，指出物性/数值/条件差异","suggestion":"解释问题的改进方向，不作为替换值","fields":["输入 field 或其子字段"],"evidences":[{"file_id":"...","chunk_index":0,"quote":"原文逐字引句"}]}]}。
 可选 proposal 格式为 {"values":{"editable_fields中的path":"可直接采用的值，遵循schema类型"},"supported":true,"evidences":[{"file_id":"...","chunk_index":0,"quote":"逐字原文"}]}。文本候选应是完整替换内容，不含操作指令。仅使用 editable_fields 中的路径；无可靠候选省略 proposal，结构不生成替换。
 unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，missing 表示本段找不到相关出处。必须覆盖每个输入 key。
@@ -750,7 +760,12 @@ def aggregate_candidates(records, candidates, location_errors, model):
         all_items = candidates[record['key']]
         # 每批只看到部分来源；“本批未提及”不能抵消其他批次已定位的判断。
         located = [i for i in all_items if i['evidences']]
-        items = located or [i for i in all_items if (i.get('proposal') or {}).get('evidences')] or all_items
+        if record.get('check_mode') == 'synthesis':
+            # 概括字段不依赖引句定位：其他批次已给出实质判断时，忽略未提及批次的 missing。
+            judged = [i for i in all_items if i['status'] != 'missing']
+            items = judged or all_items
+        else:
+            items = located or [i for i in all_items if (i.get('proposal') or {}).get('evidences')] or all_items
         statuses = {i['status'] for i in items}
         status ='uncertain' if len(statuses) > 1 else next(iter(statuses), 'missing')
         evidences = []

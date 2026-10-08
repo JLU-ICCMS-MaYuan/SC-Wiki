@@ -96,3 +96,47 @@ def test_window_page_is_where_window_starts():
     for chunk in chunks[1:]:
         first_text_page = int(re.search(r"\bp(\d) ", chunk.content).group(1))
         assert chunk.source_page == first_text_page
+
+
+CHECK_CHUNKS = [dict(file_id="main", chunk_index=0, content="The resulting l of R3m is 2.07 at 130 GPa.", section="Results")]
+
+
+def field_rows(values):
+    return {r["field"]: r for r in science.field_records("paper", "paper", values, science.PAPER_FIELDS)}
+
+
+def test_synthesis_fields_are_marked_and_keep_model_judgment():
+    rows = field_rows({"research_motivation": "Hydrogen-rich compounds are promising.", "keywords_tags": ["hydride"]})
+    assert rows["paper.research_motivation"].get("check_mode") == "synthesis"
+    assert rows["paper.keywords_tags"].get("check_mode") == "synthesis"
+    assert "check_mode" not in rows["paper.doi"]
+    # 模型引句定位失败时，synthesis 字段保留模型整体判断，不判 missing，理由也不带定位错误。
+    outcome = ev.checked_result(rows["paper.research_motivation"],
+                                result("supported", [{"file_id": "main", "chunk_index": 9, "quote": "模型凭记忆复述的走样引句"}]),
+                                CHECK_CHUNKS)
+    assert outcome["status"] == "supported"
+    assert "未在所选来源" not in outcome["reason"]
+
+
+def test_verbatim_record_falls_back_to_validated_draft_evidence():
+    # 模型复述引句走样时，回退用提取阶段已逐字验证的记录自带证据定位。
+    record = {"key": "k", "field": "material_states[2].property_modules[0].records[0]",
+              "evidences": [{"file_id": "main", "chunk_index": 0, "quote": "The resulting l of R3m is 2.07 at 130 GPa."}]}
+    outcome = ev.checked_result(record, result("supported", [{"file_id": "main", "chunk_index": 0, "quote": "模型改写后原文不存在的句子"}]), CHECK_CHUNKS)
+    assert outcome["status"] == "supported"
+    assert outcome["evidences"][0]["quote"] == "The resulting l of R3m is 2.07 at 130 GPa."
+
+
+def test_verbatim_record_without_located_evidence_stays_missing():
+    record = {"key": "k", "field": "material_states[2].property_modules[0].records[0]", "evidences": []}
+    outcome = ev.checked_result(record, result("supported", [{"file_id": "main", "chunk_index": 0, "quote": "原文没有这句话"}]), CHECK_CHUNKS)
+    assert outcome["status"] == "missing"
+
+
+def test_aggregation_ignores_unmentioned_batch_for_synthesis():
+    record = {"key": "k", "field": "paper.research_motivation", "check_mode": "synthesis"}
+    results = ev.aggregate_candidates([record], {"k": [result("supported", []), result("missing", [])]}, {"k": []}, "m")
+    assert results["k"]["status"] == "supported"
+    # 事实字段不受影响：未定位批次的 supported 仍被已定位批次覆盖，冲突仍判 uncertain。
+    fact = ev.aggregate_candidates([{"key": "k", "field": "f"}], {"k": [result("supported", [{"quote": "q"}]), result("missing", [])]}, {"k": []}, "m")
+    assert fact["k"]["status"] == "supported"

@@ -36,7 +36,18 @@ STATE_FIELDS = {
     'calculation_context': '计算条件', 'experimental_context': '实验条件',
 }
 
-COMPATIBLE_RULES = {'scientific-evidence-v2', 'scientific-evidence-v3', 'scientific-evidence-v4', 'scientific-evidence-v5'}
+# 概括/推测与分类枚举字段：原文不存在可逐字对应的句子（summary 是 AI 概括、keywords_tags 是
+# AI 提炼），核对按模型整体判断进行，不因引句逐字定位失败而改判 missing/uncertain。
+# 事实与数值字段不在其中，仍执行逐字定位（见 checked_result）。
+SYNTHESIS_FIELDS = frozenset({
+    'summary', 'key_finding', 'methodology', 'keywords_tags', 'research_motivation',
+    'knowledge_graph_title', 'paper_type', 'research_materials', 'material_families',
+    'material_relations', 'theoretical_subtype', 'superconductor_kind',
+    'state_kind', 'crystal_system', 'material_dimensionality', 'structure_families',
+    'condition_note', 'note',
+})
+
+COMPATIBLE_RULES = {'scientific-evidence-v2', 'scientific-evidence-v3', 'scientific-evidence-v4', 'scientific-evidence-v5', 'scientific-evidence-v6'}
 
 
 def adopted_suggestion(record):
@@ -98,7 +109,8 @@ def field_records(identity, path, data, fields, context=None):
         rows.append(dict(key=key, item_key=key, field=f'{path}.{name}', fields=[f'{path}.{name}'],
                          label=label, current_value=value, claim={'value': value, 'field': label, 'context': context or {}},
                          required=populated(value) and not (path == 'paper' and name in BIBLIOGRAPHY_FIELDS),
-                         evidences=[], kind='field'))
+                         evidences=[], kind='field',
+                         **({'check_mode': 'synthesis'} if name in SYNTHESIS_FIELDS else {})))
     return sorted(rows, key=lambda r: not r['required'])
 
 

@@ -56,10 +56,30 @@
 - FR-005：提取窗口合并到约 12000 字符，页码取窗口起点所在页。
 - FR-006：分段提取、全文汇总、字段核对提示词补充修正、合并、命名、等价表示与概括口径；分段缓存版本升为 9。
 - FR-007：LLM 流式响应中途断开按可重试错误处理。
+- FR-008：概括/推测与分类枚举字段（`SYNTHESIS_FIELDS`：summary、key_finding、methodology、
+  keywords_tags、research_motivation、knowledge_graph_title、paper_type、research_materials、
+  material_families、material_relations、theoretical_subtype、superconductor_kind、state_kind、
+  crystal_system、material_dimensionality、structure_families、condition_note、note）标记为
+  `check_mode=synthesis`，核对按模型整体判断进行，不因引句逐字定位失败改判 missing，聚合时
+  忽略"本批未提及"的 missing；事实与数值字段不受影响，仍执行逐字定位。
+- FR-009：事实字段核对时，若模型返回的引句全部定位失败，回退用提取阶段已通过逐字校验的记录
+  自带证据再定位一次；定位规则本身不放宽，不引入任何未验证内容。
+
+## 澄清记录
+
+- 2026-10-08（用户确认）：`research_motivation`、`keywords_tags` 等概括/推测字段是 AI 总结产物，
+  原文不存在可逐字对应的句子，不应做引句逐字定位核对（采纳"字段分级"方案）；据此新增 FR-008。
+  H3S 复现取证显示：事实字段的引句走样是低概率随机事件（同一记录 3 次独立调用全部逐字命中），
+  大量核对项下必然偶发误标红；据此新增 FR-009（引句回退）。配套强化核对提示词：quote 必须从
+  sources 或 existing_evidences 原样复制，无法逐字复制时省略该条 evidences。核对规则版本升为
+  `scientific-evidence-v6`，旧结果过期重核。
+- 2026-10-08（用户确认）：来源文件经 SHA-256 比对与测评输入逐字节一致，排除来源文件问题；主文
+  PDF 文本层存在 λ→`l`、上标压平等失真，两侧公平且不影响逐字匹配，属于 #114 文本层议题。
 
 ## 范围外
 
-- 不替换默认解析器，不修改 #114 Document IR/Claim 链路；不放宽逐字引句定位。
+- 不替换默认解析器，不修改 #114 Document IR/Claim 链路；事实与数值字段的逐字引句定位不放宽
+  （概括类字段的分级见 FR-008）。
 - 不自动批准或发布，不批量重解析历史论文；不要求 #114 的 50 篇人工基准。
 
 ## 成功标准
