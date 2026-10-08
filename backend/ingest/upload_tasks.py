@@ -609,6 +609,35 @@ def cleanup_task_files(task_id: str) -> None:
         delete_target(session, 'upload', task_id)
 
 
+def delete_task_record(task_id: str) -> None:
+    """立即删除一条上传任务记录；调用方需先完成归属校验。
+
+    运行中的任务先终止其 RQ 作业再清理；已持久化正式论文的任务仅清理
+    临时数据并保留审核快照；其余按完整清理组合三个原语并删除证据草稿。
+    生命周期锁被占用时抛出 TimeoutError。
+    """
+    task_id = _validated_task_id(task_id)
+    with upload_task_lock(task_id):
+        state = get_state(task_id) or {}
+        if state.get("status") in RUNNING_STATUSES:
+            job_id = str(state.get("job_id") or "") or None
+            if job_id:
+                _delete_processing_job(job_id)
+            update_state(task_id, status="cancelled", processing_status="cancelled")
+            state = get_state(task_id) or state
+        context = CleanupContext.from_state(task_id, state)
+        if submitted_paper_id(task_id) is not None:
+            cleanup_transient_data(task_id, context=context, preserve_review_snapshot=True)
+            return
+        cleanup_transient_data(task_id, context=context, preserve_review_snapshot=False)
+        cleanup_unsubmitted_files(task_id)
+        cleanup_duplicate_candidate(task_id, context.existing_paper_id)
+        from backend.database import SessionLocal
+        from backend.ingest.scientific_evidence import delete_target
+        with SessionLocal.begin() as session:
+            delete_target(session, 'upload', task_id)
+
+
 def submitted_paper_id(task_id: str) -> int | None:
     """返回上传任务在数据库中的持久论文 ID。"""
     from sqlalchemy import select

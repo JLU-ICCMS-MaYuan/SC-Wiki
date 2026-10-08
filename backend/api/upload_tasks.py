@@ -293,15 +293,46 @@ def retry_upload_task(task_id: str, current_user: User = Depends(get_current_use
 
 @router.delete("/{task_id}")
 def delete_upload_task(task_id: str, current_user: User = Depends(get_current_user)):
-    from backend.ingest.upload_tasks import cleanup_task_files, submitted_paper_id
+    from backend.ingest.upload_tasks import delete_task_record, submitted_paper_id
 
     state = _owned_state(task_id, current_user)
     if state.get("status") not in {"failed", "duplicate", "cancelled"}:
         raise _error(409, "UPLOAD_TASK_NOT_CLEARABLE", "运行中或待校对任务不能直接清理")
     if submitted_paper_id(task_id) is not None:
         raise _error(409, "UPLOAD_TASK_PERSISTED", "任务已经生成正式论文，不能删除文件")
-    cleanup_task_files(task_id)
+    delete_task_record(task_id)
     return {"ok": True}
+
+
+class BatchDeleteUploadTasks(BaseModel):
+    task_ids: list[str] = Field(min_length=1, max_length=100)
+
+
+@router.post("/batch-delete")
+def batch_delete_upload_tasks(
+    body: BatchDeleteUploadTasks,
+    current_user: User = Depends(get_current_user),
+):
+    """批量删除上传解析记录：逐条处理，单条失败不影响其余（best-effort）。"""
+    from backend.ingest.upload_tasks import delete_task_record
+
+    deleted: list[dict[str, str]] = []
+    failed: list[dict[str, str]] = []
+    for task_id in dict.fromkeys(body.task_ids):
+        try:
+            _owned_state(task_id, current_user)
+            delete_task_record(task_id)
+        except HTTPException as exc:
+            detail = exc.detail if isinstance(exc.detail, dict) else {}
+            reason = str(detail.get("message") or detail) if detail else str(exc.detail)
+            failed.append({"task_id": task_id, "reason": reason})
+        except TimeoutError:
+            failed.append({"task_id": task_id, "reason": "任务正被其他请求处理，请稍后重试"})
+        except Exception as exc:  # noqa: BLE001 - 单条失败需收敛为结果明细
+            failed.append({"task_id": task_id, "reason": str(exc) or exc.__class__.__name__})
+        else:
+            deleted.append({"task_id": task_id})
+    return {"ok": True, "deleted": deleted, "failed": failed}
 
 
 @router.post("/cleanup")
