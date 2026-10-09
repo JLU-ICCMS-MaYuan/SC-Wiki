@@ -136,6 +136,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   const issues = useMemo(() => [...validateRecordClient(record, definition), ...externalIssues], [record, definition, externalIssues])
   const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type), [definition, record.record_type])
   const isTc = record.record_type === 'predicted_tc' || record.record_type === 'measured_tc'
+  const mirroredTextValue = record.value_kind === 'text' && record.value_text === record.value_raw
   const currentValueField = { number: 'value_number', range: 'value_min', text: 'value_text', boolean: 'value_boolean' }[record.value_kind]
   const issue = (field: string) => issues.find(item => item.field === field || item.field.endsWith(`.${field}`)
     || (isTc && field === currentValueField && /(?:^|\.)(value_raw|unit_raw|canonical_unit)$/.test(item.field)))?.message
@@ -261,11 +262,12 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
           {Object.entries(VALUE_KIND_LABELS).map(([value, label]) => <MenuItem key={value} value={value}>{label}</MenuItem>)}
         </Select>
       </FormControl>
-      <TextField label="原始值" value={record.value_raw} disabled={readOnly} data-issue-field={fieldPath('value_raw')} error={Boolean(issue('value_raw'))} helperText={issue('value_raw')} onChange={event => update({ value_raw: event.target.value })} />
+      <TextField label="原始值" value={record.value_raw} disabled={readOnly} data-issue-field={fieldPath('value_raw')} error={Boolean(issue('value_raw'))} helperText={issue('value_raw')}
+        onChange={event => update(mirroredTextValue ? { value_raw: event.target.value, value_text: event.target.value } : { value_raw: event.target.value })} />
       <TextField label="单位" value={record.unit_raw || ''} disabled={readOnly} onChange={event => update({ unit_raw: event.target.value || null })} />
       {record.value_kind === 'number' && <TextField label="数值" type="number" value={record.value_number ?? ''} disabled={readOnly} onChange={event => update({ value_number: event.target.value === '' ? null : Number(event.target.value) })} />}
       {record.value_kind === 'range' && <><TextField label="下界" type="number" value={record.value_min ?? ''} disabled={readOnly} data-issue-field={fieldPath('value_min')} error={Boolean(issue('value_min'))} helperText={issue('value_min')} onChange={event => update({ value_min: event.target.value === '' ? null : Number(event.target.value) })} /><TextField label="上界" type="number" value={record.value_max ?? ''} disabled={readOnly} onChange={event => update({ value_max: event.target.value === '' ? null : Number(event.target.value) })} /></>}
-      {record.value_kind === 'text' && <TextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
+      {record.value_kind === 'text' && !mirroredTextValue && <TextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
       </>}
       {Object.entries(payloadSchema.properties || {}).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}

@@ -46,6 +46,18 @@ describe('Issue #94 记录表单', () => {
     expect(screen.queryByText('原文证据（1）')).not.toBeInTheDocument()
   })
 
+  it('文本性质的原始值和文本值相同时只显示一份输入并同步保存', () => {
+    const onChange = vi.fn()
+    const record: PropertyRecordDraft = { ...measured('gap', 4.2), record_type: 'property', property_code: 'band_gap',
+      module_code: 'electronic_properties', definition_key: 'record.electronic_properties.band_gap',
+      value_kind: 'text', value_raw: '3.34 eV indirect', value_text: '3.34 eV indirect', value_number: null,
+      method_code: null, payload: {} }
+    render(<SchemaDrivenRecordForm record={record} onChange={onChange} />)
+    expect(screen.queryByLabelText('文本值')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText('原始值'), { target: { value: '3.35 eV indirect' } })
+    expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ value_raw: '3.35 eV indirect', value_text: '3.35 eV indirect' }))
+  })
+
   it('定义切换会清理标准记录的自定义键，并在切回时保留原自定义身份', async () => {
     const customDefinition = {
       ...definitions.find(item => item.property_code === 'custom')!,
