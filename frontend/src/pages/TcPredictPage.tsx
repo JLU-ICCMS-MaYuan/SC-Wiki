@@ -46,13 +46,13 @@ const TcPredictPage: React.FC = () => {
       </Box>
 
       {/* Two-column layout */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.6fr) minmax(320px, 0.9fr)', gap: 3 }}>
+      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', lg: 'minmax(0, 1.6fr) minmax(320px, 0.9fr)' }, gap: 3 }}>
         {/* Left: Input + Config */}
         <Box sx={{ display: 'grid', gap: 3 }}>
           {/* Input files card */}
           <Paper sx={{ p: 2.5, borderRadius: 4 }}>
             <Typography variant="h2" gutterBottom>{t('tcPredict.inputFiles')}</Typography>
-            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
               {/* CONTCAR */}
               <Box
                 component="label"
@@ -88,7 +88,7 @@ const TcPredictPage: React.FC = () => {
 
         {/* Right: Result card */}
         <Paper sx={{
-          p: 2.5, borderRadius: 4, alignSelf: 'start', position: 'sticky', top: 24,
+          p: 2.5, borderRadius: 4, alignSelf: 'start', position: { xs: 'static', lg: 'sticky' }, top: { lg: 24 },
           boxShadow: '0 6px 16px rgba(15,23,42,.16), 0 10px 24px rgba(15,23,42,.10)',
         }}>
           <Typography variant="h2" gutterBottom>{t('tcPredict.result')}</Typography>

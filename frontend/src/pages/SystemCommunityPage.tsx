@@ -11,7 +11,7 @@ function SystemDetailView({ systemKey }: { systemKey: string }) {
   const { data, error, loading, reload } = useCommunityLoad<SystemDetail>(`/systems/${encodeURIComponent(systemKey)}?offset=${offset}`)
   if (loading) return <CircularProgress />
   if (error || !data) return <Alert severity="error" action={<Button onClick={reload}>{t('community.retry')}</Button>}>{t(error || 'community.unavailable')}</Alert>
-  return <Box sx={{ maxWidth: 1100, mx: 'auto' }}>
+  return <Box>
     <Typography variant="h1">{t('community.system', { key: data.system_key })}</Typography><Typography sx={{ my: 2 }} color="text.secondary">{t('community.systemHint')}</Typography>
     <Typography variant="h2">{t('community.papers')}</Typography>
     {data.papers.length ? <Stack gap={1} sx={{ my: 2 }}>{data.papers.map(p => <Link key={p.id} component={RouterLink} to={`/papers/${p.id}`}>{p.title} {p.year ? `(${p.year})` : ''}</Link>)}</Stack> : <Typography sx={{ my: 2 }}>{t('community.noPapers')}</Typography>}

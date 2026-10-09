@@ -273,7 +273,7 @@ const KnowledgeGraphPage: React.FC = () => {
   const downstreamKey = selectedNode ? `${selectedNode.paper_id}:downstream` : ''
 
   return (
-    <Box sx={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', px: { xs: 1.5, md: 3 }, py: 2, gap: 1.5 }}>
+    <Box sx={{ height: 'calc(100vh - 64px)', display: 'flex', flexDirection: 'column', py: 2, gap: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: { xs: 'flex-start', sm: 'center' }, justifyContent: 'space-between', gap: 1.5, flexWrap: 'wrap' }}>
         <Box>
           <Typography variant="overline" color="text.secondary">Citation Graph</Typography>

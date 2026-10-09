@@ -41,7 +41,7 @@ function renderShell(path = '/news') {
 beforeEach(() => {
   localStorage.clear()
   currentUser = null
-  vi.mocked(api.get).mockResolvedValue({ data: { provider_name: 'OpenAI', model: 'server-model', source: 'server' } })
+  vi.mocked(api.get).mockResolvedValue({ data: { provider_name: 'OpenAI', model: 'server-model', source: 'server', items: [] } })
 })
 afterEach(() => { cleanup(); localStorage.clear(); vi.clearAllMocks() })
 
@@ -70,6 +70,7 @@ describe('全角色统一侧栏', () => {
     await user.type(input, '尚未提交的内容')
     await user.upload(fileInput, file)
     const main = screen.getByRole('main')
+    expect(main).toHaveStyle({ paddingLeft: '8px', paddingRight: '8px' })
     await user.click(screen.getByRole('button', { name: '收起侧栏' }))
     expect(screen.getByRole('button', { name: '展开侧栏' })).toHaveAttribute('aria-expanded', 'false')
     expect(main.parentElement).toHaveStyle({ gridTemplateColumns: '64px minmax(0, 1fr)' })

@@ -320,7 +320,7 @@ const AdminPaperEditPage: React.FC = () => {
   }
 
   return (
-    <Container component="fieldset" disabled={editReviewSaving} maxWidth="lg" sx={{ py: 3, px: { xs: 0, sm: 3 }, border: 0, minWidth: 0 }}>
+    <Container component="fieldset" disabled={editReviewSaving} maxWidth={false} disableGutters sx={{ py: 3, border: 0, minWidth: 0 }}>
       {/* 标题栏 + 返回列表 */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
         <IconButton aria-label={t('admin.editBackToList')} onClick={() => navigate(workspacePath)}>
@@ -505,7 +505,7 @@ const AdminPaperEditPage: React.FC = () => {
                         </Typography>
                       </Box>
                       {/* Row 1: 核心数值 */}
-                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 1 }}>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(4, minmax(0, 1fr))' }, gap: 1 }}>
                         <TextField label={t('admin.fieldMaterial')} size="small" value={kp.material || ''}
                           onChange={e => setKp('material', e.target.value)} />
                         <TextField label={t('admin.fieldPropertyName')} size="small" value={kp.name || ''}
@@ -528,7 +528,7 @@ const AdminPaperEditPage: React.FC = () => {
                         </FormControl>
                       </Box>
                       {/* Row 2: 数值 */}
-                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', gap: 1, mt: 1 }}>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(5, minmax(0, 1fr))' }, gap: 1, mt: 1 }}>
                         <TextField label={t('admin.fieldValueMin')} size="small" type="number"
                           value={kp.value_min ?? ''} onChange={e => setKp('value_min', e.target.value ? Number(e.target.value) : null)} />
                         <TextField label={t('admin.fieldValueMax')} size="small" type="number"
@@ -541,7 +541,7 @@ const AdminPaperEditPage: React.FC = () => {
                           value={kp.name_raw || ''} onChange={e => setKp('name_raw', e.target.value)} />
                       </Box>
                       {/* Row 3: 条件与分类 */}
-                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 1, mt: 1 }}>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(3, minmax(0, 1fr))' }, gap: 1, mt: 1 }}>
                         <TextField label={t('admin.fieldPressure')} size="small" type="number"
                           value={kp.pressure_gpa ?? ''} onChange={e => setKp('pressure_gpa', e.target.value ? Number(e.target.value) : null)} />
                         <TextField label={t('admin.fieldTemperature')} size="small" type="number"
@@ -557,7 +557,7 @@ const AdminPaperEditPage: React.FC = () => {
                         </FormControl>
                       </Box>
                       {/* Row 4: notes */}
-                      <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1, mt: 1 }}>
+                      <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))' }, gap: 1, mt: 1 }}>
                         <TextField label={t('admin.fieldConditionNote')} size="small"
                           value={kp.condition_note || ''} onChange={e => setKp('condition_note', e.target.value)} />
                         <TextField label={t('admin.fieldNameNote')} size="small"

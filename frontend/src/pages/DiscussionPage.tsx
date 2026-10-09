@@ -35,7 +35,7 @@ export default function DiscussionPage() {
   const list = useCommunityLoad<CommunityList<CommunityEntry>>(id ? null : `/questions?q=${encodeURIComponent(query)}&sort=${sort}&offset=${offset}`)
   useEffect(() => { const timer = window.setTimeout(() => { setQuery(term); setOffset(0) }, 300); return () => window.clearTimeout(timer) }, [term])
   if (id) return <QuestionDetail key={id} id={id} />
-  return <Box sx={{ maxWidth: 1000, mx: 'auto' }}>
+  return <Box>
     <Stack direction="row" justifyContent="space-between" alignItems="center" gap={2}><Box><Typography variant="h1">{t('community.title')}</Typography><Typography color="text.secondary" sx={{ mt: 1 }}>{t('community.intro')}</Typography></Box><Button variant="contained" sx={{ flexShrink: 0, whiteSpace: 'nowrap' }} onClick={() => setAsking(v => !v)}>{t('community.ask')}</Button></Stack>
     {asking && <Card sx={{ my: 2 }}><CardContent><CommunityComposer question markdown maxLength={20000} onCancel={() => setAsking(false)} onSubmit={async (body, title) => { const created = await api.post<CommunityEntry>(`${COMMUNITY_API}/entries`, { kind: 'question', body, title }); setAsking(false); navigate(`/share/discussions/${created.id}`) }} /></CardContent></Card>}
     <Stack direction={{ xs: 'column', sm: 'row' }} gap={2} sx={{ my: 3 }}><TextField fullWidth label={t('community.search')} value={term} onChange={e => setTerm(e.target.value)} inputProps={{ maxLength: 200 }} /><TextField select label={t('community.title')} value={sort} onChange={e => { setSort(e.target.value); setOffset(0) }} sx={{ minWidth: 160 }}><MenuItem value="latest">{t('community.latest')}</MenuItem><MenuItem value="active">{t('community.active')}</MenuItem></TextField></Stack>

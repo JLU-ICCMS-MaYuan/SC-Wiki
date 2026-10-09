@@ -115,7 +115,7 @@ const AccountPage: React.FC = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 1040, mx: 'auto' }}>
+    <Box>
       <Typography variant="overline" color="primary" fontWeight={700}>ACCOUNT</Typography>
       <Typography variant="h3" fontWeight={800}>{t('account.title')}</Typography>
       <Typography color="text.secondary" sx={{ mt: 1, mb: 3 }}>{t('account.subtitle')}</Typography>

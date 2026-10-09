@@ -117,7 +117,11 @@ const AppShell: React.FC = () => {
         </Box>
       </Box>
 
-      <Box component="main" sx={{ p: { xs: 2, md: 4 }, minWidth: 0, width: '100%', boxSizing: 'border-box' }}>
+      <Box component="main" sx={{
+        px: 1, py: { xs: 2, md: 4 }, minWidth: 0, width: '100%', boxSizing: 'border-box',
+        // 对话页保留纵向全屏布局，但横向不能越过全站 8px 边距。
+        ...(location.pathname === '/rag' ? { '& > .MuiBox-root': { mx: 0 } } : {}),
+      }}>
         <Outlet />
       </Box>
       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => setAnchorEl(null)} anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }} transformOrigin={{ horizontal: 'left', vertical: 'bottom' }} slotProps={{ paper: { sx: { minWidth: 160 } } }}>

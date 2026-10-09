@@ -400,10 +400,7 @@ const UploadPage: React.FC = () => {
   /* List Stage                                    */
   /* ═══════════════════════════════════════════════ */
   return (
-    <Box sx={{
-      width: activeTaskId && tab === 0 ? 'auto' : '100%', maxWidth: 'none',
-      mx: activeTaskId && tab === 0 ? { xs: -1, md: -3 } : 0,
-    }}>
+    <Box sx={{ width: '100%', maxWidth: 'none' }}>
       <Box sx={{ mb: 3 }}>
         <Box>
           <Typography variant="overline" color="text.secondary">Upload</Typography>

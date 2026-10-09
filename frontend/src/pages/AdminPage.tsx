@@ -401,7 +401,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
   }
 
   return (
-    <Box sx={{ maxWidth: 1280, mx: 'auto' }}>
+    <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="overline" color="text.secondary">WORKSPACE</Typography>

@@ -38,7 +38,7 @@ const PublicUserPage: React.FC = () => {
   if (!profile) return <Box sx={{ minHeight: '55vh', display: 'grid', placeItems: 'center' }}><CircularProgress /></Box>
 
   return (
-    <Box sx={{ maxWidth: 820, mx: 'auto', pt: 3 }}>
+    <Box sx={{ pt: 3 }}>
       {profile.is_banned && <Alert severity="warning" sx={{ mb: 2 }}>{t('account.bannedNotice')}</Alert>}
       <Card variant="outlined" sx={{ borderRadius: 4 }}>
         <CardContent sx={{ p: { xs: 3, md: 5 } }}>
