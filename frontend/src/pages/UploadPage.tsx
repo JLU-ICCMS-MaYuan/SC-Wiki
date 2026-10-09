@@ -400,7 +400,10 @@ const UploadPage: React.FC = () => {
   /* List Stage                                    */
   /* ═══════════════════════════════════════════════ */
   return (
-    <Box sx={{ width: '100%', maxWidth: 'none' }}>
+    <Box sx={{
+      width: activeTaskId && tab === 0 ? 'auto' : '100%', maxWidth: 'none',
+      mx: activeTaskId && tab === 0 ? { xs: -1, md: -3 } : 0,
+    }}>
       <Box sx={{ mb: 3 }}>
         <Box>
           <Typography variant="overline" color="text.secondary">Upload</Typography>
@@ -430,15 +433,15 @@ const UploadPage: React.FC = () => {
               <Card variant="outlined" sx={{ overflow: 'visible' }}>
                 <CardContent>
                   <Box role="region" aria-label={t('upload.taskActionsAria')} sx={{
-                    position: 'sticky', top: '8px', zIndex: theme => theme.zIndex.appBar - 1,
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2,
-                    mx: -2, mt: -2, mb: 2, px: 2, py: 1.5,
+                    position: 'sticky', top: 0, zIndex: theme => theme.zIndex.appBar - 1,
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1,
+                    mx: -2, mt: -2, mb: 2, px: 2, py: 0.5,
                     bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider',
                     boxShadow: '0 1px 2px rgba(15,23,42,0.08)',
                   }}>
                     <Box sx={{ minWidth: 0, flex: 1 }}>
-                      <Typography variant="h6" fontWeight={700} noWrap>{taskState?.filename || t('upload.readingTask')}</Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="h6" fontWeight={700} noWrap sx={{ fontSize: { xs: 16, sm: 18 }, lineHeight: '24px' }}>{taskState?.filename || t('upload.readingTask')}</Typography>
+                      <Typography variant="body2" color="text.secondary" noWrap sx={{ lineHeight: '18px' }}>
                         {taskState
                           ? t('upload.stageProgress', {
                               index: taskState.stage_index,
