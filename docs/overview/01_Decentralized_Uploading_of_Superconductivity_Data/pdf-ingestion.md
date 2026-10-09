@@ -70,6 +70,7 @@
 - 提交后临时任务已清理时，旧页面的解析入口通过单任务状态查询回溯正式论文；仅所有者或已批准管理员获得论文位置，页面自动打开论文详情。真正过期或被清理且没有可访问论文的任务会明确提示并刷新列表，解析轮询遇到 401/403/404 即停止。活动任务列表仍只读取 Redis，不混入已提交论文。
 - 运行任务可请求取消，Worker 在文件、分段和汇总边界停止；当前阻塞的 LLM 请求允许完成或超时。
 - 单项和批量清理只处理失败、重复和已取消任务，运行中或正在提交的任务会被跳过。
+- 终态记录（失败/重复/已取消）可单条「清理」，调用 `DELETE /api/upload-tasks/{task_id}`；任务已持久化正式论文时返回 409 `UPLOAD_TASK_PERSISTED` 并保留论文。清理被拒绝或出错时，列表顶部错误提示展示后端原因，不再静默失败；生命周期锁被占用时后端返回 409 `UPLOAD_TASK_BUSY`「任务正被其他请求处理，请稍后重试」而不是 500。（[Issue #123](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/123)）
 - 解析记录列表支持复选框多选、全选与批量删除任意状态的选中记录：`POST /api/upload-tasks/batch-delete` 单次最多 100 条，逐条在 `upload_task_lock` 内 best-effort 处理——运行中任务先删除其 RQ 作业并置 `cancelled` 再清理；已提交或已持久化正式论文的记录仅执行临时清理并保留审核快照，不触碰正式论文；接口逐条返回 `deleted/failed`（含失败原因），前端确认弹窗确认后调用、刷新列表并展示结果。越权与不存在的任务 ID 计入失败明细，不中断整批。（[Issue #121](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/121)）
 - 对外任务和解析 DTO 使用字段白名单，不返回绝对路径、RQ job ID、Redis key、提示词或原始 LLM 响应。
 
@@ -129,3 +130,4 @@
 - [Issue #59：修复只读详情页与校对表单字段集不一致、字段语义错配与死代码残留](../../specs/59-detail-review-form-parity/spec.md)
 - [Issue #64：修复论文详情页整页白屏（JSON 文本列字段被当数组消费致渲染崩溃）](../../specs/64-fix-paper-detail-blank-screen/spec.md)
 - [Issue #121：上传解析记录支持多选批量删除](../../specs/121-batch-delete-upload-tasks/spec.md)
+- [Issue #123：上传解析记录单条「清理」失败时无任何反馈，锁超时被吞为 500](../../specs/123-single-clean-error-feedback/spec.md)
