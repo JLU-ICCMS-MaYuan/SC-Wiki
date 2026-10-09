@@ -82,6 +82,17 @@ def test_region_render_does_not_save_images_and_checks_hash(tmp_path):
     assert render_region(None,None,None,quote="old quote",pdf_page=1)["status"]=="legacy_text"
 
 
+def test_image_evidence_requires_a_real_figure_block(tmp_path):
+    path, ir = make_document(tmp_path)
+    block = ir.blocks[0]
+    block.block_type = "figure"
+    assert render_region(ir, path, ir.source_sha256, quote="", pdf_page=1,
+                         block_id=block.block_id)["status"] == "located"
+    block.block_type = "text"
+    assert render_region(ir, path, ir.source_sha256, quote="", pdf_page=1,
+                         block_id=block.block_id)["status"] == "unlocated"
+
+
 def test_upload_region_checks_owner_before_reading_path(monkeypatch):
     from backend.ingest import upload_tasks
     monkeypatch.setattr(upload_tasks,"get_state",lambda _:{"user_id":2,"files":[]})

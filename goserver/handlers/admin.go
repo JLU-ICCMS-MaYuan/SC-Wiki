@@ -225,6 +225,25 @@ func UpdatePaper(c *gin.Context) {
 			}
 		}
 		paperChanged := paperUpdatesChanged(paper, updates)
+		var manualBaseline []byte
+		if paperChanged {
+			encoded, marshalErr := json.Marshal(paper)
+			if marshalErr != nil {
+				return marshalErr
+			}
+			var previous map[string]interface{}
+			if unmarshalErr := json.Unmarshal(encoded, &previous); unmarshalErr != nil {
+				return unmarshalErr
+			}
+			oldValues := make(map[string]interface{}, len(updates))
+			for field := range updates {
+				oldValues[field] = previous[field]
+			}
+			manualBaseline, marshalErr = json.Marshal(map[string]interface{}{"manual_edit_baseline": oldValues})
+			if marshalErr != nil {
+				return marshalErr
+			}
+		}
 		if len(updates) > 0 {
 			if err := tx.Model(&paper).Updates(updates).Error; err != nil {
 				return err
@@ -244,6 +263,7 @@ func UpdatePaper(c *gin.Context) {
 		_, eventErr := appendPaperHistoryEvent(tx, paperHistoryInput{
 			PaperID: paper.ID, PaperRevision: revision, EventType: paperHistoryModified,
 			Actor: &actor, OperationID: operationID, OccurredAt: time.Now(),
+			ClassificationSnapshot: manualBaseline,
 		})
 		return eventErr
 	})

@@ -1666,7 +1666,10 @@ async def _create_pending_paper(
     state: dict[str, Any],
     draft: dict[str, Any],
     evidence_checks: list[dict] | None = None,
+    manual_snapshot: dict[str, Any] | None = None,
+    manual_baseline: dict[str, Any] | None = None,
 ) -> int:
+    from backend.ingest import manual_evidence
     if state.get("is_shadow"):
         raise _upload_error(403, "shadow_not_submittable", "对照任务不能提交科学数据")
     # 先拒绝旧客户端契约，再加载科学数据处理依赖；这样非法请求不会被无关的
@@ -1906,11 +1909,16 @@ async def _create_pending_paper(
                             if updated is not None:
                                 transferred[r['key']] = updated
                     await session.run_sync(lambda sync: science.save_results(sync, persisted, transferred, int(state['user_id'])))
+                    if manual_snapshot is not None and manual_baseline is not None:
+                        await session.run_sync(lambda sync: manual_evidence.transfer_to_paper(
+                            sync, manual_snapshot, manual_baseline, paper.id, paper.content_revision, persisted))
                     await session.execute(sql_delete(models.ScientificEvidenceCheck).where(
                         models.ScientificEvidenceCheck.target == 'upload', models.ScientificEvidenceCheck.target_id == task_id))
                     await session.execute(sql_delete(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == task_id))
                 paper_id = paper.id
         return paper_id
+    except manual_evidence.ManualEvidenceError as exc:
+        raise _upload_error(409, exc.code, str(exc), field=exc.field) from exc
     except IntegrityError as exc:
         raise _scientific_integrity_error(exc, draft) from exc
     except Exception as exc:
@@ -2075,9 +2083,17 @@ async def _submit_upload_draft_locked(
     snapshot = upload_snapshot(task_id, current_user.id)
     from backend.database import SessionLocal
     from backend.ingest.scientific_evidence import load_results
+    from backend.ingest import manual_evidence
+    from backend.api.evidence import _manual_snapshots
+    manual_snapshot, manual_baseline = _manual_snapshots("upload", task_id, current_user)
     with SessionLocal() as check_session:
         cached = load_results(check_session, snapshot, current_user.id)
-    evidence_checks = resolve_results(snapshot, cached, current_user.id, evidence_job_id, expected_evidence_version)
+        manual_issues = manual_evidence.validate_submission(check_session, manual_snapshot, manual_baseline)
+        manual_pending_keys = manual_evidence.complete_keys(check_session, manual_snapshot, manual_baseline)
+    if manual_issues:
+        raise _upload_error(400, "manual_evidence_incomplete", "请补齐人工修改依据", issues=manual_issues)
+    evidence_checks = resolve_results(snapshot, cached, current_user.id, evidence_job_id, expected_evidence_version,
+                                      manual_pending_keys=manual_pending_keys)
     draft = copy.deepcopy(draft)
     for state_data in draft.get('material_states') or []:
         state_data['property_modules'] = _property_modules_for_state(state_data)
@@ -2093,7 +2109,8 @@ async def _submit_upload_draft_locked(
     cleanup_context = CleanupContext.from_state(task_id, state)
     update_state(task_id, status="submitting", submission_status="submitting")
     try:
-        paper_id = await _create_pending_paper(task_id, state, draft, evidence_checks=evidence_checks)
+        paper_id = await _create_pending_paper(task_id, state, draft, evidence_checks=evidence_checks,
+                                               manual_snapshot=manual_snapshot, manual_baseline=manual_baseline)
     except Exception:
         # 提交失败必须回滚为 ready，否则任务卡在 submitting、详情页只剩空白只读预览
         try:
@@ -2480,6 +2497,10 @@ async def _rewrite_paper_scientific_draft_in_tx(
             },
         }
 
+    from backend.ingest import manual_evidence
+    from backend.ingest.property_evidence import paper_snapshot
+    manual_before = await session.run_sync(lambda sync: paper_snapshot(
+        sync, paper.id, current_user.id, current_user.role, check_access=False))
     paper.superconductor_kind = full_draft["paper"]["superconductor_kind"]
     # 仅在用户保存科学数据时同步汇总，不在读取历史论文时回填。
     paper.research_materials = _derived_research_materials(full_draft["material_states"])
@@ -2518,6 +2539,11 @@ async def _rewrite_paper_scientific_draft_in_tx(
         operation_id=history_operation_id,
         classification_snapshot=jsonable_encoder({'previous_definition_events': definition_history}) if definition_history else None,
     )
+    await session.flush()
+    manual_after = await session.run_sync(lambda sync: paper_snapshot(
+        sync, paper.id, current_user.id, current_user.role, check_access=False))
+    await session.run_sync(lambda sync: manual_evidence.mark_changes(
+        sync, manual_after, manual_before, current_user.id, current_user.username))
 
     return {
         "ok": True,

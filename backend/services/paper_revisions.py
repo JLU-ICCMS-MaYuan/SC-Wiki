@@ -234,6 +234,7 @@ async def submit_draft(session, paper_id, user, payload):
     from backend.ingest.scientific_drafts import persist_scientific_draft
     from backend.services.scientific_draft_rewrite import delete_scientific_entities, bump_paper_revision
     from backend.services.paper_history import append_paper_history_event
+    from backend.ingest import manual_evidence
     paper = await locked_paper(session, paper_id, user)
     operation_id = 'revision:' + payload.revision_id
     done = await session.scalar(select(models.PaperHistoryEvent).where(
@@ -250,8 +251,14 @@ async def submit_draft(session, paper_id, user, payload):
     if doi and await session.scalar(select(models.Paper.id).where(models.Paper.doi == doi, models.Paper.id != paper_id)):
         error(409, 'duplicate_doi', '该 DOI 已属于另一篇论文，请核对后提交')
     snapshot = await session.run_sync(lambda s: revision_snapshot(s, saved.revision_id, user.id))
+    manual_baseline = await session.run_sync(lambda s: ev.paper_snapshot(s, paper_id, user.id, user.role, check_access=False))
+    manual_issues = await session.run_sync(lambda s: manual_evidence.validate_submission(s, snapshot, manual_baseline))
+    if manual_issues:
+        raise HTTPException(400, detail={"code": "manual_evidence_incomplete", "message": "请补齐人工修改依据", "issues": manual_issues})
+    manual_pending_keys = await session.run_sync(lambda s: manual_evidence.complete_keys(s, snapshot, manual_baseline))
     cached = await session.run_sync(lambda s: science.load_results(s, snapshot, user.id))
-    checks = ev.resolve_results(snapshot, cached, user.id, payload.evidence_job_id, payload.expected_evidence_version)
+    checks = ev.resolve_results(snapshot, cached, user.id, payload.evidence_job_id, payload.expected_evidence_version,
+                                manual_pending_keys=manual_pending_keys)
     for result in checks:
         if result.get('kind') == 'property':
             state = draft['material_states'][result['state_index']]
@@ -298,6 +305,11 @@ async def submit_draft(session, paper_id, user, payload):
     await session.execute(delete(models.ScientificEvidenceCheck).where(
         models.ScientificEvidenceCheck.target == 'paper', models.ScientificEvidenceCheck.target_id == str(paper.id)))
     await session.run_sync(lambda s: science.save_results(s, persisted, transferred, user.id))
+    try:
+        await session.run_sync(lambda s: manual_evidence.transfer_to_paper(
+            s, snapshot, manual_baseline, paper.id, paper.content_revision, persisted))
+    except manual_evidence.ManualEvidenceError as exc:
+        error(409, exc.code, str(exc))
     classifications = dict(paper={k: data.get(k) for k in ('material_families', 'superconductor_kind', *AUTHOR_ROLE_FIELDS)},
         material_states=[{k: s.get(k) for k in ('state_key', 'element_count', 'material_dimensionality', 'structure_families')} for s in draft['material_states']])
     await append_paper_history_event(session, paper_id=paper.id, paper_revision=paper.content_revision,

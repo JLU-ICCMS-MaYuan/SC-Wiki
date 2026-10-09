@@ -69,7 +69,8 @@ def render_region(ir: DocumentIR | None, path: Path | None, expected_hash, *, qu
         return {"status":"legacy_text","image":None,"message":"此来源没有区域定位，可继续核对页码与原文。"}
     matches = [block for block in ir.blocks if (block_id is None or block.block_id == block_id)
                and (pdf_page is None or block.pdf_page == pdf_page)
-               and " ".join(quote.split()) in " ".join(block.text.split())]
+               and (" ".join(quote.split()) in " ".join(block.text.split()) if quote.strip()
+                    else block_id is not None and block.block_type in {"figure", "table", "table_cell"})]
     if len(matches) != 1:
         return {"status":"unlocated","image":None,"message":"引句无法唯一定位，保留文本证据。"}
     block = matches[0]

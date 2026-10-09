@@ -18,7 +18,7 @@ export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; so
     return () => { generation.current++ }
   }, [target?.target, target?.target_id, source.file_id, source.page_start, source.quote, source.block_id])
   const open = async () => {
-    if (!target || !source.quote || busy) return
+    if (!target || (!source.quote && !source.block_id) || busy) return
     const current = generation.current
     setBusy(true); setError(false)
     try {
@@ -30,9 +30,12 @@ export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; so
       if (generation.current === current) setBusy(false)
     }
   }
+  useEffect(() => {
+    if (source.evidence_kind === 'pdf_image' && source.block_id) void open()
+  }, [source.evidence_kind, source.block_id, source.file_id, source.page_start, target?.target, target?.target_id])
   return <Box sx={{ my: 1 }}>
-    <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {source.page_start ? t('evidence.page', { page: source.page_start }) : t('evidence.pageUnknown')}：{source.quote || source.content}</Typography>
-    {target && source.quote && <Button disabled={busy} onClick={() => void open()}>{t('evidence.viewRegion')}</Button>}
+    <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {source.page_start ? t('evidence.page', { page: source.page_start }) : t('evidence.pageUnknown')}{source.quote || source.content ? `：${source.quote || source.content}` : ''}</Typography>
+    {target && (source.quote || source.block_id) && source.evidence_kind !== 'pdf_image' && <Button disabled={busy} onClick={() => void open()}>{t('evidence.viewRegion')}</Button>}
     {busy && <LinearProgress aria-label={t('evidence.regionLoading')} />}
     {error && <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>}
     {result && result.status !== 'located' && <Alert severity="info">{t('evidence.regionUnavailable')}</Alert>}

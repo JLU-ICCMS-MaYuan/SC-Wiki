@@ -33,15 +33,20 @@ def _stream_json(
     system_prompt: str,
     user_prompt: str,
     *,
+    images: list[str] | None,
     on_partial: Callable[[str], None] | None,
     read_timeout: float,
 ) -> dict[str, Any]:
     """单次流式调用：逐块累积文本，可选回报中间内容，结束后解析 JSON。"""
+    user_content: Any = user_prompt
+    if images:
+        user_content = [{"type": "text", "text": user_prompt},
+                        *({"type": "image_url", "image_url": {"url": url}} for url in images)]
     stream = _client(read_timeout).chat.completions.create(
         model=get_llm_config().model,
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
+            {"role": "user", "content": user_content},
         ],
         response_format={"type": "json_object"},
         temperature=0.1,
@@ -64,6 +69,7 @@ def complete_json(
     system_prompt: str,
     user_prompt: str,
     *,
+    images: list[str] | None = None,
     on_partial: Callable[[str], None] | None = None,
     read_timeout: float = 90.0,
     retries: int = 2,
@@ -74,7 +80,7 @@ def complete_json(
         try:
             return _stream_json(
                 system_prompt, user_prompt,
-                on_partial=on_partial, read_timeout=read_timeout,
+                images=images, on_partial=on_partial, read_timeout=read_timeout,
             )
         # 流式响应中途断开（httpx.TransportError）不经 OpenAI 包装，同样按可重试处理。
         except (APITimeoutError, APIConnectionError, httpx.TransportError, json.JSONDecodeError, RuntimeError) as exc:

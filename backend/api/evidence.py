@@ -1,9 +1,12 @@
 """共享证据核对入口。后台任务只读科学数据，应用结果由原提交/审核事务负责。"""
 import json
+import hashlib
 import uuid
+from pathlib import Path
 from typing import Literal
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from backend import models
@@ -14,6 +17,7 @@ from backend.rag.llm_context import request_llm_config, get_llm_config
 from backend.ingest import property_evidence as ev
 from backend.ingest import scientific_evidence as science
 from backend.ingest import evidence_proposals as proposals
+from backend.ingest import manual_evidence as manual
 from backend.ingest.upload_tasks import redis_client, upload_queue, save_llm_config, TASK_TTL, get_draft, get_state, save_draft, upload_task_lock
 
 router = APIRouter(prefix='/api/rag/evidence', tags=['evidence'], dependencies=[Depends(request_llm_config)])
@@ -59,7 +63,14 @@ def preflight(body: Target, user=Depends(get_current_user)):
                     active_job = candidate_id
             except Exception:
                 pass
-    return {**ev.public_snapshot(snapshot, cached), 'job_id': active_job}
+    manual_pending_keys = []
+    if body.target in {'upload', 'revision'}:
+        with SessionLocal() as session:
+            if manual.table_available(session):
+                _, baseline = _manual_snapshots(body.target, body.target_id, user)
+                manual_pending_keys = sorted(manual.complete_keys(session, snapshot, baseline))
+    return {**ev.public_snapshot(snapshot, cached), 'job_id': active_job,
+            'manual_pending_keys': manual_pending_keys}
 
 
 @router.post('/jobs')
@@ -154,10 +165,18 @@ class PrepareReview(BaseModel):
 def prepare_review(body: PrepareReview, user=Depends(get_current_admin)):
     with SessionLocal() as session:
         snapshot = ev.paper_snapshot(session, body.paper_id, user.id, user.role)
+        manual_baseline = manual.paper_baseline(session, snapshot)
+        manual_issues = manual.validate_submission(session, snapshot, manual_baseline)
+        if manual_issues:
+            ev.fail('manual_evidence_incomplete', '请补齐人工修改依据', issues=manual_issues)
         if body.classifications is not None:
             science.validate_review_classifications(session, body.paper_id, body.classifications)
         records = ev.resolve_results(snapshot, science.load_results(session, snapshot, user.id), user.id, body.job_id, body.expected_version)
+        manual_ids = manual.current_ids(session, snapshot, manual_baseline)
         for record in records:
+            if record['key'] in manual_ids:
+                record['manual_evidence_id'] = manual_ids[record['key']]['id']
+                record['manual_evidence_version'] = manual_ids[record['key']]['version']
             if not record.get('required', True):
                 continue
             reason = body.resolutions.get(record['key'], record.get('resolution', '')).strip()
@@ -265,7 +284,7 @@ class RegionRequest(BaseModel):
     target: Literal["upload", "paper", "revision"]
     target_id: str = Field(min_length=1, max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
     file_id: str = Field(min_length=1, max_length=64, pattern=r"^[a-zA-Z0-9_-]+$")
-    quote: str = Field(min_length=1, max_length=10000)
+    quote: str = Field(default="", max_length=10000)
     pdf_page: int | None = Field(default=None, ge=1)
     block_id: str | None = Field(default=None, min_length=1, max_length=255)
 
@@ -273,8 +292,133 @@ class RegionRequest(BaseModel):
 @router.post("/region")
 def document_region(body: RegionRequest, user=Depends(get_current_user)):
     from backend.ingest.document_regions import region_document, render_region
-    if not body.quote.strip():
-        raise HTTPException(400, detail="原文引句不能为空")
+    if not body.quote.strip() and not body.block_id:
+        raise HTTPException(400, detail="必须提供原文引句或可靠的 PDF 区域身份")
     with SessionLocal() as session:
         ir, path, digest = region_document(session, body.target, body.target_id, body.file_id, user)
     return render_region(ir, path, digest, quote=body.quote, pdf_page=body.pdf_page, block_id=body.block_id)
+
+
+class ManualTextItem(BaseModel):
+    text: str = Field(min_length=1, max_length=manual.MAX_TEXT_CHARS)
+    source_description: str = Field(min_length=1, max_length=200)
+
+
+class ManualExplanation(BaseModel):
+    expected_version: str
+    reason: str = Field(default="", max_length=4000)
+    no_evidence_reason: str = Field(default="", max_length=4000)
+    text_items: list[ManualTextItem] = Field(default_factory=list, max_length=manual.MAX_ITEMS)
+
+
+def _manual_error(exc: manual.ManualEvidenceError) -> HTTPException:
+    return HTTPException(exc.status, detail={"code": exc.code, "message": str(exc), "field": exc.field})
+
+
+def _manual_snapshots(target: str, target_id: str, user):
+    if target not in {"upload", "revision", "paper"} or not target_id.isalnum():
+        raise HTTPException(400, detail={"code": "manual_target_invalid", "message": "人工证据目标无效"})
+    snapshot, _ = snapshot_for(Target(target=target, target_id=target_id), user)
+    with SessionLocal() as session:
+        if not manual.table_available(session):
+            raise HTTPException(503, detail={"code": "manual_evidence_unavailable", "message": "人工证据存储尚未启用"})
+    if target == "upload":
+        from backend.rag.config import settings
+        path = settings.sc_wiki_data_dir / "review_artifacts" / target_id / "result.json"
+        artifact = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
+        ai_values = artifact.get("ai_values")
+        baseline = ev.upload_snapshot(target_id, user.id, parsing_draft=ai_values) if isinstance(ai_values, dict) else {"records": []}
+    elif target == "revision":
+        with SessionLocal() as session:
+            paper_id = session.scalar(select(models.PaperRevisionDraft.paper_id).where(
+                models.PaperRevisionDraft.revision_id == target_id))
+            baseline = ev.paper_snapshot(session, int(paper_id), user.id, user.role, check_access=False) if paper_id else {"records": []}
+    else:
+        with SessionLocal() as session:
+            baseline = manual.paper_baseline(session, snapshot)
+    return snapshot, baseline
+
+
+def _manual_record_key(item_key: str) -> str:
+    if len(item_key) != 64 or any(ch not in "0123456789abcdef" for ch in item_key):
+        raise HTTPException(400, detail={"code": "manual_field_invalid", "message": "字段身份无效"})
+    return item_key
+
+
+@router.get("/{target}/{target_id}/manual/{item_key}")
+def get_manual_evidence(target: str, target_id: str, item_key: str, user=Depends(get_current_user)):
+    snapshot, baseline = _manual_snapshots(target, target_id, user)
+    try:
+        with SessionLocal() as session:
+            data = manual.read_field(session, snapshot, baseline, _manual_record_key(item_key))
+        return {"ok": True, "data": data}
+    except manual.ManualEvidenceError as exc:
+        raise _manual_error(exc) from exc
+
+
+@router.put("/{target}/{target_id}/manual/{item_key}")
+def put_manual_evidence(target: str, target_id: str, item_key: str, body: ManualExplanation,
+                        user=Depends(get_current_user)):
+    snapshot, baseline = _manual_snapshots(target, target_id, user)
+    if body.expected_version != snapshot["version"]:
+        raise HTTPException(409, detail={"code": "manual_evidence_stale", "message": "字段或来源已变化，请刷新后重新填写"})
+    try:
+        with SessionLocal.begin() as session:
+            data = manual.save_explanation(session, snapshot, baseline, _manual_record_key(item_key), user.id,
+                reason=body.reason, no_evidence_reason=body.no_evidence_reason,
+                text_items=[item.model_dump() for item in body.text_items], actor_name=user.username)
+        return {"ok": True, "data": data}
+    except manual.ManualEvidenceError as exc:
+        raise _manual_error(exc) from exc
+
+
+@router.post("/{target}/{target_id}/manual/{item_key}/files")
+async def post_manual_evidence_file(target: str, target_id: str, item_key: str,
+                                    expected_version: str = Form(...), source_description: str = Form(...),
+                                    file: UploadFile = File(...), user=Depends(get_current_user)):
+    snapshot, baseline = _manual_snapshots(target, target_id, user)
+    if expected_version != snapshot["version"]:
+        raise HTTPException(409, detail={"code": "manual_evidence_stale", "message": "字段或来源已变化，请刷新后重新上传"})
+    try:
+        raw = await file.read(manual.MAX_FILE_BYTES + 1)
+    finally:
+        await file.close()
+    data = None
+    try:
+        with SessionLocal.begin() as session:
+            data = manual.add_file(session, snapshot, baseline, _manual_record_key(item_key), user.id,
+                                   filename=file.filename or "", raw=raw, source_description=source_description,
+                                   actor_name=user.username)
+        return {"ok": True, "data": data}
+    except manual.ManualEvidenceError as exc:
+        raise _manual_error(exc) from exc
+    except Exception:
+        if data and data.get("items"):
+            manual.file_path(data["id"], data["items"][-1]["id"]).unlink(missing_ok=True)
+        raise
+
+
+@router.get("/{target}/{target_id}/manual/{item_key}/files/{item_id}")
+def get_manual_evidence_file(target: str, target_id: str, item_key: str, item_id: str,
+                             user=Depends(get_current_user)):
+    snapshot, _ = _manual_snapshots(target, target_id, user)
+    try:
+        with SessionLocal() as session:
+            _, entry, path = manual.file_entry(session, snapshot, _manual_record_key(item_key), item_id)
+        return FileResponse(path, media_type=entry["media_type"], filename=entry["filename"],
+                            content_disposition_type="inline", headers={"X-Content-Type-Options": "nosniff"})
+    except manual.ManualEvidenceError as exc:
+        raise _manual_error(exc) from exc
+
+
+@router.delete("/{target}/{target_id}/manual/{item_key}/files/{item_id}")
+def delete_manual_evidence_file(target: str, target_id: str, item_key: str, item_id: str,
+                                user=Depends(get_current_user)):
+    snapshot, _ = _manual_snapshots(target, target_id, user)
+    try:
+        with SessionLocal.begin() as session:
+            path = manual.remove_file(session, snapshot, _manual_record_key(item_key), item_id, user.id)
+        path.unlink(missing_ok=True)
+        return {"ok": True}
+    except manual.ManualEvidenceError as exc:
+        raise _manual_error(exc) from exc

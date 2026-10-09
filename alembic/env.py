@@ -6,6 +6,7 @@ from sqlalchemy import engine_from_config, pool
 
 from backend.database import Base
 from backend import models  # noqa: F401
+from backend import manual_evidence_models  # noqa: F401
 from backend.news import models as news_models  # noqa: F401
 from backend.community import models as community_models  # noqa: F401
 

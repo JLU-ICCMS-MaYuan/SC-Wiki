@@ -47,7 +47,7 @@ SYNTHESIS_FIELDS = frozenset({
     'condition_note', 'note',
 })
 
-COMPATIBLE_RULES = {'scientific-evidence-v2', 'scientific-evidence-v3', 'scientific-evidence-v4', 'scientific-evidence-v5', 'scientific-evidence-v6'}
+COMPATIBLE_RULES = {'scientific-evidence-v2', 'scientific-evidence-v3', 'scientific-evidence-v4', 'scientific-evidence-v5', 'scientific-evidence-v6', 'scientific-evidence-v7'}
 
 
 def adopted_suggestion(record):

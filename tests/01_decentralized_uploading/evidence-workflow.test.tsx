@@ -27,7 +27,7 @@ it('无核对记录的字段标签仍可查看空侧栏，不触发模型或保�
   }
   await act(async()=>render(<Empty/>))
   await act(async()=>fireEvent.click(screen.getByRole('button',{name:'期号'})))
-  expect(screen.getByText('暂无证据或建议')).toBeInTheDocument()
+  expect(screen.getByText('未找到可定位的论文原文依据；可重新查找或人工核对。')).toBeInTheDocument()
   expect(screen.queryByRole('button',{name:'完成',exact:true})).not.toBeInTheDocument()
   expect(api.post).toHaveBeenCalledTimes(1)
 })
@@ -172,9 +172,45 @@ it('已有原文直接用于裁决，不要求选择片段或编辑引句', asyn
   await advance()
   expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   expect(screen.getAllByRole('textbox')).toHaveLength(1)
-  expect(screen.getByText('查看系统找到的原文').closest('details')).not.toHaveAttribute('open')
-  expect(screen.queryByText(/片段 2|文件 main/)).not.toBeInTheDocument()
+  expect(screen.getByText('系统找到的原文').closest('details')).toHaveAttribute('open')
+  expect(screen.getByText(/source/)).toBeInTheDocument()
   expect(api.post).toHaveBeenCalledWith('/api/rag/evidence/jobs', { target: 'paper', target_id: '29', expected_version: 'v1', purpose: 'review_all' })
+})
+
+it('来源优先且默认展开，作者等结构化值不在侧栏显示 JSON', async () => {
+  const authors = { ...record, key: 'authors', field: 'paper.authors', label: '作者',
+    current_value: ['Defang Duan', 'Tian Cui'], evidences: [{ file_id: 'main', source_name: '正文.pdf', chunk_index: 0, page_start: 1, quote: 'Defang Duan and Tian Cui' }] }
+  vi.mocked(api.post).mockResolvedValue({ version: 'v1', needs_check: false, records: [authors] })
+  function Authors() { const flow = useEvidenceWorkflow({ target: { target: 'upload', target_id: '29' } });
+    return <><button onClick={() => flow.openIssue('authors')}>查看作者</button>{flow.dialog}</> }
+  await act(async () => render(<Authors />))
+  await act(async () => fireEvent.click(screen.getByText('查看作者')))
+  const drawer = screen.getByRole('dialog')
+  expect(drawer).not.toHaveTextContent('当前内容')
+  expect(drawer).not.toHaveTextContent('[\n')
+  const source = screen.getByText('系统找到的原文')
+  expect(source.closest('details')).toHaveAttribute('open')
+  await act(async () => fireEvent.click(source))
+  expect(source.closest('details')).not.toHaveAttribute('open')
+  expect(drawer.textContent!.indexOf('系统找到的原文')).toBeLessThan(drawer.textContent!.indexOf('人工修改记录'))
+  expect(drawer.textContent!.indexOf('人工修改记录')).toBeLessThan(drawer.textContent!.indexOf('AI 辅助的建议（可人工修改）'))
+  expect(drawer).toHaveTextContent('正文.pdf')
+  expect(drawer).toHaveTextContent('Defang Duan and Tian Cui')
+})
+
+it('替换建议的引句不冒充当前值的系统原文', async () => {
+  const suggested = { ...record, evidences: [], proposal: { basis_kind: 'paper_quote',
+    values: { '': 'new value' }, supported: true,
+    evidences: [{ file_id: 'main', chunk_index: 0, quote: 'new value is supported' }] } }
+  vi.mocked(api.post).mockResolvedValue({ version: 'v1', needs_check: false, records: [suggested] })
+  function Suggested() { const flow = useEvidenceWorkflow({ target: { target: 'upload', target_id: '29' } });
+    return <><button onClick={() => flow.openIssue('47')}>查看建议</button>{flow.dialog}</> }
+  await act(async () => render(<Suggested />))
+  await act(async () => fireEvent.click(screen.getByText('查看建议')))
+  const sourceSection = screen.getByText('系统找到的原文').closest('details')!
+  expect(sourceSection).toHaveTextContent('未找到可定位的论文原文依据')
+  expect(sourceSection).not.toHaveTextContent('new value is supported')
+  expect(screen.getByText('建议值的原文依据').closest('details')).toHaveTextContent('new value is supported')
 })
 
 it('上传没有出处时只提示重新查找或修改记录，不要求手选证据', async () => {

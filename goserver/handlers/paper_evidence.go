@@ -25,31 +25,33 @@ type evidenceCitation struct {
 	PageEnd    *int    `json:"page_end"`
 }
 type evidenceReviewRecord struct {
-	History        json.RawMessage    `json:"history,omitempty"`
-	Required       *bool              `json:"required,omitempty"`
-	AdoptedBasis   string             `json:"adopted_basis,omitempty"`
-	ProposalReview json.RawMessage    `json:"proposal_review,omitempty"`
-	Proposal       json.RawMessage    `json:"proposal"`
-	Decision       json.RawMessage    `json:"decision"`
-	SourceKind     string             `json:"source_kind"`
-	ItemKey        string             `json:"item_key"`
-	Kind           string             `json:"kind"`
-	Suggestion     string             `json:"suggestion"`
-	CurrentValue   json.RawMessage    `json:"current_value"`
-	Provenance     json.RawMessage    `json:"provenance"`
-	Fields         []string           `json:"fields"`
-	Key            string             `json:"key"`
-	RecordID       uint               `json:"record_id"`
-	Field          string             `json:"field"`
-	Label          string             `json:"label"`
-	ContentHash    string             `json:"content_hash"`
-	SourceHash     string             `json:"source_hash"`
-	RuleVersion    string             `json:"rule_version"`
-	Status         string             `json:"status"`
-	Reason         string             `json:"reason"`
-	Model          string             `json:"model"`
-	Resolution     string             `json:"resolution"`
-	Evidences      []evidenceCitation `json:"evidences"`
+	History               json.RawMessage    `json:"history,omitempty"`
+	Required              *bool              `json:"required,omitempty"`
+	AdoptedBasis          string             `json:"adopted_basis,omitempty"`
+	ProposalReview        json.RawMessage    `json:"proposal_review,omitempty"`
+	Proposal              json.RawMessage    `json:"proposal"`
+	Decision              json.RawMessage    `json:"decision"`
+	SourceKind            string             `json:"source_kind"`
+	ManualEvidenceID      string             `json:"manual_evidence_id,omitempty"`
+	ManualEvidenceVersion int                `json:"manual_evidence_version,omitempty"`
+	ItemKey               string             `json:"item_key"`
+	Kind                  string             `json:"kind"`
+	Suggestion            string             `json:"suggestion"`
+	CurrentValue          json.RawMessage    `json:"current_value"`
+	Provenance            json.RawMessage    `json:"provenance"`
+	Fields                []string           `json:"fields"`
+	Key                   string             `json:"key"`
+	RecordID              uint               `json:"record_id"`
+	Field                 string             `json:"field"`
+	Label                 string             `json:"label"`
+	ContentHash           string             `json:"content_hash"`
+	SourceHash            string             `json:"source_hash"`
+	RuleVersion           string             `json:"rule_version"`
+	Status                string             `json:"status"`
+	Reason                string             `json:"reason"`
+	Model                 string             `json:"model"`
+	Resolution            string             `json:"resolution"`
+	Evidences             []evidenceCitation `json:"evidences"`
 }
 type evidencePrepareError struct {
 	Status int
@@ -209,6 +211,13 @@ func applyPaperEvidence(tx *gorm.DB, paper *models.Paper, records []evidenceRevi
 		}
 		if err := tx.Exec(`INSERT INTO scientific_evidence_sources (paper_id,paper_revision,item_key,field_path,content_hash,source_hash,rule_version,result) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE field_path=VALUES(field_path),content_hash=VALUES(content_hash),source_hash=VALUES(source_hash),rule_version=VALUES(rule_version),result=VALUES(result)`, paper.ID, paper.ContentRevision, r.ItemKey, r.Field, r.ContentHash, r.SourceHash, r.RuleVersion, string(snapshot)).Error; err != nil {
 			return fmt.Errorf("保存科学来源失败: %w", err)
+		}
+		if r.ManualEvidenceID != "" {
+			updated := tx.Exec(`UPDATE scientific_manual_evidence SET status = 'submitted', paper_id = ?, paper_revision = ? WHERE id = ? AND target = 'paper' AND target_id = ? AND item_key = ? AND status = 'draft' AND evidence_version = ? AND value_hash = ? AND source_hash = ? AND TRIM(reason) <> ''`,
+				paper.ID, paper.ContentRevision, r.ManualEvidenceID, strconv.FormatUint(uint64(paper.ID), 10), r.ItemKey, r.ManualEvidenceVersion, r.ContentHash, r.SourceHash)
+			if updated.Error != nil || updated.RowsAffected != 1 {
+				return errors.New("人工证据已变化，审核未提交")
+			}
 		}
 
 	}

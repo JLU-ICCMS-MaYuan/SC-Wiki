@@ -547,6 +547,11 @@ def cleanup_unsubmitted_files(task_id: str) -> None:
     markdown_root = data_path("parsed_markdown")
     (markdown_root / f"{task_id}.md").unlink(missing_ok=True)
     shutil.rmtree(markdown_root / task_id, ignore_errors=True)
+    from backend.database import SessionLocal
+    from backend.ingest import manual_evidence
+    with SessionLocal.begin() as session:
+        roots = manual_evidence.cleanup_unsubmitted(session, task_id)
+    manual_evidence.remove_file_roots(roots)
 
 
 def cleanup_duplicate_candidate(task_id: str, existing_paper_id: int | None) -> None:

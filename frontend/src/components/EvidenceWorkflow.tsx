@@ -1,4 +1,6 @@
 import { EvidenceRegion } from './EvidenceRegion'
+import EvidenceReadableValue from './EvidenceReadableValue'
+import ManualEvidenceSection from './ManualEvidenceSection'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, TextField, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -9,7 +11,7 @@ import { createEvidenceDraftQueue } from '../lib/evidenceDraftQueue'
 import { evidenceFieldAffected } from '../lib/evidenceFields'
 import { useLanguage } from '../context/LanguageContext'
 
-export interface EvidenceSource { block_id?: string; file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
+export interface EvidenceSource { block_id?: string; evidence_kind?: 'text' | 'pdf_image'; file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
 export interface ProposalDraft { values: Record<string, unknown>; accepted: boolean; reason: string; supported?: boolean }
 export type EvidenceBasis = 'paper_quote' | 'paper_inference' | 'general_knowledge'
 export interface EvidenceHistory {
@@ -20,14 +22,15 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; verified?: boolean; paper_supported?: boolean } }
-interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[] }
+export interface EvidenceRecord { history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
 export interface EvidenceTarget { target: 'upload' | 'paper' | 'revision'; target_id: string }
 interface View { phase: 'checking' | 'countdown' | 'running' | 'error'; seconds?: number; message?: string; job?: Job }
 const base = '/api/rag/evidence'
 const problematic = evidenceProblem
+
 
 // 运行任务与持久问题列表分开；关闭抽屉不清除任何核对结果。
 export function useEvidenceWorkflow(options?: {
@@ -204,6 +207,7 @@ export function useEvidenceWorkflow(options?: {
     setReasons(Object.fromEntries(result.records.map(r => [r.key, r.proposal_draft?.reason ?? r.resolution ?? ''])))
     const unresolved = result.records.filter(r => r.required !== false && !(target.target === 'upload' && r.decision?.accepted && ['paper_inference', 'general_knowledge'].includes(r.adopted_basis || '')) && (r.stale || (!r.human_confirmed && (r.status === 'unchecked' || r.status === 'missing'))
       || (target.target === 'paper' && r.status !== 'supported' && !r.human_confirmed && !r.resolution?.trim())))
+      .filter(r => !((target.target === 'upload' || target.target === 'revision') && result.manual_pending_keys?.includes(r.key) && r.status === 'missing' && !r.stale))
     if (result.needs_check || unresolved.length) {
       if (unresolved.length) openIssue(unresolved[0].key)
       setSaveError(t('evidence.checkRequired'))
@@ -447,53 +451,62 @@ export function useEvidenceWorkflow(options?: {
     <Drawer anchor="right" variant="temporary" open={Boolean(activeRecord)} onClose={closeDrawer} ModalProps={{ disableRestoreFocus: true }} slotProps={{ transition: { onExited: restoreDrawerFocus }, paper: { role: 'dialog', className: 'evidence-review-drawer', 'aria-label': t('evidence.title'), sx: { width: { xs: '100vw', sm: 480 }, maxWidth: '100vw', p: 3 } } }}>
       {activeRecord && <>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><Typography variant="h6">{activeRecord.label}</Typography><IconButton aria-label={t('evidence.closeDrawer')} onClick={closeDrawer}><CloseIcon /></IconButton></Box>
-        <Typography fontWeight={600} sx={{ mt: 2 }}>{t(options?.getCurrentValue ? 'evidence.currentValue' : 'evidence.currentContent')}</Typography>
-        {[...new Map(activeGroup.map(r => [r.field, r])).values()].map(r => {
-          const value = options?.getCurrentValue?.(r)?.value ?? (options?.getCurrentValue?.(r) ? null : r.current_value)
-          return <Typography key={r.key} sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', my: 1 }}>{value == null || value === '' ? t('evidence.emptyValue') : typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}</Typography>
-        })}
-        {options?.getCurrentValue && !activeRecord.placeholder && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
+        <Box component="details" open key={selected} sx={{ mt: 2 }}>
+          <Typography component="summary" fontWeight={700} sx={{ cursor: 'pointer' }}>{t('evidence.foundSources')}</Typography>
+          {activeGroup.some(r => r.evidences.length)
+            ? activeGroup.flatMap(r => r.evidences)
+              .filter((source, index, all) => all.findIndex(item => item.file_id === source.file_id && item.quote === source.quote) === index)
+              .map((source, index) => <EvidenceRegion key={`${source.file_id}:${source.page_start}:${index}`} target={targetRef.current} source={source} />)
+            : activeRecord.provenance?.kind === 'derived'
+              ? <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.derivedSource')}
+                  <Typography>{t('evidence.derivedRule')}：{activeRecord.provenance.rule}</Typography>
+                  <EvidenceReadableValue value={activeRecord.provenance.input} />
+                </Alert>
+              : <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.noPaperSource')}</Alert>}
+          {activeRecord.provenance?.kind === 'contributor_structure' && <Alert severity="info" sx={{ mt: 1 }}>
+            <Typography>{t('evidence.providerLabel')}：{activeRecord.provenance.submitted_by_name || t('evidence.unknownProvider')}</Typography>
+            <Typography>{activeRecord.provenance.filename} · {activeRecord.provenance.method}</Typography>
+            {activeRecord.provenance.original_text && <Box component="details"><Box component="summary">{t('evidence.originalStructure')}</Box><Typography component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{activeRecord.provenance.original_text}</Typography></Box>}
+          </Alert>}
+          {!activeRecord.placeholder && activeGroup.map(r => <Box key={r.key} sx={{ my: 1 }}>
+            {r.stale && <Alert severity="warning">{t('evidence.staleResult')}</Alert>}
+            <Alert severity={r.human_confirmed ? 'success' : r.status === 'unchecked' ? 'info' : r.status === 'supported' ? 'success' : 'error'}>{r.human_confirmed ? t('evidence.humanConfirmed') : r.status === 'unchecked' ? t('evidence.uncheckedHint') : r.reason}</Alert>
+          </Box>)}
+        </Box>
+        <Typography fontWeight={700} sx={{ mt: 2 }}>{t('evidence.manualEditRecords')}</Typography>
+        <ManualEvidenceSection target={targetRef.current} record={activeRecord} version={preflightRef.current?.version} />
+        {activeGroup.some(r => r.history?.length || r.decision?.reason) ? <>
+          {activeGroup.map(r => r.decision?.reason && <Typography key={r.key}>{t('evidence.savedHumanReason')}：{r.decision.reason}</Typography>)}
+          {activeGroup.some(r => r.history?.length) && <Box component="details" sx={{ my: 1 }}><Typography component="summary">{t('evidence.historyLabel')}</Typography>{activeGroup.flatMap(r => r.history || []).map((entry, index) => <Box key={index} sx={{ my: 2, overflowWrap: 'anywhere' }}>
+            <Alert severity="info">{t('evidence.historyReadonly')}</Alert>
+            <EvidenceReadableValue value={entry.current_value} />
+            <Typography>{entry.reason}</Typography>
+            {(entry.adopted_basis || entry.proposal?.basis_kind) && <Typography>{t(`evidence.basis.${entry.adopted_basis || entry.proposal?.basis_kind}`)}</Typography>}
+            {entry.proposal && <><EvidenceReadableValue value={entry.proposal.values} /><Typography>{entry.proposal.explanation}</Typography></>}
+            {entry.decision?.reason && <Typography>{t('evidence.savedHumanReason')}：{entry.decision.reason}</Typography>}
+            {[...(entry.evidences || []), ...(entry.proposal?.evidences || [])].map((source, i) => <Typography key={i}>{source.source_name || source.file_id} · {source.page_start} — {source.quote}</Typography>)}
+          </Box>)}</Box>}
+        </> : null}
+        {targetRef.current?.target === 'paper' && activeGroup.map(r => <TextField key={r.key} fullWidth multiline minRows={2} sx={{ mt: 1 }} label={t('evidence.humanReason')} value={reasons[r.key] ?? r.proposal_draft?.reason ?? ''}
+          disabled={confirming || (!r.stale && Boolean(r.proposal_draft?.accepted))} onChange={event => updateReason(r, event.target.value)} helperText={t('evidence.reasonConditional')} />)}
         {dirty.current && options?.saveCurrent && <Alert severity="info">{t('evidence.saveBeforeConfirm')}</Alert>}
-        {activeGroup.every(r => !r.evidences.length && !r.proposal && !r.decision && !r.proposal_draft && (r.placeholder || r.status === 'unchecked')) && <Alert severity="info" sx={{ mt: 2 }}>{t('evidence.emptySources')}</Alert>}
-        {!activeRecord.placeholder && <><Typography fontWeight={600} sx={{ mt: 2 }}>{t('evidence.problemsDirections')}</Typography>
-        {activeGroup.map(r => <Box key={r.key} sx={{ my: 1 }}>
-          {r.stale && <Alert severity="warning">{t('evidence.staleResult')}</Alert>}
-          <Alert severity={r.human_confirmed ? 'success' : r.status === 'unchecked' ? 'info' : r.status === 'supported' ? 'success' : 'error'}>{r.human_confirmed ? t('evidence.humanConfirmed') : r.status === 'unchecked' ? t('evidence.uncheckedHint') : r.reason}</Alert>
-          <Typography sx={{ my: 1 }}>{r.suggestion || t('evidence.defaultSuggestion')}</Typography>
-        </Box>)}
+        {!activeRecord.placeholder && <>
         <Typography fontWeight={600} sx={{ my: 2 }}>{t('evidence.suggestionLabel')}</Typography>
         {activeGroup.map(r => <Box key={r.key} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
           {(r.adopted_basis || r.proposal?.basis_kind) && <Alert severity="info">{t(`evidence.basis.${r.adopted_basis || r.proposal?.basis_kind}`)}</Alert>}
-          {r.proposal?.explanation && <Typography sx={{ whiteSpace: 'pre-wrap' }}>{r.proposal.explanation}</Typography>}
-          {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
-          {r.decision?.reason && <Typography>{t('evidence.savedHumanReason')}：{r.decision.reason}</Typography>}
+          {r.suggestion && <Typography>{r.suggestion}</Typography>}
+            {r.proposal?.explanation && <Typography sx={{ whiteSpace: 'pre-wrap' }}>{r.proposal.explanation}</Typography>}
+            {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
+            {Boolean(r.proposal?.evidences?.length) && <Box component="details"><Typography component="summary">{t('evidence.suggestionSources')}</Typography>
+              {r.proposal!.evidences.map((source, index) => <EvidenceRegion key={`${source.file_id}:${index}`} target={targetRef.current} source={source} />)}
+            </Box>}
           {!r.proposal && <Alert severity="info">{t('evidence.noReplacement')}</Alert>}
           {(r.editable_fields || []).map(field => <EvidenceValueEditor key={field.path} label={r.stale ? `${field.label} · ${t('evidence.beforeEditValue')}` : field.label} schema={field.schema}
             value={Object.hasOwn(valuesFor(r), field.path) ? valuesFor(r)[field.path] : field.value} disabled={r.stale || Boolean(r.proposal_draft?.accepted)}
             onChange={value => updateValues(r, field.path, value)} />)}
-          {targetRef.current?.target === 'paper' && <TextField multiline minRows={2} label={t('evidence.humanReason')} value={reasons[r.key] ?? r.proposal_draft?.reason ?? ''}
-            disabled={confirming || (!r.stale && Boolean(r.proposal_draft?.accepted))} onChange={event => updateReason(r, event.target.value)} helperText={t('evidence.reasonConditional')} />}
         </Box>)}
         {accepted && <Alert severity="success">{t('evidence.acceptedPending')}</Alert>}</>}
-
-        {activeGroup.some(r => r.history?.length) && <Box component="details" sx={{ my: 2 }}><Typography component="summary">{t('evidence.historyLabel')}</Typography>{activeGroup.flatMap(r => r.history || []).map((entry, index) => <Box key={index} sx={{ my: 2, overflowWrap: 'anywhere' }}>
-          <Alert severity="info">{t('evidence.historyReadonly')}</Alert>
-          <Typography sx={{ whiteSpace: 'pre-wrap' }}>{typeof entry.current_value === 'object' ? JSON.stringify(entry.current_value, null, 2) : String(entry.current_value ?? '')}</Typography>
-          <Typography>{entry.reason}</Typography>
-          {(entry.adopted_basis || entry.proposal?.basis_kind) && <Typography>{t(`evidence.basis.${entry.adopted_basis || entry.proposal?.basis_kind}`)}</Typography>}
-          {entry.proposal && <><Typography>{JSON.stringify(entry.proposal.values)}</Typography><Typography>{entry.proposal.explanation}</Typography></>}
-          {entry.decision?.reason && <Typography>{t('evidence.savedHumanReason')}：{entry.decision.reason}</Typography>}
-          {[...(entry.evidences || []), ...(entry.proposal?.evidences || [])].map((source, i) => <Typography key={i}>{source.source_name || source.file_id} · {source.page_start} — {source.quote}</Typography>)}
-        </Box>)}</Box>}
-        {activeRecord.provenance?.kind === 'contributor_structure' && <Alert severity="info" sx={{ mb: 2 }}>
-          {activeRecord.evidences.length === 0 && <Typography>{t('evidence.noPaperSupport')}</Typography>}
-          <Typography>{t('evidence.providerLabel')}：{activeRecord.provenance.submitted_by_name || t('evidence.unknownProvider')}</Typography>
-          <Typography>{activeRecord.provenance.filename} · {activeRecord.provenance.method}</Typography>
-          {activeRecord.provenance.original_text && <Box component="details"><Box component="summary">原始结构文件</Box><Typography component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{activeRecord.provenance.original_text}</Typography></Box>}
-        </Alert>}
-        {activeGroup.some(r => r.evidences.length > 0 || r.proposal?.evidences.length) && <Box component="details" sx={{ my: 2 }}><Box component="summary" sx={{ cursor: 'pointer' }}>{t('evidence.foundSources')}</Box>
-          {activeGroup.flatMap(r => [...r.evidences, ...(r.proposal?.evidences || [])]).filter((e, i, all) => all.findIndex(x => x.file_id === e.file_id && x.quote === e.quote) === i).map((e, i) => <EvidenceRegion key={`${e.file_id}:${e.page_start}:${i}`} target={targetRef.current} source={e} />)}
-        </Box>}
+        {options?.getCurrentValue && !activeRecord.placeholder && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
         {saveError && <Alert severity="error" sx={{ mt: 1 }} action={draftSaveFailed ? <Button disabled={saving} onClick={() => void retryDrafts().catch(() => undefined)}>{t('evidence.retrySave')}</Button> : undefined}>{saveError} {draftSaveFailed && t('evidence.saveFailureRetained')}</Alert>}
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', my: 2 }}>
           <Button onClick={closeDrawer}>{t('evidence.back')}</Button>

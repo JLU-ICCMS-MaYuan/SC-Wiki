@@ -110,11 +110,11 @@ def test_synthesis_fields_are_marked_and_keep_model_judgment():
     assert rows["paper.research_motivation"].get("check_mode") == "synthesis"
     assert rows["paper.keywords_tags"].get("check_mode") == "synthesis"
     assert "check_mode" not in rows["paper.doi"]
-    # 模型引句定位失败时，synthesis 字段保留模型整体判断，不判 missing，理由也不带定位错误。
+    # 概括文字不必逐字出现，但没有任何可定位依据时不能标为原文支持。
     outcome = ev.checked_result(rows["paper.research_motivation"],
                                 result("supported", [{"file_id": "main", "chunk_index": 9, "quote": "模型凭记忆复述的走样引句"}]),
                                 CHECK_CHUNKS)
-    assert outcome["status"] == "supported"
+    assert outcome["status"] == "missing"
     assert "未在所选来源" not in outcome["reason"]
 
 
