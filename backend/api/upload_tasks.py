@@ -300,7 +300,10 @@ def delete_upload_task(task_id: str, current_user: User = Depends(get_current_us
         raise _error(409, "UPLOAD_TASK_NOT_CLEARABLE", "运行中或待校对任务不能直接清理")
     if submitted_paper_id(task_id) is not None:
         raise _error(409, "UPLOAD_TASK_PERSISTED", "任务已经生成正式论文，不能删除文件")
-    delete_task_record(task_id)
+    try:
+        delete_task_record(task_id)
+    except TimeoutError:
+        raise _error(409, "UPLOAD_TASK_BUSY", "任务正被其他请求处理，请稍后重试")
     return {"ok": True}
 
 

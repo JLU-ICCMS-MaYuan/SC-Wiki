@@ -82,8 +82,13 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey, activeTaskId, onToggle 
 
   const remove = async (event: React.MouseEvent, taskId: string) => {
     event.stopPropagation()
-    await api.del(`/api/upload-tasks/${taskId}`)
-    await load()
+    try {
+      await api.del(`/api/upload-tasks/${taskId}`)
+      setError('')
+      await load()
+    } catch (reason: any) {
+      setError(reason.message || t('upload.operationFailed'))
+    }
   }
 
   const allSelected = tasks.length > 0 && tasks.every(task => selectedIds.has(task.task_id))

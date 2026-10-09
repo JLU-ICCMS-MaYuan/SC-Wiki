@@ -203,3 +203,20 @@ def test_single_delete_still_rejects_running_and_persisted_tasks(monkeypatch):
         api.delete_upload_task(task_id, owner)
     assert persisted.value.status_code == 409
     assert persisted.value.detail["code"] == "UPLOAD_TASK_PERSISTED"
+
+
+def test_single_delete_reports_busy_when_lock_timeout(monkeypatch):
+    owner = SimpleNamespace(id=7, role="user", is_approved=True)
+    task_id = "e" * 32
+    monkeypatch.setattr(api, "_owned_state", lambda _t, _u: _state(task_id, "failed"))
+    monkeypatch.setattr(upload_tasks, "submitted_paper_id", lambda _task_id: None)
+    monkeypatch.setattr(
+        upload_tasks, "delete_task_record",
+        lambda _task_id: (_ for _ in ()).throw(TimeoutError("上传任务正由其他请求处理")),
+    )
+
+    with pytest.raises(api.HTTPException) as busy:
+        api.delete_upload_task(task_id, owner)
+    assert busy.value.status_code == 409
+    assert busy.value.detail["code"] == "UPLOAD_TASK_BUSY"
+    assert "请稍后重试" in busy.value.detail["message"]
