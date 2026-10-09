@@ -16,7 +16,7 @@ try {
   let states=Array.from({length:3},(_,i)=>({state_key:`s-${i}`,material_name:'Sn',material:'Sn',state_kind:'experimental',material_dimensionality:'three_dimensional',crystal_system:'tetragonal',element_count:1,pressure_value_gpa:i,property_modules:[],structure_families:[],structures:[]}))
   const source={file_id:'main',source_name:'synthetic.txt',page_start:2,quote:'Synthetic evidence only.'}
   const records=()=>[
-   {key:'title',field:'paper.title',label:'标题',current_value:paper.title,status:'supported',required:false,reason:'标题与原文一致',evidences:[source]},
+   {key:'title',item_key:'a'.repeat(64),field:'paper.title',label:'标题',current_value:paper.title,status:'supported',required:false,reason:'标题与原文一致',evidences:[source]},
    {key:'summary',field:'paper.summary',label:'论文总结',current_value:null,status:'unchecked',required:false,reason:'',evidences:[]},
    ...states.map((s,i)=>({key:s.state_key,state_key:s.state_key,field:`material_states[${i}].pressure_value_gpa`,label:'压强',current_value:s.pressure_value_gpa,status:i===1?'uncertain':'supported',reason:'压力来源',evidences:[source],...(i===1?{human_confirmed:true,adopted_basis:'general_knowledge',decision:{accepted:true,actor_user_id:8,reason:'人工确认的通用知识推测',basis_kind:'general_knowledge'}}:{})})),
   ]
@@ -29,8 +29,9 @@ try {
    if(path.endsWith('/space-groups'))return json({space_groups:[]})
    if(path.endsWith('/review-artifact'))return json({data:{}})
    if(path.endsWith('/preflight'))return json({version:'v1',needs_check:false,records:records(),sources:[]})
-   if(path.endsWith('/jobs') && req.method()==='POST'){assert.equal(req.postDataJSON().purpose,'review_all');jobs++;return json({id:'job',status:'queued'})}
+   if(path.endsWith('/jobs') && req.method()==='POST'){if(req.postDataJSON().purpose==='review_all')jobs++;return json({id:'job',status:'queued'})}
    if(path.endsWith('/jobs/job'))return json({id:'job',status:'completed',version:'v1',records:records()})
+   if(path.includes('/manual/'))return json({ok:true,data:{changed:true,status:'submitted',before_value:'Old title',after_value:paper.title,actor_name:'Fixture uploader',reason:'核对论文标题页',no_evidence_reason:'',items:[{id:'text',kind:'text',text:'人工核对标题页',source_description:'人工抄录'}]}})
    if(path===`/api/admin/papers/${paper.id}`){if(req.method()==='PUT'){paper={...paper,...req.postDataJSON()};writes++}return json({...paper,material_states:states})}
    if(path.endsWith('/scientific-draft')){states=req.postDataJSON().material_states;writes++;return json({ok:true,data:{unchanged:true}})}
    if(path.endsWith('/draft')){if(req.method()==='PUT'){paper=req.postDataJSON().paper;states=req.postDataJSON().material_states;writes++}return json({ok:true,data:{paper,material_states:states,structure_candidates:[]}})}
@@ -56,14 +57,23 @@ try {
    await page.getByRole('button',{name:'全部展开',exact:true}).click()
    const empty=page.locator('[data-evidence-key="summary"]').first();await empty.waitFor();await empty.focus();await page.keyboard.press('Enter')
    const drawer=page.locator('.evidence-review-drawer')
-   await drawer.getByText('暂无证据或建议',{exact:true}).waitFor()
+   await drawer.getByText('未找到可定位的论文原文依据；可重新查找或人工核对。',{exact:true}).waitFor()
+   await page.keyboard.press('Escape');await drawer.waitFor({state:'detached'})
+   await page.locator('[data-evidence-key="title"]').first().click()
+   await drawer.getByText('Synthetic evidence only.',{exact:false}).waitFor()
+   await drawer.getByText('人工核对标题页',{exact:true}).waitFor()
+   assert(await drawer.getByText('系统找到的原文').locator('..').evaluate(e=>e.open),'系统原文默认展开')
+   assert.equal(await drawer.getByText('保存理由和文字证据',{exact:true}).count(),0,'已提交人工材料只读')
+   await page.waitForTimeout(350)
+   await page.screenshot({path:`${artifacts}/${role}-${width}-drawer.png`})
    await page.keyboard.press('Escape');await drawer.waitFor({state:'detached'})
    const state=page.locator('[data-state-key="s-1"]'),label=state.getByRole('button',{name:'压强 (GPa)',exact:true})
    await label.scrollIntoViewIfNeeded();const before=await label.evaluate(e=>e.getBoundingClientRect().top)
    await label.focus();await page.keyboard.press('Space')
    await drawer.getByText('人工确认的通用知识推测',{exact:false}).waitFor()
-   await drawer.locator('details > summary').last().click()
+   assert(await drawer.getByText('系统找到的原文').locator('..').evaluate(e=>e.open),'系统原文默认展开')
    await drawer.getByText('Synthetic evidence only.',{exact:false}).waitFor()
+   assert.equal(await drawer.getByText('当前内容',{exact:true}).count(),0,'不显示当前内容区')
    await page.getByLabel('关闭来源详情').click();await drawer.waitFor({state:'detached'});await page.waitForTimeout(400)
    assert(Math.abs(before-await label.evaluate(e=>e.getBoundingClientRect().top))<4,'关闭不跳回顶部')
    assert.equal(await state.locator('[data-evidence-problem]').count(),0,'人工确认恢复普通样式')
@@ -76,7 +86,7 @@ try {
    const field=page.locator('[data-issue-field="paper.summary"] textarea').first()
    await field.fill('Changed current summary')
    await page.locator('[data-evidence-key="summary"]').first().click()
-   await page.locator('.evidence-review-drawer').getByText('Changed current summary',{exact:true}).waitFor()
+   assert.equal(await page.locator('.evidence-review-drawer').getByText('当前内容',{exact:true}).count(),0)
    await page.keyboard.press('Escape')
   }else{
    await Promise.all([page.waitForRequest(r=>r.url().endsWith('/jobs') && r.method()==='POST'),page.getByRole('button',{name:'进行 AI 审核',exact:true}).click()])
