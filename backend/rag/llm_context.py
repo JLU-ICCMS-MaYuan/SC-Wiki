@@ -244,18 +244,26 @@ async def request_llm_config(request: Request):
         ]
         personal = [str(value or "").strip() for value in personal]
         # 目录管理不依赖浏览器上一次选择，删除旧 ID 后仍可获取新目录。
-        if request.url.path in {"/api/rag/llm/catalog", "/api/rag/llm/default-config"}:
+        model_independent = (
+            request.url.path.startswith(("/api/rag/conversations", "/api/rag/definitions/"))
+            or request.url.path == "/api/rag/source-links"
+            or request.method == "GET" and request.url.path.startswith("/api/rag/papers/")
+        )
+        if request.url.path in {"/api/rag/llm/catalog", "/api/rag/llm/default-config"} or model_independent:
             identifier, personal = "", [None] * 4
         if identifier and any(personal):
             raise UserCredentialError("服务端模型与个人配置不能同时提交", code="LLM_CONFIG_AMBIGUOUS")
-        catalog = get_catalog()
-        public_read = request.method == "GET" and (
-            request.url.path in {"/api/rag/health", "/api/rag/llm/current", "/api/rag/stats", "/api/rag/papers", "/api/rag/superconductors"}
-            or request.url.path.startswith(("/api/rag/papers/", "/api/rag/superconductors/"))
-        )
-        if identifier or (catalog.items and not all(personal) and not public_read):
-            await require_catalog_user(request)
-        config = catalog_config(identifier) if identifier else resolve_llm_config(*personal)
+        if model_independent:
+            config = LlmConfig(provider="not-used", base_url="", model="", api_key="")
+        else:
+            catalog = get_catalog()
+            public_read = request.method == "GET" and (
+                request.url.path in {"/api/rag/health", "/api/rag/llm/current", "/api/rag/stats", "/api/rag/papers", "/api/rag/superconductors"}
+                or request.url.path.startswith("/api/rag/superconductors/")
+            )
+            if identifier or (catalog.items and not all(personal) and not public_read):
+                await require_catalog_user(request)
+            config = catalog_config(identifier) if identifier else resolve_llm_config(*personal)
         if any("\n" in value or "\r" in value for value in (
             request.headers.get("X-LLM-Provider") or "",
             request.headers.get("X-LLM-Base-URL") or "",

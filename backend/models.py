@@ -197,6 +197,47 @@ class User(Base):
     )
 
 
+class RagChatConversation(Base):
+    """按账号持久化的 RAG 会话。"""
+
+    __tablename__ = "rag_chat_conversations"
+    __table_args__ = (
+        UniqueConstraint("owner_user_id", "source_local_id", name="uq_rag_chat_local_import"),
+        Index("ix_rag_chat_owner_updated", "owner_user_id", "updated_at"),
+    )
+
+    id = Column(String(32), primary_key=True)
+    owner_user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(200), nullable=False, default="新对话")
+    source_local_id = Column(String(128))
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    turns = relationship("RagChatTurn", back_populates="conversation", cascade="all, delete-orphan")
+
+
+class RagChatTurn(Base):
+    """只记录已经完成的一问一答。"""
+
+    __tablename__ = "rag_chat_turns"
+    __table_args__ = (
+        UniqueConstraint("conversation_id", "sequence", name="uq_rag_chat_turn_sequence"),
+        UniqueConstraint("conversation_id", "request_id", name="uq_rag_chat_turn_request"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    conversation_id = Column(String(32), ForeignKey("rag_chat_conversations.id", ondelete="CASCADE"), nullable=False, index=True)
+    sequence = Column(Integer, nullable=False)
+    request_id = Column(String(64), nullable=False)
+    question = Column(Text, nullable=False)
+    answer = Column(LONG_TEXT, nullable=False)
+    citations_json = Column(JSON, nullable=False, default=list)
+    display_meta_json = Column(JSON, nullable=False, default=dict)
+    created_at = Column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+    conversation = relationship("RagChatConversation", back_populates="turns")
+
+
 class UsernameChangeAuditEvent(Base):
     """Append-only record of a superadmin username correction."""
 

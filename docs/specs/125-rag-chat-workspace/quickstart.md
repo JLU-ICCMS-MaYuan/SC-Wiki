@@ -1,6 +1,6 @@
 # 验证指南：RAG 对话工作区
 
-**状态**：实施前验收方案，以下步骤尚未执行。
+**状态**：本地代码验证已执行；真实环境验收待完成。
 
 **输入**：[Spec](spec.md) · [接口契约](contracts/rag-chat.md) · [任务](tasks.md)
 
@@ -22,7 +22,7 @@ python -m pytest "backend/tests/test_rag_chat_conversations.py" "backend/tests/t
 
 ```bash
 npm run build
-npx vitest run "src/pages/RagPage.test.tsx" --config "../vitest.config.ts"
+npx vitest run "src/pages/RagPage.test.tsx" "src/lib/useStreamingChat.test.tsx" --config "../vitest.config.ts"
 ```
 
 后端测试需覆盖主库真实事务边界、账号隔离、幂等和并发冲突；来源测试需覆盖已批准当前片段与撤回/旧版本拒绝。前端测试覆盖空态、星形按钮、候选预览、临时 Drawer、焦点和窄屏历史入口。模型可用性错误可用受控测试上游验证，不把真实密钥写入测试数据。
@@ -36,6 +36,15 @@ npx vitest run "src/pages/RagPage.test.tsx" --config "../vitest.config.ts"
 5. **润色**：空草稿按钮不可用；填写包含材料式、Tc 数值、单位和限定条件的问题，点击星形后比对原文与候选。取消、模型失败和在等待期间编辑草稿都保留当前输入；只有接受会替换草稿，均不自动发送。
 6. **来源详情**：回答内点击论文引文和有解释的物性术语，确认右侧临时抽屉显示数据库当前内容；普通未匹配词没有可点击样式。关闭后光标与滚动位置仍在回答。撤回论文或切换 revision 后，旧片段链接不可读取。
 7. **回归**：普通多轮问答、灵感探索、流式回答、来源归因和切换模型逐项执行；桌面与窄屏均检查中文、英文标签和键盘操作。
+
+## 2026-10-09 本地验证记录
+
+- 使用隔离 SQLite 和测试身份执行 `backend/tests/test_rag_chat_conversations.py`、`backend/tests/test_rag_chat_links.py`、`backend/tests/test_llm_request_paths.py`、`backend/tests/test_llm_catalog_api.py`、`tests/05_rag_question_answering/unit/test_sse_smoke.py`：14 项通过。覆盖云端所有权、HTTP/SSE 完成轮次、幂等、冲突、失败不落库、当前批准片段、撤回与旧版本拒绝，以及既有模型目录边界。
+- 使用隔离 SQLite 创建 `users` 表后，通过 Alembic `Operations` 执行 #125 迁移：两张会话表创建成功。该检查不代表真实 MySQL 已迁移。
+- `frontend/` 中 `npm run build` 通过；`RagPage.test.tsx` 和 `useStreamingChat.test.tsx` 共 9 项通过，覆盖空态、润色接受/取消/失败/编辑竞态、来源链接、详情关闭焦点、本机与账号切换、显式导入及云端请求契约。
+- 在本地 Vite 页面核对桌面布局和 390×844 手机宽度：默认无右侧固定栏；左侧历史、中央问答、多行输入与星形按钮可见；手机宽度下历史以临时抽屉打开并可关闭。该页面核对未连接真实 RAG 后端。
+
+**尚待环境验收**：在目标数据库应用迁移后，用两个真实账号和独立浏览器执行云端恢复、删除及并发场景；用已配置的真实模型和已发布论文执行普通/探索模式、提示词润色与文献片段全链路。缺少这些信号时不将 Issue #125 关闭。
 
 ## 通过信号
 

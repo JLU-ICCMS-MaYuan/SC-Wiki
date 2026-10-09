@@ -10,7 +10,7 @@
 
 | 操作 | 请求 | 成功响应 | 错误 |
 | --- | --- | --- | --- |
-| `GET /api/rag/conversations` | 有界分页游标和页长 | 本人会话 `id/title/updated_at/last_sequence`，按最近活动排序 | 401 |
+| `GET /api/rag/conversations` | `limit`（1～50）与 `offset`（从 0 开始） | 本人会话 `id/title/updated_at/last_sequence`，按最近活动排序 | 401 |
 | `POST /api/rag/conversations` | 可选标题 | 新会话摘要 | 401、400 |
 | `GET /api/rag/conversations/{id}` | 会话 ID | 有序完成轮次、来源摘要与版本 | 401、404 |
 | `DELETE /api/rag/conversations/{id}` | 会话 ID | 204 | 401、404 |
@@ -31,9 +31,10 @@
 ## 来源解析与详情
 
 - 回答完成后，来源解析接口接收有界文本和已知引文身份，从活跃物性定义、材料/别名、已批准论文公开关键词及引文中返回经当前数据验证的目标类型、显示文本和稳定 ID；无匹配、重名歧义和失效来源不返回可点击目标。实现时可批量解析，避免对每个词单独请求。
+- `POST /api/rag/source-links` 返回单篇 `paper`、多篇 `papers` 或 `definition` 目标；多篇匹配时抽屉先展示可选择的论文。当前实现匹配已批准论文引文及其关键词、活跃物性定义和关联材料名/别名；不扫描任意自由文本片段猜测术语。
 - `GET /api/rag/papers/{paper_id}` 继续提供已批准论文详情。
-- 新增当前版本片段读取接口，输入论文 ID 与片段 ID；只返回该已批准论文当前 revision 的必要片段文本、页码、章节和来源归因；不匹配返回 404。
-- 有数据库解释的术语详情只取当前活跃定义的公开解释；材料名没有解释字段时展示确切匹配的已发布关联论文，不生成虚构定义。
+- `GET /api/rag/papers/{paper_id}/fragments` 列出当前版本片段摘要；`GET /api/rag/papers/{paper_id}/fragments/{chunk_id}` 仅返回该已批准论文当前 revision 的片段正文、页码和章节；不匹配返回 404。
+- `GET /api/rag/definitions/{definition_id}` 只取当前活跃定义的公开解释；材料名没有解释字段时展示确切匹配的已发布关联论文，不生成虚构定义。
 
 ## 页面交互
 

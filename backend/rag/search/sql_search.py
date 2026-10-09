@@ -20,9 +20,14 @@ from sqlalchemy.sql import func
 
 from backend.models import (
     ChemicalSystem,
+    MaterialFamily,
+    MaterialFamilyAlias,
     MaterialState,
     Paper,
+    PaperChunk,
     PropertyRecord,
+    PropertyDefinition,
+    PaperMaterialFamily,
     Superconductor,
 )
 
@@ -238,6 +243,110 @@ async def get_paper_detail(session: AsyncSession, paper_id: int) -> dict | None:
         "paper_type": paper.paper_type,
         "record_count": int(record_count or 0),
     }
+
+
+async def list_paper_fragments(session: AsyncSession, paper_id: int, limit: int = 12) -> list[dict] | None:
+    """按当前已批准论文版本列出可打开的片段。"""
+    paper = await session.scalar(select(Paper).where(Paper.id == paper_id, *approved_paper_conditions()))
+    if paper is None:
+        return None
+    rows = (await session.scalars(select(PaperChunk).where(
+        PaperChunk.paper_id == paper_id, PaperChunk.paper_revision == paper.content_revision,
+    ).order_by(PaperChunk.paper_file_id, PaperChunk.chunk_index).limit(limit))).all()
+    return [{"id": row.id, "paper_revision": row.paper_revision,
+             "section": row.section_name or row.heading or "", "page": row.page_start,
+             "preview": row.content[:300]} for row in rows]
+
+
+async def get_paper_fragment(session: AsyncSession, paper_id: int, chunk_id: int) -> dict | None:
+    """旧 revision 或撤回论文的片段不可通过历史链接读取。"""
+    row = await session.scalar(select(PaperChunk).join(Paper, and_(
+        Paper.id == PaperChunk.paper_id,
+        Paper.content_revision == PaperChunk.paper_revision,
+    )).where(Paper.id == paper_id, PaperChunk.id == chunk_id, *approved_paper_conditions()))
+    if row is None:
+        return None
+    return {"id": row.id, "paper_id": row.paper_id, "paper_revision": row.paper_revision,
+            "section": row.section_name or row.heading or "", "page": row.page_start,
+            "content": row.content[:4000]}
+
+
+async def get_definition_detail(session: AsyncSession, definition_id: int) -> dict | None:
+    definition = await session.scalar(select(PropertyDefinition).where(
+        PropertyDefinition.id == definition_id, PropertyDefinition.is_active.is_(True),
+    ))
+    if definition is None or not (definition.description or "").strip():
+        return None
+    return {"id": definition.id, "name": definition.display_name,
+            "description": definition.description, "unit": definition.canonical_unit}
+
+
+async def resolve_answer_links(session: AsyncSession, text: str, citation_ids: list[int]) -> list[dict]:
+    """只把能在当前公开数据中确认的词和引文变为链接。"""
+    answer = text[:12_000]
+    ids = list(dict.fromkeys(citation_ids[:50]))
+    links: list[dict] = []
+    papers = (await session.scalars(select(Paper).where(
+        Paper.id.in_(ids or [-1]), *approved_paper_conditions(),
+    ))).all()
+    for paper in papers:
+        marker = f"[PID_{paper.id}]"
+        if marker in answer:
+            links.append({"term": marker, "kind": "paper", "paper_id": paper.id})
+
+    definitions = (await session.scalars(select(PropertyDefinition).where(
+        PropertyDefinition.is_active.is_(True), PropertyDefinition.description.isnot(None),
+    ).limit(500))).all()
+    definitions_by_term: dict[str, set[int]] = {}
+    papers_by_term: dict[str, set[int]] = {}
+    for definition in definitions:
+        for term in {definition.display_name, definition.code}:
+            if term and len(term) >= 2 and term in answer:
+                definitions_by_term.setdefault(term, set()).add(definition.id)
+    for paper in papers:
+        try:
+            keywords = json.loads(paper.keywords_tags or "[]")
+        except (ValueError, TypeError):
+            keywords = []
+        if isinstance(keywords, list):
+            for term in keywords[:30]:
+                if isinstance(term, str) and len(term) >= 2 and term in answer:
+                    papers_by_term.setdefault(term, set()).add(paper.id)
+
+    formulas = set(re.findall(r"\b(?:[A-Z][a-z]?\d*){2,}\b", answer))
+    if formulas:
+        rows = (await session.execute(select(Superconductor.chemical_formula, Paper.id).join(
+            Paper, and_(Paper.id == Superconductor.paper_id,
+                        Paper.content_revision == Superconductor.paper_revision),
+        ).where(Superconductor.chemical_formula.in_(formulas), *approved_paper_conditions()).limit(200))).all()
+        for formula, paper_id in rows:
+            papers_by_term.setdefault(formula, set()).add(paper_id)
+
+    family_rows = (await session.execute(select(MaterialFamily.name_zh, Paper.id).join(
+        PaperMaterialFamily, PaperMaterialFamily.material_family_id == MaterialFamily.id,
+    ).join(Paper, and_(Paper.id == PaperMaterialFamily.paper_id,
+                      Paper.content_revision == PaperMaterialFamily.paper_revision),
+    ).where(*approved_paper_conditions()).limit(500))).all()
+    alias_rows = (await session.execute(select(MaterialFamilyAlias.alias, Paper.id).join(
+        PaperMaterialFamily, PaperMaterialFamily.material_family_id == MaterialFamilyAlias.material_family_id,
+    ).join(Paper, and_(Paper.id == PaperMaterialFamily.paper_id,
+                      Paper.content_revision == PaperMaterialFamily.paper_revision),
+    ).where(*approved_paper_conditions()).limit(500))).all()
+    for term, paper_id in [*family_rows, *alias_rows]:
+        if term and len(term) >= 2 and term in answer:
+            papers_by_term.setdefault(term, set()).add(paper_id)
+
+    for term in sorted(set(definitions_by_term) | set(papers_by_term), key=len, reverse=True):
+        definition_ids = definitions_by_term.get(term, set())
+        paper_ids = sorted(papers_by_term.get(term, set()))[:12]
+        if definition_ids and paper_ids:
+            continue
+        if len(definition_ids) == 1:
+            links.append({"term": term, "kind": "definition", "definition_id": next(iter(definition_ids))})
+        elif paper_ids:
+            links.append({"term": term, "kind": "paper", "paper_id": paper_ids[0]} if len(paper_ids) == 1
+                         else {"term": term, "kind": "papers", "paper_ids": paper_ids})
+    return links
 
 
 async def _format_superconductors(session, superconductors) -> list[dict]:

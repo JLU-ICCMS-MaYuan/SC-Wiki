@@ -21,8 +21,10 @@ from sqlalchemy.exc import IntegrityError
 from openai import APIConnectionError, APIStatusError, APITimeoutError
 
 from backend import models
+from backend.database import SessionLocal, get_db
 from backend.models import Paper, PaperChunk, PaperEvidence, PaperFile, User
 from backend.rag import service
+from backend.services import rag_chat_conversations as chats
 from backend.rag.llm_client import get_llm_client
 from backend.rag.llm_catalog import get_catalog
 from backend.rag.llm_context import (
@@ -30,7 +32,7 @@ from backend.rag.llm_context import (
     server_default_metadata, UserCredentialError,
     require_catalog_user,
 )
-from backend.security import get_current_admin, get_current_superadmin, get_current_user
+from backend.security import get_current_admin, get_current_superadmin, get_current_user, get_current_user_optional
 
 router = APIRouter(
     prefix="/api/rag", tags=["rag"], dependencies=[Depends(request_llm_config)]
@@ -873,6 +875,34 @@ class RagChatRequest(BaseModel):
     rerank_top_k: int = Field(5, ge=1, le=20)
     history: list[RagMessage] = Field(default_factory=list)
     explore: bool = Field(False, description="是否启用灵感探索模式")
+    conversation_id: str | None = Field(default=None, max_length=32)
+    request_id: str | None = Field(default=None, max_length=64)
+    expected_last_sequence: int | None = Field(default=None, ge=0)
+
+
+class RagConversationCreate(BaseModel):
+    title: str = Field(default="新对话", max_length=200)
+
+
+class RagLocalMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str = Field(max_length=100_000)
+    citations: list[dict[str, Any]] = Field(default_factory=list, max_length=50)
+
+
+class RagConversationImport(BaseModel):
+    source_local_id: str = Field(min_length=1, max_length=128)
+    title: str = Field(default="旧会话", max_length=200)
+    messages: list[RagLocalMessage] = Field(max_length=100)
+
+
+class RagPolishRequest(BaseModel):
+    draft: str = Field(min_length=1, max_length=1000)
+
+
+class RagSourceLinksRequest(BaseModel):
+    text: str = Field(max_length=12_000)
+    citation_ids: list[int] = Field(default_factory=list, max_length=50)
 
 
 def _service_error(status_code: int, message: str, detail: str | None = None) -> HTTPException:
@@ -1072,23 +1102,162 @@ async def rag_chat(request: RagChatRequest):
     return {"ok": True, "data": data}
 
 
+@router.get("/conversations")
+def rag_conversations(
+    limit: int = Query(50, ge=1, le=50), offset: int = Query(0, ge=0),
+    current_user: User = Depends(get_current_user), db=Depends(get_db),
+):
+    return {"ok": True, "data": chats.list_for_user(db, current_user.id, limit=limit, offset=offset)}
+
+
+@router.post("/prompts/polish")
+async def rag_polish_prompt(payload: RagPolishRequest):
+    try:
+        suggestion = await asyncio.to_thread(service.polish_prompt, payload.draft)
+    except ValueError:
+        raise HTTPException(status_code=422, detail={"code": "POLISH_INVALID", "message": "无法保留原问题的关键信息，请修改后重试"}) from None
+    except Exception as exc:
+        raise _map_internal_error(exc) from exc
+    return {"ok": True, "data": {"suggestion": suggestion}}
+
+
+@router.post("/source-links")
+async def rag_source_links(payload: RagSourceLinksRequest):
+    try:
+        from backend.rag.database import async_session_factory
+        from backend.rag.search.sql_search import resolve_answer_links
+        async with async_session_factory() as session:
+            links = await resolve_answer_links(session, payload.text, payload.citation_ids)
+        return {"ok": True, "data": links}
+    except Exception as exc:
+        raise _map_internal_error(exc) from exc
+
+
+@router.get("/definitions/{definition_id}")
+async def rag_definition_detail(definition_id: int):
+    try:
+        from backend.rag.database import async_session_factory
+        from backend.rag.search.sql_search import get_definition_detail
+        async with async_session_factory() as session:
+            data = await get_definition_detail(session, definition_id)
+        if data is None:
+            raise service.RagNotFoundError("术语不存在")
+        return {"ok": True, "data": data}
+    except Exception as exc:
+        raise _map_internal_error(exc) from exc
+
+
+@router.post("/conversations")
+def rag_create_conversation(
+    payload: RagConversationCreate,
+    current_user: User = Depends(get_current_user), db=Depends(get_db),
+):
+    return {"ok": True, "data": chats.create(db, current_user.id, payload.title)}
+
+
+@router.post("/conversations/import")
+def rag_import_conversation(
+    payload: RagConversationImport,
+    current_user: User = Depends(get_current_user), db=Depends(get_db),
+):
+    try:
+        data = chats.import_local(db, current_user.id, payload.source_local_id, payload.title,
+                                  [item.model_dump() for item in payload.messages])
+    except ValueError:
+        raise HTTPException(status_code=413, detail={"code": "HISTORY_TOO_LARGE", "message": "旧会话中的问题过长，原本机历史未删除"}) from None
+    return {"ok": True, "data": data}
+
+
+@router.get("/conversations/{conversation_id}")
+def rag_conversation_detail(
+    conversation_id: str, current_user: User = Depends(get_current_user), db=Depends(get_db),
+):
+    try:
+        return {"ok": True, "data": chats.detail(db, current_user.id, conversation_id)}
+    except chats.ConversationNotFound:
+        raise HTTPException(status_code=404, detail="会话不存在") from None
+
+
+@router.delete("/conversations/{conversation_id}", status_code=204)
+def rag_delete_conversation(
+    conversation_id: str, current_user: User = Depends(get_current_user), db=Depends(get_db),
+):
+    try:
+        chats.delete(db, current_user.id, conversation_id)
+    except chats.ConversationNotFound:
+        raise HTTPException(status_code=404, detail="会话不存在") from None
+
+
+def _complete_cloud_turn(owner_id: int, request: RagChatRequest, answer: str, data: dict) -> dict:
+    with SessionLocal() as db:
+        return chats.complete(db, owner_id, request.conversation_id, request.request_id,
+                              request.expected_last_sequence, request.question.strip(), answer, data)
+
+
 @router.post("/chat/stream")
-async def rag_chat_stream(request: RagChatRequest):
+async def rag_chat_stream(
+    request: RagChatRequest,
+    current_user: User | None = Depends(get_current_user_optional), db=Depends(get_db),
+):
     question = request.question.strip()
     if not question:
         raise HTTPException(status_code=400, detail="问题不能为空")
 
+    cloud = request.conversation_id is not None
+    prepared = None
+    if cloud:
+        if current_user is None:
+            raise HTTPException(status_code=401, detail="请先登录")
+        if not request.request_id or request.expected_last_sequence is None:
+            raise HTTPException(status_code=400, detail="缺少云端会话请求标识或版本")
+        try:
+            prepared = chats.prepare(db, current_user.id, request.conversation_id,
+                                     request.request_id, request.expected_last_sequence)
+        except chats.ConversationNotFound:
+            raise HTTPException(status_code=404, detail="会话不存在") from None
+        except chats.ConversationConflict:
+            raise HTTPException(status_code=409, detail={"code": "CONVERSATION_CONFLICT", "message": "会话已有新消息，请刷新后重试"}) from None
+
     async def event_generator():
         try:
+            if prepared and prepared.get("completed"):
+                turn = prepared["completed"]
+                yield _sse("done", {
+                    "answer": turn["answer"], "citations": turn["citations"],
+                    **turn["display_meta"], "conversation_id": request.conversation_id,
+                    "turn_id": turn["id"], "sequence": turn["sequence"],
+                })
+                yield _sse("end", {"ok": True})
+                return
+            answer_parts: list[str] = []
+            completed = False
             async for event in service.chat_stream(
                 question,
                 top_k=request.top_k,
                 rerank_top_k=request.rerank_top_k,
-                history=_history_dicts(request.history),
+                history=prepared["history"] if prepared else _history_dicts(request.history),
                 explore=request.explore,
             ):
+                if event.get("type") == "token":
+                    answer_parts.append(str(event.get("data") or ""))
+                if cloud and event.get("type") == "done":
+                    data = dict(event.get("data") or {})
+                    answer = str(data.get("answer") or "".join(answer_parts))
+                    if not answer.strip():
+                        raise ValueError("问答未返回正文")
+                    turn = await asyncio.to_thread(_complete_cloud_turn, current_user.id, request, answer, data)
+                    completed = True
+                    event = {**event, "data": {
+                        **data, "answer": answer, "conversation_id": request.conversation_id,
+                        "turn_id": turn["id"], "sequence": turn["sequence"],
+                    }}
                 yield _sse(event.get("type", "message"), event.get("data"))
+            if cloud and not completed:
+                raise ValueError("问答未返回完成事件")
             yield _sse("end", {"ok": True})
+        except chats.ConversationConflict:
+            yield _sse("error", {"code": "CONVERSATION_CONFLICT", "message": "会话已有新消息，请刷新后重试"})
+            yield _sse("end", {"ok": False})
         except Exception as exc:
             mapped = _map_internal_error(exc)
             yield _sse("error", mapped.detail)
@@ -1116,6 +1285,34 @@ async def rag_paper_detail(paper_id: int):
     except Exception as exc:
         raise _map_internal_error(exc) from exc
     return {"ok": True, "data": data}
+
+
+@router.get("/papers/{paper_id}/fragments")
+async def rag_paper_fragments(paper_id: int, limit: int = Query(12, ge=1, le=30)):
+    try:
+        from backend.rag.database import async_session_factory
+        from backend.rag.search.sql_search import list_paper_fragments
+        async with async_session_factory() as session:
+            data = await list_paper_fragments(session, paper_id, limit)
+        if data is None:
+            raise service.RagNotFoundError("论文不存在")
+        return {"ok": True, "data": data}
+    except Exception as exc:
+        raise _map_internal_error(exc) from exc
+
+
+@router.get("/papers/{paper_id}/fragments/{chunk_id}")
+async def rag_paper_fragment(paper_id: int, chunk_id: int):
+    try:
+        from backend.rag.database import async_session_factory
+        from backend.rag.search.sql_search import get_paper_fragment
+        async with async_session_factory() as session:
+            data = await get_paper_fragment(session, paper_id, chunk_id)
+        if data is None:
+            raise service.RagNotFoundError("片段不存在")
+        return {"ok": True, "data": data}
+    except Exception as exc:
+        raise _map_internal_error(exc) from exc
 
 
 @router.get("/superconductors")

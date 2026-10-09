@@ -57,6 +57,7 @@ backend/tests/test_rag_chat_conversations.py                  # 拟新增
 backend/tests/test_rag_chat_links.py                           # 拟新增
 frontend/src/pages/RagPage.tsx
 frontend/src/lib/useStreamingChat.ts
+frontend/src/lib/useStreamingChat.test.tsx
 frontend/src/lib/ragConversations.ts                          # 拟新增
 frontend/src/components/MarkdownMessage.tsx
 frontend/src/components/RagSourceDrawer.tsx                   # 拟新增

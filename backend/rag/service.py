@@ -6,6 +6,7 @@ import asyncio
 import concurrent.futures
 import contextvars
 import json
+import re
 from pathlib import Path
 from typing import Any, AsyncIterator
 
@@ -14,6 +15,7 @@ from sqlalchemy.orm import joinedload
 
 from backend.rag.config import get_rag_settings
 from backend.rag.llm_context import UserCredentialError, get_llm_config
+from backend.rag.llm_client import get_llm_client
 
 
 class RagDataUnavailableError(RuntimeError):
@@ -30,6 +32,36 @@ class RagInternalError(RuntimeError):
 
 class RagNotFoundError(RuntimeError):
     """Raised when a requested RAG resource does not exist."""
+
+
+def polish_prompt(draft: str) -> str:
+    """仅改写草稿，不调用检索或写入问答历史。"""
+    original = draft.strip()
+    if not original or len(original) > 1000:
+        raise ValueError("提示词长度无效")
+    config = get_llm_config()
+    if not config.api_key:
+        raise RagChatUnavailableError("LLM 问答未配置")
+    response = get_llm_client(read_timeout=30).chat.completions.create(
+        model=config.model,
+        messages=[
+            {"role": "system", "content": (
+                "你只改写用户的超导研究问题，使之清楚、具体、便于检索。"
+                "保留原意、全部材料名、化学式、数值、单位、限定条件和引用要求。"
+                "不要回答问题，不添加新事实，只输出改写后的问题。"
+            )},
+            {"role": "user", "content": original},
+        ],
+        temperature=0.2,
+        max_tokens=400,
+    )
+    suggestion = str(response.choices[0].message.content or "").strip()
+    if not suggestion or len(suggestion) > 2000:
+        raise ValueError("润色结果无效")
+    required = re.findall(r"\b(?:[A-Z][a-z]?\d+(?:[A-Z][a-z]?\d*)*|\d+(?:\.\d+)?|GPa|Tc|DOI)\b", original)
+    if any(token not in suggestion for token in required):
+        raise ValueError("润色结果遗漏了原问题的数值或术语")
+    return suggestion
 
 
 def _loads_json(value: str | None, fallback: Any) -> Any:
