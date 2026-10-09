@@ -255,7 +255,8 @@ def test_review_ai_receives_image_separately_from_paper_sources(monkeypatch):
     context = {"field": {"reason": "参考截图", "items": [{"kind": "image", "source_description": "手工截图"}],
                          "images": [{"row_id": "r", "item_id": "i", "data_url": "data:image/png;base64,AA=="}]}}
     read = []
-    result = evidence.evaluate_batch([record], [], "review_all", human_context=context, image_read_out=read)
+    result = evidence.evaluate_batch([record], [], "review_all", human_context=context, image_read_out=read,
+                                     vision_verified=True)
     assert calls[0][1]["images"] == ["data:image/png;base64,AA=="]
     assert 'human_provided_evidence' in calls[0][0]
     assert result[0]["status"] == "missing"  # 人工图片不能伪装成论文原文引句。
@@ -281,7 +282,44 @@ def test_unsupported_vision_model_records_image_not_read(monkeypatch):
     context = {"field": {"reason": "参考截图", "items": [],
                          "images": [{"row_id": "r", "item_id": "i", "data_url": "data:image/png;base64,AA=="}]}}
     read = []
-    evidence.evaluate_batch([record], [], "review_all", human_context=context, image_read_out=read)
+    evidence.evaluate_batch([record], [], "review_all", human_context=context, image_read_out=read,
+                            vision_verified=True)
     assert len(calls) == 2
     assert "images" not in calls[1]
     assert read[0][1] is False
+
+
+def test_unverified_model_does_not_receive_or_claim_to_read_human_image(monkeypatch):
+    import json
+    from backend.ingest import property_evidence as evidence
+    from backend.rag import llm
+
+    calls = []
+    def complete(_, prompt, **kwargs):
+        calls.append((json.loads(prompt), kwargs))
+        return {"results": [{"key": "field", "status": "missing", "reason": "无论文来源", "evidences": []}]}
+    monkeypatch.setattr(llm, "complete_json", complete)
+    record = {"key": "field", "field": "paper.title", "claim": {"value": "H3S"},
+              "editable_fields": [], "evidences": []}
+    context = {"field": {"items": [{"kind": "image", "source_description": "人工截图", "image_index": 1}],
+                         "images": [{"row_id": "r", "item_id": "i", "data_url": "data:image/png;base64,AA=="}]}}
+    read = []
+    evidence.evaluate_batch([record], [], "review_all", human_context=context, image_read_out=read)
+    assert "images" not in calls[0][1]
+    assert calls[0][0]["human_provided_evidence"]["field"]["items"][0]["read_status"] == "not_read"
+    assert "image_index" not in calls[0][0]["human_provided_evidence"]["field"]["items"][0]
+    assert read[0][1] is False
+
+
+def test_image_capability_probe_requires_exact_unprompted_visual_code(monkeypatch):
+    from backend.ingest import property_evidence as evidence
+    from backend.rag import llm
+    monkeypatch.setattr(evidence.secrets, "randbelow", lambda _: 4)
+    def capable(_, prompt, **kwargs):
+        assert "444444" not in prompt
+        assert kwargs["images"][0].startswith("data:image/png;base64,")
+        return {"code": "444444"}
+    monkeypatch.setattr(llm, "complete_json", capable)
+    assert evidence.verify_model_image_capability() is True
+    monkeypatch.setattr(llm, "complete_json", lambda *args, **kwargs: {"code": ""})
+    assert evidence.verify_model_image_capability() is False

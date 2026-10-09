@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 import copy
+import base64
 import hashlib
+import io
 import json
 import logging
 import re
+import secrets
 import time
 import unicodedata
 from typing import Any
@@ -419,22 +422,55 @@ proposal 增加 basis_kind：paper_quote（原文直接记载）、paper_inferen
 """
 
 
+def verify_model_image_capability() -> bool:
+    """用不含真实材料的随机图片验证当前模型确实能识别图像。"""
+    from PIL import Image, ImageDraw, ImageFont
+    from backend.rag.llm import complete_json
+
+    code = ''.join(str(secrets.randbelow(10)) for _ in range(6))
+    image = Image.new('RGB', (480, 130), 'white')
+    ImageDraw.Draw(image).text((70, 20), code, fill='black', font=ImageFont.load_default(size=72))
+    output = io.BytesIO()
+    image.save(output, format='PNG')
+    data_url = 'data:image/png;base64,' + base64.b64encode(output.getvalue()).decode()
+    try:
+        response = complete_json('只读取附图中的六位数字，返回 JSON 对象 {"code":"..."}；无法读取则返回空字符串。',
+                                 '图中的六位数字是什么？', images=[data_url], retries=0, read_timeout=30)
+        return str(response.get('code') or '').strip() == code
+    except Exception as exc:
+        logging.getLogger(__name__).info('当前模型未通过图片读取校验：%s', type(exc).__name__)
+        return False
+
+
 def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None, source_catalog=None,
-                   human_context=None, image_read_out=None):
+                   human_context=None, image_read_out=None, vision_verified=False):
     """上传生成与审核共享来源定位和类型校验，任务目的不决定批准资格。"""
     from backend.rag.llm import complete_json
     from openai import APIStatusError
     prior = prior or {}
     human_context = human_context or {}
-    image_refs = [image for record in records for image in human_context.get(record['key'], {}).get('images', [])]
+    all_image_refs = [image for record in records for image in human_context.get(record['key'], {}).get('images', [])]
+    image_refs = all_image_refs if vision_verified else []
+    if image_read_out is not None and not vision_verified:
+        image_read_out.extend((item, False) for item in all_image_refs)
+    visible_human = {}
+    for record in records:
+        if record['key'] not in human_context:
+            continue
+        entry = {key: copy.deepcopy(value) for key, value in human_context[record['key']].items() if key != 'images'}
+        if not vision_verified:
+            for item in entry.get('items', []):
+                if item.get('kind') == 'image':
+                    item.pop('image_index', None)
+                    item['read_status'] = 'not_read'
+        visible_human[record['key']] = entry
     prompt = json.dumps({
         'purpose': purpose,
         'records': [{'key': r['key'], 'field': r['field'], 'claim': r['claim'],
                      'editable_fields': r.get('editable_fields', []), 'existing_evidences': r['evidences'],
                      'previous_result': {k: prior.get(r['key'], {}).get(k) for k in ('status', 'reason', 'proposal', 'evidences')}} for r in records],
         'sources': chunks,
-        'human_provided_evidence': {r['key']: {k: v for k, v in human_context.get(r['key'], {}).items() if k != 'images'}
-                                    for r in records if r['key'] in human_context}}, ensure_ascii=False, default=str)
+        'human_provided_evidence': visible_human}, ensure_ascii=False, default=str)
     try:
         parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT, prompt, on_partial=on_partial, retries=1,
                                **({'images': [item['data_url'] for item in image_refs]} if image_refs else {}))
@@ -557,6 +593,7 @@ def run_evidence_job(job_id: str):
         token = set_llm_config(config)
         update_job(job_id, status='running')
         snapshot = job['snapshot']
+        vision_verified = None
         records = [r for r in snapshot['records'] if r.get('kind') != 'derived' and r['key'] not in job['cached'] and (not job.get('requested_keys') or r['key'] in job['requested_keys'])]
         results = dict(job['cached'])
         # 完整扫描来源，按上下文大小分批，不以检索排名截断整篇论文。
@@ -586,9 +623,12 @@ def run_evidence_job(job_id: str):
                 from backend.ingest import manual_evidence
                 with SessionLocal() as session:
                     human_context = manual_evidence.review_context(session, {**snapshot, 'records': batch_records})
+            if vision_verified is None and any(entry.get('images') for entry in human_context.values()):
+                vision_verified = verify_model_image_capability()
             image_read_out = []
             evaluated = evaluate_batch(batch_records, chunks, job.get('purpose', 'check'), job.get('prior'), on_partial,
-                                       snapshot['chunks'], human_context=human_context, image_read_out=image_read_out)
+                                       snapshot['chunks'], human_context=human_context, image_read_out=image_read_out,
+                                       vision_verified=bool(vision_verified))
             if image_read_out:
                 from backend.database import SessionLocal
                 from backend.ingest import manual_evidence
