@@ -38,14 +38,13 @@ def test_unknown_measurement_method_is_never_guessed_and_values_are_preserved():
     assert result["extraction_version"] == "1"
 
 
-@pytest.mark.parametrize("change", ["legacy", "incompatible_conditions", "method", "pressure", "nan", "outside", "module", "tc_as_property", "tc_in_wrong_module"])
+@pytest.mark.parametrize("change", ["legacy", "incompatible_conditions", "pressure", "nan", "outside", "module", "tc_as_property", "tc_in_wrong_module"])
 def test_invalid_scientific_contract_fails(change):
     raw = extraction()
     state = raw["material_states"][0]
     record = state["property_modules"][0]["records"][0]
     if change == "legacy": state["tc_results"] = []
     elif change == "incompatible_conditions": record["payload"] = {"calculation_conditions": {}}
-    elif change == "method": record["method_code"] = "experimental"
     elif change == "pressure": state.update(pressure_min_gpa=160, pressure_max_gpa=140)
     elif change == "nan": record["value_number"] = float("nan")
     elif change == "outside": record["evidences"][0]["file_id"] = "other"
@@ -54,6 +53,25 @@ def test_invalid_scientific_contract_fails(change):
     elif change == "tc_in_wrong_module":
         state["property_modules"][0]["module_code"] = record["module_code"] = "electronic_properties"
     with pytest.raises(ValueError): normalize(raw)
+
+
+def test_invalid_tc_method_maps_or_falls_back_instead_of_failing():
+    # 自由文本方法映射到枚举并保留 method_raw 原文；无法识别的回退 unknown，不丢记录。
+    raw = extraction()
+    record = raw["material_states"][0]["property_modules"][0]["records"][0]
+    record["method_code"] = "Allen-Dynes-modified McMillan"
+    record["record_type"] = "predicted_tc"
+    record["payload"] = {"calculation_conditions": {}}
+    normalized = normalize(raw)["material_states"][0]["property_modules"][0]["records"][0]
+    assert normalized["method_code"] == "allen_dynes"
+    assert normalized["method_raw"] == "Allen-Dynes-modified McMillan"
+
+    raw2 = extraction()
+    record2 = raw2["material_states"][0]["property_modules"][0]["records"][0]
+    record2["method_code"] = "experimental"
+    normalized2 = normalize(raw2)["material_states"][0]["property_modules"][0]["records"][0]
+    assert normalized2["method_code"] == "unknown"
+    assert normalized2["method_raw"] == "experimental"
 
 
 def test_different_pressures_materials_methods_and_conditions_survive_merge():
