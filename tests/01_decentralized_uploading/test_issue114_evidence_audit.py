@@ -63,6 +63,67 @@ def test_unclaimed_table_row_and_formula_are_detected():
     assert "region:formula" in report.uncovered_candidates
 
 
+def _exclusion(**kwargs):
+    base = {"file_id": "f", "category": "non_result_content", "reason": "not a result"}
+    base.update(kwargs)
+    return base
+
+
+def test_declared_exclusion_unblocks_reviewed_row_and_region():
+    ir=document()
+    ir.tables=[DocumentTable(table_id="t",pdf_page=1,row_count=2,column_count=1,
+                             cells=[TableCell(cell_id="cell",row_index=0,column_index=0,block_id="b",text="200 K")])]
+    ir.blocks.append(DocumentBlock(block_id="fig",block_type="figure",pdf_page=1,reading_order=1,
+                                    text="",content_hash="d"*64))
+    exclusions=[_exclusion(table_id="t", row_index=1, category="header_or_unit_row"),
+                _exclusion(block_id="fig", category="figure_without_data")]
+    report=audit_coverage(ir,[candidate()],processed_pages=[1],exclusions=exclusions)
+    assert "table:t:row:1" not in report.uncovered_candidates
+    assert "region:fig" not in report.uncovered_candidates
+    assert report.status == "complete" and not report.requires_human
+    assert {e["category"] for e in report.exclusions} == {"header_or_unit_row", "figure_without_data"}
+
+
+def test_unreadable_or_overwhelming_exclusions_keep_requires_human():
+    ir=document()
+    ir.tables=[DocumentTable(table_id="t",pdf_page=1,row_count=2,column_count=1,
+                             cells=[TableCell(cell_id="cell",row_index=0,column_index=0,block_id="b",text="200 K")])]
+    unreadable=audit_coverage(ir,[candidate()],processed_pages=[1],
+                              exclusions=[_exclusion(table_id="t",row_index=1,category="unreadable",reason="cannot read")])
+    assert "table:t:row:1" not in unreadable.uncovered_candidates
+    assert unreadable.requires_human and "unreadable_exclusion_present" in unreadable.limitations
+    # 疑似结果段落被大面积申报为"非结果内容"：提取可能不充分，保留人工复核。
+    crowded=DocumentIR(document_id="d", source_file_id="f", source_sha256="a"*64, parse_profile="text",
+        parser={"name":"pymupdf","version":"1","mode":"text"}, pages=[PageGeometry(pdf_page=1,width=600,height=800)],
+        blocks=[DocumentBlock(block_id=f"b{i}", block_type="paragraph", pdf_page=1, printed_page=115,
+        reading_order=i, text="Tc = 200 K at 150 GPa.", bbox=(10,10,200,40), content_hash="b"*64) for i in range(4)])
+    overwhelmed=audit_coverage(crowded,[],processed_pages=[1],
+                               exclusions=[_exclusion(block_id=f"b{i}",category="non_result_content") for i in range(4)])
+    assert overwhelmed.requires_human and "excluded_ratio_above_threshold" in overwhelmed.limitations
+    # 小样本（疑似块不足 4 个）比例无统计意义，不触发阈值；正当归类不计入比例。
+    sparse=audit_coverage(document(),[],processed_pages=[1],
+                          exclusions=[_exclusion(block_id="b",category="reference_or_background")])
+    assert "excluded_ratio_above_threshold" not in sparse.limitations
+
+
+def test_empty_text_figure_is_pipeline_boundary_not_missing():
+    ir=document()
+    ir.blocks.append(DocumentBlock(block_id="emptyfig",block_type="figure",pdf_page=1,reading_order=1,
+                                    text="",content_hash="e"*64))
+    ir.blocks.append(DocumentBlock(block_id="captionfig",block_type="figure",pdf_page=1,reading_order=2,
+                                    text="Fig. 1 Tc versus pressure",content_hash="f"*64))
+    report=audit_coverage(ir,[candidate()],processed_pages=[1])
+    assert "region:emptyfig" not in report.uncovered_candidates
+    assert report.figures_without_text_layer == 1
+    assert "region:captionfig" in report.uncovered_candidates
+
+
+def test_foreign_file_exclusion_is_ignored():
+    report=audit_coverage(document(),[],processed_pages=[1],
+                          exclusions=[_exclusion(file_id="other",block_id="b")])
+    assert "block:b" in report.uncovered_candidates
+
+
 def test_tool_scope_budget_and_retry_are_enforced():
     tools=DocumentTools({"f":document()})
     with pytest.raises(AgentStopped,match="tool_not_allowed"):

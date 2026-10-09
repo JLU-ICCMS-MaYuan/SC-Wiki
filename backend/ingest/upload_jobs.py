@@ -443,6 +443,33 @@ def _atomic_write_json(path: Path, payload: Any) -> None:
     temporary.replace(path)
 
 
+def _uncovered_classifier_items(file_id: str, ir, uncovered: list[str]) -> list[dict]:
+    """把未覆盖标识还原为带原文的分类输入；只处理块/图/公式和表格行。"""
+    blocks = {b.block_id: b for b in ir.blocks}
+    tables = {t.table_id: t for t in ir.tables}
+    items = []
+    for name in uncovered:
+        if name.startswith(("block:", "region:")):
+            block = blocks.get(name.split(":", 1)[1])
+            if block is not None:
+                items.append({"id": name, "file_id": file_id, "block_id": block.block_id,
+                              "text": (block.text or "")[:300]})
+        elif name.startswith("table:"):
+            parts = name.split(":")
+            if len(parts) == 4 and parts[2] == "row":
+                table = tables.get(parts[1])
+                if table is not None:
+                    try:
+                        row = int(parts[3])
+                    except ValueError:
+                        continue
+                    cells = " | ".join((c.text or "").strip() for c in sorted(
+                        (c for c in table.cells if c.row_index == row), key=lambda c: c.column_index))
+                    items.append({"id": name, "file_id": file_id, "table_id": parts[1],
+                                  "row_index": row, "text": cells[:300]})
+    return items[:200]
+
+
 def _read_chunk(
     task_id: str,
     chunk: Chunk,
@@ -481,8 +508,13 @@ def _read_chunk(
         context = json.loads(chunk.content)
         allowed = {(context["file_id"], block["pdf_page"], block["block_id"])
                    for page in context["pages"] for block in page["blocks"]}
+        # 排除项校验需要表格行数与页号集合；与块集合同源（同一 IR 分组）。
+        allowed_tables = {(context["file_id"], table["table_id"]): int(table.get("row_count") or 0)
+                          for page in context["pages"] for table in page.get("tables", [])}
+        allowed_pages = {(context["file_id"], page["geometry"]["pdf_page"]) for page in context["pages"]}
         try:
-            result = normalize_extraction(result, allowed_blocks=allowed)
+            result = normalize_extraction(result, allowed_blocks=allowed,
+                                          allowed_tables=allowed_tables, allowed_pages=allowed_pages)
         except ValueError as exc:
             raise ParserError("domain_invalid_output", "科学提取格式、条件或来源范围不符合契约，请重试或人工核对",
                               profile=profile, parser="domain_extractor") from exc
@@ -1800,16 +1832,56 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 _atomic_write_json(artifact_directory(task_id) / "agent_calls.json", agent_audit)
                 _atomic_write_json(artifact_directory(task_id) / "claims.json", [c.model_dump(mode="json") for c in claims])
             apply_claim_evidence({"candidates": candidates}, claims)
+            # 领域提取的显式排除按文件归组，交给覆盖检查解除对应项的未覆盖计数。
+            exclusions_by_file: dict[str, list[dict]] = {}
+            for candidate in candidates:
+                for exclusion in candidate.get("coverage_exclusions") or []:
+                    if isinstance(exclusion, dict) and exclusion.get("file_id"):
+                        exclusions_by_file.setdefault(str(exclusion["file_id"]), []).append(exclusion)
             coverage = {file_id: audit_coverage(ir, [claim for claim in claims
                 if any(e.file_id == file_id for e in claim.evidences)],
+                exclusions=exclusions_by_file.get(file_id),
                 processed_pages=[p.pdf_page for p in ir.pages]).model_dump(mode="json")
                 for file_id, ir in document_set.items()}
+            # 有限回填：提取模型不会主动为每个块/表行申报处置；对仍未覆盖项做一次
+            # 定向分类，把明确非结果的项转为带理由排除。分类失败不改变原覆盖结果。
+            from backend.ingest.domain_extraction import classify_uncovered
+            for file_id, ir in document_set.items():
+                report = coverage[file_id]
+                uncovered = [name for name in report["uncovered_candidates"]
+                             if name.startswith(("block:", "region:")) or re.fullmatch(r"table:[\w-]+:row:\d+", name)]
+                if not uncovered:
+                    continue
+                items = _uncovered_classifier_items(file_id, ir, uncovered)
+                if not items:
+                    continue
+                try:
+                    decisions = classify_uncovered(items)
+                except Exception as exc:
+                    logging.getLogger(__name__).warning("未覆盖项分类失败 task=%s file=%s type=%s", task_id, file_id, type(exc).__name__)
+                    continue
+                for decision in decisions:
+                    if decision.get("decision") != "exclude":
+                        continue
+                    exclusion = {"file_id": file_id, "category": decision.get("category"), "reason": decision.get("reason")}
+                    exclusion.update({k: decision[k] for k in ("block_id", "table_id", "row_index") if decision.get(k) is not None})
+                    exclusions_by_file.setdefault(file_id, []).append(exclusion)
+                coverage[file_id] = audit_coverage(ir, [claim for claim in claims
+                    if any(e.file_id == file_id for e in claim.evidences)],
+                    exclusions=exclusions_by_file.get(file_id),
+                    processed_pages=[p.pdf_page for p in ir.pages]).model_dump(mode="json")
             _atomic_write_json(artifact_directory(task_id) / "coverage.json", coverage)
             unresolved = any(c.status != ClaimStatus.VALIDATED for c in claims)
             incomplete = any(report["requires_human"] for report in coverage.values())
             update_state(task_id, reading_state="needs_review" if unresolved or incomplete else "coverage_checked")
             if unresolved or incomplete:
-                raise ParserError("document_review_required", "存在无法定位的科学候选或未覆盖内容，请核对解析结果后重试",
+                file_names = {str(item.get("file_id")): str(item.get("original_filename") or item.get("file_id"))
+                              for item in state.get("files") or []}
+                parts = [f"{file_names.get(file_id, file_id[:8])} {len(report['uncovered_candidates'])} 项"
+                         for file_id, report in coverage.items() if report["uncovered_candidates"]]
+                detail = f"（{'；'.join(parts) or '存在无法定位的科学候选'}），完整清单见解析检查产物"
+                raise ParserError("document_review_required",
+                                  f"存在无法定位的科学候选或未覆盖内容{detail}，请核对解析结果后重试",
                                   profile=state["parser_profile"], parser="claim_validator")
 
         _ensure_not_cancelled(task_id)

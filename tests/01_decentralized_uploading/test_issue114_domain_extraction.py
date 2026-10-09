@@ -74,6 +74,35 @@ def test_invalid_tc_method_maps_or_falls_back_instead_of_failing():
     assert normalized2["method_raw"] == "experimental"
 
 
+def test_coverage_exclusions_keep_valid_and_drop_invalid_references():
+    from backend.ingest.domain_extraction import normalize_extraction
+    raw = extraction()
+    raw["coverage_exclusions"] = [
+        {"file_id": "main", "block_id": "b1", "category": "non_result_content", "reason": "not a result"},
+        {"file_id": "main", "table_id": "t", "row_index": 1, "category": "header_or_unit_row", "reason": "unit row"},
+        {"file_id": "main", "block_id": "ghost", "category": "non_result_content", "reason": "bad ref"},
+        {"file_id": "main", "table_id": "t", "row_index": 9, "category": "header_or_unit_row", "reason": "row out of range"},
+    ]
+    result = normalize_extraction(raw, allowed_blocks={("main", 1, "b1")},
+                                  allowed_tables={("main", "t"): 2}, allowed_pages={("main", 1)})
+    kept = result["coverage_exclusions"]
+    assert {e["block_id"] for e in kept if e.get("block_id")} == {"b1"}
+    assert {(e["table_id"], e["row_index"]) for e in kept if e.get("table_id")} == {("t", 1)}
+    # 无效引用（不存在的块、越界行）被丢弃，不进入覆盖检查。
+
+    # 无定位在契约层直接拒绝；pdf_page 与 block_id 并存视为辅助信息，不拒绝。
+    import pytest as _pytest
+    bad = extraction()
+    bad["coverage_exclusions"] = [{"file_id": "main", "category": "non_result_content", "reason": "no locator"}]
+    with _pytest.raises(ValueError):
+        normalize_extraction(bad, allowed_blocks={("main", 1, "b1")}, allowed_pages={("main", 1)})
+    augmented = extraction()
+    augmented["coverage_exclusions"] = [{"file_id": "main", "block_id": "b1", "pdf_page": 1,
+                                         "category": "non_result_content", "reason": "with page hint"}]
+    kept = normalize_extraction(augmented, allowed_blocks={("main", 1, "b1")})["coverage_exclusions"]
+    assert kept and kept[0]["block_id"] == "b1"
+
+
 def test_different_pressures_materials_methods_and_conditions_survive_merge():
     candidates = []
     for material, pressure, method, condition in [

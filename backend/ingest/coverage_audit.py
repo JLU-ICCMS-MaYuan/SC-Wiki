@@ -8,6 +8,9 @@ from .document_ir import DocumentIR
 
 RESULT_PATTERN = re.compile(r"\bT\s*[_c]?c\b|\bcritical\s+temperature\b|\bsuperconduct|临界温度|超导", re.I)
 
+# 疑似结果项被排除的比例上限：超过即认定大面积漏提，保留人工复核，不产出 ready。
+MAX_EXCLUDED_RATIO = 0.5
+
 
 class CoverageReport(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -20,14 +23,17 @@ class CoverageReport(BaseModel):
     suspected_result_blocks: list[str] = Field(default_factory=list)
     covered_claim_ids: list[str] = Field(default_factory=list)
     uncovered_candidates: list[str] = Field(default_factory=list)
+    exclusions: list[dict[str, object]] = Field(default_factory=list)
+    figures_without_text_layer: int = 0
     truncation_signals: list[str] = Field(default_factory=list)
     limitations: list[str] = Field(default_factory=list)
-    checker_version: str = "2"
+    checker_version: str = "3"
     requires_human: bool = True
 
 
 def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncated: bool = False,
-                   processed_pages: list[int] | None = None) -> CoverageReport:
+                   processed_pages: list[int] | None = None,
+                   exclusions: list[dict] | None = None) -> CoverageReport:
     pages = {page.pdf_page for page in ir.pages}
     processed = set(processed_pages or [])
     covered_claims, missing, covered_blocks, result_blocks = [], [], set(), set()
@@ -45,20 +51,49 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
                 result_blocks.update(e.block_id for e in result.claim.evidences)
         else:
             missing.append(claim.claim_id)
+    # 带理由的显式排除：模型审阅后判定某块/表行不产生科学候选。排除不是证据，
+    # 只解除覆盖计数；unreadable 类别仍保留人工复核。
+    excluded_blocks: set[str] = set()
+    excluded_rows: set[tuple[str, int]] = set()
+    recorded: list[dict[str, object]] = []
+    unreadable = False
+    for entry in exclusions or []:
+        if entry.get("file_id") not in (ir.source_file_id, None):
+            continue
+        recorded.append({"locator": entry.get("block_id") or (
+            f"table:{entry.get('table_id')}:row:{entry.get('row_index')}"
+            if entry.get("table_id") is not None else f"page:{entry.get('pdf_page')}"),
+            "category": entry.get("category"), "reason": str(entry.get("reason") or "")[:200]})
+        if entry.get("category") == "unreadable":
+            unreadable = True
+        if entry.get("block_id") is not None:
+            excluded_blocks.add(str(entry["block_id"]))
+        elif entry.get("table_id") is not None and entry.get("row_index") is not None:
+            excluded_rows.add((str(entry["table_id"]), int(entry["row_index"])))
     suspected = [b.block_id for b in ir.blocks if RESULT_PATTERN.search(b.text)
                  and b.block_type not in {"table", "table_cell"}]
-    missing.extend(f"block:{block}" for block in suspected if block not in result_blocks)
+    missing.extend(f"block:{block}" for block in suspected
+                   if block not in result_blocks and block not in excluded_blocks)
     for table in ir.tables:
         if table.row_count == 0 or not table.cells:
             missing.append(f"table:{table.table_id}:unread")
-        # 一条表格引用不能自动覆盖所有结果行，必须定位到各行的单元格。
+        # 一条表格引用不能自动覆盖所有结果行，必须定位到各行的单元格；带理由排除的行除外。
         for row in range(table.row_count):
             cells = [c for c in table.cells if c.row_index == row]
+            if (table.table_id, row) in excluded_rows:
+                continue
             if not cells or not any(c.block_id in result_blocks for c in cells):
                 missing.append(f"table:{table.table_id}:row:{row}")
+    figures_without_text = 0
     for block in ir.blocks:
-        if block.block_type in {"figure", "formula"} and block.block_id not in covered_blocks:
-            missing.append(f"region:{block.block_id}")
+        if block.block_type in {"figure", "formula"} and block.block_id not in covered_blocks \
+                and block.block_id not in excluded_blocks:
+            # 文本层为空的图/公式块：当前解析方案不读取图像内容，属于管线能力边界
+            # （#114 视觉/原生方案范围外），不要求提取覆盖，只记录计数供审计。
+            if not (block.text or "").strip():
+                figures_without_text += 1
+            else:
+                missing.append(f"region:{block.block_id}")
     empty = sorted(p for p in pages if not any(b.pdf_page == p and
         (b.text.strip() or b.block_type in {"figure","formula","table"}) for b in ir.blocks))
     for block in ir.blocks:
@@ -72,6 +107,16 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
         limitations.append("processed_page_not_in_document")
     if empty:
         limitations.append("empty_page_content_unconfirmed")
+    # 防滥用阈值：疑似结果段落被批量申报为"非结果内容"说明提取可能不充分，保留人工复核。
+    # 仅统计 non_result_content（背景引用与模型无法表达的内容是正当归类）；小样本
+    # （疑似块不足 4 个）比例无统计意义，不触发。
+    excluded_suspected_nonresult = sum(
+        1 for entry in exclusions or []
+        if entry.get("category") == "non_result_content" and str(entry.get("block_id") or "") in set(suspected))
+    if len(suspected) >= 4 and excluded_suspected_nonresult / len(suspected) > MAX_EXCLUDED_RATIO:
+        limitations.append("excluded_ratio_above_threshold")
+    if unreadable:
+        limitations.append("unreadable_exclusion_present")
     signals = ["output_truncated"] if truncated else []
     complete = not (missing or signals or limitations)
     return CoverageReport(status="complete" if complete else "incomplete",
@@ -80,5 +125,7 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
         figure_count=sum(b.block_type == "figure" for b in ir.blocks),
         formula_count=sum(b.block_type == "formula" for b in ir.blocks),
         suspected_result_blocks=suspected, covered_claim_ids=covered_claims,
-        uncovered_candidates=list(dict.fromkeys(missing)), truncation_signals=signals,
+        uncovered_candidates=list(dict.fromkeys(missing)),
+        exclusions=recorded, figures_without_text_layer=figures_without_text,
+        truncation_signals=signals,
         limitations=limitations, requires_human=not complete)
