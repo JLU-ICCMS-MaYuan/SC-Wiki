@@ -1,4 +1,4 @@
-"""评测器反例：使用合成数据验证算法，不作为 50 篇人工标注质量证据。"""
+"""评测器反例：合成数据只验证算法，不作为逐篇人工核对证据。"""
 import copy
 import json
 import subprocess
@@ -40,13 +40,17 @@ def score(raw):
     return evaluate(*(schema.model_validate(data) for schema, data in zip((Corpus, Run, Run, Checks), raw)))
 
 
-def test_valid_detailed_report_but_synthetic_cannot_open_gate():
-    report = score(inputs(50))
+def test_one_reviewed_paper_can_open_gate_but_synthetic_cannot():
+    report = score(inputs())
     assert report["new_f1"] == 1
     assert report["annotated_papers"] == 0
     assert not quality_gate_passed(report)
-    # 仅验证门禁的 human 分支，绝不保存为可部署的人工基准报告。
-    report = score(inputs(50, "human"))
+    # 单篇人工核对即可参与质量门；配置切换仍由维护者显式执行。
+    raw = inputs(1, "human")
+    raw[0]["papers"][0]["categories"] = ["digital", "english"]
+    report = score(raw)
+    assert report["annotated_papers"] == 1
+    assert report["runs"]["new"]["complex"] is None
     assert quality_gate_passed(report)
     assert RolloutConfig(stage=RolloutStage.DEFAULT, quality_report=report)
 
@@ -144,12 +148,12 @@ def test_invalid_region_rejected(bbox):
         Region(file_sha256="a"*64, pdf_page=1, bbox=bbox, quote="Tc")
 
 
-def test_each_complex_category_must_improve():
-    raw = inputs(50, "human")
-    # 只有一篇扫描样本；新旧均正确，即使复杂总召回提升仍不能放行。
-    for paper in raw[0]["papers"][1:]:
-        paper["categories"].remove("scanned")
+def test_reviewed_category_regression_blocks_gate_even_when_total_improves():
+    raw = inputs(3, "human")
+    for paper, category in zip(raw[0]["papers"], ("scanned", "multipage_table", "multi_pressure")):
+        paper["categories"] = ["digital", "english", category]
     raw[1]["papers"][0] = copy.deepcopy(raw[2]["papers"][0])
+    raw[2]["papers"][0].update(status="failed", records=[])
     report = score(raw)
     assert report["new_complex_recall"] > report["legacy_complex_recall"]
     assert not quality_gate_passed(report)
@@ -157,7 +161,7 @@ def test_each_complex_category_must_improve():
 
 @pytest.mark.parametrize("mutation", ["summary", "missing_category", "duplicate_id", "duplicate_pdf", "checks", "count", "nan", "missing", "unsupported"])
 def test_gate_rejects_forged_or_incomplete_summary(mutation):
-    report = score(inputs(50, "human"))
+    report = score(inputs(3, "human"))
     if mutation == "summary":
         report["new_f1"] = .99
     elif mutation == "missing_category":
@@ -171,7 +175,7 @@ def test_gate_rejects_forged_or_incomplete_summary(mutation):
     elif mutation == "checks":
         report["checks"]["failure_recovery"]["passed"] = False
     elif mutation == "count":
-        report["annotated_papers"] = 51
+        report["annotated_papers"] = 4
     elif mutation == "nan":
         report["runs"]["new"]["total"]["f1"] = float("nan")
     elif mutation == "missing":

@@ -287,6 +287,7 @@ export default {
   theoreticalSubtypeField: '理论二级类型',
   keywordsLabel: '关键词（每行一个）',
   keywordsMissingHint: '论文内容不足或提炼失败，未生成关键词；请核对后填写。',
+  keywordsAiHint: '关键词可由 AI 根据论文内容提炼；请核对后再提交。',
   retryEvidenceCheck: '重新核对来源',
   evidenceCheckFailed: '自动来源核对未完成：{message}。草稿已保留，可重试。',
   methodologyLabel: '研究方法（每行一项）',

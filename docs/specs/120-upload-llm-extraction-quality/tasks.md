@@ -18,7 +18,7 @@
 ## 阶段 3：验证
 
 - [x] T008 新增 `tests/01_decentralized_uploading/test_issue120_extraction_quality.py`，更新 `tests/test_db_helpers.py`、`test_property_evidence.py` 中过时断言。
-- [ ] T009 用户指定测试集 14 组论文，基线（HEAD `913ec1c`）与新代码同模型对比，记录到 [验证记录](validation.md)。（SC-001、SC-002）
+- [ ] T009 用户逐篇指定论文，基线（HEAD `913ec1c`）与新代码同模型对比，逐篇记录到 [验证记录](validation.md)；不等待整套样本齐全。（SC-001、SC-002）
 
 ## 阶段 4：二轮改进（FR-008、FR-009，2026-10-08 澄清后新增）
 

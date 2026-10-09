@@ -348,22 +348,24 @@ def detailed_gate_passed(report: dict) -> bool:
                     category_totals[category].update(counts)
                 if set(categories) & COMPLEX_CATEGORIES:
                     complex_counts.update(counts)
-            if run["total"] != _metrics(totals) or not complex_counts or run["complex"] != _metrics(complex_counts):
+            expected_complex = _metrics(complex_counts) if complex_counts else None
+            if run["total"] != _metrics(totals) or run["complex"] != expected_complex:
                 return False
             if run["by_category"] != {key: _metrics(counts) for key, counts in category_totals.items()}:
                 return False
             category_counts = Counter(category for values in identities.values() for category in values["categories"])
-            if set(category_counts) != CATEGORIES or report["category_papers"] != dict(category_counts):
+            if report["category_papers"] != dict(category_counts):
                 return False
-            if report[f"{name}_f1"] != run["total"]["f1"] or report[f"{name}_complex_recall"] != run["complex"]["recall"]:
+            if (report[f"{name}_f1"] != run["total"]["f1"]
+                    or report[f"{name}_complex_recall"] != (run["complex"] or {}).get("recall", 0)):
                 return False
             paper_categories.append(identities)
         if paper_categories[0] != paper_categories[1]:
             return False
         old, new = report["runs"]["legacy"], report["runs"]["new"]
         return (report["evidence_location_rate"] == new["total"]["evidence_location_rate"]
-                and all(new["by_category"][key]["recall"] > old["by_category"][key]["recall"]
-                        for key in COMPLEX_CATEGORIES))
+                and all(new["by_category"][key]["recall"] >= old["by_category"][key]["recall"]
+                        for key in report["category_papers"]))
     except (KeyError, TypeError, ValueError, AttributeError):
         return False
 

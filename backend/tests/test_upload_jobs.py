@@ -89,8 +89,7 @@ def test_missing_keywords_are_filled_from_paper_content_without_losing_draft(mon
     draft["paper"].update(research_materials=["(H2S)2H2"],
                           methodology=["ab initio calculations", "density functional theory"])
     _fill_missing_keywords(draft)
-    assert draft["paper"]["keywords_tags"] == ["(H2S)2H2", "ab initio calculations",
-                                                   "density functional theory", "superconductivity", "high pressure"]
+    assert draft["paper"]["keywords_tags"] == [], "模型不可用时不得把规则拼接结果冒充 AI 推理"
 
 
 def test_structure_candidate_binds_only_unique_phase_and_pressure():

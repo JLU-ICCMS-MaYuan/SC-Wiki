@@ -285,6 +285,7 @@ export default {
   theoreticalSubtypeField: 'Theoretical subtype',
   keywordsLabel: 'Keywords (one per line)',
   keywordsMissingHint: 'The paper did not provide enough content to generate keywords, or extraction failed. Review and enter them.',
+  keywordsAiHint: 'Keywords may be inferred by AI from this paper. Review them before submission.',
   retryEvidenceCheck: 'Retry source check',
   evidenceCheckFailed: 'Automatic source check did not finish: {message}. Your draft is preserved; you can retry.',
   methodologyLabel: 'Research methods (one per line)',

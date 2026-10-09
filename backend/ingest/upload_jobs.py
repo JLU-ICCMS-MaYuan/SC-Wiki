@@ -1324,21 +1324,7 @@ def _fill_missing_keywords(draft: dict[str, Any]) -> None:
         values, _ = _normalize_text_items(response.get("keywords_tags"), "keyword", "value", "name")
         paper["keywords_tags"] = list(dict.fromkeys(values))[:8]
     except Exception:
-        logging.getLogger(__name__).warning("关键词模型补全失败，尝试已有材料与方法", exc_info=True)
-    if not paper.get("keywords_tags"):
-        # 模型不可用时只重用草稿中已提取的本文材料与方法，不凭常识生成新事实。
-        materials = paper.get("research_materials")
-        methods = paper.get("methodology")
-        candidates = [*(materials[:2] if isinstance(materials, list) else []),
-                      *(methods[:3] if isinstance(methods, list) else [])]
-        if re.search(r"\bsuperconductiv(?:ity|e)\b", source, re.IGNORECASE):
-            candidates.append("superconductivity")
-        if re.search(r"high[- ]pressure|under pressure|pressure[- ]induced", source, re.IGNORECASE):
-            candidates.append("high pressure")
-        keywords = list(dict.fromkeys(str(item).strip() for item in candidates
-                                      if isinstance(item, str) and item.strip()))
-        if len(keywords) >= 3:
-            paper["keywords_tags"] = keywords[:8]
+        logging.getLogger(__name__).warning("关键词 AI 提炼失败，保留空值供人工核对", exc_info=True)
 
 
 def _bind_structure_candidates(draft: dict[str, Any], candidates: list[dict[str, Any]]) -> None:
