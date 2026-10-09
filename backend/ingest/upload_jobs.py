@@ -179,7 +179,9 @@ properties 需提取 energy above hull：name 固定为 "energy above hull"，un
 论文明确声明 thermodynamically stable 或 on the convex hull 时值为 0；原文未提及则不生成该条目。
 summary、keywords_tags、methodology、key_finding、research_motivation、knowledge_graph_title 必须使用英文输出。
 keywords_tags 是根据本文标题、摘要和研究内容提炼的 3–8 个英文关键词，不要求与原文逐字相同；
-内容不足以支持关键词时返回空数组，不以背景文献或通用知识补全。
+优先包含原文出现的核心材料名称或化学式、核心现象与方法，避免用泛称替代明确材料；
+同一材料的两种原文写法都重要时可同时保留。内容不足以支持关键词时返回空数组，
+不以背景文献或通用知识补全。
 这些字段必须忠实依据英文论文原文；缺少原文依据时返回空字符串或空数组，不得编造，也不得先翻译成中文。
 research_motivation 写作者开展这项研究的驱动力，不是本文的结论，也不是你的分类依据。
 依据引言、背景与动机相关段落归纳：该领域此前存在什么问题、悬而未决的争议或技术瓶颈，
@@ -1318,6 +1320,8 @@ def _fill_missing_keywords(draft: dict[str, Any]) -> None:
     try:
         response = complete_json(
             "Extract 3–8 concise English scientific keywords from this paper's title, abstract and summary. "
+            "Include the studied material's formula or name when present, plus the central phenomenon and method; "
+            "avoid generic labels when a specific material is named. "
             "Return JSON {\"keywords_tags\": [\"...\"]}. Use only supplied text; if it is insufficient, return an empty array. "
             "Do not add quotes or invent paper results.", source[:12000],
         )

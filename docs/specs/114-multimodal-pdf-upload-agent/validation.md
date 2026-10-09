@@ -218,6 +218,16 @@ Docling 正文 JSON 为诊断补齐末尾闭合符，原始响应保留；调用
 SHA-256 完全一致，将新任务的 6 个 AI 生成关键词写回旧任务；写入前另存私有草稿快照，
 没有改动其他科学字段。自动来源核对随后完成 2/2 组，`paper.keywords_tags` 为 `supported`，
 预检查 `needs_check=false`。这些关键词是 AI 对论文内容的提炼，不宣称是原文关键词列表。
+旧草稿的 `GET /draft` 也返回相同 6 项；旧页面仍显示空白的原因是编辑器只在首次挂载时请求草稿。
+现已在窗口重新获得焦点时安全重读，未保存编辑时跳过外部覆盖；上传编辑器 23 项定向测试和
+前端生产构建通过，覆盖焦点刷新与本地脏数据保护。
+
+用户再次指出关键词应由 AI 主动推理并填入。逐项复核论文原文后，在旧 H3S 草稿中把泛称
+“hydrogen-rich compound”替换为明确的 `(H2S)2H2` 与 `H3S`，把金属化表述明确为
+“pressure-induced metallization”，共保留 7 个英文关键词；修改前再次保存私有快照，
+其他科学字段不变。macOS `SpawnWorker` 对这次关键词更改完成 1/1 组来源复核，
+`paper.keywords_tags` 为 `supported`，`needs_check=false`。解析提示词同步要求优先包含
+原文明确材料名/化学式；模型失败时留空，不用规则拼接词冒充 AI 推理。
 
 本轮定向运行 `test_issue114_benchmark.py`、`test_issue114_evidence_audit.py`、
 `test_issue114_multimodal_pdf_agent.py` 与关键词补全测试，**67 项通过**；上传编辑器布局

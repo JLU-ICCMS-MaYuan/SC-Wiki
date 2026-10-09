@@ -171,6 +171,10 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const [spaceGroups, setSpaceGroups] = useState<SpaceGroupOption[]>([])
   const revisionRef = useRef(0)
   const autoCheckTarget = useRef('')
+  const currentEditor = useRef({ draft, loading, dirty, saving, submitting })
+  currentEditor.current = { draft, loading, dirty, saving, submitting }
+  const refreshEvidence = useRef(evidenceWorkflow.restore)
+  refreshEvidence.current = evidenceWorkflow.restore
 
   useEffect(() => {
     let active = true
@@ -236,6 +240,48 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     }).finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true; controller.abort() }
   }, [taskId, draftOverride, draftUrl, revisionPaperId])
+
+  useEffect(() => {
+    if (draftOverride !== undefined || readOnly || revisionPaperId) return undefined
+    let disposed = false
+    let refreshing = false
+    let controller: AbortController | null = null
+    const refresh = async () => {
+      const editor = currentEditor.current
+      if (document.visibilityState === 'hidden' || refreshing || !editor.draft || editor.loading
+        || editor.dirty || editor.saving || editor.submitting) return
+      const editVersion = revisionRef.current
+      controller = new AbortController()
+      refreshing = true
+      try {
+        const response = await api.get<{ ok: boolean; data: UploadDraft }>(draftUrl, { signal: controller.signal })
+        const latest = currentEditor.current
+        if (disposed || editVersion !== revisionRef.current || latest.dirty || latest.saving || latest.submitting) return
+        const next = normalizeUploadDraft(unwrapData(response))
+        if (JSON.stringify(next) !== JSON.stringify(latest.draft)) {
+          setDraft(next)
+          setIssues([])
+          setError('')
+          setLastSavedAt(null)
+        }
+        void refreshEvidence.current({ target: 'upload', target_id: taskId })
+      } catch {
+        // 失焦后刷新失败时保留当前草稿，下一次获得焦点仍可重试。
+      } finally {
+        refreshing = false
+      }
+    }
+    const onVisible = () => { if (document.visibilityState === 'visible') void refresh() }
+    const onFocus = () => { void refresh() }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      disposed = true
+      controller?.abort()
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [draftOverride, draftUrl, readOnly, revisionPaperId, taskId])
 
   useEffect(() => {
     if (!draft || loading || readOnly || !evidenceTarget) return

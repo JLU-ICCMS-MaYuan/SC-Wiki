@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import UploadTaskEditor from '../../frontend/src/components/UploadTaskEditor'
@@ -114,6 +114,30 @@ afterEach(() => {
 })
 
 describe('上传校对页布局与材料状态折叠', () => {
+  it('重新获得焦点时显示后台补入的 AI 关键词，不覆盖未保存编辑', async () => {
+    const initial = makeDraft([makeState()])
+    initial.paper.keywords_tags = []
+    const updated = structuredClone(initial)
+    updated.paper.keywords_tags = ['high-pressure superconductivity', 'metallization']
+    let serverDraft = initial
+    mockedApi.get.mockImplementation((url: string) => Promise.resolve(String(url).includes('/space-groups')
+      ? { space_groups: [] } as never
+      : { ok: true, data: serverDraft } as never))
+    render(<UploadTaskEditor taskId={'f'.repeat(32)} onSubmitted={vi.fn()} />)
+    const keywords = await screen.findByLabelText('关键词（每行一个）')
+    expect(keywords).toHaveValue('')
+    serverDraft = updated
+    await act(async () => { window.dispatchEvent(new Event('focus')) })
+    await waitFor(() => expect(keywords).toHaveValue('high-pressure superconductivity\nmetallization'))
+
+    fireEvent.change(keywords, { target: { value: 'user edited keyword' } })
+    const requests = mockedApi.get.mock.calls.filter(([url]) => String(url).endsWith('/draft')).length
+    serverDraft = initial
+    await act(async () => { window.dispatchEvent(new Event('focus')) })
+    expect(keywords).toHaveValue('user edited keyword')
+    expect(mockedApi.get.mock.calls.filter(([url]) => String(url).endsWith('/draft'))).toHaveLength(requests)
+  })
+
   it('六项书目信息按序显示，文本期号和历史页码保存后可重载', async () => {
     const draft = makeDraft([])
     draft.paper.pages = '100-108'
