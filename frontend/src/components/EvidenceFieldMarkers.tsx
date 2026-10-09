@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Box, Button, Typography } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import type { EvidenceRecord } from './EvidenceWorkflow'
 
 interface Props {
@@ -38,6 +39,7 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
   const [caption, setCaption] = useState<HTMLElement | null>(null)
   const names = [...new Set(records.map(r => r.label))].join('、')
   const label = `${names}：查看来源核对（${records.length}）`
+  const hasProblem = records.some(evidenceProblem)
   useEffect(() => {
     const target = fieldCaption(node)
     setCaption(target)
@@ -49,6 +51,7 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
     const attributes = {
       role: 'button', tabindex: '0', 'aria-description': label,
       title: label, 'aria-haspopup': 'dialog', 'data-evidence-key': records[0].key, 'data-evidence-caption': 'true',
+      'data-evidence-caption-problem': String(hasProblem),
     }
     const previous = Object.keys(attributes).map(name => [name, target.getAttribute(name)] as const)
     for (const [name, value] of Object.entries(attributes)) target.setAttribute(name, value)
@@ -72,12 +75,13 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
         else target.setAttribute(name, value)
       }
     }
-  }, [host, node, records, onOpen, label, names])
+  }, [host, node, records, onOpen, label, names, hasProblem])
   return caption ? null : createPortal(<Button data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : 'primary'} size="small" aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], records[0]); else onOpen(records[0].key, records.map(r => r.key)) }}>{names}</Button>, host)
 }
 
 /** 在现有表单的字段锚点附加标记，避免复制动态表单和科学校验。 */
 export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange }: Props) {
+  const theme = useTheme()
   const [targets, setTargets] = useState<Array<{ record: EvidenceRecord; node: HTMLElement }>>([])
   const [owners, setOwners] = useState<Record<string, string>>({})
   useEffect(() => {
@@ -200,10 +204,11 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
       [data-evidence-problem="true"] {outline: 2px solid #d32f2f; outline-offset: 2px; position: relative; border-radius: 8px;}
       [data-evidence-problem="true"].MuiOutlinedInput-root {outline: none;}
       [data-evidence-problem="true"].MuiOutlinedInput-root > .MuiOutlinedInput-notchedOutline {border-color: #d32f2f; border-width: 2px;}
-      [data-evidence-caption="true"] {cursor: pointer; pointer-events: auto !important;}
-      [data-evidence-problem="true"] [data-evidence-caption="true"] {color: #d32f2f !important;}
+      [data-evidence-caption="true"] {color: ${theme.palette.primary.main} !important; cursor: pointer; pointer-events: auto !important;}
+      [data-evidence-caption-problem="true"] {color: #d32f2f !important;}
       [data-evidence-caption="true"]:hover {text-decoration: underline;}
-      [data-evidence-caption="true"]:focus-visible {outline: 2px solid #d32f2f; outline-offset: 2px; border-radius: 2px;}
+      [data-evidence-caption="true"]:focus-visible {outline: 2px solid ${theme.palette.primary.main}; outline-offset: 2px; border-radius: 2px;}
+      [data-evidence-caption-problem="true"]:focus-visible {outline-color: #d32f2f;}
     `}</style>
     {[...groups].map(([node, group], i) => <FieldTrigger key={`${group[0].key}-${i}`} records={group} node={node} onOpen={onOpen} />)}
     {missing.length > 0 && <Box component="details" data-evidence-fallback sx={{ my: 1, borderLeft: 2, borderColor: 'warning.main', pl: 1.5 }}>

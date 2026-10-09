@@ -3,8 +3,10 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material'
+import { ThemeProvider } from '@mui/material/styles'
 import EvidenceFieldMarkers, { EvidenceRecordList } from '../../frontend/src/components/EvidenceFieldMarkers'
 import type { EvidenceRecord } from '../../frontend/src/components/EvidenceWorkflow'
+import theme from '../../frontend/src/theme'
 
 afterEach(cleanup)
 
@@ -109,13 +111,15 @@ it('同框问题聚合为一个文字入口，已接受后仍可查看', async (
 it.each(['总结', 'Summary'])('复用现有 %s 浮动标签，点击和键盘打开全部问题，解决后保留查看入口', async label => {
   const onOpen = vi.fn()
   const record: EvidenceRecord = { key: 'summary', field: 'paper.summary', label, status: 'uncertain', evidences: [] }
-  const form = (records: EvidenceRecord[]) => <div data-evidence-scope="label">
+  const form = (records: EvidenceRecord[]) => <ThemeProvider theme={theme}><div data-evidence-scope="label">
     <TextField id="summary" label={label} multiline defaultValue="Original content" data-issue-field="paper.summary" />
     <EvidenceFieldMarkers records={records} scope="label" onOpen={onOpen} onChange={() => {}} />
-  </div>
+  </div></ThemeProvider>
   const view = render(form([record, { ...record, key: 'second' }]))
   const trigger = await screen.findByRole('button', { name: label })
   expect(trigger).toHaveAttribute('aria-description', `${label}：查看来源核对（2）`)
+  await waitFor(() => expect(trigger).toHaveAttribute('data-evidence-caption-problem', 'true'))
+  expect(getComputedStyle(trigger).color).toBe('rgb(211, 47, 47)')
   expect(trigger.tagName).toBe('LABEL')
   expect(trigger).toHaveAttribute('for', 'summary')
   expect(screen.getAllByRole('button')).toHaveLength(1)
@@ -133,6 +137,8 @@ it.each(['总结', 'Summary'])('复用现有 %s 浮动标签，点击和键盘�
   expect(trigger).toHaveAttribute('tabindex', '0')
   expect(trigger).toHaveAttribute('data-evidence-key', 'summary')
   expect(trigger).toHaveAttribute('for', 'summary')
+  expect(trigger).toHaveAttribute('data-evidence-caption-problem', 'false')
+  expect(getComputedStyle(trigger).color).toBe('rgb(79, 70, 229)')
   fireEvent.click(trigger)
   expect(onOpen).toHaveBeenCalledTimes(4)
 })
