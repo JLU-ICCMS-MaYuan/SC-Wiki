@@ -35,3 +35,19 @@ Issue 为协作状态唯一来源。本文件记录技术拆解。
 - [ ] T016 [US4] 完成需求收敛和文档影响检查；使用 `big-project-overview-maintainer` 回写已实现行为，更新 `README.md` 的查看方法，并在 SC-006—008 全部满足后按 Issue 管理流程收尾 #109。
 
 执行顺序：T011 → T012，T013 → T014，随后 T015 → T016；后端与前端实现可分别推进，但共同验收和 Issue 收尾必须串行。
+
+## 2026-10-09 追加阶段：人类可读的侧栏与人工证据（US5，未实施）
+
+以下任务对应 FR-015—021 / SC-009—012；旧任务的勾选不能证明本阶段完成。
+
+- [ ] T017 [US5] 在 `tests/01_decentralized_uploading/evidence-workflow.test.tsx`、`scientific-evidence-markers.test.tsx` 和浏览器夹具中先复现作者 JSON、原文折叠、图像证据不可见及建议区命名问题，锁定桌面/窄屏/键盘验收。
+- [ ] T018 [US5] 在 `tests/01_decentralized_uploading/test_scientific_evidence_mysql.py` 与新增人工证据用例中先覆盖修改识别、有/无证据时的理由门禁、值版本失效、文件权限、回滚与任务清理。
+- [ ] T019 [US5] 为 `backend/models.py` 和 Alembic 新增 `scientific_manual_evidence` 迁移与私有文件存储；在 `backend/api/evidence.py` 实现文字/截图/TXT/MD 的保存、鉴权预览、类型与哈希校验及待提交删除。
+- [ ] T020 [US5] 在 `backend/api/rag.py`、`backend/services/paper_revisions.py` 和 `goserver/handlers/paper_evidence.go` 实现上传、返修及批准时的人工证据版本绑定与永久归档，验证失败恢复及不混入 `paper_files` 原论文语料。
+- [ ] T021 [US5] 更新 `frontend/src/components/EvidenceWorkflow.tsx`、`EvidenceRegion.tsx` 与中英文字典：移除“当前内容”JSON，系统原文默认展开并可折叠，人工修改区显示可读差异、理由和证据，建议区更名并保持类型化编辑。
+- [ ] T022 [US5] 更新 `backend/ingest/property_evidence.py` 与审核 AI 输入适配：人工文字和图片带 `human_provided` 来源独立输入，记录是否实际读取；模型无图像能力或读取失败时不假称已核验，并加入提示注入隔离测试。
+- [ ] T023 [US5] 在上传、返修和管理员正式提交门禁中按服务端规范值逐字段检查人工修改理由及无证据原因；保留自动保存半成品、改回原值豁免与按字段定位的错误反馈。
+- [ ] T024 [US5] 使用真实 MySQL 回滚事务、私有文件存储、审核 AI 图像路径和实际浏览器验证 SC-009—012，包括刷新、越权、重复提交、历史版本、图像失败及移动端，记录到 `quickstart.md`。
+- [ ] T025 [US5] 复核 FR/SC/任务覆盖与文档影响；实际实现并验收后使用 `big-project-overview-maintainer` 更新 Overview、补充 `README.md`，再按 Issue 管理流程关闭 #109。
+
+顺序：T017/T018 → T019/T023 → T020/T021/T022 → T024 → T025；T011—T016 的来源资格与首屏证据约束须在最终验收前完成。共享保存与审核边界串行处理。

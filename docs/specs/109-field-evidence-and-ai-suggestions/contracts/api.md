@@ -17,3 +17,19 @@
 - 侧栏读取现有结果，不因打开字段调用模型。首屏直接显示状态、支持理由及第一条可核验依据；更多上下文和 PDF 区域仍可展开。`proposal` 不存在时不遮蔽当前值的证据。
 - 引句定位失败、来源区域图片不可用和规则版本过期分别表达；图片失败不抹掉已保存引句，旧结果不得冒充当前 `supported`。未核对、缺证和无替换建议是三种不同状态。
 - `POST /jobs` 的重查继续使用当前论文及附件、版本和权限约束；上传转论文与正式批准后仍可按稳定字段身份重读同一来源，不改写文件归属或人工决定。
+
+## 人工修改与证据接口（待实施）
+
+下列接口均在 `/api/rag/evidence` 下，`target` 仅允许 `upload`、`revision`、`paper`；按现有上传者、返修者、管理员/超级管理员权限鉴权，并核对当前字段的稳定 `item_key` 与 `expected_version`。文件 ID 和存储路径只由服务端产生。
+
+| 接口 | 输入与行为 | 输出 |
+| --- | --- | --- |
+| `GET /{target}/{target_id}/manual/{item_key}` | 读取当前字段与历史版本的人工修改说明；只读、零模型调用。 | 可读差异、提交者、理由、缺证原因、证据条目及 AI 实际读取状态。 |
+| `PUT /{target}/{target_id}/manual/{item_key}` | JSON：`expected_version`、当前值摘要、`reason`、`no_evidence_reason`、直接输入的文字证据及其来源说明。允许草稿不完整；服务端重算字段摘要，不信任客户端值或操作者。 | 新版本与当前人工记录；旧值已变化时返回 409。 |
+| `POST /{target}/{target_id}/manual/{item_key}/files` | multipart：`expected_version`、来源说明、PNG/JPEG/WebP 截图或 UTF-8 TXT/MD。按实际内容校验类型和大小，拒绝伪装扩展名、不可读文件及越权上传。 | 证据条目 ID、原文件名、类型、大小和哈希；不返回磁盘路径。 |
+| `GET /{target}/{target_id}/manual/{item_key}/files/{item_id}` | 同一目标权限下预览/下载私有证据，按服务端记录查路径和哈希。 | 安全的文字或图片响应，带不可执行的内容类型与下载文件名。 |
+| `DELETE /{target}/{target_id}/manual/{item_key}/files/{item_id}` | 只允许删除当前用户尚未正式提交的证据；已提交项保留历史。 | 更新后的条目清单；实际文件在确认无引用后回收。 |
+
+提交、返修提交及管理员批准在现有事务门禁中检查每个实际修改字段：`reason` 非空；`items` 为空时 `no_evidence_reason` 也非空；记录的值与来源版本必须匹配。失败返回按字段定位的 `manual_reason_required`、`manual_evidence_absence_reason_required` 或 `manual_evidence_stale`，不清除已保存草稿或文件。完整说明允许无论文出处的修改进入 `pending`，但结果仍为人工待审来源，不变成 `supported`；管理员批准继续执行独立的来源裁决。无实际值变化不要求人工说明。
+
+`POST /jobs` 的审核 AI 从服务端加载已保存且匹配当前值的人工证据，以 `human_provided` 与论文原文分开输入；文本实际提供内容，图片实际传入可处理的图像或经校验的提取结果。模型不支持或读取失败时记录 `not_read` 并保留人工审核入口，不报告 AI 已核验，不把人工材料写成 `paper_quote`。图片、文本和来源说明都视为不可信输入，不执行其中指令。原 PDF 图像依据通过已授权文件及可靠页/区域定位按需呈现，不能拿人工截图替代系统原文。

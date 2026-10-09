@@ -1,6 +1,6 @@
 # 数据与生命周期
 
-复用 `scientific_evidence_checks.result/resolutions`、`scientific_upload_drafts` 和 `scientific_evidence_sources.result`，无需新增数据库表。
+原范围复用 `scientific_evidence_checks.result/resolutions`、`scientific_upload_drafts` 和 `scientific_evidence_sources.result`。新增 US5 的人工文件证据有独立所有权与清理周期，需要专用持久记录，不与论文原文来源混存。
 
 - 字段身份沿用 `item_key`、`state_key`、`module_key`、`record_key`、结构哈希；数组下标仅用于展示定位。
 - 核对项增加 `required`：当前是否有需核对的断言；空可选项为 false，仅展示/建议，不产生提交门禁。字段清单允许无值项目，字段类型不能从 null 推测，使用已知定义。
@@ -15,7 +15,7 @@
 
 ## 新增来源可核验约束（待实施）
 
-现有 `records[].status/reason/evidences/source_kind/provenance/check_mode` 足以表达核对结论、AI 判断、论文原文、人工来源与派生来源，不新增表。`proposal` 继续只表示替换建议，不充当当前值的支持依据。
+对于系统原文与核对结论，现有 `records[].status/reason/evidences/source_kind/provenance/check_mode` 足以表达 AI 判断、论文原文及派生来源，无须增加系统来源表。人工修改文件的独立记录见下节。`proposal` 继续只表示替换建议，不充当当前值的支持依据。
 
 - `paper_quote`：当前值为 `supported` 时，至少一条引句必须与当前文件、字段、材料及条件对应并可定位；文件名、引句及 PDF 页码或 TXT/MD 段落定位随结果及转接保留。
 - `synthesis`：值可以是对原文的忠实概括，不要求生成文字逐字出现在原文；关键论断仍需相关且可定位的原文片段。没有片段的 AI 理由只能作为待补证线索。
@@ -23,3 +23,20 @@
 - `contributor_structure`、`paper_inference`、`general_knowledge`、`human_review`：各自保留原来源限制，不转写为 `paper_quote`。人工确认仅表示有记录的人工判断，不伪造论文支持。
 
 规则版本更新后，旧 `supported` 结果可作为历史展示，不自动授予新版本通过资格；空可选字段继续可查看，但“可点击”不表示“有原文支持”。
+
+## 人工修改说明与证据实体（待实施）
+
+`scientific_manual_evidence` 每行代表一次字段修改说明，字段如下：
+
+| 字段 | 含义与约束 |
+| --- | --- |
+| `id`、`target`、`target_id`、`paper_id`、`paper_revision` | 服务端生成的身份及当前上传/返修/论文归属；正式提交时同事务绑定论文版本，保留原上传或返修身份作审计。 |
+| `item_key`、`baseline_hash`、`value_hash`、`source_hash` | 稳定字段身份、修改前后规范化值及原来源版本；只有当前值和来源均匹配的行可满足提交门禁。 |
+| `actor_user_id`、`created_at`、`updated_at`、`submitted_at` | 实际修改者与时间；不能由浏览器任意声明。 |
+| `reason`、`no_evidence_reason` | 人工判断理由始终必填于显式提交；没有证据条目时，缺证原因也必填。半成品草稿可暂时为空。 |
+| `items` | 受控 JSON 清单：每项有服务端 ID、`kind`（`text` / `image` / `text_file`）、用户声明的来源说明、SHA-256、大小及可选原文件名；文字内容保存在记录中，文件只保存私有存储键，不返回磁盘路径。 |
+| `status`、`superseded_at` | `draft` / `submitted` / `historical`；字段再次改变时旧记录只读，不为新值提供依据。 |
+
+图片与文本文件存放在独立 `manual_evidence/{id}/{item_id}` 私有目录。上传完成后先校验实际 MIME、文件内容和哈希再保存元数据；失败时清理本次暂存文件。无引用的未提交记录可随任务取消清理，已绑定论文版本的文件不受上传任务 TTL 影响。下载和预览只通过鉴权接口按记录 ID 获取。
+
+人工证据始终标记 `human_provided`，不能写入 `paper_chunks`、`paper_evidences` 或模型的论文原文来源列表；审核 AI 的输入中作为独立上下文，保留提交者、来源说明、文件身份和是否实际读取。管理员的正式裁决与该修改说明各自保存，不相互伪装。历史论文原记录不自动补造人工证据。
