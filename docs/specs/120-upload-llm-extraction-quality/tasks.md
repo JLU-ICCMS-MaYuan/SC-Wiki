@@ -26,4 +26,4 @@
 - [x] T012 `backend/ingest/property_evidence.py`：`checked_result` 支持引句回退（模型引句全部定位失败时回退提取阶段已验证证据）与 synthesis 分支（不因定位失败改判、理由不带定位错误）；`aggregate_candidates` 对 synthesis 字段忽略"本批未提及"的 missing；核对提示词要求 quote 原样复制；规则版本升为 `scientific-evidence-v6`。（FR-008、FR-009）
 - [x] T013 补充 4 项单测（synthesis 标注与保留判断、事实字段引句回退、无证据仍判 missing、聚合忽略未提及批次）；定向回归与基线对比无新增失败。
 - [x] T014 H3S 复验：同任务重跑字段核对，必填标红 5 → 1，剩余 1 项为模型判 unsupported 的有效标红（μ* 只填下界 0.1，原文为 0.1–0.13），无无效标红。
-- [ ] T010 Overview 回写已落地行为。
+- [x] T010 Overview 回写已落地行为：`pdf-parsing-pipeline.md`（提取窗口、缓存版本 9、核对分批、synthesis 字段分级与引句回退、化学式归一化）与 `upload-llm-workflow-and-agent-analysis.md`（新增 2026-10-08 已实现补充章节、更正过期数字）。

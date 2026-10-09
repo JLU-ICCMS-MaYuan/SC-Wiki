@@ -39,9 +39,9 @@
 ### 第 3 步：AI 分段阅读（reading）
 
 - `chunker.py` 把合并前的各文件 Markdown 切成 `Chunk`，`_chunks_with_preamble` 为每个文件补一个前言段；分段清单写入 `review_artifacts/{task_id}/chunk_manifest.json`，每段状态在 `waiting / processing / completed / failed` 间流转。
-- 逐段调用 `_read_chunk`（使用当前请求选择的 OpenAI 兼容 LLM）。分段中的 AI 生成研究材料、方法和核心发现必须为英文；服务端在写入 `review_artifacts/{task_id}/chunks/` 前拒绝这些字段中的中日韩字符。论文标题、摘要和 `quote` 属于来源文本，保持输入语言，不翻译也不拦截；`quote` 可能来自 PDF 文本提取或 OCR，不承诺与扫描版逐字一致。
+- 读取前由 `_merge_extraction_windows` 把相邻小段合并为约 12000 字符的提取窗口（`EXTRACTION_WINDOW_CHARS`），页码取窗口起点所在页，再逐窗口调用 `_read_chunk`（使用当前请求选择的 OpenAI 兼容 LLM），减少过细分段造成的上下文断裂与调用次数。分段中的 AI 生成研究材料、方法和核心发现必须为英文；服务端在写入 `review_artifacts/{task_id}/chunks/` 前拒绝这些字段中的中日韩字符。论文标题、摘要和 `quote` 属于来源文本，保持输入语言，不翻译也不拦截；`quote` 可能来自 PDF 文本提取或 OCR，不承诺与扫描版逐字一致。
 - 分段结果以 JSON 存到 `review_artifacts/{task_id}/chunks/`；任一分段异常（包括生成字段语言不符合约束）即整任务失败。
-- 每完成一段更新 `completed_chunks / total_chunks`，前端进度条（如“4/28 段”）即来源于此。
+- 每完成一段更新 `completed_chunks / total_chunks`，前端进度条（如“4/28 段”）即来源于此。分段缓存契约版本为 9（`CHUNK_RESULT_SCHEMA_VERSION`），旧缓存重读时重新提取。
 
 ### 第 4 步：AI 汇总草稿（summarizing）
 
@@ -49,6 +49,7 @@
 - 汇总 prompt（`SUMMARY_SYSTEM_PROMPT`）与正文提取（`extractor.py`）都要求以英文产出六个叙述字段（`summary`、`keywords_tags`、`methodology`、`key_finding`、`research_motivation`、`knowledge_graph_title`）；汇总归一化后、写入草稿和审核快照前会再次拒绝这些生成字段中的中日韩字符。标题、摘要、作者、原始数值、单位和 `quote` 保持来源语言。Worker 以验证后的英文 canonical draft 预填选项框和输入框；字段建议在提取后单独生成，通过字段名打开侧栏查看；只有非空且能定位的 `quote` 才作为论文片段显示。某字段无来源依据时保持为空，不编造内容。（[Issue #74](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/74)、[#85](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/85)）
 - 正文 PDF 在 Worker 中额外提交给本地 GROBID 的 `processFulltextDocument` 接口。GROBID 返回的 TEI `biblStruct` 会提取 DOI、题名、作者、年份和原始引文，随论文版本保存到 `paper_references`；GROBID 不可用或解析不完整时保存状态，不由 LLM 猜造引用边。（[Issue #81](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/81)）
 - `_normalize_draft` 把草稿归一化为当前数据契约：论文元信息（含单选 `superconductor_kind` 和多选 Material family）、`material_states`（材料、压强/温度/磁场、计算与实验上下文、`tc_results`、More type labels）、分类证据等。旧草稿的状态级 `superconductor_kind` 只在读取时一次性提升：唯一的非 `unknown` 值保留，冲突时回退 `unknown`；新提交拒绝该旧字段。
+- 化学式解析（`parse_formula_composition`）支持括号分组与 Unicode 下标，拒绝不配对或空括号；材料字段只在能唯一确定完整化学式时写入化学式（如 `(H2S)2H2` 不再截成 `H2S`），否则原文保留为材料名，替代式的元素数按组分统计；与空间群符号查表一致的空间群编号、晶系作为派生核对项随符号核对。（[Issue #120](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/120)）
 - 汇总后执行查重：先按归一化 DOI（`normalize_doi`）查 `papers`，再按原始文件 SHA-256 查；命中即进入 `_handle_duplicate`，任务以 `duplicate` 状态短路结束。
 - 草稿写入 Redis（`save_draft`），同时把 `ai_values` 与证据快照（分类证据、材料状态各字段证据）写入 `review_artifacts/{task_id}/result.json`。
 
@@ -80,6 +81,14 @@
 - 模型配置、超时、服务或队列失败：单独提示服务原因，原操作不继续，不归为表单填写错误。
 
 上传解析自动生成字段建议；独立按钮可继续核对，管理员按钮重新复核全部字段、既有判断和候选，已有通过缓存不跳过。提交只检查结果、不调用模型；取消或离页均不自动提交，后台已完成结果继续保存。全量结果（包括未找到和未采用建议）在 MySQL 按科学内容、来源和规则版本保存，不依赖 Redis 任务有效期。重试只处理指定问题及派生依赖，已完成的其他项目不重复调用模型。历史论文不扫描或批量改写。
+
+字段与来源核对按"记录组 × 来源批次"组合调用：来源剔除参考文献列表后整篇优先，超过约 120000
+字符才分批，每批最多 20 条记录（`SOURCE_BATCH_CHARS`、`RECORD_BATCH`）。概括/推测与分类枚举字段
+（`SYNTHESIS_FIELDS`，如 summary、research_motivation、keywords_tags、state_kind、crystal_system 等）
+标记 `check_mode=synthesis`，按模型整体判断核对，不因引句逐字定位失败改判 missing，聚合时忽略
+"本批未提及"；事实与数值字段仍执行逐字定位，模型引句全部定位失败时回退使用提取阶段已通过逐字
+校验的记录自带证据再定位一次。核对规则版本为 `scientific-evidence-v6`，旧结果按版本过期重核。
+（[Issue #120](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/120)）
 管理员的人工裁决及审核历史见[论文与记录审核](../02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 （[Issue #103](../../specs/103-property-evidence-review/spec.md)）
 
@@ -101,7 +110,7 @@
 六方面引导 AI 输出英文自由描述，只使用原文事实，不要求六项齐全，不把缺失条件补成猜测。
 每条测量 Tc 的条件分别写入该条 `experimental_conditions.description`，经既有草稿转换进入
 `property_modules[].records[].payload.experimental_conditions.description`。同材料状态下的多条
-测量结果不共享或相互覆盖条件；预测 Tc 保持计算 Conditions。分段缓存契约版本为 8，旧缓存
+测量结果不共享或相互覆盖条件；预测 Tc 保持计算 Conditions。分段缓存契约版本为 9，旧缓存
 重读时重新提取。对应表单采用单个多行框；定义版本继续保存在数据内。（[Issue #94](../../specs/94-property-record-editor/spec.md)）
 
 此链路通过模拟 LLM 返回、执行真实分段与汇总调用、草稿归一化、记录校验、SQLite 持久化及导出
@@ -147,6 +156,16 @@ Markdown；分段缓存检查方案和文本摘要。区域统一为左上原点
 2 次重试。仍有问题时保存检查产物并使用既有 failed 终态，不伪造 ready。
 `ir_ready`、`claims_ready`、`coverage_checked`、`needs_review` 只作为 reading 子状态，
 原五阶段不变。原文定位通过不代表科学语义正确，提交与批准继续经过现有核对和人工边界。
+
+2026-10-08 实测（2014 H3S 主文 + 补充材料，Docling 2.130.0 CPU）验证了上述边界：
+两个文件均成功产出 IR（合计约 3 分钟，含首次模型权重加载）；领域提取提示词原先未
+给出 `method_code` 合法枚举，模型输出自由文本方法名导致契约校验稳定失败，现已把
+predicted/measured 方法枚举写入提示词，服务端再把常见同义写法映射到枚举、无法识别
+回退 `unknown` 并在 `method_raw` 保留原文，不再因方法名丢弃整篇解析。修复后 8 个
+科学候选全部定位通过，但覆盖检查发现 89 个未覆盖项（结果块、表格行、图）：提取模型
+不会为每个表格行/结果块/图生成记录，覆盖门按设计拒绝放行。在提取模型覆盖全部表格
+行/结果块/图之前，新链路无法对此类论文产出 ready 草稿；该缺口在 #114 后续工作中
+处理，默认链路保持 legacy。
 
 正式提交在原论文事务内保存 IR、文档块和 `paper_evidence_locators`，定位重新绑定
 当前论文文件。升版沿现有当前代级联规则更新，不提供旧 revision 全文档案。
