@@ -22,3 +22,16 @@ Issue 为协作状态唯一来源。本文件记录技术拆解。
 - [x] T010 更新对应 `docs/overview/` 与 `README.md`、复核需求覆盖、独立审查修复、仅提交本任务差量，回写并按验收关闭 Issue。
 
 顺序：T001/T002 → T003 → T004/T005 → T006 → T007/T008/T009 → T010。共享文件串行处理；每个故事须具备实际存储或浏览器信号后才标记完成。
+
+## 2026-10-09 追加阶段：可核验的支持结论（US4，未实施）
+
+旧 T001—T010 的完成状态只对应原验收；下列任务用于 FR-010—014 / SC-006—008。
+
+- [ ] T011 [US4] 在 `tests/01_decentralized_uploading/test_property_evidence.py` 和定向真实来源测试中复现概括字段无引句仍显示 `supported`、事实引句不相关及派生输入失效，先锁定来源资格与版本边界。
+- [ ] T012 [US4] 更新 `backend/ingest/property_evidence.py`、`backend/ingest/scientific_evidence.py` 与必要的来源契约：统一当前值的支持资格、定位失败状态、派生输入和规则版本；保留旧结果只读历史，不批量改写论文。
+- [ ] T013 [US4] 在 `tests/01_decentralized_uploading/evidence-workflow.test.tsx` 与 `field-evidence-browser.mjs` 增加首屏可见引句、无替换建议仍显示依据、无来源提示及三入口鼠标/键盘用例。
+- [ ] T014 [US4] 更新 `frontend/src/components/EvidenceWorkflow.tsx`、`EvidenceRegion.tsx` 及中英文字典：区分当前结论、AI 理由、原文/派生依据和替换建议，首屏显示第一条来源，图片加载失败仍保留引句。
+- [ ] T015 [US4] 按 `quickstart.md` 的新增验证路径，使用真实持久化和可复现 H3S 来源夹具核对上传→待审→批准重读、同名跨文件引句、概括多论断、旧版本和无来源状态；记录通过信号与未满足项。
+- [ ] T016 [US4] 完成需求收敛和文档影响检查；使用 `big-project-overview-maintainer` 回写已实现行为，更新 `README.md` 的查看方法，并在 SC-006—008 全部满足后按 Issue 管理流程收尾 #109。
+
+执行顺序：T011 → T012，T013 → T014，随后 T015 → T016；后端与前端实现可分别推进，但共同验收和 Issue 收尾必须串行。
