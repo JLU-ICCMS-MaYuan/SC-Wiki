@@ -111,6 +111,7 @@ export interface StructureCandidate {
   original_text?: string | null
   validation?: StructureCandidateValidation
   derivation?: Record<string, unknown> | null
+  reported_structure?: { cell_parameters?: Record<string, number>; [key: string]: unknown } | null
   representations?: Partial<Record<'primitive' | 'conventional', Partial<Record<'cif' | 'poscar', {
     text?: string
     available?: boolean

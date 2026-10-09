@@ -34,6 +34,18 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.clearAllMocks(); clearFormDefinitionCache() })
 
 describe('Issue #94 记录表单', () => {
+  it('记录原文证据可展开，推断项没有引句时明确标识依据', () => {
+    const quote = { filename: 'paper.pdf', page: 3, quote: 'Tc is 4.2 K.' }
+    const view = render(<SchemaDrivenRecordForm record={{ ...measured('evidence', 4.2), evidence: quote, evidences: [quote] }}
+      definition={measuredDefinition} onChange={vi.fn()} />)
+    fireEvent.click(screen.getByText('原文证据（1）'))
+    expect(screen.getByText(/paper.pdf · 第 3 页：Tc is 4.2 K./)).toBeVisible()
+    view.rerender(<SchemaDrivenRecordForm record={{ ...measured('inference', 4.2), basis_kind: 'paper_inference', evidences: [] }}
+      definition={measuredDefinition} onChange={vi.fn()} />)
+    expect(screen.getByText('论文推断；无逐字原文引句')).toBeInTheDocument()
+    expect(screen.queryByText('原文证据（1）')).not.toBeInTheDocument()
+  })
+
   it('定义切换会清理标准记录的自定义键，并在切回时保留原自定义身份', async () => {
     const customDefinition = {
       ...definitions.find(item => item.property_code === 'custom')!,

@@ -65,3 +65,16 @@ it('无结构也可以收起，上传或新增候选后自动展开', () => {
   expect(screen.getByTestId('structure-model')).toBeVisible()
   expect(onChange).not.toHaveBeenCalled()
 })
+
+it('PDF 结构未经 ASE 校验时只显示来源和缺失说明，不渲染三维模型', () => {
+  const item = candidate('paper')
+  item.source_kind = 'pdf_reported'
+  item.validation = { ase_valid: false, message: '原子坐标不完整' }
+  item.reported_structure = { cell_parameters: { a: 6.389 } }
+  item.sources = [{ filename: 'supp.pdf', page: 4, quote: 'a=6.389 Å' }]
+  render(<StructureCandidatePanel candidates={[item]} uploading={false} onChange={vi.fn()} onUpload={vi.fn()} />)
+  expect(screen.queryByTestId('structure-model')).not.toBeInTheDocument()
+  expect(screen.getByText('原子坐标不完整')).toBeInTheDocument()
+  expect(screen.getByText('a=6.389')).toBeInTheDocument()
+  expect(screen.getByText(/a=6.389 Å/)).toBeInTheDocument()
+})

@@ -5,6 +5,7 @@ import json
 import pytest
 
 from backend.ingest.domain_extraction import normalize_extraction, merge_scientific_candidates, structured_chunks
+from backend.ingest.domain_extraction import canonical_electronic_property
 from backend.ingest.document_parsers import DocumentSource, ParseOptions, PyMuPDFParser, ParserError
 from backend.ingest.document_claims import claims_from_candidates
 
@@ -36,6 +37,35 @@ def test_unknown_measurement_method_is_never_guessed_and_values_are_preserved():
     assert record["definition_key"] == "record.superconductive_properties.measured_tc.unknown"
     assert record["record_key"].startswith("ir-")
     assert result["extraction_version"] == "1"
+
+
+def test_registered_electronic_values_are_classified_and_lattice_parameters_stay_out_of_properties():
+    raw = extraction()
+    state = raw["material_states"][0]
+    source = copy.deepcopy(state["evidences"])
+    state["property_modules"].append({"module_code": "electronic_properties", "records": [
+        {"module_code": "electronic_properties", "record_type": "property", "property_code": "custom",
+         "name_raw": "band_gap", "value_kind": "number", "value_raw": "1.2 eV", "value_number": 1.2,
+         "unit_raw": "eV", "payload": {}, "evidences": source},
+        {"module_code": "electronic_properties", "record_type": "property", "property_code": "custom",
+         "name_raw": "DOS at Fermi", "value_kind": "number", "value_raw": "2 states/eV", "value_number": 2,
+         "unit_raw": "states/eV", "payload": {}, "evidences": source},
+    ]})
+    state["property_modules"][0]["records"].append({
+        "module_code": "superconductive_properties", "record_type": "property", "property_code": "custom",
+        "name_raw": "lattice_parameters", "value_kind": "text", "value_raw": "a=6.389 Å",
+        "value_text": "a=6.389 Å", "payload": {}, "evidences": source,
+    })
+    result = normalize(raw)
+    modules = {module["module_code"]: module for module in result["material_states"][0]["property_modules"]}
+    assert [r["property_code"] for r in modules["superconductive_properties"]["records"]] == ["tc"]
+    assert {r["property_code"] for r in modules["electronic_properties"]["records"]} == {"band_gap", "dos_fermi"}
+    assert all(r["definition_key"] == f"record.electronic_properties.{r['property_code']}"
+               for r in modules["electronic_properties"]["records"])
+    assert any(e["category"] == "out_of_model_scope" and "lattice_parameters" in e["reason"]
+               for e in result["coverage_exclusions"])
+    assert canonical_electronic_property("DOS at the Fermi level") == "dos_fermi"
+    assert canonical_electronic_property("superconducting gap") is None
 
 
 @pytest.mark.parametrize("change", ["legacy", "incompatible_conditions", "pressure", "nan", "outside", "module", "tc_as_property", "tc_in_wrong_module"])

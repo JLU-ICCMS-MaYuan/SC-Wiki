@@ -143,6 +143,12 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   const update = (patch: Partial<PropertyRecordDraft>) => onChange(normalizeCurrentTcValue({ ...record, ...patch }))
   const updatePath = (path: string, value: unknown) => onChange(normalizeCurrentTcValue(setAtPath(record, path, value)))
   const tcProps = { record, readOnly, issue, fieldPath, update }
+  const quotedSources = useMemo(() => {
+    const values = [...(record.evidence ? [record.evidence] : []), ...(record.evidences || [])]
+    return [...new Map(values.filter((value): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value))
+      .filter(value => typeof value.quote === 'string' && value.quote.trim())
+      .map(value => [`${value.filename || value.source_name || ''}:${value.page || value.page_start || value.pdf_page || ''}:${value.quote}`, value])).values()]
+  }, [record.evidence, record.evidences])
 
   const renderExtensions = (path: string, schema: JsonSchema) => {
     const items = getAtPath(record, path)
@@ -245,7 +251,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   }
 
   return (
-    <Box data-issue-field={basePath} data-record-key={record.record_key} data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, minWidth: 0, containerType: isTc ? 'inline-size' : undefined, containerName: isTc ? 'tc-record' : undefined, gridTemplateColumns: isTc ? 'minmax(0, 1fr)' : { xs: '1fr', sm: 'repeat(2, 1fr)' }, p: 1.5, border: '1px solid', borderColor: 'divider', borderRadius: 1, mb: 1 }}>
+    <Box data-issue-field={basePath} data-record-key={record.record_key} data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, minWidth: 0, containerType: isTc ? 'inline-size' : undefined, containerName: isTc ? 'tc-record' : undefined, gridTemplateColumns: isTc ? 'minmax(0, 1fr)' : { xs: '1fr', sm: 'repeat(2, 1fr)' }, py: 1, mb: 1 }}>
       {definitionError && <Alert severity="error" sx={{ gridColumn: '1 / -1' }}>{definitionError}</Alert>}
       {isTc ? <TcRecordFields {...tcProps} /> : <>
       <TextField label="名称" value={record.name_raw} disabled={readOnly} data-issue-field={fieldPath('name_raw')} error={Boolean(issue('name_raw'))} helperText={issue('name_raw')} onChange={event => update({ name_raw: event.target.value })} />
@@ -263,6 +269,16 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
       </>}
       {Object.entries(payloadSchema.properties || {}).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
+      <Box sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
+        {quotedSources.length ? <Box component="details" data-evidence-summary sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
+          <Box component="summary" sx={{ cursor: 'pointer' }}>原文证据（{quotedSources.length}）</Box>
+          {quotedSources.map((source, index) => <Typography key={index} variant="caption" display="block" sx={{ mt: 0.5, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
+            {[source.filename || source.source_name || '当前论文附件', source.page || source.page_start || source.pdf_page ? `第 ${source.page || source.page_start || source.pdf_page} 页` : ''].filter(Boolean).join(' · ')}：{String(source.quote)}
+          </Typography>)}
+        </Box> : record.value_raw && <Typography variant="caption" color="text.secondary">
+          {record.basis_kind === 'paper_inference' ? '论文推断；无逐字原文引句' : record.basis_kind === 'general_knowledge' ? '通用知识建议；无论文原文引句' : '暂无可定位原文证据；可查看来源核对'}
+        </Typography>}
+      </Box>
       {!readOnly && <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
         {onClone && <Button onClick={onClone}>复制记录</Button>}
         {onDelete && <Button color="error" startIcon={<DeleteIcon />} onClick={onDelete}>删除记录</Button>}

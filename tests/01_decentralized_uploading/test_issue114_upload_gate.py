@@ -1,10 +1,22 @@
 """执行新解析任务到终态，模型用确定响应，PDF/IR/Claim/覆盖校验走真实代码。"""
 import copy
 import json
+from types import SimpleNamespace
 
 import pytest
 from backend.ingest import upload_jobs
 from backend.ingest.document_parsers import ParserError
+
+
+def test_upload_preflight_returns_running_auto_check_for_same_owner(monkeypatch):
+    monkeypatch.setenv("JWT_SECRET_KEY", "test-only-secret")
+    from backend.api import evidence
+    monkeypatch.setattr(evidence, "snapshot_for", lambda _body, _user: ({"version": "v1"}, {}))
+    monkeypatch.setattr(evidence.ev, "public_snapshot", lambda _snapshot, _cached: {"version": "v1", "needs_check": True, "records": []})
+    monkeypatch.setattr(evidence, "get_state", lambda _task_id: {"evidence_job_id": "existing"})
+    monkeypatch.setattr(evidence.ev, "read_job", lambda job_id, owner: {"id": job_id, "owner": owner, "status": "queued"})
+    body = evidence.Target(target="upload", target_id="a" * 32)
+    assert evidence.preflight(body, user=SimpleNamespace(id=1))["job_id"] == "existing"
 
 
 @pytest.mark.parametrize("valid", [True,False])
@@ -32,6 +44,8 @@ def test_upload_pipeline_never_reports_ready_with_unlocated_claim(tmp_path,monke
     monkeypatch.setattr(upload_jobs,"extract_references_from_pdf",lambda _:{"status":"unavailable","references":[]})
     monkeypatch.setattr(upload_jobs,"extract_structure_candidates",lambda *a,**k:[])
     monkeypatch.setattr(upload_jobs,"_schedule_terminal_cleanup",lambda _:None)
+    auto_checks=[]
+    monkeypatch.setattr(upload_jobs,"_start_automatic_evidence_check",lambda task_id,user_id:auto_checks.append((task_id,user_id)))
     monkeypatch.setattr(property_evidence,"generate_upload_suggestions",lambda *a,**k:None)
     saved=[];monkeypatch.setattr(upload_jobs,"save_draft",lambda _,value:saved.append(value))
     material={"scope":"current_paper","material":"LaH10","pressure_value_gpa":150,"state_kind":"theoretical",
@@ -69,6 +83,7 @@ def test_upload_pipeline_never_reports_ready_with_unlocated_claim(tmp_path,monke
         record=saved[0]["material_states"][0]["property_modules"][0]["records"][0]
         assert record["method_code"] == "unknown" and record["value_number"] == 200
         assert json.loads((artifacts/"final_claims.json").read_text())
+        assert auto_checks == [(task,1)]
     else:
         with pytest.raises(ParserError,match="无法定位"):
             upload_jobs._process_upload_task(task)
@@ -76,5 +91,6 @@ def test_upload_pipeline_never_reports_ready_with_unlocated_claim(tmp_path,monke
         assert state["reading_state"]=="needs_review"
         assert not saved
         assert upload_jobs.SUMMARY_SYSTEM_PROMPT not in calls
+        assert auto_checks == []
     assert (artifacts/"claims.json").is_file()
     assert (artifacts/"coverage.json").is_file()

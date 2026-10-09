@@ -37,6 +37,7 @@ export function useEvidenceWorkflow(options?: {
 }) {
   const { t } = useLanguage()
   const [view, setView] = useState<View | null>(null)
+  const [automatic, setAutomatic] = useState(false)
   const [records, setRecords] = useState<EvidenceRecord[]>([])
   const [selected, setSelected] = useState<string | null>(null)
   const [fallbackRecord, setFallbackRecord] = useState<EvidenceRecord | undefined>()
@@ -183,7 +184,7 @@ export function useEvidenceWorkflow(options?: {
   }, [options?.target?.target, options?.target?.target_id, restore])
 
   const payload = (preflight: Preflight, resolutions: Record<string, string> = {}): EvidencePayload => ({ evidence_job_id: jobID.current, expected_evidence_version: preflight.version, evidence_resolutions: resolutions })
-  const showResults = (next: EvidenceRecord[], preflight: Preflight) => {
+  const showResults = (next: EvidenceRecord[], preflight: Preflight, silent = false) => {
     setRecords(next)
     setDraftValues({})
     setReasons(Object.fromEntries(next.map(r => [r.key, r.proposal_draft?.reason ?? r.resolution ?? ''])))
@@ -191,7 +192,7 @@ export function useEvidenceWorkflow(options?: {
     pending.current = undefined
     setView(null)
     const disputed = next.filter(problematic)
-    if (disputed.length) openIssue(disputed[0].key)
+    if (disputed.length && !silent) openIssue(disputed[0].key)
   }
   // 提交门禁只读恢复；任何未核对项目都不在此处启动模型。
   const gate = async (target: EvidenceTarget): Promise<EvidencePayload | null> => {
@@ -221,7 +222,7 @@ export function useEvidenceWorkflow(options?: {
     return true
   }
 
-  const execute = async (target: EvidenceTarget, retryKeys?: string[]) => {
+  const execute = async (target: EvidenceTarget, retryKeys?: string[], silent = false, attempt = 0) => {
     const retryItems = retryKeys && new Set(retryKeys.map(key => {
       const record = recordsRef.current.find(r => r.key === key)
       return record?.item_key || key
@@ -252,16 +253,18 @@ export function useEvidenceWorkflow(options?: {
       preflightRef.current = preflight
       if (retryItems) {
         retryKeys = preflight.records.filter(r => retryItems.has(r.item_key || r.key)).map(r => r.key)
-        if (!retryKeys.length) { showResults(preflight.records, preflight); return }
+        if (!retryKeys.length) { showResults(preflight.records, preflight, silent); return }
       }
-      if (target.target !== 'paper' && !retryKeys && !preflight.needs_check && !preflight.records.some(r => r.status === 'unchecked')) { jobID.current = preflight.job_id; completed.current = true; showResults(preflight.records, preflight); return }
-      for (let seconds = 3; seconds > 0; seconds--) {
+      if (target.target !== 'paper' && !retryKeys && !preflight.needs_check && !preflight.records.some(r => r.status === 'unchecked')) { jobID.current = preflight.job_id; completed.current = true; showResults(preflight.records, preflight, silent); return }
+      for (let seconds = silent ? 0 : 3; seconds > 0; seconds--) {
         setView({ phase: 'countdown', seconds, message: t('evidence.startHint') })
         await pause(1000)
         if (!active()) return
       }
       setView({ phase: 'running', message: t('evidence.starting') })
-      const job = await api.post<Job>(`${base}/jobs`, { ...target, expected_version: preflight.version, purpose: target.target === 'paper' && !retryKeys ? 'review_all' : 'check', ...(retryKeys ? { retry_keys: retryKeys } : {}) })
+      const job = preflight.job_id && !retryKeys
+        ? { id: preflight.job_id, timeout_seconds: 1800 }
+        : await api.post<Job>(`${base}/jobs`, { ...target, expected_version: preflight.version, purpose: target.target === 'paper' && !retryKeys ? 'review_all' : 'check', ...(retryKeys ? { retry_keys: retryKeys } : {}) })
       if (!active()) { if (cancelLateJob.current) void api.del(`${base}/jobs/${job.id}`).catch(() => undefined); return }
       jobID.current = job.id
       const deadline = Date.now() + ((job.timeout_seconds || 600) + 60) * 1000
@@ -271,7 +274,7 @@ export function useEvidenceWorkflow(options?: {
         if (result.status === 'completed') {
           completed.current = true
           if (result.version) preflight.version = result.version
-          showResults(result.records || [], preflight)
+          showResults(result.records || [], preflight, silent)
           return
         }
         if (result.status === 'failed') throw new Error(result.error?.message || t('evidence.failed'))
@@ -283,14 +286,22 @@ export function useEvidenceWorkflow(options?: {
     } catch (error) {
       if (active()) {
         if (jobID.current && !completed.current) void api.del(`${base}/jobs/${jobID.current}`).catch(() => undefined)
-        setView({ phase: 'error', message: (error as Error).message })
+        if (silent && attempt === 0) void execute(target, retryKeys, true, 1)
+        else setView({ phase: 'error', message: (error as Error).message })
       }
     }
   }
   const run = (target: EvidenceTarget): Promise<EvidencePayload | null> => {
     if (pending.current) { setSelected(records.find(problematic)?.key || null); return Promise.resolve(null) }
     targetRef.current = target
+    setAutomatic(false)
     return new Promise(resolve => { pending.current = resolve; void execute(target) })
+  }
+  const runAutomatic = (target: EvidenceTarget) => {
+    if (view && view.phase !== 'error') return
+    targetRef.current = target
+    setAutomatic(true)
+    void execute(target, undefined, true)
   }
   const valuesFor = (record: EvidenceRecord) => record.stale ? {} : valuesRef.current[record.key] || record.proposal_draft?.values || record.proposal?.values || {}
   const saveProposal = (record: EvidenceRecord, values: Record<string, unknown>, accepted: boolean, reason: string, immediate = false) => {
@@ -415,7 +426,7 @@ export function useEvidenceWorkflow(options?: {
   }
   const dialog = <>
 
-    <Dialog open={view !== null} onClose={() => finish(null)} fullWidth maxWidth="md" aria-labelledby="evidence-workflow-title">
+    <Dialog open={view !== null && !automatic} onClose={() => finish(null)} fullWidth maxWidth="md" aria-labelledby="evidence-workflow-title">
       <DialogTitle id="evidence-workflow-title">{t('evidence.title')}</DialogTitle>
       <DialogContent>
         {view?.phase === 'countdown' && <Alert severity="info">{t('evidence.countdown', { seconds: view.seconds || 0 })}{view.message}</Alert>}
@@ -496,5 +507,5 @@ export function useEvidenceWorkflow(options?: {
       </>}
     </Drawer>
   </>
-  return { refreshAfterSave, getEditRevision: () => editRevision.current, hasUnsavedChanges: () => dirty.current, hasAccepted: records.some(r => !r.stale && r.proposal_draft?.accepted), run, gate, applyAccepted, dialog, busy: view !== null, issues, records, restore, invalidate, openIssue, clearIssues: () => finish(null), saveError }
+  return { refreshAfterSave, getEditRevision: () => editRevision.current, hasUnsavedChanges: () => dirty.current, hasAccepted: records.some(r => !r.stale && r.proposal_draft?.accepted), run, runAutomatic, automaticView: automatic ? view : null, gate, applyAccepted, dialog, busy: view !== null, issues, records, restore, invalidate, openIssue, clearIssues: () => finish(null), saveError }
 }

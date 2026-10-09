@@ -16,6 +16,7 @@ export interface PropertyRecordDraft {
   module_code: PropertyModuleCode
   record_type: PropertyRecordType
   property_code: string
+  basis_kind?: 'paper_quote' | 'paper_inference' | 'general_knowledge'
   custom_property_key?: string | null
   definition_key: string
   definition_version: number

@@ -65,8 +65,9 @@ const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, up
     ? { text: representation.text, format: format === 'poscar' ? 'vasp' : 'cif' }
     : null
   const blocked = candidate?.status === 'blocked'
+    || (candidate?.source_kind?.startsWith('pdf') && candidate.validation?.ase_valid !== true)
   const decided = candidate?.confirmation === 'confirmed' || candidate?.confirmation === 'excluded'
-  const filename = candidate?.sources?.map(source => String(source.filename || '')).filter(Boolean).join(t('upload.listSeparator'))
+  const filename = [...new Set(candidate?.sources?.map(source => String(source.filename || '')).filter(Boolean) || [])].join(t('upload.listSeparator'))
   const statusLabel = blocked
     ? t('upload.structureStatusBlocked')
     : candidate?.confirmation === 'confirmed'
@@ -122,7 +123,17 @@ const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, up
           )}
 
           {blocked
-            ? <Alert severity="error" sx={{ mt: 1.5 }}>{candidate.validation?.message || t('upload.blockedValidation')}</Alert>
+            ? <Box sx={{ mt: 1.5 }}>
+                <Alert severity="warning">{candidate.validation?.message || t('upload.blockedValidation')}</Alert>
+                {candidate.reported_structure?.cell_parameters && (
+                  <Typography variant="body2" sx={{ mt: 1, overflowWrap: 'anywhere' }}>
+                    {Object.entries(candidate.reported_structure.cell_parameters).map(([name, value]) => `${name}=${value}`).join(' · ')}
+                  </Typography>
+                )}
+                {candidate.sources?.map((source, index) => <Typography key={index} variant="caption" color="text.secondary" display="block" sx={{ mt: 0.75, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
+                  {[source.filename, source.page && `${t('upload.pageRef', { page: source.page as number })}`].filter(Boolean).join(' · ')}：{String(source.quote || '')}
+                </Typography>)}
+              </Box>
             : preview
               ? (
                   <Box sx={{ mt: 1.5 }}>

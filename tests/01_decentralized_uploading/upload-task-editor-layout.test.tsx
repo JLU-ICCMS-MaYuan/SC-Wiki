@@ -341,7 +341,7 @@ describe('空间群标准表自动补全', () => {
 })
 
 describe('文案、类型标签与模块顺序', () => {
-  it('显示压强文案与新类型标签，无主结构家族字段，结构附件渲染在物性模块之后', async () => {
+  it('显示压强文案与新类型标签，无主结构家族字段，结构附件先于物性模块', async () => {
     render(<UploadTaskEditor taskId={'1'.repeat(32)} onSubmitted={vi.fn()} draftOverride={makeDraft([
       makeState(),
       makeState({
@@ -358,7 +358,7 @@ describe('文案、类型标签与模块顺序', () => {
     const moduleSections = screen.getAllByTestId(/property-modules-/)
     const panels = screen.getAllByTestId('structure-candidate-panel')
     expect(
-      moduleSections[0].compareDocumentPosition(panels[0]) & Node.DOCUMENT_POSITION_FOLLOWING,
+      panels[0].compareDocumentPosition(moduleSections[0]) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy()
   })
 })

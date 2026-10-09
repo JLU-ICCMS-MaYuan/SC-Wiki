@@ -789,6 +789,14 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   ))}
                   </>}
 
+                  <StructureCandidatePanel
+                    materialName={`${state.material_name || state.material || t('common.notProvided')} · ${t('upload.materialStateNumber', { index: index + 1 })}`}
+                    candidates={stateCandidates}
+                    uploading={Boolean(structureUploading[index])}
+                    onUpload={file => void uploadStructureForState(index, file)}
+                    onChange={updateStructureCandidate}
+                  />
+
                   <Box data-testid={`property-modules-${index}`} sx={{ mt: 2 }}>
                     <PropertyModuleEditor
                       modules={state.property_modules || []}
@@ -809,13 +817,6 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                     />
                   </Box>
 
-                  <StructureCandidatePanel
-                    materialName={`${state.material_name || state.material || t('common.notProvided')} · ${t('upload.materialStateNumber', { index: index + 1 })}`}
-                    candidates={stateCandidates}
-                    uploading={Boolean(structureUploading[index])}
-                    onUpload={file => void uploadStructureForState(index, file)}
-                    onChange={updateStructureCandidate}
-                  />
                   </Box>
                   </Collapse>
                 </CardContent>

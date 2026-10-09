@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
 import pytest
 from redis import Redis
-from rq import Queue, SimpleWorker
+from rq import Queue, SimpleWorker, SpawnWorker
 
 from backend.ingest import upload_tasks
 from backend.rq_runtime import run_worker_forever
@@ -18,6 +19,11 @@ from backend.scripts import run_upload_workers
 
 
 REPO_ROOT = Path(__file__).parents[2]
+
+
+def test_macos_upload_worker_avoids_fork_for_native_pdf_libraries():
+    if sys.platform == "darwin":
+        assert run_upload_workers.Worker is SpawnWorker
 
 
 def _job(task_id: object) -> SimpleNamespace:
@@ -114,6 +120,26 @@ def test_upload_worker_registers_queue_failure_handler(monkeypatch):
     run_upload_workers._run_worker(with_scheduler=False)
 
     assert captured["exception_handlers"] == [upload_tasks.handle_upload_job_failure]
+    assert captured["work_horse_killed_handler"] is run_upload_workers._work_horse_killed
+
+
+def test_aborted_work_horse_converges_upload_state(monkeypatch):
+    state = {"task_id": "c" * 32, "status": "extracting", "stage": "extracting"}
+    updates = []
+    monkeypatch.setattr(upload_tasks, "get_state", lambda _task_id: state)
+    monkeypatch.setattr(upload_tasks, "update_state", lambda task_id, **changes: updates.append(changes) or {**state, **changes})
+    monkeypatch.setattr(upload_tasks, "schedule_cleanup", lambda _task_id: None)
+    run_upload_workers._work_horse_killed(_job(state["task_id"]), 123, 6, None)
+    assert updates[0]["status"] == "failed"
+    assert updates[0]["error_code"] == "upload_worker_execution_failed"
+
+
+def test_aborted_evidence_work_horse_converges_evidence_job(monkeypatch):
+    failures = []
+    monkeypatch.setattr("backend.ingest.property_evidence.evidence_job_failed", lambda job, _connection: failures.append(job))
+    job = SimpleNamespace(args=("d" * 32,), func_name="backend.ingest.property_evidence.run_evidence_job")
+    run_upload_workers._work_horse_killed(job, 123, 6, None)
+    assert failures == [job]
 
 
 def test_worker_runtime_does_not_restart_after_idle_warm_shutdown():

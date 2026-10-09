@@ -178,6 +178,8 @@ tc_method 只能取给定枚举；论文方法无法归入枚举时填 other，�
 properties 需提取 energy above hull：name 固定为 "energy above hull"，unit 固定为 "eV/atom"；
 论文明确声明 thermodynamically stable 或 on the convex hull 时值为 0；原文未提及则不生成该条目。
 summary、keywords_tags、methodology、key_finding、research_motivation、knowledge_graph_title 必须使用英文输出。
+keywords_tags 是根据本文标题、摘要和研究内容提炼的 3–8 个英文关键词，不要求与原文逐字相同；
+内容不足以支持关键词时返回空数组，不以背景文献或通用知识补全。
 这些字段必须忠实依据英文论文原文；缺少原文依据时返回空字符串或空数组，不得编造，也不得先翻译成中文。
 research_motivation 写作者开展这项研究的驱动力，不是本文的结论，也不是你的分类依据。
 依据引言、背景与动机相关段落归纳：该领域此前存在什么问题、悬而未决的争议或技术瓶颈，
@@ -1305,6 +1307,115 @@ def _legacy_state_superconductor_kind(material_states: list[dict[str, Any]]) -> 
     return next(iter(non_unknown)) if len(non_unknown) == 1 else "unknown"
 
 
+def _fill_missing_keywords(draft: dict[str, Any]) -> None:
+    """汇总遗漏关键词时，根据本文内容再提炼一次；失败不丢失科学草稿。"""
+    paper = draft.get("paper") or {}
+    if paper.get("keywords_tags"):
+        return
+    source = "\n".join(str(paper.get(field) or "") for field in ("title", "abstract", "summary", "key_finding"))
+    if len(source.strip()) < 120:
+        return
+    try:
+        response = complete_json(
+            "Extract 3–8 concise English scientific keywords from this paper's title, abstract and summary. "
+            "Return JSON {\"keywords_tags\": [\"...\"]}. Use only supplied text; if it is insufficient, return an empty array. "
+            "Do not add quotes or invent paper results.", source[:12000],
+        )
+        values, _ = _normalize_text_items(response.get("keywords_tags"), "keyword", "value", "name")
+        paper["keywords_tags"] = list(dict.fromkeys(values))[:8]
+    except Exception:
+        logging.getLogger(__name__).warning("关键词模型补全失败，尝试已有材料与方法", exc_info=True)
+    if not paper.get("keywords_tags"):
+        # 模型不可用时只重用草稿中已提取的本文材料与方法，不凭常识生成新事实。
+        materials = paper.get("research_materials")
+        methods = paper.get("methodology")
+        candidates = [*(materials[:2] if isinstance(materials, list) else []),
+                      *(methods[:3] if isinstance(methods, list) else [])]
+        if re.search(r"\bsuperconductiv(?:ity|e)\b", source, re.IGNORECASE):
+            candidates.append("superconductivity")
+        if re.search(r"high[- ]pressure|under pressure|pressure[- ]induced", source, re.IGNORECASE):
+            candidates.append("high pressure")
+        keywords = list(dict.fromkeys(str(item).strip() for item in candidates
+                                      if isinstance(item, str) and item.strip()))
+        if len(keywords) >= 3:
+            paper["keywords_tags"] = keywords[:8]
+
+
+def _bind_structure_candidates(draft: dict[str, Any], candidates: list[dict[str, Any]]) -> None:
+    """只在空间群与压力唯一对应时，把 PDF 结构放入材料状态。"""
+    states = draft.get("material_states") or []
+    for candidate in candidates:
+        if not str(candidate.get("material_state_ref") or "").startswith("unassigned:"):
+            continue
+        reported = candidate.get("reported_structure") or {}
+        symbol = str(reported.get("space_group_symbol") or "").strip().casefold().replace(" ", "")
+        pressure = reported.get("pressure_value_gpa")
+        if symbol and pressure is not None:
+            matches = [index for index, state in enumerate(states)
+                       if str(state.get("reported_space_group_symbol") or "").strip().casefold().replace(" ", "") == symbol
+                       and state.get("pressure_value_gpa") is not None
+                       and abs(float(state["pressure_value_gpa"]) - float(pressure)) < 0.01]
+        elif not symbol and pressure is None and len(states) == 1:
+            matches = [0]
+        else:
+            matches = []
+        if len(matches) == 1:
+            candidate["material_state_ref"] = f"material_states[{matches[0]}]"
+
+
+def _prune_generated_properties(draft: dict[str, Any]) -> list[dict[str, Any]]:
+    """旧 PDF 汇总的非注册性质只留审计，不当成用户主动创建的自定义项。"""
+    from backend.ingest.domain_extraction import canonical_electronic_property
+
+    excluded: list[dict[str, Any]] = []
+    for state_index, state in enumerate(draft.get("material_states") or []):
+        grouped: dict[str, dict[str, Any]] = {}
+        for module in state.get("property_modules") or []:
+            for record in module.get("records") or []:
+                code = record.get("property_code")
+                if code == "custom":
+                    code = canonical_electronic_property(record.get("name_raw"))
+                if code in {"band_gap", "dos_fermi"}:
+                    record.update(module_code="electronic_properties", property_code=code,
+                                  custom_property_key=None,
+                                  definition_key=f"record.electronic_properties.{code}", definition_version=1)
+                elif code != "tc":
+                    excluded.append({"state_index": state_index, "record": record,
+                                     "reason": "非首批注册的自动物性；保留原始候选与来源"})
+                    continue
+                target = str(record["module_code"])
+                group = grouped.setdefault(target, {**module, "module_code": target,
+                    "module_key": f"module-{target}", "definition_key": f"module.{target}", "records": []})
+                group["records"].append(record)
+        state["property_modules"] = [{**module, "display_order": index}
+                                     for index, module in enumerate(grouped.values())]
+    return excluded
+
+
+def _start_automatic_evidence_check(task_id: str, user_id: int) -> None:
+    """草稿已持久化后排队来源核对；失败不清除用户可编辑草稿。"""
+    try:
+        from backend.api.evidence import Target, create_job
+        from backend.ingest import property_evidence, scientific_evidence
+        from backend.models import User
+
+        with SessionLocal() as session:
+            user = session.get(User, user_id)
+            if user is None:
+                raise ValueError("上传用户不存在")
+            snapshot = property_evidence.upload_snapshot(task_id, user_id)
+            cached = scientific_evidence.load_results(session, snapshot, user_id, include_stale=True)
+            if not property_evidence.public_snapshot(snapshot, cached)["needs_check"]:
+                update_state(task_id, evidence_job_id=None, evidence_auto_error=None)
+                return
+            response = create_job(Target(target="upload", target_id=task_id,
+                                         expected_version=snapshot["version"]), user=user)
+        update_state(task_id, evidence_job_id=response["id"], evidence_auto_error=None)
+    except Exception as exc:
+        logging.getLogger(__name__).warning("上传来源自动核对未启动 task=%s type=%s", task_id, type(exc).__name__)
+        update_state(task_id, evidence_auto_error="自动来源核对未启动，请打开草稿重新核对")
+
+
 def _normalize_draft(
     raw: dict[str, Any], *, preserve_citation_extraction: bool = True,
 ) -> dict[str, Any]:
@@ -1915,6 +2026,10 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             draft["material_states"] = merge_scientific_candidates(candidates)
         else:
             draft = _normalize_draft(raw_draft, preserve_citation_extraction=False)
+            excluded_properties = _prune_generated_properties(draft)
+            if excluded_properties:
+                _atomic_write_json(artifact_directory(task_id) / "unclassified_properties.json", excluded_properties)
+        _fill_missing_keywords(draft)
         if document_set:
             carry_state_evidence(draft, claims)
             final_claims = claims_from_candidates(draft, document_set, legacy_sources=legacy_sources)
@@ -1928,6 +2043,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                                   profile=state["parser_profile"], parser="coverage_audit")
             apply_claim_evidence(draft, final_claims)
         validate_draft_generated_english(draft)
+        _bind_structure_candidates(draft, structure_candidates)
         draft["structure_candidates"] = structure_candidates
         draft["citation_extraction"] = citation_extraction
         current_state = get_state(task_id) or state
@@ -1988,6 +2104,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             processing_error=None, completed_chunks=len(all_chunks), total_chunks=len(all_chunks),
             duplicate=False, partial_draft=None,
         )
+        if not state.get("is_shadow"):
+            _start_automatic_evidence_check(task_id, int(state["user_id"]))
         _schedule_terminal_cleanup(task_id)
         return ready
     except UploadCancelled:

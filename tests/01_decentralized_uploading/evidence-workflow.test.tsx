@@ -75,6 +75,41 @@ async function advance(){for(let i=0;i<3;i++)await act(async()=>{await vi.advanc
 it('三秒内取消不创建模型任务',async()=>{render(<Harness/>);await start();expect(screen.getByText(/3 秒后/)).toBeInTheDocument();await act(async()=>fireEvent.click(screen.getByText('取消')));await advance();expect(api.post).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledWith(null)})
 it('核对完成返回任务与版本，不发送审核请求',async()=>{render(<Harness/>);await start();await advance();expect(done).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledWith({evidence_job_id:'job',expected_evidence_version:'v1',evidence_resolutions:{}})})
 it('后台已保存结果后无需浏览器再写草稿，返回任务版本',async()=>{vi.mocked(api.get).mockResolvedValue({status:'completed',version:'v2',records:[record]});render(<Harness target="upload"/>);await start();await advance();expect(done).toHaveBeenCalledWith({evidence_job_id:'job',expected_evidence_version:'v2',evidence_resolutions:{}})})
+it('上传自动来源核对不弹倒计时，服务失败仅重试一次并保留结果', async () => {
+  let started = 0
+  vi.mocked(api.post).mockImplementation(async path => {
+    if (path.endsWith('preflight')) return {version:'v1',needs_check:true,records:[record]} as never
+    if (path.endsWith('/jobs')) {
+      started += 1
+      if (started === 1) throw new Error('暂时不可用')
+      return {id:'job'} as never
+    }
+    throw new Error(`unexpected ${path}`)
+  })
+  function Automatic() {
+    const flow = useEvidenceWorkflow()
+    return <><button onClick={() => flow.runAutomatic({target:'upload',target_id:'29'})}>自动核对</button>
+      <span data-testid="status">{flow.automaticView?.phase || 'done'}</span>{flow.dialog}</>
+  }
+  render(<Automatic/>)
+  await act(async () => { fireEvent.click(screen.getByText('自动核对')) })
+  expect(started).toBe(2)
+  expect(screen.queryByText(/3 秒后/)).not.toBeInTheDocument()
+  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  expect(screen.getByTestId('status')).toHaveTextContent('done')
+})
+it('草稿已排队自动核对时只轮询原任务，不重复创建模型任务', async () => {
+  vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:true,records:[record],job_id:'existing'} as never)
+  vi.mocked(api.get).mockResolvedValue({status:'completed',records:[record]} as never)
+  function Automatic() {
+    const flow = useEvidenceWorkflow()
+    return <><button onClick={() => flow.runAutomatic({target:'upload',target_id:'29'})}>自动核对</button>{flow.dialog}</>
+  }
+  render(<Automatic/>)
+  await act(async () => { fireEvent.click(screen.getByText('自动核对')) })
+  expect(api.get).toHaveBeenCalledWith('/api/rag/evidence/jobs/existing')
+  expect(vi.mocked(api.post).mock.calls.filter(([path]) => path === '/api/rag/evidence/jobs')).toHaveLength(0)
+})
 it('上传语义疑点显示抽屉等待手动提交',async()=>{vi.mocked(api.get).mockResolvedValue({status:'completed',records:[{...record,status:'unsupported'}]});render(<Harness target="upload"/>);await start();await advance();expect(done).toHaveBeenCalledWith(expect.objectContaining({evidence_job_id:'job'}))})
 it('核对存在疑点只显示处理抽屉，完成不会自动批准',async()=>{
  vi.mocked(api.get).mockResolvedValue({status:'completed',records:[{...record,status:'unsupported',reason:'4.29 K 是测量温度'}]})

@@ -170,6 +170,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const [catalogError, setCatalogError] = useState('')
   const [spaceGroups, setSpaceGroups] = useState<SpaceGroupOption[]>([])
   const revisionRef = useRef(0)
+  const autoCheckTarget = useRef('')
 
   useEffect(() => {
     let active = true
@@ -235,6 +236,14 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     }).finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true; controller.abort() }
   }, [taskId, draftOverride, draftUrl, revisionPaperId])
+
+  useEffect(() => {
+    if (!draft || loading || readOnly || !evidenceTarget) return
+    const key = `${evidenceTarget.target}:${evidenceTarget.target_id}`
+    if (autoCheckTarget.current === key) return
+    autoCheckTarget.current = key
+    evidenceWorkflow.runAutomatic(evidenceTarget)
+  }, [Boolean(draft), loading, readOnly, evidenceTarget?.target, evidenceTarget?.target_id])
 
   const changeDraft = useCallback((updater: (current: UploadDraft) => UploadDraft) => {
     setDraft(current => current ? updater(current) : current)
@@ -530,7 +539,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           <Typography variant="caption" color={error ? 'error' : 'text.secondary'}>
             {saving ? t('common.saving') : dirty ? t('upload.autoSaveHint') : lastSavedAt ? t('upload.savedAt', { time: lastSavedAt }) : t('upload.draftLoaded')}
           </Typography>
-          <Button variant="outlined" disabled={saving || submitting || evidenceWorkflow.busy || Boolean(revision?.conflict)} onClick={async () => { if (evidenceTarget && await saveDraft(false)) void evidenceWorkflow.run(evidenceTarget) }}>{t('evidence.audit')}</Button>
+          {evidenceWorkflow.automaticView?.phase === 'error' && (
+            <Button variant="outlined" disabled={saving || submitting || Boolean(revision?.conflict)} onClick={async () => { if (evidenceTarget && await saveDraft(false)) evidenceWorkflow.runAutomatic(evidenceTarget) }}>{t('upload.retryEvidenceCheck')}</Button>
+          )}
           <Button variant="outlined" startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
             disabled={saving || submitting || Boolean(revision?.conflict)} onClick={() => void saveDraft(true)}>{t('upload.saveNow')}</Button>
           <Button variant="contained" startIcon={submitting ? <CircularProgress size={16} /> : <SendIcon />}
@@ -540,6 +551,11 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       </Box>
 
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
+      {evidenceWorkflow.automaticView && <Alert severity={evidenceWorkflow.automaticView.phase === 'error' ? 'warning' : 'info'} role="status" sx={{ mb: 2 }}>
+        {evidenceWorkflow.automaticView.phase === 'error'
+          ? t('upload.evidenceCheckFailed', { message: evidenceWorkflow.automaticView.message || '' })
+          : evidenceWorkflow.automaticView.message || t('evidence.checking')}
+      </Alert>}
       {draft.field_suggestions_error && evidenceWorkflow.records.some(r => r.status === 'unchecked') && <Alert severity="warning" sx={{ mb: 2 }}>{t('evidence.generationFailed')}</Alert>}
 
       {draft.citation_extraction && <CitationExtractionPanel extraction={draft.citation_extraction} />}
@@ -695,7 +711,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           <Box key={field}>
             <TextField fullWidth label={label} multiline rows={15} data-issue-field={`paper.${field}`}
               value={toLines(draft.paper[field as keyof UploadDraft['paper']] as string[] | undefined)}
-              onChange={event => setPaperField(field as keyof UploadDraft['paper'], fromLines(event.target.value))} />
+              onChange={event => setPaperField(field as keyof UploadDraft['paper'], fromLines(event.target.value))}
+              helperText={field === 'keywords_tags' && !draft.paper.keywords_tags?.length ? t('upload.keywordsMissingHint') : undefined} />
             <EvidenceNotes
               evidence={draft.field_evidence?.[field]}
             />

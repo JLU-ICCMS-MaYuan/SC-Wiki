@@ -14,7 +14,7 @@ from backend.rag.llm_context import request_llm_config, get_llm_config
 from backend.ingest import property_evidence as ev
 from backend.ingest import scientific_evidence as science
 from backend.ingest import evidence_proposals as proposals
-from backend.ingest.upload_tasks import redis_client, upload_queue, save_llm_config, TASK_TTL, get_draft, save_draft, upload_task_lock
+from backend.ingest.upload_tasks import redis_client, upload_queue, save_llm_config, TASK_TTL, get_draft, get_state, save_draft, upload_task_lock
 
 router = APIRouter(prefix='/api/rag/evidence', tags=['evidence'], dependencies=[Depends(request_llm_config)])
 
@@ -48,7 +48,18 @@ def snapshot_for(body, user):
 @router.post('/preflight')
 def preflight(body: Target, user=Depends(get_current_user)):
     snapshot, cached = snapshot_for(body, user)
-    return {**ev.public_snapshot(snapshot, cached), 'job_id': None}
+    active_job = None
+    if body.target == 'upload':
+        state = get_state(body.target_id) or {}
+        candidate_id = state.get('evidence_job_id')
+        if candidate_id:
+            try:
+                candidate = ev.read_job(candidate_id, user.id)
+                if candidate.get('status') in {'queued', 'running'}:
+                    active_job = candidate_id
+            except Exception:
+                pass
+    return {**ev.public_snapshot(snapshot, cached), 'job_id': active_job}
 
 
 @router.post('/jobs')

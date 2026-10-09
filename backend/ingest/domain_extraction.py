@@ -17,6 +17,17 @@ from .upload_contracts import PropertyRecordInput, convert_legacy_state
 EXTRACTION_VERSION = "1"
 
 
+def canonical_electronic_property(name: object) -> str | None:
+    normalized = " ".join(str(name or "").lower().replace("_", " ").replace("-", " ").split())
+    if normalized in {"band gap", "bandgap", "electronic band gap", "energy band gap", "band gap energy"}:
+        return "band_gap"
+    if normalized in {"dos at fermi", "dos at the fermi level", "density of states at fermi",
+                      "density of states at the fermi level", "fermi level density of states",
+                      "n(ef)", "n(e f)"}:
+        return "dos_fermi"
+    return None
+
+
 class Contract(BaseModel):
     model_config = ConfigDict(extra="forbid", allow_inf_nan=False, strict=True)
 
@@ -29,7 +40,7 @@ class SourceQuote(Contract):
 
 
 # 排除类别：覆盖检查承认的"已审阅并排除"理由；unreadable 表示模型读不了，
-# out_of_model_scope 表示科学内容真实存在但当前领域契约无对应模块（能带隙、晶格参数、
+# out_of_model_scope 表示科学内容真实存在但当前领域契约无对应模块（晶格参数、
 # 谱函数等），两者都保留人工复核语义，不得用于静默放行。
 EXCLUSION_CATEGORIES = ("non_result_content", "reference_or_background", "figure_without_data",
                         "header_or_unit_row", "out_of_model_scope", "unreadable")
@@ -75,7 +86,7 @@ class ExtractedRecord(PropertyRecordInput):
     record_key: str = ""
     definition_key: str = ""
     definition_version: int = 1
-    property_code: Literal["tc", "custom"]
+    property_code: Literal["tc", "band_gap", "dos_fermi", "custom"]
     basis_kind: Literal["paper_quote", "paper_inference", "general_knowledge"] = "paper_quote"
     evidences: list[SourceQuote] = Field(min_length=1)
     evidence: None = None
@@ -164,7 +175,10 @@ Tc belongs to module_code=superconductive_properties, property_code=tc, canonica
 Keep value_raw/unit_raw as reported, including ranges and uncertainty. Each payload preserves reported
 calculation parameters or experimental description; missing information remains empty, never invented.
 Server generates record_key and definition_key/version; omit these fields. No database IDs or structures.
-Other reported properties use record_type=property, property_code=custom and the appropriate module.
+Only band gaps and density of states at the Fermi level are supported non-Tc records. Use
+record_type=property, module_code=electronic_properties and property_code=band_gap or dos_fermi.
+Do not put lattice parameters, atomic coordinates or other unregistered quantities in property_modules.
+Report them as out_of_model_scope coverage exclusions with their source location instead.
 Review EVERY suspected result block, table row, figure and formula block in the supplied pages:
 emit a record for it, or declare it in coverage_exclusions with exactly one locator (block_id,
 table_id+row_index, or pdf_page), a category from {", ".join(EXCLUSION_CATEGORIES)} and a short reason.
@@ -257,6 +271,36 @@ def normalize_extraction(raw: dict, *, allowed_blocks: set[tuple[str, int, str]]
                          allowed_pages: set[tuple[str, int]] | None = None) -> dict:
     """拒绝格式错配和越范围来源，服务端生成现有科学契约需要的稳定键。"""
     result = Extraction.model_validate(raw).model_dump(mode="json")
+    # 旧提示词生成的 custom 候选不能借超导模块进入表单。仅对名称明确的两项
+    # 电子性质做保守归类，其余保留为可审计排除项，不凭名称推断数值或单位。
+    for state in result["material_states"]:
+        grouped: dict[str, dict] = {}
+        for module in state["property_modules"]:
+            for record in module["records"]:
+                if any((quote["file_id"], quote["pdf_page"], quote["block_id"]) not in allowed_blocks
+                       for quote in record["evidences"]):
+                    raise ValueError("未注册物性引用了未提供的文件、页面或块")
+                code = record["property_code"]
+                if code == "custom":
+                    code = canonical_electronic_property(record.get("name_raw")) or "custom"
+                if code in {"band_gap", "dos_fermi"}:
+                    record["property_code"] = code
+                    record["module_code"] = "electronic_properties"
+                    record["custom_property_key"] = None
+                elif code == "tc":
+                    pass
+                else:
+                    for quote in record["evidences"]:
+                        result["coverage_exclusions"].append({
+                            "file_id": quote["file_id"], "pdf_page": quote["pdf_page"],
+                            "block_id": quote["block_id"], "table_id": None, "row_index": None,
+                            "category": "out_of_model_scope",
+                            "reason": f"未注册的非 Tc 项：{record.get('name_raw') or '未命名'}",
+                        })
+                    continue
+                target = record["module_code"]
+                grouped.setdefault(target, {"module_code": target, "records": []})["records"].append(record)
+        state["property_modules"] = list(grouped.values())
     blocks_by_file: dict[str, set[str]] = {}
     for file_id, _page, block_id in allowed_blocks:
         blocks_by_file.setdefault(file_id, set()).add(block_id)
@@ -296,6 +340,8 @@ def normalize_extraction(raw: dict, *, allowed_blocks: set[tuple[str, int, str]]
                         record["method_raw"] = original_method or None
                 if prop == "tc" and (kind not in {"measured_tc", "predicted_tc"} or code != "superconductive_properties"):
                     raise ValueError("Tc 必须属于超导模块的测量或预测记录")
+                if prop in {"band_gap", "dos_fermi"} and (kind != "property" or code != "electronic_properties"):
+                    raise ValueError("电子性质必须属于电子模块的普通物性记录")
                 definition = (f"record.{code}.{kind}.{record['method_code']}" if kind in {"measured_tc", "predicted_tc"}
                               else f"record.{code}.{prop}")
                 record.update(definition_key=definition, definition_version=1)
@@ -372,7 +418,7 @@ Each item is a block or table row NOT yet covered by an extracted record. Decide
   * reference_or_background: background or referenced work, not this paper's result.
   * header_or_unit_row: table header, units or layout row without data values.
   * figure_without_data: figure/formula/caption not reporting extractable data.
-  * out_of_model_scope: real scientific content the data model cannot express (band gaps, lattice
+  * out_of_model_scope: real scientific content the data model cannot express (lattice
     parameters, atomic coordinates, spectral functions, phase diagrams without Tc).
   * unreadable: content you cannot read.
 - "needs_extraction": the item reports extractable superconductivity data (Tc, critical field,

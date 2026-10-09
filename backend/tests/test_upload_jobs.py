@@ -1,5 +1,6 @@
 import json
 import os
+from types import SimpleNamespace
 
 import pytest
 
@@ -14,6 +15,9 @@ from backend.ingest.upload_jobs import (
     _classification_scope_evidence,
     _chunks_with_preamble,
     _normalize_draft,
+    _fill_missing_keywords,
+    _bind_structure_candidates,
+    _prune_generated_properties,
     _summary_classification_candidates,
 )
 from backend.api.rag import _property_values, _validate_draft
@@ -64,6 +68,79 @@ def test_normalize_draft_flattens_evidenced_text_lists():
     tc = state["property_modules"][0]["records"][0]
     assert tc["record_type"] == "predicted_tc"
     assert tc["value_raw"] == "42"
+
+
+def test_missing_keywords_are_filled_from_paper_content_without_losing_draft(monkeypatch):
+    import backend.ingest.upload_jobs as upload_jobs
+
+    draft = {"paper": {"title": "Sulfur hydride superconductivity", "abstract": "Hydrogen sulfide under pressure shows a superconducting transition. " * 4,
+                       "summary": "The authors calculate high pressure phases.", "keywords_tags": []}}
+    monkeypatch.setattr(upload_jobs, "complete_json", lambda *_args: {"keywords_tags": ["hydrogen sulfide", "high pressure", "hydrogen sulfide"]})
+    _fill_missing_keywords(draft)
+    assert draft["paper"]["keywords_tags"] == ["hydrogen sulfide", "high pressure"]
+
+    draft["paper"]["keywords_tags"] = []
+    def unavailable(*_args):
+        raise RuntimeError("model unavailable")
+    monkeypatch.setattr(upload_jobs, "complete_json", unavailable)
+    _fill_missing_keywords(draft)
+    assert draft["paper"]["keywords_tags"] == []
+
+    draft["paper"].update(research_materials=["(H2S)2H2"],
+                          methodology=["ab initio calculations", "density functional theory"])
+    _fill_missing_keywords(draft)
+    assert draft["paper"]["keywords_tags"] == ["(H2S)2H2", "ab initio calculations",
+                                                   "density functional theory", "superconductivity", "high pressure"]
+
+
+def test_structure_candidate_binds_only_unique_phase_and_pressure():
+    draft = {"material_states": [
+        {"material": "H3S", "reported_space_group_symbol": "Im-3m", "pressure_value_gpa": 200},
+        {"material": "H3S", "reported_space_group_symbol": "Im-3m", "pressure_value_gpa": 250},
+    ]}
+    candidates = [
+        {"material_state_ref": "unassigned:supp", "reported_structure": {"space_group_symbol": "Im-3m", "pressure_value_gpa": 200}},
+        {"material_state_ref": "unassigned:supp", "reported_structure": {"space_group_symbol": "Im-3m", "pressure_value_gpa": None}},
+    ]
+    _bind_structure_candidates(draft, candidates)
+    assert candidates[0]["material_state_ref"] == "material_states[0]"
+    assert candidates[1]["material_state_ref"] == "unassigned:supp"
+
+
+def test_legacy_ai_generated_lattice_is_audited_not_added_to_custom_properties():
+    draft = {"material_states": [{"property_modules": [{
+        "module_code": "superconductive_properties", "module_key": "module-superconductive_properties",
+        "definition_key": "module.superconductive_properties", "definition_version": 1,
+        "records": [{"record_type": "property", "property_code": "custom", "module_code": "superconductive_properties",
+                     "name_raw": "lattice_parameters", "value_raw": "a=6.389 Å", "evidences": [{"quote": "a=6.389 Å"}]}],
+    }]}]}
+    excluded = _prune_generated_properties(draft)
+    assert draft["material_states"][0]["property_modules"] == []
+    assert excluded[0]["record"]["name_raw"] == "lattice_parameters"
+
+
+@pytest.mark.parametrize("needs_check", [False, True])
+def test_ready_draft_reuses_completed_evidence_before_queueing(monkeypatch, needs_check):
+    import backend.ingest.upload_jobs as upload_jobs
+    from backend.ingest import property_evidence, scientific_evidence
+    from backend.api import evidence
+
+    class Session:
+        def __enter__(self): return self
+        def __exit__(self, *_args): return False
+        def get(self, *_args): return SimpleNamespace(id=7)
+
+    writes = []
+    starts = []
+    monkeypatch.setattr(upload_jobs, "SessionLocal", Session)
+    monkeypatch.setattr(upload_jobs, "update_state", lambda _task, **changes: writes.append(changes))
+    monkeypatch.setattr(property_evidence, "upload_snapshot", lambda *_args: {"version": "v1"})
+    monkeypatch.setattr(property_evidence, "public_snapshot", lambda *_args: {"needs_check": needs_check})
+    monkeypatch.setattr(scientific_evidence, "load_results", lambda *_args, **_kwargs: {})
+    monkeypatch.setattr(evidence, "create_job", lambda body, user: starts.append((body, user)) or {"id": "job-1"})
+    upload_jobs._start_automatic_evidence_check("a" * 32, 7)
+    assert len(starts) == int(needs_check)
+    assert writes[-1]["evidence_job_id"] == ("job-1" if needs_check else None)
 
 
 def test_llm_draft_cannot_supply_citation_extraction():

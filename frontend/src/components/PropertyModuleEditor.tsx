@@ -266,11 +266,9 @@ const PropertyModuleEditor: React.FC<Props> = ({
         const moduleBasePath = basePath ? `${basePath}.${moduleIndex}` : String(moduleIndex)
         const choices = choicesFor(module.module_code)
         return (
-          <Accordion key={module.module_key} data-module-key={module.module_key} defaultExpanded data-testid={`property-module-${module.module_code}`}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ flex: 1 }}>
-              <Typography>{PROPERTY_MODULES.find(item => item.code === module.module_code)?.label || module.module_code}</Typography>
-            </AccordionSummary>
+          <Box key={module.module_key} data-module-key={module.module_key} data-testid={`property-module-${module.module_code}`} sx={{ pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <Typography variant="subtitle2" fontWeight={700}>{PROPERTY_MODULES.find(item => item.code === module.module_code)?.label || module.module_code}</Typography>
               {!readOnly && (
                 <Box sx={{ pr: 1 }}>
                   <Tooltip title="上移模块"><span><IconButton size="small" aria-label="上移模块" disabled={moduleIndex === 0} onClick={() => moveModule(moduleIndex, -1)}><ArrowUpwardIcon /></IconButton></span></Tooltip>
@@ -282,7 +280,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                 </Box>
               )}
             </Box>
-            <AccordionDetails>
+            <Box sx={{ pt: 1 }}>
               {module.records.map((record, recordIndex) => {
                 const recordBasePath = `${moduleBasePath}.records.${recordIndex}`
                 const recordIssues = issues.flatMap(item => item.field.startsWith(recordBasePath)
@@ -295,7 +293,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                 const summary = [recordLabel, record.name_raw, propertyRecordSummaryValue(record)].filter(Boolean).join(' · ')
                 const recordError = definitionErrors[record.record_key] || recordIssues[0]?.message
                 return (
-                  <Accordion key={record.record_key} defaultExpanded sx={{ mb: 1 }}>
+                  <Accordion key={record.record_key} defaultExpanded disableGutters elevation={0} square sx={{ bgcolor: 'transparent', borderBottom: '1px solid', borderColor: 'divider', '&:before': { display: 'none' } }}>
                     <AccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       aria-label={`记录 ${recordIndex + 1} · ${summary}`}
@@ -306,7 +304,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                         {recordError && <Typography color="error" variant="caption">{recordError}</Typography>}
                       </Box>
                     </AccordionSummary>
-                    <AccordionDetails>
+                    <AccordionDetails sx={{ px: 0, pt: 0.5 }}>
                       {!readOnly && (
                         <Select fullWidth size="small" inputProps={{ 'aria-label': '记录定义' }} value={`${record.definition_key}@${record.definition_version}`}
                           onChange={event => {
@@ -338,8 +336,8 @@ const PropertyModuleEditor: React.FC<Props> = ({
                   {choices.map(definition => <MenuItem key={definitionIdentity(definition)} value={definitionIdentity(definition)}>{definitionLabel(definition)}</MenuItem>)}
                 </Select>
               )}
-            </AccordionDetails>
-          </Accordion>
+            </Box>
+          </Box>
         )
       })}
     </Box>
