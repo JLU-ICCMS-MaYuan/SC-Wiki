@@ -54,7 +54,7 @@ func TestProposalDecisionSurvivesReviewContract(t *testing.T) {
 
 func TestOptionalFieldAndConjectureSurviveReviewContract(t *testing.T) {
 	var record evidenceReviewRecord
-	raw := []byte(`{"item_key":"summary","required":false,"adopted_basis":"general_knowledge","proposal_review":{"status":"reasonable","explanation":"仍为推测"}}`)
+	raw := []byte(`{"item_key":"summary","required":false,"adopted_basis":"general_knowledge","auto_filled":true,"ai_reason":"依据常规机制推测；本文未验证。","proposal_review":{"status":"reasonable","explanation":"仍为推测"}}`)
 	if err := json.Unmarshal(raw, &record); err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +63,7 @@ func TestOptionalFieldAndConjectureSurviveReviewContract(t *testing.T) {
 	if err := json.Unmarshal(encoded, &output); err != nil {
 		t.Fatal(err)
 	}
-	if string(output["required"]) != "false" || string(output["adopted_basis"]) != `"general_knowledge"` || len(output["proposal_review"]) == 0 {
-		t.Fatal("永久来源不能丢失可选项、推测性质或建议复核")
+	if string(output["required"]) != "false" || string(output["adopted_basis"]) != `"general_knowledge"` || string(output["auto_filled"]) != "true" || string(output["ai_reason"]) != `"依据常规机制推测；本文未验证。"` || len(output["proposal_review"]) == 0 {
+		t.Fatal("永久来源不能丢失可选项、推测性质、AI 理由或复核")
 	}
 }

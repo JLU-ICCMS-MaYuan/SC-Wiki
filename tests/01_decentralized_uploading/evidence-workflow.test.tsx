@@ -193,7 +193,7 @@ it('来源优先且默认展开，作者等结构化值不在侧栏显示 JSON',
   await act(async () => fireEvent.click(source))
   expect(source.closest('details')).not.toHaveAttribute('open')
   expect(drawer.textContent!.indexOf('系统找到的原文')).toBeLessThan(drawer.textContent!.indexOf('人工修改记录'))
-  expect(drawer.textContent!.indexOf('人工修改记录')).toBeLessThan(drawer.textContent!.indexOf('AI 辅助的建议（可人工修改）'))
+  expect(drawer.textContent!.indexOf('人工修改记录')).toBeLessThan(drawer.textContent!.indexOf('AI 理由'))
   expect(drawer).toHaveTextContent('正文.pdf')
   expect(drawer).toHaveTextContent('Defang Duan and Tian Cui')
 })
@@ -210,7 +210,7 @@ it('替换建议的引句不冒充当前值的系统原文', async () => {
   const sourceSection = screen.getByText('系统找到的原文').closest('details')!
   expect(sourceSection).toHaveTextContent('未找到可定位的论文原文依据')
   expect(sourceSection).not.toHaveTextContent('new value is supported')
-  expect(screen.getByText('建议值的原文依据').closest('details')).toHaveTextContent('new value is supported')
+  expect(screen.getByText('AI 理由的原文依据').closest('details')).toHaveTextContent('new value is supported')
 })
 
 it('上传没有出处时只提示重新查找或修改记录，不要求手选证据', async () => {
@@ -296,27 +296,30 @@ it('提交门禁拒绝未核对内容且绝不启动模型', async () => {
   expect(screen.getByText(/提交不会自动启动模型/)).toBeInTheDocument()
 })
 
-it('建议可编辑、持久接受和撤销，保存失败不显示完成', async () => {
-  const candidate={...record,status:'unsupported',current_value:'4.29 K',editable_fields:[{path:'',label:'建议内容',value:'4.29 K',schema:{type:'string'}}],proposal:{values:{'':'测量温度为 4.29 K'},supported:true,evidences:record.evidences}}
+it('自动填写的推测可送审，值变化后旧理由不能通过门禁', async () => {
+  const inferred = {...record, status:'missing', reason:'常规机制可能适用；本文未验证。',
+    adopted_basis:'general_knowledge', auto_filled:true}
+  vi.mocked(api.post).mockResolvedValueOnce({version:'v1',needs_check:false,records:[inferred]} as never)
+  function Gate(){const f=useEvidenceWorkflow();return <><button onClick={()=>void f.gate({target:'upload',target_id:'29'}).then(done)}>提交</button>{f.dialog}</>}
+  render(<Gate/>);await act(async()=>fireEvent.click(screen.getByText('提交')))
+  expect(done).toHaveBeenCalledWith(expect.objectContaining({expected_evidence_version:'v1'}))
+  vi.mocked(api.post).mockResolvedValueOnce({version:'v2',needs_check:true,records:[{...inferred,stale:true}]} as never)
+  await act(async()=>fireEvent.click(screen.getByText('提交')))
+  expect(done).toHaveBeenLastCalledWith(null)
+})
+
+it('AI 理由不重复表单值，人工确认不会暗中采用旧候选', async () => {
+  const candidate={...record,status:'unsupported',current_value:'4.29 K',editable_fields:[{path:'',label:'建议内容',value:'4.29 K',schema:{type:'string'}}],proposal:{values:{'':'测量温度为 4.29 K'},explanation:'这是测量温度，不是 Tc。',supported:true,evidences:record.evidences}}
   vi.mocked(api.post).mockImplementation(async(path,body)=>path.endsWith('preflight')?{version:'v1',needs_check:false,records:[candidate]} as never:{draft:body} as never)
   function Form(){const f=useEvidenceWorkflow({target:{target:'paper',target_id:'29'}});return <><button onClick={()=>f.openIssue('47')}>查看</button>{f.dialog}</>}
   await act(async()=>render(<Form/>));await act(async()=>fireEvent.click(screen.getByText('查看')))
-  expect(screen.getByLabelText('建议内容')).toHaveValue('测量温度为 4.29 K')
-  await act(async()=>fireEvent.change(screen.getByLabelText('建议内容'),{target:{value:'在 4.29 K 下测量'}}))
-  await act(async()=>vi.advanceTimersByTimeAsync(500))
-  expect(api.post).toHaveBeenLastCalledWith('/api/rag/evidence/proposals',expect.objectContaining({values:{'':'在 4.29 K 下测量'},accepted:false}))
-  vi.mocked(api.post).mockRejectedValueOnce(new Error('保存失败'))
+  expect(screen.getByText('AI 理由')).toBeInTheDocument()
+  expect(screen.getByText('这是测量温度，不是 Tc。')).toBeInTheDocument()
+  expect(screen.queryByLabelText('建议内容')).not.toBeInTheDocument()
+  expect(screen.queryByDisplayValue('测量温度为 4.29 K')).not.toBeInTheDocument()
+  await act(async()=>fireEvent.change(screen.getByLabelText('人工核对理由'),{target:{value:'核对当前表单值'}}))
   await act(async()=>fireEvent.click(screen.getByText('完成')))
-  expect(screen.getByText(/保存失败/)).toBeInTheDocument()
-  expect(screen.queryByText('撤销接受并修改')).not.toBeInTheDocument()
-  await act(async()=>fireEvent.click(screen.getByText('完成')))
-  await act(async()=>vi.advanceTimersByTimeAsync(400))
-  expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-  await act(async()=>fireEvent.click(screen.getByText('查看')))
-  expect(screen.getByText('撤销接受并修改')).toBeInTheDocument()
-  await act(async()=>fireEvent.click(screen.getByText('撤销接受并修改')))
-  expect(screen.getByLabelText('建议内容')).not.toBeDisabled()
-  expect(vi.mocked(api.post).mock.calls.some(([path])=>path.endsWith('/jobs')||path.endsWith('/review'))).toBe(false)
+  expect(api.post).toHaveBeenLastCalledWith('/api/rag/evidence/proposals',expect.objectContaining({values:{'':'4.29 K'},accepted:true}))
 })
 
 it('提交先准备已接受补丁，保存失败时不绑定；成功后只读恢复', async () => {

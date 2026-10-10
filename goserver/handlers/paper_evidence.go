@@ -28,6 +28,10 @@ type evidenceReviewRecord struct {
 	History               json.RawMessage    `json:"history,omitempty"`
 	Required              *bool              `json:"required,omitempty"`
 	AdoptedBasis          string             `json:"adopted_basis,omitempty"`
+	AutoFilled            bool               `json:"auto_filled,omitempty"`
+	AIReason              string             `json:"ai_reason,omitempty"`
+	AutoFilledContentHash string             `json:"auto_filled_content_hash,omitempty"`
+	AutoFilledSourceHash  string             `json:"auto_filled_source_hash,omitempty"`
 	ProposalReview        json.RawMessage    `json:"proposal_review,omitempty"`
 	Proposal              json.RawMessage    `json:"proposal"`
 	Decision              json.RawMessage    `json:"decision"`

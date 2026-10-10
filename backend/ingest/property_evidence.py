@@ -1,4 +1,4 @@
-"""物性证据的来源定位、内容核对与任务结果契约。模型结果不直接写科学数据。"""
+"""物性证据的来源定位、内容核对与任务结果契约。"""
 from __future__ import annotations
 
 import copy
@@ -305,11 +305,17 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     adopted_basis = (decision or {}).get('basis_kind') or result.get('adopted_basis')
     if adopted_basis in {'paper_inference', 'general_knowledge'} and status == 'supported':
         status = 'uncertain'
+    if adopted_basis in {'paper_inference', 'general_knowledge'}:
+        source_kind = adopted_basis
     if human:
         source_kind = 'human_review'
     return {**record, 'proposal': proposal, 'proposal_draft': None if result.get('stale') else result.get('proposal_draft'), 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
             'human_confirmed': human,
             'adopted_basis': adopted_basis, 'proposal_review': result.get('proposal_review'),
+            'ai_reason': result.get('ai_reason'),
+            'auto_filled': result.get('auto_filled', False),
+            'auto_filled_content_hash': result.get('auto_filled_content_hash'),
+            'auto_filled_source_hash': result.get('auto_filled_source_hash'),
             'history': result.get('history', []),
             'required': record.get('required', True) or bool(decision and adopted_basis in {'paper_inference', 'general_knowledge'}),
             'reason': reason, 'suggestion': suggestion,
@@ -415,8 +421,9 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 SUGGESTION_PROMPT = """
 对每个字段同时区分当前值与候选值。允许为空字段提出候选，但不能把猜测写为论文事实。
 proposal 增加 basis_kind：paper_quote（原文直接记载）、paper_inference（由本文和已知字段推断）、general_knowledge（通用知识推测）。
-后两类必须提供 explanation，简要列出依据、假设及局限，不要求详细内部思考过程。paper_inference 需要真实论文引句；general_knowledge 可以没有引句，supported 必须为 false。
-无合理候选就省略 proposal，不必填满。已有值的 status 只评估原文是否支持，不能用通用常识把它判为 supported。
+原文直接记载沿用已提取的当前值，无需另给 paper_quote 替换建议。仅对空值或 unknown 给出推断、推测候选；不得覆盖已有的非空值。
+后两类必须提供 explanation：用不超过 120 个汉字简洁说明“依据 → 推断 → 局限”，逻辑完整，不输出详细内部思考过程。paper_inference 需要真实论文引句；general_knowledge 可以没有引句，supported 必须为 false。
+有效的推断、推测候选将直接填写主表单；没有可靠候选就省略 proposal，不必填满。已有值的 status 只评估原文是否支持，不能用通用常识把它判为 supported。
 保持字段 schema、枚举和量纲；不生成结构或派生计算值。summary、keywords_tags、methodology、key_finding、research_motivation、knowledge_graph_title 的建议值使用英文，来源 quote 保持原语言。
 任务 purpose=review_all 时，独立检查所有 previous_result 的判断、建议及引句，而非照抄旧结论。对已有建议返回 proposal_review={"status":"reasonable|questionable|uncertain","explanation":"简要理由"}；即使合理，推测仍不是原文直接支持。
 """
@@ -468,7 +475,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         'purpose': purpose,
         'records': [{'key': r['key'], 'field': r['field'], 'claim': r['claim'],
                      'editable_fields': r.get('editable_fields', []), 'existing_evidences': r['evidences'],
-                     'previous_result': {k: prior.get(r['key'], {}).get(k) for k in ('status', 'reason', 'proposal', 'evidences')}} for r in records],
+                     'previous_result': {k: prior.get(r['key'], {}).get(k) for k in ('status', 'reason', 'proposal', 'evidences', 'adopted_basis', 'auto_filled', 'ai_reason')}} for r in records],
         'sources': chunks,
         'human_provided_evidence': visible_human}, ensure_ascii=False, default=str)
     try:
@@ -498,6 +505,8 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
             except GeneratedFieldLanguageError:
                 safe.pop('proposal')
         previous = prior.get(key, {})
+        if previous.get('auto_filled'):
+            safe.pop('proposal', None)
         review = raw.get('proposal_review')
         if isinstance(review, dict) and review.get('status') in {'reasonable', 'questionable', 'uncertain'}:
             safe['proposal_review'] = {'status': review['status'], 'explanation': str(review.get('explanation') or '')[:4000]}
@@ -508,9 +517,11 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
             if result['proposal']:
                 result['proposal']['supported'] = bool(result['proposal']['supported'] and (result.get('proposal_review') or {}).get('status') == 'reasonable')
         # 人工决定只能来自服务端旧记录，不能来自模型响应。
-        for name in ('decision', 'adopted_basis'):
+        for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason'):
             if previous.get(name) and not previous.get('stale'):
                 result[name] = copy.deepcopy(previous[name])
+        if result.get('adopted_basis') in {'paper_inference', 'general_knowledge'} and result['status'] == 'supported':
+            result['status'] = 'uncertain'
         results[key] = result
     if set(results) != set(by_key):
         raise ValueError('incomplete result schema')
@@ -547,8 +558,55 @@ def source_batches(chunks):
     return batches or [[]]
 
 
+def _fill_empty_fields(draft, record, proposal):
+    """仅把有效推断或推测补入空字段；原文提取值不被模型候选覆盖。"""
+    from .scientific_evidence import canonical, populated
+    from .property_modules import validate_record, PropertyValidationError
+
+    if proposal.get('basis_kind') not in {'paper_inference', 'general_knowledge'}:
+        return False
+    fields = {field['path']: field['value'] for field in record.get('editable_fields', [])}
+    values = proposal.get('values') or {}
+    if any(path not in fields or (populated(fields[path]) and canonical(fields[path]) != canonical(value)) for path, value in values.items()):
+        return False
+    additions = {path: value for path, value in values.items() if not populated(fields[path]) and populated(value)}
+    if not additions:
+        return False
+    if record['field'].startswith('paper.'):
+        target = draft['paper']
+    else:
+        match = re.match(r'material_states\[(\d+)\]', record['field'])
+        if not match or int(match.group(1)) >= len(draft.get('material_states') or []):
+            return False
+        state = draft['material_states'][int(match.group(1))]
+        if (state.get('state_key') or f'state-{int(match.group(1)) + 1}') != record.get('state_key'):
+            return False
+        target = state
+        if record.get('kind') == 'property':
+            module = next((item for item in state.get('property_modules') or [] if item.get('module_key') == record.get('module_key')), None)
+            target = next((item for item in (module or {}).get('records') or [] if item.get('record_key') == record.get('record_key')), None)
+            if target is None:
+                return False
+    updated = copy.deepcopy(target)
+    for path, value in additions.items():
+        name = path or record['field'].rsplit('.', 1)[-1]
+        if name in {'material_families', 'structure_families'}:
+            updated[name] = [{'name': item, 'name_zh': item, 'status': 'pending',
+                              **({'is_primary': False} if name == 'structure_families' else {})} for item in value]
+        else:
+            updated[name] = copy.deepcopy(value)
+    if record.get('kind') == 'property':
+        try:
+            updated = validate_record({**updated, 'module_code': record.get('module_code')}, path=record['field'])
+        except PropertyValidationError:
+            return False
+    target.clear()
+    target.update(updated)
+    return True
+
+
 def generate_upload_suggestions(task_id, draft, owner, on_progress=None):
-    """解析后生成候选；不修改提取值，也不提前把任务变成可提交状态。"""
+    """解析后补入有效推断与推测，并把理由绑定到补入后的字段版本。"""
     from backend.database import SessionLocal
     from backend.ingest.upload_jobs import _ensure_not_cancelled
     snapshot = upload_snapshot(task_id, owner, parsing_draft=draft)
@@ -565,13 +623,41 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None):
             errors[r['key']].extend(result['location_errors'])
     from backend.rag.llm_context import get_llm_config
     results = aggregate_candidates(records, candidates, errors, get_llm_config().model)
+    filled = copy.deepcopy(draft)
+    auto_filled = {}
+    for record in records:
+        proposal = results[record['key']].get('proposal')
+        if proposal and _fill_empty_fields(filled, record, proposal):
+            auto_filled[record['item_key']] = proposal
+    current = upload_snapshot(task_id, owner, parsing_draft=filled) if auto_filled else snapshot
+    previous = {record['item_key']: record for record in snapshot['records']}
+    previous_results = {record['item_key']: results.get(record['key']) for record in records}
+    current_results = {}
+    for record in current['records']:
+        old = previous.get(record['item_key'])
+        result = previous_results.get(record['item_key'])
+        if result is None:
+            continue
+        proposal = auto_filled.get(record['item_key'])
+        if proposal:
+            current_results[record['key']] = {**result, 'status': 'uncertain', 'reason': proposal['explanation'],
+                'evidences': proposal['evidences'], 'proposal': None, 'adopted_basis': proposal['basis_kind'],
+                'ai_reason': proposal['explanation'],
+                'auto_filled': True, 'auto_filled_content_hash': record['content_hash'],
+                'auto_filled_source_hash': record['source_hash']}
+        elif old and old['content_hash'] == record['content_hash'] and old['source_hash'] == record['source_hash']:
+            current_results[record['key']] = {**result, 'proposal': None}
+        else:
+            current_results[record['key']] = {'status': 'unchecked', 'reason': '相关字段自动填写后需重新核对', 'evidences': []}
     _ensure_not_cancelled(task_id)
     with SessionLocal.begin() as session:
         from .scientific_evidence import save_results
-        save_results(session, snapshot, results, owner)
+        save_results(session, current, current_results, owner)
+    draft.clear()
+    draft.update(filled)
     if on_progress:
         on_progress(len(batches), len(batches))
-    return results
+    return current_results
 
 def run_evidence_job(job_id: str):
     from backend.ingest.upload_tasks import load_llm_config, delete_llm_config
@@ -858,7 +944,7 @@ def aggregate_candidates(records, candidates, location_errors, model):
         reviews = [i['proposal_review'] for i in all_items if i.get('proposal_review')]
         review = None if not reviews else {'status': 'reasonable' if all(x['status'] == 'reasonable' for x in reviews) else 'questionable' if any(x['status'] == 'questionable' for x in reviews) else 'uncertain',
                     'explanation': '；'.join(dict.fromkeys(x['explanation'] for x in reviews))}
-        retained = {name: next((i[name] for i in all_items if i.get(name)), None) for name in ('decision', 'adopted_basis')}
+        retained = {name: next((i[name] for i in all_items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason')}
         results[record['key']] = dict(status=status, proposal=proposal, proposal_review=review, **retained,
             reason='；'.join(dict.fromkeys(reasons)) or '当前论文及附件中未找到可定位的相关原文',
             evidences=evidences, model=model,

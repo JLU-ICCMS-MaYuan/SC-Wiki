@@ -1,4 +1,5 @@
 """全字段建议的依据、空项与权限边界；不使用模型结果代替服务端验证。"""
+from contextlib import contextmanager
 from types import SimpleNamespace
 
 import pytest
@@ -37,6 +38,7 @@ def test_general_knowledge_suggestion_is_typed_and_never_direct_support():
     assert candidate['basis_kind'] == 'general_knowledge'
     assert candidate['explanation'] and candidate['supported'] is False
     assert candidate['evidences'] == []
+    assert proposals.checked_proposal(snap['records'][0], {**suggestion(), 'explanation': '冗长理由' * 50}, snap['chunks']) is None
 
 
 def test_inference_requires_real_basis_and_guesses_cannot_forge_quotes():
@@ -48,6 +50,87 @@ def test_inference_requires_real_basis_and_guesses_cannot_forge_quotes():
     raw['basis_kind'] = 'general_knowledge'; raw['evidences'][0]['quote'] = 'Tin has Tc of 40 K.'
     assert proposals.checked_proposal(record, raw, snap['chunks']) is None
     assert proposals.checked_proposal(record, suggestion('invented'), snap['chunks']) is None
+
+
+def test_generation_fills_empty_field_and_binds_reason_to_new_version(monkeypatch):
+    from backend import database
+    from backend.ingest import upload_jobs
+    from backend.rag import llm_context
+
+    draft = {'paper': {'summary': ''}, 'material_states': []}
+    sources = [dict(file_id='main', chunk_index=0, content='Tin is metallic.')]
+    def current_snapshot(_task_id, _owner, *, parsing_draft):
+        value = parsing_draft['paper']['summary']
+        record = dict(key='summary', item_key='summary', field='paper.summary', kind='field', label='总结',
+                      current_value=value, claim={'value': value}, required=science.populated(value), evidences=[])
+        return ev.complete_snapshot('upload', '1', [record], sources, {})
+    def evaluate(rows, chunks, purpose, **_kwargs):
+        candidate = suggestion()
+        candidate['supported'] = False
+        return [ev.checked_result(rows[0], {'status': 'missing', 'reason': '原文未给机制',
+            'proposal': candidate, 'evidences': []}, chunks)]
+    @contextmanager
+    def begin():
+        yield object()
+    saved = {}
+    monkeypatch.setattr(ev, 'upload_snapshot', current_snapshot)
+    monkeypatch.setattr(ev, 'evaluate_batch', evaluate)
+    monkeypatch.setattr(database, 'SessionLocal', SimpleNamespace(begin=begin))
+    monkeypatch.setattr(science, 'save_results', lambda _session, current, results, _owner: saved.update(snapshot=current, results=results))
+    monkeypatch.setattr(upload_jobs, '_ensure_not_cancelled', lambda _task_id: None)
+    monkeypatch.setattr(llm_context, 'get_llm_config', lambda: SimpleNamespace(model='fixture'))
+
+    ev.generate_upload_suggestions('1', draft, 7)
+    assert draft['paper']['summary'] == 'Electron-phonon coupling is plausible.'
+    current = saved['snapshot']['records'][0]
+    result = ev.checked_result(current, saved['results']['summary'], saved['snapshot']['chunks'])
+    assert result['adopted_basis'] == 'general_knowledge'
+    assert result['reason'] == '依据一般金属超导知识；本文没有直接报告机制。'
+    assert result['auto_filled_content_hash'] == current['content_hash']
+    assert science.adopted_suggestion(result)
+    assert ev.resolve_results(saved['snapshot'], {'summary': saved['results']['summary']}, 7, None, saved['snapshot']['version'])
+    paper = {**saved['snapshot'], 'target': 'paper'}
+    with pytest.raises(HTTPException):
+        ev.resolve_results(paper, {'summary': saved['results']['summary']}, 8, None, paper['version'])
+
+
+def test_generation_preserves_nonempty_extraction():
+    snap = snapshot(value='The paper reports metallic tin.')
+    draft = {'paper': {'summary': 'The paper reports metallic tin.'}, 'material_states': []}
+    candidate = proposals.checked_proposal(snap['records'][0], suggestion(), snap['chunks'])
+    assert candidate is not None
+    assert not ev._fill_empty_fields(draft, snap['records'][0], candidate)
+    assert draft['paper']['summary'] == 'The paper reports metallic tin.'
+
+
+def test_generation_can_fill_unknown_material_state_without_overwriting_neighbors():
+    draft = {'paper': {}, 'material_states': [{'material': 'Sn', 'material_dimensionality': 'unknown', 'pressure_value_gpa': 4}]}
+    record = dict(field='material_states[0].material_dimensionality', state_key='state-1', kind='field',
+                  editable_fields=[dict(path='', value='unknown')])
+    candidate = dict(basis_kind='paper_inference', values={'': 'three_dimensional'})
+    assert ev._fill_empty_fields(draft, record, candidate)
+    assert draft['material_states'][0]['material_dimensionality'] == 'three_dimensional'
+    assert draft['material_states'][0]['pressure_value_gpa'] == 4
+
+
+def test_autofilled_inference_keeps_paper_source_without_claiming_direct_support():
+    snap = snapshot()
+    original = snap['records'][0]
+    draft = {'paper': {'summary': ''}, 'material_states': []}
+    raw = suggestion('paper_inference')
+    raw['evidences'] = [dict(file_id='main', chunk_index=0, quote='Tin is metallic.')]
+    candidate = proposals.checked_proposal(original, raw, snap['chunks'])
+    assert candidate and ev._fill_empty_fields(draft, original, candidate)
+    current = snapshot(value=draft['paper']['summary'])['records'][0]
+    result = ev.checked_result(current, dict(status='uncertain', reason=candidate['explanation'],
+        ai_reason=candidate['explanation'], evidences=candidate['evidences'], adopted_basis='paper_inference',
+        auto_filled=True, auto_filled_content_hash=current['content_hash'],
+        auto_filled_source_hash=current['source_hash']), snap['chunks'])
+    assert result['source_kind'] == 'paper_inference'
+    assert result['status'] != 'supported'
+    assert result['evidences'][0]['quote'] == 'Tin is metallic.'
+    assert science.adopted_suggestion(result)
+    assert not science.adopted_suggestion({**result, 'content_hash': 'changed'})
 
 
 def test_unadopted_optional_suggestion_does_not_block_submission():
@@ -164,6 +247,23 @@ def test_model_batch_receives_existing_judgement_and_reviews_suggestion(monkeypa
     assert calls[0][1]['records'][0]['previous_result']['proposal']['basis_kind'] == 'general_knowledge'
     assert results[0]['proposal']['basis_kind'] == 'general_knowledge'
     assert results[0]['proposal_review']['status'] == 'reasonable'
+
+
+def test_reaudit_preserves_autofilled_basis_and_short_reason(monkeypatch):
+    snap = snapshot(value='Electron-phonon coupling is plausible.')
+    record = snap['records'][0]
+    prior = {'summary': dict(status='missing', reason='原文未研究机制', ai_reason='常规金属机制可能适用；本文未验证。',
+        adopted_basis='general_knowledge', auto_filled=True,
+        auto_filled_content_hash=record['content_hash'], auto_filled_source_hash=record['source_hash'])}
+    def complete(_system, _message, **_kwargs):
+        return {'results': [dict(key='summary', status='supported', reason='模型认为合理',
+            evidences=[dict(file_id='main', chunk_index=0, quote='Tin is metallic.')], proposal=suggestion())]}
+    monkeypatch.setattr('backend.rag.llm.complete_json', complete)
+    result = ev.evaluate_batch(snap['records'], snap['chunks'], 'review_all', prior)[0]
+    assert result['adopted_basis'] == 'general_knowledge'
+    assert result['ai_reason'] == '常规金属机制可能适用；本文未验证。'
+    assert result['status'] != 'supported'
+    assert result['proposal'] is None
 
 
 def test_full_audit_does_not_reuse_supported_cache(monkeypatch):

@@ -116,7 +116,7 @@ def checked_proposal(record, raw, chunks):
         return None
     basis = raw.get('basis_kind', 'paper_quote')
     explanation = str(raw.get('explanation') or '').strip()
-    if basis not in BASIS_KINDS or (basis != 'paper_quote' and not explanation):
+    if basis not in BASIS_KINDS or (basis != 'paper_quote' and (not explanation or len(explanation) > 160)):
         return None
     sources = [ev.locate(e, chunks) for e in raw.get('evidences', []) if isinstance(e, dict)]
     if len(sources) != len(raw.get('evidences', [])) or not all(sources) or (not sources and basis != 'general_knowledge'):
@@ -247,6 +247,9 @@ def prepare(session, snapshot, actor):
             record = records.get(row.item_key)
             if not record or (not row_matches(row, record) and not draft.get('preparation')):
                 continue
+            if any(science.canonical(field['value']) != science.canonical(draft['values'].get(field['path'], field['value']))
+                   for field in editable_fields(record)):
+                ev.fail('evidence_review_required', '旧候选与当前表单不同，请在主表单修改或撤销旧接受')
             selected[row.item_key] = (row, draft)
     for item_key, (row, draft) in selected.items():
         validate_applied_review(snapshot, rows, row, records.get(item_key), draft)

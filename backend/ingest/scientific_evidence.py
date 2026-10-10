@@ -51,12 +51,16 @@ COMPATIBLE_RULES = {'scientific-evidence-v2', 'scientific-evidence-v3', 'scienti
 
 
 def adopted_suggestion(record):
-    """采用只表示用户选择了候选，不能授予管理员确认权限。"""
+    """已采用或自动填写的推断只能进入待审，不能授予管理员确认权限。"""
     decision = record.get('decision') or {}
-    return bool(decision.get('accepted') and decision.get('actor_user_id') and
+    accepted = (decision.get('accepted') and decision.get('actor_user_id') and
                 decision.get('basis_kind') in {'paper_inference', 'general_knowledge'} and
                 decision.get('final_content_hash') == record.get('content_hash') and
-                decision.get('source_hash') == record.get('source_hash') and not record.get('stale'))
+                decision.get('source_hash') == record.get('source_hash'))
+    automatic = (record.get('auto_filled') and record.get('adopted_basis') in {'paper_inference', 'general_knowledge'} and
+                 record.get('auto_filled_content_hash') == record.get('content_hash') and
+                 record.get('auto_filled_source_hash') == record.get('source_hash'))
+    return bool((accepted or automatic) and not record.get('stale'))
 
 
 def human_confirmed(record, decision=None):
@@ -287,7 +291,7 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
                 items.append(copy.deepcopy(entry))
         if row.content_hash == record['content_hash'] and row.source_hash == record['source_hash']:
             return
-        entry = {name: copy.deepcopy(row.result.get(name)) for name in ('current_value', 'status', 'reason', 'evidences', 'proposal', 'decision', 'adopted_basis')}
+        entry = {name: copy.deepcopy(row.result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'adopted_basis')}
         entry.update(content_hash=row.content_hash, source_hash=row.source_hash)
         if entry not in items:
             items.append(entry)
@@ -334,7 +338,7 @@ def transfer_result(record, result, chunks, file_ids=None):
     """上传落库后重定位所有嵌套引句；文件 ID 变化不能抹掉候选或人工来源。"""
     from .property_evidence import locate
     if result.get('content_hash') != record['content_hash'] or result.get('source_hash') != record['source_hash']:
-        history = [{name: copy.deepcopy(result.get(name)) for name in ('current_value', 'status', 'reason', 'evidences', 'proposal', 'decision', 'adopted_basis', 'content_hash', 'source_hash')}]
+        history = [{name: copy.deepcopy(result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'adopted_basis', 'content_hash', 'source_hash')}]
         return {**record, 'status': 'unchecked', 'reason': '上传值与保存后的内容或来源不同，请重新核对',
                 'history': [*(result.get('history') or []), *history]}
     def relocate(source):

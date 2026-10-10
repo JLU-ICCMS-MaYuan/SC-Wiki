@@ -1,5 +1,6 @@
 """建议必须有来源、类型正确并绑定精确内容；不使用 LLM 代替确定性校验。"""
 import copy
+from types import SimpleNamespace
 import pytest
 from fastapi import HTTPException
 from backend.ingest import evidence_proposals as p, property_evidence as ev
@@ -59,3 +60,14 @@ def test_original_judgement_and_human_decision_remain_separate():
     assert result['decision']['reason'] == '人工根据原文判断'
     changed = copy.deepcopy(record); changed['content_hash'] = 'different'
     assert ev.checked_result(changed, result, snap['chunks'])['decision'] is None
+
+
+def test_hidden_old_candidate_cannot_overwrite_main_form(monkeypatch):
+    snap, _ = fixture()
+    record = snap['records'][0]
+    row = SimpleNamespace(item_key=record['item_key'], content_hash=record['content_hash'],
+        source_hash=record['source_hash'], rule_version=ev.RULE_VERSION,
+        resolutions={'proposal:7': {'accepted': True, 'values': {'': 'Tc 10 K'}}})
+    monkeypatch.setattr(p, 'rows_for', lambda *_args: [row])
+    with pytest.raises(HTTPException, match='旧候选与当前表单不同'):
+        p.prepare(object(), snap, 7)

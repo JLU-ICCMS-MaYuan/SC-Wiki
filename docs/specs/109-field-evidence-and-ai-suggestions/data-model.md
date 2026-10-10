@@ -4,10 +4,10 @@
 
 - 字段身份沿用 `item_key`、`state_key`、`module_key`、`record_key`、结构哈希；数组下标仅用于展示定位。
 - 核对项增加 `required`：当前是否有需核对的断言；空可选项为 false，仅展示/建议，不产生提交门禁。字段清单允许无值项目，字段类型不能从 null 推测，使用已知定义。
-- 建议在 `proposal` 增加 `basis_kind`（`paper_quote`、`paper_inference`、`general_knowledge`）和 `explanation`。保留类型化 `values`、`evidences`、`supported` 与版本绑定。后两类不能标为直接支持；通用知识可没有引句。
+- 模型候选仍用 `proposal` 的类型化 `values`、`basis_kind`、`explanation`、`evidences` 校验。有效论文推断与通用知识推测会补入主表单；已写入的当前核对结果保存 `adopted_basis`、简短 `ai_reason`、`auto_filled` 和对应内容/来源摘要。后两类不能标为原文直接支持；通用知识可没有引句。
 - 采用决定保留建议依据、原值、最终值、操作者、理由及内容/来源摘要。`adopted_basis` 保存已采用的来源性质，不因后续 AI 复核或人工批准消失。
 - 核对结果可保留 `proposal_review` 表达对已有建议的合理性判断，与当前值的支持状态分开。
-- 上传建议和核对结果持久保存，提交转接稳定身份。批准复制到永久来源后清理临时核对；旧结果仍可读但不得用于新值批准。
+- 上传填写值和核对结果持久保存，提交转接稳定身份。批准复制到永久来源后清理临时核对；旧结果仍可读但不得用于新值批准。
 - 空记录和未采用建议必须同样转接/归档，不能因不属于提交门禁而在批准时丢失。
 - 旧无新增字段的结果按原文建议处理；没有依据标签的历史人工决定保持人工来源，不推定为通用推测。规则版本更新使需要重核的结果失效，不批量写历史。
 
@@ -15,7 +15,7 @@
 
 ## 新增来源可核验约束（待实施）
 
-对于系统原文与核对结论，现有 `records[].status/reason/evidences/source_kind/provenance/check_mode` 足以表达 AI 判断、论文原文及派生来源，无须增加系统来源表。人工修改文件的独立记录见下节。`proposal` 继续只表示替换建议，不充当当前值的支持依据。
+对于系统原文与核对结论，现有 `records[].status/reason/evidences/source_kind/provenance/check_mode` 加上 `ai_reason/auto_filled` 足以表达 AI 判断、论文原文及派生来源，无须增加系统来源表。人工修改文件的独立记录见下节。侧栏不显示 `proposal.values` 或 `editable_fields`，主表单是唯一的当前值编辑入口。
 
 - `paper_quote`：当前值为 `supported` 时，至少一条引句必须与当前文件、字段、材料及条件对应并可定位；文件名、引句及 PDF 页码或 TXT/MD 段落定位随结果及转接保留。
 - `synthesis`：值可以是对原文的忠实概括，不要求生成文字逐字出现在原文；关键论断仍需相关且可定位的原文片段。没有片段的 AI 理由只能作为待补证线索。
