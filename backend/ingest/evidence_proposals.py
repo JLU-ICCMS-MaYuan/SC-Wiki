@@ -40,10 +40,6 @@ def schema_for(value, name=''):
         return {'type': 'object', 'required': [], 'additionalProperties': False, 'properties': {
             column.name: {'type': 'boolean' if isinstance(column.type, Boolean) else 'number' if isinstance(column.type, Numeric) else 'integer' if isinstance(column.type, Integer) else 'string', 'nullable': True}
             for column in model.__table__.columns if column.name not in excluded}}
-    if name == 'material_relations':
-        return {'type': 'array', 'items': {'type': 'object', 'required': ['material', 'relation'], 'additionalProperties': False,
-                'properties': {'material': {'type': 'string'}, 'relation': {'type': 'string'},
-                               'page': {'type': 'integer', 'nullable': True}, 'quote': {'type': 'string'}}}}
     if name in ENUMS:
         schema['enum'] = ENUMS[name]
     elif name in INTEGERS:

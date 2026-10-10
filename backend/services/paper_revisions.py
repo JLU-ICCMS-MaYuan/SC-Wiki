@@ -18,9 +18,9 @@ PAPER_FIELDS = (
     'title', 'doi', 'authors', 'journal', 'year', 'volume', 'issue_number', 'pages',
     'abstract', 'summary', 'paper_type', 'theoretical_subtype', 'superconductor_kind',
     'keywords_tags', 'methodology', 'knowledge_graph_title', 'key_finding',
-    'research_motivation', 'research_materials', 'material_relations', 'builds_on',
+    'research_motivation', 'research_materials', 'builds_on',
 )
-LIST_FIELDS = {'authors', 'keywords_tags', 'methodology', 'research_materials', 'material_relations', 'builds_on'}
+LIST_FIELDS = {'authors', 'keywords_tags', 'methodology', 'research_materials', 'builds_on'}
 AUTHOR_ROLE_FIELDS = ('corresponding_authors', 'co_first_authors')
 INTERNAL_COLUMNS = {'id', 'paper_id', 'paper_revision', 'created_at', 'updated_at'}
 
@@ -139,11 +139,14 @@ def assert_current(session, paper, saved):
 
 
 def response(saved, paper, *, conflict=False):
-    missing = not (saved.draft or {}).get('paper', {}).get('material_families')
+    draft = copy.deepcopy(saved.draft)
+    if isinstance((draft or {}).get('paper'), dict):
+        draft['paper'].pop('material_relations', None)
+    missing = not (draft or {}).get('paper', {}).get('material_families')
     warnings = ['旧审核快照中的材料家族未保存在正式记录中，请重新选择后提交。'] if missing else []
-    if not any((saved.draft or {}).get('paper', {}).get(key) for key in AUTHOR_ROLE_FIELDS):
+    if not any((draft or {}).get('paper', {}).get(key) for key in AUTHOR_ROLE_FIELDS):
         warnings.append('旧通讯作者和共同第一作者标记若未保存在历史中，无法恢复；请按原文补充。')
-    return dict(ok=True, data=saved.draft, revision_id=saved.revision_id, draft_version=saved.draft_version,
+    return dict(ok=True, data=draft, revision_id=saved.revision_id, draft_version=saved.draft_version,
         base_revision=saved.base_revision, review_comment=paper.review_comment, conflict=conflict,
         warnings=warnings)
 
@@ -220,6 +223,8 @@ async def save_draft(session, paper_id, user, payload):
     if payload.evidence_preparation_id:
         from backend.ingest.evidence_proposals import validate_save
         await session.run_sync(lambda s: validate_save(s, revision_snapshot(s, saved.revision_id, user.id), user.id, payload.evidence_preparation_id, 'upload'))
+    if 'material_relations' in (payload.draft.get('paper') or {}):
+        error(400, 'retired_material_relations', 'material_relations 已退役，请重新打开草稿')
     _reject_legacy_classification_contract(payload.draft)
     draft = _normalize_draft(copy.deepcopy(payload.draft))
     draft['paper'] = {k: v for k, v in draft['paper'].items() if k in {*PAPER_FIELDS, 'material_families', 'corresponding_authors', 'co_first_authors'}}
@@ -249,6 +254,8 @@ async def submit_draft(session, paper_id, user, payload):
         return dict(ok=True, paper_id=paper_id, content_revision=done.paper_revision, review_status=paper.review_status)
     paper, saved = await load_for_write(session, paper_id, user, payload.revision_id, payload.draft_version)
     draft = copy.deepcopy(saved.draft)
+    if isinstance(draft.get('paper'), dict):
+        draft['paper'].pop('material_relations', None)
     await _resolve_draft_classifications(session, draft)
     data, _ = _validate_draft(draft)
     from backend.ingest.upload_jobs import normalize_doi

@@ -28,7 +28,7 @@ Sn2 Sn 0.25 0.5 0.75
 const candidate = (id, size) => ({ candidate_id: `structure_${id}`, material_state_ref: 'material_states[0]', status: 'confirmed', confirmation: 'confirmed', validation: { structure_hash: `hash-${id}`, atom_count: 2, elements: ['Sn'] }, sources: [{ filename: `Sn-${id}.cif` }], representations: { conventional: { cif: { text: cif }, poscar: { text: poscar(size) } }, primitive: { cif: { text: cif.replaceAll('_cell_length_a 5', '_cell_length_a 3') }, poscar: { text: poscar(3) } } } })
 let candidates = [candidate(1, 5), candidate(2, 7)]
 let states = ['Sn', 'Sn', 'Pb', 'SnHg'].map((material, i) => ({ state_key: `state-${i}`, material_name: material, material, state_kind: i < 3 ? 'experimental' : 'unknown', material_dimensionality: 'three_dimensional', crystal_system: 'unknown', structure_families: [], property_modules: [], structures: i ? [] : candidates.map((c, j) => ({ id: j + 1, structure_text: cif, structure_format: 'cif', source_locator: c.sources[0].filename })) }))
-let paper = { id: 990103, title: '隔离布局验收示例', year: 2026, authors: [], journal: 'Fixture', paper_type: 'experimental', superconductor_kind: 'conventional', review_status: 'pending', material_families: [{ id: 8, name: '单质超导体' }], research_materials: ['outdated'], material_relations: JSON.stringify([{ material: 'Sn', relation: '研究样品的结构及输运性质，并比较不同条件下的结果。'.repeat(12), page: 3, quote: 'fixture evidence', evidence: { file_id: 'main' } }]) }
+let paper = { id: 990103, title: '隔离布局验收示例', year: 2026, authors: [], journal: 'Fixture', paper_type: 'experimental', superconductor_kind: 'conventional', review_status: 'pending', material_families: [{ id: 8, name: '单质超导体' }], research_materials: ['outdated'] }
 let savedDraft, submits = 0, scientificSaves = 0
 const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
 await context.addInitScript(() => {
@@ -128,22 +128,22 @@ try {
   await page.getByRole('button', { name: 'Sn · #2', exact: true }).click()
   assert.equal(await page.locator('[data-material-state-index="1"] [data-state-toggle]').getAttribute('aria-expanded'), 'true')
   await page.getByRole('button', { name: '全部展开', exact: true }).click()
-  await page.getByLabel('论文与该材料的关系', { exact: true }).fill('保存后保留证据来源')
+  assert.equal(await page.getByText('材料关系', { exact: true }).count(), 0)
   await page.getByLabel('材料名', { exact: true }).first().fill('Pure tin')
   await Promise.all([page.waitForResponse(r => r.url().endsWith('/draft')), page.getByRole('button', { name: '立即保存', exact: true }).click()])
-  assert.equal(savedDraft.paper.material_relations[0].quote, 'fixture evidence')
+  assert.equal('material_relations' in savedDraft.paper, false)
   assert(savedDraft.paper.research_materials.includes('Pure tin'))
   await page.getByRole('button', { name: '提交审核', exact: true }).click()
   await page.waitForTimeout(300)
   assert.equal(submits, 1)
   await page.goto(`${base}/admin/papers/990103/edit`)
   await page.getByLabel('材料名', { exact: true }).first().fill('Reviewed tin')
-  await page.getByLabel('论文与该材料的关系', { exact: true }).fill('管理员修改关系')
+  assert.equal(await page.getByText('材料关系', { exact: true }).count(), 0)
   await page.getByLabel('材料状态类型', { exact: true }).first().click()
   await page.getByRole('option', { name: '理论与实验', exact: true }).click()
   await Promise.all([page.waitForResponse(r => r.url().endsWith('/scientific-draft')), page.getByRole('button', { name: '保存修改', exact: true }).click()])
   assert.equal(scientificSaves, 1)
-  assert.equal(JSON.parse(paper.material_relations)[0].quote, 'fixture evidence')
+  assert.equal('material_relations' in paper, false)
   assert.equal(states[0].state_kind, 'mixed')
   assert(paper.research_materials.includes('Reviewed tin'))
   await page.reload()
@@ -159,7 +159,8 @@ try {
   }
   await page.setViewportSize({ width: 1440, height: 1000 })
   await mount('detail', { ...paper, material_states: states })
-  await page.getByText('管理员修改关系', { exact: true }).waitFor()
+  await page.getByText('研究材料', { exact: true }).first().waitFor({ timeout: 5000 })
+  assert.equal(await page.getByText('材料关系', { exact: true }).count(), 0)
   assert.equal(await page.getByRole('textbox').count(), 0)
   assert.equal(await page.getByText('理论与实验', { exact: true }).count(), 1)
   await noOverflow()

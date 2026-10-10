@@ -118,7 +118,6 @@ type Paper struct {
 	KeyFinding          *string `json:"key_finding"`
 	ResearchMotivation  *string `json:"research_motivation"`
 	ResearchMaterials   *string `json:"research_materials"`
-	MaterialRelations   *string `json:"material_relations"`
 	BuildsOn            *string `json:"builds_on"`
 
 	// 关联（GORM 预加载用）

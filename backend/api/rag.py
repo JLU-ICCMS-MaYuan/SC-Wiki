@@ -352,6 +352,8 @@ def _draft_values(draft: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str,
 
 
 def _reject_legacy_classification_contract(draft: dict[str, Any]) -> None:
+    if isinstance(draft.get("paper"), dict) and "material_relations" in draft["paper"]:
+        raise _upload_error(400, "retired_material_relations", "material_relations 已退役，请重新打开草稿")
     legacy_fields = {"sc_type", "sc_type_review_status", "type_code", "type_proposal_raw"}
     present = sorted(field for field in legacy_fields if field in draft)
     if any(
@@ -1747,7 +1749,6 @@ async def _create_pending_paper(
                     key_finding=paper_data.get("key_finding"),
                     research_motivation=draft.get("research_motivation") or paper_data.get("research_motivation"),
                     research_materials=paper_data.get("research_materials") or [],
-                    material_relations=paper_data.get("material_relations") or [],
                     builds_on=paper_data.get("builds_on") or [],
                     review_status="pending",
                     uploaded_by_user_id=int(state["user_id"]),

@@ -181,7 +181,6 @@ export interface PaperDraftFields {
   key_finding?: string
   research_motivation?: string
   research_materials?: string[]
-  material_relations?: import('./paperMaterials').MaterialRelation[] | string
   builds_on?: unknown[]
 }
 
@@ -252,7 +251,7 @@ export function emptyUploadDraft(): UploadDraft {
       abstract: '', summary: '', paper_type: 'unknown', theoretical_subtype: null,
       material_families: [], superconductor_kind: 'unknown',
       keywords_tags: [], methodology: [], key_finding: '', research_motivation: '',
-      research_materials: [], material_relations: [], builds_on: [],
+      research_materials: [], builds_on: [],
     },
     material_states: [],
     structure_candidates: [],
@@ -325,6 +324,7 @@ function normalizePaperFields(value: unknown): PaperDraftFields {
     ? { ...(value as PaperDraftFields & { referenced_materials?: unknown }) }
     : {}
   delete paper.referenced_materials
+  delete (paper as typeof paper & { material_relations?: unknown }).material_relations
   const authors = normalizeTextItems(paper.authors, ['name', 'value'])
   const normalizeRoles = (roles: unknown) => {
     const selected = new Set(normalizeTextItems(roles, ['name', 'value']).map(name => name.toLowerCase()))
@@ -364,6 +364,8 @@ export function normalizeUploadDraft(value: unknown): UploadDraft {
     : {}
   const fieldEvidence = { ...existingEvidence }
   delete fieldEvidence.referenced_materials
+  delete fieldEvidence.material_relations
+  delete (fieldEvidence as Record<string, unknown>)['paper.material_relations']
   for (const field of ['keywords_tags', 'methodology', 'research_materials']) {
     if (!fieldEvidence[field]) {
       const evidence = embeddedEvidence(rawPaper[field as keyof PaperDraftFields])

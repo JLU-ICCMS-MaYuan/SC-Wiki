@@ -190,7 +190,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
               </Box>
             </Box>
 
-            <PaperMaterialsSection states={paper.material_states || []} relations={paper.material_relations} historicalMaterials={paper.research_materials} />
+            <PaperMaterialsSection states={paper.material_states || []} historicalMaterials={paper.research_materials} />
             {/* 材料状态 */}
             {(paper.material_states || []).length > 0 ? (
               <Box component="details" open sx={{

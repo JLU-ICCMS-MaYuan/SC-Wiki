@@ -27,7 +27,7 @@
 
 ## 不属于引用边的关系
 
-旧 Neo4j 的 `BUILDS_ON`、`RELATES_TO`、`STUDIES`、`AUTHORED` 和 `SHARES_STRUCTURE` 不参与本 Feature 的引用边生成。特别是 `papers.builds_on` 仍是 LLM 叙述字段，不能转换成真实论文引用关系。
+旧 Neo4j 的 `BUILDS_ON`、`RELATES_TO`、`AUTHORED` 和 `SHARES_STRUCTURE` 不参与本 Feature 的引用边生成；`STUDIES` 材料边已退役。特别是 `papers.builds_on` 仍是 LLM 叙述字段，不能转换成真实论文引用关系。
 
 ## 代码与测试
 

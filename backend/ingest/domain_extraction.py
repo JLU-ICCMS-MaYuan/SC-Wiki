@@ -149,7 +149,6 @@ class Extraction(Contract):
     paper_type_evidence: list[dict[str, JsonValue]] = Field(default_factory=list)
     research_materials: list[JsonValue] = Field(default_factory=list)
     referenced_materials: list[JsonValue] = Field(default_factory=list)
-    material_relations: list[dict[str, JsonValue]] = Field(default_factory=list)
     methodology: list[JsonValue] = Field(default_factory=list)
     key_findings: list[JsonValue] = Field(default_factory=list)
     coverage_exclusions: list[CoverageExclusion] = Field(default_factory=list)

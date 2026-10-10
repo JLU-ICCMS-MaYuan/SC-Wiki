@@ -73,11 +73,6 @@ def validate_chunk_generated_english(result: dict[str, Any]) -> None:
             else:
                 _require_english(item, f"{field}[{index}]")
 
-    for index, item in enumerate(result.get("material_relations") or []):
-        if isinstance(item, dict):
-            _require_english(item.get("material"), f"material_relations[{index}].material")
-            _require_english(item.get("relation"), f"material_relations[{index}].relation")
-
     for state_index, state in enumerate(result.get("material_states") or []):
         if not isinstance(state, dict):
             continue

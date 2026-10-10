@@ -2,6 +2,8 @@
 
 关联 [Issue #103](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/103) 与 [功能规格](spec.md)。
 
+> 这是 2026-09-17 的历史演示。材料关系行及其编辑方式已由 [#127](../127-retire-material-relations/spec.md) 废止，不属于现行表单。
+
 ## 本次交付边界
 
 2026-09-17，用户确认先提供可交互的布局演示，查看效果后再接入正式前后端。

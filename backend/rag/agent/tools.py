@@ -27,7 +27,7 @@ def search_papers(query: str, limit: int = 10) -> str:
 
 @tool
 def paper_context(paper_id: int) -> str:
-    """获取一篇论文的完整上下文：基本信息、研究材料、关联论文、前驱工作、作者。
+    """获取一篇论文的完整上下文：基本信息、关联论文、前驱工作、作者。
     当你已获得 paper_id 并想了解该论文的详细内容时使用。"""
     ctx = get_paper_context(paper_id)
     if "error" in ctx:
@@ -59,7 +59,7 @@ material_info = StructuredTool.from_function(
 
 @tool
 def explore_graph(paper_id: int, depth: int = 2) -> str:
-    """从一篇论文出发，在知识图谱中多跳遍历，发现关联论文和材料。
+    """从一篇论文出发，在知识图谱中多跳遍历，发现关联论文。
     用于探索研究脉络、发现相关工作时使用。"""
     result = traverse_graph(paper_id, depth=depth, limit=20)
     # 只返回摘要信息，不返回完整节点

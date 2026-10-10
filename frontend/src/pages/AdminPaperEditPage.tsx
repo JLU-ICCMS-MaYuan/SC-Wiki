@@ -219,7 +219,8 @@ const AdminPaperEditPage: React.FC = () => {
       if (editHadScientificData || changed.paper.material_families?.length || changed.material_states.length || editStructureCandidates.length) delete payload.superconductor_kind
       // 科学段可能失败；汇总与材料状态由同一 Python 事务保存，避免第一段先写入未来值。
       if (editHadScientificData || changed.material_states.length) delete payload.research_materials
-      for (const field of ['research_materials', 'material_relations']) {
+      delete payload.material_relations
+      for (const field of ['research_materials']) {
         if (Array.isArray(payload[field])) payload[field] = JSON.stringify(payload[field])
       }
       if (authorInput.trim()) {
@@ -406,7 +407,7 @@ const AdminPaperEditPage: React.FC = () => {
                 placeholder={t('upload.authorPlaceholder')} />
             )}
           />
-          <PaperMaterialsSection states={editMaterialStates} relations={editForm.material_relations} historicalMaterials={editForm.research_materials} onChange={values => { evidenceWorkflow.invalidate('paper.material_relations'); setEditForm(current => ({ ...current, material_relations: values })) }} />
+          <PaperMaterialsSection states={editMaterialStates} historicalMaterials={editForm.research_materials} />
           <TextField label={t('admin.fieldAbstract')} size="small" fullWidth multiline rows={3}
             data-issue-field="paper.abstract" value={editForm.abstract || ''} onChange={e => setEditForm({ ...editForm, abstract: e.target.value })} />
           <TextField label={t('admin.fieldLlmSummary')} size="small" fullWidth multiline rows={2}

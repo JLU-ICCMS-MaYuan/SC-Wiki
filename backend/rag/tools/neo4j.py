@@ -78,7 +78,7 @@ def search_papers(query: str, limit: int = 10) -> list[dict[str, Any]]:
 # ═══════════════════════════════════════════════
 
 def get_paper_context(paper_id: int) -> dict[str, Any]:
-    """一篇论文的完整上下文：基本信息 + 研究材料 + 关联论文 + 前驱工作 + 作者"""
+    """一篇论文的完整上下文：基本信息 + 关联论文 + 前驱工作 + 作者"""
     with _driver().session() as s:
         # 基本信息
         row = s.run(
@@ -98,14 +98,6 @@ def get_paper_context(paper_id: int) -> dict[str, Any]:
             "methodology": node.get("methodology", ""),
             "key_finding": node.get("key_finding", ""),
         }
-
-        # 研究材料
-        materials = s.run(
-            "MATCH (p:Paper {paper_id: $pid})-[r:STUDIES]->(m:Material) "
-            "RETURN m.formula AS formula, r.role AS role, r.evidence AS evidence "
-            "LIMIT 10",
-            pid=paper_id,
-        ).data()
 
         # 关联论文
         related = s.run(
@@ -133,7 +125,6 @@ def get_paper_context(paper_id: int) -> dict[str, Any]:
 
     return {
         "paper": paper,
-        "materials": materials,
         "related_papers": related,
         "builds_on": builds_on,
         "authors": [a["name"] for a in authors],
@@ -156,6 +147,8 @@ def traverse_graph(
         types = [t.strip() for t in relations.split(",") if t.strip()]
         if not types or any(not re.fullmatch(r"[A-Z][A-Z0-9_]*", item) for item in types):
             raise ValueError("关系类型只能包含大写字母、数字和下划线")
+        if "STUDIES" in types:
+            raise ValueError("STUDIES 材料关系已退役")
         rel_filter = ":" + "|".join(types)
 
     with _driver().session() as s:
@@ -186,7 +179,7 @@ def traverse_graph(
         paper_ids = [n.get("paper_id") for n in nodes if n.get("paper_id")]
         if len(paper_ids) >= 2:
             edge_rows = s.run(
-                "MATCH (a:Paper)-[r:RELATES_TO|DEVELOPS_TO|STUDIES|BUILDS_ON]->(b) "
+                "MATCH (a:Paper)-[r:RELATES_TO|DEVELOPS_TO|BUILDS_ON]->(b) "
                 "WHERE a.paper_id IN $ids AND b.paper_id IN $ids "
                 "RETURN a.paper_id AS source, b.paper_id AS target, type(r) AS type "
                 "LIMIT 50",
@@ -267,7 +260,7 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "paper_id": {"type": "integer", "description": "起点论文 paper_id"},
                 "depth": {"type": "integer", "description": "遍历深度 1-4，默认2"},
-                "relations": {"type": "string", "description": "限定关系类型，逗号分隔，如 STUDIES,RELATES_TO"},
+                "relations": {"type": "string", "description": "限定关系类型，逗号分隔，如 RELATES_TO,BUILDS_ON"},
                 "limit": {"type": "integer", "description": "返回节点上限，默认20"},
             },
             "required": ["paper_id"],

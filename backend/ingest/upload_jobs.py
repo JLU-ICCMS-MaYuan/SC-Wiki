@@ -107,7 +107,6 @@ issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测�
   "paper_type_evidence": [{"candidate": "theoretical|experimental|review|unknown", "scope": "current_paper|referenced_work", "page": 1, "quote": "原文"}],
   "research_materials": [],
   "referenced_materials": [],
-  "material_relations": [{"material": "", "relation": "discovers|investigates|predicts", "page": 1, "quote": ""}],
   "material_states": [{
     "material": "",
     "scope": "current_paper|referenced_work",
@@ -128,11 +127,11 @@ issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测�
 
 CHUNK_SYSTEM_PROMPT += EXPERIMENTAL_CONDITIONS_PROMPT
 
-CHUNK_RESULT_SCHEMA_VERSION = 9
+CHUNK_RESULT_SCHEMA_VERSION = 10
 
 PUBLIC_CHUNK_RESULT_FIELDS = {
     "metadata", "paper_type_evidence", "research_materials",
-    "material_relations", "material_states", "methodology", "key_findings", "_source",
+    "material_states", "methodology", "key_findings", "_source",
 }
 
 
@@ -212,7 +211,7 @@ issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测�
     "superconductor_kind": "conventional|unconventional|unknown",
     "keywords_tags": [], "methodology": [],
     "knowledge_graph_title": "", "key_finding": "",
-    "research_motivation": "", "research_materials": [], "material_relations": [], "builds_on": [],
+    "research_motivation": "", "research_materials": [], "builds_on": [],
     "material_families": [{"id": null, "name": "自由材料家族名称", "status": "pending", "evidence": {"section": "", "page": null, "quote": ""}}]
   },
   "material_states": [{
@@ -792,12 +791,6 @@ def _build_candidate_draft(chunks: list[dict[str, Any]]) -> dict[str, Any]:
             for item in result.get(result_key) or []:
                 value = _preview_item_value(item, *keys) if isinstance(item, dict) else item
                 _append_unique(field, value)
-        for item in result.get("material_relations") or []:
-            relation = (
-                {key: value for key, value in item.items() if key not in {"page", "quote"}}
-                if isinstance(item, dict) else item
-            )
-            _append_unique("material_relations", relation)
         for item in result.get("key_findings") or []:
             value = _preview_item_value(item, "value", "finding", "text") if isinstance(item, dict) else item
             if value not in (None, "") and str(value) not in findings:
@@ -910,19 +903,6 @@ def _as_list(value: Any) -> list[Any]:
     if value is None:
         return []
     return value if isinstance(value, list) else [value]
-
-
-def _material_relations(value: Any) -> Any:
-    """兼容历史 JSON 字符串；无法解析时保留，不能保存其他字段时丢失来源。"""
-    if value is None or value == "":
-        return []
-    if isinstance(value, str):
-        try:
-            parsed = json.loads(value)
-            return parsed if isinstance(parsed, list) else value
-        except (ValueError, TypeError):
-            return value
-    return value
 
 
 def _normalize_text_items(value: Any, *keys: str) -> tuple[list[str], list[dict[str, Any]]]:
@@ -1480,7 +1460,6 @@ def _normalize_draft(
         "key_finding": raw_paper.get("key_finding") or "",
         "research_motivation": raw_paper.get("research_motivation") or "",
         "research_materials": research_materials,
-        "material_relations": _material_relations(raw_paper.get("material_relations")),
         "builds_on": _as_list(raw_paper.get("builds_on")),
     }
     properties = _flatten_properties(raw.get("key_properties"))
@@ -1501,6 +1480,8 @@ def _normalize_draft(
     existing_field_evidence = raw.get("field_evidence")
     field_evidence = dict(existing_field_evidence) if isinstance(existing_field_evidence, dict) else {}
     field_evidence.pop("referenced_materials", None)
+    field_evidence.pop("material_relations", None)
+    field_evidence.pop("paper.material_relations", None)
     for field, values in {
         "keywords_tags": keywords_evidence,
         "methodology": methodology_evidence,

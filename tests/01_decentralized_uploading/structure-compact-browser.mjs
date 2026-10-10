@@ -25,7 +25,7 @@ ${Array.from({ length: count }, (_, i) => `Sn${i + 1} Sn ${(i % 4) / 4} ${(Math.
 `
 const candidates = [1, 64].map((count, i) => ({ candidate_id: `structure_${i + 1}`, material_state_ref: 'material_states[0]', status: 'confirmed', confirmation: 'confirmed', validation: { structure_hash: `hash-${i + 1}`, atom_count: count, elements: ['Sn'] }, sources: [{ filename: `Sn-${count}.cif` }], representations: { conventional: { cif: { text: cif(count) } }, primitive: { cif: { text: cif(count, 11) } } } }))
 const states = [{ state_key: 'sn', material_name: 'Sn', material: 'Sn', state_kind: 'experimental', material_dimensionality: 'three_dimensional', crystal_system: 'unknown', structure_families: [], property_modules: [], structures: candidates.map((c, i) => ({ id: i + 1, structure_text: cif(i ? 64 : 1), structure_format: 'cif', source_locator: c.sources[0].filename })) }]
-const paper = { id: 990103, title: '结构附件隔离验收示例', year: 2026, authors: [], paper_type: 'experimental', superconductor_kind: 'conventional', review_status: 'pending', material_families: [], material_relations: [] }
+const paper = { id: 990103, title: '结构附件隔离验收示例', year: 2026, authors: [], paper_type: 'experimental', superconductor_kind: 'conventional', review_status: 'pending', material_families: [] }
 const records = candidates.map((c, i) => ({ key: `structure-${i + 1}`, item_key: `structure-${i + 1}`, state_key: 'sn', field: `material_states[0].structures[${i}]`, structure_hash: c.validation.structure_hash, label: '晶体结构与晶格参数', status: 'uncertain', current_value: '示例结构', reason: '示例来源待确认', evidences: [] }))
 try {
   for (const mode of ['upload', 'admin']) {

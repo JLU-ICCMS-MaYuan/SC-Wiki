@@ -38,7 +38,7 @@ var (
 		"summary", "paper_type", "theoretical_subtype", "keywords_tags",
 		"superconductor_kind",
 		"methodology", "key_finding", "research_motivation", "research_materials",
-		"material_relations", "builds_on", "knowledge_graph_title",
+		"builds_on", "knowledge_graph_title",
 	}
 	pythonBackendClient = &http.Client{Timeout: 2 * time.Minute}
 )
@@ -158,6 +158,10 @@ func UpdatePaper(c *gin.Context) {
 	var body map[string]interface{}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "JSON 格式错误"})
+		return
+	}
+	if _, retired := body["material_relations"]; retired {
+		c.JSON(http.StatusBadRequest, gin.H{"code": "retired_material_relations", "error": "material_relations 已退役"})
 		return
 	}
 

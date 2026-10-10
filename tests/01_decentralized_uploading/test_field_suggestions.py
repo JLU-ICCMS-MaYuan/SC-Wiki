@@ -188,7 +188,6 @@ def test_empty_numeric_and_list_fields_have_correct_suggestion_types():
     by_field = {r['field']: r for r in snap['records']}
     assert by_field['paper.year']['editable_fields'][0]['schema']['type'] == 'integer'
     assert by_field['paper.authors']['editable_fields'][0]['schema']['type'] == 'array'
-    assert proposals.valid_value([{'material': 'Sn', 'relation': 'investigates'}], proposals.schema_for([], 'material_relations'))
     assert proposals.valid_value({'lambda_ep': 0.5, 'mu_star': None}, proposals.schema_for(None, 'calculation_context'))
     assert proposals.valid_value({'applied_field_t': 0.2}, proposals.schema_for(None, 'experimental_context'))
 

@@ -42,9 +42,9 @@ def shortest_path(
 @router.get("/around")
 def around_paper(
     paper_id: int = Query(...),
-    relations: str | None = Query(None, description="逗号分隔，如 STUDIES,RELATES_TO"),
+    relations: str | None = Query(None, description="逗号分隔，如 RELATES_TO,BUILDS_ON"),
 ):
-    """一篇论文的上下文：研究的材料 + 关联论文 + 前驱工作 + 作者"""
+    """一篇论文的上下文：关联论文 + 前驱工作 + 作者"""
     ctx = get_paper_context(paper_id)
     if "error" in ctx:
         raise HTTPException(404, ctx["error"])
@@ -54,8 +54,6 @@ def around_paper(
         allowed = set(relations.split(","))
         if "RELATES_TO" not in allowed:
             ctx.pop("related_papers", None)
-        if "STUDIES" not in allowed:
-            ctx.pop("materials", None)
         if "BUILDS_ON" not in allowed:
             ctx.pop("builds_on", None)
         if "AUTHORED" not in allowed:

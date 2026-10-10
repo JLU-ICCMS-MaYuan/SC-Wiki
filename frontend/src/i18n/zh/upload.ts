@@ -11,13 +11,6 @@ export default {
   parserProfiles: {"legacy": "兼容方案", "text": "快速文本（PyMuPDF）", "layout": "版面结构（Docling）", "ocr": "扫描识别（MinerU）"},
 
   researchMaterialsTitle: '研究材料',
-  materialRelationsTitle: '材料关系',
-  relationMaterial: '关系涉及的材料',
-  relationDescription: '论文与该材料的关系',
-  addRelation: '添加材料关系',
-  removeRelation: '删除材料关系',
-  noRelations: '未填写材料关系',
-  invalidRelations: '现有材料关系格式无法识别，请先核对来源；原始数据已保留。',
   stateKindField: '材料状态类型',
   structureDataUnavailable: '当前结构未提供可解析的晶胞与原子位置。',
   latticeMatrixTitle: '晶格矩阵',

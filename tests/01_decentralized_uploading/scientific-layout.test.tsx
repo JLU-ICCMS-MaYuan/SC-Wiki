@@ -1,42 +1,26 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import PaperMaterialsSection from '../../frontend/src/components/PaperMaterialsSection'
 import EvidenceFieldMarkers from '../../frontend/src/components/EvidenceFieldMarkers'
-import { parseMaterialRelations, researchMaterials } from '../../frontend/src/lib/paperMaterials'
+import { researchMaterials } from '../../frontend/src/lib/paperMaterials'
 import type { EvidenceRecord } from '../../frontend/src/components/EvidenceWorkflow'
 
 afterEach(cleanup)
 
-it('历史关系解析不损失来源，非法历史值不被清空', () => {
-  const relation = { material: 'Sn', relation: 'investigates', page: 2, quote: 'source', evidence: { file_id: 'a' } }
-  expect(parseMaterialRelations(JSON.stringify([relation]))).toEqual([relation])
-  expect(parseMaterialRelations([relation])).toEqual([relation])
-  expect(parseMaterialRelations(null)).toEqual([])
-  expect(parseMaterialRelations('invalid JSON')).toBeNull()
-  expect(parseMaterialRelations('["old free text"]')).toBeNull()
+it('研究材料按名称优先汇总', () => {
   expect(researchMaterials([{ material_name: ' Tin ', material: 'Sn' }, { material_name: 'Tin' }, { material: 'Pb' }, {}])).toEqual(['Tin', 'Pb'])
 })
 
-it('关系增删改保留未知来源字段，名称变更更新汇总，详情只读', () => {
-  const source = { material: 'Sn', relation: 'investigates', page: 2, quote: 'source evidence' }
-  let saved: unknown
-  function Form() {
-    const [relations, setRelations] = useState([source])
-    return <PaperMaterialsSection states={[{ material_name: 'Tin', material: 'Sn' }, { material_name: 'Tin', material: 'Sn' }]} relations={relations} onChange={values => { saved = values; setRelations(values as typeof relations) }} />
-  }
-  const view = render(<Form />)
-  fireEvent.change(screen.getByLabelText('论文与该材料的关系'), { target: { value: 'Very long relationship '.repeat(15) } })
-  expect(saved).toEqual([{ ...source, relation: 'Very long relationship '.repeat(15) }])
-  fireEvent.click(screen.getByRole('button', { name: '添加材料关系' }))
-  expect(screen.getAllByLabelText('论文与该材料的关系')).toHaveLength(2)
-  fireEvent.click(screen.getAllByRole('button', { name: '删除材料关系' })[1])
-  expect(screen.getAllByLabelText('论文与该材料的关系')).toHaveLength(1)
-  view.rerender(<PaperMaterialsSection states={[{ material_name: 'Pure tin', material: 'Sn' }]} relations={saved} />)
+it('同名材料汇总后只显示研究材料，不提供退役关系控件', () => {
+  const view = render(<PaperMaterialsSection states={[{ material_name: 'Tin', material: 'Sn' }, { material_name: 'Tin', material: 'Sn' }]} />)
+  expect(screen.getAllByRole('button', { name: /Tin · #/ })).toHaveLength(2)
+  expect(screen.queryByText('材料关系')).not.toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: '添加材料关系' })).not.toBeInTheDocument()
+  view.rerender(<PaperMaterialsSection states={[{ material_name: 'Pure tin', material: 'Sn' }]} />)
   expect(screen.getByText('Pure tin (Sn)')).toBeInTheDocument()
   expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
-  expect(screen.queryByText('source evidence')).not.toBeInTheDocument()
 })
 
 it('未选中的结构不挂到当前模型，缺失状态不按旧数组索引误挂；清单不输出原始值', async () => {

@@ -22,7 +22,7 @@ var paperPatchFields = map[string]bool{
 	"pages": true, "year": true, "abstract": true, "summary": true,
 	"paper_type": true, "theoretical_subtype": true, "keywords_tags": true,
 	"methodology": true, "key_finding": true, "research_motivation": true,
-	"research_materials": true, "material_relations": true, "builds_on": true,
+	"research_materials": true, "builds_on": true,
 	"knowledge_graph_title": true,
 }
 
@@ -205,6 +205,10 @@ func PatchPaper(c *gin.Context) {
 	var body map[string]interface{}
 	if err := c.ShouldBindJSON(&body); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "参数错误"})
+		return
+	}
+	if _, retired := body["material_relations"]; retired {
+		c.JSON(http.StatusBadRequest, gin.H{"code": "retired_material_relations", "error": "material_relations 已退役"})
 		return
 	}
 	updates := paperPatchUpdatesFromBody(body)

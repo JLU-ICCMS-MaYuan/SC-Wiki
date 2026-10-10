@@ -121,7 +121,7 @@
 
 ## 当前边界与待核验
 
-- 旧 Neo4j 材料/作者图谱同步（`backend/ingest/sync_neo4j.py`）仍不在上传链路中自动触发；Issue #81 的论文引用图不依赖该同步，公开查询直接读取 MySQL 中的 `paper_references`。
+- 旧 Neo4j 作者及其他论文关系同步（`backend/ingest/sync_neo4j.py`）仍不在上传链路中自动触发；材料 `STUDIES` 同步已由 [#127](../../specs/127-retire-material-relations/spec.md) 移除。Issue #81 的论文引用图不依赖旧同步，公开查询直接读取 MySQL 中的 `paper_references`。
 - `backend/ingest/PIPELINE.md` 描述的 `enrich_papers.py` → `clean_results/*.json` → `key_properties` 链路属于旧 `pipeline.py` 摄入路径；当前多文件上传链路不经过 `enrich_single` 与 `key_properties`。
 - 解析质量依赖服务端默认 LLM 配置（`LLM_*` / `DEEPSEEK_*`）或用户请求中的临时配置；向量化发布仍独立依赖 Embedding 配置（`EMBEDDING_*`）与 Qdrant，用户供应商切换不改变 Embedding。
 

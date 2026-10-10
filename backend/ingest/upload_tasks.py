@@ -443,11 +443,24 @@ def get_draft(task_id: str) -> dict[str, Any] | None:
         from backend.ingest.scientific_evidence import restore_upload
         restore_upload(task_id)
         raw = redis_client().get(draft_key(task_id))
-    return convert_legacy_scientific_draft(json.loads(raw)) if raw else None
+    if not raw:
+        return None
+    draft = convert_legacy_scientific_draft(json.loads(raw))
+    if isinstance(draft.get("paper"), dict):
+        draft["paper"].pop("material_relations", None)
+    if isinstance(draft.get("field_evidence"), dict):
+        draft["field_evidence"].pop("material_relations", None)
+        draft["field_evidence"].pop("paper.material_relations", None)
+    return draft
 
 
 def save_draft(task_id: str, draft: dict[str, Any]) -> dict[str, Any]:
     draft = convert_legacy_scientific_draft(draft)
+    if isinstance(draft.get("paper"), dict):
+        draft["paper"].pop("material_relations", None)
+    if isinstance(draft.get("field_evidence"), dict):
+        draft["field_evidence"].pop("material_relations", None)
+        draft["field_evidence"].pop("paper.material_relations", None)
     client = redis_client()
     raw_state = client.get(task_key(task_id))
     if not raw_state:

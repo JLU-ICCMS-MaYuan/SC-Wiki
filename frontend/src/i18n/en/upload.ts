@@ -9,13 +9,6 @@ export default {
   parserProfiles: {"legacy": "Compatibility", "text": "Fast text (PyMuPDF)", "layout": "Document layout (Docling)", "ocr": "Scanned text (MinerU)"},
 
   researchMaterialsTitle: 'Research materials',
-  materialRelationsTitle: 'Material relations',
-  relationMaterial: 'Related material',
-  relationDescription: 'Relationship between this paper and the material',
-  addRelation: 'Add material relation',
-  removeRelation: 'Delete material relation',
-  noRelations: 'No material relations provided',
-  invalidRelations: 'The existing relations could not be read. Check the source; the original data has been preserved.',
   stateKindField: 'Material state type',
   structureDataUnavailable: 'No readable unit cell or atomic positions are available for this structure.',
   latticeMatrixTitle: 'Lattice matrix',

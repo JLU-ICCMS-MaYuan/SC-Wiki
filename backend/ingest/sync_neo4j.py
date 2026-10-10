@@ -28,7 +28,7 @@ PAPER_FIELDS = [
     "abstract", "authors", "summary", "paper_type", "keywords_tags",
     "methodology", "key_finding", "research_motivation",
     "research_materials", "referenced_materials",
-    "material_relations", "builds_on",
+    "builds_on",
 ]
 
 
@@ -86,8 +86,6 @@ class KGSync:
                 s.run("MERGE (m:Material {formula: $f}) SET m.sc_type = $sc, m.pressure_gpa = $p, "
                       "m.structure_text = $stxt, m.structure_format = $sfmt",
                       f=mat, sc=sc_type, p=pressure, stxt=stxt, sfmt=sfmt)
-                s.run("MATCH (p:Paper {paper_id: $pid}) MATCH (m:Material {formula: $f}) MERGE (p)-[:STUDIES]->(m)",
-                      pid=pid, f=mat)
 
         return 1
 
@@ -255,39 +253,6 @@ class KGSync:
         print(f"Researcher: {len(author_pairs)} 人 + AUTHORED 关系")
 
     # ═══════════════════════════════════════════════
-    # 关系: STUDIES (Paper → Material)
-    # ═══════════════════════════════════════════════
-
-    def sync_studies(self):
-        with self.driver.session() as s:
-            result = s.run(
-                "MATCH (p:Paper) WHERE p.material_relations IS NOT NULL RETURN p.paper_id, p.material_relations"
-            )
-            count = 0
-            for r in result:
-                raw = r.get("p.material_relations") or r.get("material_relations")
-                if not raw: continue
-                try:
-                    rels = json.loads(raw) if isinstance(raw, str) else raw
-                except Exception:
-                    continue
-                if not rels: continue
-                for rel in rels:
-                    if isinstance(rel, str): rel = {"material": rel, "relation": "investigates"}
-                    mat = rel.get("material", "")
-                    role = rel.get("relation", "investigates")
-                    evidence = rel.get("evidence", "")[:500]
-                    if not mat:
-                        continue
-                    s.run("""
-                        MATCH (p:Paper {paper_id: $pid})
-                        MERGE (m:Material {formula: $mat})
-                        MERGE (p)-[:STUDIES {role: $role, evidence: $ev}]->(m)
-                    """, pid=r.get("p.paper_id") or r.get("paper_id"), mat=mat, role=role, ev=evidence)
-                    count += 1
-        print(f"STUDIES: {count} 条")
-
-    # ═══════════════════════════════════════════════
     # 关系: BUILDS_ON (Paper → Paper)
     # ═══════════════════════════════════════════════
 
@@ -345,7 +310,6 @@ class KGSync:
         self.sync_materials()
         self.sync_properties()
         self.sync_researchers()
-        self.sync_studies()
         self.sync_builds_on()
         self.sync_shares_structure()
         print(f"\n完成! 耗时 {time.time()-t0:.0f}s")

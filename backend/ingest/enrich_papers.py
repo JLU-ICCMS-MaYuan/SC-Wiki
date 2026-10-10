@@ -1,5 +1,5 @@
 """
-论文信息富化: LLM从摘要+关键词提取7项结构化数据
+论文信息富化: LLM从摘要+关键词提取结构化数据
 用法:
   python backend/ingest/enrich_papers.py [--force] [--limit N] [--dry-run]
   python backend/ingest/enrich_papers.py --fix [--limit N] [--dry-run]
@@ -19,7 +19,7 @@ CLEAN_DIR = Path(__file__).resolve().parents[1] / "data" / "clean_results"
 DEV_DB = BASE_DIR / "data" / "dev.db"
 from backend.database import DATABASE_URL as MYSQL_URL
 
-PROMPT = """你是超导材料研究专家。请根据以下论文信息完成七项分析。
+PROMPT = """你是超导材料研究专家。请根据以下论文信息完成六项分析。
 
 ## 论文信息
 标题: {title}
@@ -37,24 +37,18 @@ PROMPT = """你是超导材料研究专家。请根据以下论文信息完成�
 - "review": 综述
 示例: 纯计算→["calculate"]; 用新方法研究材料→["calculate","method"]; 实验测量→["experiment"]
 
-## 任务3：标注论文→材料关系
-仅对research_materials标注，不要包含referenced_materials：
-- discovers: 首次发现/合成
-- investigates: 研究/表征已知材料
-- predicts: 理论预测(未合成)
-
-## 任务4：关键物性值
+## 任务3：关键物性值
 对每个research_material，列出论文中报告的关键物性值（含Tc/P/λ）。
 is_primary=true为核心结论值。
 
-## 任务5：研究方法
+## 任务4：研究方法
 主要方法(1-5个)：DFT, SCDFT, Eliashberg, Allen-Dynes, Wannier, MLIP, USPEX, AIRSS, VASP, Quantum ESPRESSO, path-integral, CMD, MD, XRD, Raman, DAC, SQUID, resistivity, synchrotron, neutron diffraction
 
-## 任务6：前驱工作
+## 任务5：前驱工作
 核心方法/结论直接依赖的前人工作(0-3个)：
 [{{"work": "Allen-Dynes Tc equation", "hint": "Allen, Dynes, 1975"}}]
 
-## 任务7：核心发现
+## 任务6：核心发现
 一句话概括物理/化学层面的核心发现，不写材料名。
 
 返回 JSON:
@@ -62,7 +56,6 @@ is_primary=true为核心结论值。
   "research_materials": [],
   "referenced_materials": [],
   "paper_type": ["calculate"],
-  "material_relations": [{{"material":"LaH10","relation":"discovers","evidence":"原文证据"}}],
   "key_properties": {{"LaH10":[{{"name":"diffusivity","name_note":"","value":6e-06,"unit":"cm²/s","condition":{{"pressure":{{"value":250,"unit":"GPa"}},"temperature":{{"value":300,"unit":"K"}}}},"condition_note":"","is_primary":true}}]}},
   "methodology": ["DFT"],
   "builds_on": [{{"work":"Allen-Dynes Tc equation","hint":"Allen, Dynes, 1975"}}],
@@ -81,7 +74,7 @@ FIX_PROMPT = """你是超导材料研究专家。下面是你之前的分析结�
 ## 修正指引
 {guidance}
 
-返回完整的JSON（同之前格式，包含 research_materials, referenced_materials, paper_type, material_relations, key_properties, methodology, builds_on, key_finding, research_motivation）"""
+返回完整的JSON（同之前格式，包含 research_materials, referenced_materials, paper_type, key_properties, methodology, builds_on, key_finding, research_motivation）"""
 
 
 # ═══════════════════════════════════════════════
@@ -164,7 +157,7 @@ def is_complete(result: dict) -> bool:
         pt = [pt]
     if bool(set(pt) & {"review", "method"}):
         return True  # 综述/方法论允许无 materials
-    return bool(result.get("research_materials") and result.get("material_relations"))
+    return bool(result.get("research_materials"))
 
 
 # ═══════════════════════════════════════════════
@@ -203,11 +196,10 @@ def enrich_single(paper_id: int) -> Path | None:
         with engine.connect() as c:
             c.execute(sqla_text(
                 "UPDATE papers SET research_materials = :rm, referenced_materials = :rf, "
-                "material_relations = :mr, builds_on = :bo WHERE id = :pid"
+                "builds_on = :bo WHERE id = :pid"
             ), {
                 "rm": json.dumps(result.get("research_materials")),
                 "rf": json.dumps(result.get("referenced_materials")),
-                "mr": json.dumps(result.get("material_relations")),
                 "bo": json.dumps(result.get("builds_on")),
                 "pid": paper_id,
             })
@@ -312,7 +304,7 @@ def fix_papers(dry_run: bool, limit: int | None):
         # ── 自检轮 ──
         prev_keys = [
             "research_materials", "referenced_materials", "paper_type",
-            "material_relations", "key_properties", "methodology",
+            "key_properties", "methodology",
             "builds_on", "key_finding",
         ]
         prev_json = json.dumps(

@@ -423,7 +423,6 @@ class Paper(Base):
     key_finding = Column(Text)
     research_motivation = Column(Text)
     research_materials = Column(JSON)
-    material_relations = Column(JSON)
     builds_on = Column(JSON)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(

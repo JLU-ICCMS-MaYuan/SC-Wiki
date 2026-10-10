@@ -686,7 +686,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         />
       </Box>
 
-      <PaperMaterialsSection states={draft.material_states} relations={draft.paper.material_relations} historicalMaterials={draft.paper.research_materials} onChange={readOnly ? undefined : values => setPaperField('material_relations', values)} />
+      <PaperMaterialsSection states={draft.material_states} historicalMaterials={draft.paper.research_materials} />
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, mt: 2, '& > *': { minWidth: 0 } }}>
         <FormControl fullWidth error={hasIssue('paper.paper_type')} data-issue-field="paper.paper_type">

@@ -1,21 +1,25 @@
-"""展示契约：历史关系来源与研究材料汇总。"""
-import json
+"""展示契约：旧关系退役与研究材料汇总。"""
 import asyncio
 import copy
 import os
 import pytest
 
-from backend.api.rag import _derived_research_materials
+from backend.api.rag import _derived_research_materials, _reject_legacy_classification_contract
 from backend.ingest.upload_jobs import _normalize_draft
 
 
-def test_relation_history_keeps_all_source_fields():
-    relations = [{"material": "Sn", "relation": "investigates", "page": 2,
-                  "quote": "source", "evidence": {"file_id": "main"}}]
-    for value in [relations, json.dumps(relations)]:
-        result = _normalize_draft({"paper": {"material_relations": value}})
-        assert result["paper"]["material_relations"] == relations
-    assert _normalize_draft({"paper": {"material_relations": "invalid history"}})["paper"]["material_relations"] == "invalid history"
+def test_legacy_relations_are_removed_from_normalized_draft():
+    result = _normalize_draft({"paper": {"title": "kept", "material_relations": [
+        {"material": "(H2S)2H2", "relation": "investigates"},
+        {"material": "(H2S)2H2", "relation": "predicts"}]}})
+    assert result["paper"]["title"] == "kept"
+    assert "material_relations" not in result["paper"]
+
+
+def test_old_client_cannot_write_retired_relations():
+    with pytest.raises(Exception) as raised:
+        _reject_legacy_classification_contract({"paper": {"material_relations": []}, "material_states": []})
+    assert raised.value.detail["code"] == "retired_material_relations"
 
 
 def test_summary_tracks_state_order_and_uses_name_before_formula():
@@ -27,7 +31,7 @@ def test_summary_tracks_state_order_and_uses_name_before_formula():
 
 
 @pytest.mark.skipif(os.environ.get('SCWIKI_CURRENT_MYSQL') != '1', reason='显式选择当前 MySQL 外层回滚验证')
-def test_scientific_save_reload_updates_summary_and_preserves_relations(monkeypatch):
+def test_scientific_save_reload_updates_summary(monkeypatch):
     from sqlalchemy import select
     from backend import models
     from backend.api.rag import rewrite_paper_scientific_draft
@@ -35,11 +39,9 @@ def test_scientific_save_reload_updates_summary_and_preserves_relations(monkeypa
 
     async def run():
         async with isolated_paper(monkeypatch) as (factory, user, pid, payload):
-            relation = [{"material": "Sn", "relation": "investigates", "page": 2, "quote": "source"}]
             async with factory() as session, session.begin():
                 paper = await session.get(models.Paper, pid)
                 paper.research_materials = ['legacy']
-                paper.material_relations = relation
             for name, kind in [('Tin', 'experimental'), ('Pure tin', 'mixed')]:
                 payload['material_states'][0].update(material_name=name, state_kind=kind)
                 assert (await rewrite_paper_scientific_draft(pid, copy.deepcopy(payload), user))['ok']
@@ -47,7 +49,6 @@ def test_scientific_save_reload_updates_summary_and_preserves_relations(monkeypa
                     paper = await session.get(models.Paper, pid)
                     state = await session.scalar(select(models.MaterialState).where(models.MaterialState.paper_id == pid))
                     assert paper.research_materials == [name]
-                    assert paper.material_relations == relation
                     assert state.state_kind == kind
             assert (await rewrite_paper_scientific_draft(pid, copy.deepcopy(payload), user))['data']['unchanged']
     asyncio.run(run())

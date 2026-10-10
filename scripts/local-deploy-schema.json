@@ -1,7 +1,7 @@
 {
   "schema_heads": [
     "20260914_0052",
-    "20260918_0108"
+    "20261010_0127"
   ],
   "tables": {
     "admin_applications": {
@@ -1371,6 +1371,356 @@
         ]
       ]
     },
+    "paper_document_blocks": {
+      "checks": [],
+      "columns": {
+        "bbox_json": {
+          "nullable": true,
+          "type": "json"
+        },
+        "block_id": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "block_type": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "confidence": {
+          "nullable": true,
+          "type": "float"
+        },
+        "content_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "figure_id": {
+          "nullable": true,
+          "type": "varchar(128)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "metadata_json": {
+          "nullable": true,
+          "type": "json"
+        },
+        "paper_file_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "parser_run_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "pdf_page": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "polygon_json": {
+          "nullable": true,
+          "type": "json"
+        },
+        "printed_page": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "reading_order": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "table_id": {
+          "nullable": true,
+          "type": "varchar(128)"
+        },
+        "text": {
+          "nullable": false,
+          "type": "longtext"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "parser_run_id",
+            "paper_id",
+            "paper_revision",
+            "paper_file_id"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision",
+            "paper_file_id"
+          ],
+          "table": "paper_document_parser_runs"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "paper_id",
+          "paper_file_id",
+          "parser_run_id"
+        ],
+        [
+          "paper_id",
+          "paper_revision",
+          "paper_file_id",
+          "parser_run_id",
+          "block_id"
+        ]
+      ]
+    },
+    "paper_document_parser_runs": {
+      "checks": [],
+      "columns": {
+        "capabilities_json": {
+          "nullable": true,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "document_json": {
+          "nullable": false,
+          "type": "json"
+        },
+        "ended_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "error_code": {
+          "nullable": true,
+          "type": "varchar(64)"
+        },
+        "error_summary": {
+          "nullable": true,
+          "type": "varchar(500)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "ir_schema_version": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "mode": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "model_version": {
+          "nullable": true,
+          "type": "varchar(128)"
+        },
+        "paper_file_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "parse_profile": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "parser_name": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "parser_version": {
+          "nullable": false,
+          "type": "varchar(128)"
+        },
+        "reading_state": {
+          "nullable": true,
+          "type": "varchar(32)"
+        },
+        "rule_version": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "started_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(32)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_file_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "paper_files"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "id",
+          "paper_id",
+          "paper_revision",
+          "paper_file_id"
+        ]
+      ]
+    },
+    "paper_evidence_locators": {
+      "checks": [],
+      "columns": {
+        "bbox_json": {
+          "nullable": true,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "document_block_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "figure_id": {
+          "nullable": true,
+          "type": "varchar(128)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "locator_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "paper_evidence_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_file_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "parser_name": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "parser_run_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "parser_version": {
+          "nullable": false,
+          "type": "varchar(128)"
+        },
+        "pdf_page": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "polygon_json": {
+          "nullable": true,
+          "type": "json"
+        },
+        "printed_page": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "quote": {
+          "nullable": false,
+          "type": "longtext"
+        },
+        "source_kind": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "source_version": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "table_id": {
+          "nullable": true,
+          "type": "varchar(128)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "document_block_id",
+            "paper_id",
+            "paper_file_id",
+            "parser_run_id"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_file_id",
+            "parser_run_id"
+          ],
+          "table": "paper_document_blocks"
+        },
+        {
+          "columns": [
+            "paper_evidence_id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "references": [
+            "id",
+            "paper_id",
+            "paper_revision"
+          ],
+          "table": "paper_evidences"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "locator_hash"
+        ]
+      ]
+    },
     "paper_evidences": {
       "checks": [],
       "columns": {
@@ -2007,10 +2357,6 @@
         "knowledge_graph_title": {
           "nullable": true,
           "type": "varchar(200)"
-        },
-        "material_relations": {
-          "nullable": true,
-          "type": "json"
         },
         "methodology": {
           "nullable": true,
@@ -2878,6 +3224,120 @@
         ]
       ]
     },
+    "rag_chat_conversations": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "owner_user_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "source_local_id": {
+          "nullable": true,
+          "type": "varchar(128)"
+        },
+        "title": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "owner_user_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "owner_user_id",
+          "source_local_id"
+        ]
+      ]
+    },
+    "rag_chat_turns": {
+      "checks": [],
+      "columns": {
+        "answer": {
+          "nullable": false,
+          "type": "longtext"
+        },
+        "citations_json": {
+          "nullable": false,
+          "type": "json"
+        },
+        "conversation_id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "display_meta_json": {
+          "nullable": false,
+          "type": "json"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "question": {
+          "nullable": false,
+          "type": "text"
+        },
+        "request_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "sequence": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "conversation_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "rag_chat_conversations"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "conversation_id",
+          "request_id"
+        ],
+        [
+          "conversation_id",
+          "sequence"
+        ]
+      ]
+    },
     "scientific_evidence_checks": {
       "checks": [],
       "columns": {
@@ -3006,6 +3466,96 @@
           "item_key"
         ]
       ]
+    },
+    "scientific_manual_evidence": {
+      "checks": [],
+      "columns": {
+        "actor_name_snapshot": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "actor_user_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "after_value": {
+          "nullable": true,
+          "type": "json"
+        },
+        "baseline_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "before_value": {
+          "nullable": true,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "evidence_version": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "item_key": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "items": {
+          "nullable": false,
+          "type": "json"
+        },
+        "no_evidence_reason": {
+          "nullable": false,
+          "type": "text"
+        },
+        "paper_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "reason": {
+          "nullable": false,
+          "type": "text"
+        },
+        "source_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "target": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "target_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "value_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
     },
     "scientific_structure_origins": {
       "checks": [],

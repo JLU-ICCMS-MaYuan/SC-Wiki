@@ -744,3 +744,17 @@ func TestUpdatePaperRejectsLegacyPropertyContractWithoutQueryingLegacyTable(t *t
 		t.Fatalf("code=%#v", body["code"])
 	}
 }
+
+func TestUpdatePaperRejectsRetiredMaterialRelations(t *testing.T) {
+	db := paperDetailTestDB(t)
+	seedPaperFour(t, db, reviewStatusApproved)
+	router := gin.New()
+	router.PUT("/admin/papers/:id", UpdatePaper)
+	request := httptest.NewRequest(http.MethodPut, "/admin/papers/4", strings.NewReader(`{"material_relations":[]}`))
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, request)
+	if response.Code != http.StatusBadRequest || !strings.Contains(response.Body.String(), "retired_material_relations") {
+		t.Fatalf("status=%d body=%s", response.Code, response.Body.String())
+	}
+}

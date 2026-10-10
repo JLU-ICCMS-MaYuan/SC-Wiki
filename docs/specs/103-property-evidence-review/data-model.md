@@ -1,5 +1,7 @@
 # 数据模型
 
+> 下文论文级材料关系 JSON 为历史模型；当前已由 [#127](../127-retire-material-relations/spec.md) 删除，不应作为新数据契约。
+
 ## 统一展示补充（2026-09-17）
 
 不新增实体。材料关系沿用论文级 JSON 列表，单项保留 material、relation 与原有 evidence、quote、page 等属性；编辑两个文本字段不截断来源。研究材料从当前材料状态有序去重汇总，状态类型沿用 state_kind。

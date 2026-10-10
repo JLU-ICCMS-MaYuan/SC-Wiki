@@ -58,7 +58,7 @@
 - FR-007：LLM 流式响应中途断开按可重试错误处理。
 - FR-008：概括/推测与分类枚举字段（`SYNTHESIS_FIELDS`：summary、key_finding、methodology、
   keywords_tags、research_motivation、knowledge_graph_title、paper_type、research_materials、
-  material_families、material_relations、theoretical_subtype、superconductor_kind、state_kind、
+  material_families、theoretical_subtype、superconductor_kind、state_kind、
   crystal_system、material_dimensionality、structure_families、condition_note、note）标记为
   `check_mode=synthesis`，核对按模型整体判断进行，不因引句逐字定位失败改判 missing，聚合时
   忽略"本批未提及"的 missing；事实与数值字段不受影响，仍执行逐字定位。

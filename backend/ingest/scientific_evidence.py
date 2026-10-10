@@ -22,7 +22,7 @@ PAPER_FIELDS = {
     'keywords_tags': '科学关键词', 'paper_type': '论文类型',
     'theoretical_subtype': '理论子类型', 'superconductor_kind': '超导体类别',
     'material_families': '材料家族', 'research_materials': '研究材料',
-    'material_relations': '材料关系', 'knowledge_graph_title': '图谱科学标题',
+    'knowledge_graph_title': '图谱科学标题',
 }
 STATE_FIELDS = {
     'material_name': '材料名', 'material': '材料化学式', 'material_dimensionality': '材料维度',
@@ -42,7 +42,7 @@ STATE_FIELDS = {
 SYNTHESIS_FIELDS = frozenset({
     'summary', 'key_finding', 'methodology', 'keywords_tags', 'research_motivation',
     'knowledge_graph_title', 'paper_type', 'research_materials', 'material_families',
-    'material_relations', 'theoretical_subtype', 'superconductor_kind',
+    'theoretical_subtype', 'superconductor_kind',
     'state_kind', 'crystal_system', 'material_dimensionality', 'structure_families',
     'condition_note', 'note',
 })
@@ -102,7 +102,7 @@ def field_records(identity, path, data, fields, context=None):
         value = data.get(name)
         if name in {'calculation_context', 'experimental_context'} and isinstance(value, dict):
             value = {k: v for k, v in canonical(value).items() if populated(v)}
-        if name in {'authors', 'co_first_authors', 'corresponding_authors', 'methodology', 'keywords_tags', 'research_materials', 'material_relations'} and isinstance(value, str):
+        if name in {'authors', 'co_first_authors', 'corresponding_authors', 'methodology', 'keywords_tags', 'research_materials'} and isinstance(value, str):
             try:
                 value = json.loads(value)
             except (ValueError, TypeError):

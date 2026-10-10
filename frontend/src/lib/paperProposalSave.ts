@@ -15,8 +15,9 @@ export async function saveQuickReviewProposals(paperId: number, patches: Evidenc
   const metadata: Record<string, unknown> = { ...draft.paper, history_operation_id, evidence_preparation_id: preparationId }
   if (states.length || draft.paper.material_families?.length) delete metadata.superconductor_kind
   delete metadata.key_properties
+  delete metadata.material_relations
   for (const [key, value] of Object.entries(metadata)) {
-    if (Array.isArray(value) && ['authors', 'keywords_tags', 'methodology', 'research_materials', 'material_relations'].includes(key)) metadata[key] = JSON.stringify(value)
+    if (Array.isArray(value) && ['authors', 'keywords_tags', 'methodology', 'research_materials'].includes(key)) metadata[key] = JSON.stringify(value)
   }
   if (resumeStage !== 'scientific') await api.put(`/api/admin/papers/${paperId}`, metadata)
   if (states.length || draft.paper.material_families?.length) {
