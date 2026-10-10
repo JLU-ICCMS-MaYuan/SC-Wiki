@@ -9,7 +9,7 @@
 - [x] T005 [US3] 移除 Neo4j `STUDIES` 的两处生成、查询及对外输出，清理现有边和论文属性。
 - [x] T006 [US2] 确认本机 `scwiki` 实例后执行定向数据清理与迁移；索引预检无专属来源点，无需重建。
 - [x] T007 [US1/US3] 更新 #23、#103、#109、#120 的现行要求与关联，完成 Python、Go、前端及引用图回归。
-- [ ] T008 回写 Overview、验收记录及 #127 Documentation Impact，按仓库规则提交并关闭 Issue。
+- [x] T008 回写 Overview、验收记录及 #127 Documentation Impact，按仓库规则提交并关闭 Issue。
 
 ## 覆盖
 
