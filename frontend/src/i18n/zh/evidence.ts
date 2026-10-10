@@ -2,6 +2,10 @@ export default {
   'viewRegion': '查看原 PDF 区域',
   'regionLoading': '正在加载原文区域',
   'regionUnavailable': '区域暂不可用，请继续核对页码和原文。',
+  'regionLegacyNoLocator': '此旧任务没有可靠的 PDF 区域坐标；请继续核对原文引句。',
+  'regionQuoteUnlocated': '引句未在原 PDF 文本层唯一匹配，不能可靠高亮。',
+  'regionRenderFailed': '原 PDF 暂不可渲染或来源已变化，原文引句仍可查看。',
+  'legacyTextLocator': '原 PDF 文本层唯一匹配',
   'printedPage': '印刷页码 {page}',
   'regionImage': '原 PDF 页面与证据区域高亮',
 

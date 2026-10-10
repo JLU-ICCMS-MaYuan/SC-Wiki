@@ -2,6 +2,10 @@ export default {
   'viewRegion': 'View PDF region',
   'regionLoading': 'Loading source region',
   'regionUnavailable': 'Region unavailable; page and quote remain available.',
+  'regionLegacyNoLocator': 'This older task has no reliable PDF coordinates. The source quote remains available.',
+  'regionQuoteUnlocated': 'The quote was not uniquely found in the original PDF text layer, so it cannot be highlighted reliably.',
+  'regionRenderFailed': 'The original PDF cannot be rendered or has changed. The source quote remains available.',
+  'legacyTextLocator': 'Unique match in the original PDF text layer',
   'printedPage': 'Printed page {page}',
   'regionImage': 'PDF page with highlighted evidence',
 

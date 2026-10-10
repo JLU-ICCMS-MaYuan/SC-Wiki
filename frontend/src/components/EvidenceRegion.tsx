@@ -4,7 +4,7 @@ import { api } from '../lib/api'
 import { useLanguage } from '../context/LanguageContext'
 import type { EvidenceSource, EvidenceTarget } from './EvidenceWorkflow'
 
-type Region = { status: string; image?: string; region?: number[]; pdf_page?: number; printed_page?: number; message?: string; parser?: { name: string; mode: string } }
+type Region = { status: string; image?: string; region?: number[]; regions?: number[][]; pdf_page?: number; printed_page?: number; message?: string; parser?: { name: string; mode: string } }
 
 export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; source: EvidenceSource }) {
   const { t } = useLanguage()
@@ -33,18 +33,24 @@ export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; so
   useEffect(() => {
     if (source.evidence_kind === 'pdf_image' && source.block_id) void open()
   }, [source.evidence_kind, source.block_id, source.file_id, source.page_start, target?.target, target?.target_id])
+  const page = source.page_start || result?.pdf_page
+  const highlights = result?.regions?.length ? result.regions : result?.region ? [result.region] : []
+  const unavailable = result?.status === 'legacy_text' ? t('evidence.regionLegacyNoLocator')
+    : result?.status === 'unlocated' ? t('evidence.regionQuoteUnlocated')
+      : result?.status === 'render_unavailable' ? t('evidence.regionRenderFailed')
+        : t('evidence.regionUnavailable')
   return <Box sx={{ my: 1 }}>
-    <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {source.page_start ? t('evidence.page', { page: source.page_start }) : t('evidence.pageUnknown')}{source.quote || source.content ? `：${source.quote || source.content}` : ''}</Typography>
+    <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {page ? t('evidence.page', { page }) : t('evidence.pageUnknown')}{source.quote || source.content ? `：${source.quote || source.content}` : ''}</Typography>
     {target && (source.quote || source.block_id) && source.evidence_kind !== 'pdf_image' && <Button disabled={busy} onClick={() => void open()}>{t('evidence.viewRegion')}</Button>}
     {busy && <LinearProgress aria-label={t('evidence.regionLoading')} />}
     {error && <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>}
-    {result && result.status !== 'located' && <Alert severity="info">{t('evidence.regionUnavailable')}</Alert>}
-    {result?.image && result.region && <>
-      <Typography>{result.parser?.name} · {result.parser?.mode}{result.printed_page != null ? ` · ${t('evidence.printedPage', { page: result.printed_page })}` : ''}</Typography>
+    {result && result.status !== 'located' && <Alert severity="info">{unavailable}</Alert>}
+    {result?.image && highlights.length > 0 && <>
+      <Typography>{result.parser?.mode === 'legacy_text' ? t('evidence.legacyTextLocator') : result.parser?.name}{result.printed_page != null ? ` · ${t('evidence.printedPage', { page: result.printed_page })}` : ''}</Typography>
       <Box sx={{ position: 'relative', width: '100%' }}>
-        <Box component="img" src={result.image} alt={t('evidence.regionImage')} sx={{ display: 'block', width: '100%' }} onError={() => setError(true)} />
-        <Box aria-hidden sx={{ position: 'absolute', pointerEvents: 'none', border: '2px solid #d32f2f', boxSizing: 'border-box',
-          left: `${result.region[0] * 100}%`, top: `${result.region[1] * 100}%`, width: `${result.region[2] * 100}%`, height: `${result.region[3] * 100}%` }} />
+        <Box component="img" src={result.image} alt={t('evidence.regionImage')} sx={{ display: 'block', width: '100%' }} onError={() => { setError(true); setResult(current => current ? { ...current, image: undefined } : current) }} />
+        {highlights.map((region, index) => <Box key={index} aria-hidden sx={{ position: 'absolute', pointerEvents: 'none', border: '2px solid #d32f2f', boxSizing: 'border-box',
+          left: `${region[0] * 100}%`, top: `${region[1] * 100}%`, width: `${region[2] * 100}%`, height: `${region[3] * 100}%` }} />)}
       </Box>
     </>}
   </Box>

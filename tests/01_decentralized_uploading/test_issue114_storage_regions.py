@@ -82,6 +82,46 @@ def test_region_render_does_not_save_images_and_checks_hash(tmp_path):
     assert render_region(None,None,None,quote="old quote",pdf_page=1)["status"]=="legacy_text"
 
 
+def test_legacy_pdf_uses_unique_text_layer_quote_without_inventing_coordinates(tmp_path):
+    path, ir = make_document(tmp_path)
+    found = render_region(None, path, ir.source_sha256, quote="Tc = 200 K at 150 GPa.", pdf_page=None)
+    assert found["status"] == "located"
+    assert found["pdf_page"] == 1
+    assert found["image"].startswith("data:image/png;base64,")
+    assert found["parser"]["mode"] == "legacy_text"
+    assert len(found["regions"]) >= 1
+    assert all(0 <= value <= 1 for region in found["regions"] for value in region)
+    assert render_region(None, path, "b" * 64, quote="Tc = 200 K at 150 GPa.", pdf_page=None)["status"] == "render_unavailable"
+    assert render_region(None, path, ir.source_sha256, quote="Tc = 201 K", pdf_page=None)["status"] == "unlocated"
+    assert render_region(None, path, ir.source_sha256, quote="Tc = 200 K at 150 GPa.", pdf_page=2)["status"] == "unlocated"
+
+
+def test_legacy_pdf_rejects_nonunique_quote(tmp_path):
+    import pymupdf
+    path = tmp_path / "repeated.pdf"
+    with pymupdf.open() as pdf:
+        page = pdf.new_page()
+        page.insert_text((50, 100), "Tc = 200 K at 150 GPa.")
+        page.insert_text((50, 200), "Tc = 200 K at 150 GPa.")
+        pdf.save(path)
+    digest = DocumentSource(path, "legacy").resolved_sha256()
+    assert render_region(None, path, digest, quote="Tc = 200 K at 150 GPa.", pdf_page=None)["status"] == "unlocated"
+
+
+def test_legacy_upload_returns_authenticated_pdf_for_on_demand_lookup(tmp_path, monkeypatch):
+    from backend.ingest import upload_tasks
+    path, ir = make_document(tmp_path)
+    file_id = "source-file"
+    monkeypatch.setattr(upload_tasks, "get_state", lambda _: {"user_id": 2, "files": [
+        {"file_id": file_id, "stored_path": str(path), "sha256": ir.source_sha256, "kind": "pdf"}]})
+    monkeypatch.setattr(upload_tasks, "data_path", lambda _: tmp_path)
+    found_ir, found_path, found_hash = region_document(None, "upload", "a" * 32, file_id,
+        SimpleNamespace(id=2, role="user", is_approved=True))
+    assert found_ir is None
+    assert found_path == path
+    assert found_hash == ir.source_sha256
+
+
 def test_image_evidence_requires_a_real_figure_block(tmp_path):
     path, ir = make_document(tmp_path)
     block = ir.blocks[0]
