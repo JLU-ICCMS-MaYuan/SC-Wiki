@@ -1,8 +1,8 @@
 """仅从授权来源文件按需渲染证据页面；不保存截图。"""
 from __future__ import annotations
 
-import base64
 from pathlib import Path
+import re
 
 from fastapi import HTTPException
 from sqlalchemy import select
@@ -10,6 +10,7 @@ from backend import models
 from backend.rag.config import settings
 from .document_ir import DocumentIR
 from .document_parsers import DocumentSource
+from .pdf_evidence_crops import DPI, render_evidence_crops
 
 
 def region_document(session, target, target_id, file_id, user):
@@ -69,13 +70,6 @@ def region_document(session, target, target_id, file_id, user):
     return DocumentIR.model_validate(run.document_json), path, file.sha256
 
 
-def _page_image(page) -> str:
-    import pymupdf
-    scale = min(1.5, 1600 / max(page.rect.width, page.rect.height))
-    pixels = page.get_pixmap(matrix=pymupdf.Matrix(scale, scale), alpha=False)
-    return "data:image/png;base64," + base64.b64encode(pixels.tobytes("png")).decode()
-
-
 def _legacy_pdf_region(path: Path | None, expected_hash: str | None, quote: str, pdf_page: int | None):
     fallback = {"status": "legacy_text", "image": None,
                 "message": "旧解析任务没有保存区域坐标；原文引句仍可核对。"}
@@ -89,29 +83,52 @@ def _legacy_pdf_region(path: Path | None, expected_hash: str | None, quote: str,
             needle = " ".join(quote.split())
             matches = []
             occurrences = 0
-            for page in pdf:
-                if pdf_page is not None and page.number + 1 != pdf_page:
-                    continue
-                count = " ".join(page.get_text("text").split()).casefold().count(needle.casefold())
+            page_texts = [" ".join(page.get_text("text").split()).casefold() for page in pdf]
+            for page, text in zip(pdf, page_texts):
+                # 旧 Markdown 的页码可能由相邻段落继承；原 PDF 中的唯一匹配优先。
+                count = text.count(needle.casefold())
                 occurrences += count
                 if count == 1:
                     matches.append((page.number, page.search_for(quote)))
-            if occurrences != 1 or len(matches) != 1 or not matches[0][1]:
+            if occurrences == 0:
+                spanning = []
+                for index in range(len(pdf) - 1):
+                    combined = page_texts[index] + " " + page_texts[index + 1]
+                    start = combined.find(needle.casefold())
+                    boundary = len(page_texts[index])
+                    if start < 0 or combined.count(needle.casefold()) != 1 or not start < boundary < start + len(needle):
+                        continue
+                    first_quote = needle[:boundary - start].strip()
+                    second_quote = needle[boundary - start + 1:].strip()
+                    if min(len(first_quote), len(second_quote)) < 12:
+                        continue
+                    if page_texts[index].count(first_quote.casefold()) != 1 or page_texts[index + 1].count(second_quote.casefold()) != 1:
+                        continue
+                    first_boxes = pdf[index].search_for(first_quote)
+                    second_boxes = pdf[index + 1].search_for(second_quote)
+                    if first_boxes and second_boxes:
+                        spanning.append([(index, first_boxes), (index + 1, second_boxes)])
+                if len(spanning) == 1:
+                    matches = spanning[0]
+                    occurrences = 1
+            if occurrences > 1 and pdf_page is not None:
+                matches = [item for item in matches if item[0] + 1 == pdf_page]
+                occurrences = len(matches)
+            if occurrences != 1 or not matches or len(matches) > 2 or not all(item[1] for item in matches):
                 return {"status": "unlocated", "image": None,
                         "message": "引句未在原 PDF 文本层唯一匹配，不能可靠高亮。"}
-            page = pdf[matches[0][0]]
-            if page.rotation:
-                return {"status": "unlocated", "image": None,
-                        "message": "原 PDF 页面有旋转，当前无法可靠高亮引句。"}
-            boxes = matches[0][1]
-            width, height = page.rect.width, page.rect.height
-            regions = [[box.x0 / width, box.y0 / height,
-                        box.width / width, box.height / height] for box in boxes]
-            left, top = min(box.x0 for box in boxes), min(box.y0 for box in boxes)
-            right, bottom = max(box.x1 for box in boxes), max(box.y1 for box in boxes)
-            return {"status": "located", "image": _page_image(page), "pdf_page": page.number + 1,
-                    "region": [left / width, top / height, (right - left) / width, (bottom - top) / height],
-                    "regions": regions, "parser": {"name": "原 PDF 文本层检索", "mode": "legacy_text"},
+            crops = []
+            for page_number, boxes in matches:
+                page = pdf[page_number]
+                if page.rotation:
+                    return {"status": "unlocated", "image": None,
+                            "message": "原 PDF 页面有旋转，当前无法可靠高亮引句。"}
+                crops.extend(render_evidence_crops(page, boxes))
+            first = crops[0]
+            return {"status": "located", "image": first["image"], "pdf_page": matches[0][0] + 1,
+                    "page_end": matches[-1][0] + 1,
+                    "region": first["highlights"][0], "regions": first["highlights"],
+                    "crops": crops, "dpi": DPI, "parser": {"name": "原 PDF 文本层检索", "mode": "legacy_text"},
                     "message": "引句在原 PDF 文本层唯一匹配。"}
     except Exception:
         return {"status": "render_unavailable", "image": None,
@@ -150,8 +167,27 @@ def render_region(ir: DocumentIR | None, path: Path | None, expected_hash, *, qu
             if abs(page_info.width-page.rect.width)>1 or abs(page_info.height-page.rect.height)>1:
                 raise ValueError("page geometry mismatch")
             x0,y0,x1,y1=block.bbox
-            result.update(status="located",image=_page_image(page),
-                region=[x0/page.rect.width,y0/page.rect.height,(x1-x0)/page.rect.width,(y1-y0)/page.rect.height])
+            boxes = [pymupdf.Rect(x0, y0, x1, y1)]
+            visual = block.block_type in {"figure", "table", "table_cell"}
+            if visual:
+                captions = []
+                for candidate in ir.blocks:
+                    if candidate.pdf_page != block.pdf_page or candidate.bbox is None or candidate.block_id == block.block_id:
+                        continue
+                    if candidate.block_type != "caption" and not re.match(r"^(?:fig\.?|figure|table)\s*\d", candidate.text.strip(), re.IGNORECASE):
+                        continue
+                    area = pymupdf.Rect(candidate.bbox)
+                    overlap = max(0, min(area.x1, boxes[0].x1) - max(area.x0, boxes[0].x0))
+                    gap = max(0, area.y0 - boxes[0].y1, boxes[0].y0 - area.y1)
+                    if overlap >= 0.3 * min(area.width, boxes[0].width) and gap <= 50:
+                        captions.append((gap, area))
+                if captions:
+                    boxes.append(min(captions, key=lambda item: item[0])[1])
+            crops = render_evidence_crops(page, boxes, keep_together=visual,
+                                          context_lines=0 if visual else 3)
+            first = crops[0]
+            result.update(status="located", image=first["image"], region=first["highlights"][0],
+                          crops=crops, dpi=DPI)
     except Exception:
         result.update(status="render_unavailable",message="原 PDF 暂不可渲染或来源已变化，文本证据仍可查看。")
     return result

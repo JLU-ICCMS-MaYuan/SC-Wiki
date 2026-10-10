@@ -33,20 +33,21 @@ class Target(BaseModel):
 
 
 def snapshot_for(body, user):
+    from backend.ingest.pdf_source_pages import current_pdf_results
     if body.target == 'revision':
         from backend.services.paper_revisions import revision_snapshot
         with SessionLocal() as session:
             snapshot = revision_snapshot(session, body.target_id, user.id)
-            return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
+            return snapshot, current_pdf_results(session, snapshot, science.load_results(session, snapshot, user.id, include_stale=True))
     if body.target == 'upload':
         snapshot = ev.upload_snapshot(body.target_id, user.id)
         with SessionLocal() as session:
-            return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
+            return snapshot, current_pdf_results(session, snapshot, science.load_results(session, snapshot, user.id, include_stale=True))
     if body.target != 'paper' or not body.target_id.isdigit():
         raise HTTPException(400, detail='证据目标无效')
     with SessionLocal() as session:
         snapshot = ev.paper_snapshot(session, int(body.target_id), user.id, user.role)
-        return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
+        return snapshot, current_pdf_results(session, snapshot, science.load_results(session, snapshot, user.id, include_stale=True))
 
 
 @router.post('/preflight')

@@ -198,13 +198,18 @@ def revision_snapshot(session, revision_id, owner):
     require_owner(paper, models.User(id=owner))
     saved = session.get(models.PaperRevisionDraft, paper_id)
     assert_current(session, paper, saved)
-    files = {f.id: f.original_filename for f in rows(session, models.PaperFile, paper.id)}
+    paper_files = rows(session, models.PaperFile, paper.id)
+    files = {f.id: f.original_filename for f in paper_files}
     chunks = [dict(chunk_id=c.id, file_id=str(c.paper_file_id), source_name=files.get(c.paper_file_id),
         chunk_index=c.chunk_index, content=c.content, page_start=c.page_start, page_end=c.page_end, section=c.section_name)
         for c in rows(session, models.PaperChunk, paper.id)]
     records = ev.draft_records(saved.draft, science.origins_for(session, 'revision', revision_id))
     snapshot = ev.complete_snapshot('revision', revision_id, records, chunks, saved.draft)
     snapshot['draft_version'] = saved.draft_version
+    snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',
+        stored_path=f.stored_path, sha256=f.sha256, original_filename=f.original_filename)
+        for f in paper_files if f.paper_revision == paper.content_revision and
+        f.original_filename and f.original_filename.lower().endswith('.pdf')]
     return snapshot
 
 

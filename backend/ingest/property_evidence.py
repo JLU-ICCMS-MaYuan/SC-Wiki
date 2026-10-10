@@ -81,7 +81,8 @@ def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None,
         candidates = [c for c in candidates if str(c['file_id']) == str(file_id)]
         if not candidates:
             return None, '证据指向的来源文件不在当前论文及附件中，请让系统重新查找'
-    matching = [c for c in candidates if normalized_text(quote) in normalized_text(c['content'])]
+    matching = [c for c in candidates if normalized_text(quote) in normalized_text(c['content'])
+                or normalized_text(quote) == normalized_text(str(c.get('heading') or c.get('section') or '').lstrip('# '))]
     if not matching:
         return None, '原文引句未在所选来源文本中找到，请核对引句、文件或文件解析结果'
     if evidence.get("block_id"):
@@ -108,7 +109,13 @@ def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None,
     if len(matching) != 1:
         return None, '原文引句匹配多个位置，系统尚未确认具体出处，请重新查找'
     c = matching[0]
-    return {k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'section', 'source_name')} | {'quote': quote} | ({'block_id': evidence['block_id']} if isinstance(evidence.get('block_id'), str) else {}), None
+    source = {k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'section', 'source_name')}
+    if evidence.get('locator_status') in {'verified_text_layer', 'verified_front_matter'} or evidence.get('origin_kind') == 'verified_front_matter':
+        source.update(page_start=evidence.get('page_start'), page_end=evidence.get('page_end'),
+                      locator_status=evidence.get('locator_status'), origin_kind=evidence.get('origin_kind'))
+    elif c.get('chunk_id') is not None and evidence.get('chunk_id') == c.get('chunk_id') and c.get('page_start') is None:
+        source.update(page_start=evidence.get('page_start'), page_end=evidence.get('page_end'))
+    return source | {'quote': quote} | ({'block_id': evidence['block_id']} if isinstance(evidence.get('block_id'), str) else {}), None
 
 
 def row_dict(row) -> dict:
@@ -166,7 +173,14 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
     from backend.database import SessionLocal
     with SessionLocal() as session:
         origins = science.origins_for(session, 'upload', task_id)
-    return complete_snapshot('upload', task_id, draft_records(draft, origins), chunks, draft)
+    snapshot = complete_snapshot('upload', task_id, draft_records(draft, origins), chunks, draft)
+    snapshot['pdf_manifest'] = [source for source in state.get('files') or []
+                                if str(source.get('kind') or '').lower() == 'pdf']
+    if not state.get('files') and str(state.get('file_kind') or '').lower() == 'pdf':
+        snapshot['pdf_manifest'] = [{'file_id': 'main', 'role': 'main', 'kind': 'pdf',
+            'stored_path': state.get('file_path'), 'sha256': state.get('file_sha256'),
+            'original_filename': state.get('filename')}]
+    return snapshot
 
 
 def draft_records(draft, origins):
@@ -201,7 +215,8 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
     for state_id in states:
         module_indexes.update({m.id: i for i, m in enumerate(m for m in modules.values() if m.material_state_id == state_id)})
     record_indexes = {}
-    filenames = {f.id: f.original_filename for f in session.scalars(select(models.PaperFile).where(models.PaperFile.paper_id == paper_id))}
+    paper_files = list(session.scalars(select(models.PaperFile).where(models.PaperFile.paper_id == paper_id)))
+    filenames = {f.id: f.original_filename for f in paper_files}
     chunks = [dict(chunk_id=c.id, file_id=str(c.paper_file_id), source_name=filenames.get(c.paper_file_id), chunk_index=c.chunk_index, content=c.content,
                    page_start=c.page_start, page_end=c.page_end, section=c.section_name)
               for c in session.scalars(select(models.PaperChunk).where(models.PaperChunk.paper_id == paper_id, models.PaperChunk.paper_revision == paper.content_revision).order_by(models.PaperChunk.id))]
@@ -246,9 +261,16 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             records.append(science.structure_record(structure, state.state_key, f'material_states[{si}].structures[{structure['id']}]', origins.get(structure['structure_hash'])))
     for r in records:
         if r.get('kind') != 'property':
-            r['evidences'] = [dict(chunk_map[e.paper_chunk_id], quote=e.quote) for e in source_evidences.values() if e.field_path == r['field'] and e.paper_chunk_id in chunk_map]
+            r['evidences'] = [dict(chunk_map[e.paper_chunk_id], quote=e.quote,
+                                  page_start=e.page_start or chunk_map[e.paper_chunk_id].get('page_start'),
+                                  page_end=e.page_end or chunk_map[e.paper_chunk_id].get('page_end'))
+                              for e in source_evidences.values() if e.field_path == r['field'] and e.paper_chunk_id in chunk_map]
     snapshot = complete_snapshot('paper', str(paper_id), records, chunks, paper_data)
     snapshot['review_state'] = [paper.review_status, str(paper.reviewed_at), paper.content_revision]
+    snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',
+        stored_path=f.stored_path, sha256=f.sha256, original_filename=f.original_filename)
+        for f in paper_files if f.paper_revision == paper.content_revision and
+        f.original_filename and f.original_filename.lower().endswith('.pdf')]
     return snapshot
 
 
@@ -652,6 +674,8 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None):
     _ensure_not_cancelled(task_id)
     with SessionLocal.begin() as session:
         from .scientific_evidence import save_results
+        from .pdf_source_pages import current_pdf_results
+        current_results = current_pdf_results(session, current, current_results)
         save_results(session, current, current_results, owner)
     draft.clear()
     draft.update(filled)
@@ -786,6 +810,11 @@ def resolve_results(snapshot: dict, cached: dict, user_id: int, job_id: str | No
         if job['status'] != 'completed':
             fail('evidence_task_not_complete', '证据核对未完成或已取消，请重新核对')
         results = {**job['results'], **results}
+    if snapshot.get('pdf_manifest'):
+        from backend.database import SessionLocal
+        from .pdf_source_pages import current_pdf_results
+        with SessionLocal() as session:
+            results = current_pdf_results(session, snapshot, results)
     records = []
     for r in snapshot['records']:
         if r['key'] not in results:
@@ -891,12 +920,14 @@ def save_completed_upload(snapshot, results, owner, *, locked=False):
 def persist_completed_results(snapshot, results, owner):
     from backend.database import SessionLocal
     from .scientific_evidence import save_results
+    from .pdf_source_pages import current_pdf_results
     if snapshot['target'] == 'upload':
         from backend.ingest.upload_tasks import upload_task_lock
         with upload_task_lock(snapshot['target_id']):
             # 删除与提交也持有此锁，迟到任务不能重新创建已清理的目标。
             upload_snapshot(snapshot['target_id'], owner)
             with SessionLocal.begin() as session:
+                results.update(current_pdf_results(session, snapshot, results))
                 save_results(session, snapshot, results, owner)
             save_completed_upload(snapshot, results, owner, locked=True)
         return
@@ -913,6 +944,7 @@ def persist_completed_results(snapshot, results, owner):
             current = revision_snapshot(session, snapshot['target_id'], owner)
             if current['version'] != snapshot['version'] or current['draft_version'] != snapshot.get('draft_version'):
                 fail('evidence_stale', '返修草稿已变化，旧核对结果未应用，请重新核对')
+        results.update(current_pdf_results(session, snapshot, results))
         save_results(session, snapshot, results, owner)
 
 

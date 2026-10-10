@@ -1,20 +1,34 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Box, Button, LinearProgress, Typography } from '@mui/material'
+import { Alert, Box, Button, Dialog, DialogContent, DialogTitle, IconButton, LinearProgress, Typography } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import { api } from '../lib/api'
 import { useLanguage } from '../context/LanguageContext'
 import type { EvidenceSource, EvidenceTarget } from './EvidenceWorkflow'
 
-type Region = { status: string; image?: string; region?: number[]; regions?: number[][]; pdf_page?: number; printed_page?: number; message?: string; parser?: { name: string; mode: string } }
+type Crop = { image: string; highlights: number[][]; width?: number; height?: number; pdf_page?: number; source_raster_dpi?: number }
+type Region = { status: string; image?: string; region?: number[]; regions?: number[][]; crops?: Crop[]; dpi?: number; pdf_page?: number; printed_page?: number; message?: string; parser?: { name: string; mode: string } }
+
+function CropView({ crop, label, onClick }: { crop: Crop; label: string; onClick: () => void }) {
+  const { t } = useLanguage()
+  const [failed, setFailed] = useState(false)
+  if (failed) return <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>
+  return <Box component="button" type="button" onClick={onClick} aria-label={label} sx={{ display: 'block', position: 'relative', p: 0, border: 0, bgcolor: 'transparent', cursor: 'zoom-in', width: crop.width || 'max-content' }}>
+    <Box component="img" src={crop.image} alt={t('evidence.regionImage')} onError={() => setFailed(true)} sx={{ display: 'block', maxWidth: 'none', width: crop.width ? `${crop.width}px` : 'auto', height: crop.height ? `${crop.height}px` : 'auto' }} />
+    {crop.highlights.map((region, index) => <Box key={index} aria-hidden sx={{ position: 'absolute', pointerEvents: 'none', border: '2px solid #d32f2f', boxSizing: 'border-box',
+      left: `${region[0] * 100}%`, top: `${region[1] * 100}%`, width: `${region[2] * 100}%`, height: `${region[3] * 100}%` }} />)}
+  </Box>
+}
 
 export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; source: EvidenceSource }) {
   const { t } = useLanguage()
   const [result, setResult] = useState<Region | null>(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(false)
+  const [expandedCrop, setExpandedCrop] = useState<number | null>(null)
   const generation = useRef(0)
   useEffect(() => {
     generation.current++
-    setResult(null); setBusy(false); setError(false)
+    setResult(null); setBusy(false); setError(false); setExpandedCrop(null)
     return () => { generation.current++ }
   }, [target?.target, target?.target_id, source.file_id, source.page_start, source.quote, source.block_id])
   const open = async () => {
@@ -33,8 +47,9 @@ export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; so
   useEffect(() => {
     if (source.evidence_kind === 'pdf_image' && source.block_id) void open()
   }, [source.evidence_kind, source.block_id, source.file_id, source.page_start, target?.target, target?.target_id])
-  const page = source.page_start || result?.pdf_page
+  const page = result?.pdf_page || source.page_start
   const highlights = result?.regions?.length ? result.regions : result?.region ? [result.region] : []
+  const crops = result?.crops?.length ? result.crops : result?.image && highlights.length ? [{ image: result.image, highlights }] : []
   const unavailable = result?.status === 'legacy_text' ? t('evidence.regionLegacyNoLocator')
     : result?.status === 'unlocated' ? t('evidence.regionQuoteUnlocated')
       : result?.status === 'render_unavailable' ? t('evidence.regionRenderFailed')
@@ -45,13 +60,24 @@ export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; so
     {busy && <LinearProgress aria-label={t('evidence.regionLoading')} />}
     {error && <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>}
     {result && result.status !== 'located' && <Alert severity="info">{unavailable}</Alert>}
-    {result?.image && highlights.length > 0 && <>
-      <Typography>{result.parser?.mode === 'legacy_text' ? t('evidence.legacyTextLocator') : result.parser?.name}{result.printed_page != null ? ` · ${t('evidence.printedPage', { page: result.printed_page })}` : ''}</Typography>
-      <Box sx={{ position: 'relative', width: '100%' }}>
-        <Box component="img" src={result.image} alt={t('evidence.regionImage')} sx={{ display: 'block', width: '100%' }} onError={() => { setError(true); setResult(current => current ? { ...current, image: undefined } : current) }} />
-        {highlights.map((region, index) => <Box key={index} aria-hidden sx={{ position: 'absolute', pointerEvents: 'none', border: '2px solid #d32f2f', boxSizing: 'border-box',
-          left: `${region[0] * 100}%`, top: `${region[1] * 100}%`, width: `${region[2] * 100}%`, height: `${region[3] * 100}%` }} />)}
-      </Box>
+    {crops.length > 0 && <>
+      <Typography>{result?.parser?.mode === 'legacy_text' ? t('evidence.legacyTextLocator') : result?.parser?.name}{result?.printed_page != null ? ` · ${t('evidence.printedPage', { page: result.printed_page })}` : ''}{result?.dpi ? ` · ${result.dpi} DPI` : ''}</Typography>
+      <Typography variant="caption" color="text.secondary">{t('evidence.scrollRegionHint')}</Typography>
+      {crops.map((crop, index) => <Box key={index} sx={{ my: 1 }}>
+        {crop.pdf_page && crops.length > 1 && <Typography variant="caption">{t('evidence.page', { page: crop.pdf_page })}</Typography>}
+        {crop.source_raster_dpi && <Alert severity="warning">{t('evidence.sourceRasterLowDpi', { dpi: crop.source_raster_dpi })}</Alert>}
+        <Box sx={{ maxHeight: 440, overflow: 'auto', border: 1, borderColor: 'divider' }}>
+          <CropView crop={crop} label={t('evidence.expandRegion')} onClick={() => setExpandedCrop(index)} />
+        </Box>
+      </Box>)}
     </>}
+    <Dialog open={expandedCrop !== null} onClose={() => setExpandedCrop(null)} maxWidth="xl" fullWidth>
+      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>{source.source_name || source.file_id} · {(expandedCrop !== null && crops[expandedCrop]?.pdf_page || page) ? t('evidence.page', { page: (expandedCrop !== null && crops[expandedCrop]?.pdf_page) || page! }) : t('evidence.pageUnknown')}
+        <IconButton aria-label={t('evidence.collapseRegion')} onClick={() => setExpandedCrop(null)}><CloseIcon /></IconButton>
+      </DialogTitle>
+      <DialogContent sx={{ overflow: 'auto', maxHeight: '80vh' }}>
+        {expandedCrop !== null && crops[expandedCrop] && <CropView crop={crops[expandedCrop]} label={t('evidence.collapseRegion')} onClick={() => setExpandedCrop(null)} />}
+      </DialogContent>
+    </Dialog>
   </Box>
 }

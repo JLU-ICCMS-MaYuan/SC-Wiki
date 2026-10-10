@@ -8,6 +8,10 @@ export default {
   'legacyTextLocator': '原 PDF 文本层唯一匹配',
   'printedPage': '印刷页码 {page}',
   'regionImage': '原 PDF 页面与证据区域高亮',
+  'expandRegion': '点击放大 PDF 局部证据',
+  'collapseRegion': '点击缩回 PDF 局部证据',
+  'sourceRasterLowDpi': '这份 PDF 的原始扫描图约 {dpi} DPI；局部图已按 300 DPI 渲染，但原图细节无法补回。',
+  'scrollRegionHint': '局部图可横向、纵向滚动；点击图片放大。',
 
   "historyLabel": "历史记录",
   "historyReadonly": "内容或来源已变化，以下记录仅供参考，不用于当前批准。",

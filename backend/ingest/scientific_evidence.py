@@ -343,7 +343,7 @@ def transfer_result(record, result, chunks, file_ids=None):
                 'history': [*(result.get('history') or []), *history]}
     def relocate(source):
         mapped = (file_ids or {}).get(str(source.get('file_id')))
-        locator = {k: source.get(k) for k in ('quote', 'page_start')}
+        locator = {k: source.get(k) for k in ('quote', 'page_start', 'page_end', 'origin_kind', 'locator_status')}
         if mapped is not None:
             locator.update(file_id=str(mapped), chunk_index=source.get('chunk_index'))
         return locate(locator, chunks)

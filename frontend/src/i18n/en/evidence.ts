@@ -8,6 +8,10 @@ export default {
   'legacyTextLocator': 'Unique match in the original PDF text layer',
   'printedPage': 'Printed page {page}',
   'regionImage': 'PDF page with highlighted evidence',
+  'expandRegion': 'Click to enlarge the PDF evidence crop',
+  'collapseRegion': 'Click to close the enlarged PDF evidence crop',
+  'sourceRasterLowDpi': 'The source PDF scan is about {dpi} DPI. This crop is rendered at 300 DPI, but missing source detail cannot be recovered.',
+  'scrollRegionHint': 'Scroll within the crop in either direction; click the image to enlarge it.',
 
   "historyLabel": "History",
   "historyReadonly": "Content or sources changed. These records are reference only and cannot approve the current value.",

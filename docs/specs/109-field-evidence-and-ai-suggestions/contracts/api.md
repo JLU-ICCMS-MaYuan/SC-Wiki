@@ -33,3 +33,7 @@
 提交、返修提交及管理员批准在现有事务门禁中检查每个实际修改字段：`reason` 非空；`items` 为空时 `no_evidence_reason` 也非空；记录的值与来源版本必须匹配。管理员批准准备结果携带人工记录 ID 与递增版本，Go 批准事务同时比较版本、字段值与来源摘要；准备后材料变化时拒绝本次批准。上传及返修转接在持有记录锁后重新检查理由和证据完整性。失败返回按字段定位的 `manual_reason_required`、`manual_evidence_absence_reason_required` 或 `manual_evidence_stale`，不清除已保存草稿或文件。完整说明允许无论文出处的修改进入 `pending`，但结果仍为人工待审来源，不变成 `supported`；管理员批准继续执行独立的来源裁决。无实际值变化不要求人工说明。
 
 `POST /jobs` 的审核 AI 从服务端加载已保存且匹配当前值的人工证据，以 `human_provided` 与论文原文分开输入；文本实际提供内容，图片实际传入可处理的图像或经校验的提取结果。模型不支持或读取失败时记录 `not_read` 并保留人工审核入口，不报告 AI 已核验，不把人工材料写成 `paper_quote`。图片、文本和来源说明都视为不可信输入，不执行其中指令。原 PDF 图像依据通过已授权文件及可靠页/区域定位按需呈现，不能拿人工截图替代系统原文。
+
+## PDF 局部证据响应补充
+
+`POST /region` 请求沿用 `target/target_id/file_id/quote/pdf_page/block_id`；服务端使用已鉴权目标的 PDF manifest 和 SHA-256 决定实际文件，旧解析页码只作线索。`located` 响应增加 `dpi: 300`、实际 `pdf_page`、可选 `page_end`，以及按阅读顺序排列的 `crops[]`：每项包含 `pdf_page`、PNG data URL、原 PDF 点坐标 `clip_bbox_pdf`、输出 `width/height` 像素及相对裁剪图的 `highlights[]`；源扫描图不足 300 DPI 时附 `source_raster_dpi`。原有 `image/region` 保留为第一张局部图的兼容字段。无法唯一定位、文件变化或无可信区域时不返回伪造图片，并保留原引句及明确状态。
