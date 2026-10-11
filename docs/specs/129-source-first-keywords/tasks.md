@@ -27,3 +27,10 @@
 - [ ] T009 完成 `docs/specs/129-source-first-keywords/quickstart.md` 的定向与回归验证，回写对应 `docs/overview/` 并更新 #129 Documentation Impact。（SC-001—004）
 
 **依赖**：T002→T003；T004→T005→T006；T003/T006→T007→T008→T009。T002 与 T004 可按文件编辑顺序串行执行。
+
+## 阶段 6：全文关键词选择理由（US4）
+
+- [x] T010 [US4] 在 `backend/tests/test_keyword_extraction.py` 增加全文结果含具体材料/现象/方法理由、缺理由、空泛理由及作者原列直取的回归。（FR-008～009、SC-005～006）
+- [x] T011 [US4] 在 `backend/ingest/keyword_extraction.py` 的最终模型输出与校验中保存具体选择理由，保留窗口覆盖和引句门槛。（FR-008）
+- [x] T012 [US4] 按 #109 共用契约核对 `keyword_assessment.reason` 与当前词列表版本，在 `frontend/src/components/EvidenceWorkflow.tsx` 验证 AI 理由、作者原列和失效提示。（FR-009）
+- [ ] T013 [US4] 用 H3S 与作者列表夹具核验上传、刷新、正式来源及管理员重读，记录验证边界并按 Overview/Issue 流程收尾。（SC-005～006）

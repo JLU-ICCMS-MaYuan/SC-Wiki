@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any, Callable
 
-from .property_evidence import locate, source_batches, source_chunks
+from .property_evidence import concrete_synthesis_reason, locate, source_batches, source_chunks
 
 RULE_VERSION = "source-first-keywords-v1"
 _HEADING = re.compile(
@@ -27,7 +27,8 @@ WINDOW_PROMPT = """阅读输入中当前论文的这一组连续正文，归纳�
 
 FINAL_PROMPT = """你已读完当前论文全部有效正文窗口。根据各窗口事实归纳本文的 3–8 个英文科学关键词，
 优先涵盖研究材料、核心现象与关键方法；不得只依赖摘要、标题或背景文献，不得编造。
-返回 JSON {"keywords_tags":["..."],"evidences":[{"file_id":"来源ID","chunk_index":0,"quote":"从输入逐字复制的代表性原句"}]}。
+返回 JSON {"keywords_tags":["..."],"reason":"简短中文说明所选词如何对应本文材料、现象和方法，未涉及的方向不编造，并说明局限","evidences":[{"file_id":"来源ID","chunk_index":0,"quote":"从输入逐字复制的代表性原句"}]}。
+reason 必须解释具体选词，不得只写“已阅读全文并提炼”；不要输出模型内部逐字思维。
 证据引句只能从输入 sources 或 window_summaries 的 evidences 原样复制；无法确定时返回空列表。"""
 
 
@@ -174,7 +175,10 @@ def select_keywords(sources: list[dict], *, complete: Callable | None = None) ->
         evidences = _valid_evidences(raw.get("evidences"), chunks) or evidence_pool[:3]
         if len(values) < 3 or not evidences:
             return {**base, "reason": "全文阅读完成，但关键词或原文依据不足，需人工核对"}
+        reason = str(raw.get("reason") or "").strip()[:500]
+        if not concrete_synthesis_reason(reason):
+            return {**base, "reason": "模型没有给出具体选词依据，需人工核对"}
         return {**base, "status": "completed", "kind": "fulltext_synthesis", "values": values,
-                "evidences": evidences, "reason": "已阅读当前论文全部有效正文窗口并提炼关键词"}
+                "evidences": evidences, "reason": reason}
     except Exception as exc:
         return {**base, "status": "failed", "reason": f"全文关键词提炼失败：{type(exc).__name__}；需人工核对"}

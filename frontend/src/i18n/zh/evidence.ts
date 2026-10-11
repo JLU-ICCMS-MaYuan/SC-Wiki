@@ -114,6 +114,8 @@ export default {
 "staleResult": "数据已修改，以下核对结论对应修改前内容，仅供参考。可填写新的人工理由确认当前值。",
   "aiReasonLabel": "AI 理由",
   "noAiReason": "原文直接记载，无需额外推断。",
+  "synthesisReasonMissing": "AI 尚未给出当前值的具体推断理由，请重新核对。",
+  "staleAiReason": "当前值或来源已变化，旧 AI 理由仅供历史查看；请重新核对。",
   "subtypeSynthesisHint": "全文归纳：以下原文片段用于支撑分类，类别名称并非论文逐字记载。",
   "summarySynthesisHint": "论文归纳：以下原文片段用于支撑总结；总结并非原文逐字记载。",
   "aiReasonSources": "AI 理由的原文依据",

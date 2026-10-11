@@ -114,6 +114,8 @@ export default {
 "staleResult": "Data changed. The review below describes the previous content and is reference only. Enter a new reason to confirm the current value.",
   "aiReasonLabel": "AI reasoning",
   "noAiReason": "Directly reported in the paper; no further inference needed.",
+  "synthesisReasonMissing": "The AI has not explained how it inferred the current value. Please run the review again.",
+  "staleAiReason": "The value or source changed. The old AI explanation is history only; please review the current value again.",
   "subtypeSynthesisHint": "Full-text synthesis: these passages support the classification; the category is not stated verbatim in the paper.",
   "summarySynthesisHint": "Paper synthesis: these source passages support the summary; the summary is not quoted verbatim.",
   "aiReasonSources": "Paper evidence for the AI reasoning",

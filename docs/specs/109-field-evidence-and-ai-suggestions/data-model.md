@@ -24,6 +24,12 @@
 
 规则版本更新后，旧 `supported` 结果可作为历史展示，不自动授予新版本通过资格；空可选字段继续可查看，但“可点击”不表示“有原文支持”。
 
+## 模型归纳理由与当前版本（2026-10-11）
+
+继续复用 `ScientificEvidenceCheck.result` 与正式 `ScientificEvidenceSource.result` 的 `check_mode`、`source_kind`、`reason`、`ai_reason`、`evidences`、`content_hash` 和 `source_hash`，不新增表列。`check_mode=synthesis` 且当前值来自模型归纳或分类时，`ai_reason` 保存可核查的依据到结论说明；`reason` 同时保留核对结论。旧记录没有 `ai_reason` 时，仅当前内容与来源哈希匹配、`reason` 具体有效才可作为当前 AI 理由显示。
+
+用户改值、来源变化或规则过期后，旧理由与引句只进入 `history`，不能为新值背书。作者原列关键词、确定性派生字段与人工修改分别保留自身来源身份及说明；有 AI 理由不自动授予 `supported`，仍须符合可定位本文证据与人工审核门禁。
+
 ## 人工修改说明与证据实体（代码实施中，待完整验收）
 
 `scientific_manual_evidence` 每行代表一次字段修改说明，字段如下：

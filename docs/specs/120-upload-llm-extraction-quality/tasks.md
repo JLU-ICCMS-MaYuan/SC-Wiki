@@ -43,3 +43,10 @@
 - [x] T022 [US4] 调整中英文表单标签，用实际模型输入和组件测试验证生成、侧栏缺证、修改后理由失效及失败路径。（FR-015～017、SC-006～007）
 - [x] T023 [US4] 核实唯一 H3S 草稿、留私有快照，版本匹配且未人工改写时定向重算；并行写回后只恢复总结，对照摘要和本文原文，记录前后差异。（FR-018、SC-008）
 - [x] T024 [US4] 校对 #109 侧栏 Spec，更新验收记录；功能验证后回写上传 Overview，并以独立暂存树核验本任务提交范围。（SC-006～008）
+
+## 阶段 7：材料家族归类理由（US5，2026-10-11 增量）
+
+- [ ] T025 [US5] 在 `tests/01_decentralized_uploading/test_issue120_material_family.py`、`test_property_evidence.py` 和 `evidence-workflow.test.tsx` 复现 H3S 有具体核对 `reason`、缺 `ai_reason` 却显示直接记载的故障；覆盖失效、缺证和正式转接。（FR-019～021、SC-009～010）
+- [x] T026 [US5] 复用 `backend/ingest/material_family_classification.py` 的归类理由，在 `backend/ingest/property_evidence.py` 按 #109 共用契约绑定当前分类与来源版本，禁止空泛理由自动支持。（FR-019～020）
+- [x] T027 [US5] 在 `frontend/src/components/EvidenceWorkflow.tsx` 和中英文字典中显示当前模型判断逻辑；用真实 H3S 草稿核对材料家族 ID、引句及侧栏，不覆盖其他输入。（FR-020～021、SC-009）
+- [ ] T028 [US5] 验证上传、刷新、正式来源与管理员重读；补齐 `data-model.md`、`contracts/material-family-reason.md` 和验收记录，再按 Overview 与 Issue 流程收尾。（SC-010）

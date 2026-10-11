@@ -21,3 +21,11 @@
 - 从 Git 暂存区导出独立副本，运行 `backend/tests/test_keyword_extraction.py` 与 `backend/tests/test_upload_jobs.py`：62 项通过；排除 1 项 `test_normalize_legacy_li2mgh16_properties_into_scientific_material_state`，该项在未纳入本 Feature 的既有归一化代码下失败。
 - 独立副本中的 `evidence-workflow.test.tsx` 与 `upload-task-editor-layout.test.tsx`：55 项通过；`frontend/tsconfig.json` 类型检查通过。
 - 此验证只证明暂存代码与组件行为，不表示运行服务已部署或真实论文模型输出已验收。
+
+## AI 选择理由增量验收
+
+1. 作者原列关键词仍显示原文来源；无作者列表时让模型通读代表论文，检查 `keyword_assessment.reason` 对所选材料、现象、方法词有具体解释，而非只写“已通读全文”。
+2. 分别注入空理由、过程性泛泛理由、引句失败和人工改词，确认当前侧栏待重核，旧理由只留历史；模型不能把作者原列词冒充自身推断。
+3. 上传、刷新、转论文和管理员重读同一词列表时，核对理由与来源版本一致，其他字段和关键词优先级不回归。
+
+本轮作者原列与全文提炼分支的定向回归通过；全文关键词真实模型只读调用返回材料、现象和方法的选词理由，同时指出代表引句的局限。模型结果未写回 H3S 草稿。正式转接和管理员重读尚未验收，T013 保持未完成；测试结果与边界见 [#109 验收记录](../109-field-evidence-and-ai-suggestions/quickstart.md#本轮实测)。

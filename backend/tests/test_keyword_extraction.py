@@ -81,7 +81,8 @@ def test_reference_keyword_label_does_not_count_as_author_list():
         if sources is not None:
             return {"summary": "The current paper studies a material and a method.",
                     "evidences": [{"file_id": "main", "quote": "The present paper studies a material using a new method."}]}
-        return {"keywords_tags": ["material study", "new method", "research result"]}
+        return {"keywords_tags": ["material study", "new method", "research result"],
+                "reason": "本文以当前材料为研究对象，用新方法得到研究结果，所选词分别概括材料、方法和结果。"}
 
     result = select_keywords([source(text)], complete=model)
     assert result["kind"] == "fulltext_synthesis" and len(calls) == 2
@@ -107,7 +108,8 @@ def test_fulltext_reads_every_batch_and_failure_does_not_use_partial_values(monk
                     "evidences": [{"file_id": batch[0]["file_id"], "chunk_index": batch[0]["chunk_index"],
                                    "quote": "The current paper studies sulfur hydride superconductivity at high pressure."
                                    if "The current paper" in batch[0]["content"] else "Density functional calculations find a superconducting transition."}]}
-        return {"keywords_tags": ["sulfur hydride", "superconductivity", "high pressure"]}
+        return {"keywords_tags": ["sulfur hydride", "superconductivity", "high pressure"],
+                "reason": "论文研究高压条件下的硫氢化物超导性，所选词分别标示材料、现象与条件。"}
 
     result = select_keywords([source(text)], complete=model)
     assert result["kind"] == "fulltext_synthesis"
@@ -170,3 +172,35 @@ def test_partial_source_suggestion_cannot_fill_empty_keyword_field():
     proposal = {"basis_kind": "paper_inference", "values": {"paper.keywords_tags": ["hydrides"]}}
     assert not _fill_empty_fields(draft, record, proposal)
     assert draft["paper"]["keywords_tags"] == []
+
+
+def test_fulltext_keywords_preserve_specific_selection_reason():
+    text = "<!-- page: 1 -->\nThe paper studies sulfur hydride superconductivity using structure prediction."
+    logic = "论文以硫氢化物为材料、超导性为现象、结构预测为方法，因此分别选取这三个主题词。"
+
+    def model(_prompt, payload):
+        if "sources" in json.loads(payload):
+            return {"summary": "The current paper studies sulfur hydride superconductivity and structure prediction.",
+                    "evidences": [{"file_id": "main", "quote": "The paper studies sulfur hydride superconductivity using structure prediction."}]}
+        return {"keywords_tags": ["sulfur hydride", "superconductivity", "structure prediction"],
+                "reason": logic}
+
+    result = select_keywords([source(text)], complete=model)
+    assert result["status"] == "completed"
+    assert result["kind"] == "fulltext_synthesis"
+    assert result["reason"] == logic
+
+
+def test_fulltext_keywords_reject_generic_process_reason():
+    text = "<!-- page: 1 -->\nThe paper studies sulfur hydride superconductivity using structure prediction."
+
+    def model(_prompt, payload):
+        if "sources" in json.loads(payload):
+            return {"summary": "The current paper studies sulfur hydride superconductivity and structure prediction.",
+                    "evidences": [{"file_id": "main", "quote": "The paper studies sulfur hydride superconductivity using structure prediction."}]}
+        return {"keywords_tags": ["sulfur hydride", "superconductivity", "structure prediction"],
+                "reason": "已阅读当前论文全部有效正文窗口并提炼关键词"}
+
+    result = select_keywords([source(text)], complete=model)
+    assert result["kind"] == "none"
+    assert result["values"] == []

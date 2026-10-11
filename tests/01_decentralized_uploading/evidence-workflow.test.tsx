@@ -46,6 +46,33 @@ it('理论二级类型明确显示全文归纳理由，不称原文直接记载'
   expect(screen.queryByText('原文直接记载，无需额外推断。')).not.toBeInTheDocument()
 })
 
+it.each(['paper.material_families', 'paper.paper_type', 'paper.research_motivation', 'material_states[0].material_dimensionality'])(
+  '%s 的旧 supported 归纳结果把具体核对理由显示在 AI 理由中', async field => {
+    const logic = '论文称研究对象为富氢材料并研究其高压超导，因此现有氢基家族涵盖当前研究体系。'
+    const item = { key:field, field, label:'材料家族', check_mode:'synthesis',
+      status:'supported', source_kind:'paper_quote', reason:logic,
+      evidences:[{file_id:'main',chunk_index:0,page_start:2,quote:'Hydrogen-rich (H2S)2H2 is superconducting.'}] }
+    vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[item]} as never)
+    function Form() { const flow=useEvidenceWorkflow({target:{target:'upload',target_id:'h3s'}});return <><button onClick={()=>flow.openIssue(field)}>查看归纳</button>{flow.dialog}</> }
+    await act(async()=>render(<Form/>))
+    await act(async()=>fireEvent.click(screen.getByText('查看归纳')))
+    const aiBody=screen.getByText('AI 理由').nextElementSibling
+    expect(aiBody).toHaveTextContent(logic)
+    expect(aiBody).not.toHaveTextContent('原文直接记载，无需额外推断。')
+  },
+)
+
+it('归纳理由缺失或过期时提示重核，原文事实仍保留直接记载语义', async () => {
+  const empty = { key:'family', field:'paper.material_families', label:'材料家族', check_mode:'synthesis',
+    status:'supported', reason:'与原文一致。', evidences:[{file_id:'main',chunk_index:0,quote:'H3S'}] }
+  vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[empty]} as never)
+  function Form() { const flow=useEvidenceWorkflow({target:{target:'upload',target_id:'h3s'}});return <><button onClick={()=>flow.openIssue('family')}>查看分类</button>{flow.dialog}</> }
+  await act(async()=>render(<Form/>))
+  await act(async()=>fireEvent.click(screen.getByText('查看分类')))
+  expect(screen.getByText('AI 理由').nextElementSibling).toHaveTextContent('请重新核对')
+  expect(screen.getByText('AI 理由').nextElementSibling).not.toHaveTextContent('原文直接记载，无需额外推断。')
+})
+
 it.each([
   ['author_keywords', '作者原列关键词：以下是当前论文明确列出的关键词原文。'],
   ['paper_synthesis', 'AI 全文提炼：以下原文片段用于支持关键词主题，词语不是作者原列列表。'],

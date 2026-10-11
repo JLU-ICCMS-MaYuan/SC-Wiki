@@ -23,7 +23,7 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+export interface EvidenceRecord { history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
@@ -31,6 +31,27 @@ export interface EvidenceTarget { target: 'upload' | 'paper' | 'revision'; targe
 interface View { phase: 'checking' | 'countdown' | 'running' | 'error'; seconds?: number; message?: string; job?: Job }
 const base = '/api/rag/evidence'
 const problematic = evidenceProblem
+
+function aiReasonText(record: EvidenceRecord, t: (key: string) => string): string {
+  if (record.stale) return t('evidence.staleAiReason')
+  if (record.provenance?.kind === 'author_keywords' || record.source_kind === 'author_keywords') {
+    return record.ai_reason || record.reason || t('evidence.authorKeywordsSource')
+  }
+  const synthesis = (record.check_mode === 'synthesis' || record.source_kind === 'paper_synthesis')
+    && record.provenance?.kind !== 'author_keywords' && record.provenance?.kind !== 'derived'
+    && record.source_kind !== 'human_review'
+  if (synthesis) {
+    const explanation = record.ai_reason || record.proposal?.explanation || record.reason || ''
+    const compact = explanation.replace(/[\s，,。.!；;：:]+/g, '')
+    if (compact.length >= 12 && !['原文直接记载无需额外推断', '原文直接记载', '与原文一致',
+      '原文支持', '论文原文支持', '已阅读当前论文全部有效正文窗口并提炼关键词'].includes(compact)) {
+      return explanation
+    }
+    return t('evidence.synthesisReasonMissing')
+  }
+  return record.ai_reason || record.proposal?.explanation ||
+    (record.status === 'supported' ? t('evidence.noAiReason') : record.reason)
+}
 
 
 // 运行任务与持久问题列表分开；关闭抽屉不清除任何核对结果。
@@ -489,7 +510,7 @@ export function useEvidenceWorkflow(options?: {
         <Typography fontWeight={600} sx={{ my: 2 }}>{t('evidence.aiReasonLabel')}</Typography>
         {activeGroup.map(r => <Box key={r.key} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
           {(r.adopted_basis || r.proposal?.basis_kind) && <Alert severity="info">{t(`evidence.basis.${r.adopted_basis || r.proposal?.basis_kind}`)}</Alert>}
-            <Typography sx={{ whiteSpace: 'pre-wrap' }}>{r.field === 'paper.summary' && r.stale ? t('evidence.staleResult') : r.ai_reason || r.proposal?.explanation || (r.field === 'paper.summary' || r.field === 'paper.theoretical_subtype' || r.field === 'paper.keywords_tags' ? r.reason : r.status === 'supported' ? t('evidence.noAiReason') : r.reason)}</Typography>
+            <Typography sx={{ whiteSpace: 'pre-wrap' }}>{aiReasonText(r, t)}</Typography>
             {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
             {Boolean(r.proposal?.evidences?.length) && <Box component="details"><Typography component="summary">{t('evidence.aiReasonSources')}</Typography>
               {r.proposal!.evidences.map((source, index) => <EvidenceRegion key={`${source.file_id}:${index}`} target={targetRef.current} source={source} />)}
