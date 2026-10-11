@@ -287,6 +287,7 @@ export default {
   summaryLabel: 'Chinese summary',
   keyFindingLabel: 'Key finding',
   researchMotivationLabel: 'Research motivation',
+  researchMotivationReviewHint: 'AI could not reliably identify the authors’ motivation. Review the paper and enter numbered points on separate lines.',
   materialStatesTitle: 'Material states & calculation conditions',
   addMaterialState: 'Add material state',
   materialStateNumber: 'Material state #{index}',

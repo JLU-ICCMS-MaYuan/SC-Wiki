@@ -46,6 +46,7 @@ from backend.ingest.language_contract import (
     validate_chunk_generated_english,
     validate_draft_generated_english,
 )
+from backend.ingest.research_motivation import generate_motivation, task_chunks as motivation_chunks
 from backend.ingest.structure_extractor import extract_structure_candidates
 from backend.models import Paper, PaperFile
 from backend.rag.llm import complete_json
@@ -2003,6 +2004,11 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             json.dumps(summary_candidates, ensure_ascii=False),
             on_partial=_on_summary_partial,
         )
+        raw_paper = raw_draft.get("paper") if isinstance(raw_draft.get("paper"), dict) else raw_draft
+        motivation, motivation_error = generate_motivation(
+            motivation_chunks(task_id, state, data_path("parsed_markdown")),
+        )
+        raw_draft["paper"] = {**raw_paper, "research_motivation": motivation}
         if document_set:
             # 全文汇总只负责叙述和书目，科学记录由已校验候选确定性组装。
             draft = _normalize_draft({**raw_draft, "material_states": [], "key_properties": []}, preserve_citation_extraction=False)
@@ -2012,6 +2018,9 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             excluded_properties = _prune_generated_properties(draft)
             if excluded_properties:
                 _atomic_write_json(artifact_directory(task_id) / "unclassified_properties.json", excluded_properties)
+        if motivation_error:
+            logging.getLogger(__name__).warning("研究驱动力需要人工核对 task=%s reason=%s", task_id, motivation_error)
+        draft["research_motivation_error"] = motivation_error
         from backend.ingest.keyword_extraction import select_keywords, task_sources
         keyword_assessment = select_keywords(task_sources(task_id, state, data_path('parsed_markdown')))
         draft['keyword_assessment'] = keyword_assessment

@@ -195,6 +195,20 @@ describe('上传校对页布局与材料状态折叠', () => {
     expect(text).not.toMatch(/AI\s*(草稿|临时表单|建议)|AI\s+(draft|suggestion)/i)
   })
 
+  it('研究驱动力按独立行显示，生成失败时提示人工逐行填写', () => {
+    const value = '1. The stable structure remained unresolved.\n2. Metallization motivated the study.'
+    const draft = makeDraft([makeState()])
+    draft.paper.research_motivation = value
+    render(<UploadTaskEditor taskId={'0'.repeat(32)} onSubmitted={vi.fn()} draftOverride={draft} />)
+    expect(screen.getByRole('textbox', { name: '研究驱动力' })).toHaveValue(value)
+    cleanup()
+
+    const failed = makeDraft([makeState()])
+    failed.research_motivation_error = 'invalid_motivation'
+    render(<UploadTaskEditor taskId={'0'.repeat(32)} onSubmitted={vi.fn()} draftOverride={failed} />)
+    expect(screen.getByText(/按 1\.、2\.、3\. 逐行填写/)).toBeVisible()
+  })
+
   it('论文级 Material family 与 Superconductor type 在同一分类网格行', async () => {
     render(<UploadTaskEditor taskId={'0'.repeat(32)} onSubmitted={vi.fn()} draftOverride={makeDraft([makeState()])} />)
 

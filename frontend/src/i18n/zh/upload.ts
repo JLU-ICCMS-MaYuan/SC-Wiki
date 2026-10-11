@@ -289,6 +289,7 @@ export default {
   summaryLabel: '中文总结',
   keyFindingLabel: '核心发现',
   researchMotivationLabel: '研究驱动力',
+  researchMotivationReviewHint: 'AI 未能从本文可靠归纳研究动因；请阅读原文后按 1.、2.、3. 逐行填写。',
   materialStatesTitle: '材料状态与计算条件',
   addMaterialState: '添加材料状态',
   materialStateNumber: '材料状态 #{index}',

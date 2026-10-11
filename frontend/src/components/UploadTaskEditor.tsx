@@ -302,6 +302,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     evidenceWorkflow.invalidate(`paper.${field}`)
     changeDraft(current => ({ ...current,
       ...(field === 'material_families' ? { material_family_error: null } : {}),
+      ...(field === 'research_motivation' ? { research_motivation_error: null } : {}),
       paper: { ...current.paper, [field]: value } }))
   }
 
@@ -794,7 +795,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       <Box sx={{ mt: 2 }}>
         <TextField fullWidth label={t('upload.researchMotivationLabel')} multiline minRows={3} data-issue-field="paper.research_motivation"
           value={draft.paper.research_motivation || ''}
-          onChange={event => setPaperField('research_motivation', event.target.value)} />
+          onChange={event => setPaperField('research_motivation', event.target.value)}
+          helperText={!draft.paper.research_motivation && draft.research_motivation_error
+            ? t('upload.researchMotivationReviewHint') : undefined} />
         <EvidenceNotes evidence={classificationEvidence} />
       </Box>
 
