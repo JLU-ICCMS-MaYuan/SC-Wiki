@@ -195,6 +195,7 @@ export interface UploadDraft {
   structure_candidates?: StructureCandidate[]
   research_motivation?: string
   classification_evidence?: SourceEvidence[]
+  theoretical_subtype_assessment?: { status: 'completed' | 'uncertain' | 'failed'; value: string | null; reason: string; evidences: SourceEvidence[]; source_hash: string; rule_version: string; model: string }
   keyword_assessment?: { status: 'completed' | 'uncertain' | 'failed'; kind: 'author_list' | 'fulltext_synthesis' | 'none'; values: string[]; reason: string; evidences: SourceEvidence[]; source_hash: string; rule_version: string; covered_batches: number; total_batches: number }
   classification_migration_warnings?: string[]
   field_evidence?: Record<string, SourceEvidence[]>

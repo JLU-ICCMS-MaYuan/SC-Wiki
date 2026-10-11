@@ -414,7 +414,16 @@ const AdminPaperEditPage: React.FC = () => {
             data-issue-field="paper.summary" value={editForm.summary || ''} onChange={e => setEditForm({ ...editForm, summary: e.target.value })} />
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(3, minmax(0, 1fr))' }, gap: 1.5 }}>
             <TextField label={t('admin.fieldPaperType')} size="small" data-issue-field="paper.paper_type" value={editForm.paper_type || ''}
-              onChange={e => setEditForm({ ...editForm, paper_type: e.target.value })} />
+              onChange={e => { evidenceWorkflow.invalidate('paper.paper_type'); evidenceWorkflow.invalidate('paper.theoretical_subtype'); setEditForm({ ...editForm, paper_type: e.target.value, theoretical_subtype: e.target.value === 'theoretical' ? editForm.theoretical_subtype : null }) }} />
+            <FormControl size="small" disabled={editForm.paper_type !== 'theoretical'} data-issue-field="paper.theoretical_subtype">
+              <InputLabel id="admin-theoretical-subtype-label">{t('upload.theoreticalSubtypeField')}</InputLabel>
+              <Select labelId="admin-theoretical-subtype-label" label={t('upload.theoreticalSubtypeField')} value={editForm.theoretical_subtype || ''}
+                onChange={e => { evidenceWorkflow.invalidate('paper.theoretical_subtype'); setEditForm({ ...editForm, theoretical_subtype: e.target.value || null }) }}>
+                <MenuItem value="calculation">{dict.enums.theoreticalSubtype.calculation}</MenuItem>
+                <MenuItem value="method">{dict.enums.theoreticalSubtype.method}</MenuItem>
+                <MenuItem value="theory">{dict.enums.theoreticalSubtype.theory}</MenuItem>
+              </Select>
+            </FormControl>
             <FormControl size="small" data-issue-field="paper.superconductor_kind">
               <InputLabel id="paper-superconductor-kind-label">{t('upload.superconductorKindField')}</InputLabel>
               <Select labelId="paper-superconductor-kind-label" label={t('upload.superconductorKindField')} value={editForm.superconductor_kind || 'unknown'}

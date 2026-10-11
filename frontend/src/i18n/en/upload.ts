@@ -243,6 +243,8 @@ export default {
   doiInvalid: 'Invalid DOI format',
   paperTypeRequired: 'Please select the paper type',
   theoreticalSubtypeRequired: 'A theoretical paper must have a theoretical subtype',
+  subtypeAssessmentMissing: 'Full-text classification is unavailable. Review this field manually.',
+  subtypeAssessmentConflict: 'The full-text AI suggests “{value}”. Your current selection is preserved; please review it.',
   materialStateRequired: 'A non-review paper needs at least one material state',
   materialStateLabel: 'Material state {index}',
   missingMaterial: '{label} needs a material name or chemical formula',

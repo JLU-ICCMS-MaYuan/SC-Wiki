@@ -227,6 +227,7 @@ async def save_draft(session, paper_id, user, payload):
         error(400, 'retired_material_relations', 'material_relations 已退役，请重新打开草稿')
     _reject_legacy_classification_contract(payload.draft)
     draft = _normalize_draft(copy.deepcopy(payload.draft))
+    draft.pop('theoretical_subtype_assessment', None)
     draft['paper'] = {k: v for k, v in draft['paper'].items() if k in {*PAPER_FIELDS, 'material_families', 'corresponding_authors', 'co_first_authors'}}
     draft['paper']['research_materials'] = _derived_research_materials(draft['material_states'])
     # 来源解析信息由服务端持有，客户端不能替换正文或引用解析。

@@ -32,6 +32,20 @@ it('无核对记录的字段标签仍可查看空侧栏，不触发模型或保�
   expect(api.post).toHaveBeenCalledTimes(1)
 })
 
+it('理论二级类型明确显示全文归纳理由，不称原文直接记载', async () => {
+  const subtype = { key:'subtype', field:'paper.theoretical_subtype', label:'理论子类型',
+    status:'supported', source_kind:'paper_synthesis', reason:'本文使用既有方法预测材料相和 Tc，并未开发新算法。',
+    ai_reason:'本文使用既有方法预测材料相和 Tc，并未开发新算法。',
+    evidences:[{file_id:'main',chunk_index:1,page_start:2,quote:'We predict new phases and Tc.'}] }
+  vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[subtype]} as never)
+  function Form() { const f=useEvidenceWorkflow({target:{target:'upload',target_id:'h3s'}});return <><button onClick={()=>f.openIssue('subtype')}>查看分类</button>{f.dialog}</> }
+  await act(async()=>render(<Form/>))
+  await act(async()=>fireEvent.click(screen.getByText('查看分类')))
+  expect(screen.getByText(/全文归纳：以下原文片段用于支撑分类/)).toBeInTheDocument()
+  expect(screen.getAllByText(/本文使用既有方法预测材料相和 Tc/).length).toBeGreaterThan(0)
+  expect(screen.queryByText('原文直接记载，无需额外推断。')).not.toBeInTheDocument()
+})
+
 it.each([
   ['author_keywords', '作者原列关键词：以下是当前论文明确列出的关键词原文。'],
   ['paper_synthesis', 'AI 全文提炼：以下原文片段用于支持关键词主题，词语不是作者原列列表。'],

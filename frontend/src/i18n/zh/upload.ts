@@ -245,6 +245,8 @@ export default {
   doiInvalid: 'DOI 格式不正确',
   paperTypeRequired: '请选择论文整体类型',
   theoreticalSubtypeRequired: '理论文章必须选择理论二级类型',
+  subtypeAssessmentMissing: '全文分类尚未完成，请人工核对。',
+  subtypeAssessmentConflict: '全文模型判断为“{value}”，当前人工选择已保留，请核对。',
   materialStateRequired: '非综述文章至少需要一个材料状态',
   materialStateLabel: '第 {index} 个材料状态',
   missingMaterial: '{label}至少需要材料名或化学式',

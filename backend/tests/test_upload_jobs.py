@@ -315,7 +315,7 @@ def test_normalize_draft_keeps_supported_full_paper_classifications(paper_type, 
 
 def test_summary_prompt_defines_mixed_theory_experiment_tie_breaker():
     assert "理论和实验同等重要、无法分主次，也归 experimental" in SUMMARY_SYSTEM_PROMPT
-    assert "新算法、新模型、新研究工具归 method" in SUMMARY_SYSTEM_PROMPT
+    assert "后续通读原文的专门分类" in SUMMARY_SYSTEM_PROMPT
     assert "不能只凭化学式猜测" in SUMMARY_SYSTEM_PROMPT
     assert "reported_space_group_number" in SUMMARY_SYSTEM_PROMPT
     assert "lambda_ep" in SUMMARY_SYSTEM_PROMPT

@@ -21,6 +21,11 @@ from backend import models
 
 RULE_VERSION = 'scientific-evidence-v7'
 TERMINAL = {'completed', 'failed', 'cancelled'}
+SECTION_MARKER = re.compile(r'(?im)^\s*(?:#{1,6}\s*)?(abstract|results?|discussion|conclusions?|methods?|materials and methods)\b')
+
+
+def _section_role(name: str) -> str:
+    return 'method' if 'method' in name.lower() else name.lower().rstrip('s')
 
 
 def fail(code: str, message: str, **extra):
@@ -52,6 +57,8 @@ def source_chunks(markdown: str, file_id: str) -> list[dict]:
     from backend.ingest.chunker import Chunk, chunk_paper
     chunks = []
     page = None
+    headings = [(m.start(), _section_role(m.group(1))) for m in SECTION_MARKER.finditer(markdown)]
+    cursor = 0
     parsed = chunk_paper(markdown, 0)
     sample = parsed[0].content[:100] if parsed else ''
     first_offset = markdown.find(sample) if sample else len(markdown)
@@ -60,6 +67,13 @@ def source_chunks(markdown: str, file_id: str) -> list[dict]:
         parsed.insert(0, Chunk(0, 0, '论文首页与摘要', None, preamble, max(1, len(preamble) // 4)))
     for index, chunk in enumerate(parsed):
         chunk.chunk_index = index
+        sample = chunk.content[:100]
+        offset = markdown.find(sample, cursor) if sample else -1
+        if offset < 0:
+            offset = markdown.find(sample) if sample else -1
+        if offset >= 0:
+            cursor = offset + len(sample)
+        preceding = [role for position, role in headings if position <= max(offset, 0)]
         pages = [int(p) for p in re.findall(r'<!--\s*page:\s*(\d+)\s*-->', chunk.content)]
         start = page
         if pages:
@@ -68,7 +82,8 @@ def source_chunks(markdown: str, file_id: str) -> list[dict]:
                 start = pages[0]
             page = pages[-1]
         chunks.append(dict(file_id=str(file_id), chunk_index=chunk.chunk_index, content=chunk.content,
-                           page_start=start, page_end=page, section=chunk.section_name, heading=chunk.heading))
+                           page_start=start, page_end=page, section=chunk.section_name, heading=chunk.heading,
+                           section_role=preceding[-1] if preceding else 'other'))
     return chunks
 
 
@@ -116,7 +131,12 @@ def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None,
     if len(matching) != 1:
         return None, '原文引句匹配多个位置，系统尚未确认具体出处，请重新查找'
     c = matching[0]
-    source = {k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'section', 'source_name')}
+    source = {k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'section', 'section_role', 'source_name')}
+    quote_offset = c['content'].find(quote)
+    if quote_offset >= 0:
+        local_headings = list(SECTION_MARKER.finditer(c['content'][:quote_offset]))
+        if local_headings:
+            source['section_role'] = _section_role(local_headings[-1].group(1))
     if evidence.get('locator_status') in {'verified_text_layer', 'verified_front_matter'} or evidence.get('origin_kind') == 'verified_front_matter':
         source.update(page_start=evidence.get('page_start'), page_end=evidence.get('page_end'),
                       locator_status=evidence.get('locator_status'), origin_kind=evidence.get('origin_kind'))
@@ -233,6 +253,12 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
     chunks = [dict(chunk_id=c.id, file_id=str(c.paper_file_id), source_name=filenames.get(c.paper_file_id), chunk_index=c.chunk_index, content=c.content,
                    page_start=c.page_start, page_end=c.page_end, section=c.section_name)
               for c in session.scalars(select(models.PaperChunk).where(models.PaperChunk.paper_id == paper_id, models.PaperChunk.paper_revision == paper.content_revision).order_by(models.PaperChunk.id))]
+    roles = {}
+    for chunk in chunks:
+        chunk['section_role'] = roles.get(chunk['file_id'], 'other')
+        headings = list(SECTION_MARKER.finditer(chunk['content']))
+        if headings:
+            roles[chunk['file_id']] = _section_role(headings[-1].group(1))
     records = []
     source_evidences = {e.id: e for e in session.scalars(select(models.PaperEvidence).where(models.PaperEvidence.paper_id == paper_id, models.PaperEvidence.paper_revision == paper.content_revision))}
     chunk_map = {c['chunk_id']: c for c in chunks}
@@ -263,13 +289,25 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
     paper_data = row_dict(paper)
     families = session.execute(select(models.MaterialFamily.name_zh).join(models.PaperMaterialFamily, models.PaperMaterialFamily.material_family_id == models.MaterialFamily.id).where(models.PaperMaterialFamily.paper_id == paper_id)).scalars().all()
     paper_data['material_families'] = sorted(families)
+    prior_subtype = session.scalar(select(models.ScientificEvidenceSource).where(
+        models.ScientificEvidenceSource.paper_id == paper_id,
+        models.ScientificEvidenceSource.paper_revision == paper.content_revision,
+        models.ScientificEvidenceSource.field_path == 'paper.theoretical_subtype'))
+    if prior_subtype is None:
+        from .scientific_evidence import item_identity
+        prior_subtype = session.scalar(select(models.ScientificEvidenceCheck).where(
+            models.ScientificEvidenceCheck.target == 'paper',
+            models.ScientificEvidenceCheck.target_id == str(paper_id),
+            models.ScientificEvidenceCheck.item_key == item_identity('paper', 'theoretical_subtype'))
+            .order_by(models.ScientificEvidenceCheck.id.desc()).limit(1))
+    assessment = ((prior_subtype.result or {}).get('provenance') or {}).get('assessment') if prior_subtype else None
     prior_keywords = session.scalar(select(models.ScientificEvidenceSource).where(
         models.ScientificEvidenceSource.paper_id == paper_id,
         models.ScientificEvidenceSource.paper_revision == paper.content_revision,
         models.ScientificEvidenceSource.field_path == 'paper.keywords_tags'))
     keyword_assessment = ((prior_keywords.result or {}).get('provenance') or {}).get('assessment') if prior_keywords else None
     records.extend(science.field_records('paper', 'paper', paper_data, science.PAPER_FIELDS,
-                                         keyword_assessment=keyword_assessment))
+                                         assessment=assessment, keyword_assessment=keyword_assessment))
     origins = science.origins_for(session, 'paper', str(paper_id))
     for si, state in enumerate(states.values()):
         data = row_dict(state)
@@ -314,8 +352,18 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             located, _ = locate_with_reason(e, chunks)
             if located and located not in evs:
                 evs.append(located)
+    subtype = record.get('field') == 'paper.theoretical_subtype'
     keywords = record.get('field') == 'paper.keywords_tags'
     summary = record.get('field') == 'paper.summary'
+    assessment = (record.get('provenance') or {}).get('assessment') if subtype else None
+    if subtype and isinstance(assessment, dict) and assessment.get('status') == 'completed':
+        assessed_sources = []
+        for e in assessment.get('evidences') or []:
+            located, _ = locate_with_reason(e, chunks)
+            if located and located not in assessed_sources:
+                assessed_sources.append(located)
+        # 专门分类审定的代表片段才属于本字段，不把核对模型顺带找到的 Methods 堆入侧栏。
+        evs = assessed_sources[:3]
     # 概括字段无需与原文逐字相同，但判为 supported 仍需至少一条可定位依据。
     synthesis = record.get('check_mode') == 'synthesis'
     status = result.get('status')
@@ -327,10 +375,21 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
         status = 'uncertain'
     if keywords and (record.get('provenance') or {}).get('kind') == 'author_keywords' and evs:
         status = 'supported'
+    if subtype and status == 'supported' and (
+        not isinstance(assessment, dict) or assessment.get('value') != record.get('current_value')
+        or assessment.get('status') != 'completed'
+        or not any(e.get('section_role') in {'abstract', 'result', 'discussion', 'conclusion'} for e in evs)
+    ):
+        status = 'uncertain'
     reason_errors = [] if (evs or synthesis) else errors
     reason = '；'.join([*reason_errors,
                        *(['当前概括缺少可定位的原文依据'] if synthesis and not evs else []),
                        str(result.get('reason') or '尚未找到能支持这条科学数据的有效出处')])
+    if subtype and isinstance(assessment, dict):
+        assessment_reason = str(assessment.get('reason') or '').strip()
+        reason = (assessment_reason + ('；核对意见：' + reason if status != 'supported' else '')) if assessment_reason else reason
+        if status == 'uncertain' and assessment.get('status') != 'completed':
+            reason += '；全文判断仍需人工核对'
     family_assessment = (record.get('provenance') or {}).get('assessment') if record.get('field') == 'paper.material_families' else None
     if isinstance(family_assessment, dict):
         family_reason = str(family_assessment.get('reason') or '').strip()
@@ -345,6 +404,8 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     fields = [f for f in fields if isinstance(f, str) and (f == record['field'] or f.startswith(record['field'] + '.'))] or [record['field']]
     suggestion = result.get('suggestion') or ('请补充该记录缺失的原文出处。' if status == 'missing' else '请核对物性类型、数值、单位和实验条件，并根据原文修正记录。')
     source_kind = 'derived' if provenance.get('kind') == 'derived' else 'paper_quote' if evs else 'contributor_structure' if provenance.get('verified') else 'unknown'
+    if subtype and evs:
+        source_kind = 'paper_synthesis'
     if summary:
         source_kind = 'paper_synthesis'
     if isinstance(family_assessment, dict) and evs:
@@ -371,7 +432,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     return {**record, 'proposal': proposal, 'proposal_draft': None if result.get('stale') else result.get('proposal_draft'), 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
             'human_confirmed': human,
             'adopted_basis': adopted_basis, 'proposal_review': result.get('proposal_review'),
-            'ai_reason': reason if keywords or (summary and not adopted_basis) or isinstance(family_assessment, dict) else result.get('ai_reason'),
+            'ai_reason': reason if subtype or keywords or (summary and not adopted_basis) or isinstance(family_assessment, dict) else result.get('ai_reason'),
             'auto_filled': result.get('auto_filled', False),
             'auto_filled_content_hash': result.get('auto_filled_content_hash'),
             'auto_filled_source_hash': result.get('auto_filled_source_hash'),
@@ -468,10 +529,11 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 - 结构化字段只核对值本身：state_kind、材料维度、晶系、结构家族等分类字段，原文内容足以判断即为 supported；
   不要求原文逐字写出枚举词。压力原文与单位、压力上下界只要与原文报告的压力或区间一致即 supported。
 - 叙述字段（summary、key_finding、methodology、keywords_tags、research_motivation、knowledge_graph_title、
-  paper_type、research_materials、material_families）是对全文的忠实概括：主要内容均能在原文找到依据即 supported，
+  paper_type、theoretical_subtype、research_materials、material_families）是对全文的忠实概括：主要内容均能在原文找到依据即 supported，
   并给出最能代表的 1–3 条引句；只有包含原文没有的事实或数值时才判 unsupported 或 uncertain。
-- 对 paper.summary，reason 用简短中文解释核心结论的本文依据及缺口，不复述整个总结，也不称其为原文逐字记载。
 - keywords_tags 若附有服务端已定位的作者关键词列表，按作者原列词核对；否则属于全文提炼，不得把摘要句解释成作者原列列表。
+- 对 paper.summary，reason 用简短中文解释核心结论的本文依据及缺口，不复述整个总结，也不称其为原文逐字记载。
+- theoretical_subtype 必须比较论文的研究目标与主要结果：开发新算法/工具为 method，使用已有计算方法研究材料为 calculation，解析模型或物理机制推导为 theory。只看到 Methods 或软件名不能判 supported；引句是全文归纳的支撑片段，枚举不是原文逐字记载。
 - 材料状态上下文：记录所属状态的材料、相、压力与原文一致时再判 supported；材料写成反应物或前驱体
   （把 H3S 的相写成 H2S）属于真实错误，判 unsupported 并在 proposal 中给出正确值。
 - 只看到部分来源时，若本组来源与该记录无关，返回 missing 且不给 evidences；不要因为“本组片段未提及”
@@ -538,6 +600,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         'purpose': purpose,
         'records': [{'key': r['key'], 'field': r['field'], 'claim': r['claim'],
                      'editable_fields': r.get('editable_fields', []), 'existing_evidences': r['evidences'],
+                     'subtype_assessment': (r.get('provenance') or {}).get('assessment') if r['field'] == 'paper.theoretical_subtype' else None,
                      'material_family_assessment': (r.get('provenance') or {}).get('assessment') if r['field'] == 'paper.material_families' else None,
                      'previous_result': {k: prior.get(r['key'], {}).get(k) for k in ('status', 'reason', 'proposal', 'evidences', 'adopted_basis', 'auto_filled', 'ai_reason')}} for r in records],
         'sources': chunks,
@@ -562,7 +625,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
             continue
         key = raw['key']
         safe = {k: raw[k] for k in ('status', 'reason', 'suggestion', 'fields', 'evidences', 'proposal') if k in raw}
-        if by_key[key]['field'] == 'paper.material_families':
+        if by_key[key]['field'] in {'paper.theoretical_subtype', 'paper.material_families'}:
             safe.pop('proposal', None)
         if by_key[key]['field'].startswith('paper.') and isinstance(safe.get('proposal'), dict):
             from .language_contract import validate_draft_generated_english, GeneratedFieldLanguageError
@@ -633,8 +696,9 @@ def _fill_empty_fields(draft, record, proposal):
     from .scientific_evidence import canonical, populated
     from .property_modules import validate_record, PropertyValidationError
 
-    if record['field'] in {'paper.keywords_tags', 'paper.material_families'}:
+    if record['field'] in {'paper.theoretical_subtype', 'paper.material_families', 'paper.keywords_tags'}:
         return False
+
     if proposal.get('basis_kind') not in {'paper_inference', 'general_knowledge'}:
         return False
     fields = {field['path']: field['value'] for field in record.get('editable_fields', [])}
@@ -1026,7 +1090,7 @@ def aggregate_candidates(records, candidates, location_errors, model):
         reviews = [i['proposal_review'] for i in all_items if i.get('proposal_review')]
         review = None if not reviews else {'status': 'reasonable' if all(x['status'] == 'reasonable' for x in reviews) else 'questionable' if any(x['status'] == 'questionable' for x in reviews) else 'uncertain',
                     'explanation': '；'.join(dict.fromkeys(x['explanation'] for x in reviews))}
-        retained = {name: next((i[name] for i in all_items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason')}
+        retained = {name: next((i[name] for i in all_items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason', 'source_kind')}
         results[record['key']] = dict(status=status, proposal=proposal, proposal_review=review, **retained,
             reason='；'.join(dict.fromkeys(reasons)) or '当前论文及附件中未找到可定位的相关原文',
             evidences=evidences, model=model,

@@ -96,7 +96,7 @@ def populated(value):
     return value is not None and value != '' and value != 'unknown' and value != [] and value != {}
 
 
-def field_records(identity, path, data, fields, context=None, keyword_assessment=None):
+def field_records(identity, path, data, fields, context=None, assessment=None, keyword_assessment=None):
     rows = []
     for name, label in fields.items():
         value = data.get(name)
@@ -111,10 +111,17 @@ def field_records(identity, path, data, fields, context=None, keyword_assessment
             value = sorted(str(x.get('name') or x.get('name_zh') or '') if isinstance(x, dict) else str(x) for x in value)
         key = item_identity(identity, name)
         row = dict(key=key, item_key=key, field=f'{path}.{name}', fields=[f'{path}.{name}'],
-                   label=label, current_value=value, claim={'value': value, 'field': label, 'context': context or {}},
-                   required=populated(value) and not (path == 'paper' and name in BIBLIOGRAPHY_FIELDS),
-                   evidences=[], kind='field',
-                   **({'check_mode': 'synthesis'} if name in SYNTHESIS_FIELDS else {}))
+                         label=label, current_value=value, claim={'value': value, 'field': label, 'context': context or {}},
+                         required=populated(value) and not (path == 'paper' and name in BIBLIOGRAPHY_FIELDS),
+                         evidences=[], kind='field',
+                         **({'check_mode': 'synthesis'} if name in SYNTHESIS_FIELDS else {}))
+        if path == 'paper' and name == 'theoretical_subtype':
+            from .theoretical_subtype import RULE_VERSION
+            matched = assessment if isinstance(assessment, dict) and assessment.get('value') == value else None
+            row['provenance'] = {'kind': 'paper_synthesis', 'rule_version': RULE_VERSION,
+                                 **({'assessment': matched} if matched else {})}
+            if matched and matched.get('status') == 'completed':
+                row['evidences'] = copy.deepcopy(matched.get('evidences') or [])
         if path == 'paper' and name == 'keywords_tags':
             matched = keyword_assessment if isinstance(keyword_assessment, dict) and keyword_assessment.get('values') == value else None
             if matched and matched.get('status') == 'completed':
@@ -268,6 +275,7 @@ def augment_upload(draft, records, origins):
     from backend.ingest.scientific_drafts import _candidate_conventional_representation, _candidate_state_index
     from backend.services.structure_candidates import validate_structure_text
     records.extend(field_records('paper', 'paper', draft.get('paper') or {}, PAPER_FIELDS,
+                                 assessment=draft.get('theoretical_subtype_assessment'),
                                  keyword_assessment=draft.get('keyword_assessment')))
     for index, state in enumerate(draft.get('material_states') or []):
         records.extend(state_records(state, index))
@@ -344,7 +352,12 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
 
 def transfer_result(record, result, chunks, file_ids=None):
     """上传落库后重定位所有嵌套引句；文件 ID 变化不能抹掉候选或人工来源。"""
-    from .property_evidence import locate
+    from .property_evidence import digest, locate, normalized_text
+    subtype = record.get('field') == 'paper.theoretical_subtype'
+    if subtype and (result.get('provenance') or {}).get('assessment'):
+        record['provenance'] = copy.deepcopy(result['provenance'])
+        source_hash = digest(sorted(normalized_text(c['content']) for c in chunks))
+        record['source_hash'] = digest([source_hash, record['provenance']])
     if result.get('content_hash') != record['content_hash'] or result.get('source_hash') != record['source_hash']:
         history = [{name: copy.deepcopy(result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'adopted_basis', 'content_hash', 'source_hash')}]
         return {**record, 'status': 'unchecked', 'reason': '上传值与保存后的内容或来源不同，请重新核对',
@@ -364,6 +377,14 @@ def transfer_result(record, result, chunks, file_ids=None):
                        (found := relocate(source))]
                       if key == 'evidences' and isinstance(item, list) else rebind(item)) for key, item in value.items()}
     rebound = rebind(copy.deepcopy(result))
+    if subtype and (rebound.get('provenance') or {}).get('assessment'):
+        record['provenance'] = copy.deepcopy(rebound['provenance'])
+        source_hash = digest(sorted(normalized_text(c['content']) for c in chunks))
+        record['source_hash'] = digest([source_hash, record['provenance']])
+        rebound['source_hash'] = record['source_hash']
+        return {**rebound, **record, 'source_kind': rebound.get('source_kind', 'paper_synthesis'),
+                'ai_reason': rebound.get('ai_reason'),
+                'evidences': rebound.get('evidences') or record.get('evidences') or []}
     return {**rebound, **record, 'evidences': record.get('evidences') or rebound.get('evidences', [])}
 
 

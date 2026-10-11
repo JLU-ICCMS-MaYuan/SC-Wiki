@@ -1481,7 +1481,11 @@ async def put_upload_draft(
                     proposals.validate_save(evidence_session, evidence.upload_snapshot(task_id, current_user.id), current_user.id, preparation_id, 'upload')
             previous = get_draft(task_id) or {}
             normalized = _normalize_draft(draft)
-            # 关键词来源分析只能由服务端生成，人工改词不会修改原分析。
+            # 全文分类和关键词来源分析只由服务端生成；浏览器只能编辑正式字段值。
+            if isinstance(previous.get('theoretical_subtype_assessment'), dict):
+                normalized['theoretical_subtype_assessment'] = previous['theoretical_subtype_assessment']
+            else:
+                normalized.pop('theoretical_subtype_assessment', None)
             if isinstance(previous.get('keyword_assessment'), dict):
                 normalized['keyword_assessment'] = previous['keyword_assessment']
             else:
@@ -1925,6 +1929,10 @@ async def _create_pending_paper(
                             updated = science.transfer_result(r, old, persisted['chunks'], {key: file.id for key, file in paper_files.items()})
                             if updated is not None:
                                 transferred[r['key']] = updated
+                    from backend.ingest.property_evidence import digest as evidence_digest
+                    persisted['version'] = evidence_digest([persisted['rule_version'], persisted['target'],
+                        persisted['target_id'], sorted((r['item_key'], r['content_hash'], r['source_hash'])
+                                                        for r in persisted['records'])])
                     await session.run_sync(lambda sync: science.save_results(sync, persisted, transferred, int(state['user_id'])))
                     if manual_snapshot is not None and manual_baseline is not None:
                         await session.run_sync(lambda sync: manual_evidence.transfer_to_paper(

@@ -9,7 +9,7 @@ def source_chunk(source):
     origin = result.get('provenance') or {}
     quotes = result.get('evidences') or []
     from backend.ingest.scientific_evidence import human_confirmed
-    kind = 'human_review' if human_confirmed(result) else 'derived' if origin.get('kind') == 'derived' else 'paper_quote' if quotes else origin.get('kind', 'unknown')
+    kind = 'human_review' if human_confirmed(result) else 'derived' if origin.get('kind') == 'derived' else 'paper_synthesis' if source.field_path == 'paper.theoretical_subtype' and quotes else 'paper_quote' if quotes else origin.get('kind', 'unknown')
     if kind == 'human_review':
         decision = result['decision']
         attribution = f"管理员人工确认的数据；判断人 ID：{decision['actor_user_id']}；判断理由：{decision['reason']}。论文未直接支持该结论，不能表述为论文报告或 AI 已验证的结论。"
@@ -17,6 +17,8 @@ def source_chunk(source):
         attribution = f"提供者提交的数据；论文中未提供明确支持。实际提交者：{origin.get('submitted_by_name') or '未知'}；原始文件：{origin.get('filename') or '未知'}。不得表述为该论文报告的晶体结构或晶格参数。"
     elif kind == 'derived':
         attribution = f"程序派生数据；计算依据：{origin.get('rule') or '见来源记录'}。"
+    elif kind == 'paper_synthesis':
+        attribution = 'LLM 阅读本文全文后归纳的理论二级类型；引句是支撑片段，论文没有逐字记载该枚举。'
     else:
         attribution = '来源为当前论文及附件的可核验引句。'
     basis = result.get('adopted_basis') or (result.get('decision') or {}).get('basis_kind')

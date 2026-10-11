@@ -2,6 +2,8 @@
 
 关联 [Issue #109](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/109)。独立 Feature，扩展 #103，关联 #85、#100；不重开旧 Issue。用户于 2026-09-18 确认原方案，并于 2026-10-11 确认人工修改区的简化需求。
 
+> [#128](../128-fulltext-theoretical-subtype/spec.md) 补充理论二级类型的专门来源类别：可核验的全文归纳可以为 `supported`，其引句是支撑片段，侧栏不得称为原文直接记载；原本其他字段的证据及人工修改规则继续有效。
+
 ## 用户故事与需求
 
 ### US1（P1）：在字段原位查看依据

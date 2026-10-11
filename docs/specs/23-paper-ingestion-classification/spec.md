@@ -2,6 +2,8 @@
 
 **GitHub Issue**：[＃23](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/23)
 
+> 2026-10-11：[ #128](../128-fulltext-theoretical-subtype/spec.md) 细化理论二级类型的现行判断：由 LLM 阅读本文全文与附件后按主要贡献归纳，原方法段不得独立决定类别。下文历史需求与验收记录保留。
+
 **创建日期**：2026-08-19
 
 **状态**：已确认，实施中

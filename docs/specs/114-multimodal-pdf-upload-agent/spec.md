@@ -2,6 +2,8 @@
 
 **GitHub Issue**：[ #114](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/114)
 
+> [#128](../128-fulltext-theoretical-subtype/spec.md) 的全文理论二级分类读取本功能已有的正文/附件解析文本与来源定位，不改变 Document IR、Claim 审计或 PDF 解析方案。
+
 **创建日期**：2026-09-23
 
 **状态**：已确认，实施中

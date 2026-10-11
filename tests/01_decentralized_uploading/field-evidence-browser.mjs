@@ -12,11 +12,12 @@ try {
   const context=await browser.newContext({viewport:{width:1440,height:900}})
   const user={id:7,username:'fixture',role:role==='upload'?'user':role,is_admin:role!=='upload',is_superadmin:role==='superadmin',is_approved:true,is_email_verified:true}
   await context.addInitScript(user=>{localStorage.setItem('auth_token','fixture');localStorage.setItem('auth_user',JSON.stringify(user));localStorage.setItem('sc-wiki.language','zh')},user)
-  let paper={id:990109,title:'Evidence fixture',year:2026,authors:['Fixture Author'],journal:'Synthetic',summary:'',paper_type:'experimental',superconductor_kind:'conventional',review_status:'approved',material_families:[{id:8,name:'单质超导体'}]}
+  let paper={id:990109,title:'Evidence fixture',year:2026,authors:['Fixture Author'],journal:'Synthetic',summary:'',paper_type:'theoretical',theoretical_subtype:'calculation',superconductor_kind:'conventional',review_status:'approved',material_families:[{id:8,name:'单质超导体'}]}
   let states=Array.from({length:3},(_,i)=>({state_key:`s-${i}`,material_name:'Sn',material:'Sn',state_kind:'experimental',material_dimensionality:'three_dimensional',crystal_system:'tetragonal',element_count:1,pressure_value_gpa:i,property_modules:[],structure_families:[],structures:[]}))
   const source={file_id:'main',source_name:'synthetic.txt',page_start:2,quote:'Synthetic evidence only.'}
   const records=()=>[
    {key:'title',item_key:'a'.repeat(64),field:'paper.title',label:'标题',current_value:paper.title,status:'supported',required:false,reason:'标题与原文一致',evidences:[source]},
+   {key:'subtype',field:'paper.theoretical_subtype',label:'理论子类型',current_value:'calculation',status:'supported',source_kind:'paper_synthesis',reason:'全文以既有工具预测材料性质，并非开发新算法。',ai_reason:'全文以既有工具预测材料性质，并非开发新算法。',evidences:[{...source,quote:'We predict new phases and Tc.'}]},
    {key:'summary',field:'paper.summary',label:'论文总结',current_value:null,status:'unchecked',required:false,reason:'',evidences:[]},
    ...states.map((s,i)=>({key:s.state_key,state_key:s.state_key,field:`material_states[${i}].pressure_value_gpa`,label:'压强',current_value:s.pressure_value_gpa,status:i===1?'uncertain':'supported',reason:'压力来源',evidences:[source],...(i===1?{human_confirmed:true,adopted_basis:'general_knowledge',decision:{accepted:true,actor_user_id:8,reason:'人工确认的通用知识推测',basis_kind:'general_knowledge'}}:{})})),
   ]
@@ -67,6 +68,11 @@ try {
    await page.waitForTimeout(350)
    await page.screenshot({path:`${artifacts}/${role}-${width}-drawer.png`})
    await page.keyboard.press('Escape');await drawer.waitFor({state:'detached'})
+   await page.locator('[data-evidence-key="subtype"]').first().click()
+   await drawer.getByText(/全文归纳：以下原文片段用于支撑分类/).waitFor()
+   await drawer.getByText('全文以既有工具预测材料性质，并非开发新算法。').first().waitFor()
+   assert.equal(await drawer.getByText('原文直接记载，无需额外推断。').count(),0)
+   await page.keyboard.press('Escape');await drawer.waitFor({state:'detached'})
    const state=page.locator('[data-state-key="s-1"]'),label=state.getByRole('button',{name:'压强 (GPa)',exact:true})
    await label.scrollIntoViewIfNeeded();const before=await label.evaluate(e=>e.getBoundingClientRect().top)
    await label.focus();await page.keyboard.press('Space')
@@ -95,7 +101,8 @@ try {
   }
   await open()
   await page.getByRole('button',{name:'全部展开',exact:true}).click()
-  await page.locator('[data-state-key="s-1"]').getByRole('button',{name:'压强 (GPa)',exact:true}).click()
+  const reopenedPressure=page.locator('[data-state-key="s-1"]').getByRole('button',{name:'压强 (GPa)',exact:true})
+  await reopenedPressure.focus();await page.keyboard.press('Space')
   await page.getByText('人工确认的通用知识推测',{exact:false}).waitFor()
   assert.deepEqual(errors,[])
   console.log(JSON.stringify({role,widths:[1440,390,320],jobs,writes,approvedReopen:true,result:'passed'}))

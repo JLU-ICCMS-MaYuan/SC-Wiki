@@ -711,6 +711,11 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
             <MenuItem value="theory">{dict.enums.theoreticalSubtype.theory}</MenuItem>
           </Select>
           <IssueText field="paper.theoretical_subtype" />
+          {draft.paper.paper_type === 'theoretical' && !draft.paper.theoretical_subtype && draft.theoretical_subtype_assessment?.status !== 'completed' &&
+            <FormHelperText>{draft.theoretical_subtype_assessment?.reason || t('upload.subtypeAssessmentMissing')}</FormHelperText>}
+          {draft.paper.paper_type === 'theoretical' && draft.theoretical_subtype_assessment?.status === 'completed' &&
+            draft.paper.theoretical_subtype !== draft.theoretical_subtype_assessment.value &&
+            <FormHelperText>{t('upload.subtypeAssessmentConflict', { value: dict.enums.theoreticalSubtype[draft.theoretical_subtype_assessment.value as 'calculation' | 'method' | 'theory'] || draft.theoretical_subtype_assessment.value || '' })}</FormHelperText>}
         </FormControl>
         <FormControl fullWidth data-issue-field="paper.superconductor_kind">
           <InputLabel id="paper-superconductor-kind-label">{t('upload.superconductorKindField')}</InputLabel>

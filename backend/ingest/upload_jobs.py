@@ -46,8 +46,8 @@ from backend.ingest.language_contract import (
     validate_chunk_generated_english,
     validate_draft_generated_english,
 )
-from backend.ingest.research_motivation import generate_motivation, task_chunks as motivation_chunks
 from backend.ingest.paper_summary import SUMMARY_RULES, choose_summary
+from backend.ingest.research_motivation import generate_motivation, task_chunks as motivation_chunks
 from backend.ingest.structure_extractor import extract_structure_candidates
 from backend.models import Paper, PaperFile
 from backend.rag.llm import complete_json
@@ -148,7 +148,7 @@ NON-NEGOTIABLE OUTPUT LANGUAGE: write every AI-generated summary, keyword, metho
 - 实验发现主要现象、理论用于解释实验，归 experimental。
 - 理论和实验同等重要、无法分主次，也归 experimental。
 - 以整理评价已有工作为主，归 review。
-理论二级类型只允许 calculation、method、theory。新算法、新模型、新研究工具归 method；使用已有计算方法研究具体问题归 calculation；解析推导、理论模型或机制研究归 theory。
+理论二级类型由后续通读原文的专门分类决定；此处 theoretical_subtype 必须为 null，不能凭分段候选或软件名预判。
 材料超导类型必须综合全文判断，可以使用已有类型，也可以提出自由文本新类型，不能只凭化学式猜测。
 分段证据中的 scope 表示证据主体；只有 scope=current_paper 的候选可以决定本文 paper_type 和材料状态分类，
 scope=referenced_work 或缺少 scope 的候选只能作为背景，不能参与本文分类。
@@ -1488,8 +1488,10 @@ def _normalize_draft(
         "classification_evidence": _as_list(raw.get("classification_evidence")),
         "field_evidence": field_evidence,
     }
-    if isinstance(raw.get('keyword_assessment'), dict):
-        normalized['keyword_assessment'] = raw['keyword_assessment']
+    if isinstance(raw.get("theoretical_subtype_assessment"), dict):
+        normalized["theoretical_subtype_assessment"] = raw["theoretical_subtype_assessment"]
+    if isinstance(raw.get("keyword_assessment"), dict):
+        normalized["keyword_assessment"] = raw["keyword_assessment"]
     if isinstance(raw.get("material_family_assessment"), dict):
         normalized["material_family_assessment"] = raw["material_family_assessment"]
     if raw.get("material_family_error") in {"catalog_unavailable", "classification_failed", "insufficient_evidence"}:
@@ -1995,6 +1997,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             partial_draft = _parse_partial_draft(text)
             if partial_draft is None:
                 return
+            if isinstance(partial_draft.get('paper'), dict):
+                partial_draft['paper']['theoretical_subtype'] = None
             partial_write["last_at"] = now
             update_state(task_id, partial_draft=partial_draft)
 
@@ -2036,10 +2040,21 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         if motivation_error:
             logging.getLogger(__name__).warning("研究驱动力需要人工核对 task=%s reason=%s", task_id, motivation_error)
         draft["research_motivation_error"] = motivation_error
+        if draft["paper"]["paper_type"] == "theoretical":
+            from backend.ingest.theoretical_subtype import classify, task_sources
+            from backend.rag.llm_context import get_llm_config
+
+            assessment = classify(task_sources(task_id, state, data_path("parsed_markdown")),
+                                  model=get_llm_config().model)
+            draft["paper"]["theoretical_subtype"] = assessment["value"]
+            draft["theoretical_subtype_assessment"] = assessment
+        else:
+            draft["paper"]["theoretical_subtype"] = None
         from backend.ingest.keyword_extraction import select_keywords, task_sources
-        keyword_assessment = select_keywords(task_sources(task_id, state, data_path('parsed_markdown')))
-        draft['keyword_assessment'] = keyword_assessment
-        draft['paper']['keywords_tags'] = keyword_assessment['values']
+
+        keyword_assessment = select_keywords(task_sources(task_id, state, data_path("parsed_markdown")))
+        draft["keyword_assessment"] = keyword_assessment
+        draft["paper"]["keywords_tags"] = keyword_assessment["values"]
         if document_set:
             carry_state_evidence(draft, claims)
             final_claims = claims_from_candidates(draft, document_set, legacy_sources=legacy_sources)
