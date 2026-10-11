@@ -134,3 +134,23 @@ JWT_SECRET_KEY=fixture-only DEBUG=false DATABASE_URL="sqlite:///:memory:" \
 | Go 永久来源契约 | 临时 Go 1.25 容器编译通过，2 项归档 JSON 契约测试通过；`ai_reason`、自动填写标记及版本摘要可往返 | 全量 Go 测试在无 CGO 容器中因 SQLite 驱动失败；加装 CGO 工具的容器遇到 Alpine 包镜像网络超时，未宣称全量通过 |
 
 新上传需分别用可定位引句的论文推断、无引句的通用知识推测和已有非空原文值验收：前两类直接出现在主表单，侧栏只显示简短 AI 理由；已有非空值不被覆盖。保存、刷新、上传转论文及管理员批准后核对来源类别与理由，修改任一值后旧理由只读、不能取得当前批准资格。正式批准通用知识推测仍须管理员逐项理由。真实模型生成质量及完整业务转接尚待验收，不把合成测试解释为任意论文的科学正确性。
+
+## 2026-10-11 人工证据二选一验证
+
+本次只在本地修改代码、文档和合成夹具，未向真实 H3S 记录上传新证据，也未提交该论文审核。后端复用现有 `20261009_0126` 人工证据表；没有数据库迁移。
+
+```bash
+JWT_SECRET_KEY=fixture-only DEBUG=false DATABASE_URL="sqlite:///:memory:" \
+  "/Users/mayuan/software/miniconda3/envs/sc-wiki/bin/python" -m pytest -q \
+  "tests/01_decentralized_uploading/test_issue109_manual_evidence.py" \
+  "tests/01_decentralized_uploading/test_issue109_manual_api.py" \
+  "tests/01_decentralized_uploading/test_field_suggestions.py"
+"frontend/node_modules/.bin/vitest" run --config "vitest.config.ts" \
+  "tests/01_decentralized_uploading/manual-evidence-section.test.tsx" \
+  "tests/01_decentralized_uploading/evidence-workflow.test.tsx"
+cd "frontend" && npm run build
+```
+
+初次使用当前默认 Python 时缺少 `sqlalchemy`；改用仓库现有 `sc-wiki` conda 环境并设置测试专用 JWT 与 SQLite 后，Python 44 项通过。前端组件与证据工作流 36 项通过；TypeScript/Vite 生产构建通过。FastAPI 测试覆盖省略来源说明上传 PDF、鉴权预览与越权 403；服务端测试覆盖有效 PDF、伪造 PDF、无文字 PDF、文件哈希、值版本与明确提交门禁。模拟审核模型的测试确认 PDF 文字进入 `human_provided_evidence`，成功返回后才更新已读；该测试不等于真实模型读取验证。
+
+本机 Safari 当前上传页在 H3S 草稿的“超导类型”字段实测：人工修改区仅显示判断理由与两枚单选项；选择“提供证据”后显示“选择图片、文本或 PDF”，选择“不提供证据”后仅显示缺证理由输入。未保存或上传任何真实论文证据。Codex 浏览器连接器缺少认证令牌，改用 Safari 原生可访问性树做现场检查。管理员与超级管理员实页、真实可搜索 PDF 的审核模型正向路径，以及完整上传→返修→批准的业务库事务尚未完成，#109 保持开放。

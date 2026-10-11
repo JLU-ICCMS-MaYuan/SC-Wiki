@@ -68,3 +68,15 @@ Issue 为协作状态唯一来源。本文件记录技术拆解。
 - [x] T032 [US6] 以 300 DPI 渲染引句上下各三行局部图和可信图表说明，超大区域分片，扫描件低分辨率显式提示；侧栏原始尺寸滚动、点击放大缩回。
 - [x] T033 [US6] 待审旧标题来源 dry-run、备份、事务清理与重复运行测试；本机当前 H3S 一条任务已备份修正，已批准论文跳过。
 - [ ] T034 [US6] 完成实际 H3S 登录页面的首页标题、作者及保留字段局部图与三角色桌面/窄屏复核；同步 Overview、README、#109 的验证边界，不替其他未验收项关闭 Issue。原材料关系局部图范围由 #127 废止。
+
+## 2026-10-11 人工证据二选一（US7）
+
+- [x] T035 [US7] 在 `tests/01_decentralized_uploading/test_issue109_manual_evidence.py` 和 `manual-evidence-section.test.tsx` 增加二选一门禁、图片/TXT/MD/PDF、历史只读、越权及刷新恢复的行为用例。
+- [x] T036 [US7] 更新 `frontend/src/components/ManualEvidenceSection.tsx` 和中英文字典，当前编辑区只显示判断理由及互斥选项；上传路径不再要求手填来源说明，缺证路径只显示缺证理由。
+- [x] T037 [US7] 更新 `backend/ingest/manual_evidence.py` 与 `backend/api/evidence.py`，验证 PDF 实际内容并保存私有附件，支持鉴权预览和有界文字提取，旧直接文字保持只读兼容。
+- [ ] T038 [US7] 在 `backend/ingest/property_evidence.py` 的审核完成边界登记人工 PDF 实际读取状态，并验证提交/返修/批准沿当前字段版本按附件或缺证理由校验。
+- [ ] T039 [US7] 运行定向前后端测试、构建和三入口浏览器流程，记录通过与限制到 `quickstart.md`；用 `big-project-overview-maintainer` 同步已实现行为及 README，不提前关闭仍有其他待验收项的 #109。
+
+执行顺序：T035 → T036/T037 → T038 → T039；FR-025—028、SC-016—019 均映射到上述任务。
+
+2026-10-11 进度：T035—T037 的真实组件与 FastAPI 私有文件路径已通过定向测试，Safari 上传页现场可见二选一及两条互斥控件。T038 的 PDF 审核输入和已读标记已通过服务端模拟模型测试，但尚无可搜索 PDF 的真实审核模型正向验收；T039 的管理员/超级管理员实页与完整上传→返修→批准链路也未验证，故保持未勾选。详见 [验证记录](quickstart.md)。

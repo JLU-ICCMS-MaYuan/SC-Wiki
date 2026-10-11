@@ -6,6 +6,7 @@ from types import SimpleNamespace
 from fastapi import FastAPI, HTTPException
 from fastapi.testclient import TestClient
 from PIL import Image
+import pymupdf
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -61,6 +62,19 @@ def test_manual_api_saves_private_image_and_checks_version(tmp_path, monkeypatch
     assert downloaded.status_code == 200
     assert downloaded.content == image.getvalue()
     assert downloaded.headers["x-content-type-options"] == "nosniff"
+
+    with pymupdf.open() as pdf:
+        pdf.new_page().insert_text((72, 72), "Human PDF evidence")
+        pdf_bytes = pdf.tobytes()
+    pdf_uploaded = client.post(f"{url}/files", data={"expected_version": "v1"},
+                               files={"file": ("report.pdf", pdf_bytes, "application/pdf")})
+    assert pdf_uploaded.status_code == 200
+    pdf_item = pdf_uploaded.json()["data"]["items"][-1]
+    assert pdf_item["source_description"] == "report.pdf"
+    pdf_response = client.get(f"{url}/files/{pdf_item['id']}")
+    assert pdf_response.status_code == 200
+    assert pdf_response.headers["content-type"] == "application/pdf"
+    assert pdf_response.content == pdf_bytes
 
     monkeypatch.setattr(evidence, "_manual_snapshots", lambda target, target_id, user: (_ for _ in ()).throw(HTTPException(403, "forbidden")))
     assert client.get(f"{url}/files/{item['id']}").status_code == 403

@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from PIL import Image, UnidentifiedImageError
+import pymupdf
 from sqlalchemy import case, inspect, select
 
 from backend.manual_evidence_models import ScientificManualEvidence
@@ -23,6 +24,7 @@ MAX_FILE_BYTES = 10 * 1024 * 1024
 MAX_ITEMS = 5
 MAX_TEXT_CHARS = 20_000
 MAX_REVIEW_IMAGE_BYTES = 20 * 1024 * 1024
+MAX_REVIEW_PDF_PAGES = 20
 EMPTY_HASH = hashlib.sha256(b"null").hexdigest()
 IMAGE_FORMATS = {"PNG": "image/png", "JPEG": "image/jpeg", "WEBP": "image/webp"}
 
@@ -223,8 +225,8 @@ def save_explanation(session, snapshot: dict, baseline: dict, item_key: str, act
     if len(files) + len(direct) > MAX_ITEMS:
         raise ManualEvidenceError("manual_evidence_limit", "单个字段最多 5 项人工证据", field=current["field"])
     row.reason = reason.strip()
-    row.no_evidence_reason = no_evidence_reason.strip()
     row.items = [*files, *direct]
+    row.no_evidence_reason = "" if row.items else no_evidence_reason.strip()
     row.evidence_version = (row.evidence_version or 1) + 1
     session.flush()
     return public_record(row, changed=True)
@@ -232,6 +234,16 @@ def save_explanation(session, snapshot: dict, baseline: dict, item_key: str, act
 
 def _file_type(filename: str, raw: bytes) -> tuple[str, str]:
     suffix = Path(filename).suffix.lower()
+    if suffix == ".pdf":
+        if b"%PDF-" not in raw[:1024]:
+            raise ManualEvidenceError("manual_file_invalid", "PDF 文件内容无效")
+        try:
+            with pymupdf.open(stream=raw, filetype="pdf") as pdf:
+                if not pdf.is_pdf or pdf.is_encrypted or pdf.page_count < 1:
+                    raise ManualEvidenceError("manual_file_invalid", "只支持未加密且包含页面的 PDF")
+        except (RuntimeError, ValueError, OSError) as exc:
+            raise ManualEvidenceError("manual_file_invalid", "PDF 文件内容无效") from exc
+        return "pdf", "application/pdf"
     if suffix in {".txt", ".md"}:
         try:
             text = raw.decode("utf-8")
@@ -249,7 +261,7 @@ def _file_type(filename: str, raw: bytes) -> tuple[str, str]:
     media_type = IMAGE_FORMATS.get(str(image_format))
     matching_suffixes = {"PNG": {".png"}, "JPEG": {".jpg", ".jpeg"}, "WEBP": {".webp"}}
     if media_type is None or suffix not in matching_suffixes[str(image_format)]:
-        raise ManualEvidenceError("manual_file_invalid", "只支持 PNG/JPEG/WebP 截图或 TXT/MD 文本")
+        raise ManualEvidenceError("manual_file_invalid", "只支持 PNG/JPEG/WebP、TXT/MD 或 PDF")
     return "image", media_type
 
 
@@ -262,7 +274,8 @@ def file_path(row_id: str, item_id: str) -> Path:
 def add_file(session, snapshot: dict, baseline: dict, item_key: str, actor_id: int,
              *, filename: str, raw: bytes, source_description: str, actor_name: str | None = None) -> dict[str, Any]:
     row, current = _ensure(session, snapshot, baseline, item_key, actor_id, actor_name)
-    source = source_description.strip()
+    name = Path(filename).name[:200]
+    source = source_description.strip() or name
     if not source or len(source) > 200:
         raise ManualEvidenceError("manual_source_invalid", "请填写人工证据的来源说明", field=current["field"])
     if not raw or len(raw) > MAX_FILE_BYTES:
@@ -270,7 +283,6 @@ def add_file(session, snapshot: dict, baseline: dict, item_key: str, actor_id: i
     items = list(row.items or [])
     if len(items) >= MAX_ITEMS:
         raise ManualEvidenceError("manual_evidence_limit", "单个字段最多 5 项人工证据", field=current["field"])
-    name = Path(filename).name[:200]
     kind, media_type = _file_type(name, raw)
     item_id = uuid.uuid4().hex
     path = file_path(row.id, item_id)
@@ -281,6 +293,7 @@ def add_file(session, snapshot: dict, baseline: dict, item_key: str, actor_id: i
                       "source_description": source, "sha256": hashlib.sha256(raw).hexdigest(),
                       "size": len(raw), "ai_read_status": "not_read"})
         row.items = items
+        row.no_evidence_reason = ""
         row.evidence_version = (row.evidence_version or 1) + 1
         session.flush()
     except Exception:
@@ -362,6 +375,7 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
             continue
         items: list[dict[str, Any]] = []
         images: list[dict[str, str]] = []
+        pdf_refs: list[dict[str, str]] = []
         for row in rows:
             for item in row.items or []:
                 visible = {"kind": item["kind"], "source_description": item["source_description"],
@@ -378,6 +392,21 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
                             visible["read_status"] = "not_read"
                         elif item["kind"] == "text_file":
                             visible["content"] = raw.decode("utf-8")[:MAX_TEXT_CHARS]
+                        elif item["kind"] == "pdf":
+                            try:
+                                with pymupdf.open(stream=raw, filetype="pdf") as pdf:
+                                    if pdf.is_encrypted or pdf.page_count > MAX_REVIEW_PDF_PAGES:
+                                        visible["read_status"] = "not_read"
+                                    else:
+                                        pages = [page.get_text("text").strip() for page in pdf]
+                                        content = "\n".join(page for page in pages if page)
+                                        if content and len(content) <= MAX_TEXT_CHARS:
+                                            visible["content"] = content
+                                            pdf_refs.append({"row_id": row.id, "item_id": item["id"]})
+                                        else:
+                                            visible["read_status"] = "not_read"
+                            except (RuntimeError, ValueError, OSError):
+                                visible["read_status"] = "not_read"
                         elif item["kind"] == "image":
                             if image_bytes + len(raw) > MAX_REVIEW_IMAGE_BYTES:
                                 visible["read_status"] = "not_read"
@@ -391,20 +420,20 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
         context[record["key"]] = {
             "decisions": [{"reason": row.reason, "no_evidence_reason": row.no_evidence_reason,
                            "submitted_by_user_id": row.actor_user_id} for row in rows],
-            "items": items, "images": images,
+            "items": items, "images": images, "pdf_refs": pdf_refs,
         }
     return context
 
 
-def mark_ai_read(session, image_refs: list[dict[str, str]], *, read: bool) -> None:
-    for ref in image_refs:
+def mark_ai_read(session, refs: list[dict[str, str]], *, read: bool) -> None:
+    for ref in refs:
         row = session.get(ScientificManualEvidence, ref["row_id"], with_for_update=True)
         if row is None:
             continue
         items = copy.deepcopy(row.items or [])
         matched = False
         for item in items:
-            if item.get("id") == ref["item_id"] and item.get("kind") == "image":
+            if item.get("id") == ref["item_id"] and item.get("kind") in {"image", "pdf"}:
                 item["ai_read_status"] = "read" if read else "not_read"
                 matched = True
         if matched:

@@ -63,7 +63,7 @@ try {
    await drawer.getByText('Synthetic evidence only.',{exact:false}).waitFor()
    await drawer.getByText('人工核对标题页',{exact:true}).waitFor()
    assert(await drawer.getByText('系统找到的原文').locator('..').evaluate(e=>e.open),'系统原文默认展开')
-   assert.equal(await drawer.getByText('保存理由和文字证据',{exact:true}).count(),0,'已提交人工材料只读')
+   assert.equal(await drawer.getByText('保存人工修改说明',{exact:true}).count(),0,'已提交人工材料只读')
    await page.waitForTimeout(350)
    await page.screenshot({path:`${artifacts}/${role}-${width}-drawer.png`})
    await page.keyboard.press('Escape');await drawer.waitFor({state:'detached'})

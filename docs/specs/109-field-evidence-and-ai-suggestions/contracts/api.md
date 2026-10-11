@@ -37,3 +37,10 @@
 ## PDF 局部证据响应补充
 
 `POST /region` 请求沿用 `target/target_id/file_id/quote/pdf_page/block_id`；服务端使用已鉴权目标的 PDF manifest 和 SHA-256 决定实际文件，旧解析页码只作线索。`located` 响应增加 `dpi: 300`、实际 `pdf_page`、可选 `page_end`，以及按阅读顺序排列的 `crops[]`：每项包含 `pdf_page`、PNG data URL、原 PDF 点坐标 `clip_bbox_pdf`、输出 `width/height` 像素及相对裁剪图的 `highlights[]`；源扫描图不足 300 DPI 时附 `source_raster_dpi`。原有 `image/region` 保留为第一张局部图的兼容字段。无法唯一定位、文件变化或无可信区域时不返回伪造图片，并保留原引句及明确状态。
+
+## 2026-10-11 当前人工证据接口调整
+
+- `PUT /{target}/{target_id}/manual/{item_key}` 保持原 JSON 兼容，但新界面只发送 `reason`、`no_evidence_reason` 和空 `text_items`；旧直接文字记录按原接口可读。选择提供证据时将 `no_evidence_reason` 置空，选择不提供证据时要求当前附件为空。服务端以当前附件和缺证理由执行显式提交门禁，不信任前端选项。
+- `POST .../files` 接受 PNG/JPEG/WebP、UTF-8 TXT/MD 及有效未加密 PDF，仍限制单文件 10 MiB、单字段最多 5 项。`source_description` 对新客户端可省略，由服务端根据安全文件名和真实文件类型生成；旧客户端传入的来源说明继续兼容。拒绝扩展名与内容不符、空白或损坏文件。
+- `GET .../files/{item_id}` 对 PDF 返回 `application/pdf`、`inline` 和 `nosniff`，仍按目标权限与 SHA-256 验证。PDF 仅作为人工附件，不能使用原论文区域接口或被索引为论文原文。
+- 审核 AI 只接收不超过 20 页且提取文本不超过 2 万字的可搜索 PDF 全文，保留 `human_provided` 身份；成功完成实际审核后才将该 PDF 标为已读。超限、无可读文本或失败时保持 `not_read`，供人工预览。旧 `text` 条目及已提交记录继续只读。

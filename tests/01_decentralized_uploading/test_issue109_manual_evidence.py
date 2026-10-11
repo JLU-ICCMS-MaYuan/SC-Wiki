@@ -4,6 +4,7 @@ from io import BytesIO
 from types import SimpleNamespace
 
 import pytest
+import pymupdf
 from PIL import Image
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
@@ -111,6 +112,64 @@ def test_image_is_private_and_retained_after_transfer(session, tmp_path, monkeyp
     assert session.get(ScientificManualEvidence, saved["id"]).items[0]["ai_read_status"] == "read"
     assert manual.cleanup_unsubmitted(session, "task") == []
     assert manual.file_path(saved["id"], item["id"]).is_file()
+
+
+def test_pdf_is_validated_and_only_actual_review_marks_it_read(session, tmp_path, monkeypatch):
+    from backend.ingest import property_evidence as evidence
+    from backend.rag import llm
+
+    monkeypatch.setattr(manual, "settings", SimpleNamespace(sc_wiki_data_dir=tmp_path))
+    before, current = snapshot("old"), snapshot()
+    with pymupdf.open() as pdf:
+        page = pdf.new_page()
+        page.insert_text((72, 72), "Measured transition at 203 K")
+        raw = pdf.tobytes()
+    manual.save_explanation(session, current, before, "stable-field", 7,
+                            reason="核对实验报告", no_evidence_reason="此前没有文件", text_items=[])
+    saved = manual.add_file(session, current, before, "stable-field", 7,
+                            filename="report.pdf", raw=raw, source_description="")
+    item = saved["items"][0]
+    assert item["kind"] == "pdf"
+    assert item["source_description"] == "report.pdf"
+    assert item["media_type"] == "application/pdf"
+    assert saved["no_evidence_reason"] == ""
+    context = manual.review_context(session, current)
+    assert "Measured transition at 203 K" in context["field"]["items"][0]["content"]
+    assert context["field"]["pdf_refs"] == [{"row_id": saved["id"], "item_id": item["id"]}]
+    assert session.get(ScientificManualEvidence, saved["id"]).items[0]["ai_read_status"] == "not_read"
+
+    prompts = []
+    def complete(_, prompt, **kwargs):
+        prompts.append(prompt)
+        return {"results": [{"key": "field", "status": "missing", "reason": "仅有人工来源", "evidences": []}]}
+    monkeypatch.setattr(llm, "complete_json", complete)
+    record = {"key": "field", "field": "paper.authors", "claim": {"value": "new"},
+              "editable_fields": [], "evidences": []}
+    read = []
+    monkeypatch.setattr(llm, "complete_json", lambda *args, **kwargs: {"results": []})
+    with pytest.raises(ValueError, match="incomplete result schema"):
+        evidence.evaluate_batch([record], [], "review_all", human_context=context, image_read_out=read)
+    assert read == []
+    monkeypatch.setattr(llm, "complete_json", complete)
+    evidence.evaluate_batch([record], [], "review_all", human_context=context, image_read_out=read)
+    assert "Measured transition at 203 K" in prompts[0]
+    assert "pdf_refs" not in prompts[0]
+    assert read == [({"row_id": saved["id"], "item_id": item["id"]}, True)]
+    manual.mark_ai_read(session, [read[0][0]], read=read[0][1])
+    assert session.get(ScientificManualEvidence, saved["id"]).items[0]["ai_read_status"] == "read"
+
+    with pymupdf.open() as pdf:
+        pdf.new_page()
+        blank = pdf.tobytes()
+    saved = manual.add_file(session, current, before, "stable-field", 7,
+                            filename="scan.pdf", raw=blank, source_description="")
+    context = manual.review_context(session, current)["field"]
+    assert context["items"][-1]["read_status"] == "not_read"
+    assert all(ref["item_id"] != saved["items"][-1]["id"] for ref in context["pdf_refs"])
+    with pytest.raises(manual.ManualEvidenceError) as invalid:
+        manual.add_file(session, current, before, "stable-field", 7,
+                        filename="fake.pdf", raw=b"%PDF-not-a-document", source_description="")
+    assert invalid.value.code == "manual_file_invalid"
 
 
 def test_reviewer_reason_does_not_overwrite_uploader_evidence(session):

@@ -479,6 +479,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
     prior = prior or {}
     human_context = human_context or {}
     all_image_refs = [image for record in records for image in human_context.get(record['key'], {}).get('images', [])]
+    pdf_refs = [ref for record in records for ref in human_context.get(record['key'], {}).get('pdf_refs', [])]
     image_refs = all_image_refs if vision_verified else []
     if image_read_out is not None and not vision_verified:
         image_read_out.extend((item, False) for item in all_image_refs)
@@ -486,7 +487,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
     for record in records:
         if record['key'] not in human_context:
             continue
-        entry = {key: copy.deepcopy(value) for key, value in human_context[record['key']].items() if key != 'images'}
+        entry = {key: copy.deepcopy(value) for key, value in human_context[record['key']].items() if key not in {'images', 'pdf_refs'}}
         if not vision_verified:
             for item in entry.get('items', []):
                 if item.get('kind') == 'image':
@@ -500,14 +501,14 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
                      'previous_result': {k: prior.get(r['key'], {}).get(k) for k in ('status', 'reason', 'proposal', 'evidences', 'adopted_basis', 'auto_filled', 'ai_reason')}} for r in records],
         'sources': chunks,
         'human_provided_evidence': visible_human}, ensure_ascii=False, default=str)
+    image_request_succeeded = True
     try:
         parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT, prompt, on_partial=on_partial, retries=1,
                                **({'images': [item['data_url'] for item in image_refs]} if image_refs else {}))
-        if image_read_out is not None:
-            image_read_out.extend((item, True) for item in image_refs)
     except APIStatusError as exc:
         if not image_refs or exc.status_code not in {400, 422}:
             raise
+        image_request_succeeded = False
         if image_read_out is not None:
             image_read_out.extend((item, False) for item in image_refs)
         parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT, prompt, on_partial=on_partial, retries=1)
@@ -547,6 +548,10 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         results[key] = result
     if set(results) != set(by_key):
         raise ValueError('incomplete result schema')
+    if image_read_out is not None:
+        image_read_out.extend((item, True) for item in pdf_refs)
+        if image_request_succeeded:
+            image_read_out.extend((item, True) for item in image_refs)
     return [results[r['key']] for r in records]
 
 

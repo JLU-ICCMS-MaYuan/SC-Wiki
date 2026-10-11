@@ -375,7 +375,7 @@ def put_manual_evidence(target: str, target_id: str, item_key: str, body: Manual
 
 @router.post("/{target}/{target_id}/manual/{item_key}/files")
 async def post_manual_evidence_file(target: str, target_id: str, item_key: str,
-                                    expected_version: str = Form(...), source_description: str = Form(...),
+                                    expected_version: str = Form(...), source_description: str = Form(""),
                                     file: UploadFile = File(...), user=Depends(get_current_user)):
     snapshot, baseline = _manual_snapshots(target, target_id, user)
     if expected_version != snapshot["version"]:
