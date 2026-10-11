@@ -788,7 +788,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         <Box key={String(field)} sx={{ mt: 2 }}>
           <TextField fullWidth label={String(label)} multiline minRows={Number(rows)} data-issue-field={`paper.${field}`}
             value={String(draft.paper[field as keyof UploadDraft['paper']] || '')}
-            onChange={event => setPaperField(field as keyof UploadDraft['paper'], event.target.value)} />
+            onChange={event => setPaperField(field as keyof UploadDraft['paper'], event.target.value)}
+            helperText={field === 'summary' && !draft.paper.summary ? t('upload.summaryReviewHint') : undefined} />
         </Box>
       ))}
 

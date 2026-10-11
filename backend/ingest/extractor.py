@@ -17,6 +17,7 @@ from openai import OpenAI
 from backend.rag.config import settings
 from backend.rag.llm_client import get_llm_client
 from backend.rag.llm_context import get_llm_config
+from backend.ingest.paper_summary import SUMMARY_RULES
 
 
 SYSTEM_PROMPT = """你是一个材料科学专家，专门研究超导材料。从论文文本中提取结构化元信息，严格按照以下 JSON 格式返回。
@@ -34,7 +35,7 @@ SYSTEM_PROMPT = """你是一个材料科学专家，专门研究超导材料。�
   "year": 2024,
   "abstract": "摘要全文，找不到则 null",
   "paper_type": "theoretical / experimental / review / unknown",
-  "summary": "English summary in 100-200 words covering the research subject, methods, main results (including the highest Tc), and conclusion",
+  "summary": "3-5 numbered English one-sentence core conclusions, one per line; slightly more detailed than the abstract",
   "keywords_tags": ["superconductivity", "LaH10", "high pressure", ...]
 }
 
@@ -49,8 +50,10 @@ SYSTEM_PROMPT = """你是一个材料科学专家，专门研究超导材料。�
 - year: 从 "Received/Accepted/Published" 日期、或 "year" 字段、或文件夹/文件名中的年份提取
 - abstract: 从 "Abstract" 或 "摘要" 后面提取完整段落
 - paper_type: 判定论文类型。theoretical=纯理论/计算，experimental=有实验合成/测量数据，review=综述，unknown=无法判断
-- summary: write 100-200 words in English, covering the system, core methods, highest Tc and its pressure conditions, and the main advance
+- summary: follow the paper.summary rules below; cover the system, core methods, highest Tc and its pressure conditions, and the main advance
 - keywords_tags: provide 5-10 English keywords covering material names, methods, and key property categories"""
+
+SYSTEM_PROMPT += SUMMARY_RULES
 
 
 def _openai_client() -> OpenAI:

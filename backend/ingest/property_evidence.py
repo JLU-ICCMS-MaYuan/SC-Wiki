@@ -315,6 +315,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             if located and located not in evs:
                 evs.append(located)
     keywords = record.get('field') == 'paper.keywords_tags'
+    summary = record.get('field') == 'paper.summary'
     # 概括字段无需与原文逐字相同，但判为 supported 仍需至少一条可定位依据。
     synthesis = record.get('check_mode') == 'synthesis'
     status = result.get('status')
@@ -344,6 +345,8 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     fields = [f for f in fields if isinstance(f, str) and (f == record['field'] or f.startswith(record['field'] + '.'))] or [record['field']]
     suggestion = result.get('suggestion') or ('请补充该记录缺失的原文出处。' if status == 'missing' else '请核对物性类型、数值、单位和实验条件，并根据原文修正记录。')
     source_kind = 'derived' if provenance.get('kind') == 'derived' else 'paper_quote' if evs else 'contributor_structure' if provenance.get('verified') else 'unknown'
+    if summary:
+        source_kind = 'paper_synthesis'
     if isinstance(family_assessment, dict) and evs:
         source_kind = 'paper_synthesis'
     if keywords:
@@ -368,7 +371,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     return {**record, 'proposal': proposal, 'proposal_draft': None if result.get('stale') else result.get('proposal_draft'), 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
             'human_confirmed': human,
             'adopted_basis': adopted_basis, 'proposal_review': result.get('proposal_review'),
-            'ai_reason': reason if keywords or isinstance(family_assessment, dict) else result.get('ai_reason'),
+            'ai_reason': reason if keywords or (summary and not adopted_basis) or isinstance(family_assessment, dict) else result.get('ai_reason'),
             'auto_filled': result.get('auto_filled', False),
             'auto_filled_content_hash': result.get('auto_filled_content_hash'),
             'auto_filled_source_hash': result.get('auto_filled_source_hash'),
@@ -467,6 +470,7 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 - 叙述字段（summary、key_finding、methodology、keywords_tags、research_motivation、knowledge_graph_title、
   paper_type、research_materials、material_families）是对全文的忠实概括：主要内容均能在原文找到依据即 supported，
   并给出最能代表的 1–3 条引句；只有包含原文没有的事实或数值时才判 unsupported 或 uncertain。
+- 对 paper.summary，reason 用简短中文解释核心结论的本文依据及缺口，不复述整个总结，也不称其为原文逐字记载。
 - keywords_tags 若附有服务端已定位的作者关键词列表，按作者原列词核对；否则属于全文提炼，不得把摘要句解释成作者原列列表。
 - 材料状态上下文：记录所属状态的材料、相、压力与原文一致时再判 supported；材料写成反应物或前驱体
   （把 H3S 的相写成 H2S）属于真实错误，判 unsupported 并在 proposal 中给出正确值。
@@ -673,7 +677,7 @@ def _fill_empty_fields(draft, record, proposal):
     return True
 
 
-def generate_upload_suggestions(task_id, draft, owner, on_progress=None):
+def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None):
     """解析后补入有效推断与推测，并把理由绑定到补入后的字段版本。"""
     from backend.database import SessionLocal
     from backend.ingest.upload_jobs import _ensure_not_cancelled
@@ -695,7 +699,7 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None):
     auto_filled = {}
     for record in records:
         proposal = results[record['key']].get('proposal')
-        if proposal and _fill_empty_fields(filled, record, proposal):
+        if proposal and record['field'] not in (skip_auto_fill or ()) and _fill_empty_fields(filled, record, proposal):
             auto_filled[record['item_key']] = proposal
     current = upload_snapshot(task_id, owner, parsing_draft=filled) if auto_filled else snapshot
     previous = {record['item_key']: record for record in snapshot['records']}
@@ -1028,4 +1032,7 @@ def aggregate_candidates(records, candidates, location_errors, model):
             evidences=evidences, model=model,
             suggestion='；'.join(dict.fromkeys(i['suggestion'] for i in items if i.get('suggestion'))),
             fields=list(dict.fromkeys(f for i in items for f in i.get('fields', []))))
+        if record.get('field') == 'paper.summary' and not results[record['key']].get('adopted_basis'):
+            results[record['key']]['source_kind'] = 'paper_synthesis'
+            results[record['key']]['ai_reason'] = results[record['key']]['reason']
     return results

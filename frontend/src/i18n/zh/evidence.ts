@@ -115,6 +115,7 @@ export default {
   "aiReasonLabel": "AI 理由",
   "noAiReason": "原文直接记载，无需额外推断。",
   "subtypeSynthesisHint": "全文归纳：以下原文片段用于支撑分类，类别名称并非论文逐字记载。",
+  "summarySynthesisHint": "论文归纳：以下原文片段用于支撑总结；总结并非原文逐字记载。",
   "aiReasonSources": "AI 理由的原文依据",
 "defaultSuggestion": "请对照来源核对科学数据、数值、单位与条件。",
 "noPaperSupport": "论文中未提供明确支持，不能将这部分数据归因为论文结论。",

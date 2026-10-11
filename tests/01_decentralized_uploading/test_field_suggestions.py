@@ -93,6 +93,11 @@ def test_generation_fills_empty_field_and_binds_reason_to_new_version(monkeypatc
     with pytest.raises(HTTPException):
         ev.resolve_results(paper, {'summary': saved['results']['summary']}, 8, None, paper['version'])
 
+    failed_summary = {'paper': {'summary': ''}, 'material_states': []}
+    ev.generate_upload_suggestions('1', failed_summary, 7, skip_auto_fill={'paper.summary'})
+    assert failed_summary['paper']['summary'] == ''
+    assert not saved['results']['summary'].get('auto_filled')
+
 
 def test_generation_preserves_nonempty_extraction():
     snap = snapshot(value='The paper reports metallic tin.')

@@ -115,6 +115,7 @@ export default {
   "aiReasonLabel": "AI reasoning",
   "noAiReason": "Directly reported in the paper; no further inference needed.",
   "subtypeSynthesisHint": "Full-text synthesis: these passages support the classification; the category is not stated verbatim in the paper.",
+  "summarySynthesisHint": "Paper synthesis: these source passages support the summary; the summary is not quoted verbatim.",
   "aiReasonSources": "Paper evidence for the AI reasoning",
 "defaultSuggestion": "Check the scientific claim, value, unit and conditions against the source.",
 "noPaperSupport": "No explicit support in the paper. Do not attribute these data to the paper.",

@@ -47,6 +47,7 @@ from backend.ingest.language_contract import (
     validate_draft_generated_english,
 )
 from backend.ingest.research_motivation import generate_motivation, task_chunks as motivation_chunks
+from backend.ingest.paper_summary import SUMMARY_RULES, choose_summary
 from backend.ingest.structure_extractor import extract_structure_candidates
 from backend.models import Paper, PaperFile
 from backend.rag.llm import complete_json
@@ -178,6 +179,8 @@ tc_method 只能取给定枚举；论文方法无法归入枚举时填 other，�
 properties 需提取 energy above hull：name 固定为 "energy above hull"，unit 固定为 "eV/atom"；
 论文明确声明 thermodynamically stable 或 on the convex hull 时值为 0；原文未提及则不生成该条目。
 summary、keywords_tags、methodology、key_finding、research_motivation、knowledge_graph_title 必须使用英文输出。
+paper.summary 必须遵守以下规则：
+""" + SUMMARY_RULES + """
 keywords_tags 此阶段返回空数组；后续专门检查作者原列关键词，缺失时通读全文提炼。
 这些字段必须忠实依据英文论文原文；缺少原文依据时返回空字符串或空数组，不得编造，也不得先翻译成中文。
 research_motivation 写作者开展这项研究的驱动力，不是本文的结论，也不是你的分类依据。
@@ -1422,7 +1425,7 @@ def _normalize_draft(
         "pages": raw_paper.get("pages"),
         "year": raw_paper.get("year") or parsed.paper.get("year"),
         "abstract": raw_paper.get("abstract") or parsed.paper.get("abstract"),
-        "summary": raw_paper.get("summary") or parsed.summary or "",
+        "summary": (raw_paper.get("summary") or "") if "summary" in raw_paper else parsed.summary or "",
         "paper_type": paper_type,
         "theoretical_subtype": subtype,
         "superconductor_kind": _normalize_superconductor_kind(
@@ -2005,10 +2008,22 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             on_partial=_on_summary_partial,
         )
         raw_paper = raw_draft.get("paper") if isinstance(raw_draft.get("paper"), dict) else raw_draft
+        abstract = raw_paper.get("abstract") or next((
+            item.get("metadata", {}).get("abstract") for item in summary_candidates
+            if isinstance(item, dict) and isinstance(item.get("metadata"), dict)
+            and item["metadata"].get("abstract")
+        ), None)
+        summary, summary_error = choose_summary(
+            raw_paper.get("summary") or raw_draft.get("summary"), abstract,
+            summary_candidates,
+            lambda prompt, payload: complete_json(prompt, json.dumps(payload, ensure_ascii=False)),
+        )
         motivation, motivation_error = generate_motivation(
             motivation_chunks(task_id, state, data_path("parsed_markdown")),
         )
-        raw_draft["paper"] = {**raw_paper, "research_motivation": motivation}
+        raw_draft["paper"] = {**raw_paper, "summary": summary, "research_motivation": motivation}
+        if summary_error:
+            logging.getLogger(__name__).warning("论文总结需要人工核对 task=%s reason=%s", task_id, summary_error)
         if document_set:
             # 全文汇总只负责叙述和书目，科学记录由已校验候选确定性组装。
             draft = _normalize_draft({**raw_draft, "material_states": [], "key_properties": []}, preserve_citation_extraction=False)
@@ -2054,7 +2069,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         try:
             if not state.get("is_shadow"):
                 generate_upload_suggestions(task_id, draft, int(current_state.get('user_id') or 0),
-                    on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total))
+                    on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total),
+                    skip_auto_fill={'paper.summary'} if summary_error else None)
             draft['field_suggestions_error'] = None
             update_state(task_id, suggestions_status='completed')
         except UploadCancelled:
