@@ -1486,7 +1486,42 @@ def _normalize_draft(
     }
     if isinstance(raw.get('keyword_assessment'), dict):
         normalized['keyword_assessment'] = raw['keyword_assessment']
+    if isinstance(raw.get("material_family_assessment"), dict):
+        normalized["material_family_assessment"] = raw["material_family_assessment"]
+    if raw.get("material_family_error") in {"catalog_unavailable", "classification_failed", "insufficient_evidence"}:
+        normalized["material_family_error"] = raw["material_family_error"]
     return convert_legacy_scientific_draft(normalized)
+
+
+def _classify_material_family_draft(task_id: str, state: dict, draft: dict,
+                                    candidates: list[dict]) -> None:
+    """两条解析路径共用目录优先判断，失败只留空家族字段。"""
+    from backend.ingest.material_family_classification import classify, load_catalog, task_sources
+    from backend.rag.llm_context import get_llm_config
+
+    try:
+        with SessionLocal() as family_session:
+            catalog = load_catalog(family_session)
+    except Exception as exc:
+        logging.getLogger(__name__).warning("材料家族目录读取失败 task=%s type=%s", task_id, type(exc).__name__)
+        assessment = {"status": "failed", "families": [], "evidences": [],
+                      "reason": "材料家族目录读取失败，请人工选择"}
+        error = "catalog_unavailable"
+    else:
+        try:
+            assessment = classify(catalog, draft, task_sources(task_id, state),
+                                  candidates=candidates, model=get_llm_config().model)
+        except Exception as exc:
+            logging.getLogger(__name__).warning("材料家族判断失败 task=%s type=%s", task_id, type(exc).__name__)
+            assessment = {"status": "failed", "families": [], "evidences": [],
+                          "reason": "材料家族全文判断失败，请人工选择"}
+        error = (None if assessment["status"] == "completed" else
+                 "catalog_unavailable" if not catalog else
+                 "insufficient_evidence" if assessment["status"] == "uncertain" else
+                 "classification_failed")
+    draft["paper"]["material_families"] = assessment["families"]
+    draft["material_family_assessment"] = assessment
+    draft["material_family_error"] = error
 
 
 def empty_draft() -> dict[str, Any]:
@@ -1993,6 +2028,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 raise ParserError("summary_records_missing", "汇总遗漏了已识别的 Tc、压力或方法记录，请重新核对",
                                   profile=state["parser_profile"], parser="coverage_audit")
             apply_claim_evidence(draft, final_claims)
+        # 两条解析路径在此收敛到同一论文级材料家族判断。
+        _classify_material_family_draft(task_id, state, draft, summary_candidates)
         validate_draft_generated_english(draft)
         _bind_structure_candidates(draft, structure_candidates)
         draft["structure_candidates"] = structure_candidates

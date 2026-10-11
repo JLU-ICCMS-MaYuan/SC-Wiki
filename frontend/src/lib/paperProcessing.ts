@@ -186,6 +186,8 @@ export interface PaperDraftFields {
 
 export interface UploadDraft {
   field_suggestions_error?: string | null
+  material_family_error?: 'catalog_unavailable' | 'classification_failed' | 'insufficient_evidence' | null
+  material_family_assessment?: { status: 'completed' | 'uncertain' | 'failed'; families: FamilySelection[]; reason: string; evidences: SourceEvidence[]; source_hash?: string; rule_version?: string; model?: string }
   paper: PaperDraftFields
   material_states: DraftMaterialState[]
   citation_extraction?: CitationExtraction | null

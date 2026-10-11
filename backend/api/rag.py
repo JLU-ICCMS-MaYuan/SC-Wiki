@@ -1486,6 +1486,15 @@ async def put_upload_draft(
                 normalized['keyword_assessment'] = previous['keyword_assessment']
             else:
                 normalized.pop('keyword_assessment', None)
+            # 全文材料家族判断只由服务端生成；人工改选后旧判断不再用于当前值。
+            if isinstance(previous.get('material_family_assessment'), dict):
+                normalized['material_family_assessment'] = previous['material_family_assessment']
+            else:
+                normalized.pop('material_family_assessment', None)
+            if normalized['paper'].get('material_families') == (previous.get('paper') or {}).get('material_families'):
+                normalized['material_family_error'] = previous.get('material_family_error')
+            else:
+                normalized.pop('material_family_error', None)
             if "material_states" in draft:
                 normalized["paper"]["research_materials"] = _derived_research_materials(normalized["material_states"])
             # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。

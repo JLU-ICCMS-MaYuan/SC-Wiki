@@ -300,7 +300,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
   const setPaperField = (field: keyof UploadDraft['paper'], value: unknown) => {
     evidenceWorkflow.invalidate(`paper.${field}`)
-    changeDraft(current => ({ ...current, paper: { ...current.paper, [field]: value } }))
+    changeDraft(current => ({ ...current,
+      ...(field === 'material_families' ? { material_family_error: null } : {}),
+      paper: { ...current.paper, [field]: value } }))
   }
 
   const setAuthors = (values: string[]) => {
@@ -740,8 +742,14 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
               <TextField
                 {...params}
                 label={t('upload.materialFamilyField')}
-                error={hasIssue('paper.material_families') || Boolean(catalogError)}
-                helperText={issues.find(item => item.field === 'paper.material_families')?.message || catalogError || undefined}
+                error={hasIssue('paper.material_families') || Boolean(catalogError || draft.material_family_error)}
+                helperText={catalogError || (draft.material_family_error === 'catalog_unavailable'
+                  ? t('upload.materialFamilyCatalogUnavailable')
+                  : draft.material_family_error === 'classification_failed'
+                    ? t('upload.materialFamilyInferenceFailed')
+                    : draft.material_family_error === 'insufficient_evidence'
+                      ? t('upload.materialFamilyEvidenceInsufficient')
+                      : issues.find(item => item.field === 'paper.material_families')?.message) || undefined}
               />
             )}
           />

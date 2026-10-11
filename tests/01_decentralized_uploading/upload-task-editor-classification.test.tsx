@@ -65,6 +65,20 @@ afterEach(() => {
 })
 
 describe('论文级材料家族与材料状态多维分类编辑', () => {
+  it('目录判断失败时提示人工选择，选中现有分类后清除提示', async () => {
+    mockedApi.get.mockResolvedValue({ ok: true, data: {
+      ...structuredClone(draft),
+      paper: { ...structuredClone(draft.paper), material_families: [] },
+      material_family_error: 'catalog_unavailable',
+    } })
+    render(<UploadTaskEditor taskId={'5'.repeat(32)} onSubmitted={vi.fn()} />)
+
+    expect(await screen.findByText('当前分类目录不可用，材料家族尚未自动填写；请检查目录后手动选择。')).toBeVisible()
+    fireEvent.change(screen.getByLabelText('材料家族'), { target: { value: '氢基' } })
+    fireEvent.click(await screen.findByText('氢基超导体'))
+    expect(screen.queryByText('当前分类目录不可用，材料家族尚未自动填写；请检查目录后手动选择。')).not.toBeInTheDocument()
+  })
+
   it('在论文级保存多个材料家族，状态级保留多选类型标签且不写主项标记', { timeout: 15000 }, async () => {
     render(<UploadTaskEditor taskId={'5'.repeat(32)} onSubmitted={vi.fn()} />)
 

@@ -27,3 +27,11 @@
 - [x] T013 补充 4 项单测（synthesis 标注与保留判断、事实字段引句回退、无证据仍判 missing、聚合忽略未提及批次）；定向回归与基线对比无新增失败。
 - [x] T014 H3S 复验：同任务重跑字段核对，必填标红 5 → 1，剩余 1 项为模型判 unsupported 的有效标红（μ* 只填下界 0.1，原文为 0.1–0.13），无无效标红。
 - [x] T010 Overview 回写已落地行为：`pdf-parsing-pipeline.md`（提取窗口、缓存版本 9、核对分批、synthesis 字段分级与引句回退、化学式归一化）与 `upload-llm-workflow-and-agent-analysis.md`（新增 2026-10-08 已实现补充章节、更正过期数字）。
+
+## 阶段 5：材料家族全文判断（US3，2026-10-11 增量）
+
+- [x] T015 [US3] 在 `tests/01_decentralized_uploading/test_issue120_material_family.py` 复现 H3S 误建新类，并覆盖多家族、真正新类、依据不足、引用工作、目录失败、无效 ID 与草稿版本冲突。（FR-010～014、SC-004～005）
+- [x] T016 [US3] 在 `backend/ingest/material_family_classification.py` 读取运行时目录、整篇本文来源并分类；定位引句、校验 ID/别名、去重及保留失败原因。（FR-010～013）
+- [x] T017 [US3] 在 `backend/ingest/upload_jobs.py` 共用汇总后接入分类，保留其他字段与新旧解析路径；在 `backend/ingest/property_evidence.py` 和 `backend/api/rag.py` 绑定服务端判断与当前字段版本。（FR-010、FR-012～013）
+- [x] T018 [US3] 对唯一 H3S 草稿留私有快照并在任务锁、版本核对下定向重算；现有分类与核对已正确，故无需覆盖保存值；前后差异和真实论文结果见 `docs/specs/120-upload-llm-extraction-quality/validation.md`。（FR-014、SC-004）
+- [x] T019 [US3] 两链路与相关前后端回归通过后，用 `big-project-overview-maintainer` 更新上传 Overview，只暂存本任务变更并自动提交。（SC-005）

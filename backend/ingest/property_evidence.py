@@ -142,9 +142,15 @@ def _semantic(value):
 
 def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: list[dict], context: dict) -> dict:
     from .scientific_evidence import canonical
+    from .material_family_classification import matching_assessment
     # 定位 ID/排版顺序不会改变来源正文；补入证据不改变断言版本。
     source_hash = digest(sorted((normalized_text(c['content']) for c in chunks)))
     for r in records:
+        if target == 'upload' and r['field'] == 'paper.material_families':
+            assessment = context.get('material_family_assessment')
+            if matching_assessment(assessment, (context.get('paper') or {}).get('material_families') or []):
+                r['provenance'] = {'kind': 'paper_synthesis', 'assessment': assessment}
+                r['evidences'] = copy.deepcopy(assessment.get('evidences') or [])
         r.setdefault('item_key', digest(r['key']))
         r.setdefault('fields', [r['field']])
         r.setdefault('current_value', r['claim'])
@@ -324,6 +330,11 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     reason = '；'.join([*reason_errors,
                        *(['当前概括缺少可定位的原文依据'] if synthesis and not evs else []),
                        str(result.get('reason') or '尚未找到能支持这条科学数据的有效出处')])
+    family_assessment = (record.get('provenance') or {}).get('assessment') if record.get('field') == 'paper.material_families' else None
+    if isinstance(family_assessment, dict):
+        family_reason = str(family_assessment.get('reason') or '').strip()
+        if family_reason:
+            reason = family_reason + ('；核对意见：' + reason if status != 'supported' else '')
     provenance = record.get('provenance') or {}
     if not evs and provenance.get('kind') == 'contributor_structure' and provenance.get('verified') and provenance.get('submitted_by_user_id'):
         status = 'uncertain'
@@ -333,6 +344,8 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     fields = [f for f in fields if isinstance(f, str) and (f == record['field'] or f.startswith(record['field'] + '.'))] or [record['field']]
     suggestion = result.get('suggestion') or ('请补充该记录缺失的原文出处。' if status == 'missing' else '请核对物性类型、数值、单位和实验条件，并根据原文修正记录。')
     source_kind = 'derived' if provenance.get('kind') == 'derived' else 'paper_quote' if evs else 'contributor_structure' if provenance.get('verified') else 'unknown'
+    if isinstance(family_assessment, dict) and evs:
+        source_kind = 'paper_synthesis'
     if keywords:
         source_kind = 'author_keywords' if provenance.get('kind') == 'author_keywords' and evs else 'paper_synthesis' if evs else 'unknown'
         keyword_assessment = provenance.get('assessment') if isinstance(provenance.get('assessment'), dict) else None
@@ -355,7 +368,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     return {**record, 'proposal': proposal, 'proposal_draft': None if result.get('stale') else result.get('proposal_draft'), 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
             'human_confirmed': human,
             'adopted_basis': adopted_basis, 'proposal_review': result.get('proposal_review'),
-            'ai_reason': reason if keywords else result.get('ai_reason'),
+            'ai_reason': reason if keywords or isinstance(family_assessment, dict) else result.get('ai_reason'),
             'auto_filled': result.get('auto_filled', False),
             'auto_filled_content_hash': result.get('auto_filled_content_hash'),
             'auto_filled_source_hash': result.get('auto_filled_source_hash'),
@@ -464,6 +477,7 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 
 SUGGESTION_PROMPT = """
 对每个字段同时区分当前值与候选值。允许为空字段提出候选，但不能把猜测写为论文事实。
+材料家族由专门的全文目录判断填写；这里仅按本文语义核对当前选择。现有目录名称不必在原文逐字出现，不能因原文使用 H2-containing compounds 而否定“氢基超导体”。不得为该字段生成新的自由名称建议。
 proposal 增加 basis_kind：paper_quote（原文直接记载）、paper_inference（由本文和已知字段推断）、general_knowledge（通用知识推测）。
 原文直接记载沿用已提取的当前值，无需另给 paper_quote 替换建议。仅对空值或 unknown 给出推断、推测候选；不得覆盖已有的非空值。
 后两类必须提供 explanation：用不超过 120 个汉字简洁说明“依据 → 推断 → 局限”，逻辑完整，不输出详细内部思考过程。paper_inference 需要真实论文引句；general_knowledge 可以没有引句，supported 必须为 false。
@@ -520,6 +534,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         'purpose': purpose,
         'records': [{'key': r['key'], 'field': r['field'], 'claim': r['claim'],
                      'editable_fields': r.get('editable_fields', []), 'existing_evidences': r['evidences'],
+                     'material_family_assessment': (r.get('provenance') or {}).get('assessment') if r['field'] == 'paper.material_families' else None,
                      'previous_result': {k: prior.get(r['key'], {}).get(k) for k in ('status', 'reason', 'proposal', 'evidences', 'adopted_basis', 'auto_filled', 'ai_reason')}} for r in records],
         'sources': chunks,
         'human_provided_evidence': visible_human}, ensure_ascii=False, default=str)
@@ -543,6 +558,8 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
             continue
         key = raw['key']
         safe = {k: raw[k] for k in ('status', 'reason', 'suggestion', 'fields', 'evidences', 'proposal') if k in raw}
+        if by_key[key]['field'] == 'paper.material_families':
+            safe.pop('proposal', None)
         if by_key[key]['field'].startswith('paper.') and isinstance(safe.get('proposal'), dict):
             from .language_contract import validate_draft_generated_english, GeneratedFieldLanguageError
             try:
@@ -612,7 +629,7 @@ def _fill_empty_fields(draft, record, proposal):
     from .scientific_evidence import canonical, populated
     from .property_modules import validate_record, PropertyValidationError
 
-    if record['field'] == 'paper.keywords_tags':
+    if record['field'] in {'paper.keywords_tags', 'paper.material_families'}:
         return False
     if proposal.get('basis_kind') not in {'paper_inference', 'general_knowledge'}:
         return False
