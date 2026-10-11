@@ -237,7 +237,7 @@ describe('上传校对页布局与材料状态折叠', () => {
 
     const keywords = await screen.findByLabelText('关键词（每行一个）')
     const methodology = screen.getByLabelText('研究方法（每行一项）')
-    expect(screen.getByText('关键词可由 AI 根据论文内容提炼；请核对后再提交。')).toBeInTheDocument()
+    expect(screen.getByText('原文没有可靠关键词栏时，AI 根据全文提炼关键词；请核对后再提交。')).toBeInTheDocument()
     expect(screen.queryByLabelText('研究材料（每行一个）')).not.toBeInTheDocument()
 
     const keywordsCell = keywords.closest('.MuiTextField-root')?.parentElement

@@ -46,7 +46,7 @@
 ### 第 4 步：AI 汇总草稿（summarizing）
 
 - `_summary_classification_candidates` 先过滤掉非当前论文的过期证据，再把分段候选交给 `complete_json(SUMMARY_SYSTEM_PROMPT, ...)` 汇总为一份结构化草稿。
-- 汇总 prompt（`SUMMARY_SYSTEM_PROMPT`）与正文提取（`extractor.py`）都要求以英文产出六个叙述字段（`summary`、`keywords_tags`、`methodology`、`key_finding`、`research_motivation`、`knowledge_graph_title`）；汇总归一化后、写入草稿和审核快照前会再次拒绝这些生成字段中的中日韩字符。标题、摘要、作者、原始数值、单位和 `quote` 保持来源语言。Worker 以验证后的英文 canonical draft 预填选项框和输入框；字段建议在提取后单独生成，通过字段名打开侧栏查看；只有非空且能定位的 `quote` 才作为论文片段显示。某字段无来源依据时保持为空，不编造内容。（[Issue #74](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/74)、[#85](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/85)）
+- 汇总 prompt（`SUMMARY_SYSTEM_PROMPT`）与正文提取（`extractor.py`）要求 AI 生成的叙述字段使用英文；关键词另走作者列表优先的专门流程，能定位的作者原词保留原语言，缺少作者列表时 AI 全文提炼词仍须英文。汇总归一化后、写入草稿和审核快照前会再次校验生成字段语言。标题、摘要、作者、原始数值、单位和 `quote` 保持来源语言。Worker 以验证后的 canonical draft 预填选项框和输入框；字段建议在提取后单独生成，通过字段名打开侧栏查看；只有非空且能定位的 `quote` 才作为论文片段显示。某字段无来源依据时保持为空，不编造内容。（[Issue #74](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/74)、[#85](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/85)、[#129](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/129)）
 - 正文 PDF 在 Worker 中额外提交给本地 GROBID 的 `processFulltextDocument` 接口。GROBID 返回的 TEI `biblStruct` 会提取 DOI、题名、作者、年份和原始引文，随论文版本保存到 `paper_references`；GROBID 不可用或解析不完整时保存状态，不由 LLM 猜造引用边。（[Issue #81](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/81)）
 - `_normalize_draft` 把草稿归一化为当前数据契约：论文元信息（含单选 `superconductor_kind` 和多选 Material family）、`material_states`（材料、压强/温度/磁场、计算与实验上下文、`tc_results`、More type labels）、分类证据等。旧草稿的状态级 `superconductor_kind` 只在读取时一次性提升：唯一的非 `unknown` 值保留，冲突时回退 `unknown`；新提交拒绝该旧字段。
 - 化学式解析（`parse_formula_composition`）支持括号分组与 Unicode 下标，拒绝不配对或空括号；材料字段只在能唯一确定完整化学式时写入化学式（如 `(H2S)2H2` 不再截成 `H2S`），否则原文保留为材料名，替代式的元素数按组分统计；与空间群符号查表一致的空间群编号、晶系作为派生核对项随符号核对。（[Issue #120](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/120)）
@@ -155,7 +155,7 @@ workhorse 意外结束时上传与来源核对任务都收敛到失败态，不�
 `property_modules[].records[]`，不经过旧 tc_results 中转。未知方法保持 unknown，
 每条结果保留独立条件与多页证据。全文汇总只生成书目与叙述，后端对科学候选精确
 去重和组装，不由汇总模型重写数值或合并不同条件。TXT/MD 保留原提取与有界转换。
-关键词由 AI 根据本文标题、摘要与研究内容提炼，原文没有关键词列表也可预填；编辑页提醒用户核对。若全文汇总遗漏且本文书目与叙述足够，再进行一次有界 AI 提炼；模型失败或内容不足时留空提示，不用规则拼接值冒充 AI 推理。Tc 以外的自动物性仅接受 `band_gap`、`dos_fermi` 两项，并归入电子性质专用定义；未注册的非 Tc 项带原文位置与理由留在覆盖审计，不自动进入自定义性质。该定义需要应用 `20261009_0115` 迁移，既有用户自定义记录不受此限制。
+关键词先在当前论文主文查找明确的“关键词 / Keywords”栏；找到且可定位时，按作者原词和顺序预填，包括中文原词。未找到可靠列表时，专门流程读取全部有效正文窗口，排除参考文献后提炼 3–8 个英文词，并保存代表性原文片段；任一窗口阅读失败、正文不足或证据无效时留空并说明原因。校对侧栏区分“作者原列关键词”和“AI 全文提炼”，人工改值不复用旧分析；不再只凭标题、摘要与概要补词。Tc 以外的自动物性仅接受 `band_gap`、`dos_fermi` 两项，并归入电子性质专用定义；未注册的非 Tc 项带原文位置与理由留在覆盖审计，不自动进入自定义性质。该定义需要应用 `20261009_0115` 迁移，既有用户自定义记录不受此限制。
 上传校对页重新获得焦点时会重读同一任务草稿及来源状态，让后台或协作补入的关键词出现在已打开的页面；存在未保存编辑、保存中或提交中时不覆盖本地输入。刷新失败保留当前草稿，下一次获得焦点可重试。
 旧文本解析方案产生的未注册普通物性同样只留在 `unclassified_properties.json` 审计产物；不会改写此前已保存的用户自定义记录。结构表按物相拆分，已验证的空间群允许补足其晶系强制约束的晶胞参数，并在候选推导信息中标注；空间群和压力唯一匹配时才自动绑定材料状态。
 领域候选转为 Claim 后，校验文件、页码、解析器版本、来源类别、块、区域

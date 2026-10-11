@@ -1481,6 +1481,11 @@ async def put_upload_draft(
                     proposals.validate_save(evidence_session, evidence.upload_snapshot(task_id, current_user.id), current_user.id, preparation_id, 'upload')
             previous = get_draft(task_id) or {}
             normalized = _normalize_draft(draft)
+            # 关键词来源分析只能由服务端生成，人工改词不会修改原分析。
+            if isinstance(previous.get('keyword_assessment'), dict):
+                normalized['keyword_assessment'] = previous['keyword_assessment']
+            else:
+                normalized.pop('keyword_assessment', None)
             if "material_states" in draft:
                 normalized["paper"]["research_materials"] = _derived_research_materials(normalized["material_states"])
             # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。

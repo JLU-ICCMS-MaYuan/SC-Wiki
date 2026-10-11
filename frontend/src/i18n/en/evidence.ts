@@ -18,6 +18,8 @@ export default {
 
   "generationFailed": "Suggestion generation failed. Extracted values are retained; run AI review to retry.",
   "emptySources": "No evidence or suggestions yet",
+  "authorKeywordsSource": "Author-provided keywords: the source explicitly lists these terms.",
+  "fulltextKeywordsSource": "AI full-text synthesis: these passages support the topics; the terms are not an author-provided list.",
   "proposalReview": "AI review of the suggestion",
   "savedHumanReason": "Saved human judgement",
   "basis": {

@@ -18,6 +18,8 @@ export default {
 
   "generationFailed": "建议生成失败，已提取内容已保留；可点击 AI 审核重试。",
   "emptySources": "暂无证据或建议",
+  "authorKeywordsSource": "作者原列关键词：以下是当前论文明确列出的关键词原文。",
+  "fulltextKeywordsSource": "AI 全文提炼：以下原文片段用于支持关键词主题，词语不是作者原列列表。",
   "proposalReview": "AI 对建议的复核",
   "savedHumanReason": "已保存的人工判断依据",
   "basis": {

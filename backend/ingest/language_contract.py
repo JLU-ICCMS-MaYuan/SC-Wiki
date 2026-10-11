@@ -37,11 +37,18 @@ def _require_english(value: Any, path: str) -> None:
 def validate_draft_generated_english(draft: dict[str, Any]) -> None:
     """只校验 AI 归纳字段，保留标题、摘要和 quote 等原文事实。"""
     paper = draft.get("paper") if isinstance(draft.get("paper"), dict) else {}
+    keywords = draft.get("keyword_assessment")
+    author_keywords = (isinstance(keywords, dict) and keywords.get("status") == "completed"
+                       and keywords.get("kind") == "author_list"
+                       and keywords.get("values") == paper.get("keywords_tags")
+                       and bool(keywords.get("evidences")))
     for field in _PAPER_GENERATED_FIELDS:
-        _require_english(paper.get(field), f"paper.{field}")
+        if field != "keywords_tags" or not author_keywords:
+            _require_english(paper.get(field), f"paper.{field}")
 
     for index, selection in enumerate(paper.get("material_families") or []):
-        if isinstance(selection, dict):
+        # 目录规范名来自数据库，可能是中文；只有模型提出的新名称要求英文。
+        if isinstance(selection, dict) and selection.get("id") is None:
             _require_english(selection.get("name"), f"paper.material_families[{index}].name")
 
     _require_english(draft.get("research_motivation"), "research_motivation")

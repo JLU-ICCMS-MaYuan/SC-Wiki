@@ -32,6 +32,21 @@ it('无核对记录的字段标签仍可查看空侧栏，不触发模型或保�
   expect(api.post).toHaveBeenCalledTimes(1)
 })
 
+it.each([
+  ['author_keywords', '作者原列关键词：以下是当前论文明确列出的关键词原文。'],
+  ['paper_synthesis', 'AI 全文提炼：以下原文片段用于支持关键词主题，词语不是作者原列列表。'],
+])('关键词来源 %s 在侧栏显示准确说明', async (kind, label) => {
+  const keywords = { key:'keywords', field:'paper.keywords_tags', label:'科学关键词',
+    status:'supported', source_kind:kind, provenance:{kind}, reason:'来源已核对',
+    evidences:[{file_id:'main',chunk_index:0,page_start:1,quote:'Keywords: hydrides; pressure'}] }
+  vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[keywords]} as never)
+  function Form() { const f=useEvidenceWorkflow({target:{target:'upload',target_id:'paper'}});return <><button onClick={()=>f.openIssue('keywords')}>查看关键词</button>{f.dialog}</> }
+  await act(async()=>render(<Form/>))
+  await act(async()=>fireEvent.click(screen.getByText('查看关键词')))
+  expect(screen.getByText(label)).toBeInTheDocument()
+  expect(screen.queryByText('原文直接记载，无需额外推断。')).not.toBeInTheDocument()
+})
+
 it('已接受记录只在字段侧栏显示待提交状态，顶部不再堆放按钮', async () => {
   vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[{...record,proposal_draft:{values:{},accepted:true,reason:'确认'}}]})
   function Accepted() {const f=useEvidenceWorkflow({target:{target:'paper',target_id:'29'}});return <>{f.dialog}</>}

@@ -49,10 +49,17 @@ def evidence_list(record: dict) -> list[dict]:
 
 
 def source_chunks(markdown: str, file_id: str) -> list[dict]:
-    from backend.ingest.chunker import chunk_paper
+    from backend.ingest.chunker import Chunk, chunk_paper
     chunks = []
     page = None
-    for chunk in chunk_paper(markdown, 0):
+    parsed = chunk_paper(markdown, 0)
+    sample = parsed[0].content[:100] if parsed else ''
+    first_offset = markdown.find(sample) if sample else len(markdown)
+    preamble = markdown[:first_offset].strip() if first_offset > 0 else ''
+    if len(preamble) >= 10:
+        parsed.insert(0, Chunk(0, 0, '论文首页与摘要', None, preamble, max(1, len(preamble) // 4)))
+    for index, chunk in enumerate(parsed):
+        chunk.chunk_index = index
         pages = [int(p) for p in re.findall(r'<!--\s*page:\s*(\d+)\s*-->', chunk.content)]
         start = page
         if pages:
@@ -250,7 +257,13 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
     paper_data = row_dict(paper)
     families = session.execute(select(models.MaterialFamily.name_zh).join(models.PaperMaterialFamily, models.PaperMaterialFamily.material_family_id == models.MaterialFamily.id).where(models.PaperMaterialFamily.paper_id == paper_id)).scalars().all()
     paper_data['material_families'] = sorted(families)
-    records.extend(science.field_records('paper', 'paper', paper_data, science.PAPER_FIELDS))
+    prior_keywords = session.scalar(select(models.ScientificEvidenceSource).where(
+        models.ScientificEvidenceSource.paper_id == paper_id,
+        models.ScientificEvidenceSource.paper_revision == paper.content_revision,
+        models.ScientificEvidenceSource.field_path == 'paper.keywords_tags'))
+    keyword_assessment = ((prior_keywords.result or {}).get('provenance') or {}).get('assessment') if prior_keywords else None
+    records.extend(science.field_records('paper', 'paper', paper_data, science.PAPER_FIELDS,
+                                         keyword_assessment=keyword_assessment))
     origins = science.origins_for(session, 'paper', str(paper_id))
     for si, state in enumerate(states.values()):
         data = row_dict(state)
@@ -295,6 +308,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             located, _ = locate_with_reason(e, chunks)
             if located and located not in evs:
                 evs.append(located)
+    keywords = record.get('field') == 'paper.keywords_tags'
     # 概括字段无需与原文逐字相同，但判为 supported 仍需至少一条可定位依据。
     synthesis = record.get('check_mode') == 'synthesis'
     status = result.get('status')
@@ -304,6 +318,8 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
         status = 'missing'
     elif status not in {'supported', 'unsupported', 'uncertain'}:
         status = 'uncertain'
+    if keywords and (record.get('provenance') or {}).get('kind') == 'author_keywords' and evs:
+        status = 'supported'
     reason_errors = [] if (evs or synthesis) else errors
     reason = '；'.join([*reason_errors,
                        *(['当前概括缺少可定位的原文依据'] if synthesis and not evs else []),
@@ -317,6 +333,11 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     fields = [f for f in fields if isinstance(f, str) and (f == record['field'] or f.startswith(record['field'] + '.'))] or [record['field']]
     suggestion = result.get('suggestion') or ('请补充该记录缺失的原文出处。' if status == 'missing' else '请核对物性类型、数值、单位和实验条件，并根据原文修正记录。')
     source_kind = 'derived' if provenance.get('kind') == 'derived' else 'paper_quote' if evs else 'contributor_structure' if provenance.get('verified') else 'unknown'
+    if keywords:
+        source_kind = 'author_keywords' if provenance.get('kind') == 'author_keywords' and evs else 'paper_synthesis' if evs else 'unknown'
+        keyword_assessment = provenance.get('assessment') if isinstance(provenance.get('assessment'), dict) else None
+        if keyword_assessment:
+            reason = str(keyword_assessment.get('reason') or reason) + (('；核对意见：' + reason) if status != 'supported' else '')
     from .evidence_proposals import checked_proposal
     proposal = None if result.get('stale') else checked_proposal(record, result.get('proposal'), chunks)
     decision = result.get('decision')
@@ -334,7 +355,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     return {**record, 'proposal': proposal, 'proposal_draft': None if result.get('stale') else result.get('proposal_draft'), 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
             'human_confirmed': human,
             'adopted_basis': adopted_basis, 'proposal_review': result.get('proposal_review'),
-            'ai_reason': result.get('ai_reason'),
+            'ai_reason': reason if keywords else result.get('ai_reason'),
             'auto_filled': result.get('auto_filled', False),
             'auto_filled_content_hash': result.get('auto_filled_content_hash'),
             'auto_filled_source_hash': result.get('auto_filled_source_hash'),
@@ -433,6 +454,7 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 - 叙述字段（summary、key_finding、methodology、keywords_tags、research_motivation、knowledge_graph_title、
   paper_type、research_materials、material_families）是对全文的忠实概括：主要内容均能在原文找到依据即 supported，
   并给出最能代表的 1–3 条引句；只有包含原文没有的事实或数值时才判 unsupported 或 uncertain。
+- keywords_tags 若附有服务端已定位的作者关键词列表，按作者原列词核对；否则属于全文提炼，不得把摘要句解释成作者原列列表。
 - 材料状态上下文：记录所属状态的材料、相、压力与原文一致时再判 supported；材料写成反应物或前驱体
   （把 H3S 的相写成 H2S）属于真实错误，判 unsupported 并在 proposal 中给出正确值。
 - 只看到部分来源时，若本组来源与该记录无关，返回 missing 且不给 evidences；不要因为“本组片段未提及”
@@ -590,6 +612,8 @@ def _fill_empty_fields(draft, record, proposal):
     from .scientific_evidence import canonical, populated
     from .property_modules import validate_record, PropertyValidationError
 
+    if record['field'] == 'paper.keywords_tags':
+        return False
     if proposal.get('basis_kind') not in {'paper_inference', 'general_knowledge'}:
         return False
     fields = {field['path']: field['value'] for field in record.get('editable_fields', [])}

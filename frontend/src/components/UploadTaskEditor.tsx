@@ -759,7 +759,10 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
               value={toLines(draft.paper[field as keyof UploadDraft['paper']] as string[] | undefined)}
               onChange={event => setPaperField(field as keyof UploadDraft['paper'], fromLines(event.target.value))}
               helperText={field === 'keywords_tags'
-                ? draft.paper.keywords_tags?.length ? t('upload.keywordsAiHint') : t('upload.keywordsMissingHint')
+                ? draft.paper.keywords_tags?.length
+                  ? draft.keyword_assessment?.kind === 'author_list' && JSON.stringify(draft.keyword_assessment.values) === JSON.stringify(draft.paper.keywords_tags)
+                    ? t('upload.keywordsAuthorHint') : t('upload.keywordsAiHint')
+                  : draft.keyword_assessment?.reason || t('upload.keywordsMissingHint')
                 : undefined} />
             <EvidenceNotes
               evidence={draft.field_evidence?.[field]}

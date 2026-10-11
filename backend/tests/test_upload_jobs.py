@@ -15,7 +15,6 @@ from backend.ingest.upload_jobs import (
     _classification_scope_evidence,
     _chunks_with_preamble,
     _normalize_draft,
-    _fill_missing_keywords,
     _bind_structure_candidates,
     _prune_generated_properties,
     _summary_classification_candidates,
@@ -68,28 +67,6 @@ def test_normalize_draft_flattens_evidenced_text_lists():
     tc = state["property_modules"][0]["records"][0]
     assert tc["record_type"] == "predicted_tc"
     assert tc["value_raw"] == "42"
-
-
-def test_missing_keywords_are_filled_from_paper_content_without_losing_draft(monkeypatch):
-    import backend.ingest.upload_jobs as upload_jobs
-
-    draft = {"paper": {"title": "Sulfur hydride superconductivity", "abstract": "Hydrogen sulfide under pressure shows a superconducting transition. " * 4,
-                       "summary": "The authors calculate high pressure phases.", "keywords_tags": []}}
-    monkeypatch.setattr(upload_jobs, "complete_json", lambda *_args: {"keywords_tags": ["hydrogen sulfide", "high pressure", "hydrogen sulfide"]})
-    _fill_missing_keywords(draft)
-    assert draft["paper"]["keywords_tags"] == ["hydrogen sulfide", "high pressure"]
-
-    draft["paper"]["keywords_tags"] = []
-    def unavailable(*_args):
-        raise RuntimeError("model unavailable")
-    monkeypatch.setattr(upload_jobs, "complete_json", unavailable)
-    _fill_missing_keywords(draft)
-    assert draft["paper"]["keywords_tags"] == []
-
-    draft["paper"].update(research_materials=["(H2S)2H2"],
-                          methodology=["ab initio calculations", "density functional theory"])
-    _fill_missing_keywords(draft)
-    assert draft["paper"]["keywords_tags"] == [], "模型不可用时不得把规则拼接结果冒充 AI 推理"
 
 
 def test_structure_candidate_binds_only_unique_phase_and_pressure():

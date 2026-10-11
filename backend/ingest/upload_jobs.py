@@ -177,10 +177,7 @@ tc_method 只能取给定枚举；论文方法无法归入枚举时填 other，�
 properties 需提取 energy above hull：name 固定为 "energy above hull"，unit 固定为 "eV/atom"；
 论文明确声明 thermodynamically stable 或 on the convex hull 时值为 0；原文未提及则不生成该条目。
 summary、keywords_tags、methodology、key_finding、research_motivation、knowledge_graph_title 必须使用英文输出。
-keywords_tags 是根据本文标题、摘要和研究内容提炼的 3–8 个英文关键词，不要求与原文逐字相同；
-优先包含原文出现的核心材料名称或化学式、核心现象与方法，避免用泛称替代明确材料；
-同一材料的两种原文写法都重要时可同时保留。内容不足以支持关键词时返回空数组，
-不以背景文献或通用知识补全。
+keywords_tags 此阶段返回空数组；后续专门检查作者原列关键词，缺失时通读全文提炼。
 这些字段必须忠实依据英文论文原文；缺少原文依据时返回空字符串或空数组，不得编造，也不得先翻译成中文。
 research_motivation 写作者开展这项研究的驱动力，不是本文的结论，也不是你的分类依据。
 依据引言、背景与动机相关段落归纳：该领域此前存在什么问题、悬而未决的争议或技术瓶颈，
@@ -1289,28 +1286,6 @@ def _legacy_state_superconductor_kind(material_states: list[dict[str, Any]]) -> 
     return next(iter(non_unknown)) if len(non_unknown) == 1 else "unknown"
 
 
-def _fill_missing_keywords(draft: dict[str, Any]) -> None:
-    """汇总遗漏关键词时，根据本文内容再提炼一次；失败不丢失科学草稿。"""
-    paper = draft.get("paper") or {}
-    if paper.get("keywords_tags"):
-        return
-    source = "\n".join(str(paper.get(field) or "") for field in ("title", "abstract", "summary", "key_finding"))
-    if len(source.strip()) < 120:
-        return
-    try:
-        response = complete_json(
-            "Extract 3–8 concise English scientific keywords from this paper's title, abstract and summary. "
-            "Include the studied material's formula or name when present, plus the central phenomenon and method; "
-            "avoid generic labels when a specific material is named. "
-            "Return JSON {\"keywords_tags\": [\"...\"]}. Use only supplied text; if it is insufficient, return an empty array. "
-            "Do not add quotes or invent paper results.", source[:12000],
-        )
-        values, _ = _normalize_text_items(response.get("keywords_tags"), "keyword", "value", "name")
-        paper["keywords_tags"] = list(dict.fromkeys(values))[:8]
-    except Exception:
-        logging.getLogger(__name__).warning("关键词 AI 提炼失败，保留空值供人工核对", exc_info=True)
-
-
 def _bind_structure_candidates(draft: dict[str, Any], candidates: list[dict[str, Any]]) -> None:
     """只在空间群与压力唯一对应时，把 PDF 结构放入材料状态。"""
     states = draft.get("material_states") or []
@@ -1509,6 +1484,8 @@ def _normalize_draft(
         "classification_evidence": _as_list(raw.get("classification_evidence")),
         "field_evidence": field_evidence,
     }
+    if isinstance(raw.get('keyword_assessment'), dict):
+        normalized['keyword_assessment'] = raw['keyword_assessment']
     return convert_legacy_scientific_draft(normalized)
 
 
@@ -2000,7 +1977,10 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             excluded_properties = _prune_generated_properties(draft)
             if excluded_properties:
                 _atomic_write_json(artifact_directory(task_id) / "unclassified_properties.json", excluded_properties)
-        _fill_missing_keywords(draft)
+        from backend.ingest.keyword_extraction import select_keywords, task_sources
+        keyword_assessment = select_keywords(task_sources(task_id, state, data_path('parsed_markdown')))
+        draft['keyword_assessment'] = keyword_assessment
+        draft['paper']['keywords_tags'] = keyword_assessment['values']
         if document_set:
             carry_state_evidence(draft, claims)
             final_claims = claims_from_candidates(draft, document_set, legacy_sources=legacy_sources)

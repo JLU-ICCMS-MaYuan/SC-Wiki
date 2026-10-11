@@ -36,8 +36,8 @@ STATE_FIELDS = {
     'calculation_context': '计算条件', 'experimental_context': '实验条件',
 }
 
-# 概括/推测与分类枚举字段：原文不存在可逐字对应的句子（summary 是 AI 概括、keywords_tags 是
-# AI 提炼），核对按模型整体判断进行，不因引句逐字定位失败而改判 missing/uncertain。
+# 概括/推测与分类枚举字段：summary 是 AI 概括；keywords_tags 可为作者原列或 AI 全文提炼。
+# 核对按语义判断，但作者原列关键词另须能定位原文列表。
 # 事实与数值字段不在其中，仍执行逐字定位（见 checked_result）。
 SYNTHESIS_FIELDS = frozenset({
     'summary', 'key_finding', 'methodology', 'keywords_tags', 'research_motivation',
@@ -96,7 +96,7 @@ def populated(value):
     return value is not None and value != '' and value != 'unknown' and value != [] and value != {}
 
 
-def field_records(identity, path, data, fields, context=None):
+def field_records(identity, path, data, fields, context=None, keyword_assessment=None):
     rows = []
     for name, label in fields.items():
         value = data.get(name)
@@ -110,11 +110,18 @@ def field_records(identity, path, data, fields, context=None):
         if name in {'material_families', 'structure_families'} and isinstance(value, list):
             value = sorted(str(x.get('name') or x.get('name_zh') or '') if isinstance(x, dict) else str(x) for x in value)
         key = item_identity(identity, name)
-        rows.append(dict(key=key, item_key=key, field=f'{path}.{name}', fields=[f'{path}.{name}'],
-                         label=label, current_value=value, claim={'value': value, 'field': label, 'context': context or {}},
-                         required=populated(value) and not (path == 'paper' and name in BIBLIOGRAPHY_FIELDS),
-                         evidences=[], kind='field',
-                         **({'check_mode': 'synthesis'} if name in SYNTHESIS_FIELDS else {})))
+        row = dict(key=key, item_key=key, field=f'{path}.{name}', fields=[f'{path}.{name}'],
+                   label=label, current_value=value, claim={'value': value, 'field': label, 'context': context or {}},
+                   required=populated(value) and not (path == 'paper' and name in BIBLIOGRAPHY_FIELDS),
+                   evidences=[], kind='field',
+                   **({'check_mode': 'synthesis'} if name in SYNTHESIS_FIELDS else {}))
+        if path == 'paper' and name == 'keywords_tags':
+            matched = keyword_assessment if isinstance(keyword_assessment, dict) and keyword_assessment.get('values') == value else None
+            if matched and matched.get('status') == 'completed':
+                row['provenance'] = {'kind': 'author_keywords' if matched.get('kind') == 'author_list' else 'paper_synthesis',
+                                     'assessment': matched}
+                row['evidences'] = copy.deepcopy(matched.get('evidences') or [])
+        rows.append(row)
     return sorted(rows, key=lambda r: not r['required'])
 
 
@@ -260,7 +267,8 @@ def register_structure_origin(session, target, target_id, candidate, user_id, us
 def augment_upload(draft, records, origins):
     from backend.ingest.scientific_drafts import _candidate_conventional_representation, _candidate_state_index
     from backend.services.structure_candidates import validate_structure_text
-    records.extend(field_records('paper', 'paper', draft.get('paper') or {}, PAPER_FIELDS))
+    records.extend(field_records('paper', 'paper', draft.get('paper') or {}, PAPER_FIELDS,
+                                 keyword_assessment=draft.get('keyword_assessment')))
     for index, state in enumerate(draft.get('material_states') or []):
         records.extend(state_records(state, index))
         structures = []

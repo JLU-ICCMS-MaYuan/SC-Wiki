@@ -442,6 +442,10 @@ export function useEvidenceWorkflow(options?: {
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><Typography variant="h6">{activeRecord.label}</Typography><IconButton aria-label={t('evidence.closeDrawer')} onClick={closeDrawer}><CloseIcon /></IconButton></Box>
         <Box component="details" open key={selected} sx={{ mt: 2 }}>
           <Typography component="summary" fontWeight={700} sx={{ cursor: 'pointer' }}>{t('evidence.foundSources')}</Typography>
+          {activeRecord.field === 'paper.keywords_tags' && activeRecord.provenance?.kind === 'author_keywords' &&
+            <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.authorKeywordsSource')}</Alert>}
+          {activeRecord.field === 'paper.keywords_tags' && activeRecord.provenance?.kind === 'paper_synthesis' &&
+            <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.fulltextKeywordsSource')}</Alert>}
           {activeGroup.some(r => r.evidences.length)
             ? activeGroup.flatMap(r => r.evidences)
               .filter((source, index, all) => all.findIndex(item => item.file_id === source.file_id && item.quote === source.quote) === index)
@@ -483,7 +487,7 @@ export function useEvidenceWorkflow(options?: {
         <Typography fontWeight={600} sx={{ my: 2 }}>{t('evidence.aiReasonLabel')}</Typography>
         {activeGroup.map(r => <Box key={r.key} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
           {(r.adopted_basis || r.proposal?.basis_kind) && <Alert severity="info">{t(`evidence.basis.${r.adopted_basis || r.proposal?.basis_kind}`)}</Alert>}
-            <Typography sx={{ whiteSpace: 'pre-wrap' }}>{r.ai_reason || r.proposal?.explanation || (r.status === 'supported' ? t('evidence.noAiReason') : r.reason)}</Typography>
+            <Typography sx={{ whiteSpace: 'pre-wrap' }}>{r.ai_reason || r.proposal?.explanation || (r.field === 'paper.keywords_tags' ? r.reason : r.status === 'supported' ? t('evidence.noAiReason') : r.reason)}</Typography>
             {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
             {Boolean(r.proposal?.evidences?.length) && <Box component="details"><Typography component="summary">{t('evidence.aiReasonSources')}</Typography>
               {r.proposal!.evidences.map((source, index) => <EvidenceRegion key={`${source.file_id}:${index}`} target={targetRef.current} source={source} />)}
