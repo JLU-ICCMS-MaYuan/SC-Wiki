@@ -280,10 +280,15 @@ def _file_ref(row_id: str, entry: dict) -> FileRef:
 
 
 def _read_file(row_id: str, entry: dict) -> bytes:
-    ref = _file_ref(row_id, entry)
+    try:
+        ref = _file_ref(row_id, entry)
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ManualEvidenceError("manual_file_unavailable", "人工证据文件不可用", status=409) from exc
     try:
         with create_storage(local_root=settings.sc_wiki_data_dir).open(ref) as stream:
             raw = stream.read(MAX_FILE_BYTES + 1)
+    except (ValueError, RuntimeError) as exc:
+        raise ManualEvidenceError("manual_file_storage_unavailable", "人工证据存储暂时不可用", status=503) from exc
     except FileStorageUnavailable as exc:
         raise ManualEvidenceError("manual_file_storage_unavailable", "人工证据存储暂时不可用", status=503) from exc
     except FileIntegrityError as exc:

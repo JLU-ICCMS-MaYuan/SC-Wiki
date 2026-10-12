@@ -90,6 +90,11 @@ class LocalFileStorage(_MaterializeMixin):
     def _path(self, key: str) -> Path:
         validate_key(key)
         path = self.root.joinpath(*key.split("/"))
+        current = self.root
+        for part in key.split("/"):
+            current /= part
+            if current.is_symlink():
+                raise ValueError("文件键指向符号链接")
         # 不允许已存在的目录项通过符号链接逃逸出数据根。
         if not path.resolve().is_relative_to(self.root):
             raise ValueError("文件键越界")
