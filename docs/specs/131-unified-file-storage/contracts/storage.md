@@ -1,0 +1,31 @@
+# 文件访问与配置契约
+
+**来源**：[Spec](../spec.md) FR-001～FR-006、FR-009、FR-010。
+
+## 配置
+
+| 名称 | 行为 |
+| --- | --- |
+| `FILE_STORAGE_BACKEND` | `local` 或 `s3`；本地默认 `local`，生产编排显式指定 `s3` |
+| `FILE_STORAGE_LOCAL_ROOT` | 本地根目录；默认沿用 `SC_WIKI_DATA_DIR`，旧头像目录仅本地模式使用 |
+| `S3_ENDPOINT_URL`、`S3_REGION`、`S3_BUCKET` | S3 模式必需；region 默认 `us-east-1`；bucket 由显式初始化创建，运行进程不自动创建 |
+| `S3_ACCESS_KEY_ID`、`S3_SECRET_ACCESS_KEY` | 私密配置注入；运行凭据仅具有业务桶所需权限，不使用根管理账号 |
+| `S3_ADDRESSING_STYLE` | 默认 `path`，允许 `virtual`；两种语言必须一致 |
+| `FILE_STORAGE_TMP_DIR` | 节点临时目录，不能作为文件引用返回或跨组挂载 |
+
+默认连接超时 5 秒、单次存储调用超时 60 秒、瞬时连接错误最多重试 2 次；不自动重试业务提交。保留系统证书校验，不提供跳过校验开关。同机内部 HTTP 与受来源限制的 VPC HTTP 可用；跨云公网不在本版契约内。
+
+## 操作
+
+- `put(key, stream, media_type) -> FileRef`：流式计算摘要，写入不可变新键；相同键已存在且内容不同则冲突，不能覆盖。
+- `open(ref) -> stream`、`head(ref)`：必须由已鉴权调用方提供服务器持有的引用，禁止任意 URL 获取。
+- `materialize(ref)`：下载到受控临时目录并校验摘要，返回仅本次进程使用的路径；结束清理。
+- `delete(ref)`：底层对缺失对象幂等；是否允许删除由业务生命周期服务先决定。
+
+Python 与 Go 实现等价行为；Go 首版调用范围为头像，Python 覆盖论文和证据。新头像同样生成不可变键，数据库引用更新失败只清理本次新对象，不能破坏旧头像。
+
+## 外部兼容
+
+现有文件 API 路径、身份与角色检查、50 MiB 论文上传限制及其他类型自己的限制不变。API 保留内容类型、文件名和流式行为；已有 Range 请求行为需回归，不能因代理存储整文件加载进内存。浏览器不获得 bucket、内部键或密钥。
+
+存储连接/认证/超时统一映射为 503 `FILE_STORAGE_UNAVAILABLE`，内容校验失败为 409 `FILE_INTEGRITY_MISMATCH`，引用冲突为 409 `FILE_REFERENCE_CONFLICT`；响应与日志不输出底层 DSN、签名或密钥。已有业务 403/404/413 仍由原入口产生。
