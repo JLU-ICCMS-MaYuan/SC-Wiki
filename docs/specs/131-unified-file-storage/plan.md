@@ -18,7 +18,7 @@
 - 接入 Python 上传/返修/人工证据、论文文件、审核快照、IR 外部产物和 Go 头像；所有业务删除走同一生命周期规则。
 - 以字段清单替换直接 `Path(stored_path)`，包含 `backend/ingest/document_regions.py` 的按需渲染和旧引用下载；截图不作为唯一持久证据。
 - 新建 `backend/scripts/migrate_file_storage.py`，复用现有路径安全检查思想，独立于 `make frozen/deploy` 的本地包格式。
-- `backend/storage/reference_inventory.py` 是引用字段及生产者/消费者清单；新增持久路径必须登记，测试检测未覆盖入口。
+- `backend/storage/reference_inventory.py` 是显式字段与派生路径的生产者/消费者清单；人工证据由 `row.id`/`item.id` 派生路径，候选附件、审核快照与 `clean_results` 分别按元数据、任务 ID 和论文 ID 枚举。新增持久入口必须登记，测试检测未分类文件，不能只递归搜索 `stored_path`。
 - 本地既有路径由 local 实现做源根约束转换；新的 S3 路径只读对象键。`make frozen` 只支持本地存储实例，对 S3 模式明确拒绝并指向生产备份流程，不悄悄生成缺文件的包。
 
 ## 需求到设计与验证

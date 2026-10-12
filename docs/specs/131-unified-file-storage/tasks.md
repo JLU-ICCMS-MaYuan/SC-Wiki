@@ -4,7 +4,7 @@
 
 ## 阶段 1：准备
 
-- [ ] T001 核验引用生产者/消费者并建立登记表 `backend/storage/reference_inventory.py`，覆盖本文数据模型全部载体。
+- [ ] T001 核验显式引用和由人工证据 row/item、候选附件元数据、审核快照任务 ID、富化结果论文 ID 派生的文件，建立 `backend/storage/reference_inventory.py`，覆盖本文数据模型全部载体及未分类文件阻断。
 - [ ] T002 在 `requirements.txt`、`docker/requirements.txt`、`goserver/go.mod` 中加入并锁定两语言 S3 SDK，验证兼容性，不升级核心依赖。
 
 ## 阶段 2：基础能力
@@ -22,7 +22,7 @@
 
 ## 阶段 4：US2——历史迁移（P1）
 
-- [ ] T010 [US2] 在 `tests/02_maintenance_and_verification/test_file_storage_migration.py` 建立 MySQL/Redis/S3 历史夹具，覆盖所有登记引用、TTL、缺失、越界、冲突、阶段中断与续跑。
+- [ ] T010 [US2] 在 `tests/02_maintenance_and_verification/test_file_storage_migration.py` 建立 MySQL/Redis/S3 历史夹具，包含没有 `stored_path` 字段的人工证据、候选附件、审核快照及富化结果，覆盖 TTL、缺失、越界、冲突、未分类文件、阶段中断与续跑。
 - [ ] T011 [US2] 实现 `backend/scripts/migrate_file_storage.py` 的 scan/copy/verify/switch/rollback，条件更新引用并保留源文件和脱敏清单。
 - [ ] T012 [US2] 按 `docs/specs/131-unified-file-storage/quickstart.md` 执行完整迁移和切换前回退，记录清单统计、内容摘要及故障证据。
 
