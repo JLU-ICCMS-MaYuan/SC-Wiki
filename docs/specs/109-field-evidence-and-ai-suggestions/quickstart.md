@@ -167,6 +167,43 @@ cd "frontend" && npm run build
 
 只有实际组件、真实持久化边界及浏览器验收结果齐备，才可勾选 T040—T046 与对应 Issue 验收；文档质量检查不构成功能通过证据。
 
+## 2026-10-12 US9 结构家族布局验收
+
+本轮完成 FR-032—033 / SC-022。根因是来源标记同时绑定 Autocomplete 外层和内部输入，更新时误判已有标签并额外插入至少 40px 高的按钮；已从锚点归一处修复。结构家族使用单一浮动标签，多选提示放在框下方；局部多选项继承正文样式，长名称自然换行。
+
+### 可复现的验证
+
+```bash
+NODE_OPTIONS=--no-experimental-webstorage "frontend/node_modules/.bin/vitest" run --config "vitest.config.ts" \
+  "tests/01_decentralized_uploading/scientific-evidence-markers.test.tsx" \
+  "tests/01_decentralized_uploading/material-states-editor.test.tsx" \
+  "tests/01_decentralized_uploading/upload-task-editor-layout.test.tsx" \
+  "tests/01_decentralized_uploading/upload-task-editor-classification.test.tsx" \
+  "tests/01_decentralized_uploading/evidence-workflow.test.tsx" \
+  "tests/01_decentralized_uploading/admin-paper-classification-review.test.tsx" \
+  "tests/02_identity_governance/admin-edit-page.test.tsx"
+npm --prefix "frontend" run build
+```
+
+7 个测试文件共 130 项通过，TypeScript/Vite 生产构建通过。新增重复标签用例在修复前失败（期望 1 个入口，实际 2 个），修复后通过，覆盖核对状态更新、标签唯一性、事件次数、键盘以及卸载后的语义还原。上传和管理员编辑测试覆盖既有分类编辑与保存请求，未改变数据接口。
+
+本机 Node 26 默认全局 `localStorage` 与旧 Vitest/jsdom 冲突，管理端快速审核套件首次因此失败；以本条命令的进程级 `--no-experimental-webstorage` 重跑该文件，16 项全部通过，没有修改系统环境或业务代码绕过断言。构建仅有既有 3Dmol `eval` 与大包提示。
+
+在 `frontend` 目录运行 `"node_modules/.bin/vite" --host 127.0.0.1 --port 5191 --strictPort`，浏览器打开 [布局夹具](http://127.0.0.1:5191/test-fixtures/structure-family-layout.html)。该页使用真实 `MaterialStatesEditor`、`EvidenceFieldMarkers`、主题和语言上下文，拒绝全部业务 API 请求，编辑仅存于内存；iframe 提供实际 1440px 和 390px 视口。生产打包不包含此夹具。
+
+Chrome 完成 16 种组合：中英文 × 1440/390px × 空值/单项/多项/无空格长名称，每项经历三轮核对结果更新。全部通过入口唯一性、字号字重、框体位置、长文本不裁切及窄屏无横向溢出的检查。
+
+| Chrome 实测场景 | 元素数框高 | 材料维度框高 | 结构家族框高 | 顶部/标签差 | 文字样式 |
+| --- | --- | --- | --- | --- | --- |
+| 桌面中文单项 | 53.125px | 53.125px | 53.125px | 0px / 0px | 14px / 400 |
+| 窄屏英文长名称 | 53.125px | 53.125px | 105.125px | 单列排列 | 14px / 400 |
+
+桌面空值/单行同排顶底及标签基线差不超过 1 CSS px，多行只自然增高并保持顶部一致；长名称不裁切，390px 内容溢出为 0px。Chrome 原生操作进一步验证：Shift+Tab/Enter 打开结构家族来源入口，输入“链状结构”并按 Enter 新增，Backspace 删除最后一项，清空按钮得到空数组。桌面视觉检查确认没有额外加粗标题。
+
+### 验收边界
+
+本次浏览器验证的是上传、管理员和超级管理员复用的真实组件；角色页面另由前端集成测试回归，没有修改或提交真实论文。US8 人工说明保存、版本绑定与持久化结果不在本次布局验收中，原 T045—T046 的混合验收仍未完成；#109 保持开放。本地代码可由开发服务器加载，生产环境未部署，Git 未推送。
+
 ## 2026-10-11 模型归纳理由验收补充
 
 1. 在 H3S 当前上传草稿读取 `paper.material_families` 的同版本核对：保持“氢基超导体”目录 ID，不改用户其他输入；侧栏“系统找到的原文”显示本文引句，“AI 理由”显示该引句如何支持氢基分类，不出现直接记载兜底。

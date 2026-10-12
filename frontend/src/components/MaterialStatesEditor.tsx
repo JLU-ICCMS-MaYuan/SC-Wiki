@@ -624,7 +624,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   </Box>
                   <Collapse in={!isCollapsed} timeout="auto" id={`material-state-${index}-content`}>
                   <Box>
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: 'repeat(3, 1fr)' }, gap: 1.5 }}>
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', md: 'repeat(3, minmax(0, 1fr))' }, alignItems: 'start', gap: 1.5 }}>
                     <TextField label={t('upload.materialNameField')} value={state.material_name || ''}
                       {...issueProps(`material_states[${index}].material_name`)}
                       error={materialIdentityMissing(state) || Boolean(issueOf(`material_states[${index}].material_name`))}
@@ -663,6 +663,12 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                     <Autocomplete<ClassificationTerm | string, true, false, true> data-issue-field={`material_states[${index}].structure_families`}
                       multiple
                       freeSolo
+                      sx={{ minWidth: 0 }}
+                      slotProps={{ chip: { sx: {
+                        // 单行标签不撑高输入框；长名称及多项仍可自然换行。
+                        height: 'auto', minHeight: 28, fontSize: 'inherit', fontWeight: 'inherit',
+                        '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere', py: 0.25 },
+                      } } }}
                       options={catalogs?.structure_families || []}
                       loading={catalogLoading}
                       value={(state.structure_families || []).map(selection => {
@@ -681,7 +687,9 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                           return selection ? { ...selection, is_primary: false } : null
                         }).filter(Boolean))
                       }}
-                      renderInput={params => <TextField {...params} label={t('upload.structureFamiliesField')} error={Boolean(catalogError)} />}
+                      renderInput={params => <TextField {...params} label={t('upload.structureFamiliesField')}
+                        slotProps={{ inputLabel: { shrink: true } }} error={Boolean(catalogError)}
+                        helperText={catalogError || t('upload.structureFamiliesHelp')} />}
                     />
                     <PressureEditor state={state} index={index} onChange={patch => emitStates(statesRef.current.map((item, i) => i === index ? {...item, ...patch} : item))} />
                     <FormControl fullWidth data-issue-field={`material_states[${index}].crystal_system`}>

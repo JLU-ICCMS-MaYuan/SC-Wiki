@@ -122,7 +122,9 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
             ? row?.querySelector<HTMLElement>('[data-tc-current-value]') : undefined
           const exact = structure || (row ? rowNodes.find(n => n.dataset.issueField?.endsWith(suffix) && suffix !== '') || tcValue || row : stateField || (!record.state_key ? scopedNodes.find(n => normalize(n.dataset.issueField || '') === normalize(field)) : undefined))
           const node = exact || (!record.state_key ? scopedNodes.filter(n => normalize(field).startsWith(normalize(n.dataset.issueField || '') + '.')).sort((a, b) => (b.dataset.issueField?.length || 0) - (a.dataset.issueField?.length || 0))[0] : undefined)
-          const control = node?.matches('input,textarea,select') ? node.closest<HTMLElement>('.MuiInputBase-root') || node.parentElement : node?.matches('.MuiFormControl-root') ? node.querySelector<HTMLElement>('.MuiInputBase-root') || node : node
+          // 组合控件与内部输入必须归一为同一个锚点，否则两次标注同一标签，
+          // 下次更新会把已标注标签误判为外部按钮并额外插入一行标题。
+          const control = node?.matches('input,textarea,select') ? node.closest<HTMLElement>('.MuiInputBase-root') || node.parentElement : node?.matches('.MuiFormControl-root,.MuiAutocomplete-root') ? node.querySelector<HTMLElement>('.MuiInputBase-root') || node : node
           return control ? [{ record, node: control }] : []
         })
       })

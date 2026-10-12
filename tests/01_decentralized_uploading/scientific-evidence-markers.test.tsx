@@ -2,13 +2,50 @@ import React from 'react'
 import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
-import { FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material'
+import { Autocomplete, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import EvidenceFieldMarkers, { EvidenceRecordList } from '../../frontend/src/components/EvidenceFieldMarkers'
 import type { EvidenceRecord } from '../../frontend/src/components/EvidenceWorkflow'
 import theme from '../../frontend/src/theme'
 
 afterEach(cleanup)
+
+it('多选控件更新核对结果后仍只复用一个标签，卸载后恢复标签语义', async () => {
+  const onOpen = vi.fn()
+  const onChange = vi.fn()
+  const record: EvidenceRecord = { key: 'families', field: 'material_states[0].structure_families', label: '结构家族', status: 'supported', reason: '', evidences: [] }
+  const form = (records: EvidenceRecord[], show = true) => <ThemeProvider theme={theme}>
+    <div data-evidence-scope="families">
+      <Autocomplete multiple freeSolo options={['笼状结构']} defaultValue={['笼状结构']}
+        data-issue-field={record.field} renderInput={params => <TextField {...params} label="结构家族" />} />
+      {show && <EvidenceFieldMarkers records={records} scope="families" onOpen={onOpen} onChange={onChange} />}
+    </div>
+  </ThemeProvider>
+  const view = render(form([record]))
+  for (const status of ['supported', 'uncertain', 'supported'] as const) {
+    view.rerender(form([{ ...record, status }]))
+    await waitFor(() => {
+      const entries = document.querySelectorAll('[data-evidence-key="families"]')
+      expect(entries).toHaveLength(1)
+      expect(entries[0].tagName).toBe('LABEL')
+      expect(entries[0]).toHaveAttribute('data-evidence-caption-problem', String(status !== 'supported'))
+    })
+    const label = screen.getByRole('button', { name: '结构家族' })
+    expect(document.querySelector('button[data-evidence-key="families"]')).toBeNull()
+    expect(document.querySelector('.MuiAutocomplete-root')).not.toHaveAttribute('data-evidence-problem')
+    fireEvent.click(label)
+    expect(onOpen).toHaveBeenLastCalledWith('families', ['families'])
+  }
+  expect(onOpen).toHaveBeenCalledTimes(3)
+  fireEvent.keyDown(screen.getByRole('button', { name: '结构家族' }), { key: 'Enter' })
+  expect(onOpen).toHaveBeenCalledTimes(4)
+  fireEvent.click(screen.getByRole('combobox'))
+  expect(onOpen).toHaveBeenCalledTimes(4)
+  view.rerender(form([], false))
+  expect(document.querySelector('label')).not.toHaveAttribute('role')
+  expect(document.querySelector('label')).not.toHaveAttribute('data-evidence-key')
+  expect(screen.getByRole('combobox')).toHaveAccessibleName('结构家族')
+})
 
 it('作者标签合并作者角色证据，隐藏菜单不使证据失去入口', async () => {
   const onOpen=vi.fn()

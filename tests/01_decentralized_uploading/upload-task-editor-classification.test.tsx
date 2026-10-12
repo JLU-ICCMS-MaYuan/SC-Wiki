@@ -94,7 +94,7 @@ describe('论文级材料家族与材料状态多维分类编辑', () => {
     fireEvent.click(await screen.findByRole('option', { name: '三维' }))
 
     expect(screen.queryByLabelText('主结构家族')).not.toBeInTheDocument()
-    const structureInputs = screen.getAllByLabelText('更多类型标签（可以填写不止一个类型）')
+    const structureInputs = screen.getAllByLabelText('结构家族')
     fireEvent.change(structureInputs[0], { target: { value: '笼状' } })
     fireEvent.click(await screen.findByText('笼状结构'))
     fireEvent.change(structureInputs[0], { target: { value: '层状' } })

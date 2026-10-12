@@ -392,7 +392,7 @@ describe('文案、类型标签与模块顺序', () => {
     expect((await screen.findAllByLabelText('压强 (GPa)')).length).toBe(2)
     expect(screen.queryByLabelText('压力 (GPa)')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('主结构家族')).not.toBeInTheDocument()
-    expect(screen.getAllByLabelText('更多类型标签（可以填写不止一个类型）')).toHaveLength(2)
+    expect(screen.getAllByLabelText('结构家族')).toHaveLength(2)
 
     const moduleSections = screen.getAllByTestId(/property-modules-/)
     const panels = screen.getAllByTestId('structure-candidate-panel')
