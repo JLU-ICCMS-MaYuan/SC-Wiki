@@ -2,7 +2,7 @@
 
 **输入**：[spec.md](spec.md)、[plan.md](plan.md)、[research.md](research.md)、[data-model.md](data-model.md)、[接口契约](contracts/rag-chat.md)
 
-2026-10-09 原工作区代码、文档和本地验证已完成；目标环境验收仍见 T018。2026-10-12 润色增强已确认规划、尚未实现，新增任务见阶段 6。T010～T013 的勾选只代表旧版预览交互，不能证明修订后的 US3 已完成。任务编号用于技术拆解，协作状态以 [Issue #125](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/125) 为准。
+2026-10-09 原工作区代码、文档和本地验证已完成；目标环境验收仍见 T018。2026-10-12 润色增强代码与本地自动化验证已完成，真实模型结果待人工质量复核，登录浏览器完整链路待完成，见阶段 6。T010～T013 的勾选只代表旧版预览交互，不能证明修订后的 US3 已完成。任务编号用于技术拆解，协作状态以 [Issue #125](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/125) 为准。
 
 ## 阶段 1：基础能力
 
@@ -83,14 +83,14 @@
 
 **目标**：在原工作区上增强提问质量，直接回填且可撤销，不重做云端会话或来源功能。
 
-**独立验收**：[质量评测](prompt-polish-evaluation.md)及[验证指南](quickstart.md)中的新版润色场景通过，真实模型与交互证据分开记录。本阶段全部是待实施任务。
+**独立验收**：[质量评测](prompt-polish-evaluation.md)及[验证指南](quickstart.md)中的新版润色场景通过，真实模型与交互证据分开记录。本阶段代码任务已完成；真实调用不等于人工质量门通过，未满足的验收任务仍保持未勾选。
 
-- [ ] T020 [US3] 在 `docs/specs/125-rag-chat-workspace/prompt-polish-evaluation.md` 核对并冻结 12 条输入、评分标准、旧版代码/模板快照与实际模型信息，后续输出记录到本目录 `prompt-polish-results.md`，对应 FR-018、SC-006。
-- [ ] T021 [US3] 在 `backend/tests/test_rag_chat_conversations.py` 补充真实路由到服务的润色测试，只替换外部模型边界：覆盖空白、1000/1001 字符、完整结束/截断/缺失标记、空正文、公式/数值/单位/占位符、凭据与超时、无会话写入；失败结果不得返回成功，对应 FR-010、FR-011、FR-020、FR-021、SC-007。
-- [ ] T022 [US3] 在 `backend/rag/prompts/prompt_polish.md` 移植并适配固定上游模板，在 `backend/rag/prompts/prompt_polish.LICENSE` 保留 MIT 版权和许可全文；记录提交、路径及适配说明，覆盖模糊问题完善、简单问题轻改写、禁止虚构条件与保持输入语言，对应 FR-018、SC-006。
-- [ ] T023 [US3] 在 `backend/rag/service.py` 和 `backend/api/rag.py` 接入模板与序列化草稿，统一 1000 字符边界、1600 tokens 生成额度、完整结束和关键内容校验，沿用模型选择与错误映射；运行 T021 测试并验证生产打包可读取模板，对应 FR-010、FR-011、FR-018、FR-020、FR-021、SC-007。
-- [ ] T024 [US3] 在 `frontend/src/pages/RagPage.test.tsx` 将旧预览测试更新为直接回填、零自动发送、撤销逐字恢复/失效、失败非阻塞、编辑后改回原文、发送及失败恢复、空会话再次新建、会话切出再切回、账号变化、卸载和重复点击的回归测试，对应 FR-010～FR-012、FR-017、FR-019、SC-003。
-- [ ] T025 [US3] 在 `frontend/src/pages/RagPage.tsx` 移除候选确认弹窗，增加请求/草稿/上下文保护、自动回填和一次撤销，必要时在 `frontend/src/lib/useStreamingChat.ts` 暴露最小上下文变化信号；更新 `frontend/src/i18n/zh/rag.ts` 与 `frontend/src/i18n/en/rag.ts` 文案并运行 T024，对应 FR-010～FR-012、FR-017、FR-019、SC-003。
+- [x] T020 [US3] 在 `docs/specs/125-rag-chat-workspace/prompt-polish-evaluation.md` 核对并冻结 12 条输入、评分标准、旧版代码/模板快照与实际模型信息，后续输出记录到本目录 `prompt-polish-results.md`，对应 FR-018、SC-006。
+- [x] T021 [US3] 在 `backend/tests/test_rag_chat_conversations.py` 补充真实路由到服务的润色测试，只替换外部模型边界：覆盖空白、1000/1001 字符、完整结束/截断/缺失标记、空正文、公式/数值/单位/占位符、凭据与超时、无会话写入；失败结果不得返回成功，对应 FR-010、FR-011、FR-020、FR-021、SC-007。
+- [x] T022 [US3] 在 `backend/rag/prompts/prompt_polish.md` 移植并适配固定上游模板，在 `backend/rag/prompts/prompt_polish.LICENSE` 保留 MIT 版权和许可全文；记录提交、路径及适配说明，覆盖模糊问题完善、简单问题轻改写、禁止虚构条件与保持输入语言，对应 FR-018、SC-006。
+- [x] T023 [US3] 在 `backend/rag/service.py` 和 `backend/api/rag.py` 接入模板与序列化草稿，统一 1000 字符边界、4096 tokens 生成额度、完整结束和关键内容校验，沿用模型选择与错误映射；运行 T021 测试并验证生产打包可读取模板，对应 FR-010、FR-011、FR-018、FR-020、FR-021、SC-007。
+- [x] T024 [US3] 在 `frontend/src/pages/RagPage.test.tsx` 将旧预览测试更新为直接回填、零自动发送、撤销逐字恢复/失效、失败非阻塞、编辑后改回原文、发送及失败恢复、空会话再次新建、会话切出再切回、账号变化、卸载和重复点击的回归测试，对应 FR-010～FR-012、FR-017、FR-019、SC-003。
+- [x] T025 [US3] 在 `frontend/src/pages/RagPage.tsx` 移除候选确认弹窗，增加请求/草稿/上下文保护、自动回填和一次撤销，必要时在 `frontend/src/lib/useStreamingChat.ts` 暴露最小上下文变化信号；更新 `frontend/src/i18n/zh/rag.ts` 与 `frontend/src/i18n/en/rag.ts` 文案并运行 T024，对应 FR-010～FR-012、FR-017、FR-019、SC-003。
 - [ ] T026 [US3] 按 `docs/specs/125-rag-chat-workspace/prompt-polish-evaluation.md` 用同一真实模型运行旧/新各两轮，向本目录 `prompt-polish-results.md` 写入脱敏原始结果、人工评分、有效性、延迟、用量及结论；不足 80% 改善或任何硬约束违规时修订模板并重跑完整集合，对应 FR-018、FR-020、SC-006、SC-007。
 - [ ] T027 [US3] 在 `docs/specs/125-rag-chat-workspace/quickstart.md` 记录后端专项、前端测试/构建、桌面与窄屏真实浏览器的回填→撤销→再次润色→主动发送、上下文竞态、模型失败及普通/探索模式回归；确认前后端运行制品对应已验证源码，对应 SC-003、SC-005、SC-007。
 - [ ] T028 [US3] 完成实现和验证后使用 `big-project-overview-maintainer` 更新 `docs/overview/05_Retrieval-Augmented_AI_Question_Answering/streaming-qa-and-evidence.md` 与 `availability-and-configuration.md`，同步 `README.md` 及本目录实际验证状态；通过 Issue skill 同步 #125 的文档影响与验收证据，保留未完成的 T018，对应 FR-017～FR-021、SC-003、SC-005～SC-007。
@@ -102,3 +102,11 @@
 - 前后端独立文件可分开处理，同一文件串行；本规划没有要求并行代理。
 - T020～T028 不修改旧任务编号与历史勾选含义。只有 T026 有真实质量证据、T027 有完整交互证据，才能声称新版润色验收通过。
 - #125 最终关闭同时依赖原 T018、当前 T020～T028 和 Documentation Impact；不能以本轮规划完成替代功能完成。
+
+
+### 2026-10-12 验证范围
+
+- T020～T025 已完成：固定基线与模型配置、有来源模板、实际润色路径、前端直接回填和一次撤销。后端专项 47 项、前端 26 项及生产构建通过。
+- T026 已执行真实 DeepSeek 新旧对比并保留原始输出；人工盲评与 80% 改善率判定尚未完成，保持未勾选。
+- T027 已完成自动化和本地未登录浏览器失败/窄屏检查；登录后的回填→撤销→发送及完整探索模式仍未验收，保持未勾选。
+- T028 已同步当前代码可证明的 Overview 和 README 行为；最终完整验收及收尾仍依赖 T026、T027，保持未勾选。原 T018 未被本轮润色验证替代。

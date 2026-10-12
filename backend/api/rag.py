@@ -872,7 +872,7 @@ class RagMessage(BaseModel):
 
 
 class RagChatRequest(BaseModel):
-    question: str = Field(..., min_length=1, max_length=1000)
+    question: str = Field(..., min_length=1, max_length=service.QUESTION_MAX_LENGTH)
     top_k: int = Field(15, ge=1, le=50)
     rerank_top_k: int = Field(5, ge=1, le=20)
     history: list[RagMessage] = Field(default_factory=list)
@@ -899,7 +899,7 @@ class RagConversationImport(BaseModel):
 
 
 class RagPolishRequest(BaseModel):
-    draft: str = Field(min_length=1, max_length=1000)
+    draft: str = Field(min_length=1, max_length=service.QUESTION_MAX_LENGTH)
 
 
 class RagSourceLinksRequest(BaseModel):

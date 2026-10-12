@@ -1,10 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import {
-  Alert, Box, Button, Chip, CircularProgress, Dialog, DialogActions, DialogContent,
-  DialogTitle, Drawer, IconButton, Stack, TextField, Tooltip, Typography,
+  Alert, Box, Button, Chip, CircularProgress, Drawer, IconButton, Stack, TextField, Tooltip, Typography,
 } from '@mui/material'
 import AutoAwesomeOutlinedIcon from '@mui/icons-material/AutoAwesomeOutlined'
-import CloseIcon from '@mui/icons-material/Close'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
 import MenuIcon from '@mui/icons-material/Menu'
 import AddIcon from '@mui/icons-material/Add'
@@ -15,9 +13,11 @@ import MarkdownMessage from '../components/MarkdownMessage'
 import RagSourceDrawer, { type SourceTarget } from '../components/RagSourceDrawer'
 import EvidenceCard from '../components/EvidenceCard'
 import { useLanguage } from '../context/LanguageContext'
+import { useAuth } from '../context/AuthContext'
 
 const RagPage: React.FC = () => {
   const { t } = useLanguage()
+  const { user, token } = useAuth()
   const suggestions = [t('rag.suggestion1'), t('rag.suggestion2'), t('rag.suggestion3')]
   const {
     convs, activeId, messages, loading, papers, top10, ideas, reviews, statusLog,
@@ -30,18 +30,32 @@ const RagPage: React.FC = () => {
   const [target, setTarget] = useState<SourceTarget | null>(null)
   const [polishing, setPolishing] = useState(false)
   const [polishError, setPolishError] = useState('')
-  const [suggestion, setSuggestion] = useState('')
-  const [polishOrigin, setPolishOrigin] = useState<{ text: string; id: string; revision: number } | null>(null)
+  const [undoPolish, setUndoPolish] = useState<{ text: string; revision: number } | null>(null)
   const revisionRef = useRef(0)
+  const requestRef = useRef(0)
+  const pendingRef = useRef<number | null>(null)
+  const sendContextRef = useRef(0)
   const triggerRef = useRef<{ element: HTMLElement; index: number } | null>(null)
   const chatBoxRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
+  const invalidatePolish = () => {
     revisionRef.current += 1
-    setSuggestion('')
-    setPolishOrigin(null)
+    requestRef.current += 1
+    pendingRef.current = null
+    setPolishing(false)
+    setPolishError('')
+    setUndoPolish(null)
+  }
+  // 布局副作用在异步响应回调前使已切换的上下文失效，卸载后同样不再回填。
+  useLayoutEffect(() => {
+    invalidatePolish()
     setTarget(null)
-  }, [activeId])
+    return () => { requestRef.current += 1; pendingRef.current = null }
+  }, [activeId, user?.id, token])
+  useLayoutEffect(() => {
+    sendContextRef.current += 1
+    return () => { sendContextRef.current += 1 }
+  }, [user?.id, token])
   useEffect(() => {
     if (target || !triggerRef.current) return
     const restore = () => {
@@ -74,40 +88,55 @@ const RagPage: React.FC = () => {
   }, [papers, savedPapers])
 
   const changeInput = (value: string) => {
-    revisionRef.current += 1
+    invalidatePolish()
     setInput(value)
-    if (polishOrigin) setSuggestion('')
   }
+  const inputTooLong = Array.from(input).length > 1000
   const handleSend = async () => {
     const question = input.trim()
-    if (!question || loading) return
+    if (!question || loading || inputTooLong) return
     changeInput('')
+    const context = sendContextRef.current
     const ok = await send(question, exploreMode)
-    if (!ok) setInput(current => current || question)
+    // 自动创建会话不妨碍失败恢复；显式导航或切换账号则不能恢复到新上下文。
+    if (!ok && context === sendContextRef.current) {
+      invalidatePolish()
+      setInput(current => current || question)
+    }
   }
   const handlePolish = async () => {
     const text = input.trim()
-    if (!text || polishing || loading) return
-    const origin = { text, id: activeId, revision: revisionRef.current }
-    setPolishOrigin(origin)
+    if (!text || pendingRef.current !== null || loading || inputTooLong) return
+    const origin = { text: input, revision: revisionRef.current }
+    const request = ++requestRef.current
+    pendingRef.current = request
+    setUndoPolish(null)
     setPolishError('')
-    setSuggestion('')
     setPolishing(true)
     try {
       const result = await api.post<{ ok: boolean; data: { suggestion: string } }>('/api/rag/prompts/polish', { draft: text })
-      if (revisionRef.current === origin.revision && activeId === origin.id) {
-        setSuggestion(result.data.suggestion)
+      if (requestRef.current !== request || revisionRef.current !== origin.revision) return
+      const suggestion = result.data?.suggestion
+      if (!result.ok || typeof suggestion !== 'string' || !suggestion.trim() || Array.from(suggestion).length > 1000) {
+        throw new Error('Invalid polish response')
+      }
+      if (suggestion !== origin.text) {
+        revisionRef.current += 1
+        setInput(suggestion)
+        setUndoPolish({ text: origin.text, revision: revisionRef.current })
       }
     } catch {
-      if (revisionRef.current === origin.revision) setPolishError(t('rag.polishFailed'))
-    } finally { setPolishing(false) }
-  }
-  const acceptPolish = () => {
-    if (polishOrigin && revisionRef.current === polishOrigin.revision && activeId === polishOrigin.id) {
-      changeInput(suggestion)
+      if (requestRef.current === request && revisionRef.current === origin.revision) setPolishError(t('rag.polishFailed'))
+    } finally {
+      if (requestRef.current === request) { pendingRef.current = null; setPolishing(false) }
     }
-    setSuggestion('')
-    setPolishOrigin(null)
+  }
+  const restorePolish = () => {
+    if (undoPolish && revisionRef.current === undoPolish.revision) changeInput(undoPolish.text)
+  }
+  const leaveDraftContext = () => {
+    sendContextRef.current += 1
+    invalidatePolish()
   }
   const openSource = (source: SourceTarget, trigger: HTMLElement) => {
     triggerRef.current = {
@@ -120,12 +149,14 @@ const RagPage: React.FC = () => {
     setTarget(null)
   }
   const chooseConversation = (id: string) => {
+    leaveDraftContext()
     void switchConversation(id)
     setHistoryOpen(false)
   }
 
   const history = <Stack spacing={0.5} sx={{ height: '100%', p: 1.5, overflowY: 'auto' }}>
-    <Button onClick={() => { newConversation(); setHistoryOpen(false) }} startIcon={<AddIcon />}
+    <Button onClick={() => { leaveDraftContext(); newConversation(); setHistoryOpen(false) }} startIcon={<AddIcon />}
+      disabled={loading}
       variant="text" sx={{ justifyContent: 'flex-start', color: 'text.primary', fontWeight: 600, mb: 2 }}>
       {t('rag.newConversation')}
     </Button>
@@ -145,7 +176,7 @@ const RagPage: React.FC = () => {
       </Button>
       <Tooltip title={t('rag.deleteConversation')}>
         <IconButton size="small" aria-label={`${t('rag.deleteConversation')}: ${conversation.title}`}
-          onClick={() => void deleteConversation(conversation.id)} disabled={loading}>
+          onClick={() => { if (conversation.id === activeId) leaveDraftContext(); void deleteConversation(conversation.id) }} disabled={loading}>
           <DeleteOutlineIcon fontSize="small" />
         </IconButton>
       </Tooltip>
@@ -225,7 +256,8 @@ const RagPage: React.FC = () => {
         <Box sx={{ maxWidth: 820, mx: 'auto', bgcolor: 'background.paper', border: 1, borderColor: 'divider',
           borderRadius: 3, boxShadow: '0 4px 18px rgba(15,23,42,.07)', px: 2, pt: 1.5, pb: 1 }}>
           <TextField fullWidth multiline minRows={2} maxRows={6} variant="standard"
-            InputProps={{ disableUnderline: true }} inputProps={{ maxLength: 1000, 'aria-label': t('rag.inputPlaceholder') }}
+            InputProps={{ disableUnderline: true }} inputProps={{ 'aria-label': t('rag.inputPlaceholder') }}
+            error={inputTooLong} helperText={inputTooLong ? t('rag.promptTooLong') : undefined}
             placeholder={exploreMode ? t('rag.inputPlaceholderExplore') : t('rag.inputPlaceholder')}
             value={input} onChange={event => changeInput(event.target.value)} disabled={loading}
             onKeyDown={event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); void handleSend() } }} />
@@ -234,42 +266,25 @@ const RagPage: React.FC = () => {
               onClick={() => setExploreMode(value => !value)} disabled={loading}>
               {t('rag.explore')}
             </Button>
+            {undoPolish && <Button size="small" onClick={restorePolish}>{t('rag.undoPolish')}</Button>}
             <Box sx={{ flex: 1 }} />
             <Tooltip title={input.trim() ? t('rag.polishPrompt') : t('rag.polishNeedsText')}>
               <span><IconButton aria-label={t('rag.polishPrompt')} onClick={() => void handlePolish()}
-                disabled={!input.trim() || loading || polishing}>
+                disabled={!input.trim() || inputTooLong || loading || polishing}>
                 {polishing ? <CircularProgress size={20} /> : <AutoAwesomeOutlinedIcon />}
               </IconButton></span>
             </Tooltip>
             <IconButton aria-label={t('rag.send')} onClick={() => void handleSend()}
-              disabled={!input.trim() || loading} sx={{ bgcolor: 'primary.main', color: 'primary.contrastText',
+              disabled={!input.trim() || inputTooLong || loading} sx={{ bgcolor: 'primary.main', color: 'primary.contrastText',
                 width: 38, height: 38, '&:hover': { bgcolor: 'primary.dark' },
                 '&.Mui-disabled': { opacity: 0.35 } }}><SendIcon fontSize="small" /></IconButton>
           </Box>
+          {polishError && <Alert severity="error" sx={{ mt: 1 }}>{polishError}</Alert>}
         </Box>
       </Box>
     </Box>
     <RagSourceDrawer target={target} onClose={closeSource}
       onExited={focusSource} />
-    <Dialog open={Boolean(suggestion || polishError)} onClose={() => { setSuggestion(''); setPolishError('') }}
-      fullWidth maxWidth="sm">
-      <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        {t('rag.polishPreview')}
-        <IconButton aria-label={t('common.close')} onClick={() => { setSuggestion(''); setPolishError('') }}><CloseIcon /></IconButton>
-      </DialogTitle>
-      <DialogContent>
-        {polishError ? <Alert severity="error">{polishError}</Alert> : <Stack spacing={2}>
-          <Box><Typography variant="caption" color="text.secondary">{t('rag.originalPrompt')}</Typography>
-            <Typography sx={{ whiteSpace: 'pre-wrap' }}>{polishOrigin?.text}</Typography></Box>
-          <Box><Typography variant="caption" color="text.secondary">{t('rag.polishedPrompt')}</Typography>
-            <Typography sx={{ whiteSpace: 'pre-wrap' }}>{suggestion}</Typography></Box>
-        </Stack>}
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => { setSuggestion(''); setPolishError('') }}>{t('common.cancel')}</Button>
-        {suggestion && <Button variant="contained" onClick={acceptPolish}>{t('rag.usePolished')}</Button>}
-      </DialogActions>
-    </Dialog>
   </Box>
 }
 

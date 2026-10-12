@@ -1,6 +1,7 @@
 """RAG 云端会话的真实数据库事务与所有权边界。"""
 
 import os
+import json
 
 os.environ.setdefault("DATABASE_URL", "sqlite://")
 
@@ -71,7 +72,7 @@ def test_polish_preserves_scientific_values_without_writing_history(monkeypatch,
     from backend.rag import service
 
     class Response:
-        choices = [type("Choice", (), {"message": type("Message", (), {
+        choices = [type("Choice", (), {"finish_reason": "stop", "message": type("Message", (), {
             "content": "请列出 LaH10 在 200 GPa 下的 Tc，注明论文来源。",
         })()})()]
 
@@ -103,6 +104,120 @@ def test_polish_preserves_scientific_values_without_writing_history(monkeypatch,
     monkeypatch.setattr(service, "get_llm_config", lambda: type("Config", (), {"model": "test", "api_key": ""})())
     with pytest.raises(service.RagChatUnavailableError):
         service.polish_prompt("LaH10 200 GPa Tc?")
+
+
+@pytest.fixture
+def polish_api(monkeypatch, db):
+    """实际 HTTP 路由、线程上下文与 SDK，只替换外部模型的 HTTP 传输。"""
+    monkeypatch.setenv("JWT_SECRET_KEY", "test-secret-key-only-for-isolated-tests")
+    import httpx
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from openai import OpenAI
+    from backend.api import rag
+    from backend.rag import service, llm_context
+
+    state = {"content": "请比较 LaH10 在 200 GPa 下的 Tc，并说明证据来源。",
+             "finish_reason": "stop", "requests": [], "status": 200}
+
+    def upstream(request):
+        state["requests"].append(json.loads(request.content))
+        if state.get("timeout"):
+            raise httpx.ReadTimeout("private-upstream-key", request=request)
+        return httpx.Response(state["status"], json={
+            "id": "polish-test", "object": "chat.completion", "created": 0, "model": "chosen-model",
+            "choices": [{"index": 0, "finish_reason": state["finish_reason"],
+                         "message": {"role": "assistant", "content": state["content"],
+                                     "refusal": state.get("refusal"), "tool_calls": state.get("tool_calls")}}],
+        })
+
+    config = llm_context.LlmConfig(provider="test", base_url="https://model.test/v1", model="chosen-model", api_key="fake")
+
+    async def selected_config():
+        token = llm_context.set_llm_config(config)
+        try:
+            yield config
+        finally:
+            llm_context.reset_llm_config(token)
+
+    with httpx.Client(transport=httpx.MockTransport(upstream)) as http:
+        sdk = OpenAI(api_key="fake", base_url=config.base_url, http_client=http, max_retries=0)
+        monkeypatch.setattr(service, "get_llm_client", lambda **kwargs: sdk)
+        app = FastAPI()
+        app.include_router(rag.router)
+        app.dependency_overrides[llm_context.request_llm_config] = selected_config
+        with TestClient(app) as client:
+            yield client, state
+    assert db.query(RagChatConversation).count() == 0
+    assert db.query(RagChatTurn).count() == 0
+
+
+def test_polish_http_uses_selected_model_and_preserves_contract(polish_api):
+    client, state = polish_api
+    result = client.post("/api/rag/prompts/polish", json={"draft": "LaH10 200 GPa Tc?"})
+    assert result.status_code == 200
+    assert result.json() == {"ok": True, "data": {"suggestion": state["content"]}}
+    request = state["requests"][0]
+    assert request["model"] == "chosen-model"
+    assert request["max_tokens"] == 4096
+    assert json.loads(request["messages"][1]["content"])["originalPrompt"] == "LaH10 200 GPa Tc?"
+
+
+@pytest.mark.parametrize("change", [
+    {"finish_reason": "length"}, {"finish_reason": None}, {"content": "  "},
+    {"content": None}, {"content": "问" * 1001}, {"content": "LaH10 1200 GPa Tc?"},
+    {"refusal": "不能提供"},
+    {"finish_reason": "tool_calls", "tool_calls": [{"id": "x", "type": "function", "function": {"name": "search", "arguments": "{}"}}]},
+])
+def test_polish_http_rejects_invalid_generation(polish_api, change):
+    client, state = polish_api
+    state.update(change)
+    result = client.post("/api/rag/prompts/polish", json={"draft": "LaH10 200 GPa Tc?"})
+    assert result.status_code == 422
+    assert result.json()["detail"]["code"] == "POLISH_INVALID"
+
+
+@pytest.mark.parametrize("draft", ["", " \n ", "问" * 1001])
+def test_polish_http_rejects_invalid_input_before_call(polish_api, draft):
+    client, state = polish_api
+    assert client.post("/api/rag/prompts/polish", json={"draft": draft}).status_code == 422
+    assert state["requests"] == []
+
+
+def test_polish_unicode_limit_matches_chat_input(polish_api):
+    from backend.api.rag import RagChatRequest
+    client, state = polish_api
+    state["content"] = "𠮷" * 1000
+    result = client.post("/api/rag/prompts/polish", json={"draft": "问" * 1000})
+    assert result.status_code == 200
+    assert RagChatRequest(question=result.json()["data"]["suggestion"]).question == state["content"]
+
+
+@pytest.mark.parametrize("term", ["FeSe", "MgB2", "H₃S", "0–9", "-0.10", "1e-3", "GPa", "Tc(P)", "K", "°C", "λ", "ω_log", "μ*", "0.10", "{{material_a}}", "10.1234/example", "[PID_12]"])
+def test_polish_preserves_scientific_tokens_next_to_chinese(polish_api, term):
+    client, state = polish_api
+    draft = f"请解释{term}的含义。"
+    state["content"] = f"请说明{term}的含义及适用条件。"
+    assert client.post("/api/rag/prompts/polish", json={"draft": draft}).status_code == 200
+    state["content"] = "请说明含义及适用条件。"
+    assert client.post("/api/rag/prompts/polish", json={"draft": draft}).status_code == 422
+
+
+def test_polish_rejects_changed_sign_and_exponent(polish_api):
+    client, state = polish_api
+    for draft, changed in [("参数=-0.10", "参数=0.10"), ("误差1e-3", "误差1e3")]:
+        state["content"] = changed
+        assert client.post("/api/rag/prompts/polish", json={"draft": draft}).status_code == 422
+
+
+@pytest.mark.parametrize("change", [{"timeout": True}, {"status": 401}])
+def test_polish_upstream_failure_is_sanitized(polish_api, change):
+    client, state = polish_api
+    state.update(change)
+    result = client.post("/api/rag/prompts/polish", json={"draft": "低压超导研究思路"})
+    assert result.status_code == 502
+    assert "private-upstream-key" not in result.text
+    assert len(state["requests"]) == 1
 
 
 def test_stream_uses_server_history_and_enforces_owner(monkeypatch, db):

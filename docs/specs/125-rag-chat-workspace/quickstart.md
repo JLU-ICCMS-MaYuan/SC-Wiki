@@ -1,6 +1,6 @@
 # 验证指南：RAG 对话工作区
 
-**状态**：2026-10-09 原工作区本地代码验证已执行；2026-10-12 润色增强只完成规划，新版自动回填与质量评测尚未执行；真实环境验收待完成。
+**状态**：2026-10-12 润色增强代码已实现，后端 47 项、前端 26 项和生产构建通过；真实模型对比与人工复核状态见下方记录。原工作区目标环境验收仍待完成。
 
 **输入**：[Spec](spec.md) · [接口契约](contracts/rag-chat.md) · [任务](tasks.md)
 
@@ -15,14 +15,14 @@
 实现对应测试后，在仓库根运行：
 
 ```bash
-python -m pytest "backend/tests/test_rag_chat_conversations.py" "backend/tests/test_rag_chat_links.py" -q
+JWT_SECRET_KEY="isolated-rag-test-secret" python -m pytest "backend/tests/test_rag_chat_conversations.py" "backend/tests/test_rag_chat_links.py" "backend/tests/test_llm_request_paths.py" "backend/tests/test_llm_catalog_api.py" "tests/05_rag_question_answering/unit/test_sse_smoke.py" -q
 ```
 
 在 `frontend/` 运行：
 
 ```bash
 npm run build
-npx vitest run "src/pages/RagPage.test.tsx" "src/lib/useStreamingChat.test.tsx" --config "../vitest.config.ts"
+./node_modules/.bin/vitest run "frontend/src/pages/RagPage.test.tsx" "frontend/src/lib/useStreamingChat.test.tsx" --config "../vitest.config.ts"
 ```
 
 后端测试需覆盖主库真实事务边界、账号隔离、幂等和并发冲突；来源测试需覆盖已批准当前片段与撤回/旧版本拒绝。新版前端测试覆盖空态、星形按钮、自动回填、一次撤销、上下文竞态、临时 Drawer、焦点和窄屏历史入口。模型可用性错误可用受控测试上游验证，不把真实密钥写入测试数据；这些测试不能证明润色质量。
@@ -58,7 +58,23 @@ npx vitest run "src/pages/RagPage.test.tsx" "src/lib/useStreamingChat.test.tsx" 
 6. **体验与回归**：确认中英文状态文案、按钮可访问名称及键盘操作；相同文本结果不制造无效果撤销；普通问答、探索模式、模型配置和来源详情仍可用。
 7. **证据与发布边界**：T026 将模型和质量结果记录到本目录实施时新增的 `prompt-polish-results.md`；T027 在此追加实际日期、代码提交、服务运行来源、命令及浏览器结果。不存在真实证据时维持任务未勾选，不宣称已部署。
 
-本轮规划仅执行文档链接、需求/任务覆盖、状态一致性及差异检查，没有执行上述代码测试、真实模型调用或浏览器验收。
+规划阶段只执行过文档检查；实现阶段的实际验证如下，二者不混写。
+
+## 2026-10-12 实现验证记录
+
+- **后端**：使用项目 Conda `sc-wiki` 的 Python 3.12，以上五个测试文件合计 47 项通过。新增测试经过 FastAPI 路由、`asyncio.to_thread` 请求配置传播及实际 OpenAI SDK，仅模拟外部模型 HTTP 传输；覆盖结束标记、拒绝/工具调用、超时、凭据错误、1000 字符、Unicode 码点、科学符号/公式/数值正负号/指数/占位符和不写会话。旧实现已由新增测试复现 400 tokens 和截断未拒绝的问题。
+- **前端**：`RagPage.test.tsx` 的 23 项与 `useStreamingChat.test.tsx` 的 3 项通过；覆盖直接回填、逐字撤销与失效、零自动发送、输入超长、编辑回退、发送失败恢复、新建空会话、会话/账号变化、卸载、旧错误及忙碌态保护。交互测试模拟 HTTP 返回，不作为真实模型或真实浏览器成功链路证据。
+- **构建**：`frontend/` 中 `npm run build` 通过。现有 3Dmol 的 `eval` 与大分包提示仍存在，与本次润色无关。Docker 的 `COPY backend/ ./backend/` 包含模板与许可文件；本轮未重建或部署生产镜像。
+- **真实浏览器**：本地 `http://localhost:5173/rag` 已核对星形按钮及失败非阻塞提示；服务端模型要求登录，未登录请求失败时原文保留、没有确认弹窗。390×844 窄屏下输入、星形、发送和失败提示可见。尚未取得本地登录会话，成功回填→撤销→主动发送与完整探索模式的真实浏览器验收仍未完成。
+- **真实模型复现入口**：在仓库根使用配置完整的项目 Python 执行下方命令；脚本读取当前默认模型，不输出凭据，不覆盖旧结果。固定旧版函数由 Git 提交提取，不回滚应用。JSON 中保存全部输出、结束原因、错误类别、用量、耗时和模板快照；另生成隐藏版本的评审文件。
+
+```bash
+python -m backend.scripts.evaluate_prompt_polish --output "/临时结果目录/prompt-polish-eval.json"
+```
+
+实际模型是 `deepseek-v4-pro`（编号目录 LLM1）。第一版在 1600 tokens 下出现两次不完整输出，并曾将 Tc 误解为元素，不能通过质量验收；第二版补充超导语境并采用 4096 tokens 重跑。仅运行真实模型和程序校验不能代替 SC-006 要求的人工盲评，不提前勾选质量验收任务。
+
+两版共 96 次新旧对比，第二版新方案 24/24 通过接口校验，同轮旧版 17/24；新版响应中位数 10.23 秒，旧版 4.16 秒。额外 3 次重复润色均返回完整结果，P01/P10 保持文本不变，P04 保持超导语境与一句话要求。原始输出、用量和匿名材料见[真实评测记录](prompt-polish-results.md)。可使用同一脚本的 `--repeat-from` 指向前一轮 JSON 复现重复润色检查。人工质量分数与“至少 80% 样例改善”的结论仍待填写。
 
 ## 通过信号
 

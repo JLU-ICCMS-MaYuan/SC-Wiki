@@ -34,10 +34,44 @@ class RagNotFoundError(RuntimeError):
     """Raised when a requested RAG resource does not exist."""
 
 
+QUESTION_MAX_LENGTH = 1000
+POLISH_MAX_TOKENS = 4096
+_POLISH_TEMPLATE = Path(__file__).with_name("prompts") / "prompt_polish.md"
+# ASCII 边界允许识别紧邻中文的科学表达；不把 200 误认为 1200 中的子串。
+_SCIENTIFIC_TOKEN = re.compile(
+    r"\{\{[^{}]+\}\}|\[PID_\d+\]|10\.\d{4,9}/[^\s，。；;]+|"
+    r"(?<![A-Za-z0-9_])(?:"
+    r"(?:[A-Z][a-z]?[0-9₀-₉]*){2,}|[A-Z][a-z]?[0-9₀-₉]+|"
+    r"[+−-]?\d+(?:\.\d+)?(?:[eE][+−-]?\d+)?(?:[–−-]\d+(?:\.\d+)?)?|"
+    r"Tc(?:\([A-Za-z]+\))?|DOI|[GMk]?Pa|meV|eV|K|°C|"
+    r"[α-ωΑ-Ω](?:_[A-Za-z]+)?\*?"
+    r")(?![A-Za-z0-9_])"
+)
+
+
+def validate_polish_response(original: str, response: Any) -> str:
+    """拒绝不完整或丢失可确定原文信息的结果；语义质量另由真实评测验证。"""
+    choices = getattr(response, "choices", None)
+    if not choices or getattr(choices[0], "finish_reason", None) != "stop":
+        raise ValueError("润色结果不完整")
+    message = getattr(choices[0], "message", None)
+    content = getattr(message, "content", None)
+    if (not isinstance(content, str) or getattr(message, "refusal", None)
+            or getattr(message, "tool_calls", None) or getattr(message, "function_call", None)):
+        raise ValueError("润色结果无效")
+    suggestion = content.strip()
+    if not suggestion or len(suggestion) > QUESTION_MAX_LENGTH:
+        raise ValueError("润色结果无效")
+    for token in _SCIENTIFIC_TOKEN.findall(original):
+        if not re.search(r"(?<![A-Za-z0-9_])" + re.escape(token) + r"(?![A-Za-z0-9_])", suggestion):
+            raise ValueError("润色结果遗漏了原问题的数值或术语")
+    return suggestion
+
+
 def polish_prompt(draft: str) -> str:
     """仅改写草稿，不调用检索或写入问答历史。"""
     original = draft.strip()
-    if not original or len(original) > 1000:
+    if not original or len(draft) > QUESTION_MAX_LENGTH:
         raise ValueError("提示词长度无效")
     config = get_llm_config()
     if not config.api_key:
@@ -45,23 +79,13 @@ def polish_prompt(draft: str) -> str:
     response = get_llm_client(read_timeout=30).chat.completions.create(
         model=config.model,
         messages=[
-            {"role": "system", "content": (
-                "你只改写用户的超导研究问题，使之清楚、具体、便于检索。"
-                "保留原意、全部材料名、化学式、数值、单位、限定条件和引用要求。"
-                "不要回答问题，不添加新事实，只输出改写后的问题。"
-            )},
-            {"role": "user", "content": original},
+            {"role": "system", "content": _POLISH_TEMPLATE.read_text(encoding="utf-8").split("-->", 1)[-1].strip()},
+            {"role": "user", "content": json.dumps({"originalPrompt": original}, ensure_ascii=False)},
         ],
         temperature=0.2,
-        max_tokens=400,
+        max_tokens=POLISH_MAX_TOKENS,
     )
-    suggestion = str(response.choices[0].message.content or "").strip()
-    if not suggestion or len(suggestion) > 2000:
-        raise ValueError("润色结果无效")
-    required = re.findall(r"\b(?:[A-Z][a-z]?\d+(?:[A-Z][a-z]?\d*)*|\d+(?:\.\d+)?|GPa|Tc|DOI)\b", original)
-    if any(token not in suggestion for token in required):
-        raise ValueError("润色结果遗漏了原问题的数值或术语")
-    return suggestion
+    return validate_polish_response(original, response)
 
 
 def _loads_json(value: str | None, fallback: Any) -> Any:

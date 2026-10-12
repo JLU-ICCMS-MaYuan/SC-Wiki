@@ -11,7 +11,7 @@
 | --- | --- | --- |
 | [可用性与配置](availability-and-configuration.md) | 管理数据、向量库和 LLM 能力开关 | `RAG_DATA_ROOT`、环境变量 |
 | [混合检索](hybrid-retrieval.md) | 路由 SQL、向量和融合检索模式 | 异步数据库、Qdrant |
-| [流式问答与证据](streaming-qa-and-evidence.md) | 通过 SSE 返回回答、引文和证据事件 | 检索、LLM、React 会话状态 |
+| [流式问答与证据](streaming-qa-and-evidence.md) | 提问润色与直接回填，通过 SSE 返回回答、引文和证据事件 | 检索、LLM、React 会话状态 |
 | [灵感探索](inspiration-exploration.md) | 生成想法卡片并执行可行性评审 | 检索证据、LLM reviewer |
 
 ## 功能组成
