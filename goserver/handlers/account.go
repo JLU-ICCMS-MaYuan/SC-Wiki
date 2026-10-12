@@ -5,14 +5,13 @@ import (
 	cryptorand "crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"image"
 	"image/color"
 	"image/jpeg"
 	_ "image/png"
 	"io"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -248,29 +247,24 @@ func UploadAvatar(c *gin.Context) {
 		c.JSON(500, gin.H{"error": "头像保存失败"})
 		return
 	}
-	key := hex.EncodeToString(random) + ".jpg"
-	tempPath := filepath.Join(avatarDir, key+".tmp")
-	finalPath := filepath.Join(avatarDir, key)
-	out, err := os.OpenFile(tempPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o640)
-	if err != nil {
+	key := fmt.Sprintf("files/avatars/%d/%s.jpg", user.ID, hex.EncodeToString(random))
+	var encoded bytes.Buffer
+	if err = jpeg.Encode(&encoded, destination, &jpeg.Options{Quality: 88}); err != nil {
 		c.JSON(500, gin.H{"error": "头像保存失败"})
 		return
 	}
-	err = jpeg.Encode(out, destination, &jpeg.Options{Quality: 88})
-	closeErr := out.Close()
-	if err != nil || closeErr != nil || os.Rename(tempPath, finalPath) != nil {
-		_ = os.Remove(tempPath)
-		c.JSON(500, gin.H{"error": "头像保存失败"})
+	if err = avatarFiles.Put(c.Request.Context(), key, encoded.Bytes(), "image/jpeg"); err != nil {
+		c.JSON(503, gin.H{"error": "头像存储暂时不可用"})
 		return
 	}
 	old := user.AvatarKey
 	if err := database.DB.Model(user).Update("avatar_key", key).Error; err != nil {
-		_ = os.Remove(finalPath)
+		_ = avatarFiles.Delete(c.Request.Context(), key)
 		c.JSON(500, gin.H{"error": "头像保存失败"})
 		return
 	}
 	if old != nil {
-		_ = os.Remove(filepath.Join(avatarDir, filepath.Base(*old)))
+		_ = avatarFiles.Delete(c.Request.Context(), *old)
 	}
 	user.AvatarKey = &key
 	c.JSON(200, gin.H{"avatar_url": avatarURL(*user)})
@@ -287,7 +281,7 @@ func DeleteAvatar(c *gin.Context) {
 		return
 	}
 	if old != nil {
-		_ = os.Remove(filepath.Join(avatarDir, filepath.Base(*old)))
+		_ = avatarFiles.Delete(c.Request.Context(), *old)
 	}
 	c.Status(http.StatusNoContent)
 }

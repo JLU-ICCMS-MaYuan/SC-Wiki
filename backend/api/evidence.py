@@ -7,6 +7,7 @@ from typing import Literal
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
+from starlette.background import BackgroundTask
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from backend import models
@@ -18,6 +19,7 @@ from backend.ingest import property_evidence as ev
 from backend.ingest import scientific_evidence as science
 from backend.ingest import evidence_proposals as proposals
 from backend.ingest import manual_evidence as manual
+from backend.storage import FileRef, create_storage
 from backend.ingest.upload_tasks import redis_client, upload_queue, save_llm_config, TASK_TTL, get_draft, get_state, save_draft, upload_task_lock
 
 router = APIRouter(prefix='/api/rag/evidence', tags=['evidence'], dependencies=[Depends(request_llm_config)])
@@ -395,7 +397,8 @@ async def post_manual_evidence_file(target: str, target_id: str, item_key: str,
         raise _manual_error(exc) from exc
     except Exception:
         if data and data.get("items"):
-            manual.file_path(data["id"], data["items"][-1]["id"]).unlink(missing_ok=True)
+            entry = data["items"][-1]
+            create_storage(local_root=manual.settings.sc_wiki_data_dir).delete(manual._file_ref(data["id"], entry))
         raise
 
 
@@ -406,8 +409,10 @@ def get_manual_evidence_file(target: str, target_id: str, item_key: str, item_id
     try:
         with SessionLocal() as session:
             _, entry, path = manual.file_entry(session, snapshot, _manual_record_key(item_key), item_id)
+        background = BackgroundTask(path.unlink, missing_ok=True) if entry.get("storage_key") and manual.os.environ.get("FILE_STORAGE_BACKEND") == "s3" else None
         return FileResponse(path, media_type=entry["media_type"], filename=entry["filename"],
-                            content_disposition_type="inline", headers={"X-Content-Type-Options": "nosniff"})
+                            content_disposition_type="inline", headers={"X-Content-Type-Options": "nosniff"},
+                            background=background)
     except manual.ManualEvidenceError as exc:
         raise _manual_error(exc) from exc
 
@@ -419,7 +424,10 @@ def delete_manual_evidence_file(target: str, target_id: str, item_key: str, item
     try:
         with SessionLocal.begin() as session:
             path = manual.remove_file(session, snapshot, _manual_record_key(item_key), item_id, user.id)
-        path.unlink(missing_ok=True)
+        if isinstance(path, FileRef):
+            create_storage(local_root=manual.settings.sc_wiki_data_dir).delete(path)
+        else:
+            path.unlink(missing_ok=True)
         return {"ok": True}
     except manual.ManualEvidenceError as exc:
         raise _manual_error(exc) from exc

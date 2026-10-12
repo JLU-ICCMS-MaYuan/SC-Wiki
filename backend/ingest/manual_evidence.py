@@ -9,6 +9,8 @@ import uuid
 import copy
 import base64
 import shutil
+import os
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -18,6 +20,7 @@ from sqlalchemy import case, inspect, select
 
 from backend.manual_evidence_models import ScientificManualEvidence
 from backend.rag.config import settings
+from backend.storage import FileIntegrityError, FileRef, FileStorageUnavailable, create_storage
 
 
 MAX_FILE_BYTES = 10 * 1024 * 1024
@@ -271,6 +274,27 @@ def file_path(row_id: str, item_id: str) -> Path:
     return settings.sc_wiki_data_dir / "manual_evidence" / row_id / item_id
 
 
+def _file_ref(row_id: str, entry: dict) -> FileRef:
+    key = entry.get("storage_key") or f"manual_evidence/{row_id}/{entry['id']}"
+    return FileRef(key, int(entry["size"]), str(entry["sha256"]), str(entry["media_type"]))
+
+
+def _read_file(row_id: str, entry: dict) -> bytes:
+    ref = _file_ref(row_id, entry)
+    try:
+        with create_storage(local_root=settings.sc_wiki_data_dir).open(ref) as stream:
+            raw = stream.read(MAX_FILE_BYTES + 1)
+    except FileStorageUnavailable as exc:
+        raise ManualEvidenceError("manual_file_storage_unavailable", "人工证据存储暂时不可用", status=503) from exc
+    except FileIntegrityError as exc:
+        raise ManualEvidenceError("manual_file_unavailable", "人工证据文件不可用", status=409) from exc
+    except Exception as exc:
+        raise ManualEvidenceError("manual_file_unavailable", "人工证据文件不可用", status=409) from exc
+    if len(raw) != ref.size or hashlib.sha256(raw).hexdigest() != ref.sha256:
+        raise ManualEvidenceError("manual_file_unavailable", "人工证据文件不可用", status=409)
+    return raw
+
+
 def add_file(session, snapshot: dict, baseline: dict, item_key: str, actor_id: int,
              *, filename: str, raw: bytes, source_description: str, actor_name: str | None = None) -> dict[str, Any]:
     row, current = _ensure(session, snapshot, baseline, item_key, actor_id, actor_name)
@@ -285,19 +309,27 @@ def add_file(session, snapshot: dict, baseline: dict, item_key: str, actor_id: i
         raise ManualEvidenceError("manual_evidence_limit", "单个字段最多 5 项人工证据", field=current["field"])
     kind, media_type = _file_type(name, raw)
     item_id = uuid.uuid4().hex
-    path = file_path(row.id, item_id)
     try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(raw)
+        storage = create_storage(local_root=settings.sc_wiki_data_dir)
+    except (ValueError, RuntimeError) as exc:
+        raise ManualEvidenceError("manual_file_storage_unavailable", "人工证据存储暂时不可用", status=503) from exc
+    key = f"manual_evidence/{row.id}/{item_id}"
+    ref: FileRef | None = None
+    try:
+        try:
+            ref = storage.put(key, io.BytesIO(raw), media_type)
+        except FileStorageUnavailable as exc:
+            raise ManualEvidenceError("manual_file_storage_unavailable", "人工证据存储暂时不可用", status=503) from exc
         items.append({"id": item_id, "kind": kind, "filename": name, "media_type": media_type,
-                      "source_description": source, "sha256": hashlib.sha256(raw).hexdigest(),
-                      "size": len(raw), "ai_read_status": "not_read"})
+                      "source_description": source, "storage_key": ref.key, "sha256": ref.sha256,
+                      "size": ref.size, "ai_read_status": "not_read"})
         row.items = items
         row.no_evidence_reason = ""
         row.evidence_version = (row.evidence_version or 1) + 1
         session.flush()
     except Exception:
-        path.unlink(missing_ok=True)
+        if ref is not None:
+            storage.delete(ref)
         raise
     return public_record(row, changed=True)
 
@@ -311,20 +343,30 @@ def file_entry(session, snapshot: dict, item_key: str, item_id: str) -> tuple[Sc
     for row in session.scalars(query):
         entry = next((item for item in row.items or [] if item.get("id") == item_id and item.get("kind") != "text"), None)
         if entry:
-            path = file_path(row.id, item_id)
-            if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != entry["sha256"]:
-                raise ManualEvidenceError("manual_file_unavailable", "人工证据文件不可用", status=409)
+            raw = _read_file(row.id, entry)
+            if os.environ.get("FILE_STORAGE_BACKEND", "local") == "s3":
+                with tempfile.NamedTemporaryFile(prefix="scwiki-evidence-", delete=False,
+                                                  dir=os.environ.get("FILE_STORAGE_TMP_DIR")) as output:
+                    output.write(raw)
+                    path = Path(output.name)
+            else:
+                path = file_path(row.id, item_id)
             return row, entry, path
     raise ManualEvidenceError("manual_file_not_found", "人工证据不存在", status=404)
 
 
-def remove_file(session, snapshot: dict, item_key: str, item_id: str, actor_id: int) -> Path:
-    row, _, path = file_entry(session, snapshot, item_key, item_id)
+def remove_file(session, snapshot: dict, item_key: str, item_id: str, actor_id: int) -> Path | FileRef:
+    row, entry, path = file_entry(session, snapshot, item_key, item_id)
     if row.status != "draft" or row.actor_user_id != actor_id:
+        if os.environ.get("FILE_STORAGE_BACKEND", "local") == "s3":
+            path.unlink(missing_ok=True)
         raise ManualEvidenceError("manual_file_forbidden", "已提交或非本人提供的证据不能删除", status=403)
     row.items = [item for item in row.items if item.get("id") != item_id]
     row.evidence_version = (row.evidence_version or 1) + 1
     session.flush()
+    if os.environ.get("FILE_STORAGE_BACKEND", "local") == "s3":
+        path.unlink(missing_ok=True)
+        return _file_ref(row.id, entry)
     return path
 
 
@@ -383,14 +425,12 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
                 if item["kind"] == "text":
                     visible["content"] = str(item.get("text") or "")[:MAX_TEXT_CHARS]
                 else:
-                    path = file_path(row.id, item["id"])
-                    if not path.is_file():
+                    try:
+                        raw = _read_file(row.id, item)
+                    except ManualEvidenceError:
                         visible["read_status"] = "not_read"
                     else:
-                        raw = path.read_bytes()
-                        if hashlib.sha256(raw).hexdigest() != item["sha256"]:
-                            visible["read_status"] = "not_read"
-                        elif item["kind"] == "text_file":
+                        if item["kind"] == "text_file":
                             visible["content"] = raw.decode("utf-8")[:MAX_TEXT_CHARS]
                         elif item["kind"] == "pdf":
                             try:
@@ -462,7 +502,7 @@ def transfer_to_paper(session, snapshot: dict, baseline: dict, paper_id: int, re
     session.flush()
 
 
-def cleanup_unsubmitted(session, task_id: str) -> list[Path]:
+def cleanup_unsubmitted(session, task_id: str) -> list[Path | FileRef]:
     if not table_available(session):
         return []
     roots = []
@@ -470,12 +510,18 @@ def cleanup_unsubmitted(session, task_id: str) -> list[Path]:
         ScientificManualEvidence.target == "upload",
         ScientificManualEvidence.target_id == task_id,
     )):
-        roots.append(file_path(row.id, "0" * 32).parent)
+        if os.environ.get("FILE_STORAGE_BACKEND", "local") == "s3":
+            roots.extend(_file_ref(row.id, item) for item in row.items or [] if item.get("kind") != "text")
+        else:
+            roots.append(file_path(row.id, "0" * 32).parent)
         session.delete(row)
     session.flush()
     return roots
 
 
-def remove_file_roots(roots: list[Path]) -> None:
-    for path in roots:
-        shutil.rmtree(path, ignore_errors=True)
+def remove_file_roots(roots: list[Path | FileRef]) -> None:
+    for item in roots:
+        if isinstance(item, FileRef):
+            create_storage(local_root=settings.sc_wiki_data_dir).delete(item)
+        else:
+            shutil.rmtree(item, ignore_errors=True)

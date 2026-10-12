@@ -20,6 +20,7 @@ import (
 	"scwiki/server/middleware"
 	"scwiki/server/models"
 	"scwiki/server/services"
+	"scwiki/server/storage"
 
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -41,6 +42,7 @@ var (
 	authMailer         services.Mailer
 	verificationSecret []byte
 	avatarDir          string
+	avatarFiles        storage.Files
 )
 
 func ConfigureAuth(cfg config.Config) {
@@ -50,7 +52,26 @@ func ConfigureAuth(cfg config.Config) {
 	})
 	verificationSecret = []byte(cfg.JWTSecret)
 	avatarDir = cfg.AvatarDir
-	_ = os.MkdirAll(avatarDir, 0o750)
+	mode := os.Getenv("FILE_STORAGE_BACKEND")
+	if mode != "" && mode != "local" && mode != "s3" {
+		log.Fatal("文件存储模式无效")
+	}
+	if mode == "s3" {
+		var err error
+		avatarFiles, err = storage.NewS3(
+			os.Getenv("S3_ENDPOINT_URL"), os.Getenv("S3_REGION"), os.Getenv("S3_BUCKET"),
+			os.Getenv("S3_ACCESS_KEY_ID"), os.Getenv("S3_SECRET_ACCESS_KEY"), os.Getenv("S3_ADDRESSING_STYLE"),
+		)
+		if err != nil {
+			log.Fatal("头像对象存储配置无效：", err)
+		}
+	} else {
+		if avatarDir == "" {
+			avatarDir = "data/avatars"
+		}
+		_ = os.MkdirAll(avatarDir, 0o750)
+		avatarFiles = storage.NewLocal(avatarDir)
+	}
 }
 
 func normalizeEmail(email string) string { return strings.ToLower(strings.TrimSpace(email)) }

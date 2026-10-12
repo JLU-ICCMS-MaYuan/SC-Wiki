@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"scwiki/server/database"
 	"scwiki/server/models"
@@ -48,16 +47,15 @@ func GetPublicAvatar(c *gin.Context) {
 		c.Status(http.StatusNotFound)
 		return
 	}
-	key := filepath.Base(*user.AvatarKey)
-	if key != *user.AvatarKey {
+	data, err := avatarFiles.Get(c.Request.Context(), *user.AvatarKey)
+	if os.IsNotExist(err) {
 		c.Status(http.StatusNotFound)
 		return
 	}
-	path := filepath.Join(avatarDir, key)
-	if _, err := os.Stat(path); err != nil {
-		c.Status(http.StatusNotFound)
+	if err != nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "头像存储暂时不可用"})
 		return
 	}
 	c.Header("Cache-Control", "public, max-age=3600")
-	c.File(path)
+	c.Data(http.StatusOK, "image/jpeg", data)
 }

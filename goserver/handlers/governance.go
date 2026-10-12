@@ -3,8 +3,6 @@ package handlers
 import (
 	"errors"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
@@ -129,7 +127,7 @@ func changeAccountStatus(c *gin.Context, targetStatus, eventType string) {
 		return
 	}
 	if targetStatus == "deactivated" && oldAvatar != nil {
-		_ = os.Remove(filepath.Join(avatarDir, filepath.Base(*oldAvatar)))
+		_ = avatarFiles.Delete(c.Request.Context(), *oldAvatar)
 	}
 	c.JSON(200, gin.H{"message": "账号状态已更新", "account_status": targetStatus})
 }
