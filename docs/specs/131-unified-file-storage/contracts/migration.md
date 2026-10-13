@@ -1,6 +1,6 @@
 # 历史文件迁移契约
 
-**来源**：[Spec](../spec.md) FR-007、FR-008、FR-010。以下 CLI 已实现并在隔离样本验证；尚未对当前业务实例执行文件复制或引用切换。
+**来源**：[Spec](../spec.md) FR-007、FR-008、FR-010。以下 CLI 已在隔离样本及当前本机实例执行；当前实例的 74 个业务文件和 28 处显式引用已完成对象存储切换，切换前回退演练与再次切换均通过。实际范围与限制见[验证记录](../validation.md)。
 
 ```text
 python -m backend.scripts.migrate_file_storage scan --source-root PATH --manifest PATH

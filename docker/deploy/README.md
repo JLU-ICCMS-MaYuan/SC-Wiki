@@ -1,5 +1,7 @@
 # SC-Wiki Docker 部署包
 
+此文件描述历史 Docker 交付包的导入方式；当前 `docker/compose.yaml` 仍挂载本地业务文件目录，尚未把 Garage 编入 Compose，也未完成三组服务独立编排。#131 的本机 S3 迁移只作用于原生运行实例，不能将其备份直接按下述 `data-files.tar.gz` 步骤恢复到 Docker。对象存储部署与迁移验收边界见 [#131 验证记录](../../docs/specs/131-unified-file-storage/validation.md)。
+
 ## 文件清单
 
 | 文件 | 大小 | 说明 |

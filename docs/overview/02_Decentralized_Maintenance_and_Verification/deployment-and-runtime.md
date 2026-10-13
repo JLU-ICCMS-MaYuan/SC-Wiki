@@ -21,10 +21,11 @@
 - 本地服务全部运行在宿主机，由 `scripts/dev.sh` 编排，入口为 `Makefile`（`make start` / `stop` / `status` / `logs`）。GROBID 0.8.1 从官方源码、默认 Wapiti 模型及原生库构建，Mac 共用 `sc-wiki` 的 Java 21，Linux 使用 `.local/grobid-java` 中独立 Java 17，API 8070 和管理接口 8071 均绑定回环地址；本地安装与启停不调用 Docker。
 - 请求链路为浏览器 → Vite 5173 →（`/api` 代理）→ goserver 8080 →（未匹配路由反代）→ uvicorn 8000。两段代理均为既有实现，本地化未修改 `backend/` 与 `goserver/` 源码。
 - 前端 Vite HMR、Python `uvicorn --reload`、goserver 文件监听重编译和上传 Worker 的 `watchfiles` 包装支持代码变更重载。Go 编译失败时保留旧进程继续服务。资讯 Worker 和 Scheduler 无热重载包装，修改代码后须重启相应进程。
-- 四个存储服务来自本机安装而非容器：MySQL 8.4.2、Redis 8.10.1 与 Neo4j 所需的 OpenJDK 21 均来自 conda 环境 `sc-wiki`；Neo4j 5.26.29 使用官方发行归档，和 Qdrant 1.19.0 一样安装在 `.local/`。应用 Python 依赖也使用 `sc-wiki`。
+- MySQL 8.4.2、Redis 8.10.1 与 Neo4j 所需的 OpenJDK 21 均来自 conda 环境 `sc-wiki`；Neo4j 5.26.29 使用官方发行归档，和 Qdrant 1.19.0 一样安装在 `.local/`。应用 Python 依赖也使用 `sc-wiki`。本机实例另用 Garage 2.4.1 提供仅监听回环地址的 S3 兼容文件服务。
 - MySQL 监听 3307 而非 3306：宿主机 3306 已被与本项目无关的系统级 MySQL 占用。
 - 本地 Neo4j 的 Bolt 连接使用 `127.0.0.1:17687`，HTTP 管理入口保持 `127.0.0.1:7474`；客户端连接地址、监听地址与公布地址一致。该约定避开本机曾发生的 Windows 向日葵占用 7687 问题，不改变 Docker 生产端口。
-- 全部数据存放于仓库内 `.data/`（四个数据库的数据目录、上传文件、解析产物、头像），运行时产物在 `.local/`（二进制、MySQL 配置、pid、日志）。两者均已 gitignore。
+- MySQL、Redis、Neo4j、Qdrant 数据仍在 `.data/`；本机已迁移的 74 个业务文件对象保存在 `.local/garage/data`，Garage 元数据在 `.local/garage/meta`，旧文件继续保留在 `.data/` 供迁移核查。二进制、MySQL 配置、pid 与日志也在 `.local/`。两处目录均已 gitignore；只备份 `.data/` 已不足以恢复 S3 模式的业务文件。
+- 本机 `.env` 显式选择 `FILE_STORAGE_BACKEND=s3`，Go 头像与 Python 业务文件共用私有业务桶；`make start`、`make stop` 和 `make status` 在该模式管理 Garage。新任务引用使用对象键，解析器取得本节点临时文件，不从旧 `.data` 目录静默兜底。默认 `local` 文件后端仍可用于其他原生开发实例，且不要求 Garage。
 - `make start` 默认启动 `news-worker` 与 `news-scheduler`；两者分别消费资讯队列和检查资讯日程，Worker 在 Redis 连接异常后重建连接继续运行。
 - 测试可在宿主机直接运行（`scripts/run-tests.sh`，含 backend / go / frontend 三目标），不再需要挂载仓库的一次性容器。
 - 使用说明与实施过程中的环境约束记录见 `docs/local-dev.md`。

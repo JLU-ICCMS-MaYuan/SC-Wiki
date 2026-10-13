@@ -13,7 +13,6 @@ make start
 make status
 make logs S=python
 make stop
-make frozen OUTPUT="/备份目录/sc-wiki.tar.gz"
 ```
 
 根 `Makefile` 在 macOS 自动加载 `Makefile.mac`；Linux 沿用原有入口。用户提前准备
@@ -22,10 +21,14 @@ Conda 与系统开发工具，脚本将依赖安装到独立 `sc-wiki` 环境及
 Python、前端和 Go 直接使用当前工作区；无需复制源码到构建副本。
 Mac 的 GROBID 与 Neo4j 共用 `sc-wiki` 的 Java 21，不另建 Java 环境。
 
-`deploy` 保留已有实例和旧包的兼容性检查；`frozen` 要求工作区已提交。
+`deploy` 保留已有实例和旧包的兼容性检查。本机实例已启用 S3 文件存储，`make frozen` 会明确拒绝不包含对象文件的本地包；仅 `FILE_STORAGE_BACKEND=local` 的实例可在工作区提交后使用 `make frozen OUTPUT="/备份目录/sc-wiki.tar.gz"`。
 Mac 与 Linux 使用平台专属制品清单，当前不承诺二者的冻结包可直接互换，也不支持用
 任意新版本源码覆盖旧库。完整操作、数据保留及验证边界见
 [本地开发指南](docs/local-dev.md)和 [#117 验证说明](docs/specs/117-mac-native-development/quickstart.md)。
+
+## 本机业务文件对象存储（#131）
+
+本机已把现有业务文件引用迁移到 `.local/garage/` 中运行的 Garage S3 兼容服务；业务桶仅从 `127.0.0.1:39110` 访问，应用仍通过原 API 鉴权和代理文件读写。`make start/stop/status` 随 S3 模式管理 Garage。备份时须同时保存 MySQL、必要的 Redis 状态、Garage 对象及元数据、私有配置；旧 `.data/` 文件暂时保留用于核查。切换与切换前回退证据见 [#131 验证记录](docs/specs/131-unified-file-storage/validation.md)。
 
 ## 编号服务端模型配置（#116）
 

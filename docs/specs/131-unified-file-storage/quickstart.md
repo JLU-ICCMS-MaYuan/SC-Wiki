@@ -1,6 +1,6 @@
 # 使用与验收：统一业务文件存储
 
-**Issue**：[ #131](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/131)。存储接口、隔离迁移和局部业务调用点已进入实施；以下矩阵未整体通过，具体证据见[验证记录](validation.md)。
+**Issue**：[ #131](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/131)。本机实例业务文件已经迁移至 Garage S3；以下矩阵的实际覆盖与尚缺场景见[验证记录](validation.md)。
 
 ## 前置条件
 

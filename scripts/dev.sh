@@ -76,7 +76,9 @@ start_redis() {
 
 garage_ready() {
   [[ -x "$LOCAL_DIR/bin/garage" && -f "$LOCAL_DIR/garage/config.toml" ]] || return 1
-  "$LOCAL_DIR/bin/garage" -c "$LOCAL_DIR/garage/config.toml" status 2>/dev/null | grep -q 'HEALTHY NODES'
+  local result
+  result=$("$LOCAL_DIR/bin/garage" -c "$LOCAL_DIR/garage/config.toml" status 2>/dev/null) || return 1
+  [[ "$result" == *"HEALTHY NODES"* ]]
 }
 
 start_garage() {

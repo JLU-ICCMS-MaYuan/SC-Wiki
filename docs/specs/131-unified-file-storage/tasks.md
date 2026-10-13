@@ -23,8 +23,8 @@
 ## 阶段 4：US2——历史迁移（P1）
 
 - [ ] T010 [US2] 在 `tests/02_maintenance_and_verification/test_file_storage_migration.py` 建立 MySQL/Redis/S3 历史夹具，包含没有 `stored_path` 字段的人工证据、候选附件、审核快照及富化结果，覆盖 TTL、缺失、越界、冲突、未分类文件、阶段中断与续跑。
-- [ ] T011 [US2] 实现 `backend/scripts/migrate_file_storage.py` 的 scan/copy/verify/switch/rollback，条件更新引用并保留源文件和脱敏清单。
-- [ ] T012 [US2] 按 `docs/specs/131-unified-file-storage/quickstart.md` 执行完整迁移和切换前回退，记录清单统计、内容摘要及故障证据。
+- [x] T011 [US2] 实现 `backend/scripts/migrate_file_storage.py` 的 scan/copy/verify/switch/rollback，条件更新引用并保留源文件和脱敏清单。证据：2026-10-13 本机 MySQL/Redis/Garage 实例完成切换、切换前回退及再次切换；见 [验证记录](validation.md)。
+- [x] T012 [US2] 按 `docs/specs/131-unified-file-storage/quickstart.md` 执行完整迁移和切换前回退，记录清单统计、内容摘要及故障证据。证据：74 个对象、21,056,060 字节与 28 处显式引用逐项核验，旧源文件保留；见 [验证记录](validation.md)。
 
 ## 阶段 5：US3——本地兼容（P2）
 
