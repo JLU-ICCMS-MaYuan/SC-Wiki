@@ -11,7 +11,8 @@ import unittest
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from digitize import LinearAxis, extract_curve, reconstruct, normalize_dos, spectral_integrals
+from digitize import (LinearAxis, extract_curve, reconstruct, normalize_dos, spectral_integrals,
+                      chromatic_mask, continue_frame_plateau)
 from build_demo import verified_bytes, primitive_structure, csv_text
 
 
@@ -63,6 +64,67 @@ class CurveTests(unittest.TestCase):
                                  baseline_tolerance=.3, max_baseline_gap=3)
         self.assertEqual(flags[1:3], ["baseline_inferred"] * 2)
         self.assertAlmostEqual(out[1], 2 / 15)
+
+
+class ChromaticRecoveryTests(unittest.TestCase):
+    def spec(self):
+        return dict(id="s", kind="phonon_dos", projection="X", color="red",
+                    unit="pixel", roi=[0, 0, 119, 119],
+                    amplitude_ticks=[[20, 0], [21, 1]], frequency_direction="y")
+
+    def test_dark_dashes_next_to_axis_are_recovered(self):
+        image = np.full((120, 120, 3), 255, dtype=np.uint8)
+        image[:, 20] = [3, 3, 3]
+        for y in range(10, 113):
+            if y % 10 < 3:
+                image[y, 21] = [126, 3, 3] if 30 <= y <= 80 else [255, 0, 0]
+        result = extract_curve(image, self.spec(), LinearAxis.fit([[0, 0], [119, 119]]))
+        points = {round(p["frequency_pixel"]): p for p in result["points"]}
+        self.assertEqual(points[40]["detection_mode"], "chromatic_recovery")
+        self.assertAlmostEqual(points[40]["observed_amplitude"], 1)
+        self.assertTrue(all(points[y]["reconstructed_amplitude"] is not None for y in range(30, 81)))
+        self.assertTrue(all(points[y]["status"] == "interpolated" for y in range(43, 50)))
+
+    def test_strong_observation_is_not_displaced_by_weak_pixels(self):
+        image = np.full((120, 120, 3), 255, dtype=np.uint8)
+        image[50, 40] = [255, 0, 0]
+        image[50, 21] = [126, 3, 3]
+        result = extract_curve(image, self.spec(), LinearAxis.fit([[0, 0], [119, 119]]))
+        p = next(p for p in result["points"] if p["frequency_pixel"] == 50)
+        self.assertEqual(p["detection_mode"], "strict_color")
+        self.assertEqual(p["amplitude_pixel"], 40)
+
+    def test_grey_axis_does_not_count_as_colored_evidence(self):
+        image = np.repeat(np.arange(256, dtype=np.uint8)[:, None, None], 3, axis=2)
+        for color in ("red", "green", "blue", "magenta"):
+            self.assertFalse(chromatic_mask(image, color).any())
+
+    def test_long_unobserved_gap_away_from_axis_is_not_fabricated(self):
+        image = np.full((120, 120, 3), 255, dtype=np.uint8)
+        image[10:30, 80] = [126, 3, 3]
+        image[80:100, 80] = [126, 3, 3]
+        result = extract_curve(image, self.spec(), LinearAxis.fit([[0, 0], [119, 119]]))
+        p = next(p for p in result["points"] if p["frequency_pixel"] == 50)
+        self.assertEqual(p["status"], "missing")
+        self.assertIsNone(p["reconstructed_amplitude"])
+
+    def plateau(self, values):
+        return [dict(frequency_pixel=i, observed_amplitude=v, reconstructed_amplitude=v,
+                     status="observed" if v is not None else "missing")
+                for i, v in enumerate(values)]
+
+    def test_one_frame_pixel_can_extend_an_observed_plateau(self):
+        rows = self.plateau([2., 2., 2., 2., 2., None])
+        continue_frame_plateau(rows, max_pixels=2, tolerance=.02)
+        self.assertEqual(rows[-1]["status"], "edge_continuation")
+        self.assertEqual(rows[-1]["reconstructed_amplitude"], 2.)
+        self.assertIsNone(rows[-1]["observed_amplitude"])
+
+    def test_frame_extension_rejects_slope_or_long_tail(self):
+        for values in ([1., 2., 3., 4., 5., None], [2.] * 5 + [None] * 3):
+            rows = self.plateau(values)
+            continue_frame_plateau(rows, max_pixels=2, tolerance=.02)
+            self.assertEqual(rows[-1]["status"], "missing")
 
 
 class PhysicsTests(unittest.TestCase):

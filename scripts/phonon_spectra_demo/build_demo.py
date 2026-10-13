@@ -73,7 +73,8 @@ def csv_text(result: dict) -> str:
               "kind", "projection", "frequency_thz", "frequency_pixel", "amplitude_pixel",
               "pixel_low", "pixel_high", "observed_amplitude", "reconstructed_amplitude",
               "conditional_normalized_dos", "unit", "normalized_unit", "normalization_status",
-              "normalization_accepted", "primitive_atoms", "normalization_target_modes", "point_status", "review_status",
+              "normalization_accepted", "primitive_atoms", "normalization_target_modes", "point_status",
+              "detection_mode", "review_status",
               "training_ready", "source_sha256", "pdf_page", "figure"]
     writer = csv.DictWriter(buf, fieldnames=fields)
     writer.writeheader()
@@ -94,7 +95,8 @@ def csv_text(result: dict) -> str:
                     normalization_accepted=False if curve["kind"] == "phonon_dos" else None,
                     primitive_atoms=state.get("structure", {}).get("primitive_atoms"),
                     normalization_target_modes=candidate.get("target_modes") if curve["kind"] == "phonon_dos" else None,
-                    point_status=p["status"], review_status=curve["review_status"],
+                    point_status=p["status"], detection_mode=p.get("detection_mode"),
+                    review_status=curve["review_status"],
                     training_ready=False, source_sha256=result["source"]["paper_sha256"],
                     pdf_page=result["source"]["figure"]["pdf_page"], figure=result["source"]["figure"]["label"]))
     return buf.getvalue()
@@ -114,7 +116,8 @@ def build(config: dict, pdf: Path, supplement: Path) -> tuple[dict, bytes]:
                                   python=sys.version.split()[0],
                                   software={n: importlib.metadata.version(n) for n in
                                             ("numpy", "pillow", "pymupdf", "ase", "spglib")},
-                                  mode="semi_automatic_digitization", business_database_writes=False),
+                                  mode="semi_automatic_digitization", algorithm_version="chromatic_recovery_v2",
+                                  business_database_writes=False),
                   calibration_manifest=config, material_states=[], training_ready=False)
     for state_spec in config["material_states"]:
         frequency_axis = LinearAxis.fit(state_spec["frequency_ticks"], state_spec.get("frequency_scale", "linear"))
@@ -183,6 +186,7 @@ def main() -> None:
     report = dict(schema_version=1, case_id=result["case_id"], training_ready=False,
                   states=[dict(material_state=s["id"], structure=s["structure"],
                                curves=[dict(id=c["id"], point_counts=c["point_counts"],
+                                            chromatic_recovered_points=c["chromatic_recovered_points"],
                                             clipped_frequencies_thz=c["clipped_frequencies_thz"]) for c in s["curves"]],
                                normalization={k: v for k, v in s["dos_normalization_candidate"].items()
                                               if k not in ("frequency_thz", "total", "components")},

@@ -29,7 +29,7 @@
 <div class="review"><strong>数据状态：待核对 · 尚不用于机器学习训练</strong><p class="minor">坐标与图例由人工标定，像素轨迹由程序提取。归一化不等于准确度通过，下载也不会改变审核状态。</p></div>
 </section>
 </div>
-<section class="panel data-panel"><div class="panelhead"><div><h2>逐点数据</h2><p class="minor" id="point-count"></p></div><label class="minor"><input type="checkbox" id="issues-only">只看推断、插值或缺失</label></div><div class="scroll"><table><thead><tr><th>频率 / THz</th><th>原图幅值</th><th>重建幅值</th><th>3N 条件幅值</th><th>点来源</th></tr></thead><tbody id="point-rows"></tbody></table></div></section>
+<section class="panel data-panel"><div class="panelhead"><div><h2>逐点数据</h2><p class="minor" id="point-count"></p></div><label class="minor"><input type="checkbox" id="issues-only">只看补读、重建或缺失</label></div><div class="scroll"><table><thead><tr><th>频率 / THz</th><th>原图幅值</th><th>重建幅值</th><th>3N 条件幅值</th><th>点来源</th></tr></thead><tbody id="point-rows"></tbody></table></div></section>
 <div class="footer"><span>保留原始轨迹、人工标定和重建状态。当前案例不代表其他 PDF 已通过验证。</span><span id="run-info"></span></div>
 </main>
 <dialog id="image-dialog"><div class="group"><h2>Figure 5 · 原始内嵌位图</h2><button id="close-dialog">关闭</button></div><img id="full-image" alt="H3S Figure 5 完整原图"></dialog>
@@ -41,7 +41,7 @@ const IMAGE='data:image/png;base64,__FIGURE_BASE64__';
 const CSV_BASE64='__CSV_BASE64__';
 let stateIndex=0, selected='a2f';
 const $=id=>document.getElementById(id);
-const names={observed:'图像观测',interpolated:'短缺口插值',baseline_inferred:'基线推断',boundary_assumption:'零边界假设',missing:'缺失',conditional:'条件归一化'};
+const names={observed:'图像观测',interpolated:'短缺口插值',baseline_inferred:'基线推断',boundary_assumption:'零边界假设',edge_continuation:'图框端值延续',missing:'缺失',conditional:'条件归一化'};
 const fmt=(v,n=3)=>v===null||v===undefined?'—':Number(v).toFixed(n);
 const pct=v=>(v>0?'+':'')+fmt(v,1)+'%';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -71,7 +71,7 @@ function render(){
  const cards=[['原胞原子数',s.structure.primitive_atoms,'结构展开与原胞化验证；3N = '+s.structure.mode_count],
  ['图中累计 λ',fmt(dg.cumulative_lambda_endpoint),'正文报告 '+fmt(dg.lambda_reported,2)],
  ['α²F 积分 λ',fmt(dg.lambda_integral),'较正文 '+pct(dg.lambda_difference_pct)+(dg.positive_frequency_complete?' · 含推断点':' · 部分积分')],
- ['未重建采样点',missing,'保留为空值，不以零代替']];
+ ['未重建采样点',missing,'暗色像素补读 '+s.curves.reduce((a,c)=>a+c.chromatic_recovered_points,0)+' 点；重建保留来源']];
  $('stats').innerHTML=cards.map(([name,v,note])=>'<div class="stat"><div class="name">'+name+'</div><div class="value">'+v+'</div><div class="note">'+note+'</div></div>').join('');
  $('source-note').textContent=s.phase+' / '+s.pressure_gpa+' GPa · 频率沿'+(s.curves[0].frequency_direction==='y'?'纵轴':'横轴');
  $('caption').textContent=D.source.figure.caption+' 图像来自原 PDF 内嵌位图，此处只显示当前物相。';
@@ -127,9 +127,9 @@ function renderChart(){
 function renderPoints(){
  const points=chartPoints(),n=state().dos_normalization_candidate;
  const component=isDos()?curve().projection:null;
- const rows=points.map((p,i)=>({p,i})).filter(({p})=>!$('issues-only').checked||p.status!=='observed');
- $('point-count').textContent='当前曲线 '+points.length+' 个采样点 · 显示 '+rows.length+' 点 · 破折号表示未知或不适用';
- $('point-rows').innerHTML=rows.map(({p,i})=>'<tr><td>'+fmt(p.frequency_thz,4)+'</td><td>'+fmt(p.observed_amplitude,5)+'</td><td>'+fmt(p.reconstructed_amplitude,5)+'</td><td>'+fmt(selected==='total'?p.reconstructed_amplitude:component?n.components?.[component]?.[i]:null,5)+'</td><td><span class="pill '+p.status+'">'+names[p.status]+'</span></td></tr>').join('');
+ const rows=points.map((p,i)=>({p,i})).filter(({p})=>!$('issues-only').checked||p.status!=='observed'||p.detection_mode==='chromatic_recovery');
+ $('point-count').textContent='当前曲线 '+points.length+' 个采样点 · 暗色补读 '+points.filter(p=>p.detection_mode==='chromatic_recovery').length+' 点 · 显示 '+rows.length+' 点';
+ $('point-rows').innerHTML=rows.map(({p,i})=>'<tr><td>'+fmt(p.frequency_thz,4)+'</td><td>'+fmt(p.observed_amplitude,5)+'</td><td>'+fmt(p.reconstructed_amplitude,5)+'</td><td>'+fmt(selected==='total'?p.reconstructed_amplitude:component?n.components?.[component]?.[i]:null,5)+'</td><td><span class="pill '+p.status+'">'+(p.detection_mode==='chromatic_recovery'?'暗色像素观测':names[p.status])+'</span></td></tr>').join('');
 }
 render();
 </script>

@@ -9,3 +9,5 @@
 输出：index.html（离线图表与下载）、spectra.json、points.csv、figure.png、report.json。离线 HTML 不请求业务 API，不加载外部脚本；导出与页面使用同一数据源。重复运行只重建本目录这些指定产物，不递归删除目录。未知曲线缺口保留 null，诊断失败不伪装为完整数据。
 
 H/S 投影权重和共尺度未证实时不生成 accepted 归一化。即使展示 3N 条件预览，training_ready 仍为 false。review_status 不由下载行为改变。
+
+断点修复版本以 provenance.algorithm_version=chromatic_recovery_v2 标识。补读到的真实暗色点仍为 observed，同时 detection_mode=chromatic_recovery；图框平台端点使用 edge_continuation，原始观测为空。图表、JSON 和 CSV 使用同一完整序列，不允许仅在 SVG 上跳过 null 连线。无依据长缺口仍保留 null。

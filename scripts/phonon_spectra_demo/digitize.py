@@ -53,6 +53,41 @@ def color_mask(rgb: np.ndarray, color: str) -> np.ndarray:
     return masks[color]
 
 
+def chromatic_mask(rgb: np.ndarray, color: str) -> np.ndarray:
+    """补读与黑色坐标轴混合的暗色像素；无色灰线不能成为曲线证据。"""
+    r, g, b = np.asarray(rgb, dtype=float).transpose(2, 0, 1)
+    masks = {
+        "red": (r > 35) & (r > g + 15) & (r > b + 15),
+        "blue": (b > 35) & (b > r + 15) & (b > g + 15),
+        "green": (g > 25) & (g > r + 12) & (g > b + 12),
+        "magenta": (r > 40) & (r > g + 20) & (b > g + 12) & (b > .2 * r),
+    }
+    if color not in masks:
+        raise ValueError(f"未知颜色：{color}")
+    return masks[color]
+
+
+def continue_frame_plateau(rows: list[dict], *, max_pixels: int, tolerance: float) -> None:
+    """累计曲线在图框处仅缺少至多两个像素且邻域已稳定时，延续端值。"""
+    observed = [i for i, p in enumerate(rows) if p["observed_amplitude"] is not None]
+    if len(observed) < 5:
+        return
+    for at_start in (True, False):
+        edge = observed[0] if at_start else observed[-1]
+        missing = list(range(edge)) if at_start else list(range(edge + 1, len(rows)))
+        if not missing or len(missing) > max_pixels:
+            continue
+        nearby = observed[:5] if at_start else observed[-5:]
+        positions = [rows[i]["frequency_pixel"] for i in nearby]
+        amplitudes = [rows[i]["observed_amplitude"] for i in nearby]
+        if max(positions) - min(positions) > 12 or max(amplitudes) - min(amplitudes) > tolerance:
+            continue
+        for i in missing:
+            if rows[i]["status"] == "missing":
+                rows[i]["reconstructed_amplitude"] = rows[edge]["observed_amplitude"]
+                rows[i]["status"] = "edge_continuation"
+
+
 def reconstruct(values: list[float | None], *, max_gap: int,
                 baseline_tolerance: float, max_baseline_gap: int) -> tuple[list, list]:
     """只填有界内部缺口；低值长缺口也明确记为推断，尾部不外推。"""
@@ -85,6 +120,7 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
         raise ValueError("频率方向必须为 x 或 y")
     amplitude_axis = LinearAxis.fit(spec["amplitude_ticks"], spec.get("scale", "linear"))
     mask = color_mask(rgb, spec["color"])
+    recovered_mask = chromatic_mask(rgb, spec["color"])
     allowed = np.zeros(mask.shape, dtype=bool)
     allowed[y0:y1 + 1, x0:x1 + 1] = True
     for box in spec.get("exclude", []):
@@ -93,11 +129,18 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
             raise ValueError("图例排除区域非法")
         allowed[b:d + 1, a:c + 1] = False
     mask &= allowed
+    recovered_mask &= allowed
     pixels = range(y0, y1 + 1) if orientation == "y" else range(x0, x1 + 1)
     rows: list[dict[str, Any]] = []
     clipped = []
     for pos in pixels:
         coords = np.flatnonzero(mask[pos, :]) if orientation == "y" else np.flatnonzero(mask[:, pos])
+        detection_mode = "strict_color" if len(coords) else None
+        if not len(coords):
+            coords = (np.flatnonzero(recovered_mask[pos, :]) if orientation == "y"
+                      else np.flatnonzero(recovered_mask[:, pos]))
+            if len(coords):
+                detection_mode = "chromatic_recovery"
         freq = frequency_axis.value(pos)
         if freq < 0:
             continue
@@ -113,7 +156,7 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
                 clipped.append(float(freq))
         rows.append(dict(frequency_thz=float(freq), frequency_pixel=float(pos),
                          amplitude_pixel=center, pixel_low=lo, pixel_high=hi,
-                         observed_amplitude=value))
+                         observed_amplitude=value, detection_mode=detection_mode))
     rows.sort(key=lambda p: p["frequency_thz"])
     if not any(p["observed_amplitude"] is not None for p in rows):
         raise ValueError(f"没有找到曲线颜色：{spec['id']}")
@@ -141,21 +184,26 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
                                      frequency_pixel=float(frequency_axis.pixel(freq)),
                                      amplitude_pixel=None, pixel_low=None, pixel_high=None,
                                      observed_amplitude=None, reconstructed_amplitude=0.0,
-                                     status="boundary_assumption"))
+                                     status="boundary_assumption", detection_mode=None))
     for p, val, flag in zip(rows, filled, flags):
         p["reconstructed_amplitude"] = val
         p["status"] = flag
+    if spec["kind"] == "cumulative_lambda":
+        continue_frame_plateau(rows, max_pixels=2, tolerance=1.5 * abs(amplitude_axis.slope))
     for boundary in boundary_records:
         # 不用假设覆盖恰好落在边界的直接观测。
         if all(abs(p["frequency_thz"] - boundary["frequency_thz"]) > 1e-8 for p in rows):
             rows.append(boundary)
     rows.sort(key=lambda p: p["frequency_thz"])
     counts = {s: sum(p["status"] == s for p in rows)
-              for s in ("observed", "interpolated", "baseline_inferred", "boundary_assumption", "missing")}
+              for s in ("observed", "interpolated", "baseline_inferred", "boundary_assumption",
+                        "edge_continuation", "missing")}
     return {**{k: spec[k] for k in ("id", "kind", "projection", "color", "unit", "roi")},
             "frequency_direction": orientation,
             "axis_calibration": {"frequency": frequency_axis.as_dict(), "amplitude": amplitude_axis.as_dict()},
-            "points": rows, "point_counts": counts, "clipped_frequencies_thz": clipped,
+            "points": rows, "point_counts": counts,
+            "chromatic_recovered_points": sum(p["detection_mode"] == "chromatic_recovery" for p in rows),
+            "clipped_frequencies_thz": clipped,
             "review_status": "needs_review", "training_ready": False}
 
 

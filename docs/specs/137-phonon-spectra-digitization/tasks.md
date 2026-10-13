@@ -10,6 +10,7 @@
 - [x] T006 [US3] 生成 demo/phonon-spectra/ 真实产物，执行数据往返与桌面/390px 浏览器检查，记录 validation.md。[4654 点往返一致，页面无溢出]
 - [x] T007 核对需求覆盖、科学限制及本次 Git 提交边界，更新本目录验证记录。[analysis.md、validation.md；不代表用户科学验收]
 - [ ] T008 [US3] demo 获用户验收后细化正式谱数据表单、持久化、审核及导出合同；本次不执行。
+- [x] T009 [US1] 修复 scripts/phonon_spectra_demo/digitize.py 的暗色虚线漏检与图框平台端点；同步 build_demo.py、template.html 的补读来源，增加 tests/test_digitize.py 回归并复核八条真实曲线。[FR-008、SC-007；validation.md 暗色虚线补读：20 测试、64→0 缺失、3180 原观测不变]
 
 ## 依赖与覆盖
 
