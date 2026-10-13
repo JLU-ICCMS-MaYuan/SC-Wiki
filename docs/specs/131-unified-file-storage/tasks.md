@@ -1,6 +1,6 @@
 # 实施任务：统一业务文件存储
 
-**输入**：[Spec](spec.md)、[Plan](plan.md)、[Research](research.md)、[数据模型](data-model.md)、[契约](contracts/storage.md)。所有任务未执行。
+**输入**：[Spec](spec.md)、[Plan](plan.md)、[Research](research.md)、[数据模型](data-model.md)、[契约](contracts/storage.md)。各项已有局部实施证据，但尚未完成整项验收；进展与限制见 [验证记录](validation.md)。
 
 ## 阶段 1：准备
 

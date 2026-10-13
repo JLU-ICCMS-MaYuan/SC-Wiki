@@ -28,7 +28,7 @@ def relative_file(value: str, source_root: Path) -> str:
     path = Path(value)
     if path.is_absolute():
         try:
-            path = path.relative_to(source_root.resolve())
+            path = path.resolve().relative_to(source_root.resolve())
         except ValueError as exc:
             raise FileInventoryError("文件引用位于源数据根之外") from exc
     if not path.parts or ".." in path.parts or path.parts[0] not in BUSINESS_ROOTS:

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import json
+import os
 import subprocess
 import sys
 import time
@@ -16,7 +17,7 @@ from sqlalchemy.orm import Session
 from backend.manual_evidence_models import ScientificManualEvidence
 from backend.models import ScientificUploadDraft, User
 from backend.scripts import migrate_file_storage as migration_cli
-from backend.storage.migration import discover
+from backend.storage.migration import discover, relative_file
 from backend.storage.reference_inventory import FileInventoryError
 
 
@@ -25,7 +26,15 @@ class EmptyRedis:
         return iter(())
 
 
-def _fixture(tmp_path: Path):
+def test_absolute_reference_accepts_same_root_through_directory_alias(tmp_path: Path) -> None:
+    root = tmp_path / "source"
+    (root / "upload_PDFs").mkdir(parents=True)
+    alias = tmp_path / "alias"
+    alias.symlink_to(root, target_is_directory=True)
+    assert relative_file(str(alias / "upload_PDFs" / "paper.pdf"), root) == "upload_PDFs/paper.pdf"
+
+
+def _fixture(tmp_path: Path, database_url: str | None = None):
     root = tmp_path / "old data"
     root.mkdir()
     task_id = "a" * 32
@@ -44,7 +53,7 @@ def _fixture(tmp_path: Path):
         target = root / name
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(content)
-    engine = create_engine(f"sqlite:///{tmp_path / 'source.db'}")
+    engine = create_engine(database_url or f"sqlite:///{tmp_path / 'source.db'}")
     for model in (User, ScientificManualEvidence, ScientificUploadDraft):
         model.__table__.create(engine)
     with Session(engine) as session:
@@ -62,6 +71,49 @@ def _fixture(tmp_path: Path):
             actor_user_id=7, reason="原文核验", items=[{"id": item_id, "kind": "image"}]))
         session.commit()
     return root, engine, paths
+
+
+def test_mysql_reference_switch_and_rollback_with_isolated_server(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """显式测试库上验证 MySQL 的 JSON/列条件更新，禁止连接业务实例。"""
+    url = os.environ.get("SCWIKI_FILE_STORAGE_MYSQL_TEST_URL")
+    if not url:
+        pytest.skip("未指定隔离 MySQL 测试库")
+    if "@127.0.0.1:" not in url or not url.endswith("/scwiki_file131"):
+        pytest.fail("仅允许本机隔离的 scwiki_file131 测试库")
+    boto3 = pytest.importorskip("boto3")
+    moto = pytest.importorskip("moto")
+    from backend.storage.migration import apply_database_references
+
+    root, engine, paths = _fixture(tmp_path, url)
+    try:
+        with Session(engine) as session:
+            manifest = discover(root, session, EmptyRedis())
+        monkeypatch.setenv("S3_ENDPOINT_URL", "https://s3.amazonaws.com")
+        monkeypatch.setenv("S3_BUCKET", "scwiki-storage-test")
+        monkeypatch.setenv("S3_ACCESS_KEY_ID", "test")
+        monkeypatch.setenv("S3_SECRET_ACCESS_KEY", "test")
+        manifest["stage"] = "discovered"
+        manifest_path = tmp_path / "mysql-manifest.json"
+        migration_cli.save_manifest(manifest_path, manifest)
+        with moto.mock_aws():
+            boto3.client("s3", region_name="us-east-1").create_bucket(Bucket="scwiki-storage-test")
+            migration_cli.copy_files(manifest_path)
+            migration_cli.verify(manifest_path)
+            with Session(engine) as session, session.begin():
+                assert apply_database_references(manifest, session) > 0
+            with Session(engine) as session:
+                assert session.get(User, 7).avatar_key == "avatars/legacy.jpg"
+                assert session.get(ScientificUploadDraft, "a" * 32).state["file_path"] == "upload_PDFs/" + "a" * 32 + "/main.pdf"
+            with Session(engine) as session, session.begin():
+                assert apply_database_references(manifest, session, rollback=True) > 0
+            with Session(engine) as session:
+                assert session.get(User, 7).avatar_key == "legacy.jpg"
+                assert session.get(ScientificUploadDraft, "a" * 32).state["file_path"] == str(root / "upload_PDFs" / ("a" * 32) / "main.pdf")
+            assert len(paths) == len(manifest["files"])
+    finally:
+        for model in (ScientificUploadDraft, ScientificManualEvidence, User):
+            model.__table__.drop(engine, checkfirst=True)
+        engine.dispose()
 
 
 def test_scan_finds_explicit_and_derived_references(tmp_path: Path) -> None:

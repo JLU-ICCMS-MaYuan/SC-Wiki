@@ -515,9 +515,13 @@ def test_submit_rejects_same_half_filled_draft():
 def test_submit_failure_rolls_state_back_to_ready(monkeypatch):
     from backend.ingest import upload_contracts
     from backend.ingest import scientific_evidence
+    from backend.ingest import manual_evidence
     # 没有科学记录的纯状态测试，不依赖外部来源表或核对缓存。
     monkeypatch.setattr(scientific_evidence, "origins_for", lambda *_: {})
-    monkeypatch.setattr(scientific_evidence, "load_results", lambda *_: {})
+    monkeypatch.setattr(scientific_evidence, "load_results", lambda *_, **__: {})
+    monkeypatch.setattr(manual_evidence, "table_available", lambda *_: True)
+    monkeypatch.setattr(manual_evidence, "validate_submission", lambda *_: [])
+    monkeypatch.setattr(manual_evidence, "complete_keys", lambda *_: set())
 
     task_id = "e" * 32
     draft = {"paper": {"title": "t"}, "material_states": []}
@@ -550,7 +554,7 @@ def test_submit_failure_rolls_state_back_to_ready(monkeypatch):
 
     monkeypatch.setattr(upload_tasks, "update_state", _update_state)
 
-    async def _boom(_task_id, _state, _draft, *, evidence_checks):
+    async def _boom(_task_id, _state, _draft, *, evidence_checks, manual_snapshot, manual_baseline):
         # 共享核对现在也返回非必需的书目项，不能把这些项目误当作科学提交门。
         assert all(not item.get("required", True) for item in evidence_checks)
         raise RuntimeError("模拟提交写入失败")
