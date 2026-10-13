@@ -34,6 +34,16 @@ def test_absolute_reference_accepts_same_root_through_directory_alias(tmp_path: 
     assert relative_file(str(alias / "upload_PDFs" / "paper.pdf"), root) == "upload_PDFs/paper.pdf"
 
 
+def test_fresh_switch_process_registers_database_tables(tmp_path: Path) -> None:
+    env = {**os.environ, "DATABASE_URL": f"sqlite:///{tmp_path / 'fresh.db'}"}
+    result = subprocess.run([sys.executable, "-c", "from backend.storage.migration import apply_database_references; "
+                             "from backend.database import Base; "
+                             "apply_database_references({'files': []}, None); "
+                             "assert 'scientific_upload_drafts' in Base.metadata.tables"],
+                            env=env, capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+
+
 def _fixture(tmp_path: Path, database_url: str | None = None):
     root = tmp_path / "old data"
     root.mkdir()

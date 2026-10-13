@@ -6,7 +6,7 @@
 #   scripts/dev.sh status            查看状态
 #   scripts/dev.sh logs <服务>       跟踪日志
 #
-# 服务名：mysql redis neo4j qdrant grobid python worker news-worker news-scheduler goserver frontend
+# 服务名：mysql redis neo4j qdrant grobid garage python worker news-worker news-scheduler goserver frontend
 
 . "$(dirname "${BASH_SOURCE[0]}")/lib-local.sh"
 
@@ -72,6 +72,24 @@ start_redis() {
     --appendonly no --save '300 10' --daemonize no
   wait_for 30 "redis" redis_ready || die "redis 启动失败"
   ok "redis  127.0.0.1:$REDIS_PORT"
+}
+
+garage_ready() {
+  [[ -x "$LOCAL_DIR/bin/garage" && -f "$LOCAL_DIR/garage/config.toml" ]] || return 1
+  "$LOCAL_DIR/bin/garage" -c "$LOCAL_DIR/garage/config.toml" status 2>/dev/null | grep -q 'HEALTHY NODES'
+}
+
+start_garage() {
+  [[ ${FILE_STORAGE_BACKEND:-local} == s3 ]] || die "Garage 仅在 S3 文件模式启动"
+  [[ -x "$LOCAL_DIR/bin/garage" && -f "$LOCAL_DIR/garage/config.toml" ]] || die "缺少本机 Garage 二进制或配置"
+  if pid_alive garage; then
+    garage_ready || die "Garage 进程存在但未就绪"
+    ok "garage 已在运行"; return
+  fi
+  port_busy 39110 && die "Garage S3 端口 39110 已被占用"
+  spawn garage "$LOCAL_DIR/bin/garage" -c "$LOCAL_DIR/garage/config.toml" server
+  wait_for 30 "garage" garage_ready || die "Garage 启动失败，见 $LOG_DIR/garage.log"
+  ok "garage 127.0.0.1:39110"
 }
 
 neo4j_ready() { local_curl -sf --max-time 3 "http://127.0.0.1:$NEO4J_HTTP_PORT/" >/dev/null 2>&1; }
@@ -269,6 +287,9 @@ status() {
     "goserver|local_curl -sf --max-time 3 http://127.0.0.1:$GOSERVER_PORT/health|127.0.0.1:$GOSERVER_PORT"
     "frontend|local_curl -sf --max-time 3 http://127.0.0.1:$VITE_PORT/|http://127.0.0.1:$VITE_PORT"
   )
+  if [[ ${FILE_STORAGE_BACKEND:-local} == s3 ]]; then
+    checks+=("garage|garage_ready|127.0.0.1:39110")
+  fi
   for entry in "${checks[@]}"; do
     IFS='|' read -r name cmd addr <<< "$entry"
     if eval "$cmd" >/dev/null 2>&1; then
@@ -291,6 +312,9 @@ status() {
 main() {
   local action=${1:-status}; shift || true
   load_env
+  if [[ ${FILE_STORAGE_BACKEND:-local} == s3 ]]; then
+    ALL_SERVICES=(mysql redis neo4j qdrant grobid garage "${APP_SERVICES[@]}")
+  fi
   mkdir -p "$RUN_DIR" "$LOG_DIR"
 
   case "$action" in
@@ -310,7 +334,7 @@ main() {
       local targets=("$@")
       if [[ ${#targets[@]} -eq 0 ]]; then
         # 逆序停止：先应用后基础设施
-        targets=(news-scheduler news-worker frontend goserver worker python grobid qdrant neo4j redis mysql)
+        targets=(news-scheduler news-worker frontend goserver worker python garage grobid qdrant neo4j redis mysql)
       fi
       for s in "${targets[@]}"; do
         case "$s" in

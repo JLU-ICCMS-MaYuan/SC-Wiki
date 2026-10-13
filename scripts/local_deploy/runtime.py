@@ -53,6 +53,8 @@ class Runtime:
     def check_ports(self, *, check_grobid=True):
         ports = {'mysql': (3307,), 'redis': (6379,), 'neo4j': (17687, 7474), 'qdrant': (6333, 6334),
                  'python': (8000,), 'goserver': (8080,), 'frontend': (5173,)}
+        if self.values.get('FILE_STORAGE_BACKEND') == 's3':
+            ports['garage'] = (39110, 39111, 39113)
         if check_grobid:
             ports['grobid'] = (8070, 8071)
         import re

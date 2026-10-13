@@ -69,6 +69,9 @@ def set_pointer(document: Any, pointer: list[str | int], old: str, new: str) -> 
 
 def apply_database_references(manifest: dict[str, Any], session, *, rollback: bool = False) -> int:
     """在调用方的一个数据库事务内条件更新全部已登记引用。"""
+    from backend import models  # noqa: F401  独立切换进程须注册业务表
+    from backend import manual_evidence_models  # noqa: F401
+
     changed = 0
     for item in manifest["files"]:
         for reference in item["references"]:
