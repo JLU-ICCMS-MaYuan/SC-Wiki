@@ -164,9 +164,28 @@ class PhysicsTests(unittest.TestCase):
 
     def test_zero_frequency_is_not_divided_by_zero(self):
         r = spectral_integrals([0, 1, 2], [0, 1, 2])
-        self.assertTrue(math.isfinite(r["lambda_integral"]))
+        self.assertAlmostEqual(r["lambda_integral"], 4.)
+        self.assertAlmostEqual(r["zero_interval_lambda"], 2.)
+        self.assertAlmostEqual(spectral_integrals([0, 1], [0, 1])["lambda_integral"], 2.)
+
+    def test_nonzero_zero_frequency_is_divergent(self):
+        with self.assertRaisesRegex(ValueError, "发散"):
+            spectral_integrals([0, 1, 2], [1, 1, 1])
+
+    def test_exact_constant_spectrum_and_cutoff_inside_segment(self):
+        r = spectral_integrals([1, math.e], [1, 1])
+        self.assertAlmostEqual(r["lambda_integral"], 2.)
+        self.assertAlmostEqual(r["frequency_log_thz"], math.sqrt(math.e))
+        r = spectral_integrals([0, 1, 2], [0, 1, 2], cutoff_thz=.5)
+        self.assertAlmostEqual(r["lambda_integral"], 3.)
+        self.assertEqual(r["minimum_integrated_thz"], .5)
+
+    def test_invalid_cutoff_and_single_point(self):
         with self.assertRaises(ValueError):
-            spectral_integrals([0, 1], [0, 1])
+            spectral_integrals([1], [1])
+        for cutoff in [-1, math.nan, 2]:
+            with self.assertRaises(ValueError):
+                spectral_integrals([0, 1, 2], [0, 1, 2], cutoff_thz=cutoff)
 
 
 class EvidenceTests(unittest.TestCase):

@@ -14,6 +14,7 @@
 <main class="wrap">
 <div class="heading"><div><div class="eyebrow">PHONON SPECTRA · ISSUE #137</div><h1>声子谱数字化</h1><p class="subtitle">从论文原图到数值序列。逐条查看来源、重建过程与物理核对结果。</p></div><div class="actions"><button id="download-json" class="primary">下载完整 JSON</button><button id="download-csv">下载逐点 CSV</button></div></div>
 <div class="paper"><span class="label">来源论文</span><div><div class="paper-title" id="paper-title"></div><div class="minor">DOI <a id="doi" target="_blank" rel="noopener"></a> · <span id="paper-location"></span></div></div></div>
+<section class="panel" id="scientific-review-panel" hidden style="margin-bottom:20px"><div class="panelhead"><div><h2>科学复核结论</h2><p class="minor" id="scientific-review-summary"></p></div><span class="badge">AI 复核 · 结果绑定</span></div><div class="metrics"><div id="review-dispositions"></div><details><summary>复核依据与剩余限制</summary><ul class="list" id="review-findings"></ul></details></div></section>
 <div class="tabs" role="tablist" aria-label="材料状态" id="state-tabs"></div>
 <div class="stats" id="stats"></div>
 <div class="grid">
@@ -50,6 +51,7 @@ function download(name,data,type){const url=URL.createObjectURL(new Blob([data],
 $('download-json').onclick=()=>download(D.case_id+'-spectra.json',JSON.stringify(D,null,2),'application/json');
 $('download-csv').onclick=()=>download(D.case_id+'-spectra-points.csv',Uint8Array.from(atob(CSV_BASE64),c=>c.charCodeAt(0)),'text/csv;charset=utf-8');
 $('paper-title').textContent=D.paper.title;$('doi').href='https://doi.org/'+D.paper.doi;
+if(D.scientific_review){const review=D.scientific_review;$('scientific-review-panel').hidden=false;$('scientific-review-summary').textContent=review.summary;$('review-dispositions').innerHTML=review.dispositions.map(d=>'<div class="metricrow"><span>'+esc(d.item)+'</span><strong>'+esc(d.verdict)+'</strong></div>').join('');$('review-findings').innerHTML=review.findings.map(f=>'<li>'+esc(f)+'</li>').join('')}
 $('doi').textContent=D.paper.doi;$('paper-location').textContent='正文第 '+D.source.figure.pdf_page+' 页 / '+D.source.figure.label;
 $('full-image').src=IMAGE;$('full-figure').onclick=()=>$('image-dialog').showModal();$('close-dialog').onclick=()=>$('image-dialog').close();
 $('run-info').textContent='半自动数字化 · '+D.provenance.generated_at.slice(0,10);
@@ -86,6 +88,7 @@ function render(){
  if(projection.status==='conditional_diagnostic')$('structure-metrics').innerHTML+=metric('元素模式数条件目标',Object.entries(projection.expected).map(([k,v])=>k+' '+v).join(' / '))+metric('分波面积相对目标偏差',Object.entries(projection.relative_difference_pct).map(([k,v])=>k+' '+pct(v)).join(' / '))+'<p class="minor">'+esc(projection.assumption)+'</p>';
  $('precision-basis').textContent=base.status==='conditional_candidate'?'零参考带 '+base.reference_band_thz.join('–')+' THz，原图可见像素范围 '+base.reference_pixel_range.join('–')+'；幅值 ≤ '+fmt(base.unresolved_amplitude_interval[1],5)+' 与零线不可区分，共 '+base.affected_nonzero_points+' 个非零重建点产生候选零值。'+base.assumption+'。左图保留原始提取轨迹。':base.reason;
  $('cumulative-basis').textContent=cm.status==='diagnostic_only'?'使用累计 λ 的曲线增量及对数频率求谱矩；单调投影最大调整 '+fmt(cm.max_monotone_adjustment,5)+'。核验频域 '+cm.frequency_interval_thz.map(v=>fmt(v,4)).join('–')+' THz，可读 λ 增量 '+fmt(cm.resolved_lambda_span,5)+'，不包含零频到首个可读点的未知贡献。原始累计曲线未改写。':cm.reason;
+ if(D.scientific_review){$('precision-metrics').lastElementChild.querySelector('strong').textContent='复核完成，未通过定量训练采纳';document.querySelector('.review strong').textContent='AI 科学复核已完成 · 限定用途';document.querySelector('.review p').textContent='材料归属、单位及原胞计数通过。谱线可用于探索性分析；绝对 DOS 与 α²F 尚不作为定量训练真值。详见页首复核结论。'}
  $('sensitivity').innerHTML=dg.low_frequency_sensitivity.map(v=>metric('下限 '+v.cutoff_thz+' THz','λ '+fmt(v.lambda_integral)+' / ωlog '+fmt(v.omega_log_k,1)+' K')).join('');
  renderFigure();renderChart();renderPoints();
 }

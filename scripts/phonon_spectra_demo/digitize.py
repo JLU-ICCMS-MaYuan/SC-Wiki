@@ -220,25 +220,50 @@ def integrate_contiguous(x: np.ndarray, y: list) -> tuple[float, bool]:
 
 def spectral_integrals(frequency: list, amplitude: list, cutoff_thz: float = 0.0) -> dict:
     f = np.asarray(frequency, dtype=float)
-    if len(f) != len(amplitude) or not np.isfinite(f).all() or np.any(np.diff(f) <= 0):
-        raise ValueError("频率必须有限、严格递增且与幅值等长")
+    if len(f) < 2 or len(f) != len(amplitude) or not np.isfinite(f).all() or np.any(f < 0) or np.any(np.diff(f) <= 0):
+        raise ValueError("频率必须非负、有限、严格递增且与幅值等长，至少两个点")
+    if not np.isfinite(cutoff_thz) or cutoff_thz < 0 or cutoff_thz >= f[-1]:
+        raise ValueError("积分下限必须非负、有限且小于最高频率")
     if any(v is not None and (not np.isfinite(v) or v < 0) for v in amplitude):
         raise ValueError("谱幅值必须非负或为 null")
-    selected = np.flatnonzero(f > max(0, cutoff_thz))
-    if len(selected) < 2:
-        raise ValueError("积分至少需要两个正频率采样点")
-    f = f[selected]
-    a = [amplitude[i] for i in selected]
-    kernel = [None if v is None else 2 * v / freq for freq, v in zip(f, a)]
-    lam, complete = integrate_contiguous(f, kernel)
-    log_kernel = [None if v is None else v * np.log(freq) for freq, v in zip(f, kernel)]
-    log_moment, _ = integrate_contiguous(f, log_kernel)
+    # 对已重建的分段线性 α²F 精确积分；不能用丢弃零频点回避首区间。
+    lam = log_moment = zero_interval_lambda = 0.0
+    complete = True
+    first_integrated = None
+    for x, y, a, b in zip(f[:-1], f[1:], amplitude[:-1], amplitude[1:]):
+        lo = max(float(x), cutoff_thz)
+        hi = float(y)
+        if hi <= lo:
+            continue
+        if a is None or b is None:
+            complete = False
+            continue
+        slope = (b - a) / (y - x)
+        intercept = a - slope * x
+        if lo == 0:
+            if a != 0:
+                raise ValueError("零频处 α²F 非零，完整 λ 积分发散；不能静默丢弃该区间")
+            segment_lambda = 2 * slope * hi
+            segment_moment = 2 * slope * (hi * np.log(hi) - hi)
+            zero_interval_lambda += segment_lambda
+        else:
+            log_ratio = np.log1p((hi - lo) / lo)
+            segment_lambda = 2 * (slope * (hi - lo) + intercept * log_ratio)
+            segment_moment = (2 * slope * (hi * np.log(hi) - hi - lo * np.log(lo) + lo)
+                              + intercept * log_ratio * (np.log(hi) + np.log(lo)))
+        lam += float(segment_lambda)
+        log_moment += float(segment_moment)
+        if first_integrated is None:
+            first_integrated = lo
+    if first_integrated is None:
+        raise ValueError("没有可积分的连续有效区间")
     nu_log = float(np.exp(log_moment / lam)) if lam > 0 else None
     return dict(lambda_integral=lam, frequency_log_thz=nu_log,
                 omega_log_k=None if nu_log is None else nu_log * 47.99243073366221,
                 positive_frequency_complete=complete,
-                minimum_integrated_thz=float(f[0]) if len(f) else None,
-                cutoff_thz=cutoff_thz)
+                minimum_integrated_thz=first_integrated, cutoff_thz=cutoff_thz,
+                integration_method="exact_piecewise_linear_alpha2f",
+                zero_interval_lambda=zero_interval_lambda)
 
 
 def normalize_dos(frequency: list, components: dict[str, list], atoms: int,

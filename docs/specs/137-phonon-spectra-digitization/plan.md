@@ -39,6 +39,7 @@ Spec 目录保存 spec、plan、research、data-model、quickstart、tasks、che
 | FR-006/007，SC-005 | 离线 HTML 与导出 | 浏览器、JSON/CSV 往返 |
 | FR-008，SC-007 | 强色优先、暗色色差补读、图框平台延续 | 灰轴/虚线合成图、新旧观测逐点不变、真实八曲线连续性 |
 | FR-009，SC-008 | quality.py 独立候选与核验，不改 digitize.py 原始结果 | 合成零轴/解析累计谱矩/参考值扰动无影响/4654 点不变 |
+| FR-010，SC-009 | scientific_review.py 独立求积与指纹绑定；修正零频积分极限 | 原文逐页核对、5 THz 分段一致性、解析零频真值及审阅失效测试 |
 
 ## 阶段与复杂度
 

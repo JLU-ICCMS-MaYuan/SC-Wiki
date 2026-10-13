@@ -24,3 +24,11 @@ provenance.algorithm_version=precision_audit_v3；原 curves、points、diagnost
 - precision.automatic_checks：来源哈希、连续性、零参考带有效性及累计核验可计算性；不表达科学采纳完成。
 - scientific_acceptance=requires_user_review；training_ready 仍为 false。
 - CSV 新增 zero_baseline_candidate_amplitude 与 zero_baseline_candidate_reason，只在 α²F 行填写；其单位沿用该曲线原图坐标单位。
+
+## 科学复核增量
+
+algorithm_version=scientific_audit_v4 修复零频首区间积分，增加 integration_method、zero_interval_lambda；原始曲线点与 DOS 候选保持不变。
+
+可选顶层 scientific_review 保存复核身份、范围、用途分级、原文异常、分频段核验、灵敏度及 dataset_fingerprint。状态 completed_with_restrictions 表示已执行 AI 科学复核，不表示全部数据采纳；quantitative_ml_approved=false。原曲线 needs_review 表示未作为正式科学值批准，原 precision 的 requires_user_review 仍是生成时默认状态，显式复核以顶层已绑定记录为准。
+
+指纹覆盖来源、标定、算法版本及材料状态数值，排除生成时间和复核自身。重建数据变化必须重新复核。CSV 补充 scientific_review_status/quantitative_ml_approved，与 JSON 和页面结论一致；不改变 training_ready=false。

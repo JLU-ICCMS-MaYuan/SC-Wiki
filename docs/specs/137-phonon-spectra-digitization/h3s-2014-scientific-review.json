@@ -1,0 +1,431 @@
+{
+  "schema_version": 1,
+  "review_id": "h3s-2014-scientific-audit-v4",
+  "review_date": "2026-10-13",
+  "status": "completed_with_restrictions",
+  "reviewer": {
+    "kind": "ai_scientific_review",
+    "name": "Codex",
+    "scope": "原文/图像与数字化结果的科学一致性复核；不是独立实验或重跑 DFPT"
+  },
+  "dataset_fingerprint": "41bcc04b82bd1940d763a3c50e8a90a1bd1da6b085b6573d055870dfcd68b016",
+  "quantitative_ml_approved": false,
+  "summary": "科学复核完成：材料归属、原胞计数、单位与积分关系通过；累计 λ 可作近似读图值。绝对 DOS 和 α²F 暂不作为已验收的定量机器学习训练数据。",
+  "dispositions": [
+    {
+      "item": "材料归属、压力与原胞计数",
+      "verdict": "通过",
+      "reason": "Figure 5 与表 S1 对应 R3m/130 GPa、Im-3m/200 GPa；两相原胞均为 H3S 四原子。"
+    },
+    {
+      "item": "论文直接报告的 λ 与 ωlog",
+      "verdict": "可按理论计算原文记录",
+      "reason": "正文第 3 页分别为 2.07/1125.1 K 和 2.19/1334.6 K；不得标为实验测量。"
+    },
+    {
+      "item": "累计 λ 终值",
+      "verdict": "近似读图可用",
+      "reason": "2.07143/2.18535，与正文接近；一个像素约为 0.01786/0.02288，数字化小数位不代表相同测量精度。"
+    },
+    {
+      "item": "声子 DOS 相对形状",
+      "verdict": "限探索性使用",
+      "reason": "H 高频、S 低频的形状归属合理；绝对幅值未给刻度。"
+    },
+    {
+      "item": "总 DOS 与分波绝对归一化",
+      "verdict": "条件候选，未证实",
+      "reason": "3N=12 是归一化约束；共同尺度和投影定义不明确。R3m S 分波面积对条件目标 3 偏离约 11.4%。"
+    },
+    {
+      "item": "α²F 定量谱",
+      "verdict": "暂不采纳为定量训练真值",
+      "reason": "零基线按零仍是假设；总 λ 接近不足以保证局部正确，Im-3m 20–25 THz 的增量差约 28.5%，且 28.6–29.0 THz 原图峰被图框裁切。"
+    },
+    {
+      "item": "累计谱导出的 ωlog",
+      "verdict": "限定频域诊断",
+      "reason": "单调候选仅覆盖首个可读正频点以上；与 α²F 是同一论文同图的交叉核验，不是独立实验验证。"
+    }
+  ],
+  "findings": [
+    "零频首区间积分遗漏已修复：对声明从零起的分段线性谱精确积分；零频非零幅值会明确报告发散。",
+    "原图和 4654 个采样点未改写；独立自适应求积与修正后的生产积分一致。",
+    "贴轴参考带不能独立证明物理谱权重为零，尤其 Im-3m 的最高声子带仍延伸到该频域；按零候选只是一种分辨率假设。",
+    "按 5 THz 频段比较 α²F 与累计 λ 的增量，不一致度约为 5.4%/8.5%；总 λ 的小误差会掩盖局部差异。",
+    "正文第 4 页对 Im-3m 写出 18.4% 与 82.6%，总和 101%；保留原文异常，不猜测应改哪一个。",
+    "保持 training_ready=false。曲线连续、归一化积分为 12、接近论文标量均不能独立证明训练标签正确。"
+  ],
+  "next_requirements": [
+    "定量谱训练优先使用作者或计算程序输出的原始 PDOS/α²F 数据；原图裁切处不能唯一恢复峰形。",
+    "只有图像时，保留频率分辨率、读图幅值误差和重建来源，逐频段核验；不能只以总 λ 作为通过条件。",
+    "若用于机器学习，两个物相是两个材料状态案例，4654 个像素采样点不是 4654 个独立训练样本；同论文数据应按组划分。"
+  ],
+  "metrics": {
+    "dataset_fingerprint": "41bcc04b82bd1940d763a3c50e8a90a1bd1da6b085b6573d055870dfcd68b016",
+    "method": "independent_adaptive_quadrature_and_frequency_bin_consistency",
+    "states": [
+      {
+        "id": "r3m-130gpa",
+        "primitive_atoms": 4,
+        "independent_lambda": 2.0996371056927163,
+        "production_lambda": 2.099637105692714,
+        "quadrature_difference": 2.220446049250313e-15,
+        "zero_frequency_first_interval_lambda": 0.0024499668077797017,
+        "bins": [
+          {
+            "frequency_thz": [
+              0.07653375601837809,
+              5
+            ],
+            "lambda_from_alpha": 0,
+            "lambda_from_cumulative": 0.0020535714285713665,
+            "difference": -0.0020535714285713665,
+            "numerical_quadrature_error": 0
+          },
+          {
+            "frequency_thz": [
+              5,
+              10
+            ],
+            "lambda_from_alpha": 0.27276642781156335,
+            "lambda_from_cumulative": 0.27348479371505596,
+            "difference": -0.0007183659034926126,
+            "numerical_quadrature_error": 3.028315685011532e-15
+          },
+          {
+            "frequency_thz": [
+              10,
+              15
+            ],
+            "lambda_from_alpha": 0.4165420517272823,
+            "lambda_from_cumulative": 0.38499734914208594,
+            "difference": 0.03154470258519637,
+            "numerical_quadrature_error": 4.6245457655223195e-15
+          },
+          {
+            "frequency_thz": [
+              15,
+              20
+            ],
+            "lambda_from_alpha": 0.052667806334931726,
+            "lambda_from_cumulative": 0.04464285714285765,
+            "difference": 0.008024949192074075,
+            "numerical_quadrature_error": 5.847301124953988e-16
+          },
+          {
+            "frequency_thz": [
+              20,
+              25
+            ],
+            "lambda_from_alpha": 0.09882085799389032,
+            "lambda_from_cumulative": 0.10971320346320257,
+            "difference": -0.010892345469312253,
+            "numerical_quadrature_error": 1.0971319185802996e-15
+          },
+          {
+            "frequency_thz": [
+              25,
+              30
+            ],
+            "lambda_from_alpha": 0.29539589703322355,
+            "lambda_from_cumulative": 0.28165664744612184,
+            "difference": 0.01373924958710171,
+            "numerical_quadrature_error": 3.2795532626608673e-15
+          },
+          {
+            "frequency_thz": [
+              30,
+              35
+            ],
+            "lambda_from_alpha": 0.46192083546023777,
+            "lambda_from_cumulative": 0.47194026733500327,
+            "difference": -0.010019431874765505,
+            "numerical_quadrature_error": 5.1283514708204425e-15
+          },
+          {
+            "frequency_thz": [
+              35,
+              40
+            ],
+            "lambda_from_alpha": 0.26158733914184906,
+            "lambda_from_cumulative": 0.24742344643660408,
+            "difference": 0.014163892705244985,
+            "numerical_quadrature_error": 2.904202868657102e-15
+          },
+          {
+            "frequency_thz": [
+              40,
+              45
+            ],
+            "lambda_from_alpha": 0.16092056449756362,
+            "lambda_from_cumulative": 0.16917714960478158,
+            "difference": -0.008256585107217967,
+            "numerical_quadrature_error": 1.7865771584087256e-15
+          },
+          {
+            "frequency_thz": [
+              45,
+              50
+            ],
+            "lambda_from_alpha": 0.07901532569217395,
+            "lambda_from_cumulative": 0.06830357142856958,
+            "difference": 0.010711754263604378,
+            "numerical_quadrature_error": 8.772463388170724e-16
+          },
+          {
+            "frequency_thz": [
+              50,
+              54.86722391966717
+            ],
+            "lambda_from_alpha": 0,
+            "lambda_from_cumulative": 0.001091269841268172,
+            "difference": -0.001091269841268172,
+            "numerical_quadrature_error": 0
+          }
+        ],
+        "binned_absolute_discrepancy_fraction": 0.05413335469333073,
+        "largest_absolute_discrepancy_bin": {
+          "frequency_thz": [
+            10,
+            15
+          ],
+          "lambda_from_alpha": 0.4165420517272823,
+          "lambda_from_cumulative": 0.38499734914208594,
+          "difference": 0.03154470258519637,
+          "numerical_quadrature_error": 4.6245457655223195e-15
+        },
+        "one_pixel_amplitude_sensitivity": [
+          {
+            "amplitude_shift_px": -1,
+            "lambda_integral": 2.03491910963475,
+            "numerical_quadrature_error": 2.2592140487662235e-14
+          },
+          {
+            "amplitude_shift_px": 0,
+            "lambda_integral": 2.0996371056927163,
+            "numerical_quadrature_error": 2.331065458097376e-14
+          },
+          {
+            "amplitude_shift_px": 1,
+            "lambda_integral": 2.16435510175068,
+            "numerical_quadrature_error": 2.402916867428529e-14
+          }
+        ],
+        "sensitivity_is_confidence_interval": false,
+        "unresolved_amplitude_interval": [
+          0,
+          0.03571428571429003
+        ],
+        "cumulative_endpoint": 2.071428571428573,
+        "cumulative_endpoint_one_pixel_interval": [
+          2.05357142857143,
+          2.0892857142857157
+        ],
+        "clipped_frequencies_thz": [],
+        "projection_mode_check": {
+          "status": "conditional_diagnostic",
+          "expected": {
+            "H": 9,
+            "S": 3
+          },
+          "measured": {
+            "H": 8.657613042430027,
+            "S": 3.3423869575699725
+          },
+          "relative_difference_pct": {
+            "H": -3.804299528555255,
+            "S": 11.412898585665744
+          },
+          "assumption": "仅在完整、共同尺度的正交笛卡尔元素投影定义下适用；不把各分波分别强制缩放到目标"
+        },
+        "cumulative_omega_log_k": 1075.959087695178,
+        "alpha_omega_log_k": 1070.3452077151437
+      },
+      {
+        "id": "im3m-200gpa",
+        "primitive_atoms": 4,
+        "independent_lambda": 2.251385533868194,
+        "production_lambda": 2.2513855338681936,
+        "quadrature_difference": 4.440892098500626e-16,
+        "zero_frequency_first_interval_lambda": 0.0031438067677375574,
+        "bins": [
+          {
+            "frequency_thz": [
+              0.07653375601847756,
+              5
+            ],
+            "lambda_from_alpha": 0.05481646525447972,
+            "lambda_from_cumulative": 0.01366908698022546,
+            "difference": 0.04114737827425426,
+            "numerical_quadrature_error": 6.085850185408827e-16
+          },
+          {
+            "frequency_thz": [
+              5,
+              10
+            ],
+            "lambda_from_alpha": 0.11683160897335429,
+            "lambda_from_cumulative": 0.099416859741014,
+            "difference": 0.017414749232340293,
+            "numerical_quadrature_error": 1.29709142286221e-15
+          },
+          {
+            "frequency_thz": [
+              10,
+              15
+            ],
+            "lambda_from_alpha": 0.16538258739353703,
+            "lambda_from_cumulative": 0.1726040386105754,
+            "difference": -0.007221451217038377,
+            "numerical_quadrature_error": 1.8361155639638694e-15
+          },
+          {
+            "frequency_thz": [
+              15,
+              20
+            ],
+            "lambda_from_alpha": 0.1630841438390961,
+            "lambda_from_cumulative": 0.18197235160978154,
+            "difference": -0.018888207770685422,
+            "numerical_quadrature_error": 1.810597714414454e-15
+          },
+          {
+            "frequency_thz": [
+              20,
+              25
+            ],
+            "lambda_from_alpha": 0.29869706609636304,
+            "lambda_from_cumulative": 0.2324630397332157,
+            "difference": 0.06623402636314735,
+            "numerical_quadrature_error": 3.3162036016816435e-15
+          },
+          {
+            "frequency_thz": [
+              25,
+              30
+            ],
+            "lambda_from_alpha": 0.370203362245716,
+            "lambda_from_cumulative": 0.38646735879838534,
+            "difference": -0.016263996552669358,
+            "numerical_quadrature_error": 4.110082965588412e-15
+          },
+          {
+            "frequency_thz": [
+              30,
+              35
+            ],
+            "lambda_from_alpha": 0.44800061758132875,
+            "lambda_from_cumulative": 0.4426787808513861,
+            "difference": 0.005321836729942631,
+            "numerical_quadrature_error": 4.973806006850808e-15
+          },
+          {
+            "frequency_thz": [
+              35,
+              40
+            ],
+            "lambda_from_alpha": 0.27683506758761545,
+            "lambda_from_cumulative": 0.276985944688543,
+            "difference": -0.0001508771009275378,
+            "numerical_quadrature_error": 3.07348666059432e-15
+          },
+          {
+            "frequency_thz": [
+              40,
+              45
+            ],
+            "lambda_from_alpha": 0.1286804910133913,
+            "lambda_from_cumulative": 0.12648689403789648,
+            "difference": 0.002193596975494816,
+            "numerical_quadrature_error": 1.428640439431375e-15
+          },
+          {
+            "frequency_thz": [
+              45,
+              50
+            ],
+            "lambda_from_alpha": 0.1993327083338334,
+            "lambda_from_cumulative": 0.1950219556059689,
+            "difference": 0.004310752727864492,
+            "numerical_quadrature_error": 2.2130376235311274e-15
+          },
+          {
+            "frequency_thz": [
+              50,
+              54.678290505309754
+            ],
+            "lambda_from_alpha": 0.029521415549478618,
+            "lambda_from_cumulative": 0.034324403577485896,
+            "difference": -0.004802988028007278,
+            "numerical_quadrature_error": 3.277535526255828e-16
+          }
+        ],
+        "binned_absolute_discrepancy_fraction": 0.08507962212746571,
+        "largest_absolute_discrepancy_bin": {
+          "frequency_thz": [
+            20,
+            25
+          ],
+          "lambda_from_alpha": 0.29869706609636304,
+          "lambda_from_cumulative": 0.2324630397332157,
+          "difference": 0.06623402636314735,
+          "numerical_quadrature_error": 3.3162036016816435e-15
+        },
+        "one_pixel_amplitude_sensitivity": [
+          {
+            "amplitude_shift_px": -1,
+            "lambda_integral": 2.143753602310379,
+            "numerical_quadrature_error": 2.380044608408101e-14
+          },
+          {
+            "amplitude_shift_px": 0,
+            "lambda_integral": 2.251385533868194,
+            "numerical_quadrature_error": 2.4995400570084677e-14
+          },
+          {
+            "amplitude_shift_px": 1,
+            "lambda_integral": 2.359017465426011,
+            "numerical_quadrature_error": 2.619035505608836e-14
+          }
+        ],
+        "sensitivity_is_confidence_interval": false,
+        "unresolved_amplitude_interval": [
+          0,
+          0.0457972896550487
+        ],
+        "cumulative_endpoint": 2.1853517793184487,
+        "cumulative_endpoint_one_pixel_interval": [
+          2.1624688436001236,
+          2.208234715036774
+        ],
+        "clipped_frequencies_thz": [
+          28.983346152702097,
+          28.888879445523386,
+          28.79441273834469,
+          28.69994603116598,
+          28.605479323987268
+        ],
+        "projection_mode_check": {
+          "status": "conditional_diagnostic",
+          "expected": {
+            "H": 9,
+            "S": 3
+          },
+          "measured": {
+            "H": 8.88096199076156,
+            "S": 3.1190380092384404
+          },
+          "relative_difference_pct": {
+            "H": -1.3226445470937875,
+            "S": 3.9679336412813404
+          },
+          "assumption": "仅在完整、共同尺度的正交笛卡尔元素投影定义下适用；不把各分波分别强制缩放到目标"
+        },
+        "cumulative_omega_log_k": 1284.8314141187052,
+        "alpha_omega_log_k": 1224.8193570898738
+      }
+    ],
+    "grants_scientific_acceptance": false
+  }
+}

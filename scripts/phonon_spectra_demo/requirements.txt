@@ -4,3 +4,4 @@ pillow==12.3.0
 pymupdf==1.28.2
 ase==3.29.0
 spglib==2.7.0
+scipy==1.17.1

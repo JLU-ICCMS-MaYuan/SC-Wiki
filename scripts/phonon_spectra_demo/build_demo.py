@@ -22,6 +22,7 @@ import spglib
 
 from digitize import LinearAxis, extract_curve, normalize_dos, spectral_integrals
 from quality import zero_baseline_candidate, cumulative_moments
+from scientific_review import verify_review
 
 HERE = Path(__file__).resolve().parent
 
@@ -78,7 +79,8 @@ def csv_text(result: dict) -> str:
               "conditional_normalized_dos", "unit", "normalized_unit", "normalization_status",
               "normalization_accepted", "primitive_atoms", "normalization_target_modes", "point_status",
               "detection_mode", "zero_baseline_candidate_amplitude", "zero_baseline_candidate_reason", "review_status",
-              "training_ready", "source_sha256", "pdf_page", "figure"]
+              "training_ready", "scientific_review_status", "quantitative_ml_approved",
+              "source_sha256", "pdf_page", "figure"]
     writer = csv.DictWriter(buf, fieldnames=fields)
     writer.writeheader()
     for state in result["material_states"]:
@@ -104,7 +106,10 @@ def csv_text(result: dict) -> str:
                     zero_baseline_candidate_amplitude=baseline["amplitude"][i] if has_baseline else None,
                     zero_baseline_candidate_reason=baseline["point_reasons"][i] if has_baseline else None,
                     review_status=curve["review_status"],
-                    training_ready=False, source_sha256=result["source"]["paper_sha256"],
+                    training_ready=False,
+                    scientific_review_status=result.get("scientific_review", {}).get("status"),
+                    quantitative_ml_approved=result.get("scientific_review", {}).get("quantitative_ml_approved"),
+                    source_sha256=result["source"]["paper_sha256"],
                     pdf_page=result["source"]["figure"]["pdf_page"], figure=result["source"]["figure"]["label"]))
     return buf.getvalue()
 
@@ -123,7 +128,7 @@ def build(config: dict, pdf: Path, supplement: Path) -> tuple[dict, bytes]:
                                   python=sys.version.split()[0],
                                   software={n: importlib.metadata.version(n) for n in
                                             ("numpy", "pillow", "pymupdf", "ase", "spglib")},
-                                  mode="semi_automatic_digitization", algorithm_version="precision_audit_v3",
+                                  mode="semi_automatic_digitization", algorithm_version="scientific_audit_v4",
                                   business_database_writes=False),
                   calibration_manifest=config, material_states=[], training_ready=False)
     for state_spec in config["material_states"]:
@@ -218,6 +223,7 @@ def main() -> None:
     parser.add_argument("--pdf", type=Path, required=True)
     parser.add_argument("--supplement", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--scientific-review", type=Path, help="仅加载与当前数据指纹完全一致的已完成复核记录")
     args = parser.parse_args()
     config = json.loads(args.config.read_text(encoding="utf-8"))
     out = args.output.resolve()
@@ -225,6 +231,9 @@ def main() -> None:
         if path.resolve().is_relative_to(out):
             raise ValueError("来源文件不能位于输出目录内")
     result, figure = build(config, args.pdf, args.supplement)
+    if args.scientific_review:
+        result["scientific_review"] = verify_review(
+            json.loads(args.scientific_review.read_text(encoding="utf-8")), result)
     payload = json.dumps(result, ensure_ascii=False, allow_nan=False, separators=(",", ":"))
     csv_data = csv_text(result)
     report = dict(schema_version=1, case_id=result["case_id"], training_ready=False,
@@ -245,6 +254,8 @@ def main() -> None:
                                    projection_mode_check=s["precision"]["projection_mode_check"],
                                    unresolved=s["precision"]["unresolved"]))
                           for s in result["material_states"]])
+    if "scientific_review" in result:
+        report["scientific_review"] = result["scientific_review"]
     html = (HERE / "template.html").read_text(encoding="utf-8")
     # JSON 与文献元数据不得闭合脚本标签；图和 CSV 通过 base64 嵌入。
     html = html.replace("__DATA_JSON__", payload.replace("<", "\\u003c"))

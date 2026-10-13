@@ -12,6 +12,7 @@
 - [ ] T008 [US3] demo 获用户验收后细化正式谱数据表单、持久化、审核及导出合同；本次不执行。
 - [x] T009 [US1] 修复 scripts/phonon_spectra_demo/digitize.py 的暗色虚线漏检与图框平台端点；同步 build_demo.py、template.html 的补读来源，增加 tests/test_digitize.py 回归并复核八条真实曲线。[FR-008、SC-007；validation.md 暗色虚线补读：20 测试、64→0 缺失、3180 原观测不变]
 - [x] T010 [US2] 在 scripts/phonon_spectra_demo/quality.py 增加原图零基线候选与累计谱矩独立核验；build_demo.py 记录条件模式数对照和完整验收元数据，template.html/CSV 展示候选；tests/test_quality.py 验证独立真值与原数据保留。[FR-009、SC-008；27 测试、4654 点未改，见 validation.md 精度核验]
+- [x] T011 [US2] 按用户要求执行科学复核，修复 digitize.py 的零频首区间遗漏，新增 scientific_review.py 独立核验和数据绑定，落盘 scientific-review.md/JSON，并由 build_demo.py、template.html 展示用途分级。[FR-010、SC-009；34 测试，定量训练未通过不等于复核未完成]
 
 ## 依赖与覆盖
 
