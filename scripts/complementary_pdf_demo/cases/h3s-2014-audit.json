@@ -1,0 +1,490 @@
+{
+  "schema_version": 1,
+  "scope": "H3S 首轮 34 项指定科学值及归属核对，非全字段准确率。",
+  "provenance": "2026-10-13 Codex 目视核对正文 3、4、6 页及补充 4、5 页；参考与模型生成隔离，生成后才创建本清单。",
+  "source_sha256": {
+    "main": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+    "supplementary": "2c04b51e2cb57259fe8f8e5c8a464871647b5a0a7a731ee636f42cc406efb396"
+  },
+  "items": [
+    {
+      "id": "Q001",
+      "label": "R3m@130 GPa Tc / K",
+      "query": {
+        "kind": "record",
+        "phase": "R3m",
+        "pressure": 130,
+        "path": "value"
+      },
+      "expected": [
+        155,
+        166
+      ],
+      "mode": "numbers",
+      "source": "正文第 4 页左栏首段；必须同时匹配相和压力"
+    },
+    {
+      "id": "Q002",
+      "label": "Im-3m@200 GPa Tc / K",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 200,
+        "path": "value"
+      },
+      "expected": [
+        191,
+        204
+      ],
+      "mode": "numbers",
+      "source": "正文第 4 页左栏首段；必须同时匹配相和压力"
+    },
+    {
+      "id": "Q003",
+      "label": "Im-3m@250 GPa Tc / K",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 250,
+        "path": "value"
+      },
+      "expected": 184,
+      "mode": "numbers",
+      "source": "正文第 4 页左栏首段；必须同时匹配相和压力"
+    },
+    {
+      "id": "Q004",
+      "label": "Im-3m@300 GPa Tc / K",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 300,
+        "path": "value"
+      },
+      "expected": 179,
+      "mode": "numbers",
+      "source": "正文第 4 页左栏首段；必须同时匹配相和压力"
+    },
+    {
+      "id": "Q005",
+      "label": "R3m@130 GPa lambda_ep",
+      "query": {
+        "kind": "record",
+        "phase": "R3m",
+        "pressure": 130,
+        "path": "payload/parameters/lambda_ep"
+      },
+      "expected": 2.07,
+      "mode": "numbers",
+      "source": "正文第 3 页右栏末段"
+    },
+    {
+      "id": "Q006",
+      "label": "R3m@130 GPa omega_log",
+      "query": {
+        "kind": "record",
+        "phase": "R3m",
+        "pressure": 130,
+        "path": "payload/parameters/omega_log"
+      },
+      "expected": 1125.1,
+      "mode": "numbers",
+      "source": "正文第 3 页右栏末段"
+    },
+    {
+      "id": "Q007",
+      "label": "Im-3m@200 GPa lambda_ep",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 200,
+        "path": "payload/parameters/lambda_ep"
+      },
+      "expected": 2.19,
+      "mode": "numbers",
+      "source": "正文第 3 页右栏末段"
+    },
+    {
+      "id": "Q008",
+      "label": "Im-3m@200 GPa omega_log",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 200,
+        "path": "payload/parameters/omega_log"
+      },
+      "expected": 1334.6,
+      "mode": "numbers",
+      "source": "正文第 3 页右栏末段"
+    },
+    {
+      "id": "Q009",
+      "label": "R3m@130 GPa μ*",
+      "query": {
+        "kind": "record",
+        "phase": "R3m",
+        "pressure": 130,
+        "path": "payload/parameters/mu_star"
+      },
+      "expected": [
+        0.1,
+        0.13
+      ],
+      "mode": "numbers",
+      "source": "正文第 3 页末至第 4 页首段；范围不转换为单值"
+    },
+    {
+      "id": "Q010",
+      "label": "Im-3m@200 GPa μ*",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 200,
+        "path": "payload/parameters/mu_star"
+      },
+      "expected": [
+        0.1,
+        0.13
+      ],
+      "mode": "numbers",
+      "source": "正文第 3 页末至第 4 页首段；范围不转换为单值"
+    },
+    {
+      "id": "Q011",
+      "label": "Im-3m@250 GPa μ*",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 250,
+        "path": "payload/parameters/mu_star"
+      },
+      "expected": 0.13,
+      "mode": "numbers",
+      "source": "正文第 3 页末至第 4 页首段；范围不转换为单值"
+    },
+    {
+      "id": "Q012",
+      "label": "Im-3m@300 GPa μ*",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 300,
+        "path": "payload/parameters/mu_star"
+      },
+      "expected": 0.13,
+      "mode": "numbers",
+      "source": "正文第 3 页末至第 4 页首段；范围不转换为单值"
+    },
+    {
+      "id": "Q013",
+      "label": "R3m@130 GPa k_grid",
+      "query": {
+        "kind": "record",
+        "phase": "R3m",
+        "pressure": 130,
+        "path": "payload/calculation_conditions/k_grid"
+      },
+      "expected": [
+        16,
+        16,
+        24
+      ],
+      "mode": "numbers",
+      "source": "正文第 6 页左栏计算方法第二段"
+    },
+    {
+      "id": "Q014",
+      "label": "R3m@130 GPa q_grid",
+      "query": {
+        "kind": "record",
+        "phase": "R3m",
+        "pressure": 130,
+        "path": "payload/calculation_conditions/q_grid"
+      },
+      "expected": [
+        3,
+        3,
+        5
+      ],
+      "mode": "numbers",
+      "source": "正文第 6 页左栏计算方法第二段"
+    },
+    {
+      "id": "Q015",
+      "label": "Im-3m@200 GPa k_grid",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 200,
+        "path": "payload/calculation_conditions/k_grid"
+      },
+      "expected": [
+        32,
+        32,
+        32
+      ],
+      "mode": "numbers",
+      "source": "正文第 6 页左栏计算方法第二段"
+    },
+    {
+      "id": "Q016",
+      "label": "Im-3m@200 GPa q_grid",
+      "query": {
+        "kind": "record",
+        "phase": "Im-3m",
+        "pressure": 200,
+        "path": "payload/calculation_conditions/q_grid"
+      },
+      "expected": [
+        8,
+        8,
+        8
+      ],
+      "mode": "numbers",
+      "source": "正文第 6 页左栏计算方法第二段"
+    },
+    {
+      "id": "Q017",
+      "label": "P1@20 GPa 晶胞 a",
+      "query": {
+        "kind": "structure",
+        "phase": "P1",
+        "pressure": 20,
+        "path": "cell_parameters/a"
+      },
+      "expected": 6.389,
+      "mode": "numbers",
+      "source": "补充材料第 4 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q018",
+      "label": "P1@20 GPa 晶胞 b",
+      "query": {
+        "kind": "structure",
+        "phase": "P1",
+        "pressure": 20,
+        "path": "cell_parameters/b"
+      },
+      "expected": 6.432,
+      "mode": "numbers",
+      "source": "补充材料第 4 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q019",
+      "label": "P1@20 GPa 晶胞 c",
+      "query": {
+        "kind": "structure",
+        "phase": "P1",
+        "pressure": 20,
+        "path": "cell_parameters/c"
+      },
+      "expected": 5.355,
+      "mode": "numbers",
+      "source": "补充材料第 4 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q020",
+      "label": "P1@20 GPa 晶胞 alpha",
+      "query": {
+        "kind": "structure",
+        "phase": "P1",
+        "pressure": 20,
+        "path": "cell_parameters/alpha"
+      },
+      "expected": 90.119,
+      "mode": "numbers",
+      "source": "补充材料第 4 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q021",
+      "label": "P1@20 GPa 晶胞 beta",
+      "query": {
+        "kind": "structure",
+        "phase": "P1",
+        "pressure": 20,
+        "path": "cell_parameters/beta"
+      },
+      "expected": 89.846,
+      "mode": "numbers",
+      "source": "补充材料第 4 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q022",
+      "label": "P1@20 GPa 晶胞 gamma",
+      "query": {
+        "kind": "structure",
+        "phase": "P1",
+        "pressure": 20,
+        "path": "cell_parameters/gamma"
+      },
+      "expected": 90.148,
+      "mode": "numbers",
+      "source": "补充材料第 4 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q023",
+      "label": "Cccm@60 GPa 晶胞 a",
+      "query": {
+        "kind": "structure",
+        "phase": "Cccm",
+        "pressure": 60,
+        "path": "cell_parameters/a"
+      },
+      "expected": 8.157,
+      "mode": "numbers",
+      "source": "补充材料第 4 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q024",
+      "label": "Cccm@60 GPa 晶胞 b",
+      "query": {
+        "kind": "structure",
+        "phase": "Cccm",
+        "pressure": 60,
+        "path": "cell_parameters/b"
+      },
+      "expected": 8.181,
+      "mode": "numbers",
+      "source": "补充材料第 4 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q025",
+      "label": "Cccm@60 GPa 晶胞 c",
+      "query": {
+        "kind": "structure",
+        "phase": "Cccm",
+        "pressure": 60,
+        "path": "cell_parameters/c"
+      },
+      "expected": 4.83,
+      "mode": "numbers",
+      "source": "补充材料第 4 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q026",
+      "label": "R3m@130 GPa 晶胞 a",
+      "query": {
+        "kind": "structure",
+        "phase": "R3m",
+        "pressure": 130,
+        "path": "cell_parameters/a"
+      },
+      "expected": 4.405,
+      "mode": "numbers",
+      "source": "补充材料第 5 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q027",
+      "label": "R3m@130 GPa 晶胞 c",
+      "query": {
+        "kind": "structure",
+        "phase": "R3m",
+        "pressure": 130,
+        "path": "cell_parameters/c"
+      },
+      "expected": 2.689,
+      "mode": "numbers",
+      "source": "补充材料第 5 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q028",
+      "label": "Im-3m@200 GPa 晶胞 a",
+      "query": {
+        "kind": "structure",
+        "phase": "Im-3m",
+        "pressure": 200,
+        "path": "cell_parameters/a"
+      },
+      "expected": 2.984,
+      "mode": "numbers",
+      "source": "补充材料第 5 页 Table S1；仅核对明确报告的参数"
+    },
+    {
+      "id": "Q029",
+      "label": "P1@20 GPa 间接带隙 / eV",
+      "query": {
+        "kind": "record",
+        "phase": "P1",
+        "pressure": 20,
+        "path": "value",
+        "property": "band_gap"
+      },
+      "expected": 3.34,
+      "mode": "numbers",
+      "source": "正文第 3 页右栏电子性质段"
+    },
+    {
+      "id": "Q030",
+      "label": "Cccm 跨页独立原子行数",
+      "query": {
+        "kind": "structure",
+        "phase": "Cccm",
+        "pressure": 60,
+        "path": "atomic_positions"
+      },
+      "expected": 7,
+      "mode": "count",
+      "source": "补充第 4 页末 5 行 H 加第 5 页首 2 行 S；不是展开后的晶胞原子总数"
+    },
+    {
+      "id": "Q031",
+      "label": "Cccm 跨页 S 行 1 分数坐标",
+      "query": {
+        "kind": "structure",
+        "phase": "Cccm",
+        "pressure": 60,
+        "path": "atomic_positions/-2"
+      },
+      "expected": {
+        "x": 0.75864,
+        "y": 0.07766,
+        "z": 0.5
+      },
+      "mode": "atom_coordinates",
+      "source": "补充第 5 页顶部两行仍属于上一页 Cccm@60 GPa"
+    },
+    {
+      "id": "Q032",
+      "label": "Cccm 跨页 S 行 1 Wyckoff 字母",
+      "query": {
+        "kind": "structure",
+        "phase": "Cccm",
+        "pressure": 60,
+        "path": "atomic_positions/-2"
+      },
+      "expected": "S(8l)",
+      "mode": "atom_label",
+      "source": "补充第 5 页顶部 S(8l)，最后一个字符是小写 l，不是大写 I"
+    },
+    {
+      "id": "Q033",
+      "label": "Cccm 跨页 S 行 2 分数坐标",
+      "query": {
+        "kind": "structure",
+        "phase": "Cccm",
+        "pressure": 60,
+        "path": "atomic_positions/-1"
+      },
+      "expected": {
+        "x": 0.42337,
+        "y": 0.74171,
+        "z": 0.0
+      },
+      "mode": "atom_coordinates",
+      "source": "补充第 5 页顶部两行仍属于上一页 Cccm@60 GPa"
+    },
+    {
+      "id": "Q034",
+      "label": "Cccm 跨页 S 行 2 Wyckoff 字母",
+      "query": {
+        "kind": "structure",
+        "phase": "Cccm",
+        "pressure": 60,
+        "path": "atomic_positions/-1"
+      },
+      "expected": "S(8l)",
+      "mode": "atom_label",
+      "source": "补充第 5 页顶部 S(8l)，最后一个字符是小写 l，不是大写 I"
+    }
+  ]
+}

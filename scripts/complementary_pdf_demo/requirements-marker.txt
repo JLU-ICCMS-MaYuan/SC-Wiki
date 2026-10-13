@@ -1,0 +1,2 @@
+# 安装到 .local/issue136-marker，避免改变正在运行的项目依赖。
+marker-pdf==2.0.0

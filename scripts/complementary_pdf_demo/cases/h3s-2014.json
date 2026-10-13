@@ -1,0 +1,7 @@
+{
+  "case_id": "h3s-2014",
+  "files": [
+    {"file_id": "main", "role": "main", "path": "../../../.data/upload_PDFs/947214683efc415abd9b1d64c457d86c/103e9de9802e41e397429b8b801c89d8.pdf", "sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef"},
+    {"file_id": "supplementary", "role": "supplementary", "path": "../../../.data/upload_PDFs/947214683efc415abd9b1d64c457d86c/8c30c34dc56d45afa6e153aa999eb0d1.pdf", "sha256": "2c04b51e2cb57259fe8f8e5c8a464871647b5a0a7a731ee636f42cc406efb396"}
+  ]
+}
