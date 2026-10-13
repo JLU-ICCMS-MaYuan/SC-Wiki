@@ -53,6 +53,7 @@
 - 化学式解析（`parse_formula_composition`）支持括号分组与 Unicode 下标，拒绝不配对或空括号；材料字段只在能唯一确定完整化学式时写入化学式（如 `(H2S)2H2` 不再截成 `H2S`），否则原文保留为材料名，替代式的元素数按组分统计；与空间群符号查表一致的空间群编号、晶系作为派生核对项随符号核对。（[Issue #120](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/120)）
 - 汇总后执行查重：先按归一化 DOI（`normalize_doi`）查 `papers`，再按原始文件 SHA-256 查；命中即进入 `_handle_duplicate`，任务以 `duplicate` 状态短路结束。
 - 草稿写入 Redis（`save_draft`），同时把 `ai_values` 与证据快照（分类证据、材料状态各字段证据）写入 `review_artifacts/{task_id}/result.json`。
+- 当前本机 S3 模式下，Worker 从对象键按需取得原文件，解析产物完整上传后才把版本化 `artifact_manifest` 发布到任务状态；节点内 Markdown 与 JSON 仅供本次执行使用。正式送审的 `result.json` 使用按任务 ID 可找回的私有对象键，任务状态过期后审核 API 仍可读取。
 - 理论二级类型的临时全文分析由服务端保存，含综合理由、可定位支撑片段、模型和来源版本；客户端修改当前值不能伪造分析资格。该字段的来源核对把片段标为全文归纳依据，不称论文逐字记载的枚举；仅 Methods 或软件名不能独立授予 `supported`。本机 H3S 草稿已定向复核为 `calculation`，理由同时比较结果、讨论与方法；正式已批准论文未批量修改。
 
 ### 第 5 步：等待用户校对（ready）
