@@ -5,12 +5,12 @@
 ## 阶段 1：准备
 
 - [ ] T001 核验显式引用和由人工证据 row/item、候选附件元数据、审核快照任务 ID、富化结果论文 ID 派生的文件，建立 `backend/storage/reference_inventory.py`，覆盖本文数据模型全部载体及未分类文件阻断。
-- [ ] T002 在 `requirements.txt`、`docker/requirements.txt`、`goserver/go.mod` 中加入并锁定两语言 S3 SDK，验证兼容性，不升级核心依赖。
+- [x] T002 在 `requirements.txt`、`docker/requirements.txt`、`goserver/go.mod` 中加入并锁定两语言 S3 SDK，验证兼容性，不升级核心依赖。证据：boto3 与 AWS SDK for Go v2 均固定版本；两种客户端在真实 Garage 2.4.1 上通过读写与冲突测试，见[验证记录](validation.md)。
 
 ## 阶段 2：基础能力
 
 - [ ] T003 建立 `tests/02_maintenance_and_verification/test_file_storage_contract.py` 与 `goserver/storage/storage_test.go` 的双后端行为测试，含真实 S3、流式大文件、缺对象、错误认证、冲突及越界。
-- [ ] T004 在 `backend/storage/`、`goserver/storage/` 实现 FileRef、配置、local/S3、完整性校验与临时目录管理，满足存储契约。
+- [x] T004 在 `backend/storage/`、`goserver/storage/` 实现 FileRef、配置、local/S3、完整性校验与临时目录管理，满足存储契约。证据：本机实际切换后 74 个对象完整回读，Python 隔离业务与 Go handler 在真实 Garage/本地后端通过；见[验证记录](validation.md)。
 
 ## 阶段 3：US1——业务文件接入（P1）
 
