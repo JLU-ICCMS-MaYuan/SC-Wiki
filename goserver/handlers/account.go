@@ -257,14 +257,17 @@ func UploadAvatar(c *gin.Context) {
 		c.JSON(503, gin.H{"error": "头像存储暂时不可用"})
 		return
 	}
-	old := user.AvatarKey
+	oldKey := ""
+	if user.AvatarKey != nil {
+		oldKey = *user.AvatarKey
+	}
 	if err := database.DB.Model(user).Update("avatar_key", key).Error; err != nil {
 		_ = avatarFiles.Delete(c.Request.Context(), key)
 		c.JSON(500, gin.H{"error": "头像保存失败"})
 		return
 	}
-	if old != nil {
-		_ = avatarFiles.Delete(c.Request.Context(), *old)
+	if oldKey != "" {
+		_ = avatarFiles.Delete(c.Request.Context(), oldKey)
 	}
 	user.AvatarKey = &key
 	c.JSON(200, gin.H{"avatar_url": avatarURL(*user)})
@@ -275,13 +278,16 @@ func DeleteAvatar(c *gin.Context) {
 	if !ok {
 		return
 	}
-	old := user.AvatarKey
+	oldKey := ""
+	if user.AvatarKey != nil {
+		oldKey = *user.AvatarKey
+	}
 	if err := database.DB.Model(user).Update("avatar_key", nil).Error; err != nil {
 		c.JSON(500, gin.H{"error": "头像删除失败"})
 		return
 	}
-	if old != nil {
-		_ = avatarFiles.Delete(c.Request.Context(), *old)
+	if oldKey != "" {
+		_ = avatarFiles.Delete(c.Request.Context(), oldKey)
 	}
 	c.Status(http.StatusNoContent)
 }

@@ -17,7 +17,7 @@
 - [ ] T005 [US1] 在 `tests/01_decentralized_uploading/test_file_storage_workflows.py` 建立上传、返修、人工证据、区域渲染、清理和越权端到端失败用例。
 - [ ] T006 [US1] 改造 `backend/api/upload_tasks.py`、`backend/api/rag.py`、`backend/services/paper_revisions.py` 与 `backend/ingest/upload_tasks.py` 的引用读写及生命周期，保持 API 兼容。
 - [ ] T007 [US1] 改造 `backend/ingest/upload_jobs.py`、`document_regions.py`、`manual_evidence.py`、`document_shadow.py` 及 T001 登记的其他消费者，使用 materialize 和不可变持久产物。
-- [ ] T008 [US1] 在 `goserver/handlers/account.go`、`public_profile.go`、`governance.go` 接入头像存储并在 `goserver/handlers/avatar_storage_test.go` 验证替换、越权、旧引用与失败清理。
+- [x] T008 [US1] 在 `goserver/handlers/account.go`、`public_profile.go`、`governance.go` 接入头像存储并在 `goserver/handlers/avatar_storage_test.go` 验证替换、越权、旧引用与失败清理。证据：隔离 SQLite + 本地与真实 Garage 后端的 handler 用例通过，替换和删除后桶内无残留对象；见[验证记录](validation.md)。
 - [ ] T009 [US1] 在 `backend/ingest/upload_tasks.py` 和 `backend/services/paper_revisions.py` 收敛引用检查与清理并发控制，验证仍被正式论文/返修引用的对象不会删除。
 
 ## 阶段 4：US2——历史迁移（P1）
