@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import copy
-from pathlib import Path
-
-from backend.rag.config import settings
+from backend.storage.paths import resolve_file
 from .document_parsers import DocumentSource
 
 
@@ -13,8 +11,10 @@ def _files(session, snapshot):
     for item in snapshot.get("pdf_manifest") or []:
         if str(item.get("kind") or "").lower() != "pdf" or not item.get("stored_path"):
             continue
-        path = Path(item["stored_path"])
-        yield str(item["file_id"]), path if path.is_absolute() else settings.sc_wiki_data_dir / path, item.get("sha256")
+        yield (str(item["file_id"]), resolve_file(str(item["stored_path"]),
+               size=int(item.get("size") or 0), sha256=str(item.get("sha256") or ""),
+               media_type=str(item.get("media_type") or "application/pdf"),
+               namespace=str(snapshot.get("target_id") or "")), item.get("sha256"))
 
 
 def correct_pdf_source_pages(session, snapshot, results: dict) -> dict:

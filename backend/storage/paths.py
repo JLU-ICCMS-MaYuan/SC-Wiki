@@ -62,8 +62,13 @@ def resolve_file(key: str, *, size: int, sha256: str, media_type: str = "applica
     ref = FileRef(key, size, sha256, media_type)
     cache = _cache_root(namespace) / ref.sha256 / Path(ref.key).name
     if cache.is_file():
-        digest = hashlib.sha256(cache.read_bytes()).hexdigest()
-        if cache.stat().st_size == ref.size and digest == ref.sha256:
+        digest = hashlib.sha256()
+        actual_size = 0
+        with cache.open("rb") as stream:
+            while chunk := stream.read(1024 * 1024):
+                digest.update(chunk)
+                actual_size += len(chunk)
+        if actual_size == ref.size and digest.hexdigest() == ref.sha256:
             return cache
         cache.unlink()
     cache.parent.mkdir(parents=True, exist_ok=True, mode=0o700)

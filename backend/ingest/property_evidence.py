@@ -223,6 +223,7 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
     if not state.get('files') and str(state.get('file_kind') or '').lower() == 'pdf':
         snapshot['pdf_manifest'] = [{'file_id': 'main', 'role': 'main', 'kind': 'pdf',
             'stored_path': state.get('file_path'), 'sha256': state.get('file_sha256'),
+            'size': state.get('file_size'),
             'original_filename': state.get('filename')}]
     return snapshot
 
@@ -336,7 +337,8 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
     snapshot = complete_snapshot('paper', str(paper_id), records, chunks, paper_data)
     snapshot['review_state'] = [paper.review_status, str(paper.reviewed_at), paper.content_revision]
     snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',
-        stored_path=f.stored_path, sha256=f.sha256, original_filename=f.original_filename)
+        stored_path=f.stored_path, sha256=f.sha256, size=f.size,
+        media_type=f.media_type, original_filename=f.original_filename)
         for f in paper_files if f.paper_revision == paper.content_revision and
         f.original_filename and f.original_filename.lower().endswith('.pdf')]
     return snapshot

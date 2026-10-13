@@ -210,7 +210,8 @@ def revision_snapshot(session, revision_id, owner):
     snapshot = ev.complete_snapshot('revision', revision_id, records, chunks, saved.draft)
     snapshot['draft_version'] = saved.draft_version
     snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',
-        stored_path=f.stored_path, sha256=f.sha256, original_filename=f.original_filename)
+        stored_path=f.stored_path, sha256=f.sha256, size=f.size,
+        media_type=f.media_type, original_filename=f.original_filename)
         for f in paper_files if f.paper_revision == paper.content_revision and
         f.original_filename and f.original_filename.lower().endswith('.pdf')]
     return snapshot

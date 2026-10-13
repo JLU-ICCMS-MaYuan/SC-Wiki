@@ -326,8 +326,9 @@ def _manual_snapshots(target: str, target_id: str, user):
         if not manual.table_available(session):
             raise HTTPException(503, detail={"code": "manual_evidence_unavailable", "message": "人工证据存储尚未启用"})
     if target == "upload":
-        from backend.rag.config import settings
-        path = settings.sc_wiki_data_dir / "review_artifacts" / target_id / "result.json"
+        from backend.ingest.upload_tasks import available_published_path, artifact_path
+
+        path = available_published_path(target_id, artifact_path(target_id))
         artifact = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         ai_values = artifact.get("ai_values")
         baseline = ev.upload_snapshot(target_id, user.id, parsing_draft=ai_values) if isinstance(ai_values, dict) else {"records": []}
@@ -409,7 +410,7 @@ def get_manual_evidence_file(target: str, target_id: str, item_key: str, item_id
     try:
         with SessionLocal() as session:
             _, entry, path = manual.file_entry(session, snapshot, _manual_record_key(item_key), item_id)
-        background = BackgroundTask(path.unlink, missing_ok=True) if entry.get("storage_key") and manual.os.environ.get("FILE_STORAGE_BACKEND") == "s3" else None
+        background = BackgroundTask(path.unlink, missing_ok=True) if manual.os.environ.get("FILE_STORAGE_BACKEND") == "s3" else None
         return FileResponse(path, media_type=entry["media_type"], filename=entry["filename"],
                             content_disposition_type="inline", headers={"X-Content-Type-Options": "nosniff"},
                             background=background)

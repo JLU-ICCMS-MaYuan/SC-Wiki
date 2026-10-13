@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-from backend.rag.config import settings
+from backend.storage.paths import resolve_file
 from .document_parsers import DocumentSource
 
 
@@ -17,8 +15,11 @@ def _main_file(session, snapshot):
                  and str(item.get("kind") or "").lower() == "pdf"), None)
     if not file or not file.get("stored_path"):
         return None
-    path = Path(file["stored_path"])
-    return (path if path.is_absolute() else settings.sc_wiki_data_dir / path,
+    path = resolve_file(str(file["stored_path"]), size=int(file.get("size") or 0),
+                        sha256=str(file.get("sha256") or ""),
+                        media_type=str(file.get("media_type") or "application/pdf"),
+                        namespace=str(snapshot.get("target_id") or ""))
+    return (path,
             file.get("sha256"), str(file["file_id"]), file.get("original_filename"))
 
 

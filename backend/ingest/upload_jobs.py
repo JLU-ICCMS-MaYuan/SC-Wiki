@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import logging
 import re
@@ -32,6 +33,7 @@ from backend.ingest.upload_tasks import (
     markdown_path,
     save_draft,
     schedule_cleanup,
+    upload_task_lock,
     update_state,
     load_llm_config,
     delete_llm_config,
@@ -292,10 +294,35 @@ def _original_path(state: dict[str, Any]) -> Path:
         value = main.get("stored_path") if main else None
     if not value:
         raise RuntimeError("上传文件路径缺失")
+    from backend.storage.paths import object_mode, resolve_file
+
+    if object_mode():
+        main = next((item for item in state.get("files") or [] if item.get("role") == "main"),
+                    next(iter(state.get("files") or []), {}))
+        return resolve_file(
+            str(value), size=int(state.get("file_size") or main.get("size") or 0),
+            sha256=str(state.get("file_sha256") or main.get("sha256") or ""),
+            media_type=str(main.get("media_type") or "application/octet-stream"),
+            namespace=str(state.get("task_id") or ""),
+        )
     path = Path(str(value))
     if not path.is_file():
         raise RuntimeError("上传文件不存在或已清理")
     return path
+
+
+def _source_path(state: dict[str, Any], item: dict[str, Any], fallback: Path) -> Path:
+    value = str(item.get("stored_path") or fallback)
+    from backend.storage.paths import object_mode, resolve_file
+
+    if object_mode():
+        return resolve_file(
+            value, size=int(item.get("size") or state.get("file_size") or 0),
+            sha256=str(item.get("sha256") or state.get("file_sha256") or ""),
+            media_type=str(item.get("media_type") or "application/octet-stream"),
+            namespace=str(state.get("task_id") or ""),
+        )
+    return Path(value)
 
 
 def _ir_to_markdown(ir) -> str:
@@ -537,6 +564,14 @@ def _read_chunk(
         "page_end": getattr(chunk, "source_page_end", getattr(chunk, "source_page", None)),
     }
     _atomic_write_json(result_path, result)
+    from backend.storage.paths import object_mode, publish_replacement
+    if object_mode():
+        from backend.rag.config import settings
+
+        current = get_state(task_id) or {}
+        updated = publish_replacement(result_path, data_root=settings.sc_wiki_data_dir,
+                                      task_id=task_id, current=current.get("artifact_manifest"))
+        update_state(task_id, artifact_manifest=updated)
     return result
 
 
@@ -549,7 +584,16 @@ def _chunk_manifest_path(task_id: str, *, create: bool = True) -> Path:
 
 
 def _save_chunk_manifest(task_id: str, items: list[dict[str, Any]]) -> None:
-    _atomic_write_json(_chunk_manifest_path(task_id), {"items": items})
+    path = _chunk_manifest_path(task_id)
+    _atomic_write_json(path, {"items": items})
+    from backend.storage.paths import object_mode, publish_replacement
+    if object_mode():
+        from backend.rag.config import settings
+
+        current = get_state(task_id) or {}
+        updated = publish_replacement(path, data_root=settings.sc_wiki_data_dir,
+                                      task_id=task_id, current=current.get("artifact_manifest"))
+        update_state(task_id, artifact_manifest=updated)
 
 
 def _preview_source(chunk: dict[str, Any], evidence: Any = None) -> dict[str, Any]:
@@ -833,7 +877,9 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
     state = get_state(task_id)
     if not state:
         raise KeyError("上传任务不存在或已过期")
-    manifest_path = _chunk_manifest_path(task_id, create=False)
+    from backend.ingest.upload_tasks import available_published_path
+
+    manifest_path = available_published_path(task_id, _chunk_manifest_path(task_id, create=False))
     try:
         items = json.loads(manifest_path.read_text(encoding="utf-8")).get("items", [])
     except (OSError, json.JSONDecodeError):
@@ -850,6 +896,7 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
             path = _chunk_result_path(
                 task_id, int(item["index"]), item.get("cache_file_id"), create=False,
             )
+            path = available_published_path(task_id, path)
             try:
                 result = json.loads(path.read_text(encoding="utf-8"))
                 public_result = {
@@ -1599,6 +1646,17 @@ def sha256_file(path: Path) -> str:
 
 
 def _handle_duplicate(task_id: str, state: dict[str, Any], existing: Any) -> dict[str, Any]:
+    with upload_task_lock(task_id):
+        current = get_state(task_id)
+        if current and current.get("status") == "duplicate":
+            return current
+        return _handle_duplicate_locked(task_id, state, existing)
+
+
+def _handle_duplicate_locked(task_id: str, state: dict[str, Any], existing: Any) -> dict[str, Any]:
+    from backend.storage import FileRef, create_storage
+    from backend.storage.paths import object_mode
+
     source = _original_path(state)
     source_sha256 = str(state.get("file_sha256") or "") or sha256_file(source)
     existing_sha256 = str(getattr(existing, "main_sha256", None) or "")
@@ -1606,31 +1664,40 @@ def _handle_duplicate(task_id: str, state: dict[str, Any], existing: Any) -> dic
     shutil.rmtree(artifact_directory(task_id), ignore_errors=True)
     markdown_path(task_id).unlink(missing_ok=True)
 
-    candidate_path: Path | None = None
+    candidate_path: Path | str | None = None
     if same_file:
-        source.unlink(missing_ok=True)
+        if not object_mode():
+            source.unlink(missing_ok=True)
         action = "duplicate_deleted"
     else:
-        candidate_dir = data_path("upload_PDFs") / "candidates" / str(existing.id)
-        candidate_dir.mkdir(parents=True, exist_ok=True)
-        candidate_path = candidate_dir / f"{task_id}{source.suffix.lower()}"
-        shutil.move(str(source), str(candidate_path))
-        candidate_path.with_suffix(".json").write_text(
-            json.dumps(
-                {
-                    "existing_paper_id": existing.id,
-                    "doi": existing.doi,
-                    "task_id": task_id,
-                    "user_id": state.get("user_id"),
-                    "filename": state.get("filename"),
-                    "file_sha256": state.get("file_sha256") or sha256_file(candidate_path),
-                    "created_at": state.get("created_at"),
-                },
-                ensure_ascii=False,
-                indent=2,
-            ),
-            encoding="utf-8",
-        )
+        candidate_key = f"upload_PDFs/candidates/{existing.id}/{task_id}{source.suffix.lower()}"
+        metadata = {
+            "existing_paper_id": existing.id,
+            "doi": existing.doi,
+            "task_id": task_id,
+            "user_id": state.get("user_id"),
+            "filename": state.get("filename"),
+            "file_sha256": state.get("file_sha256") or sha256_file(source),
+            "created_at": state.get("created_at"),
+            "object_key": candidate_key,
+        }
+        if object_mode():
+            storage = create_storage()
+            with source.open("rb") as stream:
+                storage.put(candidate_key, stream, "application/octet-stream")
+            storage.put(f"upload_PDFs/candidates/{existing.id}/{task_id}.json",
+                        io.BytesIO(json.dumps(metadata, ensure_ascii=False).encode("utf-8")),
+                        "application/json")
+            candidate_path = candidate_key
+        else:
+            candidate_dir = data_path("upload_PDFs") / "candidates" / str(existing.id)
+            candidate_dir.mkdir(parents=True, exist_ok=True)
+            local_candidate = candidate_dir / f"{task_id}{source.suffix.lower()}"
+            shutil.move(str(source), str(local_candidate))
+            local_candidate.with_suffix(".json").write_text(
+                json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8",
+            )
+            candidate_path = local_candidate
         action = "candidate_saved"
 
     can_view = existing.review_status in {"approved", "pending"} or (
@@ -1657,6 +1724,11 @@ def _handle_duplicate(task_id: str, state: dict[str, Any], existing: Any) -> dic
         candidate_attachment=str(candidate_path) if candidate_path else None,
         state_schema_version=UPLOAD_STATE_SCHEMA_VERSION,
     )
+    if object_mode() and same_file:
+        main_key = str(state.get("file_path") or "")
+        if main_key:
+            create_storage().delete(FileRef(main_key, int(state.get("file_size") or 0),
+                                            source_sha256, "application/octet-stream"))
     _schedule_terminal_cleanup(task_id)
     return duplicate
 
@@ -1700,6 +1772,9 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
             refresh_comparison(task_id)
         except Exception:
             logging.getLogger(__name__).warning("Shadow 对照更新失败 task=%s", task_id)
+        from backend.storage.paths import clear_namespace
+
+        clear_namespace(task_id)
 
 
 def _process_upload_task(task_id: str) -> dict[str, Any]:
@@ -1721,12 +1796,13 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         multi_file = bool(state.get("files"))
         sources = state.get("files") or [{
             "file_id": "main", "role": "main", "original_filename": state.get("filename"),
-            "kind": state.get("file_kind"), "stored_path": str(source),
+            "kind": state.get("file_kind"), "stored_path": state.get("file_path") or str(source),
+            "size": state.get("file_size"), "sha256": state.get("file_sha256"),
         }]
         citation_extraction: dict[str, Any] | None = None
         citation_source = next(
             (
-                Path(str(item.get("stored_path") or source))
+                _source_path(state, item, source)
                 for item in sources
                 if item.get("role") == "main"
                 and str(item.get("kind") or Path(str(item.get("stored_path") or source)).suffix.lstrip(".")).lower() == "pdf"
@@ -1750,7 +1826,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         for file_item in sources:
             file_item["parser_profile"] = state.get("parser_profile") or "legacy"
             _ensure_not_cancelled(task_id)
-            file_source = Path(str(file_item.get("stored_path") or source))
+            file_source = _source_path(state, file_item, source)
             file_state = {
                 **state,
                 "file_id": file_item.get("file_id") or "main",
@@ -2127,10 +2203,25 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             encoding="utf-8",
         )
         save_draft(task_id, draft)
+        artifact_manifest = None
+        from backend.storage.paths import object_mode, publish_tree
+        if object_mode():
+            from backend.rag.config import settings
+            from uuid import uuid4
+
+            run_id = uuid4().hex
+            artifact_manifest = [
+                *publish_tree(artifact_directory(task_id), data_root=settings.sc_wiki_data_dir,
+                              task_id=task_id, run_id=run_id),
+                *publish_tree(markdown_path(task_id), data_root=settings.sc_wiki_data_dir,
+                              task_id=task_id, run_id=run_id),
+                *publish_tree(data_path("parsed_markdown") / task_id, data_root=settings.sc_wiki_data_dir,
+                              task_id=task_id, run_id=run_id),
+            ]
         ready = update_state(
             task_id, status="ready", stage="ready", stage_index=5, processing_status="succeeded",
             processing_error=None, completed_chunks=len(all_chunks), total_chunks=len(all_chunks),
-            duplicate=False, partial_draft=None,
+            duplicate=False, partial_draft=None, artifact_manifest=artifact_manifest,
         )
         if not state.get("is_shadow"):
             _start_automatic_evidence_check(task_id, int(state["user_id"]))

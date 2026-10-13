@@ -70,19 +70,27 @@ async def _load_current_main_pdf(
     if not _is_current_approved(paper):
         return paper, None, "论文不是当前已审核版本"
 
-    stored_path = await session.scalar(
-        select(PaperFile.stored_path).where(
+    stored_file = await session.scalar(
+        select(PaperFile).where(
             PaperFile.paper_id == paper.id,
             PaperFile.paper_revision == paper.content_revision,
             PaperFile.role == "main",
         )
     )
-    if not stored_path:
+    if stored_file is None or not stored_file.stored_path:
         return paper, None, "当前版本没有主文件"
 
-    pdf_path = Path(str(stored_path))
-    if not pdf_path.is_absolute():
-        pdf_path = data_dir / pdf_path
+    from backend.storage.paths import object_mode, resolve_file
+
+    if object_mode():
+        pdf_path = resolve_file(str(stored_file.stored_path), size=int(stored_file.size),
+                                sha256=str(stored_file.sha256),
+                                media_type=str(stored_file.media_type or "application/pdf"),
+                                namespace=str(paper_id))
+    else:
+        pdf_path = Path(str(stored_file.stored_path))
+        if not pdf_path.is_absolute():
+            pdf_path = data_dir / pdf_path
     if pdf_path.suffix.lower() != ".pdf":
         return paper, None, "当前版本的主文件不是 PDF"
     if not pdf_path.is_file():

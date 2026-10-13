@@ -285,6 +285,8 @@ def _task_for_user(task_id: str, user: User) -> dict[str, Any]:
 
 async def _save_task_upload(file: UploadFile, user: User, file_kind: str) -> dict[str, Any]:
     from backend.ingest.upload_jobs import sha256_file
+    from backend.storage import FileConflict, FileStorageUnavailable, create_storage
+    from backend.storage.paths import object_mode
     from backend.ingest.upload_tasks import (
         cleanup_task_files,
         create_task,
@@ -313,13 +315,27 @@ async def _save_task_upload(file: UploadFile, user: User, file_kind: str) -> dic
         await file.close()
 
     relative_path = f"upload_PDFs/{task_id}/{filename}"
-    update_state(
-        task_id,
-        file_path=str(destination),
-        source_file_path=relative_path,
-        file_size=total,
-        file_sha256=sha256_file(destination),
-    )
+    storage_ref = None
+    try:
+        file_path = str(destination)
+        digest = sha256_file(destination)
+        if object_mode():
+            with destination.open("rb") as stream:
+                storage_ref = create_storage().put(relative_path, stream, file.content_type or "application/octet-stream")
+            file_path = storage_ref.key
+        update_state(task_id, file_path=file_path, source_file_path=relative_path,
+                     file_size=total, file_sha256=digest)
+    except FileConflict as exc:
+        raise _upload_error(409, "file_reference_conflict", "文件标识已被不同内容占用") from exc
+    except FileStorageUnavailable as exc:
+        raise _upload_error(503, "file_storage_unavailable", "文件存储暂时不可用") from exc
+    except Exception:
+        if storage_ref is not None:
+            create_storage().delete(storage_ref)
+        raise
+    finally:
+        if object_mode():
+            destination.unlink(missing_ok=True)
     try:
         enqueue_processing(task_id)
         schedule_cleanup(task_id)
@@ -780,17 +796,31 @@ def _artifact_by_paper_id(
     paper_id: int,
     task_id: str | None = None,
 ) -> tuple[str, Path, dict[str, Any]] | None:
-    from backend.ingest.upload_tasks import data_path
+    from backend.ingest.upload_tasks import data_path, read_artifact_path
+    from backend.storage import FileIntegrityError, FileNotFound, FileStorageUnavailable
+    from backend.storage.paths import object_mode
 
     root = data_path("review_artifacts")
-    candidates = [root / task_id / "result.json"] if task_id else root.glob("*/result.json")
+    if object_mode():
+        if not task_id:
+            return None
+        try:
+            candidates = [read_artifact_path(task_id)]
+        except (FileNotFoundError, FileNotFound):
+            return None
+        except FileIntegrityError as exc:
+            raise _upload_error(409, "review_artifact_integrity_mismatch", "审核文件完整性校验失败") from exc
+        except FileStorageUnavailable as exc:
+            raise _upload_error(503, "file_storage_unavailable", "文件存储暂时不可用") from exc
+    else:
+        candidates = [root / task_id / "result.json"] if task_id else root.glob("*/result.json")
     for result_path in candidates:
         try:
             payload = json.loads(result_path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             continue
         if int(payload.get("paper_id") or 0) == paper_id:
-            return result_path.parent.name, result_path, payload
+            return task_id or result_path.parent.name, result_path, payload
 
     return None
 
@@ -818,6 +848,44 @@ def _validate_review_snapshot(
 
 def _candidate_attachments(paper_id: int) -> list[dict[str, Any]]:
     from backend.ingest.upload_tasks import data_path
+    from backend.storage import FileIntegrityError, create_storage
+    from backend.storage.paths import object_mode
+
+    if object_mode():
+        storage = create_storage()
+        prefix = f"upload_PDFs/candidates/{paper_id}/"
+        attachments = []
+        for key in storage.list_prefix(prefix):
+            if not key.endswith(".json"):
+                continue
+            try:
+                ref = storage.describe(key)
+                if ref.size > 64 * 1024:
+                    continue
+                with storage.materialize(ref) as verified:
+                    metadata = json.loads(verified.read_text(encoding="utf-8"))
+                object_key = metadata.get("object_key")
+                if not object_key:
+                    # 历史候选附件的元数据只记录 task_id，迁移时对象键保留旧相对路径。
+                    related = [item for item in storage.list_prefix(prefix + Path(key).stem)
+                               if item != key and not item.endswith(".json")]
+                    if len(related) != 1:
+                        continue
+                    object_key = related[0]
+                candidate = storage.describe(str(object_key))
+            except (FileIntegrityError, KeyError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
+                continue
+            if candidate.sha256 != metadata.get("file_sha256"):
+                continue
+            attachments.append({
+                "id": str(metadata.get("task_id") or Path(key).stem),
+                "filename": metadata.get("filename") or Path(candidate.key).name,
+                "file_sha256": candidate.sha256,
+                "file_size": candidate.size,
+                "uploaded_by_user_id": metadata.get("user_id"),
+                "created_at": metadata.get("created_at"),
+            })
+        return attachments
 
     root = data_path("upload_PDFs") / "candidates" / str(paper_id)
     if not root.is_dir():
@@ -850,6 +918,33 @@ def _candidate_attachment_path(paper_id: int, attachment_id: str) -> tuple[Path,
     if not re.fullmatch(r"[0-9a-f]{32}", attachment_id):
         return None
     from backend.ingest.upload_tasks import data_path
+    from backend.storage import FileIntegrityError, create_storage
+    from backend.storage.paths import object_mode, resolve_known_key
+
+    if object_mode():
+        storage = create_storage()
+        metadata_key = f"upload_PDFs/candidates/{paper_id}/{attachment_id}.json"
+        try:
+            metadata_ref = storage.describe(metadata_key)
+        except FileIntegrityError:
+            return None
+        try:
+            if metadata_ref.size > 64 * 1024:
+                return None
+            with storage.materialize(metadata_ref) as verified:
+                metadata = json.loads(verified.read_text(encoding="utf-8"))
+        except (FileIntegrityError, UnicodeDecodeError, json.JSONDecodeError):
+            return None
+        key = str(metadata.get("object_key") or "")
+        if not key:
+            related = [item for item in storage.list_prefix(f"upload_PDFs/candidates/{paper_id}/{attachment_id}")
+                       if item != metadata_key and not item.endswith(".json")]
+            if len(related) != 1:
+                return None
+            key = related[0]
+        if not key.startswith(f"upload_PDFs/candidates/{paper_id}/{attachment_id}."):
+            return None
+        return resolve_known_key(key, namespace=attachment_id), Path(str(metadata.get("filename") or key)).name
 
     root = data_path("upload_PDFs") / "candidates" / str(paper_id)
     metadata_path = root / f"{attachment_id}.json"
@@ -1525,6 +1620,8 @@ async def upload_structure_candidate(
     from backend.ingest.upload_jobs import _normalize_draft
     from backend.ingest.upload_contracts import structure_format_for_filename
     from backend.ingest.upload_tasks import get_draft, save_draft, task_directory, update_state
+    from backend.storage import FileConflict, FileStorageUnavailable, create_storage
+    from backend.storage.paths import object_mode
     from backend.services.structure_candidates import StructureCandidateError, build_structure_candidate
 
     state = _task_for_user(task_id, current_user)
@@ -1573,13 +1670,22 @@ async def upload_structure_candidate(
     except (StructureCandidateError, ValueError) as exc:
         raise _upload_error(400, "structure_validation_failed", str(exc)) from exc
 
-    from backend.database import SessionLocal
-    from backend.ingest.scientific_evidence import register_structure_origin
-    with SessionLocal.begin() as origin_session:
-        register_structure_origin(origin_session, 'upload', task_id, candidate, current_user.id, current_user.username, filename, raw)
-
     destination = task_directory(task_id) / f"{file_id}{Path(filename).suffix or '.POSCAR'}"
     destination.write_bytes(raw)
+    key = f"upload_PDFs/{task_id}/{destination.name}"
+    storage_ref = None
+    stored_path = str(destination)
+    if object_mode():
+        try:
+            with destination.open("rb") as source:
+                storage_ref = create_storage().put(key, source, file.content_type or "application/octet-stream")
+        except FileConflict as exc:
+            destination.unlink(missing_ok=True)
+            raise _upload_error(409, "file_reference_conflict", "文件标识已被不同内容占用") from exc
+        except FileStorageUnavailable as exc:
+            destination.unlink(missing_ok=True)
+            raise _upload_error(503, "file_storage_unavailable", "文件存储暂时不可用") from exc
+        stored_path = storage_ref.key
     files = list(state.get("files") or [])
     previous_files = list(files)
     files.append({
@@ -1594,13 +1700,18 @@ async def upload_structure_candidate(
         "upload_status": "completed",
         "extraction_status": "completed",
         "error": None,
-        "stored_path": str(destination),
-        "source_file_path": f"upload_PDFs/{task_id}/{destination.name}",
+        "stored_path": stored_path,
+        "source_file_path": key,
     })
     candidates = [item for item in normalized_draft.get("structure_candidates") or [] if isinstance(item, dict)]
     candidates.append(candidate)
     normalized_draft["structure_candidates"] = candidates
     try:
+        from backend.database import SessionLocal
+        from backend.ingest.scientific_evidence import register_structure_origin
+        with SessionLocal.begin() as origin_session:
+            register_structure_origin(origin_session, 'upload', task_id, candidate,
+                                      current_user.id, current_user.username, filename, raw)
         update_state(task_id, files=files)
         save_draft(task_id, normalized_draft)
     except Exception:
@@ -1608,8 +1719,12 @@ async def upload_structure_candidate(
             update_state(task_id, files=previous_files)
         except Exception:
             pass
-        destination.unlink(missing_ok=True)
+        if storage_ref is not None:
+            create_storage().delete(storage_ref)
         raise
+    finally:
+        if object_mode():
+            destination.unlink(missing_ok=True)
     return {"ok": True, "data": candidate}
 
 
@@ -1649,7 +1764,7 @@ async def use_manual_upload_draft(
     current_user: User = Depends(get_current_user),
 ):
     from backend.ingest.upload_jobs import empty_draft
-    from backend.ingest.upload_tasks import artifact_path, save_draft, update_state
+    from backend.ingest.upload_tasks import artifact_path, publish_artifact_path, save_draft, update_state
 
     state = _task_for_user(task_id, current_user)
     if state.get("processing_status") != "failed":
@@ -1670,6 +1785,7 @@ async def use_manual_upload_draft(
         ),
         encoding="utf-8",
     )
+    artifact_manifest = publish_artifact_path(task_id)
     update_state(
         task_id,
         status="ready",
@@ -1679,6 +1795,7 @@ async def use_manual_upload_draft(
         processing_error=None,
         error_code=None,
         manual_mode=True,
+        artifact_manifest=artifact_manifest,
     )
     return {"ok": True, "data": draft}
 
@@ -1986,9 +2103,11 @@ def _record_submitted_upload(
     *,
     paper_revision: int = 1,
 ) -> None:
-    from backend.ingest.upload_tasks import artifact_path, update_state
+    from backend.ingest.upload_tasks import artifact_path, publish_artifact_path, read_artifact_path, update_state
 
-    result_path = artifact_path(task_id)
+    from backend.storage.paths import object_mode
+
+    result_path = read_artifact_path(task_id) if object_mode() else artifact_path(task_id)
     artifact = json.loads(result_path.read_text(encoding="utf-8")) if result_path.exists() else {}
     canonical_ai_values = artifact.get("ai_values") or draft
     if isinstance(canonical_ai_values, dict):
@@ -2005,12 +2124,15 @@ def _record_submitted_upload(
         "user_values": {key: value for key, value in draft.items() if key != "ai_original"},
         "evidence": artifact.get("evidence") or {},
     }
-    temporary = result_path.with_suffix(".json.tmp")
+    destination = artifact_path(task_id)
+    temporary = destination.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
-    temporary.replace(result_path)
+    temporary.replace(destination)
+    artifact_manifest = publish_artifact_path(task_id, submitted=True)
     update_state(
         task_id, status="submitted", paper_id=paper_id,
         review_status="pending", submission_status="submitted",
+        artifact_manifest=artifact_manifest,
     )
 
 
@@ -2402,15 +2524,16 @@ async def _reextract_main_pdf_references(session, paper: Paper) -> dict[str, Any
     """为即将生成的新版本重新解析主 PDF，避免沿用旧版本引用事实。"""
     from backend.rag.config import settings
     from backend.services.citation_graph import extract_references_from_pdf
+    from backend.storage.paths import object_mode, resolve_file
 
-    stored_path = await session.scalar(
-        select(PaperFile.stored_path).where(
+    stored_file = await session.scalar(
+        select(PaperFile).where(
             PaperFile.paper_id == paper.id,
             PaperFile.paper_revision == paper.content_revision,
             PaperFile.role == "main",
         )
     )
-    if not stored_path:
+    if stored_file is None or not stored_file.stored_path:
         return {
             "status": "unavailable",
             "parser_name": "grobid",
@@ -2419,9 +2542,15 @@ async def _reextract_main_pdf_references(session, paper: Paper) -> dict[str, Any
             "references": [],
         }
 
-    pdf_path = Path(str(stored_path))
-    if not pdf_path.is_absolute():
-        pdf_path = settings.sc_wiki_data_dir / pdf_path
+    if object_mode():
+        pdf_path = resolve_file(str(stored_file.stored_path), size=int(stored_file.size),
+                                sha256=str(stored_file.sha256),
+                                media_type=str(stored_file.media_type or "application/pdf"),
+                                namespace=str(paper.id))
+    else:
+        pdf_path = Path(str(stored_file.stored_path))
+        if not pdf_path.is_absolute():
+            pdf_path = settings.sc_wiki_data_dir / pdf_path
     if pdf_path.suffix.lower() != ".pdf":
         return {
             "status": "unavailable",
@@ -2731,6 +2860,39 @@ async def delete_paper_review_artifact(
         raise _upload_error(409, "review_artifact_still_pending", "论文仍在待审核状态")
     if context["review_status"] not in {"approved", "rejected"}:
         raise _upload_error(409, "review_artifact_not_terminal", "论文审核状态不允许清理")
+    from backend.storage import FileIntegrityError, FileNotFound, FileRef, create_storage
+    from backend.storage.paths import object_mode
+    if object_mode():
+        from backend.ingest.upload_tasks import get_state, read_artifact_path, update_state
+
+        task_id = str(context.get("task_id") or "")
+        if not task_id:
+            return {"ok": True, "paper_id": paper_id, "cleaned": False}
+        state = get_state(task_id) or {}
+        prefix = f"review_artifacts/{task_id}/"
+        current = state.get("artifact_manifest") or []
+        review_files = [item for item in current if str(item.get("logical_path") or "").startswith(prefix)]
+        storage = create_storage()
+        stable_keys = storage.list_prefix(prefix)
+        if review_files or stable_keys:
+            try:
+                payload = json.loads(read_artifact_path(task_id).read_text(encoding="utf-8"))
+            except (FileNotFoundError, FileNotFound):
+                payload = None  # 上次清理中断；继续完成幂等删除。
+            except (FileIntegrityError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+                raise _upload_error(409, "review_artifact_integrity_mismatch", "审核文件完整性校验失败") from exc
+            if payload is not None:
+                _validate_review_snapshot(context, task_id, payload)
+            elif stable_keys:
+                raise _upload_error(409, "review_artifact_integrity_mismatch", "审核文件完整性校验失败")
+        keys = {str(item["key"]) for item in review_files}
+        keys.update(key for key in storage.list_prefix(f"runs/{task_id}/") if prefix in key)
+        keys.update(stable_keys)  # 已迁移的旧审核产物保留旧相对键。
+        for key in sorted(keys):
+            storage.delete(FileRef(key, 0, "0" * 64, "application/octet-stream"))
+        if review_files:
+            update_state(task_id, artifact_manifest=[item for item in current if item not in review_files])
+        return {"ok": True, "paper_id": paper_id, "cleaned": bool(keys or review_files)}
     found = _artifact_by_paper_id(paper_id, context.get("task_id"))
     if not found:
         return {"ok": True, "paper_id": paper_id, "cleaned": False}

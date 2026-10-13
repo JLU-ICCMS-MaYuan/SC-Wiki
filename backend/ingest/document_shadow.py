@@ -21,26 +21,38 @@ def _enqueue_shadow_locked(parent_id, config):
     from rq.job import Callback
     from . import upload_tasks as tasks
     from .upload_jobs import process_upload_task, sha256_file
+    from backend.storage import create_storage
+    from backend.storage.paths import object_mode, resolve_file
 
     parent = tasks.get_state(parent_id)
     if not parent or not parent.get("shadow_profile") or parent.get("shadow_task_id"):
         return
     shadow_id = uuid4().hex
     directory = tasks.task_directory(shadow_id)
+    stored_refs = []
     try:
         files = []
         sources = parent.get("files") or [{"file_id":"main", "role":"main", "kind":parent.get("file_kind"),
-            "original_filename":parent.get("filename"), "stored_path":parent.get("file_path"), "sha256":parent.get("file_sha256")}]
+            "original_filename":parent.get("filename"), "stored_path":parent.get("file_path"),
+            "sha256":parent.get("file_sha256"), "size":parent.get("file_size")}]
         for source in sources:
-            original = Path(source["stored_path"])
+            original = (resolve_file(str(source["stored_path"]), size=int(source.get("size") or 0),
+                                     sha256=str(source.get("sha256") or ""), namespace=parent_id)
+                        if object_mode() else Path(source["stored_path"]))
             if sha256_file(original) != source["sha256"]:
                 raise ValueError("Shadow 来源文件摘要已变化")
             destination = directory / original.name
             shutil.copyfile(original, destination)
             if sha256_file(destination) != source["sha256"]:
                 raise ValueError("Shadow 文件快照不一致")
-            files.append({**source, "stored_path":str(destination),
-                          "source_file_path":f"upload_PDFs/{shadow_id}/{destination.name}"})
+            key = f"upload_PDFs/{shadow_id}/{destination.name}"
+            stored_path = str(destination)
+            if object_mode():
+                with destination.open("rb") as stream:
+                    ref = create_storage().put(key, stream, str(source.get("media_type") or "application/octet-stream"))
+                stored_refs.append(ref)
+                stored_path = ref.key
+            files.append({**source, "stored_path":stored_path, "source_file_path":key})
         if not files or not any(item.get("kind") == "pdf" for item in files):
             shutil.rmtree(directory)
             return
@@ -48,7 +60,8 @@ def _enqueue_shadow_locked(parent_id, config):
         now = int(time.time())
         shadow = dict(task_id=shadow_id, user_id=parent["user_id"], is_shadow=True, parent_task_id=parent_id,
             files=files, filename=main["original_filename"], file_kind=main["kind"], file_path=main["stored_path"],
-            file_sha256=main["sha256"], source_file_path=main["source_file_path"],
+            file_sha256=main["sha256"], file_size=main.get("size"),
+            source_file_path=main["source_file_path"],
             parser_profile=parent["shadow_profile"], parser_runs=[], reading_state=None,
             status="queued", stage="saving_file", stage_index=1, stage_total=5,
             processing_status="processing", state_schema_version=1, revision=1, llm_provider=config.provider,
@@ -61,6 +74,10 @@ def _enqueue_shadow_locked(parent_id, config):
             result_ttl=tasks.TASK_TTL, failure_ttl=tasks.TASK_TTL, on_failure=Callback(shadow_failure))
         tasks.update_state(shadow_id, job_id=job.id)
     except Exception:
+        if stored_refs:
+            store = create_storage()
+            for ref in stored_refs:
+                store.delete(ref)
         shutil.rmtree(directory, ignore_errors=True)
         tasks.redis_client().delete(tasks.task_key(shadow_id), tasks.llm_config_key(shadow_id))
         raise
@@ -109,7 +126,7 @@ def refresh_comparison(task_id):
             return
         rows = {}
         for name, identifier, current in (("legacy", parent_id, parent), ("new", shadow_id, shadow)):
-            path = tasks.artifact_path(identifier)
+            path = tasks.available_published_path(identifier, tasks.artifact_path(identifier))
             artifact = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
             rows[name] = {"task_id":identifier, "status":current["status"], "error_code":current.get("error_code"),
                 "parser_profile":current["parser_profile"], "records":_scientific_records(artifact.get("ai_values") or {})}
@@ -120,10 +137,20 @@ def refresh_comparison(task_id):
             "runs":rows, "legacy_records":sum(baseline.values()), "new_records":sum(candidate.values()),
             "same_records":sum((baseline & candidate).values()), "legacy_only":sum((baseline-candidate).values()),
             "new_only":sum((candidate-baseline).values()),
-            "has_both_outputs": all(tasks.artifact_path(i).is_file() for i in (parent_id, shadow_id))}
+            "has_both_outputs": all(tasks.available_published_path(i, tasks.artifact_path(i)).is_file()
+                                    for i in (parent_id, shadow_id))}
         from .upload_jobs import _atomic_write_json
-        _atomic_write_json(tasks.artifact_directory(parent_id) / "shadow-comparison.json", report)
-        tasks.update_state(parent_id, shadow_status=shadow["status"])
+        comparison = tasks.artifact_directory(parent_id) / "shadow-comparison.json"
+        _atomic_write_json(comparison, report)
+        from backend.storage.paths import object_mode, publish_replacement
+        if object_mode():
+            from backend.rag.config import settings
+
+            manifest = publish_replacement(comparison, data_root=settings.sc_wiki_data_dir,
+                                           task_id=parent_id, current=parent.get("artifact_manifest"))
+            tasks.update_state(parent_id, shadow_status=shadow["status"], artifact_manifest=manifest)
+        else:
+            tasks.update_state(parent_id, shadow_status=shadow["status"])
 
 
 def parent_cancelled(state):

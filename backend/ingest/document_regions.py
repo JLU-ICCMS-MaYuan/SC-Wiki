@@ -7,7 +7,7 @@ import re
 from fastapi import HTTPException
 from sqlalchemy import select
 from backend import models
-from backend.rag.config import settings
+from backend.storage.paths import resolve_file
 from .document_ir import DocumentIR
 from .document_parsers import DocumentSource
 from .pdf_evidence_crops import DPI, render_evidence_crops
@@ -15,27 +15,31 @@ from .pdf_evidence_crops import DPI, render_evidence_crops
 
 def region_document(session, target, target_id, file_id, user):
     if target == "upload":
-        from backend.ingest.upload_tasks import get_state, data_path
+        from backend.ingest.upload_tasks import available_published_path, get_state, data_path
         state = get_state(target_id)
         if not state or state.get("is_shadow"):
             raise HTTPException(404, detail="上传任务不存在")
         if state.get("user_id") != user.id and not (user.role in {"admin","superadmin"} and user.is_approved):
             raise HTTPException(403, detail="无权查看此文档")
-        files = state.get("files") or [{"file_id":"main","stored_path":state.get("file_path"),"sha256":state.get("file_sha256")}]
+        files = state.get("files") or [{"file_id":"main","stored_path":state.get("file_path"),
+                                         "sha256":state.get("file_sha256"), "size":state.get("file_size")}]
         source = next((f for f in files if f["file_id"] == file_id), None)
         if source is None:
             raise HTTPException(404, detail="来源文件不存在")
         # file_id 来自已认证的服务端 manifest，不能把客户端路径交给文件系统。
         ir_path = data_path("review_artifacts") / target_id / "document_ir" / f"{source['file_id']}.json"
+        ir_path = available_published_path(target_id, ir_path)
         if not ir_path.is_file():
             if not source.get("stored_path"):
                 return None, None, None
-            path = Path(source["stored_path"])
+            path = resolve_file(str(source["stored_path"]), size=int(source.get("size") or 0),
+                                sha256=str(source.get("sha256") or ""), namespace=target_id)
             return None, path if path.suffix.lower() == ".pdf" else None, source.get("sha256")
         ir = DocumentIR.model_validate_json(ir_path.read_text(encoding="utf-8"))
         if ir.source_file_id != source["file_id"]:
             raise HTTPException(409, detail="文档来源已变化")
-        return ir, Path(source["stored_path"]), source.get("sha256")
+        return ir, resolve_file(str(source["stored_path"]), size=int(source.get("size") or 0),
+                                sha256=str(source.get("sha256") or ""), namespace=target_id), source.get("sha256")
     if target == "revision":
         from backend.services.paper_revisions import revision_snapshot
         revision_snapshot(session, target_id, user.id)  # 复用返修所有权和版本核对。
@@ -62,9 +66,8 @@ def region_document(session, target, target_id, file_id, user):
         models.PaperDocumentParserRun.paper_revision == paper.content_revision).order_by(models.PaperDocumentParserRun.id.desc()))
     if not file.stored_path:
         return None, None, None
-    path = Path(file.stored_path)
-    if not path.is_absolute():
-        path = settings.sc_wiki_data_dir / path
+    path = resolve_file(str(file.stored_path), size=int(file.size), sha256=str(file.sha256),
+                        media_type=str(file.media_type or "application/pdf"), namespace=str(paper_id))
     if run is None:
         return None, path if path.suffix.lower() == ".pdf" else None, file.sha256
     return DocumentIR.model_validate(run.document_json), path, file.sha256

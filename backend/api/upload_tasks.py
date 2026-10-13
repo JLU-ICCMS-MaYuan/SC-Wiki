@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any, Literal
+from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import JSONResponse
@@ -149,6 +150,8 @@ async def upload_task_file(
     current_user: User = Depends(get_current_user),
 ):
     from backend.ingest.upload_jobs import sha256_file
+    from backend.storage import FileConflict, FileStorageUnavailable, create_storage
+    from backend.storage.paths import object_mode
     from backend.ingest.upload_tasks import (
         enqueue_processing,
         lock_uploaded_manifest,
@@ -167,6 +170,8 @@ async def upload_task_file(
     suffix = Path(declared["original_filename"]).suffix.lower()
     destination = task_directory(task_id) / f"{file_id}{suffix}"
     total = 0
+    reference = None
+    referenced = False
     try:
         with destination.open("wb") as stream:
             while chunk := await file.read(1024 * 1024):
@@ -175,29 +180,36 @@ async def upload_task_file(
                     raise _error(413, "FILE_TOO_LARGE", "文件超过 50 MB 限制")
                 stream.write(chunk)
         digest = sha256_file(destination)
+        key = (f"upload_PDFs/{task_id}/{file_id}/{uuid4().hex}{suffix}"
+               if object_mode() else f"upload_PDFs/{task_id}/{destination.name}")
+        stored_path = str(destination)
+        if object_mode():
+            with destination.open("rb") as source:
+                reference = create_storage().put(key, source, file.content_type or "application/octet-stream")
+            stored_path = reference.key
         state = update_task_file(
             task_id,
             file_id,
             upload_status="completed",
             size=total,
             sha256=digest,
-            stored_path=str(destination),
-            source_file_path=f"upload_PDFs/{task_id}/{destination.name}",
+            stored_path=stored_path,
+            source_file_path=key,
         )
-        if declared.get("role") == "main":
-            state = update_state(
-                task_id,
-                filename=declared["original_filename"],
-                file_kind=declared["kind"],
-                file_path=str(destination),
-                source_file_path=f"upload_PDFs/{task_id}/{destination.name}",
-                file_size=total,
-                file_sha256=digest,
-            )
+        referenced = True
+    except FileConflict as exc:
+        raise _error(409, "FILE_REFERENCE_CONFLICT", "文件标识已被不同内容占用") from exc
+    except FileStorageUnavailable as exc:
+        raise _error(503, "FILE_STORAGE_UNAVAILABLE", "文件存储暂时不可用") from exc
     except Exception:
-        destination.unlink(missing_ok=True)
+        if reference is not None and not referenced:
+            create_storage().delete(reference)
+        if not object_mode():
+            destination.unlink(missing_ok=True)
         raise
     finally:
+        if object_mode():
+            destination.unlink(missing_ok=True)
         await file.close()
 
     queued = False

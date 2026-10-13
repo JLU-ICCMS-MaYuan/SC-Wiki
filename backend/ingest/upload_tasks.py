@@ -19,6 +19,7 @@ from rq.job import Job
 from sqlalchemy.exc import SQLAlchemyError
 
 from backend.rag.config import settings
+from backend.storage import FileStorageUnavailable
 from backend.rag.llm_context import (
     LlmConfig, UserCredentialError, get_llm_config, set_llm_config,
     reset_llm_config, validate_base_url,
@@ -194,6 +195,9 @@ def create_task(
         "parser_runs": [],
         "reading_state": None,
     }
+    from backend.storage.paths import object_mode
+    if object_mode():
+        state["file_contract_version"] = 1
     if rollout and rollout.stage == "shadow" and parser_profile == "legacy":
         state["shadow_profile"] = rollout.default_profile
     client = redis_client()
@@ -392,6 +396,15 @@ def update_task_file(task_id: str, file_id: str, **changes: Any) -> dict[str, An
                 ):
                     raise ValueError("任务内存在内容完全相同的重复文件")
                 target.update(changes)
+                if target.get("role") == "main" and changes.get("upload_status") == "completed" and target.get("stored_path"):
+                    state.update({
+                        "filename": target.get("original_filename"),
+                        "file_kind": target.get("kind"),
+                        "file_path": target.get("stored_path"),
+                        "source_file_path": target.get("source_file_path"),
+                        "file_size": target.get("size"),
+                        "file_sha256": target.get("sha256"),
+                    })
                 state = apply_state_changes(
                     state, now=int(time.time()), files=files, last_progress_at=int(time.time()),
                 )
@@ -503,6 +516,76 @@ def artifact_path(task_id: str) -> Path:
     return artifact_directory(task_id) / "result.json"
 
 
+def read_published_path(task_id: str, logical: str) -> Path:
+    """从已提交的产物清单读取当前版本，不读取其他节点的本地目录。"""
+    from backend.storage.paths import object_mode, resolve_file, resolve_known_key
+
+    path = settings.sc_wiki_data_dir / logical
+    if not object_mode():
+        return path
+    state = get_state(task_id) or {}
+    item = next((item for item in state.get("artifact_manifest") or []
+                 if item.get("logical_path") == logical), None)
+    if item is None:
+        # 仅限对象化之前建立的旧任务；历史迁移把旧相对路径复制为同名对象键。
+        if state.get("file_contract_version") != 1 and logical.startswith((
+            f"review_artifacts/{task_id}/", f"parsed_markdown/{task_id}",
+        )):
+            return resolve_known_key(logical, namespace=task_id)
+        raise FileNotFoundError("解析产物尚未持久化")
+    return resolve_file(str(item["key"]), size=int(item["size"]),
+                        sha256=str(item["sha256"]),
+                        media_type=str(item.get("media_type") or "application/json"),
+                        namespace=task_id)
+
+
+def read_artifact_path(task_id: str) -> Path:
+    return read_published_path(task_id, f"review_artifacts/{task_id}/result.json")
+
+
+def available_published_path(task_id: str, path: Path) -> Path:
+    """解析中的本节点文件直接使用；跨节点读取已发布对象版本。"""
+    from backend.storage.paths import object_mode
+
+    if not object_mode():
+        return path
+    logical = path.relative_to(settings.sc_wiki_data_dir).as_posix()
+    state = get_state(task_id) or {}
+    if state.get("status") in {"ready", "submitted", "duplicate"} and any(
+        item.get("logical_path") == logical for item in state.get("artifact_manifest") or []
+    ):
+        return read_published_path(task_id, logical)
+    if path.is_file():
+        return path
+    try:
+        return read_published_path(task_id, logical)
+    except FileNotFoundError:
+        return path
+
+
+def publish_artifact_path(task_id: str, *, submitted: bool = False) -> list[dict[str, object]]:
+    """正式送审快照使用稳定键，使 Redis 任务过期后仍可按任务 ID 找回。"""
+    from backend.storage import create_storage
+    from backend.storage.paths import object_mode
+    from backend.storage.paths import publish_replacement
+
+    state = get_state(task_id) or {}
+    if submitted and object_mode():
+        path = artifact_path(task_id)
+        logical = f"review_artifacts/{task_id}/result.json"
+        with path.open("rb") as source:
+            ref = create_storage().put(logical, source, "application/json")
+        return [item for item in state.get("artifact_manifest") or []
+                if item.get("logical_path") != logical] + [{
+                    "logical_path": logical, "key": ref.key, "size": ref.size,
+                    "sha256": ref.sha256, "media_type": ref.media_type,
+                }]
+    return publish_replacement(
+        artifact_path(task_id), data_root=settings.sc_wiki_data_dir,
+        task_id=task_id, current=state.get("artifact_manifest"),
+    )
+
+
 def _validated_task_id(task_id: str) -> str:
     if not TASK_ID_PATTERN.fullmatch(task_id):
         raise ValueError("上传任务 ID 格式无效")
@@ -545,6 +628,15 @@ def cleanup_transient_data(
         except OSError:
             pass
 
+    from backend.storage.paths import object_mode
+    if object_mode() and not preserve_review_snapshot:
+        from backend.storage import FileRef, create_storage
+
+        storage = create_storage()
+        for prefix in (f"runs/{task_id}/", f"review_artifacts/{task_id}/"):
+            for key in storage.list_prefix(prefix):
+                storage.delete(FileRef(key, 0, "0" * 64, "application/octet-stream"))
+
     if cleanup_context.processing_job_id:
         _delete_processing_job(cleanup_context.processing_job_id)
     client = redis_client()
@@ -556,6 +648,17 @@ def cleanup_transient_data(
 def cleanup_unsubmitted_files(task_id: str) -> None:
     """删除未提交任务的上传文件和两类 Markdown 布局。"""
     task_id = _validated_task_id(task_id)
+    from backend.storage.paths import object_mode
+    if object_mode():
+        from backend.storage import FileRef, create_storage
+
+        storage = create_storage()
+        for prefix in (f"upload_PDFs/{task_id}/", f"parsed_markdown/{task_id}/"):
+            for key in storage.list_prefix(prefix):
+                storage.delete(FileRef(key, 0, "0" * 64, "application/octet-stream"))
+        for key in storage.list_prefix(f"parsed_markdown/{task_id}.md"):
+            if key == f"parsed_markdown/{task_id}.md":
+                storage.delete(FileRef(key, 0, "0" * 64, "application/octet-stream"))
     shutil.rmtree(data_path("upload_PDFs") / task_id, ignore_errors=True)
     markdown_root = data_path("parsed_markdown")
     (markdown_root / f"{task_id}.md").unlink(missing_ok=True)
@@ -575,6 +678,15 @@ def cleanup_duplicate_candidate(task_id: str, existing_paper_id: int | None) -> 
     paper_id = int(existing_paper_id)
     if paper_id <= 0:
         raise ValueError("已有论文 ID 格式无效")
+    from backend.storage.paths import object_mode
+    if object_mode():
+        from backend.storage import FileRef, create_storage
+
+        storage = create_storage()
+        prefix = f"upload_PDFs/candidates/{paper_id}/{task_id}"
+        for key in storage.list_prefix(prefix):
+            storage.delete(FileRef(key, 0, "0" * 64, "application/octet-stream"))
+        return
     root = data_path("upload_PDFs") / "candidates" / str(paper_id)
     if not root.is_dir():
         return
@@ -746,6 +858,8 @@ def cleanup_upload_task(
             cleanup_duplicate_candidate(task_id, context.existing_paper_id)
     except TimeoutError:
         # 提交请求持有生命周期锁时延期，避免在事务执行中删除文件。
+        _enqueue_cleanup(context, delay=60)
+    except FileStorageUnavailable:
         _enqueue_cleanup(context, delay=60)
 
 

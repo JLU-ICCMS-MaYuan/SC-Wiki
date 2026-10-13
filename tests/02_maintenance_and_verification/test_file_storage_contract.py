@@ -85,3 +85,59 @@ def test_s3_protocol_roundtrip_and_conflict() -> None:
         store.delete(ref)
         with pytest.raises(FileIntegrityError):
             store.head(ref)
+
+
+def test_object_key_resolves_to_verified_node_cache(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    boto3 = pytest.importorskip("boto3")
+    moto = pytest.importorskip("moto")
+    from backend.storage.paths import clear_namespace, resolve_file
+
+    with moto.mock_aws():
+        boto3.client("s3", region_name="us-east-1").create_bucket(Bucket="scwiki-storage-test")
+        monkeypatch.setenv("FILE_STORAGE_BACKEND", "s3")
+        monkeypatch.setenv("S3_ENDPOINT_URL", "https://s3.amazonaws.com")
+        monkeypatch.setenv("S3_BUCKET", "scwiki-storage-test")
+        monkeypatch.setenv("S3_ACCESS_KEY_ID", "test")
+        monkeypatch.setenv("S3_SECRET_ACCESS_KEY", "test")
+        monkeypatch.setenv("FILE_STORAGE_TMP_DIR", str(tmp_path))
+        from backend.storage import create_storage
+
+        ref = create_storage().put("upload_PDFs/abc123/source.pdf", io.BytesIO(b"private PDF"), "application/pdf")
+        path = resolve_file(ref.key, size=ref.size, sha256=ref.sha256, namespace="abc123")
+        assert path.read_bytes() == b"private PDF"
+        path.write_bytes(b"corrupt")
+        assert resolve_file(ref.key, size=ref.size, sha256=ref.sha256, namespace="abc123").read_bytes() == b"private PDF"
+        clear_namespace("abc123")
+        assert not path.exists()
+
+
+def test_published_review_artifact_uses_immutable_versions(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    boto3 = pytest.importorskip("boto3")
+    moto = pytest.importorskip("moto")
+    from types import SimpleNamespace
+    from backend.ingest import upload_tasks
+    from backend.storage.paths import publish_replacement, publish_tree
+
+    with moto.mock_aws():
+        boto3.client("s3", region_name="us-east-1").create_bucket(Bucket="scwiki-storage-test")
+        monkeypatch.setenv("FILE_STORAGE_BACKEND", "s3")
+        monkeypatch.setenv("S3_ENDPOINT_URL", "https://s3.amazonaws.com")
+        monkeypatch.setenv("S3_BUCKET", "scwiki-storage-test")
+        monkeypatch.setenv("S3_ACCESS_KEY_ID", "test")
+        monkeypatch.setenv("S3_SECRET_ACCESS_KEY", "test")
+        monkeypatch.setenv("FILE_STORAGE_TMP_DIR", str(tmp_path / "scratch"))
+        monkeypatch.setattr(upload_tasks, "settings", SimpleNamespace(sc_wiki_data_dir=tmp_path))
+        task_id = "a" * 32
+        source = tmp_path / "review_artifacts" / task_id / "result.json"
+        source.parent.mkdir(parents=True)
+        source.write_text('{"version": 1}')
+        manifest = publish_tree(source, data_root=tmp_path, task_id=task_id, run_id="first")
+        state = {"status": "ready", "artifact_manifest": manifest}
+        monkeypatch.setattr(upload_tasks, "get_state", lambda _: state)
+        source.unlink()
+        assert upload_tasks.read_artifact_path(task_id).read_text() == '{"version": 1}'
+        source.write_text('{"version": 2}')
+        state["artifact_manifest"] = publish_replacement(source, data_root=tmp_path, task_id=task_id,
+                                                           current=manifest)
+        assert state["artifact_manifest"][0]["key"] != manifest[0]["key"]
+        assert upload_tasks.read_artifact_path(task_id).read_text() == '{"version": 2}'
