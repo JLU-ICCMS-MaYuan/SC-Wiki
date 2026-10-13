@@ -8,13 +8,13 @@
 
 1. 论文上传区始终显示在任务中心上方，不会因正在查看或解析其他任务而消失。用户可拖拽或点击选择一组文件；这组文件共同创建一个任务并填写一张表单。默认第一份合法文件为正文，其余为附件，开始上传前可调整角色、逐项移除或清空本地清单。
 2. 页面先声明完整文件清单和角色。每个文件不超过 50 MB（50 MiB）；非法类型、超限和本地重复文件逐项拒绝，不影响同批其他合法文件。Python 执行精确大小校验，Nginx canonical 上传路由允许 51 MB multipart 请求体。
-3. 浏览器最多并行上传 3 个文件。Python 将原文件保存到 `/data/upload_PDFs/<task_id>`；所有文件完成后原子锁定清单并只入队一次。
+3. 浏览器最多并行上传 3 个文件。当前本机 S3 模式下，Python 校验并上传原文件后才把对象键写入 Redis 文件清单；本机临时上传副本随后删除。所有文件完成后原子锁定清单并只入队一次；浏览器不直连对象桶。
 4. RQ Worker 按文件提取正文，然后执行 LLM 分段阅读、LLM 全文汇总和等待用户校对。部署默认使用 2 个 Worker 进程处理两篇论文，可通过 `UPLOAD_LLM_CONCURRENCY` 调整。
 5. 文本提取后、分段 LLM 前，系统用 DOI、标题页和开头文本检查正文与附件的一致性。信息缺失不阻塞；明确冲突显示警告并要求用户在提交前确认。
-6. Markdown 保存到 `/data/parsed_markdown`；每个分段先建立状态清单，结果采用临时文件加原子替换保存。任务详情提供“AI 临时表单”和“分段解析与证据”页签；无分段时显示提取或等待状态。后台分类证据用 `current_paper` 和 `referenced_work` 区分本文工作与被引用工作，普通草稿只返回本文研究对象；引用材料不再作为普通字段或最终科学数据输出。
+6. Markdown 在 Worker 节点生成；S3 模式下完成结果按版本上传对象存储后，任务状态才发布产物清单。每个分段先建立状态清单，结果采用临时文件加原子替换保存。任务详情提供“AI 临时表单”和“分段解析与证据”页签；无分段时显示提取或等待状态。后台分类证据用 `current_paper` 和 `referenced_work` 区分本文工作与被引用工作，普通草稿只返回本文研究对象；引用材料不再作为普通字段或最终科学数据输出。
 7. 解析中的临时表单只读并持续合并结果。`reading` 和 `summarizing` 阶段的分类字段显示“候选尚未汇总”，不把正常的分段差异标成正式冲突；标题、DOI 等非分类单值字段出现不同候选时仍标记“有冲突”并并列显示，不静默覆盖。内容超过统一展示高度的字段卡片默认收起，短字段直接完整显示；每张长卡片可通过文字按钮独立展开或收起，完整候选和来源证据始终保留，轮询更新与窗口变化会重新判断溢出，任务切换不会继承前一任务的展开状态。任务进入 `ready` 后同一页签原地切换为可编辑最终草稿。（[Issue #47](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/47)）
 8. 用户停止编辑 5 秒后自动保存，也可立即保存。草稿保存只做结构性检查，半成品以及空的论文级 `material_families[]` 可以正常落盘，业务字段的完整校验留到提交时执行；提交要求所有 Paper type 至少选择一个论文级 Material family，Paper type 及理论子分类规则不变。论文基本信息区还保存单选 `superconductor_kind`（`conventional`、`unconventional`、`unknown`）；材料状态卡片不再重复设置 family 或 Superconductor type，只保留结构家族 `structure_families[]`（界面中的 `More type labels`）、不同元素种类数、压力和材料维度。目录候选由数据库驱动，界面统一显示规范中文名。AI 分类只进入审核上下文，不在提交阶段写正式目录 ID。元素种类数由服务器根据化学式重算；用户手动编辑后通过 `element_count_locked` 锁定，后续读写保留手动值。未锁定时随化学式重算，严格解析失败回退宽松元素提取，再失败则保留已有值（#52 FR-004）。论文只报告空间群而没有完整 CIF/POSCAR 时，符号与国际群号分别保存在 reported 字段；`phase_label` 不再生成或写入；λ 和 ωlog 属于 `calculation_context`；Tc 属于 `tc_results`；其余数据才进入普通 `properties`。点击提交后，一篇论文、全部 `paper_files`、正式文本块、Evidence 和条件化科学实体图在一个 MySQL 事务中写入并进入 `pending`。提交写入失败时任务状态回滚为 `ready` 并保留 `submission_status=failed`，草稿不丢失、详情页恢复可编辑表单，用户可修正后重新提交，不会卡在 `submitting`。（[Issue #55](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/55)、[Issue #79](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/79)、[Issue #80](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/80)）
-9. MySQL 事务成功后，系统保留 PDF、附件、组合及分文件 Markdown 和精简 `result.json` 审核快照；删除 Redis state/draft、用户任务索引、RQ 处理 Job、分段 JSON 和其他 LLM 中间产物。快照写入失败时不执行该临时清理，以便后续恢复。
+9. MySQL 事务成功后，系统在对象存储中保留 PDF、附件、组合及分文件 Markdown 和可按任务 ID 找回的 `result.json` 审核快照；清理 Redis state/draft、用户任务索引、RQ 处理 Job、分段 JSON 和其他 LLM 中间产物。快照写入失败时不执行该临时清理，以便后续恢复。
 10. 管理员对照 AI 建议、用户值和原文证据审核，在同一页面认可建议、改选已有分类或输入新名称。只有批准事务会写入人工确认的材料/结构家族 ID，必要的新目录项也在该事务中创建；审核事件保存分类上下文和最终选择快照。快照同时绑定 `task_id`、`paper_id` 和 `paper_revision`，只有与论文当前 revision 一致的 pending 快照可以读取。`approved` 会同步发布 Qdrant 后幂等删除临时快照；`rejected` 幂等删除临时快照；`pending` 保留临时快照。
 
 ## 已拒绝论文返修
