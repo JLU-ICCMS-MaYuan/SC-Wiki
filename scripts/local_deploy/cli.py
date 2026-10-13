@@ -306,6 +306,8 @@ def pack(root: Path, args):
         raise ValueError('源码有未提交改动；请完成提交后再执行 make frozen')
     commit = environment.run(['git', 'rev-parse', 'HEAD'], cwd=root, capture=True).strip()
     values = config.read_config(root)
+    if (os.environ.get('FILE_STORAGE_BACKEND') or values.get('FILE_STORAGE_BACKEND') or 'local') != 'local':
+        raise ValueError('make frozen 仅支持本地文件存储；S3 实例请使用生产备份和对象清单')
     config.validate_local(values, root)
     prefix = environment.runtime_prefix(root)
     reexec(prefix)

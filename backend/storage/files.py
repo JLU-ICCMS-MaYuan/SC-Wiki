@@ -19,6 +19,10 @@ class FileIntegrityError(Exception):
     """持久文件与已保存的摘要不一致。"""
 
 
+class FileNotFound(FileIntegrityError):
+    """文件键尚不存在。"""
+
+
 class FileStorageUnavailable(Exception):
     """存储服务不可用。异常正文不得包含连接参数。"""
 
@@ -50,6 +54,8 @@ class FileStorage(Protocol):
     def put(self, key: str, source: BinaryIO, media_type: str) -> FileRef: ...
     def open(self, ref: FileRef) -> BinaryIO: ...
     def head(self, ref: FileRef) -> None: ...
+    def describe(self, key: str) -> FileRef: ...
+    def list_prefix(self, prefix: str) -> list[str]: ...
     def delete(self, ref: FileRef) -> None: ...
 
     @contextmanager
@@ -132,14 +138,36 @@ class LocalFileStorage(_MaterializeMixin):
         try:
             return self._path(ref.key).open("rb")
         except FileNotFoundError as exc:
-            raise FileIntegrityError("文件不存在") from exc
+            raise FileNotFound("文件不存在") from exc
 
     def head(self, ref: FileRef) -> None:
         with self.open(ref) as source:
             _verify(ref, source)
 
+    def describe(self, key: str) -> FileRef:
+        import mimetypes
+
+        path = self._path(key)
+        try:
+            with path.open("rb") as source:
+                digest = hashlib.sha256()
+                size = 0
+                while chunk := source.read(1024 * 1024):
+                    digest.update(chunk)
+                    size += len(chunk)
+        except FileNotFoundError as exc:
+            raise FileNotFound("文件不存在") from exc
+        return FileRef(key, size, digest.hexdigest(), mimetypes.guess_type(key)[0] or "application/octet-stream")
+
     def delete(self, ref: FileRef) -> None:
         self._path(ref.key).unlink(missing_ok=True)
+
+    def list_prefix(self, prefix: str) -> list[str]:
+        directory = self._path(prefix.rstrip("/"))
+        if not directory.is_dir():
+            return []
+        return sorted(path.relative_to(self.root).as_posix() for path in directory.rglob("*")
+                      if path.is_file() and not path.is_symlink())
 
 
 class S3FileStorage(_MaterializeMixin):
@@ -173,6 +201,20 @@ class S3FileStorage(_MaterializeMixin):
                 size += len(chunk)
             ref = FileRef(key, size, digest.hexdigest(), media_type)
             staged.seek(0)
+            # 部分 S3 兼容服务忽略 If-None-Match；先核验已有键，业务键另由 UUID 隔离并发。
+            try:
+                existing = self.describe(key)
+            except FileNotFound:
+                pass
+            else:
+                if existing.size == ref.size and existing.sha256 == ref.sha256:
+                    try:
+                        with self.materialize(ref):
+                            pass
+                    except FileIntegrityError as exc:
+                        raise FileConflict("已有对象内容损坏") from exc
+                    return ref
+                raise FileConflict("文件键已被不同内容占用")
             try:
                 self.client.put_object(Bucket=self.bucket, Key=key, Body=staged,
                                        ContentLength=size, ContentType=media_type,
@@ -182,7 +224,12 @@ class S3FileStorage(_MaterializeMixin):
                     self.head(ref)
                     return ref
                 raise FileStorageUnavailable("文件存储暂时不可用") from exc
-        self.head(ref)
+        try:
+            with self.materialize(ref):
+                pass
+        except FileIntegrityError as exc:
+            self.delete(ref)
+            raise FileStorageUnavailable("对象写入后校验失败") from exc
         return ref
 
     @staticmethod
@@ -196,7 +243,7 @@ class S3FileStorage(_MaterializeMixin):
         except Exception as exc:
             code = getattr(exc, "response", {}).get("Error", {}).get("Code", "")
             if code in {"NoSuchKey", "404"}:
-                raise FileIntegrityError("文件不存在") from exc
+                raise FileNotFound("文件不存在") from exc
             raise FileStorageUnavailable("文件存储暂时不可用") from exc
 
     def head(self, ref: FileRef) -> None:
@@ -205,16 +252,42 @@ class S3FileStorage(_MaterializeMixin):
         except Exception as exc:
             code = getattr(exc, "response", {}).get("Error", {}).get("Code", "")
             if code in {"NoSuchKey", "404"}:
-                raise FileIntegrityError("文件不存在") from exc
+                raise FileNotFound("文件不存在") from exc
             raise FileStorageUnavailable("文件存储暂时不可用") from exc
         if result["ContentLength"] != ref.size or result.get("Metadata", {}).get("sha256") != ref.sha256:
             raise FileConflict("文件键已被不同内容占用")
+
+    def describe(self, key: str) -> FileRef:
+        validate_key(key)
+        try:
+            result = self.client.head_object(Bucket=self.bucket, Key=key)
+        except Exception as exc:
+            code = getattr(exc, "response", {}).get("Error", {}).get("Code", "")
+            if code in {"NoSuchKey", "404"}:
+                raise FileNotFound("文件不存在") from exc
+            raise FileStorageUnavailable("文件存储暂时不可用") from exc
+        digest = result.get("Metadata", {}).get("sha256")
+        if not digest:
+            raise FileIntegrityError("文件缺少内容摘要")
+        return FileRef(key, result["ContentLength"], digest,
+                       result.get("ContentType") or "application/octet-stream")
 
     def delete(self, ref: FileRef) -> None:
         try:
             self.client.delete_object(Bucket=self.bucket, Key=ref.key)
         except Exception as exc:
             raise FileStorageUnavailable("文件存储暂时不可用") from exc
+
+    def list_prefix(self, prefix: str) -> list[str]:
+        validate_key(prefix.rstrip("/"))
+        keys = []
+        try:
+            paginator = self.client.get_paginator("list_objects_v2")
+            for page in paginator.paginate(Bucket=self.bucket, Prefix=prefix):
+                keys.extend(item["Key"] for item in page.get("Contents", []))
+        except Exception as exc:
+            raise FileStorageUnavailable("文件存储暂时不可用") from exc
+        return sorted(keys)
 
 
 def create_storage(*, local_root: Path | None = None) -> FileStorage:

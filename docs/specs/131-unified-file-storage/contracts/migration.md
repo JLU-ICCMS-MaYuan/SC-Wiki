@@ -7,10 +7,10 @@ python -m backend.scripts.migrate_file_storage scan --source-root PATH --manifes
 python -m backend.scripts.migrate_file_storage copy --manifest PATH
 python -m backend.scripts.migrate_file_storage verify --manifest PATH
 python -m backend.scripts.migrate_file_storage switch --manifest PATH --apply
-python -m backend.scripts.migrate_file_storage rollback --manifest PATH --apply
+python -m backend.scripts.migrate_file_storage rollback --manifest PATH --apply --before-new-writes
 ```
 
-`scan` 只读；`copy` 只写目标对象和迁移日志；`verify` 完整回读内容校验；`switch` 与 `rollback` 无 `--apply` 时只输出变更计划。输入路径支持空格。出口码 0 成功、2 前置/契约错误、3 外部存储错误、4 完整性/引用冲突；日志逐项脱敏。
+`scan` 只读源数据库与 Redis，并写权限 0600 的私有迁移清单；`copy` 只写目标对象和迁移日志；`verify` 完整回读内容校验；`switch` 与 `rollback` 无 `--apply` 时只输出变更计划。实际切换要求 `SCWIKI_MAINTENANCE_MODE=1`，回退另要求 `--before-new-writes`，表示目标尚未开放新写入；工具不能凭这个标志独立证明停写，运维须先核对入口、Worker 和队列。输入路径支持空格。出口码 0 成功、2 前置/契约错误、3 外部存储错误、4 完整性/引用冲突；日志逐项脱敏。
 
 ## 迁移步骤
 

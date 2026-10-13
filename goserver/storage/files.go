@@ -156,6 +156,17 @@ func (f *s3Files) Put(ctx context.Context, key string, content []byte, mediaType
 	if !validKey(key) {
 		return ErrInvalidKey
 	}
+	// 部分 S3 兼容服务忽略条件写入；先检查已有对象，新键由随机身份隔离并发。
+	existing, readErr := f.Get(ctx, key)
+	if readErr == nil {
+		if bytes.Equal(existing, content) {
+			return nil
+		}
+		return ErrConflict
+	}
+	if !errors.Is(readErr, os.ErrNotExist) {
+		return readErr
+	}
 	sum := sha256.Sum256(content)
 	_, err := f.client.PutObject(ctx, &s3.PutObjectInput{
 		Bucket: aws.String(f.bucket), Key: aws.String(key), Body: bytes.NewReader(content),
@@ -163,6 +174,10 @@ func (f *s3Files) Put(ctx context.Context, key string, content []byte, mediaType
 		Metadata: map[string]string{"sha256": hex.EncodeToString(sum[:])}, IfNoneMatch: aws.String("*"),
 	})
 	if err == nil {
+		stored, readErr := f.Get(ctx, key)
+		if readErr != nil || !bytes.Equal(stored, content) {
+			return ErrUnavailable
+		}
 		return nil
 	}
 	var apiErr smithy.APIError

@@ -62,7 +62,19 @@ func TestS3Protocol(t *testing.T) {
 	if endpoint == "" {
 		t.Skip("未配置隔离 S3 服务")
 	}
-	files, err := NewS3(endpoint, "us-east-1", "scwiki-storage-test", "test", "test", "path")
+	region := os.Getenv("SCWIKI_TEST_S3_REGION")
+	if region == "" {
+		region = "us-east-1"
+	}
+	access := os.Getenv("SCWIKI_TEST_S3_ACCESS_KEY")
+	secret := os.Getenv("SCWIKI_TEST_S3_SECRET_KEY")
+	if access == "" {
+		access = "test"
+	}
+	if secret == "" {
+		secret = "test"
+	}
+	files, err := NewS3(endpoint, region, "scwiki-storage-test", access, secret, "path")
 	if err != nil {
 		t.Fatal(err)
 	}

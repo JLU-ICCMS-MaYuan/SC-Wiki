@@ -42,6 +42,8 @@ def scan_registered_files(root: Path, references: set[str]) -> list[InventoryFil
         if directory.is_symlink():
             raise FileInventoryError(f"业务目录是符号链接：{name}")
         for path in directory.rglob("*"):
+            if path.name == ".DS_Store" or path.name.startswith("._"):
+                continue
             relative = path.relative_to(root).as_posix()
             if path.is_symlink() or not path.resolve().is_relative_to(root):
                 raise FileInventoryError(f"发现越界或符号链接：{relative}")

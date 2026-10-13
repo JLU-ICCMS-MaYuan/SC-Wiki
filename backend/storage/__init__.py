@@ -3,6 +3,7 @@
 from .files import (
     FileConflict,
     FileIntegrityError,
+    FileNotFound,
     FileRef,
     FileStorage,
     FileStorageUnavailable,
@@ -12,6 +13,7 @@ from .files import (
 __all__ = [
     "FileConflict",
     "FileIntegrityError",
+    "FileNotFound",
     "FileRef",
     "FileStorage",
     "FileStorageUnavailable",
