@@ -223,7 +223,12 @@
           "zero_boundaries_thz": [
             0,
             55
-          ]
+          ],
+          "zero_reference_band_thz": [
+            53.5,
+            54.25
+          ],
+          "zero_reference_note": "人工核对 Figure 5 顶部沿零轴的绿色平直部分；用于估计轴遮挡后的可见零值像素，不依据正文 λ/ωlog 调参"
         },
         {
           "id": "lambda",
@@ -477,7 +482,12 @@
           "zero_boundaries_thz": [
             0,
             55
-          ]
+          ],
+          "zero_reference_band_thz": [
+            53.5,
+            54.25
+          ],
+          "zero_reference_note": "人工核对 Figure 5 顶部沿零轴的绿色平直部分；用于估计轴遮挡后的可见零值像素，不依据正文 λ/ωlog 调参"
         },
         {
           "id": "lambda",

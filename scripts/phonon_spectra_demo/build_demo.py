@@ -11,14 +11,17 @@ import io
 import json
 from pathlib import Path
 import sys
+from collections import Counter
 
 import numpy as np
 from PIL import Image
 import pymupdf
 from ase.spacegroup import crystal
+from ase.data import chemical_symbols
 import spglib
 
 from digitize import LinearAxis, extract_curve, normalize_dos, spectral_integrals
+from quality import zero_baseline_candidate, cumulative_moments
 
 HERE = Path(__file__).resolve().parent
 
@@ -74,7 +77,7 @@ def csv_text(result: dict) -> str:
               "pixel_low", "pixel_high", "observed_amplitude", "reconstructed_amplitude",
               "conditional_normalized_dos", "unit", "normalized_unit", "normalization_status",
               "normalization_accepted", "primitive_atoms", "normalization_target_modes", "point_status",
-              "detection_mode", "review_status",
+              "detection_mode", "zero_baseline_candidate_amplitude", "zero_baseline_candidate_reason", "review_status",
               "training_ready", "source_sha256", "pdf_page", "figure"]
     writer = csv.DictWriter(buf, fieldnames=fields)
     writer.writeheader()
@@ -82,7 +85,9 @@ def csv_text(result: dict) -> str:
         candidate = state["dos_normalization_candidate"]
         for curve in state["curves"]:
             normalized = candidate.get("components", {}).get(curve["projection"])
+            baseline = state.get("precision", {}).get("zero_baseline_candidate", {})
             for i, p in enumerate(curve["points"]):
+                has_baseline = curve["kind"] == "alpha2f" and baseline.get("status") == "conditional_candidate"
                 writer.writerow(dict(case_id=result["case_id"], material_state=state["id"],
                     formula=state["formula"], phase=state["phase"], pressure_gpa=state["pressure_gpa"],
                     curve=curve["id"], kind=curve["kind"], projection=curve["projection"],
@@ -96,6 +101,8 @@ def csv_text(result: dict) -> str:
                     primitive_atoms=state.get("structure", {}).get("primitive_atoms"),
                     normalization_target_modes=candidate.get("target_modes") if curve["kind"] == "phonon_dos" else None,
                     point_status=p["status"], detection_mode=p.get("detection_mode"),
+                    zero_baseline_candidate_amplitude=baseline["amplitude"][i] if has_baseline else None,
+                    zero_baseline_candidate_reason=baseline["point_reasons"][i] if has_baseline else None,
                     review_status=curve["review_status"],
                     training_ready=False, source_sha256=result["source"]["paper_sha256"],
                     pdf_page=result["source"]["figure"]["pdf_page"], figure=result["source"]["figure"]["label"]))
@@ -116,7 +123,7 @@ def build(config: dict, pdf: Path, supplement: Path) -> tuple[dict, bytes]:
                                   python=sys.version.split()[0],
                                   software={n: importlib.metadata.version(n) for n in
                                             ("numpy", "pillow", "pymupdf", "ase", "spglib")},
-                                  mode="semi_automatic_digitization", algorithm_version="chromatic_recovery_v2",
+                                  mode="semi_automatic_digitization", algorithm_version="precision_audit_v3",
                                   business_database_writes=False),
                   calibration_manifest=config, material_states=[], training_ready=False)
     for state_spec in config["material_states"]:
@@ -147,6 +154,42 @@ def build(config: dict, pdf: Path, supplement: Path) -> tuple[dict, bytes]:
         observed = [p for p in cumulative["points"] if p["observed_amplitude"] is not None]
         end = observed[-1]
         reference = state_spec["reference"]
+        alpha_spec = next(c for c in state_spec["curves"] if c["kind"] == "alpha2f")
+        baseline = zero_baseline_candidate(rgb, alpha, alpha_spec)
+        if baseline["status"] == "conditional_candidate":
+            base_integral = baseline["integral"]
+            baseline["raw_minus_candidate_lambda"] = integrals["lambda_integral"] - base_integral["lambda_integral"]
+            baseline["lambda_difference_pct"] = 100 * (base_integral["lambda_integral"] / reference["lambda"] - 1)
+            baseline["omega_log_difference_pct"] = 100 * (base_integral["omega_log_k"] / reference["omega_log_k"] - 1)
+        try:
+            moments = cumulative_moments(
+                [p["frequency_thz"] for p in cumulative["points"]],
+                [p["reconstructed_amplitude"] for p in cumulative["points"]])
+            moments["omega_log_difference_pct"] = 100 * (moments["omega_log_k"] / reference["omega_log_k"] - 1)
+            moments["endpoint_lambda_difference_pct"] = 100 * (moments["cumulative_endpoint"] / reference["lambda"] - 1)
+        except ValueError as exc:
+            moments = dict(status="unavailable", reason=str(exc))
+        precision = dict(zero_baseline_candidate=baseline, cumulative_moment=moments,
+                         automatic_checks=dict(
+                             all_curves_continuous=all(c["point_counts"]["missing"] == 0 for c in curves),
+                             source_hash_verified=True,
+                             zero_reference_valid=baseline["status"] == "conditional_candidate",
+                             independent_cumulative_available=moments["status"] == "diagnostic_only"),
+                         scientific_acceptance="requires_user_review",
+                         unresolved=["DOS 投影共同尺度尚待核实", "零基线候选含分辨率以下幅值按零处理的假设",
+                                     "累计谱矩不包含第一个可读正频点以下区间", "原图裁边无法由增加像素恢复"])
+        species_counts = Counter(chemical_symbols[z] for z in structure["atomic_numbers"])
+        areas = norm.get("component_mode_integrals", {})
+        if set(areas) == set(species_counts):
+            precision["projection_mode_check"] = dict(
+                status="conditional_diagnostic",
+                expected={k: 3 * count for k, count in species_counts.items()},
+                measured=areas,
+                relative_difference_pct={k: 100 * (areas[k] / (3 * count) - 1)
+                                         for k, count in species_counts.items()},
+                assumption="仅在完整、共同尺度的正交笛卡尔元素投影定义下适用；不把各分波分别强制缩放到目标")
+        else:
+            precision["projection_mode_check"] = dict(status="unavailable", reason="无法对应完整元素投影")
         diagnostics = dict(**integrals,
                            lambda_reported=reference["lambda"], omega_log_reported_k=reference["omega_log_k"],
                            lambda_difference_pct=100 * (integrals["lambda_integral"] / reference["lambda"] - 1),
@@ -164,7 +207,8 @@ def build(config: dict, pdf: Path, supplement: Path) -> tuple[dict, bytes]:
         result["material_states"].append(dict(
             **{k: state_spec[k] for k in ("id", "formula", "phase", "pressure_gpa")},
             structure=structure, reference=reference, curves=curves,
-            dos_normalization_candidate=norm, diagnostics=diagnostics, training_ready=False))
+            dos_normalization_candidate=norm, diagnostics=diagnostics,
+            precision=precision, training_ready=False))
     return result, figure
 
 
@@ -190,7 +234,17 @@ def main() -> None:
                                             clipped_frequencies_thz=c["clipped_frequencies_thz"]) for c in s["curves"]],
                                normalization={k: v for k, v in s["dos_normalization_candidate"].items()
                                               if k not in ("frequency_thz", "total", "components")},
-                               diagnostics=s["diagnostics"]) for s in result["material_states"]])
+                               diagnostics=s["diagnostics"],
+                               precision=dict(
+                                   zero_baseline_candidate={k: v for k, v in s["precision"]["zero_baseline_candidate"].items()
+                                                            if k not in ("frequency_thz", "amplitude", "point_reasons")},
+                                   cumulative_moment={k: v for k, v in s["precision"]["cumulative_moment"].items()
+                                                      if k not in ("monotone_frequency_thz", "monotone_cumulative")},
+                                   automatic_checks=s["precision"]["automatic_checks"],
+                                   scientific_acceptance=s["precision"]["scientific_acceptance"],
+                                   projection_mode_check=s["precision"]["projection_mode_check"],
+                                   unresolved=s["precision"]["unresolved"]))
+                          for s in result["material_states"]])
     html = (HERE / "template.html").read_text(encoding="utf-8")
     # JSON 与文献元数据不得闭合脚本标签；图和 CSV 通过 base64 嵌入。
     html = html.replace("__DATA_JSON__", payload.replace("<", "\\u003c"))

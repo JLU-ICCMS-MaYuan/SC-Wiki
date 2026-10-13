@@ -11,3 +11,5 @@
 H/S 投影权重和共尺度未证实时不生成 accepted 归一化。即使展示 3N 条件预览，training_ready 仍为 false。review_status 不由下载行为改变。
 
 断点修复版本以 provenance.algorithm_version=chromatic_recovery_v2 标识。补读到的真实暗色点仍为 observed，同时 detection_mode=chromatic_recovery；图框平台端点使用 edge_continuation，原始观测为空。图表、JSON 和 CSV 使用同一完整序列，不允许仅在 SVG 上跳过 null 连线。无依据长缺口仍保留 null。
+
+精度核验版本为 precision_audit_v3，兼容原始曲线数据。可选 zero_reference_band_thz 必须由原图核对，并通过至少五个带色行、窄带和近零轴检查；不满足则 candidate.status=unavailable，不自动选择其他频段。新增“α²F（零基线候选）”查看项与 CSV 候选列，原始曲线入口继续有效。累计谱核验保留单调修正幅度和遗漏低频范围，不写回原曲线；所有候选仍待科学复核。

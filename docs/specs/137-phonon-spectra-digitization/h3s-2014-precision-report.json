@@ -1,0 +1,505 @@
+{
+  "schema_version": 1,
+  "case_id": "h3s-2014",
+  "training_ready": false,
+  "states": [
+    {
+      "material_state": "r3m-130gpa",
+      "structure": {
+        "conventional_atoms": 12,
+        "primitive_atoms": 4,
+        "mode_count": 12,
+        "atomic_numbers": [
+          1,
+          1,
+          1,
+          16
+        ],
+        "symprec_angstrom": 0.0001,
+        "source": {
+          "spacegroup": 160,
+          "basis": [
+            [
+              0.5143,
+              0.0286,
+              0.29941
+            ],
+            [
+              0.6666666666666666,
+              0.3333333333333333,
+              0.62631
+            ]
+          ],
+          "symbols": [
+            "H",
+            "S"
+          ],
+          "cellpar": [
+            4.405,
+            4.405,
+            2.689,
+            90,
+            90,
+            120
+          ],
+          "reported_multiplicities": [
+            9,
+            3
+          ],
+          "rounding_note": "表 S1 的 0.66667/0.33333 恢复为已知三方位点的 2/3、1/3",
+          "source_pdf_page": 5
+        }
+      },
+      "curves": [
+        {
+          "id": "dos_h",
+          "point_counts": {
+            "observed": 529,
+            "interpolated": 16,
+            "baseline_inferred": 36,
+            "boundary_assumption": 2,
+            "edge_continuation": 0,
+            "missing": 0
+          },
+          "chromatic_recovered_points": 12,
+          "clipped_frequencies_thz": []
+        },
+        {
+          "id": "dos_s",
+          "point_counts": {
+            "observed": 287,
+            "interpolated": 256,
+            "baseline_inferred": 38,
+            "boundary_assumption": 2,
+            "edge_continuation": 0,
+            "missing": 0
+          },
+          "chromatic_recovered_points": 70,
+          "clipped_frequencies_thz": []
+        },
+        {
+          "id": "a2f",
+          "point_counts": {
+            "observed": 533,
+            "interpolated": 10,
+            "baseline_inferred": 38,
+            "boundary_assumption": 2,
+            "edge_continuation": 0,
+            "missing": 0
+          },
+          "chromatic_recovered_points": 6,
+          "clipped_frequencies_thz": []
+        },
+        {
+          "id": "lambda",
+          "point_counts": {
+            "observed": 350,
+            "interpolated": 230,
+            "baseline_inferred": 0,
+            "boundary_assumption": 1,
+            "edge_continuation": 1,
+            "missing": 0
+          },
+          "chromatic_recovered_points": 22,
+          "clipped_frequencies_thz": []
+        }
+      ],
+      "normalization": {
+        "status": "conditional_candidate",
+        "accepted": false,
+        "target_modes": 12,
+        "scale_factor": 0.0036208948876689374,
+        "component_mode_integrals": {
+          "H": 8.657613042430027,
+          "S": 3.3423869575699725
+        },
+        "total_mode_integral": 12,
+        "unit": "modes / THz / primitive cell",
+        "assumptions": [
+          "H、S 是完整的元素总投影",
+          "两条分波共用同一幅值尺度；图注未明确证明",
+          "频域覆盖完整，隐藏的基线与零边界采用已标注的重建假设"
+        ]
+      },
+      "diagnostics": {
+        "lambda_integral": 2.2088726995461774,
+        "frequency_log_thz": 19.853818674087552,
+        "omega_log_k": 952.8330175148362,
+        "positive_frequency_complete": true,
+        "minimum_integrated_thz": 0.07653375601837809,
+        "cutoff_thz": 0,
+        "lambda_reported": 2.07,
+        "omega_log_reported_k": 1125.1,
+        "lambda_difference_pct": 6.708826065032736,
+        "omega_log_difference_pct": -15.31125966448882,
+        "cumulative_lambda_endpoint": 2.071428571428573,
+        "cumulative_endpoint_frequency_thz": 54.772757212488465,
+        "low_frequency_sensitivity": [
+          {
+            "lambda_integral": 2.193752554588671,
+            "frequency_log_thz": 20.449060017572545,
+            "omega_log_k": 981.4000964618517,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 0.548867291911904,
+            "cutoff_thz": 0.5
+          },
+          {
+            "lambda_integral": 2.178632409631164,
+            "frequency_log_thz": 20.9194338082048,
+            "omega_log_k": 1003.9744780277003,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 1.0212008278054299,
+            "cutoff_thz": 1
+          },
+          {
+            "lambda_integral": 2.153685617473655,
+            "frequency_log_thz": 21.576027168103018,
+            "omega_log_k": 1035.485989372798,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 2.0603346067711783,
+            "cutoff_thz": 2
+          }
+        ],
+        "warnings": [
+          "图像数字化未获人工验收，不自动用于训练",
+          "DOS 共尺度与投影归一化定义须按案例核实",
+          "λ 与 ωlog 为重建曲线诊断；低频像素偏差会被积分放大"
+        ]
+      },
+      "precision": {
+        "zero_baseline_candidate": {
+          "status": "conditional_candidate",
+          "accepted": false,
+          "reference_band_thz": [
+            53.5,
+            54.25
+          ],
+          "reference_pixel_range": [
+            782,
+            783
+          ],
+          "reference_observed_rows": 8,
+          "unresolved_amplitude_interval": [
+            0,
+            0.03571428571429003
+          ],
+          "affected_nonzero_points": 173,
+          "integral": {
+            "lambda_integral": 2.0996240143870253,
+            "frequency_log_thz": 22.302682216101996,
+            "omega_log_k": 1070.359931431155,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 0.07653375601837809,
+            "cutoff_thz": 0
+          },
+          "raw_minus_candidate_lambda": 0.10924868515915209,
+          "assumption": "把与图像零参考线不可区分的幅值按零处理，仅为候选；原始像素值保留，不宣称这些点精确等于零",
+          "lambda_difference_pct": 1.431111806136487,
+          "omega_log_difference_pct": -4.8653513971064655
+        },
+        "cumulative_moment": {
+          "status": "diagnostic_only",
+          "resolved_lambda_span": 2.054484126984122,
+          "cumulative_endpoint": 2.072519841269841,
+          "lower_endpoint": 0.018035714285719106,
+          "omega_log_k": 1075.959087695178,
+          "frequency_log_thz": 22.419349702587436,
+          "frequency_interval_thz": [
+            0.07653375601837809,
+            54.86722391966717
+          ],
+          "omitted_low_frequency_interval_thz": [
+            0,
+            0.07653375601837809
+          ],
+          "negative_steps_before_projection": 20,
+          "max_monotone_adjustment": 0.008749999999999748,
+          "assumption": "累计谱应单调；仅核验首个可读正频点到末点之间的增量，不假定零频缺失质量",
+          "omega_log_difference_pct": -4.36769285439712,
+          "endpoint_lambda_difference_pct": 0.12173146231118093
+        },
+        "automatic_checks": {
+          "all_curves_continuous": true,
+          "source_hash_verified": true,
+          "zero_reference_valid": true,
+          "independent_cumulative_available": true
+        },
+        "scientific_acceptance": "requires_user_review",
+        "projection_mode_check": {
+          "status": "conditional_diagnostic",
+          "expected": {
+            "H": 9,
+            "S": 3
+          },
+          "measured": {
+            "H": 8.657613042430027,
+            "S": 3.3423869575699725
+          },
+          "relative_difference_pct": {
+            "H": -3.804299528555255,
+            "S": 11.412898585665744
+          },
+          "assumption": "仅在完整、共同尺度的正交笛卡尔元素投影定义下适用；不把各分波分别强制缩放到目标"
+        },
+        "unresolved": [
+          "DOS 投影共同尺度尚待核实",
+          "零基线候选含分辨率以下幅值按零处理的假设",
+          "累计谱矩不包含第一个可读正频点以下区间",
+          "原图裁边无法由增加像素恢复"
+        ]
+      }
+    },
+    {
+      "material_state": "im3m-200gpa",
+      "structure": {
+        "conventional_atoms": 8,
+        "primitive_atoms": 4,
+        "mode_count": 12,
+        "atomic_numbers": [
+          1,
+          1,
+          1,
+          16
+        ],
+        "symprec_angstrom": 0.0001,
+        "source": {
+          "spacegroup": 229,
+          "basis": [
+            [
+              0,
+              0.5,
+              0.5
+            ],
+            [
+              0.5,
+              0.5,
+              0.5
+            ]
+          ],
+          "symbols": [
+            "H",
+            "S"
+          ],
+          "cellpar": [
+            2.984,
+            2.984,
+            2.984,
+            90,
+            90,
+            90
+          ],
+          "reported_multiplicities": [
+            6,
+            2
+          ],
+          "source_pdf_page": 5
+        }
+      },
+      "curves": [
+        {
+          "id": "dos_h",
+          "point_counts": {
+            "observed": 555,
+            "interpolated": 16,
+            "baseline_inferred": 8,
+            "boundary_assumption": 2,
+            "edge_continuation": 0,
+            "missing": 0
+          },
+          "chromatic_recovered_points": 9,
+          "clipped_frequencies_thz": []
+        },
+        {
+          "id": "dos_s",
+          "point_counts": {
+            "observed": 284,
+            "interpolated": 276,
+            "baseline_inferred": 19,
+            "boundary_assumption": 2,
+            "edge_continuation": 0,
+            "missing": 0
+          },
+          "chromatic_recovered_points": 84,
+          "clipped_frequencies_thz": []
+        },
+        {
+          "id": "a2f",
+          "point_counts": {
+            "observed": 540,
+            "interpolated": 27,
+            "baseline_inferred": 12,
+            "boundary_assumption": 2,
+            "edge_continuation": 0,
+            "missing": 0
+          },
+          "chromatic_recovered_points": 17,
+          "clipped_frequencies_thz": [
+            28.983346152702097,
+            28.888879445523386,
+            28.79441273834469,
+            28.69994603116598,
+            28.605479323987268
+          ]
+        },
+        {
+          "id": "lambda",
+          "point_counts": {
+            "observed": 350,
+            "interpolated": 229,
+            "baseline_inferred": 0,
+            "boundary_assumption": 1,
+            "edge_continuation": 0,
+            "missing": 0
+          },
+          "chromatic_recovered_points": 28,
+          "clipped_frequencies_thz": []
+        }
+      ],
+      "normalization": {
+        "status": "conditional_candidate",
+        "accepted": false,
+        "target_modes": 12,
+        "scale_factor": 0.004141223831326127,
+        "component_mode_integrals": {
+          "H": 8.88096199076156,
+          "S": 3.1190380092384404
+        },
+        "total_mode_integral": 12,
+        "unit": "modes / THz / primitive cell",
+        "assumptions": [
+          "H、S 是完整的元素总投影",
+          "两条分波共用同一幅值尺度；图注未明确证明",
+          "频域覆盖完整，隐藏的基线与零边界采用已标注的重建假设"
+        ]
+      },
+      "diagnostics": {
+        "lambda_integral": 2.379578216680371,
+        "frequency_log_thz": 22.140213875601795,
+        "omega_log_k": 1062.562680853286,
+        "positive_frequency_complete": true,
+        "minimum_integrated_thz": 0.07653375601847756,
+        "cutoff_thz": 0,
+        "lambda_reported": 2.19,
+        "omega_log_reported_k": 1334.6,
+        "lambda_difference_pct": 8.656539574446164,
+        "omega_log_difference_pct": -20.383434673064126,
+        "cumulative_lambda_endpoint": 2.1853517793184487,
+        "cumulative_endpoint_frequency_thz": 54.678290505309754,
+        "low_frequency_sensitivity": [
+          {
+            "lambda_integral": 2.360175988905048,
+            "frequency_log_thz": 22.95475885184373,
+            "omega_log_k": 1101.6546742050298,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 0.5488672919120035,
+            "cutoff_thz": 0.5
+          },
+          {
+            "lambda_integral": 2.3407737611297263,
+            "frequency_log_thz": 23.60938128186296,
+            "omega_log_k": 1133.0715958344292,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 1.0212008278055151,
+            "cutoff_thz": 1
+          },
+          {
+            "lambda_integral": 2.3084122132378795,
+            "frequency_log_thz": 24.549451751908094,
+            "omega_log_k": 1178.1878627528317,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 2.0603346067712778,
+            "cutoff_thz": 2
+          }
+        ],
+        "warnings": [
+          "图像数字化未获人工验收，不自动用于训练",
+          "DOS 共尺度与投影归一化定义须按案例核实",
+          "λ 与 ωlog 为重建曲线诊断；低频像素偏差会被积分放大",
+          "α²F 触及图框幅值边界，峰值可能被原图裁切"
+        ]
+      },
+      "precision": {
+        "zero_baseline_candidate": {
+          "status": "conditional_candidate",
+          "accepted": false,
+          "reference_band_thz": [
+            53.5,
+            54.25
+          ],
+          "reference_pixel_range": [
+            782,
+            783
+          ],
+          "reference_observed_rows": 8,
+          "unresolved_amplitude_interval": [
+            0,
+            0.0457972896550487
+          ],
+          "affected_nonzero_points": 103,
+          "integral": {
+            "lambda_integral": 2.2513696630836098,
+            "frequency_log_thz": 25.521607716630683,
+            "omega_log_k": 1224.843990552097,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 0.07653375601847756,
+            "cutoff_thz": 0
+          },
+          "raw_minus_candidate_lambda": 0.1282085535967612,
+          "assumption": "把与图像零参考线不可区分的幅值按零处理，仅为候选；原始像素值保留，不宣称这些点精确等于零",
+          "lambda_difference_pct": 2.80226772071277,
+          "omega_log_difference_pct": -8.223888014978487
+        },
+        "cumulative_moment": {
+          "status": "diagnostic_only",
+          "resolved_lambda_span": 2.162090714234478,
+          "cumulative_endpoint": 2.1853517793184487,
+          "lower_endpoint": 0.023261065083970883,
+          "omega_log_k": 1284.8314141187052,
+          "frequency_log_thz": 26.771542813677822,
+          "frequency_interval_thz": [
+            0.07653375601847756,
+            54.678290505309754
+          ],
+          "omitted_low_frequency_interval_thz": [
+            0,
+            0.07653375601847756
+          ],
+          "negative_steps_before_projection": 18,
+          "max_monotone_adjustment": 0.011094756711913484,
+          "assumption": "累计谱应单调；仅核验首个可读正频点到末点之间的增量，不假定零频缺失质量",
+          "omega_log_difference_pct": -3.7291012948669766,
+          "endpoint_lambda_difference_pct": -0.2122475197055329
+        },
+        "automatic_checks": {
+          "all_curves_continuous": true,
+          "source_hash_verified": true,
+          "zero_reference_valid": true,
+          "independent_cumulative_available": true
+        },
+        "scientific_acceptance": "requires_user_review",
+        "projection_mode_check": {
+          "status": "conditional_diagnostic",
+          "expected": {
+            "H": 9,
+            "S": 3
+          },
+          "measured": {
+            "H": 8.88096199076156,
+            "S": 3.1190380092384404
+          },
+          "relative_difference_pct": {
+            "H": -1.3226445470937875,
+            "S": 3.9679336412813404
+          },
+          "assumption": "仅在完整、共同尺度的正交笛卡尔元素投影定义下适用；不把各分波分别强制缩放到目标"
+        },
+        "unresolved": [
+          "DOS 投影共同尺度尚待核实",
+          "零基线候选含分辨率以下幅值按零处理的假设",
+          "累计谱矩不包含第一个可读正频点以下区间",
+          "原图裁边无法由增加像素恢复"
+        ]
+      }
+    }
+  ]
+}

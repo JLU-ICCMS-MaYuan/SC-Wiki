@@ -13,3 +13,14 @@ schema_version=1，仅为 demo 合同，不改变现有 PropertyRecord 标量合
 - reference：正文 λ、ωlog 及原文位置；只参与事后比较，不参与提取或拟合。
 
 原始位图、配置摘要、软件版本和运行报告一同输出。CSV 每点携带状态身份、来源摘要及点状态，不能只导出两列失去上下文。demo 不提供自动批准或业务入库操作。
+
+## 精度核验增量
+
+provenance.algorithm_version=precision_audit_v3；原 curves、points、diagnostics 和 DOS 候选保持 v2 原值。
+
+- precision.zero_baseline_candidate：原图零参考带、可见像素区间、不可分辨幅值区间、候选序列及每点理由、独立积分和事后对照。accepted=false；保留候选零值所依赖的假设。
+- precision.cumulative_moment：累计曲线的单调候选、负增量数、最大调整量、可读频率范围、Δλ、对数矩和未覆盖低频区间。diagnostic_only，不替换原累计曲线。
+- precision.projection_mode_check：元素模式数条件目标、实际面积与偏差，明确完整正交投影和共尺度假设。
+- precision.automatic_checks：来源哈希、连续性、零参考带有效性及累计核验可计算性；不表达科学采纳完成。
+- scientific_acceptance=requires_user_review；training_ready 仍为 false。
+- CSV 新增 zero_baseline_candidate_amplitude 与 zero_baseline_candidate_reason，只在 α²F 行填写；其单位沿用该曲线原图坐标单位。

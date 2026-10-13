@@ -25,11 +25,12 @@
 </section>
 <section class="panel" aria-label="谱线数据"><div class="panelhead"><div><h2>动力学性质 · 谱数据</h2><p class="minor">材料状态内的独立曲线记录</p></div><select id="curve-select" aria-label="选择曲线"><option value="a2f">Eliashberg α²F</option><option value="lambda">累计 λ</option><option value="dos_h">H 分波 DOS（像素幅值）</option><option value="dos_s">S 分波 DOS（像素幅值）</option><option value="total">总 DOS（3N 条件预览）</option></select></div>
 <div class="chart-body" id="chart"></div><p class="chart-note" id="chart-note"></p>
-<div class="metrics"><h3>独立积分核对</h3><div id="integral-metrics"></div><div class="warn" id="warnings"></div><details><summary>低频敏感性：改变积分下限会怎样？</summary><div id="sensitivity"></div><p class="minor">这些值仅用于诊断，不选择最接近正文的下限来修正结果。积分不会跨越未知缺口。</p></details></div>
+<div class="metrics"><h3>精度核验 · 原始与候选</h3><div id="precision-metrics"></div><details><summary>零基线候选的依据与适用条件</summary><p class="minor" id="precision-basis"></p></details><details><summary>累计 λ 如何独立核验 ωlog？</summary><p class="minor" id="cumulative-basis"></p></details></div>
+<div class="metrics"><h3>原始重建曲线积分</h3><div id="integral-metrics"></div><div class="warn" id="warnings"></div><details><summary>低频敏感性：改变积分下限会怎样？</summary><div id="sensitivity"></div><p class="minor">这些值仅用于诊断，不选择最接近正文的下限来修正结果。积分不会跨越未知缺口。</p></details></div>
 <div class="review"><strong>数据状态：待核对 · 尚不用于机器学习训练</strong><p class="minor">坐标与图例由人工标定，像素轨迹由程序提取。归一化不等于准确度通过，下载也不会改变审核状态。</p></div>
 </section>
 </div>
-<section class="panel data-panel"><div class="panelhead"><div><h2>逐点数据</h2><p class="minor" id="point-count"></p></div><label class="minor"><input type="checkbox" id="issues-only">只看补读、重建或缺失</label></div><div class="scroll"><table><thead><tr><th>频率 / THz</th><th>原图幅值</th><th>重建幅值</th><th>3N 条件幅值</th><th>点来源</th></tr></thead><tbody id="point-rows"></tbody></table></div></section>
+<section class="panel data-panel"><div class="panelhead"><div><h2>逐点数据</h2><p class="minor" id="point-count"></p></div><label class="minor"><input type="checkbox" id="issues-only">只看补读、重建或缺失</label></div><div class="scroll"><table><thead><tr><th>频率 / THz</th><th>原图幅值</th><th>重建幅值</th><th>零基线候选</th><th>3N 条件幅值</th><th>点来源</th></tr></thead><tbody id="point-rows"></tbody></table></div></section>
 <div class="footer"><span>保留原始轨迹、人工标定和重建状态。当前案例不代表其他 PDF 已通过验证。</span><span id="run-info"></span></div>
 </main>
 <dialog id="image-dialog"><div class="group"><h2>Figure 5 · 原始内嵌位图</h2><button id="close-dialog">关闭</button></div><img id="full-image" alt="H3S Figure 5 完整原图"></dialog>
@@ -41,7 +42,7 @@ const IMAGE='data:image/png;base64,__FIGURE_BASE64__';
 const CSV_BASE64='__CSV_BASE64__';
 let stateIndex=0, selected='a2f';
 const $=id=>document.getElementById(id);
-const names={observed:'图像观测',interpolated:'短缺口插值',baseline_inferred:'基线推断',boundary_assumption:'零边界假设',edge_continuation:'图框端值延续',missing:'缺失',conditional:'条件归一化'};
+const names={observed:'图像观测',interpolated:'短缺口插值',baseline_inferred:'基线推断',boundary_assumption:'零边界假设',edge_continuation:'图框端值延续',missing:'缺失',conditional:'条件归一化',resolution_candidate:'零线内候选'};
 const fmt=(v,n=3)=>v===null||v===undefined?'—':Number(v).toFixed(n);
 const pct=v=>(v>0?'+':'')+fmt(v,1)+'%';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -57,20 +58,21 @@ $('curve-select').onchange=e=>{selected=e.target.value;renderChart();renderPoint
 $('overlay-toggle').onchange=renderFigure;$('zoom-toggle').onchange=()=>{$('figure-wrap').classList.toggle('zoom',$('zoom-toggle').checked)};
 $('issues-only').onchange=renderPoints;
 const state=()=>D.material_states[stateIndex];
-const curve=()=>state().curves.find(c=>c.id===selected);
+const curve=()=>selected==='alpha_candidate'?state().curves.find(c=>c.kind==='alpha2f'):state().curves.find(c=>c.id===selected);
 const isDos=()=>curve()?.kind==='phonon_dos';
 function curveLabel(c){return c.kind==='phonon_dos'?c.projection+' 分波 DOS（像素幅值）':c.kind==='alpha2f'?'Eliashberg α²F':'累计 λ'}
 function metric(label,value){return '<div class="metricrow"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>'}
 function render(){
- const s=state(),dg=s.diagnostics,n=s.dos_normalization_candidate;
- if(selected!=='total'&&!s.curves.some(c=>c.id===selected))selected=s.curves.find(c=>c.kind==='alpha2f').id;
- $('curve-select').innerHTML=s.curves.map(c=>'<option value="'+esc(c.id)+'">'+esc(curveLabel(c))+'</option>').join('')+'<option value="total">总 DOS（3N 条件预览）</option>';
+ const s=state(),dg=s.diagnostics,n=s.dos_normalization_candidate,precision=s.precision,base=precision.zero_baseline_candidate,cm=precision.cumulative_moment;
+ if(selected==='alpha_candidate'&&base.status!=='conditional_candidate')selected=s.curves.find(c=>c.kind==='alpha2f').id;
+ if(!['total','alpha_candidate'].includes(selected)&&!s.curves.some(c=>c.id===selected))selected=s.curves.find(c=>c.kind==='alpha2f').id;
+ $('curve-select').innerHTML=s.curves.map(c=>'<option value="'+esc(c.id)+'">'+esc(curveLabel(c))+'</option>').join('')+(base.status==='conditional_candidate'?'<option value="alpha_candidate">α²F（零基线候选）</option>':'')+'<option value="total">总 DOS（3N 条件预览）</option>';
  $('curve-select').value=selected;
  [...$('state-tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',String(i===stateIndex)));
  const missing=s.curves.reduce((a,c)=>a+c.point_counts.missing,0);
  const cards=[['原胞原子数',s.structure.primitive_atoms,'结构展开与原胞化验证；3N = '+s.structure.mode_count],
  ['图中累计 λ',fmt(dg.cumulative_lambda_endpoint),'正文报告 '+fmt(dg.lambda_reported,2)],
- ['α²F 积分 λ',fmt(dg.lambda_integral),'较正文 '+pct(dg.lambda_difference_pct)+(dg.positive_frequency_complete?' · 含推断点':' · 部分积分')],
+ ['零基线候选 λ',base.integral?fmt(base.integral.lambda_integral):'—',base.integral?'较正文 '+pct(base.lambda_difference_pct)+' · 原始 '+fmt(dg.lambda_integral):'零参考带未通过核验'],
  ['未重建采样点',missing,'暗色像素补读 '+s.curves.reduce((a,c)=>a+c.chromatic_recovered_points,0)+' 点；重建保留来源']];
  $('stats').innerHTML=cards.map(([name,v,note])=>'<div class="stat"><div class="name">'+name+'</div><div class="value">'+v+'</div><div class="note">'+note+'</div></div>').join('');
  $('source-note').textContent=s.phase+' / '+s.pressure_gpa+' GPa · 频率沿'+(s.curves[0].frequency_direction==='y'?'纵轴':'横轴');
@@ -79,6 +81,11 @@ function render(){
  $('provenance').textContent=JSON.stringify({source:D.source,structure:s.structure,calibration:s.curves.map(c=>({id:c.id,roi:c.roi,axis:c.axis_calibration}))},null,2);
  $('integral-metrics').innerHTML=metric('λ：曲线积分 / 正文',fmt(dg.lambda_integral)+' / '+fmt(dg.lambda_reported,2))+metric('ωlog：曲线诊断 / 正文',fmt(dg.omega_log_k,1)+' / '+fmt(dg.omega_log_reported_k,1)+' K')+metric('ωlog 相对偏差',pct(dg.omega_log_difference_pct))+metric('积分起点',fmt(dg.minimum_integrated_thz,4)+' THz')+metric('数值用途','诊断，不是通过验收的物性值');
  $('warnings').textContent=dg.warnings.join('；')+'。';
+ $('precision-metrics').innerHTML=metric('λ 原始 → 零基线候选',fmt(dg.lambda_integral)+' → '+fmt(base.integral?.lambda_integral))+metric('λ 候选 / 正文偏差',fmt(base.integral?.lambda_integral)+' / '+fmt(dg.lambda_reported,2)+' · '+(base.integral?pct(base.lambda_difference_pct):'—'))+metric('ωlog 零基线候选 / 正文',fmt(base.integral?.omega_log_k,1)+' / '+fmt(dg.omega_log_reported_k,1)+' K')+metric('ωlog 累计谱独立估算',fmt(cm.omega_log_k,1)+' K'+(cm.status==='diagnostic_only'?' · 偏差 '+pct(cm.omega_log_difference_pct):''))+metric('来源与可计算性检查',Object.values(precision.automatic_checks).filter(Boolean).length+' / '+Object.keys(precision.automatic_checks).length+' 通过')+metric('科学采纳状态','候选待核对，未自动批准');
+ const projection=precision.projection_mode_check;
+ if(projection.status==='conditional_diagnostic')$('structure-metrics').innerHTML+=metric('元素模式数条件目标',Object.entries(projection.expected).map(([k,v])=>k+' '+v).join(' / '))+metric('分波面积相对目标偏差',Object.entries(projection.relative_difference_pct).map(([k,v])=>k+' '+pct(v)).join(' / '))+'<p class="minor">'+esc(projection.assumption)+'</p>';
+ $('precision-basis').textContent=base.status==='conditional_candidate'?'零参考带 '+base.reference_band_thz.join('–')+' THz，原图可见像素范围 '+base.reference_pixel_range.join('–')+'；幅值 ≤ '+fmt(base.unresolved_amplitude_interval[1],5)+' 与零线不可区分，共 '+base.affected_nonzero_points+' 个非零重建点产生候选零值。'+base.assumption+'。左图保留原始提取轨迹。':base.reason;
+ $('cumulative-basis').textContent=cm.status==='diagnostic_only'?'使用累计 λ 的曲线增量及对数频率求谱矩；单调投影最大调整 '+fmt(cm.max_monotone_adjustment,5)+'。核验频域 '+cm.frequency_interval_thz.map(v=>fmt(v,4)).join('–')+' THz，可读 λ 增量 '+fmt(cm.resolved_lambda_span,5)+'，不包含零频到首个可读点的未知贡献。原始累计曲线未改写。':cm.reason;
  $('sensitivity').innerHTML=dg.low_frequency_sensitivity.map(v=>metric('下限 '+v.cutoff_thz+' THz','λ '+fmt(v.lambda_integral)+' / ωlog '+fmt(v.omega_log_k,1)+' K')).join('');
  renderFigure();renderChart();renderPoints();
 }
@@ -104,6 +111,7 @@ function renderFigure(){
  svg.innerHTML=markup;
 }
 function chartPoints(){const n=state().dos_normalization_candidate;
+ if(selected==='alpha_candidate'){const b=state().precision.zero_baseline_candidate;return curve().points.map((p,i)=>({...p,reconstructed_amplitude:b.amplitude[i],status:b.point_reasons[i]==='within_zero_footprint'?'resolution_candidate':p.status}))}
  if(selected==='total')return n.total?n.frequency_thz.map((f,i)=>({frequency_thz:f,reconstructed_amplitude:n.total[i],observed_amplitude:null,status:'conditional'})):[];
  return curve().points;
 }
@@ -120,16 +128,17 @@ function renderChart(){
  for(const p of points){if(p.reconstructed_amplitude===null){open=false;continue}path+=(open?'L':'M')+X(p.frequency_thz).toFixed(2)+','+Y(p.reconstructed_amplitude).toFixed(2)+' ';open=true;
  if(p.status==='observed')dots+='<circle cx="'+X(p.frequency_thz)+'" cy="'+Y(p.reconstructed_amplitude)+'" r="1" fill="#0b8386"><title>'+fmt(p.frequency_thz)+' THz / '+fmt(p.reconstructed_amplitude)+'</title></circle>';
  }
- const label=selected==='total'?'modes / THz / primitive cell':isDos()?'幅值 / 原图像素':curve().kind==='alpha2f'?'α²F / 原图坐标':'累计 λ';
+ const label=selected==='alpha_candidate'?'α²F / 零基线候选':selected==='total'?'modes / THz / primitive cell':isDos()?'幅值 / 原图像素':curve().kind==='alpha2f'?'α²F / 原图坐标':'累计 λ';
  $('chart').innerHTML='<svg viewBox="0 0 520 290" role="img" aria-label="'+esc(label)+'"><g font-size="10" fill="#627580">'+grid+'<text x="52" y="21">'+esc(label)+'</text><text x="275" y="282" text-anchor="middle">频率 ν / THz</text></g><path d="M52 40V240H490" fill="none" stroke="#bac9cf"/><path d="'+path+'" fill="none" stroke="#0b8386" stroke-width="1.3"/>'+dots+'</svg>';
- $('chart-note').textContent=selected==='total'?'条件预览：假设各分波为完整、同尺度的元素投影，总和归一化到 '+s.structure.mode_count+'。条件未确认，不能作为已核实的绝对 DOS。':isDos()?'幅值是原图像素偏移，尚无作者给出的绝对 DOS 单位。断点保持缺失；连接的推断点可在下表查看。':'实线为提取与有界重建，空缺处不连接；图像观测点叠加显示。坐标未按正文参考值修正。';
+ $('chart-note').textContent=selected==='alpha_candidate'?'此曲线将无法与图像零线区分的幅值作为零值候选。它不覆盖原始结果；零参考带、逐点理由和独立累计谱核验均可查看。':selected==='total'?'条件预览：假设各分波为完整、同尺度的元素投影，总和归一化到 '+s.structure.mode_count+'。条件未确认，不能作为已核实的绝对 DOS。':isDos()?'幅值是原图像素偏移，尚无作者给出的绝对 DOS 单位。断点保持缺失；连接的推断点可在下表查看。':'实线为提取与有界重建，空缺处不连接；图像观测点叠加显示。坐标未按正文参考值修正。';
 }
 function renderPoints(){
  const points=chartPoints(),n=state().dos_normalization_candidate;
  const component=isDos()?curve().projection:null;
  const rows=points.map((p,i)=>({p,i})).filter(({p})=>!$('issues-only').checked||p.status!=='observed'||p.detection_mode==='chromatic_recovery');
  $('point-count').textContent='当前曲线 '+points.length+' 个采样点 · 暗色补读 '+points.filter(p=>p.detection_mode==='chromatic_recovery').length+' 点 · 显示 '+rows.length+' 点';
- $('point-rows').innerHTML=rows.map(({p,i})=>'<tr><td>'+fmt(p.frequency_thz,4)+'</td><td>'+fmt(p.observed_amplitude,5)+'</td><td>'+fmt(p.reconstructed_amplitude,5)+'</td><td>'+fmt(selected==='total'?p.reconstructed_amplitude:component?n.components?.[component]?.[i]:null,5)+'</td><td><span class="pill '+p.status+'">'+(p.detection_mode==='chromatic_recovery'?'暗色像素观测':names[p.status])+'</span></td></tr>').join('');
+ const baseline=state().precision.zero_baseline_candidate;
+ $('point-rows').innerHTML=rows.map(({p,i})=>'<tr><td>'+fmt(p.frequency_thz,4)+'</td><td>'+fmt(p.observed_amplitude,5)+'</td><td>'+fmt(selected==='alpha_candidate'?curve().points[i].reconstructed_amplitude:p.reconstructed_amplitude,5)+'</td><td>'+fmt(curve()?.kind==='alpha2f'?baseline.amplitude?.[i]:null,5)+'</td><td>'+fmt(selected==='total'?p.reconstructed_amplitude:component?n.components?.[component]?.[i]:null,5)+'</td><td><span class="pill '+p.status+'">'+(p.status==='resolution_candidate'?names[p.status]:p.detection_mode==='chromatic_recovery'?'暗色像素观测':names[p.status])+'</span></td></tr>').join('');
 }
 render();
 </script>
