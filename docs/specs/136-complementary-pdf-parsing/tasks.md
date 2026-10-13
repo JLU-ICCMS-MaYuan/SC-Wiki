@@ -34,3 +34,9 @@ T001 → T002 → T003 → T004 → T005 → T006 → T007 → T008；T009 依�
 - [ ] T010 [US2] 改进 `scripts/complementary_pdf_demo/complement.py` 的内容取用粒度及 `extraction.py` 的压力归属约束，以新运行验证互补不会把不同压力合并；来源 FR-005/FR-006/FR-007，差距类型 partial。当前实现可审计但科学效果退步，不能把 T004 视为准确度验收。
 - [ ] T011 [US1] 在 `scripts/complementary_pdf_demo/extraction.py` 明确全部论文枚举及范围参数的表单承接，保持与 #120 的当前契约一致；来源 FR-008/SC-002，差距类型 partial。当前保留并标出不兼容候选，尚未达到可提交完整表单。
 - [ ] T012 完成本版 demo 用户验收及文档收尾，在 `docs/specs/136-complementary-pdf-parsing/checklists/requirements.md` 继续核验远程链接和 IMG-001 归档；来源 FR-012，差距类型 missing。不自行推送或虚构原图归档。
+
+## 阶段 7：新增四工具方向与推理对照
+
+- [x] T013 [US1] 核对现有 GROBID 的真实消费范围，在 `docs/specs/136-complementary-pdf-parsing/four-tool-architecture.md` 展示 MinerU 核心的四工具提案，在 `four-tool-community.md` 核查社区源码；来源 FR-013/SC-008。证据：GROBID 实际 TEI/48 条引用、源码路径和固定提交链接。本项完成的是调查与提案，不是四工具实现。
+- [x] T014 [US1] 用 `scripts/complementary_pdf_demo/reasoning_benchmark.py` 比较相同 MinerU 输入的 thinking 开/关，在 `docs/specs/136-complementary-pdf-parsing/reasoning-comparison.md` 保存两组各两次的真实数据；来源 FR-014/SC-009。证据：四次完整输出、共同输入/提示摘要、时间/token/34 项核对与表单限制。
+- [ ] T015 [US3] 在用户审阅四工具方案后更新 `docs/specs/136-complementary-pdf-parsing/plan.md`、数据和接口契约，再替换旧 Docling 骨架的实验与生产计划；来源 FR-013/SC-008，差距类型 missing。当前未改生产默认。

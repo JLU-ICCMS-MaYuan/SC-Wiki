@@ -202,35 +202,45 @@ def form_issues(form):
     return issues
 
 
-def call_model(directory, user_prompt, config):
+def call_model(directory, user_prompt, config, *, thinking=False, max_tokens=32768, reasoning_effort="high"):
     from openai import OpenAI
     started = time.monotonic()
-    request = {"model": config.model, "temperature": 0.1, "max_tokens": 32768,
+    request = {"model": config.model, "temperature": 0.1, "max_tokens": max_tokens,
                "system_prompt_sha256": hashlib.sha256(SYSTEM_PROMPT.encode()).hexdigest(),
                "input_chars": len(SYSTEM_PROMPT) + len(user_prompt), "max_input_chars": MAX_CHARS,
                "provider": config.provider, "started_at": datetime.now(timezone.utc).isoformat()}
-    extra = {"thinking": {"type": "disabled"}} if config.model.startswith("deepseek-") else {}
+    if thinking and not config.model.startswith("deepseek-"):
+        raise ValueError("此实验开关仅支持已核实的 DeepSeek thinking 接口")
+    extra = {"thinking": {"type": "enabled" if thinking else "disabled"}} if config.model.startswith("deepseek-") else {}
     request["extra_body"] = extra
+    request["effective_temperature"] = None if thinking else 0.1
+    effort = {"reasoning_effort": reasoning_effort} if thinking else {}
+    request.update(effort)
+    request["input_sha256"] = hashlib.sha256(user_prompt.encode()).hexdigest()
     if request["input_chars"] > MAX_CHARS:
         raise ValueError("document_input_too_large")
     write_json(directory / "request.json", request)
     (directory / "system.txt").write_text(SYSTEM_PROMPT, encoding="utf-8")
     (directory / "input.json").write_text(user_prompt, encoding="utf-8")
     parts, usage, finish = [], None, None
+    first_final_seconds, response_model = None, None
     client = OpenAI(api_key=config.api_key, base_url=config.base_url, timeout=600, max_retries=0)
     try:
         stream = client.chat.completions.create(model=config.model,
             messages=[{"role": "system", "content": SYSTEM_PROMPT}, {"role": "user", "content": user_prompt}],
-            temperature=0.1, max_tokens=32768, response_format={"type": "json_object"}, stream=True,
-            stream_options={"include_usage": True}, extra_body=extra)
+            temperature=0.1, max_tokens=max_tokens, response_format={"type": "json_object"}, stream=True,
+            stream_options={"include_usage": True}, extra_body=extra, **effort)
         with (directory / "response.txt").open("w", encoding="utf-8") as response:
             for chunk in stream:
+                response_model = chunk.model or response_model
                 if chunk.usage:
                     usage = chunk.usage.model_dump()
                 if chunk.choices:
                     delta = chunk.choices[0].delta.content
                     finish = chunk.choices[0].finish_reason or finish
                     if delta:
+                        if first_final_seconds is None:
+                            first_final_seconds = round(time.monotonic() - started, 3)
                         parts.append(delta)
                         response.write(delta)
                         response.flush()
@@ -240,12 +250,13 @@ def call_model(directory, user_prompt, config):
     finally:
         client.close()
         write_json(directory / "call.json", request | {"elapsed_seconds": round(time.monotonic() - started, 3),
-                   "usage": usage, "finish_reason": finish, "output_chars": sum(map(len, parts))})
+                   "usage": usage, "finish_reason": finish, "output_chars": sum(map(len, parts)),
+                   "first_final_seconds": first_final_seconds, "response_model": response_model})
 
 
-def extract_arm(run, manifest, arm, config, originals):
+def extract_arm(run, manifest, arm, config, originals, *, output_root=None, call_options=None):
     from .run import snapshot
-    root = run / "extractions" / arm
+    root = (output_root or run) / "extractions" / arm
     root.mkdir(parents=True, exist_ok=True)
     # 明确的重跑记录；旧响应和旧表单永远保留。
     attempts = [p for p in root.glob("attempt-*") if p.is_dir()]
@@ -258,7 +269,7 @@ def extract_arm(run, manifest, arm, config, originals):
                             ensure_ascii=False, separators=(",", ":"))
     result = {"arm": arm, "status": "failed", "attempt": output.name, "validation": {}}
     try:
-        raw = call_model(output, user_prompt, config)
+        raw = call_model(output, user_prompt, config, **(call_options or {}))
         write_json(output / "raw.json", raw)
         result["raw"] = raw
         parsed = DemoResponse.model_validate(raw).model_dump(mode="json")
