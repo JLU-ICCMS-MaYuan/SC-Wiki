@@ -1,15 +1,16 @@
 # 使用与验收：统一业务文件存储
 
-**Issue**：[ #131](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/131)。本文件是实施后的验收脚本说明，新增模块当前尚不存在；本轮未运行以下业务操作。
+**Issue**：[ #131](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/131)。存储接口、隔离迁移和局部业务调用点已进入实施；以下矩阵未整体通过，具体证据见[验证记录](validation.md)。
 
 ## 前置条件
 
 隔离开发/验收环境，已实现本 Feature 的同一提交，真实 MySQL、Redis、私有 S3 bucket；不得使用当前业务库。通过私有环境文件配置两个后端，密钥不进入测试日志。已有上传、审核、人工证据、返修、头像、结构附件样本及两名不同所有者。
 
-## 自动验证入口（待实现）
+## 自动验证入口
 
 ```bash
 python -m pytest "tests/02_maintenance_and_verification/test_file_storage_contract.py" "tests/02_maintenance_and_verification/test_file_storage_migration.py" "tests/02_maintenance_and_verification/test_local_storage_compat.py" "tests/01_decentralized_uploading/test_file_storage_workflows.py"
+python -m pytest "tests/02_maintenance_and_verification/test_file_reference_inventory.py" "tests/02_maintenance_and_verification/test_file_storage_reconcile.py"
 ```
 
 在 `goserver/` 工作目录执行：
@@ -32,6 +33,7 @@ go test ./storage ./handlers
 | 历史迁移 | 按迁移契约执行 scan/copy/verify/switch；各阶段注入中断并重跑，文件和引用零遗漏 | US2、SC-002、SC-003 |
 | 回退 | 目标尚未开放新写入时恢复旧值与旧配置；旧业务可读、源文件仍在 | US2、SC-003 |
 | 本地开发 | local 模式运行现有 make deploy/start/frozen 流程的隔离夹具；无 S3 也可用 | US3、SC-005 |
+| 安全清理 | 不传 `--apply` 运行 `python -m backend.scripts.reconcile_file_storage` 只列数量；维护窗口内对隔离库运行 `--apply`，仍引用的头像和人工证据可读 | FR-006 |
 
 ## 证据要求
 

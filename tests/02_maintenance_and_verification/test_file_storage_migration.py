@@ -172,6 +172,11 @@ def test_switch_and_rollback_preserve_redis_ttl(monkeypatch: pytest.MonkeyPatch,
             with Session(engine) as session:
                 session.get(User, 7).avatar_key = "legacy.jpg"
                 session.commit()
+            source_avatar = root / "avatars/legacy.jpg"
+            source_avatar.write_bytes(b"changed-after-verify")
+            with pytest.raises(Exception, match="切换前发生变化"):
+                migration_cli.switch_references(manifest_path, apply=True)
+            source_avatar.write_bytes(b"avatar")
             assert migration_cli.switch_references(manifest_path, apply=True)["stage"] == "switched"
             with pytest.raises(FileInventoryError, match="不允许重新复制"):
                 migration_cli.copy_files(manifest_path)

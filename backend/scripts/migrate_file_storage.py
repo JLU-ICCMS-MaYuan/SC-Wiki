@@ -137,6 +137,15 @@ def switch_references(manifest_path: Path, *, apply: bool, rollback: bool = Fals
     database_url, redis_url = os.environ.get("DATABASE_URL"), os.environ.get("REDIS_URL")
     if not database_url or not redis_url:
         raise FileInventoryError("切换需要显式 DATABASE_URL 和 REDIS_URL")
+    from backend.storage.reference_inventory import scan_registered_files
+
+    root = Path(manifest["source_root"]).resolve()
+    actual = {item.relative_path: item for item in scan_registered_files(
+        root, {item["relative_path"] for item in manifest["files"]})}
+    for item in manifest["files"]:
+        file = actual[item["relative_path"]]
+        if file.size != item["size"] or file.sha256 != item["sha256"]:
+            raise FileIntegrityError("源文件在切换前发生变化")
     from redis import Redis
     from backend.storage.migration import apply_database_references, apply_redis_references
 

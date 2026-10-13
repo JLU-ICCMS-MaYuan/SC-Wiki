@@ -1,6 +1,6 @@
 # 历史文件迁移契约
 
-**来源**：[Spec](../spec.md) FR-007、FR-008、FR-010。以下命令为待实现接口，当前不能执行迁移。
+**来源**：[Spec](../spec.md) FR-007、FR-008、FR-010。以下 CLI 已实现并在隔离样本验证；尚未对当前业务实例执行文件复制或引用切换。
 
 ```text
 python -m backend.scripts.migrate_file_storage scan --source-root PATH --manifest PATH
