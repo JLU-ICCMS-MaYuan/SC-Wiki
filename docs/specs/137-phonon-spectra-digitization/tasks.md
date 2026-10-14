@@ -19,3 +19,5 @@
 T001 → T002 → T003；T004 验证 T002/T003；T005 → T006 → T007。FR-001/003、SC-001 对应 T001/T003；FR-002、SC-002/006 对应 T002/T004；FR-004/005、SC-003/004 对应 T003/T004；FR-006/007、SC-005 对应 T005/T006。T008 是后续生产阶段，不因 demo 完成而勾选。
 
 本轮用户再次指定只做 demo 精度与验收，T010 为本次交付；T008 继续保持未执行。软件自动核验完成不代表用户已采纳科学候选。
+
+- [x] T012 [US1/US2] 修复 scientific_review.py 的虚线插值误判及真实观测域边界，增加 joint_reconstruction.py 原图范围与留出验证；更新 build_demo.py、template.html 的联合候选、掩膜和用途语义；增加 tests/test_joint_reconstruction.py 及原图派生证据，保存科学复核 v5 更正。[FR-011、SC-010；40 测试，两相每相 70 留出点，validation.md；T008 未执行]

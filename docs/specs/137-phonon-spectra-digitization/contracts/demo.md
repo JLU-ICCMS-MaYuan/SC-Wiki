@@ -15,3 +15,7 @@ H/S 投影权重和共尺度未证实时不生成 accepted 归一化。即使展
 精度核验版本为 precision_audit_v3，兼容原始曲线数据。可选 zero_reference_band_thz 必须由原图核对，并通过至少五个带色行、窄带和近零轴检查；不满足则 candidate.status=unavailable，不自动选择其他频段。新增“α²F（零基线候选）”查看项与 CSV 候选列，原始曲线入口继续有效。累计谱核验保留单调修正幅度和遗漏低频范围，不写回原曲线；所有候选仍待科学复核。
 
 scientific_audit_v4 使用修正的分段线性精确积分。可选 --scientific-review 加载已完成审阅 JSON，必须匹配当前数据指纹，且明确保留定量限制。页面展示复核已完成的用途分级，CSV 同步审阅状态，不把它转为 training_ready=true。新数据不会自动继承旧审阅。
+
+image_constraints_v5 独立导出物理约束重建候选；页面可选“α²F（联合重建候选）”，显示每相留出点像素误差及每 5 THz 的真实累计 λ 图像范围。原始曲线与零基线候选入口保留。边框遮挡候选在 CSV 中标 joint_boundary_mask，不能当作者原始峰顶。
+
+当前审阅加载 h3s-2014-scientific-review-v5.json，旧 v4 指纹失效。可选 evidence.file 相对审阅目录读取并核对 SHA-256，嵌入离线 HTML；无审阅时不显示该图。共同轴 DOS 与可见 α²F 可按限定用途定量分析，完整谱仍不整体无条件批准。

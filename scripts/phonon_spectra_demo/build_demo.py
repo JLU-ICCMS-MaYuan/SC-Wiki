@@ -23,6 +23,7 @@ import spglib
 from digitize import LinearAxis, extract_curve, normalize_dos, spectral_integrals
 from quality import zero_baseline_candidate, cumulative_moments
 from scientific_review import verify_review
+from joint_reconstruction import reconstruct_joint
 
 HERE = Path(__file__).resolve().parent
 
@@ -80,6 +81,8 @@ def csv_text(result: dict) -> str:
               "normalization_accepted", "primitive_atoms", "normalization_target_modes", "point_status",
               "detection_mode", "zero_baseline_candidate_amplitude", "zero_baseline_candidate_reason", "review_status",
               "training_ready", "scientific_review_status", "quantitative_ml_approved",
+              "joint_candidate_amplitude", "joint_candidate_cumulative_lambda", "joint_boundary_mask",
+              "conditional_quantitative_use",
               "source_sha256", "pdf_page", "figure"]
     writer = csv.DictWriter(buf, fieldnames=fields)
     writer.writeheader()
@@ -88,8 +91,10 @@ def csv_text(result: dict) -> str:
         for curve in state["curves"]:
             normalized = candidate.get("components", {}).get(curve["projection"])
             baseline = state.get("precision", {}).get("zero_baseline_candidate", {})
+            joint = state.get("precision", {}).get("joint_reconstruction", {})
             for i, p in enumerate(curve["points"]):
                 has_baseline = curve["kind"] == "alpha2f" and baseline.get("status") == "conditional_candidate"
+                has_joint = has_baseline and joint.get("status") == "physics_constrained_candidate"
                 writer.writerow(dict(case_id=result["case_id"], material_state=state["id"],
                     formula=state["formula"], phase=state["phase"], pressure_gpa=state["pressure_gpa"],
                     curve=curve["id"], kind=curve["kind"], projection=curve["projection"],
@@ -109,6 +114,10 @@ def csv_text(result: dict) -> str:
                     training_ready=False,
                     scientific_review_status=result.get("scientific_review", {}).get("status"),
                     quantitative_ml_approved=result.get("scientific_review", {}).get("quantitative_ml_approved"),
+                    joint_candidate_amplitude=joint["alpha2f"][i] if has_joint else None,
+                    joint_candidate_cumulative_lambda=joint["cumulative_lambda"][i] if has_joint else None,
+                    joint_boundary_mask=p["frequency_thz"] in joint["clipped_frequency_mask"] if has_joint else None,
+                    conditional_quantitative_use=result.get("scientific_review", {}).get("conditional_quantitative_use"),
                     source_sha256=result["source"]["paper_sha256"],
                     pdf_page=result["source"]["figure"]["pdf_page"], figure=result["source"]["figure"]["label"]))
     return buf.getvalue()
@@ -127,8 +136,8 @@ def build(config: dict, pdf: Path, supplement: Path) -> tuple[dict, bytes]:
                                   generated_at=datetime.now(timezone.utc).isoformat(),
                                   python=sys.version.split()[0],
                                   software={n: importlib.metadata.version(n) for n in
-                                            ("numpy", "pillow", "pymupdf", "ase", "spglib")},
-                                  mode="semi_automatic_digitization", algorithm_version="scientific_audit_v4",
+                                            ("numpy", "pillow", "pymupdf", "ase", "spglib", "scipy")},
+                                  mode="semi_automatic_digitization", algorithm_version="image_constraints_v5",
                                   business_database_writes=False),
                   calibration_manifest=config, material_states=[], training_ready=False)
     for state_spec in config["material_states"]:
@@ -150,6 +159,11 @@ def build(config: dict, pdf: Path, supplement: Path) -> tuple[dict, bytes]:
                 {c["projection"]: [p["reconstructed_amplitude"] for p in c["points"]] for c in dos},
                 structure["primitive_atoms"], assumptions_confirmed=state_spec["projection_scale_confirmed"])
         norm["assumptions"] = state_spec["projection_assumptions"]
+        projections = "/".join(c["projection"] for c in dos)
+        same_frame = len({tuple(c["roi"]) for c in dos}) == 1
+        norm["scale_basis"] = (f"{projections} 同一 PHDOS 坐标框支持共同尺度约定；总和施加一个模式数归一化因子"
+                               if same_frame else "分波来自不同坐标框；共同尺度必须另有案例证据，总和归一化只是条件候选")
+        norm["quantitative_use"] = "按共同坐标轴及完整元素投影约定可作条件定量数据；不等于作者原始谱真值"
         # 当前数据包含人工标定、图像重建与尚未验收的误差，绝不自动批准。
         norm["accepted"] = False
         f = [p["frequency_thz"] for p in alpha["points"]]
@@ -181,8 +195,12 @@ def build(config: dict, pdf: Path, supplement: Path) -> tuple[dict, bytes]:
                              zero_reference_valid=baseline["status"] == "conditional_candidate",
                              independent_cumulative_available=moments["status"] == "diagnostic_only"),
                          scientific_acceptance="requires_user_review",
-                         unresolved=["DOS 投影共同尺度尚待核实", "零基线候选含分辨率以下幅值按零处理的假设",
+                         unresolved=["DOS 采用同框共同尺度约定，投影定义和图像误差须随数据保留", "零基线候选含分辨率以下幅值按零处理的假设",
                                      "累计谱矩不包含第一个可读正频点以下区间", "原图裁边无法由增加像素恢复"])
+        if baseline["status"] == "conditional_candidate":
+            precision["joint_reconstruction"] = reconstruct_joint(alpha, cumulative, baseline)
+            precision["joint_reconstruction"]["integral"] = spectral_integrals(
+                precision["joint_reconstruction"]["frequency_thz"], precision["joint_reconstruction"]["alpha2f"])
         species_counts = Counter(chemical_symbols[z] for z in structure["atomic_numbers"])
         areas = norm.get("component_mode_integrals", {})
         if set(areas) == set(species_counts):
@@ -252,6 +270,9 @@ def main() -> None:
                                    automatic_checks=s["precision"]["automatic_checks"],
                                    scientific_acceptance=s["precision"]["scientific_acceptance"],
                                    projection_mode_check=s["precision"]["projection_mode_check"],
+                                   joint_reconstruction={k: v for k, v in s["precision"].get("joint_reconstruction", {}).items()
+                                                         if k not in ("frequency_thz", "alpha2f", "cumulative_lambda",
+                                                                      "alpha_lower_bound", "alpha_upper_bound")},
                                    unresolved=s["precision"]["unresolved"]))
                           for s in result["material_states"]])
     if "scientific_review" in result:
@@ -261,6 +282,12 @@ def main() -> None:
     html = html.replace("__DATA_JSON__", payload.replace("<", "\\u003c"))
     html = html.replace("__FIGURE_BASE64__", base64.b64encode(figure).decode())
     html = html.replace("__CSV_BASE64__", base64.b64encode(csv_data.encode("utf-8")).decode())
+    evidence_url = ""
+    evidence = result.get("scientific_review", {}).get("evidence")
+    if evidence:
+        evidence_bytes = verified_bytes(args.scientific_review.parent / evidence["file"], evidence["sha256"])
+        evidence_url = "data:image/svg+xml;base64," + base64.b64encode(evidence_bytes).decode()
+    html = html.replace("__REVIEW_EVIDENCE__", evidence_url)
     out.mkdir(parents=True, exist_ok=True)
     for name, data in {
         "spectra.json": json.dumps(result, ensure_ascii=False, indent=2, allow_nan=False).encode(),

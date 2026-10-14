@@ -14,7 +14,7 @@
 <main class="wrap">
 <div class="heading"><div><div class="eyebrow">PHONON SPECTRA · ISSUE #137</div><h1>声子谱数字化</h1><p class="subtitle">从论文原图到数值序列。逐条查看来源、重建过程与物理核对结果。</p></div><div class="actions"><button id="download-json" class="primary">下载完整 JSON</button><button id="download-csv">下载逐点 CSV</button></div></div>
 <div class="paper"><span class="label">来源论文</span><div><div class="paper-title" id="paper-title"></div><div class="minor">DOI <a id="doi" target="_blank" rel="noopener"></a> · <span id="paper-location"></span></div></div></div>
-<section class="panel" id="scientific-review-panel" hidden style="margin-bottom:20px"><div class="panelhead"><div><h2>科学复核结论</h2><p class="minor" id="scientific-review-summary"></p></div><span class="badge">AI 复核 · 结果绑定</span></div><div class="metrics"><div id="review-dispositions"></div><details><summary>复核依据与剩余限制</summary><ul class="list" id="review-findings"></ul></details></div></section>
+<section class="panel" id="scientific-review-panel" hidden style="margin-bottom:20px"><div class="panelhead"><div><h2>科学复核结论</h2><p class="minor" id="scientific-review-summary"></p></div><span class="badge">AI 复核 · 结果绑定</span></div><div class="metrics"><div id="review-dispositions"></div><details><summary>复核依据与剩余限制</summary><ul class="list" id="review-findings"></ul></details><details id="evidence-detail" hidden><summary>查看原图位置：虚线空隙、边框遮挡与贴轴幅值</summary><img src="__REVIEW_EVIDENCE__" style="width:100%;height:auto" alt="原图局部放大及 Im-3m 20–25 THz 耦合贡献范围"></details></div></section>
 <div class="tabs" role="tablist" aria-label="材料状态" id="state-tabs"></div>
 <div class="stats" id="stats"></div>
 <div class="grid">
@@ -26,12 +26,13 @@
 </section>
 <section class="panel" aria-label="谱线数据"><div class="panelhead"><div><h2>动力学性质 · 谱数据</h2><p class="minor">材料状态内的独立曲线记录</p></div><select id="curve-select" aria-label="选择曲线"><option value="a2f">Eliashberg α²F</option><option value="lambda">累计 λ</option><option value="dos_h">H 分波 DOS（像素幅值）</option><option value="dos_s">S 分波 DOS（像素幅值）</option><option value="total">总 DOS（3N 条件预览）</option></select></div>
 <div class="chart-body" id="chart"></div><p class="chart-note" id="chart-note"></p>
+<div class="metrics"><h3>联合重建与逐频段核对</h3><div id="joint-metrics"></div><p class="minor" id="joint-basis"></p><details><summary>每 5 THz 对照原图支持范围</summary><div id="bin-metrics"></div><p class="minor">范围来自真实累计 λ 像素包络和单调性，虚线空隙不作精确读数；不是统计置信区间。联合谱积分一致是约束，留出点偏差才是未参与拟合的图像核验。</p></details></div>
 <div class="metrics"><h3>精度核验 · 原始与候选</h3><div id="precision-metrics"></div><details><summary>零基线候选的依据与适用条件</summary><p class="minor" id="precision-basis"></p></details><details><summary>累计 λ 如何独立核验 ωlog？</summary><p class="minor" id="cumulative-basis"></p></details></div>
 <div class="metrics"><h3>原始重建曲线积分</h3><div id="integral-metrics"></div><div class="warn" id="warnings"></div><details><summary>低频敏感性：改变积分下限会怎样？</summary><div id="sensitivity"></div><p class="minor">这些值仅用于诊断，不选择最接近正文的下限来修正结果。积分不会跨越未知缺口。</p></details></div>
 <div class="review"><strong>数据状态：待核对 · 尚不用于机器学习训练</strong><p class="minor">坐标与图例由人工标定，像素轨迹由程序提取。归一化不等于准确度通过，下载也不会改变审核状态。</p></div>
 </section>
 </div>
-<section class="panel data-panel"><div class="panelhead"><div><h2>逐点数据</h2><p class="minor" id="point-count"></p></div><label class="minor"><input type="checkbox" id="issues-only">只看补读、重建或缺失</label></div><div class="scroll"><table><thead><tr><th>频率 / THz</th><th>原图幅值</th><th>重建幅值</th><th>零基线候选</th><th>3N 条件幅值</th><th>点来源</th></tr></thead><tbody id="point-rows"></tbody></table></div></section>
+<section class="panel data-panel"><div class="panelhead"><div><h2>逐点数据</h2><p class="minor" id="point-count"></p></div><label class="minor"><input type="checkbox" id="issues-only">只看补读、重建或缺失</label></div><div class="scroll"><table><thead><tr><th>频率 / THz</th><th>原图幅值</th><th>重建幅值</th><th>零基线候选</th><th>联合候选</th><th>3N 条件幅值</th><th>点来源</th></tr></thead><tbody id="point-rows"></tbody></table></div></section>
 <div class="footer"><span>保留原始轨迹、人工标定和重建状态。当前案例不代表其他 PDF 已通过验证。</span><span id="run-info"></span></div>
 </main>
 <dialog id="image-dialog"><div class="group"><h2>Figure 5 · 原始内嵌位图</h2><button id="close-dialog">关闭</button></div><img id="full-image" alt="H3S Figure 5 完整原图"></dialog>
@@ -43,7 +44,7 @@ const IMAGE='data:image/png;base64,__FIGURE_BASE64__';
 const CSV_BASE64='__CSV_BASE64__';
 let stateIndex=0, selected='a2f';
 const $=id=>document.getElementById(id);
-const names={observed:'图像观测',interpolated:'短缺口插值',baseline_inferred:'基线推断',boundary_assumption:'零边界假设',edge_continuation:'图框端值延续',missing:'缺失',conditional:'条件归一化',resolution_candidate:'零线内候选'};
+const names={observed:'图像观测',interpolated:'短缺口插值',baseline_inferred:'基线推断',boundary_assumption:'零边界假设',edge_continuation:'图框端值延续',missing:'缺失',conditional:'条件归一化',resolution_candidate:'零线内候选',joint_candidate:'物理约束重建',boundary_masked:'边框遮挡候选'};
 const fmt=(v,n=3)=>v===null||v===undefined?'—':Number(v).toFixed(n);
 const pct=v=>(v>0?'+':'')+fmt(v,1)+'%';
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -52,6 +53,7 @@ $('download-json').onclick=()=>download(D.case_id+'-spectra.json',JSON.stringify
 $('download-csv').onclick=()=>download(D.case_id+'-spectra-points.csv',Uint8Array.from(atob(CSV_BASE64),c=>c.charCodeAt(0)),'text/csv;charset=utf-8');
 $('paper-title').textContent=D.paper.title;$('doi').href='https://doi.org/'+D.paper.doi;
 if(D.scientific_review){const review=D.scientific_review;$('scientific-review-panel').hidden=false;$('scientific-review-summary').textContent=review.summary;$('review-dispositions').innerHTML=review.dispositions.map(d=>'<div class="metricrow"><span>'+esc(d.item)+'</span><strong>'+esc(d.verdict)+'</strong></div>').join('');$('review-findings').innerHTML=review.findings.map(f=>'<li>'+esc(f)+'</li>').join('')}
+$('evidence-detail').hidden=!D.scientific_review?.evidence;
 $('doi').textContent=D.paper.doi;$('paper-location').textContent='正文第 '+D.source.figure.pdf_page+' 页 / '+D.source.figure.label;
 $('full-image').src=IMAGE;$('full-figure').onclick=()=>$('image-dialog').showModal();$('close-dialog').onclick=()=>$('image-dialog').close();
 $('run-info').textContent='半自动数字化 · '+D.provenance.generated_at.slice(0,10);
@@ -60,15 +62,16 @@ $('curve-select').onchange=e=>{selected=e.target.value;renderChart();renderPoint
 $('overlay-toggle').onchange=renderFigure;$('zoom-toggle').onchange=()=>{$('figure-wrap').classList.toggle('zoom',$('zoom-toggle').checked)};
 $('issues-only').onchange=renderPoints;
 const state=()=>D.material_states[stateIndex];
-const curve=()=>selected==='alpha_candidate'?state().curves.find(c=>c.kind==='alpha2f'):state().curves.find(c=>c.id===selected);
+const curve=()=>['alpha_candidate','alpha_joint'].includes(selected)?state().curves.find(c=>c.kind==='alpha2f'):state().curves.find(c=>c.id===selected);
 const isDos=()=>curve()?.kind==='phonon_dos';
 function curveLabel(c){return c.kind==='phonon_dos'?c.projection+' 分波 DOS（像素幅值）':c.kind==='alpha2f'?'Eliashberg α²F':'累计 λ'}
 function metric(label,value){return '<div class="metricrow"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>'}
 function render(){
  const s=state(),dg=s.diagnostics,n=s.dos_normalization_candidate,precision=s.precision,base=precision.zero_baseline_candidate,cm=precision.cumulative_moment;
  if(selected==='alpha_candidate'&&base.status!=='conditional_candidate')selected=s.curves.find(c=>c.kind==='alpha2f').id;
- if(!['total','alpha_candidate'].includes(selected)&&!s.curves.some(c=>c.id===selected))selected=s.curves.find(c=>c.kind==='alpha2f').id;
+ if(!['total','alpha_candidate','alpha_joint'].includes(selected)&&!s.curves.some(c=>c.id===selected))selected=s.curves.find(c=>c.kind==='alpha2f').id;
  $('curve-select').innerHTML=s.curves.map(c=>'<option value="'+esc(c.id)+'">'+esc(curveLabel(c))+'</option>').join('')+(base.status==='conditional_candidate'?'<option value="alpha_candidate">α²F（零基线候选）</option>':'')+'<option value="total">总 DOS（3N 条件预览）</option>';
+ if(precision.joint_reconstruction)$('curve-select').innerHTML+='<option value="alpha_joint">α²F（联合重建候选）</option>';
  $('curve-select').value=selected;
  [...$('state-tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',String(i===stateIndex)));
  const missing=s.curves.reduce((a,c)=>a+c.point_counts.missing,0);
@@ -88,7 +91,11 @@ function render(){
  if(projection.status==='conditional_diagnostic')$('structure-metrics').innerHTML+=metric('元素模式数条件目标',Object.entries(projection.expected).map(([k,v])=>k+' '+v).join(' / '))+metric('分波面积相对目标偏差',Object.entries(projection.relative_difference_pct).map(([k,v])=>k+' '+pct(v)).join(' / '))+'<p class="minor">'+esc(projection.assumption)+'</p>';
  $('precision-basis').textContent=base.status==='conditional_candidate'?'零参考带 '+base.reference_band_thz.join('–')+' THz，原图可见像素范围 '+base.reference_pixel_range.join('–')+'；幅值 ≤ '+fmt(base.unresolved_amplitude_interval[1],5)+' 与零线不可区分，共 '+base.affected_nonzero_points+' 个非零重建点产生候选零值。'+base.assumption+'。左图保留原始提取轨迹。':base.reason;
  $('cumulative-basis').textContent=cm.status==='diagnostic_only'?'使用累计 λ 的曲线增量及对数频率求谱矩；单调投影最大调整 '+fmt(cm.max_monotone_adjustment,5)+'。核验频域 '+cm.frequency_interval_thz.map(v=>fmt(v,4)).join('–')+' THz，可读 λ 增量 '+fmt(cm.resolved_lambda_span,5)+'，不包含零频到首个可读点的未知贡献。原始累计曲线未改写。':cm.reason;
- if(D.scientific_review){$('precision-metrics').lastElementChild.querySelector('strong').textContent='复核完成，未通过定量训练采纳';document.querySelector('.review strong').textContent='AI 科学复核已完成 · 限定用途';document.querySelector('.review p').textContent='材料归属、单位及原胞计数通过。谱线可用于探索性分析；绝对 DOS 与 α²F 尚不作为定量训练真值。详见页首复核结论。'}
+ if(D.scientific_review){$('precision-metrics').lastElementChild.querySelector('strong').textContent='条件定量使用，未整体批准为作者真值';document.querySelector('.review strong').textContent='AI 科学复核已更正 · 条件定量使用';document.querySelector('.review p').textContent='DOS 可按共同坐标轴约定归一化使用；可见 α²F 频段保留误差和重建标签使用。边框遮挡处须加掩膜。未整体批准不意味着原论文计算错误，也不意味着所有曲线只能定性使用。';$('structure-metrics').innerHTML=$('structure-metrics').innerHTML.replace('须核实，尚未验收','同一坐标框支持共同尺度约定')}
+ const joint=precision.joint_reconstruction,audit=D.scientific_review?.metrics.states.find(t=>t.id===s.id);
+ $('joint-metrics').innerHTML=joint?metric('λ 联合重建候选',fmt(joint.integral.lambda_integral))+metric('ωlog 联合候选 / 正文',fmt(joint.integral.omega_log_k,1)+' / '+fmt(dg.omega_log_reported_k,1)+' K · '+pct(100*(joint.integral.omega_log_k/dg.omega_log_reported_k-1)))+metric('未参与拟合的累计 λ 点',joint.held_out_nodes+' / '+joint.observed_nodes)+metric('留出点偏差：RMSE / 最大',fmt(joint.held_out_rmse_px,2)+' / '+fmt(joint.held_out_max_abs_px,2)+' 像素')+metric('拟合点 RMSE',fmt(joint.full_fit_rmse_px,2)+' 像素'):metric('联合重建','不可用');
+ $('joint-basis').textContent=joint?'仅使用绿色像素包络及粉色真实观测点，不使用正文 λ/ωlog。每五个粉色观测点留出一个验证。裁边峰只保留带掩膜的候选；它的真实峰顶不能由该图唯一确定。':'';
+ $('bin-metrics').innerHTML=audit?audit.bins.map(b=>metric(b.frequency_thz.map(v=>fmt(v,1)).join('–')+' THz','原候选 '+fmt(b.lambda_from_alpha)+'；联合 '+fmt(b.joint_candidate_lambda)+'；原图范围 '+fmt(b.cumulative_observed_envelope.lower)+'–'+fmt(b.cumulative_observed_envelope.upper)+' · '+(b.compatible_with_image_envelope?'原候选相容':'原候选超出范围'))).join(''):'';
  $('sensitivity').innerHTML=dg.low_frequency_sensitivity.map(v=>metric('下限 '+v.cutoff_thz+' THz','λ '+fmt(v.lambda_integral)+' / ωlog '+fmt(v.omega_log_k,1)+' K')).join('');
  renderFigure();renderChart();renderPoints();
 }
@@ -114,6 +121,7 @@ function renderFigure(){
  svg.innerHTML=markup;
 }
 function chartPoints(){const n=state().dos_normalization_candidate;
+ if(selected==='alpha_joint'){const j=state().precision.joint_reconstruction;return curve().points.map((p,i)=>({...p,reconstructed_amplitude:j.alpha2f[i],status:j.clipped_frequency_mask.includes(p.frequency_thz)?'boundary_masked':'joint_candidate'}))}
  if(selected==='alpha_candidate'){const b=state().precision.zero_baseline_candidate;return curve().points.map((p,i)=>({...p,reconstructed_amplitude:b.amplitude[i],status:b.point_reasons[i]==='within_zero_footprint'?'resolution_candidate':p.status}))}
  if(selected==='total')return n.total?n.frequency_thz.map((f,i)=>({frequency_thz:f,reconstructed_amplitude:n.total[i],observed_amplitude:null,status:'conditional'})):[];
  return curve().points;
@@ -131,9 +139,11 @@ function renderChart(){
  for(const p of points){if(p.reconstructed_amplitude===null){open=false;continue}path+=(open?'L':'M')+X(p.frequency_thz).toFixed(2)+','+Y(p.reconstructed_amplitude).toFixed(2)+' ';open=true;
  if(p.status==='observed')dots+='<circle cx="'+X(p.frequency_thz)+'" cy="'+Y(p.reconstructed_amplitude)+'" r="1" fill="#0b8386"><title>'+fmt(p.frequency_thz)+' THz / '+fmt(p.reconstructed_amplitude)+'</title></circle>';
  }
- const label=selected==='alpha_candidate'?'α²F / 零基线候选':selected==='total'?'modes / THz / primitive cell':isDos()?'幅值 / 原图像素':curve().kind==='alpha2f'?'α²F / 原图坐标':'累计 λ';
+ const label=selected==='alpha_joint'?'α²F / 联合重建候选':selected==='alpha_candidate'?'α²F / 零基线候选':selected==='total'?'modes / THz / primitive cell':isDos()?'幅值 / 原图像素':curve().kind==='alpha2f'?'α²F / 原图坐标':'累计 λ';
  $('chart').innerHTML='<svg viewBox="0 0 520 290" role="img" aria-label="'+esc(label)+'"><g font-size="10" fill="#627580">'+grid+'<text x="52" y="21">'+esc(label)+'</text><text x="275" y="282" text-anchor="middle">频率 ν / THz</text></g><path d="M52 40V240H490" fill="none" stroke="#bac9cf"/><path d="'+path+'" fill="none" stroke="#0b8386" stroke-width="1.3"/>'+dots+'</svg>';
  $('chart-note').textContent=selected==='alpha_candidate'?'此曲线将无法与图像零线区分的幅值作为零值候选。它不覆盖原始结果；零参考带、逐点理由和独立累计谱核验均可查看。':selected==='total'?'条件预览：假设各分波为完整、同尺度的元素投影，总和归一化到 '+s.structure.mode_count+'。条件未确认，不能作为已核实的绝对 DOS。':isDos()?'幅值是原图像素偏移，尚无作者给出的绝对 DOS 单位。断点保持缺失；连接的推断点可在下表查看。':'实线为提取与有界重建，空缺处不连接；图像观测点叠加显示。坐标未按正文参考值修正。';
+ if(selected==='alpha_joint')$('chart-note').textContent='联合候选遵守 dλ/dν = 2α²F/ν，并受绿色原图像素包络约束。原始轨迹保留；积分一致是约束，不能独自证明准确度。遮挡处在逐点来源和 CSV 掩膜中标记。';
+ if(selected==='total')$('chart-note').textContent=n.scale_basis+'；总和用一个因子归一化到 '+s.structure.mode_count+' 模式。可带此约定用于定量分析；模式数是输入约束，不能独立证明峰位置、分波比例和像素精度。';
 }
 function renderPoints(){
  const points=chartPoints(),n=state().dos_normalization_candidate;
@@ -141,7 +151,7 @@ function renderPoints(){
  const rows=points.map((p,i)=>({p,i})).filter(({p})=>!$('issues-only').checked||p.status!=='observed'||p.detection_mode==='chromatic_recovery');
  $('point-count').textContent='当前曲线 '+points.length+' 个采样点 · 暗色补读 '+points.filter(p=>p.detection_mode==='chromatic_recovery').length+' 点 · 显示 '+rows.length+' 点';
  const baseline=state().precision.zero_baseline_candidate;
- $('point-rows').innerHTML=rows.map(({p,i})=>'<tr><td>'+fmt(p.frequency_thz,4)+'</td><td>'+fmt(p.observed_amplitude,5)+'</td><td>'+fmt(selected==='alpha_candidate'?curve().points[i].reconstructed_amplitude:p.reconstructed_amplitude,5)+'</td><td>'+fmt(curve()?.kind==='alpha2f'?baseline.amplitude?.[i]:null,5)+'</td><td>'+fmt(selected==='total'?p.reconstructed_amplitude:component?n.components?.[component]?.[i]:null,5)+'</td><td><span class="pill '+p.status+'">'+(p.status==='resolution_candidate'?names[p.status]:p.detection_mode==='chromatic_recovery'?'暗色像素观测':names[p.status])+'</span></td></tr>').join('');
+ $('point-rows').innerHTML=rows.map(({p,i})=>'<tr><td>'+fmt(p.frequency_thz,4)+'</td><td>'+fmt(p.observed_amplitude,5)+'</td><td>'+fmt(['alpha_candidate','alpha_joint'].includes(selected)?curve().points[i].reconstructed_amplitude:p.reconstructed_amplitude,5)+'</td><td>'+fmt(curve()?.kind==='alpha2f'?baseline.amplitude?.[i]:null,5)+'</td><td>'+fmt(curve()?.kind==='alpha2f'?state().precision.joint_reconstruction?.alpha2f[i]:null,5)+'</td><td>'+fmt(selected==='total'?p.reconstructed_amplitude:component?n.components?.[component]?.[i]:null,5)+'</td><td><span class="pill '+p.status+'">'+(['resolution_candidate','joint_candidate','boundary_masked'].includes(p.status)?names[p.status]:p.detection_mode==='chromatic_recovery'?'暗色像素观测':names[p.status])+'</span></td></tr>').join('');
 }
 render();
 </script>

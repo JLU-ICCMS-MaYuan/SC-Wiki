@@ -1,0 +1,1200 @@
+{
+  "schema_version": 1,
+  "review_id": "h3s-2014-image-constraints-v5",
+  "review_date": "2026-10-14",
+  "status": "completed_with_restrictions",
+  "supersedes": "h3s-2014-scientific-audit-v4",
+  "reviewer": {
+    "kind": "ai_scientific_review",
+    "name": "Codex",
+    "scope": "原文、原图与数字化结果复核；未重跑作者 DFPT"
+  },
+  "dataset_fingerprint": "81777f40e21bc23ecc768e7a70b3679ba0a11bacca30e8c81f8554f2a17bc4c0",
+  "quantitative_ml_approved": false,
+  "conditional_quantitative_use": true,
+  "summary": "复核更正：同框 DOS 可按共同尺度约定归一化定量使用；可见 α²F 可带像素误差与重建标签使用。撤回 Im-3m 20–25 THz 已证实有 28.5% 误差的结论；裁边处保留掩膜，未整体批准为作者原始真值。",
+  "dispositions": [
+    {
+      "item": "材料、压力、原胞计数及单位",
+      "verdict": "通过",
+      "reason": "两相均为 H3S 四原子；THz 按普通频率转换。"
+    },
+    {
+      "item": "论文直接报告的 λ / ωlog",
+      "verdict": "可按理论计算原文记录",
+      "reason": "R3m 2.07/1125.1 K；Im-3m 2.19/1334.6 K。"
+    },
+    {
+      "item": "归一化总 DOS 与 H/S 分波",
+      "verdict": "共同坐标轴约定下可作条件定量数据",
+      "reason": "同一 PHDOS 坐标框支持共同尺度；总和用一个因子归一化到 12。面积 12 不是独立准确度证据，保留像素重建及投影定义假设。"
+    },
+    {
+      "item": "Im-3m 20–25 THz 局部贡献",
+      "verdict": "原候选与原图范围相容；28.5% 误判已纠正",
+      "reason": "25 THz 在粉色虚线空隙；Δλ 支持范围 0.183–0.366，原 α 积分 0.299、联合候选 0.273 均在内。"
+    },
+    {
+      "item": "可见 α²F 的联合重建",
+      "verdict": "带误差及来源标签的条件定量候选",
+      "reason": "每相 70 个留出真实 λ 点；RMSE 0.46/0.53 像素。仅校验同图一致性，不代表独立 DFPT 精度。"
+    },
+    {
+      "item": "完整 α²F 及裁边峰顶",
+      "verdict": "遮挡处加掩膜，峰顶尚不唯一",
+      "reason": "Im-3m 约 28.6–29.0 THz 的绿峰抵达 x=977 黑框；可约束面积，不能凭位图唯一恢复峰高。"
+    },
+    {
+      "item": "贴轴幅值及低于 5 THz 的旧候选",
+      "verdict": "保留范围，使用联合候选核验",
+      "reason": "贴轴不证明严格零；Im-3m 旧低频候选超出累计谱范围，新联合候选与范围相容。"
+    }
+  ],
+  "findings": [
+    "此前把虚线空隙内的线性插值当确切读数，进而将 28.5% 当真实误差，是复核方法错误；不能归因于论文计算。",
+    "按预先固定的 5 THz 频段计算真实累计 λ 像素范围；R3m 旧候选各段相容，Im-3m 旧候选仅首段超出范围，联合候选两相各段均相容。",
+    "联合重建不接收正文标量；绿色像素包络、真实粉色点与积分关系提供约束。积分相等是约束结果，不能自证准确度。",
+    "留出 RMSE 0.464/0.528 像素，最大偏差 2.383/2.142 像素；留出的是同图读数，不能替代作者原始谱或独立实验。",
+    "同框 H/S 支持共同尺度的通常读图约定，旧报告仅因没有作者明文声明就整体拒绝定量使用的表述过严。",
+    "正文 18.4%+82.6%=101% 的文字异常仍保留；不猜测应修改哪一项。",
+    "training_ready=false 表示未整体批准为无条件作者真值；conditional_quantitative_use=true 表示可按用途、假设和掩膜进行定量分析。"
+  ],
+  "next_requirements": [
+    "作者原始谱可进一步确认投影定义、分辨率以下幅值及遮挡峰顶；不将此信息缺失判为作者计算错误。",
+    "机器学习使用须保留重建标记、误差与掩膜，同论文分组划分；4654 个采样点不是独立材料样本。"
+  ],
+  "evidence": {
+    "file": "assets/h3s-review-evidence-v5.svg",
+    "sha256": "2338cfe5ed124ae8b51d03fd4778e0e7826c6cdd9861d91bdb254e55b5f28f62",
+    "source": "原 PDF 内嵌位图的最近邻局部放大与坐标标注"
+  },
+  "metrics": {
+    "dataset_fingerprint": "81777f40e21bc23ecc768e7a70b3679ba0a11bacca30e8c81f8554f2a17bc4c0",
+    "method": "independent_adaptive_quadrature_and_frequency_bin_consistency",
+    "grants_scientific_acceptance": false,
+    "states": [
+      {
+        "id": "r3m-130gpa",
+        "primitive_atoms": 4,
+        "independent_lambda": 2.0996371056927163,
+        "production_lambda": 2.099637105692714,
+        "quadrature_difference": 2.220446049250313e-15,
+        "zero_frequency_first_interval_lambda": 0.0024499668077797017,
+        "bins": [
+          {
+            "frequency_thz": [
+              0.07653375601837809,
+              5.0
+            ],
+            "lambda_from_alpha": 0.0,
+            "lambda_from_cumulative": 0.0020535714285713665,
+            "difference": -0.0020535714285713665,
+            "numerical_quadrature_error": 0.0,
+            "cumulative_observed_envelope": {
+              "lower": 0.0,
+              "upper": 0.01785714285714235,
+              "lower_boundary": {
+                "lower": 0.008928571428576504,
+                "upper": 0.0446428571428612,
+                "adjacent_observed_frequency_thz": [
+                  0.07653375601837809,
+                  0.07653375601837809
+                ],
+                "boundary_is_direct_observation": true,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.008928571428576504,
+                "upper": 0.026785714285718853,
+                "adjacent_observed_frequency_thz": [
+                  4.98880252931103,
+                  5.083269236489734
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.003935076620300756,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              5.0,
+              10.0
+            ],
+            "lambda_from_alpha": 0.27276642781156335,
+            "lambda_from_cumulative": 0.27348479371505596,
+            "difference": -0.0007183659034926126,
+            "numerical_quadrature_error": 3.028315685011532e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.17857142857142883,
+              "upper": 0.39285714285714235,
+              "lower_boundary": {
+                "lower": 0.008928571428576504,
+                "upper": 0.026785714285718853,
+                "adjacent_observed_frequency_thz": [
+                  4.98880252931103,
+                  5.083269236489734
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.20535714285714768,
+                "upper": 0.40178571428571885,
+                "adjacent_observed_frequency_thz": [
+                  9.617671181067564,
+                  10.562338252854616
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.2672202899890739,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              10.0,
+              15.0
+            ],
+            "lambda_from_alpha": 0.4165420517272823,
+            "lambda_from_cumulative": 0.38499734914208594,
+            "difference": 0.03154470258519637,
+            "numerical_quadrature_error": 4.6245457655223195e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.25,
+              "upper": 0.5,
+              "lower_boundary": {
+                "lower": 0.20535714285714768,
+                "upper": 0.40178571428571885,
+                "adjacent_observed_frequency_thz": [
+                  9.617671181067564,
+                  10.562338252854616
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.6517857142857189,
+                "upper": 0.7053571428571477,
+                "adjacent_observed_frequency_thz": [
+                  14.907806783075031,
+                  15.002273490253742
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.39238234396350335,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              15.0,
+              20.0
+            ],
+            "lambda_from_alpha": 0.052667806334931726,
+            "lambda_from_cumulative": 0.04464285714285765,
+            "difference": 0.008024949192074075,
+            "numerical_quadrature_error": 5.847301124953988e-16,
+            "cumulative_observed_envelope": {
+              "lower": 0.0,
+              "upper": 0.08928571428571352,
+              "lower_boundary": {
+                "lower": 0.6517857142857189,
+                "upper": 0.7053571428571477,
+                "adjacent_observed_frequency_thz": [
+                  14.907806783075031,
+                  15.002273490253742
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.7053571428571477,
+                "upper": 0.7410714285714324,
+                "adjacent_observed_frequency_thz": [
+                  19.914542263546387,
+                  20.00900897072509
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.05113719870016949,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              20.0,
+              25.0
+            ],
+            "lambda_from_alpha": 0.09882085799389032,
+            "lambda_from_cumulative": 0.10971320346320257,
+            "difference": -0.010892345469312253,
+            "numerical_quadrature_error": 1.0971319185802996e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.07142857142857117,
+              "upper": 0.17857142857142705,
+              "lower_boundary": {
+                "lower": 0.7053571428571477,
+                "upper": 0.7410714285714324,
+                "adjacent_observed_frequency_thz": [
+                  19.914542263546387,
+                  20.00900897072509
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.8125000000000036,
+                "upper": 0.8839285714285747,
+                "adjacent_observed_frequency_thz": [
+                  24.732344329660336,
+                  25.771478108626088
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.10220164882570777,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              25.0,
+              30.0
+            ],
+            "lambda_from_alpha": 0.29539589703322355,
+            "lambda_from_cumulative": 0.28165664744612184,
+            "difference": 0.01373924958710171,
+            "numerical_quadrature_error": 3.2795532626608673e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.16071428571428648,
+              "upper": 0.3214285714285712,
+              "lower_boundary": {
+                "lower": 0.8125000000000036,
+                "upper": 0.8839285714285747,
+                "adjacent_observed_frequency_thz": [
+                  24.732344329660336,
+                  25.771478108626088
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 1.0446428571428612,
+                "upper": 1.1339285714285747,
+                "adjacent_observed_frequency_thz": [
+                  29.077812859880755,
+                  30.022479931667803
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.2983250115104848,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              30.0,
+              35.0
+            ],
+            "lambda_from_alpha": 0.46192083546023777,
+            "lambda_from_cumulative": 0.47194026733500327,
+            "difference": -0.010019431874765505,
+            "numerical_quadrature_error": 5.1283514708204425e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.4285714285714288,
+              "upper": 0.5714285714285712,
+              "lower_boundary": {
+                "lower": 1.0446428571428612,
+                "upper": 1.1339285714285747,
+                "adjacent_observed_frequency_thz": [
+                  29.077812859880755,
+                  30.022479931667803
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 1.5625000000000036,
+                "upper": 1.6160714285714324,
+                "adjacent_observed_frequency_thz": [
+                  34.934748704960455,
+                  35.02921541213916
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.46370579821688995,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              35.0,
+              40.0
+            ],
+            "lambda_from_alpha": 0.26158733914184906,
+            "lambda_from_cumulative": 0.24742344643660408,
+            "difference": 0.014163892705244985,
+            "numerical_quadrature_error": 2.904202868657102e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.19642857142857117,
+              "upper": 0.3214285714285712,
+              "lower_boundary": {
+                "lower": 1.5625000000000036,
+                "upper": 1.6160714285714324,
+                "adjacent_observed_frequency_thz": [
+                  34.934748704960455,
+                  35.02921541213916
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 1.8125000000000036,
+                "upper": 1.8839285714285747,
+                "adjacent_observed_frequency_thz": [
+                  39.94148418543181,
+                  40.79168455004015
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.2488823861769115,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              40.0,
+              45.0
+            ],
+            "lambda_from_alpha": 0.16092056449756362,
+            "lambda_from_cumulative": 0.16917714960478158,
+            "difference": -0.008256585107217967,
+            "numerical_quadrature_error": 1.7865771584087256e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.08928571428571352,
+              "upper": 0.21428571428571352,
+              "lower_boundary": {
+                "lower": 1.8125000000000036,
+                "upper": 1.8839285714285747,
+                "adjacent_observed_frequency_thz": [
+                  39.94148418543181,
+                  40.79168455004015
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 1.9732142857142883,
+                "upper": 2.026785714285717,
+                "adjacent_observed_frequency_thz": [
+                  44.19248600847352,
+                  45.137153080260575
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.1573547492297832,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              45.0,
+              50.0
+            ],
+            "lambda_from_alpha": 0.07901532569217395,
+            "lambda_from_cumulative": 0.06830357142856958,
+            "difference": 0.010711754263604378,
+            "numerical_quadrature_error": 8.772463388170724e-16,
+            "cumulative_observed_envelope": {
+              "lower": 0.01785714285714235,
+              "upper": 0.125,
+              "lower_boundary": {
+                "lower": 1.9732142857142883,
+                "upper": 2.026785714285717,
+                "adjacent_observed_frequency_thz": [
+                  44.19248600847352,
+                  45.137153080260575
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 2.0446428571428594,
+                "upper": 2.0982142857142883,
+                "adjacent_observed_frequency_thz": [
+                  49.954955146374516,
+                  50.04942185355323
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.07687170330730966,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              50.0,
+              54.772757212488465
+            ],
+            "lambda_from_alpha": 0.0,
+            "lambda_from_cumulative": 0.001091269841268172,
+            "difference": -0.001091269841268172,
+            "numerical_quadrature_error": 0.0,
+            "cumulative_observed_envelope": {
+              "lower": 0.0,
+              "upper": 0.053571428571428825,
+              "lower_boundary": {
+                "lower": 2.0446428571428594,
+                "upper": 2.0982142857142883,
+                "adjacent_observed_frequency_thz": [
+                  49.954955146374516,
+                  50.04942185355323
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 2.0446428571428594,
+                "upper": 2.0982142857142883,
+                "adjacent_observed_frequency_thz": [
+                  54.772757212488465,
+                  54.772757212488465
+                ],
+                "boundary_is_direct_observation": true,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 9.85553939975832e-09,
+            "joint_compatible_with_image_envelope": true
+          }
+        ],
+        "binned_point_estimate_discrepancy_fraction": 0.05413335469333073,
+        "largest_absolute_discrepancy_bin": {
+          "frequency_thz": [
+            10.0,
+            15.0
+          ],
+          "lambda_from_alpha": 0.4165420517272823,
+          "lambda_from_cumulative": 0.38499734914208594,
+          "difference": 0.03154470258519637,
+          "numerical_quadrature_error": 4.6245457655223195e-15,
+          "cumulative_observed_envelope": {
+            "lower": 0.25,
+            "upper": 0.5,
+            "lower_boundary": {
+              "lower": 0.20535714285714768,
+              "upper": 0.40178571428571885,
+              "adjacent_observed_frequency_thz": [
+                9.617671181067564,
+                10.562338252854616
+              ],
+              "boundary_is_direct_observation": false,
+              "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+            },
+            "upper_boundary": {
+              "lower": 0.6517857142857189,
+              "upper": 0.7053571428571477,
+              "adjacent_observed_frequency_thz": [
+                14.907806783075031,
+                15.002273490253742
+              ],
+              "boundary_is_direct_observation": false,
+              "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+            },
+            "is_statistical_confidence_interval": false
+          },
+          "compatible_with_image_envelope": true,
+          "point_estimate_difference_is_not_measurement_error": true,
+          "joint_candidate_lambda": 0.39238234396350335,
+          "joint_compatible_with_image_envelope": true
+        },
+        "one_pixel_amplitude_sensitivity": [
+          {
+            "amplitude_shift_px": -1,
+            "lambda_integral": 2.03491910963475,
+            "numerical_quadrature_error": 2.2592140487662235e-14
+          },
+          {
+            "amplitude_shift_px": 0,
+            "lambda_integral": 2.0996371056927163,
+            "numerical_quadrature_error": 2.331065458097376e-14
+          },
+          {
+            "amplitude_shift_px": 1,
+            "lambda_integral": 2.16435510175068,
+            "numerical_quadrature_error": 2.402916867428529e-14
+          }
+        ],
+        "sensitivity_is_confidence_interval": false,
+        "unresolved_amplitude_interval": [
+          0,
+          0.03571428571429003
+        ],
+        "cumulative_endpoint": 2.071428571428573,
+        "cumulative_endpoint_one_pixel_interval": [
+          2.05357142857143,
+          2.0892857142857157
+        ],
+        "clipped_frequencies_thz": [],
+        "projection_mode_check": {
+          "status": "conditional_diagnostic",
+          "expected": {
+            "H": 9,
+            "S": 3
+          },
+          "measured": {
+            "H": 8.657613042430027,
+            "S": 3.3423869575699725
+          },
+          "relative_difference_pct": {
+            "H": -3.804299528555255,
+            "S": 11.412898585665744
+          },
+          "assumption": "仅在完整、共同尺度的正交笛卡尔元素投影定义下适用；不把各分波分别强制缩放到目标"
+        },
+        "cumulative_omega_log_k": 1075.959087695178,
+        "alpha_omega_log_k": 1070.3452077151437,
+        "joint_reconstruction": {
+          "status": "physics_constrained_candidate",
+          "cumulative_zero_offset": 0.004605833545458457,
+          "observed_nodes": 350,
+          "held_out_nodes": 70,
+          "held_out_rmse_px": 0.46404921477343547,
+          "held_out_max_abs_px": 2.3827874701020724,
+          "full_fit_rmse_px": 0.42949468933762164,
+          "clipped_frequency_mask": [],
+          "uses_paper_reference": false,
+          "held_out_fraction": 0.2,
+          "consistency_is_constraint_not_independent_accuracy": true,
+          "assumptions": [
+            "像素包络限定可见曲线幅值",
+            "累计 λ 的零轴偏移限于一个像素",
+            "零频/高频端继承已有边界假设",
+            "边界遮挡区只提供重建候选，不声称恢复唯一峰顶"
+          ],
+          "validation": "每五个真实累计谱点留出一个；其余点与绿色原图支持范围用于重建",
+          "integral": {
+            "lambda_integral": 2.0706599570282864,
+            "frequency_log_thz": 21.62447662274096,
+            "omega_log_k": 1037.8111964685934,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 0.0,
+            "cutoff_thz": 0.0,
+            "integration_method": "exact_piecewise_linear_alpha2f",
+            "zero_interval_lambda": 0.008643675492597926
+          }
+        }
+      },
+      {
+        "id": "im3m-200gpa",
+        "primitive_atoms": 4,
+        "independent_lambda": 2.251385533868194,
+        "production_lambda": 2.2513855338681936,
+        "quadrature_difference": 4.440892098500626e-16,
+        "zero_frequency_first_interval_lambda": 0.0031438067677375574,
+        "bins": [
+          {
+            "frequency_thz": [
+              0.07653375601847756,
+              5.0
+            ],
+            "lambda_from_alpha": 0.05481646525447972,
+            "lambda_from_cumulative": 0.01366908698022546,
+            "difference": 0.04114737827425426,
+            "numerical_quadrature_error": 6.085850185408827e-16,
+            "cumulative_observed_envelope": {
+              "lower": 0.0,
+              "upper": 0.04576587143665023,
+              "lower_boundary": {
+                "lower": 0.011472886077559252,
+                "upper": 0.05723875751420948,
+                "adjacent_observed_frequency_thz": [
+                  0.07653375601847756,
+                  0.07653375601847756
+                ],
+                "boundary_is_direct_observation": true,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.011472886077559252,
+                "upper": 0.05723875751420948,
+                "adjacent_observed_frequency_thz": [
+                  4.894335822132419,
+                  5.083269236489826
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": false,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.03274303835112288,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              5.0,
+              10.0
+            ],
+            "lambda_from_alpha": 0.11683160897335429,
+            "lambda_from_cumulative": 0.099416859741014,
+            "difference": 0.017414749232340293,
+            "numerical_quadrature_error": 1.29709142286221e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.04576587143665023,
+              "upper": 0.1601805500282758,
+              "lower_boundary": {
+                "lower": 0.011472886077559252,
+                "upper": 0.05723875751420948,
+                "adjacent_observed_frequency_thz": [
+                  4.894335822132419,
+                  5.083269236489826
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.10300462895085971,
+                "upper": 0.17165343610583506,
+                "adjacent_observed_frequency_thz": [
+                  9.712137888246346,
+                  10.656804960033398
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.10389802814773379,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              10.0,
+              15.0
+            ],
+            "lambda_from_alpha": 0.16538258739353703,
+            "lambda_from_cumulative": 0.1726040386105754,
+            "difference": -0.007221451217038377,
+            "numerical_quadrature_error": 1.8361155639638694e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.11441467859162557,
+              "upper": 0.22882935718325115,
+              "lower_boundary": {
+                "lower": 0.10300462895085971,
+                "upper": 0.17165343610583506,
+                "adjacent_observed_frequency_thz": [
+                  9.712137888246346,
+                  10.656804960033398
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.28606811469746063,
+                "upper": 0.33183398613411086,
+                "adjacent_observed_frequency_thz": [
+                  14.907806783075102,
+                  15.002273490253813
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.1633802475171311,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              15.0,
+              20.0
+            ],
+            "lambda_from_alpha": 0.1630841438390961,
+            "lambda_from_cumulative": 0.18197235160978154,
+            "difference": -0.018888207770685422,
+            "numerical_quadrature_error": 1.810597714414454e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.11441467859162913,
+              "upper": 0.2288293571832547,
+              "lower_boundary": {
+                "lower": 0.28606811469746063,
+                "upper": 0.33183398613411086,
+                "adjacent_observed_frequency_thz": [
+                  14.907806783075102,
+                  15.002273490253813
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.44624866472574,
+                "upper": 0.5148974718807153,
+                "adjacent_observed_frequency_thz": [
+                  19.91454226354645,
+                  20.009008970725148
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.16473786571429325,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              20.0,
+              25.0
+            ],
+            "lambda_from_alpha": 0.29869706609636304,
+            "lambda_from_cumulative": 0.2324630397332157,
+            "difference": 0.06623402636314735,
+            "numerical_quadrature_error": 3.3162036016816435e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.18306348574660092,
+              "upper": 0.36612697149320184,
+              "lower_boundary": {
+                "lower": 0.44624866472574,
+                "upper": 0.5148974718807153,
+                "adjacent_observed_frequency_thz": [
+                  19.91454226354645,
+                  20.009008970725148
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 0.6979609576273162,
+                "upper": 0.8123756362189418,
+                "adjacent_observed_frequency_thz": [
+                  24.82681103683909,
+                  25.67701140144743
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.273147283252792,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              25.0,
+              30.0
+            ],
+            "lambda_from_alpha": 0.370203362245716,
+            "lambda_from_cumulative": 0.38646735879838534,
+            "difference": -0.016263996552669358,
+            "numerical_quadrature_error": 4.110082965588412e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.2745952286199014,
+              "upper": 0.4347757786481772,
+              "lower_boundary": {
+                "lower": 0.6979609576273162,
+                "upper": 0.8123756362189418,
+                "adjacent_observed_frequency_thz": [
+                  24.82681103683909,
+                  25.67701140144743
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 1.0869708648388432,
+                "upper": 1.1327367362754934,
+                "adjacent_observed_frequency_thz": [
+                  29.928013224489135,
+                  30.022479931667846
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.36960302065491896,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              30.0,
+              35.0
+            ],
+            "lambda_from_alpha": 0.44800061758132875,
+            "lambda_from_cumulative": 0.4426787808513861,
+            "difference": 0.005321836729942631,
+            "numerical_quadrature_error": 4.973806006850808e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.38900990721152695,
+              "upper": 0.5034245858031525,
+              "lower_boundary": {
+                "lower": 1.0869708648388432,
+                "upper": 1.1327367362754934,
+                "adjacent_observed_frequency_thz": [
+                  29.928013224489135,
+                  30.022479931667846
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 1.5217466434870204,
+                "upper": 1.5903954506419957,
+                "adjacent_observed_frequency_thz": [
+                  34.934748704960484,
+                  35.029215412139195
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.44937273296425445,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              35.0,
+              40.0
+            ],
+            "lambda_from_alpha": 0.27683506758761545,
+            "lambda_from_cumulative": 0.276985944688543,
+            "difference": -0.0001508771009275378,
+            "numerical_quadrature_error": 3.07348666059432e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.20594642146492603,
+              "upper": 0.38900990721152695,
+              "lower_boundary": {
+                "lower": 1.5217466434870204,
+                "upper": 1.5903954506419957,
+                "adjacent_observed_frequency_thz": [
+                  34.934748704960484,
+                  35.029215412139195
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 1.7963418721069218,
+                "upper": 1.9107565506985473,
+                "adjacent_observed_frequency_thz": [
+                  39.84701747825312,
+                  40.69721784286146
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.26985207496678404,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              40.0,
+              45.0
+            ],
+            "lambda_from_alpha": 0.1286804910133913,
+            "lambda_from_cumulative": 0.12648689403789648,
+            "difference": 0.002193596975494816,
+            "numerical_quadrature_error": 1.428640439431375e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.022882935718325115,
+              "upper": 0.18306348574660092,
+              "lower_boundary": {
+                "lower": 1.7963418721069218,
+                "upper": 1.9107565506985473,
+                "adjacent_observed_frequency_thz": [
+                  39.84701747825312,
+                  40.69721784286146
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 1.9336394864168724,
+                "upper": 1.9794053578535227,
+                "adjacent_observed_frequency_thz": [
+                  44.09801930129484,
+                  45.04268637308188
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.12621651138390505,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              45.0,
+              50.0
+            ],
+            "lambda_from_alpha": 0.1993327083338334,
+            "lambda_from_cumulative": 0.1950219556059689,
+            "difference": 0.004310752727864492,
+            "numerical_quadrature_error": 2.2130376235311274e-15,
+            "cumulative_observed_envelope": {
+              "lower": 0.1372976143099507,
+              "upper": 0.25171229290157626,
+              "lower_boundary": {
+                "lower": 1.9336394864168724,
+                "upper": 1.9794053578535227,
+                "adjacent_observed_frequency_thz": [
+                  44.09801930129484,
+                  45.04268637308188
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 2.1167029721634734,
+                "upper": 2.1853517793184487,
+                "adjacent_observed_frequency_thz": [
+                  49.954955146374516,
+                  50.04942185355323
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.19868606028833855,
+            "joint_compatible_with_image_envelope": true
+          },
+          {
+            "frequency_thz": [
+              50.0,
+              54.678290505309754
+            ],
+            "lambda_from_alpha": 0.029521415549478618,
+            "lambda_from_cumulative": 0.034324403577485896,
+            "difference": -0.004802988028007278,
+            "numerical_quadrature_error": 3.277535526255828e-16,
+            "cumulative_observed_envelope": {
+              "lower": 0.0,
+              "upper": 0.09153174287330046,
+              "lower_boundary": {
+                "lower": 2.1167029721634734,
+                "upper": 2.1853517793184487,
+                "adjacent_observed_frequency_thz": [
+                  49.954955146374516,
+                  50.04942185355323
+                ],
+                "boundary_is_direct_observation": false,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "upper_boundary": {
+                "lower": 2.1624688436001236,
+                "upper": 2.208234715036774,
+                "adjacent_observed_frequency_thz": [
+                  54.678290505309754,
+                  54.678290505309754
+                ],
+                "boundary_is_direct_observation": true,
+                "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+              },
+              "is_statistical_confidence_interval": false
+            },
+            "compatible_with_image_envelope": true,
+            "point_estimate_difference_is_not_measurement_error": true,
+            "joint_candidate_lambda": 0.029176495309268698,
+            "joint_compatible_with_image_envelope": true
+          }
+        ],
+        "binned_point_estimate_discrepancy_fraction": 0.08507962212746571,
+        "largest_absolute_discrepancy_bin": {
+          "frequency_thz": [
+            20.0,
+            25.0
+          ],
+          "lambda_from_alpha": 0.29869706609636304,
+          "lambda_from_cumulative": 0.2324630397332157,
+          "difference": 0.06623402636314735,
+          "numerical_quadrature_error": 3.3162036016816435e-15,
+          "cumulative_observed_envelope": {
+            "lower": 0.18306348574660092,
+            "upper": 0.36612697149320184,
+            "lower_boundary": {
+              "lower": 0.44624866472574,
+              "upper": 0.5148974718807153,
+              "adjacent_observed_frequency_thz": [
+                19.91454226354645,
+                20.009008970725148
+              ],
+              "boundary_is_direct_observation": false,
+              "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+            },
+            "upper_boundary": {
+              "lower": 0.6979609576273162,
+              "upper": 0.8123756362189418,
+              "adjacent_observed_frequency_thz": [
+                24.82681103683909,
+                25.67701140144743
+              ],
+              "boundary_is_direct_observation": false,
+              "basis": "真实有色像素包络加半像素；空隙仅使用累计谱单调约束，不作为精确插值值"
+            },
+            "is_statistical_confidence_interval": false
+          },
+          "compatible_with_image_envelope": true,
+          "point_estimate_difference_is_not_measurement_error": true,
+          "joint_candidate_lambda": 0.273147283252792,
+          "joint_compatible_with_image_envelope": true
+        },
+        "one_pixel_amplitude_sensitivity": [
+          {
+            "amplitude_shift_px": -1,
+            "lambda_integral": 2.143753602310379,
+            "numerical_quadrature_error": 2.380044608408101e-14
+          },
+          {
+            "amplitude_shift_px": 0,
+            "lambda_integral": 2.251385533868194,
+            "numerical_quadrature_error": 2.4995400570084677e-14
+          },
+          {
+            "amplitude_shift_px": 1,
+            "lambda_integral": 2.359017465426011,
+            "numerical_quadrature_error": 2.619035505608836e-14
+          }
+        ],
+        "sensitivity_is_confidence_interval": false,
+        "unresolved_amplitude_interval": [
+          0,
+          0.0457972896550487
+        ],
+        "cumulative_endpoint": 2.1853517793184487,
+        "cumulative_endpoint_one_pixel_interval": [
+          2.1624688436001236,
+          2.208234715036774
+        ],
+        "clipped_frequencies_thz": [
+          28.983346152702097,
+          28.888879445523386,
+          28.79441273834469,
+          28.69994603116598,
+          28.605479323987268
+        ],
+        "projection_mode_check": {
+          "status": "conditional_diagnostic",
+          "expected": {
+            "H": 9,
+            "S": 3
+          },
+          "measured": {
+            "H": 8.88096199076156,
+            "S": 3.1190380092384404
+          },
+          "relative_difference_pct": {
+            "H": -1.3226445470937875,
+            "S": 3.9679336412813404
+          },
+          "assumption": "仅在完整、共同尺度的正交笛卡尔元素投影定义下适用；不把各分波分别强制缩放到目标"
+        },
+        "cumulative_omega_log_k": 1284.8314141187052,
+        "alpha_omega_log_k": 1224.8193570898738,
+        "joint_reconstruction": {
+          "status": "physics_constrained_candidate",
+          "cumulative_zero_offset": 0.006019016424656796,
+          "observed_nodes": 350,
+          "held_out_nodes": 70,
+          "held_out_rmse_px": 0.5284112216731363,
+          "held_out_max_abs_px": 2.1424115687743965,
+          "full_fit_rmse_px": 0.4939853614851259,
+          "clipped_frequency_mask": [
+            28.983346152702097,
+            28.888879445523386,
+            28.79441273834469,
+            28.69994603116598,
+            28.605479323987268
+          ],
+          "uses_paper_reference": false,
+          "held_out_fraction": 0.2,
+          "consistency_is_constraint_not_independent_accuracy": true,
+          "assumptions": [
+            "像素包络限定可见曲线幅值",
+            "累计 λ 的零轴偏移限于一个像素",
+            "零频/高频端继承已有边界假设",
+            "边界遮挡区只提供重建候选，不声称恢复唯一峰顶"
+          ],
+          "validation": "每五个真实累计谱点留出一个；其余点与绿色原图支持范围用于重建",
+          "integral": {
+            "lambda_integral": 2.1808134218583626,
+            "frequency_log_thz": 26.218495995983428,
+            "omega_log_k": 1258.2893530280346,
+            "positive_frequency_complete": true,
+            "minimum_integrated_thz": 0.0,
+            "cutoff_thz": 0.0,
+            "integration_method": "exact_piecewise_linear_alpha2f",
+            "zero_interval_lambda": 3.312301077351673e-08
+          }
+        }
+      }
+    ]
+  }
+}

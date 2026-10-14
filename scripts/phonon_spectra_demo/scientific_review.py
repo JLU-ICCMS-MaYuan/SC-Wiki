@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import numpy as np
 from scipy.integrate import quad
+from joint_reconstruction import increment_envelope
 
 
 def dataset_fingerprint(data: dict) -> str:
@@ -45,22 +46,37 @@ def audit_dataset(data: dict) -> dict:
                   grants_scientific_acceptance=False, states=[])
     for s in data["material_states"]:
         curve = next(c for c in s["curves"] if c["kind"] == "alpha2f")
+        cumulative_curve = next(c for c in s["curves"] if c["kind"] == "cumulative_lambda")
         f = np.array([p["frequency_thz"] for p in curve["points"]])
         a = np.array(s["precision"]["zero_baseline_candidate"]["amplitude"])
         c = s["precision"]["cumulative_moment"]
         cf, cv = np.array(c["monotone_frequency_thz"]), np.array(c["monotone_cumulative"])
-        lo, hi = max(float(f[0]), float(cf[0])), min(float(f[-1]), float(cf[-1]))
+        observed_f = [p["frequency_thz"] for p in cumulative_curve["points"]
+                      if p["observed_amplitude"] is not None]
+        lo = max(float(f[0]), float(cf[0]), min(observed_f))
+        hi = min(float(f[-1]), float(cf[-1]), max(observed_f))
         if any(p["reconstructed_amplitude"] is None for p in curve["points"]):
             raise ValueError("该审阅计算要求先明确处理曲线缺失")
         # 预先固定 5 THz 频段，不根据正文参考值挑选分段。
-        edges = np.r_[lo, np.arange(5, hi, 5), hi]
+        interior = np.arange(5, hi, 5)
+        edges = np.r_[lo, interior[interior > lo], hi]
         bins = []
         for left, right in zip(edges[:-1], edges[1:]):
             value, error = independent_integral(f, a, float(left), float(right))
             cumulative_delta = float(np.interp(right, cf, cv) - np.interp(left, cf, cv))
+            envelope = increment_envelope(cumulative_curve, float(left), float(right))
             bins.append(dict(frequency_thz=[float(left), float(right)],
                              lambda_from_alpha=value, lambda_from_cumulative=cumulative_delta,
-                             difference=value - cumulative_delta, numerical_quadrature_error=error))
+                             difference=value - cumulative_delta, numerical_quadrature_error=error,
+                             cumulative_observed_envelope=envelope,
+                             compatible_with_image_envelope=envelope["lower"] <= value <= envelope["upper"],
+                             point_estimate_difference_is_not_measurement_error=True))
+            joint = s["precision"].get("joint_reconstruction")
+            if joint:
+                jvalue, _ = independent_integral(np.array(joint["frequency_thz"]),
+                                                 np.array(joint["alpha2f"]), float(left), float(right))
+                bins[-1]["joint_candidate_lambda"] = jvalue
+                bins[-1]["joint_compatible_with_image_envelope"] = envelope["lower"] <= jvalue <= envelope["upper"]
         pixel = abs(curve["axis_calibration"]["amplitude"]["slope"])
         sensitivity = []
         for shift in (-1, 0, 1):
@@ -79,7 +95,7 @@ def audit_dataset(data: dict) -> dict:
             quadrature_difference=value - s["precision"]["zero_baseline_candidate"]["integral"]["lambda_integral"],
             zero_frequency_first_interval_lambda=s["diagnostics"]["zero_interval_lambda"],
             bins=bins,
-            binned_absolute_discrepancy_fraction=sum(abs(b["difference"]) for b in bins) / c["resolved_lambda_span"],
+            binned_point_estimate_discrepancy_fraction=sum(abs(b["difference"]) for b in bins) / c["resolved_lambda_span"],
             largest_absolute_discrepancy_bin=max(bins, key=lambda b: abs(b["difference"])),
             one_pixel_amplitude_sensitivity=sensitivity,
             sensitivity_is_confidence_interval=False,

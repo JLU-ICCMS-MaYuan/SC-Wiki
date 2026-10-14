@@ -16,7 +16,7 @@ python -m unittest discover -s "scripts/phonon_spectra_demo/tests" -v
 重建带本次科学复核的页面时，在 build_demo.py 命令中增加：
 
 ```text
---scientific-review "docs/specs/137-phonon-spectra-digitization/h3s-2014-scientific-review.json"
+--scientific-review "docs/specs/137-phonon-spectra-digitization/h3s-2014-scientific-review-v5.json"
 ```
 
 只有数据指纹完全相同才会加载；修改标定、算法或数值后拒绝旧复核。独立计算证据可用：

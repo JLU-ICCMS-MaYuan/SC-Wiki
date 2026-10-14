@@ -32,3 +32,11 @@ algorithm_version=scientific_audit_v4 修复零频首区间积分，增加 integ
 可选顶层 scientific_review 保存复核身份、范围、用途分级、原文异常、分频段核验、灵敏度及 dataset_fingerprint。状态 completed_with_restrictions 表示已执行 AI 科学复核，不表示全部数据采纳；quantitative_ml_approved=false。原曲线 needs_review 表示未作为正式科学值批准，原 precision 的 requires_user_review 仍是生成时默认状态，显式复核以顶层已绑定记录为准。
 
 指纹覆盖来源、标定、算法版本及材料状态数值，排除生成时间和复核自身。重建数据变化必须重新复核。CSV 补充 scientific_review_status/quantitative_ml_approved，与 JSON 和页面结论一致；不改变 training_ready=false。
+
+## 图像约束增量
+
+algorithm_version=image_constraints_v5。原始 4654 点及 DOS 数值保持不变。precision.joint_reconstruction 独立保存 α²F 与累计 λ 候选序列、绿色像素上下界、零轴偏移、裁边频率掩膜、全点/留出误差及积分；uses_paper_reference=false。每五个真实粉点留出一个，未将虚线插值当观测；consistency_is_constraint_not_independent_accuracy=true。边框掩膜覆盖约 28.6–29.0 THz。
+
+科学复核新增 conditional_quantitative_use=true 与 supersedes，quantitative_ml_approved=false 表示没有把全曲线无条件批准为作者真值。metrics.states[].bins 保存累计谱原图范围、原/联合候选相容状态，旧点估计差仍保留但明确不代表测量误差；共同域只覆盖真实观测。evidence 保存派生标注 SVG 路径、哈希与来源。
+
+CSV 新增 joint_candidate_amplitude、joint_candidate_cumulative_lambda、joint_boundary_mask（仅 α²F 网格行填写）及 conditional_quantitative_use。原点来源与曲线状态不覆盖。
