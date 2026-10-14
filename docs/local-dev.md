@@ -256,6 +256,13 @@ bash scripts/run-tests.sh frontend
 
 ## 本地改的代码会进入 Docker 部署吗
 
+新 PDF 上传固定走 MinerU + GROBID + Docling + Marker 互补流程。`make deploy` 在项目 `.local/pdf-tools/` 安装独立 Marker 2.0.0 / Surya 0.22.1 环境及校验过的 llama.cpp b11580 官方平台制品，避免改变主后端依赖。已有开发实例可在 sc-wiki 环境运行 `python scripts/setup_pdf_tools.py`；明确复用既有同版本环境时使用 `--existing-marker`、`--existing-llama`，安装器会校验版本和可执行文件，不覆盖不匹配环境。
+
+Marker 默认解释器为 `.local/pdf-tools/marker/bin/python`，llama-server 为 `.local/pdf-tools/llama/llama-server`；部署可用 `SC_WIKI_MARKER_PYTHON`、`SC_WIKI_LLAMA_SERVER` 指定隔离 runtime。Docker Python 镜像在 `/opt/scwiki/pdf-tools/` 准备这两项并设置相应变量；GROBID 仍使用已有独立服务。第一次本地模型加载需要模型下载，运行原始输出/日志保存在任务制品。更新源码后按本指南重启 Python/Worker，已有历史任务不自动重解析。
+Linux 的新 Marker 环境先安装官方 `torch==2.14.1+cpu`、`torchvision==0.29.1+cpu`，避免 CPU 默认流程安装整套 CUDA 依赖；主后端环境不受影响。已存在的明确复用环境只核验，不自动替换。
+
+上传页面没有解析方案下拉框，DeepSeek JSON 请求显式关闭 thinking。文件角色不明确时须确认正文/补充，再继续解析；补强失败会保留诊断并可重试。详细运行与测试边界见 [四工具验证](specs/136-complementary-pdf-parsing/validation.md)。
+
 会。这两件事无关，不用担心「在 vite 里改了但 nginx 里没更新」。
 
 `docker/frontend.Dockerfile` 的做法是先 `COPY frontend/ .` 拷入**源码**，再在镜像内跑

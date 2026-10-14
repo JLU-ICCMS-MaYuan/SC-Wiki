@@ -185,6 +185,8 @@ export interface PaperDraftFields {
 }
 
 export interface UploadDraft {
+  parsing_conflicts?: Array<{ file_id: string; pdf_page: number; kind: string; engine?: string; selected_text?: string; alternatives: Array<{ engine?: string; text: string }> }>
+  bibliography_conflicts?: Array<{ field: string; grobid_value: unknown; extracted_value: unknown }>
   field_suggestions_error?: string | null
   research_motivation_error?: string | null
   material_family_error?: 'catalog_unavailable' | 'classification_failed' | 'insufficient_evidence' | null

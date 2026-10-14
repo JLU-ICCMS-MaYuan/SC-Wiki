@@ -34,6 +34,11 @@ class CoverageReport(BaseModel):
 def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncated: bool = False,
                    processed_pages: list[int] | None = None,
                    exclusions: list[dict] | None = None) -> CoverageReport:
+    if ir.parse_profile == "complementary":
+        selected = {b.block_id for b in ir.blocks if b.metadata.get("selected_for_reading") is not False}
+        ir = ir.model_copy(deep=True)
+        ir.blocks = [b for b in ir.blocks if b.block_id in selected]
+        ir.tables = [t for t in ir.tables if t.block_id in selected]
     pages = {page.pdf_page for page in ir.pages}
     processed = set(processed_pages or [])
     covered_claims, missing, covered_blocks, result_blocks = [], [], set(), set()

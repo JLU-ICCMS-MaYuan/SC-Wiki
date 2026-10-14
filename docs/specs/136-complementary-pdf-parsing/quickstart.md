@@ -1,4 +1,22 @@
-# 三引擎互补 demo 验证入口
+# 四工具正式流程与历史 demo 验证入口
+
+## 当前正式入口
+
+在 sc-wiki 环境执行 `python scripts/setup_pdf_tools.py` 准备隔离 Marker/llama.cpp，保持既有 GROBID 服务可用，按 [本地开发指南](../../local-dev.md) 重启 Python/Worker。登录后上传正文和补充材料即可；新任务只有 complementary，DeepSeek thinking 关闭，不手动选择解析器。
+
+真实解析与科学校验可执行：
+
+```bash
+python -m scripts.complementary_pdf_demo.production_run --case scripts/complementary_pdf_demo/cases/h3s-2014.json --output demo/complementary-pdf/four-tool-production --extract
+python -m pytest backend/tests/test_complementary_pdf.py -q
+```
+
+`--resume-dir` 复用经文件哈希验证的 IR；`--reuse-extraction` 只复用完全相同输入的真实原始模型响应，重新执行当前规范化/来源校验，并保存 reuse.json。复用不算新推理，失败记录不覆盖。输出科学 JSON 与 Claim 检查，不代替全部结构/字段的正式上传测试。
+
+完整工作流用 `scripts/check_pdf_workflow.py --pdf <正文.pdf> --output <新目录>`：仅本机新建 test_issue136_* 隔离库，复制已迁移 DDL 和公开分类/表单，启动私有 Redis，经 HTTP/JWT、真实 RQ、四工具、真实模型、草稿保存、证据检查和待审提交验证。不会向业务库写入论文；测试库/制品保留复查，不自动删除。`--resume` 在同一输出目录通过正式重试 API 继续，重试历史另存。凭据由私有 .env 读取，不保存到验证输出。
+案例需要人工补理论二级类型时，可显式使用 `--review-theoretical-subtype calculation`；测试会保存原摘要、理由和人工操作证据，不能把该步骤算为模型自动填写。该参数不更改科学值，其他 PDF 应按其实际贡献决定类型。
+
+## 历史三引擎比较入口
 
 前提：项目 Python 可导入 Docling、MinerU、当前表单契约，现有默认 LLM 配置可用；Marker 使用隔离 Python 环境及实际所需模型。所有生成产物在本机 demo 目录，不会自动发布论文。
 

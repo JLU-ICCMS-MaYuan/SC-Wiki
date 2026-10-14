@@ -1,4 +1,6 @@
-# 三引擎互补真实 demo 验证记录
+# 四工具验证与历史三引擎实验记录
+
+最新正式接入验证见文末“2026-10-14 正式四工具验证”；此前三引擎实验、负面效果和当时未完成的生产边界均保留原时点。
 
 日期：2026-10-13。对应 [Spec](spec.md)、[实施计划](plan.md) 和 [复现入口](quickstart.md)。
 
@@ -94,3 +96,64 @@ Hugging Face 直连超时，公开模型通过 `hf-mirror.com` 下载，仅下�
 SC-001 的六份真实输出、SC-002 的统一模型与四路候选/校验报告、SC-003 的来源及差异可追溯、SC-004 的字段/遗漏与核对入口、SC-005 的换输入和 SC-006 的如实效果报告已交付。本例全表单正确性、用户最终验收、多版式科学准确度、生产按需调度与唯一默认流程均未完成。SC-007 保持未完成，#136 保持开放。
 
 KISS/DRY：复用当前 DocumentIR、来源定位和科学记录校验，增加的模块只负责 demo 编排、互补、评测及 HTML。YAGNI：没有增加生产解析器选项、数据库模型或编排框架；失败证据和不同来源保留，避免用兼容修补掩盖科学错误。
+
+## 2026-10-14 正式四工具验证
+
+用户已确认架构和正式实施，thinking 关闭。以下测试均未向业务库写入或批准论文。版本为 MinerU 4.0.6、Docling 2.130.0、Marker 2.0.0、Surya 0.22.1、GROBID 0.8.1、llama.cpp b11580，模型 deepseek-v4-pro。代码实际字节及哈希保存在各运行 code/ 和独立工作流 executions/，不能只用 Git HEAD 代表原工作树。
+
+### 真实解析与科学读取
+
+H3S 原输入身份沿历史清单。真实原始制品在 `demo/complementary-pdf/four-tool-production/20261014T061204Z/` 和 `20261014T061816Z/`；第一次模型因默认输出上限截断失败保留，后改显式 max_tokens=65536。成功运行明确复用主文 IR，补充材料重新真实解析。
+
+| 输入 | MinerU | Docling | Marker | GROBID |
+| --- | --- | --- | --- | --- |
+| H3S 正文 6 页 | 全文 | 内容不触发，未执行 | 原 PDF 第 2/3/4/5 页 | 成功 |
+| H3S 补充 10 页 | 全文 | 原 PDF 第 4/5 页 | 原 PDF 第 6/7/8 页 | 成功 |
+| CaH6 正文 4 页 | 全文 | 内容不触发，未执行 | 原 PDF 第 2/3 页 | 成功 |
+
+不能把未触发说成已经执行。四工具合计均有真实运行，按页任务有 requested_pages、原始 JSON/IR/日志和原文哈希。紧凑 H3S 模型输入为正文 79788 字符、补充 173568 字符，原始备选仍保存在 IR，未重复三份全文。
+
+H3S 的新模型提取及 Claim 验证在 `demo/complementary-pdf/four-tool-verified/20261014T070410Z/`。随后重试 `20261014T072034Z/` 保留了 P1 带隙压力缺失的失败原文。最终 `20261014T072652Z/` 明确复用同输入的真实响应并执行新校验：原文“3.34 eV at 20 GPa”直接绑定 20 GPa，原状态、源块和规则留在 `_pressure_bindings`，没有修改 3.34 数值或偷偷更换模型。
+
+指定数值/压力/相检查为 5/5：R3m@130 GPa 155–166 K；Im-3m@200 GPa 191–204 K；250 GPa 184 K；300 GPa 179 K；P1@20 GPa 带隙 3.34 eV。11/11 个科学 Claim 可定位。verification.json 保留检查结果与复用来源；这是指定数值和来源检查，不是全文准确率，未重称旧 34 项全表单比较已经通过。结构候选继续由正式上传中的独立提取器承接。
+
+### HTTP、RQ、MySQL 正式上传
+
+`.data/experiments/issue136-implementation-20261014/workflow-cah6-6/` 使用全新 `test_issue136_171fd8ccb6fc`：复制实际迁移 DDL，只有公开表单/分类和测试用户；私有 Redis Unix socket 与实际 RQ。正式 HTTP/JWT 创建、上传、角色确认、四工具、DeepSeek、科学来源/覆盖、草稿 GET/PUT、证据核对、待审提交及 MySQL 回读通过。
+
+回读：paper_id=182（只在隔离库），3 条记录、37 条参考文献、1 份四工具 IR、4 条区域来源，review_status=pending。三个状态分别为 CaH6@150/200/250 GPa；Tc 为 220–235/201/187 K，泛称 Eliashberg 方程没有被冒充成明确各向异性方法。文档和 GROBID file_id 重新绑定正式文件，原 uploaded_file_id 与引擎来源仍留存。persistence.json/submission.json 可复查。
+
+保留的失败包括：旧 ORM JSON 默认值不能在 MySQL 创建；测试 socket 路径过长；模型引句改写 LaTeX被来源门拒绝；GET 机械规范化误判人工修改。分别改为真实 DDL 克隆、私有短路径 socket、显式原块引用及 AI 初始快照前规范化，未放松科学审核门。
+
+### 提交隔离与回归
+
+原工作树已有 #120/#135/#137 等修改。本次先保存初始字节，三方合成只含 #136 的提交源码到 `.data/experiments/issue136-implementation-20261014/verified-source/`，在其中重新测试；没有把其他任务的角色确认、字段生成或谱线模块混入提交。模型调用审计使用本次独立回调，GROBID 在文档解析后复用制品，不能依赖未提交的其他功能。
+
+初次分离范围修正中发现遗漏处理段和审计回调版本问题，失败运行留存 `workflow-cah6-7-index/attempts/`，不计成功。分离源码的完整真实测试结果追加在下节，不能用工作树运行替代提交源码验收。
+
+相关回归：后端 151 项通过，3 项重型解析可选测试跳过，1 项旧兼容基线单列；前端 24 项交互通过，分离源码 TypeScript/Vite 构建通过。新专用测试随后补充多次模型重试的独立原文归档，最终数量以末尾记录为准。边界包括跨文件拒绝、原页映射、表格跨度、主/备选保留、压力错挂/空压力、显式引用身份、GROBID 不可用、新方案拒绝/旧任务读取、thinking 请求、截断、实际子进程超时与取消。
+
+`test_normalize_legacy_li2mgh16_properties_into_scientific_material_state` 在未修改 HEAD 的独立归档也失败，输出两个状态而预期一个；证据 `head-baseline-test.log`。它属于已有旧文本化学式兼容问题，#120 工作树另有修复，本提交不混入该修复。另一次共享工作树回归受到同期 #137 的测试替身接口变更影响；不以这些并行变化宣称 #136 回归失败或整库已全绿。
+
+### 部署和发布边界
+
+本机隔离 runtime 准备及版本/llama-server 校验通过。Linux arm64 验证使用缓存生产基底（已核实 MinerU/Docling/Torch/NumPy 版本）准备独立 Marker 环境，具体结果待下节完成后记录。全新 Python slim 构建曾遇 DockerHub 502，改官方 ECR 可读；PyPI 重复下载缓慢的尝试已停止，不宣称全新基底构建已通过。
+
+原始 IMG-001 仍未归档，远程 Spec 尚未推送，不自行推送或关闭 Issue；这些发布/历史附件门不代表已确认代码实施未经授权。谱线数字化仍由 #137 承接。本测试不批准业务论文、不验证所有扫描/语言/版式，也不把旧人工比较和新小样本相加成准确率。
+
+### 分离提交源码的最终工作流
+
+`workflow-cah6-7-index/`、隔离库 `test_issue136_12949bf42042` 经正式 retry API 重试后，通过真实四工具/模型、来源/覆盖、草稿保存、待审提交、IR/引用/来源回读。测试显式补缺失的理论二级类型 calculation，使用正式人工依据 API 保存 GROBID 原始摘要和理由；没有调整科学值，没有把人工校对算成模型自动成功。manual-classification.json、persistence.json、submission.json 保留依据。
+
+回读为 3 个压力状态、5 条 Tc 记录（150 GPa 的总范围及 μ*=0.1/0.13 两个明示结果，另有 200/250 GPa 各一条）、37 条参考文献、6 条区域来源、1 份四工具 IR，保持 pending。范围汇总与不同参数端点都保留，不合并不同计算条件。正式 region API 用已保存的 file/page/block/quote 返回 located，区域 PNG 和定位摘要保存在该目录；不把仅 block_id 的文字块当作引句定位成功。
+
+分离源码的来源断言、模板编译和最终相关回归为 152 项后端通过、24 项前端通过；3 项可选重型测试跳过，1 项已证实原 HEAD 即失败的旧兼容用例单列。新专用测试为 22 项通过，包含失败/连接异常/成功三次模型调用各自归档，不复用上一失败调用的部分文字。
+
+### Linux arm64 实际运行
+
+缓存生产基底版本核实后，在隔离镜像中成功安装 Marker 2.0.0、Surya 0.22.1、官方 Torch 2.14.1+cpu / torchvision 0.29.1+cpu、llama.cpp b11580。默认 pip 曾拉取不需要的 CUDA 依赖，现将新 Linux Marker 环境固定为 CPU 制品；主后端依赖未替换。运行器已校验官方资产 SHA-256 和实际二进制 build 11580。该镜像用于验收，没有推送或替换运行中的业务容器。
+
+真实启动发现主后端 OpenCV 缺 libGL.so.1，已在 Dockerfile 增补 libgl1，并验证修复后 MinerU 成功解析全部 4 页，耗时 241.14 秒（含首次模型下载）。首次 Marker 失败是测试错误地把服务锁目录挂为只读，不是模型成功；改为独立可写测试缓存后，实际 Marker 补强原第 2/3 页成功，GROBID 请求成功，compose 得到 4 页合法 IR。最终明确复用已经成功、哈希匹配的 Linux MinerU IR，不称重新推理。
+
+证据在 `linux-parse/`：组件 raw/IR/log/run.json、marker.ir.json、grobid-retry/document.json、document.ir.json；`linux-marker-retry.log` 为实际成功摘要。独立 Marker 的 shutdown_models 输出显示子 llama.cpp 服务退出。Docling 的 Linux 表格页验证结果另随收尾补记。全新 slim 基底完整重建和其他架构不冒充已验收。
+Linux Docling 2.130.0 实际完成 H3S 补充原第 4/5 页，转换回原页码并输出 2 个表格；证据 `linux-docling.log`、`linux-parse/docling-linux/` 和 docling.ir.json。四工具在 Linux arm64 均有真实运行证据；最终成功镜像标识为 `scwiki-issue136-runtime-gl:20261014`，制品基于缓存生产底层，不称全新基础镜像验收。

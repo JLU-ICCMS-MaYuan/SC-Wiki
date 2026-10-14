@@ -161,14 +161,10 @@ def create_task(
     parser_profile: str | None = None,
 ) -> dict[str, Any]:
     task_id = uuid.uuid4().hex
-    rollout = None
-    if parser_profile is None:
-        from backend.ingest.parser_rollout import configured_rollout, select_profile
-        rollout = configured_rollout()
-        parser_profile = select_profile(rollout, task_id=task_id, user_id=user_id)
-    elif settings.upload_parser_stage == "shadow":
-        from backend.ingest.parser_rollout import configured_rollout
-        rollout = configured_rollout()
+    # 新任务只提供一个默认流程；历史状态不经过此创建入口。
+    if parser_profile not in {None, "complementary"}:
+        raise ValueError("新上传只支持默认互补解析")
+    parser_profile = "complementary"
     now = int(time.time())
     manifest = validate_manifest(files) if files is not None else []
     state = {
@@ -198,8 +194,6 @@ def create_task(
     from backend.storage.paths import object_mode
     if object_mode():
         state["file_contract_version"] = 1
-    if rollout and rollout.stage == "shadow" and parser_profile == "legacy":
-        state["shadow_profile"] = rollout.default_profile
     client = redis_client()
     index_key = user_tasks_key(user_id)
     while True:

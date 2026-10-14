@@ -19,6 +19,7 @@ from .document_ir import BlockType, DocumentBlock, DocumentIR, PageGeometry, Par
 
 
 class ParserProfile:
+    COMPLEMENTARY = "complementary"
     TEXT = "text"
     LAYOUT = "layout"
     OCR = "ocr"
@@ -78,6 +79,7 @@ class ParseOptions:
     profile: str = ParserProfile.TEXT
     task_id: str | None = None
     parser_options: dict[str, Any] = field(default_factory=dict)
+    cancelled: Callable[[], bool] | None = None
 
 
 @dataclass(frozen=True)
@@ -303,7 +305,9 @@ class NativePdfLlmParser:
 
 class ParserRegistry:
     def __init__(self, parsers: list[DocumentParser] | None = None):
+        from .complementary_pdf import ComplementaryPdfParser
         self.parsers = parsers if parsers is not None else [
+            ComplementaryPdfParser(),
             PyMuPDFParser(),
             DoclingParser(),
             MinerUParser(),

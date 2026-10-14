@@ -1600,6 +1600,11 @@ async def put_upload_draft(
                 normalized["paper"]["research_materials"] = _derived_research_materials(normalized["material_states"])
             # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。
             normalized["citation_extraction"] = previous.get("citation_extraction")
+            for field in ("bibliography_sources", "bibliography_conflicts", "parsing_conflicts"):
+                if field in previous:
+                    normalized[field] = previous[field]
+                else:
+                    normalized.pop(field, None)
             async with async_session_factory() as session:
                 await _resolve_draft_classifications(session, normalized)
             _validate_draft(normalized, partial=True)

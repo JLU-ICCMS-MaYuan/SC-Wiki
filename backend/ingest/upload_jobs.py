@@ -330,6 +330,8 @@ def _ir_to_markdown(ir) -> str:
     parts: list[str] = []
     current_page: int | None = None
     for block in sorted(ir.blocks, key=lambda item: (item.pdf_page, item.reading_order)):
+        if block.metadata.get("selected_for_reading") is False:
+            continue
         if block.pdf_page != current_page:
             current_page = block.pdf_page
             parts.append(f"\n<!-- page: {current_page} -->\n")
@@ -353,7 +355,8 @@ def _extract_markdown(state: dict[str, Any], source: Path) -> str:
                 file_id=str(state.get("file_id") or "main"),
                 sha256=state.get("file_sha256"),
             )
-            ir, run = parse_with_profile(source_info, ParseOptions(profile=profile, task_id=state.get("task_id")))
+            ir, run = parse_with_profile(source_info, ParseOptions(profile=profile, task_id=state.get("task_id"),
+                cancelled=lambda: (get_state(str(state.get("task_id") or "")) or {}).get("status") in {"cancelling", "cancelled"}))
             task_id = str(state.get("task_id") or "")
             if task_id:
                 _save_document_ir(task_id, source_info.file_id, ir)
@@ -512,8 +515,8 @@ def _read_chunk(
     structured = profile != "legacy" and (source or {}).get("kind") == "pdf"
     system_prompt = CHUNK_SYSTEM_PROMPT
     if structured:
-        from backend.ingest.domain_extraction import DOMAIN_SYSTEM_PROMPT, normalize_extraction
-        system_prompt = DOMAIN_SYSTEM_PROMPT
+        from backend.ingest.domain_extraction import DOMAIN_SYSTEM_PROMPT, COMPLEMENTARY_SYSTEM_PROMPT, normalize_extraction
+        system_prompt = COMPLEMENTARY_SYSTEM_PROMPT if profile == "complementary" else DOMAIN_SYSTEM_PROMPT
     signature = None
     model_metadata = None
     if profile != "legacy":
@@ -522,7 +525,7 @@ def _read_chunk(
         model_metadata = {"provider": config.provider, "model": config.model}
         signature = hashlib.sha256(json.dumps({
             "profile": profile, "content": chunk.content, "model": model_metadata,
-            "endpoint": config.base_url, "prompt": system_prompt,
+            "endpoint": config.base_url, "prompt": system_prompt, "thinking_policy": "disabled-v1",
         }, sort_keys=True).encode("utf-8")).hexdigest()
 
     if result_path.exists():
@@ -534,7 +537,23 @@ def _read_chunk(
         f"章节：{chunk.section_name or '正文'}\n页码：{getattr(chunk, 'source_page', None) or '未知'}\n"
         f"分段编号：{chunk.chunk_index}\n\n{chunk.content}"
     )
-    result = complete_json(system_prompt, prompt)
+    attempt_directory = None
+    if profile == "complementary":
+        from uuid import uuid4
+        attempt_directory = result_path.parent / "extraction_attempts" / result_path.stem / uuid4().hex
+        attempt_directory.mkdir(parents=True, exist_ok=False)
+        _atomic_write_json(attempt_directory / "input.json", {"system_prompt": system_prompt, "prompt": prompt,
+                            "model": model_metadata, "thinking": "disabled", "signature": signature})
+    def archive_partial(text):
+        (attempt_directory / "response.txt").write_text(text, encoding="utf-8")
+    def archive_call(event):
+        _atomic_write_json(attempt_directory / f"call-{event['attempt']}.json", event)
+        response = attempt_directory / "response.txt"
+        if response.exists():
+            response.replace(attempt_directory / f"call-{event['attempt']}.response.txt")
+    result = complete_json(system_prompt, prompt, **({"on_partial": archive_partial, "on_call": archive_call} if profile == "complementary" else {}))
+    if profile == "complementary":
+        _atomic_write_json(attempt_directory / "raw.json", result)
     if structured:
         context = json.loads(chunk.content)
         allowed = {(context["file_id"], block["pdf_page"], block["block_id"])
@@ -545,7 +564,10 @@ def _read_chunk(
         allowed_pages = {(context["file_id"], page["geometry"]["pdf_page"]) for page in context["pages"]}
         try:
             result = normalize_extraction(result, allowed_blocks=allowed,
-                                          allowed_tables=allowed_tables, allowed_pages=allowed_pages)
+                                          allowed_tables=allowed_tables, allowed_pages=allowed_pages,
+                                          form_parameters=(profile == "complementary"),
+                                          allowed_quote_text=({(context["file_id"], b["pdf_page"], b["block_id"]): b["text"]
+                                              for p in context["pages"] for b in p["blocks"]} if profile == "complementary" else None))
         except ValueError as exc:
             raise ParserError("domain_invalid_output", "科学提取格式、条件或来源范围不符合契约，请重试或人工核对",
                               profile=profile, parser="domain_extractor") from exc
@@ -1543,6 +1565,10 @@ def _normalize_draft(
         normalized["material_family_assessment"] = raw["material_family_assessment"]
     if raw.get("material_family_error") in {"catalog_unavailable", "classification_failed", "insufficient_evidence"}:
         normalized["material_family_error"] = raw["material_family_error"]
+    if preserve_citation_extraction:
+        for field in ("bibliography_sources", "bibliography_conflicts", "parsing_conflicts"):
+            if field in raw:
+                normalized[field] = raw[field]
     return convert_legacy_scientific_draft(normalized)
 
 
@@ -1809,14 +1835,6 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             ),
             None,
         )
-        if citation_source is not None:
-            citation_extraction = extract_references_from_pdf(citation_source)
-            update_state(
-                task_id,
-                citation_extraction_status=citation_extraction["status"],
-                citation_extraction_error=citation_extraction.get("error_message"),
-                citation_reference_count=len(citation_extraction["references"]),
-            )
         extracted_root = data_path("parsed_markdown") / task_id
         extracted_root.mkdir(parents=True, exist_ok=True)
         all_chunks: list[tuple[dict[str, Any], Chunk]] = []
@@ -1930,6 +1948,19 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                     all_chunks.append((file_item, chunk))
         md_path.write_text("".join(combined_markdown), encoding="utf-8")
         update_state(task_id, consistency=compare_file_identities(identities))
+        if citation_source is not None:
+            grobid_document = None
+            if state.get("parser_profile") == "complementary":
+                from .document_ir import DocumentIR
+                main_file = next(item for item in sources if item.get("role") == "main")
+                main_ir_path = artifact_directory(task_id) / "document_ir" / f"{main_file['file_id']}.json"
+                if main_ir_path.exists():
+                    main_ir = DocumentIR.model_validate_json(main_ir_path.read_text(encoding="utf-8"))
+                    grobid_document = main_ir.coverage.get("grobid")
+            citation_extraction = grobid_document or extract_references_from_pdf(citation_source)
+            update_state(task_id, citation_extraction_status=citation_extraction["status"],
+                         citation_extraction_error=citation_extraction.get("error_message"),
+                         citation_reference_count=len(citation_extraction["references"]))
         if not all_chunks:
             raise ValueError("论文正文为空，无法生成可校对草稿")
         manifest = [
@@ -2088,6 +2119,11 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             on_partial=_on_summary_partial,
         )
         raw_paper = raw_draft.get("paper") if isinstance(raw_draft.get("paper"), dict) else raw_draft
+        bibliography_patch = {"paper": dict(raw_paper)}
+        if state.get("parser_profile") == "complementary":
+            from .grobid_document import apply_bibliography
+            apply_bibliography(bibliography_patch, citation_extraction)
+            raw_paper = bibliography_patch["paper"]
         abstract = raw_paper.get("abstract") or next((
             item.get("metadata", {}).get("abstract") for item in summary_candidates
             if isinstance(item, dict) and isinstance(item.get("metadata"), dict)
@@ -2108,6 +2144,12 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             # 全文汇总只负责叙述和书目，科学记录由已校验候选确定性组装。
             draft = _normalize_draft({**raw_draft, "material_states": [], "key_properties": []}, preserve_citation_extraction=False)
             draft["material_states"] = merge_scientific_candidates(candidates)
+            if state.get("parser_profile") == "complementary":
+                # 在 AI 初始快照之前生成正式表示；GET/PUT 的机械派生不能被误记为人工修改。
+                draft["material_states"] = _normalize_material_states(draft["material_states"])
+                draft["paper"]["research_materials"] = list(dict.fromkeys(
+                    item.get("material_name") or item.get("material") for item in draft["material_states"]
+                    if item.get("material_name") or item.get("material")))
         else:
             draft = _normalize_draft(raw_draft, preserve_citation_extraction=False)
             excluded_properties = _prune_generated_properties(draft)
@@ -2149,6 +2191,12 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         _bind_structure_candidates(draft, structure_candidates)
         draft["structure_candidates"] = structure_candidates
         draft["citation_extraction"] = citation_extraction
+        if state.get("parser_profile") == "complementary":
+            draft.update({key: bibliography_patch[key] for key in ("bibliography_sources", "bibliography_conflicts") if key in bibliography_patch})
+            draft["parsing_conflicts"] = [
+                {"file_id": file_id, **route} for file_id, ir in document_set.items()
+                for route in ir.coverage.get("routing", []) if route.get("alternatives")
+            ]
         current_state = get_state(task_id) or state
         existing = None if state.get("is_shadow") else (_find_existing_paper(draft["paper"].get("doi")) or _find_existing_by_hash(current_state))
         if existing:

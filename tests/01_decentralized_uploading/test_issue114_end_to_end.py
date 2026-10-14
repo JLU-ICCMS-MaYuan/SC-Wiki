@@ -215,10 +215,17 @@ def upload(w, *, profile="text", run_worker=True):
         pdf.new_page().insert_text((50, 80), "LaH10 Tc = 200 K at 150 GPa.")
         pdf.new_page().insert_text((50, 80), "LaH10 Tc = 220 K at 160 GPa.")
         data = pdf.tobytes()
-    created = w.client.post("/api/upload-tasks", json={"parser_profile":profile, "files":[{
+    created = w.client.post("/api/upload-tasks", json={"files":[{
         "client_id":"main", "role":"main", "filename":"paper.pdf", "size":len(data), "media_type":"application/pdf"}]})
     assert created.status_code == 201, created.text
     task = created.json()["data"]; task_id = task["task_id"]; file_id = task["files"][0]["file_id"]
+    # #114 用例继续验证历史任务；新唯一默认和真实四工具由 #136 独立验收。
+    assert task["parser_profile"] == "complementary"
+    historical = upload_tasks.get_state(task_id)
+    historical["parser_profile"] = profile or "legacy"
+    if profile is None and upload_tasks.settings.upload_parser_stage == "shadow":
+        historical["shadow_profile"] = upload_tasks.settings.upload_parser_default_profile
+    w.connection.set(upload_tasks.task_key(task_id), json.dumps(historical))
     response = w.client.put(f"/api/upload-tasks/{task_id}/files/{file_id}", files={"file":("paper.pdf", data, "application/pdf")})
     assert response.status_code == 200, response.text
     if not run_worker:

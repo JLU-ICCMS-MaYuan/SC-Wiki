@@ -9,6 +9,9 @@ from pathlib import Path
 def convert(request: dict) -> dict:
     source = Path(request["path"])
     options = request["options"]
+    if request["parser"] == "marker":
+        from .marker_pdf import parse_marker
+        return parse_marker(source, options)
     if request["parser"] == "docling":
         from docling.datamodel.base_models import InputFormat, ConversionStatus
         from docling.datamodel.pipeline_options import PdfPipelineOptions
@@ -39,11 +42,17 @@ def convert(request: dict) -> dict:
 
 
 def main() -> None:
+    import signal
+    def interrupted(_signal, _frame):
+        raise SystemExit("parser_cancelled")
+    signal.signal(signal.SIGTERM, interrupted)
     request_path, response_path = map(Path, sys.argv[1:3])
     request = json.loads(request_path.read_text())
     try:
         payload = convert(request)
     except ImportError:
+        import traceback
+        traceback.print_exc()
         payload = {"error": "parser_dependency_unavailable"}
     except (OSError, RuntimeError):
         payload = {"error": "parser_model_unavailable"}

@@ -85,9 +85,8 @@ def _extract_year(bibl: ElementTree.Element) -> int | None:
 def parse_grobid_tei(tei: str | bytes) -> list[dict[str, Any]]:
     """Parse bibliography entries emitted by GROBID's processFulltextDocument."""
     root = ElementTree.fromstring(tei)
-    entries = root.findall(".//tei:listBibl/tei:biblStruct", GROBID_NAMESPACE)
-    if not entries:
-        entries = root.findall(".//tei:biblStruct", GROBID_NAMESPACE)
+    # header 的 biblStruct 是当前论文，不能在 bibliography 缺失时当参考文献。
+    entries = root.findall(".//tei:text/tei:back//tei:listBibl/tei:biblStruct", GROBID_NAMESPACE)
 
     references: list[dict[str, Any]] = []
     for reference_index, bibl in enumerate(entries):

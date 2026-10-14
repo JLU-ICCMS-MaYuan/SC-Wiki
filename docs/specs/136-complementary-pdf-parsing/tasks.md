@@ -1,4 +1,4 @@
-# 实施任务：三引擎互补 PDF 解析
+# 实施任务：四工具互补 PDF 解析
 
 输入：[Spec](spec.md)、[Plan](plan.md)、[Research](research.md)、[数据模型](data-model.md)、[接口契约](contracts/demo.md)。
 
@@ -21,7 +21,7 @@
 ## US3：通用入口与后续生产（P2）
 
 - [x] T008 [US3] 更换输入清单验证通用入口，并完善 `docs/specs/136-complementary-pdf-parsing/quickstart.md` 和验证证据；只提交本任务脚本与文档。证据：calcium-hydride-smoke 三次真实解析及 HTML，未宣称第二论文科学质量已验收。
-- [ ] T009 [US3] demo 获用户验收后再设计并实现生产唯一默认流程，届时更新 `docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md`；本轮不执行。
+- [x] T009 [US3] 2026-10-14 用户确认四工具架构并授权正式实现，唯一默认及 Overview 已由 T016–T021 完成；证据见 validation 正式工作流、API/UI 与提交源码测试。该状态不把旧三引擎负面实验称为验收成功。
 
 ## 依赖与验收
 
@@ -39,4 +39,15 @@ T001 → T002 → T003 → T004 → T005 → T006 → T007 → T008；T009 依�
 
 - [x] T013 [US1] 核对现有 GROBID 的真实消费范围，在 `docs/specs/136-complementary-pdf-parsing/four-tool-architecture.md` 展示 MinerU 核心的四工具提案，在 `four-tool-community.md` 核查社区源码；来源 FR-013/SC-008。证据：GROBID 实际 TEI/48 条引用、源码路径和固定提交链接。本项完成的是调查与提案，不是四工具实现。
 - [x] T014 [US1] 用 `scripts/complementary_pdf_demo/reasoning_benchmark.py` 比较相同 MinerU 输入的 thinking 开/关，在 `docs/specs/136-complementary-pdf-parsing/reasoning-comparison.md` 保存两组各两次的真实数据；来源 FR-014/SC-009。证据：四次完整输出、共同输入/提示摘要、时间/token/34 项核对与表单限制。
-- [ ] T015 [US3] 在用户审阅四工具方案后更新 `docs/specs/136-complementary-pdf-parsing/plan.md`、数据和接口契约，再替换旧 Docling 骨架的实验与生产计划；来源 FR-013/SC-008，差距类型 missing。当前未改生产默认。
+- [x] T015 [US3] 用户确认后更新 Plan、数据模型与生产契约，以 MinerU 主干替换旧 Docling 骨架的生产计划；FR-013/SC-008。证据：2026-10-14 确认、T016–T021 和正式验证；旧实验本身保留。
+
+## 阶段 8：已确认四工具架构的正式实施
+
+用户于 2026-10-14 明确认可架构并授权完整实现，thinking 关闭。T009/T010/T011/T015 的正式接入与契约收敛由下列任务承接；旧 demo 及其负面实验不重写为新架构成功。T012 的远程链接和图片归档仍独立保留。
+
+- [x] T016 [US3] 更新 #136、Spec 和 Plan，补充生产数据与接口契约；FR-013/015–018、SC-008/010/011。证据：最新完整原话、Issue 当前 type:feature 与已确认范围、production.md。
+- [x] T017 [US1/US2] 实现 MinerU 主干、Docling/Marker 按页补强与 GROBID 一次调用；保留原始块、版本、坐标、跨度、取用/差异账本；FR-005/006/013/017、SC-003/010。证据：complementary_pdf/IR 与 H3S/CaH6 真实原始制品；跨文件拒绝、原页映射测试。
+- [x] T018 [US3] 新 API/UI 固定 complementary，历史方案保持读取；GROBID header 与 bibliography 隔离，DeepSeek thinking 显式关闭；FR-015/016、SC-007/010。证据：HTTP 拒绝旧方案/旧状态读取、前端交互测试、真实 llm_calls.json。
+- [x] T019 [US2] 共享科学契约与来源校验，范围参数保留扩展，压力错挂拒绝，原文块引用由服务器展开，保留提取失败原始响应；FR-007/008/017/018、SC-002/011。证据：scientific_contracts、quote_id 身份边界与旧来源回归测试。
+- [x] T020 [US1/US3] 完成不同论文真实路径、故障重试、MySQL 来源回读和 Linux runtime 验证；FR-002/010/018、SC-005/010/011。证据：H3S 5 项指定检查/11 个 Claim，CaH6 工作树及独立提交源码真实工作流、Linux MinerU/Marker/GROBID 与 Docling 表格页；分母和限制见 validation。
+- [x] T021 回写 Overview、操作说明与验证记录，核验并提交只含本任务的源码，更新 Issue 证据；FR-012、SC-007。证据：Git 多行提交记录、独立源码测试及 Issue 当前验收清单。未推送的远程链接门独立保留，Issue 不提前关闭。

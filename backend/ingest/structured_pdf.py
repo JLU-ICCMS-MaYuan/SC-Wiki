@@ -16,50 +16,101 @@ from .document_ir import DocumentBlock, DocumentIR, DocumentTable, PageGeometry,
 
 def run_parser_worker(name, path, options):
     from .document_parsers import ParserError
+    from contextlib import ExitStack
+    import shutil
+    import time
 
     def error(code):
-        return ParserError(code, "指定解析方案执行失败，请检查依赖、模型资源或重试",
+        return ParserError(code, "解析组件执行失败，请检查运行制品或重试",
                            profile=options.profile, parser=name)
 
-    timeout = options.parser_options.get("timeout_seconds", 300)
+    timeout = options.parser_options.get("timeout_seconds", 900)
     if isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or not 0 < timeout <= 1800:
         raise error("parser_invalid_options")
     tier = options.parser_options.get("mineru_tier", "basic")
     mode = options.parser_options.get("mineru_parse_mode", "ocr")
     if tier not in {"flash", "basic", "standard", "advanced"} or mode not in {"txt", "ocr"}:
         raise error("parser_invalid_options")
-    with tempfile.TemporaryDirectory(prefix="scwiki-parser-") as directory:
-        root = Path(directory)
-        request, response = root / "request.json", root / "response.json"
-        request.write_text(json.dumps({"parser": name, "path": str(path.resolve()),
-                                      "options": {"mineru_tier": tier, "mineru_parse_mode": mode}}))
+    with ExitStack() as stack:
+        destination = options.parser_options.get("artifact_directory")
+        root = Path(destination) if destination else Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="scwiki-parser-")))
+        root.mkdir(parents=True, exist_ok=True)
+        request, response = root / "request.json", root / "raw.json"
+        if response.exists():
+            raise error("parser_artifact_exists")
+        selected = options.parser_options.get("pages")
+        input_path = path.resolve()
+        if selected is not None:
+            import pymupdf
+            with pymupdf.open(path) as original:
+                if (not selected or len(set(selected)) != len(selected) or
+                    any(type(page) is not int or not 1 <= page <= len(original) for page in selected)):
+                    raise error("parser_invalid_options")
+                selected = sorted(selected)
+                input_path = root / "selected-pages.pdf"
+                with pymupdf.open() as subset:
+                    for page in selected:
+                        subset.insert_pdf(original, from_page=page-1, to_page=page-1)
+                    subset.save(input_path)
+        request.write_text(json.dumps({"parser": name, "path": str(input_path),
+                                      "options": {"mineru_tier": tier, "mineru_parse_mode": mode},
+                                      "page_map": selected}), encoding="utf-8")
         env = os.environ.copy()
-        # 上游配置只在隔离子进程生效，不修改正在运行的 Worker 配置。
-        env["HF_HUB_DISABLE_TELEMETRY"] = "1"
-        env["MINERU_CONFIG"] = str(root / "mineru.yaml")
-        (root / "mineru.yaml").write_text("{}")
+        env.update(HF_HUB_DISABLE_TELEMETRY="1", HF_HUB_DISABLE_IMPLICIT_TOKEN="1",
+                   TOKENIZERS_PARALLELISM="false", MINERU_CONFIG=str(root / "mineru.yaml"))
+        (root / "mineru.yaml").write_text("{}", encoding="utf-8")
+        python = sys.executable
+        if name == "marker":
+            repository = Path(__file__).resolve().parents[2]
+            python = os.environ.get("SC_WIKI_MARKER_PYTHON") or str(repository / ".local/pdf-tools/marker/bin/python")
+            if not Path(python).is_file():
+                raise error("parser_dependency_unavailable")
+            env.update(SURYA_INFERENCE_BACKEND="llamacpp", SURYA_INFERENCE_PARALLEL="2",
+                       SURYA_INFERENCE_KEEP_ALIVE="0")
+            env.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
+            managed_binary = repository / ".local/pdf-tools/llama/llama-server"
+            binary = os.environ.get("SC_WIKI_LLAMA_SERVER") or (str(managed_binary) if managed_binary.is_file() else shutil.which("llama-server"))
+            if not binary or not Path(binary).is_file():
+                raise error("parser_dependency_unavailable")
+            env["LLAMA_CPP_BINARY"] = binary
+        started = time.monotonic()
+        stdout = stack.enter_context((root / "stdout.log").open("w", encoding="utf-8"))
+        stderr = stack.enter_context((root / "stderr.log").open("w", encoding="utf-8"))
         process = subprocess.Popen(
-            [sys.executable, "-m", "backend.ingest.pdf_parser_worker", str(request), str(response)],
-            cwd=Path(__file__).resolve().parents[2], env=env,
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True,
+            [python, "-m", "backend.ingest.pdf_parser_worker", str(request), str(response)],
+            cwd=Path(__file__).resolve().parents[2], env=env, stdout=stdout, stderr=stderr, start_new_session=True,
         )
         try:
-            process.wait(timeout=timeout)
-        except BaseException as exc:
+            while process.poll() is None:
+                if options.cancelled and options.cancelled():
+                    raise error("parser_cancelled")
+                if time.monotonic()-started > timeout:
+                    raise error("parser_timeout")
+                time.sleep(min(.2, timeout))
+        except BaseException:
             if process.poll() is None:
-                os.killpg(process.pid, signal.SIGKILL)
-            process.wait()
-            if isinstance(exc, subprocess.TimeoutExpired):
-                raise error("parser_timeout") from exc
+                # 先给子进程 finally 机会停止其创建的本机模型服务。
+                os.killpg(process.pid, signal.SIGTERM)
+                try:
+                    process.wait(timeout=10)
+                except subprocess.TimeoutExpired:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.wait()
             raise
+        finally:
+            (root / "run.json").write_text(json.dumps({
+                "parser": name, "elapsed_seconds": time.monotonic()-started,
+                "exit_code": process.poll(), "requested_pages": selected,
+            }), encoding="utf-8")
         if process.returncode != 0 or not response.is_file():
             raise error("parser_execution_failed")
         try:
-            output = json.loads(response.read_text())
+            output = json.loads(response.read_text(encoding="utf-8"))
         except (ValueError, OSError) as exc:
             raise error("parser_invalid_output") from exc
         if "error" in output:
             raise error(output["error"])
+        output["page_map"] = selected
         return output
 
 
@@ -129,7 +180,9 @@ def docling_bbox(value, page):
 
 def convert_docling(output, source, options, version):
     doc = output["document"]
-    pages = [PageGeometry(pdf_page=int(key), width=value["size"]["width"], height=value["size"]["height"])
+    page_map = output.get("page_map")
+    original_page = lambda number: page_map[int(number)-1] if page_map else int(number)
+    pages = [PageGeometry(pdf_page=original_page(key), width=value["size"]["width"], height=value["size"]["height"])
              for key, value in sorted(doc["pages"].items(), key=lambda pair: int(pair[0]))]
     builder = IrBuilder(source, options, "docling", version, pages, output["mode"])
     labels = {"title": "heading", "section_header": "heading", "table": "table",
@@ -147,7 +200,7 @@ def convert_docling(output, source, options, version):
         visited.add(identity)
         kind = labels.get(item.get("label"), "paragraph")
         for provenance in item.get("prov", []):
-            page = int(provenance["page_no"])
+            page = original_page(provenance["page_no"])
             text = item.get("text", "")
             data = item.get("data", {})
             if kind == "table":

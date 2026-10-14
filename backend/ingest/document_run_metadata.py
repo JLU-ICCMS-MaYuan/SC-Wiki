@@ -12,7 +12,8 @@ def save_run_metadata(task_id, state, config, *, latency, cpu):
     # 文件指纹覆盖未提交工作区，不将其误报为某个 Git commit。
     fingerprint = content_hash({name:hashlib.sha256((directory / name).read_bytes()).hexdigest()
         for name in ("upload_jobs.py", "domain_extraction.py", "document_claims.py", "claim_evidence.py",
-                     "coverage_audit.py", "document_parsers.py", "structured_pdf.py")})
+                     "coverage_audit.py", "document_parsers.py", "structured_pdf.py", "complementary_pdf.py",
+                     "complementary_ir.py", "grobid_document.py", "marker_pdf.py", "scientific_contracts.py", "pdf_parser_worker.py")})
     _atomic_write_json(artifact_directory(task_id) / "run-metadata.json", {
         "task_id":task_id, "parser_profile":state.get("parser_profile", "legacy"),
         "pipeline_revision":"sha256:" + fingerprint, "provider":config.provider, "model":config.model,

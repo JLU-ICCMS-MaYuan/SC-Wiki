@@ -4,6 +4,12 @@
 // PROCESSING_STAGES（处理阶段）与 UploadTaskStatus（任务状态）的显示标签，
 // 键与后端 value 对齐；`role` 是上传文件角色，`cell` 是晶胞表示。
 export default {
+  bibliographyDifferences: '查看题录来源差异',
+  extractedCandidate: '提取候选',
+  parsingDifferences: '有 {count} 个来源区域的解析结果存在差异，请结合原文核对。',
+  viewParsingDifferences: '查看来源差异',
+  sourcePage: 'PDF 第 {page} 页',
+
   readingStates: {"ir_ready": "文档结构已就绪", "claims_ready": "科学候选已生成，正在核对来源", "coverage_checked": "来源定位与覆盖检查已完成", "needs_review": "存在无法定位或未覆盖的内容，需要核对后重试"},
 
   parserProfile: "PDF 解析方案",

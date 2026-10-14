@@ -1,8 +1,8 @@
 # MinerU 为核心的四工具组织方案
 
-日期：2026-10-13。**架构提案，尚未实现或验收**。来源为用户最新明确要求、当前仓库与 [社区调研](four-tool-community.md)。上一版以 Docling 为骨架的实验不能作为本方案已实现的证据。
+提出日期：2026-10-13；用户确认：2026-10-14。正式实现已接入，运行及验收边界见 [验证记录](validation.md) 和 [生产契约](contracts/production.md)。下列现状调查保留 10-13 时点，不代表今天仍未实现。上一版以 Docling 为骨架的实验是独立历史证据。
 
-## 先分清当前实现与目标
+## 2026-10-13 的实现调查
 
 当前上传 Worker 对有效正文 PDF 调用本机 GROBID 的 `processFulltextDocument`，`backend/services/citation_graph.py::parse_grobid_tei` 主要消费 `listBibl/biblStruct`。输出参考文献 DOI、题名、作者、年份与原引文，提交时保存到 `paper_reference_extractions` 和 `paper_references`。引用匹配采用 DOI，或规范化标题与年份的唯一匹配，LLM 不生成引用边。
 
@@ -65,10 +65,10 @@ DeepSeek 负责理解科学语义，例如把“184 K at 250 GPa”绑定到正�
 
 科研数据库关心字段和值是否成立：材料—状态—物性—计算/实验条件—证据的关系通过校验和审核后进入 MySQL。向量相似、LLM 总结和概念关系不能直接当成科学记录或引用事实。SC-Wiki 已有 MySQL、Qdrant 和引用图基础，优先复用，不为四工具组合引入新的数据库平台。
 
-## 仍需验证的设计点
+## 实施收敛与仍需验证的边界
 
 - MinerU 作为核心时，先比较现有 basic OCR 与其适合本机/部署环境的更高能力配置；暂未选定新的 tier 或远端服务，不把 API 示例当本机性能。
-- GROBID header 和正文引文锚点目前尚未接入表单/统一 IR；需要独立适配及相同 PDF/页码身份核验。
+- GROBID header 已接入题录，正文引文锚点、参考表和 XPath/坐标保存在 IR/审核制品；无精确坐标不补造页码。无参考表时扫描 header 的回退已移除。
 - Docling/Marker 的补强触发率、实际运行粒度、重复输入压缩和新增错误，需要多篇文献验证。
-- thinking 是否保留由 [实际开关对照](reasoning-comparison.md) 决定；不能先把“关闭推理”写成架构原则。
-- 四工具生产接入仍需用户审阅本方案、更新 Plan/接口与验收范围；本轮没有修改生产默认。
+- 用户审阅 [实际开关对照](reasoning-comparison.md) 后明确关闭 thinking，新 JSON 请求固定 disabled；本地 OCR/VLM 不因此关闭。
+- 新上传默认 complementary，Plan/接口已更新，历史任务不自动重解析。少量案例不证明所有版式准确率；谱线数字化和更高 MinerU tier 不属于本次默认能力。

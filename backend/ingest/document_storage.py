@@ -14,6 +14,11 @@ async def persist_document(session, paper, paper_file, ir: DocumentIR):
         raise ValueError("文档内容哈希与原文件不一致")
     document = ir.model_dump(mode="json")
     document["source_file_id"] = str(paper_file.id)
+    if ir.parse_profile == "complementary":
+        document["coverage"]["uploaded_file_id"] = ir.source_file_id
+        if isinstance(document["coverage"].get("grobid"), dict):
+            document["coverage"]["grobid"]["uploaded_file_id"] = ir.source_file_id
+            document["coverage"]["grobid"]["file_id"] = str(paper_file.id)
     run = models.PaperDocumentParserRun(paper_id=paper.id, paper_revision=paper.content_revision,
         paper_file_id=paper_file.id, parse_profile=ir.parse_profile, parser_name=ir.parser["name"],
         parser_version=ir.parser["version"], mode=ir.parser["mode"], status="succeeded",

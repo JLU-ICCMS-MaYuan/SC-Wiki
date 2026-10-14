@@ -568,6 +568,29 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
   return (
     <Box component="fieldset" data-evidence-scope="upload-editor" disabled={submitting || Boolean(revision?.conflict)} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
+      {!!draft.parsing_conflicts?.length && <Alert severity="warning" sx={{ mb: 2 }}>
+        {t('upload.parsingDifferences', { count: draft.parsing_conflicts.length })}
+        <details><summary>{t('upload.viewParsingDifferences')}</summary>
+          {draft.parsing_conflicts.map((item, index) => <Box key={index} sx={{ mt: 1, overflowWrap: 'anywhere' }}>
+            <Typography variant="caption">{item.file_id} · {t('upload.sourcePage', { page: item.pdf_page })}</Typography>
+            {item.engine && <Typography variant="caption">{item.engine}</Typography>}
+            <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{item.selected_text}</Typography>
+            {item.alternatives.map((alternative, i) => <Box key={i}>
+              {alternative.engine && <Typography variant="caption">{alternative.engine}</Typography>}
+              <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.secondary' }}>{alternative.text}</Typography>
+            </Box>)}
+          </Box>)}
+        </details>
+      </Alert>}
+      {!!draft.bibliography_conflicts?.length && <Alert severity="info" sx={{ mb: 2 }}>
+        <details><summary>{t('upload.bibliographyDifferences')}</summary>
+          {draft.bibliography_conflicts.map((item, index) => <Box key={index} sx={{ mt: 1, overflowWrap: 'anywhere' }}>
+            <Typography variant="caption">{item.field}</Typography>
+            <Typography variant="body2">GROBID: {JSON.stringify(item.grobid_value)}</Typography>
+            <Typography variant="body2">{t('upload.extractedCandidate')}: {JSON.stringify(item.extracted_value)}</Typography>
+          </Box>)}
+        </details>
+      </Alert>}
       {revision && <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.revisionNotice')}</Alert>}
       {revision?.review_comment && <Alert severity="warning" sx={{ mb: 2 }}>{revision.review_comment}</Alert>}
       {revision?.warnings?.map(warning => <Alert key={warning} severity="warning" sx={{ mb: 2 }}>{warning}</Alert>)}
