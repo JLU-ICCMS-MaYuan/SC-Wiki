@@ -6,7 +6,7 @@ import json
 import math
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-ALGORITHM_VERSION = "spectra-production-v1"
+ALGORITHM_VERSION = "spectra-production-v2"
 FREQUENCY_FACTORS = {"THz": 1., "cm-1": .0299792458, "meV": .2417989242084918}
 
 
@@ -27,7 +27,7 @@ class CurveCalibration(BaseModel):
     id: str = Field(min_length=1, max_length=96)
     kind: Literal["phonon_dos", "alpha2f", "cumulative_lambda"]
     projection: str | None = None
-    color: Literal["red", "blue", "green", "magenta"]
+    color: Literal["red", "blue", "green", "magenta", "olive"]
     roi: tuple[int, int, int, int]
     frequency_direction: Literal["x", "y"]
     frequency_ticks: list[tuple[float, float]] = Field(min_length=2)

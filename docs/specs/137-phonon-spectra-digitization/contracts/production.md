@@ -38,3 +38,10 @@ PanelCalibration 单一材料条件，包含 state_key、panel_id、图注、投
 ## 验证映射
 
 FR-012→discovery/vision/engine→T014/T018；FR-013→models/服务/RQ/事务绑定→T015/T016；FR-014→SpectrumWorkspace/接口导出→T017；FR-015→engine 分项质量→T014/T017。SC-011 验证原 PDF 自动识图与独立合成 PDF，SC-012 验证隔离 MySQL、公开掩膜、并发及三个浏览器入口。
+
+
+## production-v2 找图与重试兼容
+
+标定颜色支持 red/blue/green/magenta/olive；olive 也是服务器和人工校对的正式颜色值。可选 IR 不存在时使用原 PDF，存储故障/摘要损坏仍报错。上下相接图片可按原 PDF 坐标渲染为完整图，source_mode=rendered_composite，保存 native_fragment_boxes_pdf_pt、固定 DPI 与变换；矢量图优先用图注和实际绘图框定位，不把纯文字页当作谱。
+
+失败占位与有未解决问题的发现运行状态为 needs_review，不作为成功缓存；历史 succeeded 空结果读取时同样显示 needs_review。发现 detail 分别包含 collections、extracted_collections、curve_count。采纳规则和服务器质量计算保持不变，模型成功生成标定不代表数据已验收。

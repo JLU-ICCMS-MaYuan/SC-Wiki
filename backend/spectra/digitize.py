@@ -47,6 +47,8 @@ def color_mask(rgb: np.ndarray, color: str) -> np.ndarray:
         "red": (r > 150) & (g < .55 * r) & (b < .55 * r),
         "green": (g > 45) & (g > 1.35 * r) & (g > 1.35 * b),
         "magenta": (r > 150) & (b > 50) & (g < .55 * r) & (b > .2 * r),
+        "olive": (r > 45) & (g > 45) & (b < .5 * np.minimum(r, g)) &
+                 (r < 1.5 * g) & (g < 1.5 * r),
     }
     if color not in masks:
         raise ValueError(f"未知颜色：{color}")
@@ -61,6 +63,8 @@ def chromatic_mask(rgb: np.ndarray, color: str) -> np.ndarray:
         "blue": (b > 35) & (b > r + 15) & (b > g + 15),
         "green": (g > 25) & (g > r + 12) & (g > b + 12),
         "magenta": (r > 40) & (r > g + 20) & (b > g + 12) & (b > .2 * r),
+        "olive": (np.minimum(r, g) > 25) & (np.minimum(r, g) > b + 15) &
+                 (np.abs(r - g) < .35 * np.maximum(r, g)),
     }
     if color not in masks:
         raise ValueError(f"未知颜色：{color}")

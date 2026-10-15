@@ -129,7 +129,7 @@ def discover(ctx, user_id, version):
         supported = verify_image_capability()
     except Exception:
         supported = False
-    count, issues = 0, []
+    count, extracted, curve_count, issues = 0, 0, 0, []
     for source in ctx["files"]:
         path = resolve_file(source["stored_path"], size=int(source.get("size") or 0),
                             sha256=str(source.get("sha256") or ""), media_type="application/pdf", namespace=ctx["target_id"])
@@ -139,8 +139,13 @@ def discover(ctx, user_id, version):
         ir = None
         if ctx["target"] == "upload":
             from backend.ingest.upload_tasks import artifact_directory, available_published_path
-            ir_path = available_published_path(ctx["target_id"], artifact_directory(ctx["target_id"]) / "document_ir" / (str(source["file_id"])+".json"))
-            if ir_path.is_file():
+            from backend.storage import FileNotFound
+            try:
+                ir_path = available_published_path(ctx["target_id"], artifact_directory(ctx["target_id"]) / "document_ir" / (str(source["file_id"])+".json"))
+            except (FileNotFoundError, FileNotFound):
+                # IR 是可选定位提示；旧任务可能只有已持久化的原 PDF。
+                ir_path = None
+            if ir_path is not None and ir_path.is_file():
                 ir = json.loads(ir_path.read_text())
         elif ctx.get("paper"):
             with SessionLocal() as session:
@@ -159,7 +164,9 @@ def discover(ctx, user_id, version):
                 try:
                     panels, panel_issues = calibrate(figure, ctx["states"])
                 except Exception as exc:
-                    panel_issues = ["自动标定失败：" + type(exc).__name__]
+                    status_code = getattr(exc, "status_code", None)
+                    status_text = f"HTTP {status_code}，" if status_code else ""
+                    panel_issues = [f"自动标定失败：{status_text}{type(exc).__name__}；待重试"]
             else:
                 panel_issues = ["当前模型读图校验未成功（能力或服务可用性未证实），谱待处理；其他解析不受影响"]
             issues.extend(dict(file_id=source["file_id"], page=figure["pdf_page"], reason=str(issue)) for issue in panel_issues)
@@ -175,13 +182,19 @@ def discover(ctx, user_id, version):
                     service.assert_version(fresh["version"], version)
                     row = service.collection(session, fresh, source_key,
                         panel["panel_id"] if panel else "__unavailable__", source_info)
-                    run, pending = service.new_run(session, row, panel or dict(issues=panel_issues), state)
+                    from backend.rag.llm_context import get_llm_config
+                    run, pending = service.new_run(session, row, panel or dict(issues=panel_issues), state,
+                                                   model_name=get_llm_config().model)
                     if pending:
                         service.complete_run(run, result)
                     service.activate(row, run, state)
                     count += 1
-    return dict(collections=count, issues=issues, image_capability_verified=supported,
-                status="completed" if supported else "needs_review")
+                    if result.get("curves"):
+                        extracted += 1
+                        curve_count += len(result["curves"])
+    return dict(collections=count, extracted_collections=extracted, curve_count=curve_count,
+                issues=issues, image_capability_verified=supported,
+                status="needs_review" if issues or not supported else "completed")
 
 
 def fingerprint_bytes(path):

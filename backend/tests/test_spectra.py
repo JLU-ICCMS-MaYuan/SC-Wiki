@@ -9,6 +9,7 @@ import pytest
 from PIL import Image
 from fastapi import HTTPException
 from backend import models
+from backend.storage import FileNotFound
 from backend.spectra.engine import extract_panel, comparison
 from backend.spectra.contracts import PanelCalibration, state_signature
 from backend.spectra.discovery import calibrate, pdf_figures
@@ -234,3 +235,125 @@ def test_archived_collection_is_not_listed_or_public(db_session):
     db_session.flush()
     assert service.listing(db_session, ctx)["items"] == []
     assert service.listing(db_session, {**ctx, "privileged": False})["items"] == []
+
+
+@pytest.mark.parametrize("missing_type", [FileNotFoundError, FileNotFound])
+def test_legacy_upload_without_ir_still_discovers_original_pdf(tmp_path, monkeypatch, missing_type):
+    import hashlib
+    import pymupdf
+    from backend.spectra import jobs, vision, discovery
+    from backend.ingest import upload_tasks
+    monkeypatch.setenv("FILE_STORAGE_BACKEND", "local")
+    monkeypatch.setenv("FILE_STORAGE_LOCAL_ROOT", str(tmp_path / "storage"))
+    doc = pymupdf.open()
+    page = doc.new_page(width=400, height=300)
+    page.insert_text((20, 20), "Phonon density of states")
+    page.draw_polyline([(40, 230), (150, 100), (350, 220)], color=(0, 0, 1))
+    path = tmp_path / "original.pdf"
+    doc.save(path)
+    doc.close()
+    def missing_ir(*args):
+        raise missing_type("可选历史 IR 不存在")
+    seen = []
+    def model(figure, states):
+        seen.append(figure)
+        return [], []
+    monkeypatch.setattr(upload_tasks, "artifact_directory", lambda task: tmp_path)
+    monkeypatch.setattr(upload_tasks, "available_published_path", missing_ir)
+    monkeypatch.setattr(vision, "verify_image_capability", lambda: True)
+    monkeypatch.setattr(discovery, "calibrate", model)
+    result = jobs.discover(dict(target="upload", target_id="legacy", states=[], files=[dict(
+        stored_path=str(path), file_id="main", size=path.stat().st_size,
+        sha256=hashlib.sha256(path.read_bytes()).hexdigest())]), 1, "version")
+    assert seen and seen[0]["source_mode"] == "rendered"
+    assert seen[0]["source_sha256"] == hashlib.sha256(path.read_bytes()).hexdigest()
+    assert result["image_capability_verified"]
+
+
+@pytest.mark.parametrize("legacy", [False, True])
+def test_incomplete_discovery_is_needs_review_and_retryable(db_session, legacy):
+    ctx, row, old, panel, state = setup_collection(db_session)
+    calibration = dict(discovery_version="v1")
+    run, _ = service.new_run(db_session, row, calibration, None)
+    outcome = dict(collections=5, extracted_collections=0, curve_count=0,
+                   issues=[dict(reason="自动标定失败：HTTP 503")], status="needs_review")
+    service.complete_run(run, outcome)
+    assert run.status == "needs_review" and run.error_code
+    if legacy:
+        run.status = "succeeded"
+        run.result_json = {**outcome, "status": "completed"}
+    retry, pending = service.new_run(db_session, row, calibration, None)
+    assert pending and retry.id == run.id and retry.status == "queued"
+    # 重试失败的发现运行不能改写此前的数值运行。
+    assert old.status == "succeeded" and old.result_json["curves"]
+
+
+def test_unavailable_panel_cannot_claim_success_or_hit_success_cache(db_session):
+    ctx, row, old, panel, state = setup_collection(db_session)
+    calibration = dict(issues=["HTTP 503"])
+    run, _ = service.new_run(db_session, row, calibration, None)
+    service.complete_run(run, dict(curves=[], candidates={}, quality={}, failures=["HTTP 503"]))
+    assert run.status == "needs_review"
+    assert service.new_run(db_session, row, calibration, None)[1]
+
+
+
+def test_olive_spectrum_is_extracted_without_confusing_green_or_axes():
+    from backend.spectra.digitize import color_mask, chromatic_mask
+    samples = np.array([[[128,128,0],[55,55,3],[128,128,128],[0,128,0],[255,128,0]]], dtype=np.uint8)
+    assert color_mask(samples, "olive").tolist() == [[True, True, False, False, False]]
+    assert chromatic_mask(samples, "olive").tolist() == [[True, True, False, False, False]]
+    image, panel = fixture()
+    green = color_mask(image, "green")
+    image[green] = [128,128,0]
+    panel["curves"][0]["color"] = "olive"
+    result = extract_panel(image, panel)
+    assert result["curves"][0]["point_counts"]["observed"] == 121
+    assert result["quality"]["integrals"]["raw"]["lambda_integral"] > 0
+
+
+def test_split_native_figure_is_composed_and_text_only_methods_skipped(tmp_path):
+    import pymupdf
+    doc = pymupdf.open()
+    page = doc.new_page(width=400, height=360)
+    for index, color in enumerate(["blue", "green"]):
+        image = Image.new("RGB", (180,120), color)
+        content = io.BytesIO(); image.save(content, format="PNG")
+        page.insert_image(pymupdf.Rect(40,50+index*120,220,170+index*120), stream=content.getvalue())
+    page.insert_text((20,325), "Figure S1 | Phonon density of states and Eliashberg function")
+    methods = doc.new_page(width=400, height=360)
+    methods.insert_text((20,20), "Eliashberg spectral function was calculated in Methods.")
+    methods.draw_line((20,100),(380,100))
+    path = tmp_path / "fragmented.pdf"
+    doc.save(path); doc.close()
+    figures = list(pdf_figures(path))
+    assert len(figures) == 1
+    figure = figures[0]
+    assert figure["source_mode"] == "rendered_composite"
+    assert len(figure["native_fragment_boxes_pdf_pt"]) == 2
+    assert figure["bbox_pdf_pt"] == pytest.approx([40,50,220,290])
+    assert figure["render_dpi"] == 160
+    assert figure["pixel_to_pdf"]["scale_y"] == pytest.approx(240/figure["size_px"][1])
+
+
+def test_vector_spectral_caption_crops_graph_instead_of_full_text_page(tmp_path):
+    import pymupdf
+    doc = pymupdf.open();page = doc.new_page(width=400,height=360)
+    page.insert_text((20,20), "Unrelated full page manuscript text")
+    page.draw_line((40,250),(350,250));page.draw_line((40,250),(40,60))
+    page.draw_polyline([(40,230),(150,100),(350,220)],color=(0,0,1))
+    page.insert_text((20,290), "Fig. 1. Phonon density of states")
+    path = tmp_path / "vector.pdf";doc.save(path);doc.close()
+    figure = list(pdf_figures(path))[0]
+    x0,y0,x1,y1 = figure["bbox_pdf_pt"]
+    assert x0 <= 40 and x1 >= 350 and 20 < y0 <= 60 and 250 <= y1 < 290
+    assert figure["pixel_to_pdf"]["offset_y"] == y0
+
+
+
+def test_legacy_empty_success_is_displayed_as_pending_without_rewriting_run(db_session):
+    ctx, row, run, panel, state = setup_collection(db_session)
+    run.result_json = dict(curves=[], candidates={}, quality={}, failures=["HTTP 503"])
+    assert run.status == "succeeded"
+    assert service.listing(db_session, ctx)["items"][0]["run"]["status"] == "needs_review"
+    assert run.status == "succeeded"

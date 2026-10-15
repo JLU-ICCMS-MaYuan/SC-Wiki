@@ -122,12 +122,19 @@ def collection(session, ctx, source_key, panel_key, source):
     return row
 
 
+def incomplete_result(result):
+    payload = result or {}
+    return bool(payload.get("status") == "needs_review" or
+                (payload.get("issues") and "collections" in payload) or
+                (payload.get("failures") and not payload.get("curves")))
+
+
 def new_run(session, row, calibration, state, *, model_name=None):
     key = fingerprint(dict(source=row.source_json, calibration=calibration,
                            state=state_signature(state), algorithm=ALGORITHM_VERSION))
     run = session.scalar(select(models.SpectrumRun).where(models.SpectrumRun.collection_id == row.id,
                                                            models.SpectrumRun.input_hash == key))
-    if run and run.status == "succeeded":
+    if run and run.status == "succeeded" and not incomplete_result(run.result_json):
         return run, False
     if run is None:
         run = models.SpectrumRun(id=uuid.uuid4().hex, collection_id=row.id, input_hash=key,
@@ -149,9 +156,11 @@ def activate(row, run, state):
 
 def complete_run(run, result):
     run.result_json = jsonable_encoder(result)
-    run.status = "succeeded"
+    incomplete = incomplete_result(result)
+    run.status = "needs_review" if incomplete else "succeeded"
     run.completed_at = datetime.now(timezone.utc)
-    run.error_code = run.error_message = None
+    run.error_code = "spectra_extraction_incomplete" if incomplete else None
+    run.error_message = "谱标定或提取未完成，请查看待处理原因后重试" if incomplete else None
 
 
 def mask_public(payload, reviews):
@@ -226,9 +235,11 @@ def listing(session, ctx):
         if ctx["target"] == "paper" and row.paper_revision != ctx["paper_revision"]:
             continue
         run = session.get(models.SpectrumRun, row.current_run_id) if row.current_run_id else None
+        status = ("needs_review" if run and run.status == "succeeded" and incomplete_result(run.result_json)
+                  else run.status if run else None)
         if row.panel_key == "__discovery__":
             if ctx["privileged"] and run:
-                jobs.append(dict(id=run.id, status=run.status, error_code=run.error_code,
+                jobs.append(dict(id=run.id, status=status, error_code=run.error_code,
                     error_message=run.error_message, detail=run.result_json))
             continue
         if not run:
@@ -251,7 +262,7 @@ def listing(session, ctx):
             if not payload["curves"]:
                 continue
         result.append(dict(id=row.id, version=row.version, state_key=row.state_key, stale=stale,
-            source=row.source_json, run=dict(id=run.id, status=run.status, error_code=run.error_code,
+            source=row.source_json, run=dict(id=run.id, status=status, error_code=run.error_code,
                 error_message=run.error_message, algorithm_version=run.algorithm_version, model_name=run.model_name),
             result=payload, review=reviews))
     return dict(items=result, jobs=jobs, version=ctx["version"], can_edit=ctx["can_edit"], can_review=ctx["can_review"])
