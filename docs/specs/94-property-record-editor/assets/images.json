@@ -41,6 +41,26 @@
         "FR-015"
       ],
       "verification": "2026-10-15 读取归档原图 PNG 字节并核对尺寸和 SHA-256；仅本地验证，未推送。"
+    },
+    {
+      "id": "IMG-003",
+      "upload_order": 3,
+      "original_name": "codex-clipboard-39d2d862-1562-496b-9e7f-1fa1ae2a231e.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-003.png",
+      "status": "local_verified",
+      "user_context": "我希望您能给重新设计一下这里的页面：\n\n1. 第一个参数补充类型，为什么前面多加那么多的小竖条呢？我觉得没必要吧，而且只需要保留新增字段这一个可以点击的按钮就可以了\n2. 下面的计算条件我觉得都可以变成一行。\n\n使用 issue 和 spec 继续设计，先做一个 demo 给我看看",
+      "related": [
+        "US6",
+        "FR-018",
+        "FR-019"
+      ],
+      "sha256": "8253007188944cb2119f58889f21e5b9a95cf4019df5af3917b85312a65a180f",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2456,
+        1132
+      ],
+      "verification": "2026-10-15 重新读取归档图片，使用 PIL 解码并核对尺寸、SHA-256；本地验证，远程链接待验证。"
     }
   ]
 }

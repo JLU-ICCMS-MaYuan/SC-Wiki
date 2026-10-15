@@ -1,0 +1,146 @@
+<style>
+  #tc-compact-demo { color-scheme: light dark; padding: 16px 0; }
+  #tc-compact-demo .tc-product { --tc-bg: light-dark(#fff, #202124); --tc-fg: light-dark(#253043, #e4e7ee); --tc-muted: light-dark(#657187, #b3bac8); --tc-border: light-dark(#c7ccd5, #626977); --tc-primary: light-dark(#6554e8, #b6aaff); --tc-pair: light-dark(#f4f3ff, #302c43); --tc-error: light-dark(#ad2537, #ff9da8); background: var(--tc-bg); color: var(--tc-fg); border: 1px solid var(--tc-border); border-radius: 8px; padding: 18px 16px; font: 14px/1.5 Roboto, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; box-sizing: border-box; }
+  #tc-compact-demo .tc-header { display: flex; flex-wrap: wrap; gap: 8px 16px; padding-right: 76px; margin-bottom: 16px; font-weight: 500; }
+  #tc-compact-demo .tc-example { font-size: 12px; font-weight: 400; color: var(--tc-muted); }
+  #tc-compact-demo .tc-scroll { overflow-x: auto; overscroll-behavior-x: contain; padding: 10px 1px 10px; scrollbar-width: thin; scrollbar-color: var(--tc-border) transparent; }
+  #tc-compact-demo .tc-line { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; min-width: 1080px; }
+  #tc-compact-demo .tc-field { position: relative; display: block; flex: 1 0 90px; min-width: 90px; }
+  #tc-compact-demo .tc-name { flex-basis: 172px; min-width: 172px; }
+  #tc-compact-demo .tc-kind { flex-basis: 76px; min-width: 76px; }
+  #tc-compact-demo .tc-lambda { flex-basis: 106px; min-width: 106px; }
+  #tc-compact-demo .tc-pair { --tc-field-bg: var(--tc-pair); display: flex; align-items: center; gap: 8px; flex: 2 0 210px; min-width: 210px; padding: 14px 8px; border-radius: 8px; background: var(--tc-pair); box-sizing: border-box; }
+  #tc-compact-demo .tc-label { position: absolute; top: -9px; left: 9px; padding: 0 4px; background: var(--tc-field-bg, var(--tc-bg)); color: var(--tc-primary); font-size: 12px; white-space: nowrap; }
+  #tc-compact-demo input:not([type=checkbox]), #tc-compact-demo select { display: block; box-sizing: border-box; width: 100%; min-width: 0; height: 44px; padding: 9px 11px; border: 1px solid var(--tc-border); border-radius: 6px; background: var(--tc-field-bg, var(--tc-bg)); color: var(--tc-fg); font: inherit; }
+  #tc-compact-demo input:focus, #tc-compact-demo select:focus { border-color: var(--tc-primary); }
+  #tc-compact-demo input.tc-with-unit { padding-right: 26px; }
+  #tc-compact-demo .tc-unit { position: absolute; top: 11px; right: 10px; color: var(--tc-muted); pointer-events: none; }
+  #tc-compact-demo .tc-check { display: flex; flex: 0 0 90px; min-height: 44px; align-items: center; gap: 6px; white-space: nowrap; margin-left: 2px; }
+  #tc-compact-demo input[type=checkbox] { width: 18px; height: 18px; margin: 0; accent-color: var(--tc-primary); }
+  #tc-compact-demo .tc-add { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; gap: 6px; min-height: 40px; padding: 6px 10px; border: none; border-radius: 4px; background: transparent; color: var(--tc-primary); font: inherit; font-weight: 500; white-space: nowrap; }
+  #tc-compact-demo .tc-add:hover { background: var(--tc-pair); }
+  #tc-compact-demo .tc-parameters { margin: 0 0 20px; }
+  #tc-compact-demo .tc-conditions-title { margin: 0 0 10px; font-weight: 500; }
+  #tc-compact-demo .tc-conditions-line { min-width: 1040px; }
+  #tc-compact-demo .tc-software { flex-basis: 140px; min-width: 140px; }
+  #tc-compact-demo .tc-method { flex-basis: 112px; min-width: 112px; }
+  #tc-compact-demo .tc-functional { flex-basis: 124px; min-width: 124px; }
+  #tc-compact-demo .tc-extension { display: flex; flex-wrap: nowrap; gap: 10px; align-items: center; min-width: 470px; padding: 10px 1px; }
+  #tc-compact-demo .tc-extension .tc-field { flex: 1 0 95px; }
+  #tc-compact-demo .tc-extension .tc-name { flex-basis: 130px; min-width: 130px; }
+  #tc-compact-demo .tc-extension .tc-kind { flex: 0 0 76px; min-width: 76px; }
+  #tc-compact-demo .tc-remove { color: var(--tc-muted); flex: 0 0 auto; border: none; background: transparent; padding: 10px 6px; min-height: 40px; font: inherit; }
+  #tc-compact-demo .tc-remove:hover { color: var(--tc-error); }
+  #tc-compact-demo .tc-condition-extensions { display: contents; }
+  #tc-compact-demo .tc-condition-extensions .tc-extension { flex: 0 0 510px; }
+  #tc-compact-demo .tc-warning { margin: 6px 0 0; font-size: 12px; color: var(--tc-error); }
+  #tc-compact-demo [hidden] { display: none !important; }
+  @media (pointer: coarse) { #tc-compact-demo input:not([type=checkbox]), #tc-compact-demo select { font-size: 16px; } #tc-compact-demo button { min-height: 44px; } }
+</style>
+<div id="tc-compact-demo" class="viz-dotted-background">
+  <section class="tc-product" aria-label="简化参数与单行计算条件">
+    <div class="tc-header">预测 Tc · allen_dynes <span class="tc-example">示例数据</span></div>
+    <div class="tc-scroll" role="region" aria-label="超导性质单行输入">
+      <div class="tc-line">
+        <label class="tc-field tc-lambda"><span class="tc-label">电声耦合强度 λ</span><input data-field="lambda" aria-label="电声耦合强度 λ" placeholder="填写 λ"></label>
+        <label class="tc-field"><span class="tc-label">ωlog</span><input data-field="omega" class="tc-with-unit" aria-label="ωlog (K)" placeholder="填写"><span class="tc-unit">K</span></label>
+        <label class="tc-field tc-name"><span class="tc-label">名称</span><input data-field="name" aria-label="名称" value="critical temperature"></label>
+        <label class="tc-field tc-kind"><span class="tc-label">值类型</span><select data-field="kind" class="cursor-interaction" aria-label="值类型"><option value="range">范围</option><option value="number">数值</option></select></label>
+        <div class="tc-pair" role="group" aria-label="第一组 Tc 与 μ*">
+          <label class="tc-field"><span class="tc-label">Tc</span><input data-field="firstTc" class="tc-with-unit" aria-label="第一组 Tc" value="281"><span class="tc-unit">K</span></label>
+          <label class="tc-field"><span class="tc-label">μ*</span><input data-field="firstMu" aria-label="第一组 μ*" value="0.13"></label>
+        </div>
+        <div class="tc-pair" role="group" aria-label="第二组 Tc 与 μ*" data-range-only>
+          <label class="tc-field"><span class="tc-label">Tc</span><input data-field="secondTc" class="tc-with-unit" aria-label="第二组 Tc" value="311"><span class="tc-unit">K</span></label>
+          <label class="tc-field"><span class="tc-label">μ*</span><input data-field="secondMu" aria-label="第二组 μ*" value="0.10"></label>
+        </div>
+        <label class="tc-check cursor-interaction"><input data-field="representative" type="checkbox">代表结果</label>
+      </div>
+    </div>
+    <div class="tc-parameters" role="group" aria-label="其他参数">
+      <div class="tc-scroll" data-extension-scroll="parameters" hidden><div data-extensions="parameters"></div></div>
+      <button type="button" class="tc-add cursor-interaction" data-add="parameters" aria-label="新增参数字段"><i data-lucide="plus" aria-hidden="true"></i>新增字段</button>
+    </div>
+    <div class="tc-conditions-title">计算条件</div>
+    <div class="tc-scroll" role="region" aria-label="单行计算条件">
+      <div class="tc-line tc-conditions-line">
+        <label class="tc-field tc-software"><span class="tc-label">计算软件</span><input data-field="code" aria-label="计算软件" value="Quantum ESPRESSO"></label>
+        <label class="tc-field tc-method"><span class="tc-label">电子结构方法</span><input data-field="method" aria-label="电子结构方法" value="DFT"></label>
+        <label class="tc-field tc-functional"><span class="tc-label">交换关联泛函</span><input data-field="functional" aria-label="交换关联泛函" value="PBE"></label>
+        <label class="tc-field"><span class="tc-label">k 网格</span><input data-field="kGrid" aria-label="k 网格" value="24 × 24 × 24"></label>
+        <label class="tc-field"><span class="tc-label">q 网格</span><input data-field="qGrid" aria-label="q 网格" value="6 × 6 × 6"></label>
+        <label class="tc-field"><span class="tc-label">k 展宽</span><input data-field="kWidth" aria-label="k 展宽" placeholder="填写"></label>
+        <label class="tc-field"><span class="tc-label">q 展宽</span><input data-field="qWidth" aria-label="q 展宽" placeholder="填写"></label>
+        <div class="tc-condition-extensions" data-extensions="conditions"></div>
+        <button type="button" class="tc-add cursor-interaction" data-add="conditions" aria-label="新增计算条件字段"><i data-lucide="plus" aria-hidden="true"></i>新增字段</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('tc-compact-demo');
+  const defaults = { lambda: '', omega: '', name: 'critical temperature', kind: 'range', firstTc: '281', firstMu: '0.13', secondTc: '311', secondMu: '0.10', representative: false,
+    code: 'Quantum ESPRESSO', method: 'DFT', functional: 'PBE', kGrid: '24 × 24 × 24', qGrid: '6 × 6 × 6', kWidth: '', qWidth: '' };
+  let values = { ...defaults }, extensions = { parameters: [], conditions: [] };
+  const restore = saved => {
+    const state = saved && saved.modelContent && saved.modelContent.compactConditions;
+    if (!state) return;
+    if (state.values) Object.keys(defaults).forEach(key => { if (typeof state.values[key] === typeof defaults[key]) values[key] = state.values[key]; });
+    if (!['range', 'number'].includes(values.kind)) values.kind = 'range';
+    for (const key of Object.keys(extensions)) if (state.extensions && Array.isArray(state.extensions[key])) {
+      extensions[key] = state.extensions[key].slice(0, 12).map(item => ({ id: String(item.id), name: String(item.name || ''), kind: item.kind === 'text' ? 'text' : 'number', value: String(item.value || ''), unit: String(item.unit || '') }));
+    }
+  };
+  const persist = () => {
+    if (window.openai && window.openai.setWidgetState) window.openai.setWidgetState({ modelContent: { compactConditions: { values, extensions } }, privateContent: null }).catch(() => {});
+  };
+  const field = (item, key, label, extraClass = '') => {
+    const wrap = document.createElement('label'); wrap.className = `tc-field ${extraClass}`;
+    const caption = document.createElement('span'); caption.className = 'tc-label'; caption.textContent = label;
+    const input = key === 'kind' ? document.createElement('select') : document.createElement('input');
+    if (key === 'kind') for (const [value, text] of [['number', '数值'], ['text', '文本']]) { const option = document.createElement('option'); option.value = value; option.textContent = text; input.append(option); }
+    input.value = item[key]; input.setAttribute('aria-label', label); input.dataset.extension = key;
+    wrap.append(caption, input); return wrap;
+  };
+  const renderExtensions = () => {
+    for (const key of Object.keys(extensions)) {
+      const host = root.querySelector(`[data-extensions="${key}"]`); host.replaceChildren();
+      for (const item of extensions[key]) {
+        const row = document.createElement('div'); row.className = 'tc-extension'; row.dataset.extensionId = item.id; row.dataset.extensionGroup = key;
+        row.setAttribute('role', 'group'); row.setAttribute('aria-label', key === 'parameters' ? '自定义参数' : '自定义计算条件');
+        row.append(field(item, 'name', '字段名称', 'tc-name'), field(item, 'kind', '值类型', 'tc-kind'), field(item, 'value', '值'), field(item, 'unit', '单位'));
+        const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'tc-remove cursor-interaction'; remove.textContent = '删除'; remove.dataset.remove = item.id; remove.setAttribute('aria-label', key === 'parameters' ? '删除参数字段' : '删除计算条件字段');
+        row.append(remove); host.append(row);
+      }
+    }
+    root.querySelector('[data-extension-scroll="parameters"]').hidden = extensions.parameters.length === 0;
+  };
+  const render = () => {
+    root.querySelectorAll('[data-field]').forEach(input => { if (input.type === 'checkbox') input.checked = values[input.dataset.field]; else input.value = values[input.dataset.field]; });
+    root.querySelector('[data-range-only]').hidden = values.kind !== 'range'; renderExtensions();
+  };
+  root.addEventListener('input', event => {
+    const input = event.target;
+    if (input.dataset.field) {
+      values[input.dataset.field] = input.type === 'checkbox' ? input.checked : input.value;
+      if (input.dataset.field === 'kind') root.querySelector('[data-range-only]').hidden = values.kind !== 'range';
+    } else if (input.dataset.extension) {
+      const row = input.closest('[data-extension-id]'); const item = extensions[row.dataset.extensionGroup].find(item => item.id === row.dataset.extensionId); if (item) item[input.dataset.extension] = input.value;
+    } else return;
+    persist();
+  });
+  root.addEventListener('click', event => {
+    const add = event.target.closest('[data-add]');
+    if (add) { const key = add.dataset.add; extensions[key].push({ id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, name: '', kind: 'number', value: '', unit: '' }); renderExtensions(); const last = root.querySelector(`[data-extensions="${key}"]`).lastElementChild; last.querySelector('input').focus(); persist(); return; }
+    const remove = event.target.closest('[data-remove]');
+    if (remove) { const row = remove.closest('[data-extension-id]'), key = row.dataset.extensionGroup; extensions[key] = extensions[key].filter(item => item.id !== remove.dataset.remove); renderExtensions(); persist(); }
+  });
+  restore(window.openai && window.openai.widgetState); render();
+  window.addEventListener('openai:set_globals', event => {
+    const saved = event.detail && event.detail.globals && event.detail.globals.widgetState;
+    const incoming = saved && saved.modelContent && saved.modelContent.compactConditions;
+    if (incoming && JSON.stringify(incoming) !== JSON.stringify({ values, extensions })) { restore(saved); render(); }
+  });
+})();
+</script>
