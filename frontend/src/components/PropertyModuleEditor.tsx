@@ -15,6 +15,7 @@ import {
 } from '../lib/propertyModules'
 import { newStabilityRecord } from '../lib/thermodynamicStability'
 import { PropertySpectrumSection, MissingPropertySpectrumModules } from './PropertySpectra'
+import PropertyModuleSection from './PropertyModuleSection'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
 
 export interface ModuleDeletion {
@@ -267,11 +268,16 @@ const PropertyModuleEditor: React.FC<Props> = ({
       {modules.map((module, moduleIndex) => {
         const moduleBasePath = basePath ? `${basePath}.${moduleIndex}` : String(moduleIndex)
         const choices = choicesFor(module.module_code)
+        const moduleProblems = [
+          ...issues.filter(issue => issue.field.startsWith(`${moduleBasePath}.`)).map(issue => issue.message),
+          ...module.records.map(record => definitionErrors[record.record_key]).filter(Boolean),
+        ]
         return (
           <Box key={module.module_key} data-module-key={module.module_key} data-testid={`property-module-${module.module_code}`} sx={{ pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Typography variant="subtitle2" fontWeight={700}>{PROPERTY_MODULES.find(item => item.code === module.module_code)?.label || module.module_code}</Typography>
-              {!readOnly && (
+            <PropertyModuleSection
+              title={PROPERTY_MODULES.find(item => item.code === module.module_code)?.label || module.module_code}
+              status={moduleProblems.length ? `${moduleProblems.length} 项待处理：${moduleProblems[0]}` : undefined}
+              actions={!readOnly ? (
                 <Box sx={{ pr: 1 }}>
                   <Tooltip title="上移模块"><span><IconButton size="small" aria-label="上移模块" disabled={moduleIndex === 0} onClick={() => moveModule(moduleIndex, -1)}><ArrowUpwardIcon /></IconButton></span></Tooltip>
                   <Tooltip title="下移模块"><span><IconButton size="small" aria-label="下移模块" disabled={moduleIndex === modules.length - 1} onClick={() => moveModule(moduleIndex, 1)}><ArrowDownwardIcon /></IconButton></span></Tooltip>
@@ -280,8 +286,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                       onClick={() => onChange(normalizeOrder(modules.filter((_, index) => index !== moduleIndex)), { deletedModuleKey: module.module_key })}><DeleteIcon /></IconButton></span>
                   </Tooltip>
                 </Box>
-              )}
-            </Box>
+              ) : undefined}>
             <PropertySpectrumSection moduleCode={module.module_code} />
             <Box sx={{ pt: 1 }}>
               {module.records.map((record, recordIndex) => {
@@ -344,6 +349,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                 </Select>
               )}
             </Box>
+            </PropertyModuleSection>
           </Box>
         )
       })}

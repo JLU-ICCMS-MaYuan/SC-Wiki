@@ -25,3 +25,8 @@
 - [x] CHK015 FR-018～034 已映射组件、版本化数据契约、T020～027 和 SC-019、022～025。[Plan 映射、contracts/record-form.md]
 - [x] CHK016 不同凸包依据、ZPE 三态、未知值和谱权限依赖边界明确，主表单和人工草稿失败路径有行为验证。[quickstart、热力学/谱导航/人工证据测试]
 - [ ] CHK017 #137 目标环境谱 API/数据库就绪与真实论文谱的独立详情验收；未执行业务迁移，保留外部依赖。
+
+## US10 模块默认折叠
+
+- [x] CHK018 用户原话、四模块默认折叠和原记录层折叠的区别已明确。[US10、FR-035～036]
+- [x] CHK019 保留未保存输入、重排/工具栏独立、只读和仅谱模块均有交互覆盖。[property-module-collapse.test.tsx、property-spectra-navigation.test.tsx]

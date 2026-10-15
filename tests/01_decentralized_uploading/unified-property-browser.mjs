@@ -58,10 +58,25 @@ try {
     })
     const page = await context.newPage(), errors = []
     page.on('pageerror', error => errors.push(error.message))
+    const expandModules = async (keyboard = false) => {
+      const sections = page.locator('[data-property-module-section]')
+      assert.equal(await sections.count(), 4)
+      assert.deepEqual(await sections.evaluateAll(nodes => nodes.map(node => node.open)), [false, false, false, false], '四类模块初次挂载默认折叠')
+      const first = sections.first().locator(':scope > summary')
+      if (keyboard) {
+        await first.focus(); await first.press('Enter')
+        assert.deepEqual(await sections.evaluateAll(nodes => nodes.map(node => node.open)), [true, false, false, false], '键盘只展开当前模块')
+        await first.press('Space')
+        assert.equal(await sections.first().evaluate(node => node.open), false)
+      }
+      if (mode === 'admin' && keyboard) await page.locator('[data-state-key="sample"]').screenshot({ path: `${output}/property-modules-collapsed.png` })
+      for (const section of await sections.all()) await section.locator(':scope > summary').click()
+    }
     const start = mode === 'upload' ? '/upload' : mode === 'admin' ? '/admin/papers/990094/edit' : '/papers/990094'
     await page.goto(`${process.env.FRONTEND_URL || 'http://127.0.0.1:5173'}${start}`)
     if (mode !== 'readonly') await page.getByRole('button', { name: '全部展开', exact: true }).click()
-    await page.getByTestId('property-record-tc').waitFor()
+    await page.getByTestId('property-record-tc').waitFor({ state: 'attached' })
+    await expandModules(true)
     const dynModule = page.getByTestId('property-module-dynamical_properties'), scModule = page.getByTestId('property-module-superconductive_properties')
     assert.equal(await dynModule.getByText('α²F 谱函数', { exact: true }).count(), 0)
     assert.equal(await scModule.getByText('声子 DOS', { exact: true }).count(), 0)
@@ -78,6 +93,11 @@ try {
         assert(await width() > 350)
         await field.fill(''); await page.waitForTimeout(50); assert.equal(await width(), 110)
         await field.fill(`condition-${key}`); await row.getByLabel('值', { exact: true }).fill('10')
+        const module = card.locator('xpath=ancestor::*[@data-module-key][1]')
+        await module.locator('[data-property-module-toggle]').click()
+        assert.equal(await field.isVisible(), false)
+        await module.locator('[data-property-module-toggle]').click()
+        assert.equal(await field.inputValue(), `condition-${key}`)
         await card.getByRole('button', { name: '新增字段', exact: true }).last().click()
         const boxes = await card.locator('[data-extension-row]').evaluateAll(nodes => nodes.map(node => node.getBoundingClientRect().top))
         assert(boxes.at(-1) > boxes.at(-2), '每个新增条件另起一行')
@@ -130,7 +150,8 @@ try {
       if (mode === 'admin') await page.screenshot({ path: `${output}/spectrum-detail.png`, fullPage: true })
       await page.getByRole('button', { name: '返回原模块', exact: true }).click()
       if (mode !== 'readonly') { await page.getByRole('button', { name: '全部展开', exact: true }).click(); assert.equal(await page.getByLabel('压强 (GPa)', { exact: true }).inputValue(), '180') }
-        await page.getByTestId('property-record-tc').waitFor()
+        await page.getByTestId('property-record-tc').waitFor({ state: 'attached' })
+      await expandModules()
     }
     if (mode === 'admin') {
       const card = page.getByTestId('property-record-tc')

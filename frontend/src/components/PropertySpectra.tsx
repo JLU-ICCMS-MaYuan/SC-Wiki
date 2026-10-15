@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, type PropsWithChildren 
 import { Alert, Box, Button, Typography } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { loadPropertySpectra, spectrumNames, usePropertySpectra, type PropertySpectrumTarget, type PropertySpectrumItem, type PropertySpectrumCurve } from '../lib/propertySpectra'
+import PropertyModuleSection from './PropertyModuleSection'
 import type { PropertyModuleCode } from '../lib/propertyModules'
 
 export interface PropertySpectraContext { target: PropertySpectrumTarget; beforeNavigate?: () => Promise<boolean> }
@@ -67,5 +68,5 @@ export function MissingPropertySpectrumModules({ existing }: { existing: Propert
     { code: 'dynamical_properties', label: '动力学性质', kinds: ['phonon_dos'] },
     { code: 'superconductive_properties', label: '超导性质', kinds: ['alpha2f', 'cumulative_lambda'] },
   ]
-  return <>{modules.filter(module => !existing.includes(module.code) && module.kinds.some(kind => kinds.includes(kind))).map(module => <Box key={module.code} data-testid={`property-module-${module.code}`} sx={{ borderTop: 1, borderColor: 'divider', pt: 1.5 }}><Typography variant="subtitle2" fontWeight={700}>{module.label}</Typography><PropertySpectrumSection moduleCode={module.code} /></Box>)}</>
+  return <>{modules.filter(module => !existing.includes(module.code) && module.kinds.some(kind => kinds.includes(kind))).map(module => <Box key={module.code} data-testid={`property-module-${module.code}`} sx={{ borderTop: 1, borderColor: 'divider', pt: 1.5 }}><PropertyModuleSection title={module.label}><PropertySpectrumSection moduleCode={module.code} /></PropertyModuleSection></Box>)}</>
 }

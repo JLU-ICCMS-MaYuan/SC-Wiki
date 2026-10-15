@@ -98,3 +98,11 @@ PropertyModuleEditor 的 Tc 摘要直接读取规范值，字段锚点及 record
 谱摘要/详情独立于 #137 尚未提交的 SpectrumWorkspace；通过小型只读 API 客户端和 provider 接入三入口。路由携带 target/target_id/state_key/curve/collection_version，重新读取服务器列表后核对，详情展示服务器返回的版本、来源、曲线/候选、质量与逐点值并使用相同鉴权下载原图和导出。后端负责 revision/run 绑定及公开裁剪；前端不扩大权限或重算物理积分。目标服务不可用如实显示。返回 URL 仅允许站内路径；编辑入口先调用已有真实保存函数，保存失败停留原页。
 
 人工修改单一主操作“保存并完成”先检查说明、证据选择、文件/缺证原因；调用现有 prepare 保存当前科学值并刷新版本，再保存说明和上传文件。失败阶段明确，保留本地修订；不以人工附件代替原文证据或正式审核。管理员仍保留原正式来源核对完成路径。
+
+## US10：模块折叠增量
+
+FR-035～036 / SC-026～027 → PropertyModuleSection → T028～030。使用共享原生 details/summary 包裹模块内容，缺省不带 open；原生鼠标和键盘交互，折叠内容保留挂载。module_key 保持现有 React 身份，因此表单更新和模块排序不重置展开状态；只读共享同一折叠控件。模块工具栏与 summary 为兄弟节点，避免移动/删除触发折叠。
+
+PropertyModuleEditor 的标量模块和 MissingPropertySpectrumModules 的仅谱模块复用该包装；记录层 Accordion 保留。模块标题显示已有问题数量和首条摘要，折叠状态不进入 PropertyModuleDraft、payload、API 或导出。原生 details 与已有定位逻辑展开祖先 details 的做法相容。
+
+验证：定向交互覆盖初始隐藏、四模块独立性、输入/嵌套折叠保留、重排与只读；已有测试在操作内容前显式展开对应模块。三入口浏览器脚本验证默认折叠后再执行原有编辑/保存/详情回归。

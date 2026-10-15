@@ -13,6 +13,12 @@ const makeRecord = (key, predicted = false) => ({
   value_kind: 'number', value_raw: predicted ? '' : 'wrong 3.78 mK', unit_raw: 'mK', canonical_unit: 'K', value_number: 3.78,
   payload: predicted ? { calculation_conditions: {}, parameters: {} } : { experimental_conditions: { description: 'Four-probe measurement' } },
 })
+const expandProperties = async page => {
+  await page.locator('[data-property-module-section]').first().waitFor({ state: 'attached' })
+  for (const section of await page.locator('[data-property-module-section]').all()) {
+    if (!(await section.evaluate(node => node.open))) await section.locator(':scope > summary').click()
+  }
+}
 try {
   for (const mode of ['admin', 'superadmin', 'upload']) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1000 }, permissions: ['clipboard-read', 'clipboard-write'] })
@@ -75,7 +81,7 @@ try {
     page.on('pageerror', error => errors.push(error.message))
     page.on('framenavigated', frame => { if (frame === page.mainFrame()) loads++ })
     await page.goto(`${process.env.FRONTEND_URL || 'http://127.0.0.1:5173'}${mode === 'upload' ? '/upload' : '/admin/papers/990094/edit'}`)
-    await page.getByRole('button', { name: '全部展开', exact: true }).click()
+    await page.getByRole('button', { name: '全部展开', exact: true }).click(); await expandProperties(page)
     const card = page.getByTestId('property-record-tc-measured')
     const input = card.getByLabel('Tc 值', { exact: true })
     await input.waitFor()
@@ -136,7 +142,7 @@ try {
     assert.equal(current().value_raw, '4.25'); assert.equal(current().unit_raw, 'K')
     assert.equal(current().is_representative, true)
     assert.equal(states[0].property_modules[0].records[0].value_number, 3.78)
-    await page.reload(); await page.getByRole('button', { name: '全部展开', exact: true }).click(); await input.waitFor()
+    await page.reload(); await page.getByRole('button', { name: '全部展开', exact: true }).click(); await expandProperties(page); await input.waitFor()
     assert.equal(await input.inputValue(), '4.25')
     await input.fill('')
     const beforeClear = writes
@@ -153,7 +159,7 @@ try {
     await Promise.all([page.waitForResponse(r => /\/(scientific-draft|draft)$/.test(r.url()) && r.request().method() === 'PUT'), save.click()])
     assert.equal(current().value_number, null); assert.equal(current().value_min, 2); assert.equal(current().value_max, 5)
     assert.equal(current().value_raw, '2–5')
-    await page.reload(); await page.getByRole('button', { name: '全部展开', exact: true }).click()
+    await page.reload(); await page.getByRole('button', { name: '全部展开', exact: true }).click(); await expandProperties(page)
     assert.equal(await card.getByLabel('Tc', { exact: true }).nth(0).inputValue(), '2')
     assert.equal(await card.getByLabel('Tc', { exact: true }).nth(1).inputValue(), '5')
     assert.equal(await card.getByText('原始记录', { exact: true }).count(), 0)
@@ -185,13 +191,13 @@ try {
       const predictedValue = states[0].property_modules[0].records[0]
       assert.deepEqual(predictedValue.payload.parameters.extensions[0], { key: 'mu_star', value_kind: 'range', unit_raw: '1', value_min: 0.1, value_max: 0.13, value_raw: '0.1–0.13' })
       if (process.env.TC_PAIRED_SCREENSHOT && mode === 'admin') await predictedCard.screenshot({ path: process.env.TC_PAIRED_SCREENSHOT })
-      await page.reload(); await page.getByRole('button', { name: '全部展开', exact: true }).click()
+      await page.reload(); await page.getByRole('button', { name: '全部展开', exact: true }).click(); await expandProperties(page)
       assert.equal(await predictedCard.getByTestId('tc-pair-0').getByLabel('μ*', { exact: true }).inputValue(), '0.13')
       assert.equal(await predictedCard.getByTestId('tc-pair-1').getByLabel('μ*', { exact: true }).inputValue(), '0.1')
     }
     if (mode === 'upload') {
       readOnly = true
-      await page.reload(); await card.getByLabel('Tc', { exact: true }).nth(0).waitFor()
+      await page.reload(); await expandProperties(page); await card.getByLabel('Tc', { exact: true }).nth(0).waitFor()
       assert.equal(await card.getByLabel('Tc', { exact: true }).nth(0).isDisabled(), true)
       assert.equal(await page.getByTestId('property-record-tc-predicted').getByLabel('μ*', { exact: true }).nth(0).isDisabled(), true)
       assert.equal(await card.getByLabel('原始值', { exact: true }).count(), 0)

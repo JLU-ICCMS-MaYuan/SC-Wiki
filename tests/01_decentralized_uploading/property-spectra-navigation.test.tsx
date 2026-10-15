@@ -88,6 +88,13 @@ it('无标量记录时谱仍出现于正确模块', async () => {
   expect(await screen.findByText('动力学性质')).toBeInTheDocument()
   expect(screen.getByText('超导性质')).toBeInTheDocument()
   expect(screen.getAllByText('查看详情')).toHaveLength(2)
+  const sections = document.querySelectorAll<HTMLDetailsElement>('[data-property-module-section]')
+  expect([...sections].map(section => section.open)).toEqual([false, false])
+  fireEvent.click(sections[0].querySelector('summary')!)
+  const links = screen.getAllByText('查看详情')
+  expect(links[0]).toBeVisible()
+  expect(links[1]).not.toBeVisible()
+
 })
 it('返回地址只允许站内路径', () => {
   for (const value of ['https://evil.test', '//evil.test', '/\\evil.test', '/\nevil.test']) expect(safeSpectrumReturn(value)).toBe('/upload')

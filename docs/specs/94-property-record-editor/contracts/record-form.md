@@ -65,3 +65,7 @@ Tc 核对的 editable_fields 不含 value_raw、unit_raw、canonical_unit，旧 
 谱 GET /api/rag/spectra?target=...&target_id=... 返回 items/jobs/version/can_edit/can_review，摘要引用 collection.id/version、state_key、curve.id/kind、run.status、review；独立路由 /spectra/:collectionId，查询参数显式携带目标、状态、曲线、集合版本与站内返回地址。重新读取后不匹配即显示错误，不展示另一状态或旧版本。图像/导出使用相同目标参数与 api.download 鉴权；候选及质量只展示服务器已授权内容。
 
 人工保存不改变 /api/rag/evidence/.../manual API：prepare 返回最新 endpoint/version，PUT 说明后串行 POST 文件，全部成功且草稿未再编辑才 complete。provide 需已有或待上传附件；none 需缺证原因并移除已存和待上传附件。busy、失败、历史与版本冲突维持 #138 规则。
+
+## 模块默认折叠
+
+初次挂载的四类模块均折叠；展开/收起仅改变原生 details 的 open 状态，不调用模块 onChange，不进入提交载荷。内容保留挂载，嵌套记录 Accordion 状态与未保存输入不因模块折叠丢失。模块身份继续由 module_key 决定；模块工具栏独立于折叠标题。

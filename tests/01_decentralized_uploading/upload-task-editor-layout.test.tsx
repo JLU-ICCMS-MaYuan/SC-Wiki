@@ -421,6 +421,7 @@ describe('energy above hull 统一物性记录', () => {
       makeState({ property_modules: [moduleWith('electronic_properties', [customRecord()])] }),
     ])} />)
 
+    fireEvent.click(screen.getByTestId('property-module-electronic_properties').querySelector('[data-property-module-toggle]')!)
     expect(await screen.findByDisplayValue('Energy Above Hull')).toBeVisible()
     expect(screen.queryByRole('button', { name: 'energy above hull' })).not.toBeInTheDocument()
   })
