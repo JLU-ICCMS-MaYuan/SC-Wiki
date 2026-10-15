@@ -1,0 +1,166 @@
+<style>
+  #unified-properties-demo { color-scheme: light dark; padding: 16px 0; }
+  #unified-properties-demo .up-product { --up-bg: light-dark(#fff, #202124); --up-fg: light-dark(#253043, #e4e7ee); --up-muted: light-dark(#657187, #b3bac8); --up-border: light-dark(#c7ccd5, #626977); --up-primary: light-dark(#6554e8, #b6aaff); --up-soft: light-dark(#f4f3ff, #302c43); --up-error: light-dark(#ad2537, #ff9da8); background: var(--up-bg); color: var(--up-fg); border: 1px solid var(--up-border); border-radius: 8px; padding: 18px 16px; font: 14px/1.5 Roboto, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; box-sizing: border-box; }
+  #unified-properties-demo .up-header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding-right: 80px; margin-bottom: 14px; font-weight: 500; }
+  #unified-properties-demo .up-example { font-size: 12px; color: var(--up-muted); font-weight: 400; }
+  #unified-properties-demo .up-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 14px; border-bottom: 1px solid var(--up-border); margin-bottom: 18px; }
+  #unified-properties-demo .up-tabs button { border: none; border-radius: 5px; background: transparent; color: var(--up-muted); padding: 8px 12px; font: inherit; min-height: 40px; white-space: nowrap; }
+  #unified-properties-demo .up-tabs button[aria-selected="true"] { background: var(--up-soft); color: var(--up-primary); font-weight: 500; }
+  #unified-properties-demo .up-record-title { font-weight: 500; margin-bottom: 12px; }
+  #unified-properties-demo .up-scroll { overflow-x: auto; overscroll-behavior-x: contain; padding: 10px 1px; scrollbar-width: thin; scrollbar-color: var(--up-border) transparent; }
+  #unified-properties-demo .up-line { display: flex; flex-wrap: nowrap; align-items: center; gap: 10px; width: max-content; min-width: 100%; }
+  #unified-properties-demo .up-field { position: relative; display: block; flex: 0 0 auto; width: 110px; min-width: 0; }
+  #unified-properties-demo .up-label { position: absolute; top: -9px; left: 9px; padding: 0 4px; background: var(--up-field-bg, var(--up-bg)); color: var(--up-primary); font-size: 12px; white-space: nowrap; }
+  #unified-properties-demo input:not([type=checkbox]), #unified-properties-demo select { display: block; box-sizing: border-box; width: 100%; min-width: 0; height: 44px; padding: 9px 11px; border: 1px solid var(--up-border); border-radius: 6px; background: var(--up-field-bg, var(--up-bg)); color: var(--up-fg); font: inherit; }
+  #unified-properties-demo input:focus, #unified-properties-demo select:focus { border-color: var(--up-primary); }
+  #unified-properties-demo input.up-with-unit { padding-right: 28px; }
+  #unified-properties-demo .up-unit { position: absolute; right: 11px; top: 11px; color: var(--up-muted); pointer-events: none; }
+  #unified-properties-demo .up-pair { --up-field-bg: var(--up-soft); display: flex; gap: 8px; align-items: center; padding: 14px 8px; border-radius: 8px; background: var(--up-soft); flex: 0 0 auto; }
+  #unified-properties-demo .up-check { display: flex; align-items: center; gap: 6px; white-space: nowrap; min-height: 44px; }
+  #unified-properties-demo input[type=checkbox] { width: 18px; height: 18px; margin: 0; accent-color: var(--up-primary); }
+  #unified-properties-demo .up-extension { display: flex; flex-wrap: nowrap; gap: 10px; align-items: center; width: max-content; padding: 10px 1px; }
+  #unified-properties-demo .up-button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; padding: 6px 10px; border: none; border-radius: 4px; background: transparent; color: var(--up-primary); font: inherit; font-weight: 500; white-space: nowrap; }
+  #unified-properties-demo .up-button:hover { background: var(--up-soft); }
+  #unified-properties-demo .up-remove { border: none; background: transparent; color: var(--up-muted); min-height: 40px; padding: 8px 6px; font: inherit; }
+  #unified-properties-demo .up-remove:hover { color: var(--up-error); }
+  #unified-properties-demo .up-parameters { margin-bottom: 18px; }
+  #unified-properties-demo .up-conditions-title { margin: 0 0 10px; font-weight: 500; }
+  #unified-properties-demo [hidden] { display: none !important; }
+  @media (pointer: coarse) { #unified-properties-demo input:not([type=checkbox]), #unified-properties-demo select { font-size: 16px; } #unified-properties-demo button { min-height: 44px; } }
+</style>
+<div id="unified-properties-demo" class="viz-dotted-background">
+  <section class="up-product" aria-label="四类物性统一表单设计">
+    <div class="up-header">物性记录 <span class="up-example">示例数据 · 理论计算记录</span></div>
+    <div class="up-tabs" role="tablist" aria-label="物性模块">
+      <button type="button" class="cursor-interaction" id="up-tab-electronic" role="tab" aria-selected="true" aria-controls="up-panel-electronic" data-module="electronic">电子性质</button>
+      <button type="button" class="cursor-interaction" id="up-tab-dynamical" role="tab" aria-selected="false" aria-controls="up-panel-dynamical" data-module="dynamical">动力学性质</button>
+      <button type="button" class="cursor-interaction" id="up-tab-thermodynamic" role="tab" aria-selected="false" aria-controls="up-panel-thermodynamic" data-module="thermodynamic">热力学性质</button>
+      <button type="button" class="cursor-interaction" id="up-tab-superconductive" role="tab" aria-selected="false" aria-controls="up-panel-superconductive" data-module="superconductive">超导性质</button>
+    </div>
+    <section id="up-panel-electronic" role="tabpanel" aria-labelledby="up-tab-electronic" data-panel="electronic"></section>
+    <section id="up-panel-dynamical" role="tabpanel" aria-labelledby="up-tab-dynamical" data-panel="dynamical" hidden></section>
+    <section id="up-panel-thermodynamic" role="tabpanel" aria-labelledby="up-tab-thermodynamic" data-panel="thermodynamic" hidden></section>
+    <section id="up-panel-superconductive" role="tabpanel" aria-labelledby="up-tab-superconductive" data-panel="superconductive" hidden></section>
+  </section>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('unified-properties-demo');
+  const definitions = {
+    electronic: { title: '带隙 · 自定义性质', values: { name: 'band gap', kind: 'number', raw: '0.82', number: '0.82', unit: 'eV', first: '', second: '', text: '', boolean: false, code: 'VASP', method: 'DFT', functional: 'PBE', kGrid: '12 × 12 × 12', kWidth: '' }, conditions: [['code','计算软件',150],['method','电子结构方法',120],['functional','交换关联泛函',125],['kGrid','k 网格',140],['kWidth','k 展宽',110]] },
+    dynamical: { title: '最高声子频率 · 自定义性质', values: { name: 'maximum phonon frequency', kind: 'number', raw: '12.4', number: '12.4', unit: 'THz', first: '', second: '', text: '', boolean: false, code: 'Quantum ESPRESSO', method: 'DFT', functional: 'PBE', kGrid: '12 × 12 × 12', qGrid: '4 × 4 × 4', kWidth: '', qWidth: '' }, conditions: [['code','计算软件',150],['method','电子结构方法',120],['functional','交换关联泛函',125],['kGrid','k 网格',140],['qGrid','q 网格',130],['kWidth','k 展宽',110],['qWidth','q 展宽',110]] },
+    thermodynamic: { title: '德拜温度 · 自定义性质', values: { name: 'Debye temperature', kind: 'number', raw: '420', number: '420', unit: 'K', first: '', second: '', text: '', boolean: false, code: 'Phonopy', calculationMethod: '准谐近似', temperature: '0–600 K' }, conditions: [['code','计算软件',150],['calculationMethod','计算方法',130],['temperature','温度范围',140]] },
+    superconductive: { title: '预测 Tc · allen_dynes', values: { name: 'critical temperature', kind: 'range', first: '281', second: '311', firstMu: '0.13', secondMu: '0.10', number: '300', mu: '0.10', lambda: '', omega: '', representative: false, code: 'Quantum ESPRESSO', method: 'DFT', functional: 'PBE', kGrid: '24 × 24 × 24', qGrid: '6 × 6 × 6', kWidth: '', qWidth: '' }, conditions: [['code','计算软件',150],['method','电子结构方法',120],['functional','交换关联泛函',125],['kGrid','k 网格',140],['qGrid','q 网格',130],['kWidth','k 展宽',110],['qWidth','q 展宽',110]] },
+  };
+  const modules = Object.keys(definitions);
+  const records = Object.fromEntries(modules.map(key => [key, { values: structuredClone(definitions[key].values), parameters: [], conditions: [] }]));
+  let selected = 'electronic';
+  const element = (tag, className, text) => { const node = document.createElement(tag); if (className) node.className = className; if (text != null) node.textContent = text; return node; };
+  const kindOptions = [['number','数值'],['range','范围'],['text','文本'],['boolean','布尔']];
+  const field = (module, key, label, { width = 110, options, unit, item, group } = {}) => {
+    const wrap = element('label','up-field'); wrap.style.width = `${width}px`;
+    wrap.append(element('span','up-label',label));
+    const input = element(options ? 'select' : 'input');
+    if (options) for (const [value, title] of options) { const option = element('option',null,title); option.value = value; input.append(option); }
+    const value = item ? item[key] : records[module].values[key]; input.value = value == null ? '' : String(value);
+    input.setAttribute('aria-label',label); input.dataset.module = module;
+    if (item) { input.dataset.item = item.id; input.dataset.group = group; input.dataset.extraKey = key; } else input.dataset.key = key;
+    if (unit) { input.classList.add('up-with-unit'); wrap.append(input,element('span','up-unit',unit)); } else wrap.append(input);
+    return wrap;
+  };
+  const check = (module, key, label) => {
+    const wrap = element('label','up-check cursor-interaction'), input = element('input'); input.type = 'checkbox'; input.checked = Boolean(records[module].values[key]); input.dataset.module = module; input.dataset.key = key;
+    wrap.append(input,document.createTextNode(label)); return wrap;
+  };
+  const mainRow = module => {
+    const state = records[module].values, host = root.querySelector(`[data-panel="${module}"] [data-main]`); host.replaceChildren();
+    const tc = module === 'superconductive';
+    if (tc) host.append(field(module,'lambda','电声耦合强度 λ',{width:130}),field(module,'omega','ωlog',{unit:'K'}));
+    host.append(field(module,'name','名称',{width:tc ? 190 : 220}),field(module,'kind','值类型',{width:90,options:tc ? kindOptions.slice(0,2) : kindOptions}));
+    if (!tc) host.append(field(module,'raw','原始值'));
+    if (tc) {
+      for (let i = 0; i < (state.kind === 'range' ? 2 : 1); i++) {
+        const pair = element('div','up-pair'); pair.setAttribute('role','group'); pair.setAttribute('aria-label',i ? '第二组 Tc 与 μ*' : '第一组 Tc 与 μ*');
+        pair.append(field(module,state.kind === 'range' ? i ? 'second' : 'first' : 'number','Tc',{unit:'K'}),field(module,state.kind === 'range' ? i ? 'secondMu' : 'firstMu' : 'mu','μ*')); host.append(pair);
+      }
+      host.append(check(module,'representative','代表结果'));
+    } else {
+      if (state.kind === 'number') host.append(field(module,'number','数值'));
+      if (state.kind === 'range') host.append(field(module,'first','下界'),field(module,'second','上界'));
+      if (state.kind === 'text') host.append(field(module,'text','文本值',{width:180}));
+      if (state.kind === 'boolean') host.append(check(module,'boolean','布尔值'));
+      host.append(field(module,'unit','单位'));
+    }
+  };
+  const addButton = (module, group) => {
+    const button = element('button','up-button cursor-interaction','＋ 新增字段'); button.type = 'button'; button.dataset.add = group; button.dataset.module = module;
+    button.setAttribute('aria-label',group === 'parameters' ? '新增参数字段' : '新增计算条件字段'); return button;
+  };
+  const measurement = document.createElement('canvas').getContext('2d');
+  const fit = input => {
+    const style = getComputedStyle(input), content = input.tagName === 'SELECT' ? input.selectedOptions[0].textContent : input.value;
+    measurement.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    input.closest('.up-field').style.width = `${Math.ceil(Math.max(110,measurement.measureText(content).width + parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + (input.tagName === 'SELECT' ? 32 : 14)))}px`;
+  };
+  const extras = (module, group) => {
+    const panel = root.querySelector(`[data-panel="${module}"]`), host = panel.querySelector(`[data-extras="${group}"]`); host.replaceChildren();
+    for (const item of records[module][group]) {
+      const row = element('div','up-extension'); row.setAttribute('role','group'); row.setAttribute('aria-label',group === 'parameters' ? '自定义参数' : '自定义计算条件');
+      const options = {item,group};
+      row.append(field(module,'name','字段名称',options),field(module,'kind','值类型',{...options,options:[['number','数值'],['text','文本']]}),field(module,'value','值',options),field(module,'unit','单位',options));
+      const remove = element('button','up-remove cursor-interaction','删除'); remove.type = 'button'; remove.dataset.remove = item.id; remove.dataset.module = module; remove.dataset.group = group; remove.setAttribute('aria-label',group === 'parameters' ? '删除参数字段' : '删除计算条件字段'); row.append(remove); host.append(row);
+    }
+    host.parentElement.hidden = records[module][group].length === 0;
+    if (selected === module) host.querySelectorAll('[data-extra-key]').forEach(fit);
+  };
+  const build = () => {
+    for (const module of modules) {
+      const panel = root.querySelector(`[data-panel="${module}"]`); panel.replaceChildren(); panel.append(element('div','up-record-title',definitions[module].title));
+      const main = element('div','up-scroll'), line = element('div','up-line'); main.setAttribute('role','region'); main.setAttribute('aria-label','性质常用字段'); line.dataset.main = ''; main.append(line); panel.append(main); mainRow(module);
+      for (const group of ['parameters','conditions']) {
+        if (group === 'conditions') {
+          panel.append(element('div','up-conditions-title','计算条件'));
+          const scroll = element('div','up-scroll'), row = element('div','up-line'); scroll.setAttribute('role','region'); scroll.setAttribute('aria-label','固定计算条件');
+          for (const [key,label,width] of definitions[module].conditions) row.append(field(module,key,label,{width})); scroll.append(row); panel.append(scroll);
+        }
+        const section = element('div',group === 'parameters' ? 'up-parameters' : 'up-conditions'); section.setAttribute('role','group'); section.setAttribute('aria-label',group === 'parameters' ? '其他参数' : '其他计算条件');
+        const scroll = element('div','up-scroll'), host = element('div'); host.dataset.extras = group; scroll.append(host); section.append(scroll,addButton(module,group)); panel.append(section); extras(module,group);
+      }
+    }
+  };
+  const show = () => {
+    root.querySelectorAll('[role="tab"]').forEach(tab => { tab.setAttribute('aria-selected',String(tab.dataset.module === selected)); });
+    root.querySelectorAll('[data-panel]').forEach(panel => { panel.hidden = panel.dataset.panel !== selected; });
+    root.querySelector(`[data-panel="${selected}"]`).querySelectorAll('[data-extra-key]').forEach(fit);
+  };
+  const snapshot = () => ({ selected, records });
+  const save = () => { if (window.openai && window.openai.setWidgetState && JSON.stringify(snapshot()).length < 14000) window.openai.setWidgetState({modelContent:{unifiedProperties:snapshot()},privateContent:null}).catch(() => {}); };
+  const restore = data => {
+    if (!data || typeof data !== 'object') return;
+    if (modules.includes(data.selected)) selected = data.selected;
+    for (const module of modules) {
+      const saved = data.records && data.records[module]; if (!saved) continue;
+      for (const key of Object.keys(records[module].values)) if (saved.values && typeof saved.values[key] === typeof records[module].values[key]) records[module].values[key] = saved.values[key];
+      if (!(module === 'superconductive' ? ['number','range'] : kindOptions.map(option => option[0])).includes(records[module].values.kind)) records[module].values.kind = definitions[module].values.kind;
+      for (const group of ['parameters','conditions']) if (Array.isArray(saved[group])) records[module][group] = saved[group].map(item => ({id:String(item.id),name:String(item.name || ''),kind:item.kind === 'text' ? 'text' : 'number',value:String(item.value || ''),unit:String(item.unit || '')}));
+    }
+  };
+  root.addEventListener('input', event => {
+    const input = event.target, module = input.dataset.module; if (!modules.includes(module)) return;
+    if (input.dataset.extraKey) { const item = records[module][input.dataset.group].find(item => item.id === input.dataset.item); if (item) item[input.dataset.extraKey] = input.value; fit(input); }
+    else if (input.dataset.key) { records[module].values[input.dataset.key] = input.type === 'checkbox' ? input.checked : input.value; if (input.dataset.key === 'kind') mainRow(module); }
+    save();
+  });
+  root.addEventListener('click', event => {
+    const tab = event.target.closest('[role="tab"]'); if (tab) { selected = tab.dataset.module; show(); save(); return; }
+    const add = event.target.closest('[data-add]'); if (add) { const module = add.dataset.module, group = add.dataset.add; records[module][group].push({id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,name:'',kind:'number',value:'',unit:''}); extras(module,group); root.querySelector(`[data-panel="${module}"] [data-extras="${group}"]`).lastElementChild.querySelector('input').focus(); save(); return; }
+    const remove = event.target.closest('[data-remove]'); if (remove) { const module = remove.dataset.module, group = remove.dataset.group; records[module][group] = records[module][group].filter(item => item.id !== remove.dataset.remove); extras(module,group); save(); }
+  });
+  root.querySelector('[role="tablist"]').addEventListener('keydown', event => {
+    if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
+    event.preventDefault(); const index = modules.indexOf(selected); selected = event.key === 'Home' ? modules[0] : event.key === 'End' ? modules.at(-1) : modules[(index+(event.key === 'ArrowRight' ? 1 : modules.length-1))%modules.length]; show(); root.querySelector(`[role="tab"][data-module="${selected}"]`).focus(); save();
+  });
+  restore(window.openai && window.openai.widgetState && window.openai.widgetState.modelContent && window.openai.widgetState.modelContent.unifiedProperties); build(); show();
+  window.addEventListener('openai:set_globals', event => { const saved = event.detail && event.detail.globals && event.detail.globals.widgetState; const data = saved && saved.modelContent && saved.modelContent.unifiedProperties; if (data && JSON.stringify(data) !== JSON.stringify(snapshot())) { restore(data); build(); show(); } });
+})();
+</script>
