@@ -11,6 +11,7 @@ from pathlib import Path
 
 from backend.api import admin_internal, form_definitions, kg, material_state_export, rag, structures, tc_predict, upload_tasks
 from backend.api.kg_live import router as kg_live_router
+from backend.ingest.upload_contracts import UploadContractError
 
 
 logger = logging.getLogger(__name__)
@@ -20,6 +21,15 @@ app = FastAPI(
     description="Conventional Superconductor Dataset",
     version="1.0.0"
 )
+
+
+@app.exception_handler(UploadContractError)
+async def upload_contract_error_handler(request: Request, exc: UploadContractError) -> JSONResponse:
+    """所有草稿入口一致返回字段校验错误，避免契约拒绝被误报为 500。"""
+    return JSONResponse(status_code=400, content={
+        "detail": {"code": exc.code, "message": str(exc), "field": exc.field},
+        "issues": [{"field": exc.field or "", "code": exc.code, "message": str(exc)}],
+    })
 
 
 @app.exception_handler(Exception)

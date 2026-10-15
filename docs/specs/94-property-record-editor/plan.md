@@ -138,3 +138,5 @@ FR-045～046 / SC-035 → 统一 state metadata 校验与 material_state_values 
 迁移合并 0052/0137 双头；先检查 mixed、多结构、旧明确结构核处理、非理论优化异常，存在时整体中止并列出数量，不做隐式删除／类型映射。空数据无需 backfill。隔离迁移升级／降级、模型 CHECK 与唯一性验证后再准备业务实例应用。共享工作区基线完整备份，只提交本次文件或分块，使用暂存树的隔离候选验证。
 
 本机应用前发现 start_python 会校验部署版本清单和完整 schema 快照。因此本次同步 Linux/macOS schema_heads 与 local-deploy-schema.json 中两个受影响表，避免迁移后服务因旧清单拒绝启动。其余表结构保持原快照，来自隔离 MySQL 迁移的真实 CHECK 文本用于新增约束，业务迁移后重新执行完整 verify_schema。
+
+真实 API 收尾检查：草稿归一化抛出的 UploadContractError 在部分入口没有局部转换，会被通用 500 接管；由主应用统一转成 400 和字段 issues，保留提交入口已有显式处理，不更改校验或保存顺序。测试覆盖真实 FastAPI 分发，并对本机草稿发出无效类型请求，验证拒绝且原草稿内容未变化。

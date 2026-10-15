@@ -105,3 +105,19 @@ def test_real_mysql_persistence_revision_export_and_constraints():
         finally:
             await engine.dispose()
     asyncio.run(run())
+
+
+def test_draft_contract_errors_reach_http_client_as_field_validation():
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from backend.main import upload_contract_error_handler
+    api = FastAPI(exception_handlers={UploadContractError: upload_contract_error_handler})
+
+    @api.post('/draft')
+    def save(draft: dict):
+        return convert_legacy_scientific_draft(draft)
+
+    response = TestClient(api).post('/draft', json={'material_states': [{'state_kind': 'mixed'}]})
+    assert response.status_code == 400
+    assert response.json()['issues'][0]['field'] == 'material_states[0].state_kind'
+    assert response.json()['detail']['code'] == 'invalid_material_state'

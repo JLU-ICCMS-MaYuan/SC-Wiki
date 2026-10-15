@@ -53,5 +53,5 @@
 - [x] CHK028 最新单份几何原话完整保留，FR-045～046/SC-035 与模型、契约、T042 对齐；复用 #49/#77，明确修订 #32 同卡多优化结构。
 - [x] CHK029 浏览器三入口证实七字段、三行、53.125px 固定框高、17 长标签、736px、类型显隐、保存刷新及只读核处理；结果见 quickstart 与 assets/state-implementation-browser.json。
 - [x] CHK030 隔离 MySQL 证实保存/返修/导出与 CHECK/唯一约束；迁移拒绝无损边界 5 项通过，不删除附件和 Evidence。
-- [ ] CHK031 目标业务实例实际迁移及真实 API 验收：已获本机高风险 schema 变更授权，等待执行及真实 API 验收。
+- [x] CHK031 目标业务实例实际迁移及真实 API 验收：见 assets/state-local-migration.json，完整 schema 核验、三份草稿 GET200、非法类型/核处理/多结构 PUT400 且前后草稿相同，服务恢复。
 - [ ] CHK032 新版远程 Spec 链接：未推送，继续保持待验证。

@@ -1,0 +1,79 @@
+{
+  "backup": "/Users/mayuan/SC-Wiki-backups/2026-10-15-162804-state94",
+  "database_sha256": "40060e8d90ad7968fdd4e87e14cca39c0a7319421e099c368ecbad60b812927e",
+  "redis_sha256": "64746c0b8fe13dcb79fc8e300952c3955e65038d4667fa3490103e5eb9164648",
+  "target": {
+    "host": "127.0.0.1",
+    "port": 3307,
+    "database": "scwiki"
+  },
+  "migration": {
+    "source_commit": "fb7c8bd",
+    "heads": [
+      "20261015_0094"
+    ],
+    "counts": {
+      "papers": 0,
+      "paper_files": 0,
+      "scientific_upload_drafts": 3,
+      "paper_revision_drafts": 0,
+      "material_states": 0,
+      "structure_models": 0
+    },
+    "full_schema_verified": true,
+    "data_counts_unchanged": true
+  },
+  "api": {
+    "http_checks": [
+      {
+        "endpoint": "http://127.0.0.1:8000/health",
+        "status": 200
+      },
+      {
+        "endpoint": "http://127.0.0.1:8080/health",
+        "status": 200
+      },
+      {
+        "endpoint": "gateway draft 1",
+        "status": 200,
+        "material_states": 16,
+        "new_contract_verified": true
+      },
+      {
+        "endpoint": "gateway draft 2",
+        "status": 200,
+        "material_states": 6,
+        "new_contract_verified": true
+      },
+      {
+        "endpoint": "gateway draft 3",
+        "status": 200,
+        "material_states": 7,
+        "new_contract_verified": true
+      },
+      {
+        "endpoint": "gateway reject mixed",
+        "status": 400,
+        "field": "material_states[0].state_kind"
+      },
+      {
+        "endpoint": "gateway reject non_theoretical_optimization",
+        "status": 400,
+        "field": "material_states[0].structure_optimization"
+      },
+      {
+        "endpoint": "gateway reject multiple_geometries",
+        "status": 400,
+        "field": "material_states[0].structure"
+      },
+      {
+        "endpoint": "/api/papers",
+        "status": 200
+      }
+    ],
+    "business_mutations": 0,
+    "model_calls": 0,
+    "tokens_logged": false,
+    "runtime_source": "本机服务按既有热重载读取共享工作区；迁移使用 fb7c8bd 精确归档源码"
+  }
+}
