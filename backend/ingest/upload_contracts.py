@@ -11,6 +11,8 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
+from backend.ingest.material_state_contract import MaterialStateContractError, state_metadata, validate_single_geometries
+
 UPLOAD_STATE_SCHEMA_VERSION = 1
 SCIENTIFIC_DRAFT_SCHEMA_VERSION = 2
 TASK_TTL = 24 * 60 * 60
@@ -332,7 +334,15 @@ def convert_legacy_scientific_draft(draft: dict[str, Any]) -> dict[str, Any]:
                 "材料状态不是对象",
                 f"material_states[{index}]",
             )
-        converted.append(convert_legacy_state(state))
+        try:
+            metadata = state_metadata(state)
+        except MaterialStateContractError as exc:
+            raise UploadContractError("invalid_material_state", str(exc), f"material_states[{index}].{exc.field}") from exc
+        converted.append({**convert_legacy_state(state), **metadata})
     result["material_states"] = converted
+    try:
+        validate_single_geometries(result)
+    except MaterialStateContractError as exc:
+        raise UploadContractError("multiple_state_geometries", str(exc), exc.field) from exc
     result["scientific_schema_version"] = SCIENTIFIC_DRAFT_SCHEMA_VERSION
     return result

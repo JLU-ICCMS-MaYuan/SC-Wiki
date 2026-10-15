@@ -207,3 +207,34 @@ Chrome 验证：1024px 和 736px 第一行均为七个同排字段；理论模�
 Chrome 进一步验证：追加超过 8 项仍可继续，回车添加、Backspace 删除、逐项删除、理论/实验显隐和试填恢复保持；暗色正常，页面错误为 0。标签是示例分类，不绑定真实论文；本轮未执行数据库操作。原“旧 mixed 后续兼容处理”方案被最新全面退役意图取代，不宣称正式数据清理已经完成。
 
 演示留档：assets/material-state-three-row-demo.html；多标签截图和观测值见同名前缀 PNG 与 validation.json。原两行 Demo 留档仅供比较，最新评审使用三行版本。
+
+## US12/US13 正式实施验收
+
+已认可的三行 Demo 落到正式共享编辑器及只读详情。首行七字段同排；第二行类型、仅理论显示的结构优化核处理与压强；第三行固定高度结构家族。17 个长标签、删除/Backspace/清空前后输入框均为 53.125 CSS px；736px 不撑宽整页，新增后标签轨道滚到最右。类型仅理论/实验/未说明；从理论切出清空隐藏核处理。
+
+### 独立候选证据
+
+排除共享工作区 #120/#135/#137 的其他未提交改动，基于 HEAD 加本轮精确增量建立候选：
+
+- TypeScript 及 Vite 生产构建通过，已有 3Dmol eval/体积提示保留。
+- 前端 4 文件 64 项通过，包含三行、类型显隐/清空、mixed 拒绝、第二份几何禁止采纳、既有编辑/折叠/人工保存回归。
+- Go models/handlers 的原生完整测试通过；部署脚本回归 44 项通过、11 项按环境跳过。
+- 后端 6 文件 43 项通过，覆盖真实隔离 MySQL 写入、新会话重读、返修草稿、完整导出、同值/谱签名变化，以及数据库 CHECK/单几何唯一约束和迁移拒绝边界。SQLite 验证升级/降级保留行数。
+- 上传、管理员、只读三个 Chrome 入口页面错误为 0。前两入口各经真实“保存并完成”控件发出 1 份隔离请求，刷新后 SSCHA 保留。HTTP 返回为隔离夹具，真实数据库往返由上述 MySQL 测试另证，不伪装端到端业务验收。结果及截图见 [浏览器结果](assets/state-implementation-browser.json)、[上传](assets/state-upload-basics.png)、[管理员](assets/state-admin-basics.png)、[只读](assets/state-readonly-basics.png)。
+- 扩展的 material-name-review 1 条旧断言仍期待 Tin（Sn）标题，本轮候选及换回 HEAD 原组件均同样失败；当前标题使用既已批准的空间群/化学式/压强，此项不计入通过数。
+
+### 数据库验证复现与边界
+
+新迁移基于 0052/0137 两头。显式空隔离 MySQL 库用 [初始化脚本](assets/prepare-state-test-db.py) 建模型 schema，降回本次变更前，再合并升级到新头；设置 STATE_GEOMETRY_TEST_URL（库名必须包含 test）及 DATABASE_URL/JWT_SECRET_KEY，用项目 Python 以 PYTHONPATH=. 运行脚本。随后运行 backend/tests/test_state_geometry_contract.py 和 test_state_geometry_migration.py。脚本拒绝已有表，不删除数据库或业务记录。旧 ORM 的 JSON 字面默认值与 MySQL 8.4 CREATE TABLE 不兼容，仅在测试建库时省略。
+
+完整历史 Alembic 链在空测试库推进时需按 #90 的空数据迁移服务通过观察门；其历史链生成的 superconductors 缺 paper_id，不能直接代替当前模型 fixture。该既有初始化边界没有在本次修改，不能声称历史链与当前模型已全面一致；本次迁移本身及当前模型上的真实保存分别验证。
+
+### 本机应用前置
+
+只读审计目标为本机 127.0.0.1:3307/scwiki，正式状态 0、规范结构 0，3 份持久化/Redis 上传草稿 mixed 0；新列尚不存在，仍为 0052/0137 两头。没有删除 mixed 数据，没有执行业务 schema 变更。
+
+AGENTS.md 将“数据库结构变更”列为高风险操作。取得授权后：暂停后台及工作进程写入，确认无活动任务；重新备份数据库与草稿并记录 Alembic 版本；从已验证源码执行 python -m alembic upgrade 20261015_0094；核验列、三种类型 CHECK、单几何唯一约束、新迁移头和真实读取/保存 API 后恢复服务。遇迁移前置冲突先停止，不删数据或静默映射。需要回退时先恢复旧服务及维护状态，再按迁移前备份恢复；降级会移除新核处理列，必须保留备份，不能当作无损科学内容回滚。
+
+业务迁移、部署、推送及远程 Spec 链接仍与本地代码交付分开，Issue 保持 OPEN。
+
+本机维护已获用户明确授权“批准本机迁移并验证生效”；本节以上为代码交付前的验证记录，实际应用结果在完成后另行追加。

@@ -1,0 +1,32 @@
+[
+  {
+    "mode": "upload",
+    "familyHeight": 53.125,
+    "longTags": 17,
+    "threeRows": "passed"
+  },
+  {
+    "mode": "upload",
+    "saves": 1,
+    "pageErrors": 0,
+    "result": "passed"
+  },
+  {
+    "mode": "admin",
+    "familyHeight": 53.125,
+    "longTags": 17,
+    "threeRows": "passed"
+  },
+  {
+    "mode": "admin",
+    "saves": 1,
+    "pageErrors": 0,
+    "result": "passed"
+  },
+  {
+    "mode": "readonly",
+    "saves": 0,
+    "pageErrors": 0,
+    "result": "passed"
+  }
+]

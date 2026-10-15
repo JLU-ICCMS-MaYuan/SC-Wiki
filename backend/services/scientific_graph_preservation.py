@@ -13,7 +13,7 @@ from backend.services.property_record_upgrade_service import record_snapshot
 
 STRUCTURE_METADATA = (
     'structure_format', 'structure_text', 'structure_hash', 'space_group_symbol', 'space_group_number',
-    'cell_parameters', 'volume_angstrom3', 'atom_count', 'geometry_method', 'nuclear_treatment',
+    'cell_parameters', 'volume_angstrom3', 'atom_count', 'geometry_method',
     'exchange_correlation', 'calculation_code', 'method_parameters', 'source_locator',
 )
 
@@ -60,7 +60,6 @@ def direct_structure_original(state, index, originals, state_keys, consumed=()):
         and state_keys.get(s['material_state_id']) == str(state.get('state_key') or f'state-{index + 1}')
         and s['structure_format'] == (direct.get('structure_format') or 'unknown')
         and s['structure_text'] == direct['structure_text']
-        and s['nuclear_treatment'] == (direct.get('nuclear_treatment') or 'unknown')
         and s['space_group_symbol'] == (direct.get('space_group_symbol') or state.get('reported_space_group_symbol'))
         and s['space_group_number'] == (direct.get('space_group_number') or state.get('reported_space_group_number'))), None)
 

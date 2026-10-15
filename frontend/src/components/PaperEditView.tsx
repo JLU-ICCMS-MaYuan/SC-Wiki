@@ -216,78 +216,42 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
                       </Box>
                       {exportError && <Alert severity="error" sx={{ mb: 1 }}>{exportError}</Alert>}
 
-                      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 1.5, mb: 2 }}>
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">{t('upload.stateKindField')}</Typography>
-                          <Typography variant="body2">{(dict.enums.stateKind as Record<string, string>)[state.state_kind || 'unknown'] || state.state_kind}</Typography>
+                      <Box data-material-basics sx={{ display: 'grid', gap: 1.5, mb: 2, minWidth: 0 }}>
+                        <Box data-material-identity-row sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', md: 'repeat(7, minmax(0, 1fr))' }, gap: 1.5 }}>
+                          {[
+                            [t('upload.materialNameField'), state.material_name],
+                            [t('upload.materialField'), state.material],
+                            [t('paperDetail.fieldElementCount'), state.element_count],
+                            [t('paperDetail.fieldDimensionality'), state.material_dimensionality],
+                            [t('paperDetail.fieldCrystalSystem'), state.crystal_system],
+                            [t('paperDetail.fieldSpaceGroupSymbol'), state.reported_space_group_symbol],
+                            [t('paperDetail.fieldSpaceGroupNumber'), state.reported_space_group_number],
+                          ].map(([label, value]) => <Box key={label} sx={{ minWidth: 0, overflowWrap: 'anywhere' }}>
+                            <Typography variant="caption" color="text.secondary">{label}</Typography>
+                            <Typography variant="body2">{value ?? t('common.notProvided')}</Typography>
+                          </Box>)}
                         </Box>
-                        {state.element_count != null && (
+                        <Box data-material-condition-row sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: state.state_kind === 'theoretical' ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))' }, gap: 1.5 }}>
                           <Box>
-                            <Typography variant="caption" color="text.secondary">{t('paperDetail.fieldElementCount')}</Typography>
-                            <Typography variant="body2">{state.element_count}</Typography>
+                            <Typography variant="caption" color="text.secondary">{t('upload.stateKindField')}</Typography>
+                            <Typography variant="body2">{(dict.enums.stateKind as Record<string, string>)[state.state_kind || 'unknown'] || state.state_kind}</Typography>
                           </Box>
-                        )}
-                        {state.material_dimensionality && (
+                          {state.state_kind === 'theoretical' && <Box>
+                            <Typography variant="caption" color="text.secondary">{t('upload.structureOptimizationField')}</Typography>
+                            <Typography variant="body2">{(dict.enums.structureOptimization as Record<string, string>)[state.structure_optimization || 'unknown']}</Typography>
+                          </Box>}
                           <Box>
-                            <Typography variant="caption" color="text.secondary">{t('paperDetail.fieldDimensionality')}</Typography>
-                            {/* 材料维度/晶系展示后端枚举 value（接口契约，不翻译） */}
-                            <Typography variant="body2">{state.material_dimensionality}</Typography>
+                            <Typography variant="caption" color="text.secondary">{t('paperDetail.pressureSection')}</Typography>
+                            <Typography variant="body2">{state.pressure_value_gpa != null ? `${state.pressure_value_gpa} GPa` : state.pressure_min_gpa != null || state.pressure_max_gpa != null ? `${state.pressure_min_gpa ?? '?'}–${state.pressure_max_gpa ?? '?'} GPa` : state.pressure_raw ? `${state.pressure_raw}${state.pressure_unit_raw ? ` ${state.pressure_unit_raw}` : ''}` : t('common.notProvided')}</Typography>
                           </Box>
-                        )}
-                        {state.crystal_system && (
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">{t('paperDetail.fieldCrystalSystem')}</Typography>
-                            <Typography variant="body2">{state.crystal_system}</Typography>
-                          </Box>
-                        )}
-                        {state.reported_space_group_symbol && (
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">{t('paperDetail.fieldSpaceGroupSymbol')}</Typography>
-                            <Typography variant="body2">{state.reported_space_group_symbol}</Typography>
-                          </Box>
-                        )}
-                        {state.reported_space_group_number != null && (
-                          <Box>
-                            <Typography variant="caption" color="text.secondary">{t('paperDetail.fieldSpaceGroupNumber')}</Typography>
-                            <Typography variant="body2">{state.reported_space_group_number}</Typography>
-                          </Box>
-                        )}
-                      </Box>
-
-                      {/* 结构家族标签 */}
-                      {(state.structure_families || []).length > 0 && (
-                        <Box sx={{ mb: 2 }}>
+                        </Box>
+                        <Box data-material-family-row sx={{ minWidth: 0 }}>
                           <Typography variant="caption" color="text.secondary">{t('paperDetail.structureFamiliesLabel')}</Typography>
-                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', mt: 0.5 }}>
-                            {state.structure_families.map((family: any) => (
-                              <Chip key={family.id || family.name} size="small" label={familyName(family, lang)} />
-                            ))}
+                          <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'nowrap', overflowX: 'auto', alignItems: 'center', height: 36, '& .MuiChip-root': { flexShrink: 0 } }}>
+                            {(state.structure_families || []).map((family: any) => <Chip key={family.id || family.name} size="small" label={familyName(family, lang)} />)}
                           </Box>
                         </Box>
-                      )}
-
-                      {/* 压强区 */}
-                      {(state.pressure_value_gpa != null || state.pressure_raw || state.pressure_min_gpa != null || state.pressure_max_gpa != null) && (
-                        <Box sx={{ mb: 2 }}>
-                          <Typography variant="caption" color="text.secondary">{t('paperDetail.pressureSection')}</Typography>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mt: 0.5 }}>
-                            {state.pressure_value_gpa != null && (
-                              <Typography variant="body2">{t('paperDetail.pressureValue', { value: state.pressure_value_gpa })}</Typography>
-                            )}
-                            {state.pressure_raw && (
-                              <Typography variant="body2" color="text.secondary">
-                                {t('paperDetail.rawText', { value: `${state.pressure_raw}${state.pressure_unit_raw ? ` (${state.pressure_unit_raw})` : ''}` })}
-                              </Typography>
-                            )}
-                            {state.pressure_min_gpa != null && (
-                              <Typography variant="body2">{t('paperDetail.pressureMin', { value: state.pressure_min_gpa })}</Typography>
-                            )}
-                            {state.pressure_max_gpa != null && (
-                              <Typography variant="body2">{t('paperDetail.pressureMax', { value: state.pressure_max_gpa })}</Typography>
-                            )}
-                          </Box>
-                        </Box>
-                      )}
+                      </Box>
 
                       <PropertySpectrumState stateKey={state.state_key || `state-${index + 1}`} summary={materialStateSummary(state)}>
                         <PropertyModuleEditor modules={state.property_modules || []} readOnly onChange={() => undefined} />

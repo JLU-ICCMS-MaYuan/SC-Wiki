@@ -15,6 +15,8 @@ export default {
   parserProfiles: {"legacy": "Compatibility", "text": "Fast text (PyMuPDF)", "layout": "Document layout (Docling)", "ocr": "Scanned text (MinerU)"},
 
   researchMaterialsTitle: 'Research materials',
+  structureOptimizationField: 'Structure optimization',
+  singleStructureHelp: 'Each state stores one geometry. Create separate states for distinct optimized geometries; switch cell and format for the same geometry.',
   stateKindField: 'Material state type',
   structureDataUnavailable: 'No readable unit cell or atomic positions are available for this structure.',
   latticeMatrixTitle: 'Lattice matrix',

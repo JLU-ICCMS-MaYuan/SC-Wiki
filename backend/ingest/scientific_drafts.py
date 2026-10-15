@@ -12,6 +12,7 @@ from typing import Any
 from sqlalchemy import select
 
 from backend import models
+from backend.ingest.material_state_contract import state_metadata, structure_nuclear_treatment, validate_single_geometries
 from backend.db_helpers import build_composition_key, build_system_key, normalize_formula
 from backend.ingest.prop_names import normalize_prop_name
 from backend.services.classification_catalog import (
@@ -262,7 +263,7 @@ def material_state_values(data: dict[str, Any]) -> dict[str, Any]:
         'element_count': count if isinstance(count, int) and not isinstance(count, bool) else count_formula_elements(str(data.get('material') or '')),
         'material_dimensionality': dimensionality,
         'crystal_system': crystal if crystal in CRYSTAL_SYSTEMS else 'unknown',
-        'state_kind': data.get('state_kind') or 'unknown',
+        **state_metadata(data),
         **{key: _number(data.get(key)) for key in ('pressure_value_gpa', 'pressure_min_gpa', 'pressure_max_gpa', 'temperature_value_k', 'magnetic_field_t')},
         **{key: data.get(key) for key in ('pressure_raw', 'pressure_unit_raw', 'reported_space_group_symbol',
             'reported_space_group_number', 'temperature_raw', 'temperature_unit_raw', 'note')},
@@ -275,6 +276,9 @@ async def persist_scientific_draft(
     draft: dict[str, Any],
 ) -> list[ScientificEvidenceTarget]:
     """Create the scientific entity graph and return evidence-link targets."""
+    validate_single_geometries(draft)
+    for state in draft.get("material_states") or []:
+        state_metadata(state)
     await assert_scientific_write_allowed(session)
     targets: list[ScientificEvidenceTarget] = []
     paper_data = draft.get("paper") if isinstance(draft.get("paper"), dict) else {}
@@ -333,7 +337,7 @@ async def persist_scientific_draft(
                 structure_format=structure_data.get("structure_format") or "unknown",
                 structure_text=structure_text,
                 structure_hash=hashlib.sha256(structure_text.encode("utf-8")).hexdigest(),
-                nuclear_treatment=structure_data.get("nuclear_treatment") or "unknown",
+                nuclear_treatment=structure_nuclear_treatment(state_data),
                 source_locator=_source_locator(structure_data.get("evidence")),
             )
             session.add(structure)
@@ -361,7 +365,6 @@ async def persist_scientific_draft(
                 {},
             )
             source_name = str(source.get("filename") or source.get("file_id") or "structure attachment")
-            calculation_data = state_data.get("calculation_context")
             candidate_structure = models.StructureModel(
                 paper_id=paper.id,
                 paper_revision=paper.content_revision,
@@ -376,8 +379,7 @@ async def persist_scientific_draft(
                 volume_angstrom3=(validation or {}).get("volume"),
                 atom_count=(validation or {}).get("atom_count"),
                 geometry_method=(metadata or {}).get("standardization_method") or "attachment_conventional",
-                nuclear_treatment=(calculation_data or {}).get("phonon_nuclear_treatment")
-                if isinstance(calculation_data, dict) else "unknown",
+                nuclear_treatment=structure_nuclear_treatment(state_data),
                 source_locator=f"attachment: {source_name}",
             )
             session.add(candidate_structure)

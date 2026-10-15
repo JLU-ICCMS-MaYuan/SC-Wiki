@@ -78,3 +78,15 @@ it('PDF 结构未经 ASE 校验时只显示来源和缺失说明，不渲染三�
   expect(screen.getByText('a=6.389')).toBeInTheDocument()
   expect(screen.getByText(/a=6.389 Å/)).toBeInTheDocument()
 })
+
+
+it('同卡已有规范几何时不能再采纳第二份；原胞和格式仍可切换', () => {
+  const onChange = vi.fn()
+  const confirmed = { ...candidate('first'), confirmation: 'confirmed', status: 'confirmed' } as StructureCandidate
+  render(<StructureCandidatePanel candidates={[confirmed, candidate('second')]} uploading={false} onUpload={vi.fn()} onChange={onChange} />)
+  expect(screen.getByRole('button', { name: '采用此结构' })).toBeDisabled()
+  expect(screen.getByText(/每张状态卡只保存一份结构几何/)).toBeVisible()
+  expect(screen.getAllByRole('combobox')).toHaveLength(3)
+  fireEvent.click(screen.getByRole('button', { name: '采用此结构' }))
+  expect(onChange).not.toHaveBeenCalled()
+})

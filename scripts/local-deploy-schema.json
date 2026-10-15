@@ -1,7 +1,6 @@
 {
   "schema_heads": [
-    "20260914_0052",
-    "20261014_0137"
+    "20261015_0094"
   ],
   "tables": {
     "admin_applications": {
@@ -939,9 +938,10 @@
         "((element_countisnull)or(element_countbetween1and118))",
         "((pressure_min_gpaisnull)or(pressure_max_gpaisnull)or(pressure_min_gpa<=pressure_max_gpa))",
         "((reported_space_group_numberisnull)or(reported_space_group_numberbetween1and230))",
+        "((structure_optimizationin('unknown','classical_static','sscha'))and((state_kind='theoretical')or(structure_optimization='unknown')))",
         "(crystal_systemin('triclinic','monoclinic','orthorhombic','tetragonal','trigonal','hexagonal','cubic','unknown'))",
         "(material_dimensionalityin('zero_dimensional','one_dimensional','two_dimensional','three_dimensional','quasi_one_dimensional','quasi_two_dimensional','unknown'))",
-        "(state_kindin('theoretical','experimental','mixed','unknown'))"
+        "(state_kindin('theoretical','experimental','unknown'))"
       ],
       "columns": {
         "created_at": {
@@ -1039,6 +1039,10 @@
         "updated_at": {
           "nullable": false,
           "type": "datetime"
+        },
+        "structure_optimization": {
+          "type": "varchar(32)",
+          "nullable": false
         }
       },
       "foreign_keys": [
@@ -4131,6 +4135,9 @@
           "id",
           "paper_id",
           "paper_revision"
+        ],
+        [
+          "material_state_id"
         ]
       ]
     },

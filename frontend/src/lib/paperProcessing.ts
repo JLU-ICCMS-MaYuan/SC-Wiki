@@ -144,7 +144,8 @@ export interface DraftMaterialState {
   pressure_max_gpa?: number | null
   pressure_raw?: string | null
   pressure_unit_raw?: string | null
-  state_kind?: 'theoretical' | 'experimental' | 'mixed' | 'unknown' | string
+  state_kind?: 'theoretical' | 'experimental' | 'unknown' | string
+  structure_optimization?: 'unknown' | 'classical_static' | 'sscha'
   reported_space_group_symbol?: string | null
   reported_space_group_number?: number | null
   structure?: Record<string, unknown> | null
@@ -397,7 +398,9 @@ export function normalizeUploadDraft(value: unknown): UploadDraft {
       if (state.schema_version != null && (!Number.isInteger(state.schema_version) || state.schema_version > PROPERTY_SCHEMA_VERSION)) {
         throw new Error(`不支持的物性草稿 Schema 版本：${state.schema_version}`)
       }
-      const normalizedState = { ...state }
+      if (!['theoretical', 'experimental', 'unknown'].includes(state.state_kind || 'unknown')) throw new Error('材料状态类型已退役或无效，请重新选择理论、实验或未说明')
+      if (!['unknown', 'classical_static', 'sscha'].includes(state.structure_optimization || 'unknown') || (state.state_kind !== 'theoretical' && state.structure_optimization && state.structure_optimization !== 'unknown')) throw new Error('结构优化核处理仅适用于理论状态')
+      const normalizedState = { ...state, structure_optimization: state.structure_optimization || 'unknown' as const }
       delete (normalizedState as { phase_label?: unknown }).phase_label
       delete (normalizedState as { material_family?: unknown }).material_family
       delete (normalizedState as { superconductor_kind?: unknown }).superconductor_kind

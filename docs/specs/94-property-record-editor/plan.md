@@ -124,3 +124,17 @@ FR-039～042 / SC-030～032 → 既有 #32/#50/#84/#90 语义核查 → T034～0
 FR-043～044 / SC-033～034 → T037～039。结构家族控件使用固定 height/min-height/max-height，内部水平 flex-nowrap 标签轨道与输入；仅轨道 overflow-x:auto，禁止标签/内容换行。新增项后滚动至右端输入处；删除或清空不改变框高。保持页面自身无横向溢出，第三行位于类型/核处理/压强下方。
 
 预览快照只接受三种类型白名单，不将旧混合类型转换为 unknown。mixed 退役是明确需求，不再保留兼容路线；本轮仅更新设计和演示，不借此访问或清理数据库。#109 历史布局增加交叉说明，避免把旧的自然增高验收继续当作最新要求。
+
+## US12/US13 进入实施：独立布局与类型边界
+
+FR-039、043 / SC-030、033 → MaterialStatesEditor 的三行容器与固定高度 StructureFamiliesField → T040：保留现有受控输入及证据锚点；第一行七字段，第二行类型/条件核处理/压强，第三行结构家族。标签在独立水平滚动轨道，输入、清空、删除和来源标签保持；不允许多标签撑高。
+
+FR-040、044 / SC-034 → 三种 state_kind 白名单与统一服务端校验 → T041：拒绝 mixed，不静默改成 unknown；模型、提取、建议、读写、导出及数据库约束同步退役。只读审计显示本机 material_states/structure_models 均为 0，3 份持久化/Redis 上传草稿 mixed 为 0，返修草稿 0；无须删除旧 mixed 科学数据。当前 Alembic 有 0052/0137 双头，新迁移必须以实际图合并，不臆造 down_revision。
+
+T042 的结构归属已确认：每状态一份规范几何。MaterialState.structure_optimization 为 unknown/classical_static/sscha，非理论必须 unknown；独立于声子/EPC。StructureModel.nuclear_treatment 从状态字段映射 unknown/classical_static/anharmonic_quantum，SSCHA 方法事实由状态列明确保存，不占用晶胞标准化 geometry_method。保存时先校验最多一个已确认候选（或一份直接结构），不自动合并不同优化结果；同几何其他表示由现有派生服务提供。StructureModel.material_state_id 增唯一约束。已有证据与附件不删除。返修保留元数据时不得恢复旧 nuclear_treatment 覆盖当前选择。
+
+FR-045～046 / SC-035 → 统一 state metadata 校验与 material_state_values → T042：接通上传归一化、提取模型、建议、人工字段哈希、正式读取、Go 响应、返修、同值比较、谱依赖签名和完整导出。服务端在任何结构写入前拒绝多个确认几何并返回明确分卡错误；前端相同卡第二次采纳禁用并说明。保留待审候选及全部来源。
+
+迁移合并 0052/0137 双头；先检查 mixed、多结构、旧明确结构核处理、非理论优化异常，存在时整体中止并列出数量，不做隐式删除／类型映射。空数据无需 backfill。隔离迁移升级／降级、模型 CHECK 与唯一性验证后再准备业务实例应用。共享工作区基线完整备份，只提交本次文件或分块，使用暂存树的隔离候选验证。
+
+本机应用前发现 start_python 会校验部署版本清单和完整 schema 快照。因此本次同步 Linux/macOS schema_heads 与 local-deploy-schema.json 中两个受影响表，避免迁移后服务因旧清单拒绝启动。其余表结构保持原快照，来自隔离 MySQL 迁移的真实 CHECK 文本用于新增约束，业务迁移后重新执行完整 verify_schema。

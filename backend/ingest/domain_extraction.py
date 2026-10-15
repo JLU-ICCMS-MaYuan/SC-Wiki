@@ -115,7 +115,8 @@ class ExtractedState(Contract):
     scope: Literal["current_paper", "referenced_work"]
     material: str = ""
     material_name: str | None = None
-    state_kind: Literal["theoretical", "experimental", "mixed", "unknown"] = "unknown"
+    state_kind: Literal["theoretical", "experimental", "unknown"] = "unknown"
+    structure_optimization: Literal["unknown", "classical_static", "sscha"] = "unknown"
     pressure_value_gpa: float | None = None
     pressure_min_gpa: float | None = None
     pressure_max_gpa: float | None = None
@@ -138,6 +139,8 @@ class ExtractedState(Contract):
 
     @model_validator(mode="after")
     def pressure_shape(self):
+        from backend.ingest.material_state_contract import state_metadata
+        state_metadata(self.model_dump())
         if not (self.material.strip() or (self.material_name or "").strip()):
             raise ValueError("材料名与化学式至少提供一项")
         if len({m.module_code for m in self.property_modules}) != len(self.property_modules):

@@ -30,6 +30,13 @@ import {
   StructureCandidate, evidenceList, unwrapData,
 } from '../lib/paperProcessing'
 
+function StructureFamilyTags({ children }: React.PropsWithChildren) {
+  const track = useRef<HTMLDivElement>(null)
+  const count = React.Children.count(children)
+  useEffect(() => { if (track.current) track.current.scrollLeft = track.current.scrollWidth }, [count])
+  return <Box ref={track} data-family-tags sx={{ display: 'flex', flexWrap: 'nowrap', alignItems: 'center', overflowX: 'auto', minWidth: 0, maxWidth: 'calc(100% - 90px)', height: 36 }}>{children}</Box>
+}
+
 // 一条校验问题。stateIndex 为空表示论文级问题；field 用于在 DOM 中定位出错输入框
 export interface ValidationIssue {
   stateIndex?: number
@@ -507,8 +514,10 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
   // 分配并确认：把候选的 material_state_ref 改为 material_states[N] 并标记 confirmed，
   // 使提交链路 _confirmed_candidates_by_state 能把它写入 structure_models（R1、FR-002）。
+  const stateHasGeometry = (index: number) => Boolean(statesRef.current[index]?.structure?.structure_text) || (structureCandidates || []).some(item => item.material_state_ref === `material_states[${index}]` && item.confirmation === 'confirmed' && item.status === 'confirmed')
+
   const assignUnassignedCandidate = (candidate: StructureCandidate) => {
-    if (readOnly || unassignedTarget == null) return
+    if (readOnly || unassignedTarget == null || stateHasGeometry(unassignedTarget)) return
     onStructureCandidatesChange?.((structureCandidates || []).map(item =>
       item.candidate_id === candidate.candidate_id
         ? {
@@ -634,7 +643,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   </Box>
                   <Collapse in={!isCollapsed} timeout="auto" id={`material-state-${index}-content`}>
                   <Box>
-                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', md: 'repeat(3, minmax(0, 1fr))' }, alignItems: 'start', gap: 1.5 }}>
+                  <Box data-material-basics sx={{ display: 'grid', gap: 1.5, minWidth: 0 }}>
+                  <Box data-material-identity-row sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', md: '1.2fr 1fr .85fr 1fr 1fr 1fr .85fr' }, alignItems: 'start', gap: 1.5, '& > *': { minWidth: 0 } }}>
                     <TextField label={t('upload.materialNameField')} value={state.material_name || ''}
                       {...issueProps(`material_states[${index}].material_name`)}
                       error={materialIdentityMissing(state) || Boolean(issueOf(`material_states[${index}].material_name`))}
@@ -643,13 +653,6 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                     <TextField label={t('upload.materialField')} value={state.material || ''}
                       {...issueProps(`material_states[${index}].material`)}
                       onChange={event => updateMaterialState(index, 'material', event.target.value)} />
-                    <FormControl fullWidth data-issue-field={`material_states[${index}].state_kind`}>
-                      <InputLabel id={`state-kind-${index}`}>{t('upload.stateKindField')}</InputLabel>
-                      <Select labelId={`state-kind-${index}`} label={t('upload.stateKindField')} value={state.state_kind || 'unknown'} onChange={event => updateMaterialState(index, 'state_kind', event.target.value)}>
-                        {(['experimental', 'theoretical', 'mixed', 'unknown'] as const).map(kind => <MenuItem key={kind} value={kind}>{dict.enums.stateKind[kind]}</MenuItem>)}
-                        {state.state_kind && !['experimental', 'theoretical', 'mixed', 'unknown'].includes(state.state_kind) && <MenuItem value={state.state_kind}>{state.state_kind}</MenuItem>}
-                      </Select>
-                    </FormControl>
                     <TextField
                       label={t('upload.elementCountField')} data-issue-field={`material_states[${index}].element_count`}
                       value={elementCountEdits[index]?.text ?? (state.element_count ?? '')}
@@ -670,38 +673,6 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                         ))}
                       </Select>
                     </FormControl>
-                    <Autocomplete<ClassificationTerm | string, true, false, true> data-issue-field={`material_states[${index}].structure_families`}
-                      multiple
-                      freeSolo
-                      sx={{ minWidth: 0 }}
-                      slotProps={{ chip: { sx: {
-                        // 单行标签不撑高输入框；长名称及多项仍可自然换行。
-                        height: 'auto', minHeight: 28, fontSize: 'inherit', fontWeight: 'inherit',
-                        '& .MuiChip-label': { whiteSpace: 'normal', overflowWrap: 'anywhere', py: 0.25 },
-                      } } }}
-                      options={catalogs?.structure_families || []}
-                      loading={catalogLoading}
-                      value={(state.structure_families || []).map(selection => {
-                        if (selection.id == null) return selection.name
-                        const option = catalogs?.structure_families.find(item => item.id === selection.id)
-                        return option || selection.name
-                      })}
-                      getOptionLabel={option => typeof option === 'string' ? option : familyName(option, lang)}
-                      isOptionEqualToValue={(option, value) => (
-                        typeof option !== 'string' && typeof value !== 'string' && option.id === value.id
-                      )}
-                      onChange={(_, values) => {
-                        // D4：编辑器不再写入主项标记，新写入的 is_primary 一律为 false
-                        updateMaterialState(index, 'structure_families', values.map(value => {
-                          const selection = typeof value === 'string' ? pendingSelection(value) : selectionForTerm(value)
-                          return selection ? { ...selection, is_primary: false } : null
-                        }).filter(Boolean))
-                      }}
-                      renderInput={params => <TextField {...params} label={t('upload.structureFamiliesField')}
-                        slotProps={{ inputLabel: { shrink: true } }} error={Boolean(catalogError)}
-                        helperText={catalogError || t('upload.structureFamiliesHelp')} />}
-                    />
-                    <PressureEditor state={state} index={index} onChange={patch => emitStates(statesRef.current.map((item, i) => i === index ? {...item, ...patch} : item))} />
                     <FormControl fullWidth data-issue-field={`material_states[${index}].crystal_system`}>
                       <InputLabel id={`crystal-system-${index}-label`}>{t('upload.crystalSystemField')}</InputLabel>
                       <Select
@@ -735,6 +706,58 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       {...issueProps(`material_states[${index}].reported_space_group_number`)}
                       onChange={event => changeSpaceGroupNumber(index, event.target.value)}
                       slotProps={{ htmlInput: { min: 1, max: 230 } }} />
+                  </Box>
+                  <Box data-material-condition-row sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: state.state_kind === 'theoretical' ? 'repeat(3, minmax(0, 1fr))' : 'repeat(2, minmax(0, 1fr))' }, alignItems: 'start', gap: 1.5, '& > *': { minWidth: 0 } }}>
+                    <FormControl fullWidth data-issue-field={`material_states[${index}].state_kind`}>
+                      <InputLabel id={`state-kind-${index}`}>{t('upload.stateKindField')}</InputLabel>
+                      <Select labelId={`state-kind-${index}`} label={t('upload.stateKindField')} value={state.state_kind || 'unknown'} onChange={event => emitStates(statesRef.current.map((item, i) => i === index ? { ...item, state_kind: event.target.value, structure_optimization: 'unknown' } : item))}>
+                        {(['theoretical', 'experimental', 'unknown'] as const).map(kind => <MenuItem key={kind} value={kind}>{dict.enums.stateKind[kind]}</MenuItem>)}
+                      </Select>
+                    </FormControl>
+                    {state.state_kind === 'theoretical' && <FormControl fullWidth data-issue-field={`material_states[${index}].structure_optimization`}>
+                      <InputLabel id={`structure-optimization-${index}`}>{t('upload.structureOptimizationField')}</InputLabel>
+                      <Select labelId={`structure-optimization-${index}`} label={t('upload.structureOptimizationField')}
+                        value={state.structure_optimization || 'unknown'} onChange={event => updateMaterialState(index, 'structure_optimization', event.target.value)}>
+                        {(['unknown', 'classical_static', 'sscha'] as const).map(value => <MenuItem key={value} value={value}>{dict.enums.structureOptimization[value]}</MenuItem>)}
+                      </Select>
+                    </FormControl>}
+                    <PressureEditor state={state} index={index} onChange={patch => emitStates(statesRef.current.map((item, i) => i === index ? {...item, ...patch} : item))} />
+                  </Box>
+                  <Box data-material-family-row sx={{ minWidth: 0 }}>
+                    <Autocomplete<ClassificationTerm | string, true, false, true> data-issue-field={`material_states[${index}].structure_families`}
+                      multiple
+                      freeSolo
+                      sx={{ minWidth: 0, '& .MuiAutocomplete-inputRoot': { flexWrap: 'nowrap', height: 'calc(1.4375em + 33px)' }, '& .MuiAutocomplete-input': { minWidth: '60px !important' } }}
+                      slotProps={{ chip: { sx: {
+                        // 标签在独立轨道横向滚动，输入框高度不随内容变化。
+                        height: 28, minHeight: 28, flexShrink: 0, my: '0 !important', fontSize: 'inherit', fontWeight: 'inherit',
+                        '& .MuiChip-label': { whiteSpace: 'nowrap' },
+                      } } }}
+                      options={catalogs?.structure_families || []}
+                      loading={catalogLoading}
+                      value={(state.structure_families || []).map(selection => {
+                        if (selection.id == null) return selection.name
+                        const option = catalogs?.structure_families.find(item => item.id === selection.id)
+                        return option || selection.name
+                      })}
+                      getOptionLabel={option => typeof option === 'string' ? option : familyName(option, lang)}
+                      isOptionEqualToValue={(option, value) => (
+                        typeof option !== 'string' && typeof value !== 'string' && option.id === value.id
+                      )}
+                      onChange={(_, values) => {
+                        // D4：编辑器不再写入主项标记，新写入的 is_primary 一律为 false
+                        updateMaterialState(index, 'structure_families', values.map(value => {
+                          const selection = typeof value === 'string' ? pendingSelection(value) : selectionForTerm(value)
+                          return selection ? { ...selection, is_primary: false } : null
+                        }).filter(Boolean))
+                      }}
+                      renderInput={params => <TextField {...params}
+                        InputProps={{ ...params.InputProps, startAdornment: params.InputProps.startAdornment ? <StructureFamilyTags>{params.InputProps.startAdornment}</StructureFamilyTags> : null }}
+                        label={t('upload.structureFamiliesField')}
+                        slotProps={{ inputLabel: { shrink: true } }} error={Boolean(catalogError)}
+                        helperText={catalogError || t('upload.structureFamiliesHelp')} />}
+                    />
+                  </Box>
                   </Box>
                   <EvidenceNotes
                     evidence={state.space_group_evidence}
@@ -810,6 +833,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   <StructureCandidatePanel
                     materialName={`${state.material_name || state.material || t('common.notProvided')} · ${t('upload.materialStateNumber', { index: index + 1 })}`}
                     candidates={stateCandidates}
+                    hasCanonicalStructure={Boolean(state.structure?.structure_text)}
                     uploading={Boolean(structureUploading[index])}
                     onUpload={file => void uploadStructureForState(index, file)}
                     onChange={updateStructureCandidate}
@@ -890,12 +914,13 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                               onChange={event => setUnassignedTarget(Number(event.target.value))}
                             >
                               {states.map((state, index) => (
-                                <MenuItem key={index} value={index}>
+                                <MenuItem key={index} value={index} disabled={stateHasGeometry(index)}>
                                   {t('upload.materialStateNumber', { index: index + 1 })}
                                   {materialLabel(state) ? ` · ${materialLabel(state)}` : ''}
                                 </MenuItem>
                               ))}
                             </Select>
+                            {states.length > 0 && <FormHelperText>{t('upload.singleStructureHelp')}</FormHelperText>}
                             {states.length === 0 && (
                               <FormHelperText>{t('upload.unassignedNeedState')}</FormHelperText>
                             )}
@@ -904,7 +929,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                             size="small"
                             variant="contained"
                             color="success"
-                            disabled={states.length === 0 || unassignedTarget == null}
+                            disabled={states.length === 0 || unassignedTarget == null || stateHasGeometry(unassignedTarget)}
                             onClick={() => assignUnassignedCandidate(candidate)}
                           >
                             {t('upload.adoptStructure')}

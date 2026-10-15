@@ -33,3 +33,7 @@ value_raw 和 unit_raw 不再作为独立原始记录：value_raw 从当前数�
 参数和计算条件仍保存在原 payload 对象的 extensions，保留 field_key、未知字段、Evidence 和原数组位置。扩展输入非法数字不能变成合法空值。普通性质原始值和规范值契约不变。
 
 热力学使用 payload.thermodynamic_stability={version:1,basis,cases}；各 case 的字段、枚举和温度约束见 Plan。当前 case 必须存在，缺省是 unknown、above_hull=null、ZPE unspecified；无示例数据默认。前后端拒绝无效版本、枚举、非有限/负数、错误单位、非 0 的 ΔE/ΔH 温度及跨模块伪装。value_kind=text、value_raw/value_text 为当前稳定性文本，服务端重新校验一致性。复制时仍生成新记录键。现有 payload_json 和完整导出无损携带全部 cases。
+
+## US12/US13 状态及规范几何
+
+此前“不新增表或列”仅适用于原记录表单。本增量新增 material_states.structure_optimization（非空，默认 unknown；unknown/classical_static/sscha）。仅 theoretical 可为非 unknown。state_kind 限 theoretical/experimental/unknown；mixed 请求和旧读取明确报错，不静默降级。StructureModel.material_state_id 唯一，同卡不另存原胞／惯用胞／格式副本。StructureModel.nuclear_treatment 由该列映射，声子近似不参与。原始文件及证据仍独立保留。

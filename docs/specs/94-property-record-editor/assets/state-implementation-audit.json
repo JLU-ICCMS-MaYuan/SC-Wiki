@@ -1,0 +1,23 @@
+{
+  "scientific_upload_drafts": {
+    "rows": 3,
+    "mixed_states": 0
+  },
+  "paper_revision_drafts": {
+    "rows": 0,
+    "mixed_states": 0
+  },
+  "material_states": {},
+  "structure_models": 0,
+  "alembic_revision": [
+    "20260914_0052",
+    "20261014_0137"
+  ],
+  "redis_upload_drafts": {
+    "rows": 3,
+    "mixed_states": 0
+  },
+  "upload_statuses": {
+    "ready": 3
+  }
+}

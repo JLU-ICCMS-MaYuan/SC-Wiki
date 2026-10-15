@@ -24,7 +24,8 @@ LIST_FIELDS = {'authors', 'co_first_authors', 'corresponding_authors', 'methodol
 BASIS_KINDS = {'paper_quote', 'paper_inference', 'general_knowledge'}
 ENUMS = {'superconductor_kind': ['conventional', 'unconventional', 'unknown'],
          'material_dimensionality': sorted(MATERIAL_DIMENSIONALITIES), 'crystal_system': sorted(CRYSTAL_SYSTEMS),
-         'state_kind': ['theoretical', 'experimental', 'mixed', 'unknown'],
+         'state_kind': ['theoretical', 'experimental', 'unknown'],
+         'structure_optimization': ['unknown', 'classical_static', 'sscha'],
          'paper_type': ['theoretical', 'experimental', 'review'],
          'theoretical_subtype': ['calculation', 'method', 'theory']}
 IMMUTABLE = {'is_representative', 'record_key', 'record_type', 'property_code', 'custom_property_key', 'definition_key',

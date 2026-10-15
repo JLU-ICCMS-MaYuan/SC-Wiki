@@ -3,7 +3,7 @@
   "platform": "linux-x86_64",
   "python": "3.12",
   "conda_packages": ["python=3.12", "pip", "mysql-server=8.4.2", "mysql-client=8.4.2", "redis-server=8.10.1", "openjdk=21.0.9", "nodejs=22"],
-  "schema_heads": ["20260914_0052", "20261014_0137"],
+  "schema_heads": ["20261015_0094"],
   "miniforge": {
     "version": "26.7.2-0",
     "url": "https://github.com/conda-forge/miniforge/releases/download/26.7.2-0/Miniforge3-26.7.2-0-Linux-x86_64.sh",

@@ -412,6 +412,7 @@ type MaterialState struct {
 	TemperatureUnitRaw       *string                        `gorm:"size:50" json:"temperature_unit_raw"`
 	MagneticFieldT           *float64                       `json:"magnetic_field_t"`
 	StateKind                string                         `gorm:"size:20;not null;default:unknown" json:"state_kind"`
+	StructureOptimization    string                         `gorm:"size:32;not null;default:unknown" json:"structure_optimization"`
 	Note                     *string                        `json:"note"`
 	CreatedAt                time.Time                      `json:"created_at"`
 	UpdatedAt                time.Time                      `json:"updated_at"`

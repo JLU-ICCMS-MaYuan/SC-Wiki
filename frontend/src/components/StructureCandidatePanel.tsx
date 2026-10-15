@@ -11,6 +11,7 @@ import { StructureCandidate } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
 
 interface Props {
+  hasCanonicalStructure?: boolean
   materialName?: string
   candidates: StructureCandidate[]
   uploading: boolean
@@ -21,7 +22,7 @@ interface Props {
 type CellKind = 'primitive' | 'conventional'
 type StructureFormat = 'cif' | 'poscar'
 
-const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, uploading, onUpload, onChange }) => {
+const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, uploading, onUpload, onChange, hasCanonicalStructure }) => {
   const { t } = useLanguage()
   const preferredCandidate = useMemo(
     () => [...candidates].reverse().find(candidate => candidate.confirmation !== 'excluded') || candidates.at(-1),
@@ -64,6 +65,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, up
   const preview = representation?.text
     ? { text: representation.text, format: format === 'poscar' ? 'vasp' : 'cif' }
     : null
+  const anotherGeometry = hasCanonicalStructure || candidates.some(item => item.candidate_id !== candidate?.candidate_id && item.confirmation === 'confirmed' && item.status === 'confirmed')
   const blocked = candidate?.status === 'blocked'
     || (candidate?.source_kind?.startsWith('pdf') && candidate.validation?.ase_valid !== true)
   const decided = candidate?.confirmation === 'confirmed' || candidate?.confirmation === 'excluded'
@@ -82,6 +84,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, up
 
   return (
     <Box data-structure-attachment sx={{ mt: 2, p: { xs: 1.5, sm: 2 }, borderRadius: 1, bgcolor: 'action.hover' }}>
+      {anotherGeometry && <Alert severity="info" sx={{ mb: 1 }}>{t('upload.singleStructureHelp')}</Alert>}
       <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }} spacing={1}>
         <Box sx={{ minWidth: 0 }}>
           <ButtonBase aria-expanded={expanded} aria-controls={contentId} onClick={() => setExpanded(value => !value)} sx={{ maxWidth: '100%', textAlign: 'left', gap: 0.5, borderRadius: 0.5, '&.Mui-focusVisible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 } }}>
@@ -172,7 +175,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, up
                     )
                   : (
                       <>
-                        <Button startIcon={<CheckCircleOutlineIcon />} variant="contained" color="success" disabled={candidate.status !== 'valid'} onClick={() => onChange(candidate.candidate_id, { confirmation: 'confirmed', status: 'confirmed' })}>{t('upload.adoptStructure')}</Button>
+                        <Button startIcon={<CheckCircleOutlineIcon />} variant="contained" color="success" disabled={candidate.status !== 'valid' || anotherGeometry} onClick={() => onChange(candidate.candidate_id, { confirmation: 'confirmed', status: 'confirmed' })}>{t('upload.adoptStructure')}</Button>
                         <Button startIcon={<BlockIcon />} color="inherit" onClick={() => onChange(candidate.candidate_id, { confirmation: 'excluded', status: 'excluded' })}>{t('upload.excludeStructure')}</Button>
                       </>
                     )}

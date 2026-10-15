@@ -77,6 +77,29 @@ describe('MaterialStatesEditor 共享组件（T017）', () => {
     vi.clearAllMocks()
   })
 
+  it('三行布局保留七项身份字段，核处理只属于理论状态并跟随切换清空', () => {
+    const { container, onChange, rerender } = renderEditor({ states: [makeState({ state_kind: 'theoretical', structure_optimization: 'sscha' })] })
+    const identity = container.querySelector('[data-material-identity-row]')!
+    expect(within(identity as HTMLElement).getByLabelText('材料名')).toBeInTheDocument()
+    expect(within(identity as HTMLElement).getByLabelText('化学式')).toBeInTheDocument()
+    expect(identity.children).toHaveLength(7)
+    expect(container.querySelector('[data-material-family-row] [data-family-tags]')).toBeNull()
+    expect(screen.getByLabelText('结构优化核处理')).toHaveTextContent('量子非谐优化（SSCHA）')
+    fireEvent.mouseDown(screen.getByLabelText('材料状态类型'))
+    expect(screen.queryByRole('option', { name: '理论与实验' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('option', { name: '实验', exact: true }))
+    const next = onChange.mock.calls.at(-1)![0]
+    expect(next[0]).toMatchObject({ state_kind: 'experimental', structure_optimization: 'unknown' })
+    rerender(<MaterialStatesEditor states={next} onChange={onChange} />)
+    expect(screen.queryByLabelText('结构优化核处理')).not.toBeInTheDocument()
+  })
+
+  it('草稿读取拒绝 mixed，结构优化字段在归一化后保留', () => {
+    expect(() => normalizeUploadDraft({ material_states: [makeState({ state_kind: 'mixed' })] })).toThrow(/退役/)
+    const normalized = normalizeUploadDraft({ material_states: [makeState({ state_kind: 'theoretical', structure_optimization: 'sscha' })] })
+    expect(normalized.material_states[0].structure_optimization).toBe('sscha')
+  })
+
   it('readOnly 模式下不可编辑：编辑输入不触发 onChange，卡片恒展开且无折叠交互', () => {
     const { onChange, rerender } = renderEditor({
       readOnly: true,

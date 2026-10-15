@@ -29,7 +29,7 @@ STATE_FIELDS = {
     'pressure_value_gpa': '压力', 'pressure_min_gpa': '压力下界', 'pressure_max_gpa': '压力上界',
     'temperature_value_k': '温度', 'magnetic_field_t': '磁场',
     'reported_space_group_symbol': '报告空间群', 'reported_space_group_number': '空间群编号',
-    'crystal_system': '晶系', 'state_kind': '材料状态类型',
+    'crystal_system': '晶系', 'state_kind': '材料状态类型', 'structure_optimization': '结构优化核处理',
     'structure_families': '结构家族', 'condition_note': '条件说明', 'note': '状态说明',
     'pressure_raw': '原始压力', 'pressure_unit_raw': '原始压力单位',
     'temperature_raw': '原始温度', 'temperature_unit_raw': '原始温度单位',
@@ -43,7 +43,7 @@ SYNTHESIS_FIELDS = frozenset({
     'summary', 'key_finding', 'methodology', 'keywords_tags', 'research_motivation',
     'knowledge_graph_title', 'paper_type', 'research_materials', 'material_families',
     'theoretical_subtype', 'superconductor_kind',
-    'state_kind', 'crystal_system', 'material_dimensionality', 'structure_families',
+    'state_kind', 'structure_optimization', 'crystal_system', 'material_dimensionality', 'structure_families',
     'condition_note', 'note',
 })
 

@@ -49,9 +49,9 @@ export default {
   stateKind: {
     theoretical: 'Theoretical',
     experimental: 'Experimental',
-    mixed: 'Theoretical and experimental',
-    unknown: 'Unknown',
+    unknown: 'Unspecified',
   },
+  structureOptimization: { unknown: 'Unspecified', classical_static: 'Classical static optimization (harmonic baseline)', sscha: 'Quantum anharmonic optimization (SSCHA)' },
   reviewStatus: {
     pending: 'Pending review',
     approved: 'Approved',

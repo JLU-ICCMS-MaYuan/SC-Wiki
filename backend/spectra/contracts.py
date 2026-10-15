@@ -92,7 +92,7 @@ def state_signature(state: dict | None) -> str:
     # 状态条件和参考物性变化使核验失效；不把展示折叠状态等 UI 信息加入签名。
     keys = ("state_key", "material", "material_name", "reported_space_group_symbol",
             "reported_space_group_number", "pressure_value_gpa", "pressure_min_gpa",
-            "pressure_max_gpa", "temperature_value_k", "magnetic_field_t", "state_kind",
+            "pressure_max_gpa", "temperature_value_k", "magnetic_field_t", "state_kind", "structure_optimization",
             "calculation_context", "property_modules", "structure", "_spectrum_structure_hashes")
     from decimal import Decimal
     def canonical(value):

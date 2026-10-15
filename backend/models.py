@@ -1163,9 +1163,12 @@ class MaterialState(Base):
             name="fk_material_states_superconductor_revision", ondelete="RESTRICT", onupdate="CASCADE",
         ),
         CheckConstraint(
-            "state_kind IN ('theoretical', 'experimental', 'mixed', 'unknown')",
+            "state_kind IN ('theoretical', 'experimental', 'unknown')",
             name="ck_material_states_kind",
         ),
+        CheckConstraint("structure_optimization IN ('unknown', 'classical_static', 'sscha') AND "
+            "(state_kind = 'theoretical' OR structure_optimization = 'unknown')",
+            name="ck_material_states_structure_optimization"),
         CheckConstraint(
             """
             pressure_min_gpa IS NULL
@@ -1232,6 +1235,7 @@ class MaterialState(Base):
         ),
     )
 
+    structure_optimization = Column(String(32), nullable=False, default="unknown", server_default="unknown")
     id = Column(BIGINT_ID, primary_key=True, autoincrement=True)
     state_key = Column(String(96), nullable=False)
     paper_id = Column(Integer, nullable=False)
@@ -1384,6 +1388,7 @@ class StructureModel(Base):
             "paper_revision",
             name="uq_structure_models_state_revision",
         ),
+        UniqueConstraint("material_state_id", name="uq_structure_models_single_geometry"),
         Index("ix_structure_models_state", "material_state_id"),
         Index("ix_structure_models_hash", "structure_hash"),
         Index(

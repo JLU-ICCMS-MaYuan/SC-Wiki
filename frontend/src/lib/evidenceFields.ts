@@ -30,7 +30,7 @@ export function currentEvidenceField(record: EvidenceRecord, paper: Record<strin
 export function evidenceFieldAffected(record: EvidenceRecord, field: string) {
   const identity = field.match(/^(material_states\[\d+\])\.(material_name|material)$/)
   if (identity && record.field.startsWith(identity[1] + '.')) return true
-  const context = field.match(/^(material_states\[\d+\])\.(material|material_dimensionality|pressure_[\w]+|temperature_[\w]+|magnetic_field_t|reported_space_group_[\w]+|crystal_system|state_kind|note|calculation_context|experimental_context)(?:\.|$)/)
+  const context = field.match(/^(material_states\[\d+\])\.(material|material_dimensionality|pressure_[\w]+|temperature_[\w]+|magnetic_field_t|reported_space_group_[\w]+|crystal_system|state_kind|structure_optimization|note|calculation_context|experimental_context)(?:\.|$)/)
   return record.field === field || record.field.startsWith(field + '.') || record.field.startsWith(field + '[') || field.startsWith(record.field + '.') || field.startsWith(record.field + '[')
     || Boolean(context && record.field.startsWith(context[1] + '.') && (record.record_key || record.provenance?.kind === 'derived'))
 }
