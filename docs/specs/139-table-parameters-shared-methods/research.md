@@ -1,0 +1,94 @@
+# 技术调查与设计决策
+
+**Issue**：[#139](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/139)
+
+**日期**：2026-10-15。本文是已确认需求的技术设计，未表示代码已实现。
+
+## 现状证据与问题分类
+
+| 调查位置 | 已确认的代码行为 | 对本功能的影响 |
+| --- | --- | --- |
+| `backend/ingest/domain_extraction.py`：`structured_chunks` | 连续页打包，默认 500000 字符，窗口重叠一页；表格通过块提供文本 | Methods 远离结果表时，一页重叠不保证共同上下文；不能靠扩大一个常数保证完整 |
+| 同文件：领域提示词与 `normalize_extraction` | 已有逐行覆盖、多处引文、`basis_kind`；禁止跨记录复制条件，提示词存在 ωlog 名称差异；规范化后校验记录 | 必须明确“有依据的共用关联”和“无依据复制”的区别，统一规范字段 |
+| `backend/ingest/scientific_contracts.py` | `normalize_parameters` 已将 `omega_log_k` 转成 `omega_log`，处理标量和范围 | 复用归一化；增加来源元数据保留及幂等回归，不再建立另一套字段映射 |
+| `backend/ingest/tc_parameters.py`、`frontend/src/lib/tcParameters.ts` | 范围 μ* 使用 `parameters.extensions`；`readTcPairs` 把低 Tc 配高 μ* | 原契约能表示本论文显式对应；仅有两个未配对范围时不能使用这一表示 |
+| `backend/ingest/upload_contracts.py`、`scientific_drafts.py`、`legacy_scientific_assembly.py` | 旧输入在来源边界转换；兼容路径中参数可能来自状态级 context | 防止将状态级 λ、ωlog 或 μ* 复制给所有不同方法的记录，兼容只留在边界 |
+| `backend/ingest/claim_evidence.py`：`validate_claim` | `paper_inference` 不能成为 `validated` 的直接科学 Claim | 共用关系推断不得混入整个 `paper_quote` 记录并绕过来源门 |
+| `backend/ingest/upload_jobs.py` | 分段候选先 Claim／覆盖检查，组装后再次检查；随后调用 `generate_upload_suggestions` | 直接表格事实先走原路径，依赖推断的跨结果关联在最终 Claim 检查后走已有建议阶段 |
+| `backend/ingest/property_evidence.py` | 推断建议可补空，结果记为 `uncertain`、`auto_filled`，绑定内容和来源 hash | 复用推断来源与人工复核；当前填空按顶层路径判断，嵌套 payload 需补充定向合并 |
+| `frontend/src/components/SchemaDrivenRecordForm.tsx` | 条件有软件、电子方法、泛函、k/q 网格、展宽及 `extensions` | 常用字段放对应阶段，其他阶段使用现有补充条件并标阶段，保留布局 |
+| `alembic/versions/20260924_0114_tc_method_definitions.py` | 预测记录定义允许对象式 parameters／calculation_conditions 及附加 payload 属性 | 本设计复用 JSON，不需新增关系表或修改已发布定义；仍须对目标库实际定义做往返测试 |
+
+问题按“主路径提取与关联能力不足”处理。没有证据表明根因是部署版本或历史库损坏；不以批量修数据替代主路径修复。
+
+## D1：科学结果与文献上下文各有职责
+
+**决策**：新增共享模块 `backend/ingest/scientific_context.py`，负责表格／表注组合、Methods 全文来源清单、作用域候选、提取预算和缺口。领域提取模块继续负责具体数值候选；服务端负责契约、来源、数值及目标身份校验；不把科学记录交回全文叙述汇总模型重写。
+
+**理由**：PDF IR 与 TXT/MD 的输入形态不同，但语义规则应共用；单独职责避免继续扩大 `upload_jobs.py`。
+
+**备选**：只改提示词无法解决来源不在输入和兼容转换丢字段；另建 La–Sc–H 专用解析器不能推广。均不采用。
+
+**证据**：上表现状；对应 FR-001～005、FR-010。
+
+## D2：表格单位是完整语义包
+
+**决策**：表格包包含原始行／单元格引用、表头、分组、表题、脚注和延续块；跨页仍保留原始 file/page/block。表题归属可由结构或模型建立，必须附来源，不靠“最近文本”无条件绑定。过大表按行组拆分，每组重复可定位的表头／表注；每行在覆盖账本出现一次逻辑身份。
+
+**理由**：分组和表注决定近似、单位、方法及 μ*；只抽行数字无法可靠关联。
+
+**备选**：将所有表注拼成新引句会破坏逐字定位；不采用。上下文重复不等于重复创建记录。
+
+**证据**：`structured_chunks`、`SourceQuote`；对应 FR-001～004、FR-008。
+
+## D3：共用条件分直接声明与推断关联
+
+**决策**：作者明确列出适用对象／范围的条件，在原范围可判定时联合引文形成直接候选。需要模型根据全文判定共用的关系，生成 `paper_inference` proposal，在已有建议阶段定向补空并显示“依据 → 关联 → 局限”。直接报告的 Tc／λ／ωlog 及其原文保持为直接事实；不把关系解释写入 quote。
+
+**理由**：需要模型理解共用关系，同时维持既有证据语义。填入草稿不等于科学审核通过。
+
+**备选**：把整条记录标成 `paper_quote`、放宽 `validate_claim`、或把所有条件都留空，分别会误归因或不能满足需求；不采用。
+
+**证据**：`validate_claim`、`generate_upload_suggestions`；对应 FR-005、FR-008～010。
+
+## D4：阶段与适用范围留在记录 JSON
+
+**决策**：既有 `payload.parameters` 保存 λ／ωlog／μ*。`payload.calculation_conditions` 的平面字段只表示该记录的主要声子／EPC 阶段；其他阶段使用带阶段名的 `extensions`，如 `sscha.k_grid`、`structural_relaxation.energy_cutoff`。新设计的 `payload.source_associations` 保存逐字段数值来源、范围来源、原始表示及依据类型，详情见数据模型。它是记录的一部分，随现有保存／提交／导出往返；运行制品仅供审计，不能成为恢复草稿必需的唯一副本。
+
+**理由**：不另建全局计算条件主数据；避免不同阶段网格拼成同一设置，且无需修改页面布局。该附加元数据目前尚未实现。
+
+**备选**：一条论文级 CalculationContext 向全部结果广播，或另建多张关系表，分别不正确或超出所需复杂度；不采用。
+
+**证据**：JSON payload 与既有扩展校验；对应 FR-005～008、FR-010。
+
+## D5：μ* 范围的界限与配对分开
+
+**决策**：本论文显式反向对应沿用 `key=mu_star` 的递增 μ* 范围及原 Tc 范围，使用现有 `readTcPairs`。未明确配对只保留 `mu_star_reported_range` 扩展和来源，μ* 两端不自动填写。其他明确但现有范围控件无法表达的配对以独立标量 Tc–μ* 结果保留共同表行身份，不能硬套反向关系。8 行验收计逻辑表行，不强制数据库恰好只有 8 条记录。
+
+**理由**：μ* 和 Tc 的各自排序不能作为配对证据。
+
+**备选**：自动假设物理单调性或额外添加通用配对表，分别违反来源要求或不必要；不采用。
+
+**证据**：`readTcPairs` 与 `parameter_issues`；对应 FR-002～004、FR-011。
+
+## D6：全文阅读可审计，重试有界
+
+**决策**：沿用任务当前模型和有效 main／supplementary 来源。来源窗口全部登记，Methods／表注漏读不能被无提示截断。超出模型预算时分窗口，合并事实清单，给每条目标记录实际相关原文。每个失败窗口最多重试一次；仍失败时停止该窗口推断、保留缺口与待核对原因，不回填惯例值。取消遵循原任务取消检查。
+
+**理由**：默认窗口不能保证全文一口气放下；高影响关联需要实际来源而非摘要替代。
+
+**备选**：固定头尾抽样、引入另一默认模型、无限循环补证，均不采用。
+
+**证据**：现有任务模型配置及来源封装；对应 FR-005、FR-007～011。
+
+## D7：缓存和旧数据有界兼容
+
+**决策**：缓存键加入上下文／规则版本、全部有效来源 hash、模型／端点、提示词和相关候选指纹；变更表注或 Methods 必须失效。兼容输入仅在现有转换边界处理。已保存历史草稿继续可读，不自动补值；用户明确重跑时建立新尝试并保留人工更正及旧制品。
+
+**理由**：旧结果缓存命中会掩盖提示词更新；重跑不是批量覆盖授权。
+
+**证据**：`_chunk_result_path` 缓存签名、`upload_contracts.py`；对应 FR-004、FR-010。
+
+## 设计适用边界
+
+以上设计没有改变已确认的 WHAT／验收范围；没有新增 API、数据库表、迁移或模型选择要求。实施时若目标库的已发布定义阻止元数据往返，不得改写已发布定义；先修订设计并报告实际冲突。未授权执行迁移或代码实现。
