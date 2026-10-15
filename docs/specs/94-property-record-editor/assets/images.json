@@ -61,6 +61,46 @@
         1132
       ],
       "verification": "2026-10-15 重新读取归档图片，使用 PIL 解码并核对尺寸、SHA-256；本地验证，远程链接待验证。"
+    },
+    {
+      "id": "IMG-004",
+      "upload_order": 4,
+      "original_name": "codex-clipboard-b1e5b209-7282-4f36-919d-8f0773ff893d.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-004.png",
+      "status": "local_verified",
+      "user_context": "为什么这里的完成按钮一致是灰色的？\n我希望单个材料状态里面可以有空间群符号+化学式+压强这三个信息。\n这两个要求和前面的要求一起做成 demo",
+      "related": [
+        "US9",
+        "FR-031",
+        "FR-032"
+      ],
+      "sha256": "5ac29c97c3e904a8ed385df2cbe967fd6a415dd42adcd96bf90920b5a8e5ccef",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3024,
+        1960
+      ],
+      "verification": "2026-10-15 重新读取归档原图，PIL 解码及 SHA-256/像素尺寸核验通过；本地验证，未推送。"
+    },
+    {
+      "id": "IMG-005",
+      "upload_order": 5,
+      "original_name": "codex-clipboard-bb5ac34f-2e6d-4f5f-8cdf-18e85806663e.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-005.png",
+      "status": "local_verified",
+      "user_context": "为什么这里的完成按钮一致是灰色的？\n我希望单个材料状态里面可以有空间群符号+化学式+压强这三个信息。\n这两个要求和前面的要求一起做成 demo",
+      "related": [
+        "US9",
+        "FR-031",
+        "FR-032"
+      ],
+      "sha256": "2355f52070d21b967b36898d3d52365f2127ea05e52e827a339830a231142dd1",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2470,
+        1110
+      ],
+      "verification": "2026-10-15 重新读取归档原图，PIL 解码及 SHA-256/像素尺寸核验通过；本地验证，未推送。"
     }
   ]
 }

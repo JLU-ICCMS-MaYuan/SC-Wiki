@@ -1,6 +1,6 @@
 <style>
   #unified-properties-demo { color-scheme: light dark; padding: 16px 0; }
-  #unified-properties-demo .up-product { --up-bg: light-dark(#fff, #202124); --up-fg: light-dark(#253043, #e4e7ee); --up-muted: light-dark(#657187, #b3bac8); --up-border: light-dark(#c7ccd5, #626977); --up-primary: light-dark(#6554e8, #b6aaff); --up-soft: light-dark(#f4f3ff, #302c43); --up-error: light-dark(#ad2537, #ff9da8); background: var(--up-bg); color: var(--up-fg); border: 1px solid var(--up-border); border-radius: 8px; padding: 18px 16px; font: 14px/1.5 Roboto, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; box-sizing: border-box; }
+  #unified-properties-demo .up-product { --up-bg: light-dark(#fff, #202124); --up-fg: light-dark(#253043, #e4e7ee); --up-muted: light-dark(#657187, #b3bac8); --up-border: light-dark(#c7ccd5, #626977); --up-primary: light-dark(#6554e8, #b6aaff); --up-soft: light-dark(#f4f3ff, #302c43); --up-error: light-dark(#ad2537, #ff9da8); background: var(--up-bg); color: var(--up-fg); border: 1px solid var(--up-border); border-radius: 8px; padding: 18px 16px; font: 14px/1.5 Roboto, Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif; box-sizing: border-box; position: relative; }
   #unified-properties-demo .up-header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding-right: 80px; margin-bottom: 14px; font-weight: 500; }
   #unified-properties-demo .up-example { font-size: 12px; color: var(--up-muted); font-weight: 400; }
   #unified-properties-demo .up-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding-bottom: 14px; border-bottom: 1px solid var(--up-border); margin-bottom: 18px; }
@@ -43,6 +43,28 @@
   #unified-properties-demo .up-point-table th, #unified-properties-demo .up-point-table td { text-align: left; padding: 9px 6px; border-bottom: 1px solid var(--up-border); font-weight: 400; }
   #unified-properties-demo .up-point-table th { color: var(--up-muted); }
   #unified-properties-demo .up-point-heading { margin: 12px 0 4px; font-weight: 500; }
+  #unified-properties-demo .up-state-summary { padding: 8px 0 16px; font-weight: 500; }
+  #unified-properties-demo .up-state-caption { display: inline; margin-left: 12px; color: var(--up-muted); overflow-wrap: anywhere; font-weight: 400; }
+  #unified-properties-demo .up-state-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 2px 0 16px; }
+  #unified-properties-demo .up-record-notice { font-size: 12px; color: var(--up-muted); }
+  #unified-properties-demo .up-product.up-review-open { min-height: 780px; }
+  #unified-properties-demo .up-review-overlay { position: absolute; inset: 0; z-index: 10; display: flex; justify-content: flex-end; background: light-dark(rgba(30,35,50,.2),rgba(0,0,0,.45)); border-radius: 8px; }
+  #unified-properties-demo .up-review { width: min(430px,100%); padding: 20px; box-sizing: border-box; background: var(--up-bg); color: var(--up-fg); border-radius: 0 8px 8px 0; }
+  #unified-properties-demo .up-review-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 12px; font-weight: 500; }
+  #unified-properties-demo .up-review-note { background: var(--up-soft); border-radius: 6px; padding: 12px; margin-bottom: 14px; font-size: 12px; }
+  #unified-properties-demo .up-review-label { display: block; margin-bottom: 12px; }
+  #unified-properties-demo .up-review-label > span { display: block; margin-bottom: 7px; }
+  #unified-properties-demo .up-review textarea { width: 100%; min-height: 90px; resize: vertical; box-sizing: border-box; padding: 10px 11px; border: 1px solid var(--up-border); border-radius: 6px; background: var(--up-bg); color: var(--up-fg); font: inherit; }
+  #unified-properties-demo .up-review-choice { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+  #unified-properties-demo .up-review-choice label { display: flex; align-items: center; gap: 6px; min-height: 32px; }
+  #unified-properties-demo .up-review-choice input[type=radio] { width: 18px; height: 18px; padding: 0; margin: 0; accent-color: var(--up-primary); }
+  #unified-properties-demo .up-review-file { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; padding: 8px 0; }
+  #unified-properties-demo .up-review-file small { display: block; color: var(--up-muted); font-size: 12px; }
+  #unified-properties-demo .up-review-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  #unified-properties-demo .up-primary { border: none; border-radius: 6px; background: var(--up-primary); color: light-dark(#fff,#202124); padding: 9px 16px; min-height: 42px; font: inherit; }
+  #unified-properties-demo .up-primary:disabled { background: var(--up-border); color: var(--up-muted); }
+  #unified-properties-demo .up-completion-reasons { margin: 10px 0; font-size: 12px; }
+  #unified-properties-demo .up-completion-reasons ul { margin: 6px 0 0; padding-left: 18px; }
   @media (max-width: 460px) { #unified-properties-demo .up-detail-grid { grid-template-columns: 1fr; } }
   #unified-properties-demo [hidden] { display: none !important; }
   @media (pointer: coarse) { #unified-properties-demo input:not([type=checkbox]), #unified-properties-demo select { font-size: 16px; } #unified-properties-demo button { min-height: 44px; } }
@@ -50,7 +72,11 @@
 <div id="unified-properties-demo" class="viz-dotted-background">
   <section class="up-product" aria-label="四类物性统一表单设计">
     <div data-form-page>
-    <div class="up-header">物性记录 <span class="up-example">示例数据 · 理论计算记录</span></div>
+    <div class="up-header">材料状态与性质 <span class="up-example">示例数据 · 理论计算记录</span></div>
+    <details class="up-state" data-material-card open>
+      <summary class="up-state-summary cursor-interaction">材料状态 #1 <span class="up-state-caption" data-material-caption>P6/mmm · LaSc₂H₂₄ · 150 GPa</span></summary>
+      <div class="up-scroll"><div class="up-line" data-material-inputs></div></div>
+      <div class="up-state-actions"><button type="button" class="up-button cursor-interaction" data-open-review>来源核对 / 人工修改</button><span class="up-record-notice" data-review-notice>当前字段的人工修改待处理</span></div>
     <div class="up-tabs" role="tablist" aria-label="物性模块">
       <button type="button" class="cursor-interaction" id="up-tab-electronic" role="tab" aria-selected="true" aria-controls="up-panel-electronic" data-module="electronic">电子性质</button>
       <button type="button" class="cursor-interaction" id="up-tab-dynamical" role="tab" aria-selected="false" aria-controls="up-panel-dynamical" data-module="dynamical">动力学性质</button>
@@ -61,6 +87,7 @@
     <section id="up-panel-dynamical" role="tabpanel" aria-labelledby="up-tab-dynamical" data-panel="dynamical" hidden></section>
     <section id="up-panel-thermodynamic" role="tabpanel" aria-labelledby="up-tab-thermodynamic" data-panel="thermodynamic" hidden></section>
     <section id="up-panel-superconductive" role="tabpanel" aria-labelledby="up-tab-superconductive" data-panel="superconductive" hidden></section>
+    </details>
     </div>
     <section data-detail-page hidden aria-label="谱解析详情页">
       <a class="up-back cursor-interaction" data-detail-back href="#properties/dynamical">← 返回动力学性质</a>
@@ -72,11 +99,35 @@
       <div class="up-point-heading">逐点数据</div>
       <table class="up-point-table" aria-label="谱逐点解析数据"><thead><tr><th>频率 (THz)</th><th>原图幅值</th><th>重建幅值</th><th>点来源</th></tr></thead><tbody data-detail-points></tbody></table>
     </section>
+    <div class="up-review-overlay" data-review-overlay hidden>
+      <section class="up-review" role="dialog" aria-modal="true" aria-label="当前字段的人工修改记录">
+        <div class="up-review-heading"><span>人工修改记录</span><button type="button" class="up-button cursor-interaction" data-close-review>返回编辑</button></div>
+        <div class="up-record-notice" data-review-target></div>
+        <div class="up-review-note">当前值或来源已修改，旧 AI 核对结果已失效。这里保存当前人工修改及依据，不把人工附件自动当作论文原文支持。</div>
+        <label class="up-review-label"><span>人工修改说明（必填）</span><textarea data-review-input="reason" aria-label="人工修改说明（必填）" placeholder="说明修改依据或专业判断"></textarea></label>
+        <div class="up-review-choice" role="radiogroup" aria-label="是否提供证据">
+          <label class="cursor-interaction"><input type="radio" name="up-review-choice" value="provide" data-review-input="choice">提供证据</label>
+          <label class="cursor-interaction"><input type="radio" name="up-review-choice" value="none" data-review-input="choice">不提供证据</label>
+        </div>
+        <label class="up-review-label" data-absence-field hidden><span>未提供证据的原因（必填）</span><textarea data-review-input="absence" aria-label="未提供证据的原因（必填）"></textarea></label>
+        <div data-review-files></div>
+        <div data-review-file-actions>
+          <label class="up-button cursor-interaction">选择图片、文本或 PDF<input data-review-file type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.md,.pdf" multiple hidden></label>
+          <button type="button" class="up-button cursor-interaction" data-upload-review-files hidden>上传证据</button>
+        </div>
+        <div class="up-record-notice">附件在 Demo 中仅作本地交互演示。</div>
+        <div class="up-completion-reasons" id="up-completion-reasons" aria-live="polite" data-completion-reasons></div>
+        <div class="up-review-actions"><button type="button" class="up-primary cursor-interaction" data-complete-review aria-describedby="up-completion-reasons" disabled>保存并完成</button></div>
+      </section>
+    </div>
   </section>
 </div>
 <script>
 (() => {
   const root = document.getElementById('unified-properties-demo');
+  const material = { spaceGroup: 'P6/mmm', formula: 'LaSc2H24', pressure: '150' };
+  const reviewDrafts = {};
+  let reviewOpen = false, reviewModule = null;
   const definitions = {
     electronic: { title: '带隙 · 自定义性质', values: { name: 'band gap', kind: 'number', raw: '0.82', number: '0.82', unit: 'eV', first: '', second: '', text: '', boolean: false, code: 'VASP', method: 'DFT', functional: 'PBE', kGrid: '12 × 12 × 12', kWidth: '' }, conditions: [['code','计算软件',150],['method','电子结构方法',120],['functional','交换关联泛函',125],['kGrid','k 网格',140],['kWidth','k 展宽',110]] },
     dynamical: { title: '最高声子频率 · 自定义性质', values: { name: 'maximum phonon frequency', kind: 'number', raw: '12.4', number: '12.4', unit: 'THz', first: '', second: '', text: '', boolean: false, code: 'Quantum ESPRESSO', method: 'DFT', functional: 'PBE', kGrid: '12 × 12 × 12', qGrid: '4 × 4 × 4', kWidth: '', qWidth: '' }, conditions: [['code','计算软件',150],['method','电子结构方法',120],['functional','交换关联泛函',125],['kGrid','k 网格',140],['qGrid','q 网格',130],['kWidth','k 展宽',110],['qWidth','q 展宽',110]] },
@@ -102,6 +153,74 @@
       points: [[0,0,'observed'],[2,0.08,'observed'],[4,0.28,'observed'],[6,0.16,'observed'],[8,0.53,'observed'],[10,0.78,'observed'],[12,0.36,'interpolated'],[14,0.44,'observed'],[16,0.14,'observed'],[18,0,'observed']] },
   };
   const element = (tag, className, text) => { const node = document.createElement(tag); if (className) node.className = className; if (text != null) node.textContent = text; return node; };
+  const materialCaption = () => {
+    const formula=material.formula.replace(/[0-9]/g,digit=>'₀₁₂₃₄₅₆₇₈₉'[Number(digit)]);
+    return `${material.spaceGroup.trim() || '空间群未填写'} · ${formula.trim() || '化学式未填写'} · ${material.pressure.trim() ? material.pressure.trim()+' GPa' : '压强未填写'}`;
+  };
+  const fingerprint = module => JSON.stringify({material,values:records[module].values,parameters:records[module].parameters,conditions:records[module].conditions});
+  const reviewDraft = module => reviewDrafts[module] || (reviewDrafts[module]={reason:'',choice:'provide',absence:'',files:[{id:'example',name:'人工截图.png',status:'uploaded'}],doneFor:'',busy:false,uploading:false,message:''});
+  const updateNotice = () => { root.querySelector('[data-review-notice]').textContent=reviewDraft(selected).doneFor===fingerprint(selected)?'当前字段的人工修改已保存（Demo）':'当前字段的人工修改待处理'; };
+  const updateMaterialCaption = () => { root.querySelector('[data-material-caption]').textContent=materialCaption(); updateNotice(); };
+  const buildMaterial = () => {
+    const host=root.querySelector('[data-material-inputs]'); host.replaceChildren();
+    for (const [key,label,width] of [['spaceGroup','空间群符号',150],['formula','化学式',190],['pressure','压强 (GPa)',145]]) {
+      const wrap=element('label','up-field'); wrap.style.width=`${width}px`; wrap.append(element('span','up-label',label));
+      const input=element('input'); input.value=material[key]; input.dataset.material=key; input.setAttribute('aria-label',label);
+      wrap.append(input); host.append(wrap);
+    }
+    updateMaterialCaption();
+  };
+  const reviewBlockers = draft => {
+    const reasons=[];
+    if (!draft.reason.trim()) reasons.push('请填写人工修改说明');
+    if (draft.choice==='provide' && !draft.files.length) reasons.push('请选择并上传证据，或选择“不提供证据”并说明原因');
+    if (draft.choice==='provide' && draft.files.some(file=>file.status!=='uploaded')) reasons.push('还有证据未上传，请先点击“上传证据”');
+    if (draft.choice==='none' && draft.files.length) reasons.push('请先移除已上传或待上传的证据');
+    if (draft.choice==='none' && !draft.absence.trim()) reasons.push('请说明未提供证据的原因');
+    return reasons;
+  };
+  const renderReview = () => {
+    const overlay=root.querySelector('[data-review-overlay]'); overlay.hidden=!reviewOpen;
+    const product=root.querySelector('.up-product'); product.classList.toggle('up-review-open',reviewOpen); product.style.minHeight='';
+    root.querySelector('[data-form-page]').inert=reviewOpen;
+    if (!reviewOpen) { updateNotice(); return; }
+    const draft=reviewDraft(reviewModule), completed=draft.doneFor===fingerprint(reviewModule);
+    root.querySelector('[data-review-target]').textContent=`${materialCaption()} · ${definitions[reviewModule].title}`;
+    root.querySelectorAll('[data-review-input]').forEach(input=>{
+      const key=input.dataset.reviewInput;
+      if (input.type==='radio') input.checked=draft.choice===input.value;
+      else if (input.value!==draft[key]) input.value=draft[key];
+      input.disabled=draft.busy;
+    });
+    root.querySelector('[data-absence-field]').hidden=draft.choice!=='none';
+    root.querySelector('[data-review-file-actions]').hidden=draft.choice!=='provide';
+    root.querySelector('[data-review-file]').disabled=draft.busy || draft.uploading;
+    const files=root.querySelector('[data-review-files]'); files.replaceChildren();
+    for (const file of draft.files) {
+      const row=element('div','up-review-file'), text=element('div'); text.append(element('span',null,file.name),element('small',null,file.status==='uploaded'?'人工提供 · 已上传（示例），AI 尚未重读':'待上传'));
+      const remove=element('button','up-remove cursor-interaction','移除'); remove.type='button'; remove.dataset.removeReview=file.id; remove.disabled=draft.busy || draft.uploading; row.append(text,remove); files.append(row);
+    }
+    const upload=root.querySelector('[data-upload-review-files]'); upload.hidden=!draft.files.some(file=>file.status==='pending'); upload.disabled=draft.busy || draft.uploading; upload.textContent=draft.uploading?'上传中…':'上传证据';
+    const blockers=reviewBlockers(draft), status=root.querySelector('[data-completion-reasons]'); status.replaceChildren();
+    if (draft.busy) status.append(element('span',null,'正在保存当前值和人工修改依据…'));
+    else if (completed) status.append(element('span',null,'当前人工修改记录已保存。'));
+    else if (blockers.length) { status.append(element('span',null,'暂不能完成：')); const list=element('ul'); for(const reason of blockers) list.append(element('li',null,reason)); status.append(list); }
+    else status.append(element('span',null,'条件已齐备，将先保存当前值、说明及证据，再完成本条人工修改记录。'));
+    if (draft.message) status.append(element('div',null,draft.message));
+    const complete=root.querySelector('[data-complete-review]'); complete.disabled=draft.busy || draft.uploading || completed || blockers.length>0; complete.textContent=draft.busy?'保存中…':completed?'已完成':'保存并完成';
+    product.style.minHeight=`${Math.max(780,root.querySelector('.up-review').scrollHeight)}px`;
+  };
+  const closeReview = () => { reviewOpen=false; renderReview(); root.querySelector('[data-open-review]').focus(); };
+  const completeReview = () => {
+    const module=reviewModule, draft=reviewDraft(module); if(draft.busy || reviewBlockers(draft).length) return;
+    const version=fingerprint(module); draft.busy=true; draft.message=''; renderReview();
+    setTimeout(()=>{
+      draft.busy=false;
+      if (version!==fingerprint(module)) draft.message='当前值再次变化，请检查后重新保存；已输入内容保留。';
+      else { draft.doneFor=version; if(reviewModule===module) reviewOpen=false; }
+      renderReview(); save();
+    },350);
+  };
   const kindOptions = [['number','数值'],['range','范围'],['text','文本'],['boolean','布尔']];
   const field = (module, key, label, { width = 110, options, unit, item, group } = {}) => {
     const wrap = element('label','up-field'); wrap.style.width = `${width}px`;
@@ -156,6 +275,7 @@
       const options = key === 'zpe' ? [['unreported','论文未说明'],['included','已计入'],['excluded','明确未计入']] : undefined;
       const control = field(module,key,label,{width,options});
       if (key === 'gibbsTemperature' && ['formation_energy','formation_enthalpy'].includes(records[module].values.hullBasis)) { const input=control.querySelector('input'); input.value='0'; input.disabled=true; }
+      if (module === 'thermodynamic' && key === 'pressure') { const input=control.querySelector('input'); input.value=material.pressure; input.disabled=true; }
       host.append(control);
     }
   };
@@ -177,6 +297,7 @@
     if (selected === module) host.querySelectorAll('[data-extra-key]').forEach(fit);
   };
   const build = () => {
+    buildMaterial();
     for (const module of modules) {
       const panel = root.querySelector(`[data-panel="${module}"]`); panel.replaceChildren(); panel.append(element('div','up-record-title',definitions[module].title));
       const main = element('div','up-scroll'), line = element('div','up-line'); main.setAttribute('role','region'); main.setAttribute('aria-label','性质常用字段'); line.dataset.main = ''; main.append(line); panel.append(main); mainRow(module);
@@ -205,6 +326,7 @@
     root.querySelectorAll('[data-panel]').forEach(panel => { panel.hidden = panel.dataset.panel !== selected; });
     root.querySelector(`[data-panel="${selected}"]`).querySelectorAll('[data-extra-key]').forEach(fit);
     if (page !== 'modules') renderDetail();
+    updateNotice();
   };
   const svgNode = (tag, attributes, text) => { const node = document.createElementNS('http://www.w3.org/2000/svg',tag); for (const [key,value] of Object.entries(attributes)) node.setAttribute(key,String(value)); if (text != null) node.textContent = text; return node; };
   const drawChart = () => {
@@ -226,17 +348,25 @@
     back.href = `#properties/${data.module}`; back.textContent = `← 返回${data.module === 'dynamical'?'动力学性质':'超导性质'}`;
     root.querySelector('[data-detail-title]').textContent = data.detail;
     const summary = root.querySelector('[data-detail-summary]'); summary.replaceChildren();
-    for (const [label,value] of [['材料状态','当前材料状态 · 示例'],['来源',data.source],['解析状态','提取完成 · 待核对'],['有效频域','0–18 THz']]) { const entry=element('div'); entry.append(element('span','up-detail-label',label),element('span',null,value)); summary.append(entry); }
+    for (const [label,value] of [['材料状态',materialCaption()],['来源',data.source],['解析状态','提取完成 · 待核对'],['有效频域','0–18 THz']]) { const entry=element('div'); entry.append(element('span','up-detail-label',label),element('span',null,value)); summary.append(entry); }
     const body=root.querySelector('[data-detail-points]'); body.replaceChildren();
     for (const point of data.points) { const row=element('tr'); for(const value of [point[0].toFixed(2),point[2]==='observed'?point[1].toFixed(3):'—',point[1].toFixed(3),point[2]==='observed'?'原图观测':'短缺口插值']) row.append(element('td',null,value)); body.append(row); }
     drawChart();
   };
-  const snapshot = () => ({ selected, page, records });
-  const save = () => { if (window.openai && window.openai.setWidgetState && JSON.stringify(snapshot()).length < 14000) window.openai.setWidgetState({modelContent:{unifiedProperties:snapshot()},privateContent:null}).catch(() => {}); };
+  const snapshot = () => ({ selected, page, records, material, reviewDrafts });
+  const save = () => { updateNotice(); if (window.openai && window.openai.setWidgetState && JSON.stringify(snapshot()).length < 14000) window.openai.setWidgetState({modelContent:{unifiedProperties:snapshot()},privateContent:null}).catch(() => {}); };
   const restore = data => {
     if (!data || typeof data !== 'object') return;
     if (modules.includes(data.selected)) selected = data.selected;
     if (data.page === 'modules' || spectrumExamples[data.page]) page = data.page;
+    for (const key of Object.keys(material)) if (data.material && typeof data.material[key]==='string') material[key]=data.material[key];
+    for (const module of modules) {
+      const incoming=data.reviewDrafts && data.reviewDrafts[module]; if(!incoming) continue;
+      const draft=reviewDraft(module);
+      for(const key of ['reason','absence','doneFor']) if(typeof incoming[key]==='string') draft[key]=incoming[key];
+      draft.choice=incoming.choice==='none'?'none':'provide';
+      if(Array.isArray(incoming.files)) draft.files=incoming.files.map(file=>({id:String(file.id),name:String(file.name),status:file.status==='uploaded'?'uploaded':'pending'}));
+    }
     for (const module of modules) {
       const saved = data.records && data.records[module]; if (!saved) continue;
       const compatible = module !== 'thermodynamic' || typeof saved.values?.hullBasis === 'string';
@@ -250,12 +380,29 @@
     }
   };
   root.addEventListener('input', event => {
-    const input = event.target, module = input.dataset.module; if (!modules.includes(module)) return;
+    const input = event.target;
+    if(input.dataset.material) { material[input.dataset.material]=input.value; updateMaterialCaption(); conditionsRow('thermodynamic'); save(); return; }
+    if(input.dataset.reviewInput) { const draft=reviewDraft(reviewModule); draft[input.dataset.reviewInput]=input.value; draft.doneFor=''; draft.message=''; renderReview(); save(); return; }
+    const module = input.dataset.module; if (!modules.includes(module)) return;
     if (input.dataset.extraKey) { const item = records[module][input.dataset.group].find(item => item.id === input.dataset.item); if (item) item[input.dataset.extraKey] = input.value; fit(input); }
     else if (input.dataset.key) { if (input.dataset.key === 'hullBasis') changeHullBasis(input.value); else records[module].values[input.dataset.key] = input.type === 'checkbox' ? input.checked : input.value; if (['kind','stability','hullBasis'].includes(input.dataset.key)) mainRow(module); if (input.dataset.key === 'hullBasis') conditionsRow(module); }
-    save();
+    updateNotice(); save();
+  });
+  root.addEventListener('change', event=>{
+    if(!event.target.matches('[data-review-file]')) return;
+    const draft=reviewDraft(reviewModule), incoming=Array.from(event.target.files || []);
+    for(const file of incoming) {
+      if(!/\.(png|jpe?g|webp|txt|md|pdf)$/i.test(file.name) || !file.size || file.size>10*1024*1024 || draft.files.length>=5) { draft.message='请选择允许类型、10 MiB 以内的文件，每字段最多 5 份。'; continue; }
+      draft.files.push({id:`${Date.now()}-${Math.random()}`,name:file.name,status:'pending'}); draft.doneFor='';
+    }
+    event.target.value=''; renderReview(); save();
   });
   root.addEventListener('click', event => {
+    if(event.target.closest('[data-open-review]')) { reviewModule=selected; reviewOpen=true; renderReview(); root.querySelector('[data-review-input="reason"]').focus(); return; }
+    if(event.target.closest('[data-close-review]')) { closeReview(); return; }
+    const removeReview=event.target.closest('[data-remove-review]'); if(removeReview) { const draft=reviewDraft(reviewModule); draft.files=draft.files.filter(file=>file.id!==removeReview.dataset.removeReview); draft.doneFor=''; renderReview(); save(); return; }
+    if(event.target.closest('[data-complete-review]')) { completeReview(); return; }
+    if(event.target.closest('[data-upload-review-files]')) { const draft=reviewDraft(reviewModule), pending=new Set(draft.files.filter(file=>file.status==='pending').map(file=>file.id)); draft.uploading=true; renderReview(); setTimeout(()=>{ for(const file of draft.files) if(pending.has(file.id)) file.status='uploaded'; draft.uploading=false; renderReview(); save(); },250); return; }
     const spectrum = event.target.closest('[data-spectrum]'); if (spectrum) { event.preventDefault(); page=spectrum.dataset.spectrum; selected=spectrumExamples[page].module; show(); save(); return; }
     const back = event.target.closest('[data-detail-back]'); if (back) { event.preventDefault(); page='modules'; show(); save(); return; }
     const tab = event.target.closest('[role="tab"]'); if (tab) { selected = tab.dataset.module; page='modules'; show(); save(); return; }
@@ -265,6 +412,11 @@
   root.querySelector('[role="tablist"]').addEventListener('keydown', event => {
     if (!['ArrowLeft','ArrowRight','Home','End'].includes(event.key)) return;
     event.preventDefault(); const index = modules.indexOf(selected); selected = event.key === 'Home' ? modules[0] : event.key === 'End' ? modules.at(-1) : modules[(index+(event.key === 'ArrowRight' ? 1 : modules.length-1))%modules.length]; show(); root.querySelector(`[role="tab"][data-module="${selected}"]`).focus(); save();
+  });
+  root.addEventListener('keydown',event=>{
+    if(!reviewOpen) return;
+    if(event.key==='Escape') { event.preventDefault(); closeReview(); return; }
+    if(event.key==='Tab') { const controls=Array.from(root.querySelector('[data-review-overlay]').querySelectorAll('button:not(:disabled),textarea:not(:disabled),input:not(:disabled)')).filter(node=>node.getClientRects().length); const first=controls[0], last=controls.at(-1); if(event.shiftKey && document.activeElement===first) { event.preventDefault(); last.focus(); } else if(!event.shiftKey && document.activeElement===last) { event.preventDefault(); first.focus(); } }
   });
   restore(window.openai && window.openai.widgetState && window.openai.widgetState.modelContent && window.openai.widgetState.modelContent.unifiedProperties); build(); show();
   new ResizeObserver(drawChart).observe(root.querySelector('[data-detail-chart]'));
