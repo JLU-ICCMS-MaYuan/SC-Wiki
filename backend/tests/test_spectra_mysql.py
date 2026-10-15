@@ -103,3 +103,94 @@ def test_mysql_paper_permission_and_revision_visibility():
         assert forbidden.value.status_code==403
         paper.review_status="approved";paper.approved_revision=paper.content_revision;s.flush()
         assert not service.context(s,"paper",str(paper.id),None)["privileged"]
+
+
+def test_mysql_navigation_assignment_http_versions_permissions_and_pending_calibration(monkeypatch):
+    """归属经正式 HTTP/存储链生成新运行，旧曲线与采纳不能悄悄挪用。"""
+    ensure_isolated()
+    import copy
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from backend.api import spectra as routes
+    from backend.database import get_db
+    from backend.security import get_current_user, get_current_user_optional
+    from backend.ingest import upload_tasks
+    from backend.tests.test_spectra import fixture
+    from backend.spectra.engine import extract_panel
+
+    suffix = uuid.uuid4().hex
+    with SessionLocal.begin() as session:
+        owner = models.User(email=suffix+"@issue137.invalid", username="nav"+suffix[:10],
+            password_hash="test-only", real_name="归属隔离验证", role="user")
+        stranger = models.User(email="other"+suffix+"@issue137.invalid", username="oth"+suffix[:10],
+            password_hash="test-only", real_name="无关用户", role="user")
+        session.add_all([owner, stranger]); session.flush()
+        owner_id, stranger_id = owner.id, stranger.id
+    states = [dict(state_key="s1", material="H3S", pressure_value_gpa=150, property_modules=[]),
+              dict(state_key="s2", material="H3S", pressure_value_gpa=200, property_modules=[])]
+    task = "nav-" + suffix
+    monkeypatch.setattr(upload_tasks, "get_state", lambda identity: dict(user_id=owner_id, status="ready",
+        files=[dict(file_id="main", role="main", kind="pdf", sha256="source")]) if identity==task else None)
+    monkeypatch.setattr(upload_tasks, "get_draft", lambda identity: dict(material_states=states) if identity==task else None)
+    monkeypatch.setattr(upload_tasks, "save_llm_config", lambda *_: None)
+    monkeypatch.setattr(routes, "get_llm_config", lambda: SimpleNamespace(model="navigation-test"))
+    dispatched = []
+    monkeypatch.setattr(routes.jobs, "dispatch", lambda job, uid: dispatched.append((job, uid)))
+    with SessionLocal.begin() as session:
+        ctx = service.context(session, "upload", task, session.get(models.User, owner_id), write=True)
+        image, calibration = fixture()
+        row = service.collection(session, ctx, "source", "p", dict(source_sha256="source", pdf_page=1))
+        run, _ = service.new_run(session, row, calibration, ctx["states"][0])
+        service.complete_run(run, extract_panel(image, calibration))
+        service.activate(row, run, ctx["states"][0])
+        row.review_json = {"a": {"status": "accepted"}}
+        collection_id, old_run, old_result, collection_version = row.id, run.id, copy.deepcopy(run.result_json), row.version
+
+    with SessionLocal() as session:
+        old_result = copy.deepcopy(session.get(models.SpectrumRun, old_run).result_json)
+
+    actor = [owner_id]
+    def database():
+        with SessionLocal() as session:
+            yield session
+    def user():
+        with SessionLocal() as session:
+            return session.get(models.User, actor[0])
+    app = FastAPI()
+    app.include_router(routes.router)
+    app.dependency_overrides[get_db] = database
+    app.dependency_overrides[get_current_user] = user
+    app.dependency_overrides[get_current_user_optional] = user
+    app.dependency_overrides[routes.request_llm_config] = lambda: None
+    query = dict(target="upload", target_id=task)
+    with TestClient(app) as client:
+        initial = client.get("/api/rag/spectra", params=query)
+        assert initial.status_code == 200
+        body = dict(**query, expected_version=initial.json()["version"],
+                    expected_collection_version=collection_version,
+                    calibration={**calibration, "state_key": "s2"})
+        changed = client.put("/api/rag/spectra/"+collection_id+"/calibration", json=body)
+        assert changed.status_code == 202, changed.text
+        assert len(dispatched) == 1 and dispatched[0][1] == owner_id
+        fresh = client.get("/api/rag/spectra", params=query).json()
+        item = fresh["items"][0]
+        assert item["state_key"] == "s2" and item["run"]["status"] == "queued"
+        assert item["result"]["curves"] == []
+        assert item["result"]["calibration"]["state_key"] == "s2"
+        assert item["review"] == {}
+        assert client.put("/api/rag/spectra/"+collection_id+"/calibration", json=body).status_code == 409
+        foreign = {**body, "expected_collection_version": item["version"],
+                   "calibration": {**calibration, "state_key": "foreign"}}
+        assert client.put("/api/rag/spectra/"+collection_id+"/calibration", json=foreign).status_code == 422
+        actor[0] = stranger_id
+        assert client.get("/api/rag/spectra", params=query).status_code == 403
+        assert client.put("/api/rag/spectra/"+collection_id+"/calibration", json=foreign).status_code == 403
+        actor[0] = owner_id
+        states[1]["pressure_value_gpa"] = 210
+        assert client.put("/api/rag/spectra/"+collection_id+"/calibration",
+            json={**body,"expected_collection_version":item["version"]}).status_code == 409
+    with SessionLocal() as session:
+        row = session.get(models.SpectrumCollection, collection_id)
+        assert row.current_run_id != old_run
+        assert session.get(models.SpectrumRun, old_run).result_json == old_result
+        assert row.review_json == {}

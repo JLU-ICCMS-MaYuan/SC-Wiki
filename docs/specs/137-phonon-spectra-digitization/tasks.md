@@ -48,7 +48,7 @@ T020 完成依据：validation.md 的 2026-10-15 本机迁移记录、assets/loc
 
 T021 保持未完成：平台实际保存 3 条 DOS 与 1 条累计 λ，均待分配；α²F 尚无数值。GPT-6-sol 多图请求返回 HTTP 503，且 v1 颜色范围和图碎片导致信息缺失。用户要求查看配置以自行核查，已告知 .env 的 LLM2_BASE_URL / LLM2_API_KEY / LLM2_MODEL；待核查后继续用正式 API 重跑，不导入手工数据。
 
-- [ ] T023 [US7/FR-016/SC-013] 按用户已认可的 assets/spectra-navigation-demo/ 原型核对并完善 frontend/src/components/PropertySpectra.tsx、frontend/src/pages/SpectrumDetailPage.tsx 的按材料状态分类、两个明确入口、独立详情及返回定位；未归属候选单列，无数据状态不串用其他谱。补充 tests/01_decentralized_uploading/property-spectra-navigation.test.tsx 与真实浏览器／权限／数据归属验证，将实际结果记入 validation.md 后再勾选；Demo 认可不代替生产或科学验收。
+- [x] T023 [US7/FR-016/SC-013] 按用户已认可的 assets/spectra-navigation-demo/ 原型核对并完善 frontend/src/components/PropertySpectra.tsx、frontend/src/pages/SpectrumDetailPage.tsx 的按材料状态分类、两个明确入口、独立详情及返回定位；未归属候选单列，无数据状态不串用其他谱。补充 tests/01_decentralized_uploading/property-spectra-navigation.test.tsx 与真实浏览器／权限／数据归属验证，将实际结果记入 validation.md 后再勾选；Demo 认可不代替生产或科学验收。
 
 T023 使用既有谱数据身份与详情路由，依赖 T015/T017 的已验证基础，和 T021 的真实数据可用性分开记录；不更改 T018/T019/T021 的未完成状态，不在本次确认记录中实施。
 
@@ -56,3 +56,5 @@ T023 使用既有谱数据身份与详情路由，依赖 T015/T017 的已验证�
 - [x] T024 [FR-012/FR-015] 用户更新 API 后重启并核对任务快照，通过 SC-Wiki 正式 API/RQ 实跑 La-Sc-H；兼容可选零证据空数组，明确排除图内 λ 注记；核验三压力的 DOS/α²F、CSV/JSON、当前状态重算及实际浏览器，保存 assets/lasc-new-api-20261015.json/png。后端/原算法 73 项通过。
 
 T024 更新 T021 的历史进展：当前 290/300/350 GPa 的 La/Sc/H DOS 和 α²F 均有平台候选，最新一轮另有 290/350 GPa 累计 λ。首次完整输出为 15 条，重读后为 14 条；旧数值仍在历史版本，不拼接。六组当前候选无 stale，但均未采纳；T021 的完整科学质量核对与候选收敛仍未完成。本次 API 重试完成，不把 T018、T019 或 T023 的验收一并勾选。
+
+T023 完成依据（2026-10-15）：正式组件的谱导航 18 项、共用工作区 2 项，邻接统一表单／折叠／上传布局 56 项回归；共享数学及后端 73 项，隔离 MySQL 3 项（含真实 HTTP 归属、双版本冲突、无关用户读写拒绝、旧运行保留及采纳失效）；生产构建通过。浏览器使用实际平台数据副本验证 DOS／α²F 入口、原图、空结果候选、返回聚焦、归属重算、匿名拒绝和带来源 CSV；390px 下页面宽度保持 390。完整结果与界限见 assets/navigation-production-20261015.json。此前“不在本次确认记录中实施”为认可记录阶段，此后用户明确要求开始执行；不据此改变其他未完成任务或关闭整个 Issue。

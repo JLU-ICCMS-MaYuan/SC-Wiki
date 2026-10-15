@@ -1,6 +1,6 @@
 import { changedScientificFields } from '../lib/evidenceFields'
 import { materialStateSummary } from '../lib/materialStateSummary'
-import { PropertySpectraProvider, PropertySpectrumState, type PropertySpectraContext } from './PropertySpectra'
+import { PropertySpectraProvider, PropertySpectrumState, PropertySpectrumControls, UnassignedPropertySpectra, type PropertySpectraContext } from './PropertySpectra'
 import { materialIdentityMissing, materialLabel } from '../lib/materialIdentity'
 import React, { useEffect, useRef, useState } from 'react'
 import {
@@ -22,7 +22,7 @@ import {
 import { useLanguage } from '../context/LanguageContext'
 import StructureCandidatePanel from './StructureCandidatePanel'
 import PropertyModuleEditor from './PropertyModuleEditor'
-import { SpectrumProvider, SpectrumControls, type SpectrumTarget } from './SpectrumWorkspace'
+import type { PropertySpectrumTarget as SpectrumTarget } from '../lib/propertySpectra'
 import PressureEditor from './PressureEditor'
 import { PROPERTY_SCHEMA_VERSION } from '../lib/propertyModules'
 import {
@@ -250,6 +250,28 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   statesRef.current = states
   // 折叠状态与元素种类数编辑仅存在于浏览器会话内，不写入草稿、不参与自动保存
   const [collapsedStates, setCollapsedStates] = useState<Record<number, boolean>>({})
+  const restoredSpectrumAnchor = useRef('')
+  useEffect(() => {
+    let frame = 0
+    const restore = () => {
+      const hash = window.location.hash
+      if (hash === restoredSpectrumAnchor.current || !hash.startsWith('#material-state-')) return
+      let id: string
+      try { id = decodeURIComponent(hash.slice(1)) } catch { return }
+      const index = states.findIndex((state, index) => 'material-state-' + (state.state_key || 'state-' + (index + 1)) === id)
+      if (index < 0) return
+      restoredSpectrumAnchor.current = hash
+      setCollapsedStates(current => ({ ...current, [index]: false }))
+      frame = window.requestAnimationFrame(() => {
+        const card = document.getElementById(id)
+        card?.scrollIntoView?.({ block: 'start' })
+        if (card) { card.tabIndex = -1; card.focus({ preventScroll: true }) }
+      })
+    }
+    restore()
+    window.addEventListener('hashchange', restore)
+    return () => { window.cancelAnimationFrame(frame); window.removeEventListener('hashchange', restore) }
+  }, [states])
   const [elementCountEdits, setElementCountEdits] = useState<Record<number, { text: string; invalid: boolean }>>({})
   const [structureUploading, setStructureUploading] = useState<Record<number, boolean>>({})
   // 未分配候选的目标材料状态下标（纯 UI 态，不写入草稿）
@@ -580,10 +602,10 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   }
 
   return (
-    <SpectrumProvider target={spectrumTarget} states={states} beforeEdit={beforeSpectrumEdit} readOnly={readOnly}>
-    <PropertySpectraProvider context={propertySpectra}>
+    <PropertySpectraProvider context={propertySpectra || (spectrumTarget ? { target: spectrumTarget, beforeNavigate: beforeSpectrumEdit } : undefined)}
+      stateKeys={states.map((state, index) => state.state_key || 'state-' + (index + 1))} readOnly={readOnly}>
     <Box sx={readOnly ? { pointerEvents: 'none', '& .MuiButton-root': { display: 'none' } } : undefined}>
-      <SpectrumControls />
+      <PropertySpectrumControls />
       <Box sx={{ mt: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
           <Typography variant="h6" fontWeight={700}>{t('upload.materialStatesTitle')}</Typography>
@@ -953,8 +975,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
         </Box>
       </Box>
     </Box>
+    <UnassignedPropertySpectra />
     </PropertySpectraProvider>
-    </SpectrumProvider>
   )
 }
 

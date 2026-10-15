@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-15T16:28:27.604752+08:00",
+  "feature": "137 / T023 / US7 / FR-016 / SC-013",
+  "source_snapshot": {
+    "task_id": "c16cc627a0c04dc8ad4289624d1da80a",
+    "states": 7,
+    "collections": 15,
+    "assigned": 8,
+    "curve_kinds": [
+      "alpha2f",
+      "cumulative_lambda",
+      "phonon_dos"
+    ],
+    "schema": "scwiki_issue137_test_t023_20261015_160520",
+    "cloned_tables": 59,
+    "business_writes": false,
+    "test_only_schema_alignment": "20261015_0094"
+  },
+  "browser_fixture": {
+    "task_id": "501a77c50c1943d6aa024942612cd1d1",
+    "user_id": 1013,
+    "primary_state": "state-6",
+    "states": [
+      "state-1",
+      "state-6"
+    ],
+    "source_task": "c16cc627a0c04dc8ad4289624d1da80a",
+    "schema": "scwiki_issue137_test_t023_20261015_160520",
+    "real_platform_copy": true
+  },
+  "tests": {
+    "navigation": 18,
+    "spectrum_workspace": 2,
+    "adjacent_frontend": 56,
+    "backend_math": 73,
+    "isolated_mysql": 3,
+    "production_build": "passed"
+  },
+  "browser_checks": [
+    "grouped_dos_and_alpha2f_buttons",
+    "state_pressure_separation",
+    "private_source_image",
+    "numeric_curve_and_table",
+    "empty_failed_candidate_no_fake_curve",
+    "material_anchor_and_focus",
+    "unassigned_anchor_and_focus",
+    "assignment_new_run_and_recompute",
+    "anonymous_private_access_rejected",
+    "csv_state_and_source_preserved",
+    "390px_document_width_390"
+  ],
+  "csv_rows": 456,
+  "narrow": {
+    "viewport_width": 390,
+    "document_width": 390
+  },
+  "screenshots": [
+    "/Users/mayuan/.codex/visualizations/2026/10/15/01a13e47-5051-7842-aea4-8c0885bafc14/spectra-production-overview.png",
+    "/Users/mayuan/.codex/visualizations/2026/10/15/01a13e47-5051-7842-aea4-8c0885bafc14/spectra-production-detail.png",
+    "/Users/mayuan/.codex/visualizations/2026/10/15/01a13e47-5051-7842-aea4-8c0885bafc14/spectra-production-narrow.png"
+  ],
+  "limits": [
+    "isolated fixture only; no business DB writes or migration",
+    "no new LLM extraction or scientific approval",
+    "test process dispatches unchanged jobs.run_job; not proof of RQ deployment",
+    "remote links not verified; no push"
+  ],
+  "isolated_candidate_verification": {
+    "base_commit": "fb7c8bdce0903e732d330c1fb59834754c46732b",
+    "scope": "Git 暂存区快照，只含 HEAD 与本次精确增量；不复制工作区未提交改动",
+    "frontend_navigation_and_workspace": 20,
+    "mysql": 3,
+    "production_build": "passed",
+    "other_tasks_uncommitted_changes": "excluded"
+  }
+}

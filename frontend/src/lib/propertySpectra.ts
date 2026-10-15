@@ -8,12 +8,49 @@ export interface PropertySpectrumItem {
   source: { source_name?: string; pdf_page?: number; panel_id?: string; size_px?: number[]; [key: string]: unknown }
   run: { id?: string; status: string; error_message?: string; algorithm_version?: string }
   review: Record<string, { status?: string; reason?: string; frequency_intervals_thz?: number[][] }>
-  result: { curves: PropertySpectrumCurve[]; quality?: Record<string, unknown>; candidates?: Record<string, any>; calibration?: Record<string, unknown>; failures?: unknown[] }
+  result: { curves: PropertySpectrumCurve[]; quality?: Record<string, any>; candidates?: Record<string, any>; calibration?: Record<string, any>; failures?: unknown[] }
 }
-export interface PropertySpectrumListing { items: PropertySpectrumItem[]; jobs: Array<{ id: string; status: string }>; version: string; can_edit: boolean; can_review: boolean }
+export interface PropertySpectrumListing { items: PropertySpectrumItem[]; jobs: Array<{ id: string; status: string; error_message?: string }>; version: string; can_edit: boolean; can_review: boolean }
 export const SPECTRUM_API = '/api/rag/spectra'
 export const spectrumQuery = (target: PropertySpectrumTarget) => new URLSearchParams(target).toString()
 export const spectrumNames: Record<string, string> = { phonon_dos: '声子 DOS', alpha2f: 'α²F 谱函数', cumulative_lambda: '累计 λ', needs_review: '待核对', accepted: '已采纳', accepted_limited: '限定频段采纳', excluded: '已排除', queued: '排队中', running: '解析中', succeeded: '解析完成', failed: '解析失败', observed: '原图观测', interpolated: '短缺口插值', baseline_inferred: '近轴推断', boundary_assumption: '边界假设', edge_continuation: '平台延续', missing: '缺失' }
+
+export interface PropertySpectrumGroup {
+  item: PropertySpectrumItem
+  kind: 'phonon_dos' | 'alpha2f'
+  curves: PropertySpectrumCurve[]
+}
+
+/** 仅合并同集合的投影或累计谱；不同材料、近似和来源集合保持独立。 */
+export function spectrumGroups(items: PropertySpectrumItem[], stateKey: string): PropertySpectrumGroup[] {
+  return items.filter(item => item.state_key === stateKey).flatMap(item =>
+    (['phonon_dos', 'alpha2f'] as const).flatMap(kind => {
+      const curves = item.result.curves.filter(curve => kind === 'phonon_dos'
+        ? curve.kind === kind : ['alpha2f', 'cumulative_lambda'].includes(curve.kind))
+      const calibrated = item.result.calibration?.curves?.some((curve: { kind: string }) => kind === 'phonon_dos'
+        ? curve.kind === kind : ['alpha2f', 'cumulative_lambda'].includes(curve.kind))
+      return curves.length || calibrated ? [{ item, kind, curves }] : []
+    }))
+}
+
+export function spectrumInterval(curves: PropertySpectrumCurve[]): string {
+  let minimum = Infinity, maximum = -Infinity
+  for (const curve of curves) for (const point of curve.points) {
+    if (Number.isFinite(point.frequency_thz)) {
+      minimum = Math.min(minimum, point.frequency_thz)
+      maximum = Math.max(maximum, point.frequency_thz)
+    }
+  }
+  return Number.isFinite(minimum) ? String(Number(minimum.toPrecision(5))) + '–' + Number(maximum.toPrecision(5)) + ' THz' : '频域未确定'
+}
+
+export function spectrumDetailPath(target: PropertySpectrumTarget, item: PropertySpectrumItem,
+  returnTo: string, curve?: PropertySpectrumCurve): string {
+  const params = new URLSearchParams({ ...target, state_key: item.state_key || 'unassigned',
+    collection_version: String(item.version), run: item.run.id || '', return: returnTo })
+  if (curve) params.set('curve', curve.id)
+  return '/spectra/' + encodeURIComponent(item.id) + '?' + params
+}
 export async function loadPropertySpectra(target: PropertySpectrumTarget, signal?: AbortSignal): Promise<PropertySpectrumListing> {
   const listing = await api.get<PropertySpectrumListing>(`${SPECTRUM_API}?${spectrumQuery(target)}`, { signal })
   if (!Array.isArray(listing?.items) || !Array.isArray(listing?.jobs)) throw new Error('谱服务返回结构无效')

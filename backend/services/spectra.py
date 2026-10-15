@@ -249,6 +249,9 @@ def listing(session, ctx):
         stale = source_stale or row.state_signature != state_signature(states.get(row.state_key))
         reviews = {} if stale else row.review_json or {}
         payload = run.result_json or dict(curves=[], candidates={}, quality={}, failures=[])
+        # 排队或失败的新运行也保留其真实标定，供按谱类型导航；不生成数值曲线。
+        if not payload.get("calibration") and (run.calibration_json or {}).get("curves"):
+            payload = {**payload, "calibration": copy.deepcopy(run.calibration_json)}
         if stale:
             payload = copy.deepcopy(payload)
             for comparisons in payload.get("quality", {}).get("comparisons", {}).values():
