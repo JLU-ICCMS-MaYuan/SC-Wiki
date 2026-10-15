@@ -23,7 +23,8 @@ DOS 无幅值刻度时以幅值零轴为0，幅值方向一个像素为1，unit=
 α²F 与 λ 的幅值必须读取真正刻度，unit=dimensionless；不能确认规范时 unit=unknown、physical_definition_confirmed=false。
 physical_definition_confirmed=true 仅限图注/坐标明确支持普通频率和标准 α²F/累计λ；不按目标值推断。
 projection_complete 与 projection_scale_confirmed 仅在完整元素合计、同一坐标框依据明确时为true。
-exclude 必须屏蔽同色图例和文字。zero_boundaries_thz 仅在确有近零端点且符合可见频域时指定，不把看不见的尾巴外推为零。
+exclude 必须屏蔽同色图例和文字，尤其是图内“λ=…”数值注记、面板字母和压力文字；这些文字绝不能作为曲线或累计 λ 终点。分别圈住文字/图例，不用覆盖整行的大框误删真实轨迹；与真实线重叠而无法分离时在 issues 记录限制。
+zero_boundaries_thz 仅在确有近零端点且符合可见频域时指定，不把看不见的尾巴外推为零。
 zero_reference_band_thz 为近幅值零轴的可见平直有色参考带且至少覆盖5像素；这是分辨率候选，不是物理严格零证明。
 请精确辨认图框和刻度像素，避免把边框外空白纳入曲线。issues 可说明裁边、未知单位、黑白、对数或重叠限制。"""
 

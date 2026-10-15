@@ -45,3 +45,8 @@ FR-012→discovery/vision/engine→T014/T018；FR-013→models/服务/RQ/事务�
 标定颜色支持 red/blue/green/magenta/olive；olive 也是服务器和人工校对的正式颜色值。可选 IR 不存在时使用原 PDF，存储故障/摘要损坏仍报错。上下相接图片可按原 PDF 坐标渲染为完整图，source_mode=rendered_composite，保存 native_fragment_boxes_pdf_pt、固定 DPI 与变换；矢量图优先用图注和实际绘图框定位，不把纯文字页当作谱。
 
 失败占位与有未解决问题的发现运行状态为 needs_review，不作为成功缓存；历史 succeeded 空结果读取时同样显示 needs_review。发现 detail 分别包含 collections、extracted_collections、curve_count。采纳规则和服务器质量计算保持不变，模型成功生成标定不代表数据已验收。
+
+
+## 可选零证据的空值语义
+
+zero_boundaries_thz 的空数组或 null 统一为 [null,null]，zero_reference_band_thz 的空数组或 null 统一为 null；均表示缺少证据，不表示零幅值、零频边界或允许插值。非空且长度错误仍拒绝。模型须分别屏蔽图内 λ 数值注记及同色文字，不能将文字当作累计曲线终点。

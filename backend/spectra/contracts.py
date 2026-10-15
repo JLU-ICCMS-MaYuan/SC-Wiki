@@ -4,7 +4,7 @@ from typing import Literal
 import hashlib
 import json
 import math
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 ALGORITHM_VERSION = "spectra-production-v2"
 FREQUENCY_FACTORS = {"THz": 1., "cm-1": .0299792458, "meV": .2417989242084918}
@@ -40,6 +40,14 @@ class CurveCalibration(BaseModel):
     exclude: list[tuple[int, int, int, int]] = Field(default_factory=list)
     zero_boundaries_thz: tuple[float | None, float | None] = (None, None)
     zero_reference_band_thz: tuple[float, float] | None = None
+
+    @field_validator("zero_boundaries_thz", "zero_reference_band_thz", mode="before")
+    @classmethod
+    def empty_zero_evidence(cls, value, info):
+        # 供应商可能用 []/null 表示未提供；未知不能转成物理零值。
+        if value is None or value == []:
+            return (None, None) if info.field_name == "zero_boundaries_thz" else None
+        return value
 
     @model_validator(mode="after")
     def validate_axes(self):

@@ -357,3 +357,24 @@ def test_legacy_empty_success_is_displayed_as_pending_without_rewriting_run(db_s
     assert run.status == "succeeded"
     assert service.listing(db_session, ctx)["items"][0]["run"]["status"] == "needs_review"
     assert run.status == "succeeded"
+
+
+
+@pytest.mark.parametrize("empty", [None, []])
+def test_empty_model_zero_evidence_stays_unknown(empty):
+    image, panel = fixture()
+    panel["curves"][0]["zero_boundaries_thz"] = empty
+    panel["curves"][0]["zero_reference_band_thz"] = empty
+    result = extract_panel(image, panel)
+    calibration = result["calibration"]["curves"][0]
+    assert list(calibration["zero_boundaries_thz"]) == [None, None]
+    assert calibration["zero_reference_band_thz"] is None
+    assert all(p["status"] == "observed" for p in result["curves"][0]["points"])
+
+
+@pytest.mark.parametrize("invalid", [[0], [0, 1, 2]])
+def test_malformed_nonempty_zero_evidence_is_still_rejected(invalid):
+    image, panel = fixture()
+    panel["curves"][0]["zero_boundaries_thz"] = invalid
+    with pytest.raises(ValueError):
+        extract_panel(image, panel)

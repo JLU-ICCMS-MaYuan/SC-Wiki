@@ -1,0 +1,1084 @@
+{
+  "timestamp": "2026-10-15T16:08:51.444136+08:00",
+  "target": {
+    "target": "upload",
+    "target_id": "c16cc627a0c04dc8ad4289624d1da80a"
+  },
+  "model": "gpt-6-sol",
+  "updated_config_snapshot_verified": true,
+  "platform": "SC-Wiki HTTP API + RQ",
+  "manual_calibration_used": false,
+  "independent_extraction_used": false,
+  "jobs": [
+    {
+      "id": "b61efeb26ca446cda02fee4d1c177a07",
+      "status": "needs_review",
+      "error_code": "spectra_extraction_incomplete",
+      "error_message": "谱标定或提取未完成，请查看待处理原因后重试",
+      "detail": {
+        "issues": [
+          {
+            "page": 4,
+            "reason": "声子色散图已排除；橙色线宽标记不作为 DOS 或 α²F 曲线。",
+            "file_id": "261650f32fe54375af8abbd83d7576f6"
+          },
+          {
+            "page": 4,
+            "reason": "phDOS 未显示幅值数字刻度，因此采用幅值零轴与逐像素标定；不能据此得到物理态密度单位。",
+            "file_id": "261650f32fe54375af8abbd83d7576f6"
+          },
+          {
+            "page": 4,
+            "reason": "右侧图框未单独标注频率刻度，其纵向频率标定沿用同一行左侧可见的 THz 刻度。",
+            "file_id": "261650f32fe54375af8abbd83d7576f6"
+          },
+          {
+            "page": 4,
+            "reason": "蓝色 λ 数值注记与曲线分别处理；图框顶部附近的曲线不外推到框外。",
+            "file_id": "261650f32fe54375af8abbd83d7576f6"
+          },
+          {
+            "page": 3,
+            "reason": "图 3A 为声子色散、图 3D 为超导能隙，均不属于本次标定范围。",
+            "file_id": "fc404abeb1e74ac2bd33d8691af97564"
+          },
+          {
+            "page": 3,
+            "reason": "图 3C 的累计 λ 曲线呈蓝紫色，无法可靠归入限定的五种颜色，故未给出该曲线的标定。",
+            "file_id": "fc404abeb1e74ac2bd33d8691af97564"
+          },
+          {
+            "page": 3,
+            "reason": "图 3B 无声子态密度幅值刻度；幅值按横向像素标定。频率刻度取自与 B、C 共用高度的图 3A 频率轴。",
+            "file_id": "fc404abeb1e74ac2bd33d8691af97564"
+          },
+          {
+            "page": 5,
+            "reason": "该页只有正文、参考文献和其他文字，没有可见的声子 DOS、α²F 或累计 λ 谱图，无法进行图像数字化标定。",
+            "file_id": "fc404abeb1e74ac2bd33d8691af97564"
+          },
+          {
+            "page": 6,
+            "reason": "该页仅含参考文献，没有声子 DOS、α²F 或累计 λ 谱图，无法进行图像标定。",
+            "file_id": "fc404abeb1e74ac2bd33d8691af97564"
+          }
+        ],
+        "status": "needs_review",
+        "collections": 8,
+        "curve_count": 14,
+        "extracted_collections": 6,
+        "image_capability_verified": true
+      }
+    }
+  ],
+  "items": [
+    {
+      "id": "252034678cdb4455b1e5be5f2b147b31",
+      "version": 5,
+      "state_key": "state-6",
+      "stale": false,
+      "pressure_gpa": 300.0,
+      "source": {
+        "file": "2024 La-Sc-H 何新玲.pdf",
+        "page": 3,
+        "mode": "rendered"
+      },
+      "run": {
+        "id": "f7c7b922530147609911f07f7c6a5df8",
+        "status": "succeeded",
+        "error_code": null,
+        "error_message": null,
+        "algorithm_version": "spectra-production-v2",
+        "model_name": "gpt-6-sol"
+      },
+      "review": {},
+      "csv_rows": 1368,
+      "curves": [
+        {
+          "id": "3B-La",
+          "kind": "phonon_dos",
+          "projection": "La",
+          "unit": "pixel",
+          "points": 456,
+          "quality": {
+            "counts": {
+              "missing": 374,
+              "observed": 56,
+              "interpolated": 26,
+              "baseline_inferred": 0,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 456,
+            "missing_fraction": 0.8201754385964912,
+            "observed_fraction": 0.12280701754385964,
+            "amplitude_tick_count": 2,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.04464248807479976,
+              67.60195434892236
+            ],
+            "reconstructed_fraction": 0.05701754385964912,
+            "amplitude_tick_residual": 3.410605131648481e-13,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 0.059357974884392206,
+            "chromatic_recovered_points": 5,
+            "frequency_pixel_resolution_thz": 0.14847760848537928,
+            "largest_unobserved_gap_samples": 364,
+            "missing_frequency_intervals_thz": [
+              [
+                0.04464248807479976,
+                1.380940964443198
+              ],
+              [
+                13.704582468729685,
+                67.60195434892236
+              ]
+            ],
+            "linearity_independently_checkable": false,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.04464248807479976
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        },
+        {
+          "id": "3B-Sc",
+          "kind": "phonon_dos",
+          "projection": "Sc",
+          "unit": "pixel",
+          "points": 456,
+          "quality": {
+            "counts": {
+              "missing": 170,
+              "observed": 152,
+              "interpolated": 7,
+              "baseline_inferred": 127,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 456,
+            "missing_fraction": 0.3728070175438597,
+            "observed_fraction": 0.3333333333333333,
+            "amplitude_tick_count": 2,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.04464248807479976,
+              67.60195434892236
+            ],
+            "reconstructed_fraction": 0.29385964912280704,
+            "amplitude_tick_residual": 3.410605131648481e-13,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 0.059357974884392206,
+            "chromatic_recovered_points": 79,
+            "frequency_pixel_resolution_thz": 0.14847760848537928,
+            "largest_unobserved_gap_samples": 93,
+            "missing_frequency_intervals_thz": [
+              [
+                0.04464248807479976,
+                1.8263737898993495
+              ],
+              [
+                36.42165656699271,
+                50.08159654764762
+              ],
+              [
+                58.24786501434346,
+                67.60195434892236
+              ]
+            ],
+            "linearity_independently_checkable": false,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.04464248807479976
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        },
+        {
+          "id": "3B-H",
+          "kind": "phonon_dos",
+          "projection": "H",
+          "unit": "pixel",
+          "points": 456,
+          "quality": {
+            "counts": {
+              "missing": 50,
+              "observed": 377,
+              "interpolated": 12,
+              "baseline_inferred": 17,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 456,
+            "missing_fraction": 0.10964912280701754,
+            "observed_fraction": 0.8267543859649122,
+            "amplitude_tick_count": 2,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.04464248807479976,
+              67.60195434892236
+            ],
+            "reconstructed_fraction": 0.06359649122807018,
+            "amplitude_tick_residual": 3.410605131648481e-13,
+            "clipped_frequencies_thz": [
+              54.3874471937236,
+              54.23896958523824,
+              42.50923851489327
+            ],
+            "frequency_tick_residual": 0.059357974884392206,
+            "chromatic_recovered_points": 12,
+            "frequency_pixel_resolution_thz": 0.14847760848537928,
+            "largest_unobserved_gap_samples": 28,
+            "missing_frequency_intervals_thz": [
+              [
+                0.04464248807479976,
+                4.053537917180023
+              ],
+              [
+                64.48392457072939,
+                67.60195434892236
+              ]
+            ],
+            "linearity_independently_checkable": false,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.04464248807479976
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        }
+      ],
+      "integrals": {},
+      "comparisons": {},
+      "cumulative_endpoint": null,
+      "limitations": [
+        "图像包络不是统计置信区间",
+        "积分一致是物理约束，不独立证明准确度",
+        "抵框峰只提供带掩膜候选，不唯一恢复峰顶",
+        "质量指标不自动授予科学采纳"
+      ]
+    },
+    {
+      "id": "afd8723697e84425b75790cfbafb4862",
+      "version": 5,
+      "state_key": "state-6",
+      "stale": false,
+      "pressure_gpa": 300.0,
+      "source": {
+        "file": "2024 La-Sc-H 何新玲.pdf",
+        "page": 3,
+        "mode": "rendered"
+      },
+      "run": {
+        "id": "069e542aba8e45dca77a60d5ba0b9d22",
+        "status": "succeeded",
+        "error_code": null,
+        "error_message": null,
+        "algorithm_version": "spectra-production-v2",
+        "model_name": "gpt-6-sol"
+      },
+      "review": {},
+      "csv_rows": 456,
+      "curves": [
+        {
+          "id": "3C-alpha2f",
+          "kind": "alpha2f",
+          "projection": null,
+          "unit": "dimensionless",
+          "points": 456,
+          "quality": {
+            "counts": {
+              "missing": 32,
+              "observed": 411,
+              "interpolated": 13,
+              "baseline_inferred": 0,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 456,
+            "missing_fraction": 0.07017543859649122,
+            "observed_fraction": 0.9013157894736842,
+            "amplitude_tick_count": 4,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.04464248807479976,
+              67.60195434892236
+            ],
+            "reconstructed_fraction": 0.02850877192982456,
+            "amplitude_tick_residual": 1.0658141036401504e-14,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 0.059357974884392206,
+            "chromatic_recovered_points": 14,
+            "frequency_pixel_resolution_thz": 0.14847760848537928,
+            "largest_unobserved_gap_samples": 21,
+            "missing_frequency_intervals_thz": [
+              [
+                0.04464248807479976,
+                1.5294185729285914
+              ],
+              [
+                64.63240217921478,
+                67.60195434892236
+              ]
+            ],
+            "linearity_independently_checkable": true,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.04464248807479976
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        }
+      ],
+      "integrals": {
+        "raw": {
+          "cutoff_thz": 0.0,
+          "omega_log_k": 1006.1837523933168,
+          "lambda_integral": 3.209477020311848,
+          "frequency_log_thz": 20.96546761670008,
+          "integration_method": "exact_piecewise_linear_alpha2f",
+          "zero_interval_lambda": 0.0,
+          "minimum_integrated_thz": 1.6778961814139564,
+          "positive_frequency_complete": false
+        }
+      },
+      "comparisons": {
+        "raw": {
+          "lambda": {
+            "reason": "缺少同条件、可定位的论文报告值",
+            "source": null,
+            "status": "unavailable",
+            "reference": null,
+            "signed_difference": null,
+            "absolute_difference": null,
+            "relative_difference_pct": null
+          },
+          "omega_log": {
+            "reason": "缺少同条件、可定位的论文报告值",
+            "source": null,
+            "status": "unavailable",
+            "reference": null,
+            "signed_difference": null,
+            "absolute_difference": null,
+            "relative_difference_pct": null
+          }
+        }
+      },
+      "cumulative_endpoint": null,
+      "limitations": [
+        "图像包络不是统计置信区间",
+        "积分一致是物理约束，不独立证明准确度",
+        "抵框峰只提供带掩膜候选，不唯一恢复峰顶",
+        "质量指标不自动授予科学采纳"
+      ]
+    },
+    {
+      "id": "c340f3c41b144662808c0933d1e75248",
+      "version": 3,
+      "state_key": "state-5",
+      "stale": false,
+      "pressure_gpa": 290.0,
+      "source": {
+        "file": "2024 La-Sc-H 何新玲-SI.pdf",
+        "page": 4,
+        "mode": "rendered_composite"
+      },
+      "run": {
+        "id": "4155b9543bda491ea593efda6c6c8c36",
+        "status": "succeeded",
+        "error_code": null,
+        "error_message": null,
+        "algorithm_version": "spectra-production-v2",
+        "model_name": "gpt-6-sol"
+      },
+      "review": {},
+      "csv_rows": 770,
+      "curves": [
+        {
+          "id": "A-alpha2f",
+          "kind": "alpha2f",
+          "projection": null,
+          "unit": "dimensionless",
+          "points": 385,
+          "quality": {
+            "counts": {
+              "missing": 0,
+              "observed": 379,
+              "interpolated": 6,
+              "baseline_inferred": 0,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 385,
+            "missing_fraction": 0.0,
+            "observed_fraction": 0.9844155844155844,
+            "amplitude_tick_count": 5,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.11366215109566724,
+              62.400520951525856
+            ],
+            "reconstructed_fraction": 0.015584415584415584,
+            "amplitude_tick_residual": 0.01033571027963376,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 0.06492161060846513,
+            "chromatic_recovered_points": 10,
+            "frequency_pixel_resolution_thz": 0.1622053614594536,
+            "largest_unobserved_gap_samples": 3,
+            "missing_frequency_intervals_thz": [],
+            "linearity_independently_checkable": true,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.11366215109566724
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        },
+        {
+          "id": "A-lambda",
+          "kind": "cumulative_lambda",
+          "projection": null,
+          "unit": "dimensionless",
+          "points": 385,
+          "quality": {
+            "counts": {
+              "missing": 1,
+              "observed": 381,
+              "interpolated": 3,
+              "baseline_inferred": 0,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 385,
+            "missing_fraction": 0.0025974025974025974,
+            "observed_fraction": 0.9896103896103896,
+            "amplitude_tick_count": 5,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.11366215109566724,
+              62.400520951525856
+            ],
+            "reconstructed_fraction": 0.007792207792207792,
+            "amplitude_tick_residual": 0.01033571027963376,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 0.06492161060846513,
+            "chromatic_recovered_points": 2,
+            "frequency_pixel_resolution_thz": 0.1622053614594536,
+            "largest_unobserved_gap_samples": 3,
+            "missing_frequency_intervals_thz": [
+              [
+                0.11366215109566724,
+                0.11366215109566724
+              ]
+            ],
+            "linearity_independently_checkable": true,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.11366215109566724
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        }
+      ],
+      "integrals": {
+        "raw": {
+          "cutoff_thz": 0.0,
+          "omega_log_k": 646.0681917954241,
+          "lambda_integral": 3.931563318151855,
+          "frequency_log_thz": 13.4618768401382,
+          "integration_method": "exact_piecewise_linear_alpha2f",
+          "zero_interval_lambda": 0.0,
+          "minimum_integrated_thz": 0.11366215109566724,
+          "positive_frequency_complete": true
+        }
+      },
+      "comparisons": {
+        "raw": {
+          "lambda": {
+            "reason": "缺少同条件、可定位的论文报告值",
+            "source": null,
+            "status": "unavailable",
+            "reference": null,
+            "signed_difference": null,
+            "absolute_difference": null,
+            "relative_difference_pct": null
+          },
+          "omega_log": {
+            "reason": "缺少同条件、可定位的论文报告值",
+            "source": null,
+            "status": "unavailable",
+            "reference": null,
+            "signed_difference": null,
+            "absolute_difference": null,
+            "relative_difference_pct": null
+          }
+        }
+      },
+      "cumulative_endpoint": {
+        "value": 3.547772614373855,
+        "frequency_thz": 62.400520951525856
+      },
+      "limitations": [
+        "图像包络不是统计置信区间",
+        "积分一致是物理约束，不独立证明准确度",
+        "抵框峰只提供带掩膜候选，不唯一恢复峰顶",
+        "质量指标不自动授予科学采纳"
+      ]
+    },
+    {
+      "id": "17d6b76963e2486aa5c4afbcbcf20d60",
+      "version": 3,
+      "state_key": "state-5",
+      "stale": false,
+      "pressure_gpa": 290.0,
+      "source": {
+        "file": "2024 La-Sc-H 何新玲-SI.pdf",
+        "page": 4,
+        "mode": "rendered_composite"
+      },
+      "run": {
+        "id": "1feb33d1335d4f0588fa6bd3253664f1",
+        "status": "succeeded",
+        "error_code": null,
+        "error_message": null,
+        "algorithm_version": "spectra-production-v2",
+        "model_name": "gpt-6-sol"
+      },
+      "review": {},
+      "csv_rows": 1155,
+      "curves": [
+        {
+          "id": "A-La-phDOS",
+          "kind": "phonon_dos",
+          "projection": "La",
+          "unit": "pixel",
+          "points": 385,
+          "quality": {
+            "counts": {
+              "missing": 275,
+              "observed": 78,
+              "interpolated": 32,
+              "baseline_inferred": 0,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 385,
+            "missing_fraction": 0.7142857142857143,
+            "observed_fraction": 0.2025974025974026,
+            "amplitude_tick_count": 2,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.11366215109566724,
+              62.400520951525856
+            ],
+            "reconstructed_fraction": 0.08311688311688312,
+            "amplitude_tick_residual": 5.684341886080803e-14,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 0.06492161060846513,
+            "chromatic_recovered_points": 34,
+            "frequency_pixel_resolution_thz": 0.1622053614594536,
+            "largest_unobserved_gap_samples": 227,
+            "missing_frequency_intervals_thz": [
+              [
+                0.11366215109566724,
+                1.5735104042307595
+              ],
+              [
+                12.765680344933052,
+                15.036555405365403
+              ],
+              [
+                21.524769863743543,
+                25.093287815851525
+              ],
+              [
+                25.742109261689343,
+                62.400520951525856
+              ]
+            ],
+            "linearity_independently_checkable": false,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.11366215109566724
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        },
+        {
+          "id": "A-Sc-phDOS",
+          "kind": "phonon_dos",
+          "projection": "Sc",
+          "unit": "pixel",
+          "points": 385,
+          "quality": {
+            "counts": {
+              "missing": 151,
+              "observed": 124,
+              "interpolated": 2,
+              "baseline_inferred": 108,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 385,
+            "missing_fraction": 0.3922077922077922,
+            "observed_fraction": 0.3220779220779221,
+            "amplitude_tick_count": 2,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.11366215109566724,
+              62.400520951525856
+            ],
+            "reconstructed_fraction": 0.2857142857142857,
+            "amplitude_tick_residual": 5.684341886080803e-14,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 0.06492161060846513,
+            "chromatic_recovered_points": 62,
+            "frequency_pixel_resolution_thz": 0.1622053614594536,
+            "largest_unobserved_gap_samples": 110,
+            "missing_frequency_intervals_thz": [
+              [
+                0.11366215109566724,
+                1.897921127149658
+              ],
+              [
+                14.22552859806813,
+                31.905912997148576
+              ],
+              [
+                57.85877083066116,
+                62.400520951525856
+              ]
+            ],
+            "linearity_independently_checkable": false,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.11366215109566724
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        },
+        {
+          "id": "A-H-phDOS",
+          "kind": "phonon_dos",
+          "projection": "H",
+          "unit": "pixel",
+          "points": 385,
+          "quality": {
+            "counts": {
+              "missing": 28,
+              "observed": 332,
+              "interpolated": 8,
+              "baseline_inferred": 17,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 385,
+            "missing_fraction": 0.07272727272727272,
+            "observed_fraction": 0.8623376623376623,
+            "amplitude_tick_count": 2,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.11366215109566724,
+              62.400520951525856
+            ],
+            "reconstructed_fraction": 0.06493506493506493,
+            "amplitude_tick_residual": 5.684341886080803e-14,
+            "clipped_frequencies_thz": [
+              45.20675263682377,
+              45.04454727536432
+            ],
+            "frequency_tick_residual": 0.06492161060846513,
+            "chromatic_recovered_points": 11,
+            "frequency_pixel_resolution_thz": 0.1622053614594536,
+            "largest_unobserved_gap_samples": 28,
+            "missing_frequency_intervals_thz": [
+              [
+                0.11366215109566724,
+                4.493206910500916
+              ]
+            ],
+            "linearity_independently_checkable": false,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.11366215109566724
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        }
+      ],
+      "integrals": {},
+      "comparisons": {},
+      "cumulative_endpoint": null,
+      "limitations": [
+        "图像包络不是统计置信区间",
+        "积分一致是物理约束，不独立证明准确度",
+        "抵框峰只提供带掩膜候选，不唯一恢复峰顶",
+        "质量指标不自动授予科学采纳"
+      ]
+    },
+    {
+      "id": "0613a47f9d4a4acc81e1a1a21f5985b9",
+      "version": 3,
+      "state_key": "state-7",
+      "stale": false,
+      "pressure_gpa": 350.0,
+      "source": {
+        "file": "2024 La-Sc-H 何新玲-SI.pdf",
+        "page": 4,
+        "mode": "rendered_composite"
+      },
+      "run": {
+        "id": "33f46daf17d540a982ba1afdee9acc03",
+        "status": "succeeded",
+        "error_code": null,
+        "error_message": null,
+        "algorithm_version": "spectra-production-v2",
+        "model_name": "gpt-6-sol"
+      },
+      "review": {},
+      "csv_rows": 834,
+      "curves": [
+        {
+          "id": "B-alpha2f",
+          "kind": "alpha2f",
+          "projection": null,
+          "unit": "dimensionless",
+          "points": 417,
+          "quality": {
+            "counts": {
+              "missing": 6,
+              "observed": 400,
+              "interpolated": 11,
+              "baseline_inferred": 0,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 417,
+            "missing_fraction": 0.014388489208633094,
+            "observed_fraction": 0.9592326139088728,
+            "amplitude_tick_count": 3,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.1666666666666572,
+              69.49999999999996
+            ],
+            "reconstructed_fraction": 0.026378896882494004,
+            "amplitude_tick_residual": 5.3290705182007506e-15,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 4.263256414560601e-14,
+            "chromatic_recovered_points": 48,
+            "frequency_pixel_resolution_thz": 0.16666666666666663,
+            "largest_unobserved_gap_samples": 11,
+            "missing_frequency_intervals_thz": [
+              [
+                68.66666666666663,
+                69.49999999999996
+              ]
+            ],
+            "linearity_independently_checkable": true,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.1666666666666572
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        },
+        {
+          "id": "B-lambda",
+          "kind": "cumulative_lambda",
+          "projection": null,
+          "unit": "dimensionless",
+          "points": 417,
+          "quality": {
+            "counts": {
+              "missing": 5,
+              "observed": 411,
+              "interpolated": 0,
+              "baseline_inferred": 0,
+              "edge_continuation": 1,
+              "boundary_assumption": 0
+            },
+            "total_points": 417,
+            "missing_fraction": 0.011990407673860911,
+            "observed_fraction": 0.9856115107913668,
+            "amplitude_tick_count": 3,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.1666666666666572,
+              69.49999999999996
+            ],
+            "reconstructed_fraction": 0.002398081534772182,
+            "amplitude_tick_residual": 5.3290705182007506e-15,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 4.263256414560601e-14,
+            "chromatic_recovered_points": 11,
+            "frequency_pixel_resolution_thz": 0.16666666666666663,
+            "largest_unobserved_gap_samples": 5,
+            "missing_frequency_intervals_thz": [
+              [
+                68.8333333333333,
+                69.49999999999996
+              ]
+            ],
+            "linearity_independently_checkable": true,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.1666666666666572
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        }
+      ],
+      "integrals": {
+        "raw": {
+          "cutoff_thz": 0.0,
+          "omega_log_k": 272.01915912849375,
+          "lambda_integral": 5.02708720878659,
+          "frequency_log_thz": 5.66795961300826,
+          "integration_method": "exact_piecewise_linear_alpha2f",
+          "zero_interval_lambda": 0.0,
+          "minimum_integrated_thz": 0.1666666666666572,
+          "positive_frequency_complete": false
+        }
+      },
+      "comparisons": {
+        "raw": {
+          "lambda": {
+            "reason": "缺少同条件、可定位的论文报告值",
+            "source": null,
+            "status": "unavailable",
+            "reference": null,
+            "signed_difference": null,
+            "absolute_difference": null,
+            "relative_difference_pct": null
+          },
+          "omega_log": {
+            "reason": "缺少同条件、可定位的论文报告值",
+            "source": null,
+            "status": "unavailable",
+            "reference": null,
+            "signed_difference": null,
+            "absolute_difference": null,
+            "relative_difference_pct": null
+          }
+        }
+      },
+      "cumulative_endpoint": {
+        "value": 2.2016129032258114,
+        "frequency_thz": 68.66666666666663
+      },
+      "limitations": [
+        "图像包络不是统计置信区间",
+        "积分一致是物理约束，不独立证明准确度",
+        "抵框峰只提供带掩膜候选，不唯一恢复峰顶",
+        "质量指标不自动授予科学采纳"
+      ]
+    },
+    {
+      "id": "cd3c1f88b4224d8389a2a9ae90b13602",
+      "version": 3,
+      "state_key": "state-7",
+      "stale": false,
+      "pressure_gpa": 350.0,
+      "source": {
+        "file": "2024 La-Sc-H 何新玲-SI.pdf",
+        "page": 4,
+        "mode": "rendered_composite"
+      },
+      "run": {
+        "id": "99e4bb54023244b599cd9c5acf968c3b",
+        "status": "succeeded",
+        "error_code": null,
+        "error_message": null,
+        "algorithm_version": "spectra-production-v2",
+        "model_name": "gpt-6-sol"
+      },
+      "review": {},
+      "csv_rows": 1251,
+      "curves": [
+        {
+          "id": "B-La-phDOS",
+          "kind": "phonon_dos",
+          "projection": "La",
+          "unit": "pixel",
+          "points": 417,
+          "quality": {
+            "counts": {
+              "missing": 294,
+              "observed": 88,
+              "interpolated": 35,
+              "baseline_inferred": 0,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 417,
+            "missing_fraction": 0.7050359712230215,
+            "observed_fraction": 0.21103117505995203,
+            "amplitude_tick_count": 2,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.1666666666666572,
+              69.49999999999996
+            ],
+            "reconstructed_fraction": 0.08393285371702638,
+            "amplitude_tick_residual": 2.273736754432321e-13,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 4.263256414560601e-14,
+            "chromatic_recovered_points": 39,
+            "frequency_pixel_resolution_thz": 0.16666666666666663,
+            "largest_unobserved_gap_samples": 285,
+            "missing_frequency_intervals_thz": [
+              [
+                0.1666666666666572,
+                1.4999999999999716
+              ],
+              [
+                22.16666666666663,
+                69.49999999999996
+              ]
+            ],
+            "linearity_independently_checkable": false,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.1666666666666572
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        },
+        {
+          "id": "B-Sc-phDOS",
+          "kind": "phonon_dos",
+          "projection": "Sc",
+          "unit": "pixel",
+          "points": 417,
+          "quality": {
+            "counts": {
+              "missing": 36,
+              "observed": 213,
+              "interpolated": 35,
+              "baseline_inferred": 133,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 417,
+            "missing_fraction": 0.08633093525179857,
+            "observed_fraction": 0.5107913669064749,
+            "amplitude_tick_count": 2,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.1666666666666572,
+              69.49999999999996
+            ],
+            "reconstructed_fraction": 0.4028776978417266,
+            "amplitude_tick_residual": 2.273736754432321e-13,
+            "clipped_frequencies_thz": [],
+            "frequency_tick_residual": 4.263256414560601e-14,
+            "chromatic_recovered_points": 131,
+            "frequency_pixel_resolution_thz": 0.16666666666666663,
+            "largest_unobserved_gap_samples": 84,
+            "missing_frequency_intervals_thz": [
+              [
+                0.1666666666666572,
+                1.9999999999999716
+              ],
+              [
+                65.66666666666663,
+                69.49999999999996
+              ]
+            ],
+            "linearity_independently_checkable": false,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.1666666666666572
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        },
+        {
+          "id": "B-H-phDOS",
+          "kind": "phonon_dos",
+          "projection": "H",
+          "unit": "pixel",
+          "points": 417,
+          "quality": {
+            "counts": {
+              "missing": 34,
+              "observed": 338,
+              "interpolated": 2,
+              "baseline_inferred": 43,
+              "edge_continuation": 0,
+              "boundary_assumption": 0
+            },
+            "total_points": 417,
+            "missing_fraction": 0.0815347721822542,
+            "observed_fraction": 0.8105515587529976,
+            "amplitude_tick_count": 2,
+            "frequency_tick_count": 4,
+            "frequency_interval_thz": [
+              0.1666666666666572,
+              69.49999999999996
+            ],
+            "reconstructed_fraction": 0.1079136690647482,
+            "amplitude_tick_residual": 2.273736754432321e-13,
+            "clipped_frequencies_thz": [
+              56.99999999999997,
+              56.8333333333333
+            ],
+            "frequency_tick_residual": 4.263256414560601e-14,
+            "chromatic_recovered_points": 6,
+            "frequency_pixel_resolution_thz": 0.16666666666666663,
+            "largest_unobserved_gap_samples": 43,
+            "missing_frequency_intervals_thz": [
+              [
+                0.1666666666666572,
+                4.166666666666629
+              ],
+              [
+                68.16666666666663,
+                69.49999999999996
+              ]
+            ],
+            "linearity_independently_checkable": false,
+            "omitted_low_frequency_interval_thz": [
+              0.0,
+              0.1666666666666572
+            ],
+            "envelope_is_statistical_confidence_interval": false
+          }
+        }
+      ],
+      "integrals": {},
+      "comparisons": {},
+      "cumulative_endpoint": null,
+      "limitations": [
+        "图像包络不是统计置信区间",
+        "积分一致是物理约束，不独立证明准确度",
+        "抵框峰只提供带掩膜候选，不唯一恢复峰顶",
+        "质量指标不自动授予科学采纳"
+      ]
+    }
+  ],
+  "current_nonstale_curve_count": 14,
+  "assigned_pressures_gpa": [
+    290.0,
+    300.0,
+    350.0
+  ],
+  "scientific_acceptance": "needs_review",
+  "export_rows_verified": true,
+  "browser": {
+    "real_business_instance": true,
+    "material_label_verified": "P6/mmm · LaSc₂H₂₄ · 290 GPa",
+    "original_image_and_overlay_visible": true,
+    "page_errors": []
+  },
+  "notes": [
+    "只统计当前材料签名下非 stale 候选；旧标定和失败结果保留，未删除",
+    "完整自动发现一度得到15条；文字排除重读的最新模型输出14条",
+    "最新300 GPa累计λ因模型不能确认蓝紫色未标定；此前版本仍保留，不与新α²F拼接",
+    "本文DOS为相对像素幅值，缺口和低频未覆盖均保留；未自动采纳",
+    "同条件且可定位的论文参考缺失时比较为 unavailable"
+  ]
+}
