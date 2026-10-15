@@ -25,11 +25,31 @@
   #unified-properties-demo .up-remove:hover { color: var(--up-error); }
   #unified-properties-demo .up-parameters { margin-bottom: 18px; }
   #unified-properties-demo .up-conditions-title { margin: 0 0 10px; font-weight: 500; }
+  #unified-properties-demo .up-spectra { margin: 22px 0 2px; }
+  #unified-properties-demo .up-spectra-title { font-weight: 500; margin-bottom: 8px; }
+  #unified-properties-demo .up-spectrum-link { width: 100%; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px 20px; box-sizing: border-box; padding: 14px 16px; border: none; border-radius: 6px; background: var(--up-soft); color: var(--up-fg); text-decoration: none; }
+  #unified-properties-demo .up-spectrum-name { font-weight: 500; }
+  #unified-properties-demo .up-spectrum-meta { display: block; color: var(--up-muted); font-size: 12px; margin-top: 4px; }
+  #unified-properties-demo .up-open-detail { color: var(--up-primary); white-space: nowrap; }
+  #unified-properties-demo .up-back { display: inline-block; color: var(--up-primary); text-decoration: none; margin-bottom: 14px; }
+  #unified-properties-demo .up-detail-title { margin: 0 0 8px; font: inherit; font-weight: 500; }
+  #unified-properties-demo .up-detail-source { color: var(--up-muted); font-size: 12px; margin-bottom: 14px; }
+  #unified-properties-demo .up-detail-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; margin: 14px 0; }
+  #unified-properties-demo .up-detail-label { color: var(--up-muted); display: block; font-size: 12px; }
+  #unified-properties-demo .up-chart { min-width: 0; }
+  #unified-properties-demo .up-chart svg { display: block; width: 100%; }
+  #unified-properties-demo .up-chart text { fill: var(--up-fg); font: 12px Arial, 'PingFang SC', sans-serif; }
+  #unified-properties-demo .up-point-table { width: 100%; border-collapse: collapse; font-size: 12px; font-variant-numeric: tabular-nums; }
+  #unified-properties-demo .up-point-table th, #unified-properties-demo .up-point-table td { text-align: left; padding: 9px 6px; border-bottom: 1px solid var(--up-border); font-weight: 400; }
+  #unified-properties-demo .up-point-table th { color: var(--up-muted); }
+  #unified-properties-demo .up-point-heading { margin: 12px 0 4px; font-weight: 500; }
+  @media (max-width: 460px) { #unified-properties-demo .up-detail-grid { grid-template-columns: 1fr; } }
   #unified-properties-demo [hidden] { display: none !important; }
   @media (pointer: coarse) { #unified-properties-demo input:not([type=checkbox]), #unified-properties-demo select { font-size: 16px; } #unified-properties-demo button { min-height: 44px; } }
 </style>
 <div id="unified-properties-demo" class="viz-dotted-background">
   <section class="up-product" aria-label="四类物性统一表单设计">
+    <div data-form-page>
     <div class="up-header">物性记录 <span class="up-example">示例数据 · 理论计算记录</span></div>
     <div class="up-tabs" role="tablist" aria-label="物性模块">
       <button type="button" class="cursor-interaction" id="up-tab-electronic" role="tab" aria-selected="true" aria-controls="up-panel-electronic" data-module="electronic">电子性质</button>
@@ -41,6 +61,17 @@
     <section id="up-panel-dynamical" role="tabpanel" aria-labelledby="up-tab-dynamical" data-panel="dynamical" hidden></section>
     <section id="up-panel-thermodynamic" role="tabpanel" aria-labelledby="up-tab-thermodynamic" data-panel="thermodynamic" hidden></section>
     <section id="up-panel-superconductive" role="tabpanel" aria-labelledby="up-tab-superconductive" data-panel="superconductive" hidden></section>
+    </div>
+    <section data-detail-page hidden aria-label="谱解析详情页">
+      <a class="up-back cursor-interaction" data-detail-back href="#properties/dynamical">← 返回动力学性质</a>
+      <h2 class="up-detail-title" data-detail-title>声子态密度解析详情</h2>
+      <div class="up-detail-source">布局示例数据 · 非实际论文解析结果</div>
+      <div class="up-detail-grid" data-detail-summary></div>
+      <div class="up-chart" data-detail-chart></div>
+      <div class="up-detail-source">实心点：原图观测 · 空心点：短缺口插值</div>
+      <div class="up-point-heading">逐点数据</div>
+      <table class="up-point-table" aria-label="谱逐点解析数据"><thead><tr><th>频率 (THz)</th><th>原图幅值</th><th>重建幅值</th><th>点来源</th></tr></thead><tbody data-detail-points></tbody></table>
+    </section>
   </section>
 </div>
 <script>
@@ -49,12 +80,27 @@
   const definitions = {
     electronic: { title: '带隙 · 自定义性质', values: { name: 'band gap', kind: 'number', raw: '0.82', number: '0.82', unit: 'eV', first: '', second: '', text: '', boolean: false, code: 'VASP', method: 'DFT', functional: 'PBE', kGrid: '12 × 12 × 12', kWidth: '' }, conditions: [['code','计算软件',150],['method','电子结构方法',120],['functional','交换关联泛函',125],['kGrid','k 网格',140],['kWidth','k 展宽',110]] },
     dynamical: { title: '最高声子频率 · 自定义性质', values: { name: 'maximum phonon frequency', kind: 'number', raw: '12.4', number: '12.4', unit: 'THz', first: '', second: '', text: '', boolean: false, code: 'Quantum ESPRESSO', method: 'DFT', functional: 'PBE', kGrid: '12 × 12 × 12', qGrid: '4 × 4 × 4', kWidth: '', qWidth: '' }, conditions: [['code','计算软件',150],['method','电子结构方法',120],['functional','交换关联泛函',125],['kGrid','k 网格',140],['qGrid','q 网格',130],['kWidth','k 展宽',110],['qWidth','q 展宽',110]] },
-    thermodynamic: { title: '德拜温度 · 自定义性质', values: { name: 'Debye temperature', kind: 'number', raw: '420', number: '420', unit: 'K', first: '', second: '', text: '', boolean: false, code: 'Phonopy', calculationMethod: '准谐近似', temperature: '0–600 K' }, conditions: [['code','计算软件',150],['calculationMethod','计算方法',130],['temperature','温度范围',140]] },
+    thermodynamic: { title: '相对于分解路径的热力学稳定性', values: { hullBasis: 'formation_enthalpy', stability: 'unstable', energyAboveHull: '0.025', decomposition: '', gibbsTemperature: '', zpe: 'unreported', pressure: '', code: '', functional: '', kGrid: '' }, conditions: [['gibbsTemperature','温度 (K)',115],['pressure','压力 (GPa)',125],['zpe','零点振动能 ZPE',180],['code','计算软件',150],['functional','交换关联泛函',125],['kGrid','k 网格',140]] },
     superconductive: { title: '预测 Tc · allen_dynes', values: { name: 'critical temperature', kind: 'range', first: '281', second: '311', firstMu: '0.13', secondMu: '0.10', number: '300', mu: '0.10', lambda: '', omega: '', representative: false, code: 'Quantum ESPRESSO', method: 'DFT', functional: 'PBE', kGrid: '24 × 24 × 24', qGrid: '6 × 6 × 6', kWidth: '', qWidth: '' }, conditions: [['code','计算软件',150],['method','电子结构方法',120],['functional','交换关联泛函',125],['kGrid','k 网格',140],['qGrid','q 网格',130],['kWidth','k 展宽',110],['qWidth','q 展宽',110]] },
   };
   const modules = Object.keys(definitions);
   const records = Object.fromEntries(modules.map(key => [key, { values: structuredClone(definitions[key].values), parameters: [], conditions: [] }]));
-  let selected = 'electronic';
+  records.thermodynamic.hullDrafts = {};
+  const hullBases = ['unreported','formation_energy','formation_enthalpy','gibbs_free_energy'];
+  const hullFields = ['stability','energyAboveHull','decomposition','gibbsTemperature','zpe','pressure','code','functional','kGrid'];
+  const changeHullBasis = basis => {
+    const record=records.thermodynamic, current=record.values;
+    record.hullDrafts[current.hullBasis]=Object.fromEntries(hullFields.map(key=>[key,current[key]]));
+    const next=record.hullDrafts[basis] || Object.fromEntries(hullFields.map(key=>[key,key==='stability'?'unknown':key==='zpe'?'unreported':'']));
+    Object.assign(current,next,{hullBasis:basis});
+  };
+  let selected = 'dynamical', page = 'modules';
+  const spectrumExamples = {
+    phonon_dos: { title: '声子态密度解析结果', detail: '声子态密度解析详情', module: 'dynamical', source: '示例文献.pdf · 第 4 页 · 图 2(a)', axis: 'DOS / 相对幅值',
+      points: [[0,0,'observed'],[2,0.18,'observed'],[4,0.48,'observed'],[6,0.34,'observed'],[8,0.72,'interpolated'],[10,1.02,'observed'],[12,0.42,'observed'],[14,0.64,'observed'],[16,0.21,'observed'],[18,0,'observed']] },
+    alpha2f: { title: 'Eliashberg 谱函数 α²F(ω) 解析结果', detail: 'Eliashberg 谱函数解析详情', module: 'superconductive', source: '示例文献.pdf · 第 5 页 · 图 3(b)', axis: 'α²F(ω) / 无量纲',
+      points: [[0,0,'observed'],[2,0.08,'observed'],[4,0.28,'observed'],[6,0.16,'observed'],[8,0.53,'observed'],[10,0.78,'observed'],[12,0.36,'interpolated'],[14,0.44,'observed'],[16,0.14,'observed'],[18,0,'observed']] },
+  };
   const element = (tag, className, text) => { const node = document.createElement(tag); if (className) node.className = className; if (text != null) node.textContent = text; return node; };
   const kindOptions = [['number','数值'],['range','范围'],['text','文本'],['boolean','布尔']];
   const field = (module, key, label, { width = 110, options, unit, item, group } = {}) => {
@@ -65,7 +111,7 @@
     const value = item ? item[key] : records[module].values[key]; input.value = value == null ? '' : String(value);
     input.setAttribute('aria-label',label); input.dataset.module = module;
     if (item) { input.dataset.item = item.id; input.dataset.group = group; input.dataset.extraKey = key; } else input.dataset.key = key;
-    if (unit) { input.classList.add('up-with-unit'); wrap.append(input,element('span','up-unit',unit)); } else wrap.append(input);
+    if (unit) { input.classList.add('up-with-unit'); if (unit.length > 1) input.style.paddingRight = '78px'; wrap.append(input,element('span','up-unit',unit)); } else wrap.append(input);
     return wrap;
   };
   const check = (module, key, label) => {
@@ -74,6 +120,14 @@
   };
   const mainRow = module => {
     const state = records[module].values, host = root.querySelector(`[data-panel="${module}"] [data-main]`); host.replaceChildren();
+    if (module === 'thermodynamic') {
+      host.append(field(module,'hullBasis','凸包计算依据',{width:300,options:[['unreported','论文未说明'],['formation_energy','形成能 ΔE（0 K）'],['formation_enthalpy','形成焓 ΔH（0 K）'],['gibbs_free_energy','形成吉布斯自由能 ΔG（含温度）']]}));
+      host.append(field(module,'stability','相对于分解路径的稳定性',{width:210,options:[['unknown','未判定'],['stable','稳定'],['unstable','不稳定']]}));
+      const hullLabel = state.hullBasis === 'formation_enthalpy' ? 'above hull（ΔH）' : state.hullBasis === 'gibbs_free_energy' ? 'above hull（ΔG）' : state.hullBasis === 'formation_energy' ? 'energy above hull' : 'above hull';
+      if (state.stability === 'unstable') host.append(field(module,'energyAboveHull',hullLabel,{width:215,unit:'eV/atom'}));
+      host.append(field(module,'decomposition','分解路径',{width:300}));
+      return;
+    }
     const tc = module === 'superconductive';
     if (tc) host.append(field(module,'lambda','电声耦合强度 λ',{width:130}),field(module,'omega','ωlog',{unit:'K'}));
     host.append(field(module,'name','名称',{width:tc ? 190 : 220}),field(module,'kind','值类型',{width:90,options:tc ? kindOptions.slice(0,2) : kindOptions}));
@@ -95,6 +149,15 @@
   const addButton = (module, group) => {
     const button = element('button','up-button cursor-interaction','＋ 新增字段'); button.type = 'button'; button.dataset.add = group; button.dataset.module = module;
     button.setAttribute('aria-label',group === 'parameters' ? '新增参数字段' : '新增计算条件字段'); return button;
+  };
+  const conditionsRow = module => {
+    const host = root.querySelector(`[data-panel="${module}"] [data-fixed-conditions]`); host.replaceChildren();
+    for (const [key,label,width] of definitions[module].conditions) {
+      const options = key === 'zpe' ? [['unreported','论文未说明'],['included','已计入'],['excluded','明确未计入']] : undefined;
+      const control = field(module,key,label,{width,options});
+      if (key === 'gibbsTemperature' && ['formation_energy','formation_enthalpy'].includes(records[module].values.hullBasis)) { const input=control.querySelector('input'); input.value='0'; input.disabled=true; }
+      host.append(control);
+    }
   };
   const measurement = document.createElement('canvas').getContext('2d');
   const fit = input => {
@@ -121,38 +184,81 @@
         if (group === 'conditions') {
           panel.append(element('div','up-conditions-title','计算条件'));
           const scroll = element('div','up-scroll'), row = element('div','up-line'); scroll.setAttribute('role','region'); scroll.setAttribute('aria-label','固定计算条件');
-          for (const [key,label,width] of definitions[module].conditions) row.append(field(module,key,label,{width})); scroll.append(row); panel.append(scroll);
+          row.dataset.fixedConditions=''; scroll.append(row); panel.append(scroll); conditionsRow(module);
         }
         const section = element('div',group === 'parameters' ? 'up-parameters' : 'up-conditions'); section.setAttribute('role','group'); section.setAttribute('aria-label',group === 'parameters' ? '其他参数' : '其他计算条件');
         const scroll = element('div','up-scroll'), host = element('div'); host.dataset.extras = group; scroll.append(host); section.append(scroll,addButton(module,group)); panel.append(section); extras(module,group);
       }
+      if (module === 'dynamical' || module === 'superconductive') {
+        const kind = module === 'dynamical' ? 'phonon_dos' : 'alpha2f', spectrum = spectrumExamples[kind];
+        const section = element('div','up-spectra'); section.append(element('div','up-spectra-title','谱解析结果'));
+        const link = element('a','up-spectrum-link cursor-interaction'); link.href = `#spectra/${kind}`; link.dataset.spectrum = kind; link.setAttribute('aria-label',`查看${spectrum.detail}`);
+        const summary = element('span'); summary.append(element('span','up-spectrum-name',spectrum.title),element('span','up-spectrum-meta',`${spectrum.source} · 0–18 THz · 待核对`));
+        link.append(summary,element('span','up-open-detail','查看详情 →')); section.append(link); panel.append(section);
+      }
     }
   };
   const show = () => {
+    root.querySelector('[data-form-page]').hidden = page !== 'modules';
+    root.querySelector('[data-detail-page]').hidden = page === 'modules';
     root.querySelectorAll('[role="tab"]').forEach(tab => { tab.setAttribute('aria-selected',String(tab.dataset.module === selected)); });
     root.querySelectorAll('[data-panel]').forEach(panel => { panel.hidden = panel.dataset.panel !== selected; });
     root.querySelector(`[data-panel="${selected}"]`).querySelectorAll('[data-extra-key]').forEach(fit);
+    if (page !== 'modules') renderDetail();
   };
-  const snapshot = () => ({ selected, records });
+  const svgNode = (tag, attributes, text) => { const node = document.createElementNS('http://www.w3.org/2000/svg',tag); for (const [key,value] of Object.entries(attributes)) node.setAttribute(key,String(value)); if (text != null) node.textContent = text; return node; };
+  const drawChart = () => {
+    if (page === 'modules') return;
+    const data = spectrumExamples[page], host = root.querySelector('[data-detail-chart]'), width = Math.max(host.clientWidth,260), height = 260;
+    const left = 64, right = width-24, top = 28, bottom = 212, max = Math.max(...data.points.map(point => point[1]))*1.15;
+    const x = value => left+value/18*(right-left), y = value => bottom-value/max*(bottom-top);
+    const svg = svgNode('svg',{viewBox:`0 0 ${width} ${height}`,role:'img','aria-label':`${data.detail}示例曲线`});
+    svg.append(svgNode('rect',{x:left,y:top,width:right-left,height:bottom-top,fill:'none',stroke:'var(--up-border)'}));
+    for (const value of [0,6,12,18]) { svg.append(svgNode('text',{x:x(value),y:bottom+20,'text-anchor':'middle'},String(value))); }
+    for (let i=0;i<3;i++) { const value=max*i/2; svg.append(svgNode('text',{x:left-10,y:y(value)+4,'text-anchor':'end'},value.toFixed(2))); }
+    svg.append(svgNode('text',{x:left,y:16},data.axis),svgNode('text',{x:(left+right)/2,y:252,'text-anchor':'middle'},'频率 / THz'));
+    svg.append(svgNode('path',{d:data.points.map((point,index)=>`${index?'L':'M'}${x(point[0])},${y(point[1])}`).join(' '),fill:'none',stroke:'var(--up-primary)','stroke-width':2}));
+    for (const point of data.points) svg.append(svgNode('circle',{cx:x(point[0]),cy:y(point[1]),r:3.5,fill:point[2]==='observed'?'var(--up-primary)':'var(--up-bg)',stroke:'var(--up-primary)'}));
+    host.replaceChildren(svg);
+  };
+  const renderDetail = () => {
+    const data = spectrumExamples[page], back = root.querySelector('[data-detail-back]');
+    back.href = `#properties/${data.module}`; back.textContent = `← 返回${data.module === 'dynamical'?'动力学性质':'超导性质'}`;
+    root.querySelector('[data-detail-title]').textContent = data.detail;
+    const summary = root.querySelector('[data-detail-summary]'); summary.replaceChildren();
+    for (const [label,value] of [['材料状态','当前材料状态 · 示例'],['来源',data.source],['解析状态','提取完成 · 待核对'],['有效频域','0–18 THz']]) { const entry=element('div'); entry.append(element('span','up-detail-label',label),element('span',null,value)); summary.append(entry); }
+    const body=root.querySelector('[data-detail-points]'); body.replaceChildren();
+    for (const point of data.points) { const row=element('tr'); for(const value of [point[0].toFixed(2),point[2]==='observed'?point[1].toFixed(3):'—',point[1].toFixed(3),point[2]==='observed'?'原图观测':'短缺口插值']) row.append(element('td',null,value)); body.append(row); }
+    drawChart();
+  };
+  const snapshot = () => ({ selected, page, records });
   const save = () => { if (window.openai && window.openai.setWidgetState && JSON.stringify(snapshot()).length < 14000) window.openai.setWidgetState({modelContent:{unifiedProperties:snapshot()},privateContent:null}).catch(() => {}); };
   const restore = data => {
     if (!data || typeof data !== 'object') return;
     if (modules.includes(data.selected)) selected = data.selected;
+    if (data.page === 'modules' || spectrumExamples[data.page]) page = data.page;
     for (const module of modules) {
       const saved = data.records && data.records[module]; if (!saved) continue;
-      for (const key of Object.keys(records[module].values)) if (saved.values && typeof saved.values[key] === typeof records[module].values[key]) records[module].values[key] = saved.values[key];
-      if (!(module === 'superconductive' ? ['number','range'] : kindOptions.map(option => option[0])).includes(records[module].values.kind)) records[module].values.kind = definitions[module].values.kind;
+      const compatible = module !== 'thermodynamic' || typeof saved.values?.hullBasis === 'string';
+      for (const key of Object.keys(records[module].values)) if (compatible && saved.values && typeof saved.values[key] === typeof records[module].values[key]) records[module].values[key] = saved.values[key];
+      if (module === 'thermodynamic' && saved.hullDrafts) for (const basis of hullBases) {
+        const draft=saved.hullDrafts[basis];
+        if (draft && hullFields.every(key=>typeof draft[key]==='string')) records[module].hullDrafts[basis]=Object.fromEntries(hullFields.map(key=>[key,draft[key]]));
+      }
+      if (module !== 'thermodynamic' && !(module === 'superconductive' ? ['number','range'] : kindOptions.map(option => option[0])).includes(records[module].values.kind)) records[module].values.kind = definitions[module].values.kind;
       for (const group of ['parameters','conditions']) if (Array.isArray(saved[group])) records[module][group] = saved[group].map(item => ({id:String(item.id),name:String(item.name || ''),kind:item.kind === 'text' ? 'text' : 'number',value:String(item.value || ''),unit:String(item.unit || '')}));
     }
   };
   root.addEventListener('input', event => {
     const input = event.target, module = input.dataset.module; if (!modules.includes(module)) return;
     if (input.dataset.extraKey) { const item = records[module][input.dataset.group].find(item => item.id === input.dataset.item); if (item) item[input.dataset.extraKey] = input.value; fit(input); }
-    else if (input.dataset.key) { records[module].values[input.dataset.key] = input.type === 'checkbox' ? input.checked : input.value; if (input.dataset.key === 'kind') mainRow(module); }
+    else if (input.dataset.key) { if (input.dataset.key === 'hullBasis') changeHullBasis(input.value); else records[module].values[input.dataset.key] = input.type === 'checkbox' ? input.checked : input.value; if (['kind','stability','hullBasis'].includes(input.dataset.key)) mainRow(module); if (input.dataset.key === 'hullBasis') conditionsRow(module); }
     save();
   });
   root.addEventListener('click', event => {
-    const tab = event.target.closest('[role="tab"]'); if (tab) { selected = tab.dataset.module; show(); save(); return; }
+    const spectrum = event.target.closest('[data-spectrum]'); if (spectrum) { event.preventDefault(); page=spectrum.dataset.spectrum; selected=spectrumExamples[page].module; show(); save(); return; }
+    const back = event.target.closest('[data-detail-back]'); if (back) { event.preventDefault(); page='modules'; show(); save(); return; }
+    const tab = event.target.closest('[role="tab"]'); if (tab) { selected = tab.dataset.module; page='modules'; show(); save(); return; }
     const add = event.target.closest('[data-add]'); if (add) { const module = add.dataset.module, group = add.dataset.add; records[module][group].push({id:`${Date.now()}-${Math.random().toString(36).slice(2)}`,name:'',kind:'number',value:'',unit:''}); extras(module,group); root.querySelector(`[data-panel="${module}"] [data-extras="${group}"]`).lastElementChild.querySelector('input').focus(); save(); return; }
     const remove = event.target.closest('[data-remove]'); if (remove) { const module = remove.dataset.module, group = remove.dataset.group; records[module][group] = records[module][group].filter(item => item.id !== remove.dataset.remove); extras(module,group); save(); }
   });
@@ -161,6 +267,7 @@
     event.preventDefault(); const index = modules.indexOf(selected); selected = event.key === 'Home' ? modules[0] : event.key === 'End' ? modules.at(-1) : modules[(index+(event.key === 'ArrowRight' ? 1 : modules.length-1))%modules.length]; show(); root.querySelector(`[role="tab"][data-module="${selected}"]`).focus(); save();
   });
   restore(window.openai && window.openai.widgetState && window.openai.widgetState.modelContent && window.openai.widgetState.modelContent.unifiedProperties); build(); show();
+  new ResizeObserver(drawChart).observe(root.querySelector('[data-detail-chart]'));
   window.addEventListener('openai:set_globals', event => { const saved = event.detail && event.detail.globals && event.detail.globals.widgetState; const data = saved && saved.modelContent && saved.modelContent.unifiedProperties; if (data && JSON.stringify(data) !== JSON.stringify(snapshot())) { restore(data); build(); show(); } });
 })();
 </script>
