@@ -1,0 +1,46 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "original_name": "codex-clipboard-8e0ca7c0-8f50-43ba-95de-d7d7f963e115.png",
+      "sha256": "b97b5db31446a6c8b060a2527dffcbb17adcd83ffe67c86712c7f5bb595865a6",
+      "dimensions_px": [
+        2462,
+        494
+      ],
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-001.png",
+      "status": "local_verified",
+      "media_type": "image/png",
+      "upload_order": 1,
+      "user_context": "帮我看看有没有这样一个 issue 之前是解决超导记录的方框的编排问题的：我希望把超导性质里面的：名称，值类型，Tc 值的下界对应μ大的那个数值，Tc 的上界对应μ小的那个，电声耦合强度，wlog。使用 issue 和 spec 来执行",
+      "related": [
+        "US5",
+        "FR-012",
+        "FR-014",
+        "FR-015"
+      ],
+      "verification": "2026-10-15 读取归档原图 PNG 字节并核对尺寸和 SHA-256；仅本地验证，未推送。"
+    },
+    {
+      "id": "IMG-002",
+      "original_name": "codex-clipboard-2c4fbb91-ddb2-42a4-a4d2-d5a09cf6da5e.png",
+      "sha256": "e194b392faab1a1dcffefe77ee34599d7fe321c9c0551833e78f414401fcda70",
+      "dimensions_px": [
+        80,
+        52
+      ],
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-002.png",
+      "status": "local_verified",
+      "media_type": "image/png",
+      "upload_order": 2,
+      "user_context": "而且我觉得你也不应该明确的区分上界下界的概念，你只需要在系统的代码内知道Tc 下界和μ上界对应，Tc 上界和μ下界对应这种对应关系就行。实际的情况中，只需要填写 Tc 和μ*就行。而且淡淡的颜色框要无边框，用这个颜色",
+      "related": [
+        "US5",
+        "FR-012",
+        "FR-014",
+        "FR-015"
+      ],
+      "verification": "2026-10-15 读取归档原图 PNG 字节并核对尺寸和 SHA-256；仅本地验证，未推送。"
+    }
+  ]
+}

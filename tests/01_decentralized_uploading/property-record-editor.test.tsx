@@ -191,7 +191,7 @@ describe('Issue #94 记录表单', () => {
     const prediction = await screen.findByRole('button', { name: /记录 2.*预测 Tc.*allen_dynes/ })
     const property = screen.getByRole('button', { name: /记录 3.*自定义性质.*lambda/ })
     expect(await screen.findByLabelText('计算软件')).toHaveValue('Quantum ESPRESSO')
-    expect(screen.getByLabelText('μ*')).toHaveValue(0.1)
+    expect(screen.getByLabelText('μ*')).toHaveValue('0.1')
     const user = userEvent.setup()
     prediction.focus()
     await user.keyboard(' ')

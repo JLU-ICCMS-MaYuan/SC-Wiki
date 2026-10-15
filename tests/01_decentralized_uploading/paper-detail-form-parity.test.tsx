@@ -148,8 +148,8 @@ describe('只读详情页与校对表单字段一致（Issue #59）', () => {
 
     // λ=2.56 与 μ*=0.1 可见（关键断言：如果只取首条，这些值不会出现）
     const predicted = screen.getByTestId('property-record-record-predicted')
-    expect(within(predicted).getByLabelText('电声耦合强度 λ')).toHaveValue(2.56)
-    expect(within(predicted).getByLabelText('μ*')).toHaveValue(0.1)
+    expect(within(predicted).getByLabelText('电声耦合强度 λ')).toHaveValue('2.56')
+    expect(within(predicted).getByLabelText('μ*')).toHaveValue('0.1')
   })
 
   /**

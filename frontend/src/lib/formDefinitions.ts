@@ -1,5 +1,6 @@
 import { api } from './api'
 import { normalizeCurrentTcValue, type PropertyRecordDraft } from './propertyModules'
+import { validateTcParameters } from './tcParameters'
 
 export interface JsonSchema {
   type?: 'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'
@@ -152,6 +153,7 @@ function validateSchema(value: unknown, schema: JsonSchema, path: string, issues
 
 export function validateRecordClient(record: PropertyRecordDraft, definition?: FormDefinition): FormIssue[] {
   const issues: FormIssue[] = []
+  for (const { field, message } of validateTcParameters(record)) addIssue(issues, field, message)
   if (!record.record_key.trim()) addIssue(issues, 'record_key', '记录键不能为空')
   if (!record.name_raw.trim()) addIssue(issues, 'name_raw', '名称不能为空')
   if (record.record_type === 'property' && !record.value_raw.trim()) addIssue(issues, 'value_raw', '原始值不能为空')

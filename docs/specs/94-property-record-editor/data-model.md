@@ -19,3 +19,11 @@ value_raw 和 unit_raw 不再作为独立原始记录：value_raw 从当前数�
 数值/范围 unit_raw=K，文本/布尔 unit_raw=null。输入中的临时非法数字仅保留在界面文本状态，
 规范值为 null、value_raw 为空，保存前校验必须阻止提交。空值不能回退到旧数字。
 类型切换只清理不匹配的规范值列，record_key、条件及证据保持不变。
+
+## Tc/μ* 配对增量
+
+预测记录继续在 `payload.parameters` 保存 λ (`lambda_ep`)、ωlog (`omega_log`) 和标量 μ* (`mu_star`)；旧 `{value_number,...}` 包装对象仍可读且编辑保留元数据。
+
+范围 μ* 使用既有 `extensions` 数组中的 `{key:"mu_star",value_kind:"range",value_min:0.10,value_max:0.13,unit_raw:"1"}`；主 `mu_star` 不再同时保存。Tc 使用 `value_min=281,value_max=311`，两组为 (281,0.13) 与 (311,0.10)。未知 μ* 端点为 null，不自动补值。有效零值不能视作缺失。
+
+范围的字段键、Evidence 及额外元数据在编辑时保留；其他扩展位置不移动。组件暂存编辑组顺序，以整体配对映射规范端点，数据库不增加组序号。类型切换清理不适用的范围，保留条件和其他参数。测量记录维持实验 Conditions。

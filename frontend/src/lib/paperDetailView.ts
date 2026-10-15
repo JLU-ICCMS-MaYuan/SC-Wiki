@@ -146,17 +146,19 @@ export function collectPropertyRows(paper: any, t?: TranslateFn): PaperPropertyR
           const values: Array<[string, unknown, string]> = [
             [epcLabel, parameters.lambda_ep, ''],
             ['ωlog', parameters.omega_log ?? parameters.omega_log_k, 'K'],
-            ['μ*', parameters.mu_star, ''],
+            ['μ*', parameters.mu_star ?? (Array.isArray(parameters.extensions) ? parameters.extensions.find((item: any) => item?.key === 'mu_star' && item?.value_kind === 'range') : undefined), ''],
           ]
           for (const [label, rawValue, fallbackUnit] of values) {
             const wrapped = rawValue && typeof rawValue === 'object' ? rawValue as Record<string, unknown> : null
-            const value = wrapped ? wrapped.value_number ?? wrapped.value_raw : rawValue
+            const value = wrapped?.value_kind === 'range'
+              ? `${wrapped.value_min ?? '待填写'}–${wrapped.value_max ?? '待填写'}`
+              : wrapped ? wrapped.value_number ?? wrapped.value_raw : rawValue
             if (value == null || value === '') continue
             parameterRows.push({
               key: `parameter-${record?.record_key ?? parameterRows.length}-${label}`,
               material,
               label,
-              value: valueWithUnit(value, wrapped?.unit_raw ?? fallbackUnit),
+              value: valueWithUnit(value, wrapped?.unit_raw === '1' ? '' : wrapped?.unit_raw ?? fallbackUnit),
               condition,
               note: textOrNull(conditions.calculation_code) || '-',
             })

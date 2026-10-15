@@ -316,7 +316,7 @@ describe('超导类型与条件化 Tc 字段', () => {
     fireEvent.mouseDown((await screen.findAllByRole('combobox', { name: '添加记录' }))[0])
     fireEvent.click(await screen.findByRole('option', { name: /预测 Tc · mcmillan/ }))
     expect(await screen.findAllByLabelText('电声耦合强度 λ')).toHaveLength(1)
-    expect(screen.getAllByLabelText('ωlog (K)')).toHaveLength(1)
+    expect(screen.getAllByLabelText('ωlog')).toHaveLength(1)
     expect(screen.getAllByLabelText('μ*')).toHaveLength(1)
 
     fireEvent.mouseDown(screen.getAllByRole('combobox', { name: '添加记录' })[1])
@@ -337,7 +337,7 @@ describe('超导类型与条件化 Tc 字段', () => {
     fireEvent.click(await screen.findByRole('option', { name: /测量 Tc · resistivity/ }))
     expect(await screen.findByLabelText('Tc 值')).toBeInTheDocument()
     expect(screen.queryByLabelText('电声耦合强度 λ')).not.toBeInTheDocument()
-    expect(screen.queryByLabelText('ωlog (K)')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('ωlog')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('μ*')).not.toBeInTheDocument()
   })
 
@@ -347,9 +347,9 @@ describe('超导类型与条件化 Tc 字段', () => {
 
     fireEvent.mouseDown(await screen.findByRole('combobox', { name: '添加记录' }))
     fireEvent.click(await screen.findByRole('option', { name: /预测 Tc · mcmillan/ }))
-    expect(await screen.findByLabelText('电声耦合强度 λ')).toHaveValue(null)
-    expect(screen.getByLabelText('ωlog (K)')).toHaveValue(null)
-    expect(screen.getByLabelText('μ*')).toHaveValue(null)
+    expect(await screen.findByLabelText('电声耦合强度 λ')).toHaveValue('')
+    expect(screen.getByLabelText('ωlog')).toHaveValue('')
+    expect(screen.getByLabelText('μ*')).toHaveValue('')
   })
 
   it('论文级超导类型下拉含完整单选值域', async () => {

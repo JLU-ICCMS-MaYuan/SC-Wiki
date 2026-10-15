@@ -17,6 +17,7 @@ from typing import Any, Iterable
 from sqlalchemy import select
 
 from backend import models
+from backend.ingest.tc_parameters import parameter_issues
 
 
 MODULE_CODES = set(models.PROPERTY_MODULE_CODES)
@@ -293,6 +294,7 @@ def validate_record(
         issues.append(_issue(f"{path}.custom_property_key", "schema_validation_failed", "规范性质不能携带自定义键"))
     _validate_value_shape(item, path, issues)
     experimental = item["payload"].get("experimental_conditions")
+    issues.extend(_issue(f"{path}.{field}", "schema_validation_failed", message) for field, message in parameter_issues(item))
     if isinstance(experimental, dict) and "description" in experimental and not isinstance(experimental["description"], str):
         issues.append(_issue(f"{path}.payload.experimental_conditions.description", "schema_validation_failed", "实验 Conditions 描述必须是文本"))
     if definition is not None:

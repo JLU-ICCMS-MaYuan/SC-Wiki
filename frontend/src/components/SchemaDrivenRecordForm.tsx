@@ -5,6 +5,7 @@ import {
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
 import TcRecordFields from './TcRecordFields'
+import { muRangeIndex } from '../lib/tcParameters'
 import type { FormDefinition, FormIssue, JsonSchema } from '../lib/formDefinitions'
 import { getAtPath, setAtPath, validateRecordClient } from '../lib/formDefinitions'
 import { newStableKey, normalizeCurrentTcValue, type PropertyRecordDraft, type PropertyValueKind } from '../lib/propertyModules'
@@ -158,6 +159,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       <Box key={path} data-issue-field={fieldPath(path)} sx={{ gridColumn: '1 / -1', borderLeft: '3px solid', borderColor: 'divider', pl: 1.5 }}>
         <Typography variant="subtitle2">{titleFor(definition, path, schema, '扩展字段')}</Typography>
         {values.map((item, index) => {
+          if (record.record_type === 'predicted_tc' && path === 'payload.parameters.extensions' && index === muRangeIndex(record)) return null
           const itemPath = `${path}.${index}`
           const kind = (item.value_kind || 'number') as PropertyValueKind
           return (
@@ -223,7 +225,9 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       return (
         <Box key={path} data-issue-field={fieldPath(path)} sx={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1, borderLeft: '3px solid', borderColor: 'divider', pl: 1.5 }}>
           <Typography variant="subtitle2" sx={{ gridColumn: '1 / -1' }}>{label}</Typography>
-          {Object.entries(schema.properties || {}).map(([key, child]) => renderSchema(child, `${path}.${key}`, key))}
+          {Object.entries(schema.properties || {}).filter(([key]) => !(record.record_type === 'predicted_tc'
+            && path === 'payload.parameters' && ['lambda_ep', 'omega_log', 'omega_log_k', 'mu_star'].includes(key)))
+            .map(([key, child]) => renderSchema(child, `${path}.${key}`, key))}
           {issue(path) && <Typography color="error" variant="caption">{issue(path)}</Typography>}
         </Box>
       )

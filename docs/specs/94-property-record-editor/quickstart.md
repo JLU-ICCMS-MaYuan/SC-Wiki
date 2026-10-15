@@ -127,3 +127,22 @@ evidenceFields、evidenceProposals、PressureEditor、EvidenceFieldMarkers；本
 
 独立 Tc 候选 index 的定向验证为前端 23 项、Python 33 项通过；其中暂不包含依赖 #103 的
 核对集成用例。既有 HEAD 缺失的科学核对依赖由下一批补齐，上述应用级验证不省略该批次。
+
+## 2026-10-15：配对单行实施验收
+
+本节取代旧的 400/640px 多列断点验收。用户已在看到最终 Demo 后明确“认可，开始落地”。原图、取色与获认可 Demo 见 [附件清单](assets/images.json)，当前实现见 [真实浏览器截图](assets/tc-paired-implemented.png)。
+
+- 前端 9 文件 113 项通过，覆盖当前 Tc、参数前置、两组 μ*、交换大小次序但不移动输入组、零值/清空/非法参数、类型切换、只读、详情参数摘要及核对定位。`tc-paired-parameters.test.tsx` 的真实表单回调载荷继续送入后端往返。
+- 后端 4 文件 22 项通过：已有模块与条件校验、参数有效性，以及真实前端载荷/12 份浏览器保存请求经生产 `persist_property_modules`、SQLite 写入、新会话读取和导出。该记录证明隔离 SQLite 链路，不等同于本轮 MySQL 或生产环境验收。
+- Chrome 在管理员、超级管理员、上传三入口各完成 4 次隔离保存；页面错误均为零。测量输入在 700/640/500/400/350px、预测输入在 1100/700/375px 检查单行与局部滚动。两组底色均为 RGB(244,243,255)，分组边框为 0px，保存/重载后 μ* 与 Tc 仍对应；上传只读态的 Tc/μ* 禁用。
+- 现有核对侧栏已在 #138 中取消 JSON 展示，本轮浏览器检查改为识别当前人工编辑、保存失败保留理由、成功完成后关闭及位置保持；不是依赖已退役的 JSON 文案。上传夹具没有待核对记录时 `needs_check=false`，不发起模型任务。
+- TypeScript 和生产构建通过；既有 3Dmol eval、分包体积及依赖弃用告警仍存在。
+- 所有浏览器 API 请求均被隔离夹具拦截，未操作真实论文、调用真实模型、执行数据库迁移或部署；未推送，新版 Spec 的远程链接保持待验证，Issue 不关闭。
+
+复查入口：`tests/01_decentralized_uploading/tc-record-browser.mjs`、`tc-paired-parameters.test.tsx`、`backend/tests/test_tc_paired_parameters.py` 和 `tests/01_decentralized_uploading/test_tc_record_roundtrip.py`。浏览器脚本使用 `PLAYWRIGHT_MODULE`、`CHROMIUM_PATH`、`TC_BROWSER_PAYLOADS`、`TC_PAIRED_SCREENSHOT`，后端测试以 `TC_PAIRED_PAYLOAD` 接收前端表单载荷。隔离环境使用 SQLite URL 及专用测试 JWT，不能复用生产密钥。
+
+### 提交范围的独立验证
+
+本次仅暂存明确文件及分块，从暂存区构造隔离副本，排除原工作树 #120/#135/#137 的未提交修改。该副本前端 9 文件 112 项、生产构建、三个真实浏览器入口及 12 次保存均通过；其中前端比完整工作树少的 1 项是原有未提交的研究驱动力冲突测试，不属于本增量。当前截图和 [保存记录样例](assets/tc-paired-saved-record.json) 来自隔离夹具，均不是真实论文数据。
+
+后端相关校验/持久化/导出 21 项通过，另 1 项上传提取测试 `test_worker_prompts_and_storage_keep_each_measurement_conditions` 的旧夹具缺少 `user_id`，在隔离副本与替换为 HEAD 原始 `property_modules.py` 的基线中均以相同 KeyError 失败。该提取流程未在本轮修改，此失败不计为通过；没有把工作树里另一任务的夹具修复混入提交。本轮的独立数据库验收包括新配对参数测试以及 12 份浏览器保存请求的生产持久化和导出路径。
