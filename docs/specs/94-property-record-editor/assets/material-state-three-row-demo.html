@@ -1,0 +1,228 @@
+<style>
+#material-state-three-row-demo { color-scheme: light dark; }
+#material-state-three-row-demo .ms-app { --ms-page: light-dark(#f8fafc,#181b23); --ms-surface: light-dark(#ffffff,#222630); --ms-text: light-dark(#263247,#e5e9f2); --ms-muted: light-dark(#64748b,#b4bfd2); --ms-line: light-dark(#dde3ed,#454e61); --ms-input-line: light-dark(#bbc3d0,#67738a); --ms-brand: light-dark(#5143eb,#b5a9ff); --ms-soft: light-dark(#f2f0ff,#35304e); --ms-subtle: light-dark(#f6f7fa,#2a303c); --ms-error: light-dark(#b22d3a,#ffaab2); --ms-gap: 10px; display: grid; grid-template-columns: 146px minmax(0,1fr); background: var(--ms-page); color: var(--ms-text); font: 14px/1.5 Roboto,Arial,"PingFang SC","Microsoft YaHei",sans-serif; min-width: 0; }
+#material-state-three-row-demo * { box-sizing: border-box; }
+#material-state-three-row-demo [hidden] { display: none !important; }
+#material-state-three-row-demo .ms-nav { background: var(--ms-surface); border-right: 1px solid var(--ms-line); padding: 18px 10px; display: flex; flex-direction: column; gap: 22px; }
+#material-state-three-row-demo .ms-brand { display: flex; align-items: center; gap: 9px; padding: 0 3px 9px; font-weight: 500; }
+#material-state-three-row-demo .ms-logo { background: var(--ms-brand); color: light-dark(#fff,#181b23); display: grid; place-items: center; width: 34px; height: 34px; border-radius: 10px; font-size: 12px; }
+#material-state-three-row-demo .ms-navigation { display: grid; gap: 8px; }
+#material-state-three-row-demo .ms-nav-item { display: flex; gap: 11px; align-items: center; color: var(--ms-muted); padding: 10px 12px; border-radius: 8px; }
+#material-state-three-row-demo .ms-nav-item i, #material-state-three-row-demo .ms-nav-item svg { width: 17px; height: 17px; }
+#material-state-three-row-demo .ms-nav-item.ms-active { background: var(--ms-soft); color: var(--ms-brand); font-weight: 500; }
+#material-state-three-row-demo .ms-account { margin-top: auto; border-top: 1px solid var(--ms-line); padding: 14px 10px 0; color: var(--ms-muted); font-size: 12px; }
+#material-state-three-row-demo .ms-main { padding: 20px 14px; min-width: 0; }
+#material-state-three-row-demo .ms-page-heading { padding-right: 80px; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; }
+#material-state-three-row-demo .ms-page-title { font-size: 17px; font-weight: 500; margin: 0; }
+#material-state-three-row-demo .ms-preview { font-size: 12px; color: var(--ms-muted); }
+#material-state-three-row-demo .ms-state { border: 1px solid var(--ms-line); border-radius: 12px; background: var(--ms-surface); padding: 0 14px 10px; min-width: 0; }
+#material-state-three-row-demo .ms-state > summary { display: flex; align-items: center; gap: 10px; list-style: none; padding: 15px 0; min-width: 0; }
+#material-state-three-row-demo summary::-webkit-details-marker { display: none; }
+#material-state-three-row-demo .ms-state > summary::before { content: "›"; font-size: 20px; line-height: 1; transform: rotate(0); flex-shrink: 0; }
+#material-state-three-row-demo .ms-state[open] > summary::before { transform: rotate(90deg); }
+#material-state-three-row-demo .ms-state-name { font-weight: 500; white-space: nowrap; }
+#material-state-three-row-demo .ms-state-caption { color: var(--ms-muted); font-size: 12px; overflow-wrap: anywhere; }
+#material-state-three-row-demo .ms-form { padding: 10px 0 4px; }
+#material-state-three-row-demo .ms-identity { display: grid; grid-template-columns: 1.15fr 1.2fr 1.1fr .9fr .75fr 1fr .75fr; gap: var(--ms-gap); align-items: start; }
+#material-state-three-row-demo .ms-conditions { display: grid; grid-template-columns: 155px 240px 140px; gap: var(--ms-gap); align-items: start; margin-top: 26px; }
+#material-state-three-row-demo .ms-conditions.ms-without-nuclear { grid-template-columns: 155px 140px; }
+#material-state-three-row-demo .ms-field { position: relative; min-width: 0; }
+#material-state-three-row-demo .ms-field > label { position: absolute; left: 8px; top: -8px; padding: 0 4px; color: var(--ms-brand); background: var(--ms-surface); font-size: 11px; line-height: 16px; white-space: nowrap; z-index: 1; }
+#material-state-three-row-demo .ms-field > input, #material-state-three-row-demo .ms-field > select { border: 1px solid var(--ms-input-line); color: var(--ms-text); background: var(--ms-surface); border-radius: 6px; width: 100%; height: 43px; padding: 8px 9px; font: inherit; font-size: 13px; min-width: 0; }
+#material-state-three-row-demo input::placeholder { color: var(--ms-muted); opacity: .85; }
+#material-state-three-row-demo .ms-field > select { padding-right: 4px; }
+#material-state-three-row-demo .ms-family-field { height: 43px; min-height: 43px; max-height: 43px; padding: 4px 8px; border: 1px solid var(--ms-input-line); border-radius: 6px; }
+#material-state-three-row-demo .ms-family-field input { flex: 0 0 108px; width: 108px; height: 24px; min-width: 0; background: transparent; color: var(--ms-text); border: 0; font: inherit; font-size: 12px; padding: 1px 0; }
+#material-state-three-row-demo .ms-chip { display: inline-flex; flex: 0 0 auto; white-space: nowrap; align-items: center; gap: 3px; border-radius: 10px; background: var(--ms-subtle); padding: 2px 5px 2px 8px; max-width: none; font-size: 11px; }
+#material-state-three-row-demo .ms-chip > span { white-space: nowrap; }
+#material-state-three-row-demo .ms-family-row { margin-top: 24px; min-width: 0; }
+#material-state-three-row-demo .ms-family-scroll { display: flex; align-items: center; gap: 5px; height: 100%; min-width: 0; overflow-x: auto; overflow-y: hidden; white-space: nowrap; scrollbar-width: thin; }
+#material-state-three-row-demo [data-families] { display: flex; flex: 0 0 auto; align-items: center; gap: 5px; }
+#material-state-three-row-demo .ms-chip button { color: var(--ms-muted); background: transparent; border: 0; padding: 0 3px; font: inherit; font-size: 15px; min-height: 21px; }
+#material-state-three-row-demo .ms-under { font-size: 11px; color: var(--ms-muted); margin: 5px 0 0 2px; }
+#material-state-three-row-demo .ms-pressure-extra { margin-top: 6px; color: var(--ms-muted); font-size: 11px; }
+#material-state-three-row-demo .ms-pressure-extra summary { display: flex; align-items: center; gap: 3px; list-style: none; min-height: 23px; }
+#material-state-three-row-demo .ms-pressure-extra summary::before { content: "›"; font-size: 16px; }
+#material-state-three-row-demo .ms-pressure-extra[open] > summary::before { transform: rotate(90deg); }
+#material-state-three-row-demo .ms-pressure-detail { display: grid; gap: 4px; padding-top: 6px; }
+#material-state-three-row-demo .ms-pressure-detail label { display: grid; gap: 3px; }
+#material-state-three-row-demo .ms-pressure-detail input { width: 100%; min-width: 0; height: 32px; border: 1px solid var(--ms-input-line); background: var(--ms-surface); color: var(--ms-text); border-radius: 4px; padding: 5px; font: inherit; }
+#material-state-three-row-demo .ms-error { color: var(--ms-error); font-size: 12px; margin: 8px 0 0; }
+#material-state-three-row-demo .ms-section { border-top: 1px solid var(--ms-line); margin-top: 12px; }
+#material-state-three-row-demo .ms-section > summary { display: flex; align-items: center; gap: 8px; list-style: none; min-height: 43px; font-size: 13px; }
+#material-state-three-row-demo .ms-section > summary::before { content: "›"; font-size: 19px; }
+#material-state-three-row-demo .ms-section[open] > summary::before { transform: rotate(90deg); }
+#material-state-three-row-demo .ms-section-content { padding: 2px 0 12px 20px; color: var(--ms-muted); font-size: 12px; }
+#material-state-three-row-demo .ms-modules { margin-top: 14px; }
+#material-state-three-row-demo .ms-module { border-top: 1px solid var(--ms-line); }
+#material-state-three-row-demo .ms-module > summary { display: flex; align-items: center; gap: 8px; list-style: none; padding: 11px 0; font-weight: 500; font-size: 13px; }
+#material-state-three-row-demo .ms-module > summary::before { content: "›"; font-size: 18px; }
+#material-state-three-row-demo .ms-module[open] > summary::before { transform: rotate(90deg); }
+#material-state-three-row-demo .ms-module p { color: var(--ms-muted); padding: 0 0 10px 20px; margin: 0; font-size: 12px; }
+#material-state-three-row-demo .ms-footer { font-size: 11px; color: var(--ms-muted); margin-top: 12px; }
+@media (max-width: 880px) { #material-state-three-row-demo .ms-app { grid-template-columns: minmax(0,1fr); } #material-state-three-row-demo .ms-nav { display: none; } }
+@media (max-width: 680px) { #material-state-three-row-demo .ms-identity { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px 10px; } #material-state-three-row-demo .ms-conditions, #material-state-three-row-demo .ms-conditions.ms-without-nuclear { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 22px 10px; } #material-state-three-row-demo .ms-page-heading { padding-right: 0; } }
+@media (max-width: 400px) { #material-state-three-row-demo .ms-identity, #material-state-three-row-demo .ms-conditions, #material-state-three-row-demo .ms-conditions.ms-without-nuclear { grid-template-columns: minmax(0,1fr); } #material-state-three-row-demo .ms-state > summary { align-items: flex-start; flex-wrap: wrap; } #material-state-three-row-demo .ms-state-caption { padding-left: 18px; flex-basis: 100%; } }
+@media (pointer: coarse) { #material-state-three-row-demo .ms-field > input, #material-state-three-row-demo .ms-field > select { font-size: 16px; min-height: 44px; } #material-state-three-row-demo .ms-chip button { min-width: 30px; min-height: 23px; } }
+</style>
+<div id="material-state-three-row-demo" aria-label="材料状态三行布局与固定高度结构家族预览">
+  <div class="ms-app">
+    <aside class="ms-nav" aria-label="SC-Wiki 导航预览">
+      <div class="ms-brand"><span class="ms-logo">SC</span><span>SC-Wiki</span></div>
+      <div class="ms-navigation">
+        <span class="ms-nav-item"><i data-lucide="flame" aria-hidden="true"></i>热点</span>
+        <span class="ms-nav-item"><i data-lucide="compass" aria-hidden="true"></i>探索</span>
+        <span class="ms-nav-item"><i data-lucide="network" aria-hidden="true"></i>脉络</span>
+        <span class="ms-nav-item"><i data-lucide="users" aria-hidden="true"></i>社区</span>
+        <span class="ms-nav-item ms-active"><i data-lucide="cloud-upload" aria-hidden="true"></i>上传</span>
+        <span class="ms-nav-item"><i data-lucide="messages-square" aria-hidden="true"></i>对话</span>
+        <span class="ms-nav-item"><i data-lucide="chart-no-axes-combined" aria-hidden="true"></i>预测</span>
+      </div>
+      <div class="ms-account">中文 / English<br>材料信息校对</div>
+    </aside>
+    <main class="ms-main">
+      <div class="ms-page-heading"><h2 class="ms-page-title">材料信息校对</h2><span class="ms-preview">交互示例</span></div>
+      <details class="ms-state" open data-state-card>
+        <summary class="cursor-interaction"><span class="ms-state-name">材料状态 #1</span><span class="ms-state-caption" aria-live="polite" data-state-caption>P6/mmm · LaSc₂H₂₄ · 150 GPa</span></summary>
+        <div class="ms-form">
+          <div class="ms-identity" data-identity-row>
+            <div class="ms-field"><label for="ms-material-name">材料名</label><input id="ms-material-name" data-field="name" placeholder="未填写" autocomplete="off"></div>
+            <div class="ms-field"><label for="ms-formula">化学式</label><input id="ms-formula" data-field="formula" value="LaSc2H24" autocomplete="off"></div>
+            <div class="ms-field"><label for="ms-elements">不同元素种类数</label><input id="ms-elements" data-field="elements" type="number" min="1" step="1" value="3"><div class="ms-under" data-element-note>自动计算，可修改</div></div>
+            <div class="ms-field"><label for="ms-dimension">材料维度</label><select id="ms-dimension" data-field="dimension"><option value="3d">三维</option><option value="2d">二维</option><option value="1d">一维</option><option value="0d">零维</option><option value="unknown">未说明</option></select></div>
+            <div class="ms-field"><label for="ms-crystal">晶系</label><select id="ms-crystal" data-field="crystal"><option value="hexagonal">六方</option><option value="cubic">立方</option><option value="tetragonal">四方</option><option value="orthorhombic">正交</option><option value="trigonal">三方</option><option value="monoclinic">单斜</option><option value="triclinic">三斜</option><option value="unknown">未说明</option></select></div>
+            <div class="ms-field"><label for="ms-symmetry">空间群</label><input id="ms-symmetry" data-field="symmetry" list="ms-groups" value="P6/mmm" autocomplete="off"><datalist id="ms-groups"><option value="P6/mmm"></option><option value="Fm-3m"></option><option value="Im-3m"></option><option value="I4/mmm"></option><option value="P4/nmm"></option><option value="C2/m"></option><option value="P-1"></option><option value="P1"></option></datalist></div>
+            <div class="ms-field"><label for="ms-group-number">空间群号</label><input id="ms-group-number" data-field="groupNumber" type="number" min="1" max="230" step="1" value="191"></div>
+          </div>
+          <div class="ms-conditions" data-conditions-row>
+            <div class="ms-field"><label for="ms-source">材料状态类型</label><select id="ms-source" data-field="source"><option value="theoretical">理论</option><option value="experimental">实验</option><option value="unknown">未说明</option></select></div>
+            <div class="ms-field" data-nuclear-field><label for="ms-nuclear">结构优化 · 核处理</label><select id="ms-nuclear" data-field="nuclear" data-tooltip="记录结构优化的核处理；不据此推断声子或 EPC 的计算近似。"><option value="unknown">未说明</option><option value="classical_static">经典静态优化（简谐基准）</option><option value="sscha">量子非谐优化（SSCHA）</option></select></div>
+            <div class="ms-field"><label for="ms-pressure">压强 (GPa)</label><input id="ms-pressure" data-field="pressure" value="150" inputmode="decimal"><details class="ms-pressure-extra"><summary class="cursor-interaction">原始压强与范围</summary><div class="ms-pressure-detail"><label>原文<input data-field="pressureRaw" placeholder="未填写"></label><label>原文单位<input data-field="pressureUnit" placeholder="未填写"></label></div></details></div>
+          </div>
+          <div class="ms-family-row" data-family-row>
+            <div class="ms-field"><label for="ms-family">结构家族</label><div class="ms-family-field"><div class="ms-family-scroll" data-family-scroll><span data-families></span><input id="ms-family" list="ms-family-options" placeholder="添加类型" autocomplete="off"><datalist id="ms-family-options"><option value="superhydride clathrate"></option><option value="layered"></option><option value="perovskite"></option></datalist></div></div><div class="ms-under">可多选，回车添加；内容较多时横向滚动</div></div>
+          </div>
+          <div class="ms-error" role="alert" data-error hidden></div>
+        </div>
+        <details class="ms-section"><summary class="cursor-interaction">结构附件</summary><div class="ms-section-content">尚未添加结构附件</div></details>
+        <div class="ms-modules">
+          <details class="ms-module"><summary class="cursor-interaction">超导性质</summary><p>暂无记录</p></details>
+          <details class="ms-module"><summary class="cursor-interaction">电子性质</summary><p>暂无记录</p></details>
+          <details class="ms-module"><summary class="cursor-interaction">动力学性质</summary><p>暂无记录</p></details>
+          <details class="ms-module"><summary class="cursor-interaction">热力学性质</summary><p>暂无记录</p></details>
+        </div>
+      </details>
+      <div class="ms-footer">预览中的输入只用于样式评审。</div>
+    </main>
+  </div>
+</div>
+<script>
+(() => {
+  const root = document.getElementById("material-state-three-row-demo");
+  const app = root.querySelector(".ms-app");
+  const defaults = { name: "", formula: "LaSc2H24", elements: "3", dimension: "3d", crystal: "hexagonal", symmetry: "P6/mmm", groupNumber: "191", source: "theoretical", nuclear: "unknown", families: ["superhydride clathrate"], pressure: "150", pressureRaw: "", pressureUnit: "", elementManual: false, expanded: true };
+  const allowedSource = ["theoretical", "experimental", "unknown"];
+  const allowedNuclear = ["unknown", "classical_static", "sscha"];
+  const design = { gap: 10 };
+  const groups = { "P6/mmm": [191,"hexagonal"], "Fm-3m": [225,"cubic"], "Im-3m": [229,"cubic"], "I4/mmm": [139,"tetragonal"], "P4/nmm": [129,"tetragonal"], "C2/m": [12,"monoclinic"], "P-1": [2,"triclinic"], "P1": [1,"triclinic"] };
+  let state = { ...defaults, families: [...defaults.families] };
+  const fields = Object.fromEntries([...root.querySelectorAll("[data-field]")].map(node => [node.dataset.field,node]));
+  const stateCard = root.querySelector("[data-state-card]");
+  const familyInput = root.querySelector("#ms-family");
+  const familyHost = root.querySelector("[data-families]");
+  const familyViewport = root.querySelector("[data-family-scroll]");
+  const errors = root.querySelector("[data-error]");
+  let applying = false;
+  function safeSaved(saved) {
+    const candidate = saved?.privateContent?.materialStateTwoRow || saved?.materialStateTwoRow;
+    if (!candidate || typeof candidate !== "object") return;
+    if (typeof candidate.source === "string" && !allowedSource.includes(candidate.source)) return;
+    for (const key of Object.keys(defaults)) {
+      if (["families","elementManual","expanded"].includes(key)) continue;
+      if (typeof candidate[key] === "string") state[key] = candidate[key];
+    }
+    state.families = Array.isArray(candidate.families) ? candidate.families.filter(value => typeof value === "string") : [...defaults.families];
+    state.elementManual = candidate.elementManual === true;
+    state.expanded = candidate.expanded !== false;
+    if (!allowedNuclear.includes(state.nuclear)) state.nuclear = "unknown";
+  }
+  function persist() {
+    const saved = { ...state, families: [...state.families] };
+    const model = { source: state.source, structureNuclearTreatment: state.source === "theoretical" ? state.nuclear : null, formula: state.formula, pressureGpa: state.pressure, symmetry: state.symmetry };
+    if (JSON.stringify(saved).length > 12000) return;
+    if (window.openai?.setWidgetState) window.openai.setWidgetState({ modelContent: { materialStateTwoRow: model }, privateContent: { materialStateTwoRow: saved } }).catch(() => {});
+  }
+  function renderFamilies() {
+    familyHost.replaceChildren();
+    state.families.forEach((value,index) => {
+      const chip = document.createElement("span"); chip.className = "ms-chip";
+      const name = document.createElement("span"); name.textContent = value;
+      const remove = document.createElement("button"); remove.type = "button"; remove.className = "cursor-interaction"; remove.textContent = "×"; remove.setAttribute("aria-label",`移除结构家族 ${value}`);
+      remove.addEventListener("click",() => { state.families.splice(index,1); renderFamilies(); familyInput.focus({ preventScroll: true }); persist(); });
+      chip.append(name,remove); familyHost.append(chip);
+    });
+  }
+  function render() {
+    applying = true;
+    for (const [key,node] of Object.entries(fields)) if (node.value !== state[key]) node.value = state[key];
+    const theoretical = state.source === "theoretical";
+    root.querySelector("[data-nuclear-field]").hidden = !theoretical;
+    fields.nuclear.disabled = !theoretical;
+    root.querySelector("[data-conditions-row]").classList.toggle("ms-without-nuclear",!theoretical);
+    root.querySelector("[data-element-note]").textContent = state.elementManual ? "已手动修改" : "自动计算，可修改";
+    const formula = state.formula.trim().replace(/[0-9]/g, digit => "₀₁₂₃₄₅₆₇₈₉"[Number(digit)]) || "化学式未填写";
+    const validPressure = state.pressure.trim() !== "" && Number.isFinite(Number(state.pressure)) && Number(state.pressure) >= 0;
+    const pressure = state.pressure.trim() === "" ? "压强未填写" : validPressure ? `${state.pressure} GPa` : "压强待完善";
+    root.querySelector("[data-state-caption]").textContent = `${state.symmetry.trim() || "空间群未填写"} · ${formula} · ${pressure}`;
+    const issues = [];
+    if (state.pressure.trim() && !validPressure) issues.push("压强需为非负数值。");
+    if (state.groupNumber && (!Number.isInteger(Number(state.groupNumber)) || Number(state.groupNumber) < 1 || Number(state.groupNumber) > 230)) issues.push("空间群号应为 1–230 的整数。");
+    errors.hidden = !issues.length; errors.textContent = issues.join(" ");
+    stateCard.open = state.expanded;
+    app.style.setProperty("--ms-gap",`${design.gap}px`);
+    applying = false;
+  }
+  function addFamily() {
+    const value = familyInput.value.trim();
+    if (!value) return;
+    if (!state.families.includes(value)) state.families.push(value);
+    familyInput.value = ""; renderFamilies();
+    requestAnimationFrame(() => { familyViewport.scrollLeft = familyViewport.scrollWidth; });
+    persist();
+  }
+  safeSaved(window.openai?.widgetState);
+  renderFamilies(); render();
+  for (const [key,node] of Object.entries(fields)) {
+    const event = node.tagName === "SELECT" ? "change" : "input";
+    node.addEventListener(event,() => {
+      state[key] = node.value;
+      if (key === "elements") state.elementManual = true;
+      if (key === "formula" && !state.elementManual) {
+        const elements = state.formula.match(/[A-Z][a-z]?/g) || [];
+        state.elements = elements.length ? String(new Set(elements).size) : "";
+      }
+      if (key === "symmetry") {
+        if (groups[state.symmetry]) { state.groupNumber = String(groups[state.symmetry][0]); state.crystal = groups[state.symmetry][1]; }
+        else { state.groupNumber = ""; state.crystal = "unknown"; }
+      }
+      if (key === "crystal" && groups[state.symmetry] && groups[state.symmetry][1] !== state.crystal) {
+        state.symmetry = ""; state.groupNumber = "";
+      }
+      if (key === "groupNumber") {
+        const matched = Object.entries(groups).find(([,value]) => String(value[0]) === state.groupNumber);
+        if (matched) { state.symmetry = matched[0]; state.crystal = matched[1][1]; }
+      }
+      render(); persist();
+    });
+  }
+  familyInput.addEventListener("change",addFamily);
+  familyInput.addEventListener("keydown",event => { if (event.key === "Enter") { event.preventDefault(); addFamily(); } else if (event.key === "Backspace" && !familyInput.value && state.families.length) { state.families.pop(); renderFamilies(); persist(); } });
+  stateCard.addEventListener("toggle",() => { if (applying || state.expanded === stateCard.open) return; state.expanded = stateCard.open; persist(); });
+  window.addEventListener("openai:set_globals",event => {
+    if (!event.detail?.globals?.widgetState) return;
+    safeSaved(event.detail.globals.widgetState); renderFamilies(); render();
+  });
+  if (globalThis.lucide?.createIcons) globalThis.lucide.createIcons({ attrs: { width: 17, height: 17 } });
+  if (globalThis.Tweak) { const tweak = new Tweak({ container: app, onChange: render }); tweak.addSlider(design,"gap",{ label: "字段间距", min: 6, max: 14, step: 1, unit: "px" }); }
+})();
+</script>

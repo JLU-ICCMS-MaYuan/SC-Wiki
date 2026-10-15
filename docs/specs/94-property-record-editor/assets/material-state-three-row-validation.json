@@ -1,0 +1,29 @@
+[
+  {
+    "width": 1024,
+    "firstRow": 7,
+    "secondRow": 3,
+    "familyRow": 3,
+    "tagCount": 17,
+    "frameHeightPx": 43,
+    "horizontalOverflow": true,
+    "verticalWrap": false
+  },
+  {
+    "width": 736,
+    "familyHeightPx": 43,
+    "pageOverflow": false
+  },
+  {
+    "width": 320,
+    "familyHeightPx": 43,
+    "pageOverflow": false
+  },
+  {
+    "emptyHeightPx": 43,
+    "darkMode": true,
+    "perTagRemoval": true,
+    "legacyMixedSnapshotRejected": true,
+    "pageErrors": []
+  }
+]

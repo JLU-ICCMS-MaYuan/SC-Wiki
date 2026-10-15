@@ -199,3 +199,11 @@ evidenceFields、evidenceProposals、PressureEditor、EvidenceFieldMarkers；本
 Chrome 验证：1024px 和 736px 第一行均为七个同排字段；理论模式第二行四项同排，实验/未说明隐藏并禁用结构核处理；切回理论恢复 SSCHA 试填。化学式 H3S 自动变为两种元素，Im-3m 联动 229/立方，压强改为 180 GPa 后摘要更新；折叠不丢失输入。320px 无页面横向溢出，暗色模式可读，页面错误为 0。
 
 本轮只验证浏览器本地交互，不等同于保存/迁移或真实科学结果。预览脚本由 visualize 的 render.py 生成包装并在 iframe 内验证；可读留档、截图及观测值见本目录 assets/material-state-two-row-demo.html、material-state-two-row-demo.png、material-state-two-row-validation.json。
+
+## US13 三行固定高度 Demo
+
+本节取代 US12 上一轮两行 Demo 的布局结论，旧记录保留为历史。结构家族独占第三行；空值、单项、17 标签及长英文标签时框高均为 43 CSS px，新增标签水平排列，超宽仅内部滚动。1024px 第一行七项同排，理论第二行三项，第三行为结构家族；736/320px 均无整页溢出，框高不因标签数量变化。
+
+Chrome 进一步验证：追加超过 8 项仍可继续，回车添加、Backspace 删除、逐项删除、理论/实验显隐和试填恢复保持；暗色正常，页面错误为 0。标签是示例分类，不绑定真实论文；本轮未执行数据库操作。原“旧 mixed 后续兼容处理”方案被最新全面退役意图取代，不宣称正式数据清理已经完成。
+
+演示留档：assets/material-state-three-row-demo.html；多标签截图和观测值见同名前缀 PNG 与 validation.json。原两行 Demo 留档仅供比较，最新评审使用三行版本。
