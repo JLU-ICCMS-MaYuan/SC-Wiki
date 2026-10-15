@@ -36,6 +36,12 @@
 
 验证记录：2026-10-15 10:12（Asia/Shanghai），GitHub 身份 JLU-ICCMS-MaYuan，以 gh api 查询 `https://api.github.com/repos/JLU-ICCMS-MaYuan/SC-Wiki/contents/docs/specs/138-manual-evidence-input-reliability/spec.md?ref=mayuan`，返回 HTTP 404，未取得远端 Spec 内容。候选网页地址为 `https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/blob/mayuan/docs/specs/138-manual-evidence-input-reliability/spec.md`；当前 Issue 不把该地址列为有效远程链接。
 
-本地需求文本与实施规划覆盖已核对；远程链接 CHK013 尚未满足，因此完整文档门和关闭门仍未全部通过。任何业务功能、SC、实际浏览器、真实存储或部署验收都未执行。
+本地需求文本与实施规划覆盖已核对；远程链接 CHK013 尚未满足，因此完整文档门和关闭门仍未全部通过。初版文档阶段未执行功能验收；后续实施与本地验证以末尾记录为准，部署及真实环境验收仍未完成。
 
 本检查表的勾选仅表示上述需求审查有具体依据，不代表 Tasks 已实现；平台 Issue 是协作状态权威来源。文档内容改变时须重核对应条目。
+
+## 2026-10-15 实施补充核对
+
+用户追加原文“开始落地”已写入 Spec；原有目标、FR-001—010、SC-001—005 与范围外事项不变。当前代码沿用同一后端版本/鉴权契约，方案与任务覆盖未扩张。对应验证为 quickstart.md 的 63 项定向回归、18 项服务测试和 Chrome 四入口矩阵。
+
+CHK013 继续未勾选：本地实现授权不代表远程 Spec 已发布，不通过自行推送消除发布缺口。Safari、真实 MySQL 及完整业务验收也保持未完成，不能以当前勾选的需求文本检查替代实现验收。

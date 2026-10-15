@@ -2,7 +2,7 @@
 
 **Issue**：[#138](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/138)；**日期**：2026-10-15。
 
-本轮仅建立需求与实施文档，以下功能验收全部待执行。没有运行站点故障复现、没有代码实现、没有部署或业务库操作。
+初版为规划文档；现已按用户“开始落地”实施，结果与边界见末尾记录。
 
 ## 前置条件
 
@@ -21,7 +21,7 @@ python -m pytest "tests/01_decentralized_uploading/test_issue109_manual_api.py" 
 npm --prefix "frontend" run build
 ```
 
-两个拟新增前端测试文件须先由实施任务创建；当前文档阶段不运行这些命令。失败时保留原始输出及失败层级，不通过删测试或修改约束声称完成。
+两个前端测试文件已由实施任务创建并运行，结果见末尾记录。失败时保留原始输出及失败层级，不通过删测试或修改约束声称完成。
 
 ## 浏览器与真实存储矩阵
 
@@ -53,4 +53,39 @@ npm --prefix "frontend" run build
 
 每次执行记录命令、环境、源码/构建身份、样本、实际结果及证据路径。SC-001—005 都有对应矩阵结果后才能判功能验收通过；Overview、README、远程链接与 Issue 关闭检查另行完成。
 
-目前状态：文档已规划，业务测试与用户故障复现未执行，不勾选任何实施任务。
+目前状态：本地实现及定向验证已完成；真实环境和完整验收缺口以末尾记录为准，不能把本地通过等同于全部验收通过。
+
+## 2026-10-15 本地实施与验证记录
+
+用户已明确授权“开始落地”。生产组件已经接入，以下是实际验证范围；前文矩阵仍作为完整验收清单，未覆盖项不算通过。
+
+### 已执行
+
+- Node v24.19.0、Vitest v2.1.9：三份人工证据测试加 evidence-workflow、evidence-drawer-close、evidence-draft-queue，合计 63 项通过。覆盖即时入口、主值失败不写说明、字段/值隔离、侧栏重开、旧读取/写入响应、部分上传失败、未上传文件保护、大小/数量边界、图片粘贴、预览释放和新字段身份归并。
+- 前端 TypeScript/Vite 生产构建通过（现有大分包提示保留）。提交前还使用仅含本次暂存修改的独立副本复验，结果见本节补充。
+- Python 3.12 的既有人工证据 API/服务测试共 18 项通过；使用进程内测试 JWT、隔离 SQLite 和临时文件，不接触业务库，覆盖版本拒绝、图片/PDF 真实字节存储、鉴权预览、历史与证据规则。
+- Chrome 155.0.8059.40 的真实上传、返修、管理员与超级管理员页面全部通过。标题修改后立即补证，原生 ClipboardItem + Cmd+V 图片粘贴、PDF 拖入、系统文件选择器取消返回、多字段理由/文件保留、先保存主值再写说明/文件、保存后刷新重读均通过；未发生意外导航。1440px 桌面与 390px 窄屏的页面和侧栏均无横向溢出。
+- 浏览器脚本为 [manual-evidence-browser.mjs](../../../tests/01_decentralized_uploading/manual-evidence-browser.mjs)，全部业务接口被隔离测试路由拦截，浏览器结果不证明真实 MySQL 的四入口端到端事务。截图为本机临时 QA 产物，位于 `/tmp/scwiki-138-browser/`，不作为永久归档附件。
+
+### 可复跑命令
+
+在仓库根目录，使用 Node 24 或其他已验证兼容的 Node 执行；系统 Node 26 的实验性 localStorage 会影响旧测试的 jsdom 全局对象，未为此修改业务代码或测试配置。
+
+```sh
+node "frontend/node_modules/vitest/vitest.mjs" run --config "vitest.config.ts" "tests/01_decentralized_uploading/manual-evidence-section.test.tsx" "tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx" "tests/01_decentralized_uploading/manual-evidence-editor.test.tsx" "tests/01_decentralized_uploading/evidence-workflow.test.tsx" "tests/01_decentralized_uploading/evidence-drawer-close.test.tsx" "tests/01_decentralized_uploading/evidence-draft-queue.test.tsx"
+JWT_SECRET_KEY="scwiki-138-isolated-test-secret" FILE_STORAGE_BACKEND="local" python -m pytest "tests/01_decentralized_uploading/test_issue109_manual_api.py" "tests/01_decentralized_uploading/test_issue109_manual_evidence.py" -q
+npm --prefix "frontend" run build
+PLAYWRIGHT_MODULE="/absolute/path/to/playwright/index.mjs" CHROMIUM_PATH="/absolute/path/to/chrome" ARTIFACT_DIR="/tmp/scwiki-138-browser" node "tests/01_decentralized_uploading/manual-evidence-browser.mjs"
+```
+
+PLAYWRIGHT_MODULE、CHROMIUM_PATH 是测试运行时路径，不是项目新增依赖或用户产品配置。浏览器脚本默认指向本地 Vite，所有 API 都被测试隔离。
+
+### 扩展回归与边界
+
+扩展到整个 `tests/01_decentralized_uploading/` 的一次回归得到 300 项通过、16 项失败（该次运行在随后补充的两项针对性测试之前）。16 项全部来自 pressure-review-editing 和 submit-validation-feedback；在独立副本撤除本次工作流、侧栏、语言及上传编辑器改动，同时保留其他任务原有改动后，两个文件仍是相同 16 项失败、7 项通过。失败类别为重复压强标签和多 Alert 断言，不能报告全目录测试全绿。
+
+Safari、真正系统截图快捷键写入剪贴板的路径、真实 MySQL 下完整上传→返修→批准与权限事务仍待验收。当前实现已在 Chrome 原生剪贴板路径与真实服务端隔离文件测试通过，不将两者合并声称生产链已全部验收。未推送、未执行迁移或部署，Issue 保持开放。
+
+### 仅含本次暂存改动的独立副本验证
+
+从 Git 暂存区导出独立副本，不带其他任务的未提交改动。TypeScript/Vite 构建通过；第一次全目录回归 303 项通过、11 项失败，仅余已在任务前副本确认的压强重复标签用例；其他任务工作区中的 5 项多 Alert 失败未进入本提交。后续补入物性条件身份回归后，最终定向回归为 63 项通过。不宣称全目录全绿。

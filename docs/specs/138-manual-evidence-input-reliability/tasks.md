@@ -4,15 +4,15 @@
 
 **输入**：[spec.md](spec.md)、[plan.md](plan.md)、[research.md](research.md)、[data-model.md](data-model.md)、[交互与接口契约](contracts/manual-evidence.md)。
 
-本轮仅创建文档。以下均为待实施技术任务，不替代平台 Issue 的协作状态，也不表示已经获代码实施授权。每项实施前复查共享工作区和 #109 最新进展；同一文件修改串行执行。
+用户已追加“开始落地”授权实施；勾选仅表示对应技术任务已有验证，不替代平台 Issue 状态。每项实施前复查共享工作区和 #109 最新进展；同一文件修改串行执行。
 
 ## 阶段 1：准备
 
-- [ ] T001 在 `docs/specs/138-manual-evidence-input-reliability/research.md` 记录运行制品来源与“提供证据”异常的隔离浏览器时序，区分整页导航、组件重建和旧响应覆盖，并复核 #109 US8 实际进展及可复用保存逻辑。
+- [x] T001 在 `docs/specs/138-manual-evidence-input-reliability/research.md` 记录运行制品来源与“提供证据”异常的隔离浏览器时序，区分整页导航、组件重建和旧响应覆盖，并复核 #109 US8 实际进展及可复用保存逻辑。
 
 ## 阶段 2：基础能力
 
-- [ ] T002 对照 `frontend/src/components/EvidenceWorkflow.tsx`、`frontend/src/lib/evidenceFields.ts`、`backend/api/evidence.py` 和 `backend/ingest/manual_evidence.py`，在 `docs/specs/138-manual-evidence-input-reliability/contracts/manual-evidence.md` 核定稳定字段身份、当前值读取、保存回调及分阶段错误契约；不得增加第二套保存流程或绕过版本检查。
+- [x] T002 对照 `frontend/src/components/EvidenceWorkflow.tsx`、`frontend/src/lib/evidenceFields.ts`、`backend/api/evidence.py` 和 `backend/ingest/manual_evidence.py`，在 `docs/specs/138-manual-evidence-input-reliability/contracts/manual-evidence.md` 核定稳定字段身份、当前值读取、保存回调及分阶段错误契约；不得增加第二套保存流程或绕过版本检查。
 
 ## 阶段 3：US1——编辑内容可靠保留（P1，MVP）
 
@@ -20,9 +20,9 @@
 
 **独立验收**：填写至少两个字段的不同理由及证据状态，交替切换、关闭重开、延迟/乱序返回与失败重试，核对内容及归属。
 
-- [ ] T003 [US1] 在 `tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx` 与 `tests/01_decentralized_uploading/manual-evidence-section.test.tsx` 先覆盖旧读取覆盖新输入、切换选项、字段/任务隔离、侧栏重开、待上传 File 保留及部分成功等失败场景。
-- [ ] T004 [US1] 在 `frontend/src/lib/manualEvidenceDrafts.ts` 和 `frontend/src/components/EvidenceWorkflow.tsx` 建立编辑会话草稿及修订保护，复用已有保存协调能力；区分整份版本变化与字段值变化，旧响应不能重置新的草稿或关闭新侧栏。
-- [ ] T005 [US1] 在 `frontend/src/components/ManualEvidenceSection.tsx` 接入该草稿管理，区分加载/无修改/失败，保留选择、理由和文件，串联说明与文件的分阶段结果；成功后的关闭与焦点恢复遵循 #109，未上传文件不可被误报已保存或静默丢弃。
+- [x] T003 [US1] 在 `tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx` 与 `tests/01_decentralized_uploading/manual-evidence-section.test.tsx` 先覆盖旧读取覆盖新输入、切换选项、字段/任务隔离、侧栏重开、待上传 File 保留及部分成功等失败场景。
+- [x] T004 [US1] 在 `frontend/src/lib/manualEvidenceDrafts.ts` 和 `frontend/src/components/EvidenceWorkflow.tsx` 建立编辑会话草稿及修订保护，复用已有保存协调能力；区分整份版本变化与字段值变化，旧响应不能重置新的草稿或关闭新侧栏。
+- [x] T005 [US1] 在 `frontend/src/components/ManualEvidenceSection.tsx` 接入该草稿管理，区分加载/无修改/失败，保留选择、理由和文件，串联说明与文件的分阶段结果；成功后的关闭与焦点恢复遵循 #109，未上传文件不可被误报已保存或静默丢弃。
 
 ## 阶段 4：US2——修改后立即看到入口（P1）
 
@@ -30,9 +30,9 @@
 
 **独立验收**：书目、多选/自由输入、材料状态及物性字段分别验证立即打开和自动保存后打开；加载失败不误显示无修改。
 
-- [ ] T006 [US2] 在 `tests/01_decentralized_uploading/manual-evidence-editor.test.tsx` 先编写主编辑器与共享侧栏集成回归，覆盖五秒前打开、保存后版本刷新、主值保存失败、缺版本、改回原值及当前值变化后的旧说明保护。
-- [ ] T007 [US2] 在 `frontend/src/components/EvidenceWorkflow.tsx` 与 `frontend/src/components/ManualEvidenceSection.tsx` 根据稳定身份和当前值立即展示待同步入口；显式保存/上传时等待主值保存并取得相同字段当前版本，打开查看不调用模型或隐式提交。
-- [ ] T008 [US2] 在 `frontend/src/components/UploadTaskEditor.tsx` 与 `frontend/src/pages/AdminPaperEditPage.tsx` 接通共用保存/版本同步及草稿状态，覆盖上传、返修、管理员和超级管理员；Tc 校验等失败须保留输入并指明阶段，防止获焦后台回写覆盖正在编辑的人工说明。
+- [x] T006 [US2] 在 `tests/01_decentralized_uploading/manual-evidence-editor.test.tsx` 先编写主编辑器与共享侧栏集成回归，覆盖五秒前打开、保存后版本刷新、主值保存失败、缺版本、改回原值及当前值变化后的旧说明保护。
+- [x] T007 [US2] 在 `frontend/src/components/EvidenceWorkflow.tsx` 与 `frontend/src/components/ManualEvidenceSection.tsx` 根据稳定身份和当前值立即展示待同步入口；显式保存/上传时等待主值保存并取得相同字段当前版本，打开查看不调用模型或隐式提交。
+- [x] T008 [US2] 在 `frontend/src/components/UploadTaskEditor.tsx` 与 `frontend/src/pages/AdminPaperEditPage.tsx` 接通共用保存/版本同步及草稿状态，覆盖上传、返修、管理员和超级管理员；Tc 校验等失败须保留输入并指明阶段，防止获焦后台回写覆盖正在编辑的人工说明。
 
 ## 阶段 5：US3——拖拽文件与粘贴截图（P2）
 
@@ -40,8 +40,8 @@
 
 **独立验收**：支持类型完成拖入/上传/预览/删除，真实截图粘贴无需本地文件；文本框粘贴不变，拖拽不导航。
 
-- [ ] T009 [US3] 在 `tests/01_decentralized_uploading/manual-evidence-section.test.tsx` 先覆盖点击/drop/paste 同一校验、剪贴板图片真实 MIME 与命名、空/无效/超限输入、满五项、默认行为阻止、普通文本粘贴和请求失败后文件保留。
-- [ ] T010 [US3] 在 `frontend/src/components/ManualEvidenceSection.tsx` 与 `frontend/src/i18n/zh/evidence.ts`、`frontend/src/i18n/en/evidence.ts` 实现可聚焦拖拽/粘贴区及一致文件处理、预览清理和提示；沿用 `backend/api/evidence.py` 的鉴权人工文件接口及 10 MiB/5 项约束。
+- [x] T009 [US3] 在 `tests/01_decentralized_uploading/manual-evidence-section.test.tsx` 先覆盖点击/drop/paste 同一校验、剪贴板图片真实 MIME 与命名、空/无效/超限输入、满五项、默认行为阻止、普通文本粘贴和请求失败后文件保留。
+- [x] T010 [US3] 在 `frontend/src/components/ManualEvidenceSection.tsx` 与 `frontend/src/i18n/zh/evidence.ts`、`frontend/src/i18n/en/evidence.ts` 实现可聚焦拖拽/粘贴区及一致文件处理、预览清理和提示；沿用 `backend/api/evidence.py` 的鉴权人工文件接口及 10 MiB/5 项约束。
 
 ## 阶段 6：跨故事验证与文档收尾
 
@@ -75,6 +75,12 @@ US1 是草稿保护基础，US2 复用该基础，US3 复用前两者的写入�
 | SC-005 | T001、T008、T011—T012 | 真实浏览器、运行来源及共用入口证据 |
 
 全部故事验收场景还应逐项对照 [quickstart.md](quickstart.md) 的矩阵，不因单项测试通过勾选整个故事。
+
+## 实施证据与剩余项
+
+T001—T002：Research 实施核对和既有接口契约；T003—T010：三份人工证据测试及共用生产路径，63 项定向回归、Chrome 四入口通过。未保存内容和新字段身份归并均有回归。
+
+T011 保持未完成：Chrome、隔离 SQLite 与文件存储已验证，Safari 和真实 MySQL 完整业务链仍待验收。T012 的本地 Overview、README 与验证记录已更新；远程链接未发布，关闭门仍未满足。详见 quickstart.md。
 
 ## MVP 与增量策略
 

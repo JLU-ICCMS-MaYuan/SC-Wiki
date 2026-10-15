@@ -52,7 +52,7 @@ it('提供证据路径上传 PDF，不要求填写来源说明', async () => {
   await waitFor(() => expect(screen.getByLabelText('人工修改判断理由（必填）')).toBeInTheDocument())
   fireEvent.change(screen.getByLabelText('人工修改判断理由（必填）'), { target: { value: '查看原始报告' } })
   fireEvent.click(screen.getByLabelText('提供证据'))
-  await waitFor(() => expect(api.put).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ no_evidence_reason: '' })))
+  expect(api.put).not.toHaveBeenCalled()
   expect(screen.queryByLabelText('不提供证据的理由（必填）')).not.toBeInTheDocument()
   const file = new File(['%PDF-1.4'], 'report.pdf', { type: 'application/pdf' })
   fireEvent.change(document.querySelector('input[type=file]')!, { target: { files: [file] } })

@@ -134,6 +134,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     : { target: 'upload', target_id: taskId }
   const evidenceWorkflow = useEvidenceWorkflow({ target: evidenceTarget,
     getCurrentValue: record => draft ? currentEvidenceField(record, { ...draft.paper }, draft.material_states) : undefined,
+    saveCurrent: () => saveDraft(false, false),
   })
   const revisionIdentity = () => revisionMeta.current
     ? { revision_id: revisionMeta.current.revision_id, draft_version: revisionMeta.current.draft_version } : {}
@@ -175,6 +176,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   currentEditor.current = { draft, loading, dirty, saving, submitting }
   const refreshEvidence = useRef(evidenceWorkflow.restore)
   refreshEvidence.current = evidenceWorkflow.restore
+  const refreshSavedEvidence = useRef(evidenceWorkflow.refreshAfterSave)
+  refreshSavedEvidence.current = evidenceWorkflow.refreshAfterSave
 
   useEffect(() => {
     let active = true
@@ -249,14 +252,14 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     const refresh = async () => {
       const editor = currentEditor.current
       if (document.visibilityState === 'hidden' || refreshing || !editor.draft || editor.loading
-        || editor.dirty || editor.saving || editor.submitting) return
+        || editor.dirty || editor.saving || editor.submitting || evidenceWorkflow.hasManualDrafts()) return
       const editVersion = revisionRef.current
       controller = new AbortController()
       refreshing = true
       try {
         const response = await api.get<{ ok: boolean; data: UploadDraft }>(draftUrl, { signal: controller.signal })
         const latest = currentEditor.current
-        if (disposed || editVersion !== revisionRef.current || latest.dirty || latest.saving || latest.submitting) return
+        if (disposed || editVersion !== revisionRef.current || latest.dirty || latest.saving || latest.submitting || evidenceWorkflow.hasManualDrafts()) return
         const next = normalizeUploadDraft(unwrapData(response))
         if (JSON.stringify(next) !== JSON.stringify(latest.draft)) {
           setDraft(next)
@@ -348,7 +351,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     changeDraft(current => ({ ...current, [field]: value, ...(field === 'material_states' ? { paper: { ...current.paper, research_materials: researchMaterials(value as UploadDraft['material_states']) } } : {}) }))
   }
 
-  const saveDraft = useCallback(async (showResult = false): Promise<boolean> => {
+  const saveDraft = useCallback(async (showResult = false, syncEvidence = true): Promise<boolean> => {
     if (!draft || saving || readOnly || revision?.conflict) return false
     const tcIssues = validateTcRecords(draft.material_states)
     if (tcIssues.length) {
@@ -356,10 +359,12 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       return false
     }
     const editVersion = revisionRef.current
+    const evidenceRevision = evidenceWorkflow.getEditRevision()
     setSaving(true)
     try {
       await persistDraft(draft)
       if (editVersion === revisionRef.current) setDirty(false)
+      if (syncEvidence && editVersion === revisionRef.current) await refreshSavedEvidence.current(evidenceRevision)
       setLastSavedAt(new Date().toLocaleTimeString(lang === 'zh' ? 'zh-CN' : 'en-US', { hour: '2-digit', minute: '2-digit' }))
       if (showResult) setError('')
       return true

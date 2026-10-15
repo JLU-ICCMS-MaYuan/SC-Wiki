@@ -11,12 +11,16 @@ export function currentEvidenceField(record: EvidenceRecord, paper: Record<strin
     value = states[index]
     field = field.replace(/^material_states\[\d+\]/, `material_states[${index}]`)
     if (record.record_key) {
+      const state = value
       const mi = value.property_modules?.findIndex((m: any) => m.module_key === record.module_key) ?? -1
       const ri = mi < 0 ? -1 : value.property_modules[mi].records.findIndex((r: any) => r.record_key === record.record_key)
       if (ri < 0) return undefined
       value = value.property_modules[mi].records[ri]
       field = field.replace(/\.property_modules\[\d+\]/, `.property_modules[${mi}]`).replace(/\.records\[\d+\]/, `.records[${ri}]`)
-      return {value, field}
+      // 说明绑定物性值及材料条件；其他物性或排序变化不改变本条说明身份。
+      const context = Object.fromEntries(Object.entries(state).filter(([key]) =>
+        !['property_modules', 'structures', 'structure_candidates', 'evidence', 'evidences', 'field_evidence', 'display_order'].includes(key)))
+      return {value, field, manualValue: { record: value, state: context }}
     }
   } else if (!field.startsWith('paper.')) return undefined
   if (record.structure_hash) return undefined

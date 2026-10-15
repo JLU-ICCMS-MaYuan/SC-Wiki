@@ -2,11 +2,12 @@ import { EvidenceRegion } from './EvidenceRegion'
 import EvidenceReadableValue from './EvidenceReadableValue'
 import ManualEvidenceSection from './ManualEvidenceSection'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, Snackbar, TextField, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { api } from '../lib/api'
 import { evidenceProblem } from './EvidenceFieldMarkers'
 import { createEvidenceDraftQueue } from '../lib/evidenceDraftQueue'
+import { createManualEvidenceDrafts, manualDraftKey, manualFieldIdentity, manualValueIdentity, type PreparedManualEvidence } from '../lib/manualEvidenceDrafts'
 import { evidenceFieldAffected } from '../lib/evidenceFields'
 import { useLanguage } from '../context/LanguageContext'
 
@@ -57,7 +58,7 @@ function aiReasonText(record: EvidenceRecord, t: (key: string) => string): strin
 // 运行任务与持久问题列表分开；关闭抽屉不清除任何核对结果。
 export function useEvidenceWorkflow(options?: {
   target?: EvidenceTarget
-  getCurrentValue?: (record: EvidenceRecord) => { value: unknown; field: string } | undefined
+  getCurrentValue?: (record: EvidenceRecord) => { value: unknown; field: string; manualValue?: unknown } | undefined
   saveCurrent?: () => Promise<boolean>
 }) {
   const { t } = useLanguage()
@@ -68,6 +69,7 @@ export function useEvidenceWorkflow(options?: {
   const [fallbackRecord, setFallbackRecord] = useState<EvidenceRecord | undefined>()
   const [reasons, setReasons] = useState<Record<string, string>>({})
   const [saveError, setSaveError] = useState('')
+  const [manualNotice, setManualNotice] = useState('')
   const [saving, setSaving] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const confirmingRef = useRef(false)
@@ -76,6 +78,25 @@ export function useEvidenceWorkflow(options?: {
   const localReasons = useRef(new Map<string, string>())
   const optionsRef = useRef(options)
   optionsRef.current = options
+  const manualCurrentValue = (record: EvidenceRecord) => {
+    const current = optionsRef.current?.getCurrentValue?.(record)
+    return current ? ('manualValue' in current ? current.manualValue : current.value) : record.current_value
+  }
+  const hasLocalManualEdit = (record: EvidenceRecord) => {
+    if (record.stale) return true
+    const current = optionsRef.current?.getCurrentValue?.(record)
+    // 科学记录的服务器值含材料条件，不能直接与编辑器的原始记录对象比较。
+    return Boolean(current && typeof current.value !== 'object' && typeof record.current_value !== 'object'
+      && manualValueIdentity(current.value) !== manualValueIdentity(record.current_value))
+  }
+  const [manualDrafts] = useState(createManualEvidenceDrafts)
+  useEffect(() => {
+    const protect = (event: BeforeUnloadEvent) => {
+      if (manualDrafts.hasPending()) { event.preventDefault(); event.returnValue = '' }
+    }
+    window.addEventListener('beforeunload', protect)
+    return () => window.removeEventListener('beforeunload', protect)
+  }, [manualDrafts])
   const recordsRef = useRef(records)
   recordsRef.current = records
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
@@ -204,6 +225,34 @@ export function useEvidenceWorkflow(options?: {
     if (options?.target) void restore(options.target)
   }, [options?.target?.target, options?.target?.target_id, restore])
 
+  const prepareManual = async (record: EvidenceRecord): Promise<PreparedManualEvidence> => {
+    const target = targetRef.current
+    if (!target) throw new Error(t('evidence.manualContextMissing'))
+    const identity = `${target.target}:${target.target_id}`
+    const session = drawerSession.current
+    const hadCurrent = Boolean(optionsRef.current?.getCurrentValue?.(record))
+    const value = () => manualCurrentValue(record)
+    const expectedValue = manualValueIdentity(value())
+    const isCurrent = () => mounted.current && identity === targetIdentity.current
+      && (!optionsRef.current?.target || `${optionsRef.current.target.target}:${optionsRef.current.target.target_id}` === identity)
+      && (!hadCurrent || Boolean(optionsRef.current?.getCurrentValue?.(record)))
+      && manualValueIdentity(value()) === expectedValue
+    const saveCurrent = optionsRef.current?.saveCurrent
+    if (saveCurrent && !(await saveCurrent())) throw new Error(t('evidence.saveFirstFailed'))
+    if (!isCurrent()) throw new Error(t('evidence.changedDuringSave'))
+    const fresh = await restore(target)
+    if (!fresh || !isCurrent()) throw new Error(t('evidence.changedDuringSave'))
+    const current = fresh.records.find(entry => record.item_key ? entry.item_key === record.item_key
+      : entry.field === record.field && entry.state_key === record.state_key && entry.record_key === record.record_key)
+    if (!current?.item_key || !/^[0-9a-f]{64}$/.test(current.item_key)) throw new Error(t('evidence.manualContextMissing'))
+    manualDrafts.adopt(manualDraftKey(target, record, value()), manualDraftKey(target, current, value()))
+    return {
+      endpoint: `${base}/${target.target}/${target.target_id}/manual/${current.item_key}`,
+      version: fresh.version, isCurrent,
+      complete: () => { if (isCurrent() && drawerSession.current === session) { setManualNotice(t('common.saved')); closeDrawer() } },
+    }
+  }
+
   const payload = (preflight: Preflight, resolutions: Record<string, string> = {}): EvidencePayload => ({ evidence_job_id: jobID.current, expected_evidence_version: preflight.version, evidence_resolutions: resolutions })
   const showResults = (next: EvidenceRecord[], preflight: Preflight, silent = false) => {
     setRecords(next)
@@ -216,6 +265,16 @@ export function useEvidenceWorkflow(options?: {
   }
   // 提交门禁只读恢复；任何未核对项目都不在此处启动模型。
   const gate = async (target: EvidenceTarget): Promise<EvidencePayload | null> => {
+    if (manualDrafts.hasPending(target)) {
+      const record = recordsRef.current.find(entry => {
+        const key = manualDraftKey(target, entry, manualCurrentValue(entry))
+        const draft = manualDrafts.read(key)
+        return draft.dirty || draft.files.length || manualDrafts.previous(manualFieldIdentity(target, entry), key).length
+      })
+      if (record) openIssue(record.key)
+      setSaveError(t('evidence.manualUnsaved'))
+      return null
+    }
     await flushDrafts()
     const result = await api.post<Preflight>(`${base}/preflight`, target)
     preflightRef.current = result
@@ -439,6 +498,7 @@ export function useEvidenceWorkflow(options?: {
     }, 320)
   }
   const dialog = <>
+    <Snackbar open={Boolean(manualNotice)} autoHideDuration={4000} onClose={() => setManualNotice('')} message={manualNotice} />
 
     <Dialog open={view !== null && !automatic} onClose={() => finish(null)} fullWidth maxWidth="md" aria-labelledby="evidence-workflow-title">
       <DialogTitle id="evidence-workflow-title">{t('evidence.title')}</DialogTitle>
@@ -490,7 +550,10 @@ export function useEvidenceWorkflow(options?: {
           </Box>)}
         </Box>
         <Typography fontWeight={700} sx={{ mt: 2 }}>{t('evidence.manualEditRecords')}</Typography>
-        <ManualEvidenceSection target={targetRef.current} record={activeRecord} version={preflightRef.current?.version} />
+        <ManualEvidenceSection target={targetRef.current} record={activeRecord} version={preflightRef.current?.version}
+          drafts={manualDrafts} value={manualCurrentValue(activeRecord)}
+          localChanged={hasLocalManualEdit(activeRecord)}
+          prepare={() => prepareManual(activeRecord)} />
         {activeGroup.some(r => r.history?.length || r.decision?.reason) ? <>
           {activeGroup.map(r => r.decision?.reason && <Typography key={r.key}>{t('evidence.savedHumanReason')}：{r.decision.reason}</Typography>)}
           {activeGroup.some(r => r.history?.length) && <Box component="details" sx={{ my: 1 }}><Typography component="summary">{t('evidence.historyLabel')}</Typography>{activeGroup.flatMap(r => r.history || []).map((entry, index) => <Box key={index} sx={{ my: 2, overflowWrap: 'anywhere' }}>
@@ -531,5 +594,5 @@ export function useEvidenceWorkflow(options?: {
       </>}
     </Drawer>
   </>
-  return { refreshAfterSave, getEditRevision: () => editRevision.current, hasUnsavedChanges: () => dirty.current, hasAccepted: records.some(r => !r.stale && r.proposal_draft?.accepted), run, runAutomatic, automaticView: automatic ? view : null, gate, applyAccepted, dialog, busy: view !== null, issues, records, restore, invalidate, openIssue, clearIssues: () => finish(null), saveError }
+  return { hasManualDrafts: manualDrafts.hasPending, refreshAfterSave, getEditRevision: () => editRevision.current, hasUnsavedChanges: () => dirty.current, hasAccepted: records.some(r => !r.stale && r.proposal_draft?.accepted), run, runAutomatic, automaticView: automatic ? view : null, gate, applyAccepted, dialog, busy: view !== null, issues, records, restore, invalidate, openIssue, clearIssues: () => finish(null), saveError }
 }
