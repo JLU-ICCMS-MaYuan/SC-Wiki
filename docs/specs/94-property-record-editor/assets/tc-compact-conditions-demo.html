@@ -29,8 +29,6 @@
   #tc-compact-demo .tc-extension .tc-field { flex: 0 0 auto; width: 110px; min-width: 0; }
   #tc-compact-demo .tc-remove { color: var(--tc-muted); flex: 0 0 auto; border: none; background: transparent; padding: 10px 6px; min-height: 40px; font: inherit; }
   #tc-compact-demo .tc-remove:hover { color: var(--tc-error); }
-  #tc-compact-demo .tc-condition-extensions { display: contents; }
-  #tc-compact-demo .tc-condition-extensions .tc-extension { flex: 0 0 auto; }
   #tc-compact-demo .tc-warning { margin: 6px 0 0; font-size: 12px; color: var(--tc-error); }
   #tc-compact-demo [hidden] { display: none !important; }
   @media (pointer: coarse) { #tc-compact-demo input:not([type=checkbox]), #tc-compact-demo select { font-size: 16px; } #tc-compact-demo button { min-height: 44px; } }
@@ -69,9 +67,11 @@
         <label class="tc-field"><span class="tc-label">q 网格</span><input data-field="qGrid" aria-label="q 网格" value="6 × 6 × 6"></label>
         <label class="tc-field"><span class="tc-label">k 展宽</span><input data-field="kWidth" aria-label="k 展宽" placeholder="填写"></label>
         <label class="tc-field"><span class="tc-label">q 展宽</span><input data-field="qWidth" aria-label="q 展宽" placeholder="填写"></label>
-        <div class="tc-condition-extensions" data-extensions="conditions"></div>
-        <button type="button" class="tc-add cursor-interaction" data-add="conditions" aria-label="新增计算条件字段"><i data-lucide="plus" aria-hidden="true"></i>新增字段</button>
       </div>
+    </div>
+    <div role="group" aria-label="其他计算条件">
+      <div class="tc-scroll" data-extension-scroll="conditions" hidden><div data-extensions="conditions"></div></div>
+      <button type="button" class="tc-add cursor-interaction" data-add="conditions" aria-label="新增计算条件字段"><i data-lucide="plus" aria-hidden="true"></i>新增字段</button>
     </div>
   </section>
 </div>
@@ -124,7 +124,7 @@
         row.append(remove); host.append(row);
       }
     }
-    root.querySelector('[data-extension-scroll="parameters"]').hidden = extensions.parameters.length === 0;
+    for (const key of Object.keys(extensions)) root.querySelector(`[data-extension-scroll="${key}"]`).hidden = extensions[key].length === 0;
     fitFields();
   };
   const render = () => {
