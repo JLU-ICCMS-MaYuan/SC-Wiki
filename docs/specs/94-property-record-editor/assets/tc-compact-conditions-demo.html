@@ -25,14 +25,12 @@
   #tc-compact-demo .tc-software { flex-basis: 140px; min-width: 140px; }
   #tc-compact-demo .tc-method { flex-basis: 112px; min-width: 112px; }
   #tc-compact-demo .tc-functional { flex-basis: 124px; min-width: 124px; }
-  #tc-compact-demo .tc-extension { display: flex; flex-wrap: nowrap; gap: 10px; align-items: center; min-width: 470px; padding: 10px 1px; }
-  #tc-compact-demo .tc-extension .tc-field { flex: 1 0 95px; }
-  #tc-compact-demo .tc-extension .tc-name { flex-basis: 130px; min-width: 130px; }
-  #tc-compact-demo .tc-extension .tc-kind { flex: 0 0 76px; min-width: 76px; }
+  #tc-compact-demo .tc-extension { display: flex; flex-wrap: nowrap; gap: 10px; align-items: center; width: max-content; min-width: 0; padding: 10px 1px; }
+  #tc-compact-demo .tc-extension .tc-field { flex: 0 0 auto; width: 110px; min-width: 0; }
   #tc-compact-demo .tc-remove { color: var(--tc-muted); flex: 0 0 auto; border: none; background: transparent; padding: 10px 6px; min-height: 40px; font: inherit; }
   #tc-compact-demo .tc-remove:hover { color: var(--tc-error); }
   #tc-compact-demo .tc-condition-extensions { display: contents; }
-  #tc-compact-demo .tc-condition-extensions .tc-extension { flex: 0 0 510px; }
+  #tc-compact-demo .tc-condition-extensions .tc-extension { flex: 0 0 auto; }
   #tc-compact-demo .tc-warning { margin: 6px 0 0; font-size: 12px; color: var(--tc-error); }
   #tc-compact-demo [hidden] { display: none !important; }
   @media (pointer: coarse) { #tc-compact-demo input:not([type=checkbox]), #tc-compact-demo select { font-size: 16px; } #tc-compact-demo button { min-height: 44px; } }
@@ -95,6 +93,18 @@
   const persist = () => {
     if (window.openai && window.openai.setWidgetState) window.openai.setWidgetState({ modelContent: { compactConditions: { values, extensions } }, privateContent: null }).catch(() => {});
   };
+  const measure = document.createElement('canvas').getContext('2d');
+  const omegaField = root.querySelector('[data-field="omega"]').closest('label');
+  const fitField = input => {
+    const style = getComputedStyle(input);
+    const baseline = omegaField.getBoundingClientRect().width || 110;
+    const content = input.tagName === 'SELECT' ? input.selectedOptions[0].textContent : input.value;
+    measure.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight) + 2;
+    const width = Math.ceil(Math.max(baseline, measure.measureText(content).width + padding + (input.tagName === 'SELECT' ? 30 : 12)));
+    input.closest('.tc-field').style.width = `${width}px`;
+  };
+  const fitFields = () => root.querySelectorAll('[data-extension]').forEach(fitField);
   const field = (item, key, label, extraClass = '') => {
     const wrap = document.createElement('label'); wrap.className = `tc-field ${extraClass}`;
     const caption = document.createElement('span'); caption.className = 'tc-label'; caption.textContent = label;
@@ -115,6 +125,7 @@
       }
     }
     root.querySelector('[data-extension-scroll="parameters"]').hidden = extensions.parameters.length === 0;
+    fitFields();
   };
   const render = () => {
     root.querySelectorAll('[data-field]').forEach(input => { if (input.type === 'checkbox') input.checked = values[input.dataset.field]; else input.value = values[input.dataset.field]; });
@@ -127,6 +138,7 @@
       if (input.dataset.field === 'kind') root.querySelector('[data-range-only]').hidden = values.kind !== 'range';
     } else if (input.dataset.extension) {
       const row = input.closest('[data-extension-id]'); const item = extensions[row.dataset.extensionGroup].find(item => item.id === row.dataset.extensionId); if (item) item[input.dataset.extension] = input.value;
+      fitField(input);
     } else return;
     persist();
   });
@@ -137,6 +149,8 @@
     if (remove) { const row = remove.closest('[data-extension-id]'), key = row.dataset.extensionGroup; extensions[key] = extensions[key].filter(item => item.id !== remove.dataset.remove); renderExtensions(); persist(); }
   });
   restore(window.openai && window.openai.widgetState); render();
+  const sizingObserver = new ResizeObserver(fitFields);
+  sizingObserver.observe(omegaField);
   window.addEventListener('openai:set_globals', event => {
     const saved = event.detail && event.detail.globals && event.detail.globals.widgetState;
     const incoming = saved && saved.modelContent && saved.modelContent.compactConditions;
