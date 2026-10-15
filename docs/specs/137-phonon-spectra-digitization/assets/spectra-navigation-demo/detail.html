@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SC-Wiki · 谱数据提取详情 Demo</title>
+  <link rel="stylesheet" href="demo.css"><script src="demo.js" defer></script>
+</head>
+<body>
+<aside class="sidebar">
+  <a class="brand" href="index.html"><span class="logo">SC</span>SC-Wiki</a><div class="nav-label">研究工作台</div>
+  <nav class="navigation"><span>◈　热点</span><span>⌕　探索</span><span>⌘　脉络</span><span>♧　社区</span><a class="active" href="index.html">⇧　上传与校对</a><span>◇　对话</span></nav>
+  <div class="account"><span class="avatar">M</span><div>研究者工作区<small>界面交互预览</small></div></div>
+</aside>
+<div class="workspace"><header class="topbar"><span>论文数据　 /　 谱数据详情</span><span class="demo-badge">交互 Demo</span></header>
+<main>
+  <a class="back" id="return-link" href="index.html#state-s300">← 返回材料状态 01</a>
+  <div id="detail-content">
+    <div class="page-heading"><div><p class="eyebrow">谱数据 · 独立详情页</p><h1 id="detail-title">声子态密度 DOS</h1><p class="sub">检查来源、曲线和提取质量，返回后仍定位到原材料状态。</p></div><button class="outline" id="export-csv">↓ 下载演示 CSV</button></div>
+    <div class="assignment" id="assignment-panel" hidden><div class="assignment-copy"><h3>这组谱还没有明确的材料状态</h3><p class="sub">先对照图注核对条件，确认后再放入对应状态。</p></div><label class="sr-only" for="assign-state">选择归属材料状态</label><select id="assign-state"><option value="">选择材料状态</option><option value="s300">LaSc₂H₂₄ · 300 GPa</option></select><button class="primary" id="confirm-assignment" disabled>确认归属（演示）</button></div>
+    <div class="context-bar"><div><strong class="material" id="context-state">LaSc₂H₂₄ · P6/mmm · 300 GPa</strong><p class="sub" id="context-source">谐近似 · 主文图 3B · 0–65 THz</p></div><span class="status"><i class="dot"></i>提取完成 · 待人工核对</span></div>
+    <nav class="type-tabs" aria-label="谱类型" id="type-tabs"><a id="dos-tab" href="detail.html?state=s300&amp;kind=dos">声子态密度 DOS</a><a id="a2f-tab" href="detail.html?state=s300&amp;kind=a2f">α²F 谱函数与累计 λ</a></nav>
+    <div class="detail-grid">
+      <section class="panel"><div class="panel-head"><h3>来源图像</h3><span class="pill">示意来源图</span></div><div class="panel-body"><div id="source-plot"></div><p class="sub" id="source-caption">图 3B · 元素投影声子态密度</p></div><div class="paper-source"><span id="source-page">主文 · 第 3 页</span><span id="source-state">归属：状态 01 · 300 GPa</span></div></section>
+      <section class="panel"><div class="panel-head"><h3>提取结果</h3><select id="curve-choice" aria-label="选择提取曲线"><option value="all">全部投影</option><option value="0">La 投影</option><option value="1">Sc 投影</option><option value="2">H 投影</option></select></div><div class="panel-body"><div id="extracted-plot"></div><div class="legend" id="plot-legend"><span><i style="background:#957bc4"></i>La</span><span><i style="background:#d8a85c"></i>Sc</span><span><i style="background:#5a9293"></i>H</span></div><label class="overlay-control"><input type="checkbox" id="show-points" checked>显示采样点</label></div></section>
+    </div>
+    <p class="detail-caption">两幅图均由演示函数生成，仅用于预览检查界面；不作为论文原图或真实数字化证据。</p>
+    <div class="metrics"><div class="metric"><span id="metric-label-1">示例采样点</span><strong id="metric-value-1">131 <em>点 / 曲线</em></strong><small>演示值</small></div><div class="metric"><span id="metric-label-2">示例观测覆盖率</span><strong id="metric-value-2">98.4 <em>%</em></strong><small id="metric-note-2">缺口与推断需单独核对</small></div><div class="metric"><span id="metric-label-3">示例待核对项</span><strong id="metric-value-3">1 <em>项</em></strong><small id="metric-note-3">绝对幅值尺度未确认</small></div></div>
+    <div class="bottom-grid"><section class="panel"><div class="panel-head"><h3>数值数据预览</h3><span class="sub">前 4 个采样点 · 演示</span></div><table class="data-table"><thead><tr><th>频率 / THz</th><th id="amplitude-title">H 投影幅值</th><th>来源类型</th></tr></thead><tbody id="point-rows"></tbody></table></section><section class="panel"><div class="panel-head"><h3>来源与检查事项</h3></div><div class="panel-body"><div class="source-list"><div><span>所属材料状态</span><span id="review-state">状态 01 · 300 GPa</span></div><div><span>计算近似</span><span id="review-method">谐近似</span></div><div><span>原始来源</span><span id="review-source">主文 · 图 3B</span></div></div><p class="inline-warning" id="review-warning">DOS 绝对幅值尺度需要核对；不以曲线连续代替准确度。</p></div></section></div>
+  </div>
+  <div class="no-data" id="invalid-target" hidden><h2>此状态下没有对应谱数据</h2><p class="sub">请返回材料状态，选择已有的谱入口。</p></div>
+</main><footer>SC-Wiki · 谱数据交互设计预览<span>所有归属、曲线与质量数值均为演示，不代表真实提取结果。</span></footer></div>
+</body></html>

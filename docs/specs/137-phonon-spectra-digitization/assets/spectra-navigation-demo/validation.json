@@ -1,0 +1,80 @@
+{
+  "timestamp": "2026-10-15T15:41:41.077157+08:00",
+  "scope": "独立交互 Demo；非生产实现或科学提取验收",
+  "preview_url": "http://127.0.0.1:8847/index.html",
+  "browser": "Codex In-app Browser",
+  "viewport_width": 955,
+  "checks": [
+    {
+      "name": "声子 DOS 入口",
+      "result": "passed",
+      "evidence": "点击后 URL 为 detail.html?state=s300&kind=dos，标题和材料条件正确"
+    },
+    {
+      "name": "α²F 入口及谱类型切换",
+      "result": "passed",
+      "evidence": "入口及详情页标签切换到 kind=a2f，显示 α²F 和累计 λ 示意"
+    },
+    {
+      "name": "返回原状态",
+      "result": "passed",
+      "evidence": "详情返回 index.html#state-s300；无数据状态返回 #state-s150"
+    },
+    {
+      "name": "无数据状态",
+      "result": "passed",
+      "evidence": "150 GPa 下两个按钮禁用；直接访问其详情显示无对应谱数据"
+    },
+    {
+      "name": "未归属候选隔离",
+      "result": "passed",
+      "evidence": "未确认候选单列，不并入任一状态；详情明确归属及近似待确认"
+    },
+    {
+      "name": "确认归属",
+      "result": "passed",
+      "evidence": "手动选择 s300 并确认后，候选出现在该状态，谱组数 2→3，未归属数 1→0"
+    },
+    {
+      "name": "新归属详情",
+      "result": "passed",
+      "evidence": "新入口保留补充材料来源，近似仍待核对，不冒充主文图 3B"
+    },
+    {
+      "name": "重置演示",
+      "result": "passed",
+      "evidence": "重置后恢复 2 组已归属与 1 组未归属"
+    },
+    {
+      "name": "曲线选择",
+      "result": "passed",
+      "evidence": "选择 H 后三个系列 opacity 为 0.12、0.12、1"
+    },
+    {
+      "name": "采样点开关",
+      "result": "passed",
+      "evidence": "取消选中后点组隐藏，恢复后显示"
+    },
+    {
+      "name": "总览紧凑性",
+      "result": "passed",
+      "evidence": "总览 SVG 数量为 0，955px 宽度无水平溢出"
+    },
+    {
+      "name": "JavaScript 语法",
+      "result": "passed",
+      "evidence": "node --check demo.js 退出码 0"
+    }
+  ],
+  "not_run": [
+    "窄屏浏览器外观核验",
+    "CSV 下载端到端核验",
+    "生产后端/数据库集成",
+    "真实论文科学提取验收"
+  ],
+  "screenshots": [
+    "/Users/mayuan/.codex/visualizations/2026/10/15/01a13e47-5051-7842-aea4-8c0885bafc14/spectra-navigation-overview.png",
+    "/Users/mayuan/.codex/visualizations/2026/10/15/01a13e47-5051-7842-aea4-8c0885bafc14/spectra-detail-demo.png"
+  ],
+  "data": "生成的演示曲线、归属和质量指标；不访问业务 API"
+}
