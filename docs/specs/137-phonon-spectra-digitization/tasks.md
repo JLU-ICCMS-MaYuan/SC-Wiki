@@ -47,3 +47,7 @@ T020 完成依据：validation.md 的 2026-10-15 本机迁移记录、assets/loc
 - [x] T022 [FR-012/FR-013/FR-015] 修复缺 IR、空结果成功缓存、失败状态与原因；扩展 olive、组合上下图片碎片、矢量图框裁剪与文字页排除，升版 v2；原数学与后端 69 项、谱前端 11 项和构建通过。平台 v1 实跑见 assets/lasc-platform-run-20261015.json，v2 不冒充真实模型已重跑。
 
 T021 保持未完成：平台实际保存 3 条 DOS 与 1 条累计 λ，均待分配；α²F 尚无数值。GPT-6-sol 多图请求返回 HTTP 503，且 v1 颜色范围和图碎片导致信息缺失。用户要求查看配置以自行核查，已告知 .env 的 LLM2_BASE_URL / LLM2_API_KEY / LLM2_MODEL；待核查后继续用正式 API 重跑，不导入手工数据。
+
+- [ ] T023 [US7/FR-016/SC-013] 按用户已认可的 assets/spectra-navigation-demo/ 原型核对并完善 frontend/src/components/PropertySpectra.tsx、frontend/src/pages/SpectrumDetailPage.tsx 的按材料状态分类、两个明确入口、独立详情及返回定位；未归属候选单列，无数据状态不串用其他谱。补充 tests/01_decentralized_uploading/property-spectra-navigation.test.tsx 与真实浏览器／权限／数据归属验证，将实际结果记入 validation.md 后再勾选；Demo 认可不代替生产或科学验收。
+
+T023 使用既有谱数据身份与详情路由，依赖 T015/T017 的已验证基础，和 T021 的真实数据可用性分开记录；不更改 T018/T019/T021 的未完成状态，不在本次确认记录中实施。
