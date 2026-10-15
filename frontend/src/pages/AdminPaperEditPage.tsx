@@ -588,6 +588,12 @@ const AdminPaperEditPage: React.FC = () => {
               数据来自 /api/admin/papers/:id 的 material_states（含 property_modules/structures），
               编辑结果随保存时的 C1 请求整体替换（T020/T030/T034）。 */}
           <MaterialStatesEditor
+            propertySpectra={{ target: { target: 'paper', target_id: String(paperId) }, beforeNavigate: async () => {
+              if (evidenceWorkflow.hasManualDrafts()) throw new Error('请先保存或处理来源核对中的人工修改草稿，再打开谱详情。')
+              const version = evidenceWorkflow.getEditRevision()
+              const saved = await handleEditSave()
+              return saved && version === evidenceWorkflow.getEditRevision()
+            } }}
             onScientificEdit={evidenceWorkflow.invalidate}
             issues={evidenceIssuesForStates(evidenceWorkflow.issues, editMaterialStates)}
             states={editMaterialStates}

@@ -76,6 +76,13 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
     if (!endpoint || !version) throw new Error(t('evidence.manualContextMissing'))
     return { endpoint, version, isCurrent: () => currentKey.current === key, complete: () => {} }
   }
+  const saveBlockers = (input = draft) => [
+    !input.reason.trim() && t('evidence.manualReasonRequired'),
+    !input.choice && t('evidence.manualChoiceRequired'),
+    input.choice === 'provide' && !input.files.length && !input.saved?.items.length && t('evidence.manualEvidenceRequired'),
+    input.choice === 'none' && Boolean(input.saved?.items.length || input.files.length) && t('evidence.removeEvidenceBeforeNoEvidence'),
+    input.choice === 'none' && !input.absence.trim() && t('evidence.manualAbsenceRequired'),
+  ].filter((message): message is string => Boolean(message))
   // 请求只确认送出的输入修订；旧响应不可清空之后输入的理由和新文件。
   const save = async (uploadFiles = false) => {
     const input = store.read(key)
@@ -86,6 +93,8 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
     if (!uploadFiles && input.files.length) {
       store.patch(key, { error: t('evidence.manualPendingFiles') }); return
     }
+    const missing = saveBlockers(input)
+    if (missing.length) { store.patch(key, { error: missing.join('；') }); return }
     store.patch(key, { busy: true, error: '', notice: '' })
     let stage = t('evidence.manualStageValue')
     let explanationSaved = false
@@ -184,7 +193,6 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
           <FormControlLabel value="none" control={<Radio />} label={t('evidence.doNotProvideEvidence')} disabled={busy} />
         </RadioGroup>
         {choice === 'none' && <>
-          {!!saved?.items.length && <Alert severity="info">{t('evidence.removeEvidenceBeforeNoEvidence')}</Alert>}
           <TextField fullWidth multiline minRows={2} label={t('evidence.noEvidenceReason')} value={absence} onChange={event => store.edit(key, { absence: event.target.value })} />
         </>}
         {choice === 'provide' && <Box tabIndex={0} role="region" aria-label={t('evidence.manualDropZone')}
@@ -212,8 +220,10 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
           <PendingImage file={file} alt={t('evidence.manualImage')} />
           <Button type="button" size="small" disabled={busy} onClick={() => store.edit(key, { files: files.filter(entry => entry !== file) })}>{t('evidence.removeManualItem')}</Button>
         </Box>)}
-        {files.length > 0 && <Button type="button" size="small" disabled={busy || choice !== 'provide'} onClick={() => void save(true)}>{t('evidence.uploadManualFile')}</Button>}
-        <Button type="button" size="small" variant="outlined" disabled={busy || (choice === 'none' && Boolean(saved?.items.length))} onClick={() => void save()}>{t('evidence.saveManualEvidence')}</Button>
+        {(saveBlockers().length > 0 || loading || busy) && <Alert severity="info" role="status">
+          {loading ? t('evidence.manualLoading') : busy ? t('evidence.manualSaving') : saveBlockers().map(message => <Typography key={message} variant="body2">{message}</Typography>)}
+        </Alert>}
+        <Button type="button" size="small" variant="contained" disabled={loading || busy || saveBlockers().length > 0} onClick={() => void save(true)}>{busy ? t('evidence.manualSaving') : t('evidence.saveAndComplete')}</Button>
       </>}
     </>}
     {(saved?.items || []).map(item => <Box key={item.id} sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 1 }}>

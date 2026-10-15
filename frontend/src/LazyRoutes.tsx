@@ -11,6 +11,7 @@ const AdminPage = lazy(() => import('./pages/AdminPage'))
 const AdminPaperEditPage = lazy(() => import('./pages/AdminPaperEditPage'))
 const UploadPage = lazy(() => import('./pages/UploadPage'))
 const PaperDetailPage = lazy(() => import('./pages/PaperDetailPage'))
+const SpectrumDetailPage = lazy(() => import('./pages/SpectrumDetailPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
 const PublicUserPage = lazy(() => import('./pages/PublicUserPage'))
@@ -46,6 +47,7 @@ const LazyRoutes: React.FC = () => (
     <Route path="/admin/community" element={<Spin><RoleRoute allow={['admin', 'superadmin']}><CommunityModerationPage /></RoleRoute></Spin>} />
     <Route path="/upload" element={<Spin><UploadPage /></Spin>} />
     {/* 论文可见性按论文状态与归属逐篇由后端裁决，因此不包裹 RoleRoute */}
+    <Route path="/spectra/:collectionId" element={<Spin><SpectrumDetailPage /></Spin>} />
     <Route path="/papers/:id" element={<Spin><PaperDetailPage /></Spin>} />
     <Route path="/papers/:id/revise" element={<Spin><RoleRoute allow={['user', 'admin', 'superadmin']}><PaperRevisionPage /></RoleRoute></Spin>} />
     <Route path="/rag" element={<Spin><RagPage /></Spin>} />

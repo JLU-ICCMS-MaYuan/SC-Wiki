@@ -836,6 +836,15 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       </Box>
 
       <MaterialStatesEditor
+        propertySpectra={{ target: revisionPaperId && revisionMeta.current
+          ? { target: 'revision', target_id: revisionMeta.current.revision_id }
+          : { target: 'upload', target_id: taskId }, beforeNavigate: async () => {
+            if (readOnly) return true
+            if (evidenceWorkflow.hasManualDrafts()) throw new Error('请先保存或处理来源核对中的人工修改草稿，再打开谱详情。')
+            const version = revisionRef.current
+            const saved = await saveDraft(true)
+            return saved && version === revisionRef.current
+          } }}
         onScientificEdit={evidenceWorkflow.invalidate}
         states={draft.material_states}
         onChange={nextStates => setDraftField('material_states', nextStates)}

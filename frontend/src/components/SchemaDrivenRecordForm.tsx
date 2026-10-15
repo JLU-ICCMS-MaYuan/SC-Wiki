@@ -4,6 +4,9 @@ import {
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import DeleteIcon from '@mui/icons-material/Delete'
+import AutoGrowingTextField from './AutoGrowingTextField'
+import ThermodynamicStabilityFields from './ThermodynamicStabilityFields'
+import { isThermodynamicStability } from '../lib/thermodynamicStability'
 import TcRecordFields from './TcRecordFields'
 import { muRangeIndex } from '../lib/tcParameters'
 import type { FormDefinition, FormIssue, JsonSchema } from '../lib/formDefinitions'
@@ -29,7 +32,7 @@ const VALUE_KIND_LABELS: Record<PropertyValueKind, string> = {
 const FALLBACK_GROUP_SCHEMAS: Record<string, JsonSchema> = {
   calculation_conditions: {
     type: 'object',
-    title: '计算 Conditions',
+    title: '计算条件',
     properties: {
       calculation_code: { type: 'string', title: '计算软件' },
       electronic_method: { type: 'string', title: '电子结构方法' },
@@ -93,13 +96,17 @@ const effectivePayloadSchema = (definition: FormDefinition | undefined, recordTy
   } else if (recordType === 'measured_tc') {
     properties.experimental_conditions ||= FALLBACK_GROUP_SCHEMAS.experimental_conditions
   }
+  if (recordType === 'property' && definition?.property_code === 'custom' && schema.additionalProperties !== false) {
+    properties.parameters ||= { type: 'object', properties: { extensions: FALLBACK_GROUP_SCHEMAS.parameters.properties!.extensions } }
+    properties.calculation_conditions ||= { type: 'object', properties: { extensions: FALLBACK_GROUP_SCHEMAS.calculation_conditions.properties!.extensions } }
+  }
   for (const [group, fallback] of Object.entries(FALLBACK_GROUP_SCHEMAS)) {
     const declared = properties[group]
     if (!declared) continue
     properties[group] = {
       ...fallback,
       ...declared,
-      properties: { ...fallback.properties, ...(declared.properties || {}) },
+      properties: { ...(recordType === 'predicted_tc' ? fallback.properties : {}), ...(declared.properties || {}) },
     }
   }
   return schema
@@ -156,18 +163,17 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
     const items = getAtPath(record, path)
     const values = Array.isArray(items) ? items as Array<Record<string, any>> : []
     return (
-      <Box key={path} data-issue-field={fieldPath(path)} sx={{ gridColumn: '1 / -1', borderLeft: '3px solid', borderColor: 'divider', pl: 1.5 }}>
-        <Typography variant="subtitle2">{titleFor(definition, path, schema, '扩展字段')}</Typography>
+      <Box key={path} data-issue-field={fieldPath(path)} sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
         {values.map((item, index) => {
           if (record.record_type === 'predicted_tc' && path === 'payload.parameters.extensions' && index === muRangeIndex(record)) return null
           const itemPath = `${path}.${index}`
           const kind = (item.value_kind || 'number') as PropertyValueKind
           return (
-            <Box key={item.field_key || index} sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '2fr 1fr 2fr 1fr auto' }, gap: 1, mt: 1 }}>
-              <TextField size="small" label="字段名称" value={item.name_raw || ''} disabled={readOnly}
+            <Box key={item.field_key || index} data-extension-row sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1, overflowX: 'auto', py: 1 }}>
+              <AutoGrowingTextField data-issue-field={fieldPath(`${itemPath}.name_raw`)} label="字段名称" value={item.name_raw || ''} disabled={readOnly}
                 error={Boolean(issue(`${itemPath}.name_raw`))} helperText={issue(`${itemPath}.name_raw`)}
                 onChange={event => updatePath(`${itemPath}.name_raw`, event.target.value)} />
-              <FormControl size="small">
+              <FormControl size="small" sx={{ minWidth: 110, flex: '0 0 auto' }}>
                 <InputLabel>值类型</InputLabel>
                 <Select label="值类型" value={kind} disabled={readOnly}
                   onChange={event => updatePath(itemPath, extensionValuePatch(item, event.target.value as PropertyValueKind, item.value_raw || ''))}>
@@ -175,7 +181,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
                 </Select>
               </FormControl>
               {kind === 'boolean' ? (
-                <FormControl size="small">
+                <FormControl size="small" sx={{ minWidth: 110, flex: '0 0 auto' }}>
                   <InputLabel>值</InputLabel>
                   <Select label="值" value={String(Boolean(item.value_boolean))} disabled={readOnly}
                     onChange={event => updatePath(itemPath, extensionValuePatch(item, kind, event.target.value))}>
@@ -183,19 +189,19 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
                   </Select>
                 </FormControl>
               ) : (
-                <TextField size="small" label={kind === 'range' ? '值（下界..上界）' : '值'} value={item.value_raw || ''} disabled={readOnly}
+                <AutoGrowingTextField data-issue-field={fieldPath(`${itemPath}.value_raw`)} label={kind === 'range' ? '值（下界..上界）' : '值'} value={item.value_raw || ''} disabled={readOnly}
                   error={Boolean(issue(`${itemPath}.value_raw`))} helperText={issue(`${itemPath}.value_raw`)}
                   onChange={event => {
                     const next = extensionValuePatch(item, kind, event.target.value)
                     if (kind === 'range') {
-                      const [min, max] = event.target.value.split('..').map(Number)
+                      const [min, max] = event.target.value.split('..').map(part => part.trim() ? Number(part) : NaN)
                       next.value_min = Number.isFinite(min) ? min : null
                       next.value_max = Number.isFinite(max) ? max : null
                     }
                     updatePath(itemPath, next)
                   }} />
               )}
-              <TextField size="small" label="单位" value={item.unit_raw || ''} disabled={readOnly}
+              <AutoGrowingTextField data-issue-field={fieldPath(`${itemPath}.unit_raw`)} label="单位" value={item.unit_raw || ''} disabled={readOnly}
                 onChange={event => updatePath(`${itemPath}.unit_raw`, event.target.value)} />
               {!readOnly && <Button color="error" aria-label="删除扩展字段" onClick={() => updatePath(path, values.filter((_, itemIndex) => itemIndex !== index))}><DeleteIcon /></Button>}
             </Box>
@@ -222,11 +228,15 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
     }
     if (schema.type === 'array' && path.endsWith('.extensions')) return renderExtensions(path, schema)
     if (schema.type === 'object' || schema.properties) {
+      const fixed = Object.entries(schema.properties || {}).filter(([key, child]) => key !== 'extensions' && !(record.record_type === 'predicted_tc'
+        && path === 'payload.parameters' && ['lambda_ep', 'omega_log', 'omega_log_k', 'mu_star'].includes(key)) && child.type !== 'object')
       return (
-        <Box key={path} data-issue-field={fieldPath(path)} sx={{ gridColumn: '1 / -1', display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' }, gap: 1, borderLeft: '3px solid', borderColor: 'divider', pl: 1.5 }}>
-          <Typography variant="subtitle2" sx={{ gridColumn: '1 / -1' }}>{label}</Typography>
-          {Object.entries(schema.properties || {}).filter(([key]) => !(record.record_type === 'predicted_tc'
-            && path === 'payload.parameters' && ['lambda_ep', 'omega_log', 'omega_log_k', 'mu_star'].includes(key)))
+        <Box key={path} data-issue-field={fieldPath(path)} sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
+          {path === 'payload.calculation_conditions' && <Typography variant="body2" color="text.secondary">计算条件</Typography>}
+          {fixed.length > 0 && <Box data-condition-row sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 1, '& > *': { flex: '0 0 auto', minWidth: 110 } }}>
+            {fixed.map(([key, child]) => renderSchema(child, `${path}.${key}`, key))}
+          </Box>}
+          {Object.entries(schema.properties || {}).filter(([key, child]) => key === 'extensions' || child.type === 'object')
             .map(([key, child]) => renderSchema(child, `${path}.${key}`, key))}
           {issue(path) && <Typography color="error" variant="caption">{issue(path)}</Typography>}
         </Box>
@@ -248,7 +258,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
     }
     const numeric = schema.type === 'number' || schema.type === 'integer'
     return (
-      <TextField key={path} size="small" label={label} type={numeric ? 'number' : 'text'} value={Array.isArray(value) ? value.join(' x ') : value ?? ''} disabled={readOnly}
+      <AutoGrowingTextField key={path} label={label} type={numeric ? 'number' : 'text'} value={Array.isArray(value) ? value.join(' x ') : value ?? ''} disabled={readOnly}
         data-issue-field={fieldPath(path)} error={Boolean(issue(path))} helperText={issue(path) || schema.description}
         slotProps={numeric ? { htmlInput: { min: schema.minimum, max: schema.maximum, step: schema.type === 'integer' ? 1 : 'any' } } : undefined}
         onChange={event => updatePath(path, numeric ? (event.target.value === '' ? null : Number(event.target.value)) : parseGridOrText(event.target.value, schema))} />
@@ -256,25 +266,25 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   }
 
   return (
-    <Box data-issue-field={basePath} data-record-key={record.record_key} data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, minWidth: 0, containerType: isTc ? 'inline-size' : undefined, containerName: isTc ? 'tc-record' : undefined, gridTemplateColumns: isTc ? 'minmax(0, 1fr)' : { xs: '1fr', sm: 'repeat(2, 1fr)' }, py: 1, mb: 1 }}>
+    <Box data-issue-field={basePath} data-record-key={record.record_key} data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, minWidth: 0, containerType: isTc ? 'inline-size' : undefined, containerName: isTc ? 'tc-record' : undefined, gridTemplateColumns: 'minmax(0, 1fr)', py: 1, mb: 1 }}>
       {definitionError && <Alert severity="error" sx={{ gridColumn: '1 / -1' }}>{definitionError}</Alert>}
-      {isTc ? <TcRecordFields {...tcProps} /> : <>
-      <TextField label="名称" value={record.name_raw} disabled={readOnly} data-issue-field={fieldPath('name_raw')} error={Boolean(issue('name_raw'))} helperText={issue('name_raw')} onChange={event => update({ name_raw: event.target.value })} />
-      <FormControl>
+      {isThermodynamicStability(record) ? <ThermodynamicStabilityFields record={record} readOnly={readOnly} onChange={onChange} basePath={basePath} /> : isTc ? <TcRecordFields {...tcProps} /> : <Box data-property-core-row sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 1, '& > *': { flex: '0 0 auto', minWidth: 110 }, '& .MuiInputBase-root': { fontSize: '0.875rem' } }}>
+      <AutoGrowingTextField label="名称" value={record.name_raw} disabled={readOnly} data-issue-field={fieldPath('name_raw')} error={Boolean(issue('name_raw'))} helperText={issue('name_raw')} onChange={event => update({ name_raw: event.target.value })} />
+      <FormControl size="small">
         <InputLabel>值类型</InputLabel>
         <Select label="值类型" value={record.value_kind} disabled={readOnly} onChange={event => update({ value_kind: event.target.value as PropertyValueKind })}>
           {Object.entries(VALUE_KIND_LABELS).map(([value, label]) => <MenuItem key={value} value={value}>{label}</MenuItem>)}
         </Select>
       </FormControl>
-      <TextField label="原始值" value={record.value_raw} disabled={readOnly} data-issue-field={fieldPath('value_raw')} error={Boolean(issue('value_raw'))} helperText={issue('value_raw')}
+      <AutoGrowingTextField label="原始值" value={record.value_raw} disabled={readOnly} data-issue-field={fieldPath('value_raw')} error={Boolean(issue('value_raw'))} helperText={issue('value_raw')}
         onChange={event => update(mirroredTextValue ? { value_raw: event.target.value, value_text: event.target.value } : { value_raw: event.target.value })} />
-      <TextField label="单位" value={record.unit_raw || ''} disabled={readOnly} onChange={event => update({ unit_raw: event.target.value || null })} />
-      {record.value_kind === 'number' && <TextField label="数值" type="number" value={record.value_number ?? ''} disabled={readOnly} onChange={event => update({ value_number: event.target.value === '' ? null : Number(event.target.value) })} />}
-      {record.value_kind === 'range' && <><TextField label="下界" type="number" value={record.value_min ?? ''} disabled={readOnly} data-issue-field={fieldPath('value_min')} error={Boolean(issue('value_min'))} helperText={issue('value_min')} onChange={event => update({ value_min: event.target.value === '' ? null : Number(event.target.value) })} /><TextField label="上界" type="number" value={record.value_max ?? ''} disabled={readOnly} onChange={event => update({ value_max: event.target.value === '' ? null : Number(event.target.value) })} /></>}
-      {record.value_kind === 'text' && !mirroredTextValue && <TextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
+      <AutoGrowingTextField label="单位" value={record.unit_raw || ''} disabled={readOnly} onChange={event => update({ unit_raw: event.target.value || null })} />
+      {record.value_kind === 'number' && <AutoGrowingTextField label="数值" type="number" value={record.value_number ?? ''} disabled={readOnly} onChange={event => update({ value_number: event.target.value === '' ? null : Number(event.target.value) })} />}
+      {record.value_kind === 'range' && <><AutoGrowingTextField label="下界" type="number" value={record.value_min ?? ''} disabled={readOnly} data-issue-field={fieldPath('value_min')} error={Boolean(issue('value_min'))} helperText={issue('value_min')} onChange={event => update({ value_min: event.target.value === '' ? null : Number(event.target.value) })} /><AutoGrowingTextField label="上界" type="number" value={record.value_max ?? ''} disabled={readOnly} onChange={event => update({ value_max: event.target.value === '' ? null : Number(event.target.value) })} /></>}
+      {record.value_kind === 'text' && !mirroredTextValue && <AutoGrowingTextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
-      </>}
-      {Object.entries(payloadSchema.properties || {}).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
+      </Box>}
+      {Object.entries(payloadSchema.properties || {}).sort(([a], [b]) => a === 'parameters' ? -1 : b === 'parameters' ? 1 : 0).filter(([key]) => key !== 'thermodynamic_stability').map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
       <Box sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
         {quotedSources.length ? <Box component="details" data-evidence-summary sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
           <Box component="summary" sx={{ cursor: 'pointer' }}>原文证据（{quotedSources.length}）</Box>

@@ -338,7 +338,7 @@ describe('Issue #90 模块化物性与 Schema 表单', () => {
     expect(screen.getByLabelText('μ*')).toHaveValue('0.1')
     fireEvent.change(screen.getByLabelText('计算软件'), { target: { value: 'VASP' } })
     expect(onChange.mock.calls.at(-1)?.[0].payload.calculation_conditions.calculation_code).toBe('VASP')
-    fireEvent.click(screen.getAllByRole('button', { name: '新增字段' })[1])
+    fireEvent.click(within(document.querySelector('[data-issue-field="payload.parameters.extensions"]') as HTMLElement).getByRole('button', { name: '新增字段' }))
     expect(onChange.mock.calls.at(-1)?.[0].payload.parameters.extensions[0]).toMatchObject({
       name_raw: '', value_kind: 'number', value_raw: '', unit_raw: '',
     })

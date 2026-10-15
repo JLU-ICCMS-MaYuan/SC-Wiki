@@ -27,3 +27,9 @@ value_raw 和 unit_raw 不再作为独立原始记录：value_raw 从当前数�
 范围 μ* 使用既有 `extensions` 数组中的 `{key:"mu_star",value_kind:"range",value_min:0.10,value_max:0.13,unit_raw:"1"}`；主 `mu_star` 不再同时保存。Tc 使用 `value_min=281,value_max=311`，两组为 (281,0.13) 与 (311,0.10)。未知 μ* 端点为 null，不自动补值。有效零值不能视作缺失。
 
 范围的字段键、Evidence 及额外元数据在编辑时保留；其他扩展位置不移动。组件暂存编辑组顺序，以整体配对映射规范端点，数据库不增加组序号。类型切换清理不适用的范围，保留条件和其他参数。测量记录维持实验 Conditions。
+
+## US6～US9 增量契约
+
+参数和计算条件仍保存在原 payload 对象的 extensions，保留 field_key、未知字段、Evidence 和原数组位置。扩展输入非法数字不能变成合法空值。普通性质原始值和规范值契约不变。
+
+热力学使用 payload.thermodynamic_stability={version:1,basis,cases}；各 case 的字段、枚举和温度约束见 Plan。当前 case 必须存在，缺省是 unknown、above_hull=null、ZPE unspecified；无示例数据默认。前后端拒绝无效版本、枚举、非有限/负数、错误单位、非 0 的 ΔE/ΔH 温度及跨模块伪装。value_kind=text、value_raw/value_text 为当前稳定性文本，服务端重新校验一致性。复制时仍生成新记录键。现有 payload_json 和完整导出无损携带全部 cases。

@@ -1,4 +1,6 @@
 import { changedScientificFields } from '../lib/evidenceFields'
+import { materialStateSummary } from '../lib/materialStateSummary'
+import { PropertySpectraProvider, PropertySpectrumState, type PropertySpectraContext } from './PropertySpectra'
 import { materialIdentityMissing, materialLabel } from '../lib/materialIdentity'
 import React, { useEffect, useRef, useState } from 'react'
 import {
@@ -113,6 +115,7 @@ export const EvidenceNotes: React.FC<{
 }
 
 interface MaterialStatesEditorProps {
+  propertySpectra?: PropertySpectraContext
   /** 全部材料状态（受控值） */
   states: DraftMaterialState[]
   /** 材料状态数组整体变更回调：任何编辑都传出完整的新状态数组（T017） */
@@ -228,6 +231,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   paperType,
   onUploadStructure,
   onError,
+  propertySpectra,
 }) => {
   const { t, lang, dict } = useLanguage()
   const statesRef = useRef(states)
@@ -562,6 +566,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   }
 
   return (
+    <PropertySpectraProvider context={propertySpectra}>
     <Box sx={readOnly ? { pointerEvents: 'none', '& .MuiButton-root': { display: 'none' } } : undefined}>
       <Box sx={{ mt: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
@@ -593,7 +598,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
             const hasEnergyAboveHull = (state.properties || []).some(item =>
               [item.name, item.name_raw].some(value => String(value || '').trim().toLowerCase() === ENERGY_ABOVE_HULL_NAME))
             const element = (
-              <Card data-state-key={state.state_key || `state-${index+1}`} data-state-label={materialLabel(state)} data-material-state-index={index} key={state.state_key || index} variant="outlined" sx={{ width: '100%', minWidth: 0 }}>
+              <Card id={`material-state-${state.state_key || `state-${index+1}`}`} data-state-key={state.state_key || `state-${index+1}`} data-state-label={materialLabel(state)} data-material-state-index={index} key={state.state_key || index} variant="outlined" sx={{ width: '100%', minWidth: 0 }}>
                 <CardContent sx={{ p: { xs: 1, sm: 2 }, '&:last-child': { pb: { xs: 1, sm: 2 } } }}>
                   <Box
                     role="button"
@@ -612,9 +617,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       }} />
                       <Typography variant="subtitle2" fontWeight={700}>{t('upload.materialStateNumber', { index: index + 1 })}</Typography>
                       {(issues || []).filter(issue => issue.field.startsWith(`material_states[${index}].`)).length > 0 && <Chip size="small" color="error" label={(issues || []).filter(issue => issue.field.startsWith(`material_states[${index}].`)).length} />}
-                      {materialLabel(state) && (
-                        <Typography variant="body2" color="text.secondary" noWrap>{materialLabel(state)}</Typography>
-                      )}
+                      <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>{materialStateSummary(state)}</Typography>
                     </Box>
                     <Button size="small" color="error" startIcon={<DeleteIcon />}
                       onClick={event => {
@@ -806,6 +809,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   />
 
                   <Box data-testid={`property-modules-${index}`} sx={{ mt: 2 }}>
+                    <PropertySpectrumState stateKey={state.state_key || `state-${index + 1}`} summary={materialStateSummary(state)}>
                     <PropertyModuleEditor
                       modules={state.property_modules || []}
                       readOnly={readOnly}
@@ -823,6 +827,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                         schema_version: PROPERTY_SCHEMA_VERSION,
                       } : item))}
                     />
+                    </PropertySpectrumState>
                   </Box>
 
                   </Box>
@@ -916,6 +921,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
         </Box>
       </Box>
     </Box>
+    </PropertySpectraProvider>
   )
 }
 

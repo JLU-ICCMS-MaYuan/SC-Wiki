@@ -486,6 +486,17 @@ export function useEvidenceWorkflow(options?: {
   const batch = view?.job?.current_batch || 0
   const activeGroup = activeRecord?.placeholder ? [activeRecord] : records.filter(r => selectedKeys.includes(r.key) || r.key === selected)
   const accepted = activeGroup.length > 0 && activeGroup.every(r => r.proposal_draft?.accepted)
+  const completionBlockers = [...new Set([
+    (saving || confirming) && t('evidence.completeBusy'),
+    accepted && t('evidence.completeAccepted'),
+    ...activeGroup.flatMap(r => targetRef.current?.target === 'paper' ? [
+      dirty.current && !options?.saveCurrent && t('evidence.completeNeedsSave'),
+      (r.stale || (r.status !== 'supported' && !r.proposal?.supported)) && !(reasons[r.key] ?? r.proposal_draft?.reason ?? '').trim() && t('evidence.completeReason'),
+    ] : [
+      r.stale && t('evidence.completeStale'),
+      ((!r.proposal || r.proposal.basis_kind === 'paper_quote' || !r.proposal.basis_kind) && (r.status === 'unchecked' || (!r.evidences.length && !r.proposal?.evidences.length && !r.provenance?.verified))) && t('evidence.completeSource'),
+    ]),
+  ].filter((message): message is string => Boolean(message)))]
   const draftSaveFailed = Boolean(targetRef.current && queueFor(targetRef.current).error())
   const editCurrent = (record: EvidenceRecord) => {
     const field = optionsRef.current?.getCurrentValue?.(record)?.field || record.field
@@ -582,12 +593,11 @@ export function useEvidenceWorkflow(options?: {
         {accepted && <Alert severity="success">{t('evidence.acceptedPending')}</Alert>}</>}
         {options?.getCurrentValue && !activeRecord.placeholder && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
         {saveError && <Alert severity="error" sx={{ mt: 1 }} action={draftSaveFailed ? <Button disabled={saving} onClick={() => void retryDrafts().catch(() => undefined)}>{t('evidence.retrySave')}</Button> : undefined}>{saveError} {draftSaveFailed && t('evidence.saveFailureRetained')}</Alert>}
+        {!activeRecord.placeholder && completionBlockers.length > 0 && <Alert severity="info" sx={{ mt: 1 }}>{completionBlockers.map(message => <Typography key={message} variant="body2">{message}</Typography>)}</Alert>}
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', my: 2 }}>
           <Button onClick={closeDrawer}>{t('evidence.back')}</Button>
           {!activeRecord.placeholder && <><Button disabled={confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)} onClick={() => void execute(targetRef.current!, activeGroup.map(r => r.key))}>{t('evidence.retry')}</Button>
-          <Button variant="contained" disabled={saving || confirming || activeGroup.some(r => targetRef.current?.target === 'paper'
-            ? ((dirty.current && !options?.saveCurrent) || ((r.stale || (r.status !== 'supported' && !r.proposal?.supported)) && !(reasons[r.key] ?? r.proposal_draft?.reason ?? '').trim()))
-            : (r.stale || ((!r.proposal || r.proposal.basis_kind === 'paper_quote' || !r.proposal.basis_kind) && (r.status === 'unchecked' || (!r.evidences.length && !r.proposal?.evidences.length && !r.provenance?.verified))))) || accepted} onClick={() => void accept(activeGroup)}>{t('evidence.complete')}</Button>
+          <Button variant="contained" disabled={completionBlockers.length > 0} onClick={() => void accept(activeGroup)}>{t('evidence.complete')}</Button>
           {accepted && <Button disabled={saving} onClick={() => { for (const r of activeGroup) void saveProposal(r, valuesFor(r), false, reasons[r.key] || r.proposal_draft?.reason || '', true).catch(() => undefined) }}>{t('evidence.revise')}</Button>}</>}
         </Box>
         {issues.length > 1 && <Box>{issues.map(r => <Button key={r.key} color="error" onClick={() => openIssue(r.key)}>{r.label}</Button>)}</Box>}

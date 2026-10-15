@@ -146,3 +146,26 @@ evidenceFields、evidenceProposals、PressureEditor、EvidenceFieldMarkers；本
 本次仅暂存明确文件及分块，从暂存区构造隔离副本，排除原工作树 #120/#135/#137 的未提交修改。该副本前端 9 文件 112 项、生产构建、三个真实浏览器入口及 12 次保存均通过；其中前端比完整工作树少的 1 项是原有未提交的研究驱动力冲突测试，不属于本增量。当前截图和 [保存记录样例](assets/tc-paired-saved-record.json) 来自隔离夹具，均不是真实论文数据。
 
 后端相关校验/持久化/导出 21 项通过，另 1 项上传提取测试 `test_worker_prompts_and_storage_keep_each_measurement_conditions` 的旧夹具缺少 `user_id`，在隔离副本与替换为 HEAD 原始 `property_modules.py` 的基线中均以相同 KeyError 失败。该提取流程未在本轮修改，此失败不计为通过；没有把工作树里另一任务的夹具修复混入提交。本轮的独立数据库验收包括新配对参数测试以及 12 份浏览器保存请求的生产持久化和导出路径。
+
+## 统一四模块正式实现验收（US6～US9）
+
+用户认可最终整合 Demo 并明确要求“先把 issue 和 spec 写好”，本轮先同步 #94 与 Spec/Plan/Research/模型/契约/T020～027，再修改真实 React 表单、后端校验及页面路由。保留此前 Demo 的历史验收边界，最新实施基线见 Spec 末节。
+
+### 已验证路径
+
+- 从精确暂存内容生成独立候选目录，排除工作树 #120/#135/#137 未提交修改。前端 14 文件共 144 项通过；顺序调整后的旧测试改为按参数锚点定位，相关 2 文件 33 项复验通过。工作树原有额外 1 项研究驱动力测试不计入本次提交。
+- TypeScript 与前端生产构建通过，保留既有 3Dmol eval 和大分包告警。候选不导入尚未提交的 SpectrumWorkspace，不需要其源码才能构建。
+- Chrome 的上传、管理员、只读三个真实路由全部通过，页面错误均为 0。前两个入口各 3 次隔离科学数据保存，分别验证“保存并完成”先保存主值、再保存说明并自动上传待上传文件；未调用 AI 或正式审核。谱详情分别打开 DOS/α²F、刷新页面、读取材料条件、导出并返回，主表单字段保持；保存失败阻止跳转。
+- 浏览器验证字段初始 110px、长中英文超过 350px、清空回缩至 110px；连续补充条件逐条另起一行。375px 的 Tc 卡片仅行内滚动、输入保持单行，整页不被撑宽。材料标题在修改及折叠后保持空间群/化学式/压强。
+- ΔH 试填 0.025 eV/atom、ΔG 试填 0.018 eV/atom / 500 K，切换依据后分别恢复；这些仅是隔离夹具，未进入产品默认数据。真实保存请求被逐记录送入生产后端校验，热力学记录经 SQLite 写入、新会话重读和完整材料状态导出后保留全部 cases。
+- 后端 4 文件 36 项通过，另 1 项既有上传提取测试单列：test_worker_prompts_and_storage_keep_each_measurement_conditions 的旧夹具缺 user_id。本次候选和换回 HEAD 原始 property_modules.py 都以同一 KeyError 失败，未修改该旧夹具，也未计为通过。
+
+复查脚本：[unified-property-browser.mjs](../../../tests/01_decentralized_uploading/unified-property-browser.mjs)、[前端交互](../../../tests/01_decentralized_uploading/unified-property-modules.test.tsx)、[谱路由](../../../tests/01_decentralized_uploading/property-spectra-navigation.test.tsx)、[后端往返](../../../backend/tests/test_thermodynamic_stability.py)。浏览器配置沿用 PLAYWRIGHT_MODULE、CHROMIUM_PATH、FRONTEND_URL，PROPERTY_BROWSER_OUTPUT 指定证据目录；后端测试以 PROPERTY_BROWSER_PAYLOADS 接收该目录的 payloads.json。
+
+[正式组件布局截图](assets/unified-property-implemented.png)与[独立详情截图](assets/spectrum-detail-implemented.png)来自上述隔离夹具，不是业务论文或真实谱提取结果。实际请求中的[热力学记录样例](assets/unified-property-saved-record.json)及[三入口结果](assets/unified-property-browser-results.json)作为验收产物留存。
+
+### 目标环境边界
+
+浏览器 API 使用隔离夹具；数据库往返使用 SQLite。未操作真实论文、未执行 MySQL/谱库迁移、未调用真实模型或部署。谱详情前端已消费 #137 的目标鉴权、原图/导出及版本合同；真实谱 API、采纳裁剪和目标数据库就绪仍由 #137 验收，不能据本轮 mock 宣称后端部署完成。#94 更新版本未推送，远程 Spec 链接待验证，Issue 保持 OPEN。
+
+测试/构建日志与完整原工作树备份位于本机临时验收目录；它们是可复查记录，不承担协作状态。Issue 仍是未完成事项的状态来源。

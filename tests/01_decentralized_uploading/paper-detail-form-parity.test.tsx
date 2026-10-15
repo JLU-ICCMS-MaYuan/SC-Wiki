@@ -56,7 +56,8 @@ describe('只读详情页与校对表单字段一致（Issue #59）', () => {
     render(<PaperEditView paper={paper} onBack={() => {}} />)
 
     // 材料状态分类与论文级类型断言
-    expect(screen.getAllByText('LaH10')).toHaveLength(3)
+    expect(screen.getAllByText('LaH10')).toHaveLength(2)
+    expect(screen.getByText(/Fm-3m · LaH₁₀ · 压强未填写/)).toBeInTheDocument()
     expect(screen.getByText('氢化物')).toBeInTheDocument()
     expect(screen.getByText('不同元素种类数')).toBeInTheDocument()
     expect(screen.getByText('2')).toBeInTheDocument()

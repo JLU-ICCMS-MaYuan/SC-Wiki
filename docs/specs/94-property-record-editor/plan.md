@@ -75,3 +75,26 @@ PropertyModuleEditor 的 Tc 摘要直接读取规范值，字段锚点及 record
 | FR-017 / SC-010 | 共享表单、稳定路径、Overview | T019 | 核对回归、构建、独立提交 |
 
 不通过改写正在编辑的输入来排序；两组值写入时整体映射到规范上下界，外部记录改变时才重新载入。类型改变清理不适用的 μ* 表示；完整范围切换数值时沿用第一组当前 μ*，其他额外参数和证据保留。测量 Tc 不接收预测参数。
+
+## US6～US9 正式实施计划
+
+先更新 Issue #94 与本目录文档，再依下表实施。共享工作区其他任务先备份，脏文件仅暂存本次补丁；从暂存树生成隔离候选验证，不能依赖尚未提交的 SpectrumWorkspace。
+
+| 需求/验收 | 设计与事实来源/职责 | 任务 | 验证 |
+| --- | --- | --- | --- |
+| FR-018～025 / SC-022 | AutoGrowingTextField 以真实字体测量；SchemaDrivenRecordForm 的通用核心行、条件行、独立扩展行；实际已发布定义决定适用字段 | T020～021 | 四模块交互、原条件/证据保留、浏览器宽度与局部滚动 |
+| FR-028～030 / SC-023 | 自定义热力学记录的版本化 payload；专用组件与前后端共享语义的校验；现有 payload_json 持久化/导出 | T022 | basis 切换、未知/零值、非法值、SQLite 真写读 |
+| FR-031 / SC-019 | materialStateSummary 读取现有空间群/化学式/压强，仍以 state_key 标识 | T023 | 零压、缺失、编辑/折叠标题 |
+| FR-026～027 / SC-024 | PropertySpectra 仅消费 #137 API；模块摘要按 curve.kind；独立 SpectrumDetailPage 重新鉴权查询，主表单保存成功才导航 | T024 | 混合集合分组、错误/版本/状态不匹配、保存失败、返回与真实路由 |
+| FR-032～034 / SC-020、025 | ManualEvidenceSection 复用 #138 prepare/save(true)，统一缺项提示；EvidenceWorkflow 保留原核对禁用条件并解释原因 | T025 | pending 文件自动上传、失败保留、版本变化、旧核对不被强开 |
+| 全部 | 三入口集成、Overview、精确提交、Issue 证据 | T026～027 | 定向前后端、构建、隔离候选和浏览器 |
+
+### 存储与边界
+
+热力学复用 record.thermodynamical_properties.custom@1，property_code=custom、非空 custom_property_key；payload.thermodynamic_stability.version=1。basis 为 formation_energy / formation_enthalpy / formation_gibbs / unspecified；cases 按 basis 保存独立 case。每个 case 有 stability（stable/unstable/unknown）、above_hull（可空非负数字）、unit（eV/atom 或 meV/atom）、temperature_k、zpe（included/excluded/unspecified）、decomposition_path、source_description。ΔE/ΔH 温度必须 0；ΔG/未知依据可空，不默认 300 K。切换依据不拷贝另一 case，选择稳定/未知清空不再适用的 above_hull。规范文本列由当前 case 状态同步，仅作为记录摘要，事实留在 payload；不将整谱存为标量。
+
+普通自定义定义是开放 payload：提供可选参数及计算条件的新增入口，不为其注入 Tc 专用参数或固定条件。有 schema 的定义只呈现其声明字段；不改已发布 Schema。
+
+谱摘要/详情独立于 #137 尚未提交的 SpectrumWorkspace；通过小型只读 API 客户端和 provider 接入三入口。路由携带 target/target_id/state_key/curve/collection_version，重新读取服务器列表后核对，详情展示服务器返回的版本、来源、曲线/候选、质量与逐点值并使用相同鉴权下载原图和导出。后端负责 revision/run 绑定及公开裁剪；前端不扩大权限或重算物理积分。目标服务不可用如实显示。返回 URL 仅允许站内路径；编辑入口先调用已有真实保存函数，保存失败停留原页。
+
+人工修改单一主操作“保存并完成”先检查说明、证据选择、文件/缺证原因；调用现有 prepare 保存当前科学值并刷新版本，再保存说明和上传文件。失败阶段明确，保留本地修订；不以人工附件代替原文证据或正式审核。管理员仍保留原正式来源核对完成路径。

@@ -1,3 +1,5 @@
+import { validatePropertyExtensions } from './propertyExtensions'
+import { validateStability } from './thermodynamicStability'
 import { api } from './api'
 import { normalizeCurrentTcValue, type PropertyRecordDraft } from './propertyModules'
 import { validateTcParameters } from './tcParameters'
@@ -153,6 +155,8 @@ function validateSchema(value: unknown, schema: JsonSchema, path: string, issues
 
 export function validateRecordClient(record: PropertyRecordDraft, definition?: FormDefinition): FormIssue[] {
   const issues: FormIssue[] = []
+  for (const { field, message } of validatePropertyExtensions(record)) addIssue(issues, field, message)
+  for (const { field, message } of validateStability(record)) addIssue(issues, field, message)
   for (const { field, message } of validateTcParameters(record)) addIssue(issues, field, message)
   if (!record.record_key.trim()) addIssue(issues, 'record_key', '记录键不能为空')
   if (!record.name_raw.trim()) addIssue(issues, 'name_raw', '名称不能为空')
@@ -189,11 +193,14 @@ export function validateRecordClient(record: PropertyRecordDraft, definition?: F
   return issues
 }
 
-/** 保存按钮和自动保存共用校验，不能只依赖浏览器原生 form submit。 */
+/** 保存按钮和自动保存共用校验，覆盖 Tc、稳定性和开放补充字段。 */
 export function validateTcRecords(states: Array<{ property_modules?: { records: PropertyRecordDraft[] }[] }>): FormIssue[] {
   return states.flatMap((state, stateIndex) => (state.property_modules || []).flatMap((module, moduleIndex) =>
-    module.records.flatMap((record, recordIndex) => record.record_type === 'property' ? [] : validateRecordClient(record).map(issue => ({
-      ...issue, field: `material_states[${stateIndex}].property_modules.${moduleIndex}.records.${recordIndex}.${issue.field}`,
-    }))),
+    module.records.flatMap((record, recordIndex) => {
+      const issues = record.record_type === 'property' && record.payload.thermodynamic_stability == null
+        ? validatePropertyExtensions(record).map(issue => ({ ...issue, code: 'schema_validation_failed' }))
+        : validateRecordClient(record)
+      return issues.map(issue => ({ ...issue, field: `material_states[${stateIndex}].property_modules.${moduleIndex}.records.${recordIndex}.${issue.field}` }))
+    }),
   ))
 }

@@ -13,6 +13,8 @@ import {
   PROPERTY_MODULES, clonePropertyRecord, emptyPropertyModule, emptyPropertyRecord, propertyRecordSummaryValue,
   normalizePropertyRecordIdentity, type PropertyModuleCode, type PropertyModuleDraft, type PropertyRecordDraft,
 } from '../lib/propertyModules'
+import { newStabilityRecord } from '../lib/thermodynamicStability'
+import { PropertySpectrumSection, MissingPropertySpectrumModules } from './PropertySpectra'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
 
 export interface ModuleDeletion {
@@ -280,6 +282,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                 </Box>
               )}
             </Box>
+            <PropertySpectrumSection moduleCode={module.module_code} />
             <Box sx={{ pt: 1 }}>
               {module.records.map((record, recordIndex) => {
                 const recordBasePath = `${moduleBasePath}.records.${recordIndex}`
@@ -329,6 +332,10 @@ const PropertyModuleEditor: React.FC<Props> = ({
                   </Accordion>
                 )
               })}
+              {!readOnly && module.module_code === 'thermodynamical_properties' && <Button size="small" onClick={() => {
+                const record = newStabilityRecord(emptyPropertyRecord(module.module_code))
+                onChange(modules.map((item, index) => index === moduleIndex ? { ...item, records: [...item.records, record] } : item))
+              }}>新增稳定性记录</Button>}
               {!readOnly && (
                 <Select size="small" displayEmpty value="" inputProps={{ 'aria-label': '添加记录' }} onChange={event => addRecord(moduleIndex, event.target.value)}
                   renderValue={() => '添加记录'}>
@@ -340,6 +347,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
           </Box>
         )
       })}
+      <MissingPropertySpectrumModules existing={modules.map(module => module.module_code)} />
     </Box>
   )
 }

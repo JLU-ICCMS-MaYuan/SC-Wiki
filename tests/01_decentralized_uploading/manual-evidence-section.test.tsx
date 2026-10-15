@@ -28,7 +28,7 @@ it('人工修改只显示判断理由和证据二选一，缺证路径保存独�
   fireEvent.click(screen.getByLabelText('不提供证据'))
   fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'), { target: { value: '暂无截图' } })
   expect(screen.queryByText('选择图片、文本或 PDF')).not.toBeInTheDocument()
-  fireEvent.click(screen.getByText('保存人工修改说明'))
+  fireEvent.click(screen.getByText('保存并完成'))
   await waitFor(() => expect(api.put).toHaveBeenCalledWith(
     `/api/rag/evidence/upload/task/manual/${itemKey}`,
     expect.objectContaining({ expected_version: 'v1', reason: '对照作者页', no_evidence_reason: '暂无截图' }),
@@ -56,8 +56,8 @@ it('提供证据路径上传 PDF，不要求填写来源说明', async () => {
   expect(screen.queryByLabelText('不提供证据的理由（必填）')).not.toBeInTheDocument()
   const file = new File(['%PDF-1.4'], 'report.pdf', { type: 'application/pdf' })
   fireEvent.change(document.querySelector('input[type=file]')!, { target: { files: [file] } })
-  await waitFor(() => expect(screen.getByText('上传人工证据')).toBeEnabled())
-  fireEvent.click(screen.getByText('上传人工证据'))
+  await waitFor(() => expect(screen.getByText('保存并完成')).toBeEnabled())
+  fireEvent.click(screen.getByText('保存并完成'))
   await waitFor(() => expect(api.post).toHaveBeenCalled())
   const body = vi.mocked(api.post).mock.calls[0][1] as FormData
   expect(body.get('file')).toBe(file)
@@ -76,7 +76,7 @@ it('已有待提交附件时不能直接切到无证据路径保存', async () =
   await waitFor(() => expect(screen.getAllByText('report.pdf').length).toBeGreaterThan(0))
   fireEvent.click(screen.getByLabelText('不提供证据'))
   expect(screen.getByText('请先移除当前待提交的证据，再选择不提供证据。')).toBeInTheDocument()
-  expect(screen.getByText('保存人工修改说明')).toBeDisabled()
+  expect(screen.getByText('保存并完成')).toBeDisabled()
   expect(api.put).not.toHaveBeenCalled()
 })
 
@@ -128,6 +128,6 @@ it('已提交的人工修改记录显示理由而没有编辑控件', async () =
   render(<ManualEvidenceSection target={{ target: 'paper', target_id: '29' }} version="v1"
     record={{ key: 'field', item_key: itemKey, field: 'paper.summary', label: '总结', status: 'supported', reason: '', evidences: [] }} />)
   await waitFor(() => expect(screen.getByText(/依据原始实验记录/)).toBeInTheDocument())
-  expect(screen.queryByText('保存人工修改说明')).not.toBeInTheDocument()
+  expect(screen.queryByText('保存并完成')).not.toBeInTheDocument()
   expect(screen.queryByText('选择图片、文本或 PDF')).not.toBeInTheDocument()
 })

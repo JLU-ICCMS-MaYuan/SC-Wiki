@@ -1,0 +1,55 @@
+{
+  "record_key": "record-thermodynamical_properties-21d9c33f-c7a9-45c2-a347-78b96a5fd765",
+  "module_code": "thermodynamical_properties",
+  "record_type": "property",
+  "property_code": "custom",
+  "custom_property_key": "custom-property-207b32bd-e18d-4b55-85d5-b82f61732bb5",
+  "definition_key": "record.thermodynamical_properties.custom",
+  "definition_version": 1,
+  "name_raw": "thermodynamic stability",
+  "value_kind": "text",
+  "value_raw": "不稳定",
+  "value_number": null,
+  "payload": {
+    "thermodynamic_stability": {
+      "version": 1,
+      "basis": "formation_enthalpy",
+      "cases": {
+        "unspecified": {
+          "stability": "unknown",
+          "above_hull": null,
+          "unit": "eV/atom",
+          "temperature_k": null,
+          "zpe": "unspecified",
+          "decomposition_path": "",
+          "source_description": ""
+        },
+        "formation_enthalpy": {
+          "stability": "unstable",
+          "above_hull": 0.025,
+          "unit": "eV/atom",
+          "temperature_k": 0,
+          "zpe": "unspecified",
+          "decomposition_path": "",
+          "source_description": ""
+        },
+        "formation_gibbs": {
+          "stability": "unstable",
+          "above_hull": 0.018,
+          "unit": "eV/atom",
+          "temperature_k": 500,
+          "zpe": "unspecified",
+          "decomposition_path": "",
+          "source_description": ""
+        }
+      }
+    }
+  },
+  "evidences": [],
+  "value_text": "不稳定",
+  "value_min": null,
+  "value_max": null,
+  "value_boolean": null,
+  "unit_raw": null,
+  "canonical_unit": null
+}

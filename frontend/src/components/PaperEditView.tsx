@@ -1,3 +1,5 @@
+import { materialStateSummary } from '../lib/materialStateSummary'
+import { PropertySpectraProvider, PropertySpectrumState } from './PropertySpectra'
 import React, { useState, useEffect } from 'react'
 import {
   Box, Typography, Card, CardContent, Button,
@@ -89,6 +91,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
   const keywordList = toTextList(paper?.keywords_tags)
 
   return (
+    <PropertySpectraProvider context={{ target: { target: 'paper', target_id: String(paper.id) } }}>
     <Box data-paper-detail>
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 3 }}>
@@ -201,13 +204,13 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
                 </Box>
                 <Box sx={{ px: 2, pb: 2, borderTop: '1px solid', borderColor: 'divider', display: 'flex', flexDirection: 'column', gap: 3 }}>
                   {(paper.material_states || []).map((state: any, index: number) => (
-                    <Box key={state.state_key || state.id || index} data-material-state-index={index} data-state-key={state.state_key} tabIndex={-1} sx={{
+                    <Box id={`material-state-${state.state_key || `state-${index+1}`}`} key={state.state_key || state.id || index} data-material-state-index={index} data-state-key={state.state_key} tabIndex={-1} sx={{
                       p: 2, borderRadius: 2, bgcolor: 'grey.50', border: '1px solid', borderColor: 'divider',
                     }}>
                       {/* 分类区 */}
                       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1, mb: 1.5 }}>
                         <Typography variant="subtitle2" fontWeight={700}>
-                          {materialLabel(state) || t('paperDetail.materialStateFallback', { n: index + 1 })}
+                          {materialStateSummary(state)}
                         </Typography>
                         {state.state_key && <Button size="small" startIcon={<DownloadIcon />} onClick={() => void downloadMaterialState(state)}>导出材料状态</Button>}
                       </Box>
@@ -286,7 +289,9 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
                         </Box>
                       )}
 
-                      <PropertyModuleEditor modules={state.property_modules || []} readOnly onChange={() => undefined} />
+                      <PropertySpectrumState stateKey={state.state_key || `state-${index + 1}`} summary={materialStateSummary(state)}>
+                        <PropertyModuleEditor modules={state.property_modules || []} readOnly onChange={() => undefined} />
+                      </PropertySpectrumState>
                       <Box sx={{ mt: 2, borderTop: 1, borderColor: 'divider', pt: 2 }}>
                         <Typography variant="subtitle2" fontWeight={700} gutterBottom>{materialLabel(state)} · {t('upload.structureAttachmentTitle')}</Typography>
                         {(state.structures || []).filter((structure: any) => structure.structure_text).length ? (state.structures || []).filter((structure: any) => structure.structure_text).map((structure: any, structureIndex: number) => <Box key={structure.id || structureIndex} sx={{ mt: 2 }}>
@@ -361,6 +366,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
       </Box>
 
     </Box>
+    </PropertySpectraProvider>
   )
 }
 

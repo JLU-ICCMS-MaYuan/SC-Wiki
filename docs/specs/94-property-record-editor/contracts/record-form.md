@@ -55,3 +55,13 @@ Tc 核对的 editable_fields 不含 value_raw、unit_raw、canonical_unit，旧 
 本节取代上文常用行顺序：预测记录按 λ、ωlog、名称、值类型、Tc/μ*、Tc/μ*、代表结果排列。范围有两组，数值有一组；所有输入保持一行，宽度不足时仅行内滚动。标签只显示 Tc、μ*，相同 #F4F3FF 分组底色无外边框。测量范围同样无上下界标签，但不增加 λ/ωlog/μ*。
 
 两组写入时以 Tc 端点排序，Tc 小端与 μ* 大端对应。范围 μ* 使用 `payload.parameters.extensions[i]` 的 `key=mu_star,value_kind=range,value_min/value_max`，不同时保留主标量。μ* 可留空且允许单端未知；其余参数及扩展证据不丢弃。非法文本不能通过客户端或服务端校验，错误定位到同一个编辑框，核对锚点仍采用规范数据路径。
+
+## US6～US9 增量契约
+
+参数和计算条件仍保存在原 payload 对象的 extensions，保留 field_key、未知字段、Evidence 和原数组位置。扩展输入非法数字不能变成合法空值。普通性质原始值和规范值契约不变。
+
+热力学使用 payload.thermodynamic_stability={version:1,basis,cases}；各 case 的字段、枚举和温度约束见 Plan。当前 case 必须存在，缺省是 unknown、above_hull=null、ZPE unspecified；无示例数据默认。前后端拒绝无效版本、枚举、非有限/负数、错误单位、非 0 的 ΔE/ΔH 温度及跨模块伪装。value_kind=text、value_raw/value_text 为当前稳定性文本，服务端重新校验一致性。复制时仍生成新记录键。现有 payload_json 和完整导出无损携带全部 cases。
+
+谱 GET /api/rag/spectra?target=...&target_id=... 返回 items/jobs/version/can_edit/can_review，摘要引用 collection.id/version、state_key、curve.id/kind、run.status、review；独立路由 /spectra/:collectionId，查询参数显式携带目标、状态、曲线、集合版本与站内返回地址。重新读取后不匹配即显示错误，不展示另一状态或旧版本。图像/导出使用相同目标参数与 api.download 鉴权；候选及质量只展示服务器已授权内容。
+
+人工保存不改变 /api/rag/evidence/.../manual API：prepare 返回最新 endpoint/version，PUT 说明后串行 POST 文件，全部成功且草稿未再编辑才 complete。provide 需已有或待上传附件；none 需缺证原因并移除已存和待上传附件。busy、失败、历史与版本冲突维持 #138 规则。

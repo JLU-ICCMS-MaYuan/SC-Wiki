@@ -1,0 +1,23 @@
+[
+  {
+    "mode": "upload",
+    "saves": 3,
+    "manualWrites": 2,
+    "pageErrors": 0,
+    "result": "passed"
+  },
+  {
+    "mode": "admin",
+    "saves": 3,
+    "manualWrites": 2,
+    "pageErrors": 0,
+    "result": "passed"
+  },
+  {
+    "mode": "readonly",
+    "saves": 0,
+    "manualWrites": 0,
+    "pageErrors": 0,
+    "result": "passed"
+  }
+]
