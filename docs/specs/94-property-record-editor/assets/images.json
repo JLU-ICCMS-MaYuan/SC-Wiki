@@ -121,6 +121,27 @@
         1960
       ],
       "verification": "2026-10-15 从归档位置重新读取原图，PIL 解码、像素尺寸与 SHA-256 核验通过；本地归档，远程链接待验证。"
+    },
+    {
+      "id": "IMG-007",
+      "upload_order": 7,
+      "original_name": "codex-clipboard-21a74fea-3b97-4c39-9148-4b552d79584b.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-007.png",
+      "status": "local_verified",
+      "user_context": "我觉得需要在这里再加一个简谐还是量子非谐SSCHA 的选项。并且我希望材料名，化学式，不同元素种类数，材料维度，晶系，空间群，空间群号，都放在同一行。第二行放材料状态类型，并且只有在选择理论或者理论之后，才会出现：简谐还是量子非谐 SSHCA这个选项，然后是结构家族，然后是压强。我觉得材料状态类型里面有一个“理论与实验”不太合理，一个材料怎么可能同时有 2 个状态。我当时怎么设计的，看看我之前的 issue 和 spec。做一个 demo 给我看看。",
+      "related": [
+        "US12",
+        "FR-039",
+        "FR-040",
+        "FR-041"
+      ],
+      "sha256": "ebc4ba0a4fadda922d46a788635e1a89213c5ad0ecb767d90f19590822bfb3b9",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2478,
+        790
+      ],
+      "verification": "2026-10-15 从归档位置重新读取原图，PIL 解码、像素尺寸与 SHA-256 核验通过；本地留档，远程链接待验证。"
     }
   ]
 }

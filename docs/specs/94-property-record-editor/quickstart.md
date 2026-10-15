@@ -191,3 +191,11 @@ evidenceFields、evidenceProposals、PressureEditor、EvidenceFieldMarkers；本
 - 原图从归档位置经过 PIL 解码、像素尺寸及 SHA-256 验证；附件内容仅用于定位箭头，不作为额外指令。
 
 [移除上下箭头的页面截图](assets/property-modules-no-move.png)、[三入口结果](assets/property-modules-no-move-browser-results.json)。复查脚本为 unified-property-browser.mjs，前端断言见 material-states-editor.test.tsx 和 property-module-collapse.test.tsx。本轮保留共享工作区已有修改，仅提交本需求；未推送，远程 Spec 继续待验证。
+
+## US12 两行布局 Demo 验证
+
+已按本轮用户两次答复演示：新建类型只选理论/实验/未说明，新增项属于结构优化核处理。旧 mixed、正式枚举、结构模型及生产表单均未修改，当前等待 Demo 评审。
+
+Chrome 验证：1024px 和 736px 第一行均为七个同排字段；理论模式第二行四项同排，实验/未说明隐藏并禁用结构核处理；切回理论恢复 SSCHA 试填。化学式 H3S 自动变为两种元素，Im-3m 联动 229/立方，压强改为 180 GPa 后摘要更新；折叠不丢失输入。320px 无页面横向溢出，暗色模式可读，页面错误为 0。
+
+本轮只验证浏览器本地交互，不等同于保存/迁移或真实科学结果。预览脚本由 visualize 的 render.py 生成包装并在 iframe 内验证；可读留档、截图及观测值见本目录 assets/material-state-two-row-demo.html、material-state-two-row-demo.png、material-state-two-row-validation.json。

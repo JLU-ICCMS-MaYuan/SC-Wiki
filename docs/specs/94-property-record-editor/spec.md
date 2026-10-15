@@ -290,3 +290,37 @@
 - **SC-029**：非默认排列的已有模块按原顺序显示；上传、管理员及只读页面无移动按钮，原有折叠、保存与谱详情返回回归通过。
 
 原图 [IMG-006](assets/IMG-006.png) 的红框标出了上下箭头；附件仅作定位材料。完整原文件、原话与哈希见 [图片清单](assets/images.json)。
+
+## US12：材料基本信息两行布局与结构核处理（设计草稿与 Demo）
+
+### 追加用户原话
+
+> 我觉得需要在这里再加一个简谐还是量子非谐SSCHA 的选项。并且我希望材料名，化学式，不同元素种类数，材料维度，晶系，空间群，空间群号，都放在同一行。第二行放材料状态类型，并且只有在选择理论或者理论之后，才会出现：简谐还是量子非谐 SSHCA这个选项，然后是结构家族，然后是压强。我觉得材料状态类型里面有一个“理论与实验”不太合理，一个材料怎么可能同时有 2 个状态。我当时怎么设计的，看看我之前的 issue 和 spec。做一个 demo 给我看看。
+
+> 新建时只选理论、实验或未说明；旧混合数据后续再处理（推荐）
+
+> 结构优化的核处理
+
+### 历史设计核查
+
+- [#32](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/32) 的[数据模型](../32-superconducting-data-model/data-model.md)包含 state_kind=theoretical/experimental/mixed/unknown；其 [Research 决策 6](../32-superconducting-data-model/research.md)与 FR-007 明确区分结构核处理和声子/EPC 核处理，量子非谐结构不意味着声子与 Tc 使用同样近似。
+- [#50](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/50) 的 [FR-004 及澄清记录](../50-remove-phase-label/spec.md)将 state_kind 定义为理论、实验、混合、未知的**数据来源**，并非两种物理状态叠加。该记录是仓库中的既有设计结论，不冒充本轮用户的新原话。
+- [#84](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/84) 的 [Research R1](../84-experimental-tc-fields/research.md)明确同一材料条件可以包含理论和实验 Tc；[#90](../90-unified-superconductor-properties/data-model.md)再把各条结果及其条件归于独立 PropertyRecord。因此顶层类型不能覆盖每条结果的方法。
+
+### 本轮已明确与待评审内容
+
+用户明确新建类型只选理论、实验、未说明，旧 mixed 数据后续处理；新增选择属于结构优化核处理。用户尚未认可本轮 Demo，也未授权正式表单、枚举或数据库变更。以下是用于评审的拟议交互，新增具体字段的持久化绑定尚待正式实施设计。
+
+- **FR-039（拟议）**：宽屏第一行依次为材料名、化学式、不同元素种类数、材料维度、晶系、空间群、空间群号；第二行依次为材料状态类型、条件显示的结构优化核处理、结构家族、压强。窄端适配在 Demo 中自动换列，正式响应策略待评审。
+- **FR-040（拟议）**：新建类型仅有理论、实验、未说明，分别使用 theoretical/experimental/unknown 的演示标识；不新增 mixed 选项，不转换、拆分或删除已有 mixed 数据。
+- **FR-041（拟议）**：只有理论类型显示结构优化核处理，选项含未说明、经典静态优化（简谐基准）、量子非谐优化（SSCHA）。默认未说明。此处“经典静态优化（简谐基准）”是 AI 为区分结构与声子术语提出的界面名称，尚待 Demo 评审；普通静态结构优化不能等同于已经进行了简谐声子计算，SSCHA 也不代表所有量子非谐方法。
+- **FR-042（拟议）**：切换至实验/未说明时隐藏核处理，不据此改写声子/EPC 或 Tc 方法。Demo 保存独立的理论试填内容，切回理论可恢复；该行为仅为本地交互，不是正式 API 保存。材料状态摘要继续读取当前空间群、化学式、压强；已有模块默认折叠且没有上下移动控件。
+- **SC-030（Demo）**：在 1024px、736px 预览中第一行七项同排；理论模式第二行四项同排，实验/未说明模式隐藏核处理并收拢空位。
+- **SC-031（Demo）**：类型菜单无 mixed；选择 SSCHA 后切换到实验/未说明，控件隐藏且禁用；返回理论恢复试填，页面没有业务 API 请求。
+- **SC-032（Demo）**：化学式、元素数、常用空间群/群号/晶系和压强摘要可交互，折叠再展开保留输入；320px 无页面溢出，暗色可读，页面错误为零。常用空间群联动只用于本轮示例，不宣称内置完整 230 群资料。
+
+### 附件与评审边界
+
+[IMG-007 原图](assets/IMG-007.png)、[图片清单](assets/images.json)、[Demo 留档](assets/material-state-two-row-demo.html)、[演示截图](assets/material-state-two-row-demo.png)、[交互验证](assets/material-state-two-row-validation.json)。材料示例来自用户截图，SSCHA 选择及后续试填用于评审，不声称该论文或结构已经采用 SSCHA。
+
+正式实施还需明确：一个材料状态包含多个结构时，该顶层选择具体编辑哪个结构，如何复用已有 structure_models.nuclear_treatment 与结构方法记录。不能把顶层选择批量覆盖全部结构；本轮不写入新的数据合同，不自动转换旧 mixed，不修改 Overview。

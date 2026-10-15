@@ -1,0 +1,26 @@
+[
+  {
+    "width": 1024,
+    "firstRow": 7,
+    "secondRow": 4,
+    "conditionalStructureTreatment": true,
+    "sourceChoices": [
+      "理论",
+      "实验",
+      "未说明"
+    ],
+    "collapseRetainsDraft": true
+  },
+  {
+    "width": 736,
+    "sevenFieldsInOneRow": true
+  },
+  {
+    "width": 320,
+    "noPageOverflow": true
+  },
+  {
+    "darkMode": true,
+    "pageErrors": []
+  }
+]
