@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-10-15T16:53:12.497698+08:00",
+  "task": "T025 / FR-016 / SC-013",
+  "source": "正式 React 组件及 La–Sc–H 平台提取结果隔离副本",
+  "tests": {
+    "spectra_navigation": 20,
+    "property_module_collapse": 6,
+    "production_build": "passed"
+  },
+  "browser": {
+    "initial_modules_closed": 4,
+    "initial_visible_spectrum_buttons": 0,
+    "dos_visible_after_dynamic_close": 0,
+    "alpha_visible_while_dynamic_closed": 1,
+    "alpha_detail_navigation": "passed",
+    "empty_dos_visible_after_dynamic_open": true,
+    "empty_alpha_visible_while_superconductive_closed": false
+  },
+  "screenshot": "/Users/mayuan/.codex/visualizations/2026/10/15/01a13e47-5051-7842-aea4-8c0885bafc14/spectra-modules-collapsed.png",
+  "user_image": {
+    "path": "/Users/mayuan/Codes/SC-Wiki/docs/specs/137-phonon-spectra-digitization/assets/IMG-003-spectra-module-collapse.png",
+    "sha256": "768e10dec6501bdfd31c5bb4268aab3d8a9f813f99288ad487667718efd8f51c",
+    "dimensions": [
+      2466,
+      1098
+    ]
+  },
+  "limits": [
+    "只变更性质模块折叠归属及回归测试",
+    "不修改科学数据或原任务",
+    "未重测科学提取，未推送"
+  ]
+}

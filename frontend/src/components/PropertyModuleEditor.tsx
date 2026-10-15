@@ -275,6 +275,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                   </Tooltip>
                 </Box>
               ) : undefined}>
+            <PropertySpectrumSection moduleCode={module.module_code} />
             <Box sx={{ pt: 1 }}>
               {module.records.map((record, recordIndex) => {
                 const recordBasePath = `${moduleBasePath}.records.${recordIndex}`
@@ -337,7 +338,6 @@ const PropertyModuleEditor: React.FC<Props> = ({
               )}
             </Box>
             </PropertyModuleSection>
-            <PropertySpectrumSection moduleCode={module.module_code} />
           </Box>
         )
       })}

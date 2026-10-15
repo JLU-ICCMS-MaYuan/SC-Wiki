@@ -5,6 +5,9 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { PropertySpectraProvider, PropertySpectrumSection, PropertySpectrumState, MissingPropertySpectrumModules, UnassignedPropertySpectra } from '../../frontend/src/components/PropertySpectra'
+import PropertyModuleEditor from '../../frontend/src/components/PropertyModuleEditor'
+import { emptyPropertyModule } from '../../frontend/src/lib/propertyModules'
+import { clearFormDefinitionCache } from '../../frontend/src/lib/formDefinitions'
 import SpectrumDetailPage from '../../frontend/src/pages/SpectrumDetailPage'
 import { api } from '../../frontend/src/lib/api'
 import { safeSpectrumReturn, spectrumGroups, type PropertySpectrumListing } from '../../frontend/src/lib/propertySpectra'
@@ -18,11 +21,11 @@ const fixture = (): PropertySpectrumListing => ({ version: 'v1', jobs: [], can_e
 let listing: PropertySpectrumListing
 beforeEach(() => {
   listing = fixture()
-  vi.mocked(api.get).mockImplementation(async path => path.includes('/draft') ? { data: { material_states: [{ state_key: 'sample', material: 'LaSc2H24', reported_space_group_symbol: 'P6/mmm', pressure_value_gpa: 150 }] } } as never : structuredClone(listing) as never)
+  vi.mocked(api.get).mockImplementation(async path => path.startsWith('/api/form-definitions') ? [] as never : path.includes('/draft') ? { data: { material_states: [{ state_key: 'sample', material: 'LaSc2H24', reported_space_group_symbol: 'P6/mmm', pressure_value_gpa: 150 }] } } as never : structuredClone(listing) as never)
   vi.mocked(api.download).mockResolvedValue(new Blob(['image']))
   vi.stubGlobal('URL', class extends URL { static createObjectURL = vi.fn(() => 'blob:source'); static revokeObjectURL = vi.fn() })
 })
-afterEach(() => { cleanup(); vi.clearAllMocks(); vi.unstubAllGlobals() })
+afterEach(() => { cleanup(); clearFormDefinitionCache(); vi.clearAllMocks(); vi.unstubAllGlobals() })
 const address = (extra = '') => `/spectra/collection?target=upload&target_id=task&state_key=sample&curve=dos&collection_version=2&run=run1&return=%2Fupload${extra}`
 function mountEdit(saveResult = true) {
   let saved = 'old'
@@ -87,8 +90,19 @@ it('无标量记录时谱仍出现于正确模块', async () => {
   render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}><PropertySpectrumState stateKey="sample" summary="sample"><MissingPropertySpectrumModules existing={[]} /></PropertySpectrumState></PropertySpectraProvider></MemoryRouter>)
   expect(await screen.findByText('动力学性质')).toBeInTheDocument()
   expect(screen.getByText('超导性质')).toBeInTheDocument()
-  expect(screen.getByRole('button', { name: '查看声子 DOS' })).toBeVisible()
-  expect(screen.getByRole('button', { name: '查看 α²F' })).toBeVisible()
+  const dos = screen.getByText('查看声子 DOS'), alpha = screen.getByText('查看 α²F')
+  expect(dos).not.toBeVisible()
+  expect(alpha).not.toBeVisible()
+  const dynamicModule = screen.getByTestId('property-module-dynamical_properties')
+  const superconductiveModule = screen.getByTestId('property-module-superconductive_properties')
+  fireEvent.click(dynamicModule.querySelector('summary')!)
+  expect(dos).toBeVisible()
+  expect(alpha).not.toBeVisible()
+  fireEvent.click(superconductiveModule.querySelector('summary')!)
+  expect(alpha).toBeVisible()
+  fireEvent.click(dynamicModule.querySelector('summary')!)
+  expect(dos).not.toBeVisible()
+  expect(alpha).toBeVisible()
   expect(screen.queryByRole('img')).not.toBeInTheDocument()
   expect(screen.queryByRole('table')).not.toBeInTheDocument()
 
@@ -221,4 +235,30 @@ it('只有累计 λ 时入口如实标明，不冒充存在 α²F', async () => 
   mountEdit()
   expect(await screen.findByRole('button', { name: '查看累计 λ' })).toBeVisible()
   expect(screen.queryByRole('button', { name: '查看 α²F' })).not.toBeInTheDocument()
+})
+
+it.each([false, true])('已有模块内的谱入口与空态随模块折叠，readOnly=%s', async readOnly => {
+  const changed = vi.fn()
+  const modules = [emptyPropertyModule('dynamical_properties', 0), emptyPropertyModule('superconductive_properties', 1)]
+  render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}>
+    <PropertySpectrumState stateKey="sample" summary="150 GPa"><PropertyModuleEditor modules={modules} readOnly={readOnly} onChange={changed} /></PropertySpectrumState>
+    <PropertySpectrumState stateKey="empty" summary="300 GPa"><div data-testid="empty-spectra-state"><PropertyModuleEditor modules={modules} readOnly={readOnly} onChange={changed} /></div></PropertySpectrumState>
+  </PropertySpectraProvider></MemoryRouter>)
+  const dos = await screen.findByText('查看声子 DOS'), alpha = screen.getByText('查看 α²F')
+  const empty = screen.getByTestId('empty-spectra-state')
+  const noDos = within(empty).getByText('暂无声子 DOS'), noAlpha = within(empty).getByText('暂无 α²F')
+  for (const element of [dos, alpha, noDos, noAlpha]) expect(element).not.toBeVisible()
+  const allDynamic = screen.getAllByTestId('property-module-dynamical_properties')
+  fireEvent.click(allDynamic[0].querySelector('summary')!)
+  expect(dos).toBeVisible()
+  expect(alpha).not.toBeVisible()
+  fireEvent.click(allDynamic[0].querySelector('summary')!)
+  expect(dos).not.toBeVisible()
+  fireEvent.click(allDynamic[1].querySelector('summary')!)
+  expect(noDos).toBeVisible()
+  expect(noAlpha).not.toBeVisible()
+  fireEvent.click(screen.getAllByTestId('property-module-superconductive_properties')[1].querySelector('summary')!)
+  expect(noAlpha).toBeVisible()
+  expect(changed).not.toHaveBeenCalled()
+  expect(api.download).not.toHaveBeenCalled()
 })

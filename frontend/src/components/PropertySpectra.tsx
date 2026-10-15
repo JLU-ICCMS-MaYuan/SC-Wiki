@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
 import { loadPropertySpectra, spectrumDetailPath, spectrumGroups, spectrumInterval, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumTarget, type PropertySpectrumItem, type PropertySpectrumCurve } from '../lib/propertySpectra'
 import type { PropertyModuleCode } from '../lib/propertyModules'
+import PropertyModuleSection from './PropertyModuleSection'
 
 export interface PropertySpectraContext { target: PropertySpectrumTarget; beforeNavigate?: () => Promise<boolean> }
 const Spectra = createContext<(PropertySpectraContext & ReturnType<typeof usePropertySpectra> & { stateKeys?: string[]; readOnly: boolean }) | null>(null)
@@ -135,6 +136,6 @@ export function MissingPropertySpectrumModules({ existing }: { existing: Propert
     { code: 'dynamical_properties', label: '动力学性质' }, { code: 'superconductive_properties', label: '超导性质' },
   ]
   return <>{modules.filter(module => !existing.includes(module.code)).map(module => <Box key={module.code} data-testid={'property-module-' + module.code} sx={{ borderTop: 1, borderColor: 'divider', pt: 1.5 }}>
-    <Typography variant="subtitle2" fontWeight={700}>{module.label}</Typography><PropertySpectrumSection moduleCode={module.code} />
+    <PropertyModuleSection title={module.label}><PropertySpectrumSection moduleCode={module.code} /></PropertyModuleSection>
   </Box>)}</>
 }
