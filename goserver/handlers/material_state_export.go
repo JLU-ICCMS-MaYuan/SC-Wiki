@@ -2,13 +2,17 @@ package handlers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"scwiki/server/database"
 	"scwiki/server/models"
@@ -84,6 +88,12 @@ func ExportMaterialState(c *gin.Context) {
 	}
 
 	materialStateExportAfterSnapshot()
+	spectra, err := materialStateSpectra(c, uint(paperID), snapshotRevision, stateKey)
+	if err != nil {
+		writeMaterialStateExportError(c, errExportIncomplete, "谱导出尚未完成，请重试")
+		return
+	}
+	snapshot["spectra"] = spectra
 	var currentRevision uint
 	if err := database.DB.Model(&models.Paper{}).Select("content_revision").Where("id = ?", uint(paperID)).Scan(&currentRevision).Error; err != nil || currentRevision != snapshotRevision {
 		writeMaterialStateExportError(c, errExportRevisionConflict, "论文版本已变化，请重试")
@@ -92,6 +102,50 @@ func ExportMaterialState(c *gin.Context) {
 
 	c.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="paper-%d-%s.json"`, paperID, exportFilenameSegment(stateKey)))
 	c.JSON(http.StatusOK, snapshot)
+}
+
+// 质量与公开掩膜由 Python 谱服务裁决，Go 不重复实现科学筛选。
+func materialStateSpectra(c *gin.Context, paperID, revision uint, stateKey string) ([]any, error) {
+	result := []any{}
+	if !database.DB.Migrator().HasTable("spectrum_collections") {
+		return result, nil
+	}
+	var count int64
+	if err := database.DB.Table("spectrum_collections").Where("paper_id = ? AND paper_revision = ? AND state_key = ?", paperID, revision, stateKey).Count(&count).Error; err != nil {
+		return nil, err
+	}
+	if count == 0 {
+		return result, nil
+	}
+	base := os.Getenv("PYTHON_BACKEND_URL")
+	if base == "" {
+		base = "http://127.0.0.1:8000"
+	}
+	endpoint := fmt.Sprintf("%s/api/rag/spectra/material-state/%d/%s?expected_revision=%d", strings.TrimRight(base, "/"), paperID, url.PathEscape(stateKey), revision)
+	req, err := http.NewRequestWithContext(c.Request.Context(), http.MethodGet, endpoint, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Authorization", c.GetHeader("Authorization"))
+	response, err := (&http.Client{Timeout: 15 * time.Second}).Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer response.Body.Close()
+	if response.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("谱服务返回状态 %d", response.StatusCode)
+	}
+	var payload struct {
+		Revision uint  `json:"paper_revision"`
+		Spectra  []any `json:"spectra"`
+	}
+	if err := json.NewDecoder(response.Body).Decode(&payload); err != nil {
+		return nil, err
+	}
+	if payload.Revision != revision {
+		return nil, errExportRevisionConflict
+	}
+	return payload.Spectra, nil
 }
 
 func parseMaterialStateKey(raw string) (string, bool) {

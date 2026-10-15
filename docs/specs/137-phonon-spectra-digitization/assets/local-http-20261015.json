@@ -1,0 +1,26 @@
+{
+  "gateway": "127.0.0.1:8080",
+  "tasks": [
+    {
+      "task_id": "7070620afbfc45deb9ab22dae31badd3",
+      "http_status": 200,
+      "items": 0,
+      "jobs": 0,
+      "migration_error": false
+    },
+    {
+      "task_id": "c16cc627a0c04dc8ad4289624d1da80a",
+      "http_status": 200,
+      "items": 0,
+      "jobs": 0,
+      "migration_error": false
+    },
+    {
+      "task_id": "947214683efc415abd9b1d64c457d86c",
+      "http_status": 200,
+      "items": 0,
+      "jobs": 0,
+      "migration_error": false
+    }
+  ]
+}

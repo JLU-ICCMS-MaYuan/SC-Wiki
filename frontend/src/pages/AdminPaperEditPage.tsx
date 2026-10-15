@@ -594,6 +594,8 @@ const AdminPaperEditPage: React.FC = () => {
               const saved = await handleEditSave()
               return saved && version === evidenceWorkflow.getEditRevision()
             } }}
+            spectrumTarget={{ target: 'paper', target_id: String(paperId) }}
+            beforeSpectrumEdit={() => handleEditSave()}
             onScientificEdit={evidenceWorkflow.invalidate}
             issues={evidenceIssuesForStates(evidenceWorkflow.issues, editMaterialStates)}
             states={editMaterialStates}

@@ -171,6 +171,8 @@ async def open_draft(session, paper_id, user, *, create=False):
             session.add(saved)
         saved.revision_id, saved.base_revision, saved.base_fingerprint = uuid.uuid4().hex, paper.content_revision, baseline
         saved.draft, saved.draft_version, saved.submitted_revision = draft, 1, None
+        from backend.services.spectra import copy_to_revision
+        await copy_to_revision(session, paper, saved.revision_id)
         saved.created_at = datetime.utcnow()
         for origin in (await session.scalars(select(models.ScientificStructureOrigin).where(
                 models.ScientificStructureOrigin.target == 'paper', models.ScientificStructureOrigin.target_id == str(paper_id)))).all():
@@ -296,6 +298,8 @@ async def submit_draft(session, paper_id, user, payload):
     paper.doi = doi
     paper.reviewed_at = paper.reviewed_by_user_id = paper.review_comment = None
     targets = await persist_scientific_draft(session, paper, draft)
+    from backend.services.spectra import bind_to_paper
+    await bind_to_paper(session, paper, draft, target="revision", target_id=saved.revision_id)
     await ev.persist_existing_paper_targets(session, paper, targets)
     await preserve_structure_metadata(session, paper, draft, old_structures, old_structure_evidence)
     # 本轮模型结果只按内容和来源完全一致的项目转给待审论文；没有人工管理员裁决继承。

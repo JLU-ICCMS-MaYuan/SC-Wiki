@@ -1,0 +1,24 @@
+{
+  "timestamp": "2026-10-15T06:20:15.007598+00:00",
+  "database": "127.0.0.1:3307/scwiki",
+  "heads": [
+    "20260914_0052",
+    "20261014_0137"
+  ],
+  "old_table_count": 56,
+  "old_tables_rows_and_checksums_unchanged": true,
+  "new_tables": {
+    "spectrum_collections": {
+      "rows": 0,
+      "checksum": 0
+    },
+    "spectrum_runs": {
+      "rows": 0,
+      "checksum": 0
+    }
+  },
+  "backup_path": "/Users/mayuan/SC-Wiki-backups/2026-10-15-142015-spectra137/scwiki-before-20261014_0137.sql",
+  "backup_bytes": 6360184,
+  "backup_sha256": "bb563dcf046ece0c6378fdc01782812cceeec31a04f77f01e9543c18a589c716",
+  "deployment_schema_verified": true
+}

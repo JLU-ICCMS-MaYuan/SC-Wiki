@@ -100,3 +100,21 @@ it('返回地址只允许站内路径', () => {
   for (const value of ['https://evil.test', '//evil.test', '/\\evil.test', '/\nevil.test']) expect(safeSpectrumReturn(value)).toBe('/upload')
   expect(safeSpectrumReturn('/papers/12#material-state-sample')).toBe('/papers/12#material-state-sample')
 })
+
+it('独立详情可展开共用原图叠加、校对与逐谱审核', async () => {
+  const raw = listing.items[0] as any
+  raw.source.size_px = [160, 100]
+  raw.result.curves = [Object.assign(raw.result.curves[0], {
+    axis_calibration: { amplitude: { slope: -.01, intercept: 1 } },
+    frequency_direction: 'x', clipped_frequencies_thz: [],
+    points: [{ ...point, frequency_pixel: 20 }],
+  })]
+  raw.result.calibration = { panel_id: 'p', state_key: 'sample', curves: [] }
+  listing.can_review = true
+  render(<MemoryRouter initialEntries={[address()]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage />} /></Routes></MemoryRouter>)
+  await screen.findByText('声子 DOS解析详情')
+  fireEvent.click(screen.getByText('原图叠加、标定校对与逐谱审核'))
+  expect(await screen.findByText('修正标定并重提取')).toBeInTheDocument()
+  expect(screen.getByLabelText('原图叠加提取曲线')).toBeChecked()
+  expect(screen.getByText('保存本条谱审核')).toBeInTheDocument()
+})

@@ -52,3 +52,7 @@ Spec 目录保存 spec、plan、research、data-model、quickstart、tasks、che
 FR-011/SC-010 → 原始有色像素及完整标定清单 → joint_reconstruction.py 的读数范围与联合约束 → T012 → 合成谱/独立求积/留出验证及真实原图位置。scientific_review.py 不再把虚线插值点当精确真值，限制共同频域为真实观测范围。build_demo.py 导出联合序列、掩膜与误差；template.html 继续保留原轨迹，展示两相每 5 THz 范围与更正结论。新候选独立添加，不改变数据所有权或生产范围。
 
 数值拟合使用已有 SciPy；图像证据由独立 render_review_evidence.py 使用 Matplotlib 生成，不增加业务依赖。共同轴 DOS 作为带约定的条件定量输出，不按分波目标分别缩放。
+
+## 正式阶段
+
+已确认完整计划见 [production-plan.md](production-plan.md)。backend/spectra 提供共享计算、自动发现和契约；backend/services/spectra 负责事务与版本，backend/api/spectra 负责权限接口；前端共用谱质量组件用于上传、审核和详情。新增两表存集合身份和不可变运行JSON，图片走既有 FileStorage，RQ 复用上传队列。

@@ -2273,6 +2273,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         )
         if not state.get("is_shadow"):
             _start_automatic_evidence_check(task_id, int(state["user_id"]))
+            from backend.spectra.jobs import enqueue_upload
+            enqueue_upload(task_id)
         _schedule_terminal_cleanup(task_id)
         return ready
     except UploadCancelled:

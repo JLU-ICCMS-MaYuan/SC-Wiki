@@ -22,6 +22,7 @@ import {
 import { useLanguage } from '../context/LanguageContext'
 import StructureCandidatePanel from './StructureCandidatePanel'
 import PropertyModuleEditor from './PropertyModuleEditor'
+import { SpectrumProvider, SpectrumControls, type SpectrumTarget } from './SpectrumWorkspace'
 import PressureEditor from './PressureEditor'
 import { PROPERTY_SCHEMA_VERSION } from '../lib/propertyModules'
 import {
@@ -116,6 +117,8 @@ export const EvidenceNotes: React.FC<{
 
 interface MaterialStatesEditorProps {
   propertySpectra?: PropertySpectraContext
+  spectrumTarget?: SpectrumTarget
+  beforeSpectrumEdit?: () => Promise<boolean>
   /** 全部材料状态（受控值） */
   states: DraftMaterialState[]
   /** 材料状态数组整体变更回调：任何编辑都传出完整的新状态数组（T017） */
@@ -231,6 +234,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   paperType,
   onUploadStructure,
   onError,
+  spectrumTarget,
+  beforeSpectrumEdit,
   propertySpectra,
 }) => {
   const { t, lang, dict } = useLanguage()
@@ -566,8 +571,10 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   }
 
   return (
+    <SpectrumProvider target={spectrumTarget} states={states} beforeEdit={beforeSpectrumEdit} readOnly={readOnly}>
     <PropertySpectraProvider context={propertySpectra}>
     <Box sx={readOnly ? { pointerEvents: 'none', '& .MuiButton-root': { display: 'none' } } : undefined}>
+      <SpectrumControls />
       <Box sx={{ mt: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
           <Typography variant="h6" fontWeight={700}>{t('upload.materialStatesTitle')}</Typography>
@@ -922,6 +929,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
       </Box>
     </Box>
     </PropertySpectraProvider>
+    </SpectrumProvider>
   )
 }
 

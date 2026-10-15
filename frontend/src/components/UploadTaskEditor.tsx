@@ -845,6 +845,10 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
             const saved = await saveDraft(true)
             return saved && version === revisionRef.current
           } }}
+        spectrumTarget={revisionPaperId && revisionMeta.current
+          ? { target: 'revision', target_id: revisionMeta.current.revision_id }
+          : { target: 'upload', target_id: taskId }}
+        beforeSpectrumEdit={() => saveDraft(false)}
         onScientificEdit={evidenceWorkflow.invalidate}
         states={draft.material_states}
         onChange={nextStates => setDraftField('material_states', nextStates)}

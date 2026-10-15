@@ -1,5 +1,7 @@
 # demo 谱数据契约
 
+> 历史 demo 合同；正式数据库与接口见 [contracts/production.md](contracts/production.md)。模型只能提出标定，数值和质量由服务器共享算法生成。
+
 schema_version=1，仅为 demo 合同，不改变现有 PropertyRecord 标量合同。
 
 - source：PDF/补充文件名与 SHA-256、页码、图号、原图 SHA-256、尺寸、PDF 区域及标定方式。

@@ -1,7 +1,7 @@
 {
   "schema_heads": [
     "20260914_0052",
-    "20261010_0127"
+    "20261014_0137"
   ],
   "tables": {
     "admin_applications": {
@@ -3626,6 +3626,198 @@
         "task_id"
       ],
       "unique": []
+    },
+    "spectrum_collections": {
+      "checks": [
+        "(targetin('upload','paper','revision'))"
+      ],
+      "columns": {
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "current_run_id": {
+          "nullable": true,
+          "type": "varchar(32)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "material_state_id": {
+          "nullable": true,
+          "type": "bigint"
+        },
+        "owner_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "panel_key": {
+          "nullable": false,
+          "type": "varchar(96)"
+        },
+        "paper_file_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "review_json": {
+          "nullable": false,
+          "type": "json"
+        },
+        "source_json": {
+          "nullable": false,
+          "type": "json"
+        },
+        "source_key": {
+          "nullable": false,
+          "type": "varchar(96)"
+        },
+        "state_key": {
+          "nullable": true,
+          "type": "varchar(96)"
+        },
+        "state_signature": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "target": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "target_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "updated_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "version": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "material_state_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "material_states"
+        },
+        {
+          "columns": [
+            "paper_file_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "paper_files"
+        },
+        {
+          "columns": [
+            "paper_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "target",
+          "target_id",
+          "source_key",
+          "panel_key"
+        ]
+      ]
+    },
+    "spectrum_runs": {
+      "checks": [],
+      "columns": {
+        "algorithm_version": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "calibration_json": {
+          "nullable": true,
+          "type": "json"
+        },
+        "collection_id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "completed_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "created_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "error_code": {
+          "nullable": true,
+          "type": "varchar(64)"
+        },
+        "error_message": {
+          "nullable": true,
+          "type": "varchar(500)"
+        },
+        "id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "input_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "model_name": {
+          "nullable": true,
+          "type": "varchar(128)"
+        },
+        "result_json": {
+          "nullable": true,
+          "type": "json"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(32)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "collection_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "spectrum_collections"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "collection_id",
+          "input_hash"
+        ]
+      ]
     },
     "structure_families": {
       "checks": [],

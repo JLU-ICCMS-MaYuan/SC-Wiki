@@ -487,6 +487,16 @@ def save_draft(task_id: str, draft: dict[str, Any]) -> dict[str, Any]:
             persist_upload(session, task_id, state, draft)
             client.persist(task_key(task_id))
             client.persist(draft_key(task_id))
+        else:
+            from backend.services.spectra import available
+            if available(session):
+                from backend.models import SpectrumCollection
+                from sqlalchemy import select
+                if session.scalar(select(SpectrumCollection.id).where(
+                        SpectrumCollection.target == "upload", SpectrumCollection.target_id == task_id).limit(1)):
+                    persist_upload(session, task_id, state, draft)
+                    client.persist(task_key(task_id))
+                    client.persist(draft_key(task_id))
     return draft
 
 

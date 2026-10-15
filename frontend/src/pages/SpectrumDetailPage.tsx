@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Alert, Box, Button, MenuItem, Table, TableBody, TableCell, TableHead, TablePagination, TableRow, TextField, Typography } from '@mui/material'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { SpectrumProvider, SpectrumQuality, SpectrumCollectionWorkspace } from '../components/SpectrumWorkspace'
 import { materialStateSummary } from '../lib/materialStateSummary'
 import { api } from '../lib/api'
 import { SPECTRUM_API, safeSpectrumReturn, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumCurve, type PropertySpectrumTarget } from '../lib/propertySpectra'
@@ -37,23 +38,13 @@ function SpectrumPlot({ curve, candidate, reconstructionLabel = '原始重建' }
     <Typography variant="caption">蓝：原图观测　紫：{reconstructionLabel}　橙：所选候选。未知点保持缺口。</Typography>
   </Box>
 }
-const qualityLabels: Record<string, string> = { observed_fraction: '原图观测覆盖率', missing_fraction: '缺失比例', reconstructed_fraction: '重建比例', frequency_interval_thz: '频域 (THz)', largest_unobserved_gap_samples: '最大未观测间隔（点）', clipped_frequencies_thz: '抵框频率 (THz)', omitted_low_frequency_interval_thz: '未覆盖低频 (THz)', frequency_tick_residual: '频率刻度残差', amplitude_tick_residual: '幅值刻度残差', lambda_integral: 'λ 积分', omega_log_k: 'ωlog (K)', reason: '说明' }
-function Quality({ value }: { value: Record<string, any> }) {
-  const rows: Array<[string, unknown]> = []
-  for (const [id, metrics] of Object.entries<any>(value.curves || {})) for (const [key, metric] of Object.entries(metrics)) if (qualityLabels[key]) rows.push([`${id} · ${qualityLabels[key]}`, metric])
-  for (const [variant, metrics] of Object.entries<any>(value.integrals || {})) for (const [key, metric] of Object.entries(metrics)) if (qualityLabels[key]) rows.push([`${({ raw: '原始重建', zero_baseline: '零基线候选', joint: '联合候选' } as Record<string, string>)[variant] || variant} · ${qualityLabels[key]}`, metric])
-  return <>
-    {value.metric_domain_note && <Alert severity="info">{String(value.metric_domain_note)}</Alert>}
-    <Table size="small"><TableBody>{rows.map(([name, metric], index) => <TableRow key={index}><TableCell>{name}</TableCell><TableCell sx={{ overflowWrap: 'anywhere' }}>{Array.isArray(metric) ? metric.map(show).join('–') : typeof metric === 'number' ? show(metric) : String(metric ?? '未知')}</TableCell></TableRow>)}</TableBody></Table>
-    {(value.limitations || []).map((text: string, index: number) => <Typography key={index} variant="body2">{text}</Typography>)}
-    <Box component="details"><Typography component="summary" sx={{ cursor: 'pointer' }}>完整质量与比较数据</Typography><Box component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere', fontSize: 12 }}>{JSON.stringify(value, null, 2)}</Box></Box>
-  </>
-}
 export default function SpectrumDetailPage() {
   const { collectionId } = useParams(), [params] = useSearchParams(), location = useLocation(), navigate = useNavigate()
   const kind = params.get('target'), targetId = params.get('target_id')
   const target = ['upload', 'paper', 'revision'].includes(kind || '') && targetId ? { target: kind, target_id: targetId } as PropertySpectrumTarget : undefined
   const { listing, loading, error, reload } = usePropertySpectra(target)
+  const [workspaceOpen, setWorkspaceOpen] = useState(false)
+  const [materialStates, setMaterialStates] = useState<any[]>([])
   const [material, setMaterial] = useState(''), [materialError, setMaterialError] = useState('')
   const [image, setImage] = useState(''), [actionError, setActionError] = useState(''), [variant, setVariant] = useState('raw'), [page, setPage] = useState(0)
   const item = listing?.items.find(item => item.id === collectionId)
@@ -72,7 +63,7 @@ export default function SpectrumDetailPage() {
   }, [validItem?.id, validItem?.version, query])
   useEffect(() => {
     const controller = new AbortController()
-    setMaterial(''); setMaterialError('')
+    setMaterial(''); setMaterialError(''); setMaterialStates([])
     if (!validItem || !target) return () => controller.abort()
     const revisionPaper = safeSpectrumReturn(params.get('return')).match(/^\/papers\/(\d+)\/revise(?:[?#]|$)/)?.[1]
     const endpoint = target.target === 'upload' ? `/api/rag/upload-tasks/${encodeURIComponent(target.target_id)}/draft`
@@ -83,6 +74,7 @@ export default function SpectrumDetailPage() {
       if (controller.signal.aborted) return
       if (target.target === 'revision' && response.revision_id !== target.target_id) throw new Error('返修草稿版本不匹配')
       const draft = response.data || response
+      setMaterialStates(draft.material_states || [])
       const state = (draft.material_states || []).find((state: any, index: number) => (state.state_key || `state-${index + 1}`) === validItem.state_key)
       if (!state) throw new Error('未找到对应材料状态')
       setMaterial(materialStateSummary(state))
@@ -132,8 +124,14 @@ export default function SpectrumDetailPage() {
         <SpectrumPlot reconstructionLabel="共同尺度归一化候选" curve={{ ...curve, unit: normalization.unit || '', points: curve.points.map(point => ({ ...point, observed_amplitude: null, reconstructed_amplitude: candidate.get(point.frequency_thz) ?? null })) }} candidate={new Map()} />
       </> : <SpectrumPlot curve={curve} candidate={candidate} />}
       {image && <Box component="details" open sx={{ my: 2 }}><Typography component="summary" sx={{ cursor: 'pointer' }}>论文原图</Typography><Box component="img" src={image} alt="经权限校验读取的谱原图" sx={{ maxWidth: '100%', maxHeight: 600, objectFit: 'contain' }} /></Box>}
-      <Box component="details" sx={{ my: 2 }}><Typography component="summary" sx={{ cursor: 'pointer' }}>提取质量与比较</Typography><Quality value={validItem.result.quality || {}} /></Box>
+      <Box component="details" sx={{ my: 2 }}><Typography component="summary" sx={{ cursor: 'pointer' }}>提取质量与比较</Typography><SpectrumQuality quality={validItem.result.quality || {}} /></Box>
       {validItem.review[curve.id]?.reason && <Alert severity="info">采纳说明：{validItem.review[curve.id].reason} {validItem.review[curve.id].frequency_intervals_thz?.map(pair => `${pair.join('–')} THz`).join('；')}</Alert>}
+      {target && <Box component="details" onToggle={event => setWorkspaceOpen(event.currentTarget.open)} sx={{ my: 2 }}><Typography component="summary" sx={{ cursor: 'pointer' }}>原图叠加、标定校对与逐谱审核</Typography>
+        {workspaceOpen && <SpectrumProvider target={target} states={materialStates} readOnly={!listing?.can_edit && !listing?.can_review}>
+          <Alert severity="info">校对或审核保存后，请返回原模块查看最新版本。</Alert>
+          <SpectrumCollectionWorkspace collectionId={validItem.id} curveId={curve.id}/>
+        </SpectrumProvider>}
+      </Box>}
       <Typography fontWeight={600} sx={{ mt: 2 }}>逐点数据 · 频率 (THz) / 原幅值 ({curve.unit || '单位未说明'}){variant === 'normalized' && ` / 候选 (${normalization.unit || '单位未说明'})`}</Typography>
       <Box sx={{ overflowX: 'auto' }}><Table size="small"><TableHead><TableRow>{['频率', '原图观测', '原始重建', '所选候选', '点来源', '检测方式'].map(label => <TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>
         {curve.points.slice(page * 100, (page + 1) * 100).map((point, index) => <TableRow key={index}><TableCell>{show(point.frequency_thz)}</TableCell><TableCell>{show(point.observed_amplitude)}</TableCell><TableCell>{show(point.reconstructed_amplitude)}</TableCell><TableCell>{show(candidate.get(point.frequency_thz))}</TableCell><TableCell>{spectrumNames[point.status] || point.status}</TableCell><TableCell>{point.detection_mode || '未说明'}</TableCell></TableRow>)}

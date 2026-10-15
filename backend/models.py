@@ -2456,3 +2456,52 @@ class ScientificUploadDraft(Base):
     draft = Column(JSON, nullable=False)
     state = Column(JSON, nullable=False)
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+
+class SpectrumCollection(Base):
+    """独立谱集合身份；历史运行不随材料状态整体重写删除。"""
+    __tablename__ = "spectrum_collections"
+    __table_args__ = (
+        UniqueConstraint("target", "target_id", "source_key", "panel_key", name="uq_spectrum_collection_source"),
+        CheckConstraint("target IN ('upload','paper','revision')", name="ck_spectrum_target"),
+        Index("ix_spectrum_paper_revision", "paper_id", "paper_revision"),
+    )
+    id = Column(String(32), primary_key=True)
+    target = Column(String(16), nullable=False)
+    target_id = Column(String(64), nullable=False)
+    owner_id = Column(Integer, nullable=False)
+    paper_id = Column(Integer, ForeignKey("papers.id", ondelete="CASCADE"), nullable=True)
+    paper_revision = Column(Integer, nullable=True)
+    paper_file_id = Column(Integer, ForeignKey("paper_files.id", ondelete="SET NULL"), nullable=True)
+    material_state_id = Column(BIGINT_ID, ForeignKey("material_states.id", ondelete="SET NULL"), nullable=True)
+    state_key = Column(String(96), nullable=True)
+    state_signature = Column(String(64), nullable=False)
+    source_key = Column(String(96), nullable=False)
+    panel_key = Column(String(96), nullable=False)
+    source_json = Column(JSON, nullable=False)
+    current_run_id = Column(String(32), nullable=True)
+    version = Column(Integer, nullable=False, default=1)
+    review_json = Column(JSON, nullable=False, default=dict)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class SpectrumRun(Base):
+    """一次谱发现或提取；完成运行的数值不被后续标定改写。"""
+    __tablename__ = "spectrum_runs"
+    __table_args__ = (
+        UniqueConstraint("collection_id", "input_hash", name="uq_spectrum_run_input"),
+        Index("ix_spectrum_run_collection", "collection_id", "created_at"),
+    )
+    id = Column(String(32), primary_key=True)
+    collection_id = Column(String(32), ForeignKey("spectrum_collections.id", ondelete="CASCADE"), nullable=False)
+    input_hash = Column(String(64), nullable=False)
+    algorithm_version = Column(String(64), nullable=False)
+    model_name = Column(String(128), nullable=True)
+    status = Column(String(32), nullable=False)
+    calibration_json = Column(JSON, nullable=True)
+    result_json = Column(JSON, nullable=True)
+    error_code = Column(String(64), nullable=True)
+    error_message = Column(String(500), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True), nullable=True)

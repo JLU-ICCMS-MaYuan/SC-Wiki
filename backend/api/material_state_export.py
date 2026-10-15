@@ -156,6 +156,13 @@ def build_material_state_export(db: Session, *, paper_id: int, state_key: str, u
             "ui_schema": item.ui_schema, "status": item.status, "checksum": item.checksum,
         } for _, item in sorted(definitions.items())],
     }
+    from backend.services import spectra as spectrum_service
+    if spectrum_service.available(db):
+        spectrum_context = spectrum_service.context(db, "paper", str(paper_id), user)
+        payload["spectra"] = [item for item in spectrum_service.listing(db, spectrum_context)["items"]
+                              if item["state_key"] == state_key]
+    else:
+        payload["spectra"] = []
     return jsonable_encoder(payload)
 
 

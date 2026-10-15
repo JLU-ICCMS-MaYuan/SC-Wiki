@@ -49,6 +49,8 @@ app.include_router(tc_predict.router)
 app.include_router(structures.router)
 app.include_router(rag.router)
 from backend.api import evidence, paper_revisions
+from backend.api import spectra
+app.include_router(spectra.router)
 app.include_router(evidence.router)
 app.include_router(paper_revisions.router)
 app.include_router(upload_tasks.router)

@@ -814,3 +814,17 @@ def test_corrupt_configuration_has_no_shell_side_effects_in_real_loader(tmp_path
     result = subprocess.run(['bash', '-c', script, 'bash', str(scripts / 'lib-local.sh')], capture_output=True, text=True)
     assert result.returncode != 0
     assert not marker.exists()
+
+
+def test_schema_heads_match_source_on_linux_and_macos(monkeypatch):
+    from alembic.config import Config
+    from alembic.script import ScriptDirectory
+    env = module('environment')
+    expected = set(ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_heads())
+    snapshot = json.loads((ROOT / 'scripts/local-deploy-schema.json').read_text())
+    assert set(snapshot['schema_heads']) == expected
+    assert {'spectrum_collections', 'spectrum_runs'} <= snapshot['tables'].keys()
+    for system, machine in [('Linux', 'x86_64'), ('Darwin', 'arm64')]:
+        monkeypatch.setattr(env.platform, 'system', lambda: system)
+        monkeypatch.setattr(env.platform, 'machine', lambda: machine)
+        assert set(env.versions(ROOT)['schema_heads']) == expected

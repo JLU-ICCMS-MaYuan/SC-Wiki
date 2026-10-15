@@ -1955,6 +1955,8 @@ async def _create_pending_paper(
                         document_runs[paper_file.id] = await persist_document(session, paper, paper_file, ir)
 
                 scientific_targets = await persist_scientific_draft(session, paper, draft)
+                from backend.services.spectra import bind_to_paper
+                await bind_to_paper(session, paper, draft, target="upload", target_id=task_id)
                 from backend.services.citation_graph import persist_reference_extraction
 
                 citation_extraction = draft.get("citation_extraction")
@@ -2673,6 +2675,8 @@ async def _rewrite_paper_scientific_draft_in_tx(
     if bumped:
         await bump_paper_revision(session, paper)
     targets = await persist_scientific_draft(session, paper, full_draft)
+    from backend.services.spectra import bind_to_paper
+    await bind_to_paper(session, paper, full_draft)
     from backend.services.classification_catalog import save_paper_material_families
     await save_paper_material_families(session, paper, full_draft["paper"]["material_families"])
     from backend.ingest.property_evidence import persist_existing_paper_targets
