@@ -29,4 +29,9 @@
 ## US10 模块默认折叠
 
 - [x] CHK018 用户原话、四模块默认折叠和原记录层折叠的区别已明确。[US10、FR-035～036]
-- [x] CHK019 保留未保存输入、重排/工具栏独立、只读和仅谱模块均有交互覆盖。[property-module-collapse.test.tsx、property-spectra-navigation.test.tsx]
+- [x] CHK019 保留未保存输入、已有顺序兼容/删除工具栏独立、只读和仅谱模块均有交互覆盖。[property-module-collapse.test.tsx、property-spectra-navigation.test.tsx]
+
+## US11 取消模块上下移动
+
+- [x] CHK020 #90 原排序实现与 #94 当前迭代入口已核查，新原话及 IMG-006 完整归档；最新要求取代手动排序交互。[US11、assets/images.json]
+- [x] CHK021 无上下移动入口、已有顺序兼容、默认折叠及删除限制已覆盖，未引入固定重排或迁移。[FR-037～038、相关交互回归]

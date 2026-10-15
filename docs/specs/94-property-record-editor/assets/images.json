@@ -101,6 +101,26 @@
         1110
       ],
       "verification": "2026-10-15 重新读取归档原图，PIL 解码及 SHA-256/像素尺寸核验通过；本地验证，未推送。"
+    },
+    {
+      "id": "IMG-006",
+      "upload_order": 6,
+      "original_name": "codex-clipboard-16602d06-97e8-4233-bc61-86452a733cf6.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-006.png",
+      "status": "local_verified",
+      "user_context": "我觉得这个上下移动模块的功能可以取消，使用 issue 和 spec 来执行。注意看看之前是不是有提到过这个需求的 issue，如果有，就按照之前的需求追加新的要求。",
+      "related": [
+        "US11",
+        "FR-037",
+        "FR-038"
+      ],
+      "sha256": "03629639fee617b2a00efb6a0713777d9af0ef65b66d272c9103663aa67f6111",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3024,
+        1960
+      ],
+      "verification": "2026-10-15 从归档位置重新读取原图，PIL 解码、像素尺寸与 SHA-256 核验通过；本地归档，远程链接待验证。"
     }
   ]
 }

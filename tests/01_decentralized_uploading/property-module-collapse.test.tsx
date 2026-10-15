@@ -57,16 +57,15 @@ it('未保存输入和内部记录的折叠状态在模块收起后保留，输�
   expect(input).toHaveValue('尚未保存的名称')
   expect(changed).toHaveBeenCalledTimes(1)
 })
-it('重排操作不切换模块，展开状态按稳定 module_key 保留', () => {
+it('不提供模块移动按钮，折叠不改变已有模块顺序', () => {
   const { changed } = mount()
+  expect(screen.queryByLabelText('上移模块')).not.toBeInTheDocument()
+  expect(screen.queryByLabelText('下移模块')).not.toBeInTheDocument()
   toggle(0)
-  const original = details(0)
-  fireEvent.click(within(region(0)).getByRole('button', { name: '下移模块' }))
-  expect(details(0)).toBe(original)
   expect(details(0).open).toBe(true)
   expect(details(1).open).toBe(false)
-  expect(changed).toHaveBeenCalledTimes(1)
-  expect(changed.mock.calls[0][0][1].module_key).toBe(PROPERTY_MODULES[0].code)
+  expect([...document.querySelectorAll<HTMLElement>('[data-module-key]')].map(node => node.dataset.moduleKey)).toEqual(PROPERTY_MODULES.map(module => module.code))
+  expect(changed).not.toHaveBeenCalled()
 })
 it('只读模块也默认折叠且可展开查看，输入继续禁用', () => {
   const { changed } = mount(true)

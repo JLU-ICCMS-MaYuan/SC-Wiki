@@ -13,7 +13,7 @@ export default function PropertyModuleSection({ title, status, actions, children
     '& > details[open] > summary .property-module-chevron': { transform: 'rotate(90deg)' },
   }}>
     <Box component="details" data-property-module-section>
-      <Box component="summary" data-property-module-toggle sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minHeight: 40, pr: actions ? 16 : 0, cursor: 'pointer', listStyle: 'none', borderRadius: 1,
+      <Box component="summary" data-property-module-toggle sx={{ display: 'flex', alignItems: 'center', gap: 0.5, minHeight: 40, pr: actions ? 6 : 0, cursor: 'pointer', listStyle: 'none', borderRadius: 1,
         '&::-webkit-details-marker': { display: 'none' }, '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' },
       }}>
         <ChevronRightIcon className="property-module-chevron" fontSize="small" sx={{ flexShrink: 0 }} />

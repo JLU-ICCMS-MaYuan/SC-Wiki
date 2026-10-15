@@ -2,8 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Box, Button, IconButton, MenuItem, Select, Tooltip, Typography,
 } from '@mui/material'
-import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import {
@@ -212,14 +210,6 @@ const PropertyModuleEditor: React.FC<Props> = ({
     onChange([...modules, emptyPropertyModule(code, modules.length)])
   }
 
-  const moveModule = (index: number, offset: number) => {
-    const target = index + offset
-    if (target < 0 || target >= modules.length) return
-    const next = [...modules]
-    ;[next[index], next[target]] = [next[target], next[index]]
-    onChange(normalizeOrder(next))
-  }
-
   const choicesFor = (moduleCode: PropertyModuleCode) => (
     definitions[moduleCode]?.length ? definitions[moduleCode] : fallbackDefinitionRefs(moduleCode)
   )
@@ -279,8 +269,6 @@ const PropertyModuleEditor: React.FC<Props> = ({
               status={moduleProblems.length ? `${moduleProblems.length} 项待处理：${moduleProblems[0]}` : undefined}
               actions={!readOnly ? (
                 <Box sx={{ pr: 1 }}>
-                  <Tooltip title="上移模块"><span><IconButton size="small" aria-label="上移模块" disabled={moduleIndex === 0} onClick={() => moveModule(moduleIndex, -1)}><ArrowUpwardIcon /></IconButton></span></Tooltip>
-                  <Tooltip title="下移模块"><span><IconButton size="small" aria-label="下移模块" disabled={moduleIndex === modules.length - 1} onClick={() => moveModule(moduleIndex, 1)}><ArrowDownwardIcon /></IconButton></span></Tooltip>
                   <Tooltip title={module.records.length ? '请先删除模块内记录' : '删除模块'}>
                     <span><IconButton size="small" aria-label="删除模块" disabled={module.records.length > 0}
                       onClick={() => onChange(normalizeOrder(modules.filter((_, index) => index !== moduleIndex)), { deletedModuleKey: module.module_key })}><DeleteIcon /></IconButton></span>

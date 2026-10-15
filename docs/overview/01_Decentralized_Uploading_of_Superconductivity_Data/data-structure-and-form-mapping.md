@@ -54,7 +54,7 @@
 | 材料状态 | 材料名、化学式、元素数、材料维度、晶系、压力、温度、磁场、状态类型、报告空间群、备注 | 是，核心重复单元；材料名与化学式至少一项 | `material_states`；有化学式时关联 `chemical_systems`、`superconductors` |
 | 结构家族 | 结构家族名称、是否主家族 | 每个状态可多选，最多一个主项 | `structure_families`、`material_state_structure_families` |
 | 结构模型 | CIF/POSCAR 文本、格式、空间群、晶胞、原子数、计算方法、来源位置 | 每个状态可有多个 | `structure_models` |
-| 物性模块 | 超导、动力学、热力学、电子性质 | 按需添加、排序和删除 | `property_modules` |
+| 物性模块 | 超导、动力学、热力学、电子性质 | 按需添加和删除，保留已有显示顺序 | `property_modules` |
 | 物性记录 | 类型、物性代码、原始值、规范值、单位、方法、代表标记、定义版本 | 每个模块可有多条 | `property_records` |
 | Conditions 与参数 | 计算或实验 Conditions、lambda、omega log、mu*、网格、展宽及预留扩展字段 | 每条记录独立拥有 | `property_records.payload_json` |
 | 论文证据 | 字段路径、章节、页码范围、原文引句 | 是 | `paper_chunks`、`paper_evidences`、`property_record_evidences` |
@@ -164,7 +164,7 @@ Tc 直接修改 value_number，范围修改上下界；不再显示“原始记�
 
 | 表 | 主键与主要关联 | 保存内容 |
 | --- | --- | --- |
-| `property_modules` | 关联一个 `material_state`；模块代码在该状态内唯一 | 按需挂载的模块及排序 |
+| `property_modules` | 关联一个 `material_state`；模块代码在该状态内唯一 | 按需挂载的模块及已有显示顺序 |
 | `property_records` | 关联模块、材料状态、论文 revision 和定义版本 | 固定检索列、值、单位、方法、代表标记和 `payload_json` |
 | `property_record_evidences` | `property_record_id` ↔ `paper_evidence_id`，要求同 revision | 记录级或字段路径级来源 |
 | `property_evidence_checks` | 关联当前论文 revision 与物性记录；记录删除时级联清理 | 内容和来源摘要、规则版本、模型结论与理由、证据快照 |
@@ -294,4 +294,6 @@ Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖�
 
 该前端消费 #137 的谱 API；谱存储、迁移、自动提取和目标部署验收属于 #137。服务不可用时显示错误，不生成演示曲线，不把谱塞入标量 PropertyRecord，也不放宽 stale、逐谱采纳或公开范围。当前统一表单、真实保存链与隔离验证记录见 [#94 验收说明](../../specs/94-property-record-editor/quickstart.md)。
 
-四类性质模块本身默认折叠，点击标题或通过键盘可独立展开；仅有谱结果的模块也采用相同交互。收起保留未保存输入和内部记录的展开状态，重排状态随 module_key 保留；模块折叠不调用科学数据 onChange。标题可提示已有校验问题，移动/删除工具栏与折叠动作分开。上传、返修、管理员及只读入口共用此行为。单条记录的默认展开规则保持原样。
+四类性质模块本身默认折叠，点击标题或通过键盘可独立展开；仅有谱结果的模块也采用相同交互。收起保留未保存输入和内部记录的展开状态，状态随 module_key 保留，已有显示顺序保持；模块折叠不调用科学数据 onChange。标题可提示已有校验问题，删除工具栏与折叠动作分开。上传、返修、管理员及只读入口共用此行为。单条记录的默认展开规则保持原样。
+
+模块标题不再提供上下移动或其他手动排序入口；仍按已有数据顺序显示并保留 display_order 合同，不强制重排历史数据。空模块删除后仍保持剩余模块的相对顺序。

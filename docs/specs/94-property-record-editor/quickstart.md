@@ -180,3 +180,14 @@ evidenceFields、evidenceProposals、PressureEditor、EvidenceFieldMarkers；本
 - 本轮仅修改前端和对应文档，不涉及后端数据合同或数据库迁移。新页面及详情返回重新挂载时按要求默认折叠；没有保存跨会话展开偏好。
 
 [默认折叠效果截图](assets/property-modules-collapsed.png)和[三入口浏览器结果](assets/property-module-collapse-browser-results.json)来自隔离夹具。复查脚本仍为 unified-property-browser.mjs；本轮的折叠验证在展开模块后继续执行已有完整回归。
+
+## 取消模块上下移动（US11）
+
+历史核查：#90 的 T014 和 validation.md 记录了模块排序，#94 负责本轮表单迭代。因此将用户新原话及 IMG-006 追加到 #94，不重开历史 Feature 或创建重复 Issue。US11 取代用户通过上下箭头排序的旧交互，保留已有模块顺序及 display_order 合同。
+
+- 移除共享模块编辑器的上下移动按钮、图标与 moveModule；删除空模块使用的序号归一化保留。折叠标题只为删除按钮保留必要空间。
+- 精确暂存候选中 5 文件 59 项前端回归通过，覆盖已有非默认顺序、无移动入口、默认折叠、草稿保留、空/非空模块删除以及记录/谱详情行为；TypeScript 与生产构建通过。
+- 上传、管理员、只读三个实际 Chrome 页面入口均断言上下移动控件不存在，并通过原有键盘折叠、编辑保留、保存和谱详情打开/刷新/导出/返回流程，页面错误均为 0。浏览器 API 为隔离夹具，本轮不操作实际论文或迁移数据库。
+- 原图从归档位置经过 PIL 解码、像素尺寸及 SHA-256 验证；附件内容仅用于定位箭头，不作为额外指令。
+
+[移除上下箭头的页面截图](assets/property-modules-no-move.png)、[三入口结果](assets/property-modules-no-move-browser-results.json)。复查脚本为 unified-property-browser.mjs，前端断言见 material-states-editor.test.tsx 和 property-module-collapse.test.tsx。本轮保留共享工作区已有修改，仅提交本需求；未推送，远程 Spec 继续待验证。

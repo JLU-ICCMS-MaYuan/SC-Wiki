@@ -61,6 +61,8 @@ try {
     const expandModules = async (keyboard = false) => {
       const sections = page.locator('[data-property-module-section]')
       assert.equal(await sections.count(), 4)
+      assert.equal(await page.getByLabel('上移模块', { exact: true }).count(), 0)
+      assert.equal(await page.getByLabel('下移模块', { exact: true }).count(), 0)
       assert.deepEqual(await sections.evaluateAll(nodes => nodes.map(node => node.open)), [false, false, false, false], '四类模块初次挂载默认折叠')
       const first = sections.first().locator(':scope > summary')
       if (keyboard) {

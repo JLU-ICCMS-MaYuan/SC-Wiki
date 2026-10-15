@@ -69,3 +69,7 @@ Tc 核对的 editable_fields 不含 value_raw、unit_raw、canonical_unit，旧 
 ## 模块默认折叠
 
 初次挂载的四类模块均折叠；展开/收起仅改变原生 details 的 open 状态，不调用模块 onChange，不进入提交载荷。内容保留挂载，嵌套记录 Accordion 状态与未保存输入不因模块折叠丢失。模块身份继续由 module_key 决定；模块工具栏独立于折叠标题。
+
+## 模块顺序兼容
+
+模块上下移动入口已取消，不提供替代排序操作；仍使用原 property_modules 数组顺序和 display_order 保存合同，不强制重新排列历史数据。空模块删除仍有既有删除元数据及序号归一化，其他模块的相对顺序不变。US10 的默认折叠及草稿保留保持。

@@ -291,20 +291,17 @@ describe('Issue #90 模块化物性与 Schema 表单', () => {
     expect(states[0].deleted_record_keys).toEqual(['record-deleted'])
   })
 
-  it('模块上下移动后按视觉顺序重写 display_order', () => {
-    const superconductive = { ...emptyPropertyModule('superconductive_properties', 0), module_key: 'module-first' }
-    const electronic = { ...emptyPropertyModule('electronic_properties', 1), module_key: 'module-second' }
+  it('保留已有非默认模块顺序且不提供上下移动入口', () => {
+    const electronic = { ...emptyPropertyModule('electronic_properties', 0), module_key: 'module-first' }
+    const superconductive = { ...emptyPropertyModule('superconductive_properties', 1), module_key: 'module-second' }
     const { onChange } = renderEditor({
-      states: [makeState({ property_modules: [superconductive, electronic] })],
+      states: [makeState({ property_modules: [electronic, superconductive] })],
     })
 
-    const firstRegion = screen.getByTestId('property-module-superconductive_properties')
-    fireEvent.click(within(firstRegion).getByRole('button', { name: '下移模块' }))
-    const states = onChange.mock.calls.at(-1)?.[0] as DraftMaterialState[]
-    expect(states[0].property_modules).toEqual([
-      expect.objectContaining({ module_key: 'module-second', display_order: 0 }),
-      expect.objectContaining({ module_key: 'module-first', display_order: 1 }),
-    ])
+    expect([...document.querySelectorAll<HTMLElement>('[data-module-key]')].map(node => node.dataset.moduleKey)).toEqual(['module-first', 'module-second'])
+    expect(screen.queryByLabelText('上移模块')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('下移模块')).not.toBeInTheDocument()
+    expect(onChange).not.toHaveBeenCalled()
   })
 
   it('记录定义由预测 Tc 切为测量 Tc 时替换条件分组', async () => {

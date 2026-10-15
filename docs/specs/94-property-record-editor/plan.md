@@ -101,8 +101,14 @@ PropertyModuleEditor 的 Tc 摘要直接读取规范值，字段锚点及 record
 
 ## US10：模块折叠增量
 
-FR-035～036 / SC-026～027 → PropertyModuleSection → T028～030。使用共享原生 details/summary 包裹模块内容，缺省不带 open；原生鼠标和键盘交互，折叠内容保留挂载。module_key 保持现有 React 身份，因此表单更新和模块排序不重置展开状态；只读共享同一折叠控件。模块工具栏与 summary 为兄弟节点，避免移动/删除触发折叠。
+FR-035～036 / SC-026～027 → PropertyModuleSection → T028～030。使用共享原生 details/summary 包裹模块内容，缺省不带 open；原生鼠标和键盘交互，折叠内容保留挂载。module_key 保持现有 React 身份，因此表单更新不重置展开状态；只读共享同一折叠控件。模块工具栏与 summary 为兄弟节点，避免删除触发折叠。
 
 PropertyModuleEditor 的标量模块和 MissingPropertySpectrumModules 的仅谱模块复用该包装；记录层 Accordion 保留。模块标题显示已有问题数量和首条摘要，折叠状态不进入 PropertyModuleDraft、payload、API 或导出。原生 details 与已有定位逻辑展开祖先 details 的做法相容。
 
-验证：定向交互覆盖初始隐藏、四模块独立性、输入/嵌套折叠保留、重排与只读；已有测试在操作内容前显式展开对应模块。三入口浏览器脚本验证默认折叠后再执行原有编辑/保存/详情回归。
+验证：定向交互覆盖初始隐藏、四模块独立性、输入/嵌套折叠保留、已有顺序保留与只读；已有测试在操作内容前显式展开对应模块。三入口浏览器脚本验证默认折叠后再执行原有编辑/保存/详情回归。
+
+## US11：移除模块移动交互
+
+FR-037～038 / SC-028～029 → PropertyModuleEditor、PropertyModuleSection → T031～033。删除上下移动按钮、图标导入和 moveModule；保留删除空模块使用的 normalizeOrder 及既有 module_key/display_order 合同。模块仍直接按传入数组显示，不引入固定排序或数据迁移。共享折叠标题仅为删除按钮预留必要宽度。
+
+更新原有重排交互测试，改为验证非默认顺序不被改写、无移动入口、默认折叠和空模块删除保持。浏览器三入口追加无上下箭头断言，并复用原保存/折叠/详情回归。
