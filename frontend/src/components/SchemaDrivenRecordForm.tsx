@@ -166,11 +166,18 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       <Box key={path} data-issue-field={fieldPath(path)} sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
         {values.map((item, index) => {
           if (record.record_type === 'predicted_tc' && path === 'payload.parameters.extensions' && index === muRangeIndex(record)) return null
+          if (path === 'payload.parameters.extensions') {
+            const parameters = record.payload.parameters as Record<string, any> | undefined
+            const canonical = String(item.key || '').replace(/_reported$/, '')
+            if (item.reported && ['lambda_ep', 'omega_log', 'mu_star'].includes(canonical) && parameters && canonical in parameters) return null
+            const paired = values[muRangeIndex(record)]
+            if (item.key === 'mu_star_reported_range' && paired && paired.value_min === item.value_min && paired.value_max === item.value_max) return null
+          }
           const itemPath = `${path}.${index}`
           const kind = (item.value_kind || 'number') as PropertyValueKind
           return (
             <Box key={item.field_key || index} data-extension-row sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1, overflowX: 'auto', py: 1 }}>
-              <AutoGrowingTextField data-issue-field={fieldPath(`${itemPath}.name_raw`)} label="字段名称" value={item.name_raw || ''} disabled={readOnly}
+              <AutoGrowingTextField data-issue-field={fieldPath(`${itemPath}.name_raw`)} label="字段名称" value={item.name_raw ?? item.name ?? item.key ?? ''} disabled={readOnly}
                 error={Boolean(issue(`${itemPath}.name_raw`))} helperText={issue(`${itemPath}.name_raw`)}
                 onChange={event => updatePath(`${itemPath}.name_raw`, event.target.value)} />
               <FormControl size="small" sx={{ minWidth: 110, flex: '0 0 auto' }}>
@@ -284,7 +291,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       {record.value_kind === 'text' && !mirroredTextValue && <AutoGrowingTextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
       </Box>}
-      {Object.entries(payloadSchema.properties || {}).sort(([a], [b]) => a === 'parameters' ? -1 : b === 'parameters' ? 1 : 0).filter(([key]) => key !== 'thermodynamic_stability').map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
+      {Object.entries(payloadSchema.properties || {}).sort(([a], [b]) => a === 'parameters' ? -1 : b === 'parameters' ? 1 : 0).filter(([key]) => !['thermodynamic_stability', 'source_associations', 'table_row_ref'].includes(key)).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
       <Box sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
         {quotedSources.length ? <Box component="details" data-evidence-summary sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
           <Box component="summary" sx={{ cursor: 'pointer' }}>原文证据（{quotedSources.length}）</Box>

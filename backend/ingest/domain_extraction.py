@@ -11,7 +11,7 @@ from .chunker import Chunk
 from .document_ir import DocumentIR, content_hash
 from .document_parsers import ParserError
 from .property_modules import EXPERIMENTAL_METHODS, MODULE_CODES, THEORETICAL_METHODS, validate_record
-from .upload_contracts import PropertyRecordInput, convert_legacy_state
+from .upload_contracts import PropertyRecordInput, convert_legacy_state, convert_legacy_scientific_draft
 
 
 EXTRACTION_VERSION = "1"
@@ -193,15 +193,32 @@ emit a record for it, or declare it in coverage_exclusions with exactly one loca
 table_id+row_index, or pdf_page), a category from {", ".join(EXCLUSION_CATEGORIES)} and a short reason.
 Rows that are headers/units use header_or_unit_row; figures without scientific data use figure_without_data;
 background or referenced results use reference_or_background; content you cannot read MUST use unreadable.
-Reported lambda_ep, omega_log_k and mu_star may be retained in the predicted record's payload.parameters.
+Extract ALL reported lambda_ep, omega_log and mu_star into EACH corresponding predicted record's payload.parameters.
+Read table title, headers, units, group rows, continuation blocks and footnotes together with every data row.
+Preserve harmonic/anharmonic approximation in payload.approximation and table row identity in payload.table_row_ref
+(file_id, table_id, row_index, group when present). Same pressure with different approximation must remain distinct.
+Table context candidates are original surrounding blocks, not automatically associated captions; establish their
+relationship from the original labels/wording, and cite each supporting header/note block separately.
+Do not exclude a table note reporting mu_star, lambda_ep, omega_log or method as irrelevant header content.
 Write generated descriptions, methods and findings in English; preserve source language in quotes and metadata.
 Metadata may include title, DOI, authors, journal, issue_number, year and abstract; never invent missing values.
 Paper type evidence needs candidate, scope, page and quote. Return empty material_states if there are no facts.
 FORM RULES: Each known phase and pressure has a separate material_state; a record must not inherit
 another pressure's state. Every predicted_tc payload has a calculation_conditions object and a sibling
 parameters object. Use parameters.lambda_ep, parameters.omega_log, parameters.mu_star. A parameter
-range uses parameters.extensions with key=mu_star, value_kind=range, value_raw as reported,
-actual value_min/value_max and unit_raw=1, with the main mu_star null. Non-Tc records must have
+range uses parameters.extensions, value_kind=range, value_raw as reported, increasing value_min/value_max,
+unit_raw=1, with the main mu_star null. Use key=mu_star ONLY when the source explicitly pairs Tc_min with
+mu_max and Tc_max with mu_min (e.g. Tc increases as reported mu goes from 0.16 to 0.1 in a table caption).
+For a merely reported range without endpoint pairing use key=mu_star_reported_range; never guess pairing.
+An ordered table convention is explicit pairing: when its caption reports mu_star from high to low and
+Tc cells report low to high, the corresponding ordered endpoints apply to every row of that table.
+The note need not repeat on every row; cite both the original cell and caption. Use key=mu_star in this case.
+For a different explicitly reported endpoint mapping, emit separate paired scalar results sharing table_row_ref.
+Keep reported numeric wrappers and provenance; omega_log uses K only when units are known.
+Calculation settings can share an explicit author scope across rows when all supporting quotes are supplied.
+Do not infer common applicability into a direct record: the separate full-source suggestion stage handles it.
+Separate phonon/EPC, structural relaxation, SSCHA and AIMD settings; other stages use stage-prefixed extensions,
+never copy their supercell/Γ grids into the flat EPC fields. Non-Tc records must have
 is_representative=false.
 Table cell text is in blocks; tables.cells references those blocks with row/column/span metadata.
 Do not regenerate a clean quote by changing damaged source symbols. Use exact continuous quotes.
@@ -260,13 +277,23 @@ def structured_chunks(ir: DocumentIR, *, max_chars: int = 500000) -> list[Chunk]
               "source_version": ir.source_version, "parser": ir.parser}
 
     def encoded(group):
-        return json.dumps(header | {"pages": group}, ensure_ascii=False)
+        from .scientific_context import table_packages
+        context = header | {"pages": group}
+        return json.dumps(context | {"table_contexts": table_packages(context)}, ensure_ascii=False)
 
-    groups, current = [], []
+    split_pages = []
     for page in pages:
         if len(encoded([page])) > max_chars:
-            raise ParserError("document_input_too_large", "单页结构化内容超过读取预算，请人工核对或重新选择解析方案",
-                              profile=ir.parse_profile, parser=ir.parser["name"])
+            from .scientific_context import split_table_page
+            parts = split_table_page(page,encoded,max_chars)
+            if parts is None:
+                raise ParserError("document_input_too_large", "单页完整原始块或表格行超过读取预算，请人工核对",
+                                  profile=ir.parse_profile, parser=ir.parser["name"])
+            split_pages.extend(parts)
+        else:
+            split_pages.append(page)
+    groups, current = [], []
+    for page in split_pages:
         if current and len(encoded([*current, page])) > max_chars:
             groups.append(current)
             # 保留前一页上下文，便于跨页条件关联；不允许因重叠挤掉新页。
@@ -427,6 +454,7 @@ def merge_scientific_candidates(candidates: list[dict[str, Any]]) -> list[dict]:
     """仅合并完全一致的状态和记录；不同条件、方法、引句均保留。"""
     states: dict[str, dict] = {}
     for candidate in candidates:
+        candidate = convert_legacy_scientific_draft(candidate)
         for raw in candidate.get("material_states", []):
             if raw.get("scope") != "current_paper":
                 continue

@@ -24,7 +24,7 @@ export default function EvidenceReadableValue({ value }: { value: unknown }) {
     {value.map((item, index) => <Box component="li" key={index} sx={{ mb: 0.5 }}><EvidenceReadableValue value={item} /></Box>)}
   </Box>
   if (typeof value === 'object') return <Box component="dl" sx={{ my: 0.5, display: 'grid', gap: 0.75 }}>
-    {Object.entries(value).map(([key, item]) => <Box key={key} sx={{ overflowWrap: 'anywhere' }}>
+    {Object.entries(value).filter(([key]) => !['source_associations', 'table_row_ref'].includes(key)).map(([key, item]) => <Box key={key} sx={{ overflowWrap: 'anywhere' }}>
       <Typography component="dt" variant="caption" color="text.secondary">{labels[lang][key] || key.replaceAll('_', ' ')}</Typography>
       <Box component="dd" sx={{ m: 0 }}><EvidenceReadableValue value={item} /></Box>
     </Box>)}

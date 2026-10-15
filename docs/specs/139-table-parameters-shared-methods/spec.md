@@ -4,7 +4,7 @@
 
 **创建日期**：2026-10-15
 
-**状态**：需求已确认，进入技术规划。用户在对话中阅读本版全文后答复“是”；业务功能尚未实现或验收。
+**状态**：需求已确认并已明确授权实施。核心代码、参数专项、完整真实上传及分层验证均已在本地通过；未推送，远程链接门仍未通过，Issue 保持 OPEN，详见 validation.md。
 
 ## 原始需求记录
 
@@ -21,10 +21,20 @@
 
 > 是
 
+### 实施授权补充
+
+> 已完成 [Issue #139](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/139) 的规划并提交 `61a7179`，未推送。
+>
+> - [技术方案](/Users/mayuan/Codes/SC-Wiki/docs/specs/139-table-parameters-shared-methods/plan.md)：完整提取表格／表注，按阶段关联 Methods 共用条件。
+> - [实施任务](/Users/mayuan/Codes/SC-Wiki/docs/specs/139-table-parameters-shared-methods/tasks.md)：21 项任务，覆盖全部需求。
+> - [验收步骤](/Users/mayuan/Codes/SC-Wiki/docs/specs/139-table-parameters-shared-methods/quickstart.md)：包含 Table 1 全部 8 行、真实解析、MySQL 和浏览器验证。
+>
+> 文档一致性检查通过，Issue 已同步。代码尚未实施，运行验收尚未执行。 开始落地实施。
+
 ## 附件与推断来源
 
 - 附件：用户上传的解析表单截图，原文件按字节归档为 [IMG-001](assets/IMG-001-upload-missing-parameters.png)。截图只证明界面所示字段缺失，不证明论文中的科学数值。
-- 论文材料：本地 La–Sc–H 主文及补充材料已有解析文本；主文题名为《Predicted hot superconductivity in LaSc2H24 under pressure》，DOI 为 `10.1073/pnas.2401840121`。原 PDF 的目视核对属于后续验收；本次尚未执行。
+- 论文材料：本地 La–Sc–H 主文及补充材料已有解析文本；主文题名为《Predicted hot superconductivity in LaSc2H24 under pressure》，DOI 为 `10.1073/pnas.2401840121`。原 PDF 第 4／5 页已在 T001 渲染目视核对并冻结独立答案；完整新上传结果另见 validation.md。
 - AI 调查：Table 1 的表题、表行及 Methods 已在本地解析文本中读到。下述数值和阶段区分是调查所得，独立于用户原话；各字段最终适用范围仍须根据原 PDF 和完整上下文核对。
 - 第一次“是”确认完整 Issue 草案；“继续”要求推进。完整 Spec 在对话中展开后，第二次“是”确认本版 Spec，并授权继续编写 Plan、Tasks 和设计文档。两次确认各有对应对象，不作为代码实施或推送授权。
 
@@ -59,7 +69,7 @@ IMG-001 的 AI 观察：LaSc2H24、150 GPa 的 Tc 为 281–311 K，λ、ωlog�
 - “原文有依据的共用”允许跨记录关联；仅凭材料相同、压力相近或领域惯例不能推断共用。
 - 科学数值必须来自材料；模型负责解释其归属和范围，关联依据不冒充作者逐条声明。
 - 同一材料、相和压力下的谐／非谐结果保持可区分，不要求强行拆成不同材料状态。
-- 用户已确认本版 Spec，本轮生成 Plan、Tasks 和相关设计；不进入业务代码实施。用户没有改变原始需求范围。
+- 用户确认 Spec／规划后，又明确要求“开始落地实施”。本轮按既定范围实施，未获得推送、部署或业务库迁移授权。
 
 ## 用户场景与验收
 
@@ -161,7 +171,7 @@ IMG-001 的 AI 观察：LaSc2H24、150 GPa 的 Tc 为 281–311 K，λ、ωlog�
 - 谱曲线数字化由既有相关功能处理；本需求只处理论文报告的标量与计算条件。
 - 不批量重写历史论文数据，不自动重跑或覆盖用户现有解析草稿。
 - 不更换解析引擎，不重新设计表单布局，不扩展为无来源的参数预测。
-- 本轮不执行数据库迁移、部署、推送或业务代码实施。
+- 本轮不执行业务数据库迁移、部署或推送；仅在专用测试库验证持久化。
 
 ## 澄清记录
 

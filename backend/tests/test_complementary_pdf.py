@@ -101,7 +101,7 @@ def test_parameter_range_is_an_extension_not_an_endpoint():
     normalize_parameters(record)
     p=record["payload"]["parameters"]
     assert "mu_star" not in p and p["omega_log"]==1200
-    extension=next(x for x in p["extensions"] if x["key"]=="mu_star")
+    extension=next(x for x in p["extensions"] if x["key"]=="mu_star_reported_range")
     assert (extension["value_min"],extension["value_max"],extension["value_raw"])==(.1,.13,"0.10–0.13")
 
 

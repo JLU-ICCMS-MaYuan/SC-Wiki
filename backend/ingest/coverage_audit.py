@@ -12,6 +12,38 @@ RESULT_PATTERN = re.compile(r"\bT\s*[_c]?c\b|\bcritical\s+temperature\b|\bsuperc
 MAX_EXCLUDED_RATIO = 0.5
 
 
+def verified_download_stamps(ir: DocumentIR, source_path, claims: list[Claim]) -> list[dict]:
+    """仅识别原 PDF 文字层可确认的页侧下载水印；不把 OCR 不可读等同于非结果。"""
+    from .document_parsers import DocumentSource
+    from .document_ir import content_hash
+    import pymupdf
+    used = {e.block_id for c in claims for e in c.evidences if e.file_id==ir.source_file_id}
+    pages = {p.pdf_page:p for p in ir.pages}
+    candidates = []
+    for b in ir.blocks:
+        if b.block_id in used or not b.bbox or b.metadata.get('selected_for_reading') is False:
+            continue
+        if b.block_type not in {'paragraph','ocr_text'}:
+            continue
+        x0,y0,x1,y1 = b.bbox
+        p = pages[b.pdf_page]
+        if (x1 <= p.width*0.04 or x0 >= p.width*0.96) and y1-y0 >= 8*max(x1-x0,1):
+            candidates.append(b)
+    if not candidates or DocumentSource(source_path,ir.source_file_id).resolved_sha256()!=ir.source_sha256:
+        return []
+    results = []
+    with pymupdf.open(source_path) as pdf:
+        for b in candidates:
+            original = pdf[b.pdf_page-1].get_textbox(pymupdf.Rect(b.bbox))
+            if not re.match(r'downloadedfromhttps?://',re.sub(r'\s+','',original).casefold()):
+                continue
+            results.append({'file_id':ir.source_file_id,'block_id':b.block_id,
+                'category':'non_result_content','reason':'Publisher download stamp verified against the original PDF text layer; not scientific content.',
+                'verification':{'rule':'download-stamp-v1','source_sha256':ir.source_sha256,
+                    'pdf_page':b.pdf_page,'bbox':list(b.bbox),'text_layer_hash':content_hash(original)}})
+    return results
+
+
 class CoverageReport(BaseModel):
     model_config = ConfigDict(extra="forbid")
     status: str = "incomplete"
@@ -69,6 +101,8 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
             f"table:{entry.get('table_id')}:row:{entry.get('row_index')}"
             if entry.get("table_id") is not None else f"page:{entry.get('pdf_page')}"),
             "category": entry.get("category"), "reason": str(entry.get("reason") or "")[:200]})
+        if entry.get('verification'):
+            recorded[-1]['verification'] = entry['verification']
         if entry.get("category") == "unreadable":
             unreadable = True
         if entry.get("block_id") is not None:

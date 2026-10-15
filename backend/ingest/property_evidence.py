@@ -185,6 +185,15 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
         r.setdefault('item_key', digest(r['key']))
         r.setdefault('fields', [r['field']])
         r.setdefault('current_value', r['claim'])
+        if r.get('kind') == 'property':
+            from .scientific_context import scientific_fingerprint, state_fingerprint
+            scientific_record = r['claim']['record']
+            associations = (scientific_record.get('payload') or {}).get('source_associations') or []
+            r['source_associations'] = [{**copy.deepcopy(a), 'stale':(
+                a.get('target_fingerprint') != scientific_fingerprint(scientific_record)
+                or (a.get('target_state_fingerprint') is not None and a.get('target_state_fingerprint') != state_fingerprint(r['claim'].get('state') or {}))
+                or not all(locate(e, chunks) for e in [*a.get('fact_evidences', []), *a.get('scope_evidences', [])]))}
+                for a in associations if isinstance(a, dict)]
         from .evidence_proposals import editable_fields
         r['editable_fields'] = editable_fields(r)
         r['content_hash'] = digest(canonical(r['claim']))
@@ -218,6 +227,11 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
     with SessionLocal() as session:
         origins = science.origins_for(session, 'upload', task_id)
     snapshot = complete_snapshot('upload', task_id, draft_records(draft, origins), chunks, draft)
+    from .scientific_context import bind_snapshot_source_documents, source_documents
+    source_manifest = state.get('files') or [{'file_id':'main','role':'main','sha256':state.get('file_sha256')}]
+    bind_snapshot_source_documents(snapshot,source_documents([
+        {'file_id':s['file_id'],'file_role':s.get('role'),'source_sha256':s.get('sha256')}
+        for s in source_manifest if s.get('role') in {'main','supplementary'}]))
     snapshot['pdf_manifest'] = [source for source in state.get('files') or []
                                 if str(source.get('kind') or '').lower() == 'pdf']
     if not state.get('files') and str(state.get('file_kind') or '').lower() == 'pdf':
@@ -335,6 +349,10 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
                                   page_end=e.page_end or chunk_map[e.paper_chunk_id].get('page_end'))
                               for e in source_evidences.values() if e.field_path == r['field'] and e.paper_chunk_id in chunk_map]
     snapshot = complete_snapshot('paper', str(paper_id), records, chunks, paper_data)
+    from .scientific_context import bind_snapshot_source_documents, source_documents
+    bind_snapshot_source_documents(snapshot,source_documents([
+        {'file_id':str(f.id),'file_role':f.role,'source_sha256':f.sha256}
+        for f in paper_files if f.paper_revision == paper.content_revision and f.role in {'main','supplementary'}]))
     snapshot['review_state'] = [paper.review_status, str(paper.reviewed_at), paper.content_revision]
     snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',
         stored_path=f.stored_path, sha256=f.sha256, size=f.size,
@@ -438,6 +456,14 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     from .scientific_evidence import human_confirmed
     human = human_confirmed({**record, 'stale': result.get('stale', False)}, decision or {})
     adopted_basis = (decision or {}).get('basis_kind') or result.get('adopted_basis')
+    associations = record.get('source_associations') or []
+    if associations and not human:
+        if any(a.get('stale') for a in associations):
+            if status == 'supported':
+                status = 'uncertain'
+            reason = '科学值或来源已变化，共用设置的旧关联需要重新核对；' + reason
+        elif any(a.get('basis_kind') == 'paper_inference' for a in associations):
+            adopted_basis = 'paper_inference'
     if adopted_basis in {'paper_inference', 'general_knowledge'} and status == 'supported':
         status = 'uncertain'
     if adopted_basis in {'paper_inference', 'general_knowledge'}:
@@ -570,6 +596,9 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 - theoretical_subtype 必须比较论文的研究目标与主要结果：开发新算法/工具为 method，使用已有计算方法研究材料为 calculation，解析模型或物理机制推导为 theory。只看到 Methods 或软件名不能判 supported；引句是全文归纳的支撑片段，枚举不是原文逐字记载。
 - 材料状态上下文：记录所属状态的材料、相、压力与原文一致时再判 supported；材料写成反应物或前驱体
   （把 H3S 的相写成 H2S）属于真实错误，判 unsupported 并在 proposal 中给出正确值。
+- 同一结果的表行、表头、分组、单位和表注可联合支持 λ、ωlog、Tc–μ* 及方法；不要只核对最高 Tc。
+  必须分别引用相应原始块，不能把多块拼成不存在的原句。Methods 可支持多压力共用设置，但区分
+  EPC、结构优化、SSCHA 和 AIMD 阶段及局部例外；推断关联仍为 paper_inference，不冒充原文直接支持。
 - 只看到部分来源时，若本组来源与该记录无关，返回 missing 且不给 evidences；不要因为“本组片段未提及”
   把其他位置已报告的内容判为 unsupported。参考文献列表只代表他人工作。'''
 
@@ -780,7 +809,7 @@ def _fill_empty_fields(draft, record, proposal):
     return True
 
 
-def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None):
+def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None, scientific_sources=None):
     """解析后补入有效推断与推测，并把理由绑定到补入后的字段版本。"""
     from backend.database import SessionLocal
     from backend.ingest.upload_jobs import _ensure_not_cancelled
@@ -793,7 +822,16 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
         _ensure_not_cancelled(task_id)
         if on_progress:
             on_progress(index, len(batches))
-        for r, result in zip(rows, evaluate_batch(rows, chunks, 'generate', on_partial=lambda _: _ensure_not_cancelled(task_id))):
+        try:
+            evaluated = evaluate_batch(rows,chunks,'generate',on_partial=lambda _:_ensure_not_cancelled(task_id))
+        except Exception as exc:
+            _ensure_not_cancelled(task_id)
+            if type(exc).__name__=='UploadCancelled':
+                raise
+            logging.getLogger(__name__).warning('字段建议分批核对失败 task=%s batch=%s type=%s',task_id,index,type(exc).__name__)
+            evaluated = [checked_result(r,{'status':'uncertain','reason':'本批字段核对失败，已保留提取值；请重新核对来源。',
+                'evidences':r.get('evidences') or []},chunks) for r in rows]
+        for r, result in zip(rows,evaluated):
             candidates[r['key']].append(result)
             errors[r['key']].extend(result['location_errors'])
     from backend.rag.llm_context import get_llm_config
@@ -804,6 +842,31 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
         proposal = results[record['key']].get('proposal')
         if proposal and record['field'] not in (skip_auto_fill or ()) and _fill_empty_fields(filled, record, proposal):
             auto_filled[record['item_key']] = proposal
+    # 已通过最终直接 Claim 的结果保持原值；Methods 的共用推断在此补入空叶子。
+    from .scientific_context import build_context, generate_context_associations, apply_associations
+    from .upload_tasks import artifact_directory
+    from .upload_jobs import _atomic_write_json
+    from backend.rag.llm import complete_json
+    config = get_llm_config()
+    context = build_context(scientific_sources if scientific_sources is not None else snapshot['chunks'])
+    ledger = generate_context_associations(filled, context, complete_json,
+        cache_dir=artifact_directory(task_id) / 'scientific_context_cache',
+        model_identity={'provider':config.provider,'model':config.model,'endpoint':config.base_url,
+                        'associate_prompt_version':context['version']},
+        ensure_active=lambda:_ensure_not_cancelled(task_id)) if any(r.get('kind')=='property' for r in records) else None
+    if ledger is not None:
+        applied, gaps = apply_associations(filled, ledger['associations'], context | {'complete':ledger['complete']})
+        ledger['gaps'].extend(gaps)
+        ledger['applied_count'] = len(applied)
+        _atomic_write_json(artifact_directory(task_id) / 'scientific_context.json', ledger)
+        for item in applied:
+            match = next((r for r in records if '/'.join([r.get('state_key') or '',r.get('module_key') or '',r.get('record_key') or ''])==item['target']),None)
+            if match:
+                a = item['association']
+                prior = auto_filled.get(match['item_key']) or {}
+                auto_filled[match['item_key']] = {'basis_kind':'paper_inference',
+                    'explanation':'；'.join(dict.fromkeys(filter(None,[prior.get('explanation'),a['explanation']]))),
+                    'evidences':[*(prior.get('evidences') or []),*a['fact_evidences'],*a['scope_evidences']]}
     current = upload_snapshot(task_id, owner, parsing_draft=filled) if auto_filled else snapshot
     previous = {record['item_key']: record for record in snapshot['records']}
     previous_results = {record['item_key']: results.get(record['key']) for record in records}

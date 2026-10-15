@@ -1954,7 +1954,8 @@ async def _create_pending_paper(
                             raise _upload_error(409, "document_source_mismatch", "解析文档来源不一致")
                         document_runs[paper_file.id] = await persist_document(session, paper, paper_file, ir)
 
-                scientific_targets = await persist_scientific_draft(session, paper, draft)
+                scientific_targets = await persist_scientific_draft(session, paper, draft,
+                    source_file_ids={key:value.id for key,value in paper_files.items()})
                 from backend.services.spectra import bind_to_paper
                 await bind_to_paper(session, paper, draft, target="upload", target_id=task_id)
                 from backend.services.citation_graph import persist_reference_extraction

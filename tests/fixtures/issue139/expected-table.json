@@ -1,0 +1,28 @@
+{
+  "doi": "10.1073/pnas.2401840121",
+  "source_sha256": "7fccce6780e71f826519256542a5416f5b256e1aa2b546b68e194468688e2bbd",
+  "pdf_page": 4,
+  "table": "Table 1",
+  "material": "LaSc2H24",
+  "method": "isotropic_eliashberg",
+  "mu_star_at_tc_min": 0.16,
+  "mu_star_at_tc_max": 0.1,
+  "rows": [
+    {"approximation":"harmonic","pressure_gpa":290,"lambda_ep":3.56,"omega_log":865,"tc_min":311,"tc_max":339},
+    {"approximation":"harmonic","pressure_gpa":300,"lambda_ep":3.34,"omega_log":968,"tc_min":303,"tc_max":329},
+    {"approximation":"harmonic","pressure_gpa":350,"lambda_ep":2.20,"omega_log":1294,"tc_min":266,"tc_max":294},
+    {"approximation":"anharmonic","pressure_gpa":150,"lambda_ep":3.94,"omega_log":745,"tc_min":281,"tc_max":311},
+    {"approximation":"anharmonic","pressure_gpa":167,"lambda_ep":3.73,"omega_log":794,"tc_min":285,"tc_max":316},
+    {"approximation":"anharmonic","pressure_gpa":200,"lambda_ep":3.21,"omega_log":965,"tc_min":291,"tc_max":325},
+    {"approximation":"anharmonic","pressure_gpa":250,"lambda_ep":2.89,"omega_log":1075,"tc_min":296,"tc_max":331},
+    {"approximation":"anharmonic","pressure_gpa":300,"lambda_ep":2.61,"omega_log":1165,"tc_min":293,"tc_max":330}
+  ],
+  "methods_pdf_page": 5,
+  "stages": {
+    "structural_relaxation": {"calculation_code":"VASP","energy_cutoff":{"value":850,"unit":"eV"},"k_resolution":"2π × 0.03 Å^-1"},
+    "electron_phonon": {"calculation_code":"Quantum ESPRESSO","electronic_method":"DFPT","energy_cutoff":{"value":90,"unit":"Ry"},"charge_density_cutoff":{"value":720,"unit":"Ry"},"k_grid":"24×24×24","q_grid":"6×6×6"},
+    "sscha": {"energy_cutoff":{"value":80,"unit":"Ry"},"k_grid":"3×3×3","q_grid":"2×2×2","interpolated_q_grid":"6×6×6","supercell":"2×2×2","atoms":216,"temperature_k":0},
+    "aimd": {"k_grid":"Γ","supercell":"2×2×3","atoms":324,"temperature_k":300,"pressure_gpa":150}
+  },
+  "must_stay_empty": ["k_broadening", "q_broadening"]
+}

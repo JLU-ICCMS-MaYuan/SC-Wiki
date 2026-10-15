@@ -296,6 +296,15 @@ def augment_upload(draft, records, origins):
             records.append(structure_record(structure, state.get('state_key') or f'state-{index+1}', path, origins.get(hash_value)))
 
 
+def ordered_check_rows(session, target, target_id, *, lock=False):
+    """不在 MySQL filesort 中复制大 JSON；按同一 id 顺序解释历史与最新结果。"""
+    query = select(models.ScientificEvidenceCheck).where(
+        models.ScientificEvidenceCheck.target == target,
+        models.ScientificEvidenceCheck.target_id == target_id)
+    rows = session.scalars(query.with_for_update() if lock else query)
+    return sorted(rows,key=lambda row:row.id)
+
+
 def load_results(session, snapshot, actor_id=None, include_stale=False):
     current = {r['item_key']: r for r in snapshot['records']}
     found = {}
@@ -311,11 +320,7 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
         entry.update(content_hash=row.content_hash, source_hash=row.source_hash)
         if entry not in items:
             items.append(entry)
-    query = select(models.ScientificEvidenceCheck).where(
-        models.ScientificEvidenceCheck.target == snapshot['target'],
-        models.ScientificEvidenceCheck.target_id == snapshot['target_id'],
-    ).order_by(models.ScientificEvidenceCheck.id)
-    for row in session.scalars(query):
+    for row in ordered_check_rows(session,snapshot['target'],snapshot['target_id']):
         r = current.get(row.item_key)
         if not r:
             continue
@@ -393,10 +398,11 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
         if record['key'] not in results:
             continue
         result = {**record, **results[record['key']]}
-        existing = session.scalar(select(models.ScientificEvidenceCheck).where(
+        existing_id = session.scalar(select(models.ScientificEvidenceCheck.id).where(
             models.ScientificEvidenceCheck.target == snapshot['target'], models.ScientificEvidenceCheck.target_id == snapshot['target_id'],
             models.ScientificEvidenceCheck.item_key == record['item_key'], models.ScientificEvidenceCheck.content_hash == record['content_hash'],
             models.ScientificEvidenceCheck.source_hash == record['source_hash'], models.ScientificEvidenceCheck.rule_version.in_(COMPATIBLE_RULES)).order_by(models.ScientificEvidenceCheck.id.desc()).limit(1).with_for_update())
+        existing = session.get(models.ScientificEvidenceCheck,existing_id) if existing_id is not None else None
         if existing is not None and not update_decision and existing.result.get('decision'):
             result['decision'] = copy.deepcopy(existing.result['decision'])
             result['adopted_basis'] = existing.result.get('adopted_basis')

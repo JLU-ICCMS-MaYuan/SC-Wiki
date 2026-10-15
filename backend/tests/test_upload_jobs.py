@@ -621,9 +621,9 @@ def test_tc_result_calculation_context_is_numeric_normalized():
         }],
     })
 
-    context = _module_records(draft["material_states"][0])[0]["payload"]["calculation_conditions"]
+    context = _module_records(draft["material_states"][0])[0]["payload"]["parameters"]
     assert context["lambda_ep"] == 1.2
-    assert context["omega_log_k"] == 850.0
+    assert context["omega_log"] == 850.0
     assert context["mu_star"] == 0.1
 
 

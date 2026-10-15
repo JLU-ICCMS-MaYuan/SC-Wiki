@@ -297,6 +297,8 @@ def validate_record(
     _validate_value_shape(item, path, issues)
     issues.extend(_issue(f"{path}.{field}", "schema_validation_failed", message) for field, message in [*stability_issues(item), *extension_issues(item)])
     experimental = item["payload"].get("experimental_conditions")
+    from .scientific_context import association_issues
+    issues.extend(_issue(f"{path}.{field}", "schema_validation_failed", message) for field, message in association_issues(item))
     issues.extend(_issue(f"{path}.{field}", "schema_validation_failed", message) for field, message in parameter_issues(item))
     if isinstance(experimental, dict) and "description" in experimental and not isinstance(experimental["description"], str):
         issues.append(_issue(f"{path}.payload.experimental_conditions.description", "schema_validation_failed", "实验 Conditions 描述必须是文本"))

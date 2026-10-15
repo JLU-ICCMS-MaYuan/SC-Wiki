@@ -1,6 +1,7 @@
 import { EvidenceRegion } from './EvidenceRegion'
 import EvidenceReadableValue from './EvidenceReadableValue'
 import ManualEvidenceSection from './ManualEvidenceSection'
+import ScientificAssociations, { type ScientificAssociation } from './ScientificAssociations'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, Snackbar, TextField, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -24,7 +25,7 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+export interface EvidenceRecord { source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
@@ -585,6 +586,7 @@ export function useEvidenceWorkflow(options?: {
         {activeGroup.map(r => <Box key={r.key} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
           {(r.adopted_basis || r.proposal?.basis_kind) && <Alert severity="info">{t(`evidence.basis.${r.adopted_basis || r.proposal?.basis_kind}`)}</Alert>}
             <Typography sx={{ whiteSpace: 'pre-wrap' }}>{aiReasonText(r, t)}</Typography>
+            <ScientificAssociations associations={r.source_associations} target={targetRef.current} />
             {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
             {Boolean(r.proposal?.evidences?.length) && <Box component="details"><Typography component="summary">{t('evidence.aiReasonSources')}</Typography>
               {r.proposal!.evidences.map((source, index) => <EvidenceRegion key={`${source.file_id}:${index}`} target={targetRef.current} source={source} />)}

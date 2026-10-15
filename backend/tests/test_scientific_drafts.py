@@ -231,7 +231,7 @@ def test_li2mgh16_draft_persists_conditioned_scientific_entity_graph():
     assert tc_result.payload_json["calculation_conditions"] == {
         "phonon_nuclear_treatment": "unknown",
     }
-    assert float(tc_result.payload_json["parameters"]["lambda_ep"]["value_number"]) == 3.35
+    assert tc_result.payload_json["parameters"]["lambda_ep"] == 3.35
     assert "omega_log_k" not in tc_result.payload_json["parameters"]
     assert general_property.material_state_id == state.id
     assert general_property.property_code == "custom"
@@ -357,7 +357,7 @@ def test_tc_level_calculation_conditions_and_parameters_persist_per_record():
     assert not any(isinstance(item, (models.CalculationContext, models.TcResult)) for item in session.added)
 
 
-def test_theoretical_tc_without_entry_context_copies_shared_state_parameters():
+def test_theoretical_tc_without_entry_context_does_not_broadcast_shared_state_parameters():
     draft = {
         "material_states": [{
             "material": "LaH10",
@@ -397,9 +397,7 @@ def test_theoretical_tc_without_entry_context_copies_shared_state_parameters():
 
     tc_results = [item for item in session.added if isinstance(item, models.PropertyRecord)]
     assert len(tc_results) == 2
-    assert float(tc_results[0].payload_json["parameters"]["lambda_ep"]["value_number"]) == 2.5
-    assert float(tc_results[0].payload_json["parameters"]["omega_log_k"]["value_number"]) == 900
-    assert float(tc_results[0].payload_json["parameters"]["mu_star"]["value_number"]) == 0.1
+    assert tc_results[0].payload_json["parameters"] == {}
     assert tc_results[0].payload_json is not tc_results[1].payload_json
     assert tc_results[1].payload_json["parameters"] == tc_results[0].payload_json["parameters"]
     assert not any(isinstance(item, (models.CalculationContext, models.TcResult)) for item in session.added)

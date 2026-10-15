@@ -1,18 +1,18 @@
 # 验收步骤：表格超导参数与共用条件
 
-**状态**：后续实施用验证指南。下列新增测试和记录文件尚未创建，命令不是本轮已运行的结果。
+**状态**：实施与分层验证已执行，实际结果见 [验收记录](validation.md)。完整上传和远程链接门尚未通过，以下指南不能代替运行证据。
 
 ## 前置条件与执行边界
 
 1. 已有明确的代码实施授权，读取已确认 Spec、Plan、Research、数据模型、契约和 Tasks。分支为 `mayuan`，先记录工作树与已提交制品来源，保留其他任务改动。
 2. 使用项目现有 `sc-wiki` Python 3.12 环境、前端依赖与任务 LLM 配置；不输出密钥，不更换默认模型或解析引擎。
 3. 准备 La–Sc–H 主文与 SI 原 PDF，核对 DOI、文件 hash、有效角色和页码。新建隔离验收任务，不覆盖截图对应的历史人工草稿。
-4. MySQL 验证使用明确的独立测试 schema 和测试账号；新测试仅在设置 `SCWIKI_ISSUE139_TEST_DATABASE_URL` 时启用，测试自身须检查 MySQL 方言和测试库标记，拒绝默认业务库。未准备时记录未执行，不使用当前业务库代替。
+4. MySQL 验证使用明确的独立测试 schema 和测试账号；新测试仅在设置 `SCWIKI_ISSUE139_TEST_DATABASE_URL` 时启用；同时将 `DATABASE_URL` 与 `RAG_DATABASE_URL` 指向同一个测试库（后者使用 asyncmy 驱动）。测试自身检查 MySQL 方言和 `scwiki_issue139_test_` 前缀，拒绝默认业务库。未准备时记录未执行，不使用当前业务库代替。
 5. 浏览器与真实解析需要当前本地服务可用。只在验收环境新建记录，避免改写现有论文；数据库迁移和部署不在本需求内。
 
 ## 独立科学预期
 
-下表来自当前已有主文解析文本，仅是待原 PDF 核对的初始预期；T001 完成人工核对并记入 `tests/fixtures/issue139/expected-table.json` 后才可作为验收基准，不从模型输出反向生成答案。
+下表已由原 PDF 第 4 页逐行核对；T001 已记入 `tests/fixtures/issue139/expected-table.json` ，作为独立验收基准，不从模型输出反向生成答案。
 
 | 近似 | 压力 GPa | λ | ωlog K | Tc K | 表注 μ* 顺序 |
 | --- | ---: | ---: | ---: | --- | --- |
@@ -49,7 +49,7 @@ npm --prefix "frontend" run test:upload-ui --   "tests/01_decentralized_uploadin
 conda run -n sc-wiki python -m pytest   "tests/01_decentralized_uploading/test_issue139_persistence.py" -q
 ```
 
-测试要覆盖实际 API／保存服务链而非仅序列化字典，验证草稿保存重开、正式提交、返修、导出、元数据与证据保持、权限和版本冲突。每个测试清理自己创建的隔离数据。SQLite 用例只能作为快速机械回归，不能代替此边界。
+测试要覆盖实际 API／保存服务链而非仅序列化字典，验证草稿保存重开、正式提交、返修、导出、元数据与证据保持、权限和版本冲突。测试数据只保留在专用隔离库供复查；不向业务库写测试记录。SQLite 用例只能作为快速机械回归，不能代替此边界。
 
 ## 真实解析与浏览器核验
 

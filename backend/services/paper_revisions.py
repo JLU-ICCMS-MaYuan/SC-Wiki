@@ -210,6 +210,10 @@ def revision_snapshot(session, revision_id, owner):
         for c in rows(session, models.PaperChunk, paper.id)]
     records = ev.draft_records(saved.draft, science.origins_for(session, 'revision', revision_id))
     snapshot = ev.complete_snapshot('revision', revision_id, records, chunks, saved.draft)
+    from backend.ingest.scientific_context import bind_snapshot_source_documents, source_documents
+    bind_snapshot_source_documents(snapshot,source_documents([
+        {'file_id':str(f.id),'file_role':f.role,'source_sha256':f.sha256}
+        for f in paper_files if f.paper_revision==paper.content_revision and f.role in {'main','supplementary'}]))
     snapshot['draft_version'] = saved.draft_version
     snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',
         stored_path=f.stored_path, sha256=f.sha256, size=f.size,

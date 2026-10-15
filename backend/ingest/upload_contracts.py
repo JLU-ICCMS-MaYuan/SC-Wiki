@@ -218,9 +218,14 @@ def convert_legacy_state(state: dict[str, Any]) -> dict[str, Any]:
         method = old.get("tc_method") or ("resistivity" if experimental else "unknown")
         if method == "experimental":
             method = "resistivity"
+        from .domain_extraction import _normalize_tc_method
+        method = _normalize_tc_method(method,'measured_tc' if experimental else 'predicted_tc')
         conditions = old.get("experimental_conditions" if experimental else "calculation_conditions")
         if not isinstance(conditions, dict):
             conditions = old.get("experimental_context" if experimental else "calculation_context")
+        if not experimental and not isinstance(conditions, dict) and len(result.get("tc_results") or []) == 1:
+            # 有界旧输入：唯一结果的上下文无歧义；多方法/多近似必须逐结果提供。
+            conditions = result.get("calculation_context")
         payload: dict[str, Any] = {
             "experimental_conditions" if experimental else "calculation_conditions": (
                 deepcopy(conditions) if isinstance(conditions, dict) else {}
@@ -228,6 +233,15 @@ def convert_legacy_state(state: dict[str, Any]) -> dict[str, Any]:
         }
         if not experimental and isinstance(old.get("parameters"), dict):
             payload["parameters"] = deepcopy(old["parameters"])
+        if not experimental:
+            # 参数属于具体结果；状态级共用条件只能由后续作用域关联确定。
+            parameters = payload.setdefault("parameters", {})
+            for origin in (old, conditions if isinstance(conditions, dict) else {}):
+                for key in ("lambda_ep", "omega_log", "omega_log_k", "mu_star"):
+                    if key not in parameters and origin.get(key) is not None:
+                        parameters[key] = deepcopy(origin[key])
+            for key in ("lambda_ep", "omega_log", "omega_log_k", "mu_star", "evidence"):
+                payload["calculation_conditions"].pop(key, None)
         record = {
             "record_key": f"legacy-tc-{index}",
             "module_code": "superconductive_properties",
@@ -256,6 +270,15 @@ def convert_legacy_state(state: dict[str, Any]) -> dict[str, Any]:
             "evidence": deepcopy(old.get("evidence")) if isinstance(old.get("evidence"), dict) else None,
             "evidences": deepcopy(old.get("evidences") or []),
         }
+        if (old.get('tc_min_k') is not None and old.get('tc_max_k') is not None
+            and old['tc_min_k'] != old['tc_max_k'] and old.get('tc_value_k') in (None,old['tc_min_k'],old['tc_max_k'])):
+            record.update(value_kind='range',value_number=None)
+        if not experimental:
+            from .scientific_contracts import normalize_parameters
+            normalize_parameters(record)
+            for key in ("approximation", "table_row_ref", "source_associations"):
+                if key in old:
+                    record["payload"][key] = deepcopy(old[key])
         modules.setdefault("superconductive_properties", []).append(record)
     for index, old in enumerate(result.get("properties") or []):
         if not isinstance(old, dict):
@@ -326,8 +349,33 @@ def convert_legacy_scientific_draft(draft: dict[str, Any]) -> dict[str, Any]:
         raise UploadContractError(
             "legacy_scientific_conversion_failed", "材料状态必须是数组", "material_states",
         )
+    expanded = []
+    for state in states:
+        if not isinstance(state,dict) or isinstance(state.get('property_modules'),list):
+            expanded.append(state)
+            continue
+        groups = {}
+        for row in state.get('tc_results') or []:
+            pressure = row.get('pressure_value_gpa') if isinstance(row,dict) else None
+            if pressure is None:
+                pressure = state.get('pressure_value_gpa')
+            groups.setdefault(pressure,[]).append(row)
+        if len(groups)<=1 and (not groups or next(iter(groups))==state.get('pressure_value_gpa')):
+            expanded.append(state)
+            continue
+        for i,(pressure,rows) in enumerate(groups.items()):
+            branch = deepcopy(state)
+            branch['tc_results'] = rows
+            if pressure != state.get('pressure_value_gpa'):
+                branch.update(pressure_value_gpa=pressure,pressure_min_gpa=None,pressure_max_gpa=None,
+                              pressure_raw=f'{pressure:g} GPa' if pressure is not None else None,pressure_unit_raw='GPa' if pressure is not None else None,
+                              properties=[],calculation_context={})
+                branch.pop('structure',None)
+            if state.get('state_key'):
+                branch['state_key'] = str(state['state_key'])+f'-pressure-{i}'
+            expanded.append(branch)
     converted: list[dict[str, Any]] = []
-    for index, state in enumerate(states):
+    for index, state in enumerate(expanded):
         if not isinstance(state, dict):
             raise UploadContractError(
                 "legacy_scientific_conversion_failed",

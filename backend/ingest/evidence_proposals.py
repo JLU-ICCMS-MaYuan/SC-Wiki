@@ -148,10 +148,7 @@ def check_source(record, result, chunks, human_draft=None):
 
 
 def rows_for(session, snapshot, lock=False):
-    query = select(models.ScientificEvidenceCheck).where(
-        models.ScientificEvidenceCheck.target == snapshot['target'],
-        models.ScientificEvidenceCheck.target_id == snapshot['target_id']).order_by(models.ScientificEvidenceCheck.id)
-    return list(session.scalars(query.with_for_update() if lock else query))
+    return science.ordered_check_rows(session,snapshot['target'],snapshot['target_id'],lock=lock)
 
 
 def row_matches(row, record):

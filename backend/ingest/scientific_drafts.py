@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from copy import deepcopy
 from decimal import Decimal
 import hashlib
 import json
@@ -127,13 +128,13 @@ def _property_modules_for_state(state_data: dict[str, Any]) -> list[dict[str, An
     for module in property_modules:
         for item in module.get("records") or []:
             if item.get("record_type") == "predicted_tc":
-                conditions = item.get("calculation_context") if isinstance(item.get("calculation_context"), dict) else calculation_data
                 payload = item.setdefault("payload", {})
-                payload["calculation_conditions"] = {key: value for key, value in conditions.items() if key not in {"lambda_ep", "omega_log_k", "mu_star", "evidence"}}
-                parameters = payload.setdefault("parameters", {})
-                for key, unit in (("lambda_ep", "1"), ("omega_log_k", "K"), ("mu_star", "1")):
-                    if conditions.get(key) is not None:
-                        parameters[key] = {"value_raw": str(conditions[key]), "value_number": _number(conditions[key]), "unit": unit}
+                # convert_legacy_state 已按逐结果来源转换。多记录不能广播状态级参数。
+                if len(state_data.get("tc_results") or []) == 1 and calculation_data:
+                    conditions = payload.setdefault("calculation_conditions", {})
+                    for key, value in calculation_data.items():
+                        if key not in {"lambda_ep", "omega_log", "omega_log_k", "mu_star", "evidence"} and key not in conditions:
+                            conditions[key] = deepcopy(value)
             elif item.get("record_type") == "measured_tc":
                 if item.get("method_code") == "experimental":
                     item["method_code"] = "resistivity"
@@ -274,6 +275,7 @@ async def persist_scientific_draft(
     session,
     paper: models.Paper,
     draft: dict[str, Any],
+    *, source_file_ids: dict[str, int] | None = None,
 ) -> list[ScientificEvidenceTarget]:
     """Create the scientific entity graph and return evidence-link targets."""
     validate_single_geometries(draft)
@@ -396,6 +398,11 @@ async def persist_scientific_draft(
                 structure = candidate_structure
 
         property_modules = _property_modules_for_state(state_data)
+        if source_file_ids is not None:
+            from .scientific_context import remap_association_sources
+            for module in property_modules:
+                for item in module.get('records') or []:
+                    remap_association_sources(item, source_file_ids)
         records = await persist_property_modules(
             session, paper_id=paper.id, paper_revision=paper.content_revision,
             material_state_id=state.id, modules=property_modules,
