@@ -171,6 +171,8 @@ def state_records(state, index):
         if symmetry and populated(state.get(name)):
             # 群号与晶系由报告符号查表得到，核对依赖符号本身，不要求论文逐字写出。
             row.update(kind='derived', dependency=item_identity(item_identity('state', state_key), 'reported_space_group_symbol'),
+                       claim={'value': row['current_value'], 'input': state['reported_space_group_symbol'],
+                              'context': {k: state[k] for k in ('material_name', 'material') if populated(state.get(k))}},
                        provenance={'kind': 'derived', 'rule': symmetry, 'input': state.get('reported_space_group_symbol'),
                                    'expected': str(state.get(name)), 'verified': True})
             continue
@@ -178,6 +180,9 @@ def state_records(state, index):
         if conversion and populated(state.get(name)):
             raw_field, expected, rule = conversion
             row.update(kind='derived', dependency=item_identity(item_identity('state', state_key), raw_field),
+                       claim={'value': row['current_value'], 'input': state[raw_field],
+                              'unit': str(state.get(name.split('_')[0] + '_unit_raw') or '').strip().casefold(),
+                              'context': {k: state[k] for k in ('material_name', 'material') if populated(state.get(k))}},
                        provenance={'kind': 'derived', 'rule': rule, 'input': state[raw_field],
                                    'expected': str(expected), 'verified': abs(Decimal(str(state[name])) - expected) <= Decimal('0.000001')})
     return rows

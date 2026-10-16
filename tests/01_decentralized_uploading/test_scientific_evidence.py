@@ -3,6 +3,25 @@ from backend.ingest import scientific_evidence as science
 from backend.ingest import property_evidence as ev
 
 
+def test_derived_symmetry_hash_only_tracks_its_input_and_value():
+    state = {'state_key': 's', 'material': 'LaSc2H24', 'element_count': 3,
+             'pressure_value_gpa': 150, 'state_kind': 'theoretical',
+             'structure_optimization': 'harmonic', 'reported_space_group_symbol': 'P6/mmm',
+             'reported_space_group_number': 191, 'crystal_system': 'hexagonal'}
+
+    def snapshot(value):
+        return {r['field'].split('.')[-1]: r for r in ev.complete_snapshot(
+            'upload', 'isolation', science.state_records(value, 0), [], {})['records']}
+
+    before = snapshot(state)
+    after = snapshot({**state, 'pressure_value_gpa': 167, 'structure_optimization': 'sscha'})
+    for field in ('element_count', 'reported_space_group_number', 'crystal_system'):
+        assert before[field]['content_hash'] == after[field]['content_hash']
+        assert before[field]['source_hash'] == after[field]['source_hash']
+    changed_input = snapshot({**state, 'reported_space_group_symbol': 'P6mm', 'reported_space_group_number': 183})
+    assert before['crystal_system']['content_hash'] != changed_input['crystal_system']['content_hash']
+
+
 def test_unchecked_derived_input_is_not_reported_as_missing_and_human_input_is_traceable():
     records = science.state_records({'state_key':'Sn','material':'Sn','element_count':1}, 0)
     snap = ev.complete_snapshot('paper','29',records,[],{})

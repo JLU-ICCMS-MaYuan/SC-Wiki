@@ -27,12 +27,26 @@ export function currentEvidenceField(record: EvidenceRecord, paper: Record<strin
   return { value: value[field.split('.').at(-1)!] ?? null, field }
 }
 
-export function evidenceFieldAffected(record: EvidenceRecord, field: string) {
+const overlaps = (left: string, right: string) => left === right || left.startsWith(right + '.') || left.startsWith(right + '[')
+  || right.startsWith(left + '.') || right.startsWith(left + '[')
+
+export function evidenceFieldAffected(record: EvidenceRecord, field: string, records: EvidenceRecord[] = []) {
+  if (overlaps(record.field, field)) return true
   const identity = field.match(/^(material_states\[\d+\])\.(material_name|material)$/)
   if (identity && record.field.startsWith(identity[1] + '.')) return true
+  if (record.provenance?.kind === 'derived') {
+    const source = record.dependency ? records.find(row => row.item_key === record.dependency || row.key === record.dependency) : undefined
+    const name = record.field.split('.').at(-1)
+    // 换算的单位也是实际输入；旧结果仅按已知规则回退。
+    const inputs = name === 'element_count' ? ['material']
+      : name === 'reported_space_group_number' || name === 'crystal_system' ? ['reported_space_group_symbol']
+        : name === 'pressure_value_gpa' ? ['pressure_raw', 'pressure_unit_raw']
+          : name === 'temperature_value_k' ? ['temperature_raw', 'temperature_unit_raw'] : []
+    const state = record.field.match(/^material_states\[\d+\]/)?.[0]
+    return Boolean(source && overlaps(source.field, field)) || Boolean(state && inputs.some(input => overlaps(`${state}.${input}`, field)))
+  }
   const context = field.match(/^(material_states\[\d+\])\.(material|material_dimensionality|pressure_[\w]+|temperature_[\w]+|magnetic_field_t|reported_space_group_[\w]+|crystal_system|state_kind|structure_optimization|note|calculation_context|experimental_context)(?:\.|$)/)
-  return record.field === field || record.field.startsWith(field + '.') || record.field.startsWith(field + '[') || field.startsWith(record.field + '.') || field.startsWith(record.field + '[')
-    || Boolean(context && record.field.startsWith(context[1] + '.') && (record.record_key || record.provenance?.kind === 'derived'))
+  return Boolean(context && record.field.startsWith(context[1] + '.') && record.record_key)
 }
 const ignored = new Set(['evidence', 'evidences', 'display_order', 'is_representative', 'record_key', 'module_key', 'state_key'])
 const identity = (value: unknown): unknown => {
@@ -41,7 +55,7 @@ const identity = (value: unknown): unknown => {
   return row.state_key || row.module_key || row.record_key
 }
 export function changedScientificFields(before: unknown, after: unknown, path: string): string[] {
-  if (Object.is(before, after)) return []
+  if (Object.is(before, after) || (before == null && after === '') || (after == null && before === '')) return []
   if (Array.isArray(before) && Array.isArray(after)) {
     if (after.length > before.length && !after.every(identity)) return [path]
     return before.flatMap((value, index) => {

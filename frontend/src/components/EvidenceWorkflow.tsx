@@ -11,7 +11,7 @@ import { api } from '../lib/api'
 import { evidenceProblem } from './EvidenceFieldMarkers'
 import { createEvidenceDraftQueue } from '../lib/evidenceDraftQueue'
 import { createManualEvidenceDrafts, manualDraftKey, manualFieldIdentity, manualValueIdentity, type PreparedManualEvidence } from '../lib/manualEvidenceDrafts'
-import { evidenceFieldAffected } from '../lib/evidenceFields'
+import { changedScientificFields, evidenceFieldAffected } from '../lib/evidenceFields'
 import { useLanguage } from '../context/LanguageContext'
 
 export interface EvidenceSource { paper_evidence_id?: number; block_id?: string; evidence_kind?: 'text' | 'pdf_image'; file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
@@ -27,7 +27,7 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+export interface EvidenceRecord { dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
@@ -88,6 +88,19 @@ export function useEvidenceWorkflow(options?: {
   const localReasons = useRef(new Map<string, string>())
   const optionsRef = useRef(options)
   optionsRef.current = options
+  const observedValues = useRef(new Map<string, unknown>())
+  const invalidationTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const pendingEdits = useRef<Array<{ field: string; pathKind: 'current' | 'snapshot' }>>([])
+  const copyValue = (value: unknown) => value === undefined ? undefined : JSON.parse(JSON.stringify(value))
+  // 只初始化新身份；后续值在处理编辑通知时推进，避免原生事件迟到后漏掉变化。
+  useLayoutEffect(() => {
+    for (const record of records) {
+      const key = record.item_key || record.key
+      const current = optionsRef.current?.getCurrentValue?.(record)
+      if (current && !observedValues.current.has(key)) observedValues.current.set(key, copyValue(current.value))
+    }
+  })
+  useEffect(() => () => { clearTimeout(invalidationTimer.current) }, [])
   const manualCurrentValue = (record: EvidenceRecord) => {
     const current = optionsRef.current?.getCurrentValue?.(record)
     return current ? ('manualValue' in current ? current.manualValue : current.value) : record.current_value
@@ -209,7 +222,10 @@ export function useEvidenceWorkflow(options?: {
     const current = ++generation.current
     const revision = editRevision.current
     const identity = `${target.target}:${target.target_id}`
-    if (targetIdentity.current !== identity) { localReasons.current.clear(); dirty.current = false }
+    if (targetIdentity.current !== identity) {
+      localReasons.current.clear(); dirty.current = false
+      clearTimeout(invalidationTimer.current); pendingEdits.current = []
+    }
     const previousTarget = targetRef.current
     targetRef.current = target
     targetIdentity.current = identity
@@ -219,6 +235,7 @@ export function useEvidenceWorkflow(options?: {
       const result = await api.post<Preflight>(`${base}/preflight`, target)
       if (generation.current !== current || editRevision.current !== revision) return
       preflightRef.current = result
+      observedValues.current.clear()
       recordsRef.current = result.records || []
       setRecords(result.records || [])
       if (!queueFor(target).hasPending()) {
@@ -463,21 +480,54 @@ export function useEvidenceWorkflow(options?: {
   }
   const invalidate = useCallback((field: string, pathKind: 'current' | 'snapshot' = 'current') => {
     editRevision.current += 1
-    dirty.current = true
-    const matches = (record: EvidenceRecord) => {
-      const current = pathKind === 'current' ? optionsRef.current?.getCurrentValue?.(record) : undefined
-      return evidenceFieldAffected(current ? {...record, field:current.field} : record, field)
+    pendingEdits.current.push({ field, pathKind })
+    const flush = () => {
+      invalidationTimer.current = undefined
+      const edits = pendingEdits.current.splice(0)
+      const getCurrent = optionsRef.current?.getCurrentValue
+      const currentRecords = recordsRef.current.map(record => {
+        const current = getCurrent?.(record)
+        return current ? { ...record, field: current.field } : record
+      })
+      const changes = new Set<string>()
+      const removed = new Set<string>()
+      const removedPaths: string[] = []
+      if (getCurrent) {
+        for (const record of recordsRef.current) {
+          const key = record.item_key || record.key
+          const current = getCurrent(record)
+          if (observedValues.current.has(key)) {
+            if (current) changedScientificFields(observedValues.current.get(key), current.value, current.field).forEach(path => changes.add(path))
+            else if (!record.structure_hash) { removed.add(record.key); removedPaths.push(record.field) }
+          }
+          if (current) observedValues.current.set(key, copyValue(current.value))
+        }
+      }
+      // 结构等只读摘要沿用显式编辑通知；可读字段必须以实际值差异为准。
+      for (const edit of edits) {
+        if (removedPaths.some(path => path === edit.field || path.startsWith(edit.field + '.') || path.startsWith(edit.field + '['))) continue
+        const owner = recordsRef.current.find(record => record.field === edit.field || edit.field.startsWith(record.field + '.') || edit.field.startsWith(record.field + '['))
+        if (!getCurrent || !owner || owner.structure_hash) {
+          const current = owner && getCurrent?.(owner)
+          changes.add(edit.pathKind === 'snapshot' && owner && current ? edit.field.replace(owner.field, current.field) : edit.field)
+        }
+      }
+      if (!changes.size && !removed.size) return
+      dirty.current = true
+      const affected = new Set(currentRecords.filter(record => removed.has(record.key)
+        || [...changes].some(path => evidenceFieldAffected(record, path, currentRecords))).map(record => record.key))
+      for (const r of recordsRef.current.filter(record => affected.has(record.key))) {
+        localReasons.current.delete(r.item_key || r.key)
+        if (targetRef.current) queueFor(targetRef.current).discard(r.key)
+      }
+      setReasons(old => Object.fromEntries(Object.entries(old).filter(([key]) => !affected.has(key))))
+      const next = recordsRef.current.map(r => affected.has(r.key) && !r.stale
+        ? { ...r, stale: true, resolution: '', proposal_draft: undefined, proposal: undefined, human_confirmed: false, decision: undefined } : r)
+      recordsRef.current = next
+      setRecords(next)
     }
-    const affected = recordsRef.current.filter(matches)
-    for (const r of affected) {
-      if (!r.stale) localReasons.current.delete(r.item_key || r.key)
-      if (targetRef.current) queueFor(targetRef.current).discard(r.key)
-    }
-    setReasons(old => Object.fromEntries(Object.entries(old).filter(([key]) => !affected.some(r => r.key === key && !localReasons.current.has(r.item_key || r.key)))))
-    const next = recordsRef.current.map(r => matches(r)
-      ? { ...r, stale: true, resolution: '', proposal_draft: undefined, proposal: undefined, human_confirmed: false, decision: undefined } : r)
-    recordsRef.current = next
-    setRecords(next)
+    if (!optionsRef.current?.getCurrentValue) flush()
+    else if (invalidationTimer.current === undefined) invalidationTimer.current = setTimeout(flush, 0)
   }, [])
   const issues = useMemo(() => records.filter(problematic), [records])
   const activeRecord = records.find(r => r.key === selected) || (fallbackRecord?.key === selected ? fallbackRecord : undefined)

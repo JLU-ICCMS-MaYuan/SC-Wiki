@@ -35,6 +35,37 @@ def snapshot():
         [dict(file_id='main', chunk_index=0, content='The critical temperature is 10 K.')], {})
 
 
+def test_unrelated_state_edit_preserves_persisted_derived_confirmation(current_mysql):
+    state = {'state_key': 'isolation', 'material': 'LaSc2H24', 'element_count': 3,
+             'state_kind': 'theoretical', 'structure_optimization': 'classical_static',
+             'reported_space_group_symbol': 'P6/mmm', 'reported_space_group_number': 191,
+             'crystal_system': 'hexagonal', 'pressure_value_gpa': 150}
+    target_id = uuid.uuid4().hex
+
+    def build(value):
+        return ev.complete_snapshot('upload', target_id, science.state_records(value, 0), [], {})
+
+    before = build(state)
+    selected = [r for r in before['records'] if r.get('kind') == 'derived']
+    results = {r['key']: {'status': 'supported', 'reason': '已核验', 'resolution': '保留人工说明',
+        'human_confirmed': True, 'decision': {'human_confirmed': True, 'accepted': True,
+        'actor_user_id': 7, 'reason': '保留人工说明', 'final_content_hash': r['content_hash'],
+        'source_hash': r['source_hash']}} for r in selected}
+    with current_mysql.begin() as session:
+        science.save_results(session, before, results, 7)
+    after = build({**state, 'structure_optimization': 'sscha', 'pressure_value_gpa': 167})
+    with current_mysql.begin() as session:
+        restored = ev.public_snapshot(after, science.load_results(session, after, 7))
+    derived = [r for r in restored['records'] if r.get('kind') == 'derived']
+    assert len(derived) == 3
+    assert all(science.human_confirmed(r) and r['resolution'] == '保留人工说明' for r in derived)
+    changed = build({**state, 'reported_space_group_symbol': 'P6mm', 'reported_space_group_number': 183})
+    with current_mysql.begin() as session:
+        restored = ev.public_snapshot(changed, science.load_results(session, changed, 7, include_stale=True))
+    assert not any(science.human_confirmed(r) for r in restored['records']
+                   if r['field'].endswith(('.reported_space_group_number', '.crystal_system')))
+
+
 def test_unchecked_draft_and_human_confirmation_without_quote(current_mysql):
     from backend.ingest import evidence_proposals as proposals
     snap = snapshot()
