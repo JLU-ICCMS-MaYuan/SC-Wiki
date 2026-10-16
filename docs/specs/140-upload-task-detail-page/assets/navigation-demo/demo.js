@@ -36,9 +36,9 @@ function renderList() {
   function draw() {
     list.innerHTML = data.map(task => `<article class="task-row" data-task="${task.id}">
       <label class="task-select"><input type="checkbox" value="${task.id}" aria-label="选择 ${escapeHtml(task.file)}"></label>
-      <div class="task-main"><a class="task-link" href="detail.html?task=${task.id}">${escapeHtml(task.file)}</a><div class="task-meta"><span class="status ${task.state}">${stateLabels[task.state]}</span><span>· ${task.chunks} 段</span><span class="expiry">${task.expires}</span></div></div>
+      <div class="task-main"><a class="task-link" href="detail.html?task=${task.id}" target="_blank" rel="noopener" aria-label="${escapeHtml(task.file)}（在新标签页打开）">${escapeHtml(task.file)}</a><div class="task-meta"><span class="status ${task.state}">${stateLabels[task.state]}</span><span>· ${task.chunks} 段</span><span class="expiry">${task.expires}</span></div></div>
       ${task.state === 'reading' ? `<button class="button task-action" data-action="cancel" data-id="${task.id}">取消</button>` : ['failed', 'cancelled'].includes(task.state) ? `<button class="button danger task-action" data-action="remove" data-id="${task.id}">清理</button>` : ''}
-      <span class="row-chevron" aria-hidden="true">›</span></article>`).join('')
+      <span class="row-chevron" aria-hidden="true">↗</span></article>`).join('')
     document.getElementById('task-count').textContent = `${data.length} / 100`
     document.getElementById('empty-list').hidden = !!data.length
     updateSelection()

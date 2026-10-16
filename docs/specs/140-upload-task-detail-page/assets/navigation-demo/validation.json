@@ -25,5 +25,14 @@
     "完整可访问性",
     "真实解析、保存、审核与谱详情业务集成"
   ],
-  "spec_status": "未修改，等待用户体验反馈"
+  "new_tab_revision": {
+    "date": "2026-10-16",
+    "task_click_opens_new_tab": "通过：标签页从 1 个增加为 2 个",
+    "original_tab_url": "http://127.0.0.1:18440/index.html",
+    "new_tab_url": "http://127.0.0.1:18440/detail.html?task=lasc-ready",
+    "new_tab_heading": "2024 La-Sc-H 何新玲.pdf",
+    "checkbox_no_extra_tab": "通过：选择复选框后仍为 2 个标签页",
+    "javascript_syntax": "通过 node --check"
+  },
+  "spec_status": "未修改，等待用户体验反馈；新标签页要求已保存到 review.md"
 }
