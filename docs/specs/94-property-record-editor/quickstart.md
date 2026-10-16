@@ -306,3 +306,10 @@ Overview 已同步实际按钮行为，#94 保持开放；本地 Spec/附件仍�
 - 浏览器可复核材料：[组件夹具入口](assets/dos-implemented-browser-harness.tsx)、[数据](assets/dos-implemented-fixtures.json)。入口复制到临时 Vite 根目录 main.tsx，数据复制为 dos-fixtures.json；src/node_modules 指向项目 frontend 同名目录。macOS 的临时目录逻辑路径和真实路径均需在 Vite fs.allow 中允许。仅表注来自已审计备份，19.10 明确为冲突演示值，不写真实草稿。
 - 测试使用 SQLite 内存库与进程内测试 JWT；最初缺少 DATABASE_URL／JWT_SECRET_KEY 的环境错误在设置隔离测试值后消除，不修改系统配置。构建仍有既有 3Dmol eval／分包提示，组件旧夹具有 MUI 选项提示；未计作失败。
 - 本轮没有业务数据库迁移、真实原任务 PUT、历史批量修复或远端部署／推送。旧重复正式记录由服务端拒绝隐式新增或删除，须明确处理；旧未提交草稿在转换与正常保存边界收敛，不执行全库扫描改写。#94 其他工作及远程链接门继续保持。
+
+## 2026-10-16：结构优化选项文案修订
+
+- 结构优化核处理的中文 classical_static 标签改为“经典静态优化”，英文改为 Classical static optimization；MaterialStatesEditor 与 PaperEditView 共用该字典，不改变保存值或后端契约。
+- 与 HEAD 字典逐项比对：中英文均仅 structureOptimization.classical_static 的显示文字变化，其他键值一致。既有 enum-labels-i18n 6 项和 material-states-editor 27 项，共 33 项通过。
+- 本机 Node 26 默认 Web Storage 使既有双语测试的 localStorage.clear 读取失败；使用命令级 NODE_OPTIONS="--no-experimental-webstorage" 后，两份测试全通过，不修改系统环境或测试源码。命令：NODE_OPTIONS="--no-experimental-webstorage" node "frontend/node_modules/vitest/vitest.mjs" run --config "vitest.config.ts" "tests/01_decentralized_uploading/material-states-editor.test.tsx" "tests/01_decentralized_uploading/enum-labels-i18n.test.tsx"。
+- 纯文案修订不新增测试或执行数据库迁移；历史 Spec 的提案文字和原 Demo 保留，本次 FR-046 及最新修订为当前规则。未推送，Issue #94 保持开放。

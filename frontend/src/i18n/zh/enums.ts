@@ -62,7 +62,7 @@ export default {
     experimental: '实验',
     unknown: '未说明',
   },
-  structureOptimization: { unknown: '未说明', classical_static: '经典静态优化（简谐基准）', sscha: '量子非谐优化（SSCHA）' },
+  structureOptimization: { unknown: '未说明', classical_static: '经典静态优化', sscha: '量子非谐优化（SSCHA）' },
   // 论文审核状态。needs_revision 是历史遗留状态，仍可能出现在旧数据中。
   reviewStatus: {
     pending: '待审核',

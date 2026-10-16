@@ -51,7 +51,7 @@ export default {
     experimental: 'Experimental',
     unknown: 'Unspecified',
   },
-  structureOptimization: { unknown: 'Unspecified', classical_static: 'Classical static optimization (harmonic baseline)', sscha: 'Quantum anharmonic optimization (SSCHA)' },
+  structureOptimization: { unknown: 'Unspecified', classical_static: 'Classical static optimization', sscha: 'Quantum anharmonic optimization (SSCHA)' },
   reviewStatus: {
     pending: 'Pending review',
     approved: 'Approved',

@@ -149,3 +149,7 @@ T024 的完成范围是消费 #137 正式合同的前端路径；真实谱生成
 - [x] T066 [US17] 更新本目录验收与检查表、现有 `docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md`，按本次差异提交并同步 Issue #94；保留远程文档待验证，不推送或关闭。
 
 依赖：T063 → T064 → T065 → T066。设计映射为 FR-056→T064；FR-057/058→T063；SC-049/050→T065，授权与文档收尾→T066。已有原文的 Demo 限制按最新实施授权解释，不改写旧记录。
+
+## 结构优化选项文案修订
+
+- [x] T067 按用户原话修订 FR-046，删除 `frontend/src/i18n/zh/enums.ts` 的“（简谐基准）”及英文对应括号；同步当前 Overview，验证两字典仅目标显示值变化和相关 33 项回归，追加 Issue #94 文案需求。内部 classical_static 与数据契约不变。
