@@ -81,3 +81,7 @@ Tc 核对的 editable_fields 不含 value_raw、unit_raw、canonical_unit，旧 
 ## US14：DOS 展示例外
 
 electronic_properties / property / dos_fermi 跳过单条记录折叠、定义选择和行下方证据摘要，直接使用通用核心行。文本镜像值只有名称、值类型、原始值、单位四项；非镜像文本与其他类型继续保留对应规范值编辑。definition_key/version、record_key、payload、evidence/evidences 及 API 合同不变；复制删除、定义错误和只读行为沿用共享表单。
+
+## US15：DOS 唯一性的合同草案边界
+
+现有公共 API 与存储合同本轮不变。拟议每状态最多一个当前 DOS，其他报告作为来源或待裁决候选；不同状态分别保存。单靠前端过滤不能作为正式唯一性约束。候选与当前记录的身份、合并后的核对失效、历史修复和 API 拒绝规则需在 Demo 认可后的正式设计中明确，当前未获确认。

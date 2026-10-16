@@ -1,0 +1,29 @@
+{
+  "checked_date": "2026-10-16",
+  "scope": "仅只读历史备份与当前代码，未写业务数据",
+  "backup_path": ".data/backups/issue139-parameter-repair/c16cc627a0c04dc8ad4289624d1da80a-20261016T030851Z.json",
+  "backup_sha256": "da1d6f6f70ce310b3b0a20abc740ef858201a1044a16bc62a2d862cbc3afcfbd",
+  "state": {
+    "material": "LaSc2H24",
+    "pressure_value_gpa": 167
+  },
+  "dos_count": 3,
+  "value_raw": "18.76",
+  "unit_raw": "states/spin/Ry/f.u.",
+  "copy_key_count": 2,
+  "difference_fields_from_first": [
+    [
+      "record_key"
+    ],
+    [
+      "record_key"
+    ]
+  ],
+  "evidences_equal": true,
+  "code_sources": [
+    "frontend/src/lib/propertyModules.ts:clonePropertyRecord",
+    "frontend/src/components/PropertyModuleEditor.tsx:module.records.map"
+  ],
+  "conclusion": "三条科学内容与证据相同，两条为复制路径生成副本；既有编辑入口未约束状态内 DOS 唯一性。",
+  "limitation": "未读取本次最新 Redis 草稿，未断言历史备份之外的当前数据。"
+}

@@ -254,3 +254,10 @@ AGENTS.md 将“数据库结构变更”列为高风险操作。取得授权后�
 - 当前工作树 npm run build 通过（包含 TypeScript）；从 HEAD 导出 frontend 并只复制本次两份组件生成隔离副本，构建也通过：/tmp/scwiki-dos-candidate.BfX1AB/build.log。未纳入工作区其他任务的未提交修改。
 - 原图 IMG-008、IMG-009 与清单已归档；Overview 已同步。现有测试夹具有 MUI 选项提示，构建有 3Dmol eval 与分包大小提示，均未导致失败。
 - 本轮验证范围为组件行为与构建，未执行真实数据库修改、浏览器端到端验收、远端部署或推送；#94 保持开放，远程附件及 Spec 链接待推送核验。本轮没有修改远端 Issue 正文。
+
+## 2026-10-16：US15 独立 Demo 评审准备
+
+- 只读核对原任务历史备份：167 GPa 有三条 18.76 DOS，仅 record_key 不同，其中两条 record-copy-；证据完全相同。审计文件为 assets/fermi-dos-duplicate-audit.json，不据此宣称最新 Redis 已审计或已修复。
+- 独立 HTML Demo 的浏览器检查覆盖：相同副本一行且无复制/重复新增；不同值待选择；选择后两候选保留；四输入与候选操作只读；空值；另一压强；来源侧栏；模块折叠后保留编辑。8 组观察均符合预期，控制台 error 为 0，默认 1280×720 无整页横向溢出。
+- 截图 assets/fermi-dos-singleton-demo.png，记录 assets/fermi-dos-demo-validation.json；两者仅证明交互演示。冲突候选 19.10 为演示数值。
+- Spec US15 是待评审草案，替代 US14 的直接实施流程。用户尚未认可本版 Demo/Issue 追加草案；本轮未修改正式代码、真实草稿、数据库或 Overview，未回退 e9d210a，未写入远端 Issue，未推送。

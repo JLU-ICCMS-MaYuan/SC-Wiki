@@ -182,6 +182,26 @@
         188
       ],
       "verification": "2026-10-16 从归档位置重读 PNG，核对原文件字节、尺寸及 SHA-256；本地验证，远程链接待验证。"
+    },
+    {
+      "id": "IMG-010",
+      "upload_order": 10,
+      "original_name": "codex-clipboard-aece1677-a789-401d-95ca-9ec846d54ad2.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-010.png",
+      "status": "local_verified",
+      "user_context": "你把这个刚刚的修改变成 issue 和 spec。我不明白为什么这里重复了这么多次，一个材料状态应该只有一个费米能级处 dos 啊？而且你应该先给我做demo，我决定后再落实",
+      "related": [
+        "US15",
+        "FR-049",
+        "FR-050"
+      ],
+      "sha256": "ca0ace690dfa07f5a76d3399d20578779a4a23b856bc2f97dccadaaaa05a0582",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2480,
+        1152
+      ],
+      "verification": "2026-10-16 从归档位置重读并核对原文件字节、PNG 尺寸及 SHA-256；本地归档，远程未验证。"
     }
   ]
 }

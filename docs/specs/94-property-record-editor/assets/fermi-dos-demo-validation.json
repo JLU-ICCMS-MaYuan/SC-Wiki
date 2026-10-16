@@ -1,0 +1,69 @@
+{
+  "checked_date": "2026-10-16",
+  "scope": "独立 HTML Demo 的浏览器交互，不代表正式功能验收",
+  "checks": [
+    {
+      "inputs": [
+        {
+          "id": "name",
+          "value": "N(Ef)"
+        },
+        {
+          "id": "kind",
+          "value": "text"
+        },
+        {
+          "id": "value",
+          "value": "18.76"
+        },
+        {
+          "id": "unit",
+          "value": "states/spin/Ry/f.u."
+        }
+      ],
+      "noDuplicateActions": true,
+      "noPageOverflow": true,
+      "rows": 1,
+      "scenario": "相同副本"
+    },
+    {
+      "candidateCount": 2,
+      "rows": 1,
+      "scenario": "冲突待选",
+      "value": ""
+    },
+    {
+      "candidateCount": 2,
+      "collapsed": true,
+      "rows": 1,
+      "scenario": "选择后候选保留",
+      "value": "19.10"
+    },
+    {
+      "allDisabled": true,
+      "scenario": "只读"
+    },
+    {
+      "rows": 1,
+      "scenario": "空状态",
+      "unit": "",
+      "value": ""
+    },
+    {
+      "pressure": "150 GPa",
+      "scenario": "另一压强",
+      "value": "18.44"
+    },
+    {
+      "quoteIsNotFabricated": true,
+      "scenario": "来源侧栏",
+      "visible": true
+    },
+    {
+      "expanded": true,
+      "scenario": "折叠后保留编辑",
+      "value": "18.80"
+    }
+  ],
+  "consoleErrors": []
+}

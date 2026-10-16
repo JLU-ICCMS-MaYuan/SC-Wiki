@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>费米能级 DOS · 单条记录演示</title>
+<style>
+:root { color-scheme:light dark; --bg:light-dark(#f7f8fb,#171a22); --surface:light-dark(#fff,#222632); --ink:light-dark(#283344,#e9edf5); --muted:light-dark(#738095,#b3bdce); --line:light-dark(#dce1eb,#485168); --brand:light-dark(#6250f6,#b5a8ff); --soft:light-dark(#f4f3ff,#35304f); --warning:light-dark(#965709,#f6c67a); --warn-bg:light-dark(#fff8eb,#393025); }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; }
+button,input,select { font:inherit; color:inherit; }
+button { cursor:pointer; }
+[hidden] { display:none!important; }
+.app { max-width:1180px; margin:32px auto; padding:0 24px; }
+.top { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:24px; }
+h1 { font-size:20px; font-weight:600; margin:0; }
+.tag { display:inline-block; font-size:12px; padding:3px 9px; border-radius:5px; background:var(--soft); color:var(--brand); margin-left:10px; vertical-align:middle; }
+.note { color:var(--muted); font-size:13px; margin:8px 0 0; }
+.scenarios { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 22px; }
+.scenarios button,.plain { background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:7px 12px; }
+.scenarios button[aria-pressed=true] { background:var(--soft); border-color:var(--brand); color:var(--brand); }
+.state { background:var(--surface); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.state-head { display:flex; align-items:center; flex-wrap:wrap; gap:12px; border-bottom:1px solid var(--line); padding:16px 22px; }
+.formula { font-weight:600; font-size:17px; }
+.pressure { color:var(--muted); }
+.workspace { padding:0 22px 24px; }
+.module>summary { padding:18px 0; cursor:pointer; font-weight:600; font-size:16px; }
+.status { color:var(--muted); font-size:12px; font-weight:400; margin-left:12px; }
+.fields-scroll { overflow-x:auto; padding:13px 2px 5px; }
+.fields { display:flex; align-items:flex-start; gap:10px; width:max-content; min-width:0; }
+.field { position:relative; flex:0 0 auto; width:132px; }
+.field.kind { width:108px; }
+.field.unit { width:230px; }
+.field label { position:absolute; top:-10px; left:10px; padding:0 5px; font-size:12px; background:var(--surface); color:var(--brand); z-index:1; }
+.field label button { border:0; padding:0; background:transparent; color:inherit; line-height:inherit; }
+.field label button:hover { text-decoration:underline; }
+.field input,.field select { width:100%; height:46px; border:1px solid var(--line); border-radius:7px; padding:10px 13px; background:var(--surface); font-size:15px; outline:none; }
+.field input:focus,.field select:focus { border-color:var(--brand); box-shadow:0 0 0 1px var(--brand); }
+.field input:disabled,.field select:disabled { opacity:.7; cursor:default; }
+.hint { color:var(--muted); font-size:12px; margin:12px 0 0; }
+.conflict { border:1px solid var(--line); border-radius:7px; background:var(--warn-bg); margin-top:16px; padding:12px 14px; }
+.conflict>summary { cursor:pointer; color:var(--warning); }
+.conflict p { margin:8px 0; color:var(--muted); font-size:13px; }
+.candidate { display:flex; align-items:center; gap:12px; flex-wrap:wrap; border-top:1px solid var(--line); padding:12px 0 2px; }
+.candidate .source { color:var(--muted); font-size:12px; flex:1 1 180px; }
+.candidate button { color:var(--brand); background:var(--surface); border:1px solid var(--line); padding:5px 10px; border-radius:5px; }
+.footer { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:22px; color:var(--muted); font-size:12px; }
+.footer button { margin-left:auto; }
+.overlay { position:fixed; inset:0; background:#0004; z-index:5; }
+.drawer { position:fixed; top:0; right:0; bottom:0; width:min(410px,100%); padding:24px; background:var(--surface); box-shadow:-8px 0 30px #0002; overflow:auto; z-index:6; }
+.drawer-head { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.drawer h2 { font-size:17px; }
+.drawer h3 { font-size:14px; margin-top:26px; }
+.drawer p { color:var(--muted); overflow-wrap:anywhere; }
+.drawer .source-card { border:1px solid var(--line); border-radius:7px; padding:12px; margin-top:12px; }
+button:focus-visible { outline:2px solid var(--brand); outline-offset:3px; }
+@media(max-width:600px) { .app { margin:18px auto; padding:0 12px; } .workspace { padding:0 14px 18px; } .state-head { padding:14px; } h1 { font-size:18px; } .tag { margin:8px 0 0; } .status { display:block; margin:3px 0 0; } }
+</style>
+</head>
+<body>
+<main class="app">
+  <header class="top">
+    <div><h1>费米能级 DOS <span class="tag">设计 Demo · 待评审</span></h1><p class="note">每个材料状态只保留一个当前 DOS。此演示不写入真实草稿。</p></div>
+    <label><input id="readonly" type="checkbox"> 只读预览</label>
+  </header>
+  <nav class="scenarios" aria-label="演示场景">
+    <button type="button" data-mode="same" aria-pressed="true">3 条相同记录</button>
+    <button type="button" data-mode="conflict" aria-pressed="false">不同数值待选择</button>
+    <button type="button" data-mode="empty" aria-pressed="false">尚未填写</button>
+    <button type="button" data-mode="pressure" aria-pressed="false">另一个材料状态</button>
+  </nav>
+  <section class="state">
+    <header class="state-head"><span class="formula">LaSc₂H₂₄</span><span id="pressure" class="pressure">167 GPa</span><span class="pressure">理论</span></header>
+    <div class="workspace">
+      <details class="module" open>
+        <summary>电子性质 <span id="status" class="status">相同记录归为一项 · 来源保留</span></summary>
+        <div class="fields-scroll">
+          <div class="fields" data-dos-row>
+            <div class="field"><label for="name"><button type="button" id="sources" aria-label="查看 DOS 来源">名称</button></label><input id="name" value="N(Ef)" aria-label="名称"></div>
+            <div class="field kind"><label for="kind">值类型</label><select id="kind"><option value="text">文本</option><option value="number">数值</option></select></div>
+            <div class="field"><label for="value">原始值</label><input id="value" value="18.76" inputmode="decimal"></div>
+            <div class="field unit"><label for="unit">单位</label><input id="unit" value="states/spin/Ry/f.u."></div>
+          </div>
+        </div>
+        <p class="hint">点击“名称”标签查看来源。</p>
+        <details id="conflict" class="conflict" hidden open>
+          <summary id="conflict-title">2 个不同数值，待选择当前值</summary>
+          <p>本场景为交互示例。不同数值不自动合并；选择后仍保留全部来源。</p>
+          <div class="candidate"><strong>18.76</strong><span class="source">候选 A · 演示来源</span><button type="button" data-candidate="18.76">采用此值</button></div>
+          <div class="candidate"><strong>19.10</strong><span class="source">候选 B · 演示来源，非论文事实</span><button type="button" data-candidate="19.10">采用此值</button></div>
+        </details>
+      </details>
+    </div>
+  </section>
+  <div class="footer"><span id="feedback" role="status">三条相同记录只显示一行；不提供复制 DOS 或新增第二条入口。</span><button id="reset" class="plain" type="button">重置演示</button></div>
+</main>
+<div id="overlay" class="overlay" hidden></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
+  <div class="drawer-head"><h2 id="drawer-title">DOS 来源</h2><button id="close" class="plain" type="button">关闭</button></div>
+  <p>167 GPa 备份中的三条记录只有记录键不同，数值、单位与证据相同。相同来源不重复展示。</p>
+  <div class="source-card"><strong id="source-value">N(Ef) · 18.76 states/spin/Ry/f.u.</strong><p>此卡片只演示来源入口，不伪造页码或原文引句。</p></div>
+  <h3>拟议保留规则</h3><p>相同记录合成一个当前值，原始记录与证据保留。不同值保留为候选，由人工选定。</p>
+</aside>
+<script>
+(function () {
+  const get = id => document.getElementById(id);
+  let mode = "same";
+  let focusBeforeDrawer;
+  const names = ["name","kind","value","unit"];
+  function disabled() {
+    names.forEach(id => { get(id).disabled = get("readonly").checked; });
+    document.querySelectorAll("[data-candidate]").forEach(button => { button.disabled = get("readonly").checked; });
+  }
+  function render(nextMode) {
+    mode = nextMode;
+    get("name").value = "N(Ef)";
+    get("kind").value = "text";
+    get("unit").value = mode === "empty" ? "" : "states/spin/Ry/f.u.";
+    get("value").value = mode === "same" ? "18.76" : mode === "pressure" ? "18.44" : "";
+    get("pressure").textContent = mode === "pressure" ? "150 GPa" : "167 GPa";
+    get("conflict").hidden = mode !== "conflict";
+    get("conflict").open = true;
+    get("conflict-title").textContent = "2 个不同数值，待选择当前值";
+    get("status").textContent = mode === "same" ? "相同记录归为一项 · 来源保留" : mode === "conflict" ? "待选择当前 DOS" : mode === "empty" ? "待填写" : "独立状态 · 独立 DOS";
+    get("feedback").textContent = mode === "pressure" ? "150 GPa 与 167 GPa 分别保存各自 DOS；不跨材料状态合并。" : mode === "conflict" ? "主行只有一个；请先选择候选，或填写经核对的当前值。" : mode === "empty" ? "可直接填写唯一的 DOS，无需添加记录。" : "三条相同记录只显示一行；不提供复制 DOS 或新增第二条入口。";
+    document.querySelectorAll("[data-mode]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.mode === mode)));
+    disabled();
+  }
+  document.querySelectorAll("[data-mode]").forEach(button => button.addEventListener("click", () => render(button.dataset.mode)));
+  document.querySelectorAll("[data-candidate]").forEach(button => button.addEventListener("click", () => {
+    get("value").value = button.dataset.candidate;
+    get("status").textContent = "已选定当前值 · 来源待核对";
+    get("conflict-title").textContent = "查看 2 个候选与来源";
+    get("conflict").open = false;
+    get("feedback").textContent = "当前 DOS 已选择为 " + button.dataset.candidate + "；两个候选仍保留，本地演示未保存。";
+  }));
+  names.forEach(id => get(id).addEventListener("input", () => {
+    get("status").textContent = "演示中已修改 · 来源待核对";
+    get("feedback").textContent = "修改仅保留在本页，重置或切换场景后恢复示例。";
+  }));
+  get("readonly").addEventListener("change", disabled);
+  get("reset").addEventListener("click", () => render(mode));
+  function closeDrawer() {
+    get("drawer").hidden = true; get("overlay").hidden = true;
+    if (focusBeforeDrawer) focusBeforeDrawer.focus();
+  }
+  get("sources").addEventListener("click", () => {
+    focusBeforeDrawer = document.activeElement;
+    get("source-value").textContent = "N(Ef) · " + (get("value").value || "待选择") + " " + get("unit").value;
+    get("drawer").querySelector("p").textContent = mode === "same" ? "167 GPa 备份中的三条记录只有记录键不同，数值、单位与证据相同。相同来源不重复展示。" : mode === "conflict" ? "两个候选是冲突处理的交互示例。19.10 不作为论文真实数值。" : mode === "empty" ? "当前尚未填写 DOS，没有可展示来源。" : "150 GPa 是另一材料状态，DOS 与 167 GPa 分开保存。";
+    get("drawer").hidden = false; get("overlay").hidden = false; get("close").focus();
+  });
+  get("close").addEventListener("click", closeDrawer);
+  get("overlay").addEventListener("click", closeDrawer);
+  document.addEventListener("keydown", event => {
+    if (get("drawer").hidden) return;
+    if (event.key === "Escape") closeDrawer();
+    if (event.key === "Tab") { event.preventDefault(); get("close").focus(); }
+  });
+  render("same");
+}());
+</script>
+</body>
+</html>
