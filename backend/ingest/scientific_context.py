@@ -6,8 +6,9 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import unicodedata
 
-CONTEXT_VERSION = "scientific-context-v2"
+CONTEXT_VERSION = "scientific-context-v4"
 STAGES = {"electron_phonon", "structural_relaxation", "electronic_structure", "sscha", "aimd", "superconductivity"}
 PARAMETERS = {"lambda_ep", "omega_log", "mu_star"}
 CONDITIONS = {"calculation_code", "electronic_method", "exchange_correlation_functional", "k_grid", "q_grid", "k_broadening", "q_broadening"}
@@ -24,6 +25,8 @@ def scientific_fingerprint(record):
     value.pop("module_code", None)
     value.get("payload", {}).pop("source_associations", None)
     value.get("payload", {}).pop("table_row_ref", None)
+    value.get("payload", {}).pop("tc_group", None)
+    value.get("payload", {}).pop("tc_range_origin", None)
     from .scientific_evidence import canonical
     return fingerprint(canonical(value))
 
@@ -479,7 +482,8 @@ def reported_value_matches(value, raw, evidences):
     # 仅用于值的等价核对；保存的逐字引句绝不改写。
     numeric_text = re.sub(r'\\(?:mathbf|mathrm|mathsf|text|operatorname)\s*\{([^{}]*)\}',r'\1',text)
     numeric_text = re.sub(r'[{}$]','',numeric_text)
-    numeric_text = normalized_text(numeric_text).replace('−','-')
+    # 表格列间空白是数字边界；不能把 290 3.56 压成 2903.56。
+    numeric_text = unicodedata.normalize('NFKC', numeric_text).casefold().replace('\u00ad','').replace('−','-')
     def power(match):
         exponent = int(match.group(1))
         return str(10.0 ** exponent) if -300 <= exponent <= 300 else match.group()
@@ -497,7 +501,7 @@ def reported_value_matches(value, raw, evidences):
                 return False
         elif isinstance(item,str):
             def folded(s):
-                normalized = normalized_text(s).replace('×','x').replace('\\times','x')
+                normalized = normalized_text(s).replace('\u00ad','').replace('×','x').replace('\\times','x')
                 normalized = re.sub(r'\\(?:mathbf|mathrm|mathsf|text|operatorname|dot|hat|bar|mathbb|mathfrak)','',normalized)
                 normalized = normalized.replace('\\pi','π').replace('\\gamma','γ').replace('å','a').replace('−','-')
                 normalized = re.sub(r'1e([+-]?\d+)',r'10^\1',normalized)
@@ -632,7 +636,8 @@ def generate_context_associations(draft, context, model, *, cache_dir=None, mode
     for i,setting in enumerate(ledger['settings']):
         setting['setting_id'] = f'setting-{i}'
     rows = [{"target":key,"expected_fingerprint":scientific_fingerprint(r),
-             "state":{k:v for k,v in s.items() if k not in {"property_modules","structure"}},"record":r}
+             "state":{k:v for k,v in s.items() if k not in {"property_modules","structure"}},
+             "record":{**r,"payload":{k:v for k,v in (r.get('payload') or {}).items() if k not in {'tc_group','tc_range_origin'}}}}
             for key,(s,m,r) in targets(draft).items()]
     for start in range(0,len(rows),8):
         payload = {"targets":rows[start:start+8],"settings":ledger["settings"]}

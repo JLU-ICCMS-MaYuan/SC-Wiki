@@ -139,3 +139,10 @@ state_kind 的 mixed 来自 #32/#50 的来源分类；#84 允许同条件计算�
 ## US19 正式实施决策
 
 沿用Demo已认可的位置，不抽象新组件或增加底部定位样式。原Select的父容器已是全宽纵向布局，将其移到谱展示后即可满足每卡底部要求；addModule逻辑及module_key不变，已有输入/折叠不需迁移。浏览器使用实际MaterialStatesEditor与谱Provider、模拟只读接口响应验证最终位置；不操作业务任务。
+
+
+## US16 正式数据决定
+
+采用既有 records 数组逐点保存 Tc 与 μ*，而非新增数组 API 或把三个点挤入范围端点。payload.tc_group v1 的 group_key/method_key/point_key 仅用于表单身份；旧记录不因名称、材料或方法相同自动合组。旧范围在用户编辑组合或选端点时拆分，原表示留在 tc_range_origin，未明确配对的 μ* 不猜。
+
+分组与范围历史不进入当前科学指纹、来源断言和证据可读值。生成断言先深复制，验证不会修改调用者。共同条件在每条记录各自存储；新增点不复制结果证据。折叠后首次展开导致文字测量为零的问题用现有 AutoGrowingTextField 的 ResizeObserver 重测解决，没有新依赖。

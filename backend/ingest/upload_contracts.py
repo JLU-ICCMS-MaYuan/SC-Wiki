@@ -399,4 +399,6 @@ def convert_legacy_scientific_draft(draft: dict[str, Any]) -> dict[str, Any]:
     except MaterialStateContractError as exc:
         raise UploadContractError("multiple_state_geometries", str(exc), exc.field) from exc
     result["scientific_schema_version"] = SCIENTIFIC_DRAFT_SCHEMA_VERSION
+    from .tc_groups import validate_tc_draft
+    validate_tc_draft(result)
     return result

@@ -109,3 +109,10 @@ electronic_properties / property / dos_fermi 跳过单条记录折叠、定义�
 ## US19 添加物性模块入口
 
 每个可编辑状态的添加下拉位于所属PropertyModuleEditor最后、全部已有模块和谱展示之后；空态位于结构区之后。新增仍只向当前状态modules末尾追加，菜单排除当前已有类型。已有顺序、稳定键、折叠、未保存输入及删除合同保持；只读不渲染添加控件。无API或数据合同变化，不增加吸底、悬浮或自动滚动。
+
+
+## US16 多点预测 Tc 契约
+
+每个明确组合为 predicted_tc / number，value_number 是 Tc，payload.parameters.mu_star 是对应标量；is_representative 指向该条，整个材料状态跨方法最多一个。新代表的 Tc／μ* 必须有限且非负，清空／删除不自动改选。旧范围可读及保存草稿，正式提交须选择明确端点或取消旧代表标记。
+
+payload.tc_group={version:1,group_key,method_key,point_key} 组织共同参数、方法行及稳定点，tc_range_origin 只保留旧表示。组内共同参数与计算条件必须一致；同一方法行定义一致，点身份不能重复。历史无元数据各自成组。删除方法通过既有 deleted_record_keys 显式删除其成员；未提交的 DB 保留记录也参加唯一性与条件校验。JSON、保存／返修／导出继续逐记录，不新增路由或迁移。

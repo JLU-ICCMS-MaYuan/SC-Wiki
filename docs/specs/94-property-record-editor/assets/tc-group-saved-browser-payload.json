@@ -1,0 +1,277 @@
+{
+  "modules": [
+    {
+      "module_key": "module-superconductive_properties",
+      "module_code": "superconductive_properties",
+      "definition_key": "module.superconductive_properties",
+      "definition_version": 1,
+      "display_order": 0,
+      "records": [
+        {
+          "record_key": "legacy-tc-0",
+          "module_code": "superconductive_properties",
+          "record_type": "predicted_tc",
+          "property_code": "tc",
+          "custom_property_key": null,
+          "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+          "definition_version": 1,
+          "name_raw": "critical temperature",
+          "value_kind": "number",
+          "value_raw": "281",
+          "value_number": 281,
+          "value_min": null,
+          "value_max": null,
+          "unit_raw": "K",
+          "canonical_unit": "K",
+          "method_code": "isotropic_eliashberg",
+          "method_raw": null,
+          "uncertainty": null,
+          "criterion_code": null,
+          "criterion_raw": null,
+          "is_representative": false,
+          "structure_key": null,
+          "payload": {
+            "calculation_conditions": {
+              "calculation_code": ""
+            },
+            "parameters": {
+              "lambda_ep": 3.94,
+              "omega_log": 745,
+              "extensions": [],
+              "mu_star": 0.16
+            },
+            "tc_range_origin": {
+              "value_kind": "range",
+              "value_raw": "281–311",
+              "value_number": null,
+              "value_min": 281,
+              "value_max": 311,
+              "parameters": {
+                "lambda_ep": 3.94,
+                "omega_log": 745,
+                "extensions": [
+                  {
+                    "key": "mu_star",
+                    "value_kind": "range",
+                    "unit_raw": "1",
+                    "value_min": 0.1,
+                    "value_max": 0.16,
+                    "value_raw": "0.1–0.16"
+                  }
+                ]
+              },
+              "is_representative": true
+            },
+            "tc_group": {
+              "version": 1,
+              "group_key": "legacy-tc-0",
+              "method_key": "legacy-tc-0",
+              "point_key": "legacy-tc-0:0"
+            }
+          },
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Anharmonic 150 3.94 745 18.44 281 to 311"
+            },
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+            }
+          ],
+          "value_text": null,
+          "value_boolean": null
+        },
+        {
+          "record_key": "tc-point-59f7f004-4224-4c48-8252-884947de2878",
+          "module_code": "superconductive_properties",
+          "record_type": "predicted_tc",
+          "property_code": "tc",
+          "custom_property_key": null,
+          "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+          "definition_version": 1,
+          "name_raw": "critical temperature",
+          "value_kind": "number",
+          "value_raw": "311",
+          "value_number": 311,
+          "value_min": null,
+          "value_max": null,
+          "unit_raw": "K",
+          "canonical_unit": "K",
+          "method_code": "isotropic_eliashberg",
+          "method_raw": null,
+          "uncertainty": null,
+          "criterion_code": null,
+          "criterion_raw": null,
+          "is_representative": false,
+          "structure_key": null,
+          "payload": {
+            "calculation_conditions": {
+              "calculation_code": ""
+            },
+            "parameters": {
+              "lambda_ep": 3.94,
+              "omega_log": 745,
+              "extensions": [],
+              "mu_star": 0.1
+            },
+            "tc_range_origin": {
+              "value_kind": "range",
+              "value_raw": "281–311",
+              "value_number": null,
+              "value_min": 281,
+              "value_max": 311,
+              "parameters": {
+                "lambda_ep": 3.94,
+                "omega_log": 745,
+                "extensions": [
+                  {
+                    "key": "mu_star",
+                    "value_kind": "range",
+                    "unit_raw": "1",
+                    "value_min": 0.1,
+                    "value_max": 0.16,
+                    "value_raw": "0.1–0.16"
+                  }
+                ]
+              },
+              "is_representative": true
+            },
+            "tc_group": {
+              "version": 1,
+              "group_key": "legacy-tc-0",
+              "method_key": "legacy-tc-0",
+              "point_key": "legacy-tc-0:1"
+            }
+          },
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Anharmonic 150 3.94 745 18.44 281 to 311"
+            },
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+            }
+          ],
+          "value_text": null,
+          "value_boolean": null
+        },
+        {
+          "record_key": "record-superconductive_properties-11470367-4eac-4999-ba6e-0ed3a30dfd4e",
+          "module_code": "superconductive_properties",
+          "record_type": "predicted_tc",
+          "property_code": "tc",
+          "custom_property_key": null,
+          "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+          "definition_version": 1,
+          "name_raw": "critical temperature",
+          "value_kind": "number",
+          "value_raw": "300",
+          "value_number": 300,
+          "payload": {
+            "parameters": {
+              "lambda_ep": 3.94,
+              "omega_log": 745,
+              "mu_star": 0.13
+            },
+            "calculation_conditions": {
+              "calculation_code": ""
+            },
+            "tc_group": {
+              "version": 1,
+              "group_key": "legacy-tc-0",
+              "method_key": "legacy-tc-0",
+              "point_key": "record-superconductive_properties-11470367-4eac-4999-ba6e-0ed3a30dfd4e"
+            }
+          },
+          "evidences": [],
+          "method_code": "isotropic_eliashberg",
+          "unit_raw": "K",
+          "canonical_unit": "K",
+          "is_representative": false,
+          "value_min": null,
+          "value_max": null,
+          "value_text": null,
+          "value_boolean": null
+        },
+        {
+          "record_key": "record-superconductive_properties-b66af55c-9dc1-4065-baf0-649bfe804f87",
+          "module_code": "superconductive_properties",
+          "record_type": "predicted_tc",
+          "property_code": "tc",
+          "custom_property_key": null,
+          "definition_key": "record.superconductive_properties.predicted_tc.allen_dynes",
+          "definition_version": 1,
+          "name_raw": "critical temperature",
+          "value_kind": "number",
+          "value_raw": "250",
+          "value_number": 250,
+          "payload": {
+            "parameters": {
+              "lambda_ep": 3.94,
+              "omega_log": 745,
+              "mu_star": 0.12
+            },
+            "calculation_conditions": {
+              "calculation_code": ""
+            },
+            "tc_group": {
+              "version": 1,
+              "group_key": "legacy-tc-0",
+              "method_key": "tc-method-b2d7b3c1-bcc3-461a-aa3c-53604c2b5a9d",
+              "point_key": "record-superconductive_properties-b66af55c-9dc1-4065-baf0-649bfe804f87"
+            }
+          },
+          "evidences": [],
+          "method_code": "allen_dynes",
+          "unit_raw": "K",
+          "canonical_unit": "K",
+          "is_representative": true,
+          "value_min": null,
+          "value_max": null,
+          "value_text": null,
+          "value_boolean": null,
+          "method_raw": null
+        }
+      ]
+    }
+  ],
+  "deleted_record_keys": []
+}

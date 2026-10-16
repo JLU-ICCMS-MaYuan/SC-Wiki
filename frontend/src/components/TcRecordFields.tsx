@@ -23,7 +23,7 @@ interface Props {
 const numberPattern = /^[+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/
 
 /** 保留小数/指数编辑文本；可选参数的非法文本也必须进入保存校验。 */
-function TcNumber({ value, label, field, error, readOnly, onChange, unit, currentTc = false }: {
+export function TcNumber({ value, label, field, error, readOnly, onChange, unit, currentTc = false }: {
   value: ParameterValue; label: string; field: string; error?: string; readOnly: boolean
   onChange: (value: ParameterValue) => void; unit?: string; currentTc?: boolean
 }) {

@@ -24,10 +24,24 @@ interface Props {
   readOnly?: boolean
   onChange: (record: PropertyRecordDraft) => void
   onDelete?: () => void
+  tcCore?: React.ReactNode
 }
 
 const VALUE_KIND_LABELS: Record<PropertyValueKind, string> = {
   number: '数值', range: '范围', text: '文本', boolean: '布尔',
+}
+
+const stageNames: Record<string, string> = { electron_phonon: '声子／电声耦合', structural_relaxation: '结构优化',
+  electronic_structure: '电子结构', sscha: 'SSCHA', aimd: '分子动力学', superconductivity: '超导计算' }
+const settingNames: Record<string, string> = { calculation_code: '计算软件', electronic_method: '电子结构方法',
+  exchange_correlation_functional: '交换关联泛函', energy_cutoff: '截断能', charge_density_cutoff: '电荷密度截断能',
+  k_grid: 'k 网格', q_grid: 'q 网格', q_grid_interpolated: '插值 q 网格', supercell: '超胞', atoms: '原子数',
+  temperature_k: '温度', convergence_energy: '能量收敛阈值', convergence_force: '力收敛阈值', matsubara_frequency_cutoff: 'Matsubara 频率截断' }
+const extensionName = (item: Record<string, any>): string => {
+  if (item.name_raw != null) return item.name_raw
+  const [stage, key] = String(item.key || '').split('.')
+  const automatic = !item.name || item.name === `${stage} · ${key}` || item.name === item.key
+  return automatic && stageNames[stage] && settingNames[key] ? `${stageNames[stage]} · ${settingNames[key]}` : item.name ?? item.key ?? ''
 }
 
 const FALLBACK_GROUP_SCHEMAS: Record<string, JsonSchema> = {
@@ -140,6 +154,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   readOnly = false,
   onChange,
   onDelete,
+  tcCore,
 }) => {
   const issues = useMemo(() => [...validateRecordClient(record, definition), ...externalIssues], [record, definition, externalIssues])
   const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type), [definition, record.record_type])
@@ -181,7 +196,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
           const kind = (item.value_kind || 'number') as PropertyValueKind
           return (
             <Box key={item.field_key || index} data-extension-row sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, mt: 1, overflowX: 'auto', py: 1 }}>
-              <AutoGrowingTextField data-issue-field={fieldPath(`${itemPath}.name_raw`)} label="字段名称" value={item.name_raw ?? item.name ?? item.key ?? ''} disabled={readOnly}
+              <AutoGrowingTextField data-issue-field={fieldPath(`${itemPath}.name_raw`)} label="字段名称" value={extensionName(item)} disabled={readOnly}
                 error={Boolean(issue(`${itemPath}.name_raw`))} helperText={issue(`${itemPath}.name_raw`)}
                 onChange={event => updatePath(`${itemPath}.name_raw`, event.target.value)} />
               <FormControl size="small" sx={{ minWidth: 110, flex: '0 0 auto' }}>
@@ -218,7 +233,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
             </Box>
           )
         })}
-        {!readOnly && <Button size="small" startIcon={<AddIcon />} onClick={() => updatePath(path, [...values, {
+        {!readOnly && !(tcCore && path === 'payload.parameters.extensions') && <Button size="small" startIcon={<AddIcon />} onClick={() => updatePath(path, [...values, {
           field_key: newStableKey('field'), name_raw: '', value_kind: 'number', value_raw: '', value_number: null, unit_raw: '', evidences: [],
         }])}>新增字段</Button>}
       </Box>
@@ -279,7 +294,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   return (
     <Box data-issue-field={basePath} data-record-key={record.record_key} data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, minWidth: 0, containerType: isTc ? 'inline-size' : undefined, containerName: isTc ? 'tc-record' : undefined, gridTemplateColumns: 'minmax(0, 1fr)', py: 1, mb: 1 }}>
       {definitionError && <Alert severity="error" sx={{ gridColumn: '1 / -1' }}>{definitionError}</Alert>}
-      {isThermodynamicStability(record) ? <ThermodynamicStabilityFields record={record} readOnly={readOnly} onChange={onChange} basePath={basePath} actions={recordActions} /> : isTc ? <TcRecordFields {...tcProps} actions={recordActions} /> : <PropertyRecordRow actions={recordActions}><Box data-property-core-row sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 1, '& > *': { flex: '0 0 auto', minWidth: 110 }, '& .MuiInputBase-root': { fontSize: '0.875rem' } }}>
+      {tcCore || (isThermodynamicStability(record) ? <ThermodynamicStabilityFields record={record} readOnly={readOnly} onChange={onChange} basePath={basePath} actions={recordActions} /> : isTc ? <TcRecordFields {...tcProps} actions={recordActions} /> : <PropertyRecordRow actions={recordActions}><Box data-property-core-row sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 1, '& > *': { flex: '0 0 auto', minWidth: 110 }, '& .MuiInputBase-root': { fontSize: '0.875rem' } }}>
       <AutoGrowingTextField label="名称" value={record.name_raw} disabled={readOnly} data-issue-field={fieldPath('name_raw')} error={Boolean(issue('name_raw'))} helperText={issue('name_raw')} onChange={event => update({ name_raw: event.target.value })} />
       <FormControl size="small">
         <InputLabel>值类型</InputLabel>
@@ -294,7 +309,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       {record.value_kind === 'range' && <><AutoGrowingTextField label="下界" type="number" value={record.value_min ?? ''} disabled={readOnly} data-issue-field={fieldPath('value_min')} error={Boolean(issue('value_min'))} helperText={issue('value_min')} onChange={event => update({ value_min: event.target.value === '' ? null : Number(event.target.value) })} /><AutoGrowingTextField label="上界" type="number" value={record.value_max ?? ''} disabled={readOnly} onChange={event => update({ value_max: event.target.value === '' ? null : Number(event.target.value) })} /></>}
       {record.value_kind === 'text' && !mirroredTextValue && <AutoGrowingTextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
-      </Box></PropertyRecordRow>}
+      </Box></PropertyRecordRow>)}
       {hasDosConflict(record) && <Button size="small" color="warning" sx={{ justifySelf: 'start' }} aria-haspopup="dialog" onClick={event => {
         event.currentTarget.dispatchEvent(new CustomEvent('scwiki:open-record-evidence', { bubbles: true, detail: { record, field: basePath } }))
       }}>数值有矛盾 · 查看来源对照</Button>}

@@ -1,0 +1,54 @@
+[
+  {
+    "check": "正式组件保存重开后的四点两方法",
+    "checked": 1,
+    "methodRows": 2,
+    "parameterRows": 1,
+    "summary": "代表结果：Allen–Dynes · μ* = 0.12 · Tc = 250 K"
+  },
+  {
+    "check": "管理员共享入口改选",
+    "checked": 1,
+    "summary": "代表结果：各向同性 Eliashberg · μ* = 0.1 · Tc = 311 K"
+  },
+  {
+    "check": "只读共享入口",
+    "checkboxes": [
+      {
+        "checked": false,
+        "disabled": true
+      },
+      {
+        "checked": true,
+        "disabled": true
+      },
+      {
+        "checked": false,
+        "disabled": true
+      },
+      {
+        "checked": false,
+        "disabled": true
+      }
+    ],
+    "deleteMethodButtons": 0
+  },
+  {
+    "check": "390px container",
+    "parameterLineWidth": 390,
+    "methodLineWidth": 348,
+    "methodScrollWidths": [
+      1364,
+      668
+    ],
+    "checkboxCenterDeltas": [
+      0,
+      0,
+      0,
+      0
+    ],
+    "documentWidth": 1280,
+    "viewportWidth": 1280,
+    "scope": "container width; IAB viewport override did not change reported innerWidth"
+  }
+]

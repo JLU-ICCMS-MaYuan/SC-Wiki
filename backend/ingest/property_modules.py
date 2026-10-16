@@ -312,6 +312,8 @@ def validate_record(
     from .scientific_context import association_issues
     issues.extend(_issue(f"{path}.{field}", "schema_validation_failed", message) for field, message in association_issues(item))
     issues.extend(_issue(f"{path}.{field}", "schema_validation_failed", message) for field, message in parameter_issues(item))
+    from .tc_groups import tc_record_issues
+    issues.extend(_issue(f"{path}.{field}", code, message) for field, code, message in tc_record_issues(item))
     if isinstance(experimental, dict) and "description" in experimental and not isinstance(experimental["description"], str):
         issues.append(_issue(f"{path}.payload.experimental_conditions.description", "schema_validation_failed", "实验 Conditions 描述必须是文本"))
     if definition is not None:
@@ -358,6 +360,10 @@ def normalize_module(
     except ValueError as error:
         raise PropertyValidationError([_issue(f"{module_path}.records", "invalid_dos_sources", str(error))]) from error
     item["records"] = [validate_record(record, path=f"{module_path}.records[{index}]") for index, record in enumerate(records)]
+    from .tc_groups import tc_collection_issues
+    tc_issues = tc_collection_issues(item["records"], strict_representative=True)
+    if tc_issues:
+        raise PropertyValidationError([_issue(f"{module_path}.{field}", code, message) for field, code, message in tc_issues])
     return item
 
 
@@ -445,6 +451,16 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
             submitted_record_keys.add((module["module_key"], record["record_key"]))
         normalized_modules.append(module)
 
+    from .tc_groups import tc_collection_issues
+    retained_tc = [{"record_key": r.record_key, "record_type": r.record_type, "value_kind": r.value_kind,
+                    "value_number": r.value_number, "method_code": r.method_code, "definition_key": r.definition_key,
+                    "definition_version": r.definition_version, "payload": r.payload_json, "is_representative": r.is_representative}
+                   for r in existing_records_list if r.record_key not in deleted_record_keys
+                   and (module_key_by_id.get(r.module_id), r.record_key) not in submitted_record_keys]
+    tc_issues = tc_collection_issues([*retained_tc, *(r for m in normalized_modules for r in m["records"])], strict_representative=True)
+    if tc_issues:
+        raise PropertyValidationError([_issue(field, code, message) for field, code, message in tc_issues])
+
     incoming_dos = [record for module in normalized_modules for record in module["records"] if is_fermi_dos(record)]
     retained_dos = [record for record in existing_records_list
                     if record.property_code == "dos_fermi" and module_code_by_id.get(record.module_id) == "electronic_properties"
@@ -479,7 +495,7 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
             continue
         module = existing.get(module_key)
         if record.is_representative and record.record_type in {"predicted_tc", "measured_tc"}:
-            representative.add((record.record_type, record.method_code or ""))
+            representative.add((record.record_type, "" if record.record_type == "predicted_tc" else record.method_code or ""))
         if record.property_code == "custom" and record.custom_property_key and module:
             custom_signatures[(module.module_code, record.custom_property_key)] = _custom_signature(record)
 
@@ -501,9 +517,9 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
             record.update(normalized)
             record["definition_id"] = definition.id
             if record.get("is_representative") and record["record_type"] in {"predicted_tc", "measured_tc"}:
-                key = (record["record_type"], record.get("method_code") or "")
+                key = (record["record_type"], "" if record["record_type"] == "predicted_tc" else record.get("method_code") or "")
                 if key in representative:
-                    raise PropertyValidationError([_issue(record["record_key"], "duplicate_representative_tc", "同一类型和方法只能有一条代表 Tc")])
+                    raise PropertyValidationError([_issue(record["record_key"], "duplicate_representative_tc", "同一材料状态只能选择一个预测代表组合；测量结果按方法保留代表")])
                 representative.add(key)
             if record["property_code"] == "custom":
                 custom_key = (module["module_code"], str(record.get("custom_property_key") or ""))

@@ -48,7 +48,7 @@ export function evidenceFieldAffected(record: EvidenceRecord, field: string, rec
   const context = field.match(/^(material_states\[\d+\])\.(material|material_dimensionality|pressure_[\w]+|temperature_[\w]+|magnetic_field_t|reported_space_group_[\w]+|crystal_system|state_kind|structure_optimization|note|calculation_context|experimental_context)(?:\.|$)/)
   return Boolean(context && record.field.startsWith(context[1] + '.') && record.record_key)
 }
-const ignored = new Set(['evidence', 'evidences', 'display_order', 'is_representative', 'record_key', 'module_key', 'state_key'])
+const ignored = new Set(['evidence', 'evidences', 'display_order', 'is_representative', 'record_key', 'module_key', 'state_key', 'tc_group', 'tc_range_origin'])
 const identity = (value: unknown): unknown => {
   if (!value || typeof value !== 'object') return undefined
   const row = value as Record<string, unknown>

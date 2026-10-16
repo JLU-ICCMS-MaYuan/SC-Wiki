@@ -217,3 +217,10 @@ StructureViewer3D 已有 ResizeObserver，在首次隐藏展开时适配有效�
 ## US19 正式实施计划
 
 用户“认可开始”解除Demo阶段限制。将PropertyModuleEditor既有添加Select原样移动到MissingPropertySpectrumModules之后，不新增包装、样式或数据处理。每状态仍经MaterialStatesEditor独立渲染，复用已有addModule、稳定键与只读判断。运行模块编辑、折叠、谱导航及材料表单回归；独立HEAD归档仅叠加本次位置差异完成构建，并用真实共享组件验证两卡/空态/谱展示/只读/输入保留和390px。T077→T078→T079；排除共享工作区的多Tc等未提交功能。
+
+
+## US16 正式实施计划与完成
+
+以用户“认可开始落地执行。”为授权；按 [正式实施记录](tc-multi-result-implementation.md) 复用 SchemaDrivenRecordForm 条件与既有单值记录存储。前端适配层处理稳定点身份、旧范围显式拆分和组内共同参数；PropertyModuleEditor 负责跨方法代表互斥与批量删除键。后端转换保护新分组，正式持久化结合未提交的现存记录验证唯一代表及共同条件，锁沿用材料状态行。
+
+FR-060～062 / SC-046～047 → 组合适配、共享组件和逐点代表 → T080～082 → 浏览器记录与 MySQL 往返。条件补空交给 #139 T027～028，远程 Issue 更新与链接验证单独收尾，不以本地提交代替推送。

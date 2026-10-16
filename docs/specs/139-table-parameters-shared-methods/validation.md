@@ -146,3 +146,22 @@
 - [原任务重开截图](assets/validation-original-task-20261016.jpg)：1920×853，SHA-256 `ed9a618a6755225cc8884392ca5f0cbd250c245d141663fdada37ed944ecff27`；来自用户本机正式页面的真实截图，不是演示数据。
 
 本次原任务的 8 条 λ／ωlog 已实际补填并保存。来源核对仍受上传者身份限制，页面提示“只有上传者可以核对该草稿”；未将补填冒充新的 LLM 提取、来源核对通过或管理员批准。旧 AI 初始产物继续保留作为故障证据。本次仅回写 Spec／Tasks／验证及附件，不改 Overview 的当前解析行为；没有推送或关闭 Issue。
+
+
+## 原任务计算条件补全实际完成（2026-10-16）
+
+上一轮原任务仅补参数，未补Methods；本轮按“认可开始落地执行。”正式执行。任务仍为c16cc627a0c04dc8ad4289624d1da80a，revision6、ready、未提交。主文SHA/DOI与本文件基线一致；有效主文fc404abeb1e74ac2bd33d8691af97564与SI 261650f32fe54375af8abbd83d7576f6均参与完整读取。
+
+备份、原始候选、逐表行近似、校验缺口与应用计划位于本地 `.data/review_artifacts/c16cc627a0c04dc8ad4289624d1da80a/calculation_backfill/20261016T071804Z/`，包含backup.json、table_assignments_raw.json、table_assignments.json、ledger.json、call_sources.json、plan.json、applied.json。原文与完整模型响应不加入Git。
+
+8条均补QE／DFPT、k24³、q6³、90／720Ry；VASP／PBE／850eV及优化网格/收敛阈值保留结构阶段。5条非谐各20关联，3条谐各12关联，共136；SSCHA 80Ry、216原子、0K、k3³、采样q2³、插值q6³及超胞2³只进入5条非谐。24个SSCHA对谐候选明确排除。EPC泛函与未报告展宽保持空。
+
+首轮因Quantum软连字符定位失败未写；部分新候选漏结构设置或SSCHA错挂，也未写。最终用20261016T063806Z真实完整模型候选与20261016T064954Z真实逐表分类，在当前v4规则下全量重新验证：全草稿hash、完整来源内容/SHA/角色、旧目标指纹、原模型及端点签名阅读缓存一致；仅内部近似投影重绑指纹，业务科学值不改。不是fixture填值或伪改complete。
+
+已执行prepare --resume-from .../20261016T064954Z --revalidate-prior .../20261016T063806Z，再apply本次plan.json；不可重复应用旧计划，版本/全图hash门会拒绝。applied=136、uncertain_checks=8。8条核对缓存为uncertain/paper_inference，location_errors=0、关联未过期，不能当作管理员物理批准。
+
+[逐条保存对照](assets/original-task-conditions-validation.json)复查136关联指纹当前、Redis与MySQL ScientificUploadDraft相等；规范化视图去掉条件/来源后与备份相等。保留167/250的原单值及inactive范围槽位、150旧范围代表标记；不自动恢复范围或挑端点。既有DOS converter会规范化并归档同状态原始DOS（167GPa当前4个来源），故不声称raw字节仅两个字段变化，也不拿更早备份覆盖后来用户改动。
+
+[真实原任务页面截图](assets/original-task-conditions-implemented.png)及后台DOM复核8行软件、网格和阶段扩展。页面只展开/查看，没有点编辑、保存或提交；实际保存由上述工具经既有保存路径执行。新分组的四点/两方法另在真实隔离MySQL通过保存/返修/导出3项；后端50项条件/表格/来源回归、前端55项和构建通过。此前真实新任务fe096c9cd805492f8f5bd838c7dbd244的完整Worker验收继续有效，本次没有再次在线跑完整新上传，不能把专项回归称为新一轮端到端上传。
+
+无业务库迁移、远端部署或推送；#94/#139保持OPEN，远程正文与链接单独收尾。

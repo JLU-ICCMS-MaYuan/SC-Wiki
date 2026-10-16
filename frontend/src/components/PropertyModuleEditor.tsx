@@ -16,10 +16,13 @@ import { PropertySpectrumSection, MissingPropertySpectrumModules } from './Prope
 import PropertyModuleSection from './PropertyModuleSection'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
 import { isFermiDos, normalizeDosModules } from '../lib/fermiDos'
+import PredictedTcGroupEditor from './PredictedTcGroupEditor'
+import { isGroupedTc, predictedTcGroups, tcGroupKey } from '../lib/predictedTcGroups'
 
 export interface ModuleDeletion {
   deletedModuleKey?: string
   deletedRecordKey?: string
+  deletedRecordKeys?: string[]
 }
 
 interface Props {
@@ -241,6 +244,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
       {modules.map((module, moduleIndex) => {
         const moduleBasePath = basePath ? `${basePath}.${moduleIndex}` : String(moduleIndex)
         const choices = choicesFor(module.module_code)
+        const tcGroups = predictedTcGroups(module.records)
         const moduleProblems = [
           ...issues.filter(issue => issue.field.startsWith(`${moduleBasePath}.`)).map(issue => issue.message),
           ...module.records.map(record => definitionErrors[record.record_key]).filter(Boolean),
@@ -261,6 +265,33 @@ const PropertyModuleEditor: React.FC<Props> = ({
             <PropertySpectrumSection moduleCode={module.module_code} />
             <Box sx={{ pt: 1 }}>
               {module.records.map((record, recordIndex) => {
+                if (isGroupedTc(record)) {
+                  const group = tcGroups.find(items => tcGroupKey(items[0]) === tcGroupKey(record))!
+                  if (group[0].record_key !== record.record_key) return null
+                  const summary = [definitionLabel(record), record.name_raw, propertyRecordSummaryValue(record)].filter(Boolean).join(' · ')
+                  return <Accordion key={tcGroupKey(record)} defaultExpanded disableGutters elevation={0} square sx={{ bgcolor: 'transparent', '&:before': { display: 'none' } }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-label={`记录 ${recordIndex + 1} · ${summary}`}>
+                      <Typography>{group.length > 1 ? `超导转变温度 Tc · ${group.length} 条结果` : summary}</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails sx={{ px: 0 }}><PredictedTcGroupEditor records={group}
+                    definitions={choices as FormDefinition[]} definition={boundDefinitions[group[0].record_key]}
+                    errors={group.map(item => definitionErrors[item.record_key])} issues={issues}
+                    basePath={moduleBasePath} recordIndices={new Map(module.records.map((item, index) => [item.record_key, index]))}
+                    readOnly={readOnly} onChange={(next, selected) => {
+                      const keys = new Set(group.map(item => item.record_key)), nextKeys = new Set(next.map(item => item.record_key))
+                      const removed = group.filter(item => !nextKeys.has(item.record_key)).map(item => item.record_key)
+                      onChange(modules.map(current => {
+                        const clearRepresentative = (item: PropertyRecordDraft) => selected && item.record_type === 'predicted_tc' ? { ...item, is_representative: false } : item
+                        if (current.module_key !== module.module_key) return { ...current, records: current.records.map(clearRepresentative) }
+                        const records: PropertyRecordDraft[] = []
+                        current.records.forEach(item => {
+                          if (item.record_key === group[0].record_key) records.push(...next)
+                          else if (!keys.has(item.record_key)) records.push(clearRepresentative(item))
+                        })
+                        return { ...current, records }
+                      }), removed.length ? { deletedRecordKeys: removed } : undefined)
+                    }} /></AccordionDetails></Accordion>
+                }
                 const recordBasePath = `${moduleBasePath}.records.${recordIndex}`
                 const recordIssues = issues.flatMap(item => item.field.startsWith(recordBasePath)
                   ? [{ ...item, field: item.field.slice(recordBasePath.length + 1) }]

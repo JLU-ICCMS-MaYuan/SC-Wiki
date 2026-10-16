@@ -6,7 +6,14 @@ export default function AutoGrowingTextField({ value, label, sx, minFieldWidth =
   const measure = useRef<HTMLSpanElement>(null)
   const [width, setWidth] = useState(minFieldWidth)
   useLayoutEffect(() => {
-    setWidth(Math.max(minFieldWidth, Math.ceil(measure.current?.getBoundingClientRect().width || 0) + 36))
+    const updateWidth = () => setWidth(Math.max(minFieldWidth, Math.ceil(measure.current?.getBoundingClientRect().width || 0) + 36))
+    updateWidth()
+    // 折叠模块内初次测量为零；展开后文字尺寸变化也需要重测。
+    if (typeof ResizeObserver !== 'undefined' && measure.current) {
+      const observer = new ResizeObserver(updateWidth)
+      observer.observe(measure.current)
+      return () => observer.disconnect()
+    }
   }, [value, label, minFieldWidth])
   return <Box sx={{ position: 'relative', flex: '0 0 auto', width }} data-auto-growing-field>
     <Box component="span" ref={measure} aria-hidden sx={{ position: 'absolute', visibility: 'hidden', whiteSpace: 'pre', fontFamily: 'inherit', fontSize: '1rem', fontWeight: 400, width: 'max-content', pointerEvents: 'none' }}>{String(value ?? '')}</Box>

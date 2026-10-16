@@ -872,8 +872,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       onChange={(modules, deletion) => emitStates(statesRef.current.map((item, itemIndex) => itemIndex === index ? {
                         ...item,
                         property_modules: modules,
-                        deleted_record_keys: deletion?.deletedRecordKey
-                          ? [...new Set([...(item.deleted_record_keys || []), deletion.deletedRecordKey])]
+                        deleted_record_keys: deletion?.deletedRecordKey || deletion?.deletedRecordKeys?.length
+                          ? [...new Set([...(item.deleted_record_keys || []), ...(deletion.deletedRecordKey ? [deletion.deletedRecordKey] : []), ...(deletion.deletedRecordKeys || [])])]
                           : item.deleted_record_keys || [],
                         deleted_module_keys: deletion?.deletedModuleKey
                           ? [...new Set([...(item.deleted_module_keys || []), deletion.deletedModuleKey])]

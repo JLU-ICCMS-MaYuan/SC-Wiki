@@ -84,6 +84,7 @@ def canonical(value):
             'superconductor_id', 'chemical_system_id', 'structure_id', 'created_at', 'updated_at',
             'evidence', 'evidences', 'display_order', 'is_representative',
             'record_checksum', 'source_fingerprint', 'record_key', 'module_key',
+            'tc_group', 'tc_range_origin',
         } and v is not None}
     if isinstance(value, list):
         return [canonical(v) for v in value]
@@ -138,9 +139,13 @@ def record_identity(state_key, module_key, record_key):
 
 def record_claim(record, state):
     from backend.services.scientific_draft_rewrite import _record_snapshot
-    value = _record_snapshot(record, module_code=record.get('module_code', '') if isinstance(record, dict) else '')
+    value = copy.deepcopy(_record_snapshot(record, module_code=record.get('module_code', '') if isinstance(record, dict) else ''))
     # 模块代码属于稳定定位，不是科学事实；数据库精度和默认值不改变断言。
     value.pop('module_code', None)
+    # 分组身份和范围历史是表示/来源元数据，不让模型把它们当作当前科学数值。
+    if isinstance(value.get('payload'), dict):
+        for key in ('tc_group', 'tc_range_origin'):
+            value['payload'].pop(key, None)
     return copy.deepcopy({'record': value, 'state': {k: state.get(k) for k in STATE_FIELDS if k != 'structure_families' and populated(state.get(k))}})
 
 

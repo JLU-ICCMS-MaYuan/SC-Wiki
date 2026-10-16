@@ -1,0 +1,914 @@
+{
+  "task_id": "c16cc627a0c04dc8ad4289624d1da80a",
+  "revision": 6,
+  "rows": [
+    {
+      "pressure": 150.0,
+      "tc": [
+        281,
+        311
+      ],
+      "approximation": "anharmonic",
+      "conditions": {
+        "calculation_code": "Quantum ESPRESSO",
+        "extensions": [
+          {
+            "key": "structural_relaxation.calculation_code",
+            "name": "structural_relaxation · calculation_code",
+            "value_kind": "text",
+            "value_raw": "VASP",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.exchange_correlation_functional",
+            "name": "structural_relaxation · exchange_correlation_functional",
+            "value_kind": "text",
+            "value_raw": "PBE",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.energy_cutoff",
+            "name": "structural_relaxation · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "850",
+            "unit_raw": "eV",
+            "value_number": 850
+          },
+          {
+            "key": "structural_relaxation.k_grid",
+            "name": "structural_relaxation · k_grid",
+            "value_kind": "text",
+            "value_raw": "2π × 0.03 Å⁻¹",
+            "unit_raw": "Å⁻¹"
+          },
+          {
+            "key": "structural_relaxation.convergence_energy",
+            "name": "structural_relaxation · convergence_energy",
+            "value_kind": "text",
+            "value_raw": "10^-8 eV",
+            "unit_raw": "eV"
+          },
+          {
+            "key": "structural_relaxation.convergence_force",
+            "name": "structural_relaxation · convergence_force",
+            "value_kind": "text",
+            "value_raw": "1 meV/Å",
+            "unit_raw": "meV/Å"
+          },
+          {
+            "key": "electron_phonon.energy_cutoff",
+            "name": "electron_phonon · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "90",
+            "unit_raw": "Ry",
+            "value_number": 90
+          },
+          {
+            "key": "electron_phonon.charge_density_cutoff",
+            "name": "electron_phonon · charge_density_cutoff",
+            "value_kind": "number",
+            "value_raw": "720",
+            "unit_raw": "Ry",
+            "value_number": 720
+          },
+          {
+            "key": "sscha.calculation_code",
+            "name": "sscha · calculation_code",
+            "value_kind": "text",
+            "value_raw": "SSCHA",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.supercell",
+            "name": "sscha · supercell",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.atoms",
+            "name": "sscha · atoms",
+            "value_kind": "number",
+            "value_raw": "216",
+            "unit_raw": null,
+            "value_number": 216
+          },
+          {
+            "key": "sscha.temperature_k",
+            "name": "sscha · temperature_k",
+            "value_kind": "number",
+            "value_raw": "0",
+            "unit_raw": "K",
+            "value_number": 0
+          },
+          {
+            "key": "sscha.q_grid",
+            "name": "sscha · q_grid",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.energy_cutoff",
+            "name": "sscha · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "80",
+            "unit_raw": "Ry",
+            "value_number": 80
+          },
+          {
+            "key": "sscha.k_grid",
+            "name": "sscha · k_grid",
+            "value_kind": "text",
+            "value_raw": "3 × 3 × 3",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.q_grid_interpolated",
+            "name": "sscha · q_grid_interpolated",
+            "value_kind": "text",
+            "value_raw": "6 × 6 × 6",
+            "unit_raw": null
+          }
+        ],
+        "electronic_method": "DFPT",
+        "k_grid": "24 × 24 × 24",
+        "q_grid": "6 × 6 × 6"
+      },
+      "associations": 20,
+      "all_fingerprints_current": true
+    },
+    {
+      "pressure": 167.0,
+      "tc": 316,
+      "approximation": "anharmonic",
+      "conditions": {
+        "extensions": [
+          {
+            "key": "structural_relaxation.calculation_code",
+            "name": "structural_relaxation · calculation_code",
+            "value_kind": "text",
+            "value_raw": "VASP",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.exchange_correlation_functional",
+            "name": "structural_relaxation · exchange_correlation_functional",
+            "value_kind": "text",
+            "value_raw": "PBE",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.energy_cutoff",
+            "name": "structural_relaxation · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "850",
+            "unit_raw": "eV",
+            "value_number": 850
+          },
+          {
+            "key": "structural_relaxation.k_grid",
+            "name": "structural_relaxation · k_grid",
+            "value_kind": "text",
+            "value_raw": "2π × 0.03 Å⁻¹",
+            "unit_raw": "Å⁻¹"
+          },
+          {
+            "key": "structural_relaxation.convergence_energy",
+            "name": "structural_relaxation · convergence_energy",
+            "value_kind": "text",
+            "value_raw": "10^-8 eV",
+            "unit_raw": "eV"
+          },
+          {
+            "key": "structural_relaxation.convergence_force",
+            "name": "structural_relaxation · convergence_force",
+            "value_kind": "text",
+            "value_raw": "1 meV/Å",
+            "unit_raw": "meV/Å"
+          },
+          {
+            "key": "electron_phonon.energy_cutoff",
+            "name": "electron_phonon · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "90",
+            "unit_raw": "Ry",
+            "value_number": 90
+          },
+          {
+            "key": "electron_phonon.charge_density_cutoff",
+            "name": "electron_phonon · charge_density_cutoff",
+            "value_kind": "number",
+            "value_raw": "720",
+            "unit_raw": "Ry",
+            "value_number": 720
+          },
+          {
+            "key": "sscha.calculation_code",
+            "name": "sscha · calculation_code",
+            "value_kind": "text",
+            "value_raw": "SSCHA",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.supercell",
+            "name": "sscha · supercell",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.atoms",
+            "name": "sscha · atoms",
+            "value_kind": "number",
+            "value_raw": "216",
+            "unit_raw": null,
+            "value_number": 216
+          },
+          {
+            "key": "sscha.temperature_k",
+            "name": "sscha · temperature_k",
+            "value_kind": "number",
+            "value_raw": "0",
+            "unit_raw": "K",
+            "value_number": 0
+          },
+          {
+            "key": "sscha.q_grid",
+            "name": "sscha · q_grid",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.energy_cutoff",
+            "name": "sscha · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "80",
+            "unit_raw": "Ry",
+            "value_number": 80
+          },
+          {
+            "key": "sscha.k_grid",
+            "name": "sscha · k_grid",
+            "value_kind": "text",
+            "value_raw": "3 × 3 × 3",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.q_grid_interpolated",
+            "name": "sscha · q_grid_interpolated",
+            "value_kind": "text",
+            "value_raw": "6 × 6 × 6",
+            "unit_raw": null
+          }
+        ],
+        "calculation_code": "Quantum ESPRESSO",
+        "electronic_method": "DFPT",
+        "k_grid": "24 × 24 × 24",
+        "q_grid": "6 × 6 × 6"
+      },
+      "associations": 20,
+      "all_fingerprints_current": true
+    },
+    {
+      "pressure": 200.0,
+      "tc": [
+        291,
+        325
+      ],
+      "approximation": "anharmonic",
+      "conditions": {
+        "extensions": [
+          {
+            "key": "structural_relaxation.calculation_code",
+            "name": "structural_relaxation · calculation_code",
+            "value_kind": "text",
+            "value_raw": "VASP",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.exchange_correlation_functional",
+            "name": "structural_relaxation · exchange_correlation_functional",
+            "value_kind": "text",
+            "value_raw": "PBE",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.energy_cutoff",
+            "name": "structural_relaxation · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "850",
+            "unit_raw": "eV",
+            "value_number": 850
+          },
+          {
+            "key": "structural_relaxation.k_grid",
+            "name": "structural_relaxation · k_grid",
+            "value_kind": "text",
+            "value_raw": "2π × 0.03 Å⁻¹",
+            "unit_raw": "Å⁻¹"
+          },
+          {
+            "key": "structural_relaxation.convergence_energy",
+            "name": "structural_relaxation · convergence_energy",
+            "value_kind": "text",
+            "value_raw": "10^-8 eV",
+            "unit_raw": "eV"
+          },
+          {
+            "key": "structural_relaxation.convergence_force",
+            "name": "structural_relaxation · convergence_force",
+            "value_kind": "text",
+            "value_raw": "1 meV/Å",
+            "unit_raw": "meV/Å"
+          },
+          {
+            "key": "electron_phonon.energy_cutoff",
+            "name": "electron_phonon · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "90",
+            "unit_raw": "Ry",
+            "value_number": 90
+          },
+          {
+            "key": "electron_phonon.charge_density_cutoff",
+            "name": "electron_phonon · charge_density_cutoff",
+            "value_kind": "number",
+            "value_raw": "720",
+            "unit_raw": "Ry",
+            "value_number": 720
+          },
+          {
+            "key": "sscha.calculation_code",
+            "name": "sscha · calculation_code",
+            "value_kind": "text",
+            "value_raw": "SSCHA",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.supercell",
+            "name": "sscha · supercell",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.atoms",
+            "name": "sscha · atoms",
+            "value_kind": "number",
+            "value_raw": "216",
+            "unit_raw": null,
+            "value_number": 216
+          },
+          {
+            "key": "sscha.temperature_k",
+            "name": "sscha · temperature_k",
+            "value_kind": "number",
+            "value_raw": "0",
+            "unit_raw": "K",
+            "value_number": 0
+          },
+          {
+            "key": "sscha.q_grid",
+            "name": "sscha · q_grid",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.energy_cutoff",
+            "name": "sscha · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "80",
+            "unit_raw": "Ry",
+            "value_number": 80
+          },
+          {
+            "key": "sscha.k_grid",
+            "name": "sscha · k_grid",
+            "value_kind": "text",
+            "value_raw": "3 × 3 × 3",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.q_grid_interpolated",
+            "name": "sscha · q_grid_interpolated",
+            "value_kind": "text",
+            "value_raw": "6 × 6 × 6",
+            "unit_raw": null
+          }
+        ],
+        "calculation_code": "Quantum ESPRESSO",
+        "electronic_method": "DFPT",
+        "k_grid": "24 × 24 × 24",
+        "q_grid": "6 × 6 × 6"
+      },
+      "associations": 20,
+      "all_fingerprints_current": true
+    },
+    {
+      "pressure": 250.0,
+      "tc": 331,
+      "approximation": "anharmonic",
+      "conditions": {
+        "extensions": [
+          {
+            "key": "structural_relaxation.calculation_code",
+            "name": "structural_relaxation · calculation_code",
+            "value_kind": "text",
+            "value_raw": "VASP",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.exchange_correlation_functional",
+            "name": "structural_relaxation · exchange_correlation_functional",
+            "value_kind": "text",
+            "value_raw": "PBE",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.energy_cutoff",
+            "name": "structural_relaxation · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "850",
+            "unit_raw": "eV",
+            "value_number": 850
+          },
+          {
+            "key": "structural_relaxation.k_grid",
+            "name": "structural_relaxation · k_grid",
+            "value_kind": "text",
+            "value_raw": "2π × 0.03 Å⁻¹",
+            "unit_raw": "Å⁻¹"
+          },
+          {
+            "key": "structural_relaxation.convergence_energy",
+            "name": "structural_relaxation · convergence_energy",
+            "value_kind": "text",
+            "value_raw": "10^-8 eV",
+            "unit_raw": "eV"
+          },
+          {
+            "key": "structural_relaxation.convergence_force",
+            "name": "structural_relaxation · convergence_force",
+            "value_kind": "text",
+            "value_raw": "1 meV/Å",
+            "unit_raw": "meV/Å"
+          },
+          {
+            "key": "electron_phonon.energy_cutoff",
+            "name": "electron_phonon · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "90",
+            "unit_raw": "Ry",
+            "value_number": 90
+          },
+          {
+            "key": "electron_phonon.charge_density_cutoff",
+            "name": "electron_phonon · charge_density_cutoff",
+            "value_kind": "number",
+            "value_raw": "720",
+            "unit_raw": "Ry",
+            "value_number": 720
+          },
+          {
+            "key": "sscha.calculation_code",
+            "name": "sscha · calculation_code",
+            "value_kind": "text",
+            "value_raw": "SSCHA",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.supercell",
+            "name": "sscha · supercell",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.atoms",
+            "name": "sscha · atoms",
+            "value_kind": "number",
+            "value_raw": "216",
+            "unit_raw": null,
+            "value_number": 216
+          },
+          {
+            "key": "sscha.temperature_k",
+            "name": "sscha · temperature_k",
+            "value_kind": "number",
+            "value_raw": "0",
+            "unit_raw": "K",
+            "value_number": 0
+          },
+          {
+            "key": "sscha.q_grid",
+            "name": "sscha · q_grid",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.energy_cutoff",
+            "name": "sscha · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "80",
+            "unit_raw": "Ry",
+            "value_number": 80
+          },
+          {
+            "key": "sscha.k_grid",
+            "name": "sscha · k_grid",
+            "value_kind": "text",
+            "value_raw": "3 × 3 × 3",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.q_grid_interpolated",
+            "name": "sscha · q_grid_interpolated",
+            "value_kind": "text",
+            "value_raw": "6 × 6 × 6",
+            "unit_raw": null
+          }
+        ],
+        "calculation_code": "Quantum ESPRESSO",
+        "electronic_method": "DFPT",
+        "k_grid": "24 × 24 × 24",
+        "q_grid": "6 × 6 × 6"
+      },
+      "associations": 20,
+      "all_fingerprints_current": true
+    },
+    {
+      "pressure": 290.0,
+      "tc": [
+        311,
+        339
+      ],
+      "approximation": "harmonic",
+      "conditions": {
+        "extensions": [
+          {
+            "key": "structural_relaxation.calculation_code",
+            "name": "structural_relaxation · calculation_code",
+            "value_kind": "text",
+            "value_raw": "VASP",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.exchange_correlation_functional",
+            "name": "structural_relaxation · exchange_correlation_functional",
+            "value_kind": "text",
+            "value_raw": "PBE",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.energy_cutoff",
+            "name": "structural_relaxation · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "850",
+            "unit_raw": "eV",
+            "value_number": 850
+          },
+          {
+            "key": "structural_relaxation.k_grid",
+            "name": "structural_relaxation · k_grid",
+            "value_kind": "text",
+            "value_raw": "2π × 0.03 Å⁻¹",
+            "unit_raw": "Å⁻¹"
+          },
+          {
+            "key": "structural_relaxation.convergence_energy",
+            "name": "structural_relaxation · convergence_energy",
+            "value_kind": "text",
+            "value_raw": "10^-8 eV",
+            "unit_raw": "eV"
+          },
+          {
+            "key": "structural_relaxation.convergence_force",
+            "name": "structural_relaxation · convergence_force",
+            "value_kind": "text",
+            "value_raw": "1 meV/Å",
+            "unit_raw": "meV/Å"
+          },
+          {
+            "key": "electron_phonon.energy_cutoff",
+            "name": "electron_phonon · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "90",
+            "unit_raw": "Ry",
+            "value_number": 90
+          },
+          {
+            "key": "electron_phonon.charge_density_cutoff",
+            "name": "electron_phonon · charge_density_cutoff",
+            "value_kind": "number",
+            "value_raw": "720",
+            "unit_raw": "Ry",
+            "value_number": 720
+          }
+        ],
+        "calculation_code": "Quantum ESPRESSO",
+        "electronic_method": "DFPT",
+        "k_grid": "24 × 24 × 24",
+        "q_grid": "6 × 6 × 6"
+      },
+      "associations": 12,
+      "all_fingerprints_current": true
+    },
+    {
+      "pressure": 300.0,
+      "tc": [
+        303,
+        329
+      ],
+      "approximation": "harmonic",
+      "conditions": {
+        "extensions": [
+          {
+            "key": "structural_relaxation.calculation_code",
+            "name": "structural_relaxation · calculation_code",
+            "value_kind": "text",
+            "value_raw": "VASP",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.exchange_correlation_functional",
+            "name": "structural_relaxation · exchange_correlation_functional",
+            "value_kind": "text",
+            "value_raw": "PBE",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.energy_cutoff",
+            "name": "structural_relaxation · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "850",
+            "unit_raw": "eV",
+            "value_number": 850
+          },
+          {
+            "key": "structural_relaxation.k_grid",
+            "name": "structural_relaxation · k_grid",
+            "value_kind": "text",
+            "value_raw": "2π × 0.03 Å⁻¹",
+            "unit_raw": "Å⁻¹"
+          },
+          {
+            "key": "structural_relaxation.convergence_energy",
+            "name": "structural_relaxation · convergence_energy",
+            "value_kind": "text",
+            "value_raw": "10^-8 eV",
+            "unit_raw": "eV"
+          },
+          {
+            "key": "structural_relaxation.convergence_force",
+            "name": "structural_relaxation · convergence_force",
+            "value_kind": "text",
+            "value_raw": "1 meV/Å",
+            "unit_raw": "meV/Å"
+          },
+          {
+            "key": "electron_phonon.energy_cutoff",
+            "name": "electron_phonon · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "90",
+            "unit_raw": "Ry",
+            "value_number": 90
+          },
+          {
+            "key": "electron_phonon.charge_density_cutoff",
+            "name": "electron_phonon · charge_density_cutoff",
+            "value_kind": "number",
+            "value_raw": "720",
+            "unit_raw": "Ry",
+            "value_number": 720
+          }
+        ],
+        "calculation_code": "Quantum ESPRESSO",
+        "electronic_method": "DFPT",
+        "k_grid": "24 × 24 × 24",
+        "q_grid": "6 × 6 × 6"
+      },
+      "associations": 12,
+      "all_fingerprints_current": true
+    },
+    {
+      "pressure": 300.0,
+      "tc": [
+        293,
+        330
+      ],
+      "approximation": "anharmonic",
+      "conditions": {
+        "extensions": [
+          {
+            "key": "structural_relaxation.calculation_code",
+            "name": "structural_relaxation · calculation_code",
+            "value_kind": "text",
+            "value_raw": "VASP",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.exchange_correlation_functional",
+            "name": "structural_relaxation · exchange_correlation_functional",
+            "value_kind": "text",
+            "value_raw": "PBE",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.energy_cutoff",
+            "name": "structural_relaxation · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "850",
+            "unit_raw": "eV",
+            "value_number": 850
+          },
+          {
+            "key": "structural_relaxation.k_grid",
+            "name": "structural_relaxation · k_grid",
+            "value_kind": "text",
+            "value_raw": "2π × 0.03 Å⁻¹",
+            "unit_raw": "Å⁻¹"
+          },
+          {
+            "key": "structural_relaxation.convergence_energy",
+            "name": "structural_relaxation · convergence_energy",
+            "value_kind": "text",
+            "value_raw": "10^-8 eV",
+            "unit_raw": "eV"
+          },
+          {
+            "key": "structural_relaxation.convergence_force",
+            "name": "structural_relaxation · convergence_force",
+            "value_kind": "text",
+            "value_raw": "1 meV/Å",
+            "unit_raw": "meV/Å"
+          },
+          {
+            "key": "electron_phonon.energy_cutoff",
+            "name": "electron_phonon · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "90",
+            "unit_raw": "Ry",
+            "value_number": 90
+          },
+          {
+            "key": "electron_phonon.charge_density_cutoff",
+            "name": "electron_phonon · charge_density_cutoff",
+            "value_kind": "number",
+            "value_raw": "720",
+            "unit_raw": "Ry",
+            "value_number": 720
+          },
+          {
+            "key": "sscha.calculation_code",
+            "name": "sscha · calculation_code",
+            "value_kind": "text",
+            "value_raw": "SSCHA",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.supercell",
+            "name": "sscha · supercell",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.atoms",
+            "name": "sscha · atoms",
+            "value_kind": "number",
+            "value_raw": "216",
+            "unit_raw": null,
+            "value_number": 216
+          },
+          {
+            "key": "sscha.temperature_k",
+            "name": "sscha · temperature_k",
+            "value_kind": "number",
+            "value_raw": "0",
+            "unit_raw": "K",
+            "value_number": 0
+          },
+          {
+            "key": "sscha.q_grid",
+            "name": "sscha · q_grid",
+            "value_kind": "text",
+            "value_raw": "2 × 2 × 2",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.energy_cutoff",
+            "name": "sscha · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "80",
+            "unit_raw": "Ry",
+            "value_number": 80
+          },
+          {
+            "key": "sscha.k_grid",
+            "name": "sscha · k_grid",
+            "value_kind": "text",
+            "value_raw": "3 × 3 × 3",
+            "unit_raw": null
+          },
+          {
+            "key": "sscha.q_grid_interpolated",
+            "name": "sscha · q_grid_interpolated",
+            "value_kind": "text",
+            "value_raw": "6 × 6 × 6",
+            "unit_raw": null
+          }
+        ],
+        "calculation_code": "Quantum ESPRESSO",
+        "electronic_method": "DFPT",
+        "k_grid": "24 × 24 × 24",
+        "q_grid": "6 × 6 × 6"
+      },
+      "associations": 20,
+      "all_fingerprints_current": true
+    },
+    {
+      "pressure": 350.0,
+      "tc": [
+        266,
+        294
+      ],
+      "approximation": "harmonic",
+      "conditions": {
+        "extensions": [
+          {
+            "key": "structural_relaxation.calculation_code",
+            "name": "structural_relaxation · calculation_code",
+            "value_kind": "text",
+            "value_raw": "VASP",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.exchange_correlation_functional",
+            "name": "structural_relaxation · exchange_correlation_functional",
+            "value_kind": "text",
+            "value_raw": "PBE",
+            "unit_raw": null
+          },
+          {
+            "key": "structural_relaxation.energy_cutoff",
+            "name": "structural_relaxation · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "850",
+            "unit_raw": "eV",
+            "value_number": 850
+          },
+          {
+            "key": "structural_relaxation.k_grid",
+            "name": "structural_relaxation · k_grid",
+            "value_kind": "text",
+            "value_raw": "2π × 0.03 Å⁻¹",
+            "unit_raw": "Å⁻¹"
+          },
+          {
+            "key": "structural_relaxation.convergence_energy",
+            "name": "structural_relaxation · convergence_energy",
+            "value_kind": "text",
+            "value_raw": "10^-8 eV",
+            "unit_raw": "eV"
+          },
+          {
+            "key": "structural_relaxation.convergence_force",
+            "name": "structural_relaxation · convergence_force",
+            "value_kind": "text",
+            "value_raw": "1 meV/Å",
+            "unit_raw": "meV/Å"
+          },
+          {
+            "key": "electron_phonon.energy_cutoff",
+            "name": "electron_phonon · energy_cutoff",
+            "value_kind": "number",
+            "value_raw": "90",
+            "unit_raw": "Ry",
+            "value_number": 90
+          },
+          {
+            "key": "electron_phonon.charge_density_cutoff",
+            "name": "electron_phonon · charge_density_cutoff",
+            "value_kind": "number",
+            "value_raw": "720",
+            "unit_raw": "Ry",
+            "value_number": 720
+          }
+        ],
+        "calculation_code": "Quantum ESPRESSO",
+        "electronic_method": "DFPT",
+        "k_grid": "24 × 24 × 24",
+        "q_grid": "6 × 6 × 6"
+      },
+      "associations": 12,
+      "all_fingerprints_current": true
+    }
+  ],
+  "conditions_only_in_canonical_view": true,
+  "mysql_redis_equal": true,
+  "association_count": 136
+}

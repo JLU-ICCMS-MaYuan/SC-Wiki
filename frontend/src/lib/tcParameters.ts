@@ -72,6 +72,11 @@ export function validateTcParameters(record: PropertyRecordDraft): Array<{ field
   if (record.record_type !== 'predicted_tc') return []
   const parameters = tcParameters(record), issues: Array<{ field: string; message: string }> = []
   const valid = (value: unknown) => value == null || (typeof value === 'number' && Number.isFinite(value) && value >= 0)
+  const representativeMu = readTcParameter(record, 'mu_star')
+  if (record.is_representative && (record.value_kind !== 'number' || record.value_number == null || !valid(record.value_number)
+    || representativeMu == null || !valid(representativeMu))) {
+    issues.push({ field: 'is_representative', message: '请明确选择具体 Tc／μ* 组合，或取消旧代表标记' })
+  }
   for (const key of ['lambda_ep', 'omega_log', 'mu_star'] as const) {
     if (!valid(readTcParameter(record, key))) issues.push({ field: `payload.parameters.${key}`, message: '请输入完整的非负数值' })
   }
