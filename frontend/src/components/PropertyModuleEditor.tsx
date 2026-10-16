@@ -288,6 +288,23 @@ const PropertyModuleEditor: React.FC<Props> = ({
                 const recordLabel = definitionLabel(record)
                 const summary = [recordLabel, record.name_raw, propertyRecordSummaryValue(record)].filter(Boolean).join(' · ')
                 const recordError = definitionErrors[record.record_key] || recordIssues[0]?.message
+                const recordEditor = (
+                  <PropertyRecordEditor
+                    key={record.record_key}
+                    record={record}
+                    definition={boundDefinitions[record.record_key] || definitions[record.module_code]?.find(item => definitionIdentity(item) === `${record.definition_key}@${record.definition_version}`)}
+                    definitionError={definitionErrors[record.record_key]}
+                    issues={recordIssues}
+                    basePath={recordBasePath}
+                    readOnly={readOnly}
+                    onChange={next => updateRecordByKey(module.module_key, record.record_key, next)}
+                    onClone={readOnly ? undefined : () => cloneRecordByKey(module.module_key, record.record_key)}
+                    onDelete={readOnly ? undefined : () => deleteRecordByKey(module.module_key, record.record_key)}
+                  />
+                )
+                if (record.module_code === 'electronic_properties' && record.record_type === 'property' && record.property_code === 'dos_fermi') {
+                  return recordEditor
+                }
                 return (
                   <Accordion key={record.record_key} defaultExpanded disableGutters elevation={0} square sx={{ bgcolor: 'transparent', borderBottom: '1px solid', borderColor: 'divider', '&:before': { display: 'none' } }}>
                     <AccordionSummary
@@ -310,17 +327,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                           {allChoices.map(definition => <MenuItem key={definitionIdentity(definition)} value={definitionIdentity(definition)}>{definitionLabel(definition)}</MenuItem>)}
                         </Select>
                       )}
-                      <PropertyRecordEditor
-                        record={record}
-                        definition={boundDefinitions[record.record_key] || definitions[record.module_code]?.find(item => definitionIdentity(item) === `${record.definition_key}@${record.definition_version}`)}
-                        definitionError={definitionErrors[record.record_key]}
-                        issues={recordIssues}
-                        basePath={recordBasePath}
-                        readOnly={readOnly}
-                        onChange={next => updateRecordByKey(module.module_key, record.record_key, next)}
-                        onClone={readOnly ? undefined : () => cloneRecordByKey(module.module_key, record.record_key)}
-                        onDelete={readOnly ? undefined : () => deleteRecordByKey(module.module_key, record.record_key)}
-                      />
+                      {recordEditor}
                     </AccordionDetails>
                   </Accordion>
                 )

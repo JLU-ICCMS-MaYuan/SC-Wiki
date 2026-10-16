@@ -34,6 +34,56 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.clearAllMocks(); clearFormDefinitionCache() })
 
 describe('Issue #94 记录表单', () => {
+  it('费米能级 DOS 直接显示紧凑输入，编辑、复制、删除和只读均保留记录契约', async () => {
+    const dosDefinition: FormDefinition = {
+      ...definitions.find(item => item.property_code === 'custom')!,
+      module_code: 'electronic_properties', property_code: 'dos_fermi',
+      definition_key: 'record.electronic_properties.dos_fermi',
+      json_schema: { type: 'object', properties: {} },
+    }
+    vi.mocked(api.get).mockImplementation(async path => (
+      path.startsWith('/api/form-definitions?') ? [dosDefinition] : dosDefinition
+    ) as never)
+    const quote = { filename: 'paper.pdf', page: 3, quote: 'N(Ef) is 18.44 states/spin/Ry.' }
+    const dos: PropertyRecordDraft = {
+      record_key: 'dos', module_code: 'electronic_properties', record_type: 'property',
+      property_code: 'dos_fermi', definition_key: dosDefinition.definition_key, definition_version: 1,
+      name_raw: 'N(Ef)', value_kind: 'text', value_raw: '18.44', value_text: '18.44',
+      unit_raw: 'states/spin/Ry', payload: {}, evidence: quote, evidences: [quote],
+    }
+    const changed = vi.fn()
+    const Harness = ({ readOnly = false }: { readOnly?: boolean }) => {
+      const [modules, setModules] = useState<PropertyModuleDraft[]>([{
+        ...emptyPropertyModule('electronic_properties'), records: [dos],
+      }])
+      return <PropertyModuleEditor modules={modules} readOnly={readOnly} onChange={next => { changed(next); setModules(next) }} />
+    }
+    const view = render(<Harness />)
+    await waitFor(() => expect(api.get).toHaveBeenCalled())
+    fireEvent.click(screen.getByText('电子性质'))
+    const row = screen.getByTestId('property-record-dos')
+    expect(within(row).getByLabelText('名称')).toHaveValue('N(Ef)')
+    expect(within(row).getByLabelText('原始值')).toHaveValue('18.44')
+    expect(within(row).getByLabelText('单位')).toHaveValue('states/spin/Ry')
+    expect(within(row).getByRole('combobox')).toHaveTextContent('文本')
+    expect(within(row).queryByLabelText('文本值')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^记录 1/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: '记录定义' })).not.toBeInTheDocument()
+    expect(screen.queryByText(/原文证据（/)).not.toBeInTheDocument()
+    fireEvent.change(within(row).getByLabelText('原始值'), { target: { value: '19.5' } })
+    expect(changed.mock.calls.at(-1)![0][0].records[0]).toEqual({ ...dos, value_raw: '19.5', value_text: '19.5' })
+    fireEvent.click(within(row).getByRole('button', { name: '复制记录' }))
+    const copied = changed.mock.calls.at(-1)![0][0].records[1]
+    expect(copied.record_key).not.toBe(dos.record_key)
+    expect(copied.evidences).toEqual([quote])
+    fireEvent.click(within(screen.getByTestId(`property-record-${copied.record_key}`)).getByRole('button', { name: '删除记录' }))
+    expect(changed.mock.calls.at(-1)![0][0].records).toHaveLength(1)
+    view.rerender(<Harness readOnly />)
+    expect(screen.getByLabelText('原始值')).toBeDisabled()
+    expect(screen.getByLabelText('原始值')).toHaveValue('19.5')
+    expect(screen.queryByRole('button', { name: '复制记录' })).not.toBeInTheDocument()
+  })
+
   it('记录原文证据可展开，推断项没有引句时明确标识依据', () => {
     const quote = { filename: 'paper.pdf', page: 3, quote: 'Tc is 4.2 K.' }
     const view = render(<SchemaDrivenRecordForm record={{ ...measured('evidence', 4.2), evidence: quote, evidences: [quote] }}

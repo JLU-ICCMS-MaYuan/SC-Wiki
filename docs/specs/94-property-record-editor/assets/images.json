@@ -142,6 +142,46 @@
         790
       ],
       "verification": "2026-10-15 从归档位置重新读取原图，PIL 解码、像素尺寸与 SHA-256 核验通过；本地留档，远程链接待验证。"
+    },
+    {
+      "id": "IMG-008",
+      "upload_order": 8,
+      "original_name": "codex-clipboard-55dfbd45-af30-4da7-ae34-8580408397a2.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-008.png",
+      "status": "local_verified",
+      "user_context": "这里的电子结构的 费米能级处的 dos 怎么做的这么复杂？我就希望保留这个就可以",
+      "related": [
+        "US14",
+        "FR-047",
+        "FR-048"
+      ],
+      "sha256": "4a7c2d00e8929e4c24d63b07e9d70399ed062ab9bef825b07b24358611af05e4",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2446,
+        394
+      ],
+      "verification": "2026-10-16 从归档位置重读 PNG，核对原文件字节、尺寸及 SHA-256；本地验证，远程链接待验证。"
+    },
+    {
+      "id": "IMG-009",
+      "upload_order": 9,
+      "original_name": "codex-clipboard-90f647e6-b613-4d08-b486-2818126a4e0d.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-009.png",
+      "status": "local_verified",
+      "user_context": "这里的电子结构的 费米能级处的 dos 怎么做的这么复杂？我就希望保留这个就可以",
+      "related": [
+        "US14",
+        "FR-047",
+        "FR-048"
+      ],
+      "sha256": "77a4f106f0f3c4742eec424d447d53ec1bf7702f2c2fff096a723c6b0c8c1c45",
+      "media_type": "image/png",
+      "dimensions_px": [
+        1316,
+        188
+      ],
+      "verification": "2026-10-16 从归档位置重读 PNG，核对原文件字节、尺寸及 SHA-256；本地验证，远程链接待验证。"
     }
   ]
 }

@@ -77,3 +77,7 @@ Tc 核对的 editable_fields 不含 value_raw、unit_raw、canonical_unit，旧 
 ## US12/US13 材料状态契约
 
 所有上传／返修及管理员科学草稿统一携带 state_kind 与 structure_optimization（缺省 unknown）。前者仅 theoretical/experimental/unknown；后者仅 unknown/classical_static/sscha，非 theoretical 必须 unknown。无 CIF 时也可记录论文明确给出的结构优化方法。完整材料导出和 Go 读取携带同名列。mixed 或非法值按字段定位拒绝，不映射。每状态最多一份非空直接结构或一个 confirmed/confirmed 候选；多份请求拒绝并提示不同优化几何分别建卡。原胞／惯用胞与格式表示放在该候选 representations，不创建额外 StructureModel。
+
+## US14：DOS 展示例外
+
+electronic_properties / property / dos_fermi 跳过单条记录折叠、定义选择和行下方证据摘要，直接使用通用核心行。文本镜像值只有名称、值类型、原始值、单位四项；非镜像文本与其他类型继续保留对应规范值编辑。definition_key/version、record_key、payload、evidence/evidences 及 API 合同不变；复制删除、定义错误和只读行为沿用共享表单。

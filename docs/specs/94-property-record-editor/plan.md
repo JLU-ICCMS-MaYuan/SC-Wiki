@@ -140,3 +140,7 @@ FR-045～046 / SC-035 → 统一 state metadata 校验与 material_state_values 
 本机应用前发现 start_python 会校验部署版本清单和完整 schema 快照。因此本次同步 Linux/macOS schema_heads 与 local-deploy-schema.json 中两个受影响表，避免迁移后服务因旧清单拒绝启动。其余表结构保持原快照，来自隔离 MySQL 迁移的真实 CHECK 文本用于新增约束，业务迁移后重新执行完整 verify_schema。
 
 真实 API 收尾检查：草稿归一化抛出的 UploadContractError 在部分入口没有局部转换，会被通用 500 接管；由主应用统一转成 400 和字段 issues，保留提交入口已有显式处理，不更改校验或保存顺序。测试覆盖真实 FastAPI 分发，并对本机草稿发出无效类型请求，验证拒绝且原草稿内容未变化。
+
+## US14：DOS 展示简化
+
+FR-047～048 / SC-036 → T045～047。PropertyModuleEditor 按电子模块、property 类型与 dos_fermi 代码选择直接渲染已有 PropertyRecordEditor，跳过记录 Accordion 与定义选择；SchemaDrivenRecordForm 对同一记录隐藏证据摘要，复用通用核心行及保存事件。定义加载失败仍在表单显示，其他记录继续原分支。不改变数据所有权、读取依赖或组件职责，不新增接口和依赖。

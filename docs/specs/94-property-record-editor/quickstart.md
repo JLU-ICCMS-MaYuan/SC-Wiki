@@ -246,3 +246,11 @@ AGENTS.md 将“数据库结构变更”列为高风险操作。取得授权后�
 服务已恢复：Python/Go health200、网关论文列表200；三份原有草稿分别返回16/6/7个状态，全部带合法类型及核处理字段。另对第一份草稿发出 mixed、非理论 SSCHA、同卡多规范结构三类无效 PUT，均400并带字段定位，前后数据库草稿及真实 GET 结果完全一致；没有保存新业务科学内容或调用模型。统一 UploadContractError 响应补齐部分入口原会误报500的边界，FastAPI 实际分发已加入回归。
 
 [本机迁移及 API 证据](assets/state-local-migration.json) 留存备份哈希、全部迁移头、行数与匿名化 HTTP 结果。迁移源码为精确提交；本机服务沿用既有热重载方式读取共享工作区，其中仍包含其他任务的未提交内容，不能声称全部运行内容仅来自本次提交。没有推送或远端部署，远程 Spec 链接仍待验证。
+
+## 2026-10-16：US14 费米能级 DOS 简化验收
+
+- 先运行新增 DOS 行为用例，在“仍显示记录折叠标题”断言上复现失败；实施后通过。
+- property-record-editor、unified-property-modules、tc-record-layout、material-states-editor 四份组件测试：62/62 通过。DOS 用例覆盖四项输入、无重复标题/定义选择/证据摘要、原始值与文本同步、定义/证据保留、复制删除及只读。
+- 当前工作树 npm run build 通过（包含 TypeScript）；从 HEAD 导出 frontend 并只复制本次两份组件生成隔离副本，构建也通过：/tmp/scwiki-dos-candidate.BfX1AB/build.log。未纳入工作区其他任务的未提交修改。
+- 原图 IMG-008、IMG-009 与清单已归档；Overview 已同步。现有测试夹具有 MUI 选项提示，构建有 3Dmol eval 与分包大小提示，均未导致失败。
+- 本轮验证范围为组件行为与构建，未执行真实数据库修改、浏览器端到端验收、远端部署或推送；#94 保持开放，远程附件及 Spec 链接待推送核验。本轮没有修改远端 Issue 正文。

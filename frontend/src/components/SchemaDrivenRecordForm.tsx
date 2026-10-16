@@ -144,6 +144,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   const issues = useMemo(() => [...validateRecordClient(record, definition), ...externalIssues], [record, definition, externalIssues])
   const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type), [definition, record.record_type])
   const isTc = record.record_type === 'predicted_tc' || record.record_type === 'measured_tc'
+  const isDosFermi = record.module_code === 'electronic_properties' && record.record_type === 'property' && record.property_code === 'dos_fermi'
   const mirroredTextValue = record.value_kind === 'text' && record.value_text === record.value_raw
   const currentValueField = { number: 'value_number', range: 'value_min', text: 'value_text', boolean: 'value_boolean' }[record.value_kind]
   const issue = (field: string) => issues.find(item => item.field === field || item.field.endsWith(`.${field}`)
@@ -292,7 +293,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
       </Box>}
       {Object.entries(payloadSchema.properties || {}).sort(([a], [b]) => a === 'parameters' ? -1 : b === 'parameters' ? 1 : 0).filter(([key]) => !['thermodynamic_stability', 'source_associations', 'table_row_ref'].includes(key)).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
-      <Box sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
+      {!isDosFermi && <Box sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
         {quotedSources.length ? <Box component="details" data-evidence-summary sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
           <Box component="summary" sx={{ cursor: 'pointer' }}>原文证据（{quotedSources.length}）</Box>
           {quotedSources.map((source, index) => <Typography key={index} variant="caption" display="block" sx={{ mt: 0.5, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
@@ -301,7 +302,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
         </Box> : record.value_raw && <Typography variant="caption" color="text.secondary">
           {record.basis_kind === 'paper_inference' ? '论文推断；无逐字原文引句' : record.basis_kind === 'general_knowledge' ? '通用知识建议；无论文原文引句' : '暂无可定位原文证据；可查看来源核对'}
         </Typography>}
-      </Box>
+      </Box>}
       {!readOnly && <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
         {onClone && <Button onClick={onClone}>复制记录</Button>}
         {onDelete && <Button color="error" startIcon={<DeleteIcon />} onClick={onDelete}>删除记录</Button>}
