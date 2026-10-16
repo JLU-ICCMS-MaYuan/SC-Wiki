@@ -1,0 +1,25 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-c89aebd1-db03-48ab-9344-6bc730c96e4e.png",
+      "locator": "docs/specs/109-field-evidence-and-ai-suggestions/assets/IMG-001.png",
+      "status": "local_verified",
+      "sha256": "cf5757e6b5d280ffa4434db81fcf820168ad7978da3465136f1c537ca991d3e5",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2464,
+        522
+      ],
+      "user_context": "新需求：\n为什么我刚刚只是修改了结构核优化处理里面的内容，就会有另外3个“不同元素种类数”和“空间群号” “晶系” 就立刻变红？然后几秒钟后 因为他们没有被修改，回复正常颜色。我觉得这是不合理的！如果其他几个没有修改，就不应该变红？你帮我查查是不是他们对应这个代码逻辑的问题或者纰漏，他的数据表单也应该满足这个需求：如果没有被修改，就不应该因为其他表单数据修改了同步变红。你看看有没有issue 可以和这个问题对应？有就追加并且重新整理 issue 和 spec，如果没有就新建 issue 和 spec。",
+      "related": [
+        "US11",
+        "FR-038",
+        "FR-039",
+        "SC-027"
+      ],
+      "verification": "2026-10-16 归档原 PNG，重新读取校验原文件字节、尺寸、SHA-256 并解码查看；未推送。"
+    }
+  ]
+}

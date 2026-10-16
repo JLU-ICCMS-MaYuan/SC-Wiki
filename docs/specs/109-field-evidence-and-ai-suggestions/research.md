@@ -94,3 +94,26 @@
 - **理由**：H3S 材料家族旧结果已经解释“富氢材料 → 氢基超导体”，但 `ai_reason` 为空且 `source_kind=paper_quote`，前端因此显示固定直接记载文案。逐个字段修补会继续漏掉其他归纳字段。
 - **备选**：只改前端兜底不能保证新核对产生具体理由，也不能覆盖提交后的正式来源；另建理由表增加不必要的持久化复杂度。
 - **边界**：作者原列关键词、确定性派生值和人工改写各用自身来源说明；不暴露模型内部逐字思维，也不以理由代替可定位本文证据。
+
+
+## 2026-10-16 调查：无关编辑导致程序派生项临时失效
+
+本节为已核查的代码事实与待确认修复设计，不代表业务修复完成。
+
+### 已验证事实
+
+- `frontend/src/lib/evidenceFields.ts::evidenceFieldAffected` 把 `structure_optimization`、压强等识别为材料上下文；只要同状态记录带 `provenance.kind=derived` 就返回受影响，不检查该派生规则的实际输入。
+- 用本机 Node 加载 TypeScript 编译器、转译并执行工作区的真实函数，构造状态 2 的元素数、群号与晶系三条派生记录。分别传入 `structure_optimization`、`pressure_value_gpa`、`reported_space_group_symbol` 和 `material` 的变化，四次均返回这三条记录全部受影响；另一状态的核处理变化返回空。前两次已直接证明本次误失效，符号变化也错误波及元素数。
+- `MaterialStatesEditor.emitStates` 用 `changedScientificFields` 通知实际变化，上传与管理页均接入 `EvidenceWorkflow.invalidate`。`EvidenceFieldMarkers` 还从原生 input/change 通知；`invalidate` 没有先验证该事件对应的规范化值是否真正变化，并会清除受影响项的理由、建议与人工确认，设置 `stale=true`。
+- `EvidenceFieldMarkers.evidenceProblem` 将 stale 作为问题，控制标签和边框；工作流 issues 同时进入材料卡片问题计数，因此这不是三个控件自己的数值校验错误。
+- `UploadTaskEditor` 等待 5000ms 自动保存，成功且版本未变化后调用 `refreshAfterSave`，重新读取服务端结果。后端 `public_snapshot` 再执行 `apply_derived`，可以根据仍有效的输入恢复支持状态。这条调用链解释用户描述的几秒后恢复；未在用户真实登录会话测量该时序。
+- 服务端 `scientific_evidence.state_records` 已保存明确 `dependency`：元素数指向化学式；群号和晶系在确为程序派生时指向报告空间群符号。`public_snapshot` 返回包含这些信息的记录，前端类型与影响计算尚未使用它。单位换算同样有原始输入依赖。
+- 后端物性 `record_claim` 包含材料科学条件，真实条件变化可能使数值未变的物性断言过期。因此不能简单改成“只有目标输入框的值变化才核对”，也不能取消所有跨字段失效。
+
+### 待确认设计及取舍
+
+复用已有字段值比较、稳定身份和服务端 `dependency`，由共享影响范围计算统一处理真实输入依赖及科学上下文；派生字段不再使用“同状态全部 derived”的分支。前端事件负责通知实际更改，工作流在清除理由前再次过滤无效通知；原生与程序事件合并处理，不能靠等待自动保存纠错。
+
+不新增数据库表、第二套永久核对存储或新的 AI 调用。优先扩展已有 `EvidenceRecord` 可选依赖类型并消费既有响应。旧响应缺失依赖时，按已知规则明确解析输入并验证，不能直接认定全状态派生项失效或全都有效。遇到未知规则应先记录具体限制与保守状态，再修订设计，不能猜测科学依赖。
+
+验收需要同时覆盖真实受影响项仍会失效和无关项不误伤；仅截图颜色、纯源码匹配或单个模拟函数不能证明浏览器与持久化修复完成。
