@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "id": "IMG-016",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-44f2e07d-a081-469c-8e01-3eb38639feb4.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-016.png",
+      "status": "local_verified",
+      "user_context": "每个材料状态的添加物性模块，放到每个材料状态的最下方。使用 issue 和 spec，然后做好 demo 给我看看",
+      "related": [
+        "US19",
+        "FR-069"
+      ],
+      "sha256": "2b7f5eccfb72399388a2a28f88e1950b59b426ea7914b594b61483c54edacf21",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2480,
+        622
+      ],
+      "verification": "2026-10-16 从归档路径重读解码并核对原字节、尺寸与 SHA-256；图片仅为现状材料，本地未推送。"
+    }
+  ]
+}

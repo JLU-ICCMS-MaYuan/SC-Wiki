@@ -78,3 +78,10 @@
 - [x] CHK043 FR-066～068 / SC-053～055、Plan/Research/展示合同、T071～073 对齐；当前结构 hash 与来源对应，结构/派生表示保存合同不改，#103 保留历史并增加新规则指向。[structure-collapse-demo.md 正式实施基线]
 - [x] CHK044 正式共享组件及真实 3Dmol 在1280/390px、首次展开、旋转/缩放像素保留、候选/晶胞/格式/坐标保留、来源及焦点、只读、空态和新增候选行为均通过；独立源码58项回归、TypeScript/生产构建通过。[assets/structure-collapse-implemented-validation.json]
 - [ ] CHK045 新版远程 Spec/附件：尚未推送，远程链接待验证，不据本轮验收关闭 #94。
+
+
+## US19 添加入口底部设计
+
+- [x] CHK046 原话和IMG-016完整留档，AI解释与原文分开；复用OPEN/唯一type:feature的#94，关联既有模块和谱展示合同。[module-add-bottom-demo.md、GitHub只读查询]
+- [x] CHK047 两状态、空态、谱展示、只读、键盘、保持输入与390px的Demo验证有可复查记录。[SC-056～057]
+- [ ] CHK048 用户评审完整追加草案和Demo，远端Issue同步及正式实施尚未授权；远程Spec链接待推送验证。[SC-058]

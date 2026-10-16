@@ -207,3 +207,8 @@ Documentation Impact：本轮仅更新现有 Spec 增量、Plan、Tasks、图片
 用户认可默认收起和完整 Demo，授权正式落实。沿用既有候选数据和来源核对，不新增接口或持久字段。StructureCandidatePanel 使用与 PropertyModuleSection 相同的箭头、文字和 40px 标题，将全部详情及上传放进保持挂载的隐藏区；来源文字独立于折叠按钮并绑定当前结构 hash。MaterialStatesEditor 传递只读权限，面板只读时仅保留查看和下载；PaperEditView 用 PropertyModuleSection 包装正式结构详情。
 
 StructureViewer3D 已有 ResizeObserver，在首次隐藏展开时适配有效尺寸，原尺寸重开不 zoomTo；本次先保留此实现，以真实浏览器确认。单元回归覆盖默认收起、空态、候选及只读，浏览器核验实际 3Dmol、来源/键盘、窄屏、选项保留，再用仅含本次增量的隔离源码运行回归和构建。T071 → T072 → T073；按差异精确提交，不纳入其他未提交需求。
+
+
+## US19：添加入口底部 Demo 计划
+
+仅制作独立 HTML 两状态交互。每卡结构区、已有模块容器、谱展示容器、添加区顺序固定；新增模块插入所属卡模块容器的末尾，添加区保持卡片最后。保留原生 details 节点和输入，避免全卡重绘造成丢值；只读切换仅隐藏动作及禁用输入。空态、谱展示与390px纳入验证；场景切换明确为样例重置。正式落地拟将 PropertyModuleEditor 现有 Select 移到 MissingPropertySpectrumModules 之后，但当前不修改组件。T074→T075→T076，与 FR-069～071/SC-056～058 对齐。

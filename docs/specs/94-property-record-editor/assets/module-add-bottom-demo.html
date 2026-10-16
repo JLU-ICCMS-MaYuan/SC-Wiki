@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,"><title>添加物性模块 · 状态卡底部 Demo</title>
+<style>
+:root{color-scheme:light dark;--page:light-dark(#f8fafc,#181b23);--surface:light-dark(#fff,#242835);--ink:light-dark(#1f2937,#e7ebf4);--muted:light-dark(#64748b,#b4becd);--line:light-dark(#e2e8f0,#485065);--brand:light-dark(#4f46e5,#b8afff)}
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:var(--page);color:var(--ink);font:14px/1.6 system-ui,-apple-system,"PingFang SC",sans-serif}.app{max-width:1120px;margin:24px auto;padding:0 20px}h1{font-size:20px;margin:0}p{margin:6px 0;color:var(--muted);font-size:13px}.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:18px 0}.toolbar button,.toolbar select{border:1px solid var(--line);border-radius:6px;background:var(--surface);padding:6px 12px;font:inherit;color:inherit}.toolbar label{display:flex;gap:6px;align-items:center}.toolbar input{accent-color:var(--brand)}.state{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:16px 20px;margin:16px 0;min-width:0;box-shadow:0 1px 3px #0f172a15}.state-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.state-heading h2{font-size:15px;margin:0}.state-heading span{color:var(--muted);font-size:12px;white-space:nowrap}.identity{display:flex;flex-wrap:wrap;gap:12px 30px;color:var(--muted);font-size:12px;margin:0 0 16px}.identity b{display:block;color:var(--ink);font-size:14px;font-weight:500}.section{min-width:0;position:relative}.section+.section,.modules>.section{border-top:1px solid var(--line);padding-top:8px;margin-top:8px}summary{display:flex;align-items:center;gap:6px;min-height:40px;cursor:pointer;list-style:none;font-weight:700;border-radius:5px}summary::-webkit-details-marker{display:none}.chevron{width:18px;height:18px;flex-shrink:0}details[open]>summary>.chevron{transform:rotate(90deg)}.status{font-size:12px;font-weight:400;color:var(--muted);margin-left:6px}.body{padding:8px 0 16px}.section:not([open])>.body{display:none}.module-title{padding-right:36px}.remove{position:absolute;right:0;top:12px;width:32px;height:32px;display:grid;place-items:center;background:transparent;color:var(--muted);border:0;cursor:pointer}.remove svg{width:19px;height:19px}.remove:disabled{opacity:.35;cursor:default}.add-row{margin-top:16px;padding-top:12px;border-top:1px solid var(--line)}.module-select{display:block;width:100%;height:44px;padding:0 14px;border:1px solid var(--line);border-radius:7px;color:var(--ink);background:var(--surface);font:inherit;cursor:pointer}.fields{display:flex;gap:12px;overflow:auto;padding:8px 1px 4px}.field{position:relative;flex:0 0 140px}.field span{position:absolute;left:8px;top:-9px;background:var(--surface);padding:0 4px;color:var(--brand);font-size:11px}.field input{height:42px;width:100%;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font:inherit;color:inherit;background:var(--surface)}button:focus-visible,summary:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--brand);outline-offset:2px}.note{font-size:12px;color:var(--muted);margin-top:16px}.source-preview{border-left:2px solid var(--line);padding:8px 12px}.status-line{min-height:24px;font-size:12px;color:var(--muted)}.draft{margin-top:24px;border-top:1px solid var(--line);padding-top:12px}.draft pre{font:13px/1.7 inherit;white-space:pre-wrap;overflow-wrap:anywhere;background:var(--surface);padding:16px;border:1px solid var(--line);border-radius:8px}
+@media(max-width:600px){.app{margin:16px auto;padding:0 12px}.state{padding:12px}.state-heading{align-items:flex-start}.state-heading h2{font-size:14px}.identity{gap:8px 18px}.status{margin-left:2px}h1{font-size:18px}}
+</style>
+</head>
+<body>
+<main class="app">
+<h1>“添加物性模块”移至每张状态卡底部</h1>
+<p>先查看已有结构和物性，再在该材料状态的末尾添加模块。以下均为演示数据，仅供评审。</p>
+<nav class="toolbar" aria-label="演示选项">
+  <label>场景 <select id="scenario"><option value="normal">两个材料状态</option><option value="empty">暂无物性模块</option><option value="spectrum">含谱展示模块</option></select></label>
+  <label><input id="readonly" type="checkbox"> 只读预览</label>
+  <button id="reset" type="button">恢复演示</button>
+</nav>
+<div id="states"></div>
+<p id="announcement" class="status-line" role="status" aria-live="polite"></p>
+<p class="note">本轮只移动添加入口：已有模块顺序、折叠和试填内容保持。新增模块仍在当前状态的末尾，添加入口始终位于其后。只读不显示添加和删除入口。</p>
+<details class="draft"><summary>拟追加至 #94 的完整正文</summary><pre id="issue-draft"></pre></details>
+</main>
+<script>
+(() => {
+  const labels={superconductive:'超导性质',electronic:'电子性质',dynamical:'动力学性质',thermodynamical:'热力学性质'};
+  const arrow='<svg class="chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+  const trash='<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6zm9.5-15-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+  const states=document.getElementById('states'), readonly=document.getElementById('readonly');
+  let scenario='normal';
+  const field=(caption,value='')=>{const label=document.createElement('label');label.className='field';const name=document.createElement('span');name.textContent=caption;const input=document.createElement('input');input.value=value;input.setAttribute('aria-label',caption);input.disabled=readonly.checked;label.append(name,input);return label};
+  function moduleNode(code,hasRecord=false,spectrumOnly=false){
+    const module=document.createElement('details');module.className='section';module.dataset.module=code;
+    module.innerHTML='<summary class="module-title">'+arrow+'<span>'+labels[code]+'</span></summary><div class="body"></div>';
+    const body=module.querySelector('.body');
+    if(spectrumOnly){const hint=document.createElement('p');hint.className='source-preview';hint.textContent='声子 DOS 来源摘要与详情入口位置（模拟谱展示，无真实曲线）。';body.append(hint);module.dataset.spectrum='true'}
+    else if(hasRecord){const row=document.createElement('div');row.className='fields';row.append(...(code==='superconductive'?[field('Tc（K）'),field('μ*')]:code==='electronic'?[field('名称','N(Ef)'),field('原始值'),field('单位')]:[field('稳定性说明')]));body.append(row)}
+    else{const hint=document.createElement('p');hint.textContent='暂无记录（演示）。';body.append(hint)}
+    if(!spectrumOnly){const remove=document.createElement('button');remove.type='button';remove.className='remove';remove.innerHTML=trash;remove.setAttribute('aria-label','删除'+labels[code]);remove.title=hasRecord?'请先删除模块内记录':'删除模块';remove.disabled=hasRecord;remove.hidden=readonly.checked;
+      remove.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();const card=module.closest('.state');module.remove();refreshPicker(card);document.getElementById('announcement').textContent=card.dataset.label+'：已删除空模块'+labels[code]});module.querySelector('summary').append(remove)}
+    return module;
+  }
+  function refreshPicker(card){
+    const picker=card.querySelector('.module-select'),present=new Set([...card.querySelectorAll('[data-module]:not([data-spectrum])')].map(node=>node.dataset.module));
+    picker.replaceChildren(new Option('添加物性模块',''));picker.options[0].disabled=true;
+    for(const [code,label] of Object.entries(labels))if(!present.has(code))picker.add(new Option(label,code));
+    picker.value='';
+  }
+  function createCard(index,modules){
+    const card=document.createElement('section');card.className='state';card.dataset.state=String(index);card.dataset.label='材料状态 #'+index;
+    card.innerHTML='<header class="state-heading"><h2>模拟材料 '+(index===1?'A':'B')+' · 材料状态 #'+index+'</h2><span>'+ (index===1?'150':'200') +' GPa</span></header><div class="identity"><div>化学式<b>示例 '+(index===1?'A':'B')+'</b></div><div>材料类型<b>理论</b></div></div><details class="section"><summary>'+arrow+'<span>晶体结构</span><span class="status">暂无结构</span></summary><div class="body"><p>该记录暂无结构数据（演示）。</p></div></details><div class="modules"></div><div class="spectrum-modules"></div><div class="add-row"><select class="module-select" aria-label="材料状态 '+index+' 的添加物性模块"></select></div>';
+    for(const item of modules)card.querySelector(item[2]?'.spectrum-modules':'.modules').append(moduleNode(...item));refreshPicker(card);
+    card.querySelector('.module-select').addEventListener('change',event=>{
+      const code=event.target.value;if(!code||readonly.checked)return;
+      const spectrum=card.querySelector('[data-spectrum][data-module="'+code+'"]');
+      if(spectrum)spectrum.remove();
+      card.querySelector('.modules').append(moduleNode(code));
+      refreshPicker(card);document.getElementById('announcement').textContent=card.dataset.label+'：已添加'+labels[code]+'；添加入口仍在卡片底部。';event.target.focus();
+    });
+    card.querySelector('.add-row').hidden=readonly.checked;return card;
+  }
+  function render(){
+    const modules=scenario==='empty'?[]:[['superconductive',true],['electronic',true],['dynamical',false,scenario==='spectrum']];
+    states.replaceChildren(createCard(1,modules),createCard(2,scenario==='empty'?[]:[['electronic',true]]));
+    document.getElementById('announcement').textContent='';
+  }
+  document.getElementById('scenario').addEventListener('change',event=>{scenario=event.target.value;render()});
+  readonly.addEventListener('change',()=>{for(const card of states.querySelectorAll('.state')){card.querySelector('.add-row').hidden=readonly.checked;card.querySelectorAll('.remove').forEach(button=>button.hidden=readonly.checked);card.querySelectorAll('input').forEach(input=>input.disabled=readonly.checked)}});
+  document.getElementById('reset').addEventListener('click',()=>{readonly.checked=false;document.getElementById('scenario').value='normal';scenario='normal';render()});
+  document.getElementById('issue-draft').textContent=`## US19：将添加物性模块移至各材料状态底部（Demo 待评审）
+
+### 原始需求记录
+> 每个材料状态的添加物性模块，放到每个材料状态的最下方。使用 issue 和 spec，然后做好 demo 给我看看
+
+### 目标与范围
+沿用 #94、唯一 type:feature 和现有关系。每张材料状态卡先展示结构和已有物性模块，最后显示全宽“添加物性模块”下拉；入口位于全部模块（含谱展示）之后、卡片内部。添加仅作用于当前状态，新模块仍位于末尾且在添加入口之前。保留原有模块顺序、折叠及输入；只读不显示添加入口。
+
+### 验收与边界
+Demo 覆盖两状态独立添加、空态、模块展开、已有输入保留、含谱展示、只读、键盘与390px；入口始终在各自卡片末尾。演示数据明确标注，不改正式组件、API、科学数据或存储，不增加自动滚动/固定悬浮行为。
+
+### 关联与 Documentation Impact
+沿用 #90 模块数据合同、#94 折叠与结构布局、#137 谱展示入口；不新建重复 Issue 或父子关系。更新 docs/specs/94-property-record-editor/ 的草案、Demo、原图及验证记录；本轮不改变 Overview 或根 README。正式落地后再更新当前功能说明。
+
+### 状态与附件
+Spec 仓库路径：docs/specs/94-property-record-editor/module-add-bottom-demo.md；原图 IMG-016、Demo 与验证位于同目录 assets/module-add-bottom-*。均仅本地留档，远程链接待验证。当前追加正文及 Demo 等待用户评审，尚未写入远端 Issue；#94 保持 OPEN。`;
+  render();
+})();
+</script>
+</body>
+</html>

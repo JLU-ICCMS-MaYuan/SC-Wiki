@@ -1,0 +1,96 @@
+{
+  "checks": [
+    {
+      "name": "两张卡片末尾各有一个全宽添加入口",
+      "passed": true,
+      "details": [
+        {
+          "afterAll": true,
+          "count": 1,
+          "lastChild": "add-row",
+          "state": "1",
+          "width": 873
+        },
+        {
+          "afterAll": true,
+          "count": 1,
+          "lastChild": "add-row",
+          "state": "2",
+          "width": 873
+        }
+      ]
+    },
+    {
+      "name": "第一卡新增热力学后仍位于入口前，Tc=123.45及展开保留、第二卡不变",
+      "passed": true
+    },
+    {
+      "name": "删除空模块不清空输入，类型重新可添加",
+      "passed": true
+    },
+    {
+      "name": "只读隐藏两卡添加/删除入口并禁用输入",
+      "passed": true
+    },
+    {
+      "name": "第二卡独立新增及Enter/Space折叠保留试填",
+      "passed": true
+    },
+    {
+      "name": "添加入口在仅谱展示之后，新增标量模块仍在谱展示之前且无重复入口",
+      "passed": true
+    },
+    {
+      "name": "无物性模块时入口仍在结构后，空态新增只作用于指定卡片",
+      "passed": true
+    },
+    {
+      "name": "390px收起/展开/新增无整页溢出，入口保持卡尾，输入保留",
+      "passed": true,
+      "details": {
+        "cards": [
+          {
+            "afterAll": true,
+            "state": "1",
+            "width": 366
+          },
+          {
+            "afterAll": true,
+            "state": "2",
+            "width": 366
+          }
+        ],
+        "overflow": false
+      }
+    },
+    {
+      "name": "四类模块齐全后无可重复添加选项",
+      "passed": true
+    },
+    {
+      "name": "完整Issue草案可在Demo底部展开阅读",
+      "passed": true
+    }
+  ],
+  "console_errors": [],
+  "viewport_override_reset": true,
+  "url": "http://127.0.0.1:8768/module-add-bottom-demo.html",
+  "date": "2026-10-16",
+  "branch": "mayuan",
+  "base_commit": "19972399385dd5ad6c780c09e3b3cc2e814a6b01",
+  "scope": "仅独立设计Demo，未修改正式组件、API、真实数据或Overview",
+  "demo_sha256": "8a941af935ff3b5602a33facebe8bc458a645ec1db0bfdcb1b817ed5c42fe666",
+  "input_image": "IMG-016",
+  "remote_issue": {
+    "number": 94,
+    "state": "OPEN",
+    "type": "type:feature",
+    "action": "只读查重并准备完整追加草案，等待本版确认，尚未写入"
+  },
+  "boundaries": [
+    "模拟材料和字段仅用于布局交互",
+    "未验证正式React组件或业务保存",
+    "不调用业务API/AI、不持久化试填",
+    "没有推送或部署"
+  ]
+}
