@@ -313,3 +313,18 @@ Overview 已同步实际按钮行为，#94 保持开放；本地 Spec/附件仍�
 - 与 HEAD 字典逐项比对：中英文均仅 structureOptimization.classical_static 的显示文字变化，其他键值一致。既有 enum-labels-i18n 6 项和 material-states-editor 27 项，共 33 项通过。
 - 本机 Node 26 默认 Web Storage 使既有双语测试的 localStorage.clear 读取失败；使用命令级 NODE_OPTIONS="--no-experimental-webstorage" 后，两份测试全通过，不修改系统环境或测试源码。命令：NODE_OPTIONS="--no-experimental-webstorage" node "frontend/node_modules/vitest/vitest.mjs" run --config "vitest.config.ts" "tests/01_decentralized_uploading/material-states-editor.test.tsx" "tests/01_decentralized_uploading/enum-labels-i18n.test.tsx"。
 - 纯文案修订不新增测试或执行数据库迁移；历史 Spec 的提案文字和原 Demo 保留，本次 FR-046 及最新修订为当前规则。未推送，Issue #94 保持开放。
+
+
+## US18 正式简洁结构区验收
+
+基于 HEAD 归档仅叠加本次组件、3行字典键及结构测试，路径 `/tmp/scwiki-structure-accepted`（临时验证目录）。运行：
+
+```bash
+NODE_OPTIONS=--no-experimental-webstorage node frontend/node_modules/vitest/vitest.mjs run --config vitest.config.ts tests/01_decentralized_uploading/structure-attachment-collapse.test.tsx tests/01_decentralized_uploading/structure-detail-collapse.test.tsx tests/01_decentralized_uploading/property-module-collapse.test.tsx tests/01_decentralized_uploading/material-states-editor.test.tsx tests/01_decentralized_uploading/crystal-structure.test.tsx tests/01_decentralized_uploading/paper-detail-route.test.tsx
+```
+
+6份58项通过；在 frontend 执行 `npm run build`，TypeScript 和 Vite 构建通过。真实浏览器经 CUA 打开隔离 Vite 夹具，使用正式 MaterialStatesEditor、PaperEditView、EvidenceFieldMarkers 及3Dmol；夹具将 fetch 全部截断，模拟数据不读写业务服务。
+
+复现夹具：将 `assets/structure-collapse-implemented-harness.tsx` 复制至独立源码的 `frontend/structure-accepted.tsx`，把 `../../../../frontend/src/` 导入前缀替换为 `./src/`；建立含 root 节点及指向该脚本的独立HTML，再通过 Vite 打开。验证结果、截图及源码哈希见同目录 structure-collapse-demo.md 和 assets/structure-collapse-implemented-validation.json。
+
+扩大检查中的旧只读字段测试2项在 HEAD 原组件复现，不计入通过数；共享工作区未提交的多 Tc 逻辑有2项相关测试失败，独立候选27项材料表单通过，未把其他任务修改纳入本次。没有执行推送、部署、真实业务保存或 AI 调用。

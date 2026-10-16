@@ -1,6 +1,6 @@
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react'
 import { Alert, Box, Button, ButtonBase, Chip, CircularProgress, Divider, FormControl, InputLabel, MenuItem, Select, Stack, Typography } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import DownloadIcon from '@mui/icons-material/Download'
 import BlockIcon from '@mui/icons-material/Block'
@@ -15,6 +15,7 @@ interface Props {
   materialName?: string
   candidates: StructureCandidate[]
   uploading: boolean
+  readOnly?: boolean
   onUpload: (file: File) => void
   onChange: (candidateId: string, changes: Partial<StructureCandidate>) => void
 }
@@ -22,7 +23,7 @@ interface Props {
 type CellKind = 'primitive' | 'conventional'
 type StructureFormat = 'cif' | 'poscar'
 
-const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, uploading, onUpload, onChange, hasCanonicalStructure }) => {
+const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, readOnly = false, onUpload, onChange, hasCanonicalStructure }) => {
   const { t } = useLanguage()
   const preferredCandidate = useMemo(
     () => [...candidates].reverse().find(candidate => candidate.confirmation !== 'excluded') || candidates.at(-1),
@@ -31,7 +32,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, up
   const [selectedCandidateId, setSelectedCandidateId] = useState(preferredCandidate?.candidate_id || '')
   const [cell, setCell] = useState<CellKind>('conventional')
   const [format, setFormat] = useState<StructureFormat>('cif')
-  const [expanded, setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(false)
   const contentId = useId()
   const cellLabelId = useId()
   const formatLabelId = useId()
@@ -83,38 +84,32 @@ const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, up
   const formatLabel = format === 'cif' ? 'CIF' : 'POSCAR'
 
   return (
-    <Box data-structure-attachment sx={{ mt: 2, p: { xs: 1.5, sm: 2 }, borderRadius: 1, bgcolor: 'action.hover' }}>
-      {anotherGeometry && <Alert severity="info" sx={{ mb: 1 }}>{t('upload.singleStructureHelp')}</Alert>}
-      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" alignItems={{ xs: 'stretch', sm: 'center' }} spacing={1}>
-        <Box sx={{ minWidth: 0 }}>
-          <ButtonBase aria-expanded={expanded} aria-controls={contentId} onClick={() => setExpanded(value => !value)} sx={{ maxWidth: '100%', textAlign: 'left', gap: 0.5, borderRadius: 0.5, '&.Mui-focusVisible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 } }}>
-            <ExpandMoreIcon sx={{ flexShrink: 0, transform: expanded ? 'rotate(0deg)' : 'rotate(-90deg)' }} />
-            <Typography component="span" variant="subtitle2" fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>{materialName ? `${materialName} · ` : ''}{t('upload.structureAttachmentTitle')}</Typography>
-          </ButtonBase>
-        </Box>
-        <Button component="label" size="small" variant="outlined" startIcon={uploading ? <CircularProgress size={16} /> : <UploadFileIcon />} disabled={uploading}>
+    <Box data-structure-attachment data-scientific-structure={candidate ? true : undefined} data-structure-hash={candidate?.validation?.structure_hash} data-structure-id={candidate?.candidate_id} sx={{ mt: 2, minWidth: 0, pointerEvents: 'auto', ...(readOnly ? { '& .MuiButton-root': { display: 'inline-flex' } } : {}) }}>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ minHeight: 40 }}>
+        <ButtonBase aria-expanded={expanded} aria-controls={contentId} onClick={() => setExpanded(value => !value)} sx={{ minWidth: 0, flex: 1, justifyContent: 'flex-start', textAlign: 'left', gap: 0.5, minHeight: 40, borderRadius: 1, '&.Mui-focusVisible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 } }}>
+          <ChevronRightIcon fontSize="small" sx={{ flexShrink: 0, transform: expanded ? 'rotate(90deg)' : undefined }} />
+          <Typography component="span" variant="subtitle2" fontWeight={700}>{t('upload.crystalStructureTitle')}</Typography>
+          <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>{uploading ? t('upload.validating') : candidate ? statusLabel : t('upload.structureStatusEmpty')}</Typography>
+        </ButtonBase>
+        {candidate && <Typography data-evidence-readonly component="span" variant="caption" sx={{ flexShrink: 0 }}>{t('upload.structureSourceReview')}</Typography>}
+      </Stack>
+      {/* 隐藏而不卸载，保留画布、视角和选择；来源入口独立于折叠按钮。 */}
+      <Box id={contentId} hidden={!expanded}>
+        {anotherGeometry && <Alert severity="info" sx={{ mt: 1 }}>{t('upload.singleStructureHelp')}</Alert>}
+        {!readOnly && <Button component="label" size="small" variant="outlined" startIcon={uploading ? <CircularProgress size={16} /> : <UploadFileIcon />} disabled={uploading} sx={{ mt: 1.5 }}>
           {uploading ? t('upload.validating') : t('upload.uploadStructure')}
           <input hidden type="file" accept=".cif,.poscar,.vasp,POSCAR,CONTCAR" onChange={event => {
             const selected = event.target.files?.[0]
             event.target.value = ''
             if (selected) { setExpanded(true); onUpload(selected) }
           }} />
-        </Button>
-      </Stack>
-
-      {!candidate && <Typography id={contentId} hidden={!expanded} variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>{t('paperDetail.noStructure')}</Typography>}
-
-      {candidate && (
-        <Box data-scientific-structure data-structure-hash={candidate.validation?.structure_hash} data-structure-id={candidate.candidate_id} sx={{ mt: 1.5 }}>
+        </Button>}
+        {!candidate && <Typography variant="body2" color="text.secondary" sx={{ mt: 1.5 }}>{t('paperDetail.noStructure')}</Typography>}
+        {candidate && <Box sx={{ mt: 1.5 }}>
           <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" spacing={1}>
-            <Box sx={{ minWidth: 0 }}>
-              <Typography variant="subtitle2" fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>{filename || candidate.candidate_id}</Typography>
-            </Box>
+            <Typography variant="subtitle2" fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>{filename || candidate.candidate_id}</Typography>
             <Chip size="small" label={statusLabel} color={blocked ? 'warning' : candidate.confirmation === 'confirmed' ? 'success' : 'default'} />
           </Stack>
-
-          {/* 隐藏而不卸载，保留画布、视角和选择；文件标题始终可用于来源核对。 */}
-          <Box id={contentId} hidden={!expanded}>
           {candidates.length > 1 && (
             <Select fullWidth size="small" value={candidate.candidate_id} aria-label={t('upload.candidateSelectAria')} onChange={event => setSelectedCandidateId(String(event.target.value))} sx={{ mt: 1.5 }}>
               {candidates.map(item => (
@@ -167,7 +162,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, up
                   </Select>
                 </FormControl>
                 <Button startIcon={<DownloadIcon />} variant="outlined" disabled={!representation?.text} onClick={() => download(candidate, cell, format)}>{t('upload.downloadStructure')}</Button>
-                {decided
+                {!readOnly && (decided
                   ? (
                       <Button startIcon={<RestoreIcon />} color="inherit" onClick={() => onChange(candidate.candidate_id, { confirmation: 'unreviewed', status: 'valid' })}>
                         {t('upload.restoreToPending')}
@@ -178,13 +173,12 @@ const StructureCandidatePanel: React.FC<Props> = ({ materialName, candidates, up
                         <Button startIcon={<CheckCircleOutlineIcon />} variant="contained" color="success" disabled={candidate.status !== 'valid' || anotherGeometry} onClick={() => onChange(candidate.candidate_id, { confirmation: 'confirmed', status: 'confirmed' })}>{t('upload.adoptStructure')}</Button>
                         <Button startIcon={<BlockIcon />} color="inherit" onClick={() => onChange(candidate.candidate_id, { confirmation: 'excluded', status: 'excluded' })}>{t('upload.excludeStructure')}</Button>
                       </>
-                    )}
+                    ))}
               </Stack>
             </>
           )}
-          </Box>
-        </Box>
-      )}
+        </Box>}
+      </Box>
     </Box>
   )
 }

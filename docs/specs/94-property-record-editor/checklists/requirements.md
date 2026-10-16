@@ -70,3 +70,11 @@
 - [x] CHK039 用户已认可 Demo 与完整 Issue 正文，最新“开始落地！”明确授权 US17 实施；不包含 US15/US16 的数据方案。[Spec US17 正式实施授权]
 - [x] CHK040 FR-056～059 阶段解释、SC-049～050、主行责任、删除键和既有数据合同已对齐；映射到 T063～066。[Spec、Plan、Research、data-model、contracts/record-form]
 - [x] CHK041 四模块共六种记录在实际组件浏览器中宽/窄容器对齐中心差均为 0 CSS px，字段区局部滚动；只读与目标键盘删除通过。隔离候选 7 份/100 项回归及 TypeScript/生产构建通过。[SC-049～050、assets/record-actions-implemented-validation.json、quickstart 正式实施验收]
+
+
+## US18 简洁结构折叠
+
+- [x] CHK042 用户完整原话、IMG-015、历史 #103 规则、Demo 与最新“认可。开始”均留存；确认默认收起和正式实施，#94 已追加获批草案并读回核验 OPEN/唯一 type:feature。[structure-collapse-demo.md、GitHub #94]
+- [x] CHK043 FR-066～068 / SC-053～055、Plan/Research/展示合同、T071～073 对齐；当前结构 hash 与来源对应，结构/派生表示保存合同不改，#103 保留历史并增加新规则指向。[structure-collapse-demo.md 正式实施基线]
+- [x] CHK044 正式共享组件及真实 3Dmol 在1280/390px、首次展开、旋转/缩放像素保留、候选/晶胞/格式/坐标保留、来源及焦点、只读、空态和新增候选行为均通过；独立源码58项回归、TypeScript/生产构建通过。[assets/structure-collapse-implemented-validation.json]
+- [ ] CHK045 新版远程 Spec/附件：尚未推送，远程链接待验证，不据本轮验收关闭 #94。

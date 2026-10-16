@@ -1,3 +1,4 @@
+import PropertyModuleSection from './PropertyModuleSection'
 import { materialStateSummary } from '../lib/materialStateSummary'
 import { PropertySpectraProvider, PropertySpectrumState } from './PropertySpectra'
 import React, { useState, useEffect } from 'react'
@@ -256,12 +257,13 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
                       <PropertySpectrumState stateKey={state.state_key || `state-${index + 1}`} summary={materialStateSummary(state)}>
                         <PropertyModuleEditor modules={state.property_modules || []} readOnly onChange={() => undefined} />
                       </PropertySpectrumState>
-                      <Box sx={{ mt: 2, borderTop: 1, borderColor: 'divider', pt: 2 }}>
-                        <Typography variant="subtitle2" fontWeight={700} gutterBottom>{materialLabel(state)} · {t('upload.structureAttachmentTitle')}</Typography>
+                      <Box sx={{ mt: 2 }}>
+                        <PropertyModuleSection title={t('upload.crystalStructureTitle')}>
                         {(state.structures || []).filter((structure: any) => structure.structure_text).length ? (state.structures || []).filter((structure: any) => structure.structure_text).map((structure: any, structureIndex: number) => <Box key={structure.id || structureIndex} sx={{ mt: 2 }}>
                           <Typography variant="body2" fontWeight={600} gutterBottom>{structure.filename || `${materialLabel(state)} · ${t('paperDetail.structureIndex', { n: structureIndex + 1 })}`} ({structure.structure_format || 'cif'})</Typography>
                           <CrystalStructureView data={structure.structure_text} format={structure.structure_format || 'cif'} />
                         </Box>) : <Typography variant="body2" color="text.secondary">{t('paperDetail.noStructure')}</Typography>}
+                        </PropertyModuleSection>
                       </Box>
                     </Box>
                   ))}

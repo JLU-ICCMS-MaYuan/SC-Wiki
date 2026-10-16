@@ -1,0 +1,97 @@
+{
+  "date": "2026-10-16",
+  "base_commit": "496d927848b9640ca463c54a612f88004ac07624",
+  "branch": "mayuan",
+  "source": "HEAD 归档仅叠加本次结构区增量；排除共享工作区其他未提交功能",
+  "candidate_sha256": {
+    "frontend/src/components/StructureCandidatePanel.tsx": "7bbb8dd810387c8a132f6cb647b47e9e45a021e01715811a1097d3f7f4121fe3",
+    "frontend/src/components/PaperEditView.tsx": "5d68953a6db179465e371258eef4b5b56136a8d61c9b9bbb100a717f392c64c9",
+    "frontend/src/components/MaterialStatesEditor.tsx": "05b18e13493d22ff060524b40302f409696a342cd7002cb4a898b9f40676416e",
+    "frontend/src/i18n/zh/upload.ts": "cccea6c4c5c7483d5883fb143dbaae30ab41a18f9f9e3f21c5f78d2f601a69d3",
+    "frontend/src/i18n/en/upload.ts": "19f09a7d35d239f1598a1c9e28acdc8dae372575d3c2f6d6d58f922679eb49eb"
+  },
+  "unit": {
+    "files": 6,
+    "passed": 58,
+    "node_options": "--no-experimental-webstorage",
+    "baseline_failures": [
+      "paper-detail-form-parity 材料名称计数预期2而HEAD实际3",
+      "paper-detail-form-parity 旧压强原文/下限展示缺失"
+    ],
+    "baseline_method": "独立副本换回 HEAD 原 PaperEditView，同样2项失败",
+    "shared_dirty_failures": "多Tc记录删除/新增2项在独立候选中不复现，未纳入本次提交"
+  },
+  "build": {
+    "typescript": "通过",
+    "vite": "通过",
+    "existing_warnings": [
+      "3Dmol eval",
+      "大分包提示"
+    ]
+  },
+  "browser": {
+    "tool": "CUA / Codex in-app browser",
+    "url": "http://127.0.0.1:5194/structure-accepted.html",
+    "fixture": "structure-collapse-implemented-harness.tsx",
+    "real_components": [
+      "MaterialStatesEditor",
+      "PaperEditView",
+      "StructureCandidatePanel",
+      "CrystalStructureView",
+      "StructureViewer3D",
+      "EvidenceFieldMarkers"
+    ],
+    "data": "模拟 Sn 晶胞和来源，所有 fetch 在夹具截断",
+    "desktop": {
+      "viewport_width": 1280,
+      "collapsed_height": 40,
+      "background": "transparent",
+      "model_height": 400,
+      "data_height": 400,
+      "model_width": 507,
+      "data_width": 507
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "collapsed_height": 40,
+      "model_height": 280,
+      "data_height": 400,
+      "page_overflow": false
+    },
+    "checks": {
+      "first_hidden_expand_model_and_parameters": true,
+      "rotate_zoom_before_collapse": true,
+      "reopen_model_pixel_identical": true,
+      "source_switch_second_to_first": true,
+      "source_close_focus_return": true,
+      "candidate_cell_format_coordinates_retained": true,
+      "readonly_controls_work": true,
+      "readonly_upload_adopt_absent": true,
+      "empty_details_only_when_expanded": true,
+      "new_candidate_auto_expand": true,
+      "enter_space_toggle": true,
+      "paper_readonly_detail_expand_model": true
+    },
+    "science_changes": 0,
+    "uploads": 0,
+    "console_errors": 0,
+    "model_pixel_comparison": {
+      "crop": [
+        123,
+        755,
+        630,
+        1110
+      ],
+      "difference_bbox": null,
+      "description": "全页截图裁切旋转缩放后的模型区域；收起重开前后逐像素一致"
+    },
+    "viewport_override_reset": true
+  },
+  "boundaries": [
+    "未调用业务 API 或 AI",
+    "未写入业务草稿或修改几何",
+    "未推送或远端部署",
+    "真实账号完整保存/审核链不属于本次布局验收"
+  ]
+}

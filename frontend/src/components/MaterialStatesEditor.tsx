@@ -857,6 +857,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                     candidates={stateCandidates}
                     hasCanonicalStructure={Boolean(state.structure?.structure_text)}
                     uploading={Boolean(structureUploading[index])}
+                    readOnly={readOnly}
                     onUpload={file => void uploadStructureForState(index, file)}
                     onChange={updateStructureCandidate}
                   />
