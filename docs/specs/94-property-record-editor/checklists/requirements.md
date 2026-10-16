@@ -59,8 +59,8 @@
 ## US17 记录操作 Demo
 
 - [x] CHK033 完整原话与 AI 判断分离，已有 #94 为 OPEN 且唯一 `type:feature`；没有新增同范围 Issue。[Spec US17、GitHub 本轮查询]
-- [x] CHK034 明确复制实际行为与有限使用价值，建议移除未写成已确认规则；US15 的 DOS 清理未混入本轮。[Spec US17、Research US17]
+- [x] CHK034 明确复制实际行为与有限使用价值，设计已获认可但未写成已实现行为；US15 的 DOS 清理未混入本轮。[Spec US17、Research US17]
 - [x] CHK035 同行删除、局部滚动、只读、目标隔离和试填保留有浏览器观察依据；只证明独立 Demo。[SC-043～044、assets/record-actions-demo-validation.json]
 - [x] CHK036 IMG-012 从归档位置解码并验证尺寸和 SHA-256，原文件与截图派生材料分开保存。[assets/record-actions-images.json]
-- [ ] CHK037 用户已查看并认可本版完整 Issue 追加草案与 Demo；当前无实际答复，SC-045 未满足。
+- [x] CHK037 用户已查看并认可本版完整 Issue 追加草案与 Demo，实际答复“认可设计并同步 #94，暂不落地”；#94 已追加完整获批正文及最新答复，读回核验保持 OPEN、唯一 type:feature，SC-045 的设计确认和同步部分已满足。[Spec US17、GitHub #94 US17]
 - [ ] CHK038 正式实施授权、四模块集成验收及远程 Spec/附件链接验证；本轮未进入，不据 Demo 关闭 #94。

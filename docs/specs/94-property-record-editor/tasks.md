@@ -124,11 +124,11 @@ T024 的完成范围是消费 #137 正式合同的前端路径；真实谱生成
 
 ## US17：复制按钮取舍与同行删除 Demo
 
-仅调查和演示已获授权；正式方案及 Issue 追加待确认，以下完成项只证明 Demo 交付。
+调查和演示已完成，Demo 设计及 Issue 追加正文已获确认并同步；用户明确暂不落地，以下完成项不代表正式功能实现。
 
 - [x] T056 [US17] 核查 GitHub #94、#90 合同与复制/删除代码，向 `docs/specs/94-property-record-editor/spec.md` 追加完整原话及待评审需求，留存 IMG-012 与独立图片索引。
 - [x] T057 [US17] 制作 `docs/specs/94-property-record-editor/assets/record-actions-demo.html`，提供现有/建议切换、同行删除及窄容器演示，覆盖 FR-056～059。
 - [x] T058 [US17] 用真实浏览器验证 SC-043～044，留存截图和 `docs/specs/94-property-record-editor/assets/record-actions-demo-validation.json`，在 `quickstart.md` 记录边界，准备完整 Issue 追加草案。
-- [ ] T059 [US17] 展示 `docs/specs/94-property-record-editor/assets/record-actions-issue-draft.md` 全文及 Demo，取得实际确认后更新 Issue #94；确认设计及正式实施授权后才建立生产路径实施任务（SC-045）。
+- [x] T059 [US17] 展示 `docs/specs/94-property-record-editor/assets/record-actions-issue-draft.md` 全文及 Demo，取得“认可设计并同步 #94，暂不落地”的实际答复后更新 Issue #94；读回核验原正文、完整获批草案、唯一类型与 OPEN 均保留（SC-045）。正式实施未授权，不建立生产路径实施任务。
 
-顺序：T056 → T057 → T058 → 用户评审 → T059。当前交付范围是 Demo，不新增并行代理工作；正式四模块集成和业务保存没有对应已完成任务。
+顺序：T056 → T057 → T058 → 用户评审 → T059，已完成 Demo 及确认同步。正式四模块集成和业务保存均未实施；等待未来明确的落地指令，不自动推进。

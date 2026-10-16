@@ -279,4 +279,6 @@ python3 -m http.server 18449 --bind 127.0.0.1 --directory "docs/specs/94-propert
 
 真实浏览器完成上述 8 组检查：默认及 360px 删除/输入中心差为 0 CSS px；360px/760px 无整页横向溢出；控制台 error 为 0。详见 [观测记录](assets/record-actions-demo-validation.json)和[截图](assets/record-actions-demo.jpg)。未跑生产构建，因为本次没有修改正式代码或依赖；检查不代表真实保存、四模块集成、数据库、部署或历史重复清理已验收。
 
-Spec US17、Issue 追加正文及正式落地均等待用户评审。本轮不写远端 Issue，不推送，不更新当前功能 Overview。
+用户已答复“认可设计并同步 #94，暂不落地”。本版 Demo 设计及完整追加正文获得认可，#94 已同步；通过 `gh issue view 94 --json title,body,state,labels,url` 读回核验：原正文保留、获批草案完整、追加最新答复，仍为 OPEN 且唯一类型为 `type:feature`。获批原稿仍保留其当时的待评审文案，Issue 末尾的最新结论优先。
+
+本轮仅同步需求与文档，未修改正式代码、真实数据或 Overview，未推送；远程 Spec/图片链接仍待验证。整份 Spec 未经过另一次完整逐字确认，正式实施未获授权。

@@ -108,3 +108,5 @@ state_kind 的 mixed 来自 #32/#50 的来源分类；#84 允许同条件计算�
 代码证据：`frontend/src/lib/propertyModules.ts:clonePropertyRecord`、`frontend/src/components/PropertyModuleEditor.tsx:cloneRecordByKey`、`frontend/src/components/SchemaDrivenRecordForm.tsx` 底部操作行。历史副本证据复用 `assets/fermi-dos-duplicate-audit.json`；未审计最新业务数据。
 
 删除语义复用既有逐条删除，不新增确认、撤销、自动清理或持久化行为。独立 Demo 的“恢复示例”只恢复演示数据。正式组件何时移除内部工具函数，须在实施前核查其他调用方，不能依据一个按钮直接推断函数可删。
+
+评审结论：用户答复“认可设计并同步 #94，暂不落地”，认可取消复制与同行删除的演示设计。已同步 #94，正式代码和真实数据保持当前行为；本节历史“等待评审”指建议形成时的状态，不作为继续阻塞同步的依据。
