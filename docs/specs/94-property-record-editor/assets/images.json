@@ -202,6 +202,27 @@
         1152
       ],
       "verification": "2026-10-16 从归档位置重读并核对原文件字节、PNG 尺寸及 SHA-256；本地归档，远程未验证。"
+    },
+    {
+      "id": "IMG-011",
+      "upload_order": 11,
+      "original_name": "codex-clipboard-34c42123-0a2d-42ce-b633-b01afd85ed49.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-011.png",
+      "status": "local_verified",
+      "user_context": "我觉得我之前对于这个页面的设计还是有问题的\n\n1. λ，wlog 应该单独为第一行，不需要设置新增字段。\n2. Tc, mu 为第二行，二者的对应关系之前已经提到过。需要设置新增字段。\n3. 计算条件为什么没填上。我记得我之前提过要求\n\n你来规划落实我这个三个要是，使用 issue 和 spec，如果之前有相关的 issue 和 spec，可以追加。",
+      "related": [
+        "US16",
+        "FR-053",
+        "FR-054",
+        "Issue #139"
+      ],
+      "sha256": "6519336d2714895bfc347d3c7b5ec9f09695aa55f798f27e6434bd22a7d5579e",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2476,
+        808
+      ],
+      "verification": "2026-10-16 从归档路径重读原始 PNG，解码并核对尺寸与 SHA-256；图片只作材料，本地留档，远程未验证。"
     }
   ]
 }

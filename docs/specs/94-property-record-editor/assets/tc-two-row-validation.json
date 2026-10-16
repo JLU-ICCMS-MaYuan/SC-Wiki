@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-16",
+  "browser": "Codex In-app Browser",
+  "url": "http://127.0.0.1:8774/tc-two-row-demo.html",
+  "scope": "独立设计预览；未调用模型、业务 API 或写入真实草稿",
+  "checks": [
+    {
+      "check": "两行布局与自动扩宽",
+      "baseWidth": 170,
+      "contentWidth": 1280,
+      "extensionWidth": 304,
+      "firstAddButtons": 0,
+      "firstInputs": 2,
+      "firstTop": 167.796875,
+      "pageWidth": 1280,
+      "pairCount": 2,
+      "secondTop": 231.796875
+    },
+    {
+      "check": "300GPa谐近似",
+      "extensions": false,
+      "lambda": "3.34",
+      "omega": "968",
+      "sschaInputs": false
+    },
+    {
+      "check": "300GPa非谐近似",
+      "lambda": "2.61",
+      "omega": "1165",
+      "sschaInputs": true
+    },
+    {
+      "check": "预览保存重开",
+      "conditionName": true,
+      "parameterName": "这是用于检验新增字段自动扩宽的较长名称",
+      "status": "已恢复保存的预览"
+    },
+    {
+      "check": "清空回缩",
+      "width": 170
+    },
+    {
+      "check": "类型切换单值",
+      "pairs": 1
+    },
+    {
+      "check": "错误配对拦截",
+      "error": "两组 Tc 与 μ* 的对应关系不一致，请检查输入。",
+      "saveDisabled": true
+    },
+    {
+      "addDisabled": true,
+      "check": "只读输入与操作禁用",
+      "cloneDisabled": true,
+      "editable": 0
+    },
+    {
+      "check": "390px局部滚动",
+      "page": 390,
+      "regions": [
+        {
+          "label": "第一行 λ 与 ωlog",
+          "scroll": 356,
+          "width": 340
+        },
+        {
+          "label": "第二行 Tc 与 μ*",
+          "scroll": 1020,
+          "width": 340
+        },
+        {
+          "label": "固定计算条件",
+          "scroll": 1266,
+          "width": 340
+        }
+      ],
+      "viewport": 390
+    }
+  ]
+}
