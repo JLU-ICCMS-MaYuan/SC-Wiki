@@ -110,7 +110,7 @@ FR-032—033 / SC-022 的浏览器验收由 T052 覆盖，文档同步由 T053 �
 数据字段与生命周期见 [数据模型](data-model.md)，预检返回和界面契约见 [接口](contracts/api.md)。#120、#128、#129、#66 保留各自字段的生成规则，本计划只收敛共享来源语义。
 
 
-## 2026-10-16 US11 增量设计（待确认、未实施）
+## 2026-10-16 US11 增量设计（已确认、未实施）
 
 1. 先在真实 `MaterialStatesEditor`、`EvidenceFieldMarkers` 与 `useEvidenceWorkflow` 组合复现误标，并记录编辑瞬间、自动保存前后、失败与迟到响应。建立字段和科学条件依赖矩阵；服务器 `state_records` / `record_claim` 为科学断言事实来源，UI 路径仅负责定位。
 2. 在 `evidenceFields.ts` 共享计算中按稳定身份解析已有 `dependency`，仅传播实际输入变更及必要的科学上下文变化；以字段值比较识别同值事件。`EvidenceWorkflow.invalidate` 使用统一受影响集合，再清理对应理由、人工确认和队列。同步审查原生 input/change 与组件回调，保留 React 事件时序约束。
