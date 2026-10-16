@@ -1,0 +1,29 @@
+{
+  "date": "2026-10-16",
+  "timezone": "Asia/Shanghai",
+  "scope": "独立静态交互原型，不是产品功能验收",
+  "browser": "Codex In-app Browser",
+  "entry": "http://127.0.0.1:18440/index.html",
+  "checks": {
+    "javascript_syntax": "通过 node --check",
+    "checkbox_stays_on_list": "通过，选中状态改变且地址不变",
+    "blank_area_navigation": "通过，进入 detail.html?task=lasc-ready",
+    "return_to_list": "通过",
+    "keyboard_enter_navigation": "通过，进入 hydride-reading 任务",
+    "save_and_reload": "通过，标题恢复为已保存演示值",
+    "unsaved_return_prompt": "通过，展示继续编辑、放弃修改、保存并返回",
+    "discard_and_return": "通过",
+    "clean_without_navigation": "通过，第三条任务清理后保留列表地址",
+    "reset_demo": "通过，任务数从 2 恢复为 3",
+    "browser_error_logs": 0
+  },
+  "not_verified": [
+    "取消确认完整流程",
+    "批量删除完整流程",
+    "窄屏完整交互",
+    "浏览器原生未保存离页提示",
+    "完整可访问性",
+    "真实解析、保存、审核与谱详情业务集成"
+  ],
+  "spec_status": "未修改，等待用户体验反馈"
+}

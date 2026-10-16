@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>上传 · SC-Wiki 交互 Demo</title><link rel="stylesheet" href="demo.css"><script src="demo.js" defer></script></head>
+<body data-page="list">
+<aside class="sidebar"><a class="brand" href="index.html"><span class="brand-icon">S</span><span class="nav-text">SC-Wiki</span></a><nav aria-label="主导航"><span><b>◈</b><span class="nav-text">热点</span></span><span><b>⌕</b><span class="nav-text">探索</span></span><span><b>⌘</b><span class="nav-text">脉络</span></span><span><b>♧</b><span class="nav-text">社区</span></span><a class="active" href="index.html" aria-label="上传"><b>⇧</b><span class="nav-text">上传</span></a><span><b>◇</b><span class="nav-text">对话</span></span><span><b>∿</b><span class="nav-text">预测</span></span></nav><div class="sidebar-bottom"><span class="nav-text">中文 / English</span><span class="profile"><b>M</b><span class="nav-text">研究者</span></span></div></aside>
+<main class="workspace">
+  <div class="page-title"><div><h1>上传</h1><p>上传论文，查看解析进度，校对后提交审核。</p></div><span class="demo-label">交互 Demo · 样例数据</span></div>
+  <div class="tabs"><span class="tab active">论文上传</span><span class="tab muted">JSON 数据导入</span></div>
+  <section class="upload-box" aria-label="上传区域示意"><span class="upload-icon">⇧</span><h2>上传论文与补充材料</h2><p>将 PDF、TXT、MD 或结构附件拖到这里</p><button class="button outline" disabled>选择文件</button><small>此 Demo 演示任务导航，文件上传暂不可用</small></section>
+  <section aria-labelledby="records-heading"><div class="section-heading"><h2 id="records-heading">上传解析记录 <span class="count" id="task-count">3 / 100</span></h2><div class="list-tools"><label class="selection"><input type="checkbox" id="select-all">全选</label><span id="selection-count" hidden></span><button class="button danger" id="batch-delete" hidden>删除所选</button><button class="button text" id="reset-demo">重置演示</button></div></div>
+  <p class="list-hint">点击任务条框，进入独立页面查看解析与校对。</p>
+  <div class="task-list" id="tasks"></div>
+  <div class="list-empty panel" id="empty-list" hidden>暂无上传任务<button class="button outline" id="reset-empty">恢复演示任务</button></div>
+  </section>
+  <footer>交互预览：任务导航、选择和清理仅操作演示数据。</footer>
+</main><div id="toast" class="toast" role="status" hidden></div>
+</body></html>
