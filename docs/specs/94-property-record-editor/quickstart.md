@@ -328,3 +328,16 @@ NODE_OPTIONS=--no-experimental-webstorage node frontend/node_modules/vitest/vite
 复现夹具：将 `assets/structure-collapse-implemented-harness.tsx` 复制至独立源码的 `frontend/structure-accepted.tsx`，把 `../../../../frontend/src/` 导入前缀替换为 `./src/`；建立含 root 节点及指向该脚本的独立HTML，再通过 Vite 打开。验证结果、截图及源码哈希见同目录 structure-collapse-demo.md 和 assets/structure-collapse-implemented-validation.json。
 
 扩大检查中的旧只读字段测试2项在 HEAD 原组件复现，不计入通过数；共享工作区未提交的多 Tc 逻辑有2项相关测试失败，独立候选27项材料表单通过，未把其他任务修改纳入本次。没有执行推送、部署、真实业务保存或 AI 调用。
+
+
+## US19 正式添加入口位置验收
+
+独立源码目录`/tmp/scwiki-module-bottom-accepted`只含HEAD及本次PropertyModuleEditor的Select移动。验证命令：
+
+```bash
+NODE_OPTIONS=--no-experimental-webstorage node frontend/node_modules/vitest/vitest.mjs run --config vitest.config.ts tests/01_decentralized_uploading/property-module-collapse.test.tsx tests/01_decentralized_uploading/property-record-editor.test.tsx tests/01_decentralized_uploading/property-spectra-navigation.test.tsx tests/01_decentralized_uploading/material-states-editor.test.tsx
+```
+
+4份70项通过；frontend中`npm run build`的TypeScript/生产构建通过。真实共享组件的7组浏览器检查及390px无溢出见[module-add-bottom-demo.md](module-add-bottom-demo.md)正式验证段和assets/module-add-bottom-implemented-validation.json。模拟接口响应与组件夹具留档，不读写业务任务。
+
+复现浏览器夹具：复制assets/module-add-bottom-implemented-harness.tsx到隔离源码frontend目录，将导入前缀`../../../../frontend/src/`改成`./src/`，用独立HTML挂载root并经Vite加载。两卡提供独立添加菜单，使用只读/无模块切换验证边界。构建和回归无需运行夹具。

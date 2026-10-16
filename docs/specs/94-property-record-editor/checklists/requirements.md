@@ -84,4 +84,11 @@
 
 - [x] CHK046 原话和IMG-016完整留档，AI解释与原文分开；复用OPEN/唯一type:feature的#94，关联既有模块和谱展示合同。[module-add-bottom-demo.md、GitHub只读查询]
 - [x] CHK047 两状态、空态、谱展示、只读、键盘、保持输入与390px的Demo验证有可复查记录。[SC-056～057]
-- [ ] CHK048 用户评审完整追加草案和Demo，远端Issue同步及正式实施尚未授权；远程Spec链接待推送验证。[SC-058]
+- [ ] CHK048 用户已以“认可开始”确认完整追加草案和Demo，远端Issue已同步且实施获授权；本项合并了远程Spec链接检查，因尚未推送仍保持未完成。[SC-058、CHK049]
+
+
+## US19 正式实施验收
+
+- [x] CHK049 用户“认可开始”已确认完整Demo及追加草案，解除实施门；#94追加后读回保持OPEN、唯一type:feature。[module-add-bottom-demo.md、GitHub #94]
+- [x] CHK050 仅移动既有Select至MissingPropertySpectrumModules之后，原菜单/事件/只读/稳定键合同保持；独立候选70项回归、构建及真实两卡/空态/谱/只读/键盘/390px验证通过。[assets/module-add-bottom-implemented-validation.json]
+- [ ] CHK051 新版远程Spec/附件链接待推送后验证，本地验收不关闭整个#94。

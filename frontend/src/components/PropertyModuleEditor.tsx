@@ -237,15 +237,6 @@ const PropertyModuleEditor: React.FC<Props> = ({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-      {!readOnly && (
-        <Select size="small" displayEmpty value="" inputProps={{ 'aria-label': '添加物性模块' }}
-          onChange={event => addModule(event.target.value as PropertyModuleCode)}
-          renderValue={() => '添加物性模块'}>
-          <MenuItem value="" disabled>添加物性模块</MenuItem>
-          {PROPERTY_MODULES.filter(item => !modules.some(module => module.module_code === item.code))
-            .map(item => <MenuItem key={item.code} value={item.code}>{item.label}</MenuItem>)}
-        </Select>
-      )}
       {modules.length === 0 && readOnly && <Alert severity="info">未报告物性模块</Alert>}
       {modules.map((module, moduleIndex) => {
         const moduleBasePath = basePath ? `${basePath}.${moduleIndex}` : String(moduleIndex)
@@ -341,6 +332,15 @@ const PropertyModuleEditor: React.FC<Props> = ({
         )
       })}
       <MissingPropertySpectrumModules existing={modules.map(module => module.module_code)} />
+      {!readOnly && (
+        <Select size="small" displayEmpty value="" inputProps={{ 'aria-label': '添加物性模块' }}
+          onChange={event => addModule(event.target.value as PropertyModuleCode)}
+          renderValue={() => '添加物性模块'}>
+          <MenuItem value="" disabled>添加物性模块</MenuItem>
+          {PROPERTY_MODULES.filter(item => !modules.some(module => module.module_code === item.code))
+            .map(item => <MenuItem key={item.code} value={item.code}>{item.label}</MenuItem>)}
+        </Select>
+      )}
     </Box>
   )
 }

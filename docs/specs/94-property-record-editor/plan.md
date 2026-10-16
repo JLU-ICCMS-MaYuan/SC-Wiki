@@ -212,3 +212,8 @@ StructureViewer3D 已有 ResizeObserver，在首次隐藏展开时适配有效�
 ## US19：添加入口底部 Demo 计划
 
 仅制作独立 HTML 两状态交互。每卡结构区、已有模块容器、谱展示容器、添加区顺序固定；新增模块插入所属卡模块容器的末尾，添加区保持卡片最后。保留原生 details 节点和输入，避免全卡重绘造成丢值；只读切换仅隐藏动作及禁用输入。空态、谱展示与390px纳入验证；场景切换明确为样例重置。正式落地拟将 PropertyModuleEditor 现有 Select 移到 MissingPropertySpectrumModules 之后，但当前不修改组件。T074→T075→T076，与 FR-069～071/SC-056～058 对齐。
+
+
+## US19 正式实施计划
+
+用户“认可开始”解除Demo阶段限制。将PropertyModuleEditor既有添加Select原样移动到MissingPropertySpectrumModules之后，不新增包装、样式或数据处理。每状态仍经MaterialStatesEditor独立渲染，复用已有addModule、稳定键与只读判断。运行模块编辑、折叠、谱导航及材料表单回归；独立HEAD归档仅叠加本次位置差异完成构建，并用真实共享组件验证两卡/空态/谱展示/只读/输入保留和390px。T077→T078→T079；排除共享工作区的多Tc等未提交功能。

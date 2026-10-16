@@ -1,10 +1,12 @@
-# US19：添加物性模块移至材料状态底部（设计草稿）
+# US19：添加物性模块移至材料状态底部（已认可）
 
-关联 [Issue #94](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/94)，沿用唯一 type:feature；本轮仅调查、Spec 草稿与 Demo，等待用户评审，不修改正式页面。
+关联 [Issue #94](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/94)，沿用唯一 type:feature；用户已认可 Demo 与完整追加正文，并授权正式实施。
 
 ## 原始需求记录
 
 > 每个材料状态的添加物性模块，放到每个材料状态的最下方。使用 issue 和 spec，然后做好 demo 给我看看
+
+> 认可开始
 
 ## 附件与推断来源
 
@@ -57,3 +59,24 @@ FR-069/SC-056 → 卡片内末尾添加区 → T074/T075；FR-070/071、SC-057 �
 含谱展示场景中，入口位于谱模块之后；新增标量模块仍在谱展示之前。无模块时入口在结构区之后，新增仅改变目标卡。390px下两卡均宽366px，收起、展开、试填和新增无整页横向溢出；四种模块齐全后没有可重复添加选项。完整拟追加正文可在Demo底部展开阅读，验证后已恢复默认场景并解除临时视口覆盖。
 
 [桌面截图](assets/module-add-bottom-desktop.png)、[390px截图](assets/module-add-bottom-mobile.png)、[验证记录](assets/module-add-bottom-validation.json)。只证明独立Demo交互；正式React表单、保存链和数据未修改，未写入远端Issue或关闭#94。
+
+
+## 正式实施基线（2026-10-16）
+
+用户最新“认可开始”确认前述完整草案与Demo，并授权正式落实。原文中的“仅Demo、待评审、不修改正式页面”保留为历史阶段，以本节为准。FR-069～071、SC-056～057适用于正式共享组件；SC-058的评审门已解除，新增正式验证与文档收尾。既有模块、谱展示、添加区顺序不增加其他产品决策。
+
+生产责任仅为把 PropertyModuleEditor 原有添加 Select 原样移到 MissingPropertySpectrumModules 之后。MaterialStatesEditor 每卡仍渲染一个组件，状态所属 onChange、模块稳定键及菜单过滤均不改。只读继续不渲染添加入口；不新增接口、存储、定位样式或自动滚动。
+
+映射：FR-069/070 → JSX正常文档流中移动控件 → T077；FR-071/SC-057 → 复用既有 addModule 与稳定键 → T078回归/真实组件浏览器；SC-056 → 两状态、空态、谱展示、只读及390px实际布局 → T078；授权/Issue/Overview/提交 → T076/T079。只暂存当前增量，保留共享文件其他未提交功能。
+
+
+## 正式实现与验证
+
+PropertyModuleEditor的原添加Select已原样移到MissingPropertySpectrumModules之后，没有新增样式、事件、数据分支或组件。每个材料状态继续独立使用共享组件，覆盖上传、返修及管理员编辑；只读原本不渲染添加入口的规则保持。
+
+- 独立HEAD归档仅叠加本次Select位置差异：物性编辑、模块折叠、谱导航及材料状态4份70项回归通过；TypeScript与生产构建通过，保留已有测试夹具/MUI、React Router及分包/eval提示。
+- 真实MaterialStatesEditor/PropertyModuleEditor/PropertySpectra浏览器验证7组通过：两卡添加入口位于全部模块及谱展示之后，第一卡新增热力学保留已有“保留的试填”及展开，第二卡不变；第二卡可独立新增超导性质，第一卡删除空模块不丢值。
+- 无标量模块时入口仍在谱展示后；键盘打开菜单/Enter新增后目标卡模块数1、另一卡0。只读添加入口数量0。390px下两卡宽358px、页面scrollWidth390px，无整页横向溢出；解除临时视口覆盖，控制台error0。
+- 夹具只返回模拟只读响应，没有业务API/保存、AI调用或真实科学草稿写入。布局变更不需要API、数据库或迁移验证，不冒充真实账号完整提交链或远端部署。
+
+[实际桌面截图](assets/module-add-bottom-implemented-desktop.png)、[390px截图](assets/module-add-bottom-implemented-mobile.png)、[生产组件夹具](assets/module-add-bottom-implemented-harness.tsx)、[验证记录](assets/module-add-bottom-implemented-validation.json)。#94已追加获批草案和最新原话并读回确认OPEN/唯一type:feature；最终验收与提交号随后回写，不关闭整个Issue。新版文档仍未推送，远程链接待验证。

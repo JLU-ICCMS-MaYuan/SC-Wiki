@@ -1,0 +1,70 @@
+{
+  "checks": [
+    {
+      "check": "两卡入口位于包括谱展示的全部模块后",
+      "locations": [
+        {
+          "afterModules": true,
+          "pickerCount": 1,
+          "state": "fixture-1",
+          "width": 1114
+        },
+        {
+          "afterModules": true,
+          "pickerCount": 1,
+          "state": "fixture-2",
+          "width": 1114
+        }
+      ]
+    },
+    {
+      "check": "第一卡新增热力学，原记录试填及展开保留，第二卡模块不变，谱摘要展示之后仍是添加入口",
+      "passed": true
+    },
+    {
+      "check": "第二卡独立新增超导性质；第一卡删除空热力学不丢失已有输入",
+      "passed": true
+    },
+    {
+      "check": "只读没有添加入口，现有输入禁用",
+      "passed": true
+    },
+    {
+      "check": "无标量模块时仍在谱展示末尾且两卡各一个入口",
+      "passed": true
+    },
+    {
+      "check": "键盘打开菜单并按Enter添加目标模块",
+      "passed": true
+    },
+    {
+      "check": "390px两卡入口均在所有模块末尾，无整页溢出",
+      "passed": true
+    }
+  ],
+  "keyboard_add_scalar_count": 1,
+  "other_state_scalar_count": 0,
+  "errors": [
+    {
+      "level": "error",
+      "message": "You are calling ReactDOMClient.createRoot() on a container that has already been passed to createRoot() before. Instead, call root.render() on the existing root instead if you want to update it.",
+      "timestamp": "2026-10-16T07:28:32.204Z",
+      "url": "http://127.0.0.1:5195/node_modules/.vite/deps/react-dom_client.js?v=2437b44d"
+    }
+  ],
+  "viewport_override_reset": true,
+  "requests": "[\"GET /api/form-definitions?target_kind=property_record&module_code=electronic_properties\",\"GET /api/form-definitions/record.electronic_properties.custom/versions/1\",\"GET /api/rag/spectra?target=upload&target_id=fixture-only\",\"GET /api/rag/spectra?target=upload&target_id=fixture-only\",\"GET /api/form-definitions?target_kind=property_record&module_code=thermodynamical_properties\",\"GET /api/form-definitions?target_kind=property_record&module_code=electronic_properties\",\"GET /api/rag/spectra?target=upload&target_id=fixture-only\"]",
+  "date": "2026-10-16",
+  "branch": "mayuan",
+  "base_commit": "f0f3d42da8d12be431346f05d0fb8331ffcb26e3",
+  "candidate_source_sha256": "2172b52d6f9440edccb97d34171da8e6329e5ad59f823d2d311b622504320a69",
+  "source": "frontend/src/components/PropertyModuleEditor.tsx",
+  "unit": {
+    "files": 4,
+    "passed": 70
+  },
+  "build": "TypeScript与Vite生产构建通过，保留已有分包/eval提示",
+  "fixture": "module-add-bottom-implemented-harness.tsx",
+  "boundary": "隔离源码仅移动Select，浏览器使用实际MaterialStatesEditor及谱组件；模拟数据，全部fetch由夹具响应，无业务保存、AI或业务API访问",
+  "url": "http://127.0.0.1:5195/module-bottom.html"
+}
