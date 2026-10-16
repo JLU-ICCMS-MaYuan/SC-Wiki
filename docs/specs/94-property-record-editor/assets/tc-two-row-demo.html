@@ -6,6 +6,7 @@
 <style>
 :root{font-family:Arial,"PingFang SC","Microsoft YaHei",sans-serif;color:#293343;background:#f7f8fa;font-size:14px;--purple:#6554e8;--border:#c8cdd5}*{box-sizing:border-box}body{margin:0;padding:28px 24px}main{max-width:1320px;margin:auto}h1{font-size:24px;margin:0 0 10px;font-weight:600}p{line-height:1.7;margin:6px 0;color:#687488}button,select,input{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.5}.toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:22px 0 16px}.toolbar .grow{flex:1}.button{background:#fff;border:1px solid var(--border);border-radius:6px;padding:9px 14px;color:#465168}.button.primary{background:var(--purple);border-color:var(--purple);color:#fff}.badge{display:inline-block;border-radius:4px;font-size:12px;padding:4px 8px;background:#edeaff;color:#6554c2;margin-left:10px;vertical-align:middle}.tabs{display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid #dce0e6;margin-bottom:18px;padding:0 0 8px}.tabs button{flex:none;border:0;background:none;padding:10px 14px;color:#687488;border-radius:6px}.tabs button[aria-selected=true]{background:#eeebff;color:#5542d5;font-weight:600}.card{border:1px solid #dce0e6;border-radius:10px;background:white;padding:20px;min-width:0}.context{display:flex;gap:12px;flex-wrap:wrap;align-items:center;padding-bottom:16px;border-bottom:1px solid #edf0f3;margin-bottom:18px}.context strong{font-size:17px}.context span{color:#687488}.scroll{overflow-x:auto;overscroll-behavior-x:contain;padding:12px 1px 8px;min-width:0}.line{display:flex;gap:12px;align-items:center;width:max-content;min-width:100%;padding:0 1px}.parameter-line{min-width:0}.field{position:relative;display:block;flex:none;width:170px;--field-bg:#fff}.field.wide{width:230px}.field.small{width:100px}.field input,.field select{height:44px;width:100%;border:1px solid var(--border);border-radius:6px;padding:10px 12px;background:var(--field-bg);color:#293343;outline:none}.field input:focus,.field select:focus{border:2px solid var(--purple);padding:9px 11px}.field .label{position:absolute;top:-8px;left:9px;background:var(--field-bg);font-size:12px;color:#66718a;padding:0 4px;white-space:nowrap}.field .unit{position:absolute;right:12px;top:14px;color:#778396}.field:has(.unit) input{padding-right:30px}.pair{display:flex;gap:8px;padding:14px 9px;background:#f4f3ff;border-radius:8px;border:none;flex:none}.pair .field{--field-bg:#f4f3ff;width:145px}.pair .field .label{color:#6554bd}.check{display:flex;align-items:center;gap:6px;white-space:nowrap;flex:none}.check input{accent-color:var(--purple);width:17px;height:17px}.add{display:inline-flex;gap:8px;align-items:center;border:0;padding:8px 10px;color:var(--purple);background:none;font-weight:600;margin:2px 0 14px}.add span{font-size:22px;font-weight:400}.section-title{color:#7a8596;margin:8px 0 0}.extensions .scroll{padding-top:14px}.extension-line{min-width:0;gap:10px}.extension-line .field{width:170px}.extension-line .field input{min-width:170px}.delete{background:none;color:#b54040;border:0;padding:9px 12px;white-space:nowrap}.footer{display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #edf0f3;margin-top:16px;padding-top:14px}.source{margin-top:8px;font-size:13px;line-height:1.7}.source summary{cursor:pointer;color:#7a8596;padding:10px 0}.source-box{background:#f8f9fc;border-radius:6px;padding:12px 16px}.source-box p{margin:6px 0}.source-box strong{color:#465168}.source-box .pending{color:#9c7022}.error{color:#b42332;font-size:13px;min-height:0}.error:empty{display:none}#status{color:#687488;font-size:13px}#measure{position:absolute;visibility:hidden;white-space:pre;font:14px Arial,"PingFang SC",sans-serif}input:disabled,select:disabled{color:#6b7280;background:#fafafa}.note{margin-top:14px;font-size:12px}.read-mode{display:flex;gap:6px;align-items:center}@media(max-width:650px){body{padding:18px 10px}.card{padding:14px}h1{font-size:21px}.toolbar{gap:8px}.pair .field{width:125px}}
 .method-row .add{margin:0;white-space:nowrap}.method-row .pair .field{width:125px}.pair-delete{font-size:22px;padding:0 3px;align-self:center}
+.pair-choice{width:17px;height:17px;margin:0 3px 0 0;accent-color:var(--purple);flex:none}.representative-help{font-size:12px;margin:8px 0 0}.representative-summary{font-size:13px;color:#6554bd;margin:0 0 8px;line-height:1.6}
 </style>
 <main>
   <h1>超导记录分行布局<span class="badge">可交互 Demo</span></h1>
@@ -16,6 +17,8 @@
     <div class="context"><strong id="material"></strong><span id="approximation"></span></div>
     <div class="section-title">超导转变温度 Tc</div>
     <div id="parameters" class="scroll" role="region" aria-label="第一行 λ 与 ωlog"><div class="line parameter-line" id="parameter-line"></div></div>
+    <p class="representative-help" id="representative-help">每个 Tc 前的小方框用于选择代表结果：勾选哪一组，就采用该方法、该 μ* 对应的 Tc。同一材料样例只选一组，改选会取消原选择，再次点击可取消。请先填写该组 Tc 和 μ*。</p>
+    <div class="representative-summary" id="representative-summary" role="status" aria-live="polite">尚未选择代表结果</div>
     <div id="tc" role="region" aria-label="预测方法与 Tc／μ* 组合"></div>
     <div id="error" class="error" role="alert"></div>
     <button class="add" id="add-parameter"><span aria-hidden="true">＋</span>新增字段</button>
@@ -30,7 +33,7 @@
 </main><span id="measure" aria-hidden="true"></span>
 <script>
 (() => {
-  const key='scwiki-tc-two-row-demo-v2', $=id=>document.getElementById(id);
+  const key='scwiki-tc-two-row-demo-v3', $=id=>document.getElementById(id);
   const methodOptions=[['','请选择预测方法'],['isotropic_eliashberg','各向同性 Eliashberg'],['anisotropic_eliashberg','各向异性 Eliashberg'],['allen_dynes','Allen–Dynes'],['mcmillan','McMillan'],['scdft','SCDFT'],['other','其他'],['unknown','未说明']];
   const inputDefaults={conditions:{code:'Quantum ESPRESSO',method:'DFPT',functional:'',k:'24×24×24',q:'6×6×6',kb:'',qb:''}};
   const seeds=[
@@ -39,13 +42,13 @@
     {id:'h300',pressure:300,approximation:'谐近似',lambda:'3.34',omega:'968',kind:'range',pairs:[{tc:'303',mu:'0.16'},{tc:'329',mu:'0.1'}]},
     {id:'a300',pressure:300,approximation:'非谐近似',lambda:'2.61',omega:'1165',kind:'range',pairs:[{tc:'293',mu:'0.16'},{tc:'330',mu:'0.1'}]},
   ];
-  const defaults=()=>seeds.map(({kind,pairs,...seed})=>({...structuredClone(inputDefaults),...structuredClone(seed),methods:[{id:'initial',code:'isotropic_eliashberg',representative:false,pairs:structuredClone(pairs.slice(0,kind==='range'?2:1))}],extensions:[
+  const defaults=()=>seeds.map(({kind,pairs,...seed})=>({...structuredClone(inputDefaults),...structuredClone(seed),representativePairId:null,methods:[{id:'initial',code:'isotropic_eliashberg',pairs:structuredClone(pairs.slice(0,kind==='range'?2:1)).map((pair,i)=>({...pair,id:'initial-'+i}))}],extensions:[
     {id:'cutoff',name:'声子／EPC · 波函数截断能',kind:'number',value:'90',unit:'Ry'},
     {id:'density',name:'声子／EPC · 电荷密度截断能',kind:'number',value:'720',unit:'Ry'},
     ...(seed.approximation==='非谐近似'?[{id:'sscha',name:'SSCHA · 截断能',kind:'number',value:'80',unit:'Ry'}]:[])
   ]}));
   let rows=defaults(), active='a150', readonly=false;
-  try{const saved=JSON.parse(sessionStorage.getItem(key));if(saved&&saved.version===2&&Array.isArray(saved.rows)&&saved.rows.length&&saved.rows.some(r=>r.id===saved.active)){rows=saved.rows;active=saved.active;$('status').textContent='已恢复保存的预览';}}catch{}
+  try{const saved=JSON.parse(sessionStorage.getItem(key));if(saved&&saved.version===3&&Array.isArray(saved.rows)&&saved.rows.length&&saved.rows.some(r=>r.id===saved.active)){rows=saved.rows;active=saved.active;$('status').textContent='已恢复保存的预览';}}catch{}
   const current=()=>rows.find(r=>r.id===active);
   const field=(label,value,change,{unit='',width='',type='text',grow=false}={})=>{
     const wrap=document.createElement('label');wrap.className='field '+width;
@@ -76,7 +79,18 @@
   function validate(){
     const r=current(), numeric=[r.lambda,r.omega,...r.methods.flatMap(m=>m.pairs.flatMap(p=>[p.tc,p.mu]))];
     const error=numeric.some(v=>v.trim()&&(!Number.isFinite(Number(v))||Number(v)<0))?'请输入完整的非负数值。':'';
-    $('error').textContent=error;$('save').disabled=!!error;return !error;
+    $('error').textContent=error;$('save').disabled=!!error;syncRepresentative();return !error;
+  }
+  const completeNumber=value=>value.trim()!==''&&Number.isFinite(Number(value))&&Number(value)>=0;
+  function syncRepresentative(){
+    const r=current(),entries=r.methods.flatMap(method=>method.pairs.map(pair=>({method,pair}))),selected=entries.find(x=>x.pair.id===r.representativePairId);
+    if(!selected||!selected.method.code||!completeNumber(selected.pair.tc)||!completeNumber(selected.pair.mu))r.representativePairId=null;
+    document.querySelectorAll('[data-representative-pair]').forEach(check=>{
+      const entry=entries.find(x=>x.pair.id===check.dataset.representativePair);
+      check.disabled=readonly||!entry?.method.code||!completeNumber(entry.pair.tc)||!completeNumber(entry.pair.mu);
+      check.checked=check.dataset.representativePair===r.representativePairId;
+    });
+    $('representative-summary').textContent=r.representativePairId?`代表结果：${methodOptions.find(([code])=>code===selected.method.code)?.[1]||selected.method.code} · μ* = ${selected.pair.mu} · Tc = ${selected.pair.tc} K`:'尚未选择代表结果';
   }
   function changed(){render();$('status').textContent='预览有未保存的修改';}
   function action(text,aria,run,style='add'){
@@ -87,14 +101,14 @@
       const scroll=document.createElement('div');scroll.className='scroll method-row';scroll.dataset.methodId=method.id;scroll.role='group';scroll.setAttribute('aria-label','第'+(methodIndex+1)+'种预测方法');
       const line=document.createElement('div');line.className='line';
       line.append(select('预测方法',method.code,methodOptions,v=>method.code=v,'wide'));
-      line.append(action('＋ 组合','添加 Tc／μ* 组合',()=>{method.pairs.push({tc:'',mu:''});changed();}));
+      line.append(action('＋ 组合','添加 Tc／μ* 组合',()=>{method.pairs.push({id:crypto.randomUUID(),tc:'',mu:''});changed();}));
       method.pairs.forEach((pair,pairIndex)=>{
         const group=document.createElement('div');group.className='pair';group.role='group';group.setAttribute('aria-label','第'+(pairIndex+1)+'组 Tc 与 μ*');
+        const representative=document.createElement('input');representative.type='checkbox';representative.className='pair-choice';representative.dataset.representativePair=pair.id;representative.setAttribute('aria-label','选择第'+(methodIndex+1)+'种方法第'+(pairIndex+1)+'组为代表结果');representative.setAttribute('aria-describedby','representative-help');representative.title='将该 μ* 对应的 Tc 设为代表结果';representative.addEventListener('change',()=>{r.representativePairId=representative.checked?pair.id:null;syncRepresentative();$('status').textContent='预览有未保存的修改';});group.append(representative);
         group.append(field('Tc',pair.tc,v=>pair.tc=v,{unit:'K'}),field('μ*',pair.mu,v=>pair.mu=v));
         const remove=action('×','删除第'+(pairIndex+1)+'组组合',()=>{method.pairs.splice(pairIndex,1);changed();},'delete pair-delete');
         remove.disabled=readonly||method.pairs.length===1;remove.title=method.pairs.length===1?'至少保留一组，或删除整行方法':'删除本组 Tc 与 μ*';group.append(remove);line.append(group);
       });
-      const label=document.createElement('label');label.className='check';const check=document.createElement('input');check.type='checkbox';check.checked=method.representative;check.disabled=readonly;check.addEventListener('change',()=>{method.representative=check.checked;$('status').textContent='预览有未保存的修改';});label.append(check,document.createTextNode('代表结果'));line.append(label);
       const removeMethod=action('删除方法','删除第'+(methodIndex+1)+'种方法',()=>{r.methods.splice(methodIndex,1);changed();},'delete');removeMethod.disabled=readonly||r.methods.length===1;line.append(removeMethod);
       scroll.append(line);$('tc').append(scroll);
     });
@@ -109,13 +123,13 @@
     $('sscha-source').textContent=r.approximation==='非谐近似'?'SSCHA：2×2×2 超胞、216 原子、0 K、80 Ry、3×3×3 k、2×2×2 采样 q，插值到 6×6×6 q；与主 EPC 设置分阶段保存。':'当前为谐近似记录，不关联 SSCHA 阶段设置。';
     ['add-parameter','add-condition','clone'].forEach(id=>$(id).disabled=readonly);$('delete-record').hidden=!r.copy;$('delete-record').disabled=readonly;validate();
   }
-  $('add-parameter').addEventListener('click',()=>{current().methods.push({id:crypto.randomUUID(),code:'',representative:false,pairs:[{tc:'',mu:''}]});changed();});
+  $('add-parameter').addEventListener('click',()=>{current().methods.push({id:crypto.randomUUID(),code:'',pairs:[{id:crypto.randomUUID(),tc:'',mu:''}]});changed();});
   $('add-condition').addEventListener('click',()=>{current().extensions.push({id:crypto.randomUUID(),name:'',kind:'number',value:'',unit:''});render();$('status').textContent='预览有未保存的修改';});
   $('clone').addEventListener('click',()=>{const row=structuredClone(current());row.id=crypto.randomUUID();row.copy=true;rows.push(row);active=row.id;render();$('status').textContent='已复制预览记录，尚未保存';});
   $('delete-record').addEventListener('click',()=>{rows=rows.filter(r=>r.id!==active);active=rows[0].id;render();$('status').textContent='已删除预览副本，尚未保存';});
   $('readonly').addEventListener('change',event=>{readonly=event.target.checked;render();});
   $('reset').addEventListener('click',()=>{rows=defaults();active='a150';sessionStorage.removeItem(key);render();$('status').textContent='已恢复初始示例';});
-  $('save').addEventListener('click',()=>{if(!validate())return;try{sessionStorage.setItem(key,JSON.stringify({version:2,rows,active}));$('status').textContent='预览已保存，刷新后可恢复；未写入真实草稿';}catch{$('status').textContent='浏览器存储不可用，预览未保存';}});
+  $('save').addEventListener('click',()=>{if(!validate())return;try{sessionStorage.setItem(key,JSON.stringify({version:3,rows,active}));$('status').textContent='预览已保存，刷新后可恢复；未写入真实草稿';}catch{$('status').textContent='浏览器存储不可用，预览未保存';}});
   render();
 })();
 </script>

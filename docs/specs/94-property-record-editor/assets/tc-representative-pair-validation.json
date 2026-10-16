@@ -1,0 +1,69 @@
+{
+  "date": "2026-10-16",
+  "version": 3,
+  "scope": "仅独立Demo；测试的Allen–Dynes 250K/0.12为人工试填，最终已恢复原表281K/0.16",
+  "checks": [
+    {
+      "check": "选择具体μ对应Tc",
+      "checked": [
+        "选择第1种方法第2组为代表结果"
+      ],
+      "summary": "代表结果：各向同性 Eliashberg · μ* = 0.1 · Tc = 311 K"
+    },
+    {
+      "check": "同方法改选互斥",
+      "count": 1,
+      "summary": "代表结果：各向同性 Eliashberg · μ* = 0.16 · Tc = 281 K"
+    },
+    {
+      "check": "空白组合不能作为代表",
+      "disabled": true
+    },
+    {
+      "check": "跨方法改选与保存重开",
+      "checked": 1,
+      "summary": "代表结果：Allen–Dynes · μ* = 0.12 · Tc = 250 K"
+    },
+    {
+      "check": "删除非代表组不改变代表",
+      "checked": 1,
+      "summary": "代表结果：Allen–Dynes · μ* = 0.12 · Tc = 250 K"
+    },
+    {
+      "check": "删除代表方法清除选择",
+      "checked": 0,
+      "summary": "尚未选择代表结果"
+    },
+    {
+      "check": "清空μ不保留无对应的代表结果",
+      "checked": 0,
+      "disabled": true,
+      "summary": "尚未选择代表结果"
+    },
+    {
+      "check": "允许取消代表结果",
+      "checked": 0
+    },
+    {
+      "check": "只读保留选择但禁止更改",
+      "checked": 1,
+      "enabled": 0
+    },
+    {
+      "check": "删除代表组合不会改选剩余组",
+      "checked": 0,
+      "remaining": 1,
+      "summary": "尚未选择代表结果"
+    },
+    {
+      "check": "另一材料样例不继承选择",
+      "checked": 0
+    },
+    {
+      "check": "窄屏与选框位置",
+      "checkboxBeforeTc": true,
+      "page": 390,
+      "viewport": 390
+    }
+  ]
+}
