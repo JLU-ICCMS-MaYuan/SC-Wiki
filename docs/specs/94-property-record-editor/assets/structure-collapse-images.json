@@ -1,0 +1,24 @@
+{
+  "images": [
+    {
+      "id": "IMG-015",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-73fe6714-b88a-4634-9ef1-9bda1bb3fddd.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-015.png",
+      "status": "local_verified",
+      "user_context": "新的需求：晶体结构展示这一部分，我也希望折叠之后的页面能很简洁，类似于下面的超导性质，电子性质这样的页面，简洁的折叠起来。展开后再展示更详细的页面。你使用 issue 和 spec 来实现，看看是不是已经有 issue，如果有可以追加这个需求。然后做好 demo 给我 看看，再决定",
+      "related": [
+        "US18",
+        "FR-066",
+        "FR-067"
+      ],
+      "sha256": "9aeb65dc9f283428e8d8e2763e7969b24fdd2858e39160bf0cd2a4ef376424ac",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2468,
+        770
+      ],
+      "verification": "2026-10-16 从归档路径重读 PNG，核对原字节、尺寸及 SHA-256；本地归档，未推送。图片只作材料。"
+    }
+  ]
+}

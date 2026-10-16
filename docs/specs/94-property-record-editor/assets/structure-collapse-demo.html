@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="data:,"><title>晶体结构 · 简洁折叠 Demo</title>
+<style>
+:root{color-scheme:light dark;--page:light-dark(#f7f8fb,#181b23);--surface:light-dark(#fff,#232735);--ink:light-dark(#273142,#e7ebf4);--muted:light-dark(#738094,#b2bbcd);--line:light-dark(#e0e5ef,#454d63);--brand:light-dark(#6250f6,#b3a8ff);--soft:light-dark(#f4f3ff,#34304d);--warn:light-dark(#b64224,#ffbb9b)}
+*{box-sizing:border-box}body{margin:0;background:var(--page);color:var(--ink);font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}button,select{font:inherit;color:inherit}button{cursor:pointer}[hidden]{display:none!important}.app{max-width:1180px;margin:28px auto;padding:0 24px}h1{font-size:20px;margin:0;font-weight:600}.lead{font-size:13px;color:var(--muted);margin:6px 0 20px}.toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:18px 0}.plain,.toolbar button{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6px 12px}.toolbar button[aria-pressed=true]{color:var(--brand);border-color:var(--brand);background:var(--soft)}.toolbar label{margin-left:auto;white-space:nowrap}.state{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:0 18px 8px;min-width:0}.state-head{padding:15px 0;font-weight:600;display:flex;align-items:center;gap:12px;flex-wrap:wrap}.state-head small{font-weight:400;color:var(--muted)}.module{border-top:1px solid var(--line);min-width:0}.module>summary{display:flex;align-items:center;gap:8px;min-height:54px;list-style:none;cursor:pointer;font-weight:700;outline-offset:2px}.module>summary::-webkit-details-marker{display:none}.chevron{width:16px;height:16px;flex-shrink:0;transition:transform .15s}.module[open]>summary .chevron{transform:rotate(90deg)}.summary-state{margin-left:auto;font-size:12px;font-weight:400;color:var(--muted);white-space:nowrap}.summary-state.problem{color:var(--warn);border:0;background:transparent;padding:4px 0}.module-body{padding:4px 0 20px;min-width:0}.module:not([open])>.module-body{display:none}.body-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:2px 0 16px}.upload{color:var(--brand);border:1px solid var(--brand);border-radius:18px;background:transparent;padding:7px 14px}.empty{color:var(--muted);font-size:13px;padding:4px 0}.details-note{font-size:12px;color:var(--muted);margin:8px 0}.detail-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.model,.data{height:330px;border:1px solid var(--line);border-radius:7px;min-width:0;overflow:auto}.model{display:flex;align-items:center;justify-content:center;flex-direction:column;background:var(--page)}.model svg{width:100%;max-width:330px;height:240px;flex-shrink:0}.model p{font-size:12px;color:var(--muted);margin:0 10px;text-align:center}.data{padding:12px}.data h3{font-size:13px;margin:0 0 10px}.metadata{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;margin-bottom:16px;font-size:12px}.metadata span{color:var(--muted)}.coordinate-control{font-size:12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0 8px}.coordinate-control select{padding:4px 8px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}table{width:100%;border-collapse:collapse;font-size:12px;white-space:nowrap}th,td{padding:6px 8px;border-bottom:1px solid var(--line);text-align:right}th:first-child,td:first-child{text-align:left}.field-scroll{overflow-x:auto;padding:8px 1px 3px}.fields{display:flex;gap:10px;width:max-content}.field{position:relative;width:128px;flex-shrink:0}.field label{position:absolute;top:-8px;left:8px;background:var(--surface);padding:0 4px;font-size:11px;color:var(--brand)}.field input{width:100%;height:42px;border:1px solid var(--line);border-radius:6px;padding:8px 11px;font:inherit;color:var(--ink);background:var(--surface)}.footer{font-size:12px;color:var(--muted);margin-top:18px}.overlay{position:fixed;inset:0;background:#0004;z-index:5}.drawer{position:fixed;right:0;top:0;bottom:0;width:min(380px,100%);background:var(--surface);padding:24px;overflow:auto;z-index:6;box-shadow:-8px 0 30px #0002}.drawer h2{font-size:17px;margin:0}.drawer p{font-size:13px;color:var(--muted)}.drawer-head{display:flex;align-items:center;justify-content:space-between;gap:10px}button:disabled,input:disabled{opacity:.5;cursor:default}summary:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--brand);outline-offset:3px}
+@media(max-width:680px){.app{margin:18px auto;padding:0 12px}.state{padding:0 12px 8px}.detail-grid{grid-template-columns:minmax(0,1fr)}.model{height:270px}.data{height:300px}.toolbar label{margin-left:0}.summary-state{max-width:42%;overflow:hidden;text-overflow:ellipsis}h1{font-size:18px}}
+</style>
+</head>
+<body>
+<main class="app">
+<h1>晶体结构 · 简洁折叠 Demo</h1>
+<p class="lead">收起时与物性模块一样简洁，展开后查看结构与操作。仅交互预览，等待评审。</p>
+<nav class="toolbar" aria-label="演示场景">
+  <button data-mode="empty" type="button" aria-pressed="true">暂无结构</button>
+  <button data-mode="ready" type="button" aria-pressed="false">有结构布局</button>
+  <button data-mode="review" type="button" aria-pressed="false">待核对</button>
+  <label><input id="readonly" type="checkbox"> 只读预览</label>
+  <button id="reset" type="button">恢复演示</button>
+</nav>
+<section class="state">
+  <header class="state-head"><span id="material">LaSc₂H₂₄</span><small>材料状态 #1</small></header>
+  <details id="structure" class="module" data-structure-section>
+    <summary><svg class="chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>晶体结构</span><span id="structure-status" class="summary-state">未提供</span><button id="review-trigger" class="summary-state problem" type="button" hidden aria-haspopup="dialog">1 项待核对</button></summary>
+    <div class="module-body">
+      <div class="body-toolbar"><button id="upload" class="upload" type="button">↥ 上传 CIF / POSCAR / VASP</button><button id="source-trigger" class="plain" type="button" hidden>查看来源核对</button></div>
+      <p id="empty-message" class="empty">该记录暂无结构数据</p>
+      <div id="structure-details" hidden>
+        <p class="details-note">以下几何仅用于布局演示：立方盒、两处示意位置，不代表 LaSc₂H₂₄ 或任何论文计算结果。</p>
+        <div class="body-toolbar"><span>结构示例</span><span class="summary-state">示例几何 · 2 个位置</span></div>
+        <div class="detail-grid">
+          <div class="model">
+            <svg viewBox="0 0 330 240" role="img" aria-label="晶体结构模型区域布局示意">
+              <g transform="translate(65 145)" fill="none" stroke="currentColor" stroke-opacity=".4" stroke-width="1.5">
+                <path d="M0 0 120 0 175 -45 55 -45Z M0 -100 120 -100 175 -145 55 -145Z M0 0 0 -100 M120 0 120 -100 M175 -45 175 -145 M55 -45 55 -145"/>
+                <path d="M0 0 87.5 -72.5" stroke-dasharray="4 4"/>
+                <circle cx="0" cy="0" r="10" fill="#8b7df3" stroke="none"/><circle cx="87.5" cy="-72.5" r="12" fill="#65b7c2" stroke="none"/>
+              </g>
+            </svg>
+            <p>结构预览区域（布局示意）</p>
+          </div>
+          <div class="data">
+            <h3>晶格参数</h3><div class="metadata"><span>a / b / c</span><b>3 / 3 / 3 Å</b><span>α / β / γ</span><b>90 / 90 / 90°</b><span>体积</span><b>27 Å³</b></div>
+            <h3>晶格矩阵（Å）</h3><table aria-label="演示晶格矩阵"><tbody><tr><th>a</th><td>3</td><td>0</td><td>0</td></tr><tr><th>b</th><td>0</td><td>3</td><td>0</td></tr><tr><th>c</th><td>0</td><td>0</td><td>3</td></tr></tbody></table>
+            <label class="coordinate-control">位置坐标 <select id="coordinates"><option value="fractional">分数坐标</option><option value="cartesian">直角坐标（Å）</option></select></label>
+            <table aria-label="演示位置坐标"><thead><tr><th>示意点</th><th>x</th><th>y</th><th>z</th></tr></thead><tbody><tr><td>A</td><td>0</td><td>0</td><td>0</td></tr><tr><td>B</td><td data-coordinate>0.5</td><td data-coordinate>0.5</td><td data-coordinate>0.5</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+      <p id="upload-notice" class="details-note" role="status" hidden>这里只演示展开后的上传入口，没有读取或上传文件。</p>
+    </div>
+  </details>
+  <details class="module" data-property-section>
+    <summary><svg class="chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>超导性质</span></summary>
+    <div class="module-body"><div class="field-scroll"><div class="fields"><div class="field"><label for="tc">Tc（K）</label><input id="tc" placeholder="演示试填" aria-label="Tc（K）"></div><div class="field"><label for="mu">μ*</label><input id="mu" placeholder="演示试填" aria-label="μ*"></div></div></div></div>
+  </details>
+  <details class="module" data-property-section>
+    <summary><svg class="chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>电子性质</span></summary>
+    <div class="module-body"><div class="field-scroll"><div class="fields"><div class="field"><label for="dos-name">名称</label><input id="dos-name" value="N(Ef)" aria-label="名称"></div><div class="field"><label for="dos">原始值</label><input id="dos" placeholder="演示试填" aria-label="DOS 原始值"></div><div class="field"><label for="unit">单位</label><input id="unit" placeholder="演示试填" aria-label="DOS 单位"></div></div></div></div>
+  </details>
+  <details class="module" data-property-section>
+    <summary><svg class="chevron" viewBox="0 0 20 20" aria-hidden="true"><path d="m7 4 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>动力学性质</span></summary>
+    <div class="module-body"><p class="empty">此处保留动力学性质的详细内容。</p></div>
+  </details>
+</section>
+<p class="footer">本版建议首次打开时收起结构区；是否采用这一默认行为，和收起样式一起由你评审。真实结构模型、文件与核对逻辑尚未修改。</p>
+</main>
+<div id="overlay" class="overlay" hidden></div>
+<aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden><div class="drawer-head"><h2 id="drawer-title">结构来源核对</h2><button id="close" class="plain" type="button">关闭</button></div><p>来源入口保留在结构区。本示例没有绑定真实原文，不生成核对结论或伪造引句。</p><p>“待核对”场景演示收起时仍可发现并打开问题；打开来源不会展开结构区或修改数据。</p></aside>
+<script>
+(function(){
+  const get=id=>document.getElementById(id);
+  let mode="empty",sourceFocus;
+  function readonly(){get("upload").disabled=get("readonly").checked;["tc","mu","dos-name","dos","unit"].forEach(id=>{get(id).disabled=get("readonly").checked})}
+  function scenario(next){
+    mode=next;get("structure").open=false;
+    get("material").textContent=mode==="empty"?"LaSc₂H₂₄":"结构交互示例";
+    get("empty-message").hidden=mode!=="empty";get("structure-details").hidden=mode==="empty";
+    get("structure-status").hidden=mode==="review";get("structure-status").textContent=mode==="empty"?"未提供":"示例结构";
+    get("review-trigger").hidden=mode!=="review";get("source-trigger").hidden=mode==="empty";
+    get("upload-notice").hidden=true;
+    document.querySelectorAll("[data-mode]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.mode===mode)));
+    readonly();
+  }
+  document.querySelectorAll("[data-mode]").forEach(button=>button.addEventListener("click",()=>scenario(button.dataset.mode)));
+  get("readonly").addEventListener("change",readonly);
+  get("upload").addEventListener("click",()=>{get("upload-notice").hidden=false});
+  get("coordinates").addEventListener("change",()=>document.querySelectorAll("[data-coordinate]").forEach(cell=>{cell.textContent=get("coordinates").value==="fractional"?"0.5":"1.5"}));
+  get("reset").addEventListener("click",()=>{get("coordinates").value="fractional";document.querySelectorAll("[data-coordinate]").forEach(cell=>{cell.textContent="0.5"});document.querySelectorAll("[data-property-section]").forEach(section=>{section.open=false});["tc","mu","dos","unit"].forEach(id=>{get(id).value=""});scenario("empty")});
+  function openSource(event){event.preventDefault();event.stopPropagation();sourceFocus=document.activeElement;get("drawer").hidden=false;get("overlay").hidden=false;get("close").focus({preventScroll:true})}
+  function closeSource(){get("drawer").hidden=true;get("overlay").hidden=true;sourceFocus?.focus({preventScroll:true})}
+  get("review-trigger").addEventListener("click",openSource);get("source-trigger").addEventListener("click",openSource);
+  get("close").addEventListener("click",closeSource);get("overlay").addEventListener("click",closeSource);
+  document.addEventListener("keydown",event=>{if(get("drawer").hidden)return;if(event.key==="Escape")closeSource();if(event.key==="Tab"){event.preventDefault();get("close").focus()}});
+  scenario("empty");
+})();
+</script>
+</body></html>

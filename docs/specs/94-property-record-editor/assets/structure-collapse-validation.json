@@ -1,0 +1,86 @@
+{
+  "checked_date": "2026-10-16",
+  "scope": "独立HTML的折叠布局和交互；未验证真实结构上传、3Dmol或业务保存",
+  "checks": [
+    {
+      "emptyVisible": false,
+      "heights": [
+        55,
+        55,
+        55,
+        55
+      ],
+      "noPageOverflow": true,
+      "open": false,
+      "scenario": "收起空态",
+      "uploadVisible": false
+    },
+    {
+      "emptyVisible": true,
+      "open": true,
+      "scenario": "展开空态",
+      "uploadVisible": true
+    },
+    {
+      "coordinates": [
+        "1.5",
+        "1.5",
+        "1.5"
+      ],
+      "detailVisible": true,
+      "open": true,
+      "sameRow": true,
+      "scenario": "展开详情"
+    },
+    {
+      "coordinate": "1.5",
+      "mode": "cartesian",
+      "open": true,
+      "scenario": "折叠保留视图"
+    },
+    {
+      "scenario": "模块独立",
+      "structureOpen": false,
+      "superconductiveOpen": true,
+      "tc": "123"
+    },
+    {
+      "drawerOpen": true,
+      "scenario": "收起查看问题",
+      "structureOpen": false,
+      "tc": "123"
+    },
+    {
+      "closed": true,
+      "focus": "review-trigger",
+      "scenario": "来源关闭",
+      "structureOpen": false
+    },
+    {
+      "coordinateViewEnabled": true,
+      "scenario": "只读",
+      "sourceEnabled": true,
+      "tcDisabled": true,
+      "uploadDisabled": true
+    },
+    {
+      "heights": [
+        55,
+        55,
+        55,
+        55
+      ],
+      "pageWidth": 390,
+      "scenario": "窄屏收起",
+      "width": 390
+    },
+    {
+      "detailVisible": true,
+      "pageWidth": 390,
+      "scenario": "窄屏展开",
+      "stacked": true,
+      "width": 390
+    }
+  ],
+  "errors": []
+}
