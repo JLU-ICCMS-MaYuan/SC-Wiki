@@ -64,6 +64,24 @@
       "checkboxBeforeTc": true,
       "page": 390,
       "viewport": 390
+    },
+    {
+      "check": "选框竖向居中修订",
+      "groups": [
+        {
+          "checkbox_center": 529.890625,
+          "tc_center": 529.890625,
+          "group_center": 529.890625,
+          "offset": 0
+        },
+        {
+          "checkbox_center": 529.890625,
+          "tc_center": 529.890625,
+          "group_center": 529.890625,
+          "offset": 0
+        }
+      ],
+      "scope": "仅Demo样式；实际浏览器测量，CSS px"
     }
   ]
 }

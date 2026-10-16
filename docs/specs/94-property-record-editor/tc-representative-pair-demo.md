@@ -24,3 +24,9 @@
 [交互 Demo](assets/tc-two-row-demo.html)、[本轮截图](assets/tc-representative-pair-demo.jpg)、[浏览器验证记录](assets/tc-representative-pair-validation.json)。截图最终恢复为论文原有的 281 K／0.16；测试期间 Allen–Dynes 的 250 K／0.12 是临时人工试填，已清除，不是论文事实。
 
 本轮不修改正式组件、业务草稿、数据库、核对状态或远端 Issue，原任务 Methods 补全仍属于 #139 的待执行工作。正式实施与两份 Issue 的追加写入继续按既定 Demo 评审流程处理，不把本次改 Demo 指令当作已经认可最终界面。
+
+## 选框竖向对齐修订
+
+> 我建议这个小方框，放到竖向居中的位置，而不是放在那个左上角的位置。
+
+代表结果选框增加 `align-self: center`，位于所属淡紫色组合的竖向中心。浏览器测量两组的选框、Tc 输入框和组合容器中心均为 529.890625 CSS px，中心偏差为 0；只调整 Demo 排版，不改变选择逻辑。[对齐截图](assets/tc-representative-centered.jpg)，测量补充到原验证记录。
