@@ -15,6 +15,7 @@ import { newStabilityRecord } from '../lib/thermodynamicStability'
 import { PropertySpectrumSection, MissingPropertySpectrumModules } from './PropertySpectra'
 import PropertyModuleSection from './PropertyModuleSection'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
+import { isFermiDos, normalizeDosModules } from '../lib/fermiDos'
 
 export interface ModuleDeletion {
   deletedModuleKey?: string
@@ -144,12 +145,13 @@ const PropertyRecordEditor = React.memo<PropertyRecordEditorProps>(
 )
 
 const PropertyModuleEditor: React.FC<Props> = ({
-  modules,
+  modules: suppliedModules,
   issues = [],
   basePath = '',
   readOnly = false,
   onChange,
 }) => {
+  const modules = useMemo(() => normalizeDosModules(suppliedModules), [suppliedModules])
   const [definitions, setDefinitions] = useState<Record<string, FormDefinition[]>>({})
   const [boundDefinitions, setBoundDefinitions] = useState<Record<string, FormDefinition>>({})
   const [definitionErrors, setDefinitionErrors] = useState<Record<string, string>>({})
@@ -216,6 +218,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
     const module = modules[moduleIndex]
     const definition = choicesFor(module.module_code).find(item => definitionIdentity(item) === identity)
     if (!definition) return
+    if (definition.property_code === 'dos_fermi' && module.records.some(isFermiDos)) return
     const record = recordForDefinition(emptyPropertyRecord(module.module_code), definition)
     onChange(modules.map((item, index) => index === moduleIndex ? { ...item, records: [...item.records, record] } : item))
   }
@@ -271,9 +274,10 @@ const PropertyModuleEditor: React.FC<Props> = ({
                 const recordIssues = issues.flatMap(item => item.field.startsWith(recordBasePath)
                   ? [{ ...item, field: item.field.slice(recordBasePath.length + 1) }]
                   : [])
-                const allChoices = choices.some(item => definitionIdentity(item) === `${record.definition_key}@${record.definition_version}`)
-                  ? choices
-                  : [boundDefinitions[record.record_key], ...choices].filter(Boolean)
+                const availableChoices = choices.filter(item => item.property_code !== 'dos_fermi' || isFermiDos(record) || !module.records.some(isFermiDos))
+                const allChoices = availableChoices.some(item => definitionIdentity(item) === `${record.definition_key}@${record.definition_version}`)
+                  ? availableChoices
+                  : [boundDefinitions[record.record_key], ...availableChoices].filter(Boolean)
                 const recordLabel = definitionLabel(record)
                 const summary = [recordLabel, record.name_raw, propertyRecordSummaryValue(record)].filter(Boolean).join(' · ')
                 const recordError = definitionErrors[record.record_key] || recordIssues[0]?.message
@@ -328,7 +332,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
                 <Select size="small" displayEmpty value="" inputProps={{ 'aria-label': '添加记录' }} onChange={event => addRecord(moduleIndex, event.target.value)}
                   renderValue={() => '添加记录'}>
                   <MenuItem value="" disabled>添加记录</MenuItem>
-                  {choices.map(definition => <MenuItem key={definitionIdentity(definition)} value={definitionIdentity(definition)}>{definitionLabel(definition)}</MenuItem>)}
+                  {choices.filter(definition => definition.property_code !== 'dos_fermi' || !module.records.some(isFermiDos)).map(definition => <MenuItem key={definitionIdentity(definition)} value={definitionIdentity(definition)}>{definitionLabel(definition)}</MenuItem>)}
                 </Select>
               )}
             </Box>

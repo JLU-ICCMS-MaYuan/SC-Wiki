@@ -9,6 +9,7 @@ import ThermodynamicStabilityFields from './ThermodynamicStabilityFields'
 import { isThermodynamicStability } from '../lib/thermodynamicStability'
 import TcRecordFields from './TcRecordFields'
 import PropertyRecordRow from './PropertyRecordRow'
+import { DOS_SOURCE_KEY, hasDosConflict, isFermiDos } from '../lib/fermiDos'
 import { muRangeIndex } from '../lib/tcParameters'
 import type { FormDefinition, FormIssue, JsonSchema } from '../lib/formDefinitions'
 import { getAtPath, setAtPath, validateRecordClient } from '../lib/formDefinitions'
@@ -143,7 +144,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   const issues = useMemo(() => [...validateRecordClient(record, definition), ...externalIssues], [record, definition, externalIssues])
   const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type), [definition, record.record_type])
   const isTc = record.record_type === 'predicted_tc' || record.record_type === 'measured_tc'
-  const isDosFermi = record.module_code === 'electronic_properties' && record.record_type === 'property' && record.property_code === 'dos_fermi'
+  const isDosFermi = isFermiDos(record)
   const mirroredTextValue = record.value_kind === 'text' && record.value_text === record.value_raw
   const currentValueField = { number: 'value_number', range: 'value_min', text: 'value_text', boolean: 'value_boolean' }[record.value_kind]
   const issue = (field: string) => issues.find(item => item.field === field || item.field.endsWith(`.${field}`)
@@ -286,15 +287,18 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
           {Object.entries(VALUE_KIND_LABELS).map(([value, label]) => <MenuItem key={value} value={value}>{label}</MenuItem>)}
         </Select>
       </FormControl>
-      <AutoGrowingTextField label="原始值" value={record.value_raw} disabled={readOnly} data-issue-field={fieldPath('value_raw')} error={Boolean(issue('value_raw'))} helperText={issue('value_raw')}
+      <AutoGrowingTextField label="原始值" value={record.value_raw} disabled={readOnly} data-dos-current-value={isDosFermi ? true : undefined} data-issue-field={fieldPath('value_raw')} error={Boolean(issue('value_raw'))} helperText={issue('value_raw')}
         onChange={event => update(mirroredTextValue ? { value_raw: event.target.value, value_text: event.target.value } : { value_raw: event.target.value })} />
-      <AutoGrowingTextField label="单位" value={record.unit_raw || ''} disabled={readOnly} onChange={event => update({ unit_raw: event.target.value || null })} />
+      <AutoGrowingTextField label="单位" value={record.unit_raw || ''} disabled={readOnly} data-issue-field={isDosFermi ? fieldPath('unit_raw') : undefined} onChange={event => update({ unit_raw: event.target.value || null })} />
       {record.value_kind === 'number' && <AutoGrowingTextField label="数值" type="number" value={record.value_number ?? ''} disabled={readOnly} onChange={event => update({ value_number: event.target.value === '' ? null : Number(event.target.value) })} />}
       {record.value_kind === 'range' && <><AutoGrowingTextField label="下界" type="number" value={record.value_min ?? ''} disabled={readOnly} data-issue-field={fieldPath('value_min')} error={Boolean(issue('value_min'))} helperText={issue('value_min')} onChange={event => update({ value_min: event.target.value === '' ? null : Number(event.target.value) })} /><AutoGrowingTextField label="上界" type="number" value={record.value_max ?? ''} disabled={readOnly} onChange={event => update({ value_max: event.target.value === '' ? null : Number(event.target.value) })} /></>}
       {record.value_kind === 'text' && !mirroredTextValue && <AutoGrowingTextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
       </Box></PropertyRecordRow>}
-      {Object.entries(payloadSchema.properties || {}).sort(([a], [b]) => a === 'parameters' ? -1 : b === 'parameters' ? 1 : 0).filter(([key]) => !['thermodynamic_stability', 'source_associations', 'table_row_ref'].includes(key)).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
+      {hasDosConflict(record) && <Button size="small" color="warning" sx={{ justifySelf: 'start' }} aria-haspopup="dialog" onClick={event => {
+        event.currentTarget.dispatchEvent(new CustomEvent('scwiki:open-record-evidence', { bubbles: true, detail: { record, field: basePath } }))
+      }}>数值有矛盾 · 查看来源对照</Button>}
+      {Object.entries(payloadSchema.properties || {}).sort(([a], [b]) => a === 'parameters' ? -1 : b === 'parameters' ? 1 : 0).filter(([key]) => !['thermodynamic_stability', 'source_associations', 'table_row_ref', DOS_SOURCE_KEY].includes(key)).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
       {!isDosFermi && <Box sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
         {quotedSources.length ? <Box component="details" data-evidence-summary sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
           <Box component="summary" sx={{ cursor: 'pointer' }}>原文证据（{quotedSources.length}）</Box>

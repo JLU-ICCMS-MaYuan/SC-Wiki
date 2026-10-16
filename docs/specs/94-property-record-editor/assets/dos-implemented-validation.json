@@ -1,0 +1,65 @@
+{
+  "checked_date": "2026-10-16",
+  "scope": "正式共享组件与纯后端生成快照的隔离浏览器夹具；未写真实任务或科学数据库",
+  "checks": [
+    {
+      "candidates": 2,
+      "noDuplicateTitle": true,
+      "returnButtons": 1,
+      "rows": 1,
+      "scenario": "正式冲突侧栏",
+      "sourceInputs": 0,
+      "value": ""
+    },
+    {
+      "focusIsRaw": true,
+      "scenario": "正式返回修改",
+      "scrollY": 0
+    },
+    {
+      "candidates": 2,
+      "conflictVisible": true,
+      "manualReason": true,
+      "scenario": "正式修改后重开",
+      "value": "19.10"
+    },
+    {
+      "candidates": 2,
+      "inputDisabled": true,
+      "returnCount": 0,
+      "scenario": "正式只读"
+    },
+    {
+      "conflictButton": false,
+      "rows": 1,
+      "scenario": "正式相同副本",
+      "value": "18.76"
+    },
+    {
+      "pageWidth": 390,
+      "rows": 1,
+      "scenario": "正式窄屏主表单",
+      "viewport": 390
+    },
+    {
+      "candidates": 2,
+      "clientWidth": 390,
+      "scenario": "正式窄屏侧栏",
+      "scrollWidth": 390,
+      "width": 390
+    },
+    {
+      "focused": true,
+      "fullyVisible": true,
+      "scenario": "正式窄屏返回",
+      "scrollY": 0,
+      "scrollBefore": 0
+    },
+    {
+      "candidates": 2,
+      "duplicateHeadings": 0,
+      "rawInputs": 1,
+      "scenario": "正式名称标签"
+    }
+  ]
+}

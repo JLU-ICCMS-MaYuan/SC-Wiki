@@ -2,6 +2,8 @@ import { EvidenceRegion } from './EvidenceRegion'
 import EvidenceReadableValue from './EvidenceReadableValue'
 import ManualEvidenceSection from './ManualEvidenceSection'
 import ScientificAssociations, { type ScientificAssociation } from './ScientificAssociations'
+import DosFermiConflict, { dosRecordForEvidence } from './DosFermiConflict'
+import { hasDosConflict, sameDosValue } from '../lib/fermiDos'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, Snackbar, TextField, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
@@ -12,7 +14,7 @@ import { createManualEvidenceDrafts, manualDraftKey, manualFieldIdentity, manual
 import { evidenceFieldAffected } from '../lib/evidenceFields'
 import { useLanguage } from '../context/LanguageContext'
 
-export interface EvidenceSource { block_id?: string; evidence_kind?: 'text' | 'pdf_image'; file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
+export interface EvidenceSource { paper_evidence_id?: number; block_id?: string; evidence_kind?: 'text' | 'pdf_image'; file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
 export interface ProposalField { path: string; label: string; value: unknown; schema: { type: string; enum?: string[] } }
 export interface ProposalDraft { values: Record<string, unknown>; accepted: boolean; reason: string; supported?: boolean }
 export type EvidenceBasis = 'paper_quote' | 'paper_inference' | 'general_knowledge'
@@ -25,7 +27,7 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+export interface EvidenceRecord { module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
@@ -33,6 +35,13 @@ export interface EvidenceTarget { target: 'upload' | 'paper' | 'revision'; targe
 interface View { phase: 'checking' | 'countdown' | 'running' | 'error'; seconds?: number; message?: string; job?: Job }
 const base = '/api/rag/evidence'
 const problematic = evidenceProblem
+function dosValueInput(record: EvidenceRecord) {
+  const row = Array.from(document.querySelectorAll<HTMLElement>('[data-record-key]')).find(node =>
+    node.dataset.recordKey === record.record_key
+    && (!record.state_key || node.closest<HTMLElement>('[data-state-key]')?.dataset.stateKey === record.state_key)
+    && (!record.module_key || node.closest<HTMLElement>('[data-module-key]')?.dataset.moduleKey === record.module_key))
+  return row?.querySelector<HTMLInputElement>('[data-dos-current-value] input')
+}
 
 function aiReasonText(record: EvidenceRecord, t: (key: string) => string): string {
   if (record.stale) return t('evidence.staleAiReason')
@@ -86,6 +95,10 @@ export function useEvidenceWorkflow(options?: {
   const hasLocalManualEdit = (record: EvidenceRecord) => {
     if (record.stale) return true
     const current = optionsRef.current?.getCurrentValue?.(record)
+    const dos = dosRecordForEvidence(record)
+    if (dos && current?.value && typeof current.value === 'object') {
+      return !sameDosValue(dos, current.value as import('../lib/propertyModules').PropertyRecordDraft)
+    }
     // 科学记录的服务器值含材料条件，不能直接与编辑器的原始记录对象比较。
     return Boolean(current && typeof current.value !== 'object' && typeof record.current_value !== 'object'
       && manualValueIdentity(current.value) !== manualValueIdentity(record.current_value))
@@ -486,6 +499,8 @@ export function useEvidenceWorkflow(options?: {
   const percent = total > 0 ? Math.floor(done / total * 100) : undefined
   const batch = view?.job?.current_batch || 0
   const activeGroup = activeRecord?.placeholder ? [activeRecord] : records.filter(r => selectedKeys.includes(r.key) || r.key === selected)
+  const activeDos = activeRecord ? dosRecordForEvidence(activeRecord) : undefined
+  const activeDosConflict = Boolean(activeDos && hasDosConflict(activeDos))
   const accepted = activeGroup.length > 0 && activeGroup.every(r => r.proposal_draft?.accepted)
   const completionBlockers = [...new Set([
     (saving || confirming) && t('evidence.completeBusy'),
@@ -503,6 +518,19 @@ export function useEvidenceWorkflow(options?: {
     const field = optionsRef.current?.getCurrentValue?.(record)?.field || record.field
     closeDrawer()
     setTimeout(() => {
+      if (dosRecordForEvidence(record)) {
+        const input = dosValueInput(record)
+        if (!input || input.disabled) return
+        for (let parent = input.parentElement; parent; parent = parent.parentElement) if (parent instanceof HTMLDetailsElement) parent.open = true
+        input.focus({ preventScroll: true })
+        const area = input.closest<HTMLElement>('[data-property-core-row]')
+        if (area) {
+          const fieldBounds = input.getBoundingClientRect(), areaBounds = area.getBoundingClientRect()
+          if (fieldBounds.right > areaBounds.right) area.scrollLeft += fieldBounds.right - areaBounds.right + 2
+          else if (fieldBounds.left < areaBounds.left) area.scrollLeft += fieldBounds.left - areaBounds.left - 2
+        }
+        return
+      }
       const node = Array.from(document.querySelectorAll<HTMLElement>('[data-issue-field]')).find(n => n.dataset.issueField === field)
       for (let parent = node?.parentElement; parent; parent = parent.parentElement) if (parent instanceof HTMLDetailsElement) parent.open = true
       const input = node?.matches('input,textarea,select') ? node : node?.querySelector<HTMLElement>('input,textarea,select,[role="combobox"]')
@@ -535,13 +563,15 @@ export function useEvidenceWorkflow(options?: {
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><Typography variant="h6">{activeRecord.label}</Typography><IconButton aria-label={t('evidence.closeDrawer')} onClick={closeDrawer}><CloseIcon /></IconButton></Box>
         <Box component="details" open key={selected} sx={{ mt: 2 }}>
           <Typography component="summary" fontWeight={700} sx={{ cursor: 'pointer' }}>{t('evidence.foundSources')}</Typography>
+          <DosFermiConflict record={activeRecord} target={targetRef.current}
+            onEdit={dosValueInput(activeRecord) && !dosValueInput(activeRecord)?.disabled ? () => editCurrent(activeRecord) : undefined} />
           {activeRecord.field === 'paper.theoretical_subtype' && <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.subtypeSynthesisHint')}</Alert>}
           {activeRecord.field === 'paper.summary' && !activeRecord.stale && <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.summarySynthesisHint')}</Alert>}
           {activeRecord.field === 'paper.keywords_tags' && activeRecord.provenance?.kind === 'author_keywords' &&
             <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.authorKeywordsSource')}</Alert>}
           {activeRecord.field === 'paper.keywords_tags' && activeRecord.provenance?.kind === 'paper_synthesis' &&
             <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.fulltextKeywordsSource')}</Alert>}
-          {activeGroup.some(r => r.evidences.length)
+          {activeDosConflict ? null : activeGroup.some(r => r.evidences.length)
             ? activeGroup.flatMap(r => r.evidences)
               .filter((source, index, all) => all.findIndex(item => item.file_id === source.file_id && item.quote === source.quote) === index)
               .map((source, index) => <EvidenceRegion key={`${source.file_id}:${source.page_start}:${index}`} target={targetRef.current} source={source} />)
@@ -593,7 +623,7 @@ export function useEvidenceWorkflow(options?: {
             </Box>}
         </Box>)}
         {accepted && <Alert severity="success">{t('evidence.acceptedPending')}</Alert>}</>}
-        {options?.getCurrentValue && !activeRecord.placeholder && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
+        {options?.getCurrentValue && !activeRecord.placeholder && !activeDosConflict && (!activeDos || (dosValueInput(activeRecord) && !dosValueInput(activeRecord)?.disabled)) && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
         {saveError && <Alert severity="error" sx={{ mt: 1 }} action={draftSaveFailed ? <Button disabled={saving} onClick={() => void retryDrafts().catch(() => undefined)}>{t('evidence.retrySave')}</Button> : undefined}>{saveError} {draftSaveFailed && t('evidence.saveFailureRetained')}</Alert>}
         {!activeRecord.placeholder && completionBlockers.length > 0 && <Alert severity="info" sx={{ mt: 1 }}>{completionBlockers.map(message => <Typography key={message} variant="body2">{message}</Typography>)}</Alert>}
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', my: 2 }}>

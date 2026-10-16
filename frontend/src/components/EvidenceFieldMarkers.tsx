@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { Box, Button, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import type { EvidenceRecord } from './EvidenceWorkflow'
+import type { PropertyRecordDraft } from '../lib/propertyModules'
 
 interface Props {
   records: EvidenceRecord[]
@@ -87,6 +88,26 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
   useEffect(() => {
     const root = document.querySelector<HTMLElement>(`[data-evidence-scope="${scope}"]`)
     if (!root) return
+    const openRecord = (event: Event) => {
+      const { record, field } = (event as CustomEvent<{ record: PropertyRecordDraft; field: string }>).detail
+      const node = (event.target as HTMLElement).closest<HTMLElement>('[data-record-key]')
+      const stateKey = node?.closest<HTMLElement>('[data-state-key]')?.dataset.stateKey
+      const moduleKey = node?.closest<HTMLElement>('[data-module-key]')?.dataset.moduleKey
+      const found = records.find(item => item.record_key === record.record_key && item.state_key === stateKey && item.module_key === moduleKey)
+      if (found) onOpen(found.key, [found.key])
+      else {
+        const key = 'view:dos:' + stateKey + ':' + moduleKey + ':' + record.record_key
+        onOpen(key, [key], { key, field, label: record.name_raw || '费米能级 DOS', placeholder: true, required: false,
+          module_code: record.module_code, state_key: stateKey, module_key: moduleKey, record_key: record.record_key,
+          current_value: { record }, status: 'uncertain', reason: 'DOS 来源数值存在差异，待人工核对', evidences: [] })
+      }
+    }
+    root.addEventListener('scwiki:open-record-evidence', openRecord)
+    return () => root.removeEventListener('scwiki:open-record-evidence', openRecord)
+  }, [records, scope, onOpen])
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>(`[data-evidence-scope="${scope}"]`)
+    if (!root) return
     let active = true
     let frame: ReturnType<typeof setTimeout> | undefined
     const find = () => {
@@ -108,7 +129,9 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
         const row = record.record_key ? Array.from(area.querySelectorAll<HTMLElement>('[data-record-key]')).find(n => n.dataset.recordKey === record.record_key) : undefined
         if (record.record_key && !row) return []
         const scopedNodes = nodes.filter(node => area.contains(node))
-        const fields = [...new Set(record.fields || [record.field])]
+        const fields = row?.querySelector('[data-dos-current-value]')
+          ? ['name_raw', 'value_raw', 'unit_raw'].map(name => record.field + '.' + name)
+          : [...new Set(record.fields || [record.field])]
         return fields.filter(field => !fields.some(other => other !== field && other.startsWith(field + '.'))).flatMap(field => {
           const suffix = field.startsWith(record.field) ? field.slice(record.field.length) : ''
           const rowNodes = row ? Array.from(row.querySelectorAll<HTMLElement>('[data-issue-field]')) : scopedNodes
@@ -120,7 +143,8 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
           // 已移除的 Tc raw 控件仍可出现在旧核对快照中，定位到当前值而非整个记录。
           const tcValue = ['.value_raw', '.unit_raw', '.canonical_unit'].includes(suffix)
             ? row?.querySelector<HTMLElement>('[data-tc-current-value]') : undefined
-          const exact = structure || (row ? rowNodes.find(n => n.dataset.issueField?.endsWith(suffix) && suffix !== '') || tcValue || row : stateField || (!record.state_key ? scopedNodes.find(n => normalize(n.dataset.issueField || '') === normalize(field)) : undefined))
+          const dosValue = suffix === '' ? row?.querySelector<HTMLElement>('[data-dos-current-value]') : undefined
+          const exact = structure || (row ? rowNodes.find(n => n.dataset.issueField?.endsWith(suffix) && suffix !== '') || tcValue || dosValue || row : stateField || (!record.state_key ? scopedNodes.find(n => normalize(n.dataset.issueField || '') === normalize(field)) : undefined))
           const node = exact || (!record.state_key ? scopedNodes.filter(n => normalize(field).startsWith(normalize(n.dataset.issueField || '') + '.')).sort((a, b) => (b.dataset.issueField?.length || 0) - (a.dataset.issueField?.length || 0))[0] : undefined)
           // 组合控件与内部输入必须归一为同一个锚点，否则两次标注同一标签，
           // 下次更新会把已标注标签误判为外部按钮并额外插入一行标题。

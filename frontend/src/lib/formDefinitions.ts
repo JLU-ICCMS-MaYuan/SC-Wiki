@@ -3,6 +3,7 @@ import { validateStability } from './thermodynamicStability'
 import { api } from './api'
 import { normalizeCurrentTcValue, type PropertyRecordDraft } from './propertyModules'
 import { validateTcParameters } from './tcParameters'
+import { dosArchiveIssue, pendingDosValue } from './fermiDos'
 
 export interface JsonSchema {
   type?: 'object' | 'array' | 'string' | 'number' | 'integer' | 'boolean' | 'null'
@@ -160,7 +161,10 @@ export function validateRecordClient(record: PropertyRecordDraft, definition?: F
   for (const { field, message } of validateTcParameters(record)) addIssue(issues, field, message)
   if (!record.record_key.trim()) addIssue(issues, 'record_key', '记录键不能为空')
   if (!record.name_raw.trim()) addIssue(issues, 'name_raw', '名称不能为空')
-  if (record.record_type === 'property' && !record.value_raw.trim()) addIssue(issues, 'value_raw', '原始值不能为空')
+  const pendingDos = pendingDosValue(record)
+  const archiveIssue = dosArchiveIssue(record)
+  if (archiveIssue) addIssue(issues, 'payload.dos_fermi_sources', archiveIssue)
+  if (record.record_type === 'property' && !record.value_raw.trim() && !pendingDos) addIssue(issues, 'value_raw', '原始值不能为空')
   if (record.record_type === 'predicted_tc' || record.record_type === 'measured_tc') {
     const fields = record.value_kind === 'number' ? ['value_number'] as const
       : record.value_kind === 'range' ? ['value_min', 'value_max'] as const : []
@@ -182,7 +186,7 @@ export function validateRecordClient(record: PropertyRecordDraft, definition?: F
   if (record.record_type === 'measured_tc' && (!experimental || calculation)) {
     issues.push({ field: calculation ? 'payload.calculation_conditions' : 'payload.experimental_conditions', code: 'invalid_condition_type', message: '测量 Tc 只能使用实验 Conditions' })
   }
-  if (record.value_kind === 'range' && (record.value_min == null || record.value_max == null || record.value_min > record.value_max)) addIssue(issues, 'value_min', '范围值无效')
+  if (!pendingDos && record.value_kind === 'range' && (record.value_min == null || record.value_max == null || record.value_min > record.value_max)) addIssue(issues, 'value_min', '范围值无效')
   if (definition && (definition.status === 'draft' || definition.module_code !== record.module_code || definition.record_type !== record.record_type)) {
     issues.push({ field: 'definition_key', code: 'definition_not_available', message: '定义版本不可用于该记录' })
   }

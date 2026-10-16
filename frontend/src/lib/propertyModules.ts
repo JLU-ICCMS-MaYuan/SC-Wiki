@@ -1,3 +1,5 @@
+import { normalizeDosRecords } from './fermiDos'
+
 export const PROPERTY_MODULES = [
   { code: 'superconductive_properties', label: '超导性质' },
   { code: 'dynamical_properties', label: '动力学性质' },
@@ -149,7 +151,7 @@ export function convertLegacyPropertyModules(state: Record<string, any>): Proper
       definition_version: module.definition_version || 1,
       display_order: index,
       records: Array.isArray(module.records)
-        ? module.records.map(record => normalizePropertyRecordIdentity(record))
+        ? normalizeDosRecords(module.records.map(record => normalizePropertyRecordIdentity(record)))
         : [],
     }))
   }

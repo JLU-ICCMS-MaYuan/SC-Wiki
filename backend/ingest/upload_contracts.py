@@ -12,6 +12,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field
 
 from backend.ingest.material_state_contract import MaterialStateContractError, state_metadata, validate_single_geometries
+from backend.ingest.fermi_dos import normalize_records as normalize_dos_records
 
 UPLOAD_STATE_SCHEMA_VERSION = 1
 SCIENTIFIC_DRAFT_SCHEMA_VERSION = 2
@@ -207,6 +208,11 @@ def convert_legacy_state(state: dict[str, Any]) -> dict[str, Any]:
                 else:
                     record["custom_property_key"] = None
         result["schema_version"] = SCIENTIFIC_DRAFT_SCHEMA_VERSION
+        for module in result.get("property_modules") or []:
+            try:
+                module["records"] = normalize_dos_records(module.get("records") or [])
+            except ValueError as error:
+                raise UploadContractError("invalid_dos_sources", str(error), "property_modules") from error
         return result
     modules: dict[str, list[dict[str, Any]]] = {}
     for index, old in enumerate(result.get("tc_results") or []):
@@ -330,7 +336,7 @@ def convert_legacy_state(state: dict[str, Any]) -> dict[str, Any]:
         {
             "module_key": f"module-{code}", "module_code": code,
             "definition_key": f"module.{code}", "definition_version": 1,
-            "display_order": order, "records": records,
+            "display_order": order, "records": normalize_dos_records(records),
         }
         for order, (code, records) in enumerate(modules.items())
         if records

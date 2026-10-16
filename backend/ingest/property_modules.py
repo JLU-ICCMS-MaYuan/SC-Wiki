@@ -20,6 +20,10 @@ from backend import models
 from backend.ingest.tc_parameters import parameter_issues
 from backend.ingest.thermodynamic_stability import stability_issues
 from backend.ingest.property_extensions import extension_issues
+from backend.ingest.fermi_dos import (
+    ARCHIVE_KEY as DOS_SOURCE_KEY, is_fermi_dos, normalize_records as normalize_dos_records,
+    pending_current_value as pending_dos_value, source_records as dos_source_records,
+)
 
 
 MODULE_CODES = set(models.PROPERTY_MODULE_CODES)
@@ -257,13 +261,20 @@ def validate_record(
     item["name_raw"] = str(item.get("name_raw") or "").strip()
     item["value_raw"] = str(item.get("value_raw") or "").strip()
     item["payload"] = deepcopy(item.get("payload") if isinstance(item.get("payload"), dict) else {})
+    pending_dos = False
+    if is_fermi_dos(item):
+        try:
+            dos_source_records(item)
+            pending_dos = pending_dos_value(item)
+        except ValueError as error:
+            issues.append(_issue(f"{path}.payload.{DOS_SOURCE_KEY}", "invalid_dos_sources", str(error)))
     if module_code not in MODULE_CODES:
         issues.append(_issue(f"{path}.module_code", "unknown_module", "未注册的物性模块"))
     if not item["record_key"]:
         issues.append(_issue(f"{path}.record_key", "schema_validation_failed", "record_key 不能为空"))
     if not item["name_raw"]:
         issues.append(_issue(f"{path}.name_raw", "schema_validation_failed", "名称不能为空"))
-    if record_type not in {"predicted_tc", "measured_tc"} and not item["value_raw"]:
+    if record_type not in {"predicted_tc", "measured_tc"} and not item["value_raw"] and not pending_dos:
         issues.append(_issue(f"{path}.value_raw", "schema_validation_failed", "原始值不能为空"))
     if record_type in {"predicted_tc", "measured_tc"}:
         if property_code != "tc":
@@ -294,7 +305,8 @@ def validate_record(
             issues.append(_issue(f"{path}.custom_property_key", "custom_property_conflict", "自定义性质必须具有 custom_property_key"))
     elif str(item.get("custom_property_key") or "").strip():
         issues.append(_issue(f"{path}.custom_property_key", "schema_validation_failed", "规范性质不能携带自定义键"))
-    _validate_value_shape(item, path, issues)
+    if not pending_dos:
+        _validate_value_shape(item, path, issues)
     issues.extend(_issue(f"{path}.{field}", "schema_validation_failed", message) for field, message in [*stability_issues(item), *extension_issues(item)])
     experimental = item["payload"].get("experimental_conditions")
     from .scientific_context import association_issues
@@ -341,7 +353,11 @@ def normalize_module(
     item["paper_id"] = paper_id
     item["paper_revision"] = paper_revision
     item["display_order"] = max(0, int(item.get("display_order") or 0))
-    item["records"] = [validate_record({**record, "module_code": code}, path=f"{module_path}.records[{index}]") for index, record in enumerate(item.get("records") or []) if isinstance(record, dict)]
+    try:
+        records = normalize_dos_records([{**record, "module_code": code} for record in item.get("records") or [] if isinstance(record, dict)])
+    except ValueError as error:
+        raise PropertyValidationError([_issue(f"{module_path}.records", "invalid_dos_sources", str(error))]) from error
+    item["records"] = [validate_record(record, path=f"{module_path}.records[{index}]") for index, record in enumerate(records)]
     return item
 
 
@@ -367,7 +383,7 @@ def _evidence_references(record: dict[str, Any]) -> list[dict[str, Any]]:
         if isinstance(value, dict):
             add(value.get("evidences"), path)
             for key, child in value.items():
-                if key != "evidences":
+                if key not in {"evidences", DOS_SOURCE_KEY}:
                     walk(child, f"{path}.{key}" if path else key)
         elif isinstance(value, list):
             for index, child in enumerate(value):
@@ -404,12 +420,15 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
     """在一个事务中保存模块和记录；删除必须通过显式列表请求。"""
     deleted_record_keys = set(deleted_record_keys or [])
     deleted_module_keys = set(deleted_module_keys or [])
+    # 锁实际材料状态，串行化同状态的新 DOS；不依赖浏览器禁用新增入口。
+    await session.execute(select(models.MaterialState.id).where(models.MaterialState.id == material_state_id).with_for_update())
     result = await session.execute(select(models.PropertyModule).where(models.PropertyModule.material_state_id == material_state_id))
     existing_modules = list(result.scalars().all())
     existing = {item.module_key: item for item in existing_modules}
     records_result = await session.execute(select(models.PropertyRecord).where(models.PropertyRecord.material_state_id == material_state_id))
     existing_records_list = list(records_result.scalars().all())
     module_key_by_id = {item.id: item.module_key for item in existing_modules}
+    module_code_by_id = {item.id: item.module_code for item in existing_modules}
     existing_records = {(module_key_by_id.get(item.module_id), item.record_key): item for item in existing_records_list}
 
     normalized_modules: list[dict[str, Any]] = []
@@ -425,6 +444,16 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
         for record in module["records"]:
             submitted_record_keys.add((module["module_key"], record["record_key"]))
         normalized_modules.append(module)
+
+    incoming_dos = [record for module in normalized_modules for record in module["records"] if is_fermi_dos(record)]
+    retained_dos = [record for record in existing_records_list
+                    if record.property_code == "dos_fermi" and module_code_by_id.get(record.module_id) == "electronic_properties"
+                    and record.record_key not in deleted_record_keys
+                    and (module_key_by_id.get(record.module_id), record.record_key) not in submitted_record_keys]
+    if len(incoming_dos) + len(retained_dos) > 1:
+        raise PropertyValidationError([_issue("property_modules", "duplicate_dos_fermi", "同一材料状态只能保留一个当前 DOS；已有重复记录需显式处理")])
+    if any(not record.get("value_raw") for record in incoming_dos):
+        raise PropertyValidationError([_issue("property_modules", "dos_value_required", "请在主表单填写人工核对后的 DOS 当前值")])
 
     for module_key in deleted_module_keys:
         db_module = existing.get(module_key)

@@ -296,3 +296,13 @@ python3 -m http.server 18449 --bind 127.0.0.1 --directory "docs/specs/94-propert
 验收副本与完整日志位于本机临时目录 `/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-record-actions-implementation-b4_82k37/` 的 candidate，测试/构建日志为 `/tmp/scwiki-record-actions-candidate-tests.log`、`/tmp/scwiki-record-actions-build.log`。临时目录不是持久附件，关键截图和观察已归档。本次源文件 SHA-256 清单见浏览器验证记录，便于核对验收来源。
 
 Overview 已同步实际按钮行为，#94 保持开放；本地 Spec/附件仍未推送，远程链接待验证。根 README 的安装和启动入口不变。没有执行历史 DOS 自动清理或多方法 Tc 数据迁移。
+
+## 2026-10-16：US15 DOS 唯一值正式实现验证
+
+- 独立候选从 HEAD 导出，只覆盖本次代码；property_evidence.py / upload_contracts.py 仅移植 DOS 增量，排除 #120 等已有未提交修改。候选目录：/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-dos-candidate-t7e3wuyk。
+- 独立候选前端 5 文件、96 项通过，包括 DOS 9 项；后端 4 文件、31 项通过，包括 DOS 9 项及真实 SQLite 保存／重读、拒绝新增第二条、空当前值拒绝、归档校验与模型不能独自确认矛盾。工作树的相同后端目录有另外两项其他任务的未提交测试，共 33 项通过；不将它们计入独立提交证据。
+- TypeScript／生产构建在工作树和独立候选均通过。末次前端变更是有效人工确认提示及其过期回归，已在最终独立候选重新验证；日志 /tmp/scwiki-dos-candidate-ui-tests.log 与 /tmp/scwiki-dos-candidate-build.log。
+- [正式组件浏览器记录](assets/dos-implemented-validation.json) 的 9 组断言通过；[宽屏截图](assets/dos-implemented.png)、[窄屏截图](assets/dos-implemented-mobile.png) 使用真实共享组件、纯后端生成的隔离快照及受控 API 夹具，不是旧独立 HTML Demo。390px 页面与侧栏不溢出，返回聚焦原始值且页面位置保持；只读无返回编辑入口，修改后人工理由即时可见。
+- 浏览器可复核材料：[组件夹具入口](assets/dos-implemented-browser-harness.tsx)、[数据](assets/dos-implemented-fixtures.json)。入口复制到临时 Vite 根目录 main.tsx，数据复制为 dos-fixtures.json；src/node_modules 指向项目 frontend 同名目录。macOS 的临时目录逻辑路径和真实路径均需在 Vite fs.allow 中允许。仅表注来自已审计备份，19.10 明确为冲突演示值，不写真实草稿。
+- 测试使用 SQLite 内存库与进程内测试 JWT；最初缺少 DATABASE_URL／JWT_SECRET_KEY 的环境错误在设置隔离测试值后消除，不修改系统配置。构建仍有既有 3Dmol eval／分包提示，组件旧夹具有 MUI 选项提示；未计作失败。
+- 本轮没有业务数据库迁移、真实原任务 PUT、历史批量修复或远端部署／推送。旧重复正式记录由服务端拒绝隐式新增或删除，须明确处理；旧未提交草稿在转换与正常保存边界收敛，不执行全库扫描改写。#94 其他工作及远程链接门继续保持。

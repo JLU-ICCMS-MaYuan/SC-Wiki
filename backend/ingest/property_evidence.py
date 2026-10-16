@@ -187,7 +187,10 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
         r.setdefault('current_value', r['claim'])
         if r.get('kind') == 'property':
             from .scientific_context import scientific_fingerprint, state_fingerprint
+            from .fermi_dos import has_conflict as has_dos_conflict
             scientific_record = r['claim']['record']
+            if scientific_record.get('property_code') == 'dos_fermi':
+                r['dos_fermi_conflict'] = has_dos_conflict({**scientific_record, 'module_code': r.get('module_code')})
             associations = (scientific_record.get('payload') or {}).get('source_associations') or []
             r['source_associations'] = [{**copy.deepcopy(a), 'stale':(
                 a.get('target_fingerprint') != scientific_fingerprint(scientific_record)
@@ -197,7 +200,12 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
         from .evidence_proposals import editable_fields
         r['editable_fields'] = editable_fields(r)
         r['content_hash'] = digest(canonical(r['claim']))
-        r['source_hash'] = digest([source_hash, r.get('provenance') or {}])
+        source_identity = [source_hash, r.get('provenance') or {}]
+        if r.get('kind') == 'property' and scientific_record.get('property_code') == 'dos_fermi':
+            dos_sources = (scientific_record.get('payload') or {}).get('dos_fermi_sources')
+            if dos_sources is not None:
+                source_identity.append({'dos_fermi_sources': dos_sources})
+        r['source_hash'] = digest(source_identity)
     version = digest([RULE_VERSION, target, target_id, sorted((r['item_key'], r['content_hash'], r['source_hash']) for r in records)])
     return dict(target=target, target_id=str(target_id), records=records, chunks=chunks, version=version, rule_version=RULE_VERSION)
 
@@ -298,7 +306,7 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             e = source_evidences.get(link.paper_evidence_id)
             if e and e.paper_chunk_id in chunk_map:
                 c = chunk_map[e.paper_chunk_id]
-                evs.append(dict(file_id=c['file_id'], chunk_id=c['chunk_id'], chunk_index=c['chunk_index'], quote=e.quote,
+                evs.append(dict(paper_evidence_id=e.id, file_id=c['file_id'], chunk_id=c['chunk_id'], chunk_index=c['chunk_index'], quote=e.quote,
                                 page_start=e.page_start, page_end=e.page_end, section=e.section))
         state_data = row_dict(states[record.material_state_id])
         material = next((x['chemical_formula'] for x in contexts['superconductors'] if x['id'] == state_data['superconductor_id']), '')
@@ -484,6 +492,9 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     if model_synthesis and status == 'supported' and not inference_reason and not human:
         status = 'uncertain'
         reason = '模型尚未给出当前归纳值的具体判断理由，请重新核对。'
+    if record.get('dos_fermi_conflict') and not human:
+        status = 'uncertain'
+        reason = '同一材料状态发现不同 DOS 数值，需人工核对；' + reason
     ai_reason = (None if human else (
         inference_reason if status == 'supported' else reason if concrete_synthesis_reason(reason) else None
     ) or '模型尚未给出当前值的具体推断理由，请重新核对。') if model_synthesis else (

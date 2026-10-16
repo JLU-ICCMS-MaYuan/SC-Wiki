@@ -41,3 +41,7 @@ value_raw 和 unit_raw 不再作为独立原始记录：value_raw 从当前数�
 ## US17 记录操作布局
 
 本次仅删除逐条复制的 UI 入口及其回调，不修改 PropertyRecordDraft、稳定记录键、Evidence、payload 或任何持久化字段；底层 clonePropertyRecord 的深复制语义保留。删除继续传递 deletedRecordKey，未删除记录的值和证据保持原对象内容。既有多个 DOS 不因界面改造被归并或删除。
+
+## US15：当前 DOS 与原始来源
+
+dos_fermi 的当前值继续保存在既有 value_* / unit_* 字段；payload.dos_fermi_sources={version:1,records:[完整原始记录]} 保存被收敛记录的身份、值、单位、条件、元数据和证据，子记录不得嵌套同一归档。不同来源而无明确当前值时保留空当前表示，仅允许留在草稿。来源差异由归档计算，不因编辑或保存说明清空。公开核对记录为 DOS 添加 dos_fermi_conflict，正式来源可携带 paper_evidence_id 供同条授权引用解读。无新表、列或数据库迁移。

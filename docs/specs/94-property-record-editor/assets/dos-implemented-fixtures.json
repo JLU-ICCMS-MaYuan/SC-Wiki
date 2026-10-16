@@ -1,0 +1,1348 @@
+{
+  "same": {
+    "modules": [
+      {
+        "module_key": "electronic",
+        "module_code": "electronic_properties",
+        "definition_key": "module.electronic_properties",
+        "definition_version": 1,
+        "display_order": 0,
+        "records": [
+          {
+            "record_key": "dos-current",
+            "module_code": "electronic_properties",
+            "record_type": "property",
+            "property_code": "dos_fermi",
+            "custom_property_key": null,
+            "definition_key": "record.electronic_properties.dos_fermi",
+            "definition_version": 1,
+            "name_raw": "N(Ef)",
+            "value_kind": "text",
+            "value_raw": "18.76",
+            "value_number": null,
+            "value_min": null,
+            "value_max": null,
+            "value_text": "18.76",
+            "value_boolean": null,
+            "unit_raw": "states/spin/Ry/f.u.",
+            "canonical_unit": null,
+            "payload": {
+              "dos_fermi_sources": {
+                "version": 1,
+                "records": [
+                  {
+                    "record_key": "dos-current",
+                    "module_code": "electronic_properties",
+                    "record_type": "property",
+                    "property_code": "dos_fermi",
+                    "custom_property_key": null,
+                    "definition_key": "record.electronic_properties.dos_fermi",
+                    "definition_version": 1,
+                    "name_raw": "N(Ef)",
+                    "value_kind": "text",
+                    "value_raw": "18.76",
+                    "value_number": null,
+                    "value_min": null,
+                    "value_max": null,
+                    "value_text": "18.76",
+                    "value_boolean": null,
+                    "unit_raw": "states/spin/Ry/f.u.",
+                    "canonical_unit": null,
+                    "payload": {},
+                    "evidences": [
+                      {
+                        "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                        "chunk_id": null,
+                        "chunk_index": 21,
+                        "page_start": 4,
+                        "page_end": 4,
+                        "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                        "section_role": "result",
+                        "source_name": "2024 La-Sc-H 何新玲.pdf",
+                        "locator_status": "verified_text_layer",
+                        "origin_kind": null,
+                        "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                      }
+                    ]
+                  },
+                  {
+                    "record_key": "dos-second",
+                    "module_code": "electronic_properties",
+                    "record_type": "property",
+                    "property_code": "dos_fermi",
+                    "custom_property_key": null,
+                    "definition_key": "record.electronic_properties.dos_fermi",
+                    "definition_version": 1,
+                    "name_raw": "N(Ef)",
+                    "value_kind": "text",
+                    "value_raw": "18.76",
+                    "value_number": null,
+                    "value_min": null,
+                    "value_max": null,
+                    "value_text": "18.76",
+                    "value_boolean": null,
+                    "unit_raw": "states/spin/Ry/f.u.",
+                    "canonical_unit": null,
+                    "payload": {},
+                    "evidences": [
+                      {
+                        "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                        "chunk_id": null,
+                        "chunk_index": 21,
+                        "page_start": 4,
+                        "page_end": 4,
+                        "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                        "section_role": "result",
+                        "source_name": "2024 La-Sc-H 何新玲.pdf",
+                        "locator_status": "verified_text_layer",
+                        "origin_kind": null,
+                        "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            "evidences": [
+              {
+                "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                "chunk_id": null,
+                "chunk_index": 21,
+                "page_start": 4,
+                "page_end": 4,
+                "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                "section_role": "result",
+                "source_name": "2024 La-Sc-H 何新玲.pdf",
+                "locator_status": "verified_text_layer",
+                "origin_kind": null,
+                "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "preflight": {
+      "version": "3f1e84533f9ba573086df655c650023fc680bae9b6ab7b56546876c2e054294a",
+      "needs_check": true,
+      "records": [
+        {
+          "key": "fixture-dos",
+          "item_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "state_key": "dos-state",
+          "module_key": "electronic",
+          "record_key": "dos-current",
+          "module_code": "electronic_properties",
+          "kind": "property",
+          "field": "material_states[0].property_modules[0].records[0]",
+          "claim": {
+            "record": {
+              "record_key": "dos-current",
+              "record_type": "property",
+              "property_code": "dos_fermi",
+              "custom_property_key": null,
+              "definition_key": "record.electronic_properties.dos_fermi",
+              "definition_version": 1,
+              "name_raw": "N(Ef)",
+              "value_kind": "text",
+              "value_raw": "18.76",
+              "value_number": null,
+              "value_min": null,
+              "value_max": null,
+              "value_text": "18.76",
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "states/spin/Ry/f.u.",
+              "canonical_unit": null,
+              "method_code": null,
+              "method_raw": null,
+              "criterion_code": null,
+              "criterion_raw": null,
+              "is_representative": false,
+              "structure_key": null,
+              "payload": {
+                "dos_fermi_sources": {
+                  "version": 1,
+                  "records": [
+                    {
+                      "record_key": "dos-current",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "18.76",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "18.76",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [
+                        {
+                          "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                          "chunk_id": null,
+                          "chunk_index": 21,
+                          "page_start": 4,
+                          "page_end": 4,
+                          "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                          "section_role": "result",
+                          "source_name": "2024 La-Sc-H 何新玲.pdf",
+                          "locator_status": "verified_text_layer",
+                          "origin_kind": null,
+                          "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                        }
+                      ]
+                    },
+                    {
+                      "record_key": "dos-second",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "18.76",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "18.76",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [
+                        {
+                          "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                          "chunk_id": null,
+                          "chunk_index": 21,
+                          "page_start": 4,
+                          "page_end": 4,
+                          "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                          "section_role": "result",
+                          "source_name": "2024 La-Sc-H 何新玲.pdf",
+                          "locator_status": "verified_text_layer",
+                          "origin_kind": null,
+                          "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "state": {
+              "material": "LaSc2H24",
+              "pressure_value_gpa": 167
+            }
+          },
+          "label": "N(Ef)",
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+            }
+          ],
+          "fields": [
+            "material_states[0].property_modules[0].records[0]"
+          ],
+          "current_value": {
+            "record": {
+              "record_key": "dos-current",
+              "record_type": "property",
+              "property_code": "dos_fermi",
+              "custom_property_key": null,
+              "definition_key": "record.electronic_properties.dos_fermi",
+              "definition_version": 1,
+              "name_raw": "N(Ef)",
+              "value_kind": "text",
+              "value_raw": "18.76",
+              "value_number": null,
+              "value_min": null,
+              "value_max": null,
+              "value_text": "18.76",
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "states/spin/Ry/f.u.",
+              "canonical_unit": null,
+              "method_code": null,
+              "method_raw": null,
+              "criterion_code": null,
+              "criterion_raw": null,
+              "is_representative": false,
+              "structure_key": null,
+              "payload": {
+                "dos_fermi_sources": {
+                  "version": 1,
+                  "records": [
+                    {
+                      "record_key": "dos-current",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "18.76",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "18.76",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [
+                        {
+                          "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                          "chunk_id": null,
+                          "chunk_index": 21,
+                          "page_start": 4,
+                          "page_end": 4,
+                          "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                          "section_role": "result",
+                          "source_name": "2024 La-Sc-H 何新玲.pdf",
+                          "locator_status": "verified_text_layer",
+                          "origin_kind": null,
+                          "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                        }
+                      ]
+                    },
+                    {
+                      "record_key": "dos-second",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "18.76",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "18.76",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [
+                        {
+                          "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                          "chunk_id": null,
+                          "chunk_index": 21,
+                          "page_start": 4,
+                          "page_end": 4,
+                          "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                          "section_role": "result",
+                          "source_name": "2024 La-Sc-H 何新玲.pdf",
+                          "locator_status": "verified_text_layer",
+                          "origin_kind": null,
+                          "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "state": {
+              "material": "LaSc2H24",
+              "pressure_value_gpa": 167
+            }
+          },
+          "dos_fermi_conflict": false,
+          "source_associations": [],
+          "editable_fields": [
+            {
+              "path": "name_raw",
+              "label": "name_raw",
+              "value": "N(Ef)",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "value_raw",
+              "label": "value_raw",
+              "value": "18.76",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "value_number",
+              "label": "value_number",
+              "value": null,
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "path": "value_min",
+              "label": "value_min",
+              "value": null,
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "path": "value_max",
+              "label": "value_max",
+              "value": null,
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "path": "value_text",
+              "label": "value_text",
+              "value": "18.76",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "value_boolean",
+              "label": "value_boolean",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "uncertainty",
+              "label": "uncertainty",
+              "value": null,
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "path": "unit_raw",
+              "label": "unit_raw",
+              "value": "states/spin/Ry/f.u.",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "canonical_unit",
+              "label": "canonical_unit",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "method_code",
+              "label": "method_code",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "method_raw",
+              "label": "method_raw",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "criterion_code",
+              "label": "criterion_code",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "criterion_raw",
+              "label": "criterion_raw",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "payload",
+              "label": "payload",
+              "value": {
+                "dos_fermi_sources": {
+                  "version": 1,
+                  "records": [
+                    {
+                      "record_key": "dos-current",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "18.76",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "18.76",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [
+                        {
+                          "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                          "chunk_id": null,
+                          "chunk_index": 21,
+                          "page_start": 4,
+                          "page_end": 4,
+                          "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                          "section_role": "result",
+                          "source_name": "2024 La-Sc-H 何新玲.pdf",
+                          "locator_status": "verified_text_layer",
+                          "origin_kind": null,
+                          "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                        }
+                      ]
+                    },
+                    {
+                      "record_key": "dos-second",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "18.76",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "18.76",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [
+                        {
+                          "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                          "chunk_id": null,
+                          "chunk_index": 21,
+                          "page_start": 4,
+                          "page_end": 4,
+                          "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                          "section_role": "result",
+                          "source_name": "2024 La-Sc-H 何新玲.pdf",
+                          "locator_status": "verified_text_layer",
+                          "origin_kind": null,
+                          "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dos_fermi_sources": {
+                    "type": "object",
+                    "properties": {
+                      "version": {
+                        "type": "number"
+                      },
+                      "records": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "record_key": {
+                              "type": "string"
+                            },
+                            "module_code": {
+                              "type": "string"
+                            },
+                            "record_type": {
+                              "type": "string"
+                            },
+                            "property_code": {
+                              "type": "string"
+                            },
+                            "custom_property_key": {
+                              "type": "string"
+                            },
+                            "definition_key": {
+                              "type": "string"
+                            },
+                            "definition_version": {
+                              "type": "number"
+                            },
+                            "name_raw": {
+                              "type": "string"
+                            },
+                            "value_kind": {
+                              "type": "string"
+                            },
+                            "value_raw": {
+                              "type": "string"
+                            },
+                            "value_number": {
+                              "type": "number"
+                            },
+                            "value_min": {
+                              "type": "number"
+                            },
+                            "value_max": {
+                              "type": "number"
+                            },
+                            "value_text": {
+                              "type": "string"
+                            },
+                            "value_boolean": {
+                              "type": "string"
+                            },
+                            "unit_raw": {
+                              "type": "string"
+                            },
+                            "canonical_unit": {
+                              "type": "string"
+                            },
+                            "payload": {
+                              "type": "object",
+                              "properties": {},
+                              "additionalProperties": false
+                            },
+                            "evidences": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "file_id": {
+                                    "type": "string"
+                                  },
+                                  "chunk_id": {
+                                    "type": "string"
+                                  },
+                                  "chunk_index": {
+                                    "type": "number"
+                                  },
+                                  "page_start": {
+                                    "type": "number"
+                                  },
+                                  "page_end": {
+                                    "type": "number"
+                                  },
+                                  "section": {
+                                    "type": "string"
+                                  },
+                                  "section_role": {
+                                    "type": "string"
+                                  },
+                                  "source_name": {
+                                    "type": "string"
+                                  },
+                                  "locator_status": {
+                                    "type": "string"
+                                  },
+                                  "origin_kind": {
+                                    "type": "string"
+                                  },
+                                  "quote": {
+                                    "type": "string"
+                                  }
+                                },
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          ],
+          "content_hash": "8d08a801915887be53fbdd71e0dd979b79dcd4a67422b5c9dfb9417a1718ee30",
+          "source_hash": "bdd578328041243027cd4e5e70a39af64573049b64fc5360bae70b31a92f6144",
+          "status": "unchecked",
+          "reason": "尚未核对科学数据与原文"
+        }
+      ],
+      "sources": []
+    }
+  },
+  "conflict": {
+    "modules": [
+      {
+        "module_key": "electronic",
+        "module_code": "electronic_properties",
+        "definition_key": "module.electronic_properties",
+        "definition_version": 1,
+        "display_order": 0,
+        "records": [
+          {
+            "record_key": "dos-current",
+            "module_code": "electronic_properties",
+            "record_type": "property",
+            "property_code": "dos_fermi",
+            "custom_property_key": null,
+            "definition_key": "record.electronic_properties.dos_fermi",
+            "definition_version": 1,
+            "name_raw": "N(Ef)",
+            "value_kind": "text",
+            "value_raw": "",
+            "value_number": null,
+            "value_min": null,
+            "value_max": null,
+            "value_text": "",
+            "value_boolean": null,
+            "unit_raw": "states/spin/Ry/f.u.",
+            "canonical_unit": null,
+            "payload": {
+              "dos_fermi_sources": {
+                "version": 1,
+                "records": [
+                  {
+                    "record_key": "dos-current",
+                    "module_code": "electronic_properties",
+                    "record_type": "property",
+                    "property_code": "dos_fermi",
+                    "custom_property_key": null,
+                    "definition_key": "record.electronic_properties.dos_fermi",
+                    "definition_version": 1,
+                    "name_raw": "N(Ef)",
+                    "value_kind": "text",
+                    "value_raw": "18.76",
+                    "value_number": null,
+                    "value_min": null,
+                    "value_max": null,
+                    "value_text": "18.76",
+                    "value_boolean": null,
+                    "unit_raw": "states/spin/Ry/f.u.",
+                    "canonical_unit": null,
+                    "payload": {},
+                    "evidences": [
+                      {
+                        "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                        "chunk_id": null,
+                        "chunk_index": 21,
+                        "page_start": 4,
+                        "page_end": 4,
+                        "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                        "section_role": "result",
+                        "source_name": "2024 La-Sc-H 何新玲.pdf",
+                        "locator_status": "verified_text_layer",
+                        "origin_kind": null,
+                        "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                      }
+                    ]
+                  },
+                  {
+                    "record_key": "dos-second",
+                    "module_code": "electronic_properties",
+                    "record_type": "property",
+                    "property_code": "dos_fermi",
+                    "custom_property_key": null,
+                    "definition_key": "record.electronic_properties.dos_fermi",
+                    "definition_version": 1,
+                    "name_raw": "N(Ef)",
+                    "value_kind": "text",
+                    "value_raw": "19.10",
+                    "value_number": null,
+                    "value_min": null,
+                    "value_max": null,
+                    "value_text": "19.10",
+                    "value_boolean": null,
+                    "unit_raw": "states/spin/Ry/f.u.",
+                    "canonical_unit": null,
+                    "payload": {},
+                    "evidences": [],
+                    "evidence": null
+                  }
+                ]
+              }
+            },
+            "evidences": [
+              {
+                "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                "chunk_id": null,
+                "chunk_index": 21,
+                "page_start": 4,
+                "page_end": 4,
+                "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                "section_role": "result",
+                "source_name": "2024 La-Sc-H 何新玲.pdf",
+                "locator_status": "verified_text_layer",
+                "origin_kind": null,
+                "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "preflight": {
+      "version": "c78639331990e3489e6777cb622eccde66eca9f1ece3332d8e841dba028687ba",
+      "needs_check": true,
+      "records": [
+        {
+          "key": "fixture-dos",
+          "item_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "state_key": "dos-state",
+          "module_key": "electronic",
+          "record_key": "dos-current",
+          "module_code": "electronic_properties",
+          "kind": "property",
+          "field": "material_states[0].property_modules[0].records[0]",
+          "claim": {
+            "record": {
+              "record_key": "dos-current",
+              "record_type": "property",
+              "property_code": "dos_fermi",
+              "custom_property_key": null,
+              "definition_key": "record.electronic_properties.dos_fermi",
+              "definition_version": 1,
+              "name_raw": "N(Ef)",
+              "value_kind": "text",
+              "value_raw": "",
+              "value_number": null,
+              "value_min": null,
+              "value_max": null,
+              "value_text": "",
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "states/spin/Ry/f.u.",
+              "canonical_unit": null,
+              "method_code": null,
+              "method_raw": null,
+              "criterion_code": null,
+              "criterion_raw": null,
+              "is_representative": false,
+              "structure_key": null,
+              "payload": {
+                "dos_fermi_sources": {
+                  "version": 1,
+                  "records": [
+                    {
+                      "record_key": "dos-current",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "18.76",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "18.76",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [
+                        {
+                          "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                          "chunk_id": null,
+                          "chunk_index": 21,
+                          "page_start": 4,
+                          "page_end": 4,
+                          "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                          "section_role": "result",
+                          "source_name": "2024 La-Sc-H 何新玲.pdf",
+                          "locator_status": "verified_text_layer",
+                          "origin_kind": null,
+                          "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                        }
+                      ]
+                    },
+                    {
+                      "record_key": "dos-second",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "19.10",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "19.10",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [],
+                      "evidence": null
+                    }
+                  ]
+                }
+              }
+            },
+            "state": {
+              "material": "LaSc2H24",
+              "pressure_value_gpa": 167
+            }
+          },
+          "label": "N(Ef)",
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+            }
+          ],
+          "fields": [
+            "material_states[0].property_modules[0].records[0]"
+          ],
+          "current_value": {
+            "record": {
+              "record_key": "dos-current",
+              "record_type": "property",
+              "property_code": "dos_fermi",
+              "custom_property_key": null,
+              "definition_key": "record.electronic_properties.dos_fermi",
+              "definition_version": 1,
+              "name_raw": "N(Ef)",
+              "value_kind": "text",
+              "value_raw": "",
+              "value_number": null,
+              "value_min": null,
+              "value_max": null,
+              "value_text": "",
+              "value_boolean": null,
+              "uncertainty": null,
+              "unit_raw": "states/spin/Ry/f.u.",
+              "canonical_unit": null,
+              "method_code": null,
+              "method_raw": null,
+              "criterion_code": null,
+              "criterion_raw": null,
+              "is_representative": false,
+              "structure_key": null,
+              "payload": {
+                "dos_fermi_sources": {
+                  "version": 1,
+                  "records": [
+                    {
+                      "record_key": "dos-current",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "18.76",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "18.76",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [
+                        {
+                          "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                          "chunk_id": null,
+                          "chunk_index": 21,
+                          "page_start": 4,
+                          "page_end": 4,
+                          "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                          "section_role": "result",
+                          "source_name": "2024 La-Sc-H 何新玲.pdf",
+                          "locator_status": "verified_text_layer",
+                          "origin_kind": null,
+                          "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                        }
+                      ]
+                    },
+                    {
+                      "record_key": "dos-second",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "19.10",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "19.10",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [],
+                      "evidence": null
+                    }
+                  ]
+                }
+              }
+            },
+            "state": {
+              "material": "LaSc2H24",
+              "pressure_value_gpa": 167
+            }
+          },
+          "dos_fermi_conflict": true,
+          "source_associations": [],
+          "editable_fields": [
+            {
+              "path": "name_raw",
+              "label": "name_raw",
+              "value": "N(Ef)",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "value_raw",
+              "label": "value_raw",
+              "value": "",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "value_number",
+              "label": "value_number",
+              "value": null,
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "path": "value_min",
+              "label": "value_min",
+              "value": null,
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "path": "value_max",
+              "label": "value_max",
+              "value": null,
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "path": "value_text",
+              "label": "value_text",
+              "value": "",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "value_boolean",
+              "label": "value_boolean",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "uncertainty",
+              "label": "uncertainty",
+              "value": null,
+              "schema": {
+                "type": "number"
+              }
+            },
+            {
+              "path": "unit_raw",
+              "label": "unit_raw",
+              "value": "states/spin/Ry/f.u.",
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "canonical_unit",
+              "label": "canonical_unit",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "method_code",
+              "label": "method_code",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "method_raw",
+              "label": "method_raw",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "criterion_code",
+              "label": "criterion_code",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "criterion_raw",
+              "label": "criterion_raw",
+              "value": null,
+              "schema": {
+                "type": "string"
+              }
+            },
+            {
+              "path": "payload",
+              "label": "payload",
+              "value": {
+                "dos_fermi_sources": {
+                  "version": 1,
+                  "records": [
+                    {
+                      "record_key": "dos-current",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "18.76",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "18.76",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [
+                        {
+                          "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+                          "chunk_id": null,
+                          "chunk_index": 21,
+                          "page_start": 4,
+                          "page_end": 4,
+                          "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+                          "section_role": "result",
+                          "source_name": "2024 La-Sc-H 何新玲.pdf",
+                          "locator_status": "verified_text_layer",
+                          "origin_kind": null,
+                          "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+                        }
+                      ]
+                    },
+                    {
+                      "record_key": "dos-second",
+                      "module_code": "electronic_properties",
+                      "record_type": "property",
+                      "property_code": "dos_fermi",
+                      "custom_property_key": null,
+                      "definition_key": "record.electronic_properties.dos_fermi",
+                      "definition_version": 1,
+                      "name_raw": "N(Ef)",
+                      "value_kind": "text",
+                      "value_raw": "19.10",
+                      "value_number": null,
+                      "value_min": null,
+                      "value_max": null,
+                      "value_text": "19.10",
+                      "value_boolean": null,
+                      "unit_raw": "states/spin/Ry/f.u.",
+                      "canonical_unit": null,
+                      "payload": {},
+                      "evidences": [],
+                      "evidence": null
+                    }
+                  ]
+                }
+              },
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dos_fermi_sources": {
+                    "type": "object",
+                    "properties": {
+                      "version": {
+                        "type": "number"
+                      },
+                      "records": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "record_key": {
+                              "type": "string"
+                            },
+                            "module_code": {
+                              "type": "string"
+                            },
+                            "record_type": {
+                              "type": "string"
+                            },
+                            "property_code": {
+                              "type": "string"
+                            },
+                            "custom_property_key": {
+                              "type": "string"
+                            },
+                            "definition_key": {
+                              "type": "string"
+                            },
+                            "definition_version": {
+                              "type": "number"
+                            },
+                            "name_raw": {
+                              "type": "string"
+                            },
+                            "value_kind": {
+                              "type": "string"
+                            },
+                            "value_raw": {
+                              "type": "string"
+                            },
+                            "value_number": {
+                              "type": "number"
+                            },
+                            "value_min": {
+                              "type": "number"
+                            },
+                            "value_max": {
+                              "type": "number"
+                            },
+                            "value_text": {
+                              "type": "string"
+                            },
+                            "value_boolean": {
+                              "type": "string"
+                            },
+                            "unit_raw": {
+                              "type": "string"
+                            },
+                            "canonical_unit": {
+                              "type": "string"
+                            },
+                            "payload": {
+                              "type": "object",
+                              "properties": {},
+                              "additionalProperties": false
+                            },
+                            "evidences": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "file_id": {
+                                    "type": "string"
+                                  },
+                                  "chunk_id": {
+                                    "type": "string"
+                                  },
+                                  "chunk_index": {
+                                    "type": "number"
+                                  },
+                                  "page_start": {
+                                    "type": "number"
+                                  },
+                                  "page_end": {
+                                    "type": "number"
+                                  },
+                                  "section": {
+                                    "type": "string"
+                                  },
+                                  "section_role": {
+                                    "type": "string"
+                                  },
+                                  "source_name": {
+                                    "type": "string"
+                                  },
+                                  "locator_status": {
+                                    "type": "string"
+                                  },
+                                  "origin_kind": {
+                                    "type": "string"
+                                  },
+                                  "quote": {
+                                    "type": "string"
+                                  }
+                                },
+                                "additionalProperties": false
+                              }
+                            }
+                          },
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          ],
+          "content_hash": "996d0ec7289890cfc605ec722bf52ea4ba9437d192bd95d4fc0189ca9a3568cd",
+          "source_hash": "bdd578328041243027cd4e5e70a39af64573049b64fc5360bae70b31a92f6144",
+          "status": "unchecked",
+          "reason": "尚未核对科学数据与原文"
+        }
+      ],
+      "sources": []
+    }
+  }
+}
