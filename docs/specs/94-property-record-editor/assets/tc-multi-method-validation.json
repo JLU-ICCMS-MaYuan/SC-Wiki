@@ -1,0 +1,125 @@
+{
+  "date": "2026-10-16",
+  "version": 2,
+  "scope": "独立Demo；未修改正式组件、业务契约或原任务；300K/0.13仅为验证试填，最终恢复空白",
+  "checks": [
+    {
+      "check": "多方法多组合保存重开",
+      "methodControls": 2,
+      "oldNameInput": false,
+      "plainHeading": true,
+      "rows": [
+        {
+          "method": "isotropic_eliashberg",
+          "pairs": [
+            [
+              "281",
+              "0.16"
+            ],
+            [
+              "311",
+              "0.1"
+            ],
+            [
+              "300",
+              "0.13"
+            ]
+          ]
+        },
+        {
+          "method": "allen_dynes",
+          "pairs": [
+            [
+              "",
+              ""
+            ],
+            [
+              "",
+              ""
+            ]
+          ]
+        }
+      ],
+      "status": "已恢复保存的预览"
+    },
+    {
+      "check": "删除中间组合不串行",
+      "rows": [
+        {
+          "method": "isotropic_eliashberg",
+          "pairs": [
+            [
+              "281",
+              "0.16"
+            ],
+            [
+              "300",
+              "0.13"
+            ]
+          ]
+        },
+        {
+          "method": "allen_dynes",
+          "pairs": [
+            [
+              "",
+              ""
+            ],
+            [
+              "",
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "check": "删除方法及至少一组保护",
+      "lastMethodDeleteDisabled": true,
+      "lastPairDeleteDisabled": true,
+      "methods": 1,
+      "pairs": 1
+    },
+    {
+      "check": "只读禁止增删编辑",
+      "editable": 0
+    },
+    {
+      "check": "390px多方法局部滚动",
+      "methodRows": [
+        {
+          "scroll": 1132,
+          "width": 340
+        },
+        {
+          "scroll": 1132,
+          "width": 340
+        }
+      ],
+      "page": 390,
+      "viewport": 390
+    },
+    {
+      "check": "最终展示与按钮可见性",
+      "methodRows": [
+        {
+          "addVisibleWithinRow": true,
+          "code": "isotropic_eliashberg",
+          "pairs": 2
+        },
+        {
+          "addVisibleWithinRow": true,
+          "code": "allen_dynes",
+          "pairs": 2
+        }
+      ],
+      "scroll": 955,
+      "width": 955
+    },
+    {
+      "check": "切换167GPa初始单组",
+      "methods": 1,
+      "pairs": 1
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "images": [
+    {
+      "id": "IMG-013",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-f1f00d23-15a0-4259-8c0a-dc76d047aa74.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-013.png",
+      "status": "local_verified",
+      "user_context": "1. 我希望把选择 Tc 预测的方法的下拉选项框放到这里，如图 1 所示。原本的图二所示的地方就变成 超导转变温度 Tc，类似于“计算条件”一样的普通文本\n2. 我希望能追加/删除图一所示的 Tc 和mu 的组合，这样就可以变化的展示不止 1 个 Tc-mu 组合了。\n3. 同时点击添加字段也能展示其他方法计算的 Tc。",
+      "related": [
+        "US16 修订",
+        "FR-060",
+        "FR-061",
+        "FR-062"
+      ],
+      "sha256": "56b32efc06f387085a6cf92012609d76ce4ba21d4a2053f5717b9f48f5c3828b",
+      "dimensions_px": [
+        1754,
+        228
+      ],
+      "media_type": "image/png",
+      "verification": "2026-10-16 从归档路径读取原图，解码并核对尺寸与SHA-256；本地验证，未推送。附件只作材料。"
+    },
+    {
+      "id": "IMG-014",
+      "upload_order": 2,
+      "original_name": "codex-clipboard-edf7bf07-8750-494e-a032-b06851597b58.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-014.png",
+      "status": "local_verified",
+      "user_context": "1. 我希望把选择 Tc 预测的方法的下拉选项框放到这里，如图 1 所示。原本的图二所示的地方就变成 超导转变温度 Tc，类似于“计算条件”一样的普通文本\n2. 我希望能追加/删除图一所示的 Tc 和mu 的组合，这样就可以变化的展示不止 1 个 Tc-mu 组合了。\n3. 同时点击添加字段也能展示其他方法计算的 Tc。",
+      "related": [
+        "US16 修订",
+        "FR-060",
+        "FR-061",
+        "FR-062"
+      ],
+      "sha256": "73822460a94955aec736cf33d4f842bbbc166032adf59d801fefafaf8c78c600",
+      "dimensions_px": [
+        1744,
+        144
+      ],
+      "media_type": "image/png",
+      "verification": "2026-10-16 从归档路径读取原图，解码并核对尺寸与SHA-256；本地验证，未推送。附件只作材料。"
+    }
+  ]
+}
