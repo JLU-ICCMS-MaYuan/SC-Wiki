@@ -1,0 +1,24 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-a691d4f9-b548-4995-a86f-fb308c987a85.png",
+      "locator": "docs/specs/52-upload-review-material-state/assets/IMG-001.png",
+      "status": "local_verified",
+      "sha256": "3862c9e714230240a10aa7d915a95b67575d86252e88af6fba9995487fa1dae9",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2508,
+        566
+      ],
+      "user_context": "这里的“**自动计算，可手动修改**”这个就不需要展示了，感觉好蠢。看看这个需求是那个 issue 和 spec 做的？可以取消展示这个。",
+      "related": [
+        "US2",
+        "FR-004",
+        "T029"
+      ],
+      "verification": "2026-10-16 重新读取归档 PNG，核对原文件字节、SHA-256 与尺寸并解码查看；仅本地归档，未推送。"
+    }
+  ]
+}

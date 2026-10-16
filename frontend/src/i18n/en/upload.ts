@@ -315,7 +315,6 @@ export default {
   materialFamilyEvidenceInsufficient: 'The paper does not provide enough evidence for a reliable material-family classification. Select one after review.',
   elementCountField: 'Distinct element count',
   elementCountInvalid: 'Enter an integer from 1 to 118',
-  elementCountAuto: 'Auto-calculated; editable manually',
   materialDimensionalityField: 'Material dimensionality',
   structureFamiliesField: 'Structure families',
   structureFamiliesHelp: 'Select or enter multiple types',

@@ -125,7 +125,7 @@ describe('论文级材料家族与材料状态多维分类编辑', () => {
 
     const elementCounts = await screen.findAllByLabelText('不同元素种类数')
     expect(elementCounts[0]).toHaveValue('2')
-    expect(screen.getAllByText('自动计算，可手动修改')).toHaveLength(2)
+    expect(screen.queryByText('自动计算，可手动修改')).not.toBeInTheDocument()
 
     fireEvent.change(elementCounts[0], { target: { value: '5' } })
     fireEvent.click(screen.getByRole('button', { name: '立即保存' }))

@@ -14,6 +14,8 @@
 
 ## 技术上下文
 
+2026-10-16 展示修订（FR-004）：在共享 `MaterialStatesEditor.tsx` 中，仅在元素种类数非法时设置 `helperText`；正常状态不提供辅助文案，同时删除中英文 `elementCountAuto` 字典项。复用现有分类组件测试，验证提示不再展示、手动修改仍保存锁定标志、非法值仍提示且不写入草稿。不修改后端或草稿字段。
+
 - **语言与版本**：Python 3.12（FastAPI/SQLAlchemy 2.x）、TypeScript + React 18 + MUI 5（Vite）、Go 1.22+（GORM）
 - **主要依赖**：pymatgen≥2023.9（传递引入 spglib，本 Feature 显式声明）、MUI Autocomplete/Collapse
 - **数据存储**：MySQL 8.4（alembic 迁移，裸 `op.add_column`/`op.create_check_constraint` 模式）；未提交草稿在 Redis（JSON）

@@ -679,7 +679,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       label={t('upload.elementCountField')} data-issue-field={`material_states[${index}].element_count`}
                       value={elementCountEdits[index]?.text ?? (state.element_count ?? '')}
                       error={Boolean(elementCountEdits[index]?.invalid)}
-                      helperText={elementCountEdits[index]?.invalid ? t('upload.elementCountInvalid') : t('upload.elementCountAuto')}
+                      helperText={elementCountEdits[index]?.invalid ? t('upload.elementCountInvalid') : undefined}
                       onChange={event => changeElementCount(index, event.target.value)}
                     />
                     <FormControl fullWidth data-issue-field={`material_states[${index}].material_dimensionality`}>

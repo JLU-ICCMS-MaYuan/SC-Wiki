@@ -41,6 +41,8 @@
 **独立验收**：quickstart 场景 2。
 
 - [x] T013 [US2] 改 `frontend/src/components/UploadTaskEditor.tsx`（:690-695）：去除 readOnly；onChange 校验整数 1–118 并置 `element_count_locked=true`；helperText 改为「自动计算，可手动修改」
+
+  2026-10-16 修订：常驻辅助文案已由用户要求取消，按 T029 收敛；本任务其余编辑与锁定行为保留。
 - [x] T014 [US2] 更新 `tests/01_decentralized_uploading/upload-task-editor-classification.test.tsx`：编辑元素数→保存 payload 含锁定标志与新值
 
 ## 阶段 5：用户故事 3——超导类型与条件化 Tc（P1，MVP）
@@ -121,3 +123,9 @@
 本轮证据：前端 `upload-task-editor-layout.test.tsx` 与 `upload-task-editor-classification.test.tsx` 共 25 项通过；后端 `test_space_groups.py`、`test_upload_jobs.py`、`test_scientific_drafts.py`、`test_classification_catalog.py` 共 75 项通过。测试运行于当前工作树（含原有未提交修改），未调用真实 LLM。T024 保持未勾选，#52 尚未完成关闭验收。
 
 后续验证：上传工作流、#90 物性与模块持久化专项 27 项通过；修正了提交失败回滚测试中缺少任务快照和新参数的夹具。真实 MySQL 8.4 分阶段迁移套件首次 6 通过、1 失败；修正重复推进 COPY 的测试夹具后，该失败项重跑通过。测试仅创建并清理 `scwiki_issue90_test_` 前缀的隔离库，未操作现有业务库；这些测试覆盖迁移至 #90 Contract、审计清理及数据修复，不能宣称全链最新 head 启动已验收。Chromium 已打开本地应用及登录弹窗，尚无登录后的草稿保存、刷新和提交证据；T024/T028 保持未完成。
+
+## 阶段 10：移除元素种类数常驻提示（2026-10-16）
+
+- [x] T029 [US2] 按 FR-004 修订移除共享 `MaterialStatesEditor.tsx` 的正常态辅助文案及中英文字典项；调整既有分类组件测试，验证手动保存锁定与非法值提示仍有效；同步 Spec、Plan、快速验收与原图归档。
+
+验证证据：`cd frontend && npm run test:upload-ui -- tests/01_decentralized_uploading/upload-task-editor-classification.test.tsx tests/01_decentralized_uploading/material-states-editor.test.tsx` 共 31 项通过。原图重新读取并解码，SHA-256 与尺寸见 `assets/images.json`；`git diff --check` 通过。测试使用当前工作树（含其他任务已有改动），未执行部署；T024/T028 的既有端到端验收缺口保持不变。

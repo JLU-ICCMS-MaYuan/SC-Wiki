@@ -317,7 +317,6 @@ export default {
   materialFamilyEvidenceInsufficient: '本文依据不足，无法可靠判断材料家族；请核对后手动选择。',
   elementCountField: '不同元素种类数',
   elementCountInvalid: '请输入 1–118 的整数',
-  elementCountAuto: '自动计算，可手动修改',
   materialDimensionalityField: '材料维度',
   structureFamiliesField: '结构家族',
   structureFamiliesHelp: '可选择或输入多个类型',
