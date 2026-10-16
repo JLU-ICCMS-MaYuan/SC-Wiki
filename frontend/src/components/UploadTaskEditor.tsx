@@ -382,6 +382,17 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     return () => window.clearTimeout(timer)
   }, [dirty, draft, saveDraft, saving, submitting, revision?.conflict])
 
+  // 详情会在独立标签页中打开；关闭、刷新或返回前保护尚未完成保存的主表单。
+  useEffect(() => {
+    if (readOnly || (!dirty && !saving && !submitting)) return
+    const protect = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+    window.addEventListener('beforeunload', protect)
+    return () => window.removeEventListener('beforeunload', protect)
+  }, [readOnly, dirty, saving, submitting])
+
   // 返回全部问题而不是遇到第一条就退出：用户需要一次看清所有待补字段，
   // 而不是每修一条再提交一次才发现下一条
   const validate = (): ValidationIssue[] => {

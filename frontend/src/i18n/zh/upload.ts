@@ -4,6 +4,10 @@
 // PROCESSING_STAGES（处理阶段）与 UploadTaskStatus（任务状态）的显示标签，
 // 键与后端 value 对齐；`role` 是上传文件角色，`cell` 是晶胞表示。
 export default {
+  taskDetailTitle: '解析与校对',
+  backToUploads: '返回上传记录',
+  openTaskNewTab: '在新标签页打开 {filename} 的解析详情',
+
   bibliographyDifferences: '查看题录来源差异',
   extractedCandidate: '提取候选',
   parsingDifferences: '有 {count} 个来源区域的解析结果存在差异，请结合原文核对。',
@@ -145,7 +149,7 @@ export default {
   cleanupHours: '{hours}小时{minutes}分后删除',
   cleanupMinutes: '{minutes}分{seconds}秒后删除',
   recordsLoadFailed: '上传解析记录加载失败',
-  taskUnavailable: '该解析任务已过期或被清理，任务列表已刷新。',
+  taskUnavailable: '该解析任务已过期或被清理，请返回上传记录。',
   cancelTaskConfirm: '确定取消这个任务吗？当前 LLM 请求可能需要等待完成或超时。',
   recordsTitle: '上传解析记录',
   noActiveTasks: '暂无活动任务',

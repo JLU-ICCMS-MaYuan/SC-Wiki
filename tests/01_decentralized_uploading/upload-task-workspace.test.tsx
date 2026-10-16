@@ -47,7 +47,7 @@ const seedAuthenticatedUser = () => {
 }
 
 describe('论文上传工作区', () => {
-  it.each([true, false])('旧任务入口在已提交=%s 时跳转论文或明确提示并刷新列表', async (submitted) => {
+  it.each([true, false])('任务详情地址在已提交=%s 时跳转论文或明确提示', async (submitted) => {
     seedAuthenticatedUser()
     const oldTask = task('z'.repeat(32), '旧任务.pdf')
     let listRequests = 0
@@ -69,11 +69,10 @@ describe('论文上传工作区', () => {
       return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
     }))
     const Location = () => <div data-testid="location">{useLocation().pathname}</div>
-    render(<MemoryRouter><AuthProvider><Location /><UploadPage /></AuthProvider></MemoryRouter>)
-    fireEvent.click(await screen.findByRole('button', { name: '查看 旧任务.pdf 的解析详情' }))
+    render(<MemoryRouter><AuthProvider><Location /><UploadPage taskId={oldTask.task_id} /></AuthProvider></MemoryRouter>)
     if (submitted) await waitFor(() => expect(screen.getByTestId('location')).toHaveTextContent('/papers/29'))
-    else expect(await screen.findByText('该解析任务已过期或被清理，任务列表已刷新。')).toBeVisible()
-    await waitFor(() => expect(screen.queryByRole('button', { name: '查看 旧任务.pdf 的解析详情' })).not.toBeInTheDocument())
+    else expect(await screen.findByText('该解析任务已过期或被清理，请返回上传记录。')).toBeVisible()
+    expect(screen.queryByRole('region', { name: '当前解析任务操作' })).not.toBeInTheDocument()
     expect(localStorage.getItem('scwiki_active_upload_task:7')).toBeNull()
   })
 
@@ -306,8 +305,8 @@ describe('论文上传工作区', () => {
     expect(screen.getByRole('textbox', { name: '压强 (GPa)' })).toHaveValue('300')
     expect(screen.getByRole('combobox', { name: '空间群符号' })).toHaveValue('Fd-3m')
     expect(screen.getByRole('spinbutton', { name: '空间群号' })).toHaveValue(227)
-    expect(screen.getByRole('spinbutton', { name: '电声耦合强度 λ' })).toHaveValue(3.35)
-    expect(screen.getByRole('spinbutton', { name: 'ωlog (K)' })).toHaveValue(null)
+    expect(screen.getByRole('textbox', { name: '电声耦合强度 λ' })).toHaveValue('3.35')
+    expect(screen.getByRole('textbox', { name: 'ωlog' })).toHaveValue('')
     expect(document.querySelector('input[type="file"]')?.getAttribute('accept')).toContain('.vasp')
 
     fireEvent.click(screen.getByRole('button', { name: '立即保存' }))
@@ -603,7 +602,7 @@ describe('论文上传工作区', () => {
     expect(screen.queryByRole('button', { name: '提交审核' })).not.toBeInTheDocument()
   })
 
-  it('查看和切换解析任务时仍保留上传入口及其本地文件', async () => {
+  it('新标签页任务入口保留上传文件与多选状态，不恢复旧的内联任务', async () => {
     const first = task('a'.repeat(32), '第一篇.pdf')
     const second = task('b'.repeat(32), '第二篇.pdf')
     seedAuthenticatedUser()
@@ -630,22 +629,19 @@ describe('论文上传工作区', () => {
     })
     expect(screen.getByText('待上传.pdf')).toBeVisible()
 
-    fireEvent.click(await screen.findByRole('button', { name: '查看 第二篇.pdf 的解析详情' }))
-
-    await waitFor(() => expect(screen.getByText('待上传.pdf')).toBeVisible())
-    expect(screen.getByLabelText('拖拽或选择论文文件')).toBeVisible()
-    expect(screen.getByRole('button', { name: '收起 第二篇.pdf 的解析详情' })).toBeVisible()
-    const stickyTaskActions = screen.getByRole('region', { name: '当前解析任务操作' })
-    expect(stickyTaskActions).toHaveStyle({
-      position: 'sticky',
-      top: '0px',
-    })
-    expect(stickyTaskActions.closest('.MuiCard-root')).toHaveStyle({ overflow: 'visible' })
-
-    fireEvent.click(screen.getByRole('button', { name: '收起当前解析详情' }))
-
-    expect(await screen.findByRole('button', { name: '查看 第二篇.pdf 的解析详情' })).toBeVisible()
+    const link = await screen.findByRole('link', { name: '在新标签页打开 第二篇.pdf 的解析详情' })
+    expect(link).toHaveAttribute('href', `/upload/tasks/${second.task_id}`)
+    expect(link).toHaveAttribute('target', '_blank')
+    expect(link).toHaveAttribute('rel', 'noopener')
+    fireEvent.click(screen.getByRole('checkbox', { name: '选择 第一篇.pdf 的解析记录' }))
+    fireEvent.click(link)
     expect(screen.getByText('待上传.pdf')).toBeVisible()
+    expect(screen.getByLabelText('拖拽或选择论文文件')).toBeVisible()
+    expect(screen.getByRole('checkbox', { name: '选择 第一篇.pdf 的解析记录' })).toBeChecked()
+    expect(screen.queryByRole('button', { name: /查看.*解析详情|收起解析/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('region', { name: '当前解析任务操作' })).not.toBeInTheDocument()
+    const requests = vi.mocked(fetch).mock.calls.map(([url]) => String(url))
+    expect(requests).not.toContain(`/api/upload-tasks/${first.task_id}`)
+    expect(requests).not.toContain(`/api/upload-tasks/${second.task_id}`)
   })
 })

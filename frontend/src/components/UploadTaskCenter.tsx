@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Alert, Box, Button, Card, CardContent, Checkbox, Chip, CircularProgress, Typography } from '@mui/material'
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
-import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { api } from '../lib/api'
 import { UploadTaskState, unwrapData } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
@@ -31,11 +30,9 @@ const STATUS_KEYS = [
 
 interface Props {
   refreshKey?: number
-  activeTaskId?: string | null
-  onToggle: (task: UploadTaskState) => void
 }
 
-const UploadTaskCenter: React.FC<Props> = ({ refreshKey, activeTaskId, onToggle }) => {
+const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
   const { t } = useLanguage()
   const [tasks, setTasks] = useState<UploadTaskState[]>([])
   const [loading, setLoading] = useState(false)
@@ -66,6 +63,11 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey, activeTaskId, onToggle 
   }
 
   useEffect(() => { void load() }, [refreshKey])
+  useEffect(() => {
+    const refresh = () => { void load() }
+    window.addEventListener('focus', refresh)
+    return () => window.removeEventListener('focus', refresh)
+  }, [])
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(timer)
@@ -162,24 +164,30 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey, activeTaskId, onToggle 
       <Box sx={{ display: 'grid', gap: 1 }}>
         {tasks.map(task => {
           const remaining = countdownParts(task.cleanup_at, now)
-          const selected = task.task_id === activeTaskId
           const running = ['uploading', 'queued', 'extracting', 'reading', 'summarizing', 'submitting', 'cancelling']
             .includes(task.status || '')
           const statusText = task.status && (STATUS_KEYS as readonly string[]).includes(task.status)
             ? t('upload.status.' + task.status)
             : task.stage || ''
           return (
-            <Card key={task.task_id} variant="outlined" sx={{ borderColor: selected ? 'primary.main' : 'divider', bgcolor: selected ? 'action.selected' : 'background.paper' }}>
+            <Card key={task.task_id} variant="outlined" sx={{ position: 'relative', '&:hover': { borderColor: 'primary.main' }, '&:focus-within': { borderColor: 'primary.main' } }}>
               <CardContent sx={{ py: 1.5, '&:last-child': { pb: 1.5 }, display: 'flex', gap: 1.5, alignItems: 'center', flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
                 <Checkbox
                   size="small"
-                  sx={{ p: 0.5 }}
+                  sx={{ p: 0.5, position: 'relative', zIndex: 2 }}
                   checked={selectedIds.has(task.task_id)}
                   onChange={() => toggleSelect(task.task_id)}
                   inputProps={{ 'aria-label': t('upload.toggleSelectAria', { filename: task.filename || task.files?.[0]?.original_filename || task.task_id }) }}
                 />
                 <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography fontWeight={700} noWrap>{task.filename || task.files?.[0]?.original_filename || task.task_id}</Typography>
+                  <Typography component="a"
+                    href={`/upload/tasks/${encodeURIComponent(task.task_id)}`}
+                    target="_blank" rel="noopener"
+                    aria-label={t('upload.openTaskNewTab', { filename: task.filename || task.files?.[0]?.original_filename || task.task_id })}
+                    fontWeight={700} noWrap sx={{ display: 'block', color: 'inherit', textDecoration: 'none',
+                      '&::after': { content: '\'\'', position: 'absolute', inset: 0, zIndex: 1 },
+                      '&:focus-visible': { outline: 'none', '&::after': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: '-2px' } },
+                    }}>{task.filename || task.files?.[0]?.original_filename || task.task_id}</Typography>
                   <Typography variant="caption" color="text.secondary">
                     {statusText}
                     {task.total_chunks > 0 ? t('upload.chunkCount', { done: task.completed_chunks, total: task.total_chunks }) : ''}
@@ -192,20 +200,11 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey, activeTaskId, onToggle 
                         : t('upload.cleanupMinutes', { minutes: remaining.minutes, seconds: remaining.seconds })}
                   </Typography>}
                 </Box>
-                <Button
-                  size="small"
-                  variant={selected ? 'contained' : 'text'}
-                  startIcon={selected ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-                  aria-label={t('upload.toggleDetailAria', {
-                    action: selected ? t('upload.collapse') : t('upload.view'),
-                    filename: task.filename || task.files?.[0]?.original_filename || task.task_id,
-                  })}
-                  onClick={() => onToggle(task)}
-                >{selected ? t('upload.collapseDetail') : t('upload.viewDetail')}</Button>
+                <OpenInNewIcon aria-hidden="true" sx={{ color: 'text.disabled', fontSize: 18 }} />
                 {running
-                  ? <Button size="small" color="warning" onClick={event => void cancel(event, task.task_id)}>{t('upload.cancel')}</Button>
+                  ? <Button sx={{ position: 'relative', zIndex: 2 }} size="small" color="warning" onClick={event => void cancel(event, task.task_id)}>{t('upload.cancel')}</Button>
                   : ['failed', 'duplicate', 'cancelled'].includes(task.status || '')
-                    ? <Button size="small" color="error" onClick={event => void remove(event, task.task_id)}>{t('upload.clean')}</Button>
+                    ? <Button sx={{ position: 'relative', zIndex: 2 }} size="small" color="error" onClick={event => void remove(event, task.task_id)}>{t('upload.clean')}</Button>
                     : null}
               </CardContent>
             </Card>

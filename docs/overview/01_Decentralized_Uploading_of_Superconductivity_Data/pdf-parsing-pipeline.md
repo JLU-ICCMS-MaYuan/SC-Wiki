@@ -61,6 +61,12 @@
 - `processing_status=succeeded`，任务进入可校对状态；`_schedule_terminal_cleanup` 通过 RQ scheduler 排程终态清理。
 - 取消（`cancelled`）与失败同样进入终态清理排程；业务解析异常使用 `error_code=paper_processing_failed`，RQ 入口边界异常使用 `error_code=upload_worker_execution_failed`，两者都记录 `failed_stage` 并可在文件仍有效时重新解析。清理由 `cleanup_upload_task` 执行。
 
+## 任务详情入口
+
+上传页只保留上传与任务概览；点击任务条框普通区域，在新标签页打开 `/upload/tasks/:taskId`，原页面继续保留待上传文件与选择状态。详情由地址任务和服务端权限确定，不再依据浏览器旧活动任务缓存展开。账号或任务变化时重建工作区，旧请求的迟到响应不覆盖新目标；无权限或任务失效时不展示旧表单。已提交任务沿用正式论文跳转。
+
+详情复用既有解析进度、分段结果、校对编辑、来源核对和提交功能，顶部提供“返回上传记录”。主表单未保存或保存中时，关闭标签页、刷新或通过普通返回链接离页会触发浏览器保护；人工证据草稿继续使用原有保护。浏览器可能限制原生提示，不能保证强制结束进程时保存未完成输入。原列表重新获得焦点会刷新任务索引；不新增数据表或任务接口。验证边界见 [#140](../../specs/140-upload-task-detail-page/validation.md)。
+
 ## 用户校对与提交落库
 
 - 用户校对后先保存草稿，再执行共享的物性证据预检查；正式提交调用 `POST /api/rag/upload-tasks/{task_id}/submit`（`backend/api/rag.py`）。保存与提交共用任务锁，重复提交按已提交结果幂等返回。创建、文件上传和任务状态查询仍使用 `/api/upload-tasks`。

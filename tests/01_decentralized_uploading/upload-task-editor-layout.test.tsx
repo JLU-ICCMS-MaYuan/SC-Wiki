@@ -500,3 +500,32 @@ describe('保存/提交失败的后端错误提示', () => {
     expect(await screen.findByText('提交审核失败')).toBeInTheDocument()
   })
 })
+
+
+describe('独立解析标签页未保存保护', () => {
+  it('仅在主表单未保存或保存中阻止离页，保存完成后解除', async () => {
+    render(<UploadTaskEditor taskId="navigation-test" onSubmitted={vi.fn()} />)
+    const title = await screen.findByRole('textbox', { name: '标题' })
+    const clean = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(clean)
+    expect(clean.defaultPrevented).toBe(false)
+    fireEvent.change(title, { target: { value: '未保存修改' } })
+    const dirty = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(dirty)
+    expect(dirty.defaultPrevented).toBe(true)
+    fireEvent.click(screen.getByRole('button', { name: '立即保存' }))
+    await waitFor(() => expect(screen.getByRole('button', { name: '立即保存' })).toBeEnabled())
+    const saved = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(saved)
+    expect(saved.defaultPrevented).toBe(false)
+  })
+
+  it('只读处理中预览不注册主表单未保存阻断', async () => {
+    render(<UploadTaskEditor taskId="navigation-readonly" readOnly draftOverride={makeDraft([])} onSubmitted={vi.fn()} />)
+    expect(await screen.findByRole('textbox', { name: '标题' })).toHaveValue('测试论文')
+    expect(screen.queryByRole('button', { name: '提交审核' })).not.toBeInTheDocument()
+    const event = new Event('beforeunload', { cancelable: true })
+    window.dispatchEvent(event)
+    expect(event.defaultPrevented).toBe(false)
+  })
+})

@@ -28,7 +28,7 @@ const cancelledTask = record('b'.repeat(32), '取消任务.pdf', 'cancelled')
 const renderCenter = () =>
   render(
     <LanguageProvider>
-      <UploadTaskCenter onToggle={vi.fn()} />
+      <UploadTaskCenter />
     </LanguageProvider>,
   )
 

@@ -7,7 +7,7 @@ import {
 } from '@mui/material'
 import {
   CloudUpload, Check, PictureAsPdf, Description, Code,
-  Replay as ReplayIcon, EditNote as EditNoteIcon, KeyboardArrowUp as KeyboardArrowUpIcon,
+  Replay as ReplayIcon, EditNote as EditNoteIcon, ArrowBack as ArrowBackIcon,
 } from '@mui/icons-material'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
@@ -36,7 +36,7 @@ const ACCEPTED_STR = ACCEPTED_TYPES.join(',')
 const MAX_PAPER_UPLOAD_BYTES = 50 * 1024 * 1024
 
 /* ═══════════════════════════════════════════════ */
-const UploadPage: React.FC = () => {
+const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const { user } = useAuth()
   const { t } = useLanguage()
   const navigate = useNavigate()
@@ -55,7 +55,7 @@ const UploadPage: React.FC = () => {
   const [fileType, setFileType] = useState<'json' | 'paper' | ''>('')
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
-  const [activeTaskId, setActiveTaskId] = useState<string | null>(null)
+  const activeTaskId = taskId || null
   const [taskState, setTaskState] = useState<UploadTaskState | null>(null)
   const [taskLoading, setTaskLoading] = useState(false)
   const [taskPollTick, setTaskPollTick] = useState(0)
@@ -85,33 +85,8 @@ const UploadPage: React.FC = () => {
     return stage ? t('upload.step.' + stage.key) : key
   }
 
-  const taskStorageKey = user ? `scwiki_active_upload_task:${user.id}` : null
-
-  const collapseActiveTask = () => {
-    setActiveTaskId(null)
-    setTaskState(null)
-    if (taskStorageKey) localStorage.removeItem(taskStorageKey)
-  }
-
-  const toggleTask = (task: UploadTaskState) => {
-    if (task.task_id === activeTaskId) {
-      collapseActiveTask()
-      return
-    }
-    setActiveTaskId(task.task_id)
-    setTaskState(task)
-    if (taskStorageKey) localStorage.setItem(taskStorageKey, task.task_id)
-    // 任务可能已在其他页面提交；状态查询负责恢复入口，活动上报失败不能变成未处理异常。
-    void api.post(`/api/upload-tasks/${task.task_id}/activity`).catch(() => undefined)
-  }
-
   useEffect(() => {
-    if (!taskStorageKey) { setActiveTaskId(null); setTaskState(null); return }
-    setActiveTaskId(localStorage.getItem(taskStorageKey))
-  }, [taskStorageKey])
-
-  useEffect(() => {
-    if (!activeTaskId || !taskStorageKey) return
+    if (!activeTaskId || !user) return
     let timer: number | undefined
     let stopped = false
     const controller = new AbortController()
@@ -131,15 +106,11 @@ const UploadPage: React.FC = () => {
       } catch (reason: any) {
         if (stopped || reason.name === 'AbortError') return
         if (reason.code === 'UPLOAD_TASK_SUBMITTED' && Number.isSafeInteger(reason.submittedPaperId) && reason.submittedPaperId > 0) {
-          setTaskCenterTick(value => value + 1)
           openExistingPaper(reason.submittedPaperId)
           return
         }
         if (reason.status === 401 || reason.status === 403 || reason.status === 404) {
-          localStorage.removeItem(taskStorageKey)
-          setActiveTaskId(null)
           setTaskState(null)
-          setTaskCenterTick(value => value + 1)
           setError(reason.status === 404 ? t('upload.taskUnavailable') : (reason.message || t('upload.progressQueryFailed')))
         } else {
           setError(reason.message || t('upload.progressQueryFailed'))
@@ -150,13 +121,15 @@ const UploadPage: React.FC = () => {
       }
     }
 
+    // 打开任务后沿用服务端活动记录；失败不影响详情恢复。
+    void api.post(`/api/upload-tasks/${activeTaskId}/activity`).catch(() => undefined)
     void poll()
     return () => {
       stopped = true
       controller.abort()
       if (timer) window.clearTimeout(timer)
     }
-  }, [activeTaskId, taskStorageKey, taskPollTick])
+  }, [activeTaskId, user?.id, taskPollTick])
 
   useEffect(() => () => uploadXhr.current?.abort(), [])
 
@@ -247,19 +220,7 @@ const UploadPage: React.FC = () => {
         try {
           const data = JSON.parse(xhr.responseText) as UploadAcceptedResponse
           if (!data.task_id) throw new Error(t('upload.responseMissingTask'))
-          setActiveTaskId(data.task_id)
-          setTaskState({
-            task_id: data.task_id,
-            filename: data.filename || file.name,
-            stage: data.stage || 'saving_file',
-            stage_index: data.stage_index || 1,
-            stage_total: data.stage_total || 5,
-            processing_status: data.processing_status || 'processing',
-            processing_error: data.processing_error || null,
-            completed_chunks: data.completed_chunks || 0,
-            total_chunks: data.total_chunks || 0,
-          })
-          if (taskStorageKey) localStorage.setItem(taskStorageKey, data.task_id)
+          setTaskCenterTick(value => value + 1)
           setSnackbar(t('upload.fileSavedParsing'))
           setFile(null); setFileType('')
         } catch {
@@ -332,16 +293,12 @@ const UploadPage: React.FC = () => {
 
   // 论文详情由 /papers/:id 路由承载，离开后仍可通过刷新、前进/后退或直接访问地址回到
   const handleTaskSubmitted = (paperId: number) => {
-    if (taskStorageKey) localStorage.removeItem(taskStorageKey)
-    setActiveTaskId(null)
     setTaskState(null)
     setSnackbar(t('upload.submittedForReview'))
     navigate(`/papers/${paperId}`)
   }
 
   const openExistingPaper = (paperId: number) => {
-    if (taskStorageKey) localStorage.removeItem(taskStorageKey)
-    setActiveTaskId(null)
     setTaskState(null)
     navigate(`/papers/${paperId}`)
   }
@@ -404,28 +361,29 @@ const UploadPage: React.FC = () => {
       <Box sx={{ mb: 3 }}>
         <Box>
           <Typography variant="overline" color="text.secondary">Upload</Typography>
-          <Typography variant="h4" fontWeight={800}>{t('upload.pageTitle')}</Typography>
+          <Typography variant="h4" fontWeight={800}>{t(activeTaskId ? 'upload.taskDetailTitle' : 'upload.pageTitle')}</Typography>
         </Box>
       </Box>
 
       {/* Tabs: Paper / JSON */}
-      <Tabs value={tab} onChange={(_, v) => { setTab(v); setFile(null); setError(''); setParsed(null); }}
+      {!activeTaskId && <Tabs value={tab} onChange={(_, v) => { setTab(v); setFile(null); setError(''); setParsed(null); }}
         sx={{ mb: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Tab label={t('upload.tabPaper')} />
         <Tab label={t('upload.tabJson')} />
-      </Tabs>
+      </Tabs>}
 
       {/* ── TAB 0: Paper upload ── */}
       {tab === 0 && !parsed && (
         <>
-          <MultiFileUploadPanel onCreated={task => {
-            setActiveTaskId(task.task_id)
-            setTaskState(task)
-            setTaskCenterTick(value => value + 1)
-            if (taskStorageKey) localStorage.setItem(taskStorageKey, task.task_id)
-          }} />
-          <UploadTaskCenter refreshKey={taskCenterTick} activeTaskId={activeTaskId} onToggle={toggleTask} />
-          {activeTaskId && (
+          {!activeTaskId && <>
+            <MultiFileUploadPanel onCreated={() => setTaskCenterTick(value => value + 1)} />
+            <UploadTaskCenter key={user.id} refreshKey={taskCenterTick} />
+          </>}
+          {activeTaskId && !taskState && <Box sx={{ mb: 2 }}>
+            <Button component="a" href="/upload" startIcon={<ArrowBackIcon />}>{t('upload.backToUploads')}</Button>
+            {taskLoading && <LinearProgress aria-label={t('upload.restoringProgress')} />}
+          </Box>}
+          {activeTaskId && taskState && (
             <Box sx={{ mb: 3 }}>
               <Card variant="outlined" sx={{ overflow: 'visible' }}>
                 <CardContent>
@@ -453,11 +411,11 @@ const UploadPage: React.FC = () => {
                       <Button
                         size="small"
                         variant="contained"
-                        startIcon={<KeyboardArrowUpIcon />}
-                        aria-label={t('upload.collapseDetailAria')}
-                        onClick={collapseActiveTask}
+                        component="a"
+                        href="/upload"
+                        startIcon={<ArrowBackIcon />}
                         sx={{ minHeight: 44, flexShrink: 0 }}
-                      >{t('upload.collapseDetail')}</Button>
+                      >{t('upload.backToUploads')}</Button>
                     </Box>
                   </Box>
 
@@ -538,7 +496,7 @@ const UploadPage: React.FC = () => {
       )}
 
       {/* ── TAB 1: JSON import ── */}
-      {tab === 1 && (
+      {!activeTaskId && tab === 1 && (
         <>
           {!parsed ? (
             <Card variant="outlined"

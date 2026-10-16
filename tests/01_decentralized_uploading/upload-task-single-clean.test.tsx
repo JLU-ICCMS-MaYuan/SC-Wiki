@@ -25,7 +25,7 @@ const failedTask = {
 const renderCenter = () =>
   render(
     <LanguageProvider>
-      <UploadTaskCenter onToggle={vi.fn()} />
+      <UploadTaskCenter />
     </LanguageProvider>,
   )
 
