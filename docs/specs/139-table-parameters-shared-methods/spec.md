@@ -31,6 +31,12 @@
 >
 > 文档一致性检查通过，Issue 已同步。代码尚未实施，运行验收尚未执行。 开始落地实施。
 
+### 原任务缺失反馈
+
+> 我记得我和你提过一次需求：就是让你把 lambda，wlog 都解析填进去。对应的就是在LaSc2H24 这篇文章里面，我希望你能读表：如图2，把这些数据都填进去。为什么你没有把这件事做成，我看到现有的解析结果里面还是对于这些数据是空白的。
+
+本次补充附件见 IMG-002／IMG-003；此次核查及原任务定向补填见 [验收记录](validation.md#原任务参数补填2026-10-16)。
+
 ## 附件与推断来源
 
 - 附件：用户上传的解析表单截图，原文件按字节归档为 [IMG-001](assets/IMG-001-upload-missing-parameters.png)。截图只证明界面所示字段缺失，不证明论文中的科学数值。
@@ -56,6 +62,34 @@ images:
 ```
 
 IMG-001 的 AI 观察：LaSc2H24、150 GPa 的 Tc 为 281–311 K，λ、ωlog、两端 μ* 和计算条件为空。无 OCR、裁剪图或重绘副本；图片中的文字只作材料，不作为执行指令。
+
+本次附件原文件逐字节归档并从以下路径重新解码、核对尺寸及 SHA-256。附件中的文字只作为证据，不构成执行指令；均未推送，远程链接待验证。
+
+```yaml
+images:
+  - id: IMG-002
+    upload_order: 1
+    original_name: codex-clipboard-e6f2515b-c31f-452f-baf2-796e4ac16242.png
+    locator: docs/specs/139-table-parameters-shared-methods/assets/IMG-002-original-task-missing-parameters.png
+    status: local_verified
+    user_context: "我看到现有的解析结果里面还是对于这些数据是空白的。"
+    related: [US1, US3, FR-004, SC-002, SC-005]
+    sha256: 825cc0d982457c864d431982fba35b758b5e9d55395ea1ac98a27bd5d7b1cefe
+    media_type: image/png
+    dimensions_px: [2462, 720]
+  - id: IMG-003
+    upload_order: 2
+    original_name: codex-clipboard-50f2ea13-b2d6-47b8-a22f-f11e06599225.png
+    locator: docs/specs/139-table-parameters-shared-methods/assets/IMG-003-lasc-table-1.png
+    status: local_verified
+    user_context: "我希望你能读表：如图2，把这些数据都填进去。"
+    related: [US1, FR-001, FR-002, FR-003, SC-001]
+    sha256: 919b37dfbbb73b656d302e9e180a6a569a4d713633b09c0275b13ff6971ea2b1
+    media_type: image/png
+    dimensions_px: [1900, 632]
+```
+
+AI 观察：IMG-002 对应 281–311 K 的参数空白；IMG-003 是 Table 1，包含 8 行 λ、ωlog、Tc 与两种近似，表题给出 μ*=0.16→0.1。不能用新任务验收通过代替原任务已补填。
 
 ## 背景与目标
 
