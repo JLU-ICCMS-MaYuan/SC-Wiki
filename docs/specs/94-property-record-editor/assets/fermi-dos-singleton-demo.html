@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>费米能级 DOS · 单条记录演示</title>
+<link rel="icon" href="data:,">
 <style>
 :root { color-scheme:light dark; --bg:light-dark(#f7f8fb,#171a22); --surface:light-dark(#fff,#222632); --ink:light-dark(#283344,#e9edf5); --muted:light-dark(#738095,#b3bdce); --line:light-dark(#dce1eb,#485168); --brand:light-dark(#6250f6,#b5a8ff); --soft:light-dark(#f4f3ff,#35304f); --warning:light-dark(#965709,#f6c67a); --warn-bg:light-dark(#fff8eb,#393025); }
 * { box-sizing:border-box; }
@@ -38,21 +39,34 @@ h1 { font-size:20px; font-weight:600; margin:0; }
 .field input:focus,.field select:focus { border-color:var(--brand); box-shadow:0 0 0 1px var(--brand); }
 .field input:disabled,.field select:disabled { opacity:.7; cursor:default; }
 .hint { color:var(--muted); font-size:12px; margin:12px 0 0; }
-.conflict { border:1px solid var(--line); border-radius:7px; background:var(--warn-bg); margin-top:16px; padding:12px 14px; }
-.conflict>summary { cursor:pointer; color:var(--warning); }
-.conflict p { margin:8px 0; color:var(--muted); font-size:13px; }
-.candidate { display:flex; align-items:center; gap:12px; flex-wrap:wrap; border-top:1px solid var(--line); padding:12px 0 2px; }
-.candidate .source { color:var(--muted); font-size:12px; flex:1 1 180px; }
-.candidate button { color:var(--brand); background:var(--surface); border:1px solid var(--line); padding:5px 10px; border-radius:5px; }
+.conflict-link { display:inline-flex; align-items:center; gap:6px; margin-top:12px; border:0; border-radius:5px; padding:5px 9px; color:var(--warning); background:var(--warn-bg); }
+.conflict { border:1px solid var(--line); border-radius:7px; background:var(--warn-bg); margin:12px 0; padding:12px; }
+.conflict strong { color:var(--warning); }
+.conflict p { margin:6px 0 0; font-size:12px; }
+.candidate { border:1px solid var(--line); border-radius:7px; padding:12px; margin:12px 0; }
+.candidate-value { font-size:16px; font-weight:600; overflow-wrap:anywhere; }
+.candidate .source { color:var(--muted); font-size:12px; }
+.candidate blockquote { margin:10px 0; padding-left:10px; border-left:2px solid var(--line); overflow-wrap:anywhere; font-size:12px; }
+.candidate .source-gap { color:var(--warning); }
 .footer { display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-top:22px; color:var(--muted); font-size:12px; }
 .footer button { margin-left:auto; }
 .overlay { position:fixed; inset:0; background:#0004; z-index:5; }
-.drawer { position:fixed; top:0; right:0; bottom:0; width:min(410px,100%); padding:24px; background:var(--surface); box-shadow:-8px 0 30px #0002; overflow:auto; z-index:6; }
+.drawer { position:fixed; top:0; right:0; bottom:0; width:min(480px,100%); padding:24px; background:var(--surface); box-shadow:-8px 0 30px #0002; overflow:auto; z-index:6; }
 .drawer-head { display:flex; justify-content:space-between; align-items:center; gap:12px; }
 .drawer h2 { font-size:17px; }
 .drawer h3 { font-size:14px; margin-top:26px; }
 .drawer p { color:var(--muted); overflow-wrap:anywhere; }
-.drawer .source-card { border:1px solid var(--line); border-radius:7px; padding:12px; margin-top:12px; }
+.drawer section { border-top:1px solid var(--line); margin-top:22px; }
+.drawer details>summary { font-weight:600; cursor:pointer; margin-top:18px; }
+.drawer label { display:block; margin:12px 0 5px; font-size:13px; }
+.drawer textarea { width:100%; min-height:78px; resize:vertical; padding:9px; font:inherit; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:6px; }
+.drawer fieldset { border:0; padding:0; margin:12px 0; min-width:0; }
+.drawer fieldset label { display:inline-flex; gap:6px; margin:4px 12px 4px 0; }
+.drawer input[type=file] { max-width:100%; font-size:12px; }
+.drawer .primary { background:var(--brand); color:light-dark(#fff,#171a22); border:0; }
+.drawer .error { color:light-dark(#b3261e,#ffb4ab); }
+.drawer button:disabled { opacity:.45; cursor:default; }
+.drawer .drawer-note { font-size:12px; }
 button:focus-visible { outline:2px solid var(--brand); outline-offset:3px; }
 @media(max-width:600px) { .app { margin:18px auto; padding:0 12px; } .workspace { padding:0 14px 18px; } .state-head { padding:14px; } h1 { font-size:18px; } .tag { margin:8px 0 0; } .status { display:block; margin:3px 0 0; } }
 </style>
@@ -65,7 +79,9 @@ button:focus-visible { outline:2px solid var(--brand); outline-offset:3px; }
   </header>
   <nav class="scenarios" aria-label="演示场景">
     <button type="button" data-mode="same" aria-pressed="true">3 条相同记录</button>
-    <button type="button" data-mode="conflict" aria-pressed="false">不同数值待选择</button>
+    <button type="button" data-mode="conflict" aria-pressed="false">不同数值 · 已有当前值</button>
+    <button type="button" data-mode="unselected" aria-pressed="false">不同数值 · 尚无当前值</button>
+    <button type="button" data-mode="missing" aria-pressed="false">冲突来源缺失</button>
     <button type="button" data-mode="empty" aria-pressed="false">尚未填写</button>
     <button type="button" data-mode="pressure" aria-pressed="false">另一个材料状态</button>
   </nav>
@@ -83,12 +99,7 @@ button:focus-visible { outline:2px solid var(--brand); outline-offset:3px; }
           </div>
         </div>
         <p class="hint">点击“名称”标签查看来源。</p>
-        <details id="conflict" class="conflict" hidden open>
-          <summary id="conflict-title">2 个不同数值，待选择当前值</summary>
-          <p>本场景为交互示例。不同数值不自动合并；选择后仍保留全部来源。</p>
-          <div class="candidate"><strong>18.76</strong><span class="source">候选 A · 演示来源</span><button type="button" data-candidate="18.76">采用此值</button></div>
-          <div class="candidate"><strong>19.10</strong><span class="source">候选 B · 演示来源，非论文事实</span><button type="button" data-candidate="19.10">采用此值</button></div>
-        </details>
+        <button id="conflict-link" type="button" class="conflict-link" hidden aria-haspopup="dialog">⚠ 数值有矛盾 · 查看来源对照</button>
       </details>
     </div>
   </section>
@@ -96,66 +107,207 @@ button:focus-visible { outline:2px solid var(--brand); outline-offset:3px; }
 </main>
 <div id="overlay" class="overlay" hidden></div>
 <aside id="drawer" class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" hidden>
-  <div class="drawer-head"><h2 id="drawer-title">DOS 来源</h2><button id="close" class="plain" type="button">关闭</button></div>
-  <p>167 GPa 备份中的三条记录只有记录键不同，数值、单位与证据相同。相同来源不重复展示。</p>
-  <div class="source-card"><strong id="source-value">N(Ef) · 18.76 states/spin/Ry/f.u.</strong><p>此卡片只演示来源入口，不伪造页码或原文引句。</p></div>
-  <h3>拟议保留规则</h3><p>相同记录合成一个当前值，原始记录与证据保留。不同值保留为候选，由人工选定。</p>
+  <div class="drawer-head"><h2 id="drawer-title">N(Ef) 来源核对</h2><button id="close" class="plain" type="button">关闭</button></div>
+  <p class="drawer-note">交互演示 · 冲突候选非论文事实；不调用模型或业务 API。</p>
+  <details id="source-section" open data-sidebar-section="sources">
+    <summary>系统找到的原文</summary>
+    <div id="conflict-panel" class="conflict" hidden tabindex="-1">
+      <strong>发现不同 DOS 数值，待人工核对</strong>
+      <p>以下是来源中的候选，不是另一套编辑表单。请比较数值、单位及条件，再返回主表单决定。</p>
+    </div>
+    <div id="source-list"></div>
+    <button id="return-edit" class="plain" type="button">返回主表单修改</button>
+    <p id="readonly-hint" class="drawer-note" hidden>只读预览可查看全部来源，不能修改 DOS。</p>
+  </details>
+  <section data-sidebar-section="manual">
+    <h3>人工修改记录</h3>
+    <p id="manual-empty" class="drawer-note">尚未修改。请返回主表单核对、编辑当前值。</p>
+    <div id="manual-fields" hidden>
+      <label for="manual-reason">人工修改判断理由（必填）</label>
+      <textarea id="manual-reason" placeholder="说明如何核对这些来源，以及修改的依据"></textarea>
+      <fieldset><legend>人工证据</legend>
+        <label><input type="radio" name="evidence-choice" value="provide"> 提供证据</label>
+        <label><input type="radio" name="evidence-choice" value="none"> 不提供证据</label>
+      </fieldset>
+      <div id="provide-evidence" hidden><label for="evidence-file">选择证据文件（仅演示，不上传）</label><input id="evidence-file" type="file" accept=".png,.jpg,.jpeg,.webp,.txt,.md,.pdf" multiple><p id="file-names" class="drawer-note"></p></div>
+      <div id="no-evidence" hidden><label for="absence-reason">不提供证据的理由</label><textarea id="absence-reason"></textarea></div>
+      <p id="manual-error" class="error" role="alert"></p>
+      <p id="manual-saved" class="drawer-note" hidden>演示说明已保存；来源矛盾仍待人工裁决。</p>
+      <button id="save-preview" class="plain primary" type="button">保存并完成（仅演示）</button>
+      <p class="drawer-note">此处仅模拟人工说明流程，不代表矛盾已解决或数据已审核。</p>
+    </div>
+  </section>
+  <section data-sidebar-section="ai">
+    <h3>AI 理由</h3>
+    <p id="ai-reason">此演示没有运行 AI 核对，不生成或冒充 AI 判断。</p>
+  </section>
 </aside>
 <script>
 (function () {
   const get = id => document.getElementById(id);
   let mode = "same";
   let focusBeforeDrawer;
+  let scrollBeforeDrawer = 0;
+  let overflowBeforeDrawer = "";
   const names = ["name","kind","value","unit"];
+  const drafts = new Map();
+  const hasConflict = () => ["conflict","unselected","missing"].includes(mode);
+  const tableCaption = "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa).";
+  const initial = () => ({
+    name:"N(Ef)", kind:"text", value:mode === "empty" || mode === "unselected" ? "" : mode === "pressure" ? "18.44" : "18.76",
+    unit:mode === "empty" ? "" : "states/spin/Ry/f.u.", changed:false, reason:"", choice:"", absence:"", files:[], saved:false,
+  });
+  const current = () => drafts.get(mode);
+  function updateStatus() {
+    get("status").textContent = hasConflict() ? "数值有矛盾 · 待人工决定" : current().changed ? "已修改 · 来源待核对" : mode === "empty" ? "待填写" : mode === "pressure" ? "独立状态 · 独立 DOS" : "相同记录归为一项 · 来源保留";
+  }
   function disabled() {
     names.forEach(id => { get(id).disabled = get("readonly").checked; });
-    document.querySelectorAll("[data-candidate]").forEach(button => { button.disabled = get("readonly").checked; });
+    ["return-edit","manual-reason","absence-reason","evidence-file","save-preview"].forEach(id => { get(id).disabled = get("readonly").checked; });
+    document.querySelectorAll("[name=evidence-choice]").forEach(input => { input.disabled = get("readonly").checked; });
+    get("readonly-hint").hidden = !get("readonly").checked;
+  }
+  function syncManual() {
+    const draft = current();
+    get("manual-empty").hidden = draft.changed;
+    get("manual-fields").hidden = !draft.changed;
+    get("manual-reason").value = draft.reason;
+    get("absence-reason").value = draft.absence;
+    document.querySelectorAll("[name=evidence-choice]").forEach(input => { input.checked = input.value === draft.choice; });
+    get("provide-evidence").hidden = draft.choice !== "provide";
+    get("no-evidence").hidden = draft.choice !== "none";
+    get("file-names").textContent = draft.files.length ? draft.files.map(file => file.name).join("、") + "（仅本页，未上传）" : "尚未选择文件";
+    get("manual-saved").hidden = !draft.saved;
+    get("manual-error").textContent = "";
   }
   function render(nextMode) {
     mode = nextMode;
-    get("name").value = "N(Ef)";
-    get("kind").value = "text";
-    get("unit").value = mode === "empty" ? "" : "states/spin/Ry/f.u.";
-    get("value").value = mode === "same" ? "18.76" : mode === "pressure" ? "18.44" : "";
+    if (!drafts.has(mode)) drafts.set(mode,initial());
+    names.forEach(id => { get(id).value = current()[id]; });
     get("pressure").textContent = mode === "pressure" ? "150 GPa" : "167 GPa";
-    get("conflict").hidden = mode !== "conflict";
-    get("conflict").open = true;
-    get("conflict-title").textContent = "2 个不同数值，待选择当前值";
-    get("status").textContent = mode === "same" ? "相同记录归为一项 · 来源保留" : mode === "conflict" ? "待选择当前 DOS" : mode === "empty" ? "待填写" : "独立状态 · 独立 DOS";
-    get("feedback").textContent = mode === "pressure" ? "150 GPa 与 167 GPa 分别保存各自 DOS；不跨材料状态合并。" : mode === "conflict" ? "主行只有一个；请先选择候选，或填写经核对的当前值。" : mode === "empty" ? "可直接填写唯一的 DOS，无需添加记录。" : "三条相同记录只显示一行；不提供复制 DOS 或新增第二条入口。";
+    get("conflict-link").hidden = !hasConflict();
+    updateStatus();
+    get("feedback").textContent = hasConflict() ? "主表单仍只有一个 DOS；点击矛盾提示，在侧栏查看来源对照。" : mode === "pressure" ? "不同压强分别保留 DOS，不跨材料状态合并。" : mode === "empty" ? "可直接填写唯一的 DOS，无需添加记录。" : "三条相同记录只显示一行；来源保留，不提供复制或新增第二条入口。";
     document.querySelectorAll("[data-mode]").forEach(button => button.setAttribute("aria-pressed", String(button.dataset.mode === mode)));
+    get("evidence-file").value = "";
+    syncManual();
     disabled();
   }
   document.querySelectorAll("[data-mode]").forEach(button => button.addEventListener("click", () => render(button.dataset.mode)));
-  document.querySelectorAll("[data-candidate]").forEach(button => button.addEventListener("click", () => {
-    get("value").value = button.dataset.candidate;
-    get("status").textContent = "已选定当前值 · 来源待核对";
-    get("conflict-title").textContent = "查看 2 个候选与来源";
-    get("conflict").open = false;
-    get("feedback").textContent = "当前 DOS 已选择为 " + button.dataset.candidate + "；两个候选仍保留，本地演示未保存。";
-  }));
-  names.forEach(id => get(id).addEventListener("input", () => {
-    get("status").textContent = "演示中已修改 · 来源待核对";
-    get("feedback").textContent = "修改仅保留在本页，重置或切换场景后恢复示例。";
+  names.forEach(id => get(id).addEventListener(id === "kind" ? "change" : "input", () => {
+    const draft = current();
+    draft[id] = get(id).value;
+    draft.changed = names.some(name => draft[name] !== initial()[name]);
+    draft.saved = false;
+    updateStatus();
+    get("feedback").textContent = hasConflict() ? "当前值已在主表单修改；所有冲突来源仍保留，请在侧栏补充人工说明。" : "修改仅保留在本页，未写入业务草稿。";
   }));
   get("readonly").addEventListener("change", disabled);
-  get("reset").addEventListener("click", () => render(mode));
-  function closeDrawer() {
+  get("reset").addEventListener("click", () => { drafts.delete(mode); render(mode); });
+  function closeDrawer(target) {
     get("drawer").hidden = true; get("overlay").hidden = true;
-    if (focusBeforeDrawer) focusBeforeDrawer.focus();
+    document.body.style.overflow = overflowBeforeDrawer;
+    window.scrollTo(0,scrollBeforeDrawer);
+    const focusTarget = target || focusBeforeDrawer;
+    if (focusTarget) focusTarget.focus({preventScroll:true});
   }
-  get("sources").addEventListener("click", () => {
+  function addSource(label,value,missing) {
+    const card = document.createElement("article");
+    card.className = "candidate";
+    card.dataset.sourceCandidate = "true";
+    const title = document.createElement("div");
+    title.className = "candidate-value";
+    title.textContent = label + " · " + value + " states/spin/Ry/f.u.";
+    const conditions = document.createElement("p");
+    conditions.className = "source";
+    conditions.textContent = "材料条件：LaSc₂H₂₄ · " + (mode === "pressure" ? "150" : "167") + " GPa · 理论";
+    card.append(title,conditions);
+    const source = document.createElement("p");
+    source.className = "source";
+    source.textContent = missing ? "演示候选，无可核验的来源文件、页码或原文。" : "历史备份：2024 La-Sc-H 何新玲.pdf · 第 4 页 · Table 1 表注";
+    card.append(source);
+    if (!missing) {
+      const quote = document.createElement("blockquote");
+      quote.textContent = "electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.)";
+      card.append(quote);
+      const full = document.createElement("details");
+      const summary = document.createElement("summary");
+      summary.textContent = "查看完整表注";
+      const fullQuote = document.createElement("blockquote");
+      fullQuote.textContent = tableCaption;
+      full.append(summary,fullQuote);
+      card.append(full);
+    }
+    const gap = document.createElement("p");
+    gap.className = "source source-gap";
+    gap.textContent = missing ? "缺少出处，不能据此判断该数值正确。" : "表注说明 DOS 定义与单位，不能单独证明此数值；实际表格行仍需核对。";
+    card.append(gap);
+    get("source-list").append(card);
+  }
+  function openDrawer() {
     focusBeforeDrawer = document.activeElement;
-    get("source-value").textContent = "N(Ef) · " + (get("value").value || "待选择") + " " + get("unit").value;
-    get("drawer").querySelector("p").textContent = mode === "same" ? "167 GPa 备份中的三条记录只有记录键不同，数值、单位与证据相同。相同来源不重复展示。" : mode === "conflict" ? "两个候选是冲突处理的交互示例。19.10 不作为论文真实数值。" : mode === "empty" ? "当前尚未填写 DOS，没有可展示来源。" : "150 GPa 是另一材料状态，DOS 与 167 GPa 分开保存。";
+    scrollBeforeDrawer = window.scrollY;
+    overflowBeforeDrawer = document.body.style.overflow;
+    get("conflict-panel").hidden = !hasConflict();
+    get("source-section").open = true;
+    get("source-list").replaceChildren();
+    if (hasConflict()) {
+      addSource("来源候选 A","18.76",mode === "missing");
+      addSource("来源候选 B（演示值）","19.10",true);
+    } else if (mode !== "empty") {
+      addSource(mode === "same" ? "相同副本的来源（去重）" : "此压强的来源",mode === "pressure" ? "18.44" : "18.76",false);
+    } else {
+      const empty = document.createElement("p");
+      empty.textContent = "尚未报告 DOS，没有可核验来源。";
+      get("source-list").append(empty);
+    }
+    syncManual();
     get("drawer").hidden = false; get("overlay").hidden = false; get("close").focus();
+    document.body.style.overflow = "hidden";
+    get("drawer").scrollTop = 0;
+    if (hasConflict()) get("conflict-panel").focus({preventScroll:true});
+  }
+  get("sources").addEventListener("click",openDrawer);
+  get("conflict-link").addEventListener("click",openDrawer);
+  get("close").addEventListener("click",() => closeDrawer());
+  get("overlay").addEventListener("click",() => closeDrawer());
+  get("return-edit").addEventListener("click",() => {
+    closeDrawer(get("value"));
+    const area = document.querySelector(".fields-scroll");
+    const field = get("value").getBoundingClientRect();
+    const bounds = area.getBoundingClientRect();
+    if (field.right > bounds.right) area.scrollLeft += field.right - bounds.right + 2;
+    else if (field.left < bounds.left) area.scrollLeft += field.left - bounds.left - 2;
   });
-  get("close").addEventListener("click", closeDrawer);
-  get("overlay").addEventListener("click", closeDrawer);
+  for (const [id,key] of [["manual-reason","reason"],["absence-reason","absence"]]) {
+    get(id).addEventListener("input",() => { current()[key] = get(id).value; current().saved = false; get("manual-saved").hidden = true; });
+  }
+  document.querySelectorAll("[name=evidence-choice]").forEach(input => input.addEventListener("change",() => {
+    current().choice = input.value; current().saved = false; syncManual();
+  }));
+  get("evidence-file").addEventListener("change",() => { current().files = Array.from(get("evidence-file").files); current().saved = false; syncManual(); });
+  get("save-preview").addEventListener("click",() => {
+    const draft = current();
+    const blockers = [];
+    if (!draft.reason.trim()) blockers.push("请填写人工修改判断理由");
+    if (!draft.choice) blockers.push("请选择提供证据或不提供证据");
+    if (draft.choice === "none" && !draft.absence.trim()) blockers.push("请说明不提供证据的理由");
+    if (draft.choice === "provide" && !draft.files.length) blockers.push("请选择演示证据文件，文件不会上传");
+    if (blockers.length) { get("manual-error").textContent = blockers.join("；"); return; }
+    draft.saved = true;
+    closeDrawer();
+    get("feedback").textContent = "人工说明已在本页演示中保存；来源矛盾仍待人工裁决，未写业务数据。";
+  });
   document.addEventListener("keydown", event => {
     if (get("drawer").hidden) return;
-    if (event.key === "Escape") closeDrawer();
-    if (event.key === "Tab") { event.preventDefault(); get("close").focus(); }
+    if (event.key === "Escape") { event.preventDefault(); closeDrawer(); }
+    if (event.key === "Tab") {
+      const items = Array.from(get("drawer").querySelectorAll("button,input,textarea,select,summary"))
+        .filter(node => !node.disabled && node.getClientRects().length);
+      const index = items.indexOf(document.activeElement);
+      if (event.shiftKey && index <= 0) { event.preventDefault(); items[items.length-1].focus(); }
+      if (!event.shiftKey && (index === -1 || index === items.length-1)) { event.preventDefault(); items[0].focus(); }
+    }
   });
   render("same");
 }());

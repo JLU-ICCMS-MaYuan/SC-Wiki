@@ -419,6 +419,8 @@
 
 [IMG-010 原图](assets/IMG-010.png)、[图片清单](assets/images.json)、[独立 Demo](assets/fermi-dos-singleton-demo.html)。18.76 与 150 GPa 的 18.44 来自备份；冲突场景的 19.10 是明确标注的演示数值，不是论文事实。原图与 Demo 仅本地留档，远程链接待验证。
 
+**已授权的侧栏 Demo 修订**：冲突对照移入“系统找到的原文”，侧栏只读、返回主表单修改；完整原话、既有侧栏依据、交互设计和验证见 [DOS 矛盾侧栏 Demo 修订](dos-conflict-sidebar-demo.md)。仅授权独立 Demo，正式实施仍待评审。
+
 ### 待确认决策
 
 - 是否认可相同副本归并并保留来源、不同数值人工选定一个当前值的 Demo。

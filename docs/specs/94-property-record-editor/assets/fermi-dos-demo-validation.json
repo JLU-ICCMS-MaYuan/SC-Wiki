@@ -1,69 +1,220 @@
 {
   "checked_date": "2026-10-16",
-  "scope": "独立 HTML Demo 的浏览器交互，不代表正式功能验收",
+  "scope": "独立 DOS 侧栏 HTML Demo；不代表正式业务或人工裁决验收",
+  "networkVerification": "静态核对独立 HTML 无业务 API、模型调用或持久存储入口；不作为浏览器网络抓包结果",
   "checks": [
     {
-      "inputs": [
-        {
-          "id": "name",
-          "value": "N(Ef)"
-        },
-        {
-          "id": "kind",
-          "value": "text"
-        },
-        {
-          "id": "value",
-          "value": "18.76"
-        },
-        {
-          "id": "unit",
-          "value": "states/spin/Ry/f.u."
-        }
+      "conflictHidden": true,
+      "rows": 1,
+      "scenario": "相同副本",
+      "value": "18.76"
+    },
+    {
+      "adoptButtons": 0,
+      "bodyScroll": 0,
+      "candidatesInDrawer": 2,
+      "candidatesInMain": 0,
+      "currentValue": "18.76",
+      "insideOriginalSection": true,
+      "order": [
+        "sources",
+        "manual",
+        "ai"
       ],
-      "noDuplicateActions": true,
-      "noPageOverflow": true,
-      "rows": 1,
-      "scenario": "相同副本"
+      "scenario": "冲突侧栏",
+      "sourceInputs": 0,
+      "units": [
+        "来源候选 A · 18.76 states/spin/Ry/f.u.",
+        "来源候选 B（演示值） · 19.10 states/spin/Ry/f.u."
+      ]
     },
     {
-      "candidateCount": 2,
-      "rows": 1,
-      "scenario": "冲突待选",
-      "value": ""
+      "drawerHidden": true,
+      "focus": "value",
+      "scenario": "返回修改",
+      "scroll": 0,
+      "value": "18.76"
     },
     {
-      "candidateCount": 2,
-      "collapsed": true,
-      "rows": 1,
-      "scenario": "选择后候选保留",
+      "candidates": 2,
+      "conflictVisible": true,
+      "manualVisible": true,
+      "scenario": "修改后重开",
       "value": "19.10"
     },
     {
-      "allDisabled": true,
-      "scenario": "只读"
+      "drawerOpen": true,
+      "error": "请填写人工修改判断理由；请选择提供证据或不提供证据",
+      "scenario": "说明缺项"
     },
     {
+      "absence": "这是独立交互 Demo，没有向业务系统提交证据。",
+      "noEvidenceSelected": true,
+      "reason": "演示：先比对不同来源的数值，当前试填仍需原文核验。",
+      "scenario": "说明关闭重开"
+    },
+    {
+      "closed": true,
+      "conflictRemains": true,
+      "scenario": "模拟保存",
+      "status": "数值有矛盾 · 待人工决定"
+    },
+    {
+      "candidates": 2,
+      "reason": "演示：先比对不同来源的数值，当前试填仍需原文核验。",
+      "savedNote": true,
+      "scenario": "保存后重开"
+    },
+    {
+      "candidates": 2,
       "rows": 1,
-      "scenario": "空状态",
-      "unit": "",
+      "scenario": "无当前值不任选",
       "value": ""
     },
     {
+      "missingWarnings": [
+        "缺少出处，不能据此判断该数值正确。",
+        "缺少出处，不能据此判断该数值正确。"
+      ],
+      "quotes": 0,
+      "scenario": "来源缺失",
+      "value": "18.76"
+    },
+    {
+      "closed": true,
+      "focus": "conflict-link",
+      "scenario": "遮罩关闭"
+    },
+    {
+      "scenario": "未报告",
+      "sourceCards": 0,
+      "sourceText": "尚未报告 DOS，没有可核验来源。",
+      "value": ""
+    },
+    {
+      "conflictHidden": true,
       "pressure": "150 GPa",
-      "scenario": "另一压强",
+      "scenario": "不同压强",
       "value": "18.44"
     },
     {
-      "quoteIsNotFabricated": true,
-      "scenario": "来源侧栏",
-      "visible": true
+      "candidates": 2,
+      "mainDisabled": true,
+      "manualDisabled": true,
+      "returnDisabled": true,
+      "scenario": "只读",
+      "value": "19.10"
     },
     {
-      "expanded": true,
-      "scenario": "折叠后保留编辑",
-      "value": "18.80"
+      "focusInsideDrawer": true,
+      "scenario": "键盘焦点限制"
+    },
+    {
+      "closed": true,
+      "focus": "conflict-link",
+      "scenario": "Escape关闭"
+    },
+    {
+      "pageWidth": 390,
+      "rowWidth": 632,
+      "rows": 1,
+      "scenario": "窄屏主表单",
+      "scrollAreaWidth": 336,
+      "viewport": 390
+    },
+    {
+      "drawerClientWidth": 390,
+      "drawerScrollWidth": 390,
+      "drawerWidth": 390,
+      "mainScroll": 61.5,
+      "pageWidth": 390,
+      "scenario": "窄屏侧栏",
+      "viewport": 390
+    },
+    {
+      "fieldFullyVisible": true,
+      "focus": "value",
+      "rowScroll": 60,
+      "scenario": "窄屏返回修改",
+      "scroll": 61.5,
+      "scrollBefore": 61.5
+    },
+    {
+      "drawerTop": 0,
+      "noPageOverflow": true,
+      "rows": 1,
+      "scenario": "最终边界",
+      "viewport": 1280
     }
   ],
-  "consoleErrors": []
+  "consoleErrors": [],
+  "previous_demo_validation": {
+    "checked_date": "2026-10-16",
+    "scope": "独立 HTML Demo 的浏览器交互，不代表正式功能验收",
+    "checks": [
+      {
+        "inputs": [
+          {
+            "id": "name",
+            "value": "N(Ef)"
+          },
+          {
+            "id": "kind",
+            "value": "text"
+          },
+          {
+            "id": "value",
+            "value": "18.76"
+          },
+          {
+            "id": "unit",
+            "value": "states/spin/Ry/f.u."
+          }
+        ],
+        "noDuplicateActions": true,
+        "noPageOverflow": true,
+        "rows": 1,
+        "scenario": "相同副本"
+      },
+      {
+        "candidateCount": 2,
+        "rows": 1,
+        "scenario": "冲突待选",
+        "value": ""
+      },
+      {
+        "candidateCount": 2,
+        "collapsed": true,
+        "rows": 1,
+        "scenario": "选择后候选保留",
+        "value": "19.10"
+      },
+      {
+        "allDisabled": true,
+        "scenario": "只读"
+      },
+      {
+        "rows": 1,
+        "scenario": "空状态",
+        "unit": "",
+        "value": ""
+      },
+      {
+        "pressure": "150 GPa",
+        "scenario": "另一压强",
+        "value": "18.44"
+      },
+      {
+        "quoteIsNotFabricated": true,
+        "scenario": "来源侧栏",
+        "visible": true
+      },
+      {
+        "expanded": true,
+        "scenario": "折叠后保留编辑",
+        "value": "18.80"
+      }
+    ],
+    "consoleErrors": []
+  }
 }
