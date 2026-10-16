@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>物性记录操作 · 交互评审</title>
+<style>
+:root{font-family:Inter,"PingFang SC","Microsoft YaHei",sans-serif;color:#273142;background:#f5f6fa;font-synthesis:none}*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit}button{cursor:pointer;border:0;background:transparent;border-radius:6px;padding:10px 14px;color:#6151e8}button:hover{background:#f0edff}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #7561ec;outline-offset:2px}button:disabled{cursor:default;opacity:.45}header{padding:28px 32px 22px;background:white;border-bottom:1px solid #e5e7ee}.eyebrow{font-size:12px;letter-spacing:.08em;color:#7561ec;font-weight:700}h1{font-size:24px;margin:9px 0}p{margin:8px 0;line-height:1.65;color:#687080;font-size:14px}.controls{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:20px}.segmented{display:flex;padding:4px;background:#f1f2f7;border-radius:9px}.segmented button[aria-pressed=true]{background:#fff;box-shadow:0 1px 5px #29314a16;color:#4c3acd;font-weight:600}.select-control{display:flex;gap:8px;align-items:center;font-size:13px;color:#687080}.select-control select{padding:7px;border:1px solid #d6d9e1;border-radius:6px;background:white;color:#273142}.check{display:flex;align-items:center;gap:6px;font-size:13px}main{padding:28px 24px;overflow:hidden}.preview{max-width:100%;margin:auto;width:100%}.state{background:white;border:1px solid #e4e6ed;border-radius:12px;padding:24px;min-width:0}.state-heading{font-size:17px;font-weight:600;margin-bottom:26px}.module+.module{margin-top:28px;border-top:1px solid #e8e9ee;padding-top:18px}.module-head{display:flex;align-items:center;gap:8px;margin-bottom:13px}.module-head button{padding:7px 0;color:#273142;font-size:16px;font-weight:600}.module-head .add{margin-left:auto;font-size:13px;color:#6151e8;font-weight:500}.record{padding:10px 0 18px}.record+.record{border-top:1px solid #eee}.record-title{color:#6151e8;font-size:13px;font-weight:600;margin:0 0 8px}.row{display:flex;align-items:center;gap:18px;min-width:0}.track{display:flex;align-items:center;gap:10px;overflow-x:auto;flex:1;min-width:0;padding:10px 2px 12px;scrollbar-width:thin}.field{display:flex;flex-direction:column;position:relative;flex:0 0 130px;padding-top:6px}.field.small{flex-basis:100px}.field.wide{flex-basis:190px}.field span{position:absolute;top:0;left:10px;background:white;padding:0 4px;font-size:11px;color:#7561ec;line-height:14px}.field input,.field select{width:100%;border:1px solid #bdc2cd;border-radius:7px;background:white;color:#374151;height:42px;padding:9px 12px;min-width:0;font-size:14px}.field input:disabled,.field select:disabled{background:#f7f7f9;color:#747b86}.field:has(:disabled) span{background:#f7f7f9}.delete{flex:0 0 auto;color:#bc2e29;display:inline-flex;align-items:center;gap:6px;padding:10px 8px;font-size:13px;white-space:nowrap;margin-top:4px}.delete:hover{background:#fff0ef}.delete svg{width:17px;height:17px;fill:currentColor}.footer{display:flex;justify-content:flex-end;gap:8px}.footer button{font-size:13px}.footer .delete{margin:0}.pair{display:flex;gap:8px;padding:6px 8px;border-radius:9px;background:#f4f3ff;flex:0 0 auto}.pair .field{flex-basis:95px;width:95px}.pair .field span{background:#f4f3ff}.pair input{background:#fff}.hint{font-size:12px;color:#8a90a0}.empty{font-size:14px;color:#8a90a0;padding:22px 0}.notice{display:flex;align-items:center;gap:8px;padding:14px 2px;font-size:13px;color:#616979;min-height:52px;flex-wrap:wrap}.notice button{padding:6px 10px;font-size:13px;margin-left:auto}.tag{display:inline-block;background:#eeebff;color:#6551dc;padding:3px 8px;border-radius:5px;font-size:12px;margin-left:8px;font-weight:400}#status{min-height:22px}@media(max-width:600px){header{padding:20px}main{padding:16px 12px}.state{padding:16px}.row{gap:8px}h1{font-size:21px}.controls{gap:12px}.segmented button{padding:9px 10px}}
+</style>
+<header>
+  <div class="eyebrow">SC-WIKI / ISSUE #94</div>
+  <h1>让记录操作回到数据行</h1>
+  <p>建议取消逐条“复制记录”，将“删除记录”放在对应数据行右端。先试用，再决定是否落地。</p>
+  <div class="controls">
+    <div class="segmented" role="group" aria-label="对比方案"><button id="proposed" aria-pressed="true">建议方案</button><button id="current" aria-pressed="false">现有布局</button></div>
+    <label class="select-control">预览宽度 <select id="width"><option value="100%">随窗口</option><option value="760px">760px</option><option value="360px">360px</option></select></label>
+    <label class="check"><input type="checkbox" id="readonly">只读预览</label>
+  </div>
+</header>
+<main><div class="preview" id="preview">
+  <section class="state" aria-label="材料状态">
+    <div class="state-heading">P6/mmm · LaSc₂H₂₄ · 167 GPa <span class="tag">交互示例</span></div>
+    <div id="modules"></div>
+  </section>
+  <div class="notice"><span id="explanation">删除按钮与输入框垂直居中；字段较多时仅输入区域横向滚动。</span><button id="reset">恢复示例</button></div>
+  <p id="status" role="status" aria-live="polite">独立 demo，所有操作只影响当前预览。</p>
+  <p class="hint">DOS 值沿用用户截图；Tc 参数为排版演示值。未连接正式草稿、数据库或保存接口。</p>
+</div></main>
+<script>
+(() => {
+  const $=id=>document.getElementById(id);
+  const defaults=()=>[
+    {id:'electronic',name:'电子性质',open:true,records:[{id:'dos',type:'dos',name:'N(Ef)',kind:'文本',value:'18.76',unit:'states/spin/Ry/f.u.'}]},
+    {id:'superconducting',name:'超导性质',open:true,records:[{id:'tc-1',type:'tc',name:'Critical temperature',kind:'范围',lambda:'2.10',omega:'960',tc1:'185',mu1:'0.13',tc2:'206',mu2:'0.10'}]}
+  ];
+  const states={proposed:defaults(),current:defaults()};let mode='proposed',readonly=false;
+  const say=text=>$('status').textContent=text;
+  function field(record,key,label,width=''){
+    const wrapper=document.createElement('label');wrapper.className='field '+width;
+    const title=document.createElement('span');title.textContent=label;
+    const input=document.createElement('input');input.value=record[key]||'';input.disabled=readonly;input.autocomplete='off';
+    input.addEventListener('input',()=>{record[key]=input.value;say('已修改预览字段；未保存到正式页面。');});wrapper.append(title,input);return wrapper;
+  }
+  function kind(record){
+    const wrapper=document.createElement('label');wrapper.className='field small';const title=document.createElement('span');title.textContent='值类型';
+    const select=document.createElement('select');select.disabled=readonly;
+    ['数值','范围','文本','布尔'].forEach(value=>{const option=document.createElement('option');option.textContent=value;option.value=value;select.append(option);});select.value=record.kind;
+    select.addEventListener('change',()=>{record.kind=select.value;render();say('已切换预览类型。');});wrapper.append(title,select);return wrapper;
+  }
+  function deleteButton(module,record){
+    const button=document.createElement('button');button.className='delete';button.setAttribute('aria-label','删除记录 '+record.name);
+    button.innerHTML='<svg aria-hidden="true" viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>删除记录';
+    button.addEventListener('click',()=>{module.records=module.records.filter(r=>r.id!==record.id);render();say('已删除这一条预览记录，其他记录保留；可点击“恢复示例”重试。');});return button;
+  }
+  function render(){
+    $('modules').replaceChildren();$('proposed').setAttribute('aria-pressed',mode==='proposed');$('current').setAttribute('aria-pressed',mode==='current');
+    $('explanation').textContent=mode==='proposed'?'删除按钮与输入框垂直居中；字段较多时仅输入区域横向滚动。':'现有布局：复制和删除单独占据行下工具栏。可试点复制，观察完整副本。';
+    states[mode].forEach(module=>{
+      const section=document.createElement('section');section.className='module';const header=document.createElement('div');header.className='module-head';
+      const toggle=document.createElement('button');toggle.textContent=(module.open?'⌄  ':'›  ')+module.name;toggle.setAttribute('aria-expanded',module.open);toggle.addEventListener('click',()=>{module.open=!module.open;render();});header.append(toggle);
+      if(module.id==='superconducting'&&!readonly){const add=document.createElement('button');add.className='add';add.textContent='＋ 添加记录';add.addEventListener('click',()=>{module.records.push({id:crypto.randomUUID(),type:'tc',name:'Critical temperature',kind:'数值',lambda:'',omega:'',tc1:'',mu1:'',tc2:'',mu2:''});module.open=true;render();say('已添加空白预览记录；未复制旧记录的数值和证据。');});header.append(add);}
+      section.append(header);
+      if(module.open){if(!module.records.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='暂无记录';section.append(empty);}
+        module.records.forEach(record=>{
+          const card=document.createElement('div');card.className='record';card.dataset.recordId=record.id;
+          if(record.type==='tc'){const title=document.createElement('div');title.className='record-title';title.textContent='预测 Tc · 计算结果';card.append(title);}
+          const row=document.createElement('div');row.className='row';const track=document.createElement('div');track.className='track';track.tabIndex=0;track.setAttribute('aria-label',module.name+'记录字段');
+          if(record.type==='tc')track.append(field(record,'lambda','电声耦合强度 λ'),field(record,'omega','ωlog (K)'));
+          track.append(field(record,'name','名称',record.type==='tc'?'wide':''),kind(record));
+          if(record.type==='dos')track.append(field(record,'value',record.kind==='范围'?'原始值（范围）':'原始值'),field(record,'unit','单位','wide'));
+          else if(record.kind==='文本'||record.kind==='布尔')track.append(field(record,'value',record.kind==='布尔'?'值（是/否）':'值'));
+          else{for(let i=1;i<=(record.kind==='范围'?2:1);i++){const pair=document.createElement('div');pair.className='pair';pair.append(field(record,'tc'+i,'Tc (K)'),field(record,'mu'+i,'μ*'));track.append(pair);}}
+          row.append(track);if(!readonly&&mode==='proposed')row.append(deleteButton(module,record));card.append(row);
+          if(!readonly&&mode==='current'){const footer=document.createElement('div');footer.className='footer';const copy=document.createElement('button');copy.textContent='复制记录';copy.addEventListener('click',()=>{const clone=structuredClone(record);clone.id=crypto.randomUUID();module.records.push(clone);render();say('已新增完整副本：字段值相同，但记录身份独立；这并不代表增加了新的科学结果。');});footer.append(copy,deleteButton(module,record));card.append(footer);}
+          section.append(card);
+        });
+      }$('modules').append(section);
+    });
+  }
+  ['proposed','current'].forEach(id=>$(id).addEventListener('click',()=>{mode=id;render();say('已切换对比方案；两种预览各自保留试填内容。');}));
+  $('readonly').addEventListener('change',event=>{readonly=event.target.checked;render();say(readonly?'只读预览：可展开模块和滚动，不能修改记录。':'已返回可编辑预览。');});
+  $('width').addEventListener('change',event=>$('preview').style.width=event.target.value);
+  $('reset').addEventListener('click',()=>{states.proposed=defaults();states.current=defaults();render();say('已恢复初始示例。');});render();
+})();
+</script>
+</html>

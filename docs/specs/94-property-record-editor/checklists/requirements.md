@@ -55,3 +55,12 @@
 - [x] CHK030 隔离 MySQL 证实保存/返修/导出与 CHECK/唯一约束；迁移拒绝无损边界 5 项通过，不删除附件和 Evidence。
 - [x] CHK031 目标业务实例实际迁移及真实 API 验收：见 assets/state-local-migration.json，完整 schema 核验、三份草稿 GET200、非法类型/核处理/多结构 PUT400 且前后草稿相同，服务恢复。
 - [ ] CHK032 新版远程 Spec 链接：未推送，继续保持待验证。
+
+## US17 记录操作 Demo
+
+- [x] CHK033 完整原话与 AI 判断分离，已有 #94 为 OPEN 且唯一 `type:feature`；没有新增同范围 Issue。[Spec US17、GitHub 本轮查询]
+- [x] CHK034 明确复制实际行为与有限使用价值，建议移除未写成已确认规则；US15 的 DOS 清理未混入本轮。[Spec US17、Research US17]
+- [x] CHK035 同行删除、局部滚动、只读、目标隔离和试填保留有浏览器观察依据；只证明独立 Demo。[SC-043～044、assets/record-actions-demo-validation.json]
+- [x] CHK036 IMG-012 从归档位置解码并验证尺寸和 SHA-256，原文件与截图派生材料分开保存。[assets/record-actions-images.json]
+- [ ] CHK037 用户已查看并认可本版完整 Issue 追加草案与 Demo；当前无实际答复，SC-045 未满足。
+- [ ] CHK038 正式实施授权、四模块集成验收及远程 Spec/附件链接验证；本轮未进入，不据 Demo 关闭 #94。

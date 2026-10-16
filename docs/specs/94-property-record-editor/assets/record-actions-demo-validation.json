@@ -1,0 +1,103 @@
+{
+  "date": "2026-10-16",
+  "scope": "独立 HTML demo；未执行正式保存或业务数据修改",
+  "browser": "Codex in-app browser",
+  "checks": [
+    {
+      "name": "建议布局",
+      "result": {
+        "copyButtons": 0,
+        "pageOverflow": false,
+        "records": 2,
+        "rows": [
+          {
+            "buttonInRow": true,
+            "centerDelta": 0
+          },
+          {
+            "buttonInRow": true,
+            "centerDelta": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "现有复制新增完整副本",
+      "result": {
+        "dosRows": 2,
+        "values": [
+          [
+            "N(Ef)",
+            "18.76",
+            "states/spin/Ry/f.u."
+          ],
+          [
+            "N(Ef)",
+            "18.76",
+            "states/spin/Ry/f.u."
+          ]
+        ]
+      }
+    },
+    {
+      "name": "仅删除目标记录",
+      "result": {
+        "emptyVisible": "暂无记录",
+        "remainingRecords": 1,
+        "tcRetained": true
+      }
+    },
+    {
+      "name": "新增空白Tc",
+      "result": {
+        "blankValues": [
+          "",
+          "",
+          "Critical temperature",
+          "",
+          ""
+        ],
+        "records": 3
+      }
+    },
+    {
+      "name": "只读",
+      "result": {
+        "addButtons": 0,
+        "allDisabled": true,
+        "deleteButtons": 0
+      }
+    },
+    {
+      "name": "360px容器",
+      "result": {
+        "pageOverflow": false,
+        "previewWidth": 360,
+        "rows": [
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": true
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "760px容器",
+      "result": {
+        "pageOverflow": false,
+        "width": 760
+      }
+    },
+    {
+      "name": "折叠保留试填",
+      "result": "18.80"
+    }
+  ],
+  "consoleErrors": []
+}

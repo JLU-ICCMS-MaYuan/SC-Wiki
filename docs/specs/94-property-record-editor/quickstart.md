@@ -261,3 +261,22 @@ AGENTS.md 将“数据库结构变更”列为高风险操作。取得授权后�
 - 独立 HTML Demo 的浏览器检查覆盖：相同副本一行且无复制/重复新增；不同值待选择；选择后两候选保留；四输入与候选操作只读；空值；另一压强；来源侧栏；模块折叠后保留编辑。8 组观察均符合预期，控制台 error 为 0，默认 1280×720 无整页横向溢出。
 - 截图 assets/fermi-dos-singleton-demo.png，记录 assets/fermi-dos-demo-validation.json；两者仅证明交互演示。冲突候选 19.10 为演示数值。
 - Spec US15 是待评审草案，替代 US14 的直接实施流程。用户尚未认可本版 Demo/Issue 追加草案；本轮未修改正式代码、真实草稿、数据库或 Overview，未回退 e9d210a，未写入远端 Issue，未推送。
+
+## 2026-10-16：US17 记录操作独立 Demo
+
+从仓库根目录执行：
+
+```sh
+python3 -m http.server 18449 --bind 127.0.0.1 --directory "docs/specs/94-property-record-editor/assets"
+```
+
+访问 `http://127.0.0.1:18449/record-actions-demo.html`。该端口若正在提供本 Demo，可直接访问，不重复启动。
+
+1. 默认建议方案无复制按钮，DOS 和 Tc 的删除均在本行右端。
+2. 切到现有布局，复制 DOS 后得到两份相同数值；切回建议方案仍保留本方案的试填状态。
+3. 删除 DOS 后 Tc 保留；恢复示例，再添加 Tc，新增数值为空。输入 DOS 18.80，折叠后展开，保留试填。
+4. 选择 360px/760px 预览宽度，字段局部滚动、删除不移出右端；只读时输入禁用且无新增/复制/删除。
+
+真实浏览器完成上述 8 组检查：默认及 360px 删除/输入中心差为 0 CSS px；360px/760px 无整页横向溢出；控制台 error 为 0。详见 [观测记录](assets/record-actions-demo-validation.json)和[截图](assets/record-actions-demo.jpg)。未跑生产构建，因为本次没有修改正式代码或依赖；检查不代表真实保存、四模块集成、数据库、部署或历史重复清理已验收。
+
+Spec US17、Issue 追加正文及正式落地均等待用户评审。本轮不写远端 Issue，不推送，不更新当前功能 Overview。

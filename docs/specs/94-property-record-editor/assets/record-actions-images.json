@@ -1,0 +1,24 @@
+{
+  "images": [
+    {
+      "id": "IMG-012",
+      "upload_order": 12,
+      "original_name": "codex-clipboard-b8da07a5-d233-441c-b3c3-b200c43fa772.png",
+      "locator": "docs/specs/94-property-record-editor/assets/IMG-012.png",
+      "status": "local_verified",
+      "user_context": "我观察到解析数据表单记录里面有一个“复制记录”按钮，那是干什么的了？感觉没什么用，我也平时从来不用。你来判断一下是不是有必要保留这个功能按钮？\n\n另外我觉得那个“删除记录”按钮应该放到和一行数据相同水平的位置\n\n你使用 issue 和 spec 来实现，先看看有没有可以复用的 spec 和 issue，如果没有再新建。然后做好 demo 再决定要不要落地.",
+      "related": [
+        "US17",
+        "FR-056",
+        "FR-057"
+      ],
+      "sha256": "d43036097e943f14d9962462b19f9a6f16745df12d09d6ccf97db43a8a95981c",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2438,
+        486
+      ],
+      "verification": "2026-10-16 从归档位置重新读取，使用图像工具解码并核对原图字节、PNG 尺寸及 SHA-256；仅本地验证，远程链接待验证。"
+    }
+  ]
+}

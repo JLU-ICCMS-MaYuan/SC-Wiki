@@ -121,3 +121,14 @@ T024 的完成范围是消费 #137 正式合同的前端路径；真实谱生成
 - [x] T053 浏览器验证两行及按钮归属、Tc／μ* 单值与范围、不同近似、新增删除、扩宽回缩、复制、只读和保存重开；保存测量及截图，按明确文件提交，不写业务草稿。（SC-040～041；验证见 assets/tc-two-row-validation.json）
 - [ ] T054 展示 Demo 并取得用户实际认可；再逐份展示 #94／#139 追加草案、确认和同步，不能用本轮制作授权代替 Demo 或 Issue 正文确认。（SC-042）
 - [ ] T055 Demo 确认后同步 Research／契约，实施共享表单、验证三入口和持久化回归；原任务 Methods 补全由 #139 执行，完成后才回写正式行为 Overview。本轮不执行。（FR-053～055；SC-042）
+
+## US17：复制按钮取舍与同行删除 Demo
+
+仅调查和演示已获授权；正式方案及 Issue 追加待确认，以下完成项只证明 Demo 交付。
+
+- [x] T056 [US17] 核查 GitHub #94、#90 合同与复制/删除代码，向 `docs/specs/94-property-record-editor/spec.md` 追加完整原话及待评审需求，留存 IMG-012 与独立图片索引。
+- [x] T057 [US17] 制作 `docs/specs/94-property-record-editor/assets/record-actions-demo.html`，提供现有/建议切换、同行删除及窄容器演示，覆盖 FR-056～059。
+- [x] T058 [US17] 用真实浏览器验证 SC-043～044，留存截图和 `docs/specs/94-property-record-editor/assets/record-actions-demo-validation.json`，在 `quickstart.md` 记录边界，准备完整 Issue 追加草案。
+- [ ] T059 [US17] 展示 `docs/specs/94-property-record-editor/assets/record-actions-issue-draft.md` 全文及 Demo，取得实际确认后更新 Issue #94；确认设计及正式实施授权后才建立生产路径实施任务（SC-045）。
+
+顺序：T056 → T057 → T058 → 用户评审 → T059。当前交付范围是 Demo，不新增并行代理工作；正式四模块集成和业务保存没有对应已完成任务。
