@@ -37,3 +37,7 @@ value_raw 和 unit_raw 不再作为独立原始记录：value_raw 从当前数�
 ## US12/US13 状态及规范几何
 
 此前“不新增表或列”仅适用于原记录表单。本增量新增 material_states.structure_optimization（非空，默认 unknown；unknown/classical_static/sscha）。仅 theoretical 可为非 unknown。state_kind 限 theoretical/experimental/unknown；mixed 请求和旧读取明确报错，不静默降级。StructureModel.material_state_id 唯一，同卡不另存原胞／惯用胞／格式副本。StructureModel.nuclear_treatment 由该列映射，声子近似不参与。原始文件及证据仍独立保留。
+
+## US17 记录操作布局
+
+本次仅删除逐条复制的 UI 入口及其回调，不修改 PropertyRecordDraft、稳定记录键、Evidence、payload 或任何持久化字段；底层 clonePropertyRecord 的深复制语义保留。删除继续传递 deletedRecordKey，未删除记录的值和证据保持原对象内容。既有多个 DOS 不因界面改造被归并或删除。

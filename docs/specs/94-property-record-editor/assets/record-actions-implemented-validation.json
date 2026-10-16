@@ -1,0 +1,151 @@
+{
+  "date": "2026-10-16",
+  "scope": "实际 PropertyModuleEditor/SchemaDrivenRecordForm/TcRecordFields/ThermodynamicStabilityFields；隔离 fixture 与定义读取，不连接业务草稿/API保存",
+  "url": "http://127.0.0.1:18450/record-actions-verification.html",
+  "checks": [
+    {
+      "name": "宽屏真实组件",
+      "result": {
+        "copyButtons": 0,
+        "pageOverflow": false,
+        "rows": [
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": false,
+            "key": "electronic_properties-one",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": false,
+            "key": "dynamical_properties-one",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": false,
+            "key": "thermodynamical_properties-one",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": false,
+            "key": "thermodynamical_properties-two",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": true,
+            "key": "superconductive_properties-one",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": false,
+            "key": "superconductive_properties-two",
+            "overflow": "auto"
+          }
+        ],
+        "stageWidth": 923
+      }
+    },
+    {
+      "name": "360px真实组件",
+      "result": {
+        "copyButtons": 0,
+        "pageOverflow": false,
+        "rows": [
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": true,
+            "key": "electronic_properties-one",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": true,
+            "key": "dynamical_properties-one",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": true,
+            "key": "thermodynamical_properties-one",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": true,
+            "key": "thermodynamical_properties-two",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": true,
+            "key": "superconductive_properties-one",
+            "overflow": "auto"
+          },
+          {
+            "buttonInside": true,
+            "centerDelta": 0,
+            "fieldScrollable": true,
+            "key": "superconductive_properties-two",
+            "overflow": "auto"
+          }
+        ],
+        "stageWidth": 360
+      }
+    },
+    {
+      "name": "只读真实组件",
+      "result": {
+        "deleteButtons": 0,
+        "editableFields": 0,
+        "records": 5,
+        "selectsDisabled": true
+      }
+    },
+    {
+      "name": "键盘删除预测Tc只作用目标并保留其他未保存输入",
+      "result": {
+        "deletedAbsent": true,
+        "dosValue": "18.80",
+        "measuredValues": [
+          "Measured Tc",
+          "number",
+          "187",
+          "on"
+        ],
+        "remainingRecords": 5,
+        "status": "删除键：superconductive_properties-one"
+      }
+    }
+  ],
+  "consoleErrors": [],
+  "source_sha256": {
+    "frontend/src/components/PropertyRecordRow.tsx": "3eebe249404e9d3997bd27b8d9c35ecb02f50566e2fa1d5faa31e5750787c9a4",
+    "frontend/src/components/PropertyModuleEditor.tsx": "cbe204387eb3dddedd6fdc138c65c1f0febcfe45ae3b3d730996d3fbef170909",
+    "frontend/src/components/SchemaDrivenRecordForm.tsx": "170b7d46246ee0aeb4d6d92c2531b6343293b77c8ecd413553656533642b4a75",
+    "frontend/src/components/TcRecordFields.tsx": "ee671595a9867f7a7fcc9456d4e464ead14b96aae06cce991c31c320fff99f64",
+    "frontend/src/components/ThermodynamicStabilityFields.tsx": "dbf751f0be384aeedbea0d74defeff638dd43fdc1a664774fb15345c028d512b",
+    "tests/01_decentralized_uploading/property-record-editor.test.tsx": "c3d130d5abeccc03ae5ee88813052a58696b68ce3a2fb1211b4769dd2d5c887e"
+  },
+  "candidate": "/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-record-actions-implementation-b4_82k37/candidate",
+  "component_tests": {
+    "files": 7,
+    "passed": 100,
+    "candidate_passed": 100
+  },
+  "build": "隔离候选 TypeScript 与 Vite 生产构建通过"
+}

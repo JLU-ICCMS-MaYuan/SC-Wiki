@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
+import PropertyRecordRow from './PropertyRecordRow'
 import {
   Box, Checkbox, FormControl, FormControlLabel, InputAdornment, InputLabel,
   MenuItem, Select, TextField,
@@ -15,6 +17,7 @@ interface Props {
   issue: (field: string) => string | undefined
   fieldPath: (field: string) => string
   update: (patch: Partial<PropertyRecordDraft>) => void
+  actions?: ReactNode
 }
 
 const numberPattern = /^[+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/
@@ -48,7 +51,7 @@ const signature = (record: PropertyRecordDraft) => JSON.stringify([
   record.record_key, record.value_kind, record.value_number, record.value_min, record.value_max, record.payload.parameters,
 ])
 
-export default function TcRecordFields({ record, readOnly, issue, fieldPath, update }: Props) {
+export default function TcRecordFields({ record, readOnly, issue, fieldPath, update, actions }: Props) {
   const kindLabel = useId(), predicted = record.record_type === 'predicted_tc', range = record.value_kind === 'range'
   const [pairs, setPairs] = useState(() => readTcPairs(record))
   const published = useRef(signature(record))
@@ -102,7 +105,7 @@ export default function TcRecordFields({ record, readOnly, issue, fieldPath, upd
     setPairs(readTcPairs(next))
     emit(next)
   }
-  return <Box data-testid="tc-core-row" sx={{ gridColumn: '1 / -1', minWidth: 0, overflowX: 'auto', py: 1 }}>
+  return <PropertyRecordRow actions={actions}><Box data-testid="tc-core-row" sx={{ gridColumn: '1 / -1', minWidth: 0, overflowX: 'auto', py: 1 }}>
     <Box data-testid="tc-input-line" sx={{ display: 'flex', flexWrap: 'nowrap', alignItems: 'center', gap: 1, minWidth: predicted ? range ? 1100 : 860 : range ? 720 : 600 }}>
       {predicted && <>{parameter('lambda_ep', '电声耦合强度 λ')}{parameter('omega_log', 'ωlog', 'K')}</>}
       <TextField size="small" label="名称" value={record.name_raw} disabled={readOnly} sx={{ flex: '1.5 0 190px' }}
@@ -126,5 +129,5 @@ export default function TcRecordFields({ record, readOnly, issue, fieldPath, upd
       <FormControlLabel label="代表结果" data-issue-field={fieldPath('is_representative')} sx={{ m: 0, whiteSpace: 'nowrap', flexShrink: 0 }}
         control={<Checkbox checked={Boolean(record.is_representative)} disabled={readOnly} onChange={event => emit({ is_representative: event.target.checked })} />} />
     </Box>
-  </Box>
+  </Box></PropertyRecordRow>
 }

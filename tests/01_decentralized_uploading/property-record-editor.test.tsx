@@ -9,6 +9,8 @@ import { api } from '../../frontend/src/lib/api'
 import { clearFormDefinitionCache, validateRecordClient, type FormDefinition } from '../../frontend/src/lib/formDefinitions'
 import { emptyPropertyModule, type PropertyModuleDraft, type PropertyRecordDraft } from '../../frontend/src/lib/propertyModules'
 import matrix from '../fixtures/issue90/form-definition-matrix.json'
+import { newStabilityRecord } from '../../frontend/src/lib/thermodynamicStability'
+import { emptyPropertyRecord } from '../../frontend/src/lib/propertyModules'
 
 vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn() } }))
 const definitions = matrix.definitions as FormDefinition[]
@@ -34,7 +36,7 @@ beforeEach(() => {
 afterEach(() => { cleanup(); vi.clearAllMocks(); clearFormDefinitionCache() })
 
 describe('Issue #94 记录表单', () => {
-  it('费米能级 DOS 直接显示紧凑输入，编辑、复制、删除和只读均保留记录契约', async () => {
+  it('费米能级 DOS 直接显示紧凑输入，无复制入口，同行删除与只读保留记录契约', async () => {
     const dosDefinition: FormDefinition = {
       ...definitions.find(item => item.property_code === 'custom')!,
       module_code: 'electronic_properties', property_code: 'dos_fermi',
@@ -56,7 +58,7 @@ describe('Issue #94 记录表单', () => {
       const [modules, setModules] = useState<PropertyModuleDraft[]>([{
         ...emptyPropertyModule('electronic_properties'), records: [dos],
       }])
-      return <PropertyModuleEditor modules={modules} readOnly={readOnly} onChange={next => { changed(next); setModules(next) }} />
+      return <PropertyModuleEditor modules={modules} readOnly={readOnly} onChange={(next, deletion) => { changed(next, deletion); setModules(next) }} />
     }
     const view = render(<Harness />)
     await waitFor(() => expect(api.get).toHaveBeenCalled())
@@ -72,16 +74,17 @@ describe('Issue #94 记录表单', () => {
     expect(screen.queryByText(/原文证据（/)).not.toBeInTheDocument()
     fireEvent.change(within(row).getByLabelText('原始值'), { target: { value: '19.5' } })
     expect(changed.mock.calls.at(-1)![0][0].records[0]).toEqual({ ...dos, value_raw: '19.5', value_text: '19.5' })
-    fireEvent.click(within(row).getByRole('button', { name: '复制记录' }))
-    const copied = changed.mock.calls.at(-1)![0][0].records[1]
-    expect(copied.record_key).not.toBe(dos.record_key)
-    expect(copied.evidences).toEqual([quote])
-    fireEvent.click(within(screen.getByTestId(`property-record-${copied.record_key}`)).getByRole('button', { name: '删除记录' }))
-    expect(changed.mock.calls.at(-1)![0][0].records).toHaveLength(1)
+    expect(within(row).queryByRole('button', { name: '复制记录' })).not.toBeInTheDocument()
+    expect(within(row.querySelector('[data-record-primary-row]') as HTMLElement).getByRole('button', { name: '删除记录' })).toBeVisible()
     view.rerender(<Harness readOnly />)
     expect(screen.getByLabelText('原始值')).toBeDisabled()
     expect(screen.getByLabelText('原始值')).toHaveValue('19.5')
     expect(screen.queryByRole('button', { name: '复制记录' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: '删除记录' })).not.toBeInTheDocument()
+    view.rerender(<Harness />)
+    fireEvent.click(screen.getByRole('button', { name: '删除记录' }))
+    expect(changed.mock.calls.at(-1)![0][0].records).toHaveLength(0)
+    expect(changed.mock.calls.at(-1)![1]).toEqual({ deletedRecordKey: 'dos' })
   })
 
   it('记录原文证据可展开，推断项没有引句时明确标识依据', () => {
@@ -185,7 +188,7 @@ describe('Issue #94 记录表单', () => {
     expect(next[0].records).toHaveLength(3)
   })
 
-  it('多条记录独立折叠，编辑值、复制及删除不影响其他记录状态', async () => {
+  it('多条记录独立折叠，新增空白及删除不影响其他记录的未保存输入', async () => {
     const changed = vi.fn()
     const Harness = () => {
       const [modules, setModules] = useState(initialModules)
@@ -202,14 +205,35 @@ describe('Issue #94 记录表单', () => {
     expect(first).toHaveAttribute('aria-expanded', 'false')
     expect(second).toHaveAttribute('aria-expanded', 'true')
     expect(changed).not.toHaveBeenCalled()
-    await user.click(within(screen.getByTestId('property-record-second')).getByRole('button', { name: '复制记录' }))
-    expect(screen.getByRole('button', { name: /记录 3.*测量 Tc.*3.8 K/ })).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.queryByRole('button', { name: '复制记录' })).not.toBeInTheDocument()
+    fireEvent.mouseDown(screen.getByRole('combobox', { name: '添加记录' }))
+    await user.click(await screen.findByRole('option', { name: '测量 Tc · resistivity', exact: true }))
+    expect(changed.mock.calls.at(-1)![0][0].records[2]).toMatchObject({ value_number: null, value_raw: '', evidences: [] })
     expect(first).toHaveAttribute('aria-expanded', 'false')
     await user.click(within(screen.getByTestId('property-record-second')).getByRole('button', { name: '删除记录' }))
     expect(first).toHaveAttribute('aria-expanded', 'false')
     await user.click(first)
     expect(within(screen.getByTestId('property-record-first')).getByLabelText('实验 Conditions')).toHaveValue('Edited first\nconditions')
     expect(changed.mock.calls.at(-1)![0][0].records).toHaveLength(2)
+  })
+
+  it.each([
+    ['电子性质', { ...emptyPropertyRecord('electronic_properties'), name_raw: 'band gap' }, '名称'],
+    ['动力学性质', { ...emptyPropertyRecord('dynamical_properties'), name_raw: 'frequency' }, '名称'],
+    ['热力学普通记录', { ...emptyPropertyRecord('thermodynamical_properties'), name_raw: 'enthalpy' }, '名称'],
+    ['热力学稳定性', newStabilityRecord(emptyPropertyRecord('thermodynamical_properties')), '凸包依据'],
+    ['测量 Tc', measured('measured-action', 4.2), '名称'],
+    ['预测 Tc', { ...measured('predicted-action', 5), record_type: 'predicted_tc', payload: {} }, '名称'],
+  ] as const)('%s 的删除位于主输入行，只读不暴露修改入口', (_label, record, mainLabel) => {
+    const onDelete = vi.fn(), onChange = vi.fn()
+    const view = render(<SchemaDrivenRecordForm record={record} onChange={onChange} onDelete={onDelete} />)
+    const row = screen.getByLabelText(mainLabel).closest('[data-record-primary-row]') as HTMLElement
+    fireEvent.click(within(row).getByRole('button', { name: '删除记录' }))
+    expect(onDelete).toHaveBeenCalledTimes(1)
+    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: '复制记录' })).not.toBeInTheDocument()
+    view.rerender(<SchemaDrivenRecordForm record={record} onChange={onChange} onDelete={onDelete} readOnly />)
+    expect(screen.queryByRole('button', { name: '删除记录' })).not.toBeInTheDocument()
   })
 
   it('只读记录可收起但不能编辑，服务端错误在收起时可见', async () => {

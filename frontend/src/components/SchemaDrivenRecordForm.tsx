@@ -8,6 +8,7 @@ import AutoGrowingTextField from './AutoGrowingTextField'
 import ThermodynamicStabilityFields from './ThermodynamicStabilityFields'
 import { isThermodynamicStability } from '../lib/thermodynamicStability'
 import TcRecordFields from './TcRecordFields'
+import PropertyRecordRow from './PropertyRecordRow'
 import { muRangeIndex } from '../lib/tcParameters'
 import type { FormDefinition, FormIssue, JsonSchema } from '../lib/formDefinitions'
 import { getAtPath, setAtPath, validateRecordClient } from '../lib/formDefinitions'
@@ -22,7 +23,6 @@ interface Props {
   readOnly?: boolean
   onChange: (record: PropertyRecordDraft) => void
   onDelete?: () => void
-  onClone?: () => void
 }
 
 const VALUE_KIND_LABELS: Record<PropertyValueKind, string> = {
@@ -139,7 +139,6 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   readOnly = false,
   onChange,
   onDelete,
-  onClone,
 }) => {
   const issues = useMemo(() => [...validateRecordClient(record, definition), ...externalIssues], [record, definition, externalIssues])
   const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type), [definition, record.record_type])
@@ -153,6 +152,9 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   const update = (patch: Partial<PropertyRecordDraft>) => onChange(normalizeCurrentTcValue({ ...record, ...patch }))
   const updatePath = (path: string, value: unknown) => onChange(normalizeCurrentTcValue(setAtPath(record, path, value)))
   const tcProps = { record, readOnly, issue, fieldPath, update }
+  const recordActions = !readOnly && onDelete
+    ? <Button color="error" startIcon={<DeleteIcon />} onClick={onDelete} sx={{ whiteSpace: 'nowrap' }}>删除记录</Button>
+    : undefined
   const quotedSources = useMemo(() => {
     const values = [...(record.evidence ? [record.evidence] : []), ...(record.evidences || [])]
     return [...new Map(values.filter((value): value is Record<string, unknown> => Boolean(value) && typeof value === 'object' && !Array.isArray(value))
@@ -276,7 +278,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   return (
     <Box data-issue-field={basePath} data-record-key={record.record_key} data-testid={`property-record-${record.record_key}`} sx={{ display: 'grid', gap: 1, minWidth: 0, containerType: isTc ? 'inline-size' : undefined, containerName: isTc ? 'tc-record' : undefined, gridTemplateColumns: 'minmax(0, 1fr)', py: 1, mb: 1 }}>
       {definitionError && <Alert severity="error" sx={{ gridColumn: '1 / -1' }}>{definitionError}</Alert>}
-      {isThermodynamicStability(record) ? <ThermodynamicStabilityFields record={record} readOnly={readOnly} onChange={onChange} basePath={basePath} /> : isTc ? <TcRecordFields {...tcProps} /> : <Box data-property-core-row sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 1, '& > *': { flex: '0 0 auto', minWidth: 110 }, '& .MuiInputBase-root': { fontSize: '0.875rem' } }}>
+      {isThermodynamicStability(record) ? <ThermodynamicStabilityFields record={record} readOnly={readOnly} onChange={onChange} basePath={basePath} actions={recordActions} /> : isTc ? <TcRecordFields {...tcProps} actions={recordActions} /> : <PropertyRecordRow actions={recordActions}><Box data-property-core-row sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 1, '& > *': { flex: '0 0 auto', minWidth: 110 }, '& .MuiInputBase-root': { fontSize: '0.875rem' } }}>
       <AutoGrowingTextField label="名称" value={record.name_raw} disabled={readOnly} data-issue-field={fieldPath('name_raw')} error={Boolean(issue('name_raw'))} helperText={issue('name_raw')} onChange={event => update({ name_raw: event.target.value })} />
       <FormControl size="small">
         <InputLabel>值类型</InputLabel>
@@ -291,7 +293,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       {record.value_kind === 'range' && <><AutoGrowingTextField label="下界" type="number" value={record.value_min ?? ''} disabled={readOnly} data-issue-field={fieldPath('value_min')} error={Boolean(issue('value_min'))} helperText={issue('value_min')} onChange={event => update({ value_min: event.target.value === '' ? null : Number(event.target.value) })} /><AutoGrowingTextField label="上界" type="number" value={record.value_max ?? ''} disabled={readOnly} onChange={event => update({ value_max: event.target.value === '' ? null : Number(event.target.value) })} /></>}
       {record.value_kind === 'text' && !mirroredTextValue && <AutoGrowingTextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
       {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
-      </Box>}
+      </Box></PropertyRecordRow>}
       {Object.entries(payloadSchema.properties || {}).sort(([a], [b]) => a === 'parameters' ? -1 : b === 'parameters' ? 1 : 0).filter(([key]) => !['thermodynamic_stability', 'source_associations', 'table_row_ref'].includes(key)).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
       {!isDosFermi && <Box sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
         {quotedSources.length ? <Box component="details" data-evidence-summary sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
@@ -302,10 +304,6 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
         </Box> : record.value_raw && <Typography variant="caption" color="text.secondary">
           {record.basis_kind === 'paper_inference' ? '论文推断；无逐字原文引句' : record.basis_kind === 'general_knowledge' ? '通用知识建议；无论文原文引句' : '暂无可定位原文证据；可查看来源核对'}
         </Typography>}
-      </Box>}
-      {!readOnly && <Box sx={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
-        {onClone && <Button onClick={onClone}>复制记录</Button>}
-        {onDelete && <Button color="error" startIcon={<DeleteIcon />} onClick={onDelete}>删除记录</Button>}
       </Box>}
     </Box>
   )

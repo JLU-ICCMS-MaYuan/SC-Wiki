@@ -138,3 +138,14 @@ T024 的完成范围是消费 #137 正式合同的前端路径；真实谱生成
 - [x] T060 保存最新三点原话和 IMG-013／014，更新分行 Demo 为普通 Tc 标题、行首方法下拉和可增删的多组配对；新增字段改为添加空白方法行。（FR-060～062）
 - [x] T061 浏览器验证三组配对、第二方法独立编辑／保存重开、删除中间组不串值、删除方法、至少一组／一行保护、只读及390px局部滚动，保存新版截图与验证记录。此项仅为 Demo 验证。（SC-046～047）
 - [ ] T062 用户评审新版 Demo 后，再确认正式多结果数据表示及现有范围转换、证据、条件适用范围、保存导出与版本兼容；按既定流程逐份确认 Issue 增量。未确认前不实施正式组件或修复业务草稿。（SC-048，关联 #139）
+
+## US17 正式实施
+
+最新指令“开始落地！”授权以下任务；仅执行本故事，US15/US16 的未完成项不随之推进。
+
+- [x] T063 [US17] 在 `frontend/src/components/PropertyRecordRow.tsx` 建立共享同行操作布局，接入 `SchemaDrivenRecordForm.tsx`、`TcRecordFields.tsx`、`ThermodynamicStabilityFields.tsx` 的主行（FR-057～058、SC-049）。
+- [x] T064 [US17] 删除 `frontend/src/components/PropertyModuleEditor.tsx` 与 `SchemaDrivenRecordForm.tsx` 的复制入口回调，保留数据深复制及新增/删除合同，更新 `tests/01_decentralized_uploading/property-record-editor.test.tsx` 行为回归（FR-056、SC-050）。
+- [x] T065 [US17] 运行相关共享表单回归、隔离候选 TypeScript/生产构建，在浏览器验证真实组件的宽/窄布局、同行删除、只读及输入保留，留存 `assets/record-actions-implemented-validation.json` 与截图（SC-049～050）。
+- [x] T066 [US17] 更新本目录验收与检查表、现有 `docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md`，按本次差异提交并同步 Issue #94；保留远程文档待验证，不推送或关闭。
+
+依赖：T063 → T064 → T065 → T066。设计映射为 FR-056→T064；FR-057/058→T063；SC-049/050→T065，授权与文档收尾→T066。已有原文的 Demo 限制按最新实施授权解释，不改写旧记录。

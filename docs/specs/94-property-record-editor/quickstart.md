@@ -282,3 +282,17 @@ python3 -m http.server 18449 --bind 127.0.0.1 --directory "docs/specs/94-propert
 用户已答复“认可设计并同步 #94，暂不落地”。本版 Demo 设计及完整追加正文获得认可，#94 已同步；通过 `gh issue view 94 --json title,body,state,labels,url` 读回核验：原正文保留、获批草案完整、追加最新答复，仍为 OPEN 且唯一类型为 `type:feature`。获批原稿仍保留其当时的待评审文案，Issue 末尾的最新结论优先。
 
 本轮仅同步需求与文档，未修改正式代码、真实数据或 Overview，未推送；远程 Spec/图片链接仍待验证。整份 Spec 未经过另一次完整逐字确认，正式实施未获授权。
+
+## US17 正式实施验收（2026-10-16）
+
+用户在认可 Demo 和 Issue 正文后明确要求“开始落地！”，本次只实现 US17 的记录复制入口取消与同行删除，未实施 US15/US16。
+
+- 共享组件：普通物性/DOS、Tc、热力学稳定性都接入 PropertyRecordRow；删除在字段滚动区外，移除 onClone 和仅供该入口的模块回调。原删除稳定键、元数据和底层深复制数据工具保持。
+- 当前工作树相关 7 份测试共 100 项通过；从 HEAD 导出源码，仅复制本次 5 份组件与 1 份测试的隔离候选，同样 7 份/100 项通过。包括各类主行删除、只读、模块按键删除元数据、空白新增、折叠及其他记录未保存值保留、Tc 与来源核对/谱导航回归。
+- 隔离候选 npm run build（含 TypeScript）通过；构建仍提示已有 3Dmol eval 和分包体积，未导致失败。不将共享工作树其他任务改动带入本次提交。
+- 真实浏览器加载实际 PropertyModuleEditor 和共享表单，定义读取与样例独立；923px / 360px 容器中六类记录的删除与首个输入中心差均为 0 CSS px，按钮在行内，页面无横向溢出；360px 所有字段区均可局部滚动。只读无删除、所有可见输入/选择禁用；键盘删除预测 Tc 后只移除对应稳定键，保留 DOS 18.80 和测量 Tc 187 的未保存试填值。控制台 error 为 0。
+- [浏览器记录](assets/record-actions-implemented-validation.json)、[正式组件截图](assets/record-actions-implemented.jpg)仅证明实际组件在隔离样例中的行为；未对业务草稿执行删除/保存，没有运行新的持久化测试或数据库迁移，不声称已部署远端。
+
+验收副本与完整日志位于本机临时目录 `/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-record-actions-implementation-b4_82k37/` 的 candidate，测试/构建日志为 `/tmp/scwiki-record-actions-candidate-tests.log`、`/tmp/scwiki-record-actions-build.log`。临时目录不是持久附件，关键截图和观察已归档。本次源文件 SHA-256 清单见浏览器验证记录，便于核对验收来源。
+
+Overview 已同步实际按钮行为，#94 保持开放；本地 Spec/附件仍未推送，远程链接待验证。根 README 的安装和启动入口不变。没有执行历史 DOS 自动清理或多方法 Tc 数据迁移。

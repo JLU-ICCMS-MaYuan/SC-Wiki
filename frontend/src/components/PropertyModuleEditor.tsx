@@ -8,7 +8,7 @@ import {
   loadFormDefinition, loadModuleDefinitions, type FormDefinition, type FormIssue,
 } from '../lib/formDefinitions'
 import {
-  PROPERTY_MODULES, clonePropertyRecord, emptyPropertyModule, emptyPropertyRecord, propertyRecordSummaryValue,
+  PROPERTY_MODULES, emptyPropertyModule, emptyPropertyRecord, propertyRecordSummaryValue,
   normalizePropertyRecordIdentity, type PropertyModuleCode, type PropertyModuleDraft, type PropertyRecordDraft,
 } from '../lib/propertyModules'
 import { newStabilityRecord } from '../lib/thermodynamicStability'
@@ -110,7 +110,6 @@ interface PropertyRecordEditorProps {
   basePath: string
   readOnly: boolean
   onChange: (record: PropertyRecordDraft) => void
-  onClone?: () => void
   onDelete?: () => void
 }
 
@@ -122,7 +121,7 @@ const sameIssues = (left: FormIssue[], right: FormIssue[]) => (
 )
 
 const PropertyRecordEditor = React.memo<PropertyRecordEditorProps>(
-  ({ record, definition, definitionError, issues, basePath, readOnly, onChange, onClone, onDelete }) => (
+  ({ record, definition, definitionError, issues, basePath, readOnly, onChange, onDelete }) => (
     <SchemaDrivenRecordForm
       record={record}
       definition={definition}
@@ -131,7 +130,6 @@ const PropertyRecordEditor = React.memo<PropertyRecordEditorProps>(
       basePath={basePath}
       readOnly={readOnly}
       onChange={onChange}
-      onClone={onClone}
       onDelete={onDelete}
     />
   ),
@@ -228,15 +226,6 @@ const PropertyModuleEditor: React.FC<Props> = ({
       : { ...module, records: module.records.map(current => current.record_key === recordKey ? record : current) }))
   }, [])
 
-  const cloneRecordByKey = useCallback((moduleKey: string, recordKey: string) => {
-    const currentModule = modulesRef.current.find(module => module.module_key === moduleKey)
-    const currentRecord = currentModule?.records.find(record => record.record_key === recordKey)
-    if (!currentModule || !currentRecord) return
-    onChangeRef.current(modulesRef.current.map(module => module.module_key === moduleKey
-      ? { ...module, records: [...module.records, clonePropertyRecord(currentRecord)] }
-      : module))
-  }, [])
-
   const deleteRecordByKey = useCallback((moduleKey: string, recordKey: string) => {
     onChangeRef.current(modulesRef.current.map(module => module.module_key === moduleKey
       ? { ...module, records: module.records.filter(record => record.record_key !== recordKey) }
@@ -298,7 +287,6 @@ const PropertyModuleEditor: React.FC<Props> = ({
                     basePath={recordBasePath}
                     readOnly={readOnly}
                     onChange={next => updateRecordByKey(module.module_key, record.record_key, next)}
-                    onClone={readOnly ? undefined : () => cloneRecordByKey(module.module_key, record.record_key)}
                     onDelete={readOnly ? undefined : () => deleteRecordByKey(module.module_key, record.record_key)}
                   />
                 )
