@@ -1,0 +1,578 @@
+{
+  "modules": [
+    {
+      "module_key": "module-superconductive_properties",
+      "module_code": "superconductive_properties",
+      "definition_key": "module.superconductive_properties",
+      "definition_version": 1,
+      "display_order": 0,
+      "records": [
+        {
+          "record_key": "legacy-tc-0",
+          "module_code": "superconductive_properties",
+          "record_type": "predicted_tc",
+          "property_code": "tc",
+          "custom_property_key": null,
+          "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+          "definition_version": 1,
+          "name_raw": "critical temperature",
+          "value_kind": "range",
+          "value_raw": "281–311",
+          "value_number": null,
+          "value_min": 281,
+          "value_max": 311,
+          "unit_raw": "K",
+          "canonical_unit": "K",
+          "method_code": "isotropic_eliashberg",
+          "method_raw": null,
+          "uncertainty": null,
+          "criterion_code": null,
+          "criterion_raw": null,
+          "is_representative": false,
+          "structure_key": null,
+          "payload": {
+            "calculation_conditions": {
+              "calculation_code": "Quantum ESPRESSO",
+              "extensions": [
+                {
+                  "key": "structural_relaxation.calculation_code",
+                  "name": "structural_relaxation · calculation_code",
+                  "value_kind": "text",
+                  "value_raw": "VASP",
+                  "unit_raw": null
+                },
+                {
+                  "key": "structural_relaxation.exchange_correlation_functional",
+                  "name": "structural_relaxation · exchange_correlation_functional",
+                  "value_kind": "text",
+                  "value_raw": "PBE",
+                  "unit_raw": null
+                },
+                {
+                  "key": "structural_relaxation.energy_cutoff",
+                  "name": "structural_relaxation · energy_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "850",
+                  "unit_raw": "eV",
+                  "value_number": 850
+                },
+                {
+                  "key": "structural_relaxation.k_grid",
+                  "name": "structural_relaxation · k_grid",
+                  "value_kind": "text",
+                  "value_raw": "2π × 0.03 Å⁻¹",
+                  "unit_raw": "Å⁻¹"
+                },
+                {
+                  "key": "structural_relaxation.convergence_energy",
+                  "name": "structural_relaxation · convergence_energy",
+                  "value_kind": "text",
+                  "value_raw": "10^-8 eV",
+                  "unit_raw": "eV"
+                },
+                {
+                  "key": "structural_relaxation.convergence_force",
+                  "name": "structural_relaxation · convergence_force",
+                  "value_kind": "text",
+                  "value_raw": "1 meV/Å",
+                  "unit_raw": "meV/Å"
+                },
+                {
+                  "key": "electron_phonon.energy_cutoff",
+                  "name": "electron_phonon · energy_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "90",
+                  "unit_raw": "Ry",
+                  "value_number": 90
+                },
+                {
+                  "key": "electron_phonon.charge_density_cutoff",
+                  "name": "electron_phonon · charge_density_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "720",
+                  "unit_raw": "Ry",
+                  "value_number": 720
+                },
+                {
+                  "key": "sscha.calculation_code",
+                  "name": "sscha · calculation_code",
+                  "value_kind": "text",
+                  "value_raw": "SSCHA",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.supercell",
+                  "name": "sscha · supercell",
+                  "value_kind": "text",
+                  "value_raw": "2 × 2 × 2",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.atoms",
+                  "name": "sscha · atoms",
+                  "value_kind": "number",
+                  "value_raw": "216",
+                  "unit_raw": null,
+                  "value_number": 216
+                },
+                {
+                  "key": "sscha.temperature_k",
+                  "name": "sscha · temperature_k",
+                  "value_kind": "number",
+                  "value_raw": "0",
+                  "unit_raw": "K",
+                  "value_number": 0
+                },
+                {
+                  "key": "sscha.q_grid",
+                  "name": "sscha · q_grid",
+                  "value_kind": "text",
+                  "value_raw": "2 × 2 × 2",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.energy_cutoff",
+                  "name": "sscha · energy_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "80",
+                  "unit_raw": "Ry",
+                  "value_number": 80
+                },
+                {
+                  "key": "sscha.k_grid",
+                  "name": "sscha · k_grid",
+                  "value_kind": "text",
+                  "value_raw": "3 × 3 × 3",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.q_grid_interpolated",
+                  "name": "sscha · q_grid_interpolated",
+                  "value_kind": "text",
+                  "value_raw": "6 × 6 × 6",
+                  "unit_raw": null
+                }
+              ],
+              "electronic_method": "DFPT",
+              "k_grid": "24 × 24 × 24",
+              "q_grid": "6 × 6 × 6"
+            },
+            "parameters": {
+              "lambda_ep": 3.94,
+              "omega_log": 745,
+              "extensions": [
+                {
+                  "key": "mu_star",
+                  "value_kind": "range",
+                  "unit_raw": "1",
+                  "value_min": 0.1,
+                  "value_max": 0.16,
+                  "value_raw": "0.1–0.16"
+                }
+              ]
+            }
+          },
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Anharmonic 150 3.94 745 18.44 281 to 311"
+            },
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "definitions": [
+    {
+      "definition_key": "record.superconductive_properties.predicted_tc.allen_dynes",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "method_code": "allen_dynes",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "calculation_conditions"
+        ],
+        "properties": {
+          "parameters": {
+            "type": "object"
+          },
+          "calculation_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {
+        "groups": [
+          "calculation_conditions",
+          "parameters"
+        ]
+      },
+      "status": "published",
+      "checksum": "540f5eb563a1b793cc6c18e37387579ee13478bc32f4e72e0815c043626ddb73"
+    },
+    {
+      "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "method_code": "unknown",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "calculation_conditions"
+        ],
+        "properties": {
+          "parameters": {
+            "type": "object"
+          },
+          "calculation_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "8f637ac05eb748c1f71527da6812d56f1a7d66b486e4567d16511ca107016e6b"
+    },
+    {
+      "definition_key": "record.superconductive_properties.measured_tc.resistivity",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "measured_tc",
+      "method_code": "resistivity",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "experimental_conditions"
+        ],
+        "properties": {
+          "experimental_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "7e4bba7bfca43a7fc20142b3b746a813e86db4abcba1a36aead8219ab21077db"
+    },
+    {
+      "definition_key": "record.superconductive_properties.custom",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "property",
+      "method_code": null,
+      "property_code": "custom",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "c4c93d4e54d1efe0415cdfb59a48a77e63fe01f32f6d468f0d773dfd9403c75f"
+    },
+    {
+      "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "method_code": "mcmillan",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "calculation_conditions"
+        ],
+        "properties": {
+          "parameters": {
+            "type": "object"
+          },
+          "calculation_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "f817885e6c10049effac9e18b150344971c4ba66957c2f7d0dc87e8ac035875c"
+    },
+    {
+      "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "method_code": "isotropic_eliashberg",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "calculation_conditions"
+        ],
+        "properties": {
+          "parameters": {
+            "type": "object"
+          },
+          "calculation_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "e42da1d8fb99a7a92e1f13842e98ec8af41df2fae24fd15666c2e582fd1dc28f"
+    },
+    {
+      "definition_key": "record.superconductive_properties.predicted_tc.anisotropic_eliashberg",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "method_code": "anisotropic_eliashberg",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "calculation_conditions"
+        ],
+        "properties": {
+          "parameters": {
+            "type": "object"
+          },
+          "calculation_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "ea93b045057e53b1da58b4ff8ecb6f4f00d878978f3251684292dbba6b544b63"
+    },
+    {
+      "definition_key": "record.superconductive_properties.predicted_tc.scdft",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "method_code": "scdft",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "calculation_conditions"
+        ],
+        "properties": {
+          "parameters": {
+            "type": "object"
+          },
+          "calculation_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "b5468a8d891c275e8ebceb6b631f2a19177b9167ce6908ede0d441af2a466bc5"
+    },
+    {
+      "definition_key": "record.superconductive_properties.predicted_tc.other",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "predicted_tc",
+      "method_code": "other",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "calculation_conditions"
+        ],
+        "properties": {
+          "parameters": {
+            "type": "object"
+          },
+          "calculation_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "0c1ef84bef521601759d1c5e268af14a904ee593d2df56f55a055ca07e5a2a1b"
+    },
+    {
+      "definition_key": "record.superconductive_properties.measured_tc.magnetic_susceptibility",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "measured_tc",
+      "method_code": "magnetic_susceptibility",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "experimental_conditions"
+        ],
+        "properties": {
+          "experimental_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "7df244a7fda5e9a06c72bfb9e148c61678d803ffbfe1de6ba6ac1a445446a9a1"
+    },
+    {
+      "definition_key": "record.superconductive_properties.measured_tc.specific_heat",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "measured_tc",
+      "method_code": "specific_heat",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "experimental_conditions"
+        ],
+        "properties": {
+          "experimental_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "2b1fb893e026b5b18cfa7f255bdb163e8778ce4757b7c8fed093644df71dd3d6"
+    },
+    {
+      "definition_key": "record.superconductive_properties.measured_tc.other",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "measured_tc",
+      "method_code": "other",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "experimental_conditions"
+        ],
+        "properties": {
+          "experimental_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "f6f1f51c0b05fd52065c7b4b51cffe9b2a5f898473d64c406e3a0069a1767b68"
+    },
+    {
+      "definition_key": "record.superconductive_properties.measured_tc.unknown",
+      "version": 1,
+      "target_kind": "property_record",
+      "module_code": "superconductive_properties",
+      "record_type": "measured_tc",
+      "method_code": "unknown",
+      "property_code": "tc",
+      "core_schema": {
+        "type": "object"
+      },
+      "json_schema": {
+        "type": "object",
+        "required": [
+          "experimental_conditions"
+        ],
+        "properties": {
+          "experimental_conditions": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": true
+      },
+      "ui_schema": {},
+      "status": "published",
+      "checksum": "74f42e772543169a4788eb5378685462424f7604512be8341420c495d1548a5e"
+    }
+  ]
+}

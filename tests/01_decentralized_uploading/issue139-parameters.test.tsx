@@ -29,7 +29,7 @@ it('显示 150 GPa 两端配对、阶段扩展并保留人工清空', () => {
   expect(screen.getByLabelText('ωlog')).toHaveValue('745')
   expect(within(screen.getByTestId('tc-pair-0')).getByLabelText('μ*')).toHaveValue('0.16')
   expect(within(screen.getByTestId('tc-pair-1')).getByLabelText('μ*')).toHaveValue('0.1')
-  expect(screen.getByDisplayValue('SSCHA 截断能')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '设置字段：SSCHA 截断能' })).toBeInTheDocument()
   expect(screen.queryByText('source_associations')).not.toBeInTheDocument()
   fireEvent.change(screen.getByLabelText('ωlog'),{target:{value:''}})
   const updated=changed.mock.calls.at(-1)![0]

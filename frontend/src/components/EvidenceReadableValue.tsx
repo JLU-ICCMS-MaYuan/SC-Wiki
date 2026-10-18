@@ -5,13 +5,13 @@ const labels: Record<'zh' | 'en', Record<string, string>> = {
   zh: {
     authors: '作者', co_first_authors: '共同第一作者', corresponding_authors: '通讯作者',
     material: '材料', pressure_value_gpa: '压强 (GPa)', value_raw: '原始值',
-    name_raw: '名称', unit_raw: '单位', cell_parameters: '晶胞参数',
+    field_settings: '字段标注', name_raw: '名称', unit_raw: '单位', cell_parameters: '晶胞参数',
     space_group_symbol: '空间群', rule: '规则', input: '输入',
   },
   en: {
     authors: 'Authors', co_first_authors: 'Co-first authors', corresponding_authors: 'Corresponding authors',
     material: 'Material', pressure_value_gpa: 'Pressure (GPa)', value_raw: 'Original value',
-    name_raw: 'Name', unit_raw: 'Unit', cell_parameters: 'Cell parameters',
+    field_settings: 'Field annotations', name_raw: 'Name', unit_raw: 'Unit', cell_parameters: 'Cell parameters',
     space_group_symbol: 'Space group', rule: 'Rule', input: 'Input',
   },
 }

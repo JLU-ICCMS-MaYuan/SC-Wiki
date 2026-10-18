@@ -341,3 +341,12 @@ NODE_OPTIONS=--no-experimental-webstorage node frontend/node_modules/vitest/vite
 4份70项通过；frontend中`npm run build`的TypeScript/生产构建通过。真实共享组件的7组浏览器检查及390px无溢出见[module-add-bottom-demo.md](module-add-bottom-demo.md)正式验证段和assets/module-add-bottom-implemented-validation.json。模拟接口响应与组件夹具留档，不读写业务任务。
 
 复现浏览器夹具：复制assets/module-add-bottom-implemented-harness.tsx到隔离源码frontend目录，将导入前缀`../../../../frontend/src/`改成`./src/`，用独立HTML挂载root并经Vite加载。两卡提供独立添加菜单，使用只读/无模块切换验证边界。构建和回归无需运行夹具。
+
+
+## US20 正式共享表单验证
+
+运行前端定向回归：`npm --prefix frontend run test:upload-ui -- tests/01_decentralized_uploading/calculation-field-settings.test.tsx tests/01_decentralized_uploading/predicted-tc-groups.test.tsx tests/01_decentralized_uploading/issue139-parameters.test.tsx`，并运行生产构建。测试涵盖取消/应用、非法范围、新增/删除/重开、外部修改拒绝、只读与具体Tc配置。
+
+实际浏览器使用正式PropertyModuleEditor的隔离harness：assets/field-sidebar-implemented-harness.tsx，初始夹具field-sidebar-implemented-fixture.json，保存载荷field-sidebar-saved-browser-payload.json。页面保存为sessionStorage，不是业务HTTP保存；随后载荷送入test_tc_groups_mysql.py的field-sidebar参数用例，执行真实服务保存、返修和导出。不得用脚本夹具冒充真实原任务改写。
+
+结果与截图见[正式实施记录](tc-field-sidebar-demo.md)，图片field-sidebar-implemented-wide/editor/mobile.png及验证JSON位于assets。浏览器检查17项、初轮相关前端59项和构建通过，MySQL与标注契约合计5项通过；最终以独立暂存候选结果为准。

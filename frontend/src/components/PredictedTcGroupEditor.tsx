@@ -6,7 +6,7 @@ import type { FormDefinition, FormIssue } from '../lib/formDefinitions'
 import { newStableKey, type PropertyRecordDraft } from '../lib/propertyModules'
 import { muRangeIndex, readTcParameter, setTcParameter } from '../lib/tcParameters'
 import { completeTcNumber, expandTcPoints, newTcPoint, selectTcPoint, tcMethodKey, tcPointKey, tcPointViews, updateTcCommon, updateTcPoint } from '../lib/predictedTcGroups'
-import { TcNumber } from './TcRecordFields'
+import TcScientificField from './TcScientificField'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
 import PropertyRecordRow from './PropertyRecordRow'
 
@@ -39,8 +39,14 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
       method_raw: null, definition_key: d.definition_key, definition_version: d.version } : record))
   }
   const parameter = (key: 'lambda_ep' | 'omega_log', label: string, unit?: string) => <Box sx={{ width: 170, flex: '0 0 auto' }}>
-    <TcNumber label={label} value={readTcParameter(root, key)} readOnly={readOnly} field={`${rootPath}.payload.parameters.${key}`} unit={unit}
-      error={error(`${rootPath}.payload.parameters.${key}`)} onChange={value => onChange(updateTcCommon(records, { ...root, payload: setTcParameter(root, key, value) }))} />
+    <TcScientificField label={label} value={readTcParameter(root, key)} readOnly={readOnly} field={`${rootPath}.payload.parameters.${key}`} unit={unit}
+      settings={(root.payload.parameters as any)?.field_settings?.[key]}
+      error={error(`${rootPath}.payload.parameters.${key}`)} onChange={value => onChange(updateTcCommon(records, { ...root, payload: setTcParameter(root, key, value) }))}
+      onApply={(value, settings) => {
+        const payload = setTcParameter(root, key, value), parameters = payload.parameters as Record<string, any>
+        parameters.field_settings = { ...(parameters.field_settings || {}), [key]: settings }
+        onChange(updateTcCommon(records, { ...root, payload }))
+      }} />
   </Box>
   const core = <Box data-testid="predicted-tc-core" sx={{ minWidth: 0 }}>
     <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>超导转变温度 Tc</Typography>
@@ -87,11 +93,17 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
                   slotProps={{ input: { 'aria-label': `选择第${methodIndex + 1}种方法第${index + 1}组为代表结果`, 'aria-describedby': helpId } }}
                   data-issue-field={`${path(point.record)}.is_representative`}
                   onChange={(_, checked) => onChange(selectTcPoint(records, point.key, checked), checked)} />
-                <Box sx={{ width: 125 }}><TcNumber value={point.tc} label="Tc" unit="K" currentTc readOnly={readOnly}
+                <Box sx={{ width: 150 }}><TcScientificField value={point.tc} label="Tc" unit="K" readOnly={readOnly} currentTc
                   field={`${path(point.record)}.${tcField}`} error={error(`${path(point.record)}.${tcField}`)}
+                  settings={(point.record.payload.field_settings as any)?.tc}
+                  onApply={(value, settings) => onChange(updateTcPoint(records, point.key, 'tc', value).map(r => tcPointKey(r) === point.key
+                    ? { ...r, payload: { ...r.payload, field_settings: { ...(r.payload.field_settings as any || {}), tc: settings } } } : r))}
                   onChange={value => onChange(updateTcPoint(records, point.key, 'tc', value))} /></Box>
-                <Box sx={{ width: 125 }}><TcNumber value={point.mu} label="μ*" readOnly={readOnly}
+                <Box sx={{ width: 150 }}><TcScientificField value={point.mu} label="μ*" readOnly={readOnly}
                   field={`${path(point.record)}.${muField}`} error={error(`${path(point.record)}.${muField}`)}
+                  settings={(point.record.payload.field_settings as any)?.mu_star}
+                  onApply={(value, settings) => onChange(updateTcPoint(records, point.key, 'mu', value).map(r => tcPointKey(r) === point.key
+                    ? { ...r, payload: { ...r.payload, field_settings: { ...(r.payload.field_settings as any || {}), mu_star: settings } } } : r))}
                   onChange={value => onChange(updateTcPoint(records, point.key, 'mu', value))} /></Box>
                 {!readOnly && <IconButton size="small" color="error" disabled={points.length === 1} aria-label={`删除第${index + 1}组组合`}
                   onClick={() => onChange(expandTcPoints(records).filter(r => tcPointKey(r) !== point.key))}><DeleteIcon fontSize="small" /></IconButton>}

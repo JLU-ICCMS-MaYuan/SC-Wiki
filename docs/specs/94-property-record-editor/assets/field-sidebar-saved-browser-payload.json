@@ -1,0 +1,506 @@
+{
+  "modules": [
+    {
+      "module_key": "module-superconductive_properties",
+      "module_code": "superconductive_properties",
+      "definition_key": "module.superconductive_properties",
+      "definition_version": 1,
+      "display_order": 0,
+      "records": [
+        {
+          "record_key": "legacy-tc-0",
+          "module_code": "superconductive_properties",
+          "record_type": "predicted_tc",
+          "property_code": "tc",
+          "custom_property_key": null,
+          "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+          "definition_version": 1,
+          "name_raw": "critical temperature",
+          "value_kind": "number",
+          "value_raw": "281",
+          "value_number": 281,
+          "value_min": null,
+          "value_max": null,
+          "unit_raw": "K",
+          "canonical_unit": "K",
+          "method_code": "isotropic_eliashberg",
+          "method_raw": null,
+          "uncertainty": null,
+          "criterion_code": null,
+          "criterion_raw": null,
+          "is_representative": false,
+          "structure_key": null,
+          "payload": {
+            "calculation_conditions": {
+              "calculation_code": "Quantum ESPRESSO",
+              "extensions": [
+                {
+                  "key": "structural_relaxation.calculation_code",
+                  "name": "structural_relaxation · calculation_code",
+                  "value_kind": "text",
+                  "value_raw": "VASP",
+                  "unit_raw": null
+                },
+                {
+                  "key": "structural_relaxation.exchange_correlation_functional",
+                  "name": "structural_relaxation · exchange_correlation_functional",
+                  "value_kind": "text",
+                  "value_raw": "PBE",
+                  "unit_raw": null
+                },
+                {
+                  "key": "structural_relaxation.energy_cutoff",
+                  "name": "structural_relaxation · energy_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "850",
+                  "unit_raw": "eV",
+                  "value_number": 850
+                },
+                {
+                  "key": "structural_relaxation.k_grid",
+                  "name": "structural_relaxation · k_grid",
+                  "value_kind": "text",
+                  "value_raw": "2π × 0.03 Å⁻¹",
+                  "unit_raw": "Å⁻¹"
+                },
+                {
+                  "key": "structural_relaxation.convergence_energy",
+                  "name": "structural_relaxation · convergence_energy",
+                  "value_kind": "text",
+                  "value_raw": "10^-8 eV",
+                  "unit_raw": "eV"
+                },
+                {
+                  "key": "structural_relaxation.convergence_force",
+                  "name": "structural_relaxation · convergence_force",
+                  "value_kind": "text",
+                  "value_raw": "1 meV/Å",
+                  "unit_raw": "meV/Å"
+                },
+                {
+                  "key": "electron_phonon.energy_cutoff",
+                  "name": "electron_phonon · energy_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "90",
+                  "unit_raw": "Ry",
+                  "value_number": 90
+                },
+                {
+                  "key": "electron_phonon.charge_density_cutoff",
+                  "name": "electron_phonon · charge_density_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "720",
+                  "unit_raw": "Ry",
+                  "value_number": 720
+                },
+                {
+                  "key": "sscha.calculation_code",
+                  "name": "sscha · calculation_code",
+                  "value_kind": "text",
+                  "value_raw": "SSCHA",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.supercell",
+                  "name": "sscha · supercell",
+                  "value_kind": "text",
+                  "value_raw": "2 × 2 × 2",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.atoms",
+                  "name": "sscha · atoms",
+                  "value_kind": "number",
+                  "value_raw": "216",
+                  "unit_raw": null,
+                  "value_number": 216
+                },
+                {
+                  "key": "sscha.temperature_k",
+                  "name": "sscha · temperature_k",
+                  "value_kind": "number",
+                  "value_raw": "0",
+                  "unit_raw": "K",
+                  "value_number": 0
+                },
+                {
+                  "key": "sscha.q_grid",
+                  "name": "sscha · q_grid",
+                  "value_kind": "text",
+                  "value_raw": "2 × 2 × 2",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.energy_cutoff",
+                  "name": "sscha · energy_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "80",
+                  "unit_raw": "Ry",
+                  "value_number": 80
+                },
+                {
+                  "key": "sscha.k_grid",
+                  "name": "sscha · k_grid",
+                  "value_kind": "text",
+                  "value_raw": "3 × 3 × 3",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.q_grid_interpolated",
+                  "name": "sscha · q_grid_interpolated",
+                  "value_kind": "text",
+                  "value_raw": "6 × 6 × 6",
+                  "unit_raw": null
+                },
+                {
+                  "field_key": "field-20bd6b35-757c-4457-b400-f4a6ee07c80b",
+                  "name_raw": "测试能量窗",
+                  "value_kind": "range",
+                  "value_raw": "20..40",
+                  "unit_raw": "meV",
+                  "value_min": 20,
+                  "value_max": 40
+                }
+              ],
+              "electronic_method": "DFPT",
+              "k_grid": "24 × 24 × 24",
+              "q_grid": "6 × 6 × 6",
+              "field_settings": {
+                "calculation_code": {
+                  "name_raw": "EPC 软件",
+                  "unit_raw": ""
+                }
+              }
+            },
+            "parameters": {
+              "lambda_ep": 3.94,
+              "omega_log": 745,
+              "field_settings": {
+                "omega_log": {
+                  "name_raw": "对数平均声子频率",
+                  "unit_raw": "K"
+                }
+              },
+              "extensions": [],
+              "mu_star": 0.16
+            },
+            "tc_range_origin": {
+              "value_kind": "range",
+              "value_raw": "281–311",
+              "value_number": null,
+              "value_min": 281,
+              "value_max": 311,
+              "parameters": {
+                "lambda_ep": 3.94,
+                "omega_log": 745,
+                "field_settings": {
+                  "omega_log": {
+                    "name_raw": "对数平均声子频率",
+                    "unit_raw": "K"
+                  }
+                },
+                "extensions": [
+                  {
+                    "key": "mu_star",
+                    "value_kind": "range",
+                    "unit_raw": "1",
+                    "value_min": 0.1,
+                    "value_max": 0.16,
+                    "value_raw": "0.1–0.16"
+                  }
+                ]
+              },
+              "is_representative": false
+            },
+            "tc_group": {
+              "version": 1,
+              "group_key": "legacy-tc-0",
+              "method_key": "legacy-tc-0",
+              "point_key": "legacy-tc-0:0"
+            },
+            "field_settings": {
+              "tc": {
+                "name_raw": "Tc 下端",
+                "unit_raw": "K"
+              }
+            }
+          },
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Anharmonic 150 3.94 745 18.44 281 to 311"
+            },
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+            }
+          ],
+          "value_text": null,
+          "value_boolean": null
+        },
+        {
+          "record_key": "tc-point-10f0da7e-deb1-4df2-8766-fe687c6e628d",
+          "module_code": "superconductive_properties",
+          "record_type": "predicted_tc",
+          "property_code": "tc",
+          "custom_property_key": null,
+          "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+          "definition_version": 1,
+          "name_raw": "critical temperature",
+          "value_kind": "number",
+          "value_raw": "311",
+          "value_number": 311,
+          "value_min": null,
+          "value_max": null,
+          "unit_raw": "K",
+          "canonical_unit": "K",
+          "method_code": "isotropic_eliashberg",
+          "method_raw": null,
+          "uncertainty": null,
+          "criterion_code": null,
+          "criterion_raw": null,
+          "is_representative": true,
+          "structure_key": null,
+          "payload": {
+            "calculation_conditions": {
+              "calculation_code": "Quantum ESPRESSO",
+              "extensions": [
+                {
+                  "key": "structural_relaxation.calculation_code",
+                  "name": "structural_relaxation · calculation_code",
+                  "value_kind": "text",
+                  "value_raw": "VASP",
+                  "unit_raw": null
+                },
+                {
+                  "key": "structural_relaxation.exchange_correlation_functional",
+                  "name": "structural_relaxation · exchange_correlation_functional",
+                  "value_kind": "text",
+                  "value_raw": "PBE",
+                  "unit_raw": null
+                },
+                {
+                  "key": "structural_relaxation.energy_cutoff",
+                  "name": "structural_relaxation · energy_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "850",
+                  "unit_raw": "eV",
+                  "value_number": 850
+                },
+                {
+                  "key": "structural_relaxation.k_grid",
+                  "name": "structural_relaxation · k_grid",
+                  "value_kind": "text",
+                  "value_raw": "2π × 0.03 Å⁻¹",
+                  "unit_raw": "Å⁻¹"
+                },
+                {
+                  "key": "structural_relaxation.convergence_energy",
+                  "name": "structural_relaxation · convergence_energy",
+                  "value_kind": "text",
+                  "value_raw": "10^-8 eV",
+                  "unit_raw": "eV"
+                },
+                {
+                  "key": "structural_relaxation.convergence_force",
+                  "name": "structural_relaxation · convergence_force",
+                  "value_kind": "text",
+                  "value_raw": "1 meV/Å",
+                  "unit_raw": "meV/Å"
+                },
+                {
+                  "key": "electron_phonon.energy_cutoff",
+                  "name": "electron_phonon · energy_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "90",
+                  "unit_raw": "Ry",
+                  "value_number": 90
+                },
+                {
+                  "key": "electron_phonon.charge_density_cutoff",
+                  "name": "electron_phonon · charge_density_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "720",
+                  "unit_raw": "Ry",
+                  "value_number": 720
+                },
+                {
+                  "key": "sscha.calculation_code",
+                  "name": "sscha · calculation_code",
+                  "value_kind": "text",
+                  "value_raw": "SSCHA",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.supercell",
+                  "name": "sscha · supercell",
+                  "value_kind": "text",
+                  "value_raw": "2 × 2 × 2",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.atoms",
+                  "name": "sscha · atoms",
+                  "value_kind": "number",
+                  "value_raw": "216",
+                  "unit_raw": null,
+                  "value_number": 216
+                },
+                {
+                  "key": "sscha.temperature_k",
+                  "name": "sscha · temperature_k",
+                  "value_kind": "number",
+                  "value_raw": "0",
+                  "unit_raw": "K",
+                  "value_number": 0
+                },
+                {
+                  "key": "sscha.q_grid",
+                  "name": "sscha · q_grid",
+                  "value_kind": "text",
+                  "value_raw": "2 × 2 × 2",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.energy_cutoff",
+                  "name": "sscha · energy_cutoff",
+                  "value_kind": "number",
+                  "value_raw": "80",
+                  "unit_raw": "Ry",
+                  "value_number": 80
+                },
+                {
+                  "key": "sscha.k_grid",
+                  "name": "sscha · k_grid",
+                  "value_kind": "text",
+                  "value_raw": "3 × 3 × 3",
+                  "unit_raw": null
+                },
+                {
+                  "key": "sscha.q_grid_interpolated",
+                  "name": "sscha · q_grid_interpolated",
+                  "value_kind": "text",
+                  "value_raw": "6 × 6 × 6",
+                  "unit_raw": null
+                },
+                {
+                  "field_key": "field-20bd6b35-757c-4457-b400-f4a6ee07c80b",
+                  "name_raw": "测试能量窗",
+                  "value_kind": "range",
+                  "value_raw": "20..40",
+                  "unit_raw": "meV",
+                  "value_min": 20,
+                  "value_max": 40
+                }
+              ],
+              "electronic_method": "DFPT",
+              "k_grid": "24 × 24 × 24",
+              "q_grid": "6 × 6 × 6",
+              "field_settings": {
+                "calculation_code": {
+                  "name_raw": "EPC 软件",
+                  "unit_raw": ""
+                }
+              }
+            },
+            "parameters": {
+              "lambda_ep": 3.94,
+              "omega_log": 745,
+              "field_settings": {
+                "omega_log": {
+                  "name_raw": "对数平均声子频率",
+                  "unit_raw": "K"
+                }
+              },
+              "extensions": [],
+              "mu_star": 0.1
+            },
+            "tc_range_origin": {
+              "value_kind": "range",
+              "value_raw": "281–311",
+              "value_number": null,
+              "value_min": 281,
+              "value_max": 311,
+              "parameters": {
+                "lambda_ep": 3.94,
+                "omega_log": 745,
+                "field_settings": {
+                  "omega_log": {
+                    "name_raw": "对数平均声子频率",
+                    "unit_raw": "K"
+                  }
+                },
+                "extensions": [
+                  {
+                    "key": "mu_star",
+                    "value_kind": "range",
+                    "unit_raw": "1",
+                    "value_min": 0.1,
+                    "value_max": 0.16,
+                    "value_raw": "0.1–0.16"
+                  }
+                ]
+              },
+              "is_representative": false
+            },
+            "tc_group": {
+              "version": 1,
+              "group_key": "legacy-tc-0",
+              "method_key": "legacy-tc-0",
+              "point_key": "legacy-tc-0:1"
+            }
+          },
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Anharmonic 150 3.94 745 18.44 281 to 311"
+            },
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "chunk_id": null,
+              "chunk_index": 21,
+              "page_start": 4,
+              "page_end": 4,
+              "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+              "section_role": "result",
+              "source_name": "2024 La-Sc-H 何新玲.pdf",
+              "locator_status": "verified_text_layer",
+              "origin_kind": null,
+              "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa)."
+            }
+          ],
+          "value_text": null,
+          "value_boolean": null
+        }
+      ]
+    }
+  ],
+  "deleted_record_keys": []
+}

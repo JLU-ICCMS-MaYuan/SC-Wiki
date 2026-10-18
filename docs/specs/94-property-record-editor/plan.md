@@ -224,3 +224,10 @@ StructureViewer3D 已有 ResizeObserver，在首次隐藏展开时适配有效�
 以用户“认可开始落地执行。”为授权；按 [正式实施记录](tc-multi-result-implementation.md) 复用 SchemaDrivenRecordForm 条件与既有单值记录存储。前端适配层处理稳定点身份、旧范围显式拆分和组内共同参数；PropertyModuleEditor 负责跨方法代表互斥与批量删除键。后端转换保护新分组，正式持久化结合未提交的现存记录验证唯一代表及共同条件，锁沿用材料状态行。
 
 FR-060～062 / SC-046～047 → 组合适配、共享组件和逐点代表 → T080～082 → 浏览器记录与 MySQL 往返。条件补空交给 #139 T027～028，远程 Issue 更新与链接验证单独收尾，不以本地提交代替推送。
+
+
+## US20 正式实施计划
+
+FR-072/073 → ScientificFieldBox + 共用ScientificFieldSettingsDrawer → 预测记录计算条件和逐点Tc参数接入；FR-074 → CalculationConditionFields本地侧栏草稿、稳定扩展键与显式应用；FR-075 → 仅隐藏结构优化扩展、保持原payload与阶段隔离。固定字段保留schema类型，元数据通过现有开放payload保存；共享参数/条件仍由updateTcCommon传播，逐点设置保留在各结果。
+
+T087记录授权与契约 → T088实现 → T089来源/保存/只读/并发保护及窄屏验证 → T090文档和精确提交。隔离验证源从HEAD与本次差异构成，排除其他任务的未提交工作；复验浏览器载荷经过MySQL保存、返修与导出。远程Issue和链接门独立保留，不自动推送。

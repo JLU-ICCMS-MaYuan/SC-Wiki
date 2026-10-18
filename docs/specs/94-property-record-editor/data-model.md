@@ -45,3 +45,10 @@ value_raw 和 unit_raw 不再作为独立原始记录：value_raw 从当前数�
 ## US15：当前 DOS 与原始来源
 
 dos_fermi 的当前值继续保存在既有 value_* / unit_* 字段；payload.dos_fermi_sources={version:1,records:[完整原始记录]} 保存被收敛记录的身份、值、单位、条件、元数据和证据，子记录不得嵌套同一归档。不同来源而无明确当前值时保留空当前表示，仅允许留在草稿。来源差异由归档计算，不因编辑或保存说明清空。公开核对记录为 DOS 添加 dos_fermi_conflict，正式来源可携带 paper_evidence_id 供同条授权引用解读。无新表、列或数据库迁移。
+
+
+## US20 字段标注与侧栏暂存
+
+固定条件标注使用payload.calculation_conditions.field_settings[科学key]={name_raw,unit_raw}，原条件键和值不搬动。共享λ/ωlog标注使用payload.parameters.field_settings，各成员随共同参数一致保存；逐结果Tc/μ*标注使用payload.field_settings.tc / mu_star，身份属于对应科学记录。Tc和ωlog规范值仍K，标注不表示自动换算。
+
+补充字段保留现有extensions与原key/field_key/evidences；侧栏的未应用草稿仅在组件状态，不写入持久层。固定schema类型不变，扩展改类型清除旧value_*槽位。既有开放payload保存/返修/导出包含上述字段，无数据库迁移；源值比较仍包含标注，修改后旧来源待核对。

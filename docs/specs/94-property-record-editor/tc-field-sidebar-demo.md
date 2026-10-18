@@ -58,3 +58,43 @@
 用户认可已展示的 LaSc₂H₂₄ 字段方框与右侧设置 Demo。FR-072～075 的展示与新增流程、SC-059～060 的交互演示作为后续正式接入的设计依据；此前“Demo待评审”描述为阶段历史。此答复不视为批准未展示的远程 Issue 追加正文，不改写 #94/#139 协作状态。
 
 本次只记录 Demo 认可，没有实施正式组件或重写原任务。正式接入调查确认：SchemaDrivenRecordForm 的自定义扩展已有 name_raw、value_kind、value_raw、unit_raw 与来源；固定计算条件则来自 schema，字段名、类型和单位不能按 Demo 自由替换后写入原字段。正式方案需要明确固定语义与展示元数据的边界，复用现有科学验证和来源失效规则，不能仅用 HTML 演示持久化代替。
+
+
+## 正式实施授权与类型澄清
+
+### 用户原话
+
+> 认可，继续
+
+关于固定字段保留类型、补充字段可自由切换，用户答复：
+
+> 接受：固定字段保留类型，补充字段可切换
+
+以上最新授权覆盖正式共享表单实施，取代此前仅记录Demo认可/未实施的阶段边界。固定字段的名称、单位可侧栏设置，原科学key与类型保留；补充字段可切换文本/数值/范围/布尔。无需为类型转换新增公共API或迁移。未授权推送，尚未展示的远程Issue正文仍需单独评审。
+
+### 正式数据边界
+
+- 固定计算条件仍存于原calculation_conditions键；名称与原始单位标注存calculation_conditions.field_settings[原key]，保留科学类型及值。补充字段仍存extensions，保存原有key/field_key、来源和其他元数据，侧栏应用时清理非当前类型的旧值槽位。
+- λ/ωlog设置存parameters.field_settings，共同参数组逐记录传播；Tc/μ*设置存每条记录payload.field_settings，保持具体点身份与配对，不改变代表唯一性。Tc与ωlog规范值仍按K保存，侧栏明确原始单位标注不执行数值换算。
+- field_settings没有被排除出科学比较；新增/修改标注沿现有fingerprint与源值失效机制保守地使旧关联待核对，不把人工设置冒充新来源。已发布定义、接口及导出契约不变，字段设置随开放payload保存/返修/导出。
+- 新增先在侧栏暂存，应用才创建稳定键；取消不写。打开后字段/记录变化则拒绝覆盖，只读侧栏只能查看。结构优化阶段扩展只从超导编辑主区隐藏，保留原payload与导出，不误搬PBE；没有批量更新原任务数据。
+
+
+## 正式实现与本地验收
+
+正式SchemaDrivenRecordForm的预测Tc计算条件接入CalculationConditionFields，PredictedTcGroupEditor的λ/ωlog/Tc/μ*接入TcScientificField；两者共享ScientificFieldBox和ScientificFieldSettingsDrawer。名称点击与来源核对入口各自保留，设置通过既有onChange及科学比较传播，不将人工编辑重新授信。旧测量/其他性质表单不作本次范围外重构。
+
+计算条件扩展按原索引与稳定身份编辑，并核对打开时快照；新增未应用不产生空数据，取消与Escape不写。侧栏关闭使用MUI现有焦点/模态行为；只读只允许查看。字段方框显式border-box避免独立主题环境下挤压相邻框，代表框继续竖向居中。
+
+真实共享组件17项浏览器观察见 [验证JSON](assets/field-sidebar-implemented-validation.json)及[宽屏](assets/field-sidebar-implemented-wide.png)、[编辑侧栏](assets/field-sidebar-implemented-editor.png)、[390px](assets/field-sidebar-implemented-mobile.png)。修改示例EPC软件/对数平均声子频率/Tc下端与测试能量窗仅在隔离夹具中，不改真实原任务。3个条件/参数层级的标注与新增范围在保存重开后保留。
+
+同一浏览器保存载荷通过既有persist_property_modules、current_draft和build_material_state_export在隔离MySQL往返；完整payload一致，包含field_settings、原结构优化扩展、来源和Tc分组，部分写入仍不能绕过代表唯一或共同条件。原四点用例继续通过，新增两点侧栏载荷一并参数化验证。标注会改变科学指纹，旧来源仍是旧指纹，未跳过核对。
+
+初轮前端7文件59项与构建通过；MySQL4项加标注契约1项共5项通过。测试仍有原夹具MUI下拉值提示、构建3Dmol eval及大分包提示，没有新增依赖。验证使用独立无头Chrome，不改用户浏览器会话；未重新运行全文LLM或修改业务任务。原图临时文件缺失限制仍保留。
+
+
+### 独立暂存版本收尾
+
+从Git暂存索引导出仅含本次增量的源码，未带入#120/#135同期未提交改动；该版本前端原7文件59项通过，补充布尔false与类型槽位清理用例后侧栏5项全部通过，合计60项相关用例。TypeScript/Vite构建通过，标注契约1项和隔离MySQL4项通过。浏览器17项另行留存，单位标注/条件/逐点参数保存重开和导出均覆盖。当前正式实现局限于预测Tc共享编辑入口；未部署远端、未推送，也未把原图缺失写成已归档。
+
+T088～090的技术工作已完成；远程Issue正文与链接仍由既有待办T083承接。此次没有批准或写入未展示的远程追加正文，不关闭整个#94。

@@ -9,6 +9,7 @@ import ThermodynamicStabilityFields from './ThermodynamicStabilityFields'
 import { isThermodynamicStability } from '../lib/thermodynamicStability'
 import TcRecordFields from './TcRecordFields'
 import PropertyRecordRow from './PropertyRecordRow'
+import CalculationConditionFields from './CalculationConditionFields'
 import { DOS_SOURCE_KEY, hasDosConflict, isFermiDos } from '../lib/fermiDos'
 import { muRangeIndex } from '../lib/tcParameters'
 import type { FormDefinition, FormIssue, JsonSchema } from '../lib/formDefinitions'
@@ -242,6 +243,12 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
 
   const renderSchema = (schema: JsonSchema, path: string, fallbackLabel: string): React.ReactNode => {
     const label = titleFor(definition, path, schema, fallbackLabel)
+    if (record.record_type === 'predicted_tc' && path === 'payload.calculation_conditions') {
+      const resolved = { ...schema, properties: Object.fromEntries(Object.entries(schema.properties || {}).map(([key, child]) =>
+        [key, { ...child, title: titleFor(definition, `${path}.${key}`, child, key) }])) }
+      return <CalculationConditionFields key={path} record={record} schema={resolved} readOnly={readOnly}
+        basePath={fieldPath(path)} onChange={onChange} />
+    }
     if (path === 'payload.experimental_conditions' && record.record_type === 'measured_tc') {
       const descriptionPath = `${path}.description`
       const error = issue(descriptionPath) || issue(path)

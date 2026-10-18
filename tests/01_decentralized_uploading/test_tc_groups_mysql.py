@@ -21,15 +21,16 @@ ROOT = Path(__file__).parents[2]
 pytestmark = pytest.mark.skipif(not os.environ.get('TC_GROUP_TEST_DATABASE_URL'), reason='需要显式隔离 MySQL')
 
 
-def test_browser_payload_mysql_reopen_revision_export_and_retained_records():
+@pytest.mark.parametrize('artifact_prefix,point_count', [('tc-group', 4), ('field-sidebar', 2)])
+def test_browser_payload_mysql_reopen_revision_export_and_retained_records(artifact_prefix, point_count):
     url = make_url(os.environ['TC_GROUP_TEST_DATABASE_URL'])
     assert url.drivername.startswith('mysql') and (url.database or '').startswith('scwiki_issue139_test_')
-    payload = json.loads((ROOT / 'docs/specs/94-property-record-editor/assets/tc-group-saved-browser-payload.json').read_text())
-    fixture = json.loads((ROOT / 'docs/specs/94-property-record-editor/assets/tc-group-implemented-fixture.json').read_text())
+    payload = json.loads((ROOT / f'docs/specs/94-property-record-editor/assets/{artifact_prefix}-saved-browser-payload.json').read_text())
+    fixture = json.loads((ROOT / f'docs/specs/94-property-record-editor/assets/{artifact_prefix}-implemented-fixture.json').read_text())
     records = payload['modules'][0]['records']
-    assert len(records) == 4 and all(r['value_kind'] == 'number' for r in records)
+    assert len(records) == point_count and all(r['value_kind'] == 'number' for r in records)
     assert sum(bool(r.get('is_representative')) for r in records) == 1
-    assert {r['method_code'] for r in records} == {'isotropic_eliashberg', 'allen_dynes'}
+    assert {r['method_code'] for r in records} == ({'isotropic_eliashberg', 'allen_dynes'} if artifact_prefix == 'tc-group' else {'isotropic_eliashberg'})
     async def exercise():
         engine = create_async_engine(url.set(drivername='mysql+asyncmy'))
         sessions = async_sessionmaker(engine, expire_on_commit=False)
@@ -65,7 +66,7 @@ def test_browser_payload_mysql_reopen_revision_export_and_retained_records():
             paper = await session.get(models.Paper, pid)
             exported = await session.run_sync(lambda db: build_material_state_export(db, paper_id=pid, state_key='tc-state', user=models.User(id=uid, role='user')))
             actual = exported['property_modules'][0]['records']
-            assert len(actual) == 4
+            assert len(actual) == point_count
             expected = {r['record_key']: r for r in records}
             for r in actual:
                 before = expected[r['record_key']]
@@ -76,6 +77,7 @@ def test_browser_payload_mysql_reopen_revision_export_and_retained_records():
             revision = await session.run_sync(lambda db: current_draft(db, db.get(models.Paper, pid)))
             reopened = revision['material_states'][0]['property_modules'][0]['records']
             assert {r['record_key']: r['payload']['tc_group'] for r in reopened} == {r['record_key']: r['payload']['tc_group'] for r in actual}
+            assert {r['record_key']: r['payload'] for r in reopened} == {r['record_key']: r['payload'] for r in actual}
         # 部分写入不能绕过已保留的不同方法代表，也不能改坏同一共同参数组。
         async with sessions.begin() as session:
             incoming = deepcopy(payload['modules'])

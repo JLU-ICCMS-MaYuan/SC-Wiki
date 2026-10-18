@@ -116,3 +116,10 @@ electronic_properties / property / dos_fermi 跳过单条记录折叠、定义�
 每个明确组合为 predicted_tc / number，value_number 是 Tc，payload.parameters.mu_star 是对应标量；is_representative 指向该条，整个材料状态跨方法最多一个。新代表的 Tc／μ* 必须有限且非负，清空／删除不自动改选。旧范围可读及保存草稿，正式提交须选择明确端点或取消旧代表标记。
 
 payload.tc_group={version:1,group_key,method_key,point_key} 组织共同参数、方法行及稳定点，tc_range_origin 只保留旧表示。组内共同参数与计算条件必须一致；同一方法行定义一致，点身份不能重复。历史无元数据各自成组。删除方法通过既有 deleted_record_keys 显式删除其成员；未提交的 DB 保留记录也参加唯一性与条件校验。JSON、保存／返修／导出继续逐记录，不新增路由或迁移。
+
+
+## US20 字段侧栏契约
+
+主表单只显示名称与当前值；点击名称打开右侧设置。固定字段保留原科学key和类型，名称/原始单位标注使用field_settings（条件在calculation_conditions内，λ/ωlog在parameters内，逐点Tc/μ*在payload内）。补充字段沿用extensions的name_raw/value_kind/value_*/unit_raw及原key/evidences；新增仅在应用后进入records。
+
+取消/关闭不写入；只读可查看；字段或记录从打开到应用发生变化则拒绝旧设置。Tc/ωlog规范值仍以K保存，单位标注不自动换算。字段设置继续参加当前科学比较，旧来源保守失效，不能当作AI已核对。结构优化设置不在超导编辑主区展开，数据/来源/导出保留。没有新增公共API、发布定义修改或数据库迁移。
