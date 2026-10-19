@@ -1051,6 +1051,14 @@ def _flatten_properties(value: Any) -> list[dict[str, Any]]:
 
 def _formula_from_material(value: Any) -> str:
     text = str(value or "").strip()
+    # 报告空间群前缀属于物相标注，不能混入材料化学式或生成第二个材料身份。
+    phase, separator, formula = text.rpartition("-")
+    if separator and lookup_number(phase):
+        try:
+            normalize_formula(formula)
+            return formula
+        except ValueError:
+            pass
     try:
         normalize_formula(text)
         return text
@@ -1407,6 +1415,18 @@ def _bind_structure_candidates(draft: dict[str, Any], candidates: list[dict[str,
             matches = [0]
         else:
             matches = []
+        # 空间群和压力仍须与化学式同时相符，不能跨化合物分配同空间群结构。
+        material = str(reported.get("material") or "").strip()
+        if material:
+            from pymatgen.core import Composition
+            compatible = []
+            for index in matches:
+                try:
+                    if Composition(material).reduced_composition == Composition(states[index].get("material") or "").reduced_composition:
+                        compatible.append(index)
+                except ValueError:
+                    continue
+            matches = compatible
         if len(matches) == 1:
             candidate["material_state_ref"] = f"material_states[{matches[0]}]"
 
@@ -1947,6 +1967,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 if not structure_format and str(file_item.get("kind") or file_state.get("file_kind") or "").lower() == "pdf":
                     structure_candidates.extend(extract_structure_candidates(
                         markdown,
+                        pdf_path=file_source,
                         source={
                             "file_id": file_item.get("file_id"),
                             "filename": file_item.get("original_filename") or file_source.name,

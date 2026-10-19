@@ -157,7 +157,8 @@ it('未归属空结果在独立详情显示失败和真实来源，不挂载假�
   listing.items[0].result.quality = { limitations: ['无法明确压力'] }
   const unassigned = '/spectra/collection?target=upload&target_id=task&state_key=unassigned&collection_version=2&run=run1&return=%2Fupload'
   render(<MemoryRouter initialEntries={[unassigned]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage />} /></Routes></MemoryRouter>)
-  expect(await screen.findByText('这组谱尚未归属到当前材料状态')).toBeInTheDocument()
+  expect(await screen.findByText('谱提取记录')).toBeInTheDocument()
+  expect(screen.queryByText('这组谱尚未归属到当前材料状态')).not.toBeInTheDocument()
   expect(await screen.findByAltText('经权限校验读取的谱原图')).toBeInTheDocument()
   expect(screen.getByText(/无法明确压力/)).toBeInTheDocument()
   expect(screen.queryByRole('table')).not.toBeInTheDocument()
@@ -172,6 +173,35 @@ it('未归属候选只显示摘要，点击才读取原图和点表', async () =
   expect(screen.queryByRole('img')).not.toBeInTheDocument()
   expect(screen.queryByRole('table')).not.toBeInTheDocument()
   expect(api.download).not.toHaveBeenCalled()
+})
+
+it('六条失败记录不计入一组待确认谱，保留原因及详情入口', async () => {
+  const spectrum = listing.items[0]
+  spectrum.state_key = null
+  for (let index = 0; index < 6; index++) listing.items.push({ ...structuredClone(spectrum), id: `failed-${index}`,
+    run: { id: `run-${index}`, status: 'needs_review' }, result: { curves: [], failures: [`第 ${index} 次标定 HTTP 503`] } })
+  render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}><UnassignedPropertySpectra /></PropertySpectraProvider></MemoryRouter>)
+  expect(await screen.findByText('待确认归属 · 1 组谱数据')).toBeVisible()
+  expect(screen.getByText('谱提取记录 · 6 条未生成曲线或标定')).toBeVisible()
+  expect(screen.getAllByRole('button', { name: '核对归属' })).toHaveLength(1)
+  const history = screen.getByText('谱提取记录 · 6 条未生成曲线或标定')
+  fireEvent.click(history)
+  expect(screen.getByText('第 0 次标定 HTTP 503')).toBeVisible()
+  expect(screen.getAllByRole('button', { name: '查看提取记录' })).toHaveLength(6)
+  expect(api.download).not.toHaveBeenCalled()
+})
+
+it('只有失败记录时不声称存在待分配谱；有真实标定但未生成曲线仍可核对归属', async () => {
+  listing.items[0].state_key = null
+  listing.items[0].result = { curves: [], failures: ['未发现谱图'] }
+  const view = render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}><UnassignedPropertySpectra /></PropertySpectraProvider></MemoryRouter>)
+  await screen.findByText('谱提取记录 · 1 条未生成曲线或标定')
+  expect(screen.queryByText(/待确认归属 ·/)).not.toBeInTheDocument()
+  view.unmount()
+  listing.items[0].result.calibration = { curves: [{ id: 'a', kind: 'alpha2f' }] }
+  render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}><UnassignedPropertySpectra /></PropertySpectraProvider></MemoryRouter>)
+  expect(await screen.findByText('待确认归属 · 1 组谱数据')).toBeVisible()
+  expect(screen.getByRole('button', { name: '核对归属' })).toBeVisible()
 })
 
 it('归属确认复用原标定接口及双版本，保留标定并返回选择的状态', async () => {

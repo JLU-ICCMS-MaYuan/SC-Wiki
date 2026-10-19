@@ -21,6 +21,7 @@ import {
 } from '../lib/classifications'
 import { useLanguage } from '../context/LanguageContext'
 import StructureCandidatePanel from './StructureCandidatePanel'
+import StructureCandidateSource from './StructureCandidateSource'
 import PropertyModuleEditor from './PropertyModuleEditor'
 import type { PropertySpectrumTarget as SpectrumTarget } from '../lib/propertySpectra'
 import PressureEditor from './PressureEditor'
@@ -923,6 +924,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                           </Typography>
                         )}
                       </Box>
+                      <StructureCandidateSource candidate={candidate} />
                       {!blocked && (
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1, flexWrap: 'wrap' }}>
                           <FormControl size="small" sx={{ minWidth: 220, flex: '1 1 220px' }}>
@@ -957,16 +959,12 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                           >
                             {t('upload.adoptStructure')}
                           </Button>
-                          <Button
-                            size="small"
-                            color="inherit"
-                            disabled={candidate.confirmation === 'excluded'}
-                            onClick={() => updateStructureCandidate(candidate.candidate_id, { confirmation: 'excluded', status: 'excluded' })}
-                          >
-                            {t('upload.excludeStructure')}
-                          </Button>
                         </Box>
                       )}
+                      <Button size="small" color="inherit"
+                        onClick={() => updateStructureCandidate(candidate.candidate_id, { confirmation: 'excluded', status: 'excluded' })}>
+                        {t('upload.excludeStructure')}
+                      </Button>
                     </Card>
                   )
                 })}

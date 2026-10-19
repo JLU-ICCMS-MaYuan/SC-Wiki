@@ -12,6 +12,10 @@ export interface PropertySpectrumItem {
 }
 export interface PropertySpectrumListing { items: PropertySpectrumItem[]; jobs: Array<{ id: string; status: string; error_message?: string }>; version: string; can_edit: boolean; can_review: boolean }
 export const SPECTRUM_API = '/api/rag/spectra'
+/** 无曲线且无可用标定的是提取记录，不能计作等待分配的谱。 */
+export function hasSpectrumData(item: PropertySpectrumItem): boolean {
+  return Boolean(item.result.curves.length || item.result.calibration?.curves?.length)
+}
 export const spectrumQuery = (target: PropertySpectrumTarget) => new URLSearchParams(target).toString()
 export const spectrumNames: Record<string, string> = { phonon_dos: '声子 DOS', alpha2f: 'α²F 谱函数', cumulative_lambda: '累计 λ', needs_review: '待核对', accepted: '已采纳', accepted_limited: '限定频段采纳', excluded: '已排除', queued: '排队中', running: '解析中', succeeded: '解析完成', failed: '解析失败', observed: '原图观测', interpolated: '短缺口插值', baseline_inferred: '近轴推断', boundary_assumption: '边界假设', edge_continuation: '平台延续', missing: '缺失' }
 

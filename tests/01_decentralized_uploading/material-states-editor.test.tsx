@@ -308,7 +308,7 @@ describe('Issue #90 模块化物性与 Schema 表单', () => {
     }
     const { onChange } = renderEditor({ states: [makeState({ property_modules: [module] })] })
 
-    fireEvent.click(await screen.findByRole('button', { name: '删除记录' }))
+    fireEvent.click(await screen.findByRole('button', { name: '删除第1种方法' }))
     const states = onChange.mock.calls.at(-1)?.[0] as DraftMaterialState[]
     expect(states[0].property_modules?.[0].records).toEqual([])
     expect(states[0].deleted_record_keys).toEqual(['record-deleted'])
@@ -327,9 +327,10 @@ describe('Issue #90 模块化物性与 Schema 表单', () => {
     expect(onChange).not.toHaveBeenCalled()
   })
 
-  it('记录定义由预测 Tc 切为测量 Tc 时替换条件分组', async () => {
+  it('预测 Tc 使用专用方法选择，切换方法时保留计算条件和参数', async () => {
+    const alternative = { ...predictedDefinition, definition_key: 'record.superconductive_properties.predicted_tc.mcmillan', method_code: 'mcmillan' }
     vi.mocked(api.get).mockImplementation((url: string) => {
-      if (url.startsWith('/api/form-definitions?')) return Promise.resolve(definitions.slice(0, 2) as never)
+      if (url.startsWith('/api/form-definitions?')) return Promise.resolve([predictedDefinition, alternative] as never)
       const definition = definitions.find(item => url.includes(encodeURIComponent(item.definition_key)))
       return definition ? Promise.resolve(definition as never) : Promise.reject(new Error('not found'))
     })
@@ -338,17 +339,17 @@ describe('Issue #90 模块化物性与 Schema 表单', () => {
     }
     const { onChange } = renderEditor({ states: [makeState({ property_modules: [module] })] })
 
-    fireEvent.mouseDown(await screen.findByRole('combobox', { name: '记录定义' }))
-    fireEvent.click(await screen.findByRole('option', { name: /测量 Tc · resistivity/ }))
+    fireEvent.mouseDown(await screen.findByRole('combobox', { name: '预测方法' }))
+    fireEvent.click(await screen.findByRole('option', { name: 'McMillan' }))
     const states = onChange.mock.calls.at(-1)?.[0] as DraftMaterialState[]
     expect(states[0].property_modules?.[0].records[0]).toMatchObject({
-      record_type: 'measured_tc',
-      method_code: 'resistivity',
-      definition_key: 'record.superconductive_properties.measured_tc.resistivity',
-      payload: { experimental_conditions: {} },
+      record_type: 'predicted_tc',
+      method_code: 'mcmillan',
+      definition_key: alternative.definition_key,
+      payload: formDefinitionMatrix.valid_records.predicted_tc.payload,
     })
-    expect(states[0].property_modules?.[0].records[0].payload).not.toHaveProperty('calculation_conditions')
-    expect(states[0].property_modules?.[0].records[0].payload).not.toHaveProperty('parameters')
+    expect(states[0].property_modules?.[0].records[0].payload).toHaveProperty('calculation_conditions')
+    expect(states[0].property_modules?.[0].records[0].payload).toHaveProperty('parameters')
   })
 
   it('Schema 表单渲染 Conditions/参数/预留分组并保持嵌套错误路径', () => {
@@ -506,6 +507,21 @@ describe('未分配结构候选的分配与确认（Issue #77）', () => {
     expect(region).toHaveTextContent('校验失败：无法解析结构')
     // blocked 候选不提供采用入口（不得确认，FR-004）
     expect(screen.queryByRole('button', { name: '采用此结构' })).not.toBeInTheDocument()
+  })
+
+  it('失败候选可查看晶胞和原文依据并排除，不提供采用入口', () => {
+    const { onStructureCandidatesChange } = renderWithCandidates({ structureCandidates: [unassignedCandidate({
+      status: 'blocked', representations: {}, validation: { ase_valid: false, message: '位点精度待核对' },
+      reported_structure: { material: 'LaSc2H24', space_group_symbol: 'P6/mmm', pressure_value_gpa: 300, cell_parameters: { a: 4.712, gamma: 120 } },
+      sources: [{ filename: 'supp.pdf', page: 8, quote: 'La (1b) 0 0 0.500' }],
+    })] })
+    expect(screen.getByText('LaSc2H24 · P6/mmm · 300 GPa')).toBeVisible()
+    fireEvent.click(screen.getByText('查看结构来源与已提取参数'))
+    expect(screen.getByText('a = 4.712，gamma = 120')).toBeVisible()
+    expect(screen.getByText('La (1b) 0 0 0.500')).toBeVisible()
+    expect(screen.queryByRole('button', { name: '采用此结构' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '不采用' }))
+    expect(onStructureCandidatesChange.mock.calls[0][0][0]).toMatchObject({ confirmation: 'excluded', status: 'excluded' })
   })
 
   it('T008：排除后候选标记 excluded 且不再显示', () => {

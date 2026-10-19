@@ -3,7 +3,7 @@ import { Alert, Box, Button, Chip, Typography } from '@mui/material'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { api } from '../lib/api'
-import { loadPropertySpectra, spectrumDetailPath, spectrumGroups, spectrumInterval, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumTarget, type PropertySpectrumItem, type PropertySpectrumCurve } from '../lib/propertySpectra'
+import { hasSpectrumData, loadPropertySpectra, spectrumDetailPath, spectrumGroups, spectrumInterval, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumTarget, type PropertySpectrumItem, type PropertySpectrumCurve } from '../lib/propertySpectra'
 import type { PropertyModuleCode } from '../lib/propertyModules'
 import PropertyModuleSection from './PropertyModuleSection'
 
@@ -64,7 +64,7 @@ export function PropertySpectrumSection({ moduleCode }: { moduleCode: PropertyMo
   </Box>
 }
 
-function SpectrumSummary({ item, curves, dos, unassigned = false }: { item: PropertySpectrumItem; curves: PropertySpectrumCurve[]; dos?: boolean; unassigned?: boolean }) {
+function SpectrumSummary({ item, curves, dos, unassigned = false, attempt = false }: { item: PropertySpectrumItem; curves: PropertySpectrumCurve[]; dos?: boolean; unassigned?: boolean; attempt?: boolean }) {
   const ctx = useContext(Spectra)!, material = useContext(Material)
   const navigate = useNavigate(), location = useLocation()
   const [busy, setBusy] = useState(false), [error, setError] = useState('')
@@ -85,8 +85,9 @@ function SpectrumSummary({ item, curves, dos, unassigned = false }: { item: Prop
   const hasAlpha = curves.some(curve => curve.kind === 'alpha2f') || (!curves.length && item.result.calibration?.curves?.some((curve: { kind: string }) => curve.kind === 'alpha2f'))
   const statuses = [...new Set(curves.map(curve => item.review[curve.id]?.status || 'needs_review'))]
   const review = statuses.length === 1 ? spectrumNames[statuses[0]] || statuses[0] : '部分曲线待核对'
-  const title = unassigned ? (curves.length ? [...new Set(curves.map(curve => spectrumNames[curve.kind]))].join(' / ') : '谱图候选 · 尚无数值曲线')
+  const title = attempt ? '谱提取记录 · 未生成曲线或标定' : unassigned ? (curves.length ? [...new Set(curves.map(curve => spectrumNames[curve.kind]))].join(' / ') : '谱图候选 · 尚无数值曲线')
     : dos ? '声子态密度 DOS' : hasAlpha ? 'Eliashberg 谱函数 α²F(ω)' : '累计 λ（尚无 α²F 数值）'
+  const failures = item.result.failures?.length ? item.result.failures : item.result.quality?.limitations || []
   return <Box data-spectrum-collection={item.id} data-spectrum-group={unassigned ? 'unassigned' : dos ? 'phonon_dos' : 'alpha2f'} sx={{ bgcolor: unassigned ? '#FFFCF5' : '#FAF9FF', border: '1px solid', borderColor: unassigned ? '#ECE1C6' : '#E4DFFA', borderRadius: 1.5, px: 2, py: 1.5, mb: 1 }}>
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
       <Box sx={{ minWidth: 0 }}>
@@ -97,11 +98,12 @@ function SpectrumSummary({ item, curves, dos, unassigned = false }: { item: Prop
           {item.source.source_name || '来源未命名'} · 第 {item.source.pdf_page ?? '未知'} 页{item.source.panel_id ? ' · ' + item.source.panel_id : ''} · {spectrumInterval(curves)}
         </Typography>
         {!curves.length && !unassigned && <Typography variant="caption" color="text.secondary">尚无数值曲线，可查看原图与提取状态。</Typography>}
-        {unassigned && <Typography variant="caption" color="text.secondary">材料条件尚未确定，请先检查图注与归属。</Typography>}
+        {unassigned && !attempt && <Typography variant="caption" color="text.secondary">材料条件尚未确定，请先检查图注与归属。</Typography>}
+        {attempt && <Typography variant="caption" color="text.secondary" display="block" sx={{ overflowWrap: 'anywhere', maxHeight: 120, overflowY: 'auto' }}>{failures.map((value: unknown) => typeof value === 'string' ? value : JSON.stringify(value)).join('；') || item.run.error_message || '尚无可供分配的谱数据。'}</Typography>}
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, ml: 'auto' }}>
         <Typography variant="caption" color="text.secondary">{item.stale ? '条件已变化，需重新核对' : ['queued', 'running', 'failed', 'needs_review'].includes(item.run.status) ? spectrumNames[item.run.status] : review}</Typography>
-        <Button variant="outlined" size="small" disabled={busy} endIcon={<OpenInNewIcon sx={{ fontSize: '14px !important' }} />} onClick={() => void open()}>{busy ? '正在打开…' : unassigned ? '核对归属' : dos ? '查看声子 DOS' : hasAlpha ? '查看 α²F' : '查看累计 λ'}</Button>
+        <Button variant="outlined" size="small" disabled={busy} endIcon={<OpenInNewIcon sx={{ fontSize: '14px !important' }} />} onClick={() => void open()}>{busy ? '正在打开…' : attempt ? '查看提取记录' : unassigned ? '核对归属' : dos ? '查看声子 DOS' : hasAlpha ? '查看 α²F' : '查看累计 λ'}</Button>
       </Box>
     </Box>
     {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
@@ -121,10 +123,18 @@ export function UnassignedPropertySpectra() {
   if (!ctx?.listing) return null
   const items = ctx.listing.items.filter(item => !item.state_key || ctx.stateKeys && !ctx.stateKeys.includes(item.state_key))
   if (!items.length) return null
+  const spectra = items.filter(hasSpectrumData), attempts = items.filter(item => !hasSpectrumData(item))
   return <Box id="spectra-unassigned" sx={{ mt: 3, pointerEvents: 'auto', '& .MuiButton-root': { display: 'inline-flex !important' } }}>
-    <Typography variant="subtitle2" sx={{ mb: 1 }}>待确认归属 · {items.length} 组谱数据</Typography>
+    {!!spectra.length && <>
+    <Typography variant="subtitle2" sx={{ mb: 1 }}>待确认归属 · {spectra.length} 组谱数据</Typography>
     <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>未确认的谱不并入任何材料状态。</Typography>
-    {items.map(item => <SpectrumSummary key={item.id} item={item} curves={item.result.curves} unassigned />)}
+    {spectra.map(item => <SpectrumSummary key={item.id} item={item} curves={item.result.curves} unassigned />)}
+    </>}
+    {!!attempts.length && <Box component="details" sx={{ mt: 2 }}>
+      <Typography component="summary" variant="subtitle2" sx={{ cursor: 'pointer', mb: 1 }}>谱提取记录 · {attempts.length} 条未生成曲线或标定</Typography>
+      <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1 }}>保留失败原因与来源。这些记录不计入待确认归属的谱数量。</Typography>
+      {attempts.map(item => <SpectrumSummary key={item.id} item={item} curves={[]} unassigned attempt />)}
+    </Box>}
   </Box>
 }
 

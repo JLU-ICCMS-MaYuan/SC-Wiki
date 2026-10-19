@@ -351,11 +351,12 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     changeDraft(current => ({ ...current, [field]: value, ...(field === 'material_states' ? { paper: { ...current.paper, research_materials: researchMaterials(value as UploadDraft['material_states']) } } : {}) }))
   }
 
-  const saveDraft = useCallback(async (showResult = false, syncEvidence = true): Promise<boolean> => {
+  const saveDraft = useCallback(async (showResult = false, syncEvidence = true, reportFailure = false): Promise<boolean> => {
     if (!draft || saving || readOnly || revision?.conflict) return false
     const tcIssues = validateTcRecords(draft.material_states)
     if (tcIssues.length) {
       if (showResult) { setError(tcIssues[0].message); setIssues(tcIssues) }
+      if (reportFailure) throw new Error(tcIssues[0].message)
       return false
     }
     const editVersion = revisionRef.current
@@ -369,7 +370,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       if (showResult) setError('')
       return true
     } catch (reason) {
-      setError(failureMessage(t, 'save', reason, t('upload.draftSaveFailed')))
+      const message = failureMessage(t, 'save', reason, t('upload.draftSaveFailed'))
+      setError(message)
+      if (reportFailure) throw new Error(message)
       return false
     } finally {
       setSaving(false)
@@ -852,8 +855,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           : { target: 'upload', target_id: taskId }, beforeNavigate: async () => {
             if (readOnly) return true
             if (evidenceWorkflow.hasManualDrafts()) throw new Error('请先保存或处理来源核对中的人工修改草稿，再打开谱详情。')
+            if (!dirty && !saving && !submitting) return true
             const version = revisionRef.current
-            const saved = await saveDraft(true)
+            const saved = await saveDraft(true, true, true)
             return saved && version === revisionRef.current
           } }}
         spectrumTarget={revisionPaperId && revisionMeta.current

@@ -1,4 +1,5 @@
 from backend.ingest.structure_extractor import extract_structure_candidates
+import pytest
 
 
 def test_extracts_explicit_fractional_coordinate_table_with_page_evidence():
@@ -179,3 +180,95 @@ Figure S1 | Phonon dispersion
     assert [item["validation"]["atom_count"] for item in candidates] == [2, 24, 12, 8]
     assert [item["reported_structure"]["pressure_value_gpa"] for item in candidates] == [20, 60, 130, 200]
     assert candidates[2]["derivation"]["rounded_fractional_sites"] == ["S(3a)"]
+
+
+@pytest.mark.parametrize("text", [
+    "The compound LaSc2H24 has space group P6/mmm at 300 GPa.",
+    "Table S2. Lattice parameters and H-H distances.\na = b c\n300 4.735 3.216 1.076-1.204",
+])
+def test_structural_mentions_without_coordinate_evidence_are_not_candidates(text):
+    assert extract_structure_candidates("<!-- page: 3 -->\n" + text, source={"file_id": "main"}) == []
+
+
+@pytest.mark.parametrize("angles", ["α = 90 β = 90 γ = 90", "\uf061 = 90 \uf062 = 90 \uf067 = 90"])
+def test_pdf_greek_cell_angles_are_read_without_claiming_missing_parameters(angles):
+    text = f"<!-- page: 8 -->\na = 3 b = 3 c = 3 {angles}\nFractional coordinates:\nCu 0 0 0"
+    candidate, = extract_structure_candidates(text, source={"file_id": "main"})
+    assert candidate["status"] == "valid"
+    assert candidate["validation"]["cell_parameters"]["gamma"] == 90
+
+
+def test_pdf_row_layout_recovers_compounds_with_audited_rounding_derivation(tmp_path):
+    import pymupdf
+    doc = pymupdf.open()
+    page = doc.new_page()
+    rows = """Table S1. The calculated crystal structural parameters at 300 GPa.
+Atomic coordinates (fractional)
+Compound Space group Lattice parameters Atoms X Y Z
+LaSc2 Fddd a = 4.248 La (8b) 0 0 0.5
+b = 6.845 Sc (16f) 0 0.843 0
+c = 7.682 alpha = 90 beta = 90 gamma = 90
+LaSc2H24 P6/mmm a = 4.712 La (1b) 0 0 0.5
+b = 4.712 Sc (2c) 0.333 0.667 0
+c = 3.236 H (6m) 0.759 0.519 0.5
+alpha = 90 H (6j) 0.762 0 0
+beta = 90 H (12n) 0.614 0 0.289
+gamma = 120"""
+    page.insert_text((30, 40), rows, fontsize=9)
+    path = tmp_path / "structure.pdf"
+    doc.save(path); doc.close()
+    flattened = """<!-- page: 1 -->
+Table S1. The calculated crystal structural parameters at 300 GPa.
+Atomic coordinates (fractional)
+LaSc2 Fddd a = 4.248
+b = 6.845 c = 7.682 alpha = 90 beta = 90 gamma = 90
+La (8b)
+Sc (16f)
+0 0 0 .843 .5 0
+"""
+    # 没有行布局时不能按猜测重组列。
+    assert extract_structure_candidates(flattened, source={"file_id": "supp"})[0]["status"] == "blocked"
+    candidates = extract_structure_candidates(flattened, source={"file_id": "supp"}, pdf_path=path)
+    assert [c["reported_structure"]["material"] for c in candidates] == ["LaSc2", "LaSc2H24"]
+    assert [c["reported_structure"]["pressure_value_gpa"] for c in candidates] == [300, 300]
+    assert candidates[0]["validation"]["atom_count"] == 24
+    assert candidates[0]["reported_structure"]["independent_sites"] == 2
+    assert candidates[1]["status"] == "valid"
+    assert candidates[1]["confirmation"] == "unreviewed"
+    assert candidates[1]["validation"]["atom_count"] == 27
+    from backend.services.structure_candidates import read_atoms
+    from pymatgen.io.ase import AseAtomsAdaptor
+    from pymatgen.symmetry.analyzer import SpacegroupAnalyzer
+    atoms = read_atoms("cif", candidates[1]["representations"]["conventional"]["cif"]["text"])
+    assert atoms.get_chemical_symbols().count("H") == 24
+    assert SpacegroupAnalyzer(AseAtomsAdaptor.get_structure(atoms), symprec=1e-4).get_space_group_number() == 191
+    assert [x["site"] for x in candidates[1]["derivation"]["rounding_adjustments"]] == ["Sc(2c)", "H(6m)"]
+    assert "0.333" in candidates[1]["sources"][0]["quote"]
+    assert len({c["candidate_id"] for c in candidates}) == 2
+    assert all(c["sources"][0]["page"] == 1 for c in candidates)
+
+
+def test_rounding_projection_does_not_hide_incompatible_reported_coordinates():
+    text = """<!-- page: 1 -->
+Table S1. Structural parameters at 300 GPa.
+Atomic coordinates (fractional)
+Sc2 P6/mmm a=4 b=4 c=3 alpha=90 beta=90 gamma=120
+Sc (2c) 0.340 0.667 0.000
+"""
+    candidate, = extract_structure_candidates(text, source={"file_id": "supp"})
+    assert candidate["status"] == "blocked"
+    assert candidate["representations"] == {}
+
+
+def test_same_geometry_at_explicitly_different_pressures_is_not_merged():
+    text = """<!-- page: 1 -->
+Table S1 | Structure parameters
+Atomic coordinates (fractional)
+Im-3m a=2.984 H(6b) 0 0.5 0.5
+(200 GPa) S(2a) 0.5 0.5 0.5
+Im-3m a=2.984 H(6b) 0 0.5 0.5
+(250 GPa) S(2a) 0.5 0.5 0.5
+"""
+    candidates = extract_structure_candidates(text, source={"file_id": "supp"})
+    assert [c["reported_structure"]["pressure_value_gpa"] for c in candidates] == [200, 250]
+    assert len({c["candidate_id"] for c in candidates}) == 2

@@ -4,7 +4,7 @@ import { useLocation, useNavigate, useParams, useSearchParams } from 'react-rout
 import { SpectrumProvider, SpectrumQuality, SpectrumCollectionWorkspace } from '../components/SpectrumWorkspace'
 import { materialStateSummary } from '../lib/materialStateSummary'
 import { api } from '../lib/api'
-import { SPECTRUM_API, safeSpectrumReturn, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumCurve, type PropertySpectrumTarget } from '../lib/propertySpectra'
+import { hasSpectrumData, SPECTRUM_API, safeSpectrumReturn, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumCurve, type PropertySpectrumTarget } from '../lib/propertySpectra'
 
 const show = (value: unknown) => typeof value === 'number' && Number.isFinite(value) ? Number(value.toPrecision(7)).toString() : '未知'
 function SpectrumPlot({ curve, candidate, reconstructionLabel = '原始重建' }: { curve: PropertySpectrumCurve; candidate: Map<number, number>; reconstructionLabel?: string }) {
@@ -58,6 +58,7 @@ export default function SpectrumDetailPage() {
       : item && (String(item.version) !== params.get('collection_version') || (params.get('run') && item.run.id !== params.get('run')))
         ? '谱版本已变化，请返回原模块重新打开最新结果。' : ''
   const validItem = !mismatch ? item : undefined
+  const attempt = Boolean(validItem && !hasSpectrumData(validItem))
   const unassigned = Boolean(validItem && (!validItem.state_key || statesLoaded && !material))
   const calibration = validItem?.result.calibration
   const canAssign = listing?.can_edit && statesLoaded && materialStates.length > 0 && Array.isArray(calibration?.curves) && calibration.curves.length > 0
@@ -133,8 +134,8 @@ export default function SpectrumDetailPage() {
   const selected = choices.find(choice => choice.key === variant)
   const candidate = new Map<number, number>(selected?.frequencies.map((frequency, index) => [frequency, selected.amplitudes[index]]) || [])
   const relatedCurves = (validItem?.result.curves || []).filter(value => curve?.kind === 'phonon_dos' ? value.kind === 'phonon_dos' : ['alpha2f', 'cumulative_lambda'].includes(value.kind))
-  const title = curve ? (spectrumNames[curve.kind] || '谱') + '解析详情' : '谱图候选 · 核对归属'
-  const limitation = validItem?.result.quality?.limitations || validItem?.result.failures || []
+  const title = curve ? (spectrumNames[curve.kind] || '谱') + '解析详情' : attempt ? '谱提取记录' : '谱图候选 · 核对归属'
+  const limitation = validItem?.result.failures?.length ? validItem.result.failures : validItem?.result.quality?.limitations || []
   return <Box sx={{ minWidth: 0, pb: 4 }}>
     <Button onClick={() => navigate(safeSpectrumReturn(params.get('return')))}>返回原模块</Button>
     <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, flexWrap: 'wrap', my: 2 }}>
@@ -145,7 +146,7 @@ export default function SpectrumDetailPage() {
     {(error || mismatch) && <Alert severity="error">{mismatch || error}<Button onClick={reload}>重新读取</Button></Alert>}
     {validItem && <>
       <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 2, p: 2, mb: 2 }}>
-        <Typography fontWeight={700}>{unassigned ? '归属待确认' : material || location.state?.materialSummary || '正在读取材料状态…'}</Typography>
+        <Typography fontWeight={700}>{attempt ? '尚未生成可分配的谱数据' : unassigned ? '归属待确认' : material || location.state?.materialSummary || '正在读取材料状态…'}</Typography>
         <Typography variant="body2" color="text.secondary">{validItem.source.source_name || '来源未命名'} · 第 {validItem.source.pdf_page ?? '未知'} 页 · {validItem.source.panel_id || ''}</Typography>
         {calibration?.caption && <Typography variant="caption" color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>{calibration.caption}</Typography>}
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}><Chip size="small" label={spectrumNames[validItem.run.status] || validItem.run.status} /><Typography variant="caption">数据版本 {validItem.version}{curve ? ' · ' + (spectrumNames[validItem.review[curve.id]?.status || 'needs_review']) : ''}</Typography></Box>
@@ -154,7 +155,7 @@ export default function SpectrumDetailPage() {
       {validItem.stale && <Alert severity="warning">材料条件或来源已变化，旧采纳与参考比较已失效，请核对并重新提取。</Alert>}
       {validItem.run.error_message && <Alert severity="warning">{validItem.run.error_message}</Alert>}
       {actionError && <Alert severity="warning">{actionError}</Alert>}
-      {unassigned && <Box sx={{ bgcolor: '#FFFCF5', border: '1px solid #ECE1C6', borderRadius: 2, p: 2, my: 2 }}>
+      {unassigned && !attempt && <Box sx={{ bgcolor: '#FFFCF5', border: '1px solid #ECE1C6', borderRadius: 2, p: 2, my: 2 }}>
         <Typography fontWeight={600}>这组谱尚未归属到当前材料状态</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>先对照原图与图注核对材料、物相和压力；确认后重新计算质量，旧采纳失效。</Typography>
         {listing?.can_edit ? canAssign ? <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>

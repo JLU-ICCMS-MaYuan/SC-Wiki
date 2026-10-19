@@ -74,6 +74,8 @@ tests/01_decentralized_uploading/structure-candidates.test.tsx # 新增：前端
 
 ## 结构选择
 
+2026-10-19 缺陷修复补充：打印小数造成 Wyckoff 多重性不符时，由 `backend/services/wyckoff_rounding.py` 根据已报告空间群操作求解舍入区间内的对称约束；解析器只传入原文数值字符串和报告多重性。整数按精确值，小数的末位半单位定义区间；唯一兼容稳定子、约束残差、逐坐标界限与严格多重性全部通过才生成派生候选。保留输入、派生值及改变量，界面提示并等待人工确认；不放宽空间群展开容差。验证映射：FR-007～010／SC-002／SC-004 → 有界对称投影与审计字段 → T035 → `test_wyckoff_rounding.py`、独立完整结构空间群及 CIF 重新读取检查。
+
 PDF 机械提取保持现有来源文件和页码边界；结构识别独立为 `structure_extractor.py`，避免把
 晶体学规则塞进通用论文字段提示词。`structure_candidates.py` 是唯一结构科学边界，负责
 ASE/pymatgen 组合、容差、四种派生输出和失败语义。上传编排只负责调用、合并和保存草稿；API

@@ -334,17 +334,27 @@ def test_validate_draft_rejects_when_materials_missing_everywhere():
 def test_create_pending_paper_derives_research_materials(tmp_path, monkeypatch):
     import backend.rag.database as rag_database
     from backend.ingest import scientific_drafts, upload_jobs
+    from backend.services import spectra
 
     monkeypatch.setattr(upload_jobs, "_normalize_draft", lambda draft: draft)
 
     async def _resolve_noop(_session, _draft):
         return None
 
-    async def _persist_noop(_session, _paper, _draft):
+    persisted_sources = []
+
+    async def _persist_noop(_session, _paper, _draft, *, source_file_ids=None):
+        persisted_sources.append(source_file_ids)
         return []
+
+    spectrum_targets = []
+
+    async def _bind_spectra(_session, _paper, _draft, *, target, target_id):
+        spectrum_targets.append((target, target_id))
 
     monkeypatch.setattr(rag, "_resolve_draft_classifications", _resolve_noop)
     monkeypatch.setattr(scientific_drafts, "persist_scientific_draft", _persist_noop)
+    monkeypatch.setattr(spectra, "bind_to_paper", _bind_spectra)
     monkeypatch.setattr(upload_tasks, "markdown_path", lambda _task_id: tmp_path / "missing.md")
     session = FakePaperSession()
     monkeypatch.setattr(rag_database, "async_session_factory", lambda: session)
@@ -358,6 +368,8 @@ def test_create_pending_paper_derives_research_materials(tmp_path, monkeypatch):
 
     paper = next(obj for obj in session.added if isinstance(obj, Paper))
     assert paper.research_materials == ["LaH10", "CeCu2Si2"]
+    assert persisted_sources == [{}]
+    assert spectrum_targets == [("upload", "c" * 32)]
     history = next(obj for obj in session.added if isinstance(obj, PaperHistoryEvent))
     assert history.event_type == "uploaded"
     assert history.actor_user_id == 1

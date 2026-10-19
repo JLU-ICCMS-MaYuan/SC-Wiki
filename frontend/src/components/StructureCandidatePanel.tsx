@@ -7,6 +7,7 @@ import BlockIcon from '@mui/icons-material/Block'
 import RestoreIcon from '@mui/icons-material/Restore'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import CrystalStructureView from './CrystalStructureView'
+import { StructureRoundingNotice } from './StructureCandidateSource'
 import { StructureCandidate } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
 
@@ -110,6 +111,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, readO
             <Typography variant="subtitle2" fontWeight={700} sx={{ overflowWrap: 'anywhere' }}>{filename || candidate.candidate_id}</Typography>
             <Chip size="small" label={statusLabel} color={blocked ? 'warning' : candidate.confirmation === 'confirmed' ? 'success' : 'default'} />
           </Stack>
+          <StructureRoundingNotice candidate={candidate} />
           {candidates.length > 1 && (
             <Select fullWidth size="small" value={candidate.candidate_id} aria-label={t('upload.candidateSelectAria')} onChange={event => setSelectedCandidateId(String(event.target.value))} sx={{ mt: 1.5 }}>
               {candidates.map(item => (

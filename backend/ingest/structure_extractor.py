@@ -7,6 +7,8 @@ does not infer missing cells, coordinate systems, occupancies, or disorder.
 from __future__ import annotations
 
 import re
+import hashlib
+from pathlib import Path
 from typing import Any
 
 from ase import Atoms
@@ -29,6 +31,10 @@ _CELL_KEYS = {
     "beta": ("_cell_angle_beta", "cell_angle_beta"),
     "gamma": ("_cell_angle_gamma", "cell_angle_gamma"),
 }
+_GREEK_CELL_NAMES = str.maketrans({"α": "alpha", "β": "beta", "γ": "gamma",
+                                 "\uf061": "alpha", "\uf062": "beta", "\uf067": "gamma"})
+_SITE_LABEL = re.compile(rf"({_ELEMENT})\s*\((\d+[a-z])\)")
+_SITE_ROW = re.compile(rf"({_ELEMENT})\s*\((\d+[a-z])\)\s+({_NUMBER})\s+({_NUMBER})\s+({_NUMBER})")
 
 
 def _page_for_offset(text: str, offset: int) -> int | None:
@@ -37,6 +43,7 @@ def _page_for_offset(text: str, offset: int) -> int | None:
 
 
 def _cell_parameters(text: str) -> dict[str, float]:
+    text = text.translate(_GREEK_CELL_NAMES)
     values: dict[str, float] = {}
     for key, aliases in _CELL_KEYS.items():
         alias_pattern = "|".join(re.escape(alias) for alias in aliases)
@@ -155,7 +162,8 @@ def _extract_structure_candidate_block(
     text = str(markdown or "")
     if not text.strip():
         return []
-    cues = re.search(r"cell_length|lattice\s+parameter|space\s+group|atomic\s+coordinates?|fractional\s+coordinates?|cartesian\s+coordinates?", text, re.IGNORECASE)
+    # 提到空间群或晶格常数并不表示该页报告了原子结构。
+    cues = re.search(r"atomic\s+coordinates?|fractional\s+coordinates?|cartesian\s+coordinates?|wyckoff|_atom_site_", text, re.IGNORECASE)
     if not cues:
         return []
     cells = _cell_parameters(text)
@@ -217,78 +225,86 @@ def _extract_structure_candidate_block(
 
 def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list[dict[str, Any]], set[int]]:
     """按物相拆分带 Wyckoff 位点的结构表，避免把多相晶胞拼成一个模型。"""
-    table = re.search(r"(?im)^Table\s+S?\d+\s*[|:]\s*Structure parameters\b", markdown)
+    table = re.search(r"(?im)^Table\s+S?\d+\s*[.|:]\s*[^\n]*?structur(?:e|al)\s+parameters\b", markdown)
     if not table:
         return [], set()
     start_page = list(_PAGE.finditer(markdown, 0, table.start()))
     table_start = start_page[-1].start() if start_page else table.start()
-    end = re.search(r"(?im)^Figure\s+S?\d+\s*[|:]", markdown[table.end():])
+    end = re.search(r"(?im)^(?:Table|Figure|Fig\.)\s+S?\d+\s*[.|:]", markdown[table.end():])
     table_end = table.end() + end.start() if end else len(markdown)
     text = markdown[table_start:table_end]
     # Docling 会把单元格逐个换行，并在其间加入 block 注释；等长空白替换保留页码偏移。
     text = re.sub(r"<!--\s*block:[^>]*-->", lambda match: " " * len(match.group()), text)
     if not re.search(r"Atomic coordinates\s*\(fractional\)", text, re.IGNORECASE):
         return [], set()
-    heads = list(re.finditer(rf"(?m)^\s*([A-Z][A-Za-z0-9/-]{{0,12}})\s+a\s*=\s*({_NUMBER})\b", text))
+    heads = list(re.finditer(rf"(?m)^\s*(?:(?P<material>[A-Z][A-Za-z0-9]{{0,30}})\s+)?(?P<symbol>[A-Z][A-Za-z0-9/-]{{0,12}})\s+a\s*=\s*({_NUMBER})\b", text))
     if not heads:
         return [], set()
     candidates: list[dict[str, Any]] = []
     pages: set[int] = set()
-    site = re.compile(rf"({_ELEMENT})\((\d+[a-z])\)\s+({_NUMBER})\s+({_NUMBER})\s+({_NUMBER})", re.IGNORECASE)
-    phase_parts: dict[tuple[str, tuple[tuple[str, float], ...]], dict[str, Any]] = {}
+    header_pressure = re.search(r"(?:at|under)\s+(\d+(?:\.\d+)?)\s*GPa", text[:heads[0].start()], re.IGNORECASE)
+    phase_parts: dict[tuple, dict[str, Any]] = {}
     for index, head in enumerate(heads):
-        symbol = head.group(1)
+        symbol, material = head.group("symbol"), head.group("material")
         segment = text[head.start():heads[index + 1].start() if index + 1 < len(heads) else len(text)]
         page = _page_for_offset(markdown, table_start + head.start())
         if page:
             pages.add(page)
-        normalized = segment.replace("\uf061", "alpha").replace("\uf062", "beta").replace("\uf067", "gamma")
+        normalized = segment.translate(_GREEK_CELL_NAMES)
         cells = _cell_parameters(normalized)
         pressure_match = re.search(r"\((\d+(?:\.\d+)?)\s*GPa\)", normalized[:160], re.IGNORECASE)
-        pressure = float(pressure_match.group(1)) if pressure_match else None
+        pressure = float(pressure_match.group(1)) if pressure_match else float(header_pressure.group(1)) if header_pressure else None
         unique_rows = {tuple(row.group(part) for part in (1, 2, 3, 4, 5)): row
-                       for row in site.finditer(normalized)}
+                       for row in _SITE_ROW.finditer(normalized)}
         valid_rows = [(row, [float(row.group(part)) for part in (3, 4, 5)])
                       for row in unique_rows.values()]
+        missing_rows = len(_SITE_LABEL.findall(normalized)) != len(list(_SITE_ROW.finditer(normalized)))
         invalid_sites = 0
+        rounding_adjustments = []
         try:
             from pymatgen.symmetry.groups import SpaceGroup
+            from backend.services.wyckoff_rounding import restore_rounded_site
             group_for_sites = SpaceGroup(symbol)
             valid_rows = []
             for row in unique_rows.values():
                 multiplicity = int(re.match(r"\d+", row.group(2)).group())
-                coords = [float(row.group(part)) for part in (3, 4, 5)]
-                if len(group_for_sites.get_orbit(coords)) != multiplicity:
-                    # PDF 表格把精确 1/3、2/3 等分数打印为五位小数；只有位点
-                    # 多重性因此恢复一致时才采用精确分数，原始数值留在引句中。
-                    fractions = (0.0, 0.25, 1 / 3, 0.5, 2 / 3, 0.75, 1.0)
-                    rounded = [min(fractions, key=lambda item: abs(item - value))
-                               if min(abs(item - value) for item in fractions) <= 0.00005 else value
-                               for value in coords]
-                    if len(group_for_sites.get_orbit(rounded, tol=0.0001)) != multiplicity:
-                        invalid_sites += 1
-                        continue
-                    coords = rounded
+                try:
+                    coords, adjustment = restore_rounded_site(group_for_sites, [row.group(i) for i in (3, 4, 5)], multiplicity)
+                except ValueError:
+                    invalid_sites += 1
+                    continue
+                if adjustment:
+                    rounding_adjustments.append({"site": f"{row.group(1)}({row.group(2)})", **adjustment})
                 valid_rows.append((row, coords))
         except Exception:
             invalid_sites = len(unique_rows)
-        identity = (symbol, tuple(sorted(cells.items())))
+        identity = (material, symbol, pressure, tuple(sorted(cells.items())))
+        # 跨页重复表头可省略压力；只与唯一的同几何、同材料条件合并。
+        compatible = [key for key in phase_parts if key[:2] == identity[:2] and key[3] == identity[3]
+                      and (key[2] == pressure or key[2] is None or pressure is None)]
+        if len(compatible) == 1:
+            identity = compatible[0]
         part = phase_parts.get(identity)
         if part is None:
-            phase_parts[identity] = {"symbol": symbol, "segment": segment, "page": page,
+            phase_parts[identity] = {"symbol": symbol, "material": material, "segment": segment, "page": page,
                                      "cells": cells, "pressure": pressure, "rows": valid_rows,
+                                     "missing_rows": missing_rows,
+                                     "rounding_adjustments": rounding_adjustments,
                                      "invalid_sites": invalid_sites,
-                                     "pressure_source": {**source, "page": page, "quote": segment.strip()} if pressure is not None else None}
+                                     "pressure_source": {**source, "page": page if pressure_match else _page_for_offset(markdown, table.start()),
+                                                         "quote": segment.strip() if pressure_match else text[:heads[0].start()].strip()} if pressure is not None else None}
         else:
             if pressure is not None:
                 part["pressure"] = pressure
                 part["pressure_source"] = {**source, "page": page, "quote": segment.strip()}
             if (invalid_sites == 0, len(valid_rows)) > (part["invalid_sites"] == 0, len(part["rows"])):
-                part.update(segment=segment, page=page, rows=valid_rows, invalid_sites=invalid_sites)
+                part.update(segment=segment, page=page, rows=valid_rows, invalid_sites=invalid_sites,
+                            missing_rows=missing_rows, rounding_adjustments=rounding_adjustments)
     for part in phase_parts.values():
         symbol, segment, page = part["symbol"], part["segment"], part["page"]
         cells, pressure, rows = dict(part["cells"]), part["pressure"], part["rows"]
         source_with_quote = {**source, "page": page, "quote": segment.strip()}
+        condition_id = hashlib.sha256(repr((part["material"], symbol, pressure, sorted(cells.items()))).encode()).hexdigest()[:16]
         try:
             from pymatgen.core import Lattice, Structure
             from pymatgen.symmetry.groups import SpaceGroup
@@ -315,14 +331,22 @@ def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list
             required = {"a", "b", "c", "alpha", "beta", "gamma"}
             if not required.issubset(cells):
                 raise ValueError("缺少可验证的晶胞参数")
+            if part["missing_rows"]:
+                raise ValueError("原子标签与坐标列已拆散，无法可靠恢复逐行对应关系")
             if part["invalid_sites"]:
-                raise ValueError("位点多重性与报告空间群不一致，需人工核对")
+                raise ValueError("位点多重性与报告空间群不一致，需核对原文坐标精度或舍入")
             if not rows:
                 raise ValueError("缺少可验证的原子位点")
             species = [row.group(1) for row, _ in rows]
             coords = [point for _, point in rows]
             lattice = Lattice.from_parameters(*(cells[key] for key in ("a", "b", "c", "alpha", "beta", "gamma")))
             structure = Structure.from_spacegroup(group.symbol, lattice, species, coords)
+            if len(structure) != sum(int(re.match(r"\d+", row.group(2)).group()) for row, _ in rows):
+                raise ValueError("展开原子数与报告的位点多重性之和不一致")
+            if part["material"]:
+                from pymatgen.core import Composition
+                if structure.composition.reduced_composition != Composition(part["material"]).reduced_composition:
+                    raise ValueError("展开后的化学计量与表中化学式不一致")
             atoms = AseAtomsAdaptor.get_atoms(structure)
             candidate = build_structure_candidate(
                 structure_format="cif", structure_text=serialize_atoms(atoms, "cif"),
@@ -331,11 +355,13 @@ def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list
             )
             candidate["original_format"] = None
             candidate["original_text"] = None
+            candidate["candidate_id"] += ":" + condition_id
             candidate["reported_structure"] = {"space_group_symbol": symbol, "cell_parameters": cells,
-                                               "pressure_value_gpa": pressure, "independent_sites": len(rows)}
+                                               "material": part["material"], "pressure_value_gpa": pressure, "independent_sites": len(rows)}
             candidate["derivation"] = {"kind": "space_group_expansion" if group.int_number != 1 else "direct_coordinates",
-                                        "label": "空间群展开" if group.int_number != 1 else "原文直接报告",
+                                        "label": "按原文精度恢复对称约束后展开" if part["rounding_adjustments"] else "空间群展开" if group.int_number != 1 else "原文直接报告",
                                         "inferred_cell_parameters": inferred,
+                                        "rounding_adjustments": part["rounding_adjustments"],
                                         "rounded_fractional_sites": [f"{row.group(1)}({row.group(2)})" for row, point in rows
                                                                      if point != [float(row.group(i)) for i in (3, 4, 5)]]}
             if part["pressure_source"] and part["pressure_source"]["quote"] != source_with_quote["quote"]:
@@ -345,7 +371,8 @@ def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list
             blocked = _blocked_candidate(source, f"结构表 {symbol} 无法生成可靠模型：{exc}",
                                          page=page, quote=segment.strip(), cell_parameters=cells)
             blocked["reported_structure"] = {"space_group_symbol": symbol, "cell_parameters": cells,
-                                             "pressure_value_gpa": pressure}
+                                             "material": part["material"], "pressure_value_gpa": pressure}
+            blocked["candidate_id"] += ":" + condition_id
             candidates.append(blocked)
     return candidates, pages
 
@@ -355,11 +382,26 @@ def extract_structure_candidates(
     *,
     source: dict[str, Any],
     material_state_ref: str | None = None,
+    pdf_path: Path | None = None,
 ) -> list[dict[str, Any]]:
     """Extract one candidate per explicit page block to avoid merging conditions."""
     text = str(markdown or "")
     if not text.strip():
         return []
+    if pdf_path is not None:
+        # 仅在坐标表页取原 PDF 的行布局；不从已丢列关系的 Markdown 猜测坐标。
+        import pymupdf
+        with pymupdf.open(pdf_path) as document:
+            for index, page in enumerate(document):
+                rows = page.get_text(sort=True)
+                if not re.search(r"Atomic\s+coordinates\s*\(fractional\)", rows, re.IGNORECASE):
+                    continue
+                marker = f"<!-- page: {index + 1} -->"
+                pattern = rf"{re.escape(marker)}.*?(?=<!--\s*page:\s*\d+\s*-->|\Z)"
+                block = re.search(pattern, text, flags=re.DOTALL)
+                if block and _SITE_LABEL.search(block.group()) and len(_SITE_LABEL.findall(block.group())) == len(_SITE_ROW.findall(block.group())):
+                    continue
+                text = re.sub(pattern, lambda _: marker + "\n" + rows + "\n", text, flags=re.DOTALL)
     blocks = re.split(r"(?=<!--\s*page:\s*\d+\s*-->)", text, flags=re.IGNORECASE)
     if len(blocks) == 1:
         blocks = [text]
