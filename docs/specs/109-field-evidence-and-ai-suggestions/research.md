@@ -151,3 +151,9 @@ PDF优先保留现有来源授权与高亮服务，字段级来源不能丢file_
 只记录核对不足以解释“谁修改了什么”。因此在已有保存入口追加实际操作者的字段差异：上传由显式 editor 参数接收认证用户，不能取任务 owner；返修拒绝客户端日志，管理员复用既有论文处理历史 JSON。既有 manual evidence 仍负责理由、材料及门禁，不用其行创建时间冒充每次值修改时刻。普通保存不改变无核对草稿的保留规则。
 
 真实 PDF 故障有两处：旧对象化任务缺少可选区域 IR 时抛 StorageFileNotFound，原降级路径没有捕获；request_llm_config 又把不调用模型的预览路由纳入模型目录验证。仅对可选 IR 缺失启用原 PDF 唯一文字定位，预览、预检及人工证据 GET 不依赖模型配置，认证与原文件身份、哈希校验保留。长引句首屏压缩显示，定位用全文。真实图、实际放大和窄屏证据见[实施验证](field-review-implementation-validation.md)。
+
+### 字段名路径与 Demo 不一致的原因
+
+ScientificFieldBox 名称按钮直接调用 onSettings()，ScientificFieldSettingsDrawer 在没有 presentation 时打开独立 Drawer。只有从核对标记进入 EvidenceWorkflow、再选设置页时才创建 presentation 并嵌入统一侧栏，因此此前测试通过的入口无法覆盖用户截图路径。Demo 的字段名调用 open(id, 'settings')，与本地 FR-048 一致；远程 #109 旧正文仍要求原文、人工记录、AI 内容保留，未同步的三页签增量也不能成为删除可达入口的依据。
+
+修复复用字段节点到核对记录的已有定位结果，避免再次按名称猜字段或将两个 μ* 的来源混合。字段名与核对标记只改变初始页签，之后都可访问设置、来源、历史。验收改用完整 UploadTaskEditor 和原任务只读快照，并明确身份与 HTTP 夹具边界。

@@ -21,7 +21,11 @@ export default function ScientificFieldBox({ name, value, readOnly, numeric, fie
   }, [field, onSettings])
   return <Box data-scientific-field={field} data-scientific-field-key={fieldKey} data-issue-field={field} sx={{ position: 'relative', boxSizing: 'border-box', width: fullWidth ? '100%' : 'max-content', minWidth: fullWidth ? 0 : 140, maxWidth: '100%', flex: '0 0 auto',
     border: 1, borderColor: error ? 'error.main' : 'divider', borderRadius: 1, px: 1.25, py: .5 }}>
-    <Button size="small" onClick={() => onSettings()} aria-label={`设置字段：${name}`} sx={{ p: 0, minWidth: 0, maxWidth: 'calc(100% - 20px)', fontSize: 12, lineHeight: 1.5, textAlign: 'left', textTransform: 'none' }}>{name}</Button>
+    <Button size="small" onClick={event => {
+      const request = { field, name, value, handled: false }
+      event.currentTarget.dispatchEvent(new CustomEvent('scwiki:open-field-settings', { bubbles: true, detail: request }))
+      if (!request.handled) onSettings()
+    }} aria-label={`设置字段：${name}`} sx={{ p: 0, minWidth: 0, maxWidth: 'calc(100% - 20px)', fontSize: 12, lineHeight: 1.5, textAlign: 'left', textTransform: 'none' }}>{name}</Button>
     <TextField variant="standard" value={value} placeholder="未填写" type={numeric ? 'number' : 'text'}
       error={Boolean(error)} helperText={error} onChange={event => onChange?.(event.target.value)}
       slotProps={{ input: { disableUnderline: true, readOnly: readOnly || !onChange }, htmlInput: { 'aria-label': name, step: 'any' } }}

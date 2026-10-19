@@ -20,6 +20,7 @@ const records: EvidenceRecord[] = [
  {key:'method',item_key:'method',record_key:'r',module_key:'m',state_key:'s',record_field:'method_code',field:prefix+'method_code',fields:[prefix+'method_code'],label:'预测方法',status:'supported',reason:'仅核对当前方法',current_value:'isotropic_eliashberg',evidences:[{file_id:'main',chunk_index:0,quote:'method'}],audit_events:[{id:'run-method',actor:{kind:'ai',model:'Method Model'},occurred_at:'2026-10-19T09:00:00Z',summary:'AI核对当前方法，未改值'}]},
  {key:'lambda',item_key:'lambda',record_key:'r',module_key:'m',state_key:'s',record_field:'payload.parameters.lambda_ep',field:prefix+'payload.parameters.lambda_ep',fields:[prefix+'payload.parameters.lambda_ep'],label:'λ独立核对',status:'unsupported',reason:'λ示例尚需核对',current_value:3.94,evidences:[]},
  {key:'software',item_key:'software',record_key:'r',module_key:'m',state_key:'s',record_field:'payload.calculation_conditions.calculation_code',field:prefix+'payload.calculation_conditions.calculation_code',fields:[prefix+'payload.calculation_conditions.calculation_code'],label:'计算软件',status:'supported',reason:'软件来源',current_value:'Quantum ESPRESSO',evidences:[{file_id:'main',chunk_index:0,page_start:5,quote:'Quantum ESPRESSO'}]},
+ {key:'mu',item_key:'mu',record_key:'r',module_key:'m',state_key:'s',record_field:'payload.parameters.mu_star',field:prefix+'payload.parameters.mu_star',fields:[prefix+'payload.parameters.mu_star'],label:'μ*',status:'supported',reason:'当前组合的μ*来源',current_value:.1,evidences:[{file_id:'main',chunk_index:0,quote:'mu = 0.1'}],audit_events:[{id:'mu-review',actor:{kind:'ai',model:'Mu Model'},occurred_at:'2026-10-19T09:00:00Z',summary:'核对当前μ*，保留0.1'}]},
 ]
 beforeEach(()=>{vi.mocked(api.get).mockImplementation(async path=>(path.includes('/form-definitions')?(path.includes('?')?[definition]:definition):{ok:true,data:{changed:false,items:[],reason:'',history:[]}})as never)
  vi.mocked(api.post).mockImplementation(async path=>(path.endsWith('/preflight')?{version:'v',needs_check:true,records:structuredClone(records)}:{status:'located',image:'data:image/png;base64,eA==',region:[0,0,1,1]})as never)})
@@ -32,6 +33,43 @@ function Harness({readOnly=false}:{readOnly?:boolean}){
 }
 const drawer=()=>document.querySelector('.evidence-review-drawer') as HTMLElement
 async function show(){await act(async()=>render(<Harness/>));fireEvent.click(screen.getByText('超导性质'));await screen.findByRole('button',{name:/计算软件：查看来源核对/})}
+it.each(['μ*','计算软件','电声耦合强度 λ'])('点击字段名 %s 直接进入统一侧栏设置页，原文/人工/AI/历史仍可访问',async name=>{
+ await show();fireEvent.click(screen.getByRole('button',{name:`设置字段：${name}`,exact:true}))
+ expect(await within(drawer()).findByLabelText('字段名称（key）')).toBeVisible()
+ expect(within(drawer()).getByRole('tab',{name:'字段设置'})).toHaveAttribute('aria-selected','true')
+ expect(within(drawer()).getAllByRole('tab')).toHaveLength(3)
+ expect(document.querySelectorAll('.MuiDrawer-paper')).toHaveLength(1)
+ fireEvent.change(within(drawer()).getByLabelText('字段名称（key）'),{target:{value:'尚未应用的名称'}})
+ fireEvent.click(within(drawer()).getByRole('tab',{name:'来源核对'}))
+ for(const title of ['系统找到的原文','人工修改记录','AI 理由'])expect(within(drawer()).getByText(title,{selector:'summary'})).toBeVisible()
+ if(name==='μ*')expect(within(drawer()).getByText(/mu = 0.1/)).toBeVisible()
+ fireEvent.click(within(drawer()).getByRole('tab',{name:'历史记录'}))
+ fireEvent.click(within(drawer()).getByText('历史记录',{selector:'summary'}))
+ if(name==='μ*')expect(within(drawer()).getByText('AI · Mu Model')).toBeVisible()
+ fireEvent.click(within(drawer()).getByRole('tab',{name:'字段设置'}))
+ expect(within(drawer()).getByLabelText('字段名称（key）')).toHaveValue('尚未应用的名称')
+ fireEvent.click(within(drawer()).getByRole('button',{name:'取消',exact:true}))
+ await waitFor(()=>expect(drawer()).toBeNull())
+ expect(screen.getByRole('button',{name:`设置字段：${name}`,exact:true})).toBeVisible()
+ expect(vi.mocked(api.post).mock.calls.every(([path])=>path.endsWith('/preflight'))).toBe(true)
+})
+it('从μ*字段名应用修改后关闭统一侧栏，只修改当前字段',async()=>{
+ await show();fireEvent.click(screen.getByRole('button',{name:'设置字段：μ*',exact:true}))
+ fireEvent.change(await within(drawer()).findByLabelText('值'),{target:{value:'0.12'}})
+ fireEvent.click(within(drawer()).getByRole('button',{name:'应用修改',exact:true}))
+ await waitFor(()=>expect(drawer()).toBeNull())
+ expect(screen.getByRole('textbox',{name:'μ*',exact:true})).toHaveValue('0.12')
+ expect(screen.getByRole('textbox',{name:'Tc',exact:true})).toHaveValue('311')
+})
+it('无核对记录的字段名仍进三页签，只读设置不出现写入操作',async()=>{
+ await act(async()=>render(<Harness readOnly/>));fireEvent.click(screen.getByText('超导性质'))
+ fireEvent.click(await screen.findByRole('button',{name:'设置字段：ωlog',exact:true}))
+ expect(await within(drawer()).findByLabelText('字段名称（key）')).toBeDisabled()
+ expect(within(drawer()).getAllByRole('tab')).toHaveLength(3)
+ expect(within(drawer()).queryByRole('button',{name:'应用修改'})).not.toBeInTheDocument()
+ fireEvent.click(within(drawer()).getByRole('tab',{name:'来源核对'}))
+ expect(within(drawer()).getByText('系统找到的原文',{selector:'summary'})).toBeVisible()
+})
 it('方法只审自身，无Tc集合审核入口；三页签和四块分区不混入其他子项',async()=>{
  await show()
  expect(screen.queryByRole('button',{name:'超导转变温度 Tc'})).not.toBeInTheDocument()

@@ -186,8 +186,8 @@ export function useEvidenceWorkflow(options?: {
   }
   // 核对记录变化时在绘制前保持阅读位置，避免关闭动画期间先下移再跳回。
   useLayoutEffect(() => { preserveDrawerPosition() }, [records])
-  const openIssue = (key: string, keys?: string[], fallback?: EvidenceRecord) => {
-    setDrawerTab('source'); setIssueListOpen(false)
+  const openIssue = (key: string, keys?: string[], fallback?: EvidenceRecord, tab: 'source' | 'settings' = 'source') => {
+    setDrawerTab(tab); setIssueListOpen(false)
     setFallbackRecord(fallback)
     drawerSession.current += 1
     const trigger = document.activeElement
@@ -642,7 +642,7 @@ export function useEvidenceWorkflow(options?: {
         </Tabs>
         <Box hidden={drawerTab !== 'settings'} key={'settings:' + activeRecord.key} sx={{ pt: 2 }}>
           <ReviewFieldSettings identity={activeRecord.item_key || activeRecord.key} field={options?.getCurrentValue?.(activeRecord)?.field || activeRecord.field}
-            enabled={drawerTab === 'settings'} onDone={() => setDrawerTab('source')} onEdit={() => editCurrent(activeRecord)} />
+            enabled={drawerTab === 'settings'} onDone={closeDrawer} onEdit={() => editCurrent(activeRecord)} />
         </Box>
         <Box hidden={drawerTab !== 'source'} key={'source:' + activeRecord.key}>
         <ReviewSection title={t('evidence.foundSources')} initialOpen>

@@ -1,0 +1,39 @@
+{
+  "time": "2026-10-19T07:44:26.531Z",
+  "scope": "真实UploadTaskEditor与原任务草稿/预检的只读快照；HTTP身份为隔离夹具；PDF经正式区域服务读取原文件，无真实保存",
+  "checks": {
+    "tabs": [
+      "字段设置",
+      "来源核对",
+      "历史记录"
+    ],
+    "selected_tab": "字段设置",
+    "mu": "0.1",
+    "desktop_drawer": {
+      "width": 480,
+      "right": 1512
+    },
+    "source_sections": [
+      "系统找到的原文",
+      "人工修改记录",
+      "AI 理由",
+      "历史记录",
+      "查看详情",
+      "旧整条记录结论，仅供参考，不代表当前子项已核对（10）"
+    ],
+    "history_expandable": true,
+    "real_pdf": {
+      "width": 1106,
+      "height": 412,
+      "complete": true
+    },
+    "narrow": {
+      "width": 390,
+      "client": 390,
+      "scroll": 390
+    },
+    "errors": [],
+    "writes": []
+  },
+  "region_requests": 1
+}

@@ -8,7 +8,7 @@ import type { PropertyRecordDraft } from '../lib/propertyModules'
 interface Props {
   records: EvidenceRecord[]
   scope: string
-  onOpen: (key: string, keys?: string[], fallback?: EvidenceRecord) => void
+  onOpen: (key: string, keys?: string[], fallback?: EvidenceRecord, tab?: 'source' | 'settings') => void
   onChange: (field: string, pathKind?: 'current' | 'snapshot') => void
 }
 const normalize = (field: string) => field.replace(/^user_values\./, '').replace(/^paper\.(co_first_authors|corresponding_authors)$/, 'paper.authors')
@@ -94,6 +94,28 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
   const theme = useTheme()
   const [targets, setTargets] = useState<Array<{ record: EvidenceRecord; node: HTMLElement }>>([])
   const [owners, setOwners] = useState<Record<string, string>>({})
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>(`[data-evidence-scope="${scope}"]`)
+    if (!root) return
+    const openSettings = (event: Event) => {
+      const request = (event as CustomEvent<{ field: string; name: string; value: string; handled: boolean }>).detail
+      if (request.handled) return
+      const node = (event.target as HTMLElement).closest<HTMLElement>('[data-scientific-field]')
+      if (!node) return
+      request.handled = true
+      const found = targets.find(target => target.node === node)?.record
+      if (found) onOpen(found.key, [found.key], found.placeholder ? found : undefined, 'settings')
+      else {
+        // 新增或尚未载入核对结果的字段仍使用同一侧栏，不伪造来源资格。
+        const field = request.field.replace(/\.(\d+)(?=\.|$)/g, '[$1]')
+        const key = `view:${scope}:${field}`
+        onOpen(key, [key], { key, field, label: request.name, current_value: request.value,
+          status: 'unchecked', reason: '', evidences: [], required: false, placeholder: true }, 'settings')
+      }
+    }
+    root.addEventListener('scwiki:open-field-settings', openSettings)
+    return () => root.removeEventListener('scwiki:open-field-settings', openSettings)
+  }, [scope, targets, onOpen])
   useEffect(() => {
     const root = document.querySelector<HTMLElement>(`[data-evidence-scope="${scope}"]`)
     if (!root) return
