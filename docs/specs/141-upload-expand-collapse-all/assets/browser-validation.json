@@ -1,0 +1,469 @@
+{
+  "date": "2026-10-19",
+  "fixture": "tests/fixtures/issue141/draft.json",
+  "boundary": "真实生产组件及浏览器，所有API由隔离夹具拦截；不写真实任务，不代表生产部署",
+  "checks": [
+    {
+      "name": "初始：两卡展开，八模块默认收起",
+      "modules": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "states": [
+        "true",
+        "true"
+      ],
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "name": "顶部一次展开两卡八模块",
+      "modules": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "states": [
+        "true",
+        "true"
+      ],
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "name": "顶部一次收起两卡八模块",
+      "modules": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "states": [
+        "false",
+        "false"
+      ],
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "name": "单独重开材料仍保持模块收起",
+      "modules": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "states": [
+        "true",
+        "false"
+      ],
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "name": "重复展开恢复手动收起模块",
+      "modules": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "states": [
+        "true",
+        "true"
+      ],
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "name": "Space触发全部折叠",
+      "modules": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "states": [
+        "false",
+        "false"
+      ],
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "name": "Enter触发全部展开",
+      "modules": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "states": [
+        "true",
+        "true"
+      ],
+      "width": 1440,
+      "viewport": 1440
+    },
+    {
+      "name": "390px收起无横向溢出",
+      "modules": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "states": [
+        "false",
+        "false"
+      ],
+      "width": 390,
+      "viewport": 390
+    },
+    {
+      "name": "390px展开无新增横向溢出",
+      "modules": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "states": [
+        "true",
+        "true"
+      ],
+      "width": 390,
+      "viewport": 390
+    },
+    {
+      "name": "折叠没有新增保存或解析请求",
+      "requestsBefore": 4
+    },
+    {
+      "name": "英文按钮展开",
+      "modules": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "states": [
+        "true",
+        "true"
+      ],
+      "width": 390,
+      "viewport": 390
+    }
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "path": "/api/rag/llm/current",
+      "method": "GET"
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/llm/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/community/notifications/unread",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/llm/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/activity",
+      "method": "POST"
+    },
+    {
+      "path": "/api/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "method": "GET"
+    },
+    {
+      "path": "/api/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/parsing",
+      "method": "GET"
+    },
+    {
+      "path": "/api/classification-catalogs",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/space-groups",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/draft",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/evidence/preflight",
+      "method": "POST"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.superconductive_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.dynamical_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.thermodynamical_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.electronic_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/spectra",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/evidence/preflight",
+      "method": "POST"
+    },
+    {
+      "path": "/api/rag/llm/current",
+      "method": "GET"
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/llm/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/community/notifications/unread",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/llm/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/activity",
+      "method": "POST"
+    },
+    {
+      "path": "/api/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "method": "GET"
+    },
+    {
+      "path": "/api/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/parsing",
+      "method": "GET"
+    },
+    {
+      "path": "/api/classification-catalogs",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/space-groups",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/draft",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/evidence/preflight",
+      "method": "POST"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.superconductive_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.dynamical_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.thermodynamical_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.electronic_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/spectra",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/evidence/preflight",
+      "method": "POST"
+    },
+    {
+      "path": "/api/rag/llm/current",
+      "method": "GET"
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/llm/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/community/notifications/unread",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/llm/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/activity",
+      "method": "POST"
+    },
+    {
+      "path": "/api/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "method": "GET"
+    },
+    {
+      "path": "/api/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/parsing",
+      "method": "GET"
+    },
+    {
+      "path": "/api/classification-catalogs",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/space-groups",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/upload-tasks/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/draft",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/evidence/preflight",
+      "method": "POST"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.superconductive_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.dynamical_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.thermodynamical_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/form-definitions/record.electronic_properties.custom/versions/1",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/spectra",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/evidence/preflight",
+      "method": "POST"
+    }
+  ],
+  "artifact_source": "原始HEAD归档叠加本次增量，经npm run build后在127.0.0.1:5179运行生产构建产物"
+}

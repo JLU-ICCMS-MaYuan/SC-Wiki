@@ -1,0 +1,10 @@
+{
+  "base_commit": "5bff8b0affa715adba32565255d13243bbeeedcc",
+  "files": {
+    "frontend/src/components/MaterialStatesEditor.tsx": "87bac11426be656c633ca289738f69b270b771a341dcb8b569f6d0c5e384bb2d",
+    "frontend/src/pages/UploadPage.tsx": "40386e0a7a483b91379b9f34a139fe62b593eb7452d48a03f12c73c0a0d323c1",
+    "frontend/src/context/MaterialStateControlsContext.ts": "1b58ee8c881da4f15a80623a84f4eda6d8dd7929bcdaf8defbfde11b7be46198",
+    "tests/01_decentralized_uploading/upload-expand-collapse-all.test.tsx": "7abc312009a0d603876f83661e233de91bc904689058e1bea4f372221779cc48",
+    "tests/fixtures/issue141/draft.json": "5c9baca7123e868d178d00baafb71f8d6254350d352b258c8b7e7f8e56e94cb1"
+  }
+}

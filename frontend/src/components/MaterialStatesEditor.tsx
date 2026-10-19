@@ -2,7 +2,9 @@ import { changedScientificFields } from '../lib/evidenceFields'
 import { materialStateSummary } from '../lib/materialStateSummary'
 import { PropertySpectraProvider, PropertySpectrumState, PropertySpectrumControls, UnassignedPropertySpectra, type PropertySpectraContext } from './PropertySpectra'
 import { materialIdentityMissing, materialLabel } from '../lib/materialIdentity'
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { MaterialStateControlsContext } from '../context/MaterialStateControlsContext'
 import { readOnlyEvidenceFormSx } from './EvidenceFieldMarkers'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Card, CardContent, Chip, Collapse, FormControl,
@@ -251,6 +253,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   propertySpectra,
 }) => {
   const { t, lang, dict } = useLanguage()
+  const controlsContainer = useContext(MaterialStateControlsContext)
+  const editorRef = useRef<HTMLDivElement>(null)
   const statesRef = useRef(states)
   statesRef.current = states
   // 折叠状态与元素种类数编辑仅存在于浏览器会话内，不写入草稿、不参与自动保存
@@ -379,6 +383,10 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
   const setAllCollapsed = (value: boolean) => {
     if (readOnly) return
+    // 只切换当前编辑器的物性模块；保留原生单项操作、结构区和记录内部的展开状态。
+    editorRef.current?.querySelectorAll<HTMLDetailsElement>(
+      '[data-property-modules] [data-property-module-section]',
+    ).forEach(section => { section.open = !value })
     setCollapsedStates(value
       ? Object.fromEntries(statesRef.current.map((_, index) => [index, true]))
       : {})
@@ -607,21 +615,23 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     cardEnvironmentRef.current = environment
   }
 
+  const bulkControls = <>
+    <Button size="small" variant="outlined" disabled={readOnly || states.length === 0}
+      onClick={() => setAllCollapsed(true)}>{t('common.collapseAll')}</Button>
+    <Button size="small" variant="outlined" disabled={readOnly || states.length === 0}
+      onClick={() => setAllCollapsed(false)}>{t('common.expandAll')}</Button>
+  </>
+
   return (
     <PropertySpectraProvider context={propertySpectra || (spectrumTarget ? { target: spectrumTarget, beforeNavigate: beforeSpectrumEdit } : undefined)}
       stateKeys={states.map((state, index) => state.state_key || 'state-' + (index + 1))} readOnly={readOnly}>
-    <Box sx={readOnly ? readOnlyEvidenceFormSx : undefined}>
+    <Box ref={editorRef} sx={readOnly ? readOnlyEvidenceFormSx : undefined}>
       <PropertySpectrumControls />
       <Box sx={{ mt: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
           <Typography variant="h6" fontWeight={700}>{t('upload.materialStatesTitle')}</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            {states.length > 0 && (
-              <>
-                <Button size="small" onClick={() => setAllCollapsed(true)}>{t('common.collapseAll')}</Button>
-                <Button size="small" onClick={() => setAllCollapsed(false)}>{t('common.expandAll')}</Button>
-              </>
-            )}
+            {controlsContainer ? createPortal(bulkControls, controlsContainer) : states.length > 0 && bulkControls}
             <Button startIcon={<AddIcon />} onClick={addState}>{t('upload.addMaterialState')}</Button>
           </Box>
         </Box>
@@ -870,7 +880,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                     onChange={updateStructureCandidate}
                   />
 
-                  <Box data-testid={`property-modules-${index}`} sx={{ mt: 2 }}>
+                  <Box data-property-modules data-testid={`property-modules-${index}`} sx={{ mt: 2 }}>
                     <PropertySpectrumState stateKey={state.state_key || `state-${index + 1}`} summary={materialStateSummary(state)}>
                     <PropertyModuleEditor
                       modules={state.property_modules || []}

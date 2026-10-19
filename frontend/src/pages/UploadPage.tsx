@@ -11,6 +11,7 @@ import {
 } from '@mui/icons-material'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
+import { MaterialStateControlsContext } from '../context/MaterialStateControlsContext'
 import AuthDialog from '../components/AuthDialog'
 import UploadTaskCenter from '../components/UploadTaskCenter'
 import MultiFileUploadPanel from '../components/MultiFileUploadPanel'
@@ -60,6 +61,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const [taskLoading, setTaskLoading] = useState(false)
   const [taskPollTick, setTaskPollTick] = useState(0)
   const [taskCenterTick, setTaskCenterTick] = useState(0)
+  const [materialControlsContainer, setMaterialControlsContainer] = useState<HTMLDivElement | null>(null)
 
   /* ── JSON import state ─────────────────────── */
   const [parsed, setParsed] = useState<ParsedGroup | null>(null)
@@ -386,15 +388,17 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
           {activeTaskId && taskState && (
             <Box sx={{ mb: 3 }}>
               <Card variant="outlined" sx={{ overflow: 'visible' }}>
+                <MaterialStateControlsContext.Provider value={materialControlsContainer}>
                 <CardContent>
                   <Box role="region" aria-label={t('upload.taskActionsAria')} sx={{
                     position: 'sticky', top: 0, zIndex: theme => theme.zIndex.appBar - 1,
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1,
+                    flexWrap: { xs: 'wrap', sm: 'nowrap' },
                     mx: -2, mt: -2, mb: 2, px: 2, py: 0.5,
                     bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider',
                     boxShadow: '0 1px 2px rgba(15,23,42,0.08)',
                   }}>
-                    <Box sx={{ minWidth: 0, flex: 1 }}>
+                    <Box sx={{ minWidth: 0, flex: 1, flexBasis: { xs: '100%', sm: 0 } }}>
                       <Typography variant="h6" fontWeight={700} noWrap sx={{ fontSize: { xs: 16, sm: 18 }, lineHeight: '24px' }}>{taskState?.filename || t('upload.readingTask')}</Typography>
                       <Typography variant="body2" color="text.secondary" noWrap sx={{ lineHeight: '18px' }}>
                         {taskState
@@ -406,7 +410,10 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                           : t('upload.restoringProgress')}
                       </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 1,
+                      flexWrap: 'wrap', width: { xs: '100%', sm: 'auto' }, flexShrink: 0 }}>
+                      <Box ref={setMaterialControlsContainer} data-material-state-controls
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }} />
                       {taskLoading && <CircularProgress size={22} />}
                       <Button
                         size="small"
@@ -486,6 +493,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                   )}
                   {activeTaskId && <UploadParsingDetail key={`${activeTaskId}:${taskPollTick}`} taskId={activeTaskId} onSubmitted={handleTaskSubmitted} />}
                 </CardContent>
+                </MaterialStateControlsContext.Provider>
               </Card>
             </Box>
           )}
