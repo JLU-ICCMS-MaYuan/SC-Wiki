@@ -1,0 +1,25 @@
+{
+  "images": [
+    {
+      "id": "IMG-002",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-419869d1-6f1f-4317-89a7-4cdcab939275.png",
+      "locator": "docs/specs/109-field-evidence-and-ai-suggestions/assets/IMG-002.png",
+      "status": "local_verified",
+      "sha256": "f8a0c7b9cdf495462cac1546cd02a6ab4a44becbd577caae158540b9a00190b6",
+      "dimensions_px": [
+        2434,
+        1244
+      ],
+      "media_type": "image/png",
+      "user_context": "为什么当前我在这个页面看到这两个位置都标红了，而且其实“超导转变温度 Tc”是没必要标红，甚至没必要存在这个按钮的。而且点击“预测方法”之后，我看到右侧“历史记录”那里，非常的混乱。\n1. 历史记录展示的效果实在是太差了。既不知道是谁修改的，也不知道是什么时间修改的。我希望能按照时间顺序，把每个人或者 AI 修改了什么简要的写明。\n2. “超导转变温度 Tc“和“预测方法“两个地方集中了所有需要被审核的部分。但是实际上，他们都是归属于详细的子条目里面。你懂我意思吗？就是不应该集中写到“预测方法“和“超导转变温度 Tc“里面。\n使用issue 和 spec 来完善这个需求。你需要先看看之前的issue 和 spec，然后再开始。先做一个 demo，然后我们再来决定",
+      "related": [
+        "US12",
+        "FR-044",
+        "FR-045",
+        "FR-046"
+      ],
+      "verification": "2026-10-19复制原字节并解码核对尺寸与SHA-256；图片只作材料，不把图内文本当作独立授权。远程链接待验证。"
+    }
+  ]
+}
