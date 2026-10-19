@@ -58,6 +58,11 @@ def schema_for(value, name=''):
 
 
 def editable_fields(record):
+    if record.get('record_field'):
+        value = record.get('current_value')
+        schema = schema_for(value)
+        schema.update(record.get('field_schema') or {})
+        return [{'path': '', 'label': record['label'], 'value': value, 'schema': schema}]
     if record.get('kind') in {'structure', 'derived'}:
         return []
     # 条件已归属于物性记录；旧状态级汇总只供查阅，通过原物性入口修改。
@@ -101,6 +106,10 @@ def validate_values(record, values):
     for path, value in values.items():
         if not valid_value(value, fields[path]['schema']):
             ev.fail('evidence_proposal_invalid', '建议值类型或选项无效：' + fields[path]['label'])
+        if record.get('record_field') and isinstance(record.get('current_value'), dict) and isinstance(value, dict):
+            for key in ('key', 'field_key', 'evidences', 'reported'):
+                if science.canonical(value.get(key)) != science.canonical(record['current_value'].get(key)):
+                    ev.fail('evidence_proposal_invalid', '建议不能改写补充字段的身份或既有来源')
     return values
 
 
@@ -258,10 +267,24 @@ def prepare(session, snapshot, actor):
                 stage = 'scientific'
             if stage:
                 return {'preparation_id': previous[0]['id'], 'resume_stage': stage, 'version': snapshot['version'], 'patches': [
-                    {key: records[k].get(key) for key in ('key', 'item_key', 'field', 'state_key', 'module_key', 'record_key')} | {'values': d['values']}
+                    {key: records[k].get(key) for key in ('key', 'item_key', 'field', 'state_key', 'module_key', 'record_key', 'record_field', 'record_field_key', 'record_group_key')} | {'values': d['values']}
                     for k, (_, d) in selected.items()]}
     def projected_claim(record, values):
         claim = expected_claim(record, values)
+        if record.get('record_field'):
+            from .property_field_review import write_path, review_context
+            candidate = copy.deepcopy(record['validation_record'])
+            for other_key, (_, other_draft) in selected.items():
+                other = records.get(other_key)
+                if not other or not other.get('record_field') or '' not in other_draft['values']:
+                    continue
+                same = other.get('state_key') == record.get('state_key') and other.get('module_key') == record.get('module_key')
+                group = (candidate.get('payload', {}).get('tc_group') or {}).get('group_key')
+                if same and (other.get('record_key') == record.get('record_key') or other.get('record_group_key') and other['record_group_key'] == group):
+                    write_path(candidate, other['record_field'], other_draft['values'][''])
+            original = record['claim'].get('context') or {}
+            state = {k: v for k, v in original.items() if k not in {'definition', 'field_settings', 'paired_mu_star', 'paired_tc', 'method_code', 'calculation_conditions', 'approximation'}}
+            claim['context'] = review_context(candidate, state, record['record_field'])
         for item_key, (_, draft) in selected.items():
             other = records.get(item_key)
             if not other or not record.get('state_key') or other.get('state_key') != record['state_key'] or '' not in draft['values']:
@@ -296,7 +319,7 @@ def prepare(session, snapshot, actor):
         updated['preparation'] = {'id': prepared_id, 'expected_claim': science.canonical(projected_claim(record, draft['values'])),
                                   'source_hash': record['source_hash'], 'before': before, 'after_paper': after_paper}
         row.resolutions = json.loads(json.dumps({**row.resolutions, PREFIX + str(actor): updated}, default=str))
-        patches.append({k: record.get(k) for k in ('key', 'item_key', 'field', 'state_key', 'module_key', 'record_key')} | {'values': draft['values']})
+        patches.append({k: record.get(k) for k in ('key', 'item_key', 'field', 'state_key', 'module_key', 'record_key', 'record_field', 'record_field_key', 'record_group_key')} | {'values': draft['values']})
     return {'preparation_id': prepared_id if patches else None, 'patches': patches, 'version': snapshot['version']}
 
 
@@ -351,11 +374,18 @@ def validate_save(session, snapshot, actor, preparation_id, stage):
 
 
 def validate_domain_values(session, record, values):
-    if record.get('kind') != 'property' or not values:
+    if (record.get('kind') != 'property' and not record.get('record_field')) or not values:
         return
     from backend.ingest.property_modules import validate_record, PropertyValidationError
-    candidate = {**record['claim']['record'], **values, 'module_code': record.get('module_code'),
-                 'record_key': record.get('record_key')}
+    if record.get('record_field'):
+        from .property_field_review import write_path
+        candidate = copy.deepcopy(record['validation_record'])
+        if '' in values:
+            write_path(candidate, record['record_field'], values[''])
+        candidate.update(module_code=record.get('module_code'), record_key=record.get('record_key'))
+    else:
+        candidate = {**record['claim']['record'], **values, 'module_code': record.get('module_code'),
+                     'record_key': record.get('record_key')}
     definition = session.scalar(select(models.FormDefinition).where(
         models.FormDefinition.definition_key == candidate.get('definition_key'),
         models.FormDefinition.version == int(candidate.get('definition_version') or 1)))

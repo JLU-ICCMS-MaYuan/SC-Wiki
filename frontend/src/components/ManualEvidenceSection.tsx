@@ -19,7 +19,7 @@ function PendingImage({ file, alt }: { file: File; alt: string }) {
 }
 
 export default function ManualEvidenceSection({ target, record, version, drafts, value = record.current_value,
-  localChanged = false, prepare }: {
+  localChanged = false, prepare, readOnly = false, showHistory = true, onRecords }: {
   target?: EvidenceTarget
   record: EvidenceRecord
   version?: string
@@ -27,6 +27,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
   value?: unknown
   localChanged?: boolean
   prepare?: () => Promise<PreparedManualEvidence>
+  readOnly?: boolean; showHistory?: boolean; onRecords?: (key: string, entries: ManualRecord[]) => void
 }) {
   const { t } = useLanguage()
   const [fallback] = useState(createManualEvidenceDrafts)
@@ -34,6 +35,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
   const key = manualDraftKey(target, record, value)
   const draft = useSyncExternalStore(store.subscribe, () => store.read(key))
   const { saved, reason, absence, choice, files, busy, error, notice } = draft
+  useEffect(() => { onRecords?.(record.item_key || record.key, saved ? [...(saved.id ? [saved] : []), ...(saved.history || [])] : []) }, [saved, onRecords, record.item_key, record.key])
   const [loading, setLoading] = useState(true)
   const [reload, setReload] = useState(0)
   const [dragging, setDragging] = useState(false)
@@ -178,14 +180,14 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
     {previous.length > 0 && <Box component="details"><Typography component="summary">{t('evidence.manualPreviousDraft')}</Typography>
       {previous.map(({ key: oldKey, draft: entry }) => <Box key={oldKey}><Typography>{entry.reason}</Typography><Typography>{entry.absence}</Typography>
         {entry.files.map((file, i) => <Typography key={i}>{file.name}</Typography>)}
-        <Button type="button" disabled={entry.busy} onClick={() => store.discard(oldKey)}>{t('evidence.manualDiscardPrevious')}</Button></Box>)}
+        <Button type="button" disabled={readOnly || entry.busy} onClick={() => store.discard(oldKey)}>{t('evidence.manualDiscardPrevious')}</Button></Box>)}
     </Box>}
     {localChanged && !saved?.changed && <Alert severity="info">{t('evidence.manualSyncPending')}</Alert>}
     {!changed ? <>{loading ? <Typography role="status">{t('evidence.manualLoading')}</Typography>
       : !error && !history.length && <Typography color="text.secondary">{t('evidence.noManualEdits')}</Typography>}</> : <>
-      {saved?.status === 'submitted' && !localChanged ? <>
-        <Typography>{t('evidence.manualReason')}：{saved.reason}</Typography>
-        {saved.no_evidence_reason && <Typography>{t('evidence.noEvidenceReason')}：{saved.no_evidence_reason}</Typography>}
+      {(saved?.status === 'submitted' && !localChanged) || readOnly ? <>
+        <Typography>{t('evidence.manualReason')}：{saved?.reason || reason}</Typography>
+        {saved?.no_evidence_reason && <Typography>{t('evidence.noEvidenceReason')}：{saved.no_evidence_reason}</Typography>}
       </> : <>
         <TextField fullWidth multiline minRows={2} label={t('evidence.manualReason')} value={reason} onChange={event => store.edit(key, { reason: event.target.value })} />
         <RadioGroup aria-label={t('evidence.evidenceChoice')} value={choice} onChange={event => store.edit(key, { choice: event.target.value as 'provide' | 'none' })}>
@@ -230,13 +232,13 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
       <Typography variant="caption">{t('evidence.humanProvided')} · {item.source_description}</Typography>
       {item.kind === 'text' ? <EvidenceReadableValue value={item.text} />
         : <Button type="button" size="small" onClick={() => void showFile(item)}>{item.filename || t('evidence.manualFile')}</Button>}
-      {saved?.status === 'draft' && <Button type="button" size="small" color="error" disabled={busy} onClick={() => void removeItem(item)}>{t('evidence.removeManualItem')}</Button>}
+      {saved?.status === 'draft' && !readOnly && <Button type="button" size="small" color="error" disabled={busy} onClick={() => void removeItem(item)}>{t('evidence.removeManualItem')}</Button>}
       {(item.kind === 'image' || item.kind === 'pdf') && item.ai_read_status !== 'read' && <Typography variant="caption" display="block">{t('evidence.fileNotRead')}</Typography>}
     </Box>)}
     {previewView}
     {notice && <Alert severity="info">{notice}</Alert>}
     {error && <Alert severity="error">{error}</Alert>}
     {error && !saved && <Button type="button" disabled={loading} onClick={() => { store.patch(key, { error: '' }); setReload(value => value + 1) }}>{t('evidence.manualRetryLoad')}</Button>}
-    {historyView}
+    {showHistory && historyView}
   </Box>
 }

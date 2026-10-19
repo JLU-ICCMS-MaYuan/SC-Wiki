@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from backend import models
 from backend.storage.paths import resolve_file
+from backend.storage.files import FileNotFound as StorageFileNotFound
 from .document_ir import DocumentIR
 from .document_parsers import DocumentSource
 from .pdf_evidence_crops import DPI, render_evidence_crops
@@ -28,8 +29,12 @@ def region_document(session, target, target_id, file_id, user):
             raise HTTPException(404, detail="来源文件不存在")
         # file_id 来自已认证的服务端 manifest，不能把客户端路径交给文件系统。
         ir_path = data_path("review_artifacts") / target_id / "document_ir" / f"{source['file_id']}.json"
-        ir_path = available_published_path(target_id, ir_path)
-        if not ir_path.is_file():
+        try:
+            ir_path = available_published_path(target_id, ir_path)
+        except (StorageFileNotFound, FileNotFoundError):
+            # 区域IR是可选产物；旧任务仍可从同一授权原PDF的文字层可靠定位。
+            ir_path = None
+        if ir_path is None or not ir_path.is_file():
             if not source.get("stored_path"):
                 return None, None, None
             path = resolve_file(str(source["stored_path"]), size=int(source.get("size") or 0),

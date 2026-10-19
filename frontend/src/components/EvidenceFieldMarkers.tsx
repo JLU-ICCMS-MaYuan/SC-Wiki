@@ -13,6 +13,12 @@ interface Props {
 }
 const normalize = (field: string) => field.replace(/^user_values\./, '').replace(/^paper\.(co_first_authors|corresponding_authors)$/, 'paper.authors')
 const valueText = (value: unknown) => typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value ?? '')
+function matchesField(node: HTMLElement, record: EvidenceRecord, suffix: string) {
+  suffix = suffix.replace('.omega_log_k', '.omega_log')
+  if (record.record_field_key && record.record_field?.startsWith('payload.calculation_conditions.extensions.')) return node.dataset.scientificFieldKey === record.record_field_key
+  if (record.record_field?.startsWith('payload.parameters.extensions.')) return Boolean(node.dataset.issueField?.includes('.payload.parameters.extensions.') && node.dataset.issueField.endsWith('.' + record.record_field.split('.').at(-1)))
+  return suffix !== '' && Boolean(node.dataset.issueField?.endsWith(suffix) || (suffix.includes('.payload.parameters.') && suffix.endsWith('.value_number') && node.dataset.issueField?.endsWith(suffix.slice(0, -13))))
+}
 
 function recordOwner(record: EvidenceRecord, scope: string) {
   if (!record.state_key) return '论文'
@@ -42,6 +48,9 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
   const label = `${names}：查看来源核对（${records.length}）`
   const hasProblem = records.some(evidenceProblem)
   useEffect(() => {
+    if (node.hasAttribute('data-scientific-field')) {
+      host.style.cssText = 'position:absolute;right:4px;top:4px;line-height:1'
+    }
     const target = fieldCaption(node)
     setCaption(target)
     if (!target) {
@@ -77,7 +86,7 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
       }
     }
   }, [host, node, records, onOpen, label, names, hasProblem])
-  return caption ? null : createPortal(<Button data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : 'primary'} size="small" aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], records[0]); else onOpen(records[0].key, records.map(r => r.key)) }}>{names}</Button>, host)
+  return caption ? null : createPortal(<Button data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : 'primary'} size="small" sx={node.hasAttribute('data-scientific-field') ? { minWidth: 20, p: 0 } : undefined} aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], records[0]); else onOpen(records[0].key, records.map(r => r.key)) }}>{node.hasAttribute('data-scientific-field') ? '•' : names}</Button>, host)
 }
 
 /** 在现有表单的字段锚点附加标记，避免复制动态表单和科学校验。 */
@@ -133,7 +142,8 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
           ? ['name_raw', 'value_raw', 'unit_raw'].map(name => record.field + '.' + name)
           : [...new Set(record.fields || [record.field])]
         return fields.filter(field => !fields.some(other => other !== field && other.startsWith(field + '.'))).flatMap(field => {
-          const suffix = field.startsWith(record.field) ? field.slice(record.field.length) : ''
+          const recordPath = record.record_field ? record.field.slice(0, record.field.length - record.record_field.length - 1) : record.field
+          const suffix = field.startsWith(recordPath) ? field.slice(recordPath.length) : ''
           const rowNodes = row ? Array.from(row.querySelectorAll<HTMLElement>('[data-issue-field]')) : scopedNodes
           const structures = Array.from(area.querySelectorAll<HTMLElement>('[data-scientific-structure]'))
           const structure = record.structure_hash ? structures.find(n => n.dataset.structureHash === record.structure_hash) : undefined
@@ -144,11 +154,11 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
           const tcValue = ['.value_raw', '.unit_raw', '.canonical_unit'].includes(suffix)
             ? row?.querySelector<HTMLElement>('[data-tc-current-value]') : undefined
           const dosValue = suffix === '' ? row?.querySelector<HTMLElement>('[data-dos-current-value]') : undefined
-          const exact = structure || (row ? rowNodes.find(n => n.dataset.issueField?.endsWith(suffix) && suffix !== '') || tcValue || dosValue || row : stateField || (!record.state_key ? scopedNodes.find(n => normalize(n.dataset.issueField || '') === normalize(field)) : undefined))
+          const exact = structure || (row ? rowNodes.find(n => matchesField(n, record, suffix)) || (!record.record_field ? tcValue || dosValue || row : undefined) : stateField || (!record.state_key ? scopedNodes.find(n => normalize(n.dataset.issueField || '') === normalize(field)) : undefined))
           const node = exact || (!record.state_key ? scopedNodes.filter(n => normalize(field).startsWith(normalize(n.dataset.issueField || '') + '.')).sort((a, b) => (b.dataset.issueField?.length || 0) - (a.dataset.issueField?.length || 0))[0] : undefined)
           // 组合控件与内部输入必须归一为同一个锚点，否则两次标注同一标签，
           // 下次更新会把已标注标签误判为外部按钮并额外插入一行标题。
-          const control = node?.matches('input,textarea,select') ? node.closest<HTMLElement>('.MuiInputBase-root') || node.parentElement : node?.matches('.MuiFormControl-root,.MuiAutocomplete-root') ? node.querySelector<HTMLElement>('.MuiInputBase-root') || node : node
+          const control = node?.hasAttribute('data-scientific-field') ? node : node?.querySelector<HTMLElement>('[data-scientific-field]') || (node?.matches('input,textarea,select') ? node.closest<HTMLElement>('.MuiInputBase-root') || node.parentElement : node?.matches('.MuiFormControl-root,.MuiAutocomplete-root') ? node.querySelector<HTMLElement>('.MuiInputBase-root') || node : node)
           return control ? [{ record, node: control }] : []
         })
       })

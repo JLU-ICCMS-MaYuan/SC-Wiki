@@ -461,7 +461,7 @@ def get_draft(task_id: str) -> dict[str, Any] | None:
     return draft
 
 
-def save_draft(task_id: str, draft: dict[str, Any]) -> dict[str, Any]:
+def save_draft(task_id: str, draft: dict[str, Any], *, editor=None) -> dict[str, Any]:
     draft = convert_legacy_scientific_draft(draft)
     if isinstance(draft.get("paper"), dict):
         draft["paper"].pop("material_relations", None)
@@ -473,6 +473,11 @@ def save_draft(task_id: str, draft: dict[str, Any]) -> dict[str, Any]:
     if not raw_state:
         raise KeyError("上传任务不存在或已过期")
     state = apply_user_activity(json.loads(raw_state), now=int(time.time()))
+    if editor is not None:
+        from .evidence_audit import draft_change_events
+        previous = client.get(draft_key(task_id))
+        state['_field_change_events'] = [*(state.get('_field_change_events') or []),
+            *draft_change_events(json.loads(previous) if previous else {}, draft, editor)]
     ttl = max(1, int(state.get("cleanup_at") or (int(time.time()) + TASK_TTL)) - int(time.time()))
     with client.pipeline(transaction=True) as pipeline:
         pipeline.setex(task_key(task_id), ttl, _encoded(state))

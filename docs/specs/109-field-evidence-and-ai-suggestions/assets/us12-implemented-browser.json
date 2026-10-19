@@ -1,0 +1,54 @@
+{
+  "checked_at": "2026-10-19T07:16:42.358Z",
+  "scope": "正式共享组件 + 真实原PDF + 正式区域路由；只读桥接绑定原上传者，未覆盖正常登录HTTP完整链路",
+  "source": {
+    "task_id": "c16cc627a0c04dc8ad4289624d1da80a",
+    "doi": "10.1073/pnas.2401840121",
+    "sha256": "7fccce6780e71f826519256542a5416f5b256e1aa2b546b68e194468688e2bbd",
+    "pdf_page": 5
+  },
+  "checks": {
+    "no_tc_collection_button": true,
+    "three_tabs": [
+      "字段设置",
+      "来源核对",
+      "历史记录"
+    ],
+    "source_initially_open": true,
+    "independent_collapses": true,
+    "real_pdf_images": [
+      {
+        "width": 1106,
+        "height": 412,
+        "decoded": true
+      },
+      {
+        "width": 1108,
+        "height": 897,
+        "decoded": true
+      }
+    ],
+    "long_quote_sent_untruncated": true,
+    "zoom_dialog": {
+      "width": 1448,
+      "height": 504
+    },
+    "real_pdf_zoom": true,
+    "unapplied_settings_retained": true,
+    "tabs_collapses_keep_pdf_without_request": true,
+    "no_other_issue_buttons": true,
+    "pdf_repeat_request": true,
+    "readonly_no_review_writes": true,
+    "readonly_pdf": true,
+    "narrow_drawer": {
+      "width": 390,
+      "right": 390,
+      "scrollWidth": 390,
+      "clientWidth": 390
+    },
+    "browser_errors": []
+  },
+  "region_requests": 3,
+  "business_writes": 0,
+  "model_calls": 0
+}

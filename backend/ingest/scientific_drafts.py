@@ -417,8 +417,12 @@ async def persist_scientific_draft(
             for record_index, item in enumerate(module.get("records") or []):
                 entity = records_by_key.get((module_ids.get(module.get("module_key")), item.get("record_key")))
                 for evidence in evidence_list(item) if entity is not None else []:
+                    record_path = f"{state_path}.property_modules[{module_index}].records[{record_index}]"
+                    relative = str(evidence.get('field_path') or '')
+                    if relative in {'method_code', 'value_number', 'value_min', 'value_max', 'value_text', 'value_boolean'} or relative.startswith(('payload.parameters.', 'payload.calculation_conditions.')):
+                        record_path += '.' + relative
                     targets.append(ScientificEvidenceTarget(
-                        f"{state_path}.property_modules[{module_index}].records[{record_index}]",
+                        record_path,
                         evidence, "property_record", entity,
                     ))
     return targets
@@ -447,6 +451,6 @@ def add_scientific_evidence_link(
     elif target.kind == "property_record":
         session.add(models.PropertyRecordEvidence(
             record_id=target.entity.id,
-            field_path=target.field_path,
+            field_path=target.evidence.get('field_path') or target.field_path,
             **common,
         ))

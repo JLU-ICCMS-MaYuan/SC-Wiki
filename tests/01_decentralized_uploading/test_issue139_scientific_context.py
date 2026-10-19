@@ -214,6 +214,7 @@ def test_changed_document_hash_invalidates_even_when_old_quote_survives():
     apply_associations(d,[candidate(d)],ctx)
     rows=[r for r in ev.draft_records(d,{}) if r['kind']=='property']
     snap=ev.complete_snapshot('upload','task',rows,ctx['sources'],d)
+    snap['records'] = [r for r in snap['records'] if r.get('record_field') == 'payload.calculation_conditions.k_grid']
     bind_snapshot_source_documents(snap,{'main':{'sha256':'a'*64,'role':'main'}})
     before=snap['version']
     assert not snap['records'][0]['source_associations'][0]['stale']

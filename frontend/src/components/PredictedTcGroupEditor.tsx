@@ -65,7 +65,7 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
     {methods.map((method, methodIndex) => {
       const members = records.filter(r => tcMethodKey(r) === method), first = members[0]
       const points = members.flatMap(tcPointViews)
-      return <Box key={method} role="group" aria-label={`第${methodIndex + 1}种预测方法`}>
+      return <Box key={method} role="group" data-record-key={first.record_key} aria-label={`第${methodIndex + 1}种预测方法`}>
         <PropertyRecordRow actions={readOnly ? undefined : <Tooltip title="删除本方法及其全部组合"><IconButton color="error" size="small" aria-label={`删除第${methodIndex + 1}种方法`}
           onClick={() => onChange(records.filter(r => tcMethodKey(r) !== method))}><DeleteIcon /></IconButton></Tooltip>}>
           <Box data-testid="tc-method-line" sx={{ display: 'flex', alignItems: 'center', gap: 1, overflowX: 'auto', py: 1, '& > *': { flex: '0 0 auto' } }}>

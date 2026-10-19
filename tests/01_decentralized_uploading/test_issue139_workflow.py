@@ -47,16 +47,17 @@ def test_suggestion_pipeline_preserves_direct_facts_and_marks_inference(tmp_path
     assert r['value_min']==281 and r['value_max']==311
     assert r['payload']['parameters']['lambda_ep']==3.94
     assert r['payload']['calculation_conditions']['k_grid']=='24×24×24'
-    result=next(iter(results.values()))
+    snap,checks=stored[0]
+    field=next(row for row in snap['records'] if row.get('record_field')=='payload.calculation_conditions.k_grid')
+    result=results[field['key']]
     assert result['status']=='uncertain' and result['adopted_basis']=='paper_inference'
     assert result['auto_filled'] and result['auto_filled_content_hash']
-    snap,checks=stored[0]
-    assert snap['records'][0]['source_associations'][0]['stale'] is False
+    assert field['source_associations'][0]['stale'] is False
     # 后续模型不能把推断提升为“原文直接支持”；人工改值使说明失效。
-    checked=ev.checked_result(snap['records'][0],{'status':'supported','evidences':[c['fact_evidences'][0]]},sources)
+    checked=ev.checked_result(field,{'status':'supported','evidences':[c['fact_evidences'][0]]},sources)
     assert checked['status']=='uncertain' and checked['source_kind']=='paper_inference'
     r['payload']['calculation_conditions']['k_grid']='12×12×12'
-    changed=snapshot('task',1,parsing_draft=d)['records'][0]
+    changed=next(row for row in snapshot('task',1,parsing_draft=d)['records'] if row.get('record_field')=='payload.calculation_conditions.k_grid')
     assert changed['source_associations'][0]['stale'] is True
     assert ev.checked_result(changed,{'status':'supported','evidences':[c['fact_evidences'][0]]},sources)['status']=='uncertain'
 

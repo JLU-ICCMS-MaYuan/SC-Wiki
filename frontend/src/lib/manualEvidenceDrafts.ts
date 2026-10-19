@@ -15,6 +15,7 @@ export interface ManualRecord {
   after_value?: unknown
   actor_user_id?: number
   actor_name?: string
+  created_at?: string
   status?: string
   reason: string
   no_evidence_reason: string

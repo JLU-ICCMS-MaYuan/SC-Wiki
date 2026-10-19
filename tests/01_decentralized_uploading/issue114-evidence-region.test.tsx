@@ -33,3 +33,14 @@ it('切换来源后不显示迟到的旧区域', async () => {
   finish({ status: 'located', image: 'data:image/png;base64,aA==', region: [0,0,1,1] })
   await waitFor(() => expect(screen.queryByRole('img')).not.toBeInTheDocument())
 })
+
+it('图像区域加载失败可以显式重试，同一来源恢复后重新显示图像', async () => {
+  vi.mocked(api.post).mockResolvedValue({ status: 'located', image: 'data:image/png;base64,aA==', region: [0,0,1,1] })
+  render(<EvidenceRegion target={{ target: 'upload', target_id: 'task' }} source={{ ...source, evidence_kind: 'pdf_image', block_id: 'b1' }} />)
+  const image = await screen.findByRole('img')
+  fireEvent.error(image)
+  fireEvent.click(await screen.findByRole('button', { name: '重新加载原 PDF 区域' }))
+  expect(await screen.findByRole('img')).toBeInTheDocument()
+  expect(api.post).toHaveBeenCalledTimes(2)
+  expect(screen.getByText(/Tc = 200 K/)).toBeInTheDocument()
+})

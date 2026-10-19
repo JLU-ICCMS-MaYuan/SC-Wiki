@@ -466,7 +466,8 @@ def test_put_draft_saves_half_filled_draft(monkeypatch):
 
     saved = {}
 
-    def _save(_task_id, draft):
+    def _save(_task_id, draft, *, editor):
+        assert editor.id == 1
         saved["draft"] = draft
         return draft
 

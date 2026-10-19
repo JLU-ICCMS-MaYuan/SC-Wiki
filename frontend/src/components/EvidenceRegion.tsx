@@ -8,12 +8,13 @@ import type { EvidenceSource, EvidenceTarget } from './EvidenceWorkflow'
 type Crop = { image: string; highlights: number[][]; width?: number; height?: number; pdf_page?: number; source_raster_dpi?: number }
 type Region = { status: string; image?: string; region?: number[]; regions?: number[][]; crops?: Crop[]; dpi?: number; pdf_page?: number; printed_page?: number; message?: string; parser?: { name: string; mode: string } }
 
-function CropView({ crop, label, onClick }: { crop: Crop; label: string; onClick: () => void }) {
+function CropView({ crop, label, onClick, onFailure }: { crop: Crop; label: string; onClick: () => void; onFailure?: () => void }) {
   const { t } = useLanguage()
   const [failed, setFailed] = useState(false)
-  if (failed) return <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>
+  useEffect(() => { setFailed(false) }, [crop.image])
+  if (failed) return onFailure ? null : <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>
   return <Box component="button" type="button" onClick={onClick} aria-label={label} sx={{ display: 'block', position: 'relative', p: 0, border: 0, bgcolor: 'transparent', cursor: 'zoom-in', width: crop.width || 'max-content' }}>
-    <Box component="img" src={crop.image} alt={t('evidence.regionImage')} onError={() => setFailed(true)} sx={{ display: 'block', maxWidth: 'none', width: crop.width ? `${crop.width}px` : 'auto', height: crop.height ? `${crop.height}px` : 'auto' }} />
+    <Box component="img" src={crop.image} alt={t('evidence.regionImage')} onError={() => { setFailed(true); onFailure?.() }} sx={{ display: 'block', maxWidth: 'none', width: crop.width ? `${crop.width}px` : 'auto', height: crop.height ? `${crop.height}px` : 'auto' }} />
     {crop.highlights.map((region, index) => <Box key={index} aria-hidden sx={{ position: 'absolute', pointerEvents: 'none', border: '2px solid #d32f2f', boxSizing: 'border-box',
       left: `${region[0] * 100}%`, top: `${region[1] * 100}%`, width: `${region[2] * 100}%`, height: `${region[3] * 100}%` }} />)}
   </Box>
@@ -30,11 +31,11 @@ export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; so
     generation.current++
     setResult(null); setBusy(false); setError(false); setExpandedCrop(null)
     return () => { generation.current++ }
-  }, [target?.target, target?.target_id, source.file_id, source.page_start, source.quote, source.block_id])
+  }, [target?.target, target?.target_id, source.file_id, source.page_start, source.page_end, source.chunk_index, source.quote, source.block_id, source.evidence_kind])
   const open = async () => {
     if (!target || (!source.quote && !source.block_id) || busy) return
     const current = generation.current
-    setBusy(true); setError(false)
+    setBusy(true); setError(false); setResult(null); setExpandedCrop(null)
     try {
       const data = await api.post<Region>('/api/rag/evidence/region', { ...target, file_id: source.file_id, pdf_page: source.page_start, quote: source.quote, block_id: source.block_id })
       if (generation.current === current) setResult(data)
@@ -54,11 +55,16 @@ export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; so
     : result?.status === 'unlocated' ? t('evidence.regionQuoteUnlocated')
       : result?.status === 'render_unavailable' ? t('evidence.regionRenderFailed')
         : t('evidence.regionUnavailable')
+  const quote = source.quote || source.content || ''
   return <Box sx={{ my: 1 }}>
-    <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {page ? t('evidence.page', { page }) : t('evidence.pageUnknown')}{source.quote || source.content ? `：${source.quote || source.content}` : ''}</Typography>
+    <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {page ? t('evidence.page', { page }) : t('evidence.pageUnknown')}{quote ? `：${quote.length > 500 ? quote.slice(0, 360) + '…' : quote}` : ''}</Typography>
+    {quote.length > 500 && <Box component="details" sx={{ my: 1 }}><Typography component="summary" variant="caption" sx={{ cursor: 'pointer' }}>{t('evidence.fullQuote')}</Typography>
+      <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{quote}</Typography>
+    </Box>}
     {target && (source.quote || source.block_id) && source.evidence_kind !== 'pdf_image' && <Button disabled={busy} onClick={() => void open()}>{t('evidence.viewRegion')}</Button>}
     {busy && <LinearProgress aria-label={t('evidence.regionLoading')} />}
     {error && <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>}
+    {source.evidence_kind === 'pdf_image' && (error || result && result.status !== 'located') && <Button disabled={busy} onClick={() => void open()}>{t('evidence.retryRegion')}</Button>}
     {result && result.status !== 'located' && <Alert severity="info">{unavailable}</Alert>}
     {crops.length > 0 && <>
       <Typography>{result?.parser?.mode === 'legacy_text' ? t('evidence.legacyTextLocator') : result?.parser?.name}{result?.printed_page != null ? ` · ${t('evidence.printedPage', { page: result.printed_page })}` : ''}{result?.dpi ? ` · ${result.dpi} DPI` : ''}</Typography>
@@ -67,7 +73,7 @@ export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; so
         {crop.pdf_page && crops.length > 1 && <Typography variant="caption">{t('evidence.page', { page: crop.pdf_page })}</Typography>}
         {crop.source_raster_dpi && <Alert severity="warning">{t('evidence.sourceRasterLowDpi', { dpi: crop.source_raster_dpi })}</Alert>}
         <Box sx={{ maxHeight: 440, overflow: 'auto', border: 1, borderColor: 'divider' }}>
-          <CropView crop={crop} label={t('evidence.expandRegion')} onClick={() => setExpandedCrop(index)} />
+          <CropView crop={crop} label={t('evidence.expandRegion')} onClick={() => setExpandedCrop(index)} onFailure={() => setError(true)} />
         </Box>
       </Box>)}
     </>}

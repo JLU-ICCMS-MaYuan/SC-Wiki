@@ -247,6 +247,8 @@ async def request_llm_config(request: Request):
         model_independent = (
             request.url.path.startswith(("/api/rag/conversations", "/api/rag/definitions/"))
             or request.url.path == "/api/rag/source-links"
+            or request.url.path in {"/api/rag/evidence/region", "/api/rag/evidence/preflight"}
+            or request.method == "GET" and request.url.path.startswith("/api/rag/evidence/") and "/manual/" in request.url.path
             or request.method == "GET" and request.url.path.startswith("/api/rag/papers/")
         )
         if request.url.path in {"/api/rag/llm/catalog", "/api/rag/llm/default-config"} or model_independent:

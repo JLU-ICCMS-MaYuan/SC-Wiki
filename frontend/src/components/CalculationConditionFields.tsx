@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import type { JsonSchema } from '../lib/formDefinitions'
 import { newStableKey, type PropertyRecordDraft, type PropertyValueKind } from '../lib/propertyModules'
-import ScientificFieldBox from './ScientificFieldBox'
+import ScientificFieldBox, { type FieldSettingsPresentation } from './ScientificFieldBox'
 import ScientificFieldSettingsDrawer from './ScientificFieldSettingsDrawer'
 
 const stages: Record<string, string> = { electron_phonon: '声子／电声耦合', structural_relaxation: '结构优化', electronic_structure: '电子结构', sscha: 'SSCHA', aimd: '分子动力学', superconductivity: '超导计算' }
@@ -28,8 +28,9 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
   const conditions = record.payload.calculation_conditions as Record<string, any> || {}
   const extensions: Record<string, any>[] = conditions.extensions || []
   const [editing, setEditing] = useState<Editing | null>(null), [error, setError] = useState('')
+  const [presentation, setPresentation] = useState<FieldSettingsPresentation>()
   const write = (next: Record<string, any>) => onChange({ ...record, payload: { ...record.payload, calculation_conditions: next } })
-  const open = (next: Editing) => { setError(''); setEditing({ ...next, recordKey: record.record_key }) }
+  const open = (next: Editing, host?: FieldSettingsPresentation) => { setPresentation(host); setError(''); setEditing({ ...next, recordKey: record.record_key }) }
   const rawValue = (key: string) => Array.isArray(conditions[key]) ? conditions[key].join(' × ') : String(conditions[key] ?? '')
   const fixed = Object.entries(schema.properties || {}).filter(([key, child]) => key !== 'extensions' && child.type !== 'object')
   const save = () => {
@@ -77,23 +78,23 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
         const display = conditions.field_settings?.[key], name = display?.name_raw || child.title || settings[key] || key
         return <ScientificFieldBox key={key} name={name} value={rawValue(key)} readOnly={readOnly} numeric={['number', 'integer'].includes(child.type || '')} field={`${basePath}.${key}`}
           onChange={value => write({ ...conditions, [key]: ['number', 'integer'].includes(child.type || '') ? value === '' ? null : Number(value) : child.type === 'array' ? value.split(/[x×,\s]+/).filter(Boolean).map(Number) : value })}
-          onSettings={() => open({ fixed: true, key, snapshot: signature([conditions[key], display]), name, kind: ['number', 'integer'].includes(child.type || '') ? 'number' : 'text', raw: rawValue(key), unit: display?.unit_raw || '', })} />
+          onSettings={host => open({ fixed: true, key, snapshot: signature([conditions[key], display]), name, kind: ['number', 'integer'].includes(child.type || '') ? 'number' : 'text', raw: rawValue(key), unit: display?.unit_raw || '', }, host)} />
       })}
       {extensions.filter(item => !String(item.key || '').startsWith('structural_relaxation.')).map(item => {
         const index = extensions.indexOf(item)
-        return <ScientificFieldBox key={item.field_key || item.key || index} name={conditionName(item)} value={conditionValue(item)} readOnly={readOnly} field={`${basePath}.extensions.${index}.value_raw`}
+        return <ScientificFieldBox key={item.field_key || item.key || index} name={conditionName(item)} value={conditionValue(item)} readOnly={readOnly} field={`${basePath}.extensions.${index}.value_raw`} fieldKey={item.field_key || item.key}
           error={item.value_kind === 'number' && item.value_raw && (item.value_number == null || !Number.isFinite(item.value_number)) ? '请输入完整有效的数值' : undefined}
           onChange={['text', 'number'].includes(item.value_kind || 'text') ? raw => {
             const updated = { ...item, value_raw: raw, ...(item.value_kind === 'number' ? { value_number: raw.trim() ? Number(raw) : null } : { value_text: raw }) }
             write({ ...conditions, extensions: extensions.map((entry, i) => i === index ? updated : entry) })
           } : undefined}
-          onSettings={() => open({ index, fixed: false, snapshot: signature(item), name: conditionName(item), kind: item.value_kind || 'text',
-            raw: item.value_kind === 'boolean' ? item.value_boolean == null ? '' : String(item.value_boolean) : conditionValue(item), unit: item.unit_raw || '' })} />
+          onSettings={host => open({ index, fixed: false, snapshot: signature(item), name: conditionName(item), kind: item.value_kind || 'text',
+            raw: item.value_kind === 'boolean' ? item.value_boolean == null ? '' : String(item.value_boolean) : conditionValue(item), unit: item.unit_raw || '' }, host)} />
       })}
     </Box>
     {!readOnly && <Button size="small" onClick={() => open({ fixed: false, snapshot: '', name: '', raw: '', unit: '', kind: 'number' })}>＋ 新增字段</Button>}
     {extensions.some(item => String(item.key || '').startsWith('structural_relaxation.')) && <Typography variant="caption" component="p" color="text.secondary">结构优化阶段的设置保留在原记录和导出中，不作为当前超导计算条件展示。</Typography>}
-    <ScientificFieldSettingsDrawer value={editing} readOnly={readOnly} typeLocked={editing?.fixed}
+    <ScientificFieldSettingsDrawer presentation={presentation} value={editing} readOnly={readOnly} typeLocked={editing?.fixed}
       adding={editing?.index == null && !editing?.fixed} error={error}
       onChange={value => setEditing(current => current && { ...current, ...value })} onApply={save} onClose={() => setEditing(null)}
       onDelete={editing?.index == null ? undefined : () => {

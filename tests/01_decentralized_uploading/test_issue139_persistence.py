@@ -85,7 +85,7 @@ def test_mysql_draft_submission_revision_evidence_export_and_permission(tmp_path
             assert association['fact_evidences'][0]['file_id']==file_id
             assert association['target_fingerprint']==scientific_fingerprint(exported)
             snap=ev.paper_snapshot(db,pid,uid,'user',check_access=False)
-            prop=next(row for row in snap['records'] if row.get('kind')=='property')
+            prop=next(row for row in snap['records'] if row.get('record_field')=='payload.calculation_conditions.k_grid')
             assert not prop['source_associations'][0]['stale']
             checked=ev.checked_result(prop,{'status':'supported','evidences':prop['evidences']},snap['chunks'])
             assert checked['status']=='uncertain'

@@ -1,5 +1,6 @@
 // 比较科学编辑值；稳定身份用于数组匹配，排序与纯补证不会使核对失效。
 import type { EvidenceRecord } from '../components/EvidenceWorkflow'
+import { getAtPath } from './formDefinitions'
 
 /** 当前字段按稳定身份读取；返回路径只用于聚焦，不作为数据身份。 */
 export function currentEvidenceField(record: EvidenceRecord, paper: Record<string, unknown>, states: Array<Record<string, any>>) {
@@ -17,6 +18,30 @@ export function currentEvidenceField(record: EvidenceRecord, paper: Record<strin
       if (ri < 0) return undefined
       value = value.property_modules[mi].records[ri]
       field = field.replace(/\.property_modules\[\d+\]/, `.property_modules[${mi}]`).replace(/\.records\[\d+\]/, `.records[${ri}]`)
+      if (record.record_field) {
+        let path = record.record_field
+        if (path.includes('.omega_log_k') && getAtPath(value, path) == null) {
+          path = path.replace('.omega_log_k', '.omega_log')
+          field = field.replace('.omega_log_k', '.omega_log')
+        }
+        if (path.includes('.extensions.') && (record.record_field_key || record.current_value && typeof record.current_value === 'object')) {
+          const [group] = path.split('.extensions.')
+          const extensions = getAtPath(value, group + '.extensions') as Array<Record<string, unknown>> | undefined
+          const matches = extensions?.map((e, i) => ({ e, i })).filter(({ e }) => record.record_field_key
+            ? (e.field_key || e.key) === record.record_field_key : JSON.stringify(e) === JSON.stringify(record.current_value)) || []
+          const index = matches.length === 1 ? matches[0].i : -1
+          if (index < 0) return undefined
+          path = path.replace(/\.extensions\.\d+/, `.extensions.${index}`)
+          field = field.replace(/\.extensions\.\d+/, `.extensions.${index}`)
+        }
+        const scalar = getAtPath(value, path) ?? null
+        let annotations: unknown
+        if (path.startsWith('payload.parameters.mu_star') || path.startsWith('payload.parameters.extensions.')) annotations = value.payload.field_settings?.mu_star
+        else if (path.startsWith('payload.parameters.')) annotations = value.payload.parameters?.field_settings?.[path.split('.')[2].replace('omega_log_k', 'omega_log')]
+        else if (path.startsWith('payload.calculation_conditions.') && !path.includes('.extensions.')) annotations = value.payload.calculation_conditions?.field_settings?.[path.split('.')[2]]
+        else if (path.startsWith('value_')) annotations = value.payload.field_settings?.tc
+        return { value: scalar, field, manualValue: scalar, comparisonValue: { value: scalar, field_settings: annotations } }
+      }
       // 说明绑定物性值及材料条件；其他物性或排序变化不改变本条说明身份。
       const context = Object.fromEntries(Object.entries(state).filter(([key]) =>
         !['property_modules', 'structures', 'structure_candidates', 'evidence', 'evidences', 'field_evidence', 'display_order'].includes(key)))
@@ -32,6 +57,7 @@ const overlaps = (left: string, right: string) => left === right || left.startsW
 
 export function evidenceFieldAffected(record: EvidenceRecord, field: string, records: EvidenceRecord[] = []) {
   if (overlaps(record.field, field)) return true
+  if (record.record_field && record.record_dependencies?.some(path => overlaps(record.field.slice(0, record.field.length - record.record_field!.length) + path, field))) return true
   const identity = field.match(/^(material_states\[\d+\])\.(material_name|material)$/)
   if (identity && record.field.startsWith(identity[1] + '.')) return true
   if (record.provenance?.kind === 'derived') {

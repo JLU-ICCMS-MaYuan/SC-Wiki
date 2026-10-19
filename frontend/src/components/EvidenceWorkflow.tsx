@@ -1,3 +1,7 @@
+import ReviewSection from './ReviewSection'
+import ReviewFieldSettings from './ReviewFieldSettings'
+import EvidenceHistoryTimeline, { type AuditEvent } from './EvidenceHistoryTimeline'
+import type { ManualRecord } from '../lib/manualEvidenceDrafts'
 import { EvidenceRegion } from './EvidenceRegion'
 import EvidenceReadableValue from './EvidenceReadableValue'
 import ManualEvidenceSection from './ManualEvidenceSection'
@@ -5,7 +9,7 @@ import ScientificAssociations, { type ScientificAssociation } from './Scientific
 import DosFermiConflict, { dosRecordForEvidence } from './DosFermiConflict'
 import { hasDosConflict, sameDosValue } from '../lib/fermiDos'
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, Snackbar, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, Snackbar, Tabs, Tab, TextField, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { api } from '../lib/api'
 import { evidenceProblem } from './EvidenceFieldMarkers'
@@ -19,6 +23,8 @@ export interface ProposalField { path: string; label: string; value: unknown; sc
 export interface ProposalDraft { values: Record<string, unknown>; accepted: boolean; reason: string; supported?: boolean }
 export type EvidenceBasis = 'paper_quote' | 'paper_inference' | 'general_knowledge'
 export interface EvidenceHistory {
+  audit_events?: AuditEvent[]
+  legacy_scope?: string
   current_value?: unknown
   reason?: string
   ai_reason?: string
@@ -27,7 +33,7 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+export interface EvidenceRecord { audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
@@ -68,13 +74,18 @@ function aiReasonText(record: EvidenceRecord, t: (key: string) => string): strin
 // 运行任务与持久问题列表分开；关闭抽屉不清除任何核对结果。
 export function useEvidenceWorkflow(options?: {
   target?: EvidenceTarget
-  getCurrentValue?: (record: EvidenceRecord) => { value: unknown; field: string; manualValue?: unknown } | undefined
+  readOnly?: boolean
+  getCurrentValue?: (record: EvidenceRecord) => { value: unknown; field: string; manualValue?: unknown; comparisonValue?: unknown } | undefined
   saveCurrent?: () => Promise<boolean>
 }) {
   const { t } = useLanguage()
   const [view, setView] = useState<View | null>(null)
   const [automatic, setAutomatic] = useState(false)
   const [records, setRecords] = useState<EvidenceRecord[]>([])
+  const [drawerTab, setDrawerTab] = useState('source')
+  const [issueListOpen, setIssueListOpen] = useState(false)
+  const [manualHistory, setManualHistory] = useState<Record<string, ManualRecord[]>>({})
+  const receiveManualHistory = useCallback((key: string, entries: ManualRecord[]) => setManualHistory(old => JSON.stringify(old[key]) === JSON.stringify(entries) ? old : { ...old, [key]: entries }), [])
   const [selected, setSelected] = useState<string | null>(null)
   const [fallbackRecord, setFallbackRecord] = useState<EvidenceRecord | undefined>()
   const [reasons, setReasons] = useState<Record<string, string>>({})
@@ -97,7 +108,7 @@ export function useEvidenceWorkflow(options?: {
     for (const record of records) {
       const key = record.item_key || record.key
       const current = optionsRef.current?.getCurrentValue?.(record)
-      if (current && !observedValues.current.has(key)) observedValues.current.set(key, copyValue(current.value))
+      if (current && !observedValues.current.has(key)) observedValues.current.set(key, copyValue(current.comparisonValue ?? current.value))
     }
   })
   useEffect(() => () => { clearTimeout(invalidationTimer.current) }, [])
@@ -106,6 +117,10 @@ export function useEvidenceWorkflow(options?: {
     return current ? ('manualValue' in current ? current.manualValue : current.value) : record.current_value
   }
   const hasLocalManualEdit = (record: EvidenceRecord) => {
+    if (record.record_field) {
+      const current = optionsRef.current?.getCurrentValue?.(record)
+      return Boolean(current && manualValueIdentity(current.value) !== manualValueIdentity(record.current_value))
+    }
     if (record.stale) return true
     const current = optionsRef.current?.getCurrentValue?.(record)
     const dos = dosRecordForEvidence(record)
@@ -172,6 +187,7 @@ export function useEvidenceWorkflow(options?: {
   // 核对记录变化时在绘制前保持阅读位置，避免关闭动画期间先下移再跳回。
   useLayoutEffect(() => { preserveDrawerPosition() }, [records])
   const openIssue = (key: string, keys?: string[], fallback?: EvidenceRecord) => {
+    setDrawerTab('source'); setIssueListOpen(false)
     setFallbackRecord(fallback)
     drawerSession.current += 1
     const trigger = document.activeElement
@@ -497,10 +513,10 @@ export function useEvidenceWorkflow(options?: {
           const key = record.item_key || record.key
           const current = getCurrent(record)
           if (observedValues.current.has(key)) {
-            if (current) changedScientificFields(observedValues.current.get(key), current.value, current.field).forEach(path => changes.add(path))
+            if (current) changedScientificFields(observedValues.current.get(key), current.comparisonValue ?? current.value, current.field).forEach(path => changes.add(path))
             else if (!record.structure_hash) { removed.add(record.key); removedPaths.push(record.field) }
           }
-          if (current) observedValues.current.set(key, copyValue(current.value))
+          if (current) observedValues.current.set(key, copyValue(current.comparisonValue ?? current.value))
         }
       }
       // 结构等只读摘要沿用显式编辑通知；可读字段必须以实际值差异为准。
@@ -588,6 +604,15 @@ export function useEvidenceWorkflow(options?: {
     }, 320)
   }
   const dialog = <>
+    {records.length > 0 && <Button data-evidence-pending-navigation onClick={() => setIssueListOpen(true)}>{t('evidence.pendingItems')}（{issues.length}）</Button>}
+    <Dialog open={issueListOpen} onClose={() => setIssueListOpen(false)} fullWidth maxWidth="sm">
+      <DialogTitle>{t('evidence.pendingItems')}</DialogTitle><DialogContent>
+        {!issues.length && <Typography>{t('evidence.noPendingItems')}</Typography>}
+        {issues.map(record => <Button key={record.key} fullWidth sx={{ justifyContent: 'start', textAlign: 'left', display: 'block', my: 1 }} onClick={() => openIssue(record.key)}>
+          <Typography variant="caption" color="text.secondary">{record.owner_label}</Typography><Typography>{record.label}</Typography>
+        </Button>)}
+      </DialogContent><DialogActions><Button onClick={() => setIssueListOpen(false)}>{t('common.close')}</Button></DialogActions>
+    </Dialog>
     <Snackbar open={Boolean(manualNotice)} autoHideDuration={4000} onClose={() => setManualNotice('')} message={manualNotice} />
 
     <Dialog open={view !== null && !automatic} onClose={() => finish(null)} fullWidth maxWidth="md" aria-labelledby="evidence-workflow-title">
@@ -611,8 +636,16 @@ export function useEvidenceWorkflow(options?: {
     <Drawer anchor="right" variant="temporary" open={Boolean(activeRecord)} onClose={closeDrawer} ModalProps={{ disableRestoreFocus: true }} slotProps={{ transition: { onExited: restoreDrawerFocus }, paper: { role: 'dialog', className: 'evidence-review-drawer', 'aria-label': t('evidence.title'), sx: { width: { xs: '100vw', sm: 480 }, maxWidth: '100vw', p: 3 } } }}>
       {activeRecord && <>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}><Typography variant="h6">{activeRecord.label}</Typography><IconButton aria-label={t('evidence.closeDrawer')} onClick={closeDrawer}><CloseIcon /></IconButton></Box>
-        <Box component="details" open key={selected} sx={{ mt: 2 }}>
-          <Typography component="summary" fontWeight={700} sx={{ cursor: 'pointer' }}>{t('evidence.foundSources')}</Typography>
+        <Typography variant="caption" color="text.secondary">{activeRecord.owner_label}</Typography>
+        <Tabs value={drawerTab} onChange={(_, value) => setDrawerTab(value)} variant="fullWidth">
+          <Tab value="settings" label={t('evidence.settingsTab')} /><Tab value="source" label={t('evidence.sourceTab')} /><Tab value="history" label={t('evidence.historyLabel')} />
+        </Tabs>
+        <Box hidden={drawerTab !== 'settings'} key={'settings:' + activeRecord.key} sx={{ pt: 2 }}>
+          <ReviewFieldSettings identity={activeRecord.item_key || activeRecord.key} field={options?.getCurrentValue?.(activeRecord)?.field || activeRecord.field}
+            enabled={drawerTab === 'settings'} onDone={() => setDrawerTab('source')} onEdit={() => editCurrent(activeRecord)} />
+        </Box>
+        <Box hidden={drawerTab !== 'source'} key={'source:' + activeRecord.key}>
+        <ReviewSection title={t('evidence.foundSources')} initialOpen>
           <DosFermiConflict record={activeRecord} target={targetRef.current}
             onEdit={dosValueInput(activeRecord) && !dosValueInput(activeRecord)?.disabled ? () => editCurrent(activeRecord) : undefined} />
           {activeRecord.field === 'paper.theoretical_subtype' && <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.subtypeSynthesisHint')}</Alert>}
@@ -640,49 +673,46 @@ export function useEvidenceWorkflow(options?: {
             {r.stale && <Alert severity="warning">{t('evidence.staleResult')}</Alert>}
             <Alert severity={r.human_confirmed ? 'success' : r.status === 'unchecked' ? 'info' : r.status === 'supported' ? 'success' : 'error'}>{r.human_confirmed ? t('evidence.humanConfirmed') : r.status === 'unchecked' ? t('evidence.uncheckedHint') : r.reason}</Alert>
           </Box>)}
-        </Box>
-        <Typography fontWeight={700} sx={{ mt: 2 }}>{t('evidence.manualEditRecords')}</Typography>
-        <ManualEvidenceSection target={targetRef.current} record={activeRecord} version={preflightRef.current?.version}
+          {Boolean(activeRecord.legacy_evidences?.length) && !activeRecord.evidences.length && <ReviewSection title={t('evidence.legacySources')}>
+            {activeRecord.legacy_evidences!.map((source, index) => <EvidenceRegion key={index} target={targetRef.current} source={source} />)}
+          </ReviewSection>}
+        </ReviewSection>
+        <ReviewSection title={t('evidence.manualEditRecords')}>
+        <ManualEvidenceSection readOnly={options?.readOnly} showHistory={false} onRecords={receiveManualHistory} target={targetRef.current} record={activeRecord} version={preflightRef.current?.version}
           drafts={manualDrafts} value={manualCurrentValue(activeRecord)}
           localChanged={hasLocalManualEdit(activeRecord)}
           prepare={() => prepareManual(activeRecord)} />
-        {activeGroup.some(r => r.history?.length || r.decision?.reason) ? <>
-          {activeGroup.map(r => r.decision?.reason && <Typography key={r.key}>{t('evidence.savedHumanReason')}：{r.decision.reason}</Typography>)}
-          {activeGroup.some(r => r.history?.length) && <Box component="details" sx={{ my: 1 }}><Typography component="summary">{t('evidence.historyLabel')}</Typography>{activeGroup.flatMap(r => r.history || []).map((entry, index) => <Box key={index} sx={{ my: 2, overflowWrap: 'anywhere' }}>
-            <Alert severity="info">{t('evidence.historyReadonly')}</Alert>
-            <EvidenceReadableValue value={entry.current_value} />
-            <Typography>{entry.ai_reason || entry.reason}</Typography>
-            {(entry.adopted_basis || entry.proposal?.basis_kind) && <Typography>{t(`evidence.basis.${entry.adopted_basis || entry.proposal?.basis_kind}`)}</Typography>}
-            {entry.proposal?.explanation && <Typography>{entry.proposal.explanation}</Typography>}
-            {entry.decision?.reason && <Typography>{t('evidence.savedHumanReason')}：{entry.decision.reason}</Typography>}
-            {[...(entry.evidences || []), ...(entry.proposal?.evidences || [])].map((source, i) => <Typography key={i}>{source.source_name || source.file_id} · {source.page_start} — {source.quote}</Typography>)}
-          </Box>)}</Box>}
-        </> : null}
-        {targetRef.current?.target === 'paper' && activeGroup.map(r => <TextField key={r.key} fullWidth multiline minRows={2} sx={{ mt: 1 }} label={t('evidence.humanReason')} value={reasons[r.key] ?? r.proposal_draft?.reason ?? ''}
+        {!options?.readOnly && targetRef.current?.target === 'paper' && activeGroup.map(r => <TextField key={r.key} fullWidth multiline minRows={2} sx={{ mt: 1 }} label={t('evidence.humanReason')} value={reasons[r.key] ?? r.proposal_draft?.reason ?? ''}
           disabled={confirming || (!r.stale && Boolean(r.proposal_draft?.accepted))} onChange={event => updateReason(r, event.target.value)} helperText={t('evidence.reasonConditional')} />)}
         {dirty.current && options?.saveCurrent && <Alert severity="info">{t('evidence.saveBeforeConfirm')}</Alert>}
-        {!activeRecord.placeholder && <>
-        <Typography fontWeight={600} sx={{ my: 2 }}>{t('evidence.aiReasonLabel')}</Typography>
+        </ReviewSection>
+        <ReviewSection title={t('evidence.aiReasonLabel')}>
         {activeGroup.map(r => <Box key={r.key} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
           {(r.adopted_basis || r.proposal?.basis_kind) && <Alert severity="info">{t(`evidence.basis.${r.adopted_basis || r.proposal?.basis_kind}`)}</Alert>}
-            <Typography sx={{ whiteSpace: 'pre-wrap' }}>{aiReasonText(r, t)}</Typography>
+            <Typography sx={{ whiteSpace: 'pre-wrap' }}>{aiReasonText(r, t) || t('evidence.noAiReason')}</Typography>
             <ScientificAssociations associations={r.source_associations} target={targetRef.current} />
             {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
             {Boolean(r.proposal?.evidences?.length) && <Box component="details"><Typography component="summary">{t('evidence.aiReasonSources')}</Typography>
               {r.proposal!.evidences.map((source, index) => <EvidenceRegion key={`${source.file_id}:${index}`} target={targetRef.current} source={source} />)}
             </Box>}
         </Box>)}
-        {accepted && <Alert severity="success">{t('evidence.acceptedPending')}</Alert>}</>}
-        {options?.getCurrentValue && !activeRecord.placeholder && !activeDosConflict && (!activeDos || (dosValueInput(activeRecord) && !dosValueInput(activeRecord)?.disabled)) && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
+        {accepted && <Alert severity="success">{t('evidence.acceptedPending')}</Alert>}
+        </ReviewSection>
+        {!options?.readOnly && options?.getCurrentValue && !activeRecord.placeholder && !activeDosConflict && (!activeDos || (dosValueInput(activeRecord) && !dosValueInput(activeRecord)?.disabled)) && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
         {saveError && <Alert severity="error" sx={{ mt: 1 }} action={draftSaveFailed ? <Button disabled={saving} onClick={() => void retryDrafts().catch(() => undefined)}>{t('evidence.retrySave')}</Button> : undefined}>{saveError} {draftSaveFailed && t('evidence.saveFailureRetained')}</Alert>}
         {!activeRecord.placeholder && completionBlockers.length > 0 && <Alert severity="info" sx={{ mt: 1 }}>{completionBlockers.map(message => <Typography key={message} variant="body2">{message}</Typography>)}</Alert>}
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', my: 2 }}>
           <Button onClick={closeDrawer}>{t('evidence.back')}</Button>
-          {!activeRecord.placeholder && <><Button disabled={confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)} onClick={() => void execute(targetRef.current!, activeGroup.map(r => r.key))}>{t('evidence.retry')}</Button>
+          {!options?.readOnly && !activeRecord.placeholder && <><Button disabled={confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)} onClick={() => void execute(targetRef.current!, activeGroup.map(r => r.key))}>{t('evidence.retry')}</Button>
           <Button variant="contained" disabled={completionBlockers.length > 0} onClick={() => void accept(activeGroup)}>{t('evidence.complete')}</Button>
           {accepted && <Button disabled={saving} onClick={() => { for (const r of activeGroup) void saveProposal(r, valuesFor(r), false, reasons[r.key] || r.proposal_draft?.reason || '', true).catch(() => undefined) }}>{t('evidence.revise')}</Button>}</>}
         </Box>
-        {issues.length > 1 && <Box>{issues.map(r => <Button key={r.key} color="error" onClick={() => openIssue(r.key)}>{r.label}</Button>)}</Box>}
+        </Box>
+        <Box hidden={drawerTab !== 'history'} key={'history:' + activeRecord.key}>
+          <ReviewSection title={t('evidence.historyLabel')}>
+            <EvidenceHistoryTimeline record={activeRecord} manual={manualHistory[activeRecord.item_key || activeRecord.key] || []} />
+          </ReviewSection>
+        </Box>
       </>}
     </Drawer>
   </>

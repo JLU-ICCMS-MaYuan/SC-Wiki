@@ -1608,7 +1608,7 @@ async def put_upload_draft(
             async with async_session_factory() as session:
                 await _resolve_draft_classifications(session, normalized)
             _validate_draft(normalized, partial=True)
-            saved = save_draft(task_id, normalized)
+            saved = save_draft(task_id, normalized, editor=current_user)
             return {"ok": True, "data": saved, "saved_at": int(time.time())}
     except TimeoutError as exc:
         raise _upload_error(409, 'submission_in_progress', '该草稿正在提交，请稍后重试') from exc
@@ -2693,6 +2693,11 @@ async def _rewrite_paper_scientific_draft_in_tx(
         await persist_reference_extraction(session, paper, citation_extraction)
     from backend.services.paper_history import append_paper_history_event
 
+    await session.flush()
+    manual_after = await session.run_sync(lambda sync: paper_snapshot(
+        sync, paper.id, current_user.id, current_user.role, check_access=False))
+    from backend.ingest.evidence_audit import field_change_events
+    field_changes = field_change_events(manual_before, manual_after, current_user)
     await append_paper_history_event(
         session,
         paper_id=paper.id,
@@ -2701,11 +2706,9 @@ async def _rewrite_paper_scientific_draft_in_tx(
         actor_user_id=current_user.id,
         actor_username_snapshot=current_user.username,
         operation_id=history_operation_id,
-        classification_snapshot=jsonable_encoder({'previous_definition_events': definition_history}) if definition_history else None,
+        classification_snapshot=jsonable_encoder({'previous_definition_events': definition_history, 'field_changes': field_changes}),
     )
     await session.flush()
-    manual_after = await session.run_sync(lambda sync: paper_snapshot(
-        sync, paper.id, current_user.id, current_user.role, check_access=False))
     await session.run_sync(lambda sync: manual_evidence.mark_changes(
         sync, manual_after, manual_before, current_user.id, current_user.username))
 

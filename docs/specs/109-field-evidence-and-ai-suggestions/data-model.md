@@ -66,3 +66,11 @@
 展示事件需要稳定event_id、状态/组/记录/字段身份、actor种类与当时姓名或实际AI运行身份、发生时间及明确时区、动作类型、前后值、理由摘要和对应科学/来源版本；作者/时间可以明确缺失，不能从当前check行或任务owner猜测。
 
 审核事件不等同字段改值，AI核对不等同AI改值或管理员批准。旧整条claim的历史仅供参考，不拆成多个子项的supported。具体持久化结构、权限与API待用户认可Demo后设计；本段不是当前数据表能力描述。
+
+## US12 正式细项与事件存储
+
+本节取代上节 Demo 时点的未实施限制。预测 Tc 子项复用 kind=field、item_key、content_hash、source_hash；内部 record_field、record_field_key、record_group_key 负责定位。实际值仍在原科学记录，validation_record 仅供服务端整记录校验，不进入公开返回或每条核对 JSON。Tc、μ* 使用稳定 point 身份，范围显式拆成单值后身份及科学版本保持；共同参数按明确 tc_group 共享，方法按 method 独立。旧粗记录标注 legacy_scope=record，只供参考。
+
+audit_events 含 id、item_key、field、label、actor、occurred_at、kind、summary，以及可选前后值、设置、理由。人工 actor 来自认证用户，普通保存用用户名快照；AI actor 来自实际模型调用，另记发起用户 ID。时间具有明确 UTC 偏移。上传普通修改事件在现有任务 state._field_change_events，随原任务持久化或清理；返修在服务器持有的 draft 日志；管理员在现有 PaperHistoryEvent.classification_snapshot.field_changes。核对、补空及人工确认事件写 ScientificEvidenceCheck.result.audit_events，正式转接沿原 JSON。不新增表列或迁移。
+
+事件为追加历史，读取按稳定字段及事件 ID 去重，不授予通过资格。普通改值、设置、人工确认及 AI 核对分开显示；旧作者、时间缺失保留缺失。验证与边界见[实施验证](field-review-implementation-validation.md)。

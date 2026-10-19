@@ -319,6 +319,30 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
     current = {r['item_key']: r for r in snapshot['records']}
     found = {}
     histories = {}
+    legacy = {}
+    previous_fields = {}
+    for record in snapshot['records']:
+        if record.get('legacy_item_key'):
+            legacy.setdefault(record['legacy_item_key'], []).append(record)
+        if record.get('previous_field_item_key'):
+            previous_fields.setdefault(record['previous_field_item_key'], []).append(record)
+    def remember_legacy(row):
+        for leaf in legacy.get(row.item_key, []):
+            entries = histories.setdefault(leaf['key'], [])
+            entry = {k: copy.deepcopy(row.result.get(k)) for k in ('current_value', 'reason', 'evidences', 'audit_events')}
+            value = entry.get('current_value')
+            if isinstance(value, dict) and isinstance(value.get('record'), dict):
+                original = value['record']
+                entry['current_value'] = {k: original.get(k) for k in ('name_raw', 'method_code', 'value_raw', 'unit_raw') if original.get(k) is not None}
+            entry.update(legacy_scope='record', content_hash=row.content_hash, source_hash=row.source_hash)
+            if entry not in entries:
+                entries.append(entry)
+        for leaf in previous_fields.get(row.item_key, []):
+            entries = histories.setdefault(leaf['key'], [])
+            entry = {k: copy.deepcopy(row.result.get(k)) for k in ('current_value', 'reason', 'audit_events')}
+            entry.update(content_hash=row.content_hash, source_hash=row.source_hash, prior_field_identity=True)
+            if entry not in entries:
+                entries.append(entry)
     def remember(row, record):
         items = histories.setdefault(record['key'], [])
         for entry in row.result.get('history') or []:
@@ -326,13 +350,14 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
                 items.append(copy.deepcopy(entry))
         if row.content_hash == record['content_hash'] and row.source_hash == record['source_hash']:
             return
-        entry = {name: copy.deepcopy(row.result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'adopted_basis')}
+        entry = {name: copy.deepcopy(row.result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'adopted_basis', 'audit_events')}
         entry.update(content_hash=row.content_hash, source_hash=row.source_hash)
         if entry not in items:
             items.append(entry)
     for row in ordered_check_rows(session,snapshot['target'],snapshot['target_id']):
         r = current.get(row.item_key)
         if not r:
+            remember_legacy(row)
             continue
         remember(row, r)
         valid = row.content_hash == r['content_hash'] and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES
@@ -353,15 +378,25 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
             r = current.get(row.item_key)
             if r:
                 remember(row, r)
+            else:
+                remember_legacy(row)
             if r and (r['key'] not in found or found[r['key']].get('stale')) and row.content_hash == r['content_hash'] and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES:
                 found[r['key']] = copy.deepcopy(row.result)
     for key, history in histories.items():
+        if history and key not in found and next(r for r in snapshot['records'] if r['key'] == key).get('record_field'):
+            found[key] = {'status': 'unchecked', 'reason': '当前版本的子项尚未独立核对；旧核对记录仅供历史参考', 'evidences': []}
         if history and key not in found and include_stale:
             found[key] = {'status': 'unchecked', 'reason': '内容或来源已变化，请重新核对', 'stale': True}
         elif history and key not in found and not next(r for r in snapshot['records'] if r['key'] == key).get('required', True):
             found[key] = {'status': 'unchecked', 'reason': '当前为空或可选字段；历史记录仅供参考'}
         if key in found:
             found[key]['history'] = history
+    from .evidence_audit import merge_events
+    for record in snapshot['records']:
+        events = [event for event in snapshot.get('_field_change_events') or [] if event.get('item_key') == record['item_key']]
+        if events:
+            result = found.setdefault(record['key'], {'status': 'unchecked', 'reason': '当前字段尚未核对'})
+            result['audit_events'] = merge_events(result.get('audit_events'), events)
     return found
 
 
@@ -374,7 +409,7 @@ def transfer_result(record, result, chunks, file_ids=None):
         source_hash = digest(sorted(normalized_text(c['content']) for c in chunks))
         record['source_hash'] = digest([source_hash, record['provenance']])
     if result.get('content_hash') != record['content_hash'] or result.get('source_hash') != record['source_hash']:
-        history = [{name: copy.deepcopy(result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'adopted_basis', 'content_hash', 'source_hash')}]
+        history = [{name: copy.deepcopy(result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'adopted_basis', 'content_hash', 'source_hash', 'audit_events')}]
         return {**record, 'status': 'unchecked', 'reason': '上传值与保存后的内容或来源不同，请重新核对',
                 'history': [*(result.get('history') or []), *history]}
     def relocate(source):
@@ -404,6 +439,13 @@ def transfer_result(record, result, chunks, file_ids=None):
 
 
 def save_results(session, snapshot, results, actor_id, *, update_decision=False):
+    # 现有目标行串行化JSON事件追加；不创建新的审计表，也不覆盖并发事件。
+    if snapshot['target'] == 'upload':
+        session.scalar(select(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == snapshot['target_id']).with_for_update())
+    elif snapshot['target'] == 'paper':
+        session.scalar(select(models.Paper).where(models.Paper.id == int(snapshot['target_id'])).with_for_update())
+    elif snapshot['target'] == 'revision':
+        session.scalar(select(models.PaperRevisionDraft).where(models.PaperRevisionDraft.revision_id == snapshot['target_id']).with_for_update())
     for record in snapshot['records']:
         if record['key'] not in results:
             continue
@@ -418,6 +460,9 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
             result['adopted_basis'] = existing.result.get('adopted_basis')
         if existing is not None and existing.result.get('history') and not result.get('history'):
             result['history'] = copy.deepcopy(existing.result['history'])
+        from .evidence_audit import append_review_event
+        append_review_event(session, record, result, existing.result if existing is not None else None, actor_id, human=update_decision)
+        result.pop('validation_record', None)  # 服务端临时校验数据，不复制整张记录进每个子项。
         resolutions = copy.deepcopy((existing.resolutions or {}) if existing is not None else {})
         if not update_decision:
             from .evidence_proposals import editable_fields

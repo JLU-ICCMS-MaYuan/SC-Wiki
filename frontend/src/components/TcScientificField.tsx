@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Box } from '@mui/material'
-import ScientificFieldBox from './ScientificFieldBox'
+import ScientificFieldBox, { type FieldSettingsPresentation } from './ScientificFieldBox'
 import ScientificFieldSettingsDrawer, { type ScientificFieldSettings } from './ScientificFieldSettingsDrawer'
 import type { ParameterValue } from '../lib/tcParameters'
 
@@ -16,6 +16,7 @@ export default function TcScientificField({ value, label, unit = '', field, read
     if (!Object.is(value, published.current)) setText(String(value ?? ''))
     published.current = value
   }, [value])
+  const [presentation, setPresentation] = useState<FieldSettingsPresentation>()
   const signature = JSON.stringify([field, value, settings])
   const convert = (raw: string): ParameterValue => raw === '' ? null : numeric.test(raw) && Number.isFinite(Number(raw)) ? Number(raw) : raw
   const raw = text, name = settings?.name_raw || label
@@ -25,8 +26,8 @@ export default function TcScientificField({ value, label, unit = '', field, read
         setText(next); const value = convert(next)
         published.current = currentTc && typeof value === 'string' ? null : value; onChange(value)
       }}
-      onSettings={() => { setMessage(''); setEditing({ name, kind: 'number', raw, unit: settings?.unit_raw ?? unit, signature }) }} />
-    <ScientificFieldSettingsDrawer value={editing} readOnly={readOnly} typeLocked error={message}
+      onSettings={host => { setPresentation(host); setMessage(''); setEditing({ name, kind: 'number', raw, unit: settings?.unit_raw ?? unit, signature }) }} />
+    <ScientificFieldSettingsDrawer presentation={presentation} value={editing} readOnly={readOnly} typeLocked error={message}
       note={unit === 'K' ? '规范值以 K 保存；此处单位设置保留原始标注，不自动换算规范值。' : '名称和单位设置保留为字段标注，不改变固定字段的科学含义。'}
       onChange={next => setEditing(current => current && { ...current, ...next })} onClose={() => setEditing(null)} onApply={() => {
         if (!editing || readOnly) return

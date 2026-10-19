@@ -172,6 +172,8 @@ def _semantic(value):
 
 
 def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: list[dict], context: dict) -> dict:
+    from .property_field_review import expand_property_fields
+    records = expand_property_fields(records)
     from .scientific_evidence import canonical
     from .material_family_classification import matching_assessment
     # 定位 ID/排版顺序不会改变来源正文；补入证据不改变断言版本。
@@ -235,6 +237,7 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
     with SessionLocal() as session:
         origins = science.origins_for(session, 'upload', task_id)
     snapshot = complete_snapshot('upload', task_id, draft_records(draft, origins), chunks, draft)
+    snapshot['_field_change_events'] = copy.deepcopy(state.get('_field_change_events') or [])
     from .scientific_context import bind_snapshot_source_documents, source_documents
     source_manifest = state.get('files') or [{'file_id':'main','role':'main','sha256':state.get('file_sha256')}]
     bind_snapshot_source_documents(snapshot,source_documents([
@@ -263,7 +266,11 @@ def draft_records(draft, origins):
                     field=f'material_states[{si}].property_modules[{mi}].records[{ri}]',
                     label=f'{state_data.get("material_name") or state_data.get("material") or state_data.get("display_name") or "材料状态 " + str(si+1)} · {record.get("name_raw")} · {record.get("value_raw")} {record.get("unit_raw") or ""}',
                     item_key=science.record_identity(state_data.get('state_key') or f'state-{si+1}', module['module_key'], record['record_key']),
-                    state_key=state_data.get('state_key') or f'state-{si+1}', kind='property', claim=science.record_claim(record, state_data), evidences=evidence_list(record)))
+                    state_key=state_data.get('state_key') or f'state-{si+1}', kind='property', claim=science.record_claim(record, state_data), evidences=evidence_list(record),
+                    tc_group_key=((record.get('payload') or {}).get('tc_group') or {}).get('group_key'),
+                    tc_group_meta=copy.deepcopy((record.get('payload') or {}).get('tc_group')),
+                    tc_range_origin_kind=((record.get('payload') or {}).get('tc_range_origin') or {}).get('value_kind'),
+                    tc_method_key=((record.get('payload') or {}).get('tc_group') or {}).get('method_key')))
     science.augment_upload(draft, records, origins)
     return records
 
@@ -307,7 +314,7 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             if e and e.paper_chunk_id in chunk_map:
                 c = chunk_map[e.paper_chunk_id]
                 evs.append(dict(paper_evidence_id=e.id, file_id=c['file_id'], chunk_id=c['chunk_id'], chunk_index=c['chunk_index'], quote=e.quote,
-                                page_start=e.page_start, page_end=e.page_end, section=e.section))
+                                page_start=e.page_start, page_end=e.page_end, section=e.section, field_path=link.field_path))
         state_data = row_dict(states[record.material_state_id])
         material = next((x['chemical_formula'] for x in contexts['superconductors'] if x['id'] == state_data['superconductor_id']), '')
         state_data['material'] = material
@@ -319,7 +326,11 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             item_key=science.record_identity(state_data['state_key'], module.module_key, record.record_key),
             state_key=state_data['state_key'], module_code=module.module_code, module_key=module.module_key, record_key=record.record_key,
             field=field, label=f'{state_data.get("material_name") or material or "材料状态 " + str(record.material_state_id)} · {record.name_raw} · {record.value_raw} {record.unit_raw or ""}',
-            claim=science.record_claim(record, state_data), evidences=evs))
+            claim=science.record_claim(record, state_data), evidences=evs,
+            tc_group_key=((record.payload_json or {}).get('tc_group') or {}).get('group_key'),
+            tc_group_meta=copy.deepcopy((record.payload_json or {}).get('tc_group')),
+            tc_range_origin_kind=((record.payload_json or {}).get('tc_range_origin') or {}).get('value_kind'),
+            tc_method_key=((record.payload_json or {}).get('tc_group') or {}).get('method_key')))
     paper_data = row_dict(paper)
     families = session.execute(select(models.MaterialFamily.name_zh).join(models.PaperMaterialFamily, models.PaperMaterialFamily.material_family_id == models.MaterialFamily.id).where(models.PaperMaterialFamily.paper_id == paper_id)).scalars().all()
     paper_data['material_families'] = sorted(families)
@@ -351,12 +362,15 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
         for structure in (x for x in contexts['structure_models'] if x['material_state_id'] == state.id):
             records.append(science.structure_record(structure, state.state_key, f'material_states[{si}].structures[{structure['id']}]', origins.get(structure['structure_hash'])))
     for r in records:
-        if r.get('kind') != 'property':
+        if r.get('kind') != 'property' and not r.get('record_field'):
             r['evidences'] = [dict(chunk_map[e.paper_chunk_id], quote=e.quote,
                                   page_start=e.page_start or chunk_map[e.paper_chunk_id].get('page_start'),
                                   page_end=e.page_end or chunk_map[e.paper_chunk_id].get('page_end'))
                               for e in source_evidences.values() if e.field_path == r['field'] and e.paper_chunk_id in chunk_map]
     snapshot = complete_snapshot('paper', str(paper_id), records, chunks, paper_data)
+    snapshot['_field_change_events'] = [copy.deepcopy(event)
+        for history in session.scalars(select(models.PaperHistoryEvent).where(models.PaperHistoryEvent.paper_id == paper_id))
+        for event in (history.classification_snapshot or {}).get('field_changes') or []]
     from .scientific_context import bind_snapshot_source_documents, source_documents
     bind_snapshot_source_documents(snapshot,source_documents([
         {'file_id':str(f.id),'file_role':f.role,'source_sha256':f.sha256}
@@ -440,7 +454,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     if not evs and provenance.get('kind') == 'contributor_structure' and provenance.get('verified') and provenance.get('submitted_by_user_id'):
         status = 'uncertain'
         reason = '论文中未找到明确支持；结构由 ' + str(provenance.get('submitted_by_name') or '已记录的提交者') + ' 提交，必须由管理员核验来源并说明批准理由。' + reason
-    fields = result.get('fields') or record.get('fields') or [record['field']]
+    fields = record.get('fields') if record.get('record_field') else result.get('fields') or record.get('fields') or [record['field']]
     # 模型只能选择当前项内的真实字段，不能定位到别的记录。
     fields = [f for f in fields if isinstance(f, str) and (f == record['field'] or f.startswith(record['field'] + '.'))] or [record['field']]
     suggestion = result.get('suggestion') or ('请补充该记录缺失的原文出处。' if status == 'missing' else '请核对物性类型、数值、单位和实验条件，并根据原文修正记录。')
@@ -499,7 +513,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
         inference_reason if status == 'supported' else reason if concrete_synthesis_reason(reason) else None
     ) or '模型尚未给出当前值的具体推断理由，请重新核对。') if model_synthesis else (
         reason if subtype or keywords or (summary and not adopted_basis) else result.get('ai_reason'))
-    return {**record, 'proposal': proposal, 'proposal_draft': None if result.get('stale') else result.get('proposal_draft'), 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
+    return {**{key: value for key, value in record.items() if key != 'validation_record'}, 'proposal': proposal, 'proposal_draft': None if result.get('stale') else result.get('proposal_draft'), 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
             'human_confirmed': human,
             'adopted_basis': adopted_basis, 'proposal_review': result.get('proposal_review'),
             'ai_reason': ai_reason,
@@ -510,6 +524,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             'required': record.get('required', True) or bool(decision and adopted_basis in {'paper_inference', 'general_knowledge'}),
             'reason': reason, 'suggestion': suggestion,
             'location_errors': errors, 'model': result.get('model') or '', 'fields': fields,
+            'audit_events': result.get('audit_events') or [], 'history': result.get('history') or [],
             'resolution': result.get('resolution', ''), 'stale': result.get('stale', False)}
 
 
@@ -520,6 +535,7 @@ def public_snapshot(snapshot: dict, cached: dict) -> dict:
         records.append(checked_result(r, result, snapshot['chunks']) if result else {**r, 'status': 'unchecked', 'reason': '尚未核对科学数据与原文'})
     from .scientific_evidence import apply_derived
     records = apply_derived(records)
+    records = [{key: value for key, value in row.items() if key != 'validation_record'} for row in records]
     return dict(version=snapshot['version'], needs_check=any(r.get('required', True) and ((r['status'] == 'unchecked' and not r.get('human_confirmed')) or r.get('stale')) for r in records), records=records,
                 sources=[{k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'content')} for c in snapshot['chunks']])
 
@@ -716,6 +732,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         if isinstance(review, dict) and review.get('status') in {'reasonable', 'questionable', 'uncertain'}:
             safe['proposal_review'] = {'status': review['status'], 'explanation': str(review.get('explanation') or '')[:4000]}
         result = checked_result(by_key[key], safe, chunks)
+        result['_model_reviewed'] = True  # 仅成功解析的实际调用可产生AI核对事件。
         if purpose == 'review_all' and previous.get('proposal') and not previous.get('stale'):
             from .evidence_proposals import checked_proposal
             result['proposal'] = checked_proposal(by_key[key], previous['proposal'], source_catalog if source_catalog is not None else chunks)
@@ -774,6 +791,9 @@ def _fill_empty_fields(draft, record, proposal):
     """仅把有效推断或推测补入空字段；原文提取值不被模型候选覆盖。"""
     from .scientific_evidence import canonical, populated
     from .property_modules import validate_record, PropertyValidationError
+    if record.get('record_field'):
+        # 科学子项的补空继续由原文Claim/Methods关联处理，不从通用建议填入软件默认值。
+        return False
 
     if record['field'] in {'paper.theoretical_subtype', 'paper.material_families', 'paper.keywords_tags'}:
         return False
@@ -864,36 +884,50 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
         cache_dir=artifact_directory(task_id) / 'scientific_context_cache',
         model_identity={'provider':config.provider,'model':config.model,'endpoint':config.base_url,
                         'associate_prompt_version':context['version']},
-        ensure_active=lambda:_ensure_not_cancelled(task_id)) if any(r.get('kind')=='property' for r in records) else None
+        ensure_active=lambda:_ensure_not_cancelled(task_id)) if any(r.get('kind')=='property' or r.get('record_field') for r in records) else None
+    applied = []
     if ledger is not None:
         applied, gaps = apply_associations(filled, ledger['associations'], context | {'complete':ledger['complete']})
         ledger['gaps'].extend(gaps)
         ledger['applied_count'] = len(applied)
         _atomic_write_json(artifact_directory(task_id) / 'scientific_context.json', ledger)
         for item in applied:
-            match = next((r for r in records if '/'.join([r.get('state_key') or '',r.get('module_key') or '',r.get('record_key') or ''])==item['target']),None)
+            pointer = str(item.get('association', {}).get('target_path') or '').strip('/').replace('/', '.')
+            match = next((r for r in records if '/'.join([r.get('state_key') or '',r.get('module_key') or '',r.get('record_key') or ''])==item['target']
+                          and (not r.get('record_field') or pointer == r['record_field'] or pointer.startswith(r['record_field'] + '.'))),None)
             if match:
                 a = item['association']
                 prior = auto_filled.get(match['item_key']) or {}
                 auto_filled[match['item_key']] = {'basis_kind':'paper_inference',
                     'explanation':'；'.join(dict.fromkeys(filter(None,[prior.get('explanation'),a['explanation']]))),
                     'evidences':[*(prior.get('evidences') or []),*a['fact_evidences'],*a['scope_evidences']]}
-    current = upload_snapshot(task_id, owner, parsing_draft=filled) if auto_filled else snapshot
+    current = upload_snapshot(task_id, owner, parsing_draft=filled) if auto_filled or applied else snapshot
     previous = {record['item_key']: record for record in snapshot['records']}
     previous_results = {record['item_key']: results.get(record['key']) for record in records}
     current_results = {}
     for record in current['records']:
         old = previous.get(record['item_key'])
         result = previous_results.get(record['item_key'])
+        if record.get('record_field'):
+            matched = [item['association'] for item in applied
+                       if '/'.join([record.get('state_key') or '', record.get('module_key') or '', record.get('record_key') or '']) == item['target']
+                       and str(item['association'].get('target_path') or '').strip('/').replace('/', '.') == record['record_field']]
+            if matched:
+                from uuid import uuid4
+                auto_filled[record['item_key']] = {'basis_kind': 'paper_inference', 'explanation': '；'.join(dict.fromkeys(a['explanation'] for a in matched)),
+                    'evidences': [e for a in matched for e in [*a['fact_evidences'], *a['scope_evidences']]]}
+                result = {**(result or {}), 'model': config.model, '_audit_action': 'auto_fill', '_audit_event_id': uuid4().hex}
         if result is None:
             continue
         proposal = auto_filled.get(record['item_key'])
         if proposal:
+            from uuid import uuid4
             current_results[record['key']] = {**result, 'status': 'uncertain', 'reason': proposal['explanation'],
                 'evidences': proposal['evidences'], 'proposal': None, 'adopted_basis': proposal['basis_kind'],
                 'ai_reason': proposal['explanation'],
                 'auto_filled': True, 'auto_filled_content_hash': record['content_hash'],
-                'auto_filled_source_hash': record['source_hash']}
+                'auto_filled_source_hash': record['source_hash'],
+                '_audit_action': 'auto_fill', '_audit_event_id': result.get('_audit_event_id') or uuid4().hex}
         elif old and old['content_hash'] == record['content_hash'] and old['source_hash'] == record['source_hash']:
             current_results[record['key']] = {**result, 'proposal': None}
         else:
@@ -1088,7 +1122,8 @@ async def persist_existing_paper_targets(session, paper, targets):
             fail('evidence_invalid_source', error, issues=[{'field':target.field_path,'message':error}])
         existing = await session.scalar(select(models.PaperEvidence).where(
             models.PaperEvidence.paper_id==paper.id, models.PaperEvidence.paper_revision==paper.content_revision,
-            models.PaperEvidence.paper_chunk_id==located['chunk_id'], models.PaperEvidence.quote==located['quote']))
+            models.PaperEvidence.paper_chunk_id==located['chunk_id'], models.PaperEvidence.quote==located['quote'],
+            models.PaperEvidence.field_path==target.field_path))
         if existing is None:
             existing = models.PaperEvidence(paper_id=paper.id,paper_revision=paper.content_revision,paper_chunk_id=located['chunk_id'],
                 field_path=target.field_path,quote=located['quote'],section=located.get('section'),page_start=located.get('page_start'),page_end=located.get('page_end'))
@@ -1127,7 +1162,7 @@ def save_completed_upload(snapshot, results, owner, *, locked=False):
             return
         draft = copy.deepcopy(get_draft(snapshot['target_id']))
         for r in current['records']:
-            if r.get('kind') != 'property' or r['key'] not in results:
+            if (r.get('kind') != 'property' and not r.get('record_field')) or r['key'] not in results:
                 continue
             result = checked_result(r, results[r['key']], snapshot['chunks'])
             if not result['evidences']:
@@ -1136,7 +1171,11 @@ def save_completed_upload(snapshot, results, owner, *, locked=False):
             state['property_modules'] = _property_modules_for_state(state)
             module = next(m for m in state['property_modules'] if m['module_key'] == r['module_key'])
             record = next(x for x in module['records'] if x['record_key'] == r['record_key'])
-            record['evidences'] = result['evidences']
+            if r.get('record_field'):
+                record['evidences'] = [e for e in record.get('evidences') or [] if e.get('field_path') != r['record_field']]
+                record['evidences'].extend({**e, 'field_path': r['record_field']} for e in result['evidences'])
+            else:
+                record['evidences'] = result['evidences']
             record.pop('evidence', None)
         save_draft(snapshot['target_id'], draft)
         client = redis_client()
@@ -1176,6 +1215,7 @@ def persist_completed_results(snapshot, results, owner):
 
 
 def aggregate_candidates(records, candidates, location_errors, model):
+    from uuid import uuid4
     results = {}
     for record in records:
         all_items = candidates[record['key']]
@@ -1208,7 +1248,9 @@ def aggregate_candidates(records, candidates, location_errors, model):
             reason='；'.join(dict.fromkeys(reasons)) or '当前论文及附件中未找到可定位的相关原文',
             evidences=evidences, model=model,
             suggestion='；'.join(dict.fromkeys(i['suggestion'] for i in items if i.get('suggestion'))),
-            fields=list(dict.fromkeys(f for i in items for f in i.get('fields', []))))
+            fields=[record['field']] if record.get('record_field') else list(dict.fromkeys(f for i in items for f in i.get('fields', []))))
+        if any(item.get('_model_reviewed') for item in all_items):
+            results[record['key']].update(_audit_action='ai_review', _audit_event_id=uuid4().hex)
         if (record.get('check_mode') == 'synthesis' or record.get('field') == 'paper.summary') and (record.get('provenance') or {}).get('kind') not in {'author_keywords', 'derived'} and not results[record['key']].get('adopted_basis'):
             results[record['key']]['source_kind'] = 'paper_synthesis'
             if record.get('field') == 'paper.summary' or concrete_synthesis_reason(results[record['key']]['reason']):

@@ -215,6 +215,7 @@ def revision_snapshot(session, revision_id, owner):
         {'file_id':str(f.id),'file_role':f.role,'source_sha256':f.sha256}
         for f in paper_files if f.paper_revision==paper.content_revision and f.role in {'main','supplementary'}]))
     snapshot['draft_version'] = saved.draft_version
+    snapshot['_field_change_events'] = copy.deepcopy(saved.draft.get('_field_change_events') or [])
     snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',
         stored_path=f.stored_path, sha256=f.sha256, size=f.size,
         media_type=f.media_type, original_filename=f.original_filename)
@@ -241,6 +242,12 @@ async def save_draft(session, paper_id, user, payload):
     draft.pop('citation_extraction', None)
     await _resolve_draft_classifications(session, draft)
     _validate_draft(draft, partial=True)
+    from backend.ingest.evidence_audit import draft_change_events
+    # 客户端不能回传或伪造修改日志；只追加服务器比较结果。
+    draft.pop('_field_change_events', None)
+    events = [*(saved.draft.get('_field_change_events') or []), *draft_change_events(saved.draft, draft, user)]
+    if events:
+        draft['_field_change_events'] = events
     if draft != saved.draft:
         saved.draft, saved.draft_version = draft, saved.draft_version + 1
     await session.flush()
@@ -280,12 +287,16 @@ async def submit_draft(session, paper_id, user, payload):
     checks = ev.resolve_results(snapshot, cached, user.id, payload.evidence_job_id, payload.expected_evidence_version,
                                 manual_pending_keys=manual_pending_keys)
     for result in checks:
-        if result.get('kind') == 'property':
+        if result.get('kind') == 'property' or result.get('record_field'):
             state = draft['material_states'][result['state_index']]
             module = next(m for m in state['property_modules'] if m['module_key'] == result['module_key'])
             record = next(r for r in module['records'] if r['record_key'] == result['record_key'])
             record.pop('evidence', None)
-            record['evidences'] = result['evidences']
+            if result.get('record_field'):
+                record['evidences'] = [e for e in record.get('evidences') or [] if e.get('field_path') != result['record_field']]
+                record['evidences'].extend({**e, 'field_path': result['record_field']} for e in result['evidences'])
+            else:
+                record['evidences'] = result['evidences']
     old_structures = await snapshot_structures(session, paper.id)
     old_structure_evidence = [ev.row_dict(r) for r in (await session.scalars(select(models.StructureModelEvidence)
         .where(models.StructureModelEvidence.paper_id == paper.id))).all()]
