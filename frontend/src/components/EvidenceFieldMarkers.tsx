@@ -13,6 +13,12 @@ interface Props {
 }
 const normalize = (field: string) => field.replace(/^user_values\./, '').replace(/^paper\.(co_first_authors|corresponding_authors)$/, 'paper.authors')
 const valueText = (value: unknown) => typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value ?? '')
+/** 只读宿主保留来源、字段设置查看及模块展开入口。 */
+export const readOnlyEvidenceFormSx = {
+  pointerEvents: 'none', '& .MuiButton-root': { display: 'none' },
+  '& [data-scientific-settings], & [data-evidence-key], & [data-property-module-toggle]': { pointerEvents: 'auto' },
+  '& .MuiButton-root[data-scientific-settings], & .MuiButton-root[data-evidence-key]': { display: 'inline-flex' },
+} as const
 function matchesField(node: HTMLElement, record: EvidenceRecord, suffix: string) {
   suffix = suffix.replace('.omega_log_k', '.omega_log')
   if (record.record_field_key && record.record_field?.startsWith('payload.calculation_conditions.extensions.')) return node.dataset.scientificFieldKey === record.record_field_key
@@ -260,6 +266,7 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
     <style>{`
       [data-evidence-annotated="true"] {position: relative;}
       [data-evidence-problem="true"] {outline: 2px solid #d32f2f; outline-offset: 2px; position: relative; border-radius: 8px;}
+      [data-scientific-field][data-evidence-problem="true"] {outline: none; border-color: #d32f2f;}
       [data-evidence-problem="true"].MuiOutlinedInput-root {outline: none;}
       [data-evidence-problem="true"].MuiOutlinedInput-root > .MuiOutlinedInput-notchedOutline {border-color: #d32f2f; border-width: 2px;}
       [data-evidence-caption="true"] {color: ${theme.palette.primary.main} !important; cursor: pointer; pointer-events: auto !important;}

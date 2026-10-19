@@ -3,6 +3,7 @@ import { materialStateSummary } from '../lib/materialStateSummary'
 import { PropertySpectraProvider, PropertySpectrumState, PropertySpectrumControls, UnassignedPropertySpectra, type PropertySpectraContext } from './PropertySpectra'
 import { materialIdentityMissing, materialLabel } from '../lib/materialIdentity'
 import React, { useEffect, useRef, useState } from 'react'
+import { readOnlyEvidenceFormSx } from './EvidenceFieldMarkers'
 import {
   Accordion, AccordionDetails, AccordionSummary, Alert, Autocomplete, Box, Button, Card, CardContent, Chip, Collapse, FormControl,
   FormHelperText, InputLabel, MenuItem, Select, TextField, Typography,
@@ -138,6 +139,8 @@ interface MaterialStatesEditorProps {
   readOnly?: boolean
   /** 校验问题：驱动字段错误态与 data-issue-field 定位锚点 */
   issues?: ValidationIssue[]
+  /** 来源待处理只用于计数，完整理由由字段侧栏展示。 */
+  reviewFields?: string[]
   /** draft 顶层的结构候选（不在 states 内，单独进出） */
   structureCandidates?: StructureCandidate[]
   onStructureCandidatesChange?: (next: StructureCandidate[]) => void
@@ -233,6 +236,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   catalogs,
   readOnly = false,
   issues,
+  reviewFields,
   structureCandidates,
   onStructureCandidatesChange,
   spaceGroups = [],
@@ -292,6 +296,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     spaceGroups: SpaceGroupOption[]
     paperType?: string
     issues?: ValidationIssue[]
+    reviewFields?: string[]
     readOnly: boolean
     lang: 'zh' | 'en'
     dict: ReturnType<typeof useLanguage>['dict']
@@ -595,7 +600,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     return <FormHelperText error>{issue.message}</FormHelperText>
   }
 
-  const environment = { catalogs, catalogLoading, catalogError, structureCandidates, spaceGroups, paperType, issues, readOnly, lang, dict }
+  const environment = { catalogs, catalogLoading, catalogError, structureCandidates, spaceGroups, paperType, issues, reviewFields, readOnly, lang, dict }
   const previousEnvironment = cardEnvironmentRef.current
   if (!previousEnvironment || Object.entries(environment).some(([key, value]) => value !== previousEnvironment[key as keyof typeof previousEnvironment])) {
     cardCacheRef.current.clear()
@@ -605,7 +610,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   return (
     <PropertySpectraProvider context={propertySpectra || (spectrumTarget ? { target: spectrumTarget, beforeNavigate: beforeSpectrumEdit } : undefined)}
       stateKeys={states.map((state, index) => state.state_key || 'state-' + (index + 1))} readOnly={readOnly}>
-    <Box sx={readOnly ? { pointerEvents: 'none', '& .MuiButton-root': { display: 'none' } } : undefined}>
+    <Box sx={readOnly ? readOnlyEvidenceFormSx : undefined}>
       <PropertySpectrumControls />
       <Box sx={{ mt: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
@@ -623,6 +628,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
         <Box data-testid="material-states-list" sx={{ display: 'flex', flexDirection: 'column', width: '100%', gap: 1.5, mt: 1.5 }}>
           {states.map((state, index) => {
+            const pendingCount = new Set([...(issues || []).map(issue => issue.field), ...(reviewFields || [])]
+              .filter(field => field.startsWith(`material_states[${index}].`))).size
             const isCollapsed = !readOnly && Boolean(collapsedStates[index])
             const uploading = Boolean(structureUploading[index])
             const elementCountEdit = elementCountEdits[index]
@@ -655,7 +662,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                         transition: 'transform 180ms ease',
                       }} />
                       <Typography variant="subtitle2" fontWeight={700}>{t('upload.materialStateNumber', { index: index + 1 })}</Typography>
-                      {(issues || []).filter(issue => issue.field.startsWith(`material_states[${index}].`)).length > 0 && <Chip size="small" color="error" label={(issues || []).filter(issue => issue.field.startsWith(`material_states[${index}].`)).length} />}
+                      {pendingCount > 0 && <Chip size="small" color="error" label={pendingCount} />}
                       <Typography variant="body2" color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>{materialStateSummary(state)}</Typography>
                     </Box>
                     <Button size="small" color="error" startIcon={<DeleteIcon />}
@@ -870,6 +877,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       readOnly={readOnly}
                       basePath={`material_states.${index}.property_modules`}
                       issues={(issues || []).map(item => ({ field: item.field.replace(/\[(\d+)\]/g, '.$1'), code: 'schema_validation_failed', message: item.message }))}
+                      reviewFields={(reviewFields || []).map(field => field.replace(/\[(\d+)\]/g, '.$1'))}
                       onChange={(modules, deletion) => emitStates(statesRef.current.map((item, itemIndex) => itemIndex === index ? {
                         ...item,
                         property_modules: modules,

@@ -157,3 +157,12 @@ PDF优先保留现有来源授权与高亮服务，字段级来源不能丢file_
 ScientificFieldBox 名称按钮直接调用 onSettings()，ScientificFieldSettingsDrawer 在没有 presentation 时打开独立 Drawer。只有从核对标记进入 EvidenceWorkflow、再选设置页时才创建 presentation 并嵌入统一侧栏，因此此前测试通过的入口无法覆盖用户截图路径。Demo 的字段名调用 open(id, 'settings')，与本地 FR-048 一致；远程 #109 旧正文仍要求原文、人工记录、AI 内容保留，未同步的三页签增量也不能成为删除可达入口的依据。
 
 修复复用字段节点到核对记录的已有定位结果，避免再次按名称猜字段或将两个 μ* 的来源混合。字段名与核对标记只改变初始页签，之后都可访问设置、来源、历史。验收改用完整 UploadTaskEditor 和原任务只读快照，并明确身份与 HTTP 夹具边界。
+
+
+## US13 根因与实现决定
+
+UploadTaskEditor 将 validationIssues 与 evidenceIssuesForStates 合并，MaterialStatesEditor 又把所有问题改写为 schema_validation_failed；PredictedTcGroupEditor 把组内消息逐条输出为error Alert，PropertyModuleEditor 标题还拼接第一条完整消息。管理员直接把同一来源消息数组送入 MaterialStatesEditor，存在相同问题。
+
+采用两个前端通道：校验问题带具体message，来源待处理仅向表单传字段路径计数；完整来源记录继续留在工作流。这样不会依赖中文关键词、状态颜色或CSS来藏文本。侧栏当前字段的完整reason仍展示，短状态与普通说明替代来源error Alert；真正保存失败和非法输入不改变提示或门禁。
+
+只读验收还发现上传和材料编辑器各自隐藏所有按钮，导致字段key不可达。两个宿主现共用只读样式保留查看和模块展开入口，并将readOnly传给工作流禁用写操作；不更改只读草稿的目标身份或来源资格。

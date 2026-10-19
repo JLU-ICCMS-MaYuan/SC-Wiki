@@ -67,3 +67,8 @@
 - 长引句可压缩显示，定位仍用完整 quote。区域和设置内容在页签、折叠时保持挂载，换来源后旧响应失效，渲染失败有明确提示与重试。
 
 验证见[实施验证](../field-review-implementation-validation.md)。
+
+
+## US13 展示约束
+
+API、JSON与数据库不变。reason/status/stale仍按原契约返回；前端表单只消费输入校验消息，来源记录仅投影当前reviewFields供计数，不将reason伪装成schema_validation_failed。完整理由在当前字段侧栏正常文本展示，不能因隐藏重复正文清空状态、来源或人工资格。对应FR-053～057见[设计](../source-review-presentation.md)。

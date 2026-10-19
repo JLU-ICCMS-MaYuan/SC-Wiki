@@ -1,4 +1,9 @@
 export default {
+  "reviewStatus": {
+    "human": "Manually confirmed", "stale": "Recheck needed", "unreported": "Not reported",
+    "unchecked": "Not checked", "supported": "Supported by source", "unsupported": "Source does not support this value",
+    "uncertain": "Evidence needs confirmation", "missing": "Source missing"
+  },
   "saveAndComplete": "Save and finish",
   "manualSaving": "Saving the current value and manual evidence…",
   "manualReasonRequired": "Enter the reason for your manual edit.",

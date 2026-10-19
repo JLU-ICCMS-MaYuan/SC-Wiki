@@ -1,4 +1,5 @@
 import ReviewSection from './ReviewSection'
+import EvidenceReviewSummary from './EvidenceReviewSummary'
 import ReviewFieldSettings from './ReviewFieldSettings'
 import EvidenceHistoryTimeline, { type AuditEvent } from './EvidenceHistoryTimeline'
 import type { ManualRecord } from '../lib/manualEvidenceDrafts'
@@ -669,10 +670,7 @@ export function useEvidenceWorkflow(options?: {
             <Typography>{activeRecord.provenance.filename} · {activeRecord.provenance.method}</Typography>
             {activeRecord.provenance.original_text && <Box component="details"><Box component="summary">{t('evidence.originalStructure')}</Box><Typography component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{activeRecord.provenance.original_text}</Typography></Box>}
           </Alert>}
-          {!activeRecord.placeholder && activeGroup.map(r => <Box key={r.key} sx={{ my: 1 }}>
-            {r.stale && <Alert severity="warning">{t('evidence.staleResult')}</Alert>}
-            <Alert severity={r.human_confirmed ? 'success' : r.status === 'unchecked' ? 'info' : r.status === 'supported' ? 'success' : 'error'}>{r.human_confirmed ? t('evidence.humanConfirmed') : r.status === 'unchecked' ? t('evidence.uncheckedHint') : r.reason}</Alert>
-          </Box>)}
+          {!activeRecord.placeholder && activeGroup.map(r => <EvidenceReviewSummary key={r.key} record={r} />)}
           {Boolean(activeRecord.legacy_evidences?.length) && !activeRecord.evidences.length && <ReviewSection title={t('evidence.legacySources')}>
             {activeRecord.legacy_evidences!.map((source, index) => <EvidenceRegion key={index} target={targetRef.current} source={source} />)}
           </ReviewSection>}

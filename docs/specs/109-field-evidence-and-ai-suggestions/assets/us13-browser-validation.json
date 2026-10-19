@@ -1,0 +1,95 @@
+{
+  "time": "2026-10-19T08:28:00.359Z",
+  "scope": "完整上传/返修/管理员/超级管理员组件；原任务只读草稿及预检快照，HTTP身份及普通API为隔离夹具，上传PDF通过正式区域服务读取原文件，无业务写入或模型调用",
+  "results": [
+    {
+      "mode": "upload",
+      "leaked_reasons": [],
+      "pending": "待处理项（188）",
+      "expected_pending": 188,
+      "marked_fields": 134,
+      "source_alerts": 0,
+      "sidebar_reason": "依据待确认\n\n科学值或来源已变化，共用设置的旧关联需要重新核对；原文方法部分明确说明自洽电子密度和 EPC 计算采用 6×6×6 q 点网格，与当前值一致。",
+      "tabs": 3,
+      "pdf": {
+        "width": 1106,
+        "height": 468,
+        "complete": true
+      },
+      "pdf_zoom": true,
+      "narrow": {
+        "top": 0,
+        "width": 390,
+        "client": 390,
+        "scroll": 390
+      },
+      "writes": [],
+      "errors": [],
+      "region_requests": 1
+    },
+    {
+      "mode": "revision",
+      "leaked_reasons": [],
+      "pending": "待处理项（188）",
+      "expected_pending": 188,
+      "marked_fields": 134,
+      "source_alerts": 0,
+      "sidebar_reason": "依据待确认\n\n科学值或来源已变化，共用设置的旧关联需要重新核对；原文方法部分明确说明自洽电子密度和 EPC 计算采用 6×6×6 q 点网格，与当前值一致。",
+      "tabs": 3,
+      "narrow": {
+        "top": 0,
+        "width": 390,
+        "client": 390,
+        "scroll": 390
+      },
+      "writes": [],
+      "errors": [],
+      "region_requests": 0
+    },
+    {
+      "mode": "admin",
+      "leaked_reasons": [],
+      "pending": "待处理项（188）",
+      "expected_pending": 188,
+      "marked_fields": 135,
+      "source_alerts": 0,
+      "sidebar_reason": "依据待确认\n\n科学值或来源已变化，共用设置的旧关联需要重新核对；原文方法部分明确说明自洽电子密度和 EPC 计算采用 6×6×6 q 点网格，与当前值一致。",
+      "tabs": 3,
+      "narrow": {
+        "top": 0,
+        "width": 390,
+        "client": 390,
+        "scroll": 390
+      },
+      "writes": [],
+      "errors": [],
+      "region_requests": 0
+    },
+    {
+      "mode": "superadmin",
+      "leaked_reasons": [],
+      "pending": "待处理项（188）",
+      "expected_pending": 188,
+      "marked_fields": 135,
+      "source_alerts": 0,
+      "sidebar_reason": "依据待确认\n\n科学值或来源已变化，共用设置的旧关联需要重新核对；原文方法部分明确说明自洽电子密度和 EPC 计算采用 6×6×6 q 点网格，与当前值一致。",
+      "tabs": 3,
+      "narrow": {
+        "top": 0,
+        "width": 390,
+        "client": 390,
+        "scroll": 390
+      },
+      "writes": [],
+      "errors": [],
+      "region_requests": 0
+    },
+    {
+      "mode": "readonly",
+      "readonly_viewable": true,
+      "tabs": 3,
+      "errors": [],
+      "writes": []
+    }
+  ]
+}

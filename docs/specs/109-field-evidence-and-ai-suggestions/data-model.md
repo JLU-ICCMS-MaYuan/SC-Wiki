@@ -74,3 +74,8 @@
 audit_events 含 id、item_key、field、label、actor、occurred_at、kind、summary，以及可选前后值、设置、理由。人工 actor 来自认证用户，普通保存用用户名快照；AI actor 来自实际模型调用，另记发起用户 ID。时间具有明确 UTC 偏移。上传普通修改事件在现有任务 state._field_change_events，随原任务持久化或清理；返修在服务器持有的 draft 日志；管理员在现有 PaperHistoryEvent.classification_snapshot.field_changes。核对、补空及人工确认事件写 ScientificEvidenceCheck.result.audit_events，正式转接沿原 JSON。不新增表列或迁移。
 
 事件为追加历史，读取按稳定字段及事件 ID 去重，不授予通过资格。普通改值、设置、人工确认及 AI 核对分开显示；旧作者、时间缺失保留缺失。验证与边界见[实施验证](field-review-implementation-validation.md)。
+
+
+## US13 前端展示职责
+
+不新增数据实体。校验消息和来源记录继续由各自原始数据持有；前端新增reviewFields仅表示当前稳定身份映射后的路径，用于材料／模块计数。reason不再进入表单校验错误，侧栏按原记录完整展示。

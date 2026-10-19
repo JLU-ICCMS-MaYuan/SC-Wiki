@@ -21,7 +21,7 @@ export default function ScientificFieldBox({ name, value, readOnly, numeric, fie
   }, [field, onSettings])
   return <Box data-scientific-field={field} data-scientific-field-key={fieldKey} data-issue-field={field} sx={{ position: 'relative', boxSizing: 'border-box', width: fullWidth ? '100%' : 'max-content', minWidth: fullWidth ? 0 : 140, maxWidth: '100%', flex: '0 0 auto',
     border: 1, borderColor: error ? 'error.main' : 'divider', borderRadius: 1, px: 1.25, py: .5 }}>
-    <Button size="small" onClick={event => {
+    <Button data-scientific-settings size="small" onClick={event => {
       const request = { field, name, value, handled: false }
       event.currentTarget.dispatchEvent(new CustomEvent('scwiki:open-field-settings', { bubbles: true, detail: request }))
       if (!request.handled) onSettings()

@@ -1,4 +1,4 @@
-import { currentEvidenceField, evidenceIssuesForStates } from '../lib/evidenceFields'
+import { currentEvidenceField, evidenceFieldsForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
 import { useEvidenceWorkflow, type EvidenceTarget } from './EvidenceWorkflow'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
@@ -22,7 +22,7 @@ import {
   UploadDraft, normalizeUploadDraft, unwrapData,
 } from '../lib/paperProcessing'
 import { validateRecordClient, validateTcRecords } from '../lib/formDefinitions'
-import EvidenceFieldMarkers from './EvidenceFieldMarkers'
+import EvidenceFieldMarkers, { readOnlyEvidenceFormSx } from './EvidenceFieldMarkers'
 import PaperMaterialsSection from './PaperMaterialsSection'
 import { researchMaterials } from '../lib/paperMaterials'
 
@@ -133,6 +133,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     ? revision ? { target: 'revision', target_id: revision.revision_id } : undefined
     : { target: 'upload', target_id: taskId }
   const evidenceWorkflow = useEvidenceWorkflow({ target: evidenceTarget,
+    readOnly,
     getCurrentValue: record => draft ? currentEvidenceField(record, { ...draft.paper }, draft.material_states) : undefined,
     saveCurrent: () => saveDraft(false, false),
   })
@@ -162,8 +163,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const [error, setError] = useState('')
   // 本次提交发现的校验问题；驱动字段错误态与定位，提交成功或重新加载草稿时清空
   const [validationIssues, setIssues] = useState<ValidationIssue[]>([])
-  const issues = [...new Map([...validationIssues, ...evidenceIssuesForStates(evidenceWorkflow.issues, draft?.material_states || [])]
-    .map(issue => [`${issue.field}:${issue.message}`, issue])).values()]
+  const issues = validationIssues
+  const reviewFields = evidenceFieldsForStates(evidenceWorkflow.issues, draft?.material_states || [])
   const [authorMenu, setAuthorMenu] = useState<{ author: string; anchorEl: HTMLElement } | null>(null)
   const [authorInput, setAuthorInput] = useState('')
   const [catalogs, setCatalogs] = useState<ClassificationCatalogs | null>(null)
@@ -651,7 +652,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
       {draft.citation_extraction && <CitationExtractionPanel extraction={draft.citation_extraction} />}
 
-      <Box sx={readOnly ? { pointerEvents: 'none', '& .MuiButton-root': { display: 'none' } } : undefined}>
+      <Box sx={readOnly ? readOnlyEvidenceFormSx : undefined}>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, '& > *': { minWidth: 0 } }}>
         <Box sx={{ gridColumn: '1 / -1' }}>
           <TextField fullWidth label={t('upload.title')} value={draft.paper.title || ''}
@@ -872,6 +873,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         catalogError={catalogError}
         readOnly={readOnly || submitting}
         issues={issues}
+        reviewFields={reviewFields}
         structureCandidates={draft.structure_candidates || []}
         onStructureCandidatesChange={next => setDraftField('structure_candidates', next)}
         spaceGroups={spaceGroups}

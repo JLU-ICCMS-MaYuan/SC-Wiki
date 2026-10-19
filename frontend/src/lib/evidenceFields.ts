@@ -100,7 +100,7 @@ export function changedScientificFields(before: unknown, after: unknown, path: s
 
 
 /** 折叠计数与定位使用编辑器当前顺序，核对身份仍取稳定键。 */
-export function evidenceIssuesForStates(records: import('../components/EvidenceWorkflow').EvidenceRecord[], states: Array<{ state_key?: string; property_modules?: Array<{ module_key: string; records: Array<{ record_key: string }> }> }>) {
+export function evidenceFieldsForStates(records: import('../components/EvidenceWorkflow').EvidenceRecord[], states: Array<{ state_key?: string; property_modules?: Array<{ module_key: string; records: Array<{ record_key: string }> }> }>) {
   return records.map(record => {
     let field = record.field
     const si = record.state_key ? states.findIndex(state => state.state_key === record.state_key) : -1
@@ -113,6 +113,6 @@ export function evidenceIssuesForStates(records: import('../components/EvidenceW
         if (ri >= 0) field = field.replace(/\.records\[\d+\]/, `.records[${ri}]`)
       }
     }
-    return { field, message: record.reason }
+    return field
   })
 }

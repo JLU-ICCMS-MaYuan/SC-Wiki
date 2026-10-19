@@ -1,4 +1,4 @@
-import { currentEvidenceField, evidenceIssuesForStates } from '../lib/evidenceFields'
+import { currentEvidenceField, evidenceFieldsForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
 import { materialStateFromDetail, candidateFromStructureModel, remapScientificIdentities, type ScientificIdentityMap } from '../lib/paperEditing'
 import { applyEvidencePatches, type EvidencePatch } from '../lib/evidenceProposals'
@@ -597,7 +597,7 @@ const AdminPaperEditPage: React.FC = () => {
             spectrumTarget={{ target: 'paper', target_id: String(paperId) }}
             beforeSpectrumEdit={() => handleEditSave()}
             onScientificEdit={evidenceWorkflow.invalidate}
-            issues={evidenceIssuesForStates(evidenceWorkflow.issues, editMaterialStates)}
+            reviewFields={evidenceFieldsForStates(evidenceWorkflow.issues, editMaterialStates)}
             states={editMaterialStates}
             onChange={states => {
               if (JSON.stringify(researchMaterials(editMaterialStates)) !== JSON.stringify(researchMaterials(states))) evidenceWorkflow.invalidate('paper.research_materials')

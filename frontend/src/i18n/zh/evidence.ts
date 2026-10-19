@@ -1,4 +1,9 @@
 export default {
+  "reviewStatus": {
+    "human": "已人工确认", "stale": "待重新核对", "unreported": "未报告",
+    "unchecked": "待核对", "supported": "原文支持", "unsupported": "依据不支持当前值",
+    "uncertain": "依据待确认", "missing": "缺少来源"
+  },
   "saveAndComplete": "保存并完成",
   "manualSaving": "正在保存当前值与人工依据…",
   "manualReasonRequired": "请填写人工修改说明。",

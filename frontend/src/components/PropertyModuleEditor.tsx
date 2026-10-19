@@ -28,6 +28,7 @@ export interface ModuleDeletion {
 interface Props {
   modules: PropertyModuleDraft[]
   issues?: FormIssue[]
+  reviewFields?: string[]
   basePath?: string
   readOnly?: boolean
   onChange: (modules: PropertyModuleDraft[], deletion?: ModuleDeletion) => void
@@ -150,6 +151,7 @@ const PropertyRecordEditor = React.memo<PropertyRecordEditorProps>(
 const PropertyModuleEditor: React.FC<Props> = ({
   modules: suppliedModules,
   issues = [],
+  reviewFields = [],
   basePath = '',
   readOnly = false,
   onChange,
@@ -245,15 +247,14 @@ const PropertyModuleEditor: React.FC<Props> = ({
         const moduleBasePath = basePath ? `${basePath}.${moduleIndex}` : String(moduleIndex)
         const choices = choicesFor(module.module_code)
         const tcGroups = predictedTcGroups(module.records)
-        const moduleProblems = [
-          ...issues.filter(issue => issue.field.startsWith(`${moduleBasePath}.`)).map(issue => issue.message),
-          ...module.records.map(record => definitionErrors[record.record_key]).filter(Boolean),
-        ]
+        const pendingCount = new Set([...issues.map(issue => issue.field), ...reviewFields]
+          .filter(field => field.startsWith(`${moduleBasePath}.`))).size
+          + module.records.filter(record => definitionErrors[record.record_key]).length
         return (
           <Box key={module.module_key} data-module-key={module.module_key} data-testid={`property-module-${module.module_code}`} sx={{ pt: 1.5, borderTop: '1px solid', borderColor: 'divider' }}>
             <PropertyModuleSection
               title={PROPERTY_MODULES.find(item => item.code === module.module_code)?.label || module.module_code}
-              status={moduleProblems.length ? `${moduleProblems.length} 项待处理：${moduleProblems[0]}` : undefined}
+              status={pendingCount ? `${pendingCount} 项待处理` : undefined}
               actions={!readOnly ? (
                 <Box sx={{ pr: 1 }}>
                   <Tooltip title={module.records.length ? '请先删除模块内记录' : '删除模块'}>
