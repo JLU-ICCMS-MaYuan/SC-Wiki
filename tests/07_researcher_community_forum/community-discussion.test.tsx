@@ -73,6 +73,15 @@ describe('只读社区与多模型问答', () => {
     await screen.findByText('模型一 · m1'); expect(screen.getByText('生成失败')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: '重新生成' })).not.toBeInTheDocument()
   })
+  it('历史问题没有模型任务时使用不依赖新字段的排序', async () => {
+    const question = { ...comment, kind: 'question', title: '迁移前的历史问题', generation_tasks: [], origin: '', revision: 0 }
+    vi.mocked(api.get).mockImplementation(async url => url === '/api/community/entries/42' ? question : { items: [], total: 0 })
+    render(<MemoryRouter initialEntries={['/share/discussions/42']}><Routes><Route path="/share/discussions/:id" element={<DiscussionPage />} /></Routes></MemoryRouter>)
+    await screen.findByText('迁移前的历史问题')
+    await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/community/entries?kind=answer&question_id=42&sort=latest&offset=0', expect.anything()))
+    expect(vi.mocked(api.get).mock.calls.some(([url]) => url.includes('sort=models'))).toBe(false)
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
   it('论文权限失败不显示历史内容或输入', async () => {
     vi.mocked(api.get).mockRejectedValue({ code: 'paper_forbidden', status: 403 })
     render(<MemoryRouter><CommentPanel target={{ paper_id: 7 }} /></MemoryRouter>)

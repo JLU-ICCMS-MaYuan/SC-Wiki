@@ -1,0 +1,44 @@
+[
+  {
+    "id": "IMG-001",
+    "original_name": "codex-clipboard-a7405efb-48f0-43d5-ac9b-7f38bfecc668.png",
+    "path": "docs/specs/142-community-ai-discussion/assets/IMG-001-runtime-unavailable.png",
+    "sha256": "deace64d1251432e83487750441e4cf1e26f6ffb3a49f286ae4d8167812d9546",
+    "upload_order": 1,
+    "locator": "docs/specs/142-community-ai-discussion/assets/IMG-001-runtime-unavailable.png",
+    "status": "local_verified",
+    "user_context": "为什么我点击之后发现还是不可以用 ？",
+    "related": [
+      "US1",
+      "FR-003",
+      "T008"
+    ],
+    "media_type": "image/png",
+    "dimensions_px": [
+      3376,
+      1106
+    ],
+    "verification": "原文件字节复制，SHA-256 一致；PNG 实际解码通过。"
+  },
+  {
+    "id": "IMG-002",
+    "original_name": "codex-clipboard-70b33e2c-cbf9-4aa8-ac83-0e7726fec2ac.png",
+    "path": "docs/specs/142-community-ai-discussion/assets/IMG-002-runtime-unavailable.png",
+    "sha256": "a5849e3900fbbaf393bdd877daabf822494461258764240d7e5c738618f8272e",
+    "upload_order": 2,
+    "locator": "docs/specs/142-community-ai-discussion/assets/IMG-002-runtime-unavailable.png",
+    "status": "local_verified",
+    "user_context": "为什么我点击之后发现还是不可以用 ？",
+    "related": [
+      "US1",
+      "FR-003",
+      "T008"
+    ],
+    "media_type": "image/png",
+    "dimensions_px": [
+      2306,
+      916
+    ],
+    "verification": "原文件字节复制，SHA-256 一致；PNG 实际解码通过。"
+  }
+]

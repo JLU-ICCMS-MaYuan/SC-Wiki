@@ -13,7 +13,8 @@ import AIGenerationPanel, { ModelTasks } from '../components/community/AIGenerat
 function QuestionDetail({ id }: { id: string }) {
   const { t } = useLanguage(); const [offset, setOffset] = useState(0), [focus, setFocus] = useState(focusedEntry())
   const question = useCommunityLoad<CommunityEntry>(`/entries/${id}`)
-  const answers = useCommunityLoad<CommunityList<CommunityEntry>>(question.data?.kind === 'question' && question.data.status === 'visible' ? `/entries?kind=answer&question_id=${id}&sort=models&offset=${offset}${focus ? `&focus_id=${focus}` : ''}` : null)
+  const answerSort = question.data?.generation_tasks?.length ? 'models' : 'latest'
+  const answers = useCommunityLoad<CommunityList<CommunityEntry>>(question.data?.kind === 'question' && question.data.status === 'visible' ? `/entries?kind=answer&question_id=${id}&sort=${answerSort}&offset=${offset}${focus ? `&focus_id=${focus}` : ''}` : null)
   const reload = () => { question.reload(); answers.reload() }
   const active = question.data?.generation_tasks?.some(task => ['queued', 'running'].includes(task.state))
   useEffect(() => { if (!active) return; const timer = window.setInterval(reload, 3000); return () => window.clearInterval(timer) }, [active])

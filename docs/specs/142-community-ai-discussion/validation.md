@@ -55,3 +55,13 @@ python tests/07_researcher_community_forum/verify-ai-community.py --browser
 ## 独立提交候选复验
 
 从暂存索引导出独立代码目录，未复制其他任务的未提交改动；新增 Python 9 项测试与前端生产构建再次通过。README 索引只包含社区段落，原有上传修改留在工作区。
+
+## 本地运行反馈：历史问题读取恢复
+
+用户反馈见 IMG-001/IMG-002。实际连接 `127.0.0.1:3307/scwiki`，迁移版本仍为 `20261015_0094`，没有 AI 表和 `model_order` 字段；Go 日志与实际请求均确认 `ORDER BY model_order` 导致 1054/500。
+
+修复历史问题的排序选择：没有模型任务时请求 `sort=latest`，有模型任务时仍使用 `sort=models`。13 项社区前端测试与生产构建通过；实际 `http://127.0.0.1:5173/share/discussions/7` 在无登录的浏览器中恢复 200 和“暂无内容”，没有发帖或触发 AI。见 [实际只读核验](assets/runtime-read-check.json) 与 [恢复截图](assets/runtime-read-fixed.png)。
+
+同时核实：社区 Worker 未运行、队列为空，Python API 因热重载停在连接关闭等待；`mayuan` 是普通账号，`superadmin_mayuan` 是正常且邮箱已验证的超级管理员。没有改变任何账号角色。旧问题不会自动补答，生成需要新的超级管理员提问。
+
+已对六张现有社区表及 Alembic 版本表做只读备份，并生成从 0094 到 0142 的离线迁移 SQL。备份位于 `.local/backups/community142-20261020-190219/`，包含 SHA-256 清单；现有社区数据为一个问题，其余社区表为空。备份和迁移清单不入 Git。尚未执行业务库迁移或服务启用，等待用户明确授权。

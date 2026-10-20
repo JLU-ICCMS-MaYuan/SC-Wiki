@@ -1,0 +1,11 @@
+{
+  "page": "http://127.0.0.1:5173/share/discussions/7",
+  "responses": [
+    {
+      "url": "http://127.0.0.1:5173/api/community/entries?kind=answer&question_id=7&sort=latest&offset=0",
+      "status": 200
+    }
+  ],
+  "read_only": true,
+  "no_posts_created": true
+}
