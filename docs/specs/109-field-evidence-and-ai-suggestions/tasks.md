@@ -172,3 +172,12 @@ T068～T072 证据见[正式实施验证](field-review-implementation-validation
 - [x] T079 独立索引候选回归与构建，回写Overview、Issue验收，精确提交，保留其他任务改动。（FR-057）
 
 证据见[展示设计与验证](source-review-presentation.md#实施与验证结果)：独立候选126项通过、构建通过；四类编辑入口保持188项待处理，主表单来源理由和来源Alert均为0，只读查看及真实PDF解码/放大通过。旧管理员测试3项在干净HEAD上同样失败，不计作本轮通过。
+
+## 2026-10-20 状态与核对修订
+
+本轮已确认需求、原话、设计和实施任务见 [直接依赖核对与简洁压强](state-review-convergence-20261020.md)。新规则覆盖该功能此前相冲突行为，历史原文与验收保留。
+
+- [x] T080 本轮阶段1及验证证据见 [状态与核对修订](state-review-convergence-20261020.md)。
+- [x] T081 本轮阶段2及验证证据见 [状态与核对修订](state-review-convergence-20261020.md)。
+- [x] T082 本轮阶段3及验证证据见 [状态与核对修订](state-review-convergence-20261020.md)。
+- [x] T083 本轮阶段4及验证证据见 [状态与核对修订](state-review-convergence-20261020.md)。

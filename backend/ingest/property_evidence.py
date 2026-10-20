@@ -187,6 +187,10 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
                 r['evidences'] = copy.deepcopy(assessment.get('evidences') or [])
         r.setdefault('item_key', digest(r['key']))
         r.setdefault('fields', [r['field']])
+        if r.get('kind') == 'property':
+            from .review_dependencies import state_paths
+            r['state_dependencies'] = state_paths(((r.get('claim') or {}).get('record', {}).get('payload') or {}).get('source_associations') or [])
+            r['dependency_policy_version'] = 1
         r.setdefault('current_value', r['claim'])
         if r.get('kind') == 'property':
             from .fermi_dos import has_conflict as has_dos_conflict

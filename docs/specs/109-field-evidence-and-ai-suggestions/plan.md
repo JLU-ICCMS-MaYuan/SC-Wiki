@@ -165,3 +165,7 @@ ScientificFieldBox 将名称点击交给所在表单的 EvidenceFieldMarkers；�
 ## US13 展示通道分离
 
 按[展示设计](source-review-presentation.md)实施：T075归档原文原图并更新#109；T076将来源路径reviewFields与validationIssues分离并保留计数、定位；T077侧栏使用短状态与正常段落展示完整理由；T078完整宿主回归和原PDF浏览器；T079索引隔离构建、Overview和远程验收回写、精确提交。FR-053/054对应T076及SC-041/042；FR-055对应T077及SC-043；FR-056/057对应T078及SC-044/045。
+
+## 2026-10-20 状态与核对修订
+
+本轮已确认需求、原话、设计和实施任务见 [直接依赖核对与简洁压强](state-review-convergence-20261020.md)。新规则覆盖该功能此前相冲突行为，历史原文与验收保留。

@@ -18,13 +18,14 @@ const definitions = JSON.parse(await readFile(new URL('../../backend/data/form_d
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH, headless: true })
 const reports = []
 try {
-  for (const role of ['upload', 'revision', 'admin', 'superadmin']) {
+  for (const role of (process.env.SC_WIKI_BROWSER_ROLES || 'upload,revision,admin,superadmin').split(',')) {
     const draft = { paper: { id: 990109, title: 'US11 隔离验收', year: 2026, authors: [], paper_type: 'theoretical',
       journal: 'Fixture', review_status: 'pending', superconductor_kind: 'conventional', material_families: [{ id: 8, name: '氢基超导体' }] },
       material_states: [{ id: 1, state_key: 'isolation', material: 'LaSc2H24', material_name: 'Fixture hydride', element_count: 3,
         state_kind: 'theoretical', structure_optimization: 'classical_static', material_dimensionality: 'three_dimensional',
         reported_space_group_symbol: 'P6/mmm', reported_space_group_number: 191, crystal_system: 'hexagonal',
         pressure_value_gpa: 150, structure_families: [], property_modules: [], structures: [] }], structure_candidates: [] }
+    if (process.env.SC_WIKI_PROPERTY_FIXTURE) draft.material_states[0].property_modules = JSON.parse(await readFile(process.env.SC_WIKI_PROPERTY_FIXTURE, 'utf8'))
     let stored = await call({ op: 'init', draft }), saves = 0, revisionVersion = 1, failNextSave = true
     const user = { id: 7, username: 'fixture', role: role === 'superadmin' ? 'superadmin' : role === 'admin' ? 'admin' : 'user',
       is_admin: ['admin', 'superadmin'].includes(role), is_superadmin: role === 'superadmin', is_approved: true, is_email_verified: true }
@@ -85,14 +86,28 @@ try {
       }, role)
     }
     await page.getByLabel('结构优化核处理', { exact: true }).waitFor()
-    const fields = ['element_count', 'reported_space_group_number', 'crystal_system']
+    if (process.env.SC_WIKI_PROPERTY_FIXTURE) {
+      for (const code of ['superconductive_properties', 'electronic_properties']) {
+        const details = page.getByTestId('property-module-' + code).locator('details').first()
+        if (await details.count() && !(await details.evaluate(el => el.open))) await details.locator(':scope > summary').click()
+      }
+    }
+    const fields = ['element_count', 'reported_space_group_number', 'crystal_system', ...stored.preflight.records.filter(r => r.record_key && r.required !== false).map(r => r.field.replace('material_states[0].', ''))]
     const inspect = async stage => {
       const values = await page.evaluate(fields => fields.map(field => {
         const anchor = document.querySelector(`[data-issue-field="material_states[0].${field}"]`)
         const label = anchor?.querySelector('label')
-        return { field, red: Boolean(anchor?.querySelector('[data-evidence-problem="true"]') || anchor?.matches('[data-evidence-problem="true"]')),
+        return { field, present: Boolean(anchor), red: Boolean(anchor?.querySelector('[data-evidence-problem="true"]') || anchor?.matches('[data-evidence-problem="true"]')),
           labelRed: label?.getAttribute('data-evidence-caption-problem') === 'true' }
       }), fields)
+      if (process.env.SC_WIKI_PROPERTY_FIXTURE) {
+        const properties = await page.evaluate(() => Array.from(document.querySelectorAll('[data-testid^="property-module-"] [data-evidence-key]')).map(caption => ({
+          label: caption.textContent, red: caption.getAttribute('data-evidence-caption-problem') === 'true',
+        })))
+        assert(properties.length >= 8, `必须实际检查已渲染的物性字段：${JSON.stringify(properties)}`)
+        assert(properties.every(item => !item.red), `${role}/${stage}: 物性字段被连带标红 ${JSON.stringify(properties)}`)
+        values.push(...properties.map(item => ({field: item.label, present: true, red: item.red, labelRed: item.red})))
+      }
       assert(values.every(value => !value.red && !value.labelRed), `${role}/${stage}: ${JSON.stringify(values)}`)
       const counter = await page.locator('[data-material-state-index="0"] .MuiChip-colorError').allTextContents()
       assert.deepEqual(counter, stage === 'initial' ? [] : ['1'], `${role}/${stage}: 仅真实修改的核处理计入问题`)
@@ -116,7 +131,10 @@ try {
     assert.equal(stored.draft.material_states[0].structure_optimization, 'sscha')
     await inspect('saved')
     await page.locator('[data-issue-field="material_states[0].element_count"] label').click()
-    await page.locator('.evidence-review-drawer').getByText('保留的人工说明', { exact: false }).first().waitFor()
+    try {
+    await page.locator('.evidence-review-drawer').getByText('隔离夹具核验', { exact: false }).first().waitFor()
+    } catch (error) { await writeFile(`${artifacts}/debug-preflight.json`, JSON.stringify(stored.preflight, null, 2)); await page.screenshot({path:`${artifacts}/debug.png`,fullPage:true}); throw error }
+    assert.equal(stored.preflight.records.find(r => r.field.endsWith('.element_count')).decision.reason, '保留的人工说明')
     await page.getByLabel('关闭来源详情').click()
     await page.waitForTimeout(300)
     await page.screenshot({ path: `${artifacts}/${role}.png`, fullPage: true })

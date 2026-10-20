@@ -1,0 +1,237 @@
+{
+  "storage": "真实MySQL保存点与外事务回滚",
+  "roles": [
+    "admin",
+    "revision",
+    "superadmin",
+    "upload"
+  ],
+  "points": [
+    {
+      "role": "upload",
+      "stage": "initial",
+      "saves": 0,
+      "problem_counter": [],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "upload",
+      "stage": "edit",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "upload",
+      "stage": "waiting",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "upload",
+      "stage": "save-failed",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "upload",
+      "stage": "saved",
+      "saves": 1,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "revision",
+      "stage": "initial",
+      "saves": 0,
+      "problem_counter": [],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "revision",
+      "stage": "edit",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "revision",
+      "stage": "waiting",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "revision",
+      "stage": "save-failed",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "revision",
+      "stage": "saved",
+      "saves": 1,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "admin",
+      "stage": "initial",
+      "saves": 0,
+      "problem_counter": [],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "admin",
+      "stage": "edit",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "admin",
+      "stage": "waiting",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "admin",
+      "stage": "save-failed",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "admin",
+      "stage": "saved",
+      "saves": 1,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "superadmin",
+      "stage": "initial",
+      "saves": 0,
+      "problem_counter": [],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "superadmin",
+      "stage": "edit",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "superadmin",
+      "stage": "waiting",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "superadmin",
+      "stage": "save-failed",
+      "saves": 0,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    },
+    {
+      "role": "superadmin",
+      "stage": "saved",
+      "saves": 1,
+      "problem_counter": [
+        "1"
+      ],
+      "inspected_fields": 31,
+      "problem_fields": []
+    }
+  ],
+  "sample_checked_fields": [
+    "element_count",
+    "reported_space_group_number",
+    "crystal_system",
+    "•",
+    "•",
+    "预测方法",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "•",
+    "名称",
+    "值类型",
+    "原始值",
+    "单位"
+  ],
+  "raw_artifact_location": "/tmp/scwiki-convergence-staged-browser/results.json"
+}

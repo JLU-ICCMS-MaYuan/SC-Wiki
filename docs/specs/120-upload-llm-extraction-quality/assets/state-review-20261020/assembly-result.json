@@ -1,0 +1,290 @@
+[
+  {
+    "material": "LaSc2H24",
+    "pressure_gpa": 150,
+    "optimization": "sscha",
+    "records": [
+      {
+        "property": "tc",
+        "value_number": null,
+        "value_raw": "281 to 311 K",
+        "value_text": null,
+        "value_min": 281,
+        "value_max": 311,
+        "parameters": {
+          "lambda_ep": 3.94,
+          "extensions": [
+            {
+              "key": "mu_star_reported",
+              "value_kind": "text",
+              "value_raw": "0.16 to 0.1",
+              "unit_raw": "to 0.1"
+            }
+          ],
+          "omega_log": 745
+        }
+      },
+      {
+        "property": "dos_fermi",
+        "value_number": null,
+        "value_raw": "18.44",
+        "value_text": "18.44",
+        "value_min": null,
+        "value_max": null,
+        "parameters": null
+      }
+    ]
+  },
+  {
+    "material": "LaSc2H24",
+    "pressure_gpa": 167,
+    "optimization": "sscha",
+    "records": [
+      {
+        "property": "tc",
+        "value_number": null,
+        "value_raw": "285 to 316 K",
+        "value_text": null,
+        "value_min": 285,
+        "value_max": 316,
+        "parameters": {
+          "lambda_ep": 3.73,
+          "extensions": [
+            {
+              "key": "mu_star_reported",
+              "value_kind": "text",
+              "value_raw": "0.16 to 0.1",
+              "unit_raw": "to 0.1"
+            }
+          ],
+          "omega_log": 794
+        }
+      },
+      {
+        "property": "dos_fermi",
+        "value_number": null,
+        "value_raw": "18.76",
+        "value_text": "18.76",
+        "value_min": null,
+        "value_max": null,
+        "parameters": null
+      }
+    ]
+  },
+  {
+    "material": "LaSc2H24",
+    "pressure_gpa": 200,
+    "optimization": "sscha",
+    "records": [
+      {
+        "property": "tc",
+        "value_number": null,
+        "value_raw": "291 to 325 K",
+        "value_text": null,
+        "value_min": 291,
+        "value_max": 325,
+        "parameters": {
+          "lambda_ep": 3.21,
+          "extensions": [
+            {
+              "key": "mu_star_reported",
+              "value_kind": "text",
+              "value_raw": "0.16 to 0.1",
+              "unit_raw": "to 0.1"
+            }
+          ],
+          "omega_log": 965
+        }
+      },
+      {
+        "property": "dos_fermi",
+        "value_number": null,
+        "value_raw": "19.31",
+        "value_text": "19.31",
+        "value_min": null,
+        "value_max": null,
+        "parameters": null
+      }
+    ]
+  },
+  {
+    "material": "LaSc2H24",
+    "pressure_gpa": 250,
+    "optimization": "sscha",
+    "records": [
+      {
+        "property": "tc",
+        "value_number": null,
+        "value_raw": "296 to 331 K",
+        "value_text": null,
+        "value_min": 296,
+        "value_max": 331,
+        "parameters": {
+          "lambda_ep": 2.89,
+          "extensions": [
+            {
+              "key": "mu_star_reported",
+              "value_kind": "text",
+              "value_raw": "0.16 to 0.1",
+              "unit_raw": "to 0.1"
+            }
+          ],
+          "omega_log": 1075
+        }
+      },
+      {
+        "property": "dos_fermi",
+        "value_number": null,
+        "value_raw": "19.63",
+        "value_text": "19.63",
+        "value_min": null,
+        "value_max": null,
+        "parameters": null
+      }
+    ]
+  },
+  {
+    "material": "LaSc2H24",
+    "pressure_gpa": 290,
+    "optimization": "classical_static",
+    "records": [
+      {
+        "property": "tc",
+        "value_number": null,
+        "value_raw": "311 to 339 K",
+        "value_text": null,
+        "value_min": 311,
+        "value_max": 339,
+        "parameters": {
+          "lambda_ep": 3.56,
+          "extensions": [
+            {
+              "key": "mu_star_reported",
+              "value_kind": "text",
+              "value_raw": "0.16 to 0.1",
+              "unit_raw": "to 0.1"
+            }
+          ],
+          "omega_log": 865
+        }
+      },
+      {
+        "property": "dos_fermi",
+        "value_number": null,
+        "value_raw": "18.69",
+        "value_text": "18.69",
+        "value_min": null,
+        "value_max": null,
+        "parameters": null
+      }
+    ]
+  },
+  {
+    "material": "LaSc2H24",
+    "pressure_gpa": 300,
+    "optimization": "classical_static",
+    "records": [
+      {
+        "property": "tc",
+        "value_number": null,
+        "value_raw": "303 to 329 K",
+        "value_text": null,
+        "value_min": 303,
+        "value_max": 329,
+        "parameters": {
+          "lambda_ep": 3.34,
+          "extensions": [
+            {
+              "key": "mu_star_reported",
+              "value_kind": "text",
+              "value_raw": "0.16 to 0.1",
+              "unit_raw": "to 0.1"
+            }
+          ],
+          "omega_log": 968
+        }
+      },
+      {
+        "property": "dos_fermi",
+        "value_number": null,
+        "value_raw": "17.27",
+        "value_text": "17.27",
+        "value_min": null,
+        "value_max": null,
+        "parameters": null
+      }
+    ]
+  },
+  {
+    "material": "LaSc2H24",
+    "pressure_gpa": 350,
+    "optimization": "classical_static",
+    "records": [
+      {
+        "property": "tc",
+        "value_number": null,
+        "value_raw": "266 to 294 K",
+        "value_text": null,
+        "value_min": 266,
+        "value_max": 294,
+        "parameters": {
+          "lambda_ep": 2.2,
+          "extensions": [
+            {
+              "key": "mu_star_reported",
+              "value_kind": "text",
+              "value_raw": "0.16 to 0.1",
+              "unit_raw": "to 0.1"
+            }
+          ],
+          "omega_log": 1294
+        }
+      },
+      {
+        "property": "dos_fermi",
+        "value_number": null,
+        "value_raw": "15.64",
+        "value_text": "15.64",
+        "value_min": null,
+        "value_max": null,
+        "parameters": null
+      }
+    ]
+  },
+  {
+    "material": "LaSc2H24",
+    "pressure_gpa": 300,
+    "optimization": "sscha",
+    "records": [
+      {
+        "property": "tc",
+        "value_number": null,
+        "value_raw": "293 to 330 K",
+        "value_text": null,
+        "value_min": 293,
+        "value_max": 330,
+        "parameters": {
+          "lambda_ep": 2.61,
+          "extensions": [
+            {
+              "key": "mu_star_reported",
+              "value_kind": "text",
+              "value_raw": "0.16 to 0.1",
+              "unit_raw": "to 0.1"
+            }
+          ],
+          "omega_log": 1165
+        }
+      },
+      {
+        "property": "dos_fermi",
+        "value_number": null,
+        "value_raw": "19.61",
+        "value_text": "19.61",
+        "value_min": null,
+        "value_max": null,
+        "parameters": null
+      }
+    ]
+  }
+]

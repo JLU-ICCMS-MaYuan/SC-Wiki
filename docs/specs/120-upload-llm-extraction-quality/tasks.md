@@ -50,3 +50,12 @@
 - [x] T026 [US5] 复用 `backend/ingest/material_family_classification.py` 的归类理由，在 `backend/ingest/property_evidence.py` 按 #109 共用契约绑定当前分类与来源版本，禁止空泛理由自动支持。（FR-019～020）
 - [x] T027 [US5] 在 `frontend/src/components/EvidenceWorkflow.tsx` 和中英文字典中显示当前模型判断逻辑；用真实 H3S 草稿核对材料家族 ID、引句及侧栏，不覆盖其他输入。（FR-020～021、SC-009）
 - [ ] T028 [US5] 验证上传、刷新、正式来源与管理员重读；补齐 `data-model.md`、`contracts/material-family-reason.md` 和验收记录，再按 Overview 与 Issue 流程收尾。（SC-010）
+
+## 2026-10-20 状态与核对修订
+
+本轮已确认需求、原话、设计和实施任务见 [状态核处理提取与分支保留](state-review-convergence-20261020.md)。新规则覆盖该功能此前相冲突行为，历史原文与验收保留。
+
+- [x] T036 本轮阶段1及验证证据见 [状态与核对修订](state-review-convergence-20261020.md)。
+- [x] T037 本轮阶段2及验证证据见 [状态与核对修订](state-review-convergence-20261020.md)。
+- [x] T038 本轮阶段3及验证证据见 [状态与核对修订](state-review-convergence-20261020.md)。
+- [x] T039 本轮阶段4及验证证据见 [状态与核对修订](state-review-convergence-20261020.md)。

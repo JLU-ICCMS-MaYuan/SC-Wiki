@@ -14,7 +14,7 @@ export function StructuralResults({ query }: { query: Record<string, unknown> | 
     if (!query) { setItems([]); setTotal(0); return }
     setBusy(true); setError('')
     void api.post<any>('/api/rag/structural-records/search', { ...query, limit: 20, offset: page * 20 })
-      .then(value => { if (active) { setItems(value.items || []); setTotal(value.total || 0) } })
+      .then(value => { if (active) { setItems((value.items || []).filter((item: StructuralItem) => item.kind === 'model')); setTotal(value.total || 0) } })
       .catch(reason => { if (active) { setItems([]); setTotal(0); setError(reason.message) } })
       .finally(() => { if (active) setBusy(false) })
     return () => { active = false }
@@ -35,7 +35,7 @@ export default function PaperStructuralCollection({ paperId }: { paperId: number
   const [items, setItems] = useState<StructuralItem[]>([]), [error, setError] = useState('')
   useEffect(() => {
     let active = true; setItems([]); setError('')
-    void api.get<any>(`/api/rag/structural-records/paper/${paperId}`).then(value => { if (active) setItems(value.items || []) })
+    void api.get<any>(`/api/rag/structural-records/paper/${paperId}`).then(value => { if (active) setItems((value.items || []).filter((item: StructuralItem) => item.kind === 'model' && !item.state_key)) })
       .catch(reason => { if (active) setError(reason.message) })
     return () => { active = false }
   }, [paperId])

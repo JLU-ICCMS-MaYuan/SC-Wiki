@@ -1,0 +1,36 @@
+{
+  "backend_staged": {
+    "passed": 132,
+    "skipped": 16
+  },
+  "frontend_staged": {
+    "passed": 52,
+    "failed": 0
+  },
+  "mysql_outer_rollback": {
+    "passed": 11
+  },
+  "formal_revision_api_mysql": {
+    "passed": 3
+  },
+  "browser": {
+    "roles": 4,
+    "observations": 20,
+    "real_mysql": true,
+    "actual_rendered_fields": 31
+  },
+  "build": "passed",
+  "model": "deepseek-v4-pro",
+  "model_input_chars": 78349,
+  "candidate_states": 20,
+  "assembled_states": 8,
+  "whole_pdf_reparsed": false,
+  "historical_baseline_failures": {
+    "revision_submission_fixture_manual_reasons": true,
+    "multiple_geometries_fixture": true,
+    "old_audit_event_fixture": true,
+    "reproduced_on_unchanged_head": true
+  },
+  "public_approval": false,
+  "push": false
+}

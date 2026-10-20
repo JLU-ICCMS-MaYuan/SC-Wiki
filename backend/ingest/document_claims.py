@@ -87,7 +87,7 @@ def claims_from_candidates(candidate: dict, documents: dict[str, DocumentIR], *,
         if "material_states[" in path and not any(key in path for key in ("property_modules[","tc_results[","properties[")):
             values = {key:node[key] for key in ("material","material_name","pressure_value_gpa","pressure_min_gpa",
                 "pressure_max_gpa","pressure_raw","pressure_unit_raw","state_kind","temperature_value_k",
-                "magnetic_field_t","magnetic_field_value_t","temperature_raw","temperature_unit_raw","note",
+                "structure_optimization","magnetic_field_t","magnetic_field_value_t","temperature_raw","temperature_unit_raw","note",
                 "reported_space_group_number","reported_space_group_symbol",
                 "material_dimensionality","material_family","structure_families")
                 if node.get(key) is not None and node.get(key) != ""}

@@ -30,7 +30,7 @@ with engine.connect() as connection:
                 draft = command['draft']
                 with sessions.begin() as session:
                     science.persist_upload(session, task_id, {'user_id': 7}, draft)
-                snap = ev.complete_snapshot('upload', task_id, science.state_records(draft['material_states'][0], 0), [], {})
+                snap = ev.complete_snapshot('upload', task_id, ev.draft_records(draft, {}), [], {})
                 results = {r['key']: {'status': 'supported', 'reason': '隔离夹具核验', 'resolution': '保留的人工说明',
                     'human_confirmed': True, 'decision': {'human_confirmed': True, 'accepted': True,
                     'actor_user_id': 7, 'reason': '保留的人工说明', 'final_content_hash': r['content_hash'],
@@ -43,7 +43,7 @@ with engine.connect() as connection:
             with sessions.begin() as session:
                 # 每次都从新 Session 读回，不拿浏览器内存或上次响应冒充持久化。
                 draft = session.get(models.ScientificUploadDraft, task_id).draft
-                snap = ev.complete_snapshot('upload', task_id, science.state_records(draft['material_states'][0], 0), [], {})
+                snap = ev.complete_snapshot('upload', task_id, ev.draft_records(draft, {}), [], {})
                 result = ev.public_snapshot(snap, science.load_results(session, snap, 7, include_stale=True))
             print(json.dumps({'draft': draft, 'preflight': result}, default=str), flush=True)
     finally:

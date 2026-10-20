@@ -159,26 +159,6 @@ def draft_items(draft):
         if "retention" in candidate:
             # 真正的失败项仍留在草稿供核对，不以有效模型形式落库。
             if candidate.get("status") == "blocked":
-                reported = candidate.get("reported_structure") or {}
-                result.append(
-                    dict(
-                        record_key=str(
-                            candidate.get("candidate_id") or "issue:" + fingerprint(candidate)[:32]
-                        ),
-                        kind="issue",
-                        material=str(reported.get("material") or ""),
-                        elements=[],
-                        system_key="",
-                        retention="pending",
-                        pressure_gpa=number(reported.get("pressure_value_gpa")),
-                        space_group=reported.get("space_group_symbol"),
-                        data_json={
-                            **copy.deepcopy(candidate),
-                            "sources": sources(candidate.get("sources")),
-                            "retention": "pending",
-                        },
-                    )
-                )
                 continue
             original = copy.deepcopy(candidate.get("structural_record") or candidate)
             original["retention"] = candidate["retention"]
@@ -192,20 +172,7 @@ def draft_items(draft):
                 except (ValueError, IndexError, KeyError):
                     data["state_key"] = None
             result.append(data)
-    result.extend(normalize(item, "lattice") for item in draft.get("structural_observations") or [])
-    for problem in draft.get("structural_extraction_issues") or []:
-        key = problem.get("record_key") or "issue:" + fingerprint(problem)[:32]
-        result.append(
-            dict(
-                record_key=key,
-                kind="issue",
-                material="",
-                elements=[],
-                system_key="",
-                retention="pending",
-                data_json={**copy.deepcopy(problem), "record_key": key, "sources": sources([problem])},
-            )
-        )
+    # 旧观测字段只兼容读取；当前资料仅收录完整模型。
     keys = [r["record_key"] for r in result]
     if any(not isinstance(key, str) or not key or len(key) > 128 for key in keys):
         raise ValueError("结构资料来源标识无效")
@@ -273,10 +240,8 @@ def supplement_draft(session, paper, draft):
     for row in items:
         value = copy.deepcopy(row.data_json)
         value["retention"] = row.retention
-        if row.kind == "lattice":
-            draft["structural_observations"].append(value)
-        elif row.kind == "issue" and not value.get("candidate_id"):
-            draft.setdefault("structural_extraction_issues", []).append(value)
+        if row.kind != "model":
+            continue
         else:
             if any(
                 c.get("candidate_id") == value.get("candidate_id")

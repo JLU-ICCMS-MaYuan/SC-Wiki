@@ -134,26 +134,22 @@ def client(database):
         yield client, session, paper, app
 
 
-def test_unassigned_model_and_lattice_survive_save_and_reopen_without_tc(database):
+def test_unassigned_model_survives_and_partial_parameters_are_not_collected(database):
     session, paper = database
     draft = save(session, paper)
     rows = service.current_items(session, paper)
-    assert len(rows) == 2 and {r.kind for r in rows} == {"model", "lattice"}
+    assert len(rows) == 1 and {r.kind for r in rows} == {"model"}
     assert all(r.state_key is None for r in rows)
     restored = service.supplement_draft(session, paper, dict(material_states=[], structure_candidates=[]))
     assert restored["structure_candidates"][0]["retention"] == "retained"
-    assert (
-        restored["structural_observations"][0]["cell_parameters"]
-        == draft["structural_observations"][0]["cell_parameters"]
-    )
-    assert restored["structural_observations"][0]["coordinate_status"] == "not_reported"
+    assert restored["structural_observations"] == []
     save(
         session,
         paper,
         candidates=restored["structure_candidates"],
         observations=restored["structural_observations"],
     )
-    assert len(service.current_items(session, paper)) == 2
+    assert len(service.current_items(session, paper)) == 1
 
 
 def test_invalid_client_geometry_cannot_erase_saved_records(database):
@@ -174,10 +170,8 @@ def test_invalid_client_geometry_cannot_erase_saved_records(database):
 def test_malformed_issue_keys_and_null_cells_are_rejected_before_save():
     from fastapi import HTTPException
 
-    for key in ("x" * 129, ["invalid"]):
-        with pytest.raises(HTTPException) as exc:
-            service.validate_draft(dict(structural_extraction_issues=[dict(record_key=key, reason="核对")]))
-        assert exc.value.status_code == 400
+    # 旧客户端的无效非模型资料不进入当前收录流程。
+    service.validate_draft(dict(structural_extraction_issues=[dict(record_key=['ignored'], reason='核对')]))
     value = observation()
     value["cell_parameters"]["a"] = None
     with pytest.raises(ValueError, match="空值"):
@@ -246,7 +240,7 @@ def test_public_element_search_has_structure_without_tc_and_own_elements(client)
         "/api/rag/structural-records/search",
         json=dict(elements=["La", "Sc"], mode="elements_contained_search"),
     ).json()
-    assert contains["total"] == 2
+    assert contains["total"] == 1
     assert (
         client.post(
             "/api/rag/structural-records/search", json=dict(elements=["Xx"], mode="elements_exact_search")
@@ -291,14 +285,15 @@ def test_export_keeps_sources_and_partial_records_cannot_fake_atomic_file(client
     client, session, paper, app = client
     rows = service.current_items(session, paper)
     model = next(r for r in rows if r.kind == "model")
-    partial = next(r for r in rows if r.kind == "lattice")
+    partial = Record(paper_id=paper.id,paper_revision=paper.content_revision,**service.normalize(observation(),"lattice"))
+    session.add(partial)
+    session.commit()
     response = client.get(f"/api/rag/structural-records/{model.id}/download?format=cif")
     assert response.status_code == 200 and "_atom_site" in response.text
-    payload = client.get(f"/api/rag/structural-records/{partial.id}/download?format=json").json()
-    assert payload["data"]["sources"][0]["table"] == "Table S2"
-    assert payload["data"]["cell_parameters"] == {"a": 4.735, "c": 3.216}
-    assert client.get(f"/api/rag/structural-records/{partial.id}/download?format=cif").status_code == 400
-    assert "Table S2" in client.get(f"/api/rag/structural-records/{partial.id}/download?format=csv").text
+    for format in ('json','csv','cif','poscar'):
+        assert client.get(f"/api/rag/structural-records/{partial.id}/download?format={format}").status_code == 404
+    assert len(client.get(f"/api/rag/structural-records/paper/{paper.id}").json()['items']) == 1
+
 
 
 def test_revision_copy_keeps_prior_revision_and_retention(database):
@@ -313,8 +308,8 @@ def test_revision_copy_keeps_prior_revision_and_retention(database):
         candidates=draft["structure_candidates"],
         observations=draft["structural_observations"],
     )
-    assert len(session.scalars(select(Record).where(Record.paper_id == paper.id)).all()) == 4
-    assert len(service.current_items(session, paper)) == 2
+    assert len(session.scalars(select(Record).where(Record.paper_id == paper.id)).all()) == 2
+    assert len(service.current_items(session, paper)) == 1
 
 
 def test_independent_orthorhombic_table_preserves_rows_and_units(tmp_path):
@@ -413,13 +408,14 @@ def test_extraction_issues_survive_paper_roundtrip_but_are_never_public(client):
     asyncio.run(service.persist(AsyncBridge(session), paper, draft))
     session.commit()
     rows = service.current_items(session, paper)
-    assert len(rows) == 2 and all(r.kind == "issue" and r.retention == "pending" for r in rows)
+    assert rows == []
     assert client.post("/api/rag/structural-records/search", json={}).json()["total"] == 0
     original_keys = {r.record_key for r in rows}
     restored = service.supplement_draft(session, paper, dict(material_states=[], structure_candidates=[]))
-    asyncio.run(service.persist(AsyncBridge(session), paper, restored))
-    session.commit()
-    assert {r.record_key for r in service.current_items(session, paper)} == original_keys
+    assert not restored.get('structural_extraction_issues')
+    assert not restored.get('structure_candidates')
+    assert client.post('/api/rag/structural-records/search', json={}).json()['total'] == 0
+
 
 
 def test_reextract_is_owner_authorized_hash_verified_preview_only(client, tmp_path, monkeypatch):

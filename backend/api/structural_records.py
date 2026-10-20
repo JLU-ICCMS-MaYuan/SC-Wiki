@@ -52,7 +52,7 @@ def paper_records(paper_id: int, user=Depends(get_current_user_optional), db: Se
         "items": [
             service.serialize(row, paper, private=privileged)
             for row in service.current_items(db, paper)
-            if privileged or row.retention == "retained"
+            if row.kind == "model" and (privileged or row.retention == "retained")
         ]
     }
 
@@ -92,7 +92,7 @@ def search_records(body: Search, db: Session = Depends(get_db)):
         .join(models.Paper, models.Paper.id == Record.paper_id)
         .where(
             Record.retention == "retained",
-            Record.kind.in_(["model", "lattice"]),
+            Record.kind == "model",
             Record.paper_revision == models.Paper.content_revision,
             models.Paper.review_status == "approved",
             models.Paper.approved_revision == models.Paper.content_revision,
@@ -152,7 +152,6 @@ def reextract(body: Preview, user=Depends(get_current_user), db: Session = Depen
     from backend.ingest.upload_tasks import get_state, get_draft
     from backend.storage.paths import resolve_file
     from backend.ingest.structure_extractor import extract_structure_candidates
-    from backend.ingest.structural_observations import extract_lattice_observations
     from backend.ingest.upload_jobs import _bind_structure_candidates
 
     if body.target == "upload":
@@ -220,9 +219,7 @@ def reextract(body: Preview, user=Depends(get_current_user), db: Session = Depen
             sha256=source["sha256"],
         )
         candidates.extend(extract_structure_candidates(markdown, source=origin, pdf_path=path))
-        values, errors = extract_lattice_observations(path, source=origin)
-        observations.extend(values)
-        issues.extend(errors)
+        # 不完整参数不再作为独立资料项返回。
     for value in candidates:
         value["retention"] = "pending"
     _bind_structure_candidates(draft, candidates)
@@ -239,7 +236,7 @@ def reextract(body: Preview, user=Depends(get_current_user), db: Session = Depen
 def visible_record(db, identity, user):
     ready(db)
     row = db.get(Record, identity)
-    if row is None:
+    if row is None or row.kind != "model":
         fail("结构资料不存在或无权访问", 404)
     paper, privileged = visible_paper(db, row.paper_id, user)
     if row.paper_revision != paper.content_revision or (not privileged and row.retention != "retained"):

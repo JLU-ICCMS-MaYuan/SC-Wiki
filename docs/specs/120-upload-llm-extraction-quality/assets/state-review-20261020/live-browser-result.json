@@ -1,0 +1,75 @@
+{
+  "states": [
+    {
+      "pressure": 150,
+      "optimization": "量子非谐优化（SSCHA）"
+    },
+    {
+      "pressure": 167,
+      "optimization": "量子非谐优化（SSCHA）"
+    },
+    {
+      "pressure": 200,
+      "optimization": "量子非谐优化（SSCHA）"
+    },
+    {
+      "pressure": 250,
+      "optimization": "量子非谐优化（SSCHA）"
+    },
+    {
+      "pressure": 290,
+      "optimization": "经典静态优化"
+    },
+    {
+      "pressure": 300,
+      "optimization": "经典静态优化"
+    },
+    {
+      "pressure": 300,
+      "optimization": "量子非谐优化（SSCHA）"
+    },
+    {
+      "pressure": 350,
+      "optimization": "经典静态优化"
+    }
+  ],
+  "branchValues": [
+    {
+      "optimization": "classical_static",
+      "Tc": [
+        303,
+        329
+      ],
+      "lambda": 3.34,
+      "omega": 968,
+      "dos": "17.27",
+      "dos_raw": "17.27"
+    },
+    {
+      "optimization": "sscha",
+      "Tc": [
+        293,
+        330
+      ],
+      "lambda": 2.61,
+      "omega": 1165,
+      "dos": "19.61",
+      "dos_raw": "19.61"
+    }
+  ],
+  "states_total": 8,
+  "sscha": 5,
+  "static": 3,
+  "independent_models": 1,
+  "LaSc2_atoms": 24,
+  "duplicate_model_cards": 0,
+  "partial_cards": 0,
+  "pressure_extra_controls": 0,
+  "model_download": true,
+  "mobile_width": {
+    "scroll": 390,
+    "viewport": 390
+  },
+  "writes": [],
+  "errors": []
+}

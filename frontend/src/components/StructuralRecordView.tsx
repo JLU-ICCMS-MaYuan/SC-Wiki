@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 
 export interface StructuralItem {
   id: string; kind: 'model' | 'lattice' | 'issue'; material: string; pressure_gpa?: number | null; space_group?: string
-  data: any; title?: string; doi?: string; paper_id?: number; paper_revision?: number; retention?: string
+  data: any; title?: string; doi?: string; paper_id?: number; paper_revision?: number; retention?: string; state_key?: string | null
 }
 
 export default function StructuralRecordView({ item, cell = 'conventional' }: { item: StructuralItem; cell?: 'primitive' | 'conventional' }) {

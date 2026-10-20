@@ -74,12 +74,12 @@ it('真实派生输入变化仍影响对应字段，核处理不扩散到无关�
 })
 
 it.each(['pressure_value_gpa', 'structure_optimization', 'note'])(
-  '编辑 %s 不误伤三个程序派生项，真实物性上下文仍会失效', field => {
+  '编辑 %s 不误伤三个程序派生项，物性仅按明确的状态依赖失效', field => {
     for (const row of records().filter(row => row.provenance?.kind === 'derived')) {
       expect(evidenceFieldAffected(row, `material_states[0].${field}`, records())).toBe(false)
     }
     const property = { ...records()[0], field: 'material_states[0].property_modules[0].records[0]', record_key: 'p' }
-    expect(evidenceFieldAffected(property, `material_states[0].${field}`, records())).toBe(true)
+    expect(evidenceFieldAffected(property, `material_states[0].${field}`, records())).toBe(field === 'pressure_value_gpa')
     expect(evidenceFieldAffected(property, `material_states[1].${field}`, records())).toBe(false)
   },
 )

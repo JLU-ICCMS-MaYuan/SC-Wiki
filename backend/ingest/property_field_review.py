@@ -33,7 +33,8 @@ def write_path(value, path, replacement):
 
 def review_context(record, state, path):
     """仅真实上下文进入版本；修改别的结果值不使本字段失效。"""
-    context = deepcopy(state)
+    from .review_dependencies import state_inputs, record_inputs
+    context = state_inputs(state, (record.get("payload") or {}).get("source_associations") or [])
     payload = record.get('payload') or {}
     is_mu = path.startswith('payload.parameters.mu_star') or path.startswith('payload.parameters.extensions.')
     if path == 'method_code' or path.startswith('value_') or is_mu:
@@ -70,12 +71,7 @@ def review_context(record, state, path):
                                 [record.get('value_min'), record.get('value_max')])
     if path.startswith(('value_', 'payload.parameters.mu_star')) or '.extensions.' in path and path.startswith('payload.parameters.'):
         context['method_code'] = record.get('method_code')
-    if path.startswith(('value_', 'payload.parameters.')):
-        conditions = deepcopy(payload.get('calculation_conditions') or {})
-        conditions['extensions'] = [e for e in conditions.get('extensions') or []
-                                    if not str(e.get('key') or '').startswith(('structural_relaxation.', 'aimd.'))]
-        context['calculation_conditions'] = conditions
-        context['approximation'] = payload.get('approximation')
+    context['direct_inputs'] = {key: deepcopy(read_path(record, key)) for key in record_inputs(record, path)}
     if '.sscha.' in path:
         context['approximation'] = payload.get('approximation')
     return context
@@ -172,16 +168,14 @@ def expand_property_fields(records):
                 context['association_dependencies'] = [field_binding(source, parent['claim'].get('state') or {}, a)
                                                        for a in associations]
             extension_value = read_path(source, '.'.join(path.split('.')[:4])) if '.extensions.' in path else None
-            dependencies = (['method_code'] if path.startswith('value_') or identity.startswith('parameters.mu_star') else []) + (['payload.calculation_conditions'] if path.startswith(('value_', 'payload.parameters.')) else [])
-            if path.startswith('value_'):
-                mu_extension = next((i for i, e in enumerate(parameters.get('extensions') or []) if e.get('key') == 'mu_star' and e.get('value_kind') == 'range'), None)
-                dependencies.append(f'payload.parameters.extensions.{mu_extension}.' + ('value_max' if path == 'value_min' else 'value_min') if mu_extension is not None and path in {'value_min', 'value_max'} else 'payload.parameters.mu_star')
-            if identity.startswith('parameters.mu_star'):
-                dependencies.extend(['value_number'] if source.get('value_kind') == 'number' else ['value_min' if path.endswith('.value_max') else 'value_max'] if '.extensions.' in path else ['value_min', 'value_max'])
+            from .review_dependencies import record_inputs, state_paths
+            dependencies = record_inputs(source, path)
             result.append({k: deepcopy(v) for k, v in parent.items() if k not in {'key', 'item_key', 'claim', 'evidences', 'current_value', 'fields', 'field', 'kind', 'label'}} | {
                 'key': key, 'item_key': key, 'kind': 'field', 'record_field': path,
                 'record_group_key': group if common and path != 'method_code' else None,
                 'record_dependencies': dependencies,
+                'state_dependencies': state_paths(associations),
+                'dependency_policy_version': 1,
                 'legacy_item_key': legacy_parent, 'previous_field_item_key': prior_field if prior_field != key else None,
                 'validation_record': validation, 'field': field,
                 'record_field_key': (extension_value.get('field_key') or extension_value.get('key')) if isinstance(extension_value, dict) else None,

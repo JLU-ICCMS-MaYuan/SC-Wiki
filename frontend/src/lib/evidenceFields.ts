@@ -71,8 +71,9 @@ export function evidenceFieldAffected(record: EvidenceRecord, field: string, rec
     const state = record.field.match(/^material_states\[\d+\]/)?.[0]
     return Boolean(source && overlaps(source.field, field)) || Boolean(state && inputs.some(input => overlaps(`${state}.${input}`, field)))
   }
-  const context = field.match(/^(material_states\[\d+\])\.(material|material_dimensionality|pressure_[\w]+|temperature_[\w]+|magnetic_field_t|reported_space_group_[\w]+|crystal_system|state_kind|structure_optimization|note|calculation_context|experimental_context)(?:\.|$)/)
-  return Boolean(context && record.field.startsWith(context[1] + '.') && record.record_key)
+  const context = field.match(/^(material_states\[\d+\])\.([a-z_]+)(?:\.|$)/)
+  const dependencies = record.state_dependencies || ['material', 'material_name', 'pressure_value_gpa', 'pressure_min_gpa', 'pressure_max_gpa', 'reported_space_group_symbol', 'temperature_value_k', 'magnetic_field_t', 'state_kind']
+  return Boolean(context && record.field.startsWith(context[1] + '.') && record.record_key && dependencies.includes(context[2]))
 }
 const ignored = new Set(['evidence', 'evidences', 'display_order', 'is_representative', 'record_key', 'module_key', 'state_key', 'tc_group', 'tc_range_origin'])
 const identity = (value: unknown): unknown => {

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Box, TextField, Typography } from '@mui/material'
+import { Alert, Box, TextField } from '@mui/material'
 import type { DraftMaterialState } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
 
@@ -44,17 +44,6 @@ export default function PressureEditor({ state, index, onChange }: {
         ? { pressure_value_gpa: null, pressure_raw: null, pressure_unit_raw: null, pressure_min_gpa: null, pressure_max_gpa: null }
         : { pressure_value_gpa: value })} />
     {(mismatch || outsideRange) && <Alert severity="warning" sx={{ mt: 1 }}>{t('evidence.pressureMismatch')}</Alert>}
-    <Box component="details" sx={{ mt: 1 }}>
-      <Box component="summary" sx={{ cursor: 'pointer', color: 'text.secondary' }}>{t('evidence.pressureConditions')}</Box>
-      <Box sx={{ display: 'grid', gap: 1, mt: 1 }}>
-        <TextField label={t('evidence.pressureRaw')} data-issue-field={`${path}.pressure_raw`} value={state.pressure_raw ?? ''}
-          onChange={e => onChange({pressure_raw: e.target.value || null})} />
-        <TextField label={t('evidence.pressureUnit')} data-issue-field={`${path}.pressure_unit_raw`} value={state.pressure_unit_raw ?? ''}
-          onChange={e => onChange({pressure_unit_raw: e.target.value || null})} />
-        <PressureNumber label={t('evidence.pressureMin')} field={`${path}.pressure_min_gpa`} value={state.pressure_min_gpa} onChange={value => onChange({pressure_min_gpa: value})} />
-        <PressureNumber label={t('evidence.pressureMax')} field={`${path}.pressure_max_gpa`} value={state.pressure_max_gpa} onChange={value => onChange({pressure_max_gpa: value})} />
-        <Typography variant="caption" color="text.secondary">{t('evidence.pressureHint')}</Typography>
-      </Box>
-    </Box>
+
   </Box>
 }

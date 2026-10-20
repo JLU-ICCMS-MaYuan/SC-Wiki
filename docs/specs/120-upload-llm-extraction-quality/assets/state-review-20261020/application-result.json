@@ -1,0 +1,25 @@
+{
+  "states_before": 7,
+  "states_after": 8,
+  "sscha": 5,
+  "classical_static": 3,
+  "partial_records_removed": 8,
+  "manual_properties_preserved": [
+    150,
+    167,
+    200,
+    250,
+    290,
+    350
+  ],
+  "paper_preserved": true,
+  "task_id": "c16cc627a0c04dc8ad4289624d1da80a",
+  "backup": ".data/backups/state-review-20261020-214147",
+  "spectra_preserved": true,
+  "durable_draft": true,
+  "submitted": false,
+  "approved": false,
+  "after_fingerprint": "4bde782a9633f15524537f192f80b83dc4983959c15af974840834bad746d57a",
+  "result_slots_verified": true,
+  "restored_dos_row_source_verified": true
+}

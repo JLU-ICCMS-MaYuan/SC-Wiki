@@ -22,6 +22,7 @@ def _path(record, association):
 def field_binding(record, state, association):
     from .property_field_review import read_path, review_context
     from .scientific_context import fingerprint, state_fingerprint
+    from .review_dependencies import state_inputs, record_inputs
     from .scientific_evidence import canonical
     path = _path(record, association)
     if not path:
@@ -42,18 +43,11 @@ def field_binding(record, state, association):
         if '.' in tail:
             identity += '.' + tail.split('.', 1)[1]
     context = review_context(record, {}, path)
-    # 网格/截断能的含义依赖本阶段软件、理论和泛函，不能继承到另一套计算。
-    conditions = (record.get('payload') or {}).get('calculation_conditions') or {}
     stage = association.get('stage')
-    stage_settings = {key: conditions.get(key) for key in
-                      ('calculation_code', 'electronic_method', 'exchange_correlation_functional')}
-    if stage not in {'electron_phonon', 'superconductivity'}:
-        stage_settings = {e.get('field_key') or e.get('key'): e for e in conditions.get('extensions') or []
-                          if str(e.get('key') or '').startswith(str(stage) + '.')
-                          and str(e.get('key')).rsplit('.', 1)[-1] in stage_settings}
-    return {'version': 1, 'field_key': field_key, 'fingerprint': fingerprint(canonical({
+    stage_settings = {key: read_path(record, key) for key in record_inputs(record, path)}
+    return {'version': 2, 'field_key': field_key, 'fingerprint': fingerprint(canonical({
         'field': identity, 'value': value, 'context': context, 'stage': stage,
-        'stage_settings': stage_settings, 'state': state_fingerprint(state)}))}
+        'stage_settings': stage_settings, 'state': state_inputs(state, [association])}))}
 
 
 def bind_field(record, state, association):
@@ -67,13 +61,17 @@ def snapshot_association(record, state, association, chunks=None):
     result = deepcopy(association)
     binding = association.get('field_binding')
     if binding is not None:
-        result['stale'] = binding.get('version') != 1 or binding != field_binding(record, state, association)
+        result['stale'] = binding != field_binding(record, state, association)
+        if result['stale'] and binding.get('version') == 1:
+            # 有界重建旧绑定：同一参数/工作流不因无关核处理标签修正而过期。
+            optimizations = [state.get('structure_optimization')] if (association.get('scope') or {}).get('structure_optimization') else [None, 'unknown', 'classical_static', 'sscha']
+            result['stale'] = not any(binding == _legacy_field_binding(record, {**state, 'structure_optimization': opt}, association) for opt in optimizations)
         path = _path(record, association)
         if path:
             result['target_path'] = '/' + path.replace('.', '/')
     else:
         result['stale'] = association.get('target_fingerprint') != scientific_fingerprint(record)
-    if association.get('target_state_fingerprint') is not None:
+    if binding is None and association.get('target_state_fingerprint') is not None:
         result['stale'] |= association['target_state_fingerprint'] != state_fingerprint(state)
     if chunks is not None:
         from .property_evidence import locate
@@ -197,3 +195,41 @@ def aggregate_reviews(record, candidates):
         if any(r['associations'][index]['basis_kind'] == 'paper_inference' for r in reviews):
             association['basis_kind'] = 'paper_inference'
     return result
+
+
+def _legacy_field_binding(record, state, association):
+    from .property_field_review import read_path
+    from .legacy_review_context import review_context
+    from .scientific_context import fingerprint, state_fingerprint
+    from .scientific_evidence import canonical
+    path = _path(record, association)
+    if not path:
+        return None
+    value = read_path(record, path)
+    if value is None:
+        return None
+    identity = path
+    field_key = None
+    if '.extensions.' in path:
+        root, tail = path.split('.extensions.', 1)
+        entry = read_path(record, root + '.extensions.' + tail.split('.')[0])
+        field_key = (entry or {}).get('field_key') or (entry or {}).get('key')
+        if not field_key or sum((e.get('field_key') or e.get('key')) == field_key
+                                for e in read_path(record, root + '.extensions') or []) != 1:
+            return None
+        identity = root + '.extensions.' + field_key
+        if '.' in tail:
+            identity += '.' + tail.split('.', 1)[1]
+    context = review_context(record, {}, path)
+    # 网格/截断能的含义依赖本阶段软件、理论和泛函，不能继承到另一套计算。
+    conditions = (record.get('payload') or {}).get('calculation_conditions') or {}
+    stage = association.get('stage')
+    stage_settings = {key: conditions.get(key) for key in
+                      ('calculation_code', 'electronic_method', 'exchange_correlation_functional')}
+    if stage not in {'electron_phonon', 'superconductivity'}:
+        stage_settings = {e.get('field_key') or e.get('key'): e for e in conditions.get('extensions') or []
+                          if str(e.get('key') or '').startswith(str(stage) + '.')
+                          and str(e.get('key')).rsplit('.', 1)[-1] in stage_settings}
+    return {'version': 1, 'field_key': field_key, 'fingerprint': fingerprint(canonical({
+        'field': identity, 'value': value, 'context': context, 'stage': stage,
+        'stage_settings': stage_settings, 'state': state_fingerprint(state)}))}

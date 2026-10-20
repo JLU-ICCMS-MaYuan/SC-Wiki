@@ -117,6 +117,7 @@ def field_records(identity, path, data, fields, context=None, assessment=None, k
                          required=populated(value) and not (path == 'paper' and name in BIBLIOGRAPHY_FIELDS),
                          evidences=[], kind='field',
                          **({'check_mode': 'synthesis'} if name in SYNTHESIS_FIELDS else {}))
+        row['evidences'] = copy.deepcopy((data.get('field_evidence') or {}).get(name) or [])
         if path == 'paper' and name == 'theoretical_subtype':
             from .theoretical_subtype import RULE_VERSION
             matched = assessment if isinstance(assessment, dict) and assessment.get('value') == value else None
@@ -147,7 +148,8 @@ def record_claim(record, state):
     if isinstance(value.get('payload'), dict):
         for key in ('tc_group', 'tc_range_origin'):
             value['payload'].pop(key, None)
-    return copy.deepcopy({'record': value, 'state': {k: state.get(k) for k in STATE_FIELDS if k != 'structure_families' and populated(state.get(k))}})
+    from .review_dependencies import state_inputs
+    return copy.deepcopy({'record': value, 'state': state_inputs(state, (value.get('payload') or {}).get('source_associations') or [])})
 
 
 def state_records(state, index):
@@ -362,6 +364,21 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
             continue
         remember(row, r)
         valid = row.content_hash == r['content_hash'] and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES
+        if not valid and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES:
+            from .review_dependencies import project_claim
+            old_claim = row.result.get('claim')
+            if isinstance(old_claim, dict) and r.get('kind') == 'property':
+                valid = canonical(project_claim(old_claim)) == canonical(r['claim'])
+            elif isinstance(old_claim, dict) and r.get('record_field') and r.get('validation_record'):
+                from .review_dependencies import legacy_leaf_claim
+                old_context = old_claim.get('context') or {}
+                # 只尝试移除不属于直接依赖的核处理/派生展示字段；真实条件仍需逐项一致。
+                state = {key: old_context[key] for key in STATE_FIELDS if key in old_context}
+                current_context = r['claim'].get('context') or {}
+                if all(canonical(state.get(key)) == canonical(current_context.get(key)) for key in r.get('state_dependencies') or []):
+                    reconstructed = legacy_leaf_claim(r['validation_record'], state, r['record_field'], r['claim']['field'])
+                    valid = canonical(reconstructed) == canonical(old_claim)
+
         if valid or (include_stale and (r['key'] not in found or found[r['key']].get('stale'))):
             result = copy.deepcopy(row.result)
             result['stale'] = not valid

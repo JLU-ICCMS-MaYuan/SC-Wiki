@@ -89,7 +89,7 @@ def test_migration_scientific_write_revision_and_rollback(monkeypatch):
                 assert targets == []
         async with factory() as session:
             rows = (await session.scalars(select(Record).where(Record.paper_id == paper_id))).all()
-            assert len(rows) == 2 and all(r.state_key is None for r in rows)
+            assert len(rows) == 1 and all(r.state_key is None for r in rows)
             assert next(r for r in rows if r.kind == "model").material == "LaSc2"
             paper = await session.get(models.Paper, paper_id)
             restored = await session.run_sync(
@@ -106,7 +106,7 @@ def test_migration_scientific_write_revision_and_rollback(monkeypatch):
                     await persist_scientific_draft(session, paper, draft)
                     raise RuntimeError("rollback")
         async with factory() as session:
-            assert await session.scalar(select(func.count()).select_from(Record)) == 2
+            assert await session.scalar(select(func.count()).select_from(Record)) == 1
             assert (await session.get(models.Paper, paper_id)).content_revision == 1
         async with factory() as session:
             async with session.begin():
@@ -114,7 +114,7 @@ def test_migration_scientific_write_revision_and_rollback(monkeypatch):
                 paper.content_revision = 2
                 await persist_scientific_draft(session, paper, draft)
         async with factory() as session:
-            assert await session.scalar(select(func.count()).select_from(Record)) == 4
+            assert await session.scalar(select(func.count()).select_from(Record)) == 2
         await async_engine.dispose()
 
     asyncio.run(run())

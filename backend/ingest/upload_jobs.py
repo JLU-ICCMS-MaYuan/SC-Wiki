@@ -1992,13 +1992,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                             "sha256": file_item.get("sha256"),
                         },
                     ))
-                    from backend.ingest.structural_observations import extract_lattice_observations
-                    observations, problems = extract_lattice_observations(file_source, source={
-                        "file_id": file_item.get("file_id"), "filename": file_item.get("original_filename") or file_source.name,
-                        "role": file_item.get("role"), "sha256": file_item.get("sha256"),
-                    })
-                    structural_observations.extend(observations)
-                    structural_issues.extend(problems)
+
             except Exception as extraction_exc:
                 if multi_file:
                     file_item["extraction_status"] = "failed"
@@ -2230,10 +2224,20 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         raw_draft["paper"] = {**raw_paper, "summary": summary, "research_motivation": motivation}
         if summary_error:
             logging.getLogger(__name__).warning("论文总结需要人工核对 task=%s reason=%s", task_id, summary_error)
+        from backend.ingest.state_optimization import resolve_candidates, assemble_candidates
+        resolved_candidates, optimization_issues = resolve_candidates(
+            candidates if document_set else summary_candidates, scientific_sources, complete_json)
+        _atomic_write_json(artifact_directory(task_id) / "structure_optimization_assessment.json", {
+            "issues": optimization_issues,
+            "states": [{"material": item.get("material"), "pressure_value_gpa": item.get("pressure_value_gpa"),
+                        "structure_optimization": item.get("structure_optimization", "unknown"),
+                        "evidences": (item.get("field_evidence") or {}).get("structure_optimization", [])}
+                       for candidate in resolved_candidates for item in candidate.get("material_states") or []],
+        })
         if document_set:
             # 全文汇总只负责叙述和书目，科学记录由已校验候选确定性组装。
             draft = _normalize_draft({**raw_draft, "material_states": [], "key_properties": []}, preserve_citation_extraction=False)
-            draft["material_states"] = merge_scientific_candidates(candidates)
+            draft["material_states"] = assemble_candidates(resolved_candidates)
             if state.get("parser_profile") == "complementary":
                 # 在 AI 初始快照之前生成正式表示；GET/PUT 的机械派生不能被误记为人工修改。
                 draft["material_states"] = _normalize_material_states(draft["material_states"])
@@ -2241,10 +2245,15 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                     item.get("material_name") or item.get("material") for item in draft["material_states"]
                     if item.get("material_name") or item.get("material")))
         else:
-            draft = _normalize_draft(raw_draft, preserve_citation_extraction=False)
+            draft = _normalize_draft({**raw_draft, "material_states": [], "key_properties": []},
+                                     preserve_citation_extraction=False)
+            draft["material_states"] = assemble_candidates(resolved_candidates)
+            draft["generation_issues"] = optimization_issues
             excluded_properties = _prune_generated_properties(draft)
             if excluded_properties:
                 _atomic_write_json(artifact_directory(task_id) / "unclassified_properties.json", excluded_properties)
+        if document_set and optimization_issues:
+            draft.setdefault("generation_issues", []).extend(optimization_issues)
         if motivation_error:
             logging.getLogger(__name__).warning("研究驱动力需要人工核对 task=%s reason=%s", task_id, motivation_error)
         draft["research_motivation_error"] = motivation_error

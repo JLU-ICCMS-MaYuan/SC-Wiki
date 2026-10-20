@@ -10,7 +10,7 @@ export default function StructuralRecordPage() {
   useEffect(() => {
     let active = true; setItem(null); setError('')
     void api.get<StructuralItem>('/api/rag/structural-records/' + encodeURIComponent(recordId || ''))
-      .then(value => { if (active) setItem(value) }).catch(reason => { if (active) setError(reason.message) })
+      .then(value => { if (active) { if (value.kind !== 'model') setError('该资料不是完整结构，已不再收录。'); else setItem(value) } }).catch(reason => { if (active) setError(reason.message) })
     return () => { active = false }
   }, [recordId])
   const download = async (format: string) => {
