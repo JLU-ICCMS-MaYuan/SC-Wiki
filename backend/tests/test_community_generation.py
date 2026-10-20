@@ -52,3 +52,26 @@ def test_model_identity_ignores_rotated_key_but_not_endpoint_or_model():
     other=LlmConfig('server','https://other.example/v1','m','secret')
     assert c.identity(first)==c.identity(rotated)
     assert c.identity(first)!=c.identity(other)
+
+
+def test_empty_public_library_does_not_require_embedding(monkeypatch):
+    from sqlalchemy import create_engine, text
+    from backend import database
+    engine = create_engine("sqlite:///:memory:")
+    with engine.begin() as db:
+        db.execute(text("CREATE TABLE papers(id INTEGER, review_status TEXT, approved_revision INTEGER, content_revision INTEGER)"))
+        db.execute(text("INSERT INTO papers VALUES (1, 'pending', NULL, 1), (2, 'approved', 1, 2)"))
+    monkeypatch.setattr(database, 'engine', engine)
+    assert g.retrieve_sources('为什么会出现超导？') == []
+    engine.dispose()
+
+
+def test_complete_requires_finished_stream(monkeypatch):
+    from backend.rag import llm
+    def fake(system, payload, **options):
+        assert options['retries'] == 0
+        options['on_call']({'finish_reason': 'length'})
+        return {'body':'截断的答案'}
+    monkeypatch.setattr(llm, 'complete_json', fake)
+    with pytest.raises(g.GenerationError, match='invalid_model_output'):
+        g.complete('system', {'question':'问题'})

@@ -126,7 +126,7 @@ Go 提供公开读取与内容治理，Python AI API 和独立 RQ 队列负责�
 
 配置沿用服务端编号模型目录、默认模型、Redis 及站内 RAG。使用 `python -m backend.community worker` 启动默认两个消费者；本地 `scripts/dev.sh start community-worker` 与 Docker Compose 的 `community-worker` 已提供启动项。模型配置不完整、Redis 不可用或尚未迁移时会提示失败，不自动切换模型。后台监督仅恢复任务，不自动创建问题。
 
-本次仅完成源码与隔离环境验收，未迁移业务数据库、部署或推送。详见 [Feature #142](docs/specs/142-community-ai-discussion/spec.md) 和[验收记录](docs/specs/142-community-ai-discussion/validation.md)。
+本机 scwiki 已迁移并启用 Python API 与社区 Worker，两个配置模型真实回答通过；未推送或部署其他机器。请使用 superadmin_mayuan 发起新问题，mayuan 账号保持只读，历史问题不自动补答。当前公开文献为空，答案采用通用知识；非空库检索仍需可用的 Embedding 配置。详见 [Feature #142](docs/specs/142-community-ai-discussion/spec.md) 和[验收记录](docs/specs/142-community-ai-discussion/validation.md)。
 
 ## 本地 Neo4j 连接（#113）
 

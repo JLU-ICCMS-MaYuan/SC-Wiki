@@ -65,3 +65,18 @@ python tests/07_researcher_community_forum/verify-ai-community.py --browser
 同时核实：社区 Worker 未运行、队列为空，Python API 因热重载停在连接关闭等待；`mayuan` 是普通账号，`superadmin_mayuan` 是正常且邮箱已验证的超级管理员。没有改变任何账号角色。旧问题不会自动补答，生成需要新的超级管理员提问。
 
 已对六张现有社区表及 Alembic 版本表做只读备份，并生成从 0094 到 0142 的离线迁移 SQL。备份位于 `.local/backups/community142-20261020-190219/`，包含 SHA-256 清单；现有社区数据为一个问题，其余社区表为空。备份和迁移清单不入 Git。尚未执行业务库迁移或服务启用，等待用户明确授权。
+
+## 本地部署完成
+
+本轮用户明确要求“你来帮我确认，然后完成部署这个讨论部分”，授权范围为本机实例；不是远程服务器部署。
+
+- 执行前确认迁移头 0094、活动事务 0、上传队列及社区队列均空；已有备份与 SQL 哈希通过复核。
+- 本机 `127.0.0.1:3307/scwiki` 已应用 `20261020_0142`。六张原社区表逐字段比对一致，新批次/任务/修订表为空；没有修改账号角色或给历史问题自动补答。见 [迁移结果](assets/local-migration.json)。
+- 恢复卡在热重载关闭等待的 Python API；正常启动两个社区消费者。健康、公开问题、Vite 模型排序读取均返回 200；普通账号调用管理接口 403，超级管理员 200。见 [API 核验](assets/local-api-check.json)。
+- 正式社区 Worker 实际消费了一次只读站内检索检查任务，结果为空；测试任务已经清理，没有新增讨论内容。见 [Worker 核验](assets/local-worker-check.json)。
+- 当前没有已公开论文，也没有 Embedding 密钥。修复空库处理后，数据库确认无资料时可使用通用知识；将来公开文献检索需要配置可用 Embedding/向量服务，检索故障不会被隐藏为空结果。
+- 实测 GPT 网关对普通请求返回 text/event-stream，旧非流式代码收到字符串而无法取 choices。复用项目原有流式 JSON 接口后，deepseek-v4-pro 和 gpt-6-sol 都实际完成回答，约 6.6 秒与 11.3 秒；没有使用隔离模型夹具替代本次真实调用，也没有发布测试答案。见 [真实模型核验](assets/local-model-check.json)。
+- 补充空库及截断流检查后，11 项单元测试通过；更新 HTTP SSE 夹具的真实 MySQL/Redis/RQ 回归（含实际进程中断）通过。见 [回归日志](assets/deployment-regression.txt)。
+- 实际浏览器确认普通用户没有提问按钮，超级管理员可见手动提问、AI 随机提问和任务入口，没有服务报错。见 [页面核验](assets/local-browser-ready.json) 与 [截图](assets/local-superadmin-ready.png)。
+
+运行环境是本机热加载工作区，其中包含其他任务未提交代码；本次提交只纳入社区增量，不将整个运行环境冒称独立干净制品。未推送，也未部署其他机器。此前“未迁移”的记录是当时状态，本节为本轮最新结果。

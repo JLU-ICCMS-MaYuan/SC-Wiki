@@ -11,8 +11,6 @@ import unicodedata
 from sqlalchemy import select
 from backend.models import Paper
 from backend.community.models import CommunityEntry
-from backend.rag.llm_client import get_llm_client
-from backend.rag.llm_context import get_llm_config
 
 CATEGORIES = {
     "foundations": ("基础概念", "超导态、迈斯纳效应、能隙、相干长度、穿透深度"),
@@ -40,20 +38,12 @@ def fingerprint(title):
 
 
 def complete(system, payload):
-    response = get_llm_client(read_timeout=180).chat.completions.create(
-        model=get_llm_config().model,
-        messages=[{"role": "system", "content": system},
-                  {"role": "user", "content": json.dumps(payload, ensure_ascii=False)}],
-    )
-    if not response.choices or response.choices[0].finish_reason != "stop":
-        raise GenerationError("invalid_model_output")
-    content = response.choices[0].message.content or ""
-    content = re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip())
-    try:
-        result = json.loads(content)
-    except (ValueError, TypeError):
-        raise GenerationError("invalid_model_output") from None
-    if not isinstance(result, dict):
+    # 复用经过供应商适配的流式入口；部分兼容网关即使不要求流式也返回 SSE。
+    from backend.rag.llm import complete_json
+    calls = []
+    result = complete_json(system, json.dumps(payload, ensure_ascii=False),
+                           read_timeout=180, retries=0, on_call=calls.append)
+    if not calls or calls[-1].get("finish_reason") != "stop" or not isinstance(result, dict):
         raise GenerationError("invalid_model_output")
     return result
 
@@ -86,8 +76,17 @@ def create_question(db, category):
 
 
 def retrieve_sources(question):
-    from backend.rag.search.vector_search import search_by_semantics
+    from backend.database import engine
+    from sqlalchemy.orm import Session
     try:
+        # 空公开库是可验证的无资料状态，不应依赖 Embedding 凭据才能回答。
+        with Session(engine) as db:
+            public_id = db.scalar(select(Paper.id).where(
+                Paper.review_status == "approved", Paper.approved_revision == Paper.content_revision
+            ).limit(1))
+        if public_id is None:
+            return []
+        from backend.rag.search.vector_search import search_by_semantics
         rows = asyncio.run(search_by_semantics(question, top_k=8))
     except Exception:
         raise GenerationError("retrieval_failed") from None

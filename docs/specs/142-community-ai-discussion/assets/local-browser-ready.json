@@ -1,0 +1,15 @@
+{
+  "checks": [
+    {
+      "role": "user",
+      "ready": true,
+      "write_actions_performed": false
+    },
+    {
+      "role": "superadmin",
+      "ready": true,
+      "write_actions_performed": false
+    }
+  ],
+  "published": false
+}

@@ -1,0 +1,25 @@
+{
+  "question": "为什么仅凭零电阻还不能充分确认超导？请简要说明磁性证据的作用。",
+  "public_sources": 0,
+  "published": false,
+  "results": [
+    {
+      "id": "LLM1",
+      "name": "deepseek",
+      "model": "deepseek-v4-pro",
+      "status": "success",
+      "seconds": 6.6,
+      "answer_characters": 500,
+      "citations": 0
+    },
+    {
+      "id": "LLM2",
+      "name": "openAI",
+      "model": "gpt-6-sol",
+      "status": "success",
+      "seconds": 11.3,
+      "answer_characters": 212,
+      "citations": 0
+    }
+  ]
+}

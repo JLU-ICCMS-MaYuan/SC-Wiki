@@ -1,0 +1,13 @@
+{
+  "database": "127.0.0.1:3307/scwiki",
+  "versions": [
+    "20261020_0142"
+  ],
+  "original_community_rows_preserved": true,
+  "new_tables": {
+    "community_ai_batches": 0,
+    "community_ai_tasks": 0,
+    "community_entry_revisions": 0
+  },
+  "backup": "/Users/mayuan/Codes/SC-Wiki/.local/backups/community142-20261020-190219"
+}

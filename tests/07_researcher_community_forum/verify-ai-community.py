@@ -84,8 +84,16 @@ def main():
                         mode['conflict']=False
                         with engine.begin() as conn:
                             conn.execute(text("UPDATE community_entries SET body='并发人工修订', revision=revision+1, human_edited=1 WHERE kind='answer' AND model_id='LLM1'"))
-                data=json.dumps({'id':'test','object':'chat.completion','created':0,'model':model,'choices':[{'index':0,'message':{'role':'assistant','content':json.dumps(result,ensure_ascii=False)},'finish_reason':'stop'}]}).encode()
-                self.send_response(200);self.send_header('Content-Type','application/json');self.send_header('Content-Length',str(len(data)));self.end_headers()
+                content=json.dumps(result,ensure_ascii=False)
+                if payload.get('stream'):
+                    events=[{'id':'test','object':'chat.completion.chunk','created':0,'model':model,'choices':[{'index':0,'delta':{'role':'assistant','content':content},'finish_reason':None}]},
+                            {'id':'test','object':'chat.completion.chunk','created':0,'model':model,'choices':[{'index':0,'delta':{},'finish_reason':'stop'}]}]
+                    data=(''.join('data: '+json.dumps(event)+'\n\n' for event in events)+'data: [DONE]\n\n').encode()
+                    content_type='text/event-stream'
+                else:
+                    data=json.dumps({'id':'test','object':'chat.completion','created':0,'model':model,'choices':[{'index':0,'message':{'role':'assistant','content':content},'finish_reason':'stop'}]}).encode()
+                    content_type='application/json'
+                self.send_response(200);self.send_header('Content-Type',content_type);self.send_header('Content-Length',str(len(data)));self.end_headers()
                 try:self.wfile.write(data)
                 except (BrokenPipeError,ConnectionResetError):pass
             def log_message(self,*args):pass

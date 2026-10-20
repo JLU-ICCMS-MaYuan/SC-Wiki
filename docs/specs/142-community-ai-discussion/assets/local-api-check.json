@@ -1,0 +1,28 @@
+{
+  "checks": [
+    {
+      "username": "mayuan",
+      "role": "user",
+      "status": 403
+    },
+    {
+      "username": "superadmin_mayuan",
+      "role": "superadmin",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8000/health",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:8080/api/community/questions",
+      "status": 200
+    },
+    {
+      "url": "http://127.0.0.1:5173/api/community/entries?kind=answer&question_id=7&sort=models",
+      "status": 200
+    }
+  ],
+  "community_workers": 2,
+  "published_test_content": false
+}
