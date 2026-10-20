@@ -1,0 +1,14 @@
+{
+  "desktop_width": 680,
+  "mobile_width": 390,
+  "collapsed_default": true,
+  "model_multiselect": true,
+  "empty_selection_disabled": true,
+  "selection_order": "OpenAI → DeepSeek",
+  "same_card_append": true,
+  "dialogs": 0,
+  "external_requests": [],
+  "errors": [],
+  "production_modified": false,
+  "selector_button_gap_px": 8
+}
