@@ -114,3 +114,65 @@ def revisions(entry_id: int, user=Depends(authorized)):
             return {"items": [{"revision": r.revision, "body": r.body, "human_edited": r.human_edited,
                                "actor_id": r.actor_id, "created_at": r.created_at} for r in rows]}
     return call(read)
+
+
+class AnswerRequestPayload(GenerateRequest):
+    model_key: str = Field(min_length=64, max_length=64)
+
+
+class TurnEditPayload(BaseModel):
+    body: str = Field(min_length=1, max_length=20000)
+    revision: int = Field(ge=1)
+
+
+@router.get("/models")
+def answer_models(user=Depends(authorized)):
+    from backend.community.answers import model_options
+    return {"items": call(model_options)}
+
+
+@router.post("/questions/{question_id}/answers", status_code=202)
+def add_answer(question_id: int, payload: AnswerRequestPayload, user=Depends(authorized)):
+    from backend.community.answers import enqueue_answer
+    def submit_once():
+        try:
+            return enqueue_answer(user.id, question_id, str(payload.request_id), payload.model_key)
+        except IntegrityError:
+            return enqueue_answer(user.id, question_id, str(payload.request_id), payload.model_key)
+    return call(submit_once)
+
+
+@router.get("/questions/{question_id}/queue")
+def answer_queue(question_id: int, user=Depends(authorized)):
+    from backend.community.answers import Request, dto, question_locked, reconcile_answers
+    def read():
+        reconcile_answers()
+        with Session(engine) as db:
+            question_locked(db, question_id)
+            rows = db.scalars(select(Request).where(Request.question_id == question_id).order_by(Request.sequence.desc()).limit(100))
+            return {"items": sorted([dto(row) for row in rows], key=lambda row: row['sequence'])}
+    return call(read)
+
+
+@router.post("/answer-requests/{identifier}/retry", status_code=202)
+def retry_answer_request(identifier: int, payload: GenerateRequest, user=Depends(authorized)):
+    from backend.community.answers import retry_answer
+    return call(retry_answer, user.id, identifier, str(payload.request_id))
+
+
+@router.patch("/turns/{identifier}")
+def edit_answer_turn(identifier: int, payload: TurnEditPayload, user=Depends(authorized)):
+    from backend.community.answers import edit_turn
+    body = payload.body.strip()
+    if not body: raise HTTPException(422, detail={"code":"invalid_community_input"})
+    return call(edit_turn, user.id, identifier, body, payload.revision)
+
+
+@router.get("/turns/{identifier}/revisions")
+def answer_turn_revisions(identifier: int, user=Depends(authorized)):
+    from backend.community.models import CommunityTurnRevision
+    def read():
+        with Session(engine) as db:
+            rows = db.scalars(select(CommunityTurnRevision).where(CommunityTurnRevision.turn_id == identifier).order_by(CommunityTurnRevision.revision.desc()).limit(100))
+            return {"items": [{"revision": r.revision, "body": r.body, "human_edited": r.human_edited, "created_at": r.created_at} for r in rows]}
+    return call(read)

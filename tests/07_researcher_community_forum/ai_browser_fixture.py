@@ -70,7 +70,7 @@ def run(root, directory, app, owner_id, question_id):
             fixture={'users':identities,'question_id':question_id,'question_title':question.title}
         fixture_path=directory/'browser-fixture.json';fixture_path.write_text(json.dumps(fixture))
         browser_env={**env,'COMMUNITY_BASE_URL':f'http://127.0.0.1:{proxy.server_port}','COMMUNITY_ARTIFACT_DIR':str(directory),'COMMUNITY_BROWSER_FIXTURE':str(fixture_path)}
-        subprocess.run([str(Path(os.sys.executable).parent/'node'),str(root/'tests/07_researcher_community_forum/ai-community-browser.mjs')],env=browser_env,check=True)
+        subprocess.run([str(Path(os.sys.executable).parent/'node'),str(root/'tests/07_researcher_community_forum'/os.environ.get('COMMUNITY_BROWSER_SCRIPT','ai-community-browser.mjs'))],env=browser_env,check=True)
     finally:
         (directory/'browser-fixture.json').unlink(missing_ok=True)
         if proxy:proxy.shutdown()

@@ -1,6 +1,7 @@
 {
   "schema_heads": [
-    "20261020_0049"
+    "20261020_0049",
+    "20261020_0143"
   ],
   "tables": {
     "admin_applications": {
@@ -462,6 +463,284 @@
         ]
       ]
     },
+    "community_answer_requests": {
+      "checks": [],
+      "columns": {
+        "actor_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "answer_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "config_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "context_snapshot": {
+          "nullable": true,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "error": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "finished_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "job_id": {
+          "nullable": false,
+          "type": "varchar(80)"
+        },
+        "model": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "model_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "model_name": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "question_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "request_id": {
+          "nullable": false,
+          "type": "varchar(36)"
+        },
+        "retry_of": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "sequence": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "sources": {
+          "nullable": true,
+          "type": "json"
+        },
+        "started_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "state": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "turn_id": {
+          "nullable": true,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "answer_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "question_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "retry_of"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_answer_requests"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "question_id",
+          "sequence"
+        ],
+        [
+          "request_id"
+        ]
+      ]
+    },
+    "community_answer_turn_revisions": {
+      "checks": [],
+      "columns": {
+        "actor_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "body": {
+          "nullable": false,
+          "type": "mediumtext"
+        },
+        "citations": {
+          "nullable": true,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "human_edited": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "replies": {
+          "nullable": true,
+          "type": "json"
+        },
+        "revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "turn_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "turn_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_answer_turns"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "turn_id",
+          "revision"
+        ]
+      ]
+    },
+    "community_answer_turns": {
+      "checks": [],
+      "columns": {
+        "body": {
+          "nullable": false,
+          "type": "mediumtext"
+        },
+        "citations": {
+          "nullable": true,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "entry_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "human_edited": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "replies": {
+          "nullable": true,
+          "type": "json"
+        },
+        "request_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "entry_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "request_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_answer_requests"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "request_id"
+        ]
+      ]
+    },
     "community_entries": {
       "checks": [],
       "columns": {
@@ -703,6 +982,63 @@
         [
           "entry_id",
           "revision"
+        ]
+      ]
+    },
+    "community_model_answers": {
+      "checks": [],
+      "columns": {
+        "config_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "entry_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "first_sequence": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "question_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "entry_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "question_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "entry_id"
+        ],
+        [
+          "question_id",
+          "config_hash"
         ]
       ]
     },

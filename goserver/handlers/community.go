@@ -397,7 +397,15 @@ func communityDTO(db *gorm.DB, e models.CommunityEntry, u *models.User) gin.H {
 	if e.Kind == "question" {
 		db.Model(&models.CommunityEntry{}).Where("question_id = ? AND kind = 'answer' AND status = 'visible'", e.ID).Count(&replies)
 	}
-	return gin.H{"id": e.ID, "kind": e.Kind, "title": e.Title, "body": e.Body, "status": e.Status, "author": author,
+	modelCount, responseCount := communityAnswerCounts(db, e)
+	turns := communityAnswerTurns(db, e)
+	if len(turns) > 0 && turns[0]["sources_available"] == false {
+		e.Body = ""
+		e.Citations = nil
+		sourcesAvailable = false
+		editable = false
+	}
+	return gin.H{"model_count": modelCount, "response_count": responseCount, "turns": turns, "id": e.ID, "kind": e.Kind, "title": e.Title, "body": e.Body, "status": e.Status, "author": author,
 		"question_id": e.QuestionID, "answer_id": e.AnswerID, "paper_id": e.PaperID, "system_key": e.SystemKey,
 		"parent_id": e.ParentID, "reply_to_id": e.ReplyToID, "votes": votes, "voted": voted > 0, "answer_count": replies,
 		"can_edit": editable, "can_delete": false, "can_reply": false,

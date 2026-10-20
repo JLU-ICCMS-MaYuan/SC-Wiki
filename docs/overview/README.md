@@ -59,7 +59,7 @@ flowchart LR
 - RAG 已从 Chroma 迁移到 Qdrant 封装，但部分兼容命名仍保留 `chroma` 字样。
 - RAG 结构化物性工具、材料详情、检索和统计统一读取当前已批准的 `property_records`；普通流式/非流式问答共用 Mentor。读取规则及外部索引边界见[混合检索](05_Retrieval-Augmented_AI_Question_Answering/hybrid-retrieval.md)。
 - 晶体结构后端 API 已实现，前端在论文详情中按材料状态下的 `structures`（来自 `structure_models`）展示结构，完整结构审核工作台仍未从当前路由中确认。当前全库无结构模型记录，只验证过空态。（[Issue #57](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/57)）
-- “社区”展开排行榜、Tc~X 演变和 AI 学术讨论；[科研交流](06_Researcher_Community_Forum/community-discussion.md)提供超级管理员提问、多模型自动回答、历史评论只读及内容治理。旧 `/share` 进入图表，图表组合的编辑入口在管理页。
+- “社区”展开排行榜、Tc~X 演变和 AI 学术讨论；[科研交流](06_Researcher_Community_Forum/community-discussion.md)提供超级管理员提问、问题内选模型排队和同模型连续回应、历史评论只读及内容治理。旧 `/share` 进入图表，图表组合的编辑入口在管理页。
 - Tc 估算由代码明确标记为实验页面，不构成模型科学有效性的保证。
 - 引用发展图不依赖 Neo4j：GROBID 在上传 Worker 中解析参考文献，MySQL 保存原始记录和匹配状态，Go API 直接查询公开引用图。旧 Neo4j 图谱仍供历史材料/作者关系功能使用。
 - 账号身份与分级工作台变更已通过 Go 全量测试、Vitest、前端生产构建和 Alembic MySQL 离线迁移 SQL 生成；真实 SMTP、持久化 MySQL 与完整部署链路仍需在目标环境验收。

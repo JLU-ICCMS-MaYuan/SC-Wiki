@@ -5,9 +5,9 @@ from sqlalchemy.orm import Session
 from backend.database import engine
 from backend.rag.llm_context import set_llm_config, reset_llm_config
 from .configuration import TIMEOUT, key, load_config, redis_connection
-from .generation import GenerationError, create_question, fingerprint, retrieve_sources, approved_sources, sources_current, create_answer
-from .models import CommunityAIBatch as Batch, CommunityAITask as Task, CommunityEntry as Entry, CommunityEntryRevision as Revision
-from .service import actor_allowed, locked, now, batch_tasks, enqueue, fail_job, refresh_batch
+from .generation import GenerationError, create_question, fingerprint
+from .models import CommunityAIBatch as Batch, CommunityEntry as Entry
+from .service import actor_allowed, locked, now, batch_tasks, fail_job
 
 
 @contextmanager
@@ -51,86 +51,20 @@ def prepare(batch_id, job_id, connection, lease):
                     question = Entry(kind="question", title=title, body=body, author_id=None,
                                      origin="ai", category=category, model_id=selected_id,
                                      model_name=selected_name, model=selected_model,
-                                     question_hash=fingerprint(title), status="visible", activity_at=now())
+                                     question_hash=fingerprint(title), status="visible", activity_at=now(), created_at=now(), updated_at=now())
                     db.add(question); db.flush(); batch.question_id = question.id
                     question_id = question.id
-        with Session(engine) as db:
-            question = db.get(Entry, question_id)
-            question_text = question.title+"\n"+question.body
-        rows = retrieve_sources(question_text)
         with Session(engine) as db, db.begin():
-            actor_allowed(db, actor_id)
-            question = locked(db, Entry, question_id)
             batch = locked(db, Batch, batch_id)
-            if batch.job_id != job_id or batch.state != "running" or question.status != "visible" or not lease.owned():
-                raise GenerationError("generation_conflict")
-            batch.sources = approved_sources(db, rows)
-            scheduled = []
+            if batch.job_id != job_id or batch.state != 'running' or not lease.owned():
+                raise GenerationError('generation_conflict')
+            batch.state, batch.sources, batch.finished_at = 'succeeded', [], now()
             for task in batch_tasks(db, batch_id):
-                config_for_task = load_config(connection, job_id, task.model_id, task.config_hash)
-                task.job_id = "community-"+uuid.uuid4().hex
-                task.state, task.error = "queued", ""
-                task.attempt += 1; task.question_revision = question.revision; task.started_at = now()
-                scheduled.append((task.id, task.job_id, task.model_id, config_for_task))
-        for task_id, task_job_id, model_id, task_config in scheduled:
-            enqueue("task", task_id, task_job_id, {model_id: task_config})
+                task.state, task.error, task.finished_at = 'succeeded', '', now()
     finally:
         reset_llm_config(token)
 
 
-def answer(task_id, job_id, connection, lease):
-    with Session(engine) as db, db.begin():
-        task = locked(db, Task, task_id)
-        if task.job_id != job_id or task.state != "queued":
-            return
-        batch = db.get(Batch, task.batch_id)
-        actor_allowed(db, batch.actor_id)
-        question = db.get(Entry, batch.question_id)
-        if question.status != "visible" or question.revision != task.question_revision:
-            raise GenerationError("generation_conflict")
-        if not sources_current(db, batch.sources):
-            raise GenerationError("sources_changed")
-        task.state, task.started_at = "running", now()
-        config = load_config(connection, job_id, task.model_id, task.config_hash)
-        sources = batch.sources or []
-        question_text = question.title+"\n"+question.body
-        question_id, batch_id = question.id, batch.id
-    token = set_llm_config(config)
-    try:
-        body, citations = create_answer(question_text, sources)
-    finally:
-        reset_llm_config(token)
-    with Session(engine) as db, db.begin():
-        batch = db.get(Batch, batch_id)
-        actor_allowed(db, batch.actor_id)
-        # 与 Go 的治理锁顺序一致：问题 -> 答案 -> 任务。
-        question = locked(db, Entry, question_id)
-        current_task = db.get(Task, task_id)
-        previous = locked(db, Entry, current_task.answer_id) if current_task.answer_id else None
-        task = locked(db, Task, task_id)
-        if task.job_id != job_id or task.state != "running" or not lease.owned():
-            raise GenerationError("generation_conflict")
-        if question.status != "visible" or question.revision != task.question_revision:
-            raise GenerationError("generation_conflict")
-        if previous and (previous.status != "visible" or previous.revision != task.answer_revision):
-            raise GenerationError("generation_conflict")
-        if not sources_current(db, sources, lock=True):
-            raise GenerationError("sources_changed")
-        if previous:
-            db.add(Revision(entry_id=previous.id, revision=previous.revision, body=previous.body,
-                            citations=previous.citations, human_edited=previous.human_edited))
-            previous.body, previous.citations = body, citations
-            previous.human_edited = False; previous.revision += 1; previous.updated_at = now()
-        else:
-            previous = Entry(kind="answer", title="", body=body, author_id=None, origin="ai",
-                             question_id=question_id, model_id=task.model_id, model_name=task.model_name,
-                             model=task.model, model_order=task.model_order, citations=citations,
-                             status="visible", activity_at=now())
-            db.add(previous); db.flush(); task.answer_id = previous.id
-        question.activity_at = now()
-        task.state, task.error, task.finished_at = "succeeded", "", now()
-    # 提交后另开事务汇总，避免持有答案/任务锁时形成反向等待或旧快照。
-    refresh_batch(batch_id)
 
 
 def run(kind, identifier, job_id):
@@ -138,7 +72,8 @@ def run(kind, identifier, job_id):
     connection = redis_connection()
     try:
         with capacity(connection) as lease:
-            (prepare if kind == "batch" else answer)(identifier, job_id, connection, lease)
+            if kind != "batch": raise GenerationError("workflow_changed")
+            prepare(identifier, job_id, connection, lease)
     except Exception as exc:
         code = str(exc) if isinstance(exc, GenerationError) else "generation_failed"
         fail_job(kind, identifier, job_id, code)

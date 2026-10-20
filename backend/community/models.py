@@ -138,3 +138,66 @@ class CommunityEntryRevision(Base):
     human_edited = Column(Boolean, nullable=False)
     actor_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+
+class CommunityModelAnswer(Base):
+    __tablename__ = "community_model_answers"
+    __table_args__ = (UniqueConstraint("question_id", "config_hash", name="uq_community_model_card"),)
+    id = Column(Integer, primary_key=True)
+    question_id = Column(Integer, ForeignKey("community_entries.id"), nullable=False)
+    config_hash = Column(String(64), nullable=False)
+    entry_id = Column(Integer, ForeignKey("community_entries.id"), nullable=False, unique=True)
+    first_sequence = Column(Integer, nullable=False)
+
+
+class CommunityAnswerRequest(Base):
+    __tablename__ = "community_answer_requests"
+    __table_args__ = (UniqueConstraint("question_id", "sequence", name="uq_community_answer_sequence"),)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    request_id = Column(String(36), nullable=False, unique=True)
+    question_id = Column(Integer, ForeignKey("community_entries.id"), nullable=False, index=True)
+    sequence = Column(Integer, nullable=False)
+    actor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    model_id = Column(String(64), nullable=False)
+    model_name = Column(String(200), nullable=False)
+    model = Column(String(200), nullable=False)
+    config_hash = Column(String(64), nullable=False)
+    state = Column(String(16), nullable=False, default="queued")
+    error = Column(String(64), nullable=False, default="")
+    job_id = Column(String(80), nullable=False)
+    retry_of = Column(Integer, ForeignKey("community_answer_requests.id"))
+    answer_id = Column(Integer, ForeignKey("community_entries.id"))
+    turn_id = Column(Integer)
+    context_snapshot = Column(JSON)
+    sources = Column(JSON)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    started_at = Column(DateTime)
+    finished_at = Column(DateTime)
+
+
+class CommunityAnswerTurn(Base):
+    __tablename__ = "community_answer_turns"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    entry_id = Column(Integer, ForeignKey("community_entries.id"), nullable=False, index=True)
+    request_id = Column(Integer, ForeignKey("community_answer_requests.id"), nullable=False, unique=True)
+    body = Column(Text().with_variant(MEDIUMTEXT(), "mysql"), nullable=False)
+    citations = Column(JSON)
+    replies = Column(JSON)
+    revision = Column(Integer, nullable=False, default=1)
+    human_edited = Column(Boolean, nullable=False, default=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now())
+
+
+class CommunityTurnRevision(Base):
+    __tablename__ = "community_answer_turn_revisions"
+    __table_args__ = (UniqueConstraint("turn_id", "revision", name="uq_community_turn_revision"),)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    turn_id = Column(Integer, ForeignKey("community_answer_turns.id"), nullable=False)
+    revision = Column(Integer, nullable=False)
+    body = Column(Text().with_variant(MEDIUMTEXT(), "mysql"), nullable=False)
+    citations = Column(JSON)
+    replies = Column(JSON)
+    human_edited = Column(Boolean, nullable=False)
+    actor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())

@@ -86,3 +86,17 @@ type CommunityEntryRevision struct {
 	ActorID     *uint
 	CreatedAt   time.Time
 }
+
+// CommunityAnswerTurn 是模型卡片内的追加段，首答仍保存在 CommunityEntry。
+type CommunityAnswerTurn struct {
+	ID          uint            `gorm:"primaryKey" json:"id"`
+	EntryID     uint            `json:"entry_id"`
+	RequestID   uint            `json:"request_id"`
+	Body        string          `gorm:"type:mediumtext" json:"body"`
+	Citations   json.RawMessage `gorm:"type:json" json:"citations"`
+	Replies     json.RawMessage `gorm:"type:json" json:"replies"`
+	Revision    int             `json:"revision"`
+	HumanEdited bool            `json:"human_edited"`
+	CreatedAt   time.Time       `json:"created_at"`
+	UpdatedAt   time.Time       `json:"updated_at"`
+}

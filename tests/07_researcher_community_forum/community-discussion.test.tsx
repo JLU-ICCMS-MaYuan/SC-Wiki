@@ -7,6 +7,7 @@ import CommunityMarkdown from '../../frontend/src/components/community/Community
 import CommunityComposer from '../../frontend/src/components/community/CommunityComposer'
 import CommentPanel from '../../frontend/src/components/community/CommentPanel'
 import PaperCommunity from '../../frontend/src/components/community/PaperCommunity'
+import ModelAnswerCard from '../../frontend/src/components/community/ModelAnswerCard'
 import EntryCard from '../../frontend/src/components/community/EntryCard'
 import DiscussionPage from '../../frontend/src/pages/DiscussionPage'
 import { api } from '../../frontend/src/lib/api'
@@ -66,12 +67,14 @@ describe('只读社区与多模型问答', () => {
     expect(screen.getByRole('link', { name: '[S1] 来源论文' })).toHaveAttribute('href', '/papers/9')
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
-  it('公开详情展示各模型状态，用户无法触发重生成', async () => {
-    const question = { ...comment, kind: 'question', title: '多模型问题', generation_tasks: [{ id: 1, model_name: '模型一', model: 'm1', state: 'failed', error: 'generation_failed' }, { id: 2, model_name: '模型二', model: 'm2', state: 'succeeded' }] }
-    vi.mocked(api.get).mockImplementation(async url => url === '/api/community/entries/42' ? question : { items: [], total: 0 })
+  it('历史问题详情可选择模型排队，已有任务运行时仍可加入', async () => {
+    auth.user.role = 'superadmin'
+    const question = { ...comment, kind: 'question', title: '问题详情', model_count: 0, response_count: 0 }
+    vi.mocked(api.get).mockImplementation(async url => url === '/api/community/entries/42' ? question : url.endsWith('/models') ? { items: [{ key: 'a'.repeat(64), name: 'DeepSeek', model: 'deepseek' }] } : url.endsWith('/queue') ? { items: [{ id: 2, sequence: 1, model_name: 'OpenAI', model: 'gpt', state: 'running', error: '' }] } : { items: [], total: 0 })
     render(<MemoryRouter initialEntries={['/share/discussions/42']}><Routes><Route path="/share/discussions/:id" element={<DiscussionPage />} /></Routes></MemoryRouter>)
-    await screen.findByText('模型一 · m1'); expect(screen.getByText('生成失败')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '重新生成' })).not.toBeInTheDocument()
+    fireEvent.click(await screen.findByRole('button', { name: '生成答案' }))
+    fireEvent.click(await screen.findByRole('button', { name: '加入生成队列' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/community/ai/questions/42/answers', { request_id: expect.any(String), model_key: 'a'.repeat(64) }))
   })
   it('历史问题没有模型任务时使用不依赖新字段的排序', async () => {
     const question = { ...comment, kind: 'question', title: '迁移前的历史问题', generation_tasks: [], origin: '', revision: 0 }
@@ -81,6 +84,18 @@ describe('只读社区与多模型问答', () => {
     await waitFor(() => expect(api.get).toHaveBeenCalledWith('/api/community/entries?kind=answer&question_id=42&sort=latest&offset=0', expect.anything()))
     expect(vi.mocked(api.get).mock.calls.some(([url]) => url.includes('sort=models'))).toBe(false)
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+  })
+  it('同模型卡片展示首答和补充，保留回应定位而不是另建卡片', () => {
+    const entry = { ...comment, kind: 'answer', origin: 'ai', model_name: 'DeepSeek', model: 'deepseek', turns: [
+      { key: 'A42', id: null, body: '这是初始论点', sequence: 1, revision: 1, created_at: comment.created_at },
+      { key: 'A42T1', id: 1, body: '补充不同角度并承认前述限制', sequence: 3, revision: 1, created_at: comment.created_at, replies: [{ key: 'A43', model_name: 'OpenAI', sequence: 2 }] },
+    ] }
+    render(<MemoryRouter><ModelAnswerCard entry={entry} reload={() => {}} /></MemoryRouter>)
+    expect(screen.getAllByText('DeepSeek')).toHaveLength(1)
+    expect(screen.getByText('初始回答')).toBeInTheDocument()
+    expect(screen.getByText('补充回答')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'OpenAI #2' })).toHaveAttribute('href', '#answer-A43')
+    expect(screen.queryByRole('button', { name: '编辑' })).not.toBeInTheDocument()
   })
   it('论文权限失败不显示历史内容或输入', async () => {
     vi.mocked(api.get).mockRejectedValue({ code: 'paper_forbidden', status: 403 })

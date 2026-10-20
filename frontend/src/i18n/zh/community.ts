@@ -1,4 +1,6 @@
 export default {
+  questionGeneration: '提问进度',
+"generateAnswer": "生成答案", "chooseModel": "选择回答模型", "enqueueAnswer": "加入生成队列", "answerQueue": "本问题的回答队列", "retryAtEnd": "重试并排到队尾", "continuationHint": "模型会阅读本问题已有的 AI 回答。再次选择同一模型，将在它的答案卡片内追加补充。", "initialAnswer": "初始回答", "additionalAnswer": "补充回答", "respondingTo": "回应前文", "expandAnswer": "展开阅读全文", "collapseAnswer": "收起回答", "modelCount": "{count} 个模型", "responseCount": "{count} 次回答",
 
   "aiAsk": "AI 随机提问",
   "aiGenerated": "AI 生成",
@@ -32,6 +34,7 @@ export default {
     "partial": "部分完成"
   },
   "jobErrors": {
+"answer_not_distinct": "回答重复或未回应前文，未发布；可重试。",
     "duplicate_question": "未能生成不重复的问题，请重试。",
     "invalid_model_output": "模型未返回完整有效内容，请重试。",
     "invalid_citation": "引用未通过核验，请重试。",
@@ -45,7 +48,7 @@ export default {
     "preparation_failed": "问题准备失败，请在生成任务中重试。",
     "capacity_busy": "生成任务繁忙，请稍后重试。",
     "generation_failed": "模型生成失败，请重试。",
-    "superadmin_required": "发起账号已无操作权限。"
+    "context_too_long":"前文超出模型处理能力，未截断内容。","workflow_changed":"请在问题详情选择模型生成。","superadmin_required": "发起账号已无操作权限。"
   }
 ,
   title: 'AI 学术讨论', rankings: '排行榜', charts: 'Tc~X 演变', expand: '展开社区菜单',
@@ -64,7 +67,7 @@ export default {
   noticeAnswer: '回答了你的问题', noticeComment: '评论了你的答案', noticeReply: '回复了你的评论', open: '查看内容',
   moderation: '社区管理', pending: '待处理举报', resolved: '已处理举报', hide: '隐藏内容', restore: '恢复内容', dismiss: '驳回举报', reason: '处置原因（至少 5 个字）', audit: '处理记录',
   back: '返回讨论', focused: '正在查看指定内容', showAll: '查看全部', total: '共 {count} 条',
-  errors: {"community_read_only": "公开互动已关闭。", "community_revision_conflict": "内容已被修改，请刷新后操作。", "community_ai_unavailable": "AI 服务暂不可用，请检查迁移、模型配置和后台服务。", "no_models": "尚未配置可用的服务端模型。", "request_conflict": "此请求已提交不同内容，请刷新后重试。", "superadmin_required": "仅超级管理员可以操作。", "model_config_changed": "原模型配置已改变，无法使用其他模型代替。", "sources_changed": "来源资料已变化。", "preparation_failed": "请先在生成任务中重试问题准备。", "queue_unavailable": "任务队列不可用，请稍后重试。", "retry_model_separately": "请按模型分别重试。", generic: '操作失败，请稍后重试。', invalid_community_input: '请检查内容长度和填写信息。', content_unavailable: '内容已删除、隐藏或不存在。',
+  errors: {"community_read_only": "公开互动已关闭。", "community_revision_conflict": "内容已被修改，请刷新后操作。", "community_ai_unavailable": "AI 服务暂不可用，请检查迁移、模型配置和后台服务。", "no_models": "尚未配置可用的服务端模型。", "request_conflict": "此请求已提交不同内容，请刷新后重试。", "context_too_long":"前文超出模型处理能力，未截断内容。","workflow_changed":"请在问题详情选择模型生成。","superadmin_required": "仅超级管理员可以操作。", "model_config_changed": "原模型配置已改变，无法使用其他模型代替。", "sources_changed": "来源资料已变化。", "preparation_failed": "请先在生成任务中重试问题准备。", "queue_unavailable": "任务队列不可用，请稍后重试。", "retry_model_separately": "请按模型分别重试。", generic: '操作失败，请稍后重试。', invalid_community_input: '请检查内容长度和填写信息。', content_unavailable: '内容已删除、隐藏或不存在。',
     verified_account_required: '请使用已验证邮箱的正常账号。', paper_forbidden: '你目前无权访问这篇论文及其讨论。',
     not_content_author: '只能编辑或删除自己的内容。', community_rate_limited: '操作过于频繁，请稍后再试。',
     community_rate_limit_unavailable: '发布服务暂时不可用，请稍后重试。', community_unavailable: '社区服务暂时不可用，请稍后重试。',

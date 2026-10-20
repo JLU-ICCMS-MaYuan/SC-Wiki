@@ -1,4 +1,6 @@
 export default {
+  questionGeneration: 'Question generation',
+"generateAnswer": "Generate an answer", "chooseModel": "Choose a model", "enqueueAnswer": "Add to queue", "answerQueue": "Answer queue", "retryAtEnd": "Retry at end", "continuationHint": "The model reads existing AI answers. Selecting it again adds a response within its own card.", "initialAnswer": "Initial answer", "additionalAnswer": "Follow-up answer", "respondingTo": "Responding to", "expandAnswer": "Read full answer", "collapseAnswer": "Collapse answer", "modelCount": "{count} models", "responseCount": "{count} responses",
 
   "aiAsk": "Generate a question",
   "aiGenerated": "AI generated",
@@ -32,6 +34,7 @@ export default {
     "partial": "Partially complete"
   },
   "jobErrors": {
+"answer_not_distinct": "The answer repeated prior content or did not respond to it. Not published; retry is available.",
     "duplicate_question": "Could not generate a distinct question. Retry.",
     "invalid_model_output": "Incomplete or invalid model output. Retry.",
     "invalid_citation": "Unverified citation. Retry.",
@@ -45,7 +48,7 @@ export default {
     "preparation_failed": "Question preparation failed. Retry from Generation tasks.",
     "capacity_busy": "Generation capacity busy. Retry later.",
     "generation_failed": "Model generation failed. Retry.",
-    "superadmin_required": "The initiating account no longer has permission."
+    "context_too_long":"Previous answers exceed model capacity; content was not truncated.","workflow_changed":"Choose a model from the question page.","superadmin_required": "The initiating account no longer has permission."
   }
 ,
   title: 'AI academic discussions', rankings: 'Rankings', charts: 'Tc–X evolution', expand: 'Expand community menu',
@@ -64,7 +67,7 @@ export default {
   noticeAnswer: 'answered your question', noticeComment: 'commented on your answer', noticeReply: 'replied to your comment', open: 'View content',
   moderation: 'Community moderation', pending: 'Pending reports', resolved: 'Resolved reports', hide: 'Hide content', restore: 'Restore content', dismiss: 'Dismiss report', reason: 'Reason (at least 5 characters)', audit: 'Moderation history',
   back: 'Back to discussions', focused: 'Showing selected content', showAll: 'Show all', total: '{count} items',
-  errors: {"community_read_only": "Public interactions are disabled.", "community_revision_conflict": "Content changed. Refresh before editing.", "community_ai_unavailable": "AI service unavailable. Check migrations, model configuration and workers.", "no_models": "No server models configured.", "request_conflict": "Request ID already used for different content. Refresh and retry.", "superadmin_required": "Superadmin access required.", "model_config_changed": "Original model configuration changed.", "sources_changed": "Source material changed.", "preparation_failed": "Retry question preparation from Generation tasks.", "queue_unavailable": "Queue unavailable. Retry later.", "retry_model_separately": "Retry each model separately.", generic: 'Something went wrong. Please try again.', invalid_community_input: 'Check the content length and input fields.', content_unavailable: 'The content was removed, hidden or does not exist.',
+  errors: {"community_read_only": "Public interactions are disabled.", "community_revision_conflict": "Content changed. Refresh before editing.", "community_ai_unavailable": "AI service unavailable. Check migrations, model configuration and workers.", "no_models": "No server models configured.", "request_conflict": "Request ID already used for different content. Refresh and retry.", "context_too_long":"Previous answers exceed model capacity; content was not truncated.","workflow_changed":"Choose a model from the question page.","superadmin_required": "Superadmin access required.", "model_config_changed": "Original model configuration changed.", "sources_changed": "Source material changed.", "preparation_failed": "Retry question preparation from Generation tasks.", "queue_unavailable": "Queue unavailable. Retry later.", "retry_model_separately": "Retry each model separately.", generic: 'Something went wrong. Please try again.', invalid_community_input: 'Check the content length and input fields.', content_unavailable: 'The content was removed, hidden or does not exist.',
     verified_account_required: 'An active account with a verified email is required.', paper_forbidden: 'You do not have access to this paper or its discussion.',
     not_content_author: 'You can only edit or delete your own content.', community_rate_limited: 'Too many requests. Please try again later.',
     community_rate_limit_unavailable: 'Publishing is temporarily unavailable. Please try again later.', community_unavailable: 'The community service is temporarily unavailable.',

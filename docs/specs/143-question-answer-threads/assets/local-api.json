@@ -1,0 +1,27 @@
+{
+  "checks": [
+    {
+      "role": "user",
+      "route": "/api/community/ai/models",
+      "status": 403
+    },
+    {
+      "role": "user",
+      "route": "/api/community/ai/questions/8/queue",
+      "status": 403
+    },
+    {
+      "role": "superadmin",
+      "route": "/api/community/ai/models",
+      "status": 200
+    },
+    {
+      "role": "superadmin",
+      "route": "/api/community/ai/questions/8/queue",
+      "status": 200
+    }
+  ],
+  "workers": 2,
+  "readonly_worker_probe": "passed",
+  "posted": false
+}

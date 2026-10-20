@@ -75,3 +75,26 @@ def test_complete_requires_finished_stream(monkeypatch):
     monkeypatch.setattr(llm, 'complete_json', fake)
     with pytest.raises(g.GenerationError, match='invalid_model_output'):
         g.complete('system', {'question':'问题'})
+
+
+def test_full_previous_answers_and_reference_validation(monkeypatch):
+    previous=[{'key':'A1','body':'全文'*10000,'model_name':'DeepSeek','sequence':1}]
+    def complete(prompt,payload):
+        assert payload['previous_answers']==previous
+        assert len(payload['previous_answers'][0]['body'])==20000
+        assert '不是权威证据' in prompt
+        return {'body':'认同前文 [A1]，补充另一角度。'}
+    monkeypatch.setattr(g,'complete',complete)
+    assert '[A1]' in g.create_answer('问题',[],previous)[0]
+    monkeypatch.setattr(g,'complete',lambda *args:{'body':'虚构前文 [A9T2]'})
+    with pytest.raises(g.GenerationError,match='invalid_citation'):
+        g.create_answer('问题',[],previous)
+
+
+def test_repeated_continuation_is_never_published(monkeypatch):
+    calls=[]
+    monkeypatch.setattr(g,'complete',lambda *a:calls.append(a) or {'body':'相同的原始答案'})
+    with pytest.raises(g.GenerationError,match='answer_not_distinct'):
+        g.create_answer('问题',[],[{'key':'A1','body':'相同的原始答案'}])
+    assert len(calls)==2
+    assert '上次输出被拒绝' in calls[1][0]

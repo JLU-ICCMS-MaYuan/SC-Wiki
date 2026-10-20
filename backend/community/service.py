@@ -96,10 +96,10 @@ def submit(actor_id, request_id, title=None, body=""):
             if existing.actor_id != actor_id or existing.request_hash != request_hash:
                 raise GenerationError("request_conflict")
             return existing.id
-    available = models()
+    available = models() if title is None else []
     connection = redis_connection()
     try:
-        connection.ping()
+        if title is None: connection.ping()
     except Exception:
         raise GenerationError("queue_unavailable") from None
     finally:
@@ -108,22 +108,25 @@ def submit(actor_id, request_id, title=None, body=""):
     with Session(engine) as db, db.begin():
         actor_allowed(db, actor_id)
         category = secrets.choice(tuple(CATEGORIES)) if title is None else ""
-        question_model = secrets.choice(available)[0]
+        selected = secrets.choice(available) if available else None
+        question_model = selected[0] if selected else ""
         batch = Batch(id=request_id, actor_id=actor_id, request_hash=request_hash,
                       category=category, question_model_id=question_model, state="queued", error="",
-                      job_id="community-"+uuid.uuid4().hex, attempt=1)
+                      job_id="community-"+uuid.uuid4().hex, attempt=1, created_at=now())
         if title is not None:
             question = Entry(kind="question", title=title, body=body, author_id=actor_id,
-                             origin="human", status="visible", activity_at=now())
+                             origin="human", status="visible", activity_at=now(), created_at=now(), updated_at=now())
             db.add(question); db.flush()
             batch.question_id = question.id
+            batch.state, batch.sources, batch.finished_at = "succeeded", [], now()
         db.add(batch); db.flush()
-        for order, (identifier, name, config) in enumerate(available):
+        for order, (identifier, name, config) in enumerate([selected] if selected else []):
             db.add(Task(batch_id=batch.id, model_id=identifier, model_name=name[:200], model=config.model,
                         config_hash=identity(config), model_order=order, state="queued", error="", job_id="",
                         attempt=0, question_revision=1, answer_revision=0))
         job_id = batch.job_id
-    enqueue("batch", request_id, job_id, {i:c for i, _, c in available})
+    if selected:
+        enqueue("batch", request_id, job_id, {selected[0]: selected[2]})
     return request_id
 
 
@@ -147,31 +150,7 @@ def retry_batch(actor_id, batch_id):
 
 
 def retry_task(actor_id, task_id):
-    with Session(engine) as db, db.begin():
-        actor_allowed(db, actor_id)
-        preliminary = db.get(Task, task_id)
-        if not preliminary:
-            raise GenerationError("content_unavailable")
-        batch = db.get(Batch, preliminary.batch_id)
-        if batch.sources is None or not batch.question_id:
-            raise GenerationError("preparation_failed")
-        question = locked(db, Entry, batch.question_id)
-        answer = locked(db, Entry, preliminary.answer_id) if preliminary.answer_id else None
-        task = locked(db, Task, task_id)
-        if question.status != "visible" or (answer and answer.status != "visible"):
-            raise GenerationError("content_unavailable")
-        if task.state in ACTIVE:
-            return batch.id
-        configs = current_configs([task])
-        task.question_revision = question.revision
-        task.answer_revision = answer.revision if answer else 0
-        task.state, task.error, task.finished_at = "queued", "", None
-        task.started_at = now()
-        task.attempt += 1; task.job_id = "community-"+uuid.uuid4().hex
-        batch.state = "running"
-        job_id, batch_id = task.job_id, batch.id
-    enqueue("task", task_id, job_id, configs)
-    return batch_id
+    raise GenerationError("workflow_changed")
 
 
 def reconcile():
@@ -198,11 +177,11 @@ def reconcile():
                 connection.delete(key(job_id))
     finally:
         connection.close()
+    from .answers import reconcile_answers
+    reconcile_answers()
 
 
 def batch_dto(db, batch):
     return {"id": batch.id, "question_id": batch.question_id, "state": batch.state, "error": batch.error,
             "category": batch.category, "can_retry": batch.sources is None and batch.state == "failed",
-            "tasks": [{"id": t.id, "batch_id": t.batch_id, "model_id": t.model_id, "model_name": t.model_name, "model": t.model,
-                       "model_order": t.model_order, "answer_id": t.answer_id, "state": t.state, "error": t.error}
-                      for t in batch_tasks(db, batch.id)]}
+            "tasks": []}

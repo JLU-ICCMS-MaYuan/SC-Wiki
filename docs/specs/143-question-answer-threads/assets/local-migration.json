@@ -1,0 +1,25 @@
+{
+  "database": "127.0.0.1:3307/scwiki",
+  "before": [
+    "20261020_0142"
+  ],
+  "after": [
+    "20261020_0143"
+  ],
+  "old_rows_unchanged": true,
+  "old_counts": {
+    "community_ai_batches": 1,
+    "community_ai_tasks": 2,
+    "community_entries": 4,
+    "community_entry_revisions": 0,
+    "community_moderation_events": 0,
+    "community_notifications": 0,
+    "community_reports": 0,
+    "community_systems": 0,
+    "community_votes": 0
+  },
+  "model_cards": 2,
+  "requests": 0,
+  "backup": "/Users/mayuan/Codes/SC-Wiki/.local/backups/community143-20261020-200908",
+  "sha256": "f2328984c8befafa7fd8ab42d18a2607f812f41b6ddac88b8cdabf3e5d8e28bb"
+}
