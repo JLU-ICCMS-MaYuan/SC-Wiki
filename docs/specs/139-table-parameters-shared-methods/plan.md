@@ -123,3 +123,18 @@ docs/specs/139-table-parameters-shared-methods/
 | FR-016、SC-007 | 提取契约与原文适用范围 | T033/T035 | 原文Methods、缺失值、HF与DFT分阶段 |
 
 执行顺序T032→T033→T034→T035→T036；同文件串行。用户确认已获得，不创建分支；在mayuan保留原有改动并只提交本次增量。读取新Spec、Plan、Research与原合同后实施；业务结构不变，无新数据库合同。已发布定义不原地修改。
+
+
+## US5实施计划
+
+在`backend/ingest/functional_inference.py`提供受限候选构造，`scientific_context.py`扩展关联输出并接入既有补空，`calculation_methods.py`同步受限例外提示，必要时`property_evidence.py`说明推断核对语义。输入仍为完整来源阅读得到的设置和现有目标，输出仍为现有来源关联及空值填写。
+
+| 需求／标准 | 组件职责与事实来源 | 任务 | 验证 |
+| --- | --- | --- | --- |
+| FR-017/019、SC-009 | 已定位VASP-PBE/QE设置、模型关联判断、受限构造器 | T038 | 实际生成→应用→核对及真实Methods |
+| FR-018/020/022、SC-010 | 范围/例外/候选冲突检查和原补空保护 | T038/T039 | 明确QE优先、已有值、多候选、缺来源及反例 |
+| FR-021、SC-011 | 现有source_associations/字段核对及保存契约 | T039/T040 | JSON重读、条件/来源变化及推断身份保持 |
+
+执行T037→T038→T039→T040，更新后重读Spec/Research/契约；mayuan分支增量隔离，不迁移、不推送、不批量修复业务草稿。当前需求授权不放开其他跨阶段设置。
+
+US5在线验证发现模型可能把已有结构阶段PBE扩展误认作QE已填写；提示明确QE现值只由calculation_conditions.exchange_correlation_functional判断，结构阶段扩展是推断依据而不是目标值。新增对应回归，原结构PBE扩展保持，QE空字段另存带推断标识的PBE。

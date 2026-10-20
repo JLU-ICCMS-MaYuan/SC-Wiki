@@ -1,0 +1,35 @@
+{
+  "model": "deepseek-v4-pro",
+  "scope": "完整主文和SI来源，200 GPa有效记录副本；既有VASP-PBE扩展保留，QE空字段独立推断；未写业务草稿",
+  "source_windows": 2,
+  "source_blocks": 159,
+  "complete": true,
+  "applied_count": 1,
+  "inference_gaps": [],
+  "explanation": "QE泛函未直接报告；依据本文VASP-PBE及同一计算流程，推测QE也使用PBE。同一材料LaSc2H24的结构优化和电子性质计算使用VASP/PBE，谐波声子和EPC计算使用Quantum ESPRESSO但未报告泛函。方法部分未提及QE使用不同泛函，且工作流连续，推断QE也采用PBE。",
+  "inference_rule": "vasp_pbe_to_qe_v1",
+  "basis_kind": "paper_inference",
+  "target_path": "/payload/calculation_conditions/exchange_correlation_functional",
+  "source_setting_ids": {
+    "vasp_software_setting_id": "setting-0",
+    "vasp_functional_setting_id": "setting-2",
+    "qe_software_setting_id": "setting-7"
+  },
+  "review_after_reload": {
+    "status": "uncertain",
+    "adopted_basis": "paper_inference",
+    "source_kind": "paper_inference"
+  },
+  "live_draft_unchanged": true,
+  "artifact_directory": ".data/review_artifacts/c16cc627a0c04dc8ad4289624d1da80a/qe_pbe_inference/20261020T081023Z",
+  "input_sha256": "79912ee702ad643eeae2d7e33f31c7708552cdf75788eb6e43fd2be07d7be4e8",
+  "ledger_sha256": "1d7602ba6ad55b9358509c76c49ae190e2ee02301106ef49d58900f0b2a9b80a",
+  "independent_source_replay": {
+    "applied": 1,
+    "gaps": [],
+    "value": "PBE",
+    "status": "uncertain",
+    "source_kind": "paper_inference",
+    "basis": "paper_inference"
+  }
+}

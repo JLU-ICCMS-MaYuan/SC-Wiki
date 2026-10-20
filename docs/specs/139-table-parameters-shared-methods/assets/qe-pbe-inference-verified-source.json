@@ -1,0 +1,10 @@
+{
+  "base_commit": "832348b9b2f4fdf3515594164b12cff27e766303",
+  "files": {
+    "backend/ingest/functional_inference.py": "2aaf38fae3462bfd3fca7bf48b52928ff351fb3d6586778fdf8c13ee0cc78af1",
+    "backend/ingest/scientific_context.py": "bf24437da288d15fda206c070fdc95ecb3a17f3fff8796ed9d5a64fa2bc50d94",
+    "backend/ingest/calculation_methods.py": "c3ed7f66a649dc7a842fe21db7738ff8c8fde7e477010923c2d78a64f522e191",
+    "backend/ingest/property_evidence.py": "488746dfccb7c8a82eb29a105cf6a7bb1d96b034d9a59e884008dbc9af45ee38",
+    "tests/01_decentralized_uploading/test_qe_pbe_inference.py": "4539e6abff4f9e57013830ea3cd776cc9ee06611f73f6d3f06670df8c87fdd9b"
+  }
+}

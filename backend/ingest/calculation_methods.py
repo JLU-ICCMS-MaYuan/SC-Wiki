@@ -17,6 +17,9 @@ If a sentence mentions software and DFPT, extract the software AND phonon_method
 Separate mixed descriptions into their fields. Do not silently replace DFPT with DFT:
 only extract electronic_method when supported by an applicable source, otherwise leave it
 unknown. Never borrow a structural-relaxation functional/method for EPC without scope evidence.
+Exception only in the separate association stage: a validated VASP-PBE / QE workflow may propose
+QE PBE as paper_inference when QE omits its functional. Never invent this as a directly reported
+QE atomic setting during extraction; explicit QE settings, conflicts and existing values take priority.
 When reviewing evidence, matching a word in the source is insufficient: its scientific
 category and calculation stage must match the target field as well.
 """

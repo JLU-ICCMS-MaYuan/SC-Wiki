@@ -153,3 +153,11 @@ T027/T028 技术完成状态由 T029/T030 与真实验收支撑；远程协作�
 - [x] T034 在`backend/ingest/property_evidence.py`及必要的建议入口阻止错误类别与旧支持继续通过，保留正确人工值及旧历史。
 - [x] T035 新增方法分类生产链回归，验证真实La–Sc–H Methods、阶段扩展、保存重读、缺失值及旧缓存边界；独立增量副本验证。
 - [x] T036 更新Overview及US4验收记录，核对独立增量并回写Issue；Git提交号在提交完成后追加，不推送。
+
+
+## US5：QE的PBE推断
+
+- [x] T037 按原话及“继续”确认更新#139和Spec/Plan/Research/契约。
+- [x] T038 新增`backend/ingest/functional_inference.py`，接入`scientific_context.py`关联与补空，调整`calculation_methods.py`受限例外，保留推断标识。
+- [x] T039 新增生产链正反例和保存重读回归，验证直接来源优先、已有值、来源与范围变化、推断身份。
+- [x] T040 用La–Sc–H真实Methods验证受限推断，完成独立增量验证，更新Overview与验收记录，回写Issue；Git提交号在提交后追加，不推送。

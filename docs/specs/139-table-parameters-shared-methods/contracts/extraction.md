@@ -55,3 +55,12 @@
 ## US4：方法字段语义
 
 `electronic_method`保存DFT、HF等电子结构理论；`exchange_correlation_functional`保存PBE等泛函；`calculation_code`保存QE/VASP等软件。DFPT、有限位移法归入声子方法，沿现有阶段化扩展以`electron_phonon.phonon_method`保存。四类值分别绑定自身适用证据，不以出现某一词替代字段语义核对。旧错误值不被静默替换，新的错误提取须重试/报告缺口，旧核对不能继续授予支持。
+
+
+## US5：PBE跨软件推断契约
+
+READ保留原子设置真实stage。关联输出可额外返回functional_inferences，每项包含target、vasp_software_setting_id、vasp_functional_setting_id、qe_software_setting_id、scope、scope_evidences及explanation；ID只能指向本次已校验设置。程序验证VASP/PBE、QE及目标范围后，强制生成electron_phonon阶段的exchange_correlation_functional=PBE和paper_inference关联，不允许模型自己升级为paper_quote。
+
+适用前提为完整有效来源、同一材料/物相及工作流联系、QE泛函未报告/目标为空、无明确例外或冲突。保存inference_rule=vasp_pbe_to_qe_v1和来源设置ID、两端原文及推断解释；原设置仍属于VASP阶段。已有值、QE明确泛函、候选冲突及无证据情形不补值。不改变普通关联的阶段映射与校验。
+
+US5关联输出同时支持`functional_inference_exclusions`，每项为target和明确reason；有VASP/PBE及QE设置、目标泛函为空且没有明确QE设置时，必须在推断或排除列表中给出判断，不能只分配结构优化扩展后静默遗漏QE。遗漏触发一次纠正，仍缺失保留生成缺口，不伪造推断。

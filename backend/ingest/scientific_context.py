@@ -9,7 +9,7 @@ import re
 import unicodedata
 from .calculation_methods import METHOD_SEMANTICS_PROMPT, method_field_issue
 
-CONTEXT_VERSION = "scientific-context-v5"
+CONTEXT_VERSION = "scientific-context-v6"
 STAGES = {"electron_phonon", "structural_relaxation", "electronic_structure", "sscha", "aimd", "superconductivity"}
 PARAMETERS = {"lambda_ep", "omega_log", "mu_star"}
 CONDITIONS = {"calculation_code", "electronic_method", "exchange_correlation_functional", "k_grid", "q_grid", "k_broadening", "q_broadening"}
@@ -254,10 +254,31 @@ Same reported phase + same calculation workflow across a pressure sweep + one Me
 exception is a valid paper_inference of shared applicability; the author need not repeat it for each pressure.
 This is stronger evidence than formula alone. Explain that bridge rather than requiring literal 'all pressures'.
 
+BOUNDED PBE INFERENCE: if THIS paper explicitly reports VASP using PBE and QE in the SAME material/phase
+workflow omits its functional, you may infer PBE for QE. No explicit author sentence saying both share PBE
+is required. Read the workflow link and all exceptions; never infer from formula alone or from software defaults.
+Only PBE is allowed here. Explicit QE functional settings take priority; do not overwrite any existing value.
+If functionals conflict, multiple donor choices disagree, or the material/workflow link is unclear, omit the inference
+and explain the gap. Do not transfer cutoffs, grids, smearing, or electronic_method through this exception.
+Keep original VASP settings and normal assignments in their original stage; do NOT relabel a setting as QE.
+Instead add functional_inferences:[{"target":"exact target ID","vasp_software_setting_id":"setting-N",
+"vasp_functional_setting_id":"setting-N","qe_software_setting_id":"setting-N","scope":{"material":"..."},
+"scope_evidences":[{"source_id":"..."}],"explanation":"简短中文说明同一流程的联系，并声明QE泛函未直接报告"}].
+The server constructs a separate paper_inference only after checking these immutable setting references.
+For EVERY target with a missing QE functional and VASP/PBE + QE settings available, explicitly return
+either a functional_inferences entry or functional_inference_exclusions:[{"target":"...","reason":"why not"}].
+Do not silently skip this decision after assigning PBE only to a structural-relaxation extension.
+The ONLY existing QE functional is record.payload.calculation_conditions.exchange_correlation_functional.
+A structural_relaxation/electronic_structure.exchange_correlation_functional extension is the VASP donor,
+NOT the QE field. Its presence or a normal assignment for it is NOT a reason to exclude the QE inference.
+If the workflow link is clear, QE's flat functional is empty, and no conflict/exception exists, return the
+functional_inferences entry even when the VASP PBE extension already exists.
+
 Return JSON {"assignments":[{"setting_id":"copy supplied setting_id","targets":["exact target ID",...],
 "excluded_targets":["other target IDs",...],"exclusion_reason":"why these are inapplicable or scope is uncertain",
 "basis_kind":"paper_inference|paper_quote","scope":{"material":"copy target material"},
-"scope_evidences":[{"source_id":"original source ID"}],"explanation":"简短中文依据、适用逻辑与局限"}],"gaps":[]}.
+"scope_evidences":[{"source_id":"original source ID"}],"explanation":"简短中文依据、适用逻辑与局限"}],
+"functional_inferences":[],"functional_inference_exclusions":[],"gaps":[]}.
 EVERY setting must account for EVERY supplied target, either in targets or excluded_targets; group common
 targets to avoid repeating values. Include targets=[] for wholly inapplicable settings. Exclusions need reasons.
 Do not silently omit targets because the author did not repeat the setting on every pressure row.
@@ -410,6 +431,12 @@ def association_issues(record):
             or not all(re.fullmatch(r"[a-f0-9]{64}",str(item.get(key) or "")) for key in ("source_fingerprint","target_fingerprint"))
             or not all(isinstance(item.get(key),list) and item[key] and all(isinstance(e,dict) and e.get("file_id") and e.get("quote") for e in item[key]) for key in ("fact_evidences","scope_evidences"))):
             errors.append((f"payload.source_associations.{i}","来源关联的路径、范围、阶段或版本证据无效"))
+        if isinstance(item,dict) and item.get('inference_rule') is not None:
+            from .functional_inference import RULE, FUNCTIONAL
+            if (item['inference_rule'] != RULE or item.get('basis_kind') != 'paper_inference'
+                or item.get('stage') != 'electron_phonon'
+                or item.get('target_path') != '/payload/calculation_conditions/'+FUNCTIONAL):
+                errors.append((f'payload.source_associations.{i}', 'QE泛函推断必须保留独立路径、阶段及论文推断身份'))
         if isinstance(item,dict) and item.get('source_documents') is not None:
             documents = item['source_documents']
             if (not isinstance(documents,dict) or not all(isinstance(key,str) and isinstance(value,dict)
@@ -607,7 +634,7 @@ def apply_associations(draft, candidates, context):
                 if value in (None,"",[],{}):
                     continue
                 parent[parts[-1]] = deepcopy(value)
-            association = {k:deepcopy(c[k]) for k in ("basis_kind","stage","scope","explanation","reported_value_raw","unit_raw","table_row_ref") if k in c}
+            association = {k:deepcopy(c[k]) for k in ("basis_kind","stage","scope","explanation","reported_value_raw","unit_raw","table_row_ref","inference_rule","source_setting_ids") if k in c}
             association.update(version=1,target_path=path,fact_evidences=facts,scope_evidences=scopes,
                                source_fingerprint=context["source_fingerprint"],target_fingerprint=scientific_fingerprint(updated),
                                target_state_fingerprint=state_fingerprint(entry[0]))
@@ -663,6 +690,20 @@ def generate_context_associations(draft, context, model, *, cache_dir=None, mode
                     (directory/'raw.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
                 if not isinstance(result.get("assignments"),list):
                     raise ValueError("缺少关系候选")
+                from .functional_inference import functional_inference_candidates, functional_inference_targets
+                lookup = {t['target']:t for t in rows[start:start+8]}
+                settings = {s['setting_id']:s for s in ledger['settings']}
+                potential = functional_inference_targets(settings, lookup)
+                inference_requests = result.get('functional_inferences', [])
+                inference_exclusions = result.get('functional_inference_exclusions', [])
+                if not isinstance(inference_requests, list) or not isinstance(inference_exclusions, list):
+                    raise ValueError("QE泛函推断及排除必须是数组")
+                decided = {x.get('target') for x in inference_requests if isinstance(x, dict) and isinstance(x.get('target'), str)}
+                decided.update(x.get('target') for x in inference_exclusions
+                               if isinstance(x, dict) and isinstance(x.get('target'), str) and str(x.get('reason') or '').strip())
+                if potential - decided:
+                    raise ValueError("必须在functional_inferences或functional_inference_exclusions中说明QE空泛函目标的判断，不能只处理VASP扩展："
+                                     + json.dumps(sorted(potential-decided), ensure_ascii=False))
                 if 'assignments' in result:
                     for assignment in result['assignments']:
                         if assignment.get('setting_id') in accounted:
@@ -673,8 +714,12 @@ def generate_context_associations(draft, context, model, *, cache_dir=None, mode
                             accounted[assignment['setting_id']].update(excluded)
                     missing = {key:sorted(expected-done) for key,done in accounted.items() if expected-done}
                 ledger["associations"].extend(result.get("associations") or [])
-                lookup = {t['target']:t for t in rows[start:start+8]}
-                settings = {s['setting_id']:s for s in ledger['settings']}
+                inferred, inference_gaps = functional_inference_candidates(
+                    inference_requests, settings, lookup, context)
+                ledger['associations'].extend(inferred)
+                ledger['gaps'].extend(inference_gaps)
+                ledger['gaps'].extend({'target': x['target'], 'reason': 'functional_inference_declined', 'detail': x['reason']}
+                                     for x in inference_exclusions if isinstance(x, dict) and x.get('target') in lookup and x.get('reason'))
                 for assignment in result.get('assignments') or []:
                     setting = settings.get(assignment.get('setting_id'))
                     if setting is None:
