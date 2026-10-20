@@ -214,7 +214,8 @@ def revision_snapshot(session, revision_id, owner):
     from backend.ingest.scientific_context import bind_snapshot_source_documents, source_documents
     bind_snapshot_source_documents(snapshot,source_documents([
         {'file_id':str(f.id),'file_role':f.role,'source_sha256':f.sha256}
-        for f in paper_files if f.paper_revision==paper.content_revision and f.role in {'main','supplementary'}]))
+        for f in paper_files if f.paper_revision==paper.content_revision and f.role in {'main','supplementary'}]),
+        {str(f.id) for f in paper_files if f.paper_revision==paper.content_revision and f.role in {'main','supplementary'}})
     snapshot['draft_version'] = saved.draft_version
     snapshot['_field_change_events'] = copy.deepcopy(saved.draft.get('_field_change_events') or [])
     snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',

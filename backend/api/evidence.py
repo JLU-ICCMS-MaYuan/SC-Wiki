@@ -2,6 +2,7 @@
 import json
 import hashlib
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Literal
 
@@ -78,6 +79,7 @@ def preflight(body: Target, user=Depends(get_current_user)):
 
 @router.post('/jobs')
 def create_job(body: Target, user=Depends(get_current_user)):
+    review_started_at = datetime.now(timezone.utc).isoformat()
     snapshot, cached = snapshot_for(body, user)
     if body.purpose == 'review_all' and (body.target != 'paper' or user.role not in {'admin', 'superadmin'}):
         raise HTTPException(403, detail='全量复核仅用于管理员论文审核')
@@ -111,8 +113,11 @@ def create_job(body: Target, user=Depends(get_current_user)):
         ev.fail('evidence_model_config', '尚未配置模型，请先填写模型配置')
     job_id = uuid.uuid4().hex
     job = dict(id=job_id, owner=user.id, snapshot=snapshot, cached=cached, prior=prior, purpose=body.purpose,
+               review_started_at=review_started_at,
                requested_keys=None if body.purpose == 'review_all' else sorted(retry_keys) or None, status='queued', progress='等待后台核对')
-    redis_client().setex(ev.task_key(job_id), TASK_TTL, json.dumps(job, ensure_ascii=False, default=str))
+    client = redis_client()
+    client.setex(ev.task_key(job_id), TASK_TTL, json.dumps(job, ensure_ascii=False, default=str))
+    ev.write_job_control(job, client)
     save_llm_config(job_id, config)
     try:
         upload_queue().enqueue(ev.run_evidence_job, job_id, job_id='evidence-'+job_id, job_timeout=1800, result_ttl=TASK_TTL, failure_ttl=TASK_TTL, on_failure=ev.evidence_job_failed)
@@ -126,7 +131,7 @@ def create_job(body: Target, user=Depends(get_current_user)):
 
 @router.get('/jobs/{job_id}')
 def get_job(job_id: str, user=Depends(get_current_user)):
-    job = ev.read_job(job_id, user.id)
+    job = ev.read_job_status(job_id, user.id)
     result = {k: job.get(k) for k in ('id', 'status', 'progress', 'error', 'completed_batches', 'total_batches', 'current_batch')}
     if job['status'] == 'completed':
         # 任务执行期间可能已有人工决定；以落库后的当前版本为准，不用任务快照覆盖它。

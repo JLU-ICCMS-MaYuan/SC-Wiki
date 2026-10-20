@@ -14,12 +14,11 @@ key=electron_phonon.phonon_method, value_kind=text and value_raw as reported.
 PBE/LDA/GGA/HSE are exchange-correlation functionals/approximations, not the electronic
 theory field. Quantum ESPRESSO/VASP are calculation_code, not a method or functional.
 If a sentence mentions software and DFPT, extract the software AND phonon_method separately.
-Separate mixed descriptions into their fields. Do not silently replace DFPT with DFT:
-only extract electronic_method when supported by an applicable source, otherwise leave it
-unknown. Never borrow a structural-relaxation functional/method for EPC without scope evidence.
-Exception only in the separate association stage: a validated VASP-PBE / QE workflow may propose
-QE PBE as paper_inference when QE omits its functional. Never invent this as a directly reported
-QE atomic setting during extraction; explicit QE settings, conflicts and existing values take priority.
+Separate mixed descriptions into their fields. A clearly applicable DFPT phonon workflow
+may justify electronic_method=DFT by the method definition in the separate association/review stage.
+Keep DFPT in phonon_method and record this as an inference, not a direct quotation.
+Never infer a functional from DFPT, software defaults, or another software's settings.
+VASP-PBE does NOT justify QE-PBE. Require an applicable report for the specific software or leave empty.
 When reviewing evidence, matching a word in the source is insufficient: its scientific
 category and calculation stage must match the target field as well.
 """

@@ -1,5 +1,7 @@
 # 数据模型：科学参数、阶段和来源关联
 
+计算条件的 `rule_review`、完整来源窗口及软件／阶段归属契约见[自动核对增量](condition-auto-review.md)。`paper_inference` 表示来源身份，不再单独决定是否必须人工确认；新规则通过不设置 `human_confirmed`。旧 `vasp_pbe_to_qe_v1` 只可作为历史读取，不得重新补值或授予通过。
+
 字段失效与重核版本由[后台修复增量](association-recheck.md)补充：带 `field_binding` 的新关联按字段依赖比较，旧格式仍保守读取；通过当前原文核对的新关联保存在核对结果的 `association_review`，原 payload 关联保留为历史。下文整条 `target_fingerprint` 继续用于旧格式及补空前的并发检查，不再作为新字段绑定的唯一失效条件。
 
 **依据**：[Spec](spec.md)、[设计决策 D3～D5](research.md)。契约已按本轮实现落地，运行边界见 validation.md。

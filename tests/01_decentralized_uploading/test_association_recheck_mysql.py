@@ -17,7 +17,7 @@ def test_real_persistence_keeps_renewal_and_invalidates_changed_value(current_my
         science.save_results(db, snap, results, 7)
     with current_mysql.begin() as db:
         reopened = ev.public_snapshot(snap, science.load_results(db, snap, 7))
-        assert grid(reopened)['status'] == 'supported'
+        assert grid(reopened)['status'] == 'uncertain'  # 缺少新规则要求的完整软件/物相证明。
         assert not grid(reopened)['source_associations'][0]['stale']
         assert grid(reopened)['association_review']['previous_associations'][0]['stale']
         science.save_results(db, snap, results, 7)

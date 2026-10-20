@@ -363,6 +363,9 @@ def normalize_extraction(raw: dict, *, allowed_blocks: set[tuple[str, int, str]]
                     if evidence.get("quote") is not None:
                         raise ValueError("原文块引用不能同时改写 quote")
                     evidence["quote"] = allowed_quote_text[identity]
+    validate_extracted_methods(result)
+    from .condition_rules import remove_unreported_generated_conditions
+    remove_unreported_generated_conditions(result)
     if form_parameters:
         from .scientific_contracts import resolve_reported_pressures
         resolve_reported_pressures(result)

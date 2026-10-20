@@ -131,6 +131,9 @@ def checked_proposal(record, raw, chunks):
     sources = [ev.locate(e, chunks) for e in raw.get('evidences', []) if isinstance(e, dict)]
     if len(sources) != len(raw.get('evidences', [])) or not all(sources) or (not sources and basis != 'general_knowledge'):
         return None
+    from .condition_rules import proposal_allowed
+    if not proposal_allowed(record, basis, values, sources):
+        return None
     return {'version': ev.RULE_VERSION, 'values': values, 'evidences': sources,
             'basis_kind': basis, 'explanation': explanation,
             'supported': basis == 'paper_quote' and raw.get('supported') is True, 'content_hash': record['content_hash'],

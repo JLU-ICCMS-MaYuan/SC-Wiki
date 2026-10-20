@@ -101,6 +101,7 @@ def test_worker_reports_completed_batches_only_after_model_returns(monkeypatch):
     monkeypatch.setattr(upload_tasks, 'load_llm_config', lambda _id: SimpleNamespace(model='test'))
     monkeypatch.setattr(upload_tasks, 'delete_llm_config', lambda _id: None)
     monkeypatch.setattr(ev, 'read_job', lambda *_args: job)
+    monkeypatch.setattr(ev, 'read_job_status', lambda *_args: ev.job_control(job))
     monkeypatch.setattr(ev, 'persist_completed_results', lambda *_args: None)
     from backend.api import evidence
     monkeypatch.setattr(evidence, 'snapshot_for', lambda *_args: (job['snapshot'], job.get('results', {})))

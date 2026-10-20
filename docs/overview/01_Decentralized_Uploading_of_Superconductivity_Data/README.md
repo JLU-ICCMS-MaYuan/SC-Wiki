@@ -53,7 +53,7 @@
 
 计算条件区分电子结构理论（DFT、Hartree–Fock等）、交换关联泛函、软件和声子方法。DFPT／有限位移按声子方法保存，错误归入电子结构理论时，提取与来源核对均会提示类别错误；历史值保留供修正，不自动替换成DFT。见[方法字段规则](data-structure-and-form-mapping.md#计算方法的字段语义)。
 
-同一论文明确VASP使用PBE、QE泛函未报告时，AI可依据同材料/物相工作流提出QE也使用PBE；程序验证来源与范围后仅补空，并保留“论文推断”及局限。QE明确设置、已有人工值和冲突优先，不默认全篇采用PBE。见[受约束的QE泛函推断](data-structure-and-form-mapping.md#qe泛函的受约束推断)。
+泛函按对应软件的原文记录：VASP 的 PBE 不能推算成 QE 的 PBE，QE 未报告时留空免审。计算条件在软件、阶段、材料／物相、数值和完整来源均满足已确认规则时，可保留推断身份并自动核对通过，整篇论文仍需最终批准。见[QE 泛函按原文记录](data-structure-and-form-mapping.md#qe-泛函按原文记录)及[来源关联与重新核对](source-association-review.md)。
 
 [数据结构与表单映射](data-structure-and-form-mapping.md#四类性质的统一编辑与详情入口)记录四类性质的紧凑行、逐条扩宽补充字段、材料状态三元标题、分判据热力学稳定性与独立谱详情入口。上传、管理员和只读页面复用同一组件；谱后端是否已在目标环境就绪需沿 #137 单独验收。人工修改通过“保存并完成”保存当前值、说明和附件，禁用原因及正式核对边界见[论文与记录审核](../02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md#人工修改保存与来源核对完成)。
 

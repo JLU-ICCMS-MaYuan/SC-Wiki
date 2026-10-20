@@ -203,6 +203,11 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
                     [*association.get('fact_evidences', []), *association.get('scope_evidences', [])])
         from .evidence_proposals import editable_fields
         r['editable_fields'] = editable_fields(r)
+        from .condition_rules import descriptor
+        condition = descriptor(r)
+        if condition:
+            r['condition_context'] = condition
+            r['claim'].setdefault('context', {})['condition_policy'] = condition
         r['content_hash'] = digest(canonical(r['claim']))
         source_identity = [source_hash, r.get('provenance') or {}]
         if r.get('kind') == 'property' and scientific_record.get('property_code') == 'dos_fermi':
@@ -244,7 +249,8 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
     source_manifest = state.get('files') or [{'file_id':'main','role':'main','sha256':state.get('file_sha256')}]
     bind_snapshot_source_documents(snapshot,source_documents([
         {'file_id':s['file_id'],'file_role':s.get('role'),'source_sha256':s.get('sha256')}
-        for s in source_manifest if s.get('role') in {'main','supplementary'}]))
+        for s in source_manifest if s.get('role') in {'main','supplementary'}]),
+        {str(s['file_id']) for s in source_manifest if s.get('role') in {'main','supplementary'}})
     snapshot['pdf_manifest'] = [source for source in state.get('files') or []
                                 if str(source.get('kind') or '').lower() == 'pdf']
     if not state.get('files') and str(state.get('file_kind') or '').lower() == 'pdf':
@@ -376,7 +382,8 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
     from .scientific_context import bind_snapshot_source_documents, source_documents
     bind_snapshot_source_documents(snapshot,source_documents([
         {'file_id':str(f.id),'file_role':f.role,'source_sha256':f.sha256}
-        for f in paper_files if f.paper_revision == paper.content_revision and f.role in {'main','supplementary'}]))
+        for f in paper_files if f.paper_revision == paper.content_revision and f.role in {'main','supplementary'}]),
+        {str(f.id) for f in paper_files if f.paper_revision == paper.content_revision and f.role in {'main','supplementary'}})
     snapshot['review_state'] = [paper.review_status, str(paper.reviewed_at), paper.content_revision]
     snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',
         stored_path=f.stored_path, sha256=f.sha256, size=f.size,
@@ -392,6 +399,10 @@ def cached_results(session, snapshot: dict) -> dict:
 
 
 def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
+    from . import condition_rules
+    rule_review = condition_rules.current_review(record, result, chunks)
+    if rule_review:
+        result = {**result, 'association_review': condition_rules.renewed_associations(record, rule_review, chunks)}
     from .association_review import effective_associations
     record = {**record, 'source_associations': effective_associations(record, result, chunks)}
     evs = []
@@ -498,12 +509,26 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
                 reason = stale_reason + reason
         elif any(a.get('basis_kind') == 'paper_inference' for a in associations):
             adopted_basis = 'paper_inference'
-    if adopted_basis in {'paper_inference', 'general_knowledge'} and status == 'supported':
+    if adopted_basis in {'paper_inference', 'general_knowledge'} and status == 'supported' and not rule_review:
         status = 'uncertain'
     if adopted_basis in {'paper_inference', 'general_knowledge'}:
         source_kind = adopted_basis
     if human:
         source_kind = 'human_review'
+    if rule_review and not human and adopted_basis != 'general_knowledge':
+        status = 'supported'
+        if not adopted_basis:
+            source_kind = 'paper_quote'
+        reason = '按已确认的计算条件规则核对通过；' + '；'.join(dict.fromkeys(a['explanation'] for a in rule_review['assessments']))
+        evs = list({digest(e): e for a in rule_review['assessments'] for name in
+                    ('fact_evidences', 'scope_evidences', 'software_evidences') for e in a[name]}.values())
+        if any(a['value_origin'] == 'dfpt_definition' for a in rule_review['assessments']):
+            adopted_basis, source_kind = 'paper_inference', 'paper_inference'
+    elif record.get('condition_context') and record.get('required') and status == 'supported' and not human:
+        status = 'uncertain'
+        reason = '计算条件尚需核对软件、阶段及完整适用范围；' + reason
+    if not rule_review and (result.get('condition_window') or {}).get('error') and not human:
+        reason = '规则核对未通过：' + result['condition_window']['error'] + '；' + reason
     if model_synthesis and evs and not human and not adopted_basis:
         source_kind = 'paper_synthesis'
     reason_candidates = (
@@ -525,6 +550,8 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
         inference_reason if status == 'supported' else reason if concrete_synthesis_reason(reason) else None
     ) or '模型尚未给出当前值的具体推断理由，请重新核对。') if model_synthesis else (
         reason if subtype or keywords or (summary and not adopted_basis) else result.get('ai_reason'))
+    if rule_review and not human:
+        ai_reason = reason
     method_error = review_method_issue(record)
     proposal_draft = None if result.get('stale') else result.get('proposal_draft')
     if method_error:
@@ -541,6 +568,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             'ai_reason': ai_reason,
             'association_review': result.get('association_review'),
             'association_conflict': result.get('association_conflict', False),
+            'condition_window': result.get('condition_window'), 'rule_review': rule_review,
             'auto_filled': result.get('auto_filled', False) and not method_error,
             'auto_filled_content_hash': result.get('auto_filled_content_hash'),
             'auto_filled_source_hash': result.get('auto_filled_source_hash'),
@@ -596,6 +624,49 @@ def read_job(job_id: str, user_id: int) -> dict:
     return job
 
 
+def job_control_key(job_id):
+    return f'evidence-status:{job_id}'
+
+
+def job_control(job):
+    fields = ('id', 'owner', 'status', 'progress', 'error', 'completed_batches', 'total_batches', 'current_batch')
+    return {**{k: job.get(k) for k in fields},
+            'snapshot': {k: (job.get('snapshot') or {}).get(k) for k in ('target', 'target_id')}}
+
+
+def write_job_control(job, client=None):
+    from backend.ingest.upload_tasks import redis_client, TASK_TTL
+    client = client if client is not None else redis_client()
+    client.setex(job_control_key(job['id']), TASK_TTL, json.dumps(job_control(job), ensure_ascii=False))
+
+
+def read_job_status(job_id, user_id):
+    from backend.ingest.upload_tasks import redis_client
+    if not re.fullmatch(r'[0-9a-f]{32}', job_id or ''):
+        fail('evidence_task_missing', '证据核对任务不存在或已过期，请重新核对')
+    raw = redis_client().get(job_control_key(job_id))
+    if raw is None:
+        return job_control(read_job(job_id, user_id))  # 兼容未结束的旧任务。
+    control = json.loads(raw)
+    if control.get('owner') != user_id:
+        fail('evidence_task_missing', '证据核对任务不存在、已过期或无权访问')
+    return control
+
+
+def evidence_stream_guard(job_id, owner, started, deadline_seconds):
+    last_check = float('-inf')
+    def guard(_content):
+        nonlocal last_check
+        now = time.monotonic()
+        if now - started > deadline_seconds:
+            raise TimeoutError('evidence deadline')
+        if now - last_check >= 1:
+            last_check = now
+            if read_job_status(job_id, owner)['status'] == 'cancelled':
+                raise InterruptedError('cancelled')
+    return guard
+
+
 def update_job(job_id: str, **changes):
     from backend.ingest.upload_tasks import redis_client, TASK_TTL
     client = redis_client()
@@ -614,6 +685,7 @@ def update_job(job_id: str, **changes):
                 job.update(changes)
                 pipe.multi()
                 pipe.setex(task_key(job_id), TASK_TTL, json.dumps(job, ensure_ascii=False, default=str))
+                pipe.setex(job_control_key(job_id), TASK_TTL, json.dumps(job_control(job), ensure_ascii=False))
                 pipe.execute()
                 return
             except WatchError:
@@ -650,8 +722,7 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 - 同一结果的表行、表头、分组、单位和表注可联合支持 λ、ωlog、Tc–μ* 及方法；不要只核对最高 Tc。
   必须分别引用相应原始块，不能把多块拼成不存在的原句。Methods 可支持多压力共用设置，但区分
   EPC、结构优化、SSCHA 和 AIMD 阶段及局部例外；推断关联仍为 paper_inference，不冒充原文直接支持。
-  对vasp_pbe_to_qe_v1泛函关联：本文VASP明确PBE、QE未报告且同一工作流无反例时，可保留QE=PBE的论文推断。
-  核查两端原文与工作流联系，不要求作者直接声明QE也是PBE；不得把推断升级为直接报告，QE明确泛函和人工值优先。
+  泛函必须有对应软件的报告依据。旧vasp_pbe_to_qe_v1规则已撤销，VASP-PBE不能支持QE-PBE；未报告的QE泛函留空。
 - 只看到部分来源时，若本组来源与该记录无关，返回 missing 且不给 evidences；不要因为“本组片段未提及”
   把其他位置已报告的内容判为 unsupported。参考文献列表只代表他人工作。'''
 
@@ -663,6 +734,7 @@ SUGGESTION_PROMPT = """
 proposal 增加 basis_kind：paper_quote（原文直接记载）、paper_inference（由本文和已知字段推断）、general_knowledge（通用知识推测）。
 原文直接记载沿用已提取的当前值，无需另给 paper_quote 替换建议。仅对空值或 unknown 给出推断、推测候选；不得覆盖已有的非空值。
 后两类必须提供 explanation：用不超过 120 个汉字简洁说明“依据 → 推断 → 局限”，逻辑完整，不输出详细内部思考过程。paper_inference 需要真实论文引句；general_knowledge 可以没有引句，supported 必须为 false。
+计算条件不适用通用知识或软件默认值补猜；尤其不得从VASP泛函推测QE泛函。未报告的可选条件保持空白。
 有效的推断、推测候选将直接填写主表单；没有可靠候选就省略 proposal，不必填满。已有值的 status 只评估原文是否支持，不能用通用常识把它判为 supported。
 保持字段 schema、枚举和量纲；不生成结构或派生计算值。summary、keywords_tags、methodology、key_finding、research_motivation、knowledge_graph_title 的建议值使用英文，来源 quote 保持原语言。
 任务 purpose=review_all 时，独立检查所有 previous_result 的判断、建议及引句，而非照抄旧结论。对已有建议返回 proposal_review={"status":"reasonable|questionable|uncertain","explanation":"简要理由"}；即使合理，推测仍不是原文直接支持。
@@ -692,11 +764,15 @@ def verify_model_image_capability() -> bool:
 
 
 def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None, source_catalog=None,
-                   human_context=None, image_read_out=None, vision_verified=False, on_response=None):
+                   human_context=None, image_read_out=None, vision_verified=False, on_response=None, review_started_at=None):
     """上传生成与审核共享来源定位和类型校验，任务目的不决定批准资格。"""
     from backend.rag.llm import complete_json
     from openai import APIStatusError
     from .association_review import REVIEW_PROMPT, review_inputs, checked_review, without_source_ids
+    from . import condition_rules
+    from datetime import datetime, timezone
+    if review_started_at is None:
+        review_started_at = datetime.now(timezone.utc).isoformat()
     prior = prior or {}
     human_context = human_context or {}
     all_image_refs = [image for record in records for image in human_context.get(record['key'], {}).get('images', [])]
@@ -721,6 +797,10 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
                      'editable_fields': r.get('editable_fields', []), 'existing_evidences': without_source_ids(r['evidences']),
                      'check_mode': r.get('check_mode'),
                      'source_associations': review_inputs(r),
+                     'condition_context': r.get('condition_context'),
+                     'condition_scope_candidates': condition_rules.scope_candidates(r, chunks),
+                     'condition_result_candidates': condition_rules.result_candidates(r, chunks),
+                     'condition_evidence_candidates': condition_rules.evidence_candidates(r, chunks),
                      'provenance_kind': (r.get('provenance') or {}).get('kind'),
                      'subtype_assessment': (r.get('provenance') or {}).get('assessment') if r['field'] == 'paper.theoretical_subtype' else None,
                      'material_family_assessment': (r.get('provenance') or {}).get('assessment') if r['field'] == 'paper.material_families' else None,
@@ -728,8 +808,9 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         'sources': [{**chunk, 'source_id': f'review-source-{index}'} for index, chunk in enumerate(chunks)],
         'human_provided_evidence': visible_human}, ensure_ascii=False, default=str)
     image_request_succeeded = True
+    association_prompt = REVIEW_PROMPT if any(r.get('source_associations') and not r.get('condition_context') for r in records) else ''
     try:
-        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT + REVIEW_PROMPT, prompt, on_partial=on_partial, retries=1,
+        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT + association_prompt + condition_rules.PROMPT, prompt, on_partial=on_partial, retries=1,
                                **({'images': [item['data_url'] for item in image_refs]} if image_refs else {}))
     except APIStatusError as exc:
         if not image_refs or exc.status_code not in {400, 422}:
@@ -737,12 +818,43 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         image_request_succeeded = False
         if image_read_out is not None:
             image_read_out.extend((item, False) for item in image_refs)
-        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT + REVIEW_PROMPT, prompt, on_partial=on_partial, retries=1)
+        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT + association_prompt + condition_rules.PROMPT, prompt, on_partial=on_partial, retries=1)
     if not isinstance(parsed.get('results'), list):
         raise ValueError('invalid result schema')
+    by_key = {r['key']: r for r in records}
+    feedback = []
+    for raw in parsed['results']:
+        row = by_key.get(raw.get('key')) if isinstance(raw, dict) else None
+        context = (row or {}).get('condition_context') or {}
+        if (row and row.get('required') and row.get('condition_sources_complete')
+            and all(context.get(k) for k in ('material', 'phase', 'software'))
+            and raw.get('status') != 'unsupported'
+            and (raw.get('condition_review') or {}).get('verdict') not in {'conflict', 'uncertain', 'not_reported'}
+            and not condition_rules.checked_window(row, raw.get('condition_review'), chunks, source_catalog)['assessment']):
+            feedback.append({'key': row['key'], 'error': condition_rules.checked_window(row, raw.get('condition_review'), chunks, source_catalog)['error']})
+    if feedback:
+        # 仅对明确的输出/定位缺口给一次定向补证机会；真实冲突和不确定结论不反复重试。
+        requested = {f['key'] for f in feedback}
+        repair_input = json.loads(prompt)
+        repair_input['records'] = [r for r in repair_input['records'] if r['key'] in requested]
+        repair_input['validation_feedback'] = feedback
+        initial = copy.deepcopy(parsed)
+        try:
+            repaired = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT + condition_rules.PROMPT +
+                '\n请只重核反馈中的字段，补齐缺少的真实范围引句；不能通过改写科学值或自报通过绕过校验。',
+                json.dumps(repair_input, ensure_ascii=False, default=str), on_partial=on_partial, retries=0)
+            replacements = {r['key']: r for r in repaired.get('results') or [] if isinstance(r, dict) and r.get('key') in requested}
+            parsed['results'] = [replacements.get(r.get('key'), r) if isinstance(r, dict) else r for r in parsed['results']]
+            parsed['repair_response'] = repaired
+        except InterruptedError:
+            raise
+        except Exception as exc:
+            if type(exc).__name__ == 'UploadCancelled':
+                raise
+            parsed['repair_error'] = type(exc).__name__
+        parsed['initial_response'] = initial
     if on_response:
         on_response(parsed)
-    by_key = {r['key']: r for r in records}
     association_owners = {}
     for record in records:
         for association in review_inputs(record):
@@ -761,6 +873,9 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         safe['association_review'] = checked_review(by_key[key], reviews, chunks)
         safe['association_conflict'] = any(isinstance(a, dict) and a.get('verdict') == 'conflict'
                                            for a in reviews or [])
+        safe['condition_window'] = condition_rules.checked_window(by_key[key], raw.get('condition_review'), chunks, source_catalog)
+        if safe['condition_window'] and raw.get('status') == 'unsupported':
+            safe['condition_window'].update(verdict='conflict', assessment=None)
         if by_key[key]['field'] in {'paper.theoretical_subtype', 'paper.material_families'}:
             safe.pop('proposal', None)
         if by_key[key]['field'].startswith('paper.') and isinstance(safe.get('proposal'), dict):
@@ -777,6 +892,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
             safe['proposal_review'] = {'status': review['status'], 'explanation': str(review.get('explanation') or '')[:4000]}
         result = checked_result(by_key[key], safe, chunks)
         result['_model_reviewed'] = True  # 仅成功解析的实际调用可产生AI核对事件。
+        result['review_started_at'] = review_started_at
         if purpose == 'review_all' and previous.get('proposal') and not previous.get('stale'):
             from .evidence_proposals import checked_proposal
             result['proposal'] = checked_proposal(by_key[key], previous['proposal'], source_catalog if source_catalog is not None else chunks)
@@ -829,6 +945,12 @@ def source_batches(chunks):
     if batch:
         batches.append(batch)
     return batches or [[]]
+
+
+def record_batches(records):
+    # 条件结果还含范围和软件证据，控制单次响应规模，避免后台批次超时或漏项。
+    size = min(RECORD_BATCH, 12) if any(r.get('condition_context') for r in records) else RECORD_BATCH
+    return [records[start:start + size] for start in range(0, len(records), size)]
 
 
 def _fill_empty_fields(draft, record, proposal):
@@ -890,7 +1012,7 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
     from backend.ingest.upload_jobs import _ensure_not_cancelled
     snapshot = upload_snapshot(task_id, owner, parsing_draft=draft)
     records = [r for r in snapshot['records'] if r.get('kind') != 'derived']
-    batches = [(records[start:start + RECORD_BATCH], chunks) for start in range(0, len(records), RECORD_BATCH) for chunks in source_batches(snapshot['chunks'])]
+    batches = [(batch, chunks) for batch in record_batches(records) for chunks in source_batches(snapshot['chunks'])]
     candidates = {r['key']: [] for r in records}
     errors = {r['key']: [] for r in records}
     for index, (rows, chunks) in enumerate(batches):
@@ -898,7 +1020,7 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
         if on_progress:
             on_progress(index, len(batches))
         try:
-            evaluated = evaluate_batch(rows,chunks,'generate',on_partial=lambda _:_ensure_not_cancelled(task_id))
+            evaluated = evaluate_batch(rows,chunks,'generate',on_partial=lambda _:_ensure_not_cancelled(task_id), source_catalog=snapshot['chunks'])
         except Exception as exc:
             _ensure_not_cancelled(task_id)
             if type(exc).__name__=='UploadCancelled':
@@ -910,7 +1032,7 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
             candidates[r['key']].append(result)
             errors[r['key']].extend(result['location_errors'])
     from backend.rag.llm_context import get_llm_config
-    results = aggregate_candidates(records, candidates, errors, get_llm_config().model)
+    results = aggregate_candidates(records, candidates, errors, get_llm_config().model, snapshot['chunks'])
     filled = copy.deepcopy(draft)
     auto_filled = {}
     for record in records:
@@ -977,6 +1099,30 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
         else:
             current_results[record['key']] = {'status': 'unchecked', 'reason': '相关字段自动填写后需重新核对', 'evidences': []}
     _ensure_not_cancelled(task_id)
+    # 条件补空会改变字段/软件上下文；在最终值上执行与独立重核相同的规则，不能沿用空值结论。
+    from . import condition_rules
+    condition_rows = [r for r in current['records'] if r['key'] in current_results and r.get('condition_context') and r.get('required')
+                      and r.get('condition_sources_complete') and not condition_rules.current_review(
+                          r, current_results.get(r['key']) or {}, current['chunks'])]
+    for batch in record_batches(condition_rows):
+        pending, location_errors = {r['key']: [] for r in batch}, {r['key']: [] for r in batch}
+        try:
+            for chunks in source_batches(current['chunks']):
+                _ensure_not_cancelled(task_id)
+                evaluated = evaluate_batch(batch, chunks, 'check', prior=current_results,
+                    on_partial=lambda _: _ensure_not_cancelled(task_id), source_catalog=current['chunks'])
+                for row, result in zip(batch, evaluated):
+                    pending[row['key']].append(result)
+                    location_errors[row['key']].extend(result.get('location_errors') or [])
+            current_results.update(aggregate_candidates(batch, pending, location_errors, config.model, current['chunks']))
+        except Exception as exc:
+            _ensure_not_cancelled(task_id)
+            if type(exc).__name__ == 'UploadCancelled':
+                raise
+            logging.getLogger(__name__).warning('计算条件规则核对未完成 task=%s type=%s', task_id, type(exc).__name__)
+            for row in batch:
+                current_results[row['key']] = {**(current_results.get(row['key']) or {}), 'rule_review': None,
+                    'status': 'uncertain', 'reason': '计算条件规则核对未完成；提取值已保留，请重新核对。'}
     with SessionLocal.begin() as session:
         from .scientific_evidence import save_results
         from .pdf_source_pages import current_pdf_results
@@ -1008,13 +1154,17 @@ def run_evidence_job(job_id: str):
         token = set_llm_config(config)
         update_job(job_id, status='running')
         snapshot = job['snapshot']
+        if snapshot.get('condition_source_manifest_complete') is False and any(r.get('condition_context') for r in snapshot['records']):
+            update_job(job_id, status='failed', error={'code': 'evidence_source_incomplete',
+                       'message': '正文或补充材料缺少完整可读来源，不能把未读内容当作未报告。'})
+            return
         vision_verified = None
         records = [r for r in snapshot['records'] if r.get('kind') != 'derived' and r['key'] not in job['cached'] and (not job.get('requested_keys') or r['key'] in job['requested_keys'])]
         results = dict(job['cached'])
         # 完整扫描来源，按上下文大小分批，不以检索排名截断整篇论文。
         batches = source_batches(snapshot['chunks']) if records else []
         source_batch_count = len(batches)
-        batches = [(source_batch, records[start:start + RECORD_BATCH]) for start in range(0, len(records), RECORD_BATCH) for source_batch in batches]
+        batches = [(source_batch, batch) for batch in record_batches(records) for source_batch in batches]
         deadline_seconds = min(1740, max(480, len(batches) * 150))
         processed = {r['key']: 0 for r in records}
         update_job(job_id, completed_batches=0, total_batches=len(batches), current_batch=0)
@@ -1022,16 +1172,12 @@ def run_evidence_job(job_id: str):
         location_errors = {r['key']: [] for r in records}
         started = time.monotonic()
         for index, (chunks, batch_records) in enumerate(batches):
-            if read_job(job_id, job['owner'])['status'] == 'cancelled':
+            if read_job_status(job_id, job['owner'])['status'] == 'cancelled':
                 return
             if time.monotonic() - started > deadline_seconds:
                 raise TimeoutError('evidence deadline')
             update_job(job_id, current_batch=index + 1, progress=f'正在核对第 {index+1}/{len(batches)} 组原文')
-            def on_partial(_content):
-                if read_job(job_id, job['owner'])['status'] == 'cancelled':
-                    raise InterruptedError('cancelled')
-                if time.monotonic() - started > deadline_seconds:
-                    raise TimeoutError('evidence deadline')
+            on_partial = evidence_stream_guard(job_id, job['owner'], started, deadline_seconds)
             human_context = {}
             if job.get('purpose') == 'review_all' and snapshot['target'] == 'paper':
                 from backend.database import SessionLocal
@@ -1043,7 +1189,8 @@ def run_evidence_job(job_id: str):
             image_read_out = []
             evaluated = evaluate_batch(batch_records, chunks, job.get('purpose', 'check'), job.get('prior'), on_partial,
                                        snapshot['chunks'], human_context=human_context, image_read_out=image_read_out,
-                                       vision_verified=bool(vision_verified))
+                                       vision_verified=bool(vision_verified),
+                                       review_started_at=job.get('review_started_at') or '')
             if image_read_out:
                 from backend.database import SessionLocal
                 from backend.ingest import manual_evidence
@@ -1059,18 +1206,18 @@ def run_evidence_job(job_id: str):
                 processed[record['key']] += 1
             finished = [r for r in batch_records if processed[r['key']] == source_batch_count]
             if finished:
-                fresh = aggregate_candidates(finished, candidates, location_errors, config.model)
-                if read_job(job_id, job['owner'])['status'] == 'cancelled':
+                fresh = aggregate_candidates(finished, candidates, location_errors, config.model, snapshot['chunks'])
+                if read_job_status(job_id, job['owner'])['status'] == 'cancelled':
                     return
                 persist_completed_results({**snapshot, 'records': finished}, fresh, job['owner'])
                 results.update(fresh)
                 update_job(job_id, results=results)
         if not batches and records:
-            fresh = aggregate_candidates(records, candidates, location_errors, config.model)
+            fresh = aggregate_candidates(records, candidates, location_errors, config.model, snapshot['chunks'])
             persist_completed_results({**snapshot, 'records': records}, fresh, job['owner'])
             results.update(fresh)
         update_job(job_id, status='completed', results=results, progress='核对完成', completed_batches=len(batches), current_batch=0)
-        if read_job(job_id, job['owner'])['status'] == 'completed':
+        if read_job_status(job_id, job['owner'])['status'] == 'completed':
             from backend.ingest.upload_tasks import TASK_TTL
             redis_client().setex(cache_key(snapshot, job['owner']), TASK_TTL, job_id)
     except InterruptedError:
@@ -1260,9 +1407,10 @@ def persist_completed_results(snapshot, results, owner):
         save_results(session, snapshot, results, owner)
 
 
-def aggregate_candidates(records, candidates, location_errors, model):
+def aggregate_candidates(records, candidates, location_errors, model, source_catalog=None):
     from uuid import uuid4
     from .association_review import aggregate_reviews
+    from . import condition_rules
     results = {}
     for record in records:
         all_items = candidates[record['key']]
@@ -1292,6 +1440,7 @@ def aggregate_candidates(records, candidates, location_errors, model):
                     'explanation': '；'.join(dict.fromkeys(x['explanation'] for x in reviews))}
         retained = {name: next((i[name] for i in all_items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason', 'source_kind')}
         results[record['key']] = dict(status=status, proposal=proposal, proposal_review=review, **retained,
+            review_started_at=min((i['review_started_at'] for i in all_items if i.get('review_started_at')), default=None),
             association_review=aggregate_reviews(record, all_items),
             association_conflict=any(i.get('association_conflict') for i in all_items),
             reason='；'.join(dict.fromkeys(reasons)) or '当前论文及附件中未找到可定位的相关原文',
@@ -1300,6 +1449,13 @@ def aggregate_candidates(records, candidates, location_errors, model):
             fields=[record['field']] if record.get('record_field') else list(dict.fromkeys(f for i in items for f in i.get('fields', []))))
         if any(item.get('_model_reviewed') for item in all_items):
             results[record['key']].update(_audit_action='ai_review', _audit_event_id=uuid4().hex)
+        rule = condition_rules.finalize(record, all_items, source_catalog)
+        if rule:
+            result = results[record['key']]
+            result['rule_review'] = rule
+            result['status'] = 'uncertain'
+            result.update({k: v for k, v in checked_result(record, result, source_catalog).items()
+                           if k in {'status', 'reason', 'ai_reason', 'adopted_basis', 'source_kind', 'evidences', 'association_review', 'rule_review'}})
         if (record.get('check_mode') == 'synthesis' or record.get('field') == 'paper.summary') and (record.get('provenance') or {}).get('kind') not in {'author_keywords', 'derived'} and not results[record['key']].get('adopted_basis'):
             results[record['key']]['source_kind'] = 'paper_synthesis'
             if record.get('field') == 'paper.summary' or concrete_synthesis_reason(results[record['key']]['reason']):

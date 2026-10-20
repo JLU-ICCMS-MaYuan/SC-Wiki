@@ -289,6 +289,7 @@ def test_worker_failure_keeps_completed_group_in_mysql(current_mysql, monkeypatc
     monkeypatch.setattr(upload_tasks, "load_llm_config", lambda _id: SimpleNamespace(model="test"))
     monkeypatch.setattr(upload_tasks, "delete_llm_config", lambda _id: None)
     monkeypatch.setattr(ev, "read_job", lambda *_args: job)
+    monkeypatch.setattr(ev, "read_job_status", lambda *_args: ev.job_control(job))
     monkeypatch.setattr(ev, "update_job", lambda _id, **changes: job.update(changes))
     calls = []
     def model(_system, prompt, **kwargs):

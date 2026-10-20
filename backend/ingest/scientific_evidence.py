@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import copy
 import json
+from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 
 from sqlalchemy import delete, select
@@ -425,7 +426,7 @@ def transfer_result(record, result, chunks, file_ids=None):
             return value
         return {key: ([found for source in item if isinstance(source, dict) and
                        (found := relocate(source))]
-                      if key in {'evidences', 'fact_evidences', 'scope_evidences'} and isinstance(item, list) else rebind(item)) for key, item in value.items()}
+                      if key in {'evidences', 'fact_evidences', 'scope_evidences', 'software_evidences'} and isinstance(item, list) else rebind(item)) for key, item in value.items()}
     rebound = rebind(copy.deepcopy(result))
     if rebound.get('association_review'):
         from .association_review import association_id
@@ -439,6 +440,14 @@ def transfer_result(record, result, chunks, file_ids=None):
                 'ai_reason': rebound.get('ai_reason'),
                 'evidences': rebound.get('evidences') or record.get('evidences') or []}
     return {**rebound, **record, 'evidences': record.get('evidences') or rebound.get('evidences', [])}
+
+
+def _review_time(value):
+    try:
+        parsed = datetime.fromisoformat(str(value).replace('Z', '+00:00'))
+        return parsed.replace(tzinfo=timezone.utc) if parsed.tzinfo is None else parsed
+    except (ValueError, TypeError):
+        return datetime.min.replace(tzinfo=timezone.utc)
 
 
 def save_results(session, snapshot, results, actor_id, *, update_decision=False):
@@ -458,6 +467,16 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
             models.ScientificEvidenceCheck.item_key == record['item_key'], models.ScientificEvidenceCheck.content_hash == record['content_hash'],
             models.ScientificEvidenceCheck.source_hash == record['source_hash'], models.ScientificEvidenceCheck.rule_version.in_(COMPATIBLE_RULES)).order_by(models.ScientificEvidenceCheck.id.desc()).limit(1).with_for_update())
         existing = session.get(models.ScientificEvidenceCheck,existing_id) if existing_id is not None else None
+        if existing is not None and not update_decision and (result.get('model') or result.get('review_started_at')):
+            # 同一内容版本的较早请求不能在迟到后覆盖较新核对；并非“支持优先”。
+            previous_time = _review_time(existing.result.get('review_started_at'))
+            if not existing.result.get('review_started_at'):
+                previous_time = max((_review_time(e.get('occurred_at')) for e in existing.result.get('audit_events') or []
+                                     if e.get('kind') in {'ai_review', 'auto_fill'}), default=previous_time)
+            if _review_time(result.get('review_started_at')) < previous_time:
+                results[record['key']] = {**copy.deepcopy(existing.result), 'superseded_review': {
+                    'review_started_at': result.get('review_started_at'), 'status': result.get('status'), 'reason': result.get('reason')}}
+                continue
         if existing is not None and not update_decision and existing.result.get('decision'):
             result['decision'] = copy.deepcopy(existing.result['decision'])
             result['adopted_basis'] = existing.result.get('adopted_basis')

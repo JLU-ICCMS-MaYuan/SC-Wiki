@@ -106,10 +106,11 @@ def test_fresh_review_replaces_stale_association_without_mutating_draft(monkeypa
     d = setup(legacy=True); original = deepcopy(d); snap = snapshot(d)
     assert grid(snap)['source_associations'][0]['stale']
     result, stored = evaluate(monkeypatch, snap)
-    assert result['status'] == 'supported' and not result['source_associations'][0]['stale']
+    # 关联重建成功；本例没有软件/物相及完整来源证明，不能获得新规则的自动通过。
+    assert result['status'] == 'uncertain' and not result['source_associations'][0]['stale']
     assert result['association_review']['previous_associations'][0]['stale']
     reopened = ev.public_snapshot(snapshot(d), json.loads(json.dumps(stored)))
-    assert grid(reopened)['status'] == 'supported'
+    assert grid(reopened)['status'] == 'uncertain'
     assert not grid(reopened)['source_associations'][0]['stale']
     assert d == original
 
@@ -129,7 +130,7 @@ def test_renewed_legacy_grid_survives_unrelated_tc_edit(monkeypatch):
     current = snapshot(d)
     assert grid(current)['content_hash'] == grid(snap)['content_hash']
     restored = grid(ev.public_snapshot(current, stored))
-    assert restored['status'] == 'supported'
+    assert restored['status'] == 'uncertain'
     assert not restored['source_associations'][0]['stale']
 
 
@@ -192,7 +193,7 @@ def test_formal_transfer_relocates_new_association_evidence(monkeypatch):
     for e in formal['evidences']: e['file_id'] = '99'
     transferred = science.transfer_result(formal, result, chunks, {'main': '99'})
     reopened = ev.checked_result(formal, transferred, chunks)
-    assert reopened['status'] == 'supported'
+    assert reopened['status'] == 'uncertain'
     assert not reopened['source_associations'][0]['stale']
     assert reopened['source_associations'][0]['scope_evidences'][0]['file_id'] == '99'
 

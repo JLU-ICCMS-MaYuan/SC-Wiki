@@ -141,10 +141,11 @@ def test_old_supported_and_accepted_cache_no_longer_grants_passage():
     assert evidence.checked_result(leaf, raw, snap["chunks"])["proposal_draft"]["accepted"]
 
 
-def test_correct_dft_and_other_scientific_fields_are_not_invalidated():
+def test_correct_dft_value_is_preserved_and_other_scientific_fields_are_not_invalidated():
     snap, leaf = snapshot("DFT")
     result = evidence.checked_result(leaf, {"status": "supported", "evidences": old_result(leaf)["evidences"]}, snap["chunks"])
-    assert result["status"] == "supported" and result["current_value"] == "DFT"
+    # DFT不是类别错误；自动通过还需当前软件/物相和完整来源规则，本例没有提供。
+    assert result["status"] == "uncertain" and result["current_value"] == "DFT"
     bad_snap, _ = snapshot()
     unrelated = next(r for r in bad_snap["records"] if r.get("record_field") == "payload.parameters.lambda_ep")
     result = evidence.checked_result(unrelated, {"status": "supported", "evidences": old_result(leaf)["evidences"]}, bad_snap["chunks"])
@@ -161,6 +162,7 @@ def test_domain_extraction_entry_rejects_dfpt_and_preserves_hf():
     with pytest.raises(ValueError, match="电子结构方法"):
         normalize_extraction(raw, allowed_blocks={("main", 1, "b1")})
     r["payload"]["calculation_conditions"]["electronic_method"] = "HF"
+    r['evidences'][0]['quote'] += ' The electronic structure uses Hartree-Fock theory.'
     restored = normalize_extraction(raw, allowed_blocks={("main", 1, "b1")})
     assert restored["material_states"][0]["property_modules"][0]["records"][0]["payload"]["calculation_conditions"]["electronic_method"] == "HF"
 

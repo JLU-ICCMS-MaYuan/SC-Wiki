@@ -1,5 +1,7 @@
 # 实施计划：超导参数提取与共用条件关联
 
+当前实施基线以[计算条件规则增量](condition-auto-review.md)为准：关闭 US5 泛函补猜，共享规则核对、全窗证据及版本门，前端不变。
+
 来源关联失效与重新核对的后台修复设计、任务和验证映射见[已确认增量](association-recheck.md)。
 
 **Issue**：[#139](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/139)

@@ -161,3 +161,14 @@ T027/T028 技术完成状态由 T029/T030 与真实验收支撑；远程协作�
 - [x] T038 新增`backend/ingest/functional_inference.py`，接入`scientific_context.py`关联与补空，调整`calculation_methods.py`受限例外，保留推断标识。
 - [x] T039 新增生产链正反例和保存重读回归，验证直接来源优先、已有值、来源与范围变化、推断身份。
 - [x] T040 用La–Sc–H真实Methods验证受限推断，完成独立增量验证，更新Overview与验收记录，回写Issue；Git提交号在提交后追加，不推送。
+
+
+## US7：计算条件按确认规则自动核对
+
+US5 的实现记录保留为历史；用户最新要求已撤销其 QE 泛函推断许可。当前依据为 [FR-023～027 / SC-012～014](condition-auto-review.md)。
+
+- [x] T041 完成条件规则、软件／阶段／用途及完整来源绑定；证据见[规则与反例验证](condition-auto-review-validation.md)。
+- [x] T042 关闭专用和通用泛函补猜，新提取的已知条件必须有原文；明确 DFPT 定义及空值免审边界。证据见同一验收记录。
+- [x] T043 接入新上传、重核、返修和管理员审核，验证 MySQL 重读、迟到请求保护及紧凑任务状态。证据：200 项回归、7 项 MySQL 验证和实际 RQ 任务。
+- [x] T044 备份后清空已授权的两处 QE=PBE，完成 145 项条件及 6 项依赖核查，原数值其余不变。证据：本地 verification-final.json 及验收记录。
+- [x] T045 回写 Overview、Spec、Issue 并准备只含本次增量的提交；提交号完成后回写 Issue，不推送、不关闭 Issue。

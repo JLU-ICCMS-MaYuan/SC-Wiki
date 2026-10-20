@@ -60,11 +60,11 @@
 
 两种提取入口、全文Methods阅读及补空采用相同语义约束；错误分类会要求模型纠正或保留缺口。核对同时检查字段类别和可定位原文，历史DFPT电子方法即使原文出现DFPT也不再获得有效支持，旧接受或理由不绕过类别检查。旧值和历史出处仍可查看；已接受的正确修正候选、人工填写的DFT及其他科学字段保持。这里只修正分类，不批量修改历史草稿。相关验证与在线模型边界见 [#139 方法语义验收](../../specs/139-table-parameters-shared-methods/method-semantics-validation.md)。
 
-### QE泛函的受约束推断
+### QE 泛函按原文记录
 
-当本文明确VASP使用PBE、QE未直接报告泛函，且模型能够说明同一材料/物相的工作流联系、没有相反来源时，系统可在QE空泛函中补PBE。模型须引用已校验的VASP、PBE和QE设置及流程原文；程序再次检查软件、阶段、范围、局部例外、候选冲突及已有值。直接报告的QE泛函优先，不因另一阶段的PBE覆盖LDA等现值。
+泛函必须有对应软件的报告依据。QE 未报告时保持空白，不从 VASP 的 PBE、软件默认值或相似工作流推算；空白可选条件不要求人工确认。明确报告的 QE 泛函仍可提取和关联，已有人工值不会被通用补空覆盖。
 
-新增值标记为`paper_inference`，记录两端依据、`vasp_pbe_to_qe_v1`规则和简短局限说明，明确QE泛函未由作者直接报告。保存重读及重核不会自动升级为直接原文支持，相关值/来源变化后仍按既有版本规则失效。模型对候选目标必须给出推断或明确不推断理由，遗漏时有界重试；其他参数不通过此例外复制。没有VASP-PBE依据时，不采用通用PBE默认值。该能力不批量修复历史草稿，验证边界见[#139 QE泛函推断验收](../../specs/139-table-parameters-shared-methods/qe-pbe-inference-validation.md)。
+旧 `vasp_pbe_to_qe_v1` 已撤销，只保留历史读取；专用推断、通用建议及新提取候选均不能重新补入无依据的 QE 泛函。新规则及定向处理范围见[#139 计算条件自动核对](../../specs/139-table-parameters-shared-methods/condition-auto-review.md)。
 
 ### 数据映射
 
@@ -359,7 +359,7 @@ Schema v2；v2 载荷和规范 property identity 不会再次被旧转换覆盖�
 
 每个明确组合继续按单值科学记录保存，payload.tc_group v1只组织共同参数和方法行，JSON／返修／导出保持逐记录。旧范围不自动改值或选择端点；明确编辑/选点时才拆分，原表示保留为历史，未配对μ*不猜。无分组历史记录各自成组。后端检查分组条件一致及唯一代表，并将未提交但仍保留的记录纳入校验；分组身份与范围历史不属于当前科学断言。
 
-Methods来源关联继续按阶段/适用范围补空并保留uncertain；结构优化泛函不直接复制到EPC，只有上述受约束VASP-PBE→QE推断可作为论文推断补空，未报告展宽保持空。定向旧任务修复必须备份并复查版本/全图hash，不能以新任务通过代替旧草稿已保存。验证边界见[#94实施记录](../../specs/94-property-record-editor/tc-multi-result-implementation.md)和[#139验收](../../specs/139-table-parameters-shared-methods/validation.md)。
+Methods 来源关联按软件、阶段及适用范围补空。白名单条件完成全部正文／SI 核查、证据有效且无例外时可按规则通过；其余保留待核对。结构优化泛函和收敛阈值不能复制给 QE，未报告参数留空。定向旧任务修复必须备份并复查版本，不能以新任务通过代替旧草稿已保存。验证边界见[#94实施记录](../../specs/94-property-record-editor/tc-multi-result-implementation.md)及[#139 当前规则](../../specs/139-table-parameters-shared-methods/condition-auto-review.md)。
 
 
 ## 预测记录的字段设置侧栏
