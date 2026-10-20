@@ -1,0 +1,21 @@
+{
+  "task_id": "c16cc627a0c04dc8ad4289624d1da80a",
+  "models": {
+    "LaSc2": 24,
+    "LaSc2H24": 27
+  },
+  "observations": 8,
+  "retention": "retained",
+  "confirmation": "unreviewed",
+  "other_draft_fields_preserved": true,
+  "spectra_preserved": true,
+  "durable_draft_matches": true,
+  "durable_numeric_tolerance": 1e-12,
+  "served_draft_matches": true,
+  "original_hashes_unchanged": true,
+  "paper_count": 0,
+  "public_results": 0,
+  "reason": "论文尚未提交审核",
+  "model_calls": 0,
+  "draft_after_fingerprint": "82c7fe7100be8bc81b40afee501238e21d1f1f23bbccb4b87f9e58d1fc776309"
+}

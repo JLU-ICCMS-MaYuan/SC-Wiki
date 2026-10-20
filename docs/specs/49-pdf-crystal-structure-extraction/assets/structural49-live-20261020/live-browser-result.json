@@ -1,0 +1,18 @@
+{
+  "live": true,
+  "task_id": "c16cc627a0c04dc8ad4289624d1da80a",
+  "models": 2,
+  "observations": 8,
+  "retained": true,
+  "LaSc2_atoms": 24,
+  "real_webgl": true,
+  "cif_download": true,
+  "anharmonic300_preserved": true,
+  "partial_no_cif": true,
+  "mobile_width": {
+    "scroll": 390,
+    "viewport": 390
+  },
+  "form_writes": [],
+  "errors": []
+}
