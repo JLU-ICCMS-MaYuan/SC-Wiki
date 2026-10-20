@@ -94,6 +94,9 @@ def expand_property_fields(records):
         if parent.get('tc_group_meta'):
             validation.setdefault('payload', {})['tc_group'] = deepcopy(parent['tc_group_meta'])
         payload = source.get('payload') or {}
+        from .association_review import snapshot_association
+        source_associations = [snapshot_association(source, parent['claim'].get('state') or {}, a)
+                               for a in payload.get('source_associations') or []]
         parameters = payload.get('parameters') or {}
         conditions = payload.get('calculation_conditions') or {}
         group = (payload.get('tc_group') or {}).get('group_key')  # snapshot通常已去除UI身份，调用者可显式提供。
@@ -158,13 +161,16 @@ def expand_property_fields(records):
             field = parent['field'] + '.' + path
             evs = [deepcopy(e) for e in parent.get('evidences') or [] if e.get('field_path') in {path, field}]
             associations = []
-            for association in payload.get('source_associations') or []:
+            for association in source_associations:
                 pointer = str(association.get('target_path') or '').strip('/').replace('/', '.')
                 if pointer == path or pointer.startswith(path + '.') or path.startswith(pointer + '.'):
                     evs.extend(deepcopy(association.get('fact_evidences') or []))
-                    from .scientific_context import scientific_fingerprint
-                    associations.append({**deepcopy(association), 'stale': association.get('target_fingerprint') != scientific_fingerprint(source)})
+                    associations.append(association)
             context = review_context(source, parent['claim'].get('state') or {}, path)
+            if associations:
+                from .association_review import field_binding
+                context['association_dependencies'] = [field_binding(source, parent['claim'].get('state') or {}, a)
+                                                       for a in associations]
             extension_value = read_path(source, '.'.join(path.split('.')[:4])) if '.extensions.' in path else None
             dependencies = (['method_code'] if path.startswith('value_') or identity.startswith('parameters.mu_star') else []) + (['payload.calculation_conditions'] if path.startswith(('value_', 'payload.parameters.')) else [])
             if path.startswith('value_'):

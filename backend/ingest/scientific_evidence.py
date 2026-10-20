@@ -425,8 +425,11 @@ def transfer_result(record, result, chunks, file_ids=None):
             return value
         return {key: ([found for source in item if isinstance(source, dict) and
                        (found := relocate(source))]
-                      if key == 'evidences' and isinstance(item, list) else rebind(item)) for key, item in value.items()}
+                      if key in {'evidences', 'fact_evidences', 'scope_evidences'} and isinstance(item, list) else rebind(item)) for key, item in value.items()}
     rebound = rebind(copy.deepcopy(result))
+    if rebound.get('association_review'):
+        from .association_review import association_id
+        rebound['association_review']['inputs'] = sorted(association_id(a) for a in record.get('source_associations') or [])
     if subtype and (rebound.get('provenance') or {}).get('assessment'):
         record['provenance'] = copy.deepcopy(rebound['provenance'])
         source_hash = digest(sorted(normalized_text(c['content']) for c in chunks))
@@ -460,6 +463,12 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
             result['adopted_basis'] = existing.result.get('adopted_basis')
         if existing is not None and existing.result.get('history') and not result.get('history'):
             result['history'] = copy.deepcopy(existing.result['history'])
+        if existing is not None and existing.result.get('association_review') != result.get('association_review') and existing.result.get('association_review'):
+            previous_review = {name: copy.deepcopy(existing.result.get(name)) for name in
+                               ('status', 'reason', 'ai_reason', 'evidences', 'association_review', 'content_hash', 'source_hash')}
+            history = result.setdefault('history', [])
+            if previous_review not in history:
+                history.append(previous_review)
         from .evidence_audit import append_review_event
         append_review_event(session, record, result, existing.result if existing is not None else None, actor_id, human=update_decision)
         result.pop('validation_record', None)  # 服务端临时校验数据，不复制整张记录进每个子项。

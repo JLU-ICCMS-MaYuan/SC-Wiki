@@ -92,6 +92,8 @@ def condition_proposal(original, projected, associations, context):
         payload.setdefault('source_associations', []).extend(new)
         for association in new:
             association['target_fingerprint'] = scientific_fingerprint(before)
+            from .association_review import bind_field
+            bind_field(before, destination[key][0], association)
         before.pop('record_checksum', None)
     assert_conditions_only(original, updated)
     return updated, applied, gaps

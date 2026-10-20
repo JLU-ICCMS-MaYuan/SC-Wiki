@@ -1,5 +1,7 @@
 # 数据模型：科学参数、阶段和来源关联
 
+字段失效与重核版本由[后台修复增量](association-recheck.md)补充：带 `field_binding` 的新关联按字段依赖比较，旧格式仍保守读取；通过当前原文核对的新关联保存在核对结果的 `association_review`，原 payload 关联保留为历史。下文整条 `target_fingerprint` 继续用于旧格式及补空前的并发检查，不再作为新字段绑定的唯一失效条件。
+
 **依据**：[Spec](spec.md)、[设计决策 D3～D5](research.md)。契约已按本轮实现落地，运行边界见 validation.md。
 
 ## 数据所有权

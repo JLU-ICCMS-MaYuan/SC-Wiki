@@ -1,5 +1,7 @@
 # 功能规格：超导参数表格提取与共用计算条件关联
 
+来源关联失效与重新核对的已确认修复范围见[后台修复增量](association-recheck.md)，前端展示不在本次变更范围。
+
 **Issue**：[#139](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/139)
 
 **创建日期**：2026-10-15

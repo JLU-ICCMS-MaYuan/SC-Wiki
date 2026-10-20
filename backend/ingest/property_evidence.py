@@ -189,17 +189,18 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
         r.setdefault('fields', [r['field']])
         r.setdefault('current_value', r['claim'])
         if r.get('kind') == 'property':
-            from .scientific_context import scientific_fingerprint, state_fingerprint
             from .fermi_dos import has_conflict as has_dos_conflict
             scientific_record = r['claim']['record']
             if scientific_record.get('property_code') == 'dos_fermi':
                 r['dos_fermi_conflict'] = has_dos_conflict({**scientific_record, 'module_code': r.get('module_code')})
             associations = (scientific_record.get('payload') or {}).get('source_associations') or []
-            r['source_associations'] = [{**copy.deepcopy(a), 'stale':(
-                a.get('target_fingerprint') != scientific_fingerprint(scientific_record)
-                or (a.get('target_state_fingerprint') is not None and a.get('target_state_fingerprint') != state_fingerprint(r['claim'].get('state') or {}))
-                or not all(locate(e, chunks) for e in [*a.get('fact_evidences', []), *a.get('scope_evidences', [])]))}
-                for a in associations if isinstance(a, dict)]
+            from .association_review import snapshot_association
+            r['source_associations'] = [snapshot_association(scientific_record, r['claim'].get('state') or {}, a, chunks)
+                                        for a in associations if isinstance(a, dict)]
+        elif r.get('source_associations'):
+            for association in r['source_associations']:
+                association['stale'] |= not all(locate(e, chunks) for e in
+                    [*association.get('fact_evidences', []), *association.get('scope_evidences', [])])
         from .evidence_proposals import editable_fields
         r['editable_fields'] = editable_fields(r)
         r['content_hash'] = digest(canonical(r['claim']))
@@ -391,6 +392,8 @@ def cached_results(session, snapshot: dict) -> dict:
 
 
 def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
+    from .association_review import effective_associations
+    record = {**record, 'source_associations': effective_associations(record, result, chunks)}
     evs = []
     errors = []
     for e in result.get('evidences') or []:
@@ -480,11 +483,19 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     human = human_confirmed({**record, 'stale': result.get('stale', False)}, decision or {})
     adopted_basis = (decision or {}).get('basis_kind') or result.get('adopted_basis')
     associations = record.get('source_associations') or []
+    if result.get('association_conflict') and not human:
+        if status == 'supported':
+            status = 'uncertain'
+        conflict_reason = '当前来源关联存在适用范围冲突，请核对；'
+        if not reason.startswith(conflict_reason):
+            reason = conflict_reason + reason
     if associations and not human:
         if any(a.get('stale') for a in associations):
             if status == 'supported':
                 status = 'uncertain'
-            reason = '科学值或来源已变化，共用设置的旧关联需要重新核对；' + reason
+            stale_reason = '科学值或来源已变化，共用设置的旧关联需要重新核对；'
+            if not reason.startswith(stale_reason):
+                reason = stale_reason + reason
         elif any(a.get('basis_kind') == 'paper_inference' for a in associations):
             adopted_basis = 'paper_inference'
     if adopted_basis in {'paper_inference', 'general_knowledge'} and status == 'supported':
@@ -528,6 +539,8 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             'human_confirmed': human,
             'adopted_basis': adopted_basis, 'proposal_review': result.get('proposal_review'),
             'ai_reason': ai_reason,
+            'association_review': result.get('association_review'),
+            'association_conflict': result.get('association_conflict', False),
             'auto_filled': result.get('auto_filled', False) and not method_error,
             'auto_filled_content_hash': result.get('auto_filled_content_hash'),
             'auto_filled_source_hash': result.get('auto_filled_source_hash'),
@@ -679,10 +692,11 @@ def verify_model_image_capability() -> bool:
 
 
 def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None, source_catalog=None,
-                   human_context=None, image_read_out=None, vision_verified=False):
+                   human_context=None, image_read_out=None, vision_verified=False, on_response=None):
     """上传生成与审核共享来源定位和类型校验，任务目的不决定批准资格。"""
     from backend.rag.llm import complete_json
     from openai import APIStatusError
+    from .association_review import REVIEW_PROMPT, review_inputs, checked_review, without_source_ids
     prior = prior or {}
     human_context = human_context or {}
     all_image_refs = [image for record in records for image in human_context.get(record['key'], {}).get('images', [])]
@@ -704,17 +718,18 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
     prompt = json.dumps({
         'purpose': purpose,
         'records': [{'key': r['key'], 'field': r['field'], 'claim': r['claim'],
-                     'editable_fields': r.get('editable_fields', []), 'existing_evidences': r['evidences'],
+                     'editable_fields': r.get('editable_fields', []), 'existing_evidences': without_source_ids(r['evidences']),
                      'check_mode': r.get('check_mode'),
+                     'source_associations': review_inputs(r),
                      'provenance_kind': (r.get('provenance') or {}).get('kind'),
                      'subtype_assessment': (r.get('provenance') or {}).get('assessment') if r['field'] == 'paper.theoretical_subtype' else None,
                      'material_family_assessment': (r.get('provenance') or {}).get('assessment') if r['field'] == 'paper.material_families' else None,
-                     'previous_result': {k: prior.get(r['key'], {}).get(k) for k in ('status', 'reason', 'proposal', 'evidences', 'adopted_basis', 'auto_filled', 'ai_reason')}} for r in records],
-        'sources': chunks,
+                     'previous_result': without_source_ids({k: prior.get(r['key'], {}).get(k) for k in ('status', 'reason', 'proposal', 'evidences', 'adopted_basis', 'auto_filled', 'ai_reason')})} for r in records],
+        'sources': [{**chunk, 'source_id': f'review-source-{index}'} for index, chunk in enumerate(chunks)],
         'human_provided_evidence': visible_human}, ensure_ascii=False, default=str)
     image_request_succeeded = True
     try:
-        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT, prompt, on_partial=on_partial, retries=1,
+        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT + REVIEW_PROMPT, prompt, on_partial=on_partial, retries=1,
                                **({'images': [item['data_url'] for item in image_refs]} if image_refs else {}))
     except APIStatusError as exc:
         if not image_refs or exc.status_code not in {400, 422}:
@@ -722,16 +737,30 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         image_request_succeeded = False
         if image_read_out is not None:
             image_read_out.extend((item, False) for item in image_refs)
-        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT, prompt, on_partial=on_partial, retries=1)
+        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT + REVIEW_PROMPT, prompt, on_partial=on_partial, retries=1)
     if not isinstance(parsed.get('results'), list):
         raise ValueError('invalid result schema')
+    if on_response:
+        on_response(parsed)
     by_key = {r['key']: r for r in records}
+    association_owners = {}
+    for record in records:
+        for association in review_inputs(record):
+            association_owners.setdefault(association['association_id'], set()).add(record['key'])
     results = {}
     for raw in parsed['results']:
         if not isinstance(raw, dict) or raw.get('key') not in by_key:
             continue
         key = raw['key']
         safe = {k: raw[k] for k in ('status', 'reason', 'suggestion', 'fields', 'evidences', 'proposal') if k in raw}
+        reviews = raw.get('association_reviews')
+        if reviews is None and isinstance(parsed.get('association_reviews'), list):
+            # 实际模型偶发把数组放到顶层；只按服务端唯一身份归属，不按顺序猜字段。
+            reviews = [a for a in parsed['association_reviews'] if isinstance(a, dict)
+                       and association_owners.get(a.get('association_id')) == {key}]
+        safe['association_review'] = checked_review(by_key[key], reviews, chunks)
+        safe['association_conflict'] = any(isinstance(a, dict) and a.get('verdict') == 'conflict'
+                                           for a in reviews or [])
         if by_key[key]['field'] in {'paper.theoretical_subtype', 'paper.material_families'}:
             safe.pop('proposal', None)
         if by_key[key]['field'].startswith('paper.') and isinstance(safe.get('proposal'), dict):
@@ -1206,7 +1235,9 @@ def persist_completed_results(snapshot, results, owner):
         from backend.ingest.upload_tasks import upload_task_lock
         with upload_task_lock(snapshot['target_id']):
             # 删除与提交也持有此锁，迟到任务不能重新创建已清理的目标。
-            upload_snapshot(snapshot['target_id'], owner)
+            current = upload_snapshot(snapshot['target_id'], owner)
+            if current['version'] != snapshot['version']:
+                fail('evidence_stale', '草稿或来源已变化，旧核对结果未应用，请重新核对')
             with SessionLocal.begin() as session:
                 results.update(current_pdf_results(session, snapshot, results))
                 save_results(session, snapshot, results, owner)
@@ -1231,6 +1262,7 @@ def persist_completed_results(snapshot, results, owner):
 
 def aggregate_candidates(records, candidates, location_errors, model):
     from uuid import uuid4
+    from .association_review import aggregate_reviews
     results = {}
     for record in records:
         all_items = candidates[record['key']]
@@ -1260,6 +1292,8 @@ def aggregate_candidates(records, candidates, location_errors, model):
                     'explanation': '；'.join(dict.fromkeys(x['explanation'] for x in reviews))}
         retained = {name: next((i[name] for i in all_items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason', 'source_kind')}
         results[record['key']] = dict(status=status, proposal=proposal, proposal_review=review, **retained,
+            association_review=aggregate_reviews(record, all_items),
+            association_conflict=any(i.get('association_conflict') for i in all_items),
             reason='；'.join(dict.fromkeys(reasons)) or '当前论文及附件中未找到可定位的相关原文',
             evidences=evidences, model=model,
             suggestion='；'.join(dict.fromkeys(i['suggestion'] for i in items if i.get('suggestion'))),

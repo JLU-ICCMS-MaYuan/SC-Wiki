@@ -1,5 +1,7 @@
 # 实施计划：超导参数提取与共用条件关联
 
+来源关联失效与重新核对的后台修复设计、任务和验证映射见[已确认增量](association-recheck.md)。
+
 **Issue**：[#139](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/139)
 
 **日期**：2026-10-15

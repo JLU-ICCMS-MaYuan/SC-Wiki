@@ -443,6 +443,12 @@ def association_issues(record):
                 and re.fullmatch(r'[a-f0-9]{64}',str(value.get('sha256') or ''))
                 and value.get('role') in {'main','supplementary'} for key,value in documents.items())):
                 errors.append((f'payload.source_associations.{i}.source_documents','完整来源指纹无效'))
+        if isinstance(item, dict) and item.get('field_binding') is not None:
+            binding = item['field_binding']
+            if (not isinstance(binding, dict) or binding.get('version') != 1
+                or not re.fullmatch(r'[a-f0-9]{64}', str(binding.get('fingerprint') or ''))
+                or binding.get('field_key') is not None and not isinstance(binding['field_key'], str)):
+                errors.append((f'payload.source_associations.{i}.field_binding', '字段来源绑定无效'))
     return errors
 
 
@@ -656,6 +662,10 @@ def apply_associations(draft, candidates, context):
         for stored in r["payload"]["source_associations"]:
             if stored["target_path"]==a["target_path"] and stored["source_fingerprint"]==a["source_fingerprint"]:
                 stored["target_fingerprint"] = a["target_fingerprint"]
+                from .association_review import bind_field
+                bind_field(r, lookup[target][0], stored)
+                if stored.get('field_binding'):
+                    a['field_binding'] = deepcopy(stored['field_binding'])
         from .property_modules import record_checksum
         r["record_checksum"] = record_checksum(r)
         applied.append({"target":target,"association":a})
