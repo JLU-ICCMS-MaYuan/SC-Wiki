@@ -45,7 +45,7 @@ const LazyRoutes: React.FC = () => (
     <Route path="/share/discussions/:id" element={<Spin><DiscussionPage /></Spin>} />
     <Route path="/systems/:systemKey" element={<Spin><SystemCommunityPage /></Spin>} />
     <Route path="/account/notifications" element={<Spin><RoleRoute allow={['user', 'admin', 'superadmin']}><CommunityNotificationsPage /></RoleRoute></Spin>} />
-    <Route path="/admin/community" element={<Spin><RoleRoute allow={['admin', 'superadmin']}><CommunityModerationPage /></RoleRoute></Spin>} />
+    <Route path="/admin/community" element={<Spin><RoleRoute allow={['superadmin']}><CommunityModerationPage /></RoleRoute></Spin>} />
     <Route path="/upload" element={<Spin><UploadPage /></Spin>} />
     <Route path="/upload/tasks/:taskId" element={<Spin><UploadTaskPage /></Spin>} />
     {/* 论文可见性按论文状态与归属逐篇由后端裁决，因此不包裹 RoleRoute */}

@@ -6,12 +6,12 @@
 #   scripts/dev.sh status            查看状态
 #   scripts/dev.sh logs <服务>       跟踪日志
 #
-# 服务名：mysql redis neo4j qdrant grobid garage python worker news-worker news-scheduler goserver frontend
+# 服务名：mysql redis neo4j qdrant grobid garage python worker community-worker news-worker news-scheduler goserver frontend
 
 . "$(dirname "${BASH_SOURCE[0]}")/lib-local.sh"
 
 INFRA_SERVICES=(mysql redis neo4j qdrant grobid)
-APP_SERVICES=(python worker news-worker news-scheduler goserver frontend)
+APP_SERVICES=(python worker community-worker news-worker news-scheduler goserver frontend)
 ALL_SERVICES=("${INFRA_SERVICES[@]}" "${APP_SERVICES[@]}")
 
 # ── 通用进程管理 ────────────────────────────────────────────
@@ -214,6 +214,14 @@ start_frontend() {
   ok "frontend http://127.0.0.1:$VITE_PORT  ← 浏览器入口"
 }
 
+start_community_worker() {
+  if pid_alive community-worker; then ok "community-worker 已在运行"; return; fi
+  ( cd "$REPO_ROOT" && spawn community-worker "$PY_BIN/python" -m backend.community worker )
+  sleep 1
+  pid_alive community-worker || die "community-worker 启动失败，见 $LOG_DIR/community-worker.log"
+  ok "community-worker"
+}
+
 start_news_worker() {
   if pid_alive news-worker; then
     ok "news-worker 已在运行"
@@ -300,7 +308,7 @@ status() {
       printf '%-16s \033[0;31m%-10s\033[0m %s\n' "$name" 已停止 "$addr"
     fi
   done
-  for name in worker news-worker news-scheduler; do
+  for name in worker community-worker news-worker news-scheduler; do
     if pid_alive "$name"; then
       printf '%-16s \033[0;32m%-10s\033[0m\n' "$name" 运行中
     else
@@ -336,7 +344,7 @@ main() {
       local targets=("$@")
       if [[ ${#targets[@]} -eq 0 ]]; then
         # 逆序停止：先应用后基础设施
-        targets=(news-scheduler news-worker frontend goserver worker python garage grobid qdrant neo4j redis mysql)
+        targets=(news-scheduler community-worker news-worker frontend goserver worker python garage grobid qdrant neo4j redis mysql)
       fi
       for s in "${targets[@]}"; do
         case "$s" in

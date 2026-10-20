@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -85,6 +84,8 @@ func communityEntries(c *gin.Context) {
 	}
 	if kind == "answer" {
 		switch c.DefaultQuery("sort", "votes") {
+		case "models":
+			order = "model_order ASC, id ASC"
 		case "votes":
 			order = "(SELECT COUNT(*) FROM community_votes WHERE entry_id = community_entries.id) DESC, id ASC"
 		case "latest":
@@ -213,136 +214,22 @@ func communityGetEntry(c *gin.Context) {
 	c.JSON(200, communityDTO(database.DB, entry, communityViewer(c)))
 }
 
-type communityCreateInput struct {
-	communityTarget
-	Kind      string `json:"kind"`
-	Title     string `json:"title"`
-	Body      string `json:"body"`
-	ReplyToID *uint  `json:"reply_to_id"`
-}
-
-func communityText(kind, title, body string) error {
-	if kind == "question" {
-		if !communityLength(title, 3, 200) {
-			return communityBad()
-		}
-	} else if title != "" {
-		return communityBad()
+func communityEdit(c *gin.Context) {
+	var body struct {
+		Body     string `json:"body"`
+		Revision int    `json:"revision"`
 	}
-	min, max := 1, 20000
-	switch kind {
-	case "question":
-		min = 0
-	case "answer":
-	case "comment":
-		max = 2000
-	default:
-		return communityBad()
-	}
-	if !communityLength(body, min, max) {
-		return communityBad()
-	}
-	return nil
-}
-func communityCreate(c *gin.Context) {
-	var body communityCreateInput
 	if err := communityBind(c, &body); err != nil {
 		communityFail(c, err)
 		return
 	}
-	body.Title = strings.TrimSpace(body.Title)
 	body.Body = strings.TrimSpace(body.Body)
-	if err := communityText(body.Kind, body.Title, body.Body); err != nil {
-		communityFail(c, err)
+	if !communityLength(body.Body, 1, 20000) || body.Revision < 1 {
+		communityFail(c, communityBad())
 		return
 	}
-	category := "content"
-	if body.Kind == "question" {
-		category = body.Kind
-	}
-	if err := communityLimit(c, category); err != nil {
-		communityFail(c, err)
-		return
-	}
-	u := communityViewer(c)
-	var entry models.CommunityEntry
-	err := database.DB.Transaction(func(tx *gorm.DB) error {
-		if err := communityLockActor(tx, u); err != nil {
-			return err
-		}
-		if err := communityLockTarget(tx, body.communityTarget); err != nil {
-			return err
-		}
-		current := communityCurrent(tx)
-		if err := body.communityTarget.validate(current, body.Kind, u); err != nil {
-			return err
-		}
-		entry = models.CommunityEntry{Kind: body.Kind, Title: body.Title, Body: body.Body, AuthorID: u.ID, QuestionID: body.QuestionID, AnswerID: body.AnswerID, PaperID: body.PaperID, SystemKey: body.SystemKey, Status: "visible", ActivityAt: time.Now().UTC()}
-		if entry.SystemKey != nil {
-			var space models.CommunitySystem
-			// 既有空间不可删除，无须每次 upsert；无条件 upsert 的排他锁会与
-			// 隐藏评论时的外键检查形成反向锁依赖。仅首次创建需要写锁。
-			err := tx.Where("system_key = ?", *entry.SystemKey).First(&space).Error
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				err = tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&models.CommunitySystem{SystemKey: *entry.SystemKey}).Error
-			}
-			if err != nil {
-				return err
-			}
-		}
-		if body.ReplyToID != nil {
-			if entry.Kind != "comment" {
-				return communityBad()
-			}
-			var reply models.CommunityEntry
-			if err := tx.First(&reply, *body.ReplyToID).Error; err != nil {
-				return err
-			}
-			// 根先于回复锁定，避免回复之间产生相反锁顺序。
-			rootID := reply.ID
-			if reply.ParentID != nil {
-				rootID = *reply.ParentID
-			}
-			var lockedRoot models.CommunityEntry
-			if err := current.First(&lockedRoot, rootID).Error; err != nil {
-				return err
-			}
-			if lockedRoot.Status != "visible" {
-				return communityError{409, "content_unavailable"}
-			}
-			if err := current.First(&reply, *body.ReplyToID).Error; err != nil {
-				return err
-			}
-			if reply.Kind != "comment" || reply.Status != "visible" || !communitySameTarget(entry, reply) {
-				return communityBad()
-			}
-			entry.ReplyToID = &reply.ID
-			entry.ParentID = &lockedRoot.ID
-		}
-		if err := tx.Create(&entry).Error; err != nil {
-			return err
-		}
-		if entry.QuestionID != nil {
-			if err := tx.Model(&models.CommunityEntry{}).Where("id = ?", *entry.QuestionID).Update("activity_at", entry.ActivityAt).Error; err != nil {
-				return err
-			}
-		}
-		return communityNotify(tx, entry)
-	})
-	if err != nil {
-		communityFail(c, err)
-		return
-	}
-	c.JSON(201, communityDTO(database.DB, entry, u))
-}
-
-func communityMutate(c *gin.Context, action func(*gorm.DB, *models.CommunityEntry) error) {
 	id, err := communityID(c.Param("id"))
 	if err != nil {
-		communityFail(c, err)
-		return
-	}
-	if err = communityLimit(c, "content"); err != nil {
 		communityFail(c, err)
 		return
 	}
@@ -351,6 +238,9 @@ func communityMutate(c *gin.Context, action func(*gorm.DB, *models.CommunityEntr
 	err = database.DB.Transaction(func(tx *gorm.DB) error {
 		if err := communityLockActor(tx, u); err != nil {
 			return err
+		}
+		if u.Role != "superadmin" {
+			return communityError{403, "superadmin_required"}
 		}
 		if err := tx.First(&entry, id).Error; err != nil {
 			return err
@@ -361,91 +251,29 @@ func communityMutate(c *gin.Context, action func(*gorm.DB, *models.CommunityEntr
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&entry, id).Error; err != nil {
 			return err
 		}
+		if entry.Kind != "answer" {
+			return communityError{403, "community_read_only"}
+		}
 		if err := communityAccess(communityCurrent(tx), entry, u, false); err != nil {
 			return err
 		}
-		if entry.AuthorID != u.ID {
-			return communityError{403, "not_content_author"}
+		if entry.Revision != body.Revision {
+			return communityError{409, "community_revision_conflict"}
 		}
-		return action(tx, &entry)
+		if err := tx.Create(&models.CommunityEntryRevision{EntryID: entry.ID, Revision: entry.Revision, Body: entry.Body, Citations: entry.Citations, HumanEdited: entry.HumanEdited, ActorID: &u.ID}).Error; err != nil {
+			return err
+		}
+		entry.Body = body.Body
+		entry.HumanEdited = true
+		entry.Revision++
+		entry.UpdatedAt = time.Now().UTC()
+		return tx.Model(&entry).Updates(map[string]any{"body": entry.Body, "human_edited": true, "revision": entry.Revision, "updated_at": entry.UpdatedAt}).Error
 	})
 	if err != nil {
 		communityFail(c, err)
 		return
 	}
 	c.JSON(200, communityDTO(database.DB, entry, u))
-}
-func communityEdit(c *gin.Context) {
-	var body struct {
-		Title *string `json:"title"`
-		Body  *string `json:"body"`
-	}
-	if err := communityBind(c, &body); err != nil {
-		communityFail(c, err)
-		return
-	}
-	if body.Title == nil && body.Body == nil {
-		communityFail(c, communityBad())
-		return
-	}
-	communityMutate(c, func(tx *gorm.DB, e *models.CommunityEntry) error {
-		if body.Title != nil {
-			e.Title = strings.TrimSpace(*body.Title)
-		}
-		if body.Body != nil {
-			e.Body = strings.TrimSpace(*body.Body)
-		}
-		if err := communityText(e.Kind, e.Title, e.Body); err != nil {
-			return err
-		}
-		return tx.Save(e).Error
-	})
-}
-func communityDelete(c *gin.Context) {
-	communityMutate(c, func(tx *gorm.DB, e *models.CommunityEntry) error { e.Status = "deleted"; return tx.Save(e).Error })
-}
-
-func communityVote(c *gin.Context) {
-	id, err := communityID(c.Param("id"))
-	if err != nil {
-		communityFail(c, err)
-		return
-	}
-	if err = communityLimit(c, "action"); err != nil {
-		communityFail(c, err)
-		return
-	}
-	u := communityViewer(c)
-	var e models.CommunityEntry
-	err = database.DB.Transaction(func(tx *gorm.DB) error {
-		if err := communityLockActor(tx, u); err != nil {
-			return err
-		}
-		if err := tx.First(&e, id).Error; err != nil {
-			return err
-		}
-		if err := communityLockTarget(tx, communityTargetOf(e)); err != nil {
-			return err
-		}
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&e, id).Error; err != nil {
-			return err
-		}
-		if err := communityAccess(communityCurrent(tx), e, u, false); err != nil {
-			return err
-		}
-		if e.Kind != "answer" {
-			return communityBad()
-		}
-		if c.Request.Method == "DELETE" {
-			return tx.Where("entry_id = ? AND user_id = ?", id, u.ID).Delete(&models.CommunityVote{}).Error
-		}
-		return tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&models.CommunityVote{EntryID: id, UserID: u.ID}).Error
-	})
-	if err != nil {
-		communityFail(c, err)
-		return
-	}
-	c.JSON(200, communityDTO(database.DB, e, u))
 }
 
 func communitySystem(c *gin.Context) {

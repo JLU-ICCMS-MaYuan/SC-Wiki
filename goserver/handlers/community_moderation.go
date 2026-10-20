@@ -10,49 +10,6 @@ import (
 	"time"
 )
 
-func communityReport(c *gin.Context) {
-	var body struct {
-		Reason string `json:"reason"`
-	}
-	if err := communityBind(c, &body); err != nil {
-		communityFail(c, err)
-		return
-	}
-	body.Reason = strings.TrimSpace(body.Reason)
-	if !communityLength(body.Reason, 5, 1000) {
-		communityFail(c, communityBad())
-		return
-	}
-	id, err := communityID(c.Param("id"))
-	if err != nil {
-		communityFail(c, err)
-		return
-	}
-	if err = communityLimit(c, "action"); err != nil {
-		communityFail(c, err)
-		return
-	}
-	u := communityViewer(c)
-	report := models.CommunityReport{EntryID: id, ReporterID: u.ID, Reason: body.Reason, Status: "pending"}
-	err = database.DB.Transaction(func(tx *gorm.DB) error {
-		var e models.CommunityEntry
-		if err := tx.First(&e, id).Error; err != nil {
-			return err
-		}
-		if err := communityAccess(tx, e, u, false); err != nil {
-			return err
-		}
-		if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&report).Error; err != nil {
-			return err
-		}
-		return tx.Where("entry_id = ? AND reporter_id = ?", id, u.ID).First(&report).Error
-	})
-	if err != nil {
-		communityFail(c, err)
-		return
-	}
-	c.JSON(200, gin.H{"id": report.ID, "status": report.Status})
-}
 func communityReports(c *gin.Context) {
 	limit, offset, err := communityPage(c)
 	if err != nil {
@@ -95,8 +52,9 @@ func communityReports(c *gin.Context) {
 }
 func communityModerate(c *gin.Context) {
 	var body struct {
-		Action string `json:"action"`
-		Reason string `json:"reason"`
+		Action   string `json:"action"`
+		Revision int    `json:"revision"`
+		Reason   string `json:"reason"`
 	}
 	if err := communityBind(c, &body); err != nil {
 		communityFail(c, err)
@@ -121,7 +79,7 @@ func communityModerate(c *gin.Context) {
 		if err := communityLockActor(tx, u); err != nil {
 			return err
 		}
-		if u.Role != "admin" && u.Role != "superadmin" {
+		if u.Role != "superadmin" {
 			return communityError{403, "admin_required"}
 		}
 		var entry models.CommunityEntry
@@ -138,6 +96,9 @@ func communityModerate(c *gin.Context) {
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&entry, id).Error; err != nil {
 			return err
 		}
+		if body.Revision != entry.Revision {
+			return communityError{409, "community_revision_conflict"}
+		}
 		if body.Action == "hide" {
 			if entry.Status != "visible" {
 				return communityError{409, "invalid_moderation_transition"}
@@ -150,7 +111,8 @@ func communityModerate(c *gin.Context) {
 			}
 			entry.Status = "visible"
 		}
-		if err := tx.Save(&entry).Error; err != nil {
+		entry.Revision++
+		if err := tx.Model(&entry).Updates(map[string]any{"status": entry.Status, "revision": entry.Revision, "updated_at": time.Now().UTC()}).Error; err != nil {
 			return err
 		}
 		if err := tx.Create(&models.CommunityModerationEvent{EntryID: id, ActorID: communityViewer(c).ID, Action: body.Action, Reason: body.Reason}).Error; err != nil {

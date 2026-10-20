@@ -1,5 +1,5 @@
-"""Shared metadata for community tables. Business rules live in the Go service."""
-from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+"""共享社区元数据；Go 承担读取与治理，Python 承担 AI 生成生命周期。"""
+from sqlalchemy import Boolean, JSON, Column, DateTime, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from sqlalchemy.sql import func
 from backend.database import Base
@@ -24,7 +24,17 @@ class CommunityEntry(Base):
     kind = Column(String(16), nullable=False)
     title = Column(String(200), nullable=False, server_default="")
     body = Column(Text().with_variant(MEDIUMTEXT(), "mysql"), nullable=False)
-    author_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    author_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    origin = Column(String(16), nullable=False, server_default="human")
+    category = Column(String(64), nullable=False, server_default="")
+    model_id = Column(String(64), nullable=False, server_default="")
+    model_name = Column(String(200), nullable=False, server_default="")
+    model = Column(String(200), nullable=False, server_default="")
+    model_order = Column(Integer, nullable=False, server_default="0")
+    citations = Column(JSON, nullable=True)
+    human_edited = Column(Boolean, nullable=False, server_default="0")
+    revision = Column(Integer, nullable=False, server_default="1")
+    question_hash = Column(String(64), unique=True, nullable=True)
     question_id = Column(Integer, ForeignKey("community_entries.id", ondelete="CASCADE"))
     answer_id = Column(Integer, ForeignKey("community_entries.id", ondelete="CASCADE"))
     paper_id = Column(Integer, ForeignKey("papers.id", ondelete="CASCADE"))
@@ -75,4 +85,56 @@ class CommunityNotification(Base):
     entry_id = Column(Integer, ForeignKey("community_entries.id", ondelete="CASCADE"), nullable=False)
     kind = Column(String(16), nullable=False)
     read_at = Column(DateTime)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+
+class CommunityAIBatch(Base):
+    __tablename__ = "community_ai_batches"
+    id = Column(String(36), primary_key=True)
+    actor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    request_hash = Column(String(64), nullable=False)
+    question_id = Column(Integer, ForeignKey("community_entries.id"), unique=True)
+    state = Column(String(16), nullable=False, default="queued")
+    error = Column(String(64), nullable=False, default="")
+    category = Column(String(64), nullable=False, default="")
+    question_model_id = Column(String(64), nullable=False)
+    sources = Column(JSON, nullable=True)
+    job_id = Column(String(80), nullable=False, default="")
+    attempt = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())
+    started_at = Column(DateTime)
+    finished_at = Column(DateTime)
+
+
+class CommunityAITask(Base):
+    __tablename__ = "community_ai_tasks"
+    __table_args__ = (UniqueConstraint("batch_id", "model_id", name="uq_community_ai_model"),)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    batch_id = Column(String(36), ForeignKey("community_ai_batches.id"), nullable=False, index=True)
+    model_id = Column(String(64), nullable=False)
+    model_name = Column(String(200), nullable=False)
+    model = Column(String(200), nullable=False)
+    config_hash = Column(String(64), nullable=False)
+    model_order = Column(Integer, nullable=False)
+    answer_id = Column(Integer, ForeignKey("community_entries.id"), unique=True)
+    state = Column(String(16), nullable=False, default="queued")
+    error = Column(String(64), nullable=False, default="")
+    job_id = Column(String(80), nullable=False, default="")
+    attempt = Column(Integer, nullable=False, default=0)
+    question_revision = Column(Integer, nullable=False, default=1)
+    answer_revision = Column(Integer, nullable=False, default=0)
+    started_at = Column(DateTime)
+    finished_at = Column(DateTime)
+
+
+class CommunityEntryRevision(Base):
+    __tablename__ = "community_entry_revisions"
+    __table_args__ = (UniqueConstraint("entry_id", "revision", name="uq_community_revision"),)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    entry_id = Column(Integer, ForeignKey("community_entries.id"), nullable=False)
+    revision = Column(Integer, nullable=False)
+    body = Column(Text().with_variant(MEDIUMTEXT(), "mysql"), nullable=False)
+    citations = Column(JSON)
+    human_edited = Column(Boolean, nullable=False)
+    actor_id = Column(Integer, ForeignKey("users.id"))
     created_at = Column(DateTime, nullable=False, server_default=func.now())

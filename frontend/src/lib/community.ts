@@ -9,15 +9,21 @@ export interface CommunityEntry extends CommunityTarget {
   id: number; kind: 'question' | 'answer' | 'comment'; title: string; body: string
   status: 'visible' | 'deleted' | 'hidden'; author: CommunityAuthor | null
   parent_id: number | null; reply_to_id: number | null; votes: number; voted: boolean; answer_count: number
+  origin?: 'human' | 'ai'; category?: string; model_id?: string; model_name?: string; model?: string; model_order?: number
+  revision?: number; human_edited?: boolean; sources_available?: boolean
+  citations?: Array<{ id: string; paper_id: number; paper_revision: number; title: string }>
+  generation_tasks?: CommunityAITask[]
   can_edit: boolean; can_delete: boolean; can_reply: boolean; created_at: string; updated_at: string; url: string
 }
+export interface CommunityAITask { id: number; batch_id?: string; model_id: string; model_name: string; model: string; model_order: number; state: string; error: string; answer_id: number | null }
+export interface CommunityAIBatch { id: string; question_id: number | null; state: string; error: string; category: string; can_retry: boolean; tasks: CommunityAITask[] }
 export interface CommunityList<T> { items: T[]; total: number; offset?: number; context?: T[] }
 export function targetQuery(target: CommunityTarget): string {
   return new URLSearchParams(Object.entries(target).filter(([, v]) => v != null).map(([k, v]) => [k, String(v)])).toString()
 }
 export function communityErrorKey(error: unknown): string {
   const code = (error as ApiError)?.code
-  const known = ['invalid_community_input', 'content_unavailable', 'verified_account_required', 'paper_forbidden', 'not_content_author', 'community_rate_limited', 'community_rate_limit_unavailable', 'community_unavailable', 'invalid_moderation_transition']
+  const known = ['community_read_only', 'community_revision_conflict', 'community_ai_unavailable', 'no_models', 'request_conflict', 'superadmin_required', 'model_config_changed', 'sources_changed', 'preparation_failed', 'queue_unavailable', 'retry_model_separately', 'invalid_community_input', 'content_unavailable', 'verified_account_required', 'paper_forbidden', 'not_content_author', 'community_rate_limited', 'community_rate_limit_unavailable', 'community_unavailable', 'invalid_moderation_transition']
   return `community.errors.${code && known.includes(code) ? code : 'generic'}`
 }
 export function useCommunityLoad<T>(path: string | null) {

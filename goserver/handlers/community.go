@@ -27,14 +27,15 @@ func RegisterCommunityRoutes(r *gin.Engine) {
 	read.GET("/entries/:id", communityGetEntry)
 	read.GET("/systems/:key", communitySystem)
 	write := r.Group("/api/community", middleware.AuthRequired, communityWriter)
-	write.POST("/entries", communityCreate)
-	write.PATCH("/entries/:id", communityEdit)
-	write.DELETE("/entries/:id", communityDelete)
-	write.PUT("/entries/:id/vote", communityVote)
-	write.DELETE("/entries/:id/vote", communityVote)
-	write.POST("/entries/:id/reports", communityReport)
-	write.POST("/entries/:id/moderate", middleware.AdminRequired, communityModerate)
-	write.GET("/moderation/reports", middleware.AdminRequired, communityReports)
+	write.POST("/entries", communityReadOnly)
+	write.PATCH("/entries/:id", middleware.SuperAdminRequired, communityEdit)
+	write.DELETE("/entries/:id", communityReadOnly)
+	write.PUT("/entries/:id/vote", communityReadOnly)
+	write.DELETE("/entries/:id/vote", communityReadOnly)
+	write.POST("/entries/:id/reports", communityReadOnly)
+	write.POST("/entries/:id/moderate", middleware.SuperAdminRequired, communityModerate)
+	write.GET("/moderation/reports", middleware.SuperAdminRequired, communityReports)
+	write.GET("/moderation/entries", middleware.SuperAdminRequired, communityManagedEntries)
 	auth := r.Group("/api/community", middleware.AuthRequired)
 	auth.GET("/notifications", communityNotifications)
 	auth.GET("/notifications/unread", communityUnread)
@@ -372,11 +373,19 @@ func communityDTO(db *gorm.DB, e models.CommunityEntry, u *models.User) gin.H {
 	author := gin.H(nil)
 	editable := false
 	if e.Status == "visible" {
-		author = communityAuthor(db, e.AuthorID)
-		editable = u != nil && u.ID == e.AuthorID && u.IsEmailVerified && u.AccountStatus == "active"
+		if e.Origin != "ai" {
+			author = communityAuthor(db, e.AuthorID)
+		}
+		editable = u != nil && u.Role == "superadmin" && e.Kind == "answer" && u.IsEmailVerified && u.AccountStatus == "active"
 	} else {
 		e.Body = ""
 		e.Title = ""
+	}
+	sourcesAvailable := communitySourcesAvailable(db, e.Citations)
+	if !sourcesAvailable {
+		e.Body = ""
+		e.Citations = nil
+		editable = false
 	}
 	var votes, voted, replies int64
 	if e.Kind == "answer" && e.Status == "visible" {
@@ -391,6 +400,9 @@ func communityDTO(db *gorm.DB, e models.CommunityEntry, u *models.User) gin.H {
 	return gin.H{"id": e.ID, "kind": e.Kind, "title": e.Title, "body": e.Body, "status": e.Status, "author": author,
 		"question_id": e.QuestionID, "answer_id": e.AnswerID, "paper_id": e.PaperID, "system_key": e.SystemKey,
 		"parent_id": e.ParentID, "reply_to_id": e.ReplyToID, "votes": votes, "voted": voted > 0, "answer_count": replies,
-		"can_edit": editable, "can_delete": editable, "can_reply": e.Status == "visible",
-		"created_at": e.CreatedAt, "updated_at": e.UpdatedAt, "url": communityURL(db, e)}
+		"can_edit": editable, "can_delete": false, "can_reply": false,
+		"origin": e.Origin, "category": e.Category, "model_id": e.ModelID, "model_name": e.ModelName, "model": e.Model, "model_order": e.ModelOrder,
+		"revision": e.Revision, "human_edited": e.HumanEdited, "citations": communityPublicCitations(e.Citations), "sources_available": sourcesAvailable,
+		"generation_tasks": communityGenerationTasks(db, e),
+		"created_at":       e.CreatedAt, "updated_at": e.UpdatedAt, "url": communityURL(db, e)}
 }

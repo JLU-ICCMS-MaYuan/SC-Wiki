@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from pathlib import Path
 
-from backend.api import admin_internal, form_definitions, kg, material_state_export, rag, structures, tc_predict, upload_tasks
+from backend.api import community_ai, admin_internal, form_definitions, kg, material_state_export, rag, structures, tc_predict, upload_tasks
 from backend.api.kg_live import router as kg_live_router
 from backend.ingest.upload_contracts import UploadContractError
 
@@ -67,6 +67,7 @@ app.include_router(upload_tasks.router)
 app.include_router(kg.router)
 app.include_router(kg_live_router)
 app.include_router(admin_internal.router)
+app.include_router(community_ai.router)
 app.include_router(form_definitions.router)
 app.include_router(form_definitions.admin_router)
 app.include_router(form_definitions.promotion_router)

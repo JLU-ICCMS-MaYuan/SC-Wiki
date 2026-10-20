@@ -103,7 +103,7 @@ def health(runtime):
                     'http://127.0.0.1:5173/api/form-definitions'):
             if not client.get(url).is_success:
                 raise ValueError('服务健康检查失败')
-    for name in ('worker', 'news-worker', 'news-scheduler'):
+    for name in ('worker', 'community-worker', 'news-worker', 'news-scheduler'):
         if not runtime.owned_pid(name):
             raise ValueError(f'{name} 未运行')
     from rq import Worker
@@ -274,7 +274,7 @@ def deploy(root: Path, args):
             return 0
         except BaseException:
             state.save(failed_stage=state.record['phase'])
-            for service in ('news-scheduler', 'frontend', 'goserver', 'worker', 'news-worker', 'python', 'qdrant', 'neo4j', 'redis', 'mysql'):
+            for service in ('news-scheduler', 'frontend', 'goserver', 'worker', 'community-worker', 'news-worker', 'python', 'qdrant', 'neo4j', 'redis', 'mysql'):
                 try:
                     runtime.stop_gracefully(service)
                 except (ValueError, OSError):

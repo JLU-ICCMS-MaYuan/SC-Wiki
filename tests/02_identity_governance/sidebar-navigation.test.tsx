@@ -89,7 +89,7 @@ describe('全角色统一侧栏', () => {
     await user.click(screen.getByRole('button', { name: '社区' }))
     expect(screen.getByRole('menuitem', { name: '排行榜' })).toBeInTheDocument()
     expect(screen.getByRole('menuitem', { name: 'Tc~X 演变' })).toBeInTheDocument()
-    await user.click(screen.getByRole('menuitem', { name: '讨论' }))
+    await user.click(screen.getByRole('menuitem', { name: 'AI 学术讨论' }))
     expect(screen.getByLabelText('当前地址')).toHaveTextContent('/share/discussions')
   })
 

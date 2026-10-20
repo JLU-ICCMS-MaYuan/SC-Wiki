@@ -3,15 +3,14 @@ import { Alert, Box, Button, Stack, TextField, Typography } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { communityErrorKey } from '../../lib/community'
-import AuthDialog from '../AuthDialog'
 import CommunityMarkdown from './CommunityMarkdown'
 
 interface Props { onSubmit: (body: string, title: string) => Promise<void>; question?: boolean; markdown?: boolean; initialBody?: string; initialTitle?: string; submitLabel?: string; onCancel?: () => void; maxLength?: number; label?: string }
 export default function CommunityComposer({ onSubmit, question = false, markdown = false, initialBody = '', initialTitle = '', submitLabel, onCancel, maxLength = 2000, label }: Props) {
   const { user } = useAuth(); const { t } = useLanguage()
   const [body, setBody] = useState(initialBody), [title, setTitle] = useState(initialTitle)
-  const [busy, setBusy] = useState(false), [preview, setPreview] = useState(false), [error, setError] = useState(''), [login, setLogin] = useState(false)
-  if (!user) return <><Button onClick={() => setLogin(true)}>{t('community.login')}</Button><AuthDialog open={login} onClose={() => setLogin(false)} /></>
+  const [busy, setBusy] = useState(false), [preview, setPreview] = useState(false), [error, setError] = useState('')
+  if (user?.role !== 'superadmin') return null
   if (!user.is_email_verified) return <Alert severity="info">{t('community.verify')}</Alert>
   const submit = async (event: React.FormEvent) => {
     event.preventDefault(); if (busy) return

@@ -14,7 +14,7 @@ import time
 from .environment import run
 from .host import java_home, listening_pids, process_info
 
-APPS = ('news-scheduler', 'frontend', 'goserver', 'worker', 'news-worker', 'python')
+APPS = ('news-scheduler', 'frontend', 'goserver', 'worker', 'community-worker', 'news-worker', 'python')
 
 
 def port_occupied(number):
@@ -207,7 +207,7 @@ server.directories.run={self.local / 'run-neo4j'}
                     self.stop_gracefully(name)
                     stopped.append(name)
             export_redis(redis_connection(self.values))
-            for name in ('worker', 'news-worker'):
+            for name in ('worker', 'community-worker', 'news-worker'):
                 if name in running:
                     self.stop_gracefully(name)
                     stopped.append(name)

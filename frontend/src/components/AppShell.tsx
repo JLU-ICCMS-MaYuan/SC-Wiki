@@ -100,7 +100,7 @@ const AppShell: React.FC = () => {
             {user ? (
               <>
               <CommunityNotificationLink collapsed={collapsed} />
-              {['admin', 'superadmin'].includes(user.role) && <SidebarButton icon={<AdminPanelSettingsOutlined />} label={t('community.moderation')} collapsed={collapsed} selected={isActive('/admin/community')} onClick={() => navigate('/admin/community')} />}
+              {user.role === 'superadmin' && <SidebarButton icon={<AdminPanelSettingsOutlined />} label={t('community.moderation')} collapsed={collapsed} selected={isActive('/admin/community')} onClick={() => navigate('/admin/community')} />}
               <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: collapsed ? 'column' : 'row', gap: 0.5, mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
                 <SidebarButton icon={<RoleIcon />} label={t(`enums.role.${user.role}`)} detail={user.username} collapsed={collapsed} selected={accountActive} onClick={() => navigate('/account')} />
                 <Tooltip title={t('nav.accountMenu')} placement="right" arrow>

@@ -1,6 +1,6 @@
 {
   "schema_heads": [
-    "20261015_0094"
+    "20261020_0142"
   ],
   "tables": {
     "admin_applications": {
@@ -272,6 +272,196 @@
         ]
       ]
     },
+    "community_ai_batches": {
+      "checks": [],
+      "columns": {
+        "actor_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "attempt": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "category": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "error": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "finished_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "varchar(36)"
+        },
+        "job_id": {
+          "nullable": false,
+          "type": "varchar(80)"
+        },
+        "question_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "question_model_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "request_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "sources": {
+          "nullable": true,
+          "type": "json"
+        },
+        "started_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "state": {
+          "nullable": false,
+          "type": "varchar(16)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "question_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "question_id"
+        ]
+      ]
+    },
+    "community_ai_tasks": {
+      "checks": [],
+      "columns": {
+        "answer_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "answer_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "attempt": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "batch_id": {
+          "nullable": false,
+          "type": "varchar(36)"
+        },
+        "config_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "error": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "finished_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "job_id": {
+          "nullable": false,
+          "type": "varchar(80)"
+        },
+        "model": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "model_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "model_name": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "model_order": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "question_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "started_at": {
+          "nullable": true,
+          "type": "datetime"
+        },
+        "state": {
+          "nullable": false,
+          "type": "varchar(16)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "answer_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        },
+        {
+          "columns": [
+            "batch_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_ai_batches"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "answer_id"
+        ],
+        [
+          "batch_id",
+          "model_id"
+        ]
+      ]
+    },
     "community_entries": {
       "checks": [],
       "columns": {
@@ -284,22 +474,54 @@
           "type": "integer"
         },
         "author_id": {
-          "nullable": false,
+          "nullable": true,
           "type": "integer"
         },
         "body": {
           "nullable": false,
           "type": "mediumtext"
         },
+        "category": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "citations": {
+          "nullable": true,
+          "type": "json"
+        },
         "created_at": {
           "nullable": false,
           "type": "datetime"
+        },
+        "human_edited": {
+          "nullable": false,
+          "type": "tinyint"
         },
         "id": {
           "nullable": false,
           "type": "integer"
         },
         "kind": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "model": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "model_id": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "model_name": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "model_order": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "origin": {
           "nullable": false,
           "type": "varchar(16)"
         },
@@ -311,12 +533,20 @@
           "nullable": true,
           "type": "integer"
         },
+        "question_hash": {
+          "nullable": true,
+          "type": "varchar(64)"
+        },
         "question_id": {
           "nullable": true,
           "type": "integer"
         },
         "reply_to_id": {
           "nullable": true,
+          "type": "integer"
+        },
+        "revision": {
+          "nullable": false,
           "type": "integer"
         },
         "status": {
@@ -404,7 +634,77 @@
       "primary_key": [
         "id"
       ],
-      "unique": []
+      "unique": [
+        [
+          "question_hash"
+        ]
+      ]
+    },
+    "community_entry_revisions": {
+      "checks": [],
+      "columns": {
+        "actor_id": {
+          "nullable": true,
+          "type": "integer"
+        },
+        "body": {
+          "nullable": false,
+          "type": "mediumtext"
+        },
+        "citations": {
+          "nullable": true,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "entry_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "human_edited": {
+          "nullable": false,
+          "type": "tinyint"
+        },
+        "id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "revision": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "actor_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "entry_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "community_entries"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "entry_id",
+          "revision"
+        ]
+      ]
     },
     "community_moderation_events": {
       "checks": [],
@@ -1020,6 +1320,10 @@
           "nullable": false,
           "type": "varchar(20)"
         },
+        "structure_optimization": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
         "superconductor_id": {
           "nullable": true,
           "type": "integer"
@@ -1039,10 +1343,6 @@
         "updated_at": {
           "nullable": false,
           "type": "datetime"
-        },
-        "structure_optimization": {
-          "type": "varchar(32)",
-          "nullable": false
         }
       },
       "foreign_keys": [

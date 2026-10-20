@@ -10,7 +10,7 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 
 上传与管理员编辑共用材料名/化学式至少一项规则；命名材料可没有化学式，当前编辑保存后可逐项填写人工理由确认。详见[上传数据结构](01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md)与[论文审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 
-所有角色与访客共享左侧导航，页面不再保留全宽顶部栏。SC-Wiki 位于最上方，点击返回默认热点页；下方依次为热点、探索、脉络、社区、上传、对话、预测。社区展开排行榜、Tc~X 演变和讨论，侧栏收起时通过菜单选择。底部留白后依次提供模型配置、中文/英文；已登录者其后可访问通知，管理员与超级管理员另有举报管理，最后为角色入口及头像菜单；访客最后为登录。
+所有角色与访客共享左侧导航，页面不再保留全宽顶部栏。SC-Wiki 位于最上方，点击返回默认热点页；下方依次为热点、探索、脉络、社区、上传、对话、预测。社区展开排行榜、Tc~X 演变和 AI 学术讨论，侧栏收起时通过菜单选择。底部留白后依次提供模型配置、中文/英文；已登录者其后可访问通知，超级管理员另有社区管理，最后为角色入口及头像菜单；访客最后为登录。
 
 侧栏展开为 216px，可向左收起为 64px 图标栏；小于 900px 的窗口默认收起，按钮可随时展开。每个功能有图标与可访问名称，收起后悬停可查看全名。侧栏在页面滚动时保持可见，低高度时可以内部滚动。折叠只改变布局，保留当前页面输入和已选文件；该选择保留于当前页面会话。所有应用页面主体使用侧栏右侧剩余宽度，左右各留 8px，普通上下边距仍为窄屏 16px、桌面 32px；整页根容器不再居中限宽，局部文字、空态和弹层保留自身排版约束。详见 [Feature #101](../specs/101-unified-collapsible-sidebar/spec.md)、[全站布局 #126](../specs/126-app-wide-content-layout/spec.md) 与[使用验收说明](../specs/101-unified-collapsible-sidebar/quickstart.md)。
 
@@ -25,7 +25,7 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 | [超导数据搜索与数据库发现](03_Superconductivity_Data_Search_and_Database_Discovery/README.md) | 本地材料检索、结果分享导出、代表结构下载、Tc 统计图表 | Go API、主业务数据库 |
 | [超导论文引用发展知识图谱](04_Superconductivity_Development_Knowledge_Graph/README.md) | 基于 MySQL 引用事实的分类概览、搜索和分页展开 | Go API、Python Worker、GROBID、MySQL |
 | [检索增强 AI 问答](05_Retrieval-Augmented_AI_Question_Answering/README.md) | 混合检索、流式问答、证据展示和灵感探索 | Python FastAPI、MySQL、Qdrant、LLM 配置 |
-| [研究者社区论坛](06_Researcher_Community_Forum/README.md) | 注册登录、贡献排行、材料家族及年度论文统计、问答、体系与论文评论、通知及举报管理 | Go API、JWT、MySQL、Redis |
+| [研究者社区论坛](06_Researcher_Community_Forum/README.md) | 注册登录、贡献排行、材料家族及年度论文统计、只读多模型 AI 问答、历史评论、通知及超级管理员治理 | Go、Python、JWT、MySQL、Redis/RQ、模型目录 |
 | [AI 辅助 Tc 估算](07_AI_Assisted_Tc_Estimation/README.md) | 根据 CONTCAR 与 PDOS 文件计算实验性 Tc 估算和解释特征 | pymatgen、NumPy、上传文件 |
 
 ## 整体关系
@@ -59,7 +59,7 @@ flowchart LR
 - RAG 已从 Chroma 迁移到 Qdrant 封装，但部分兼容命名仍保留 `chroma` 字样。
 - RAG 结构化物性工具、材料详情、检索和统计统一读取当前已批准的 `property_records`；普通流式/非流式问答共用 Mentor。读取规则及外部索引边界见[混合检索](05_Retrieval-Augmented_AI_Question_Answering/hybrid-retrieval.md)。
 - 晶体结构后端 API 已实现，前端在论文详情中按材料状态下的 `structures`（来自 `structure_models`）展示结构，完整结构审核工作台仍未从当前路由中确认。当前全库无结构模型记录，只验证过空态。（[Issue #57](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/57)）
-- “社区”展开排行榜、Tc~X 演变和讨论；[科研交流](06_Researcher_Community_Forum/community-discussion.md)包含问答、体系与论文评论、站内通知及举报管理。旧 `/share` 进入图表，图表组合的编辑入口在管理页。
+- “社区”展开排行榜、Tc~X 演变和 AI 学术讨论；[科研交流](06_Researcher_Community_Forum/community-discussion.md)提供超级管理员提问、多模型自动回答、历史评论只读及内容治理。旧 `/share` 进入图表，图表组合的编辑入口在管理页。
 - Tc 估算由代码明确标记为实验页面，不构成模型科学有效性的保证。
 - 引用发展图不依赖 Neo4j：GROBID 在上传 Worker 中解析参考文献，MySQL 保存原始记录和匹配状态，Go API 直接查询公开引用图。旧 Neo4j 图谱仍供历史材料/作者关系功能使用。
 - 账号身份与分级工作台变更已通过 Go 全量测试、Vitest、前端生产构建和 Alembic MySQL 离线迁移 SQL 生成；真实 SMTP、持久化 MySQL 与完整部署链路仍需在目标环境验收。

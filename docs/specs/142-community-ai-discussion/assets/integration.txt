@@ -1,0 +1,9 @@
+PASS migration upgrade/downgrade/upgrade
+PASS API role/idempotency, shared sources, real HTTP models, partial failure/retry and credential cleanup
+PASS concurrent model completion and duplicate task replay
+PASS revision conflict, interrupted worker recovery, hidden content guard, random question pipeline
+PASS real worker process interruption and task recovery
+PASS source revocation and populated migration downgrade guard
+ok  	scwiki/server/handlers	0.765s
+PASS browser 6 checks
+RESULT /var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-142-fu4xsr52/result.json
