@@ -13,6 +13,7 @@ const UploadPage = lazy(() => import('./pages/UploadPage'))
 const UploadTaskPage = lazy(() => import('./pages/UploadTaskPage'))
 const PaperDetailPage = lazy(() => import('./pages/PaperDetailPage'))
 const SpectrumDetailPage = lazy(() => import('./pages/SpectrumDetailPage'))
+const StructuralRecordPage = lazy(() => import('./pages/StructuralRecordPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 const AccountPage = lazy(() => import('./pages/AccountPage'))
 const PublicUserPage = lazy(() => import('./pages/PublicUserPage'))
@@ -37,6 +38,7 @@ const PaperRevisionPage = React.lazy(() => import('./pages/PaperRevisionPage'))
 
 const LazyRoutes: React.FC = () => (
   <Routes>
+    <Route path="/structures/:recordId" element={<Spin><StructuralRecordPage /></Spin>} />
     <Route path="/search" element={<Spin><SearchPage /></Spin>} />
     <Route path="/share" element={<Navigate to="/share/charts" replace />} />
     <Route path="/share/charts" element={<Spin><SharePage section="charts" /></Spin>} />

@@ -425,6 +425,8 @@ async def persist_scientific_draft(
                         record_path,
                         evidence, "property_record", entity,
                     ))
+    from backend.services.structural_records import persist as persist_structural_records
+    await persist_structural_records(session, paper, draft, source_file_ids)
     return targets
 
 

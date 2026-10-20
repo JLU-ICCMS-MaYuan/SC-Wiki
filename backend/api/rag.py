@@ -487,6 +487,8 @@ def _validate_draft(
     paper, material_states = _draft_values(draft)
     _validate_tc_method_invariants(material_states, partial=partial)
     _validate_property_module_contract(material_states, partial=partial)
+    from backend.services.structural_records import validate_draft as validate_structural_records
+    validate_structural_records(draft)
     if partial:
         # 草稿保存（PUT）仅做结构性检查，业务字段校验留给提交时执行，
         # 避免半成品草稿被 400 拒绝导致编辑丢失。
@@ -2637,6 +2639,13 @@ async def _rewrite_paper_scientific_draft_in_tx(
         "structure_candidates": draft.get("structure_candidates") or [],
     }
     old_structures = await snapshot_structures(session, paper.id)
+    # 旧客户端编辑普通科学字段时仍保留论文独立结构资料；升版前读取原 revision。
+    from backend.services.structural_records import supplement_draft
+    full_draft = await session.run_sync(lambda sync: supplement_draft(sync, paper, full_draft))
+    if "structural_observations" in draft:
+        full_draft["structural_observations"] = draft["structural_observations"]
+    if "structural_extraction_issues" in draft:
+        full_draft["structural_extraction_issues"] = draft["structural_extraction_issues"]
     prepare_existing_structure_candidates(full_draft, old_structures)
     _validate_draft(full_draft)
     if current_user.role not in {"admin", "superadmin"}:

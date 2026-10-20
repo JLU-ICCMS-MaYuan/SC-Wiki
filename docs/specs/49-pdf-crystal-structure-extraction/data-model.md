@@ -4,6 +4,37 @@
 
 ## 设计原则
 
+2026-10-20 增补：下文既有结构候选与状态规范几何契约继续保留。另设 `paper_structural_records`，使论文报告的结构和部分几何信息在不关联材料状态、没有 Tc 的情况下独立保存。规范几何的 `confirmation` 与资料的 `retention` 分开，不通过伪造 Tc 或主要研究状态取得可检索性。
+
+### 论文独立资料 `paper_structural_records`
+
+| 字段 | 含义与约束 |
+| --- | --- |
+| `id`、`record_key` | 服务端资料 ID、稳定来源标识；同一论文 revision 内来源键唯一 |
+| `paper_id`、`paper_revision` | 唯一来源论文及内容版本；旧版本资料保留，读取只取当前版本 |
+| `kind` | `model` 完整结构；`lattice` 部分几何；`issue` 仅供内部核对的提取问题 |
+| `material`、`elements`、`system_key` | 从实际几何／报告化学式校验出的材料与自身元素集合，供无 Tc 查询 |
+| `pressure_gpa`、`space_group` | 明确报告的压力与空间群；未知保持空 |
+| `state_key` | 可选关联状态；不构成保存前提，也不作为独立资料的删除外键 |
+| `retention` | `pending` 待核对；`retained` 明确保留；`excluded` 明确不保留；提取问题始终 pending |
+| `data_json` | 完整原始／派生坐标、表示、参数、单位、原文分组、逐行来源及保留决定 |
+
+来源只保存文件身份、原名、角色、哈希、页码、表／行、几何位置和引句，不对客户端输出服务器路径。完整几何在服务端重新读取、核对化学计量并生成派生表示，不信任浏览器提供的哈希、元素与“校验通过”。几何资料与原附件不因材料状态删除而丢失。
+
+### 草稿增补
+
+`structure_candidates[]` 增加 `retention`；`retained` 允许 `material_state_ref="unassigned:*"`，不改变既有 `confirmation=confirmed` 必须关联状态的规范几何门。
+
+`structural_observations[]` 保存来源键、化学式、原空间群、压力、原文近似分组、直接报告的 `cell_parameters`、对称性派生参数、单位、键长范围、`coordinate_status=not_reported` 和 `retention`。同一压力的谐／非谐行不共用来源键。
+
+`structural_extraction_issues[]` 保存无法恢复的布局、单位或分组原因；`structural_extraction_version` 表明解析版本。问题资料可以随论文保留，但从不进入公开结构搜索，也不能导出为完整原子文件。
+
+### 保存、返修与公开
+
+资料写入由 `persist_scientific_draft` 的同一事务调用，失败回滚不留下半套来源资料。返修读取恢复独立模型、观测和保留决定；升版创建新 revision 资料并保留旧版本。管理员通过旧请求体修改其他字段时，服务端仍继承未加载的独立资料。
+
+公开查询要求 `retention=retained`、来源论文 `review_status=approved` 且已批准 revision 与当前内容及资料版本一致。上传者／有权限的管理员可查看当前私有资料。模型为原胞／惯用胞提供 CIF、POSCAR；部分观测只提供带来源 JSON／CSV，不制造原子位置。
+
 结构候选是上传草稿阶段的临时聚合；正式结构沿用 #32 的 `StructureModel`，不新增结构级审核
 状态。原始输入、直接报告字段和派生表示分别保存，避免把推导内容误标为论文原文。
 

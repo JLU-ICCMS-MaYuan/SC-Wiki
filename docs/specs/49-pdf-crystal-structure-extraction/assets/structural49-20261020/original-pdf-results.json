@@ -1,0 +1,254 @@
+{
+  "models": [
+    {
+      "material": "LaSc2",
+      "space_group": "Fddd",
+      "atom_count": 24,
+      "sources": [
+        {
+          "filename": "2024 La-Sc-H 何新玲-SI.pdf",
+          "sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+          "page": 8,
+          "table": null
+        },
+        {
+          "filename": "2024 La-Sc-H 何新玲-SI.pdf",
+          "sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+          "page": 8,
+          "table": null
+        }
+      ]
+    },
+    {
+      "material": "LaSc2H24",
+      "space_group": "P6/mmm",
+      "atom_count": 27,
+      "sources": [
+        {
+          "filename": "2024 La-Sc-H 何新玲-SI.pdf",
+          "sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+          "page": 8,
+          "table": null
+        },
+        {
+          "filename": "2024 La-Sc-H 何新玲-SI.pdf",
+          "sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+          "page": 8,
+          "table": null
+        }
+      ]
+    }
+  ],
+  "observations": [
+    {
+      "material": "LaSc2H24",
+      "pressure_value_gpa": 290.0,
+      "calculation_label": "Harmonic",
+      "cell_parameters": {
+        "a": 4.751,
+        "c": 3.229
+      },
+      "cell_constraints": {
+        "b": "a"
+      },
+      "derived_cell_parameters": {
+        "b": 4.751,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120
+      },
+      "bond_lengths": [
+        {
+          "pair": "H-H",
+          "min": 1.068,
+          "max": 1.209,
+          "unit": "angstrom"
+        }
+      ]
+    },
+    {
+      "material": "LaSc2H24",
+      "pressure_value_gpa": 300.0,
+      "calculation_label": "Harmonic",
+      "cell_parameters": {
+        "a": 4.735,
+        "c": 3.216
+      },
+      "cell_constraints": {
+        "b": "a"
+      },
+      "derived_cell_parameters": {
+        "b": 4.735,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120
+      },
+      "bond_lengths": [
+        {
+          "pair": "H-H",
+          "min": 1.076,
+          "max": 1.204,
+          "unit": "angstrom"
+        }
+      ]
+    },
+    {
+      "material": "LaSc2H24",
+      "pressure_value_gpa": 350.0,
+      "calculation_label": "Harmonic",
+      "cell_parameters": {
+        "a": 4.659,
+        "c": 3.157
+      },
+      "cell_constraints": {
+        "b": "a"
+      },
+      "derived_cell_parameters": {
+        "b": 4.659,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120
+      },
+      "bond_lengths": [
+        {
+          "pair": "H-H",
+          "min": 1.053,
+          "max": 1.183,
+          "unit": "angstrom"
+        }
+      ]
+    },
+    {
+      "material": "LaSc2H24",
+      "pressure_value_gpa": 150.0,
+      "calculation_label": "Anharmonic",
+      "cell_parameters": {
+        "a": 5.084,
+        "c": 3.528
+      },
+      "cell_constraints": {
+        "b": "a"
+      },
+      "derived_cell_parameters": {
+        "b": 5.084,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120
+      },
+      "bond_lengths": [
+        {
+          "pair": "H-H",
+          "min": 1.156,
+          "max": 1.307,
+          "unit": "angstrom"
+        }
+      ]
+    },
+    {
+      "material": "LaSc2H24",
+      "pressure_value_gpa": 167.0,
+      "calculation_label": "Anharmonic",
+      "cell_parameters": {
+        "a": 5.033,
+        "c": 3.49
+      },
+      "cell_constraints": {
+        "b": "a"
+      },
+      "derived_cell_parameters": {
+        "b": 5.033,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120
+      },
+      "bond_lengths": [
+        {
+          "pair": "H-H",
+          "min": 1.147,
+          "max": 1.293,
+          "unit": "angstrom"
+        }
+      ]
+    },
+    {
+      "material": "LaSc2H24",
+      "pressure_value_gpa": 200.0,
+      "calculation_label": "Anharmonic",
+      "cell_parameters": {
+        "a": 4.943,
+        "c": 3.425
+      },
+      "cell_constraints": {
+        "b": "a"
+      },
+      "derived_cell_parameters": {
+        "b": 4.943,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120
+      },
+      "bond_lengths": [
+        {
+          "pair": "H-H",
+          "min": 1.133,
+          "max": 1.268,
+          "unit": "angstrom"
+        }
+      ]
+    },
+    {
+      "material": "LaSc2H24",
+      "pressure_value_gpa": 250.0,
+      "calculation_label": "Anharmonic",
+      "cell_parameters": {
+        "a": 4.831,
+        "c": 3.341
+      },
+      "cell_constraints": {
+        "b": "a"
+      },
+      "derived_cell_parameters": {
+        "b": 4.831,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120
+      },
+      "bond_lengths": [
+        {
+          "pair": "H-H",
+          "min": 1.113,
+          "max": 1.237,
+          "unit": "angstrom"
+        }
+      ]
+    },
+    {
+      "material": "LaSc2H24",
+      "pressure_value_gpa": 300.0,
+      "calculation_label": "Anharmonic",
+      "cell_parameters": {
+        "a": 4.741,
+        "c": 3.271
+      },
+      "cell_constraints": {
+        "b": "a"
+      },
+      "derived_cell_parameters": {
+        "b": 4.741,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 120
+      },
+      "bond_lengths": [
+        {
+          "pair": "H-H",
+          "min": 1.096,
+          "max": 1.212,
+          "unit": "angstrom"
+        }
+      ]
+    }
+  ],
+  "extraction_issues": [],
+  "model_calls": 0
+}

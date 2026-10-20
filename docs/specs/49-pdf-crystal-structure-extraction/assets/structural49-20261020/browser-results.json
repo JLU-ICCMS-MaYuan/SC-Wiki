@@ -1,0 +1,25 @@
+{
+  "search_no_tc": true,
+  "source_link": true,
+  "atom_count": 24,
+  "real_webgl": true,
+  "cif_download": true,
+  "lattice_csv": true,
+  "partial_no_cif": true,
+  "reextract_models": 2,
+  "reextract_observations": 8,
+  "explicit_apply": true,
+  "retention": true,
+  "model_mobile_width": {
+    "scroll": 390,
+    "viewport": 390
+  },
+  "workspace_mobile_width": {
+    "scroll": 390,
+    "viewport": 390
+  },
+  "isolated_form_saves": 1,
+  "business_writes": 0,
+  "model_calls": 0,
+  "errors": []
+}

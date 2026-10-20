@@ -45,3 +45,11 @@
 
 - 本地空间群筛选未实现，前端不显示空间群范围筛选；结果表格的空间群列继续保留。
 - `superconductor_type` 筛选按 `state_kind` 过滤，与论文级 Material family 的用户预期不符；社区图表侧已迁到 `paper_material_families`，本地检索的取值集合与前端 `SC_TYPE_MAP` 展示映射均未同步。（[Issue #72](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/72)）
+
+## 无 Tc 的结构资料检索
+
+`/search` 在既有元素／化学式入口单列“相关结构资料”，调用 Python `POST /api/rag/structural-records/search`。资料按自身组成匹配，精确查询只匹配相同元素集合，包含查询匹配含选中元素的体系，组合查询匹配选中集合内的子体系；不依赖 Tc 或材料状态。结构区域独立分页，使用关键词、压力和年份筛选，Tc 范围与图表开关只影响 Tc 数据区。
+
+结果显示完整模型或无坐标几何资料、压力、空间群、论文标题／DOI 与来源位置，可进入 `/structures/:recordId` 查看和下载。仅当前已批准论文 revision 中明确保留的模型／观测公开；待核对、排除、提取失败和旧 revision 不进入公开查询。收录伴随结构不表示材料已证实超导。查询直接读取当前事实，无新增结果缓存；缺迁移显示接口错误，不能伪装为零结果。
+
+完整模型详情支持惯用胞／原胞三维展示及 CIF／POSCAR，几何资料提供来源 JSON／CSV，没有原子位置时禁止 CIF／POSCAR。实现与权限验证见 [#49 实施记录](../../specs/49-pdf-crystal-structure-extraction/implementation-20261020.md)。

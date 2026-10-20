@@ -24,6 +24,7 @@ from sqlalchemy.orm import DeclarativeBase, relationship, synonym
 from sqlalchemy.sql import func
 
 from backend.database import Base
+from backend.structural_models import PaperStructuralRecord
 
 
 USERNAME_TYPE = String(32).with_variant(

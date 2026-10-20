@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { StructuralResults } from '../components/PaperStructuralCollection'
 import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import {
   Box, Typography, Card, CardContent, Chip, Button,
@@ -149,6 +150,8 @@ const SearchPage: React.FC = () => {
   const formulaQuery = formula.trim()
   const elementsKey = [...selected].sort().join(',')
   const filtersKey = JSON.stringify(filters)
+  const structuralElements = [...selected].sort()
+  const structuralFormulaSearch = structuralElements.length === 0 && !!formulaQuery
 
   // 直接从图表跳转——加载论文详情
   useEffect(() => {
@@ -438,6 +441,13 @@ const SearchPage: React.FC = () => {
           </Box>
 
           {/* Data table */}
+          <StructuralResults query={structuralFormulaSearch
+            ? { elements: [], mode: 'formula_search', formula: formulaQuery, keyword: filters.formula,
+                pressure_min: filters.pMin > 0 ? filters.pMin : null, pressure_max: filters.pMax < 9999 ? filters.pMax : null,
+                year_min: filters.yMin > 1900 ? filters.yMin : null, year_max: filters.yMax < 2030 ? filters.yMax : null }
+            : structuralElements.length ? { elements: structuralElements, mode, keyword: filters.formula,
+                pressure_min: filters.pMin > 0 ? filters.pMin : null, pressure_max: filters.pMax < 9999 ? filters.pMax : null,
+                year_min: filters.yMin > 1900 ? filters.yMin : null, year_max: filters.yMax < 2030 ? filters.yMax : null } : null} />
           <Card sx={{ position:'relative' }}>
             <CardContent>
               <Typography variant="h2" gutterBottom>{t('search.resultTable')}</Typography>

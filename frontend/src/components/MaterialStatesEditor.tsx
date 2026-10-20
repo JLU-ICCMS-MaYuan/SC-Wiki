@@ -127,6 +127,7 @@ export const EvidenceNotes: React.FC<{
 }
 
 interface MaterialStatesEditorProps {
+  independentStructureWorkspace?: boolean
   propertySpectra?: PropertySpectraContext
   spectrumTarget?: SpectrumTarget
   beforeSpectrumEdit?: () => Promise<boolean>
@@ -251,6 +252,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   spectrumTarget,
   beforeSpectrumEdit,
   propertySpectra,
+  independentStructureWorkspace,
 }) => {
   const { t, lang, dict } = useLanguage()
   const controlsContainer = useContext(MaterialStateControlsContext)
@@ -915,7 +917,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
             <Alert severity="info">{t('upload.noMaterialStates')}</Alert>
           )}
 
-          {!readOnly && unassignedCandidates.length > 0 && (
+          {!readOnly && !independentStructureWorkspace && unassignedCandidates.length > 0 && (
             <Box data-testid="unassigned-candidates" sx={{ mt: 2 }}>
               <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
                 {t('upload.unassignedCandidatesTitle')}

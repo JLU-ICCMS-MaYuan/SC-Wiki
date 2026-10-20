@@ -8,7 +8,7 @@
 
 | 小功能 | 职责 | 依赖 |
 | --- | --- | --- |
-| [本地材料检索](local-material-search.md) | 按化学式或元素关系检索临界温度记录 | Go API、MySQL、`property_records`、`material_states` |
+| [本地材料检索](local-material-search.md) | 按化学式或元素关系检索临界温度与独立结构资料 | Go／Python API、MySQL、`property_records`、`material_states`、`paper_structural_records` |
 | [论文与物性结果](paper-and-property-results.md) | 组织论文、关键物性、结构预览和搜索结果 | 本地材料检索、论文关系 |
 | [分享与导出](share-and-export.md) | 输出 JSON、RIS 等分享数据 | 论文与物性结果 |
 | [代表结构查询与下载](representative-query-and-download.md) | 匹配超导记录、选取代表结构并控制下载 | 已批准结构、访问权限 |

@@ -1619,6 +1619,9 @@ def _normalize_draft(
         "classification_evidence": _as_list(raw.get("classification_evidence")),
         "field_evidence": field_evidence,
     }
+    for field in ("structural_observations", "structural_extraction_version", "structural_extraction_issues"):
+        if field in raw:
+            normalized[field] = raw[field]
     if isinstance(raw.get("theoretical_subtype_assessment"), dict):
         normalized["theoretical_subtype_assessment"] = raw["theoretical_subtype_assessment"]
     if isinstance(raw.get("keyword_assessment"), dict):
@@ -1904,6 +1907,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         combined_markdown: list[str] = []
         identities: list[dict[str, Any]] = []
         structure_candidates: list[dict[str, Any]] = []
+        structural_observations: list[dict[str, Any]] = []
+        structural_issues: list[dict[str, Any]] = []
         for file_item in sources:
             file_item["parser_profile"] = state.get("parser_profile") or "legacy"
             _ensure_not_cancelled(task_id)
@@ -1984,8 +1989,16 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                             "file_id": file_item.get("file_id"),
                             "filename": file_item.get("original_filename") or file_source.name,
                             "role": file_item.get("role"),
+                            "sha256": file_item.get("sha256"),
                         },
                     ))
+                    from backend.ingest.structural_observations import extract_lattice_observations
+                    observations, problems = extract_lattice_observations(file_source, source={
+                        "file_id": file_item.get("file_id"), "filename": file_item.get("original_filename") or file_source.name,
+                        "role": file_item.get("role"), "sha256": file_item.get("sha256"),
+                    })
+                    structural_observations.extend(observations)
+                    structural_issues.extend(problems)
             except Exception as extraction_exc:
                 if multi_file:
                     file_item["extraction_status"] = "failed"
@@ -2267,6 +2280,11 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         validate_draft_generated_english(draft)
         _bind_structure_candidates(draft, structure_candidates)
         draft["structure_candidates"] = structure_candidates
+        for candidate in structure_candidates:
+            candidate.setdefault("retention", "pending")
+        draft["structural_observations"] = structural_observations
+        draft["structural_extraction_issues"] = structural_issues
+        draft["structural_extraction_version"] = "structural-records-v1"
         draft["citation_extraction"] = citation_extraction
         if state.get("parser_profile") == "complementary":
             draft.update({key: bibliography_patch[key] for key in ("bibliography_sources", "bibliography_conflicts") if key in bibliography_patch})

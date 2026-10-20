@@ -102,6 +102,8 @@ export interface StructureCandidateValidation {
 }
 
 export interface StructureCandidate {
+  retention?: 'pending' | 'retained' | 'excluded'
+  structural_record?: StructureCandidate
   candidate_id: string
   material_state_ref?: string | null
   source_kind?: 'attachment' | 'pdf_reported' | 'pdf_derived' | 'merged' | string
@@ -196,6 +198,9 @@ export interface UploadDraft {
   material_states: DraftMaterialState[]
   citation_extraction?: CitationExtraction | null
   structure_candidates?: StructureCandidate[]
+  structural_observations?: import('./structuralRecords').LatticeObservation[]
+  structural_extraction_version?: string
+  structural_extraction_issues?: Array<{ reason: string; page?: number }>
   research_motivation?: string
   classification_evidence?: SourceEvidence[]
   theoretical_subtype_assessment?: { status: 'completed' | 'uncertain' | 'failed'; value: string | null; reason: string; evidences: SourceEvidence[]; source_hash: string; rule_version: string; model: string }
@@ -425,6 +430,9 @@ export function normalizeUploadDraft(value: unknown): UploadDraft {
       }
     }) : [],
     structure_candidates: Array.isArray(raw.structure_candidates) ? raw.structure_candidates : [],
+    ...(Array.isArray(raw.structural_observations) ? { structural_observations: raw.structural_observations } : {}),
+    structural_extraction_version: raw.structural_extraction_version,
+    structural_extraction_issues: raw.structural_extraction_issues,
     classification_evidence: Array.isArray(raw.classification_evidence)
       ? raw.classification_evidence
       : [],

@@ -114,7 +114,8 @@ def current_draft(session, paper):
                 representations={'conventional': {'cif': {'text': text, 'available': True}}},
                 validation={'structure_format': 'cif', 'atom_count': structure.atom_count, 'cell_parameters': structure.cell_parameters},
                 sources=[{'file_id': f'structure_{structure.id}', 'filename': f'structure_{structure.id}.cif', 'role': 'attachment'}]))
-    return jsonable_encoder(dict(paper=data, material_states=states, structure_candidates=candidates))
+    from backend.services.structural_records import supplement_draft
+    return jsonable_encoder(supplement_draft(session, paper, dict(paper=data, material_states=states, structure_candidates=candidates)))
 
 
 def fingerprint(session, paper, draft=None):

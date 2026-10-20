@@ -590,7 +590,7 @@ describe('T010：UploadTaskEditor 集成（Issue #77）', () => {
     vi.clearAllMocks()
   })
 
-  it('校对页展示未分配候选；分配确认后保存草稿的 structure_candidates 含 confirmed 候选', async () => {
+  it('校对页可独立保留未分配模型，保存时无需强制关联材料状态', async () => {
     vi.mocked(api.get).mockImplementation((url: string) => {
       if (String(url).includes('/space-groups')) {
         return Promise.resolve({ space_groups: [] } as never)
@@ -601,20 +601,18 @@ describe('T010：UploadTaskEditor 集成（Issue #77）', () => {
 
     render(<UploadTaskEditor taskId={'c'.repeat(32)} onSubmitted={vi.fn()} draftOverride={draftWithUnassigned} />)
 
-    const region = await screen.findByTestId('unassigned-candidates')
+    const region = await screen.findByTestId('paper-structural-workspace')
     expect(region).toHaveTextContent('Hg-R-3m.vasp')
 
-    fireEvent.mouseDown(screen.getByLabelText('分配到材料状态'))
-    fireEvent.click(await screen.findByRole('option', { name: /材料状态 #1/ }))
-    fireEvent.click(screen.getByRole('button', { name: '采用此结构' }))
+    fireEvent.click(screen.getByRole('button', { name: '保留此结构' }))
 
     fireEvent.click(screen.getByRole('button', { name: '立即保存' }))
     await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1))
     const body = api.put.mock.calls[0][1] as { structure_candidates: Array<Record<string, unknown>> }
     expect(body.structure_candidates[0]).toMatchObject({
-      material_state_ref: 'material_states[0]',
-      confirmation: 'confirmed',
-      status: 'confirmed',
+      material_state_ref: 'unassigned:file-1',
+      confirmation: 'unreviewed',
+      status: 'valid', retention: 'retained',
     })
   })
 })

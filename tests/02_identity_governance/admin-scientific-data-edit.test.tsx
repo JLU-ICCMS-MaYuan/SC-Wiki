@@ -124,6 +124,9 @@ async function openEditDialog() {
   await user.click(await screen.findByRole('button', { name: '论文审核' }))
   await user.click(await screen.findByRole('button', { name: '编辑' }))
   expect(await screen.findByText('编辑论文')).toBeVisible()
+  const module = await screen.findByTestId('property-module-superconductive_properties')
+  const fold = module.querySelector('details')
+  if (fold && !fold.open) await user.click(fold.querySelector('summary')!)
   return user
 }
 
@@ -134,7 +137,7 @@ describe('T027：待审核论文科学数据原地编辑', () => {
     // 可编辑模式：输入框可修改（readOnly 下不会出现可编辑输入）
     const formula = screen.getByLabelText('化学式')
     expect(formula).toHaveValue('Sn')
-    expect(within(screen.getByTestId('property-record-record-tc')).getByLabelText('Tc 值')).toHaveValue('3.78')
+    expect(within(screen.getByTestId('property-record-record-tc')).getByLabelText('Tc')).toHaveValue('3.78')
     expect(screen.getByDisplayValue('threshold current')).toBeVisible()
   })
 
@@ -145,7 +148,7 @@ describe('T027：待审核论文科学数据原地编辑', () => {
     const formula = screen.getByLabelText('化学式')
     await user.clear(formula)
     await user.type(formula, 'H3S')
-    const tcValue = within(screen.getByTestId('property-record-record-tc')).getByLabelText('Tc 值')
+    const tcValue = within(screen.getByTestId('property-record-record-tc')).getByLabelText('Tc')
     await user.clear(tcValue)
     await user.type(tcValue, '250')
     const rawValue = within(screen.getByTestId('property-record-record-current')).getByLabelText('原始值')
@@ -182,13 +185,15 @@ describe('T027：待审核论文科学数据原地编辑', () => {
     expect(await screen.findByText(/论文级字段校验失败/)).toBeVisible()
   })
 
-  it('切换为实验测量后，科学数据保存请求不携带计算上下文', async () => {
+  it('已有实验测量记录保存时不携带计算上下文', async () => {
+    const measured = structuredClone(detailWithStates)
+    Object.assign(measured.material_states[0].property_modules[0].records[0], {
+      record_type: 'measured_tc', method_code: 'resistivity',
+      definition_key: 'record.superconductive_properties.measured_tc.resistivity', payload: { experimental_conditions: {} },
+    })
+    const originalGet = mockedApi.get.getMockImplementation()!
+    mockedApi.get.mockImplementation((path: string) => path === '/api/admin/papers/88' ? Promise.resolve(measured) as never : originalGet(path))
     const user = await openEditDialog()
-
-    expect(screen.getByLabelText('电声耦合强度 λ')).toHaveValue(1.2)
-    const tcRecord = screen.getByTestId('property-record-record-tc')
-    await user.click(within(tcRecord.parentElement as HTMLElement).getByRole('combobox', { name: '记录定义' }))
-    await user.click(await screen.findByRole('option', { name: /测量 Tc · resistivity/ }))
     expect(screen.queryByLabelText('电声耦合强度 λ')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('对数声子频率 ωlog (K)')).not.toBeInTheDocument()
     expect(screen.queryByLabelText('库仑屏蔽常数 μ*')).not.toBeInTheDocument()

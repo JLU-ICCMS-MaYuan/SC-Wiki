@@ -17,6 +17,7 @@ import PropertyModuleEditor from './PropertyModuleEditor'
 import { toTextList } from '../lib/paperTextLists'
 import { materialLabel } from '../lib/materialIdentity'
 import { Link } from 'react-router-dom'
+import PaperStructuralCollection from './PaperStructuralCollection'
 
 interface PaperEditViewProps {
   // 论文数据与加载/错误分流由路由页面壳 PaperDetailPage 负责，本组件只负责展示。
@@ -94,6 +95,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
   return (
     <PropertySpectraProvider context={{ target: { target: 'paper', target_id: String(paper.id) } }}>
     <Box data-paper-detail>
+      <PaperStructuralCollection paperId={paper.id} />
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 3 }}>
         <Box>

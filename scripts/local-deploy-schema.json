@@ -1,6 +1,6 @@
 {
   "schema_heads": [
-    "20261020_0142"
+    "20261020_0049"
   ],
   "tables": {
     "admin_applications": {
@@ -2597,6 +2597,91 @@
       "unique": [
         [
           "revision_id"
+        ]
+      ]
+    },
+    "paper_structural_records": {
+      "checks": [
+        "(kindin('model','lattice','issue'))",
+        "(retentionin('pending','retained','excluded'))"
+      ],
+      "columns": {
+        "data_json": {
+          "nullable": false,
+          "type": "json"
+        },
+        "elements": {
+          "nullable": false,
+          "type": "json"
+        },
+        "id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "kind": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "material": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "pressure_gpa": {
+          "nullable": true,
+          "type": "decimal(20, 8)"
+        },
+        "record_key": {
+          "nullable": false,
+          "type": "varchar(128)"
+        },
+        "retention": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "space_group": {
+          "nullable": true,
+          "type": "varchar(100)"
+        },
+        "state_key": {
+          "nullable": true,
+          "type": "varchar(128)"
+        },
+        "system_key": {
+          "nullable": false,
+          "type": "varchar(255)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "paper_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "paper_id",
+          "paper_revision",
+          "record_key"
         ]
       ]
     },

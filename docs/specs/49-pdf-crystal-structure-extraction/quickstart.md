@@ -40,3 +40,13 @@ npx vitest run tests/01_decentralized_uploading/structure-candidates.test.tsx
 - 未确认候选不会出现在正式 `structure_models`。
 - 提交晚期失败后，Paper、Evidence 和结构实体没有残留新增记录。
 - approved 当前 revision 的授权查看和导出成功；无权限请求不返回内容。
+
+## 2026-10-20 独立结构资料验收
+
+1. 在专用隔离库执行 `20261020_0049`，验证资料表；缺迁移时应显示明确不可用提示，不能显示为无数据。
+2. 对可搜索原始 PDF 点击“重新读取结构资料”，预览后应用；确认完整模型能在未关联状态时独立保留、切换晶胞和下载。部分观测须显示来源与无原子位置，不应出现完整结构导出。
+3. 保存／重开论文或返修，确认保留决定、原始来源和历史 revision 不丢失。明确保留后，经既有批准流程，元素搜索独立展示该资料及来源论文；不要求 Tc。
+4. 自动化：`python -m pytest backend/tests/test_structural_records.py -q`；配置仅指向空隔离库的 `STRUCTURAL_MYSQL_TEST_URL` 后执行 `backend/tests/test_structural_records_mysql.py`；使用现有 Vitest 配置运行 `tests/01_decentralized_uploading/structural-records.test.tsx`。
+5. 当前原始 SI 核查预期为两个完整模型及 S2 八条无坐标观测；LaSc₂ 的惯用胞含 24 原子。两个 300 GPa 观测分别保持 Harmonic／Anharmonic 原值，不共用或补入 S1 原子位置。
+
+实际执行结果和业务应用边界见 [实施记录](implementation-20261020.md)。业务库迁移与旧任务正式应用尚未执行，不把本验收步骤当作执行授权。

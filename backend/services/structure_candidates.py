@@ -216,7 +216,7 @@ def build_structure_candidate(
     validation = validate_atoms(atoms, normalized, source_text=structure_text).as_dict()
     return {
         "candidate_id": hashlib.sha256(
-            f"{source.get('file_id') or source.get('filename') or ''}:{validation['structure_hash']}".encode()
+            f"{source.get('sha256') or source.get('file_id') or source.get('filename') or ''}:{validation['structure_hash']}".encode()
         ).hexdigest()[:24],
         "material_state_ref": material_state_ref,
         "source_kind": source_kind,

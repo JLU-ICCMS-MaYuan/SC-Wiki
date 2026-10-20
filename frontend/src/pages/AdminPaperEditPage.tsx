@@ -23,6 +23,8 @@ import {
 } from '../lib/classifications'
 import { DraftMaterialState, StructureCandidate, unwrapData } from '../lib/paperProcessing'
 import MaterialStatesEditor, { SpaceGroupOption } from '../components/MaterialStatesEditor'
+import PaperStructuralWorkspace from '../components/PaperStructuralWorkspace'
+import type { LatticeObservation } from '../lib/structuralRecords'
 import PaperMetadataRow from '../components/PaperMetadataRow'
 import { useLanguage } from '../context/LanguageContext'
 import { convertLegacyPropertyModules, PROPERTY_SCHEMA_VERSION } from '../lib/propertyModules'
@@ -81,6 +83,8 @@ const AdminPaperEditPage: React.FC = () => {
     saveCurrent: () => handleEditSave([], undefined, undefined, false),
   })
   const [editStructureCandidates, setEditStructureCandidates] = useState<StructureCandidate[]>([])
+  const [editStructuralObservations, setEditStructuralObservations] = useState<LatticeObservation[]>([])
+  const [structuralLoadError, setStructuralLoadError] = useState('')
   const scientificIdentityMap = useRef<ScientificIdentityMap>({})
   const [editSpaceGroups, setEditSpaceGroups] = useState<SpaceGroupOption[]>([])
   // 论文原本是否有科学数据：有才在保存时走科学数据段（契约 C4 第二步）
@@ -164,6 +168,24 @@ const AdminPaperEditPage: React.FC = () => {
             candidateFromStructureModel(model, `material_states[${index}]`)))
         setEditMaterialStates(materialStates)
         setEditStructureCandidates(structureCandidates)
+        try {
+          const collection = await api.get<any>(`/api/rag/structural-records/paper/${paperId}`)
+          const models = (collection.items || []).filter((item: any) => item.kind === 'model' || item.kind === 'issue' && item.data?.candidate_id)
+          const candidates = [...structureCandidates]
+          for (const item of models) {
+            const index = materialStates.findIndex(state => state.state_key === item.state_key)
+            const ref = index >= 0 ? `material_states[${index}]` : 'unassigned:paper'
+            const adopted = index >= 0 ? candidates.find(c => c.material_state_ref === ref) : undefined
+            if (adopted) Object.assign(adopted, { retention: item.retention, structural_record: item.data })
+            else candidates.push({ ...item.data, retention: item.retention, material_state_ref: ref })
+          }
+          setEditStructureCandidates(candidates)
+          setEditStructuralObservations((collection.items || []).filter((item: any) => item.kind === 'lattice').map((item: any) => ({ ...item.data, retention: item.retention })))
+          setStructuralLoadError('')
+        } catch (error: any) {
+          // 未迁移的旧环境仍可编辑原字段；服务端保存会保护未加载的结构资料。
+          setStructuralLoadError(error.message || '结构资料读取失败')
+        }
         setEditHadScientificData(
           materialStates.length > 0 || structureCandidates.length > 0 || classifications.materialFamilies.length > 0,
         )
@@ -249,12 +271,11 @@ const AdminPaperEditPage: React.FC = () => {
       // 第一步：论文级字段保存（Go）。失败在此终止，不调用科学数据段。
       if (resumeStage !== 'scientific') await api.put(`/api/admin/papers/${paperId}`, payload)
       if (patches.length) { setEditForm(changed.paper); setEditListText({}) }
-      if (editHadScientificData || changed.paper.material_families?.length || changed.material_states.length || editStructureCandidates.length) {
+      if (editHadScientificData || changed.paper.material_families?.length || changed.material_states.length || editStructureCandidates.length || editStructuralObservations.length) {
         try {
           const identities = remapScientificIdentities(changed.material_states, editStructureCandidates, scientificIdentityMap.current)
           // 第二步：科学数据整体替换（Python，契约 C1）。
-          // structure_candidates 只提交已确认候选：未确认（unreviewed）与已排除（excluded）
-          // 的候选不落库，与上传链路「先确认后保存」的语义一致（契约 C1/C2）。
+          // 规范几何只采用已确认候选；独立资料同时保存保留决定，待核对与排除项不公开。
           const response = await api.put<{ ok: boolean; data: ScientificIdentityMap & { revision_bumped?: boolean } }>(
             `/api/rag/papers/${paperId}/scientific-draft`,
             {
@@ -262,7 +283,8 @@ const AdminPaperEditPage: React.FC = () => {
               superconductor_kind: changed.paper.superconductor_kind || 'unknown',
               material_families: changed.paper.material_families,
               material_states: identities.states,
-              structure_candidates: identities.candidates.filter(candidate => candidate.confirmation === 'confirmed'),
+              structure_candidates: identities.candidates.filter(candidate => candidate.confirmation === 'confirmed' || candidate.retention),
+              ...(!structuralLoadError ? { structural_observations: editStructuralObservations } : {}),
               history_operation_id: historyOperationId, evidence_preparation_id: preparationId,
             },
           )
@@ -588,6 +610,7 @@ const AdminPaperEditPage: React.FC = () => {
               数据来自 /api/admin/papers/:id 的 material_states（含 property_modules/structures），
               编辑结果随保存时的 C1 请求整体替换（T020/T030/T034）。 */}
           <MaterialStatesEditor
+            independentStructureWorkspace
             propertySpectra={{ target: { target: 'paper', target_id: String(paperId) }, beforeNavigate: async () => {
               if (evidenceWorkflow.hasManualDrafts()) throw new Error('请先保存或处理来源核对中的人工修改草稿，再打开谱详情。')
               const version = evidenceWorkflow.getEditRevision()
@@ -615,6 +638,9 @@ const AdminPaperEditPage: React.FC = () => {
             onUploadStructure={handleUploadStructure}
             onError={setSnackbar}
           />
+          {structuralLoadError && <Alert severity="warning">论文独立结构资料暂不可读取：{structuralLoadError}。当前未加载的资料会由服务端保留。</Alert>}
+          <PaperStructuralWorkspace candidates={editStructureCandidates} observations={editStructuralObservations}
+            onCandidates={setEditStructureCandidates} onObservations={setEditStructuralObservations} />
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>
             <Button variant="outlined" onClick={() => navigate(workspacePath)}>{t('common.cancel')}</Button>

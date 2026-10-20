@@ -25,6 +25,8 @@ import { validateRecordClient, validateTcRecords } from '../lib/formDefinitions'
 import EvidenceFieldMarkers, { readOnlyEvidenceFormSx } from './EvidenceFieldMarkers'
 import PaperMaterialsSection from './PaperMaterialsSection'
 import { researchMaterials } from '../lib/paperMaterials'
+import PaperStructuralWorkspace from './PaperStructuralWorkspace'
+import { mergeStructuralPreview } from '../lib/structuralRecords'
 
 interface UploadTaskEditorProps {
   taskId: string
@@ -851,6 +853,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       </Box>
 
       <MaterialStatesEditor
+        independentStructureWorkspace
         propertySpectra={{ target: revisionPaperId && revisionMeta.current
           ? { target: 'revision', target_id: revisionMeta.current.revision_id }
           : { target: 'upload', target_id: taskId }, beforeNavigate: async () => {
@@ -891,6 +894,27 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         superconductorKind={draft.paper.superconductor_kind}
         onError={setError}
       />
+      <PaperStructuralWorkspace candidates={draft.structure_candidates || []} observations={draft.structural_observations || []}
+        readOnly={readOnly || submitting} issues={draft.structural_extraction_issues || []}
+        onCandidates={values => setDraftField('structure_candidates', values)}
+        onObservations={values => setDraftField('structural_observations', values)}
+        onReextract={readOnly ? undefined : async () => {
+          if (evidenceWorkflow.hasManualDrafts()) throw new Error('请先保存来源核对中的人工修改，再读取结构资料。')
+          if (!(await saveDraft(true, true, true))) throw new Error('主表单尚未保存，请稍后重试。')
+          const version = revisionRef.current
+          const result = await api.post<any>('/api/rag/structural-records/reextract', revisionPaperId && revisionMeta.current
+            ? { target: 'revision', target_id: revisionMeta.current.revision_id } : { target: 'upload', target_id: taskId })
+          return { ...result, editor_version: version }
+        }}
+        onApplyPreview={value => {
+          if (value.editor_version !== revisionRef.current) throw new Error('表单在读取期间已变化，请重新读取；当前输入已保留。')
+          changeDraft(current => ({ ...current,
+            structure_candidates: mergeStructuralPreview(current.structure_candidates || [], value.structure_candidates),
+            structural_observations: mergeStructuralPreview(current.structural_observations || [], value.structural_observations),
+            structural_extraction_issues: value.structural_extraction_issues,
+            structural_extraction_version: value.structural_extraction_version,
+          }))
+        }} />
     </Box>
     </Box>
   )

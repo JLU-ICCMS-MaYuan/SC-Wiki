@@ -61,6 +61,8 @@ app.include_router(rag.router)
 from backend.api import evidence, paper_revisions
 from backend.api import spectra
 app.include_router(spectra.router)
+from backend.api import structural_records
+app.include_router(structural_records.router)
 app.include_router(evidence.router)
 app.include_router(paper_revisions.router)
 app.include_router(upload_tasks.router)
