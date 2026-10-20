@@ -17,6 +17,7 @@ from sqlalchemy import and_, func
 from backend.database import SessionLocal
 from backend.db_helpers import FORMULA_NON_ELEMENT_TOKENS, extract_formula_elements_loose, normalize_formula
 from backend.ingest.chunker import Chunk, chunk_paper
+from backend.ingest.calculation_methods import METHOD_SEMANTICS_PROMPT, validate_extracted_methods
 from backend.ingest.extractor import _parse_result
 from backend.ingest.pdf_extractor import extract_text_from_pdf
 from backend.ingest.document_parsers import (
@@ -146,7 +147,8 @@ with increasing bounds, no scalar mu_star; without explicit pairing use key=mu_s
 """
 CHUNK_SYSTEM_PROMPT += "\nRead table headers, groups, units, title and footnotes with ALL data rows. Preserve per-result lambda_ep, omega_log (K), mu_star and harmonic/anharmonic identity. Only explicit inverse Tc–mu pairing uses the special mu_star range; otherwise use mu_star_reported_range. Never broadcast state-level parameters across methods.\n"
 
-CHUNK_RESULT_SCHEMA_VERSION = 12
+CHUNK_SYSTEM_PROMPT += METHOD_SEMANTICS_PROMPT
+CHUNK_RESULT_SCHEMA_VERSION = 13
 
 PUBLIC_CHUNK_RESULT_FIELDS = {
     "metadata", "paper_type_evidence", "research_materials",
@@ -262,6 +264,9 @@ issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测�
   "research_motivation": "",
   "classification_evidence": [{"section": "", "page": null, "quote": ""}]
 }"""
+
+
+SUMMARY_SYSTEM_PROMPT += METHOD_SEMANTICS_PROMPT
 
 
 SUMMARY_SYSTEM_PROMPT += EXPERIMENTAL_CONDITIONS_PROMPT
@@ -601,6 +606,13 @@ def _read_chunk(
             except ValueError as retry_error:
                 raise ParserError("domain_invalid_output", "科学提取格式、条件或来源范围不符合契约，请重试或人工核对",
                                   profile=profile, parser="domain_extractor") from retry_error
+    if not structured:
+        try:
+            validate_extracted_methods(result)
+        except ValueError as exc:
+            _ensure_not_cancelled(task_id)
+            result = complete_json(system_prompt, prompt + '\n计算方法类别错误，请根据原文修正，未知保持空值：' + str(exc), retries=0)
+            validate_extracted_methods(result)
     validate_chunk_generated_english(result)
     result["_schema_version"] = CHUNK_RESULT_SCHEMA_VERSION
     result["_document_signature"] = signature

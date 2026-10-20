@@ -50,3 +50,8 @@
 ## 验证边界
 
 契约回归覆盖双入口、真实生产者消费链、payload 深合并、配对方向、空值、阶段、局部例外、伪造引句、取消、重试、缓存失效与来源变更。模拟模型响应只能证明机械转换，真实模型与原 PDF、浏览器和 MySQL 验收分开记录。
+
+
+## US4：方法字段语义
+
+`electronic_method`保存DFT、HF等电子结构理论；`exchange_correlation_functional`保存PBE等泛函；`calculation_code`保存QE/VASP等软件。DFPT、有限位移法归入声子方法，沿现有阶段化扩展以`electron_phonon.phonon_method`保存。四类值分别绑定自身适用证据，不以出现某一词替代字段语义核对。旧错误值不被静默替换，新的错误提取须重试/报告缺口，旧核对不能继续授予支持。

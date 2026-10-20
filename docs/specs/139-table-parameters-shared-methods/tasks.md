@@ -144,3 +144,12 @@ T022 没有改动不可读科学内容的门槛，也没有按 OCR 噪声字符�
 - [ ] T031 展示并确认 #139 完整远程追加正文，分别同步Issue；推送和远程链接核验继续等待单独授权。
 
 T027/T028 技术完成状态由 T029/T030 与真实验收支撑；远程协作仍未完成，不能据此关闭 Issue。
+
+
+## US4：计算方法语义修正
+
+- [x] T032 对照完整原话与已确认增量，更新#139、Spec/Plan/Research并归档IMG-004。
+- [x] T033 在`backend/ingest/calculation_methods.py`、`scientific_context.py`、`scientific_contracts.py`、`domain_extraction.py`、`upload_jobs.py`统一方法语义、修正提取与补空，升级相关缓存。
+- [x] T034 在`backend/ingest/property_evidence.py`及必要的建议入口阻止错误类别与旧支持继续通过，保留正确人工值及旧历史。
+- [x] T035 新增方法分类生产链回归，验证真实La–Sc–H Methods、阶段扩展、保存重读、缺失值及旧缓存边界；独立增量副本验证。
+- [x] T036 更新Overview及US4验收记录，核对独立增量并回写Issue；Git提交号在提交完成后追加，不推送。

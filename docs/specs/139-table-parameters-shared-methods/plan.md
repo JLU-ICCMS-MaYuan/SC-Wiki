@@ -110,3 +110,16 @@ docs/specs/139-table-parameters-shared-methods/
 独立工具 backfill-upload-calculation-conditions.py 将准备与应用分开：备份有效规范化草稿/任务/来源，完整读取主文和SI，逐表行核对近似；只补空的计算条件及来源关联，不改 Tc／μ*／λ／ωlog／代表或人工值。应用在既有任务锁内重新核对 revision、全草稿hash及来源，变化即拒绝。旧真实模型候选仅在完整来源、草稿、模型签名及目标指纹一致时重用，现行值／引句／近似／阶段校验全部重跑。
 
 上下文版本v4：软连字符仅作格式等价；数字保留表列边界，禁止将相邻290和3.56拼成2903.56。SSCHA必须有本条明确非谐表行，结构优化PBE不能进入EPC泛函，未报告展宽保持空。范围推断缓存为uncertain/paper_inference，不冒充管理员批准。真实补全136项、8条结果，详细审计见validation.md。
+
+
+## US4实施计划：计算方法分类
+
+复用Python提取、现有JSON扩展和字段核对链。新增`backend/ingest/calculation_methods.py`集中定义字段语义与错误类别判别；`scientific_context.py`修正READ/ASSOCIATE提示、遗漏检查与补空守卫，并升级上下文缓存；`scientific_contracts.py`在新提取的条件验证处检查类别。`domain_extraction.py`和`upload_jobs.py`两种入口共享语义提示。`property_evidence.py`和建议校验按当前方法语义检查原文结论及旧缓存，不修改业务值。
+
+| 需求 | 职责／事实来源 | 任务 | 验证 |
+| --- | --- | --- | --- |
+| FR-012/013、SC-006 | 共享语义、全文READ和阶段扩展 | T032/T033 | 正反例及真实READ→关联→补空 |
+| FR-014/015、SC-008 | 来源核对及历史支持读取 | T034 | 旧支持/接受不能绕过类别检查，正确DFT保留 |
+| FR-016、SC-007 | 提取契约与原文适用范围 | T033/T035 | 原文Methods、缺失值、HF与DFT分阶段 |
+
+执行顺序T032→T033→T034→T035→T036；同文件串行。用户确认已获得，不创建分支；在mayuan保留原有改动并只提交本次增量。读取新Spec、Plan、Research与原合同后实施；业务结构不变，无新数据库合同。已发布定义不原地修改。

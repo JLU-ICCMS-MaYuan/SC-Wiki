@@ -20,7 +20,7 @@
   "methods_pdf_page": 5,
   "stages": {
     "structural_relaxation": {"calculation_code":"VASP","energy_cutoff":{"value":850,"unit":"eV"},"k_resolution":"2π × 0.03 Å^-1"},
-    "electron_phonon": {"calculation_code":"Quantum ESPRESSO","electronic_method":"DFPT","energy_cutoff":{"value":90,"unit":"Ry"},"charge_density_cutoff":{"value":720,"unit":"Ry"},"k_grid":"24×24×24","q_grid":"6×6×6"},
+    "electron_phonon": {"calculation_code":"Quantum ESPRESSO","phonon_method":"DFPT","energy_cutoff":{"value":90,"unit":"Ry"},"charge_density_cutoff":{"value":720,"unit":"Ry"},"k_grid":"24×24×24","q_grid":"6×6×6"},
     "sscha": {"energy_cutoff":{"value":80,"unit":"Ry"},"k_grid":"3×3×3","q_grid":"2×2×2","interpolated_q_grid":"6×6×6","supercell":"2×2×2","atoms":216,"temperature_k":0},
     "aimd": {"k_grid":"Γ","supercell":"2×2×3","atoms":324,"temperature_k":300,"pressure_gpa":150}
   },

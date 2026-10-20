@@ -1,0 +1,14 @@
+{
+  "base_commit": "7865ea92d0dab2ecbbe5ae4bbcfe3652de32f877",
+  "files": {
+    "backend/ingest/property_evidence.py": "2cab218cd805bcd5b8a02e44fe6382f6591c71f195d77cf9627ad8fc8ab6d89b",
+    "backend/ingest/scientific_context.py": "2d90590c4b1820241bba53c2e68a5d3de2dbfc1c80beb852b3da25484d376fe5",
+    "backend/ingest/domain_extraction.py": "4e2561cfdf23017d21c9d5db94f31f50922f20738ba7140be939f95de4d1d96f",
+    "backend/ingest/scientific_contracts.py": "e2a4b8095ddc970088274dbd7d04d76b158d874f4b36242cde7efb86a2bd55bf",
+    "backend/ingest/evidence_proposals.py": "e8ff5ba922fdbfc385a1b38c5bba10e0b29dc6acdab5c813ff55efd7821baf8c",
+    "backend/ingest/upload_jobs.py": "1e387574f32717d09b42d32760ff5d24269ab157c0a45da79aebbfbf559b4581",
+    "backend/ingest/calculation_methods.py": "d89e7aaffa50a3e50bb723e541e6b48dfc37f113524a23a9af9c840a6cc92cb6",
+    "tests/01_decentralized_uploading/test_calculation_method_semantics.py": "959bcf69c2c7b24019747377ae37bd14d974fb0d0890f86670c0fe9e81dd312a",
+    "tests/fixtures/issue139/expected-table.json": "4796395978210c71defec57ce9a1baf5e96d5a9e522c3eb71a600d80931cdfca"
+  }
+}

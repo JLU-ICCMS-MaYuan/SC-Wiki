@@ -66,3 +66,8 @@ conda run -n sc-wiki python -m pytest   "tests/01_decentralized_uploading/test_i
 实施阶段在 `validation.md` 写明运行时间、源码提交／工作区差异、环境、模型、来源文件 hash、测试命令与收集／通过／跳过数、原文逐行对照、实际浏览器截图路径、MySQL 库的非敏感标识、调用数／耗时／可得 token 用量及所有未完成项。
 
 SC-001～005 分别列实际结果与证据位置；8 行漏行和错挂为 0，阶段混用、误覆盖及编造为 0，保存重开保持一致。模拟通过、PDF 解析成功或表单非空都不能单独证明需求验收。远程 Spec／图片未推送或实际 URL 不可访问时链接门继续未完成，Issue 保持 OPEN。
+
+
+## US4方法分类验收
+
+用包含DFT/HF与DFPT的软件/方法混合段落进行提取，电子理论、泛函、软件与声子方法必须分开；只报告DFPT时不得自动补DFT。检查旧DFPT电子方法不再获得有效支持、人工DFT保持、声子扩展与原文保存重读一致。步骤及实际边界见[方法语义验收](method-semantics-validation.md)。

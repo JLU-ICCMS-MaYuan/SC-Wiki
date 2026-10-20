@@ -100,6 +100,7 @@ def valid_value(value, schema):
 
 
 def validate_values(record, values):
+    from .calculation_methods import review_method_issue
     fields = {f['path']: f for f in editable_fields(record)}
     if not isinstance(values, dict) or set(values) - set(fields):
         ev.fail('evidence_proposal_invalid', '建议包含不可修改的字段')
@@ -110,6 +111,9 @@ def validate_values(record, values):
             for key in ('key', 'field_key', 'evidences', 'reported'):
                 if science.canonical(value.get(key)) != science.canonical(record['current_value'].get(key)):
                     ev.fail('evidence_proposal_invalid', '建议不能改写补充字段的身份或既有来源')
+    method_error = review_method_issue(record, values)
+    if method_error:
+        ev.fail('evidence_proposal_invalid', method_error)
     return values
 
 

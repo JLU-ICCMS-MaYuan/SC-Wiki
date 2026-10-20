@@ -164,6 +164,10 @@ def resolve_reported_pressures(result):
 
 
 def validate_conditions(state, record):
+    from .calculation_methods import record_method_issue
+    issue = record_method_issue(record)
+    if issue:
+        raise ValueError(issue)
     pressure = state.get("pressure_value_gpa")
     condition = record.get("payload", {}).get("calculation_conditions", {})
     reported = condition.get("pressure_gpa") if isinstance(condition, dict) else None

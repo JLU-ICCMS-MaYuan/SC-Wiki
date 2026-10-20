@@ -1,0 +1,43 @@
+{
+  "complete": true,
+  "gaps": [],
+  "settings": [
+    {
+      "key": "calculation_code",
+      "value": "VASP",
+      "stage": "structural_relaxation"
+    },
+    {
+      "key": "electronic_method",
+      "value": "DFT",
+      "stage": "structural_relaxation"
+    },
+    {
+      "key": "exchange_correlation_functional",
+      "value": "PBE",
+      "stage": "structural_relaxation"
+    },
+    {
+      "key": "calculation_code",
+      "value": "Quantum ESPRESSO",
+      "stage": "electron_phonon"
+    },
+    {
+      "key": "phonon_method",
+      "value": "DFPT",
+      "stage": "electron_phonon"
+    },
+    {
+      "key": "calculation_code",
+      "value": "SSCHA",
+      "stage": "sscha"
+    }
+  ],
+  "model": "deepseek-v4-pro",
+  "scope": "真实电子结构和声子Methods连续段落，非完整新上传验收",
+  "live_draft_unchanged": true,
+  "artifact_directory": ".data/review_artifacts/c16cc627a0c04dc8ad4289624d1da80a/method_semantics/20261020T063936Z",
+  "input_sha256": "5e7eff056be33ae119511a5acf1a14aa68467f4dd0af8be142c67ceb98ca8546",
+  "ledger_sha256": "b44a316d3a23ebabb4e8af5e60ad5c53d954aac022cf2856bba2409c0cb3bc0d",
+  "earlier_failure": ".data/review_artifacts/c16cc627a0c04dc8ad4289624d1da80a/method_semantics/20261020T063620Z/ledger.json"
+}

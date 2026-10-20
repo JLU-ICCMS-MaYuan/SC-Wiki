@@ -18,6 +18,7 @@ from sqlalchemy import select, Numeric
 from decimal import Decimal
 
 from backend import models
+from .calculation_methods import METHOD_SEMANTICS_PROMPT, review_method_issue
 
 RULE_VERSION = 'scientific-evidence-v7'
 TERMINAL = {'completed', 'failed', 'cancelled'}
@@ -513,11 +514,21 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
         inference_reason if status == 'supported' else reason if concrete_synthesis_reason(reason) else None
     ) or '模型尚未给出当前值的具体推断理由，请重新核对。') if model_synthesis else (
         reason if subtype or keywords or (summary and not adopted_basis) else result.get('ai_reason'))
-    return {**{key: value for key, value in record.items() if key != 'validation_record'}, 'proposal': proposal, 'proposal_draft': None if result.get('stale') else result.get('proposal_draft'), 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
+    method_error = review_method_issue(record)
+    proposal_draft = None if result.get('stale') else result.get('proposal_draft')
+    if method_error:
+        # 历史原值/引句仍可查看，但旧支持、接受及人工理由不能授予错误类别通过资格。
+        status, human, decision = 'unsupported', False, None
+        source_kind = 'paper_quote' if evs else 'unknown'
+        reason = method_error + '；旧核对意见：' + reason
+        suggestion = method_error
+        if proposal_draft and review_method_issue(record, proposal_draft.get('values')):
+            proposal_draft = None
+    return {**{key: value for key, value in record.items() if key != 'validation_record'}, 'proposal': proposal, 'proposal_draft': proposal_draft, 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
             'human_confirmed': human,
             'adopted_basis': adopted_basis, 'proposal_review': result.get('proposal_review'),
             'ai_reason': ai_reason,
-            'auto_filled': result.get('auto_filled', False),
+            'auto_filled': result.get('auto_filled', False) and not method_error,
             'auto_filled_content_hash': result.get('auto_filled_content_hash'),
             'auto_filled_source_hash': result.get('auto_filled_source_hash'),
             'history': result.get('history', []),
@@ -525,7 +536,7 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             'reason': reason, 'suggestion': suggestion,
             'location_errors': errors, 'model': result.get('model') or '', 'fields': fields,
             'audit_events': result.get('audit_events') or [], 'history': result.get('history') or [],
-            'resolution': result.get('resolution', ''), 'stale': result.get('stale', False)}
+            'resolution': '' if method_error else result.get('resolution', ''), 'stale': result.get('stale', False)}
 
 
 def public_snapshot(snapshot: dict, cached: dict) -> dict:
@@ -642,6 +653,8 @@ proposal 增加 basis_kind：paper_quote（原文直接记载）、paper_inferen
 任务 purpose=review_all 时，独立检查所有 previous_result 的判断、建议及引句，而非照抄旧结论。对已有建议返回 proposal_review={"status":"reasonable|questionable|uncertain","explanation":"简要理由"}；即使合理，推测仍不是原文直接支持。
 """
 
+
+SYSTEM_PROMPT += METHOD_SEMANTICS_PROMPT
 
 def verify_model_image_capability() -> bool:
     """用不含真实材料的随机图片验证当前模型确实能识别图像。"""
