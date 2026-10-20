@@ -1,4 +1,5 @@
 export default {
+"chooseMultipleModels": "Choose models · multiple selection", "selectAtLeastOne": "Select at least one model", "modelSequence": "{names}, generated in order", "readFullAnswer": "Read full answer", "readModelAnswer": "Read the full answer by {name}", "backToQuestion": "Back to question",
   questionGeneration: 'Question generation',
 "generateAnswer": "Generate an answer", "chooseModel": "Choose a model", "enqueueAnswer": "Add to queue", "answerQueue": "Answer queue", "retryAtEnd": "Retry at end", "continuationHint": "The model reads existing AI answers. Selecting it again adds a response within its own card.", "initialAnswer": "Initial answer", "additionalAnswer": "Follow-up answer", "respondingTo": "Responding to", "expandAnswer": "Read full answer", "collapseAnswer": "Collapse answer", "modelCount": "{count} models", "responseCount": "{count} responses",
 

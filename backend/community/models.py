@@ -201,3 +201,15 @@ class CommunityTurnRevision(Base):
     human_edited = Column(Boolean, nullable=False)
     actor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
+
+
+class CommunityAnswerGroup(Base):
+    """一次多模型提交的幂等边界，和全部子请求同事务保存。"""
+    __tablename__ = "community_answer_groups"
+    id = Column(String(36), primary_key=True)
+    question_id = Column(Integer, ForeignKey("community_entries.id"), nullable=False)
+    actor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    model_keys = Column(JSON, nullable=False)
+    item_ids = Column(JSON, nullable=False)
+    retry_of = Column(Integer, nullable=True)
+    created_at = Column(DateTime, nullable=False, server_default=func.now())

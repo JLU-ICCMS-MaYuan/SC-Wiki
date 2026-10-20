@@ -1,0 +1,9 @@
+ok  	scwiki/server	(cached)
+ok  	scwiki/server/cache	(cached)
+?   	scwiki/server/config	[no test files]
+?   	scwiki/server/database	[no test files]
+ok  	scwiki/server/handlers	20.783s
+ok  	scwiki/server/middleware	(cached)
+ok  	scwiki/server/models	(cached)
+ok  	scwiki/server/services	(cached)
+ok  	scwiki/server/storage	(cached)

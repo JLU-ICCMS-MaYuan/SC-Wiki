@@ -1,0 +1,37 @@
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+stderr | tests/07_researcher_community_forum/community-discussion.test.tsx > 只读社区与多模型问答 > 所有身份的论文与体系评论均只读：user
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/07_researcher_community_forum/community-discussion.test.tsx (17 tests) 421ms
+stderr | tests/02_identity_governance/sidebar-navigation.test.tsx > 全角色统一侧栏 > 全部全局入口位于侧栏，业务顺序固定，品牌回到默认热点页
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/07_researcher_community_forum/news-feed.test.tsx > preserves manual news and Nobel milestones
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/07_researcher_community_forum/news-feed.test.tsx (4 tests) 204ms
+stderr | tests/07_researcher_community_forum/community-charts.test.tsx > 无数据点时仍显示坐标系与品质因子背景 > 两张图都渲染出坐标轴，而不是用 Alert 顶掉图表
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/07_researcher_community_forum/publication-stats.test.tsx > 家族论文数量和年度图 > 排行榜保留贡献榜及登录身份（登录=false），现有刷新按钮同时刷新论文统计
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/07_researcher_community_forum/publication-stats.test.tsx (9 tests) 409ms
+ ✓ tests/02_identity_governance/sidebar-navigation.test.tsx (7 tests) 1349ms
+   ✓ 全角色统一侧栏 > 收起与展开保留正文挂载、未保存输入和本地文件，图标仍可导航 332ms
+   ✓ 全角色统一侧栏 > 收起时能切换中英文并保留表单，模型弹窗与登录注册可打开 451ms
+ ✓ tests/07_researcher_community_forum/community-charts.test.tsx (20 tests) 2701ms
+   ✓ 材料家族选择框固定宽度（US5） > 全部取消后显示「未选择」 397ms
+
+ Test Files  5 passed (5)
+      Tests  57 passed (57)
+   Start at  21:23:10
+   Duration  4.73s (transform 390ms, setup 0ms, collect 6.84s, tests 5.09s, environment 709ms, prepare 178ms)

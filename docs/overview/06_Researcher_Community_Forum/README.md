@@ -10,7 +10,7 @@
 | --- | --- | --- |
 | [注册、登录与 JWT](registration-login-and-jwt.md) | 账号创建、凭据校验、会话撤销和前端本地会话 | Go API、JWT、bcrypt |
 | [研究者贡献排行与论文统计](researcher-contribution-ranking.md) | 展示贡献参与人数、上传与审核 Top 20、个人排名，以及材料家族论文数量和年度发文量 | 论文、材料家族、审核事件、用户、Redis |
-| [AI 学术讨论与历史评论](community-discussion.md) | 问题内选模型排队、同模型连续回应、公众只读及版本治理 | Go、Python、MySQL、Redis/RQ、模型目录与公开文献 |
+| [AI 学术讨论与历史评论](community-discussion.md) | 窄版摘要与独立答案页、行内多模型排队、同模型连续回应及版本治理 | Go、Python、MySQL、Redis/RQ、模型目录与公开文献 |
 
 ## 功能组成
 

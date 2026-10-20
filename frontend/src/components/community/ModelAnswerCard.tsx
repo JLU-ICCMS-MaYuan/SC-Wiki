@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
-import { Alert, Avatar, Box, Button, Card, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Link, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Avatar, Box, Button, Card, CardActionArea, CardContent, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, Link, Stack, TextField, Typography } from '@mui/material'
 import { useAuth } from '../../context/AuthContext'
 import { useLanguage } from '../../context/LanguageContext'
 import { api } from '../../lib/api'
-import { COMMUNITY_API, CommunityEntry, CommunityTurn, communityErrorKey } from '../../lib/community'
+import { COMMUNITY_API, CommunityEntry, CommunityTurn, communityErrorKey, answerPath, answerExcerpt } from '../../lib/community'
 import CommunityComposer from './CommunityComposer'
 import CommunityMarkdown from './CommunityMarkdown'
 
 function AnswerSegment({ entry, turn, index, reload }: { entry: CommunityEntry; turn: CommunityTurn; index: number; reload: () => void }) {
   const { t, lang } = useLanguage(); const { user } = useAuth()
-  const [expanded, setExpanded] = useState(turn.body.length < 1200), [editing, setEditing] = useState(false), [error, setError] = useState('')
+  const [expanded, setExpanded] = useState(true), [editing, setEditing] = useState(false), [error, setError] = useState('')
   const [history, setHistory] = useState<Array<{ revision: number; body: string }> | null>(null)
   useEffect(() => { const expand = (event: Event) => { if ((event as CustomEvent).detail === turn.key) setExpanded(true) }; window.addEventListener('community-expand-answer', expand); return () => window.removeEventListener('community-expand-answer', expand) }, [turn.key])
   const manager = user?.role === 'superadmin' && user.is_email_verified
@@ -30,7 +30,7 @@ function AnswerSegment({ entry, turn, index, reload }: { entry: CommunityEntry; 
       <Box sx={{ maxHeight: expanded ? 'none' : 320, overflow: 'hidden', position: 'relative', fontSize: '1rem', lineHeight: 1.9, '& p': { lineHeight: 1.9 }, '& pre': { overflowX: 'auto' }, '& table': { display: 'block', overflowX: 'auto' }, ...(!expanded ? { maskImage: 'linear-gradient(to bottom, black 75%, transparent)' } : {}) }}><CommunityMarkdown content={turn.body} /></Box>
       {turn.body.length >= 1200 && <Button onClick={() => setExpanded(v => !v)}>{t(expanded ? 'community.collapseAnswer' : 'community.expandAnswer')}</Button>}
     </>}
-    {!!turn.replies?.length && <Stack direction="row" gap={1} flexWrap="wrap" sx={{ my: 1 }}><Typography variant="caption" color="text.secondary">{t('community.respondingTo')}</Typography>{turn.replies.map(reply => <Link key={reply.key} href={`#answer-${reply.key}`} onClick={() => window.dispatchEvent(new CustomEvent('community-expand-answer', { detail: reply.key }))} variant="caption">{reply.model_name} {reply.sequence ? `#${reply.sequence}` : reply.key}</Link>)}</Stack>}
+    {!!turn.replies?.length && <Stack direction="row" gap={1} flexWrap="wrap" sx={{ my: 1 }}><Typography variant="caption" color="text.secondary">{t('community.respondingTo')}</Typography>{turn.replies.map(reply => <Link key={reply.key} component={RouterLink} to={answerPath(entry.question_id!, reply.key.match(/^A(\d+)/)?.[1] || entry.id, reply.key)} variant="caption">{reply.model_name} {reply.sequence ? `#${reply.sequence}` : reply.key}</Link>)}</Stack>}
     {!!turn.citations?.length && <Box sx={{ bgcolor: 'action.hover', borderRadius: 1, px: 1.5, py: 1, mt: 1 }}><Typography variant="caption" color="text.secondary">{t('community.sources')}</Typography>{turn.citations.map(source => <Typography key={source.id} variant="body2"><Link component={RouterLink} to={`/papers/${source.paper_id}`}>[{source.id}] {source.title}</Link></Typography>)}</Box>}
     {manager && <Stack direction="row" gap={1} sx={{ mt: 1 }}>{turn.sources_available !== false && <Button size="small" onClick={() => setEditing(v => !v)}>{t('community.edit')}</Button>}<Button size="small" onClick={() => void revisions()}>{t('community.history')}</Button></Stack>}
     {error && <Alert severity="error">{t(error)}</Alert>}
@@ -38,17 +38,24 @@ function AnswerSegment({ entry, turn, index, reload }: { entry: CommunityEntry; 
   </Box>
 }
 
-export default function ModelAnswerCard({ entry, reload }: { entry: CommunityEntry; reload: () => void }) {
+export default function ModelAnswerCard({ entry, reload, compact = false }: { entry: CommunityEntry; reload: () => void; compact?: boolean }) {
   const { t } = useLanguage(); const { user } = useAuth(); const [hiding, setHiding] = useState(false), [reason, setReason] = useState(''), [error, setError] = useState(''), [busy, setBusy] = useState(false)
   const brand = `${entry.model_name} ${entry.model}`.toLowerCase()
   const deepseek = brand.includes('deepseek'), openai = brand.includes('openai') || brand.includes('gpt')
   const color = deepseek ? '#4D6BFE' : openai ? '#087F6F' : '#7355B5'
-  const label = deepseek ? 'DeepSeek' : openai ? 'OpenAI' : entry.model_name
+  const label = entry.origin !== 'ai' ? entry.author?.username || t('community.deactivated') : deepseek ? 'DeepSeek' : openai ? 'OpenAI' : entry.model_name || entry.model || 'AI'
   const turns = entry.turns?.length ? entry.turns : [{ key: `A${entry.id}`, id: null, body: entry.body, sequence: 0, revision: entry.revision || 1, human_edited: entry.human_edited, created_at: entry.created_at, citations: entry.citations, sources_available: entry.sources_available }]
+  if (compact) return <Card id={`entry-${entry.id}`} variant="outlined" sx={{ mb: 1.25, borderRadius: 2, borderColor: 'divider', boxShadow: '0 2px 6px rgba(25,40,65,.02)' }}>
+    <CardActionArea component={RouterLink} to={answerPath(entry.question_id!, entry.id)} aria-label={t('community.readModelAnswer', { name: label })} sx={{ display: 'block', px: 2.25, py: 1.75 }}>
+      <Stack direction="row" gap={1.25} alignItems="center"><Avatar sx={{ bgcolor: `${color}12`, color, width: 32, height: 32, borderRadius: 1.5, fontSize: 13, fontWeight: 800 }}>{deepseek ? 'D' : openai ? 'O' : label[0]}</Avatar><Box sx={{ flex: 1, minWidth: 0 }}><Typography fontSize={13} fontWeight={700}>{label}</Typography><Typography fontSize={10} color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>{entry.model}</Typography></Box>{entry.origin === 'ai' && <Typography fontSize={9} color="text.secondary" sx={{ px: .6, border: '1px solid', borderColor: 'divider', borderRadius: .6 }}>AI</Typography>}</Stack>
+      <Typography sx={{ mt: 1.25, fontSize: 13, lineHeight: 1.85, color: 'text.secondary', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', overflowWrap: 'anywhere' }}>{entry.sources_available === false ? t('community.sourcesUnavailable') : answerExcerpt(entry.body)}</Typography>
+      <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 1.1 }}><Typography fontSize={10} color="text.secondary">{t('community.responseCount', { count: turns.length })}</Typography><Typography fontSize={11} color="primary">{t('community.readFullAnswer')} →</Typography></Stack>
+    </CardActionArea>
+  </Card>
   return <Card id={`entry-${entry.id}`} variant="outlined" sx={{ mb: 2.5, borderRadius: 2.5, borderColor: 'divider', borderTop: `3px solid ${color}`, boxShadow: '0 3px 14px rgba(25,40,65,.04)' }}>
     <CardContent sx={{ px: { xs: 2, sm: 3.5 }, py: 2.5 }}>
       <Stack direction="row" gap={1.5} alignItems="center"><Avatar sx={{ bgcolor: color, width: 44, height: 44, fontWeight: 800 }}>{deepseek ? 'D' : openai ? 'O' : 'AI'}</Avatar><Box sx={{ minWidth: 0, flex: 1 }}><Typography fontWeight={800} fontSize={18}>{label}</Typography><Typography variant="caption" color="text.secondary" sx={{ overflowWrap: 'anywhere' }}>{entry.model}</Typography></Box><Chip size="small" variant="outlined" label={t('community.aiGenerated')} /></Stack>
-      <Box sx={{ maxWidth: '88ch', ml: { xs: 0, md: 7 }, mt: 1 }}>{turns.map((turn, index) => <React.Fragment key={turn.key}>{index > 0 && <Divider sx={{ my: 1 }} />}<AnswerSegment entry={entry} turn={turn} index={index} reload={reload} /></React.Fragment>)}</Box>
+      <Box sx={{ mt: 1 }}>{turns.map((turn, index) => <React.Fragment key={turn.key}>{index > 0 && <Divider sx={{ my: 1 }} />}<AnswerSegment entry={entry} turn={turn} index={index} reload={reload} /></React.Fragment>)}</Box>
       {user?.role === 'superadmin' && <Box sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 1, textAlign: 'right' }}><Button size="small" color="inherit" onClick={() => setHiding(true)}>{t('community.hide')}</Button></Box>}
       {error && <Alert severity="error">{t(error)}</Alert>}
     </CardContent>

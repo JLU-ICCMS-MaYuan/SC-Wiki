@@ -60,3 +60,9 @@
 [验证记录](assets/compact-answer-demo/validation.json) · [桌面](assets/compact-answer-demo/desktop.png) · [手机](assets/compact-answer-demo/mobile.png) · [展开](assets/compact-answer-demo/expanded.png)
 
 这些结果仅说明 Demo 行为，不能证明真实批量生成接口已经实现。正式讨论页、数据与模型服务没有修改。
+
+## 审阅结果
+
+用户实际观看Demo后答复“并且我还希望单击某个答案，可以调整到另一个独立的页面里。认可，开始修改。”本版已获认可，正式需求同步spec.md；最新独立页要求取代主要行内展开方式。Demo保留作为历史原型，不冒充新的正式页面。
+
+正式落地已完成：采用680px列表、多选相邻按钮；答案点击进入独立页替代Demo内联展开。批量接口、父子权限与本机启用证据见validation.md。原型静态文件保留原样，不作为正式接口。

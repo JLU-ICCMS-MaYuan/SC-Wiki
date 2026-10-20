@@ -19,6 +19,7 @@ const AccountPage = lazy(() => import('./pages/AccountPage'))
 const PublicUserPage = lazy(() => import('./pages/PublicUserPage'))
 const SuperAdminPage = lazy(() => import('./pages/SuperAdminPage'))
 const RoleRoute = lazy(() => import('./components/RoleRoute'))
+const DiscussionAnswerPage = lazy(() => import('./pages/DiscussionAnswerPage'))
 const DiscussionPage = lazy(() => import('./pages/DiscussionPage'))
 const SystemCommunityPage = lazy(() => import('./pages/SystemCommunityPage'))
 const CommunityNotificationsPage = lazy(() => import('./pages/CommunityNotificationsPage'))
@@ -44,6 +45,7 @@ const LazyRoutes: React.FC = () => (
     <Route path="/share/charts" element={<Spin><SharePage section="charts" /></Spin>} />
     <Route path="/share/rankings" element={<Spin><SharePage section="rankings" /></Spin>} />
     <Route path="/share/discussions" element={<Spin><DiscussionPage /></Spin>} />
+    <Route path="/share/discussions/:id/answers/:answerId" element={<Spin><DiscussionAnswerPage /></Spin>} />
     <Route path="/share/discussions/:id" element={<Spin><DiscussionPage /></Spin>} />
     <Route path="/systems/:systemKey" element={<Spin><SystemCommunityPage /></Spin>} />
     <Route path="/account/notifications" element={<Spin><RoleRoute allow={['user', 'admin', 'superadmin']}><CommunityNotificationsPage /></RoleRoute></Spin>} />

@@ -23,6 +23,7 @@ import (
 func RegisterCommunityRoutes(r *gin.Engine) {
 	read := r.Group("/api/community", middleware.OptionalAuth)
 	read.GET("/questions", communityQuestions)
+	read.GET("/questions/:questionID/answers/:id", communityAnswerDetail)
 	read.GET("/entries", communityEntries)
 	read.GET("/entries/:id", communityGetEntry)
 	read.GET("/systems/:key", communitySystem)

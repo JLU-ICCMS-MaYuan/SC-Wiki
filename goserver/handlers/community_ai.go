@@ -162,3 +162,28 @@ func communityAnswerCounts(db *gorm.DB, entry models.CommunityEntry) (int64, int
 	db.Table("community_answer_turns t").Joins("JOIN community_entries e ON e.id = t.entry_id").Where("e.question_id = ? AND e.status = 'visible'", entry.ID).Count(&turns)
 	return count, count + turns
 }
+
+// 独立答案入口必须验证父问题，不能让错误URL展示另一问题的答案。
+func communityAnswerDetail(c *gin.Context) {
+	questionID, err := communityID(c.Param("questionID"))
+	if err != nil {
+		communityFail(c, err)
+		return
+	}
+	id, err := communityID(c.Param("id"))
+	if err != nil {
+		communityFail(c, err)
+		return
+	}
+	var entry models.CommunityEntry
+	if err = database.DB.Where("id = ? AND kind = 'answer' AND question_id = ?", id, questionID).First(&entry).Error; err != nil {
+		communityFail(c, err)
+		return
+	}
+	if err = communityAccess(database.DB, entry, communityViewer(c), false); err != nil {
+		communityFail(c, err)
+		return
+	}
+	c.Header("Cache-Control", "no-store")
+	c.JSON(200, communityDTO(database.DB, entry, communityViewer(c)))
+}

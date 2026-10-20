@@ -165,3 +165,18 @@ func TestCommunitySourceVisibility(t *testing.T) {
 		t.Fatal(got)
 	}
 }
+
+func TestCommunityIndependentAnswerParentAndVisibility(t *testing.T) {
+	f := newCommunityFixture(t)
+	q := f.seed(models.CommunityEntry{Kind: "question", Title: "独立问题", AuthorID: f.users[0].ID})
+	other := f.seed(models.CommunityEntry{Kind: "question", Title: "另一个问题", AuthorID: f.users[0].ID})
+	a := f.seed(models.CommunityEntry{Kind: "answer", QuestionID: &q, Body: "完整回答", AuthorID: f.users[1].ID})
+	path := fmt.Sprintf("/questions/%d/answers/%d", q, a)
+	if f.request("GET", path, nil, -1, 200)["body"] != "完整回答" {
+		t.Fatal("missing full answer")
+	}
+	f.request("GET", fmt.Sprintf("/questions/%d/answers/%d", other, a), nil, -1, 404)
+	f.request("GET", fmt.Sprintf("/questions/%d/answers/%d", q, q), nil, -1, 404)
+	f.db.Model(&models.CommunityEntry{}).Where("id = ?", q).Update("status", "hidden")
+	f.request("GET", path, nil, -1, 404)
+}

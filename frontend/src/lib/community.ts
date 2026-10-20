@@ -60,3 +60,14 @@ export function focusedEntry(): number | undefined {
   return raw && /^\d+$/.test(raw) && Number(raw) > 0 ? Number(raw) : undefined
 }
 export function notifyCommunityChanged() { window.dispatchEvent(new Event('community-notifications-changed')) }
+
+// 稳定独立答案地址；跨答案回应不会受问题列表分页影响。
+export function answerPath(questionId: number | string, answerId: number | string, turnKey?: string): string {
+  return `/share/discussions/${questionId}/answers/${answerId}${turnKey ? `#answer-${turnKey}` : ''}`
+}
+
+export function answerExcerpt(body: string): string {
+  return body.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1')
+    .replace(/<[^>]*>/g, '').replace(/[#*`>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 300)
+}

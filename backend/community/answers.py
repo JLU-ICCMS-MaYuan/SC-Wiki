@@ -11,7 +11,7 @@ from backend.database import engine
 from backend.rag.llm_context import set_llm_config, reset_llm_config
 from .models import (CommunityEntry as Entry, CommunityModelAnswer as Card,
                      CommunityAnswerRequest as Request, CommunityAnswerTurn as Turn,
-                     CommunityTurnRevision as Revision)
+                     CommunityTurnRevision as Revision, CommunityAnswerGroup as Group)
 from .configuration import models, identity, redis_connection, save_configs, load_config, key, QUEUE, TIMEOUT, TTL
 from .generation import GenerationError, retrieve_sources, approved_sources, sources_current, create_answer
 from .service import actor_allowed, locked, now
@@ -35,48 +35,88 @@ def dto(request):
             'state', 'error', 'answer_id', 'turn_id', 'retry_of', 'created_at', 'started_at', 'finished_at')}
 
 
-def enqueue_answer(actor_id, question_id, request_id, model_key, retry_of=None):
-    # 幂等复读不依赖模型仍在目录中。
+def _existing_group(db, actor_id, question_id, request_id, model_keys, retry_of):
+    group = db.get(Group, request_id)
+    if group:
+        if (group.actor_id, group.question_id, group.model_keys, group.retry_of) != (actor_id, question_id, model_keys, retry_of):
+            raise GenerationError('request_conflict')
+        items = [db.scalar(select(Request).where(Request.request_id == identifier)) for identifier in group.item_ids]
+        if not all(items):
+            raise GenerationError('request_conflict')
+        return {'request_id': request_id, 'items': [dto(item) for item in items]}
+    legacy = db.scalar(select(Request).where(Request.request_id == request_id))
+    if legacy:
+        if (legacy.actor_id, legacy.question_id, [legacy.config_hash], legacy.retry_of) != (actor_id, question_id, model_keys, retry_of):
+            raise GenerationError('request_conflict')
+        return {'request_id': request_id, 'items': [dto(legacy)]}
+    return None
+
+
+def enqueue_answers(actor_id, question_id, request_id, model_keys, retry_of=None):
+    if not model_keys or len(set(model_keys)) != len(model_keys):
+        raise GenerationError('invalid_community_input')
     with Session(engine) as db:
-        existing = db.scalar(select(Request).where(Request.request_id == request_id))
+        existing = _existing_group(db, actor_id, question_id, request_id, model_keys, retry_of)
         if existing:
-            if (existing.actor_id, existing.question_id, existing.config_hash, existing.retry_of) != (actor_id, question_id, model_key, retry_of):
-                raise GenerationError('request_conflict')
-            return dto(existing)
-    chosen = next(((i, name, c) for i, name, c in models() if identity(c) == model_key), None)
-    if chosen is None:
+            return existing
+    available = {identity(c): (i, name, c) for i, name, c in models()}
+    if any(model_key not in available for model_key in model_keys):
         raise GenerationError('model_config_changed')
-    model_id, name, config = chosen
     connection = redis_connection()
-    job_id = 'community-answer-' + request_id
+    written_keys = []
+    committed = False
     try:
         connection.ping()
         with Session(engine) as db, db.begin():
             actor_allowed(db, actor_id)
             question_locked(db, question_id)
-            existing = db.scalar(select(Request).where(Request.request_id == request_id).with_for_update())
+            # 取得问题锁后重读，避免并发相同提交建立两组任务。
+            db.expire_all()
+            existing = _existing_group(db, actor_id, question_id, request_id, model_keys, retry_of)
             if existing:
-                if (existing.actor_id, existing.question_id, existing.config_hash, existing.retry_of) != (actor_id, question_id, model_key, retry_of):
-                    raise GenerationError('request_conflict')
-                return dto(existing)
-            card = db.scalar(select(Card).where(Card.question_id == question_id, Card.config_hash == model_key))
-            if card and db.get(Entry, card.entry_id).status != 'visible':
-                raise GenerationError('content_unavailable')
+                return existing
+            for model_key in model_keys:
+                card = db.scalar(select(Card).where(Card.question_id == question_id, Card.config_hash == model_key))
+                if card and db.get(Entry, card.entry_id).status != 'visible':
+                    raise GenerationError('content_unavailable')
             last_request = db.scalar(select(Request.sequence).where(Request.question_id == question_id).order_by(Request.sequence.desc()).limit(1).with_for_update()) or 0
             last_card = db.scalar(select(Card.first_sequence).where(Card.question_id == question_id).order_by(Card.first_sequence.desc()).limit(1).with_for_update()) or 0
-            request = Request(request_id=request_id, question_id=question_id, sequence=max(last_request, last_card)+1,
-                              actor_id=actor_id, model_id=model_id, model_name=name[:200], model=config.model,
-                              config_hash=model_key, state='queued', error='', job_id=job_id, retry_of=retry_of, created_at=now())
-            db.add(request); db.flush()
-            save_configs(connection, job_id, {model_id: config})
-            result = dto(request)
+            sequence = max(last_request, last_card)
+            item_ids = [str(uuid.uuid5(uuid.UUID(request_id), str(index))) for index in range(len(model_keys))]
+            group = Group(id=request_id, question_id=question_id, actor_id=actor_id, model_keys=model_keys,
+                          item_ids=item_ids, retry_of=retry_of, created_at=now())
+            db.add(group); db.flush()
+            requests = []
+            for offset, (model_key, item_id) in enumerate(zip(model_keys, item_ids), 1):
+                model_id, name, config = available[model_key]
+                job_id = 'community-answer-' + item_id
+                request = Request(request_id=item_id, question_id=question_id, sequence=sequence+offset,
+                                  actor_id=actor_id, model_id=model_id, model_name=name[:200], model=config.model,
+                                  config_hash=model_key, state='queued', error='', job_id=job_id,
+                                  retry_of=retry_of, created_at=now())
+                db.add(request); db.flush()
+                # 先登记待清理键，连接在写成功后报错时也不遗留凭据。
+                written_keys.append(key(job_id))
+                save_configs(connection, job_id, {model_id: config})
+                requests.append(dto(request))
+            result = {'request_id': request_id, 'items': requests}
+        committed = True
         try:
             dispatch(question_id)
         except Exception:
-            pass  # 已持久化的请求由监督补投递，不让用户误以为入队失败。
+            pass  # 持久化成功后由监督补齐投递，不误报为未入队。
         return result
     finally:
+        if not committed and written_keys:
+            try:
+                connection.delete(*written_keys)
+            except Exception:
+                pass  # Redis故障时限时键仍会到期；回滚任务不会被投递。
         connection.close()
+
+
+def enqueue_answer(actor_id, question_id, request_id, model_key, retry_of=None):
+    return enqueue_answers(actor_id, question_id, request_id, [model_key], retry_of)['items'][0]
 
 
 def retry_answer(actor_id, identifier, request_id):

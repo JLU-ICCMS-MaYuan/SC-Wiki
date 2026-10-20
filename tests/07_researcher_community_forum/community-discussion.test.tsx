@@ -10,6 +10,8 @@ import PaperCommunity from '../../frontend/src/components/community/PaperCommuni
 import ModelAnswerCard from '../../frontend/src/components/community/ModelAnswerCard'
 import EntryCard from '../../frontend/src/components/community/EntryCard'
 import DiscussionPage from '../../frontend/src/pages/DiscussionPage'
+import DiscussionAnswerPage from '../../frontend/src/pages/DiscussionAnswerPage'
+import AnswerQueue from '../../frontend/src/components/community/AnswerQueue'
 import { api } from '../../frontend/src/lib/api'
 
 const auth = vi.hoisted(() => ({ user: { id: 1, username: 'alice', role: 'user', is_email_verified: true } as any, token: 'test' }))
@@ -72,9 +74,9 @@ describe('只读社区与多模型问答', () => {
     const question = { ...comment, kind: 'question', title: '问题详情', model_count: 0, response_count: 0 }
     vi.mocked(api.get).mockImplementation(async url => url === '/api/community/entries/42' ? question : url.endsWith('/models') ? { items: [{ key: 'a'.repeat(64), name: 'DeepSeek', model: 'deepseek' }] } : url.endsWith('/queue') ? { items: [{ id: 2, sequence: 1, model_name: 'OpenAI', model: 'gpt', state: 'running', error: '' }] } : { items: [], total: 0 })
     render(<MemoryRouter initialEntries={['/share/discussions/42']}><Routes><Route path="/share/discussions/:id" element={<DiscussionPage />} /></Routes></MemoryRouter>)
-    fireEvent.click(await screen.findByRole('button', { name: '生成答案' }))
-    fireEvent.click(await screen.findByRole('button', { name: '加入生成队列' }))
-    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/community/ai/questions/42/answers', { request_id: expect.any(String), model_key: 'a'.repeat(64) }))
+    fireEvent.click(await screen.findByRole('button', { name: '生成答案 (1)' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/api/community/ai/questions/42/answers/batch', { request_id: expect.any(String), model_keys: ['a'.repeat(64)] }))
   })
   it('历史问题没有模型任务时使用不依赖新字段的排序', async () => {
     const question = { ...comment, kind: 'question', title: '迁移前的历史问题', generation_tasks: [], origin: '', revision: 0 }
@@ -86,7 +88,7 @@ describe('只读社区与多模型问答', () => {
     expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
   it('同模型卡片展示首答和补充，保留回应定位而不是另建卡片', () => {
-    const entry = { ...comment, kind: 'answer', origin: 'ai', model_name: 'DeepSeek', model: 'deepseek', turns: [
+    const entry = { ...comment, kind: 'answer', origin: 'ai', question_id: 7, model_name: 'DeepSeek', model: 'deepseek', turns: [
       { key: 'A42', id: null, body: '这是初始论点', sequence: 1, revision: 1, created_at: comment.created_at },
       { key: 'A42T1', id: 1, body: '补充不同角度并承认前述限制', sequence: 3, revision: 1, created_at: comment.created_at, replies: [{ key: 'A43', model_name: 'OpenAI', sequence: 2 }] },
     ] }
@@ -94,8 +96,46 @@ describe('只读社区与多模型问答', () => {
     expect(screen.getAllByText('DeepSeek')).toHaveLength(1)
     expect(screen.getByText('初始回答')).toBeInTheDocument()
     expect(screen.getByText('补充回答')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'OpenAI #2' })).toHaveAttribute('href', '#answer-A43')
+    expect(screen.getByRole('link', { name: 'OpenAI #2' })).toHaveAttribute('href', '/share/discussions/7/answers/43#answer-A43')
     expect(screen.queryByRole('button', { name: '编辑' })).not.toBeInTheDocument()
+  })
+  it('行内多选保持勾选顺序，空选禁用，失败重试复用UUID', async () => {
+    vi.mocked(api.get).mockImplementation(async url => url.endsWith('/models') ? { items: [{ key: 'a'.repeat(64), name: 'DeepSeek', model: 'd' }, { key: 'b'.repeat(64), name: 'OpenAI', model: 'gpt' }] } : { items: [] })
+    vi.mocked(api.post).mockRejectedValueOnce({ code: 'queue_unavailable' }).mockResolvedValue({ items: [] })
+    render(<MemoryRouter><AnswerQueue questionId={7} onChanged={() => {}} /></MemoryRouter>)
+    await screen.findByRole('button', { name: '生成答案 (2)' })
+    fireEvent.click(screen.getByRole('button', { name: 'DeepSeek' }))
+    fireEvent.click(screen.getByRole('button', { name: 'OpenAI' }))
+    expect(screen.getByRole('button', { name: '生成答案 (0)' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'OpenAI' }))
+    fireEvent.click(screen.getByRole('button', { name: 'DeepSeek' }))
+    fireEvent.click(screen.getByRole('button', { name: '生成答案 (2)' }))
+    await screen.findByText('任务队列不可用，请稍后重试。')
+    const first = vi.mocked(api.post).mock.calls[0][1]
+    expect(first).toEqual({ request_id: expect.any(String), model_keys: ['b'.repeat(64), 'a'.repeat(64)] })
+    fireEvent.click(screen.getByRole('button', { name: '生成答案 (2)' }))
+    await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2))
+    expect(vi.mocked(api.post).mock.calls[1][1]).toEqual(first)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+  it('摘要点击进入独立答案页，直接路由包含完整首答和补充', async () => {
+    const entry = { ...comment, question_id: 7, kind: 'answer', origin: 'ai', model_name: 'DeepSeek', model: 'deepseek', body: '摘要开头', turns: [
+      { key: 'A42', id: null, body: '这是完整的首答', sequence: 1, revision: 1, created_at: comment.created_at },
+      { key: 'A42T1', id: 1, body: '这是完整的补充', sequence: 2, revision: 1, created_at: comment.created_at },
+    ] }
+    vi.mocked(api.get).mockImplementation(async url => url === '/api/community/questions/7/answers/42' ? entry : { ...comment, id: 7, kind: 'question', title: '原问题' })
+    render(<MemoryRouter initialEntries={['/summary']}><Routes><Route path="/summary" element={<ModelAnswerCard entry={entry} reload={() => {}} compact />} /><Route path="/share/discussions/:id/answers/:answerId" element={<DiscussionAnswerPage />} /></Routes></MemoryRouter>)
+    expect(screen.queryByText('这是完整的补充')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('link', { name: '查看 DeepSeek 的完整回答' }))
+    await screen.findByText('这是完整的补充')
+    expect(screen.getByText('这是完整的首答')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '返回问题' })).toHaveAttribute('href', '/share/discussions/7#entry-42')
+  })
+  it('独立答案无权访问时不显示内容', async () => {
+    vi.mocked(api.get).mockRejectedValue({ code: 'content_unavailable', status: 404 })
+    render(<MemoryRouter initialEntries={['/share/discussions/7/answers/42']}><Routes><Route path="/share/discussions/:id/answers/:answerId" element={<DiscussionAnswerPage />} /></Routes></MemoryRouter>)
+    await screen.findByRole('alert')
+    expect(screen.queryByText('初始回答')).not.toBeInTheDocument()
   })
   it('论文权限失败不显示历史内容或输入', async () => {
     vi.mocked(api.get).mockRejectedValue({ code: 'paper_forbidden', status: 403 })

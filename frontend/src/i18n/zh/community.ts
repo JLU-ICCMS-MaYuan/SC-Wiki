@@ -1,4 +1,5 @@
 export default {
+"chooseMultipleModels": "选择回答模型 · 可多选", "selectAtLeastOne": "请至少选择一个模型", "modelSequence": "{names}，依次生成", "readFullAnswer": "查看完整回答", "readModelAnswer": "查看 {name} 的完整回答", "backToQuestion": "返回问题",
   questionGeneration: '提问进度',
 "generateAnswer": "生成答案", "chooseModel": "选择回答模型", "enqueueAnswer": "加入生成队列", "answerQueue": "本问题的回答队列", "retryAtEnd": "重试并排到队尾", "continuationHint": "模型会阅读本问题已有的 AI 回答。再次选择同一模型，将在它的答案卡片内追加补充。", "initialAnswer": "初始回答", "additionalAnswer": "补充回答", "respondingTo": "回应前文", "expandAnswer": "展开阅读全文", "collapseAnswer": "收起回答", "modelCount": "{count} 个模型", "responseCount": "{count} 次回答",
 

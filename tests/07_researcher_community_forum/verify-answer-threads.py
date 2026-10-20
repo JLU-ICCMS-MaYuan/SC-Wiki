@@ -54,10 +54,11 @@ def main():
             module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);return module
         old=migration('20260917_0107_community_discussion.py')
         base=migration('20261020_0142_community_ai.py')
-        new=migration('20261020_0143_answer_threads.py')
+        threads=migration('20261020_0143_answer_threads.py')
+        new=migration('20261020_0143b_answer_groups.py')
         with engine.begin() as conn:
             with Operations.context(MigrationContext.configure(conn)):
-                old.upgrade();base.upgrade();new.upgrade();new.downgrade();new.upgrade()
+                old.upgrade();base.upgrade();threads.upgrade();new.upgrade();new.downgrade();new.upgrade()
         print('PASS migration upgrade/downgrade/upgrade',flush=True)
         with Session(engine) as db,db.begin():
             user=User(email='owner@example.test',username='owner',real_name='Owner',password_hash='unused',role='superadmin',account_status='active',is_email_verified=True)
@@ -134,7 +135,7 @@ def main():
             role['value']=value
             assert client.post('/api/community/ai/questions/generate',json={'request_id':str(uuid4())}).status_code==403
         role['value']='superadmin'
-        from backend.community.models import CommunityAnswerRequest as AnswerRequest, CommunityAnswerTurn as Turn, CommunityModelAnswer as Card
+        from backend.community.models import CommunityAnswerRequest as AnswerRequest, CommunityAnswerTurn as Turn, CommunityModelAnswer as Card, CommunityAnswerGroup as Group
         request_id=str(uuid4())
         payload={'request_id':request_id,'title':'为什么零电阻不等于证明迈斯纳效应？','body':''}
         response=client.post('/api/community/ai/questions',json=payload)
@@ -165,6 +166,52 @@ def main():
         assert 'secret' not in str(client.get(f'/api/community/ai/questions/{question_id}/queue').json())
         assert not list(connection.scan_iter('community-ai:credentials:*'))
         print('PASS manual question does not answer, FIFO A-B-A, two cards/three responses, full context at execution, idempotency',flush=True)
+        # 无效模型或第二个凭据写入失败时整组回滚，不得留下第一项。
+        def batch(keys,rid=None):
+            return client.post(f'/api/community/ai/questions/{question_id}/answers/batch',json={'request_id':rid or str(uuid4()),'model_keys':keys})
+        with Session(engine) as db: before=len(list(db.scalars(select(AnswerRequest))));groups_before=len(list(db.scalars(select(Group))))
+        assert batch([options[0]['key'],'f'*64]).status_code==409
+        assert batch([options[0]['key'],options[0]['key']]).status_code==409
+        assert batch([]).status_code==422
+        from redis.exceptions import RedisError
+        original_save=answers.save_configs;credential_calls=[]
+        def fail_second(conn,job_id,configs):
+            original_save(conn,job_id,configs);credential_calls.append(job_id)
+            if len(credential_calls)==2:raise RedisError('isolated second-write failure')
+        answers.save_configs=fail_second
+        try: assert batch([options[0]['key'],options[1]['key']]).status_code==503
+        finally: answers.save_configs=original_save
+        with Session(engine) as db:
+            assert len(list(db.scalars(select(AnswerRequest))))==before
+            assert len(list(db.scalars(select(Group))))==groups_before
+        assert not list(connection.scan_iter('community-ai:credentials:*'))
+        for role_value in ('user','admin'):
+            role['value']=role_value
+            assert batch([options[0]['key']]).status_code==403
+        role['value']='superadmin'
+        batch_id=str(uuid4());group=batch([options[1]['key'],options[0]['key']],batch_id)
+        assert group.status_code==202,group.text
+        original_ids=[item['id'] for item in group.json()['items']]
+        assert [item['model_name'] for item in group.json()['items']]==['OpenAI','DeepSeek']
+        assert [item['id'] for item in batch([options[1]['key'],options[0]['key']],batch_id).json()['items']]==original_ids
+        assert batch([options[0]['key'],options[1]['key']],batch_id).status_code==409
+        assert queue.count==1
+        consume()
+        with Session(engine) as db: assert all(db.get(AnswerRequest,i).state=='succeeded' for i in original_ids)
+        from concurrent.futures import ThreadPoolExecutor
+        concurrent_uuid=str(uuid4())
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            responses=list(pool.map(lambda _:batch([options[0]['key'],options[1]['key']],concurrent_uuid),range(2)))
+        assert all(response.status_code==202 for response in responses)
+        assert [item['id'] for item in responses[0].json()['items']]==[item['id'] for item in responses[1].json()['items']]
+        consume()
+        fail_models.add('model-two')
+        partial=batch([options[1]['key'],options[0]['key']]);assert partial.status_code==202
+        consume();fail_models.clear()
+        with Session(engine) as db:
+            assert [db.get(AnswerRequest,item['id']).state for item in partial.json()['items']]==['failed','succeeded']
+        print('PASS atomic multi-model submission, concurrency/idempotency, invalid model/Redis rollback, role checks, partial generation failure continues',flush=True)
+
         fail_models.add('model-two');failed=add(1);following=add(0);consume();fail_models.clear()
         with Session(engine) as db:
             assert db.get(AnswerRequest,failed['id']).state=='failed'
@@ -249,7 +296,7 @@ def main():
             browser_run(ROOT,directory,app,owner_id,question_id)
         # 只导出本次迁移涉及表的结构供部署清单更新，不读取业务数据。
         from scripts.local_deploy.schema import structure
-        tables=['community_model_answers','community_answer_requests','community_answer_turns','community_answer_turn_revisions']
+        tables=['community_model_answers','community_answer_requests','community_answer_turns','community_answer_turn_revisions','community_answer_groups']
         (directory/'schema.json').write_text(json.dumps({name:structure(inspect(engine),name) for name in tables},ensure_ascii=False,indent=2))
         (directory/'result.json').write_text(json.dumps({'status':'passed','database':schema,'models':2,'source_transport':'fixture; real publication/version checks','schema_file':str(directory/'schema.json')},ensure_ascii=False,indent=2))
         print('RESULT '+str(directory/'result.json'),flush=True)

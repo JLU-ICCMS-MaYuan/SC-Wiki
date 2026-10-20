@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {
+      "role": "user",
+      "summary_width": 680,
+      "detail_refresh": true,
+      "return": true,
+      "mobile": true,
+      "errors": []
+    },
+    {
+      "role": "superadmin",
+      "summary_width": 680,
+      "detail_refresh": true,
+      "return": true,
+      "mobile": true,
+      "errors": []
+    }
+  ],
+  "posted": false
+}

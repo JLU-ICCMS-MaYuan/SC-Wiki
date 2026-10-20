@@ -1,0 +1,8 @@
+PASS migration upgrade/downgrade/upgrade
+PASS manual question does not answer, FIFO A-B-A, two cards/three responses, full context at execution, idempotency
+PASS atomic multi-model submission, concurrency/idempotency, invalid model/Redis rollback, role checks, partial generation failure continues
+PASS failure continues, retry at end, concurrent edit protection, segment editing/revisions
+PASS worker recovery, hidden-card protection, random question does not auto-answer
+PASS real worker interruption, tail retry and next-answer recovery
+PASS browser 5 checks
+RESULT /var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/scwiki-143-zxh7t_6d/result.json

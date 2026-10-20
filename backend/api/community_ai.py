@@ -176,3 +176,21 @@ def answer_turn_revisions(identifier: int, user=Depends(authorized)):
             rows = db.scalars(select(CommunityTurnRevision).where(CommunityTurnRevision.turn_id == identifier).order_by(CommunityTurnRevision.revision.desc()).limit(100))
             return {"items": [{"revision": r.revision, "body": r.body, "human_edited": r.human_edited, "created_at": r.created_at} for r in rows]}
     return call(read)
+
+
+class AnswerGroupPayload(GenerateRequest):
+    model_keys: list[str] = Field(min_length=1, max_length=50)
+
+
+@router.post("/questions/{question_id}/answers/batch", status_code=202)
+def add_answer_group(question_id: int, payload: AnswerGroupPayload, user=Depends(authorized)):
+    from backend.community.answers import enqueue_answers
+    if any(len(identifier) != 64 for identifier in payload.model_keys):
+        raise HTTPException(422, detail={"code": "invalid_community_input"})
+    def submit_once():
+        try:
+            return enqueue_answers(user.id, question_id, str(payload.request_id), payload.model_keys)
+        except IntegrityError:
+            # 并发UUID唯一冲突后复读同组，异参数仍返回冲突。
+            return enqueue_answers(user.id, question_id, str(payload.request_id), payload.model_keys)
+    return call(submit_once)

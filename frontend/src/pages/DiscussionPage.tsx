@@ -6,7 +6,6 @@ import { useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import { COMMUNITY_API, CommunityEntry, CommunityList, CommunityAIBatch, communityErrorKey, focusedEntry, useCommunityLoad } from '../lib/community'
 import CommunityComposer from '../components/community/CommunityComposer'
-import CommentPanel from '../components/community/CommentPanel'
 import EntryCard from '../components/community/EntryCard'
 import AIGenerationPanel from '../components/community/AIGenerationPanel'
 import AnswerQueue from '../components/community/AnswerQueue'
@@ -19,20 +18,20 @@ function QuestionDetail({ id }: { id: string }) {
   const answers = useCommunityLoad<CommunityList<CommunityEntry>>(question.data?.kind === 'question' && question.data.status === 'visible' ? `/entries?kind=answer&question_id=${id}&sort=${answerSort}&offset=${offset}${focus ? `&focus_id=${focus}` : ''}` : null)
   const reload = () => { question.reload(); answers.reload() }
   useEffect(() => { const timer = window.setInterval(reload, 5000); return () => window.clearInterval(timer) }, [id])
-  useEffect(() => { if (answers.data && focus) document.getElementById(`entry-${focus}`)?.scrollIntoView?.({ block: 'center' }) }, [answers.data, focus])
+  useEffect(() => { if (answers.data) { const target = focus ? `entry-${focus}` : window.location.hash.slice(1); if (/^entry-\d+$/.test(target)) document.getElementById(target)?.scrollIntoView?.({ block: 'center' }) } }, [answers.data, focus])
   if (question.loading && !question.data) return <CircularProgress />
   if (question.data?.kind !== 'question') return <Alert severity="error" action={<Button onClick={question.reload}>{t('community.retry')}</Button>}>{t(question.error || 'community.unavailable')}</Alert>
-  return <Box sx={{ bgcolor: '#f5f7fa', p: { xs: 0, sm: 2 }, borderRadius: 2 }}>
+  return <Box sx={{ width: '100%', maxWidth: 680, mx: 'auto' }}>
     <Button component={RouterLink} to="/share/discussions">{t('community.back')}</Button>
-    <Card variant="outlined" sx={{ borderRadius: 2.5, mb: 3 }}><CardContent sx={{ p: { xs: 2, sm: 3.5 } }}>
+    <Card variant="outlined" sx={{ borderRadius: 2.5, mb: 3 }}><CardContent sx={{ p: { xs: 2, sm: 3 } }}>
       <EntryCard entry={question.data} reload={reload} />
       <Stack direction="row" gap={2} flexWrap="wrap" sx={{ my: 2 }}><Typography color="text.secondary">{t('community.modelCount', { count: question.data.model_count || 0 })}</Typography><Typography color="text.secondary">{t('community.responseCount', { count: question.data.response_count || 0 })}</Typography></Stack>
-      {user?.role === 'superadmin' && <AnswerQueue questionId={Number(id)} onChanged={reload} />}
     </CardContent></Card>
+    {user?.role === 'superadmin' && <AnswerQueue key={id} questionId={Number(id)} onChanged={reload} />}
     <Typography variant="h2" sx={{ mb: 2 }}>{t('community.answers')}</Typography>
     {focus && <Alert severity="info" action={<Button onClick={() => { setFocus(undefined); window.history.replaceState(null, '', window.location.pathname) }}>{t('community.showAll')}</Button>}>{t('community.focused')}</Alert>}
     {answers.loading && <CircularProgress size={24} />}{answers.error && <Alert severity="error" action={<Button onClick={answers.reload}>{t('community.retry')}</Button>}>{t(answers.error)}</Alert>}
-    {answers.data?.items.map(entry => entry.origin === 'ai' ? <ModelAnswerCard key={entry.id} entry={entry} reload={reload} /> : <Card key={entry.id} sx={{ p: 2, mb: 2 }}><EntryCard entry={entry} reload={reload}><CommentPanel target={{ answer_id: entry.id }} /></EntryCard></Card>)}
+    {answers.data?.items.map(entry => <ModelAnswerCard key={entry.id} entry={entry} reload={reload} compact />)}
     {answers.data?.items.length === 0 && <Typography sx={{ my: 2 }}>{t('community.empty')}</Typography>}
     {answers.data && answers.data.total > 20 && <Stack direction="row"><Button disabled={!offset} onClick={() => setOffset(v => v - 20)}>{t('community.previous')}</Button><Button disabled={offset + 20 >= answers.data.total} onClick={() => setOffset(v => v + 20)}>{t('community.next')}</Button></Stack>}
   </Box>
