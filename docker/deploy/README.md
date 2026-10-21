@@ -18,6 +18,10 @@ Compose 至少使用 2.30，以支持 `env_file.format: raw`。私有 env 使用
 
 私有目录权限 0700，配置文件 0600。不要把本机 `.env` 直接复制作为生产配置，其中的回环地址和本机路径不适用。不运行包含秘密展开结果的 `compose config`；入口 `config` 仅验证而不输出值。
 
+解析模型缓存统一位于计算组 `/models` 卷：Hugging Face、Datalab 和 MinerU 分别使用
+`/models/huggingface`、`/models/cache`、`/models/mineru`。这是可重建缓存，不是业务文件，
+不能代替 Garage 对象备份。已有模型权重可在摘要核验后复制以避免重复下载。
+
 ## 命令
 
 以下在发布源码根目录运行，必须先填写并核实发布配置：
