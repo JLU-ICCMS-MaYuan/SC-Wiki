@@ -88,3 +88,7 @@ ssh "root@47.111.123.225" 'cd "/opt/scwiki/current" && python3 "scripts/deploy.p
 
 本地源数据及私有独立备份继续保留。Embedding 与尚未完成的业务验收以 #146 为准；
 不要因为网站已可访问而关闭所有部署验收任务。
+
+2026-10-21 20:25 复查时公网域名已被阿里云 `Non-compliance ICP Filing` 页面拦截，
+HTTPS 握手被重置；服务器内应用正常。需要处理备案/接入状态后再验收公网可用性，
+此前成功的 HTTP 和浏览器测试不能代表当前外网状态。
