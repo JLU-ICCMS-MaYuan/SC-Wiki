@@ -75,3 +75,27 @@
 使用本地项目Python环境，加载 `.env` 后导入 `backend.ingest.property_evidence`、`evidence_proposals`。仅执行 `upload_snapshot`、`editable_fields`、`valid_value`、`validate_values`，查询 `ScientificEvidenceCheck`，以及对两份草稿构造快照比较；不调用 `save_draft`、`save_results`、create_job或重新核对模型。若当前用户继续编辑，后续复现应重新读取并注明当时版本，不将本次摘要当作永远不变的事实。
 
 本轮未保存完整业务快照到Git，历史数据仍在原本地.data备份和数据库中。三张原图在本Spec的assets中，哈希见spec.md；文档及截图远程可读性尚待单独授权推送后验证。
+
+
+## 补充复现：N(EF)名称保存被空数值槽拦截
+
+用户补充原图IMG-004（spec.md保存完整原话）。截图中数值17.27所在行上方的状态标题未完整显示；下方可见另一个300 GPa状态卡片，不能据此把两张卡片混为一条。当前草稿只读查得17.27记录对应 `state_index=5`、300 GPa、`legacy-property-7`；另一个300 GPa状态为19.61，不能自动互换。
+
+对当前同一任务执行upload_snapshot，检查电子性质dos_fermi普通物性记录：
+
+```json
+{"name_raw":"N(Ef)","property_code":"dos_fermi","value_kind":"text","value_number":null,"value_text":"17.27","value_raw":"17.27","unit_raw":"states/spin/Ry/f.u."}
+```
+
+只读对照：
+
+1. `editable_fields(record)`生成所有可编辑字段，按当前前端valuesFor方式构造 `{field.path: field.value}`，调用validate_values即报 `evidence_proposal_invalid`，message为 `建议值类型或选项无效：value_number`，与截图相符。
+2. 当前value_number为空，schema为number且未允许空值；value_min、value_max、value_boolean、uncertainty、canonical_unit、method_code、method_raw、criterion_code、criterion_raw也含被当前推断规则拒绝的空成员。
+3. 仅提交 `{"name_raw":"N(Ef)"}` 调用同一validate_values可通过，说明并非名称字符串本身非法。真实浏览器请求体仍未捕获，这里复现的是现有保存构造路径的服务函数边界。
+4. 同一草稿读取到的8条N(EF)普通物性均可重现value_number空值拒绝。167 GPa记录还含嵌套来源对象，其合法可空成员也需遵循一致规则；不得直接放开整个对象、身份和证据改写。
+
+这与SSCHA空单位属于同一层的读取/保存类型合同不一致，但触发字段不同：SSCHA是扩展对象的unit_raw，N(EF)是文本物性未启用的value_number等槽。修复须按字段定义与value_kind区分启用/未启用值槽，不能靠给所有空槽补0或将所有字段nullable来绕过。
+
+截图中17.27/19.61、谐波/非谐波、单位的说明属于另外的科学核对问题，本轮没有重新读原表裁定，没有改名、改类型、改值或采纳模型建议。可保存与可完成科学审核须分别验收；不能以修复保存错误为由消除有根据的科学冲突。
+
+本轮仍为只读调查和文档补充，未修改代码或业务数据，未做浏览器端到端验收。
