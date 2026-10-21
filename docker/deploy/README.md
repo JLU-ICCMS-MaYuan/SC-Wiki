@@ -74,3 +74,17 @@ Caddy 将 API 直接转发给 Go，并用实际连接来源覆盖 X-Real-IP；Go
 未来将各组迁往独立机器时，分别初始化所需组、配置私网端点，并按 #132 执行数据迁移。独立 bridge 不会跨主机，私网端口覆写和来源规则须另行落实。真实多机和 #133 完整故障恢复不由单机测试替代。
 
 当前实际状态、备份位置与验证证据见 [#146 验证记录](../../docs/specs/146-aliyun-production-deployment/validation.md)。
+
+## 当前实例
+
+网站为 https://www.sc-wiki.com，服务器为 `root@47.111.123.225`，发布入口目录为
+`/opt/scwiki/current`，发布清单为 `/opt/scwiki/release.env`，私有配置位于
+`/opt/scwiki/private/`。首次备份和核验记录位于 `/opt/scwiki/backups/initial-20261021/`。
+
+```bash
+ssh "root@47.111.123.225" 'cd "/opt/scwiki/current" && python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" status'
+ssh "root@47.111.123.225" 'cd "/opt/scwiki/current" && python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" logs --group compute --service worker'
+```
+
+本地源数据及私有独立备份继续保留。Embedding 与尚未完成的业务验收以 #146 为准；
+不要因为网站已可访问而关闭所有部署验收任务。

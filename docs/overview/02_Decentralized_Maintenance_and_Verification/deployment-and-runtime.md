@@ -17,6 +17,11 @@
 - `/health` 保留存活语义，`/readyz` 只读检查角色依赖；生产启动核验 schema，升级为显式维护操作。源端多 Alembic heads 必须匹配，不自动 stamp 未知库。
 - 三项目配置、对象备份边界及本地测试已通过；真实服务器迁移、业务和域名验收以 [#146 验证记录](../../specs/146-aliyun-production-deployment/validation.md) 为准。真实两机/三机及 #133 完整执行恢复尚未验收。
 
+2026-10-21 单机实例已在 https://www.sc-wiki.com 提供服务。Caddy 负责 HTTPS、真实客户端 IP
+和 API 到 Go 的转发，Nginx 提供静态页面；生产迁移、登录、既有草稿读取、默认 PDF 解析、
+独立启停和容器重建持久化已实际验证。Embedding 尚未配置，完整语义检索、正式审核发布
+及全部外部模型能力仍有待验收项，不据此宣称所有功能验收完成。
+
 ### 本地开发：宿主机进程（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)）
 
 - 本地服务全部运行在宿主机，由 `scripts/dev.sh` 编排，入口为 `Makefile`（`make start` / `stop` / `status` / `logs`）。GROBID 0.8.1 从官方源码、默认 Wapiti 模型及原生库构建，Mac 共用 `sc-wiki` 的 Java 21，Linux 使用 `.local/grobid-java` 中独立 Java 17，API 8070 和管理接口 8071 均绑定回环地址；本地安装与启停不调用 Docker。
