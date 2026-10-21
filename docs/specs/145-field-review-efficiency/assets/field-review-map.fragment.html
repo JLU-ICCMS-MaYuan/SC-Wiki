@@ -1508,6 +1508,25 @@ main { max-width: 1040px; margin: 0 auto; }
     @media(max-width:520px) { #field-review-audit-145 .selectors { grid-template-columns:1fr; } }
   </style>
   <div class="heading">每个字段，究竟核对了什么？</div>
+  <details>
+    <summary>哪些情况会标红？红框不是“修改过”的标记</summary>
+    <p><strong>来源核对红框：</strong>需要核对的项目，当前结论过期；或尚未通过且没有有效的接受、人工确认或解决记录。未修改也可能红。</p>
+    <p><strong>输入错误红框：</strong>控件检查到缺值、格式、范围、类型、定义或字段关系错误。即使来源通过，也可能红。</p>
+    <table class="table table-sm"><thead><tr><th>来源待处理的原因</th><th>典型情况</th></tr></thead><tbody>
+      <tr><td>尚未核对</td><td>新项目、无可复用结果、任务尚未完成。</td></tr>
+      <tr><td>没有有效依据</td><td>缺引句、引句不匹配、文件/PDF不可读、位置不唯一。</td></tr>
+      <tr><td>不支持或不确定</td><td>数值、单位、表格行、材料/相不符，证据不足。</td></tr>
+      <tr><td>旧结论失效</td><td>值或真实依赖、来源、规则变了；也可能是未正确处理的内部版本变化。</td></tr>
+      <tr><td>共用条件不适用</td><td>软件/阶段/物相/用途冲突、局部例外、规则凭证不完整。</td></tr>
+      <tr><td>推断或归纳未满足条件</td><td>尚未有效接受的推断/常识、归纳理由不足、分类评估未完成。</td></tr>
+      <tr><td>解析或合并冲突</td><td>生成问题、同状态不同DOS值；一条物性可使名称/值/单位一起红。</td></tr>
+      <tr><td>派生输入待核实</td><td>元素数/空间群/换算不一致，或输入来源尚未通过。</td></tr>
+      <tr><td>语义或结果归属错误</td><td>方法字段误填DFPT；Tc未对应SSCHA非谐原表分组。</td></tr>
+      <tr><td>结构来源待确认</td><td>贡献者结构缺论文支持或结构身份未验证。</td></tr>
+    </tbody></table>
+    <p>以上须结合当前有效处理标记；旧结论过期时，过去的确认不能消红。required=false只免来源层标红，不能免输入错误。保存失败的红色提示条不等于字段红框。</p>
+    <p>仅修改无关字段、组内重排、添加同流程Tc–μ*，不应撤销未变共用条件。颜色表示当前待处理状态，不是修改历史，也不等于论文已批准。</p>
+  </details>
   <div class="text-small text-muted" data-meta></div>
   <div class="selectors">
     <label class="form-label">表单范围<select class="form-select" data-group aria-label="表单范围"></select></label>

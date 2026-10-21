@@ -41,3 +41,9 @@ tools/verify_map.mjs接受原路径的完整HTML或早期带iframe预览，分�
 > /Users/mayuan/Codes/SC-Wiki/docs/specs/145-field-review-efficiency/assets/field-review-map.fragment.html 里面都是乱码？！！！！无法阅读
 
 只读检查原字节为UTF-8，本机Chrome自动识别后标题中文正确，但原文件没有编码声明且主题变量为空，缺少独立运行样式。因此未声称已复现同一个查看器的乱码；修复交付为完整UTF-8离线网页，并在用户原路径验证中文和交互。本次不改网站业务代码或字段数据。
+
+## 标红条件调查补充
+
+直接在隔离浏览器上下文导入当前前端EvidenceFieldMarkers.tsx的evidenceProblem，查看15个代表状态：supported/未过期不红；modified属性本身不红；unchecked/missing/uncertain/unsupported无处理标记时红；stale即使过去人工确认/接受也红；required=false不触发来源红；当前人工确认/已接受候选/非空resolution抑制来源红；只填写reason或resolution为空格不消红。此检查是现有谓词行为核查，不是产品修复测试。
+
+red-marking.md同时覆盖本地error属性、动态schema、后台状态降级、派生依赖、普通物性共享标记等入口；不宣称所有ValidationIssue都会画到输入框，部分仅Alert或模块提示。原图新增原因折叠区，原字段数据与计数不变，直接HTML仍保留UTF-8和内嵌样式。

@@ -12,3 +12,5 @@
 - [ ] T008 更新docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/source-association-review.md中的已实现行为，补远程文档验证后回写Issue；不自动推送。
 
 T001/T002的证据见validation.md与对应制品；只完成文档审计。顺序为T003→设计确认→T004/T005→T006/T007→T008，实际代码实施需要后续授权。US2可先验证无修改零写入，US3独立验证历史/来源变化。当前不宣称实施完成。
+
+- [x] T009 [US1] 对照EvidenceFieldMarkers、EvidenceWorkflow及后端状态转换，建立red-marking.md，补原路径图的原因区；实调用evidenceProblem核查15个代表状态，不修改产品逻辑。
