@@ -10,9 +10,17 @@ services:
       SITE_DOMAIN: ${SITE_DOMAIN:?}
       SITE_APEX: ${SITE_APEX:?}
     restart: unless-stopped
+    depends_on:
+      frontend:
+        condition: service_started
   frontend:
     image: ${FRONTEND_IMAGE:?}
     restart: unless-stopped
+    depends_on:
+      goserver:
+        condition: service_healthy
+      python:
+        condition: service_healthy
   goserver:
     image: ${GOSERVER_IMAGE:?}
     env_file:

@@ -149,7 +149,7 @@ def test_compose_groups_have_no_cross_dependencies_or_shared_business_files(tmp_
         result = deployment.compose(group, "--profile", "*", "config", "--format", "json", capture=True)
         configs[group] = json.loads(result.stdout)
         for service in configs[group]["services"].values():
-            assert not service.get("depends_on")
+            assert set(service.get("depends_on", {})) <= set(configs[group]["services"])
     assert all(not service.get("ports") for service in configs["data"]["services"].values())
     assert all(not service.get("ports") for service in configs["compute"]["services"].values())
     app_mounts = configs["app"]["services"]["python"]["volumes"]
@@ -157,6 +157,7 @@ def test_compose_groups_have_no_cross_dependencies_or_shared_business_files(tmp_
     assert {v["source"] for v in app_mounts}.isdisjoint(v["source"] for v in compute_mounts)
     assert configs["app"]["services"]["maintenance"]["profiles"] == ["maintenance"]
     assert configs["app"]["networks"]["default"]["external"]
+    assert configs["compute"]["services"]["worker"]["depends_on"]["grobid"]["condition"] == "service_healthy"
     # compose config 为可再次解析的输出将 $ 转义为 $$。
     assert configs["app"]["services"]["python"]["environment"]["SMTP_PASSWORD"].replace("$$", "$") == secret
     assert configs["app"]["services"]["goserver"]["environment"]["SMTP_PASSWORD"].replace("$$", "$") == secret

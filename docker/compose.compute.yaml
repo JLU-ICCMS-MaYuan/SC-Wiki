@@ -5,6 +5,9 @@ services:
     volumes: ["compute-scratch:/data", "compute-models:/models"]
     mem_limit: 8g
     cpus: 2.5
+    depends_on:
+      grobid:
+        condition: service_healthy
   grobid:
     image: ${GROBID_IMAGE:?}
     restart: unless-stopped
