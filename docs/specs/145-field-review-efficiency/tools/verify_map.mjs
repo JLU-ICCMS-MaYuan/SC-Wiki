@@ -11,7 +11,10 @@ const report=[],errors=[]
 try{
  const page=await browser.newPage();page.on('pageerror',e=>errors.push(e.message))
  await page.goto(pathToFileURL(preview).href)
- const iframe=await page.waitForSelector('iframe'),frame=await iframe.contentFrame()
+ const iframe=await page.$('iframe'),frame=iframe?await iframe.contentFrame():page
+ assert.equal(await frame.evaluate(()=>document.characterSet),'UTF-8')
+ assert.equal(await frame.locator('.heading').textContent(),'每个字段，究竟核对了什么？')
+ assert((await frame.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--foreground'))).trim())
  await frame.waitForSelector('[data-field] option',{state:'attached'})
  for(const width of [736,360]){
   await page.setViewportSize({width,height:1100});await page.waitForTimeout(250)
