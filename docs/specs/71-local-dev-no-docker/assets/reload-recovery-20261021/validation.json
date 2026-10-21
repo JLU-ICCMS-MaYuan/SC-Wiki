@@ -1,0 +1,38 @@
+{
+  "before": {
+    "python_pid": 23090,
+    "worker_pid": 40578,
+    "shutdown_since": "2026-10-20 21:48:35 Asia/Shanghai",
+    "old_connections": 3,
+    "python_health": "timeout",
+    "gateway_list": "502 after 30s"
+  },
+  "after": {
+    "python_health": 200,
+    "list_8000": {
+      "status": 200,
+      "records": 3,
+      "seconds": 0.051
+    },
+    "list_8080": {
+      "status": 200,
+      "records": 3,
+      "seconds": 0.006
+    },
+    "list_5173": {
+      "status": 200,
+      "records": 3,
+      "seconds": 0.007
+    },
+    "material_states": 8,
+    "make_start": "passed"
+  },
+  "graceful_shutdown_seconds": 10,
+  "actual_reload_regression": {
+    "passed": 1,
+    "seconds": 11.27,
+    "scenario": "未完成请求存续期间修改文件，关闭超时后替换服务进程恢复健康"
+  },
+  "database_migration": false,
+  "scientific_data_modified": false
+}

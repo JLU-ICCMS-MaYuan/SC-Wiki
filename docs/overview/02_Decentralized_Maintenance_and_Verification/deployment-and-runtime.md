@@ -55,6 +55,8 @@
 1. 用户先准备 Conda 和系统基础工具；`make deploy` 寻找其实际前缀并复用兼容的 `sc-wiki`，环境缺失则创建。脚本不安装或升级 Conda，不修改 base；缺少/不可用 Conda 或 `sc-wiki` 实际指向 base 时在预检阶段拒绝，可用 `CONDA_EXE` 指定安装位置。依赖版本和下载摘要由 `scripts/local-deploy-versions.json` 管理；Go、Neo4j 和 Qdrant 位于 `.local/`。`make setup` 委托同一安装器，仅准备依赖和配置；完整分工见[本地开发说明](../../local-dev.md#工具和配置分工)。
 2. `make deploy` 自动检查 `dist/` 的直接子项：只有一个压缩包时自动校验解压，多于一个明确要求只能保留一个，`.sha256` 不计数。显式 `BUNDLE` 可以指定来源但不绕过多包限制。压缩包与已有 `.deployment/manifest.json` 须一致；完全无包才初始化空库。有包时沿用当前源码/服务版本一致性、空目标和数据完整性检查，恢复到临时目录后提升为 `.data`。已有不属于该部署的数据（包括另一空库部署的实例）会阻断，成功后的重跑不重复导入。Linux 的 `make migrate` 保留为旧 Docker 卷迁移入口；Mac 明确提示使用符合版本约束的 `make deploy BUNDLE=...`。
 3. `make start` 启动全部服务，按依赖顺序等待健康检查。便携实例核验进程归属和真实 schema，只核验、不升级数据库；没有便携记录的旧实例保留原迁移启动路径。
+Python本地热重载最多等待旧请求关闭10秒，超时取消未完成请求后启动替换进程，避免无限等待旧连接而持续占用8000。若旧配置已卡住，可仅执行`bash "scripts/dev.sh" restart python`恢复；仍须通过PID归属、schema和健康核验，不自动抢占他人端口。实现及真实长请求重载验证见[#71修复记录](../../specs/71-local-dev-no-docker/reload-recovery-20261021.md)。
+
 4. 浏览器访问 `http://127.0.0.1:5173`。`make status` 查看各服务状态，`make logs S=<服务>` 跟踪日志。
 
 部署前置检查不要求 Docker，阻塞报告通过 `next_steps` 提供处理建议，

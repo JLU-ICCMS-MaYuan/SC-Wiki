@@ -173,9 +173,11 @@ start_python() {
     ( cd "$REPO_ROOT" && "$PY_BIN/python" -m backend.scripts.run_migrations ) \
       >>"$LOG_DIR/migrate.log" 2>&1 || die "迁移失败，见 $LOG_DIR/migrate.log"
   fi
+  # 限制关闭等待，避免旧请求让热重载永久卡住、父进程一直占用端口。
   # --reload 依赖 watchfiles；只监听 backend/ 避免 .data 写入触发重启。
   ( cd "$REPO_ROOT" && spawn python "$PY_BIN/uvicorn" backend.main:app \
-      --host 127.0.0.1 --port "$PYTHON_PORT" --reload --reload-dir backend )
+      --host 127.0.0.1 --port "$PYTHON_PORT" --reload --reload-dir backend \
+      --timeout-graceful-shutdown 10 )
   wait_for 90 "python" py_ready || die "python 启动失败，见 $LOG_DIR/python.log"
   ok "python 127.0.0.1:$PYTHON_PORT (--reload)"
 }

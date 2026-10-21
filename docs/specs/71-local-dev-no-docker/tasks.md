@@ -228,3 +228,9 @@ make stop               # 停止全部
 - **`docker/nginx.conf` 的上传相关配置未在本地链路复现**。本地走 vite 代理，
   没有 nginx 的 `client_max_body_size` 与 `proxy_request_buffering off`，
   大文件上传行为可能与生产不同，待核验。
+
+## 2026-10-21：Python重载恢复
+
+- [x] T075 限制旧连接关闭等待，避免无限重载卡住。
+- [x] T076 真实长请求与文件重载回归通过。
+- [x] T077 验证现场三层任务列表、草稿及重复启动，详见[修复记录](reload-recovery-20261021.md)。
