@@ -1,5 +1,3 @@
 [
-  "mayuanmark/scwiki-frontend:sha-434fc94",
-  "mayuanmark/scwiki-goserver:sha-434fc94",
-  "mayuanmark/scwiki-python:sha-434fc94"
+  "mayuanmark/scwiki-python:sha-39bdcac"
 ]
