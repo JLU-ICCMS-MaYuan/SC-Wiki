@@ -1,0 +1,50 @@
+name: Export verified deployment image delta
+
+on:
+  push:
+    branches: [mayuan]
+    paths:
+      - .github/workflows/export-deployment-delta.yml
+      - scripts/deployment_image_delta.py
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare archive workspace
+        run: |
+          sudo rm -rf /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/share/dotnet
+          sudo apt-get update -qq
+          sudo apt-get install -y xdelta3
+          df -h .
+      - name: Verify delta transport guards
+        run: python3 -m unittest discover -s tests/02_maintenance_and_verification -p test_deployment_image_delta.py
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: 12341215651
+          run-id: 39588691825
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: base
+          merge-multiple: true
+      - uses: actions/download-artifact@v4
+        with:
+          artifact-ids: 12350119050
+          run-id: 39607553751
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: target
+          merge-multiple: true
+      - name: Create delta and verify exact reconstruction
+        run: |
+          python3 scripts/deployment_image_delta.py create --base base --target target --output delta \
+            --source-commit 39bdcac3f8ead28103d98188d4178b23044820c2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deployment-python-delta-39bdcac
+          path: delta/
+          compression-level: 0
+          retention-days: 2
