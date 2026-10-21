@@ -1,7 +1,9 @@
 services:
   mysql:
     image: ${MYSQL_IMAGE:?}
-    env_file: ["${SCWIKI_ROOT:?}/private/app.env"]
+    env_file:
+      - path: ${SCWIKI_ROOT:?}/private/app.env
+        format: raw
     volumes: ["mysql:/var/lib/mysql"]
     restart: unless-stopped
     healthcheck:
@@ -20,7 +22,9 @@ services:
     restart: unless-stopped
   neo4j:
     image: ${NEO4J_IMAGE:?}
-    env_file: ["${SCWIKI_ROOT:?}/private/neo4j.env"]
+    env_file:
+      - path: ${SCWIKI_ROOT:?}/private/neo4j.env
+        format: raw
     environment:
       NEO4J_server_memory_heap_initial__size: 256M
       NEO4J_server_memory_heap_max__size: 512M
@@ -29,12 +33,15 @@ services:
     restart: unless-stopped
   qdrant:
     image: ${QDRANT_IMAGE:?}
-    env_file: ["${SCWIKI_ROOT:?}/private/qdrant.env"]
+    env_file:
+      - path: ${SCWIKI_ROOT:?}/private/qdrant.env
+        format: raw
     volumes: ["qdrant:/qdrant/storage"]
     restart: unless-stopped
   garage:
     image: ${GARAGE_IMAGE:?}
-    command: ["/garage", "-c", "/etc/garage.toml", "server"]
+    entrypoint: ["/garage"]
+    command: ["-c", "/etc/garage.toml", "server"]
     volumes:
       - garage-meta:/var/lib/garage/meta
       - garage-data:/var/lib/garage/data

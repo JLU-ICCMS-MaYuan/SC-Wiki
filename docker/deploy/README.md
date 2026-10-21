@@ -4,6 +4,9 @@
 
 ## 首次准备
 
+Compose 至少使用 2.30，以支持 `env_file.format: raw`。私有 env 使用不带外层引号的
+`KEY=value` 行；Compose 与维护容器均按原值读取，密码中的美元符号和引号不会再次展开。
+
 安装 Docker Engine 和 Compose。把本次发布源码放在服务器，复制 `release.env.example` 到 `/opt/scwiki/release.env`，填写实际源码 SHA、各镜像 digest；离线导入时可使用已核验的 `sha256:<image-config-id>`，同时保留来源 manifest digest 和归档校验清单。
 
 私有配置位于 `/opt/scwiki/private/`：

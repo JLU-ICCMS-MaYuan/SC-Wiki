@@ -26,7 +26,8 @@ def test_news_services_are_started_separately_from_upload_worker():
     assert 'command: ["python", "-m", "backend.news", "worker"]' in worker
     assert 'command: ["python", "-m", "backend.scripts.run_upload_workers"]' in upload_worker
 
-    assert 'env_file: ["${SCWIKI_ROOT:?}/private/app.env"]' in RUNTIME_PATH.read_text()
+    assert 'path: ${SCWIKI_ROOT:?}/private/app.env' in RUNTIME_PATH.read_text()
+    assert 'format: raw' in RUNTIME_PATH.read_text()
     assert 'restart: unless-stopped' in RUNTIME_PATH.read_text()
     for block in (scheduler, worker):
         assert 'depends_on' not in block

@@ -1,7 +1,5 @@
 [
-  "neo4j:5.26.29",
-  "qdrant/qdrant:v1.19.0",
-  "dxflrs/garage:v2.4.1",
-  "lfoppiano/grobid:0.8.1",
-  "caddy:2.10.2"
+  "mayuanmark/scwiki-frontend:sha-434fc94",
+  "mayuanmark/scwiki-goserver:sha-434fc94",
+  "mayuanmark/scwiki-python:sha-434fc94"
 ]

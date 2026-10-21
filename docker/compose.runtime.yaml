@@ -2,7 +2,9 @@
 services:
   python-base:
     image: ${PYTHON_IMAGE:?必须指定固定镜像}
-    env_file: ["${SCWIKI_ROOT:?}/private/app.env"]
+    env_file:
+      - path: ${SCWIKI_ROOT:?}/private/app.env
+        format: raw
     environment:
       SC_WIKI_DATA_DIR: /data
       FILE_STORAGE_TMP_DIR: /data/tmp

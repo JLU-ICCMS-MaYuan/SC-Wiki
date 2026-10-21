@@ -15,7 +15,9 @@ services:
     restart: unless-stopped
   goserver:
     image: ${GOSERVER_IMAGE:?}
-    env_file: ["${SCWIKI_ROOT:?}/private/app.env"]
+    env_file:
+      - path: ${SCWIKI_ROOT:?}/private/app.env
+        format: raw
     environment:
       PORT: "8080"
       FILE_STORAGE_BACKEND: s3

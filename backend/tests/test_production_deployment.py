@@ -141,6 +141,8 @@ def test_mutable_image_tag_is_rejected(tmp_path):
 
 def test_compose_groups_have_no_cross_dependencies_or_shared_business_files(tmp_path):
     release = make_release(tmp_path)
+    secret = "literal$DOLLAR'quotes\""
+    (tmp_path / "private/app.env").write_text("SMTP_PASSWORD=" + secret + "\n")
     deployment = deploy.Deployment(release)
     configs = {}
     for group in deploy.GROUPS:
@@ -155,3 +157,6 @@ def test_compose_groups_have_no_cross_dependencies_or_shared_business_files(tmp_
     assert {v["source"] for v in app_mounts}.isdisjoint(v["source"] for v in compute_mounts)
     assert configs["app"]["services"]["maintenance"]["profiles"] == ["maintenance"]
     assert configs["app"]["networks"]["default"]["external"]
+    # compose config 为可再次解析的输出将 $ 转义为 $$。
+    assert configs["app"]["services"]["python"]["environment"]["SMTP_PASSWORD"].replace("$$", "$") == secret
+    assert configs["app"]["services"]["goserver"]["environment"]["SMTP_PASSWORD"].replace("$$", "$") == secret
