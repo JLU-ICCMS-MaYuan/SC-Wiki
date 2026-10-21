@@ -13,7 +13,12 @@ def consume():
         try:
             reconcile()
             worker_class = SpawnWorker if sys.platform == "darwin" else Worker
-            worker_class([QUEUE], connection=connection).work(with_scheduler=False)
+            worker = worker_class([QUEUE], connection=connection)
+            worker.work(with_scheduler=False)
+            # RQ 的正常停止会返回，不能在维护窗口重新创建消费者。
+            if (getattr(worker, "_stop_requested", False)
+                    or getattr(worker, "_shutdown_requested_date", None) is not None):
+                return
         except Exception:
             # 不输出包含连接信息或凭据的异常字符串。
             import logging

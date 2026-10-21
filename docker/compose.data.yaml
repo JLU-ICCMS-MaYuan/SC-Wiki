@@ -11,10 +11,12 @@ services:
       retries: 20
   redis:
     image: ${REDIS_IMAGE:?}
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - cp /run/scwiki-redis.conf /tmp/scwiki-redis.conf; chown redis:redis /tmp/scwiki-redis.conf; exec /usr/local/bin/docker-entrypoint.sh redis-server /tmp/scwiki-redis.conf
     volumes:
       - redis:/data
-      - ${SCWIKI_ROOT:?}/private/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ${SCWIKI_ROOT:?}/private/redis.conf:/run/scwiki-redis.conf:ro
     restart: unless-stopped
   neo4j:
     image: ${NEO4J_IMAGE:?}
