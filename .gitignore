@@ -28,6 +28,7 @@ wheels/
 /docker/deploy/*
 !/docker/deploy/README.md
 !/docker/deploy/*.example
+!/docker/deploy/export-images.json
 /demo/
 
 # 目录：编辑器、工作区与本地辅助工具

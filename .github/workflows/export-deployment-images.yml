@@ -1,24 +1,49 @@
 name: Export verified deployment images
 
 on:
+  push:
+    branches: [mayuan]
+    paths:
+      - .github/workflows/export-deployment-images.yml
+      - docker/deploy/export-images.json
   workflow_dispatch:
     inputs:
       images:
         description: '需要转运的镜像引用 JSON 数组（每项固定版本或 digest）'
-        required: true
+        required: false
         type: string
 
 permissions:
   contents: read
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.images.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: images
+        env:
+          IMAGES_INPUT: ${{ inputs.images }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from pathlib import Path
+          images = json.loads(os.environ.get("IMAGES_INPUT") or Path("docker/deploy/export-images.json").read_text())
+          if not isinstance(images, list) or not images or any(not isinstance(v, str) or not re.fullmatch(r"[a-zA-Z0-9./_:@-]+", v) for v in images):
+              raise SystemExit("Invalid image list")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as output:
+              output.write("value=" + json.dumps(images, separators=(",", ":")) + "\n")
+          PY
   export:
+    needs: prepare
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
-        image: ${{ fromJSON(inputs.images) }}
+        image: ${{ fromJSON(needs.prepare.outputs.images) }}
     steps:
       - name: Prepare isolated runner
         run: |
