@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+from contextlib import closing
 import json
 import os
 from pathlib import Path
@@ -56,7 +57,7 @@ def check(role: str = "python", *, schema: bool = False) -> dict[str, bool]:
 
     def qdrant():
         from backend.rag.qdrant_connection import create_qdrant_client
-        with create_qdrant_client() as client:
+        with closing(create_qdrant_client()) as client:
             client.get_collections()
 
     def neo4j():

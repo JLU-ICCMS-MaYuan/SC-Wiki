@@ -107,7 +107,8 @@ def health() -> dict[str, Any]:
     qdrant_available = False
     try:
         from backend.rag.qdrant_connection import create_qdrant_client
-        with create_qdrant_client() as client:
+        from contextlib import closing
+        with closing(create_qdrant_client()) as client:
             client.get_collections()
         qdrant_available = True
     except Exception:

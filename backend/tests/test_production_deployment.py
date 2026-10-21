@@ -3,6 +3,9 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import sys
+import time
+import uuid
 
 import boto3
 import pytest
@@ -54,6 +57,60 @@ def test_missing_digest_metadata_is_rejected(objects, tmp_path):
     with pytest.raises(ValueError, match="摘要元数据"):
         backup.export_objects(tmp_path / "objects")
     assert not (tmp_path / "objects/manifest.json").exists()
+
+
+def test_json_import_rounding_is_restored_without_accepting_business_changes():
+    expected = {"curve": [5.684341886080803e-14], "label": "original"}
+    imported = {"curve": [5.684341886080804e-14], "label": "original"}
+    assert backup.numeric_json_changes(expected, imported) == [
+        ('$."curve"[0]', "5.684341886080803e-14")]
+    with pytest.raises(ValueError):
+        backup.numeric_json_changes(expected, {"curve": [0.1], "label": "original"})
+    with pytest.raises(ValueError):
+        backup.numeric_json_changes(expected, {"curve": expected["curve"], "label": "changed"})
+
+
+def test_persistent_redis_draft_ignores_stale_cleanup_timestamp(monkeypatch, tmp_path):
+    from scripts.local_deploy import storage
+    binary = Path(sys.executable).with_name("redis-server")
+    if not binary.is_file():
+        pytest.skip("需要隔离 Redis")
+    class Cursor:
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def execute(self, query): assert query == "SELECT id FROM users"
+        def fetchall(self): return [(7,)]
+    class Connection:
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def cursor(self): return Cursor()
+    monkeypatch.setattr(storage, "mysql_connection", lambda _: Connection())
+    monkeypatch.setenv("DATABASE_URL", "unused-isolated")
+    socket = Path("/tmp") / ("scwiki146-" + uuid.uuid4().hex + ".sock")
+    monkeypatch.setenv("REDIS_URL", "unix://" + str(socket))
+    process = subprocess.Popen([str(binary), "--port", "0", "--unixsocket", str(socket),
+                                "--dir", str(tmp_path), "--save", "", "--appendonly", "no"],
+                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        for _ in range(100):
+            if socket.exists(): break
+            time.sleep(.02)
+        task_id = "a" * 32
+        state = {"user_id": 7, "cleanup_at": 1, "updated_at": 1, "status": "ready"}
+        payload = {"format": 1, "tasks": [{"task_id": task_id, "state": state,
+                   "draft": {"paper": {"title": "preserved"}}, "state_expires_at": None,
+                   "draft_expires_at": None}]}
+        source = tmp_path / "redis.json"
+        source.write_text(json.dumps(payload))
+        assert backup.restore_redis(source) == {"restored_tasks": 1, "expired_tasks": 0}
+        with backup.redis_client() as client:
+            assert json.loads(client.get(f"upload:{task_id}:state")) == state
+            assert client.pttl(f"upload:{task_id}:state") == -1
+            assert client.pttl(f"upload:{task_id}:draft") == -1
+    finally:
+        process.terminate()
+        process.wait(timeout=10)
+        socket.unlink(missing_ok=True)
 
 
 def make_release(tmp_path):

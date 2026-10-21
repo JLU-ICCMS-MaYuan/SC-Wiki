@@ -144,6 +144,96 @@ def mysql_inventory():
     return result
 
 
+def export_mysql_json(target):
+    """补充 JSON 原文，避免 MySQL JSON 文本解析的浮点末位变化。"""
+    from scripts.local_deploy.storage import mysql_connection, identifier
+    tables = []
+    with mysql_connection(os.environ["DATABASE_URL"]) as connection, connection.cursor() as cursor:
+        cursor.execute("SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS "
+                       "WHERE TABLE_SCHEMA=DATABASE() AND DATA_TYPE='json' ORDER BY TABLE_NAME,ORDINAL_POSITION")
+        columns = {}
+        for table, column in cursor.fetchall():
+            columns.setdefault(table, []).append(column)
+        for table, names in columns.items():
+            cursor.execute("SHOW KEYS FROM " + identifier(table) + " WHERE Key_name='PRIMARY'")
+            primary = [row[4] for row in sorted(cursor.fetchall(), key=lambda row: row[3])]
+            if not primary:
+                raise ValueError("JSON 备份表缺少主键")
+            selected = ",".join(identifier(name) for name in [*primary, *names])
+            cursor.execute("SELECT " + selected + " FROM " + identifier(table))
+            rows = [{"key": list(row[:len(primary)]), "values": list(row[len(primary):])}
+                    for row in cursor.fetchall()]
+            tables.append({"table": table, "primary": primary, "columns": names, "rows": rows})
+    write_json(target, {"format": 1, "tables": tables})
+    return {"json_tables": len(tables)}
+
+
+def numeric_json_changes(expected, actual, path="$"):
+    """仅接受 JSON 文本导入中的浮点差异；结构、字符串或整数变化拒绝。"""
+    import math
+    if type(expected) is not type(actual):
+        raise ValueError("JSON 类型不一致")
+    if isinstance(expected, dict):
+        if expected.keys() != actual.keys():
+            raise ValueError("JSON 字段集合不一致")
+        return [item for key in expected for item in numeric_json_changes(
+            expected[key], actual[key], path + "." + json.dumps(key, ensure_ascii=False))]
+    if isinstance(expected, list):
+        if len(expected) != len(actual):
+            raise ValueError("JSON 列表长度不一致")
+        return [item for index, (left, right) in enumerate(zip(expected, actual))
+                for item in numeric_json_changes(left, right, f"{path}[{index}]")]
+    if expected == actual:
+        return []
+    if isinstance(expected, float) and math.isfinite(expected) and math.isfinite(actual):
+        # 仅允许相邻 double 的解析舍入误差，不把业务数据修改当作恢复修正。
+        if abs(expected - actual) <= max(math.ulp(expected), math.ulp(actual)):
+            return [(path, repr(expected))]
+    raise ValueError("JSON 内容差异不属于可恢复的浮点解析舍入")
+
+
+def restore_mysql_json(source):
+    from scripts.local_deploy.storage import mysql_connection, identifier
+    data = json.loads(source.read_text())
+    if data.get("format") != 1:
+        raise ValueError("JSON 补充备份格式无效")
+    changed = 0
+    with mysql_connection(os.environ["DATABASE_URL"]) as connection, connection.cursor() as cursor:
+        connection.begin()
+        try:
+            for table in data["tables"]:
+                primary, columns = table["primary"], table["columns"]
+                selection = ",".join(identifier(name) for name in [*primary, *columns])
+                cursor.execute("SELECT " + selection + " FROM " + identifier(table["table"]) + " FOR UPDATE")
+                actual = {tuple(row[:len(primary)]): list(row[len(primary):]) for row in cursor.fetchall()}
+                if set(actual) != {tuple(row["key"]) for row in table["rows"]}:
+                    raise ValueError("恢复目标主键集合与备份不一致")
+                for row in table["rows"]:
+                    for column, expected, current in zip(columns, row["values"], actual[tuple(row["key"])]):
+                        if expected == current:
+                            continue
+                        if expected is None or current is None:
+                            raise ValueError("JSON 空值不一致")
+                        changes = numeric_json_changes(json.loads(expected), json.loads(current))
+                        where = " AND ".join(identifier(name) + "=%s" for name in primary)
+                        if changes:
+                            expression = "JSON_SET(" + identifier(column) + "," + ",".join(
+                                "%s,CAST(%s AS DOUBLE)" for _ in changes) + ")"
+                            parameters = [value for item in changes for value in item] + row["key"]
+                            cursor.execute("UPDATE " + identifier(table["table"]) + " SET " +
+                                           identifier(column) + "=" + expression + " WHERE " + where, parameters)
+                            changed += len(changes)
+                        cursor.execute("SELECT " + identifier(column) + " FROM " +
+                                       identifier(table["table"]) + " WHERE " + where, row["key"])
+                        if cursor.fetchone()[0] != expected:
+                            raise ValueError("JSON 修复后原文仍不一致")
+            connection.commit()
+        except Exception:
+            connection.rollback()
+            raise
+    return {"restored_float_values": changed}
+
+
 def assert_no_jobs(client):
     from scripts.local_deploy.storage import assert_no_jobs as check
     check(client)
@@ -185,8 +275,8 @@ def restore_redis(source):
             if not re.fullmatch(r"[a-f0-9]{32}", task["task_id"]) or task["state"]["user_id"] not in users:
                 raise ValueError("任务身份或用户无效")
             deadline = task.get("state_expires_at")
-            cleanup = task["state"].get("cleanup_at")
-            deadlines = [float(v) for v in (deadline, cleanup) if v is not None]
+            # PERSIST 后 JSON 中可能仍留有旧 cleanup_at；真实 Redis TTL 才是备份事实。
+            deadlines = [float(deadline)] if deadline is not None else []
             if deadlines and min(deadlines) <= time.time():
                 expired += 1
                 continue
@@ -216,7 +306,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--env-file", type=Path)
     parser.add_argument("action", choices=["objects-export", "objects-restore", "objects-verify",
-                                           "redis-export", "redis-restore", "mysql-inventory"])
+                                           "redis-export", "redis-restore", "mysql-inventory",
+                                           "mysql-json-export", "mysql-json-restore"])
     parser.add_argument("path", type=Path)
     parser.add_argument("--remote", action="store_true")
     args = parser.parse_args()
@@ -234,6 +325,10 @@ def main():
         result = export_redis(args.path)
     elif args.action == "redis-restore":
         result = restore_redis(args.path)
+    elif args.action == "mysql-json-export":
+        result = export_mysql_json(args.path)
+    elif args.action == "mysql-json-restore":
+        result = restore_mysql_json(args.path)
     else:
         data = mysql_inventory()
         write_json(args.path, data)

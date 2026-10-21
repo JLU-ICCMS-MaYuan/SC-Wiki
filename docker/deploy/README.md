@@ -48,6 +48,12 @@ python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" logs --group com
 
 MySQL 清单包括表结构、数量与行内容摘要；备份与恢复后分别生成并比较。源文件路径转换只能针对登记的文件字段，不能全库字符串替换。私有完整原备份另行保留。
 
+MySQL 原生 JSON 文本导入可能使极小浮点数移动一个 double 的末位。冻结窗口须同时执行
+`mysql-json-export` 保存 JSON 原文，恢复 SQL 后用 `mysql-json-restore` 核对：
+只允许相邻 double 的解析误差，通过 SQL DOUBLE 转换恢复原始数值，其他类型、结构或内容变化
+直接拒绝；所有修复在同一事务内，修复后必须与原文完全相等。最后仍要求整库内容摘要一致，
+不能用容差替代完整性验收。JSON 补充文件须纳入同一备份摘要清单。
+
 归档通过 SSH/rsync 传输并核对 SHA-256。先在隔离目标恢复演练，再做最终冻结迁移；服务器开放写入后回退前先保护新增数据。
 
 ## 上线边界

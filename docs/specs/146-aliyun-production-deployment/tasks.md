@@ -2,7 +2,7 @@
 
 输入：[Spec](spec.md)、[Plan](plan.md)、[Research](research.md)、[数据模型](data-model.md)、[契约](contracts/deployment.md)。
 
-- [ ] T001 核实源端版本、数据与发布身份，在 docs/specs/146-aliyun-production-deployment/validation.md 记录。
+- [x] T001 核实源端版本、数据与发布身份，在 docs/specs/146-aliyun-production-deployment/validation.md 记录（源端实测及冻结清单见该文件）。
 - [ ] T002 [US3] 编写并验证 scripts/deploy.py 及 docker/compose.app.yaml、docker/compose.data.yaml、docker/compose.compute.yaml。
 - [ ] T003 [US1] 实现认证连接、只读就绪、Caddy 和显式迁移，覆盖 backend/scripts/check_dependencies.py 与 goserver/。
 - [ ] T004 [US2] 实现 scripts/production_backup.py 的有清单备份、恢复、校验，验证对象元数据、TTL、空目标与失败保护。
