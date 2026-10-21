@@ -21,7 +21,13 @@ wheels/
 /frontend/static/
 
 # 目录：本地 Docker 部署副本和演示产物
-/docker/
+/docker/*
+!/docker/compose*.yaml
+!/docker/Caddyfile
+!/docker/deploy/
+/docker/deploy/*
+!/docker/deploy/README.md
+!/docker/deploy/*.example
 /demo/
 
 # 目录：编辑器、工作区与本地辅助工具

@@ -1,0 +1,67 @@
+name: Export verified deployment images
+
+on:
+  workflow_dispatch:
+    inputs:
+      images:
+        description: '需要转运的镜像引用 JSON 数组（每项固定版本或 digest）'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        image: ${{ fromJSON(inputs.images) }}
+    steps:
+      - name: Prepare isolated runner
+        run: |
+          sudo rm -rf /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+          sudo apt-get update -qq
+          sudo apt-get install -y skopeo
+      - name: Authenticate Docker Hub
+        env:
+          HUB_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          HUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: printf '%s' "$HUB_TOKEN" | skopeo login --username "$HUB_USER" --password-stdin docker.io
+      - name: Export exact amd64 artifact
+        env:
+          SOURCE_IMAGE: ${{ matrix.image }}
+        run: |
+          python3 - <<'PY'
+          import os, re
+          value = os.environ["SOURCE_IMAGE"]
+          if not re.fullmatch(r"[a-zA-Z0-9./_:@-]+", value):
+              raise SystemExit("Invalid image reference")
+          PY
+          mkdir "export"
+          skopeo inspect --override-os linux --override-arch amd64 "docker://$SOURCE_IMAGE" > "export/source.json"
+          SOURCE_DIGEST=$(python3 -c 'import json; print(json.load(open("export/source.json"))["Digest"])')
+          SOURCE_REPO=$(python3 -c 'import json; print(json.load(open("export/source.json"))["Name"])')
+          skopeo copy --override-os linux --override-arch amd64 "docker://$SOURCE_REPO@$SOURCE_DIGEST" "docker-archive:export/image.tar:scwiki-transfer/image:amd64"
+          python3 - <<'PY'
+          import hashlib, json, tarfile
+          from pathlib import Path
+          with tarfile.open("export/image.tar") as archive:
+              manifest = json.load(archive.extractfile("manifest.json"))
+              config = archive.extractfile(manifest[0]["Config"]).read()
+          source = json.loads(Path("export/source.json").read_text())
+          source["loaded_image_id"] = "sha256:" + hashlib.sha256(config).hexdigest()
+          source["config"] = json.loads(config)
+          Path("export/source.json").write_text(json.dumps(source, indent=2))
+          PY
+          gzip "export/image.tar"
+          cd "export"
+          sha256sum "image.tar.gz" "source.json" > "checksums.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deployment-image-${{ strategy.job-index }}
+          path: export/
+          compression-level: 0
+          retention-days: 2

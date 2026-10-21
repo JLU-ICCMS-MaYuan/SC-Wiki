@@ -6,9 +6,17 @@
 """
 
 import csv
+import os
 from pathlib import Path
 
 _CSV_FILE = Path(__file__).resolve().parent / "prop_name_map.csv"
+
+
+def _shared_cache():
+    from redis import Redis
+    from backend.rag.config import settings
+    return Redis.from_url(settings.redis_url, decode_responses=True,
+                          socket_connect_timeout=2, socket_timeout=2)
 
 _CANONICAL_NAMES: list[str] = []
 _PROP_LABELS: dict[str, str] = {}
@@ -36,6 +44,14 @@ def _load_map() -> list[tuple[str, str]]:
                     labels[r[1]] = r[2]
     _PROP_LABELS = labels
     _CANONICAL_NAMES = sorted(names)
+    if os.environ.get("FILE_STORAGE_BACKEND") == "s3":
+        # 动态映射是可重建缓存；业务规范名仍以正式数据库记录为准。
+        try:
+            with _shared_cache() as client:
+                rows.extend((key.lower(), value) for key, value in
+                            client.hgetall("scwiki:prop-name-map").items())
+        except Exception:
+            pass
     return rows
 
 # 首次加载
@@ -47,6 +63,10 @@ PROP_LABELS = _PROP_LABELS
 
 def _append_to_csv(raw: str, canonical: str) -> None:
     """追加新映射到 CSV 文件末尾。"""
+    if os.environ.get("FILE_STORAGE_BACKEND") == "s3":
+        with _shared_cache() as client:
+            client.hset("scwiki:prop-name-map", raw.strip(), canonical)
+        return
     already = False
     if _CSV_FILE.exists():
         existing = _CSV_FILE.read_text()

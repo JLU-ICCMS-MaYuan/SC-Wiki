@@ -90,6 +90,14 @@ def health_check():
     return {"status": "ok", "service": "superconductor-dataset"}
 
 
+@app.get("/readyz")
+def readiness():
+    from backend.scripts.check_dependencies import check
+    result = check()
+    return JSONResponse(status_code=200 if all(result.values()) else 503,
+                        content={"ready": all(result.values()), "dependencies": result})
+
+
 # 所有非 API 路径 → React SPA（前端路由接管）
 @app.get("/{full_path:path}")
 async def spa_fallback(full_path: str):

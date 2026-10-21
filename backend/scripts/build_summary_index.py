@@ -9,15 +9,13 @@ import json
 import time
 
 from sqlalchemy import create_engine, text
-from qdrant_client import QdrantClient
+from backend.rag.qdrant_connection import create_qdrant_client
 from qdrant_client.models import Distance, PointStruct, VectorParams
 
 from backend.ingest.embedder import embed_texts
 from backend.database import DATABASE_URL as MYSQL_URL
 
 COLLECTION_NAME = "paper_summaries"
-QDRANT_HOST = "127.0.0.1"
-QDRANT_PORT = 6333
 BATCH_SIZE = 50
 
 
@@ -32,7 +30,7 @@ def main():
     print(f"MySQL 读取 {len(rows)} 篇论文")
 
     # Qdrant 客户端
-    client = QdrantClient(host=QDRANT_HOST, port=QDRANT_PORT)
+    client = create_qdrant_client()
 
     # 删除旧集合并重建
     try:

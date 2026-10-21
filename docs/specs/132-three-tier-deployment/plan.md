@@ -8,7 +8,7 @@
 
 ## 技术上下文
 
-Linux Docker Engine 与 Compose v2.24+；当前开发机可用 Compose v5.1.2 仅为工具事实，不代表生产运行验收。Go 1.25、Python 3.12、MySQL 8.4、Redis 7、Neo4j 5、Qdrant 与现有 HTTP 栈；#131 提供 S3 客户端，数据组新增单节点 MinIO。版本以固定发布清单为部署输入，禁止 latest。
+Linux Docker Engine 与 Compose v2.24+；当前开发机可用 Compose v5.1.2 仅为工具事实，不代表生产运行验收。Go 1.25、Python 3.12、MySQL 8.4、按源端兼容版本固定的 Redis、Neo4j 5、Qdrant 与现有 HTTP 栈；#131 提供 S3 客户端，数据组沿用单节点 Garage（2026-10-21 用户确认 #146 方案）。版本以固定发布清单为部署输入，禁止 latest。
 
 测试分为 Compose 配置、CLI 角色和生命周期测试、真实认证依赖检查、隔离容器单机与真实两机验收。三机业务验收由 #133 负责，拓扑/配置支持由本 Feature 提供。
 

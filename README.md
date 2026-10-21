@@ -2,6 +2,16 @@
 
 # SC-Wiki 各页面介绍
 
+## 阿里云三组单机部署（#146）
+
+生产使用网站、数据、解析三个独立 Compose 项目，入口为
+`python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" <动作> --group <组>`。
+旧 `docker/compose.yaml` 已退役，不再启动全栈；本地原生开发入口不变。
+应用镜像固定版本，业务文件使用 Garage S3，数据库迁移为显式维护操作。
+首次迁移必须一致性备份、恢复并校验，不能直接把运行中的 `.data/` 拷到容器。
+配置与运维见 [部署指南](docker/deploy/README.md)，实际上线和验收状态见
+[#146 验证记录](docs/specs/146-aliyun-production-deployment/validation.md)。
+
 ## macOS 原生本地开发（#117）
 
 Apple Silicon Mac 在项目根目录直接使用以下命令，无需 Lima 或 Docker：

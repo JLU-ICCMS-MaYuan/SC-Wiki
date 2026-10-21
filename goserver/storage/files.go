@@ -30,6 +30,20 @@ type Files interface {
 	Delete(ctx context.Context, key string) error
 }
 
+// Check 只读检查存储可用性；不创建测试对象或目录。
+func Check(ctx context.Context, files Files) error {
+	switch f := files.(type) {
+	case *s3Files:
+		_, err := f.client.ListObjectsV2(ctx, &s3.ListObjectsV2Input{Bucket: aws.String(f.bucket), MaxKeys: aws.Int32(1)})
+		return err
+	case *localFiles:
+		_, err := os.Stat(f.root)
+		return err
+	default:
+		return ErrUnavailable
+	}
+}
+
 func validKey(key string) bool {
 	if key == "" || len(key) > 500 || strings.ContainsAny(key, "\\\r\n\x00") {
 		return false

@@ -122,7 +122,7 @@ def test_canonical_upload_publishes_object_key_before_queue(monkeypatch: pytest.
             app.dependency_overrides[get_current_user] = lambda: SimpleNamespace(id=7, role="user", is_approved=True)
             client = TestClient(app)
             created = client.post("/api/upload-tasks", json={"files": [{"client_id": "main", "role": "main",
-                "filename": "paper.pdf", "size": 3}], "parser_profile": "legacy"})
+                "filename": "paper.pdf", "size": 3}], "parser_profile": "complementary"})
             assert created.status_code == 201, created.text
             task_id = created.json()["data"]["task_id"]
             file_id = created.json()["data"]["files"][0]["file_id"]

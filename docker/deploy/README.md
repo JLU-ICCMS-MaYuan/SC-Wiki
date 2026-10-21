@@ -1,144 +1,59 @@
-# SC-Wiki Docker 部署包
+# SC-Wiki 三组生产部署
 
-此文件描述历史 Docker 交付包的导入方式；当前 `docker/compose.yaml` 仍挂载本地业务文件目录，尚未把 Garage 编入 Compose，也未完成三组服务独立编排。#131 的本机 S3 迁移只作用于原生运行实例，不能将其备份直接按下述 `data-files.tar.gz` 步骤恢复到 Docker。对象存储部署与迁移验收边界见 [#131 验证记录](../../docs/specs/131-unified-file-storage/validation.md)。
+网站、数据、解析分别由 `compose.app.yaml`、`compose.data.yaml`、`compose.compute.yaml` 管理；共享运行定义位于 `compose.runtime.yaml`。旧 `compose.yaml` 已停止提供聚合服务，避免新建另一套空数据库。本机原生开发流程不变。
 
-## 文件清单
+## 首次准备
 
-| 文件 | 大小 | 说明 |
-|------|------|------|
-| `compose.yaml` | - | Docker Compose 编排（含迁移任务、上传 Worker 和 Redis） |
-| `.env.example` | - | 环境变量模板，复制为 `.env` 填入密钥 |
-| `mysql-export.sql` | 91 MB | MySQL 全量导出 |
-| `neo4j-dump/` | 908 KB | Neo4j 知识图谱导出 |
-| `data-files.tar.gz` | 632 MB | Qdrant + graph.json + uploads + clean_results |
+安装 Docker Engine 和 Compose。把本次发布源码放在服务器，复制 `release.env.example` 到 `/opt/scwiki/release.env`，填写实际源码 SHA、各镜像 digest；离线导入时可使用已核验的 `sha256:<image-config-id>`，同时保留来源 manifest digest 和归档校验清单。
 
-## Docker Hub 镜像
+私有配置位于 `/opt/scwiki/private/`：
+- `app.env`：两语言数据库 URL 指向同一库、带认证 Redis、Qdrant、Neo4j、S3、JWT、SMTP 和模型目录。
+- `neo4j.env`：`NEO4J_AUTH=neo4j/实际密码`。
+- `qdrant.env`：`QDRANT__SERVICE__API_KEY=实际密钥`。
+- `redis.conf`：监听容器内部端口、启用 AOF、配置 requirepass。
+- `garage.toml`：固定本机节点配置，元数据和对象路径分别为 /var/lib/garage/meta、/var/lib/garage/data，S3 端口 3900。节点布局、私有桶及读写账号显式初始化。
 
-| 镜像 | 大小 |
-|------|------|
-| `str3num/scwiki-goserver:v1.0` | 14 MB |
-| `str3num/scwiki-frontend:v1.0` | 27 MB |
-| `str3num/scwiki-python:v1.0` | 219 MB |
-| `mysql:8.4` | 官方 |
-| `redis:7-alpine` | 官方 |
-| `neo4j:5` | 官方 |
-| `qdrant/qdrant:latest` | 官方 |
+私有目录权限 0700，配置文件 0600。不要把本机 `.env` 直接复制作为生产配置，其中的回环地址和本机路径不适用。不运行包含秘密展开结果的 `compose config`；入口 `config` 仅验证而不输出值。
 
-## 部署步骤
+## 命令
 
-### 0. 装 Docker
+以下在发布源码根目录运行，必须先填写并核实发布配置：
 
 ```bash
-curl -fsSL https://get.docker.com | sh
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" init
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" config
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" pull
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" up --group data
 ```
 
-### 1. 上传到服务器
+数据恢复前不启动应用或 Worker。数据组初始化不代表业务恢复完成；Garage 布局、桶和账号也须先准备。
 
 ```bash
-scp deploy.tar.gz user@服务器IP:/opt/scwiki/
-cd /opt/scwiki
-tar xzf deploy.tar.gz
-cd deploy
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" check
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" migrate
+# 只有确实需要且备份已就绪时，显式添加 --apply 执行受保护迁移。
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" up --group compute
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" up --group app
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" status
+python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" logs --group compute --service worker
 ```
 
-### 2. 配置环境变量
+`stop --group compute` 只停止解析；`up --group app` 只更新网站。没有 `down -v`、prune 或自动删除源数据入口。普通 up 核验配置、存储身份、真实连接及 schema，不自动改库。
 
-```bash
-cp .env.example .env
-nano .env   # 填入真实密钥
-```
+## 备份与恢复
 
-### 3. 解压数据文件
+先暂停新增写入和调度，排空任务，再冻结写入进程。使用 MySQL 逻辑导出、Neo4j 离线 dump、Qdrant 集合快照和别名清单，不直接复制运行中的数据库裸目录。
 
-```bash
-tar xzf data-files.tar.gz
-# 得到 data/ 目录（Qdrant、graph.json、uploads 等）
-```
+`scripts/production_backup.py` 提供 `objects-export/objects-restore/objects-verify`、`redis-export/redis-restore`、`mysql-inventory`。源端可通过 `--env-file` 私下加载配置；容器里使用已注入的环境。对象内容与原始键、Content-Type、sha256 等元数据一起保存，恢复要求空桶并逐项完整回读。Redis 只恢复业务任务/草稿及映射缓存，保留原过期时间，不搬旧队列执行载荷、锁、验证码和临时模型密钥。
 
-### 4. 拉取镜像
+MySQL 清单包括表结构、数量与行内容摘要；备份与恢复后分别生成并比较。源文件路径转换只能针对登记的文件字段，不能全库字符串替换。私有完整原备份另行保留。
 
-```bash
-docker compose pull
-```
+归档通过 SSH/rsync 传输并核对 SHA-256。先在隔离目标恢复演练，再做最终冻结迁移；服务器开放写入后回退前先保护新增数据。
 
-### 5. 启动数据库容器
+## 上线边界
 
-```bash
-docker compose up -d mysql neo4j redis qdrant
-# 等待 healthy 状态
-docker compose ps
-```
+Caddy 公开 80/443 并管理证书；前端与数据库均通过内部网络连接。实际域名访问、登录、文件权限、解析、审核、检索、RAG、社区及资讯仍须逐项验收。/health 仅表示进程存活，/readyz 表示当前角色依赖可用。
 
-### 6. 导入 MySQL
+未来将各组迁往独立机器时，分别初始化所需组、配置私网端点，并按 #132 执行数据迁移。独立 bridge 不会跨主机，私网端口覆写和来源规则须另行落实。真实多机和 #133 完整故障恢复不由单机测试替代。
 
-```bash
-docker compose exec -T mysql mysql -u root -p"${MYSQL_ROOT_PASSWORD}" < mysql-export.sql
-```
-
-### 7. 导入 Neo4j
-
-```bash
-# 先把 dump 文件拷进容器
-docker compose cp neo4j-dump/ neo4j:/backup/
-# 导入（需要先停掉 neo4j）
-docker compose stop neo4j
-docker compose run --rm neo4j neo4j-admin database load neo4j --from-path=/backup/ --overwrite
-docker compose up -d neo4j
-```
-
-### 8. 启动全部服务
-
-```bash
-docker compose up -d
-docker compose ps   # 确认 7 个容器全部 running
-```
-
-### 9. 验证
-
-```bash
-curl http://localhost:80      # 前端
-curl http://localhost:8080/health  # Go API
-```
-
-## 服务器目录结构
-
-```
-/opt/scwiki/deploy/
-├── compose.yaml
-├── .env
-├── data/                    # 从 data-files.tar.gz 解压
-│   ├── qdrant_storage/
-│   ├── graph.json
-│   ├── uploads/
-│   ├── upload_PDFs/
-│   ├── parsed_markdown/
-│   ├── review_artifacts/
-│   ├── clean_results/
-│   └── property_name_mapping.json
-├── mysql-export.sql
-└── neo4j-dump/
-```
-
-## 更新流程
-
-代码更新后在开发机重新构建 + 推送新版本，然后在服务器：
-
-```bash
-docker compose pull          # 拉取新镜像
-docker compose up -d
-```
-
-## 论文上传配置
-
-- Nginx 与应用上传上限均为 50 MB。
-- `python`、`worker` 共用 `data/upload_PDFs`、`data/parsed_markdown` 和 `data/review_artifacts`。
-- Redis 使用 AOF 保存 24 小时任务和草稿；`migrate` 在 Python/Go 启动前执行 Alembic。
-- `RAG_DATABASE_URL` 应指向与 `DATABASE_URL` 相同的 MySQL 数据库，并使用异步驱动；缺省时 Python 会使用 `DATABASE_URL` 并自动转换驱动。
-- 通用 OpenAI 兼容 LLM 使用 `LLM_API_KEY`、`LLM_BASE_URL`、`LLM_MODEL`；留空时回退到 DeepSeek 配置。
-
-更新上传链路后至少重建或拉取 `python`、`worker`、`goserver`、`frontend` 四个服务，并执行：
-
-```bash
-docker compose up -d --force-recreate migrate python worker goserver frontend
-docker compose logs --tail=100 migrate python worker goserver frontend
-```
+当前实际状态、备份位置与验证证据见 [#146 验证记录](../../docs/specs/146-aliyun-production-deployment/validation.md)。

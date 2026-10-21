@@ -32,6 +32,8 @@ class RagSettings(BaseSettings):
     qdrant_host: str = "127.0.0.1"
     qdrant_port: int = 6333
     qdrant_grpc_port: int = 6334
+    qdrant_url: str = ""
+    qdrant_api_key: str = ""
 
     deepseek_api_key: str = ""
     deepseek_base_url: str = "https://api.deepseek.com"

@@ -1,0 +1,71 @@
+services:
+  caddy:
+    image: ${CADDY_IMAGE:?}
+    ports: ["80:80", "443:443"]
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    environment:
+      SITE_DOMAIN: ${SITE_DOMAIN:?}
+      SITE_APEX: ${SITE_APEX:?}
+    restart: unless-stopped
+  frontend:
+    image: ${FRONTEND_IMAGE:?}
+    restart: unless-stopped
+  goserver:
+    image: ${GOSERVER_IMAGE:?}
+    env_file: ["${SCWIKI_ROOT:?}/private/app.env"]
+    environment:
+      PORT: "8080"
+      FILE_STORAGE_BACKEND: s3
+      SC_WIKI_DATA_DIR: /data
+      AVATAR_DIR: /data/avatars
+    volumes: ["app-scratch:/data"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8080/readyz"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+  python:
+    extends: {file: compose.runtime.yaml, service: python-base}
+    volumes: ["app-scratch:/data", "app-models:/models"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8000/readyz"]
+      interval: 30s
+      timeout: 25s
+      retries: 3
+  community-worker:
+    extends: {file: compose.runtime.yaml, service: python-base}
+    command: ["python", "-m", "backend.community", "worker"]
+    volumes: ["app-scratch:/data"]
+  news-worker:
+    extends: {file: compose.runtime.yaml, service: python-base}
+    command: ["python", "-m", "backend.news", "worker"]
+  news-scheduler:
+    extends: {file: compose.runtime.yaml, service: python-base}
+    command: ["python", "-m", "backend.news", "schedule"]
+  maintenance:
+    extends: {file: compose.runtime.yaml, service: python-base}
+    profiles: ["maintenance"]
+    restart: "no"
+    command: ["python", "-m", "backend.scripts.check_dependencies", "--role", "python", "--schema"]
+    volumes: ["${SCWIKI_ROOT:?}/backups:/backups", "app-scratch:/data"]
+volumes:
+  app-scratch:
+    name: ${DEPLOYMENT_ID:?}_app-scratch
+    external: true
+  app-models:
+    name: ${DEPLOYMENT_ID:?}_app-models
+    external: true
+  caddy-data:
+    name: ${DEPLOYMENT_ID:?}_caddy-data
+    external: true
+  caddy-config:
+    name: ${DEPLOYMENT_ID:?}_caddy-config
+    external: true
+networks:
+  default:
+    name: ${DEPLOYMENT_ID:?}_internal
+    external: true

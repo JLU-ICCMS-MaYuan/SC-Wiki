@@ -3,6 +3,7 @@ package cache
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"os"
 	"time"
 
@@ -13,11 +14,30 @@ var rdb *redis.Client
 var ctx = context.Background()
 
 func init() {
+	if value := os.Getenv("REDIS_URL"); value != "" {
+		options, err := redis.ParseURL(value)
+		if err != nil {
+			log.Fatal("REDIS_URL 配置无效")
+		}
+		options.DialTimeout = 2 * time.Second
+		options.ReadTimeout = 2 * time.Second
+		options.WriteTimeout = 2 * time.Second
+		rdb = redis.NewClient(options)
+		return
+	}
 	addr := os.Getenv("REDIS_ADDR")
 	if addr == "" {
 		addr = "127.0.0.1:6379"
 	}
 	Connect(addr)
+}
+
+// Ping 只检查实际认证连接，不写缓存。
+func Ping(ctx context.Context) error {
+	if rdb == nil {
+		return redis.ErrClosed
+	}
+	return rdb.Ping(ctx).Err()
 }
 
 // Connect 切换 Redis 地址，供应用初始化和隔离集成测试复用。

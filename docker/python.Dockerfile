@@ -22,6 +22,9 @@ RUN pip install --no-cache-dir -r requirements.txt \
 COPY backend/ ./backend/
 COPY alembic/ ./alembic/
 COPY alembic.ini ./alembic.ini
+COPY scripts/local_deploy/ ./scripts/local_deploy/
+COPY scripts/local-deploy-versions.json scripts/local-deploy-schema.json ./scripts/
+COPY scripts/production_backup.py ./scripts/production_backup.py
 
 EXPOSE 8000
 ENV SC_WIKI_MARKER_PYTHON=/opt/scwiki/pdf-tools/marker/bin/python \

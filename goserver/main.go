@@ -150,6 +150,7 @@ func main() {
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
+	r.GET("/readyz", handlers.Readiness)
 
 	// 7. 反向代理：转发未匹配请求到 Python（配置连接池）
 	pyURL, _ := url.Parse(cfg.PythonBackend)

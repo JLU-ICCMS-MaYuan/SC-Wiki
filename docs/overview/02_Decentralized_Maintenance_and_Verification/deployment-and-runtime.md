@@ -8,13 +8,14 @@
 
 ## 当前行为
 
-### 生产：Docker Compose
+### 生产：三个独立 Docker Compose 项目
 
-- 生产编排文件为 `docker/compose.yaml`，包含 frontend、goserver、python、migrate、worker、news-worker、news-scheduler、mysql、redis、neo4j、qdrant 和 grobid 共 12 个服务，使用 8 类镜像；Python API、迁移和三个后台任务服务共用 Python 镜像。GROBID 通过 `/api/isalive` 健康检查后才允许 Python/Worker 启动，应用启动还受迁移任务成功完成的约束。
-- frontend 使用 Nginx 提供前端静态资源并反向代理；Go 服务提供主要公开 API；未匹配的 Python 能力通过 Go 转发到 Python 服务。
-- Go 服务挂载 `graph.json`、`clean_results` 和持久化头像目录 `/data/avatars`；Python/Worker 服务挂载上传文件、富化结果和属性映射缓存，并通过 `GROBID_URL=http://grobid:8070` 调用引用解析服务。
-- MySQL、Redis、Neo4j 使用命名卷，Qdrant 使用宿主机数据目录持久化；当前 GROBID 未配置持久化挂载。服务通过 healthcheck 和 `depends_on` 控制启动顺序。
-- 当前仓库只包含 `docker/compose.yaml`；源码构建可分别使用 `docker/*.Dockerfile`，不存在 `docker/compose.dev.yaml`。
+- 网站、数据、解析分别由 `docker/compose.app.yaml`、`compose.data.yaml`、`compose.compute.yaml` 定义，共用 `compose.runtime.yaml`。入口为 `scripts/deploy.py --release <绝对路径> <动作> --group <组>`；旧 `docker/compose.yaml` 已退役为空服务提示。
+- 网站组包含 Caddy、Nginx 前端、Go/Python API、社区与资讯 Worker/调度器；计算组包含上传/证据 Worker 和 GROBID；数据组包含 MySQL、Redis、Neo4j、Qdrant 和 Garage。
+- 项目显式引用共享网络及外部卷，初始化记录部署身份。网站与计算使用不同临时卷和模型缓存；持久业务文件经 Garage S3 读取，动态物性名映射在 S3 模式使用 Redis 缓存，不追加镜像内 CSV。
+- Caddy 配置 HTTPS 与裸域名跳转；只有 80/443 映射到宿主机。跨组使用可配置连接及认证，不使用跨项目 `depends_on`。Go 支持 Redis URL；Qdrant 业务和运维共用客户端配置。
+- `/health` 保留存活语义，`/readyz` 只读检查角色依赖；生产启动核验 schema，升级为显式维护操作。源端多 Alembic heads 必须匹配，不自动 stamp 未知库。
+- 三项目配置、对象备份边界及本地测试已通过；真实服务器迁移、业务和域名验收以 [#146 验证记录](../../specs/146-aliyun-production-deployment/validation.md) 为准。真实两机/三机及 #133 完整执行恢复尚未验收。
 
 ### 本地开发：宿主机进程（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)）
 
@@ -45,10 +46,11 @@
 
 ### 生产部署
 
-1. 准备 Compose 读取的 `.env`，填写数据库、JWT、Neo4j、LLM、Embedding 和 SMTP 配置；SMTP 需要主机、端口、发件人、账号、授权码和 TLS 模式；网易示例使用 smtp.163.com:465、implicit TLS 与 sc_wiki@163.com。
-2. 准备 `data/` 下的图谱快照、外部数据、上传目录、富化结果和 Qdrant 存储。
-3. 使用 `docker compose -f docker/compose.yaml up -d` 启动服务；首次部署的数据导入和 Neo4j dump 恢复遵循 `docker/deploy/README.md`。
-4. 通过 frontend 入口访问站点；Go 的 `/health` 和 Python/RAG 健康接口用于分别核验服务状态。
+1. 根据 `docker/deploy/README.md` 准备固定镜像发布清单和服务器私有配置；不得照搬本机回环地址和路径。
+2. 显式初始化部署身份和数据存储，单独完成 Garage 节点、桶及账号初始化。
+3. 排空写入，一致性导出数据库、必要 Redis 业务状态、图、向量及 S3 对象元数据；先演练恢复，再执行最终迁移与逐项校验。
+4. 通过 `check` 核验连接和 schema；如需要升级，单独执行 `migrate --apply`。随后依次启动计算与网站组。
+5. 验证域名、真实业务、独立生命周期与恢复能力。保留源数据和独立备份，运行中不自动同步本机开发数据。
 
 ### 本地开发
 

@@ -106,9 +106,9 @@ def health() -> dict[str, Any]:
     # 检查 Qdrant 连接
     qdrant_available = False
     try:
-        from qdrant_client import QdrantClient
-        client = QdrantClient(host=settings.qdrant_host, port=settings.qdrant_port)
-        client.get_collections()
+        from backend.rag.qdrant_connection import create_qdrant_client
+        with create_qdrant_client() as client:
+            client.get_collections()
         qdrant_available = True
     except Exception:
         pass

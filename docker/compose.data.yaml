@@ -1,0 +1,66 @@
+services:
+  mysql:
+    image: ${MYSQL_IMAGE:?}
+    env_file: ["${SCWIKI_ROOT:?}/private/app.env"]
+    volumes: ["mysql:/var/lib/mysql"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: ${REDIS_IMAGE:?}
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - redis:/data
+      - ${SCWIKI_ROOT:?}/private/redis.conf:/usr/local/etc/redis/redis.conf:ro
+    restart: unless-stopped
+  neo4j:
+    image: ${NEO4J_IMAGE:?}
+    env_file: ["${SCWIKI_ROOT:?}/private/neo4j.env"]
+    environment:
+      NEO4J_server_memory_heap_initial__size: 256M
+      NEO4J_server_memory_heap_max__size: 512M
+      NEO4J_server_memory_pagecache_size: 256M
+    volumes: ["neo4j:/data", "neo4j-logs:/logs"]
+    restart: unless-stopped
+  qdrant:
+    image: ${QDRANT_IMAGE:?}
+    env_file: ["${SCWIKI_ROOT:?}/private/qdrant.env"]
+    volumes: ["qdrant:/qdrant/storage"]
+    restart: unless-stopped
+  garage:
+    image: ${GARAGE_IMAGE:?}
+    command: ["/garage", "-c", "/etc/garage.toml", "server"]
+    volumes:
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+      - ${SCWIKI_ROOT:?}/private/garage.toml:/etc/garage.toml:ro
+    restart: unless-stopped
+volumes:
+  mysql:
+    name: ${DEPLOYMENT_ID:?}_mysql
+    external: true
+  redis:
+    name: ${DEPLOYMENT_ID:?}_redis
+    external: true
+  neo4j:
+    name: ${DEPLOYMENT_ID:?}_neo4j
+    external: true
+  neo4j-logs:
+    name: ${DEPLOYMENT_ID:?}_neo4j-logs
+    external: true
+  qdrant:
+    name: ${DEPLOYMENT_ID:?}_qdrant
+    external: true
+  garage-meta:
+    name: ${DEPLOYMENT_ID:?}_garage-meta
+    external: true
+  garage-data:
+    name: ${DEPLOYMENT_ID:?}_garage-data
+    external: true
+networks:
+  default:
+    name: ${DEPLOYMENT_ID:?}_internal
+    external: true

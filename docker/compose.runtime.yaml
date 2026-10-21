@@ -1,0 +1,18 @@
+# 被三个项目通过 extends 复用，不作为独立启动入口。
+services:
+  python-base:
+    image: ${PYTHON_IMAGE:?必须指定固定镜像}
+    env_file: ["${SCWIKI_ROOT:?}/private/app.env"]
+    environment:
+      SC_WIKI_DATA_DIR: /data
+      FILE_STORAGE_TMP_DIR: /data/tmp
+      HF_HOME: /models/huggingface
+      XDG_CACHE_HOME: /models/cache
+      UPLOAD_LLM_CONCURRENCY: "1"
+      FILE_STORAGE_BACKEND: s3
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 120s
+    logging:
+      driver: json-file
+      options: {max-size: "20m", max-file: "3"}

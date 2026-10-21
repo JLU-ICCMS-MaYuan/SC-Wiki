@@ -16,6 +16,7 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, PointStruct, VectorParams
 
 from backend.rag.config import settings as rag_settings
+from backend.rag.qdrant_connection import create_qdrant_client
 
 # ── 默认集合名 ───────────────────────────────────────────────────────────
 COLLECTION_NAME = "paper_chunks"
@@ -33,10 +34,7 @@ def _get_client() -> QdrantClient:
     """
     global _client
     if _client is None:
-        _client = QdrantClient(
-            host=rag_settings.qdrant_host,
-            port=rag_settings.qdrant_port,
-        )
+        _client = create_qdrant_client()
     return _client
 
 
