@@ -43,7 +43,7 @@ DNS www 和根域均指向目标；备案按用户要求不阻塞准备。所有
 - https://www.sc-wiki.com 外网返回 200；HTTP 和裸域名最终跳转至该 HTTPS 地址。Caddy 已签发两个域名的有效证书，证书数据位于独立持久卷。
 - 应用制品来源为 GitHub `434fc94e911d961dd8ff78c780e99592ced3ad5a` 的三个 Docker Hub 镜像，构建运行 39587178515；应用转运运行 39588691825，基础组件转运运行 39587178755。经归档摘要、文件清单、平台、根文件系统及运行配置比对后导入，Docker 29 使用的实际本地镜像 ID 另存 `loaded-image.json`，不能误把 OCI config hash 当作本地 manifest ID。
 - 当前部署目录 `/opt/scwiki/current` 指向配置发布目录，`/opt/scwiki/release.env` 分别记录应用源码和部署配置提交。运行应用源码与后续配置提交中的非测试业务代码经 Git diff 核对一致。配置修复不冒充应用制品重新构建。
-- 三组共 15 个常驻容器正常运行；仅 Caddy 的 80/443 发布到公网。服务器安装 Docker 29.1.3 / Compose 2.40.3，使用显式外部卷和共享内部网络。
+- 三组共 14 个常驻容器正常运行（网站 7、数据 5、解析 2；后续按 Compose 声明复核并修正此前误记的 15）；仅 Caddy 的 80/443 发布到公网。服务器安装 Docker 29.1.3 / Compose 2.40.3，使用显式外部卷和共享内部网络。
 - 最终维护窗口再次核实 MySQL、Redis、S3、Neo4j、Qdrant 与已经演练的快照完全相同；据此复用已验证备份。原生本机服务随后恢复为独立开发副本，后续不与生产双向同步。
 - 生产恢复后 MySQL 68 表、6487 行结构与内容摘要完全一致；23 处 JSON 末位解析误差通过原值恢复，未放宽校验。S3 89 对象完整回读、Redis 3 个持久草稿、Neo4j 节点标签/属性/关系及约束、Qdrant 集合配置和别名均核验一致。目标私有备份位于 `/opt/scwiki/backups/initial-20261021/`。
 - GROBID 原 2 GiB 限额造成真实 OOM，调整为容器 4 GiB、Java 堆 1 GiB；上传 Worker 单任务、7 GiB。官方 GROBID 镜像无 curl，改为镜像自带 Bash 检查实际 HTTP 200。稳态 GROBID 约 2.3 GiB，无运行任务时整组资源保有余量。
@@ -85,3 +85,25 @@ DNS www 和根域均指向目标；备案按用户要求不阻塞准备。所有
 - Python 构建任务 39604157792 / 119235963626 成功；完整镜像转运任务 39607553751 第一次因标签尚未发布而失败，第二次成功。目标 Docker Hub digest 为 `sha256:b84dfedf2ff5a64ab8e1a63fe499b0f0ae19c4d1461336415d814699e877c67b`，源码为 39bdcac。
 - 完整归档约 4.77 GB。阿里云直下速度过低，本机范围下载 8 MiB 耗时 26.91 秒；SSH 上传同样大小为 2.68 秒。改为同一归档的 VCDIFF 转运，完整下载的部分保留，不宣称已经导入。
 - 服务器从 Ubuntu 官方软件包源安装 xdelta3 3.0.11-dfsg-1.2，无核心依赖升级或服务重启；真实差分编解码、损坏包拒绝、错误基准拒绝和已有输出保护共 4 项测试通过。真实镜像差分还原验收尚待流水线及目标执行。
+
+## 2026-10-21 Embedding 已在最终运行容器生效
+
+- GitHub 差分工作流 39613852858 成功：基准制品 12341215651，目标完整制品 12350119050，差分制品 12353800300。差分本体 2,674,083 字节，传输 ZIP 为 2,694,148 字节；完整压缩制品约 4.77 GB。
+- 导出端和服务器分别实际还原 10,252,118,016 字节的完整 Docker tar，SHA-256 均为 `b8cf198f21fd45c3f940c97ee34b006563ca518a76ea43e1822c29b90bcc125b`。导入后逐项核对配置、文件层及 linux/amd64 平台，未重新构建替代镜像。
+- 当前 Python 镜像源码为 `39bdcac3f8ead28103d98188d4178b23044820c2`，Docker Hub digest 为 `sha256:b84dfedf2ff5a64ab8e1a63fe499b0f0ae19c4d1461336415d814699e877c67b`，实际本地镜像 ID 为 `sha256:adb862036a0acd59d03410b07861ceb1a290dc549e517a9fe9fac0b47ce3ab04`。配置源码为 `293e1926d340a4622a0c894197d82fb797162e09`，入口 `/opt/scwiki/current` 指向 `/opt/scwiki/releases/293e192`。
+- 前端与 Go 沿用原 434fc94 制品；已核对其业务源码和 Dockerfile 从该版到本次应用提交没有变化。发布清单分别保存 Python、前端、Go 和配置的提交身份。
+- 最终镜像先在独立维护容器验证，再停止调度/API、确认队列及运行任务均为空，正常停止并重建五个 Python 角色。没有强制终止业务任务，没有迁移 schema；原应用环境和发布配置保留于 `/opt/scwiki/backups/embedding-20261021/`。
+- 在实际运行的 Python 容器中再次调用百炼，分批产生 11 个 1536 维向量，真实写入 Qdrant 临时集合、查询返回 3 条且命中原文；无对应审核论文的合成片段被业务过滤隐藏。临时集合已删除，原业务集合数量和维度保持不变。
+- Python API、社区 Worker、资讯 Worker、资讯 Scheduler、上传 Worker 五个容器的镜像和全部 Embedding 参数一致；所有 Compose 声明的 14 个服务运行正常，五个数据容器 ID 保持不变。MySQL、Redis、Garage、Qdrant、Neo4j 和 GROBID 角色依赖检查通过，服务器内部 HTTPS 健康接口正常。
+- 证据：服务器备份目录中的 `loaded-image.json`、`final-image-smoke.json`、`activation-verification.json`、`queues-before-switch.json`；差分与还原归档位于 `/opt/scwiki/images/delta-39613852858/12353800300/`。本机配置备份和浏览器证据位于 `/Users/mayuan/SC-Wiki-backups/embedding-20261021/`。
+- 本轮 SSH 连接曾遇本机配置短暂语法错误；再次检查时用户配置已恢复，后续使用有效配置的私有快照，未修改原 SSH 配置。慢速完整下载已停止并保留约 92 MB 部分文件。
+
+## 最终公网状态：HTTPS 可用，HTTP 仍受拦截
+
+本轮更新后的外网状态取代此前“HTTPS 握手重置”的阶段结论：
+
+- www 与裸域 A 记录仍为 47.111.123.225。
+- `https://www.sc-wiki.com` 返回 200；真实 Chrome 渲染标题“SC-Wiki 超导文献数据库”，页面可见，无页面脚本异常和 5xx。公开 `/health` 返回正常状态，浏览器证据为本机备份目录中的 `browser-public.json`、`website-embedding.png`。
+- `https://sc-wiki.com` 返回 301，跳转到 `https://www.sc-wiki.com/`。
+- `http://www.sc-wiki.com` 与 `http://sc-wiki.com` 仍返回阿里云 Beaver 的 403 / Non-compliance ICP Filing 页面，因此 HTTP 自动跳转验收仍不成立。
+- Embedding 基础接入已完成，不以此替代检索效果评测、正式审核发布全链路和全部社区/外部模型验收。#146 继续开放，T007/T008 不因本次接入自动完成。

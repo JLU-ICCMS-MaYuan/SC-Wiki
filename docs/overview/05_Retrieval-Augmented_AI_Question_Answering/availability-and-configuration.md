@@ -11,7 +11,7 @@
   不随用户选择的聊天模型变化。`EMBEDDING_BATCH_SIZE` 默认 10，
   `EMBEDDING_DIMENSIONS` 可显式指定输出维度，未配置则使用模型默认值。
   同一次调用按响应索引还原原文顺序，校验数量、维度及有限数值；全部批次成功后才进入索引写入。
-  百炼 `text-embedding-v4` 已通过合成文本的真实 API 验证；配置 1536 维用于匹配当前实例既有集合。
+  百炼 `text-embedding-v4` 已通过合成文本的真实 API、Qdrant 写入与查询验证；配置 1536 维用于匹配当前实例既有集合。
   模型或维度变化需核对并重建相应索引，不自动删除旧集合，也不将不同模型向量混用。
 - 默认数据根指向仓库外的相邻数据集目录。
 - 健康检查分别判断数据库、向量库和聊天配置，检索可用与聊天可用不是同一状态。
@@ -53,8 +53,11 @@ Worker 共用的 `/data/runtime/default_llm.json`，后续调用立即生效。�
 - `backend/rag/service.py`
 - `backend/api/rag.py`
 - `tests/05_rag_question_answering/`
+- `tests/05_rag_question_answering/unit/test_embedding_provider.py`
 
 ## 相关变更记录
+
+Embedding 部署与真实运行验证：[Issue #146 验证记录](../../specs/146-aliyun-production-deployment/validation.md)。
 
 实现来源：[Issue #73：顶栏 AI 供应商切换](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/73)。
 

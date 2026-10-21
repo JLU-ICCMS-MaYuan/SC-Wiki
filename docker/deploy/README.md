@@ -7,7 +7,7 @@
 Compose 至少使用 2.30，以支持 `env_file.format: raw`。私有 env 使用不带外层引号的
 `KEY=value` 行；Compose 与维护容器均按原值读取，密码中的美元符号和引号不会再次展开。
 
-安装 Docker Engine 和 Compose。把本次发布源码放在服务器，复制 `release.env.example` 到 `/opt/scwiki/release.env`，填写实际源码 SHA、各镜像 digest；离线导入时可使用已核验的 `sha256:<image-config-id>`，同时保留来源 manifest digest 和归档校验清单。
+安装 Docker Engine 和 Compose。把本次发布源码放在服务器，复制 `release.env.example` 到 `/opt/scwiki/release.env`，填写实际源码 SHA、各镜像 digest；离线导入时使用核验后的实际本地镜像 ID，同时保留来源 manifest digest 和归档校验清单。Docker 29 的本地镜像 ID 可能不同于配置 JSON 的 SHA-256，不能混用。
 
 私有配置位于 `/opt/scwiki/private/`：
 - `app.env`：两语言数据库 URL 指向同一库、带认证 Redis、Qdrant、Neo4j、S3、JWT、SMTP 和模型目录。
@@ -90,6 +90,22 @@ Caddy 将 API 直接转发给 Go，并用实际连接来源覆盖 X-Real-IP；Go
 当前实际状态、备份位置与验证证据见 [#146 验证记录](../../docs/specs/146-aliyun-production-deployment/validation.md)。
 
 ## 当前实例
+
+### 网络受限时的同版本镜像差分
+
+服务器保留了上一版本的完整 `image.tar.gz` 时，可以使用
+`.github/workflows/export-deployment-delta.yml` 生成 VCDIFF 包。当前工作流固定本次基准和目标
+GitHub 制品 ID；下一次发布必须先核对并更新输入，不能把旧差分用于新镜像。
+导出端验证完整压缩归档摘要，实际还原并比较目标 tar 的 SHA-256。
+
+服务器需要 `xdelta3`，使用 `scripts/deployment_image_delta.py restore`，分别通过
+`--base-archive` 指定保留的原压缩包、`--package` 指定包含 manifest.json、source.json 和
+image.vcdiff 的目录、`--output` 指定尚不存在的新 tar 文件。工具验证基准与差分摘要，
+还原后要求完整目标 tar 摘要完全一致；失败时禁止导入，不覆盖旧文件。
+还须核验差分制品自身的 GitHub artifact 摘要，再执行 `docker load`，并比较导入镜像的
+配置、文件层和平台与 source.json 一致，最后记录实际本地镜像 ID。此流程不改目标镜像版本。
+
+### 连接与维护
 
 网站为 https://www.sc-wiki.com，服务器为 `root@47.111.123.225`，发布入口目录为
 `/opt/scwiki/current`，发布清单为 `/opt/scwiki/release.env`，私有配置位于

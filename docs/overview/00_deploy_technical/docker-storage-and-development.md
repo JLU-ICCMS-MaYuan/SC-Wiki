@@ -1,5 +1,9 @@
 # Docker 镜像积累与本地、服务器开发部署
 
+本文保留 2026-09-21 的空间快照与当时的部署分析，旧 Compose 示例不作为现行生产命令。
+当前三项目编排、固定镜像及差分转运以[部署与运行时](../02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)
+和[部署指南](../../../docker/deploy/README.md)为准；旧 `docker/compose.yaml` 已退役。
+
 ## 1. 结论与核验范围
 
 **日常写代码使用热重载，发布和部署验收时才构建镜像；数据库独立持久化，调试环境使用独立数据副本。** 当前本地数据库可以继续使用，不需要为了减少镜像而迁回 Docker。
