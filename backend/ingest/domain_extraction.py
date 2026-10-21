@@ -245,9 +245,10 @@ and do not replace the measurement pressure with the phase stability range.
 """
 
 SUMMARY_BOUNDARY = """
-DOCUMENT IR PIPELINE: Scientific material_states are already validated and assembled by the server.
+SCIENTIFIC RECORD OWNERSHIP: Scientific material_states are assembled from chunk candidates by the server.
 Summarize paper metadata and classification only. Return material_states=[]; do not regenerate, merge,
-drop, complete or rewrite any scientific record, method, pressure or condition. The server retains them.
+drop, complete or rewrite any scientific record, method, pressure or condition. Return key_properties=[].
+The server retains all scientific candidates for validation and deterministic assembly.
 """
 
 

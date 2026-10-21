@@ -68,27 +68,10 @@ def current_candidate_context(candidates: list[dict]) -> list[dict]:
 
 def task_sources(task_id: str, state: dict) -> list[dict]:
     """使用已解析的当前任务正文；只去掉明确的参考文献列表。"""
-    from .upload_tasks import data_path, markdown_path
+    from .upload_source_bundle import task_source_chunks
+    from .upload_tasks import data_path
 
-    root = data_path("parsed_markdown") / task_id
-    files = state.get("files") or [{"file_id": "main", "role": "main",
-                                     "original_filename": state.get("filename")}]
-    chunks = []
-    for item in files:
-        if item.get("role") not in {"main", "supplementary", "attachment"}:
-            continue
-        file_id = str(item.get("file_id") or "")
-        if not re.fullmatch(r"[\w-]+", file_id):
-            continue
-        path = root / f"{file_id}.md"
-        if not path.is_file():
-            continue
-        chunks.extend(_source_from_path(path, file_id, item.get("original_filename")))
-    if not chunks:
-        path = markdown_path(task_id)
-        if path.is_file():
-            chunks.extend(_source_from_path(path, "main", state.get("filename")))
-    return chunks
+    return task_source_chunks(task_id, state, data_path("parsed_markdown"), trim_references=True)
 
 
 def _source_from_path(path: Path, file_id: str, name: str | None) -> list[dict]:
@@ -126,6 +109,33 @@ def matching_assessment(assessment: dict | None, selections: list[dict]) -> bool
                       for item in items if isinstance(item, dict))
 
     return keys(assessment.get("families") or []) == keys(selections)
+
+
+def assess_initial_families(catalog: list[dict], selections: list[dict], chunks: list[dict],
+                            reason: str = "") -> dict | None:
+    """首轮已选中现有目录且本文引句可定位时，无需第二次分类调用。"""
+    if not catalog or not selections or not reason.strip():
+        return None
+    by_id = {item["id"]: item for item in catalog}
+    families, evidences, seen = [], [], set()
+    for item in selections:
+        if not isinstance(item, dict):
+            return None
+        identifier = item.get("id")
+        term = by_id.get(identifier) if identifier is not None else _matching_term(str(item.get("name") or ""), catalog)
+        if not term or term["id"] in seen:
+            return None
+        quote = item.get("evidence")
+        found = locate(quote, chunks) if isinstance(quote, dict) else None
+        if not found:
+            return None
+        seen.add(term["id"])
+        families.append({"id": term["id"], "name": term["name"], "status": "confirmed"})
+        evidences.append(found)
+    return {"status": "completed", "families": families, "evidences": evidences,
+            "reason": reason.strip()[:500], "rule_version": RULE_VERSION,
+            "source_hash": hashlib.sha256(json.dumps([(c.get("file_id"), c.get("content")) for c in chunks],
+                ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()}
 
 
 def classify(catalog: list[dict], draft: dict, chunks: list[dict], *,

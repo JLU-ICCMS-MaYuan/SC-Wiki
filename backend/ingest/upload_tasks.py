@@ -708,11 +708,14 @@ def cleanup_duplicate_candidate(task_id: str, existing_paper_id: int | None) -> 
         pass
 
 
-def enqueue_processing(task_id: str) -> str:
+def enqueue_processing(task_id: str, *, preserve_llm_config: bool = False) -> str:
     from backend.ingest.upload_jobs import process_upload_task
 
-    config = get_llm_config()
-    save_llm_config(task_id, config)
+    config = load_llm_config(task_id) if preserve_llm_config else get_llm_config()
+    if config is None:
+        raise ValueError("原解析模型配置已过期，请重新发起任务")
+    if not preserve_llm_config:
+        save_llm_config(task_id, config)
     job = upload_queue().enqueue(
         process_upload_task,
         task_id,
@@ -724,7 +727,7 @@ def enqueue_processing(task_id: str) -> str:
         task_id, job_id=job.id, processing_status="processing", processing_error=None,
         llm_provider=config.provider,
     )
-    if (state or {}).get("shadow_profile"):
+    if (state or {}).get("shadow_profile") and not preserve_llm_config:
         try:
             from .document_shadow import enqueue_shadow
             enqueue_shadow(task_id, config)

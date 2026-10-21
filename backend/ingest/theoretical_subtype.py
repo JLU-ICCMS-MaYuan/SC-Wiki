@@ -30,30 +30,9 @@ WINDOW_PROMPT = """你在阅读一篇论文的其中一组连续原文。只记�
 
 
 def task_sources(task_id: str, state: dict, root: Path) -> list[dict]:
-    chunks = []
-    files = state.get("files") or [{"file_id": "main", "role": "main", "original_filename": state.get("filename")}]
-    for item in files:
-        if item.get("role") not in {"main", "supplementary", "attachment"}:
-            continue
-        if str(item.get("kind") or "pdf").lower() not in {"pdf", "txt", "md"}:
-            continue
-        file_id = str(item.get("file_id") or "")
-        if not re.fullmatch(r"[\w-]+", file_id):
-            continue
-        path = root / task_id / f"{file_id}.md"
-        if not path.is_file():
-            continue
-        markdown = path.read_text(encoding="utf-8")
-        # 参考文献仅描述他人工作。遇到明确标题时剔除其后正文，不截断任何其他页面。
-        match = re.search(r"(?im)^\s*(?:#{1,6}\s*)?(?:references|bibliography|参考文献)\s*$", markdown)
-        if match:
-            markdown = markdown[:match.start()]
-        source = source_chunks(markdown, file_id)
-        for chunk in source:
-            chunk["source_name"] = item.get("original_filename")
-            chunk["file_role"] = item.get("role")
-        chunks.extend(source)
-    return chunks
+    from .upload_source_bundle import task_source_chunks
+
+    return task_source_chunks(task_id, state, root, trim_references=True)
 
 
 def _call(prompt: str, payload: Any, complete: Callable) -> dict:
@@ -61,6 +40,30 @@ def _call(prompt: str, payload: Any, complete: Callable) -> dict:
     if not isinstance(result, dict):
         raise ValueError("全文分类模型返回格式无效")
     return result
+
+
+def assess_candidate(chunks: list[dict], raw: dict, *, model: str = "",
+                     total_batches: int = 1) -> dict:
+    """首轮与定向判断共用贡献证据门，避免提示词差异改变分类标准。"""
+    signature = hashlib.sha256(json.dumps([(c["file_id"], c["content"]) for c in chunks],
+        ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
+    base = {"rule_version": RULE_VERSION, "source_hash": signature, "model": model,
+            "covered_batches": total_batches, "total_batches": total_batches}
+    value = raw.get("value")
+    reason = str(raw.get("reason") or "").strip()[:500]
+    evidence = []
+    for item in (raw.get("evidences") or [])[:3]:
+        if not isinstance(item, dict):
+            continue
+        found = locate(item, chunks)
+        if found and found not in evidence:
+            evidence.append(found)
+    has_contribution = any(str(item.get("section_role") or "").lower() in CONTRIBUTION_SECTIONS
+                           for item in evidence)
+    if value not in SUBTYPES or not reason or not has_contribution:
+        return {**base, "status": "uncertain", "value": None,
+                "reason": reason or "无法根据全文可靠判断理论二级类型", "evidences": evidence}
+    return {**base, "status": "completed", "value": value, "reason": reason, "evidences": evidence}
 
 
 def classify(chunks: list[dict], *, complete: Callable | None = None, model: str = "") -> dict:
@@ -89,28 +92,14 @@ def classify(chunks: list[dict], *, complete: Callable | None = None, model: str
     except Exception as exc:
         return {**base, "status": "failed", "value": None,
                 "reason": f"全文分类失败：{type(exc).__name__}；请重新判断或人工选择", "evidences": []}
-    value = raw.get("value")
-    reason = str(raw.get("reason") or "").strip()[:500]
-    evidence = []
-    for item in (raw.get("evidences") or [])[:3]:
-        if not isinstance(item, dict):
-            continue
-        found = locate(item, chunks)
-        if found and found not in evidence:
-            evidence.append(found)
-    has_contribution = any(str(item.get("section_role") or "").lower() in CONTRIBUTION_SECTIONS
-                           for item in evidence)
-    if value not in SUBTYPES or not reason or not has_contribution:
-        return {**base, "status": "uncertain", "value": None,
-                "reason": reason or "无法根据全文可靠判断理论二级类型",
-                "evidences": evidence}
-    return {**base, "status": "completed", "value": value, "reason": reason, "evidences": evidence}
+    return assess_candidate(chunks, raw, model=model, total_batches=len(batches))
 
 
 def rerun_ready_upload(task_id: str, *, expected_filename: str, complete: Callable | None = None) -> dict:
     """只重判一个 ready 草稿的二级类型，模型调用期间不锁住用户编辑。"""
-    from backend.ingest.upload_tasks import (artifact_path, data_path, get_draft, get_state,
-                                             save_draft, upload_task_lock)
+    from backend.ingest.upload_tasks import (available_published_path, artifact_path, data_path, get_draft, get_state,
+                                             publish_artifact_path, save_draft, update_state, upload_task_lock)
+    from backend.storage.paths import object_mode
     from backend.rag.llm_context import get_llm_config
 
     with upload_task_lock(task_id):
@@ -119,7 +108,7 @@ def rerun_ready_upload(task_id: str, *, expected_filename: str, complete: Callab
             raise ValueError("目标不是可编辑的已完成上传草稿")
         if state.get("filename") != expected_filename or draft.get("paper", {}).get("paper_type") != "theoretical":
             raise ValueError("目标文件或论文类型与本次定向重判不符")
-        path = artifact_path(task_id)
+        path = available_published_path(task_id, artifact_path(task_id))
         artifact = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         original_ai = ((artifact.get("ai_values") or {}).get("paper") or {}).get("theoretical_subtype")
         starting_value = draft["paper"].get("theoretical_subtype")
@@ -148,9 +137,12 @@ def rerun_ready_upload(task_id: str, *, expected_filename: str, complete: Callab
             ai_values.setdefault("paper", {})["theoretical_subtype"] = assessment["value"]
             ai_values["theoretical_subtype_assessment"] = assessment
             artifact["ai_values"] = ai_values
-            temporary = path.with_suffix(".json.tmp")
+            destination = artifact_path(task_id)
+            temporary = destination.with_suffix(".json.tmp")
             temporary.write_text(json.dumps(artifact, ensure_ascii=False, indent=2), encoding="utf-8")
-            temporary.replace(path)
+            temporary.replace(destination)
+            if object_mode():
+                update_state(task_id, artifact_manifest=publish_artifact_path(task_id))
 
     checked = False
     if assessment["status"] == "completed" and current["paper"].get("theoretical_subtype") == assessment["value"]:

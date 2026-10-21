@@ -51,6 +51,18 @@
 - [x] T027 [US5] 在 `frontend/src/components/EvidenceWorkflow.tsx` 和中英文字典中显示当前模型判断逻辑；用真实 H3S 草稿核对材料家族 ID、引句及侧栏，不覆盖其他输入。（FR-020～021、SC-009）
 - [ ] T028 [US5] 验证上传、刷新、正式来源与管理员重读；补齐 `data-model.md`、`contracts/material-family-reason.md` 和验收记录，再按 Overview 与 Issue 流程收尾。（SC-010）
 
+## 阶段 8：统一自动填表（US6～US8，2026-10-12）
+
+- [ ] T029 [US6] 在 `tests/01_decentralized_uploading/test_generation_quality.py` 建立全字段生产者矩阵和首轮/重试比较回归，覆盖 La-Sc-H、H3S、CaH6 与实验论文。（FR-022～023、FR-025、SC-011～012）
+- [ ] T030 [US7] 在 `backend/ingest/domain_extraction.py` 与 `backend/ingest/upload_jobs.py` 让 `legacy` 与 #114 从已定位候选程序组装科学行，并检查缺失 Tc/压力/方法，不让汇总覆盖。（FR-024、SC-013）
+- [ ] T031 [US6] 在 `backend/ingest/upload_jobs.py` 与论文级生成器实现共享主汇总、质量门和仅失败字段重试；保留首值及冲突。（FR-023、FR-025）
+- [ ] T032 [US6] 在 `backend/ingest/property_evidence.py` 和 `frontend/src/components/UploadTaskEditor.tsx` 输出字段级失败诊断，复用已验证来源并减少无意义核对调用。（FR-026～027）
+- [ ] T033 [US8] 在 `backend/ingest/` 的私有产物与评测脚本记录每阶段调用数、tokens、耗时和同模型事实差异；修复全字段矩阵确认的问题。（FR-022、FR-027、SC-011～014）
+- [ ] T034 [US8] 在 `scripts/` 盘点全部未提交旧草稿，备份、版本/模型/人工修改保护后自动重算并逐项报告。（FR-028、SC-014）
+- [ ] T035 更新本目录验证记录及上传 Overview；按 Issue #120 验收与 Documentation Impact 收尾。
+
+依赖 #135 的有效来源先落地；T029 在实现前，T030 和 T031 串行修改共享主流程，T032～T034 在质量门稳定后，T035 最后。新增任务不改写旧任务的完成记录。
+
 ## 2026-10-20 状态与核对修订
 
 本轮已确认需求、原话、设计和实施任务见 [状态核处理提取与分支保留](state-review-convergence-20261020.md)。新规则覆盖该功能此前相冲突行为，历史原文与验收保留。

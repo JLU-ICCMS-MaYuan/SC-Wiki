@@ -54,6 +54,24 @@ def test_model_cannot_forge_source_to_approve():
     assert '引句未在所选来源文本中找到' in result['reason']
 
 
+def test_generation_conflict_cannot_be_approved_by_model_check_alone():
+    record = {'key': 'motivation', 'field': 'paper.research_motivation',
+              'generation_issue': {'code': 'conflict', 'message': '两次动因结果冲突'}}
+    result = ev.checked_result(record, {'status': 'supported', 'reason': '原文支持当前值',
+                                        'evidences': [{'file_id': 'main', 'quote': chunks()[0]['content']}]}, chunks())
+    assert result['status'] == 'uncertain'
+    assert '两次动因结果冲突' in result['reason']
+
+
+def test_effective_file_role_changes_upload_source_version():
+    record = {'key': 'title', 'field': 'paper.title', 'claim': {'value': 'A title'}, 'kind': 'field'}
+    main = [{'file_id': 'a', 'file_role': 'main', 'content': 'A text'}]
+    supplement = [{**main[0], 'file_role': 'supplementary'}]
+    first = ev.complete_snapshot('upload', 'task', [record.copy()], main, {'_source_roles': True})
+    second = ev.complete_snapshot('upload', 'task', [record.copy()], supplement, {'_source_roles': True})
+    assert first['version'] != second['version']
+
+
 def test_location_errors_distinguish_missing_file_quote_and_ambiguity():
     assert '没有原文引句' in ev.locate_with_reason({}, chunks())[1]
     assert '没有可读取' in ev.locate_with_reason({'quote': 'q'}, [])[1]

@@ -70,16 +70,17 @@ def valid_summary(value: Any, abstract: str | None) -> bool:
 def choose_summary(initial: Any, abstract: str | None, candidates: Any,
                    complete: Callable[..., dict[str, Any]]) -> tuple[str, str | None]:
     """先用全文汇总结果；无效时只重新调用一次总结模型。"""
+    first = initial.strip() if isinstance(initial, str) else ""
     if valid_summary(initial, abstract):
-        return initial.strip(), None
+        return first, None
     try:
         retry = complete(RETRY_PROMPT, {"abstract": abstract or "", "candidates": candidates})
         text = retry.get("summary") if isinstance(retry, dict) else None
     except Exception:
-        return "", "retry_failed"
+        return first, "retry_failed"
     if valid_summary(text, abstract):
         return text.strip(), None
-    return "", "invalid_summary"
+    return first, "invalid_summary"
 
 
 def rerun_ready_upload(task_id: str, *, expected_filename: str, expected_main_sha256: str) -> dict[str, Any]:
@@ -89,8 +90,10 @@ def rerun_ready_upload(task_id: str, *, expected_filename: str, expected_main_sh
     from backend.database import SessionLocal
     from backend.ingest import property_evidence as evidence, scientific_evidence as science
     from backend.ingest.keyword_extraction import task_sources
-    from backend.ingest.upload_tasks import (artifact_path, data_path, get_draft, get_state,
-                                             save_draft, upload_task_lock)
+    from backend.ingest.upload_tasks import (artifact_path, available_published_path, data_path,
+                                             get_draft, get_state, publish_artifact_path,
+                                             save_draft, update_state, upload_task_lock)
+    from backend.storage.paths import object_mode, resolve_file
     from backend.manual_evidence_models import ScientificManualEvidence
     from backend.rag.llm import complete_json
     from backend.rag.llm_context import get_llm_config
@@ -106,10 +109,16 @@ def rerun_ready_upload(task_id: str, *, expected_filename: str, expected_main_sh
         if len(main) != 1 or main[0].get("sha256") != expected_main_sha256:
             raise ValueError("正文文件身份不匹配")
         for item in files:
-            source = Path(str(item.get("stored_path") or ""))
+            if object_mode():
+                source = resolve_file(str(item.get("stored_path") or ""),
+                                      size=int(item.get("size") or 0), sha256=str(item.get("sha256") or ""),
+                                      media_type=str(item.get("media_type") or "application/octet-stream"),
+                                      namespace=task_id)
+            else:
+                source = Path(str(item.get("stored_path") or ""))
             if not source.is_file() or hashlib.sha256(source.read_bytes()).hexdigest() != item.get("sha256"):
                 raise ValueError("来源文件内容已变化")
-        path = artifact_path(task_id)
+        path = available_published_path(task_id, artifact_path(task_id))
         artifact = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         original = ((artifact.get("ai_values") or {}).get("paper") or {}).get("summary")
         current = (draft.get("paper") or {}).get("summary")
@@ -174,6 +183,8 @@ def rerun_ready_upload(task_id: str, *, expected_filename: str, expected_main_sh
         temporary = artifact_path(task_id).with_suffix(".json.summary.tmp")
         temporary.write_text(json.dumps(latest_artifact, ensure_ascii=False, indent=2), encoding="utf-8")
         temporary.replace(artifact_path(task_id))
+        if object_mode():
+            update_state(task_id, artifact_manifest=publish_artifact_path(task_id))
 
     final = evidence.upload_snapshot(task_id, owner)
     with SessionLocal() as session:

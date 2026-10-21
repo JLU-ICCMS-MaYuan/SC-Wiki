@@ -34,25 +34,9 @@ reason 必须解释具体选词，不得只写“已阅读全文并提炼”；�
 
 def task_sources(task_id: str, state: dict[str, Any], root: Path) -> list[dict[str, str]]:
     """仅读取本次上传已解析的论文文本，不读取外部或用户提交的人工证据。"""
-    files = state.get("files") or [{
-        "file_id": "main", "role": "main", "kind": state.get("file_kind") or "pdf",
-        "original_filename": state.get("filename"),
-    }]
-    sources = []
-    for item in files:
-        if item.get("role") not in {"main", "supplementary"}:
-            continue
-        if str(item.get("kind") or "pdf").lower() not in {"pdf", "txt", "md"}:
-            continue
-        file_id = str(item.get("file_id") or "")
-        if not re.fullmatch(r"[\w-]+", file_id):
-            continue
-        path = root / task_id / f"{file_id}.md"
-        if path.is_file():
-            sources.append({"file_id": file_id, "role": item["role"],
-                            "source_name": str(item.get("original_filename") or file_id),
-                            "content": path.read_text(encoding="utf-8")})
-    return sources
+    from .upload_source_bundle import text_sources
+
+    return text_sources(task_id, state, root)
 
 
 def _body(markdown: str) -> str:
@@ -67,7 +51,7 @@ def _split_terms(value: str) -> list[str]:
             depth += 1
         elif char in ")]}" and depth:
             depth -= 1
-        if depth == 0 and char in ",，;；·•":
+        if depth == 0 and char in ",，;；·•|":
             parts.append("".join(current))
             current = []
         else:
@@ -75,7 +59,7 @@ def _split_terms(value: str) -> list[str]:
     parts.append("".join(current))
     result, seen = [], set()
     for part in parts:
-        term = part.strip(" \t.。:：;；")
+        term = part.strip().strip(".。:：;；").strip()
         key = term.casefold()
         if term and len(term) <= 100 and key not in seen:
             result.append(term)
@@ -109,6 +93,17 @@ def _author_list(sources: list[dict], chunks: list[dict]) -> tuple[list[str], li
             evidence = locate({"file_id": source["file_id"], "quote": value_line.strip()}, chunks)
             if evidence:
                 return values, [evidence]
+        # 部分期刊首页直接用竖线分隔关键词，省略 Keywords 标题。
+        for line in lines[:80]:
+            raw = line.strip()
+            if raw.startswith("|") or len(raw) > 200 or raw.count("|") not in {2, 3, 4, 5, 6, 7}:
+                continue
+            values = _split_terms(raw)
+            if not 3 <= len(values) <= 8 or any(len(value.split()) > 4 or re.search(r"\d", value) for value in values):
+                continue
+            evidence = locate({"file_id": source["file_id"], "quote": raw}, chunks)
+            if evidence:
+                return values, [evidence]
     return [], []
 
 
@@ -125,7 +120,9 @@ def _valid_evidences(raw: Any, chunks: list[dict]) -> list[dict]:
     return evidences
 
 
-def select_keywords(sources: list[dict], *, complete: Callable | None = None) -> dict[str, Any]:
+def select_keywords(sources: list[dict], *, complete: Callable | None = None,
+                    initial_values: Any = None, initial_evidences: Any = None,
+                    initial_reason: str = "") -> dict[str, Any]:
     """作者列表优先；完整阅读失败时不把部分摘要冒充全文结论。"""
     from backend.rag.llm import complete_json
 
@@ -149,20 +146,32 @@ def select_keywords(sources: list[dict], *, complete: Callable | None = None) ->
         return {**base, "status": "completed", "kind": "author_list", "values": values,
                 "evidences": evidences, "reason": "采用当前论文作者原列关键词"}
 
+    first = [value.strip() for value in initial_values if isinstance(value, str)] if isinstance(initial_values, list) else []
+    first = list(dict.fromkeys(value for value in first if value and len(value) <= 100))[:8]
+    first_evidence = _valid_evidences(initial_evidences, chunks)
+    if 3 <= len(first) <= 8 and not any(_CJK.search(value) for value in first) and first_evidence \
+            and concrete_synthesis_reason(initial_reason):
+        return {**base, "status": "completed", "kind": "main_synthesis", "values": first,
+                "evidences": first_evidence, "reason": initial_reason[:500]}
+
     batches = [batch for batch in source_batches(chunks) if batch]
     base["total_batches"] = len(batches)
     if not batches:
         return {**base, "reason": "没有可读取的当前论文正文，关键词需人工核对"}
     summaries = []
     try:
-        for batch in batches:
-            raw = complete(WINDOW_PROMPT, json.dumps({"sources": batch}, ensure_ascii=False))
-            if not isinstance(raw, dict) or not str(raw.get("summary") or "").strip():
-                raise ValueError("全文窗口摘要为空")
-            summaries.append({"summary": str(raw["summary"])[:2000],
-                              "evidences": _valid_evidences(raw.get("evidences"), batch)})
-            base["covered_batches"] += 1
-        raw = complete(FINAL_PROMPT, json.dumps({"window_summaries": summaries}, ensure_ascii=False))
+        if len(batches) == 1:
+            raw = complete(FINAL_PROMPT, json.dumps({"sources": batches[0]}, ensure_ascii=False))
+            base["covered_batches"] = 1
+        else:
+            for batch in batches:
+                window = complete(WINDOW_PROMPT, json.dumps({"sources": batch}, ensure_ascii=False))
+                if not isinstance(window, dict) or not str(window.get("summary") or "").strip():
+                    raise ValueError("全文窗口摘要为空")
+                summaries.append({"summary": str(window["summary"])[:2000],
+                                  "evidences": _valid_evidences(window.get("evidences"), batch)})
+                base["covered_batches"] += 1
+            raw = complete(FINAL_PROMPT, json.dumps({"window_summaries": summaries}, ensure_ascii=False))
         if not isinstance(raw, dict):
             raise ValueError("关键词输出无效")
         if not isinstance(raw.get("keywords_tags"), list):
@@ -181,4 +190,5 @@ def select_keywords(sources: list[dict], *, complete: Callable | None = None) ->
         return {**base, "status": "completed", "kind": "fulltext_synthesis", "values": values,
                 "evidences": evidences, "reason": reason}
     except Exception as exc:
-        return {**base, "status": "failed", "reason": f"全文关键词提炼失败：{type(exc).__name__}；需人工核对"}
+        return {**base, "status": "failed", "values": first,
+                "reason": f"全文关键词提炼失败：{type(exc).__name__}；保留首轮候选供人工核对"}

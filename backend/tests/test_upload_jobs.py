@@ -315,12 +315,12 @@ def test_normalize_draft_keeps_supported_full_paper_classifications(paper_type, 
 
 def test_summary_prompt_defines_mixed_theory_experiment_tie_breaker():
     assert "理论和实验同等重要、无法分主次，也归 experimental" in SUMMARY_SYSTEM_PROMPT
-    assert "后续通读原文的专门分类" in SUMMARY_SYSTEM_PROMPT
+    assert "理论二级类型按本文整体贡献判断" in SUMMARY_SYSTEM_PROMPT
     assert "不能只凭化学式猜测" in SUMMARY_SYSTEM_PROMPT
-    assert "reported_space_group_number" in SUMMARY_SYSTEM_PROMPT
-    assert "lambda_ep" in SUMMARY_SYSTEM_PROMPT
-    assert "omega_log_k" in SUMMARY_SYSTEM_PROMPT
-    assert "pressure_value_gpa" in SUMMARY_SYSTEM_PROMPT
+    assert '"material_states": []' in SUMMARY_SYSTEM_PROMPT
+    for scientific_field in ("reported_space_group_number", "lambda_ep", "omega_log_k", "pressure_value_gpa"):
+        assert scientific_field in CHUNK_SYSTEM_PROMPT
+        assert scientific_field not in SUMMARY_SYSTEM_PROMPT
     assert "phase_label" not in SUMMARY_SYSTEM_PROMPT
 
 

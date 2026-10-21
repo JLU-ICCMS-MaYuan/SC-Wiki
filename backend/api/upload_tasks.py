@@ -38,6 +38,16 @@ class CreateUploadTask(BaseModel):
     parser_profile: Literal["complementary"] | None = None
 
 
+class RoleDecision(BaseModel):
+    file_id: str
+    role: Literal["main", "supplementary", "attachment"]
+
+
+class ResolveRoles(BaseModel):
+    expected_revision: int = Field(ge=0)
+    roles: list[RoleDecision] = Field(min_length=1)
+
+
 def _error(status: int, code: str, message: str) -> HTTPException:
     return HTTPException(status_code=status, detail={"code": code, "message": message})
 
@@ -301,6 +311,62 @@ def retry_upload_task(task_id: str, current_user: User = Depends(get_current_use
     )
     enqueue_processing(task_id)
     return JSONResponse(status_code=202, content={"ok": True, "data": public_task_state(state)})
+
+
+@router.post("/{task_id}/resolve-roles")
+def resolve_upload_roles(task_id: str, body: ResolveRoles, current_user: User = Depends(get_current_user)):
+    """仅在正文身份不确定时接收完整角色表，复用已经解析的原文。"""
+    from backend.ingest.upload_tasks import (
+        available_published_path, data_path, enqueue_processing, get_state,
+        load_llm_config, update_state, upload_task_lock,
+    )
+    from backend.ingest.document_roles import assess_roles, TEXT_KINDS
+
+    _owned_state(task_id, current_user)
+    with upload_task_lock(task_id):
+        state = get_state(task_id)
+        if not state or int(state.get("user_id") or 0) != current_user.id:
+            raise _error(403, "UPLOAD_TASK_FORBIDDEN", "只有上传者可以确认文件角色")
+        if state.get("status") != "needs_role_review":
+            raise _error(409, "ROLE_REVIEW_NOT_PENDING", "当前任务不等待文件角色确认")
+        if int(state.get("revision") or 0) != body.expected_revision:
+            raise _error(409, "ROLE_REVIEW_STALE", "任务版本已变化，请刷新后重新确认")
+        files = state.get("files") or []
+        choices = {item.file_id: item.role for item in body.roles}
+        if (len(choices) != len(body.roles) or set(choices) != {str(f.get("file_id")) for f in files}
+                or sum(role == "main" for role in choices.values()) != 1):
+            raise _error(422, "ROLE_REVIEW_INVALID", "请为每份文件指定角色，并且恰好选择一个正文")
+        if any(choices[str(f["file_id"])] == "main" and str(f.get("kind") or "").lower() not in TEXT_KINDS
+               for f in files):
+            raise _error(422, "ROLE_REVIEW_INVALID", "结构附件不能作为论文正文")
+        root = data_path("parsed_markdown") / task_id
+        texts = {}
+        for item in files:
+            path = available_published_path(task_id, root / f"{item['file_id']}.md")
+            if path.is_file():
+                texts[str(item["file_id"])] = path.read_text(encoding="utf-8")
+        observed = assess_roles(files, texts)
+        assessment = state.get("role_assessment") or {}
+        if observed["source_hash"] != assessment.get("source_hash"):
+            raise _error(409, "ROLE_SOURCE_CHANGED", "来源文件已变化，请重新解析后确认")
+        if load_llm_config(task_id) is None:
+            raise _error(409, "ROLE_MODEL_EXPIRED", "原解析模型配置已过期，请重新发起解析")
+        selected = [{**f, "declared_role": f.get("declared_role") or f.get("role"),
+                     "role": choices[str(f["file_id"])]} for f in files]
+        detail = {item["file_id"]: {**item, "effective_role": choices[item["file_id"]]}
+                  for item in assessment.get("files") or []}
+        resolved = {**assessment, "status": "user_confirmed",
+                    "main_file_id": next(file_id for file_id, role in choices.items() if role == "main"),
+                    "files": list(detail.values()), "reason": "上传者确认了文件角色"}
+        update_state(task_id, status="queued", stage="extracting", files=selected,
+                     role_assessment=resolved, processing_status="processing")
+        try:
+            enqueue_processing(task_id, preserve_llm_config=True)
+        except Exception as exc:
+            update_state(task_id, status="needs_role_review", stage="extracting", files=files,
+                         role_assessment=assessment, processing_status="needs_input")
+            raise _error(503, "ROLE_RESUME_FAILED", "角色已确认但任务未能入队，请重试") from exc
+    return JSONResponse(status_code=202, content={"ok": True, "data": public_task_state(get_state(task_id))})
 
 
 @router.delete("/{task_id}")

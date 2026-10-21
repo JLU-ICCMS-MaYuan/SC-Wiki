@@ -43,12 +43,13 @@ def test_worker_prompts_and_storage_keep_each_measurement_conditions(tmp_path, m
     source.write_text("# Results\n\nHg was measured by four-probe resistivity. Tc was 4.2 K and 3.8 K.")
     artifact_dir = tmp_path / "artifacts"
     artifact_dir.mkdir()
-    state = {"task_id": "e" * 32, "file_path": str(source), "file_kind": "md", "status": "queued"}
+    state = {"task_id": "e" * 32, "user_id": 1, "file_path": str(source), "file_kind": "md", "status": "queued"}
     saved = {}
     prompts = []
     generated = []
     monkeypatch.setattr('backend.ingest.property_evidence.generate_upload_suggestions',
-                        lambda task, draft, owner, on_progress=None: generated.append(deepcopy(draft)))
+                        lambda task, draft, owner, on_progress=None, **kwargs: generated.append(deepcopy(draft)))
+    monkeypatch.setattr(upload_jobs, '_start_automatic_evidence_check', lambda *_: None)
     monkeypatch.setattr(upload_jobs, "get_state", lambda _: state)
     monkeypatch.setattr(upload_jobs, "markdown_path", lambda _: source)
     monkeypatch.setattr(upload_jobs, "artifact_directory", lambda _: artifact_dir)
@@ -65,14 +66,15 @@ def test_worker_prompts_and_storage_keep_each_measurement_conditions(tmp_path, m
 
     def complete_json(system, prompt, **kwargs):
         prompts.append(system)
-        for direction in ("样品", "制备方式", "测量方法", "测量装置", "外场", "压力不确定度"):
-            assert direction in system
-        assert "experimental_conditions.description" in system
-        assert "不是六个必填项" in system
-        assert "不要猜测或编造" in system
         if system == upload_jobs.CHUNK_SYSTEM_PROMPT:
+            for direction in ("样品", "制备方式", "测量方法", "测量装置", "外场", "压力不确定度"):
+                assert direction in system
+            assert "experimental_conditions.description" in system
+            assert "不是六个必填项" in system
+            assert "不要猜测或编造" in system
             return {"material_states": deepcopy(raw_draft()["material_states"])}
-        candidates = json.loads(prompt)
+        assert "material_states=[]" in system
+        candidates = json.loads(prompt)["candidates"]
         assert candidates[0]["material_states"][0]["tc_results"][1]["experimental_conditions"]["description"] == DESCRIPTIONS[1]
         return raw_draft()
 
@@ -82,7 +84,8 @@ def test_worker_prompts_and_storage_keep_each_measurement_conditions(tmp_path, m
     assert result["status"] == "ready"
     assert len(generated) == 1
     assert generated[0]['material_states'] == saved['material_states']
-    assert prompts == [upload_jobs.CHUNK_SYSTEM_PROMPT, upload_jobs.SUMMARY_SYSTEM_PROMPT]
+    assert prompts[0] == upload_jobs.CHUNK_SYSTEM_PROMPT
+    assert prompts[1].startswith(upload_jobs.SUMMARY_SYSTEM_PROMPT)
     modules = saved["material_states"][0]["property_modules"]
     assert [record["payload"]["experimental_conditions"]["description"] for record in modules[0]["records"]] == DESCRIPTIONS
     assert "tc_results" not in saved["material_states"][0]

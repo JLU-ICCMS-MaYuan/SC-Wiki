@@ -1598,6 +1598,15 @@ async def put_upload_draft(
                 normalized.pop('material_family_error', None)
             if normalized['paper'].get('research_motivation') == (previous.get('paper') or {}).get('research_motivation'):
                 normalized['research_motivation_error'] = previous.get('research_motivation_error')
+            if normalized['paper'].get('summary') == (previous.get('paper') or {}).get('summary'):
+                normalized['summary_error'] = previous.get('summary_error')
+            normalized['generation_issues'] = [issue for issue in previous.get('generation_issues') or []
+                if isinstance(issue, dict) and (
+                    (str(issue.get('field') or '').startswith('paper.')
+                     and normalized['paper'].get(str(issue['field']).split('.', 1)[1])
+                         == (previous.get('paper') or {}).get(str(issue['field']).split('.', 1)[1]))
+                    or (issue.get('field') == 'material_states'
+                        and normalized.get('material_states') == previous.get('material_states')))]
             if "material_states" in draft:
                 normalized["paper"]["research_materials"] = _derived_research_materials(normalized["material_states"])
             # citation_extraction 是服务端 GROBID 产物，不能接受浏览器回传值覆盖。

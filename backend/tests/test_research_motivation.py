@@ -3,7 +3,7 @@
 import json
 
 from backend.ingest.property_evidence import source_chunks
-from backend.ingest.research_motivation import generate_motivation, task_chunks, valid_motivation
+from backend.ingest.research_motivation import choose_motivation, generate_motivation, task_chunks, valid_motivation
 
 
 SOURCE = """# Introduction
@@ -52,7 +52,7 @@ def test_inline_numbers_and_unlocated_quotes_cannot_enter_draft():
                                     "This quote does not occur in the paper.")]}
 
     value, error = generate_motivation(chunks, complete=complete)
-    assert (value, error) == ("", "invalid_motivation")
+    assert (value, error) == ("", "quote_unlocated")
     assert len(calls) == 2
 
 
@@ -89,3 +89,20 @@ def test_task_reads_current_paper_text_and_excludes_unrelated_files(tmp_path):
     ]}, tmp_path)
     assert chunks and {chunk["file_id"] for chunk in chunks} == {"main"}
     assert all("External background" not in chunk["content"] for chunk in chunks)
+
+
+def test_initial_motivation_with_located_quotes_needs_no_second_model_call():
+    chunks = source_chunks(SOURCE, "main")
+    value = "1. The stable high-pressure structure needed to be established."
+    quote = {"file_id": "main", "quote": "The stable high-pressure structure of the synthesized compound remained unresolved."}
+    assert choose_motivation(value, [quote], chunks,
+                             complete=lambda *_: (_ for _ in ()).throw(AssertionError("不得二次调用"))) == (
+                                 value, None, "initial")
+
+
+def test_failed_retry_keeps_first_motivation_and_reports_missing_quote():
+    chunks = source_chunks(SOURCE, "main")
+    value = "1. The stable high-pressure structure needed to be established."
+    result = choose_motivation(value, [{"file_id": "main", "quote": "不存在的引句"}], chunks,
+                               complete=lambda *_: {"motives": []})
+    assert result == (value, "quote_unlocated", "initial_review")

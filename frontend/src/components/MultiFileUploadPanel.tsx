@@ -64,10 +64,9 @@ const MultiFileUploadPanel: React.FC<Props> = ({ onCreated }) => {
       else if (signatures.has(signature)) rejected.push(t('upload.fileDuplicate', { name: file.name }))
       else { accepted.push(file); signatures.add(signature) }
     }
-    const hasMain = items.some(item => item.role === 'main')
     const additions = accepted.map((file, index): Selected => ({
       clientId: crypto.randomUUID().replaceAll('-', ''), file,
-      role: !hasMain && index === 0 ? 'main' : 'attachment', progress: 0, status: '等待上传',
+      role: 'attachment', progress: 0, status: '等待上传',
     }))
     if (additions.length) setItems(current => [...current, ...additions])
     setError(rejected.join(t('upload.sentenceSeparator')))
@@ -89,7 +88,6 @@ const MultiFileUploadPanel: React.FC<Props> = ({ onCreated }) => {
   }
 
   const start = async () => {
-    if (items.filter(item => item.role === 'main').length !== 1) { setError(t('upload.mustSelectMain')); return }
     setBusy(true); setError('')
     try {
       const created = await api.post<{ ok: boolean; data: UploadTaskState }>('/api/upload-tasks', {

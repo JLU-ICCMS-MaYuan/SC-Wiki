@@ -309,6 +309,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     changeDraft(current => ({ ...current,
       ...(field === 'material_families' ? { material_family_error: null } : {}),
       ...(field === 'research_motivation' ? { research_motivation_error: null } : {}),
+      ...(field === 'summary' ? { summary_error: null } : {}),
+      generation_issues: (current.generation_issues || []).filter(issue => issue.field !== `paper.${field}`),
       paper: { ...current.paper, [field]: value } }))
   }
 
@@ -651,6 +653,18 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           : evidenceWorkflow.automaticView.message || t('evidence.checking')}
       </Alert>}
       {draft.field_suggestions_error && evidenceWorkflow.records.some(r => r.status === 'unchecked') && <Alert severity="warning" sx={{ mb: 2 }}>{t('evidence.generationFailed')}</Alert>}
+      {Boolean(draft.generation_issues?.length) && <Alert severity="warning" sx={{ mb: 2 }}>
+        <strong>{t('upload.generationIssuesTitle')}</strong>
+        <Box component="ul" sx={{ my: 0.5, pl: 2 }}>
+          {draft.generation_issues?.map((issue, index) => <li key={`${issue.field}:${issue.code}:${index}`}>
+            {issue.field}: {issue.message}
+            {issue.candidate != null && <Box component="div" sx={{ whiteSpace: 'pre-wrap', maxHeight: 180, overflow: 'auto' }}>
+              {t('upload.generationPendingCandidate')}: {typeof issue.candidate === 'string'
+                ? issue.candidate : JSON.stringify(issue.candidate)}
+            </Box>}
+          </li>)}
+        </Box>
+      </Alert>}
 
       {draft.citation_extraction && <CitationExtractionPanel extraction={draft.citation_extraction} />}
 
@@ -839,7 +853,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           <TextField fullWidth label={String(label)} multiline minRows={Number(rows)} data-issue-field={`paper.${field}`}
             value={String(draft.paper[field as keyof UploadDraft['paper']] || '')}
             onChange={event => setPaperField(field as keyof UploadDraft['paper'], event.target.value)}
-            helperText={field === 'summary' && !draft.paper.summary ? t('upload.summaryReviewHint') : undefined} />
+            helperText={field === 'summary' && (!draft.paper.summary || draft.summary_error)
+              ? t('upload.summaryReviewHint') : undefined} />
         </Box>
       ))}
 
@@ -847,7 +862,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         <TextField fullWidth label={t('upload.researchMotivationLabel')} multiline minRows={3} data-issue-field="paper.research_motivation"
           value={draft.paper.research_motivation || ''}
           onChange={event => setPaperField('research_motivation', event.target.value)}
-          helperText={!draft.paper.research_motivation && draft.research_motivation_error
+          helperText={draft.research_motivation_error
             ? t('upload.researchMotivationReviewHint') : undefined} />
         <EvidenceNotes evidence={classificationEvidence} />
       </Box>

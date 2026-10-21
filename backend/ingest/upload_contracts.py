@@ -23,8 +23,8 @@ FIXED_TERMINAL_STATUSES = {"failed", "duplicate", "cancelled"}
 FINAL_STATUSES = FIXED_TERMINAL_STATUSES | {"submitted"}
 FILE_ROLES = {"main", "supplementary", "attachment"}
 FILE_SUFFIXES = {".pdf", ".txt", ".md", ".cif", ".poscar", ".vasp"}
-PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state"}
-PUBLIC_FILE_FIELDS = {"file_id", "role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
+PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state", "role_assessment"}
+PUBLIC_FILE_FIELDS = {"file_id", "role", "declared_role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
 
 @dataclass(frozen=True)
 class CleanupContext:
@@ -48,7 +48,7 @@ def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> d
     result = {**state, **changes, "updated_at": now}
     if target != current:
         result["revision"] = int(state.get("revision") or 0) + 1
-        if target == "ready":
+        if target in {"ready", "needs_role_review"}:
             result["last_user_activity_at"] = now; result["cleanup_at"] = now + TASK_TTL; result.pop("terminal_at", None)
         elif target in FIXED_TERMINAL_STATUSES:
             result["terminal_at"] = now; result["cleanup_at"] = now + TASK_TTL
@@ -59,7 +59,7 @@ def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> d
 
 def apply_user_activity(state: dict[str, Any], *, now: int) -> dict[str, Any]:
     result = dict(state); result["updated_at"] = now
-    if result.get("status") == "ready": result["last_user_activity_at"] = now; result["cleanup_at"] = now + TASK_TTL
+    if result.get("status") in {"ready", "needs_role_review"}: result["last_user_activity_at"] = now; result["cleanup_at"] = now + TASK_TTL
     return result
 
 def structure_format_for_filename(filename: str) -> str | None:
@@ -76,8 +76,8 @@ def validate_manifest(files: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
         suffix = Path(filename).suffix.lower(); structure_format = structure_format_for_filename(filename)
         if suffix not in FILE_SUFFIXES and structure_format is None: raise ValueError("文件类型不支持")
         if size < 0 or size > MAX_UPLOAD_BYTES: raise ValueError("文件超过 50 MB 限制")
-        normalized.append({"file_id": uuid4().hex, "client_id": str(item.get("client_id") or index), "role": role, "original_filename": filename, "media_type": item.get("media_type"), "kind": structure_format or suffix.lstrip("."), "size": size, "sort_order": index, "upload_status": "waiting", "extraction_status": "waiting", "error": None})
-    if sum(item["role"] == "main" for item in normalized) != 1: raise ValueError("文件清单必须恰好一个正文")
+        normalized.append({"file_id": uuid4().hex, "client_id": str(item.get("client_id") or index), "role": role, "declared_role": role, "original_filename": filename, "media_type": item.get("media_type"), "kind": structure_format or suffix.lstrip("."), "size": size, "sort_order": index, "upload_status": "waiting", "extraction_status": "waiting", "error": None})
+    # 上传前的角色只是声明；有效正文在文本提取后统一判定。
     return normalized
 
 def public_task_state(state: dict[str, Any]) -> dict[str, Any]:

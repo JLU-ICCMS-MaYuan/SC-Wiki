@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import json
 import time
+import hashlib
 from contextvars import ContextVar
+from contextlib import contextmanager
 from collections.abc import Callable
 from typing import Any
 
@@ -14,7 +16,26 @@ from backend.rag.llm_client import get_llm_client
 from backend.rag.llm_context import get_llm_config
 
 
+_call_observer: ContextVar[Callable[[dict], None] | None] = ContextVar("llm_call_observer", default=None)
+_call_phase: ContextVar[str] = ContextVar("llm_call_phase", default="")
 _call_stats: ContextVar[dict] = ContextVar("llm_call_stats", default={})
+
+
+def set_call_observer(observer: Callable[[dict], None]):
+    return _call_observer.set(observer)
+
+
+def reset_call_observer(token) -> None:
+    _call_observer.reset(token)
+
+
+@contextmanager
+def call_phase(name: str):
+    token = _call_phase.set(name)
+    try:
+        yield
+    finally:
+        _call_phase.reset(token)
 
 
 def _client(read_timeout: float) -> OpenAI:
@@ -81,7 +102,6 @@ def _stream_json(
     return _extract_json("".join(accumulated))
 
 
-
 def complete_json(
     system_prompt: str,
     user_prompt: str,
@@ -104,12 +124,28 @@ def complete_json(
             if on_call:
                 on_call({**_call_stats.get(), "attempt": attempt + 1, "status": "completed",
                          "elapsed_seconds": time.monotonic() - started})
+            observer = _call_observer.get()
+            if observer:
+                output_chars = len(json.dumps(result, ensure_ascii=False))
+                observer({**_call_stats.get(), "phase": _call_phase.get(), "model": get_llm_config().model, "prompt_hash": hashlib.sha256(system_prompt.encode()).hexdigest(),
+                          "attempt": attempt + 1, "status": "completed", "elapsed_seconds": time.monotonic() - started,
+                          "input_chars": len(system_prompt) + len(user_prompt),
+                          "output_chars": output_chars, "tokens": None,
+                          "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4,
+                          "output_tokens_estimate": (output_chars + 3) // 4})
             return result
         # 流式响应中途断开（httpx.TransportError）不经 OpenAI 包装，同样按可重试处理。
         except (APITimeoutError, APIConnectionError, httpx.TransportError, json.JSONDecodeError, RuntimeError) as exc:
             if on_call:
                 on_call({**_call_stats.get(), "attempt": attempt + 1, "status": "failed",
                          "error_type": type(exc).__name__, "elapsed_seconds": time.monotonic() - started})
+            observer = _call_observer.get()
+            if observer:
+                observer({**_call_stats.get(), "phase": _call_phase.get(), "model": get_llm_config().model, "prompt_hash": hashlib.sha256(system_prompt.encode()).hexdigest(),
+                          "attempt": attempt + 1, "status": "failed", "error_type": type(exc).__name__,
+                          "elapsed_seconds": time.monotonic() - started,
+                          "input_chars": len(system_prompt) + len(user_prompt), "tokens": None,
+                          "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4})
             last_error = exc
             if attempt >= retries:
                 break

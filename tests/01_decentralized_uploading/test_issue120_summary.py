@@ -31,12 +31,12 @@ def test_summary_retries_only_invalid_output_and_never_copies_abstract():
     assert not valid_summary("1. One sentence. Another sentence.\n2. A second conclusion.\n3. A third conclusion.", ABSTRACT)
 
 
-def test_failed_retry_leaves_summary_empty_without_normalization_fallback():
+def test_failed_retry_preserves_first_summary_for_explicit_review():
     selected, error = choose_summary(ABSTRACT, ABSTRACT, [], lambda *_: {"summary": ABSTRACT})
-    assert (selected, error) == ("", "invalid_summary")
+    assert (selected, error) == (ABSTRACT, "invalid_summary")
     draft = _normalize_draft({"paper": {"abstract": ABSTRACT, "summary": selected, "paper_type": "unknown"},
                               "summary": ABSTRACT, "material_states": []})
-    assert draft["paper"]["summary"] == ""
+    assert draft["paper"]["summary"] == ABSTRACT
     assert choose_summary("", ABSTRACT, [], lambda *_: (_ for _ in ()).throw(RuntimeError())) == ("", "retry_failed")
 
 

@@ -8,16 +8,26 @@ import { convertLegacyPropertyModules, PROPERTY_SCHEMA_VERSION } from './propert
 export type ProcessingStage = 'saving_file' | 'queued' | 'extracting' | 'reading' | 'summarizing' | 'ready'
 export type ProcessingStatus = 'processing' | 'succeeded' | 'failed' | 'cancelled'
 export type UploadTaskStatus = 'uploading' | 'queued' | 'extracting' | 'reading' | 'summarizing' |
-  'ready' | 'submitting' | 'submitted' | 'failed' | 'duplicate' | 'cancelling' | 'cancelled'
+  'ready' | 'needs_role_review' | 'submitting' | 'submitted' | 'failed' | 'duplicate' | 'cancelling' | 'cancelled'
 
 export interface UploadTaskFile {
   file_id: string
   role: 'main' | 'supplementary' | 'attachment'
+  declared_role?: 'main' | 'supplementary' | 'attachment'
   original_filename: string
   size?: number
   upload_status?: string
   extraction_status?: string
   error?: string | null
+}
+
+export interface UploadRoleAssessment {
+  status: 'resolved' | 'needs_review' | 'user_confirmed'
+  main_file_id: string | null
+  reason: string
+  source_hash: string
+  files: Array<{ file_id: string; declared_role: UploadTaskFile['role']; effective_role: UploadTaskFile['role'] | null;
+    article_signals: string[]; supplement_signals: string[]; readable: boolean }>
 }
 
 export type CitationExtractionStatus = 'succeeded' | 'partial' | 'failed' | 'unavailable'
@@ -191,7 +201,9 @@ export interface UploadDraft {
   parsing_conflicts?: Array<{ file_id: string; pdf_page: number; kind: string; engine?: string; selected_text?: string; alternatives: Array<{ engine?: string; text: string }> }>
   bibliography_conflicts?: Array<{ field: string; grobid_value: unknown; extracted_value: unknown }>
   field_suggestions_error?: string | null
+  summary_error?: string | null
   research_motivation_error?: string | null
+  generation_issues?: Array<{ field: string; code: string; message: string; candidate?: unknown }>
   material_family_error?: 'catalog_unavailable' | 'classification_failed' | 'insufficient_evidence' | null
   material_family_assessment?: { status: 'completed' | 'uncertain' | 'failed'; families: FamilySelection[]; reason: string; evidences: SourceEvidence[]; source_hash?: string; rule_version?: string; model?: string }
   paper: PaperDraftFields
@@ -217,7 +229,7 @@ export interface UploadTaskState {
   reading_state?: string | null
   stage_index: number
   stage_total: number
-  processing_status: ProcessingStatus
+  processing_status: ProcessingStatus | 'needs_input'
   processing_error?: string | null
   error_code?: string | null
   completed_chunks: number
@@ -233,6 +245,7 @@ export interface UploadTaskState {
   updated_at?: number
   files?: UploadTaskFile[]
   revision?: number
+  role_assessment?: UploadRoleAssessment
 }
 
 export interface UploadAcceptedResponse extends Partial<UploadTaskState> {

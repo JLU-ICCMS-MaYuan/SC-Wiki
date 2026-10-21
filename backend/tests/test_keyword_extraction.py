@@ -79,13 +79,14 @@ def test_reference_keyword_label_does_not_count_as_author_list():
         calls.append(prompt)
         sources = json.loads(payload).get("sources")
         if sources is not None:
-            return {"summary": "The current paper studies a material and a method.",
+            return {"keywords_tags": ["material study", "new method", "research result"],
+                    "reason": "本文以当前材料为研究对象，用新方法得到研究结果，所选词分别概括材料、方法和结果。",
                     "evidences": [{"file_id": "main", "quote": "The present paper studies a material using a new method."}]}
         return {"keywords_tags": ["material study", "new method", "research result"],
                 "reason": "本文以当前材料为研究对象，用新方法得到研究结果，所选词分别概括材料、方法和结果。"}
 
     result = select_keywords([source(text)], complete=model)
-    assert result["kind"] == "fulltext_synthesis" and len(calls) == 2
+    assert result["kind"] == "fulltext_synthesis" and len(calls) == 1
     assert "unrelated" not in result["values"]
 
 
@@ -180,7 +181,8 @@ def test_fulltext_keywords_preserve_specific_selection_reason():
 
     def model(_prompt, payload):
         if "sources" in json.loads(payload):
-            return {"summary": "The current paper studies sulfur hydride superconductivity and structure prediction.",
+            return {"keywords_tags": ["sulfur hydride", "superconductivity", "structure prediction"],
+                    "reason": logic,
                     "evidences": [{"file_id": "main", "quote": "The paper studies sulfur hydride superconductivity using structure prediction."}]}
         return {"keywords_tags": ["sulfur hydride", "superconductivity", "structure prediction"],
                 "reason": logic}

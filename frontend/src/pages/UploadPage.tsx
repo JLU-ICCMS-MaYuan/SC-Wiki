@@ -15,6 +15,7 @@ import { MaterialStateControlsContext } from '../context/MaterialStateControlsCo
 import AuthDialog from '../components/AuthDialog'
 import UploadTaskCenter from '../components/UploadTaskCenter'
 import MultiFileUploadPanel from '../components/MultiFileUploadPanel'
+import UploadRoleReview from '../components/UploadRoleReview'
 import UploadParsingDetail from '../components/UploadParsingDetail'
 import { api } from '../lib/api'
 import { buildLlmHeaders } from '../lib/llmProvider'
@@ -430,6 +431,11 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                     <Alert severity={taskState.reading_state === 'needs_review' ? 'warning' : 'info'} sx={{ mb: 1 }}>
                       {t(`upload.readingStates.${taskState.reading_state}`)}
                     </Alert>}
+                  {taskState?.role_assessment && <UploadRoleReview task={taskState} onResolved={updated => {
+                    setTaskState(updated)
+                    setTaskPollTick(value => value + 1)
+                    setTaskCenterTick(value => value + 1)
+                  }} />}
 
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(5, minmax(0, 1fr))' }, gap: 1 }}>
                     {PROCESSING_STAGES.map((item, index) => {
@@ -491,7 +497,8 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                       {taskState.duplicate_reason || t('upload.duplicateExisting')}
                     </Alert>
                   )}
-                  {activeTaskId && <UploadParsingDetail key={`${activeTaskId}:${taskPollTick}`} taskId={activeTaskId} onSubmitted={handleTaskSubmitted} />}
+                  {activeTaskId && taskState?.status !== 'needs_role_review' &&
+                    <UploadParsingDetail key={`${activeTaskId}:${taskPollTick}`} taskId={activeTaskId} onSubmitted={handleTaskSubmitted} />}
                 </CardContent>
                 </MaterialStateControlsContext.Provider>
               </Card>

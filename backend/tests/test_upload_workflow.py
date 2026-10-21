@@ -480,6 +480,29 @@ def test_put_draft_saves_half_filled_draft(monkeypatch):
     assert saved["draft"] == result["data"]
 
 
+def test_put_draft_preserves_scientific_conflict_until_states_change(monkeypatch):
+    import backend.rag.database as rag_database
+    from backend.ingest import upload_jobs
+
+    task_id = "e" * 32
+    previous = _half_filled_draft()
+    previous["generation_issues"] = [{"field": "material_states", "code": "conflict",
+                                      "message": "科学记录候选待审"}]
+    monkeypatch.setattr(rag, "_task_for_user", lambda *_args: {"task_id": task_id})
+    monkeypatch.setattr(upload_tasks, "get_draft", lambda *_args: previous)
+    monkeypatch.setattr(upload_jobs, "_normalize_draft", lambda draft: draft)
+    monkeypatch.setattr(rag_database, "async_session_factory", lambda: FakeAsyncSession())
+
+    async def _resolve_noop(_session, _draft):
+        return None
+
+    monkeypatch.setattr(rag, "_resolve_draft_classifications", _resolve_noop)
+    monkeypatch.setattr(upload_tasks, "save_draft", lambda _task_id, draft, *, editor: draft)
+    submitted = json.loads(json.dumps(previous))
+    result = asyncio.run(rag.put_upload_draft(task_id, submitted, SimpleNamespace(id=1)))
+    assert result["data"]["generation_issues"] == previous["generation_issues"]
+
+
 def test_put_draft_rejects_experimental_tc_calculation_context(monkeypatch):
     import backend.rag.database as rag_database
     from backend.ingest import upload_jobs

@@ -178,7 +178,12 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
     from .scientific_evidence import canonical
     from .material_family_classification import matching_assessment
     # 定位 ID/排版顺序不会改变来源正文；补入证据不改变断言版本。
-    source_hash = digest(sorted((normalized_text(c['content']) for c in chunks)))
+    source_roles = context.get('_source_roles')
+    source_hash = (digest(sorted((str(c.get('file_id')), str(c.get('file_role')),
+                                  normalized_text(c['content'])) for c in chunks))
+                   if source_roles else digest(sorted(normalized_text(c['content']) for c in chunks)))
+    generation_issues = {str(item.get('field')): item for item in context.get('generation_issues') or []
+                         if isinstance(item, dict) and item.get('code')}
     for r in records:
         if target == 'upload' and r['field'] == 'paper.material_families':
             assessment = context.get('material_family_assessment')
@@ -205,6 +210,12 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
             for association in r['source_associations']:
                 association['stale'] |= not all(locate(e, chunks) for e in
                     [*association.get('fact_evidences', []), *association.get('scope_evidences', [])])
+        if target == 'upload':
+            issue = generation_issues.get(r['field'])
+            if issue is None and r['field'].startswith('material_states['):
+                issue = generation_issues.get('material_states')
+            if issue is not None:
+                r['generation_issue'] = {'code': issue['code'], 'message': str(issue.get('message') or '')}
         from .evidence_proposals import editable_fields
         r['editable_fields'] = editable_fields(r)
         from .condition_rules import descriptor
@@ -218,6 +229,8 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
             dos_sources = (scientific_record.get('payload') or {}).get('dos_fermi_sources')
             if dos_sources is not None:
                 source_identity.append({'dos_fermi_sources': dos_sources})
+        if r.get('generation_issue'):
+            source_identity.append(r['generation_issue'])
         r['source_hash'] = digest(source_identity)
     version = digest([RULE_VERSION, target, target_id, sorted((r['item_key'], r['content_hash'], r['source_hash']) for r in records)])
     return dict(target=target, target_id=str(target_id), records=records, chunks=chunks, version=version, rule_version=RULE_VERSION)
@@ -225,6 +238,7 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
 
 def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = None) -> dict:
     from backend.ingest.upload_tasks import get_draft, get_state, markdown_path
+    from backend.ingest.upload_source_bundle import task_source_chunks
     from backend.ingest.scientific_drafts import _property_modules_for_state
     from . import scientific_evidence as science
     state, draft = get_state(task_id), parsing_draft if parsing_draft is not None else get_draft(task_id)
@@ -232,22 +246,12 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
         raise HTTPException(403, detail='只有上传者可以核对该草稿')
     if not draft or state.get('paper_id') or (parsing_draft is None and (state.get('stage') != 'ready' or state.get('processing_status') != 'succeeded')):
         fail('draft_not_ready', '草稿尚未准备完成或已经提交')
-    path = markdown_path(task_id)
-    chunks = []
-    root = path.parent / task_id
-    for source in state.get('files') or []:
-        file_id = str(source.get('file_id') or '')
-        if not re.fullmatch(r'[\w-]+', file_id):
-            continue
-        source_path = root / f'{file_id}.md'
-        if source_path.is_file():
-            chunks.extend({**c, 'source_name': source.get('original_filename') or source.get('filename')} for c in source_chunks(source_path.read_text(encoding='utf-8'), file_id))
-    if not chunks and path.is_file():
-        chunks = [{**c, 'source_name': state.get('filename')} for c in source_chunks(path.read_text(encoding='utf-8'), 'main')]
+    chunks = task_source_chunks(task_id, state, markdown_path(task_id).parent)
     from backend.database import SessionLocal
     with SessionLocal() as session:
         origins = science.origins_for(session, 'upload', task_id)
-    snapshot = complete_snapshot('upload', task_id, draft_records(draft, origins), chunks, draft)
+    role_context = ({**draft, '_source_roles': True} if state.get('role_assessment') else draft)
+    snapshot = complete_snapshot('upload', task_id, draft_records(draft, origins), chunks, role_context)
     snapshot['_field_change_events'] = copy.deepcopy(state.get('_field_change_events') or [])
     from .scientific_context import bind_snapshot_source_documents, source_documents
     source_manifest = state.get('files') or [{'file_id':'main','role':'main','sha256':state.get('file_sha256')}]
@@ -547,9 +551,13 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     if model_synthesis and status == 'supported' and not inference_reason and not human:
         status = 'uncertain'
         reason = '模型尚未给出当前归纳值的具体判断理由，请重新核对。'
+    generation_issue = record.get('generation_issue')
     if record.get('dos_fermi_conflict') and not human:
         status = 'uncertain'
         reason = '同一材料状态发现不同 DOS 数值，需人工核对；' + reason
+    if generation_issue and status == 'supported' and not human:
+        status = 'uncertain'
+        reason = str(generation_issue.get('message') or '生成结果尚需人工核对') + '；' + reason
     ai_reason = (None if human else (
         inference_reason if status == 'supported' else reason if concrete_synthesis_reason(reason) else None
     ) or '模型尚未给出当前值的具体推断理由，请重新核对。') if model_synthesis else (
@@ -740,6 +748,8 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 
 
 
+SYSTEM_PROMPT += METHOD_SEMANTICS_PROMPT
+
 SUGGESTION_PROMPT = """
 对每个字段同时区分当前值与候选值。允许为空字段提出候选，但不能把猜测写为论文事实。
 材料家族由专门的全文目录判断填写；这里仅按本文语义核对当前选择。现有目录名称不必在原文逐字出现，不能因原文使用 H2-containing compounds 而否定“氢基超导体”。不得为该字段生成新的自由名称建议。
@@ -752,8 +762,6 @@ proposal 增加 basis_kind：paper_quote（原文直接记载）、paper_inferen
 任务 purpose=review_all 时，独立检查所有 previous_result 的判断、建议及引句，而非照抄旧结论。对已有建议返回 proposal_review={"status":"reasonable|questionable|uncertain","explanation":"简要理由"}；即使合理，推测仍不是原文直接支持。
 """
 
-
-SYSTEM_PROMPT += METHOD_SEMANTICS_PROMPT
 
 def verify_model_image_capability() -> bool:
     """用不含真实材料的随机图片验证当前模型确实能识别图像。"""
@@ -1018,12 +1026,14 @@ def _fill_empty_fields(draft, record, proposal):
     return True
 
 
-def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None, scientific_sources=None):
+def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None, scientific_sources=None,
+                                requested_fields=None):
     """解析后补入有效推断与推测，并把理由绑定到补入后的字段版本。"""
     from backend.database import SessionLocal
     from backend.ingest.upload_jobs import _ensure_not_cancelled
     snapshot = upload_snapshot(task_id, owner, parsing_draft=draft)
-    records = [r for r in snapshot['records'] if r.get('kind') != 'derived']
+    records = [r for r in snapshot['records'] if r.get('kind') != 'derived'
+               and (requested_fields is None or r['field'] in requested_fields)]
     batches = [(batch, chunks) for batch in record_batches(records) for chunks in source_batches(snapshot['chunks'])]
     candidates = {r['key']: [] for r in records}
     errors = {r['key']: [] for r in records}
@@ -1144,7 +1154,8 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
     draft.update(filled)
     if on_progress:
         on_progress(len(batches), len(batches))
-    return current_results
+    return {record['key']: {**current_results[record['key']], 'field': record['field']}
+            for record in current['records'] if record['key'] in current_results}
 
 def run_evidence_job(job_id: str):
     from backend.ingest.upload_tasks import load_llm_config, delete_llm_config

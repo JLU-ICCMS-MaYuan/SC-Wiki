@@ -46,11 +46,6 @@ FR-012→discovery/vision/engine→T014/T018；FR-013→models/服务/RQ/事务�
 
 失败占位与有未解决问题的发现运行状态为 needs_review，不作为成功缓存；历史 succeeded 空结果读取时同样显示 needs_review。发现 detail 分别包含 collections、extracted_collections、curve_count。采纳规则和服务器质量计算保持不变，模型成功生成标定不代表数据已验收。
 
-
-## 可选零证据的空值语义
-
-zero_boundaries_thz 的空数组或 null 统一为 [null,null]，zero_reference_band_thz 的空数组或 null 统一为 null；均表示缺少证据，不表示零幅值、零频边界或允许插值。非空且长度错误仍拒绝。模型须分别屏蔽图内 λ 数值注记及同色文字，不能将文字当作累计曲线终点。
-
 ## T023 状态归属与摘要导航
 
 模块入口按 state_key + collection_id + 曲线族归组：phonon_dos 的全部投影共用“查看声子 DOS”；alpha2f 与同集合 cumulative_lambda 共用“查看 α²F”。同状态不同集合／近似分别保留。无该族数值明确空态，不能拿其他状态或另一集合的累计 λ 配对。
@@ -58,6 +53,11 @@ zero_boundaries_thz 的空数组或 null 统一为 [null,null]，zero_reference_
 详情 URL 保留 target、target_id、state_key、collection_version、run、return；curve 可选择实际存在的曲线。未归属以 state_key=unassigned 对应服务端 null，空结果集合可省略 curve，且只能查看真实来源及失败，不生成示例曲线。URL 中材料／集合／曲线／版本任一不匹配仍拒绝。权限由原接口决定，前端标签不能绕过。
 
 详情从当前草稿或论文读取完整材料状态标签（包含相和压力）。手动确认归属只允许有 can_edit 权限、有有效标定且目标状态存在时走原 calibration PUT；保留已有曲线标定，复用任务和集合乐观版本检查。重新归属触发原异步数值及质量重算、旧采纳失效；前端返回对应状态显示排队／运行／失败，不能承诺请求受理即提取成功。保存出错和版本冲突不跳转、不覆盖当前选择。
+
+
+## 可选零证据的空值语义
+
+zero_boundaries_thz 的空数组或 null 统一为 [null,null]，zero_reference_band_thz 的空数组或 null 统一为 null；均表示缺少证据，不表示零幅值、零频边界或允许插值。非空且长度错误仍拒绝。模型须分别屏蔽图内 λ 数值注记及同色文字，不能将文字当作累计曲线终点。
 
 ## T025：性质模块内折叠
 
