@@ -1,3 +1,4 @@
+import { createFieldDraftSaver } from '../lib/fieldDrafts'
 import { currentEvidenceField, evidenceFieldsForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
 import { materialStateFromDetail, candidateFromStructureModel, remapScientificIdentities, type ScientificIdentityMap } from '../lib/paperEditing'
@@ -144,6 +145,7 @@ const AdminPaperEditPage: React.FC = () => {
     const loadDetail = async () => {
       scientificIdentityMap.current = {}
       setEditLoading(true)
+      fieldSaver.current = null
       try {
         const { detail, pendingValues } = await loadPaperReviewSource(paperId)
         const classifications = resolveReviewClassifications(detail, pendingValues)
@@ -189,6 +191,14 @@ const AdminPaperEditPage: React.FC = () => {
         setEditHadScientificData(
           materialStates.length > 0 || structureCandidates.length > 0 || classifications.materialFamilies.length > 0,
         )
+        const staged = await api.get<{ staged: boolean; draft: any }>(`/api/rag/evidence/draft-state?target=paper&target_id=${paperId}`)
+        if (staged.staged) {
+          setEditForm(staged.draft.paper)
+          setEditMaterialFamilies(staged.draft.paper.material_families || [])
+          setEditMaterialStates(staged.draft.material_states || [])
+          setEditStructureCandidates(staged.draft.structure_candidates || [])
+          setEditStructuralObservations(staged.draft.structural_observations || [])
+        }
         // 已落库结构表示：异步拉取完整表示并入候选，不阻塞表单渲染
         void loadStructureRepresentations(detailStates)
       } catch (e: unknown) {
@@ -204,17 +214,13 @@ const AdminPaperEditPage: React.FC = () => {
   const handleEditReview = async () => {
     setEditReviewSaving(true)
     try {
-      let classifications: ReviewClassifications | undefined
-      if (editReviewStatus === 'approved') {
-        if ((!evidenceWorkflow.hasAccepted || evidenceWorkflow.hasUnsavedChanges()) && !(await handleEditSave())) return
-        if (!(await evidenceWorkflow.applyAccepted({ target: 'paper', target_id: String(paperId) }, handleEditSave))) return
-        const { detail } = await loadPaperReviewSource(Number(paperId))
-        classifications = resolveReviewClassifications(detail)
-      }
-      const payload = paperReviewPayload(editReviewStatus, editReviewComment, classifications)
+      if (editReviewStatus === 'approved' && evidenceWorkflow.hasUnsavedChanges() && !(await handleEditSave())) return
+      const payload = editReviewStatus === 'approved'
+        ? { status: editReviewStatus, comment: editReviewComment, review_request_id: crypto.randomUUID() }
+        : paperReviewPayload(editReviewStatus, editReviewComment)
       const evidence = editReviewStatus === 'approved' ? await evidenceWorkflow.gate({ target: 'paper', target_id: String(paperId) }) : {}
       if (!evidence) return
-      await api.post(`/api/admin/papers/${paperId}/review`, { ...payload, ...evidence })
+      await api.post(editReviewStatus === 'approved' ? '/api/rag/evidence/review-commit' : `/api/admin/papers/${paperId}/review`, { ...payload, ...evidence, paper_id: Number(paperId) })
       navigate(workspacePath)
     } catch (e: unknown) {
       setSnackbar(t('admin.reviewFailed', { reason: (e as Error).message }))
@@ -224,95 +230,23 @@ const AdminPaperEditPage: React.FC = () => {
   // 两段保存（契约 C4）：先论文级（Go，低风险），后科学数据（Python，整体替换）。
   // 科学数据段仅当论文原本有科学数据或当前编辑区有内容时执行——纯论文级编辑
   // （如无材料状态的综述）不需要触发整体替换。
-  const handleEditSave = async (patches: EvidencePatch[] = [], preparationId?: string, resumeStage?: 'scientific' | 'finalize', refreshEvidence = true) => {
-    const revision = evidenceWorkflow.getEditRevision()
-    const invalidPressure = Array.from(document.querySelectorAll<HTMLInputElement>('[data-evidence-scope="paper-edit"] [data-pressure-input]')).find(input => !input.checkValidity())
-    if (invalidPressure) { invalidPressure.reportValidity(); setSnackbar(t('evidence.invalidPressure')); return false }
+  const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
+  const editableDraft = () => ({ paper: { ...editForm, material_families: editMaterialFamilies },
+    material_states: editMaterialStates, structure_candidates: editStructureCandidates,
+    structural_observations: editStructuralObservations })
+  useEffect(() => {
+    if (!editLoading && !fieldSaver.current && paperId) {
+      fieldSaver.current = createFieldDraftSaver({target: 'paper', target_id: String(paperId)})
+      fieldSaver.current.initialize(editableDraft())
+    }
+  }, [editLoading, paperId])
+  const handleEditSave = async (_patches: EvidencePatch[] = [], _preparationId?: string, _resumeStage?: 'scientific' | 'finalize', _refreshEvidence = true) => {
     try {
-      const tcIssue = validateTcRecords(editMaterialStates)[0]
-      if (tcIssue) { setSnackbar(tcIssue.message); return false }
-      const historyOperationId = crypto.randomUUID()
-      const paper: Record<string, any> = { ...editForm, material_families: editMaterialFamilies }
-      const changed = applyEvidencePatches({ paper, material_states: editMaterialStates }, patches)
-      const missingIdentity = changed.material_states.findIndex(materialIdentityMissing)
-      if (missingIdentity >= 0) throw new Error(t('upload.missingMaterial', {label:t('upload.materialStateLabel', {index:missingIdentity+1})}))
-      const payload: Record<string, any> = { ...changed.paper, history_operation_id: historyOperationId, evidence_preparation_id: preparationId }
-      // 分类由科学保存原子写入，避免第一段先改类型使第二段误判为同值。
-      if (editHadScientificData || changed.paper.material_families?.length || changed.material_states.length || editStructureCandidates.length) delete payload.superconductor_kind
-      // 科学段可能失败；汇总与材料状态由同一 Python 事务保存，避免第一段先写入未来值。
-      if (editHadScientificData || changed.material_states.length) delete payload.research_materials
-      delete payload.material_relations
-      for (const field of ['research_materials']) {
-        if (Array.isArray(payload[field])) payload[field] = JSON.stringify(payload[field])
-      }
-      if (authorInput.trim()) {
-        payload.authors = JSON.stringify(appendAuthor(toTextList(editForm.authors), authorInput))
-      }
-      // Go 文本列不接收数组；只转换数组和用户编辑过的字段，原字符串/空值保持不变。
-      for (const field of ['authors', 'keywords_tags', 'methodology'] as const) {
-        if (field !== 'authors' && editListText[field] !== undefined && !patches.some(p => p.field === `paper.${field}`)) {
-          payload[field] = JSON.stringify(textLinesToList(editListText[field]!))
-        } else if (Array.isArray(payload[field])) {
-          payload[field] = JSON.stringify(payload[field])
-        }
-      }
-      delete payload.key_properties
-      // 只提交 superconductor_properties 的真实列。压强、温度等条件字段属材料状态，
-      // 不经物性接口修改；后端也不再接受这些无对应列的字段。
-      if (payload.key_properties) {
-        payload.key_properties = payload.key_properties.map((kp: any) => ({
-          id: kp.id, material: kp.material, name_raw: kp.name_raw,
-          value_min: kp.value_min, value_max: kp.value_max,
-          value_raw: kp.value_raw, value_number: kp.value_number,
-          unit: kp.unit, canonical_unit: kp.canonical_unit,
-          condition_note: kp.condition_note,
-        }))
-      }
-      // 第一步：论文级字段保存（Go）。失败在此终止，不调用科学数据段。
-      if (resumeStage !== 'scientific') await api.put(`/api/admin/papers/${paperId}`, payload)
-      if (patches.length) { setEditForm(changed.paper); setEditListText({}) }
-      if (editHadScientificData || changed.paper.material_families?.length || changed.material_states.length || editStructureCandidates.length || editStructuralObservations.length) {
-        try {
-          const identities = remapScientificIdentities(changed.material_states, editStructureCandidates, scientificIdentityMap.current)
-          // 第二步：科学数据整体替换（Python，契约 C1）。
-          // 规范几何只采用已确认候选；独立资料同时保存保留决定，待核对与排除项不公开。
-          const response = await api.put<{ ok: boolean; data: ScientificIdentityMap & { revision_bumped?: boolean } }>(
-            `/api/rag/papers/${paperId}/scientific-draft`,
-            {
-              paper_type: changed.paper.paper_type || '',
-              superconductor_kind: changed.paper.superconductor_kind || 'unknown',
-              material_families: changed.paper.material_families,
-              material_states: identities.states,
-              structure_candidates: identities.candidates.filter(candidate => candidate.confirmation === 'confirmed' || candidate.retention),
-              ...(!structuralLoadError ? { structural_observations: editStructuralObservations } : {}),
-              history_operation_id: historyOperationId, evidence_preparation_id: preparationId,
-            },
-          )
-          scientificIdentityMap.current = {
-            structure_candidate_id_map: { ...scientificIdentityMap.current.structure_candidate_id_map, ...response?.data?.structure_candidate_id_map },
-            structure_key_map: { ...scientificIdentityMap.current.structure_key_map, ...response?.data?.structure_key_map },
-          }
-          setEditMaterialStates(current => remapScientificIdentities(current, [], scientificIdentityMap.current).states)
-          setEditStructureCandidates(current => remapScientificIdentities([], current, scientificIdentityMap.current).candidates)
-          // 升版成功（T045）：论文已退回待审核，明确提示审核通过前不对外公开
-          setSnackbar(response?.data?.revision_bumped
-            ? t('admin.scientificSavedRevisionBumped')
-            : t('common.saved'))
-        } catch (e: unknown) {
-          // FR-019：论文级已保存成功，只需重试科学数据部分；不离开编辑页
-          setSnackbar(t('admin.scientificSaveFailed', { reason: (e as Error).message }))
-          return false
-        }
-      } else {
-        setSnackbar(t('common.saved'))
-      }
-      if (patches.length) {
-        setEditForm(changed.paper); setEditMaterialFamilies(changed.paper.material_families)
-        setEditMaterialStates(remapScientificIdentities(changed.material_states, [], scientificIdentityMap.current).states); setEditListText({})
-      }
-      if (!preparationId && refreshEvidence) await evidenceWorkflow.refreshAfterSave(revision)
+      if (!fieldSaver.current) return false
+      await fieldSaver.current.save(editableDraft())
+      setSnackbar(t('common.saved'))
       return true
-    } catch (e: unknown) { setSnackbar(t('admin.saveFailedReason', { reason: (e as Error).message })); return false }
+    } catch (error) { setSnackbar(t('admin.saveFailedReason', { reason: (error as Error).message })); return false }
   }
 
   // 论文结构补传（契约 C2）：只产出并校验候选、不落库；成功后并入本地候选，
@@ -369,7 +303,7 @@ const AdminPaperEditPage: React.FC = () => {
             <EvidenceFieldMarkers records={evidenceWorkflow.records} scope="paper-edit" onOpen={evidenceWorkflow.openIssue} onChange={evidenceWorkflow.invalidate} />
             <Box data-evidence-ignore><Typography variant="subtitle2" fontWeight={700} gutterBottom>{t('admin.editReviewSection')}</Typography>
             <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-              <Button variant="outlined" disabled={editReviewSaving || evidenceWorkflow.busy} onClick={async () => { if (await handleEditSave()) void evidenceWorkflow.run({ target: 'paper', target_id: String(paperId) }) }}>{t('evidence.audit')}</Button>
+              <Button variant="outlined" disabled={editReviewSaving || evidenceWorkflow.busy} onClick={evidenceWorkflow.showResults}>{t('evidence.viewResults')}</Button>
           <Box sx={{ minWidth: 170 }}>
                 <PaperReviewStatusSelect id="edit-review-status" value={editReviewStatus}
                   onChange={setEditReviewStatus} disabled={editReviewSaving} />

@@ -1,4 +1,6 @@
 export default {
+  "reviewCurrentField": "Review this field with AI",
+  "viewResults": "View review results",
   "reviewStatus": {
     "human": "Manually confirmed", "stale": "Recheck needed", "unreported": "Not reported",
     "unchecked": "Not checked", "supported": "Supported by source", "unsupported": "Source does not support this value",

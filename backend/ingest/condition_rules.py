@@ -71,7 +71,12 @@ def descriptor(record):
     if '.extensions.' in path:
         value = record.get('current_value')
         if not isinstance(value, dict):
-            return None
+            if not path.endswith('.value_raw'):
+                return None
+            from .property_field_review import read_path
+            value = read_path(source, '.'.join(path.split('.')[:4]))
+            if not isinstance(value, dict):
+                return None
         key = str(value.get('key') or '')
         if '.' not in key:
             return None

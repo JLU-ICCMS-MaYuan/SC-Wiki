@@ -1,3 +1,4 @@
+import { draftNumber } from '../lib/fieldDrafts'
 import { useEffect, useRef, useState } from 'react'
 import { Alert, Box, TextField } from '@mui/material'
 import type { DraftMaterialState } from '../lib/paperProcessing'
@@ -16,13 +17,12 @@ function PressureNumber({ value, label, field, onChange }: {
   const valid = text === '' || (new RegExp(`^${numberPattern}$`).test(text) && Number.isFinite(Number(text)))
   useEffect(() => { input.current?.setCustomValidity(valid ? '' : t('evidence.invalidPressure')) }, [valid, t])
   return <TextField fullWidth label={label} data-issue-field={field} value={text} inputRef={input}
-    error={!valid} helperText={!valid ? t('evidence.invalidPressure') : undefined}
+    error={false}
     slotProps={{ htmlInput: { inputMode: 'decimal', 'data-pressure-input': 'true' } }}
     onChange={event => {
       const next = event.target.value
       setText(next)
-      if (next === '') onChange(null)
-      else if (new RegExp(`^${numberPattern}$`).test(next) && Number.isFinite(Number(next))) onChange(Number(next))
+      onChange(draftNumber(next))
     }} />
 }
 
@@ -43,7 +43,7 @@ export default function PressureEditor({ state, index, onChange }: {
       onChange={value => onChange(value === null
         ? { pressure_value_gpa: null, pressure_raw: null, pressure_unit_raw: null, pressure_min_gpa: null, pressure_max_gpa: null }
         : { pressure_value_gpa: value })} />
-    {(mismatch || outsideRange) && <Alert severity="warning" sx={{ mt: 1 }}>{t('evidence.pressureMismatch')}</Alert>}
+
 
   </Box>
 }

@@ -125,7 +125,7 @@ def _current(session, snapshot: dict, record: dict, *, for_update: bool = False)
         ScientificManualEvidence.target_id == str(snapshot["target_id"]),
         ScientificManualEvidence.item_key == record["item_key"],
         ScientificManualEvidence.value_hash == record["content_hash"],
-        ScientificManualEvidence.source_hash == record["source_hash"],
+        ScientificManualEvidence.source_hash == record.get("paper_source_hash", record["source_hash"]),
         ScientificManualEvidence.status != "historical",
     )
     if snapshot["target"] == "paper":
@@ -142,8 +142,6 @@ def _ensure(session, snapshot: dict, baseline: dict, item_key: str, actor_id: in
     if current is None:
         raise ManualEvidenceError("manual_field_not_found", "当前字段不存在", status=404)
     prior = _by_item(baseline).get(item_key)
-    if prior and _semantic_value(prior) == _semantic_value(current):
-        raise ManualEvidenceError("manual_field_unchanged", "字段没有实际修改", field=current["field"], status=409)
     row = _current(session, snapshot, current, for_update=True)
     if row is not None and row.status == "draft" and row.actor_user_id == actor_id:
         if actor_name and not row.actor_name_snapshot and row.actor_user_id == actor_id:
@@ -155,7 +153,7 @@ def _ensure(session, snapshot: dict, baseline: dict, item_key: str, actor_id: in
         ScientificManualEvidence.item_key == item_key,
         ScientificManualEvidence.status == "draft",
     ).with_for_update()):
-        if old.actor_user_id != actor_id and old.value_hash == current["content_hash"] and old.source_hash == current["source_hash"]:
+        if old.actor_user_id != actor_id and old.value_hash == current["content_hash"] and old.source_hash == current.get("paper_source_hash", current["source_hash"]):
             raise ManualEvidenceError("manual_evidence_conflict", "该字段正由其他人修改，请刷新后重试", field=current["field"], status=409)
         old.status = "historical"
     row = ScientificManualEvidence(
@@ -163,7 +161,7 @@ def _ensure(session, snapshot: dict, baseline: dict, item_key: str, actor_id: in
         paper_id=int(snapshot["target_id"]) if snapshot["target"] == "paper" else None,
         paper_revision=int(snapshot.get("review_state", [None, None, 1])[2] or 1) if snapshot["target"] == "paper" else None,
         item_key=item_key, baseline_hash=str(prior.get("content_hash") if prior else EMPTY_HASH),
-        value_hash=str(current["content_hash"]), source_hash=str(current["source_hash"]),
+        value_hash=str(current["content_hash"]), source_hash=str(current.get("paper_source_hash", current["source_hash"])),
         before_value=json.loads(json.dumps(prior.get("current_value") if prior else None, default=str)),
         after_value=json.loads(json.dumps(current.get("current_value"), default=str)),
         actor_user_id=actor_id, actor_name_snapshot=(actor_name or "")[:100],
@@ -189,16 +187,19 @@ def public_record(row: ScientificManualEvidence | None, *, changed: bool) -> dic
     }
 
 
-def read_field(session, snapshot: dict, baseline: dict, item_key: str) -> dict[str, Any]:
+def read_field(session, snapshot: dict, baseline: dict, item_key: str, *, include_history=True) -> dict[str, Any]:
     current = _by_item(snapshot).get(item_key)
     if current is None:
         raise ManualEvidenceError("manual_field_not_found", "当前字段不存在", status=404)
     prior = _by_item(baseline).get(item_key)
     row = _current(session, snapshot, current)
     changed = prior is None or _semantic_value(current) != _semantic_value(prior)
-    result = public_record(row if changed else None, changed=changed)
+    result = public_record(row, changed=changed)
     result["before_value"] = row.before_value if changed and row else (prior or {}).get("current_value")
     result["after_value"] = row.after_value if changed and row else current.get("current_value")
+    if not include_history:
+        result['history'] = []
+        return result
     query = select(ScientificManualEvidence).where(
         ScientificManualEvidence.target == snapshot["target"],
         ScientificManualEvidence.target_id == str(snapshot["target_id"]),
@@ -412,7 +413,7 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
             ScientificManualEvidence.target_id == str(snapshot["target_id"]),
             ScientificManualEvidence.item_key == record["item_key"],
             ScientificManualEvidence.value_hash == record["content_hash"],
-            ScientificManualEvidence.source_hash == record["source_hash"],
+            ScientificManualEvidence.source_hash == record.get("paper_source_hash", record["source_hash"]),
             ScientificManualEvidence.status != "historical",
         )
         if snapshot["target"] == "paper":
@@ -490,9 +491,11 @@ def mark_ai_read(session, refs: list[dict[str, str]], *, read: bool) -> None:
 def transfer_to_paper(session, snapshot: dict, baseline: dict, paper_id: int, revision: int,
                       persisted_snapshot: dict | None = None) -> None:
     persisted = _by_item(persisted_snapshot or {})
-    for record, _ in changed_records(snapshot, baseline):
+    for record in snapshot.get('records') or []:
         row = _current(session, snapshot, record, for_update=True)
-        if row is None or not row.reason.strip() or (not row.items and not row.no_evidence_reason.strip()):
+        if row is None:
+            continue
+        if not row.reason.strip() or (not row.items and not row.no_evidence_reason.strip()):
             raise ManualEvidenceError("manual_evidence_incomplete", "人工修改依据已变化，请补齐后重新提交",
                                       field=record["field"], status=409)
         mapped = persisted.get(record["item_key"])
@@ -503,7 +506,13 @@ def transfer_to_paper(session, snapshot: dict, baseline: dict, paper_id: int, re
         row.paper_id, row.paper_revision, row.status = paper_id, revision, "submitted"
         if mapped is not None:
             row.value_hash = str(mapped["content_hash"])
-            row.source_hash = str(mapped["source_hash"])
+            row.source_hash = str(mapped.get("paper_source_hash", mapped["source_hash"]))
+    # 旧版本补充材料仍属于这篇论文；保留为历史，不随上传临时数据清理。
+    for row in session.scalars(select(ScientificManualEvidence).where(
+            ScientificManualEvidence.target == snapshot['target'],
+            ScientificManualEvidence.target_id == snapshot['target_id'])):
+        row.target, row.target_id = 'paper', str(paper_id)
+        row.paper_id, row.paper_revision, row.status = paper_id, revision, 'historical'
     session.flush()
 
 

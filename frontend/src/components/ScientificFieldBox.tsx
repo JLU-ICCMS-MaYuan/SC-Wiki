@@ -1,6 +1,6 @@
 import { Box, Button, TextField } from '@mui/material'
 import { useEffect } from 'react'
-export interface FieldSettingsPresentation { container: HTMLElement; onDone: () => void }
+export interface FieldSettingsPresentation { container: HTMLElement; onDone: () => void; part?: 'name' | 'kind' | 'raw' | 'unit' }
 
 /** 主表单仅显示字段名称与值，元数据由右侧设置负责。 */
 export default function ScientificFieldBox({ name, value, readOnly, numeric, field, fieldKey, error, fullWidth = false, onSettings, onChange }: {

@@ -77,7 +77,9 @@ def current_draft(session, paper):
         .where(models.PaperMaterialFamily.paper_id == paper.id).order_by(models.MaterialFamily.id))]
     states, candidates = [], []
     source_evidence = {e.id: e for e in rows(session, models.PaperEvidence, paper.id)}
-    chunks = {c.id: c for c in rows(session, models.PaperChunk, paper.id)}
+    from sqlalchemy.orm import load_only
+    chunks = {c.id: c for c in session.scalars(select(models.PaperChunk).where(models.PaperChunk.paper_id == paper.id)
+        .options(load_only(models.PaperChunk.id, models.PaperChunk.paper_file_id, models.PaperChunk.chunk_index)))}
     for index, state in enumerate(rows(session, models.MaterialState, paper.id)):
         item = values(state, {'superconductor_id'})
         material = session.get(models.Superconductor, state.superconductor_id) if state.superconductor_id else None
@@ -108,7 +110,7 @@ def current_draft(session, paper):
             if structure.structure_format.lower() != 'cif':
                 from backend.services.structure_candidates import read_atoms, export_representations
                 text = export_representations(read_atoms(structure.structure_format, text))['conventional']['cif']['text']
-            candidates.append(dict(candidate_id=f'structure_{structure.id}',
+            candidates.append(dict(candidate_id=f'structure_{structure.id}', review_key=structure.review_key or science.item_identity('structure-original-id', structure.id),
                 material_state_ref=f'material_states[{index}]', status='confirmed', confirmation='confirmed',
                 source_kind='attachment', original_format=structure.structure_format, original_text=structure.structure_text,
                 representations={'conventional': {'cif': {'text': text, 'available': True}}},
@@ -195,7 +197,7 @@ async def load_for_write(session, paper_id, user, revision_id, version=None):
     return paper, saved
 
 
-def revision_snapshot(session, revision_id, owner):
+def revision_snapshot(session, revision_id, owner, *, legacy=False):
     # 锁顺序始终为论文→草稿，与提交及审核一致。
     paper_id = session.scalar(select(models.PaperRevisionDraft.paper_id).where(models.PaperRevisionDraft.revision_id == revision_id))
     if paper_id is None:
@@ -210,7 +212,7 @@ def revision_snapshot(session, revision_id, owner):
         chunk_index=c.chunk_index, content=c.content, page_start=c.page_start, page_end=c.page_end, section=c.section_name)
         for c in rows(session, models.PaperChunk, paper.id)]
     records = ev.draft_records(saved.draft, science.origins_for(session, 'revision', revision_id))
-    snapshot = ev.complete_snapshot('revision', revision_id, records, chunks, saved.draft)
+    snapshot = ev.complete_snapshot('revision', revision_id, records, chunks, saved.draft, split_fields=not legacy)
     from backend.ingest.scientific_context import bind_snapshot_source_documents, source_documents
     bind_snapshot_source_documents(snapshot,source_documents([
         {'file_id':str(f.id),'file_role':f.role,'source_sha256':f.sha256}
@@ -223,7 +225,8 @@ def revision_snapshot(session, revision_id, owner):
         media_type=f.media_type, original_filename=f.original_filename)
         for f in paper_files if f.paper_revision == paper.content_revision and
         f.original_filename and f.original_filename.lower().endswith('.pdf')]
-    return snapshot
+    from backend.ingest.field_review import bind_support_versions
+    return bind_support_versions(snapshot, session)
 
 
 async def save_draft(session, paper_id, user, payload):
@@ -281,13 +284,8 @@ async def submit_draft(session, paper_id, user, payload):
         error(409, 'duplicate_doi', '该 DOI 已属于另一篇论文，请核对后提交')
     snapshot = await session.run_sync(lambda s: revision_snapshot(s, saved.revision_id, user.id))
     manual_baseline = await session.run_sync(lambda s: ev.paper_snapshot(s, paper_id, user.id, user.role, check_access=False))
-    manual_issues = await session.run_sync(lambda s: manual_evidence.validate_submission(s, snapshot, manual_baseline))
-    if manual_issues:
-        raise HTTPException(400, detail={"code": "manual_evidence_incomplete", "message": "请补齐人工修改依据", "issues": manual_issues})
-    manual_pending_keys = await session.run_sync(lambda s: manual_evidence.complete_keys(s, snapshot, manual_baseline))
-    cached = await session.run_sync(lambda s: science.load_results(s, snapshot, user.id))
-    checks = ev.resolve_results(snapshot, cached, user.id, payload.evidence_job_id, payload.expected_evidence_version,
-                                manual_pending_keys=manual_pending_keys)
+    cached = await session.run_sync(lambda s: science.load_results(s, snapshot, user.id, include_stale=True))
+    checks = ev.resolve_results(snapshot, cached, user.id, payload.evidence_job_id, payload.expected_evidence_version)
     for result in checks:
         if result.get('kind') == 'property' or result.get('record_field'):
             state = draft['material_states'][result['state_index']]

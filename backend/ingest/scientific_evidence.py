@@ -239,7 +239,7 @@ def converted_state_value(state, name):
     return None
 
 
-def structure_record(structure, state_key, path, origin=None):
+def structure_record(structure, state_key, path, origin=None, state_context=None):
     from backend.services.structure_candidates import validate_structure_text
     data = dict(structure)
     provenance = dict(origin or {'kind': 'contributor_structure', 'paper_supported': False})
@@ -254,9 +254,11 @@ def structure_record(structure, state_key, path, origin=None):
     except (ValueError, KeyError):
         structure_hash = item_identity(data.get('structure_text'))
         provenance['verified'] = False
-    key = item_identity('structure', state_key, structure_hash)
+    review_key = data.get('review_key') or structure.get('review_key') or (item_identity('structure-original-id', structure['id']) if structure.get('id') else item_identity('structure-candidate', structure['candidate_id']) if structure.get('candidate_id') else item_identity('inline-structure', state_key))
+    key = item_identity('structure', state_key, review_key)
     return dict(key=key, item_key=key, field=path, fields=[path], label='晶体结构与晶格参数',
-                current_value=data, kind='structure', claim=data, evidences=[], provenance=provenance, structure_hash=structure_hash, state_key=state_key)
+                current_value=data, kind='structure', claim=data, evidences=[], provenance=provenance, structure_hash=structure_hash, state_key=state_key,
+                legacy_structure_item_key=item_identity('structure', state_key, structure_hash), _state_context=state_context or {})
 
 
 def origins_for(session, target, target_id):
@@ -300,13 +302,13 @@ def augment_upload(draft, records, origins):
                 continue
             representation = _candidate_conventional_representation(candidate)
             if representation:
-                structures.append(({'structure_format': 'cif', 'structure_text': representation[0]}, f'structure_candidates[{ci}]'))
+                structures.append(({'structure_format': 'cif', 'structure_text': representation[0], 'candidate_id': candidate.get('candidate_id'), 'review_key': candidate.get('review_key')}, f'structure_candidates[{ci}]'))
         for structure, path in structures:
             try:
                 hash_value = validate_structure_text(structure['structure_format'], structure['structure_text'])['structure_hash']
             except (ValueError, KeyError):
                 hash_value = ''
-            records.append(structure_record(structure, state.get('state_key') or f'state-{index+1}', path, origins.get(hash_value)))
+            records.append(structure_record(structure, state.get('state_key') or f'state-{index+1}', path, origins.get(hash_value), {k: state.get(k) for k in ('material', 'material_name', 'pressure_value_gpa', 'reported_space_group_symbol', 'state_kind')}))
 
 
 def ordered_check_rows(session, target, target_id, *, lock=False):
@@ -318,7 +320,7 @@ def ordered_check_rows(session, target, target_id, *, lock=False):
     return sorted(rows,key=lambda row:row.id)
 
 
-def load_results(session, snapshot, actor_id=None, include_stale=False):
+def load_result_history(session, snapshot, actor_id=None, include_stale=False):
     current = {r['item_key']: r for r in snapshot['records']}
     found = {}
     histories = {}
@@ -427,6 +429,77 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
     return found
 
 
+def load_results(session, snapshot, actor_id=None, include_stale=False):
+    """先读取小型版本索引，只取当前需要的JSON；保存路径不调用历史恢复。"""
+    table = models.ScientificEvidenceCheck
+    current = {r['item_key']: r for r in snapshot['records']}
+    if not current:
+        return {}
+    versions = session.execute(select(table.id, table.item_key, table.content_hash, table.source_hash).where(
+        table.target == snapshot['target'], table.target_id == snapshot['target_id'],
+        table.item_key.in_(current))).all()
+    chosen, exact = {}, set()
+    for row_id, key, content, source in sorted(versions):
+        record = current[key]
+        valid = (content, source) == (record['content_hash'], record['source_hash'])
+        if valid or (include_stale and key not in exact):
+            chosen[key] = row_id
+            if valid:
+                exact.add(key)
+    found = {}
+    rows = session.scalars(select(table).where(table.id.in_(chosen.values()))) if chosen else []
+    for row in rows:
+        record = current[row.item_key]
+        result = copy.deepcopy(row.result)
+        result.pop('history', None)
+        result.pop('audit_events', None)
+        result.update(content_hash=row.content_hash, source_hash=row.source_hash,
+                      stale=row.item_key not in exact, stored_result=True)
+        result['resolution'] = (row.resolutions or {}).get(str(actor_id), '')
+        result['proposal_draft'] = copy.deepcopy((row.resolutions or {}).get('proposal:' + str(actor_id)))
+        if result['stale']:
+            result['pending_review'] = True
+        found[record['key']] = result
+    if snapshot['target'] == 'paper':
+        source_table = models.ScientificEvidenceSource
+        for row in session.scalars(select(source_table).where(
+                source_table.paper_id == int(snapshot['target_id']), source_table.item_key.in_(current))):
+            record = current[row.item_key]
+            if row.item_key in exact:
+                continue
+            if (row.content_hash, row.source_hash) == (record['content_hash'], record['source_hash']):
+                result = copy.deepcopy(row.result)
+                result.pop('history', None)
+                result.pop('audit_events', None)
+                result.update(content_hash=row.content_hash, source_hash=row.source_hash, stale=False, stored_result=True)
+                found[record['key']] = result
+    # 只按精确旧断言版本继承整项通过；旧失败不能复制到所有子字段。
+    legacy = {r['legacy_item_key']: r['legacy_content_hash'] for r in current.values()
+              if r.get('legacy_content_hash') and r['key'] not in found}
+    if legacy:
+        ids = session.execute(select(table.id, table.item_key, table.content_hash, table.source_hash).where(
+            table.target == snapshot['target'], table.target_id == snapshot['target_id'], table.item_key.in_(legacy))).all()
+        latest = {}
+        for row_id, key, content, source in sorted(ids):
+            if content == legacy[key]:
+                latest[(key, source)] = row_id
+        rows = session.scalars(select(table).where(table.id.in_(latest.values()))) if latest else []
+        for row in rows:
+            if row.result.get('status') != 'supported' or row.result.get('source_kind') == 'human_review':
+                continue
+            for record in current.values():
+                if (record['key'] not in found and record.get('legacy_item_key') == row.item_key and
+                        record.get('legacy_content_hash') == row.content_hash and record['source_hash'] == row.source_hash):
+                    result = {**copy.deepcopy(row.result), **record, 'status': 'supported',
+                              'stored_result': True, 'stale': False,
+                              'inherited_from': {'item_key': row.item_key, 'content_hash': row.content_hash}}
+                    result.pop('history', None)
+                    result.pop('audit_events', None)
+                    result['evidences'] = copy.deepcopy(row.result.get('evidences') or [])
+                    found[record['key']] = result
+    return found
+
+
 def transfer_result(record, result, chunks, file_ids=None):
     """上传落库后重定位所有嵌套引句；文件 ID 变化不能抹掉候选或人工来源。"""
     from .property_evidence import digest, locate, normalized_text
@@ -503,15 +576,10 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
                 results[record['key']] = {**copy.deepcopy(existing.result), 'superseded_review': {
                     'review_started_at': result.get('review_started_at'), 'status': result.get('status'), 'reason': result.get('reason')}}
                 continue
-        if existing is not None and not update_decision and record.get('condition_context'):
-            from .condition_lifecycle import effective_result
-            retained = effective_result(record, result, [existing.result, result], snapshot['chunks'])
-            if retained is not result:
-                # 保存本次尝试及真实请求时间；不让同版本失败覆盖唯一的有效规则证据。
-                for name in ('review_started_at', '_audit_action', '_audit_event_id'):
-                    if name in result:
-                        retained[name] = result[name]
-                result = retained
+        if existing is not None and not update_decision:
+            from .field_review import retain_valid_pass
+            prior = {**existing.result, 'content_hash': existing.content_hash, 'source_hash': existing.source_hash}
+            result = retain_valid_pass(record, prior, result)
         if existing is not None and not update_decision and existing.result.get('decision'):
             result['decision'] = copy.deepcopy(existing.result['decision'])
             result['adopted_basis'] = existing.result.get('adopted_basis')
@@ -626,7 +694,7 @@ def restore_user_uploads(user_id):
 def apply_derived(records):
     by_item = {r['item_key']: r for r in records}
     for record in records:
-        if record.get('kind') != 'derived':
+        if record.get('kind') != 'derived' or record.get('human_modified'):
             continue
         source = by_item.get(record.get('dependency'))
         if human_confirmed(record):
@@ -654,8 +722,8 @@ def apply_derived(records):
         elif source and (source['status'] == 'unchecked' or source.get('stale')):
             record.update(status='unchecked', reason='计算一致；输入来源尚未核对，请继续核对或由管理员说明依据后确认', evidences=[])
         elif source:
-            record.update(status='uncertain' if source.get('evidences') else 'missing',
-                          reason='派生值的输入来源尚未通过核对', evidences=source.get('evidences', []))
+            record.update(status='unchecked', pending_review=True,
+                          reason='计算关系保留；问题归到尚未通过的输入字段', evidences=source.get('evidences', []))
     return records
 
 

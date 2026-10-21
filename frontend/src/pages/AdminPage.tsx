@@ -1,4 +1,4 @@
-import { saveInitialReviewClassifications, saveQuickReviewProposals } from '../lib/paperProposalSave'
+
 import { EvidenceRecordList } from '../components/EvidenceFieldMarkers'
 import { useEvidenceWorkflow } from '../components/EvidenceWorkflow'
 import React, { useState, useEffect, useCallback } from 'react'
@@ -225,17 +225,12 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
     if (!reviewDlg.paper || reviewSaving) return
     setReviewSaving(true)
     try {
-      let classifications
-      if (reviewStatus === 'approved') {
-        await saveInitialReviewClassifications(reviewDlg.paper.id)
-        if (!(await evidenceWorkflow.applyAccepted({ target: 'paper', target_id: String(reviewDlg.paper.id) }, (patches, preparationId, resumeStage) => saveQuickReviewProposals(reviewDlg.paper.id, patches, preparationId, resumeStage)))) return
-        const { detail } = await loadPaperReviewSource(reviewDlg.paper.id)
-        classifications = resolveReviewClassifications(detail)
-      }
-      const payload = paperReviewPayload(reviewStatus, reviewComment, classifications)
+      const payload = reviewStatus === 'approved'
+        ? { status: reviewStatus, comment: reviewComment, review_request_id: crypto.randomUUID() }
+        : paperReviewPayload(reviewStatus, reviewComment)
       const evidence = reviewStatus === 'approved' ? await evidenceWorkflow.gate({ target: 'paper', target_id: String(reviewDlg.paper.id) }) : {}
       if (!evidence) return
-      await api.post(`/api/admin/papers/${reviewDlg.paper.id}/review`, { ...payload, ...evidence })
+      await api.post(reviewStatus === 'approved' ? '/api/rag/evidence/review-commit' : `/api/admin/papers/${reviewDlg.paper.id}/review`, { ...payload, ...evidence, paper_id: reviewDlg.paper.id })
       setSnackbar(t('admin.reviewDone'))
       setReviewDlg({paper:null!,open:false})
       loadPapers()
@@ -753,7 +748,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
             <Chip size="small" label={t('admin.doiChip', { value: reviewDlg.paper?.doi || '-' })} variant="outlined" />
             <Chip size="small" label={t('admin.yearChip', { value: reviewDlg.paper?.year || '-' })} variant="outlined" />
           </Box>
-          <Button variant="outlined" disabled={reviewSaving || evidenceWorkflow.busy} onClick={() => void evidenceWorkflow.run({ target: 'paper', target_id: String(reviewDlg.paper.id) })}>{t('evidence.audit')}</Button>
+          <Button variant="outlined" disabled={reviewSaving || evidenceWorkflow.busy} onClick={evidenceWorkflow.showResults}>{t('evidence.viewResults')}</Button>
           <EvidenceRecordList records={evidenceWorkflow.records} onOpen={evidenceWorkflow.openIssue} />
           <PaperReviewStatusSelect id="paper-review-status" value={reviewStatus}
             onChange={setReviewStatus} disabled={reviewSaving} />

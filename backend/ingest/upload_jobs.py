@@ -2492,7 +2492,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             duplicate=False, partial_draft=None, artifact_manifest=artifact_manifest,
         )
         if not state.get("is_shadow"):
-            _start_automatic_evidence_check(task_id, int(state["user_id"]))
+            # 解析中的字段核对已完成；ready后不再排队重复检查。
             from backend.spectra.jobs import enqueue_upload
             enqueue_upload(task_id)
         _schedule_terminal_cleanup(task_id)

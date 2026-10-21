@@ -68,7 +68,7 @@ export function newTcPoint(template: PropertyRecordDraft, methodKey: string, def
 export function updateTcPoint(records: PropertyRecordDraft[], key: string, field: 'tc' | 'mu', value: ParameterValue): PropertyRecordDraft[] {
   return expandTcPoints(records).map(record => {
     if (tcPointKey(record) !== key) return record
-    const updated = field === 'tc' ? { ...record, value_number: typeof value === 'number' ? value : null }
+    const updated = field === 'tc' ? { ...record, value_number: value as number | null }
       : { ...record, payload: setTcParameter(record, 'mu_star', value) }
     if (!completeTcNumber(updated.value_number) || !completeTcNumber(readTcParameter(updated, 'mu_star'))) updated.is_representative = false
     return normalizeCurrentTcValue(updated)

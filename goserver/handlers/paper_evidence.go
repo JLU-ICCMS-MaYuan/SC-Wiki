@@ -25,6 +25,8 @@ type evidenceCitation struct {
 	PageEnd    *int    `json:"page_end"`
 }
 type evidenceReviewRecord struct {
+	HumanModified         bool               `json:"human_modified,omitempty"`
+	SupplementalEvidences json.RawMessage    `json:"supplemental_evidences,omitempty"`
 	History               json.RawMessage    `json:"history,omitempty"`
 	Required              *bool              `json:"required,omitempty"`
 	AdoptedBasis          string             `json:"adopted_basis,omitempty"`
@@ -80,6 +82,28 @@ func validHumanEvidence(r evidenceReviewRecord) bool {
 	return r.SourceKind == "human_review" && decision.Confirmed && decision.Accepted && decision.Actor != 0 && strings.TrimSpace(decision.Reason) != "" && decision.ContentHash != "" && decision.ContentHash == r.ContentHash && decision.SourceHash != "" && decision.SourceHash == r.SourceHash
 }
 
+// 补充材料由Python定位并核对，不伪装为论文引句，也不接受只有人工理由的旧确认。
+func validContributorEvidence(r evidenceReviewRecord) bool {
+	if r.SourceKind != "contributor_evidence" || r.Status != "supported" {
+		return false
+	}
+	var items []struct {
+		SHA    string `json:"sha256"`
+		Quote  string `json:"quote"`
+		Origin string `json:"origin_kind"`
+		Actor  uint   `json:"submitted_by_user_id"`
+	}
+	if json.Unmarshal(r.SupplementalEvidences, &items) != nil || len(items) == 0 {
+		return false
+	}
+	for _, item := range items {
+		if len(item.SHA) != 64 || strings.TrimSpace(item.Quote) == "" || item.Origin != "contributor_evidence" || item.Actor == 0 {
+			return false
+		}
+	}
+	return true
+}
+
 var evidencePrepareClient = &http.Client{Timeout: 20 * time.Second}
 
 func preparePaperEvidence(tx *gorm.DB, paper *models.Paper, auth, jobID, version string, resolutions map[string]string, classifications ...map[string]interface{}) ([]evidenceReviewRecord, error) {
@@ -128,13 +152,13 @@ func preparePaperEvidence(tx *gorm.DB, paper *models.Paper, auth, jobID, version
 	if err := json.Unmarshal(data, &result); err != nil {
 		return nil, err
 	}
-	propertyCount := int64(0)
+	propertyIDs := map[uint]bool{}
 	for _, r := range result.Records {
 		if r.RecordID != 0 {
-			propertyCount++
+			propertyIDs[r.RecordID] = true
 		}
 	}
-	if propertyCount != count {
+	if int64(len(propertyIDs)) != count {
 		return nil, errors.New("证据核对结果缺少记录")
 	}
 	seen := map[string]bool{}
@@ -144,19 +168,11 @@ func preparePaperEvidence(tx *gorm.DB, paper *models.Paper, auth, jobID, version
 		}
 		seen[r.ItemKey] = true
 		// 空字段和未采用建议仍归档，但不作为科学断言批准。
-		if r.Required != nil && !*r.Required && r.RecordID == 0 && r.AdoptedBasis == "" {
+		if r.Required != nil && !*r.Required && !r.HumanModified {
 			continue
 		}
-		var origin struct {
-			Kind        string `json:"kind"`
-			Verified    bool   `json:"verified"`
-			SubmittedBy uint   `json:"submitted_by_user_id"`
-		}
-		_ = json.Unmarshal(r.Provenance, &origin)
-		hasOrigin := origin.Kind == "contributor_structure" && origin.Verified && origin.SubmittedBy != 0 && strings.TrimSpace(r.Resolution) != ""
-		human := validHumanEvidence(r)
-		if (r.AdoptedBasis == "general_knowledge" && !human) || (len(r.Evidences) == 0 && !hasOrigin && !human) || ((r.Status == "missing" || r.Status == "unchecked") && !human) || (r.Status != "supported" && strings.TrimSpace(r.Resolution) == "") {
-			return nil, errors.New("证据核对结果无效")
+		if r.Status != "supported" || r.SourceKind == "human_review" {
+			return nil, errors.New("字段未通过科学审核；人工说明不能代替核对通过")
 		}
 		if r.RecordID == 0 {
 			continue
@@ -178,8 +194,10 @@ func optionalString(value string) interface{} {
 
 // 调用方已锁论文行；证据、核对记录和批准历史一同提交或回滚。
 func applyPaperEvidence(tx *gorm.DB, paper *models.Paper, records []evidenceReviewRecord) error {
+	cleared := map[uint]bool{}
 	for _, r := range records {
-		if r.RecordID != 0 {
+		if r.RecordID != 0 && !cleared[r.RecordID] {
+			cleared[r.RecordID] = true
 			if err := tx.Where("record_id = ?", r.RecordID).Delete(&models.PropertyRecordEvidence{}).Error; err != nil {
 				return err
 			}
@@ -225,7 +243,7 @@ func applyPaperEvidence(tx *gorm.DB, paper *models.Paper, records []evidenceRevi
 		}
 
 	}
-	return tx.Exec("DELETE FROM scientific_evidence_checks WHERE target = ? AND target_id = ?", "paper", strconv.FormatUint(uint64(paper.ID), 10)).Error
+	return nil // 保留原始核对历史，不能因批准删除逐字段记录。
 }
 
 // Python 统一验证准备时的科学版本；调用方已持有论文行锁。

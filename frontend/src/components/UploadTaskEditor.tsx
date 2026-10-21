@@ -1,3 +1,4 @@
+import { createFieldDraftSaver, preserveRawNumbers } from '../lib/fieldDrafts'
 import { currentEvidenceField, evidenceFieldsForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
 import { useEvidenceWorkflow, type EvidenceTarget } from './EvidenceWorkflow'
@@ -141,26 +142,15 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   })
   const revisionIdentity = () => revisionMeta.current
     ? { revision_id: revisionMeta.current.revision_id, draft_version: revisionMeta.current.draft_version } : {}
-  const persistDraft = useCallback(async (value: UploadDraft, preparationId?: string) => {
-    if (revisionPaperId) {
-      if (!revisionMeta.current) throw new Error(t('upload.draftMissing'))
-      let result: RevisionDraftResponse
-      try {
-        result = await api.put<RevisionDraftResponse>(draftUrl, {
-          ...revisionIdentity(), draft: value, evidence_preparation_id: preparationId,
-        })
-      } catch (reason) {
-        if (['revision_conflict', 'revision_draft_conflict', 'revision_status_changed'].includes((reason as ApiError).code || '')) {
-          setRevision(current => current ? { ...current, conflict: true } : current)
-        }
-        throw reason
-      }
-      revisionMeta.current = result
-      setRevision(result)
-    } else {
-      await api.put(draftUrl, { ...value, ...(preparationId ? { evidence_preparation_id: preparationId } : {}) })
+  const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
+  const persistDraft = useCallback(async (value: UploadDraft, _preparationId?: string) => {
+    if (!fieldSaver.current) throw new Error(t('upload.draftMissing'))
+    const result = await fieldSaver.current.save(value)
+    if (revisionMeta.current && result.draft_version !== undefined) {
+      revisionMeta.current = { ...revisionMeta.current, draft_version: result.draft_version }
+      setRevision(revisionMeta.current)
     }
-  }, [draftUrl, revisionPaperId, t])
+  }, [t])
   const [lastSavedAt, setLastSavedAt] = useState<string | null>(null)
   const [error, setError] = useState('')
   // 本次提交发现的校验问题；驱动字段错误态与定位，提交成功或重新加载草稿时清空
@@ -174,13 +164,10 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const [catalogError, setCatalogError] = useState('')
   const [spaceGroups, setSpaceGroups] = useState<SpaceGroupOption[]>([])
   const revisionRef = useRef(0)
-  const autoCheckTarget = useRef('')
   const currentEditor = useRef({ draft, loading, dirty, saving, submitting })
   currentEditor.current = { draft, loading, dirty, saving, submitting }
   const refreshEvidence = useRef(evidenceWorkflow.restore)
   refreshEvidence.current = evidenceWorkflow.restore
-  const refreshSavedEvidence = useRef(evidenceWorkflow.refreshAfterSave)
-  refreshSavedEvidence.current = evidenceWorkflow.refreshAfterSave
 
   useEffect(() => {
     let active = true
@@ -215,6 +202,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   useEffect(() => {
     if (draftOverride !== undefined) {
       const normalized = normalizeUploadDraft(draftOverride)
+      if (revisionMeta.current || !revisionPaperId) { fieldSaver.current = createFieldDraftSaver(revisionMeta.current ? {target: 'revision', target_id: revisionMeta.current.revision_id} : {target: 'upload', target_id: taskId}); fieldSaver.current.initialize(normalized) }
       setDraft(normalized)
       setLoading(false)
       setDirty(false)
@@ -237,7 +225,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         revisionMeta.current = response as RevisionDraftResponse
         setRevision(response as RevisionDraftResponse)
       }
-      const normalized = normalizeUploadDraft(unwrapData(response))
+      const normalized = preserveRawNumbers(unwrapData(response), normalizeUploadDraft(unwrapData(response)))
+      if (revisionMeta.current || !revisionPaperId) { fieldSaver.current = createFieldDraftSaver(revisionMeta.current ? {target: 'revision', target_id: revisionMeta.current.revision_id} : {target: 'upload', target_id: taskId}); fieldSaver.current.initialize(normalized) }
       setDraft(normalized)
       setDirty(false)
       setError('')
@@ -263,8 +252,10 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         const response = await api.get<{ ok: boolean; data: UploadDraft }>(draftUrl, { signal: controller.signal })
         const latest = currentEditor.current
         if (disposed || editVersion !== revisionRef.current || latest.dirty || latest.saving || latest.submitting || evidenceWorkflow.hasManualDrafts()) return
-        const next = normalizeUploadDraft(unwrapData(response))
+        const next = preserveRawNumbers(unwrapData(response), normalizeUploadDraft(unwrapData(response)))
         if (JSON.stringify(next) !== JSON.stringify(latest.draft)) {
+          fieldSaver.current = createFieldDraftSaver({target: 'upload', target_id: taskId})
+          fieldSaver.current.initialize(next)
           setDraft(next)
           setIssues([])
           setError('')
@@ -288,14 +279,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       document.removeEventListener('visibilitychange', onVisible)
     }
   }, [draftOverride, draftUrl, readOnly, revisionPaperId, taskId])
-
-  useEffect(() => {
-    if (!draft || loading || readOnly || !evidenceTarget) return
-    const key = `${evidenceTarget.target}:${evidenceTarget.target_id}`
-    if (autoCheckTarget.current === key) return
-    autoCheckTarget.current = key
-    evidenceWorkflow.runAutomatic(evidenceTarget)
-  }, [Boolean(draft), loading, readOnly, evidenceTarget?.target, evidenceTarget?.target_id])
 
   const changeDraft = useCallback((updater: (current: UploadDraft) => UploadDraft) => {
     setDraft(current => current ? updater(current) : current)
@@ -356,21 +339,14 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     changeDraft(current => ({ ...current, [field]: value, ...(field === 'material_states' ? { paper: { ...current.paper, research_materials: researchMaterials(value as UploadDraft['material_states']) } } : {}) }))
   }
 
-  const saveDraft = useCallback(async (showResult = false, syncEvidence = true, reportFailure = false): Promise<boolean> => {
+  const saveDraft = useCallback(async (showResult = false, _syncEvidence = true, reportFailure = false): Promise<boolean> => {
     if (!draft || saving || readOnly || revision?.conflict) return false
-    const tcIssues = validateTcRecords(draft.material_states)
-    if (tcIssues.length) {
-      if (showResult) { setError(tcIssues[0].message); setIssues(tcIssues) }
-      if (reportFailure) throw new Error(tcIssues[0].message)
-      return false
-    }
+    if (!dirty) return true
     const editVersion = revisionRef.current
-    const evidenceRevision = evidenceWorkflow.getEditRevision()
     setSaving(true)
     try {
       await persistDraft(draft)
       if (editVersion === revisionRef.current) setDirty(false)
-      if (syncEvidence && editVersion === revisionRef.current) await refreshSavedEvidence.current(evidenceRevision)
       setLastSavedAt(new Date().toLocaleTimeString(lang === 'zh' ? 'zh-CN' : 'en-US', { hour: '2-digit', minute: '2-digit' }))
       if (showResult) setError('')
       return true
@@ -510,13 +486,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     setSubmitting(true)
     try {
       if (!(await saveDraft(false))) return
-      if (!(await evidenceWorkflow.applyAccepted(evidenceTarget, async (patches, preparationId) => {
-        if (!draft) return false
-        const changed = applyEvidencePatches(draft, patches)
-        await persistDraft(changed, preparationId)
-        setDraft(changed); setDirty(false)
-        return true
-      }))) return
       const evidencePayload = await evidenceWorkflow.gate(evidenceTarget)
       if (!evidencePayload) return
       let response: SubmitResponse | { data: SubmitResponse }
@@ -636,7 +605,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
             {saving ? t('common.saving') : dirty ? t('upload.autoSaveHint') : lastSavedAt ? t('upload.savedAt', { time: lastSavedAt }) : t('upload.draftLoaded')}
           </Typography>
           {evidenceWorkflow.automaticView?.phase === 'error' && (
-            <Button variant="outlined" disabled={saving || submitting || Boolean(revision?.conflict)} onClick={async () => { if (evidenceTarget && await saveDraft(false)) evidenceWorkflow.runAutomatic(evidenceTarget) }}>{t('upload.retryEvidenceCheck')}</Button>
+            <Button variant="outlined" disabled={saving || submitting || Boolean(revision?.conflict)} onClick={evidenceWorkflow.showResults}>{t('evidence.viewResults')}</Button>
           )}
           <Button variant="outlined" startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
             disabled={saving || submitting || Boolean(revision?.conflict)} onClick={() => void saveDraft(true)}>{t('upload.saveNow')}</Button>
@@ -717,6 +686,12 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
               '& .MuiAutocomplete-input': { minWidth: '10ch !important' },
             }}
           />
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {(['corresponding_authors', 'co_first_authors'] as const).map(field => {
+              const record = evidenceWorkflow.records.find(r => r.field === `paper.${field}`)
+              return record ? <Button key={field} size="small" onClick={() => evidenceWorkflow.openIssue(record.key)}>{field === 'corresponding_authors' ? '通讯作者' : '共同第一作者'} · 来源核对</Button> : null
+            })}
+          </Box>
           <Menu anchorEl={authorMenu?.anchorEl} open={Boolean(authorMenu)} onClose={() => setAuthorMenu(null)}>
             {authorMenu && ([
               ['corresponding_authors', t('upload.correspondingAuthor')],

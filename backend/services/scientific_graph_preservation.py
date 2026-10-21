@@ -7,6 +7,7 @@ from fastapi import HTTPException
 from sqlalchemy import insert, select
 
 from backend import models
+from backend.ingest.scientific_evidence import item_identity as review_identity
 from backend.ingest.scientific_drafts import _candidate_state_index, _candidate_conventional_representation
 from backend.services.property_record_upgrade_service import record_snapshot
 
@@ -14,7 +15,7 @@ from backend.services.property_record_upgrade_service import record_snapshot
 STRUCTURE_METADATA = (
     'structure_format', 'structure_text', 'structure_hash', 'space_group_symbol', 'space_group_number',
     'cell_parameters', 'volume_angstrom3', 'atom_count', 'geometry_method',
-    'exchange_correlation', 'calculation_code', 'method_parameters', 'source_locator',
+    'exchange_correlation', 'calculation_code', 'method_parameters', 'source_locator', 'review_key',
 )
 
 
@@ -144,7 +145,7 @@ async def preserve_structure_metadata(session, paper, draft, originals, evidence
             used_ids.add(new.id)
             unchanged.add(old['id'])
             for key in STRUCTURE_METADATA:
-                setattr(new, key, old[key])
+                setattr(new, key, (old.get(key) or review_identity('structure-original-id', old['id'])) if key == 'review_key' else old[key])
     for candidate in confirmed_candidates(draft):
         old = old_by_id.get(candidate.get('candidate_id'))
         index = _candidate_state_index(candidate)
@@ -164,7 +165,7 @@ async def preserve_structure_metadata(session, paper, draft, originals, evidence
         if unchanged_structure_text(old, representation[0]):
             unchanged.add(old['id'])
             for key in STRUCTURE_METADATA:
-                setattr(new, key, old[key])
+                setattr(new, key, (old.get(key) or review_identity('structure-original-id', old['id'])) if key == 'review_key' else old[key])
     by_id = {s.id: s for s in new_structures}
     for old in originals:
         if old['id'] in id_map and old['parent_structure_id'] in id_map:

@@ -92,7 +92,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, readO
           <Typography component="span" variant="subtitle2" fontWeight={700}>{t('upload.crystalStructureTitle')}</Typography>
           <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>{uploading ? t('upload.validating') : candidate ? statusLabel : t('upload.structureStatusEmpty')}</Typography>
         </ButtonBase>
-        {candidate && <Typography data-evidence-readonly component="span" variant="caption" sx={{ flexShrink: 0 }}>{t('upload.structureSourceReview')}</Typography>}
+        {candidate && <Typography data-evidence-readonly data-structure-field="structure_text" component="span" variant="caption" sx={{ flexShrink: 0 }}>{t('upload.structureSourceReview')}</Typography>}
       </Stack>
       {/* 隐藏而不卸载，保留画布、视角和选择；来源入口独立于折叠按钮。 */}
       <Box id={contentId} hidden={!expanded}>
@@ -137,7 +137,7 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, readO
             : preview
               ? (
                   <Box sx={{ mt: 1.5 }}>
-                    <CrystalStructureView data={preview.text} format={preview.format} />
+                    <CrystalStructureView data={preview.text} format={preview.format} reviewFields={cell === 'conventional'} />
                     <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.75 }}>
                       {t('upload.currentDisplay', { cell: cellLabel, format: formatLabel })}
                     </Typography>

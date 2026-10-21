@@ -11,7 +11,7 @@ interface Props {
   onOpen: (key: string, keys?: string[], fallback?: EvidenceRecord, tab?: 'source' | 'settings') => void
   onChange: (field: string, pathKind?: 'current' | 'snapshot') => void
 }
-const normalize = (field: string) => field.replace(/^user_values\./, '').replace(/^paper\.(co_first_authors|corresponding_authors)$/, 'paper.authors')
+const normalize = (field: string) => field.replace(/^user_values\./, '')
 const valueText = (value: unknown) => typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value ?? '')
 /** 只读宿主保留来源、字段设置查看及模块展开入口。 */
 export const readOnlyEvidenceFormSx = {
@@ -21,7 +21,7 @@ export const readOnlyEvidenceFormSx = {
 } as const
 function matchesField(node: HTMLElement, record: EvidenceRecord, suffix: string) {
   suffix = suffix.replace('.omega_log_k', '.omega_log')
-  if (record.record_field_key && record.record_field?.startsWith('payload.calculation_conditions.extensions.')) return node.dataset.scientificFieldKey === record.record_field_key
+  if (record.record_field_key && record.record_field?.startsWith('payload.calculation_conditions.extensions.')) return node.dataset.scientificFieldKey === record.record_field_key && (!record.record_field?.split('.extensions.')[1]?.includes('.') || Boolean(node.dataset.issueField?.endsWith('.' + record.record_field.split('.').at(-1))))
   if (record.record_field?.startsWith('payload.parameters.extensions.')) return Boolean(node.dataset.issueField?.includes('.payload.parameters.extensions.') && node.dataset.issueField.endsWith('.' + record.record_field.split('.').at(-1)))
   return suffix !== '' && Boolean(node.dataset.issueField?.endsWith(suffix) || (suffix.includes('.payload.parameters.') && suffix.endsWith('.value_number') && node.dataset.issueField?.endsWith(suffix.slice(0, -13))))
 }
@@ -34,7 +34,7 @@ function recordOwner(record: EvidenceRecord, scope: string) {
   return [name, index == null ? `材料状态 ${record.state_key}` : `材料状态 ${Number(index) + 1}${state ? '' : '（已移除）'}`].filter(Boolean).join(' · ')
 }
 
-export const evidenceProblem = (record: EvidenceRecord) => record.required !== false && Boolean(record.stale || (record.status !== 'supported' && !record.proposal_draft?.accepted && !record.human_confirmed && !record.resolution?.trim()))
+export const evidenceProblem = (record: EvidenceRecord) => !record.pending_review && !record.stale && (record.required !== false || record.human_modified) && ['unsupported', 'uncertain', 'missing'].includes(record.status)
 
 /** 优先复用控件自己的标签，不把整个输入框变成按钮。 */
 function fieldCaption(node: HTMLElement) {
@@ -115,7 +115,9 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
         // 新增或尚未载入核对结果的字段仍使用同一侧栏，不伪造来源资格。
         const field = request.field.replace(/\.(\d+)(?=\.|$)/g, '[$1]')
         const key = `view:${scope}:${field}`
-        onOpen(key, [key], { key, field, label: request.name, current_value: request.value,
+        onOpen(key, [key], { key, field, label: request.name, current_value: request.value, state_key: node.closest<HTMLElement>('[data-state-key]')?.dataset.stateKey,
+          module_key: node.closest<HTMLElement>('[data-module-key]')?.dataset.moduleKey, record_key: node.closest<HTMLElement>('[data-record-key]')?.dataset.recordKey,
+          record_field_key: node.closest<HTMLElement>('[data-scientific-field-key]')?.dataset.scientificFieldKey,
           status: 'unchecked', reason: '', evidences: [], required: false, placeholder: true }, 'settings')
       }
     }
@@ -166,7 +168,7 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
         const row = record.record_key ? Array.from(area.querySelectorAll<HTMLElement>('[data-record-key]')).find(n => n.dataset.recordKey === record.record_key) : undefined
         if (record.record_key && !row) return []
         const scopedNodes = nodes.filter(node => area.contains(node))
-        const fields = row?.querySelector('[data-dos-current-value]')
+        const fields = !record.record_field && row?.querySelector('[data-dos-current-value]')
           ? ['name_raw', 'value_raw', 'unit_raw'].map(name => record.field + '.' + name)
           : [...new Set(record.fields || [record.field])]
         return fields.filter(field => !fields.some(other => other !== field && other.startsWith(field + '.'))).flatMap(field => {
@@ -182,7 +184,8 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
           const tcValue = ['.value_raw', '.unit_raw', '.canonical_unit'].includes(suffix)
             ? row?.querySelector<HTMLElement>('[data-tc-current-value]') : undefined
           const dosValue = suffix === '' ? row?.querySelector<HTMLElement>('[data-dos-current-value]') : undefined
-          const exact = structure || (row ? rowNodes.find(n => matchesField(n, record, suffix)) || (!record.record_field ? tcValue || dosValue || row : undefined) : stateField || (!record.state_key ? scopedNodes.find(n => normalize(n.dataset.issueField || '') === normalize(field)) : undefined))
+          const structureField = record.structure_field ? structure?.querySelector<HTMLElement>(`[data-structure-field="${record.structure_field}"]`) : structure
+          const exact = structureField || (row ? rowNodes.find(n => matchesField(n, record, suffix)) || (!record.record_field ? tcValue || dosValue || row : undefined) : stateField || (!record.state_key ? scopedNodes.find(n => normalize(n.dataset.issueField || '') === normalize(field)) : undefined))
           const node = exact || (!record.state_key ? scopedNodes.filter(n => normalize(field).startsWith(normalize(n.dataset.issueField || '') + '.')).sort((a, b) => (b.dataset.issueField?.length || 0) - (a.dataset.issueField?.length || 0))[0] : undefined)
           // 组合控件与内部输入必须归一为同一个锚点，否则两次标注同一标签，
           // 下次更新会把已标注标签误判为外部按钮并额外插入一行标题。
@@ -206,10 +209,14 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
         const field = anchor?.dataset.issueField || `view:${caption.id || input?.id || caption.textContent}`
         const record: EvidenceRecord = {key:`view:${scope}:${field}:${caption.id}`, field, label:caption.textContent || '',
           current_value:input?.value ?? node.querySelector('[role="combobox"]')?.textContent ?? '', status:'unchecked',
+          state_key: node.closest<HTMLElement>('[data-state-key]')?.dataset.stateKey,
+          module_key: node.closest<HTMLElement>('[data-module-key]')?.dataset.moduleKey, record_key: node.closest<HTMLElement>('[data-record-key]')?.dataset.recordKey,
+          record_field_key: node.closest<HTMLElement>('[data-scientific-field-key]')?.dataset.scientificFieldKey,
           reason:'', evidences:[], required:false, placeholder:true}
         next.push({record,node})
       }
       for (const node of root.querySelectorAll<HTMLElement>('[data-evidence-readonly]')) {
+        if (next.some(x => x.node === node) || node.closest('[data-evidence-ignore]')) continue
         const owner = node.closest<HTMLElement>('[data-scientific-structure]')
         const associated = owner && next.filter(x => x.node === owner)
         if (associated && associated.length) {
@@ -217,6 +224,8 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
         } else {
           const record: EvidenceRecord = {key:`view:${scope}:readonly:${node.textContent}`, field:'view:readonly',
             label:node.textContent || '', current_value:node.parentElement?.textContent || '', status:'unchecked',
+            structure_field: node.dataset.structureField, structure_hash: owner?.dataset.structureHash,
+            state_key: node.closest<HTMLElement>('[data-state-key]')?.dataset.stateKey,
             reason:'', evidences:[], required:false, placeholder:true}
           next.push({record,node})
         }
@@ -236,8 +245,11 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
       const moduleKey = node.closest<HTMLElement>('[data-module-key]')?.dataset.moduleKey
       const recordKey = node.closest<HTMLElement>('[data-record-key]')?.dataset.recordKey
       const record = records.find(r => r.state_key === stateKey && r.module_key === moduleKey && r.record_key === recordKey)
+      const currentBase = field.match(/^material_states\[\d+\]\.property_modules\[\d+\]\.records\[\d+\]/)?.[0]
+      const snapshotBase = record?.record_field ? record.field.slice(0, -record.record_field.length - 1) : record?.field
       const changedField = stateKey && record
-        ? recordKey ? record.field : field.replace(/^material_states\[\d+\]/, record.field.match(/^material_states\[\d+\]/)?.[0] || '')
+        ? currentBase && snapshotBase ? snapshotBase + field.slice(currentBase.length)
+          : field.replace(/^material_states\[\d+\]/, record.field.match(/^material_states\[\d+\]/)?.[0] || '')
         : field
       // 浏览器会在原生监听器之间执行微任务；必须等整次事件传播结束，
       // 否则 React 的 onChange 尚未读取新值就被核对标记的更新恢复为旧值。

@@ -468,6 +468,7 @@ def bind_snapshot_source_documents(snapshot, documents, expected_file_ids=None):
     from .property_evidence import digest, RULE_VERSION
     readable = {str(c.get('file_id')) for c in snapshot['chunks'] if str(c.get('content') or '').strip()}
     expected = set(expected_file_ids) if expected_file_ids is not None else set(documents)
+    snapshot.update(_source_documents=documents, _source_expected=sorted(expected), _source_readable=sorted(readable))
     snapshot['condition_source_manifest_complete'] = bool(expected) and expected <= set(documents) and expected <= readable
     base_hashes = snapshot.setdefault('_association_source_base_hashes',{})
     for record in snapshot['records']:

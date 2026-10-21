@@ -407,6 +407,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     const parsed = Number(trimmed)
     if (!/^\d+$/.test(trimmed) || parsed < 1 || parsed > 118) {
       setElementCountEdits(current => ({ ...current, [index]: { text: raw, invalid: true } }))
+      emitStates(statesRef.current.map((item, itemIndex) => itemIndex === index ? { ...item, element_count: raw as unknown as number, element_count_locked: true } : item))
       return
     }
     setElementCountEdits(current => ({ ...current, [index]: { text: raw, invalid: false } }))
@@ -689,7 +690,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   <Box data-material-identity-row sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', sm: 'repeat(2, minmax(0, 1fr))', md: '1.2fr 1fr .85fr 1fr 1fr 1fr .85fr' }, alignItems: 'start', gap: 1.5, '& > *': { minWidth: 0 } }}>
                     <TextField label={t('upload.materialNameField')} value={state.material_name || ''}
                       {...issueProps(`material_states[${index}].material_name`)}
-                      error={materialIdentityMissing(state) || Boolean(issueOf(`material_states[${index}].material_name`))}
+                      error={Boolean(issueOf(`material_states[${index}].material_name`))}
                       helperText={materialIdentityMissing(state) ? t('upload.missingMaterial', {label:t('upload.materialStateLabel', {index:index+1})}) : issueOf(`material_states[${index}].material_name`)?.message}
                       onChange={event => updateMaterialState(index, 'material_name', event.target.value)} />
                     <TextField label={t('upload.materialField')} value={state.material || ''}
@@ -698,7 +699,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                     <TextField
                       label={t('upload.elementCountField')} data-issue-field={`material_states[${index}].element_count`}
                       value={elementCountEdits[index]?.text ?? (state.element_count ?? '')}
-                      error={Boolean(elementCountEdits[index]?.invalid)}
+                      error={Boolean(issueOf(`material_states[${index}].element_count`))}
                       helperText={elementCountEdits[index]?.invalid ? t('upload.elementCountInvalid') : undefined}
                       onChange={event => changeElementCount(index, event.target.value)}
                     />

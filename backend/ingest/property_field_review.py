@@ -98,7 +98,8 @@ def expand_property_fields(records):
         group = (payload.get('tc_group') or {}).get('group_key')  # snapshot通常已去除UI身份，调用者可显式提供。
         group = parent.get('tc_group_key') or group
         meta = parent.get('tc_group_meta') or {}
-        specifications = [('method_code', LABELS['method_code'], 'text', 'method_code', True)]
+        specifications = [('method_code', LABELS['method_code'], 'text', 'method_code', True),
+                          ('payload.approximation', '核处理近似', 'text', 'approximation', True)]
         for key in ('lambda_ep', 'omega_log'):
             actual = 'omega_log_k' if key == 'omega_log' and key not in parameters and 'omega_log_k' in parameters else key
             value = parameters.get(actual)

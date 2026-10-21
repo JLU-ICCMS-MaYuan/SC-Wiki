@@ -183,7 +183,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
         <Button type="button" disabled={readOnly || entry.busy} onClick={() => store.discard(oldKey)}>{t('evidence.manualDiscardPrevious')}</Button></Box>)}
     </Box>}
     {localChanged && !saved?.changed && <Alert severity="info">{t('evidence.manualSyncPending')}</Alert>}
-    {!changed ? <>{loading ? <Typography role="status">{t('evidence.manualLoading')}</Typography>
+    {!changed && readOnly ? <>{loading ? <Typography role="status">{t('evidence.manualLoading')}</Typography>
       : !error && !history.length && <Typography color="text.secondary">{t('evidence.noManualEdits')}</Typography>}</> : <>
       {(saved?.status === 'submitted' && !localChanged) || readOnly ? <>
         <Typography>{t('evidence.manualReason')}：{saved?.reason || reason}</Typography>

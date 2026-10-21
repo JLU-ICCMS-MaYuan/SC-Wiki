@@ -42,13 +42,14 @@ export function currentEvidenceField(record: EvidenceRecord, paper: Record<strin
           path = path.replace(/\.extensions\.\d+/, `.extensions.${index}`)
           field = field.replace(/\.extensions\.\d+/, `.extensions.${index}`)
         }
+        if (path.endsWith('.name') && getAtPath(value, path + '_raw') != null) { path += '_raw'; field += '_raw' }
         const scalar = getAtPath(value, path) ?? null
         let annotations: unknown
         if (path.startsWith('payload.parameters.mu_star') || path.startsWith('payload.parameters.extensions.')) annotations = value.payload.field_settings?.mu_star
         else if (path.startsWith('payload.parameters.')) annotations = value.payload.parameters?.field_settings?.[path.split('.')[2].replace('omega_log_k', 'omega_log')]
         else if (path.startsWith('payload.calculation_conditions.') && !path.includes('.extensions.')) annotations = value.payload.calculation_conditions?.field_settings?.[path.split('.')[2]]
         else if (path.startsWith('value_')) annotations = value.payload.field_settings?.tc
-        return { value: scalar, field, record_key: value.record_key, manualValue: scalar, comparisonValue: { value: scalar, field_settings: annotations } }
+        return { value: scalar, field, record_key: value.record_key, manualValue: scalar, comparisonValue: scalar }
       }
       // 说明绑定物性值及材料条件；其他物性或排序变化不改变本条说明身份。
       const context = Object.fromEntries(Object.entries(state).filter(([key]) =>
@@ -57,7 +58,8 @@ export function currentEvidenceField(record: EvidenceRecord, paper: Record<strin
     }
   } else if (!field.startsWith('paper.')) return undefined
   if (record.structure_hash) return undefined
-  return { value: value[field.split('.').at(-1)!] ?? null, field }
+  const relative = field.replace(/^material_states\[\d+\]\./, '').replace(/^paper\./, '')
+  return { value: getAtPath(value, relative) ?? null, field }
 }
 
 const overlaps = (left: string, right: string) => left === right || left.startsWith(right + '.') || left.startsWith(right + '[')

@@ -33,12 +33,37 @@ def field_change_events(before, after, user):
     return events
 
 
-def draft_change_events(before, after, user):
-    from .property_evidence import complete_snapshot, draft_records
+def draft_change_events(before, after, user, changes=None):
+    from .property_evidence import draft_records
+    from .property_field_review import expand_property_fields
+    from .field_review import independent_fields
     from .upload_contracts import convert_legacy_scientific_draft
+    def relevant(draft):
+        if changes is None:
+            return draft
+        roots = {change['path'][0] for change in changes}
+        selected_states = {part['value'] for change in changes for part in change['path']
+                           if isinstance(part, dict) and part.get('key') == 'state_key'}
+        selected_records = {part['value'] for change in changes for part in change['path']
+                            if isinstance(part, dict) and part.get('key') == 'record_key'}
+        states = []
+        if 'material_states' in roots:
+            for state in draft.get('material_states') or []:
+                if selected_states and state.get('state_key') not in selected_states:
+                    continue
+                state = deepcopy(state)
+                if not any('structure' in change['path'] for change in changes):
+                    state.pop('structure', None)
+                    state.pop('structures', None)
+                if selected_records:
+                    state['property_modules'] = [{**m, 'records': [r for r in m.get('records') or []
+                        if r.get('record_key') in selected_records]} for m in state.get('property_modules') or []]
+                states.append(state)
+        return {'paper': draft.get('paper') if 'paper' in roots else {}, 'material_states': states,
+                'structure_candidates': draft.get('structure_candidates') if 'structure_candidates' in roots else []}
     def snapshot(draft):
-        draft = convert_legacy_scientific_draft(deepcopy(draft or {}))
-        return complete_snapshot('upload', 'field-diff', draft_records(draft or {}, {}), [], draft or {})
+        draft = deepcopy(relevant(draft or {}))
+        return {'records': independent_fields(expand_property_fields(draft_records(draft or {}, {})))}
     return field_change_events(snapshot(before), snapshot(after), user)
 
 

@@ -1,3 +1,4 @@
+import { draftNumber } from '../lib/fieldDrafts'
 import { useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 import type { JsonSchema } from '../lib/formDefinitions'
@@ -35,6 +36,7 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
   const fixed = Object.entries(schema.properties || {}).filter(([key, child]) => key !== 'extensions' && child.type !== 'object')
   const save = () => {
     if (!editing || readOnly) return
+    if (presentation?.part) { setEditing(null); return }
     if (editing.recordKey !== record.record_key) { setError('当前记录已变化，请关闭后重新打开'); return }
     if (!editing.name.trim()) { setError('请填写字段名称'); return }
     if (editing.fixed) {
@@ -85,7 +87,7 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
         return <ScientificFieldBox key={item.field_key || item.key || index} name={conditionName(item)} value={conditionValue(item)} readOnly={readOnly} field={`${basePath}.extensions.${index}.value_raw`} fieldKey={item.field_key || item.key}
           error={item.value_kind === 'number' && item.value_raw && (item.value_number == null || !Number.isFinite(item.value_number)) ? '请输入完整有效的数值' : undefined}
           onChange={['text', 'number'].includes(item.value_kind || 'text') ? raw => {
-            const updated = { ...item, value_raw: raw, ...(item.value_kind === 'number' ? { value_number: raw.trim() ? Number(raw) : null } : { value_text: raw }) }
+            const updated = { ...item, value_raw: raw, ...(item.value_kind === 'number' ? { value_number: draftNumber(raw) } : { value_text: raw }) }
             write({ ...conditions, extensions: extensions.map((entry, i) => i === index ? updated : entry) })
           } : undefined}
           onSettings={host => open({ index, fixed: false, snapshot: signature(item), name: conditionName(item), kind: item.value_kind || 'text',
@@ -96,7 +98,23 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
     {extensions.some(item => String(item.key || '').startsWith('structural_relaxation.')) && <Typography variant="caption" component="p" color="text.secondary">结构优化阶段的设置保留在原记录和导出中，不作为当前超导计算条件展示。</Typography>}
     <ScientificFieldSettingsDrawer presentation={presentation} value={editing} readOnly={readOnly} typeLocked={editing?.fixed}
       adding={editing?.index == null && !editing?.fixed} error={error}
-      onChange={value => setEditing(current => current && { ...current, ...value })} onApply={save} onClose={() => setEditing(null)}
+      onChange={value => {
+        setEditing(current => current && { ...current, ...value })
+        const part = presentation?.part
+        if (!part || !editing) return
+        if (editing.fixed) {
+          const key = editing.key!
+          if (part === 'name' || part === 'unit') write({ ...conditions, field_settings: {
+            ...conditions.field_settings, [key]: { ...conditions.field_settings?.[key], [part === 'name' ? 'name_raw' : 'unit_raw']: part === 'name' ? value.name : value.unit } } })
+          else if (part === 'raw') write({ ...conditions, [key]: ['number', 'integer'].includes(schema.properties?.[key]?.type || '') ? draftNumber(value.raw) : value.raw })
+        } else if (editing.index != null) {
+          const item = extensions[editing.index]
+          const patch = part === 'name' ? { name_raw: value.name } : part === 'unit' ? {unit_raw: value.unit}
+            : part === 'kind' ? {value_kind: value.kind}
+            : {value_raw: value.raw, ...(item.value_kind === 'number' ? {value_number: draftNumber(value.raw)} : item.value_kind === 'boolean' ? {value_boolean: value.raw === '' ? null : value.raw === 'true'} : {value_text: value.raw})}
+          write({ ...conditions, extensions: extensions.map((entry, index) => index === editing.index ? {...entry, ...patch} : entry) })
+        }
+      }} onApply={save} onClose={() => setEditing(null)}
       onDelete={editing?.index == null ? undefined : () => {
         if (editing.recordKey !== record.record_key || signature(extensions[editing.index!]) !== editing.snapshot) { setError('字段已发生变化，请关闭后重新打开'); return }
         write({ ...conditions, extensions: extensions.filter((_, i) => i !== editing.index) }); setEditing(null)

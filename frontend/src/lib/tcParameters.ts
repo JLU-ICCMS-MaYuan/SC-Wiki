@@ -41,7 +41,7 @@ export function setTcPairs(record: PropertyRecordDraft, pairs: [TcPair, TcPair])
   const parameters = { ...tcParameters(record) }
   if (record.value_kind !== 'range') return { value_number: pairs[0].tc, payload: setTcParameter(record, 'mu_star', pairs[0].mu) }
   // 仅规范化写入数据，输入组的位置由组件保持，不在用户输入中途换位。
-  const sorted = pairs[0].tc != null && pairs[1].tc != null && pairs[0].tc > pairs[1].tc ? [pairs[1], pairs[0]] : pairs
+  const sorted = typeof pairs[0].tc === 'number' && typeof pairs[1].tc === 'number' && pairs[0].tc > pairs[1].tc ? [pairs[1], pairs[0]] : pairs
   const index = muRangeIndex(record)
   const extensions = Array.isArray(parameters.extensions) ? [...parameters.extensions] : []
   const previous = index >= 0 ? extensions[index] : object(parameters.mu_star)

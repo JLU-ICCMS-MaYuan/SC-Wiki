@@ -1532,6 +1532,8 @@ async def get_upload_draft(
         if state.get("processing_status") == "failed":
             raise _upload_error(409, "draft_not_ready", "解析失败，可重新解析或手动填写")
         raise _upload_error(409, "draft_not_ready", "AI 草稿尚未生成")
+    if draft.get('_field_edit_format') == 1:
+        return {'ok': True, 'data': draft}
     async with async_session_factory() as session:
         result = await session.execute(select(models.MaterialFamily))
         families_by_code = {
@@ -2073,8 +2075,7 @@ async def _create_pending_paper(
                     if manual_snapshot is not None and manual_baseline is not None:
                         await session.run_sync(lambda sync: manual_evidence.transfer_to_paper(
                             sync, manual_snapshot, manual_baseline, paper.id, paper.content_revision, persisted))
-                    await session.execute(sql_delete(models.ScientificEvidenceCheck).where(
-                        models.ScientificEvidenceCheck.target == 'upload', models.ScientificEvidenceCheck.target_id == task_id))
+                    # 原上传核对历史保留，可从正式论文的字段历史追溯。
                     await session.execute(sql_delete(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == task_id))
                 paper_id = paper.id
         return paper_id
@@ -2250,27 +2251,27 @@ async def _submit_upload_draft_locked(
     from backend.database import SessionLocal
     from backend.ingest.scientific_evidence import load_results
     from backend.ingest import manual_evidence
-    from backend.api.evidence import _manual_snapshots
-    manual_snapshot, manual_baseline = _manual_snapshots("upload", task_id, current_user)
+    manual_snapshot = snapshot
+    # 人工说明只归档，不再形成第二套批准门禁或触发全量历史读取。
+    manual_baseline = snapshot
     with SessionLocal() as check_session:
-        cached = load_results(check_session, snapshot, current_user.id)
-        manual_issues = manual_evidence.validate_submission(check_session, manual_snapshot, manual_baseline)
-        manual_pending_keys = manual_evidence.complete_keys(check_session, manual_snapshot, manual_baseline)
-    if manual_issues:
-        raise _upload_error(400, "manual_evidence_incomplete", "请补齐人工修改依据", issues=manual_issues)
-    evidence_checks = resolve_results(snapshot, cached, current_user.id, evidence_job_id, expected_evidence_version,
-                                      manual_pending_keys=manual_pending_keys)
+        cached = load_results(check_session, snapshot, current_user.id, include_stale=True)
+    evidence_checks = resolve_results(snapshot, cached, current_user.id, evidence_job_id, expected_evidence_version)
     draft = copy.deepcopy(draft)
     for state_data in draft.get('material_states') or []:
         state_data['property_modules'] = _property_modules_for_state(state_data)
     for result in evidence_checks:
-        if result.get('kind') != 'property':
+        if result.get('kind') != 'property' and not result.get('record_field'):
             continue
         state_data = draft['material_states'][result['state_index']]
         module = next(m for m in state_data['property_modules'] if m['module_key'] == result['module_key'])
         record = next(r for r in module['records'] if r['record_key'] == result['record_key'])
         record.pop('evidence', None)
-        record['evidences'] = result['evidences']
+        if result.get('record_field'):
+            record['evidences'] = [e for e in record.get('evidences') or [] if e.get('field_path') != result['record_field']]
+            record['evidences'].extend({**e, 'field_path': result['record_field']} for e in result['evidences'])
+        else:
+            record['evidences'] = result['evidences']
 
     cleanup_context = CleanupContext.from_state(task_id, state)
     update_state(task_id, status="submitting", submission_status="submitting")

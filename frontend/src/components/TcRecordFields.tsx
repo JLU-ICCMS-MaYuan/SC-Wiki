@@ -34,7 +34,7 @@ export function TcNumber({ value, label, field, error, readOnly, onChange, unit,
     published.current = value
   }, [value])
   const valid = numberPattern.test(text) && Number.isFinite(Number(text))
-  const message = text !== '' && !valid ? '请输入完整的非负数值' : error
+  const message = error
   return <TextField size="small" fullWidth label={label} value={text} disabled={readOnly}
     data-issue-field={field} data-tc-current-value={currentTc || undefined} error={Boolean(message)} helperText={message}
     slotProps={{ htmlInput: { inputMode: 'decimal' }, input: unit ? { endAdornment: <InputAdornment position="end">{unit}</InputAdornment> } : undefined }}
@@ -42,7 +42,7 @@ export function TcNumber({ value, label, field, error, readOnly, onChange, unit,
       const next = event.target.value
       setText(next)
       const value = next === '' ? null : numberPattern.test(next) && Number.isFinite(Number(next)) ? Number(next) : next
-      published.current = currentTc && typeof value === 'string' ? null : value
+      published.current = value
       onChange(value)
     }} />
 }
@@ -66,7 +66,7 @@ export default function TcRecordFields({ record, readOnly, issue, fieldPath, upd
   }
   const changePair = (index: 0 | 1, key: keyof TcPair, value: ParameterValue) => {
     const next: [TcPair, TcPair] = [{ ...pairs[0] }, { ...pairs[1] }]
-    next[index] = { ...next[index], [key]: key === 'tc' && typeof value === 'string' ? null : value }
+    next[index] = { ...next[index], [key]: value }
     setPairs(next)
     emit(setTcPairs(record, next))
   }
@@ -80,7 +80,7 @@ export default function TcRecordFields({ record, readOnly, issue, fieldPath, upd
   }
   const pair = (index: 0 | 1) => {
     // 规范端点变化时只更新锚点，不移动用户正在编辑的配对。
-    const reversed = pairs[0].tc != null && pairs[1].tc != null && pairs[0].tc > pairs[1].tc
+    const reversed = typeof pairs[0].tc === 'number' && typeof pairs[1].tc === 'number' && pairs[0].tc > pairs[1].tc
     const minimum = (index === 0) !== reversed
     const tcField = range ? minimum ? 'value_min' : 'value_max' : 'value_number'
     const extension = muRangeIndex(record)

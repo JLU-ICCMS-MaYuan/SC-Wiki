@@ -104,7 +104,7 @@ export const clonePropertyRecord = (record: PropertyRecordDraft): PropertyRecord
 /** Tc 的 raw 列仅为当前值的兼容表示，不能作为另一份可编辑数据。 */
 export function normalizeCurrentTcValue(record: PropertyRecordDraft): PropertyRecordDraft {
   if (record.record_type !== 'measured_tc' && record.record_type !== 'predicted_tc') return record
-  const numberText = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0 ? String(value) : ''
+  const numberText = (value: unknown) => typeof value === 'string' ? value : typeof value === 'number' && Number.isFinite(value) && value >= 0 ? String(value) : ''
   let raw = ''
   if (record.value_kind === 'number') raw = numberText(record.value_number)
   if (record.value_kind === 'range') {

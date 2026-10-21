@@ -326,6 +326,7 @@ async def persist_scientific_draft(
                 f"{state_path}.reported_space_group", space_group_evidence
             ))
 
+        from .scientific_evidence import item_identity as review_identity
         structure = None
         structure_data = state_data.get("structure")
         if isinstance(structure_data, dict) and str(structure_data.get("structure_text") or "").strip():
@@ -338,6 +339,7 @@ async def persist_scientific_draft(
                 space_group_number=structure_data.get("space_group_number") or state_data.get("reported_space_group_number"),
                 structure_format=structure_data.get("structure_format") or "unknown",
                 structure_text=structure_text,
+                review_key=structure_data.get('review_key') or review_identity('inline-structure', state.state_key),
                 structure_hash=hashlib.sha256(structure_text.encode("utf-8")).hexdigest(),
                 nuclear_treatment=structure_nuclear_treatment(state_data),
                 source_locator=_source_locator(structure_data.get("evidence")),
@@ -375,6 +377,7 @@ async def persist_scientific_draft(
                 space_group_number=state_data.get("reported_space_group_number"),
                 structure_format="cif",
                 structure_text=structure_text,
+                review_key=candidate.get('review_key') or review_identity('structure-candidate', candidate.get('candidate_id')),
                 structure_hash=(validation or {}).get("structure_hash")
                 or hashlib.sha256(structure_text.encode("utf-8")).hexdigest(),
                 cell_parameters=(validation or {}).get("cell_parameters"),

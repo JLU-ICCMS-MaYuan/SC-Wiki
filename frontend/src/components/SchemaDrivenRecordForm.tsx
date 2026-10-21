@@ -1,3 +1,4 @@
+import { draftNumber } from '../lib/fieldDrafts'
 import React, { useMemo } from 'react'
 import {
   Alert, Box, Button, Checkbox, FormControl, FormControlLabel, InputLabel, MenuItem, Select, TextField, Typography,
@@ -13,7 +14,7 @@ import CalculationConditionFields from './CalculationConditionFields'
 import { DOS_SOURCE_KEY, hasDosConflict, isFermiDos } from '../lib/fermiDos'
 import { muRangeIndex } from '../lib/tcParameters'
 import type { FormDefinition, FormIssue, JsonSchema } from '../lib/formDefinitions'
-import { getAtPath, setAtPath, validateRecordClient } from '../lib/formDefinitions'
+import { getAtPath, setAtPath } from '../lib/formDefinitions'
 import { newStableKey, normalizeCurrentTcValue, type PropertyRecordDraft, type PropertyValueKind } from '../lib/propertyModules'
 
 interface Props {
@@ -140,7 +141,7 @@ const extensionValuePatch = (item: Record<string, any>, kind: PropertyValueKind,
   delete next.value_max
   delete next.value_text
   delete next.value_boolean
-  if (kind === 'number') next.value_number = raw === '' ? null : Number(raw)
+  if (kind === 'number') next.value_number = draftNumber(raw)
   if (kind === 'text') next.value_text = raw
   if (kind === 'boolean') next.value_boolean = raw === 'true'
   return next
@@ -157,7 +158,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   onDelete,
   tcCore,
 }) => {
-  const issues = useMemo(() => [...validateRecordClient(record, definition), ...externalIssues], [record, definition, externalIssues])
+  const issues = externalIssues
   const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type), [definition, record.record_type])
   const isTc = record.record_type === 'predicted_tc' || record.record_type === 'measured_tc'
   const isDosFermi = isFermiDos(record)
@@ -294,7 +295,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       <AutoGrowingTextField key={path} label={label} type={numeric ? 'number' : 'text'} value={Array.isArray(value) ? value.join(' x ') : value ?? ''} disabled={readOnly}
         data-issue-field={fieldPath(path)} error={Boolean(issue(path))} helperText={issue(path) || schema.description}
         slotProps={numeric ? { htmlInput: { min: schema.minimum, max: schema.maximum, step: schema.type === 'integer' ? 1 : 'any' } } : undefined}
-        onChange={event => updatePath(path, numeric ? (event.target.value === '' ? null : Number(event.target.value)) : parseGridOrText(event.target.value, schema))} />
+        onChange={event => updatePath(path, numeric ? (draftNumber(event.target.value)) : parseGridOrText(event.target.value, schema))} />
     )
   }
 
@@ -303,7 +304,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       {definitionError && <Alert severity="error" sx={{ gridColumn: '1 / -1' }}>{definitionError}</Alert>}
       {tcCore || (isThermodynamicStability(record) ? <ThermodynamicStabilityFields record={record} readOnly={readOnly} onChange={onChange} basePath={basePath} actions={recordActions} /> : isTc ? <TcRecordFields {...tcProps} actions={recordActions} /> : <PropertyRecordRow actions={recordActions}><Box data-property-core-row sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 1, '& > *': { flex: '0 0 auto', minWidth: 110 }, '& .MuiInputBase-root': { fontSize: '0.875rem' } }}>
       <AutoGrowingTextField label="名称" value={record.name_raw} disabled={readOnly} data-issue-field={fieldPath('name_raw')} error={Boolean(issue('name_raw'))} helperText={issue('name_raw')} onChange={event => update({ name_raw: event.target.value })} />
-      <FormControl size="small">
+      <FormControl size="small" data-issue-field={fieldPath('value_kind')}>
         <InputLabel>值类型</InputLabel>
         <Select label="值类型" value={record.value_kind} disabled={readOnly} onChange={event => update({ value_kind: event.target.value as PropertyValueKind })}>
           {Object.entries(VALUE_KIND_LABELS).map(([value, label]) => <MenuItem key={value} value={value}>{label}</MenuItem>)}
@@ -311,11 +312,11 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       </FormControl>
       <AutoGrowingTextField label="原始值" value={record.value_raw} disabled={readOnly} data-dos-current-value={isDosFermi ? true : undefined} data-issue-field={fieldPath('value_raw')} error={Boolean(issue('value_raw'))} helperText={issue('value_raw')}
         onChange={event => update(mirroredTextValue ? { value_raw: event.target.value, value_text: event.target.value } : { value_raw: event.target.value })} />
-      <AutoGrowingTextField label="单位" value={record.unit_raw || ''} disabled={readOnly} data-issue-field={isDosFermi ? fieldPath('unit_raw') : undefined} onChange={event => update({ unit_raw: event.target.value || null })} />
-      {record.value_kind === 'number' && <AutoGrowingTextField label="数值" type="number" value={record.value_number ?? ''} disabled={readOnly} onChange={event => update({ value_number: event.target.value === '' ? null : Number(event.target.value) })} />}
-      {record.value_kind === 'range' && <><AutoGrowingTextField label="下界" type="number" value={record.value_min ?? ''} disabled={readOnly} data-issue-field={fieldPath('value_min')} error={Boolean(issue('value_min'))} helperText={issue('value_min')} onChange={event => update({ value_min: event.target.value === '' ? null : Number(event.target.value) })} /><AutoGrowingTextField label="上界" type="number" value={record.value_max ?? ''} disabled={readOnly} onChange={event => update({ value_max: event.target.value === '' ? null : Number(event.target.value) })} /></>}
-      {record.value_kind === 'text' && !mirroredTextValue && <AutoGrowingTextField label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
-      {record.value_kind === 'boolean' && <FormControlLabel control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
+      <AutoGrowingTextField label="单位" value={record.unit_raw || ''} disabled={readOnly} data-issue-field={fieldPath('unit_raw')} onChange={event => update({ unit_raw: event.target.value || null })} />
+      {record.value_kind === 'number' && <AutoGrowingTextField data-issue-field={fieldPath('value_number')} label="数值" type="text" value={record.value_number ?? ''} disabled={readOnly} onChange={event => update({ value_number: draftNumber(event.target.value) })} />}
+      {record.value_kind === 'range' && <><AutoGrowingTextField label="下界" type="text" value={record.value_min ?? ''} disabled={readOnly} data-issue-field={fieldPath('value_min')} error={Boolean(issue('value_min'))} helperText={issue('value_min')} onChange={event => update({ value_min: draftNumber(event.target.value) })} /><AutoGrowingTextField data-issue-field={fieldPath('value_max')} label="上界" type="text" value={record.value_max ?? ''} disabled={readOnly} onChange={event => update({ value_max: draftNumber(event.target.value) })} /></>}
+      {record.value_kind === 'text' && !mirroredTextValue && <AutoGrowingTextField data-issue-field={fieldPath('value_text')} label="文本值" value={record.value_text || ''} disabled={readOnly} onChange={event => update({ value_text: event.target.value })} />}
+      {record.value_kind === 'boolean' && <FormControlLabel data-issue-field={fieldPath('value_boolean')} control={<Checkbox checked={Boolean(record.value_boolean)} disabled={readOnly} onChange={event => update({ value_boolean: event.target.checked })} />} label="布尔值" />}
       </Box></PropertyRecordRow>)}
       {hasDosConflict(record) && <Button size="small" color="warning" sx={{ justifySelf: 'start' }} aria-haspopup="dialog" onClick={event => {
         event.currentTarget.dispatchEvent(new CustomEvent('scwiki:open-record-evidence', { bubbles: true, detail: { record, field: basePath } }))

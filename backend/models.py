@@ -1341,6 +1341,7 @@ class MaterialStateStructureFamily(Base):
 
 class StructureModel(Base):
     __tablename__ = "structure_models"
+    review_key = Column(String(64), nullable=True)
     __table_args__ = (
         ForeignKeyConstraint(
             ["material_state_id", "paper_id", "paper_revision"],
@@ -2451,6 +2452,17 @@ class PaperRevisionDraft(Base):
     draft = Column(JSON)
     submitted_revision = Column(Integer)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
+    updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+
+class ScientificReviewDraft(Base):
+    """管理员编辑暂存；核对通过前不改正式科学记录。"""
+    __tablename__ = 'scientific_review_drafts'
+    paper_id = Column(Integer, ForeignKey('papers.id', ondelete='CASCADE'), primary_key=True)
+    owner_id = Column(Integer, ForeignKey('users.id', ondelete='RESTRICT'), nullable=False)
+    base_revision = Column(Integer, nullable=False)
+    base_fingerprint = Column(String(64), nullable=False)
+    draft = Column(JSON, nullable=False)
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
 

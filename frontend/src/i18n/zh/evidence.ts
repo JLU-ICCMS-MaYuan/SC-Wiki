@@ -1,4 +1,6 @@
 export default {
+  "reviewCurrentField": "大模型核对",
+  "viewResults": "查看核对结果",
   "reviewStatus": {
     "human": "已人工确认", "stale": "待重新核对", "unreported": "未报告",
     "unchecked": "待核对", "supported": "原文支持", "unsupported": "依据不支持当前值",
