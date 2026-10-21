@@ -12,6 +12,9 @@
 配置与运维见 [部署指南](docker/deploy/README.md)，实际上线和验收状态见
 [#146 验证记录](docs/specs/146-aliyun-production-deployment/validation.md)。
 
+Embedding 与聊天模型独立配置。百炼 `text-embedding-v4` 的接入参数、分批限制和
+既有向量集合兼容要求见[独立 Embedding 配置](docker/deploy/README.md#独立-embedding-配置)。
+
 ## macOS 原生本地开发（#117）
 
 Apple Silicon Mac 在项目根目录直接使用以下命令，无需 Lima 或 Docker：

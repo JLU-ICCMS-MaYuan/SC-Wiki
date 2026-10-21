@@ -24,6 +24,20 @@ Compose 至少使用 2.30，以支持 `env_file.format: raw`。私有 env 使用
 
 ## 命令
 
+### 独立 Embedding 配置
+
+在私有 `app.env` 配置 `EMBEDDING_API_KEY`、`EMBEDDING_BASE_URL`、
+`EMBEDDING_MODEL=text-embedding-v4`、`EMBEDDING_DIMENSIONS=1536`、
+`EMBEDDING_BATCH_SIZE=10`。Base URL 使用密钥对应地域的 OpenAI 兼容根地址，
+不含末尾 `/embeddings`。这组配置与聊天模型目录独立。
+
+1536 是当前实例既有集合的维度；其他部署须先核对集合配置。未设置维度时采用模型默认值，
+不能把不同模型或维度的向量混入旧索引。分批默认每批 10 段，全部成功后才写入本次索引。
+更新配置后重新创建网站组及计算组的 Python 容器；单纯 restart 不会刷新容器环境变量。
+仅生成向量和查询会产生供应商用量，重复读取已有向量不重新调用 Embedding。
+
+### 部署命令
+
 以下在发布源码根目录运行，必须先填写并核实发布配置：
 
 ```bash

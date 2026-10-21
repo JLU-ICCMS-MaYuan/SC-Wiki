@@ -34,3 +34,10 @@ backend/scripts/check_dependencies.py 和 Go readyz 提供只读就绪；Qdrant 
 | FR-006 / SC-004 | 真实业务与文档 | T007、T008 |
 
 先建立全部文档与配置验证，再实施连接和编排，准备服务器及恢复演练，最后进入冻结迁移与正式验收。#132 同机部分以本次实现证据回写，跨机不勾选。
+
+## Embedding 接入补充
+
+FR-008 / SC-004 → 用户选定的百炼 text-embedding-v4 → backend/ingest/embedder.py 与 RagSettings → T009。
+通过私有配置指定 1536 维，与现有 Qdrant 集合匹配，不删除或重建业务集合。统一入口按每批最多 10 段调用，按响应 index 对齐文本，校验数量、维度和有限数值后再允许索引。
+验证覆盖多批请求、异常响应拒绝、真实供应商调用和服务器临时测试集合写入/查询/清理；业务审核过滤不因验收而放宽。
+发布使用已验证提交的 Docker Hub 制品；私有配置仅同步 Embedding 项，保留线上数据库与其他凭据。

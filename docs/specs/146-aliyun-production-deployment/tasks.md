@@ -12,3 +12,5 @@
 - [ ] T008 更新 README.md、docker/deploy/README.md、相关 docs/overview/，提交并按授权发布，核实 Issue/Spec 双向链接。
 
 依赖：T001 → T002/T003/T004 → T005 → T006 → T007 → T008；共享触点串行处理。所有勾选必须有真实证据。FR/SC 覆盖见 plan.md。
+
+- [ ] T009 [US1] [FR-008] 接入 text-embedding-v4 的可配置维度与分批调用，通过回归测试和服务器真实生成、保存、检索验证，记录制品与配置身份；不以此关闭 T007 的其他验收项。

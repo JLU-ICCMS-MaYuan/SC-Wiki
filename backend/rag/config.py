@@ -6,6 +6,7 @@ import os
 from functools import lru_cache
 from pathlib import Path
 
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -49,6 +50,8 @@ class RagSettings(BaseSettings):
     embedding_model: str = "text-embedding-3-small"
     embedding_api_key: str = ""
     embedding_base_url: str = ""
+    embedding_dimensions: int | None = Field(default=None, gt=0)
+    embedding_batch_size: int = Field(default=10, gt=0)
 
     debug: bool = False
 
