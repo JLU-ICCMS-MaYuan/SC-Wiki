@@ -147,4 +147,3 @@ flowchart TB
 
 用户先回复“认可。”，随后完整粘贴框架并明确“PLEASE IMPLEMENT THIS PLAN”。本 Spec 是该框架的编号化表达；没有扩大多机与恢复范围。Git push 仍需独立授权。
 当前无未决架构选择；具体镜像 digest 和源端版本由实际核验填写，不编造值。
-
