@@ -556,6 +556,12 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
         reason if subtype or keywords or (summary and not adopted_basis) else result.get('ai_reason'))
     if rule_review and not human:
         ai_reason = reason
+    from .condition_lifecycle import result_scope_issue
+    scope_issue = result_scope_issue(record, chunks)
+    if scope_issue and status == 'supported' and not human:
+        status, reason, ai_reason = 'uncertain', scope_issue, scope_issue
+    if result.get('invalidation_details') and status != 'supported' and not human:
+        reason = '本次失效原因：' + '；'.join(result['invalidation_details']) + '。' + reason
     method_error = review_method_issue(record)
     proposal_draft = None if result.get('stale') else result.get('proposal_draft')
     if method_error:
@@ -581,6 +587,8 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             'reason': reason, 'suggestion': suggestion,
             'location_errors': errors, 'model': result.get('model') or '', 'fields': fields,
             'audit_events': result.get('audit_events') or [], 'history': result.get('history') or [],
+            'review_revalidation': result.get('review_revalidation'), 'review_attempt': result.get('review_attempt'),
+            'invalidation_details': result.get('invalidation_details'),
             'resolution': '' if method_error else result.get('resolution', ''), 'stale': result.get('stale', False)}
 
 
@@ -1447,6 +1455,8 @@ def aggregate_candidates(records, candidates, location_errors, model, source_cat
             review_started_at=min((i['review_started_at'] for i in all_items if i.get('review_started_at')), default=None),
             association_review=aggregate_reviews(record, all_items),
             association_conflict=any(i.get('association_conflict') for i in all_items),
+            condition_conflict=any((i.get('condition_window') or {}).get('verdict') == 'conflict' for i in all_items),
+            condition_window_errors=[i['condition_window']['error'] for i in all_items if (i.get('condition_window') or {}).get('error')],
             reason='；'.join(dict.fromkeys(reasons)) or '当前论文及附件中未找到可定位的相关原文',
             evidences=evidences, model=model,
             suggestion='；'.join(dict.fromkeys(i['suggestion'] for i in items if i.get('suggestion'))),

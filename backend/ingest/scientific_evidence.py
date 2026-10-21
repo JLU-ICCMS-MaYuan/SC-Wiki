@@ -324,6 +324,7 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
     histories = {}
     legacy = {}
     previous_fields = {}
+    condition_history = {}
     for record in snapshot['records']:
         if record.get('legacy_item_key'):
             legacy.setdefault(record['legacy_item_key'], []).append(record)
@@ -363,6 +364,8 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
             remember_legacy(row)
             continue
         remember(row, r)
+        if r.get('condition_context'):
+            condition_history.setdefault(r['key'], []).append(row.result)
         valid = row.content_hash == r['content_hash'] and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES
         if not valid and row.source_hash == r['source_hash'] and row.rule_version in COMPATIBLE_RULES:
             from .review_dependencies import project_claim
@@ -409,6 +412,12 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
             found[key] = {'status': 'unchecked', 'reason': '当前为空或可选字段；历史记录仅供参考'}
         if key in found:
             found[key]['history'] = history
+    from .condition_lifecycle import effective_result
+    for record in snapshot['records']:
+        if record['key'] in condition_history:
+            result = effective_result(record, found.get(record['key']), condition_history[record['key']], snapshot['chunks'])
+            if result is not None:
+                found[record['key']] = result
     from .evidence_audit import merge_events
     for record in snapshot['records']:
         events = [event for event in snapshot.get('_field_change_events') or [] if event.get('item_key') == record['item_key']]
@@ -494,6 +503,15 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
                 results[record['key']] = {**copy.deepcopy(existing.result), 'superseded_review': {
                     'review_started_at': result.get('review_started_at'), 'status': result.get('status'), 'reason': result.get('reason')}}
                 continue
+        if existing is not None and not update_decision and record.get('condition_context'):
+            from .condition_lifecycle import effective_result
+            retained = effective_result(record, result, [existing.result, result], snapshot['chunks'])
+            if retained is not result:
+                # 保存本次尝试及真实请求时间；不让同版本失败覆盖唯一的有效规则证据。
+                for name in ('review_started_at', '_audit_action', '_audit_event_id'):
+                    if name in result:
+                        retained[name] = result[name]
+                result = retained
         if existing is not None and not update_decision and existing.result.get('decision'):
             result['decision'] = copy.deepcopy(existing.result['decision'])
             result['adopted_basis'] = existing.result.get('adopted_basis')

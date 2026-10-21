@@ -2,6 +2,14 @@
 import type { EvidenceRecord } from '../components/EvidenceWorkflow'
 import { getAtPath } from './formDefinitions'
 
+function currentRecordIndex(record: EvidenceRecord, rows: Array<Record<string, any>>) {
+  const own = rows.findIndex(row => row.record_key === record.record_key)
+  // 共用字段属于组；Tc/μ*自身仍属于原结果，不能借另一点恢复资格。
+  const group = record.record_group_key || (record.record_field?.startsWith('payload.calculation_conditions.') ? record.record_key : undefined)
+  if (own >= 0 && (!record.record_group_key || rows[own].payload?.tc_group?.group_key === group)) return own
+  return group ? rows.findIndex(row => row.payload?.tc_group?.group_key === group) : -1
+}
+
 /** 当前字段按稳定身份读取；返回路径只用于聚焦，不作为数据身份。 */
 export function currentEvidenceField(record: EvidenceRecord, paper: Record<string, unknown>, states: Array<Record<string, any>>) {
   let value: any = paper
@@ -14,7 +22,7 @@ export function currentEvidenceField(record: EvidenceRecord, paper: Record<strin
     if (record.record_key) {
       const state = value
       const mi = value.property_modules?.findIndex((m: any) => m.module_key === record.module_key) ?? -1
-      const ri = mi < 0 ? -1 : value.property_modules[mi].records.findIndex((r: any) => r.record_key === record.record_key)
+      const ri = mi < 0 ? -1 : currentRecordIndex(record, value.property_modules[mi].records)
       if (ri < 0) return undefined
       value = value.property_modules[mi].records[ri]
       field = field.replace(/\.property_modules\[\d+\]/, `.property_modules[${mi}]`).replace(/\.records\[\d+\]/, `.records[${ri}]`)
@@ -40,7 +48,7 @@ export function currentEvidenceField(record: EvidenceRecord, paper: Record<strin
         else if (path.startsWith('payload.parameters.')) annotations = value.payload.parameters?.field_settings?.[path.split('.')[2].replace('omega_log_k', 'omega_log')]
         else if (path.startsWith('payload.calculation_conditions.') && !path.includes('.extensions.')) annotations = value.payload.calculation_conditions?.field_settings?.[path.split('.')[2]]
         else if (path.startsWith('value_')) annotations = value.payload.field_settings?.tc
-        return { value: scalar, field, manualValue: scalar, comparisonValue: { value: scalar, field_settings: annotations } }
+        return { value: scalar, field, record_key: value.record_key, manualValue: scalar, comparisonValue: { value: scalar, field_settings: annotations } }
       }
       // 说明绑定物性值及材料条件；其他物性或排序变化不改变本条说明身份。
       const context = Object.fromEntries(Object.entries(state).filter(([key]) =>
@@ -110,7 +118,7 @@ export function evidenceFieldsForStates(records: import('../components/EvidenceW
       const mi = states[si].property_modules?.findIndex(module => module.module_key === record.module_key) ?? -1
       if (mi >= 0) {
         field = field.replace(/\.property_modules\[\d+\]/, `.property_modules[${mi}]`)
-        const ri = states[si].property_modules![mi].records.findIndex(row => row.record_key === record.record_key)
+        const ri = currentRecordIndex(record, states[si].property_modules![mi].records)
         if (ri >= 0) field = field.replace(/\.records\[\d+\]/, `.records[${ri}]`)
       }
     }

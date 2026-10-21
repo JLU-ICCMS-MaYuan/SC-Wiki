@@ -30,6 +30,18 @@ ENUMS = {'superconductor_kind': ['conventional', 'unconventional', 'unknown'],
          'theoretical_subtype': ['calculation', 'method', 'theory']}
 IMMUTABLE = {'is_representative', 'record_key', 'record_type', 'property_code', 'custom_property_key', 'definition_key',
              'definition_version', 'structure_key', 'value_kind'}
+VALUE_SLOTS = {'number': {'value_number'}, 'range': {'value_min', 'value_max'},
+               'text': {'value_text'}, 'boolean': {'value_boolean'}}
+OPTIONAL_FIELDS = NUMBERS | {'value_text', 'value_boolean', 'unit_raw', 'canonical_unit', 'method_code',
+    'method_raw', 'criterion_code', 'criterion_raw', 'structure_key', 'custom_property_key', 'chunk_id',
+    'page_start', 'page_end', 'origin_kind', 'source_name', 'section', 'locator_status', 'field_path'}
+
+
+def value_slot_schema(schema, name, owner):
+    kind = owner.get('value_kind')
+    if kind in VALUE_SLOTS and name in set().union(*VALUE_SLOTS.values()):
+        return {**schema, 'nullable': False} if name in VALUE_SLOTS[kind] else {'type': 'null', 'nullable': True}
+    return schema
 
 
 def schema_for(value, name=''):
@@ -47,13 +59,15 @@ def schema_for(value, name=''):
         schema = {'type': 'integer'}
     elif name in NUMBERS or isinstance(value, (int, float, Decimal)) and not isinstance(value, bool):
         schema = {'type': 'number'}
-    elif isinstance(value, bool):
+    elif name == 'value_boolean' or isinstance(value, bool):
         schema = {'type': 'boolean'}
     elif name in LIST_FIELDS or isinstance(value, list):
         value = value if isinstance(value, list) else []
         schema = {'type': 'array', 'items': schema_for(value[0]) if value else {'type': 'string'}}
     elif isinstance(value, dict):
-        schema = {'type': 'object', 'properties': {k: schema_for(v, k) for k, v in value.items()}, 'additionalProperties': False}
+        schema = {'type': 'object', 'properties': {k: value_slot_schema(schema_for(v, k), k, value) for k, v in value.items()}, 'additionalProperties': False}
+    if name in OPTIONAL_FIELDS:
+        schema['nullable'] = True
     return schema
 
 
@@ -71,7 +85,7 @@ def editable_fields(record):
     if record.get('kind') == 'property':
         current = record['claim']['record']
         derived = {'value_raw', 'unit_raw', 'canonical_unit'} if current.get('record_type') in {'measured_tc', 'predicted_tc'} else set()
-        return [{'path': name, 'label': name, 'value': value, 'schema': schema_for(value, name)}
+        return [{'path': name, 'label': name, 'value': value, 'schema': value_slot_schema(schema_for(value, name), name, current)}
                 for name, value in current.items() if name not in IMMUTABLE and name not in derived]
     value = record.get('current_value', record['claim'].get('value'))
     return [{'path': '', 'label': record.get('label', record['field']), 'value': value,
@@ -111,6 +125,12 @@ def validate_values(record, values):
             for key in ('key', 'field_key', 'evidences', 'reported'):
                 if science.canonical(value.get(key)) != science.canonical(record['current_value'].get(key)):
                     ev.fail('evidence_proposal_invalid', '建议不能改写补充字段的身份或既有来源')
+    if record.get('kind') == 'property' and record['claim']['record'].get('value_kind') in VALUE_SLOTS:
+        from .property_modules import _validate_value_shape
+        issues = []
+        _validate_value_shape({**record['claim']['record'], **values}, record['field'], issues)
+        if issues:
+            ev.fail('evidence_proposal_invalid', issues[0].field + '：' + issues[0].message)
     method_error = review_method_issue(record, values)
     if method_error:
         ev.fail('evidence_proposal_invalid', method_error)
@@ -178,20 +198,24 @@ def save_draft(session, snapshot, actor, key, values, accepted, reason):
     rows = rows_for(session, snapshot, True)
     row = next((r for r in reversed(rows) if row_matches(r, record)), None)
     previous = next((r for r in reversed(rows) if r.item_key == record['item_key']), None)
+    effective = science.load_results(session, snapshot, actor).get(key) if record.get('condition_context') else None
     if row is None:
         # 理由草稿不依赖模型完成；占位结果明确保持未核对，不进入模型缓存。
-        science.save_results(session, snapshot, {key: {'status': 'unchecked', 'reason': '尚未核对科学数据与原文', 'evidences': []}}, actor)
+        science.save_results(session, snapshot, {key: effective or {'status': 'unchecked', 'reason': '尚未核对科学数据与原文', 'evidences': []}}, actor)
         session.flush()
         row = next(r for r in reversed(rows_for(session, snapshot, True)) if row_matches(r, record))
     validate_values(record, values)
-    result = ev.checked_result(record, row.result, snapshot['chunks'])
+    result = ev.checked_result(record, effective or row.result, snapshot['chunks'])
+    if effective and result.get('rule_review'):
+        # 将当前规则重验结果写入当前版本；旧版本行和失败尝试仍保留。
+        row.result = {**copy.deepcopy(effective), 'review_started_at': row.result.get('review_started_at')}
     proposal = result.get('proposal') or {}
     supported = bool(proposal.get('supported') and ev.digest(values) == ev.digest(proposal.get('values')))
     unchanged = all(science.canonical(f['value']) == science.canonical(values.get(f['path'], f['value'])) for f in editable_fields(record))
     matches_proposal = bool(proposal and ev.digest(values) == ev.digest(proposal.get('values')))
     supported = supported if matches_proposal else (unchanged and result['status'] == 'supported')
     basis_kind = proposal.get('basis_kind', 'paper_quote') if matches_proposal else (result.get('adopted_basis') or 'paper_quote')
-    if basis_kind != 'paper_quote':
+    if basis_kind != 'paper_quote' and not (unchanged and result.get('rule_review') and supported):
         supported = False
     human = bool(accepted and snapshot['target'] == 'paper' and not supported and reason.strip())
     if accepted:
@@ -278,6 +302,9 @@ def prepare(session, snapshot, actor):
                     for k, (_, d) in selected.items()]}
     def projected_claim(record, values):
         claim = expected_claim(record, values)
+        if all(science.canonical(f['value']) == science.canonical(values.get(f['path'], f['value']))
+               for f in editable_fields(record)):
+            return copy.deepcopy(record['claim'])
         if record.get('record_field'):
             from .property_field_review import write_path, review_context
             candidate = copy.deepcopy(record['validation_record'])
@@ -349,6 +376,7 @@ def finalize(session, snapshot, actor, preparation_id):
                         source_hash=record['source_hash'], preparation_id=preparation_id)
         result = {**record, **{k: row.result.get(k) for k in ('status', 'reason', 'suggestion', 'model')},
                   'evidences': sources, 'decision': decision, 'proposal': row.result.get('proposal'),
+                  **{k: copy.deepcopy(row.result[k]) for k in ('rule_review', 'association_review') if row.result.get(k)},
                   'adopted_basis': draft.get('basis_kind', 'paper_quote'),
                   'status': 'supported' if draft['supported'] else draft.get('ai_status') or row.result.get('status'),
                   'source_kind': 'human_review' if draft.get('human_confirmed') else row.result.get('source_kind')}

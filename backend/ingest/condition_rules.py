@@ -4,7 +4,7 @@ import math
 import re
 import unicodedata
 
-VERSION = 'condition-rules-v1'
+VERSION = 'condition-rules-v2'
 PARAMETERS = {'calculation_code', 'electronic_method', 'exchange_correlation_functional',
               'phonon_method', 'k_grid', 'q_grid', 'q_grid_interpolated', 'energy_cutoff',
               'charge_density_cutoff', 'convergence_energy', 'convergence_force',
@@ -97,10 +97,6 @@ def descriptor(record):
             'material': context.get('material'),
             'phase': context.get('reported_space_group_symbol') or context.get('reported_space_group_number'),
             'approximation': context.get('approximation'), 'structure_optimization': context.get('structure_optimization')}
-    if stage == 'sscha':
-        parameters = (source.get('payload') or {}).get('parameters') or {}
-        result['result_numbers'] = [v for v in [context.get('pressure_value_gpa'), source.get('value_number'), source.get('value_min'), source.get('value_max'),
-            scalar(parameters.get('lambda_ep')), scalar(parameters.get('omega_log'))] if type(v) in (int, float)]
     return result
 
 
@@ -116,8 +112,20 @@ def scope_candidates(record, chunks):
             identity_in_text(context.get('material'), c['content']) and identity_in_text(context.get('phase'), c['content'])]
 
 
+def result_context(record):
+    """结果数字只作表格定位辅助，不进入共用条件内容版本。"""
+    context = deepcopy(policy_context(record) or {})
+    source = record.get('validation_record') or {}
+    state = (record.get('claim') or {}).get('context') or {}
+    parameters = (source.get('payload') or {}).get('parameters') or {}
+    context['result_numbers'] = [v for v in [state.get('pressure_value_gpa'), source.get('value_number'),
+        source.get('value_min'), source.get('value_max'), scalar(parameters.get('lambda_ep')),
+        scalar(parameters.get('omega_log'))] if type(v) in (int, float)]
+    return context
+
+
 def result_candidates(record, chunks):
-    context = policy_context(record) or {}
+    context = result_context(record)
     if context.get('stage') != 'sscha' or not context.get('result_numbers'):
         return []
     return [f'review-source-{i}' for i, c in enumerate(chunks) if anharmonic_result_matches(context, c['content'])]
@@ -165,7 +173,7 @@ def material_phase_anchor(context, chunks):
 
 
 PROMPT = '''
-计算条件规则 condition-rules-v1：有 condition_context 的记录，额外在每个 results[i] 内输出 condition_review：
+计算条件规则 condition-rules-v2：有 condition_context 的记录，额外在每个 results[i] 内输出 condition_review：
 {"verdict":"supported|not_reported|conflict|uncertain","value_origin":"reported|dfpt_definition",
  "scope":{"material":"当前材料","phase":"当前物相","software":"对应软件","stage":"对应阶段","parameter":"对应参数用途","approximation":"anharmonic|harmonic|unknown"},
  "exceptions":"none|present|unknown","explanation":"简短中文依据及适用范围",
@@ -186,8 +194,9 @@ software与stage都必须匹配，VASP的能量/力收敛阈值不能给QE。
 泛函必须有对应软件的报告。严禁从VASP-PBE推断QE-PBE；QE没有报告泛函就留空。
 未报告的可选条件留空，不提出通用知识猜测或软件默认值。已有值仍逐项判断，不自动改写。
 SSCHA超胞/原子数/温度只能给当前SSCHA/非谐流程，不能套给另一条谐波或AIMD结果。
-SSCHA范围证据还要引用原表的anharmonic分组及与result_numbers相符的结果行；scope中写approximation=anharmonic。
-condition_result_candidates提供可能包含分组和本条数值的原文，请阅读确认后与材料/物相依据一起引用。
+SSCHA条件须引用声明SSCHA非谐流程及材料/物相适用范围的原文，scope写approximation=anharmonic。
+不要以Tc数值或μ*是否匹配决定未变共用条件是否有效；结果配对与流程归属另行核对。
+condition_result_candidates仅提供原表定位线索，不是共用条件通过的前置要求；结果数值归属由结果核对处理。
 旧关联标签和以前的判断不是本次依据。关联属于paper_inference不妨碍按确认规则核对，仍保留其推断身份。
 有condition_context时优先完成condition_review，服务端会据此更新对应关联，无需重复生成association_reviews。
 '''
@@ -304,12 +313,9 @@ def validate_assessment(record, raw, chunks):
     if context['stage'] == 'sscha':
         if scope.get('approximation') == 'harmonic':
             return None
-        if not any(anharmonic_result_matches(context, e['quote']) for e in evidence['scope_evidences']):
-            matches = [i for i, c in enumerate(chunks) if anharmonic_result_matches(context, c['content'])]
-            if len(matches) != 1:
-                return None
-            # 确定性补入唯一匹配的原表分组；保存原始块，不编造表行或修改结果数值。
-            evidence['scope_evidences'].extend(locate_sources([{'source_id': f'review-source-{matches[0]}'}], chunks) or [])
+        # 非谐流程必须有依据；结果数值不是共用条件事实的身份。
+        if scope.get('approximation') != 'anharmonic' or not re.search(r'\banharmonic\b|非谐', normalized(scope_text + ' ' + software_text)):
+            return None
     origin = raw.get('value_origin')
     value = record.get('current_value')
     ownership_sources = [*evidence['fact_evidences'], *evidence['software_evidences']]
@@ -369,10 +375,8 @@ def review_error(record, raw, chunks):
     if context['stage'] == 'sscha':
         from .scientific_context import reported_value_matches
         if ((raw.get('scope') or {}).get('approximation') != 'anharmonic'
-            or not re.search(r'\banharmonic\b|非谐', normalized(text))
-            or not all(reported_value_matches(n, str(n), scope) for n in context.get('result_numbers') or [])):
-            return ('SSCHA的scope须写approximation=anharmonic，并补入原表非谐分组及当前结果行，'
-                    '不能只引用Methods；结果数值=' + str(context.get('result_numbers')))
+            or not re.search(r'\banharmonic\b|非谐', normalized(text))):
+            return 'SSCHA范围须明确非谐计算流程，并提供当前材料/物相的适用原文'
     return '当前值、单位、软件、阶段或参数用途未通过一致性校验，不能只引用其他软件的设置'
 
 
@@ -405,7 +409,7 @@ def current_review(record, result, chunks):
         or review.get('coverage') != sorted({window_hash(b) for b in source_batches(chunks)})):
         return None
     assessments = [validate_assessment(record, a, chunks) for a in review.get('assessments') or []]
-    if not assessments or not all(assessments) or result.get('association_conflict'):
+    if not assessments or not all(assessments) or result.get('association_conflict') or result.get('condition_conflict'):
         return None
     rule_id = 'dfpt_to_dft' if any(a['value_origin'] == 'dfpt_definition' for a in assessments) else 'reported_condition_scope'
     if review.get('rule_id') != rule_id:
