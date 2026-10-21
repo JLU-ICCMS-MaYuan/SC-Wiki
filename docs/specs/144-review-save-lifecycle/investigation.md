@@ -99,3 +99,38 @@
 截图中17.27/19.61、谐波/非谐波、单位的说明属于另外的科学核对问题，本轮没有重新读原表裁定，没有改名、改类型、改值或采纳模型建议。可保存与可完成科学审核须分别验收；不能以修复保存错误为由消除有根据的科学冲突。
 
 本轮仍为只读调查和文档补充，未修改代码或业务数据，未做浏览器端到端验收。
+
+
+## 补充症状：新增Tc–μ*组合后SSCHA条件瞬间标红
+
+用户提供IMG-005/006，报告从既有331/0.1新增296/0.16后，下面的SSCHA软件、超胞、原子数、温度、q网格、截断能、k网格、插值q网格共8项变红；QE与其他EPC字段未同样标红。截图是结果画面，未包含完整事件序列或压力标题。
+
+### 已证实的代码依赖不一致
+
+当前 `condition_rules.descriptor` 对SSCHA条件构造 `result_numbers`，包含压力、Tc单值/端点、λ及ωlog；`property_evidence.complete_snapshot` 将整个condition_policy纳入claim和content_hash。这用于从历史结果反查非谐归属，但也把结果数值带入条件资格。
+
+只读控制实验从真实草稿250 GPa、331、λ=2.89、ωlog=1075取SSCHA软件字段，复制到内存，仅将validation_record.value_number改为296：
+
+- 当前科学字段值SSCHA完全相同；record_dependencies仍为[]。
+- condition_context.result_numbers从[250.0,331,2.89,1075]变为[250.0,296,2.89,1075]，策略对象不再相同。
+- 证明显式依赖清单之外存在结果数值依赖；没有写回草稿，也没有运行模型。
+
+这不等于完整复现“新增第二个点”瞬间红框：实验改变的是内存中的承载结果，实际新增保留第一点时还需调查分组身份、范围展开、标记归属、事件路径及异步快照。不能把候选原因写成已证实的唯一根因。
+
+### 实际新增路径与后续复现点
+
+`PredictedTcGroupEditor`添加组合调用expandTcPoints和newTcPoint；`predictedTcGroups.ts`保存group_key/method_key/point_key，复制共同条件，新点从空值开始。PropertyModuleEditor将整个组写回，后台property_field_review为共同条件按组身份去重，而校验仍持有一条结果的validation_record。必须检查前端分组和后端归属在空点、范围展开、增删重排及切换代表点时是否一致。
+
+`evidenceFields.ts`负责前端变更/依赖判定，`EvidenceWorkflow.invalidate`处理当前值及变化通知，后端另有review_dependencies与condition_policy。即使页面显示不变，多处各自判断的依赖也可能不一致。修复必须统一实际依赖的含义，不能只加SSCHA不标红的例外。
+
+业务验收应分开：已有共用条件事实、该条件对新结果的适用性、新结果Tc–μ*数值。新结果可能待核对，但不能倒推否定已有流程的条件；新流程/近似真的改变则检查对应范围，不能忽略SSCHA非谐归属保护。
+
+### 页面跳动：同一Issue追踪，根因尚未确定
+
+用户转述一次隔离测试/视频没有跳转；本轮只收到两张PNG，没有可读取视频或完整浏览器时序，未观看视频、未复现跳动。该报告不能证明故障消失，也不能证明由上述SSCHA依赖造成。
+
+代码确有多种位置行为：UploadTaskEditor的定位scrollIntoView/focus、EvidenceWorkflow的侧栏返回滚动补偿及聚焦、EvidenceFieldMarkers的标签focus。这些都是待排查入口，存在调用不代表就是故障。
+
+实际验收应记录完整页面入口与任务版本、点击组合/逐项输入/保存重核/侧栏开关的顺序、URL、activeElement、滚动容器位置、组件身份及请求返回顺序。分别判断是滚动、失焦、路由导航还是重新挂载，覆盖实际编辑器、核对标记和异步操作；只有隔离新增测试没复现不构成结案证据。
+
+本次仍仅调查与文档增量；没有更改前端或业务数据。无需再让用户判断原有计算条件科学上是否正确来替代软件缺陷定位。
