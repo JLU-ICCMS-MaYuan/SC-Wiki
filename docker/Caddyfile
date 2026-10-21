@@ -1,6 +1,17 @@
 {$SITE_DOMAIN} {
     encode zstd gzip
-    reverse_proxy frontend:80
+    @api path /api/* /health
+    handle @api {
+        request_body {
+            max_size 51MiB
+        }
+        reverse_proxy goserver:8080 {
+            header_up X-Real-IP {remote_host}
+        }
+    }
+    handle {
+        reverse_proxy frontend:80
+    }
 }
 
 {$SITE_APEX} {
