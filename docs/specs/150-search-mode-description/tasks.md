@@ -31,3 +31,15 @@
 | SC-003 | T004 | 选择、清除与结果请求参数 |
 
 未完成协作行动仅以 GitHub Issue 为准。远程 Spec 链接待推送后核验；不擅自推送或关闭 Issue。
+
+## 阶段 4：布局修订收敛
+
+来源：用户在 IMG-002 后明确要求替换初版头部布局；旧 T003/T004 的证据仅对应旧版，不能证明新布局完成。
+
+- [x] T006 [US1] 更新 docs/specs/150-search-mode-description/spec.md、plan.md、research.md、contracts/ui.md、checklists/requirements.md，归档 IMG-002 并将最新原话同步到 Issue #150；覆盖 FR-005–007。
+- [x] T007 [US1] 修改 frontend/src/pages/SearchPage.tsx 为首行对齐、已选元素独立下一行、统一字号和说明弹性列；覆盖 FR-005–007。
+- [x] T008 [US1] 按 docs/specs/150-search-mode-description/quickstart.md 复验双语桌面/窄屏、字号/中心/列宽及选择交互，记录截图并同步 docs/overview/03_Superconductivity_Data_Search_and_Database_Discovery/local-material-search.md；覆盖 SC-001–004。
+
+按 T006 → T007 → T008 串行执行，原任务与历史验收保留。
+
+本轮 T006–T008 证据：spec.md 原文及 IMG-002 索引、quickstart.md 当前版本验收、assets/aligned-validation.json 和新版截图；43 组界面检查及修订后的构建通过。

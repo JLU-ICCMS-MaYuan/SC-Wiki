@@ -22,7 +22,7 @@ npm run test:upload-ui -- tests/03_data_search_and_database_discovery/search-pag
 npm run build
 ```
 
-## 验证记录
+## 初版验证记录（布局修订前）
 
 2026-10-22，本地 `http://127.0.0.1:5173/search`，使用 Chrome 与 Playwright，真实页面及布局引擎，API 在浏览器中隔离。
 
@@ -56,3 +56,20 @@ npm run build
 - [桌面中文截图](assets/desktop-zh.png)、[窄屏中文截图](assets/mobile-zh.png)、[窄屏英文截图](assets/mobile-en.png)。
 - 本次临时浏览器驱动：`/tmp/scwiki-150-browser.mjs`；原始完整输出：`/tmp/scwiki-150-artifacts/results.json`；基线输出：`/tmp/scwiki-150-baseline-results.json`。临时文件不作为长期唯一证据，关键摘要与截图已归档。
 - 人工复查可按上面的操作与预期重做。此验证不证明生产数据库检索结果或线上部署，未执行推送。
+
+## 布局修订验收（当前版本）
+
+2026-10-22 根据用户第二次截图及明确反馈调整。旧截图只代表初版，当前布局见本节。
+
+- 第一行桌面采用三列：标题、占满剩余宽度的说明、模式与操作；已选元素独立下一行。
+- 标题、三个模式、进入/清除按钮、已选元素标签与值统一 16px，说明沿用 13px。
+- 1600/1920 像素桌面分别实测标题、说明及五个按钮垂直中心差不超过 1px，说明两侧间距各 16px，无额外限宽。
+- 中英文各三种模式，在 1920、1600、1440、1024、768、390、320 像素宽度检查，加初始桌面共 43 组通过。小于 1600 像素时采用窄屏排列，避免较长英文把说明挤到零宽度。
+- 所有尺寸下已选元素均位于整组标题/说明/操作下方；说明与按钮无相互重叠、无截断，计算字号符合规则。
+- 三种说明、默认空选择、语言切换、选择/清除、三种模式出站检索参数，以及隔离搜索失败后返回说明均通过；pageerror 为 0。
+- 本轮布局修订后再次运行 `npm run build` 通过；保留既有大分包与 3Dmol eval 警告。
+- 本轮只改变布局，未重跑无变化的结果页旧回归；初版记录的 3 项基线失败仍不能声称已修复。
+
+证据：[新版头部截图](assets/aligned-header-zh.png)、[桌面截图](assets/aligned-desktop-zh.png)、[窄屏中文](assets/aligned-mobile-zh.png)、[窄屏英文](assets/aligned-mobile-en.png)、[尺寸与字号实测](assets/aligned-validation.json)。
+
+本次临时浏览器驱动：`/tmp/scwiki-150-layout-browser.mjs`；完整输出：`/tmp/scwiki-150-layout-artifacts/results.json`。复查时按上方操作，并核对第一行中心、独立已选行、字号及说明列宽。

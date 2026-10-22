@@ -8,7 +8,7 @@
 
 - Go API `POST /api/papers/search/records` 支持 `formula_search`、`elements_exact_search`、`elements_combination_search` 和 `elements_contained_search` 四种模式。
 - 化学式检索通过化学式提取元素并构建 `system_key`；元素检索在 `chemical_systems` 内按精确、组合或包含关系匹配材料体系。
-- 元素周期表卡片顶部随当前方案显示说明：组合匹配所选元素的一种或多种组成的体系，精确匹配恰好包含全部所选元素的体系，包含模式允许加入其他元素。默认及未选元素时也显示说明，清除元素保留当前说明；支持中英文与窄屏换行。说明仅解释匹配规则，示例不保证存在对应记录，亦不改变检索逻辑。见 [#150 规格与验收](../../specs/150-search-mode-description/quickstart.md)。
+- 元素周期表卡片顶部随当前方案显示说明：组合匹配所选元素的一种或多种组成的体系，精确匹配恰好包含全部所选元素的体系，包含模式允许加入其他元素。桌面首行依次为标题、说明、模式与进入/清除操作，垂直居中，说明占满标题与模式组之间的剩余宽度；已选元素放在独立下一行。头部除说明外统一 16px，说明为 13px；默认及未选元素时也显示说明，清除元素保留当前说明。支持中英文；小于 1600px 窗口按窄屏排列并允许按钮换行。说明仅解释匹配规则，示例不保证存在对应记录，亦不改变检索逻辑。见 [#150 规格与验收](../../specs/150-search-mode-description/quickstart.md)。
 - 本地检索的记录主体是 `property_records`，关联 `property_modules`、`material_states`、`superconductors` 与当前 revision 的 `papers`；只读取 `property_code = tc` 的测量或预测 Tc 记录。一行代表一个材料在一组条件下的一条 Tc 记录。（[Issue #57](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/57)）
 - 筛选条件各自对应真实列：Tc 使用 `property_records.value_number`，缺失时取 `value_min` 与 `value_max` 的均值，压强用 `material_states.pressure_value_gpa`，元素用 `material_states.superconductor_id`，关键词匹配论文字段或 `superconductors.chemical_formula`。（[Issue #57](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/57)）
 - 请求的 `superconductor_type` 参数当前落到 `material_states.state_kind`，但该列的取值是 `theoretical`/`experimental`/`mixed`/`unknown`，描述数据来源性质而非材料分类；材料分类维度现为论文级 `paper_material_families` 关联。本地检索尚未按该关系筛选，属待核验的语义不一致。（[Issue #72](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/72)、[Issue #79](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/79)）

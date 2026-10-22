@@ -303,35 +303,39 @@ const SearchPage: React.FC = () => {
         {/* Periodic table card */}
         <Card sx={{ boxShadow: 3 }}>
           <CardContent>
-            <Box sx={{ display:'flex',flexWrap:'wrap',alignItems:'center',gap:2,mb:2 }}>
-              <Box sx={{ minWidth:0 }}>
-                <Typography variant="h2">{t('search.periodicSearch')}</Typography>
-                <Box sx={{ display:'flex',flexWrap:'wrap',alignItems:'center',gap:1.5,mt:1.5 }}>
-                  <Typography variant="body2">{t('search.selectedElements')}</Typography>
-                  <Chip label={selected.size ? [...selected].sort().join(', ') : t('search.noneSelected')} color={selected.size ? 'primary' : 'default'}
-                    sx={{ maxWidth:'100%',height:'auto','& .MuiChip-label':{ whiteSpace:'normal',overflowWrap:'anywhere',py:0.75 } }} />
+            <Box sx={{ fontSize:16,mb:2 }}>
+              <Box sx={{ display:'grid',gridTemplateColumns:'auto minmax(0,1fr) auto',alignItems:'center',gap:2,
+                '@media (max-width:1599px)':{ gridTemplateColumns:'minmax(0,1fr)' } }}>
+                <Typography variant="h2" sx={{ fontSize:'inherit',lineHeight:1.5 }}>{t('search.periodicSearch')}</Typography>
+                {currentElementSearchMode && (
+                  <Typography id="element-search-mode-description" role="status" aria-live="polite" aria-atomic="true" variant="body2"
+                    sx={{ minWidth:0,color:'text.secondary',lineHeight:1.7,overflowWrap:'anywhere' }}>
+                    {t(currentElementSearchMode.description)}
+                  </Typography>
+                )}
+                <Box sx={{ display:'flex',alignItems:'center',gap:1,maxWidth:'100%',
+                  '& .MuiButton-root':{ fontSize:'inherit' },
+                  '@media (max-width:1599px)':{ flexWrap:'wrap' } }}>
+                  {/* Mode segments */}
+                  <Box sx={{ display:'inline-flex',gap:0.5,maxWidth:'100%',bgcolor:'#e8e8ed',borderRadius:'20px',p:0.5,
+                    '@media (max-width:1599px)':{ flexWrap:'wrap' } }}>
+                    {elementSearchModes.map(option=>(
+                      <Button key={option.value} size="small"
+                        aria-pressed={mode===option.value}
+                        aria-describedby={mode===option.value ? 'element-search-mode-description' : undefined}
+                        sx={{ borderRadius:'16px',px:2.5,py:1,color:mode===option.value?'#fff':'text.primary',bgcolor:mode===option.value?'primary.main':'transparent',minWidth:0,maxWidth:'100%',overflowWrap:'anywhere',textTransform:'none','&:hover':{bgcolor:mode===option.value?'primary.main':'action.hover'} }}
+                        onClick={()=>setMode(option.value)}>{t(option.label)}</Button>
+                    ))}
+                  </Box>
+                  <Button variant="contained" disabled={selected.size===0 && !formulaQuery}
+                    onClick={()=>{setStage('results');toast(t('search.elementsRefreshed'))}}>{t('search.enterPage')}</Button>
+                  <Button variant="outlined" onClick={()=>setSelected(new Set())}>{t('search.clearSelection')}</Button>
                 </Box>
               </Box>
-              {currentElementSearchMode && (
-                <Typography id="element-search-mode-description" role="status" aria-live="polite" aria-atomic="true" variant="body2"
-                  sx={{ flex:'1 1 280px',minWidth:0,color:'text.secondary',lineHeight:1.7,overflowWrap:'anywhere' }}>
-                  {t(currentElementSearchMode.description)}
-                </Typography>
-              )}
-              <Box sx={{ display:'flex',flexWrap:'wrap',alignItems:'center',gap:1,maxWidth:'100%' }}>
-                {/* Mode segments */}
-                <Box sx={{ display:'inline-flex',flexWrap:'wrap',gap:0.5,maxWidth:'100%',bgcolor:'#e8e8ed',borderRadius:'20px',p:0.5 }}>
-                  {elementSearchModes.map(option=>(
-                    <Button key={option.value} size="small"
-                      aria-pressed={mode===option.value}
-                      aria-describedby={mode===option.value ? 'element-search-mode-description' : undefined}
-                      sx={{ borderRadius:'16px',px:3.5,py:1,fontSize:'0.9rem',color:mode===option.value?'#fff':'text.primary',bgcolor:mode===option.value?'primary.main':'transparent',minWidth:0,maxWidth:'100%',overflowWrap:'anywhere',textTransform:'none','&:hover':{bgcolor:mode===option.value?'primary.main':'action.hover'} }}
-                      onClick={()=>setMode(option.value)}>{t(option.label)}</Button>
-                  ))}
-                </Box>
-                <Button variant="contained" disabled={selected.size===0 && !formulaQuery}
-                  onClick={()=>{setStage('results');toast(t('search.elementsRefreshed'))}}>{t('search.enterPage')}</Button>
-                <Button variant="outlined" onClick={()=>setSelected(new Set())}>{t('search.clearSelection')}</Button>
+              <Box sx={{ display:'flex',flexWrap:'wrap',alignItems:'center',gap:1.5,mt:1.5,minWidth:0 }}>
+                <Typography sx={{ fontSize:'inherit' }}>{t('search.selectedElements')}</Typography>
+                <Chip label={selected.size ? [...selected].sort().join(', ') : t('search.noneSelected')} color={selected.size ? 'primary' : 'default'}
+                  sx={{ fontSize:'inherit',maxWidth:'100%',height:'auto','& .MuiChip-label':{ whiteSpace:'normal',overflowWrap:'anywhere',py:0.75 } }} />
               </Box>
             </Box>
             <Box sx={{ overflowX:'auto',py:2 }}>
