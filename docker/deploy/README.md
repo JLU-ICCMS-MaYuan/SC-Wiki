@@ -1,5 +1,10 @@
 # SC-Wiki 三组生产部署
 
+主目录迁移目标为 `/home/mayuan/sc-wiki`（发布与私有配置）和
+`/home/mayuan/scwiki-containered`（本项目持久数据）。实际切换与核验状态见
+[#146 验证记录](../../docs/specs/146-aliyun-production-deployment/validation.md)。
+下文 `/opt/scwiki` 的初始部署示例适用于旧布局；新布局操作使用文末的当前实例命令。
+
 网站、数据、解析分别由 `compose.app.yaml`、`compose.data.yaml`、`compose.compute.yaml` 管理；共享运行定义位于 `compose.runtime.yaml`。旧 `compose.yaml` 已停止提供聚合服务，避免新建另一套空数据库。本机原生开发流程不变。
 
 ## 首次准备
@@ -107,14 +112,29 @@ image.vcdiff 的目录、`--output` 指定尚不存在的新 tar 文件。工具
 
 ### 连接与维护
 
-网站为 https://www.sc-wiki.com，服务器为 `root@47.111.123.225`，发布入口目录为
-`/opt/scwiki/current`，发布清单为 `/opt/scwiki/release.env`，私有配置位于
-`/opt/scwiki/private/`。首次备份和核验记录位于 `/opt/scwiki/backups/initial-20261021/`。
+网站为 https://www.sc-wiki.com，服务器为 `47.111.123.225`。用户指定迁移后的发布入口为
+`/home/mayuan/sc-wiki/current`，发布清单为 `/home/mayuan/sc-wiki/release.env`，
+私有配置位于 `/home/mayuan/sc-wiki/private/`。首次备份保留在新发布根的
+`backups/initial-20261021/`，本次迁移证据位于 `backups/relocation-20261022/`。
 
 ```bash
-ssh "root@47.111.123.225" 'cd "/opt/scwiki/current" && python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" status'
-ssh "root@47.111.123.225" 'cd "/opt/scwiki/current" && python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" logs --group compute --service worker'
+# 登录 mayuan 后在服务器执行，Docker 管理使用 sudo。
+cd "/home/mayuan/sc-wiki/current"
+sudo python3 "scripts/deploy.py" --release "/home/mayuan/sc-wiki/release.env" status
+sudo python3 "scripts/deploy.py" --release "/home/mayuan/sc-wiki/release.env" logs --group compute --service worker
 ```
+
+`SCWIKI_VOLUME_ROOT=/home/mayuan/scwiki-containered`、`SCWIKI_VOLUME_PREFIX=scwiki-home`
+将 13 个活跃卷绑定到该数据根的同名子目录，三个 Compose 项目和网络名称仍为 scwiki。
+发布根归 mayuan 管理；数据根可由 mayuan 查看目录列表，但 MySQL、Redis、Neo4j 等子目录
+保留服务原有 UID/GID 和权限，禁止递归 chown/chmod。历史演练数据库保存于数据根的
+`archive/rehearsal-mysql`，不是线上活跃数据。
+
+日常操作只使用新入口。旧 `/opt/scwiki` 和原 `scwiki_*` 卷保留为停写时副本，不再承接新写入；
+不要同时启动两套。回退前先暂停入口和任务，保存新目录中的新增业务数据，核对迁移证据后
+才能恢复旧配置；禁止直接用旧卷覆盖当前业务。Docker `/var/lib/docker` 与 containerd
+`/var/lib/containerd` 保持不变。目录迁移后的启动会严格核验部署标记与卷实际 device 路径，
+缺失目录时不会静默创建空数据。
 
 本地源数据及私有独立备份继续保留。Embedding 与尚未完成的业务验收以 #146 为准；
 不要因为网站已可访问而关闭所有部署验收任务。

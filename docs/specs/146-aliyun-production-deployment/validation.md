@@ -107,3 +107,19 @@ DNS www 和根域均指向目标；备案按用户要求不阻塞准备。所有
 - `https://sc-wiki.com` 返回 301，跳转到 `https://www.sc-wiki.com/`。
 - `http://www.sc-wiki.com` 与 `http://sc-wiki.com` 仍返回阿里云 Beaver 的 403 / Non-compliance ICP Filing 页面，因此 HTTP 自动跳转验收仍不成立。
 - Embedding 基础接入已完成，不以此替代检索效果评测、正式审核发布全链路和全部社区/外部模型验收。#146 继续开放，T007/T008 不因本次接入自动完成。
+
+## 2026-10-22 主目录与持久数据迁移
+
+- 用户明确指定发布根 `/home/mayuan/sc-wiki`，数据根 `/home/mayuan/scwiki-containered`；仅迁移 SC-Wiki，不改 Docker/containerd 引擎存储。两个目标原先不存在，mayuan UID/GID 均为 1000，已有 sudo 组权限。
+- 部署工具与三个 Compose 文件支持 `SCWIKI_VOLUME_PREFIX` / `SCWIKI_VOLUME_ROOT`；实际使用 scwiki-home 前缀，外部网络与三个项目仍为 scwiki。启动核验标记、目录和真实卷 device；新增缺目录、错路径、符号链接、非空目录接管及 Compose 解析测试，13 项通过。配置提交 `ea300d3446667592ff8f8c00d7bee3b147ab7eef`，应用镜像保持此前版本。
+- 先预复制约 23 GB 发布、备份和镜像归档。首轮维护检查发现一条未来执行的 `backend.ingest.upload_tasks.cleanup_upload_task` 定时任务，未删除或提前执行；先恢复入口，再采用同机冷迁移的明确白名单保留。所有实际排队、执行和延迟重试任务为空，3 个草稿均为 ready。
+- 第二轮正常停止全部 14 个服务，确认没有 OOM 或强杀退出；保存业务清单和 89 个 S3 对象的内容/元数据独立备份。冷态 rsync 使用 numeric IDs、ACL、扩展属性、硬链接和符号链接保留；源/目标逐文件 SHA-256、类型、UID/GID、权限和链接内容比较一致，全部 13 个卷另通过 rsync checksum 空差异检查。
+- 活跃卷约 3.62 GB，旧演练 MySQL 另复制约 402 MB 到 `scwiki-containered/archive/rehearsal-mysql`；它继续保持停止状态。原 `/opt/scwiki` 和原 `scwiki_*` 卷保留，没有覆盖源数据。
+- 数据组先在新目录启动，恢复前后的 68 张表结构/行数/内容摘要、6 个草稿状态键及绝对过期时间、属性名映射、向量配置和内容、Neo4j 节点/关系/约束/索引均一致。89 个 S3 对象完整回读通过；保留的定时清理作业字段摘要及原执行时间一致。
+- 新发布目录归 mayuan 管理，两个顶层目录均为 0700；私有配置保留秘密权限。数据各子目录内部仍使用原服务 UID/GID，未递归改为 mayuan。通过 runuser 实测 mayuan 能进入发布根、读取及修改 release.env。
+- `/home/mayuan/sc-wiki/current` 指向 `releases/ea300d3`；13 个活跃卷的 device 均位于新数据根，所有业务 bind 挂载均位于新发布根。DockerRootDir 仍为 `/var/lib/docker`，containerd 未配置或迁移，旧数据卷保留。
+- 数据与计算角色检查通过，网站恢复后 HTTPS 新闻页及健康接口为 200、HTTPS 裸域 301 到 www；HTTP 仍为阿里云备案 403，未因此声明全部域名验收通过。
+- 迁移证据、冷态清单和逻辑核验保存在 `/home/mayuan/sc-wiki/backups/relocation-20261022/`；本次操作工作区 `/opt/scwiki-home-migration-20261022/` 暂时保留。原路径只作停写时副本，不应再启动旧配置；开放写入后的回退必须先保护新数据。
+- 补充重建未因挂载变化自动重建的 frontend、news-worker、news-scheduler 和 grobid 后，14 个容器的 Compose 管理标签均指向新发布根，避免后续工具仍提示旧入口。计算服务重建期间先暂停入口并检查无排队/执行任务，未修改数据卷内容。
+- 最终真实 Chrome 访问 HTTPS 新闻页成功，标题正确、页面可见，健康接口为 200 / status=ok，无脚本异常或 5xx；证据 `browser-verification.json` 与 `runtime-verification.json` 已留存。mayuan 可以管理新发布根，13 个活跃卷全部使用新目录。
+- 本地分支存在其他任务尚未推送的提交，因此本次配置/文档完成本地提交与服务器发布，但未连带推送这些无关提交；Issue 记录本地提交及运行证据，新文档的远端同步仍待独立处理。

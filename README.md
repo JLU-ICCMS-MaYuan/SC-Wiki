@@ -5,7 +5,9 @@
 ## 阿里云三组单机部署（#146）
 
 生产使用网站、数据、解析三个独立 Compose 项目，入口为
-`python3 "scripts/deploy.py" --release "/opt/scwiki/release.env" <动作> --group <组>`。
+`sudo python3 "scripts/deploy.py" --release "/home/mayuan/sc-wiki/release.env" <动作> --group <组>`，
+在服务器 `/home/mayuan/sc-wiki/current` 下执行。发布配置、备份和镜像归档归入
+`/home/mayuan/sc-wiki`；本项目持久数据在 `/home/mayuan/scwiki-containered`，保留服务所需权限。
 旧 `docker/compose.yaml` 已退役，不再启动全栈；本地原生开发入口不变。
 应用镜像固定版本，业务文件使用 Garage S3，数据库迁移为显式维护操作。
 首次迁移必须一致性备份、恢复并校验，不能直接把运行中的 `.data/` 拷到容器。

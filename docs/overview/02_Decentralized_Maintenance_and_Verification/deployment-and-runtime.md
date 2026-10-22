@@ -31,6 +31,15 @@ Caddy 负责 HTTPS、真实客户端 IP
 配置、文件层及平台。差分不改变目标制品，也不覆盖已有输出文件。运行记录区分 Docker Hub
 digest、实际本地镜像 ID 与各服务的源码提交，避免把 Docker 29 的本地镜像 ID 误认为配置摘要。
 
+2026-10-22 按用户指定完成同机目录迁移：发布入口为 `/home/mayuan/sc-wiki/current`，
+私有配置、备份和镜像归档位于 `/home/mayuan/sc-wiki`，13 个业务持久卷通过 local bind 卷
+存放于 `/home/mayuan/scwiki-containered`。发布清单分别以 `SCWIKI_ROOT`、
+`SCWIKI_VOLUME_ROOT`、`SCWIKI_VOLUME_PREFIX` 记录两类路径与独立卷身份；启动检查
+部署标记和真实卷挂载一致，缺目录、符号链接替换或错误挂载会拒绝启动。
+两个顶层目录归 mayuan，数据内部保留原服务 UID/GID；管理 Docker 继续使用 sudo。
+Docker/containerd 引擎存储未移动。旧 `/opt/scwiki` 和原卷保留为停写时副本，不再接收线上写入；
+不能同时启动旧配置或用旧卷直接覆盖新数据。迁移证据位于新发布根的 `backups/relocation-20261022/`。
+
 ### 本地开发：宿主机进程（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)）
 
 - 本地服务全部运行在宿主机，由 `scripts/dev.sh` 编排，入口为 `Makefile`（`make start` / `stop` / `status` / `logs`）。GROBID 0.8.1 从官方源码、默认 Wapiti 模型及原生库构建，Mac 共用 `sc-wiki` 的 Java 21，Linux 使用 `.local/grobid-java` 中独立 Java 17，API 8070 和管理接口 8071 均绑定回环地址；本地安装与启停不调用 Docker。
