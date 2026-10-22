@@ -1,0 +1,112 @@
+/* 仅独立 Demo 入口加载；不覆盖现有应用页面。 */
+body:has(.sc-auth-demo) { background: #fff; }
+.sc-auth-demo { min-height: 100svh; background: #fff; color: #272536; display: flex; flex-direction: column; --sc-purple: #4f46e5; font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+.sc-auth-demo * { box-sizing: border-box; }
+.sc-auth-demo button, .sc-auth-demo input { font: inherit; }
+.sc-auth-demo a { color: inherit; text-decoration: none; }
+.sc-auth-demo :focus-visible { outline: 3px solid #a39bef; outline-offset: 4px; }
+.sc-auth-demo h1:focus, .sc-auth-demo h2:focus { outline: none; }
+.sc-auth-header { height: 108px; flex-shrink: 0; padding: 0 5%; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.sc-brand { display: inline-flex; align-items: center; gap: 12px; }
+.sc-brand-mark { width: 44px; height: 44px; border: 1px solid #e3dff8; border-radius: 13px; display: grid; grid-auto-flow: column; place-content: center; background: #f5f3ff; color: #4f46e5; font-size: 25px; font-weight: 650; letter-spacing: -1.8px; }
+.sc-brand-mark > span { color: #8b80dc; }
+.sc-brand-name { display: flex; flex-direction: column; font-size: 18px; font-weight: 650; letter-spacing: -.5px; line-height: 1.3; }
+.sc-brand-name > span { font-size: 10px; font-weight: 450; color: #878395; letter-spacing: 1.4px; margin-top: 4px; }
+.sc-header-actions { display: flex; align-items: center; gap: 20px; color: #716c80; }
+.sc-header-actions .MuiButton-root { font-size: 12px; font-weight: 450; padding: 0 8px; min-width: 0; }
+.sc-header-actions .MuiSvgIcon-root { font-size: 16px; }
+.sc-auth-main { flex: 1; width: 100%; max-width: 1600px; margin: auto; display: grid; grid-template-columns: 60% 40%; padding: 28px 5% 42px; align-items: center; }
+.sc-visual { min-width: 0; align-self: center; padding: 0 28px 0 0; }
+.sc-hero-copy { padding-left: 7%; }
+.sc-eyebrow { font-size: 11px; font-weight: 550; letter-spacing: 2px; color: #756e94; display: flex; align-items: center; gap: 10px; }
+.sc-eyebrow > span { display: inline-block; width: 20px; height: 1px; background: #8d83be; }
+.sc-hero-copy h2 { font-size: clamp(36px, 3.5vw, 55px); line-height: 1.3; font-weight: 550; letter-spacing: -1.8px; margin: 23px 0 20px; }
+.sc-hero-copy h2 > span { color: #7262b6; }
+.sc-hero-copy p { font-size: 14px; color: #777183; line-height: 1.9; margin: 0; }
+.sc-hero-copy p > span { color: #928c9c; font-size: 12px; }
+.sc-scene { margin: -1px 0 0; }
+.sc-orbit { display: block; width: 100%; max-height: 340px; overflow: visible; }
+.sc-scene-meta { margin: -9px 8% 0; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.sc-state { display: inline-flex; align-items: center; gap: 7px; color: #827b94; font-size: 11px; letter-spacing: .3px; }
+.sc-state-dot { width: 5px; height: 5px; background: #9282be; border-radius: 50%; }
+.sc-scene-actions { display: flex; align-items: center; gap: 18px; }
+.sc-scene-actions .MuiIconButton-root { color: #8d849d; }
+.sc-temperature { font-family: Georgia, serif; font-style: italic; color: #8b819b; font-size: 14px; }
+.sc-temperature sub { font-size: 10px; }
+.sc-science { margin: 9px 8% 0; font-size: 10px; color: #938c9e; max-width: 480px; line-height: 1.8; }
+.sc-science summary { cursor: pointer; width: fit-content; }
+.sc-science p { margin: 8px 0 0; font-size: 11px; }
+.sc-form-section { min-width: 0; padding: 32px 0 32px 38px; display: flex; justify-content: center; border-left: 1px solid #f0edf5; }
+.sc-form-content { width: 100%; max-width: 380px; }
+.sc-tabs { display: flex; gap: 30px; margin-bottom: 35px; border-bottom: 1px solid #eeecf2; }
+.sc-tabs button { background: none; border: 0; padding: 0 3px 13px; position: relative; color: #918a9a; cursor: pointer; font-size: 14px; }
+.sc-tabs button[aria-selected="true"] { color: #4f46e5; font-weight: 600; }
+.sc-tabs button[aria-selected="true"]::after { content: ''; position: absolute; bottom: -1px; height: 2px; background: #4f46e5; left: 0; right: 0; border-radius: 2px; }
+.sc-form-content h1 { font-size: 26px; font-weight: 600; line-height: 1.45; letter-spacing: -.8px; margin: 0 0 8px; }
+.sc-form-intro { color: #776d83; font-size: 13px; line-height: 1.8; margin: 0 0 31px; overflow-wrap: anywhere; }
+.sc-form-intro strong { display: inline-block; margin-top: 8px; color: #5a526b; font-weight: 500; }
+.sc-form-content fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.sc-field { margin-bottom: 20px; }
+.sc-field > label { display: block; font-size: 12px; font-weight: 550; color: #514b60; margin-bottom: 9px; }
+.sc-field input { width: 100%; min-width: 0; height: 49px; border: 1px solid #e6e2ed; border-radius: 9px; background: #fcfbfd; padding: 0 14px; font-size: 14px; color: #332c43; transition: border-color .15s, box-shadow .15s; }
+.sc-field input::placeholder { color: #80758d; font-size: 13px; }
+.sc-field input:hover { border-color: #c7bfd9; }
+.sc-field input:focus { outline: none; border-color: #8f80d4; box-shadow: 0 0 0 3px #f2eefb; background: #fff; }
+.sc-field input[aria-invalid="true"] { border-color: #b3261e; }
+.sc-password { position: relative; }
+.sc-password input { padding-right: 47px; }
+.sc-password .MuiIconButton-root { position: absolute; right: 8px; top: 9px; color: #a39bad; }
+.sc-field-hint { display: block; margin-top: 7px; font-size: 11px; color: #786d82; line-height: 1.5; }
+.sc-auth-demo .sc-submit.MuiButton-root { min-height: 49px; border-radius: 9px; font-size: 14px; font-weight: 550; letter-spacing: .3px; margin-top: 7px; padding: 0 17px; justify-content: space-between; }
+.sc-auth-demo .sc-submit.MuiButton-root:hover { background: #4338ca; }
+.sc-email-only { display: flex; align-items: center; justify-content: center; gap: 7px; color: #796e84; font-size: 11px; margin: 19px 0 0; }
+.sc-email-only .MuiSvgIcon-root { font-size: 14px; }
+.sc-demo-note { margin-top: 37px; padding-top: 18px; border-top: 1px solid #f0edf4; color: #796e84; font-size: 11px; line-height: 1.7; }
+.sc-demo-note details { margin-top: 6px; }
+.sc-demo-note summary { cursor: pointer; width: fit-content; color: #857990; }
+.sc-demo-note p { margin: 10px 0; }
+.sc-demo-note .MuiButton-root { font-size: 11px; padding: 0 9px; min-height: 30px; }
+.sc-auth-footer { flex-shrink: 0; padding: 24px 5% 27px; display: flex; justify-content: space-between; gap: 20px; color: #7e7489; font-size: 10px; letter-spacing: .5px; }
+.sc-footer-dot { padding: 0 10px; color: #d4cedc; }
+.sc-form-error.MuiAlert-root { margin: 0 0 12px; font-size: 12px; overflow-wrap: anywhere; }
+.sc-step-symbol { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; color: #7863b2; background: #f5f1fc; margin-bottom: 26px; }
+.sc-success-symbol { color: #468b75; background: #edf8f3; }
+.sc-code-notice { font-size: 12px; line-height: 1.8; padding: 14px; background: #f8f6fc; border-radius: 8px; color: #837591; margin-bottom: 22px; }
+.sc-code-input { letter-spacing: 9px; font-variant-numeric: tabular-nums; }
+.sc-auth-demo .sc-resend { font-size: 12px; margin-top: 10px; font-weight: 450; }
+.sc-auth-demo .sc-back-login { margin-top: 16px; font-size: 12px; padding-left: 0; color: #897d97; }
+.sc-entry { flex: 1; width: min(720px, 90%); margin: 100px auto; }
+.sc-entry h1 { font-size: clamp(30px, 4vw, 48px); font-weight: 550; line-height: 1.4; margin: 24px 0; }
+.sc-entry p { color: #897f97; max-width: 540px; line-height: 1.9; }
+.sc-entry-buttons { display: flex; gap: 16px; margin: 35px 0; flex-wrap: wrap; }
+.sc-entry-buttons .MuiButton-root { border-radius: 9px; min-height: 48px; }
+.sc-live-link { font-size: 12px; color: #827397 !important; }
+@media (min-width: 1600px) { .sc-auth-main { padding-left: 60px; padding-right: 60px; } }
+@media (max-width: 1100px) and (min-width: 761px) { .sc-auth-main { grid-template-columns: 54% 46%; padding-left: 3%; padding-right: 4%; } .sc-form-section { padding-left: 26px; } .sc-visual { padding-right: 12px; } .sc-hero-copy p > span { display: inline-block; max-width: 270px; } }
+@media (max-width: 760px) {
+  .sc-auth-header { height: 86px; padding: 0 24px; gap: 8px; }
+  .sc-brand-name { font-size: 16px; } .sc-brand-name > span { font-size: 8px; letter-spacing: .5px; }
+  .sc-brand-mark { height: 36px; width: 36px; font-size: 21px; border-radius: 10px; }
+  .sc-brand { gap: 9px; } .sc-header-actions { gap: 6px; }
+  .sc-header-actions .MuiButton-root { font-size: 11px; padding: 0 5px; } .sc-header-actions .MuiButton-startIcon { margin-right: 4px; }
+  .sc-auth-main { display: flex; flex-direction: column; padding: 13px 24px 25px; }
+  .sc-visual { padding: 0; width: 100%; max-width: 480px; }
+  .sc-hero-copy { padding: 0; } .sc-eyebrow { font-size: 9px; letter-spacing: 1px; }
+  .sc-hero-copy h2 { font-size: 29px; margin: 14px 0 0; letter-spacing: -.7px; }
+  .sc-hero-copy h2 br { display: none; } .sc-hero-copy p { display: none; }
+  .sc-scene { margin: 4px 0 0; } .sc-orbit { max-height: 170px; }
+  .sc-scene-meta { margin: -4px 0 0; } .sc-state { font-size: 10px; }
+  .sc-science { margin: 3px 0 0; font-size: 9px; }
+  .sc-form-section { width: 100%; padding: 30px 0 0; border-left: 0; margin-top: 15px; border-top: 1px solid #f0edf5; }
+  .sc-tabs { margin-bottom: 25px; } .sc-form-content h1 { font-size: 24px; }
+  .sc-form-intro { margin-bottom: 25px; } .sc-demo-note { margin-top: 28px; }
+  .sc-auth-footer { padding: 22px 24px; font-size: 9px; } .sc-auth-footer > span:last-child { display: none; }
+  .sc-field input { font-size: 16px; } .sc-entry { margin: 50px auto; }
+}
+@media (max-width: 380px) {
+  .sc-auth-header { padding: 0 16px; } .sc-brand-name > span { display: none; }
+  .sc-header-actions { gap: 0; } .sc-header-actions .MuiButton-startIcon { display: none; }
+  .sc-auth-main { padding-left: 20px; padding-right: 20px; } .sc-hero-copy h2 { font-size: 26px; }
+  .sc-orbit { max-height: 170px; } .sc-form-content h1 { font-size: 22px; }
+}
+@media (prefers-reduced-motion: reduce) { .sc-field input { transition: none; } }
