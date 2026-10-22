@@ -83,6 +83,37 @@ it('μ* 真实控件通过来源侧栏定位设置表单并保存修改', async 
   await waitFor(() => expect(apply).toHaveBeenCalledWith(0.1, {name_raw: 'μ* 修订值', unit_raw: ''}))
 })
 
+it('主动核对使用草稿令牌，通过后关闭且提交直接复用', async () => {
+  const passed = {...base, status: 'supported' as const, pending_review: false, reason: '模型已核对当前值及依据'}
+  const save = vi.fn().mockResolvedValue(true)
+  vi.mocked(api.post).mockImplementation(async (path) => {
+    if (path.endsWith('/summary')) return {version: 'draft-v1', records: [base], needs_check: true} as never
+    if (path.endsWith('/jobs')) return {id: 'field-job', status: 'queued'} as never
+    if (path.endsWith('/submit-check')) return {status: 'completed', version: 'science-v1', records: [passed]} as never
+    throw new Error(path)
+  })
+  vi.mocked(api.get).mockImplementation(async path => path.endsWith('/jobs/field-job')
+    ? {id: 'field-job', status: 'completed', version: 'science-v1', records: [passed]} as never
+    : {record: {}, records: [], history: []} as never)
+  let flow: ReturnType<typeof useEvidenceWorkflow>
+  function Harness() {
+    flow = useEvidenceWorkflow({target: {target: 'upload', target_id: 'test'}, saveCurrent: save})
+    return <><button onClick={() => flow.openIssue('name')}>打开核对</button>{flow.dialog}</>
+  }
+  render(<Harness />)
+  await waitFor(() => expect(flow!.records).toHaveLength(1))
+  fireEvent.click(screen.getByText('打开核对'))
+  fireEvent.click(await screen.findByRole('button', {name: '大模型核对'}))
+  await waitFor(() => expect(flow!.records[0].status).toBe('supported'))
+  expect(api.post).toHaveBeenCalledWith('/api/rag/evidence/jobs', {target: 'upload', target_id: 'test',
+    expected_draft_version: 'draft-v1', purpose: 'field', retry_keys: ['name']})
+  expect(screen.queryByRole('button', {name: '大模型核对'})).not.toBeInTheDocument()
+  let result
+  await act(async () => { result = await flow!.gate({target: 'upload', target_id: 'test'}) })
+  expect(result).toMatchObject({expected_evidence_version: 'science-v1'})
+  expect(vi.mocked(api.post).mock.calls.filter(([path]) => path.endsWith('/jobs'))).toHaveLength(1)
+})
+
 it('编辑只去当前键旧红框，不预检查、不启动模型；恢复旧值不实时新增红框', async () => {
   let value = 'old'
   let flow: ReturnType<typeof useEvidenceWorkflow>

@@ -143,7 +143,8 @@ export default {
   "reason": "Human review reason (required for this record)",
   "reasonHint": "Explain why the source supports this property. Your reason will be saved in the review history.",
   "back": "Return to edit records",
-  "retry": "Let the system search again",
+  "retry": "Retry verification",
+  "fieldReviewSaved": "Verification passed and saved. Submission will reuse this result while the content and evidence remain unchanged.",
   "approve": "Confirm sources and continue approval",
   "humanReason": "Human review reason",
   "original": "Source text"

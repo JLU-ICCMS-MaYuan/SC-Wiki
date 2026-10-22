@@ -1,12 +1,33 @@
 import '@testing-library/jest-dom/vitest'
 import React from 'react'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, expect, it, vi } from 'vitest'
 import ManualEvidenceSection from '../../frontend/src/components/ManualEvidenceSection'
 import { api } from '../../frontend/src/lib/api'
 
 vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn(), put: vi.fn(), post: vi.fn(), del: vi.fn(), download: vi.fn() } }))
 afterEach(() => { cleanup(); vi.clearAllMocks(); vi.unstubAllGlobals() })
+
+it('主动核对前保存当前人工说明，缺少必要理由时不允许静默使用旧说明', async () => {
+  const saved = {changed: true, reason: '', no_evidence_reason: '', items: []}
+  vi.mocked(api.get).mockResolvedValue({ok: true, data: saved} as never)
+  vi.mocked(api.put).mockResolvedValue({ok: true, data: {...saved, reason: '按定义换算', no_evidence_reason: '等价表示无需新增附件'}} as never)
+  const trigger = {current: null as (() => Promise<boolean>) | null}
+  render(<ManualEvidenceSection target={{target: 'upload', target_id: 'task'}} version="field-v1"
+    saveBeforeReview={trigger} record={{key: 'field', item_key: 'a'.repeat(64), field: 'paper.title', label: '标题', status: 'missing', reason: '', evidences: []}} />)
+  const reason = await screen.findByLabelText('人工修改判断理由（必填）')
+  fireEvent.change(reason, {target: {value: '按定义换算'}})
+  let ready
+  await act(async () => { ready = await trigger.current!() })
+  expect(ready).toBe(false)
+  expect(api.put).not.toHaveBeenCalled()
+  fireEvent.click(screen.getByLabelText('不提供证据'))
+  fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'), {target: {value: '等价表示无需新增附件'}})
+  await act(async () => { ready = await trigger.current!() })
+  expect(ready).toBe(true)
+  expect(api.put).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({
+    expected_version: 'field-v1', reason: '按定义换算', no_evidence_reason: '等价表示无需新增附件'}))
+})
 
 it('人工修改只显示判断理由和证据二选一，缺证路径保存独立理由', async () => {
   const itemKey = 'a'.repeat(64)

@@ -30,6 +30,7 @@ class Target(BaseModel):
     target: str
     target_id: str
     expected_version: str | None = None
+    expected_draft_version: str | None = None
     candidates: dict[str, list[dict]] = Field(default_factory=dict)
     retry_keys: list[str] | None = None
     purpose: Literal['check', 'review_all', 'parse', 'submit', 'field'] = 'submit'
@@ -250,6 +251,17 @@ def preflight(body: Target, user=Depends(get_current_user)):
 
 @router.post('/jobs')
 def create_job(body: Target, user=Depends(get_current_user)):
+    # 摘要只承诺草稿版本，不能与包含来源的科学快照版本混用。
+    if body.expected_draft_version is not None:
+        from backend.ingest.field_drafts import authorized_draft, draft_version, target_lock
+        with target_lock(body.target, body.target_id):
+            with SessionLocal() as session:
+                draft, _ = authorized_draft(session, body.target, body.target_id, user)
+            if body.expected_draft_version != draft_version(draft):
+                ev.fail('evidence_stale', '核对前草稿已发生变化，当前输入保留，请重新打开后核对')
+            snapshot, cached = snapshot_for(body, user)
+            snapshot['draft_version_token'] = body.expected_draft_version
+            return enqueue_review(body.model_copy(update={'expected_version': snapshot['version']}), user, snapshot, cached)
     snapshot, cached = snapshot_for(body, user)
     return enqueue_review(body, user, snapshot, cached)
 
@@ -290,6 +302,8 @@ def enqueue_review(body, user, snapshot, cached):
     from backend.ingest.field_drafts import authorized_draft, draft_version
     with SessionLocal() as session:
         draft, _ = authorized_draft(session, body.target, body.target_id, user)
+    if snapshot.get('draft_version_token') and snapshot['draft_version_token'] != draft_version(draft):
+        ev.fail('evidence_stale', '构建核对依据期间草稿发生变化，未启动旧内容的核对')
     snapshot['draft_version_token'] = draft_version(draft)
     config = get_llm_config()
     if not config.api_key:
@@ -393,6 +407,8 @@ def get_job(job_id: str, user=Depends(get_current_user)):
             draft, _ = authorized_draft(session, stored['snapshot']['target'], stored['snapshot']['target_id'], user)
             if stored['snapshot'].get('draft_version_token') != draft_version(draft):
                 ev.fail('evidence_stale', '核对期间内容发生变化，未提交；已经完成的有效结果保留')
+            from backend.ingest.field_review import validate_support_versions
+            validate_support_versions(stored['snapshot'], session)
             cached = science.load_results(session, stored['snapshot'], user.id)
         result.update(review_response(stored['snapshot'], {**stored.get('results', {}), **cached}))
     return result

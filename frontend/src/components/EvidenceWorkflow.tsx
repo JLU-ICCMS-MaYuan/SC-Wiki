@@ -94,6 +94,7 @@ export function useEvidenceWorkflow(options?: {
   const [saving, setSaving] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const confirmingRef = useRef(false)
+  const saveManualBeforeReview = useRef<(() => Promise<boolean>) | null>(null)
   const editRevision = useRef(0)
   const dirty = useRef(false)
   const localReasons = useRef(new Map<string, string>())
@@ -407,8 +408,11 @@ export function useEvidenceWorkflow(options?: {
     completed.current = false
     jobID.current = undefined
     setSaveError('')
-    setSelected(null)
     try {
+      // 先保存当前侧栏的人工依据，再卸载侧栏；不能静默核对旧说明。
+      if (retryKeys && saveManualBeforeReview.current && !(await saveManualBeforeReview.current())) return
+      if (!active()) return
+      setSelected(null)
       await flushDrafts()
       if (!active()) return
       if (retryKeys && saveCurrent) {
@@ -421,13 +425,14 @@ export function useEvidenceWorkflow(options?: {
       setView({ phase: 'checking', message: t('evidence.checking') })
       const preflight = await api.post<Preflight>(`${base}/summary`, target)
       if (!active()) return
+      if (revision !== editRevision.current) throw new Error(t('evidence.changedDuringSave'))
       preflightRef.current = preflight
       if (retryItems) {
         retryKeys = preflight.records.filter(r => retryItems.has(r.item_key || r.key)).map(r => r.key)
         if (!retryKeys.length) { showResults(preflight.records, preflight, silent); return }
       }
       if (target.target !== 'paper' && !retryKeys && !preflight.needs_check && !preflight.records.some(r => r.status === 'unchecked')) { jobID.current = preflight.job_id; completed.current = true; showResults(preflight.records, preflight, silent); return }
-      for (let seconds = silent ? 0 : 3; seconds > 0; seconds--) {
+      for (let seconds = silent || retryKeys ? 0 : 3; seconds > 0; seconds--) {
         setView({ phase: 'countdown', seconds, message: t('evidence.startHint') })
         await pause(1000)
         if (!active()) return
@@ -435,7 +440,7 @@ export function useEvidenceWorkflow(options?: {
       setView({ phase: 'running', message: t('evidence.starting') })
       const job = preflight.job_id && !retryKeys
         ? { id: preflight.job_id, timeout_seconds: 1800 }
-        : await api.post<Job>(`${base}/jobs`, { ...target, expected_version: preflight.version, purpose: retryKeys ? 'field' : 'submit', ...(retryKeys ? { retry_keys: retryKeys } : {}) })
+        : await api.post<Job>(`${base}/jobs`, { ...target, expected_draft_version: preflight.version, purpose: retryKeys ? 'field' : 'submit', ...(retryKeys ? { retry_keys: retryKeys } : {}) })
       if (!active()) { if (cancelLateJob.current) void api.del(`${base}/jobs/${job.id}`).catch(() => undefined); return }
       jobID.current = job.id
       const deadline = Date.now() + ((job.timeout_seconds || 600) + 60) * 1000
@@ -443,13 +448,16 @@ export function useEvidenceWorkflow(options?: {
         const result = await api.get<Job>(`${base}/jobs/${job.id}`)
         if (!active()) return
         if (result.status === 'completed') {
+          if (revision !== editRevision.current) throw new Error(t('evidence.changedDuringSave'))
           completed.current = true
           if (result.version) preflight.version = result.version
           if (retryItems) {
             const selectedResults = (result.records || []).filter(r => retryItems.has(r.item_key || r.key))
             setRecords(old => old.map(r => selectedResults.find(fresh => (fresh.item_key || fresh.key) === (r.item_key || r.key)) || r))
             setView(null)
-            if (selectedResults[0]) openIssue(selectedResults[0].key)
+            const reviewed = selectedResults[0]
+            if (reviewed?.status === 'supported' && !reviewed.stale && !reviewed.pending_review) setManualNotice(t('evidence.fieldReviewSaved'))
+            else if (reviewed) openIssue(reviewed.key)
           } else showResults(result.records || [], preflight, silent)
           return
         }
@@ -702,6 +710,7 @@ export function useEvidenceWorkflow(options?: {
         </ReviewSection>
         <ReviewSection title={t('evidence.manualEditRecords')}>
         <ManualEvidenceSection readOnly={options?.readOnly} showHistory={false} onRecords={receiveManualHistory} target={targetRef.current} record={activeRecord} version={preflightRef.current?.version}
+          saveBeforeReview={saveManualBeforeReview}
           drafts={manualDrafts} value={manualCurrentValue(activeRecord)}
           localChanged={hasLocalManualEdit(activeRecord)}
           prepare={() => prepareManual(activeRecord)} />

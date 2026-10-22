@@ -346,17 +346,32 @@ def bind_support_versions(snapshot, session=None):
             return snapshot
         rows = db.execute(select(ScientificManualEvidence.id, ScientificManualEvidence.item_key,
             ScientificManualEvidence.value_hash, ScientificManualEvidence.source_hash,
-            ScientificManualEvidence.items).where(
+            ScientificManualEvidence.items, ScientificManualEvidence.reason,
+            ScientificManualEvidence.no_evidence_reason).where(
                 ScientificManualEvidence.target == snapshot['target'],
                 ScientificManualEvidence.target_id == snapshot['target_id'],
+                ScientificManualEvidence.item_key.in_([r['item_key'] for r in snapshot['records']]),
                 ScientificManualEvidence.status != 'historical')).all()
     for record in snapshot['records']:
         source = record.get('paper_source_hash', record['source_hash'])
-        versions = sorted((row[0], digest([(i.get('sha256'), i.get('kind'), i.get('source_description')) for i in row[4] or []])) for row in rows if row[1] == record['item_key']
-                          and row[2] == record['content_hash'] and row[3] == source and row[4])
+        record['source_hash'] = source
+        versions = sorted((row[0], digest([row[5], row[6],
+            [(i.get('sha256'), i.get('kind'), i.get('source_description')) for i in row[4] or []]]))
+            for row in rows if row[1] == record['item_key']
+            and row[2] == record['content_hash'] and row[3] == source and (row[4] or row[5] or row[6]))
         if versions:
             record['paper_source_hash'] = source
             record['source_hash'] = digest([source, versions])
     snapshot['version'] = digest([snapshot['target'], snapshot['target_id'],
         sorted(field_version(r) for r in snapshot['records'])])
     return snapshot
+
+
+def validate_support_versions(snapshot, session):
+    """核对期间补充依据有变时保留旧版本历史，禁止把旧回答当成当前结论。"""
+    from .property_evidence import fail
+    current = bind_support_versions({'target': snapshot['target'], 'target_id': snapshot['target_id'],
+        'records': [{key: r[key] for key in ('item_key', 'content_hash', 'source_hash', 'paper_source_hash') if key in r}
+                    for r in snapshot['records']]}, session)
+    if [field_version(r) for r in current['records']] != [field_version(r) for r in snapshot['records']]:
+        fail('evidence_stale', '核对期间人工理由或补充证据发生变化，请核对最新依据')

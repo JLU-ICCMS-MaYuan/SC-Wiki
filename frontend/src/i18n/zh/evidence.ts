@@ -143,7 +143,8 @@ export default {
   "reason": "人工核对理由（此条必填）",
   "reasonHint": "确认原文支持所填物性后说明判断依据，随审核历史保存。",
   "back": "返回修改记录",
-  "retry": "让系统重新查找",
+  "retry": "重试核对",
+  "fieldReviewSaved": "核对通过，结果已保存；内容和依据不变时，提交将直接复用。",
   "approve": "确认原文并继续批准",
   "humanReason": "人工核对理由",
   "original": "原文"

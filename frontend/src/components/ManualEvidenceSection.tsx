@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore, type MutableRefObject } from 'react'
 import { Alert, Box, Button, FormControlLabel, Radio, RadioGroup, TextField, Typography } from '@mui/material'
 import { api } from '../lib/api'
 import { useLanguage } from '../context/LanguageContext'
@@ -19,7 +19,7 @@ function PendingImage({ file, alt }: { file: File; alt: string }) {
 }
 
 export default function ManualEvidenceSection({ target, record, version, drafts, value = record.current_value,
-  localChanged = false, prepare, readOnly = false, showHistory = true, onRecords }: {
+  localChanged = false, prepare, readOnly = false, showHistory = true, onRecords, saveBeforeReview }: {
   target?: EvidenceTarget
   record: EvidenceRecord
   version?: string
@@ -27,6 +27,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
   value?: unknown
   localChanged?: boolean
   prepare?: () => Promise<PreparedManualEvidence>
+  saveBeforeReview?: MutableRefObject<(() => Promise<boolean>) | null>
   readOnly?: boolean; showHistory?: boolean; onRecords?: (key: string, entries: ManualRecord[]) => void
 }) {
   const { t } = useLanguage()
@@ -130,6 +131,18 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
         notice: explanationSaved ? t('evidence.manualPartialSaved') : '' })
     } finally { store.patch(key, { busy: false }) }
   }
+
+  useEffect(() => {
+    if (!saveBeforeReview) return
+    const persist = async () => {
+      if (store.read(key).busy) return false
+      if (store.read(key).dirty || store.read(key).files.length) await save(true)
+      const current = store.read(key)
+      return !current.dirty && !current.busy && !current.files.length && !current.error
+    }
+    saveBeforeReview.current = persist
+    return () => { if (saveBeforeReview.current === persist) saveBeforeReview.current = null }
+  })
 
   const showFile = async (item: ManualItem) => {
     try {

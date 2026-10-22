@@ -72,6 +72,28 @@ def test_no_evidence_needs_separate_absence_reason_and_reverting_needs_no_explan
     assert manual.validate_submission(session, before, before) == []
 
 
+def test_review_version_includes_reason_without_attachments_and_only_its_own_field(session):
+    from copy import deepcopy
+    from backend.ingest.field_review import bind_support_versions, validate_support_versions
+    from fastapi import HTTPException
+    before, current = snapshot('old'), snapshot()
+    current['records'].append({**current['records'][0], 'key': 'untouched', 'item_key': 'untouched'})
+    saved = manual.save_explanation(session, current, before, 'stable-field', 7,
+        reason='按等价表示核对', no_evidence_reason='没有新增事实无需额外附件', text_items=[])
+    first = bind_support_versions(deepcopy(current), session)
+    row = session.get(ScientificManualEvidence, saved['id'])
+    row.reason = '新的说明'; session.flush()
+    second = bind_support_versions(deepcopy(current), session)
+    assert first['records'][0]['source_hash'] != second['records'][0]['source_hash']
+    assert first['records'][1]['source_hash'] == second['records'][1]['source_hash']
+    with pytest.raises(HTTPException):
+        validate_support_versions(first, session)
+    validate_support_versions(second, session)
+    # 标为 AI 已读不能使同一依据失效。
+    row.status = 'submitted'; session.flush()
+    validate_support_versions(second, session)
+
+
 def test_transfer_rechecks_explanation_after_preflight(session):
     before, current = snapshot("old"), snapshot()
     manual.save_explanation(session, current, before, "stable-field", 7,

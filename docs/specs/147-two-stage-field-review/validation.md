@@ -28,3 +28,12 @@ Go 旧测试 `TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction` 仍
 - 目标测试：`npm run test:upload-ui -- tests/01_decentralized_uploading/two-stage-review.test.tsx`，10 项通过。
 - `npm run build`（包含 `tsc -b` 与 Vite production build）通过；仅有 3Dmol 的 `eval` 提醒及大 chunk 提醒。
 - `git diff --check` 通过。三张用户附件中的前两张已归档，第三张提供路径不存在，Spec 已登记该材料缺口。
+
+## 2026-10-22 主动核对循环修复验证
+
+- `test_field_review_start.py`、`test_two_stage_review.py`、`test_issue109_manual_evidence.py`、`test_property_evidence.py`：48 项通过。覆盖真实摘要/科学快照不同令牌、旧请求失败与新请求排队、快照构建期间并发修改拒绝、无证据理由进入模型请求及肯定/否定回答、仅本字段依据版本改变、模型通过结果读取后提交不排新任务。
+- `two-stage-review.test.tsx`、`manual-evidence-section.test.tsx`：18 项通过。包含主动按钮保存当前人工说明、必要说明缺失时保持侧栏、任务使用草稿令牌、通过后关闭并提交复用；保留上一轮 μ* 设置保存与字段隔离测试。
+- 本机 MySQL 外层回滚验证：`test_two_stage_review_mysql.py -k 'current_result_reuses or partial_results_and_failure'`：2 项通过。实际 `save_results` / `load_results` 与严格门禁路径，测试事务全部回滚。
+- `npm run build` 及 `git diff --check` 通过；构建仍只有既有大分包与 3Dmol 提醒。
+- 新截图已归档，原话、根因与验收见 [主动核对回归](field-review-start-regression.md)。Issue #147 已追加本轮记录，保持开放；未推送。
+- 验证边界：模型响应使用可控测试回答，未在用户真实 La-Sc-H 草稿上调用模型或代为提交；没有宣称实际 μ* 已科学通过。此次没有批量修改草稿或修复全部历史核对记录。

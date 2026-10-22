@@ -122,6 +122,8 @@ images:
 
 ## 原始需求记录
 
+后续主动核对版本循环的完整原话、图片及修复验收追加于 [主动核对回归](field-review-start-regression.md)，不替换下方原计划。
+
 PLEASE IMPLEMENT THIS PLAN:
 # 两阶段逐字段审核：编辑不重核，提交只检查必要内容
 
