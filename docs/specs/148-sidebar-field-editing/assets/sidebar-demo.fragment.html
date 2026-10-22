@@ -1,0 +1,194 @@
+<div id="scwiki-sidebar-demo">
+  <style>
+    #scwiki-sidebar-demo{color-scheme:light dark;--sw-bg:light-dark(#fff,#191922);--sw-soft:light-dark(#f6f7fa,#23232d);--sw-line:light-dark(#dfe2eb,#444452);--sw-ink:light-dark(#263044,#f0edf8);--sw-sub:light-dark(#69768e,#c2bdd0);--sw-purple:light-dark(#5144eb,#b7adff);--sw-fill:light-dark(#5144eb,#7563e7);--sw-on:#fff;--sw-warn:light-dark(#a84412,#ffb17f);--sw-warn-bg:light-dark(#fff6ed,#35271e);--sw-green:light-dark(#177451,#82dfb8);--sw-red:light-dark(#d63040,#ff8791);font:14px/1.6 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;color:var(--sw-ink);border:1px solid var(--sw-line);border-radius:12px;overflow:hidden;background:var(--sw-bg)}
+    #scwiki-sidebar-demo *{box-sizing:border-box}
+    #scwiki-sidebar-demo [hidden]{display:none!important}
+    #scwiki-sidebar-demo button,#scwiki-sidebar-demo input,#scwiki-sidebar-demo textarea,#scwiki-sidebar-demo select{font:inherit}
+    #scwiki-sidebar-demo button{cursor:var(--cursor-interaction,default)}
+    #scwiki-sidebar-demo .sw-top{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--sw-line);padding-right:96px;flex-wrap:wrap;background:var(--sw-bg)}
+    #scwiki-sidebar-demo .sw-logo{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:var(--sw-fill);color:var(--sw-on);font-weight:600}
+    #scwiki-sidebar-demo .sw-title{font-weight:600}
+    #scwiki-sidebar-demo .sw-sub{color:var(--sw-sub);font-size:12px}
+    #scwiki-sidebar-demo .sw-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,480px);align-items:stretch}
+    #scwiki-sidebar-demo .sw-layout.closed{grid-template-columns:1fr}
+    #scwiki-sidebar-demo .sw-main{padding:26px 22px;background:var(--sw-soft);min-width:0}
+    #scwiki-sidebar-demo .sw-main h3{font-size:17px;margin:0 0 20px;font-weight:600}
+    #scwiki-sidebar-demo .sw-main p{margin:0 0 18px}
+    #scwiki-sidebar-demo .sw-card{background:var(--sw-bg);border:1px solid var(--sw-line);border-radius:8px;margin:12px 0;padding:15px;min-width:0}
+    #scwiki-sidebar-demo .sw-card.problem{border:1.5px solid var(--sw-red)}
+    #scwiki-sidebar-demo .sw-key{background:none;border:0;padding:0;color:var(--sw-purple);text-align:left;font-weight:500}
+    #scwiki-sidebar-demo .sw-value{white-space:pre-wrap;overflow-wrap:anywhere;margin-top:7px}
+    #scwiki-sidebar-demo .sw-state{font-size:12px;color:var(--sw-sub);display:block;margin-top:12px}
+    #scwiki-sidebar-demo .sw-side{padding:20px 24px 24px;border-left:1px solid var(--sw-line);background:var(--sw-bg);min-width:0}
+    #scwiki-sidebar-demo .sw-heading{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+    #scwiki-sidebar-demo h2{font-size:20px;font-weight:600;margin:0}
+    #scwiki-sidebar-demo .sw-close{width:36px;height:36px;border:0;background:none;color:var(--sw-sub);font-size:25px;padding:0}
+    #scwiki-sidebar-demo .sw-tabs{display:flex;border-bottom:1px solid var(--sw-line);margin-bottom:24px}
+    #scwiki-sidebar-demo .sw-tab{flex:1;min-width:0;padding:12px 2px;border:0;border-bottom:2px solid transparent;background:none;color:var(--sw-sub);white-space:nowrap}
+    #scwiki-sidebar-demo .sw-tab[aria-selected="true"]{color:var(--sw-purple);border-bottom-color:var(--sw-purple);font-weight:600}
+    #scwiki-sidebar-demo .sw-field{display:block;margin:0 0 20px}
+    #scwiki-sidebar-demo .sw-field>span{display:block;margin-bottom:7px;font-size:13px;color:var(--sw-sub)}
+    #scwiki-sidebar-demo input[type=text],#scwiki-sidebar-demo textarea,#scwiki-sidebar-demo select{display:block;width:100%;padding:11px 12px;border:1px solid var(--sw-line);border-radius:6px;background:var(--sw-bg);color:var(--sw-ink);min-width:0}
+    #scwiki-sidebar-demo textarea{resize:vertical;min-height:138px}
+    #scwiki-sidebar-demo input[readonly],#scwiki-sidebar-demo select:disabled{background:var(--sw-soft);color:var(--sw-sub);opacity:1}
+    #scwiki-sidebar-demo .sw-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;margin-top:22px}
+    #scwiki-sidebar-demo .sw-button{border:1px solid transparent;border-radius:24px;padding:8px 18px;background:none;color:var(--sw-purple);min-height:40px}
+    #scwiki-sidebar-demo .sw-button.primary{background:var(--sw-fill);color:var(--sw-on)}
+    #scwiki-sidebar-demo .sw-button.outline{border-color:var(--sw-line)}
+    #scwiki-sidebar-demo button:disabled{opacity:.45;cursor:default}
+    #scwiki-sidebar-demo details{border:1px solid var(--sw-line);border-radius:7px;margin:14px 0;overflow:hidden}
+    #scwiki-sidebar-demo summary{padding:11px 14px;background:var(--sw-soft);font-weight:500}
+    #scwiki-sidebar-demo .sw-section{padding:14px;overflow-wrap:anywhere}
+    #scwiki-sidebar-demo blockquote{border-left:3px solid var(--sw-line);padding-left:12px;margin:10px 0}
+    #scwiki-sidebar-demo .sw-note{font-size:13px;color:var(--sw-sub);margin-top:9px}
+    #scwiki-sidebar-demo .sw-error{color:var(--sw-red)}
+    #scwiki-sidebar-demo .sw-radio{display:flex;gap:8px;align-items:center;margin:10px 0}
+    #scwiki-sidebar-demo .sw-radio input{accent-color:var(--sw-fill)}
+    #scwiki-sidebar-demo .sw-confirm{background:var(--sw-warn-bg);color:var(--sw-warn);border-radius:8px;padding:13px;margin-bottom:18px}
+    #scwiki-sidebar-demo .sw-toast{border-top:1px solid var(--sw-line);padding:11px 20px;background:var(--sw-bg);color:var(--sw-green);font-size:13px}
+    #scwiki-sidebar-demo .sw-event{padding:13px 0;border-bottom:1px solid var(--sw-line);white-space:pre-wrap;overflow-wrap:anywhere}
+    #scwiki-sidebar-demo .sw-event:last-child{border-bottom:0}
+    #scwiki-sidebar-demo .sw-empty{padding:12px 0;color:var(--sw-sub)}
+    @media(max-width:700px){#scwiki-sidebar-demo .sw-layout{grid-template-columns:1fr}#scwiki-sidebar-demo .sw-layout:not(.closed) .sw-main{display:none}#scwiki-sidebar-demo .sw-side{border-left:0;padding:18px}#scwiki-sidebar-demo .sw-top{padding:12px 96px 12px 16px}#scwiki-sidebar-demo input[type=text],#scwiki-sidebar-demo textarea,#scwiki-sidebar-demo select{font-size:16px}}
+  </style>
+  <div class="sw-top"><span class="sw-logo">SC</span><div><div class="sw-title">SC-Wiki · 表单校对</div><div class="sw-sub">交互演示 · 不读写真实数据</div></div></div>
+  <div class="sw-layout">
+    <section class="sw-main" aria-label="主表单预览">
+      <h3>La–Sc–H · 示例表单</h3>
+      <p class="sw-sub">点击字段名称打开设置。应用修改后，当前值会更新在这里。</p>
+      <div class="sw-card problem" data-card="methods"><button class="sw-key" type="button" data-field="methods">研究方法</button><div class="sw-value" data-main="methods"></div><span class="sw-state" data-status="methods"></span></div>
+      <div class="sw-card" data-card="mu"><button class="sw-key" type="button" data-field="mu">μ*</button><div class="sw-value" data-main="mu"></div><span class="sw-state" data-status="mu"></span></div>
+    </section>
+    <section class="sw-side" role="dialog" aria-label="字段设置侧栏" aria-modal="true">
+      <div class="sw-heading"><h2 data-heading>研究方法</h2><button class="sw-close" type="button" aria-label="关闭侧栏">×</button></div>
+      <div class="sw-tabs" role="tablist" aria-label="字段侧栏页签">
+        <button id="sw148-settings-tab" class="sw-tab" type="button" role="tab" aria-controls="sw148-settings" aria-selected="true" data-tab="settings">字段设置</button>
+        <button id="sw148-source-tab" class="sw-tab" type="button" role="tab" aria-controls="sw148-source" aria-selected="false" data-tab="source">来源核对</button>
+        <button id="sw148-history-tab" class="sw-tab" type="button" role="tab" aria-controls="sw148-history" aria-selected="false" data-tab="history">历史记录</button>
+      </div>
+      <div class="sw-confirm" role="alert" data-confirm hidden>有尚未应用的修改，要放弃并关闭吗？<div class="sw-actions"><button class="sw-button" type="button" data-continue>继续编辑</button><button class="sw-button outline" type="button" data-discard>放弃修改并关闭</button></div></div>
+      <section id="sw148-settings" role="tabpanel" aria-labelledby="sw148-settings-tab">
+        <label class="sw-field"><span>字段名称（key）</span><input type="text" data-name readonly aria-label="字段名称（key）"></label>
+        <label class="sw-field" data-text-field><span>当前值</span><textarea data-text rows="8" aria-label="当前值（研究方法）"></textarea><div class="sw-note">每行一项研究方法</div></label>
+        <label class="sw-field" data-number-field hidden><span>当前值</span><input type="text" inputmode="decimal" data-number aria-label="当前值（μ*）"></label>
+        <label class="sw-field" data-kind-field hidden><span>值类型</span><select aria-label="值类型" disabled><option>数值</option></select></label>
+        <label class="sw-field" data-unit-field hidden><span>单位</span><input type="text" data-unit aria-label="单位" placeholder="无量纲"></label>
+        <div class="sw-note" data-settings-hint>字段名称固定；可以直接修改当前值。</div>
+        <div class="sw-error" role="alert" data-setting-error></div>
+        <div class="sw-actions"><button class="sw-button" type="button" data-cancel>取消</button><button class="sw-button primary" type="button" data-apply disabled>应用修改</button></div>
+      </section>
+      <section id="sw148-source" role="tabpanel" aria-labelledby="sw148-source-tab" hidden>
+        <div class="sw-note" data-review-state></div>
+        <details open><summary>系统找到的原文</summary><div class="sw-section"><div class="sw-sub">示例材料 · 第 2 页 · 仅用于演示排版</div><blockquote data-quote></blockquote></div></details>
+        <details open><summary>AI 理由</summary><div class="sw-section" data-ai></div></details>
+        <div class="sw-note" data-pending-setting hidden>字段设置有尚未应用的修改，请先应用或取消。</div>
+        <div class="sw-actions"><button class="sw-button" type="button" data-reject>人工审核不通过</button><button class="sw-button primary" type="button" data-approve>人工审核通过</button></div>
+        <details data-manual hidden><summary>人工修改记录</summary><div class="sw-section">
+          <label class="sw-field"><span>人工修改理由</span><textarea data-reason rows="3" aria-label="人工修改理由"></textarea></label>
+          <label class="sw-radio"><input type="radio" name="sw148-evidence" value="provide">提供证据</label>
+          <label class="sw-radio"><input type="radio" name="sw148-evidence" value="none">不提供证据</label>
+          <label class="sw-field" data-files-field hidden><span>演示附件（不上传）</span><input type="file" data-files multiple accept=".png,.jpg,.jpeg,.webp,.txt,.md,.pdf"></label>
+          <label class="sw-field" data-absence-field hidden><span>不提供证据的理由</span><textarea data-absence rows="3" aria-label="不提供证据的理由"></textarea></label>
+          <div class="sw-note" data-manual-hint></div>
+          <div class="sw-actions"><button class="sw-button primary" type="button" data-save>保存</button></div>
+        </div></details>
+        <div class="sw-actions"><button class="sw-button outline" type="button" data-model>大模型核对（模拟）</button></div>
+      </section>
+      <section id="sw148-history" role="tabpanel" aria-labelledby="sw148-history-tab" hidden><div data-history></div></section>
+    </section>
+  </div>
+  <div class="sw-toast" role="status" aria-live="polite" hidden></div>
+  <script>
+    (() => {
+      const root = document.getElementById('scwiki-sidebar-demo');
+      const q = s => root.querySelector(s), all = s => [...root.querySelectorAll(s)];
+      const fields = {
+        methods: {name:'研究方法', value:'CALYPSO crystal structure search\nDFT structural optimization and electronic calculations\nHarmonic phonon and electron–phonon coupling calculations\nSSCHA anharmonic phonon calculations', unit:'', status:'review', modified:false, quote:'Crystal structure search; electronic, phonon and electron–phonon coupling calculations.（演示内容）', ai:'演示：当前方法列表包含结构搜索、电子计算及声子计算，需要你对照原文确认。', history:[], manual:{reason:'',choice:'',absence:'',files:[],saved:false}},
+        mu: {name:'μ*', value:'0.10', unit:'', status:'passed', modified:false, quote:'μ* = 0.10（演示内容）', ai:'演示：当前值与示例中的 μ* 参数一致。', history:[], manual:{reason:'',choice:'',absence:'',files:[],saved:false}}
+      };
+      let selected = 'methods', tab = 'settings', staged, openedFrom = 'methods', modelTimer;
+      const statuses = {review:'待人工审核',passed:'已核对通过',human:'人工审核通过',pending:'已修改，待核对',rejected:'人工审核不通过，待处理'};
+      const clone = f => ({name:f.name,value:f.value,unit:f.unit});
+      const dirty = () => selected && JSON.stringify(staged) !== JSON.stringify(clone(fields[selected]));
+      const toast = text => { q('.sw-toast').textContent = text; q('.sw-toast').hidden = false; };
+      const event = (f,text) => { f.history.unshift({text,time:new Date().toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit'})}); };
+      function drawMain() {
+        for (const [key,f] of Object.entries(fields)) {
+          q(`[data-main="${key}"]`).textContent=f.value || '未填写';
+          q(`[data-status="${key}"]`).textContent=statuses[f.status];
+          q(`[data-card="${key}"]`).classList.toggle('problem',['review','rejected'].includes(f.status));
+          q(`[data-field="${key}"]`).textContent=f.name;
+        }
+      }
+      function showTab(next) {
+        tab=next;
+        all('[data-tab]').forEach(b => b.setAttribute('aria-selected',String(b.dataset.tab===tab)));
+        ['settings','source','history'].forEach(t => q(`#sw148-${t}`).hidden=t!==tab);
+        drawReview(); drawHistory();
+      }
+      function drawSettings() {
+        q('[data-heading]').textContent=fields[selected].name;
+        q('[data-name]').value=staged.name; q('[data-name]').readOnly=selected==='methods';
+        q('[data-text]').value=staged.value; q('[data-number]').value=staged.value; q('[data-unit]').value=staged.unit;
+        q('[data-text-field]').hidden=selected!=='methods';
+        ['number','kind','unit'].forEach(k=>q(`[data-${k}-field]`).hidden=selected!=='mu');
+        q('[data-settings-hint]').textContent=selected==='methods'?'字段名称固定；可以直接修改当前值。':'固定科学类型为数值；名称和单位可保留显示标注。';
+        q('[data-setting-error]').textContent=''; q('[data-apply]').disabled=!dirty();
+      }
+      function drawReview() {
+        if (!selected) return;
+        const f=fields[selected], m=f.manual;
+        q('[data-review-state]').textContent=statuses[f.status];
+        q('[data-quote]').textContent=f.quote; q('[data-ai]').textContent=f.ai;
+        q('[data-pending-setting]').hidden=!dirty();
+        q('[data-approve]').disabled=Boolean(dirty() || f.modified || f.status==='human');
+        q('[data-reject]').disabled=Boolean(dirty()); q('[data-model]').disabled=Boolean(dirty());
+        q('[data-manual]').hidden=!(f.modified||f.status==='rejected');
+        if (!q('[data-manual]').hidden) q('[data-manual]').open=true;
+        q('[data-reason]').value=m.reason; q('[data-absence]').value=m.absence;
+        all('input[name="sw148-evidence"]').forEach(r=>r.checked=r.value===m.choice);
+        q('[data-files-field]').hidden=m.choice!=='provide'; q('[data-absence-field]').hidden=m.choice!=='none';
+        q('[data-manual-hint]').textContent=m.saved?'已保存人工记录；尚未代表核对通过。':m.files.length?m.files.map(f=>f.name).join('、'):'修改理由必填；选择提供证据，或说明不提供的原因。';
+      }
+      function drawHistory() {
+        if (!selected) return;
+        const container=q('[data-history]'); container.replaceChildren();
+        if (!fields[selected].history.length) {const p=document.createElement('p');p.className='sw-empty';p.textContent='暂无操作记录';container.append(p);}
+        for (const item of fields[selected].history) {const p=document.createElement('div');p.className='sw-event';p.textContent=item.time+' · '+item.text;container.append(p);}
+      }
+      function open(key) {
+        selected=key; openedFrom=key; staged=clone(fields[key]);
+        q('.sw-side').hidden=false; q('.sw-layout').classList.remove('closed'); q('.sw-main').inert=true;
+        q('[data-confirm]').hidden=true; q('[data-files]').value=''; drawSettings(); showTab('settings');
+      }
+      function close(force=false) {
+        if (dirty()&&!force) { q('[data-confirm]').hidden=false; return; }
+        clearTimeout(modelTimer); q('.sw-side').hidden=true; q('.sw-layout').classList.add('closed'); q('.sw-main').inert=false;
+        selected=null; drawMain(); q(`[data-field="${openedFrom}"]`).focus();
+      }
+      all('[data-field]').forEach(b=>b.addEventListener('click',()=>open(b.dataset.field)));
+      all('[data-tab]').forEach(b=>b.addEventListener('click',()=>showTab(b.dataset.tab)));
+      q('.sw-tabs').addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight'].includes(e.key))return; e.preventDefault();const tabs=all('[data-tab]'),i=tabs.findIndex(b=>b.dataset.tab===tab),n=(i+(e.key==='ArrowRight'?1:2))%3;showTab(tabs[n].dataset.tab);tabs[n].focus();});
+      q('.sw-close').addEventListener('click',()=>close()); q('[data-cancel]').addEventListener('click',()=>close(true));
+      q('[data-continue]').addEventListener('click',()=>{q('[data-confirm]').hidden=true;}); q('[data-discard]').addEventListener('click',()=>close(true));
+      root.addEventListener('keydown',e=>{if(e.key==='Escape'&&selected){e.preventDefault();close();}});
+      for (const [selector,key] of [['[data-name]','name'],['[data-text]','value'],['[data-number]','value'],['[data-unit]','unit']]) q(selector).addEventListener('input',e=>{staged[key]=e.target.value;q('[data-apply]').disabled=!dirty();q('[data-setting-error]').textContent='';});
+      q('[data-apply]').addEventListener('click',()=>{
+        if(!dirty()) return;
+        if(!staged.name.trim()){q('[data-setting-error]').textContent='请填写字段名称。';return;}
+        if(selected==='mu'&&staged.value.trim()!==''&&(!Number.isFinite(Number(staged.value))||Number(staged.value)<0)){q('[data-setting-error]').textContent='请输入有效的非负数值，或清空。';return;}
+        const f=fields[selected];Object.assign(f,staged);f.modified=true;f.status='pending';f.manual.saved=false;
+        event(f,'应用字段设置修改（未调用模型）');toast('已应用到演示表单；未调用模型，尚未审核通过。');close(true);
+      });
+      q('[data-approve]').addEventListener('click',()=>{const f=fields[selected];if(dirty()||f.modified)return;f.status='human';event(f,'人工审核通过，保留当前值和依据');toast('演示：已人工审核通过；未变化时提交直接复用。');close(true);});
+      q('[data-reject]').addEventListener('click',()=>{const f=fields[selected];f.status='rejected';event(f,'人工审核不通过，待修改');drawMain();drawReview();});
+      for(const [selector,key] of [['[data-reason]','reason'],['[data-absence]','absence']])q(selector).addEventListener('input',e=>{const m=fields[selected].manual;m[key]=e.target.value;m.saved=false;});
+      all('input[name="sw148-evidence"]').forEach(r=>r.addEventListener('change',()=>{const m=fields[selected].manual;m.choice=r.value;m.saved=false;drawReview();}));
+      q('[data-files]').addEventListener('change',e=>{const m=fields[selected].manual;m.files=[...e.target.files].map(f=>({name:f.name}));m.saved=false;drawReview();});
+      const missing = m => !m.reason.trim()?'请填写人工修改理由。':!m.choice?'请选择证据方式。':m.choice==='none'&&!m.absence.trim()?'请填写不提供证据的理由。':m.choice==='provide'&&!m.files.length?'请先选择演示附件。':'';
+      q('[data-save]').addEventListener('click',()=>{const f=fields[selected],m=f.manual,error=missing(m);if(error){q('[data-manual-hint]').textContent=error;return;}if(!m.saved){m.saved=true;f.modified=true;f.status='pending';event(f,'保存人工记录（未调用模型）');}drawReview();drawMain();toast('已保存演示中的人工记录；侧栏保持打开，等待核对。');});
+      q('[data-model]').addEventListener('click',()=>{const key=selected,f=fields[key];if(dirty())return;if((f.modified||f.manual.reason)&&(!f.manual.saved||missing(f.manual))){toast('请先完整填写并保存人工修改记录。');return;}q('[data-model]').disabled=true;toast('正在模拟核对结果，不会实际调用模型。');modelTimer=setTimeout(()=>{if(selected!==key)return;f.status='passed';f.modified=false;f.ai='模拟核对通过：仅用于展示通过后的界面，不代表真实科学审核。';event(f,'模型核对通过（模拟结果）');drawMain();drawReview();toast('模拟结果已保存；未再修改时，提交无需重复核对。');},350);});
+      drawMain(); open('methods');
+    })();
+  </script>
+</div>

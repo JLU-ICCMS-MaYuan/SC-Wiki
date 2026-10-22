@@ -3,6 +3,7 @@
 输入：[Spec](spec.md)、[Plan](plan.md)、[调查](research.md)、[数据](data-model.md)、[契约](contracts/field-settings.md)。当前为设计草案，技术任务未实施。
 
 - [x] T001 建立新 Issue，保留用户原话和澄清；调查 #103、#94、#109、#147 及当前代码，归档两张截图。
+- [x] T008 按用户新增请求制作独立交互 Demo，保留三个页签、论文键值编辑和 μ* 四项设置；浏览器检查及截图见 demo.md。此项不替代 T002—T007 的正式实现验收。
 - [ ] T002 [US1] 在 tests/01_decentralized_uploading 增加真实 UploadTaskEditor／管理员论文字段设置复现，覆盖研究方法多行列表和原始编辑文本。
 - [ ] T003 [US1] 在 frontend/src/components/UploadTaskEditor.tsx、frontend/src/pages/AdminPaperEditPage.tsx 接入共享论文文本／列表设置适配器及现有配置事件。
 - [ ] T004 [US2] 在 frontend/src/components/ReviewFieldSettings.tsx、EvidenceWorkflow.tsx 去除两个重复返回入口，保留 × 和三个页签，未适配复杂字段至少可读显示名称和值。
