@@ -34,8 +34,9 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+export interface EvidenceRecord { detail_ref?: string; field_decision?: {contract: string; action: 'approve' | 'reject'; actor_user_id: number; actor_name?: string; occurred_at: string}; settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
+interface FieldDetail { record?: Partial<EvidenceRecord>; history?: EvidenceHistory[]; review_token?: string; can_approve?: boolean; source_state?: string }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
 export interface EvidenceTarget { target: 'upload' | 'paper' | 'revision'; target_id: string }
@@ -66,8 +67,7 @@ export function aiReasonText(record: EvidenceRecord, t: (key: string) => string)
     }
     return t('evidence.synthesisReasonMissing')
   }
-  return record.ai_reason || record.proposal?.explanation ||
-    (record.status === 'supported' ? t('evidence.noAiReason') : record.reason)
+  return record.ai_reason || record.proposal?.explanation || record.reason || ''
 }
 
 
@@ -88,6 +88,9 @@ export function useEvidenceWorkflow(options?: {
   const receiveManualHistory = useCallback((key: string, entries: ManualRecord[]) => setManualHistory(old => JSON.stringify(old[key]) === JSON.stringify(entries) ? old : { ...old, [key]: entries }), [])
   const [selected, setSelected] = useState<string | null>(null)
   const [fallbackRecord, setFallbackRecord] = useState<EvidenceRecord | undefined>()
+  const [sourceDetail, setSourceDetail] = useState<{key: string; ref?: string; data?: FieldDetail; error?: string}>()
+  const [detailReload, setDetailReload] = useState(0)
+  const [manualOpenKey, setManualOpenKey] = useState<string>()
   const [reasons, setReasons] = useState<Record<string, string>>({})
   const [saveError, setSaveError] = useState('')
   const [manualNotice, setManualNotice] = useState('')
@@ -228,20 +231,25 @@ export function useEvidenceWorkflow(options?: {
     if (!record || record.placeholder) return
     const target = targetRef.current
     const params = new URLSearchParams({ ...target, item_key: record.item_key || record.key, history: String(drawerTab === 'history') })
-    void api.get<{ record?: Partial<EvidenceRecord>; history?: EvidenceHistory[] }>(`${base}/field-detail?${params}`).then(result => {
+    const history = drawerTab === 'history'
+    if (!history) setSourceDetail({key: selected, ref: record.detail_ref})
+    void api.get<FieldDetail>(`${base}/field-detail?${params}`).then(result => {
       if (!active) return
-      setRecords(old => old.map(r => r.key !== selected ? r : {
-        ...result.record, ...r,
-        ...(result.record ? { evidences: result.record.evidences || [], proposal: result.record.proposal,
-          source_associations: result.record.source_associations, provenance: result.record.provenance } : {}),
-        ...(result.history ? { history: result.history } : {}),
-      }))
-    }).catch(error => { if (active) setSaveError((error as Error).message) })
+      if (!history && (!result.record || !result.review_token || !['available', 'empty', 'historical'].includes(result.source_state || ''))) {
+        throw new Error(t('evidence.sourceResponseInvalid'))
+      }
+      if (history) setRecords(old => old.map(r => r.key === selected ? {...r, history: result.history || []} : r))
+      else setSourceDetail({key: selected, ref: record.detail_ref, data: result})
+    }).catch(error => { if (active) {
+      if (history) setSaveError((error as Error).message)
+      else setSourceDetail({key: selected, ref: record.detail_ref, error: (error as Error).message})
+    } })
     return () => { active = false }
-  }, [selected, drawerTab])
+  }, [selected, drawerTab, detailReload, records.find(r => r.key === selected)?.detail_ref])
   const closeDrawer = useCallback(() => {
     drawerSession.current += 1
     void flushDrafts().catch(() => undefined)
+    setManualOpenKey(undefined)
     setSelected(null)
   }, [])
   useEffect(() => {
@@ -279,6 +287,7 @@ export function useEvidenceWorkflow(options?: {
     const identity = `${target.target}:${target.target_id}`
     if (targetIdentity.current !== identity) {
       localReasons.current.clear(); dirty.current = false
+      setSourceDetail(undefined); setSelected(null); setManualOpenKey(undefined)
       clearTimeout(invalidationTimer.current); pendingEdits.current = []
     }
     const previousTarget = targetRef.current
@@ -334,7 +343,11 @@ export function useEvidenceWorkflow(options?: {
     return {
       endpoint: `${base}/${target.target}/${target.target_id}/manual/${current.item_key}`,
       version: fresh.version, isCurrent,
-      complete: () => { if (isCurrent() && drawerSession.current === session) { setManualNotice(t('common.saved')); closeDrawer() } },
+      complete: () => { if (isCurrent() && drawerSession.current === session) {
+        setManualNotice(t('common.saved'))
+        setRecords(old => old.map(r => r.key === record.key ? {...r, pending_review: true, human_modified: true} : r))
+        setDetailReload(value => value + 1)
+      } },
     }
   }
 
@@ -348,15 +361,17 @@ export function useEvidenceWorkflow(options?: {
     const disputed = next.filter(problematic)
     if (disputed.length && !silent) openIssue(disputed[0].key)
   }
-  // 提交门禁只读恢复；任何未核对项目都不在此处启动模型。
+  // 提交复用已通过项；后端只为尚未核对的实际修改排队。
   const gate = async (target: EvidenceTarget): Promise<EvidencePayload | null> => {
     const current = ++generation.current
+    setSaveError('')
     completed.current = false
     await flushDrafts()
     targetRef.current = target
     setAutomatic(false)
     setView({ phase: 'checking', message: '正在检查本次提交的必要字段' })
     try {
+      if (manualDrafts.hasPending(target)) throw new Error(t('evidence.saveManualBeforeSubmit'))
       let result = await api.post<Job & Preflight & { program_issues?: Array<{field: string; message: string}> }>(`${base}/submit-check`, target)
       if (current !== generation.current) return null
       if (result.program_issues?.length) { setRecords(result.records || []); throw new Error(result.program_issues.map(i => '程序检查：' + i.message).join('；')) }
@@ -376,10 +391,17 @@ export function useEvidenceWorkflow(options?: {
       const next = (result.records || []).map(r => ({ ...r, pending_review: false }))
       recordsRef.current = next
       setRecords(next)
-      const blocked = next.filter(r => (r.required !== false || r.human_modified) && (r.stale || r.status !== 'supported'))
+      const blocked = next.filter(r => r.field_decision?.action === 'reject' || (r.required !== false || r.human_modified) && (r.stale || r.status !== 'supported'))
       if (blocked.length) { openIssue(blocked[0].key); setSaveError('这些字段尚未通过审核，未提交'); return null }
       return { evidence_job_id: id, expected_evidence_version: result.version, evidence_resolutions: {} }
-    } catch (error) { setSaveError((error as Error).message); return null }
+    } catch (error) {
+      const failure = error as import('../lib/api').ApiError
+      setSaveError(failure.issues?.map(issue => {
+        const label = recordsRef.current.find(r => r.field === issue.field)?.label
+        return (label ? label + '：' : '') + issue.message
+      }).join('；') || failure.message)
+      return null
+    }
     finally { setView(null) }
   }
   const applyAccepted = async (target: EvidenceTarget, save: (patches: import('../lib/evidenceProposals').EvidencePatch[], preparationId: string, resumeStage?: 'scientific' | 'finalize') => Promise<boolean>) => {
@@ -487,46 +509,6 @@ export function useEvidenceWorkflow(options?: {
     setAutomatic(true)
     void execute(target, undefined, true)
   }
-  const valuesFor = (record: EvidenceRecord) => record.stale ? {} : Object.fromEntries((record.editable_fields || []).map(field => [field.path, field.value]))
-  const saveProposal = (record: EvidenceRecord, values: Record<string, unknown>, accepted: boolean, reason: string, immediate = false) => {
-    if (!targetRef.current || !preflightRef.current) return Promise.resolve()
-    const target = targetRef.current
-    const identity = `${target.target}:${target.target_id}`
-    targetIdentity.current = identity
-    const request = { ...target, expected_version: preflightRef.current.version, key: record.key, values, accepted, reason }
-    const revision = editRevision.current
-    const queue = queueFor(target)
-    queue.enqueue(record.key, async () => {
-      const result = await api.post<{ draft: ProposalDraft }>(`${base}/proposals`, request)
-      if (mounted.current && editRevision.current === revision && targetIdentity.current === identity && preflightRef.current?.version === request.expected_version) setRecords(old => old.map(r => r.key === record.key ? { ...r, stale: false, proposal_draft: result.draft } : r))
-    })
-    return immediate ? queue.flush() : Promise.resolve()
-  }
-  const updateReason = (record: EvidenceRecord, reason: string) => {
-    localReasons.current.set(record.item_key || record.key, reason)
-    setReasons(old => ({ ...old, [record.key]: reason }))
-  }
-  const accept = async (group: EvidenceRecord[]) => {
-    if (confirmingRef.current) return
-    confirmingRef.current = true
-    setConfirming(true)
-    const session = drawerSession.current
-    try {
-      setSaveError('')
-      if (optionsRef.current?.saveCurrent && !(await optionsRef.current.saveCurrent())) throw new Error(t('evidence.saveFirstFailed'))
-      await retryDrafts()
-      for (const record of group) {
-        const key = record.item_key || record.key
-        if (!localReasons.current.has(key)) continue
-        await api.put(`${base}/field-note`, { ...targetRef.current, item_key: key, reason: localReasons.current.get(key), before: record.resolution || '' })
-        const note = localReasons.current.get(key) || ''
-        setRecords(old => old.map(r => (r.item_key || r.key) === key ? {...r, resolution: note} : r))
-        localReasons.current.delete(key)
-      }
-      if (session === drawerSession.current) closeDrawer()
-    } catch (error) { setSaveError((error as Error).message) }
-    finally { confirmingRef.current = false; if (mounted.current) setConfirming(false) }
-  }
   const invalidate = useCallback((field: string, pathKind: 'current' | 'snapshot' = 'current') => {
     editRevision.current += 1
     pendingEdits.current.push({ field, pathKind })
@@ -586,7 +568,28 @@ export function useEvidenceWorkflow(options?: {
     else if (invalidationTimer.current === undefined) invalidationTimer.current = setTimeout(flush, 0)
   }, [])
   const issues = useMemo(() => records.filter(problematic), [records])
-  const activeRecord = records.find(r => r.key === selected) || (fallbackRecord?.key === selected ? fallbackRecord : undefined)
+  const summaryRecord = records.find(r => r.key === selected) || (fallbackRecord?.key === selected ? fallbackRecord : undefined)
+  const currentDetail = sourceDetail?.key === selected && sourceDetail?.ref === summaryRecord?.detail_ref ? sourceDetail : undefined
+  const activeRecord = summaryRecord && currentDetail?.data?.record ? {...summaryRecord, ...currentDetail.data.record,
+    key: summaryRecord.key, field: summaryRecord.field, fields: summaryRecord.fields,
+    pending_review: summaryRecord.pending_review || currentDetail.data.record.pending_review} : summaryRecord
+  const manualVisible = Boolean(activeRecord && (manualOpenKey === activeRecord.key || activeRecord.field_decision?.action === 'reject'
+    || activeRecord.human_modified || hasLocalManualEdit(activeRecord)))
+  const decideField = async (action: 'approve' | 'reject') => {
+    if (!activeRecord || !currentDetail?.data?.review_token || confirmingRef.current) return
+    confirmingRef.current = true; setConfirming(true); setSaveError('')
+    const record = activeRecord, revision = editRevision.current, session = drawerSession.current
+    try {
+      const result = await api.post<FieldDetail>(`${base}/field-decision`, {...targetRef.current,
+        item_key: record.item_key || record.key, action, review_token: currentDetail.data.review_token})
+      if (editRevision.current !== revision || drawerSession.current !== session) return
+      setRecords(old => old.map(r => r.key === record.key ? {...r, ...result.record, pending_review: false} : r))
+      setSourceDetail({key: record.key, ref: summaryRecord?.detail_ref, data: result})
+      if (action === 'approve') { setManualNotice(t('evidence.humanApprovalSaved')); closeDrawer() }
+      else setManualOpenKey(record.key)
+    } catch (error) { setSaveError((error as Error).message) }
+    finally { confirmingRef.current = false; if (mounted.current) setConfirming(false) }
+  }
   const restoreDrawerFocus = () => {
     if (!mounted.current || activeRecord || view) return
     const origin = drawerReturn.current
@@ -607,7 +610,6 @@ export function useEvidenceWorkflow(options?: {
   const activeGroup = activeRecord ? [activeRecord] : []
   const activeDos = activeRecord ? dosRecordForEvidence(activeRecord) : undefined
   const activeDosConflict = Boolean(activeDos && hasDosConflict(activeDos))
-  const accepted = activeGroup.length > 0 && activeGroup.every(r => r.proposal_draft?.accepted)
   const completionBlockers = (saving || confirming) ? [t('evidence.completeBusy')] : []
   const draftSaveFailed = Boolean(targetRef.current && queueFor(targetRef.current).error())
   const editCurrent = (record: EvidenceRecord) => {
@@ -635,6 +637,7 @@ export function useEvidenceWorkflow(options?: {
     }, 320)
   }
   const dialog = <>
+    {saveError && !activeRecord && !view && <Alert severity="error" sx={{my: 1}}>{saveError}</Alert>}
     {records.length > 0 && <Button data-evidence-pending-navigation onClick={() => setIssueListOpen(true)}>{t('evidence.pendingItems')}（{issues.length}）</Button>}
     <Dialog open={issueListOpen} onClose={() => setIssueListOpen(false)} fullWidth maxWidth="sm">
       <DialogTitle>{t('evidence.pendingItems')}</DialogTitle><DialogContent>
@@ -688,7 +691,9 @@ export function useEvidenceWorkflow(options?: {
             <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.authorKeywordsSource')}</Alert>}
           {activeRecord.field === 'paper.keywords_tags' && activeRecord.provenance?.kind === 'paper_synthesis' &&
             <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.fulltextKeywordsSource')}</Alert>}
-          {activeDosConflict ? null : activeGroup.some(r => r.evidences.length)
+          {currentDetail?.error ? <Alert severity="error" action={<Button onClick={() => setDetailReload(n => n + 1)}>{t('evidence.retrySource')}</Button>}>{t('evidence.sourceLoadFailed')} {currentDetail.error}</Alert>
+            : !currentDetail?.data && !activeRecord.placeholder ? <Typography role="status">{t('evidence.sourceLoading')}</Typography>
+            : activeDosConflict ? null : activeGroup.some(r => r.evidences.length)
             ? activeGroup.flatMap(r => r.evidences)
               .filter((source, index, all) => all.findIndex(item => item.file_id === source.file_id && item.quote === source.quote) === index)
               .map((source, index) => <EvidenceRegion key={`${source.file_id}:${source.page_start}:${index}`} target={targetRef.current} source={source} />)
@@ -703,22 +708,13 @@ export function useEvidenceWorkflow(options?: {
             <Typography>{activeRecord.provenance.filename} · {activeRecord.provenance.method}</Typography>
             {activeRecord.provenance.original_text && <Box component="details"><Box component="summary">{t('evidence.originalStructure')}</Box><Typography component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{activeRecord.provenance.original_text}</Typography></Box>}
           </Alert>}
+          {currentDetail?.data?.source_state === 'historical' && <Alert severity="info">{t('evidence.historicalSource')}</Alert>}
           {!activeRecord.placeholder && activeGroup.map(r => <EvidenceReviewSummary key={r.key} record={r} />)}
           {Boolean(activeRecord.legacy_evidences?.length) && !activeRecord.evidences.length && <ReviewSection title={t('evidence.legacySources')}>
             {activeRecord.legacy_evidences!.map((source, index) => <EvidenceRegion key={index} target={targetRef.current} source={source} />)}
           </ReviewSection>}
         </ReviewSection>
-        <ReviewSection title={t('evidence.manualEditRecords')}>
-        <ManualEvidenceSection readOnly={options?.readOnly} showHistory={false} onRecords={receiveManualHistory} target={targetRef.current} record={activeRecord} version={preflightRef.current?.version}
-          saveBeforeReview={saveManualBeforeReview}
-          drafts={manualDrafts} value={manualCurrentValue(activeRecord)}
-          localChanged={hasLocalManualEdit(activeRecord)}
-          prepare={() => prepareManual(activeRecord)} />
-        {!options?.readOnly && targetRef.current?.target === 'paper' && activeGroup.map(r => <TextField key={r.key} fullWidth multiline minRows={2} sx={{ mt: 1 }} label={t('evidence.humanReason')} value={reasons[r.key] ?? r.proposal_draft?.reason ?? ''}
-          disabled={confirming || (!r.stale && Boolean(r.proposal_draft?.accepted))} onChange={event => updateReason(r, event.target.value)} helperText={t('evidence.reasonConditional')} />)}
-        {dirty.current && options?.saveCurrent && <Alert severity="info">{t('evidence.saveBeforeConfirm')}</Alert>}
-        </ReviewSection>
-        <ReviewSection title={t('evidence.aiReasonLabel')}>
+        <ReviewSection title={t('evidence.aiReasonLabel')} initialOpen>
         {activeGroup.map(r => <Box key={r.key} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
           {(r.adopted_basis || r.proposal?.basis_kind) && <Alert severity="info">{t(`evidence.basis.${r.adopted_basis || r.proposal?.basis_kind}`)}</Alert>}
             {(r.pending_review || r.stale) && <Alert severity="info">当前内容待提交核对；下方仅显示已有核对结论。</Alert>}
@@ -729,16 +725,29 @@ export function useEvidenceWorkflow(options?: {
               {r.proposal!.evidences.map((source, index) => <EvidenceRegion key={`${source.file_id}:${index}`} target={targetRef.current} source={source} />)}
             </Box>}
         </Box>)}
-        {accepted && <Alert severity="success">{t('evidence.acceptedPending')}</Alert>}
         </ReviewSection>
+        {!options?.readOnly && !activeRecord.placeholder && <Box sx={{display: 'flex', gap: 1, my: 2}}>
+          <Button disabled={confirming || !currentDetail?.data?.review_token || hasLocalManualEdit(activeRecord)}
+            onClick={() => void decideField('reject')}>{t('evidence.humanReject')}</Button>
+          <Button variant="contained" disabled={confirming || !currentDetail?.data?.can_approve || hasLocalManualEdit(activeRecord)}
+            onClick={() => void decideField('approve')}>{t('evidence.humanApprove')}</Button>
+        </Box>}
+        {manualVisible && <ReviewSection title={t('evidence.manualEditRecords')} initialOpen expand={manualOpenKey === activeRecord.key}>
+        <ManualEvidenceSection readOnly={options?.readOnly} showHistory={false} onRecords={receiveManualHistory} target={targetRef.current} record={activeRecord} version={preflightRef.current?.version}
+          saveBeforeReview={saveManualBeforeReview}
+          drafts={manualDrafts} value={manualCurrentValue(activeRecord)}
+          localChanged={hasLocalManualEdit(activeRecord)}
+          prepare={() => prepareManual(activeRecord)} />
+        {dirty.current && options?.saveCurrent && <Alert severity="info">{t('evidence.saveBeforeConfirm')}</Alert>}
+        </ReviewSection>}
         {!options?.readOnly && options?.getCurrentValue && !activeRecord.placeholder && !activeDosConflict && (!activeDos || (dosValueInput(activeRecord) && !dosValueInput(activeRecord)?.disabled)) && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
         {saveError && <Alert severity="error" sx={{ mt: 1 }} action={draftSaveFailed ? <Button disabled={saving} onClick={() => void retryDrafts().catch(() => undefined)}>{t('evidence.retrySave')}</Button> : undefined}>{saveError} {draftSaveFailed && t('evidence.saveFailureRetained')}</Alert>}
         {!activeRecord.placeholder && completionBlockers.length > 0 && <Alert severity="info" sx={{ mt: 1 }}>{completionBlockers.map(message => <Typography key={message} variant="body2">{message}</Typography>)}</Alert>}
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', my: 2 }}>
           <Button onClick={closeDrawer}>{t('evidence.back')}</Button>
           {!options?.readOnly && !activeRecord.placeholder && <><Button disabled={confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)} onClick={() => void execute(targetRef.current!, activeGroup.map(r => r.key))}>{t('evidence.reviewCurrentField')}</Button>
-          <Button variant="contained" disabled={completionBlockers.length > 0} onClick={() => void accept(activeGroup)}>{t('evidence.complete')}</Button>
-          {accepted && <Button disabled={saving} onClick={() => { for (const r of activeGroup) void saveProposal(r, valuesFor(r), false, reasons[r.key] || r.proposal_draft?.reason || '', true).catch(() => undefined) }}>{t('evidence.revise')}</Button>}</>}
+
+</>}
         </Box>
         </Box>
         <Box hidden={drawerTab !== 'history'} key={'history:' + activeRecord.key}>

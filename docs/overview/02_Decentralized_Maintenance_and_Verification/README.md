@@ -13,7 +13,7 @@
 | [数据库初始化与迁移](database-initialization-and-migrations.md) | 建表、填充周期表并执行版本迁移 | Alembic、Docker Compose、启动脚本 |
 | [数据导入与导出](data-import-and-export.md) | 离线交换用户、论文、记录和结构数据 | JSON、主业务数据库 |
 | [部署与运行时](deployment-and-runtime.md) | 生产 Docker 与 Linux/Mac 原生开发、配置及运行边界 | Make、Conda、Docker Compose、Go、Python |
-| [论文与记录审核](literature-and-record-review.md) | 两工作台三状态审核、科学保存的结构来源与审计保留、原位来源核对与人工裁决，以及超级管理员治理 | 分级权限、共享证据服务、论文与物性模型 |
+| [论文与记录审核](literature-and-record-review.md) | 两工作台审核、逐字段人工决定与三个模型入口、结果复用、原位来源及审计；[审核流程图](literature-and-record-review.md#逐字段审核流程图) | 分级权限、共享证据服务、论文与物性模型 |
 | [角色与管理员审批](roles-and-administrator-approval.md) | 用户中心、公开资料、管理员资格申请和账号治理 | 账户 API、超级管理员 API、审计模型 |
 | [格式校验与存储](format-validation-and-storage.md) | 解析结构文本、计算摘要并保存元数据 | pymatgen、结构模型 |
 

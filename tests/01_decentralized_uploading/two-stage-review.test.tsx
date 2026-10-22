@@ -133,8 +133,13 @@ it('编辑只去当前键旧红框，不预检查、不启动模型；恢复旧�
   expect(api.post).toHaveBeenCalledTimes(1)
 })
 
-it('完成只保存实际改动并关闭，不调用预检查或接受建议接口', async () => {
+it('认可原内容只保存正式人工决定，不写科学值、不调用模型、不填写理由', async () => {
   const save = vi.fn().mockResolvedValue(true)
+  const decision = {contract: 'field-review-v2', action: 'approve', actor_user_id: 7, occurred_at: '2026-10-22T08:00:00Z'}
+  vi.mocked(api.get).mockResolvedValue({record: base, review_token: 'field-token', can_approve: true, source_state: 'empty'})
+  vi.mocked(api.post).mockImplementation(async (path) => path.endsWith('/field-decision')
+    ? {record: {...base, status: 'supported', field_decision: decision}, review_token: 'approved', can_approve: true} as never
+    : {version: 'v1', records: [base], needs_check: false} as never)
   function Harness() {
     const flow = useEvidenceWorkflow({target: {target: 'upload', target_id: 'test'}, saveCurrent: save})
     return <><button onClick={() => flow.openIssue('name')}>打开</button>{flow.dialog}</>
@@ -142,10 +147,12 @@ it('完成只保存实际改动并关闭，不调用预检查或接受建议接�
   render(<Harness />)
   await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
   fireEvent.click(screen.getByText('打开'))
-  await screen.findByRole('button', {name: '完成', exact: true})
-  fireEvent.click(screen.getByRole('button', {name: '完成', exact: true}))
-  await waitFor(() => expect(save).toHaveBeenCalledTimes(1))
-  expect(api.post).toHaveBeenCalledTimes(1)
+  await waitFor(() => expect(screen.getByRole('button', {name: '人工审核通过', exact: true})).toBeEnabled())
+  expect(screen.queryByLabelText('人工修改判断理由（必填）')).not.toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button', {name: '人工审核通过', exact: true}))
+  await waitFor(() => expect(api.post).toHaveBeenCalledTimes(2))
+  expect(api.post).toHaveBeenLastCalledWith('/api/rag/evidence/field-decision', {target: 'upload', target_id: 'test', item_key: 'name', action: 'approve', review_token: 'field-token'})
+  expect(save).not.toHaveBeenCalled()
   expect(api.put).not.toHaveBeenCalled()
 })
 
@@ -158,6 +165,57 @@ it('提交同版本失败不会进入旧人工理由绕过路径', async () => {
   await act(async () => { answer = await flow!.gate({target: 'upload', target_id: 'test'}) })
   expect(answer).toBeNull()
   expect(api.post).toHaveBeenCalledWith('/api/rag/evidence/submit-check', {target: 'upload', target_id: 'test'})
+})
+
+it('原文加载中或失败不显示无证据，重试和同版本摘要刷新不丢原文', async () => {
+  let rejectLoad: (error: Error) => void
+  vi.mocked(api.get).mockImplementationOnce(() => new Promise((_, reject) => { rejectLoad = reject }))
+  let flow: ReturnType<typeof useEvidenceWorkflow>
+  function Harness() { flow = useEvidenceWorkflow({target: {target: 'upload', target_id: 'test'}}); return <><button onClick={() => flow.openIssue('name')}>看原文</button>{flow.dialog}</> }
+  render(<Harness />)
+  await waitFor(() => expect(flow!.records).toHaveLength(1))
+  fireEvent.click(screen.getByText('看原文'))
+  expect(await screen.findByText('正在加载此字段的原文依据…')).toBeInTheDocument()
+  expect(screen.queryByText(/未找到可定位的论文原文依据/)).not.toBeInTheDocument()
+  await act(async () => rejectLoad!(new Error('连接失败')))
+  expect(await screen.findByText(/原文依据加载失败/)).toBeInTheDocument()
+  expect(screen.queryByText(/未找到可定位的论文原文依据/)).not.toBeInTheDocument()
+  vi.mocked(api.get).mockResolvedValue({record: {...base, evidences: [{file_id: 'main', quote: '原文确实保存着', source_name: 'paper.pdf'}]}, review_token: 'current', can_approve: true, source_state: 'available'})
+  fireEvent.click(screen.getByRole('button', {name: '重试加载'}))
+  await screen.findByText(/原文确实保存着/)
+  await act(async () => { await flow!.restore({target: 'upload', target_id: 'test'}) })
+  expect(screen.getByText(/原文确实保存着/)).toBeInTheDocument()
+})
+
+it('人工不通过只记录拒绝并展开修改记录，不自动修改值或启动模型', async () => {
+  const row = {...base, item_key: 'a'.repeat(64)}
+  vi.mocked(api.get).mockImplementation(async path => path.includes('/manual/')
+    ? {ok: true, data: {changed: false, reason: '', no_evidence_reason: '', items: []}} as never
+    : {record: row, review_token: 'before', can_approve: true, source_state: 'empty'} as never)
+  vi.mocked(api.post).mockImplementation(async path => path.endsWith('/field-decision')
+    ? {record: {...row, field_decision: {contract: 'field-review-v2', action: 'reject', actor_user_id: 7, occurred_at: '2026-10-22T08:00:00Z'}}, review_token: 'after', can_approve: true} as never
+    : {version: 'v', records: [row], needs_check: false} as never)
+  function Harness() { const flow = useEvidenceWorkflow({target: {target: 'upload', target_id: 'test'}}); return <><button onClick={() => flow.openIssue('name')}>打开拒绝</button>{flow.dialog}</> }
+  render(<Harness />)
+  await waitFor(() => expect(api.post).toHaveBeenCalledTimes(1))
+  fireEvent.click(screen.getByText('打开拒绝'))
+  await waitFor(() => expect(screen.getByRole('button', {name: '人工审核不通过'})).toBeEnabled())
+  fireEvent.click(screen.getByRole('button', {name: '人工审核不通过'}))
+  await screen.findByLabelText('人工修改判断理由（必填）')
+  expect(screen.getByRole('button', {name: '保存', exact: true})).toBeDisabled()
+  expect(api.put).not.toHaveBeenCalled()
+  expect(api.patch).not.toHaveBeenCalled()
+  expect(vi.mocked(api.post).mock.calls.map(([path]) => path)).toEqual(['/api/rag/evidence/summary', '/api/rag/evidence/field-decision'])
+})
+
+it('提交被程序阻止时即使侧栏关闭也显示具体缺项', async () => {
+  let flow: ReturnType<typeof useEvidenceWorkflow>
+  function Harness() { flow = useEvidenceWorkflow(); return <>{flow.dialog}</> }
+  render(<Harness />)
+  vi.mocked(api.post).mockRejectedValue(Object.assign(new Error('人工修改记录不完整'), {issues: [{field: 'paper.title', message: '请填写人工修改理由'}]}))
+  await act(async () => { expect(await flow!.gate({target: 'upload', target_id: 'test'})).toBeNull() })
+  expect(screen.getByRole('alert')).toHaveTextContent('请填写人工修改理由')
+  expect(api.post).toHaveBeenCalledTimes(1)
 })
 
 it('N(EF)真实控件定位：名称失败只标名称，数值与单位各自打开自己的侧栏', async () => {

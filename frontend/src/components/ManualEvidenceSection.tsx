@@ -90,6 +90,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
   const save = async (uploadFiles = false) => {
     const input = store.read(key)
     if (input.busy) return
+    if (!input.dirty && !input.files.length) return
     if (input.choice === 'none' && input.saved?.items.length) {
       store.patch(key, { error: t('evidence.removeEvidenceBeforeNoEvidence') }); return
     }

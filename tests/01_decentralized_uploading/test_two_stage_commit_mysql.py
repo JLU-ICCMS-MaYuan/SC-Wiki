@@ -13,7 +13,7 @@ from backend.ingest.field_drafts import authorized_draft, draft_version, save_fi
 pytestmark = pytest.mark.skipif(os.environ.get('SCWIKI_CURRENT_MYSQL') != '1', reason='需显式启用MySQL回滚测试')
 
 
-@pytest.mark.parametrize('passed', [True, False])
+@pytest.mark.parametrize('passed', [True, False, 'human'])
 def test_admin_review_atomic_application_and_blocking(passed):
     asyncio.run(review_case(passed))
 
@@ -49,6 +49,14 @@ async def review_case(passed):
                 checks = {r['key']: {'status': 'unsupported' if not passed and r['field'] == 'paper.title' else 'supported',
                                     'reason': '隔离测试预置的核对结果', 'source_kind': 'paper_quote'} for r in snap['records']}
                 await db.run_sync(lambda s: science.save_results(s, snap, checks, actor.id))
+                if passed == 'human':
+                    from backend.ingest.field_decisions import detail, decide
+                    year = next(r for r in snap['records'] if r['field'] == 'paper.year')
+                    one = {**snap, 'records': [year]}
+                    def approve_year(session):
+                        cached = science.load_results(session, one, actor.id)
+                        return decide(session, one, cached, actor, 'approve', detail(one, cached)['review_token'])
+                    assert (await db.run_sync(approve_year))['record']['human_confirmed']
                 request = FieldReviewCommit(paper_id=paper.id, expected_evidence_version=snap['version'])
                 if not passed:
                     with pytest.raises(Exception) as failure:

@@ -164,13 +164,46 @@ def field_detail(target: str, target_id: str, item_key: str, history: bool = Fal
             if revisions:
                 targets.append(and_(table.target == 'revision', table.target_id.in_(revisions)))
         query = select(table).where(or_(*targets), table.item_key == item_key).order_by(table.id.desc())
-        rows = list(session.scalars(query if history else query.limit(1)))
         if history:
+            rows = list(session.scalars(query))
             return {'history': [{**row.result, 'content_hash': row.content_hash, 'source_hash': row.source_hash} for row in rows]}
-        result = dict(rows[0].result) if rows else {}
-        result.pop('history', None)
-        result.pop('audit_events', None)
-        return {'record': result}
+    # 详情选当前字段版本；历史只在 history=true 的独立页签读取。
+    snapshot, _ = _manual_snapshots(target, target_id, user, _manual_record_key(item_key))
+    from backend.ingest.field_review import bind_support_versions
+    from backend.ingest.field_decisions import detail
+    with SessionLocal() as session:
+        bind_support_versions(snapshot, session)
+        cached = science.load_results(session, snapshot, user.id, include_stale=True)
+    view = detail(snapshot, cached)
+    view['record'].pop('history', None)
+    view['record'].pop('audit_events', None)
+    return view
+
+
+class FieldDecision(Target):
+    item_key: str
+    action: Literal['approve', 'reject']
+    review_token: str
+
+
+@router.post('/field-decision')
+def save_field_decision(body: FieldDecision, user=Depends(get_current_user)):
+    from backend.ingest.field_drafts import target_lock, authorized_draft
+    from backend.ingest.field_source_metadata import read, field_snapshot
+    from backend.ingest.field_review import bind_support_versions
+    from backend.ingest.field_decisions import decide
+    item_key = _manual_record_key(body.item_key)
+    # 旧草稿首次访问建立来源元数据，后续决定不加载 PDF 或整篇核对历史。
+    _manual_snapshots(body.target, body.target_id, user, item_key)
+    with target_lock(body.target, body.target_id), SessionLocal.begin() as session:
+        authorized_draft(session, body.target, body.target_id, user, lock=True)
+        metadata = read(session, body.target, body.target_id)
+        if metadata is None:
+            ev.fail('evidence_stale', '来源已变化，请重新打开当前字段')
+        snapshot, _ = field_snapshot(session, body.target, body.target_id, user, item_key, metadata)
+        bind_support_versions(snapshot, session)
+        cached = science.load_results(session, snapshot, user.id, include_stale=True)
+        return decide(session, snapshot, cached, user, body.action, body.review_token)
 
 
 @router.post('/summary')
@@ -179,6 +212,7 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
     from backend.ingest.field_drafts import authorized_draft, draft_version
     from backend.ingest.field_review import independent_fields, compact_result
     from backend.ingest.property_field_review import expand_property_fields
+    from backend.ingest.field_decisions import display_reason
     with SessionLocal() as session:
         draft, _ = authorized_draft(session, body.target, body.target_id, user)
         records = independent_fields(expand_property_fields(ev.draft_records(draft, {})))
@@ -187,17 +221,38 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
             table.target_id == body.target_id).group_by(table.item_key)
         # 只投影摘要字段；MySQL不把数十MB历史和PDF原文送回应用。
         rows = session.execute(select(table.item_key, table.result['current_value'], table.result['status'],
-            table.result['reason'], table.result['ai_reason'], table.result['source_kind']).where(table.id.in_(latest))).all()
+            table.result['reason'], table.result['ai_reason'], table.result['source_kind'],
+            table.result['field_decision'], table.content_hash, table.source_hash, table.id).where(table.id.in_(latest))).all()
+        from backend.ingest.field_source_metadata import read, field_snapshot
+        from backend.ingest.field_review import bind_support_versions, valid_field_decision
+        metadata = read(session, body.target, body.target_id)
+        current_fields = {}
+        if metadata:
+            current, _ = field_snapshot(session, body.target, body.target_id, user, None, metadata)
+            bind_support_versions(current, session)
+            current_fields = {r['item_key']: r for r in current['records']}
         results = {row[0]: row for row in rows}
         from backend.ingest.field_review import changed_keys
         modified = changed_keys({'records': records, '_field_change_events': (get_state(body.target_id) or {}).get('_field_change_events') or []}) if body.target == 'upload' else changed_keys({'records': records, '_field_change_events': draft.get('_field_change_events') or []})
         output = []
         for record in records:
             row = results.get(record['item_key'])
-            matches = row is not None and row[5] != 'human_review' and science.canonical(row[1]) == science.canonical(record.get('current_value'))
+            decision_current = current_fields.get(record['item_key'])
+            decision = {'field_decision': row[6]} if row else {}
+            valid_decision = bool(decision_current and valid_field_decision(decision_current, decision))
+            matches = row is not None and (row[5] != 'human_review' or valid_decision) and science.canonical(row[1]) == science.canonical(record.get('current_value'))
+            if row and decision_current:
+                matches = matches and (row[7], row[8]) == (decision_current['content_hash'], decision_current['source_hash'])
+            if row and row[6] and not valid_decision:
+                matches = False
             output.append(compact_result({**record, 'status': row[2] if matches else 'unchecked',
-                'reason': (row[3] or '') if row else '', 'ai_reason': (row[4] or '') if row else '',
-                'pending_review': not matches, 'human_modified': record['item_key'] in modified, 'resolution': (draft.get('_review_notes', {}).get(record['item_key']) or {}).get('reason', '')}))
+                'reason': display_reason(row[3]) if row else '', 'ai_reason': display_reason(row[4]) if row else '',
+                'field_decision': row[6] if valid_decision else None,
+                'human_confirmed': valid_decision and row[6].get('action') == 'approve',
+                'detail_ref': ev.digest([row[9], row[7], row[8], row[2], row[3], row[6],
+                    (decision_current or {}).get('content_hash'), (decision_current or {}).get('source_hash')]) if row else '',
+                'pending_review': not matches, 'human_modified': record['item_key'] in modified or bool((decision_current or {}).get('paper_source_hash')),
+                'resolution': (draft.get('_review_notes', {}).get(record['item_key']) or {}).get('reason', '')}))
         return {'version': draft_version(draft), 'records': output, 'needs_check': False}
 
 
@@ -233,8 +288,8 @@ def snapshot_for(body, user):
 @router.post('/preflight')
 def preflight(body: Target, user=Depends(get_current_user)):
     snapshot, cached = snapshot_for(body, user)
-    from backend.ingest.field_review import deterministic_results
-    cached.update({key: {**value, 'stored_result': True} for key, value in deterministic_results(snapshot).items()})
+    from backend.ingest.field_review import merge_program_results
+    merge_program_results(snapshot, cached)
     active_job = None
     if body.target == 'upload':
         state = get_state(body.target_id) or {}
@@ -267,7 +322,7 @@ def create_job(body: Target, user=Depends(get_current_user)):
 
 
 def enqueue_review(body, user, snapshot, cached):
-    from backend.ingest.field_review import needs_review, reusable
+    from backend.ingest.field_review import needs_review, reusable, changed_keys
     review_started_at = datetime.now(timezone.utc).isoformat()
     if body.purpose == 'review_all' and (body.target != 'paper' or user.role not in {'admin', 'superadmin'}):
         raise HTTPException(403, detail='全量复核仅用于管理员论文审核')
@@ -279,12 +334,29 @@ def enqueue_review(body, user, snapshot, cached):
     if body.purpose == 'field' and len(retry_keys) != 1:
         ev.fail('evidence_target_invalid', '主动核对必须指定一个字段')
     prior = dict(cached)
+    changed = changed_keys(snapshot)
+    for record in snapshot['records']:
+        record['human_modified'] = bool(record.get('human_modified') or record['item_key'] in changed or record.get('paper_source_hash'))
     cached = {r['key']: cached[r['key']] for r in snapshot['records']
               if reusable(r, cached.get(r['key'])) and r['key'] not in retry_keys}
     requested = retry_keys if body.purpose == 'field' else {
-        r['key'] for r in snapshot['records'] if needs_review(r, cached.get(r['key']))}
+        r['key'] for r in snapshot['records'] if needs_review(r, cached.get(r['key']))
+        and (body.purpose != 'submit' or r.get('human_modified'))}
     if not requested:
         return {'status': 'completed', **review_response(snapshot, cached)}
+    # 程序仅检查人工记录是否齐全；理由是否科学成立由随后模型判断。
+    modified = [r for r in snapshot['records'] if r['key'] in requested and r.get('human_modified')]
+    if modified:
+        with SessionLocal() as session:
+            issues = []
+            for record in modified:
+                entry = manual._current(session, snapshot, record)
+                if not entry or not entry.reason.strip():
+                    issues.append({'field': record['field'], 'message': '请填写人工修改理由'})
+                elif not entry.items and not entry.no_evidence_reason.strip():
+                    issues.append({'field': record['field'], 'message': '请提供证据，或填写不提供证据的原因'})
+            if issues:
+                ev.fail('manual_evidence_incomplete', '人工修改记录尚未填写完整，未启动模型核对', issues=issues)
     if not snapshot.get('chunks') or snapshot.get('condition_source_manifest_complete') is False:
         ev.fail('evidence_source_incomplete', '正文或补充材料尚未读取完整，未启动模型核对，也未把缺失内容当成未报告')
     for record in snapshot['records']:
@@ -370,8 +442,8 @@ def submit_check(body: Target, user=Depends(get_current_user)):
             science.save_results(session, snapshot, program, user.id)
         return {'status': 'completed', **review_response(snapshot, {**cached, **program}), 'program_issues': issues}
     snapshot, cached = snapshot_for(body, user)
-    from backend.ingest.field_review import deterministic_results
-    cached.update({key: {**value, 'stored_result': True} for key, value in deterministic_results(snapshot).items()})
+    from backend.ingest.field_review import merge_program_results
+    merge_program_results(snapshot, cached)
     from backend.ingest.field_review_migration import migrated, migrate
     with SessionLocal.begin() as session:
         if not migrated(session, snapshot):

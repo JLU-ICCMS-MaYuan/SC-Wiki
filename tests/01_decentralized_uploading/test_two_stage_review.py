@@ -89,6 +89,30 @@ def test_empty_optional_human_change_needs_review_but_blank_alone_does_not():
     assert not blocking(record, None)
 
 
+@pytest.mark.parametrize('action', ['approve', 'reject'])
+def test_program_quote_match_cannot_overwrite_explicit_human_decision(action):
+    from backend.ingest.field_review import merge_program_results
+    record = {'key': 'title', 'item_key': 'title', 'content_hash': 'value', 'source_hash': 'source',
+              'field': 'paper.title', 'current_value': 'LaScH', 'required': True,
+              'evidences': [{'file_id': 'main', 'chunk_index': 0, 'quote': 'LaScH', 'origin_kind': 'verified_front_matter'}]}
+    result = {**record, 'status': 'supported' if action == 'approve' else 'uncertain', 'reason': '保留人工决定',
+              'field_decision': {'contract': 'field-review-v2', 'action': action, 'actor_user_id': 7,
+                                 'content_hash': 'value', 'source_hash': 'source'}}
+    snapshot = {'records': [record], 'chunks': [{'file_id': 'main', 'chunk_index': 0, 'content': 'LaScH'}]}
+    cached = {'title': result}
+    merge_program_results(snapshot, cached)
+    assert cached['title']['reason'] == '保留人工决定'
+    assert blocking(record, cached['title']) == (action == 'reject')
+    if action == 'reject':
+        assert blocking({**record, 'required': False}, cached['title'])
+    changed = {**record, 'source_hash': 'different'}
+    assert not reusable(changed, result)
+    snapshot['_field_change_events'] = [{'item_key': 'title', 'before_value': 'before'}]
+    empty = {}
+    merge_program_results(snapshot, empty)
+    assert not empty, '人工修改不能被程序字面匹配跳过模型审核'
+
+
 def test_returning_to_passed_version_reuses_without_model():
     record = {'item_key': 'k', 'content_hash': 'original', 'source_hash': 'source'}
     old = {**record, 'status': 'supported'}

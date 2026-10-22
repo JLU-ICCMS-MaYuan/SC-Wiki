@@ -1,0 +1,223 @@
+{
+  "passed": true,
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload-tasks/99999999999999999999999999999999/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/99999999999999999999999999999999"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload-tasks/99999999999999999999999999999999/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/99999999999999999999999999999999"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/99999999999999999999999999999999/parsing"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/99999999999999999999999999999999/parsing"
+    },
+    {
+      "method": "GET",
+      "path": "/api/classification-catalogs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/space-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/upload-tasks/99999999999999999999999999999999/draft"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/space-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/upload-tasks/99999999999999999999999999999999/draft"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/evidence/summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/evidence/field-detail"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/evidence/field-decision"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload-tasks/99999999999999999999999999999999/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/99999999999999999999999999999999"
+    },
+    {
+      "method": "POST",
+      "path": "/api/upload-tasks/99999999999999999999999999999999/activity"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/99999999999999999999999999999999"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/99999999999999999999999999999999/parsing"
+    },
+    {
+      "method": "GET",
+      "path": "/api/upload-tasks/99999999999999999999999999999999/parsing"
+    },
+    {
+      "method": "GET",
+      "path": "/api/classification-catalogs"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/space-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/upload-tasks/99999999999999999999999999999999/draft"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/space-groups"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/upload-tasks/99999999999999999999999999999999/draft"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/evidence/summary"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/evidence/field-detail"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/evidence/field-decision"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/evidence/upload/99999999999999999999999999999999/manual/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/evidence/field-detail"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/evidence/upload/99999999999999999999999999999999/manual/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/evidence/manual-context"
+    },
+    {
+      "method": "PUT",
+      "path": "/api/rag/evidence/upload/99999999999999999999999999999999/manual/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/evidence/field-detail"
+    }
+  ],
+  "manualWrites": 1,
+  "errors": []
+}

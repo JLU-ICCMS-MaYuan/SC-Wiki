@@ -25,6 +25,8 @@ def review_api(monkeypatch):
     monkeypatch.setattr(field_drafts, 'authorized_draft', lambda *a, **k: (deepcopy(draft), None))
     monkeypatch.setattr(field_drafts, 'target_lock', lambda *a: nullcontext())
     monkeypatch.setattr(api, 'get_state', lambda *a: {})
+    from backend.ingest import field_source_metadata
+    monkeypatch.setattr(field_source_metadata, 'manifest', lambda *a: [])
     def snapshot(*args):
         return ev.complete_snapshot('upload', 'task', ev.draft_records(draft, {}),
             [{'file_id': 'main', 'chunk_index': 0, 'content': 'LaScH'}], draft), {}
@@ -120,3 +122,49 @@ def test_submit_reuses_persisted_field_pass_without_enqueuing_again(review_api):
     assert response['status'] == 'completed'
     assert response['records'][0]['status'] == 'supported'
     assert not queued
+
+
+def test_submit_96_passes_only_enqueues_4_changes_and_does_not_retry_scientific_failure(review_api, monkeypatch):
+    _, user, queued, snapshot = review_api
+    snap, _ = snapshot()
+    template = snap['records'][0]
+    snap['records'] = [{**template, 'key': str(i), 'item_key': str(i), 'field': 'paper.field' + str(i),
+        'fields': ['paper.field' + str(i)], 'content_hash': 'value' + str(i), 'current_value': 'after', 'required': True} for i in range(100)]
+    snap['_field_change_events'] = [{'item_key': str(i), 'before_value': 'before'} for i in range(96, 100)]
+    cached = {r['key']: {**r, 'status': 'supported', 'stored_result': True} for r in snap['records'][:96]}
+    monkeypatch.setattr(api.manual, '_current', lambda *a: SimpleNamespace(reason='修改理由', items=[], no_evidence_reason='依据已存原文，无新增附件'))
+    body = api.Target(target='upload', target_id='task', purpose='submit', expected_version=snap['version'])
+    assert api.enqueue_review(body, user, snap, cached)['status'] == 'queued'
+    assert json.loads(queued[0][2])['requested_keys'] == ['96', '97', '98', '99']
+    cached.update({r['key']: {**r, 'status': 'unsupported' if r['key'] == '99' else 'supported', 'stored_result': True} for r in snap['records'][96:]})
+    assert api.enqueue_review(body, user, snap, cached)['status'] == 'completed'
+    assert len(queued) == 1
+    with pytest.raises(HTTPException):
+        ev.resolve_results(snap, cached, user.id, None, snap['version'])
+
+
+def test_missing_manual_reason_blocks_before_model_configuration(review_api, monkeypatch):
+    _, user, queued, snapshot = review_api
+    snap, _ = snapshot()
+    row = snap['records'][0]
+    snap['records'] = [row]
+    snap['_field_change_events'] = [{'item_key': row['item_key'], 'before_value': 'old'}]
+    monkeypatch.setattr(api.manual, '_current', lambda *a: None)
+    monkeypatch.setattr(api, 'get_llm_config', lambda: pytest.fail('缺少人工理由时不应启动模型'))
+    with pytest.raises(HTTPException) as failure:
+        api.enqueue_review(api.Target(target='upload', target_id='task', purpose='field', expected_version=snap['version'], retry_keys=[row['key']]), user, snap, {})
+    assert failure.value.detail['issues'][0]['message'] == '请填写人工修改理由'
+    assert not queued
+
+
+@pytest.mark.parametrize('issue,expected', [('已纠正角色；只保存新候选供人工比较', 'supported'), ('其他真实冲突', 'uncertain')])
+def test_explicit_model_review_resolves_only_the_old_candidate_marker(monkeypatch, issue, expected):
+    from backend.rag import llm
+    record = {'key': 'title', 'item_key': 'title', 'field': 'paper.title', 'fields': ['paper.title'],
+        'claim': {'value': 'LaScH'}, 'current_value': 'LaScH', 'evidences': [],
+        'generation_issue': {'code': 'conflict', 'message': issue}}
+    chunks = [{'file_id': 'main', 'chunk_index': 0, 'content': 'LaScH'}]
+    monkeypatch.setattr(llm, 'complete_json', lambda *a, **k: {'results': [{'key': 'title', 'status': 'supported',
+        'reason': '原文给出了当前材料名称', 'evidences': [{'file_id': 'main', 'chunk_index': 0, 'quote': 'LaScH'}]}]})
+    result = ev.evaluate_batch([record], chunks, 'field')[0]
+    assert result['status'] == expected

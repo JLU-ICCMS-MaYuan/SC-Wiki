@@ -1,4 +1,13 @@
 export default {
+  "humanApprove": "Approve field",
+  "saveManualBeforeSubmit": "Save the manual edit notes and attachments in the sidebar before submitting.",
+  "humanReject": "Reject field",
+  "humanApprovalSaved": "Human approval saved. Submission will reuse it while the content and evidence are unchanged.",
+  "sourceLoading": "Loading evidence for this field…",
+  "sourceLoadFailed": "Evidence could not be loaded. This does not mean no evidence exists.",
+  "sourceResponseInvalid": "The source response is incomplete. Please retry loading.",
+  "retrySource": "Retry loading",
+  "historicalSource": "These sources belong to an earlier version and are retained for comparison, not current approval.",
   "reviewCurrentField": "Review this field with AI",
   "viewResults": "View review results",
   "reviewStatus": {
@@ -6,7 +15,7 @@ export default {
     "unchecked": "Not checked", "supported": "Supported by source", "unsupported": "Source does not support this value",
     "uncertain": "Evidence needs confirmation", "missing": "Source missing"
   },
-  "saveAndComplete": "Save and finish",
+  "saveAndComplete": "Save",
   "manualSaving": "Saving the current value and manual evidence…",
   "manualReasonRequired": "Enter the reason for your manual edit.",
   "manualChoiceRequired": "Choose evidence or explain why none is provided.",

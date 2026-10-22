@@ -34,7 +34,7 @@ function recordOwner(record: EvidenceRecord, scope: string) {
   return [name, index == null ? `材料状态 ${record.state_key}` : `材料状态 ${Number(index) + 1}${state ? '' : '（已移除）'}`].filter(Boolean).join(' · ')
 }
 
-export const evidenceProblem = (record: EvidenceRecord) => !record.pending_review && !record.stale && (record.required !== false || record.human_modified) && ['unsupported', 'uncertain', 'missing'].includes(record.status)
+export const evidenceProblem = (record: EvidenceRecord) => !record.pending_review && !record.stale && (record.required !== false || record.human_modified || record.field_decision?.action === 'reject') && ['unsupported', 'uncertain', 'missing'].includes(record.status)
 
 /** 优先复用控件自己的标签，不把整个输入框变成按钮。 */
 function fieldCaption(node: HTMLElement) {

@@ -584,7 +584,7 @@ func validatePaperEvidenceComplete(tx *gorm.DB, paper *models.Paper, prepared ..
 	var humanRecords []uint
 	for _, records := range prepared {
 		for _, record := range records {
-			if record.RecordID != 0 && validContributorEvidence(record) {
+			if record.RecordID != 0 && (validContributorEvidence(record) || validFieldDecision(record)) {
 				humanRecords = append(humanRecords, record.RecordID)
 			}
 		}

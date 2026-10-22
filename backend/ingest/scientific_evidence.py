@@ -566,6 +566,17 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
             models.ScientificEvidenceCheck.item_key == record['item_key'], models.ScientificEvidenceCheck.content_hash == record['content_hash'],
             models.ScientificEvidenceCheck.source_hash == record['source_hash'], models.ScientificEvidenceCheck.rule_version.in_(COMPATIBLE_RULES)).order_by(models.ScientificEvidenceCheck.id.desc()).limit(1).with_for_update())
         existing = session.get(models.ScientificEvidenceCheck,existing_id) if existing_id is not None else None
+        if existing is not None and not update_decision:
+            from .field_review import valid_field_decision
+            previous_decision = (existing.result or {}).get('field_decision') or {}
+            if valid_field_decision(record, existing.result):
+                # 人工认可不能被同版本模型回答推翻；人工拒绝后旧任务不能迟到覆盖。
+                if (previous_decision['action'] == 'approve' or
+                        _review_time(result.get('review_started_at')) <= _review_time(previous_decision.get('occurred_at'))):
+                    results[record['key']] = copy.deepcopy(existing.result)
+                    continue
+                result.pop('field_decision', None)
+                result['human_confirmed'] = False
         if existing is not None and not update_decision and (result.get('model') or result.get('review_started_at')):
             # 同一内容版本的较早请求不能在迟到后覆盖较新核对；并非“支持优先”。
             previous_time = _review_time(existing.result.get('review_started_at'))
@@ -692,8 +703,11 @@ def restore_user_uploads(user_id):
 
 
 def apply_derived(records):
+    from .field_review import valid_field_decision
     by_item = {r['item_key']: r for r in records}
     for record in records:
+        if valid_field_decision(record, record):
+            continue
         if record.get('kind') != 'derived' or record.get('human_modified'):
             continue
         source = by_item.get(record.get('dependency'))

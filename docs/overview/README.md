@@ -67,7 +67,7 @@ flowchart LR
 
 ## 文档维护
 
-上传提交和两工作台批准共用科学数据来源核对：核对与提交独立，管理员可对当前内容逐条说明理由确认；编辑页先保存新值，再将人工确认绑定当前版本。
+上传提交和两工作台批准共用科学数据来源核对：保存与审核决定分开；认可现有内容直接点击人工审核通过，无需理由。人工修改保存后在提交或主动核对时进入模型，同版本通过结果复用。流程图见[逐字段审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md#逐字段审核流程图)。
 操作流程见[PDF 解析管线](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md)与
 [论文与记录审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 

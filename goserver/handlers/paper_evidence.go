@@ -25,6 +25,7 @@ type evidenceCitation struct {
 	PageEnd    *int    `json:"page_end"`
 }
 type evidenceReviewRecord struct {
+	FieldDecision         json.RawMessage    `json:"field_decision,omitempty"`
 	HumanModified         bool               `json:"human_modified,omitempty"`
 	SupplementalEvidences json.RawMessage    `json:"supplemental_evidences,omitempty"`
 	History               json.RawMessage    `json:"history,omitempty"`
@@ -62,6 +63,21 @@ type evidenceReviewRecord struct {
 type evidencePrepareError struct {
 	Status int
 	Detail json.RawMessage
+}
+
+// 新字段决定由 Python 校验和持久化；普通理由或旧人工标记不能冒充。
+func validFieldDecision(r evidenceReviewRecord) bool {
+	var decision struct {
+		Contract    string `json:"contract"`
+		Action      string `json:"action"`
+		Actor       uint   `json:"actor_user_id"`
+		ContentHash string `json:"content_hash"`
+		SourceHash  string `json:"source_hash"`
+	}
+	return json.Unmarshal(r.FieldDecision, &decision) == nil && decision.Contract == "field-review-v2" &&
+		decision.Action == "approve" && decision.Actor != 0 && r.Status == "supported" &&
+		decision.ContentHash != "" && decision.ContentHash == r.ContentHash &&
+		decision.SourceHash != "" && decision.SourceHash == r.SourceHash
 }
 
 func (e *evidencePrepareError) Error() string { return "证据核对未完成" }
@@ -171,7 +187,7 @@ func preparePaperEvidence(tx *gorm.DB, paper *models.Paper, auth, jobID, version
 		if r.Required != nil && !*r.Required && !r.HumanModified {
 			continue
 		}
-		if r.Status != "supported" || r.SourceKind == "human_review" {
+		if r.Status != "supported" || (r.SourceKind == "human_review" && !validFieldDecision(r)) {
 			return nil, errors.New("字段未通过科学审核；人工说明不能代替核对通过")
 		}
 		if r.RecordID == 0 {

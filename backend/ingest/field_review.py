@@ -7,9 +7,20 @@ def field_version(record):
     return (record['item_key'], record['content_hash'], record['source_hash'])
 
 
+def valid_field_decision(record, result, action=None):
+    decision = (result or {}).get('field_decision') or {}
+    return bool(decision.get('contract') == 'field-review-v2' and decision.get('actor_user_id')
+                and decision.get('action') in {'approve', 'reject'}
+                and (action is None or decision['action'] == action)
+                and all(decision.get(k) and decision[k] == record.get(k) for k in ('content_hash', 'source_hash'))
+                and not (result or {}).get('stale'))
+
+
 def reusable(record, result):
+    if result and result.get('field_decision') and not valid_field_decision(record, result):
+        return False
     return bool(result and not result.get('stale') and
-                result.get('source_kind') != 'human_review' and
+                (result.get('source_kind') != 'human_review' or valid_field_decision(record, result)) and
                 all(result.get(key) == record.get(key) for key in ('content_hash', 'source_hash')) and
                 result.get('status') in {'supported', 'unsupported', 'uncertain', 'missing'})
 
@@ -21,6 +32,8 @@ def needs_review(record, result):
 
 
 def blocking(record, result):
+    if valid_field_decision(record, result, 'reject'):
+        return True
     if not record.get('required', True) and not record.get('human_modified'):
         return False
     return not reusable(record, result) or result.get('status') != 'supported'
@@ -43,7 +56,7 @@ def compact_result(result):
     """摘要不携带原文、候选大对象或历史，字段详情通过独立接口取得。"""
     keys = ('key', 'item_key', 'field', 'fields', 'label', 'current_value', 'status', 'reason',
             'ai_reason', 'resolution', 'required', 'stale', 'pending_review', 'human_modified', 'content_hash',
-            'source_hash', 'record_field', 'record_field_key', 'record_group_key', 'state_key',
+            'source_hash', 'field_decision', 'human_confirmed', 'detail_ref', 'record_field', 'record_field_key', 'record_group_key', 'state_key',
             'module_key', 'record_key', 'structure_hash', 'structure_field', 'settings_field', 'settings_part', 'owner_label', 'source_kind', 'check_mode')
     return {key: deepcopy(result[key]) for key in keys if key in result} | {'evidences': []}
 
@@ -240,7 +253,7 @@ def prepare_submission(snapshot, cached):
     changed = changed_keys(snapshot)
     modified = [r for r in snapshot['records'] if r['item_key'] in changed]
     for record in snapshot['records']:
-        record['human_modified'] = record['item_key'] in changed
+        record['human_modified'] = record['item_key'] in changed or bool(record.get('paper_source_hash'))
         previous = cached.get(record['key'])
         if record['human_modified']:
             related = [r for r in snapshot['records'] if r.get('state_key') == record.get('state_key')
@@ -287,6 +300,10 @@ def prepare_submission(snapshot, cached):
             'claim': deepcopy(record['claim']), 'prior_claim': deepcopy(previous.get('claim')),
             'scope_review': {'previous_content_hash': previous['content_hash'],
                              'required_keys': [r['key'] for r in owners]}}
+        if cached[record['key']].get('field_decision'):
+            # 新范围由修改入口承担审核，不把旧人工决定冒充新范围的人工确认。
+            cached[record['key']]['prior_field_decision'] = cached[record['key']].pop('field_decision')
+            cached[record['key']].update(human_confirmed=False, check_method='scope_reuse', source_kind='scope_reuse')
     return snapshot, cached
 
 
@@ -332,6 +349,17 @@ def deterministic_results(snapshot):
                 'reason': '程序检查：字段与已定位的论文首页原文一致', 'ai_reason': '程序检查：字段与已定位的论文首页原文一致',
                 'evidences': sources, 'check_method': 'program'}
     return results
+
+
+def merge_program_results(snapshot, cached):
+    """程序自动结论不能覆盖同版本人工决定，尤其不能把人工拒绝重新变成通过。"""
+    changed = changed_keys(snapshot)
+    for record in snapshot['records']:
+        record['human_modified'] = record['item_key'] in changed or bool(record.get('paper_source_hash'))
+    by_key = {r['key']: r for r in snapshot['records']}
+    for key, result in deterministic_results(snapshot).items():
+        if not valid_field_decision(by_key[key], cached.get(key)):
+            cached[key] = {**result, 'stored_result': True}
 
 
 def bind_support_versions(snapshot, session=None):

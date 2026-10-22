@@ -912,7 +912,15 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         review = raw.get('proposal_review')
         if isinstance(review, dict) and review.get('status') in {'reasonable', 'questionable', 'uncertain'}:
             safe['proposal_review'] = {'status': review['status'], 'explanation': str(review.get('explanation') or '')[:4000]}
-        result = checked_result(by_key[key], safe, chunks)
+        checked_record = by_key[key]
+        candidate_issue = checked_record.get('generation_issue') or {}
+        reviewed_candidate = purpose in {'field', 'submit'} and candidate_issue.get('message') == '已纠正角色；只保存新候选供人工比较'
+        if reviewed_candidate:
+            # 新的显式科学核对决定当前值；旧“候选待选”标记不能强制推翻新判断。
+            checked_record = {k: v for k, v in checked_record.items() if k != 'generation_issue'}
+        result = checked_result(checked_record, safe, chunks)
+        if reviewed_candidate:
+            result['resolved_generation_issue'] = candidate_issue
         supplemental = []
         for reference in raw.get('supplemental_evidences') or []:
             if not isinstance(reference, dict):
@@ -1503,7 +1511,7 @@ def aggregate_candidates(records, candidates, location_errors, model, source_cat
         reviews = [i['proposal_review'] for i in all_items if i.get('proposal_review')]
         review = None if not reviews else {'status': 'reasonable' if all(x['status'] == 'reasonable' for x in reviews) else 'questionable' if any(x['status'] == 'questionable' for x in reviews) else 'uncertain',
                     'explanation': '；'.join(dict.fromkeys(x['explanation'] for x in reviews))}
-        retained = {name: next((i[name] for i in all_items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason', 'source_kind', 'supplemental_evidences', 'manual_reason_review')}
+        retained = {name: next((i[name] for i in all_items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason', 'source_kind', 'supplemental_evidences', 'manual_reason_review', 'resolved_generation_issue')}
         results[record['key']] = dict(status=status, proposal=proposal, proposal_review=review, **retained,
             review_started_at=min((i['review_started_at'] for i in all_items if i.get('review_started_at')), default=None),
             association_review=aggregate_reviews(record, all_items),

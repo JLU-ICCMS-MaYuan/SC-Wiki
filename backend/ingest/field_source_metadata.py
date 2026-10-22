@@ -47,7 +47,10 @@ def field_snapshot(session, target, target_id, user, item_key, metadata):
     snapshot = ev.complete_snapshot(target, target_id, ev.draft_records(draft, {}), chunks, context, metadata_only=True)
     from .scientific_context import bind_snapshot_source_documents
     bind_snapshot_source_documents(snapshot, metadata.get('_source_documents') or {}, set(metadata.get('_source_expected') or []))
-    snapshot['records'] = [r for r in snapshot['records'] if r['item_key'] == item_key]
+    if item_key is not None:
+        snapshot['records'] = [r for r in snapshot['records'] if r['item_key'] == item_key]
+    from .upload_tasks import get_state
+    snapshot['_field_change_events'] = ((get_state(target_id) or {}).get('_field_change_events') or []) if target == 'upload' else draft.get('_field_change_events') or []
     # 说明与附件保存使用草稿版本；附件自身的变化不会让同批上传的下一份文件误判过期。
     snapshot['version'] = ev.digest([draft_version(draft), manifest(session, target, target_id)])
     if target == 'paper':
