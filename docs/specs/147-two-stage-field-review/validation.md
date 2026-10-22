@@ -21,3 +21,10 @@ Go 旧测试 `TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction` 仍
 - 未运行真实浏览器登录后的生产认证 E2E；前端测试使用现有测试运行器。
 - 未在生产部署；Issue/Spec 远程双向链接待用户授权推送后验证。
 - 旧数据首次提交迁移在隔离副本验证，真实用户草稿未批量执行迁移。
+
+## 2026-10-22 侧栏回归修复验证
+
+- 已新增 `two-stage-review.test.tsx` 回归：字段设置即使从分项来源入口打开，也一次纵向展示名称、值、值类型、单位；μ* 的真实 `TcScientificField` 可由来源侧栏定位并保存设置；待提交状态不拼接或伪造 AI 理由。
+- 目标测试：`npm run test:upload-ui -- tests/01_decentralized_uploading/two-stage-review.test.tsx`，10 项通过。
+- `npm run build`（包含 `tsc -b` 与 Vite production build）通过；仅有 3Dmol 的 `eval` 提醒及大 chunk 提醒。
+- `git diff --check` 通过。三张用户附件中的前两张已归档，第三张提供路径不存在，Spec 已登记该材料缺口。

@@ -11,6 +11,7 @@
 - [x] T007 [US3] 在backend/api/rag.py、backend/services/paper_revisions.py和goserver/handlers/paper_evidence.go接入统一严格门禁及原子版本校验；前端提交冻结并自动完成。
 - [x] T008 在tests/01_decentralized_uploading覆盖全部SC，运行MySQL回滚、浏览器与447项性能验证，写validation.md。
 - [x] T009 用Overview技能回写已实现行为，README操作说明、Issue证据和任务范围本地提交；不推送。
+- [x] T010 [US2] 修复字段设置分项展示回归、μ* 设置字段定位和待审核状态冒充 AI 理由；使用真实设置组件路径补回归测试并追加验证记录。
 
 ## 覆盖与依赖
 

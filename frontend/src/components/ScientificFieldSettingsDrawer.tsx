@@ -11,21 +11,20 @@ export default function ScientificFieldSettingsDrawer({ value, readOnly, typeLoc
   presentation?: FieldSettingsPresentation; note?: string; onChange: (value: ScientificFieldSettings) => void; onApply: () => void; onClose: () => void; onDelete?: () => void
 }) {
   const wasOpen = useRef(false)
-  const visible = (part: string) => !presentation?.part || presentation.part === part
   useEffect(() => {
     if (wasOpen.current && !value && presentation) presentation.onDone()
     wasOpen.current = Boolean(value)
   }, [value, presentation])
   const content = value && <Stack component="form" onSubmit={event => { event.preventDefault(); onApply() }} spacing={2} sx={{ p: presentation ? 0 : 3, minHeight: '100%', boxSizing: 'border-box' }}>
       <Typography variant="h6">{readOnly ? '查看字段' : adding ? '新增字段' : '编辑字段'}</Typography>
-      {visible('name') && <TextField autoFocus label="字段名称（key）" value={value.name} disabled={readOnly} onChange={event => onChange({ ...value, name: event.target.value })} />}
-      {visible('kind') && <TextField select label="值类型" value={value.kind} disabled={readOnly || typeLocked} onChange={event => onChange({ ...value, kind: event.target.value as PropertyValueKind })}>
-        {Object.entries(kinds).map(([key, name]) => <MenuItem key={key} value={key}>{name}</MenuItem>)}
-      </TextField>}
-      {visible('raw') && (value.kind === 'boolean' ? <TextField select label="值" value={value.raw} disabled={readOnly} onChange={event => onChange({ ...value, raw: event.target.value })}>
+      <TextField autoFocus label="字段名称（key）" value={value.name} disabled={readOnly} onChange={event => onChange({ ...value, name: event.target.value })} />
+      {value.kind === 'boolean' ? <TextField select label="值" value={value.raw} disabled={readOnly} onChange={event => onChange({ ...value, raw: event.target.value })}>
         <MenuItem value="">未填写</MenuItem><MenuItem value="true">是</MenuItem><MenuItem value="false">否</MenuItem>
-      </TextField> : <TextField label={value.kind === 'range' ? '值（下界..上界）' : '值'} value={value.raw} disabled={readOnly} onChange={event => onChange({ ...value, raw: event.target.value })} />)}
-      {visible('unit') && <TextField label="单位" value={value.unit} disabled={readOnly} onChange={event => onChange({ ...value, unit: event.target.value })} />}
+      </TextField> : <TextField label={value.kind === 'range' ? '值（下界..上界）' : '值'} value={value.raw} disabled={readOnly} onChange={event => onChange({ ...value, raw: event.target.value })} />}
+      <TextField select label="值类型" value={value.kind} disabled={readOnly || typeLocked} onChange={event => onChange({ ...value, kind: event.target.value as PropertyValueKind })}>
+        {Object.entries(kinds).map(([key, name]) => <MenuItem key={key} value={key}>{name}</MenuItem>)}
+      </TextField>
+      <TextField label="单位" value={value.unit} disabled={readOnly} onChange={event => onChange({ ...value, unit: event.target.value })} />
       <Alert severity="info">{typeLocked ? '固定字段保留科学类型。' : ''}修改单位不自动换算数值；请同时核对当前值。</Alert>
       {note && <Typography variant="caption" color="text.secondary">{note}</Typography>}
       {error && <Alert severity="error">{error}</Alert>}

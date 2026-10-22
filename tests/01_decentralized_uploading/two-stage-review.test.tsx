@@ -2,12 +2,14 @@ import '@testing-library/jest-dom/vitest'
 import React from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
-import { useEvidenceWorkflow, type EvidenceRecord } from '../../frontend/src/components/EvidenceWorkflow'
+import { aiReasonText, useEvidenceWorkflow, type EvidenceRecord } from '../../frontend/src/components/EvidenceWorkflow'
 import { evidenceProblem } from '../../frontend/src/components/EvidenceFieldMarkers'
 import EvidenceFieldMarkers from '../../frontend/src/components/EvidenceFieldMarkers'
 import { TextField } from '@mui/material'
 import { createFieldDraftSaver, fieldChanges } from '../../frontend/src/lib/fieldDrafts'
 import { api } from '../../frontend/src/lib/api'
+import TcScientificField from '../../frontend/src/components/TcScientificField'
+import ReviewFieldSettings from '../../frontend/src/components/ReviewFieldSettings'
 
 vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), del: vi.fn() } }))
 afterEach(() => { cleanup(); vi.clearAllMocks() })
@@ -43,6 +45,42 @@ it('人工理由与旧接受标记不能解除有效的失败红框', () => {
   expect(evidenceProblem({...base, resolution: '我确认', human_confirmed: true,
     proposal_draft: { accepted: true, reason: '说明', values: {} }})).toBe(true)
   expect(evidenceProblem({...base, pending_review: true})).toBe(false)
+})
+
+it('字段设置入口无论原字段分项如何定位，都展示完整纵向设置表单', async () => {
+  const { default: ScientificFieldSettingsDrawer } = await import('../../frontend/src/components/ScientificFieldSettingsDrawer')
+  const host = document.createElement('div'); document.body.append(host)
+  render(<ScientificFieldSettingsDrawer value={{name: 'Tc', kind: 'number', raw: '331', unit: 'K'}} readOnly={false}
+    presentation={{container: host, part: 'raw', onDone: () => {}}} onChange={() => {}} onApply={() => {}} onClose={() => {}} />)
+  expect(screen.getByLabelText('字段名称（key）')).toHaveValue('Tc')
+  expect(screen.getByLabelText('值类型')).toBeInTheDocument()
+  expect(screen.getByLabelText('值')).toHaveValue('331')
+  expect(screen.getByLabelText('单位')).toHaveValue('K')
+  host.remove()
+})
+
+it('待提交核对状态不伪装成 AI 理由', () => {
+  expect(aiReasonText({...base, stale: true, pending_review: true, reason: '原文给出了明确的旧证据结论'}, () => '无理由'))
+    .toBe('原文给出了明确的旧证据结论')
+  expect(aiReasonText({...base, stale: true, pending_review: true, reason: ''}, () => '无理由')).toBe('')
+})
+
+it('μ* 真实控件通过来源侧栏定位设置表单并保存修改', async () => {
+  const field = 'material_states[0].property_modules[0].records[0].payload.parameters.mu_star'
+  const apply = vi.fn()
+  const change = vi.fn()
+  render(<>
+    <TcScientificField value={0.1} label="μ*" field={field} readOnly={false} onChange={change} onApply={apply} />
+    <ReviewFieldSettings identity="mu" field={field} settingsField={field} sourceField={field}
+      enabled onDone={() => {}} onEdit={() => {}} />
+  </>)
+  await screen.findByLabelText('字段名称（key）')
+  expect(screen.getByLabelText('值')).toHaveValue('0.1')
+  expect(screen.getByLabelText('值类型')).toBeInTheDocument()
+  expect(screen.getByLabelText('单位')).toBeInTheDocument()
+  fireEvent.change(screen.getByLabelText('字段名称（key）'), {target: {value: 'μ* 修订值'}})
+  fireEvent.click(screen.getByRole('button', {name: '应用修改'}))
+  await waitFor(() => expect(apply).toHaveBeenCalledWith(0.1, {name_raw: 'μ* 修订值', unit_raw: ''}))
 })
 
 it('编辑只去当前键旧红框，不预检查、不启动模型；恢复旧值不实时新增红框', async () => {

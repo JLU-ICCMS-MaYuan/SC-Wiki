@@ -50,8 +50,7 @@ function dosValueInput(record: EvidenceRecord) {
   return row?.querySelector<HTMLInputElement>('[data-dos-current-value] input')
 }
 
-function aiReasonText(record: EvidenceRecord, t: (key: string) => string): string {
-  if (record.pending_review || record.stale) return '上次内容的核对理由（修改后待提交检查）：' + (record.ai_reason || record.reason || '尚无核对结果')
+export function aiReasonText(record: EvidenceRecord, t: (key: string) => string): string {
   if (record.provenance?.kind === 'author_keywords' || record.source_kind === 'author_keywords') {
     return record.ai_reason || record.reason || t('evidence.authorKeywordsSource')
   }
@@ -713,6 +712,7 @@ export function useEvidenceWorkflow(options?: {
         <ReviewSection title={t('evidence.aiReasonLabel')}>
         {activeGroup.map(r => <Box key={r.key} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
           {(r.adopted_basis || r.proposal?.basis_kind) && <Alert severity="info">{t(`evidence.basis.${r.adopted_basis || r.proposal?.basis_kind}`)}</Alert>}
+            {(r.pending_review || r.stale) && <Alert severity="info">当前内容待提交核对；下方仅显示已有核对结论。</Alert>}
             <Typography sx={{ whiteSpace: 'pre-wrap' }}>{aiReasonText(r, t) || t('evidence.noAiReason')}</Typography>
             <ScientificAssociations associations={r.source_associations} target={targetRef.current} />
             {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
