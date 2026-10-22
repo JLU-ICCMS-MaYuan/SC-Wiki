@@ -130,9 +130,11 @@ sudo python3 "scripts/deploy.py" --release "/home/mayuan/sc-wiki/release.env" lo
 保留服务原有 UID/GID 和权限，禁止递归 chown/chmod。历史演练数据库保存于数据根的
 `archive/rehearsal-mysql`，不是线上活跃数据。
 
-日常操作只使用新入口。旧 `/opt/scwiki` 和原 `scwiki_*` 卷保留为停写时副本，不再承接新写入；
-不要同时启动两套。回退前先暂停入口和任务，保存新目录中的新增业务数据，核对迁移证据后
-才能恢复旧配置；禁止直接用旧卷覆盖当前业务。Docker `/var/lib/docker` 与 containerd
+日常操作只使用新入口。2026-10-22 按用户要求删除旧 `/opt/scwiki`、迁移临时目录和已停止的
+`scwiki-rehearsal-mysql` 容器。原 `scwiki_*` 数据卷和镜像仍保留，不再承接新写入；
+迁移工作区、旧配置和容器信息归档于新发布根的 `backups/cleanup-opt-20261022/`。
+回退前先暂停入口和任务，保存新目录中的新增业务数据，再从保留记录制定恢复步骤；
+不要执行已不存在的旧入口，也禁止直接用旧卷覆盖当前业务。Docker `/var/lib/docker` 与 containerd
 `/var/lib/containerd` 保持不变。目录迁移后的启动会严格核验部署标记与卷实际 device 路径，
 缺失目录时不会静默创建空数据。
 

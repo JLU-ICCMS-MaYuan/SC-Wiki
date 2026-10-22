@@ -105,7 +105,11 @@ flowchart TB
 
 你希望两个目录这样分工吗？/home/mayuan/scwiki 放发布代码、配置、备份和镜像归档, scwiki 命名为 sc-wiki；/home/mayuan/containered 放 SC-Wiki 的数据库、对象文件、模型缓存等持久数据, 名字命名为scwiki-containered。还是希望 containered 存放整个 Docker/containerd 引擎的数据（会影响这台机器上的其他容器）？目录名将按你写的 containered 保留。按 SC-Wiki 分工，只迁移本网站的数据（推荐）
 
-需求结论：采用最新名称 `/home/mayuan/sc-wiki` 与 `/home/mayuan/scwiki-containered`，仅迁移 SC-Wiki 发布与业务持久目录，Docker/containerd 引擎不迁移。发布文件交 mayuan 管理，数据内部服务身份和秘密权限保持；保留原目录和原卷供回退。
+需求结论：采用最新名称 `/home/mayuan/sc-wiki` 与 `/home/mayuan/scwiki-containered`，仅迁移 SC-Wiki 发布与业务持久目录，Docker/containerd 引擎不迁移。发布文件交 mayuan 管理，数据内部服务身份和秘密权限保持；迁移阶段保留原目录和原卷供回退。后续按下面明确清理要求删除旧目录和已停止演练容器，保留原卷及新根下的备份。
+
+### 迁移后的清理原始需求
+
+完成之后你可以登录 root 把/opt 下面的那些 scwiki 和相关的容器都删除了
 
 用户提供的 DNS 截图显示 www 和根域 A 记录指向目标服务器；已独立通过 DNS 查询核对。图片仅作辅助材料，实施依据为实际 DNS，不推断备案状态。图片原件位于用户提供的微信临时目录，尚未归档。
 工程默认：使用 Caddy 管理证书，保留 Garage；这是已讨论的具体方案，不要求新增机器。

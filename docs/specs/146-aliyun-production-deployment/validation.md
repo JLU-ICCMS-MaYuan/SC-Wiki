@@ -123,3 +123,12 @@ DNS www 和根域均指向目标；备案按用户要求不阻塞准备。所有
 - 补充重建未因挂载变化自动重建的 frontend、news-worker、news-scheduler 和 grobid 后，14 个容器的 Compose 管理标签均指向新发布根，避免后续工具仍提示旧入口。计算服务重建期间先暂停入口并检查无排队/执行任务，未修改数据卷内容。
 - 最终真实 Chrome 访问 HTTPS 新闻页成功，标题正确、页面可见，健康接口为 200 / status=ok，无脚本异常或 5xx；证据 `browser-verification.json` 与 `runtime-verification.json` 已留存。mayuan 可以管理新发布根，13 个活跃卷全部使用新目录。
 - 本地分支存在其他任务尚未推送的提交，因此本次配置/文档完成本地提交与服务器发布，但未连带推送这些无关提交；Issue 记录本地提交及运行证据，新文档的远端同步仍待独立处理。
+
+## 2026-10-22 按用户授权清理旧目录与演练容器
+
+- 用户明确要求迁移完成后由 root 删除 /opt 下的旧 scwiki 目录及相关容器。本轮检查确认线上 14 个服务全部使用新目录，只有 `scwiki-rehearsal-mysql` 为停止状态的旧演练容器。
+- 删除前对照迁移时的 21,104 项发布清单，确认新副本路径齐全且文件长度一致（仅已登记的发布清单/身份标记发生变化）；10 个私有配置文件与旧副本逐字节摘要一致。新根无指回旧目录的符号链接，容器挂载和进程 cwd/exe 无旧路径依赖；旧目录无未归档的新文件。
+- 将完整约 32 MB 迁移工作区另外保存到 `/home/mayuan/sc-wiki/backups/cleanup-opt-20261022/migration-workspace/`，保留旧发布配置、卷定义、容器 inspect 信息及清理前运行容器身份。
+- 精确删除 `/opt/scwiki`、`/opt/scwiki-home-migration-20261022` 和停止的 `scwiki-rehearsal-mysql` 容器，目录原占用共 23,705,964,544 字节。未使用 force、容器 rm -v 或全局 prune；没有删除数据卷、镜像或 `/opt/containerd`。
+- 删除后原 14 个线上容器 ID、镜像及启动时间不变，全部运行且健康检查正常；旧数据卷仍作为停写时备份保留。`/opt` 下只剩 containerd。
+- 证据为新根 `backups/cleanup-opt-20261022/` 中的 `source-verification.json`、`running-containers-before.json`、`approved-targets.json`、`removed-container-inspect.json`、`cleanup-result.json`。旧 /opt 入口已不存在，恢复必须基于新根保留记录并先保护新增业务数据。
