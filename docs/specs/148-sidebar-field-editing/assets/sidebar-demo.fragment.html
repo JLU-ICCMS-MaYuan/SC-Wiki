@@ -35,6 +35,9 @@
     #scwiki-sidebar-demo .sw-button{border:1px solid transparent;border-radius:24px;padding:8px 18px;background:none;color:var(--sw-purple);min-height:40px}
     #scwiki-sidebar-demo .sw-button.primary{background:var(--sw-fill);color:var(--sw-on)}
     #scwiki-sidebar-demo .sw-button.outline{border-color:var(--sw-line)}
+    #scwiki-sidebar-demo .sw-review-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;align-items:stretch}
+    #scwiki-sidebar-demo .sw-review-actions .sw-button{min-width:0;padding-inline:4px;overflow-wrap:anywhere}
+    #scwiki-sidebar-demo .sw-review-actions .sw-simulation{display:inline-block;white-space:nowrap}
     #scwiki-sidebar-demo button:disabled{opacity:.45;cursor:default}
     #scwiki-sidebar-demo details{border:1px solid var(--sw-line);border-radius:7px;margin:14px 0;overflow:hidden}
     #scwiki-sidebar-demo summary{padding:11px 14px;background:var(--sw-soft);font-weight:500}
@@ -88,7 +91,7 @@ SSCHA anharmonic phonon calculations</textarea><div class="sw-note">每行一项
         <details open><summary>系统找到的原文</summary><div class="sw-section"><div class="sw-sub">示例材料 · 第 2 页 · 仅用于演示排版</div><blockquote data-quote></blockquote></div></details>
         <details open><summary>AI 理由</summary><div class="sw-section" data-ai></div></details>
         <div class="sw-note" data-pending-setting hidden>字段设置有尚未应用的修改，请先应用或取消。</div>
-        <div class="sw-actions"><button class="sw-button" type="button" data-reject>人工审核不通过</button><button class="sw-button primary" type="button" data-approve>人工审核通过</button></div>
+        <div class="sw-actions sw-review-actions"><button class="sw-button" type="button" data-reject>人工审核不通过</button><button class="sw-button primary" type="button" data-approve>人工审核通过</button><button class="sw-button outline" type="button" data-model>大模型核对<span class="sw-simulation">（模拟）</span></button></div>
         <details data-manual hidden><summary>人工修改记录</summary><div class="sw-section">
           <label class="sw-field"><span>人工修改理由</span><textarea data-reason rows="3" aria-label="人工修改理由"></textarea></label>
           <label class="sw-radio"><input type="radio" name="sw148-evidence" value="provide">提供证据</label>
@@ -98,7 +101,6 @@ SSCHA anharmonic phonon calculations</textarea><div class="sw-note">每行一项
           <div class="sw-note" data-manual-hint></div>
           <div class="sw-actions"><button class="sw-button primary" type="button" data-save>保存</button></div>
         </div></details>
-        <div class="sw-actions"><button class="sw-button outline" type="button" data-model>大模型核对（模拟）</button></div>
       </section>
       <section id="sw148-history" role="tabpanel" aria-labelledby="sw148-history-tab" hidden><div data-history></div></section>
     </section>
