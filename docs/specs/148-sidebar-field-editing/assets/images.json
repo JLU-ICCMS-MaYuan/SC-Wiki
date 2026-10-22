@@ -1,0 +1,42 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-8d582c15-ade3-4277-a003-e7b1ea5342d4.png",
+      "locator": "docs/specs/148-sidebar-field-editing/assets/IMG-001-return-buttons.png",
+      "status": "local_verified",
+      "user_context": "来源页两个返回入口",
+      "related": [
+        "US2",
+        "Issue #148"
+      ],
+      "sha256": "f3d706befbeba9d5e53e79e2905882ec212aec75c392de9fb60e46df257a55e5",
+      "media_type": "image/png",
+      "dimensions_px": [
+        890,
+        426
+      ],
+      "verification": "原文件逐字节比对及图片解码通过；未推送，远程可读性待验证。"
+    },
+    {
+      "id": "IMG-002",
+      "upload_order": 2,
+      "original_name": "codex-clipboard-4473f45b-63a8-4556-a20f-de20d4bcfbd8.png",
+      "locator": "docs/specs/148-sidebar-field-editing/assets/IMG-002-methodology-settings.png",
+      "status": "local_verified",
+      "user_context": "研究方法设置页缺少键值",
+      "related": [
+        "US1",
+        "Issue #148"
+      ],
+      "sha256": "253bfa82055c87f2490b85fcd0c67d88d5c1d1da40db6127abb1920564d074d6",
+      "media_type": "image/png",
+      "dimensions_px": [
+        936,
+        962
+      ],
+      "verification": "原文件逐字节比对及图片解码通过；未推送，远程可读性待验证。"
+    }
+  ]
+}
