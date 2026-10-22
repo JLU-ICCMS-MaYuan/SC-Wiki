@@ -56,8 +56,11 @@
     <section class="sw-main" aria-label="主表单预览">
       <h3>La–Sc–H · 示例表单</h3>
       <p class="sw-sub">点击字段名称打开设置。应用修改后，当前值会更新在这里。</p>
-      <div class="sw-card problem" data-card="methods"><button class="sw-key" type="button" data-field="methods">研究方法</button><div class="sw-value" data-main="methods"></div><span class="sw-state" data-status="methods"></span></div>
-      <div class="sw-card" data-card="mu"><button class="sw-key" type="button" data-field="mu">μ*</button><div class="sw-value" data-main="mu"></div><span class="sw-state" data-status="mu"></span></div>
+      <div class="sw-card problem" data-card="methods"><button class="sw-key" type="button" data-field="methods">研究方法</button><div class="sw-value" data-main="methods">CALYPSO crystal structure search
+DFT structural optimization and electronic calculations
+Harmonic phonon and electron–phonon coupling calculations
+SSCHA anharmonic phonon calculations</div><span class="sw-state" data-status="methods">待人工审核</span></div>
+      <div class="sw-card" data-card="mu"><button class="sw-key" type="button" data-field="mu">μ*</button><div class="sw-value" data-main="mu">0.10</div><span class="sw-state" data-status="mu">已核对通过</span></div>
     </section>
     <section class="sw-side" role="dialog" aria-label="字段设置侧栏" aria-modal="true">
       <div class="sw-heading"><h2 data-heading>研究方法</h2><button class="sw-close" type="button" aria-label="关闭侧栏">×</button></div>
@@ -68,8 +71,11 @@
       </div>
       <div class="sw-confirm" role="alert" data-confirm hidden>有尚未应用的修改，要放弃并关闭吗？<div class="sw-actions"><button class="sw-button" type="button" data-continue>继续编辑</button><button class="sw-button outline" type="button" data-discard>放弃修改并关闭</button></div></div>
       <section id="sw148-settings" role="tabpanel" aria-labelledby="sw148-settings-tab">
-        <label class="sw-field"><span>字段名称（key）</span><input type="text" data-name readonly aria-label="字段名称（key）"></label>
-        <label class="sw-field" data-text-field><span>当前值</span><textarea data-text rows="8" aria-label="当前值（研究方法）"></textarea><div class="sw-note">每行一项研究方法</div></label>
+        <label class="sw-field"><span>字段名称（key）</span><input type="text" data-name readonly value="研究方法" aria-label="字段名称（key）"></label>
+        <label class="sw-field" data-text-field><span>当前值</span><textarea data-text rows="8" aria-label="当前值（研究方法）">CALYPSO crystal structure search
+DFT structural optimization and electronic calculations
+Harmonic phonon and electron–phonon coupling calculations
+SSCHA anharmonic phonon calculations</textarea><div class="sw-note">每行一项研究方法</div></label>
         <label class="sw-field" data-number-field hidden><span>当前值</span><input type="text" inputmode="decimal" data-number aria-label="当前值（μ*）"></label>
         <label class="sw-field" data-kind-field hidden><span>值类型</span><select aria-label="值类型" disabled><option>数值</option></select></label>
         <label class="sw-field" data-unit-field hidden><span>单位</span><input type="text" data-unit aria-label="单位" placeholder="无量纲"></label>
@@ -103,7 +109,7 @@
       const root = document.getElementById('scwiki-sidebar-demo');
       const q = s => root.querySelector(s), all = s => [...root.querySelectorAll(s)];
       const fields = {
-        methods: {name:'研究方法', value:'CALYPSO crystal structure search\nDFT structural optimization and electronic calculations\nHarmonic phonon and electron–phonon coupling calculations\nSSCHA anharmonic phonon calculations', unit:'', status:'review', modified:false, quote:'Crystal structure search; electronic, phonon and electron–phonon coupling calculations.（演示内容）', ai:'演示：当前方法列表包含结构搜索、电子计算及声子计算，需要你对照原文确认。', history:[], manual:{reason:'',choice:'',absence:'',files:[],saved:false}},
+        methods: {name:'研究方法', value:q('[data-text]').value, unit:'', status:'review', modified:false, quote:'Crystal structure search; electronic, phonon and electron–phonon coupling calculations.（演示内容）', ai:'演示：当前方法列表包含结构搜索、电子计算及声子计算，需要你对照原文确认。', history:[], manual:{reason:'',choice:'',absence:'',files:[],saved:false}},
         mu: {name:'μ*', value:'0.10', unit:'', status:'passed', modified:false, quote:'μ* = 0.10（演示内容）', ai:'演示：当前值与示例中的 μ* 参数一致。', history:[], manual:{reason:'',choice:'',absence:'',files:[],saved:false}}
       };
       let selected = 'methods', tab = 'settings', staged, openedFrom = 'methods', modelTimer;
