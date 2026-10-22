@@ -37,6 +37,26 @@
         962
       ],
       "verification": "原文件逐字节比对及图片解码通过；未推送，远程可读性待验证。"
+    },
+    {
+      "id": "IMG-003",
+      "upload_order": 3,
+      "original_name": "codex-clipboard-ecf25bf6-3a4f-4b6b-a43b-e017a1f31f67.png",
+      "locator": "docs/specs/148-sidebar-field-editing/assets/IMG-003-review-buttons.png",
+      "status": "local_verified",
+      "user_context": "这三个放到一行",
+      "related": [
+        "US2",
+        "FR-009",
+        "Issue #148"
+      ],
+      "sha256": "3466e325f5c38e3dc04c3251c2b3d00e2b8ce94ec9669dcdab0712f21ab69bb5",
+      "media_type": "image/png",
+      "dimensions_px": [
+        614,
+        290
+      ],
+      "verification": "原文件字节与 PNG 尺寸读取通过；并排截图另列为实现派生材料。"
     }
   ]
 }

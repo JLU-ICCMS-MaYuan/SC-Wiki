@@ -83,6 +83,12 @@ export function useEvidenceWorkflow(options?: {
   const [automatic, setAutomatic] = useState(false)
   const [records, setRecords] = useState<EvidenceRecord[]>([])
   const [drawerTab, setDrawerTab] = useState('source')
+  const [settingsPending, setSettingsPending] = useState(false)
+  const settingsPendingRef = useRef(false)
+  const [discardSettingsOpen, setDiscardSettingsOpen] = useState(false)
+  const reportSettingsPending = useCallback((pending: boolean) => {
+    settingsPendingRef.current = pending; setSettingsPending(pending)
+  }, [])
   const [issueListOpen, setIssueListOpen] = useState(false)
   const [manualHistory, setManualHistory] = useState<Record<string, ManualRecord[]>>({})
   const receiveManualHistory = useCallback((key: string, entries: ManualRecord[]) => setManualHistory(old => JSON.stringify(old[key]) === JSON.stringify(entries) ? old : { ...old, [key]: entries }), [])
@@ -211,7 +217,7 @@ export function useEvidenceWorkflow(options?: {
       const session = drawerSession.current
       void (async () => {
         try {
-          if (!(await optionsRef.current!.saveCurrent!())) return
+          // 查看只定位已保存的字段；未保存的值继续由父草稿持有，不能在打开时顺带保存。
           const {record} = await api.post<{record: EvidenceRecord}>(`${base}/identify-field`, { ...targetRef.current,
             field: fallback.field, state_key: fallback.state_key, module_key: fallback.module_key,
             record_key: fallback.record_key, record_field_key: fallback.record_field_key,
@@ -247,6 +253,8 @@ export function useEvidenceWorkflow(options?: {
     return () => { active = false }
   }, [selected, drawerTab, detailReload, records.find(r => r.key === selected)?.detail_ref])
   const closeDrawer = useCallback(() => {
+    if (settingsPendingRef.current) { setDiscardSettingsOpen(true); return }
+    setDiscardSettingsOpen(false)
     drawerSession.current += 1
     void flushDrafts().catch(() => undefined)
     setManualOpenKey(undefined)
@@ -610,6 +618,7 @@ export function useEvidenceWorkflow(options?: {
   const activeGroup = activeRecord ? [activeRecord] : []
   const activeDos = activeRecord ? dosRecordForEvidence(activeRecord) : undefined
   const activeDosConflict = Boolean(activeDos && hasDosConflict(activeDos))
+  const activeCurrent = activeRecord ? options?.getCurrentValue?.(activeRecord) : undefined
   const completionBlockers = (saving || confirming) ? [t('evidence.completeBusy')] : []
   const draftSaveFailed = Boolean(targetRef.current && queueFor(targetRef.current).error())
   const editCurrent = (record: EvidenceRecord) => {
@@ -648,6 +657,14 @@ export function useEvidenceWorkflow(options?: {
       </DialogContent><DialogActions><Button onClick={() => setIssueListOpen(false)}>{t('common.close')}</Button></DialogActions>
     </Dialog>
     <Snackbar open={Boolean(manualNotice)} autoHideDuration={4000} onClose={() => setManualNotice('')} message={manualNotice} />
+    <Dialog open={discardSettingsOpen} onClose={() => setDiscardSettingsOpen(false)} aria-labelledby="discard-field-settings-title">
+      <DialogTitle id="discard-field-settings-title">{t('evidence.settingsDiscardTitle')}</DialogTitle>
+      <DialogContent>{t('evidence.settingsDiscardQuestion')}</DialogContent>
+      <DialogActions>
+        <Button onClick={() => setDiscardSettingsOpen(false)}>{t('evidence.settingsContinue')}</Button>
+        <Button onClick={() => { reportSettingsPending(false); closeDrawer() }}>{t('evidence.settingsDiscard')}</Button>
+      </DialogActions>
+    </Dialog>
 
     <Dialog open={view !== null && !automatic} onClose={() => finish(null)} fullWidth maxWidth="md" aria-labelledby="evidence-workflow-title">
       <DialogTitle id="evidence-workflow-title">{t('evidence.title')}</DialogTitle>
@@ -676,10 +693,9 @@ export function useEvidenceWorkflow(options?: {
         </Tabs>
         <Box hidden={drawerTab !== 'settings'} key={'settings:' + activeRecord.key} sx={{ pt: 2 }}>
           <ReviewFieldSettings identity={activeRecord.item_key || activeRecord.key} field={options?.getCurrentValue?.(activeRecord)?.field || activeRecord.field}
-            part={activeRecord.settings_part || 'raw'} settingsField={activeRecord.settings_field} sourceField={activeRecord.field}
-            related={records.filter(r => (r.settings_field || r.field) === (activeRecord.settings_field || activeRecord.field)).map(r => ({ key: r.key, label: ({name:'名称', unit:'单位', kind:'值类型', raw:'值'})[r.settings_part || 'raw'] }))}
-            onSelect={key => { setSelected(key); setSelectedKeys([key]) }}
-            enabled={drawerTab === 'settings'} onDone={closeDrawer} onEdit={() => editCurrent(activeRecord)} />
+            settingsField={activeRecord.settings_field} sourceField={activeRecord.field}
+            enabled={drawerTab === 'settings'} onDone={closeDrawer} onPendingChange={reportSettingsPending}
+            label={activeRecord.label} value={activeCurrent ? activeCurrent.value : activeRecord.current_value} />
         </Box>
         <Box hidden={drawerTab !== 'source'} key={'source:' + activeRecord.key}>
         <ReviewSection title={t('evidence.foundSources')} initialOpen>
@@ -726,11 +742,14 @@ export function useEvidenceWorkflow(options?: {
             </Box>}
         </Box>)}
         </ReviewSection>
-        {!options?.readOnly && !activeRecord.placeholder && <Box sx={{display: 'flex', gap: 1, my: 2}}>
-          <Button disabled={confirming || !currentDetail?.data?.review_token || hasLocalManualEdit(activeRecord)}
+        {settingsPending && <Typography color="text.secondary">{t('evidence.settingsPending')}</Typography>}
+        {!options?.readOnly && !activeRecord.placeholder && <Box data-field-review-actions sx={{display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: .75, my: 2, '& .MuiButton-root': {minWidth: 0, px: .5, overflowWrap: 'anywhere'}}}>
+          <Button disabled={settingsPending || confirming || !currentDetail?.data?.review_token || hasLocalManualEdit(activeRecord)}
             onClick={() => void decideField('reject')}>{t('evidence.humanReject')}</Button>
-          <Button variant="contained" disabled={confirming || !currentDetail?.data?.can_approve || hasLocalManualEdit(activeRecord)}
+          <Button variant="contained" disabled={settingsPending || confirming || !currentDetail?.data?.can_approve || hasLocalManualEdit(activeRecord)}
             onClick={() => void decideField('approve')}>{t('evidence.humanApprove')}</Button>
+          <Button variant="outlined" disabled={settingsPending || confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)}
+            onClick={() => void execute(targetRef.current!, activeGroup.map(r => r.key))}>{t('evidence.reviewCurrentField')}</Button>
         </Box>}
         {manualVisible && <ReviewSection title={t('evidence.manualEditRecords')} initialOpen expand={manualOpenKey === activeRecord.key}>
         <ManualEvidenceSection readOnly={options?.readOnly} showHistory={false} onRecords={receiveManualHistory} target={targetRef.current} record={activeRecord} version={preflightRef.current?.version}
@@ -740,15 +759,8 @@ export function useEvidenceWorkflow(options?: {
           prepare={() => prepareManual(activeRecord)} />
         {dirty.current && options?.saveCurrent && <Alert severity="info">{t('evidence.saveBeforeConfirm')}</Alert>}
         </ReviewSection>}
-        {!options?.readOnly && options?.getCurrentValue && !activeRecord.placeholder && !activeDosConflict && (!activeDos || (dosValueInput(activeRecord) && !dosValueInput(activeRecord)?.disabled)) && <Button onClick={() => editCurrent(activeRecord)}>{t('evidence.editCurrent')}</Button>}
         {saveError && <Alert severity="error" sx={{ mt: 1 }} action={draftSaveFailed ? <Button disabled={saving} onClick={() => void retryDrafts().catch(() => undefined)}>{t('evidence.retrySave')}</Button> : undefined}>{saveError} {draftSaveFailed && t('evidence.saveFailureRetained')}</Alert>}
         {!activeRecord.placeholder && completionBlockers.length > 0 && <Alert severity="info" sx={{ mt: 1 }}>{completionBlockers.map(message => <Typography key={message} variant="body2">{message}</Typography>)}</Alert>}
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', my: 2 }}>
-          <Button onClick={closeDrawer}>{t('evidence.back')}</Button>
-          {!options?.readOnly && !activeRecord.placeholder && <><Button disabled={confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)} onClick={() => void execute(targetRef.current!, activeGroup.map(r => r.key))}>{t('evidence.reviewCurrentField')}</Button>
-
-</>}
-        </Box>
         </Box>
         <Box hidden={drawerTab !== 'history'} key={'history:' + activeRecord.key}>
           <ReviewSection title={t('evidence.historyLabel')}>

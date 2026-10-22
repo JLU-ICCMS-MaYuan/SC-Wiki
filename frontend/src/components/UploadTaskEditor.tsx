@@ -19,6 +19,7 @@ import { useLanguage } from '../context/LanguageContext'
 import MaterialStatesEditor, { EvidenceNotes, SpaceGroupOption, ValidationIssue } from './MaterialStatesEditor'
 import CitationExtractionPanel from './CitationExtractionPanel'
 import PaperMetadataRow from './PaperMetadataRow'
+import ReviewPaperTextField from './ReviewPaperTextField'
 import {
   UploadDraft, normalizeUploadDraft, unwrapData,
 } from '../lib/paperProcessing'
@@ -640,9 +641,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       <Box sx={readOnly ? readOnlyEvidenceFormSx : undefined}>
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 2, '& > *': { minWidth: 0 } }}>
         <Box sx={{ gridColumn: '1 / -1' }}>
-          <TextField fullWidth label={t('upload.title')} value={draft.paper.title || ''}
+          <ReviewPaperTextField fullWidth label={t('upload.title')} value={draft.paper.title || ''} readOnly={readOnly} disabled={submitting || Boolean(revision?.conflict)}
             {...issueProps('paper.title')}
-            onChange={event => setPaperField('title', event.target.value)} />
+            onValueChange={value => setPaperField('title', value)} />
         </Box>
         <Box sx={{ gridColumn: '1 / -1' }}>
           <Autocomplete
@@ -803,9 +804,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           ['methodology', t('upload.methodologyLabel')],
         ].map(([field, label]) => (
           <Box key={field}>
-            <TextField fullWidth label={label} multiline rows={15} data-issue-field={`paper.${field}`}
+            <ReviewPaperTextField fullWidth label={label} multiline rows={15} data-issue-field={`paper.${field}`} readOnly={readOnly} disabled={submitting || Boolean(revision?.conflict)}
               value={toLines(draft.paper[field as keyof UploadDraft['paper']] as string[] | undefined)}
-              onChange={event => setPaperField(field as keyof UploadDraft['paper'], fromLines(event.target.value))}
+              onValueChange={value => setPaperField(field as keyof UploadDraft['paper'], fromLines(value))}
               helperText={field === 'keywords_tags'
                 ? draft.paper.keywords_tags?.length
                   ? draft.keyword_assessment?.kind === 'author_list' && JSON.stringify(draft.keyword_assessment.values) === JSON.stringify(draft.paper.keywords_tags)
@@ -825,18 +826,18 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         ['key_finding', t('upload.keyFindingLabel'), 3],
       ].map(([field, label, rows]) => (
         <Box key={String(field)} sx={{ mt: 2 }}>
-          <TextField fullWidth label={String(label)} multiline minRows={Number(rows)} data-issue-field={`paper.${field}`}
+          <ReviewPaperTextField fullWidth label={String(label)} multiline minRows={Number(rows)} data-issue-field={`paper.${field}`} readOnly={readOnly} disabled={submitting || Boolean(revision?.conflict)}
             value={String(draft.paper[field as keyof UploadDraft['paper']] || '')}
-            onChange={event => setPaperField(field as keyof UploadDraft['paper'], event.target.value)}
+            onValueChange={value => setPaperField(field as keyof UploadDraft['paper'], value)}
             helperText={field === 'summary' && (!draft.paper.summary || draft.summary_error)
               ? t('upload.summaryReviewHint') : undefined} />
         </Box>
       ))}
 
       <Box sx={{ mt: 2 }}>
-        <TextField fullWidth label={t('upload.researchMotivationLabel')} multiline minRows={3} data-issue-field="paper.research_motivation"
+        <ReviewPaperTextField fullWidth label={t('upload.researchMotivationLabel')} multiline minRows={3} data-issue-field="paper.research_motivation" readOnly={readOnly} disabled={submitting || Boolean(revision?.conflict)}
           value={draft.paper.research_motivation || ''}
-          onChange={event => setPaperField('research_motivation', event.target.value)}
+          onValueChange={value => setPaperField('research_motivation', value)}
           helperText={draft.research_motivation_error
             ? t('upload.researchMotivationReviewHint') : undefined} />
         <EvidenceNotes evidence={classificationEvidence} />

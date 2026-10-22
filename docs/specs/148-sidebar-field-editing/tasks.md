@@ -1,14 +1,15 @@
 # 实施任务
 
-输入：[Spec](spec.md)、[Plan](plan.md)、[调查](research.md)、[数据](data-model.md)、[契约](contracts/field-settings.md)。当前为设计草案，技术任务未实施。
+输入：[Spec](spec.md)、[Plan](plan.md)、[调查](research.md)、[数据](data-model.md)、[契约](contracts/field-settings.md)。用户已认可 Demo 并授权实施。
 
 - [x] T001 建立新 Issue，保留用户原话和澄清；调查 #103、#94、#109、#147 及当前代码，归档两张截图。
 - [x] T008 按用户新增请求制作独立交互 Demo，保留三个页签、论文键值编辑和 μ* 四项设置；浏览器检查及截图见 demo.md。此项不替代 T002—T007 的正式实现验收。
-- [ ] T002 [US1] 在 tests/01_decentralized_uploading 增加真实 UploadTaskEditor／管理员论文字段设置复现，覆盖研究方法多行列表和原始编辑文本。
-- [ ] T003 [US1] 在 frontend/src/components/UploadTaskEditor.tsx、frontend/src/pages/AdminPaperEditPage.tsx 接入共享论文文本／列表设置适配器及现有配置事件。
-- [ ] T004 [US2] 在 frontend/src/components/ReviewFieldSettings.tsx、EvidenceWorkflow.tsx 去除两个重复返回入口，保留 × 和三个页签，未适配复杂字段至少可读显示名称和值。
-- [ ] T005 [US1,US3] 覆盖标题、摘要、总结、主要发现、研究动机、关键词、研究方法，以及既有 Tc／μ*／计算条件设置；确认应用、取消、只读、换行、并发和切页签。
-- [ ] T006 [US2,US3] 运行浏览器生产路由隔离验证：设置编辑不退出侧栏，单字段保存差异正确，零额外模型请求，窄屏无溢出。
-- [ ] T007 验证通过后更新 Overview 审核部分及必要导航、README 与本 Spec 验收记录；仅本轮文件本地提交，不推送。
+- [x] T002 [US1] 真实 UploadTaskEditor／管理员复现已覆盖研究方法、多行列表和原始文本；另先复现了管理员 JSON 文本与数组保存前值不一致。证据见 validation.md。
+- [x] T003 [US1] 两个宿主接入 ReviewPaperTextField、共用配置事件及父草稿回调；管理员列表基线对齐既有 draft-state。
+- [x] T004 [US2] 移除两个返回入口；保留三个页签、关闭及未应用保护；复杂字段显示可读名称和值。
+- [x] T005 [US1,US3] 40 项目标测试通过，含七类论文设置、已有科学设置、只读、长文本、空值、取消、并发及页签暂存。
+- [x] T006 [US2,US3] 四种真实 React 路由在隔离 HTTP 夹具下验证单字段保存、失败重试、重载、零模型请求及 320/390px 无溢出，见 assets/implementation-browser.json。
+- [x] T007 Overview、README、Spec 与验收记录已更新；本轮文件按仓库要求本地提交，不推送。远程 Spec 链接门仍待后续授权推送。
+- [x] T009 [US2] 三个审核按钮同排，1440/390/320px 真实浏览器几何检查通过；#147 原人工认可及人工记录保存浏览器回归通过。
 
-依赖：T001 → T002 → T003 → T004 → T005/T006 → T007。FR-001/002/005/008 由 T002/003/005 验证；FR-003/004 由 T004/005/006 验证；FR-006/007 由 T005/006 验证。复选框只有业务路径和对应验证通过后才能勾选。
+依赖：T001 → T002 → T003 → T004/T009 → T005/T006 → T007。FR-001/002/005/008 由 T002/003/005 验证；FR-003/004 由 T004/005/006 验证；FR-006/007 由 T005/006 验证；FR-009 由 T009/006 验证。复选框只有业务路径和对应验证通过后才能勾选。

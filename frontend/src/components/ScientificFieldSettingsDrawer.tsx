@@ -11,10 +11,16 @@ export default function ScientificFieldSettingsDrawer({ value, readOnly, typeLoc
   presentation?: FieldSettingsPresentation; note?: string; onChange: (value: ScientificFieldSettings) => void; onApply: () => void; onClose: () => void; onDelete?: () => void
 }) {
   const wasOpen = useRef(false)
+  const original = useRef('')
+  const previousPresentation = useRef(presentation)
   useEffect(() => {
+    if (value && (!wasOpen.current || presentation !== previousPresentation.current)) original.current = JSON.stringify(value)
+    previousPresentation.current = presentation
+    presentation?.onPendingChange?.(Boolean(value) && JSON.stringify(value) !== original.current)
     if (wasOpen.current && !value && presentation) presentation.onDone()
     wasOpen.current = Boolean(value)
   }, [value, presentation])
+  useEffect(() => () => presentation?.onPendingChange?.(false), [presentation])
   const content = value && <Stack component="form" onSubmit={event => { event.preventDefault(); onApply() }} spacing={2} sx={{ p: presentation ? 0 : 3, minHeight: '100%', boxSizing: 'border-box' }}>
       <Typography variant="h6">{readOnly ? '查看字段' : adding ? '新增字段' : '编辑字段'}</Typography>
       <TextField autoFocus label="字段名称（key）" value={value.name} disabled={readOnly} onChange={event => onChange({ ...value, name: event.target.value })} />

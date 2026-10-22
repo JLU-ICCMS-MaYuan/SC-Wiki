@@ -72,7 +72,7 @@ it('μ* 真实控件通过来源侧栏定位设置表单并保存修改', async 
   render(<>
     <TcScientificField value={0.1} label="μ*" field={field} readOnly={false} onChange={change} onApply={apply} />
     <ReviewFieldSettings identity="mu" field={field} settingsField={field} sourceField={field}
-      enabled onDone={() => {}} onEdit={() => {}} />
+      enabled onDone={() => {}} />
   </>)
   await screen.findByLabelText('字段名称（key）')
   expect(screen.getByLabelText('值')).toHaveValue('0.1')

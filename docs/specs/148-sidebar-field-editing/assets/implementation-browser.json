@@ -1,0 +1,166 @@
+{
+  "passed": true,
+  "boundary": "真实前端路由；HTTP 保存与读取使用隔离内存夹具，未调用真实数据库或模型",
+  "results": [
+    {
+      "role": "upload",
+      "route": "/upload/tasks/88888888888888888888888888888888",
+      "fields": [
+        "title",
+        "abstract",
+        "summary",
+        "key_finding",
+        "research_motivation",
+        "keywords_tags",
+        "methodology"
+      ],
+      "modelRequests": 0,
+      "patches": [
+        [
+          {
+            "path": [
+              "paper",
+              "methodology"
+            ],
+            "before": [
+              "DFT",
+              "SSCHA"
+            ],
+            "value": [
+              "DFT",
+              "SSCHA revised"
+            ]
+          }
+        ]
+      ],
+      "errors": [],
+      "widths": [
+        1440,
+        390,
+        320
+      ],
+      "saveRetry": true,
+      "reload": true
+    },
+    {
+      "role": "revision",
+      "route": "/papers/148/revise",
+      "fields": [
+        "title",
+        "abstract",
+        "summary",
+        "key_finding",
+        "research_motivation",
+        "keywords_tags",
+        "methodology"
+      ],
+      "modelRequests": 0,
+      "patches": [
+        [
+          {
+            "path": [
+              "paper",
+              "methodology"
+            ],
+            "before": [
+              "DFT",
+              "SSCHA"
+            ],
+            "value": [
+              "DFT",
+              "SSCHA revised"
+            ]
+          }
+        ]
+      ],
+      "errors": [],
+      "widths": [
+        1440,
+        390,
+        320
+      ],
+      "saveRetry": true,
+      "reload": true
+    },
+    {
+      "role": "admin",
+      "route": "/admin/papers/148/edit",
+      "fields": [
+        "title",
+        "abstract",
+        "summary",
+        "key_finding",
+        "research_motivation",
+        "keywords_tags",
+        "methodology"
+      ],
+      "modelRequests": 0,
+      "patches": [
+        [
+          {
+            "path": [
+              "paper",
+              "methodology"
+            ],
+            "before": [
+              "DFT",
+              "SSCHA"
+            ],
+            "value": [
+              "DFT",
+              "SSCHA revised"
+            ]
+          }
+        ]
+      ],
+      "errors": [],
+      "widths": [
+        1440,
+        390,
+        320
+      ],
+      "saveRetry": true,
+      "reload": true
+    },
+    {
+      "role": "superadmin",
+      "route": "/admin/papers/148/edit",
+      "fields": [
+        "title",
+        "abstract",
+        "summary",
+        "key_finding",
+        "research_motivation",
+        "keywords_tags",
+        "methodology"
+      ],
+      "modelRequests": 0,
+      "patches": [
+        [
+          {
+            "path": [
+              "paper",
+              "methodology"
+            ],
+            "before": [
+              "DFT",
+              "SSCHA"
+            ],
+            "value": [
+              "DFT",
+              "SSCHA revised"
+            ]
+          }
+        ]
+      ],
+      "errors": [],
+      "widths": [
+        1440,
+        390,
+        320
+      ],
+      "saveRetry": true,
+      "reload": true
+    }
+  ]
+}

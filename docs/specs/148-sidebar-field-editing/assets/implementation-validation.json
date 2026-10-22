@@ -1,0 +1,100 @@
+{
+  "baseline_commit": "ac6ec8bf637b16fe690f98b021846ea9c1ea114f",
+  "unit": {
+    "passed": 40,
+    "failed": 0,
+    "files": [
+      {
+        "file": "calculation-field-settings.test.tsx",
+        "passed": 6
+      },
+      {
+        "file": "manual-evidence-section.test.tsx",
+        "passed": 7
+      },
+      {
+        "file": "paper-field-settings.test.tsx",
+        "passed": 13
+      },
+      {
+        "file": "two-stage-review.test.tsx",
+        "passed": 14
+      }
+    ]
+  },
+  "extended_regression": {
+    "unchanged_baseline_failures": [
+      {
+        "file": "evidence-field-isolation.test.tsx",
+        "test": "真实编辑器只改核处理时，三个派生项及其人工说明保持有效；重复通知不误标"
+      },
+      {
+        "file": "evidence-field-isolation.test.tsx",
+        "test": "迟到核对不能覆盖请求之后的编辑，失败恢复也保留无关项"
+      },
+      {
+        "file": "field-review-layout.test.tsx",
+        "test": "点击字段名 μ* 直接进入统一侧栏设置页，原文/人工/AI/历史仍可访问"
+      },
+      {
+        "file": "field-review-layout.test.tsx",
+        "test": "点击字段名 计算软件 直接进入统一侧栏设置页，原文/人工/AI/历史仍可访问"
+      },
+      {
+        "file": "field-review-layout.test.tsx",
+        "test": "点击字段名 电声耦合强度 λ 直接进入统一侧栏设置页，原文/人工/AI/历史仍可访问"
+      },
+      {
+        "file": "field-review-layout.test.tsx",
+        "test": "从μ*字段名应用修改后关闭统一侧栏，只修改当前字段"
+      },
+      {
+        "file": "field-review-layout.test.tsx",
+        "test": "方法只审自身，无Tc集合审核入口；三页签和四块分区不混入其他子项"
+      },
+      {
+        "file": "field-review-layout.test.tsx",
+        "test": "设置页签复用现有编辑器，切换保留未应用输入，原PDF区域折叠重开不重复请求"
+      },
+      {
+        "file": "field-review-layout.test.tsx",
+        "test": "其他问题仅在独立导航中可达；只读不显示重查和完成"
+      },
+      {
+        "file": "source-review-presentation.test.tsx",
+        "test": "upload 完整宿主不展开20条来源理由，侧栏仍保留完整说明与阻断"
+      },
+      {
+        "file": "source-review-presentation.test.tsx",
+        "test": "revision 完整宿主不展开20条来源理由，侧栏仍保留完整说明与阻断"
+      },
+      {
+        "file": "source-review-presentation.test.tsx",
+        "test": "admin 完整宿主不展开20条来源理由，侧栏仍保留完整说明与阻断"
+      },
+      {
+        "file": "source-review-presentation.test.tsx",
+        "test": "非法数值仍就地显示，来源理由不会混进校验辅助文本"
+      },
+      {
+        "file": "source-review-presentation.test.tsx",
+        "test": "未定位来源项保留独立入口和问题数，不生成正文警告"
+      },
+      {
+        "file": "source-review-presentation.test.tsx",
+        "test": "真实保存错误继续提示，来源说明不会因此回到主表单"
+      }
+    ],
+    "baselinePassed": 11,
+    "baselineFailed": 15,
+    "failureSetUnchanged": true
+  },
+  "browser": "implementation-browser.json",
+  "human_review": {
+    "manualWrites": 1,
+    "modelJobs": 0,
+    "errors": []
+  },
+  "build": "TypeScript 与 Vite 构建通过；既有 3Dmol eval 与大分包警告保留。",
+  "boundary": "真实前端与浏览器；业务 HTTP 为隔离夹具，不证明真实 MySQL 或真实模型审核已验收。"
+}

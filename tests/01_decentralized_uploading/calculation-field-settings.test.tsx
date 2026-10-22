@@ -1,13 +1,29 @@
 import '@testing-library/jest-dom/vitest'
 import React, { useState } from 'react'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
-import { afterEach, expect, it } from 'vitest'
+import { afterEach, expect, it, vi } from 'vitest'
 import SchemaDrivenRecordForm from '../../frontend/src/components/SchemaDrivenRecordForm'
 import TcScientificField from '../../frontend/src/components/TcScientificField'
+import ScientificFieldSettingsDrawer from '../../frontend/src/components/ScientificFieldSettingsDrawer'
 import type { PropertyRecordDraft } from '../../frontend/src/lib/propertyModules'
 import type { ParameterValue } from '../../frontend/src/lib/tcParameters'
 
 afterEach(cleanup)
+it('放弃一次侧栏后重新打开科学设置，不把新会话误判为尚未应用的旧修改', () => {
+  const first = document.createElement('div'), next = document.createElement('div')
+  document.body.append(first, next)
+  const pending = vi.fn()
+  const settings = { name: 'μ*', kind: 'number' as const, raw: '0.1', unit: '' }
+  const presentation = { container: first, onDone() {}, onPendingChange: pending }
+  const props = { readOnly: false, onChange() {}, onApply() {}, onClose() {} }
+  const view = render(<ScientificFieldSettingsDrawer {...props} value={settings} presentation={presentation} />)
+  view.rerender(<ScientificFieldSettingsDrawer {...props} value={{...settings, raw: '0.15'}} presentation={presentation} />)
+  expect(pending).toHaveBeenLastCalledWith(true)
+  view.rerender(<ScientificFieldSettingsDrawer {...props} value={{...settings, raw: '0.2'}} presentation={{...presentation, container: next}} />)
+  expect(pending).toHaveBeenLastCalledWith(false)
+  expect(screen.getByLabelText('值')).toHaveValue('0.2')
+  view.unmount(); first.remove(); next.remove()
+})
 const row = (): PropertyRecordDraft => ({ record_key: 'r', module_code: 'superconductive_properties', property_code: 'tc', record_type: 'predicted_tc',
   method_code: 'isotropic_eliashberg', name_raw: 'Tc', value_kind: 'number', value_number: 311, value_raw: '311', canonical_unit: 'K',
   payload: { parameters: { lambda_ep: 3.94, omega_log: 745, mu_star: .1 }, calculation_conditions: { calculation_code: 'Quantum ESPRESSO',

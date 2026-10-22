@@ -27,6 +27,7 @@ import MaterialStatesEditor, { SpaceGroupOption } from '../components/MaterialSt
 import PaperStructuralWorkspace from '../components/PaperStructuralWorkspace'
 import type { LatticeObservation } from '../lib/structuralRecords'
 import PaperMetadataRow from '../components/PaperMetadataRow'
+import ReviewPaperTextField from '../components/ReviewPaperTextField'
 import { useLanguage } from '../context/LanguageContext'
 import { convertLegacyPropertyModules, PROPERTY_SCHEMA_VERSION } from '../lib/propertyModules'
 import { validateTcRecords } from '../lib/formDefinitions'
@@ -58,6 +59,10 @@ const AdminPaperEditPage: React.FC = () => {
   const [editForm, setEditForm] = useState<Record<string, any>>({})
   const [authorInput, setAuthorInput] = useState('')
   const [editListText, setEditListText] = useState<Partial<Record<'keywords_tags' | 'methodology', string>>>({})
+  const changeListText = (field: 'keywords_tags' | 'methodology', value: string) => {
+    setEditListText(current => ({ ...current, [field]: value }))
+    setEditForm(current => ({ ...current, [field]: textLinesToList(value) }))
+  }
   const editAuthors = useMemo(() => toTextList(editForm.authors), [editForm.authors])
   const commitAuthorInput = () => {
     if (authorInput.trim()) {
@@ -198,6 +203,12 @@ const AdminPaperEditPage: React.FC = () => {
           setEditMaterialStates(staged.draft.material_states || [])
           setEditStructureCandidates(staged.draft.structure_candidates || [])
           setEditStructuralObservations(staged.draft.structural_observations || [])
+        } else if (staged.draft?.paper) {
+          // Go 详情的列表为 JSON 文本；保存前值必须与草稿接口的实际数组一致。
+          const canonicalPaper = staged.draft.paper
+          setEditForm(current => ({ ...current, ...Object.fromEntries(
+            (['keywords_tags', 'methodology'] as const).filter(field => field in canonicalPaper).map(field => [field, canonicalPaper[field]]),
+          ) }))
         }
         // 已落库结构表示：异步拉取完整表示并入候选，不阻塞表单渲染
         void loadStructureRepresentations(detailStates)
@@ -320,8 +331,8 @@ const AdminPaperEditPage: React.FC = () => {
             </Typography></Box>
           </Box>
 
-          <TextField data-issue-field="paper.title" label={t('admin.fieldTitle')} size="small" fullWidth multiline rows={2}
-            value={editForm.title || ''} onChange={e => setEditForm({ ...editForm, title: e.target.value })} />
+          <ReviewPaperTextField data-issue-field="paper.title" label={t('admin.fieldTitle')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving}
+            value={editForm.title || ''} onValueChange={value => setEditForm(current => ({ ...current, title: value }))} />
           <PaperMetadataRow
             journal={<TextField data-issue-field="paper.journal" label={t('admin.fieldJournal')} size="small" value={editForm.journal || ''}
               onChange={e => setEditForm({ ...editForm, journal: e.target.value })} />}
@@ -364,10 +375,10 @@ const AdminPaperEditPage: React.FC = () => {
             )}
           />
           <PaperMaterialsSection states={editMaterialStates} historicalMaterials={editForm.research_materials} />
-          <TextField label={t('admin.fieldAbstract')} size="small" fullWidth multiline rows={3}
-            data-issue-field="paper.abstract" value={editForm.abstract || ''} onChange={e => setEditForm({ ...editForm, abstract: e.target.value })} />
-          <TextField label={t('admin.fieldLlmSummary')} size="small" fullWidth multiline rows={2}
-            data-issue-field="paper.summary" value={editForm.summary || ''} onChange={e => setEditForm({ ...editForm, summary: e.target.value })} />
+          <ReviewPaperTextField label={t('admin.fieldAbstract')} size="small" fullWidth multiline rows={3} disabled={editReviewSaving}
+            data-issue-field="paper.abstract" value={editForm.abstract || ''} onValueChange={value => setEditForm(current => ({ ...current, abstract: value }))} />
+          <ReviewPaperTextField label={t('admin.fieldLlmSummary')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving}
+            data-issue-field="paper.summary" value={editForm.summary || ''} onValueChange={value => setEditForm(current => ({ ...current, summary: value }))} />
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(3, minmax(0, 1fr))' }, gap: 1.5 }}>
             <TextField label={t('admin.fieldPaperType')} size="small" data-issue-field="paper.paper_type" value={editForm.paper_type || ''}
               onChange={e => { evidenceWorkflow.invalidate('paper.paper_type'); evidenceWorkflow.invalidate('paper.theoretical_subtype'); setEditForm({ ...editForm, paper_type: e.target.value, theoretical_subtype: e.target.value === 'theoretical' ? editForm.theoretical_subtype : null }) }} />
@@ -420,18 +431,18 @@ const AdminPaperEditPage: React.FC = () => {
           </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1.5 }}>
             {(['keywords_tags', 'methodology'] as const).map(field => (
-              <TextField key={field} data-issue-field={`paper.${field}`}
+              <ReviewPaperTextField key={field} data-issue-field={`paper.${field}`} disabled={editReviewSaving}
                 label={t(field === 'keywords_tags' ? 'admin.fieldKeywordsTags' : 'admin.fieldMethodology')}
                 size="small" fullWidth multiline minRows={3}
                 helperText={t('admin.listOnePerLine')}
                 value={editListText[field] ?? toTextList(editForm[field]).join('\n')}
-                onChange={event => setEditListText(current => ({ ...current, [field]: event.target.value }))} />
+                onValueChange={value => changeListText(field, value)} />
             ))}
           </Box>
-          <TextField label={t('admin.fieldKeyFinding')} size="small" fullWidth multiline rows={2}
-            data-issue-field="paper.key_finding" value={editForm.key_finding || ''} onChange={e => setEditForm({ ...editForm, key_finding: e.target.value })} />
-          <TextField label={t('admin.fieldResearchMotivation')} size="small" fullWidth multiline rows={2}
-            data-issue-field="paper.research_motivation" value={editForm.research_motivation || ''} onChange={e => setEditForm({ ...editForm, research_motivation: e.target.value })} />
+          <ReviewPaperTextField label={t('admin.fieldKeyFinding')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving}
+            data-issue-field="paper.key_finding" value={editForm.key_finding || ''} onValueChange={value => setEditForm(current => ({ ...current, key_finding: value }))} />
+          <ReviewPaperTextField label={t('admin.fieldResearchMotivation')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving}
+            data-issue-field="paper.research_motivation" value={editForm.research_motivation || ''} onValueChange={value => setEditForm(current => ({ ...current, research_motivation: value }))} />
           {/* 知识图谱标题：单栏英文输入，随 editForm 一并提交（T046）。 */}
           <TextField data-issue-field="paper.knowledge_graph_title" label={t('admin.fieldKnowledgeGraphTitle')} size="small" fullWidth
             value={editForm.knowledge_graph_title || ''} onChange={e => setEditForm({ ...editForm, knowledge_graph_title: e.target.value })} />

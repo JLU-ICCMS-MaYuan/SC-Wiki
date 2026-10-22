@@ -1,6 +1,6 @@
 # 验收操作清单
 
-当前未实现；以下是实施时的验收步骤，不是通过报告。
+以下步骤已在本地实现与隔离前端验收中执行；通过结果与未覆盖边界见 [validation.md](validation.md)。
 
 1. 在隔离上传草稿打开“研究方法”的字段设置：名称和值立即可见，不再只有备用提示。
 2. 修改第二行方法，切换来源、历史再回设置：暂存内容保留。取消后主表单不变；重新修改并应用后，仅研究方法改变。
@@ -10,3 +10,5 @@
 6. Tc／μ*／λ／ωlog／计算条件的名称、值、类型、单位保持原能力，固定类型不可乱改，取消和范围校验仍有效。
 7. 记录保存请求的字段差异与模型请求数：只有明确应用的字段变化，编辑和保存模型调用为 0；#147 人工通过／不通过行为不变。
 8. 在生产 React 路由的隔离 API 夹具中完成桌面和窄屏验证，再运行相关 Vitest 与 TypeScript 构建。不使用用户真实草稿进行破坏性试验。
+
+可复现命令：在 frontend/ 启动 Vite（端口 5198），运行 `npm run test:upload-ui -- tests/01_decentralized_uploading/paper-field-settings.test.tsx`；回到仓库根运行 `node tests/01_decentralized_uploading/paper-field-settings-browser.mjs`。浏览器脚本允许通过 `PLAYWRIGHT_MODULE`、`CHROMIUM_PATH` 和 `FRONTEND_URL` 指定本机依赖与地址，所有业务 API 均被隔离夹具拦截。
