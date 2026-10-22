@@ -130,6 +130,12 @@ const SearchPage: React.FC = () => {
   )
   const [selected, setSelected] = useState<Set<string>>(new Set(initElements))
   const [mode, setMode] = useState(initMode)
+  const elementSearchModes = [
+    { value:'elements_combination_search', label:'search.modeCombination', description:'search.modeCombinationDescription' },
+    { value:'elements_exact_search', label:'search.modeExact', description:'search.modeExactDescription' },
+    { value:'elements_contained_search', label:'search.modeContained', description:'search.modeContainedDescription' },
+  ]
+  const currentElementSearchMode = elementSearchModes.find(option => option.value === mode)
   const [formula, setFormula] = useState(initElements.join(''))
   const [selectedRecord, setSelectedRecord] = useState<SuperconductorRecord>(MOCK_RECORDS[0])
   const [snackbar, setSnackbar] = useState('')
@@ -297,25 +303,30 @@ const SearchPage: React.FC = () => {
         {/* Periodic table card */}
         <Card sx={{ boxShadow: 3 }}>
           <CardContent>
-            <Box sx={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:2,mb:2 }}>
-              <Box>
+            <Box sx={{ display:'flex',flexWrap:'wrap',alignItems:'center',gap:2,mb:2 }}>
+              <Box sx={{ minWidth:0 }}>
                 <Typography variant="h2">{t('search.periodicSearch')}</Typography>
-                <Box sx={{ display:'flex',alignItems:'center',gap:1.5,mt:1.5 }}>
+                <Box sx={{ display:'flex',flexWrap:'wrap',alignItems:'center',gap:1.5,mt:1.5 }}>
                   <Typography variant="body2">{t('search.selectedElements')}</Typography>
-                  <Chip label={selected.size ? [...selected].sort().join(', ') : t('search.noneSelected')} color={selected.size ? 'primary' : 'default'} />
+                  <Chip label={selected.size ? [...selected].sort().join(', ') : t('search.noneSelected')} color={selected.size ? 'primary' : 'default'}
+                    sx={{ maxWidth:'100%',height:'auto','& .MuiChip-label':{ whiteSpace:'normal',overflowWrap:'anywhere',py:0.75 } }} />
                 </Box>
               </Box>
-              <Box sx={{ display:'flex',alignItems:'center',gap:1 }}>
+              {currentElementSearchMode && (
+                <Typography id="element-search-mode-description" role="status" aria-live="polite" aria-atomic="true" variant="body2"
+                  sx={{ flex:'1 1 280px',minWidth:0,color:'text.secondary',lineHeight:1.7,overflowWrap:'anywhere' }}>
+                  {t(currentElementSearchMode.description)}
+                </Typography>
+              )}
+              <Box sx={{ display:'flex',flexWrap:'wrap',alignItems:'center',gap:1,maxWidth:'100%' }}>
                 {/* Mode segments */}
-                <Box sx={{ display:'inline-flex',gap:0.5,bgcolor:'#e8e8ed',borderRadius:'20px',p:0.5 }}>
-                  {[
-                    {v:'elements_combination_search',l:t('search.modeCombination')},
-                    {v:'elements_exact_search',l:t('search.modeExact')},
-                    {v:'elements_contained_search',l:t('search.modeContained')},
-                  ].map(m=>(
-                    <Button key={m.v} size="small"
-                      sx={{ borderRadius:'16px',px:3.5,py:1,fontSize:'0.9rem',color:mode===m.v?'#fff':'text.primary',bgcolor:mode===m.v?'primary.main':'transparent',minWidth:0,textTransform:'none','&:hover':{bgcolor:mode===m.v?'primary.main':'action.hover'} }}
-                      onClick={()=>setMode(m.v)}>{m.l}</Button>
+                <Box sx={{ display:'inline-flex',flexWrap:'wrap',gap:0.5,maxWidth:'100%',bgcolor:'#e8e8ed',borderRadius:'20px',p:0.5 }}>
+                  {elementSearchModes.map(option=>(
+                    <Button key={option.value} size="small"
+                      aria-pressed={mode===option.value}
+                      aria-describedby={mode===option.value ? 'element-search-mode-description' : undefined}
+                      sx={{ borderRadius:'16px',px:3.5,py:1,fontSize:'0.9rem',color:mode===option.value?'#fff':'text.primary',bgcolor:mode===option.value?'primary.main':'transparent',minWidth:0,maxWidth:'100%',overflowWrap:'anywhere',textTransform:'none','&:hover':{bgcolor:mode===option.value?'primary.main':'action.hover'} }}
+                      onClick={()=>setMode(option.value)}>{t(option.label)}</Button>
                   ))}
                 </Box>
                 <Button variant="contained" disabled={selected.size===0 && !formulaQuery}

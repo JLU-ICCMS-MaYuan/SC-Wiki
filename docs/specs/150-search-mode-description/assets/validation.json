@@ -1,0 +1,245 @@
+{
+  "日期": "2026-10-22",
+  "环境": "本地 Chrome，真实页面和布局，API 隔离",
+  "浏览器验收通过": true,
+  "布局检查数": 37,
+  "布局矩阵": [
+    {
+      "宽度": 1920,
+      "语言": "zh",
+      "说明": "检索同时包含全部所选元素的材料，允许包含其他元素。例如选择 La、H，可匹配 La–H、La–H–S 等体系。"
+    },
+    {
+      "宽度": 1920,
+      "语言": "en",
+      "说明": "Find materials made of one or more selected elements, with no other elements. For example, selecting La and H matches La, H, and La–H systems."
+    },
+    {
+      "宽度": 1920,
+      "语言": "en",
+      "说明": "Find materials made of all selected elements and no others. For example, selecting La and H matches only La–H systems, with any ratio of the elements."
+    },
+    {
+      "宽度": 1920,
+      "语言": "en",
+      "说明": "Find materials containing all selected elements, with other elements allowed. For example, selecting La and H matches La–H, La–H–S, and other systems containing both."
+    },
+    {
+      "宽度": 1440,
+      "语言": "en",
+      "说明": "Find materials made of one or more selected elements, with no other elements. For example, selecting La and H matches La, H, and La–H systems."
+    },
+    {
+      "宽度": 1440,
+      "语言": "en",
+      "说明": "Find materials made of all selected elements and no others. For example, selecting La and H matches only La–H systems, with any ratio of the elements."
+    },
+    {
+      "宽度": 1440,
+      "语言": "en",
+      "说明": "Find materials containing all selected elements, with other elements allowed. For example, selecting La and H matches La–H, La–H–S, and other systems containing both."
+    },
+    {
+      "宽度": 1024,
+      "语言": "en",
+      "说明": "Find materials made of one or more selected elements, with no other elements. For example, selecting La and H matches La, H, and La–H systems."
+    },
+    {
+      "宽度": 1024,
+      "语言": "en",
+      "说明": "Find materials made of all selected elements and no others. For example, selecting La and H matches only La–H systems, with any ratio of the elements."
+    },
+    {
+      "宽度": 1024,
+      "语言": "en",
+      "说明": "Find materials containing all selected elements, with other elements allowed. For example, selecting La and H matches La–H, La–H–S, and other systems containing both."
+    },
+    {
+      "宽度": 768,
+      "语言": "en",
+      "说明": "Find materials made of one or more selected elements, with no other elements. For example, selecting La and H matches La, H, and La–H systems."
+    },
+    {
+      "宽度": 768,
+      "语言": "en",
+      "说明": "Find materials made of all selected elements and no others. For example, selecting La and H matches only La–H systems, with any ratio of the elements."
+    },
+    {
+      "宽度": 768,
+      "语言": "en",
+      "说明": "Find materials containing all selected elements, with other elements allowed. For example, selecting La and H matches La–H, La–H–S, and other systems containing both."
+    },
+    {
+      "宽度": 390,
+      "语言": "en",
+      "说明": "Find materials made of one or more selected elements, with no other elements. For example, selecting La and H matches La, H, and La–H systems."
+    },
+    {
+      "宽度": 390,
+      "语言": "en",
+      "说明": "Find materials made of all selected elements and no others. For example, selecting La and H matches only La–H systems, with any ratio of the elements."
+    },
+    {
+      "宽度": 390,
+      "语言": "en",
+      "说明": "Find materials containing all selected elements, with other elements allowed. For example, selecting La and H matches La–H, La–H–S, and other systems containing both."
+    },
+    {
+      "宽度": 320,
+      "语言": "en",
+      "说明": "Find materials made of one or more selected elements, with no other elements. For example, selecting La and H matches La, H, and La–H systems."
+    },
+    {
+      "宽度": 320,
+      "语言": "en",
+      "说明": "Find materials made of all selected elements and no others. For example, selecting La and H matches only La–H systems, with any ratio of the elements."
+    },
+    {
+      "宽度": 320,
+      "语言": "en",
+      "说明": "Find materials containing all selected elements, with other elements allowed. For example, selecting La and H matches La–H, La–H–S, and other systems containing both."
+    },
+    {
+      "宽度": 1920,
+      "语言": "zh",
+      "说明": "检索由所选元素中的一种或多种组成的材料，不包含其他元素。例如选择 La、H，可匹配 La、H 和 La–H 体系。"
+    },
+    {
+      "宽度": 1920,
+      "语言": "zh",
+      "说明": "检索恰好由全部所选元素组成的材料，不包含其他元素。例如选择 La、H，仅匹配 La–H 体系，不限制各元素的比例。"
+    },
+    {
+      "宽度": 1920,
+      "语言": "zh",
+      "说明": "检索同时包含全部所选元素的材料，允许包含其他元素。例如选择 La、H，可匹配 La–H、La–H–S 等体系。"
+    },
+    {
+      "宽度": 1440,
+      "语言": "zh",
+      "说明": "检索由所选元素中的一种或多种组成的材料，不包含其他元素。例如选择 La、H，可匹配 La、H 和 La–H 体系。"
+    },
+    {
+      "宽度": 1440,
+      "语言": "zh",
+      "说明": "检索恰好由全部所选元素组成的材料，不包含其他元素。例如选择 La、H，仅匹配 La–H 体系，不限制各元素的比例。"
+    },
+    {
+      "宽度": 1440,
+      "语言": "zh",
+      "说明": "检索同时包含全部所选元素的材料，允许包含其他元素。例如选择 La、H，可匹配 La–H、La–H–S 等体系。"
+    },
+    {
+      "宽度": 1024,
+      "语言": "zh",
+      "说明": "检索由所选元素中的一种或多种组成的材料，不包含其他元素。例如选择 La、H，可匹配 La、H 和 La–H 体系。"
+    },
+    {
+      "宽度": 1024,
+      "语言": "zh",
+      "说明": "检索恰好由全部所选元素组成的材料，不包含其他元素。例如选择 La、H，仅匹配 La–H 体系，不限制各元素的比例。"
+    },
+    {
+      "宽度": 1024,
+      "语言": "zh",
+      "说明": "检索同时包含全部所选元素的材料，允许包含其他元素。例如选择 La、H，可匹配 La–H、La–H–S 等体系。"
+    },
+    {
+      "宽度": 768,
+      "语言": "zh",
+      "说明": "检索由所选元素中的一种或多种组成的材料，不包含其他元素。例如选择 La、H，可匹配 La、H 和 La–H 体系。"
+    },
+    {
+      "宽度": 768,
+      "语言": "zh",
+      "说明": "检索恰好由全部所选元素组成的材料，不包含其他元素。例如选择 La、H，仅匹配 La–H 体系，不限制各元素的比例。"
+    },
+    {
+      "宽度": 768,
+      "语言": "zh",
+      "说明": "检索同时包含全部所选元素的材料，允许包含其他元素。例如选择 La、H，可匹配 La–H、La–H–S 等体系。"
+    },
+    {
+      "宽度": 390,
+      "语言": "zh",
+      "说明": "检索由所选元素中的一种或多种组成的材料，不包含其他元素。例如选择 La、H，可匹配 La、H 和 La–H 体系。"
+    },
+    {
+      "宽度": 390,
+      "语言": "zh",
+      "说明": "检索恰好由全部所选元素组成的材料，不包含其他元素。例如选择 La、H，仅匹配 La–H 体系，不限制各元素的比例。"
+    },
+    {
+      "宽度": 390,
+      "语言": "zh",
+      "说明": "检索同时包含全部所选元素的材料，允许包含其他元素。例如选择 La、H，可匹配 La–H、La–H–S 等体系。"
+    },
+    {
+      "宽度": 320,
+      "语言": "zh",
+      "说明": "检索由所选元素中的一种或多种组成的材料，不包含其他元素。例如选择 La、H，可匹配 La、H 和 La–H 体系。"
+    },
+    {
+      "宽度": 320,
+      "语言": "zh",
+      "说明": "检索恰好由全部所选元素组成的材料，不包含其他元素。例如选择 La、H，仅匹配 La–H 体系，不限制各元素的比例。"
+    },
+    {
+      "宽度": 320,
+      "语言": "zh",
+      "说明": "检索同时包含全部所选元素的材料，允许包含其他元素。例如选择 La、H，可匹配 La–H、La–H–S 等体系。"
+    }
+  ],
+  "搜索请求": [
+    {
+      "elements": [
+        "H",
+        "La"
+      ],
+      "mode": "elements_combination_search",
+      "limit": 50,
+      "offset": 0
+    },
+    {
+      "elements": [
+        "H",
+        "La"
+      ],
+      "mode": "elements_exact_search",
+      "limit": 50,
+      "offset": 0
+    },
+    {
+      "elements": [
+        "H",
+        "La"
+      ],
+      "mode": "elements_contained_search",
+      "limit": 50,
+      "offset": 0
+    },
+    {
+      "elements": [
+        "H",
+        "La"
+      ],
+      "mode": "elements_contained_search",
+      "limit": 50,
+      "offset": 0
+    }
+  ],
+  "页面异常": [],
+  "构建": "通过",
+  "基线提交": "a9959006d5b421fecb20b837d151c014ce734157",
+  "修改前后回归结果": {
+    "总数": 10,
+    "通过": 7,
+    "基线失败": 3
+  },
+  "基线失败用例": [
+    "筛选和服务端分页保留参数，结果行仍打开论文及结构",
+    "请求失败后仍可重试并显示本地结果",
+    "筛选无匹配时可重置并恢复本地结果"
+  ],
+  "边界": "未验证生产数据库结果，未推送或部署；完整回归未全绿"
+}
