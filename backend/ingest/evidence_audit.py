@@ -4,11 +4,14 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 
-def field_change_events(before, after, user):
+def field_change_events(before, after, user, *, value_origin='human_input'):
     """只比较字段自身的值与标注；依赖失效不冒充用户修改。"""
+    if value_origin not in {'human_input', 'model_extraction', 'system_assembly'}:
+        raise ValueError('字段来源类型无效')
     from .scientific_evidence import canonical
     previous = {r['item_key']: r for r in before['records'] if r.get('kind') == 'field'}
     current = {r['item_key']: r for r in after['records'] if r.get('kind') == 'field'}
+    old_states = {r.get('state_key') for r in before['records'] if r.get('state_key')}
     events, operation = [], uuid4().hex
     occurred_at = datetime.now(timezone.utc).isoformat()
     for key in previous.keys() | current.keys():
@@ -28,12 +31,14 @@ def field_change_events(before, after, user):
                        'occurred_at': occurred_at, 'kind': 'field_change', 'summary': summary,
                        'before_value': deepcopy(old.get('current_value')) if old else None,
                        'after_value': deepcopy(new.get('current_value')) if new else None,
+                       **({'state_creation': {'state_key': record['state_key'], 'value_origin': value_origin}}
+                          if new and record.get('state_key') and record['state_key'] not in old_states else {}),
                        **({'before_settings': deepcopy(value(old)['field_settings']),
                            'after_settings': deepcopy(value(new)['field_settings']), 'summary': '修改并保存字段设置'} if annotations_changed else {})})
     return events
 
 
-def draft_change_events(before, after, user, changes=None):
+def draft_change_events(before, after, user, changes=None, *, value_origin='human_input'):
     from .property_evidence import draft_records
     from .property_field_review import expand_property_fields
     from .field_review import independent_fields
@@ -64,7 +69,7 @@ def draft_change_events(before, after, user, changes=None):
     def snapshot(draft):
         draft = deepcopy(relevant(draft or {}))
         return {'records': independent_fields(expand_property_fields(draft_records(draft or {}, {})))}
-    return field_change_events(snapshot(before), snapshot(after), user)
+    return field_change_events(snapshot(before), snapshot(after), user, value_origin=value_origin)
 
 
 def merge_events(*groups):

@@ -174,9 +174,13 @@ def state_records(state, index):
             rows[-1].pop('provenance', None)
     for row in rows:
         row['state_key'] = state_key
+        from .state_field_review import context as state_review_context
+        if row.get('kind') == 'field':
+            row['state_review_context'] = state_review_context(state)
         name = row['field'].rsplit('.', 1)[-1]
         symmetry = derived_symmetry_value(state, name)
         if symmetry and populated(state.get(name)):
+            row.pop('state_review_context', None)
             # 群号与晶系由报告符号查表得到，核对依赖符号本身，不要求论文逐字写出。
             row.update(kind='derived', dependency=item_identity(item_identity('state', state_key), 'reported_space_group_symbol'),
                        claim={'value': row['current_value'], 'input': state['reported_space_group_symbol'],
@@ -186,6 +190,7 @@ def state_records(state, index):
             continue
         conversion = converted_state_value(state, name)
         if conversion and populated(state.get(name)):
+            row.pop('state_review_context', None)
             raw_field, expected, rule = conversion
             row.update(kind='derived', dependency=item_identity(item_identity('state', state_key), raw_field),
                        claim={'value': row['current_value'], 'input': state[raw_field],
@@ -455,6 +460,9 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
         result.pop('audit_events', None)
         result.update(content_hash=row.content_hash, source_hash=row.source_hash,
                       stale=row.item_key not in exact, stored_result=True)
+        from .state_field_review import scope_matches
+        if not scope_matches(record, result):
+            result.update(stale=True, pending_review=True)
         result['resolution'] = (row.resolutions or {}).get(str(actor_id), '')
         result['proposal_draft'] = copy.deepcopy((row.resolutions or {}).get('proposal:' + str(actor_id)))
         if result['stale']:
@@ -472,6 +480,9 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
                 result.pop('history', None)
                 result.pop('audit_events', None)
                 result.update(content_hash=row.content_hash, source_hash=row.source_hash, stale=False, stored_result=True)
+                from .state_field_review import scope_matches
+                if not scope_matches(record, result):
+                    result.update(stale=True, pending_review=True)
                 found[record['key']] = result
     # 只按精确旧断言版本继承整项通过；旧失败不能复制到所有子字段。
     legacy = {r['legacy_item_key']: r['legacy_content_hash'] for r in current.values()
@@ -596,6 +607,14 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
             result['adopted_basis'] = existing.result.get('adopted_basis')
         if existing is not None and existing.result.get('history') and not result.get('history'):
             result['history'] = copy.deepcopy(existing.result['history'])
+        if existing is not None and result.get('model') and any(
+                existing.result.get(k) != result.get(k) for k in ('status', 'reason', 'evidences')):
+            previous_check = {k: copy.deepcopy(existing.result.get(k)) for k in
+                ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'content_hash',
+                 'source_hash', 'state_review_context', 'model', 'review_started_at')}
+            history = result.setdefault('history', [])
+            if previous_check not in history:
+                history.append(previous_check)
         if existing is not None and existing.result.get('association_review') != result.get('association_review') and existing.result.get('association_review'):
             previous_review = {name: copy.deepcopy(existing.result.get(name)) for name in
                                ('status', 'reason', 'ai_reason', 'evidences', 'association_review', 'content_hash', 'source_hash')}

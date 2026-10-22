@@ -157,6 +157,26 @@ def test_missing_manual_reason_blocks_before_model_configuration(review_api, mon
     assert not queued
 
 
+def test_new_state_field_can_start_without_manual_reason_but_later_edit_cannot(review_api, monkeypatch):
+    from backend.ingest.evidence_audit import field_change_events
+    _,user,queued,_=review_api
+    state={'state_key':'new-state','material':'LaSc2H24','pressure_value_gpa':300,
+           'structure_optimization':'sscha','material_dimensionality':'three_dimensional'}
+    snap=ev.complete_snapshot('upload','task',science.state_records(state,0),
+         [{'file_id':'main','chunk_index':0,'content':'LaSc2H24 at 300 GPa.'}],{})
+    row=next(r for r in snap['records'] if r['field'].endswith('.material_dimensionality'))
+    snap['_field_change_events']=field_change_events({'records':[]},snap,SimpleNamespace(id=7,username='user'))
+    monkeypatch.setattr(api.manual,'_current',lambda *a:None)
+    body=api.Target(target='upload',target_id='task',purpose='field',expected_version=snap['version'],retry_keys=[row['key']])
+    assert api.enqueue_review(body,user,snap,{})['status']=='queued'
+    assert json.loads(queued[0][2])['requested_keys']==[row['key']]
+    row['current_value']='two_dimensional'
+    with pytest.raises(HTTPException) as failure:
+        api.enqueue_review(body,user,snap,{})
+    assert failure.value.detail['code']=='manual_evidence_incomplete'
+    assert len(queued)==1
+
+
 @pytest.mark.parametrize('issue,expected', [('已纠正角色；只保存新候选供人工比较', 'supported'), ('其他真实冲突', 'uncertain')])
 def test_explicit_model_review_resolves_only_the_old_candidate_marker(monkeypatch, issue, expected):
     from backend.rag import llm

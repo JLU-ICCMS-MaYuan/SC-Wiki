@@ -377,8 +377,11 @@ def remove_file(session, snapshot: dict, item_key: str, item_id: str, actor_id: 
 
 
 def validate_submission(session, snapshot: dict, baseline: dict) -> list[dict[str, str]]:
+    from .state_field_review import initial_state_value
     issues: list[dict[str, str]] = []
     for record, _ in changed_records(snapshot, baseline):
+        if initial_state_value(snapshot, record):
+            continue
         row = _current(session, snapshot, record)
         if row is None or not row.reason.strip():
             issues.append({"field": record["field"], "code": "manual_reason_required", "message": "人工修改后请填写判断理由"})

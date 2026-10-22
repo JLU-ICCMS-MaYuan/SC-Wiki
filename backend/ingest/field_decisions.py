@@ -23,6 +23,7 @@ def modification_requires_model(snapshot, record, result):
 
 
 def detail(snapshot, cached):
+    from .state_field_review import initial_state_value, scope_matches
     if len(snapshot['records']) != 1:
         ev.fail('evidence_field_missing', '字段已删除或无法唯一定位，请重新打开')
     record = snapshot['records'][0]
@@ -39,6 +40,9 @@ def detail(snapshot, cached):
                  'evidences': deepcopy(previous.get('evidences') or record.get('evidences') or []),
                  'reason': previous.get('reason') or '', 'ai_reason': previous.get('ai_reason') or previous.get('reason') or ''}
     displayed['human_confirmed'] = valid_field_decision(record, previous, 'approve')
+    displayed['automatic_source_lookup'] = initial_state_value(snapshot, record)
+    if displayed['automatic_source_lookup']:
+        displayed['human_modified'] = False  # 原值与创建归因仍在审计中；不展示逐项人工补证门。
     if not valid_field_decision(record, previous):
         displayed.pop('field_decision', None)
     # 处理日志不作为科学解释；原始文字仍留在数据库与历史。
@@ -46,7 +50,8 @@ def detail(snapshot, cached):
     displayed['reason'] = display_reason(displayed['reason'])
     invalid_derived = record.get('kind') == 'derived' and not (record.get('provenance') or {}).get('verified')
     return {'record': displayed, 'review_token': review_token(snapshot, record, previous),
-            'can_approve': not modified and not invalid_derived and previous.get('source_kind') != 'program',
+            'can_approve': not modified and not invalid_derived and previous.get('source_kind') != 'program'
+                           and scope_matches(record, previous),
             'source_state': 'historical' if previous and not exact else 'available' if displayed['evidences'] else 'empty'}
 
 
@@ -71,6 +76,7 @@ def decide(session, snapshot, cached, actor, action, expected_token):
     result = {**previous, 'status': 'supported' if action == 'approve' else 'uncertain',
               'stale': False, 'pending_review': False, 'field_decision': decision,
               'human_confirmed': action == 'approve', 'check_method': 'human',
+              'state_review_context': record.get('state_review_context'),
               'machine_status': previous.get('machine_status', previous.get('status', 'unchecked')),
               'reason': previous.get('reason') or '', 'ai_reason': view['record']['ai_reason'],
               'evidences': view['record']['evidences'],

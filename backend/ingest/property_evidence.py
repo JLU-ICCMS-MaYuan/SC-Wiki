@@ -43,6 +43,29 @@ def normalized_text(value: str) -> str:
     return re.sub(r'\s+', '', unicodedata.normalize('NFKC', value)).casefold()
 
 
+def locator_text(value: str) -> str:
+    # 只用于引句定位；不改既有来源摘要，否则会使无关通过结果全部失效。
+    return normalized_text(value.translate(str.maketrans('', '', '\u00ad\u200b\ufeff')))
+
+
+def original_quote_span(content: str, quote: str) -> str | None:
+    """按字符映射恢复原句，保留来源中的软连字符；不改写科学字符。"""
+    if quote in content:
+        return quote
+    pieces, positions = [], []
+    for index, char in enumerate(content):
+        normalized = locator_text(char)
+        pieces.append(normalized)
+        positions.extend([index] * len(normalized))
+    text, needle = ''.join(pieces), locator_text(quote)
+    if not needle:
+        return None
+    start = text.find(needle)
+    if start < 0 or text.find(needle, start + 1) >= 0:
+        return None
+    return content[positions[start]:positions[start + len(needle) - 1] + 1]
+
+
 def concrete_synthesis_reason(value: Any) -> bool:
     """拒绝把执行状态或逐字记载套话当成模型归纳的判断逻辑。"""
     if not isinstance(value, str):
@@ -103,7 +126,36 @@ def locate(evidence: dict, chunks: list[dict]) -> dict | None:
     return locate_with_reason(evidence, chunks)[0]
 
 
+def resolve_review_sources(evidences, chunks):
+    """仅解析本次模型响应的编号；编号不可跨请求或跨文件复用。"""
+    out = []
+    for raw in evidences or []:
+        if not isinstance(raw, dict):
+            out.append({'quote': '', '_reference_error': '证据格式无效，请重试原文查证'})
+            continue
+        if 'source_id' not in raw:
+            out.append(raw)
+            continue
+        match = re.fullmatch(r'review-source-(0|[1-9][0-9]*)', str(raw['source_id']))
+        index = int(match[1]) if match else -1
+        if not 0 <= index < len(chunks):
+            out.append({'quote': '', '_reference_error': '证据编号不属于本次来源，请重试原文查证'})
+            continue
+        source = chunks[index]
+        if raw.get('file_id') is not None and str(raw['file_id']) != str(source['file_id']):
+            out.append({'quote': '', '_reference_error': '证据编号与来源文件不一致，请重试原文查证'})
+            continue
+        if raw.get('quote') and locator_text(str(raw['quote'])) not in locator_text(source['content']):
+            out.append({'quote': '', '_reference_error': '引句不在指定编号的原文片段中，请重试原文查证'})
+            continue
+        out.append({**{k: source.get(k) for k in ('file_id', 'chunk_index', 'chunk_id')},
+                    'quote': raw.get('quote') or source['content']})
+    return out
+
+
 def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None, str | None]:
+    if evidence.get('_reference_error'):
+        return None, evidence['_reference_error']
     quote = str(evidence.get('quote') or '').strip()
     if not quote:
         return None, '证据没有原文引句，请让系统重新查找'
@@ -115,8 +167,8 @@ def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None,
         candidates = [c for c in candidates if str(c['file_id']) == str(file_id)]
         if not candidates:
             return None, '证据指向的来源文件不在当前论文及附件中，请让系统重新查找'
-    matching = [c for c in candidates if normalized_text(quote) in normalized_text(c['content'])
-                or normalized_text(quote) == normalized_text(str(c.get('heading') or c.get('section') or '').lstrip('# '))]
+    matching = [c for c in candidates if locator_text(quote) in locator_text(c['content'])
+                or locator_text(quote) == locator_text(str(c.get('heading') or c.get('section') or '').lstrip('# '))]
     if not matching:
         return None, '原文引句未在所选来源文本中找到，请核对引句、文件或文件解析结果'
     if evidence.get("block_id"):
@@ -143,6 +195,11 @@ def locate_with_reason(evidence: dict, chunks: list[dict]) -> tuple[dict | None,
     if len(matching) != 1:
         return None, '原文引句匹配多个位置，系统尚未确认具体出处，请重新查找'
     c = matching[0]
+    original_quote = original_quote_span(c['content'], quote)
+    if original_quote is not None:
+        quote = original_quote
+    elif locator_text(quote) != locator_text(str(c.get('heading') or c.get('section') or '').lstrip('# ')):
+        return None, '原文引句在片段内无法唯一定位，请重试原文查证'
     source = {k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'section', 'section_role', 'source_name')}
     quote_offset = c['content'].find(quote)
     if quote_offset >= 0:
@@ -243,7 +300,7 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
         if r.get('generation_issue'):
             source_identity.append(r['generation_issue'])
         r['source_hash'] = digest(source_identity)
-    version = digest([RULE_VERSION, target, target_id, sorted((r['item_key'], r['content_hash'], r['source_hash']) for r in records)])
+    version = digest([RULE_VERSION, target, target_id, sorted((r['item_key'], r['content_hash'], r['source_hash'], digest(r.get('state_review_context'))) for r in records)])
     return dict(target=target, target_id=str(target_id), records=records, chunks=chunks, version=version, rule_version=RULE_VERSION, _source_digest=source_hash)
 
 
@@ -420,6 +477,7 @@ def cached_results(session, snapshot: dict) -> dict:
 
 
 def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
+    from .scientific_evidence import populated
     if (result.get('stored_result') and not result.get('stale') and
             result.get('content_hash') == record.get('content_hash') and
             result.get('source_hash') == record.get('source_hash')):
@@ -602,7 +660,24 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
         suggestion = method_error
         if proposal_draft and review_method_issue(record, proposal_draft.get('values')):
             proposal_draft = None
+    model_opinion = None
+    location_check = None
+    if not evs and not human and not method_error and populated(record.get('current_value')):
+        if errors:
+            model_opinion = {'status': result.get('status'), 'reason': result.get('reason'), 'suggestion': result.get('suggestion')}
+            status, source_kind = 'unchecked', 'unknown'
+            location_check = 'failed'
+            reason = '原文出处验证未完成：' + '；'.join(errors)
+            ai_reason = reason
+            suggestion = '请重新查证原文；本次没有据此判定字段值错误。'
+        elif result.get('status') == 'supported' and status != 'supported':
+            model_opinion = {'status': result.get('status'), 'reason': result.get('reason'), 'suggestion': result.get('suggestion')}
+            location_check = 'missing'
+            reason = '模型未提供可定位的适用原文，当前字段仍待查证。'
+            ai_reason = reason
+            suggestion = '请查找适用原文或补充材料；当前值保持不变。'
     return {**{key: value for key, value in record.items() if key != 'validation_record'}, 'proposal': proposal, 'proposal_draft': proposal_draft, 'decision': decision, 'evidences': evs, 'source_kind': source_kind, 'status': status,
+            'model_opinion': model_opinion, 'location_check': location_check,
             'human_confirmed': human,
             'adopted_basis': adopted_basis, 'proposal_review': result.get('proposal_review'),
             'ai_reason': ai_reason,
@@ -773,6 +848,13 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 
 
 SYSTEM_PROMPT += METHOD_SEMANTICS_PROMPT
+SYSTEM_PROMPT += '''
+状态基本字段同时提供 state_review_context，其中 structure_optimization 区分 classical_static 与 sscha。
+即使材料与压力相同，也必须核对该优化方式下的适用范围；不可把静态晶格或超导结果直接用于 SSCHA。
+evidences 优先返回本次 sources 中的 source_id（review-source-N），可加从该片段原样复制的短 quote；
+没有 quote 时服务端取回该编号的完整原段。不得捏造编号，不得用另一个文件的编号承载引句。
+这是查证已填值，不补空值、不修改输入。无法确认适用范围或没有证据时明确报告缺口。
+'''
 
 SUGGESTION_PROMPT = """
 对每个字段同时区分当前值与候选值。允许为空字段提出候选，但不能把猜测写为论文事实。
@@ -844,6 +926,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
     prompt = json.dumps({
         'purpose': purpose,
         'records': [{'key': r['key'], 'field': r['field'], 'claim': r['claim'],
+                     'state_review_context': r.get('state_review_context'),
                      'editable_fields': r.get('editable_fields', []), 'existing_evidences': without_source_ids(r['evidences']),
                      'check_mode': r.get('check_mode'), 'review_relationships': r.get('review_relationships', []),
                      'source_associations': review_inputs(r),
@@ -887,6 +970,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
             continue
         key = raw['key']
         safe = {k: raw[k] for k in ('status', 'reason', 'suggestion', 'fields', 'evidences', 'proposal') if k in raw}
+        safe['evidences'] = resolve_review_sources(safe.get('evidences'), chunks)
         reviews = raw.get('association_reviews')
         if reviews is None and isinstance(parsed.get('association_reviews'), list):
             # 实际模型偶发把数组放到顶层；只按服务端唯一身份归属，不按顺序猜字段。
@@ -1490,9 +1574,9 @@ def aggregate_candidates(records, candidates, location_errors, model, source_cat
         # 每批只看到部分来源；“本批未提及”不能抵消其他批次已定位的判断。
         located = [i for i in all_items if i['evidences']]
         if record.get('check_mode') == 'synthesis':
-            # 概括字段不依赖引句定位：其他批次已给出实质判断时，忽略未提及批次的 missing。
-            judged = [i for i in all_items if i['status'] != 'missing']
-            items = judged or all_items
+            # 已定位批次优先；技术未完成和本批未提及不抵消其他批次的有效判断。
+            judged = [i for i in all_items if i['status'] not in {'missing', 'unchecked'}]
+            items = located or judged or all_items
         else:
             items = located or [i for i in all_items if (i.get('proposal') or {}).get('evidences')] or all_items
         statuses = {i['status'] for i in items}
@@ -1511,7 +1595,7 @@ def aggregate_candidates(records, candidates, location_errors, model, source_cat
         reviews = [i['proposal_review'] for i in all_items if i.get('proposal_review')]
         review = None if not reviews else {'status': 'reasonable' if all(x['status'] == 'reasonable' for x in reviews) else 'questionable' if any(x['status'] == 'questionable' for x in reviews) else 'uncertain',
                     'explanation': '；'.join(dict.fromkeys(x['explanation'] for x in reviews))}
-        retained = {name: next((i[name] for i in all_items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason', 'source_kind', 'supplemental_evidences', 'manual_reason_review', 'resolved_generation_issue')}
+        retained = {name: next((i[name] for i in items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason', 'source_kind', 'supplemental_evidences', 'manual_reason_review', 'resolved_generation_issue', 'model_opinion', 'location_check')}
         results[record['key']] = dict(status=status, proposal=proposal, proposal_review=review, **retained,
             review_started_at=min((i['review_started_at'] for i in all_items if i.get('review_started_at')), default=None),
             association_review=aggregate_reviews(record, all_items),

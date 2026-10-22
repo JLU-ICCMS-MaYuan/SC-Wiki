@@ -4,22 +4,26 @@ from copy import deepcopy
 
 def field_version(record):
     """结果版本不包含模型名称或实现版本。"""
-    return (record['item_key'], record['content_hash'], record['source_hash'])
+    from .property_evidence import digest
+    return (record['item_key'], record['content_hash'], record['source_hash'],
+            digest(record.get('state_review_context')))
 
 
 def valid_field_decision(record, result, action=None):
+    from .state_field_review import scope_matches
     decision = (result or {}).get('field_decision') or {}
     return bool(decision.get('contract') == 'field-review-v2' and decision.get('actor_user_id')
                 and decision.get('action') in {'approve', 'reject'}
                 and (action is None or decision['action'] == action)
                 and all(decision.get(k) and decision[k] == record.get(k) for k in ('content_hash', 'source_hash'))
-                and not (result or {}).get('stale'))
+                and not (result or {}).get('stale') and scope_matches(record, result or {}))
 
 
 def reusable(record, result):
+    from .state_field_review import scope_matches
     if result and result.get('field_decision') and not valid_field_decision(record, result):
         return False
-    return bool(result and not result.get('stale') and
+    return bool(result and not result.get('stale') and scope_matches(record, result) and
                 (result.get('source_kind') != 'human_review' or valid_field_decision(record, result)) and
                 all(result.get(key) == record.get(key) for key in ('content_hash', 'source_hash')) and
                 result.get('status') in {'supported', 'unsupported', 'uncertain', 'missing'})
@@ -369,6 +373,10 @@ def bind_support_versions(snapshot, session=None):
     from backend.database import SessionLocal
     from .manual_evidence import ScientificManualEvidence, table_available
     from .property_evidence import digest
+    from .state_field_review import bind_scope_events
+    bind_scope_events(snapshot)
+    snapshot['version'] = digest([snapshot['target'], snapshot['target_id'],
+        sorted(field_version(r) for r in snapshot['records'])])
     with (nullcontext(session) if session is not None else SessionLocal()) as db:
         if not table_available(db):
             return snapshot
@@ -399,7 +407,7 @@ def validate_support_versions(snapshot, session):
     """核对期间补充依据有变时保留旧版本历史，禁止把旧回答当成当前结论。"""
     from .property_evidence import fail
     current = bind_support_versions({'target': snapshot['target'], 'target_id': snapshot['target_id'],
-        'records': [{key: r[key] for key in ('item_key', 'content_hash', 'source_hash', 'paper_source_hash') if key in r}
+        'records': [{key: r[key] for key in ('item_key', 'content_hash', 'source_hash', 'paper_source_hash', 'state_key', 'state_review_context') if key in r}
                     for r in snapshot['records']]}, session)
     if [field_version(r) for r in current['records']] != [field_version(r) for r in snapshot['records']]:
         fail('evidence_stale', '核对期间人工理由或补充证据发生变化，请核对最新依据')

@@ -65,7 +65,11 @@ def correct_pdf_source_pages(session, snapshot, results: dict) -> dict:
                 source["locator_status"] = "ambiguous" if hits else "not_in_pdf_text_layer"
         if result.get("status") == "supported" and not verified and all(
             str(source.get("file_id")) in pdf_ids for source in result["evidences"]):
-            result.update(status="missing", reason="当前引句未在原 PDF 文本层唯一定位，请人工核对或重新解析。")
+            message = "原文出处验证未完成：当前引句未在原 PDF 文本层唯一定位，请重新查证；尚未据此判定字段值错误。"
+            result['model_opinion'] = result.get('model_opinion') or {
+                k: result.get(k) for k in ('status', 'reason', 'suggestion')}
+            result.update(status="unchecked", location_check="failed", reason=message, ai_reason=message,
+                          suggestion="请检查来源读取与定位结果后重试。")
         corrected[record["key"]] = result
     return corrected
 

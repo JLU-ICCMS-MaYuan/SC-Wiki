@@ -222,7 +222,9 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
         # 只投影摘要字段；MySQL不把数十MB历史和PDF原文送回应用。
         rows = session.execute(select(table.item_key, table.result['current_value'], table.result['status'],
             table.result['reason'], table.result['ai_reason'], table.result['source_kind'],
-            table.result['field_decision'], table.content_hash, table.source_hash, table.id).where(table.id.in_(latest))).all()
+            table.result['field_decision'], table.content_hash, table.source_hash, table.id,
+            table.result['state_review_context'], table.result['review_started_at'],
+            table.result['state_key']).where(table.id.in_(latest))).all()
         from backend.ingest.field_source_metadata import read, field_snapshot
         from backend.ingest.field_review import bind_support_versions, valid_field_decision
         metadata = read(session, body.target, body.target_id)
@@ -238,11 +240,15 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
         for record in records:
             row = results.get(record['item_key'])
             decision_current = current_fields.get(record['item_key'])
-            decision = {'field_decision': row[6]} if row else {}
+            decision = {'field_decision': row[6], 'state_review_context': row[10],
+                        'review_started_at': row[11], 'state_key': row[12]} if row else {}
             valid_decision = bool(decision_current and valid_field_decision(decision_current, decision))
             matches = row is not None and (row[5] != 'human_review' or valid_decision) and science.canonical(row[1]) == science.canonical(record.get('current_value'))
             if row and decision_current:
                 matches = matches and (row[7], row[8]) == (decision_current['content_hash'], decision_current['source_hash'])
+                from backend.ingest.state_field_review import scope_matches
+                matches = matches and scope_matches(decision_current, {'state_review_context': row[10],
+                    'review_started_at': row[11], 'state_key': row[12], 'field_decision': row[6]})
             if row and row[6] and not valid_decision:
                 matches = False
             output.append(compact_result({**record, 'status': row[2] if matches else 'unchecked',
@@ -250,7 +256,8 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
                 'field_decision': row[6] if valid_decision else None,
                 'human_confirmed': valid_decision and row[6].get('action') == 'approve',
                 'detail_ref': ev.digest([row[9], row[7], row[8], row[2], row[3], row[6],
-                    (decision_current or {}).get('content_hash'), (decision_current or {}).get('source_hash')]) if row else '',
+                    (decision_current or {}).get('content_hash'), (decision_current or {}).get('source_hash'),
+                    (decision_current or {}).get('state_review_context')]) if row else '',
                 'pending_review': not matches, 'human_modified': record['item_key'] in modified or bool((decision_current or {}).get('paper_source_hash')),
                 'resolution': (draft.get('_review_notes', {}).get(record['item_key']) or {}).get('reason', '')}))
         return {'version': draft_version(draft), 'records': output, 'needs_check': False}
@@ -345,7 +352,9 @@ def enqueue_review(body, user, snapshot, cached):
     if not requested:
         return {'status': 'completed', **review_response(snapshot, cached)}
     # 程序仅检查人工记录是否齐全；理由是否科学成立由随后模型判断。
-    modified = [r for r in snapshot['records'] if r['key'] in requested and r.get('human_modified')]
+    from backend.ingest.state_field_review import initial_state_value
+    modified = [r for r in snapshot['records'] if r['key'] in requested and r.get('human_modified')
+                and not initial_state_value(snapshot, r)]
     if modified:
         with SessionLocal() as session:
             issues = []

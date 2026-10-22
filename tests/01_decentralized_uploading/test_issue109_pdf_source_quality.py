@@ -79,7 +79,8 @@ def test_wrong_page_hint_is_corrected_and_repeated_quote_loses_support(tmp_path,
     repeated = {"tc": {"status": "supported", "evidences": [{"file_id": "main", "chunk_index": 1,
         "quote": "H2S"}]}}
     ambiguous = pdf_source_pages.correct_pdf_source_pages(None, snapshot, repeated)
-    assert ambiguous["tc"]["status"] == "missing"
+    assert ambiguous["tc"]["status"] == "unchecked"
+    assert ambiguous["tc"]["location_check"] == "failed"
     assert ambiguous["tc"]["evidences"][0]["locator_status"] == "ambiguous"
 
 

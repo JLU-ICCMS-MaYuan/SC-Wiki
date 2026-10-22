@@ -17,6 +17,30 @@ from test_scientific_evidence_mysql import current_mysql
 pytestmark = pytest.mark.skipif(os.environ.get('SCWIKI_CURRENT_MYSQL') != '1', reason='仅显式启用本机回滚测试')
 
 
+def test_state_scope_persistence_and_support_validation(current_mysql):
+    target=uuid4().hex
+    def build(method):
+        state={'state_key':'scope','material':'LaSc2H24','pressure_value_gpa':300,
+               'structure_optimization':method,'material_dimensionality':'three_dimensional'}
+        snap=ev.complete_snapshot('upload',target,science.state_records(state,0),[],{})
+        snap['records']=[r for r in snap['records'] if r['field'].endswith('.material_dimensionality')]
+        return snap
+    before=build('sscha');row=before['records'][0]
+    with current_mysql.begin() as db:
+        field_review.bind_support_versions(before,db)
+        field_review.validate_support_versions(before,db)
+        science.save_results(db,before,{row['key']:{'status':'supported','reason':'原文支持 SSCHA 状态',
+            'model':'test','review_started_at':'2026-10-22T00:00:00+00:00'}},7)
+    with current_mysql() as db:
+        restored=science.load_results(db,before,7)
+        assert field_review.reusable(row,restored[row['key']])
+        after=build('classical_static')
+        changed=science.load_results(db,after,7,include_stale=True)
+        assert changed[row['key']]['stale']
+        from backend.ingest.field_decisions import detail
+        assert not detail(after,changed)['can_approve']
+
+
 @pytest.fixture
 def context(current_mysql, monkeypatch):
     target = uuid4().hex
