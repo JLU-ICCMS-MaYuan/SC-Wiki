@@ -1,6 +1,9 @@
 // 快讯域文案：首页快讯 Hero、自动采集信息流（NewsFeed）、来源状态、详情抽屉与人工快讯（ManualNews）。
 // 通用按钮（重试等）复用 common 域；仅此页专有的文案放在这里。
 export default {
+  classificationNotice: '标签依据标题和摘要自动判断',
+  moreFamilies: '另有 {count} 个材料家族，点击条目查看全部',
+
   // Hero 区
   heroAffiliation: '吉林大学 物质模拟方法与软件教育部重点实验室',
   heroTitle: '超导维基',

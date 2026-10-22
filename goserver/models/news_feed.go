@@ -37,3 +37,24 @@ type NewsFeedSource struct {
 	Fetched        int    `json:"fetched"`
 	Accepted       int    `json:"accepted"`
 }
+
+// 分类结果只用于自动资讯，不代表正式论文审核。
+type NewsFeedClassification struct {
+	ItemID             string `gorm:"primaryKey;size:32"`
+	PaperType          *string
+	TheoreticalSubtype *string
+	ContentHash        string
+	CatalogHash        string
+	RuleVersion        string
+	Model              string
+	Reason             string
+	Status             string
+	Attempts           int
+	AttemptToken       string
+	UpdatedAt          string
+}
+
+type NewsFeedMaterialFamily struct {
+	ItemID           string `gorm:"primaryKey;size:32"`
+	MaterialFamilyID uint   `gorm:"primaryKey"`
+}

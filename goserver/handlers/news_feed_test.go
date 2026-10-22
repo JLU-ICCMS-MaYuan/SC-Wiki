@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -26,10 +28,61 @@ func newsTestDB(t *testing.T) *gorm.DB {
 	old := database.DB
 	database.DB = db
 	t.Cleanup(func() { database.DB = old; sqlDB.Close() })
-	if err := db.AutoMigrate(&models.NewsFeedItem{}, &models.NewsFeedSource{}, &models.NewsItem{}); err != nil {
+	if err := db.AutoMigrate(&models.NewsFeedItem{}, &models.NewsFeedSource{}, &models.NewsItem{}, &models.NewsFeedClassification{}, &models.NewsFeedMaterialFamily{}); err != nil {
+		t.Fatal(err)
+	}
+	if err := db.Exec("CREATE TABLE material_families (id INTEGER PRIMARY KEY, name_zh TEXT, name_en TEXT)").Error; err != nil {
 		t.Fatal(err)
 	}
 	return db
+}
+
+func TestNewsClassificationCurrentAndStaleResults(t *testing.T) {
+	db := newsTestDB(t)
+	if err := db.Exec("INSERT INTO material_families VALUES (1, '氢基超导体', 'Hydrides')").Error; err != nil {
+		t.Fatal(err)
+	}
+	kind, subtype := "theoretical", "theory"
+	for _, id := range []string{"current", "stale", "failed", "pending"} {
+		item := models.NewsFeedItem{ID: id, Kind: "preprint", Title: "中文标题 <test>", Summary: "摘要", Authors: "[]", Links: "[]"}
+		if err := db.Create(&item).Error; err != nil {
+			t.Fatal(err)
+		}
+		if id == "pending" {
+			continue
+		}
+		result := models.NewsFeedClassification{ItemID: id, PaperType: &kind, TheoreticalSubtype: &subtype,
+			ContentHash: fmt.Sprintf("%x", sha256.Sum256([]byte(item.Title+"\x00"+item.Summary))), Status: "completed"}
+		if id == "stale" {
+			result.ContentHash = "old"
+		}
+		if id == "failed" {
+			result.Status = "failed"
+		}
+		if err := db.Create(&result).Error; err != nil {
+			t.Fatal(err)
+		}
+		if err := db.Create(&models.NewsFeedMaterialFamily{ItemID: id, MaterialFamilyID: 1}).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	response := newsRequest("/api/news/feed")
+	if response.Code != 200 {
+		t.Fatalf("%d %s", response.Code, response.Body.String())
+	}
+	var body struct{ Items []newsFeedView }
+	if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+		t.Fatal(err)
+	}
+	for _, item := range body.Items {
+		if item.ID == "current" {
+			if item.PaperType == nil || *item.PaperType != kind || item.TheoreticalSubtype == nil || *item.TheoreticalSubtype != subtype || len(item.MaterialFamilies) != 1 || item.MaterialFamilies[0].NameZh != "氢基超导体" {
+				t.Fatalf("missing classification: %+v", item)
+			}
+		} else if item.PaperType != nil || item.TheoreticalSubtype != nil || item.MaterialFamilies == nil || len(item.MaterialFamilies) != 0 {
+			t.Fatalf("stale or unavailable classification must be empty: %+v", item)
+		}
+	}
 }
 
 func newsRequest(path string) *httptest.ResponseRecorder {
@@ -131,6 +184,9 @@ func TestNewsFeedMySQLContract(t *testing.T) {
 	for _, item := range result.Items {
 		if item.Notice == "" || item.URL == "" {
 			t.Fatalf("契约缺字段: %+v", item)
+		}
+		if os.Getenv("NEWS_TEST_REQUIRE_CLASSIFICATION") == "1" && (item.PaperType == nil || *item.PaperType != "theoretical" || item.TheoreticalSubtype == nil || *item.TheoreticalSubtype != "calculation" || len(item.MaterialFamilies) != 1 || item.MaterialFamilies[0].NameZh != "氢基超导体") {
+			t.Fatalf("Python 分类未正确传递: %+v", item)
 		}
 	}
 }

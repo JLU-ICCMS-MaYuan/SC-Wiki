@@ -1,0 +1,254 @@
+{
+  "model": "deepseek-v4-pro",
+  "scope": "只读现有资讯和目录；调用模型；结果只保存本地验收文件，未写业务库",
+  "catalog": [
+    {
+      "id": 1,
+      "name_zh": "氢基超导体",
+      "name_en": "Hydrogen-based superconductor",
+      "aliases": [
+        "Hydrogen-based superconductor",
+        "hydride",
+        "hydrogen-rich superconductor",
+        "hydrogen_based",
+        "氢化物",
+        "高压氢化物"
+      ]
+    },
+    {
+      "id": 2,
+      "name_zh": "铜基超导体",
+      "name_en": "Copper-based superconductor",
+      "aliases": [
+        "Copper-based superconductor",
+        "copper_based",
+        "cuprate",
+        "铜基",
+        "铜氧化物超导体"
+      ]
+    },
+    {
+      "id": 3,
+      "name_zh": "铁基超导体",
+      "name_en": "Iron-based superconductor",
+      "aliases": [
+        "Iron-based superconductor",
+        "iron_based",
+        "铁基"
+      ]
+    },
+    {
+      "id": 4,
+      "name_zh": "镍基超导体",
+      "name_en": "Nickel-based superconductor",
+      "aliases": [
+        "Nickel-based superconductor",
+        "nickel_based",
+        "nickelate",
+        "镍基"
+      ]
+    },
+    {
+      "id": 5,
+      "name_zh": "无机硼碳氮基超导体",
+      "name_en": "Inorganic boron-carbon-nitrogen-based superconductor",
+      "aliases": [
+        "inorganic_bcn_based",
+        "无机硼碳氮基超导"
+      ]
+    },
+    {
+      "id": 6,
+      "name_zh": "有机超导体",
+      "name_en": "Organic superconductor",
+      "aliases": [
+        "Organic superconductor",
+        "organic",
+        "有机超导"
+      ]
+    },
+    {
+      "id": 7,
+      "name_zh": "重费米子超导体",
+      "name_en": "Heavy-fermion superconductor",
+      "aliases": [
+        "Heavy-fermion superconductor",
+        "heavy_fermion",
+        "重费米子超导"
+      ]
+    },
+    {
+      "id": 8,
+      "name_zh": "单质超导体",
+      "name_en": "Elemental superconductor",
+      "aliases": []
+    }
+  ],
+  "samples": [
+    {
+      "source": {
+        "id": "c61be448724e44e59b491ec72777c9bd",
+        "title": "Electrochemical Growth of Full Volume Meissner Effect Superconducting BKBO",
+        "summary": "In this work we show the results of electrochemical synthesis of BKBO crystals using three different experimental setup configurations. The setups differ between each other by varying level of control over physical variables and progressing from a two-electrode to a three-electrode configuration using highly oriented platinum counter electrode. By systematic analysis of the temperature dependence of the magnetic susceptibility at the superconducting transition of the collected crystals we observe that an order of magnitude sharper superconducting transition is achieved for the most comprehensive three-electrode setup. In addition, the level of chemical substitution can be controlled by the value of the overpotential versus reference electrode. We demonstrate that with this technique a full volume Meissner effect can be achieved with a sharp transition temperature for the superconducting crystal.",
+        "url": "https://arxiv.org/abs/2609.30677"
+      },
+      "result": {
+        "paper_type": "experimental",
+        "theoretical_subtype": null,
+        "material_family_ids": [],
+        "reason": "本文主要介绍BKBO超导晶体的电化学合成实验，通过不同电极配置优化合成条件，并测量磁化率以表征超导转变。BKBO（钡钾铋氧化物）不属于输入目录中列出的任何材料家族（如氢基、铜基、铁基、镍基、无机硼碳氮基、有机、重费米子、单质超导体），因此材料家族为空。论文类型为实验研究，无理论子类。"
+      },
+      "status": "completed"
+    },
+    {
+      "source": {
+        "id": "3ed3391268184215ba0b0c4cc31e59a3",
+        "title": "Multiorbital periodic Anderson model for CeRh2As2",
+        "summary": "CeRh2As2 is a heavy-fermion superconductor that exhibits distinct low- and high-field superconducting phases, widely interpreted as reflecting a field-induced change in the parity of the order parameter. However, the superconductivity develops in close proximity to magnetic order whose microscopic origin and nature remain unclear. Moreover, the low-lying crystal-electric-field-split doublets of the Ce 4f electrons appear to realize an unusual \"quasi-quartet\" structure. This has motivated proposals that quadrupolar degrees of freedom play an important role in the low-temperature physics. Here we develop a microscopic heavy-fermion description of CeRh2As2 that incorporates both the quasi-quartet structure and the nonsymmorphic symmetry. Within a multiorbital periodic Anderson model, we include the lowest-lying $Γ_7$ and $Γ_6$ doublets of the Ce 4f electrons, and allow for nonlocal hybridization with the conduction d electrons. Single occupancy of the 4f states is enforced within the rotationally invariant slave-boson formalism. Adopting a mean-field treatment, we first show that the effective low-energy Hamiltonian is accurately captured by a single-orbital tight-binding model, justifying the minimal descriptions widely employed in the literature. Allowing for a magnetic ground state, we find that our model displays metallic $\\mathbf{Q}=(π,π)$ antiferromagnetic order over a wide parameter regime. Ferromagnetic solutions also occur, but in a smaller region of parameter space and with greater sensitivity to carrier concentration and the form of the f-d hybridization. Quadrupolar moments appear only within magnetically ordered phases and are generally small, becoming substantial only when the $Γ_7$ and $Γ_6$ doublets are nearly degenerate. Our results provide a microscopic basis for understanding the itinerant heavy-fermion physics and ordered phases of CeRh2As2.",
+        "url": "https://arxiv.org/abs/2609.31001"
+      },
+      "result": {
+        "paper_type": "theoretical",
+        "theoretical_subtype": "theory",
+        "material_family_ids": [
+          7
+        ],
+        "reason": "本文构建多轨道周期安德森模型研究CeRh2As2的重费米子物理和磁有序，属于理论模型和机制解释，故paper_type为theoretical，theoretical_subtype为theory。CeRh2As2是重费米子超导体，对应材料家族ID 7。"
+      },
+      "status": "completed"
+    },
+    {
+      "source": {
+        "id": "89aad2e718de49feb9385f095793c96a",
+        "title": "Theoretical prediction of superconductivity and nontrivial band topology in rock-salt transition-metal hydrides M H ( M = Mo, W, Ru, Rh, Y)",
+        "summary": "Abstract Transition-metal hydrides have recently emerged as a promising platform for exploring the interplay between super-conductivity and nontrivial band topology. Here, using first-principles calculations, we predict a family of rock-salt transition-metal monohydrides M H ( M = Mo, W, Ru, Rh, Y) that are stable at ambient pressure. Our calculations show that these compounds exhibit phonon-mediated superconductivity, with estimated superconducting transition temperatures of 14.6 K, 14.5 K, 5.3 K, 7.9 K, and 4.5 K for MoH, WH, RuH, RhH, and YH, respectively. For MoH and WH, the electron-phonon coupling is mainly contributed by the softened low-frequency phonon modes associated with transition-metal vibrations, which couple strongly to the doubly degenerate d -orbitals ( d x 2 - y 2 and d z 2 ) near the Fermi level. In addition, spin-orbit coupling opens nontrivial band gaps near the Fermi level, as confirmed by Z 2 topological invariants and topologically protected surface states. These results identify rock-salt transition-metal monohydrides as promising ambient-pressure platforms for investigating the coexistence of superconductivity and nontrivial band topology.",
+        "url": "https://doi.org/10.1088/0256-307x/43/11/110701"
+      },
+      "result": {
+        "paper_type": "theoretical",
+        "theoretical_subtype": "calculation",
+        "material_family_ids": [
+          1
+        ],
+        "reason": "该研究使用第一性原理计算预测岩盐结构过渡金属氢化物MH（M=Mo, W, Ru, Rh, Y）的稳定性和超导电性，属于理论计算类。主要贡献是计算预测，未提出新方法或理论模型，故子类为calculation。材料家族为氢基超导体（ID 1），因为研究对象是氢化物。"
+      },
+      "status": "completed"
+    },
+    {
+      "source": {
+        "id": "061c2e67f70f4ebc93ef8360b8ee1e85",
+        "title": "Superconducting digital integrated circuits designs and architectures: overview and outlook",
+        "summary": "",
+        "url": "https://doi.org/10.1007/s42514-026-00281-2"
+      },
+      "result": {
+        "paper_type": "review",
+        "theoretical_subtype": null,
+        "material_family_ids": [],
+        "reason": "标题表明文章是对超导数字集成电路设计与架构的概述和展望，属于综述性质，不涉及具体材料家族。"
+      },
+      "status": "completed"
+    },
+    {
+      "source": {
+        "id": "3c2897580577486aac2e18c4ddbf2a59",
+        "title": "Structure and superconducting performance of YBa2Cu3O7-δ bulk added with carbon nanotubes prepared by thermal treatment method",
+        "summary": "YBa 2 Cu 3 O 7-δ (Y123) superconductors with different concentrations of single-walled carbon nanotubes (CNTs) ( x = 0.2–1.0 mass%) were synthesized using a thermal treatment method. The influence of CNT addition on the structural, microstructural, and superconducting properties was investigated using thermogravimetric analysis (TGA/DTG), X-ray diffraction (XRD), field-emission scanning electron microscopy coupled with energy-dispersive X-ray spectroscopy (FESEM–EDX), AC susceptibility (ACS), and the four-point probe (4PP) technique. Thermal stability was examined using TGA-DTG analysis. XRD analysis confirmed that the orthorhombic Y123 phase remained dominant in all samples. Minor secondary phases, including Y 2 BaCuO 5 (Y211) (0.2–12.3%), were detected in all CNT-added samples, while the Y 2 Ba 4 Cu 7 O 15−δ (Y247) phase (4.2%) was identified at x = 0.8 mass% CNT. FESEM observations revealed a reduction in the average grain size with CNT incorporation. AC susceptibility measurements showed a slight increase in the onset transition temperature ( T c-onset ), rising from 91.7 K for the undoped sample to 92.3 K for the sample containing 0.4 mass% CNT. The peak temperature ( T p ) of the imaginary component shifted towards higher temperatures for the samples with x = 0.4 and 0.8 mass% CNT. Electrical resistivity measurements confirmed superconducting behaviour in all samples, with the sharpest superconducting transition (Δ T c ) observed at x = 0.4 mass% CNT. The critical current density ( J c ), determined from the current–voltage characteristics, increased from 2.04 A cm −2 for the undoped Y123 sample to 8.1 A cm −2 for the sample containing 0.4 mass% CNT. These results indicate that an optimal CNT addition improves grain connectivity and flux-pinning behaviour, thereby enhancing the superconducting performance of Y123 ceramics.",
+        "url": "https://doi.org/10.1007/s10973-026-16159-y"
+      },
+      "result": {
+        "paper_type": "experimental",
+        "theoretical_subtype": null,
+        "material_family_ids": [
+          2
+        ],
+        "reason": "该研究通过热处理方法制备了添加碳纳米管的YBa2Cu3O7-δ块材，并系统表征了其结构、微观形貌和超导性能，属于实验研究。材料为Y123铜氧化物超导体，属于铜基超导体家族。未涉及理论计算或方法改进，故理论子类为空。"
+      },
+      "status": "completed"
+    }
+  ],
+  "synthetic_boundary_cases": [
+    {
+      "name": "方法创新",
+      "source_kind": "synthetic_test_only",
+      "title": "A new solver for anisotropic Eliashberg equations",
+      "summary": "We introduce and validate a new numerical solver. Our central contribution is a new algorithm that improves convergence and accuracy, benchmarked against existing solvers, rather than predictions for a particular compound.",
+      "expected": [
+        "theoretical",
+        "method",
+        []
+      ],
+      "result": {
+        "paper_type": "theoretical",
+        "theoretical_subtype": "method",
+        "material_family_ids": [],
+        "reason": "标题和摘要表明主要贡献是提出并验证一种新的各向异性 Eliashberg 方程数值求解器，重点在于算法改进而非针对特定材料的结果，因此归类为理论方法类。未涉及具体材料家族，故材料家族为空。"
+      },
+      "passed": true
+    },
+    {
+      "name": "综述多家族",
+      "source_kind": "synthetic_test_only",
+      "title": "A review of hydride and cuprate superconductivity",
+      "summary": "This review surveys progress in hydrogen-rich hydrides and copper-oxide superconductors. It summarizes previously reported experiments and theoretical studies; no original research results are presented.",
+      "expected": [
+        "review",
+        null,
+        [
+          1,
+          2
+        ]
+      ],
+      "result": {
+        "paper_type": "review",
+        "theoretical_subtype": null,
+        "material_family_ids": [
+          1,
+          2
+        ],
+        "reason": "标题和摘要明确表明这是一篇综述，回顾了氢基和铜氧化物超导体的进展，没有原始研究结果。因此 paper_type 为 review。材料家族涉及氢基超导体（ID 1）和铜基超导体（ID 2）。综述不区分理论子类，故 theoretical_subtype 为 null。"
+      },
+      "passed": true
+    },
+    {
+      "name": "产业新闻",
+      "source_kind": "synthetic_test_only",
+      "title": "Superconducting technology company shares rise",
+      "summary": "The company's share price rose after a financial earnings announcement. No new scientific results or specific superconducting materials were discussed.",
+      "expected": [
+        null,
+        null,
+        []
+      ],
+      "result": {
+        "paper_type": null,
+        "theoretical_subtype": null,
+        "material_family_ids": [],
+        "reason": "输入为股票上涨的财经新闻，未涉及具体超导材料或科学研究，无法判断论文类型、理论子类及材料家族。"
+      },
+      "passed": true
+    },
+    {
+      "name": "背景与本文区分",
+      "source_kind": "synthetic_test_only",
+      "title": "Experimental superconductivity in a hydrogen-rich hydride",
+      "summary": "Previous first-principles calculations predicted superconductivity in hydrides. Here we experimentally synthesize a hydrogen-rich hydride and measure its zero resistance and diamagnetic response. These measurements are the main results of this work.",
+      "expected": [
+        "experimental",
+        null,
+        [
+          1
+        ]
+      ],
+      "result": {
+        "paper_type": "experimental",
+        "theoretical_subtype": null,
+        "material_family_ids": [
+          1
+        ],
+        "reason": "标题和摘要表明本文主要工作是实验合成富氢氢化物并测量其零电阻和抗磁性，属于实验研究。材料为氢基超导体，对应ID 1。无理论子类型。"
+      },
+      "passed": true
+    }
+  ]
+}

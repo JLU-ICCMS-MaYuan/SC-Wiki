@@ -1,0 +1,21 @@
+[
+  {
+    "id": "IMG-001",
+    "upload_order": 1,
+    "original_name": "codex-clipboard-639d8c24-d0b1-4ba7-9cb1-71c919f2d868.png",
+    "locator": "docs/specs/153-news-classification-labels/assets/IMG-001.png",
+    "status": "local_verified",
+    "user_context": "为捕获到的最新文献增加分类标签",
+    "related": [
+      "US1",
+      "FR-001"
+    ],
+    "sha256": "269e241556f21204d2fbb4c1d586c76dc5a7253b4832b9e24181bda5c9e6bba8",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3398,
+      1500
+    ],
+    "verification": "2026-10-22 读取原文件、校验 PNG 尺寸和 SHA256；未生成派生图"
+  }
+]

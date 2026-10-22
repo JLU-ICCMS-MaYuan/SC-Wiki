@@ -4,6 +4,7 @@ import { Close as CloseIcon } from '@mui/icons-material'
 import { api } from '../lib/api'
 import { useLanguage } from '../context/LanguageContext'
 import type { Lang } from '../i18n'
+import NewsClassificationLabels, { type NewsClassification } from './NewsClassificationLabels'
 
 type Kind = 'news' | 'preprint' | 'journal_article'
 const PAGE_SIZE = 5
@@ -14,7 +15,7 @@ const kindColors: Record<Kind, { bg: string; color: string }> = {
 }
 const sourceNames: Record<string, string> = { arxiv: 'arXiv', crossref: 'Crossref', openalex: 'OpenAlex', physorg: 'Phys.org', google_news: 'Google News', aps: 'APS', acs: 'ACS', nature: 'Nature', science: 'Science', nsr: 'NSR', cpl: 'CPL', cpb: 'CPB', materials_today: 'Materials Today' }
 type TFunc = (key: string, vars?: Record<string, string | number>) => string
-interface FeedItem {
+interface FeedItem extends NewsClassification {
   id: string; title: string; kind: Exclude<Kind, ''>; source: string; url: string
   summary: string; summary_source: string; authors: string[]; journal: string; doi: string
   published_at: string; date_precision: string; last_seen_at: string; version: number
@@ -117,7 +118,7 @@ function FeedColumn({ kind, label, onSelect, onSources }: FeedColumnProps) {
   const pages = data ? Math.min(10000, Math.max(1, Math.ceil(data.total / PAGE_SIZE))) : 1
   return <Paper component="section" aria-label={label} variant="outlined" sx={{ minWidth: 0, height: '100%', display: 'flex', flexDirection: 'column', px: { xs: 2, md: 2.5 }, borderRadius: 2, boxShadow: 'none' }}>
     <Typography component="h3" variant="h3" sx={{ flexShrink: 0, pt: 2, pb: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>{label}</Typography>
-    <Box sx={{ height: 430, display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{ height: { xs: 830, md: 930, lg: 730 }, display: 'flex', flexDirection: 'column' }}>
       {loading ? <FeedLoading label={t('news.loadingFeed')} /> : error ? <Alert severity="error" sx={{ my: 2 }} action={<Button color="inherit" onClick={() => setRevision(v => v + 1)}>{t('common.retry')}</Button>}>
         {t('news.feedLoadFailed')}
       </Alert> : data?.items.length === 0 ? <Box sx={{ py: 5 }} role="status">
@@ -160,6 +161,7 @@ function FeedColumn({ kind, label, onSelect, onSources }: FeedColumnProps) {
           <Typography component="h4" variant="body2" sx={{ lineHeight: 1.4, fontWeight: 700, display: '-webkit-box', WebkitBoxOrient: 'vertical', WebkitLineClamp: 2, overflow: 'hidden' }}>
             {item.title}
           </Typography>
+          <NewsClassificationLabels item={item} />
           {(item.authors.length > 0 || item.journal) && <Typography variant="caption" sx={{ mt: 0.25, color: 'text.secondary', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {item.authors.slice(0, 4).join(lang === 'zh' ? '、' : ', ')}{item.authors.length > 4 ? t('news.etAl') : ''}{item.journal ? ' · ' + item.journal : ''}
           </Typography>}
@@ -197,6 +199,7 @@ export default function NewsFeed() {
       <Typography id="news-feed-heading" component="h2" variant="h2">{t('news.feedTitle')}</Typography>
       <Typography variant="body2" sx={{ mt: 0.5, color: 'text.secondary' }}>{t('news.feedSubtitle')}</Typography>
       <Typography variant="body2" sx={{ mt: 1, color: 'text.primary' }}>{t('news.autoCollected')}</Typography>
+      <Typography variant="caption" color="text.secondary">{t('news.classificationNotice')}</Typography>
     </Box>
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2 }}>
       {columns.map(column => <FeedColumn key={column.kind} {...column} onSelect={setSelectedItem} onSources={handleSources} />)}
@@ -237,7 +240,7 @@ export default function NewsFeed() {
               border: 'none'
             }}
           />
-          <IconButton onClick={() => setSelectedItem(null)} size="small">
+          <IconButton aria-label={t('common.close')} onClick={() => setSelectedItem(null)} size="small">
             <CloseIcon />
           </IconButton>
         </Box>
@@ -260,6 +263,8 @@ export default function NewsFeed() {
             <Typography variant="body2" color="text.secondary"><strong>{t('news.collectedLabel')}</strong>{dateLabel(t, selectedItem.last_seen_at)}</Typography>
           </Stack>
 
+          <NewsClassificationLabels item={selectedItem} expanded />
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>{t('news.classificationNotice')}</Typography>
           {selectedItem.summary && <>
             <Typography variant="body1" fontWeight={600} sx={{ mb: 1.5 }}>{t('news.summaryLabel')}</Typography>
             <Typography variant="body2" sx={{ lineHeight: 1.8, whiteSpace: 'pre-line', mb: 3, color: 'text.primary' }}>

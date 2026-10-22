@@ -1,0 +1,80 @@
+{
+  "results": [
+    {
+      "scenario": "Python→MySQL→Go→React",
+      "labels": "理论文章\n计算类\n氢基超导体"
+    },
+    {
+      "width": 1500,
+      "overflow": false,
+      "cards": 15,
+      "clipped": [],
+      "counters": [
+        "+16",
+        "+16",
+        "+16"
+      ],
+      "drawerLabels": 19
+    },
+    {
+      "width": 1024,
+      "overflow": false,
+      "cards": 15,
+      "clipped": [],
+      "counters": [
+        "+17",
+        "+1",
+        "+17",
+        "+1",
+        "+17",
+        "+1"
+      ],
+      "drawerLabels": 19
+    },
+    {
+      "width": 736,
+      "overflow": false,
+      "cards": 15,
+      "clipped": [],
+      "counters": [
+        "+14",
+        "+14",
+        "+14"
+      ],
+      "drawerLabels": 19
+    },
+    {
+      "width": 390,
+      "overflow": false,
+      "cards": 15,
+      "clipped": [],
+      "counters": [
+        "+17",
+        "+17",
+        "+17"
+      ],
+      "drawerLabels": 19
+    },
+    {
+      "width": 320,
+      "overflow": false,
+      "cards": 15,
+      "clipped": [],
+      "counters": [
+        "+17",
+        "+1",
+        "+17",
+        "+1",
+        "+17",
+        "+1"
+      ],
+      "drawerLabels": 19
+    },
+    {
+      "scenario": "English labels and family names",
+      "fullFamilies": true
+    }
+  ],
+  "independentPagination": true,
+  "failures": []
+}

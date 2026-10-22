@@ -1,5 +1,5 @@
 """跨 Python/Go 共享的资讯表；不引用正式论文表。"""
-from sqlalchemy import ForeignKey, Index, Integer, String, Text
+from sqlalchemy import CheckConstraint, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 from backend.database import Base
 
@@ -51,3 +51,30 @@ class NewsFeedSource(Base):
     error_code: Mapped[str] = mapped_column(String(40), default="")
     fetched: Mapped[int] = mapped_column(Integer, default=0)
     accepted: Mapped[int] = mapped_column(Integer, default=0)
+
+
+class NewsFeedClassification(Base):
+    __tablename__ = "news_feed_classifications"
+    item_id: Mapped[str] = mapped_column(ForeignKey("news_feed_items.id", ondelete="CASCADE"), primary_key=True)
+    paper_type: Mapped[str | None] = mapped_column(String(20))
+    theoretical_subtype: Mapped[str | None] = mapped_column(String(20))
+    content_hash: Mapped[str] = mapped_column(String(64))
+    catalog_hash: Mapped[str] = mapped_column(String(64))
+    rule_version: Mapped[str] = mapped_column(String(64))
+    model: Mapped[str] = mapped_column(String(200), default="")
+    reason: Mapped[str] = mapped_column(Text, default="")
+    status: Mapped[str] = mapped_column(String(16))
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    attempt_token: Mapped[str] = mapped_column(String(32))
+    updated_at: Mapped[str] = mapped_column(String(20))
+    __table_args__ = (
+        CheckConstraint("paper_type IS NULL OR paper_type IN ('experimental','theoretical','review')", name="ck_news_classification_type"),
+        CheckConstraint("theoretical_subtype IS NULL OR (paper_type IS NOT NULL AND paper_type = 'theoretical' AND theoretical_subtype IN ('calculation','method','theory'))", name="ck_news_classification_subtype"),
+        CheckConstraint("status IN ('running','completed','failed')", name="ck_news_classification_status"),
+    )
+
+
+class NewsFeedMaterialFamily(Base):
+    __tablename__ = "news_feed_material_families"
+    item_id: Mapped[str] = mapped_column(ForeignKey("news_feed_items.id", ondelete="CASCADE"), primary_key=True)
+    material_family_id: Mapped[int] = mapped_column(ForeignKey("material_families.id", ondelete="RESTRICT"), primary_key=True)

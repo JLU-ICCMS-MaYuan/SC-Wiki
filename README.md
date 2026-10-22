@@ -192,6 +192,16 @@ scripts/dev.sh status
 | `NEWS_CONTACT_EMAIL` | 空 | 可选真实联系邮箱，用于 Crossref polite pool |
 
 Go 提供 `GET /api/news/feed`，旧 `GET /api/news` 保持人工快讯数组格式。部署需要配套发布 Go、前端、迁移和两个 Python 进程。
+
+Feature #153 为全部自动资讯增加研究类型、理论子类和材料家族标签。只使用已有标题摘要，
+家族来自数据库目录，无法判断的维度留空；不触发全文解析或写入正式论文。
+需先在目标环境按既有授权流程应用包含 `20261022_0153` 的迁移，再发布 Go/前端并重启
+`news-worker`、`news-scheduler`。此后调度器每分钟在采集任务之后追加最多三条的分类批次，
+自动覆盖历史和新增条目，无需额外进程；模型使用服务器默认配置。
+分类调用不持有采集事务，单条失败一小时后重试、最多三次；输入或目录变化会重新判断。
+分类表的 `status`、`attempts`、`reason` 可用于诊断；过期的最后一次运行会标为失败。
+页面保留“未经本站审核”说明，标签不是正式科研审核结果。部署前准备和本地验收边界见
+[分类标签验证说明](docs/specs/153-news-classification-labels/quickstart.md)。
 Phys.org 只能补回当前 RSS 窗口；Crossref 不转载摘要；该版本不计算热度或生成 AI 摘要。
 
 完整测试、启动、恢复说明见 [Quickstart](docs/specs/88-networked-superconductivity-discovery/quickstart.md)，当前行为见 [资讯功能总览](docs/overview/news.md)。

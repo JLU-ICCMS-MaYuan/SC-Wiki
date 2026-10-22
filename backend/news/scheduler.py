@@ -115,6 +115,40 @@ def schedule_forever(engine, connection, hour=8, zone="Asia/Shanghai"):
     while True:
         try:
             enqueue_due(engine, connection, hour=hour, zone=zone)
+            enqueue_classification(connection)
         except Exception as exc:
             logging.getLogger(__name__).error("news scheduler failed: %s", type(exc).__name__)
         time.sleep(60)
+
+
+def enqueue_classification(connection):
+    """每轮采集入队之后最多追加一个短分类任务，独立锁避免并发调度重复。"""
+    from .classification import JOB_TIMEOUT as classification_timeout
+
+    lock = connection.lock("scwiki-news:classification-schedule", timeout=30, blocking_timeout=0)
+    if not lock.acquire(blocking=False):
+        return False
+    try:
+        queue = Queue(QUEUE_NAME, connection=connection)
+        job_id = "scwiki-news-classification"
+        previous = queue.fetch_job(job_id)
+        if previous and previous.get_status(refresh=True) in ACTIVE:
+            return False
+        if previous:
+            previous.delete()
+        queue.enqueue("backend.news.scheduler.run_classification_job", job_id=job_id,
+                      job_timeout=classification_timeout, result_ttl=86400, failure_ttl=86400)
+        return True
+    finally:
+        try:
+            lock.release()
+        except LockError:
+            logging.getLogger(__name__).warning("news classification schedule lock expired")
+
+
+def run_classification_job():
+    from backend.database import engine
+    from .classification import classify_batch
+
+    engine.dispose(close=False)
+    return classify_batch(engine)

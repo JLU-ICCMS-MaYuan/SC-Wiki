@@ -20,7 +20,7 @@
 ## 用户界面
 - **品牌 Hero**：页面显示 `Superconduct Wiki / 超导维基`、吉林大学物质模拟方法与软件教育部重点实验室署名和平台能力简介；仅保留跳转 Explore（`/search`）的 `Start Exploring / 开始探索` 主按钮。
 - **三列资讯流**：自动资讯分为 News、Preprints、Articles 三栏；桌面端三列并排、窄屏纵向排列，每栏最多显示 5 条并独立使用 `Previous`/`Next` 翻页。三栏保持等高，每个资讯槽位使用统一高度，分页控件固定在栏底部对齐。
-- **简洁列表**：默认只显示标题、作者和类型标签，隐藏完整摘要避免占满屏幕。
+- **简洁列表**：默认显示标题、作者、来源类型及自动研究分类标签，隐藏完整摘要避免占满屏幕。卡片按屏幕宽度统一保留足够槽位高度，家族标签超出一行时显示 `+N`，详情展开全部标签。
 - **详情抽屉**：点击任意条目，右侧滑出半屏抽屉展示完整信息（摘要、期刊、DOI、多来源链接、发表与采集时间）。
 - **类型标签颜色**：新闻用浅蓝色（#e3f2fd），预印本用浅紫色（#f3e5f5），期刊论文用浅绿色（#e8f5e9），低饱和度视觉舒适。
 - **交互反馈**：列表项悬停显示背景色变化和手型光标；点击关闭按钮或遮罩层关闭抽屉。
@@ -33,8 +33,26 @@ Docker Compose 以 `news-scheduler` 运行该调度进程，并以 `news-worker`
 Redis 互斥锁防止并发采集。
 任务最长 900 秒，单请求有限重试；失败不前移成功水位，不清空已有资讯。
 
+## 自动研究分类
+
+全部自动资讯（含新闻和科研报道）可根据已有标题、摘要自动判断研究类型：实验、理论、综述，按主要贡献单选。
+理论再单选计算类、方法类、理论模型与机制；材料家族从当前数据库目录和别名中多选，不能判断的维度留空。
+综述可带材料家族；产业资讯不强行分类。页面说明“标签依据标题和摘要自动判断”，不代表全文阅读或正式审核。
+
+分类不占用采集事务或 PDF 队列。调度器每分钟先安排采集，再向资讯队列追加一个最多三条的分类批次，
+以当前服务器默认 LLM 生成结构化结果；按最近采集和首次发现时间优先扫描，已完成且输入未变的条目跳过。
+历史条目在同一路径下分批补齐，无需新增进程。标题、摘要、目录或规则变化后重判；不自动创建家族。
+每次调用前保存尝试计数，失败一小时后重试，最多三次；运行中断五分钟后可恢复，最后一次过期尝试收敛为失败。
+写回核验内容、目录及尝试标识，过期任务不能覆盖新结果。API 仅返回当前标题摘要对应的已完成结果，失败和待分类维度为空。
+
+实现入口为 [分类服务](../../backend/news/classification.py)、资讯调度、Go 资讯接口及
+[标签组件](../../frontend/src/components/NewsClassificationLabels.tsx)。分类新增的两张表需要先迁移，
+再配套发布服务；代码已通过隔离验证，不代表当前业务实例已经启用或历史补齐已经完成。
+
 ## 数据与约束
-新增 news_feed_items、news_feed_identities、news_feed_sources 三表，无正式 papers/材料/物性表写入。
+自动资讯使用 news_feed_items、news_feed_identities、news_feed_sources；分类另存 news_feed_classifications 和
+news_feed_material_families。分类保存研究类型、理论子类、输入与目录指纹、规则版本、模型、理由和尝试状态，
+家族关联只引用已有 material_families；资讯删除或合并时级联删除对应附属记录。无正式 papers/材料/物性表写入。
 来源请求固定白名单端点，响应限 5 MiB；arXiv 请求间隔至少 3.1 秒，其他来源至少 1 秒。
 科学元数据与 Phys.org 连接不继承系统代理，避免本地代理故障中断论文采集；Google News 连接保留系统代理，以适应受限网络。单个来源的连接失败仍只记录该来源失败。
 通用来源首次回看默认 7 天，后续重叠 2 天；OpenAlex 每次至少回看出版日期 30 天并依靠身份键去重。默认最多 100 页，超限、损坏响应和来源错误显式失败。
@@ -49,11 +67,13 @@ RSS 只能补回当前订阅窗口；已移除的历史内容无法保证找回�
 - [#88 完整运行与验证说明](../specs/88-networked-superconductivity-discovery/quickstart.md)、[Compose 部署修复](../specs/86-news-scheduler/quickstart.md)。
 
 ## 验证与运行边界
-当前工作树通过 Python 单元测试、隔离 MySQL 迁移/RQ Worker 测试、Python 写入后 Go 读取的契约测试、Go 全包测试、页面交互测试和前端生产构建。
+资讯与分类专项通过 Python 单元测试、隔离 MySQL 迁移/RQ 测试、Python 写入后 Go 读取的契约测试、Go 资讯测试、页面交互测试和前端生产构建。
 在线 OpenAlex 30 天窗口只读验证确认目标 ACS DOI 的发现与原文来源映射，并拒绝 Zenodo DOI；此结果不表示生产运行环境已部署。
 浏览器使用真实新闻处理器与隔离数据库检查桌面/手机布局；人工快讯响应在该预览中为测试样本。
-分支原有论文删除模块的 Go 编译问题阻断全包验证，未把定向新闻测试当作完整服务构建通过。
+本轮 Go 全包测试仍有论文证据审核测试 TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction 的既有失败，已在未修改 HEAD 副本复现；未把定向资讯测试当作全包通过。
 
 ## 相关变更记录
+[Feature #153](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/153) 增加自动分类标签；
+[专项验收](../specs/153-news-classification-labels/quickstart.md) 包含真实模型抽样、跨语言链路、浏览器检查及未部署边界。
 [Feature #63](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/63) 与 [Spec](../specs/63-daily-superconductivity-news/spec.md)；[Feature #83](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/83) 完成 News 品牌与三列独立分页；[Bug #86](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/86) 补齐 Compose 中的 scheduler 和 worker；[Feature #88](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/88) 扩展联网发现与过滤；[Maintenance #92](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/92) 跟踪历史 Zenodo 误收清理。
 未完成协作事项以该 Issue 为准；本页不维护第二套任务状态。

@@ -1,6 +1,9 @@
 // 英文快讯域文案。键集必须与 zh/news.ts 完全一致——字典类型由中文侧推导，
 // 缺键会在 `tsc -b` 阶段报错，不会静默回退。
 export default {
+  classificationNotice: 'Labels are inferred automatically from titles and abstracts',
+  moreFamilies: '{count} more material families; open the item to view all',
+
   // Hero
   heroAffiliation: 'Key Laboratory of Material Simulation Methods & Software of Ministry of Education, Jilin University, China',
   heroTitle: 'Superconduct Wiki',
