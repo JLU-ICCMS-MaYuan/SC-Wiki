@@ -64,16 +64,16 @@ services:
     volumes: ["${SCWIKI_ROOT:?}/backups:/backups", "app-scratch:/data"]
 volumes:
   app-scratch:
-    name: ${DEPLOYMENT_ID:?}_app-scratch
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_app-scratch
     external: true
   app-models:
-    name: ${DEPLOYMENT_ID:?}_app-models
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_app-models
     external: true
   caddy-data:
-    name: ${DEPLOYMENT_ID:?}_caddy-data
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_caddy-data
     external: true
   caddy-config:
-    name: ${DEPLOYMENT_ID:?}_caddy-config
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_caddy-config
     external: true
 networks:
   default:

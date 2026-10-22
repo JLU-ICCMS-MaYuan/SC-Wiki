@@ -49,25 +49,25 @@ services:
     restart: unless-stopped
 volumes:
   mysql:
-    name: ${DEPLOYMENT_ID:?}_mysql
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_mysql
     external: true
   redis:
-    name: ${DEPLOYMENT_ID:?}_redis
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_redis
     external: true
   neo4j:
-    name: ${DEPLOYMENT_ID:?}_neo4j
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_neo4j
     external: true
   neo4j-logs:
-    name: ${DEPLOYMENT_ID:?}_neo4j-logs
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_neo4j-logs
     external: true
   qdrant:
-    name: ${DEPLOYMENT_ID:?}_qdrant
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_qdrant
     external: true
   garage-meta:
-    name: ${DEPLOYMENT_ID:?}_garage-meta
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_garage-meta
     external: true
   garage-data:
-    name: ${DEPLOYMENT_ID:?}_garage-data
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_garage-data
     external: true
 networks:
   default:

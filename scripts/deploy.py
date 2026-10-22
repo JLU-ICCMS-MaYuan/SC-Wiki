@@ -41,6 +41,15 @@ def read_release(path: Path) -> dict[str, str]:
     root = Path(values.get("SCWIKI_ROOT", ""))
     if not root.is_absolute() or root.resolve() != root or root == Path("/"):
         raise ValueError("SCWIKI_ROOT 必须是规范绝对目录")
+    prefix = values.get("SCWIKI_VOLUME_PREFIX", values["DEPLOYMENT_ID"])
+    if not re.fullmatch(r"[a-z][a-z0-9-]{1,39}", prefix):
+        raise ValueError("SCWIKI_VOLUME_PREFIX 无效")
+    if "SCWIKI_VOLUME_ROOT" in values:
+        data_root = Path(values["SCWIKI_VOLUME_ROOT"])
+        if (not data_root.is_absolute() or data_root.resolve() != data_root
+                or data_root == Path("/") or data_root == root
+                or data_root in root.parents or root in data_root.parents):
+            raise ValueError("SCWIKI_VOLUME_ROOT 必须是与发布根独立的规范绝对目录")
     if not re.fullmatch(r"[a-f0-9]{40}", values.get("SOURCE_COMMIT", "")):
         raise ValueError("必须记录完整源码提交")
     for key in IMAGE_KEYS:
@@ -64,6 +73,9 @@ class Deployment:
         self.values = read_release(self.release)
         self.root = Path(self.values["SCWIKI_ROOT"])
         self.identity = self.values["DEPLOYMENT_ID"]
+        self.volume_prefix = self.values.get("SCWIKI_VOLUME_PREFIX", self.identity)
+        self.volume_root = (Path(self.values["SCWIKI_VOLUME_ROOT"])
+                            if self.values.get("SCWIKI_VOLUME_ROOT") else None)
         self.source = Path(__file__).resolve().parents[1]
         self.marker = self.root / "deployment.json"
 
@@ -84,15 +96,31 @@ class Deployment:
         recorded = json.loads(self.marker.read_text())
         if recorded.get("deployment_id") != self.identity or recorded.get("root") != str(self.root):
             raise ValueError("部署身份或目录不一致")
+        if (recorded.get("volume_prefix", self.identity) != self.volume_prefix
+                or recorded.get("volume_root") != (str(self.volume_root) if self.volume_root else None)):
+            raise ValueError("持久存储配置与部署标记不一致")
         if not set(groups) <= set(recorded.get("groups", [])):
             raise ValueError("目标服务组未显式初始化")
         volumes = [v for group in groups for v in GROUP_VOLUMES[group]]
         for kind, names in (("network", [self.identity + "_internal"]),
-                            ("volume", [self.identity + "_" + v for v in volumes])):
+                            ("volume", [self.volume_prefix + "_" + v for v in volumes])):
             for name in names:
                 info = self.inspect(kind, name)
                 if not info or info.get("Labels", {}).get("scwiki.deployment") != self.identity:
                     raise ValueError(f"存储/网络身份不一致：{name}")
+                if kind == "volume":
+                    self.validate_volume(info, name[len(self.volume_prefix) + 1:])
+
+    def validate_volume(self, info, suffix):
+        options = info.get("Options") or {}
+        if self.volume_root:
+            path = self.volume_root / suffix
+            if not path.is_dir() or path.resolve() != path:
+                raise ValueError(f"持久目录缺失或使用符号链接：{suffix}")
+            if info.get("Driver") != "local" or options != {"type": "none", "o": "bind", "device": str(path)}:
+                raise ValueError(f"持久卷实际挂载路径不匹配：{suffix}")
+        elif options:
+            raise ValueError(f"未声明的持久卷挂载配置：{suffix}")
 
     def initialize(self, groups=GROUPS):
         if self.marker.exists():
@@ -101,22 +129,39 @@ class Deployment:
         volumes = [v for group in groups for v in GROUP_VOLUMES[group]]
         # 不接管其他部署的卷，不静默覆盖；同标签的中断初始化可重入。
         for kind, names in (("network", [self.identity + "_internal"]),
-                            ("volume", [self.identity + "_" + v for v in volumes])):
+                            ("volume", [self.volume_prefix + "_" + v for v in volumes])):
             for name in names:
                 info = self.inspect(kind, name)
                 if info and info.get("Labels", {}).get("scwiki.deployment") != self.identity:
                     raise ValueError(f"发现不属于本次部署的资源：{name}")
+                if info and kind == "volume":
+                    self.validate_volume(info, name[len(self.volume_prefix) + 1:])
+        if self.volume_root:
+            for suffix in volumes:
+                path = self.volume_root / suffix
+                if path.exists() and (not path.is_dir() or path.resolve() != path):
+                    raise ValueError(f"持久目录无效：{suffix}")
+                if path.exists() and any(path.iterdir()) and not self.inspect("volume", self.volume_prefix + "_" + suffix):
+                    raise ValueError(f"init 不接管非空持久目录：{suffix}")
         self.root.mkdir(parents=True, exist_ok=True)
         for name in ("private", "backups"):
             (self.root / name).mkdir(mode=0o700, exist_ok=True)
         for kind, names in (("network", [self.identity + "_internal"]),
-                            ("volume", [self.identity + "_" + v for v in volumes])):
+                            ("volume", [self.volume_prefix + "_" + v for v in volumes])):
             for name in names:
                 if not self.inspect(kind, name):
-                    run(["docker", kind, "create", "--label",
-                         "scwiki.deployment=" + self.identity, name], capture=True)
+                    args = ["docker", kind, "create", "--label", "scwiki.deployment=" + self.identity]
+                    if kind == "volume" and self.volume_root:
+                        self.volume_root.mkdir(parents=True, exist_ok=True, mode=0o700)
+                        path = self.volume_root / name[len(self.volume_prefix) + 1:]
+                        path.mkdir(exist_ok=True, mode=0o700)
+                        args += ["--driver", "local", "--opt", "type=none", "--opt", "o=bind",
+                                 "--opt", "device=" + str(path)]
+                    run([*args, name], capture=True)
         with self.marker.open("x") as out:
-            json.dump({"deployment_id": self.identity, "root": str(self.root), "groups": list(groups)}, out)
+            json.dump({"deployment_id": self.identity, "root": str(self.root), "groups": list(groups),
+                       "volume_prefix": self.volume_prefix,
+                       "volume_root": str(self.volume_root) if self.volume_root else None}, out)
         self.require_identity(groups)
 
     def maintenance(self, arguments, *, capture=False, check=True):

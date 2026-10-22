@@ -31,10 +31,10 @@ services:
       start_period: 60s
 volumes:
   compute-scratch:
-    name: ${DEPLOYMENT_ID:?}_compute-scratch
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_compute-scratch
     external: true
   compute-models:
-    name: ${DEPLOYMENT_ID:?}_compute-models
+    name: ${SCWIKI_VOLUME_PREFIX:-${DEPLOYMENT_ID:?}}_compute-models
     external: true
 networks:
   default:

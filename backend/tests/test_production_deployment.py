@@ -139,6 +139,79 @@ def test_mutable_image_tag_is_rejected(tmp_path):
         deploy.read_release(release)
 
 
+def configured_bind_deployment(tmp_path, monkeypatch):
+    release = make_release(tmp_path)
+    data = tmp_path.parent / (tmp_path.name + "-volumes")
+    data.mkdir()
+    with release.open("a") as out:
+        out.write(f"SCWIKI_VOLUME_PREFIX=scwiki-home\nSCWIKI_VOLUME_ROOT={data.resolve()}\n")
+    deployment = deploy.Deployment(release)
+    deployment.marker.write_text(json.dumps({
+        "deployment_id": deployment.identity, "root": str(deployment.root), "groups": ["data"],
+        "volume_prefix": "scwiki-home", "volume_root": str(data.resolve()),
+    }))
+    resources = {}
+    for suffix in deploy.GROUP_VOLUMES["data"]:
+        (data / suffix).mkdir()
+        resources["scwiki-home_" + suffix] = {
+            "Driver": "local", "Labels": {"scwiki.deployment": deployment.identity},
+            "Options": {"type": "none", "o": "bind", "device": str(data / suffix)},
+        }
+    resources[deployment.identity + "_internal"] = {"Labels": {"scwiki.deployment": deployment.identity}}
+    monkeypatch.setattr(deployment, "inspect", lambda kind, name: resources.get(name))
+    return deployment, data, resources
+
+
+def test_bind_volume_identity_checks_real_path_and_missing_directory(tmp_path, monkeypatch):
+    d, data, resources = configured_bind_deployment(tmp_path, monkeypatch)
+    d.require_identity(("data",))
+    resources["scwiki-home_mysql"]["Options"]["device"] = "/wrong/mysql"
+    with pytest.raises(ValueError, match="实际挂载路径"):
+        d.require_identity(("data",))
+    resources["scwiki-home_mysql"]["Options"]["device"] = str(data / "mysql")
+    (data / "mysql").rmdir()
+    with pytest.raises(ValueError, match="持久目录缺失"):
+        d.require_identity(("data",))
+
+
+def test_bind_directory_symlink_and_marker_mismatch_are_rejected(tmp_path, monkeypatch):
+    d, data, _ = configured_bind_deployment(tmp_path, monkeypatch)
+    (data / "mysql").rmdir()
+    (data / "mysql").symlink_to(data / "redis", target_is_directory=True)
+    with pytest.raises(ValueError, match="符号链接"):
+        d.require_identity(("data",))
+    record = json.loads(d.marker.read_text())
+    record["volume_prefix"] = "other"
+    d.marker.write_text(json.dumps(record))
+    with pytest.raises(ValueError, match="部署标记"):
+        d.require_identity(("data",))
+
+
+def test_bind_init_refuses_unregistered_existing_data(tmp_path, monkeypatch):
+    d, data, resources = configured_bind_deployment(tmp_path, monkeypatch)
+    d.marker.unlink()
+    resources.pop("scwiki-home_mysql")
+    (data / "mysql/business-data").write_text("must preserve")
+    with pytest.raises(ValueError, match="非空持久目录"):
+        d.initialize(("data",))
+    assert (data / "mysql/business-data").read_text() == "must preserve"
+
+
+def test_bind_compose_prefix_preserves_project_network(tmp_path, monkeypatch):
+    d, _, _ = configured_bind_deployment(tmp_path, monkeypatch)
+    config = json.loads(d.compose("data", "config", "--format", "json", capture=True).stdout)
+    assert config["volumes"]["mysql"]["name"] == "scwiki-home_mysql"
+    assert config["networks"]["default"]["name"] == "scwiki-test_internal"
+
+
+def test_volume_root_cannot_contain_release_directory(tmp_path):
+    release = make_release(tmp_path)
+    with release.open("a") as out:
+        out.write(f"SCWIKI_VOLUME_ROOT={tmp_path.parent.resolve()}\n")
+    with pytest.raises(ValueError, match="独立"):
+        deploy.read_release(release)
+
+
 def test_compose_groups_have_no_cross_dependencies_or_shared_business_files(tmp_path):
     release = make_release(tmp_path)
     secret = "literal$DOLLAR'quotes\""
