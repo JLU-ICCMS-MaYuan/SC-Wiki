@@ -2,28 +2,25 @@
 .nobel-feature button, .nobel-feature a { font: inherit; }
 .nobel-feature :where(a) { color: var(--nobel-primary); }
 .nobel-feature button { cursor: pointer; }
-.nobel-embedded { padding: 28px 20px; border-radius: 16px; }
+.nobel-embedded { padding: 20px 20px 16px; border-radius: 16px; }
 .nobel-person-coaward { font-size: 12px; line-height: 1.7; color: var(--nobel-muted); margin: 10px 0 12px; }
 .nobel-biography section .nobel-coaward { margin-top: 12px; }
 .nobel-feature { background: #fff; color: var(--nobel-text); }
-.nobel-exhibition { max-width: 1440px; margin: auto; padding: 28px 48px; }
+.nobel-exhibition { max-width: 1440px; margin: auto; padding: 20px 32px 16px; }
 .nobel-header { text-align: center; }
 .nobel-brand { display: block; text-align: left; font-size: 17px; font-weight: 750; text-decoration: none; margin-bottom: 30px; }
 .nobel-brand span { color: var(--nobel-muted); font-size: 12px; font-weight: 400; margin-left: 14px; }
 .nobel-kicker { color: var(--nobel-primary); font-size: 12px; font-weight: 700; letter-spacing: .08em; margin: 0 0 12px; }
 .nobel-header :is(h1,h2) { font-size: clamp(28px, 3vw, 40px); font-weight: 700; margin: 0; letter-spacing: -.01em; }
-.nobel-intro { color: var(--nobel-muted); font-size: 14px; line-height: 1.7; margin: 16px 0 28px; }
+.nobel-intro { color: var(--nobel-muted); font-size: 14px; line-height: 1.7; margin: 10px 0 8px; }
 .nobel-gallery { background: #fff; }
-.nobel-gallery-topline { display: flex; justify-content: space-between; align-items: center; gap: 20px; color: var(--nobel-muted); font-size: 12px; padding: 0 8px; }
-.nobel-gallery-topline button { border: 1px solid var(--nobel-divider); border-radius: 999px; background: #fff; color: var(--nobel-primary); padding: 9px 16px; white-space: nowrap; }
-.nobel-gallery-topline button:disabled { color: var(--nobel-muted); cursor: default; }
-.nobel-stage { position: relative; height: 850px; overflow: hidden; touch-action: pan-y; cursor: grab; user-select: none; }
+.nobel-stage { position: relative; overflow: hidden; touch-action: pan-y; cursor: grab; user-select: none; }
 .nobel-stage[data-dragging="true"], .nobel-stage[data-dragging="true"] * { cursor: grabbing; }
 .nobel-stage::before, .nobel-stage::after { content: ''; position: absolute; top: 0; bottom: 0; width: 55px; z-index: 250; pointer-events: none; }
 .nobel-stage::before { left: 0; background: linear-gradient(to right, #fff, transparent); }
 .nobel-stage::after { right: 0; background: linear-gradient(to left, #fff, transparent); }
 .nobel-ring { position: absolute; inset: 0; }
-.nobel-face { position: absolute; left: 50%; top: 32px; width: 260px; transform-origin: center 0; background: #fff; color: var(--nobel-text); text-decoration: none; cursor: grab; border: 0; outline-offset: 6px; will-change: transform; }
+.nobel-face { position: absolute; left: 50%; top: 8px; width: 260px; transform-origin: center 0; background: #fff; color: var(--nobel-text); text-decoration: none; cursor: grab; border: 0; outline-offset: 6px; will-change: transform; }
 .nobel-photo { height: 305px; background: #fff; perspective: 900px; }
 .nobel-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; -webkit-user-drag: none;
   transform: rotateY(var(--portrait-yaw, 0deg)); transform-origin: center;
@@ -40,12 +37,11 @@
 .nobel-person-open { color: var(--nobel-primary); font-size: 11px; }
 .nobel-face:hover .nobel-person-copy h2 { color: var(--nobel-primary); }
 .nobel-face:focus-visible { outline: 2px solid var(--nobel-primary); border-radius: 6px; }
-.nobel-person-index { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; padding: 14px 0; border-top: 1px solid var(--nobel-divider); }
+.nobel-person-index { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; padding: 6px 0; border-top: 1px solid var(--nobel-divider); }
 .nobel-person-index button { background: #fff; border: 1px solid transparent; color: var(--nobel-muted); padding: 7px 12px; font-size: 12px; border-radius: 999px; }
 .nobel-person-index button[aria-pressed="true"] { color: var(--nobel-primary); background: #eef2ff; }
 .nobel-person-index button:hover { border-color: var(--nobel-divider); }
 .nobel-feature button:focus-visible, .nobel-back:focus-visible { outline: 2px solid var(--nobel-primary); outline-offset: 3px; }
-.nobel-footer { font-size: 11px; color: var(--nobel-muted); margin: 20px 0 0; text-align: center; }
 .nobel-detail { max-width: 1180px; margin: auto; padding: 36px 40px 64px; }
 .nobel-back { font-size: 13px; text-decoration: none; }
 .nobel-detail-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 64px; margin-top: 40px; }
@@ -68,8 +64,6 @@
  .nobel-exhibition { padding: 20px 16px; }
  .nobel-brand { margin-bottom: 26px; }
  .nobel-intro { font-size: 12px; }
- .nobel-gallery-topline { align-items: start; font-size: 11px; gap: 10px; padding: 0; }
- .nobel-stage { height: 850px; }
  .nobel-face { width: 240px; }
  .nobel-photo { height: 285px; }
  .nobel-stage::before, .nobel-stage::after { width: 18px; }
@@ -77,4 +71,16 @@
  .nobel-detail-grid { grid-template-columns: 1fr; gap: 28px; }
  .nobel-detail-portrait { position: static; max-width: 260px; margin: auto; }
  .nobel-biography h1 { font-size: 27px; }
+}
+
+.nobel-contact { padding-top: 12px; text-align: center; color: var(--nobel-muted); font-size: 12px; line-height: 1.7; }
+.nobel-contact-list { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 24px; }
+.nobel-contact-person { display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 6px; }
+.nobel-contact-person > span { color: var(--nobel-text); }
+.nobel-contact-person a { text-decoration: none; overflow-wrap: anywhere; }
+.nobel-contact-person a:hover { text-decoration: underline; }
+.nobel-contact p { margin: 8px 0 0; }
+@media (max-width: 760px) {
+  .nobel-exhibition { padding: 16px 12px; }
+  .nobel-contact-list { flex-direction: column; gap: 5px; }
 }

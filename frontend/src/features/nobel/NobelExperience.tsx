@@ -1,9 +1,9 @@
-import { useState, useRef, useEffect, useMemo, type CSSProperties, type PointerEvent } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, useMemo, type CSSProperties, type PointerEvent } from 'react'
 import theme from '../../theme'
 import { projectGallery } from './projection'
 import type { NobelLaureate } from './data'
 import type { Lang } from '../../i18n'
-import { getLaureates, coAwardText, copy } from './copy'
+import { getLaureates, coAwardText, copy, contacts } from './copy'
 import './nobel.css'
 
 
@@ -73,11 +73,12 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
   const laureates = useMemo(() => getLaureates(lang), [lang])
   const Title = embedded ? 'h2' : 'h1'
   const [angle, setAngle] = useState(0)
-  const [paused, setPaused] = useState(false)
+  const [focused, setFocused] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [reduced, setReduced] = useState(false)
   const [width, setWidth] = useState(1100)
+  const [cardHeights, setCardHeights] = useState<number[]>([])
   const stage = useRef<HTMLDivElement>(null)
   const direction = useRef(1)
   const gesture = useRef<{ id: number; startX: number; lastX: number; moved: boolean } | null>(null)
@@ -85,6 +86,25 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
   const step = 360 / laureates.length
   const frontIndex = ((Math.round(-angle / step) % laureates.length) + laureates.length) % laureates.length
   const layout = projectGallery(angle, laureates.length, width)
+  const visible = (index: number) => {
+    const card = layout[index]
+    return card.opacity > 0 && Math.abs(card.x) < width / 2 + card.cardWidth * card.scale / 2
+  }
+  // 8px顶部 + 可见卡片变换后的底边 + 12px底部，不使用会留下大片空白的固定高度。
+  const stageHeight = Math.ceil(8 + Math.max(...layout.map((card, index) =>
+    visible(index) ? card.y + (cardHeights[index] || 660) * card.scale : 0)) + 12)
+
+  useLayoutEffect(() => {
+    const cards = [...(stage.current?.querySelectorAll<HTMLElement>('.nobel-face') ?? [])]
+    const measure = () => {
+      const heights = cards.map(card => card.offsetHeight)
+      setCardHeights(previous => heights.every((height, index) => height === previous[index]) ? previous : heights)
+    }
+    measure()
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure)
+    cards.forEach(card => observer?.observe(card))
+    return () => observer?.disconnect()
+  }, [lang])
 
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
@@ -97,7 +117,7 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
   }, [])
 
   useEffect(() => {
-    if (paused || hovered || dragging || reduced) return
+    if (focused || hovered || dragging || reduced) return
     let frame: number
     let previous = 0
     const tick = (now: number) => {
@@ -108,9 +128,9 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
     }
     frame = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(frame)
-  }, [paused, hovered, dragging, reduced])
+  }, [focused, hovered, dragging, reduced])
 
-  const choose = (index: number) => { setAngle(-index * step); setPaused(true) }
+  const choose = (index: number) => setAngle(-index * step)
   const pointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (!event.isPrimary || event.button !== 0 || gesture.current) return
     gesture.current = { id: event.pointerId, startX: event.clientX, lastX: event.clientX, moved: false }
@@ -152,13 +172,7 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
         <p className="nobel-intro">{text.intro}</p>
       </header>
       <section className="nobel-gallery" aria-label={text.gallery}>
-        <div className="nobel-gallery-topline">
-          <span>{text.controls}</span>
-          <button type="button" onClick={() => setPaused(!paused)} aria-pressed={paused} disabled={reduced}>
-            {reduced ? text.reduced : paused ? text.resume : text.pause}
-          </button>
-        </div>
-        <div className="nobel-stage" ref={stage} data-dragging={dragging} data-angle={angle}
+        <div className="nobel-stage" ref={stage} data-dragging={dragging} data-angle={angle} style={{ height: stageHeight }}
           onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd}
           onPointerCancel={pointerEnd}
           onLostPointerCapture={event => {
@@ -172,20 +186,21 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
           <div className="nobel-ring" role="list" aria-label={text.ring}>
             {laureates.map((person, index) => {
               const { x, y, scale, cardWidth, yaw, opacity } = layout[index]
-              const visible = opacity > 0 && Math.abs(x) < width / 2 + cardWidth * scale / 2
+              const isVisible = visible(index)
               return (
                 <a key={person.id} role="listitem"
                   className={`nobel-face${index === frontIndex ? ' is-selected' : ''}`}
                   data-scale={scale}
                   style={{ transform: `translate(-50%, 0) translate(${x}px, ${y}px) scale(${scale})`,
                     width: cardWidth, '--portrait-yaw': `${yaw}deg`, opacity,
-                    visibility: visible ? 'visible' : 'hidden' } as CSSProperties}
+                    visibility: isVisible ? 'visible' : 'hidden' } as CSSProperties}
                   href={detailHref(person.id)} target="_blank" rel="noopener noreferrer"
-                  tabIndex={visible ? 0 : -1} draggable={false}
+                  tabIndex={isVisible ? 0 : -1} draggable={false}
                   aria-label={text.visit(person.englishName, person.awardYear)}
                   onPointerEnter={event => { if (event.pointerType === 'mouse' && !gesture.current) setHovered(true) }}
                   onPointerLeave={() => setHovered(false)}
-                  onFocus={() => { if (!gesture.current) choose(index) }}>
+                  onFocus={() => { if (!gesture.current) { choose(index); setFocused(true) } }}
+                  onBlur={() => setFocused(false)}>
                   <div className="nobel-photo"><img src={person.image} alt={`${person.englishName} · ${text.photo}`} draggable={false} /></div>
                   <div className="nobel-person-copy">
                     <span className="nobel-award-year">{person.awardYear} · {text.prize}</span>
@@ -207,7 +222,15 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
             onClick={() => choose(index)}>{person.englishName.split(' ').slice(-1)[0]}</button>)}
         </nav>
       </section>
-      {!embedded && <footer className="nobel-footer">{text.demoNote}</footer>}
+      <footer className="nobel-contact">
+        <div className="nobel-contact-list">
+          {contacts.map(contact => <span key={contact.zh} className="nobel-contact-person">
+            <span>{contact[lang]}</span>
+            {contact.email && <a href={`mailto:${contact.email}`}>{contact.email}</a>}
+          </span>)}
+        </div>
+        <p>{text.contactInvite}</p>
+      </footer>
     </section>
   )
 }

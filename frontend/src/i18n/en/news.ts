@@ -9,7 +9,7 @@ export default {
   moreFamilies: '{count} more material families; open the item to view all',
 
   // Hero
-  heroAffiliation: 'Key Laboratory of Material Simulation Methods & Software of Ministry of Education, Jilin University, China',
+  heroAffiliation: 'Key Laboratory of Material Simulation Methods & Software of Ministry of Education, College of Physics, Jilin University, China',
   heroTitle: 'Superconduct Wiki',
   heroSubtitle: 'An AI-driven, decentralized research infrastructure for superconductivity, unifying curated scientific data, Tc prediction, a superconductivity knowledge graph, and retrieval-augmented AI assistance.',
   startExploring: 'Start Exploring',

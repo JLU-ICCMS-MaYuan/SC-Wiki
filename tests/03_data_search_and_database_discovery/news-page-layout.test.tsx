@@ -94,7 +94,7 @@ describe('Issue #83 News 页面品牌与三列资讯流', () => {
     renderNews('en')
 
     expect(await screen.findByRole('heading', { name: 'Superconduct Wiki', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('Key Laboratory of Material Simulation Methods & Software of Ministry of Education, Jilin University, China')).toBeInTheDocument()
+    expect(screen.getByText('Key Laboratory of Material Simulation Methods & Software of Ministry of Education, College of Physics, Jilin University, China')).toBeInTheDocument()
     expect(screen.getByText(/AI-driven, decentralized research infrastructure/i)).toBeInTheDocument()
     expect(screen.queryByText('Element Search')).not.toBeInTheDocument()
     expect(screen.queryByText('AI Q&A')).not.toBeInTheDocument()
@@ -106,7 +106,7 @@ describe('Issue #83 News 页面品牌与三列资讯流', () => {
 
     renderNews('zh')
     expect(await screen.findByRole('heading', { name: '超导维基', level: 1 })).toBeInTheDocument()
-    expect(screen.getByText('吉林大学 物质模拟方法与软件教育部重点实验室')).toBeInTheDocument()
+    expect(screen.getByText('吉林大学 物理学院 物质模拟方法与软件教育部重点实验室')).toBeInTheDocument()
   })
 
   it('按类型分别加载 5 条，并且一个栏目的翻页不改变其他栏目', async () => {

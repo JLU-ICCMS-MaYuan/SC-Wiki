@@ -1,0 +1,92 @@
+[
+  {
+    "id": "IMG-007",
+    "upload_order": 7,
+    "original_name": "codex-clipboard-6207fce9-1723-4e5b-9120-2a4b7d043b49.png",
+    "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-007-compact-feedback.png",
+    "status": "local_verified",
+    "user_context": "1. 我感觉不需要很多细小的用法说明。例如：图一图二的说明都删除。\n2. 而且默认就是一直旋转，不需要操控是不是要让他停止。\n3. 白色边太多了，红框画出来的。我建议尽量减少。我希望能把图 5 里的那几个诺奖科学家的字提高到紧贴他们的头像的位置，但注意不要太紧，留一点点就行，千万不要重叠。\n4. 然后在诺奖科学家的名字的下面，放置：马原： mayuan@calypso.org.cn，郭强，钟鑫：zhongxin@jlu.edu.cn，刘寒雨：hanyuliu@jlu.edu.cn，的名字以及对应的邮箱。然后补充：如果有任何问题和合作，欢迎联系。\n5. 当然了要保留“从超导与超流到量子隧穿，认识十二位诺奖得主。”这句话。\n6. 另外这里应该写吉林大学 物理学院 物质模拟方法与软件教育部重点实验室\n\n使用 issue 和 spec 来修改。",
+    "related": [
+      "FR-017",
+      "FR-018",
+      "FR-019",
+      "FR-020"
+    ],
+    "sha256": "6af0d4832dd591d436eac11df510352ce256177aed182a916195698b6f41d613",
+    "media_type": "image/png",
+    "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-007-compact-feedback.png\n  pixelWidth: 718\n  pixelHeight: 146\n",
+    "verification": "复制原文件，哈希及sips图像解码检查"
+  },
+  {
+    "id": "IMG-008",
+    "upload_order": 8,
+    "original_name": "codex-clipboard-6f3aa084-1a2c-45ea-8b02-027352dbeb08.png",
+    "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-008-compact-feedback.png",
+    "status": "local_verified",
+    "user_context": "1. 我感觉不需要很多细小的用法说明。例如：图一图二的说明都删除。\n2. 而且默认就是一直旋转，不需要操控是不是要让他停止。\n3. 白色边太多了，红框画出来的。我建议尽量减少。我希望能把图 5 里的那几个诺奖科学家的字提高到紧贴他们的头像的位置，但注意不要太紧，留一点点就行，千万不要重叠。\n4. 然后在诺奖科学家的名字的下面，放置：马原： mayuan@calypso.org.cn，郭强，钟鑫：zhongxin@jlu.edu.cn，刘寒雨：hanyuliu@jlu.edu.cn，的名字以及对应的邮箱。然后补充：如果有任何问题和合作，欢迎联系。\n5. 当然了要保留“从超导与超流到量子隧穿，认识十二位诺奖得主。”这句话。\n6. 另外这里应该写吉林大学 物理学院 物质模拟方法与软件教育部重点实验室\n\n使用 issue 和 spec 来修改。",
+    "related": [
+      "FR-017",
+      "FR-018",
+      "FR-019",
+      "FR-020"
+    ],
+    "sha256": "9f537774fd637c203ce49827f1c6750ce5ea62e1e01280b8aa61fc3a2ed3ba89",
+    "media_type": "image/png",
+    "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-008-compact-feedback.png\n  pixelWidth: 340\n  pixelHeight: 140\n",
+    "verification": "复制原文件，哈希及sips图像解码检查"
+  },
+  {
+    "id": "IMG-009",
+    "upload_order": 9,
+    "original_name": "codex-clipboard-494360fb-1c09-4b82-a84b-a626a0c20344.png",
+    "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-009-compact-feedback.png",
+    "status": "local_verified",
+    "user_context": "1. 我感觉不需要很多细小的用法说明。例如：图一图二的说明都删除。\n2. 而且默认就是一直旋转，不需要操控是不是要让他停止。\n3. 白色边太多了，红框画出来的。我建议尽量减少。我希望能把图 5 里的那几个诺奖科学家的字提高到紧贴他们的头像的位置，但注意不要太紧，留一点点就行，千万不要重叠。\n4. 然后在诺奖科学家的名字的下面，放置：马原： mayuan@calypso.org.cn，郭强，钟鑫：zhongxin@jlu.edu.cn，刘寒雨：hanyuliu@jlu.edu.cn，的名字以及对应的邮箱。然后补充：如果有任何问题和合作，欢迎联系。\n5. 当然了要保留“从超导与超流到量子隧穿，认识十二位诺奖得主。”这句话。\n6. 另外这里应该写吉林大学 物理学院 物质模拟方法与软件教育部重点实验室\n\n使用 issue 和 spec 来修改。",
+    "related": [
+      "FR-017",
+      "FR-018",
+      "FR-019",
+      "FR-020"
+    ],
+    "sha256": "aca5be1251cf36a53a4dfdfc72c73e695f5db27df637bef3c8a8b02f162ced94",
+    "media_type": "image/png",
+    "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-009-compact-feedback.png\n  pixelWidth: 3376\n  pixelHeight: 1770\n",
+    "verification": "复制原文件，哈希及sips图像解码检查"
+  },
+  {
+    "id": "IMG-010",
+    "upload_order": 10,
+    "original_name": "codex-clipboard-d5047060-42c9-4df1-8f57-77d0cd5d20f6.png",
+    "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-010-compact-feedback.png",
+    "status": "local_verified",
+    "user_context": "1. 我感觉不需要很多细小的用法说明。例如：图一图二的说明都删除。\n2. 而且默认就是一直旋转，不需要操控是不是要让他停止。\n3. 白色边太多了，红框画出来的。我建议尽量减少。我希望能把图 5 里的那几个诺奖科学家的字提高到紧贴他们的头像的位置，但注意不要太紧，留一点点就行，千万不要重叠。\n4. 然后在诺奖科学家的名字的下面，放置：马原： mayuan@calypso.org.cn，郭强，钟鑫：zhongxin@jlu.edu.cn，刘寒雨：hanyuliu@jlu.edu.cn，的名字以及对应的邮箱。然后补充：如果有任何问题和合作，欢迎联系。\n5. 当然了要保留“从超导与超流到量子隧穿，认识十二位诺奖得主。”这句话。\n6. 另外这里应该写吉林大学 物理学院 物质模拟方法与软件教育部重点实验室\n\n使用 issue 和 spec 来修改。",
+    "related": [
+      "FR-017",
+      "FR-018",
+      "FR-019",
+      "FR-020"
+    ],
+    "sha256": "89008f0914391bd0749a7610b51cc3e2752c1fa34f1dabf2196c2a6fb1388e08",
+    "media_type": "image/png",
+    "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-010-compact-feedback.png\n  pixelWidth: 2356\n  pixelHeight: 786\n",
+    "verification": "复制原文件，哈希及sips图像解码检查"
+  },
+  {
+    "id": "IMG-011",
+    "upload_order": 11,
+    "original_name": "codex-clipboard-0b30822f-0354-493a-b257-9081343c538f.png",
+    "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-011-compact-feedback.png",
+    "status": "local_verified",
+    "user_context": "1. 我感觉不需要很多细小的用法说明。例如：图一图二的说明都删除。\n2. 而且默认就是一直旋转，不需要操控是不是要让他停止。\n3. 白色边太多了，红框画出来的。我建议尽量减少。我希望能把图 5 里的那几个诺奖科学家的字提高到紧贴他们的头像的位置，但注意不要太紧，留一点点就行，千万不要重叠。\n4. 然后在诺奖科学家的名字的下面，放置：马原： mayuan@calypso.org.cn，郭强，钟鑫：zhongxin@jlu.edu.cn，刘寒雨：hanyuliu@jlu.edu.cn，的名字以及对应的邮箱。然后补充：如果有任何问题和合作，欢迎联系。\n5. 当然了要保留“从超导与超流到量子隧穿，认识十二位诺奖得主。”这句话。\n6. 另外这里应该写吉林大学 物理学院 物质模拟方法与软件教育部重点实验室\n\n使用 issue 和 spec 来修改。",
+    "related": [
+      "FR-017",
+      "FR-018",
+      "FR-019",
+      "FR-020"
+    ],
+    "sha256": "ee90c765d1531680dc653158c2f5d7e0417f277710d49aea5cf076b856c07dcd",
+    "media_type": "image/png",
+    "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-011-compact-feedback.png\n  pixelWidth: 3840\n  pixelHeight: 1948\n",
+    "verification": "复制原文件，哈希及sips图像解码检查"
+  }
+]

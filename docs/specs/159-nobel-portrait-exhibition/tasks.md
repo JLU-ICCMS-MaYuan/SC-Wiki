@@ -65,3 +65,11 @@ T004、T006–T010 的运行证据见 [validation.md](validation.md) 与真实�
 - [x] T019 验证正式页面、深链接、共享关系、样式隔离及既有交互；回写Overview和Issue。
 
 T017–T019 已完成当前原照版本的源码接入与本地验证，证据见 `integration-validation.md`、`assets/award-facts.json` 和 `assets/production-validation/`。原照外部许可核查、最终漫画与全面科学史审校不因此完成；未部署云端或推送。
+
+## 紧凑布局与联系人
+
+- [x] T020 删除说明与暂停按钮，实现默认持续旋转及索引选择后继续（FR-017）。
+- [x] T021 收紧展区和索引间距，添加联系人并补齐机构署名（FR-018–020）。
+- [x] T022 归档五张截图，核验中英文、手机、全部旋转相位不重叠/裁切及联系人，更新Issue/Overview。
+
+T020–T022证据：`assets/compact-feedback.json`、`assets/compact-validation/browser.json`及截图、Demo与正式页面回归；构建通过，24项定向测试通过。中英文三种宽度共726相位，内容到索引实测11.69–13.47px，无重叠或裁切。郭强未提供邮箱，按原话仅显示姓名。

@@ -33,3 +33,9 @@ Vite 默认地址为 `http://localhost:5173/nobel-demo.html`。如果 `5173` 已
 - `node tests/07_researcher_community_forum/nobel-production-browser.mjs` 检查真实正式路由、中英文、份额、图片、新标签页和手机；通过 `NOBEL_SITE_URL` 可覆盖默认地址。
 - Node 26环境运行Vitest需加 `NODE_OPTIONS=--no-experimental-webstorage`，避免Node自身未配置的localStorage覆盖jsdom实现。
 - 本次仅源码接入与本地验证，不构成阿里云、Docker或镜像发布。
+
+## 紧凑版本评审
+
+当前可访问 `http://127.0.0.1:5173/news#nobel-milestones`。没有操作提示或暂停开关，默认自动旋转；索引选择后继续，悬停和键盘阅读仍可暂时停驻。索引紧随人物介绍，联系人位于索引下方。
+
+执行 `NOBEL_SITE_URL=http://127.0.0.1:5173 node tests/07_researcher_community_forum/nobel-compact-browser.mjs` 验证两种语言、三种宽度的全圈间距、联系人和自动恢复。结果在 `assets/compact-validation/`。

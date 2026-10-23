@@ -9,7 +9,7 @@ export default {
   moreFamilies: '另有 {count} 个材料家族，点击条目查看全部',
 
   // Hero 区
-  heroAffiliation: '吉林大学 物质模拟方法与软件教育部重点实验室',
+  heroAffiliation: '吉林大学 物理学院 物质模拟方法与软件教育部重点实验室',
   heroTitle: '超导维基',
   heroSubtitle: '面向超导研究的 AI 驱动去中心化科研数据基础设施，融合可追溯科学数据、Tc 预测、超导知识图谱与 RAG 智能问答。',
   startExploring: '开始探索',

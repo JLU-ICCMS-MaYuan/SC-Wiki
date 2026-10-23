@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || '../../prototypes/account-center/node_modules/playwright/index.mjs')
 const base = process.env.NOBEL_DEMO_URL || 'http://127.0.0.1:5174/nobel-demo.html'
-const output = new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/production-validation/demo/', import.meta.url)
+const output = new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/compact-validation/demo/', import.meta.url)
 await mkdir(output, { recursive: true })
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } })
@@ -14,7 +14,9 @@ const choose = name => page.getByRole('button', { name, exact: true }).click()
 async function scanFullTurn(viewportWidth) {
   await page.setViewportSize({ width: viewportWidth, height: 1100 })
   await choose('Onnes')
+  await page.locator('.nobel-stage').evaluate(e => e.scrollIntoView({ block: 'start' }))
   const stage = await page.locator('.nobel-stage').boundingBox()
+  const startAngle = await angle()
   const x = stage.x + stage.width / 2, y = stage.y + 10
   await page.mouse.move(x, y)
   await page.mouse.down()
@@ -34,6 +36,7 @@ async function scanFullTurn(viewportWidth) {
       assert.ok(gap >= 12, `${viewportWidth}px / ${degrees}度 图片或文字遮挡: ${gap}`)
     }
   }
+  assert.ok(Math.abs(await angle() - startAngle - 360) < 2, '全圈扫描必须实际转过360度')
   await page.mouse.up()
   await choose('Onnes')
   return { width: viewportWidth, samples: 121, minGap }
@@ -92,7 +95,6 @@ try {
   await page.mouse.move(stage.x + stage.width / 2 - 160, stage.y + 10, { steps: 12 })
   await page.mouse.up()
   assert.ok(await angle() < afterRight)
-  await page.getByRole('button', { name: '继续旋转', exact: true }).click()
   await page.mouse.move(0, 0)
   const released = await angle()
   await page.waitForTimeout(300)
@@ -100,6 +102,10 @@ try {
   results.drag = '头像按住右拖/背景左拖角度相反；释放沿最后方向自转；拖动不误开标签页；姓名跟随照片'
 
   await choose('Onnes')
+  await onnes.evaluate(e => e.scrollIntoView({ block: 'center' }))
+  const clickRect = await onnes.boundingBox()
+  await page.mouse.move(clickRect.x + clickRect.width / 2, clickRect.y + 100)
+  await page.waitForTimeout(60)
   const [popup] = await Promise.all([page.waitForEvent('popup'), onnes.click()])
   await popup.waitForLoadState()
   assert.equal(new URL(popup.url()).searchParams.get('person'), 'onnes')
