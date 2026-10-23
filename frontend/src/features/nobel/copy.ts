@@ -1,11 +1,12 @@
 import type { Lang } from '../../i18n'
 import { laureates, type NobelLaureate } from './data'
 import { englishBiographies } from './en'
+import { awardRecipients } from './awards'
 
 export const copy = {
   zh: {
     title: '超导研究的诺奖群像', kicker: '诺贝尔奖里程碑 · 1913—2003',
-    intro: '从超导与超流到量子隧穿，认识十二位诺奖得主。', brand: '科学史展厅',
+    intro: '从超导与超流到量子隧穿，认识十一位诺奖得主。', brand: '科学史展厅',
     gallery: '诺贝尔物理学奖得主肖像展', ring: '旋转的获奖者肖像', select: '选择获奖者', prize: '诺贝尔物理学奖',
     read: '科研经历与参考资料 ↗', back: '← 返回肖像展', photo: '原始照片', photoCaption: '历史原照 · 诺贝尔奖里程碑',
     identity: '获奖时国籍/身份：', achievement: '获奖成果', career: '科研经历', connection: '与超导研究的关系', sources: '参考资料', share: '本届奖项个人份额：',
@@ -16,7 +17,7 @@ export const copy = {
   },
   en: {
     title: 'Nobel portraits in superconductivity', kicker: 'NOBEL MILESTONES · 1913–2003',
-    intro: 'Twelve laureates across superconductivity, superfluidity and quantum tunneling.', brand: 'History of science',
+    intro: 'Eleven laureates across superconductivity, superfluidity and quantum tunneling.', brand: 'History of science',
     gallery: 'Nobel physics laureate portraits', ring: 'Rotating laureate portraits', select: 'Select a laureate', prize: 'Nobel Prize in Physics',
     read: 'Research and references ↗', back: '← Back to the portraits', photo: 'original photograph', photoCaption: 'Original photograph · Nobel milestones',
     identity: 'Nationality / affiliation at the award: ', achievement: 'Award-winning contribution', career: 'Research career', connection: 'Connection to superconductivity', sources: 'References', share: 'Individual share of this prize: ',
@@ -41,8 +42,8 @@ export function getLaureates(lang: Lang): NobelLaureate[] {
   }))
 }
 
-export function coAwardText(person: NobelLaureate, people: NobelLaureate[], lang: Lang) {
-  const peers = people.filter(other => other.awardYear === person.awardYear && other.id !== person.id)
+export function coAwardText(person: NobelLaureate, lang: Lang) {
+  const peers = awardRecipients.filter(other => other.awardYear === person.awardYear && other.id !== person.id)
   if (!peers.length) return lang === 'zh'
     ? `独获 ${person.awardYear} 年诺贝尔物理学奖。`
     : `Sole recipient of the ${person.awardYear} Nobel Prize in Physics.`

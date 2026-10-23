@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || '../../prototypes/account-center/node_modules/playwright/index.mjs')
 const base = process.env.NOBEL_DEMO_URL || 'http://127.0.0.1:5174/nobel-demo.html'
-const output = new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/compact-validation/demo/', import.meta.url)
+const output = new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/roster-validation/demo/', import.meta.url)
 await mkdir(output, { recursive: true })
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } })
@@ -114,7 +114,7 @@ try {
   await popup.close()
   results.popup = '普通点击仍打开独立标签页，opener为空'
   const hrefs = await page.locator('.nobel-face').evaluateAll(es => es.map(e => e.href))
-  assert.equal(hrefs.length, 12)
+  assert.equal(hrefs.length, 11)
   for (const url of hrefs) {
     await page.goto(url)
     await page.locator('.nobel-detail-portrait img').evaluate(img => img.decode())
@@ -123,7 +123,7 @@ try {
     for (const href of await page.locator('.nobel-citations a').evaluateAll(es => es.map(e => e.getAttribute('href')))) assert.equal(await page.locator(href).count(), 1)
   }
   await page.screenshot({ path: new URL('detail.png', output).pathname, fullPage: true })
-  results.details = '12个详情页原照与段落引用锚点正常'
+  results.details = '11个详情页原照与段落引用锚点正常'
 
   await page.setViewportSize({ width: 390, height: 844 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
@@ -131,7 +131,7 @@ try {
   const reducedAngle = await angle()
   await page.waitForTimeout(200)
   assert.equal(await angle(), reducedAngle)
-  for (const name of ['Onnes','Bardeen','Cooper','Schrieffer','Esaki','Giaever','Josephson','Bednorz','Müller','Abrikosov','Ginzburg','Leggett']) {
+  for (const name of ['Onnes','Bardeen','Cooper','Schrieffer','Giaever','Josephson','Bednorz','Müller','Abrikosov','Ginzburg','Leggett']) {
     await choose(name)
     const r = await page.locator('.nobel-face.is-selected').boundingBox()
     assert.ok(r && r.x >= 0 && r.x + r.width <= 390)
@@ -142,7 +142,7 @@ try {
   await page.locator('.nobel-face').first().focus()
   await page.keyboard.press('Tab')
   assert.ok((await page.locator('.nobel-face.is-selected').textContent()).includes('Bardeen'))
-  results.accessibility = '390px无横向溢出；减少动态关闭自转；12人索引与键盘聚焦可用'
+  results.accessibility = '390px无横向溢出；减少动态关闭自转；11人索引与键盘聚焦可用'
 
   const touch = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, reducedMotion: 'reduce' })
   await touch.goto(base)

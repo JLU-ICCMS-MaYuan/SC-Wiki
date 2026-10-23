@@ -26,7 +26,6 @@ function Citations({ indices, lang }: { indices: number[]; lang: Lang }) {
 
 export function NobelDetail({ person, lang = 'zh', backHref = '/news#nobel-milestones' }: { person: NobelLaureate; lang?: Lang; backHref?: string }) {
   const text = copy[lang]
-  const people = getLaureates(lang)
   return (
     <section className="nobel-detail">
       <a className="nobel-back" href={backHref}>{text.back}</a>
@@ -44,7 +43,7 @@ export function NobelDetail({ person, lang = 'zh', backHref = '/news#nobel-miles
           <section>
             <h2>{text.achievement}</h2>
             <p>{person.awardReason}<Citations lang={lang} indices={[1, 3]} /></p>
-            <p className="nobel-coaward">{coAwardText(person, people, lang)}<Citations lang={lang} indices={[1, 3]} /></p>
+            <p className="nobel-coaward">{coAwardText(person, lang)}<Citations lang={lang} indices={[1, 3]} /></p>
             <p>{text.share}<strong>{person.prizeShare}</strong><Citations lang={lang} indices={[1]} /></p>
           </section>
           <section>
@@ -209,7 +208,7 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
                     <span className="nobel-person-years">{person.years}</span>
                     <p className="nobel-person-identity">{person.identity}</p>
                     <p className="nobel-person-achievement">{person.achievement}</p>
-                    <p className="nobel-person-coaward">{coAwardText(person, laureates, lang)}</p>
+                    <p className="nobel-person-coaward">{coAwardText(person, lang)}</p>
                     <span className="nobel-person-open">{text.read}</span>
                   </div>
                 </a>

@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import {mkdir,writeFile} from 'node:fs/promises'
 const {chromium}=await import(process.env.PLAYWRIGHT_MODULE || '../../prototypes/account-center/node_modules/playwright/index.mjs')
 const base=process.env.NOBEL_SITE_URL || 'http://127.0.0.1:5173'
-const out=new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/compact-validation/',import.meta.url)
+const out=new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/roster-validation/compact/',import.meta.url)
 await mkdir(out,{recursive:true})
 const b=await chromium.launch({channel:'chrome'})
 const p=await b.newPage({viewport:{width:1440,height:1100},reducedMotion:'reduce'})
@@ -38,7 +38,7 @@ try {
  for(const lang of ['zh','en'])for(const width of [1440,768,390])await scan(lang,width)
  await p.setViewportSize({width:1440,height:1100});await p.goto(`${base}/news`)
  await p.getByText('吉林大学 物理学院 物质模拟方法与软件教育部重点实验室',{exact:true}).waitFor()
- assert.equal(await p.getByText('从超导与超流到量子隧穿，认识十二位诺奖得主。',{exact:true}).count(),1)
+ assert.equal(await p.getByText('从超导与超流到量子隧穿，认识十一位诺奖得主。',{exact:true}).count(),1)
  assert.equal(await p.locator('.nobel-gallery-topline').count(),0)
  assert.equal(await p.getByRole('button',{name:/暂停旋转|继续旋转/}).count(),0)
  const contact=p.locator('.nobel-contact')
@@ -50,7 +50,7 @@ try {
  assert.ok(await contact.evaluate(e=>e.getBoundingClientRect().top>=document.querySelector('.nobel-person-index').getBoundingClientRect().bottom))
  await p.getByRole('button',{name:'Onnes',exact:true}).click()
  await p.locator('.nobel-feature').screenshot({path:new URL('desktop.png',out).pathname})
- await p.setViewportSize({width:390,height:844});await p.getByRole('button',{name:'Esaki',exact:true}).click()
+ await p.setViewportSize({width:390,height:844});await p.getByRole('button',{name:'Giaever',exact:true}).click()
  await p.locator('.nobel-feature').screenshot({path:new URL('mobile.png',out).pathname})
  assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true)
  // 正常模式：选择索引后自动恢复，不再依赖一个不可见的暂停开关。
@@ -58,7 +58,7 @@ try {
  await p.mouse.move(0,0)
  const angle=()=>p.locator('.nobel-stage').getAttribute('data-angle').then(Number)
  const initial=await angle();await p.waitForTimeout(300);assert.ok(await angle()>initial)
- await p.getByRole('button',{name:'Esaki',exact:true}).click();await p.mouse.move(0,0)
+ await p.getByRole('button',{name:'Giaever',exact:true}).click();await p.mouse.move(0,0)
  const selected=await angle();await p.waitForTimeout(300);assert.ok(await angle()>selected)
  // 键盘阅读仅在焦点停留于人物时暂停，离开后恢复。
  await p.locator('.nobel-face.is-selected').focus();const focused=await angle();await p.waitForTimeout(200);assert.equal(await angle(),focused)

@@ -39,3 +39,7 @@ Vite 默认地址为 `http://localhost:5173/nobel-demo.html`。如果 `5173` 已
 当前可访问 `http://127.0.0.1:5173/news#nobel-milestones`。没有操作提示或暂停开关，默认自动旋转；索引选择后继续，悬停和键盘阅读仍可暂时停驻。索引紧随人物介绍，联系人位于索引下方。
 
 执行 `NOBEL_SITE_URL=http://127.0.0.1:5173 node tests/07_researcher_community_forum/nobel-compact-browser.mjs` 验证两种语言、三种宽度的全圈间距、联系人和自动恢复。结果在 `assets/compact-validation/`。
+
+## 11人名单核对
+
+当前仅移除江崎，约瑟夫森和莱格特保留。正式页与Demo均为11个入口，`/nobel/esaki`不再展示人物详情；中英文引言为十一位/Eleven。1973年的历史共享说明仍列出江崎，与是否展出分开。新验证证据在 `assets/roster-validation/`。

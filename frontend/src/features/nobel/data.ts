@@ -80,20 +80,6 @@ export const laureates: NobelLaureate[] = [
     ],
   },
   {
-    id: 'esaki', name: '江崎玲于奈', englishName: 'Leo Esaki', years: '1925–', awardYear: 1973, prizeShare: '1/4',
-    identity: '日本 · 获奖时任职 IBM 研究实验室（美国）', identityNote: '国家/机构身份按诺奖资料所列的获奖时任职地点说明，不据出生地推定国籍。',
-    achievement: '因发现半导体中的电子隧穿现象获奖，并发展隧道二极管；其获奖贡献并非超导研究。',
-    career: '江崎在东京大学接受物理学训练，早年在东京通信工业（后为 Sony）从事半导体研究，之后在 IBM Thomas J. Watson 研究中心继续工作。他对重掺杂半导体中隧穿电流的研究促成隧道二极管的发现。',
-    awardReason: '1973 年诺贝尔物理学奖的一半由江崎玲于奈和 Ivar Giaever 平分，两人各获全奖的 1/4，分别表彰半导体和超导体中的实验性隧穿发现；另一半授予 Brian Josephson，表彰超电流穿过隧道势垒的理论预言。',
-    superconductivityLink: '三人的研究都涉及量子隧穿，但研究对象与具体成果不同：江崎研究半导体，Giaever 研究超导体中的电子隧穿，Josephson 预言超导隧道结中的超电流。江崎因此列入相关隧穿里程碑，不应被写成因超导贡献获奖。', image: portrait('leo-esaki.jpg'),
-    sources: [
-      { label: '诺贝尔奖：江崎事实资料', url: person(1973, 'esaki', 'facts'), supports: '出生信息与官方人物资料' },
-      { label: '诺贝尔奖：江崎传记', url: person(1973, 'esaki'), supports: '科研经历与半导体隧穿研究' },
-      { label: '诺贝尔奖：1973 年物理学奖', url: prize(1973), supports: '江崎与 Giaever 的共同授奖理由' },
-      { label: 'Esaki，Physical Review (1958)', url: 'https://doi.org/10.1103/PhysRev.109.603', supports: '半导体隧穿原始论文' },
-    ],
-  },
-  {
     id: 'giaever', name: '伊瓦尔·贾埃弗', englishName: 'Ivar Giaever', years: '1929–2025', awardYear: 1973, prizeShare: '1/4',
     identity: '美国 · 通用电气研究实验室', identityNote: '挪威出生；官方传记明确记载其于 1964 年加入美国国籍，早于 1973 年获奖。',
     achievement: '实验验证超导体中的电子隧穿，测得与超导能隙有关的隧穿特征。',

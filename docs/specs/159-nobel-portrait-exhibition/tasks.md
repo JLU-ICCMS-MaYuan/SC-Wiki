@@ -73,3 +73,10 @@ T017–T019 已完成当前原照版本的源码接入与本地验证，证据�
 - [x] T022 归档五张截图，核验中英文、手机、全部旋转相位不重叠/裁切及联系人，更新Issue/Overview。
 
 T020–T022证据：`assets/compact-feedback.json`、`assets/compact-validation/browser.json`及截图、Demo与正式页面回归；构建通过，24项定向测试通过。中英文三种宽度共726相位，内容到索引实测11.69–13.47px，无重叠或裁切。郭强未提供邮箱，按原话仅显示姓名。
+
+## 11人名单修订
+
+- [x] T023 按最终确认只移除江崎，更新展陈、入口、资产和中英文人数（FR-021）。
+- [x] T024 分离完整奖项历史并验证Giaever/Josephson共享说明仍准确、Leggett仍保留（FR-022）。
+
+T023/T024验证：23项Vitest及正式构建通过；真实浏览器确认11个入口、江崎路由无详情、Josephson/Leggett保留、1973历史共享关系正确。紧凑布局726相位和原有拖动/新标签页回归通过。证据见 `roster-validation.md` 和 `assets/roster-validation/`。

@@ -31,14 +31,6 @@ export const englishBiographies: Record<string, Biography> = {
     awardReason: 'The 1972 prize recognized the BCS theory developed jointly with Bardeen and Cooper.',
     superconductivityLink: 'His construction of the BCS ground-state wavefunction enabled a quantitative microscopic description of superconductivity.',
   },
-  esaki: {
-    identity: 'Japan · IBM Research, United States, at the time of the award',
-    identityNote: 'Nationality and the country of the employing institution are distinct.',
-    achievement: 'Awarded for electron tunneling in semiconductors, leading to the tunnel diode; his prize-winning contribution was not superconductivity.',
-    career: 'Esaki studied at the University of Tokyo and investigated semiconductors at Tokyo Tsushin Kogyo, later Sony. He joined IBM’s Thomas J. Watson Research Center in 1960. His work on heavily doped semiconductors led to the tunnel diode.',
-    awardReason: 'Esaki and Giaever divided one half of the 1973 prize, each receiving one quarter, for experimental tunneling discoveries in semiconductors and superconductors, respectively. Josephson received the other half for theoretical predictions concerning supercurrent through a tunnel barrier.',
-    superconductivityLink: 'All three contributions concern quantum tunneling, but the systems differ: Esaki studied semiconductors, Giaever studied electron tunneling involving superconductors, and Josephson predicted supercurrent through superconducting tunnel junctions. Sharing a prize does not make Esaki’s work a superconductivity discovery.',
-  },
   giaever: {
     identity: 'United States · General Electric Research and Development Center',
     identityNote: 'Born in Norway; his Nobel biography records that he became a US citizen in 1964, before the 1973 award.',
