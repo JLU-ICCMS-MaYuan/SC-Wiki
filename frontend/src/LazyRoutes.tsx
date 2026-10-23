@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { Box, CircularProgress } from '@mui/material'
 
+const NobelLaureatePage = lazy(() => import('./pages/NobelLaureatePage'))
 const SearchPage = lazy(() => import('./pages/SearchPage'))
 const RagPage = lazy(() => import('./pages/RagPage'))
 const TcPredictPage = lazy(() => import('./pages/TcPredictPage'))
@@ -39,6 +40,7 @@ const PaperRevisionPage = React.lazy(() => import('./pages/PaperRevisionPage'))
 
 const LazyRoutes: React.FC = () => (
   <Routes>
+    <Route path="/nobel/:personId" element={<Spin><NobelLaureatePage /></Spin>} />
     <Route path="/structures/:recordId" element={<Spin><StructuralRecordPage /></Spin>} />
     <Route path="/search" element={<Spin><SearchPage /></Spin>} />
     <Route path="/share" element={<Navigate to="/share/charts" replace />} />

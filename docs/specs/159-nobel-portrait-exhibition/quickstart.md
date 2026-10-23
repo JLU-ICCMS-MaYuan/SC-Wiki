@@ -25,3 +25,11 @@ Vite 默认地址为 `http://localhost:5173/nobel-demo.html`。如果 `5173` 已
 第二轮评审：页面为白底与站点主色，头像边缘淡入白色；姓名跟随头像，按住左右拖动改变方向，主位最大。最新实测证据见 `assets/validation-v2/`，第一版证据仍保存在 `assets/validation/`。
 
 第三轮评审：改为不遮挡的弧形展陈；主位更大，侧位转斜并缩小，姓名仍正向随照片移动。最新证据在 `assets/validation-v3/`；拖动一整圈检查主位交接和两侧间隔。手机优先完整呈现主位，左右拖动或索引查看其余人物。
+
+## 正式页面本地验收
+
+- 当前Vite地址：[快讯页展陈](http://127.0.0.1:5174/news#nobel-milestones)、[江崎详情](http://127.0.0.1:5174/nobel/esaki)。地址端口以Vite实际输出为准。
+- `npm --prefix frontend run build` 构建正式页面；`npm --prefix frontend run preview -- --host 127.0.0.1 --port 4174`可独立查看编译产物。
+- `node tests/07_researcher_community_forum/nobel-production-browser.mjs` 检查真实正式路由、中英文、份额、图片、新标签页和手机；通过 `NOBEL_SITE_URL` 可覆盖默认地址。
+- Node 26环境运行Vitest需加 `NODE_OPTIONS=--no-experimental-webstorage`，避免Node自身未配置的localStorage覆盖jsdom实现。
+- 本次仅源码接入与本地验证，不构成阿里云、Docker或镜像发布。

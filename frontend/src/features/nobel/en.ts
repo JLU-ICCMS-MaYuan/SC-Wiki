@@ -1,0 +1,95 @@
+import type { NobelLaureate } from './data'
+
+type Biography = Pick<NobelLaureate, 'identity' | 'achievement' | 'career' | 'awardReason' | 'superconductivityLink'> & { identityNote?: string }
+
+export const englishBiographies: Record<string, Biography> = {
+  onnes: {
+    identity: 'Netherlands · Leiden University',
+    achievement: 'Investigated matter at low temperatures and liquefied helium; his low-temperature experiments also revealed superconductivity in mercury.',
+    career: 'Onnes studied in Groningen and Heidelberg before establishing a low-temperature laboratory at Leiden. He liquefied helium in 1908 and discovered the abrupt disappearance of measurable electrical resistance in mercury in 1911.',
+    awardReason: 'The 1913 prize recognized his investigations of matter at low temperatures, leading, among other achievements, to the production of liquid helium.',
+    superconductivityLink: 'His discovery of the superconducting transition opened the experimental study of superconductivity.',
+  },
+  bardeen: {
+    identity: 'United States · University of Illinois Urbana-Champaign',
+    achievement: 'Developed the microscopic BCS theory of superconductivity with Cooper and Schrieffer.',
+    career: 'Bardeen studied at Wisconsin and Princeton, worked on the transistor at Bell Laboratories, and received the 1956 Nobel Prize in Physics for that work. At Illinois he developed the BCS theory with Cooper and Schrieffer. He remains the only person awarded the Physics prize twice.',
+    awardReason: 'The 1972 prize recognized the jointly developed theory of superconductivity, usually called the BCS theory. This was Bardeen’s second Physics prize.',
+    superconductivityLink: 'BCS theory describes conventional superconductivity through the pairing of electrons into Cooper pairs.',
+  },
+  cooper: {
+    identity: 'United States · Brown University',
+    achievement: 'Developed BCS theory with Bardeen and Schrieffer; Cooper pairing is a central concept of the theory.',
+    career: 'Cooper studied at Columbia and worked at the Institute for Advanced Study and the University of Illinois before joining Brown. His investigation of electron pairing near the Fermi surface became a key element of BCS theory.',
+    awardReason: 'The 1972 prize was shared with Bardeen and Schrieffer for their jointly developed BCS theory of superconductivity.',
+    superconductivityLink: 'Cooper pairs supply the microscopic pairing picture used in conventional superconductivity.',
+  },
+  schrieffer: {
+    identity: 'United States · University of Pennsylvania',
+    achievement: 'Developed BCS theory with Bardeen and Cooper, including its key many-electron wavefunction.',
+    career: 'Schrieffer studied at MIT and then at Illinois, where his doctoral work contributed to the 1957 theory. He subsequently worked at Chicago, Illinois, Pennsylvania, UC Santa Barbara and Florida State.',
+    awardReason: 'The 1972 prize recognized the BCS theory developed jointly with Bardeen and Cooper.',
+    superconductivityLink: 'His construction of the BCS ground-state wavefunction enabled a quantitative microscopic description of superconductivity.',
+  },
+  esaki: {
+    identity: 'Japan · IBM Research, United States, at the time of the award',
+    identityNote: 'Nationality and the country of the employing institution are distinct.',
+    achievement: 'Awarded for electron tunneling in semiconductors, leading to the tunnel diode; his prize-winning contribution was not superconductivity.',
+    career: 'Esaki studied at the University of Tokyo and investigated semiconductors at Tokyo Tsushin Kogyo, later Sony. He joined IBM’s Thomas J. Watson Research Center in 1960. His work on heavily doped semiconductors led to the tunnel diode.',
+    awardReason: 'Esaki and Giaever divided one half of the 1973 prize, each receiving one quarter, for experimental tunneling discoveries in semiconductors and superconductors, respectively. Josephson received the other half for theoretical predictions concerning supercurrent through a tunnel barrier.',
+    superconductivityLink: 'All three contributions concern quantum tunneling, but the systems differ: Esaki studied semiconductors, Giaever studied electron tunneling involving superconductors, and Josephson predicted supercurrent through superconducting tunnel junctions. Sharing a prize does not make Esaki’s work a superconductivity discovery.',
+  },
+  giaever: {
+    identity: 'United States · General Electric Research and Development Center',
+    identityNote: 'Born in Norway; his Nobel biography records that he became a US citizen in 1964, before the 1973 award.',
+    achievement: 'Demonstrated electron tunneling involving superconductors and measured features associated with the superconducting energy gap.',
+    career: 'Giaever studied engineering in Norway and joined General Electric after emigrating to North America. His low-temperature thin-film tunnel-junction experiments provided a way to investigate superconducting energy gaps.',
+    awardReason: 'Giaever and Esaki divided one half of the 1973 prize, each receiving one quarter, for experimental tunneling discoveries in superconductors and semiconductors, respectively. Josephson received the other half.',
+    superconductivityLink: 'Giaever’s experiments established tunneling as a probe of the superconducting energy gap.',
+  },
+  josephson: {
+    identity: 'United Kingdom · University of Cambridge',
+    achievement: 'Predicted supercurrent through a superconducting tunnel junction, including the DC and AC Josephson effects.',
+    career: 'As a graduate researcher at Cambridge, Josephson analyzed two superconductors separated by a thin barrier. He predicted a supercurrent at zero applied voltage and an alternating current under an applied voltage; these effects were subsequently observed.',
+    awardReason: 'Josephson received one half of the 1973 prize for theoretical predictions of the properties of a supercurrent through a tunnel barrier. Esaki and Giaever each received one quarter for separate experimental tunneling discoveries.',
+    superconductivityLink: 'The Josephson effects underpin superconducting interference devices, precision voltage standards and superconducting electronics.',
+  },
+  bednorz: {
+    identity: 'Born in West Germany · IBM Zurich Research Laboratory, Switzerland, at the time of the award',
+    identityNote: 'Birthplace and affiliation are stated separately; neither alone establishes nationality.',
+    achievement: 'Discovered high-temperature superconductivity in lanthanum-barium-copper oxide ceramics with Müller.',
+    career: 'Bednorz began studying chemistry at Münster in 1968, then moved into crystallography. He began doctoral research at ETH Zurich in 1977, joined IBM in 1982 and started searching for superconducting oxides with Müller in 1983. Their breakthrough came in 1986.',
+    awardReason: 'The 1987 prize recognized the important breakthrough in the discovery of superconductivity in ceramic materials.',
+    superconductivityLink: 'The cuprate discovery initiated a new phase of high-temperature superconductivity research.',
+  },
+  mueller: {
+    identity: 'Switzerland · IBM Zurich Research Laboratory',
+    achievement: 'Discovered high-temperature superconductivity in oxide ceramics with Bednorz.',
+    career: 'Müller studied physics at ETH Zurich and spent much of his research career at IBM Zurich. His investigations of oxide materials and collaboration with Bednorz led to superconductivity in the lanthanum-barium-copper oxide system.',
+    awardReason: 'The 1987 prize was shared with Bednorz for their breakthrough in superconductivity in ceramic materials.',
+    superconductivityLink: 'The initial material showed superconducting behavior near 35 K. It stimulated cuprate research but did not itself reach liquid-nitrogen temperatures, around 77 K.',
+  },
+  abrikosov: {
+    identity: 'United States and Russia · Argonne National Laboratory',
+    identityNote: 'The 2003 Nobel press release explicitly lists American and Russian citizenship; his birthplace was then in the Soviet Union.',
+    achievement: 'Developed the theory of type-II superconductors, in which magnetic flux enters as quantized vortices.',
+    career: 'Abrikosov trained at Moscow State University, worked at the Landau Institute and later joined Argonne. Using Ginzburg–Landau theory, he described the mixed state of type-II superconductors and the vortex lattice.',
+    awardReason: 'Abrikosov, Ginzburg and Leggett each received one third of the 2003 prize for pioneering contributions to the theory of superconductors and superfluids. Abrikosov’s central contribution concerned type-II superconductivity.',
+    superconductivityLink: 'The vortex theory explains the coexistence of magnetic flux and superconductivity in the mixed state.',
+  },
+  ginzburg: {
+    identity: 'Russia · P. N. Lebedev Physical Institute',
+    achievement: 'Developed the phenomenological Ginzburg–Landau theory of superconductivity with Landau.',
+    career: 'Ginzburg studied at Moscow State University and worked for many years at the Lebedev Institute. His interests included electromagnetic-wave propagation, astrophysics and condensed matter. In 1950 he and Landau introduced a macroscopic order-parameter theory of superconductivity.',
+    awardReason: 'Ginzburg, Abrikosov and Leggett each received one third of the 2003 prize for pioneering contributions to the theory of superconductors and superfluids.',
+    superconductivityLink: 'Ginzburg–Landau theory describes superconductivity with a macroscopic order parameter and provides the foundation for the theory of type-II superconductors.',
+  },
+  leggett: {
+    identity: 'United Kingdom and United States · University of Illinois Urbana-Champaign',
+    identityNote: 'His biography records US citizenship in 2002 while retaining UK citizenship; both are listed in the 2003 press release.',
+    achievement: 'Explained the macroscopic quantum properties of superfluid helium-3, including its paired states and order-parameter structure.',
+    career: 'Leggett trained at Oxford and worked at Oxford, Sussex and Illinois. He developed the theory of the distinct paired phases of superfluid helium-3 and investigated symmetry and coherence in macroscopic quantum systems.',
+    awardReason: 'Leggett, Abrikosov and Ginzburg each received one third of the 2003 prize. Leggett’s recognized contribution was the theory of superfluid helium-3, not a superconductivity discovery.',
+    superconductivityLink: 'He appears in this exhibition as part of the shared 2003 milestone in superconductivity and superfluidity. His prize-winning superfluid work is distinguished from superconductivity.',
+  },
+}

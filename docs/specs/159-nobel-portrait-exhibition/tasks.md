@@ -57,3 +57,11 @@ T004、T006–T010 的运行证据见 [validation.md](validation.md) 与真实�
 - [x] T016 验证密集相位、循环边界和真实浏览器不遮挡，保留拖动/详情/移动端回归证据；对应 SC-009/010。
 
 第三轮证据见 `assets/validation-v3/browser.json`、截图及 `NobelDemo.test.tsx`。六种宽度、0.5度步长的双圈数学检查和三种视口各121个实际拖动位置通过；4项Vitest、TypeScript、独立Demo构建通过。
+
+## 正式接入及获奖关系
+
+- [x] T017 核对官方授奖理由与份额，增加个人成果后的共同获奖说明和详情份额（FR-014/015）。
+- [x] T018 抽取共用功能、接入 `/news` 和 `/nobel/:personId`，作用域化样式并支持中英文（FR-016）。
+- [x] T019 验证正式页面、深链接、共享关系、样式隔离及既有交互；回写Overview和Issue。
+
+T017–T019 已完成当前原照版本的源码接入与本地验证，证据见 `integration-validation.md`、`assets/award-facts.json` 和 `assets/production-validation/`。原照外部许可核查、最终漫画与全面科学史审校不因此完成；未部署云端或推送。

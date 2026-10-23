@@ -1,0 +1,8 @@
+{
+  "base": "http://127.0.0.1:4174",
+  "build": "Vite production build",
+  "detailRoutes": 12,
+  "photos": "12 images decoded from /assets hashed URLs",
+  "directReload": true,
+  "errors": []
+}

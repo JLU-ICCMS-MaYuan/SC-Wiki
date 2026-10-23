@@ -1,0 +1,16 @@
+{
+  "id": "IMG-006",
+  "upload_order": 6,
+  "original_name": "codex-clipboard-b308c113-5c33-40bb-b037-8ed7d020bacc.png",
+  "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-006-coaward.png",
+  "status": "local_verified",
+  "user_context": "江崎玲于奈因为什么超导贡献拿诺奖？为什么你写的是发现半导体里面的电子隧道效应。这和超导有关系吗？如果有几个人是同一年共享一份诺奖，我希望你能在我提到的红框的位置写清楚他和 xxxx 同年贡献诺奖。我的话可能不够专业，凝练，学术。你帮我按这个意思做一下。",
+  "related": [
+    "FR-014",
+    "FR-015"
+  ],
+  "sha256": "7446de052d4421b2d8e0d4b8369dc765eea4c86bb95f0f73c708240f9c4fdc24",
+  "media_type": "image/png",
+  "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-006-coaward.png\n  pixelWidth: 686\n  pixelHeight: 1200\n",
+  "verification": "复制原始字节，复查哈希并用sips解码；标框为视觉材料"
+}

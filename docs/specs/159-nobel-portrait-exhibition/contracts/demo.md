@@ -24,3 +24,12 @@
 - 主位比例1.10、两侧递减至0.42附近；照片侧向转角渐变至约48度，文字保持正向。
 - 中心两个人物的相位插值确定原点，主位交接不跳动；循环折返点位于不可见范围。
 - 此为可读性优先的弧形画廊，不承诺严格物理圆柱投影；白底、原照及既有交互保留。
+
+## 正式页面接入（取代仅Demo边界）
+
+- `/news#nobel-milestones` 嵌入同一 `features/nobel/NobelExperience.tsx` 展陈，不增加重复站点品牌。
+- 正式详情为 `/nobel/:personId`，支持直接打开/刷新；未知ID给出未找到提示和返回展陈入口。
+- Demo保留 `/nobel-demo.html?person=<id>&lang=zh|en`，复用正式组件/数据/布局。
+- 正式页面通过LanguageContext切换中英文，Demo用查询参数；每个肖像成果后新增共同获奖句，详情显示官方份额与来源。
+- 原照片由Vite构建至 `/assets`，匹配既有Nginx静态服务和Python的assets挂载；不增加后端接口。
+- 样式局限于nobel类名及组件根内，不覆盖body、全局按钮/链接或页面背景。

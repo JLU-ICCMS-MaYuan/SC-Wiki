@@ -85,3 +85,11 @@ RSS 只能补回当前订阅窗口；已移除的历史内容无法保证找回�
 [专项验收](../specs/153-news-classification-labels/quickstart.md) 包含真实模型抽样、跨语言链路、浏览器检查及未部署边界。
 [Feature #63](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/63) 与 [Spec](../specs/63-daily-superconductivity-news/spec.md)；[Feature #83](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/83) 完成 News 品牌与三列独立分页；[Bug #86](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/86) 补齐 Compose 中的 scheduler 和 worker；[Feature #88](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/88) 扩展联网发现与过滤；[Maintenance #92](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/92) 跟踪历史 Zenodo 误收清理。
 未完成协作事项以该 Issue 为准；本页不维护第二套任务状态。
+
+## 诺贝尔奖人物展陈
+
+`/news` 的诺奖时间线已替换为12位获奖者的原照弧形展陈：白色背景、按显示宽度保留间隔、主位放大、侧位转斜，姓名与说明随人物移动。支持拖动改方向、悬停暂停、人物索引、键盘和减少动态；点击新标签页进入 `/nobel/:personId`。详情可直接打开和刷新，未知人物显示明确提示。
+
+每张肖像的个人成果后列出同年度共同获奖者，单独获奖者单独说明；详情列明授奖份额及官方引用。特别区分1973年江崎的半导体隧穿、Giaever的超导体电子隧穿、Josephson的超电流理论预言，份额分别为1/4、1/4、1/2；共同获奖不等于合作完成同一成果。
+
+界面与资料支持中英文，Demo和正式页面复用 `frontend/src/features/nobel/` 的组件、数据、布局和原照。图片随前端构建输出至 `/assets`；无新增业务数据库或API。当前仍为原照版本，最终漫画、图片外部许可与全面史实审校未完成。本地源码验证不代表云端部署，见 [#159接入验证](../specs/159-nobel-portrait-exhibition/integration-validation.md)。

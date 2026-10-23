@@ -1,0 +1,110 @@
+[
+  {
+    "year": 1913,
+    "id": "onnes",
+    "url": "https://www.nobelprize.org/prizes/physics/1913/onnes/facts/",
+    "http_status": 200,
+    "share": "1/1",
+    "motivation": "“for his investigations on the properties of matter at low temperatures which led, inter alia, to the production of liquid helium”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 1972,
+    "id": "bardeen",
+    "url": "https://www.nobelprize.org/prizes/physics/1972/bardeen/facts/",
+    "http_status": 200,
+    "share": "1/3",
+    "motivation": "“for their jointly developed theory of superconductivity, usually called the BCS-theory”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 1972,
+    "id": "cooper",
+    "url": "https://www.nobelprize.org/prizes/physics/1972/cooper/facts/",
+    "http_status": 200,
+    "share": "1/3",
+    "motivation": "“for their jointly developed theory of superconductivity, usually called the BCS-theory”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 1972,
+    "id": "schrieffer",
+    "url": "https://www.nobelprize.org/prizes/physics/1972/schrieffer/facts/",
+    "http_status": 200,
+    "share": "1/3",
+    "motivation": "“for their jointly developed theory of superconductivity, usually called the BCS-theory”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 1973,
+    "id": "esaki",
+    "url": "https://www.nobelprize.org/prizes/physics/1973/esaki/facts/",
+    "http_status": 200,
+    "share": "1/4",
+    "motivation": "“for their experimental discoveries regarding tunneling phenomena in semiconductors and superconductors, respectively”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 1973,
+    "id": "giaever",
+    "url": "https://www.nobelprize.org/prizes/physics/1973/giaever/facts/",
+    "http_status": 200,
+    "share": "1/4",
+    "motivation": "“for their experimental discoveries regarding tunneling phenomena in semiconductors and superconductors, respectively”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 1973,
+    "id": "josephson",
+    "url": "https://www.nobelprize.org/prizes/physics/1973/josephson/facts/",
+    "http_status": 200,
+    "share": "1/2",
+    "motivation": "“for his theoretical predictions of the properties of a supercurrent through a tunnel barrier, in particular those phenomena which are generally known as the Josephson effects”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 1987,
+    "id": "bednorz",
+    "url": "https://www.nobelprize.org/prizes/physics/1987/bednorz/facts/",
+    "http_status": 200,
+    "share": "1/2",
+    "motivation": "“for their important break-through in the discovery of superconductivity in ceramic materials”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 1987,
+    "id": "muller",
+    "url": "https://www.nobelprize.org/prizes/physics/1987/muller/facts/",
+    "http_status": 200,
+    "share": "1/2",
+    "motivation": "“for their important break-through in the discovery of superconductivity in ceramic materials”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 2003,
+    "id": "abrikosov",
+    "url": "https://www.nobelprize.org/prizes/physics/2003/abrikosov/facts/",
+    "http_status": 200,
+    "share": "1/3",
+    "motivation": "“for pioneering contributions to the theory of superconductors and superfluids”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 2003,
+    "id": "ginzburg",
+    "url": "https://www.nobelprize.org/prizes/physics/2003/ginzburg/facts/",
+    "http_status": 200,
+    "share": "1/3",
+    "motivation": "“for pioneering contributions to the theory of superconductors and superfluids”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  },
+  {
+    "year": 2003,
+    "id": "leggett",
+    "url": "https://www.nobelprize.org/prizes/physics/2003/leggett/facts/",
+    "http_status": 200,
+    "share": "1/3",
+    "motivation": "“for pioneering contributions to the theory of superconductors and superfluids”",
+    "verified": "2026-10-23 Asia/Shanghai"
+  }
+]

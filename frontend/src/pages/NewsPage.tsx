@@ -1,13 +1,14 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Box, Typography, Paper, Button } from '@mui/material'
+import { Box, Typography, Button } from '@mui/material'
 import NewsFeed, { ManualNews } from '../components/NewsFeed'
 import { useLanguage } from '../context/LanguageContext'
+import { NobelGallery, NobelSurface } from '../features/nobel/NobelExperience'
 
 
 const NewsPage: React.FC = () => {
   const navigate = useNavigate()
-  const { t, dict } = useLanguage()
+  const { t, lang } = useLanguage()
 
   return (
     <Box>
@@ -33,22 +34,8 @@ const NewsPage: React.FC = () => {
       <NewsFeed />
       <ManualNews />
 
-      {/* Nobel Milestones */}
-      <Typography variant="overline" sx={{ mb: 2, display: 'block' }}>{t('news.nobelMilestones')}</Typography>
-      <Paper sx={{ p: 3, borderRadius: 4, mb: 6 }}>
-        <Box sx={{ display: 'grid', gap: 2 }}>
-          {dict.news.nobelMilestoneItems.map((item) => (
-            <Box key={item.year} sx={{ display: 'flex', gap: 2, alignItems: 'flex-start', pb: 3, borderBottom: '1px solid', borderColor: 'divider', '&:last-child': { borderBottom: 0, pb: 0 } }}>
-              <Typography variant="h3" sx={{ color: 'primary.main', minWidth: 56, fontWeight: 800 }}>{item.year}</Typography>
-              <Box sx={{ flex: 1 }}>
-                <Typography fontWeight={700} fontSize={16}>{item.name}</Typography>
-                <Typography variant="subtitle2" color="primary.main" sx={{ mb: 0.5 }}>{item.title}</Typography>
-                <Typography variant="body2" sx={{ color: 'text.secondary', lineHeight: 1.8 }}>{item.feat}</Typography>
-              </Box>
-            </Box>
-          ))}
-        </Box>
-      </Paper>
+      {/* 与独立Demo共用展陈、数据和图片，链接使用正式人物路由。 */}
+      <NobelSurface><NobelGallery embedded lang={lang} /></NobelSurface>
 
     </Box>
   )

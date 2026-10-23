@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import NobelDemo from './NobelDemo'
-import { projectGallery } from './projection'
+import { projectGallery } from '../../features/nobel/projection'
 
 describe('弧形展陈的布局不变量', () => {
   it('两圈密集相位内，所有相邻容器始终有足够间隔', () => {
