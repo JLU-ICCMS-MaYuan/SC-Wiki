@@ -22,6 +22,22 @@ beforeEach(() => {
 afterEach(cleanup)
 
 describe('正式用户中心', () => {
+  it.each([null, undefined, []])('研究方向为 %j 时可展示、取消编辑及保存', async interests => {
+    const emptyProfile = { ...profile, research_interests: interests }
+    mocked.get.mockImplementation(async (url: string) => (url === '/api/account/profile' ? emptyProfile : url.includes('papers') ? { items: [], total: 0 } : []) as never)
+    mocked.patch.mockResolvedValue(emptyProfile)
+    show(<AccountPage />)
+    await screen.findByRole('button', { name: '修改资料' })
+    expect(screen.getAllByText('暂未填写').length).toBeGreaterThan(0)
+    fireEvent.click(screen.getByRole('button', { name: '修改资料' }))
+    expect(screen.getByLabelText('研究方向')).toHaveValue('')
+    fireEvent.click(screen.getByRole('button', { name: '取消' }))
+    fireEvent.click(screen.getByRole('button', { name: '修改资料' }))
+    fireEvent.click(screen.getByRole('button', { name: '保存资料' }))
+    await screen.findByText('个人资料已保存')
+    expect(mocked.patch).toHaveBeenCalledWith('/api/account/profile', expect.objectContaining({ research_interests: [] }))
+    expect(screen.getByRole('button', { name: '修改资料' })).toBeInTheDocument()
+  })
   it('默认只读，取消还原，保存失败保留输入，成功后回到只读', async () => {
     show(<AccountPage />)
     await screen.findByText('测试机构')

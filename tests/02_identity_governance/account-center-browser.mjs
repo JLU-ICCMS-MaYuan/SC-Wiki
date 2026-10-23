@@ -12,7 +12,7 @@ try {
   for (const role of ['user', 'admin', 'superadmin']) {
     const context = await browser.newContext({ viewport: { width: 1440, height: 1100 }, deviceScaleFactor: 1 })
     const user = { id: 7, username: 'researcher', email: 'researcher@example.test', role, is_admin: role !== 'user', is_superadmin: role === 'superadmin', is_approved: true, is_email_verified: true, account_status: 'active', username_change_allowed: false }
-    let profile = { ...user, real_name: '研究者', affiliation: '吉林大学 · 物理学院', orcid: '', research_interests: ['高压超导', '第一性原理计算'], avatar_url: null }
+    let profile = { ...user, real_name: '研究者', affiliation: '吉林大学 · 物理学院', orcid: '', research_interests: role === 'user' ? null : ['高压超导', '第一性原理计算'], avatar_url: null }
     await context.addInitScript(({ user }) => { if (location.origin !== 'http://127.0.0.1:5173') return; localStorage.setItem('auth_token', 'isolated-browser-fixture'); localStorage.setItem('auth_user', JSON.stringify(user)); localStorage.setItem('sc-wiki.language', 'zh') }, { user })
     await context.route('**/api/**', async route => {
       const request = route.request(), url = new URL(request.url()), method = request.method()
@@ -20,6 +20,7 @@ try {
       calls.push({ role, path, method })
       let body = []
       if (path === '/api/auth/me') body = { user }
+      else if (path === '/api/news/feed') body = { items: [], total: 0, sources: [] }
       else if (path === '/api/account/profile') {
         if (method === 'PATCH') profile = { ...profile, ...request.postDataJSON() }
         body = profile
@@ -39,7 +40,9 @@ try {
     })
     context.on('page', tab => tab.on('pageerror', error => errors.push(error.message)))
     const page = await context.newPage()
-    await page.goto('http://127.0.0.1:5173/account')
+    await page.goto('http://127.0.0.1:5173/news')
+    await page.getByRole('button', { name: { user: '用户', admin: '管理员', superadmin: '超级管理员' }[role], exact: true }).click()
+    await page.waitForURL('**/account')
     await page.getByRole('button', { name: '修改资料', exact: true }).waitFor()
     assert.equal(await page.getByRole('textbox', { name: '真实姓名', exact: true }).count(), 0)
     await page.getByRole('button', { name: '修改资料', exact: true }).click()

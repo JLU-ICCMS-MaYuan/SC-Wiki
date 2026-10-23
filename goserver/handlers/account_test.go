@@ -1,6 +1,30 @@
 package handlers
 
-import "testing"
+import (
+	"encoding/json"
+	"scwiki/server/models"
+	"testing"
+)
+
+func TestAccountProfileEmptyInterestsAreArray(t *testing.T) {
+	for _, raw := range []json.RawMessage{nil, json.RawMessage("null"), json.RawMessage("[]"), json.RawMessage(`["超导"]`)} {
+		encoded, err := json.Marshal(accountProfilePayload(models.User{ResearchInterests: raw}))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var payload map[string]any
+		if err := json.Unmarshal(encoded, &payload); err != nil {
+			t.Fatal(err)
+		}
+		interests, ok := payload["research_interests"].([]any)
+		if !ok {
+			t.Fatalf("input=%s research_interests must be an array, got %#v", raw, payload["research_interests"])
+		}
+		if string(raw) == `["超导"]` && (len(interests) != 1 || interests[0] != "超导") {
+			t.Fatal("existing interests changed")
+		}
+	}
+}
 
 func TestNormalizeORCID(t *testing.T) {
 	for _, value := range []string{"0000-0002-1825-0097", "0000-0002-9079-593X"} {

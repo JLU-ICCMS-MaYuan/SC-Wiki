@@ -28,6 +28,10 @@ func accountProfilePayload(user models.User) gin.H {
 	if len(user.ResearchInterests) > 0 {
 		_ = json.Unmarshal(user.ResearchInterests, &interests)
 	}
+	// SQL NULL 和 JSON null 均表示未填写；接口始终返回数组，不修改存储内容。
+	if interests == nil {
+		interests = []string{}
+	}
 	return gin.H{
 		"id": user.ID, "email": user.Email, "username": user.Username,
 		"username_change_allowed": user.UsernameChangeAllowed,

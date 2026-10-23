@@ -23,7 +23,7 @@ interface Profile {
   real_name: string
   affiliation: string | null
   orcid: string | null
-  research_interests: string[]
+  research_interests: string[] | null
   avatar_url: string | null
   role: 'user' | 'admin' | 'superadmin'
   is_email_verified: boolean
@@ -95,6 +95,8 @@ const AccountPage: React.FC = () => {
   if (initialLoading) return <Box sx={{ minHeight: '55vh', display: 'grid', placeItems: 'center' }}><CircularProgress /></Box>
   if (!profile || !user) return <Alert severity="error">{message?.text || t('account.profileLoadFailed')}</Alert>
 
+  const profileInterests = profile.research_interests ?? []
+
   const saveProfile = () => {
     if (realName && !profile.real_name && !window.confirm(t('account.realNameConfirm'))) return
     void run(async () => {
@@ -145,7 +147,7 @@ const AccountPage: React.FC = () => {
             <TextField className="account-research" label={t('account.researchInterests')} value={interests} onChange={e => setInterests(e.target.value)} disabled={busy} helperText={t('account.interestsHelper')} />
           </> : <>
             {[[t('account.realName'), profile.real_name], [t('account.affiliation'), profile.affiliation], ['ORCID', profile.orcid]].map(([label, value]) => <div key={label}><span className="account-field-label">{label}</span><Typography sx={{ overflowWrap: 'anywhere' }}>{value || t('account.notProvided')}</Typography></div>)}
-            <div className="account-research"><span className="account-field-label">{t('account.researchInterests')}</span><Stack direction="row" gap={1} flexWrap="wrap">{profile.research_interests.length ? profile.research_interests.map(item => <Chip size="small" key={item} label={item} />) : <Typography color="text.secondary">{t('account.notProvided')}</Typography>}</Stack></div>
+            <div className="account-research"><span className="account-field-label">{t('account.researchInterests')}</span><Stack direction="row" gap={1} flexWrap="wrap">{profileInterests.length ? profileInterests.map(item => <Chip size="small" key={item} label={item} />) : <Typography color="text.secondary">{t('account.notProvided')}</Typography>}</Stack></div>
           </>}
         </div>
         {editing && <Stack direction="row" gap={1} sx={{ px: 3, pb: 2 }} flexWrap="wrap"><Button component="label" disabled={busy} startIcon={<PhotoCamera />}>{t('account.uploadAvatar')}<input hidden type="file" disabled={busy} accept="image/jpeg,image/png,image/webp" onChange={event => uploadAvatar(event.target.files?.[0])} /></Button>{profile.avatar_url && <Button color="error" disabled={busy} startIcon={<DeleteOutline />} onClick={() => void run(async () => { await api.del('/api/account/avatar'); setProfile({ ...profile, avatar_url: null }); replaceUser({ ...user, avatar_url: null }) }, t('account.avatarDeleted'))}>{t('common.delete')}</Button>}</Stack>}
