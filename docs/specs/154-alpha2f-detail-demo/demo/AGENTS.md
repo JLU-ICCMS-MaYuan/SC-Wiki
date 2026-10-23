@@ -7,3 +7,7 @@
 应用界面在 src/ 中。保留 .openai/hosting.json、worker/index.js、scripts/prepare-sites-build.mjs、tests/sites-worker.test.mjs 的运行约定。部署前应构建并执行托管测试，但本次未要求部署。
 
 用户请求优先。仓库根 AGENTS.md 的 mayuan 分支检查、只提交本任务、简体中文及禁止自动推送规则继续适用。
+
+## 第二轮交互约定
+
+单图三模式保持来源轴向；DOS 支持全部或单分波。提取频率必须从零开始，不得以伪造补零满足。比较仅显示绝对偏差，λ 不标单位，点表差值也取绝对值。DOS 核验全部分波积分与 3N，缺依据时不可计算。
