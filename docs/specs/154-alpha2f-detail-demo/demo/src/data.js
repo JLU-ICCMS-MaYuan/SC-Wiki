@@ -16,7 +16,7 @@ export function area(data, fields) {
   return data.slice(1).reduce((sum, row, i) => sum + (row.f - data[i].f) * fields.reduce((total, key) => total + row[key] + data[i][key], 0) / 2, 0);
 }
 // 先构造已知 3N 的合成来源谱，再施加提取偏差；不事后把提取结果缩放到 3N。
-export const dosModel = { atoms: 27, target: 81, tolerance: 0.01, unit: 'states/(THz·cell)' };
+export const dosModel = { atoms: 27, target: 81, unit: 'states/(THz·cell)' };
 const sourceScale = dosModel.target / area(samples, ['d0', 'd1', 'd2']);
 export const rows = samples.map(row => {
   const d0 = row.d0 * sourceScale, d1 = row.d1 * sourceScale, d2 = row.d2 * sourceScale;

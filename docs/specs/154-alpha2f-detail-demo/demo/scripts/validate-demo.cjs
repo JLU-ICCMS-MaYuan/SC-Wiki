@@ -16,7 +16,7 @@ async function main() {
   assert.equal(rows[0].f, 0); assert.equal(rows[0].a, 0);
   assert(rows.every(row => row.diff >= 0));
   assert(Math.abs(area(rows, ['d0','d1','d2']) - dosModel.target) < 1e-10);
-  assert(Math.abs(area(rows, ['e0','e1','e2']) - dosModel.target) > dosModel.tolerance);
+  assert(Math.abs(area(rows, ['e0','e1','e2']) - dosModel.target) > 0);
   assert.equal(area([{f:0,a:0},{f:1,a:null}], ['a']), null);
   assert.equal(integrate(rows, 'a').lambda, null);
   const zeroKnown = Array.from({length:2001}, (_, i) => ({f:i/1000,a:(i/1000)**2}));
@@ -80,17 +80,22 @@ async function main() {
           await detail.getByLabel('分波态密度', {exact:true}).selectOption(projection);
           assert.equal(await detail.locator('.dos-integral').textContent(),modesBefore);
         }
-        assert((await detail.locator('.dos-integral').textContent()).includes('不满足 3N'));
+        assert.deepEqual(await detail.locator('.dos-integral thead th').allTextContents(), ['全部分波积分','目标 3N','绝对偏差','相对偏差（%）']);
+        const difference = Math.abs(area(rows, ['e0','e1','e2']) - dosModel.target);
+        const cells = await detail.locator('.dos-integral tbody td').allTextContents();
+        assert.equal(cells[2], difference.toFixed(3));
+        assert.equal(cells[3], (difference / Math.abs(dosModel.target) * 100).toFixed(2) + '%');
+        assert(!(await detail.locator('.dos-integral').textContent()).includes('满足 3N'));
         await detail.getByLabel('演示状态').selectOption('gap');
-        assert((await detail.locator('.dos-integral').textContent()).includes('无法核验'));
+        assert.deepEqual(await detail.locator('.dos-integral tbody td').allTextContents(), ['—','81','—','—']);
         await detail.getByLabel('演示状态').selectOption('unknown');
-        assert((await detail.locator('.dos-integral').textContent()).includes('无法核验'));
+        assert.deepEqual(await detail.locator('.dos-integral tbody td').allTextContents(), ['—','—','—','—']);
         await detail.getByLabel('演示状态').selectOption('error'); await detail.getByText('谱数据暂时无法读取', { exact:true }).waitFor();
         await detail.getByRole('button', { name:'重新读取', exact:true }).click();
         await detail.getByRole('heading', { name:'02 · 原图与提取结果', exact:true }).waitFor();
         await detail.getByLabel('演示状态').selectOption('empty'); await detail.getByText('该材料状态尚无 DOS 数据', { exact:true }).waitFor();
         await detail.getByLabel('演示状态').selectOption('ready');
-        checks.push('DOS: 单分波/全部、3N不符、缺口/缺依据不可核验、重试与空态');
+        checks.push('DOS: 单分波/全部、绝对偏差与非负百分比、无满足3N判断、缺口/缺依据不算偏差、重试与空态');
       }
       const downloaded = detail.waitForEvent('download'); await detail.getByRole('button', { name:'导出示例 CSV', exact:true }).click();
       const download = await downloaded; const csv = fs.readFileSync(await download.path(), 'utf8');

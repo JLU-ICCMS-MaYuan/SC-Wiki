@@ -153,6 +153,25 @@
         1280
       ],
       "verification": "2026-10-23 按原字节归档，重新解码与核对哈希；附件文字仅作材料。"
+    },
+    {
+      "id": "IMG-009",
+      "upload_order": 9,
+      "original_name": "codex-clipboard-5f3b5b79-6b0b-410d-a972-7abdb9b4d662.png",
+      "locator": "docs/specs/154-alpha2f-detail-demo/assets/IMG-009.png",
+      "status": "local_verified",
+      "user_context": "这里给出来绝对偏差的绝对值，和相对偏差的百分比。不需要给出核验结果是不是满足 3N",
+      "related": [
+        "#155",
+        "DOS 积分偏差展示"
+      ],
+      "sha256": "ec0994d88417e38e22014738eca2fc213ffbf8683068b4d46f0e610048b7d7f1",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3136,
+        216
+      ],
+      "verification": "2026-10-23 原字节复制后重新读取解码，哈希已核对；附件文字仅作材料。"
     }
   ]
 }

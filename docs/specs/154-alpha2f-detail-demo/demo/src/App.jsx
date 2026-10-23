@@ -81,10 +81,12 @@ function DosQuality({ data, unknown }) {
   const modes = area(data, ['e0', 'e1', 'e2']);
   const valid = !unknown && modes !== null;
   const difference = valid ? Math.abs(modes - dosModel.target) : null;
-  return <section><div className="section-heading"><div><h2>03 · 频段与数据完整性</h2><p>对全部分波在完整频段求和积分，核验是否满足 3N；不随图中分波选择变化。</p></div></div>
+  const relativeDifference = valid && dosModel.target !== 0 ? difference / Math.abs(dosModel.target) * 100 : null;
+  return <section><div className="section-heading"><div><h2>03 · 频段与数据完整性</h2><p>对全部分波在完整频段求和积分，展示与目标 3N 的偏差；不随图中分波选择变化。</p></div></div>
     <div className="metrics"><div><span>提取与积分频率范围</span><strong>0.00–70.00 <small>THz</small></strong><small>DOS：{unknown ? '单位待核对' : dosModel.unit}</small></div><div><span>原胞原子数 N</span><strong>{unknown ? '待确认' : dosModel.atoms}</strong><small>合成示例设定，非本材料结构判定</small></div><div><span>目标振动模式数 3N</span><strong>{unknown ? '—' : dosModel.target}</strong><small>个振动模式 / 原胞</small></div></div>
-    <div className="table-wrap"><table className="dos-integral"><thead><tr>{['全部分波积分','目标 3N','绝对偏差','核验结果'].map(text => <th key={text}>{text}</th>)}</tr></thead><tbody><tr><td className="accent">{valid ? fmt(modes) : '—'}</td><td>{unknown ? '—' : dosModel.target}</td><td>{fmt(difference)}</td><td>{!valid ? '无法核验' : difference <= dosModel.tolerance ? '满足 3N' : '不满足 3N'}</td></tr></tbody></table></div>
-    <p className={!valid ? 'notice slim' : 'footnote'}>{unknown ? '原胞原子数、绝对单位或完整投影依据缺失，无法判断是否为 3N。' : modes === null ? 'H 分波在 32.50–34.00 THz 缺失，不能给出全部积分；缺口不补零。' : '合成来源谱预先设定为 81 个模式；提取谱含偏差，未经事后归一化。演示核验容差为 0.01 个模式。'}</p>
+    <div className="table-wrap"><table className="dos-integral"><thead><tr>{['全部分波积分','目标 3N','绝对偏差','相对偏差（%）'].map(text => <th key={text}>{text}</th>)}</tr></thead><tbody><tr><td className="accent">{valid ? fmt(modes) : '—'}</td><td>{unknown ? '—' : dosModel.target}</td><td>{fmt(difference)}</td><td>{relativeDifference === null ? '—' : fmt(relativeDifference, 2) + '%'}</td></tr></tbody></table></div>
+    <p className={!valid ? 'notice slim' : 'footnote'}>{unknown ? '原胞原子数、绝对单位或完整投影依据缺失，暂不能计算偏差。' : modes === null ? 'H 分波在 32.50–34.00 THz 缺失，不能给出全部积分；缺口不补零。' : '合成来源谱预先设定为 81 个模式；提取谱含偏差，未经事后归一化。'}</p>
+    <p className="footnote">绝对偏差 = |全部分波积分 − 3N|；相对偏差 = 绝对偏差 / |3N| × 100%。目标为零时不计算百分比。</p>
     <p className="footnote">N 指原胞内原子总数。仅完整、互不重复且同一绝对尺度的分波可相加；真实图未覆盖到零频时标为提取不完整，不伪造零频数据。</p>
   </section>;
 }
