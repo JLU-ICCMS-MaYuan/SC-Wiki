@@ -1,0 +1,16 @@
+{
+  "sqliteGoAPI": true,
+  "reportInNewsOnly": true,
+  "journalColumnClean": true,
+  "originalLinkCount": 1,
+  "targetURL": "https://phys.org/news/2026-10-hidden-rivalry-quantum-states-heart.html",
+  "externalAccess": {
+    "verified": false,
+    "observations": [
+      "初次HTTP探测200",
+      "后续浏览器400或连接验证页；常规浏览器等待30秒仍未取得正文"
+    ],
+    "userBrowserConfirmation": "pending"
+  },
+  "errors": []
+}

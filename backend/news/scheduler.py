@@ -32,7 +32,7 @@ def due(state, cutoff, now):
         return True
     if state.status == "running" and state.last_started_at:
         return now - parse_time(state.last_started_at) > timedelta(seconds=JOB_TIMEOUT + 100)
-    if state.status == "failed" and state.last_finished_at:
+    if state.status in {"failed", "partial"} and state.last_finished_at:
         return now - parse_time(state.last_finished_at) >= timedelta(hours=1)
     if state.last_success_at and parse_time(state.last_success_at) >= cutoff:
         return False

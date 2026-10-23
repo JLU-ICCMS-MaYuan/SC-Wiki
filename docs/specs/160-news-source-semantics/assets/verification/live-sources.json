@@ -1,0 +1,328 @@
+{
+  "mode": "只读公开源；不写业务库；无Key；每个查询最多4页",
+  "checked_at": "2026-10-23T08:44:13.001036+00:00",
+  "sources": [
+    {
+      "source": "acs",
+      "status": "complete",
+      "error": "",
+      "endpoint_errors": [],
+      "fetched": 6,
+      "accepted_records": 4,
+      "unique_items": 4,
+      "sample": [
+        {
+          "title": "Resist-Free Shadow Deposition Using Silicon Trenches for Josephson Junctions in Superconducting Qubits",
+          "doi": "10.1021/acs.nanolett.6c02734",
+          "url": "https://pubs.acs.org/nalefd/article/doi/10.1021/acs.nanolett.6c02734/5456613/Resist-Free-Shadow-Deposition-Using-Silicon",
+          "published_at": "2026-10-22T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        },
+        {
+          "title": "Experimental Signature of Transient Symmetry Breaking in a Cavity Dirty-Limit Superconductor",
+          "doi": "10.1021/acs.nanolett.6c03749",
+          "url": "https://pubs.acs.org/nalefd/article/26/41/14303/5448525/Experimental-Signature-of-Transient-Symmetry",
+          "published_at": "2026-10-10T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        },
+        {
+          "title": "Crystal Chemistry of a Nickelate Superconductor: La/Pr Distribution, Oxygen Stoichiometry, and High-Pressure Structural Evolution in La2PrNi2O7",
+          "doi": "10.1021/acs.inorgchem.6c03000",
+          "url": "https://pubs.acs.org/inocaj/article/65/41/24175/5447187/Crystal-Chemistry-of-a-Nickelate-Superconductor-La",
+          "published_at": "2026-10-08T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        },
+        {
+          "title": "Bulk 1T-NbSe2 Superconductor Stabilized by the Doped Ti-3d0 Electronic Configuration",
+          "doi": "10.1021/jacs.6c14384",
+          "url": "https://pubs.acs.org/jacsat/article/148/39/42573/5438223/Bulk-1T-NbSe2-Superconductor-Stabilized-by-the",
+          "published_at": "2026-09-25T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        }
+      ]
+    },
+    {
+      "source": "aps",
+      "status": "complete",
+      "error": "",
+      "endpoint_errors": [],
+      "fetched": 459,
+      "accepted_records": 161,
+      "unique_items": 149,
+      "sample": [
+        {
+          "title": "Multiterminal Quasiballistic Josephson Effect in Monocrystalline Gold",
+          "doi": "10.1103/rp26-lscg",
+          "url": "https://link.aps.org/doi/10.1103/rp26-lscg",
+          "published_at": "2026-10-14T10:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "aps"
+        },
+        {
+          "title": "Kink-Boundary-Induced Polarity Revealed by Nonreciprocal Charge Transport in ${\\mathrm{FeTe}}_{0.7}{\\mathrm{Se}}_{0.3}$ Superconductor",
+          "doi": "10.1103/73y1-qmwg",
+          "url": "https://link.aps.org/doi/10.1103/73y1-qmwg",
+          "published_at": "2026-10-09T10:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "aps"
+        },
+        {
+          "title": "Energy relaxation in superconducting single-crystal TiN films probed by flux-flow instability",
+          "doi": "10.1103/28sl-jtv2",
+          "url": "https://link.aps.org/doi/10.1103/28sl-jtv2",
+          "published_at": "2026-10-21T10:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "aps"
+        },
+        {
+          "title": "Crystal structure effects on vortex dynamics in superconducting ${\\mathrm{MgB}}_{2}$ thin films",
+          "doi": "10.1103/ghfm-2tzs",
+          "url": "https://link.aps.org/doi/10.1103/ghfm-2tzs",
+          "published_at": "2026-10-21T10:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "aps"
+        }
+      ]
+    },
+    {
+      "source": "nature",
+      "status": "complete",
+      "error": "",
+      "endpoint_errors": [],
+      "fetched": 120,
+      "accepted_records": 25,
+      "unique_items": 22,
+      "sample": [
+        {
+          "title": "Teleportation transition of surface codes on a superconducting quantum processor",
+          "doi": "10.1038/s41567-026-03484-0",
+          "url": "https://www.nature.com/articles/s41567-026-03484-0",
+          "published_at": "2026-10-22T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "nature"
+        },
+        {
+          "title": "Superconductivity and ferroelectric orbital magnetism in semimetallic rhombohedral hexalayer graphene",
+          "doi": "10.1038/s41567-026-03443-9",
+          "url": "https://www.nature.com/articles/s41567-026-03443-9",
+          "published_at": "2026-10-21T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "nature"
+        },
+        {
+          "title": "Light-induced asymmetric pseudogap below the critical temperature in cuprates",
+          "doi": "10.1038/s41567-026-03446-6",
+          "url": "https://www.nature.com/articles/s41567-026-03446-6",
+          "published_at": "2026-10-20T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "nature"
+        },
+        {
+          "title": "Evidence for spin-fluctuation-mediated superconductivity in electron-doped cuprates",
+          "doi": "10.1038/s41567-026-03454-6",
+          "url": "https://www.nature.com/articles/s41567-026-03454-6",
+          "published_at": "2026-10-19T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "nature"
+        }
+      ]
+    },
+    {
+      "source": "science",
+      "status": "complete",
+      "error": "",
+      "endpoint_errors": [],
+      "fetched": 53,
+      "accepted_records": 3,
+      "unique_items": 2,
+      "sample": [
+        {
+          "title": "Magic state cultivation on a superconducting quantum processor",
+          "doi": "10.1126/science.aee7961",
+          "url": "https://www.science.org/doi/abs/10.1126/science.aee7961",
+          "published_at": "2026-10-15T06:00:02Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "science"
+        },
+        {
+          "title": "Magic state cultivation on a superconducting quantum processor",
+          "doi": "10.1126/science.aee7961",
+          "url": "https://www.science.org/doi/10.1126/science.aee7961",
+          "published_at": "2026-10-15T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        },
+        {
+          "title": "Vortex-mediated spin current injection into two-dimensional superconductor NbSe 2",
+          "doi": "10.1126/sciadv.aeh1582",
+          "url": "https://www.science.org/doi/10.1126/sciadv.aeh1582",
+          "published_at": "2026-10-23T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        }
+      ]
+    },
+    {
+      "source": "cpl",
+      "status": "complete",
+      "error": "",
+      "endpoint_errors": [],
+      "fetched": 2,
+      "accepted_records": 2,
+      "unique_items": 2,
+      "sample": [
+        {
+          "title": "Theoretical prediction of superconductivity and nontrivial band topology in rock-salt transition-metal hydrides M H ( M = Mo, W, Ru, Rh, Y)",
+          "doi": "10.1088/0256-307x/43/11/110701",
+          "url": "https://iopscience.iop.org/article/10.1088/0256-307X/43/11/110701",
+          "published_at": "2026-09-25T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        },
+        {
+          "title": "Ultrasmall (3,0) carbon nanotube: a superconducting unit with strong electron-phonon coupling",
+          "doi": "10.1088/0256-307x/43/10/100711",
+          "url": "https://iopscience.iop.org/article/10.1088/0256-307X/43/10/100711",
+          "published_at": "2026-10-19T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        }
+      ]
+    },
+    {
+      "source": "cpb",
+      "status": "complete",
+      "error": "",
+      "endpoint_errors": [],
+      "fetched": 11,
+      "accepted_records": 11,
+      "unique_items": 11,
+      "sample": [
+        {
+          "title": "Electron-Doping-Enhanced High-temperature Superconductivity in (3,0) Carbon Nanotube",
+          "doi": "10.1088/1674-1056/aeb674",
+          "url": "https://iopscience.iop.org/article/10.1088/1674-1056/aeb674",
+          "published_at": "2026-10-20T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        },
+        {
+          "title": "Coexistence of superconductivity and charge-density-wave in van der Waals layered material NbTe 4",
+          "doi": "10.1088/1674-1056/ae31de",
+          "url": "https://iopscience.iop.org/article/10.1088/1674-1056/ae31de",
+          "published_at": "2026-10-01T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        },
+        {
+          "title": "Superconductivity of highly hydrogen-rich hydride CsH 25",
+          "doi": "10.1088/1674-1056/ae881e",
+          "url": "https://iopscience.iop.org/article/10.1088/1674-1056/ae881e",
+          "published_at": "2026-10-01T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        },
+        {
+          "title": "Superconductivity in ternary yttrium–zirconium hydride under high pressure",
+          "doi": "10.1088/1674-1056/ae5171",
+          "url": "https://iopscience.iop.org/article/10.1088/1674-1056/ae5171",
+          "published_at": "2026-10-01T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "crossref"
+        }
+      ]
+    },
+    {
+      "source": "materials_today",
+      "status": "complete",
+      "error": "",
+      "endpoint_errors": [],
+      "fetched": 24,
+      "accepted_records": 0,
+      "unique_items": 0,
+      "sample": []
+    },
+    {
+      "source": "nsr",
+      "status": "complete",
+      "error": "",
+      "endpoint_errors": [],
+      "fetched": 0,
+      "accepted_records": 0,
+      "unique_items": 0,
+      "sample": []
+    },
+    {
+      "source": "openalex",
+      "status": "partial",
+      "error": "openalex_key_required",
+      "endpoint_errors": [],
+      "fetched": 100,
+      "accepted_records": 99,
+      "unique_items": 99,
+      "sample": [
+        {
+          "title": "Superconducting properties of transition metal dichalcogenides in proximity to a conventional superconductor",
+          "doi": "10.1103/2kt6-vmbf",
+          "url": "https://doi.org/10.1103/2kt6-vmbf",
+          "published_at": "2026-10-02T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "openalex"
+        },
+        {
+          "title": "Superconducting diode effect in magnetic superconductors realized by nonreciprocal domain-wall dynamics",
+          "doi": "10.1103/k96f-s31s",
+          "url": "https://doi.org/10.1103/k96f-s31s",
+          "published_at": "2026-10-22T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "openalex"
+        },
+        {
+          "title": "Exotic superconducting states in altermagnets",
+          "doi": "10.1103/7zl4-35wd",
+          "url": "https://doi.org/10.1103/7zl4-35wd",
+          "published_at": "2026-10-20T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "openalex"
+        },
+        {
+          "title": "Perspectives on Superconducting Neural Networks",
+          "doi": "10.1541/ieejfms.146.389",
+          "url": "https://doi.org/10.1541/ieejfms.146.389",
+          "published_at": "2026-09-30T00:00:00Z",
+          "date_precision": "day",
+          "kind": "journal_article",
+          "discovery_source": "openalex"
+        }
+      ]
+    }
+  ]
+}

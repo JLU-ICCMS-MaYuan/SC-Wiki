@@ -1,0 +1,8 @@
+# 接口与任务约定
+
+原列表参数、自然周锚点、分页、分类标签与links数组保留。kind和display_kind均按内容语义投影；
+新闻报道不会进入journal_article总数。原文详情只渲染一个safe URL，后台多来源信息不删除。
+
+来源状态partial表示取得并保存部分有效内容，但至少一个入口或后续页未完成。
+last_success_at仅在完整采集成功时前移；partial与failed按一小时重试，不逐分钟空转。
+NEWS_OPENALEX_API_KEY为可选私有配置，不回传或记录在错误日志中。

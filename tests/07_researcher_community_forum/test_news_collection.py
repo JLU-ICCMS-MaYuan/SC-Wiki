@@ -147,10 +147,10 @@ def test_three_sources_and_rights():
     assert openalex.original_source == "acs"
     assert openalex.discovery_source == "openalex"
     assert openalex.relevance_evidence == "title: superconductivity"
-    assert openalex.content_type == "peer_reviewed"
+    assert openalex.content_type == "journal_article"
     assert openalex.display_kind == "journal_article"
     assert physorg.content_type == "research_report"
-    assert physorg.display_kind == "journal_article"
+    assert physorg.display_kind == "news"
 
 
 def test_google_news_is_social_industry_content():
@@ -170,7 +170,7 @@ def test_openalex_requires_journal_article_and_strong_abstract_evidence():
     assert items[0].relevance_evidence == "abstract: superconducting + vortices"
     query = requests[0].url.params
     assert "from_publication_date:2026-08-01" in query["filter"]
-    assert "type:article,primary_location.source.type:journal" in query["filter"]
+    assert "type:article|review,primary_location.source.type:journal" in query["filter"]
 
 
 @pytest.mark.parametrize("payload", [b"<html>blocked</html>", b"<rss><channel>", b""])
@@ -224,7 +224,7 @@ def test_dedupe_version_and_late_doi_merge(engine):
         assert item.summary_source == "arxiv"
         assert len(json.loads(item.links)) == 2
         assert item.first_seen_at == iso(NOW)
-        assert len(db.scalars(select(NewsFeedIdentity)).all()) == 3
+        assert len(db.scalars(select(NewsFeedIdentity)).all()) == 5  # 两个来源ID、DOI与两个原文URL。
 
 
 def test_failure_preserves_watermark_and_other_source_runs(engine):
@@ -267,29 +267,29 @@ def test_missing_title_and_unsafe_url_fail_closed():
 def test_pagination_limit_is_not_success():
     items = [dict(CROSSREF["message"]["items"][0], DOI=f"10.1234/{i}") for i in range(100)]
     src = Sources(transport(lambda _: httpx.Response(200, json={"message": {"items": items, "next-cursor": "more"}})), max_pages=1)
-    with pytest.raises(CollectionError, match="page_limit"):
-        src.fetch("crossref", NOW, NOW)
+    assert len(src.fetch("crossref", NOW, NOW)) == 100
+    assert src.partial_error == "page_limit"
 
 
 def test_crossref_cursor_and_filtered_count():
     seen = []
     def handler(request):
         seen.append(request.url.params["cursor"])
-        if len(seen) == 1:
+        if request.url.params["cursor"] == "*":
             items = [dict(CROSSREF["message"]["items"][0], DOI=f"10.1234/{i}", title=["Unrelated weather report"]) for i in range(100)]
         else:
             items = CROSSREF["message"]["items"]
         return httpx.Response(200, json={"message": {"items": items, "next-cursor": "cursor-token"}})
     src = Sources(transport(handler))
     assert len(src.fetch("crossref", NOW, NOW)) == 1
-    assert src.fetched == 101 and seen == ["*", "cursor-token"]
+    assert src.fetched == 404 and seen == ["*", "cursor-token"] * 4
 
 
 def test_publisher_source_uses_crossref_prefix_and_preserves_provenance():
     seen = []
     def handler(request):
         seen.append(request.url.params["filter"])
-        return httpx.Response(200, json=CROSSREF)
+        return httpx.Response(200, json={"message": {"items": [dict(CROSSREF["message"]["items"][0], DOI="10.1021/test")]}})
     item = Sources(transport(handler)).fetch("acs", NOW, NOW)[0]
     assert "prefix:10.1021" in seen[0]
     assert item.source == "acs"

@@ -140,6 +140,6 @@ describe('Issue #83 News 页面品牌与三列资讯流', () => {
 
     fireEvent.click(screen.getByText('News 1-1'))
     expect(await screen.findByText('Summary for news 1-1')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /source/i })).toHaveAttribute('rel', 'noopener noreferrer')
+    expect(screen.getByRole('link', { name: /Phys.org/i })).toHaveAttribute('rel', 'noopener noreferrer')
   })
 })

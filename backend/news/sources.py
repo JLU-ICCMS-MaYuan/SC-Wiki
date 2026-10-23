@@ -3,14 +3,16 @@ import calendar
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 import json
+import os
 import re
 import time
 
 import feedparser
 import httpx
 
-from .domain import (CollectionError, PUBLISHER_SOURCES, Record, canonical_url, iso, normalize_doi, parse_time, plain,
+from .domain import (CollectionError, PUBLISHER_SOURCES, Record, canonical_url, content_kind, iso, normalize_doi, parse_time, plain,
                      publisher_for_doi, relevance_evidence, relevant, safe_url, scholarly_relevance_evidence)
+from .publishers import PUBLISHER_FEEDS, PUBLISHER_FILTERS, SEARCH_TERMS, matches_publisher, original_url, publisher_records
 
 ENDPOINTS = {
     "arxiv": "https://export.arxiv.org/api/query",
@@ -44,8 +46,9 @@ class Transport:
             self.direct_client.close()
         self.client.close()
 
-    def get(self, source, url, params=None):
-        if ENDPOINTS.get(source) != url:
+    def get(self, source, url, params=None, headers=None):
+        allowed = {ENDPOINTS.get(source), *(url for _, url in PUBLISHER_FEEDS.get(source, ())) }
+        if url not in allowed:
             raise CollectionError("invalid_record")
         for attempt in range(3):
             self.guard()
@@ -53,7 +56,7 @@ class Transport:
             self.sleep(3.1 if source == "arxiv" else 1.0)
             try:
                 request_client = self.client if source == "google_news" else self.direct_client
-                with request_client.stream("GET", url, params=params) as response:
+                with request_client.stream("GET", url, params=params, headers=headers) as response:
                     if response.status_code == 429 or response.status_code >= 500:
                         code = "rate_limited" if response.status_code == 429 else "http_error"
                         if attempt == 2:
@@ -70,6 +73,12 @@ class Transport:
                             raise CollectionError(code)
                         self.sleep(max(0, delay))
                         continue
+                    if response.status_code == 401:
+                        raise CollectionError("authentication_required")
+                    if response.status_code == 403:
+                        raise CollectionError("access_denied")
+                    if response.status_code == 400:
+                        raise CollectionError("bad_request")
                     if response.status_code != 200:
                         raise CollectionError("http_error")
                     content = bytearray()
@@ -101,7 +110,7 @@ def rss_time(entry, name):
 
 
 def crossref_date(item):
-    for field in ("published", "published-online", "published-print"):
+    for field in ("published-online", "published", "published-print"):
         parts = item.get(field, {}).get("date-parts")
         if parts and parts[0]:
             values = parts[0]
@@ -115,13 +124,18 @@ def crossref_date(item):
 
 
 class Sources:
-    def __init__(self, transport=None, max_pages=100, contact=""):
+    def __init__(self, transport=None, max_pages=100, contact="", openalex_key=None):
         self.transport = transport or Transport(contact=contact)
         self.max_pages = max_pages
         self.contact = contact
+        self.openalex_key = os.getenv("NEWS_OPENALEX_API_KEY", "") if openalex_key is None else openalex_key
+        self.partial_error = ""
+        self.endpoint_errors = []
 
     def fetch(self, source, since, until):
         self.fetched = 0
+        self.partial_error = ""
+        self.endpoint_errors = []
         if source not in ENDPOINTS:
             raise CollectionError("invalid_record")
         result = self.publisher(source, since, until) if source in PUBLISHER_SOURCES else getattr(self, source)(since, until)
@@ -170,19 +184,61 @@ class Sources:
         raise CollectionError("page_limit")
 
     def crossref(self, since, until):
-        return self._crossref("crossref", since, until)
+        since = min(since, until - timedelta(days=30))
+        return self._crossref_search("crossref", since, until)
 
     def publisher(self, source, since, until):
-        return self._crossref(source, since, until, PUBLISHER_SOURCES[source])
+        result, successes = [], 0
+        since = min(since, until - timedelta(days=30))
+        for journal, endpoint in PUBLISHER_FEEDS.get(source, ()):
+            try:
+                records, count = publisher_records(self.transport.get(source, endpoint), source, journal, since)
+                self.fetched += count
+                result.extend(records)
+                successes += 1
+            except CollectionError as exc:
+                self.endpoint_errors.append(f"{source}:rss:{journal}:{exc}")
+        try:
+            result.extend(self._crossref_search(source, since, until))
+            successes += 1
+        except CollectionError as exc:
+            self.endpoint_errors.append(f"{source}:crossref:{exc}")
+        if not successes:
+            raise CollectionError("publisher_unavailable")
+        if self.endpoint_errors:
+            self.partial_error = "publisher_partial"
+        # 各入口的记录交给事务层按 DOI/URL 合并，保留真实发现来源和更完整的元数据。
+        return result
 
-    def _crossref(self, source, since, until, prefix=""):
+    @staticmethod
+    def _unique(records):
+        unique = {}
+        for record in records:
+            unique.setdefault(record.doi or canonical_url(record.url), record)
+        return list(unique.values())
+
+    def _crossref_search(self, source, since, until):
+        result, successes, failures = [], 0, []
+        for term in SEARCH_TERMS:
+            try:
+                result.extend(self._crossref(source, since, until, term))
+                successes += 1
+            except CollectionError as exc:
+                failures.append(str(exc))
+        if not successes:
+            raise CollectionError(failures[0])
+        if failures:
+            self.partial_error = "crossref_partial"
+        return self._unique(result)
+
+    def _crossref(self, source, since, until, term):
         result, cursor, previous_ids = [], "*", None
         for _ in range(self.max_pages):
-            filters = f"type:journal-article,from-index-date:{since.date()},until-index-date:{until.date()}"
-            if prefix:
-                filters += ",prefix:" + prefix
-            params = {"query": "superconduct", "filter": filters,
-                "rows": 100, "cursor": cursor}
+            filters = f"type:journal-article,from-pub-date:{since.date()},until-pub-date:{until.date()}"
+            if source in PUBLISHER_FILTERS:
+                filters += "," + PUBLISHER_FILTERS[source]
+            params = {"query": term, "filter": filters,
+                "rows": 100, "cursor": cursor, "sort": "indexed", "order": "desc"}
             if self.contact:
                 params["mailto"] = self.contact
             try:
@@ -190,44 +246,71 @@ class Sources:
                 items = body["items"]
                 if not isinstance(items, list):
                     raise ValueError("items")
+            except CollectionError as exc:
+                if result:
+                    self.partial_error = str(exc)
+                    return result
+                raise
             except (KeyError, ValueError, TypeError):
+                if result:
+                    self.partial_error = "invalid_feed"
+                    return result
                 raise CollectionError("invalid_feed")
             self.fetched += len(items)
             ids = [item.get("DOI") for item in items]
             if ids and ids == previous_ids:
-                raise CollectionError("invalid_feed")
+                self.partial_error = "invalid_feed"
+                return result
             previous_ids = ids
             for item in items:
                 title = plain(" ".join(item.get("title", [])), 4000)
                 if not title:
-                    raise CollectionError("invalid_record")
-                if item.get("type") != "journal-article" or not relevant(title):
+                    self.partial_error = "invalid_record"
+                    continue
+                evidence = scholarly_relevance_evidence(title, plain(item.get("abstract", "")))
+                if item.get("type") != "journal-article" or not evidence:
+                    continue
+                if source in PUBLISHER_FILTERS and not matches_publisher(item, source):
                     continue
                 doi = normalize_doi(item.get("DOI", ""))
                 if not doi:
-                    raise CollectionError("invalid_record")
-                published, precision = crossref_date(item)
-                updated = item.get("indexed", {}).get("date-time", "")
-                if updated:
-                    updated = iso(parse_time(updated))
-                evidence = relevance_evidence(title)
+                    self.partial_error = "invalid_record"
+                    continue
+                try:
+                    published, precision = crossref_date(item)
+                    updated = item.get("indexed", {}).get("date-time", "")
+                    if updated:
+                        updated = iso(parse_time(updated))
+                except CollectionError:
+                    self.partial_error = "invalid_record"
+                    continue
+                if published and precision == "day" and not since.date().isoformat() <= published[:10] <= until.date().isoformat():
+                    continue
+                resource = (item.get("resource") or {}).get("primary") or {}
+                try:
+                    url = original_url(resource.get("URL") or "https://doi.org/" + doi)
+                except CollectionError:
+                    url = "https://doi.org/" + doi
+                kind = content_kind("journal_article", doi=doi, url=url)
                 result.append(Record(
-                    source=source, external_id=doi, kind="journal_article",
-                    title=title, doi=doi, url="https://doi.org/" + doi,
+                    source=source, external_id=doi, kind=kind,
+                    title=title, doi=doi, url=url,
                     authors=[plain(" ".join(filter(None, [a.get("given"), a.get("family"), a.get("name")])), 120)
                              for a in item.get("author", [])][:100],
                     journal=plain(" ".join(item.get("container-title", [])), 1000),
                     published_at=published, date_precision=precision, source_updated_at=updated,
-                    content_type="peer_reviewed", display_kind="journal_article", discovery_source="crossref",
+                    content_type="research_report" if kind == "news" else "journal_article", display_kind=kind, discovery_source="crossref",
                     original_source=publisher_for_doi(doi) or (source if source in PUBLISHER_SOURCES else ""), relevance_evidence=evidence,
                 ))
             if len(items) < 100:
                 return result
             next_cursor = body.get("next-cursor")
             if not next_cursor:
-                raise CollectionError("invalid_feed")
+                self.partial_error = "invalid_feed"
+                return result
             cursor = next_cursor
-        raise CollectionError("page_limit")
+        self.partial_error = "page_limit"
+        return result
 
     def openalex(self, since, until):
         result, cursor = [], "*"
@@ -238,22 +321,32 @@ class Sources:
             params = {
                 "search": "superconduct",
                 "filter": (f"from_publication_date:{since.date()},to_publication_date:{until.date()},"
-                           "type:article,primary_location.source.type:journal"),
+                           "type:article|review,primary_location.source.type:journal"),
                 "per-page": 100,
                 "cursor": cursor,
             }
             try:
-                body = json.loads(self.transport.get("openalex", ENDPOINTS["openalex"], params))
+                # 官方支持 Bearer；避免把Key放在会被HTTP客户端记录的查询URL中。
+                headers = {"Authorization": "Bearer " + self.openalex_key} if self.openalex_key else None
+                body = json.loads(self.transport.get("openalex", ENDPOINTS["openalex"], params, headers=headers))
                 items = body["results"]
                 if not isinstance(items, list):
                     raise ValueError("results")
+            except CollectionError as exc:
+                if result:
+                    self.partial_error = str(exc)
+                    return result
+                raise
             except (KeyError, ValueError, TypeError):
+                if result:
+                    self.partial_error = "invalid_feed"
+                    return result
                 raise CollectionError("invalid_feed")
             self.fetched += len(items)
             for item in items:
                 location = item.get("primary_location") or {}
                 source = location.get("source") or {}
-                if (item.get("type") != "article" or source.get("type") != "journal"
+                if (item.get("type") not in {"article", "review"} or source.get("type") != "journal"
                         or location.get("is_published") is False or location.get("is_accepted") is False):
                     continue
                 title = plain(item.get("title", ""), 4000)
@@ -267,31 +360,47 @@ class Sources:
                 # OpenAlex 偶尔把 Zenodo 上传映射到期刊主来源；该 DOI 前缀不能证明同行评审。
                 if doi.startswith("10.5281/"):
                     continue
-                url = safe_url(location.get("landing_page_url") or ("https://doi.org/" + doi if doi else item.get("id", "")))
+                try:
+                    url = safe_url(location.get("landing_page_url") or ("https://doi.org/" + doi if doi else item.get("id", "")))
+                except CollectionError:
+                    self.partial_error = "invalid_record"
+                    continue
                 published = item.get("publication_date", "")
                 if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", published):
-                    raise CollectionError("invalid_record")
+                    self.partial_error = "invalid_record"
+                    continue
                 updated = item.get("updated_date", "")
                 if updated:
-                    updated = iso(parse_time(_openalex_timestamp(updated)))
+                    try:
+                        updated = iso(parse_time(_openalex_timestamp(updated)))
+                    except CollectionError:
+                        self.partial_error = "invalid_record"
+                        continue
                 authors = [plain((row.get("author") or {}).get("display_name", ""), 120)
                            for row in item.get("authorships", [])][:100]
                 journal = plain(((location.get("source") or {}).get("display_name", "")), 1000)
                 external_id = str(item.get("id", "")).rsplit("/", 1)[-1]
                 if not external_id:
-                    raise CollectionError("invalid_record")
+                    self.partial_error = "invalid_record"
+                    continue
+                kind = content_kind("journal_article", doi=doi, url=url)
                 result.append(Record(
-                    source="openalex", external_id=external_id, kind="journal_article", title=title, url=url,
+                    source="openalex", external_id=external_id, kind=kind, title=title, url=url,
                     summary=abstract, summary_source="openalex" if abstract else "", doi=doi, authors=authors,
                     journal=journal, published_at=published + "T00:00:00Z", source_updated_at=updated,
-                    content_type="peer_reviewed", display_kind="journal_article", discovery_source="openalex",
+                    content_type="research_report" if kind == "news" else "journal_article", display_kind=kind, discovery_source="openalex",
                     original_source=publisher_for_doi(doi), relevance_evidence=evidence,
                 ))
             next_cursor = (body.get("meta") or {}).get("next_cursor")
-            if not next_cursor or not items:
+            total = (body.get("meta") or {}).get("count")
+            if not next_cursor or not items or (isinstance(total, int) and self.fetched >= total):
+                return result
+            if not self.openalex_key:
+                self.partial_error = "openalex_key_required"
                 return result
             cursor = next_cursor
-        raise CollectionError("page_limit")
+        self.partial_error = "page_limit"
+        return result
 
     def physorg(self, since, until):
         parsed = feed(self.transport.get("physorg", ENDPOINTS["physorg"]))
@@ -310,7 +419,7 @@ class Sources:
                 source="physorg", external_id=canonical_url(url), kind="news", title=title,
                 url=url, summary=plain(entry.get("summary", "")), summary_source="physorg",
                 published_at=published, source_updated_at=published,
-                content_type="research_report", display_kind="journal_article", discovery_source="physorg",
+                content_type="research_report", display_kind="news", discovery_source="physorg",
                 original_source="physorg", relevance_evidence=relevance_evidence(title, entry.get("summary", "")),
             ))
         return result

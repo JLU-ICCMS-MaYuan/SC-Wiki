@@ -158,9 +158,9 @@ Go 提供公开读取与首答治理，Python AI API 和独立 RQ 队列负责�
 
 ## 自动资讯采集（Feature #63 / #88）
 
-`/news` 定时从 arXiv、Crossref、OpenAlex、Phys.org 和 Google News RSS 发现超导资讯，按类型筛选和分页；保留人工快讯与诺贝尔奖里程碑。APS、ACS、Nature、Science、NSR、CPL、CPB、Materials Today 当前经 Crossref DOI 前缀补充发现，页面保留聚合发现来源与出版商原文来源，不将其表述为出版社官方 API/RSS 直连。
+`/news` 定时从 arXiv、Crossref、OpenAlex、Phys.org 和 Google News RSS 发现超导资讯，按内容类型和自然周分页；保留人工快讯与诺奖展陈。APS、Nature、Science、Materials Today 接入官方期刊 RSS；八组来源均由 Crossref 补充发现，NSR、CPL、CPB、Materials Today 使用期刊 ISSN 过滤并逐条校验，其余使用出版商 DOI 前缀。页面保留实际发现来源与原文来源。
 自动资讯标注“自动采集，未经本站审核”，只进入独立资讯表，不进入正式论文、材料或 PDF 解析队列。
-OpenAlex 每次至少滚动回看最近 30 天，只发布已发表且主来源为期刊的 `article`，并拒绝 Zenodo 仓储 DOI；题名可直接证明超导相关性，自动关键词或主题需达到最低置信度，只有摘要命中时还须包含第二个超导学术上下文信号。Phys.org 是科研报道但按约定展示在期刊论文栏，Google News RSS 条目归为社会/产业资讯。
+Crossref 使用最近至少 30 天的发表日期窗口及多种超导词形，避免将旧论文重新索引误当新发表；在线发表日期优先。OpenAlex 同样至少回看 30 天，接受期刊 `article/review`，拒绝明确未发表及 Zenodo 仓储 DOI；保留既有相关性证据规则。Phys.org 科研报道、出版社新闻和社会/产业资讯进入新闻栏，不能因出版商网站或 DOI 就归入期刊论文。详情只展示一个原文入口，后台多来源记录保留。
 
 Python 进程使用统一的 `requirements.txt`，不复制外部项目仓库：
 
@@ -192,8 +192,16 @@ scripts/dev.sh status
 | `NEWS_DAILY_HOUR` | `8` | 每日运行小时，0–23 |
 | `NEWS_TIMEZONE` | `Asia/Shanghai` | 每日运行时区 |
 | `NEWS_INITIAL_DAYS` | `7` | 首次回看天数 |
-| `NEWS_MAX_PAGES` | `100` | 每来源单次分页上限，超限报告失败 |
+| `NEWS_MAX_PAGES` | `100` | 每查询分页上限；期刊索引超限时保留有效部分并报告未完成 |
 | `NEWS_CONTACT_EMAIL` | 空 | 可选真实联系邮箱，用于 Crossref polite pool |
+| `NEWS_OPENALEX_API_KEY` | 空 | 可选服务端私有 Key，通过 Bearer 请求头发送，不写入 URL 或公开响应 |
+
+OpenAlex 无 Key 时仅获取允许的首批结果；需要继续分页时保存有效记录并标记 `partial/openalex_key_required`。
+匿名共享额度耗尽也可能返回 429，Key 不等于无限配额。本功能不代办注册或购买额度。
+任一期刊入口失败时保留其他入口结果，部分完成不推进 `last_success_at`，与失败一样一小时后重试；
+400/401/403/429 分别保留可诊断代码。后台来源状态不重新展示在公开页面。
+官方 RSS 不保证覆盖全部历史或所有期刊，原文网站也可能要求连接验证；来源实测及开源方案比较见
+[Issue #160 研究记录](docs/specs/160-news-source-semantics/research.md)。
 
 Go 提供 `GET /api/news/feed`，旧 `GET /api/news` 保持人工快讯数组格式。部署需要配套发布 Go、前端、迁移和两个 Python 进程。
 

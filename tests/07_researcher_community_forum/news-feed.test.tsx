@@ -3,7 +3,7 @@ import { afterEach, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { MemoryRouter } from 'react-router-dom'
-import NewsFeed from '../../frontend/src/components/NewsFeed'
+import NewsFeed, { primaryNewsLink } from '../../frontend/src/components/NewsFeed'
 import NewsPage from '../../frontend/src/pages/NewsPage'
 
 const row = {
@@ -75,4 +75,25 @@ it('preserves manual news and Nobel milestones', async () => {
  expect(await screen.findByText('人工快讯样本')).toBeInTheDocument()
  expect(screen.getByText('诺贝尔奖里程碑')).toBeInTheDocument()
  expect(screen.getByText('Heike Kamerlingh Onnes')).toBeInTheDocument()
+})
+
+it('shows one original link even when provenance contains duplicate roles', async () => {
+ const url = 'https://phys.org/news/2026-10-hidden-rivalry-quantum-states-heart.html'
+ vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response({ ...body, items: [{ ...row, kind: 'news', source: 'physorg', original_source: 'physorg', url,
+  links: [{ source: 'physorg', role: 'discovery', url }, { source: 'physorg', role: 'original', url }],
+ }] })))
+ render(<NewsFeed />)
+ fireEvent.click((await screen.findAllByText(row.title))[0])
+ const links = await screen.findAllByRole('link', { name: 'Phys.org ↗' })
+ expect(links).toHaveLength(1)
+ expect(links[0]).toHaveAttribute('href', url)
+ expect(links[0]).toHaveAttribute('target', '_blank')
+})
+
+it('falls back to a safe alternative without rendering an invalid primary URL', () => {
+ const base = { url: 'javascript:alert(1)', source: 'crossref', original_source: 'aps', links: [
+  { source: 'bad', url: 'data:text/html,unsafe' }, { source: 'aps', url: 'https://doi.org/10.1103/example' },
+ ] }
+ expect(primaryNewsLink(base)).toEqual(base.links[1])
+ expect(primaryNewsLink({ ...base, links: [] })).toBeUndefined()
 })

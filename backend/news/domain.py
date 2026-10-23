@@ -5,14 +5,24 @@ from html.parser import HTMLParser
 import re
 from urllib.parse import unquote, urlsplit, urlunsplit
 
-PUBLISHER_SOURCES = {
-    "aps": "10.1103", "acs": "10.1021", "nature": "10.1038", "science": "10.1126",
-    "nsr": "10.1093/nsr", "cpl": "10.1088/0256-307x", "cpb": "10.1088/1674-1056",
-    "materials_today": "10.1016/j.mattod",
-}
+# 来源标识与查询过滤条件分开；期刊 DOI 片段不是 Crossref 注册前缀。
+PUBLISHER_SOURCES = ("aps", "acs", "nature", "science", "nsr", "cpl", "cpb", "materials_today")
 SOURCES = ("arxiv", "crossref", "openalex", *PUBLISHER_SOURCES, "physorg", "google_news")
 DISPLAY_KINDS = ("news", "preprint", "journal_article")
-CONTENT_TYPES = ("peer_reviewed", "preprint", "research_report", "social_industry")
+CONTENT_TYPES = ("journal_article", "peer_reviewed", "preprint", "research_report", "social_industry")
+
+
+def content_kind(kind, content_type="", doi="", source="", url=""):
+    """按内容判类，保留旧数据读取语义；不从出版社域名推断所有内容是论文。"""
+    if (kind == "news" or content_type in {"research_report", "social_industry"}
+            or source in {"physorg", "google_news"} or doi.lower().startswith(("10.1038/d41586-", "10.1038/news.", "10.1103/physics.", "10.1021/cen-"))):
+        return "news"
+    location = urlsplit(url)
+    if (location.hostname in {"physics.aps.org", "cen.acs.org"}
+            or location.hostname in {"www.science.org", "www.sciencemag.org"} and location.path.startswith(("/content/article/", "/news/"))
+            or location.hostname == "www.nature.com" and location.path.startswith("/news/")):
+        return "news"
+    return "preprint" if kind == "preprint" else "journal_article"
 
 _RELEVANCE_PATTERN = re.compile(
     r"superconduct\w*|超导|\bjosephson\b|\bcooper[ -]pairs?\b|\bmeissner\b", re.I

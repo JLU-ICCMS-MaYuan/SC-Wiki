@@ -8,7 +8,7 @@ import uuid
 from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
-from .domain import CollectionError, SOURCES, iso, parse_time
+from .domain import CollectionError, SOURCES, content_kind, canonical_url, iso, parse_time
 from .models import NewsFeedIdentity, NewsFeedItem, NewsFeedSource
 
 log = logging.getLogger(__name__)
@@ -29,6 +29,12 @@ def _links(*groups):
 def upsert(db, record, now):
     record.validate()
     keys = [identity_key(record.source + ":" + record.external_id)]
+    url_key = identity_key("url:" + canonical_url(record.url))
+    url_identity = db.get(NewsFeedIdentity, url_key)
+    url_owner = db.get(NewsFeedItem, url_identity.item_id) if url_identity else None
+    # 不让错误复用的落地页把两个已知不同 DOI 的论文合并。
+    if not (url_owner and url_owner.doi and record.doi and url_owner.doi != record.doi):
+        keys.append(url_key)
     if record.doi and record.kind != "news":
         keys.append(identity_key("doi:" + record.doi))
     identities = db.scalars(select(NewsFeedIdentity).where(NewsFeedIdentity.key.in_(keys))).all()
@@ -46,6 +52,7 @@ def upsert(db, record, now):
     if not matches:
         db.add(item)
         db.flush()
+    reported_news = any(row.content_type == "research_report" for row in matches)
     for other in matches[1:]:
         if not item.summary and other.summary:
             item.summary, item.summary_source = other.summary, other.summary_source
@@ -69,11 +76,15 @@ def upsert(db, record, now):
     item.doi = record.doi or item.doi
     item.arxiv_id = record.arxiv_id or item.arxiv_id
     item.version = max(record.version, item.version)
-    item.display_kind = record.display_kind or record.kind
-    item.content_type = record.content_type or item.content_type
-    item.discovery_source = record.discovery_source or record.source
-    item.original_source = record.original_source or item.original_source
-    item.relevance_evidence = record.relevance_evidence or item.relevance_evidence
+    if reported_news and record.discovery_source in {"crossref", "openalex"}:
+        # 聚合索引的笼统 journal-article 类型不能覆盖出版商已明确声明的报道。
+        item.kind, item.content_type = "news", "research_report"
+    item.kind = content_kind(item.kind, item.content_type, item.doi, item.source, item.url)
+    item.display_kind = item.kind
+    if item.kind == "news" and item.content_type != "social_industry":
+        item.content_type = "research_report"
+    elif item.kind == "journal_article":
+        item.content_type = "journal_article"
     item.links = _links(json.loads(item.links), [
         {"source": record.discovery_source or record.source, "url": record.url, "role": "discovery"},
         *([{"source": record.original_source, "url": record.url, "role": "original"}] if record.original_source else []),
@@ -111,14 +122,18 @@ def collect_source(engine, source, sources, now=None, initial_days=7, before_com
                     raise CollectionError("invalid_record")
                 upsert(db, record, iso(started))
             state = db.get(NewsFeedSource, source)
-            state.status, state.error_code = "success", ""
-            state.last_success_at = iso(started)
+            partial = getattr(sources, "partial_error", "")
+            state.status, state.error_code = ("partial", partial) if partial else ("success", "")
+            if not partial:
+                state.last_success_at = iso(started)
             state.last_finished_at = iso(now or datetime.now(timezone.utc))
             state.fetched = getattr(sources, "fetched", len(records))
             state.accepted = len(records)
             if before_commit:
                 before_commit()
-        return True
+        if partial:
+            log.warning("news source=%s partial=%s endpoint_errors=%s", source, partial, getattr(sources, "endpoint_errors", []))
+        return not partial
     except Exception as exc:
         code = str(exc) if isinstance(exc, CollectionError) else "collection_error"
         with Session(engine) as db, db.begin():
@@ -126,5 +141,5 @@ def collect_source(engine, source, sources, now=None, initial_days=7, before_com
             state.status, state.error_code = "failed", code
             state.last_finished_at = iso(now or datetime.now(timezone.utc))
         # 不输出异常原文：HTTP/数据库异常可能含 URL、凭证和响应正文。
-        log.warning("news source=%s error=%s exception=%s", source, code, type(exc).__name__)
+        log.warning("news source=%s error=%s exception=%s endpoint_errors=%s", source, code, type(exc).__name__, getattr(sources, "endpoint_errors", []))
         return False

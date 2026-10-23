@@ -209,6 +209,75 @@ func TestNewsWeekYearBoundary(t *testing.T) {
 	}
 }
 
+func TestNewsContentSemanticsOverrideLegacyColumn(t *testing.T) {
+	db := newsTestDB(t)
+	for _, row := range []models.NewsFeedItem{
+		{ID: "report", Kind: "news", Source: "physorg", ContentType: "research_report", DisplayKind: "journal_article"},
+		{ID: "publisher-news", Kind: "journal_article", Source: "crossref", DOI: "10.1038/d41586-026-00001", ContentType: "peer_reviewed"},
+		{ID: "science-news", Kind: "journal_article", Source: "science", URL: "http://www.science.org/content/article/report"},
+		{ID: "aps-news", Kind: "journal_article", Source: "crossref", DOI: "10.1103/physics.19.1"},
+		{ID: "acs-news", Kind: "journal_article", Source: "crossref", DOI: "10.1021/cen-v100n001.p01"},
+		{ID: "journal", Kind: "journal_article", Source: "aps", ContentType: "journal_article"},
+		{ID: "preprint", Kind: "preprint", Source: "arxiv", DisplayKind: "journal_article"},
+	} {
+		row.Authors, row.Links = "[]", "[]"
+		if err := db.Create(&row).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	for kind, count := range map[string]int{"news": 5, "preprint": 1, "journal_article": 1} {
+		w := newsRequest("/api/news/feed?kind=" + kind)
+		var body struct {
+			Items []newsFeedView
+			Total int
+		}
+		if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &body) != nil {
+			t.Fatal(w.Body.String())
+		}
+		if body.Total != count || len(body.Items) != count {
+			t.Fatalf("%s: %+v", kind, body)
+		}
+		for _, item := range body.Items {
+			if item.Kind != kind || item.DisplayKind != kind {
+				t.Fatalf("query and item semantics differ: %+v", item)
+			}
+			if kind == "news" && item.ContentType != "research_report" {
+				t.Fatal(item.ContentType)
+			}
+		}
+	}
+	var original models.NewsFeedItem
+	if err := db.First(&original, "id = ?", "report").Error; err != nil {
+		t.Fatal(err)
+	}
+	if original.DisplayKind != "journal_article" {
+		t.Fatal("read must not rewrite stored provenance")
+	}
+}
+
+func TestNewsSemanticsBrowserPreview(t *testing.T) {
+	address := os.Getenv("NEWS_SEMANTICS_PREVIEW_ADDRESS")
+	if address == "" {
+		t.Skip("未启用隔离 SQLite 资讯预览")
+	}
+	db := newsTestDB(t)
+	url := "https://phys.org/news/2026-10-hidden-rivalry-quantum-states-heart.html"
+	links, _ := json.Marshal([]map[string]string{{"source": "physorg", "url": url, "role": "discovery"}, {"source": "physorg", "url": url, "role": "original"}})
+	for _, row := range []models.NewsFeedItem{
+		{ID: "report", Kind: "news", DisplayKind: "journal_article", ContentType: "research_report", Source: "physorg", OriginalSource: "physorg", Title: "A hidden rivalry between two quantum states at the heart of superconductors", URL: url, Links: string(links)},
+		{ID: "journal", Kind: "journal_article", ContentType: "peer_reviewed", Source: "aps", Title: "Journal fixture: superconductivity research", URL: "https://example.org/journal", Links: "[]"},
+		{ID: "preprint", Kind: "preprint", Source: "arxiv", Title: "Preprint fixture: superconductivity research", URL: "https://arxiv.org/abs/2608.12345", Links: "[]"},
+	} {
+		row.PublishedAt, row.DatePrecision, row.Authors = time.Now().UTC().Format(time.RFC3339), "day", "[]"
+		if err := db.Create(&row).Error; err != nil {
+			t.Fatal(err)
+		}
+	}
+	router := gin.New()
+	router.GET("/api/news/feed", ListNewsFeed)
+	t.Fatal(http.ListenAndServe(address, router))
+}
+
 func TestNewsFeedBadParametersAndDatabaseErrors(t *testing.T) {
 	db := newsTestDB(t)
 	for _, query := range []string{"?page=0", "?page=-1", "?page=wat", "?page=10001", "?page_size=101", "?kind=all"} {

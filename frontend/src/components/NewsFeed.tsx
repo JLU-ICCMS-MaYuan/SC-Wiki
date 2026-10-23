@@ -31,6 +31,12 @@ export function safeNewsLink(value: string): string | undefined {
   return undefined
 }
 
+export function primaryNewsLink(item: Pick<FeedItem, 'url' | 'source' | 'original_source' | 'links'>) {
+  const primary = safeNewsLink(item.url)
+  if (primary) return { source: item.original_source || item.source, url: primary }
+  return item.links.find(link => safeNewsLink(link.url))
+}
+
 function dateLabel(t: TFunc, value: string, precision = 'day') {
   if (!value) return t('news.dateNotProvided')
   if (precision === 'year') return t('news.yearOnly', { year: value.slice(0, 4) })
@@ -101,7 +107,7 @@ function FeedColumn({ kind, label, onSelect }: FeedColumnProps) {
         {t('news.feedLoadFailed')}
       </Alert> : data?.items.length === 0 ? <Box sx={{ py: 5 }} role="status">
         <Typography fontWeight={600}>{t('news.feedEmpty')}</Typography>
-        <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>{t('news.feedEmptyHint')}</Typography>
+        <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>{t(period === 'week' ? 'news.weekEmptyHint' : 'news.historyEmptyHint')}</Typography>
       </Box> : <Box component="ul" sx={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateRows: 'repeat(5, minmax(0, 1fr))', listStyle: 'none', m: 0, p: 0 }}>
         {data?.items.map(item => <Box
           component="li"
@@ -162,6 +168,7 @@ function FeedColumn({ kind, label, onSelect }: FeedColumnProps) {
 export default function NewsFeed() {
   const { t, lang } = useLanguage()
   const [selectedItem, setSelectedItem] = useState<FeedItem | null>(null)
+  const originalLink = selectedItem ? primaryNewsLink(selectedItem) : undefined
   const columns: { kind: Kind; label: string }[] = [
     { kind: 'news', label: t('news.feedNewsColumn') },
     { kind: 'preprint', label: t('news.feedPreprintsColumn') },
@@ -216,9 +223,9 @@ export default function NewsFeed() {
             {selectedItem.title}
           </Typography>
 
-          {(selectedItem.authors.length > 0 || selectedItem.journal) && <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+          {(selectedItem.authors.length > 0 || (selectedItem.kind === 'journal_article' && selectedItem.journal)) && <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
             <strong>{t('news.authorLabel')}</strong>{selectedItem.authors.slice(0, 10).join(lang === 'zh' ? '、' : ', ')}{selectedItem.authors.length > 10 ? t('news.etAl') : ''}
-            {selectedItem.journal && <><br /><strong>{t('news.journalLabel')}</strong>{selectedItem.journal}</>}
+            {selectedItem.kind === 'journal_article' && selectedItem.journal && <><br /><strong>{t('news.journalLabel')}</strong>{selectedItem.journal}</>}
           </Typography>}
 
           <Stack direction="row" useFlexGap flexWrap="wrap" gap={1.5} sx={{ mb: 3 }}>
@@ -246,13 +253,12 @@ export default function NewsFeed() {
             <strong>{t('news.doiLabel')}</strong>{selectedItem.doi}
           </Typography>}
 
-          {selectedItem.links.filter(link => safeNewsLink(link.url)).length > 0 && <>
+          {originalLink && <>
             <Typography variant="body1" fontWeight={600} sx={{ mb: 1.5 }}>{t('news.originalLinks')}</Typography>
             <Stack gap={1} sx={{ mb: 3 }}>
-              {selectedItem.links.filter(link => safeNewsLink(link.url)).map(link =>
-                <Link key={link.source} href={safeNewsLink(link.url)} target="_blank" rel="noopener noreferrer" variant="body2" sx={{ display: 'block' }}>
-                  {sourceNames[link.source] || link.source} ↗
-                </Link>)}
+              <Link href={originalLink.url} target="_blank" rel="noopener noreferrer" variant="body2" sx={{ display: 'block' }}>
+                {sourceNames[originalLink.source] || originalLink.source} ↗
+              </Link>
             </Stack>
           </>}
         </Box>

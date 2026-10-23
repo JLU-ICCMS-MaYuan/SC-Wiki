@@ -7,12 +7,13 @@
 
 ## 当前行为
 - arXiv 使用 cond-mat.supr-con 分类 API，按更新时间分页；去除版本编号形成稳定身份，版本升级更新原条目。
-- Crossref 使用官方 API 和索引日期窗口，查询 `superconduct` 并按题名规则过滤，仅保存书目元数据，不存摘要。APS、ACS、Nature、Science、NSR、CPL、CPB、Materials Today 当前通过各自 DOI 前缀的 Crossref 补充发现，页面保留 `crossref` 发现来源与出版商原文来源；这不是逐家出版社官方 API/RSS 直连。
-- OpenAlex 以固定主题滚动检查至少 30 天内的期刊文章，以弥补免费接口不能按更新时间增量查询的限制；请求端限定 `article` 和期刊主来源，本地再次拒绝明确未发表、未接收及 Zenodo 仓储 DOI。题名可直接证明相关性；自动关键词或主题必须达到最低置信度；只有摘要命中时，还必须同时出现临界参量、涡旋、配对、能隙或磁通钉扎等超导学术上下文。
+- Crossref 使用最近至少 30 天的发表日期窗口，分别查询 superconductivity、superconducting、superconductor、Josephson，按索引顺序完成游标分页，公开列表仍按发表时间排序。期刊原始在线发表日期优先，保留日期精度；仅保存书目信息，不存 Crossref 摘要。APS/ACS/Nature/Science 使用正确的 DOI 注册前缀，NSR/CPL/CPB/Materials Today 使用 ISSN 并逐条校验范围，避免将期刊 DOI 片段误当出版社前缀。
+- APS 的 PRL/PRB/PRX，Nature 的 Nature/Nature Physics/Nature Materials/Nature Communications，Science 的当期和提前发表，以及 Materials Today 已有官方 RSS 适配，和 Crossref 补充组合使用。RSS仅保存元数据与原文链接，不抓取全文；没有可用官方RSS的来源继续通过索引获取，不声称逐家官网完整抓取。
+- OpenAlex 至少滚动回看 30 天内、主来源为期刊的 `article/review`，本地拒绝明确未发表、未接收及 Zenodo 仓储 DOI。题名可证明相关性；自动关键词/主题有置信度门槛，摘要命中还需超导学术上下文。可选 NEWS_OPENALEX_API_KEY 使用 Bearer 头；无Key且有后续页时保留首批结果并记 partial/openalex_key_required，不把第一页200当完整成功。匿名共享预算耗尽可能返回429。
 - Phys.org 读取官方超导 RSS，保留原标题与原文链接，只展示订阅摘要，不抓文章全文。
 - Google News RSS 用固定查询 `superconduct OR 超导` 发现公开索引的社会、产业、政策或股票资讯。它不保证覆盖未被搜索服务收录的网页或微信公众号内容。
-- 相同 DOI 的论文条目在事务内合并，保留来源链接；只按确定标识去重，不按相似标题猜测。
-- 自动条目保存 `content_type`、`display_kind`、发现来源、原文来源和相关性命中依据。Phys.org 的真实内容类型为科研报道，但按产品约定展示在期刊论文栏；Google News 为社会/产业资讯并展示在新闻栏。
+- 相同 DOI 或规范化原文 URL 的条目在事务内合并，保留来源链接；两个已知不同 DOI 不因错误复用同一URL而合并，不按相似标题猜测。预印本补充信息不把已经发表的条目退回预印本；聚合索引笼统的 journal-article 类型也不覆盖出版商明确的新闻标识。
+- 自动条目保留 `content_type`、发现/原文来源与相关性依据，但分栏按内容语义：Phys.org 科研报道、出版社新闻及社会/产业资讯进入新闻；arXiv等进入预印本；正式期刊条目进入期刊栏。已知 Nature新闻、APS Physics、ACS C&EN 和 Science新闻栏目按报道识别。旧 display_kind 不再决定分栏，计数、分页和公开返回使用同一语义，不需先批量改写历史记录。新期刊类型使用 journal_article，不以元数据冒称完成同行评审核验。
 - 页面按发表时间倒序，以 News、Preprints、Articles 三列并列展示；每列固定请求所属类型且每页 5 条，三列独立维护页码和翻页状态。只有年/月的日期明确标注精度。
 - 三栏默认只显示北京时间当前自然周（周一零点至下周一零点）。翻页保留周锚点，末页或本周为空时提供“历史更多”，按发表时间从新到旧展示其余已收录条目，并可返回本周。仅年/月或未知日期不推定属于本周，保留在历史入口；计数和分页由服务端同一条件约束。旧 API 无 period 参数时保持全量兼容。
 - 公开页面不展示来源更新状态面板、采集告警、错误码、最后成功时间或订阅窗口说明；后台仍保存采集状态用于运行诊断。页面继续区分资讯加载中、暂无条目和请求失败，保留列表失败后的重试入口。
@@ -22,7 +23,7 @@
 - **品牌 Hero**：页面显示 `Superconduct Wiki / 超导维基`、吉林大学物理学院物质模拟方法与软件教育部重点实验室署名和平台能力简介；仅保留跳转 Explore（`/search`）的 `Start Exploring / 开始探索` 主按钮。
 - **三列资讯流**：自动资讯分为 News、Preprints、Articles 三栏；桌面端三列并排、窄屏纵向排列，每栏最多显示 5 条并独立使用 `Previous`/`Next` 翻页。三栏保持等高，每个资讯槽位使用统一高度，分页控件固定在栏底部对齐。
 - **简洁列表**：默认显示标题、作者、来源类型及自动研究分类标签，隐藏完整摘要避免占满屏幕。卡片按屏幕宽度统一保留足够槽位高度，家族标签超出一行时显示 `+N`，详情展开全部标签。
-- **详情抽屉**：点击任意条目，右侧滑出半屏抽屉展示完整信息（摘要、期刊、DOI、多来源链接、发表与采集时间）。
+- **详情抽屉**：点击条目打开右侧抽屉。原文只呈现一个入口，优先使用安全的条目原文URL，主URL无效时取安全备用链接；后台多来源追溯保留，不重复展示同URL的不同角色。只有期刊条目显示“期刊”字段，新闻不因刊载来源而被称为期刊论文。原文能否直达仍受外站访问条件影响。
 - **类型标签颜色**：新闻用浅蓝色（#e3f2fd），预印本用浅紫色（#f3e5f5），期刊论文用浅绿色（#e8f5e9），低饱和度视觉舒适。
 - **交互反馈**：列表项悬停显示背景色变化和手型光标；点击关闭按钮或遮罩层关闭抽屉。
 - **响应式设计**：抽屉在桌面端占 50% 宽度，移动端全屏显示。
@@ -34,6 +35,9 @@ Docker Compose 以 `news-scheduler` 运行该调度进程，并以 `news-worker`
 Redis 互斥锁防止并发采集。
 macOS 的资讯 Worker 使用 RQ SpawnWorker，以新解释器执行任务，避免 fork 后系统网络库触发 Objective-C 崩溃；Linux 仍使用原 Worker。启动日志记录实际 Worker 类名。
 任务最长 900 秒，单请求有限重试；失败不前移成功水位，不清空已有资讯。
+
+期刊入口或后续页部分失败时，保留已经取得的有效记录，来源记为 partial，不推进 last_success_at；
+partial 和 failed 均按一小时重试。401/403/429 和错误请求分别记录稳定错误码，日志不包含私有Key。
 
 ## 自动研究分类
 
@@ -61,7 +65,7 @@ news_feed_material_families。分类保存研究类型、理论子类、输入�
 家族关联只引用已有 material_families；资讯删除或合并时级联删除对应附属记录。无正式 papers/材料/物性表写入。
 来源请求固定白名单端点，响应限 5 MiB；arXiv 请求间隔至少 3.1 秒，其他来源至少 1 秒。
 科学元数据与 Phys.org 连接不继承系统代理，避免本地代理故障中断论文采集；Google News 连接保留系统代理，以适应受限网络。单个来源的连接失败仍只记录该来源失败。
-通用来源首次回看默认 7 天，后续重叠 2 天；OpenAlex 每次至少回看出版日期 30 天并依靠身份键去重。默认最多 100 页，超限、损坏响应和来源错误显式失败。
+通用来源首次回看默认 7 天，后续重叠 2 天；期刊发现与 OpenAlex 至少回看发表日期 30 天，并依靠身份键去重。期刊索引默认每查询最多 100 页，其有效部分与未完成状态分别保存，不伪装完整成功。
 RSS 只能补回当前订阅窗口；已移除的历史内容无法保证找回。Crossref 标题筛选及 OpenAlex 的保守期刊/相关性规则会漏掉边界内容，不承诺覆盖全部超导论文。当前自动过滤只能阻止未来误收；规则收紧前写入的 Zenodo 历史条目由 [Issue #92](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/92) 通过独立、可审计的数据清理流程处理。
 运行命令不会自动建表，生产迁移和进程部署仍需操作者明确执行。
 
@@ -79,6 +83,7 @@ RSS 只能补回当前订阅窗口；已移除的历史内容无法保证找回�
 本轮 Go 全包测试仍有论文证据审核测试 TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction 的既有失败，已在未修改 HEAD 副本复现；未把定向资讯测试当作全包通过。
 
 ## 相关变更记录
+[Feature #160](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/160) 更新内容分栏、单原文入口与期刊发现；[研究](../specs/160-news-source-semantics/research.md)和[验证记录](../specs/160-news-source-semantics/quickstart.md)区分代码实现、真实入口结果、外站访问限制与部署状态。
 [Bug #157](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/157) 修复 macOS 资讯采集的 fork 崩溃，恢复本地采集及本周展示；[诊断与验收](../specs/157-macos-news-worker/spec.md)。来源网络失败与 Worker 恢复分开记录，不将空列表解释为没有相关文献。
 [Feature #156](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/156) 移除公开资讯页的来源更新状态展示，保留条目来源信息与后台采集诊断；[规格](../specs/156-remove-news-source-status/spec.md)。
 [Feature #153](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/153) 增加自动分类标签；

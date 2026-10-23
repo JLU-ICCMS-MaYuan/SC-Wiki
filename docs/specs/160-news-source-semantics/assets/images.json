@@ -1,0 +1,40 @@
+[
+  {
+    "id": "IMG-001",
+    "upload_order": 1,
+    "original_name": "codex-clipboard-b3eac101-2a0d-4a13-9188-978da5010ac2.png",
+    "locator": "docs/specs/160-news-source-semantics/assets/IMG-001.png",
+    "status": "local_verified",
+    "user_context": "资讯分栏与原文链接问题",
+    "related": [
+      "US1",
+      "US2"
+    ],
+    "sha256": "d864c5a5e97b339ae561eee6f8fc7c3ff3066d107f9bd6d31e45edf55f3b6c7e",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3402,
+      1396
+    ],
+    "verification": "2026-10-23 读取原图并核验尺寸和SHA256，无派生替代"
+  },
+  {
+    "id": "IMG-002",
+    "upload_order": 2,
+    "original_name": "codex-clipboard-ad8811e1-6f33-42fa-9e77-1a9b64a50999.png",
+    "locator": "docs/specs/160-news-source-semantics/assets/IMG-002.png",
+    "status": "local_verified",
+    "user_context": "资讯分栏与原文链接问题",
+    "related": [
+      "US1",
+      "US2"
+    ],
+    "sha256": "f8661aed8ed2650935c48e1a08f09b7e760a38a32fb31d270f040c2e6152f3c2",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3840,
+      1948
+    ],
+    "verification": "2026-10-23 读取原图并核验尺寸和SHA256，无派生替代"
+  }
+]

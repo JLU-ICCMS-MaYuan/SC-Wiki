@@ -35,6 +35,14 @@ type newsFeedFamily struct {
 	NameEn string `json:"name_en"`
 }
 
+// 内容决定分栏；display_kind 不再允许将科研报道放进期刊。与 Python content_kind 保持一致。
+const newsContentKind = "CASE WHEN kind = 'news' OR content_type IN ('research_report','social_industry') OR source IN ('physorg','google_news') OR doi LIKE '10.1038/d41586-%' OR doi LIKE '10.1038/news.%' OR doi LIKE '10.1103/physics.%' OR doi LIKE '10.1021/cen-%' OR url LIKE 'http%://physics.aps.org/%' OR url LIKE 'http%://cen.acs.org/%' OR url LIKE 'http%://www.science.org/content/article/%' OR url LIKE 'http%://www.science.org/news/%' OR url LIKE 'http%://www.sciencemag.org/content/article/%' OR url LIKE 'http%://www.sciencemag.org/news/%' OR url LIKE 'http%://www.nature.com/news/%' THEN 'news' WHEN kind = 'preprint' THEN 'preprint' ELSE 'journal_article' END"
+
+type newsFeedRow struct {
+	models.NewsFeedItem
+	EffectiveKind string
+}
+
 func newsPageParameter(c *gin.Context, name string, fallback, maximum int) (int, bool) {
 	value, err := strconv.Atoi(c.DefaultQuery(name, strconv.Itoa(fallback)))
 	return value, err == nil && value > 0 && value <= maximum
@@ -74,7 +82,7 @@ func listNewsFeedAt(c *gin.Context, now time.Time) {
 	fail := func() { c.JSON(http.StatusInternalServerError, gin.H{"error": "资讯读取失败，请稍后重试"}) }
 	query := database.DB.WithContext(c.Request.Context()).Model(&models.NewsFeedItem{})
 	if kind != "" {
-		query = query.Where("CASE WHEN display_kind = '' THEN kind ELSE display_kind END = ?", kind)
+		query = query.Where(newsContentKind+" = ?", kind)
 	}
 	// 不把仅年/月的日期臆测为本周；历史是补集，保留所有其他已收录条目。
 	withinWeek := "date_precision = 'day' AND published_at >= ? AND published_at < ?"
@@ -88,8 +96,8 @@ func listNewsFeedAt(c *gin.Context, now time.Time) {
 		fail()
 		return
 	}
-	rows := make([]models.NewsFeedItem, 0)
-	if err := query.Order("published_at DESC").Order("first_seen_at DESC").Order("id DESC").Limit(size).Offset((page - 1) * size).Find(&rows).Error; err != nil {
+	rows := make([]newsFeedRow, 0)
+	if err := query.Select("news_feed_items.*, " + newsContentKind + " AS effective_kind").Order("published_at DESC").Order("first_seen_at DESC").Order("id DESC").Limit(size).Offset((page - 1) * size).Find(&rows).Error; err != nil {
 		fail()
 		return
 	}
@@ -122,7 +130,14 @@ func listNewsFeedAt(c *gin.Context, now time.Time) {
 		}
 	}
 	for _, row := range rows {
-		item := newsFeedView{NewsFeedItem: row, Authors: []string{}, Links: []newsFeedLink{}, Notice: "自动采集，未经本站审核", MaterialFamilies: []newsFeedFamily{}}
+		row.Kind, row.DisplayKind = row.EffectiveKind, row.EffectiveKind
+		if row.Kind == "news" && row.ContentType != "social_industry" {
+			row.ContentType = "research_report"
+		}
+		if row.Kind == "journal_article" {
+			row.ContentType = "journal_article"
+		}
+		item := newsFeedView{NewsFeedItem: row.NewsFeedItem, Authors: []string{}, Links: []newsFeedLink{}, Notice: "自动采集，未经本站审核", MaterialFamilies: []newsFeedFamily{}}
 		if result, ok := classifications[row.ID]; ok && result.ContentHash == fmt.Sprintf("%x", sha256.Sum256([]byte(row.Title+"\x00"+row.Summary))) {
 			item.PaperType = result.PaperType
 			if result.PaperType != nil && *result.PaperType == "theoretical" {

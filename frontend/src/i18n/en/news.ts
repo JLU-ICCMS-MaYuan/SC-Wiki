@@ -32,7 +32,8 @@ export default {
   loadingFeed: 'Loading news…',
   feedLoadFailed: 'Failed to load the feed. Please retry. This does not mean there is no news.',
   feedEmpty: 'No news matches the current filter',
-  feedEmptyHint: 'Try a different content type, or check whether the sources below have been collected successfully.',
+  weekEmptyHint: 'No items collected this week. Use More history to browse other items.',
+  historyEmptyHint: 'No historical items have been collected.',
   publishedAt: 'Published: {date}',
   publishedLabel: 'Published: ',
   etAl: ' et al.',
@@ -51,7 +52,7 @@ export default {
   summaryLabel: 'Abstract',
   summarySourceLabel: 'Abstract source: ',
   doiLabel: 'DOI: ',
-  originalLinks: 'Original links',
+  originalLinks: 'Original link',
 
   // Date display
   dateNotProvided: 'Date not provided',

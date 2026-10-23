@@ -6,6 +6,8 @@
 
 **状态**：需求已确认
 
+> 2026-10-23 后续修订：[#160](../160-news-source-semantics/spec.md) 按用户新要求取消 Phys.org 位于期刊栏的例外，统一按内容类型分栏，并更新单原文入口和期刊发现策略。下文原有 FR-006、SC-004 及对应澄清保留为历史，不作为当前实现规则。
+
 ## 背景与目标
 
 已完成的 [#63](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/63) 每日资讯功能只定时采集 arXiv、Crossref 和 Phys.org 三个固定端点，再展示已保存的结果。它不能保证发现 APS、ACS、Nature、Science 等出版商的最新超导论文，也没有覆盖超导产业、政策或股票资讯。
