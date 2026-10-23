@@ -7,7 +7,7 @@ import theme from '../../frontend/src/theme'
 import { LanguageProvider } from '../../frontend/src/context/LanguageContext'
 import AuthDemo from '../../frontend/src/demos/auth/AuthDemo'
 import { createDemoAuth } from '../../frontend/src/demos/auth/mockAuth'
-import { advanceOrbit, DEFAULT_SPEED, MAX_SPEED, normalizeAngle, pushOrbit, RESTART_SPEED, TAU } from '../../frontend/src/demos/auth/orbitMotion'
+import { advanceOrbit, DEFAULT_SPEED, MAX_SPEED, normalizeAngle, pushOrbit, RESTART_SPEED, TAU } from '../../frontend/src/features/auth/orbitMotion'
 
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.useRealTimers() })
 

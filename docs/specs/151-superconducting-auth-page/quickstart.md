@@ -77,3 +77,12 @@ node "tests/02_identity_governance/auth-demo-browser.mjs"
 ## 第四版当前展示（2026-10-23）
 
 按最新反馈移除磁场线、屏蔽电流、图例及理想态标注。两层云团数量各减半（尾迹 28→14、局部 16→8），雾量约减少 50%。1 秒一圈上限、停靠、低速重启与找回密码演示不变。TypeScript、独立打包、18 个浏览器布局/状态与核心交互回归通过，零 API 请求。最新证据见 assets/revision-4/；第三版图示为历史，不是当前页面。
+
+## 正式页面使用（用户已批准落地）
+
+现在访问 <http://127.0.0.1:5173/auth>，或点击侧栏/上传页登录入口。该页调用真实认证服务，需使用真实账号；Demo 地址仍为 /auth-demo.html，仅供演示。
+
+忘记密码：填写绑定邮箱，收到六位验证码后验证身份，设置新密码并确认，成功后返回登录。默认 60 秒重发冷却，验证码和改密授权各 5 分钟有效；失败时按页面提示重新获取。需要当前 Go 进程的 SMTP、Redis 和数据库配置可用。
+
+本次实现与验证详见 [正式验收](acceptance-production.md)。测试时不要在真实数据库创建无关账号；隔离浏览器夹具仅在显式环境变量下启动：
+在 goserver/ 使用 ../.local/go/bin/go test ./handlers -run ^TestAuthBrowserFixture$ -count=1 -timeout 10m，并设置 SCWIKI_AUTH_BROWSER_FIXTURE 指向临时状态 JSON；在仓库根运行 tests/02_identity_governance/auth-production-browser.mjs（可指定 PLAYWRIGHT_MODULE、CHROMIUM_PATH、AUTH_FIXTURE_FILE、FRONTEND_URL）。结束后创建状态 JSON 路径加 .stop 的文件退出夹具。该夹具只编译进测试，不进入生产。

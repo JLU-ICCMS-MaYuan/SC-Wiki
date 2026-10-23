@@ -22,3 +22,7 @@
 ## 第四版当前状态
 
 世界坐标云团减为 14 个，近表面云团减为 8 个；其他时间和运动状态不变。第三版磁场组件已移除。
+
+## 正式认证状态
+
+生产用户沿用 users 表，不新增持久化字段。Redis 保存 password-reset 的验证码摘要/错误次数和 password-reset-grant 的随机令牌摘要/错误次数，均有 5 分钟 TTL；scope 包含账号 ID、邮箱与会话版本。重发替换验证码并撤销令牌，成功改密增版本。浏览器只有当前页面内存持有验证密码和 reset_token，不写 URL/localStorage。真实 AuthContext 继续负责正式 token/user 保存，成功重置不自动登录。

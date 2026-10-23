@@ -39,7 +39,7 @@ vi.mock('../../frontend/src/context/AuthContext', () => ({
 }))
 
 import AppShell from '../../frontend/src/components/AppShell'
-import AuthDialog from '../../frontend/src/components/AuthDialog'
+import AuthPage from '../../frontend/src/pages/AuthPage'
 import LazyRoutes from '../../frontend/src/LazyRoutes'
 import RoleRoute from '../../frontend/src/components/RoleRoute'
 
@@ -95,10 +95,10 @@ describe('身份与工作台导航', () => {
 
 describe('注册入口', () => {
   it('取消注册审批选项并明确公开实名与十位密码', () => {
-    render(<MemoryRouter><AuthDialog open onClose={() => {}} /></MemoryRouter>)
+    render(<MemoryRouter><AuthPage /></MemoryRouter>)
     fireEvent.click(screen.getByRole('tab', { name: '注册' }))
-    expect(screen.getByLabelText('真实姓名（选填，填写后公开）')).toBeInTheDocument()
-    expect(screen.getByText('至少 10 位')).toBeInTheDocument()
+    expect(screen.getByLabelText('真实姓名（可选）')).toBeInTheDocument()
+    expect(screen.getByText('至少 10 个字符，最多 72 字节')).toBeInTheDocument()
     expect(screen.queryByText(/申请成为管理员/)).not.toBeInTheDocument()
   })
 })

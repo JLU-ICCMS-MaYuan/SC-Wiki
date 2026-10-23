@@ -1,0 +1,100 @@
+{
+  "fixture": {
+    "cache": "isolated miniredis",
+    "database": "isolated SQLite",
+    "mail": "capturing Mailer interface; no external delivery",
+    "url": "http://127.0.0.1:58047"
+  },
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/auth/username-availability"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/verify-email"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/password-reset/request"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/password-reset/verify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/password-reset/verify"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/password-reset/complete"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/username-availability"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/resend-verification"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/verify-email"
+    }
+  ],
+  "scenarios": [
+    "侧栏入口进入无侧栏独立页；返回完整来源 query/hash",
+    "真实注册、用户名校验、邮件捕获、验证码消费、会话建立并返回上传来源",
+    "真实找回：错误验证码恢复、确认不一致、新密码登录、旧密码拒绝、旧 JWT 撤销、来源回跳",
+    "恶意外站回跳被丢弃，默认返回热点",
+    "首次真实发信失败保留账号；刷新后未验证登录继续重发并验证"
+  ],
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 900,
+      "state": "login-zh"
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "state": "login-zh"
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "state": "login-zh"
+    },
+    {
+      "width": 320,
+      "height": 720,
+      "state": "login-zh"
+    }
+  ],
+  "errors": []
+}

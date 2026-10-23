@@ -21,7 +21,7 @@
 
 ## US3：正式集成（P2，用户评审通过后才开始）
 
-- [ ] T009 [US3] 经明确批准后在 frontend/src/App.tsx、components/AppShell.tsx、pages/UploadPage.tsx 接入独立 /auth 与统一入口，复用真实认证及合法站内回跳。
+- [x] T009 [US3] 经明确批准后在 frontend/src/App.tsx、components/AppShell.tsx、pages/UploadPage.tsx 接入独立 /auth 与统一入口，复用真实认证及合法站内回跳。
 - [ ] T010 [US3] 验证正式认证，更新 docs/overview/README.md 与 docs/overview/06_Researcher_Community_Forum/registration-login-and-jwt.md，核验远程 Spec 后处理 Issue 关闭门。
 
 ## 依赖、覆盖与独立验收
@@ -46,7 +46,7 @@ T001：原文、两张原图、Issue #151 及 FR/SC 映射齐备；T002/T003/T00
 
 T011/T012 完成后执行 T013；正式 T009/T010 仍待用户批准。
 
-- [ ] T014 [US3] 正式接入获批后，在 docs/specs/151-superconducting-auth-page/contracts/ 确认真实找回密码契约，结合届时 goserver/handlers/auth.go、邮件服务及 frontend/src/context/AuthContext.tsx 完成发信、验证码、安全改密和真实验收；不得直接发布 Demo 服务。
+- [x] T014 [US3] 正式接入获批后，在 docs/specs/151-superconducting-auth-page/contracts/ 确认真实找回密码契约，结合届时 goserver/handlers/auth.go、邮件服务及 frontend/src/context/AuthContext.tsx 完成发信、验证码、安全改密和真实验收；不得直接发布 Demo 服务。
 
 第二版证据：T011/T013 见 assets/revision-2/results.json 的 speedCap、stopCoordinates、trackStopRestart、vapor；T012/T013 见 12 项 Vitest 及浏览器找回全流程。T014 属于未来正式阶段，不在本次 Demo 授权中。
 
@@ -61,3 +61,15 @@ T011/T012 完成后执行 T013；正式 T009/T010 仍待用户批准。
 ## 第四版：精简视觉
 
 - [x] T018 [US1] 删除 frontend/src/demos/auth/MagneticField.tsx 与相关展示/样式，将 SuperconductorScene.tsx 雾量减半，更新 copy.ts、浏览器断言和本目录证据；覆盖 FR-017/018、SC-010。
+
+## 正式实施（用户已授权）
+
+- [x] T019 [US3] 在 frontend/src/features/auth/、pages/AuthPage.tsx、lib/authNavigation.ts 提取共享界面和真实服务，接入 App.tsx、AppShell.tsx、UploadPage.tsx 的统一登录入口与安全来源回跳。
+- [x] T020 [US3] 在 goserver/handlers/password_reset.go、goserver/main.go 实现公开邮箱验证码找回，补充处理器及验证码隔离/过期/并发测试。
+- [x] T021 [US3] 在 tests/02_identity_governance/ 完成正式路由/服务测试与隔离端到端验证，更新 Overview、当前契约及验收记录，提交本次文件并同步 Issue。
+
+## 正式阶段证据与剩余门槛
+
+T009/T019：生产 /auth、两个入口、站内来源校验及注册/登录端到端通过。T014/T020：Go 公开找回路由及隔离/过期/并发/错误测试通过，邮件组件 TLS/SMTP 测试通过。T021：62 项前端测试、正式构建、隔离真实 HTTP 浏览器与 Overview 更新完成，具体证据见 acceptance-production.md。
+
+T010 保持未完成：Overview 已更新，但公网投递、目标 MySQL 环境验收和远程 Spec 链接仍未完成，不以本地文件存在关闭 Issue。

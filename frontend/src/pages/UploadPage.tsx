@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Box, Typography, Card, CardContent, Button, TextField,
   Paper, Chip, Alert, Snackbar, CircularProgress, LinearProgress,
@@ -12,7 +12,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 import { MaterialStateControlsContext } from '../context/MaterialStateControlsContext'
-import AuthDialog from '../components/AuthDialog'
+import { authHref } from '../lib/authNavigation'
 import UploadTaskCenter from '../components/UploadTaskCenter'
 import MultiFileUploadPanel from '../components/MultiFileUploadPanel'
 import UploadRoleReview from '../components/UploadRoleReview'
@@ -42,11 +42,9 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
   const { user } = useAuth()
   const { t } = useLanguage()
   const navigate = useNavigate()
+  const location = useLocation()
   const fileInput = useRef<HTMLInputElement>(null)
   const uploadXhr = useRef<XMLHttpRequest | null>(null)
-
-  /* ── Auth dialog ───────────────────────────── */
-  const [authOpen, setAuthOpen] = useState(false)
 
   /* ── Tab (paper / json) ────────────────────── */
   const [tab, setTab] = useState(0)
@@ -347,11 +345,10 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
         <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
           {t('upload.loginHint')}
         </Typography>
-        <Button variant="contained" size="large" onClick={() => setAuthOpen(true)}
+        <Button variant="contained" size="large" onClick={() => navigate(authHref(location))}
           sx={{ borderRadius: '999px', px: 6, py: 1.5, fontSize: 16 }}>
           {t('upload.loginRegister')}
         </Button>
-        <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
       </Box>
     )
   }

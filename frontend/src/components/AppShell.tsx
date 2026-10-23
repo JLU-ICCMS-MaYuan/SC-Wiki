@@ -8,7 +8,7 @@ import {
 } from '@mui/icons-material'
 import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
-import AuthDialog from './AuthDialog'
+import { authHref } from '../lib/authNavigation'
 import LanguageSwitcher from './LanguageSwitcher'
 import LlmProviderSwitcher from './LlmProviderSwitcher'
 import SidebarButton from './SidebarButton'
@@ -36,7 +36,6 @@ const AppShell: React.FC = () => {
   const smallScreen = useMediaQuery(theme.breakpoints.down('md'))
   const [collapseChoice, setCollapseChoice] = useState<boolean | null>(null)
   const collapsed = collapseChoice ?? smallScreen
-  const [authOpen, setAuthOpen] = useState(false)
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [communityOpen, setCommunityOpen] = useState(location.pathname.startsWith('/share/'))
   const [communityAnchor, setCommunityAnchor] = useState<HTMLElement | null>(null)
@@ -112,7 +111,7 @@ const AppShell: React.FC = () => {
                 </Tooltip>
               </Box>
               </>
-            ) : <SidebarButton icon={<PersonOutline />} label={t('nav.login')} collapsed={collapsed} onClick={() => setAuthOpen(true)} />}
+            ) : <SidebarButton icon={<PersonOutline />} label={t('nav.login')} collapsed={collapsed} onClick={() => navigate(authHref(location))} />}
           </Box>
         </Box>
       </Box>
@@ -130,7 +129,6 @@ const AppShell: React.FC = () => {
           {t('nav.logout')}
         </MenuItem>
       </Menu>
-      <AuthDialog open={authOpen} onClose={() => setAuthOpen(false)} />
       <Menu anchorEl={communityAnchor} open={Boolean(communityAnchor)} onClose={() => setCommunityAnchor(null)}>
         {communityItems.map(item => <MenuItem key={item.path} selected={isActive(item.path)} onClick={() => { setCommunityAnchor(null); navigate(item.path) }}>{t(item.key)}</MenuItem>)}
       </Menu>

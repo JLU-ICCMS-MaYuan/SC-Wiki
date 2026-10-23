@@ -1,18 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Alert, Button, CircularProgress, IconButton } from '@mui/material'
 import { ArrowBackRounded, ArrowForwardRounded, CheckRounded, EmailOutlined, LockOutlined, VisibilityOffOutlined, VisibilityOutlined } from '@mui/icons-material'
-import type { AuthDemoCopy } from './copy'
-import type { createDemoAuth, DemoError } from './mockAuth'
+import { authCopy, type AuthDemoCopy } from './copy'
+import { passwordError, type AuthService, type AuthFailure } from './service'
 
 interface Props {
-  auth: ReturnType<typeof createDemoAuth>
+  auth: AuthService
   copy: AuthDemoCopy
   lang: 'zh' | 'en'
   initialEmail: string
   onBack: (email: string) => void
+  onBusy?: (busy: boolean) => void
 }
 
-export default function PasswordReset({ auth, copy: c, lang, initialEmail, onBack }: Props) {
+export default function PasswordReset({ auth, copy: c, lang, initialEmail, onBack, onBusy }: Props) {
   const [step, setStep] = useState<'email' | 'code' | 'password' | 'success'>('email')
   const [email, setEmail] = useState(initialEmail)
   const [code, setCode] = useState('')
@@ -20,7 +21,7 @@ export default function PasswordReset({ auth, copy: c, lang, initialEmail, onBac
   const [confirmation, setConfirmation] = useState('')
   const [show, setShow] = useState(false)
   const [grant, setGrant] = useState('')
-  const [error, setError] = useState<DemoError | ''>('')
+  const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [resendAt, setResendAt] = useState(0)
   const [seconds, setSeconds] = useState(0)
@@ -34,6 +35,7 @@ export default function PasswordReset({ auth, copy: c, lang, initialEmail, onBac
     return () => { alive.current = false; auth.cancelPasswordReset(currentEmail.current) }
   }, [auth])
   useEffect(() => { heading.current?.focus() }, [step])
+  useEffect(() => { onBusy?.(busy) }, [busy, onBusy])
   useEffect(() => {
     const update = () => setSeconds(Math.max(0, Math.ceil((resendAt - Date.now()) / 1000)))
     update()
@@ -46,13 +48,17 @@ export default function PasswordReset({ auth, copy: c, lang, initialEmail, onBac
     if (busy) return
     setBusy(true); setError('')
     try { await work() } catch (err) {
-      if (alive.current) setError((err as Error).message as DemoError)
+      if (alive.current) {
+        const failure = err as AuthFailure
+        setError(failure.message)
+        if (failure.resendAfterSeconds) { setSeconds(failure.resendAfterSeconds); setResendAt(Date.now() + failure.resendAfterSeconds * 1000) }
+      }
     } finally { if (alive.current) setBusy(false) }
   }
   const requestCode = async () => {
-    await auth.requestPasswordReset(email)
+    const retry = await auth.requestPasswordReset(email)
     if (!alive.current) return
-    setResendAt(Date.now() + 60_000); setSeconds(60); setStep('code'); setCode('')
+    setResendAt(Date.now() + (retry ?? 60) * 1000); setSeconds(retry ?? 60); setStep('code'); setCode('')
   }
   const submit = (event: React.FormEvent) => {
     event.preventDefault()
@@ -64,6 +70,8 @@ export default function PasswordReset({ auth, copy: c, lang, initialEmail, onBac
         setGrant(result); setCode(''); setStep('password')
       } else if (step === 'password') {
         if (password !== confirmation) throw new Error('passwordMismatch')
+        const invalid = passwordError(password)
+        if (invalid) throw new Error(invalid)
         await auth.resetPassword(email, grant, password)
         if (!alive.current) return
         setGrant(''); setPassword(''); setConfirmation(''); setStep('success')
@@ -102,7 +110,7 @@ export default function PasswordReset({ auth, copy: c, lang, initialEmail, onBac
               <input id="reset-confirm" type={show ? 'text' : 'password'} autoComplete="new-password" required minLength={10} value={confirmation} onChange={event => setConfirmation(event.target.value)} aria-invalid={error === 'passwordMismatch'} />
             </div>
           </>}
-          {error && <Alert severity="error" className="sc-form-error">{c.errors[error] || c.errors.expired}</Alert>}
+          {error && <Alert severity="error" className="sc-form-error">{c.errors[error] || authCopy[lang].errors[error as keyof typeof authCopy.zh.errors] || c.errors.expired}</Alert>}
           <Button className="sc-submit" variant="contained" fullWidth type="submit" disabled={busy} endIcon={busy ? <CircularProgress size={17} color="inherit" /> : <ArrowForwardRounded />}>
             {busy ? c.busy : step === 'email' ? c.sendReset : step === 'code' ? c.verify : c.savePassword}
           </Button>

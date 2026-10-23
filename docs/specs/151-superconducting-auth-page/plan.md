@@ -61,3 +61,11 @@ FR-014/SC-008 → orbitMotion 与浏览器高频采样 → T015；FR-015～016/S
 ## 第四版调整
 
 按最新反馈删除 MagneticField.tsx、相关 SVG marker、图例、无用样式及双语文案；SuperconductorScene 两层云团数量各减半，运动/认证逻辑保持。FR-017/018、SC-010 对应 T018；使用既有浏览器回归及新旧截图验证。
+
+## 正式落地（2026-10-23）
+
+用户已确认第四版并授权实施。将视觉组件、PasswordReset、双语文案、样式和认证表单移入 frontend/src/features/auth/，用小型 AuthService 接口隔离 Demo 内存服务和生产 AuthContext/API。AuthPage 位于主 AppShell 外，AppShell 与 UploadPage 统一调用安全 returnTo 构造函数；所有生产调用迁移后删除旧 AuthDialog，相关测试迁移到 AuthPage，避免保留重复认证实现。
+
+Go 新增独立 password_reset.go，复用现有 SendPasswordChangeCode 邮件模板、checkSendLimits、HMAC/Redis 原子消费与 JWT session_version。缓存 challenge 使用独立 scope，发码/验证/改密在用户行锁下串行，避免旧会话授权跨越改密。新增真实 HTTP 处理器集成测试和隔离浏览器端到端验收；公网 SMTP 投递不擅自发往用户邮箱。
+
+FR-019 → T019 前端路由/服务 → 正式浏览器跳转与注册登录；FR-020/021 → T020 Go API及缓存 → 注册码隔离、过期、并发、改密撤销测试；SC-011 → T021 集成与文档。T009/T014 对应落地，T010 含远程链接门仍不得虚构完成。

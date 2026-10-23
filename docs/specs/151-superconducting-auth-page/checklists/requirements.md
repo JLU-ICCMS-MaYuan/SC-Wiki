@@ -34,3 +34,10 @@
 
 - [x] CHK020 最新三句反馈逐字保存，FR-017/018 明确覆盖旧磁场展示及全量浓雾；原始论文与视频依据保留为历史。[spec.md]
 - [x] CHK021 两层云团各减半、磁场和屏蔽电流及图例不存在，保持速度/停靠与认证边界。[SC-010；assets/revision-4/results.json、design-qa.md]
+
+## 正式落地确认与验证
+
+- [x] CHK022 用户原文“ok，开始落地。”已保存，第四版视觉确认和正式实施授权成立；旧“仅 Demo”文字为历史阶段约束。[spec.md 正式实施基线]
+- [x] CHK023 正式契约覆盖真实认证、来源安全、验证码/改密授权隔离、失败恢复和旧会话撤销，且任务映射和验收证据齐备。[contracts/production-auth.md、acceptance-production.md]
+- [x] CHK024 Overview 只写已实现行为，隔离验证、外部 SMTP、MySQL 与全量测试失败边界明确。[docs/overview/06_Researcher_Community_Forum/registration-login-and-jwt.md、acceptance-production.md]
+- [ ] CHK025 远程 Spec 链接、实际公网邮箱收信与目标环境验收完成。[未推送、未发送真实外部测试邮件，Issue 保持开放]

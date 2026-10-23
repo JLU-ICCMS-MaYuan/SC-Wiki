@@ -31,6 +31,7 @@ function DraftPage() {
 
 function renderShell(path = '/news') {
   return render(<MemoryRouter initialEntries={[path]}><LanguageProvider><Routes>
+    <Route path="/auth" element={<output aria-label="认证地址">{window.location.pathname}</output>} />
     <Route element={<AppShell />}>
       <Route path="/" element={<Navigate to="/news" replace />} />
       <Route path="*" element={<DraftPage />} />
@@ -111,7 +112,7 @@ describe('全角色统一侧栏', () => {
     expect(screen.getByRole('button', { name: '登录' })).toBeInTheDocument()
   })
 
-  it('收起时能切换中英文并保留表单，模型弹窗与登录注册可打开', async () => {
+  it('收起时能切换中英文并保留表单，模型弹窗可打开且登录跳转独立路由', async () => {
     const user = userEvent.setup()
     renderShell('/upload')
     fireEvent.change(screen.getByLabelText('未保存内容'), { target: { value: '保留' } })
@@ -127,9 +128,9 @@ describe('全角色统一侧栏', () => {
     expect(screen.getByRole('dialog')).toHaveTextContent('OpenAI · server-model')
     await user.click(screen.getByRole('button', { name: '取消' }))
     await user.click(await screen.findByRole('button', { name: '登录' }))
-    expect(screen.getByRole('dialog')).toBeInTheDocument()
-    await user.click(screen.getByRole('tab', { name: '注册' }))
-    expect(screen.getByLabelText('真实姓名（选填，填写后公开）')).toBeInTheDocument()
+    expect(screen.getByLabelText('认证地址')).toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: '主导航' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
   it('键盘可以展开侧栏并聚焦、激活导航', async () => {

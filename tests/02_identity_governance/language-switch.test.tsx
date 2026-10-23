@@ -18,7 +18,6 @@ vi.mock('../../frontend/src/context/AuthContext', () => ({
   useAuth: () => ({ user: null, logout: vi.fn() }),
 }))
 
-vi.mock('../../frontend/src/components/AuthDialog', () => ({ default: () => null }))
 
 const STORAGE_KEY = 'sc-wiki.language'
 

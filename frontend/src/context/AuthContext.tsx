@@ -62,7 +62,7 @@ function clearAuth() {
  *
  * AuthContext 是模块（非组件渲染路径），不能使用 useLanguage。因此本文件抛出的
  * Error.message 一律是稳定的机器键（如 'loginFailed'、'invalidCredentials'），
- * 由消费组件（AuthDialog / AccountPage）在渲染时用 `t('account.' + message)`
+ * 由消费组件（AuthPage / AccountPage）在渲染时用 `t('account.' + message)`
  * 映射为界面文案，从而随语言切换。
  *
  * 后端返回的中文 detail 是服务端数据（backend/api/auth_routes.py 的常量），
