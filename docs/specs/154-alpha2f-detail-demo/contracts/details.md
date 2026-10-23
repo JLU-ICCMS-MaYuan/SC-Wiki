@@ -26,3 +26,7 @@ quality.dos_mode_integral 在原胞和完整绝对密度条件满足时含 integ
 新标签链接包含 target、target_id、state_key、collection_version、run、curve 和 kind。不调用保存接口，详情使用已保存的材料条件。旧地址兼容 curve 推断 kind；版本变化提供打开最新结果。历史切换仅内存读取，异步请求过期时不覆盖新选择。
 
 相同输入摘要下已有数值的 succeeded/needs_review 运行不可被重试改写；复用原运行。更改标定、状态依赖或算法版本才生成新数值运行。无曲线的失败/发现记录沿既有重试机制处理。
+
+## 子图显示框扩展
+
+CurveCalibration 可提供 display_bbox（原图绝对像素四元组，或 null），必须包含 roi 并位于原图内。提取输出保留该字段，但不平移或重写点坐标；新增字段本身不改变谱数学。旧记录缺字段时前端在 ROI 邻域检测图框，可信边框和合理显示框用于 viewBox/clipPath；过大的模型框不直接采用，无法独立定位时明确提示。

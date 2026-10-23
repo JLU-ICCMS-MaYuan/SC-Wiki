@@ -33,3 +33,7 @@
 使用正式 FastAPI 路由和本机业务库只读事务（测试注入任务所有者，未经过真实认证/网关）：列表、290 GPa DOS 原图、CSV、历史均返回 200。数据库未写入。证据见 ../155-phonon-dos-detail-demo/production-http-readonly.json。该结果证明当前数据可经路由序列化和存储读取，不能反推过去截图 500 的唯一原因。
 
 相同输入重复提取时，已有数值的 needs_review 结果复用，不覆盖原观测；新增缓存不可变性回归通过。
+
+## 子图裁切与比例修订
+
+本轮更新为 88 项后端/数学、33 项前端通过，真实谱快照验证裁切和同像素叠加、左右分区及滑动选项。详见 [裁切验证](../154-alpha2f-detail-demo/crop-validation.md)，后续自动化方案见 [裁切调研](../154-alpha2f-detail-demo/crop-research.md)。

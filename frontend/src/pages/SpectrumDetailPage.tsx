@@ -154,8 +154,11 @@ export default function SpectrumDetailPage() {
       </DetailSection>}
       {imageError && <Alert severity="warning" sx={{ mb: 2 }}>{imageError}<Button onClick={() => setImageRetry(value => value + 1)}>重新读取原图</Button></Alert>}
       {!primary.length && <Alert severity="info" sx={{ mb: 2 }}>尚未得到数值曲线。{(selected.result.failures || selected.result.quality?.limitations || []).map((value: unknown) => typeof value === 'string' ? value : JSON.stringify(value)).join('；')}</Alert>}
-      <SpectrumResult key={selected.id + selected.run.id + kind} item={selected} curves={primary} image={image} retryImage={() => setImageRetry(value => value + 1)} />
-      {!!primary.length && <><SpectrumMetrics item={selected} curves={primary} history={historical}/><SpectrumPoints key={selected.run.id} curves={primary}/></>}
+      <Box data-testid="spectrum-analysis-grid" sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0,1fr)', lg: primary.length ? 'minmax(0,.85fr) minmax(0,1.15fr)' : 'minmax(0,1fr)' }, gap: 2, alignItems: 'start', mb: 2, '& > .MuiPaper-root': { mb: 0 } }}>
+        <SpectrumResult key={selected.id + selected.run.id + kind} item={selected} curves={primary} image={image} retryImage={() => setImageRetry(value => value + 1)} />
+        {!!primary.length && <SpectrumMetrics item={selected} curves={primary} history={historical}/>}
+      </Box>
+      {!!primary.length && <SpectrumPoints key={selected.run.id} curves={primary}/>}
     </>}
   </Box>
 }

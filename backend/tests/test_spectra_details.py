@@ -61,6 +61,25 @@ def test_alpha_independent_amplitude_evidence_required():
     assert extract_panel(image, panel)["quality"]["integrals"]["raw"]["status"] == "unavailable"
 
 
+def test_display_crop_retains_source_coordinates_and_does_not_change_points():
+    image, panel = fixture()
+    before = extract_panel(image, panel)
+    panel["curves"][0]["display_bbox"] = [15,5,145,90]
+    result = extract_panel(image, panel)
+    assert result["curves"][0]["display_bbox"] == [15,5,145,90]
+    assert result["curves"][0]["points"] == before["curves"][0]["points"]
+    panel["curves"][0]["display_bbox"] = [15,5,180,120]
+    result = extract_panel(image, panel)
+    assert not result["curves"] and "显示裁切框超出原图" in result["failures"][0]["reason"]
+
+
+def test_display_crop_cannot_cut_through_curve_roi():
+    from backend.spectra.contracts import PanelCalibration
+    _, panel = fixture(); panel["curves"][0]["display_bbox"] = [30,10,140,80]
+    with pytest.raises(ValueError, match="显示裁切框必须完整包含"):
+        PanelCalibration.model_validate(panel)
+
+
 def test_panel_identity_ignores_model_labels_and_roi_but_keeps_material():
     _, panel = fixture(); changed = copy.deepcopy(panel)
     changed["panel_id"] = "renamed-by-model"

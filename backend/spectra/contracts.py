@@ -35,6 +35,7 @@ class CurveCalibration(BaseModel):
     projection: str | None = None
     color: Literal["red", "blue", "green", "magenta", "olive"]
     roi: tuple[int, int, int, int]
+    display_bbox: tuple[int, int, int, int] | None = None
     frequency_direction: Literal["x", "y"]
     frequency_ticks: list[tuple[float, float]] = Field(min_length=2)
     amplitude_ticks: list[tuple[float, float]] = Field(min_length=2)
@@ -58,6 +59,11 @@ class CurveCalibration(BaseModel):
 
     @model_validator(mode="after")
     def validate_axes(self):
+        if self.display_bbox is not None:
+            x0, y0, x1, y1 = self.display_bbox
+            rx0, ry0, rx1, ry1 = self.roi
+            if not (0 <= x0 < x1 and 0 <= y0 < y1 and x0 <= rx0 < rx1 <= x1 and y0 <= ry0 < ry1 <= y1):
+                raise ValueError("显示裁切框必须完整包含当前曲线提取框")
         for ticks in (self.frequency_ticks, self.amplitude_ticks):
             if not all(math.isfinite(v) for pair in ticks for v in pair):
                 raise ValueError("坐标刻度必须为有限数值")

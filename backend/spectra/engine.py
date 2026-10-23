@@ -83,6 +83,8 @@ def extract_panel(rgb: np.ndarray, calibration: dict, *, references: dict | None
                 steps = np.diff([v for _, v in ordered])
                 if not (np.all(steps > 0) or np.all(steps < 0)):
                     raise ValueError("坐标刻度不单调，不能使用线性标定")
+            if c.display_bbox and (c.display_bbox[2] >= rgb.shape[1] or c.display_bbox[3] >= rgb.shape[0]):
+                raise ValueError("显示裁切框超出原图")
             ticks = [[p, v * FREQUENCY_FACTORS[c.frequency_unit]] for p, v in c.frequency_ticks]
             zero_ticks = [p for p, value in ticks if value == 0]
             if len(zero_ticks) != 1:
@@ -107,6 +109,7 @@ def extract_panel(rgb: np.ndarray, calibration: dict, *, references: dict | None
             failures.append(dict(curve_id=c.id, reason=str(exc)))
             continue
         curve["source_frequency_unit"] = c.frequency_unit
+        curve["display_bbox"] = list(c.display_bbox) if c.display_bbox else None
         curve["canonical_frequency_unit"] = "THz"
         curve["physical_definition_confirmed"] = c.physical_definition_confirmed
         # 已有实际单位 DOS 的密度随 dν 转换；像素相对幅值不用伪单位转换。

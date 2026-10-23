@@ -17,7 +17,10 @@ CALIBRATION_PROMPT = """你为科学谱图生成图像数字化标定，不生�
 只支持线性坐标、red/blue/green/magenta/olive 五种有色曲线（olive 包括橄榄黄）。不支持的图在 issues 中说明，不伪造标定。
 返回 JSON {panels:[{panel_id,state_key,caption,projection_scale_confirmed,projection_complete,curves:[...]}],issues:[]}。
 每个面板属于单一材料条件；只用给定 state_key，归属不唯一为 null。不同条件或多条α²F须拆面板。
-每个曲线对象严格包含：id、kind(phonon_dos|alpha2f|cumulative_lambda)、projection(元素字符串或null)、color、roi([x0,y0,x1,y1]整数且包含边框内侧)、frequency_direction(x|y)、frequency_ticks([[频率轴像素,刻度值],...])、amplitude_ticks([[幅值轴像素,刻度值],...])、frequency_unit(THz|cm-1|meV)、frequency_scale(linear)、amplitude_scale(linear)、unit、physical_definition_confirmed、exclude(图例框数组)、zero_boundaries_thz([低端,高端])、zero_reference_band_thz([低,高]或null)。
+每个曲线对象严格包含：id、kind(phonon_dos|alpha2f|cumulative_lambda)、projection(元素字符串或null)、color、roi([x0,y0,x1,y1]整数且包含边框内侧)、display_bbox([x0,y0,x1,y1]或null)、frequency_direction(x|y)、frequency_ticks([[频率轴像素,刻度值],...])、amplitude_ticks([[幅值轴像素,刻度值],...])、frequency_unit(THz|cm-1|meV)、frequency_scale(linear)、amplitude_scale(linear)、unit、physical_definition_confirmed、amplitude_evidence、exclude(图例框数组)、zero_boundaries_thz([低端,高端])、zero_reference_band_thz([低,高]或null)。
+先按材料、压力和面板标签定位一行，再按谱类型定位该行子图，最后读取坐标，不把整张组合图当作一个子图。
+roi 是完整坐标框内的取数区域，不能只围住有色曲线或最大峰；display_bbox 是供用户查看的最小完整子图，包含该子图边框、刻度与图例，不包含其他压力行、相邻声子色散或其他谱种类。α²F 与同框累计 λ 可共用显示框，同一 DOS 的各分波共用显示框。
+共享频率轴位于相邻子图时，从共享轴读取频率标定，但不要为了把该轴裁进来而包含相邻子图。所有矩形都使用同一原图绝对像素坐标，不把裁切后坐标混入标定。不能确认显示框时返回 null，保留 roi 并说明限制，不猜框。
 所有坐标以给定原图像素为准，不能以缩略图像素作答。优先采用至少三个可见刻度，两点可用但不能称已独立验证线性。
 DOS 无幅值刻度时以幅值零轴为0，幅值方向一个像素为1，unit=pixel；有模式数密度单位时unit=modes_per_source_frequency。
 α²F 与 λ 的幅值必须分别读取真正刻度，unit=dimensionless；不能因同为无量纲就借用 λ 刻度标定 α²F。α²F 还须提供 amplitude_evidence 字符串，摘录支持其独立幅值刻度/缩放的图注或轴标签；不确定时设 null，unit=unknown、physical_definition_confirmed=false。

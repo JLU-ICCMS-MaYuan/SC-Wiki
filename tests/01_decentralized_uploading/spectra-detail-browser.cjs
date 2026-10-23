@@ -37,17 +37,43 @@ async function main() {
       const query=new URLSearchParams({target:'upload',target_id:'c16cc627a0c04dc8ad4289624d1da80a',state_key:item.state_key,curve:curve.id,run:item.run.id,collection_version:String(item.version),return:'/upload'});
       await page.goto(base+'/spectra/'+id+'?'+query);
       await page.getByRole('heading',{name:'02 · 原图与提取结果'}).waitFor();
+      await page.waitForFunction(()=>document.querySelector('svg[data-crop-method="frame"]'));
+      const figure = page.locator('svg[role="img"]');
+      const crop = (await figure.getAttribute('data-crop-box')).split(',').map(Number);
+      const plot = (await figure.getAttribute('data-plot-box')).split(',').map(Number);
+      assert(crop[3]<480 && crop[1]<20);
+      if(kind==='alpha') assert(crop[0]>628 && plot[2]-plot[0]<170);
+      else assert(crop[0]>465 && crop[2]<636);
+      const left = await page.getByRole('heading',{name:'02 · 原图与提取结果'}).boundingBox();
+      const right = await page.getByRole('heading',{name:kind==='alpha'?'03 · 积分结果与参考值对比':'03 · 频段与数据完整性'}).boundingBox();
+      assert(right.x>left.x && Math.abs(right.y-left.y)<5);
+      let dataPath = null;
       for (const mode of ['仅原图','仅提取数据','原图与数据叠加']) {
         await page.getByRole('button',{name:mode,exact:true}).click();
-        await page.waitForTimeout(100);
+        await page.waitForTimeout(300);
         assert.equal(await page.locator('main svg[role="img"]').count(),1);
+        const indicatorBox=await page.getByTestId('spectrum-view-indicator').boundingBox();
+        const selectedBox=await page.getByRole('button',{name:mode,exact:true}).boundingBox();
+        assert(Math.abs(indicatorBox.x-selectedBox.x)<2 && Math.abs(indicatorBox.width-selectedBox.width)<2);
+        assert.deepEqual((await figure.getAttribute('data-plot-box')).split(',').map(Number),plot);
+        if(mode==='仅提取数据') dataPath = await figure.locator('path[data-spectrum-path]').first().getAttribute('d');
+        if(mode==='原图与数据叠加') {
+          assert.equal(await figure.locator('path[data-spectrum-path]').first().getAttribute('d'),dataPath);
+          assert((await page.getByTestId('spectrum-view-indicator').evaluate(el=>getComputedStyle(el).transitionProperty)).includes('transform'));
+          await page.getByRole('slider',{name:'叠加强度'}).press('ArrowLeft');
+          assert(Number(await page.getByRole('slider',{name:'叠加强度'}).inputValue()) < .85);
+        }
+        await figure.screenshot({path:path.join(out, `crop-${kind}-${mode==='仅原图'?'source':mode==='仅提取数据'?'data':'overlay'}.png`)});
       }
       await page.getByRole('button',{name:'仅提取数据',exact:true}).click();
+      await page.emulateMedia({reducedMotion:'reduce'});
+      assert.equal(await page.getByTestId('spectrum-view-indicator').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
+      await page.emulateMedia({reducedMotion:'no-preference'});
       assert((await page.locator('svg[role="img"]').getAttribute('aria-label')).includes('频率沿竖轴'));
       if(kind==='dos') {
         await page.getByRole('combobox',{name:/分波态密度/}).click();
         await page.getByRole('option',{name:'仅 H',exact:true}).click();
-        assert.equal(await page.locator('svg[role="img"] path[stroke="#38a477"]').count(),1);
+        assert.equal(await page.locator('svg[role="img"] path[data-spectrum-path][stroke="#168b68"]').count(),1);
         await page.getByRole('combobox',{name:/分波态密度/}).click(); await page.getByRole('option',{name:'全部分波',exact:true}).click();
       }
       await page.getByRole('button',{name:'查看提取历史',exact:true}).click();
@@ -67,7 +93,7 @@ async function main() {
       await page.screenshot({path:path.join(out,`production-${kind}-mobile.png`)});
       await page.locator('svg[role="img"]').screenshot({path:path.join(out,`production-${kind}-mobile-plot.png`)});
       await page.setViewportSize({width:1440,height:1000});
-      checks.push(kind+': 正式路由、真实谱快照、三模式、来源轴向、历史、定高点表、390px');
+      checks.push(kind+': 正式路由、真实子图边框、排除相邻谱及350GPa、等比图框、三模式同像素路径、滑动选项、左右布局、历史、定高点表、390px');
     }
     assert.deepEqual(errors,[]); assert.deepEqual(writes,[]);
     fs.writeFileSync(path.join(out,'production-browser.json'),JSON.stringify({checks,errors,writes,network:'本机数据库只读快照，浏览器网络隔离；非真实生产 HTTP 验收'},null,2));

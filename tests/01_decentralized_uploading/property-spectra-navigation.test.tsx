@@ -147,7 +147,7 @@ it('返回地址只允许站内路径', () => {
 it('单图支持原图、提取及叠加三种显示方式', async () => {
   const raw = listing.items[0] as any
   raw.source.size_px = [160,100]
-  Object.assign(raw.result.curves[0], { frequency_direction: 'y', axis_calibration: { amplitude: {slope:1,intercept:0}, frequency: {slope:-1,intercept:90} } })
+  Object.assign(raw.result.curves[0], { roi:[10,20,80,90], frequency_direction: 'y', axis_calibration: { amplitude: {slope:1,intercept:0}, frequency: {slope:-1,intercept:90} } })
   raw.result.curves[0].points.forEach((p: any) => { p.frequency_pixel = 90 - p.frequency_thz })
   render(<MemoryRouter initialEntries={[address()]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage />} /></Routes></MemoryRouter>)
   await screen.findByText('声子 DOS解析详情')

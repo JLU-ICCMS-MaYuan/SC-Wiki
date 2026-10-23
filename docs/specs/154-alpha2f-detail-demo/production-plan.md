@@ -36,3 +36,7 @@ FR-009/SC-006 → α²F 不借累计 λ 范围。
 不迁移数据库，不重启/部署服务，不回填旧谱。完成代码与隔离验证后自动提交；Overview 只记录已落地行为。未推送时保留远程文档链接未验证状态，Issue 不因代码完成自动关闭。
 
 接口与数据模型见 [共用合同](../154-alpha2f-detail-demo/contracts/details.md) 和 [数据关系](../154-alpha2f-detail-demo/data-model.md)。验证见 [正式验证](production-validation.md)。
+
+## 子图裁切与比例修订
+
+前端 spectrumGeometry 依据 ROI 和原图像素校正图框，SpectrumFigure 三模式共用全局坐标/裁切；不平移历史点。显示框 display_bbox 为模型可空建议，服务器校验包含关系和图内边界，前端还拒绝过大范围。具体来源、已实现边界与后续双阶段方案见 ../154-alpha2f-detail-demo/crop-research.md。
