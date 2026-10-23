@@ -1,6 +1,10 @@
 // 快讯域文案：首页快讯 Hero、自动采集信息流（NewsFeed）、来源状态、详情抽屉与人工快讯（ManualNews）。
 // 通用按钮（重试等）复用 common 域；仅此页专有的文案放在这里。
 export default {
+  currentWeek: '本周 · 北京时间周一 {start} 起',
+  historyScope: '其他已收录内容 · 按发表时间从新到旧',
+  moreHistory: '历史更多',
+  backToWeek: '返回本周',
   classificationNotice: '标签依据标题和摘要自动判断',
   moreFamilies: '另有 {count} 个材料家族，点击条目查看全部',
 

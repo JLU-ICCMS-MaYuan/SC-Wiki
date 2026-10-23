@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"scwiki/server/database"
@@ -41,10 +42,32 @@ func newsPageParameter(c *gin.Context, name string, fallback, maximum int) (int,
 
 // ListNewsFeed 读取自动资讯及已有家族名称，旧人工快讯接口保持独立。
 func ListNewsFeed(c *gin.Context) {
+	listNewsFeedAt(c, time.Now())
+}
+
+// 使用固定北京时间偏移，避免精简容器缺少时区数据库；自然周从周一开始。
+func newsWeek(now time.Time, requested string) (time.Time, time.Time, error) {
+	zone := time.FixedZone("Asia/Shanghai", 8*60*60)
+	local := now.In(zone)
+	start := time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, zone)
+	start = start.AddDate(0, 0, -(int(local.Weekday())+6)%7)
+	if requested != "" {
+		anchor, err := time.ParseInLocation("2006-01-02", requested, zone)
+		if err != nil || anchor.Weekday() != time.Monday || anchor.After(start) {
+			return time.Time{}, time.Time{}, fmt.Errorf("invalid week")
+		}
+		start = anchor
+	}
+	return start, start.AddDate(0, 0, 7), nil
+}
+
+func listNewsFeedAt(c *gin.Context, now time.Time) {
 	page, validPage := newsPageParameter(c, "page", 1, 10000)
 	size, validSize := newsPageParameter(c, "page_size", 20, 100)
 	kind := c.Query("kind")
-	if !validPage || !validSize || (kind != "" && kind != "news" && kind != "preprint" && kind != "journal_article") {
+	period := c.DefaultQuery("period", "all") // 旧 API 消费者保持全量；页面明确传 week/history。
+	weekStart, weekEnd, weekErr := newsWeek(now, c.Query("week"))
+	if !validPage || !validSize || weekErr != nil || (period != "all" && period != "week" && period != "history") || (kind != "" && kind != "news" && kind != "preprint" && kind != "journal_article") {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "资讯查询参数不合法"})
 		return
 	}
@@ -52,6 +75,13 @@ func ListNewsFeed(c *gin.Context) {
 	query := database.DB.WithContext(c.Request.Context()).Model(&models.NewsFeedItem{})
 	if kind != "" {
 		query = query.Where("CASE WHEN display_kind = '' THEN kind ELSE display_kind END = ?", kind)
+	}
+	// 不把仅年/月的日期臆测为本周；历史是补集，保留所有其他已收录条目。
+	withinWeek := "date_precision = 'day' AND published_at >= ? AND published_at < ?"
+	if period == "week" {
+		query = query.Where(withinWeek, weekStart.UTC().Format(time.RFC3339), weekEnd.UTC().Format(time.RFC3339))
+	} else if period == "history" {
+		query = query.Where("NOT ("+withinWeek+")", weekStart.UTC().Format(time.RFC3339), weekEnd.UTC().Format(time.RFC3339))
 	}
 	var total int64
 	if err := query.Count(&total).Error; err != nil {
@@ -140,5 +170,6 @@ func ListNewsFeed(c *gin.Context) {
 		sources = append(sources, state)
 	}
 	c.Header("Cache-Control", "no-store")
-	c.JSON(http.StatusOK, gin.H{"items": items, "total": total, "page": page, "page_size": size, "sources": sources})
+	c.JSON(http.StatusOK, gin.H{"items": items, "total": total, "page": page, "page_size": size, "sources": sources,
+		"period": period, "week": weekStart.Format("2006-01-02"), "week_end": weekEnd.Format("2006-01-02"), "timezone": "Asia/Shanghai"})
 }

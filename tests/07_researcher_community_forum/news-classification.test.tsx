@@ -58,3 +58,20 @@ it('keeps independent pagination and opens the full classification drawer', asyn
   fireEvent.click(screen.getAllByRole('button', { name: '下一页' })[1])
   await waitFor(() => expect(fetch).toHaveBeenCalledWith(expect.stringContaining('kind=preprint&page=2'), expect.anything()))
 })
+
+it('offers history on an empty week, pins the week, and switches only that column', async () => {
+  const fetcher = vi.fn().mockImplementation((url: string) => {
+    const params = new URL(url, 'http://localhost').searchParams
+    return Promise.resolve(new Response(JSON.stringify({ items: [], total: 0, page: 1, page_size: 5, sources: [], week: '2026-10-19', week_end: '2026-10-26', period: params.get('period') }), { status: 200 }))
+  })
+  vi.stubGlobal('fetch', fetcher)
+  render(<NewsFeed />)
+  await screen.findAllByRole('button', { name: '历史更多' })
+  expect(fetcher.mock.calls.slice(0, 3).every(([url]) => url.includes('period=week'))).toBe(true)
+  fireEvent.click(screen.getAllByRole('button', { name: '历史更多' })[1])
+  await screen.findByRole('button', { name: '返回本周' })
+  expect(fetcher).toHaveBeenLastCalledWith(expect.stringMatching(/kind=preprint.*page=1.*period=history.*week=2026-10-19/), expect.anything())
+  expect(screen.getAllByRole('button', { name: '历史更多' })).toHaveLength(2)
+  fireEvent.click(screen.getByRole('button', { name: '返回本周' }))
+  await waitFor(() => expect(fetcher).toHaveBeenLastCalledWith(expect.stringMatching(/kind=preprint.*page=1.*period=week.*week=2026-10-19/), expect.anything()))
+})
