@@ -10,7 +10,7 @@ import numpy as np
 from backend import models
 from backend.database import SessionLocal
 from backend.services import spectra as service
-from backend.spectra.contracts import fingerprint
+from backend.spectra.contracts import fingerprint, panel_identity
 
 log = logging.getLogger(__name__)
 
@@ -181,7 +181,7 @@ def discover(ctx, user_id, version):
                     fresh = service.context(session, ctx["target"], ctx["target_id"], session.get(models.User, user_id), write=True)
                     service.assert_version(fresh["version"], version)
                     row = service.collection(session, fresh, source_key,
-                        panel["panel_id"] if panel else "__unavailable__", source_info)
+                        panel_identity(panel) if panel else "__unavailable__", source_info)
                     from backend.rag.llm_context import get_llm_config
                     run, pending = service.new_run(session, row, panel or dict(issues=panel_issues), state,
                                                    model_name=get_llm_config().model)

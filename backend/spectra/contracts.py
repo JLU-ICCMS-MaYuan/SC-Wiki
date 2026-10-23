@@ -6,7 +6,7 @@ import json
 import math
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-ALGORITHM_VERSION = "spectra-production-v2"
+ALGORITHM_VERSION = "spectra-production-v3"
 FREQUENCY_FACTORS = {"THz": 1., "cm-1": .0299792458, "meV": .2417989242084918}
 
 
@@ -20,6 +20,12 @@ def conventional_structure_text(candidate):
 def fingerprint(value) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
                                     separators=(",", ":"), allow_nan=False).encode()).hexdigest()
+
+
+def panel_identity(panel: dict) -> str:
+    """模型标签、图框微调及频率范围不是同一来源谱的稳定身份。"""
+    return "spectrum-" + fingerprint({"state": panel.get("state_key"),
+        "curves": sorted((c["kind"], c.get("projection") or "") for c in panel["curves"])})[:48]
 
 
 class CurveCalibration(BaseModel):
@@ -37,6 +43,7 @@ class CurveCalibration(BaseModel):
     amplitude_scale: Literal["linear"] = "linear"
     unit: str
     physical_definition_confirmed: bool = False
+    amplitude_evidence: str | None = None
     exclude: list[tuple[int, int, int, int]] = Field(default_factory=list)
     zero_boundaries_thz: tuple[float | None, float | None] = (None, None)
     zero_reference_band_thz: tuple[float, float] | None = None

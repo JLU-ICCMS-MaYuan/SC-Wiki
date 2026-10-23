@@ -134,25 +134,45 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
         allowed[b:d + 1, a:c + 1] = False
     mask &= allowed
     recovered_mask &= allowed
-    pixels = range(y0, y1 + 1) if orientation == "y" else range(x0, x1 + 1)
+    pixels = list(range(y0, y1 + 1) if orientation == "y" else range(x0, x1 + 1))
+    zero_pixel = spec.get("zero_frequency_pixel")
+    if zero_pixel is not None and zero_pixel not in pixels:
+        pixels.append(zero_pixel)
     rows: list[dict[str, Any]] = []
     clipped = []
     for pos in pixels:
-        coords = np.flatnonzero(mask[pos, :]) if orientation == "y" else np.flatnonzero(mask[:, pos])
+        fractional = int(pos) != pos
+        if fractional:
+            lo, hi = int(np.floor(pos)), int(np.ceil(pos))
+            weight = pos - lo
+            strip = ((1 - weight) * rgb[lo:lo+1] + weight * rgb[hi:hi+1] if orientation == "y" else
+                     (1 - weight) * rgb[:, lo:lo+1] + weight * rgb[:, hi:hi+1])
+            permitted = (allowed[lo] & allowed[hi] if orientation == "y" else allowed[:, lo] & allowed[:, hi])
+            direct = color_mask(strip, spec["color"]).reshape(-1) & permitted
+            recovered = chromatic_mask(strip, spec["color"]).reshape(-1) & permitted
+        else:
+            pos = int(pos)
+            direct = mask[pos, :] if orientation == "y" else mask[:, pos]
+            recovered = recovered_mask[pos, :] if orientation == "y" else recovered_mask[:, pos]
+        coords = np.flatnonzero(direct)
         detection_mode = "strict_color" if len(coords) else None
         if not len(coords):
-            coords = (np.flatnonzero(recovered_mask[pos, :]) if orientation == "y"
-                      else np.flatnonzero(recovered_mask[:, pos]))
+            coords = np.flatnonzero(recovered)
             if len(coords):
                 detection_mode = "chromatic_recovery"
-        freq = frequency_axis.value(pos)
+        if fractional and len(coords):
+            detection_mode = "subpixel_color"
+        freq = 0.0 if zero_pixel is not None and pos == zero_pixel else frequency_axis.value(pos)
         if freq < 0:
             continue
         lo = hi = center = value = None
         if len(coords):
             center = float(coords.mean())
             lo, hi = float(coords.min()), float(coords.max())
-            value = max(0.0, amplitude_axis.value(center))
+            raw_value = amplitude_axis.value(center)
+            # 仅消除浮点运算舍入误差，不把贴轴的可辨幅值当作物理零。
+            roundoff = 8 * np.finfo(float).eps * (abs(amplitude_axis.slope * center) + abs(amplitude_axis.intercept))
+            value = 0.0 if abs(raw_value) <= roundoff else max(0.0, raw_value)
             # 标定方向反向也成立，裁切按实际 ROI 两侧检查。
             bounds = (x0, x1) if orientation == "y" else (y0, y1)
             nonzero_edge = bounds[1] if amplitude_axis.slope > 0 else bounds[0]

@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react'
 import { Alert, Box, Button, Chip, Typography } from '@mui/material'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
 import { hasSpectrumData, loadPropertySpectra, spectrumDetailPath, spectrumGroups, spectrumInterval, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumTarget, type PropertySpectrumItem, type PropertySpectrumCurve } from '../lib/propertySpectra'
 import type { PropertyModuleCode } from '../lib/propertyModules'
@@ -66,22 +66,9 @@ export function PropertySpectrumSection({ moduleCode }: { moduleCode: PropertyMo
 
 function SpectrumSummary({ item, curves, dos, unassigned = false, attempt = false }: { item: PropertySpectrumItem; curves: PropertySpectrumCurve[]; dos?: boolean; unassigned?: boolean; attempt?: boolean }) {
   const ctx = useContext(Spectra)!, material = useContext(Material)
-  const navigate = useNavigate(), location = useLocation()
-  const [busy, setBusy] = useState(false), [error, setError] = useState('')
+  const location = useLocation()
   const first = curves.find(curve => curve.kind === 'alpha2f') || curves[0]
-  const open = async () => {
-    if (busy) return
-    setBusy(true); setError('')
-    try {
-      if (ctx.beforeNavigate && !(await ctx.beforeNavigate())) throw new Error('主表单尚未保存，请处理保存错误后重试。')
-      const fresh = await loadPropertySpectra(ctx.target)
-      const current = fresh.items.find(value => value.id === item.id && value.state_key === item.state_key)
-      if (!current || first && !current.result.curves.some(value => value.id === first.id && value.kind === first.kind)) throw new Error('谱结果或材料归属已变化，请刷新后重新打开。')
-      const returnTo = location.pathname + location.search + (unassigned ? '#spectra-unassigned' : '#material-state-' + encodeURIComponent(material.stateKey))
-      navigate(spectrumDetailPath(ctx.target, current, returnTo, first), { state: { materialSummary: unassigned ? '归属待确认' : material.summary } })
-    } catch (error: any) { setError(error.message || '无法打开谱详情') }
-    finally { setBusy(false) }
-  }
+  const returnTo = location.pathname + location.search + (unassigned ? '#spectra-unassigned' : '#material-state-' + encodeURIComponent(material.stateKey))
   const hasAlpha = curves.some(curve => curve.kind === 'alpha2f') || (!curves.length && item.result.calibration?.curves?.some((curve: { kind: string }) => curve.kind === 'alpha2f'))
   const statuses = [...new Set(curves.map(curve => item.review[curve.id]?.status || 'needs_review'))]
   const review = statuses.length === 1 ? spectrumNames[statuses[0]] || statuses[0] : '部分曲线待核对'
@@ -103,10 +90,9 @@ function SpectrumSummary({ item, curves, dos, unassigned = false, attempt = fals
       </Box>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, ml: 'auto' }}>
         <Typography variant="caption" color="text.secondary">{item.stale ? '条件已变化，需重新核对' : ['queued', 'running', 'failed', 'needs_review'].includes(item.run.status) ? spectrumNames[item.run.status] : review}</Typography>
-        <Button variant="outlined" size="small" disabled={busy} endIcon={<OpenInNewIcon sx={{ fontSize: '14px !important' }} />} onClick={() => void open()}>{busy ? '正在打开…' : attempt ? '查看提取记录' : unassigned ? '核对归属' : dos ? '查看声子 DOS' : hasAlpha ? '查看 α²F' : '查看累计 λ'}</Button>
+        <Button component="a" href={spectrumDetailPath(ctx.target, item, returnTo, first, unassigned ? undefined : dos ? 'phonon_dos' : 'alpha2f')} target="_blank" rel="noopener noreferrer" variant="outlined" size="small" endIcon={<OpenInNewIcon sx={{ fontSize: '14px !important' }} />}>{attempt ? '查看提取记录' : unassigned ? '核对归属' : dos ? '查看声子 DOS' : hasAlpha ? '查看 α²F' : '查看累计 λ'}</Button>
       </Box>
     </Box>
-    {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
   </Box>
 }
 

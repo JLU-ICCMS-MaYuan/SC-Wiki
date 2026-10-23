@@ -1,0 +1,130 @@
+{
+  "read_only": true,
+  "business_data_updated": false,
+  "model_called": false,
+  "date": "2026-10-23",
+  "items": [
+    {
+      "collection": "702b9390fdeb43aa9af755ef935befb0",
+      "source_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+      "image_sha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+      "source_run": "54f7db9a041e4f3b851e1600aa8859d1",
+      "algorithm": "spectra-production-v3",
+      "status": "needs_review",
+      "curves": [
+        {
+          "id": "A-La-phDOS",
+          "kind": "phonon_dos",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        },
+        {
+          "id": "A-Sc-phDOS",
+          "kind": "phonon_dos",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        },
+        {
+          "id": "A-H-phDOS",
+          "kind": "phonon_dos",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        },
+        {
+          "id": "A-alpha2f",
+          "kind": "alpha2f",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        },
+        {
+          "id": "A-cumulative-lambda",
+          "kind": "cumulative_lambda",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        }
+      ],
+      "failures": [],
+      "alpha_integral": {
+        "status": "unavailable",
+        "reason": "α²F 独立幅值刻度依据、单位或普通频率定义尚未确认"
+      }
+    },
+    {
+      "collection": "c340f3c41b144662808c0933d1e75248",
+      "source_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+      "image_sha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+      "source_run": "4155b9543bda491ea593efda6c6c8c36",
+      "algorithm": "spectra-production-v3",
+      "status": "needs_review",
+      "curves": [
+        {
+          "id": "A-alpha2f",
+          "kind": "alpha2f",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        },
+        {
+          "id": "A-lambda",
+          "kind": "cumulative_lambda",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        }
+      ],
+      "failures": [],
+      "alpha_integral": {
+        "status": "unavailable",
+        "reason": "α²F 独立幅值刻度依据、单位或普通频率定义尚未确认"
+      }
+    },
+    {
+      "collection": "17d6b76963e2486aa5c4afbcbcf20d60",
+      "source_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+      "image_sha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+      "source_run": "1feb33d1335d4f0588fa6bd3253664f1",
+      "algorithm": "spectra-production-v3",
+      "status": "needs_review",
+      "curves": [
+        {
+          "id": "A-La-phDOS",
+          "kind": "phonon_dos",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        },
+        {
+          "id": "A-Sc-phDOS",
+          "kind": "phonon_dos",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        },
+        {
+          "id": "A-H-phDOS",
+          "kind": "phonon_dos",
+          "zero_frequency": 0.0,
+          "zero_status": "missing",
+          "zero_amplitude": null,
+          "zero_observed": false
+        }
+      ],
+      "failures": [],
+      "alpha_integral": null
+    }
+  ]
+}

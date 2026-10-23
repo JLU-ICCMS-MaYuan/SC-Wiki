@@ -72,12 +72,29 @@ def review(collection_id: str, body: ReviewRequest, user=Depends(get_current_use
     return dict(version=row.version)
 
 
-def visible_item(session, target, target_id, collection_id, user):
+def visible_item(session, target, target_id, collection_id, user, run_id=None):
     ctx = service.context(session, target, target_id, user)
-    item = next((i for i in service.listing(session, ctx)["items"] if i["id"] == collection_id), None)
+    if run_id:
+        allowed = service.history(session, ctx, collection_id)
+        if not any(run["id"] == run_id for run in allowed):
+            service.fail("spectra_run_missing", "历史运行不存在", 404)
+    item = next((i for i in service.listing(session, ctx, run_override=(collection_id, run_id) if run_id else None)["items"] if i["id"] == collection_id), None)
     if item is None:
         service.fail("spectra_collection_missing", "该谱不存在或尚未公开", 404)
     return item
+
+
+@router.get("/{collection_id}/history")
+def history(collection_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
+            user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
+    ctx = service.context(session, target, target_id, user)
+    return dict(items=service.history(session, ctx, collection_id))
+
+
+@router.get("/{collection_id}/runs/{run_id}")
+def historical_run(collection_id: str, run_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
+                   user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
+    return visible_item(session, target, target_id, collection_id, user, run_id)
 
 
 @router.get("/material-state/{paper_id}/{state_key}")
@@ -101,7 +118,7 @@ def image(collection_id: str, target: Literal["upload", "paper", "revision"], ta
         storage.head(ref)
         with storage.open(ref) as source:
             return Response(source.read(), media_type="image/png", headers={"Cache-Control": "private, no-store"})
-    except (FileIntegrityError, FileStorageUnavailable):
+    except (FileIntegrityError, FileStorageUnavailable, FileNotFoundError):
         service.fail("spectra_image_unavailable", "谱原图暂不可读取；数值结果已保留，请检查文件存储", 503)
 
 
@@ -142,8 +159,9 @@ def csv_export(item):
 
 @router.get("/{collection_id}/export")
 def export(collection_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
-           format: Literal["json", "csv"]="json", user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
-    item = visible_item(session, target, target_id, collection_id, user)
+           format: Literal["json", "csv"]="json", run_id: str | None = None,
+           user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
+    item = visible_item(session, target, target_id, collection_id, user, run_id)
     data = csv_export(item) if format == "csv" else json.dumps(item, ensure_ascii=False, allow_nan=False)
     return Response(data, media_type="text/csv; charset=utf-8" if format == "csv" else "application/json",
                     headers={"Content-Disposition": f'attachment; filename="spectrum-{collection_id}.{format}"'})

@@ -126,7 +126,7 @@ def incomplete_result(result):
     payload = result or {}
     return bool(payload.get("status") == "needs_review" or
                 (payload.get("issues") and "collections" in payload) or
-                (payload.get("failures") and not payload.get("curves")))
+                payload.get("failures"))
 
 
 def new_run(session, row, calibration, state, *, model_name=None):
@@ -134,6 +134,9 @@ def new_run(session, row, calibration, state, *, model_name=None):
                            state=state_signature(state), algorithm=ALGORITHM_VERSION))
     run = session.scalar(select(models.SpectrumRun).where(models.SpectrumRun.collection_id == row.id,
                                                            models.SpectrumRun.input_hash == key))
+    # 相同输入的有数值结果不可被重试覆盖；更改标定/状态/算法自然生成新运行。
+    if run and run.status in {"succeeded", "needs_review"} and (run.result_json or {}).get("curves"):
+        return run, False
     if run and run.status == "succeeded" and not incomplete_result(run.result_json):
         return run, False
     if run is None:
@@ -190,6 +193,9 @@ def mask_public(payload, reviews):
     output["calibration"]["curves"] = [c for c in output["calibration"]["curves"] if c["id"] in ids]
     alpha = next((c for c in selected if c["kind"] == "alpha2f"), None)
     dos = [c for c in selected if c["kind"] == "phonon_dos"]
+    if len(dos) != sum(c["kind"] == "phonon_dos" for c in payload.get("curves", [])) or any(
+            reviews.get(c["id"], {}).get("status") == "accepted_limited" for c in dos):
+        output["quality"]["dos_mode_integral"] = dict(status="unavailable", reason="当前公开分波或频段不完整，不能展示全部模式数积分")
     if alpha is None:
         for k in ("zero_baseline", "joint"):
             output["candidates"].pop(k, None)
@@ -224,7 +230,9 @@ def mask_public(payload, reviews):
     return output
 
 
-def listing(session, ctx):
+def listing(session, ctx, *, run_override=None):
+    if run_override and not ctx["privileged"]:
+        fail("spectra_history_forbidden", "历史提取只对有权限的维护者开放", 403)
     rows = list(session.scalars(select(models.SpectrumCollection).where(
         models.SpectrumCollection.target == ctx["target"], models.SpectrumCollection.target_id == ctx["target_id"])))
     states = {s["state_key"]: s for s in ctx["states"]}
@@ -234,7 +242,11 @@ def listing(session, ctx):
             continue
         if ctx["target"] == "paper" and row.paper_revision != ctx["paper_revision"]:
             continue
-        run = session.get(models.SpectrumRun, row.current_run_id) if row.current_run_id else None
+        run_id = run_override[1] if run_override and row.id == run_override[0] else row.current_run_id
+        run = session.get(models.SpectrumRun, run_id) if run_id else None
+        if run and run.collection_id != row.id:
+            fail("spectra_run_missing", "历史运行不属于该谱集合", 404)
+        historical = bool(run and run.id != row.current_run_id)
         status = ("needs_review" if run and run.status == "succeeded" and incomplete_result(run.result_json)
                   else run.status if run else None)
         if row.panel_key == "__discovery__":
@@ -246,7 +258,7 @@ def listing(session, ctx):
             continue
         source_stale = ("files" in ctx and row.source_json.get("source_sha256") not in
                         {f.get("sha256") for f in ctx["files"]})
-        stale = source_stale or row.state_signature != state_signature(states.get(row.state_key))
+        stale = historical or source_stale or row.state_signature != state_signature(states.get(row.state_key))
         reviews = {} if stale else row.review_json or {}
         payload = run.result_json or dict(curves=[], candidates={}, quality={}, failures=[])
         # 排队或失败的新运行也保留其真实标定，供按谱类型导航；不生成数值曲线。
@@ -267,8 +279,27 @@ def listing(session, ctx):
         result.append(dict(id=row.id, version=row.version, state_key=row.state_key, stale=stale,
             source=row.source_json, run=dict(id=run.id, status=status, error_code=run.error_code,
                 error_message=run.error_message, algorithm_version=run.algorithm_version, model_name=run.model_name),
-            result=payload, review=reviews))
+            result=payload, review=reviews, historical=historical,
+            recorded_state_key=(run.calibration_json or {}).get("state_key"),
+            recorded_caption=(run.calibration_json or {}).get("caption"),
+            recorded_at=(run.created_at.isoformat() if run.created_at else "")))
     return dict(items=result, jobs=jobs, version=ctx["version"], can_edit=ctx["can_edit"], can_review=ctx["can_review"])
+
+
+def history(session, ctx, collection_id):
+    if not ctx["privileged"]:
+        fail("spectra_history_forbidden", "历史提取只对有权限的维护者开放", 403)
+    row = session.get(models.SpectrumCollection, collection_id)
+    if not row or row.target != ctx["target"] or row.target_id != ctx["target_id"]:
+        fail("spectra_collection_missing", "谱集合不属于当前目标", 404)
+    if ctx["target"] == "paper" and row.paper_revision != ctx["paper_revision"]:
+        fail("spectra_revision_stale", "谱集合不属于当前论文版本", 404)
+    runs = session.scalars(select(models.SpectrumRun).where(models.SpectrumRun.collection_id == collection_id)
+                          .order_by(models.SpectrumRun.created_at.desc(), models.SpectrumRun.id.desc()))
+    return [dict(id=run.id, status=run.status, current=run.id == row.current_run_id,
+                 created_at=run.created_at.isoformat() if run.created_at else "",
+                 state_key=(run.calibration_json or {}).get("state_key"),
+                 caption=(run.calibration_json or {}).get("caption")) for run in runs]
 
 
 def checked_row(session, ctx, row_id, version):

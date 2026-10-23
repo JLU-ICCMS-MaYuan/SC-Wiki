@@ -31,28 +31,13 @@ function mountEditor() {
   </Routes></MemoryRouter>)
 }
 
-it('已保存的主表单直接打开谱，不因无关字段重新校验而拦截', async () => {
-  vi.mocked(api.put).mockRejectedValue(new Error('不应发起保存'))
+it.each([false, true])('新标签页查看谱不会触发保存，已有改动=%s', async changed => {
+  vi.mocked(api.put).mockRejectedValue(new Error('保存接口失败不应影响查看'))
   mountEditor()
-  fireEvent.click(await screen.findByRole('button', { name: '核对归属' }))
-  expect(await screen.findByText('已打开谱详情')).toBeVisible()
+  if (changed) fireEvent.change(await screen.findByLabelText('标题'), { target: { value: '保留当前输入' } })
+  const link = await screen.findByRole('link', { name:'核对归属' })
+  expect(link).toHaveAttribute('target', '_blank')
+  expect(link.getAttribute('href')).toContain('/spectra/spectrum')
   expect(api.put).not.toHaveBeenCalled()
-})
-
-it('未保存的改动先成功持久化，再进入谱详情', async () => {
-  mountEditor()
-  fireEvent.change(await screen.findByLabelText('标题'), { target: { value: '修改后标题' } })
-  fireEvent.click(await screen.findByRole('button', { name: '核对归属' }))
-  expect(await screen.findByText('已打开谱详情')).toBeVisible()
-  expect(api.put).toHaveBeenCalledWith('/api/rag/upload-tasks/task/draft', expect.objectContaining({ paper: expect.objectContaining({ title: '修改后标题' }) }))
-})
-
-it('保存失败时谱入口显示后端具体原因并保留当前表单', async () => {
-  vi.mocked(api.put).mockRejectedValue({ detail: { code: 'draft_conflict', message: '草稿版本冲突，请刷新后核对' } })
-  mountEditor()
-  fireEvent.change(await screen.findByLabelText('标题'), { target: { value: '保留当前输入' } })
-  fireEvent.click(await screen.findByRole('button', { name: '核对归属' }))
-  await waitFor(() => expect(screen.getAllByText(/草稿版本冲突，请刷新后核对/).length).toBeGreaterThan(0))
-  expect(screen.getByLabelText('标题')).toHaveValue('保留当前输入')
-  expect(screen.queryByText('已打开谱详情')).not.toBeInTheDocument()
+  expect(screen.getByLabelText('标题')).toHaveValue(changed ? '保留当前输入' : '原始标题')
 })

@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from './api'
 export type PropertySpectrumTarget = { target: 'upload' | 'paper' | 'revision'; target_id: string }
-export interface PropertySpectrumPoint { frequency_thz: number; observed_amplitude: number | null; reconstructed_amplitude: number | null; status: string; detection_mode?: string }
-export interface PropertySpectrumCurve { id: string; kind: string; projection?: string | null; unit: string; points: PropertySpectrumPoint[] }
+export interface PropertySpectrumPoint { frequency_thz: number; frequency_pixel?: number; amplitude_pixel?: number | null; observed_amplitude: number | null; reconstructed_amplitude: number | null; status: string; detection_mode?: string }
+export interface PropertySpectrumCurve { id: string; kind: string; projection?: string | null; unit: string; points: PropertySpectrumPoint[]; frequency_direction?: 'x' | 'y'; roi?: number[]; axis_calibration?: { amplitude: { slope: number; intercept: number }; frequency: { slope: number; intercept: number } } }
 export interface PropertySpectrumItem {
   id: string; version: number; state_key: string | null; stale: boolean
+  recorded_at?: string; historical?: boolean; recorded_state_key?: string | null; recorded_caption?: string
   source: { source_name?: string; pdf_page?: number; panel_id?: string; size_px?: number[]; [key: string]: unknown }
   run: { id?: string; status: string; error_message?: string; algorithm_version?: string }
   review: Record<string, { status?: string; reason?: string; frequency_intervals_thz?: number[][] }>
@@ -23,23 +24,28 @@ export interface PropertySpectrumGroup {
   item: PropertySpectrumItem
   kind: 'phonon_dos' | 'alpha2f'
   curves: PropertySpectrumCurve[]
+  history: PropertySpectrumItem[]
 }
 
-/** 仅合并同集合的投影或累计谱；不同材料、近似和来源集合保持独立。 */
+/** 当前表示最新有数据的展示版本，不表示科学采纳；其他来源/提取保留在历史。 */
 export function spectrumGroups(items: PropertySpectrumItem[], stateKey: string): PropertySpectrumGroup[] {
-  return items.filter(item => item.state_key === stateKey).flatMap(item =>
-    (['phonon_dos', 'alpha2f'] as const).flatMap(kind => {
+  return (['phonon_dos', 'alpha2f'] as const).flatMap(kind => {
+    const candidates = items.filter(item => item.state_key === stateKey).flatMap(item => {
       const curves = item.result.curves.filter(curve => kind === 'phonon_dos'
         ? curve.kind === kind : ['alpha2f', 'cumulative_lambda'].includes(curve.kind))
       const calibrated = item.result.calibration?.curves?.some((curve: { kind: string }) => kind === 'phonon_dos'
         ? curve.kind === kind : ['alpha2f', 'cumulative_lambda'].includes(curve.kind))
       return curves.length || calibrated ? [{ item, kind, curves }] : []
-    }))
+    }).sort((a, b) => Number(Boolean(b.curves.length)) - Number(Boolean(a.curves.length))
+      || (b.item.recorded_at || '').localeCompare(a.item.recorded_at || '') || b.item.id.localeCompare(a.item.id))
+    return candidates.length ? [{ ...candidates[0], history: candidates.slice(1).map(value => value.item) }] : []
+  })
 }
 
 export function spectrumInterval(curves: PropertySpectrumCurve[]): string {
   let minimum = Infinity, maximum = -Infinity
-  for (const curve of curves) for (const point of curve.points) {
+  const primary = curves.some(curve => curve.kind === 'alpha2f') ? curves.filter(curve => curve.kind === 'alpha2f') : curves
+  for (const curve of primary) for (const point of curve.points) {
     if (Number.isFinite(point.frequency_thz)) {
       minimum = Math.min(minimum, point.frequency_thz)
       maximum = Math.max(maximum, point.frequency_thz)
@@ -49,10 +55,11 @@ export function spectrumInterval(curves: PropertySpectrumCurve[]): string {
 }
 
 export function spectrumDetailPath(target: PropertySpectrumTarget, item: PropertySpectrumItem,
-  returnTo: string, curve?: PropertySpectrumCurve): string {
+  returnTo: string, curve?: PropertySpectrumCurve, kind?: 'phonon_dos' | 'alpha2f'): string {
   const params = new URLSearchParams({ ...target, state_key: item.state_key || 'unassigned',
     collection_version: String(item.version), run: item.run.id || '', return: returnTo })
   if (curve) params.set('curve', curve.id)
+  if (kind || curve) params.set('kind', kind || (curve?.kind === 'phonon_dos' ? 'phonon_dos' : 'alpha2f'))
   return '/spectra/' + encodeURIComponent(item.id) + '?' + params
 }
 export async function loadPropertySpectra(target: PropertySpectrumTarget, signal?: AbortSignal): Promise<PropertySpectrumListing> {

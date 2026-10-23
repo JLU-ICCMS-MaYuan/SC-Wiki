@@ -1,0 +1,26 @@
+{
+  "mode": "正式 FastAPI 路由 + 本机业务库只读事务；测试注入任务所有者，不经过真实认证/网关",
+  "results": [
+    {
+      "operation": "list",
+      "status": 200,
+      "bytes": 3104878
+    },
+    {
+      "operation": "dos_image",
+      "status": 200,
+      "bytes": 702579
+    },
+    {
+      "operation": "dos_csv",
+      "status": 200,
+      "bytes": 335220
+    },
+    {
+      "operation": "dos_history",
+      "status": 200,
+      "bytes": 390
+    }
+  ],
+  "database_written": false
+}

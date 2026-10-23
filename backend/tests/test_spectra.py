@@ -33,13 +33,13 @@ def fixture(kind="alpha2f", unit="THz"):
     rgb=np.full((100,160,3),255,dtype=np.uint8)
     rgb[79:82,20:141]=0
     for x in range(20,141):
-        # 原频率1–7，α²F=0.01ν；避开未知零频端。
-        y=80-round((1+(x-20)/20)*2)
+        # 原频率0–6，α²F=0.01ν，零频端来自实际有色像素。
+        y=80-round((x-20)/20*2)
         rgb[y,x]=[0,128,0]
     c=dict(id="a",kind=kind,projection="H" if kind=="phonon_dos" else None,color="green",
-           roi=[20,10,140,80],frequency_direction="x",frequency_ticks=[[20,1],[80,4],[140,7]],
+           roi=[20,10,140,80],frequency_direction="x",frequency_ticks=[[20,0],[80,3],[140,6]],
            amplitude_ticks=[[80,0],[60,.1]],frequency_unit=unit,unit="dimensionless" if kind!="phonon_dos" else "pixel",
-           physical_definition_confirmed=True,exclude=[],zero_boundaries_thz=[None,None])
+           physical_definition_confirmed=True,amplitude_evidence="合成原图独立幅值刻度",exclude=[],zero_boundaries_thz=[None,None])
     panel=dict(panel_id="p",state_key="s1",caption="",curves=[c],projection_scale_confirmed=False,projection_complete=False)
     return rgb,panel
 
@@ -77,8 +77,8 @@ def test_density_frequency_conversion_has_jacobian():
     p["curves"][0]["unit"]="modes_per_source_frequency"
     r=extract_panel(image,p)
     c=r["curves"][0]
-    assert c["points"][0]["frequency_thz"]==pytest.approx(.0299792458)
-    assert c["points"][50]["observed_amplitude"]==pytest.approx(.035/.0299792458)
+    assert c["points"][0]["frequency_thz"]==pytest.approx(0.)
+    assert c["points"][50]["observed_amplitude"]==pytest.approx(.025/.0299792458)
     assert c["unit"]=="modes/THz/primitive_cell"
 
 

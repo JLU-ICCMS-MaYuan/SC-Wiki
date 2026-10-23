@@ -20,7 +20,8 @@ CALIBRATION_PROMPT = """你为科学谱图生成图像数字化标定，不生�
 每个曲线对象严格包含：id、kind(phonon_dos|alpha2f|cumulative_lambda)、projection(元素字符串或null)、color、roi([x0,y0,x1,y1]整数且包含边框内侧)、frequency_direction(x|y)、frequency_ticks([[频率轴像素,刻度值],...])、amplitude_ticks([[幅值轴像素,刻度值],...])、frequency_unit(THz|cm-1|meV)、frequency_scale(linear)、amplitude_scale(linear)、unit、physical_definition_confirmed、exclude(图例框数组)、zero_boundaries_thz([低端,高端])、zero_reference_band_thz([低,高]或null)。
 所有坐标以给定原图像素为准，不能以缩略图像素作答。优先采用至少三个可见刻度，两点可用但不能称已独立验证线性。
 DOS 无幅值刻度时以幅值零轴为0，幅值方向一个像素为1，unit=pixel；有模式数密度单位时unit=modes_per_source_frequency。
-α²F 与 λ 的幅值必须读取真正刻度，unit=dimensionless；不能确认规范时 unit=unknown、physical_definition_confirmed=false。
+α²F 与 λ 的幅值必须分别读取真正刻度，unit=dimensionless；不能因同为无量纲就借用 λ 刻度标定 α²F。α²F 还须提供 amplitude_evidence 字符串，摘录支持其独立幅值刻度/缩放的图注或轴标签；不确定时设 null，unit=unknown、physical_definition_confirmed=false。
+所有谱必须识别原图真实零频刻度并包含在 frequency_ticks 中，roi 覆盖该边界；无证据不得猜造零点，记录待核对原因。
 physical_definition_confirmed=true 仅限图注/坐标明确支持普通频率和标准 α²F/累计λ；不按目标值推断。
 projection_complete 与 projection_scale_confirmed 仅在完整元素合计、同一坐标框依据明确时为true。
 exclude 必须屏蔽同色图例和文字，尤其是图内“λ=…”数值注记、面板字母和压力文字；这些文字绝不能作为曲线或累计 λ 终点。分别圈住文字/图例，不用覆盖整行的大框误删真实轨迹；与真实线重叠而无法分离时在 issues 记录限制。
