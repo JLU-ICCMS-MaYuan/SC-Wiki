@@ -1,0 +1,12 @@
+{
+  "total": 1357,
+  "processed": 1357,
+  "results": {
+    "completed": 1357
+  },
+  "database_status": {
+    "completed": 1357
+  },
+  "elapsed_seconds": 337,
+  "model": "deepseek-v4-pro"
+}

@@ -1,0 +1,14 @@
+{
+  "source_commit": "9541e118ac4f7f00f616220e0da419d6aee24a6b",
+  "component_sources": {
+    "python": "9541e118ac4f7f00f616220e0da419d6aee24a6b",
+    "goserver": "eb8ce92d917e9f3818589f8a4a7e96184b4ec61d",
+    "frontend": "eb8ce92d917e9f3818589f8a4a7e96184b4ec61d"
+  },
+  "images": {
+    "python": "sha256:c8693945577cf9e4763d7855af80196b3d467e6a0e6ce1e3ce26e32e4a511ef1",
+    "goserver": "sha256:412d8305182b4b77735888ed9b4944599cc972490d4dfef651118bdddce86a2c",
+    "frontend": "sha256:3678d697c31e364df406f9ebc9d0655ca555bb235a168083e6275a17cb09eb3c"
+  },
+  "data_containers_unchanged": true
+}

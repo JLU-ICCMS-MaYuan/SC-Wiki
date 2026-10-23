@@ -1,0 +1,11 @@
+{
+  "publicURL": "https://www.sc-wiki.com/news",
+  "weeklyPages": 5,
+  "emptyWeekHistory": true,
+  "lastPageHistory": true,
+  "returnToWeek": true,
+  "classificationVisible": true,
+  "mobileOverflow": false,
+  "errors": [],
+  "bad": []
+}

@@ -48,7 +48,11 @@ Redis 互斥锁防止并发采集。
 
 实现入口为 [分类服务](../../backend/news/classification.py)、资讯调度、Go 资讯接口及
 [标签组件](../../frontend/src/components/NewsClassificationLabels.tsx)。分类新增的两张表需要先迁移，
-再配套发布服务；代码已通过隔离验证，不代表当前业务实例已经启用或历史补齐已经完成。
+再配套发布服务；当前生产启用和补齐结果见下方发布记录。
+
+2026-10-23 已在当前生产实例启用，迁移、1,357 条存量补标和自然周/历史入口经过公网验证；
+本地副本 1,121 条也已补齐。这些数量是发布时快照，分类 completed 包括明确留空的维度。
+发布镜像、数据不变性、真实验证和来源覆盖边界见 [发布记录](../specs/153-news-classification-labels/deployment-20261023.md)。
 
 ## 数据与约束
 自动资讯使用 news_feed_items、news_feed_identities、news_feed_sources；分类另存 news_feed_classifications 和

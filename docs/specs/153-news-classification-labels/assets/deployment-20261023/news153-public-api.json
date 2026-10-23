@@ -1,0 +1,205 @@
+{
+  "health": 200,
+  "feeds": [
+    {
+      "kind": "news",
+      "period": "week",
+      "total": 0,
+      "week": "2026-10-19",
+      "items": []
+    },
+    {
+      "kind": "news",
+      "period": "history",
+      "total": 4,
+      "week": "2026-10-19",
+      "items": [
+        {
+          "id": "5abdee54515b417cb69b423b177e93bf",
+          "published_at": "2026-08-31T22:20:03Z",
+          "paper_type": "experimental",
+          "theoretical_subtype": null,
+          "families": []
+        },
+        {
+          "id": "e9ce013ff88e415d83e43c30db9a9638",
+          "published_at": "2026-08-26T14:40:04Z",
+          "paper_type": "experimental",
+          "theoretical_subtype": null,
+          "families": [
+            "镍基超导体"
+          ]
+        },
+        {
+          "id": "3703fd18bd5549cdaf67706fd542cfb2",
+          "published_at": "2026-08-24T22:30:01Z",
+          "paper_type": null,
+          "theoretical_subtype": null,
+          "families": []
+        },
+        {
+          "id": "e41e83a28c034d778030089b46ba6bdc",
+          "published_at": "2026-08-24T20:50:01Z",
+          "paper_type": "experimental",
+          "theoretical_subtype": null,
+          "families": []
+        }
+      ]
+    },
+    {
+      "kind": "preprint",
+      "period": "week",
+      "total": 24,
+      "week": "2026-10-19",
+      "items": [
+        {
+          "id": "4e2973f505d344d199d67d714ebd19d5",
+          "published_at": "2026-10-21T17:16:53Z",
+          "paper_type": "theoretical",
+          "theoretical_subtype": "method",
+          "families": []
+        },
+        {
+          "id": "a60460a8ade24714a8834135924e8d89",
+          "published_at": "2026-10-21T16:23:33Z",
+          "paper_type": "experimental",
+          "theoretical_subtype": null,
+          "families": []
+        },
+        {
+          "id": "defe89fd38de489f86f9d4f30eeab463",
+          "published_at": "2026-10-21T15:34:34Z",
+          "paper_type": "experimental",
+          "theoretical_subtype": null,
+          "families": [
+            "铜基超导体"
+          ]
+        },
+        {
+          "id": "544fa19bbb154f88b243db8eb656f8c1",
+          "published_at": "2026-10-21T12:25:47Z",
+          "paper_type": "theoretical",
+          "theoretical_subtype": "theory",
+          "families": []
+        },
+        {
+          "id": "b12e27d926cf484fb52863e8175cc6d6",
+          "published_at": "2026-10-21T11:26:34Z",
+          "paper_type": "theoretical",
+          "theoretical_subtype": "theory",
+          "families": []
+        }
+      ]
+    },
+    {
+      "kind": "preprint",
+      "period": "history",
+      "total": 536,
+      "week": "2026-10-19",
+      "items": [
+        {
+          "id": "7924148ac40f480a82e123e6a4dbaf6f",
+          "published_at": "2026-10-17T21:30:14Z",
+          "paper_type": "theoretical",
+          "theoretical_subtype": "theory",
+          "families": []
+        },
+        {
+          "id": "a18a7688fae84af3bcb1a32d5c2aa296",
+          "published_at": "2026-10-17T18:07:37Z",
+          "paper_type": "theoretical",
+          "theoretical_subtype": "calculation",
+          "families": [
+            "无机硼碳氮基超导体"
+          ]
+        },
+        {
+          "id": "18d7eeb1e8e44759a52f385af99a17c0",
+          "published_at": "2026-10-17T03:11:26Z",
+          "paper_type": "theoretical",
+          "theoretical_subtype": "theory",
+          "families": []
+        },
+        {
+          "id": "226a302cef994669a8ea622f6bcaa291",
+          "published_at": "2026-10-17T02:49:54Z",
+          "paper_type": "theoretical",
+          "theoretical_subtype": "theory",
+          "families": []
+        },
+        {
+          "id": "4bdc74c37f484feaab679c970c11c92b",
+          "published_at": "2026-10-16T22:58:16Z",
+          "paper_type": null,
+          "theoretical_subtype": null,
+          "families": []
+        }
+      ]
+    },
+    {
+      "kind": "journal_article",
+      "period": "week",
+      "total": 2,
+      "week": "2026-10-19",
+      "items": [
+        {
+          "id": "030c862407bc4a4a83a749ed9f831acb",
+          "published_at": "2026-10-20T22:00:07Z",
+          "paper_type": null,
+          "theoretical_subtype": null,
+          "families": []
+        },
+        {
+          "id": "0103ab43b7f84dccbd6f630df1de2814",
+          "published_at": "2026-10-20T20:00:07Z",
+          "paper_type": null,
+          "theoretical_subtype": null,
+          "families": []
+        }
+      ]
+    },
+    {
+      "kind": "journal_article",
+      "period": "history",
+      "total": 791,
+      "week": "2026-10-19",
+      "items": [
+        {
+          "id": "0b77fe1167ac47359f198647163b2c79",
+          "published_at": "2026-10-16T14:20:06Z",
+          "paper_type": "experimental",
+          "theoretical_subtype": null,
+          "families": []
+        },
+        {
+          "id": "a2a6c2514aba4f4e99835f11431d49d5",
+          "published_at": "2026-10-14T16:40:08Z",
+          "paper_type": null,
+          "theoretical_subtype": null,
+          "families": []
+        },
+        {
+          "id": "d7c3001057ad4369873592d77cb3d801",
+          "published_at": "2026-10-14T16:20:02Z",
+          "paper_type": null,
+          "theoretical_subtype": null,
+          "families": []
+        },
+        {
+          "id": "bbea6277c3a449669a45d3bea6dd443f",
+          "published_at": "2026-10-13T21:40:08Z",
+          "paper_type": null,
+          "theoretical_subtype": null,
+          "families": []
+        },
+        {
+          "id": "0f40d543da7f431fa3d0a98cd0120d37",
+          "published_at": "2026-10-08T12:00:11Z",
+          "paper_type": null,
+          "theoretical_subtype": null,
+          "families": []
+        }
+      ]
+    }
+  ]
+}

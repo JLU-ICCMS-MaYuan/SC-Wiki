@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "requests": [
+    {
+      "kind": "news",
+      "period": "week",
+      "number": 1,
+      "week": null
+    },
+    {
+      "kind": "preprint",
+      "period": "week",
+      "number": 1,
+      "week": null
+    },
+    {
+      "kind": "journal_article",
+      "period": "week",
+      "number": 1,
+      "week": null
+    },
+    {
+      "kind": "preprint",
+      "period": "week",
+      "number": 2,
+      "week": "2026-10-19"
+    },
+    {
+      "kind": "preprint",
+      "period": "history",
+      "number": 1,
+      "week": "2026-10-19"
+    },
+    {
+      "kind": "preprint",
+      "period": "history",
+      "number": 2,
+      "week": "2026-10-19"
+    },
+    {
+      "kind": "preprint",
+      "period": "week",
+      "number": 1,
+      "week": "2026-10-19"
+    }
+  ],
+  "errors": []
+}
