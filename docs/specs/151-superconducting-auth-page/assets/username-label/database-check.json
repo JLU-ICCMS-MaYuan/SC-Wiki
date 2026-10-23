@@ -1,0 +1,15 @@
+{
+  "target": "本机 127.0.0.1:3307，仅只读元数据与重复组计数",
+  "indices": [
+    {
+      "INDEX_NAME": "uq_users_username",
+      "NON_UNIQUE": 0,
+      "COLUMN_NAME": "username"
+    }
+  ],
+  "column": {
+    "COLLATION_NAME": "ascii_bin",
+    "IS_NULLABLE": "NO"
+  },
+  "duplicate_groups": 0
+}

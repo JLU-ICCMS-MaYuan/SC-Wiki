@@ -164,7 +164,7 @@ describe('独立 Demo 表单', () => {
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('Demo must not fetch'))
     mount()
     fireEvent.click(screen.getByRole('tab', { name: '注册' }))
-    fireEvent.change(screen.getByLabelText('公开用户名'), { target: { value: 'new_person' } })
+    fireEvent.change(screen.getByLabelText('用户名'), { target: { value: 'new_person' } })
     fireEvent.change(screen.getByLabelText('邮箱'), { target: { value: 'new@example.com' } })
     fireEvent.change(screen.getByLabelText('密码'), { target: { value: 'password123' } })
     fireEvent.click(screen.getByRole('button', { name: '创建账号' }))

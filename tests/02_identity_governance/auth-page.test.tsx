@@ -31,6 +31,25 @@ describe('登录来源安全', () => {
   })
 })
 
+it('注册使用用户名标签，失焦提示重复，提交时后端冲突仍被展示', async () => {
+  fetchMock.mockResolvedValueOnce(response(200, { available: false, reason: '用户名已被占用' }))
+    .mockResolvedValueOnce(response(409, { error: '用户名已被占用' }))
+  mount()
+  fireEvent.click(screen.getByRole('tab', { name: '注册', exact: true }))
+  expect(screen.queryByLabelText('公开用户名')).not.toBeInTheDocument()
+  const field = screen.getByLabelText('用户名', { exact: true })
+  fireEvent.change(field, { target: { value: 'ExistingUser' } })
+  fireEvent.blur(field)
+  await screen.findByText('该邮箱或用户名已被使用，请换一个再试。')
+  expect(field).toHaveAttribute('aria-invalid', 'true')
+  fireEvent.change(screen.getByLabelText('邮箱'), { target: { value: 'another@example.test' } })
+  fireEvent.change(screen.getByLabelText('密码'), { target: { value: 'longPassword123' } })
+  fireEvent.click(screen.getByRole('button', { name: '创建账号' }))
+  expect(await screen.findByRole('alert')).toHaveTextContent('该邮箱或用户名已被使用，请换一个再试。')
+  expect(fetchMock.mock.calls.map(([url]) => url)).toEqual(['/api/auth/username-availability?username=ExistingUser', '/api/auth/register'])
+  expect(localStorage.getItem('auth_token')).toBeNull()
+})
+
 it('正式登录保存会话并返回来源，页面无 Demo 账号提示', async () => {
   fetchMock.mockResolvedValueOnce(response(200, { access_token: 'token', user: { username: 'Researcher' } }))
   mount('/auth?returnTo=%2Fupload%3Ftask%3D12%23draft')

@@ -26,7 +26,7 @@ function show() {
 }
 function register() {
   fireEvent.click(screen.getByRole('tab', { name: '注册' }))
-  fireEvent.change(screen.getByLabelText('公开用户名'), { target: { value: 'Researcher' } })
+  fireEvent.change(screen.getByLabelText('用户名'), { target: { value: 'Researcher' } })
   fireEvent.change(screen.getByLabelText('邮箱'), { target: { value: 'researcher@example.test' } })
   fireEvent.change(screen.getByLabelText('密码'), { target: { value: 'strong-pass-123' } })
   fireEvent.click(screen.getByRole('button', { name: '创建账号' }))
@@ -91,7 +91,7 @@ it('发送期间禁止关闭和切换标签，迟到响应保留注册邮箱', a
   expect(screen.getByRole('tab', { name: '登录' })).toBeDisabled()
   expect(screen.getByLabelText('邮箱')).toBeDisabled()
   expect(screen.getByLabelText('密码')).toBeDisabled()
-  expect(screen.getByLabelText('公开用户名')).toBeDisabled()
+  expect(screen.getByLabelText('用户名')).toBeDisabled()
   const back = screen.getByRole('button', { name: '返回', exact: true })
   expect(back).toBeDisabled()
   fireEvent.click(back)

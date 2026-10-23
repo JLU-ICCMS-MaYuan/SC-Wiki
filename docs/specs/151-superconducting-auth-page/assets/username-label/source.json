@@ -1,0 +1,13 @@
+{
+  "id": "IMG-USERNAME-001",
+  "original_name": "codex-clipboard-5f67a653-fd13-4216-80e7-30484ba32a74.png",
+  "locator": "original.png",
+  "sha256": "3499a06fc743661a19f79b5d54a5cc8c58ad63bea79ab16abc080afc8cd71b87",
+  "dimensions_px": [
+    1034,
+    988
+  ],
+  "status": "local_verified",
+  "user_context": "不建议这里这里叫做公开用户名。给人感觉好像公开了很危险一样。就叫用户名就行。我忘记用户名有没有检查是不是重复了。按理说是不应该用户名重复的。使用 issue 和 spec 来完成。",
+  "verification": "2026-10-23 复制原图并核对 PNG 头、尺寸及 SHA256；截图仅作界面材料，未使用其中邮箱进行业务操作。"
+}

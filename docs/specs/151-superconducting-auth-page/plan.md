@@ -69,3 +69,7 @@ FR-014/SC-008 → orbitMotion 与浏览器高频采样 → T015；FR-015～016/S
 Go 新增独立 password_reset.go，复用现有 SendPasswordChangeCode 邮件模板、checkSendLimits、HMAC/Redis 原子消费与 JWT session_version。缓存 challenge 使用独立 scope，发码/验证/改密在用户行锁下串行，避免旧会话授权跨越改密。新增真实 HTTP 处理器集成测试和隔离浏览器端到端验收；公网 SMTP 投递不擅自发往用户邮箱。
 
 FR-019 → T019 前端路由/服务 → 正式浏览器跳转与注册登录；FR-020/021 → T020 Go API及缓存 → 注册码隔离、过期、并发、改密撤销测试；SC-011 → T021 集成与文档。T009/T014 对应落地，T010 含远程链接门仍不得虚构完成。
+
+## 注册字段命名后续调整
+
+复用 Issue #151，不新增重叠功能。仅修改 features/auth/copy.ts 的中文/英文标签，Demo 继承共享文案；现有可用性 API、注册校验与唯一索引保持。补充端到端防重路径核验，不改大小写规则或数据库。FR-022/023、SC-012 对应 T022。

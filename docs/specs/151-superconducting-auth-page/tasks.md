@@ -73,3 +73,9 @@ T011/T012 完成后执行 T013；正式 T009/T010 仍待用户批准。
 T009/T019：生产 /auth、两个入口、站内来源校验及注册/登录端到端通过。T014/T020：Go 公开找回路由及隔离/过期/并发/错误测试通过，邮件组件 TLS/SMTP 测试通过。T021：62 项前端测试、正式构建、隔离真实 HTTP 浏览器与 Overview 更新完成，具体证据见 acceptance-production.md。
 
 T010 保持未完成：Overview 已更新，但公网投递、目标 MySQL 环境验收和远程 Spec 链接仍未完成，不以本地文件存在关闭 Issue。
+
+## 注册字段命名与防重
+
+- [x] T022 [US3] 修改 frontend/src/features/auth/copy.ts 注册标签；更新标签选择器并核验失焦/提交/数据库防重，将结果和截图保存到 assets/username-label/，同步 Issue 与 Overview。
+
+T022 证据：username-label-validation.md；37 项前端、3 项 Go 目标测试、TypeScript 与正式页面双语核验通过；本机 MySQL 唯一索引只读检查及重复组计数已记录。

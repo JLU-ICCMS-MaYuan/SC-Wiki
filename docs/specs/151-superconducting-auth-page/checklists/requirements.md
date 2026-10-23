@@ -41,3 +41,5 @@
 - [x] CHK023 正式契约覆盖真实认证、来源安全、验证码/改密授权隔离、失败恢复和旧会话撤销，且任务映射和验收证据齐备。[contracts/production-auth.md、acceptance-production.md]
 - [x] CHK024 Overview 只写已实现行为，隔离验证、外部 SMTP、MySQL 与全量测试失败边界明确。[docs/overview/06_Researcher_Community_Forum/registration-login-and-jwt.md、acceptance-production.md]
 - [ ] CHK025 远程 Spec 链接、实际公网邮箱收信与目标环境验收完成。[未推送、未发送真实外部测试邮件，Issue 保持开放]
+
+- [x] CHK026 注册字段命名反馈逐字保存，截图有原件及哈希；FR-022/023 明确只改标签并核验现有防重，不自行改变大小写规则。[spec.md、assets/username-label/source.json、username-label-validation.md]

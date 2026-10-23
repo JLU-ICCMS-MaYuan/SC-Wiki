@@ -50,7 +50,7 @@ try {
   assert.equal(await page.evaluate(() => document.activeElement?.id), 'demo-username')
   report.flows.push('键盘标签切换、Tab 进入表单')
 
-  await page.getByLabel('公开用户名', { exact: true }).fill('demo_researcher')
+  await page.getByLabel('用户名', { exact: true }).fill('demo_researcher')
   await page.getByLabel('邮箱', { exact: true }).fill('new@example.com')
   await page.getByLabel('密码', { exact: true }).fill('password123')
   await page.getByRole('button', { name: '显示密码', exact: true }).click()
