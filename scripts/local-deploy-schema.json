@@ -1,7 +1,7 @@
 {
   "schema_heads": [
     "20261020_0049",
-    "20261020_0143b"
+    "20261022_0153"
   ],
   "tables": {
     "admin_applications": {
@@ -1780,6 +1780,78 @@
         ]
       ]
     },
+    "news_feed_classifications": {
+      "checks": [
+        "((paper_typeisnull)or(paper_typein('experimental','theoretical','review')))",
+        "((theoretical_subtypeisnull)or((paper_typeisnotnull)and(paper_type='theoretical')and(theoretical_subtypein('calculation','method','theory'))))",
+        "(statusin('running','completed','failed'))"
+      ],
+      "columns": {
+        "attempt_token": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "attempts": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "catalog_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "content_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "item_id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "model": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "paper_type": {
+          "nullable": true,
+          "type": "varchar(20)"
+        },
+        "reason": {
+          "nullable": false,
+          "type": "text"
+        },
+        "rule_version": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "theoretical_subtype": {
+          "nullable": true,
+          "type": "varchar(20)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "item_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "news_feed_items"
+        }
+      ],
+      "primary_key": [
+        "item_id"
+      ],
+      "unique": []
+    },
     "news_feed_identities": {
       "checks": [],
       "columns": {
@@ -1907,6 +1979,44 @@
       "foreign_keys": [],
       "primary_key": [
         "id"
+      ],
+      "unique": []
+    },
+    "news_feed_material_families": {
+      "checks": [],
+      "columns": {
+        "item_id": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "material_family_id": {
+          "nullable": false,
+          "type": "integer"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "item_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "news_feed_items"
+        },
+        {
+          "columns": [
+            "material_family_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "material_families"
+        }
+      ],
+      "primary_key": [
+        "item_id",
+        "material_family_id"
       ],
       "unique": []
     },
@@ -4339,6 +4449,59 @@
       ],
       "unique": []
     },
+    "scientific_review_drafts": {
+      "checks": [],
+      "columns": {
+        "base_fingerprint": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "base_revision": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "draft": {
+          "nullable": false,
+          "type": "json"
+        },
+        "owner_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "paper_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "owner_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        },
+        {
+          "columns": [
+            "paper_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "papers"
+        }
+      ],
+      "primary_key": [
+        "paper_id"
+      ],
+      "unique": []
+    },
     "scientific_structure_origins": {
       "checks": [],
       "columns": {
@@ -4841,6 +5004,10 @@
         "parent_structure_id": {
           "nullable": true,
           "type": "bigint"
+        },
+        "review_key": {
+          "nullable": true,
+          "type": "varchar(64)"
         },
         "source_locator": {
           "nullable": true,
