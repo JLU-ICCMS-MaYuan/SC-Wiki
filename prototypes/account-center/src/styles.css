@@ -1637,3 +1637,165 @@ h1 {
     font-size: 11px;
   }
 }
+
+/* 改密使用身份验证与邮箱确认两步，样式限定在账户安全卡片。 */
+.security-form.security-verification {
+  display: block;
+}
+.security-steps {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+  padding: 0 0 18px;
+  margin: 0 0 18px;
+  border-bottom: 1px solid var(--line);
+}
+.security-steps li {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 13px;
+  color: #7b8294;
+}
+.security-steps li > span {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f0f1f6;
+  font-size: 12px;
+}
+.security-steps .current {
+  color: var(--purple);
+  font-weight: 600;
+}
+.security-steps .current > span {
+  background: #efecff;
+}
+.security-steps .complete {
+  color: #36835e;
+}
+.security-steps svg {
+  font-size: 16px;
+}
+.security-description {
+  font-size: 13px;
+  color: #687286;
+  margin-bottom: 20px;
+  line-height: 1.7;
+}
+.security-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.security-fields label {
+  font-size: 12px;
+}
+.security-code {
+  grid-column: 1 / -1;
+}
+.code-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 480px;
+  margin-top: 8px;
+}
+.code-input input {
+  margin: 0;
+  flex: 1;
+}
+.security-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+.security-demo {
+  font-size: 11px;
+  color: #737b8e;
+  line-height: 1.8;
+  margin-top: 16px;
+  overflow-wrap: anywhere;
+}
+.security-demo code {
+  color: #6c5e9f;
+  background: #f6f4fc;
+  border-radius: 3px;
+  padding: 2px 4px;
+}
+.security-sent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  background: #f3f9f5;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+.security-sent > svg {
+  color: #36835e;
+}
+.security-sent > div {
+  flex: 1;
+  min-width: 0;
+}
+.security-sent b {
+  font-size: 13px;
+  color: #36835e;
+}
+.security-sent p {
+  font-size: 12px;
+  color: #687286;
+  line-height: 1.7;
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.security-sent strong {
+  font-weight: 500;
+}
+.security-error {
+  color: #b44747;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 16px;
+}
+.security-verification button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+@media (max-width: 600px) {
+  .security-fields {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .security-steps {
+    gap: 22px;
+  }
+  .security-sent {
+    flex-wrap: wrap;
+  }
+  .security-sent .button {
+    margin-left: auto;
+  }
+  .code-input {
+    gap: 7px;
+  }
+  .code-input .button {
+    font-size: 11px;
+    padding: 8px;
+  }
+}
+@media (max-width: 600px) {
+  .security-sent {
+    display: grid;
+    grid-template-columns: 20px minmax(0, 1fr);
+  }
+  .security-sent .button {
+    grid-column: 2;
+    margin-left: 0;
+    justify-self: start;
+  }
+}

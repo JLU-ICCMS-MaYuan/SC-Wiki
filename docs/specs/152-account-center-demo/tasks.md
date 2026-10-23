@@ -12,3 +12,5 @@
 T001 → T002 → T003 → T004 → T005；T006 依赖用户反馈。本清单只跟踪技术拆解，协作状态以 Issue #152 为准。
 
 T002–T005 的原型验收证据：`prototypes/account-center/design-qa.md` 与 `scripts/verify-browser.mjs`；生产实现不在本清单完成项中。
+
+- [x] T007 [US4] 在 `prototypes/account-center/src/App.jsx` 扩展两步邮箱验证码改密，`src/styles.css` 增加局部布局，新增浏览器回归验证 SC-005；同步 Spec 与 Issue #152。证据：`scripts/verify-password.mjs`，仅原型验收。

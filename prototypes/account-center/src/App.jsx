@@ -522,12 +522,78 @@ function PaperList({ role, reviewed = false, onSelect, isPublic = false }) {
 }
 function Security({ onNotice }) {
   const [open, setOpen] = useState(false);
+  const [step, setStep] = useState("identity");
+  const [oldPassword, setOldPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [sentAt, setSentAt] = useState(0);
+  const [now, setNow] = useState(Date.now());
+  // 固定凭证仅供独立原型演示，正式接入必须由后端校验和发送验证码。
+  const [demoPassword, setDemoPassword] = useState("DemoOld123!");
+  const cooldown = Math.max(0, Math.ceil((sentAt + 60000 - now) / 1000));
+  const expired = sentAt > 0 && now - sentAt >= 300000;
+  useEffect(() => {
+    if (!sentAt) return;
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, [sentAt]);
+  const clearForm = () => {
+    setStep("identity");
+    setOldPassword("");
+    setEmail("");
+    setCode("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setSentAt(0);
+    setError("");
+  };
+  const sendCode = () => {
+    if (
+      oldPassword !== demoPassword ||
+      email.trim().toLowerCase() !== "mayuan@example.com"
+    ) {
+      setError("旧密码或账户绑定邮箱不正确，请核对后重试。");
+      return;
+    }
+    if (cooldown > 0) return;
+    const timestamp = Date.now();
+    setSentAt(timestamp);
+    setNow(timestamp);
+    setCode("");
+    setError("");
+    setStep("password");
+    onNotice("验证码已模拟发送。演示验证码为 246810，不会发送真实邮件。");
+  };
+  const submit = (event) => {
+    event.preventDefault();
+    if (step === "identity") return sendCode();
+    if (!sentAt || Date.now() - sentAt >= 300000) {
+      setError("验证码已过期，请重新发送。");
+      return;
+    }
+    if (code !== "246810") return setError("验证码不正确，请重新输入。");
+    if (newPassword.length < 10) return setError("新密码至少需要 10 位。");
+    if (newPassword === demoPassword)
+      return setError("新密码不能与旧密码相同。");
+    if (newPassword !== confirmPassword)
+      return setError("两次输入的新密码不一致。");
+    setDemoPassword(newPassword);
+    clearForm();
+    setOpen(false);
+    onNotice("邮箱验证通过，密码已在本次演示中修改。刷新后恢复示例。");
+  };
   return (
     <section className="card security-card">
       <button
         className="security-toggle"
         aria-expanded={open}
-        onClick={() => setOpen(!open)}
+        onClick={() => {
+          clearForm();
+          setOpen(!open);
+        }}
       >
         <span className="section-icon">
           <Lock />
@@ -542,30 +608,173 @@ function Security({ onNotice }) {
         </span>
       </button>
       {open && (
-        <form
-          className="security-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            onNotice("演示完成：正式接入后，修改密码将使旧登录状态失效。");
-            event.currentTarget.reset();
-            setOpen(false);
-          }}
-        >
-          <label>
-            当前密码
-            <input type="password" required autoComplete="current-password" />
-          </label>
-          <label>
-            新密码
-            <input
-              type="password"
-              required
-              minLength={10}
-              autoComplete="new-password"
-              placeholder="至少 10 位"
-            />
-          </label>
-          <button className="button primary">确认修改</button>
+        <form className="security-form security-verification" onSubmit={submit}>
+          <ol className="security-steps" aria-label="修改密码步骤">
+            <li
+              aria-current={step === "identity" ? "step" : undefined}
+              className={step === "identity" ? "current" : "complete"}
+            >
+              <span>{step === "identity" ? "1" : <Check />}</span>验证身份
+            </li>
+            <li
+              aria-current={step === "password" ? "step" : undefined}
+              className={step === "password" ? "current" : ""}
+            >
+              <span>2</span>设置新密码
+            </li>
+          </ol>
+          {step === "identity" ? (
+            <>
+              <p className="security-description">
+                先验证旧密码和账户绑定邮箱，再向该邮箱发送验证码。
+              </p>
+              <div className="security-fields">
+                <label>
+                  旧密码
+                  <input
+                    type="password"
+                    required
+                    autoComplete="current-password"
+                    value={oldPassword}
+                    onChange={(event) => {
+                      setOldPassword(event.target.value);
+                      setError("");
+                    }}
+                    placeholder="请输入当前登录密码"
+                  />
+                </label>
+                <label>
+                  账户邮箱
+                  <input
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={email}
+                    onChange={(event) => {
+                      setEmail(event.target.value);
+                      setError("");
+                    }}
+                    placeholder="请输入账户绑定的邮箱"
+                  />
+                </label>
+              </div>
+              <p className="security-demo">
+                仅供体验：
+                {demoPassword === "DemoOld123!" ? (
+                  <>
+                    旧密码 <code>DemoOld123!</code>，
+                  </>
+                ) : (
+                  "请使用刚刚设置的密码，"
+                )}
+                邮箱 <code>mayuan@example.com</code>
+                。不发送真实邮件，请勿输入真实密码。
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="security-sent">
+                <Check />
+                <div>
+                  <b>身份已验证</b>
+                  <p>
+                    验证码已模拟发送至账户邮箱{" "}
+                    <strong>{email.trim().toLowerCase()}</strong>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="button quiet"
+                  onClick={clearForm}
+                >
+                  重新验证身份
+                </button>
+              </div>
+              <div className="security-fields">
+                <div className="security-code">
+                  <label htmlFor="security-email-code">邮箱验证码</label>
+                  <div className="code-input">
+                    <input
+                      id="security-email-code"
+                      type="text"
+                      required
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      pattern="[0-9]{6}"
+                      maxLength={6}
+                      value={code}
+                      onChange={(event) => setCode(event.target.value)}
+                      placeholder="输入 6 位验证码"
+                    />
+                    <button
+                      type="button"
+                      className="button secondary"
+                      disabled={cooldown > 0}
+                      onClick={sendCode}
+                    >
+                      {cooldown > 0 ? `${cooldown} 秒后重发` : "重新发送"}
+                    </button>
+                  </div>
+                </div>
+                <label>
+                  新密码
+                  <input
+                    type="password"
+                    required
+                    minLength={10}
+                    autoComplete="new-password"
+                    value={newPassword}
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    placeholder="至少 10 位，不能与旧密码相同"
+                  />
+                </label>
+                <label>
+                  确认新密码
+                  <input
+                    type="password"
+                    required
+                    minLength={10}
+                    autoComplete="new-password"
+                    value={confirmPassword}
+                    onChange={(event) => setConfirmPassword(event.target.value)}
+                    placeholder="再次输入新密码"
+                  />
+                </label>
+              </div>
+              <p className="security-demo">
+                演示验证码 <code>246810</code> ·{" "}
+                {expired ? "已过期，请重新发送" : "5 分钟内有效"}
+                。正式接入后，修改成功将使旧登录状态失效。
+              </p>
+            </>
+          )}
+          {error && (
+            <p className="security-error" role="alert">
+              {error}
+            </p>
+          )}
+          <div className="security-buttons">
+            <button
+              type="button"
+              className="button secondary"
+              onClick={() => {
+                clearForm();
+                setOpen(false);
+              }}
+            >
+              取消
+            </button>
+            <button
+              className="button primary"
+              disabled={
+                step === "identity"
+                  ? !oldPassword || !email.trim()
+                  : !code || !newPassword || !confirmPassword
+              }
+            >
+              {step === "identity" ? "验证并发送验证码" : "验证并修改密码"}
+            </button>
+          </div>
         </form>
       )}
     </section>
@@ -899,7 +1108,7 @@ export function App() {
               )}
               {!isPublic && (
                 <>
-                  <Security onNotice={setNotice} />
+                  <Security key={role} onNotice={setNotice} />
                   <WorkEntries role={role} onNotice={setNotice} />
                 </>
               )}
