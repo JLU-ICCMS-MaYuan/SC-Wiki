@@ -128,7 +128,8 @@ def csv_export(item):
               "frequency_thz", "observed_amplitude", "reconstructed_amplitude", "status", "detection_mode",
               "pixel_low", "pixel_high", "unit", "frequency_unit", "source_frequency_unit",
               "normalized_dos_candidate", "normalized_dos_unit", "zero_baseline_candidate", "joint_candidate",
-              "joint_cumulative_lambda", "boundary_mask", "review_status", "review_reason", "pdf_page", "source_sha256"]
+              "joint_cumulative_lambda", "boundary_mask", "review_status", "review_reason", "pdf_page", "source_sha256",
+              "rejected_chromatic_pixels", "candidate_components", "reconstruction_blocked"]
     writer = csv.DictWriter(output, fieldnames=fields); writer.writeheader()
     payload = item["result"]
     candidates = payload.get("candidates") or {}
@@ -146,7 +147,8 @@ def csv_export(item):
             writer.writerow(dict(collection_id=item["id"], run_id=item["run"]["id"],
                 algorithm_version=item["run"]["algorithm_version"], state_key=item["state_key"], curve_id=c["id"],
                 kind=c["kind"], projection=c["projection"], **{k:p.get(k) for k in ("frequency_thz",
-                "observed_amplitude", "reconstructed_amplitude", "status", "detection_mode", "pixel_low", "pixel_high")},
+                "observed_amplitude", "reconstructed_amplitude", "status", "detection_mode", "pixel_low", "pixel_high",
+                "rejected_chromatic_pixels", "candidate_components", "reconstruction_blocked")},
                 unit=c["unit"], frequency_unit="THz", source_frequency_unit=c.get("source_frequency_unit"),
                 normalized_dos_candidate=normalized.get(freq), normalized_dos_unit=norm.get("unit") if normalized else None,
                 zero_baseline_candidate=bmap.get(freq) if alpha else None,

@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 import numpy as np
+from scipy.ndimage import binary_dilation
 
 _trapezoid = np.trapezoid if hasattr(np, "trapezoid") else np.trapz
 
@@ -93,14 +94,17 @@ def continue_frame_plateau(rows: list[dict], *, max_pixels: int, tolerance: floa
 
 
 def reconstruct(values: list[float | None], *, max_gap: int,
-                baseline_tolerance: float, max_baseline_gap: int) -> tuple[list, list]:
+                baseline_tolerance: float, max_baseline_gap: int, blocked_indices=()) -> tuple[list, list]:
     """只填有界内部缺口；低值长缺口也明确记为推断，尾部不外推。"""
     out = list(values)
     flags = ["observed" if v is not None else "missing" for v in values]
     observed = [i for i, v in enumerate(values) if v is not None]
+    blocked = set(blocked_indices)
     for left, right in zip(observed, observed[1:]):
         gap = right - left - 1
         if gap == 0:
+            continue
+        if any(i in blocked for i in range(left + 1, right)):
             continue
         if gap <= max_gap:
             flag = "interpolated"
@@ -134,6 +138,12 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
         allowed[b:d + 1, a:c + 1] = False
     mask &= allowed
     recovered_mask &= allowed
+    # 暗但色相纯净的真线不能因亮度低被删除；归一化仅用于判色，不修改原图或数值。
+    normalized_rgb = np.asarray(rgb, dtype=float) * 255 / np.maximum(np.max(rgb, axis=2, keepdims=True), 1)
+    chromatic_core = color_mask(normalized_rgb, spec["color"]) & recovered_mask
+    # 宽松色差会接纳文字的棕色彩边，须由邻域内严格本色或纯净暗色像素支撑。
+    # 在排除图例之后计算邻域，不能借被屏蔽文字/图例取得支持。
+    recovery_support = binary_dilation(mask | chromatic_core, structure=np.ones((3, 3), dtype=bool), iterations=2) & allowed
     pixels = list(range(y0, y1 + 1) if orientation == "y" else range(x0, x1 + 1))
     zero_pixel = spec.get("zero_frequency_pixel")
     if zero_pixel is not None and zero_pixel not in pixels:
@@ -149,17 +159,34 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
                      (1 - weight) * rgb[:, lo:lo+1] + weight * rgb[:, hi:hi+1])
             permitted = (allowed[lo] & allowed[hi] if orientation == "y" else allowed[:, lo] & allowed[:, hi])
             direct = color_mask(strip, spec["color"]).reshape(-1) & permitted
-            recovered = chromatic_mask(strip, spec["color"]).reshape(-1) & permitted
+            raw_recovered = chromatic_mask(strip, spec["color"]).reshape(-1) & permitted
+            supported = (recovery_support[lo] | recovery_support[hi] if orientation == "y"
+                         else recovery_support[:, lo] | recovery_support[:, hi])
+            recovered = raw_recovered & supported
         else:
             pos = int(pos)
             direct = mask[pos, :] if orientation == "y" else mask[:, pos]
-            recovered = recovered_mask[pos, :] if orientation == "y" else recovered_mask[:, pos]
+            raw_recovered = recovered_mask[pos, :] if orientation == "y" else recovered_mask[:, pos]
+            supported = recovery_support[pos, :] if orientation == "y" else recovery_support[:, pos]
+            recovered = raw_recovered & supported
         coords = np.flatnonzero(direct)
         detection_mode = "strict_color" if len(coords) else None
+        rejected = 0
+        blocked = False
         if not len(coords):
+            rejected = int(np.count_nonzero(raw_recovered & ~recovered))
             coords = np.flatnonzero(recovered)
             if len(coords):
                 detection_mode = "chromatic_recovery"
+            elif rejected:
+                detection_mode = "unsupported_chromatic"
+                blocked = True
+        components = int(1 + np.count_nonzero(np.diff(coords) > 1)) if len(coords) else 0
+        if components > 1:
+            # 可能是曲线/文字混入，也可能是真实遮挡；不能平均到没有像素的位置。
+            coords = np.array([], dtype=int)
+            detection_mode = "ambiguous_components"
+            blocked = True
         if fractional and len(coords):
             detection_mode = "subpixel_color"
         freq = 0.0 if zero_pixel is not None and pos == zero_pixel else frequency_axis.value(pos)
@@ -180,7 +207,9 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
                 clipped.append(float(freq))
         rows.append(dict(frequency_thz=float(freq), frequency_pixel=float(pos),
                          amplitude_pixel=center, pixel_low=lo, pixel_high=hi,
-                         observed_amplitude=value, detection_mode=detection_mode))
+                         observed_amplitude=value, detection_mode=detection_mode,
+                         rejected_chromatic_pixels=rejected, candidate_components=components,
+                         reconstruction_blocked=blocked))
     rows.sort(key=lambda p: p["frequency_thz"])
     if not any(p["observed_amplitude"] is not None for p in rows):
         raise ValueError(f"没有找到曲线颜色：{spec['id']}")
@@ -188,7 +217,8 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
     values = [p["observed_amplitude"] for p in rows]
     filled, flags = reconstruct(values, max_gap=spec.get("max_gap_px", 12),
                                 baseline_tolerance=tolerance,
-                                max_baseline_gap=spec.get("max_baseline_gap_px", 90))
+                                max_baseline_gap=spec.get("max_baseline_gap_px", 90),
+                                blocked_indices=[i for i, p in enumerate(rows) if p["reconstruction_blocked"]])
     # 边界零值仅在案例明确声明且最近实测值接近基线时用于候选重建。
     boundary_records = []
     for side, freq in (("low", spec.get("zero_boundaries_thz", [None, None])[0]),
@@ -201,6 +231,8 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
             continue
         indices = range(edge) if side == "low" else range(edge + 1, len(rows))
         for i in indices:
+            if rows[i]["reconstruction_blocked"]:
+                continue
             f0, f1 = freq, rows[edge]["frequency_thz"]
             filled[i] = max(0.0, values[edge] * (rows[i]["frequency_thz"] - f0) / (f1 - f0))
             flags[i] = "baseline_inferred"
@@ -214,6 +246,9 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
         p["status"] = flag
     if spec["kind"] == "cumulative_lambda":
         continue_frame_plateau(rows, max_pixels=2, tolerance=1.5 * abs(amplitude_axis.slope))
+    for p in rows:
+        if p.get("reconstruction_blocked"):
+            p["reconstructed_amplitude"], p["status"] = None, "missing"
     for boundary in boundary_records:
         # 不用假设覆盖恰好落在边界的直接观测。
         if all(abs(p["frequency_thz"] - boundary["frequency_thz"]) > 1e-8 for p in rows):

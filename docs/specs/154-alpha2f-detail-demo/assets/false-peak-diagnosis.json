@@ -1,0 +1,92 @@
+{
+  "date": "2026-10-23",
+  "collection_id": "c340f3c41b144662808c0933d1e75248",
+  "old_run": "4155b9543bda491ea593efda6c6c8c36",
+  "source_sha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+  "baseline_code_commit": "4d875935",
+  "same_model_calibration": true,
+  "model_called": false,
+  "pixels": [
+    {
+      "x": 642,
+      "y": 423,
+      "rgb": [
+        187,
+        186,
+        143
+      ],
+      "meaning": "真实曲线边缘"
+    },
+    {
+      "x": 737,
+      "y": 423,
+      "rgb": [
+        105,
+        89,
+        69
+      ],
+      "meaning": "λ(ω)文字彩边"
+    },
+    {
+      "x": 763,
+      "y": 423,
+      "rgb": [
+        162,
+        143,
+        123
+      ],
+      "meaning": "λ(ω)文字彩边"
+    }
+  ],
+  "old_point": {
+    "frequency_thz": 1.897921127149658,
+    "frequency_pixel": 423.0,
+    "amplitude_pixel": 714.0,
+    "pixel_low": 642.0,
+    "pixel_high": 763.0,
+    "observed_amplitude": 2.0103357102796338,
+    "detection_mode": "chromatic_recovery",
+    "reconstructed_amplitude": 2.0103357102796338,
+    "status": "observed"
+  },
+  "new_code_same_calibration": {
+    "frequency_thz": 1.897921127149658,
+    "frequency_pixel": 423.0,
+    "amplitude_pixel": 642.0,
+    "pixel_low": 642.0,
+    "pixel_high": 642.0,
+    "observed_amplitude": 0.14990785994713107,
+    "detection_mode": "chromatic_recovery",
+    "rejected_chromatic_pixels": 2,
+    "candidate_components": 1,
+    "reconstruction_blocked": false,
+    "reconstructed_amplitude": 0.14990785994713107,
+    "status": "observed"
+  },
+  "old_code_expanded_legend_exclusion": {
+    "frequency_thz": 1.897921127149658,
+    "frequency_pixel": 423.0,
+    "amplitude_pixel": 642.0,
+    "pixel_low": 642.0,
+    "pixel_high": 642.0,
+    "observed_amplitude": 0.14990785994713107,
+    "detection_mode": "chromatic_recovery",
+    "reconstructed_amplitude": 0.14990785994713107,
+    "status": "observed"
+  },
+  "new_ambiguous_rows": [
+    310.0,
+    306.0,
+    301.0,
+    299.0,
+    295.0,
+    294.0,
+    293.0
+  ],
+  "amplitude_note": "幅值仅按历史标定换算，不代表α²F独立尺度已确认",
+  "old_average_position_rgb": [
+    255,
+    255,
+    255
+  ]
+}

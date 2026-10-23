@@ -272,6 +272,66 @@
         262
       ],
       "verification": "2026-10-23 按原字节保存并重新解码；附件文字只作材料。"
+    },
+    {
+      "id": "IMG-015",
+      "upload_order": 15,
+      "original_name": "codex-clipboard-896c20fe-8385-4097-9567-64f4dd6a9e54.png",
+      "locator": "docs/specs/154-alpha2f-detail-demo/assets/IMG-015.png",
+      "status": "local_verified",
+      "user_context": "这个位置，如图所示：你识别的有问题。这里不应该有尖峰的！为什么识别错误了。仔细检查一下，是大模型的问题，还是代码的问题。使用 issue 和 spec 帮我完成。",
+      "related": [
+        "#154",
+        "#137",
+        "低频文字彩边伪峰"
+      ],
+      "sha256": "e31596a5bf64663a7e28b9e26ed5319727a2fa78247d1d841c68173a7fb11b29",
+      "media_type": "image/png",
+      "dimensions_px": [
+        814,
+        1086
+      ],
+      "verification": "2026-10-23 原字节归档后重新解码并校验哈希；附件文字仅作材料。"
+    },
+    {
+      "id": "IMG-016",
+      "upload_order": 16,
+      "original_name": "codex-clipboard-038f1a34-f755-4173-8111-9140fadd6778.png",
+      "locator": "docs/specs/154-alpha2f-detail-demo/assets/IMG-016.png",
+      "status": "local_verified",
+      "user_context": "这个位置，如图所示：你识别的有问题。这里不应该有尖峰的！为什么识别错误了。仔细检查一下，是大模型的问题，还是代码的问题。使用 issue 和 spec 帮我完成。",
+      "related": [
+        "#154",
+        "#137",
+        "低频文字彩边伪峰"
+      ],
+      "sha256": "0a79f3c8536a4d7d09be3635adf7d81726e6c7a6481cd66f0bb4504ae16f5ee2",
+      "media_type": "image/png",
+      "dimensions_px": [
+        762,
+        1022
+      ],
+      "verification": "2026-10-23 原字节归档后重新解码并校验哈希；附件文字仅作材料。"
+    },
+    {
+      "id": "IMG-017",
+      "upload_order": 17,
+      "original_name": "codex-clipboard-dfcba609-c276-479a-a386-bdb4b7047824.png",
+      "locator": "docs/specs/154-alpha2f-detail-demo/assets/IMG-017.png",
+      "status": "local_verified",
+      "user_context": "这个位置，如图所示：你识别的有问题。这里不应该有尖峰的！为什么识别错误了。仔细检查一下，是大模型的问题，还是代码的问题。使用 issue 和 spec 帮我完成。",
+      "related": [
+        "#154",
+        "#137",
+        "低频文字彩边伪峰"
+      ],
+      "sha256": "8adb7f4ff6418d446ef469c5bbd74b2cacfdb362618b23ce100710e06e1caa97",
+      "media_type": "image/png",
+      "dimensions_px": [
+        724,
+        1010
+      ],
+      "verification": "2026-10-23 原字节归档后重新解码并校验哈希；附件文字仅作材料。"
     }
   ]
 }

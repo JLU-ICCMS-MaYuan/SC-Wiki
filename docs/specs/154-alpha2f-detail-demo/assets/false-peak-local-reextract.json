@@ -1,0 +1,43 @@
+{
+  "date": "2026-10-23",
+  "environment": "本机原生 127.0.0.1:3307/scwiki",
+  "target_id": "c16cc627a0c04dc8ad4289624d1da80a",
+  "collection_id": "c340f3c41b144662808c0933d1e75248",
+  "old_run_id": "4155b9543bda491ea593efda6c6c8c36",
+  "new_run_id": "15974842501e44ecb50fa8b7d495f873",
+  "collection_version": 4,
+  "algorithm": "spectra-production-v4",
+  "status": "needs_review",
+  "calibration_reused": true,
+  "model_called": false,
+  "execution": "jobs.enqueue + jobs.run_job 正式任务函数直接定向执行，未经过 RQ 调度或 HTTP 认证",
+  "old_result_hash_before": "55936e78de67b503f024013b6746f83e8aa5ca2a5e43db2719d1508394ae73a2",
+  "old_result_hash_after": "55936e78de67b503f024013b6746f83e8aa5ca2a5e43db2719d1508394ae73a2",
+  "other_collections_unchanged": true,
+  "draft_unchanged": true,
+  "point": {
+    "status": "observed",
+    "pixel_low": 642.0,
+    "pixel_high": 642.0,
+    "frequency_thz": 1.9444405373092335,
+    "detection_mode": "chromatic_recovery",
+    "amplitude_pixel": 642.0,
+    "frequency_pixel": 423.0,
+    "observed_amplitude": 0.14990785994713107,
+    "candidate_components": 1,
+    "reconstruction_blocked": false,
+    "reconstructed_amplitude": 0.14990785994713107,
+    "rejected_chromatic_pixels": 2
+  },
+  "csv_matches": true,
+  "ambiguity_rows": [
+    310.0,
+    306.0,
+    301.0,
+    299.0,
+    295.0,
+    294.0,
+    293.0
+  ],
+  "scientific_acceptance": false
+}

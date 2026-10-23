@@ -66,6 +66,15 @@ async function main() {
         await figure.screenshot({path:path.join(out, `crop-${kind}-${mode==='仅原图'?'source':mode==='仅提取数据'?'data':'overlay'}.png`)});
       }
       await page.getByRole('button',{name:'仅提取数据',exact:true}).click();
+      if(kind==='alpha' && item.run.algorithm_version==='spectra-production-v4') {
+        const row=curve.points.find(point=>point.frequency_pixel===423);
+        assert.equal(row.amplitude_pixel,642); assert.equal(row.rejected_chromatic_pixels,2);
+        const d=await figure.locator('path[data-spectrum-path]').first().getAttribute('d');
+        const positions=[...d.matchAll(/[ML]([^,]+),([^ ]+)/g)].map(match=>[Number(match[1]),Number(match[2])]);
+        assert(positions.some(([x,y])=>Math.abs(y-423)<1e-8&&Math.abs(x-642)<1e-8));
+        assert(!positions.some(([x,y])=>Math.abs(y-423)<1e-8&&Math.abs(x-714)<1e-8));
+        checks.push('alpha: v4 实际新运行的423行回绘在真实曲线642，未回绘旧伪峰714');
+      }
       await page.emulateMedia({reducedMotion:'reduce'});
       assert.equal(await page.getByTestId('spectrum-view-indicator').evaluate(el=>getComputedStyle(el).transitionDuration),'0s');
       await page.emulateMedia({reducedMotion:'no-preference'});

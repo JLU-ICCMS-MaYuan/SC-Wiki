@@ -30,3 +30,7 @@ quality.dos_mode_integral 在原胞和完整绝对密度条件满足时含 integ
 ## 子图显示框扩展
 
 CurveCalibration 可提供 display_bbox（原图绝对像素四元组，或 null），必须包含 roi 并位于原图内。提取输出保留该字段，但不平移或重写点坐标；新增字段本身不改变谱数学。旧记录缺字段时前端在 ROI 邻域检测图框，可信边框和合理显示框用于 viewBox/clipPath；过大的模型框不直接采用，无法独立定位时明确提示。
+
+## v4 颜色补读与歧义来源
+
+宽松补读需严格本色或纯净暗色邻域支持，不取不相连候选的整体均值。歧义行不允许插值跨越；点保留 rejected_chromatic_pixels、candidate_components、reconstruction_blocked，CSV 同步导出。detection_mode 可为 ambiguous_components 或 unsupported_chromatic，status 仍为 missing；页面据此显示待核对原因。校验版本 spectra-production-v4 保证旧输入不会复用旧错误算法结果，旧运行数值不覆盖。

@@ -1,0 +1,77 @@
+{
+  "image": "false-peak-source.png",
+  "image_sha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+  "calibration": {
+    "id": "A-alpha2f",
+    "roi": [
+      637,
+      50,
+      790,
+      434
+    ],
+    "kind": "alpha2f",
+    "unit": "dimensionless",
+    "color": "olive",
+    "exclude": [
+      [
+        674,
+        382,
+        789,
+        402
+      ]
+    ],
+    "projection": null,
+    "frequency_unit": "THz",
+    "amplitude_scale": "linear",
+    "amplitude_ticks": [
+      [
+        636.0,
+        0.0
+      ],
+      [
+        675.0,
+        1.0
+      ],
+      [
+        714.0,
+        2.0
+      ],
+      [
+        752.0,
+        3.0
+      ],
+      [
+        791.0,
+        4.0
+      ]
+    ],
+    "frequency_scale": "linear",
+    "frequency_ticks": [
+      [
+        435.0,
+        0.0
+      ],
+      [
+        311.0,
+        20.0
+      ],
+      [
+        188.0,
+        40.0
+      ],
+      [
+        65.0,
+        60.0
+      ]
+    ],
+    "frequency_direction": "y",
+    "zero_boundaries_thz": [
+      null,
+      null
+    ],
+    "zero_reference_band_thz": null,
+    "physical_definition_confirmed": true
+  },
+  "frequency_pixel": 423,
+  "expected_amplitude_pixel": 642
+}

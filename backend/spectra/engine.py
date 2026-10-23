@@ -49,6 +49,8 @@ def coverage(curve):
             missing_intervals.append([points[start]["frequency_thz"],points[end]["frequency_thz"]])
             start=None
     return dict(total_points=size, counts=counts,
+                rejected_chromatic_pixels=sum(p.get("rejected_chromatic_pixels", 0) for p in points),
+                ambiguous_samples=sum(p.get("detection_mode") == "ambiguous_components" for p in points),
                 zero_frequency_observed=points[0]["frequency_thz"] == 0 and points[0]["observed_amplitude"] is not None,
                 frequency_interval_thz=[points[0]["frequency_thz"],points[-1]["frequency_thz"]],
                 omitted_low_frequency_interval_thz=([0.,points[0]["frequency_thz"]] if points[0]["frequency_thz"]>0 else None),
@@ -129,7 +131,7 @@ def extract_panel(rgb: np.ndarray, calibration: dict, *, references: dict | None
                             linearity_independently_checkable=len(c.frequency_ticks)>2 and len(c.amplitude_ticks)>2)
     result = dict(algorithm_version=ALGORITHM_VERSION, calibration=panel.model_dump(), curves=curves,
                   failures=failures, quality=dict(curves=metrics, limitations=[]), candidates={})
-    if failures or any(not metric["zero_frequency_observed"] for metric in metrics.values()):
+    if failures or any(not metric["zero_frequency_observed"] or metric["ambiguous_samples"] for metric in metrics.values()):
         result["status"] = "needs_review"
     q = result["quality"]
     alpha = next((c for c in curves if c["kind"] == "alpha2f"), None)

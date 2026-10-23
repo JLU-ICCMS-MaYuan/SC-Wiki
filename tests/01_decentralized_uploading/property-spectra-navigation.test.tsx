@@ -103,6 +103,16 @@ it('正式详情移除候选与重复审核，点表定高显示真实状态和�
   expect(screen.getByRole('region', { name: '可滚动的逐点数据表' })).toHaveStyle({ overflow: 'auto' })
   expect(within(screen.getAllByRole('table').at(-1)!).getByText('0.2')).toBeInTheDocument()
 })
+it('有歧义的彩边和多轨迹保留待核对状态，不展示插值伪值', async () => {
+  listing.items[0].result.curves[0].points = [
+    { ...point, observed_amplitude:null, reconstructed_amplitude:null, status:'missing', detection_mode:'ambiguous_components' },
+    { ...point, frequency_thz:2, observed_amplitude:null, reconstructed_amplitude:null, status:'missing', detection_mode:'unsupported_chromatic' },
+  ]
+  render(<MemoryRouter initialEntries={[address()]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage />} /></Routes></MemoryRouter>)
+  expect(await screen.findByText('多条轨迹，待核对')).toBeInTheDocument()
+  expect(screen.getByText('彩边证据不足，待核对')).toBeInTheDocument()
+  expect(within(screen.getAllByRole('table').at(-1)!).queryByText('2.2')).not.toBeInTheDocument()
+})
 
 it.each(['state_key=other', 'collection_version=1', 'run=old'])('直接路由拒绝不匹配身份 %s', async replace => {
   const key = replace.split('=')[0]

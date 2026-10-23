@@ -7,6 +7,7 @@ import { spectrumCurveColor } from '../lib/spectrumGeometry'
 import { spectrumInterval, spectrumNames } from '../lib/propertySpectra'
 
 export const spectrumNumber = (value: unknown, digits = 4) => typeof value === 'number' && Number.isFinite(value) ? Number(value.toFixed(digits)).toString() : '—'
+const pointStatus = (status: string, detection?: string) => detection === 'ambiguous_components' ? '多条轨迹，待核对' : detection === 'unsupported_chromatic' ? '彩边证据不足，待核对' : status === 'observed' ? '原图提取' : spectrumNames[status] || status
 const unitName = (unit: string) => unit === 'dimensionless' || unit === '1' ? '无量纲' : unit === 'pixel' ? '相对幅值（像素）' : unit === 'unknown' ? '单位待核对' : unit
 const boxStyle = { p: { xs: 2, md: 2.5 }, mb: 2, borderRadius: 2, minWidth: 0 }
 
@@ -65,7 +66,7 @@ export function SpectrumPoints({ curves }: { curves: Curve[] }) {
     <TextField size="small" label="查找频率" value={search} onChange={event => setSearch(event.target.value)} sx={{ mb: 2 }} />
     <Box role="region" aria-label="可滚动的逐点数据表" tabIndex={0} sx={{ maxWidth: 1180, height: { xs: 300, md: 330 }, overflow: 'auto', border: 1, borderColor: 'divider', borderRadius: 1 }}>
       <Table stickyHeader size="small" sx={{ minWidth: 760 }}><TableHead><TableRow>{['曲线 / 单位', '频率 / THz', '原图提取', '提取数据（含重建）', '幅值绝对差', '数据状态'].map(label => <TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>
-        {rows.map(({ curve, point, i }) => <TableRow key={`${curve.id}-${i}`}><TableCell>{curve.projection || spectrumNames[curve.kind]} / {unitName(curve.unit)}</TableCell><TableCell>{spectrumNumber(point.frequency_thz, 7)}</TableCell><TableCell>{spectrumNumber(point.observed_amplitude, 7)}</TableCell><TableCell>{spectrumNumber(point.reconstructed_amplitude, 7)}</TableCell><TableCell>{point.observed_amplitude != null && point.reconstructed_amplitude != null ? spectrumNumber(Math.abs(point.reconstructed_amplitude - point.observed_amplitude), 7) : '—'}</TableCell><TableCell>{point.status === 'observed' ? '原图提取' : spectrumNames[point.status] || point.status}</TableCell></TableRow>)}
+        {rows.map(({ curve, point, i }) => <TableRow key={`${curve.id}-${i}`}><TableCell>{curve.projection || spectrumNames[curve.kind]} / {unitName(curve.unit)}</TableCell><TableCell>{spectrumNumber(point.frequency_thz, 7)}</TableCell><TableCell>{spectrumNumber(point.observed_amplitude, 7)}</TableCell><TableCell>{spectrumNumber(point.reconstructed_amplitude, 7)}</TableCell><TableCell>{point.observed_amplitude != null && point.reconstructed_amplitude != null ? spectrumNumber(Math.abs(point.reconstructed_amplitude - point.observed_amplitude), 7) : '—'}</TableCell><TableCell>{pointStatus(point.status, point.detection_mode)}</TableCell></TableRow>)}
       </TableBody></Table>{!rows.length && <Typography sx={{ p: 2 }}>没有匹配的数据点</Typography>}
     </Box><Typography variant="caption" color="text.secondary">{rows.length} 点 · 数据状态说明点的来源，不表示已审核通过。</Typography>
   </DetailSection>
