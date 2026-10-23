@@ -43,3 +43,7 @@ Vite 默认地址为 `http://localhost:5173/nobel-demo.html`。如果 `5173` 已
 ## 11人名单核对
 
 当前仅移除江崎，约瑟夫森和莱格特保留。正式页与Demo均为11个入口，`/nobel/esaki`不再展示人物详情；中英文引言为十一位/Eleven。1973年的历史共享说明仍列出江崎，与是否展出分开。新验证证据在 `assets/roster-validation/`。
+
+## 固定横线验证
+
+当前横线按完整旋转周期所需最大空间固定，不再跟随当前人物上下移动。不同人物经过时下方空白可以不同，但索引和联系信息不跳动。窗口尺寸、语言或字体重排会重新计算合理高度。脚本 `nobel-compact-browser.mjs` 现在验证固定位置与全周期容量，最新记录在 `assets/fixed-divider-validation/`。

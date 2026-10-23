@@ -80,3 +80,10 @@ T020–T022证据：`assets/compact-feedback.json`、`assets/compact-validation/
 - [x] T024 分离完整奖项历史并验证Giaever/Josephson共享说明仍准确、Leggett仍保留（FR-022）。
 
 T023/T024验证：23项Vitest及正式构建通过；真实浏览器确认11个入口、江崎路由无详情、Josephson/Leggett保留、1973历史共享关系正确。紧凑布局726相位和原有拖动/新标签页回归通过。证据见 `roster-validation.md` 和 `assets/roster-validation/`。
+
+## 固定分隔线
+
+- [x] T025 以完整旋转周期的卡片底边上界确定固定舞台高度，移除角度依赖（FR-023/024）。
+- [x] T026 验证中英文及桌面/手机整圈分隔线位置不变、内容完整，归档截图并同步Issue/Overview。
+
+T025/T026证据见 `fixed-divider-validation.md` 与 `assets/fixed-divider-validation/`：11项测试、构建、正式页面和Demo回归通过；中英文三种视口726相位分隔线/联系区域位移0px，临界余量约12px，自动旋转及索引切换不移动横线。

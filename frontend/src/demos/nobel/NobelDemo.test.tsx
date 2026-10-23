@@ -1,9 +1,24 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import NobelDemo from './NobelDemo'
-import { projectGallery } from '../../features/nobel/projection'
+import { projectGallery, galleryStageHeight, galleryGeometry } from '../../features/nobel/projection'
 
 describe('弧形展陈的布局不变量', () => {
+  it('固定高度容纳全圈所有人物，且最长人物主位仅留必要余量', () => {
+    const heights = [580, 640, 612, 560, 720, 630, 595, 610, 700, 650, 675]
+    const height = galleryStageHeight(heights)
+    for (let angle = -360; angle <= 360; angle += 0.5) {
+      for (const card of projectGallery(angle, heights.length, 1100)) {
+        const bottom = galleryGeometry.top + card.y + heights[card.index] * card.scale
+        if (bottom > height - galleryGeometry.bottomGap + 1e-6) throw new Error(`相位${angle}卡片被裁切`)
+      }
+    }
+    const tallest = Math.max(...heights)
+    const gap = height - galleryGeometry.top - tallest * 1.1
+    expect(gap).toBeGreaterThanOrEqual(12)
+    expect(gap).toBeLessThan(13)
+    expect(galleryStageHeight([...heights, 900])).toBeGreaterThan(height)
+  })
   it('两圈密集相位内，所有相邻容器始终有足够间隔', () => {
     for (const width of [288, 358, 568, 744, 1024, 1344]) {
       for (let angle = -360; angle <= 360; angle += 0.5) {

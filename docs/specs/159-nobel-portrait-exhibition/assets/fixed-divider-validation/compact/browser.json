@@ -1,0 +1,81 @@
+{
+  "base": "http://127.0.0.1:5173",
+  "metrics": [
+    {
+      "lang": "zh",
+      "width": 1440,
+      "samples": 121,
+      "minGap": 13.369796752929688,
+      "maxGap": 87.54806518554688,
+      "minSpacing": 35.9998779296875,
+      "stageHeight": 661,
+      "lineShift": 0,
+      "contactShift": 0
+    },
+    {
+      "lang": "zh",
+      "width": 768,
+      "samples": 121,
+      "minGap": 13.369796752929688,
+      "maxGap": 87.54804992675781,
+      "minSpacing": 35.99992370605469,
+      "stageHeight": 661,
+      "lineShift": 0,
+      "contactShift": 0
+    },
+    {
+      "lang": "zh",
+      "width": 390,
+      "samples": 121,
+      "minGap": 13.367538452148438,
+      "maxGap": 82.73696899414062,
+      "minSpacing": 24.011672973632812,
+      "stageHeight": 639,
+      "lineShift": 0,
+      "contactShift": 0
+    },
+    {
+      "lang": "en",
+      "width": 1440,
+      "samples": 121,
+      "minGap": 11.980712890625,
+      "maxGap": 94.64485168457031,
+      "minSpacing": 35.9998779296875,
+      "stageHeight": 679,
+      "lineShift": 0,
+      "contactShift": 0
+    },
+    {
+      "lang": "en",
+      "width": 768,
+      "samples": 121,
+      "minGap": 11.980697631835938,
+      "maxGap": 94.6448974609375,
+      "minSpacing": 35.99992370605469,
+      "stageHeight": 679,
+      "lineShift": 0,
+      "contactShift": 0
+    },
+    {
+      "lang": "en",
+      "width": 390,
+      "samples": 121,
+      "minGap": 11.769729614257812,
+      "maxGap": 92.95458984375,
+      "minSpacing": 24.011672973632812,
+      "stageHeight": 657,
+      "lineShift": 0,
+      "contactShift": 0
+    }
+  ],
+  "checks": [
+    "分隔线及联系人全圈固定，临界位置只保留必要间距",
+    "提示及暂停按钮移除",
+    "索引选择后继续旋转",
+    "联系人四人、三条准确邮箱、无郭强邮箱",
+    "中文机构及引言逐字匹配",
+    "键盘焦点阅读及离开恢复",
+    "手机无横向溢出"
+  ],
+  "errors": []
+}

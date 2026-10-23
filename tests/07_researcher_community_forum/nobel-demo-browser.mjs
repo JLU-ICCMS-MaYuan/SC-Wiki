@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || '../../prototypes/account-center/node_modules/playwright/index.mjs')
 const base = process.env.NOBEL_DEMO_URL || 'http://127.0.0.1:5174/nobel-demo.html'
-const output = new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/roster-validation/demo/', import.meta.url)
+const output = new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/fixed-divider-validation/demo/', import.meta.url)
 await mkdir(output, { recursive: true })
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } })

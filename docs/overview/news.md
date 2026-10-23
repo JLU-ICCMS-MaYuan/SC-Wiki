@@ -94,6 +94,8 @@ RSS 只能补回当前订阅窗口；已移除的历史内容无法保证找回�
 
 界面与资料支持中英文，Demo和正式页面复用 `frontend/src/features/nobel/` 的组件、数据、布局和原照。图片随前端构建输出至 `/assets`；无新增业务数据库或API。当前仍为原照版本，最终漫画、图片外部许可与全面史实审校未完成。本地源码验证不代表云端部署，见 [#159接入验证](../specs/159-nobel-portrait-exhibition/integration-validation.md)。
 
-诺奖展陈默认自动旋转，不显示操作说明或暂停开关；选择姓名索引后继续，悬停/键盘阅读及减少动态行为保留。展区高度随可见人物内容计算，索引与人物介绍保留约12px间距；索引下显示马原（mayuan@calypso.org.cn）、郭强（未提供邮箱，仅姓名）、钟鑫（zhongxin@jlu.edu.cn）、刘寒雨（hanyuliu@jlu.edu.cn）及联系邀请。参见[紧凑布局验证](../specs/159-nobel-portrait-exhibition/compact-validation.md)。
+诺奖展陈默认自动旋转，不显示操作说明或暂停开关；选择姓名索引后继续，悬停/键盘阅读及减少动态行为保留。展区高度按全部人物完整旋转周期的最大占用固定，横线、索引和联系区域不随旋转上下移动，临界位置保留约12px余量；索引下显示马原（mayuan@calypso.org.cn）、郭强（未提供邮箱，仅姓名）、钟鑫（zhongxin@jlu.edu.cn）、刘寒雨（hanyuliu@jlu.edu.cn）及联系邀请。参见[紧凑布局验证](../specs/159-nobel-portrait-exhibition/compact-validation.md)。
 
 当前展陈按用户确认排除半导体隧穿获奖者江崎玲于奈，保留约瑟夫森及超流氦-3理论获奖者莱格特，总计11人（1+3+2+2+3）。江崎没有卡片、索引或人物详情；1973年的完整获奖历史仍在共享说明中准确列出其姓名及原始份额。展陈名单和完整奖项元数据分开维护。
+
+窗口、字体、语言或内容重排时重新测量高度；短人物经过主位时允许必要空白，以保证横线位置稳定。见[固定分隔线验证](../specs/159-nobel-portrait-exhibition/fixed-divider-validation.md)。

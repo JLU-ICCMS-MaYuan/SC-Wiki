@@ -1,0 +1,16 @@
+{
+  "id": "IMG-012",
+  "upload_order": 12,
+  "original_name": "codex-clipboard-9fb28902-46eb-412b-8d26-716de236b28c.png",
+  "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-012-moving-divider.png",
+  "status": "local_verified",
+  "sha256": "0b7bfe70ea06348c4ff6f54f4d8282fef0f0acaea16de41727d2af05f2b722fa",
+  "media_type": "image/png",
+  "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-012-moving-divider.png\n  pixelWidth: 2820\n  pixelHeight: 412\n",
+  "user_context": "这里的横线一直在随着上面的头像旋转而上下移动。这非常丑陋，你需要保证的是找到临界的位置，保证给上面的头像转动加上配字足够的空间，不要让那个横线上下移动。使用 issue 和 spec 完成。",
+  "related": [
+    "FR-023",
+    "FR-024"
+  ],
+  "verification": "原始字节复制、哈希核对与sips解码；附件仅作位置证据，不据截图旧名单改写当前11人范围"
+}

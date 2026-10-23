@@ -20,7 +20,7 @@
 .nobel-stage::before { left: 0; background: linear-gradient(to right, #fff, transparent); }
 .nobel-stage::after { right: 0; background: linear-gradient(to left, #fff, transparent); }
 .nobel-ring { position: absolute; inset: 0; }
-.nobel-face { position: absolute; left: 50%; top: 8px; width: 260px; transform-origin: center 0; background: #fff; color: var(--nobel-text); text-decoration: none; cursor: grab; border: 0; outline-offset: 6px; will-change: transform; }
+.nobel-face { position: absolute; left: 50%; top: var(--nobel-face-top, 8px); width: 260px; transform-origin: center 0; background: #fff; color: var(--nobel-text); text-decoration: none; cursor: grab; border: 0; outline-offset: 6px; will-change: transform; }
 .nobel-photo { height: 305px; background: #fff; perspective: 900px; }
 .nobel-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; -webkit-user-drag: none;
   transform: rotateY(var(--portrait-yaw, 0deg)); transform-origin: center;

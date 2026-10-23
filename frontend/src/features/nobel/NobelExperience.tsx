@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useLayoutEffect, useMemo, type CSSProperties, type PointerEvent } from 'react'
 import theme from '../../theme'
-import { projectGallery } from './projection'
+import { projectGallery, galleryGeometry, galleryStageHeight } from './projection'
 import type { NobelLaureate } from './data'
 import type { Lang } from '../../i18n'
 import { getLaureates, coAwardText, copy, contacts } from './copy'
@@ -89,9 +89,8 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
     const card = layout[index]
     return card.opacity > 0 && Math.abs(card.x) < width / 2 + card.cardWidth * card.scale / 2
   }
-  // 8px顶部 + 可见卡片变换后的底边 + 12px底部，不使用会留下大片空白的固定高度。
-  const stageHeight = Math.ceil(8 + Math.max(...layout.map((card, index) =>
-    visible(index) ? card.y + (cardHeights[index] || 660) * card.scale : 0)) + 12)
+  // 预留所有人物转到主位时的最大空间，旋转不再推动索引和联系人。
+  const stageHeight = useMemo(() => galleryStageHeight(cardHeights), [cardHeights])
 
   useLayoutEffect(() => {
     const cards = [...(stage.current?.querySelectorAll<HTMLElement>('.nobel-face') ?? [])]
@@ -171,7 +170,8 @@ export function NobelGallery({ lang = 'zh', embedded = false, detailHref = id =>
         <p className="nobel-intro">{text.intro}</p>
       </header>
       <section className="nobel-gallery" aria-label={text.gallery}>
-        <div className="nobel-stage" ref={stage} data-dragging={dragging} data-angle={angle} style={{ height: stageHeight }}
+        <div className="nobel-stage" ref={stage} data-dragging={dragging} data-angle={angle}
+          style={{ height: stageHeight, '--nobel-face-top': `${galleryGeometry.top}px` } as CSSProperties}
           onPointerDown={pointerDown} onPointerMove={pointerMove} onPointerUp={pointerEnd}
           onPointerCancel={pointerEnd}
           onLostPointerCapture={event => {
