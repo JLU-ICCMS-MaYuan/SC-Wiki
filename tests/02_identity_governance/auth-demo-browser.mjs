@@ -102,6 +102,43 @@ try {
   await page.getByRole('heading', { name: '欢迎回来，研究者。' }).waitFor()
   report.flows.push('未验证邮箱恢复、模拟重发、倒计时跨语言保留')
 
+  // 找回密码仅从登录按钮进入，不提前显示新密码表单。
+  await page.goto(`${base}/auth-demo.html`)
+  await page.setViewportSize({ width: 1440, height: 900 })
+  assert.equal(await page.getByLabel('新密码', { exact: true }).count(), 0)
+  await page.getByRole('button', { name: '忘记密码？', exact: true }).click()
+  await shot('reset-email-1440')
+  await page.getByLabel('邮箱', { exact: true }).fill('researcher@example.com')
+  await page.getByRole('button', { name: '发送验证码', exact: true }).click()
+  await page.getByRole('heading', { name: '验证你的身份' }).waitFor()
+  assert.equal(await page.getByLabel('新密码', { exact: true }).count(), 0)
+  await page.getByLabel('6 位验证码').fill('000000')
+  await page.getByRole('button', { name: '验证邮箱', exact: true }).click()
+  await page.getByRole('alert').filter({ hasText: '验证码不正确' }).waitFor()
+  await page.getByLabel('6 位验证码').fill('123456')
+  await page.getByRole('button', { name: '验证邮箱', exact: true }).click()
+  await page.getByRole('heading', { name: '设置新密码' }).waitFor()
+  await page.getByLabel('新密码', { exact: true }).fill('changedPassword123')
+  await page.getByLabel('确认新密码', { exact: true }).fill('differentPassword123')
+  await page.getByRole('button', { name: '确认修改密码', exact: true }).click()
+  await page.getByRole('alert').filter({ hasText: '两次输入的密码不一致' }).waitFor()
+  await shot('reset-password-error-1440')
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.getByRole('button', { name: 'English', exact: true }).click()
+  await noOverflow('reset-password-en-390', 390, 844)
+  await page.getByRole('button', { name: '中文', exact: true }).click()
+  await page.getByLabel('确认新密码', { exact: true }).fill('changedPassword123')
+  await page.getByRole('button', { name: '确认修改密码', exact: true }).click()
+  await page.getByRole('heading', { name: '密码已更新' }).waitFor()
+  await page.getByRole('button', { name: '返回登录', exact: true }).click()
+  await page.getByLabel('密码', { exact: true }).fill('demo123456')
+  await page.getByRole('button', { name: '登录', exact: true }).click()
+  await page.getByRole('alert').filter({ hasText: '邮箱或密码不正确' }).waitFor()
+  await page.getByLabel('密码', { exact: true }).fill('changedPassword123')
+  await page.getByRole('button', { name: '登录', exact: true }).click()
+  await page.getByRole('heading', { name: '欢迎回来，研究者。' }).waitFor()
+  report.flows.push('忘记密码入口、错误验证码、验证后设密、确认不一致、旧密码拒绝和新密码登录')
+
   await page.goto(`${base}/auth-demo.html`)
   await page.setViewportSize({ width: 1440, height: 900 })
   const puck = page.getByTestId('superconductor-puck')
@@ -116,7 +153,7 @@ try {
   for (let i = 0; i < 5; i++) {
     phases.push(Number(await puck.getAttribute('data-phase')))
     transforms.push(await puck.getAttribute('transform'))
-    if (i < 4) await page.waitForTimeout(4200)
+    if (i < 4) await page.waitForTimeout(3300)
   }
   assert(new Set(transforms).size === 5)
   assert(phases.some((phase, i) => i > 0 && phase < phases[i - 1]))
@@ -142,6 +179,71 @@ try {
   await page.waitForTimeout(100)
   assert.notEqual(await puck.getAttribute('transform'), hidden)
   report.animation.visibilityEventInjection = '暂停及恢复通过；未验证真实操作系统标签后台状态'
+
+  assert.equal(await page.locator('.sc-form-section').evaluate(el => getComputedStyle(el).borderLeftWidth), '0px')
+  const push = async () => {
+    const position = await puck.evaluate(el => {
+      const point = el.ownerSVGElement.createSVGPoint()
+      const p = point.matrixTransform(el.getScreenCTM())
+      return { x: p.x, y: p.y }
+    })
+    await page.mouse.move(position.x, position.y)
+    assert.equal(await puck.evaluate(el => getComputedStyle(el).cursor), 'grab')
+    await page.mouse.down()
+    assert.equal(await puck.evaluate(el => getComputedStyle(el).cursor), 'grabbing')
+    await page.mouse.up()
+    await page.waitForTimeout(40)
+  }
+  assert.equal(await puck.getAttribute('data-period'), '12000')
+  await push()
+  assert(Number(await puck.getAttribute('data-period')) < 12000)
+  for (let i = 0; i < 12; i++) await push()
+  assert.equal(await puck.getAttribute('data-period'), '4000')
+  await push()
+  assert.equal(await puck.getAttribute('data-period'), '4000')
+  report.animation.speedCap = '初始 12000ms；点击加速；重复点击上限 4000ms'
+
+  const initialAngle = Number(await puck.getAttribute('data-phase')) * Math.PI * 2
+  const targetAngle = (initialAngle + Math.PI / 2) % (Math.PI * 2)
+  const trackPoint = await page.locator('.sc-orbit').evaluate((svg, angle) => {
+    const point = svg.createSVGPoint()
+    point.x = 360 + 244 * Math.cos(angle); point.y = 245 + 98 * Math.sin(angle)
+    const result = point.matrixTransform(svg.getScreenCTM())
+    return { x: result.x, y: result.y }
+  }, targetAngle)
+  await page.mouse.click(trackPoint.x, trackPoint.y)
+  await page.locator('.sc-stop-marker').waitFor()
+  assert.equal(await page.locator('.sc-track-control').evaluate(el => getComputedStyle(el).outlineStyle), 'none')
+  assert.notEqual(await puck.getAttribute('data-period'), 'stopped')
+  await page.waitForFunction(() => document.querySelector('[data-testid="superconductor-puck"]')?.getAttribute('data-period') === 'stopped')
+  // 浏览器鼠标事件可能量化 clientX/Y；实际停靠必须精确匹配点击产生的标记。
+  const markerTransform = await page.locator('.sc-stop-marker').getAttribute('transform')
+  const [markerX, markerY] = markerTransform.match(/[-\d.]+/g).map(Number)
+  const selectedAngle = (Math.atan2((markerY - 245) / 98, (markerX - 360) / 244) + Math.PI * 2) % (Math.PI * 2)
+  const stoppedAngle = Number(await puck.getAttribute('data-phase')) * Math.PI * 2
+  assert(Math.abs(stoppedAngle - selectedAngle) < 0.00001)
+  assert(Math.abs(Math.atan2(Math.sin(selectedAngle - targetAngle), Math.cos(selectedAngle - targetAngle))) < .02)
+  report.animation.stopCoordinates = { requested: targetAngle, selected: selectedAngle, stopped: stoppedAngle }
+  const atTarget = await puck.getAttribute('transform')
+  await page.waitForTimeout(200)
+  assert.equal(await puck.getAttribute('transform'), atTarget)
+  await shot('parked-with-vapor-1440')
+  await push()
+  assert.equal(await puck.getAttribute('data-period'), '20000')
+  assert.equal(await page.locator('.sc-stop-marker').count(), 0)
+  await push()
+  assert(Number(await puck.getAttribute('data-period')) < 20000)
+  report.animation.trackStopRestart = '真实鼠标选择前方目标、到点精确停靠；重新推动 20000ms，继续点击加速'
+  const fog = page.locator('.sc-vapor > g').first()
+  const fogBefore = await fog.getAttribute('transform')
+  await page.waitForTimeout(200)
+  assert.notEqual(await fog.getAttribute('transform'), fogBefore)
+  await shot('interactive-orbit-1440')
+  await page.getByRole('button', { name: '暂停动画', exact: true }).click()
+  const frozenFog = await fog.getAttribute('transform')
+  await page.waitForTimeout(160)
+  assert.equal(await fog.getAttribute('transform'), frozenFog)
+  report.animation.vapor = '白雾随动画时钟扩散；暂停冻结'
 
   assert.equal(await page.evaluate(() => localStorage.getItem('auth_token')), 'untouched-session')
   assert.deepEqual(report.apiRequests, [])

@@ -1,0 +1,167 @@
+{
+  "layouts": [
+    {
+      "name": "login-zh-1440",
+      "width": 1440,
+      "height": 900,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "name": "register-zh-1440",
+      "width": 1440,
+      "height": 900,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "name": "login-zh-768",
+      "width": 768,
+      "height": 1024,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "name": "register-zh-768",
+      "width": 768,
+      "height": 1024,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "name": "login-zh-390",
+      "width": 390,
+      "height": 844,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "name": "register-zh-390",
+      "width": 390,
+      "height": 844,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "name": "login-zh-320",
+      "width": 320,
+      "height": 720,
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "name": "register-zh-320",
+      "width": 320,
+      "height": 720,
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "name": "login-en-1440",
+      "width": 1440,
+      "height": 900,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "name": "register-en-1440",
+      "width": 1440,
+      "height": 900,
+      "client": 1440,
+      "scroll": 1440
+    },
+    {
+      "name": "login-en-768",
+      "width": 768,
+      "height": 1024,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "name": "register-en-768",
+      "width": 768,
+      "height": 1024,
+      "client": 768,
+      "scroll": 768
+    },
+    {
+      "name": "login-en-390",
+      "width": 390,
+      "height": 844,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "name": "register-en-390",
+      "width": 390,
+      "height": 844,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "name": "login-en-320",
+      "width": 320,
+      "height": 720,
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "name": "register-en-320",
+      "width": 320,
+      "height": 720,
+      "client": 320,
+      "scroll": 320
+    },
+    {
+      "name": "verification-en-390",
+      "width": 390,
+      "height": 844,
+      "client": 390,
+      "scroll": 390
+    },
+    {
+      "name": "reset-password-en-390",
+      "width": 390,
+      "height": 844,
+      "client": 390,
+      "scroll": 390
+    }
+  ],
+  "flows": [
+    "键盘标签切换、Tab 进入表单",
+    "注册、密码显隐、验证码错误恢复、冷却、验证成功",
+    "上传入口跳转、登录错误恢复和成功",
+    "未验证邮箱恢复、模拟重发、倒计时跨语言保留",
+    "忘记密码入口、错误验证码、验证后设密、确认不一致、旧密码拒绝和新密码登录",
+    "原有认证存储保持、零 API 请求、无页面异常"
+  ],
+  "animation": {
+    "reducedMotionStartsPaused": true,
+    "fullCyclePhases": [
+      0.08753521870054244,
+      0.3625268853672089,
+      0.6375102187005469,
+      0.9125018853672088,
+      0.18748521870053173
+    ],
+    "fullCycleTransforms": [
+      "translate(568.0159833825194 254.22334843520463) scale(0.952268722893066)",
+      "translate(201.503336145509 277.50903213310914) scale(0.9760296246256216)",
+      "translate(201.54658925264474 128.47612907627553) scale(0.8239552337513015)",
+      "translate(568.0457103444132 151.7961305075382) scale(0.8477511535791207)",
+      "translate(451.42107109527774 293.861248698961) scale(0.992715559896899)"
+    ],
+    "pause": true,
+    "visibilityEventInjection": "暂停及恢复通过；未验证真实操作系统标签后台状态",
+    "speedCap": "初始 12000ms；点击加速；重复点击上限 4000ms",
+    "stopCoordinates": {
+      "requested": 4.007487910689202,
+      "selected": 4.008969331200053,
+      "stopped": 4.008969331200053
+    },
+    "trackStopRestart": "真实鼠标选择前方目标、到点精确停靠；重新推动 20000ms，继续点击加速",
+    "vapor": "白雾随动画时钟扩散；暂停冻结"
+  },
+  "apiRequests": [],
+  "errors": []
+}

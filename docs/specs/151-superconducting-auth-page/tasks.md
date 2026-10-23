@@ -37,3 +37,15 @@ MVP 是 US1+US2。勾选 Demo 任务只代表 Demo 行为，不代表生产集�
 ## 第一阶段证据
 
 T001：原文、两张原图、Issue #151 及 FR/SC 映射齐备；T002/T003/T005/T006：6 项 Vitest 与浏览器认证流程通过；T004/T007：完整周期、暂停及多尺寸截图见 design-qa.md 和 assets/browser-results.json；T008：quickstart.md 与本地预览可用，本次源码提交可由 `git log -- frontend/auth-demo.html` 复查。T009/T010 保持未完成，等待用户 Demo 评审。
+
+## 2026-10-23：用户视觉评审修改
+
+- [x] T011 [US1] 在 frontend/src/demos/auth/orbitMotion.ts、SuperconductorScene.tsx、auth-demo.css 实现无竖线、材质/白雾、点击加速、上限和轨道定点停靠；覆盖 FR-010～012。
+- [x] T012 [US2] 在 frontend/src/demos/auth/PasswordReset.tsx、AuthDemo.tsx、mockAuth.ts、copy.ts 实现从忘记密码按钮进入的邮箱验证改密模拟流程；覆盖 FR-013。
+- [x] T013 [US1] 扩展 tests/02_identity_governance/auth-demo.test.tsx 与 auth-demo-browser.mjs，记录 SC-006/007 验证及新截图，更新本目录验收记录。
+
+T011/T012 完成后执行 T013；正式 T009/T010 仍待用户批准。
+
+- [ ] T014 [US3] 正式接入获批后，在 docs/specs/151-superconducting-auth-page/contracts/ 确认真实找回密码契约，结合届时 goserver/handlers/auth.go、邮件服务及 frontend/src/context/AuthContext.tsx 完成发信、验证码、安全改密和真实验收；不得直接发布 Demo 服务。
+
+第二版证据：T011/T013 见 assets/revision-2/results.json 的 speedCap、stopCoordinates、trackStopRestart、vapor；T012/T013 见 12 项 Vitest 及浏览器找回全流程。T014 属于未来正式阶段，不在本次 Demo 授权中。

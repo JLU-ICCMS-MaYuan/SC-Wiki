@@ -4,7 +4,7 @@
 
 ## 摘要与技术上下文
 
-React 19 / TypeScript 5.6 / MUI 7 / Vite 5，复用主题与 LanguageProvider。独立 HTML 入口加载 Demo，不引入生产 App 或 AuthProvider。SVG 与 requestAnimationFrame 驱动 16 秒一周的动画，直接更新 SVG 变换，不让每帧触发表单重渲染。目标为桌面及移动浏览器，后台无持续动画帧。无新增依赖、后端或持久化数据；Vitest/jsdom 验证行为，浏览器验证布局与动画。
+React 19 / TypeScript 5.6 / MUI 7 / Vite 5，复用主题与 LanguageProvider。独立 HTML 入口加载 Demo，不引入生产 App 或 AuthProvider。SVG 与 requestAnimationFrame 驱动默认 12 秒一周、点击可变速并定点停靠的动画，直接更新 SVG 变换，不让每帧触发表单重渲染。目标为桌面及移动浏览器，后台无持续动画帧。无新增依赖、后端或持久化数据；Vitest/jsdom 验证行为，浏览器验证布局与动画。
 
 ## 质量门
 
@@ -43,3 +43,11 @@ React 19 / TypeScript 5.6 / MUI 7 / Vite 5，复用主题与 LanguageProvider。
 ## 复杂度说明
 
 独立入口避免误改现有工作流；模拟服务专门演示失败和恢复而不触碰真实账号。无需新建应用脚手架、添加 WebGL 库或抽象生产认证适配框架。
+
+## 2026-10-23 修改实施
+
+新增 orbitMotion.ts 作为纯运动状态模型，scene 用 SVG 坐标逆变换得到点击角度，按角位移检测跨过目标并精确停靠。复用同一可暂停动画时钟驱动白雾，不新增 3D 依赖；细化陶瓷颗粒、霜晶、切边、环槽和高光。去掉 CSS 竖线。
+
+密码找回使用独立 PasswordReset 组件，由登录页按钮进入；mockAuth 增加请求重置码、验证、凭证消费和改密。邮箱重置挑战与注册挑战分开，不伪装生产服务。双语文案、自动化流程和视觉证据一起更新。
+
+FR-010～012 / SC-006 → orbitMotion + SuperconductorScene + CSS → T011/T013；FR-013 / SC-007 → PasswordReset + mockAuth → T012/T013。正式密码重置 API 与 SMTP 仍需第二阶段设计和实现。

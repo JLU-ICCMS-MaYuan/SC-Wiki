@@ -6,8 +6,9 @@ import { usernameValidationError } from '../../lib/username'
 import { authDemoCopy } from './copy'
 import { createDemoAuth, DEMO_PASSWORD, type DemoError } from './mockAuth'
 import SuperconductorScene from './SuperconductorScene'
+import PasswordReset from './PasswordReset'
 
-type Step = 'login' | 'register' | 'verify' | 'done'
+type Step = 'login' | 'register' | 'verify' | 'done' | 'reset'
 const initialView = () => new URLSearchParams(window.location.search).get('view') === 'entry'
 
 export default function AuthDemo() {
@@ -143,7 +144,7 @@ export default function AuthDemo() {
               }}>{c[tab]}</button>)}
           </div>}
 
-          <div id="auth-panel" role={step === 'login' || step === 'register' ? 'tabpanel' : undefined}
+          {step === 'reset' ? <PasswordReset auth={auth} copy={c} lang={lang} initialEmail={email} onBack={value => { setEmail(value); setPassword(''); changeStep('login') }} /> : <div id="auth-panel" role={step === 'login' || step === 'register' ? 'tabpanel' : undefined}
             aria-labelledby={step === 'login' || step === 'register' ? `tab-${step}` : undefined}>
             {step === 'verify' && <div className="sc-step-symbol"><EmailOutlined /></div>}
             {step === 'done' && <div className="sc-step-symbol sc-success-symbol"><CheckRounded /></div>}
@@ -181,6 +182,7 @@ export default function AuthDemo() {
                       value={code} onChange={event => setCode(event.target.value.replace(/\D/g, '').slice(0, 6))} />
                   </div>
                 </>}
+                {step === 'login' && <Button className="sc-forgot" size="small" disabled={busy} onClick={() => { setPassword(''); changeStep('reset') }}>{c.forgot}</Button>}
                 {error && <Alert severity="error" className="sc-form-error">{c.errors[error] || c.errors.credentials}</Alert>}
                 <Button className="sc-submit" variant="contained" type="submit" fullWidth disabled={busy} endIcon={busy ? <CircularProgress size={17} color="inherit" /> : <ArrowForwardRounded />}>
                   {busy ? c.busy : primary}
@@ -194,7 +196,7 @@ export default function AuthDemo() {
 
             {step === 'verify' && <Button className="sc-back-login" color="inherit" size="small" disabled={busy} startIcon={<ArrowBackRounded />} onClick={() => changeStep('login')}>{c.backLogin}</Button>}
             {(step === 'login' || step === 'register') && <p className="sc-email-only"><EmailOutlined />{c.emailOnly}</p>}
-          </div>
+          </div>}
 
           <div className="sc-demo-note"><span>{c.demo}</span>
             <details><summary>{c.demoDetails}</summary><p>{c.demoHint}</p>
