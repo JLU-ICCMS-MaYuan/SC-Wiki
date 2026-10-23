@@ -17,6 +17,7 @@ type EmailConfig struct {
 
 type Mailer interface {
 	SendVerificationCode(to, code string) error
+	SendPasswordChangeCode(to, code string) error
 }
 
 type SMTPMailer struct {
@@ -42,6 +43,14 @@ func (m *SMTPMailer) Configured() bool {
 }
 
 func (m *SMTPMailer) SendVerificationCode(to, code string) error {
+	return m.sendCode(to, code, "SC-Wiki 邮箱验证码", "如果您没有申请注册，请忽略此邮件。")
+}
+
+func (m *SMTPMailer) SendPasswordChangeCode(to, code string) error {
+	return m.sendCode(to, code, "SC-Wiki 修改密码验证码", "此验证码仅用于修改账户密码。如果不是您本人操作，请勿向任何人提供此验证码。")
+}
+
+func (m *SMTPMailer) sendCode(to, code, subject, instruction string) error {
 	if !m.Configured() {
 		return fmt.Errorf("SMTP 配置不完整或 TLS 模式无效")
 	}
@@ -95,9 +104,9 @@ func (m *SMTPMailer) SendVerificationCode(to, code string) error {
 		return err
 	}
 	message := "From: " + m.config.From + "\r\nTo: " + to +
-		"\r\nSubject: " + mime.QEncoding.Encode("UTF-8", "SC-Wiki 邮箱验证码") +
+		"\r\nSubject: " + mime.QEncoding.Encode("UTF-8", subject) +
 		"\r\nMIME-Version: 1.0\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: 8bit\r\n\r\n" +
-		fmt.Sprintf("您的 SC-Wiki 验证码是：%s\r\n验证码 5 分钟内有效，请勿转发。\r\n如果您没有申请注册，请忽略此邮件。\r\n", code)
+		fmt.Sprintf("您的 SC-Wiki 验证码是：%s\r\n验证码 5 分钟内有效，请勿转发。\r\n%s\r\n", code, instruction)
 	if _, err := writer.Write([]byte(message)); err != nil {
 		return err
 	}

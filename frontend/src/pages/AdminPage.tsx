@@ -21,7 +21,7 @@ import { type User, useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import PaperReviewStatusSelect from '../components/PaperReviewStatusSelect'
 import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload } from '../lib/paperReview'
-import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom'
 import ChartGroupEditor from '../components/ChartGroupEditor'
 import NewsManager from '../components/NewsManager'
 import SuperAdminGovernance from '../components/SuperAdminGovernance'
@@ -95,9 +95,9 @@ const WORKSPACE_CARDS: Array<{
   { key: 'news', labelKey: 'admin.newsTitle', hintKey: 'admin.cardHintManage', accent: 'error.main', tab: 4, metric: 'none', superOnly: true },
 ]
 /* ═══════════════════════════════════════════════ */
-interface AdminPageProps { mode?: 'admin' | 'superadmin' }
+interface AdminPageProps { mode?: 'admin' | 'superadmin'; embedded?: boolean }
 
-const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
+const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false }) => {
   const { user, replaceUser } = useAuth()
   const { t, lang, dict } = useLanguage()
   const navigate = useNavigate()
@@ -115,7 +115,12 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
     return labels[value as keyof typeof labels] || value
   }
 
-  const [tab, setTab] = useState(0)
+  const [searchParams] = useSearchParams()
+  const section = searchParams.get('section') || ''
+  const sectionTitles: Record<string, string> = { papers: 'admin.cardPapers', users: 'admin.usersPermissions', applications: 'admin.applicationsTab', charts: 'admin.cardChartGroups', news: 'admin.newsTitle', models: 'account.modelsTitle', audit: 'admin.auditTab' }
+  const sectionTabs: Record<string, number> = { papers: 1, users: 2, applications: 2, audit: 2, charts: 3, news: 4, models: 5 }
+  const [tab, setTab] = useState(embedded ? 1 : sectionTabs[section] || 0)
+  useEffect(() => { if (!embedded) setTab(sectionTabs[section] || 0) }, [section, embedded])
   const [snackbar, setSnackbar] = useState('')
   /* ── Dashboard ──────────────────────────────── */
   const [stats, setStats] = useState<{users:number,papers:number,pending:number} | null>(null)
@@ -124,7 +129,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
   const [papers, setPapers] = useState<PaperRecord[]>([])
   const [papersTotal, setPapersTotal] = useState(0)
   const [papersPage, setPapersPage] = useState(1)
-  const [papersStatus, setPapersStatus] = useState('')
+  const [papersStatus, setPapersStatus] = useState(embedded ? 'pending' : '')
   const [papersKeyword, setPapersKeyword] = useState('')
   const [papersMaterial, setPapersMaterial] = useState('')
   const [papersYearMin, setPapersYearMin] = useState('')
@@ -209,9 +214,9 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
     } catch { setChartGroups([]) }
   }, [])
 
-  useEffect(() => { loadStats() }, [loadStats])
-  useEffect(() => { loadPapers() }, [loadPapers])
-  useEffect(() => { if (isSuper) void loadChartGroups() }, [isSuper, loadChartGroups])
+  useEffect(() => { if (!embedded && tab === 0) void loadStats() }, [loadStats, embedded, tab])
+  useEffect(() => { if (tab === 1 || tab === 0) void loadPapers() }, [loadPapers, tab])
+  useEffect(() => { if (isSuper && !embedded && (tab === 0 || tab === 3)) void loadChartGroups() }, [isSuper, embedded, tab, loadChartGroups])
 
   /* ── Review actions ──────────────────────────── */
   const openReview = async (paper: PaperRecord) => {
@@ -397,10 +402,11 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
 
   return (
     <Box>
+      {!embedded && <>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="overline" color="text.secondary">WORKSPACE</Typography>
-          <Typography variant="h4" fontWeight={800}>{isSuper ? t('admin.titleSuper') : t('admin.title')}</Typography>
+          <Typography variant="h4" fontWeight={800}>{sectionTitles[section] ? t(sectionTitles[section]) : isSuper ? t('admin.titleSuper') : t('admin.title')}</Typography>
         </Box>
       </Box>
 
@@ -408,7 +414,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
       {/* ═══════════════════════════════════════════ */}
       {/* Dashboard - 卡片式功能入口 */}
       {/* ═══════════════════════════════════════════ */}
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 2, mb: 3 }}>
+      {!section && <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 2, mb: 3 }}>
         {WORKSPACE_CARDS.filter(card => !card.superOnly || isSuper).map(card => (
           <Card key={card.key} sx={{ borderLeft: '4px solid', borderColor: card.accent }}>
             {/* CardActionArea 提供 role=button、键盘可达与焦点环；带 onClick 的 Card 对读屏和键盘用户不可达。 */}
@@ -436,8 +442,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
             </Typography>
           </CardContent>
         </Card>
-      </Box>
+      </Box>}
 
+      </>}
+      {isSuper && tab === 5 && <DefaultLlmConfigPanel />}
       {/* ═══════════════════════════════════════════ */}
       {/* TAB 1: Paper Review */}
       {/* ═══════════════════════════════════════════ */}
@@ -569,7 +577,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin' }) => {
       {/* ═══════════════════════════════════════════ */}
       {/* TAB 2: User Management (superadmin only) */}
       {/* ═══════════════════════════════════════════ */}
-      {tab === 2 && isSuper && <SuperAdminGovernance />}
+      {tab === 2 && isSuper && <SuperAdminGovernance initialSection={section === 'users' ? 1 : section === 'audit' ? 2 : 0} />}
       {false && tab === 2 && isSuper && (
         <Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>

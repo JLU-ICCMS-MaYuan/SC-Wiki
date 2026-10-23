@@ -1,5 +1,30 @@
 # 演示验收记录
 
+## 正式接入验收（2026-10-23）
+
+- 正式实现：AccountPage/AccountSecurity/AccountReviews/AccountWorkEntries，真实本人检查接口、SMTP 改密码及服务端强制验证；原型与正式入口分别保留在 5186 和本机 5173。
+- 前端：账户、身份导航、论文详情相关 28 项通过，正式 `npm run build` 通过；英文 AccountPage/AdminPage 两项使用 Node 22 通过。当前 Node 26 的既有巡检存在 localStorage 环境错误，未修改其测试逻辑来规避。
+- 后端：完整 `go test ./...` 首次发现本项测试夹具缺 user_email，修正后专项通过；另一个既有 `TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction` 的 SQL 期望失败，在未修改 HEAD 的独立快照中复现。本项不改证据审核语义；明确排除该既有用例后的全包检查通过。
+- 安全回归：发送前旧密码／绑定邮箱校验、缺码拒绝、用途／账户隔离、错误次数、过期、重发、SMTP/Redis 故障拒绝、成功撤销会话、并发仅成功一次及请求处理中已撤销会话拒绝，均通过。
+- 邮件：本地真实 TLS SMTP fixture 已收到改密邮件，验证标题与改密用途内容；这不代表外部邮箱已收到真实邮件。本轮未给用户真实地址发信。
+- 浏览器：正式 React 页面三角色、编辑取消／保存、待检查复用、六个新标签页模块、1440px 桌面及 390/320px 小屏通过，零页面脚本错误；使用隔离 API 响应，不修改真实账户或论文。后端数据与安全通过真实处理器测试分别验证。
+- 视觉：原型与正式截图合并查看；原站导航保留，列表按实际响应条数展示。窄屏论文状态改为独立一行，320px 工作入口单列。证据在本地 `prototypes/account-center/qa/production/`，详见 [正式视觉记录](production-design-qa.md)。
+- 本地新发码路由无认证请求返回 401；开发服务自动重载。没有推送、生产部署或数据库迁移。
+
+### 可重复验证
+
+```bash
+cd "goserver"
+../.local/go/bin/go test ./... -skip '^TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction$'
+cd "../frontend"
+npm run test:upload-ui -- ../tests/02_identity_governance/account-center.test.tsx ../tests/02_identity_governance/identity_ui.test.tsx ../tests/01_decentralized_uploading/paper-detail-route.test.tsx
+npm run build
+cd ".."
+node tests/02_identity_governance/account-center-browser.mjs
+```
+
+Go 完整检查的既有失败没有被删除、修复或计作通过；Issue 因远程文档尚未推送而保持开放。
+
 ## 2026-10-23：邮箱验证码改密演示
 
 - `node scripts/verify-password.mjs`：三角色完整流程通过。未填旧密码或邮箱不能发送，错误旧密码或非绑定邮箱不能进入第二步；错误或过期验证码、相同新旧密码、确认不一致均拒绝修改。

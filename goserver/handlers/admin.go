@@ -743,8 +743,7 @@ func DeletePaper(c *gin.Context) {
 // GetMyUploads 当前用户的上传记录
 // GET /api/papers/my-uploads?limit=20&offset=0
 func GetMyUploads(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "50"))
-	offset, _ := strconv.Atoi(c.DefaultQuery("offset", "0"))
+	limit, offset := contributionPagination(c)
 
 	email, exists := c.Get("user_email")
 	if !exists {
@@ -760,12 +759,23 @@ func GetMyUploads(c *gin.Context) {
 
 	var total int64
 	query := database.DB.Model(&models.Paper{}).Where("uploaded_by_user_id = ?", user.ID)
-	query.Count(&total)
+	if keyword := strings.TrimSpace(c.Query("keyword")); keyword != "" {
+		like := "%" + keyword + "%"
+		query = query.Where("(title LIKE ? OR doi LIKE ? OR journal LIKE ?)", like, like, like)
+	}
+	if status := c.Query("review_status"); status != "" {
+		query = query.Where("review_status = ?", status)
+	}
+	if query.Count(&total).Error != nil {
+		c.JSON(500, gin.H{"error": "论文加载失败"})
+		return
+	}
 
 	var papers []models.Paper
-	query.Order("created_at DESC").
-		Limit(limit).Offset(offset).
-		Find(&papers)
+	if query.Order("created_at DESC, id DESC").Limit(limit).Offset(offset).Find(&papers).Error != nil {
+		c.JSON(500, gin.H{"error": "论文加载失败"})
+		return
+	}
 
 	items := make([]gin.H, 0, len(papers))
 	for _, paper := range papers {

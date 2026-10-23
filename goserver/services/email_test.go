@@ -160,6 +160,27 @@ func TestSMTPFailuresAndNoTLSFallback(t *testing.T) {
 	}
 }
 
+func TestSMTPPasswordChangePurpose(t *testing.T) {
+	sender, messages := smtpFixture(t, "starttls", "")
+	if err := sender.SendPasswordChangeCode("recipient@example.test", "345678"); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case content := <-messages:
+		msg, err := mail.ReadMessage(strings.NewReader(content))
+		if err != nil {
+			t.Fatal(err)
+		}
+		subject, _ := new(mime.WordDecoder).DecodeHeader(msg.Header.Get("Subject"))
+		body, _ := io.ReadAll(msg.Body)
+		if subject != "SC-Wiki 修改密码验证码" || !strings.Contains(string(body), "345678") || !strings.Contains(string(body), "仅用于修改账户密码") || strings.Contains(string(body), "申请注册") {
+			t.Fatal("incorrect password change email")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("password email not delivered")
+	}
+}
+
 func TestSMTPRejectsMissingConfigAndHeaderInjection(t *testing.T) {
 	sender := NewSMTPMailer(EmailConfig{})
 	if sender.Configured() || sender.SendVerificationCode("recipient@example.test", "123456") == nil {

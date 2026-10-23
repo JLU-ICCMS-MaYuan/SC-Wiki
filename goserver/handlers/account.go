@@ -13,13 +13,11 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	"scwiki/server/database"
 	"scwiki/server/models"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 	_ "golang.org/x/image/webp"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -288,44 +286,6 @@ func DeleteAvatar(c *gin.Context) {
 	}
 	if oldKey != "" {
 		_ = avatarFiles.Delete(c.Request.Context(), oldKey)
-	}
-	c.Status(http.StatusNoContent)
-}
-
-func ChangePassword(c *gin.Context) {
-	user, ok := currentUserFromContext(c)
-	if !ok {
-		return
-	}
-	var body struct {
-		CurrentPassword string `json:"current_password"`
-		NewPassword     string `json:"new_password"`
-	}
-	if c.ShouldBindJSON(&body) != nil || len(body.NewPassword) < 10 {
-		c.JSON(400, gin.H{"error": "新密码至少 10 位"})
-		return
-	}
-	err := database.DB.Transaction(func(tx *gorm.DB) error {
-		var locked models.User
-		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&locked, user.ID).Error; err != nil {
-			return err
-		}
-		if bcrypt.CompareHashAndPassword([]byte(locked.PasswordHash), []byte(body.CurrentPassword)) != nil {
-			return gorm.ErrInvalidData
-		}
-		hash, err := bcrypt.GenerateFromPassword([]byte(body.NewPassword), bcrypt.DefaultCost)
-		if err != nil {
-			return err
-		}
-		return tx.Model(&locked).Updates(map[string]any{"password_hash": string(hash), "session_version": gorm.Expr("session_version + 1"), "updated_at": time.Now()}).Error
-	})
-	if err == gorm.ErrInvalidData {
-		c.JSON(403, gin.H{"error": "当前密码错误"})
-		return
-	}
-	if err != nil {
-		c.JSON(500, gin.H{"error": "密码修改失败"})
-		return
 	}
 	c.Status(http.StatusNoContent)
 }

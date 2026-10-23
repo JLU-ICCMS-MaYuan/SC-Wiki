@@ -108,6 +108,8 @@ func main() {
 		auth.POST("/account/avatar", handlers.UploadAvatar)
 		auth.DELETE("/account/avatar", handlers.DeleteAvatar)
 		auth.POST("/account/change-password", handlers.ChangePassword)
+		auth.POST("/account/password-change-code", handlers.SendPasswordChangeCode)
+		auth.GET("/account/reviewed-papers", middleware.AdminRequired, handlers.GetReviewedPapers)
 		auth.POST("/account/admin-applications", handlers.SubmitAdminApplication)
 		auth.GET("/account/admin-applications", handlers.GetOwnAdminApplications)
 		auth.POST("/account/admin-applications/:id/withdraw", handlers.WithdrawAdminApplication)

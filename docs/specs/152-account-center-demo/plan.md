@@ -1,5 +1,13 @@
 # 演示实施计划
 
+## 正式接入计划（当前阶段）
+
+- AccountPage 复用 React/MUI 及原侧栏，拆分 AccountSecurity、AccountWorkEntries、AccountReviews，MyPapersList 共用收录／本人检查列表。只迁入已确认账户区域视觉，不重做全站导航。
+- 新增 `POST /api/account/password-change-code` 接收 current_password/email；原 change-password 新增 email/code 必填。复用 TLS SMTP、Redis 限流及原子消费，摘要绑定改密用途、用户和会话版本。数据库行锁内再次核验状态与版本，成功事务更新密码和 session_version；数据库失败不恢复已消费码。
+- 新增 `/api/account/reviewed-papers`，按 PaperHistoryEvent 的本人 reviewed 事件去重，每论文取最近一次本人操作；不迁移 schema。
+- AdminPage 支持嵌入审核及 section 深链，SuperAdminGovernance 支持目标分区；复用现有真实审核和管理组件。
+- 映射：FR-007/008、SC-006 → T009；FR-003/005 → T010；FR-001/002/004、SC-007 → T011；T012 为综合验证和事实文档回写。下文原型计划为历史记录。
+
 **Issue**：[ #152](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/152) · **日期**：2026-10-22 · [Spec](spec.md)
 
 ## 技术上下文

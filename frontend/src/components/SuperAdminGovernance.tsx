@@ -51,10 +51,11 @@ interface AuditEvent {
   created_at: string
 }
 
-const SuperAdminGovernance: React.FC = () => {
+const SuperAdminGovernance: React.FC<{ initialSection?: number }> = ({ initialSection = 0 }) => {
   const { user } = useAuth()
   const { t, dict } = useLanguage()
-  const [section, setSection] = useState(0)
+  const [section, setSection] = useState(initialSection)
+  useEffect(() => { setSection(initialSection) }, [initialSection])
   const [users, setUsers] = useState<GovernanceUser[]>([])
   const [applications, setApplications] = useState<AdminApplication[]>([])
   const [audits, setAudits] = useState<AuditEvent[]>([])
