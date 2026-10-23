@@ -31,6 +31,7 @@ export default defineConfig({
       'tests/02_identity_governance/**/*.test.tsx',
       'tests/03_data_search_and_database_discovery/**/*.test.tsx',
       'frontend/src/pages/RagPage.test.tsx',
+      'frontend/src/demos/nobel/NobelDemo.test.tsx',
       'frontend/src/lib/useStreamingChat.test.tsx',
       'tests/07_researcher_community_forum/**/*.test.tsx',
     ],
