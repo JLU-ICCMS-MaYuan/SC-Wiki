@@ -103,6 +103,8 @@ export function useEvidenceWorkflow(options?: {
   const [saving, setSaving] = useState(false)
   const [confirming, setConfirming] = useState(false)
   const confirmingRef = useRef(false)
+  const decisionEpoch = useRef(0)
+  const fieldDecisionEpoch = useRef(new Map<string, number>())
   const saveManualBeforeReview = useRef<(() => Promise<boolean>) | null>(null)
   const editRevision = useRef(0)
   const dirty = useRef(false)
@@ -236,17 +238,18 @@ export function useEvidenceWorkflow(options?: {
     const record = recordsRef.current.find(r => r.key === selected)
     if (!record || record.placeholder) return
     const target = targetRef.current
+    const epoch = fieldDecisionEpoch.current.get(selected) || 0
     const params = new URLSearchParams({ ...target, item_key: record.item_key || record.key, history: String(drawerTab === 'history') })
     const history = drawerTab === 'history'
     if (!history) setSourceDetail({key: selected, ref: record.detail_ref})
     void api.get<FieldDetail>(`${base}/field-detail?${params}`).then(result => {
-      if (!active) return
+      if (!active || epoch !== (fieldDecisionEpoch.current.get(selected) || 0)) return
       if (!history && (!result.record || !result.review_token || !['available', 'empty', 'historical'].includes(result.source_state || ''))) {
         throw new Error(t('evidence.sourceResponseInvalid'))
       }
       if (history) setRecords(old => old.map(r => r.key === selected ? {...r, history: result.history || []} : r))
       else setSourceDetail({key: selected, ref: record.detail_ref, data: result})
-    }).catch(error => { if (active) {
+    }).catch(error => { if (active && epoch === (fieldDecisionEpoch.current.get(selected) || 0)) {
       if (history) setSaveError((error as Error).message)
       else setSourceDetail({key: selected, ref: record.detail_ref, error: (error as Error).message})
     } })
@@ -290,6 +293,7 @@ export function useEvidenceWorkflow(options?: {
   useEffect(() => () => { finish(null, false) }, [finish])
 
   const restore = useCallback(async (target: EvidenceTarget) => {
+    const epoch = decisionEpoch.current
     const current = ++generation.current
     const revision = editRevision.current
     const identity = `${target.target}:${target.target_id}`
@@ -305,7 +309,7 @@ export function useEvidenceWorkflow(options?: {
     if (!mounted.current || generation.current !== current || editRevision.current !== revision) return
     try {
       const result = await api.post<Preflight>(`${base}/summary`, target)
-      if (generation.current !== current || editRevision.current !== revision) return
+      if (generation.current !== current || editRevision.current !== revision || epoch !== decisionEpoch.current) return
       preflightRef.current = result
       observedValues.current.clear()
       recordsRef.current = result.records || []
@@ -583,15 +587,31 @@ export function useEvidenceWorkflow(options?: {
     pending_review: summaryRecord.pending_review || currentDetail.data.record.pending_review} : summaryRecord
   const manualVisible = Boolean(activeRecord && (manualOpenKey === activeRecord.key || activeRecord.field_decision?.action === 'reject'
     || activeRecord.human_modified || hasLocalManualEdit(activeRecord)))
+  const canApprove = Boolean(summaryRecord && activeRecord && problematic(summaryRecord) && problematic(activeRecord)
+    && currentDetail?.data?.can_approve && !hasLocalManualEdit(activeRecord) && !settingsPending)
   const decideField = async (action: 'approve' | 'reject') => {
     if (!activeRecord || !currentDetail?.data?.review_token || confirmingRef.current) return
+    if (action === 'approve' && !canApprove) return
     confirmingRef.current = true; setConfirming(true); setSaveError('')
-    const record = activeRecord, revision = editRevision.current, session = drawerSession.current
+    const record = activeRecord, session = drawerSession.current, target = targetRef.current
+    const currentValue = () => {
+      const current = optionsRef.current?.getCurrentValue?.(record)
+      return manualValueIdentity(current ? current.comparisonValue ?? current.value : record.current_value)
+    }
+    const value = currentValue()
     try {
       const result = await api.post<FieldDetail>(`${base}/field-decision`, {...targetRef.current,
         item_key: record.item_key || record.key, action, review_token: currentDetail.data.review_token})
-      if (editRevision.current !== revision || drawerSession.current !== session) return
-      setRecords(old => old.map(r => r.key === record.key ? {...r, ...result.record, pending_review: false} : r))
+      if (!result.record || result.record.field_decision?.action !== action || (action === 'approve' && result.record.status !== 'supported')) {
+        throw new Error(t('evidence.decisionResponseInvalid'))
+      }
+      if (target?.target !== targetRef.current?.target || target?.target_id !== targetRef.current?.target_id || currentValue() !== value) return
+      decisionEpoch.current += 1
+      fieldDecisionEpoch.current.set(record.key, (fieldDecisionEpoch.current.get(record.key) || 0) + 1)
+      const update = (old: EvidenceRecord[]) => old.map(r => r.key === record.key ? {...r, ...result.record, pending_review: false} : r)
+      recordsRef.current = update(recordsRef.current)
+      setRecords(update)
+      if (drawerSession.current !== session) return
       setSourceDetail({key: record.key, ref: summaryRecord?.detail_ref, data: result})
       if (action === 'approve') { setManualNotice(t('evidence.humanApprovalSaved')); closeDrawer() }
       else setManualOpenKey(record.key)
@@ -746,7 +766,7 @@ export function useEvidenceWorkflow(options?: {
         {!options?.readOnly && !activeRecord.placeholder && <Box data-field-review-actions sx={{display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: .75, my: 2, '& .MuiButton-root': {minWidth: 0, px: .5, overflowWrap: 'anywhere'}}}>
           <Button disabled={settingsPending || confirming || !currentDetail?.data?.review_token || hasLocalManualEdit(activeRecord)}
             onClick={() => void decideField('reject')}>{t('evidence.humanReject')}</Button>
-          <Button variant="contained" disabled={settingsPending || confirming || !currentDetail?.data?.can_approve || hasLocalManualEdit(activeRecord)}
+          <Button variant="contained" disabled={confirming || !canApprove}
             onClick={() => void decideField('approve')}>{t('evidence.humanApprove')}</Button>
           <Button variant="outlined" disabled={settingsPending || confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)}
             onClick={() => void execute(targetRef.current!, activeGroup.map(r => r.key))}>{t('evidence.reviewCurrentField')}</Button>

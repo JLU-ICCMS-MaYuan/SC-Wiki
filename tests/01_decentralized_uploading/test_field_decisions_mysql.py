@@ -54,6 +54,10 @@ def context(current_mysql, monkeypatch):
     monkeypatch.setattr(upload_tasks, 'get_draft', lambda task: deepcopy(draft) if task == target else None)
     monkeypatch.setattr(api, 'get_state', lambda task: state if task == target else None)
     monkeypatch.setattr(field_drafts, 'target_lock', lambda *a: nullcontext())
+    # 本组持久化场景使用待人工确认的必需项；默认书目信息可选免审，不能借它测试通过按钮。
+    draft_records = ev.draft_records
+    monkeypatch.setattr(ev, 'draft_records', lambda *a, **kw: [
+        {**r, 'required': True} if r['field'] == 'paper.title' else r for r in draft_records(*a, **kw)])
     snap = ev.complete_snapshot('upload', target, ev.draft_records(draft, {}),
         [{'file_id': 'main', 'chunk_index': 0, 'content': 'LaScH'}], draft)
     with current_mysql.begin() as db:
@@ -73,6 +77,7 @@ def test_human_approval_survives_summary_reopen_and_submission_without_model(con
     monkeypatch.setattr(api, 'get_llm_config', lambda: pytest.fail('人工通过与复用不应读取模型配置'))
     result = api.save_field_decision(request, actor)
     assert result['record']['status'] == 'supported'
+    assert not result['can_approve']
     assert result['record']['field_decision']['actor_user_id'] == actor.id
     assert result['record']['resolved_generation_issue']['message'] == '已纠正角色；只保存新候选供人工比较'
     assert result['record']['reason'] == '已找到原文，等待人工确认'
@@ -82,6 +87,7 @@ def test_human_approval_survives_summary_reopen_and_submission_without_model(con
     summary_record = next(r for r in summary['records'] if r['key'] == record['key'])
     assert summary_record['status'] == 'supported' and summary_record['human_confirmed']
     assert not summary_record['pending_review']
+    assert not api.field_detail('upload', target, record['item_key'], user=actor)['can_approve']
     history = api.field_detail('upload', target, record['item_key'], history=True, user=actor)
     events = history['history'][0]['audit_events']
     assert sum(e.get('kind') == 'human_review' for e in events) == 1
@@ -92,6 +98,21 @@ def test_human_approval_survives_summary_reopen_and_submission_without_model(con
     assert api.enqueue_review(api.Target(target='upload', target_id=target, purpose='submit', expected_version=snap['version']), actor, one, cached)['status'] == 'completed'
     assert ev.resolve_results(one, cached, actor.id, None, snap['version'])[0]['status'] == 'supported'
     assert draft['paper']['title'] == 'LaScH'
+
+
+def test_machine_pass_cannot_be_approved_but_can_be_rejected(context):
+    target, actor, draft, state, snap, record, factory = context
+    with factory.begin() as db:
+        science.save_results(db, snap, {record['key']: {'status': 'supported', 'reason': '模型已核对'}}, actor.id)
+    view = api.field_detail('upload', target, record['item_key'], user=actor)
+    assert not view['can_approve']
+    with pytest.raises(HTTPException):
+        api.save_field_decision(api.FieldDecision(target='upload', target_id=target, item_key=record['item_key'],
+            action='approve', review_token=view['review_token']), actor)
+    rejected = api.save_field_decision(api.FieldDecision(target='upload', target_id=target, item_key=record['item_key'],
+        action='reject', review_token=view['review_token']), actor)
+    assert rejected['record']['field_decision']['action'] == 'reject'
+    assert rejected['can_approve']
 
 
 def test_reject_blocks_without_change_and_stale_token_cannot_approve(context):

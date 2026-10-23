@@ -179,6 +179,7 @@ export default {
   "settingsName": "Field name (key)",
   "settingsValue": "Current value",
   "settingsApply": "Apply changes",
+  "decisionResponseInvalid": "The saved review decision was not returned. Please retry; the current issue is retained.",
   "settingsPending": "Field settings have unapplied changes. Apply or cancel them first.",
   "settingsConflict": "This field has changed. Keep your input, then close and reopen the settings.",
   "settingsDiscardTitle": "Unapplied changes",

@@ -179,6 +179,7 @@ export default {
   "settingsName": "字段名称（key）",
   "settingsValue": "当前值",
   "settingsApply": "应用修改",
+  "decisionResponseInvalid": "未收到已保存的人工审核结果，请重试；当前问题仍保留。",
   "settingsPending": "字段设置有尚未应用的修改，请先应用或取消。",
   "settingsConflict": "字段已发生变化，请保留当前输入，关闭后重新打开。",
   "settingsDiscardTitle": "有尚未应用的修改",

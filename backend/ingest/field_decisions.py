@@ -49,8 +49,12 @@ def detail(snapshot, cached):
     displayed['ai_reason'] = display_reason(displayed['ai_reason'])
     displayed['reason'] = display_reason(displayed['reason'])
     invalid_derived = record.get('kind') == 'derived' and not (record.get('provenance') or {}).get('verified')
+    unresolved = (not displayed['pending_review'] and not displayed['stale']
+                  and (record.get('required', True) or displayed['human_modified']
+                       or (displayed.get('field_decision') or {}).get('action') == 'reject')
+                  and displayed['status'] in {'unsupported', 'uncertain', 'missing'})
     return {'record': displayed, 'review_token': review_token(snapshot, record, previous),
-            'can_approve': not modified and not invalid_derived and previous.get('source_kind') != 'program'
+            'can_approve': unresolved and not modified and not invalid_derived and previous.get('source_kind') != 'program'
                            and scope_matches(record, previous),
             'source_state': 'historical' if previous and not exact else 'available' if displayed['evidences'] else 'empty'}
 

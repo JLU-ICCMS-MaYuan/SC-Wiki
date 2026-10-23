@@ -1,0 +1,33 @@
+{
+  "date": "2026-10-23",
+  "frontend": {
+    "passed": 39,
+    "files": [
+      "approval-state.test.tsx",
+      "two-stage-review.test.tsx",
+      "paper-field-settings.test.tsx"
+    ]
+  },
+  "mysql": {
+    "passed": 7,
+    "storage": "本机外层事务回滚；随机隔离目标，不改真实草稿"
+  },
+  "browser": {
+    "passed": true,
+    "manualWrites": 1,
+    "errors": []
+  },
+  "live_read_only": {
+    "target": "7070620afbfc45deb9ab22dae31badd3",
+    "field": "material_states[2].structure_optimization",
+    "saved_result_id": 5472,
+    "current_value": "classical_static",
+    "status": "supported",
+    "human_confirmed": true,
+    "can_approve_after_fix": false,
+    "can_approve_before_fix": true,
+    "draft_unchanged_during_read": true,
+    "scope": "只读本机 MySQL／Redis；未发审核决定、保存草稿或模型请求"
+  },
+  "build": "TypeScript 与 Vite 构建通过；保留既有大分包和3Dmol警告"
+}

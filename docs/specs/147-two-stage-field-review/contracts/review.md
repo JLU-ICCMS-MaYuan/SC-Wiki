@@ -22,3 +22,5 @@
 - 来源详情绑定当前字段及其结果版本，明确加载／错误／无来源／历史来源，避免空摘要被误读为无证据。
 
 实际接口：`POST /field-decision` 请求为 `target`、`target_id`、`item_key`、`action=approve|reject`、`review_token`；无需理由。响应包含当前 `record`、新的 `review_token`、`can_approve` 和 `source_state`。令牌绑定字段内容、依据及用户查看的结论；过期返回 409，目标权限仍由服务端验证。来源详情通过 `GET /field-detail` 返回相同契约，`history=true` 仅返回本字段历史。
+
+2026-10-23 修订：`can_approve` 仅表示当前未解决红框项是否允许人工通过，已通过和免审项返回 false；不能把普通“不通过”入口一并禁用。相同版本的已保存人工决定仍幂等返回，响应中的按钮资格为 false。前端结合可见红框状态控制按钮，只有收到已保存的正式决定才消红并关闭；旧摘要／详情不覆盖新决定。见 [状态回归](../approval-state-regression.md)。
