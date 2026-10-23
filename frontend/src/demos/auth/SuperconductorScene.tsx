@@ -3,8 +3,11 @@ import { IconButton } from '@mui/material'
 import { PauseRounded, PlayArrowRounded } from '@mui/icons-material'
 import type { AuthDemoCopy } from './copy'
 import { advanceOrbit, DEFAULT_SPEED, MAX_SPEED, normalizeAngle, pushOrbit, TAU, type OrbitMotion } from './orbitMotion'
+import MagneticField from './MagneticField'
 
 const point = (angle: number, rx: number, ry: number, offset = 0) => `${360 + Math.cos(angle) * rx},${245 + Math.sin(angle) * ry + offset}`
+const TRAIL_COUNT = 28
+const LOCAL_CLOUD_COUNT = 16
 
 export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
   const [reduced, setReduced] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
@@ -19,6 +22,8 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
   const puck = useRef<SVGGElement>(null)
   const shadow = useRef<SVGEllipseElement>(null)
   const vapor = useRef<SVGGElement>(null)
+  const trail = useRef<SVGGElement>(null)
+  const clouds = useRef<Array<{ cycle: number; x: number; y: number; scale: number; drift: number }>>([])
   const vaporTime = useRef(0)
   const motion = useRef<OrbitMotion>({ angle: 0.55, speed: DEFAULT_SPEED, target: null })
 
@@ -63,14 +68,33 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
       shadow.current?.setAttribute('cx', String(x))
       shadow.current?.setAttribute('cy', String(y + 2))
       shadow.current?.setAttribute('rx', String(39 * scale))
-      // 白雾是冷凝水滴的示意；使用同一动画时钟，暂停或后台时不继续漂移。
+      // 世界坐标尾迹保留在经过的轨道附近，不像贴在圆片上的透明装饰。
+      Array.from(trail.current?.children ?? []).forEach((cloud, i) => {
+        const clock = vaporTime.current / 3200 + i / TRAIL_COUNT
+        const phase = clock % 1, cycle = Math.floor(clock)
+        if (!clouds.current[i] || clouds.current[i].cycle !== cycle) {
+          const emissionAngle = clouds.current[i] ? angle : angle - Math.min(.7, motion.current.speed * phase * 1400)
+          const spread = ((i * 13) % 23) - 11
+          clouds.current[i] = {
+            cycle, x: 360 + (244 + spread) * Math.cos(emissionAngle),
+            y: 245 + 98 * Math.sin(emissionAngle) - 33 + (i % 4) * 4,
+            scale: .88 + .1 * Math.sin(emissionAngle), drift: Math.sin(emissionAngle) * 34 + spread,
+          }
+        }
+        const origin = clouds.current[i]
+        const dx = origin.drift * phase + Math.sin(phase * Math.PI * 3 + i) * 5
+        const dy = 50 * phase - Math.sin(phase * Math.PI) * 15
+        cloud.setAttribute('transform', `translate(${origin.x + dx} ${origin.y + dy}) scale(${origin.scale * (.8 + phase * 1.9)})`)
+        cloud.setAttribute('opacity', String(Math.pow(Math.sin(phase * Math.PI), .6) * .92))
+      })
+      // 近表面浓雾持续向两侧翻滚；同一时钟保证暂停和后台冻结。
       Array.from(vapor.current?.children ?? []).forEach((cloud, i) => {
-        const phase = (vaporTime.current / 2600 + i / 10) % 1
+        const phase = (vaporTime.current / 2400 + i / LOCAL_CLOUD_COUNT) % 1
         const spread = i % 2 ? 1 : -1
-        const x = spread * (20 + 31 * phase) + Math.sin(angle) * phase * 38
-        const y = -7 - 28 * phase - Math.cos(angle) * phase * 12
-        cloud.setAttribute('transform', `translate(${x} ${y}) scale(${0.5 + phase * 1.4})`)
-        cloud.setAttribute('opacity', String(Math.sin(phase * Math.PI) * 0.6))
+        const x = spread * (15 + 45 * phase) + Math.sin(angle) * phase * 30
+        const y = -4 - 50 * Math.sin(phase * Math.PI) + 22 * phase
+        cloud.setAttribute('transform', `translate(${x} ${y}) scale(${.8 + phase * 1.9})`)
+        cloud.setAttribute('opacity', String(Math.sin(phase * Math.PI) * .88))
       })
     }
     const tick = (now: number) => {
@@ -101,16 +125,26 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
         <radialGradient id="sc-puck-top" cx="35%" cy="25%" r="80%">
           <stop offset="0" stopColor="#858e98" /><stop offset=".3" stopColor="#555d67" /><stop offset=".7" stopColor="#323943" /><stop offset="1" stopColor="#20262f" />
         </radialGradient>
-        <radialGradient id="sc-vapor"><stop offset="0" stopColor="#fff" stopOpacity=".98" /><stop offset=".5" stopColor="#f4f8fc" stopOpacity=".85" /><stop offset="1" stopColor="#b9cbd9" stopOpacity="0" /></radialGradient>
+        <radialGradient id="sc-vapor" cx="43%" cy="34%"><stop offset="0" stopColor="#e2e8f0" stopOpacity=".95" /><stop offset=".5" stopColor="#e8edf4" stopOpacity=".9" /><stop offset=".8" stopColor="#f1f4f8" stopOpacity=".72" /><stop offset="1" stopColor="#e4eaf2" stopOpacity="0" /></radialGradient>
+        <g id="sc-cloud-shape">
+          <path d="M-40 7C-48-2-39-11-30-10C-37-25-12-30-6-19C1-34 22-26 22-14C42-23 53-3 36 5C49 19 26 29 15 18C6 34-17 26-20 17C-37 27-52 17-40 7Z" fill="url(#sc-vapor)" />
+          <path d="M-30-5C-39-19-13-25-7-12C5-29 27-19 20-6C35-15 44-2 29 6C18 15 4 7-7 14C-18 20-29 10-30-5Z" fill="#fff" opacity=".7" />
+        </g>
+        <marker id="sc-field-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M1 1L6 4L1 7" fill="none" stroke="#238ca5" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></marker>
+        <marker id="sc-current-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M1 1L6 4L1 7" fill="none" stroke="#9868bf" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></marker>
         <linearGradient id="sc-frost" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#fff" stopOpacity=".9" /><stop offset="1" stopColor="#b8d8e8" stopOpacity=".05" /></linearGradient>
         <pattern id="sc-grain" width="29" height="23" patternUnits="userSpaceOnUse">
           {Array.from({ length: 39 }, (_, i) => <ellipse key={i} cx={(i * 17.37) % 29} cy={(i * 11.79) % 23} rx={.25 + i % 4 * .19} ry={.2 + i % 3 * .16} fill={i % 3 ? '#bdc8d3' : '#10161e'} opacity={.15 + i % 5 * .065} />)}
         </pattern>
-        <filter id="sc-vapor-soft" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="1.5" /></filter>
+        <filter id="sc-vapor-soft" x="-50%" y="-100%" width="200%" height="300%">
+          <feTurbulence type="fractalNoise" baseFrequency=".035 .065" numOctaves="2" seed="8" result="cloud-noise" />
+          <feDisplacementMap in="SourceGraphic" in2="cloud-noise" scale="17" xChannelSelector="R" yChannelSelector="G" />
+          <feGaussianBlur stdDeviation="2" />
+        </filter>
         <filter id="sc-soft-shadow" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="5" /></filter>
       </defs>
 
-      {/* 背景测量线与磁场示意保持低对比，视觉重心留给悬浮圆片。 */}
+      {/* 背景测量线与有方向的磁场示意分开，不把测量线冒充物理场线。 */}
       <g fill="none" stroke="#e9eaf1" strokeWidth="1">
         <ellipse cx="360" cy="257" rx="316" ry="135" strokeDasharray="3 8" />
         <path d="M29 257H691M360 103V413" strokeDasharray="3 8" />
@@ -130,7 +164,6 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
       <ellipse cx="360" cy="245" rx="219" ry="86" fill="none" stroke="#b1b8c8" strokeWidth="1.5" />
       <g fill="none" stroke="#aba3dd" strokeWidth="1" opacity=".35">
         <ellipse cx="360" cy="245" rx="247" ry="100" />
-        <path d="M160 209C168 91 262 72 291 158M177 202C187 120 252 103 276 165M431 164C456 97 537 106 553 210" />
       </g>
       <g fill="#8e86ac" fontFamily="inherit" fontSize="11" letterSpacing="2">
         <text x="360" y="242" textAnchor="middle">SC-WIKI</text>
@@ -142,6 +175,12 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
       </g>
       <text x="42" y="376" fill="#9b95b0" fontSize="10" letterSpacing="1.3">01 / MAGNETIC TRACK</text>
       <text x="610" y="145" fill="#9b95b0" fontSize="10" letterSpacing="1.3">T &lt; T<tspan baselineShift="sub" fontSize="8">c</tspan></text>
+
+      <g ref={trail} className="sc-vapor sc-vapor-trail" pointerEvents="none" aria-hidden="true" filter="url(#sc-vapor-soft)">
+        {Array.from({ length: TRAIL_COUNT }, (_, i) => <g key={i}>
+          <use href="#sc-cloud-shape" transform={`rotate(${(i % 5 - 2) * 11})`} />
+        </g>)}
+      </g>
 
       <ellipse className="sc-track-control" cx="360" cy="245" rx="244" ry="98" fill="none" stroke="transparent" strokeWidth="49"
         role="button" tabIndex={0} aria-label={copy.stopTrack} onClick={clickTrack} onKeyDown={event => {
@@ -161,10 +200,8 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
         <title>{copy.pushPuck}</title>
         <ellipse rx="60" ry="50" fill="transparent" />
         <ellipse className="sc-push-halo" cy="10" rx="49" ry="25" fill="none" stroke="#9890c8" strokeWidth="1" strokeDasharray="3 4" />
-        {/* 绕过圆片的场线仅为示意，不表示磁场求解结果。 */}
-        <g fill="none" stroke="#86c1d0" strokeWidth="1" opacity=".35" pointerEvents="none">
-          <path d="M-57 33C-75 13-66-19-47-24M57 33C75 13 66-19 47-24" />
-          <path d="M-47 28C-59 11-56-10-43-16M47 28C59 11 56-10 43-16" />
+        <g ref={vapor} className="sc-vapor sc-vapor-local" pointerEvents="none" aria-hidden="true" filter="url(#sc-vapor-soft)">
+          {Array.from({ length: LOCAL_CLOUD_COUNT }, (_, i) => <g key={i}><use href="#sc-cloud-shape" transform={`rotate(${(i % 5 - 2) * 13}) scale(.85)`} /></g>)}
         </g>
         <g className="sc-puck-body">
           <path d="M-42-5C-42-31 42-31 42-5V12C42 37-42 37-42 12Z" fill="url(#sc-puck-side)" stroke="#252d37" strokeWidth=".5" />
@@ -180,9 +217,7 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
           })}
           <path d="M-39-2l1 9M-35 3l1 10M-29 8v5M32 7l-1 7" stroke="url(#sc-frost)" strokeWidth="1" opacity=".65" />
         </g>
-        <g ref={vapor} className="sc-vapor" pointerEvents="none" aria-hidden="true" filter="url(#sc-vapor-soft)">
-          {Array.from({ length: 10 }, (_, i) => <g key={i}><ellipse rx="18" ry="10" fill="url(#sc-vapor)" /><ellipse cx="9" cy="-5" rx="13" ry="9" fill="url(#sc-vapor)" /></g>)}
-        </g>
+        <MagneticField />
       </g>
     </svg>
     <div className="sc-scene-meta">
@@ -194,6 +229,7 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
         </IconButton>
       </div>
     </div>
+    <div className="sc-field-legend"><span><i className="sc-field-key" />{copy.fieldLegend}</span><span><i className="sc-current-key" />{copy.currentLegend}</span><span className="sc-meissner-caption">{copy.meissnerCaption}</span></div>
     <p className="sc-orbit-hint">{copy.orbitHint}</p>
     <details className="sc-science"><summary>{copy.science}</summary><p>{copy.scienceText}</p></details>
   </div>

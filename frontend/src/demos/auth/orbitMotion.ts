@@ -1,7 +1,7 @@
 export const TAU = Math.PI * 2
 export const DEFAULT_SPEED = TAU / 12_000
 export const RESTART_SPEED = TAU / 20_000
-export const MAX_SPEED = TAU / 4_000
+export const MAX_SPEED = TAU / 1_000
 export interface OrbitMotion { angle: number; speed: number; target: number | null }
 export const normalizeAngle = (angle: number) => ((angle % TAU) + TAU) % TAU
 

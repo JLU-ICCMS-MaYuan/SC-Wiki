@@ -58,3 +58,16 @@ final result: passed
 证据：[登录全景](assets/revision-2/login-zh-1440.png)、[手机登录](assets/revision-2/login-zh-390.png)、[定点停靠与白雾](assets/revision-2/parked-with-vapor-1440.png)、[忘记密码](assets/revision-2/reset-email-1440.png)、[英文改密错误态](assets/revision-2/reset-password-en-390.png)、[两版对照](assets/revision-2/comparison.png)、[机器记录](assets/revision-2/results.json)。
 
 未做低端设备帧率或跨浏览器结论；后台暂停仍以可见性事件注入验证。12 项测试与 18 个布局状态通过不等于生产密码重置已接入。
+
+## 第三版复查：视频浓雾与抗磁性（2026-10-23）
+
+本轮最终结果：通过 Demo 检查，用户视觉评审仍待完成。参考为用户 58.898 秒录屏、原第二版页面和新需求；视频黑底实拍与网页白底不作像素一致性比较，只对比雾团相对尺寸、外溢形态及动态留痕。
+
+- 字体和布局：保留整体分栏，新加紧凑双色图例与理想迈斯纳态说明，手机换行且无横向溢出。
+- 色彩和图像：蓝青色外场线与紫色表面电流区分；场线连续、不穿入样品截面。浓雾为白色内层与淡冷灰边缘，能遮蔽部分轨道但保留圆片和点击功能。
+- 第一次浓雾强化后的动态图出现圆泡尾迹（P2），已改为不规则云形与噪声位移融合；复查新运行画面，不再保留径向暗环结构。
+- 已并排对比视频 25.250 秒的浓雾与运行态轨道；雾团尺度达到数倍圆片并沿轨道铺开，保持网页概念图风格，尚不能等同实拍液氮的全部湍流细节。
+- 最高速测量采用连续浏览器时间和相位采样，约每秒一圈；高速定点停靠、低速重启、全部模拟认证/改密流程保持通过。8 条外场曲线每条采样 301 点未进入圆片包围截面，只是图示几何检查，不是科学仿真验收。
+- 源码使用固定 28 个尾迹云团和 16 个局部云团；本机 Chromium 流程通过，不据此声称低端设备帧率或跨浏览器全部合格。
+
+证据：[视频与实现对照](assets/revision-3/comparison.png)、[桌面登录](assets/revision-3/login-zh-1440.png)、[手机登录](assets/revision-3/login-zh-390.png)、[运行态浓雾](assets/revision-3/interactive-orbit-1440.png)、[机器记录](assets/revision-3/results.json)。

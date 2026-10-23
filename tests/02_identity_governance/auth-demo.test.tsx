@@ -113,6 +113,7 @@ describe('可推动与定点停靠的轨道', () => {
     expect(motion.angle).toBeCloseTo(.55)
     for (let i = 0; i < 20; i++) pushOrbit(motion, false)
     expect(motion.speed).toBe(MAX_SPEED)
+    expect(TAU / motion.speed).toBeCloseTo(1000, 8)
     motion.target = .8
     expect(advanceOrbit(motion, 1000)).toBe(true)
     expect(motion.angle).toBeCloseTo(.8)

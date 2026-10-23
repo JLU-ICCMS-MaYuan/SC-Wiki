@@ -49,3 +49,11 @@ T011/T012 完成后执行 T013；正式 T009/T010 仍待用户批准。
 - [ ] T014 [US3] 正式接入获批后，在 docs/specs/151-superconducting-auth-page/contracts/ 确认真实找回密码契约，结合届时 goserver/handlers/auth.go、邮件服务及 frontend/src/context/AuthContext.tsx 完成发信、验证码、安全改密和真实验收；不得直接发布 Demo 服务。
 
 第二版证据：T011/T013 见 assets/revision-2/results.json 的 speedCap、stopCoordinates、trackStopRestart、vapor；T012/T013 见 12 项 Vitest 及浏览器找回全流程。T014 属于未来正式阶段，不在本次 Demo 授权中。
+
+## 第三版：速度、抗磁性和浓雾
+
+- [x] T015 [US1] 在 frontend/src/demos/auth/orbitMotion.ts 将上限改为每秒一圈，并扩展 tests/02_identity_governance/auth-demo-browser.mjs 的最高速周期和高速停靠验证。
+- [x] T016 [US1] 在 frontend/src/demos/auth/MagneticField.tsx、SuperconductorScene.tsx、copy.ts、auth-demo.css 实现绕体场线、屏蔽电流图例及视频参考的分层浓雾；在本目录 research.md 保存论文和视频依据。
+- [x] T017 [US1] 在 docs/specs/151-superconducting-auth-page/assets/revision-3/ 保存源视频记录、裁剪帧、截图及验证结果，更新 quickstart.md、design-qa.md 与 Issue #151。
+
+第三版证据：T015 见 revision-3/results.json 的 measuredMaxSpeedPeriodMs（约 999.29ms）与 stopCoordinates；T016/T017 见 research.md、视频来源 JSON、参考帧/实现并排图及 design-qa.md。正式阶段 T009/T010/T014 保持未完成。

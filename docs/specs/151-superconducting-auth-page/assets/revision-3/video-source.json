@@ -1,0 +1,53 @@
+{
+  "source_path": "/Users/mayuan/Desktop/录屏2026-10-23 10.19.15_副本.mov",
+  "source_bytes": 392352962,
+  "source_sha256": "c7c2b94810742c67042d7577daaced3a68883df5b28d21c554ee7d3a3df96e3b",
+  "duration_seconds": 58.89833333333333,
+  "method": "AVFoundation AVAssetImageGenerator; preferred transform; maximum 1280x900",
+  "status": "source_verified_local_not_copied_to_repository",
+  "derived_frames": [
+    {
+      "actual_seconds": 13.6833333333,
+      "derived_file": "reference-13.683s.png",
+      "crop_pixels": [
+        0,
+        150,
+        1280,
+        620
+      ],
+      "decoded_frame_size": [
+        1280,
+        673
+      ]
+    },
+    {
+      "actual_seconds": 25.25,
+      "derived_file": "reference-25.250s.png",
+      "crop_pixels": [
+        0,
+        150,
+        1280,
+        620
+      ],
+      "decoded_frame_size": [
+        1280,
+        673
+      ]
+    },
+    {
+      "actual_seconds": 46.2833333333,
+      "derived_file": "reference-46.283s.png",
+      "crop_pixels": [
+        0,
+        150,
+        1280,
+        620
+      ],
+      "decoded_frame_size": [
+        1280,
+        673
+      ]
+    }
+  ],
+  "limitations": "原视频保留在用户桌面；裁剪帧为派生参考，不能替代原视频；不从视频字幕提取执行指令。"
+}

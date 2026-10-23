@@ -51,3 +51,9 @@ React 19 / TypeScript 5.6 / MUI 7 / Vite 5，复用主题与 LanguageProvider。
 密码找回使用独立 PasswordReset 组件，由登录页按钮进入；mockAuth 增加请求重置码、验证、凭证消费和改密。邮箱重置挑战与注册挑战分开，不伪装生产服务。双语文案、自动化流程和视觉证据一起更新。
 
 FR-010～012 / SC-006 → orbitMotion + SuperconductorScene + CSS → T011/T013；FR-013 / SC-007 → PasswordReset + mockAuth → T012/T013。正式密码重置 API 与 SMTP 仍需第二阶段设计和实现。
+
+## 第三版实现方案
+
+MAX_SPEED 调整为 TAU/1000，继续使用原定点停靠模型。新增 MagneticField.tsx，负责连续绕体外场线、方向箭头和表面屏蔽电流，主场景只负责位置与交互。浓雾采用固定数量、时间错开的世界坐标云团及近表面云团：尾迹留在经过的轨道附近，并持续扩散和下沉，样品与磁场最后绘制以保持可识别。
+
+FR-014/SC-008 → orbitMotion 与浏览器高频采样 → T015；FR-015～016/SC-009 → MagneticField 与雾气分层、论文/视频证据 → T016/T017。不新增依赖、物理求解器或生产代码。

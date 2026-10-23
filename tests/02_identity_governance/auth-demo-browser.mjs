@@ -198,10 +198,20 @@ try {
   await push()
   assert(Number(await puck.getAttribute('data-period')) < 12000)
   for (let i = 0; i < 12; i++) await push()
-  assert.equal(await puck.getAttribute('data-period'), '4000')
+  assert.equal(await puck.getAttribute('data-period'), '1000')
   await push()
-  assert.equal(await puck.getAttribute('data-period'), '4000')
-  report.animation.speedCap = '初始 12000ms；点击加速；重复点击上限 4000ms'
+  assert.equal(await puck.getAttribute('data-period'), '1000')
+  report.animation.speedCap = '初始 12000ms；点击加速；重复点击上限 1000ms'
+  const cycleSamples = []
+  for (let i = 0; i < 16; i++) {
+    cycleSamples.push(await puck.evaluate(el => ({ time: performance.now(), phase: Number(el.getAttribute('data-phase')) })))
+    if (i < 15) await page.waitForTimeout(80)
+  }
+  let turns = 0
+  for (let i = 1; i < cycleSamples.length; i++) turns += (cycleSamples[i].phase - cycleSamples[i - 1].phase + 1) % 1
+  const measuredPeriod = (cycleSamples.at(-1).time - cycleSamples[0].time) / turns
+  assert(measuredPeriod > 900 && measuredPeriod < 1100, `Measured max-speed period: ${measuredPeriod}ms`)
+  report.animation.measuredMaxSpeedPeriodMs = measuredPeriod
 
   const initialAngle = Number(await puck.getAttribute('data-phase')) * Math.PI * 2
   const targetAngle = (initialAngle + Math.PI / 2) % (Math.PI * 2)
@@ -244,6 +254,24 @@ try {
   await page.waitForTimeout(160)
   assert.equal(await fog.getAttribute('transform'), frozenFog)
   report.animation.vapor = '白雾随动画时钟扩散；暂停冻结'
+
+  const fieldCheck = await page.locator('.sc-field-lines path').evaluateAll(paths => {
+    let intrusions = 0
+    for (const path of paths) {
+      const length = path.getTotalLength()
+      for (let i = 0; i <= 300; i++) {
+        const p = path.getPointAtLength(length * i / 300)
+        if (Math.abs(p.x) < 42 && p.y > -26 && p.y < 34) intrusions++
+      }
+    }
+    return { paths: paths.length, intrusions }
+  })
+  assert.equal(fieldCheck.paths, 8)
+  assert.equal(fieldCheck.intrusions, 0)
+  assert.equal(await page.locator('.sc-vapor-trail > g').count(), 28)
+  assert.equal(await page.locator('.sc-vapor-local > g').count(), 16)
+  report.animation.meissnerFieldGeometry = fieldCheck
+  report.animation.vaporLayers = { trail: 28, local: 16 }
 
   assert.equal(await page.evaluate(() => localStorage.getItem('auth_token')), 'untouched-session')
   assert.deepEqual(report.apiRequests, [])
