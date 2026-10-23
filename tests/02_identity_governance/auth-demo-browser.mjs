@@ -255,23 +255,12 @@ try {
   assert.equal(await fog.getAttribute('transform'), frozenFog)
   report.animation.vapor = '白雾随动画时钟扩散；暂停冻结'
 
-  const fieldCheck = await page.locator('.sc-field-lines path').evaluateAll(paths => {
-    let intrusions = 0
-    for (const path of paths) {
-      const length = path.getTotalLength()
-      for (let i = 0; i <= 300; i++) {
-        const p = path.getPointAtLength(length * i / 300)
-        if (Math.abs(p.x) < 42 && p.y > -26 && p.y < 34) intrusions++
-      }
-    }
-    return { paths: paths.length, intrusions }
-  })
-  assert.equal(fieldCheck.paths, 8)
-  assert.equal(fieldCheck.intrusions, 0)
-  assert.equal(await page.locator('.sc-vapor-trail > g').count(), 28)
-  assert.equal(await page.locator('.sc-vapor-local > g').count(), 16)
-  report.animation.meissnerFieldGeometry = fieldCheck
-  report.animation.vaporLayers = { trail: 28, local: 16 }
+  assert.equal(await page.locator('.sc-magnetic-field, .sc-screening-current, .sc-field-legend').count(), 0)
+  assert.equal(await page.locator('.sc-vapor-trail > g').count(), 14)
+  assert.equal(await page.locator('.sc-vapor-local > g').count(), 8)
+  report.animation.fieldOverlays = '磁场线、屏蔽电流和图例全部移除'
+  report.animation.vaporLayers = { trail: 14, local: 8, previousTrail: 28, previousLocal: 16 }
+
 
   assert.equal(await page.evaluate(() => localStorage.getItem('auth_token')), 'untouched-session')
   assert.deepEqual(report.apiRequests, [])

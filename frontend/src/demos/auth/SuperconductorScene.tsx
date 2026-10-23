@@ -3,11 +3,10 @@ import { IconButton } from '@mui/material'
 import { PauseRounded, PlayArrowRounded } from '@mui/icons-material'
 import type { AuthDemoCopy } from './copy'
 import { advanceOrbit, DEFAULT_SPEED, MAX_SPEED, normalizeAngle, pushOrbit, TAU, type OrbitMotion } from './orbitMotion'
-import MagneticField from './MagneticField'
 
 const point = (angle: number, rx: number, ry: number, offset = 0) => `${360 + Math.cos(angle) * rx},${245 + Math.sin(angle) * ry + offset}`
-const TRAIL_COUNT = 28
-const LOCAL_CLOUD_COUNT = 16
+const TRAIL_COUNT = 14
+const LOCAL_CLOUD_COUNT = 8
 
 export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
   const [reduced, setReduced] = useState(() => window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false)
@@ -130,8 +129,6 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
           <path d="M-40 7C-48-2-39-11-30-10C-37-25-12-30-6-19C1-34 22-26 22-14C42-23 53-3 36 5C49 19 26 29 15 18C6 34-17 26-20 17C-37 27-52 17-40 7Z" fill="url(#sc-vapor)" />
           <path d="M-30-5C-39-19-13-25-7-12C5-29 27-19 20-6C35-15 44-2 29 6C18 15 4 7-7 14C-18 20-29 10-30-5Z" fill="#fff" opacity=".7" />
         </g>
-        <marker id="sc-field-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M1 1L6 4L1 7" fill="none" stroke="#238ca5" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></marker>
-        <marker id="sc-current-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="5" markerHeight="5" orient="auto"><path d="M1 1L6 4L1 7" fill="none" stroke="#9868bf" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" /></marker>
         <linearGradient id="sc-frost" x1="0" y1="0" x2="1" y2="1"><stop stopColor="#fff" stopOpacity=".9" /><stop offset="1" stopColor="#b8d8e8" stopOpacity=".05" /></linearGradient>
         <pattern id="sc-grain" width="29" height="23" patternUnits="userSpaceOnUse">
           {Array.from({ length: 39 }, (_, i) => <ellipse key={i} cx={(i * 17.37) % 29} cy={(i * 11.79) % 23} rx={.25 + i % 4 * .19} ry={.2 + i % 3 * .16} fill={i % 3 ? '#bdc8d3' : '#10161e'} opacity={.15 + i % 5 * .065} />)}
@@ -144,7 +141,7 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
         <filter id="sc-soft-shadow" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="5" /></filter>
       </defs>
 
-      {/* 背景测量线与有方向的磁场示意分开，不把测量线冒充物理场线。 */}
+      {/* 背景虚线仅表示构图测量参考，不表示磁场。 */}
       <g fill="none" stroke="#e9eaf1" strokeWidth="1">
         <ellipse cx="360" cy="257" rx="316" ry="135" strokeDasharray="3 8" />
         <path d="M29 257H691M360 103V413" strokeDasharray="3 8" />
@@ -217,7 +214,6 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
           })}
           <path d="M-39-2l1 9M-35 3l1 10M-29 8v5M32 7l-1 7" stroke="url(#sc-frost)" strokeWidth="1" opacity=".65" />
         </g>
-        <MagneticField />
       </g>
     </svg>
     <div className="sc-scene-meta">
@@ -229,7 +225,6 @@ export default function SuperconductorScene({ copy }: { copy: AuthDemoCopy }) {
         </IconButton>
       </div>
     </div>
-    <div className="sc-field-legend"><span><i className="sc-field-key" />{copy.fieldLegend}</span><span><i className="sc-current-key" />{copy.currentLegend}</span><span className="sc-meissner-caption">{copy.meissnerCaption}</span></div>
     <p className="sc-orbit-hint">{copy.orbitHint}</p>
     <details className="sc-science"><summary>{copy.science}</summary><p>{copy.scienceText}</p></details>
   </div>

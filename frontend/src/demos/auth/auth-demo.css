@@ -84,12 +84,6 @@ body:has(.sc-auth-demo) { background: #fff; }
 .sc-auth-demo .sc-track-control:focus, .sc-auth-demo .sc-puck-interactive:focus { outline: none; }
 .sc-track-control:focus-visible { stroke: #8b75ba30; }
 .sc-orbit-hint { font-size: 11px; color: #82768e; margin: 9px 8% 0; }
-.sc-field-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 12px 8% 0; color: #756c82; font-size: 10px; }
-.sc-field-legend > span { display: inline-flex; gap: 6px; align-items: center; }
-.sc-field-legend i { display: inline-block; width: 17px; height: 2px; }
-.sc-field-key { background: #238ca5; }
-.sc-current-key { background: #9868bf; }
-.sc-meissner-caption { font-size: 10px; color: #887d93; }
 .sc-auth-demo .sc-forgot { display: block; margin: -8px 0 12px auto; padding: 0; min-height: 26px; font-size: 12px; font-weight: 450; border-radius: 4px; }
 .sc-reset-progress { display: flex; gap: 8px; margin: 0 0 24px; }
 .sc-reset-progress span { width: 24px; height: 3px; background: #eeeaf5; border-radius: 2px; }
@@ -117,7 +111,6 @@ body:has(.sc-auth-demo) { background: #fff; }
   .sc-scene-meta { margin: -4px 0 0; } .sc-state { font-size: 10px; }
   .sc-science { margin: 3px 0 0; font-size: 9px; }
   .sc-orbit-hint { margin: 6px 0 0; font-size: 10px; }
-  .sc-field-legend, .sc-meissner-caption { margin-left: 0; margin-right: 0; }
   .sc-form-section { width: 100%; padding: 30px 0 0; border-left: 0; margin-top: 15px; border-top: 1px solid #f0edf5; }
   .sc-tabs { margin-bottom: 25px; } .sc-form-content h1 { font-size: 24px; }
   .sc-form-intro { margin-bottom: 25px; } .sc-demo-note { margin-top: 28px; }

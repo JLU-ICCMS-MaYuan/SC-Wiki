@@ -71,3 +71,9 @@ final result: passed
 - 源码使用固定 28 个尾迹云团和 16 个局部云团；本机 Chromium 流程通过，不据此声称低端设备帧率或跨浏览器全部合格。
 
 证据：[视频与实现对照](assets/revision-3/comparison.png)、[桌面登录](assets/revision-3/login-zh-1440.png)、[手机登录](assets/revision-3/login-zh-390.png)、[运行态浓雾](assets/revision-3/interactive-orbit-1440.png)、[机器记录](assets/revision-3/results.json)。
+
+## 第四版复查（2026-10-23）
+
+结果：通过本轮 Demo 检查，用户视觉验收仍待反馈。已打开桌面与手机截图，并将第三版与第四版同尺寸页面、运行态尾迹合成对比。磁场线和屏蔽电流已完全移除，图例与相关标注也不显示；剩余轮廓虚线为构图参考，不是磁场。移除图例后表单与插画留白自然，原有字体、按钮配色和材质不变。云团数量两层各减半，运行态尾迹更稀疏，仍保留原来不规则轮廓；不把视觉 50% 解释成光学浓度的精确测量。
+
+证据：[桌面](assets/revision-4/login-zh-1440.png)、[手机](assets/revision-4/login-zh-390.png)、[前后对照](assets/revision-4/comparison.png)、[浏览器记录](assets/revision-4/results.json)。18 个布局/状态无横向溢出，零真实 API/页面异常；最高速采样约 1.012 秒，停靠、低速重启、雾气冻结和模拟认证通过。没有新增生产集成。

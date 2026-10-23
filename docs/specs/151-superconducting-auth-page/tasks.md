@@ -57,3 +57,7 @@ T011/T012 完成后执行 T013；正式 T009/T010 仍待用户批准。
 - [x] T017 [US1] 在 docs/specs/151-superconducting-auth-page/assets/revision-3/ 保存源视频记录、裁剪帧、截图及验证结果，更新 quickstart.md、design-qa.md 与 Issue #151。
 
 第三版证据：T015 见 revision-3/results.json 的 measuredMaxSpeedPeriodMs（约 999.29ms）与 stopCoordinates；T016/T017 见 research.md、视频来源 JSON、参考帧/实现并排图及 design-qa.md。正式阶段 T009/T010/T014 保持未完成。
+
+## 第四版：精简视觉
+
+- [x] T018 [US1] 删除 frontend/src/demos/auth/MagneticField.tsx 与相关展示/样式，将 SuperconductorScene.tsx 雾量减半，更新 copy.ts、浏览器断言和本目录证据；覆盖 FR-017/018、SC-010。

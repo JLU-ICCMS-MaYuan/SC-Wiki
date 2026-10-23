@@ -29,3 +29,8 @@
 - [x] CHK017 科学示意与真实磁通钉扎边界已区分；论文作者、DOI、实际读取范围与无法访问的全文均有记录。[FR-015、research.md；Prozorov/Kogan 预印本第 1～5 页和 Fig.1，London 仅元数据摘要]
 - [x] CHK018 视频原路径、时长、SHA256 和三个关键帧实际时间已登记；归档去除浏览器工具栏的裁剪派生图，不将截图作为原片。[FR-016、assets/revision-3/video-source.json]
 - [x] CHK019 最高速周期、限速、高速停靠、浓雾暂停和几何绕体有对应验证。[SC-008/009；浏览器结果及 design-qa.md]
+
+## 第四版增量核验
+
+- [x] CHK020 最新三句反馈逐字保存，FR-017/018 明确覆盖旧磁场展示及全量浓雾；原始论文与视频依据保留为历史。[spec.md]
+- [x] CHK021 两层云团各减半、磁场和屏蔽电流及图例不存在，保持速度/停靠与认证边界。[SC-010；assets/revision-4/results.json、design-qa.md]
