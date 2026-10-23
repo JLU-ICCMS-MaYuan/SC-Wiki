@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { mkdir, writeFile } from 'node:fs/promises'
 const { chromium } = await import(process.env.PLAYWRIGHT_MODULE || '../../prototypes/account-center/node_modules/playwright/index.mjs')
 const base = process.env.NOBEL_DEMO_URL || 'http://127.0.0.1:5174/nobel-demo.html'
-const output = new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/validation-v2/', import.meta.url)
+const output = new URL('../../docs/specs/159-nobel-portrait-exhibition/assets/validation-v3/', import.meta.url)
 await mkdir(output, { recursive: true })
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
 const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } })
@@ -11,6 +11,33 @@ page.on('pageerror', error => errors.push(error.message))
 const results = {}
 const angle = () => page.locator('.nobel-stage').getAttribute('data-angle').then(Number)
 const choose = name => page.getByRole('button', { name, exact: true }).click()
+async function scanFullTurn(viewportWidth) {
+  await page.setViewportSize({ width: viewportWidth, height: 1100 })
+  await choose('Onnes')
+  const stage = await page.locator('.nobel-stage').boundingBox()
+  const x = stage.x + stage.width / 2, y = stage.y + 10
+  await page.mouse.move(x, y)
+  await page.mouse.down()
+  let minGap = Infinity
+  // 指针捕获允许越过舞台边界；实际拖动两倍舞台宽度走完360度。
+  for (let degrees = 0; degrees <= 360; degrees += 3) {
+    await page.mouse.move(x + degrees * Math.max(stage.width, 360) / 180, y)
+    const bounds = await page.locator('.nobel-face').evaluateAll(elements => elements
+      .filter(e => getComputedStyle(e).visibility === 'visible' && Number(getComputedStyle(e).opacity) > 0)
+      .map(e => {
+        const rects = [e, e.querySelector('img'), e.querySelector('.nobel-person-copy')].map(node => node.getBoundingClientRect())
+        return { left: Math.min(...rects.map(r => r.left)), right: Math.max(...rects.map(r => r.right)) }
+      }).sort((a, b) => a.left - b.left))
+    for (let i = 1; i < bounds.length; i++) {
+      const gap = bounds[i].left - bounds[i - 1].right
+      minGap = Math.min(minGap, gap)
+      assert.ok(gap >= 12, `${viewportWidth}px / ${degrees}度 图片或文字遮挡: ${gap}`)
+    }
+  }
+  await page.mouse.up()
+  await choose('Onnes')
+  return { width: viewportWidth, samples: 121, minGap }
+}
 try {
   await page.goto(base)
   const before = await angle()
@@ -39,6 +66,9 @@ try {
   assert.ok(Number(await onnes.getAttribute('data-scale')) > Number(await page.locator('.nobel-face[href$="person=cooper"]').getAttribute('data-scale')))
   await page.screenshot({ path: new URL('desktop.png', output).pathname, fullPage: true })
   results.visual = '白底、原照、无相框和滤镜、白色边缘融合；姓名资料在各自移动容器内；主位大于侧位'
+  results.fullTurnSpacing = [await scanFullTurn(1440), await scanFullTurn(768), await scanFullTurn(390)]
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await choose('Onnes')
 
   let popups = 0
   page.on('popup', () => popups++)
@@ -52,7 +82,8 @@ try {
   assert.ok(await angle() > start)
   assert.equal(popups, 0)
   const movedTitle = await onnes.locator('h2').boundingBox()
-  const movedPhoto = await onnes.locator('img').boundingBox()
+  // 照片内部侧倾产生透视偏移；姓名应跟随照片所在的容器中心。
+  const movedPhoto = await onnes.locator('.nobel-photo').boundingBox()
   assert.ok(Math.abs(movedTitle.x + movedTitle.width / 2 - movedPhoto.x - movedPhoto.width / 2) < 2)
   const stage = await page.locator('.nobel-stage').boundingBox()
   const afterRight = await angle()

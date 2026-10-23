@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, type CSSProperties, type PointerEvent } from 'react'
 import theme from '../../theme'
+import { projectGallery } from './projection'
 import { laureates, type NobelLaureate } from './data'
 import './nobel-demo.css'
 
@@ -73,6 +74,7 @@ function Exhibition() {
   const suppressClick = useRef(false)
   const step = 360 / laureates.length
   const frontIndex = ((Math.round(-angle / step) % laureates.length) + laureates.length) % laureates.length
+  const layout = projectGallery(angle, laureates.length, width)
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -159,17 +161,14 @@ function Exhibition() {
           }}>
           <div className="nobel-ring" role="list" aria-label="旋转的获奖者肖像">
             {laureates.map((person, index) => {
-              const theta = (angle + step * index) * Math.PI / 180
-              const depth = Math.cos(theta)
-              const scale = 0.55 + 0.45 * Math.max(0, depth) ** 2
-              const x = Math.sin(theta) * Math.max(280, width / 2 - 130)
-              const visible = depth > 0.05
+              const { x, y, scale, cardWidth, yaw, opacity } = layout[index]
+              const visible = opacity > 0 && Math.abs(x) < width / 2 + cardWidth * scale / 2
               return (
                 <a key={person.id} role="listitem"
                   className={`nobel-face${index === frontIndex ? ' is-selected' : ''}`}
-                  data-depth={depth} data-scale={scale}
-                  style={{ transform: `translate(-50%, 0) translate(${x}px, ${(1 - depth) * 24}px) scale(${scale})`,
-                    zIndex: Math.round((depth + 1) * 100), opacity: Math.max(0, Math.min(1, depth * 3)),
+                  data-scale={scale}
+                  style={{ transform: `translate(-50%, 0) translate(${x}px, ${y}px) scale(${scale})`,
+                    width: cardWidth, '--portrait-yaw': `${yaw}deg`, opacity,
                     visibility: visible ? 'visible' : 'hidden' } as CSSProperties}
                   href={`/nobel-demo.html?person=${person.id}`} target="_blank" rel="noopener noreferrer"
                   tabIndex={visible ? 0 : -1} draggable={false}

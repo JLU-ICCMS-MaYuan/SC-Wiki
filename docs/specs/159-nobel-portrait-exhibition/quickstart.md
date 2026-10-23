@@ -23,3 +23,5 @@ Vite 默认地址为 `http://localhost:5173/nobel-demo.html`。如果 `5173` 已
 浏览器回归：在仓库根目录运行 `node "tests/07_researcher_community_forum/nobel-demo-browser.mjs"`。需要本机 Chrome；脚本默认复用 `prototypes/account-center/node_modules/playwright`，也可通过 `PLAYWRIGHT_MODULE` 指定已有 Playwright 模块，`NOBEL_DEMO_URL` 指定预览地址。
 
 第二轮评审：页面为白底与站点主色，头像边缘淡入白色；姓名跟随头像，按住左右拖动改变方向，主位最大。最新实测证据见 `assets/validation-v2/`，第一版证据仍保存在 `assets/validation/`。
+
+第三轮评审：改为不遮挡的弧形展陈；主位更大，侧位转斜并缩小，姓名仍正向随照片移动。最新证据在 `assets/validation-v3/`；拖动一整圈检查主位交接和两侧间隔。手机优先完整呈现主位，左右拖动或索引查看其余人物。

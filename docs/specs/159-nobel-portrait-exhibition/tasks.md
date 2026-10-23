@@ -50,3 +50,10 @@ T004、T006–T010 的运行证据见 [validation.md](validation.md) 与真实�
 - [x] T014 验证鼠标和触屏拖动、误点击、暂停恢复、详情、移动端与减少动态，更新证据。
 
 第二轮 T011–T014 的证据：`assets/feedback-images.json`、当前原照清单、`assets/validation-v2/browser.json` 和截图；TypeScript、2项Vitest及独立Demo构建通过。最终漫画及完整科学史审校仍属后续工作。
+
+## 第三轮调整
+
+- [x] T015 实现不重叠的循环间距布局、主位放大和侧向透视；对应 FR-012/013。
+- [x] T016 验证密集相位、循环边界和真实浏览器不遮挡，保留拖动/详情/移动端回归证据；对应 SC-009/010。
+
+第三轮证据见 `assets/validation-v3/browser.json`、截图及 `NobelDemo.test.tsx`。六种宽度、0.5度步长的双圈数学检查和三种视口各121个实际拖动位置通过；4项Vitest、TypeScript、独立Demo构建通过。
