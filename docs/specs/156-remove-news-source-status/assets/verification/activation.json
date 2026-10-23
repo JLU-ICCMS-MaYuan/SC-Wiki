@@ -1,0 +1,8 @@
+{
+  "image": "sha256:fc59106428195d3f8e7ddc8bc08f0a715580fd96a0362da381564e6d9d180349",
+  "base_source_commit": "eb8ce92d917e9f3818589f8a4a7e96184b4ec61d",
+  "patch_commit": "8435f16e7dc7b1a4aad7842a04edebf47f5b4bc0",
+  "source_mode": "scoped_frontend_patch",
+  "other_containers_unchanged": true,
+  "artifact_manifest_sha256": "4200a7ac00d8409d387e1f809c56bab0489b91fde31fbc26e694c6a11371e4a2"
+}
