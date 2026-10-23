@@ -1,0 +1,260 @@
+{
+  "desktop": [
+    {
+      "lang": "zh",
+      "tab": "登录",
+      "height": 840,
+      "width": 1920,
+      "scrollHeight": 840,
+      "scrollWidth": 1920,
+      "submitBottom": 603.234375
+    },
+    {
+      "lang": "zh",
+      "tab": "注册",
+      "height": 840,
+      "width": 1920,
+      "scrollHeight": 840,
+      "scrollWidth": 1920,
+      "submitBottom": 699.625
+    },
+    {
+      "lang": "zh",
+      "tab": "登录",
+      "height": 760,
+      "width": 1440,
+      "scrollHeight": 760,
+      "scrollWidth": 1440,
+      "submitBottom": 549.234375
+    },
+    {
+      "lang": "zh",
+      "tab": "注册",
+      "height": 760,
+      "width": 1440,
+      "scrollHeight": 760,
+      "scrollWidth": 1440,
+      "submitBottom": 634.125
+    },
+    {
+      "lang": "zh",
+      "tab": "登录",
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "submitBottom": 494.234375
+    },
+    {
+      "lang": "zh",
+      "tab": "注册",
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "submitBottom": 579.125
+    },
+    {
+      "lang": "zh",
+      "tab": "登录",
+      "height": 720,
+      "width": 1280,
+      "scrollHeight": 720,
+      "scrollWidth": 1280,
+      "submitBottom": 529.234375
+    },
+    {
+      "lang": "zh",
+      "tab": "注册",
+      "height": 720,
+      "width": 1280,
+      "scrollHeight": 720,
+      "scrollWidth": 1280,
+      "submitBottom": 614.125
+    },
+    {
+      "lang": "zh",
+      "tab": "登录",
+      "height": 768,
+      "width": 1024,
+      "scrollHeight": 768,
+      "scrollWidth": 1024,
+      "submitBottom": 553.234375
+    },
+    {
+      "lang": "zh",
+      "tab": "注册",
+      "height": 768,
+      "width": 1024,
+      "scrollHeight": 768,
+      "scrollWidth": 1024,
+      "submitBottom": 638.125
+    },
+    {
+      "lang": "en",
+      "tab": "Log in",
+      "height": 840,
+      "width": 1920,
+      "scrollHeight": 840,
+      "scrollWidth": 1920,
+      "submitBottom": 603.234375
+    },
+    {
+      "lang": "en",
+      "tab": "Sign up",
+      "height": 840,
+      "width": 1920,
+      "scrollHeight": 840,
+      "scrollWidth": 1920,
+      "submitBottom": 699.625
+    },
+    {
+      "lang": "en",
+      "tab": "Log in",
+      "height": 760,
+      "width": 1440,
+      "scrollHeight": 760,
+      "scrollWidth": 1440,
+      "submitBottom": 549.234375
+    },
+    {
+      "lang": "en",
+      "tab": "Sign up",
+      "height": 760,
+      "width": 1440,
+      "scrollHeight": 760,
+      "scrollWidth": 1440,
+      "submitBottom": 634.125
+    },
+    {
+      "lang": "en",
+      "tab": "Log in",
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "submitBottom": 494.234375
+    },
+    {
+      "lang": "en",
+      "tab": "Sign up",
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "submitBottom": 579.125
+    },
+    {
+      "lang": "en",
+      "tab": "Log in",
+      "height": 720,
+      "width": 1280,
+      "scrollHeight": 720,
+      "scrollWidth": 1280,
+      "submitBottom": 529.234375
+    },
+    {
+      "lang": "en",
+      "tab": "Sign up",
+      "height": 720,
+      "width": 1280,
+      "scrollHeight": 720,
+      "scrollWidth": 1280,
+      "submitBottom": 614.125
+    },
+    {
+      "lang": "en",
+      "tab": "Log in",
+      "height": 768,
+      "width": 1024,
+      "scrollHeight": 768,
+      "scrollWidth": 1024,
+      "submitBottom": 553.234375
+    },
+    {
+      "lang": "en",
+      "tab": "Sign up",
+      "height": 768,
+      "width": 1024,
+      "scrollHeight": 768,
+      "scrollWidth": 1024,
+      "submitBottom": 638.125
+    }
+  ],
+  "smallScreens": [
+    {
+      "height": 844,
+      "width": 390,
+      "scrollHeight": 1166,
+      "scrollWidth": 390,
+      "submitVisibleAfterTab": true
+    },
+    {
+      "height": 720,
+      "width": 320,
+      "scrollHeight": 1167,
+      "scrollWidth": 320,
+      "submitVisibleAfterTab": true
+    },
+    {
+      "height": 480,
+      "width": 1024,
+      "scrollHeight": 713,
+      "scrollWidth": 1024,
+      "submitVisibleAfterTab": true
+    }
+  ],
+  "animation": [
+    {
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "transform": "translate(353.5716209469526 300.96598309769985) scale(0.999965288875204)"
+    },
+    {
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "transform": "translate(145.54896009679018 249.74700926450907) scale(0.947701029861744)"
+    },
+    {
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "transform": "translate(151.96398592548402 151.78977579208362) scale(0.8477446691755955)"
+    },
+    {
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "transform": "translate(366.3900648473972 105.03361254858399) scale(0.8000342985189632)"
+    },
+    {
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "transform": "translate(574.4327546785853 156.23946173325686) scale(0.8522851650339356)"
+    },
+    {
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "transform": "translate(566.926717133312 254.93017135475515) scale(0.9529899707701583)"
+    },
+    {
+      "height": 650,
+      "width": 1366,
+      "scrollHeight": 650,
+      "scrollWidth": 1366,
+      "transform": "translate(351.50291418413235 300.9405587182828) scale(0.9999393456309008)"
+    }
+  ],
+  "requests": [],
+  "errors": []
+}

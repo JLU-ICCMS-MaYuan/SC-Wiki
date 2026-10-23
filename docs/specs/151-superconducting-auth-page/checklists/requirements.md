@@ -43,3 +43,6 @@
 - [ ] CHK025 远程 Spec 链接、实际公网邮箱收信与目标环境验收完成。[未推送、未发送真实外部测试邮件，Issue 保持开放]
 
 - [x] CHK026 注册字段命名反馈逐字保存，截图有原件及哈希；FR-022/023 明确只改标签并核验现有防重，不自行改变大小写规则。[spec.md、assets/username-label/source.json、username-label-validation.md]
+
+- [x] CHK027 紧凑布局反馈逐字保存，两张原图有哈希/尺寸/来源索引；FR-024/025 与 SC-013/014 分清默认桌面无溢出和小屏长内容可达的边界。[spec.md、assets/compact-layout/sources.json]
+- [x] CHK028 先复现再修正，默认桌面与极短屏分别有真实浏览器尺寸和按钮可见性证据。[compact-layout-validation.md；20 个桌面组合、3 个短屏组合及动画采样通过]

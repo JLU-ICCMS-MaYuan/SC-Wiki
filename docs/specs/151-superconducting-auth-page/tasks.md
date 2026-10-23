@@ -79,3 +79,9 @@ T010 保持未完成：Overview 已更新，但公网投递、目标 MySQL 环�
 - [x] T022 [US3] 修改 frontend/src/features/auth/copy.ts 注册标签；更新标签选择器并核验失焦/提交/数据库防重，将结果和截图保存到 assets/username-label/，同步 Issue 与 Overview。
 
 T022 证据：username-label-validation.md；37 项前端、3 项 Go 目标测试、TypeScript 与正式页面双语核验通过；本机 MySQL 唯一索引只读检查及重复组计数已记录。
+
+## 紧凑布局
+
+- [x] T023 [US3] 在 frontend/src/features/auth/auth-demo.css 压缩头尾、动画和表单留白；新增 tests/02_identity_governance/auth-layout-browser.mjs 验证桌面双语登录/注册无纵向溢出及短屏/手机内容可达；保存本 Spec 证据并同步 Issue。
+
+T023 证据：compact-layout-validation.md、assets/compact-layout/results.json；20 个桌面组合、短屏键盘访问、完整动画绕行及共享样式打包通过。

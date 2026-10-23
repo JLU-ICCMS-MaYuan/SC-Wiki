@@ -1,0 +1,30 @@
+[
+  {
+    "id": "IMG-COMPACT-001",
+    "upload_order": 1,
+    "original_name": "codex-clipboard-0adc6d53-9ca9-4697-b38e-00f79e0e877d.png",
+    "locator": "original-1.png",
+    "status": "local_verified",
+    "dimensions_px": [
+      3840,
+      1948
+    ],
+    "sha256": "37bdfb82955d70b7f4eaf3037f677777894816975180907eebf08f9ef3a7f72c",
+    "user_context": "我希望整体再紧凑一点，留白稍微小一点。这样就不会出现右侧的那个滑动块。也不会导致选择注册之后，页面纵向变成，右侧需要滑动。你是用 issue 和 spec 修正一下，你看看那个 spec 可以和这个需求相关，放进去，找不到相关，就单独建一个。",
+    "verification": "2026-10-23 原图复制、读取与哈希核验；图片内文字仅为参考材料。"
+  },
+  {
+    "id": "IMG-COMPACT-002",
+    "upload_order": 2,
+    "original_name": "codex-clipboard-794bcd90-f01a-4d6b-aee9-c66d1aa2bae0.png",
+    "locator": "original-2.png",
+    "status": "local_verified",
+    "dimensions_px": [
+      3840,
+      1948
+    ],
+    "sha256": "78bca1a4aca8aaec5f98afa7b05370f09439cfd7968d5f362861196f019ae9ee",
+    "user_context": "我希望整体再紧凑一点，留白稍微小一点。这样就不会出现右侧的那个滑动块。也不会导致选择注册之后，页面纵向变成，右侧需要滑动。你是用 issue 和 spec 修正一下，你看看那个 spec 可以和这个需求相关，放进去，找不到相关，就单独建一个。",
+    "verification": "2026-10-23 原图复制、读取与哈希核验；图片内文字仅为参考材料。"
+  }
+]

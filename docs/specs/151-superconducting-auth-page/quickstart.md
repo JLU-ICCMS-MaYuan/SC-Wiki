@@ -86,3 +86,7 @@ node "tests/02_identity_governance/auth-demo-browser.mjs"
 
 本次实现与验证详见 [正式验收](acceptance-production.md)。测试时不要在真实数据库创建无关账号；隔离浏览器夹具仅在显式环境变量下启动：
 在 goserver/ 使用 ../.local/go/bin/go test ./handlers -run ^TestAuthBrowserFixture$ -count=1 -timeout 10m，并设置 SCWIKI_AUTH_BROWSER_FIXTURE 指向临时状态 JSON；在仓库根运行 tests/02_identity_governance/auth-production-browser.mjs（可指定 PLAYWRIGHT_MODULE、CHROMIUM_PATH、AUTH_FIXTURE_FILE、FRONTEND_URL）。结束后创建状态 JSON 路径加 .stop 的文件退出夹具。该夹具只编译进测试，不进入生产。
+
+## 紧凑布局
+
+已压缩页头、页脚、标题、动画和表单留白。在 1366×650、1440×760 等已验收桌面视口，中英文登录与注册切换均无需纵向滚动，提交按钮完整可见。手机和极短窗口/展开内容仍允许自然滚动。证据见 [紧凑布局验收](compact-layout-validation.md)。

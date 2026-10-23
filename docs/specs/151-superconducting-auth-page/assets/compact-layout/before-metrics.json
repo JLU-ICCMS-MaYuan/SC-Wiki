@@ -1,0 +1,114 @@
+[
+  {
+    "w": 1920,
+    "h": 840,
+    "tab": "登录",
+    "scrollHeight": 891,
+    "innerHeight": 840,
+    "parts": {
+      ".sc-auth-header": 108,
+      ".sc-auth-main": 715,
+      ".sc-auth-footer": 68,
+      ".sc-visual": 651,
+      ".sc-form-section": 555
+    }
+  },
+  {
+    "w": 1920,
+    "h": 840,
+    "tab": "注册",
+    "scrollHeight": 1031,
+    "innerHeight": 840,
+    "parts": {
+      ".sc-auth-header": 108,
+      ".sc-auth-main": 855,
+      ".sc-auth-footer": 68,
+      ".sc-visual": 651,
+      ".sc-form-section": 791
+    }
+  },
+  {
+    "w": 1440,
+    "h": 760,
+    "tab": "登录",
+    "scrollHeight": 879,
+    "innerHeight": 760,
+    "parts": {
+      ".sc-auth-header": 108,
+      ".sc-auth-main": 704,
+      ".sc-auth-footer": 68,
+      ".sc-visual": 640,
+      ".sc-form-section": 555
+    }
+  },
+  {
+    "w": 1440,
+    "h": 760,
+    "tab": "注册",
+    "scrollHeight": 1031,
+    "innerHeight": 760,
+    "parts": {
+      ".sc-auth-header": 108,
+      ".sc-auth-main": 855,
+      ".sc-auth-footer": 68,
+      ".sc-visual": 640,
+      ".sc-form-section": 791
+    }
+  },
+  {
+    "w": 1366,
+    "h": 650,
+    "tab": "登录",
+    "scrollHeight": 872,
+    "innerHeight": 650,
+    "parts": {
+      ".sc-auth-header": 108,
+      ".sc-auth-main": 697,
+      ".sc-auth-footer": 68,
+      ".sc-visual": 633,
+      ".sc-form-section": 555
+    }
+  },
+  {
+    "w": 1366,
+    "h": 650,
+    "tab": "注册",
+    "scrollHeight": 1031,
+    "innerHeight": 650,
+    "parts": {
+      ".sc-auth-header": 108,
+      ".sc-auth-main": 855,
+      ".sc-auth-footer": 68,
+      ".sc-visual": 633,
+      ".sc-form-section": 791
+    }
+  },
+  {
+    "w": 1024,
+    "h": 768,
+    "tab": "登录",
+    "scrollHeight": 794,
+    "innerHeight": 768,
+    "parts": {
+      ".sc-auth-header": 108,
+      ".sc-auth-main": 619,
+      ".sc-auth-footer": 68,
+      ".sc-visual": 523,
+      ".sc-form-section": 555
+    }
+  },
+  {
+    "w": 1024,
+    "h": 768,
+    "tab": "注册",
+    "scrollHeight": 1031,
+    "innerHeight": 768,
+    "parts": {
+      ".sc-auth-header": 108,
+      ".sc-auth-main": 855,
+      ".sc-auth-footer": 68,
+      ".sc-visual": 523,
+      ".sc-form-section": 791
+    }
+  }
+]
