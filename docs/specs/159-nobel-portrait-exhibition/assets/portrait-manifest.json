@@ -1,105 +1,105 @@
 {
   "feature": "SC-Wiki Issue #159",
-  "canonical_output_directory": "frontend/public/img/nobel/comic",
+  "canonical_output_directory": "frontend/public/img/nobel/original",
   "shared_by_demo_and_future_site": false,
   "portraits": [
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/AA_Abrikosov_ANL1.jpg",
       "source_sha256": "108352dbbc223c774ee9893e93e8bf238a93c1ca304ae5fce16061f0357d3880",
-      "output": "frontend/public/img/nobel/comic/alexei-abrikosov.jpg",
-      "output_sha256": "5e04c88e89a8820f21a7a7f7cb26468970207ec4c3d27462dc85695470955a52",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/alexei-abrikosov.jpg",
+      "output_sha256": "108352dbbc223c774ee9893e93e8bf238a93c1ca304ae5fce16061f0357d3880",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Bardeen.jpg",
       "source_sha256": "037148c5fac3af34c1cf4b0a83514021244aa1604b13a9530226cd8705418e99",
-      "output": "frontend/public/img/nobel/comic/john-bardeen.jpg",
-      "output_sha256": "67502d117b1146d44f823dab63f3d94d68236215c68b661e2c8db2141f45be1e",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/john-bardeen.jpg",
+      "output_sha256": "037148c5fac3af34c1cf4b0a83514021244aa1604b13a9530226cd8705418e99",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Brian_Josephson,_March_2004.jpg",
       "source_sha256": "9068b3a84bc6e4c46e819b4ed975c9d287ff6c9036431bcded364260d6b99187",
-      "output": "frontend/public/img/nobel/comic/brian-josephson.jpg",
-      "output_sha256": "097203e0d0d31eae516276c26bd7eb549132f3266920b7fea9790e00cfe15e51",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/brian-josephson.jpg",
+      "output_sha256": "9068b3a84bc6e4c46e819b4ed975c9d287ff6c9036431bcded364260d6b99187",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Georg_Bednorz_speaking_at_the_groundbreaking_of_the_new_IBM_and_ETH_Zurich_Nanotech_Exploratory_Technology_Lab.jpg",
       "source_sha256": "52506a9a8bbdb4361b459383756c89cc3fb97f74c01304f254e5a764f5cbb0fa",
-      "output": "frontend/public/img/nobel/comic/georg-bednorz.jpg",
-      "output_sha256": "34e197a978b6f00eb08957a172c2bfc612069daa3e86734553420d4db814c662",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/georg-bednorz.jpg",
+      "output_sha256": "52506a9a8bbdb4361b459383756c89cc3fb97f74c01304f254e5a764f5cbb0fa",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Ginzburg_in_MSU_opaque.jpg",
       "source_sha256": "11bdaebfb04906287c9c90cbcd132e3cf9dc3be367ab844fe3c8fa6725745954",
-      "output": "frontend/public/img/nobel/comic/vitaly-ginzburg.jpg",
-      "output_sha256": "25226a3bd8f35276611c024371a4fa1808fe566c83b894bd7c4b5574444945e3",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/vitaly-ginzburg.jpg",
+      "output_sha256": "11bdaebfb04906287c9c90cbcd132e3cf9dc3be367ab844fe3c8fa6725745954",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Ivar_Giaever.jpg",
       "source_sha256": "8610b6547332f172c25be761354c0bddb9017a0a8fedd1ff61ef6c09d63d876c",
-      "output": "frontend/public/img/nobel/comic/ivar-giaever.jpg",
-      "output_sha256": "0b5976123297177bce1f2620a5ef219a6a20c858e307f718f8b2721bffd2b8c4",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/ivar-giaever.jpg",
+      "output_sha256": "8610b6547332f172c25be761354c0bddb9017a0a8fedd1ff61ef6c09d63d876c",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/John_Robert_Schrieffer.jpg",
       "source_sha256": "9a8aa97b140bdbbabcee17105638b835f4aa51d2e257e60a89304faee6499439",
-      "output": "frontend/public/img/nobel/comic/john-schrieffer.jpg",
-      "output_sha256": "8205e1bdea94a59f6cdcda3c8a68fa40483c1d6f07d95e0cdd734bc40ed5be82",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/john-schrieffer.jpg",
+      "output_sha256": "9a8aa97b140bdbbabcee17105638b835f4aa51d2e257e60a89304faee6499439",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Kamerlingh_portret.jpg",
       "source_sha256": "3b46fccd0cfa0875e3aed23cd3373ec34f9ec1140fd2e107bf0beed3bb62b4fd",
-      "output": "frontend/public/img/nobel/comic/heike-onnes.jpg",
-      "output_sha256": "49d2ec0dc0f885def440a1d842fe4e8d43dd16624733c33d08122d5277f2c7e4",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/heike-onnes.jpg",
+      "output_sha256": "3b46fccd0cfa0875e3aed23cd3373ec34f9ec1140fd2e107bf0beed3bb62b4fd",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Karl_Alexander_Mueller.jpg",
       "source_sha256": "3a4550645a87fb4fd8dd95cb3b6e1ebb39d37bb2780909c369bd237204313b87",
-      "output": "frontend/public/img/nobel/comic/alex-mueller.jpg",
-      "output_sha256": "c046b960df47a234ca116e57c4ad491b247908c9b8a89dc9bab34f4a84837a2f",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/alex-mueller.jpg",
+      "output_sha256": "3a4550645a87fb4fd8dd95cb3b6e1ebb39d37bb2780909c369bd237204313b87",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Laureate_Leon_Cooper.jpg",
       "source_sha256": "443abdb2b3012faa65135a0f4f5ad6c38c6f74f65bab00463ca7075f6ead9c1d",
-      "output": "frontend/public/img/nobel/comic/leon-cooper.jpg",
-      "output_sha256": "c4315d67f13107afe24fe7577b88f507ef7c2afb2857901e0b85e792d505fec0",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/leon-cooper.jpg",
+      "output_sha256": "443abdb2b3012faa65135a0f4f5ad6c38c6f74f65bab00463ca7075f6ead9c1d",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Leo_Esaki_1959.jpg",
       "source_sha256": "879c271f54b5a8e6cf59eb2a6de60adb4522eff4e4b19ceebdf67efe43b49410",
-      "output": "frontend/public/img/nobel/comic/leo-esaki.jpg",
-      "output_sha256": "961c27630c9ab8e0a09339821d200276c5ff592e95f10096d05dcba9359db46a",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/leo-esaki.jpg",
+      "output_sha256": "879c271f54b5a8e6cf59eb2a6de60adb4522eff4e4b19ceebdf67efe43b49410",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     },
     {
       "source": "docs/specs/159-nobel-portrait-exhibition/assets/source-portraits/Nobel_Laureate_Sir_Anthony_James_Leggett_in_2007.jpg",
       "source_sha256": "facf654f080f9611c03c86a0c281ee7eb3745fadd11f0b996017df23ffeb4b72",
-      "output": "frontend/public/img/nobel/comic/anthony-leggett.jpg",
-      "output_sha256": "e2107e015fad7af0553c59332ea0e2bbd6b08dd739d80d21250eb5f9106d1e51",
-      "processing": "assets/process-portraits.swift; Core Image CILineOverlay + warm monochrome toning; 4:5 centered crop",
+      "output": "frontend/public/img/nobel/original/anthony-leggett.jpg",
+      "output_sha256": "facf654f080f9611c03c86a0c281ee7eb3745fadd11f0b996017df23ffeb4b72",
+      "processing": "恢复历史原始照片；字节未修改，页面CSS仅做边缘透明遮罩",
       "license_status": "待核查原始外部出处及再使用许可"
     }
   ],
-  "status": "交互预览资产，参考漫画画风验收未通过；禁止作为最终素材验收凭据",
+  "status": "用户要求的原照交互预览；最终漫画后置",
   "future_requirement": "最终重绘通过后，Demo 与正式网站必须使用同一份资产，并重新生成此清单"
 }

@@ -1,100 +1,78 @@
-
 :root { color-scheme: light; }
 * { box-sizing: border-box; }
-body { margin: 0; background: #f4efe5; color: #282820; font-family: 'DM Sans', 'Noto Serif SC', sans-serif; }
+body { margin: 0; background: #fff; }
 button, a { font: inherit; }
-.nobel-demo-shell { min-height: 100vh; overflow: hidden; background: radial-gradient(ellipse at 50% 32%, #fffdf7 0, #f4efe5 68%, #ece4d4 100%); }
-.nobel-exhibition { max-width: 1440px; margin: 0 auto; padding: 24px 48px 34px; }
-.nobel-header { text-align: center; padding-top: 8px; }
-.nobel-brand { position: absolute; top: 30px; left: max(36px, calc((100vw - 1340px) / 2)); color: #23251e; font-size: 13px; font-weight: 700; letter-spacing: .12em; text-decoration: none; }
-.nobel-brand span { padding-left: 12px; color: #a18e69; font-weight: 500; letter-spacing: .04em; }
-.nobel-kicker { margin: 0 0 14px; color: #9b8355; font-size: 11px; font-weight: 700; letter-spacing: .23em; }
-.nobel-header h1 { margin: 0; font-family: 'Noto Serif SC', Georgia, serif; font-size: clamp(30px, 3.4vw, 46px); font-weight: 500; letter-spacing: .08em; }
-.nobel-intro { margin: 13px 0 0; color: #77746b; font-size: 14px; letter-spacing: .04em; }
-.nobel-gallery { margin-top: 24px; border: 1px solid rgba(133, 114, 78, .18); border-radius: 22px; background: rgba(255, 253, 247, .58); box-shadow: 0 18px 50px rgba(79, 64, 37, .08), inset 0 1px rgba(255, 255, 255, .9); }
-.nobel-gallery-topline { display: flex; justify-content: space-between; padding: 18px 26px 0; color: #9b917d; font-size: 11px; letter-spacing: .08em; }
-.nobel-stage { position: relative; height: 460px; margin: 0 auto; perspective: 1400px; perspective-origin: 50% 45%; overflow: hidden; }
-.nobel-cylinder { position: absolute; inset: 0; display: grid; place-items: center; transform-style: preserve-3d; }
-.nobel-ring { position: relative; width: 1px; height: 1px; transform-style: preserve-3d; animation: nobel-revolve 72s linear infinite; }
-.nobel-ring:has(.nobel-face:hover), .nobel-cylinder:focus-within .nobel-ring { animation-play-state: paused; }
-.nobel-ring[data-still="true"] { animation: none; transform: rotateY(var(--focus-angle)); }
-.nobel-person-index { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; padding:10px 20px 20px; }
-.nobel-person-index button { cursor:pointer; border:1px solid #d3c6ae; background:transparent; color:#68583a; border-radius:3px; padding:7px 9px; font-size:11px; }
-.nobel-person-index button[aria-pressed="true"] { background:#68583a; color:#fff9eb; }
-.nobel-person-index button:focus-visible { outline:2px solid #80632e; outline-offset:3px; }
-.nobel-citations { margin-left:6px; font-size:10px; }
-.nobel-citations a { margin-right:3px; color:#80632e; }
-.nobel-face { position: absolute; left: -95px; top: -145px; display: block; width: 190px; height: 290px; padding: 9px 9px 32px; overflow: hidden; border: 1px solid rgba(120, 100, 63, .23); border-radius: 4px; background: linear-gradient(160deg, #fffdf8, #e9dfca); box-shadow: 0 14px 28px rgba(41, 35, 23, .18), inset 0 0 0 4px rgba(255, 255, 255, .46); color: inherit; text-decoration: none; backface-visibility: hidden; transform-style: preserve-3d; transition: filter .3s ease, box-shadow .3s ease; }
-.nobel-face img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 31%; filter: sepia(.13) contrast(.96); background: #f4eddc; }
-.nobel-face::after { position: absolute; inset: 9px 9px 32px; border: 1px solid rgba(136, 113, 69, .21); content: ''; pointer-events: none; }
-.nobel-face-plaque { position: absolute; right: 9px; bottom: 8px; left: 9px; color: #82704e; font-size: 11px; letter-spacing: .2em; text-align: center; }
-.nobel-face:hover, .nobel-face:focus-visible, .nobel-face.is-selected { outline: none; box-shadow: 0 18px 36px rgba(41, 35, 23, .25), 0 0 0 2px #ad925b, inset 0 0 0 4px rgba(255, 255, 255, .5); }
-.nobel-axis { position: absolute; z-index: -1; left: 50%; top: 50%; width: 1px; height: 75%; background: linear-gradient(transparent, rgba(153, 132, 91, .34), transparent); }
-.nobel-stage-floor { position: absolute; bottom: 5px; left: 50%; width: min(760px, 76%); height: 90px; transform: translateX(-50%) rotateX(68deg); border: 1px solid rgba(155, 132, 86, .26); border-radius: 50%; background: radial-gradient(ellipse, rgba(214, 197, 159, .36), rgba(255, 255, 255, 0) 68%); }
-@keyframes nobel-revolve { from { transform: rotateY(0deg); } to { transform: rotateY(360deg); } }
-.nobel-caption { display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; align-items: center; gap: 22px; min-height: 122px; padding: 18px 30px 24px; border-top: 1px solid rgba(133, 114, 78, .14); }
-.nobel-caption-year { color: #9b8355; font-family: Georgia, serif; font-size: 36px; }
-.nobel-caption-copy h2 { margin: 0 0 7px; font-family: 'Noto Serif SC', Georgia, serif; font-size: 19px; font-weight: 600; }
-.nobel-caption-copy h2 span { color: #736f63; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; }
-.nobel-caption-copy p { max-width: 840px; margin: 4px 0 0; color: #6e6b62; font-size: 13px; line-height: 1.75; }
-.nobel-caption-copy .nobel-caption-meta { color: #988c73; font-size: 11px; letter-spacing: .04em; }
-.nobel-caption-meta i { display: inline-block; width: 3px; height: 3px; margin: 0 8px 3px; border-radius: 50%; background: #b39c6c; }
-.nobel-read-more { padding: 11px 15px; border: 1px solid #b09a6b; border-radius: 2px; color: #786641; font-size: 12px; text-decoration: none; white-space: nowrap; transition: background .2s, color .2s; }
-.nobel-read-more:hover, .nobel-read-more:focus-visible { outline: none; background: #8e784f; color: white; }
-.nobel-note { margin: 4px 0; color: #9a6d43; font-size: 11px; line-height: 1.6; }
-.nobel-footer { display: flex; justify-content: space-between; gap: 24px; margin: 17px 4px 0; color: #969080; font-size: 10px; line-height: 1.6; }
-.nobel-footer p { margin: 0; }
-
-.nobel-detail { max-width: 1240px; margin: 0 auto; padding: 38px 48px 64px; }
-.nobel-back { display: inline-block; color: #82704e; cursor: pointer; font-size: 13px; text-decoration: none; }
-.nobel-back:hover { color: #332b1c; }
-.nobel-detail-grid { display: grid; grid-template-columns: minmax(260px, 370px) minmax(0, 1fr); gap: 56px; margin-top: 34px; }
-.nobel-detail-portrait { position: sticky; top: 28px; align-self: start; margin: 0; padding: 14px 14px 12px; border: 1px solid rgba(133, 114, 78, .2); background: #fffdf7; box-shadow: 0 18px 44px rgba(79, 64, 37, .12); }
-.nobel-detail-portrait img { display: block; width: 100%; max-height: 570px; object-fit: cover; object-position: center 30%; background: #f1e8d6; }
-.nobel-detail-portrait figcaption { padding-top: 11px; color: #9a8f79; font-size: 11px; text-align: center; }
-.nobel-biography { max-width: 760px; }
-.nobel-biography h1 { margin: 0; font-family: 'Noto Serif SC', Georgia, serif; font-size: clamp(30px, 4vw, 46px); font-weight: 500; }
-.nobel-english-name { margin: 7px 0; color: #736f63; font-size: 15px; }
-.nobel-english-name span { color: #a0947d; }
-.nobel-identity { margin: 17px 0 6px; color: #8b744a; font-size: 13px; }
-.nobel-biography section { margin-top: 29px; }
-.nobel-biography h2 { margin: 0 0 9px; padding-bottom: 8px; border-bottom: 1px solid rgba(133, 114, 78, .18); color: #5d5037; font-family: 'Noto Serif SC', Georgia, serif; font-size: 18px; font-weight: 600; }
-.nobel-biography section p { margin: 0; color: #5e5d56; font-size: 14px; line-height: 1.95; }
-.nobel-sources { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
-.nobel-sources li { display: flex; flex-direction: column; gap: 3px; padding: 10px 12px; border-left: 2px solid #b49a62; background: rgba(255, 255, 255, .48); }
-.nobel-sources a { color: #715f3d; font-size: 13px; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.nobel-sources span { color: #928a79; font-size: 11px; }
-.nobel-editorial-note { margin-top: 28px; color: #989080; font-size: 11px; line-height: 1.7; }
-
-@media (max-width: 760px) {
-  .nobel-exhibition { padding: 22px 16px 24px; }
-  .nobel-brand { position: static; display: block; margin-bottom: 24px; text-align: left; }
-  .nobel-header { padding-top: 4px; }
-  .nobel-kicker { font-size: 9px; }
-  .nobel-intro { max-width: 340px; margin-right: auto; margin-left: auto; font-size: 12px; }
-  .nobel-gallery { margin-top: 24px; border-radius: 14px; }
-  .nobel-gallery-topline { padding: 14px 14px 0; font-size: 9px; }
-  .nobel-stage { height: 380px; perspective: 900px; }
-  .nobel-ring { animation-name: nobel-revolve-mobile; }
-  .nobel-ring[data-still="true"] { transform: rotateY(var(--focus-angle)) scale3d(.74, .74, .74); }
-  .nobel-face { left: -78px; top: -119px; width: 156px; height: 238px; padding: 7px 7px 27px; }
-  .nobel-face::after { inset: 7px 7px 27px; }
-  .nobel-face-plaque { right: 7px; bottom: 5px; left: 7px; font-size: 9px; }
-  @keyframes nobel-revolve-mobile { from { transform: rotateY(0deg) scale3d(.74, .74, .74); } to { transform: rotateY(360deg) scale3d(.74, .74, .74); } }
-  .nobel-caption { grid-template-columns: 62px minmax(0, 1fr); gap: 12px; padding: 16px; }
-  .nobel-caption-year { align-self: start; font-size: 28px; }
-  .nobel-caption-copy h2 { font-size: 16px; }
-  .nobel-caption-copy h2 span { display: block; margin-top: 3px; font-size: 11px; }
-  .nobel-caption-copy p { font-size: 12px; }
-  .nobel-read-more { grid-column: 2; justify-self: start; padding: 9px 12px; }
-  .nobel-footer { flex-direction: column; gap: 6px; margin: 13px 3px 0; }
-  .nobel-detail { padding: 24px 18px 48px; }
-  .nobel-detail-grid { grid-template-columns: 1fr; gap: 28px; margin-top: 24px; }
-  .nobel-detail-portrait { position: static; max-width: 360px; margin: 0 auto; }
-  .nobel-detail-portrait img { max-height: 440px; }
+a { color: var(--nobel-primary); }
+button { cursor: pointer; }
+.nobel-demo-shell { min-height: 100vh; background: #fff; color: var(--nobel-text); }
+.nobel-exhibition { max-width: 1440px; margin: auto; padding: 28px 48px; }
+.nobel-header { text-align: center; }
+.nobel-brand { display: block; text-align: left; font-size: 17px; font-weight: 750; text-decoration: none; margin-bottom: 30px; }
+.nobel-brand span { color: var(--nobel-muted); font-size: 12px; font-weight: 400; margin-left: 14px; }
+.nobel-kicker { color: var(--nobel-primary); font-size: 12px; font-weight: 700; letter-spacing: .08em; margin: 0 0 12px; }
+.nobel-header h1 { font-size: clamp(28px, 3vw, 40px); font-weight: 700; margin: 0; letter-spacing: -.01em; }
+.nobel-intro { color: var(--nobel-muted); font-size: 14px; line-height: 1.7; margin: 16px 0 28px; }
+.nobel-gallery { background: #fff; }
+.nobel-gallery-topline { display: flex; justify-content: space-between; align-items: center; gap: 20px; color: var(--nobel-muted); font-size: 12px; padding: 0 8px; }
+.nobel-gallery-topline button { border: 1px solid var(--nobel-divider); border-radius: 999px; background: #fff; color: var(--nobel-primary); padding: 9px 16px; white-space: nowrap; }
+.nobel-gallery-topline button:disabled { color: var(--nobel-muted); cursor: default; }
+.nobel-stage { position: relative; height: 660px; overflow: hidden; touch-action: pan-y; cursor: grab; user-select: none; }
+.nobel-stage[data-dragging="true"], .nobel-stage[data-dragging="true"] * { cursor: grabbing; }
+.nobel-stage::before, .nobel-stage::after { content: ''; position: absolute; top: 0; bottom: 0; width: 55px; z-index: 250; pointer-events: none; }
+.nobel-stage::before { left: 0; background: linear-gradient(to right, #fff, transparent); }
+.nobel-stage::after { right: 0; background: linear-gradient(to left, #fff, transparent); }
+.nobel-ring { position: absolute; inset: 0; }
+.nobel-face { position: absolute; left: 50%; top: 32px; width: 260px; transform-origin: center 0; background: #fff; color: var(--nobel-text); text-decoration: none; cursor: grab; border: 0; outline-offset: 6px; will-change: transform; }
+.nobel-photo { height: 305px; background: #fff; }
+.nobel-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 30%; display: block; -webkit-user-drag: none;
+  mask-image: linear-gradient(to bottom, transparent, #000 9%, #000 77%, transparent 100%), linear-gradient(to right, transparent, #000 9%, #000 91%, transparent);
+  mask-composite: intersect;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .nobel-ring { animation: none; }
-  .nobel-face, .nobel-read-more { transition: none; }
+.nobel-person-copy { padding: 4px 6px 0; text-align: center; }
+.nobel-award-year { display: block; color: var(--nobel-primary); font-size: 11px; margin-bottom: 8px; font-weight: 600; }
+.nobel-person-copy h2 { font-size: 19px; line-height: 1.4; margin: 0 0 4px; }
+.nobel-person-english { display: block; font-size: 12px; color: var(--nobel-muted); }
+.nobel-person-years { display: block; font-size: 12px; margin-top: 7px; color: var(--nobel-muted); }
+.nobel-person-identity { color: var(--nobel-muted); font-size: 12px; line-height: 1.6; margin: 10px 0 0; }
+.nobel-person-achievement { font-size: 12px; line-height: 1.7; margin: 10px 0; color: var(--nobel-muted); }
+.nobel-person-open { color: var(--nobel-primary); font-size: 11px; }
+.nobel-face:hover .nobel-person-copy h2 { color: var(--nobel-primary); }
+.nobel-face:focus-visible { outline: 2px solid var(--nobel-primary); border-radius: 6px; }
+.nobel-person-index { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; padding: 14px 0; border-top: 1px solid var(--nobel-divider); }
+.nobel-person-index button { background: #fff; border: 1px solid transparent; color: var(--nobel-muted); padding: 7px 12px; font-size: 12px; border-radius: 999px; }
+.nobel-person-index button[aria-pressed="true"] { color: var(--nobel-primary); background: #eef2ff; }
+.nobel-person-index button:hover { border-color: var(--nobel-divider); }
+button:focus-visible, .nobel-back:focus-visible { outline: 2px solid var(--nobel-primary); outline-offset: 3px; }
+.nobel-footer { font-size: 11px; color: var(--nobel-muted); margin: 20px 0 0; text-align: center; }
+.nobel-detail { max-width: 1180px; margin: auto; padding: 36px 40px 64px; }
+.nobel-back { font-size: 13px; text-decoration: none; }
+.nobel-detail-grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 64px; margin-top: 40px; }
+.nobel-detail-portrait { position: sticky; top: 28px; align-self: start; margin: 0; }
+.nobel-detail-portrait img { width: 100%; max-height: 480px; object-fit: contain; display: block; mask-image: linear-gradient(to bottom, #000 85%, transparent); }
+.nobel-detail-portrait figcaption { text-align: center; color: var(--nobel-muted); font-size: 11px; margin-top: 14px; }
+.nobel-biography h1 { font-size: 32px; margin: 0 0 8px; }
+.nobel-english-name { color: var(--nobel-muted); font-size: 15px; }
+.nobel-identity { color: var(--nobel-text); font-size: 13px; line-height: 1.7; }
+.nobel-note, .nobel-editorial-note { color: var(--nobel-muted); font-size: 12px; line-height: 1.7; }
+.nobel-biography section { margin: 30px 0; }
+.nobel-biography section h2 { border-bottom: 1px solid var(--nobel-divider); padding-bottom: 10px; margin: 0 0 12px; font-size: 18px; }
+.nobel-biography section p { font-size: 14px; line-height: 1.9; margin: 0; }
+.nobel-sources { list-style: none; padding: 0; display: grid; gap: 16px; }
+.nobel-sources li { font-size: 13px; line-height: 1.7; scroll-margin-top: 24px; }
+.nobel-sources span { display: block; color: var(--nobel-muted); font-size: 12px; }
+.nobel-citations { margin-left: 6px; font-size: 10px; }
+.nobel-citations a { margin-right: 4px; }
+@media (max-width: 760px) {
+ .nobel-exhibition { padding: 20px 16px; }
+ .nobel-brand { margin-bottom: 26px; }
+ .nobel-intro { font-size: 12px; }
+ .nobel-gallery-topline { align-items: start; font-size: 11px; gap: 10px; padding: 0; }
+ .nobel-stage { height: 645px; }
+ .nobel-face { width: 240px; }
+ .nobel-photo { height: 285px; }
+ .nobel-stage::before, .nobel-stage::after { width: 18px; }
+ .nobel-detail { padding: 22px 20px; }
+ .nobel-detail-grid { grid-template-columns: 1fr; gap: 28px; }
+ .nobel-detail-portrait { position: static; max-width: 260px; margin: auto; }
+ .nobel-biography h1 { font-size: 27px; }
 }

@@ -73,3 +73,7 @@
 ## 后续核验与限制
 
 官方网站 HTML 页面在设置正常 User-Agent 后已可访问，覆盖12人事实页、传记和奖项页面；访问结果与实质核对记录见 [validation.md](validation.md)。1987 年 Müller 的有效路径为 `muller`，不是 `mueller`。旧照片经过 Core Image 处理仍未满足参考漫画画风，当前 `frontend/public/img/nobel/comic/` 仅作交互预览资产。不得将此前的“候选资产复用”设计描述视为最终素材已完成。
+
+## 第二轮实施方案（替代第一版动画与视觉）
+
+恢复原始 JPEG 到 `frontend/public/img/nobel/original/`，按 SHA-256 核对与历史原照一致。白底和 SC-Wiki 主色，照片以透明遮罩淡入白底，删除相框及滤镜。人物姓名/资料成为同一移动容器的内容。用单一角度状态、requestAnimationFrame 和 Pointer Events 驱动圆柱水平投影；按角度计算水平位置、深度、缩放和层级，最近人物最大。拖动阈值区分点击与拖动，拖动时捕获指针，取消事件也释放状态。CSS 自转被替代，避免两个动画同时争夺角度；不新增依赖。

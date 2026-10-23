@@ -1,8 +1,13 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, render, screen } from '@testing-library/react'
 import NobelDemo from './NobelDemo'
 
+beforeEach(() => {
+  vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {}, removeEventListener() {} }))
+  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} })
+})
 afterEach(() => {
+  vi.unstubAllGlobals()
   cleanup()
   window.history.replaceState({}, '', '/')
 })
@@ -12,7 +17,10 @@ describe('诺奖肖像展 Demo', () => {
     render(<NobelDemo />)
 
     expect(screen.getByRole('heading', { name: '超导研究的诺奖群像' })).toBeTruthy()
-    expect(screen.getAllByRole('listitem')).toHaveLength(12)
+    expect(document.querySelectorAll('.nobel-face')).toHaveLength(12)
+    expect(document.querySelector('.nobel-caption')).toBeNull()
+    expect(document.querySelectorAll('.nobel-face h2')).toHaveLength(12)
+    expect(document.querySelector('.nobel-face img')?.getAttribute('src')).toContain('/original/')
     const personLink = screen.getByRole('listitem', { name: /查看 Heike Kamerlingh Onnes/ }) as HTMLAnchorElement
     expect(personLink.target).toBe('_blank')
     expect(personLink.rel).toContain('noopener')

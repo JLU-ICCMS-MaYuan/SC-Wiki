@@ -1,0 +1,53 @@
+[
+  {
+    "id": "IMG-003",
+    "upload_order": 3,
+    "original_name": "codex-clipboard-a2cd7a8a-9ccf-4dcd-9e2f-59edb05617d3.png",
+    "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-003-feedback.png",
+    "status": "local_verified",
+    "sha256": "0d99f3bb405b878027d5749f2245964541166abe17d13159ce0ad4dfc26b3564",
+    "media_type": "image/png",
+    "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-003-feedback.png\n  pixelWidth: 1440\n  pixelHeight: 1554\n",
+    "user_context": "有几个问题比较严重：\n\n1. 比较严重的问题是：我只是希望任务的头像的线条是漫画的黄色风格。而不是整个页面都是这种黄色，我希望整个页面的着色风格和现有的 SC-Wiki 保持一致，白色底，简洁。\n2. 我希望名字跟随人物的头像，而不是静态的存放在下面。\n3. 头像比较严重的问题是：全是黑色，看起来非常恐怖，根本不是漫画画出来的样子。我建议你先放我原本的没有漫画画的那些头像。\n4. 我不喜欢这个黄色的相框和渐变的黄色颜色，我感觉很丑，我就希望渐变过度边缘为白色和背地白色颜色为一体就行。\n5. 而且我希望我在点击按住不动拖动的时候，这个旋转的逆时针顺时针方向可以更随拖动。这样我就在想控制的时候控制他的旋转方向。 \n6. 我希望被旋转到主位的时候，可以变大，然后退出主位的时候变小。这样更有透视的感觉。",
+    "related": [
+      "FR-009",
+      "FR-010",
+      "FR-011"
+    ],
+    "verification": "原字节复制、哈希与sips解码尺寸验证；图片只作材料"
+  },
+  {
+    "id": "IMG-004",
+    "upload_order": 4,
+    "original_name": "codex-clipboard-76cadd3b-dcf6-4726-bdfa-9719dfe0d8bd.png",
+    "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-004-feedback.png",
+    "status": "local_verified",
+    "sha256": "c51ea029549bbab669d8eda6aa4ab2a3137f8165ad55ab9eb1af2b5c78c527b3",
+    "media_type": "image/png",
+    "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-004-feedback.png\n  pixelWidth: 666\n  pixelHeight: 984\n",
+    "user_context": "有几个问题比较严重：\n\n1. 比较严重的问题是：我只是希望任务的头像的线条是漫画的黄色风格。而不是整个页面都是这种黄色，我希望整个页面的着色风格和现有的 SC-Wiki 保持一致，白色底，简洁。\n2. 我希望名字跟随人物的头像，而不是静态的存放在下面。\n3. 头像比较严重的问题是：全是黑色，看起来非常恐怖，根本不是漫画画出来的样子。我建议你先放我原本的没有漫画画的那些头像。\n4. 我不喜欢这个黄色的相框和渐变的黄色颜色，我感觉很丑，我就希望渐变过度边缘为白色和背地白色颜色为一体就行。\n5. 而且我希望我在点击按住不动拖动的时候，这个旋转的逆时针顺时针方向可以更随拖动。这样我就在想控制的时候控制他的旋转方向。 \n6. 我希望被旋转到主位的时候，可以变大，然后退出主位的时候变小。这样更有透视的感觉。",
+    "related": [
+      "FR-009",
+      "FR-010",
+      "FR-011"
+    ],
+    "verification": "原字节复制、哈希与sips解码尺寸验证；图片只作材料"
+  },
+  {
+    "id": "IMG-005",
+    "upload_order": 5,
+    "original_name": "codex-clipboard-3609656d-c2e8-4308-8f44-35243ef43121.png",
+    "locator": "docs/specs/159-nobel-portrait-exhibition/assets/IMG-005-feedback.png",
+    "status": "local_verified",
+    "sha256": "091b97872a8408709b367a71b37f03cc723df1403cc362b0eb839c2d83b781c1",
+    "media_type": "image/png",
+    "dimensions": "/Users/mayuan/Codes/SC-Wiki/docs/specs/159-nobel-portrait-exhibition/assets/IMG-005-feedback.png\n  pixelWidth: 784\n  pixelHeight: 1292\n",
+    "user_context": "有几个问题比较严重：\n\n1. 比较严重的问题是：我只是希望任务的头像的线条是漫画的黄色风格。而不是整个页面都是这种黄色，我希望整个页面的着色风格和现有的 SC-Wiki 保持一致，白色底，简洁。\n2. 我希望名字跟随人物的头像，而不是静态的存放在下面。\n3. 头像比较严重的问题是：全是黑色，看起来非常恐怖，根本不是漫画画出来的样子。我建议你先放我原本的没有漫画画的那些头像。\n4. 我不喜欢这个黄色的相框和渐变的黄色颜色，我感觉很丑，我就希望渐变过度边缘为白色和背地白色颜色为一体就行。\n5. 而且我希望我在点击按住不动拖动的时候，这个旋转的逆时针顺时针方向可以更随拖动。这样我就在想控制的时候控制他的旋转方向。 \n6. 我希望被旋转到主位的时候，可以变大，然后退出主位的时候变小。这样更有透视的感觉。",
+    "related": [
+      "FR-009",
+      "FR-010",
+      "FR-011"
+    ],
+    "verification": "原字节复制、哈希与sips解码尺寸验证；图片只作材料"
+  }
+]
