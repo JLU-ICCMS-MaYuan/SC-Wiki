@@ -15,7 +15,7 @@
 - 自动条目保存 `content_type`、`display_kind`、发现来源、原文来源和相关性命中依据。Phys.org 的真实内容类型为科研报道，但按产品约定展示在期刊论文栏；Google News 为社会/产业资讯并展示在新闻栏。
 - 页面按发表时间倒序，以 News、Preprints、Articles 三列并列展示；每列固定请求所属类型且每页 5 条，三列独立维护页码和翻页状态。只有年/月的日期明确标注精度。
 - 三栏默认只显示北京时间当前自然周（周一零点至下周一零点）。翻页保留周锚点，末页或本周为空时提供“历史更多”，按发表时间从新到旧展示其余已收录条目，并可返回本周。仅年/月或未知日期不推定属于本周，保留在历史入口；计数和分页由服务端同一条件约束。旧 API 无 period 参数时保持全量兼容。
-- 来源状态显示最近成功时间与失败代码；区分加载中、暂无条目、请求失败、采集失败。
+- 公开页面不展示来源更新状态面板、采集告警、错误码、最后成功时间或订阅窗口说明；后台仍保存采集状态用于运行诊断。页面继续区分资讯加载中、暂无条目和请求失败，保留列表失败后的重试入口。
 - GET /api/news 保持人工快讯数组契约；数据库错误返回 HTTP 500，不再伪装为空结果。
 
 ## 用户界面
@@ -78,6 +78,7 @@ RSS 只能补回当前订阅窗口；已移除的历史内容无法保证找回�
 本轮 Go 全包测试仍有论文证据审核测试 TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction 的既有失败，已在未修改 HEAD 副本复现；未把定向资讯测试当作全包通过。
 
 ## 相关变更记录
+[Feature #156](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/156) 移除公开资讯页的来源更新状态展示，保留条目来源信息与后台采集诊断；[规格](../specs/156-remove-news-source-status/spec.md)。
 [Feature #153](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/153) 增加自动分类标签；
 [专项验收](../specs/153-news-classification-labels/quickstart.md) 包含真实模型抽样、跨语言链路、浏览器检查及未部署边界。
 [Feature #63](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/63) 与 [Spec](../specs/63-daily-superconductivity-news/spec.md)；[Feature #83](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/83) 完成 News 品牌与三列独立分页；[Bug #86](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/86) 补齐 Compose 中的 scheduler 和 worker；[Feature #88](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/88) 扩展联网发现与过滤；[Maintenance #92](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/92) 跟踪历史 Zenodo 误收清理。

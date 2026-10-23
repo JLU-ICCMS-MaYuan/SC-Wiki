@@ -52,14 +52,18 @@ it('distinguishes failures from empty results and retries', async () => {
  expect(await screen.findByText('当前筛选下暂无资讯')).toBeInTheDocument()
 })
 
-it('shows collection failure independently of cached items and blocks unsafe links', async () => {
+it.each([
+ { sources: [{ source: 'physorg', status: 'failed', last_success_at: '', error_code: 'rate_limited' }] },
+ { sources: undefined },
+])('hides source diagnostics without blocking cached items or safe-link checks (%j)', async ({ sources }) => {
  vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response({ ...body,
   items: [{ ...row, url: 'javascript:alert(1)', links: [] }],
-  sources: [{ source: 'physorg', status: 'failed', last_success_at: '', error_code: 'rate_limited' }],
+  sources,
  })))
  render(<NewsFeed />)
- expect(await screen.findByText(/采集失败/)).toBeInTheDocument()
- expect(screen.getByText(row.title)).toBeInTheDocument()
+ expect((await screen.findAllByText(row.title)).length).toBeGreaterThan(0)
+ expect(screen.queryByText(/来源更新状态|有来源需要关注|采集失败|最后成功|rate_limited|Phys.org 仅覆盖/)).not.toBeInTheDocument()
+ expect(screen.getAllByText('arXiv').length).toBeGreaterThan(0)
  expect(screen.queryByRole('link', { name: row.title })).not.toBeInTheDocument()
 })
 

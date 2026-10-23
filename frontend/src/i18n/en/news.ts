@@ -72,22 +72,6 @@ export default {
   prevPage: 'Previous',
   nextPage: 'Next',
 
-  // Source update status
-  sourceStatusTitle: 'Source update status',
-  sourcesNeedAttention: ' · Some sources need attention',
-  sourceItem: '{name}: {status}',
-  errorCode: ' ({code})',
-  sourceFailed: 'Collection failed; will retry automatically',
-  sourceNever: 'Not collected yet',
-  sourceStalled: 'Previous collection did not finish; waiting to resume',
-  sourceRunning: 'Collecting now',
-  sourceStale: 'No update in over {hours} hours',
-  sourceUpdated: 'Up to date',
-  lastSuccess: 'Last success: {time}',
-  noSuccessRecord: 'No successful run yet',
-  timeUnknown: 'Time unknown',
-  physorgNote: 'Phys.org only covers the current subscription window; historical news removed during downtime may not be recoverable.',
-
   // Detail drawer
   authorLabel: 'Authors: ',
   journalLabel: 'Journal: ',

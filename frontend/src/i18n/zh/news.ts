@@ -72,22 +72,6 @@ export default {
   prevPage: '上一页',
   nextPage: '下一页',
 
-  // 来源更新状态
-  sourceStatusTitle: '来源更新状态',
-  sourcesNeedAttention: ' · 有来源需要关注',
-  sourceItem: '{name}：{status}',
-  errorCode: '（{code}）',
-  sourceFailed: '采集失败，将自动重试',
-  sourceNever: '尚未采集',
-  sourceStalled: '上次采集未完成，等待恢复',
-  sourceRunning: '正在采集',
-  sourceStale: '超过 {hours} 小时未更新',
-  sourceUpdated: '已更新',
-  lastSuccess: '最后成功：{time}',
-  noSuccessRecord: '暂无成功记录',
-  timeUnknown: '时间未知',
-  physorgNote: 'Phys.org 仅覆盖当前订阅窗口；停机期间已移除的历史新闻可能无法补回。',
-
   // 详情抽屉
   authorLabel: '作者：',
   journalLabel: '期刊：',

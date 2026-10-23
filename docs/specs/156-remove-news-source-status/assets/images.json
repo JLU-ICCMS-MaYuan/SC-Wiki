@@ -1,0 +1,21 @@
+[
+  {
+    "id": "IMG-001",
+    "upload_order": 1,
+    "original_name": "codex-clipboard-713d2ae6-8734-4b06-95fb-660e56cbf25b.png",
+    "locator": "docs/specs/156-remove-news-source-status/assets/IMG-001.png",
+    "status": "local_verified",
+    "user_context": "这个内容不需要展示。新建 issue 开始做",
+    "related": [
+      "US1",
+      "FR-001"
+    ],
+    "sha256": "2d4addb9918a3b292ab6934e0203bed2d69fce98a9ca3a87be7a8b4c5c8f0999",
+    "media_type": "image/png",
+    "dimensions_px": [
+      1196,
+      1324
+    ],
+    "verification": "2026-10-23 读取并复制原图，核验尺寸和 SHA256；无派生图"
+  }
+]

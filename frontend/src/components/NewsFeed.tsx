@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Alert, Box, Button, Chip, Drawer, IconButton, Link, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { api } from '../lib/api'
 import { useLanguage } from '../context/LanguageContext'
-import type { Lang } from '../i18n'
 import NewsClassificationLabels, { type NewsClassification } from './NewsClassificationLabels'
 
 type Kind = 'news' | 'preprint' | 'journal_article'
@@ -22,10 +21,7 @@ interface FeedItem extends NewsClassification {
   content_type: string; display_kind: Kind; discovery_source: string; original_source: string; relevance_evidence: string
   links: { source: string; url: string }[]
 }
-interface SourceState {
-  source: string; status: string; last_success_at: string; last_started_at: string; error_code: string
-}
-interface FeedResponse { items: FeedItem[]; total: number; page: number; page_size: number; sources: SourceState[]; week?: string; week_end?: string }
+interface FeedResponse { items: FeedItem[]; total: number; page: number; page_size: number; week?: string; week_end?: string }
 
 export function safeNewsLink(value: string): string | undefined {
   try {
@@ -40,30 +36,6 @@ function dateLabel(t: TFunc, value: string, precision = 'day') {
   if (precision === 'year') return t('news.yearOnly', { year: value.slice(0, 4) })
   if (precision === 'month') return t('news.monthOnly', { month: value.slice(0, 7) })
   return value.slice(0, 10)
-}
-
-function timestamp(t: TFunc, lang: Lang, value: string) {
-  if (!value) return t('news.noSuccessRecord')
-  const parsed = new Date(value)
-  return Number.isNaN(parsed.getTime()) ? t('news.timeUnknown') : parsed.toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US', { hour12: false })
-}
-
-/** 来源是否需要用户关注：失败、从未采集、卡住或长时间未更新。 */
-function sourceNeedsAttention(state: SourceState) {
-  if (state.status === 'failed' || state.status === 'never') return true
-  if (state.status === 'running') return Date.now() - Date.parse(state.last_started_at) > 1000 * 1000
-  if (state.last_success_at && Date.now() - Date.parse(state.last_success_at) > 48 * 3600 * 1000) return true
-  return false
-}
-
-function sourceStatus(t: TFunc, state: SourceState) {
-  if (state.status === 'failed') return t('news.sourceFailed')
-  if (state.status === 'never') return t('news.sourceNever')
-  if (state.status === 'running') {
-    return Date.now() - Date.parse(state.last_started_at) > 1000 * 1000 ? t('news.sourceStalled') : t('news.sourceRunning')
-  }
-  if (state.last_success_at && Date.now() - Date.parse(state.last_success_at) > 48 * 3600 * 1000) return t('news.sourceStale', { hours: 48 })
-  return t('news.sourceUpdated')
 }
 
 function FeedLoading({ label }: { label: string }) {
@@ -81,10 +53,9 @@ interface FeedColumnProps {
   kind: Kind
   label: string
   onSelect: (item: FeedItem) => void
-  onSources: (sources: SourceState[]) => void
 }
 
-function FeedColumn({ kind, label, onSelect, onSources }: FeedColumnProps) {
+function FeedColumn({ kind, label, onSelect }: FeedColumnProps) {
   const { t, lang } = useLanguage()
   const [page, setPage] = useState(1)
   const [period, setPeriod] = useState<'week' | 'history'>('week')
@@ -108,19 +79,18 @@ function FeedColumn({ kind, label, onSelect, onSources }: FeedColumnProps) {
     if (week.current) params.set('week', week.current)
     api.get<FeedResponse>('/api/news/feed?' + params, { signal: controller.signal })
       .then(result => {
-        if (!Array.isArray(result.items) || !Array.isArray(result.sources) || typeof result.total !== 'number') throw new Error('invalid feed response')
+        if (!Array.isArray(result.items) || typeof result.total !== 'number') throw new Error('invalid feed response')
         if (!controller.signal.aborted) {
           if (result.week) week.current = result.week
           setData(result)
           const lastPage = Math.max(1, Math.ceil(result.total / PAGE_SIZE))
           if (page > lastPage) setPage(lastPage)
-          onSources(result.sources)
         }
       })
       .catch(() => { if (!controller.signal.aborted) setError(true) })
       .finally(() => { if (!controller.signal.aborted) setLoading(false) })
     return () => controller.abort()
-  }, [kind, onSources, page, period, revision])
+  }, [kind, page, period, revision])
 
   const pages = data ? Math.min(10000, Math.max(1, Math.ceil(data.total / PAGE_SIZE))) : 1
   return <Paper component="section" aria-label={label} variant="outlined" sx={{ minWidth: 0, height: '100%', display: 'flex', flexDirection: 'column', px: { xs: 2, md: 2.5 }, borderRadius: 2, boxShadow: 'none' }}>
@@ -192,8 +162,6 @@ function FeedColumn({ kind, label, onSelect, onSources }: FeedColumnProps) {
 export default function NewsFeed() {
   const { t, lang } = useLanguage()
   const [selectedItem, setSelectedItem] = useState<FeedItem | null>(null)
-  const [sources, setSources] = useState<SourceState[]>([])
-  const handleSources = useCallback((nextSources: SourceState[]) => setSources(nextSources), [])
   const columns: { kind: Kind; label: string }[] = [
     { kind: 'news', label: t('news.feedNewsColumn') },
     { kind: 'preprint', label: t('news.feedPreprintsColumn') },
@@ -213,20 +181,8 @@ export default function NewsFeed() {
       <Typography variant="caption" color="text.secondary">{t('news.classificationNotice')}</Typography>
     </Box>
     <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2 }}>
-      {columns.map(column => <FeedColumn key={column.kind} {...column} onSelect={setSelectedItem} onSources={handleSources} />)}
+      {columns.map(column => <FeedColumn key={column.kind} {...column} onSelect={setSelectedItem} />)}
     </Box>
-    {sources.length > 0 && <Box component="details" sx={{ mt: 2, color: 'text.secondary', fontSize: 13 }}>
-      <Box component="summary" sx={{ cursor: 'pointer', py: 1 }}>{t('news.sourceStatusTitle')}
-        {sources.some(sourceNeedsAttention) ? t('news.sourcesNeedAttention') : ''}
-      </Box>
-      <Stack gap={1} sx={{ pt: 1 }}>
-        {sources.map(state => <Box key={state.source}>
-          <Typography variant="body2">{t('news.sourceItem', { name: sourceNames[state.source] || state.source, status: sourceStatus(t, state) })}{state.error_code ? t('news.errorCode', { code: state.error_code }) : ''}</Typography>
-          <Typography variant="body2">{t('news.lastSuccess', { time: timestamp(t, lang, state.last_success_at) })}</Typography>
-        </Box>)}
-        <Typography variant="body2">{t('news.physorgNote')}</Typography>
-      </Stack>
-    </Box>}
 
     <Drawer
       anchor="right"
