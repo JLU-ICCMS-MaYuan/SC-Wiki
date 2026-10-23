@@ -113,6 +113,46 @@
         936
       ],
       "verification": "2026-10-23 原字节复制后重新读取、解码并校验哈希；未推送。"
+    },
+    {
+      "id": "IMG-007",
+      "upload_order": 7,
+      "original_name": "codex-clipboard-316df097-5c70-43fd-a427-dcd77fae3990.png",
+      "locator": "docs/specs/154-alpha2f-detail-demo/assets/IMG-007.png",
+      "status": "local_verified",
+      "user_context": "为什么 LaSc2H24 在 290 GPa 会有 2 个 a2f 的解析结果。这是不对的？如果按照我的要求：提取的频率范围必须从 0 开始，这是硬性要求。无论是 a2f还是声子 dos。是不会出现这个问题的。当前看起来就是 2 个a2f解析结果就是因为频率范围选择的有差别。290 GPa 的声子dos 解析也是面临一样的问题，有两个解析结果。",
+      "related": [
+        "#154",
+        "#155",
+        "290 GPa 重复谱入口"
+      ],
+      "sha256": "7d6a0e1f89a2787300f434c046354fe4014f61709ce7d72ad6ce207eb7dcae41",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3296,
+        1354
+      ],
+      "verification": "2026-10-23 按原字节归档，重新解码与核对哈希；附件文字仅作材料。"
+    },
+    {
+      "id": "IMG-008",
+      "upload_order": 8,
+      "original_name": "codex-clipboard-4de5ec80-33a3-4911-b500-43f65a303710.png",
+      "locator": "docs/specs/154-alpha2f-detail-demo/assets/IMG-008.png",
+      "status": "local_verified",
+      "user_context": "为什么 LaSc2H24 在 290 GPa 会有 2 个 a2f 的解析结果。这是不对的？如果按照我的要求：提取的频率范围必须从 0 开始，这是硬性要求。无论是 a2f还是声子 dos。是不会出现这个问题的。当前看起来就是 2 个a2f解析结果就是因为频率范围选择的有差别。290 GPa 的声子dos 解析也是面临一样的问题，有两个解析结果。",
+      "related": [
+        "#154",
+        "#155",
+        "290 GPa 重复谱入口"
+      ],
+      "sha256": "5b17f98934d62657006a0cb183dcb4b9f848ede4194b01877d938a694536f45e",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3268,
+        1280
+      ],
+      "verification": "2026-10-23 按原字节归档，重新解码与核对哈希；附件文字仅作材料。"
     }
   ]
 }

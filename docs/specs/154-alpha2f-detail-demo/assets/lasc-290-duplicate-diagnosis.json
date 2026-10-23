@@ -1,0 +1,345 @@
+{
+  "checked_on": "2026-10-23",
+  "target": "upload",
+  "target_id": "c16cc627a0c04dc8ad4289624d1da80a",
+  "state_key": "state-5",
+  "read_only": true,
+  "collections": [
+    {
+      "id": "702b9390fdeb43aa9af755ef935befb0",
+      "panel_key": "A",
+      "source_key": "b74cd3c8df24da852d7f1e2119338bef3bb11fdc410e78c29c6f6db47f1b944a",
+      "current_run_id": "54f7db9a041e4f3b851e1600aa8859d1",
+      "created_at": "2026-10-15 15:45:35",
+      "source_name": "2024 La-Sc-H 何新玲-SI.pdf",
+      "source_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+      "image_sha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+      "pdf_page": 4,
+      "bbox_pdf_pt": [
+        117.36000061035156,
+        77.04000854492188,
+        477.8400268554687,
+        503.52001953125
+      ],
+      "caption": "LaSc2H24，290 GPa；投影声子 DOS、α²F(ω) 和累计 λ(ω)",
+      "curves": [
+        {
+          "id": "A-La-phDOS",
+          "kind": "phonon_dos",
+          "projection": "La",
+          "frequency_range_thz": [
+            0.11366215109566724,
+            62.400520951525856
+          ],
+          "point_count": 385,
+          "roi": [
+            474,
+            50,
+            626,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.11366215109566724,
+            "status": "missing",
+            "observed_amplitude": null,
+            "reconstructed_amplitude": null
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        },
+        {
+          "id": "A-Sc-phDOS",
+          "kind": "phonon_dos",
+          "projection": "Sc",
+          "frequency_range_thz": [
+            0.11366215109566724,
+            62.400520951525856
+          ],
+          "point_count": 385,
+          "roi": [
+            474,
+            50,
+            626,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.11366215109566724,
+            "status": "missing",
+            "observed_amplitude": null,
+            "reconstructed_amplitude": null
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        },
+        {
+          "id": "A-H-phDOS",
+          "kind": "phonon_dos",
+          "projection": "H",
+          "frequency_range_thz": [
+            0.11366215109566724,
+            62.400520951525856
+          ],
+          "point_count": 385,
+          "roi": [
+            474,
+            50,
+            626,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.11366215109566724,
+            "status": "missing",
+            "observed_amplitude": null,
+            "reconstructed_amplitude": null
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        },
+        {
+          "id": "A-alpha2f",
+          "kind": "alpha2f",
+          "projection": null,
+          "frequency_range_thz": [
+            0.11366215109566724,
+            62.400520951525856
+          ],
+          "point_count": 385,
+          "roi": [
+            637,
+            50,
+            789,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.11366215109566724,
+            "status": "observed",
+            "observed_amplitude": 0.020819278408943376,
+            "reconstructed_amplitude": 0.020819278408943376
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        },
+        {
+          "id": "A-cumulative-lambda",
+          "kind": "cumulative_lambda",
+          "projection": null,
+          "frequency_range_thz": [
+            0.0,
+            62.400520951525856
+          ],
+          "point_count": 386,
+          "roi": [
+            637,
+            50,
+            789,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.0,
+            "status": "boundary_assumption",
+            "observed_amplitude": null,
+            "reconstructed_amplitude": 0.0
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        }
+      ]
+    },
+    {
+      "id": "c340f3c41b144662808c0933d1e75248",
+      "panel_key": "A-alpha2f-lambda",
+      "source_key": "b74cd3c8df24da852d7f1e2119338bef3bb11fdc410e78c29c6f6db47f1b944a",
+      "current_run_id": "4155b9543bda491ea593efda6c6c8c36",
+      "created_at": "2026-10-15 15:54:00",
+      "source_name": "2024 La-Sc-H 何新玲-SI.pdf",
+      "source_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+      "image_sha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+      "pdf_page": 4,
+      "bbox_pdf_pt": [
+        117.36000061035156,
+        77.04000854492188,
+        477.8400268554687,
+        503.52001953125
+      ],
+      "caption": "A：290 GPa，Eliashberg 谱函数与累计 λ",
+      "curves": [
+        {
+          "id": "A-alpha2f",
+          "kind": "alpha2f",
+          "projection": null,
+          "frequency_range_thz": [
+            0.11366215109566724,
+            62.400520951525856
+          ],
+          "point_count": 385,
+          "roi": [
+            637,
+            50,
+            790,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.11366215109566724,
+            "status": "observed",
+            "observed_amplitude": 0.020711481451819225,
+            "reconstructed_amplitude": 0.020711481451819225
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        },
+        {
+          "id": "A-lambda",
+          "kind": "cumulative_lambda",
+          "projection": null,
+          "frequency_range_thz": [
+            0.11366215109566724,
+            62.400520951525856
+          ],
+          "point_count": 385,
+          "roi": [
+            637,
+            50,
+            790,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.11366215109566724,
+            "status": "missing",
+            "observed_amplitude": null,
+            "reconstructed_amplitude": null
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        }
+      ]
+    },
+    {
+      "id": "17d6b76963e2486aa5c4afbcbcf20d60",
+      "panel_key": "A-phDOS",
+      "source_key": "b74cd3c8df24da852d7f1e2119338bef3bb11fdc410e78c29c6f6db47f1b944a",
+      "current_run_id": "1feb33d1335d4f0588fa6bd3253664f1",
+      "created_at": "2026-10-15 15:54:00",
+      "source_name": "2024 La-Sc-H 何新玲-SI.pdf",
+      "source_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+      "image_sha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+      "pdf_page": 4,
+      "bbox_pdf_pt": [
+        117.36000061035156,
+        77.04000854492188,
+        477.8400268554687,
+        503.52001953125
+      ],
+      "caption": "A：290 GPa，元素投影声子态密度",
+      "curves": [
+        {
+          "id": "A-La-phDOS",
+          "kind": "phonon_dos",
+          "projection": "La",
+          "frequency_range_thz": [
+            0.11366215109566724,
+            62.400520951525856
+          ],
+          "point_count": 385,
+          "roi": [
+            474,
+            50,
+            626,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.11366215109566724,
+            "status": "missing",
+            "observed_amplitude": null,
+            "reconstructed_amplitude": null
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        },
+        {
+          "id": "A-Sc-phDOS",
+          "kind": "phonon_dos",
+          "projection": "Sc",
+          "frequency_range_thz": [
+            0.11366215109566724,
+            62.400520951525856
+          ],
+          "point_count": 385,
+          "roi": [
+            474,
+            50,
+            626,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.11366215109566724,
+            "status": "missing",
+            "observed_amplitude": null,
+            "reconstructed_amplitude": null
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        },
+        {
+          "id": "A-H-phDOS",
+          "kind": "phonon_dos",
+          "projection": "H",
+          "frequency_range_thz": [
+            0.11366215109566724,
+            62.400520951525856
+          ],
+          "point_count": 385,
+          "roi": [
+            474,
+            50,
+            626,
+            434
+          ],
+          "first_point": {
+            "frequency_thz": 0.11366215109566724,
+            "status": "missing",
+            "observed_amplitude": null,
+            "reconstructed_amplitude": null
+          },
+          "frequency_axis": {
+            "slope": -0.1622053614594536,
+            "intercept": 70.51078902449854,
+            "max_tick_residual": 0.06492161060846513
+          }
+        }
+      ]
+    }
+  ],
+  "same_source_key": true,
+  "same_image_sha256": true,
+  "current_grouping_counts": {
+    "alpha2f": 2,
+    "phonon_dos": 2
+  }
+}
