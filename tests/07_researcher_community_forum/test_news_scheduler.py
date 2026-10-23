@@ -1,7 +1,21 @@
 from datetime import datetime, timezone
 from backend.news.scheduler import due, redis_connection, scheduled_at
 from backend.news.models import NewsFeedSource
-from backend.news.__main__ import run_worker
+from backend.news.__main__ import news_worker_class, run_worker
+
+
+def test_news_worker_uses_fresh_process_on_macos():
+    from rq import SpawnWorker, Worker
+
+    assert news_worker_class("darwin") is SpawnWorker
+    assert news_worker_class("linux") is Worker
+
+
+def test_news_worker_defaults_to_actual_platform(monkeypatch):
+    from rq import SpawnWorker
+
+    monkeypatch.setattr("backend.news.__main__.sys.platform", "darwin")
+    assert news_worker_class() is SpawnWorker
 
 
 def test_daily_cutoff_and_recovery():

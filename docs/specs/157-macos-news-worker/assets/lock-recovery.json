@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-23T03:04:07.358876+00:00",
+  "previous_ttl_ms": 561828,
+  "lock_created_at": "2026-10-23T02:56:49.185784+00:00",
+  "released": 1,
+  "news_workers": 0,
+  "started_jobs": 0,
+  "remaining_queued_jobs": 0
+}

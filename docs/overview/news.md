@@ -32,6 +32,7 @@ Python 采集进程负责外部访问、过滤、规范化和写表；Go 仅提�
 独立 schedule 进程每分钟检查日任务，默认北京时间 08:00；停机后按成功水位补跑，失败一小时后重试。
 Docker Compose 以 `news-scheduler` 运行该调度进程，并以 `news-worker` 专门消费 `scwiki-news` 队列；两者等待迁移成功和 Redis 健康后启动，容器重启时自动恢复。RQ Worker 在 Redis 短暂连接异常或空闲读超时后会重建连接继续消费。上传 Worker 不消费资讯队列。本地开发执行 `scripts/dev.sh start` 时也会默认启动这两个进程，日志和 PID 分别由 `scripts/dev.sh logs/status` 管理。
 Redis 互斥锁防止并发采集。
+macOS 的资讯 Worker 使用 RQ SpawnWorker，以新解释器执行任务，避免 fork 后系统网络库触发 Objective-C 崩溃；Linux 仍使用原 Worker。启动日志记录实际 Worker 类名。
 任务最长 900 秒，单请求有限重试；失败不前移成功水位，不清空已有资讯。
 
 ## 自动研究分类
@@ -78,6 +79,7 @@ RSS 只能补回当前订阅窗口；已移除的历史内容无法保证找回�
 本轮 Go 全包测试仍有论文证据审核测试 TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction 的既有失败，已在未修改 HEAD 副本复现；未把定向资讯测试当作全包通过。
 
 ## 相关变更记录
+[Bug #157](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/157) 修复 macOS 资讯采集的 fork 崩溃，恢复本地采集及本周展示；[诊断与验收](../specs/157-macos-news-worker/spec.md)。来源网络失败与 Worker 恢复分开记录，不将空列表解释为没有相关文献。
 [Feature #156](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/156) 移除公开资讯页的来源更新状态展示，保留条目来源信息与后台采集诊断；[规格](../specs/156-remove-news-source-status/spec.md)。
 [Feature #153](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/153) 增加自动分类标签；
 [专项验收](../specs/153-news-classification-labels/quickstart.md) 包含真实模型抽样、跨语言链路、浏览器检查及未部署边界。

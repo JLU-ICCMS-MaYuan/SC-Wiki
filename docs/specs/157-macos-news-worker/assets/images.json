@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-f8c0ddb3-fc73-4033-946a-94bc01df8fe4.png",
+      "locator": "docs/specs/157-macos-news-worker/assets/IMG-001.png",
+      "status": "local_verified",
+      "user_context": "为什么虽然可以正常展示了，但是没有任何内容？？？？我不相信这一周都已经周五了，为什么没有任何内容。",
+      "related": [
+        "US1",
+        "FR-001"
+      ],
+      "sha256": "d33ba425cda59aba6e650ad15ce2bf4ddbec06d716f9a8b2a908423ade26019b",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3370,
+        1428
+      ],
+      "verification": "原图复制后读取尺寸和 SHA-256，字节与来源一致。"
+    }
+  ]
+}

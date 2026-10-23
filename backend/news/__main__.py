@@ -2,11 +2,19 @@
 import argparse
 import logging
 import os
+import sys
 import time
 
 from backend.rq_runtime import run_worker_forever
 from .domain import SOURCES
 from .scheduler import QUEUE_NAME, redis_connection, run_job, schedule_forever
+
+
+def news_worker_class(platform=None):
+    """macOS 使用新解释器，避免 fork 后系统网络库触发 Objective-C 崩溃。"""
+    from rq import SpawnWorker, Worker
+
+    return SpawnWorker if (platform or sys.platform) == "darwin" else Worker
 
 
 def run_worker(worker_cls, connection_factory=redis_connection, sleep=time.sleep):
@@ -32,8 +40,9 @@ def main():
     if not 0 <= hour <= 23 or int(os.environ.get("NEWS_INITIAL_DAYS", "7")) < 1 or int(os.environ.get("NEWS_MAX_PAGES", "100")) < 1:
         parser.error("采集窗口/页数必须为正数，小时范围 0–23")
     if args.command == "worker":
-        from rq import Worker
-        run_worker(Worker)
+        worker_class = news_worker_class()
+        logging.info("news worker implementation=%s", worker_class.__name__)
+        run_worker(worker_class)
     elif args.command == "schedule":
         schedule_forever(engine, connection, hour, os.environ.get("NEWS_TIMEZONE", "Asia/Shanghai"))
     else:

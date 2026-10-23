@@ -1,0 +1,473 @@
+{
+  "checked_at": "2026-10-23T03:07:42.097Z",
+  "host": "127.0.0.1:5173",
+  "api": {
+    "news": {
+      "total": 0,
+      "items": [],
+      "week": "2026-10-19",
+      "sources": [
+        {
+          "source": "acs",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:47Z",
+          "last_finished_at": "2026-10-23T03:04:49Z",
+          "last_success_at": "2026-10-23T03:04:47Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 1
+        },
+        {
+          "source": "aps",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:45Z",
+          "last_finished_at": "2026-10-23T03:04:47Z",
+          "last_success_at": "2026-10-23T03:04:45Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        },
+        {
+          "source": "arxiv",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:11Z",
+          "last_finished_at": "2026-10-23T03:04:37Z",
+          "last_success_at": "2026-10-23T03:04:11Z",
+          "error_code": "",
+          "fetched": 300,
+          "accepted": 262
+        },
+        {
+          "source": "cpb",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:59Z",
+          "last_finished_at": "2026-10-23T03:05:02Z",
+          "last_success_at": "2026-10-23T03:04:59Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 0
+        },
+        {
+          "source": "cpl",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:57Z",
+          "last_finished_at": "2026-10-23T03:04:59Z",
+          "last_success_at": "2026-10-23T03:04:57Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 0
+        },
+        {
+          "source": "crossref",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:38Z",
+          "last_finished_at": "2026-10-23T03:04:40Z",
+          "last_success_at": "2026-10-23T03:04:38Z",
+          "error_code": "",
+          "fetched": 4,
+          "accepted": 3
+        },
+        {
+          "source": "google_news",
+          "status": "failed",
+          "last_started_at": "2026-10-23T03:05:07Z",
+          "last_finished_at": "2026-10-23T03:05:46Z",
+          "last_success_at": "2026-09-29T01:59:54Z",
+          "error_code": "http_error",
+          "fetched": 50,
+          "accepted": 0
+        },
+        {
+          "source": "materials_today",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:05:02Z",
+          "last_finished_at": "2026-10-23T03:05:05Z",
+          "last_success_at": "2026-10-23T03:05:02Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        },
+        {
+          "source": "nature",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:49Z",
+          "last_finished_at": "2026-10-23T03:04:51Z",
+          "last_success_at": "2026-10-23T03:04:49Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 1
+        },
+        {
+          "source": "nsr",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:54Z",
+          "last_finished_at": "2026-10-23T03:04:56Z",
+          "last_success_at": "2026-10-23T03:04:54Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        },
+        {
+          "source": "openalex",
+          "status": "failed",
+          "last_started_at": "2026-10-23T03:04:40Z",
+          "last_finished_at": "2026-10-23T03:04:45Z",
+          "last_success_at": "2026-09-28T05:02:34Z",
+          "error_code": "http_error",
+          "fetched": 924,
+          "accepted": 298
+        },
+        {
+          "source": "physorg",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:05:05Z",
+          "last_finished_at": "2026-10-23T03:05:07Z",
+          "last_success_at": "2026-10-23T03:05:05Z",
+          "error_code": "",
+          "fetched": 30,
+          "accepted": 11
+        },
+        {
+          "source": "science",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:52Z",
+          "last_finished_at": "2026-10-23T03:04:54Z",
+          "last_success_at": "2026-10-23T03:04:52Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        }
+      ]
+    },
+    "preprint": {
+      "total": 30,
+      "items": [
+        {
+          "id": "9e37992f1e514f1585da4f4a0319b330",
+          "title": "Contact Renormalization of One-Mode Electron Correlation: Validation in Four- and Ten-Electron Systems",
+          "published_at": "2026-10-22T10:07:20Z",
+          "url": "https://arxiv.org/abs/2610.31031"
+        },
+        {
+          "id": "784fc951afef48788838912fc56328ce",
+          "title": "Coulomb-Driven Electronic Textures in Lightly Hole-Doped Cuprates",
+          "published_at": "2026-10-22T05:38:49Z",
+          "url": "https://arxiv.org/abs/2610.30766"
+        },
+        {
+          "id": "6d9281cd49e14482a39b96d396be0156",
+          "title": "Cluster property and entanglement in the superconducting state",
+          "published_at": "2026-10-22T01:17:46Z",
+          "url": "https://arxiv.org/abs/2610.30581"
+        },
+        {
+          "id": "12d9dea111bc4086882c9502ed7ca200",
+          "title": "Field-free superconducting diode and tunable vortex dynamics in NbN/FePt stripe-domain heterostructures",
+          "published_at": "2026-10-22T00:22:11Z",
+          "url": "https://arxiv.org/abs/2610.30556"
+        },
+        {
+          "id": "8053d16d11004baea5c37dee6bd20ef4",
+          "title": "Anisotropic thermoelectric transport in the Sr2RuO4-Ru eutectic system",
+          "published_at": "2026-10-22T00:14:12Z",
+          "url": "https://arxiv.org/abs/2610.30547"
+        }
+      ],
+      "week": "2026-10-19",
+      "sources": [
+        {
+          "source": "acs",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:47Z",
+          "last_finished_at": "2026-10-23T03:04:49Z",
+          "last_success_at": "2026-10-23T03:04:47Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 1
+        },
+        {
+          "source": "aps",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:45Z",
+          "last_finished_at": "2026-10-23T03:04:47Z",
+          "last_success_at": "2026-10-23T03:04:45Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        },
+        {
+          "source": "arxiv",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:11Z",
+          "last_finished_at": "2026-10-23T03:04:37Z",
+          "last_success_at": "2026-10-23T03:04:11Z",
+          "error_code": "",
+          "fetched": 300,
+          "accepted": 262
+        },
+        {
+          "source": "cpb",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:59Z",
+          "last_finished_at": "2026-10-23T03:05:02Z",
+          "last_success_at": "2026-10-23T03:04:59Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 0
+        },
+        {
+          "source": "cpl",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:57Z",
+          "last_finished_at": "2026-10-23T03:04:59Z",
+          "last_success_at": "2026-10-23T03:04:57Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 0
+        },
+        {
+          "source": "crossref",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:38Z",
+          "last_finished_at": "2026-10-23T03:04:40Z",
+          "last_success_at": "2026-10-23T03:04:38Z",
+          "error_code": "",
+          "fetched": 4,
+          "accepted": 3
+        },
+        {
+          "source": "google_news",
+          "status": "failed",
+          "last_started_at": "2026-10-23T03:05:07Z",
+          "last_finished_at": "2026-10-23T03:05:46Z",
+          "last_success_at": "2026-09-29T01:59:54Z",
+          "error_code": "http_error",
+          "fetched": 50,
+          "accepted": 0
+        },
+        {
+          "source": "materials_today",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:05:02Z",
+          "last_finished_at": "2026-10-23T03:05:05Z",
+          "last_success_at": "2026-10-23T03:05:02Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        },
+        {
+          "source": "nature",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:49Z",
+          "last_finished_at": "2026-10-23T03:04:51Z",
+          "last_success_at": "2026-10-23T03:04:49Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 1
+        },
+        {
+          "source": "nsr",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:54Z",
+          "last_finished_at": "2026-10-23T03:04:56Z",
+          "last_success_at": "2026-10-23T03:04:54Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        },
+        {
+          "source": "openalex",
+          "status": "failed",
+          "last_started_at": "2026-10-23T03:04:40Z",
+          "last_finished_at": "2026-10-23T03:04:45Z",
+          "last_success_at": "2026-09-28T05:02:34Z",
+          "error_code": "http_error",
+          "fetched": 924,
+          "accepted": 298
+        },
+        {
+          "source": "physorg",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:05:05Z",
+          "last_finished_at": "2026-10-23T03:05:07Z",
+          "last_success_at": "2026-10-23T03:05:05Z",
+          "error_code": "",
+          "fetched": 30,
+          "accepted": 11
+        },
+        {
+          "source": "science",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:52Z",
+          "last_finished_at": "2026-10-23T03:04:54Z",
+          "last_success_at": "2026-10-23T03:04:52Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        }
+      ]
+    },
+    "journal_article": {
+      "total": 2,
+      "items": [
+        {
+          "id": "fd1bae669a114e61a9f64861fdaad6aa",
+          "title": "A hidden rivalry between two quantum states at the heart of superconductors",
+          "published_at": "2026-10-20T22:00:07Z",
+          "url": "https://phys.org/news/2026-10-hidden-rivalry-quantum-states-heart.html"
+        },
+        {
+          "id": "c601d6af3c814da586048ba5edc8e6dc",
+          "title": "'Smoking gun' may help solve mystery of high-temperature superconductivity",
+          "published_at": "2026-10-20T20:00:07Z",
+          "url": "https://phys.org/news/2026-10-gun-mystery-high-temperature-superconductivity.html"
+        }
+      ],
+      "week": "2026-10-19",
+      "sources": [
+        {
+          "source": "acs",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:47Z",
+          "last_finished_at": "2026-10-23T03:04:49Z",
+          "last_success_at": "2026-10-23T03:04:47Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 1
+        },
+        {
+          "source": "aps",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:45Z",
+          "last_finished_at": "2026-10-23T03:04:47Z",
+          "last_success_at": "2026-10-23T03:04:45Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        },
+        {
+          "source": "arxiv",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:11Z",
+          "last_finished_at": "2026-10-23T03:04:37Z",
+          "last_success_at": "2026-10-23T03:04:11Z",
+          "error_code": "",
+          "fetched": 300,
+          "accepted": 262
+        },
+        {
+          "source": "cpb",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:59Z",
+          "last_finished_at": "2026-10-23T03:05:02Z",
+          "last_success_at": "2026-10-23T03:04:59Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 0
+        },
+        {
+          "source": "cpl",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:57Z",
+          "last_finished_at": "2026-10-23T03:04:59Z",
+          "last_success_at": "2026-10-23T03:04:57Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 0
+        },
+        {
+          "source": "crossref",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:38Z",
+          "last_finished_at": "2026-10-23T03:04:40Z",
+          "last_success_at": "2026-10-23T03:04:38Z",
+          "error_code": "",
+          "fetched": 4,
+          "accepted": 3
+        },
+        {
+          "source": "google_news",
+          "status": "failed",
+          "last_started_at": "2026-10-23T03:05:07Z",
+          "last_finished_at": "2026-10-23T03:05:46Z",
+          "last_success_at": "2026-09-29T01:59:54Z",
+          "error_code": "http_error",
+          "fetched": 50,
+          "accepted": 0
+        },
+        {
+          "source": "materials_today",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:05:02Z",
+          "last_finished_at": "2026-10-23T03:05:05Z",
+          "last_success_at": "2026-10-23T03:05:02Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        },
+        {
+          "source": "nature",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:49Z",
+          "last_finished_at": "2026-10-23T03:04:51Z",
+          "last_success_at": "2026-10-23T03:04:49Z",
+          "error_code": "",
+          "fetched": 1,
+          "accepted": 1
+        },
+        {
+          "source": "nsr",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:54Z",
+          "last_finished_at": "2026-10-23T03:04:56Z",
+          "last_success_at": "2026-10-23T03:04:54Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        },
+        {
+          "source": "openalex",
+          "status": "failed",
+          "last_started_at": "2026-10-23T03:04:40Z",
+          "last_finished_at": "2026-10-23T03:04:45Z",
+          "last_success_at": "2026-09-28T05:02:34Z",
+          "error_code": "http_error",
+          "fetched": 924,
+          "accepted": 298
+        },
+        {
+          "source": "physorg",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:05:05Z",
+          "last_finished_at": "2026-10-23T03:05:07Z",
+          "last_success_at": "2026-10-23T03:05:05Z",
+          "error_code": "",
+          "fetched": 30,
+          "accepted": 11
+        },
+        {
+          "source": "science",
+          "status": "success",
+          "last_started_at": "2026-10-23T03:04:52Z",
+          "last_finished_at": "2026-10-23T03:04:54Z",
+          "last_success_at": "2026-10-23T03:04:52Z",
+          "error_code": "",
+          "fetched": 0,
+          "accepted": 0
+        }
+      ]
+    }
+  },
+  "page_errors": [],
+  "followup_source_probe": {
+    "google_news": {
+      "default_connection": "ConnectTimeout",
+      "direct_connection": "ConnectTimeout"
+    },
+    "openalex": {
+      "first_page_status": 200,
+      "second_cursor_page_status": 401,
+      "source_collection_succeeded": false
+    }
+  }
+}
