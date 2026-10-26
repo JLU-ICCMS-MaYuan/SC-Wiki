@@ -132,3 +132,7 @@ DNS www 和根域均指向目标；备案按用户要求不阻塞准备。所有
 - 精确删除 `/opt/scwiki`、`/opt/scwiki-home-migration-20261022` 和停止的 `scwiki-rehearsal-mysql` 容器，目录原占用共 23,705,964,544 字节。未使用 force、容器 rm -v 或全局 prune；没有删除数据卷、镜像或 `/opt/containerd`。
 - 删除后原 14 个线上容器 ID、镜像及启动时间不变，全部运行且健康检查正常；旧数据卷仍作为停写时备份保留。`/opt` 下只剩 containerd。
 - 证据为新根 `backups/cleanup-opt-20261022/` 中的 `source-verification.json`、`running-containers-before.json`、`approved-targets.json`、`removed-container-inspect.json`、`cleanup-result.json`。旧 /opt 入口已不存在，恢复必须基于新根保留记录并先保护新增业务数据。
+
+## 2026-10-26 更新至当前最新代码
+
+按用户明确的阿里云部署要求，已发布 `c9310bdf`，复用原数据和固定运行环境；发布来源、停写备份、内容核验、真实公网浏览器结果及既有测试边界见 [本次发布记录](release-20261026.md)。没有执行 Git 或镜像推送，不以本次更新关闭其他未完成验收。

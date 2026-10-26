@@ -1,0 +1,177 @@
+{
+  "activation": {
+    "source_commit": "c9310bdfc6b7f46e5706f6e4491cf1fc0830feb5",
+    "source_archive_sha256": "6a7e1445446f9a2e738a655a92ba489e5e88619bb37eb2c5c703f43256765618",
+    "source_archive_bytes": 105669621,
+    "images": {
+      "frontend": "sha256:008dfc89eb2da17f32e237a79d6f7d713372604b7c9fa8e2caaab03bde8f0f49",
+      "goserver": "sha256:e6b5a79624f5ebca3d00d9123a4ee7d049b9733c5c76a433bce05deba83cbbfe",
+      "python": "sha256:d9d1ea2b9affd6c0231e4655f7316e12b753c728b045d6a7601a498de630494e"
+    },
+    "base_images": {
+      "frontend": "sha256:fc59106428195d3f8e7ddc8bc08f0a715580fd96a0362da381564e6d9d180349",
+      "goserver": "sha256:412d8305182b4b77735888ed9b4944599cc972490d4dfef651118bdddce86a2c",
+      "python": "sha256:c8693945577cf9e4763d7855af80196b3d467e6a0e6ce1e3ce26e32e4a511ef1"
+    },
+    "built_at": "2026-10-26T01:26:04.212009+00:00",
+    "source_mode": "full-committed-source-on-existing-pinned-runtime",
+    "activated_at": "2026-10-26T01:28:49.004723+00:00",
+    "unchanged_containers": [
+      "scwiki-app-caddy-1",
+      "scwiki-compute-grobid-1",
+      "scwiki-data-redis-1",
+      "scwiki-data-mysql-1",
+      "scwiki-data-neo4j-1",
+      "scwiki-data-qdrant-1",
+      "scwiki-data-garage-1"
+    ],
+    "backup": "/home/mayuan/sc-wiki/backups/release-20261026-c9310bdf",
+    "release": "/home/mayuan/sc-wiki/releases/c9310bdf"
+  },
+  "runtime": {
+    "source_commit": "c9310bdfc6b7f46e5706f6e4491cf1fc0830feb5",
+    "running_image_ids_match": true,
+    "python_source_files_verified": 365,
+    "frontend_and_go_artifacts_verified": true
+  },
+  "server_http": {
+    "https_from_ecs": [
+      {
+        "path": "/health",
+        "status": 200,
+        "bytes": 15
+      },
+      {
+        "path": "/news",
+        "status": 200,
+        "bytes": 643
+      },
+      {
+        "path": "/auth",
+        "status": 200,
+        "bytes": 643
+      },
+      {
+        "path": "/nobel/giaever",
+        "status": 200,
+        "bytes": 643
+      },
+      {
+        "path": "/api/news",
+        "status": 200,
+        "bytes": 99
+      },
+      {
+        "path": "/api/news/feed?kind=news&period=week",
+        "status": 200,
+        "bytes": 4176
+      },
+      {
+        "path": "/api/news/feed?kind=preprint&period=week",
+        "status": 200,
+        "bytes": 2827
+      },
+      {
+        "path": "/api/news/feed?kind=journal_article&period=week",
+        "status": 200,
+        "bytes": 2827
+      },
+      {
+        "path": "/api/papers",
+        "status": 200,
+        "bytes": 22
+      },
+      {
+        "path": "/api/account/profile",
+        "status": 401,
+        "bytes": 21
+      }
+    ],
+    "http://www.sc-wiki.com/news": "308 https://www.sc-wiki.com/news",
+    "http://sc-wiki.com/news": "308 https://sc-wiki.com/news",
+    "https://sc-wiki.com/news": "301 https://www.sc-wiki.com/news"
+  },
+  "public_browser": {
+    "transport": "Chrome on local Mac directly accessing the public HTTPS domain; no SSH tunnel or host override",
+    "routes": [
+      {
+        "path": "/news",
+        "nobel_faces": 11,
+        "status": 200
+      },
+      {
+        "path": "/nobel/giaever",
+        "refresh": true,
+        "share": "1/4"
+      },
+      {
+        "path": "/auth",
+        "input_count": 2
+      }
+    ],
+    "api": [
+      {
+        "path": "/health",
+        "status": 200
+      },
+      {
+        "path": "/api/news",
+        "status": 200
+      },
+      {
+        "path": "/api/news/feed?kind=news&period=week&page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/news/feed?kind=preprint&period=week&page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/news/feed?kind=journal_article&period=history&page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/papers?page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/classification-catalogs",
+        "status": 200
+      },
+      {
+        "path": "/api/account/profile",
+        "status": 401
+      }
+    ],
+    "mobile": {
+      "width": 390,
+      "content": 390
+    },
+    "passed": true,
+    "errors": [],
+    "server_errors": []
+  },
+  "validation": {
+    "python_passed": 135,
+    "frontend_passed": 79,
+    "frontend_failed": 1,
+    "frontend_failure": "news-feed.test.tsx still expects exact old Nobel heading; new public gallery verified with 11 faces",
+    "go_packages_passed": [
+      "handlers news/account/password/registration subset",
+      "services SMTP/email subset"
+    ],
+    "frontend_production_build": true,
+    "go_linux_amd64_build": true,
+    "mysql_tables_unchanged": 71,
+    "s3_objects_verified": 89,
+    "s3_bytes": 27191813,
+    "redis_business_keys_unchanged": 5,
+    "git_push": false,
+    "image_push": false
+  },
+  "local_backup": {
+    "path": "/Users/mayuan/SC-Wiki-backups/release-20261026-c9310bdf/server",
+    "verified_files": 105,
+    "all_sha256_match": true
+  }
+}
