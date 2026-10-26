@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import AxisOverlay from './AxisOverlay'
+import { fitViewport, zoomViewport, wheelPixels, wheelFactor } from './viewport'
 import { addPoint, amplitudePixel, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
 
 export type Tool = 'select' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
@@ -10,13 +11,14 @@ type Props = {
   onAdded?: (id: string) => void; onZeroMarked?: () => void
   onPick?: (x: number, y: number) => void; onError?: (error: string) => void
 }
-type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; id?: string; prepared?: PreparedMove | null; moved?: Document }
+type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; clientStart?: {x:number;y:number}; screenScale?: number; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
 export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onZeroMarked }: Props) {
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
   const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 46, y - 10, w + 62, h + 32] }
   const [view, setView] = useState<Rect>(initial), [preview, setPreview] = useState<Document | null>(null)
   const [showAxes, setShowAxes] = useState(true)
+  const [fit, setFit] = useState<Rect>(initial), fitRef = useRef<Rect>(initial()), manualView = useRef(false)
   const [box, setBox] = useState<Rect | null>(null), [imageFailed, setImageFailed] = useState(false), [retry, setRetry] = useState(0), [scale, setScale] = useState(1)
   const clip = useId().replace(/:/g, ''), scene = preview || doc
   const curve = scene.curves.find(c => c.id === active)!
@@ -24,25 +26,36 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
     ? gesture.current.prepared : prepareMove(doc, active, selected[0], linked), [doc, active, selected[0], linked])
   const paths = useMemo(() => new Map(scene.curves.map(c => [c.id, curvePath(scene, c)])), [scene])
   const [x0, y0, x1, y1] = scene.source.plot
-  useEffect(() => { setView(initial()); setImageFailed(false); setPreview(null) }, [doc.id])
+  useEffect(() => { manualView.current=false; setImageFailed(false); setPreview(null) }, [doc.id])
   useEffect(() => {
-    const update = () => setScale(svg.current?.getScreenCTM()?.a || 1)
-    update(); const observer = new ResizeObserver(update)
-    if (svg.current) observer.observe(svg.current)
-    return () => observer.disconnect()
-  }, [view])
-  const pointer = (clientX: number, clientY: number) => new DOMPoint(clientX, clientY).matrixTransform(svg.current!.getScreenCTM()!.inverse())
-  const zoom = (factor: number, anchor?: DOMPoint) => setView(v => {
-    const original = initial(), w = Math.max(original[2] / 24, Math.min(original[2] * 2, v[2] * factor)), ratio = w / v[2]
-    const x = anchor?.x ?? v[0] + v[2] / 2, y = anchor?.y ?? v[1] + v[3] / 2
-    return [x - (x - v[0]) * ratio, y - (y - v[1]) * ratio, w, v[3] * ratio]
-  })
-  useEffect(() => {
-    const element = svg.current!
-    const wheel = (event: WheelEvent) => { event.preventDefault(); zoom(Math.exp(event.deltaY * .0015), pointer(event.clientX, event.clientY)) }
-    element.addEventListener('wheel', wheel, { passive: false })
-    return () => element.removeEventListener('wheel', wheel)
-  }, [doc.id])
+    const element=svg.current!
+    const update=()=>{
+      const {width,height}=element.getBoundingClientRect()
+      if (!width || !height) return
+      const next=fitViewport(doc.source.viewport,width,height,showAxes)
+      fitRef.current=next; setFit(next)
+      if (!manualView.current) setView(next)
+      setScale(element.getScreenCTM()?.a || 1)
+    }
+    update(); const observer=new ResizeObserver(update);observer.observe(element)
+    return ()=>observer.disconnect()
+  }, [doc.id,showAxes])
+  useEffect(()=>{setScale(svg.current?.getScreenCTM()?.a || 1)},[view])
+  const pointer=(clientX:number,clientY:number)=>new DOMPoint(clientX,clientY).matrixTransform(svg.current!.getScreenCTM()!.inverse())
+  const zoom=(factor:number,anchor?:DOMPoint)=>{
+    manualView.current=true
+    setView(v=>zoomViewport(v,fitRef.current,factor,anchor))
+  }
+  const fitWindow=()=>{manualView.current=false;setView(fitRef.current)}
+  useEffect(()=>{
+    const element=svg.current!;let frame=0,delta=0,anchor:DOMPoint|undefined
+    const wheel=(event:WheelEvent)=>{
+      event.preventDefault();delta+=wheelPixels(event.deltaY,event.deltaMode,element.clientHeight);anchor=pointer(event.clientX,event.clientY)
+      if(!frame) frame=requestAnimationFrame(()=>{frame=0;zoom(wheelFactor(delta),anchor);delta=0})
+    }
+    element.addEventListener('wheel',wheel,{passive:false})
+    return ()=>{element.removeEventListener('wheel',wheel);cancelAnimationFrame(frame)}
+  },[doc.id])
   const finish = (cancel = false) => {
     const g = gesture.current
     if (g && !cancel) {
@@ -64,22 +77,22 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
     if (added) { onSelect?.([added.id]); onAdded?.(added.id) }
   })
   return <div className={'canvas-shell ' + (editing ? 'interactive' : 'detail-canvas')}>
-    <button className="axis-toggle" aria-pressed={showAxes} onClick={() => setShowAxes(v => !v)}>轴与刻度</button>
-    {showAxes && <div className="axis-legend"><span>蓝：当前标定</span><span>灰：已有识别 / THz</span>{doc.id === 'alpha2f' && <span>棕：累计 λ 参考</span>}</div>}
+    <div className="canvas-toolbar"><button className="axis-toggle" aria-pressed={showAxes} onClick={() => setShowAxes(v => !v)}>轴与刻度</button>
     <div className="canvas-controls">
-      <button aria-label="缩小" onClick={() => zoom(1.35)}>−</button><span>{Math.round(initial()[2] / view[2] * 100)}%</span>
-      <button aria-label="放大" onClick={() => zoom(1 / 1.35)}>＋</button><button onClick={() => setView(initial())}>适应窗口</button>
+      <button aria-label="缩小" title="缩小约5%" onClick={() => zoom(1.05)}>−</button><span>{Number((fit[2] / view[2] * 100).toFixed(1))}%</span>
+      <button aria-label="放大" title="放大约5%" onClick={() => zoom(1 / 1.05)}>＋</button><button onClick={fitWindow}>适应窗口</button>
     </div>
+    </div>
+    {showAxes && <div className="axis-legend"><span>蓝：当前标定</span><span>灰：已有识别 / THz</span>{doc.id === 'alpha2f' && <span>棕：累计 λ 参考</span>}</div>}
     {imageFailed && <div className="canvas-error" role="alert">原图加载失败，暂不能选点。<button onClick={() => { setRetry(n => n + 1); setImageFailed(false) }}>重试图片</button></div>}
     <svg ref={svg} className={'source-canvas tool-' + tool} role={editing ? 'application' : 'img'} aria-label={editing ? '谱线人工编辑画布' : '原图与提取结果'}
-      data-viewbox={view.join(',')} viewBox={view.join(' ')} preserveAspectRatio="xMidYMid meet"
+      data-source-crop={doc.source.viewport.join(',')} data-viewbox={view.join(',')} viewBox={view.join(' ')} preserveAspectRatio="xMidYMid meet"
       onContextMenu={e => e.preventDefault()}
       onPointerDown={event => {
-        if (!editing || imageFailed) return
+        const pan = editing && tool === 'pan' || event.button === 1 || event.button === 2 || event.altKey
+        if (!pan && (!editing || imageFailed || event.button !== 0)) return
         event.preventDefault(); const p = pointer(event.clientX, event.clientY)
-        const pan = tool === 'pan' || event.button === 1 || event.button === 2 || event.altKey
-        if (!pan && event.button !== 0) return
-        if (pan) gesture.current = { kind: 'pan', start: p, view, doc }
+        if (pan) { manualView.current=true; gesture.current = { kind:'pan', start:p, view, doc, clientStart:{x:event.clientX,y:event.clientY}, screenScale:svg.current!.getScreenCTM()!.a } }
         else if (tool === 'add') return add(p.x, p.y)
         else if (tool === 'zeroPoint') return add(p.x, p.y, true)
         else if (tool === 'zero') return operate(() => { onChange?.(markZero(doc, p.x, p.y)); onSelect?.([]); onZeroMarked?.() })
@@ -98,7 +111,7 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
         if (!g) return
         const p = pointer(event.clientX, event.clientY)
         if (g.kind === 'pan') {
-          setView(v => [v[0] - (p.x - g.start.x), v[1] - (p.y - g.start.y), v[2], v[3]])
+          setView([g.view[0]-(event.clientX-g.clientStart!.x)/g.screenScale!,g.view[1]-(event.clientY-g.clientStart!.y)/g.screenScale!,g.view[2],g.view[3]])
         } else if (g.kind === 'box') setBox([Math.min(g.start.x, p.x), Math.min(g.start.y, p.y), Math.abs(p.x - g.start.x), Math.abs(p.y - g.start.y)])
         else {
           g.moved = g.prepared ? movePrepared(g.prepared, p.x - g.start.x, p.y - g.start.y, dragMode) : g.doc

@@ -11,6 +11,14 @@ export default function AxisOverlay({ doc, scale, point }: { doc: Document; scal
   const amplitudeTicks = currentTicks(doc.calibration.amplitude, vertical ? x0 : y0, vertical ? x1 : y1)
   const fzero = pixelAt(doc.calibration.frequency, 0), azero = pixelAt(doc.calibration.amplitude, 0)
   const line = (props: React.SVGProps<SVGLineElement>) => <line strokeWidth={1.2} vectorEffect="non-scaling-stroke" {...props}/>
+  // 窄图窗只减少当前标定的辅助标签；已有识别刻度仍全部显示。
+  const readableTicks = (values: {pixel:number;value:number}[], horizontal: boolean) => {
+    if (!horizontal) return values
+    const sorted=[...values].sort((a,b)=>a.pixel-b.pixel), selected: typeof values=[]
+    const priority=[...sorted.filter(t=>t.value===0),sorted[0],sorted.at(-1),sorted[Math.floor(sorted.length/2)],...sorted]
+    for(const tick of priority) if(tick && !selected.includes(tick) && selected.every(other=>Math.abs(other.pixel-tick.pixel)*scale > (display(other.value).length+display(tick.value).length)*3+6)) selected.push(tick)
+    return selected.sort((a,b)=>a.pixel-b.pixel)
+  }
   const ticks = (values: {pixel:number;value:number}[], along: 'x'|'y', color: string, id: string, reference = false, top = false) => values.map(({pixel,value}, i) => {
     const horizontal = along === 'x'
     return <g key={i} data-axis-tick={id} data-pixel={pixel} data-value={value}>
@@ -30,8 +38,8 @@ export default function AxisOverlay({ doc, scale, point }: { doc: Document; scal
     <g data-testid="current-axes" data-frequency-direction={doc.calibration.direction} stroke={blue}>
       {line({x1:x0,x2:x0,y1:y0,y2:y1})}{line({x1:x0,x2:x1,y1:vertical?y0:y1,y2:vertical?y0:y1})}
     </g>
-    {ticks(frequencyTicks, vertical?'y':'x',blue,'current-frequency')}
-    {ticks(amplitudeTicks, vertical?'x':'y',blue,'current-amplitude',false,vertical)}
+    {ticks(readableTicks(frequencyTicks,!vertical), vertical?'y':'x',blue,'current-frequency')}
+    {ticks(readableTicks(amplitudeTicks,vertical), vertical?'x':'y',blue,'current-amplitude',false,vertical)}
     <text transform={`translate(${x0-49/scale},${(y0+y1)/2}) rotate(-90)`} textAnchor="middle" fontSize={10/scale} fill={blue}>
       {vertical ? `频率 / ${doc.calibration.frequency.unit}` : `幅值 / ${unit}`} · 当前标定
     </text>

@@ -93,3 +93,7 @@ FR-021至024：SourceCanvas新增/替换点后报告点ID，App选中并将右�
 ## 原图不透明度
 
 共用 ImageOpacityControl.tsx 原生 range，CSS竖向排列；App持有纯视图百分比，详情卡片与编辑画布分别使用左侧栏。SourceCanvas只把百分比映射至SVG image.opacity，曲线路径和轴图层不变；隐藏图模式禁用滑条但保留值。
+
+## 图窗交互修订
+
+viewport.ts 负责按绘图区尺寸和屏幕文字边距计算fit、鼠标锚点zoom和wheel单位归一化；SourceCanvas使用独立header/footer与中间SVG布局。ResizeObserver更新fit基准，主动缩放/平移后不自动重置；点击适应或新谱重置。右键判定先于编辑权限判定，详情只开放视图变换。按钮因子1.05；滚轮delta按pixel/line/page统一后以较低灵敏度指数映射，requestAnimationFrame合并同帧事件，无逐点计算。

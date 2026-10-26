@@ -13,19 +13,37 @@ async function main() {
  context.on('page', page => {page.on('pageerror',e=>report.errors.push(e.message));page.on('download',d=>report.downloads.push(d.suggestedFilename()))});
  context.on('request', r => { if(new URL(r.url()).pathname.startsWith('/api/')) report.apiRequests.push({url:r.url(),method:r.method()}) });
  const page = await context.newPage();page.setDefaultTimeout(10000);
- const shot = async name => {await page.screenshot({path:path.join(out,'opacity-'+name+'.png'),fullPage:true});report.screenshots.push('opacity-'+name+'.png')};
+ const shot = async name => {await page.screenshot({path:path.join(out,'viewport-'+name+'.png'),fullPage:true});report.screenshots.push('viewport-'+name+'.png')};
  const button = name => page.getByRole('button',{name,exact:true});
  const svg = () => page.getByRole('application',{name:'谱线人工编辑画布'});
  const screen = (x,y) => svg().evaluate((el,p)=>{const v=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:v.x,y:v.y}}, {x,y});
  const clickAt = async(x,y) => {const p=await screen(x,y);await page.mouse.click(p.x,p.y)};
  const points = () => page.locator('[data-point]').evaluateAll(nodes=>Object.fromEntries(nodes.map(n=>[n.dataset.point,{x:Number(n.dataset.x),y:Number(n.dataset.y)}])));
  const drag = async(id,dx,dy) => {const p=(await points())[id];const a=await screen(p.x,p.y),b=await screen(p.x+dx,p.y+dy);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:8});await page.mouse.up()};
+ const assertFit=async()=>{
+  await button('适应窗口').click();
+  await page.waitForFunction(()=>{
+    const svg=document.querySelector('.source-canvas'),r=svg.getBoundingClientRect(),toolbar=document.querySelector('.canvas-toolbar').getBoundingClientRect(),footer=document.querySelector('.canvas-caption').getBoundingClientRect();
+    const texts=[...svg.querySelectorAll('[data-testid="axes-overlay"] text')];
+    const [x,y,w,h]=svg.dataset.sourceCrop.split(',').map(Number),a=new DOMPoint(x,y).matrixTransform(svg.getScreenCTM()),b=new DOMPoint(x+w,y+h).matrixTransform(svg.getScreenCTM());
+    const horizontal=svg.querySelector('[data-testid="current-axes"]')?.dataset.frequencyDirection==='y'?'current-amplitude':'current-frequency';
+    const labels=[...svg.querySelectorAll(`[data-axis-tick="${horizontal}"] text`)].map(t=>t.getBoundingClientRect()).sort((a,b)=>a.left-b.left);
+    const separated=labels.every((b,i)=>i===0 || b.left>=labels[i-1].right+1);
+    return separated && toolbar.bottom<=r.top+.5 && footer.top>=r.bottom-.5 && a.x>=r.left-.5 && a.y>=r.top-.5 && b.x<=r.right+.5 && b.y<=r.bottom+.5 && texts.every(t=>{const b=t.getBoundingClientRect();return b.left>=r.left-.5&&b.right<=r.right+.5&&b.top>=r.top-.5&&b.bottom<=r.bottom+.5});
+  });
+ };
  const stored = id => page.evaluate(id=>JSON.parse(localStorage.getItem('scwiki-spectrum-manual-v1:'+id)),id);
  try {
   await page.goto(base);await button('✎ 编辑').waitFor();
   const influence=await page.evaluate(async()=>({... (await import('/src/dragInfluence.ts')).DRAG_INFLUENCE}));report.influenceConfig=influence;
   const expectedWeight=d=>{const w=d<=influence.coreNeighbors?1-(1-influence.edgeWeight)*d/influence.coreNeighbors:influence.edgeWeight*Math.exp(-(d-influence.coreNeighbors)/influence.decayLength);return w<influence.minWeight?0:w};
   const support=Array.from({length:1001},(_,i)=>expectedWeight(i)).filter(w=>w>0).length;const slider=()=>page.getByRole('slider',{name:'原图不透明度'});
+  await assertFit();check('详情适应窗口完整包含原图子图和全部轴文字，工具栏/说明不覆盖绘图区');
+  const detailSvg=page.locator('.source-canvas'),beforePan=await detailSvg.getAttribute('data-viewbox'),detailPaths=await page.locator('[data-curve]').evaluateAll(ns=>ns.map(n=>n.getAttribute('d')));let boxPan=await detailSvg.boundingBox();
+  await page.mouse.move(boxPan.x+boxPan.width/2,boxPan.y+boxPan.height/2);await page.mouse.down({button:'right'});await page.mouse.move(boxPan.x+boxPan.width/2+50,boxPan.y+boxPan.height/2+25,{steps:6});await page.mouse.up({button:'right'});assert.notEqual(await detailSvg.getAttribute('data-viewbox'),beforePan);assert.deepEqual(await page.locator('[data-curve]').evaluateAll(ns=>ns.map(n=>n.getAttribute('d'))),detailPaths);check('详情图窗右键平移可用且曲线数据不变');
+  await assertFit();const fitWidth=Number((await detailSvg.getAttribute('data-viewbox')).split(',')[2]);await button('缩小').click();assert(Math.abs(Number((await detailSvg.getAttribute('data-viewbox')).split(',')[2])/fitWidth-1.05)<.00001);await button('放大').click();await assertFit();check('缩放按钮约5%步幅，可逆回到完整适应');
+  boxPan=await detailSvg.boundingBox();await page.mouse.move(boxPan.x+boxPan.width/2,boxPan.y+boxPan.height/2);await page.mouse.wheel(0,2);await page.waitForFunction(w=>Number(document.querySelector('.source-canvas').dataset.viewbox.split(',')[2])>w,fitWidth);const slowWidth=Number((await detailSvg.getAttribute('data-viewbox')).split(',')[2]);await page.mouse.wheel(0,120);await page.waitForFunction(w=>Number(document.querySelector('.source-canvas').dataset.viewbox.split(',')[2])>w,slowWidth);const fastWidth=Number((await detailSvg.getAttribute('data-viewbox')).split(',')[2]);assert(slowWidth/fitWidth-1<.002);assert(fastWidth/slowWidth-1>(slowWidth/fitWidth-1)*20);await assertFit();check('细小滚轮输入精细缩放，快速大量滚动缩放更快');
+
   assert.equal(await slider().inputValue(),'100');await slider().scrollIntoViewIfNeeded();let rail=await slider().boundingBox(),drawing=await page.locator('.source-canvas').boundingBox();assert(rail.height>rail.width*4 && rail.x<drawing.x);check('详情图卡左侧为竖向0–100原图不透明度滑条');
   const initialPaths=await page.locator('[data-curve]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d')));
   await slider().focus();await slider().press('Home');assert.equal(await slider().inputValue(),'0');assert.equal(await page.getByTestId('source-image').getAttribute('opacity'),'0');assert.deepEqual(await page.locator('[data-curve]').evaluateAll(nodes=>nodes.map(n=>n.getAttribute('d'))),initialPaths);assert(await page.getByTestId('axes-overlay').isVisible());await shot('opacity-zero');
@@ -35,7 +53,7 @@ async function main() {
   await button('仅提取数据').click();assert(await slider().isDisabled());assert.equal(await page.getByTestId('source-image').count(),0);await button('原图与数据叠加').click();assert.equal(Number(await slider().inputValue()),opacityValue);assert.equal(await page.evaluate(()=>localStorage.getItem('scwiki-spectrum-manual-v1:alpha2f')),null);check('隐藏原图时禁用滑条但保留值，显示设置不写科学草稿');
   await shot('demo-alpha-detail');
   assert.equal(await page.getByRole('button',{name:/导出|下载/}).count(),0);
-  await button('✎ 编辑').click();await svg().waitFor();rail=await slider().boundingBox();drawing=await svg().boundingBox();assert(rail.height>rail.width*4 && rail.x<drawing.x);assert.equal(Number(await slider().inputValue()),opacityValue);await button('← 返回详情').click();assert.equal(await page.getByRole('dialog').count(),0);assert.equal(Number(await slider().inputValue()),opacityValue);await button('✎ 编辑').click();await button('隐藏原图').click();assert(await slider().isDisabled());await button('显示原图').click();assert.equal(Number(await slider().inputValue()),opacityValue);check('编辑画布左侧竖向滑条与详情共用值，单调显示不产生未保存数据提示');
+  await button('✎ 编辑').click();await svg().waitFor();await assertFit();assert.equal(await page.getByText(/选择一个点，拖动修正局部形状/).count(),0);assert.equal(await page.locator('.tool-hint').count(),0);assert(await page.getByTestId('zero-steps').count());check('编辑器适应窗口完整，通用提示与空占位已移除，零频步骤可见');rail=await slider().boundingBox();drawing=await svg().boundingBox();assert(rail.height>rail.width*4 && rail.x<drawing.x);assert.equal(Number(await slider().inputValue()),opacityValue);await button('← 返回详情').click();assert.equal(await page.getByRole('dialog').count(),0);assert.equal(Number(await slider().inputValue()),opacityValue);await button('✎ 编辑').click();await button('隐藏原图').click();assert(await slider().isDisabled());await button('显示原图').click();assert.equal(Number(await slider().inputValue()),opacityValue);check('编辑画布左侧竖向滑条与详情共用值，单调显示不产生未保存数据提示');
   const recognizedTicks=await page.locator('[data-axis-tick="recognized-frequency"]').evaluateAll(nodes=>nodes.map(n=>[Number(n.dataset.pixel),Number(n.dataset.value)]));assert.deepEqual(recognizedTicks,[[435,0],[311,20],[188,40],[65,60]]);
   assert.equal(await page.locator('[data-axis-tick="recognized-lambda"]').count(),5);assert(await page.getByText('累计 λ · 识别参考',{exact:true}).isVisible());assert(await page.getByTestId('calibrated-zero').isVisible());check('原图叠加真实记录的频率刻度与独立λ参考，当前标定零线可见');
   await button('轴与刻度').click();assert.equal(await page.getByTestId('axes-overlay').count(),0);await button('轴与刻度').click();check('辅助轴可隐藏/恢复，不修改点');
@@ -81,7 +99,7 @@ async function main() {
   await button('声子 DOS').click();assert.equal(await page.locator('[data-axis-tick="recognized-lambda"]').count(),0);assert.equal(await page.locator('[data-axis-tick="recognized-frequency"]').count(),4);check('PhDOS共用频率识别，未把λ或相对像素冒充DOS识别幅值');await shot('demo-dos-detail');await button('✎ 编辑').click();await page.getByRole('button',{name:/^H \d/}).click();const h=await points();const hid=Object.keys(h).find(k=>k==='H-200');assert(hid);await drag(hid,5,0);await shot('demo-dos-editor');await button('保存调整').click();const savedDos=await stored('phdos');for(const c of samples[1].curves.filter(c=>c.id!=='H'))assert.deepEqual(savedDos.curves.find(v=>v.id===c.id),c);check('PhDOS 只编辑所选 H 分波，La/Sc 保持原样');
   await button('✎ 编辑').click();await page.getByRole('button',{name:/^La \d/}).click();const la=await points();await button('自由移动（X / Y）').click();await page.getByLabel('附近点联动').uncheck();await drag('La-420',2,-.2);const laAfter=await points();assert.notDeepEqual(laAfter['La-420'],la['La-420']);assert.deepEqual(laAfter['La-419'],la['La-419']);check('二维单点模式可同时改频率和幅值，其余点不动');
   await button('← 返回详情').click();await button('保存并返回').click();await button('✎ 编辑').waitFor();check('未保存退出：保存并返回');
-  await page.setViewportSize({width:390,height:844});await shot('demo-mobile-detail');rail=await slider().boundingBox();drawing=await page.locator('.source-canvas').boundingBox();assert(rail.height>rail.width*4 && rail.x<drawing.x);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await button('✎ 编辑').click();await svg().waitFor();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await shot('demo-mobile-editor');check('390px 详情和全屏编辑器无页面横向溢出');
+  await page.setViewportSize({width:390,height:844});await assertFit();check('窄屏适应窗口也完整包含轴标题与刻度');await shot('demo-mobile-detail');rail=await slider().boundingBox();drawing=await page.locator('.source-canvas').boundingBox();assert(rail.height>rail.width*4 && rail.x<drawing.x);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await button('✎ 编辑').click();await svg().waitFor();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await shot('demo-mobile-editor');check('390px 详情和全屏编辑器无页面横向溢出');
   await button('← 返回详情').click();await page.setViewportSize({width:1440,height:1000});
   await button('✎ 编辑').click();await page.locator('summary').click();await page.getByLabel('frequency-0-value',{exact:true}).fill('1');await button('← 返回详情').click();await page.getByRole('dialog').waitFor();await button('放弃修改').click();check('未应用标定表单也有退出保护，放弃后恢复已保存标定');
   await button('✎ 编辑').click();await page.locator('summary').click();await page.getByLabel('frequency-1-pixel',{exact:true}).fill('435');await button('应用标定').click();assert((await page.getByRole('alert').textContent()).includes('互不重合'));await button('← 返回详情').click();await button('放弃修改').click();check('退化标定拒绝应用，保留已有点');
@@ -143,8 +161,8 @@ async function main() {
     return {points:10000,iterations:120,prepareMs,medianMoveAndPathMs:times[60],p95MoveAndPathMs:times[114],weightedPoints:prepared.byId.size,changedPoints:moved.curves[0].points.filter(p=>p.y!==50).length,includesReactRender:false};
   });assert.equal(report.performance.weightedPoints,2*support-1);assert.equal(report.performance.changedPoints,2*support-1);check('10000点按用户配置的有限邻域移动，120次复用准备结果');
   assert.equal(await page.getByRole('button',{name:/导出|下载/}).count(),0);assert.deepEqual(report.apiRequests,[]);assert.deepEqual(report.downloads,[]);assert.deepEqual(report.errors,[]);check('无业务 API 请求、无下载入口/下载事件、无页面脚本错误');
-  report.status='passed';fs.writeFileSync(path.join(out,'opacity-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
- } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'opacity-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
+  report.status='passed';fs.writeFileSync(path.join(out,'viewport-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
+ } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'viewport-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
  finally {await browser.close()}
 }
 main().catch(e=>{console.error(e);process.exit(1)});

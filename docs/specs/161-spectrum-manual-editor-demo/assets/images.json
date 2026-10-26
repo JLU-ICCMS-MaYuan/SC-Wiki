@@ -112,6 +112,46 @@
         1102
       ],
       "verification": "2026-10-26 原字节复制、重新解码及哈希校验；未推送。"
+    },
+    {
+      "id": "IMG-007",
+      "upload_order": 7,
+      "original_name": "codex-clipboard-58fab3d7-6992-4fce-9b5b-19cfc0771a93.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/IMG-007-viewport.png",
+      "status": "local_verified",
+      "user_context": "而且图二所示的大小是点击适应窗口之后的大小，有内容被遮挡了，比如上面的：幅值/相对像素 当前标定，就被挡住了，看不到。我希望不要挡住，刚好展示全部内容。省得我还得缩小。",
+      "related": [
+        "FR-033",
+        "FR-034",
+        "SC-022"
+      ],
+      "sha256": "dbb079fc3a6582477424e8abe213a19dd7cf7ec29118536797b1dca91a952266",
+      "media_type": "image/png",
+      "dimensions_px": [
+        1444,
+        1494
+      ],
+      "verification": "2026-10-26 原字节复制，重新解码及哈希核对；尚未推送。"
+    },
+    {
+      "id": "IMG-008",
+      "upload_order": 8,
+      "original_name": "codex-clipboard-294ce909-db48-4c55-b1ba-9dc300f0bd3a.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/IMG-008-viewport.png",
+      "status": "local_verified",
+      "user_context": "而且图二所示的大小是点击适应窗口之后的大小，有内容被遮挡了，比如上面的：幅值/相对像素 当前标定，就被挡住了，看不到。我希望不要挡住，刚好展示全部内容。省得我还得缩小。",
+      "related": [
+        "FR-033",
+        "FR-034",
+        "SC-022"
+      ],
+      "sha256": "d4fcc6e5625575e9e8726989fd75fd7b4d22b612db23b47d53bc4e61b9e787dd",
+      "media_type": "image/png",
+      "dimensions_px": [
+        648,
+        1272
+      ],
+      "verification": "2026-10-26 原字节复制，重新解码及哈希核对；尚未推送。"
     }
   ]
 }
