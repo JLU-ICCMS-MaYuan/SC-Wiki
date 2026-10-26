@@ -1,0 +1,26 @@
+{
+  "source_file": "docs/specs/154-alpha2f-detail-demo/assets/false-peak-source.png",
+  "source_sha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+  "source_size": [
+    802,
+    948
+  ],
+  "alpha_snapshot": "docs/specs/154-alpha2f-detail-demo/assets/false-peak-after.json",
+  "alpha_snapshot_sha256": "cdd22acf91da3f9e6384beb004fbcfda7cbd79da0b6a1f3807aab82cd27c98e5",
+  "notes": [
+    "α²F 只复用 amplitude_pixel/frequency_pixel，未复用可能来自累计 λ 的物理幅值。",
+    "两类样本均移除 y>429 的低频点供人工补点练习。",
+    "α²F 追加 a-legend-*；DOS La 追加 La-legend-* 图例误识别示例。",
+    "PhDOS 固定像素取样不代表正式重新提取或科学验收。"
+  ],
+  "counts": {
+    "alpha2f": {
+      "alpha": 374
+    },
+    "phdos": {
+      "La": 47,
+      "Sc": 64,
+      "H": 333
+    }
+  }
+}

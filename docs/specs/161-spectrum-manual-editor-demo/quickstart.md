@@ -1,0 +1,25 @@
+# 本机运行
+
+在仓库根执行 `npm --prefix docs/specs/161-spectrum-manual-editor-demo/demo run dev`，打开输出的 127.0.0.1 地址。Demo 仅监听本机，不启动正式服务。
+
+默认地址为 [人工调整 Demo](http://127.0.0.1:5187/)。端口已占用时启动失败，不自动切换到不明地址。可在命令后加 `-- --port 5188` 指定另一个本机端口。
+
+运行依赖复用 `frontend/node_modules`。首次使用仓库时按前端既有方式安装依赖。
+
+浏览器测试使用当前环境的 Playwright 和本机 Chrome；可通过 `CODEX_RUNTIME_NODE_MODULES` 指向包含 Playwright 的 node_modules，`PLAYWRIGHT_CHANNEL` 指定浏览器 channel，`SPECTRUM_DEMO_URL` 指向实际 Demo 地址。测试使用独立浏览器上下文，不读取或覆盖用户日常浏览器的草稿。
+
+## 建议试用顺序
+
+1. 点击“编辑”，默认进入原图叠加。选中一个峰并左右拖动，观察橙色邻点随动。
+2. 滚轮放大或使用按钮；右键、Alt 拖动或“平移”工具移动视口，“适应窗口”恢复。
+3. 框选右下方演示图例误识别点，点击“删除选中点”；撤销可恢复。
+4. 用“增加点”点选缺失区域；坐标输入只调整当前点，联动设置作用于拖动。
+5. 先点“标记原图 0 频率位置”，在底部真实零频边界点击；再选“补选曲线零频点”，在对应曲线位置点击。只标线不会解除缺失提示。
+6. 展开“坐标标定”，通过靶心按钮选择刻度位置并填写对应数值，点击“应用标定”。源像素保持不变，未应用标定会阻止保存并受退出保护。
+7. 点击“保存调整”，回到详情并刷新，查看本机草稿是否保持。PhDOS 可切换 La/Sc/H，每次只编辑当前选中分波。
+
+零频选点完成只记录人工依据，幅值、积分及科学采纳仍待核对。固定样例频率沿竖轴；编辑核心支持频率横轴，误把当前竖轴图改为横轴可能产生重复频率，需先核对原图，不能绕过数据校验。
+
+`npm --prefix docs/specs/161-spectrum-manual-editor-demo/demo test` 运行逻辑测试；`npm --prefix docs/specs/161-spectrum-manual-editor-demo/demo run build` 执行类型检查和隔离构建；`npm --prefix docs/specs/161-spectrum-manual-editor-demo/demo run test:browser` 验证运行中的 Demo。
+
+保存只写当前浏览器本机草稿，不写 SC-Wiki 数据库。调整原图定位不代表科学采纳。恢复原始提取可撤销；清除浏览器站点数据会删除 Demo 草稿。

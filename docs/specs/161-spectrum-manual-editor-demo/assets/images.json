@@ -1,0 +1,38 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-b60c0c9a-6ab6-43d8-becb-fef1df112d37.png",
+      "locator": null,
+      "status": "unavailable",
+      "user_context": "a2f 和 phdos（也就是声子 dos）的提取详情页，点击左边所示的图片之后就可以进入编辑页面，",
+      "related": [
+        "FR-001"
+      ],
+      "sha256": null,
+      "media_type": null,
+      "dimensions_px": null,
+      "verification": "原临时文件不存在；保留缺口，未以预览或派生图冒充原图。"
+    },
+    {
+      "id": "IMG-002",
+      "upload_order": 2,
+      "original_name": "codex-clipboard-ff615d3f-b6f5-43a0-8377-6d7b11386b2f.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/IMG-002-editor-entry.png",
+      "status": "local_verified",
+      "user_context": "a2f 和 phdos（也就是声子 dos）的提取详情页，为左边的红框框住的地方新增一个编辑按钮。然后就可以调整 AI 识别出来的点的位置，或者增删改查一些数据点。",
+      "related": [
+        "FR-001",
+        "US1"
+      ],
+      "sha256": "539cbc2d49dbf6e514040c7e672e34283535d9f8034e596d2453f2cdb0a756d4",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3840,
+        1948
+      ],
+      "verification": "2026-10-26 原字节复制后重新解码、校验尺寸和 SHA-256；尚未推送，远程链接待验证。"
+    }
+  ]
+}
