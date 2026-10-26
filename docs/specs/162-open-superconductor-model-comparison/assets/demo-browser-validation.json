@@ -44,6 +44,7 @@
       "model_id": "bete-cso",
       "tc": 9.929108935887271,
       "formula": "Nb",
+      "input_format": "cif",
       "parameters": {
         "lambda": 0.8121517519447751,
         "omega_log": 192.92163388878257,
@@ -168,7 +169,7 @@
         "omega_log": "K",
         "omega_2": "K"
       },
-      "elapsed_seconds": 1.057
+      "elapsed_seconds": 1.109
     },
     {
       "model_id": "sisso-2019",

@@ -65,6 +65,13 @@ function ResultRow({ result, name, onReuse }: { result: Result; name: string; on
   </article>
 }
 
+function PredictionGroups({ group, onChange }: { group: string; onChange: (group: string) => void }) {
+  return <nav className="prediction-groups" aria-label="预测分类">
+    <button aria-pressed={group === 'ambient'} onClick={() => onChange('ambient')}>常压 BCS 超导体</button>
+    <button aria-pressed={group === 'hydride'} onClick={() => onChange('hydride')}>高压氢化物</button>
+  </nav>
+}
+
 export default function App() {
   const [catalog, setCatalog] = useState<{ models: Model[]; datasets: Dataset[] } | null>(null)
   const [group, setGroup] = useState('ambient')
@@ -82,6 +89,8 @@ export default function App() {
   const [results, setResults] = useState<Result[]>([])
   const [notice, setNotice] = useState('')
   const resultSection = useRef<HTMLElement>(null)
+  const categoryDialog = useRef<HTMLDialogElement>(null)
+  const groupLabel = group === 'ambient' ? '常压 BCS 超导体' : '高压氢化物'
   const model = catalog?.models.find(m => m.id === selected)
   const sharedWebsite = !!model?.code && !!model.datasets.length && model.datasets.every(id => sameWebsite(model.code, catalog!.datasets.find(d => d.id === id)!.source_url))
 
@@ -90,7 +99,10 @@ export default function App() {
   useEffect(() => { if (!running) return; setSeconds(0); const timer = setInterval(() => setSeconds(s => s + 1), 1000); return () => clearInterval(timer) }, [running])
   useEffect(() => { if (!notice) return; const timer = setTimeout(() => setNotice(''), 3000); return () => clearTimeout(timer) }, [notice])
 
-  function changeGroup(next: string) { setGroup(next); setSelected(next === 'ambient' ? 'bete-cso' : 'sisso-2022'); setError('') }
+  function changeGroup(next: string) {
+    if (next !== group) { setGroup(next); setSelected(next === 'ambient' ? 'bete-cso' : 'sisso-2022'); setError('') }
+    categoryDialog.current?.close()
+  }
   async function sample(id: string) {
     try { const data = await api<{ structure: string; format: string; note: string }>(`/demo-api/examples/${id}`); setStructure(data.structure); setFormat('auto'); setLabel(`${id.toUpperCase()} · 作者结构样本`); setNotice(data.note); setError('') }
     catch (e) { setError((e as Error).message) }
@@ -131,11 +143,10 @@ export default function App() {
   }
 
   return <div className="app">
-    <aside className="rail"><a className="brand" href="http://127.0.0.1:5173" aria-label="返回 SC-Wiki"><span className="brand-mark">SC</span><b>SC-Wiki</b></a><div className="rail-label">研究工作台</div><a href="http://127.0.0.1:5173/search"><span>⌕</span> 探索</a><a href="http://127.0.0.1:5173/share"><span>◌</span> 社区</a><a className="active" href="#"><span>✧</span> 模型实验室</a><div className="rail-bottom"><span className="live-dot"/> 本地 Demo<br/><small>原生实时开发环境</small></div></aside>
+    <aside className="rail"><a className="brand" href="http://127.0.0.1:5173" aria-label="返回 SC-Wiki"><span className="brand-mark">SC</span><b>SC-Wiki</b></a><div className="rail-label">研究工作台</div><a href="http://127.0.0.1:5173/search"><span>⌕</span> 探索</a><a href="http://127.0.0.1:5173/share"><span>◌</span> 社区</a><a className="active" href="#prediction"><span>✧</span> 预测</a><PredictionGroups group={group} onChange={changeGroup}/><div className="rail-bottom"><span className="live-dot"/> 本地 Demo<br/><small>原生实时开发环境</small></div></aside>
     <main>
-      <header className="topbar"><span>预测 <i>/</i> 模型实验室</span></header>
-      <section className="hero"><div><div className="eyebrow"><span/> OPEN MODELS · OPEN DATA</div><h1>超导模型实验室<span>Beta</span></h1><p>让预测有对照，让数据可追溯。<br className="mobile-break"/>选择模型，运行真实计算，查看它从哪些数据中学习。</p></div><div className="hero-art"><Atom/><div className="orbit-label">α²F → T<sub>c</sub></div></div></section>
-      <div className="group-bar"><div className="tabs" role="tablist" aria-label="材料分组"><button role="tab" aria-selected={group === 'ambient'} onClick={() => changeGroup('ambient')}>常压常规材料 <span>01</span></button><button role="tab" aria-selected={group === 'hydride'} onClick={() => changeGroup('hydride')}>高压氢化物 <span>02</span></button></div><span className="subtle">独立模型 · 独立条件 · 不自动平均</span></div>
+      <header className="topbar"><span>预测 <i>/</i> {groupLabel}</span><button className="mobile-category-trigger" aria-haspopup="dialog" onClick={() => categoryDialog.current?.showModal()}>选择分类</button></header>
+      <section className="hero" id="prediction"><div><div className="eyebrow"><span/> OPEN MODELS · OPEN DATA</div><h1>预测<span>Beta</span></h1><p>让预测有对照，让数据可追溯。<br className="mobile-break"/>选择模型，运行真实计算，查看它从哪些数据中学习。</p></div><div className="hero-art"><Atom/><div className="orbit-label">α²F → T<sub>c</sub></div></div></section>
       {error && <div className="error" role="alert">{error}{!catalog && <button onClick={load}>重新加载</button>}</div>}
       {!catalog ? <div className="loading">正在读取模型与数据文件状态…</div> : <>
         <nav className="model-picker" aria-label="选择模型">{catalog.models.filter(m => m.group === group).map(m => <button key={m.id} aria-pressed={selected === m.id} className={selected === m.id ? 'selected' : ''} onClick={() => { setSelected(m.id); setError('') }}><span className="picker-icon">{m.mode === 'structure' ? '◈' : 'ƒ'}</span><span><b>{m.name}</b><small>{m.mode === 'pending' ? '资料候选' : m.family}</small></span>{selected === m.id && <span className="selected-dot"/>}</button>)}</nav>
@@ -173,6 +184,7 @@ export default function App() {
       </>}
       <footer className="footer"><span>SC-Wiki · 开放模型与可追溯训练数据</span><span>本地 Demo · 预测结果不写入材料数据库</span></footer>
     </main>
+    <dialog ref={categoryDialog} className="category-dialog" aria-label="预测分类菜单"><div className="category-dialog-heading"><h2>预测</h2><button aria-label="关闭分类菜单" onClick={() => categoryDialog.current?.close()}>×</button></div><PredictionGroups group={group} onChange={changeGroup}/></dialog>
     {notice && <div role="status" className="toast">{notice}</div>}
   </div>
 }

@@ -1,10 +1,10 @@
 # 本地 Demo 使用与启动
 
-当前入口：[模型实验室](http://127.0.0.1:5189/)。独立推理 API 为 `127.0.0.1:8192`；原网站仍在 `127.0.0.1:5173`。这是用户授权的本机原生实时开发环境，没有部署到阿里云或 Docker。
+当前入口：[预测 Demo](http://127.0.0.1:5189/)。独立推理 API 为 `127.0.0.1:8192`；原网站仍在 `127.0.0.1:5173`。这是用户授权的本机原生实时开发环境，没有部署到阿里云或 Docker。
 
 ## 直接体验
 
-1. 常压组选择 BETE-NET-CSO，点击“Nb 铌”载入作者公开结构，或上传自己的 CIF／POSCAR／CONTCAR，也可直接粘贴结构原文，默认按内容自动识别格式，然后“运行模型”。
+1. 从左侧“预测”下选择“常压 BCS 超导体”，再在顶部选择 BETE-NET-CSO，点击“Nb 铌”载入作者公开结构，或上传自己的 CIF／POSCAR／CONTCAR，也可直接粘贴结构原文，默认按内容自动识别格式，然后“运行模型”。
 2. 查看实际 100 网络平均谱、Tc、λ、ωlog、ω₂。点击“用此参数对比 SISSO”，运行参数模型；两次结果按顺序独立保留为等高横条；点击“展开”查看完整参数、谱图和方法说明，“折叠”恢复紧凑显示。
 3. 模型右侧下载数据；点击“论文链接”或“原始网站”查询来源，不再显示长网址和许可／版本。代码与数据在同一仓库时只有一个网站入口。
 4. 高压组可运行 Xie 2022 公开公式；“加载示例”只是计算参数示例，不对应某个特定氢化物。其原始训练 ZIP 所在服务当前返回 503，页面明确显示“暂不可下载”。
@@ -45,3 +45,5 @@ npm --prefix "docs/specs/162-open-superconductor-model-comparison/demo" run test
 结构格式回归：`node "docs/specs/162-open-superconductor-model-comparison/demo/tests/structure-format.cjs"`。手动选择格式后若内容不符，会明确提示；再次粘贴或上传会恢复自动识别。
 
 结果横条验收：`node "docs/specs/162-open-superconductor-model-comparison/demo/tests/result-rows.cjs"`。
+
+手机端通过顶部“选择分类”打开左侧分类菜单。导航验收：`node "docs/specs/162-open-superconductor-model-comparison/demo/tests/prediction-navigation.cjs"`。

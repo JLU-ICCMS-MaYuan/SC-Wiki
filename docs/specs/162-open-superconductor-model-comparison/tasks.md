@@ -47,3 +47,6 @@ T001：固定 Git blob 校验、100 权重与原数据实际获取；T002：asse
 
 - [x] T017 在 demo/src/App.tsx 与 styles.css 实现结果单列定高横条及每条独立展开，保留完整信息和参数复用，覆盖 FR-028／029。
 - [x] T018 在 demo/tests/result-rows.cjs 以真实 MgB2 结构和参数模型请求验证高度、折叠、独立状态、数值保留和窄屏行为，覆盖 SC-019／020；归档用户原图和结果区截图。
+
+- [x] T019 按用户“开始执行”的确认，在 demo/src/App.tsx、styles.css、index.html 统一“预测”名称，把两分类移到左侧并上移模型选项；复用分类组件支持窄屏抽屉，覆盖 FR-030／031。
+- [x] T020 在 demo/tests/prediction-navigation.cjs 验证桌面几何、分类联动和真实计算、平板／窄屏及键盘；更新既有 browser.cjs 的分类定位，覆盖 SC-021／022。

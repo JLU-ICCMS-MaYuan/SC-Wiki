@@ -16,6 +16,7 @@ async function main() {
  const page = await context.newPage(); page.setDefaultTimeout(15000);
  page.on('pageerror', e => report.errors.push(e.message));
  const button = name => page.getByRole('button', {name,exact:true});
+ const category = async name => { const trigger=page.getByRole('button',{name:'选择分类',exact:true});if(await trigger.isVisible())await trigger.click();await page.getByRole('navigation',{name:'预测分类',exact:true}).getByRole('button',{name,exact:true}).click() };
  const choose = name => page.getByRole('navigation',{name:'选择模型'}).getByRole('button',{name:new RegExp(name)}).click();
  const shot = async name => {await page.waitForTimeout(250);await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));await page.getByRole('status').waitFor({state:'hidden'});await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(200);await page.screenshot({path:path.join(out,name+'.png'),fullPage:true});report.screenshots.push(name+'.png')};
  const predict = async () => {
@@ -33,7 +34,7 @@ async function main() {
   const repo=url=>new URL(url).hostname+new URL(url).pathname.split('/').slice(0,3).join('/');assert.equal(repo(href),repo(expected.source_url));
  };
  try {
-  await page.goto(base);await page.getByRole('heading',{name:'超导模型实验室Beta'}).waitFor();await page.locator('[data-dataset="bete-bundle"]').waitFor();
+  await page.goto(base);await page.getByRole('heading',{name:'预测Beta'}).waitFor();await page.locator('[data-dataset="bete-bundle"]').waitFor();
   const reference = await context.newPage();await reference.goto('http://127.0.0.1:5173/tc-predict');await reference.getByRole('heading').first().waitFor();
   const siteTheme = await reference.evaluate(()=>({background:getComputedStyle(document.body).backgroundColor,text:getComputedStyle(document.body).color,font:getComputedStyle(document.body).fontFamily,primary:getComputedStyle(document.querySelector('nav button[aria-label^="SC-Wiki"] span')).backgroundColor}));
   const demoTheme = await page.evaluate(()=>({background:getComputedStyle(document.body).backgroundColor,text:getComputedStyle(document.body).color,font:getComputedStyle(document.body).fontFamily,primary:getComputedStyle(document.querySelector('.brand-mark')).backgroundColor}));
@@ -55,7 +56,7 @@ async function main() {
   await aligned();assert.equal(await page.locator('.data-panel [data-dataset]').count(),1);await download('sisso-train');check('SISSO 只展示作者实际使用的 29 条训练数据，不要求用户另选全集');
   const before = await page.locator('[data-result]').count();await page.getByRole('textbox',{name:'lambda',exact:true}).fill('-1');
   const badResponse=page.waitForResponse(r=>r.url().endsWith('/demo-api/predict'));await button('运行模型 →').click();assert.equal((await badResponse).status(),400);await page.getByRole('alert').waitFor();assert.equal(await page.locator('[data-result]').count(),before);check('非法参数返回错误，已有结果不丢失、不产生伪结果');
-  await page.getByRole('tab',{name:/高压氢化物/}).click();await button('加载示例').click();await aligned();const hp=await predict();assert.equal(hp.model_id,'sisso-2022');assert(hp.tc>0);
+  await category('高压氢化物');await button('加载示例').click();await aligned();const hp=await predict();assert.equal(hp.model_id,'sisso-2022');assert(hp.tc>0);
   assert(await page.locator('[data-dataset="xie-2022"]').getByRole('button',{name:'暂不可下载',exact:true}).isDisabled());assert.equal((await context.request.get(base+'/demo-api/datasets/xie-2022')).status(),503);check('高压参数模型真实计算；上游训练包失败明确显示且下载接口拒绝空文件');
   assert.equal(await page.locator('.data-panel').getByRole('link',{name:'模型代码',exact:true}).count(),1);assert.equal(await page.locator('.data-panel').getByRole('link',{name:'原始网站',exact:true}).getAttribute('href'),'https://archive.materialscloud.org/records/skdzy-kyx54');
   await choose('Tc assessment model');await aligned();assert.equal(await page.getByRole('link',{name:'打开原有估算 ↗',exact:true}).count(),0);
@@ -71,9 +72,9 @@ async function main() {
   const original=await fetch('http://127.0.0.1:8080/api/tc-predict/',{method:'POST',body:originalBody});assert.equal(original.status,200);assert.deepEqual(legacyData,await original.json());
   await page.locator('[data-result="legacy"]').waitFor();const card=page.locator('[data-result="legacy"]');assert((await card.textContent()).includes('E_couple'));assert((await card.textContent()).includes(String(legacyData.predicted_tc)));assert.equal(page.url(),urlBefore);assert.equal(context.pages().length,pagesBefore);report.legacy={input:'合成 H2La 接口夹具，不用于科学评估',response:legacyData};await shot('demo-clathrate-inline');check('论文原名显示，CONTCAR＋多个 PDOS 在当前页面真实运行，与原 API 逐字段一致且无跳转');
   await page.getByLabel('电子 PDOS 文件',{exact:true}).setInputFiles(metal);const missingH=page.waitForResponse(r=>r.url().endsWith('/api/tc-predict/'));await button('运行模型 →').click();assert.equal((await missingH).status(),400);await page.getByRole('alert').waitFor();assert((await page.getByRole('alert').textContent()).includes('PDOS_H'));assert(await card.isVisible());check('缺少氢 PDOS 显示原接口错误，已成功结果保留');
-  await page.getByRole('tab',{name:/常压常规材料/}).click();await choose('SISSO · 81 样本');await aligned();await download('sisso-81');assert.equal(await page.getByRole('button',{name:'运行模型 →',exact:true}).count(),0);check('81 样本资料候选可下载，未伪装成已接入推理');
+  await category('常压 BCS 超导体');await choose('SISSO · 81 样本');await aligned();await download('sisso-81');assert.equal(await page.getByRole('button',{name:'运行模型 →',exact:true}).count(),0);check('81 样本资料候选可下载，未伪装成已接入推理');
   await choose('BETE-NET · CSO');await shot('demo-results');await page.setViewportSize({width:390,height:844});await page.evaluate(()=>window.scrollTo(0,0));assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await shot('demo-mobile');
-  await page.getByRole('tab',{name:/高压氢化物/}).click();await button('加载示例').click();await predict();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await shot('demo-mobile-hydride');check('390px 两组输入、真实运行、数据和结果可操作且无页面横向溢出');
+  await category('高压氢化物');await button('加载示例').click();await predict();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await shot('demo-mobile-hydride');check('390px 两组输入、真实运行、数据和结果可操作且无页面横向溢出');
   await choose('Tc assessment model');await page.getByLabel('电子 PDOS 文件',{exact:true}).setInputFiles([hydrogen,metal]);const mobileReply=page.waitForResponse(r=>r.url().endsWith('/api/tc-predict/'));await button('运行模型 →').click();assert.equal((await mobileReply).status(),200);await page.waitForFunction(()=>document.querySelectorAll('[data-result=legacy]').length===2);assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await shot('demo-mobile-clathrate');check('390px 原模型上传与当前页结果完整可用');
   assert.equal((await context.request.get(base+'/demo-api/datasets/unknown')).status(),404);assert.deepEqual(report.errors,[]);check('未知数据拒绝下载，无页面脚本错误');
   report.status='passed';fs.writeFileSync(path.join(out,'demo-browser-validation.json'),JSON.stringify(report,null,2)+'\n');

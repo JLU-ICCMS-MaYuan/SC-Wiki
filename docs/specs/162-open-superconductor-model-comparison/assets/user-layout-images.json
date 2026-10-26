@@ -107,5 +107,20 @@
     "media_type": "image/png",
     "user_context": "我希望展示 的结果是从上到下以固定高度的横条的方式展示，如果需要显示更多，就提供展开/折叠按钮。如果不需要显示更多就尽可能用固定高度的横条方式展现。",
     "verification": "已查看原图，按原字节归档并核对摘要及尺寸"
+  },
+  {
+    "id": "IMG-008",
+    "upload_order": 8,
+    "original_name": "codex-clipboard-466c2f70-a63a-4357-9ce7-bb7723c14632.png",
+    "locator": "assets/request-prediction-navigation.png",
+    "status": "local_verified",
+    "sha256": "e6fd6440b167343df0f6b89ce8d8510d37de3d210fa16bfee788299c608c66a1",
+    "dimensions_px": [
+      3840,
+      1948
+    ],
+    "media_type": "image/png",
+    "user_context": "我希望把这两个移动到左边。然后把下面的各个模型都移动到这两个的位置。你明白吗？你先复述一下我的 prompt，然后得到我的同意后，再执行。",
+    "verification": "已查看箭头与分类位置原图，按字节复制并核对摘要和尺寸；等待用户明确同意后实施"
   }
 ]

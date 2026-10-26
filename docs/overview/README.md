@@ -26,7 +26,7 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 | [超导论文引用发展知识图谱](04_Superconductivity_Development_Knowledge_Graph/README.md) | 基于 MySQL 引用事实的分类概览、搜索和分页展开 | Go API、Python Worker、GROBID、MySQL |
 | [检索增强 AI 问答](05_Retrieval-Augmented_AI_Question_Answering/README.md) | 混合检索、流式问答、证据展示和灵感探索 | Python FastAPI、MySQL、Qdrant、LLM 配置 |
 | [研究者社区论坛](06_Researcher_Community_Forum/README.md) | 注册登录、贡献排行、材料家族及年度论文统计、只读多模型 AI 问答、历史评论、通知及超级管理员治理 | Go、Python、JWT、MySQL、Redis/RQ、模型目录 |
-| [AI 辅助 Tc 估算](07_AI_Assisted_Tc_Estimation/README.md) | 主站 CONTCAR／PDOS 实验估算；独立本地模型实验室 Demo 提供真实推理及训练数据下载 | pymatgen、NumPy；Demo 独立 PyTorch 环境 |
+| [AI 辅助 Tc 估算](07_AI_Assisted_Tc_Estimation/README.md) | 主站 CONTCAR／PDOS 实验估算；独立本地预测 Demo 提供真实推理及训练数据下载 | pymatgen、NumPy；Demo 独立 PyTorch 环境 |
 
 ## 整体关系
 

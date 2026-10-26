@@ -114,3 +114,19 @@ BETE 不再拆成“作者原始数据库”和“结构与训练／测试划分
 - 清空结果移除所有条目与详情，无脚本错误。
 
 截图：[收起横条](assets/result-rows-collapsed.png)、[单条展开](assets/result-rows-expanded.png)、[窄屏](assets/result-rows-mobile.png)。已实际查看渲染。类型检查与构建通过；本轮只调整结果呈现，没有改变推理数据。用户第七张原图见 assets/request-result-rows.png，原文和摘要已纳入图片索引。
+
+## 左侧分类与顶部模型导航验收
+
+本轮先按用户要求复述布局，接收“预测”和“常压 BCS 超导体”两项名称修正，在用户明确回复“开始执行。”后才修改代码。
+
+页面、侧栏和浏览器标签统一为“预测”；左侧入口下纵向排列“常压 BCS 超导体”和“高压氢化物”，原顶部分类栏删除，模型选项横排上移至页头之后。分类名称调整不改变模型归属或科学适用范围。当前修改范围是独立本地 Demo（5189），不是正式主站整合。
+
+[七项导航检查](assets/prediction-navigation-validation.json)实际验证：
+
+- 1440px 名称正确；两分类在侧栏内纵向排列，顶部模型同一行并紧接页头。
+- 已选分类再次点击不会重置当前模型；分类切换联动模型列表与表单。
+- 实际参数模型请求成功，切换分类后已有结果仍保留。
+- 800px 保留完整分类文字，内容响应式堆叠，无页面溢出。
+- 390px 使用左侧分类抽屉，选择后关闭；Escape 可关闭并恢复触发按钮焦点。
+
+原十七组综合浏览器检查也通过，覆盖实际模型运行、三份数据下载摘要、右卡对齐、原模型内嵌及窄屏操作。类型检查和构建通过。截图：[桌面](assets/prediction-navigation-desktop.png)、[窄屏](assets/prediction-navigation-mobile.png)、[窄屏分类菜单](assets/prediction-navigation-mobile-menu.png)，均已查看；第八张用户原图见 assets/request-prediction-navigation.png。
