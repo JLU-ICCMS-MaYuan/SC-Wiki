@@ -1,19 +1,22 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
-import { addPoint, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Point, type Rect } from './engine'
+import AxisOverlay from './AxisOverlay'
+import { addPoint, amplitudePixel, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
 
 export type Tool = 'select' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
 type Props = {
   doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool
   linked?: boolean; dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
   onSelect?: (ids: string[]) => void; onChange?: (doc: Document, detail?: string) => void
+  onAdded?: (id: string) => void; onZeroMarked?: () => void
   onPick?: (x: number, y: number) => void; onError?: (error: string) => void
 }
 type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
-export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, onSelect, onChange, onPick, onError }: Props) {
+export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, onSelect, onChange, onPick, onError, onAdded, onZeroMarked }: Props) {
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
-  const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 34, y - 3, w + 40, h + 10] }
+  const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 46, y - 10, w + 62, h + 32] }
   const [view, setView] = useState<Rect>(initial), [preview, setPreview] = useState<Document | null>(null)
+  const [showAxes, setShowAxes] = useState(true)
   const [box, setBox] = useState<Rect | null>(null), [imageFailed, setImageFailed] = useState(false), [retry, setRetry] = useState(0), [scale, setScale] = useState(1)
   const clip = useId().replace(/:/g, ''), scene = preview || doc
   const curve = scene.curves.find(c => c.id === active)!
@@ -52,7 +55,17 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
     gesture.current = null; setPreview(null); setBox(null)
   }
   const operate = (action: () => void) => { try { action() } catch (e) { onError?.((e as Error).message) } }
+  const add = (x: number, y: number, zero = false) => operate(() => {
+    const ids = new Set(curve.points.map(p => p.id)), next = addPoint(doc, active, x, y, zero)
+    const nextCurve = next.curves.find(c => c.id === active)!
+    const added = nextCurve.points.find(p => !ids.has(p.id)) || (zero ? nextCurve.points.find(p => next.zero?.pointIds.includes(p.id)
+      && Math.abs(frequency(next, p)) < 1e-6 && Math.abs(amplitudePixel(next, p) - (next.calibration.direction === 'y' ? x : y)) <= 1e-4) : undefined)
+    onChange?.(next)
+    if (added) { onSelect?.([added.id]); onAdded?.(added.id) }
+  })
   return <div className={'canvas-shell ' + (editing ? 'interactive' : 'detail-canvas')}>
+    <button className="axis-toggle" aria-pressed={showAxes} onClick={() => setShowAxes(v => !v)}>轴与刻度</button>
+    {showAxes && <div className="axis-legend"><span>蓝：当前标定</span><span>灰：已有识别 / THz</span>{doc.id === 'alpha2f' && <span>棕：累计 λ 参考</span>}</div>}
     <div className="canvas-controls">
       <button aria-label="缩小" onClick={() => zoom(1.35)}>−</button><span>{Math.round(initial()[2] / view[2] * 100)}%</span>
       <button aria-label="放大" onClick={() => zoom(1 / 1.35)}>＋</button><button onClick={() => setView(initial())}>适应窗口</button>
@@ -67,9 +80,9 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
         const pan = tool === 'pan' || event.button === 1 || event.button === 2 || event.altKey
         if (!pan && event.button !== 0) return
         if (pan) gesture.current = { kind: 'pan', start: p, view, doc }
-        else if (tool === 'add') return operate(() => onChange?.(addPoint(doc, active, p.x, p.y)))
-        else if (tool === 'zeroPoint') return operate(() => onChange?.(addPoint(doc, active, p.x, p.y, true)))
-        else if (tool === 'zero') return operate(() => onChange?.(markZero(doc, p.x, p.y)))
+        else if (tool === 'add') return add(p.x, p.y)
+        else if (tool === 'zeroPoint') return add(p.x, p.y, true)
+        else if (tool === 'zero') return operate(() => { onChange?.(markZero(doc, p.x, p.y)); onSelect?.([]); onZeroMarked?.() })
         else if (tool === 'calibrate') return onPick?.(p.x, p.y)
         else if (tool === 'box') { gesture.current = { kind: 'box', start: p, view, doc }; setBox([p.x, p.y, 0, 0]) }
         else {
@@ -104,15 +117,12 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
             fill={picked ? '#fff' : affected ? '#f5ad35' : c.color} stroke={picked ? '#4f46e5' : '#fff'} strokeWidth={(picked ? 2.5 : .6) / scale} pointerEvents="none" />
         })}
       </g>)}
+      {showAxes && <AxisOverlay doc={scene} scale={scale} point={curve.points.find(p => p.id === selected[0])}/>}
       {scene.zero && (scene.calibration.direction === 'y'
         ? <line data-testid="zero-line" x1={x0} x2={x1} y1={scene.zero.pixel} y2={scene.zero.pixel} stroke="#e28a19" strokeWidth={1.5 / scale} strokeDasharray={`${5 / scale} ${4 / scale}`} />
         : <line data-testid="zero-line" y1={y0} y2={y1} x1={scene.zero.pixel} x2={scene.zero.pixel} stroke="#e28a19" strokeWidth={1.5 / scale} strokeDasharray={`${5 / scale} ${4 / scale}`} />)}
       {box && <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="#6455e822" stroke="#6455e8" strokeWidth={1 / scale} />}
-      {Array.from({ length: 5 }, (_, i) => {
-        const p = { id: '', segment: '', status: '', x: x0 + (x1 - x0) * i / 4, y: y1 - (y1 - y0) * i / 4 } as Point
-        const vertical = scene.calibration.direction === 'y'
-        return <text key={i} x={vertical ? x0 - 6 : p.x} y={vertical ? p.y + 2 : y1 + 13} fontSize={7} fill="#6e7890" textAnchor={vertical ? 'end' : 'middle'}>{Number(frequency(scene, p).toFixed(1))}</text>
-      })}
+
     </svg>
     <div className="canvas-caption">{editing ? '滚轮缩放 · 右键 / Alt 拖动平移 · 橙色点为联动范围' : '人工补点自动连线 · 未补选的缺口保留 · 演示数据'}</div>
   </div>

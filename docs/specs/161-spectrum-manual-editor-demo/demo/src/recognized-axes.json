@@ -1,0 +1,49 @@
+{
+  "sourceId": "lasc-290-figure-A",
+  "sourceSha256": "e6f8856d1c41cef1374cefeea9ee51358f4f5766b6ccfdad83ad3ef2f4aa0f4e",
+  "record": "docs/specs/154-alpha2f-detail-demo/assets/false-peak-fixture.json",
+  "recordSha256": "5ea6f6483830dbc0604d82983d5750fa97da1d8439ca5534cce1d3a5303d5d27",
+  "direction": "y",
+  "frequencyUnit": "THz",
+  "frequencyTicks": [
+    [
+      435.0,
+      0.0
+    ],
+    [
+      311.0,
+      20.0
+    ],
+    [
+      188.0,
+      40.0
+    ],
+    [
+      65.0,
+      60.0
+    ]
+  ],
+  "lambdaTicks": [
+    [
+      636.0,
+      0.0
+    ],
+    [
+      675.0,
+      1.0
+    ],
+    [
+      714.0,
+      2.0
+    ],
+    [
+      752.0,
+      3.0
+    ],
+    [
+      791.0,
+      4.0
+    ]
+  ],
+  "note": "频率刻度复用已有标定识别记录；旧幅值候选0–4属于累计λ，仅供原图参考。PhDOS共用该图频率轴，幅值无数字识别记录。"
+}

@@ -13,7 +13,7 @@ async function main() {
  context.on('page', page => {page.on('pageerror',e=>report.errors.push(e.message));page.on('download',d=>report.downloads.push(d.suggestedFilename()))});
  context.on('request', r => { if(new URL(r.url()).pathname.startsWith('/api/')) report.apiRequests.push({url:r.url(),method:r.method()}) });
  const page = await context.newPage();page.setDefaultTimeout(10000);
- const shot = async name => {await page.screenshot({path:path.join(out,'xy-'+name+'.png'),fullPage:true});report.screenshots.push('xy-'+name+'.png')};
+ const shot = async name => {await page.screenshot({path:path.join(out,'axes-'+name+'.png'),fullPage:true});report.screenshots.push('axes-'+name+'.png')};
  const button = name => page.getByRole('button',{name,exact:true});
  const svg = () => page.getByRole('application',{name:'谱线人工编辑画布'});
  const screen = (x,y) => svg().evaluate((el,p)=>{const v=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:v.x,y:v.y}}, {x,y});
@@ -24,7 +24,11 @@ async function main() {
  try {
   await page.goto(base);await button('✎ 编辑').waitFor();await shot('demo-alpha-detail');
   assert.equal(await page.getByRole('button',{name:/导出|下载/}).count(),0);
-  await button('✎ 编辑').click();await svg().waitFor();const start=await points();assert.equal(Object.keys(start).length,samples[0].curves[0].points.length);
+  await button('✎ 编辑').click();await svg().waitFor();
+  const recognizedTicks=await page.locator('[data-axis-tick="recognized-frequency"]').evaluateAll(nodes=>nodes.map(n=>[Number(n.dataset.pixel),Number(n.dataset.value)]));assert.deepEqual(recognizedTicks,[[435,0],[311,20],[188,40],[65,60]]);
+  assert.equal(await page.locator('[data-axis-tick="recognized-lambda"]').count(),5);assert(await page.getByText('累计 λ · 识别参考',{exact:true}).isVisible());assert(await page.getByTestId('calibrated-zero').isVisible());check('原图叠加真实记录的频率刻度与独立λ参考，当前标定零线可见');
+  await button('轴与刻度').click();assert.equal(await page.getByTestId('axes-overlay').count(),0);await button('轴与刻度').click();check('辅助轴可隐藏/恢复，不修改点');
+  const start=await points();assert.equal(Object.keys(start).length,samples[0].curves[0].points.length);
   assert((await button('自由移动（X / Y）').getAttribute('class')).includes('active'));
   await page.getByLabel('附近点联动').uncheck();await drag('a-200',3,-3);const xy=await points();assert(Math.abs(xy['a-200'].x-start['a-200'].x-3)<.01);assert(Math.abs(xy['a-200'].y-start['a-200'].y+3)<.01);await button('↶ 撤销').click();assert.deepEqual(await points(),start);await page.getByLabel('附近点联动').check();check('默认X/Y自由移动，竖向可越过旧邻点频率，撤销恢复原坐标');
   const id='a-200';assert(start[id]);await drag(id,8,0);const moved=await points();
@@ -41,22 +45,29 @@ async function main() {
   await drag(id,2,0);assert(Math.abs((await points())[id].x-moved[id].x-2)<.01);check('鼠标中心放大后保持锚点，放大选点拖动仍准确');
   const view=await svg().getAttribute('data-viewbox');await page.mouse.move(500,450);await page.mouse.down({button:'right'});await page.mouse.move(540,475,{steps:4});await page.mouse.up({button:'right'});assert.notEqual(await svg().getAttribute('data-viewbox'),view);await button('适应窗口').click();check('右键平移及适应窗口');
   const p=(await points())[id];await clickAt(p.x,p.y);await page.getByLabel('选中点幅值').fill('35');await button('应用坐标到此点').click();assert(Math.abs((await points())[id].x-672)<.01);check('数值输入修改选中点坐标');
-  await page.locator('summary').click();const beforeCal=await points();await page.getByLabel('frequency-1-value',{exact:true}).fill('65');await button('应用标定').click();assert.deepEqual(await points(),beforeCal);await button('↶ 撤销').click();check('两点标定重新换算，全部源像素位置不变，可撤销');
+  await page.locator('summary').click();const beforeCal=await points();await page.getByLabel('frequency-1-value',{exact:true}).fill('65');await button('应用标定').click();assert.deepEqual(await points(),beforeCal);assert.deepEqual(await page.locator('[data-axis-tick="recognized-frequency"]').evaluateAll(nodes=>nodes.map(n=>[Number(n.dataset.pixel),Number(n.dataset.value)])),recognizedTicks);assert(await page.locator('[data-axis-tick="current-frequency"][data-value="65"]').count());await button('↶ 撤销').click();check('两点标定重新换算，全部源像素位置不变，可撤销');
+  await page.getByLabel('频率单位',{exact:true}).selectOption('meV');await button('应用标定').click();assert.deepEqual(await points(),beforeCal);assert.deepEqual(await page.locator('[data-axis-tick="recognized-frequency"]').evaluateAll(nodes=>nodes.map(n=>[Number(n.dataset.pixel),Number(n.dataset.value)])),recognizedTicks);assert(Number(await page.locator('[data-axis-tick="current-frequency"]').last().getAttribute('data-value'))>60);await button('↶ 撤销').click();check('改单位只更新当前刻度，已有识别THz值与点位置保持');
+  await page.getByLabel('频率轴方向',{exact:true}).selectOption('x');await button('应用标定').click();assert.equal(await page.getByTestId('current-axes').getAttribute('data-frequency-direction'),'x');assert.equal(await page.locator('[data-axis-tick="current-frequency"][data-value="0"]').getAttribute('data-pixel'),'637');assert.deepEqual(await points(),beforeCal);assert.deepEqual(await page.locator('[data-axis-tick="recognized-frequency"]').evaluateAll(nodes=>nodes.map(n=>[Number(n.dataset.pixel),Number(n.dataset.value)])),recognizedTicks);await button('↶ 撤销').click();check('频率轴切换为横轴时蓝色轴同步，已有识别轴与源像素不变');
+
   await page.locator('summary').click();
   await button('▣ 框选').click();let a=await screen(735,409),b=await screen(754,416);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:5});await page.mouse.up();await page.getByRole('button',{name:/删除选中点/}).click();const deleted=await points();assert.equal(Object.keys(deleted).filter(k=>k.startsWith('a-legend')).length,0);check('框选删除图例误识别点');
   await button('＋ 增加点').click();await clickAt(649,430.5);assert.equal(Object.keys(await points()).length,Object.keys(deleted).length+1);check('在原图缺失区域人工补点');
+  assert(await page.getByLabel('选中点频率').isVisible());assert(Math.abs(Number(await page.getByTestId('point-x').textContent())-649)<.001);assert(Math.abs(Number(await page.getByTestId('point-y').textContent())-430.5)<.001);assert(Math.abs(Number((await page.getByTestId('point-zero-distance').textContent()).replace(' px',''))-4.5)<.001);assert(await page.getByTestId('selected-point-projection').isVisible());check('新增点自动选中并显示X/Y、换算坐标、距零线距离及投影');
+
   const withAdded=await points();const addedId=Object.keys(withAdded).find(k=>!deleted[k]);
   const linkPath=await page.locator('[data-curve="alpha"]').getAttribute('d');
   const addedCommand=new RegExp('[ML]'+withAdded[addedId].x+','+withAdded[addedId].y+' [ML]');
   assert(addedCommand.test(linkPath));assert(!linkPath.includes('M'+withAdded[addedId].x+','+withAdded[addedId].y+' M'));check('人工端点补点与已有首点可见连续连线，未插入额外点');
 
-  await button('1 · 标记原图 0 频率位置').click();await clickAt(640,435);assert((await page.getByTestId('zero-status').textContent()).includes('不完整'));check('只标零频位置仍提示提取不完整');
-  await button('2 · 补选曲线零频点').click();await clickAt(641,435);assert((await page.getByTestId('zero-status').textContent()).includes('已记录'));check('显式原图零频点与零频标定分开，幅值由点击位置提供');
-  await button('↖ 选点 / 拖动').click();await shot('demo-alpha-editor');await button('保存调整').click();await button('✎ 编辑').waitFor();const savedAlpha=await stored('alpha2f');assert.equal(savedAlpha.zero.pointIds.length,1);const zp=savedAlpha.curves[0].points.find(p=>p.id===savedAlpha.zero.pointIds[0]);assert(Math.abs(zp.x-641)<.01);assert(Math.abs(zp.y-435)<.01);assert(savedAlpha.operations.length>4);
+  await button('1 · 标记原图 0 频率位置').click();await clickAt(640,435);assert((await page.getByTestId('zero-status').textContent()).includes('不完整'));check('只标零频位置仍提示提取不完整');assert(Math.abs(Number((await page.getByTestId('marked-zero-pixel').textContent()).replace(' px',''))-435)<.001);check('标记零频线后右侧直接显示原图位置和频率');
+  await button('2 · 补选曲线零频点').click();await clickAt(641,435);assert((await page.getByTestId('zero-status').textContent()).includes('已记录'));check('显式原图零频点与零频标定分开，幅值由点击位置提供');assert(Math.abs(Number(await page.getByLabel('选中点频率').inputValue()))<1e-6);assert.equal(await page.getByTestId('point-zero-distance').textContent(),'0 px');check('零频补点自动选中，频率0且距零线0像素');
+  const zeroCount=Object.keys(await points()).length;await clickAt(641.5,435);assert.equal(Object.keys(await points()).length,zeroCount);assert(Math.abs(Number(await page.getByTestId('point-x').textContent())-641.5)<.001);assert(Math.abs(Number(await page.getByLabel('选中点频率').inputValue()))<1e-6);check('替换已有零频点仍自动选中对应点，不新增重复点');
+
+  await button('↖ 选点 / 拖动').click();await shot('demo-alpha-editor');await button('保存调整').click();await button('✎ 编辑').waitFor();const savedAlpha=await stored('alpha2f');assert.equal(savedAlpha.zero.pointIds.length,1);const zp=savedAlpha.curves[0].points.find(p=>p.id===savedAlpha.zero.pointIds[0]);assert(Math.abs(zp.x-641.5)<.01);assert(Math.abs(zp.y-435)<.01);assert(savedAlpha.operations.length>4);
   assert((await page.getByTestId('frequency-range').textContent()).startsWith('0–'));await page.reload();await button('✎ 编辑').click();assert.deepEqual(await points(),Object.fromEntries(savedAlpha.curves[0].points.map(p=>[p.id,{x:p.x,y:p.y}])));check('保存、详情更新、刷新恢复与非零幅值零频点保留');
   await button('恢复原始提取').click();assert.deepEqual(await points(),start);await button('↶ 撤销').click();assert.deepEqual(await points(),Object.fromEntries(savedAlpha.curves[0].points.map(p=>[p.id,{x:p.x,y:p.y}])));check('恢复原始提取也可撤销');
   await button('恢复原始提取').click();await button('← 返回详情').click();await page.getByRole('dialog').waitFor();await button('继续编辑').click();assert(await svg().isVisible());await button('← 返回详情').click();await button('放弃修改').click();assert.deepEqual(await stored('alpha2f'),savedAlpha);check('未保存退出：继续编辑或放弃，不覆盖此前保存');
-  await button('声子 DOS').click();await shot('demo-dos-detail');await button('✎ 编辑').click();await page.getByRole('button',{name:/^H \d/}).click();const h=await points();const hid=Object.keys(h).find(k=>k==='H-200');assert(hid);await drag(hid,5,0);await shot('demo-dos-editor');await button('保存调整').click();const savedDos=await stored('phdos');for(const c of samples[1].curves.filter(c=>c.id!=='H'))assert.deepEqual(savedDos.curves.find(v=>v.id===c.id),c);check('PhDOS 只编辑所选 H 分波，La/Sc 保持原样');
+  await button('声子 DOS').click();assert.equal(await page.locator('[data-axis-tick="recognized-lambda"]').count(),0);assert.equal(await page.locator('[data-axis-tick="recognized-frequency"]').count(),4);check('PhDOS共用频率识别，未把λ或相对像素冒充DOS识别幅值');await shot('demo-dos-detail');await button('✎ 编辑').click();await page.getByRole('button',{name:/^H \d/}).click();const h=await points();const hid=Object.keys(h).find(k=>k==='H-200');assert(hid);await drag(hid,5,0);await shot('demo-dos-editor');await button('保存调整').click();const savedDos=await stored('phdos');for(const c of samples[1].curves.filter(c=>c.id!=='H'))assert.deepEqual(savedDos.curves.find(v=>v.id===c.id),c);check('PhDOS 只编辑所选 H 分波，La/Sc 保持原样');
   await button('✎ 编辑').click();await page.getByRole('button',{name:/^La \d/}).click();const la=await points();await button('自由移动（X / Y）').click();await page.getByLabel('附近点联动').uncheck();await drag('La-420',2,-.2);const laAfter=await points();assert.notDeepEqual(laAfter['La-420'],la['La-420']);assert.deepEqual(laAfter['La-419'],la['La-419']);check('二维单点模式可同时改频率和幅值，其余点不动');
   await button('← 返回详情').click();await button('保存并返回').click();await button('✎ 编辑').waitFor();check('未保存退出：保存并返回');
   await page.setViewportSize({width:390,height:844});await shot('demo-mobile-detail');assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await button('✎ 编辑').click();await svg().waitFor();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await shot('demo-mobile-editor');check('390px 详情和全屏编辑器无页面横向溢出');
@@ -103,8 +114,8 @@ async function main() {
     return {points:10000,iterations:120,prepareMs,medianMoveAndPathMs:times[60],p95MoveAndPathMs:times[114],weightedPoints:prepared.byId.size,changedPoints:moved.curves[0].points.filter(p=>p.y!==50).length,includesReactRender:false};
   });assert.equal(report.performance.weightedPoints,35);assert.equal(report.performance.changedPoints,35);check('10000点只对35点施加位移，120次移动复用同一准备结果；记录核心计算与路径生成耗时');
   assert.equal(await page.getByRole('button',{name:/导出|下载/}).count(),0);assert.deepEqual(report.apiRequests,[]);assert.deepEqual(report.downloads,[]);assert.deepEqual(report.errors,[]);check('无业务 API 请求、无下载入口/下载事件、无页面脚本错误');
-  report.status='passed';fs.writeFileSync(path.join(out,'xy-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
- } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'xy-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
+  report.status='passed';fs.writeFileSync(path.join(out,'axes-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
+ } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'axes-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
  finally {await browser.close()}
 }
 main().catch(e=>{console.error(e);process.exit(1)});

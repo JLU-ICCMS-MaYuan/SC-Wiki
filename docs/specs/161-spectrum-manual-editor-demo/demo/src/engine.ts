@@ -166,11 +166,16 @@ export function reconnectManualPoints(doc: Document, curveId: string): Document 
 
 }
 
+// SVG 逆变换在边框处会产生约1e-5像素的指针/矩阵舍入误差，只容忍数值噪声，不吸附真实图外点击。
+function clickInPlot(doc: Document, x: number, y: number): [number, number] {
+  const [x0,y0,x1,y1] = doc.source.plot, epsilon = 1e-4
+  if (![x,y].every(Number.isFinite) || x < x0-epsilon || x > x1+epsilon || y < y0-epsilon || y > y1+epsilon) throw new Error('请在原图图框内选点')
+  return [Math.max(x0,Math.min(x1,x)), Math.max(y0,Math.min(y1,y))]
+}
 export function addPoint(doc: Document, curveId: string, x: number, y: number, zero = false): Document {
   const curve = doc.curves.find(c => c.id === curveId)
   if (!curve) throw new Error('请先选择一条曲线')
-  const [x0, y0, x1, y1] = doc.source.plot
-  if (![x, y].every(Number.isFinite) || x < x0 || x > x1 || y < y0 || y > y1) throw new Error('请在图框内选点')
+  ;[x,y] = clickInPlot(doc,x,y)
   if (zero) {
     if (!doc.zero) throw new Error('请先标记原图的真实零频位置')
     const at = doc.calibration.direction === 'x' ? x : y
@@ -189,9 +194,8 @@ export function addPoint(doc: Document, curveId: string, x: number, y: number, z
   return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points: result, pathOrdered: true } : c), zero: zero && doc.zero ? { ...doc.zero, pointIds: [...new Set([...doc.zero.pointIds, p.id])] } : doc.zero }, zero ? 'zero-point' : 'add', `${curve.name}：在源像素 (${x.toFixed(2)}, ${y.toFixed(2)}) 选点`)
 }
 export function markZero(doc: Document, x: number, y: number): Document {
+  ;[x,y] = clickInPlot(doc,x,y)
   const pixel = doc.calibration.direction === 'x' ? x : y
-  const [x0, y0, x1, y1] = doc.source.plot
-  if (x < x0 || x > x1 || y < y0 || y > y1) throw new Error('零频位置必须在原图图框内')
   const axis = doc.calibration.frequency, offset = valueAt(axis, pixel)
   return record({ ...doc, calibration: { ...doc.calibration, frequency: { ...axis, values: [axis.values[0] - offset, axis.values[1] - offset] } }, zero: { pixel, pointIds: [] } }, 'zero-line', '人工标记原图零频位置，仍需补选当前曲线零频点')
 }
