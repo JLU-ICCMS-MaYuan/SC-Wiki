@@ -15,6 +15,34 @@ REVISION = "56bc783908a60e8a15e31b60018e6f3c3e48f593"
 _LOCK = threading.Lock()
 
 
+def parse_structure(text, fmt="auto"):
+    """按内容识别结构；显式指定格式时保留选择并提示不匹配。"""
+    from ase.io import read
+    if fmt not in ("auto", "cif", "vasp"):
+        raise ValueError("请选择自动识别、CIF 或 POSCAR／CONTCAR")
+    if not text.strip() or len(text.encode()) > 256 * 1024:
+        raise ValueError("请提供非空且不超过 256 KiB 的结构文件")
+    text = text.lstrip("\ufeff")
+    names = {"cif": "CIF", "vasp": "POSCAR／CONTCAR"}
+    candidates = ("cif", "vasp") if fmt == "auto" else (fmt,)
+    for candidate in candidates:
+        try:
+            atoms = read(StringIO(text), format=candidate)
+            if len(atoms):
+                return atoms, candidate
+        except Exception:
+            continue
+    if fmt != "auto":
+        other = "vasp" if fmt == "cif" else "cif"
+        try:
+            alternate = read(StringIO(text), format=other)
+        except Exception:
+            alternate = None
+        if alternate is not None and len(alternate):
+            raise ValueError(f"当前选择了 {names[fmt]}，但内容可按 {names[other]} 读取；请选择“自动识别”或 {names[other]}")
+    raise ValueError("无法读取结构，请提供完整的 CIF 或 POSCAR／CONTCAR 内容（包括晶胞、元素和全部原子坐标）")
+
+
 def parameters(values, require_w2=False):
     required = ["lambda", "omega_log", "mu_star"] + (["omega_2"] if require_w2 else [])
     parsed = {}
@@ -94,16 +122,8 @@ class BetePredictor:
         self.model.eval()
 
     def predict(self, text, fmt):
-        from ase.io import read
         from ase.neighborlist import neighbor_list
-        if fmt not in ("cif", "vasp"):
-            raise ValueError("只支持 CIF 或 POSCAR／CONTCAR")
-        if not text.strip() or len(text.encode()) > 256 * 1024:
-            raise ValueError("请提供非空且不超过 256 KiB 的结构文件")
-        try:
-            atoms = read(StringIO(text), format=fmt)
-        except Exception as exc:
-            raise ValueError("结构无法解析，请检查格式和晶胞／原子坐标") from exc
+        atoms, actual_format = parse_structure(text, fmt)
         if not 1 <= len(atoms) <= 80 or not self.np.isfinite(atoms.positions).all() or not self.np.isfinite(atoms.cell.array).all():
             raise ValueError("结构必须包含 1–80 个原子，坐标与晶胞必须为有限数")
         if atoms.get_volume() / len(atoms) < 2 or not atoms.pbc.all():
@@ -138,7 +158,7 @@ class BetePredictor:
         denominator = lam - mu * (1 + 0.62 * lam)
         # 分母非正时不把公式发散解释成超高 Tc；谱和参数仍可用于核查。
         tc = wlog / 1.2 * math.exp(-1.04 * (1 + lam) / denominator) if denominator > 0 else None
-        return {"model_id": "bete-cso", "tc": tc, "formula": atoms.get_chemical_formula(), "parameters": {"lambda": lam, "omega_log": wlog, "omega_2": w2, "mu_star": mu}, "spectrum": {"frequency": frequency.tolist(), "a2f": spectrum.tolist(), "unit": "meV"}, "ensemble_size": 100, "method": "BETE-NET-CSO，100 网络平均谱＋作者 Tc 后处理", "version": REVISION, "warning": "0.25–100.25 meV 谱网格；高压氢化物及非谐效应未获本 Demo 验证。" if tc is not None else "已得到谱；Tc 公式分母非正，当前参数无法给出有效 Tc。", "units": {"tc": "K", "omega_log": "K", "omega_2": "K"}}
+        return {"model_id": "bete-cso", "tc": tc, "formula": atoms.get_chemical_formula(), "input_format": actual_format, "parameters": {"lambda": lam, "omega_log": wlog, "omega_2": w2, "mu_star": mu}, "spectrum": {"frequency": frequency.tolist(), "a2f": spectrum.tolist(), "unit": "meV"}, "ensemble_size": 100, "method": "BETE-NET-CSO，100 网络平均谱＋作者 Tc 后处理", "version": REVISION, "warning": "0.25–100.25 meV 谱网格；高压氢化物及非谐效应未获本 Demo 验证。" if tc is not None else "已得到谱；Tc 公式分母非正，当前参数无法给出有效 Tc。", "units": {"tc": "K", "omega_log": "K", "omega_2": "K"}}
 
 
 @lru_cache(maxsize=1)
@@ -153,7 +173,7 @@ def predict(request):
         if not _LOCK.acquire(blocking=False):
             raise RuntimeError("结构模型正在运行，请稍后重试")
         try:
-            result = predictor().predict(request.get("structure", ""), request.get("format", "cif"))
+            result = predictor().predict(request.get("structure", ""), request.get("format", "auto"))
         finally:
             _LOCK.release()
     else:

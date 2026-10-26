@@ -42,3 +42,5 @@ T001：固定 Git blob 校验、100 权重与原数据实际获取；T002：asse
 
 - [x] T014 在 demo/src/App.tsx 收敛“论文链接／原始网站”文字入口、移除裸网址与许可版本、合并同仓库重复入口；浏览器验证 FR-023／024、SC-015。
 - [x] T015 在 demo/scripts/prepare.py 和 catalog.json 生成并展示一份 BETE 数据整包；assets/demo-bundle-validation.json 验证 1212 个作者原文件、806 个结构及来源说明，真实浏览器下载验证 FR-025／SC-016。
+
+- [x] T016 在 demo/inference.py、demo/src/App.tsx 中实现默认内容识别、上传／粘贴恢复 auto、明确格式不匹配错误与结果格式标记；使用用户原文 demo/tests/fixtures/MgB2.POSCAR 和 tests/structure-format.cjs 验证 FR-026／027、SC-017／018。

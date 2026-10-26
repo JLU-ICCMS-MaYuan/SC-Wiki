@@ -49,3 +49,5 @@
 
 - [x] CHK023 最新三项反馈逐字追加，两张原图与此前三张一起归档；文字链接、入口去重、隐藏技术信息和单个数据包由 FR-023 至 FR-025／SC-015／016 覆盖。
 - [x] CHK024 整包不是改写原始数据，也不补造未公开文件；1212 个作者文件逐一匹配固定 Git 对象，范围与来源说明在包内保留，见 demo-bundle-validation.json。
+
+- [x] CHK025 已保存用户 POSCAR 原文与第六张错误截图；修复前明确复现 cif=400、vasp=200，修复后八项真实浏览器／API 解析回归通过，晶胞和坐标未改变。证据：assets/structure-format-validation.json 与 demo/tests/fixtures/MgB2.POSCAR。

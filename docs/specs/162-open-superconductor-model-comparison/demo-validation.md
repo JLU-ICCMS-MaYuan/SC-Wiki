@@ -90,3 +90,13 @@ BETE 不再拆成“作者原始数据库”和“结构与训练／测试划分
 [整包核验记录](assets/demo-bundle-validation.json)确认 ZIP 完整，包内 1212 个作者文件逐一匹配固定版本 Git blob 与 SHA-256；没有混入权重或生成替代数据。浏览器实际下载整包及另外两个就绪训练文件，下载字节与目录摘要一致。来源链接目标、同仓库去重、无裸网址／校验码、等高布局、真实模型运行、原接口内嵌与 390px 操作回归均通过；最新记录见 assets/demo-browser-validation.json。
 
 两张新增用户截图与此前三张一起归档于 assets/user-layout-images.json。历史段落中的分文件下载、复制和许可展示为旧版本记录，当前行为以本节为准。
+
+## 用户 MgB2 POSCAR 解析错误修复
+
+修复前使用用户完整原文复现：当前页面默认选择 CIF，实际请求也发送 format=cif，返回 400“结构无法解析”；同一文本显式 format=vasp 返回 200，原子组成 B2Mg（即 MgB2）。因此本次根因是粘贴内容后仍沿用 CIF 选项，不是首行反斜杠、晶格或坐标无效。
+
+现在页面和 API 缺省为 auto，按真实解析器识别；上传／粘贴及样本载入恢复 auto，用户仍可随后手动指定。手动选错时返回具体格式不匹配提示；不完整内容仍拒绝。返回及结果区标记实际输入格式。
+
+用户结构读出 3 个原子（Mg、B、B），晶格与分数坐标按绝对误差 1e-12 对照一致；文本内容未改写。真实 100 网络推理的自动与显式 POSCAR 结果一致。该检查证明格式处理和推理链路可运行，不是 MgB2 实验 Tc 的准确性验收。
+
+[八项回归记录](assets/structure-format-validation.json)覆盖原文自动／显式读取、无 format API、手动错误提示、粘贴、错误后缀上传、CIF 示例及无效输入；[运行截图](assets/mg-b2-poscar-success.png)。用户原图见 assets/request-poscar-error.png，原文夹具为 demo/tests/fixtures/MgB2.POSCAR。只改变输入格式处理，不改变模型权重或后处理公式。

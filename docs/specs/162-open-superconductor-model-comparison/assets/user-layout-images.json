@@ -73,5 +73,24 @@
     "media_type": "image/png",
     "user_context": "2. **原始网址也是点击“原始网站”就行，不要显示出来原始网站。而且已经有“模型代码”按钮了，为什么还要原始网址按钮。**",
     "verification": "已查看原图，复制原字节并核对 SHA-256 与尺寸"
+  },
+  {
+    "id": "IMG-006",
+    "upload_order": 6,
+    "original_name": "codex-clipboard-16a7f8b4-fd83-4e74-ad16-39c6bb9084dc.png",
+    "locator": "assets/request-poscar-error.png",
+    "status": "local_verified",
+    "sha256": "1fe545aa8bddc63b8f289d3b8733e6ad4ec28199ba897d7fd9ce870f44766660",
+    "dimensions_px": [
+      3106,
+      1594
+    ],
+    "media_type": "image/png",
+    "user_context": "为什么我输入 POSCAR结构：",
+    "related": [
+      "FR-026",
+      "SC-017"
+    ],
+    "verification": "已查看原图，按字节复制并核对摘要和尺寸；结构原文单独保存为测试夹具"
   }
 ]
