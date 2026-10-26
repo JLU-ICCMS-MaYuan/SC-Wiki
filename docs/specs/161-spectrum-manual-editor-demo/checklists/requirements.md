@@ -2,7 +2,7 @@
 
 - [x] CHK019 用户正式接入授权已追加，FR-037至041/SC-023与正式计划/合同覆盖真实数据责任、权限、版本和历史边界。
 - [x] CHK020 正式代码无docs样例依赖，Demo调参哈希不变；74后端/42前端、隔离数据库浏览器及构建证据见 production-validation.md。
-- [ ] CHK021 MySQL目标环境复验：隔离库创建失败，当前SQLite持久链路通过；不据此关闭Issue。
+- [x] CHK021 用户明确授权当前MySQL验证后，21项正式HTTP/数据库测试通过；原有谱记录哈希/数量不变、测试记录清理完毕，证据见 current-mysql-validation.md。远程Spec链接仍待验证，Issue不据此自动关闭。
 
 - [x] CHK001 用户完整需求、补充及批准方案保存在 spec.md“原始需求记录”；入口采用最后要求，导出明确移除。
 - [x] CHK002 FR-001 至 FR-013 覆盖五节方案，SC-001 至 SC-007 对应 US1 至 US4；plan.md 和 tasks.md 包含数据、行为与验收映射。

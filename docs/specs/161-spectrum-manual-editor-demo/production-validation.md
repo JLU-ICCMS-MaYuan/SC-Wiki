@@ -16,9 +16,11 @@
 - [冲突保留输入](assets/production-conflict.png)
 - [窄屏详情](assets/production-mobile-detail.png)、[窄屏编辑器](assets/production-mobile-editor.png)
 
-## 未完成的外部环境验证
+## 当前MySQL环境验证已补齐
 
-尝试在本机MySQL 3307创建独立测试库失败（当前账号无法完成建库），没有修改业务库、表或数据。本轮SQLite验证不能替代MySQL行锁与JSON持久化的实际环境复验；隔离MySQL测试支持 `SCWIKI_MANUAL_TEST_DATABASE_URL`，明确拒绝不含 `issue161_test_` 的数据库。未执行生产部署、迁移、推送或业务数据回填。
+用户随后明确授权使用当前库，不需要独立测试库。已在 `127.0.0.1:3307/scwiki`（MySQL 8.4.2）通过21项正式HTTP/数据库测试，包括并发行锁竞争。只在随机测试target下创建/清理谱数据，未建库、建表、清表。原有16个集合、38个运行的前后哈希和数量一致，无新增残留。详见 [本次验证](current-mysql-validation.md) 与 [机器证据](assets/current-mysql-validation.json)。
+
+此前因建独立库失败而保留的“MySQL尚未复验”限制已解除；之前浏览器使用SQLite、测试身份由依赖提供等边界仍然有效。本次不声称真实JWT/Redis和当前MySQL的浏览器端到端链路已经重测。没有部署、推送或业务数据回填。
 
 本轮软件实现与隔离存储链路通过，不代表整谱科学正确、训练就绪或已获科学采纳。人工修订后积分明确失效，需要另行核对；旧自动结果和历史保留。
 

@@ -6,7 +6,7 @@
 
 版本冲突和网络失败保留编辑内容，不覆盖别人新保存的结果。历史/只读页面不能保存；服务端重算零频检查，旧积分、比较和采纳失效，位置完成不代表整谱科学通过。
 
-正式参数文件为 `frontend/src/components/spectrumEditor/dragInfluence.ts`，初值沿用用户2/.3/1/.1。原Demo参数和本机草稿未改动，正式页面不读取Demo草稿。[正式接口](contracts/production.md)与[验证边界](production-validation.md)分别记录权限/版本及MySQL尚未复验的限制。
+正式参数文件为 `frontend/src/components/spectrumEditor/dragInfluence.ts`，初值沿用用户2/.3/1/.1。原Demo参数和本机草稿未改动，正式页面不读取Demo草稿。[正式接口](contracts/production.md)与[验证边界](production-validation.md)分别记录权限/版本及当前MySQL验证与浏览器验收的边界。
 
 ## 独立 Demo
 
@@ -82,3 +82,9 @@
 3. 蓝色零频虚线与原图0位置相符时，在右侧“坐标与零频核对”中点击“确认蓝色零频线与原图一致”。若不相符，向下滚动右侧面板到“零频边界”，点击“1 · 标记原图 0 频率位置”，再在0刻度对应的图框内位置点击。
 4. 在这条零频线上确认当前曲线的数据点。已有点就选中它，点击“确认选中点为零频点”；缺点则到“零频边界”点击“2 · 补选曲线零频点”，在原图曲线与零频线的交点处点击。右侧应显示频率0、距零线0 px。零频率不要求幅值也为0；原图看不清时保留待核对。
 5. 点击“保存调整”，返回详情检查结果。PhDOS的零频线只需确认一次，但La、Sc、H的零频点要分别处理，全部完成后才显示整体完成。
+
+## 当前MySQL验证说明
+
+仅在获得当前操作的明确授权后，使用 `python -m scripts.verify_spectrum_manual_current_mysql --authorized-current-mysql --report <报告路径>`。脚本从当前仓库配置读取连接，限定本次授权目标127.0.0.1:3307/scwiki；不输出密码，不修改.env。每例使用随机测试target，finally仅清理该target下的记录，前后对既有谱行做哈希核对。
+
+未提供授权开关时拒绝测试；不要把测试模块旧版带清表逻辑的隔离库命令用于业务库。当前测试实现已经移除MySQL建表/全表删除分支。

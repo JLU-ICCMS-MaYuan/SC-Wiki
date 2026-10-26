@@ -77,3 +77,10 @@ Issue [#161](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/161) 是协作�
 - [x] T031 完成隔离SQLite/HTTP、前端及浏览器验证，回写Overview并精确提交；MySQL环境复验尚未完成，见下方边界。
 
 正式接入验证：74项后端、42项前端与正式页面/隔离SQLite浏览器流程通过；构建通过。MySQL隔离库未能创建，不把该环境标为已通过。详见 production-validation.md。
+
+## 当前MySQL库验证
+
+- [x] T032 按用户授权确认当前库，改造测试为随机target及精确清理；不执行DDL或全表删除。
+- [x] T033 当前MySQL正式接口21项通过，包括并发行锁；原有16集合/38运行前后哈希一致。SQLite回归20项通过、MySQL专用项跳过。详见 current-mysql-validation.md。
+
+此记录取代前轮MySQL未验证的状态；不改变前轮浏览器使用SQLite的实际证据。
