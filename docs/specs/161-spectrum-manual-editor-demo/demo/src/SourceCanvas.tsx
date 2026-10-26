@@ -4,7 +4,7 @@ import { addPoint, amplitudePixel, curvePath, frequency, markZero, prepareMove, 
 
 export type Tool = 'select' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
 type Props = {
-  doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool
+  doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool; imageOpacity?: number
   linked?: boolean; dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
   onSelect?: (ids: string[]) => void; onChange?: (doc: Document, detail?: string) => void
   onAdded?: (id: string) => void; onZeroMarked?: () => void
@@ -12,7 +12,7 @@ type Props = {
 }
 type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
-export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, onSelect, onChange, onPick, onError, onAdded, onZeroMarked }: Props) {
+export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onZeroMarked }: Props) {
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
   const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 46, y - 10, w + 62, h + 32] }
   const [view, setView] = useState<Rect>(initial), [preview, setPreview] = useState<Document | null>(null)
@@ -106,7 +106,7 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
         }
       }} onPointerUp={() => finish()} onPointerCancel={() => finish(true)}>
       <defs><clipPath id={clip}><rect x={scene.source.viewport[0]} y={scene.source.viewport[1]} width={scene.source.viewport[2]} height={scene.source.viewport[3]} /></clipPath></defs>
-      {display !== 'data' && <image key={retry} href={scene.source.image} width={scene.source.width} height={scene.source.height} clipPath={`url(#${clip})`} onError={() => setImageFailed(true)} />}
+      {display !== 'data' && <image data-testid="source-image" opacity={imageOpacity / 100} key={retry} href={scene.source.image} width={scene.source.width} height={scene.source.height} clipPath={`url(#${clip})`} onError={() => setImageFailed(true)} />}
       {display === 'data' && <rect x={x0} y={y0} width={x1 - x0} height={y1 - y0} fill="#fff" stroke="#9ea8b9" strokeWidth={1 / scale} />}
       {display !== 'source' && scene.curves.filter(c => all || c.id === active).map(c => <g key={c.id} opacity={editing && c.id !== active ? .3 : 1}>
         <path d={paths.get(c.id)} fill="none" stroke="white" strokeWidth={4 / scale}/>

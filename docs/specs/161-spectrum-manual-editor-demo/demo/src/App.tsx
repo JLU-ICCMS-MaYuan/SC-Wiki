@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import ZeroFrequencyCheck from './ZeroFrequencyCheck'
 import { checkZeroFrequency, confirmCurrentZeroBoundary, confirmExistingZeroPoint, type ZeroCurveCheck } from './zeroCheck'
+import ImageOpacityControl from './ImageOpacityControl'
 import SourceCanvas, { type Tool } from './SourceCanvas'
 import fixtures from './fixtures.json'
 import { DRAG_INFLUENCE } from './dragInfluence'
@@ -54,6 +55,7 @@ export default function App() {
   const [checkedAfterSave, setCheckedAfterSave] = useState(false)
   const [editor, setEditor] = useState(false), [active, setActive] = useState(doc.curves[0].id), [selected, setSelected] = useState<string[]>([])
   const [tool, setTool] = useState<Tool>('select'), [linked, setLinked] = useState(true), [dragMode, setDragMode] = useState<'amplitude' | 'free'>('free')
+  const [imageOpacity, setImageOpacity] = useState(100)
   const [display, setDisplay] = useState('overlay'), [all, setAll] = useState(true)
   const [error, setError] = useState(loaded.error), [blocked, setBlocked] = useState(loaded.blocked), [notice, setNotice] = useState('')
   const [exitModal, setExitModal] = useState(false), exitAction = useRef<() => void>(() => {})
@@ -173,11 +175,12 @@ export default function App() {
       {editor ? <div className="editor-layout"><section className="workbench">
         <div className="tool-strip">{([['select','↖ 选点 / 拖动'],['pan','✥ 平移'],['add','＋ 增加点'],['box','▣ 框选']] as [Tool,string][]).map(([value,label]) => <button key={value} className={tool === value ? 'active' : ''} onClick={() => { setTool(value); setPick(null) }}>{label}</button>)}<div className="tool-strip-end"><label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></div></div>
         <div className="tool-hint">{tool === 'zero' ? '在原图真实零频刻度处点击，橙色线只表示标定位置。' : tool === 'zeroPoint' ? '在橙色零频线上的真实曲线位置点击，幅值取自你的点击。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? '点击在线段内插点或延伸最近端点；保留点击坐标和描线顺序。' : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : `选择一个点，拖动修正局部形状。两侧各 ${DRAG_INFLUENCE.coreNeighbors} 个邻点明显跟随，更远点指数衰减。`}</div>
-        <SourceCanvas doc={doc} active={active} selected={selected} editing tool={tool} linked={linked} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onAdded={focusCoordinates} onZeroMarked={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
+        <div className="editor-canvas-row"><ImageOpacityControl value={imageOpacity} onChange={setImageOpacity} disabled={display === 'data'}/>
+        <SourceCanvas doc={doc} active={active} selected={selected} imageOpacity={imageOpacity} editing tool={tool} linked={linked} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onAdded={focusCoordinates} onZeroMarked={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
           if (!pick) return
           const direction = pick.axis === 'frequency' ? calibration.direction : calibration.direction === 'x' ? 'y' : 'x'
           axisEdit(pick.axis, 'pixels', pick.index, direction === 'x' ? x : y); setTool('select'); setPick(null)
-        }}/>
+        }}/></div>
         <footer className="workbench-footer"><span><i style={{ background: curve.color }}/>{curve.name} · {curve.points.length} 个点</span><span>{displayedRange}</span><span>{doc.operations.length} 次人工操作</span></footer>
       </section><aside className="inspector">
         {selectedPanel}
@@ -211,9 +214,11 @@ export default function App() {
       </aside></div> : <>
         <section className="card material-card"><div><span className="section-number">01</span><h2>材料与来源</h2></div><div className="material-body"><div><strong>LaSc₂H₂₄ <span className="muted">· 290 GPa</span></strong><p className="muted">来源图 A · {doc.title} · 固定图像与演示点</p></div><span className="status-pill">待人工核对</span></div></section>
         <div className="analysis-grid"><section className="card plot-card"><div className="card-title"><div><span className="section-number">02</span><h2>原图与提取结果</h2></div><button className="primary" onClick={() => { setEditor(true); setSelected([]); setTool('select'); setDisplay('overlay'); setNotice('') }}>✎ 编辑</button></div>
+          <div className="detail-plot-body"><ImageOpacityControl value={imageOpacity} onChange={setImageOpacity} disabled={display === 'data'}/><div className="detail-plot-content">
           <div className="segmented view-switch">{[['source','仅原图'],['data','仅提取数据'],['overlay','原图与数据叠加']].map(([v,label]) => <button key={v} className={display === v ? 'active' : ''} onClick={() => setDisplay(v)}>{label}</button>)}</div>
           {doc.curves.length > 1 && <div className="detail-curves">{curvePicker}<label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>全部分波</label></div>}
-          <SourceCanvas doc={doc} active={active} selected={[]} display={display} all={all}/><div className="plot-footnote"><span style={{color:curve.color}}>● {curve.name}</span><span>源图与提取点共用像素坐标</span></div>
+          <SourceCanvas doc={doc} active={active} selected={[]} imageOpacity={imageOpacity} display={display} all={all}/><div className="plot-footnote"><span style={{color:curve.color}}>● {curve.name}</span><span>源图与提取点共用像素坐标</span></div>
+          </div></div>
         </section><div className="result-column"><section className="card"><div className="card-title"><div><span className="section-number">03</span><h2>{sampleId === 'phdos' ? '频段与数据完整性' : '积分结果与参考值对比'}</h2></div></div><div className="metric-pair"><div><small>实际数据频率范围</small><strong data-testid="frequency-range">{displayedRange}</strong></div><div><small>当前曲线数据点</small><strong>{curve.points.length} <small>个</small></strong></div></div>{<ZeroFrequencyCheck result={savedCheck} unit={saved.calibration.frequency.unit} afterSave={checkedAfterSave} onContinue={continueZeroCheck}/>}<div className="metric-placeholder"><span>{sampleId === 'phdos' ? '总振动模式数 / 3N 核验' : 'λ / ωlog 积分'}</span><strong>暂不可计算</strong></div><p className="muted">幅值刻度和科学依据待核对。人工选点或调整完成，不代表积分条件已满足。</p></section><section className="card guide-card"><span className="eyebrow">MANUAL CORRECTION</span><h2>把判断交还给你</h2><p>删掉图例误识别，补上漏掉的点，<br/>或揪住一个点，轻轻修正整段曲线。</p><ol><li>点击左侧“编辑”，放大原图。</li><li>选择曲线和数据点，调整局部形状。</li><li>保存后回到这里，查看修改结果。</li></ol><div className="callout info">本机 Demo 草稿 · 无下载与导出<br/>后续正式接入才会写入数据库。</div></section></div></div>
         <section className="card"><div className="card-title"><div><span className="section-number">04</span><h2>逐数据点核对</h2></div><span className="muted">{curve.name} · 幅值为{doc.calibration.amplitude.unit === 'pixel' ? '相对像素' : doc.calibration.amplitude.unit}</span></div><PointTable doc={doc} active={active} selected={selected} onSelect={setSelected}/></section>
       </>}
