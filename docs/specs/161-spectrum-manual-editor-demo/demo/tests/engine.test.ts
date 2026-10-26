@@ -28,10 +28,10 @@ describe('坐标与示例契约', () => {
 })
 describe('局部形状与限位', () => {
   it('中心完全跟随、邻点平滑衰减、范围外不动', () => {
-    expect(neighborWeight(0)).toBe(1); expect(neighborWeight(5)).toBe(.6); expect(neighborWeight(6)).toBeCloseTo(.6*Math.exp(-.5)); expect(neighborWeight(18)).toBe(0)
+    expect(neighborWeight(0)).toBe(1); expect(neighborWeight(3)).toBe(.6); expect(neighborWeight(4)).toBeCloseTo(.6*Math.exp(-.5)); expect(neighborWeight(16)).toBe(0)
     const d=move(base,'a','p1',20,-10,true,'amplitude')
     expect(d.curves[0].points[1].y).toBe(40);expect(d.curves[0].points[1].x).toBe(20)
-    expect(d.curves[0].points[2].y).toBeCloseTo(40.8);expect(d.curves[0].points[3].y).toBeCloseTo(41.6)
+    expect(d.curves[0].points[2].y).toBeCloseTo(41.3333333333);expect(d.curves[0].points[3].y).toBeCloseTo(42.6666666667)
     expect(d.curves[1]).toEqual(base.curves[1]);expect(base.curves[0].points[1].y).toBe(50)
   })
   it('不跨片段，单点模式不联动', () => {
@@ -119,10 +119,10 @@ describe('补点连接及固定邻点微调回归', () => {
     expect((curvePath(restored,restored.curves[0]).match(/M/g)||[]).length).toBe(2)
     expect(restoreManualMarkers(restored,base)).toEqual(restored)
   })
-  it('两侧各5点高权重、外侧指数下降且18点外不动，不随采样间隔改变', () => {
+  it('两侧各3点高权重、外侧指数下降且16点外不动，不随采样间隔改变', () => {
     const d=clone(base);d.curves[0].points=Array.from({length:61},(_,i)=>({id:'n'+i,x:i+10,y:50,segment:'s',status:'原始'}))
     const prepared=prepareMove(d,'a','n30',true)!, result=movePrepared(prepared,0,-10,'amplitude')
-    expect(prepared.byId.size).toBe(35)
+    expect(prepared.byId.size).toBe(31)
     for(const step of [-1,1]) for(let distance=1;distance<=20;distance++) {
       const i=30+step*distance
       expect(50-result.curves[0].points[i].y).toBeCloseTo(10*neighborWeight(distance),10)

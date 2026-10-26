@@ -40,3 +40,9 @@ Issue [#161](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/161) 是协作�
 - [x] T019 完成逻辑、浏览器、缩放单位轴向、窄屏和历史回归，记录后提交。
 
 坐标/轴叠加证据：35项逻辑测试、43个浏览器场景、TypeScript/Vite构建；见 axes-validation.md。
+
+## 三邻点与调参位置
+
+- [x] T020 将主影响区改为各3点，集中源码配置并同步界面；验证默认和手工参数，记录位置及结果后提交。
+
+本轮38项逻辑测试、43个真实浏览器场景和构建通过；手工参数测试覆盖比例、衰减长度、截断及非法值。证据见 influence-validation.md。

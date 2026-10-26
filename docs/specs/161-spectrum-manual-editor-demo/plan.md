@@ -79,3 +79,7 @@ FR-017至020 / SC-011至013：先归档三个截图、只读保存快照与诊�
 ## 坐标读数与轴可视化修订
 
 FR-021至024：SourceCanvas新增/替换点后报告点ID，App选中并将右侧坐标区置前；标零线独立显示像素和0值。新增 axisGeometry.ts 与 AxisOverlay.tsx 生成/绘制当前标定、源识别及选中点投影，数据来自已有 false-peak-fixture.json 的频率刻度；旧幅值候选明确归为累计λ参考。参考数据只读、按源图哈希匹配，不塞入或覆盖用户草稿。改单位仅换算当前刻度，已有识别保留原单位。两类谱共用绘制，缺失刻度不伪造。
+
+## 两侧3点调参修订
+
+以 demo/src/dragInfluence.ts 为单一配置来源，engine.ts 加载时生成权重表，App.tsx 读取同一邻点数显示提示。coreNeighbors=3、edgeWeight=0.6、decayLength=2、minWeight=0.001；超过每侧1000点的参数拒绝，避免误填导致过大计算。拖动仍只复用准备结果。

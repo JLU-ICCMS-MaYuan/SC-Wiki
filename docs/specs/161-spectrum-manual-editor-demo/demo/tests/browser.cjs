@@ -13,7 +13,7 @@ async function main() {
  context.on('page', page => {page.on('pageerror',e=>report.errors.push(e.message));page.on('download',d=>report.downloads.push(d.suggestedFilename()))});
  context.on('request', r => { if(new URL(r.url()).pathname.startsWith('/api/')) report.apiRequests.push({url:r.url(),method:r.method()}) });
  const page = await context.newPage();page.setDefaultTimeout(10000);
- const shot = async name => {await page.screenshot({path:path.join(out,'axes-'+name+'.png'),fullPage:true});report.screenshots.push('axes-'+name+'.png')};
+ const shot = async name => {await page.screenshot({path:path.join(out,'influence-'+name+'.png'),fullPage:true});report.screenshots.push('influence-'+name+'.png')};
  const button = name => page.getByRole('button',{name,exact:true});
  const svg = () => page.getByRole('application',{name:'谱线人工编辑画布'});
  const screen = (x,y) => svg().evaluate((el,p)=>{const v=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:v.x,y:v.y}}, {x,y});
@@ -36,10 +36,10 @@ async function main() {
   assert.deepEqual(moved['a-50'],start['a-50']);assert.deepEqual(moved['a-legend-0'],start['a-legend-0']);check('α²F 默认二维模式水平拖动：中心/邻点变化，范围外及其他片段不变');
 
   const centerIndex=samples[0].curves[0].points.findIndex(p=>p.id===id), originalPoints=samples[0].curves[0].points;
-  for(const distance of [1,5,6,10,17,18]) {
-    const expected=distance>=18?0:distance<=5?1-.08*distance:.6*Math.exp(-(distance-5)/2);
+  for(const distance of [1,3,4,8,15,16]) {
+    const expected=distance>=16?0:distance<=3?1-.4*distance/3:.6*Math.exp(-(distance-3)/2);
     for(const step of [-1,1]) {const p=originalPoints[centerIndex+step*distance];assert(Math.abs((moved[p.id].x-start[p.id].x)/8-expected)<.0001)}
-  }check('实际鼠标拖动：两侧第5/6/10/17/18点分别符合核心区、指数尾部及截断');
+  }check('实际鼠标拖动：两侧第3/4/8/15/16点分别符合核心区、指数尾部及截断');
   await button('↶ 撤销').click();assert.deepEqual(await points(),start);await button('↷ 重做').click();assert.deepEqual(await points(),moved);check('一次拖动只需一次撤销，重做精确恢复');
   const anchor=await screen(moved[id].x,moved[id].y);await page.mouse.move(anchor.x,anchor.y);await page.mouse.wheel(0,-450);await page.waitForTimeout(150);const after=await screen(moved[id].x,moved[id].y);assert(Math.hypot(anchor.x-after.x,anchor.y-after.y)<2);
   await drag(id,2,0);assert(Math.abs((await points())[id].x-moved[id].x-2)<.01);check('鼠标中心放大后保持锚点，放大选点拖动仍准确');
@@ -112,10 +112,10 @@ async function main() {
     for(let i=0;i<120;i++){const start=performance.now();moved=engine.movePrepared(prepared,0,-2,'amplitude');engine.curvePath(moved,moved.curves[0]);times.push(performance.now()-start)}
     times.sort((a,b)=>a-b);
     return {points:10000,iterations:120,prepareMs,medianMoveAndPathMs:times[60],p95MoveAndPathMs:times[114],weightedPoints:prepared.byId.size,changedPoints:moved.curves[0].points.filter(p=>p.y!==50).length,includesReactRender:false};
-  });assert.equal(report.performance.weightedPoints,35);assert.equal(report.performance.changedPoints,35);check('10000点只对35点施加位移，120次移动复用同一准备结果；记录核心计算与路径生成耗时');
+  });assert.equal(report.performance.weightedPoints,31);assert.equal(report.performance.changedPoints,31);check('10000点只对31点施加位移，120次移动复用同一准备结果；记录核心计算与路径生成耗时');
   assert.equal(await page.getByRole('button',{name:/导出|下载/}).count(),0);assert.deepEqual(report.apiRequests,[]);assert.deepEqual(report.downloads,[]);assert.deepEqual(report.errors,[]);check('无业务 API 请求、无下载入口/下载事件、无页面脚本错误');
-  report.status='passed';fs.writeFileSync(path.join(out,'axes-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
- } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'axes-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
+  report.status='passed';fs.writeFileSync(path.join(out,'influence-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
+ } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'influence-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
  finally {await browser.close()}
 }
 main().catch(e=>{console.error(e);process.exit(1)});

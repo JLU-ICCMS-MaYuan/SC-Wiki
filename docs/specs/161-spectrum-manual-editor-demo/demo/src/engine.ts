@@ -1,3 +1,5 @@
+import { createInfluenceKernel, DRAG_INFLUENCE } from './dragInfluence'
+
 // 源像素是编辑事实；标定只负责换算，不重写原图或初始提取。
 export type Axis = { pixels: [number, number]; values: [number, number]; unit: string }
 export type Point = { id: string; x: number; y: number; segment: string; status: string; manual?: boolean; breakBefore?: boolean }
@@ -70,8 +72,8 @@ export function undo(h: History): History {
 export function redo(h: History): History {
   return h.future.length ? { past: [...h.past, h.present], present: h.future[0], future: h.future.slice(1) } : h
 }
-// 两侧各5点为主要影响区，外侧指数衰减；不足千分之一的影响忽略。
-const kernel = Array.from({ length: 18 }, (_, d) => d <= 5 ? 1 - .08 * d : .6 * Math.exp(-(d - 5) / 2))
+// 主要影响区与指数尾部均从独立调参文件读取。
+const kernel = createInfluenceKernel(DRAG_INFLUENCE)
 export const neighborWeight = (distance: number) => kernel[distance] ?? 0
 export type PreparedMove = { doc: Document; curveId: string; points: Point[]; weights: number[]; byId: Map<string, number> }
 export function prepareMove(doc: Document, curveId: string, pointId: string, linked: boolean): PreparedMove | null {
