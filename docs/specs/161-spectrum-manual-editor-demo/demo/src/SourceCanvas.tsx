@@ -1,22 +1,25 @@
-import { useEffect, useId, useRef, useState } from 'react'
-import { addPoint, curvePath, frequency, markZero, move, weight, type Document, type Point, type Rect } from './engine'
+import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { addPoint, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Point, type Rect } from './engine'
 
 export type Tool = 'select' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
 type Props = {
   doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool
-  linked?: boolean; radius?: number; dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
+  linked?: boolean; dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
   onSelect?: (ids: string[]) => void; onChange?: (doc: Document, detail?: string) => void
   onPick?: (x: number, y: number) => void; onError?: (error: string) => void
 }
-type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; id?: string; moved?: Document }
+type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
-export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, radius = 0, dragMode = 'amplitude', display = 'overlay', all = true, onSelect, onChange, onPick, onError }: Props) {
+export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'amplitude', display = 'overlay', all = true, onSelect, onChange, onPick, onError }: Props) {
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
   const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 34, y - 3, w + 40, h + 10] }
   const [view, setView] = useState<Rect>(initial), [preview, setPreview] = useState<Document | null>(null)
   const [box, setBox] = useState<Rect | null>(null), [imageFailed, setImageFailed] = useState(false), [retry, setRetry] = useState(0), [scale, setScale] = useState(1)
   const clip = useId().replace(/:/g, ''), scene = preview || doc
-  const curve = scene.curves.find(c => c.id === active)!, center = curve.points.find(p => p.id === selected[0])
+  const curve = scene.curves.find(c => c.id === active)!
+  const influence = useMemo(() => gesture.current?.doc === doc && gesture.current.id === selected[0]
+    ? gesture.current.prepared : prepareMove(doc, active, selected[0], linked), [doc, active, selected[0], linked])
+  const paths = useMemo(() => new Map(scene.curves.map(c => [c.id, curvePath(scene, c)])), [scene])
   const [x0, y0, x1, y1] = scene.source.plot
   useEffect(() => { setView(initial()); setImageFailed(false); setPreview(null) }, [doc.id])
   useEffect(() => {
@@ -73,7 +76,7 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
           const candidates = curve.points.map(point => ({ point, distance: Math.hypot(point.x - p.x, point.y - p.y) * scale })).filter(v => v.distance <= 9).sort((a, b) => a.distance - b.distance)
           if (!candidates.length) { onSelect?.([]); return }
           const point = candidates[0].point
-          onSelect?.([point.id]); gesture.current = { kind: 'point', start: p, view, doc, id: point.id }
+          onSelect?.([point.id]); gesture.current = { kind: 'point', start: p, view, doc, id: point.id, prepared: prepareMove(doc, active, point.id, linked) }
         }
         svg.current!.setPointerCapture(event.pointerId)
       }}
@@ -85,7 +88,7 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
           setView(v => [v[0] - (p.x - g.start.x), v[1] - (p.y - g.start.y), v[2], v[3]])
         } else if (g.kind === 'box') setBox([Math.min(g.start.x, p.x), Math.min(g.start.y, p.y), Math.abs(p.x - g.start.x), Math.abs(p.y - g.start.y)])
         else {
-          g.moved = move(g.doc, active, g.id!, p.x - g.start.x, p.y - g.start.y, radius, linked, dragMode)
+          g.moved = g.prepared ? movePrepared(g.prepared, p.x - g.start.x, p.y - g.start.y, dragMode) : g.doc
           setPreview(g.moved)
         }
       }} onPointerUp={() => finish()} onPointerCancel={() => finish(true)}>
@@ -93,10 +96,10 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       {display !== 'data' && <image key={retry} href={scene.source.image} width={scene.source.width} height={scene.source.height} clipPath={`url(#${clip})`} onError={() => setImageFailed(true)} />}
       {display === 'data' && <rect x={x0} y={y0} width={x1 - x0} height={y1 - y0} fill="#fff" stroke="#9ea8b9" strokeWidth={1 / scale} />}
       {display !== 'source' && scene.curves.filter(c => all || c.id === active).map(c => <g key={c.id} opacity={editing && c.id !== active ? .3 : 1}>
-        <path d={curvePath(scene, c)} fill="none" stroke="white" strokeWidth={4 / scale}/>
-        <path data-curve={c.id} d={curvePath(scene, c)} fill="none" stroke={c.color} strokeWidth={1.7 / scale}/>
+        <path d={paths.get(c.id)} fill="none" stroke="white" strokeWidth={4 / scale}/>
+        <path data-curve={c.id} d={paths.get(c.id)} fill="none" stroke={c.color} strokeWidth={1.7 / scale}/>
         {editing && c.id === active && c.points.map(point => {
-          const picked = selected.includes(point.id), affected = center && weight(doc, center, point, radius, linked) > 0
+          const picked = selected.includes(point.id), affected = (influence?.byId.get(point.id) || 0) > 0
           return <circle key={point.id} data-point={point.id} data-x={point.x} data-y={point.y} cx={point.x} cy={point.y} r={(picked ? 5 : affected ? 3.5 : 2) / scale}
             fill={picked ? '#fff' : affected ? '#f5ad35' : c.color} stroke={picked ? '#4f46e5' : '#fff'} strokeWidth={(picked ? 2.5 : .6) / scale} pointerEvents="none" />
         })}
@@ -111,6 +114,6 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
         return <text key={i} x={vertical ? x0 - 6 : p.x} y={vertical ? p.y + 2 : y1 + 13} fontSize={7} fill="#6e7890" textAnchor={vertical ? 'end' : 'middle'}>{Number(frequency(scene, p).toFixed(1))}</text>
       })}
     </svg>
-    <div className="canvas-caption">{editing ? '滚轮缩放 · 右键 / Alt 拖动平移 · 橙色点为联动范围' : '保持来源图比例 · 缺口不连线 · 演示数据'}</div>
+    <div className="canvas-caption">{editing ? '滚轮缩放 · 右键 / Alt 拖动平移 · 橙色点为联动范围' : '人工补点自动连线 · 未补选的缺口保留 · 演示数据'}</div>
   </div>
 }

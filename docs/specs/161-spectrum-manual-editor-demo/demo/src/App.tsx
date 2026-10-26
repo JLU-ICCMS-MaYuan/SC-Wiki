@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import SourceCanvas, { type Tool } from './SourceCanvas'
 import fixtures from './fixtures.json'
-import { amplitude, amplitudePixel, axisValid, clone, commit, frequency, frequencyPixel, frequencySpan, move, ordered, pixelAt, record, redo, removePoints, undo, validateDocument, zeroCovered, type Axis, type Document, type History, type Point } from './engine'
+import { amplitude, amplitudePixel, axisValid, clone, commit, frequency, frequencyPixel, move, restoreManualMarkers, ordered, pixelAt, record, redo, removePoints, undo, validateDocument, zeroCovered, type Axis, type Document, type History, type Point } from './engine'
 
 const samples = fixtures as unknown as Document[]
 samples.forEach(sample => validateDocument(sample, sample))
@@ -12,7 +12,7 @@ function load(initial: Document) {
     const value = localStorage.getItem(storageKey(initial.id))
     if (!value) return { doc: clone(initial), error: '', blocked: false }
     const doc: unknown = JSON.parse(value); validateDocument(doc, initial)
-    return { doc, error: '', blocked: false }
+    return { doc: restoreManualMarkers(doc, initial), error: '', blocked: false }
   } catch { return { doc: clone(initial), error: '本机草稿不可读取或校验失败，未覆盖原草稿。请检查浏览器存储，或显式恢复原始提取后重新保存。', blocked: true } }
 }
 
@@ -42,14 +42,14 @@ export default function App() {
   const doc = history.present
   const [editor, setEditor] = useState(false), [active, setActive] = useState(doc.curves[0].id), [selected, setSelected] = useState<string[]>([])
   const [tool, setTool] = useState<Tool>('select'), [linked, setLinked] = useState(true), [dragMode, setDragMode] = useState<'amplitude' | 'free'>('amplitude')
-  const [radius, setRadius] = useState(frequencySpan(doc) * .05), [display, setDisplay] = useState('overlay'), [all, setAll] = useState(true)
+  const [display, setDisplay] = useState('overlay'), [all, setAll] = useState(true)
   const [error, setError] = useState(loaded.error), [blocked, setBlocked] = useState(loaded.blocked), [notice, setNotice] = useState('')
   const [exitModal, setExitModal] = useState(false), exitAction = useRef<() => void>(() => {})
   const [calibration, setCalibration] = useState(clone(doc.calibration)), [pick, setPick] = useState<{ axis: 'frequency' | 'amplitude'; index: 0 | 1 } | null>(null)
   const curve = doc.curves.find(c => c.id === active)!, point = curve.points.find(p => p.id === selected[0])
   const calibrationDirty = JSON.stringify(calibration) !== JSON.stringify(doc.calibration)
   const dirty = JSON.stringify(doc) !== JSON.stringify(saved) || calibrationDirty, covered = zeroCovered(doc, active)
-  useEffect(() => { setCalibration(clone(doc.calibration)); setRadius(frequencySpan(doc) * .05); setPick(null) }, [doc.calibration])
+  useEffect(() => { setCalibration(clone(doc.calibration)); setPick(null) }, [doc.calibration])
   useEffect(() => {
     if (selected.length !== 1) return
     const row = document.getElementById('row-' + selected[0]), table = row?.closest('.point-table')
@@ -106,7 +106,7 @@ export default function App() {
   const applyCoordinates = (f: number, a: number) => {
     if (!point || ![f, a].every(Number.isFinite)) { setError('坐标必须是有限数值'); return }
     const fp = pixelAt(doc.calibration.frequency, f), ap = pixelAt(doc.calibration.amplitude, a)
-    const next = move(doc, active, point.id, (doc.calibration.direction === 'x' ? fp : ap) - point.x, (doc.calibration.direction === 'y' ? fp : ap) - point.y, radius, false, 'free')
+    const next = move(doc, active, point.id, (doc.calibration.direction === 'x' ? fp : ap) - point.x, (doc.calibration.direction === 'y' ? fp : ap) - point.y, false, 'free')
     change(next, '输入坐标修改单点（越界或交叉时限制到有效位置）')
   }
   const axisEdit = (axis: 'frequency' | 'amplitude', field: 'pixels' | 'values', index: 0 | 1, value: number) => setCalibration(c => {
@@ -133,8 +133,8 @@ export default function App() {
       {error && <div role="alert" className="callout error">{error}</div>}{notice && <div role="status" className="callout success">{notice}</div>}
       {editor ? <div className="editor-layout"><section className="workbench">
         <div className="tool-strip">{([['select','↖ 选点 / 拖动'],['pan','✥ 平移'],['add','＋ 增加点'],['box','▣ 框选']] as [Tool,string][]).map(([value,label]) => <button key={value} className={tool === value ? 'active' : ''} onClick={() => { setTool(value); setPick(null) }}>{label}</button>)}<div className="tool-strip-end"><label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></div></div>
-        <div className="tool-hint">{tool === 'zero' ? '在原图真实零频刻度处点击，橙色线只表示标定位置。' : tool === 'zeroPoint' ? '在橙色零频线上的真实曲线位置点击，幅值取自你的点击。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? '点击原图曲线增加数据点；缺口中新点保持独立片段。' : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : '选择一个点，拖动修正局部形状。可在右侧关闭联动或调整范围。'}</div>
-        <SourceCanvas doc={doc} active={active} selected={selected} editing tool={tool} linked={linked} radius={radius} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onChange={change} onError={setError} onPick={(x,y) => {
+        <div className="tool-hint">{tool === 'zero' ? '在原图真实零频刻度处点击，橙色线只表示标定位置。' : tool === 'zeroPoint' ? '在橙色零频线上的真实曲线位置点击，幅值取自你的点击。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? '点击补点，自动连到当前曲线前后相邻点；只画连线，不插值补点。' : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : '选择一个点，拖动修正局部形状。两侧各 5 个邻点明显跟随，更远点指数衰减。'}</div>
+        <SourceCanvas doc={doc} active={active} selected={selected} editing tool={tool} linked={linked} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onChange={change} onError={setError} onPick={(x,y) => {
           if (!pick) return
           const direction = pick.axis === 'frequency' ? calibration.direction : calibration.direction === 'x' ? 'y' : 'x'
           axisEdit(pick.axis, 'pixels', pick.index, direction === 'x' ? x : y); setTool('select'); setPick(null)
@@ -144,8 +144,8 @@ export default function App() {
         <section className="panel-section"><div className="section-heading"><h3>编辑曲线</h3><span className="tag">单条编辑</span></div>{curvePicker}<p className="muted">{sampleId === 'phdos' ? '其他分波只作参照，不随当前曲线移动。' : '累计 λ 只在原图中参照，不作为 α²F 幅值刻度。'}</p></section>
         <section className="panel-section"><div className="section-heading"><h3>局部形状调整</h3><label className="switch"><input aria-label="附近点联动" type="checkbox" checked={linked} onChange={e => setLinked(e.target.checked)}/><span>附近点联动</span></label></div>
           <div className="segmented"><button className={dragMode === 'amplitude' ? 'active' : ''} onClick={() => setDragMode('amplitude')}>只改幅值</button><button className={dragMode === 'free' ? 'active' : ''} onClick={() => setDragMode('free')}>自由移动</button></div>
-          <label className="range-label">影响半径 <strong>{number(radius)} {doc.calibration.frequency.unit}</strong><input aria-label="联动半径" type="range" min={frequencySpan(doc) / 1000} max={frequencySpan(doc) / 3} step={frequencySpan(doc) / 1000} value={radius} onChange={e => setRadius(Number(e.target.value))} disabled={!linked}/></label>
-          <p className="muted">离选中点越远，跟随越少。仅影响同一连续片段。{dragMode === 'amplitude' && `当前频率沿${doc.calibration.direction === 'y' ? '竖轴，左右' : '横轴，上下'}拖动改变幅值。`}</p>
+          <p className="range-label">主要影响区 <strong>两侧各 5 个点</strong></p>
+          <p className="muted">按频率顺序计数。前 5 个邻点明显跟随，之后指数衰减；很远的点不动。未连接的断口和其他分波不受影响。{dragMode === 'amplitude' && `当前频率沿${doc.calibration.direction === 'y' ? '竖轴，左右' : '横轴，上下'}拖动改变幅值。`}</p>
         </section>
         {selectedPanel}
         <section className="panel-section"><h3>零频边界</h3>{zeroWarning}<div className="stack"><button className={tool === 'zero' ? 'active' : ''} onClick={() => setTool('zero')}>1 · 标记原图 0 频率位置</button><button disabled={!doc.zero} className={tool === 'zeroPoint' ? 'active' : ''} onClick={() => setTool('zeroPoint')}>2 · 补选曲线零频点</button></div><p className="muted">零频率不代表零幅值。看不清时保留待核对。</p></section>

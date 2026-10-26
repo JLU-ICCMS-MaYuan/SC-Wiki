@@ -33,6 +33,25 @@
         1948
       ],
       "verification": "2026-10-26 原字节复制后重新解码、校验尺寸和 SHA-256；尚未推送，远程链接待验证。"
+    },
+    {
+      "id": "IMG-003",
+      "upload_order": 3,
+      "original_name": "codex-clipboard-ae2d6b14-0ca8-4ace-8b2b-e8c17db78680.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/IMG-003-manual-points.png",
+      "status": "local_verified",
+      "user_context": "这里的离散的新点，是人工手动新增的点，但是他们怎么和已有的数据点连成一条线呢？可以自动连起来吗？我希望能显示出来这些点被连起来了。",
+      "related": [
+        "FR-014",
+        "SC-008"
+      ],
+      "sha256": "a1756b9adefcf43d0f2da7f1f906547c3caff32f993681498613a15a5c244801",
+      "media_type": "image/png",
+      "dimensions_px": [
+        1548,
+        850
+      ],
+      "verification": "2026-10-26 原字节归档后解码并校验 SHA-256；未推送。"
     }
   ]
 }

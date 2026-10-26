@@ -1,6 +1,6 @@
 // 源像素是编辑事实；标定只负责换算，不重写原图或初始提取。
 export type Axis = { pixels: [number, number]; values: [number, number]; unit: string }
-export type Point = { id: string; x: number; y: number; segment: string; status: string }
+export type Point = { id: string; x: number; y: number; segment: string; status: string; manual?: boolean; breakBefore?: boolean }
 export type Curve = { id: string; name: string; color: string; points: Point[] }
 export type Rect = [number, number, number, number]
 export type Document = {
@@ -24,7 +24,23 @@ export const frequencyPixel = (doc: Document, p: Point) => p[doc.calibration.dir
 export const amplitudePixel = (doc: Document, p: Point) => p[doc.calibration.direction === 'x' ? 'y' : 'x']
 export const frequency = (doc: Document, p: Point) => valueAt(doc.calibration.frequency, frequencyPixel(doc, p))
 export const amplitude = (doc: Document, p: Point) => valueAt(doc.calibration.amplitude, amplitudePixel(doc, p))
-export const ordered = (doc: Document, points: Point[]) => [...points].sort((a, b) => frequency(doc, a) - frequency(doc, b))
+const orderCache = new WeakMap<Point[], { axis: Axis; direction: string; points: Point[] }>()
+export function ordered(doc: Document, points: Point[]) {
+  const cached = orderCache.get(points)
+  if (cached?.axis === doc.calibration.frequency && cached.direction === doc.calibration.direction) return cached.points
+  const sorted = [...points].sort((a, b) => frequency(doc, a) - frequency(doc, b))
+  orderCache.set(points, { axis: doc.calibration.frequency, direction: doc.calibration.direction, points: sorted })
+  return sorted
+}
+/** 连线只检查频率相邻边；删除断口优先于人工点自动连接。 */
+export const connected = (left: Point, right: Point) => !right.breakBefore && (left.segment === right.segment || left.manual === true || right.manual === true)
+/** 兼容旧草稿；拖动会改写 status，因此以不可变初始样本的稳定 ID 识别补点。 */
+export function restoreManualMarkers(doc: Document, initial: Document): Document {
+  return { ...doc, curves: doc.curves.map(c => {
+    const original = new Set(initial.curves.find(v => v.id === c.id)!.points.map(p => p.id))
+    return { ...c, points: c.points.map(p => !original.has(p.id) && p.manual === undefined ? { ...p, manual: true } : p) }
+  }) }
+}
 export function frequencySpan(doc: Document) {
   const [x0, y0, x1, y1] = doc.source.plot
   const bounds = doc.calibration.direction === 'x' ? [x0, x1] : [y0, y1]
@@ -46,19 +62,33 @@ export function undo(h: History): History {
 export function redo(h: History): History {
   return h.future.length ? { past: [...h.past, h.present], present: h.future[0], future: h.future.slice(1) } : h
 }
-export function weight(doc: Document, center: Point, point: Point, radius: number, linked: boolean) {
-  if (center.id === point.id) return 1
-  if (!linked || point.segment !== center.segment || radius <= 0) return 0
-  const d = Math.abs(frequency(doc, point) - frequency(doc, center)) / radius
-  return d >= 1 ? 0 : (1 - d * d) ** 2
+// 两侧各5点为主要影响区，外侧指数衰减；不足千分之一的影响忽略。
+const kernel = Array.from({ length: 18 }, (_, d) => d <= 5 ? 1 - .08 * d : .6 * Math.exp(-(d - 5) / 2))
+export const neighborWeight = (distance: number) => kernel[distance] ?? 0
+export type PreparedMove = { doc: Document; curveId: string; points: Point[]; weights: number[]; byId: Map<string, number> }
+export function prepareMove(doc: Document, curveId: string, pointId: string, linked: boolean): PreparedMove | null {
+  const curve = doc.curves.find(c => c.id === curveId)
+  if (!curve) return null
+  const points = ordered(doc, curve.points), index = points.findIndex(p => p.id === pointId)
+  if (index < 0) return null
+  const weights = points.map(() => 0), byId = new Map<string, number>([[pointId, 1]])
+  weights[index] = 1
+  if (linked) for (const step of [-1, 1]) for (let d = 1; d < kernel.length; d++) {
+    const i = index + step * d, previous = i - step
+    if (i < 0 || i >= points.length || !connected(points[Math.min(i, previous)], points[Math.max(i, previous)])) break
+    weights[i] = kernel[d]; byId.set(points[i].id, kernel[d])
+  }
+  return { doc, curveId, points, weights, byId }
 }
-
-// 全部点共享同一缩放因子，遇到边界/顺序约束时整体停止，避免局部截断拉坏形状。
-export function move(doc: Document, curveId: string, pointId: string, dx: number, dy: number, radius: number, linked: boolean, mode: 'amplitude' | 'free'): Document {
-  const curve = doc.curves.find(c => c.id === curveId), center = curve?.points.find(p => p.id === pointId)
-  if (!curve || !center || ![dx, dy, radius].every(Number.isFinite)) return doc
+export function move(doc: Document, curveId: string, pointId: string, dx: number, dy: number, linked: boolean, mode: 'amplitude' | 'free'): Document {
+  const prepared = prepareMove(doc, curveId, pointId, linked)
+  return prepared ? movePrepared(prepared, dx, dy, mode) : doc
+}
+// 全部点共享限位因子；每次拖动复用起点排序和权重，不逐帧重新查找邻点。
+export function movePrepared(prepared: PreparedMove, dx: number, dy: number, mode: 'amplitude' | 'free'): Document {
+  const { doc, curveId, points, weights } = prepared
+  if (![dx, dy].every(Number.isFinite)) return doc
   if (mode === 'amplitude') { if (doc.calibration.direction === 'x') dx = 0; else dy = 0 }
-  const points = ordered(doc, curve.points), weights = points.map(p => weight(doc, center, p, radius, linked))
   const [x0, y0, x1, y1] = doc.source.plot
   let factor = 1
   const limit = (value: number, delta: number, low: number, high: number) => {
@@ -75,6 +105,8 @@ export function move(doc: Document, curveId: string, pointId: string, dx: number
   factor = Math.max(0, factor)
   if (Math.abs(dx * factor) + Math.abs(dy * factor) < 1e-10) return doc
   const moved = points.map((p, i) => weights[i] ? { ...p, x: p.x + dx * weights[i] * factor, y: p.y + dy * weights[i] * factor, status: '人工调整' } : p)
+  // 限位已经保证次序不变，绘图直接复用，不在 pointermove 中重新排序。
+  orderCache.set(moved, { axis: doc.calibration.frequency, direction: doc.calibration.direction, points: moved })
   return { ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points: moved } : c) }
 }
 export function removePoints(doc: Document, curveId: string, ids: string[]): Document {
@@ -85,7 +117,7 @@ export function removePoints(doc: Document, curveId: string, ids: string[]): Doc
   for (const p of ordered(doc, curve.points)) {
     if (selected.has(p.id)) { interrupted = true; continue }
     if (interrupted || previousSegment !== p.segment) nextSegment = uid()
-    points.push({ ...p, segment: nextSegment }); previousSegment = p.segment; interrupted = false
+    points.push({ ...p, segment: nextSegment, ...(interrupted ? { breakBefore: true } : {}) }); previousSegment = p.segment; interrupted = false
   }
   return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points } : c), zero: doc.zero ? { ...doc.zero, pointIds: doc.zero.pointIds.filter(id => !selected.has(id)) } : null }, 'delete', `删除 ${ids.length} 个选中点，保留缺口`)
 }
@@ -100,7 +132,7 @@ export function addPoint(doc: Document, curveId: string, x: number, y: number, z
     if (Math.abs(at - doc.zero.pixel) > 3) throw new Error('请在已标记的零频线上点选曲线；幅值来自你的点击位置')
     if (doc.calibration.direction === 'x') x = doc.zero.pixel; else y = doc.zero.pixel
   }
-  const p: Point = { id: uid(), x, y, segment: uid(), status: zero ? '人工零频选点' : '人工补选' }
+  const p: Point = { id: uid(), x, y, segment: uid(), manual: true, status: zero ? '人工零频选点' : '人工补选' }
   const f = frequency(doc, p), points = ordered(doc, curve.points)
   const existing = points.find(v => Math.abs(frequency(doc, v) - f) < 1e-6)
   if (existing && !zero) throw new Error('该频率已有点，请选中后调整坐标')
@@ -110,6 +142,9 @@ export function addPoint(doc: Document, curveId: string, x: number, y: number, z
     if (i > 0 && points[i - 1].segment === points[i].segment) p.segment = points[i].segment
   }
   const result = ordered(doc, [...points.filter(v => v.id !== p.id), p])
+  const inserted = result.findIndex(v => v.id === p.id)
+  // 此次补选明确连接它的两侧，只解除紧邻后点的删除断边。
+  if (inserted + 1 < result.length && result[inserted + 1].breakBefore) result[inserted + 1] = { ...result[inserted + 1], breakBefore: false }
   return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points: result } : c), zero: zero && doc.zero ? { ...doc.zero, pointIds: [...new Set([...doc.zero.pointIds, p.id])] } : doc.zero }, zero ? 'zero-point' : 'add', `${curve.name}：在源像素 (${x.toFixed(2)}, ${y.toFixed(2)}) 选点`)
 }
 export function markZero(doc: Document, x: number, y: number): Document {
@@ -123,9 +158,9 @@ export function zeroCovered(doc: Document, curveId: string) {
   return Boolean(doc.zero && doc.curves.find(c => c.id === curveId)?.points.some(p => doc.zero!.pointIds.includes(p.id) && Math.abs(frequency(doc, p)) < 1e-6))
 }
 export function curvePath(doc: Document, curve: Curve) {
-  let previous = ''
+  let previous: Point | undefined
   return ordered(doc, curve.points).map(p => {
-    const command = previous === p.segment ? 'L' : 'M'; previous = p.segment
+    const command = previous && connected(previous, p) ? 'L' : 'M'; previous = p
     return `${command}${p.x},${p.y}`
   }).join(' ')
 }
@@ -143,6 +178,7 @@ export function validateDocument(value: unknown, initial: Document): asserts val
       curveIds.add(c.id)
       for (const p of c.points) {
         if (!p.id || ids.has(p.id) || !p.segment || typeof p.status !== 'string' || ![p.x, p.y].every(Number.isFinite) || p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) throw Error()
+        if (p.manual !== undefined && typeof p.manual !== 'boolean' || p.breakBefore !== undefined && typeof p.breakBefore !== 'boolean') throw Error()
         ids.add(p.id)
       }
       const sorted = ordered(d, c.points)

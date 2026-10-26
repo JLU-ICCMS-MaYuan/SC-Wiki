@@ -13,7 +13,7 @@ async function main() {
  context.on('page', page => {page.on('pageerror',e=>report.errors.push(e.message));page.on('download',d=>report.downloads.push(d.suggestedFilename()))});
  context.on('request', r => { if(new URL(r.url()).pathname.startsWith('/api/')) report.apiRequests.push({url:r.url(),method:r.method()}) });
  const page = await context.newPage();page.setDefaultTimeout(10000);
- const shot = async name => {await page.screenshot({path:path.join(out,name+'.png'),fullPage:true});report.screenshots.push(name+'.png')};
+ const shot = async name => {await page.screenshot({path:path.join(out,'iteration-'+name+'.png'),fullPage:true});report.screenshots.push('iteration-'+name+'.png')};
  const button = name => page.getByRole('button',{name,exact:true});
  const svg = () => page.getByRole('application',{name:'谱线人工编辑画布'});
  const screen = (x,y) => svg().evaluate((el,p)=>{const v=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:v.x,y:v.y}}, {x,y});
@@ -28,6 +28,12 @@ async function main() {
   const id='a-200';assert(start[id]);await drag(id,8,0);const moved=await points();
   assert(Math.abs(moved[id].x-start[id].x-8)<.01);assert.equal(moved[id].y,start[id].y);assert(Object.keys(start).filter(k=>moved[k].x!==start[k].x).length>1);
   assert.deepEqual(moved['a-50'],start['a-50']);assert.deepEqual(moved['a-legend-0'],start['a-legend-0']);check('α²F 默认幅值联动：中心/邻点变化，范围外及其他片段不变');
+
+  const centerIndex=samples[0].curves[0].points.findIndex(p=>p.id===id), originalPoints=samples[0].curves[0].points;
+  for(const distance of [1,5,6,10,17,18]) {
+    const expected=distance>=18?0:distance<=5?1-.08*distance:.6*Math.exp(-(distance-5)/2);
+    for(const step of [-1,1]) {const p=originalPoints[centerIndex+step*distance];assert(Math.abs((moved[p.id].x-start[p.id].x)/8-expected)<.0001)}
+  }check('实际鼠标拖动：两侧第5/6/10/17/18点分别符合核心区、指数尾部及截断');
   await button('↶ 撤销').click();assert.deepEqual(await points(),start);await button('↷ 重做').click();assert.deepEqual(await points(),moved);check('一次拖动只需一次撤销，重做精确恢复');
   const anchor=await screen(moved[id].x,moved[id].y);await page.mouse.move(anchor.x,anchor.y);await page.mouse.wheel(0,-450);await page.waitForTimeout(150);const after=await screen(moved[id].x,moved[id].y);assert(Math.hypot(anchor.x-after.x,anchor.y-after.y)<2);
   await drag(id,2,0);assert(Math.abs((await points())[id].x-moved[id].x-2)<.01);check('鼠标中心放大后保持锚点，放大选点拖动仍准确');
@@ -37,6 +43,11 @@ async function main() {
   await page.locator('summary').click();
   await button('▣ 框选').click();let a=await screen(735,409),b=await screen(754,416);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:5});await page.mouse.up();await page.getByRole('button',{name:/删除选中点/}).click();const deleted=await points();assert.equal(Object.keys(deleted).filter(k=>k.startsWith('a-legend')).length,0);check('框选删除图例误识别点');
   await button('＋ 增加点').click();await clickAt(649,430.5);assert.equal(Object.keys(await points()).length,Object.keys(deleted).length+1);check('在原图缺失区域人工补点');
+  const withAdded=await points();const addedId=Object.keys(withAdded).find(k=>!deleted[k]);
+  const linkPath=await page.locator('[data-curve="alpha"]').getAttribute('d');
+  const addedCommand=new RegExp('[ML]'+withAdded[addedId].x+','+withAdded[addedId].y+' [ML]');
+  assert(addedCommand.test(linkPath));assert(!linkPath.includes('M'+withAdded[addedId].x+','+withAdded[addedId].y+' M'));check('人工端点补点与已有首点可见连续连线，未插入额外点');
+
   await button('1 · 标记原图 0 频率位置').click();await clickAt(640,435);assert((await page.getByTestId('zero-status').textContent()).includes('不完整'));check('只标零频位置仍提示提取不完整');
   await button('2 · 补选曲线零频点').click();await clickAt(641,435);assert((await page.getByTestId('zero-status').textContent()).includes('已记录'));check('显式原图零频点与零频标定分开，幅值由点击位置提供');
   await button('↖ 选点 / 拖动').click();await shot('demo-alpha-editor');await button('保存调整').click();await button('✎ 编辑').waitFor();const savedAlpha=await stored('alpha2f');assert.equal(savedAlpha.zero.pointIds.length,1);const zp=savedAlpha.curves[0].points.find(p=>p.id===savedAlpha.zero.pointIds[0]);assert(Math.abs(zp.x-641)<.01);assert(Math.abs(zp.y-435)<.01);assert(savedAlpha.operations.length>4);
@@ -56,9 +67,25 @@ async function main() {
   await button('✎ 编辑').click();await button('恢复原始提取').click();await button('保存调整').click();check('显式恢复后允许替换损坏草稿');
   await page.setViewportSize({width:390,height:844});await button('✎ 编辑').click();await page.locator('[data-row="a-200"]').click();await page.getByLabel('选中点幅值').fill('28');await button('应用坐标到此点').click();assert(Math.abs((await points())['a-200'].x-665)<.01);await shot('demo-mobile-inspector');await button('保存调整').click();await button('✎ 编辑').waitFor();check('窄屏侧栏数据表选点、坐标修改及顶部保存均可操作');
   await page.route('**/fixtures/source.png',route=>route.abort());await page.reload();await button('✎ 编辑').click();await page.getByText('原图加载失败，暂不能选点。').waitFor();const imageFailPoints=await points();await button('＋ 增加点').click();await clickAt(649,430.5);assert.deepEqual(await points(),imageFailPoints);await page.unroute('**/fixtures/source.png');await button('重试图片').click();await page.waitForFunction(()=>!document.querySelector('.canvas-error'));check('原图失败禁用图上选点，重试可恢复');
+
+  await button('← 返回详情').click();await page.setViewportSize({width:1440,height:1000});
+  const legacy=structuredClone(samples[0]);legacy.curves[0].points.push({id:'legacy-added',x:649,y:430.5,segment:'legacy-isolated',status:'人工调整'});
+  const oldJson=JSON.stringify(legacy);await page.evaluate(value=>localStorage.setItem('scwiki-spectrum-manual-v1:alpha2f',value),oldJson);await page.reload();await button('✎ 编辑').click();
+  assert.deepEqual((await points())['legacy-added'],{x:649,y:430.5});assert.equal(await page.evaluate(()=>localStorage.getItem('scwiki-spectrum-manual-v1:alpha2f')),oldJson);
+  const oldPath=await page.locator('[data-curve="alpha"]').getAttribute('d');assert(oldPath.includes('M649,430.5 L'));await shot('legacy-connected');check('旧草稿已移动的人工散点恢复后自动连线，坐标和原存储不变');
+  await clickAt(649,430.5);await page.getByRole('button',{name:/删除选中点/}).click();await button('↶ 撤销').click();assert((await page.locator('[data-curve="alpha"]').getAttribute('d')).includes('M649,430.5 L'));await button('保存调整').click();await page.reload();await button('✎ 编辑').click();assert((await page.locator('[data-curve="alpha"]').getAttribute('d')).includes('M649,430.5 L'));check('补点连线撤销及保存刷新后保持');
+  report.performance=await page.evaluate(async()=>{
+    const engine=await import('/src/engine.ts');
+    const doc={schemaVersion:1,id:'perf',source:{plot:[0,0,10000,100]},calibration:{direction:'x',frequency:{pixels:[0,10000],values:[0,100],unit:'THz'},amplitude:{pixels:[100,0],values:[0,1],unit:'pixel'}},curves:[{id:'a',points:Array.from({length:10000},(_,i)=>({id:String(i),x:i,y:50,segment:'s',status:'original'}))}]};
+    const begin=performance.now(), prepared=engine.prepareMove(doc,'a','5000',true), prepareMs=performance.now()-begin;
+    const times=[];let moved;
+    for(let i=0;i<120;i++){const start=performance.now();moved=engine.movePrepared(prepared,0,-2,'amplitude');engine.curvePath(moved,moved.curves[0]);times.push(performance.now()-start)}
+    times.sort((a,b)=>a-b);
+    return {points:10000,iterations:120,prepareMs,medianMoveAndPathMs:times[60],p95MoveAndPathMs:times[114],weightedPoints:prepared.byId.size,changedPoints:moved.curves[0].points.filter(p=>p.y!==50).length,includesReactRender:false};
+  });assert.equal(report.performance.weightedPoints,35);assert.equal(report.performance.changedPoints,35);check('10000点只对35点施加位移，120次移动复用同一准备结果；记录核心计算与路径生成耗时');
   assert.equal(await page.getByRole('button',{name:/导出|下载/}).count(),0);assert.deepEqual(report.apiRequests,[]);assert.deepEqual(report.downloads,[]);assert.deepEqual(report.errors,[]);check('无业务 API 请求、无下载入口/下载事件、无页面脚本错误');
-  report.status='passed';fs.writeFileSync(path.join(out,'browser-validation.json'),JSON.stringify(report,null,2)+'\n');
- } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
+  report.status='passed';fs.writeFileSync(path.join(out,'iteration-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
+ } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'iteration-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
  finally {await browser.close()}
 }
 main().catch(e=>{console.error(e);process.exit(1)});
