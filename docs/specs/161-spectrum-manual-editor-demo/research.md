@@ -1,5 +1,13 @@
 # 设计依据与取舍
 
+## 正式接入后的有效边界
+
+用户已认可Demo并要求落地。正式实现位于 frontend/src/components/spectrumEditor，不从docs读取示例数据或本机Demo草稿；下文早期“只复刻隔离Demo”保留为历史取舍，由 production-plan.md 和 contracts/production.md 取代。
+
+正式编辑文档由权限/版本受控接口构造。每条分波使用自己的标定，单次保存只替换该曲线，其他分波仍作为参照。新run复用现有JSON存储，不重新提取、不新增表。服务端换算数值并撤回旧积分、候选和采纳，零频记录只证明位置一致性。频率重复或回退的人工描线可以保存，但不能直接采纳为单值谱。
+
+公开过滤移除内部编辑文档，限定频段保留断边。正式联动配置复制用户2/.3/1/.1，不触动Demo原文件。Demo草稿没有真实集合/版本身份，不自动迁入业务库。
+
 - 正式详情入口在 frontend/src/pages/SpectrumDetailPage.tsx，图像面板在 SpectrumDetailView.tsx；本次只复刻隔离 Demo。
 - SpectrumFigure.tsx 已使用 SVG 与来源像素保持比例。继续使用 SVG，便于精确选点和共享变换；不引入大型绘图库。
 - PropertySpectrumPoint 的 frequency_pixel/amplitude_pixel 提供来源坐标；既有 calibration PUT 会重提取，不能拿来实现本次手动点保存。因此 Demo 不调用该接口。

@@ -33,6 +33,33 @@ class ReviewRequest(ExtractRequest):
     reason: str = ""
 
 
+class ManualRequest(ExtractRequest):
+    expected_collection_version: int = Field(ge=1)
+    base_run_id: str = Field(min_length=1, max_length=64)
+    document: dict
+
+
+@router.get("/{collection_id}/manual")
+def manual_document(collection_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
+                    kind: Literal["alpha2f", "phonon_dos"], collection_version: int, run_id: str,
+                    user=Depends(get_current_user), session: Session=Depends(get_db)):
+    from backend.spectra import manual
+    ctx = service.context(session, target, target_id, user, write=True)
+    row, run, _ = manual.current(session, ctx, collection_id, collection_version, run_id)
+    return manual.documents(session, ctx, row, run, kind)
+
+
+@router.post("/{collection_id}/manual")
+def save_manual(collection_id: str, body: ManualRequest, user=Depends(get_current_user), session: Session=Depends(get_db)):
+    from backend.spectra import manual
+    ctx = service.context(session, body.target, body.target_id, user, write=True)
+    service.assert_version(ctx["version"], body.expected_version)
+    row, run, _ = manual.current(session, ctx, collection_id, body.expected_collection_version, body.base_run_id)
+    manual.save(session, ctx, row, run, body.document, user)
+    session.commit()
+    return service.listing(session, ctx)
+
+
 @router.get("")
 def list_spectra(target: Literal["upload", "paper", "revision"], target_id: str,
                  user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
@@ -129,7 +156,9 @@ def csv_export(item):
               "pixel_low", "pixel_high", "unit", "frequency_unit", "source_frequency_unit",
               "normalized_dos_candidate", "normalized_dos_unit", "zero_baseline_candidate", "joint_candidate",
               "joint_cumulative_lambda", "boundary_mask", "review_status", "review_reason", "pdf_page", "source_sha256",
-              "rejected_chromatic_pixels", "candidate_components", "reconstruction_blocked"]
+              "rejected_chromatic_pixels", "candidate_components", "reconstruction_blocked",
+              "point_id", "frequency_pixel", "amplitude_pixel", "manual", "segment", "break_before",
+              "revision_author_id", "base_run_id"]
     writer = csv.DictWriter(output, fieldnames=fields); writer.writeheader()
     payload = item["result"]
     candidates = payload.get("candidates") or {}
@@ -155,7 +184,11 @@ def csv_export(item):
                 joint_candidate=jmap.get(freq) if alpha else None, joint_cumulative_lambda=cmap.get(freq) if alpha else None,
                 boundary_mask=freq in c["clipped_frequencies_thz"], review_status=decision.get("status", "needs_review"),
                 review_reason=decision.get("reason"), pdf_page=item["source"]["pdf_page"],
-                source_sha256=item["source"]["source_sha256"]))
+                source_sha256=item["source"]["source_sha256"],point_id=p.get("id"),
+                frequency_pixel=p.get("frequency_pixel"),amplitude_pixel=p.get("amplitude_pixel"),
+                manual=p.get("manual",False),segment=p.get("segment"),break_before=p.get("breakBefore"),
+                revision_author_id=(payload.get("manual_provenance") or {}).get("author_id"),
+                base_run_id=(payload.get("manual_provenance") or {}).get("base_run_id")))
     return output.getvalue()
 
 

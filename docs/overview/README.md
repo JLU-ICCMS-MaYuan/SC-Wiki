@@ -68,7 +68,7 @@ flowchart LR
 
 ## 文档维护
 
-独立本机谱线编辑器的当前能力与联动参数说明见[谱线人工编辑 Demo](01_Decentralized_Uploading_of_Superconductivity_Data/spectrum-manual-editor-demo.md)；该 Demo 与正式谱提取、数据库审核路径分别记录。
+谱线人工编辑器的正式接入、历史保存与联动参数说明见[谱线人工编辑](01_Decentralized_Uploading_of_Superconductivity_Data/spectrum-manual-editor-demo.md)；独立Demo与正式数据库保存路径分别记录，目标环境验证边界另列。
 
 上传提交和两工作台批准共用科学数据来源核对：保存与审核决定分开；认可现有内容直接点击人工审核通过，无需理由。人工修改保存后在提交或主动核对时进入模型，同版本通过结果复用。流程图见[逐字段审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md#逐字段审核流程图)。
 操作流程见[PDF 解析管线](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md)与

@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { Alert, Box, Button, Chip, MenuItem, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, Dialog, MenuItem, TextField, Typography } from '@mui/material'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { DetailSection, SpectrumResult, SpectrumMetrics, SpectrumPoints } from '../components/SpectrumDetailView'
+import SpectrumManualEditor from '../components/spectrumEditor/SpectrumManualEditor'
+import { checkZeroFrequency } from '../components/spectrumEditor/zeroCheck'
+import type { Document as EditorDocument } from '../components/spectrumEditor/engine'
+import type { PropertySpectrumListing } from '../lib/propertySpectra'
 import { materialStateSummary } from '../lib/materialStateSummary'
 import { api } from '../lib/api'
 import { hasSpectrumData, SPECTRUM_API, safeSpectrumReturn, spectrumNames, spectrumQuery, spectrumGroups, spectrumDetailPath, usePropertySpectra, type PropertySpectrumItem, type PropertySpectrumTarget } from '../lib/propertySpectra'
@@ -11,7 +15,10 @@ export default function SpectrumDetailPage() {
   const { collectionId } = useParams(), [params] = useSearchParams(), navigate = useNavigate()
   const targetKind = params.get('target'), targetId = params.get('target_id')
   const target = ['upload', 'paper', 'revision'].includes(targetKind || '') && targetId ? { target: targetKind, target_id: targetId } as PropertySpectrumTarget : undefined
-  const { listing, loading, error, reload } = usePropertySpectra(target)
+  const { listing, loading, error, reload, replaceListing } = usePropertySpectra(target)
+  const [editorInput,setEditorInput]=useState<{documents:EditorDocument[];base_run_id:string;collection_version:number;version:string;initialPointId?:string}|null>(null)
+  const [imageOpacity,setImageOpacity]=useState(100)
+  const [openingEditor,setOpeningEditor]=useState(false)
   const [materialStates, setMaterialStates] = useState<any[]>([]), [statesLoaded, setStatesLoaded] = useState(false)
   const [material, setMaterial] = useState(''), [materialError, setMaterialError] = useState('')
   const [assignedState, setAssignedState] = useState(''), [assigning, setAssigning] = useState(false)
@@ -40,6 +47,28 @@ export default function SpectrumDetailPage() {
   const unassigned = Boolean(validItem && (!validItem.state_key || statesLoaded && !material))
   const calibration = validItem?.result.calibration
   const canAssign = listing?.can_edit && !historical && statesLoaded && materialStates.length > 0 && Array.isArray(calibration?.curves) && calibration.curves.length > 0
+  const canEdit=Boolean(listing?.can_edit && validItem && !historical && !validItem.stale && !unassigned && !attempt && statesLoaded && image && !imageError && !loading && primary.some(c=>c.kind===kind))
+  const openEditor=async(selectedCurve?:string,focusZero=false)=>{
+    if(!canEdit || !validItem || openingEditor)return
+    setOpeningEditor(true);setActionError('')
+    try {
+      const input=await api.get<{documents:EditorDocument[];base_run_id:string;collection_version:number;version:string}>(SPECTRUM_API+'/'+encodeURIComponent(validItem.id)+'/manual?'+query+'&kind='+kind+'&collection_version='+validItem.version+'&run_id='+encodeURIComponent(validItem.run.id||''))
+      const documents=input.documents.map(doc=>({...doc,source:{...doc.source,image}}))
+      documents.sort((a,b)=>Number(b.curves[0].id===selectedCurve)-Number(a.curves[0].id===selectedCurve))
+      const zero=focusZero?checkZeroFrequency(documents[0]).curves[0]:null
+      setEditorInput({...input,documents,initialPointId:zero?.pointId||zero?.nearest?.id})
+    }catch(error:any){setActionError(error.message||'无法打开人工编辑器')}
+    finally{setOpeningEditor(false)}
+  }
+  const saveEditor=async(document:EditorDocument)=>{
+    if(!target || !validItem || !editorInput)throw new Error('编辑目标已变化，请重新打开。')
+    const updated=await api.post<PropertySpectrumListing>(SPECTRUM_API+'/'+encodeURIComponent(validItem.id)+'/manual',{
+      ...target,expected_version:editorInput.version,expected_collection_version:editorInput.collection_version,base_run_id:editorInput.base_run_id,document})
+    const fresh=updated.items.find(i=>i.id===validItem.id)
+    if(!fresh)throw new Error('保存响应缺少新版本，请刷新详情核对；编辑内容仍保留。')
+    replaceListing(updated)
+    navigate(spectrumDetailPath(target,fresh,safeSpectrumReturn(params.get('return')),fresh.result.curves.find(c=>c.id===document.curves[0].id)||fresh.result.curves[0]),{replace:true})
+  }
   useEffect(() => { historyRequest.current++; setHistoryItem(null); setHistoryRuns([]); setHistoryOpen(false); setHistoryLoading(false); return () => { historyRequest.current++ } }, [collectionId, query])
   useEffect(() => {
     let active = true, url = ''
@@ -155,10 +184,11 @@ export default function SpectrumDetailPage() {
       {imageError && <Alert severity="warning" sx={{ mb: 2 }}>{imageError}<Button onClick={() => setImageRetry(value => value + 1)}>重新读取原图</Button></Alert>}
       {!primary.length && <Alert severity="info" sx={{ mb: 2 }}>尚未得到数值曲线。{(selected.result.failures || selected.result.quality?.limitations || []).map((value: unknown) => typeof value === 'string' ? value : JSON.stringify(value)).join('；')}</Alert>}
       <Box data-testid="spectrum-analysis-grid" sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0,1fr)', lg: primary.length ? 'minmax(0,.85fr) minmax(0,1.15fr)' : 'minmax(0,1fr)' }, gap: 2, alignItems: 'start', mb: 2, '& > .MuiPaper-root': { mb: 0 } }}>
-        <SpectrumResult key={selected.id + selected.run.id + kind} item={selected} curves={primary} image={image} retryImage={() => setImageRetry(value => value + 1)} />
-        {!!primary.length && <SpectrumMetrics item={selected} curves={primary} history={historical}/>}
+        <SpectrumResult key={selected.id + selected.run.id + kind} item={selected} curves={primary} image={image} retryImage={() => setImageRetry(value => value + 1)} onEdit={listing?.can_edit && !historical ? openEditor : undefined} editingDisabled={!canEdit || openingEditor} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} />
+        {!!primary.length && <SpectrumMetrics item={selected} curves={primary} history={historical} onContinue={canEdit?(id)=>openEditor(id,true):undefined}/>}
       </Box>
       {!!primary.length && <SpectrumPoints key={selected.run.id} curves={primary}/>}
     </>}
+    <Dialog fullScreen transitionDuration={0} open={Boolean(editorInput)} onClose={()=>{}}>{editorInput && <SpectrumManualEditor documents={editorInput.documents} initialPointId={editorInput.initialPointId} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} kind={kind} onSave={saveEditor} onClose={()=>setEditorInput(null)}/>}</Dialog>
   </Box>
 }

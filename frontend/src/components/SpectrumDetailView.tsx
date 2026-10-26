@@ -1,7 +1,12 @@
 import { useState } from 'react'
-import { Alert, Box, Button, MenuItem, Paper, Slider, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
+import { Alert, Box, Button, MenuItem, Paper, Table, TableBody, TableCell, TableHead, TableRow, TextField, Typography } from '@mui/material'
 import type { PropertySpectrumCurve as Curve, PropertySpectrumItem as Item } from '../lib/propertySpectra'
 import SpectrumFigure from './SpectrumFigure'
+import SourceCanvas from './spectrumEditor/SourceCanvas'
+import ImageOpacityControl from './spectrumEditor/ImageOpacityControl'
+import ZeroFrequencyCheck from './spectrumEditor/ZeroFrequencyCheck'
+import { displayDocument, combinedZeroCheck } from './spectrumEditor/adapter'
+import './spectrumEditor/styles.css'
 import SpectrumViewSwitch from './SpectrumViewSwitch'
 import { spectrumCurveColor } from '../lib/spectrumGeometry'
 import { spectrumInterval, spectrumNames } from '../lib/propertySpectra'
@@ -15,38 +20,45 @@ export function DetailSection({ title, children }: { title: string; children: Re
   return <Paper variant="outlined" sx={boxStyle}><Typography variant="h6" sx={{ fontSize: 17, mb: 2 }}>{title}</Typography>{children}</Paper>
 }
 
-export function SpectrumResult({ item, curves, image, retryImage }: { item: Item; curves: Curve[]; image: string; retryImage: () => void }) {
-  const [mode, setMode] = useState('data'), [projection, setProjection] = useState('all'), [opacity, setOpacity] = useState(.85)
+export function SpectrumResult({ item, curves, image, retryImage, onEdit, editingDisabled = false, imageOpacity, onOpacityChange }: { item: Item; curves: Curve[]; image: string; retryImage: () => void; onEdit?: (curveId?: string) => void; editingDisabled?: boolean; imageOpacity?:number; onOpacityChange?:(value:number)=>void }) {
+  const [mode, setMode] = useState('overlay'), [projection, setProjection] = useState('all'), [localOpacity, setLocalOpacity] = useState(100)
+  const opacity=imageOpacity??localOpacity, setOpacity=onOpacityChange||setLocalOpacity
   const dos = curves[0]?.kind === 'phonon_dos'
   const selected = projection === 'all' ? curves : curves.filter(c => c.id === projection)
+  const document=displayDocument(item,selected,image)
   return <DetailSection title="02 · 原图与提取结果">
+    {onEdit && <Box sx={{textAlign:'right',mb:1}}><Button variant="contained" disabled={editingDisabled} onClick={()=>onEdit(selected[0]?.id)}>编辑</Button></Box>}
     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'space-between', mb: 2 }}>
       {dos ? <TextField select size="small" label="分波态密度" value={projection} onChange={e => setProjection(e.target.value)} sx={{ minWidth: 180 }}>
         <MenuItem value="all">全部分波</MenuItem>{curves.map(c => <MenuItem key={c.id} value={c.id}>仅 {c.projection || c.id}</MenuItem>)}
       </TextField> : <Typography variant="body2" color="text.secondary">保持来源图的轴向与幅值尺度。</Typography>}
       <SpectrumViewSwitch value={mode} onChange={setMode} />
     </Box>
-    <SpectrumFigure item={item} curves={selected} allCurves={curves} image={image} mode={mode} opacity={opacity} />
+    {document ? <div className="spectrum-manual-editor"><div className="detail-plot-body"><ImageOpacityControl value={opacity} onChange={setOpacity} disabled={mode==='data'}/><div className="detail-plot-content"><SourceCanvas doc={document} active={selected[0].id} selected={[]} display={mode} imageOpacity={opacity}/></div></div></div>
+      : <SpectrumFigure item={item} curves={selected} allCurves={curves} image={image} mode={mode} opacity={.85} />}
     {curves[0]?.kind === 'alpha2f' && mode !== 'source' && <Typography variant="caption" sx={{ color: spectrumCurveColor(curves[0], 0) }}>红线：α²F 提取数据</Typography>}
-    {mode === 'overlay' && <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}><Typography variant="caption" sx={{ whiteSpace: 'nowrap' }}>叠加强度</Typography><Slider aria-label="叠加强度" min={0} max={1} step={.05} value={opacity} onChange={(_, value) => setOpacity(value as number)} sx={{ maxWidth: 220 }} /><Typography variant="caption">{Math.round(opacity * 100)}%</Typography></Box>}
-    {curves.some(c => c.kind === 'alpha2f' && !item.result.calibration?.curves?.find((value: { id: string; amplitude_evidence?: string }) => value.id === c.id)?.amplitude_evidence) && <Alert severity="info" sx={{ mt: 1 }}>此版本的 α²F 幅值标定尚待核对，显示旧提取记录不代表其刻度已确认。</Alert>}
+
+    {curves.some(c => c.kind === 'alpha2f' && !item.result.manual_documents?.[c.id]?.calibration.amplitudeEvidence && !item.result.calibration?.curves?.find((value: { id: string; amplitude_evidence?: string }) => value.id === c.id)?.amplitude_evidence) && <Alert severity="info" sx={{ mt: 1 }}>此版本的 α²F 幅值标定尚待核对，显示旧提取记录不代表其刻度已确认。</Alert>}
     {mode !== 'data' && !image && <Button onClick={retryImage}>重新读取原图</Button>}
     {dos && <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 1 }}>{selected.map((c, i) => <Typography key={c.id} variant="caption" sx={{ color: spectrumCurveColor(c, i) }}>{c.projection || c.id}</Typography>)}</Box>}
   </DetailSection>
 }
 
-export function SpectrumMetrics({ item, curves, history }: { item: Item; curves: Curve[]; history: boolean }) {
+export function SpectrumMetrics({ item, curves, history, onContinue }: { item: Item; curves: Curve[]; history: boolean; onContinue?: (curveId?: string) => void }) {
   const dos = curves[0]?.kind === 'phonon_dos', q = item.result.quality || {}, raw = q.integrals?.raw || {}, comparisons = q.comparisons?.raw || {}
+  const manualZero=combinedZeroCheck(item,curves)
   const alpha = curves.find(c => c.kind === 'alpha2f')
   const zeroCovered = curves.length > 0 && curves.every(c => c.points[0]?.frequency_thz === 0 && c.points[0]?.observed_amplitude != null)
   const alphaCal = item.result.calibration?.curves?.find((c: { id: string }) => c.id === alpha?.id)
-  const alphaReason = !alpha ? '当前没有 α²F 数据' : item.review[alpha.id]?.status === 'accepted_limited' ? '当前只采纳限定频段，不能用整次运行积分代替该频段结果' : !alphaCal?.amplitude_evidence ? 'α²F 独立幅值刻度依据尚待核对，旧 λ 刻度不能代用' : raw.status === 'unavailable' ? raw.reason : !zeroCovered ? '当前结果未覆盖真实零频边界，请核对后重新提取' : raw.positive_frequency_complete === false ? '存在缺口，无法计算完整积分' : ''
+  const amplitudeEvidence=alpha && (item.result.manual_documents?.[alpha.id]?.calibration.amplitudeEvidence || alphaCal?.amplitude_evidence)
+  const alphaReason = !alpha ? '当前没有 α²F 数据' : item.review[alpha.id]?.status === 'accepted_limited' ? '当前只采纳限定频段，不能用整次运行积分代替该频段结果' : !amplitudeEvidence ? 'α²F 独立幅值刻度依据尚待核对，旧 λ 刻度不能代用' : raw.status === 'unavailable' ? raw.reason : !zeroCovered ? '当前结果未覆盖真实零频边界，请核对后重新提取' : raw.positive_frequency_complete === false ? '存在缺口，无法计算完整积分' : ''
   const mode = q.dos_mode_integral || { status: 'unavailable', reason: '此版本没有原始绝对 DOS 模式数核验；请核对单位、原胞及完整投影' }
   const modeAvailable = mode.status === 'available' && !item.stale && !history
   return <DetailSection title={dos ? '03 · 频段与数据完整性' : '03 · 积分结果与参考值对比'}>
     <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', mb: 2 }}><Box><Typography variant="caption" color="text.secondary">实际提取频率范围</Typography><Typography fontWeight={600}>{spectrumInterval(curves)}</Typography></Box>
       <Box><Typography variant="caption" color="text.secondary">{dos ? '原胞原子数 N / 目标 3N' : '实际积分范围'}</Typography><Typography fontWeight={600}>{dos ? `${spectrumNumber(mode.primitive_atoms, 0)} / ${spectrumNumber(mode.target_modes, 0)}` : !alphaReason && raw.minimum_integrated_thz != null ? `${spectrumNumber(raw.minimum_integrated_thz)}–${spectrumNumber(alpha?.points.at(-1)?.frequency_thz)} THz` : '暂不可计算'}</Typography></Box></Box>
-    {!zeroCovered && <Alert severity="warning" sx={{ mb: 2 }}>零频提取不完整：必须从原图的真实 0 频率边界提取，不能改标签或补造零点。</Alert>}
+    {manualZero && <div className="spectrum-manual-editor"><ZeroFrequencyCheck result={manualZero} unit="THz" afterSave={false} onContinue={value=>onContinue?.(value.id)} readOnly={!onContinue}/></div>}
+    {!manualZero && !zeroCovered && <Alert severity="warning" sx={{ mb: 2 }}>零频提取不完整：必须从原图的真实 0 频率边界提取，不能改标签或补造零点。</Alert>}
     <Box sx={{ overflowX: 'auto' }}><Table size="small" sx={{ minWidth: 540 }}><TableHead><TableRow>{(dos ? ['全部分波积分', '目标 3N', '绝对偏差', '相对偏差（%）'] : ['参数', '提取谱积分值', '论文参考值', '绝对偏差']).map(label => <TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>
       {dos ? <TableRow><TableCell>{modeAvailable ? spectrumNumber(mode.integral) : '—'}</TableCell><TableCell>{item.stale || history ? '—' : spectrumNumber(mode.target_modes)}</TableCell><TableCell>{modeAvailable ? spectrumNumber(mode.absolute_difference) : '—'}</TableCell><TableCell>{modeAvailable && mode.relative_difference_pct != null ? spectrumNumber(mode.relative_difference_pct, 2) + '%' : '—'}</TableCell></TableRow>
         : [['λ', 'lambda', 'lambda_integral'], ['ωlog（K）', 'omega_log', 'omega_log_k']].map(([label, key, field]) => {

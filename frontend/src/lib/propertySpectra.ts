@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from './api'
 export type PropertySpectrumTarget = { target: 'upload' | 'paper' | 'revision'; target_id: string }
-export interface PropertySpectrumPoint { frequency_thz: number; frequency_pixel?: number; amplitude_pixel?: number | null; observed_amplitude: number | null; reconstructed_amplitude: number | null; status: string; detection_mode?: string }
-export interface PropertySpectrumCurve { id: string; kind: string; projection?: string | null; unit: string; points: PropertySpectrumPoint[]; frequency_direction?: 'x' | 'y'; roi?: number[]; display_bbox?: number[] | null; axis_calibration?: { amplitude: { slope: number; intercept: number }; frequency: { slope: number; intercept: number } } }
+export interface PropertySpectrumPoint { id?: string; segment?: string; breakBefore?: boolean; manual?: boolean;  frequency_thz: number; frequency_pixel?: number; amplitude_pixel?: number | null; observed_amplitude: number | null; reconstructed_amplitude: number | null; status: string; detection_mode?: string }
+export interface PropertySpectrumCurve { manual_trace?: boolean;  id: string; kind: string; projection?: string | null; unit: string; points: PropertySpectrumPoint[]; frequency_direction?: 'x' | 'y'; roi?: number[]; display_bbox?: number[] | null; axis_calibration?: { amplitude: { slope: number; intercept: number }; frequency: { slope: number; intercept: number } } }
 export interface PropertySpectrumItem {
   id: string; version: number; state_key: string | null; stale: boolean
   recorded_at?: string; historical?: boolean; recorded_state_key?: string | null; recorded_caption?: string
   source: { source_name?: string; pdf_page?: number; panel_id?: string; size_px?: number[]; [key: string]: unknown }
   run: { id?: string; status: string; error_message?: string; algorithm_version?: string }
   review: Record<string, { status?: string; reason?: string; frequency_intervals_thz?: number[][] }>
-  result: { curves: PropertySpectrumCurve[]; quality?: Record<string, any>; candidates?: Record<string, any>; calibration?: Record<string, any>; failures?: unknown[] }
+  result: { manual_documents?: Record<string, import("../components/spectrumEditor/engine").Document>; curves: PropertySpectrumCurve[]; quality?: Record<string, any>; candidates?: Record<string, any>; calibration?: Record<string, any>; failures?: unknown[] }
 }
 export interface PropertySpectrumListing { items: PropertySpectrumItem[]; jobs: Array<{ id: string; status: string; error_message?: string }>; version: string; can_edit: boolean; can_review: boolean }
 export const SPECTRUM_API = '/api/rag/spectra'
@@ -18,7 +18,7 @@ export function hasSpectrumData(item: PropertySpectrumItem): boolean {
   return Boolean(item.result.curves.length || item.result.calibration?.curves?.length)
 }
 export const spectrumQuery = (target: PropertySpectrumTarget) => new URLSearchParams(target).toString()
-export const spectrumNames: Record<string, string> = { phonon_dos: '声子 DOS', alpha2f: 'α²F 谱函数', cumulative_lambda: '累计 λ', needs_review: '待核对', accepted: '已采纳', accepted_limited: '限定频段采纳', excluded: '已排除', queued: '排队中', running: '解析中', succeeded: '解析完成', failed: '解析失败', observed: '原图观测', interpolated: '短缺口插值', baseline_inferred: '近轴推断', boundary_assumption: '边界假设', edge_continuation: '平台延续', missing: '缺失' }
+export const spectrumNames: Record<string, string> = { phonon_dos: '声子 DOS', alpha2f: 'α²F 谱函数', cumulative_lambda: '累计 λ', manual_adjusted: '人工调整', needs_review: '待核对', accepted: '已采纳', accepted_limited: '限定频段采纳', excluded: '已排除', queued: '排队中', running: '解析中', succeeded: '解析完成', failed: '解析失败', observed: '原图观测', interpolated: '短缺口插值', baseline_inferred: '近轴推断', boundary_assumption: '边界假设', edge_continuation: '平台延续', missing: '缺失' }
 
 export interface PropertySpectrumGroup {
   item: PropertySpectrumItem
@@ -79,9 +79,10 @@ export function usePropertySpectra(target?: PropertySpectrumTarget) {
       .catch(error => { if (!controller.signal.aborted) setState({ key, listing: null, error: error.message || '谱服务不可用', loading: false }) })
     return () => controller.abort()
   }, [key, reloadKey])
+  const replaceListing = useCallback((listing: PropertySpectrumListing) => setState({key,listing,error:'',loading:false}),[key])
   const reload = useCallback(() => setReloadKey(value => value + 1), [])
   const current = state.key === key ? state : { listing: null, error: '', loading: !!key }
-  return { ...current, reload }
+  return { ...current, reload, replaceListing }
 }
 export function safeSpectrumReturn(value: string | null): string {
   return value && /^\/(?!\/)/.test(value) && !/[\\\u0000-\u001f]/.test(value) ? value : '/upload'

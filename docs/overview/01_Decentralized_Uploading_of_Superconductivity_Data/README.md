@@ -14,7 +14,7 @@
 | [上传、审核与默认结构](upload-review-and-default-selection.md) | 管理晶体结构 pending/approved/rejected 状态和默认项 | 用户认证、管理员权限 |
 | [上传数据结构与表单映射](data-structure-and-form-mapping.md) | 三入口统一研究材料与状态字段、退役独立材料关系、紧凑可折叠结构及草稿与 MySQL 的映射 | 上传任务、科学数据模型 |
 | [数据表关系与内容说明](table-relationships-AI-writed.md) | 核心地图、39 张数据表、表单定义及本地数据快照 | MySQL、科学数据模型、版本化表单 |
-| [谱线人工编辑 Demo 与联动调参](spectrum-manual-editor-demo.md) | 独立本机谱点编辑、坐标核对与源码调参；尚未接入正式数据库 | React、SVG、浏览器本机草稿 |
+| [谱线人工编辑与联动调参](spectrum-manual-editor-demo.md) | 正式谱点人工修订、零频核对与历史保存；独立Demo另行保留 | React、SVG、谱运行表、版本与权限 |
 
 ## 功能组成
 

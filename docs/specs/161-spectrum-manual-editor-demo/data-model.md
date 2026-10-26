@@ -1,5 +1,9 @@
 # 数据模型
 
+## 正式存储
+
+正式路径使用现有SpectrumCollection/SpectrumRun，无新增表。新运行 result_json 包含数值曲线、逐曲线 manual_documents、服务端 manual_provenance（作者/父运行/时间）和 manual_zero_checks。集合版本增加并切换当前run，review_json清空，旧run保留。返修复制后编辑身份重新绑定新集合，来源及像素保留。
+
 ## 本机 Demo 文档
 
 - schemaVersion、id：版本与示例身份；source：图像身份、哈希、原尺寸、视口、图框和路径。

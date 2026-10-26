@@ -169,6 +169,9 @@ def complete_run(run, result):
 def mask_public(payload, reviews):
     """公开谱仅返回已采纳曲线和有效频段；候选及点表同步裁剪。"""
     output = copy.deepcopy(payload)
+    output.pop("manual_documents", None)
+    output.pop("manual_provenance", None)
+    output.get("quality", {}).pop("manual_zero_checks", None)
     selected = []
     for curve in output.get("curves") or []:
         decision = reviews.get(curve["id"], {})
@@ -176,7 +179,16 @@ def mask_public(payload, reviews):
             continue
         intervals = decision.get("frequency_intervals_thz") or []
         if decision["status"] == "accepted_limited":
-            curve["points"] = [p for p in curve["points"] if any(lo <= p["frequency_thz"] <= hi for lo, hi in intervals)]
+            kept, interrupted = [], True
+            for point in curve["points"]:
+                if not any(lo <= point["frequency_thz"] <= hi for lo,hi in intervals):
+                    interrupted = True
+                    continue
+                if curve.get("manual_trace") and interrupted:
+                    point["breakBefore"] = True
+                kept.append(point)
+                interrupted = False
+            curve["points"] = kept
         curve["acceptance"] = decision
         selected.append(curve)
     output["curves"] = selected
@@ -329,6 +341,11 @@ def review_curve(session, ctx, row, curve_id, status, intervals, reason, user):
     if any(not math.isfinite(v) for pair in intervals for v in pair):
         fail("spectra_interval_invalid", "有效频段必须为有限数值", 422)
     f = [p["frequency_thz"] for p in curve["points"]]
+    if status in {"accepted", "accepted_limited"} and curve.get("manual_trace") and (
+            len(f) < 2 or any(value < 0 for value in f) or any(b <= a for a,b in zip(f,f[1:]))):
+        fail("spectra_manual_trace_unverified", "人工描线为空、频率重复或回退，请整理并核对后再采纳", 422)
+    if not f and intervals:
+        fail("spectra_interval_invalid", "空曲线不能限定采纳频段", 422)
     if any(not f[0] <= lo < hi <= f[-1] for lo, hi in intervals):
         fail("spectra_interval_invalid", "有效频段超出所提取曲线", 422)
     data = copy.deepcopy(row.review_json or {})

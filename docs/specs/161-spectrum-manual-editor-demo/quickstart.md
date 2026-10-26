@@ -1,5 +1,15 @@
 # 本机运行
 
+## 正式页面使用
+
+从当前材料状态打开α²F或声子DOS详情；有编辑权限、已归属且版本未过期时，原图卡片提供“编辑”。保存生成数据库新版本并返回新详情；PhDOS顶部选择分波，各自按自己的标定保存，切换前保存或放弃当前修改。
+
+版本冲突和网络失败保留编辑内容，不覆盖别人新保存的结果。历史/只读页面不能保存；服务端重算零频检查，旧积分、比较和采纳失效，位置完成不代表整谱科学通过。
+
+正式参数文件为 `frontend/src/components/spectrumEditor/dragInfluence.ts`，初值沿用用户2/.3/1/.1。原Demo参数和本机草稿未改动，正式页面不读取Demo草稿。[正式接口](contracts/production.md)与[验证边界](production-validation.md)分别记录权限/版本及MySQL尚未复验的限制。
+
+## 独立 Demo
+
 在仓库根执行 `npm --prefix docs/specs/161-spectrum-manual-editor-demo/demo run dev`，打开输出的 127.0.0.1 地址。Demo 仅监听本机，不启动正式服务。
 
 默认地址为 [人工调整 Demo](http://127.0.0.1:5187/)。端口已占用时启动失败，不自动切换到不明地址。可在命令后加 `-- --port 5188` 指定另一个本机端口。

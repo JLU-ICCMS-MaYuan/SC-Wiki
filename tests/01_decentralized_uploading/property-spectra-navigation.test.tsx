@@ -3,6 +3,10 @@ import React, { useState } from 'react'
 import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
+
+// JSDOM没有图像布局API；真实缩放/平移由浏览器回归验证。
+Object.defineProperty(globalThis,'ResizeObserver',{configurable:true,value:class {observe(){} unobserve(){} disconnect(){}}})
+Object.defineProperty(SVGElement.prototype,'getScreenCTM',{configurable:true,value:()=>({a:1})})
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { PropertySpectraProvider, PropertySpectrumSection, PropertySpectrumState, MissingPropertySpectrumModules, UnassignedPropertySpectra } from '../../frontend/src/components/PropertySpectra'
 import PropertyModuleEditor from '../../frontend/src/components/PropertyModuleEditor'
@@ -161,6 +165,7 @@ it('单图支持原图、提取及叠加三种显示方式', async () => {
   raw.result.curves[0].points.forEach((p: any) => { p.frequency_pixel = 90 - p.frequency_thz })
   render(<MemoryRouter initialEntries={[address()]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage />} /></Routes></MemoryRouter>)
   await screen.findByText('声子 DOS解析详情')
+  fireEvent.click(screen.getByRole('button', {name:'仅提取数据'}))
   expect(screen.getByRole('img', { name: /频率沿竖轴/ })).toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', {name:'仅原图'}))
   expect(await screen.findByRole('img', {name:'论文谱原图'})).toBeInTheDocument()
