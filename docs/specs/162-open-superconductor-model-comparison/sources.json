@@ -1,0 +1,314 @@
+{
+  "checked_date": "2026-10-26",
+  "timezone": "Asia/Shanghai",
+  "issue": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/162",
+  "scope": "作者代码、许可、论文、数据发布记录和源码的调研；不等于制品复现或部署",
+  "repositories": [
+    {
+      "repository": "HerzainR/Superconductivity-through-interpretable-ML",
+      "url": "https://github.com/HerzainR/Superconductivity-through-interpretable-ML",
+      "default_branch": "main",
+      "commit": "84a63c80416e50686a2914e6fcd1636aa44d5f85",
+      "tree_truncated": true,
+      "license_spdx": "MIT",
+      "readme_sha256": "8224da45ec20ce60eaafda64e04edbf497ab9774cdbc4c2e486c4b2594bb3e4e",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "atomgptlab/alignn",
+      "url": "https://github.com/atomgptlab/alignn",
+      "default_branch": "main",
+      "commit": "7b3111906ca61f6c1659cdf3b4f19f87b9a57692",
+      "tree_truncated": false,
+      "license_spdx": "NOASSERTION",
+      "readme_sha256": "a1270d26bc086ec91508b94e98152c0c7360f7098c053db2ba951d48afcecc77",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "chen121760/Hydride-Tc-Predictor",
+      "url": "https://github.com/chen121760/Hydride-Tc-Predictor",
+      "default_branch": "main",
+      "commit": "28f1843f32eb3df63d6fbcb5facd25a291e37a75",
+      "tree_truncated": false,
+      "license_spdx": null,
+      "readme_sha256": "50b2cad6e2763b2f3ad6f633b03f72f1dea2be509932118c65e1999e9afaf280",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "chschn/Superconductor",
+      "url": "https://github.com/chschn/Superconductor",
+      "default_branch": "main",
+      "commit": null,
+      "tree_truncated": null,
+      "license_spdx": null,
+      "readme_sha256": "907ebd8a935ba53f242b5f8bcd07ff19b6f0e4892ee450d201ee9531d52270b9",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "henniggroup/BEE-NET",
+      "url": "https://github.com/henniggroup/BEE-NET",
+      "default_branch": "main",
+      "commit": "f21c260a9117830f2d74f2c5ac844ab671c0c606",
+      "tree_truncated": false,
+      "license_spdx": null,
+      "readme_sha256": "d044c03664d91e2caf34f3b493263a16556cde7cf267d477295e5fb2989b89be",
+      "inspection": "README 和 GitHub 元数据；无真实推理",
+      "release_check": "2026-10-26 GitHub Releases 返回空数组；默认分支未见 LICENSE、database.json 或模型权重"
+    },
+    {
+      "repository": "henniggroup/BETE-NET",
+      "url": "https://github.com/henniggroup/BETE-NET",
+      "default_branch": "main",
+      "commit": "56bc783908a60e8a15e31b60018e6f3c3e48f593",
+      "tree_truncated": false,
+      "license_spdx": "Apache-2.0",
+      "readme_sha256": "4fdb16b448326e07409786b85fc70a80f251664639818b9ed00525780bd133c8",
+      "inspection": "README 和 GitHub 元数据；无真实推理",
+      "artifacts": {
+        "CSO": {
+          "count": 100,
+          "bytes": 1968447000
+        },
+        "CPD": {
+          "count": 100,
+          "bytes": 1971058200
+        },
+        "FPD": {
+          "count": 100,
+          "bytes": 1971058200
+        }
+      },
+      "cif_count": 806,
+      "database_bytes": 89104840,
+      "index_checks": {
+        "idx_train_full.txt": {
+          "rows": 651,
+          "unique": 651,
+          "missing_if_used_as_cif_stem": [
+            5,
+            6,
+            85,
+            204,
+            285,
+            290,
+            341,
+            467,
+            490,
+            656,
+            701,
+            716,
+            739,
+            750,
+            805
+          ],
+          "sha256": "56094177b38652e38ecf7bb4630eaad035b61323ea52191759c7255e0b79c53b"
+        },
+        "idx_test_full.txt": {
+          "rows": 173,
+          "unique": 173,
+          "missing_if_used_as_cif_stem": [
+            36,
+            218,
+            786
+          ],
+          "sha256": "71a18c384517452faf55b8bcb7db11d0bb7dc4102c82a7bc93cd6743096cb4b8"
+        },
+        "idx_train_V2_0.txt": {
+          "rows": 651,
+          "unique": 408,
+          "missing_if_used_as_cif_stem": [
+            5,
+            6,
+            85,
+            204,
+            285,
+            341,
+            467,
+            490,
+            750,
+            805
+          ],
+          "sha256": "9d3b53f46b47c36908f38997123687b556642e3df0a755218ab17e8b32432c8b"
+        }
+      },
+      "download_result": "数据库及一个 CSO 权重整文件请求超时；未加载"
+    },
+    {
+      "repository": "henniggroup/symbolic-regression-utilities",
+      "url": "https://github.com/henniggroup/symbolic-regression-utilities",
+      "default_branch": "master",
+      "commit": "11cf1f31888afe3a29140557dc7b3871102b8204",
+      "tree_truncated": false,
+      "license_spdx": "Apache-2.0",
+      "readme_sha256": "221eec314faf2d097d3f5abb1e678ea05ba2e39c80762abf482601a3f9bb19ac",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "khamidieh/predict_tc",
+      "url": "https://github.com/khamidieh/predict_tc",
+      "default_branch": "master",
+      "commit": "ab093ab19a4f34ec7c7bd0342afe0f7d26f0f8b6",
+      "tree_truncated": false,
+      "license_spdx": "GPL-3.0",
+      "readme_sha256": "7049af8002cd3cc4bd6ffca2cec7bdd7bec3e8aaef134a2931b5e16ca9d2d9bc",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "ljcj007/DeeperBand",
+      "url": "https://github.com/ljcj007/DeeperBand",
+      "default_branch": "main",
+      "commit": null,
+      "tree_truncated": null,
+      "license_spdx": "MIT",
+      "readme_sha256": "743d622c0c03d34aed2e10182f827ae4046c58050610a2cfc7d15159f7bfa1df",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "paprakash/ml_eliashberg",
+      "url": "https://github.com/paprakash/ml_eliashberg",
+      "default_branch": "master",
+      "commit": "6940d8b0d9f45ef13931ae56015a086f3cac0c48",
+      "tree_truncated": false,
+      "license_spdx": null,
+      "readme_sha256": "1b1aa670c83e97336446bf20647eb1c404048613d1867d58344493647c5c0208",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "pincher-chen/SODNet",
+      "url": "https://github.com/pincher-chen/SODNet",
+      "default_branch": "main",
+      "commit": "9c8fcb5b4b0423deccff458be369372033e72f76",
+      "tree_truncated": false,
+      "license_spdx": null,
+      "readme_sha256": "fc861742e2f77215b530bedac64899a36fd7d1a73f5e0914b29a33b87bb2f5e5",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "tomo835g/Deep-Learning-to-find-Superconductors",
+      "url": "https://github.com/tomo835g/Deep-Learning-to-find-Superconductors",
+      "default_branch": "main",
+      "commit": "a35b71c6eddc6a2a5157ba4f499ff5fb247e032b",
+      "tree_truncated": false,
+      "license_spdx": "NOASSERTION",
+      "readme_sha256": "a480b8c01c2e8ccdd716facceba154da1aa7ac229f38d19a7ca43855f3cf393e",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "usnistgov/alignn",
+      "url": "https://github.com/usnistgov/alignn",
+      "default_branch": "main",
+      "commit": "f2366daa3413d28a825b46e34d001b5549b05a40",
+      "tree_truncated": false,
+      "license_spdx": "NOASSERTION",
+      "readme_sha256": "aeccda544bf7236525aaf522b680e7cf4c1dd3dafd77bd8778ccb5de4287d42d",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "xqh19970407/HTSC-2025",
+      "url": "https://github.com/xqh19970407/HTSC-2025",
+      "default_branch": "main",
+      "commit": null,
+      "tree_truncated": null,
+      "license_spdx": null,
+      "readme_sha256": "bdb0c964f5d38734434025ccf0c1e8b0b40079c13300eeab4b5614e7c3e166d6",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "zjuKeLiu/S2SNet",
+      "url": "https://github.com/zjuKeLiu/S2SNet",
+      "default_branch": "main",
+      "commit": "c03ef9e2c97ed8b72ecabd7edd6ae0e8e266a7c2",
+      "tree_truncated": false,
+      "license_spdx": null,
+      "readme_sha256": "9daf3f67109d93cd73d76e28d95f93a23d583ad4da26f1d262f565c846d71a46",
+      "inspection": "README 和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "miicck/qet",
+      "url": "https://github.com/miicck/qet",
+      "default_branch": "master",
+      "commit": "d9b0e6694fc9b980a1b4872bf475ea2009652e60",
+      "tree_truncated": false,
+      "license_spdx": null,
+      "readme_sha256": "f5578c2d94c2ae28087bd6339cc8fc71563ae7e66de9ac3a4dd9f76430ef6e49",
+      "inspection": "README、文件树和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "slenderrlrl/Details-of-the-predictor",
+      "url": "https://github.com/slenderrlrl/Details-of-the-predictor",
+      "default_branch": "main",
+      "commit": "65b71c95d9626dd7c3e81c55da5dc6b33977ee70",
+      "tree_truncated": false,
+      "license_spdx": null,
+      "readme_sha256": "2380b2a8e7d4460b1b6ab8ab2aa128f4e33150edeea22112f67bc8f6c3b47e5f",
+      "inspection": "README、文件树和 GitHub 元数据；无真实推理"
+    },
+    {
+      "repository": "takuyanin/pred_hydrides_tc_by_ML",
+      "url": "https://github.com/takuyanin/pred_hydrides_tc_by_ML",
+      "default_branch": "master",
+      "commit": "790d5027397c759e0162dd2061cd2fa2c044beff",
+      "tree_truncated": false,
+      "license_spdx": null,
+      "readme_sha256": "a47c76a979d9a5b408be667aa5ebbd9544315001f5609db114281a5add1adf4c",
+      "inspection": "README、文件树和 GitHub 元数据；无真实推理"
+    }
+  ],
+  "datasets": [
+    {
+      "name": "JARVIS-SuperconDB",
+      "doi": "10.6084/m9.figshare.21370572",
+      "license": "CC BY 4.0",
+      "verified_via": "https://api.datacite.org/dois/10.6084/m9.figshare.21370572",
+      "artifact_access": "Figshare API 403；权重直链 202、正文为空"
+    },
+    {
+      "name": "Materials Cloud 常规超导原始数据",
+      "doi": "10.24435/materialscloud:qv-bq",
+      "license": "CC BY 4.0",
+      "verified_via": "https://archive.materialscloud.org/api/records/3kbt5-r3n56",
+      "files": 19,
+      "bytes": 51617204522
+    },
+    {
+      "name": "UCI Superconductivty Data",
+      "doi": "10.24432/C53P47",
+      "license": "CC BY 4.0",
+      "url": "https://archive.ics.uci.edu/dataset/464/superconductivty+data",
+      "rows": 21263,
+      "features": 81
+    },
+    {
+      "name": "Xie 2022 SISSO 训练描述符、Tc 与回归日志",
+      "doi": "10.24435/materialscloud:68-6p",
+      "license": "Apache-2.0",
+      "verified_via": "https://archive.materialscloud.org/api/records/skdzy-kyx54",
+      "files": [
+        {
+          "name": "files_description.md",
+          "bytes": 584,
+          "publisher_checksum": "md5:7e50c8d169d8d00f287ebd325e50f75f"
+        },
+        {
+          "name": "data_tables.zip",
+          "bytes": 429059,
+          "publisher_checksum": "md5:86c68504d1780b6fc7eaccbd4116706c"
+        },
+        {
+          "name": "sisso_runs.zip",
+          "bytes": 7810599,
+          "publisher_checksum": "md5:80c0ecb90d72b6dbb31dbeb82c10e0ab"
+        }
+      ],
+      "artifact_access": "API 内容与网页文件下载均 curl 56；未成功下载 ZIP",
+      "scope": "已公开参数模型的训练输入和输出；不声称全部原始 DFT 或谱数据已公开"
+    }
+  ],
+  "sisso_81_data": {
+    "rows": 81,
+    "columns": 45,
+    "sha256": "e265109b9d52526aa5a91c7fbf5507919a79a5ccbb8161234a6ba926d521571c",
+    "min_tc": 0.0675,
+    "max_tc": 38.4
+  }
+}
