@@ -36,3 +36,6 @@ T001：固定 Git blob 校验、100 权重与原数据实际获取；T002：asse
 - [ ] T010 后续完成完整网站接入、原有经验模型校准数据核查与独立科学评测；保持 Issue #162 OPEN，不以本地 Demo 完成替代。
 
 - [x] T011 在 `demo/src/main.tsx` 复用 `frontend/src/theme.ts`，统一 `demo/src/styles.css` 和品牌呈现；`demo/tests/browser.cjs` 比较当前主站实际样式并验证原交互，覆盖 FR-018／SC-011。
+
+- [x] T012 在 demo/src/App.tsx、styles.css 中集中右侧来源、实现等高并移除预览，在 demo/server.py 退役废弃接口；浏览器检查全部模型卡片几何与下载，覆盖 FR-019 至 FR-021、SC-012／013。
+- [x] T013 核查 model-name-source.md 所列论文，更新 demo/catalog.json 的模型原称，通过 demo/vite.config.mjs 和 App.tsx 复用原接口，实现当前页上传与结果；真实 API 对照和窄屏验收覆盖 FR-022／SC-014。

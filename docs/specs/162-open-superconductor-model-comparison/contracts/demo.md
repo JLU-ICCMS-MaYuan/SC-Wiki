@@ -4,7 +4,6 @@
 
 - `GET /demo-api/catalog`：模型、文件和真实可用状态；不暴露主机私有路径。
 - `GET /demo-api/datasets/{id}`：白名单、校验通过的原文件附件；无文件／校验不符返回明确错误，未知 ID 返回 404。
-- `GET /demo-api/preview/{id}`：从已核验源文件产生的少量行预览，不冒充完整训练数据。
 - `GET /demo-api/examples/{id}`：作者公开结构或参数样本，用于方便用户实际运行。
 - `POST /demo-api/predict`：模型 ID、结构文本／格式或参数；返回实际计算的 Tc、可用的 EPC 参数和谱、单位、方法版本及条件。返回中不能用参考输出表替代运行。
 - `GET /demo-api/health`：独立 Demo 存活状态及就绪信息，不读取业务数据库。
@@ -13,4 +12,4 @@
 
 下载返回真实 `Content-Length`、`Content-Disposition: attachment`，传输原字节。用户不能传入文件路径或 URL 让服务任意读取／下载。运行时不自动从互联网拉取模型；准备阶段显式获取、核查、缓存。
 
-预测只用于当前页面，没有业务数据库或服务器持久化结果；页面刷新可重新输入。原站估算通过本地 5173 页面访问，Demo 不改动其 API。
+预测只用于当前页面，没有业务数据库或服务器持久化结果；页面刷新可重新输入。Tc assessment model 在本页通过 `POST /api/tc-predict/` 调用原 API，由 Vite 转发到本机 8080。multipart 字段与原接口完全一致：单个 contcar、多个 pdos_files；直接显示 predicted_tc、f2_value、dos_h_ratio、dos_h_atom_bond、bonds_mean、bonds_var。没有跳转入口，也没有复制模型算法。

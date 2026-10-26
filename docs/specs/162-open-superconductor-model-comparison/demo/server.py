@@ -1,7 +1,5 @@
-"""本机 Demo：真实模型推理、经校验的原文件下载和只读数据预览。"""
-import csv
+"""本机 Demo：真实模型推理和经校验的原文件下载。"""
 import hashlib
-from io import StringIO
 import json
 from pathlib import Path
 
@@ -72,23 +70,6 @@ def download(identifier):
     with path.open("rb") as stream:
         sha = item["sha256"] or hashlib.file_digest(stream, "sha256").hexdigest()
     return FileResponse(path, media_type=media, filename=item["filename"], headers={"X-Content-SHA256": sha, "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
-
-
-@app.get("/demo-api/preview/{identifier}")
-def preview(identifier):
-    _, path = checked_file(identifier)
-    if identifier == "bete-data":
-        data = json.loads(path.read_text())
-        rows = [{"ID": i, "化学式": data["comp"][i], "λ": data["lambda"][i], "α²F 采样数": len(data["a2F"][i])} for i in list(data["comp"])[:5]]
-    elif path.suffix == ".csv":
-        rows = list(csv.DictReader(StringIO(path.read_text())))[:5]
-        rows = [{k: row[k] for k in list(row)[:6]} for row in rows]
-    elif path.suffix == ".dat":
-        lines = path.read_text().splitlines()
-        rows = [dict(zip(lines[0].split(), line.split())) for line in lines[1:6]]
-    else:
-        raise HTTPException(400, "辅助压缩包请直接下载查看；预览只支持数据主文件")
-    return {"rows": rows, "note": "从已校验原文件读取的前 5 条，预览不等于完整训练集。"}
 
 
 @app.get("/demo-api/examples/{identifier}")

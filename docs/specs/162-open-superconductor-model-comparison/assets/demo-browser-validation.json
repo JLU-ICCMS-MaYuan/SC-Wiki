@@ -1,18 +1,21 @@
 {
   "checks": [
     "与当前 SC-Wiki 实际页面的基础色、文字色、字体和品牌主色一致",
+    "论文／代码位于右卡，桌面左右卡片顶底和高度对齐",
     "可用的运行按钮使用主站主色",
     "Nb 结构真实运行作者 100 网络集成，返回 Tc 与 51 点谱",
     "BETE 原始 JSON 与结构划分辅助包经浏览器下载，原字节摘要一致",
-    "真实数据库前 5 条预览可打开、关闭",
+    "数据预览按钮及旧标题移除，废弃预览接口已退役",
     "原始网址复制正确",
     "结构预测参数可带入 SISSO 实际计算，保留两个独立结果",
     "29 条真实训练输入与 43 条发布数据分别下载、分别标注",
     "非法参数返回错误，已有结果不丢失、不产生伪结果",
     "高压参数模型真实计算；上游训练包失败明确显示且下载接口拒绝空文件",
-    "现有估算保留，原本地页面可访问",
+    "论文原名显示，CONTCAR＋多个 PDOS 在当前页面真实运行，与原 API 逐字段一致且无跳转",
+    "缺少氢 PDOS 显示原接口错误，已成功结果保留",
     "81 样本资料候选可下载，未伪装成已接入推理",
     "390px 两组输入、真实运行、数据和结果可操作且无页面横向溢出",
+    "390px 原模型上传与当前页结果完整可用",
     "未知数据拒绝下载，无页面脚本错误"
   ],
   "errors": [],
@@ -177,7 +180,7 @@
         "omega_log": "K",
         "omega_2": "K"
       },
-      "elapsed_seconds": 5.731
+      "elapsed_seconds": 1.051
     },
     {
       "model_id": "sisso-2019",
@@ -235,9 +238,11 @@
   ],
   "screenshots": [
     "demo-desktop.png",
+    "demo-clathrate-inline.png",
     "demo-results.png",
     "demo-mobile.png",
-    "demo-mobile-hydride.png"
+    "demo-mobile-hydride.png",
+    "demo-mobile-clathrate.png"
   ],
   "theme": {
     "reference": {
@@ -251,6 +256,17 @@
       "text": "rgb(31, 41, 55)",
       "font": "Roboto, Inter, system-ui, -apple-system, sans-serif",
       "primary": "rgb(79, 70, 229)"
+    }
+  },
+  "legacy": {
+    "input": "合成 H2La 接口夹具，不用于科学评估",
+    "response": {
+      "predicted_tc": 100.257,
+      "f2_value": 0.004615,
+      "dos_h_ratio": 0.666667,
+      "dos_h_atom_bond": 0.02,
+      "bonds_mean": 1,
+      "bonds_var": 0
     }
   },
   "status": "passed"

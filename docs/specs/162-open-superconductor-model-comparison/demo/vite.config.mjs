@@ -10,6 +10,10 @@ export default defineConfig({
     { find: /^react-dom\/client$/, replacement: dependency('react-dom/client.js') },
     { find: /^react-dom$/, replacement: dependency('react-dom/index.js') },
   ] },
-  server: { host: '127.0.0.1', port: 5189, strictPort: true, proxy: { '/demo-api': { target: 'http://127.0.0.1:8192' } } },
+  server: { host: '127.0.0.1', port: 5189, strictPort: true, proxy: {
+    '/demo-api': { target: 'http://127.0.0.1:8192' },
+    // 本页上传直接调用主站原接口，保持原有算法和文件语义。
+    '/api/tc-predict': { target: 'http://127.0.0.1:8080' },
+  } },
   build: { outDir: 'dist', emptyOutDir: true },
 })

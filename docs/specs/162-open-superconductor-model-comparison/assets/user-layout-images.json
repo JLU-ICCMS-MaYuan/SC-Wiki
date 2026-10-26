@@ -1,0 +1,47 @@
+[
+  {
+    "id": "IMG-001",
+    "upload_order": 1,
+    "original_name": "codex-clipboard-3d137399-dcc7-468c-a60c-5e471eac824e.png",
+    "locator": "assets/request-layout-01.png",
+    "status": "local_verified",
+    "sha256": "80fcdc57b01808554c89cd6248116f7f87c938af041125096665199ba64c570e",
+    "dimensions_px": [
+      530,
+      120
+    ],
+    "media_type": "image/png",
+    "user_context": "1. 这些东西都写到右侧的卡片里面。",
+    "verification": "已查看原图并逐字节复制、核对 SHA-256 与尺寸"
+  },
+  {
+    "id": "IMG-002",
+    "upload_order": 2,
+    "original_name": "codex-clipboard-01c08d1d-dae3-461a-b8f9-26eb6661ad10.png",
+    "locator": "assets/request-layout-02.png",
+    "status": "local_verified",
+    "sha256": "6ddb2eadbb4099ee49fcd44eb5cd0e734e0e73b79fc663d9328fb25ddd3eb67c",
+    "dimensions_px": [
+      796,
+      138
+    ],
+    "media_type": "image/png",
+    "user_context": "2. “它学习的数据”删掉。保证中间的卡片和右侧的卡片等高对齐。",
+    "verification": "已查看原图并逐字节复制、核对 SHA-256 与尺寸"
+  },
+  {
+    "id": "IMG-003",
+    "upload_order": 3,
+    "original_name": "codex-clipboard-9b5ee074-baf1-4047-8ed8-b90565afa5cf.png",
+    "locator": "assets/request-layout-03.png",
+    "status": "local_verified",
+    "sha256": "9866a8b785ed66d6d8a2004af951e42a22281d61f3a54084950bfc445cf44ce2",
+    "dimensions_px": [
+      1698,
+      186
+    ],
+    "media_type": "image/png",
+    "user_context": "4. 不要叫SC-Wiki·现有估算。就用姜博文的论文里面对模型的名字的描述，也不要打开原有估算那个按钮，直接把原来的页面的功能接进来就行，不需要跳转到其他页面执行。",
+    "verification": "已查看原图并逐字节复制、核对 SHA-256 与尺寸"
+  }
+]
