@@ -1,0 +1,8 @@
+{
+  "first_status": 200,
+  "second_status": 429,
+  "health_status": 200,
+  "health_seconds": 0.006787957994674798,
+  "parameters_status": 200,
+  "result_tc": 6.421846558789016
+}

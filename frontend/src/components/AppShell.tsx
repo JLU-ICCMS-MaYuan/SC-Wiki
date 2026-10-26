@@ -39,6 +39,17 @@ const AppShell: React.FC = () => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [communityOpen, setCommunityOpen] = useState(location.pathname.startsWith('/share/'))
   const [communityAnchor, setCommunityAnchor] = useState<HTMLElement | null>(null)
+  const [predictionAnchor, setPredictionAnchor] = useState<HTMLElement | null>(null)
+  const predictionActive = location.pathname === '/tc-predict'
+  const predictionGroup = new URLSearchParams(location.search).get('group') === 'hydride' ? 'hydride' : 'ambient'
+  const predictionItems = [
+    { id: 'ambient', label: t('tcPredict.ambientGroup') },
+    { id: 'hydride', label: t('tcPredict.hydrideGroup') },
+  ]
+  const choosePrediction = (group: string) => {
+    setPredictionAnchor(null)
+    if (!predictionActive || predictionGroup !== group) navigate(`/tc-predict?group=${group}`)
+  }
   const communityItems = [
     { key: 'community.rankings', path: '/share/rankings' },
     { key: 'community.charts', path: '/share/charts' },
@@ -86,6 +97,13 @@ const AppShell: React.FC = () => {
             <SidebarButton icon={<GroupsOutlined />} label={t(item.key)} collapsed={collapsed} selected={isActive('/share')} aria-expanded={collapsed ? Boolean(communityAnchor) : communityOpen}
               onClick={event => collapsed ? setCommunityAnchor(event.currentTarget) : setCommunityOpen(value => !value)} />
             {!collapsed && <Collapse in={communityOpen}><Box sx={{ pl: 2 }}>{communityItems.map(child => <SidebarButton key={child.path} icon={null} label={t(child.key)} selected={isActive(child.path)} onClick={() => navigate(child.path)} />)}</Box></Collapse>}
+          </React.Fragment> : item.path === '/tc-predict' ? <React.Fragment key={item.path}>
+            <SidebarButton icon={<AutoAwesomeOutlined />} label={t(item.key)} collapsed={collapsed} selected={predictionActive}
+              aria-haspopup={collapsed && predictionActive ? 'menu' : undefined}
+              onClick={event => { if (collapsed && predictionActive) setPredictionAnchor(event.currentTarget); else if (!predictionActive) navigate('/tc-predict') }} />
+            {!collapsed && predictionActive && <Box component="nav" aria-label={t('tcPredict.categories')} sx={{ pl: 2, display: 'flex', flexDirection: 'column', gap: .5 }}>
+              {predictionItems.map(child => <SidebarButton key={child.id} icon={null} label={child.label} selected={predictionGroup === child.id} onClick={() => choosePrediction(child.id)} />)}
+            </Box>}
           </React.Fragment> : <SidebarButton
             key={item.path} icon={<item.icon />} label={t(item.key)} collapsed={collapsed}
             selected={isActive(item.path)} onClick={() => navigate(item.path)}
@@ -131,6 +149,9 @@ const AppShell: React.FC = () => {
       </Menu>
       <Menu anchorEl={communityAnchor} open={Boolean(communityAnchor)} onClose={() => setCommunityAnchor(null)}>
         {communityItems.map(item => <MenuItem key={item.path} selected={isActive(item.path)} onClick={() => { setCommunityAnchor(null); navigate(item.path) }}>{t(item.key)}</MenuItem>)}
+      </Menu>
+      <Menu anchorEl={predictionAnchor} open={Boolean(predictionAnchor) && predictionActive && collapsed} onClose={() => setPredictionAnchor(null)}>
+        {predictionItems.map(item => <MenuItem key={item.id} selected={predictionGroup === item.id} onClick={() => choosePrediction(item.id)}>{item.label}</MenuItem>)}
       </Menu>
     </Box>
   )

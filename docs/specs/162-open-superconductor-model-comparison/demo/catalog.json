@@ -75,24 +75,6 @@
       "license": "原论文与本站实现分别引用",
       "boundary": "用于笼状超氢化物的初步 Tc 评估；沿用当前计算接口和原始输入约定，预测不等于实验结果。",
       "code_label": "本站实现"
-    },
-    {
-      "id": "sisso-81-model",
-      "name": "SISSO · 81 样本",
-      "family": "资料候选",
-      "group": "ambient",
-      "year": "候选",
-      "tagline": "数据已可下载，模型尚未接入",
-      "description": "提供原始训练数据和来源，供先行核查。当前不提供预测结果。",
-      "input": "λ、ωlog、密度和成分描述符",
-      "mode": "pending",
-      "datasets": [
-        "sisso-81"
-      ],
-      "paper": null,
-      "code": "https://github.com/HerzainR/Superconductivity-through-interpretable-ML",
-      "license": "MIT（仓库声明）",
-      "boundary": "训练数据主要分布于低 Tc；模型系数与单位待核对。"
     }
   ],
   "datasets": [

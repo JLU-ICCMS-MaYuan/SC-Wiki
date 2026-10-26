@@ -2,6 +2,10 @@
 
 核查日期：2026-10-26（Asia/Shanghai）。对应 [Issue #162](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/162) 与 [Spec 草稿](spec.md)。
 
+## 当前本地主站状态
+
+用户已暂停 SISSO 81 候选并授权主站接入；四个模型现通过 SC-Wiki 本地 `/tc-predict` 使用，正式代码位于 frontend/src/features/prediction 与 backend/prediction。原 Demo 研究和科学边界保留，主站验收见 [本地验证](local-integration-validation.md)。
+
 ## 最新实施进展
 
 初始调研之后，用户已要求本地实时开发 Demo 和新增真实推理。本轮已取得 BETE-NET 原始数据库、全部 100 个 CSO 权重和结构／划分，实际运行 BETE-NET 与两版 SISSO，并提供已校验原文件下载。Xie 2022 原包仍受上游 503 阻塞。最新能力和验证边界以 [Demo 验收](demo-validation.md) 为准；以下保留初始调研时的事实和建议，不将历史下载失败当作当前 BETE 状态。

@@ -1,4 +1,5 @@
 export default {
+  ambientGroup: '常压 BCS 超导体', hydrideGroup: '高压氢化物', categories: '预测分类',
   failed: '预测失败', title: '从结构和电子态输入估算 Tc', disclaimer: '预测结果只作为候选信息，不会自动进入公开数据库。',
   inputFiles: '输入文件', uploaded: '已上传', uploadedCount: '已上传 ({count})', clickUpload: '点击上传', result: '预测结果',
   dosRatio: 'H 态密度占比 = {value}', bondMean: 'H-H 键长均值 = {value} Å', bondVariance: 'H-H 键长方差 = {value}',

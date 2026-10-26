@@ -56,6 +56,8 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 app.include_router(tc_predict.router)
+from backend.api import tc_models
+app.include_router(tc_models.router)
 app.include_router(structures.router)
 app.include_router(rag.router)
 from backend.api import evidence, paper_revisions

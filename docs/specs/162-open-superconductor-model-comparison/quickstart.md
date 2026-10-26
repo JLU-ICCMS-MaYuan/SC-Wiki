@@ -1,4 +1,48 @@
-# 本地 Demo 使用与启动
+# SC-Wiki 本地主站预测
+
+当前正式入口：[预测](http://127.0.0.1:5173/tc-predict)。已接入主站现有 Vite／Go／FastAPI 服务，原生热重载生效；不再需要启动独立 Demo 的 5189／8192。
+
+## 主站使用
+
+1. 从左侧“预测”选择“常压 BCS 超导体”或“高压氢化物”；侧栏收起时，在预测页再次点击预测图标打开分类菜单。
+2. 顶部选择模型，上传或粘贴结构、填写参数，或在 Tc assessment model 中上传 CONTCAR＋PDOS。
+3. 结构默认自动识别 CIF／POSCAR，结果按等高横条展示，完整参数／谱图按需展开。
+4. 右侧通过“论文链接／原始网站”查来源，直接下载数据集。Xie 2022 原包暂不可用会明确提示。
+5. SISSO · 81 样本已按要求暂停，研究资料保留但不提供模型入口。
+
+## 主站本地运行与准备
+
+现有网站按项目原来的 `make start` 启动。模型无需新常驻服务；BETE 由网站按需启动隔离子进程。当前缓存复用 `.local/tc-model-demo/`，这是历史文件夹名称，并不依赖 Demo HTTP 服务。
+
+从仓库根准备全新本地环境时，先确保主站基础环境和前端依赖已经按项目说明安装，再执行：
+
+```bash
+scwiki_python_prefix="$(python3 -m scripts.local_deploy.environment "$PWD")"
+"$scwiki_python_prefix/bin/python" -m venv --system-site-packages ".local/tc-model-demo/venv"
+".local/tc-model-demo/venv/bin/python" -m pip install --no-deps --no-build-isolation -r "backend/prediction/requirements-local.txt"
+python3 "scripts/prepare_tc_models.py"
+```
+
+准备脚本要求已登录 GitHub CLI 和可用网络。大制品约数 GB，不加入 Git；作者原文件、许可和已验收下载包摘要保持一致。已有缓存逐对象校验后复用。包内 `packaged_by` 的旧 Demo 标记属于已发布包历史，本轮不改写包内字节。
+
+默认 Python 为 `.local/tc-model-demo/venv/bin/python`，数据位于同目录。部署者可通过 `TC_MODEL_CACHE`／`TC_MODEL_PYTHON` 指定其他服务端路径；用户请求不能设置这些值。当前验证平台为 Apple Silicon，Python 3.12、PyTorch 2.14 及 requirements-local.txt 中的扩展，其他平台必须重新验证。
+
+网站主进程不加载 e3nn／PyG；BETE 子进程仅允许一个并发任务，120 秒超时清理，缺少环境或校验失败返回明确错误。原参数模型及其他 API 不因该模型失败而不可用。
+
+## 主站验证
+
+```bash
+npm --prefix "frontend" run build
+"$scwiki_python_prefix/bin/python" -m pytest "backend/tests/test_tc_models.py" -q
+NODE_OPTIONS=--no-experimental-webstorage npm --prefix "frontend" run test:upload-ui -- "tests/02_identity_governance/sidebar-navigation.test.tsx"
+node "tests/06_ai_assisted_tc_estimation/local-prediction.cjs"
+```
+
+浏览器验收使用真实主站并禁止调用 Demo 端口，包含推理、下载摘要、原文件上传、主导航和手机布局；结果见 [本地接入验收](local-integration-validation.md)。
+
+## 历史 Demo 使用与启动
+
+以下为原型阶段记录，仅供复查；当前主站以本页上半部分为准，候选清单与入口可能已经更新。
 
 当前入口：[预测 Demo](http://127.0.0.1:5189/)。独立推理 API 为 `127.0.0.1:8192`；原网站仍在 `127.0.0.1:5173`。这是用户授权的本机原生实时开发环境，没有部署到阿里云或 Docker。
 

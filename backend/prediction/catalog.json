@@ -1,0 +1,126 @@
+{
+  "models": [
+    {
+      "id": "bete-cso",
+      "name": "BETE-NET · CSO",
+      "family": "等变图神经网络",
+      "group": "ambient",
+      "year": "2025",
+      "tagline": "从晶体结构预测电子–声子谱",
+      "description": "运行作者 100 个网络的集成，用平均 α²F 谱计算 λ、ωlog 和 Tc。",
+      "input": "CIF / POSCAR / CONTCAR",
+      "mode": "structure",
+      "datasets": [
+        "bete-bundle"
+      ],
+      "paper": "https://www.nature.com/articles/s41524-024-01475-4",
+      "code": "https://github.com/henniggroup/BETE-NET",
+      "license": "Apache-2.0",
+      "boundary": "0.25–100.25 meV 谱网格；高压氢化物未验证。μ* 固定 0.09。",
+      "examples": [
+        "nb",
+        "pb",
+        "al"
+      ]
+    },
+    {
+      "id": "sisso-2019",
+      "name": "SISSO · Xie 2019",
+      "family": "符号回归",
+      "group": "ambient",
+      "year": "2019",
+      "tagline": "用电子–声子参数估算 Tc",
+      "description": "执行论文式 (4) 的学习公式，提供作者实际使用的 29 条训练数据。",
+      "input": "λ、ωlog、μ*",
+      "mode": "parameters",
+      "datasets": [
+        "sisso-train"
+      ],
+      "paper": "https://arxiv.org/abs/1905.06780",
+      "code": "https://github.com/henniggroup/symbolic-regression-utilities",
+      "license": "Apache-2.0",
+      "boundary": "训练于低 Tc 常规材料；高压计算是外推，不能视为专用模型。"
+    },
+    {
+      "id": "sisso-2022",
+      "name": "SISSO · Xie 2022",
+      "family": "符号回归",
+      "group": "hydride",
+      "year": "2022",
+      "tagline": "含谱形修正的 Tc 估算",
+      "description": "执行论文式 (6)–(8)。论文以氢化物作外推检验，需要已有 EPC 参数。",
+      "input": "λ、ωlog、ω₂、μ*",
+      "mode": "parameters",
+      "datasets": [
+        "xie-2022"
+      ],
+      "paper": "https://www.nature.com/articles/s41524-021-00666-7",
+      "code": "https://github.com/henniggroup/symbolic-regression-utilities",
+      "license": "Apache-2.0",
+      "boundary": "可真实计算；训练集原网址可查询，但上游文件暂不可下载。不能从结构或电子 PDOS 自动补出 EPC 参数。"
+    },
+    {
+      "id": "legacy",
+      "name": "Tc assessment model",
+      "family": "E_couple · Tc 评估",
+      "group": "hydride",
+      "year": "2025",
+      "tagline": "基于氢子晶格与电子 PDOS 的 Tc 评估",
+      "description": "姜博文等人的 Tc assessment model：使用氢–氢距离和氢投影态密度构造 E_couple，估算笼状超氢化物的 Tc。",
+      "input": "CONTCAR + 电子 PDOS",
+      "mode": "legacy",
+      "datasets": [],
+      "paper": "https://doi.org/10.1103/PhysRevB.111.054505",
+      "code": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/blob/mayuan/backend/api/tc_predict.py",
+      "license": "原论文与本站实现分别引用",
+      "boundary": "用于笼状超氢化物的初步 Tc 评估；沿用当前计算接口和原始输入约定，预测不等于实验结果。",
+      "code_label": "本站实现"
+    }
+  ],
+  "datasets": [
+    {
+      "id": "sisso-train",
+      "filename": "sisso-2019-train.dat",
+      "name": "训练数据",
+      "description": "模型学习时使用的 29 条材料记录，包括 Tc、ωlog、λ 和 μ*。",
+      "license": "Apache-2.0",
+      "version": "11cf1f31888afe3a29140557dc7b3871102b8204",
+      "source_url": "https://github.com/henniggroup/symbolic-regression-utilities/blob/11cf1f31888afe3a29140557dc7b3871102b8204/datasets/AllenDynes/train.dat",
+      "original_url": "https://raw.githubusercontent.com/henniggroup/symbolic-regression-utilities/11cf1f31888afe3a29140557dc7b3871102b8204/datasets/AllenDynes/train.dat",
+      "rows": 29,
+      "kind": "训练输入",
+      "size": 1846,
+      "sha256": "28cf4500e570e62c110625766d6ebd45562f3fa471247497b14d0b76d342fe88"
+    },
+    {
+      "id": "xie-2022",
+      "filename": "xie-2022-data_tables.zip",
+      "name": "训练数据",
+      "description": "作者发布的训练和验证数据。原始网站目前无法提供文件下载，恢复后可补齐。",
+      "license": "Apache-2.0",
+      "version": "Materials Cloud 2021.150 v1",
+      "source_url": "https://archive.materialscloud.org/records/skdzy-kyx54",
+      "original_url": "https://archive.materialscloud.org/api/records/skdzy-kyx54/files/data_tables.zip/content",
+      "rows": null,
+      "kind": "训练／验证参数表",
+      "publisher_md5": "86c68504d1780b6fc7eaccbd4116706c",
+      "size": 429059,
+      "sha256": null
+    },
+    {
+      "id": "bete-bundle",
+      "filename": "bete-net-dataset.zip",
+      "name": "数据集",
+      "description": "包含作者公开的材料性质、晶体结构，以及训练和测试样本名单，已整理为一个下载包。原文件保持不变。",
+      "license": "Apache-2.0",
+      "version": "56bc783908a60e8a15e31b60018e6f3c3e48f593",
+      "source_url": "https://github.com/henniggroup/BETE-NET",
+      "original_url": "https://github.com/henniggroup/BETE-NET",
+      "rows": 806,
+      "kind": "本站整理下载包",
+      "size": 28981706,
+      "sha256": "e6c21e6bf90ce2f6a5030bbfb3fe965d41aa07e6406c80b9bd888bd2ac2af730",
+      "download_label": "下载数据集"
+    }
+  ]
+}

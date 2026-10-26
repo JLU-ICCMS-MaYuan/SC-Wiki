@@ -4,7 +4,7 @@
 
 **创建日期**：2026-10-26
 
-**状态**：完整功能仍为草稿；用户已另行明确授权本地实时开发 Demo，以及模型旁的真实训练集下载和原始网址。当前只实施这些已明确部分。
+**状态**：本地实施；用户明确授权将已验收页面与可运行模型接入主站，暂缓截图中的 SISSO 81 候选；生产发布及完整科学评测不在本次范围。
 
 ## 原始需求记录
 
@@ -61,9 +61,11 @@
 
 > 开始执行。
 
+> 由于推理模型无法接入。暂时放弃接入。现在开始把模型计入 sc-wiki 的本地服务。
+
 ## 附件与推断来源
 
-- 用户先后提供八张界面截图，原图及元信息已归档于 assets/request-layout-01.png 至 03.png、assets/request-dataset-01.png 至 02.png、assets/request-poscar-error.png、assets/request-result-rows.png、assets/request-prediction-navigation.png 和 assets/user-layout-images.json；仅作界面定位材料。
+- 用户先后提供九张界面截图，原图及元信息已归档于 assets/request-layout-01.png 至 03.png、assets/request-dataset-01.png 至 02.png、assets/request-poscar-error.png、assets/request-result-rows.png、assets/request-prediction-navigation.png、assets/request-local-integration.png 和 assets/user-layout-images.json；仅作界面定位材料。
 - 用户第二段原话确认的是完整展示的 Issue 草案，不是本 Spec，也不是模型名单或部署授权。
 - 当前行为依据：[Tc 估算总览](../../overview/07_AI_Assisted_Tc_Estimation/README.md)、`backend/api/tc_predict.py`、`frontend/src/pages/TcPredictPage.tsx`。
 - 模型事实及推荐依据：[调研报告](research.md)、[核验记录](validation.md)、[来源清单](sources.json)。推荐顺序是 AI 调研结论，尚未被用户选定。
@@ -154,9 +156,19 @@ images:
     media_type: "image/png"
     user_context: "我希望把这两个移动到左边。然后把下面的各个模型都移动到这两个的位置。你明白吗？你先复述一下我的 prompt，然后得到我的同意后，再执行。"
     verification: "已查看箭头与分类位置原图，按字节复制并核对摘要和尺寸；等待用户明确同意后实施"
+  - id: IMG-009
+    upload_order: 9
+    original_name: "codex-clipboard-5f5e3d9f-18e0-4f82-964d-94cbce2037f2.png"
+    locator: "assets/request-local-integration.png"
+    status: "local_verified"
+    sha256: "d19a0acaa99dda73da82157d1beef6bb4634605c0bd9a58f9ec787bfcaff0f54"
+    dimensions_px: [1162, 212]
+    media_type: "image/png"
+    user_context: "由于推理模型无法接入。暂时放弃接入。现在开始把模型计入 sc-wiki 的本地服务。"
+    verification: "已查看截图明确指向 SISSO · 81 样本资料候选，原字节归档并核对摘要和尺寸"
 ```
 
-八张用户原图已渲染查看、复制并核对摘要和尺寸；没有用重绘或 OCR 替代原图。
+九张用户原图已渲染查看、复制并核对摘要和尺寸；没有用重绘或 OCR 替代原图。
 
 ## 背景与目标
 
@@ -274,6 +286,10 @@ images:
 - **FR-030**：页面、左侧入口和浏览器标签统一称为“预测”；左侧“预测”下纵向提供“常压 BCS 超导体”和“高压氢化物”，采用用户最后确认的文案。
 - **FR-031**：各模型选项上移到原分类栏位置，在页头之后横向排列；左侧分类切换联动顶部模型和下方表单，删除原顶部分类栏。窄屏通过左侧分类抽屉保持入口可用。
 
+- **FR-032**：暂停 SISSO · 81 样本候选接入，从可选目录和主站下载白名单移除；既有调研记录与缓存不删除。
+- **FR-033**：将已验收预测页面接入 SC-Wiki 本地原生主站 `/tc-predict`，复用现有导航、主题与 API 链路，保持两类分组、原模型同页上传、数据下载和定高结果。不能通过嵌入 Demo 页面或调用 Demo 端口冒充主站接入。
+- **FR-034**：模型运行与目录代码进入正式源码路径；结构模型依赖在固定独立解释器内运行，有并发、超时和退出清理，不能阻塞主站其他 API；缺环境或制品明确失败。
+
 ### 关键实体
 
 - **模型及变体**：模型家族、版本、输入要求、输出能力、许可证及制品来源。
@@ -313,6 +329,11 @@ images:
 - **SC-021**：1440px 下两分类纵向位于左侧预测入口下，模型选项横排且直接接在页头之后，不出现“模型实验室”或旧分类文案；点击已选分类不重置当前模型。
 - **SC-022**：分类联动模型／表单，真实计算和已有结果保留正常；800px 分类可读且无溢出，390px 左侧抽屉选择后关闭，支持 Escape 与焦点返回。
 
+- **SC-023**：主站目录只包含 BETE-NET-CSO、Xie 2019／2022 和 Tc assessment model，暂停候选及数据 ID 不可通过主站接口访问。
+- **SC-024**：真实浏览器在主站完成用户 MgB2 POSCAR、参数公式和原模型文件上传，结果与已验收实现一致；实际数据包下载摘要一致，全流程不请求 5189／8192。
+- **SC-025**：分类支持 URL 刷新与返回、侧栏折叠后仍可选择，390px 可输入／运行和展开结果；预测 CSS 不影响离开路由后的其他页面。
+- **SC-026**：真实结构请求占用时返回第二请求 429，同时健康与参数模型保持可用；缺环境／制品、超时和任务取消均有对应失败与进程清理验证。
+
 ## 假设与依赖
 
 - 当前代码路径和保留边界已从源码及 Overview 核查。
@@ -333,6 +354,12 @@ images:
 - 不宣称所有常规超导体或高压氢化物均适用，不承诺论文误差可直接迁移。
 - 不将结构生成模型、通用材料势或 Eliashberg 数值求解器直接当作已训练的 Tc 预测模型。
 - 不自动推送 Git、发布镜像、启停现有服务或批量更新业务数据；允许启动此次授权的独立本地 Demo。
+
+## 最新本地主站交付范围
+
+用户最新指令及截图明确暂停 SISSO 81，并要求将模型接入本地服务；因此此前“只实施独立 Demo”“完整主站接入待授权”的限制对本轮不再适用。主站位于本机 5173，继续使用原生 Vite／Go／FastAPI；接受已完成的界面取舍和四个已验证可运行模型，旧缓存历史名称保留以复用真实制品。
+
+本轮不新增数据库或训练任务，不推送、不部署云端。Xie 2022 训练 ZIP 尚不可获取、原 Tc assessment model 校准数据尚未核实等边界继续明确记录，不能用主站接入成功抵消这些缺口。详细技术主路径见 [本地接入计划](local-integration-plan.md)。
 
 ## 最新界面取舍
 
@@ -356,6 +383,8 @@ images:
 
 - 新授权：用户回复“同时要求新增模型真实推理”；Demo 不能只显示资料或预录预测。
 
+- 新授权：用户要求“现在开始把模型计入 sc-wiki 的本地服务”，结合截图暂停 SISSO 81；在本次已确认本地实时开发环境中实施主站集成。
+
 ## 最终草案确认
 
-完整功能最终草案仍待确认。当前 Plan／Tasks 仅覆盖用户新近明确授权的本地 Demo、原始数据下载和来源展示；用户已确认新增真实推理，本轮以独立 Demo 验收，不代表完整网站已定稿。
+完整平台的长期范围仍未全部定稿；本轮按用户最新明确指令实施既有已验收模型与页面的本地主站接入，使用 local-integration-plan.md 作为本轮基线。未将云端发布、全部科学评测或未来候选接入写成已授权事项。

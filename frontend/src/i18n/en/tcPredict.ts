@@ -1,4 +1,5 @@
 export default {
+  ambientGroup: 'Ambient-pressure BCS superconductors', hydrideGroup: 'High-pressure hydrides', categories: 'Prediction categories',
   failed: 'Prediction failed', title: 'Estimate Tc from structural and electronic-state inputs', disclaimer: 'Predictions are candidates only and are never added to the public database automatically.',
   inputFiles: 'Input files', uploaded: 'Uploaded', uploadedCount: 'Uploaded ({count})', clickUpload: 'Click to upload', result: 'Prediction result',
   dosRatio: 'H density-of-states ratio = {value}', bondMean: 'Mean H-H bond length = {value} Å', bondVariance: 'H-H bond-length variance = {value}',

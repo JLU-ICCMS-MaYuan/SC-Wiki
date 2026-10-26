@@ -1,0 +1,50 @@
+{
+  "checks": [
+    "主站预测页复用唯一 AppShell，常压仅两个模型，81 样本候选和下载接口已移除",
+    "主站完整请求链自动读取用户 MgB2 POSCAR，真实 100 网络推理与已验收版本一致",
+    "主站横条独立展开正常，结构参数带入 SISSO，两个真实结果独立保留",
+    "经主站 Vite/Go/FastAPI 实际下载 BETE 整包，大小及 SHA-256 与原准备包一致",
+    "高压分组可刷新恢复、真实公式计算正常，原训练包不可用状态明确保留",
+    "原 Tc assessment model 在主站同页真实上传计算，原 API 及全部中间量保留",
+    "缺输入返回原错误且保留结果，分类 URL 支持浏览器返回",
+    "主站侧栏折叠菜单可切换预测分类，页面实例与结果保留",
+    "离开预测后主站其他页面布局无全局 CSS 污染",
+    "390px 主站侧栏分类、自动结构解析、真实推理及结果展开折叠可用且无溢出",
+    "所有操作未请求 5189/8192 Demo 服务，无页面脚本错误"
+  ],
+  "errors": [],
+  "demoRequests": [],
+  "predictions": [
+    {
+      "id": "bete-cso",
+      "tc": 6.421846558789016,
+      "formula": "B2Mg",
+      "input_format": "vasp",
+      "ensemble_size": 100
+    },
+    {
+      "id": "sisso-2019",
+      "tc": 6.730472249729194
+    },
+    {
+      "id": "sisso-2022",
+      "tc": 209.31541653537369
+    }
+  ],
+  "downloads": [
+    {
+      "id": "bete-bundle",
+      "size": 28981706,
+      "sha256": "e6c21e6bf90ce2f6a5030bbfb3fe965d41aa07e6406c80b9bd888bd2ac2af730"
+    }
+  ],
+  "legacy": {
+    "predicted_tc": 100.257,
+    "f2_value": 0.004615,
+    "dos_h_ratio": 0.666667,
+    "dos_h_atom_bond": 0.02,
+    "bonds_mean": 1,
+    "bonds_var": 0
+  },
+  "status": "passed"
+}

@@ -50,3 +50,10 @@ T001：固定 Git blob 校验、100 权重与原数据实际获取；T002：asse
 
 - [x] T019 按用户“开始执行”的确认，在 demo/src/App.tsx、styles.css、index.html 统一“预测”名称，把两分类移到左侧并上移模型选项；复用分类组件支持窄屏抽屉，覆盖 FR-030／031。
 - [x] T020 在 demo/tests/prediction-navigation.cjs 验证桌面几何、分类联动和真实计算、平板／窄屏及键盘；更新既有 browser.cjs 的分类定位，覆盖 SC-021／022。
+
+## 主站接入增量
+
+- [x] T021 在 backend/prediction/catalog.json 和 Demo 目录暂停 SISSO 81；正式白名单移除其数据 ID，保留调研历史，覆盖 FR-032／SC-023。
+- [x] T022 将源码迁入 frontend/src/features/prediction、backend/prediction、backend/api/tc_models.py，接入原 TcPredictPage／AppShell 和主 API；不引用 docs 运行模块，覆盖 FR-033／SC-024／025。
+- [x] T023 以固定独立 Python 子进程执行 BETE，校验制品、限制并发／超时并清理进程；backend/tests/test_tc_models.py 和真实服务隔离验证覆盖 FR-034／SC-026。
+- [x] T024 在 tests/06_ai_assisted_tc_estimation/local-prediction.cjs 完成主站真实推理、下载、路由状态、移动端与 CSS 隔离验证；更新 Quickstart 和 Overview，保持未验收科学范围明确。
