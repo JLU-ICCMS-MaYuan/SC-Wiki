@@ -87,7 +87,7 @@ export default function App() {
   }
 
   return <div className="app">
-    <aside className="rail"><a className="brand" href="http://127.0.0.1:5173" aria-label="返回 SC-Wiki"><Atom small/><b>SC<span>Wiki</span></b></a><div className="rail-label">研究工作台</div><a href="http://127.0.0.1:5173/explore"><span>⌕</span> 探索</a><a href="http://127.0.0.1:5173/community"><span>◌</span> 社区</a><a className="active" href="#"><span>✧</span> 模型实验室</a><div className="rail-bottom"><span className="live-dot"/> 本地 Demo<br/><small>原生实时开发环境</small></div></aside>
+    <aside className="rail"><a className="brand" href="http://127.0.0.1:5173" aria-label="返回 SC-Wiki"><span className="brand-mark">SC</span><b>SC-Wiki</b></a><div className="rail-label">研究工作台</div><a href="http://127.0.0.1:5173/search"><span>⌕</span> 探索</a><a href="http://127.0.0.1:5173/share"><span>◌</span> 社区</a><a className="active" href="#"><span>✧</span> 模型实验室</a><div className="rail-bottom"><span className="live-dot"/> 本地 Demo<br/><small>原生实时开发环境</small></div></aside>
     <main>
       <header className="topbar"><span>预测 <i>/</i> 模型实验室</span><a className="text-link" href={site} target="_blank" rel="noreferrer">打开原有估算 ↗</a></header>
       <section className="hero"><div><div className="eyebrow"><span/> OPEN MODELS · OPEN DATA</div><h1>超导模型实验室<span>Beta</span></h1><p>让预测有对照，让数据可追溯。<br className="mobile-break"/>选择模型，运行真实计算，查看它从哪些数据中学习。</p></div><div className="hero-art"><Atom/><div className="orbit-label">α²F → T<sub>c</sub></div></div></section>

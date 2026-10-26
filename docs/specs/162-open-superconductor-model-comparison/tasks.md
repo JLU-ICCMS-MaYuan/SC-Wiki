@@ -34,3 +34,5 @@ T001：固定 Git blob 校验、100 权重与原数据实际获取；T002：asse
 
 - [ ] T009 补齐 Xie 2022 原始训练 ZIP（demo/scripts/prepare.py），按发布方 MD5 核验并用原始表复现；当前外部存储 503，已在 Demo 显示缺口。
 - [ ] T010 后续完成完整网站接入、原有经验模型校准数据核查与独立科学评测；保持 Issue #162 OPEN，不以本地 Demo 完成替代。
+
+- [x] T011 在 `demo/src/main.tsx` 复用 `frontend/src/theme.ts`，统一 `demo/src/styles.css` 和品牌呈现；`demo/tests/browser.cjs` 比较当前主站实际样式并验证原交互，覆盖 FR-018／SC-011。

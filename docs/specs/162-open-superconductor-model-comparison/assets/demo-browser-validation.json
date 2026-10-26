@@ -1,5 +1,7 @@
 {
   "checks": [
+    "与当前 SC-Wiki 实际页面的基础色、文字色、字体和品牌主色一致",
+    "可用的运行按钮使用主站主色",
     "Nb 结构真实运行作者 100 网络集成，返回 Tc 与 51 点谱",
     "BETE 原始 JSON 与结构划分辅助包经浏览器下载，原字节摘要一致",
     "真实数据库前 5 条预览可打开、关闭",
@@ -175,7 +177,7 @@
         "omega_log": "K",
         "omega_2": "K"
       },
-      "elapsed_seconds": 5.248
+      "elapsed_seconds": 5.731
     },
     {
       "model_id": "sisso-2019",
@@ -237,5 +239,19 @@
     "demo-mobile.png",
     "demo-mobile-hydride.png"
   ],
+  "theme": {
+    "reference": {
+      "background": "rgb(248, 250, 252)",
+      "text": "rgb(31, 41, 55)",
+      "font": "Roboto, Inter, system-ui, -apple-system, sans-serif",
+      "primary": "rgb(79, 70, 229)"
+    },
+    "demo": {
+      "background": "rgb(248, 250, 252)",
+      "text": "rgb(31, 41, 55)",
+      "font": "Roboto, Inter, system-ui, -apple-system, sans-serif",
+      "primary": "rgb(79, 70, 229)"
+    }
+  },
   "status": "passed"
 }

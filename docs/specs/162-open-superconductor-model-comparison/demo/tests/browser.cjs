@@ -17,7 +17,7 @@ async function main() {
  page.on('pageerror', e => report.errors.push(e.message));
  const button = name => page.getByRole('button', {name,exact:true});
  const choose = name => page.getByRole('navigation',{name:'选择模型'}).getByRole('button',{name:new RegExp(name)}).click();
- const shot = async name => {await page.screenshot({path:path.join(out,name+'.png'),fullPage:true});report.screenshots.push(name+'.png')};
+ const shot = async name => {await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(200);await page.screenshot({path:path.join(out,name+'.png'),fullPage:true});report.screenshots.push(name+'.png')};
  const predict = async () => {
   const response = page.waitForResponse(r=>r.url().endsWith('/demo-api/predict') && r.request().method()==='POST',{timeout:180000});
   await button('运行模型 →').click(); const r = await response; const body = await r.json();assert.equal(r.status(),200,JSON.stringify(body));
@@ -34,7 +34,12 @@ async function main() {
  };
  try {
   await page.goto(base);await page.getByRole('heading',{name:'超导模型实验室Beta'}).waitFor();await page.locator('[data-dataset="bete-data"]').waitFor();
+  const reference = await context.newPage();await reference.goto('http://127.0.0.1:5173/tc-predict');await reference.getByRole('heading').first().waitFor();
+  const siteTheme = await reference.evaluate(()=>({background:getComputedStyle(document.body).backgroundColor,text:getComputedStyle(document.body).color,font:getComputedStyle(document.body).fontFamily,primary:getComputedStyle(document.querySelector('nav button[aria-label^="SC-Wiki"] span')).backgroundColor}));
+  const demoTheme = await page.evaluate(()=>({background:getComputedStyle(document.body).backgroundColor,text:getComputedStyle(document.body).color,font:getComputedStyle(document.body).fontFamily,primary:getComputedStyle(document.querySelector('.brand-mark')).backgroundColor}));
+  assert.deepEqual(demoTheme,siteTheme);report.theme={reference:siteTheme,demo:demoTheme};await reference.close();check('与当前 SC-Wiki 实际页面的基础色、文字色、字体和品牌主色一致');
   await shot('demo-desktop');await button('Nb 铌').click();await page.waitForFunction(()=>document.querySelector('#structure').value.includes('Nb'));
+  assert.equal(await page.locator('.run').evaluate(el=>getComputedStyle(el).backgroundColor),siteTheme.primary);check('可用的运行按钮使用主站主色');
   const nn = await predict();assert.equal(nn.ensemble_size,100);assert(Number.isFinite(nn.tc) && nn.tc>0);assert.equal(nn.spectrum.a2f.length,51);check('Nb 结构真实运行作者 100 网络集成，返回 Tc 与 51 点谱');
   await download('bete-data');await download('bete-support');check('BETE 原始 JSON 与结构划分辅助包经浏览器下载，原字节摘要一致');
   await page.locator('[data-dataset="bete-data"]').getByRole('button',{name:'预览数据',exact:true}).click();await page.getByRole('dialog').waitFor();assert.equal(await page.getByRole('dialog').locator('tbody tr').count(),5);await button('关闭预览').click();check('真实数据库前 5 条预览可打开、关闭');
