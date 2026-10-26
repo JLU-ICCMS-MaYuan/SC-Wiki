@@ -100,3 +100,17 @@ BETE 不再拆成“作者原始数据库”和“结构与训练／测试划分
 用户结构读出 3 个原子（Mg、B、B），晶格与分数坐标按绝对误差 1e-12 对照一致；文本内容未改写。真实 100 网络推理的自动与显式 POSCAR 结果一致。该检查证明格式处理和推理链路可运行，不是 MgB2 实验 Tc 的准确性验收。
 
 [八项回归记录](assets/structure-format-validation.json)覆盖原文自动／显式读取、无 format API、手动错误提示、粘贴、错误后缀上传、CIF 示例及无效输入；[运行截图](assets/mg-b2-poscar-success.png)。用户原图见 assets/request-poscar-error.png，原文夹具为 demo/tests/fixtures/MgB2.POSCAR。只改变输入格式处理，不改变模型权重或后处理公式。
+
+## 结果定高横条与展开验收
+
+按用户最新要求，结果改为单列上下排列，默认显示模型、输入摘要、Tc 和主要参数；谱图、完整参数、方法、耗时与完整输入在详情区按需展开。只有存在更多信息时显示展开按钮，不创建空详情。简单结果不会再被相邻大图撑高。
+
+[七项真实浏览器检查](assets/result-rows-validation.json)通过：
+
+- 使用用户 MgB2 POSCAR 实际运行 BETE，再带参数运行 SISSO；默认两条都是 106px，左边缘、宽度一致且上下排列。
+- 展开 BETE 仅增加其自身高度，显示真实谱图；SISSO 仍为 106px，原 Tc 不变。
+- 键盘可展开，折叠另一条不改变当前条状态；新增结果默认折叠，旧条展开状态保留。
+- 390px 下所有收起横条为 126px，无页面横向溢出；可展开谱图并折叠恢复高度。
+- 清空结果移除所有条目与详情，无脚本错误。
+
+截图：[收起横条](assets/result-rows-collapsed.png)、[单条展开](assets/result-rows-expanded.png)、[窄屏](assets/result-rows-mobile.png)。已实际查看渲染。类型检查与构建通过；本轮只调整结果呈现，没有改变推理数据。用户第七张原图见 assets/request-result-rows.png，原文和摘要已纳入图片索引。

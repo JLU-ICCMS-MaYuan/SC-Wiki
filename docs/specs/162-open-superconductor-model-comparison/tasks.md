@@ -44,3 +44,6 @@ T001：固定 Git blob 校验、100 权重与原数据实际获取；T002：asse
 - [x] T015 在 demo/scripts/prepare.py 和 catalog.json 生成并展示一份 BETE 数据整包；assets/demo-bundle-validation.json 验证 1212 个作者原文件、806 个结构及来源说明，真实浏览器下载验证 FR-025／SC-016。
 
 - [x] T016 在 demo/inference.py、demo/src/App.tsx 中实现默认内容识别、上传／粘贴恢复 auto、明确格式不匹配错误与结果格式标记；使用用户原文 demo/tests/fixtures/MgB2.POSCAR 和 tests/structure-format.cjs 验证 FR-026／027、SC-017／018。
+
+- [x] T017 在 demo/src/App.tsx 与 styles.css 实现结果单列定高横条及每条独立展开，保留完整信息和参数复用，覆盖 FR-028／029。
+- [x] T018 在 demo/tests/result-rows.cjs 以真实 MgB2 结构和参数模型请求验证高度、折叠、独立状态、数值保留和窄屏行为，覆盖 SC-019／020；归档用户原图和结果区截图。

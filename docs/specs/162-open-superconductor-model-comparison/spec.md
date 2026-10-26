@@ -51,9 +51,11 @@
 >      0.666666627         0.333333313         0.500000000
 > 会显示：结构无法解析，请检查格式和晶胞／原子坐标。你不是说你支持 vasp 的 POSCAR 和 cif 等结构吗？
 
+> 我希望展示 的结果是从上到下以固定高度的横条的方式展示，如果需要显示更多，就提供展开/折叠按钮。如果不需要显示更多就尽可能用固定高度的横条方式展现。
+
 ## 附件与推断来源
 
-- 用户先后提供六张界面截图，原图及元信息已归档于 assets/request-layout-01.png 至 03.png、assets/request-dataset-01.png 至 02.png、assets/request-poscar-error.png 和 assets/user-layout-images.json；仅作界面定位材料。
+- 用户先后提供七张界面截图，原图及元信息已归档于 assets/request-layout-01.png 至 03.png、assets/request-dataset-01.png 至 02.png、assets/request-poscar-error.png、assets/request-result-rows.png 和 assets/user-layout-images.json；仅作界面定位材料。
 - 用户第二段原话确认的是完整展示的 Issue 草案，不是本 Spec，也不是模型名单或部署授权。
 - 当前行为依据：[Tc 估算总览](../../overview/07_AI_Assisted_Tc_Estimation/README.md)、`backend/api/tc_predict.py`、`frontend/src/pages/TcPredictPage.tsx`。
 - 模型事实及推荐依据：[调研报告](research.md)、[核验记录](validation.md)、[来源清单](sources.json)。推荐顺序是 AI 调研结论，尚未被用户选定。
@@ -124,9 +126,19 @@ images:
     user_context: "为什么我输入 POSCAR结构："
     related: ["FR-026", "SC-017"]
     verification: "已查看原图，按字节复制并核对摘要和尺寸；结构原文单独保存为测试夹具"
+  - id: IMG-007
+    upload_order: 7
+    original_name: "codex-clipboard-62e8a3f5-29f8-4c88-8265-ae6c7b1a8169.png"
+    locator: "assets/request-result-rows.png"
+    status: "local_verified"
+    sha256: "25840d4954328ad544e55d3773cf69e56adbb3aee955f31b59a5637b809256e6"
+    dimensions_px: [3358, 1432]
+    media_type: "image/png"
+    user_context: "我希望展示 的结果是从上到下以固定高度的横条的方式展示，如果需要显示更多，就提供展开/折叠按钮。如果不需要显示更多就尽可能用固定高度的横条方式展现。"
+    verification: "已查看原图，按原字节归档并核对摘要及尺寸"
 ```
 
-六张用户原图已渲染查看、复制并核对摘要和尺寸；没有用重绘或 OCR 替代原图。
+七张用户原图已渲染查看、复制并核对摘要和尺寸；没有用重绘或 OCR 替代原图。
 
 ## 背景与目标
 
@@ -238,6 +250,9 @@ images:
 - **FR-026**：结构输入默认按内容自动识别 CIF 或 POSCAR／CONTCAR，上传与粘贴切回自动识别；不只依据文件名后缀判断格式，API 未指定格式时亦自动识别。
 - **FR-027**：允许用户随后手动指定格式；指定格式与可解析内容不符时明确提示切换，不擅自按另一格式成功返回。解析成功后的原子数量、占位、周期和几何约束保持有效。
 
+- **FR-028**：运行结果按现有先后顺序从上到下单列展示，默认是等高横条，集中显示模型、输入摘要、Tc 和可容纳的主要参数；不再并排拉伸卡片。
+- **FR-029**：有更多参数、谱图或方法说明时提供每条独立的展开／折叠按钮；无额外内容不提供空展开入口。折叠后恢复固定高度，展开不修改结果数据或其他条目的状态，新结果默认折叠。
+
 ### 关键实体
 
 - **模型及变体**：模型家族、版本、输入要求、输出能力、许可证及制品来源。
@@ -270,6 +285,9 @@ images:
 
 - **SC-017**：用户原文 MgB2 POSCAR 保持不变，自动与显式 POSCAR 均可真实计算且输出一致；读出 1 个 Mg、2 个 B，晶格和分数坐标与原文一致。
 - **SC-018**：遗留 CIF 选项后的粘贴、错误文件后缀的上传、默认 API 请求和 CIF 样本均正确处理；手动格式不匹配与无效内容得到明确错误，并保留输入与已有结果。
+
+- **SC-019**：桌面收起结果外框高度均为 106px，390px 窄屏均为 126px；单列上下排列，无页面横向溢出，简单结果不因相邻谱图而增高。
+- **SC-020**：只展开当前条的完整信息和谱图，鼠标／键盘均可操作；折叠恢复原高度，新增结果保留旧条展开状态，Tc 与全部数据不变，清空结果移除全部条目。
 
 ## 假设与依赖
 

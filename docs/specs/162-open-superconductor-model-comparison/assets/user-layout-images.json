@@ -92,5 +92,20 @@
       "SC-017"
     ],
     "verification": "已查看原图，按字节复制并核对摘要和尺寸；结构原文单独保存为测试夹具"
+  },
+  {
+    "id": "IMG-007",
+    "upload_order": 7,
+    "original_name": "codex-clipboard-62e8a3f5-29f8-4c88-8265-ae6c7b1a8169.png",
+    "locator": "assets/request-result-rows.png",
+    "status": "local_verified",
+    "sha256": "25840d4954328ad544e55d3773cf69e56adbb3aee955f31b59a5637b809256e6",
+    "dimensions_px": [
+      3358,
+      1432
+    ],
+    "media_type": "image/png",
+    "user_context": "我希望展示 的结果是从上到下以固定高度的横条的方式展示，如果需要显示更多，就提供展开/折叠按钮。如果不需要显示更多就尽可能用固定高度的横条方式展现。",
+    "verification": "已查看原图，按原字节归档并核对摘要及尺寸"
   }
 ]

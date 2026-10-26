@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 type Dataset = { id: string; filename: string; name: string; description: string; license: string; version: string; source_url: string; original_url: string; rows: number | null; kind: string; size: number; sha256: string | null; available: boolean; error: string | null; download_url: string | null; download_label?: string }
 type Model = { id: string; name: string; family: string; group: string; year: string; tagline: string; description: string; input: string; mode: string; datasets: string[]; paper: string | null; code: string | null; code_label?: string; license: string; boundary: string }
@@ -30,6 +30,39 @@ function Spectrum({ result }: { result: Result }) {
   const peak = Math.max(...s.a2f, .001)
   const points = s.a2f.map((y, i) => `${35 + s.frequency[i] / 100.25 * 600},${115 - y / peak * 88}`).join(' ')
   return <figure className="spectrum"><figcaption>预测 α²F(ω) <span>100 个网络的平均谱</span></figcaption><svg viewBox="0 0 660 155" role="img" aria-label="BETE-NET 真实预测的电子声子谱"><line x1="35" y1="115" x2="635" y2="115"/><line x1="35" y1="20" x2="35" y2="115"/><polyline points={points}/><text x="32" y="137">0</text><text x="320" y="137">50</text><text x="590" y="137">100 meV</text><text x="7" y="20">{peak.toFixed(2)}</text></svg></figure>
+}
+
+const parameterLabels: Record<string, string> = {
+  lambda: 'λ', omega_log: 'ωlog / K', omega_2: 'ω₂ / K', mu_star: 'μ*',
+  f2_value: 'E_couple（f₂）', dos_h_ratio: 'H DOS 占比', dos_h_atom_bond: '每原子／键 H PDOS',
+  bonds_mean: 'H–H 均值 / Å', bonds_var: 'H–H 方差 / Å²',
+}
+
+function ResultRow({ result, name, onReuse }: { result: Result; name: string; onReuse: (result: Result) => void }) {
+  const [expanded, setExpanded] = useState(false)
+  const detailsId = useId()
+  const parameters = Object.entries(result.parameters)
+  const comparisonParameters = parameters.filter(([key]) => ['lambda', 'omega_log', 'mu_star'].includes(key))
+  const summaryParameters = comparisonParameters.length ? comparisonParameters : parameters.slice(0, 3)
+  const hasDetails = !!(parameters.length || result.spectrum || result.warning || result.method)
+  return <article className="result-card" data-result={result.model_id} data-expanded={expanded}>
+    <div className="result-summary">
+      <div className="result-identity"><h3 title={name}>{name}</h3><p title={result.label}>{result.label}</p></div>
+      <div className="result-inline-parameters">{summaryParameters.map(([key, val]) => <span key={key}>{parameterLabels[key] || key}<b>{value(val)}</b></span>)}</div>
+      <div className="tc">{result.tc === null ? '不适用' : value(result.tc)}{result.tc !== null && <small>K</small>}<span>预测 T<sub>c</sub></span></div>
+      <div className="result-actions">
+        {hasDetails && <button className="result-toggle" aria-expanded={expanded} aria-controls={detailsId} onClick={() => setExpanded(open => !open)}>{expanded ? '折叠' : '展开'}</button>}
+        {result.spectrum && <button className="result-compare" onClick={() => onReuse(result)}>用此参数对比 SISSO →</button>}
+      </div>
+    </div>
+    {hasDetails && <div id={detailsId} className="result-details" role="region" aria-label={`${name}详细结果`} hidden={!expanded}>
+      <p className="result-input">{result.label}</p>
+      <div className="result-parameters">{parameters.map(([key, val]) => <span key={key}>{parameterLabels[key] || key}<b>{value(val)}</b></span>)}</div>
+      {result.spectrum && <Spectrum result={result}/>}
+      <p className="hint">{result.warning}</p>
+      <div className="result-footer"><small>{result.input_format && `输入：${result.input_format === 'cif' ? 'CIF' : 'POSCAR / CONTCAR'} · `}{result.elapsed_seconds}s · {result.ensemble_size ? `${result.ensemble_size} 个网络 · ` : ''}{result.method}</small></div>
+    </div>}
+  </article>
 }
 
 export default function App() {
@@ -136,7 +169,7 @@ export default function App() {
             {!model.datasets.length && <div className="dataset unavailable-dataset"><h4>训练／校准数据待核实</h4><p>已核对论文模型名称和公式；原始训练文件及其下载授权仍待核实。请通过上方论文查看方法和数据说明。</p></div>}
           </aside>
         </section>}
-        <section className="results" ref={resultSection}><div className="results-heading"><div><div className="eyebrow">RESULTS</div><h2>本次运行结果 <span>{results.length}</span></h2></div>{results.length > 0 && <button className="text-button" onClick={() => setResults([])}>清空结果</button>}</div>{!results.length ? <div className="results-empty"><span>↗</span><p>运行一个模型，真实结果会显示在这里。<small>你可以继续运行其他模型，对照输入条件与预测结果。</small></p></div> : <><p className="hint">按次保留原始结果，不自动平均。不同输入条件的数值不能直接当作模型精度比较。</p><div className="result-list">{results.map(result => <article className="result-card" key={result.run} data-result={result.model_id}><div className="result-top"><div><span className="pill">真实计算</span><h3>{catalog.models.find(m => m.id === result.model_id)?.name}</h3><p>{result.label}</p></div><div className="tc">{result.tc === null ? '不适用' : value(result.tc)}{result.tc !== null && <small>K</small>}<span>预测 T<sub>c</sub></span></div></div><div className="result-parameters">{Object.entries(result.parameters).map(([key, val]) => <span key={key}>{{ lambda: 'λ', omega_log: 'ωlog / K', omega_2: 'ω₂ / K', mu_star: 'μ*', f2_value: 'E_couple（f₂）', dos_h_ratio: 'H DOS 占比', dos_h_atom_bond: '每原子／键 H PDOS', bonds_mean: 'H–H 均值 / Å', bonds_var: 'H–H 方差 / Å²' }[key] || key}<b>{value(val)}</b></span>)}</div>{result.spectrum && <Spectrum result={result}/>}<p className="hint">{result.warning}</p><div className="result-footer"><small>{result.input_format && `输入：${result.input_format === 'cif' ? 'CIF' : 'POSCAR / CONTCAR'} · `}{result.elapsed_seconds}s · {result.ensemble_size ? `${result.ensemble_size} 个网络 · ` : ''}{result.method}</small>{result.spectrum && <button onClick={() => reuse(result)}>用此参数对比 SISSO →</button>}</div></article>)}</div></>}</section>
+        <section className="results" ref={resultSection}><div className="results-heading"><div><div className="eyebrow">RESULTS</div><h2>本次运行结果 <span>{results.length}</span></h2></div>{results.length > 0 && <button className="text-button" onClick={() => setResults([])}>清空结果</button>}</div>{!results.length ? <div className="results-empty"><span>↗</span><p>运行一个模型，真实结果会显示在这里。<small>你可以继续运行其他模型，对照输入条件与预测结果。</small></p></div> : <><p className="hint">按次保留原始结果，不自动平均。不同输入条件的数值不能直接当作模型精度比较。</p><div className="result-list">{results.map(result => <ResultRow key={result.run} result={result} name={catalog.models.find(m => m.id === result.model_id)?.name || result.model_id} onReuse={reuse}/>)}</div></>}</section>
       </>}
       <footer className="footer"><span>SC-Wiki · 开放模型与可追溯训练数据</span><span>本地 Demo · 预测结果不写入材料数据库</span></footer>
     </main>

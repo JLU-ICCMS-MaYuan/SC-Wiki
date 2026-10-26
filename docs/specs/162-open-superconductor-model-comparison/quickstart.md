@@ -5,7 +5,7 @@
 ## 直接体验
 
 1. 常压组选择 BETE-NET-CSO，点击“Nb 铌”载入作者公开结构，或上传自己的 CIF／POSCAR／CONTCAR，也可直接粘贴结构原文，默认按内容自动识别格式，然后“运行模型”。
-2. 查看实际 100 网络平均谱、Tc、λ、ωlog、ω₂。点击“用此参数对比 SISSO”，运行参数模型；两次结果独立保留。
+2. 查看实际 100 网络平均谱、Tc、λ、ωlog、ω₂。点击“用此参数对比 SISSO”，运行参数模型；两次结果按顺序独立保留为等高横条；点击“展开”查看完整参数、谱图和方法说明，“折叠”恢复紧凑显示。
 3. 模型右侧下载数据；点击“论文链接”或“原始网站”查询来源，不再显示长网址和许可／版本。代码与数据在同一仓库时只有一个网站入口。
 4. 高压组可运行 Xie 2022 公开公式；“加载示例”只是计算参数示例，不对应某个特定氢化物。其原始训练 ZIP 所在服务当前返回 503，页面明确显示“暂不可下载”。
 5. 高压组选择 **Tc assessment model**（姜博文等人的论文称呼），在本页上传 CONTCAR／POSCAR 和包含 PDOS_H.dat 的多份电子 PDOS，再运行并查看 Tc 及全部中间量。请求直接复用原 API，不跳转到其他页面；此功能需要本机原站 8080／8000 服务运行。
@@ -43,3 +43,5 @@ npm --prefix "docs/specs/162-open-superconductor-model-comparison/demo" run test
 浏览器验收依赖本机 Playwright 和 Chrome，读取真实服务，实际下载原文件并计算 SHA-256，不模拟预测 API。数值回归与工程验证的具体结果及边界见 [Demo 验证](demo-validation.md)。
 
 结构格式回归：`node "docs/specs/162-open-superconductor-model-comparison/demo/tests/structure-format.cjs"`。手动选择格式后若内容不符，会明确提示；再次粘贴或上传会恢复自动识别。
+
+结果横条验收：`node "docs/specs/162-open-superconductor-model-comparison/demo/tests/result-rows.cjs"`。

@@ -51,3 +51,5 @@
 - [x] CHK024 整包不是改写原始数据，也不补造未公开文件；1212 个作者文件逐一匹配固定 Git 对象，范围与来源说明在包内保留，见 demo-bundle-validation.json。
 
 - [x] CHK025 已保存用户 POSCAR 原文与第六张错误截图；修复前明确复现 cif=400、vasp=200，修复后八项真实浏览器／API 解析回归通过，晶胞和坐标未改变。证据：assets/structure-format-validation.json 与 demo/tests/fixtures/MgB2.POSCAR。
+
+- [x] CHK026 结果定高横条与展开要求逐字保存，第七张原图已归档；FR-028／029、SC-019／020 明确默认高度、按需详情和独立状态，结果区浏览器验收记录对应真实运行。
