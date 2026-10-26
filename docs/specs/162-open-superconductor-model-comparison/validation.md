@@ -1,8 +1,10 @@
-# 调研与文档核验记录
+# 初始调研与文档核验记录（Demo 实施前）
 
 日期：2026-10-26（Asia/Shanghai）。对应 [Issue #162](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/162)。
 
-## 本轮实际完成
+用户后续已授权并完成本地 Demo 实施，最新状态见 [Demo 验收](demo-validation.md)。下文保留初始调研阶段记录。
+
+## 初始调研阶段实际完成
 
 - 读取仓库 AGENTS.md、全局 Issue／Spec 技能、Tc 功能 Overview、API 与前端入口。
 - 默认分支核验为 `mayuan`；开始时已有无关未跟踪目录 `docs/specs/161-spectrum-manual-editor-demo/`，本次不编辑、不暂存。

@@ -1,0 +1,39 @@
+{
+  "status": "passed",
+  "bete": [
+    {
+      "id": "305",
+      "formula": "Nb",
+      "tc": 9.929108935887271,
+      "published_reference_tc": 9.916777070230395,
+      "tc_difference_K": 0.012331865656875607,
+      "max_spectrum_difference": 0.0005058948460400225
+    },
+    {
+      "id": "21",
+      "formula": "Pb",
+      "tc": 4.529556012493551,
+      "published_reference_tc": 4.529472565816501,
+      "tc_difference_K": 8.34466770500697e-05,
+      "max_spectrum_difference": 3.130687222163697e-05
+    },
+    {
+      "id": "689",
+      "formula": "Al",
+      "tc": 2.160156862771901,
+      "published_reference_tc": 2.1578881950855577,
+      "tc_difference_K": 0.002268667686343484,
+      "max_spectrum_difference": 0.00029655385374810495
+    }
+  ],
+  "synthetic_strained_Nb_tc": 9.318154688357351,
+  "sisso2019_training_rmse": 0.2510619453781878,
+  "sisso2022_formula_check": 209.31541653537369,
+  "invalid_cases": 4,
+  "reference_sha256": "1eb7b6568c76ced95ce8c6229acfaafd20903402344af7503328c6a2a57dc600",
+  "limits": [
+    "BETE 是当前发布版本的近似数值回归，不是逐位复现或独立性能评测",
+    "Xie 2022 原始训练包下载失败，只验证公开公式与输入边界",
+    "合成形变结构仅验证新输入真实经过模型，不代表该结构物理稳定或 Tc 正确"
+  ]
+}

@@ -1,0 +1,111 @@
+"""从作者固定 Git 对象准备 Demo 文件；不改变上游数据的字节。"""
+import concurrent.futures
+import hashlib
+import json
+from pathlib import Path
+import subprocess
+import time
+import urllib.request
+import zipfile
+
+ROOT = Path(__file__).resolve().parents[5]
+CACHE = ROOT / ".local/tc-model-demo"
+REPO = "henniggroup/BETE-NET"
+REVISION = "56bc783908a60e8a15e31b60018e6f3c3e48f593"
+
+
+def gh(*args):
+    for attempt in range(3):
+        try:
+            return subprocess.check_output(["gh", "api", *args], timeout=120)
+        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+            if attempt == 2:
+                raise
+            time.sleep(2 * (attempt + 1))
+
+
+def valid(path, sha):
+    if not path.is_file():
+        return False
+    b = path.read_bytes()
+    return hashlib.sha1(f"blob {len(b)}\0".encode() + b).hexdigest() == sha
+
+
+def save(path, content, sha):
+    digest = hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest()
+    if digest != sha:
+        raise ValueError(f"上游对象校验不符：{path.name}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    part = path.with_suffix(path.suffix + ".part")
+    part.write_bytes(content)
+    part.replace(path)
+
+
+def blob(repo, entry, path):
+    if not valid(path, entry["sha"]):
+        data = gh(f"repos/{repo}/git/blobs/{entry['sha']}", "-H", "Accept: application/vnd.github.raw+json")
+        save(path, data, entry["sha"])
+
+
+def main():
+    CACHE.mkdir(parents=True, exist_ok=True)
+    tree = json.loads(gh(f"repos/{REPO}/git/trees/{REVISION}?recursive=1"))
+    if tree.get("truncated"):
+        raise ValueError("作者文件树不完整")
+    entries = {v["path"]: v for v in tree["tree"] if v["type"] == "blob"}
+    (CACHE / "bete-tree.json").write_text(json.dumps(tree))
+    # 结构和索引通过 GraphQL 批量读取，逐文件按原始 Git blob 校验。
+    texts = [v for p, v in entries.items() if p.startswith(("structures/", "indices/", "utils/")) and not "__pycache__" in p or p in ("LICENSE", "README.md")]
+    missing = [v for v in texts if not valid(CACHE / "bete" / v["path"], v["sha"])]
+    for offset in range(0, len(missing), 40):
+        batch = missing[offset:offset + 40]
+        fields = " ".join(f'b{i}:object(oid:"{e["sha"]}"){{... on Blob{{text oid}}}}' for i, e in enumerate(batch))
+        query = '{repository(owner:"henniggroup",name:"BETE-NET"){' + fields + '}}'
+        result = json.loads(gh("graphql", "-f", "query=" + query))
+        if result.get("errors"):
+            raise ValueError(result["errors"])
+        for i, e in enumerate(batch):
+            value = result["data"]["repository"][f"b{i}"]
+            save(CACHE / "bete" / e["path"], value["text"].encode(), e["sha"])
+        print(f"结构／划分文件 {min(offset + 40, len(missing))}/{len(missing)}", flush=True)
+    blob(REPO, entries["database.json"], CACHE / "datasets/bete-net-database.json")
+    for repo, sha, name in [
+        ("henniggroup/symbolic-regression-utilities", "17feb9f6a48ebe68f512364e8cbd43ec36b4b6cd", "sisso-2019-train.dat"),
+        ("henniggroup/symbolic-regression-utilities", "cd1220ef2094a13b2ed3f9811af2e2604d8a2a28", "sisso-2019-data.csv"),
+        ("HerzainR/Superconductivity-through-interpretable-ML", "25cc62a7fe3bca4cb4ea06ef9f2c905867570072", "sisso-81-data.csv"),
+    ]:
+        blob(repo, {"sha": sha}, CACHE / "datasets" / name)
+    # 这是本站打包的辅助材料，压缩包内保留原文件与版本清单，不冒充作者发布包。
+    with zipfile.ZipFile(CACHE / "datasets/bete-structures-splits.zip", "w", zipfile.ZIP_DEFLATED) as z:
+        for e in sorted(texts, key=lambda v: v["path"]):
+            if e["path"].startswith(("structures/", "indices/")) or e["path"] == "LICENSE":
+                info = zipfile.ZipInfo(e["path"], (2026, 10, 26, 0, 0, 0))
+                info.compress_type = zipfile.ZIP_DEFLATED
+                z.writestr(info, (CACHE / "bete" / e["path"]).read_bytes())
+        info = zipfile.ZipInfo("SOURCE.json", (2026, 10, 26, 0, 0, 0))
+        z.writestr(info, json.dumps({"repository": REPO, "revision": REVISION, "packaged_by": "SC-Wiki Demo", "files": [{"path": e["path"], "git_blob": e["sha"]} for e in texts if e["path"].startswith(("structures/", "indices/")) or e["path"] == "LICENSE"]}, indent=2))
+    weights = [entries[f"CSO/model_cso_{i}.pt"] for i in range(100)]
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
+        for i, _ in enumerate(pool.map(lambda e: blob(REPO, e, CACHE / "bete" / e["path"]), weights), 1):
+            if i % 5 == 0:
+                print(f"CSO 原始权重 {i}/100", flush=True)
+    # 原作者输出只用于数值回归验收，不用作网站预测结果。
+    blob(REPO, entries["test_preds/CSO.json"], CACHE / "bete/reference-cso.json")
+    # 上游暂时不可用不会破坏已取得的其他模型；后续重跑可补齐同一原始包。
+    xie = CACHE / "datasets/xie-2022-data_tables.zip"
+    expected_md5 = "86c68504d1780b6fc7eaccbd4116706c"
+    if not xie.is_file() or hashlib.md5(xie.read_bytes()).hexdigest() != expected_md5:
+        try:
+            url = "https://archive.materialscloud.org/api/records/skdzy-kyx54/files/data_tables.zip/content"
+            with urllib.request.urlopen(url, timeout=20) as response:
+                data = response.read(1024 * 1024)
+            if len(data) != 429059 or hashlib.md5(data).hexdigest() != expected_md5:
+                raise ValueError("Xie 原包大小或发布方 MD5 不符")
+            xie.write_bytes(data)
+        except (OSError, ValueError) as exc:
+            print(f"Xie 2022 原包暂不可用（{type(exc).__name__}），不生成替代文件", flush=True)
+    print("原始文件准备完成", flush=True)
+
+
+if __name__ == "__main__":
+    main()

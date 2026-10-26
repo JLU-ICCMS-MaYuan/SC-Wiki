@@ -310,5 +310,13 @@
     "sha256": "e265109b9d52526aa5a91c7fbf5507919a79a5ccbb8161234a6ba926d521571c",
     "min_tc": 0.0675,
     "max_tc": 38.4
+  },
+  "demo_update": {
+    "date": "2026-10-26",
+    "scope": "本地真实推理与数据下载；旧 repositories 字段中的 inspection/download_result 为初始调研快照",
+    "bete": "原数据库、100 个 CSO 权重、结构／索引已按固定对象取得；当前 806 条数据与 824 条参考结果版本不同",
+    "verified_downloads": "assets/demo-browser-validation.json",
+    "model_validation": "assets/demo-model-validation.json",
+    "remaining": "Xie 2022 原 ZIP 存储服务仍返回 503"
   }
 }

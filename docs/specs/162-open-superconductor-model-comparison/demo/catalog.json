@@ -1,0 +1,186 @@
+{
+  "models": [
+    {
+      "id": "bete-cso",
+      "name": "BETE-NET · CSO",
+      "family": "等变图神经网络",
+      "group": "ambient",
+      "year": "2025",
+      "tagline": "从晶体结构预测电子–声子谱",
+      "description": "运行作者 100 个网络的集成，用平均 α²F 谱计算 λ、ωlog 和 Tc。",
+      "input": "CIF / POSCAR / CONTCAR",
+      "mode": "structure",
+      "datasets": [
+        "bete-data",
+        "bete-support"
+      ],
+      "paper": "https://www.nature.com/articles/s41524-024-01475-4",
+      "code": "https://github.com/henniggroup/BETE-NET",
+      "license": "Apache-2.0",
+      "boundary": "0.25–100.25 meV 谱网格；高压氢化物未验证。μ* 固定 0.09。",
+      "examples": [
+        "nb",
+        "pb",
+        "al"
+      ]
+    },
+    {
+      "id": "sisso-2019",
+      "name": "SISSO · Xie 2019",
+      "family": "符号回归",
+      "group": "ambient",
+      "year": "2019",
+      "tagline": "用电子–声子参数估算 Tc",
+      "description": "执行论文式 (4) 的学习公式。29 条原始训练输入与完整发布数据分别提供。",
+      "input": "λ、ωlog、μ*",
+      "mode": "parameters",
+      "datasets": [
+        "sisso-train",
+        "sisso-published"
+      ],
+      "paper": "https://arxiv.org/abs/1905.06780",
+      "code": "https://github.com/henniggroup/symbolic-regression-utilities",
+      "license": "Apache-2.0",
+      "boundary": "训练于低 Tc 常规材料；高压计算是外推，不能视为专用模型。"
+    },
+    {
+      "id": "sisso-2022",
+      "name": "SISSO · Xie 2022",
+      "family": "符号回归",
+      "group": "hydride",
+      "year": "2022",
+      "tagline": "含谱形修正的 Tc 估算",
+      "description": "执行论文式 (6)–(8)。论文以氢化物作外推检验，需要已有 EPC 参数。",
+      "input": "λ、ωlog、ω₂、μ*",
+      "mode": "parameters",
+      "datasets": [
+        "xie-2022"
+      ],
+      "paper": "https://www.nature.com/articles/s41524-021-00666-7",
+      "code": "https://github.com/henniggroup/symbolic-regression-utilities",
+      "license": "Apache-2.0",
+      "boundary": "可真实计算；训练集原网址可查询，但上游文件暂不可下载。不能从结构或电子 PDOS 自动补出 EPC 参数。"
+    },
+    {
+      "id": "legacy",
+      "name": "SC-Wiki · 现有估算",
+      "family": "经验估算",
+      "group": "hydride",
+      "year": "保留",
+      "tagline": "沿用你当前的 CONTCAR + PDOS 流程",
+      "description": "原有页面、接口和公式继续使用。训练／校准数据来源尚未核实，不以别人的数据代替。",
+      "input": "CONTCAR + 电子 PDOS",
+      "mode": "legacy",
+      "datasets": [],
+      "paper": null,
+      "code": null,
+      "license": "沿用现有实现",
+      "boundary": "训练数据来源尚未核实；仍为实验性估算。"
+    },
+    {
+      "id": "sisso-81-model",
+      "name": "SISSO · 81 样本",
+      "family": "资料候选",
+      "group": "ambient",
+      "year": "候选",
+      "tagline": "数据已可下载，模型尚未接入",
+      "description": "提供原始训练数据和来源，供先行核查。当前不提供预测结果。",
+      "input": "λ、ωlog、密度和成分描述符",
+      "mode": "pending",
+      "datasets": [
+        "sisso-81"
+      ],
+      "paper": null,
+      "code": "https://github.com/HerzainR/Superconductivity-through-interpretable-ML",
+      "license": "MIT（仓库声明）",
+      "boundary": "训练数据主要分布于低 Tc；模型系数与单位待核对。"
+    }
+  ],
+  "datasets": [
+    {
+      "id": "bete-data",
+      "filename": "bete-net-database.json",
+      "name": "作者原始数据库",
+      "description": "806 条公开记录，含训练／测试数据与 α²F、声子信息；结构与划分见下方辅助包。论文样本数与本发布版本有差异。",
+      "license": "Apache-2.0",
+      "version": "56bc783908a60e8a15e31b60018e6f3c3e48f593",
+      "source_url": "https://github.com/henniggroup/BETE-NET/blob/56bc783908a60e8a15e31b60018e6f3c3e48f593/database.json",
+      "original_url": "https://raw.githubusercontent.com/henniggroup/BETE-NET/56bc783908a60e8a15e31b60018e6f3c3e48f593/database.json",
+      "rows": 806,
+      "kind": "公开全集",
+      "size": 89104840,
+      "sha256": "8325db2edaaad8ed46908994866a97f752dcf07c3f58a1394f4209e37639b1b8"
+    },
+    {
+      "id": "bete-support",
+      "filename": "bete-structures-splits.zip",
+      "name": "结构与训练／测试划分",
+      "description": "本站打包，保留作者原始 CIF、索引和许可证；包内 SOURCE.json 指向每个原对象。",
+      "license": "Apache-2.0",
+      "version": "56bc783908a60e8a15e31b60018e6f3c3e48f593",
+      "source_url": "https://github.com/henniggroup/BETE-NET/tree/56bc783908a60e8a15e31b60018e6f3c3e48f593/structures",
+      "original_url": "https://github.com/henniggroup/BETE-NET/tree/56bc783908a60e8a15e31b60018e6f3c3e48f593/indices",
+      "rows": 806,
+      "kind": "辅助材料·本站打包",
+      "size": 1005819,
+      "sha256": "5d2371f6945bb38437c76997bb74328ebf2e5bf91efb8f5532b84a54cf55ae04"
+    },
+    {
+      "id": "sisso-train",
+      "filename": "sisso-2019-train.dat",
+      "name": "作者原始训练输入",
+      "description": "原始 train.dat：29 个低 Tc 材料的 Tc、ωlog、λ、μ*；下载保持作者原字节。",
+      "license": "Apache-2.0",
+      "version": "11cf1f31888afe3a29140557dc7b3871102b8204",
+      "source_url": "https://github.com/henniggroup/symbolic-regression-utilities/blob/11cf1f31888afe3a29140557dc7b3871102b8204/datasets/AllenDynes/train.dat",
+      "original_url": "https://raw.githubusercontent.com/henniggroup/symbolic-regression-utilities/11cf1f31888afe3a29140557dc7b3871102b8204/datasets/AllenDynes/train.dat",
+      "rows": 29,
+      "kind": "训练输入",
+      "size": 1846,
+      "sha256": "28cf4500e570e62c110625766d6ebd45562f3fa471247497b14d0b76d342fe88"
+    },
+    {
+      "id": "sisso-published",
+      "filename": "sisso-2019-data.csv",
+      "name": "作者完整发布数据",
+      "description": "43 条发布数据，包括训练与其他材料，不能全部称为训练集。",
+      "license": "Apache-2.0",
+      "version": "11cf1f31888afe3a29140557dc7b3871102b8204",
+      "source_url": "https://github.com/henniggroup/symbolic-regression-utilities/blob/11cf1f31888afe3a29140557dc7b3871102b8204/datasets/AllenDynes/data.csv",
+      "original_url": "https://raw.githubusercontent.com/henniggroup/symbolic-regression-utilities/11cf1f31888afe3a29140557dc7b3871102b8204/datasets/AllenDynes/data.csv",
+      "rows": 43,
+      "kind": "公开全集",
+      "size": 1192,
+      "sha256": "7ef3b796cf0e2f416e37de7c86cc9ad9107b73f665e0c28cf2937cff12b208b1"
+    },
+    {
+      "id": "xie-2022",
+      "filename": "xie-2022-data_tables.zip",
+      "name": "作者训练描述符与 Tc 数据",
+      "description": "Materials Cloud 原始归档。元信息与许可可核查，但文件存储服务本次返回 503；暂未取得可供本地下载的原文件。",
+      "license": "Apache-2.0",
+      "version": "Materials Cloud 2021.150 v1",
+      "source_url": "https://archive.materialscloud.org/records/skdzy-kyx54",
+      "original_url": "https://archive.materialscloud.org/api/records/skdzy-kyx54/files/data_tables.zip/content",
+      "rows": null,
+      "kind": "训练／验证参数表",
+      "publisher_md5": "86c68504d1780b6fc7eaccbd4116706c",
+      "size": 429059,
+      "sha256": null
+    },
+    {
+      "id": "sisso-81",
+      "filename": "sisso-81-data.csv",
+      "name": "81 样本原始训练数据",
+      "description": "作者发布的 81 个常规超导体、45 列数据；该模型尚未接入推理。",
+      "license": "MIT（仓库声明）",
+      "version": "84a63c80416e50686a2914e6fcd1636aa44d5f85",
+      "source_url": "https://github.com/HerzainR/Superconductivity-through-interpretable-ML/blob/84a63c80416e50686a2914e6fcd1636aa44d5f85/1_Dataset/data.csv",
+      "original_url": "https://raw.githubusercontent.com/HerzainR/Superconductivity-through-interpretable-ML/84a63c80416e50686a2914e6fcd1636aa44d5f85/1_Dataset/data.csv",
+      "rows": 81,
+      "kind": "训练输入",
+      "size": 27719,
+      "sha256": "bfff86078154a6431fc84702960c22a2bce02fe1d2ea633952ddc23354a8880f"
+    }
+  ]
+}

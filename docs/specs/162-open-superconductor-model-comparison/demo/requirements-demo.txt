@@ -1,0 +1,9 @@
+# 独立 venv 继承现有 sc-wiki 的 PyTorch 2.14、NumPy、SciPy、FastAPI 等；不安装到主环境。
+e3nn==0.4.2
+opt_einsum==3.4.0
+opt_einsum_fx==0.1.4
+torch-geometric==2.0.2
+torch-scatter==2.1.2
+torch-cluster==1.6.3
+torch-sparse==0.6.18
+ase==3.22.0
