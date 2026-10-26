@@ -36,3 +36,7 @@
 ## 手动调参入口
 
 用户最新要求将5邻点改为3。参数集中在 demo/src/dragInfluence.ts：核心区 w=1−(1−edgeWeight)·d/coreNeighbors；外侧 w=edgeWeight·exp(−(d−coreNeighbors)/decayLength)。按 minWeight 生成有限权重表，不再硬编码数组长度，避免改参数后界面与实际行为不一致。
+
+## 零频检查的完成条件
+
+旧 zeroCovered 只能识别 pointIds，普通手动加到0的点不会成为确认记录；旧详情持续使用笼统提示。改为检查人是否显式确认零频位置、确认点是否仍存在且位于该线；数值近零不自动批准。直接复用 zero.pixel/pointIds，不增加服务端或“human_confirmed”字段。位置容差仅1e-4源像素（处理指针舍入），不能把0.01像素或更大的缺口当作已覆盖。各分波共享位置但各自确认数据点。候选点可明确确认，原坐标不变；结果从保存快照导出，不保存会过期的完成标记。

@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { addPoint, amplitude, axisValid, clone, commit, curvePath, frequency, markZero, move, pixelAt, record, redo, removePoints, undo, validateDocument, valueAt, neighborWeight, prepareMove, movePrepared, connected, restoreManualMarkers, tracePoints, reconnectManualPoints, zeroCovered, type Document, type History } from '../src/engine'
 import fixtures from '../src/fixtures.json'
+import { DRAG_INFLUENCE } from '../src/dragInfluence'
+const expectedWeight = (d: number) => {
+  const c = DRAG_INFLUENCE
+  const weight = d <= c.coreNeighbors ? 1-(1-c.edgeWeight)*d/c.coreNeighbors : c.edgeWeight*Math.exp(-(d-c.coreNeighbors)/c.decayLength)
+  return weight < c.minWeight ? 0 : weight
+}
+const support = Array.from({length:1001},(_,i)=>expectedWeight(i)).filter(w=>w>0).length
 const base: Document = {
   schemaVersion: 1, id: 'test', title: '测试谱', description: '',
   source: { id: 'source', sha256: 'hash', width: 101, height: 101, image: '', plot: [0,0,100,100], viewport: [0,0,100,100] },
@@ -28,10 +35,10 @@ describe('坐标与示例契约', () => {
 })
 describe('局部形状与限位', () => {
   it('中心完全跟随、邻点平滑衰减、范围外不动', () => {
-    expect(neighborWeight(0)).toBe(1); expect(neighborWeight(3)).toBe(.6); expect(neighborWeight(4)).toBeCloseTo(.6*Math.exp(-.5)); expect(neighborWeight(16)).toBe(0)
+    expect(neighborWeight(0)).toBe(1); expect(neighborWeight(DRAG_INFLUENCE.coreNeighbors)).toBeCloseTo(DRAG_INFLUENCE.edgeWeight); expect(neighborWeight(support)).toBe(0)
     const d=move(base,'a','p1',20,-10,true,'amplitude')
     expect(d.curves[0].points[1].y).toBe(40);expect(d.curves[0].points[1].x).toBe(20)
-    expect(d.curves[0].points[2].y).toBeCloseTo(41.3333333333);expect(d.curves[0].points[3].y).toBeCloseTo(42.6666666667)
+    expect(d.curves[0].points[2].y).toBeCloseTo(50-10*expectedWeight(1));expect(d.curves[0].points[3].y).toBeCloseTo(50-10*expectedWeight(2))
     expect(d.curves[1]).toEqual(base.curves[1]);expect(base.curves[0].points[1].y).toBe(50)
   })
   it('不跨片段，单点模式不联动', () => {
@@ -119,10 +126,10 @@ describe('补点连接及固定邻点微调回归', () => {
     expect((curvePath(restored,restored.curves[0]).match(/M/g)||[]).length).toBe(2)
     expect(restoreManualMarkers(restored,base)).toEqual(restored)
   })
-  it('两侧各3点高权重、外侧指数下降且16点外不动，不随采样间隔改变', () => {
+  it('当前用户配置的邻点权重和截断生效，不随采样间隔改变', () => {
     const d=clone(base);d.curves[0].points=Array.from({length:61},(_,i)=>({id:'n'+i,x:i+10,y:50,segment:'s',status:'原始'}))
     const prepared=prepareMove(d,'a','n30',true)!, result=movePrepared(prepared,0,-10,'amplitude')
-    expect(prepared.byId.size).toBe(31)
+    expect(prepared.byId.size).toBe(1+2*Math.min(30,support-1))
     for(const step of [-1,1]) for(let distance=1;distance<=20;distance++) {
       const i=30+step*distance
       expect(50-result.curves[0].points[i].y).toBeCloseTo(10*neighborWeight(distance),10)
