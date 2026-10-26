@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addPoint, amplitude, axisValid, clone, commit, curvePath, frequency, markZero, move, pixelAt, record, redo, removePoints, undo, validateDocument, valueAt, neighborWeight, prepareMove, movePrepared, connected, restoreManualMarkers, zeroCovered, type Document, type History } from '../src/engine'
+import { addPoint, amplitude, axisValid, clone, commit, curvePath, frequency, markZero, move, pixelAt, record, redo, removePoints, undo, validateDocument, valueAt, neighborWeight, prepareMove, movePrepared, connected, restoreManualMarkers, tracePoints, reconnectManualPoints, zeroCovered, type Document, type History } from '../src/engine'
 import fixtures from '../src/fixtures.json'
 const base: Document = {
   schemaVersion: 1, id: 'test', title: '测试谱', description: '',
@@ -35,16 +35,16 @@ describe('局部形状与限位', () => {
     expect(d.curves[1]).toEqual(base.curves[1]);expect(base.curves[0].points[1].y).toBe(50)
   })
   it('不跨片段，单点模式不联动', () => {
-    expect(move(base,'a','p4',0,-10,true,'amplitude').curves[0].points[5]).toEqual(base.curves[0].points[5])
-    const d=move(base,'a','p1',0,-10,false,'amplitude');expect(d.curves[0].points[0]).toEqual(base.curves[0].points[0])
+    expect(move(base,'a','p4',0,-10,true,'amplitude').curves[0].points[5]).toMatchObject(base.curves[0].points[5])
+    const d=move(base,'a','p1',0,-10,false,'amplitude');expect(d.curves[0].points[0]).toMatchObject(base.curves[0].points[0])
   })
   it('竖直频率时只左右改幅值', () => {
     const d=clone(base);d.calibration.direction='y';d.curves[0].points.forEach((p,i)=>{p.y=10+i*10;p.x=40})
     const next=move(d,'a','p1',8,50,true,'amplitude');expect(next.curves[0].points[1].x).toBe(48);expect(next.curves[0].points[1].y).toBe(20)
   })
-  it('二维限位阻止点交叉，同时限制幅值位移', () => {
+  it('二维移动可跨原邻点频率，描线顺序不变', () => {
     const d=move(base,'a','p1',50,-20,false,'free'), p=d.curves[0].points[1]
-    expect(p.x).toBeLessThan(30);expect(p.x).toBeGreaterThan(29.99);expect(p.y).toBeGreaterThan(45)
+    expect(p.x).toBe(70);expect(p.y).toBe(30);expect(tracePoints(d,d.curves[0]).map(p=>p.id)).toEqual(base.curves[0].points.map(p=>p.id))
     expect(()=>validateDocument(d,base)).not.toThrow()
   })
   it('图框限位不改变范围外点', () => {
@@ -55,18 +55,18 @@ describe('局部形状与限位', () => {
 describe('片段与真实零频选点', () => {
   it('删除中间点断开绘图与联动', () => {
     const d=removePoints(base,'a',['p2']);expect(d.curves[0].points).toHaveLength(5)
-    expect(d.curves[0].points[1].segment).not.toBe(d.curves[0].points[2].segment)
+    expect(connected(d.curves[0].points[1],d.curves[0].points[2])).toBe(false)
     expect((curvePath(d,d.curves[0]).match(/M/g)||[]).length).toBe(3)
     const moved=move(d,'a','p1',0,-10,true,'amplitude');expect(moved.curves[0].points[2].y).toBe(50)
   })
   it('缺口补点自动连接两侧，片段内部插入保持连接', () => {
     const d=removePoints(base,'a',['p2']);const filled=addPoint(d,'a',30,20)
     expect((curvePath(filled,filled.curves[0]).match(/M/g)||[]).length).toBe(2);expect(filled.curves[0].points.find(p=>p.x===30)!.manual).toBe(true)
-    const inside=addPoint(base,'a',15,20);expect(inside.curves[0].points.find(p=>p.x===15)!.segment).toBe('s')
+    const inside=addPoint(base,'a',15,20);expect((curvePath(inside,inside.curves[0]).match(/M/g)||[]).length).toBe(2)
   })
-  it('删空仍可增加，重复频率拒绝', () => {
+  it('删空仍可增加，相同频率描线可编辑但重复位置拒绝', () => {
     const d=removePoints(base,'a',base.curves[0].points.map(p=>p.id));expect(addPoint(d,'a',15,20).curves[0].points).toHaveLength(1)
-    expect(()=>addPoint(base,'a',20,20)).toThrow('已有点')
+    expect(()=>addPoint(base,'a',20,50)).toThrow('已有点');expect(()=>validateDocument(addPoint(base,'a',20,20),base)).not.toThrow()
   })
   it('标零不自动补点；零幅值来自用户点选', () => {
     const d=markZero(base,0,50);expect(d.curves).toEqual(base.curves);expect(zeroCovered(d,'a')).toBe(false)
@@ -114,7 +114,7 @@ describe('补点连接及固定邻点微调回归', () => {
   it('旧草稿中移动过的人工点按稳定 ID 识别，坐标和原对象不变', () => {
     const old=clone(base); old.curves[0].points.unshift({id:'old-manual',x:5,y:39,segment:'isolated',status:'人工调整'})
     const restored=restoreManualMarkers(old,base)
-    expect(restored.curves[0].points[0]).toEqual({...old.curves[0].points[0],manual:true})
+    expect(restored.curves[0].points[0]).toMatchObject({...old.curves[0].points[0],manual:true})
     expect(old.curves[0].points[0].manual).toBeUndefined()
     expect((curvePath(restored,restored.curves[0]).match(/M/g)||[]).length).toBe(2)
     expect(restoreManualMarkers(restored,base)).toEqual(restored)
@@ -140,4 +140,42 @@ describe('补点连接及固定邻点微调回归', () => {
     expect(linked.curves[0].points.find(p=>p.id==='p3')!.y).toBeLessThan(50)
     const deleted=removePoints(d,'a',[id]);expect(move(deleted,'a','p1',0,-5,true,'amplitude').curves[0].points.find(p=>p.id==='p3')!.y).toBe(50)
   })
+})
+
+
+describe('用户截图坐标与二维描线回归', () => {
+  it('右侧新点的 y 略大时延长端点，不再先到新点再折回旧点', () => {
+    const d=clone(base);d.source.plot=[630,280,710,320];d.calibration.direction='y'
+    d.calibration.frequency={pixels:[320,280],values:[0,40],unit:'THz'}
+    d.curves[0].points=[{id:'before',x:679.7,y:302.51,segment:'s',status:'原始'},{id:'old-end',x:685.13,y:302.24,segment:'s',status:'原始'}]
+    const next=addPoint(d,'a',687.8,302.30), points=tracePoints(next,next.curves[0])
+    expect(points.map(p=>p.id).slice(0,2)).toEqual(['before','old-end'])
+    expect(points[2].x).toBe(687.8);expect(points[2].y).toBe(302.30)
+    expect(curvePath(next,next.curves[0])).toBe('M679.7,302.51 L685.13,302.24 L687.8,302.3')
+  })
+  it('在线段内部插点保持前后连线，不投影或修改点击位置', () => {
+    const next=addPoint(base,'a',15,49.9), pts=tracePoints(next,next.curves[0])
+    expect(pts[0].id).toBe('p0');expect(pts[1].x).toBe(15);expect(pts[1].y).toBe(49.9);expect(pts[2].id).toBe('p1')
+  })
+  it('二维移动保持重复频率描线的顺序与全部非目标点', () => {
+    const d=move(base,'a','p1',10,-8,false,'free')
+    expect(d.curves[0].points[1]).toMatchObject({id:'p1',x:30,y:42})
+    expect(d.curves[0].points[2]).toMatchObject({id:'p2',x:30,y:50})
+    expect(()=>validateDocument(d,base)).not.toThrow()
+    expect(curvePath(d,d.curves[0])).toContain('L30,42 L30,50')
+  })
+  it('显式重连只修连接顺序，坐标、点身份及非目标曲线保持', () => {
+    const d=clone(base);d.calibration.direction='y';d.curves[0].pathOrdered=true;d.curves[0].points.splice(1,0,{id:'manual',x:25,y:49.9,segment:'m',status:'人工调整',manual:true})
+    const h: History={past:[],present:d,future:[]}, next=reconnectManualPoints(d,'a')
+    const coords=(v:Document)=>Object.fromEntries(v.curves[0].points.map(p=>[p.id,[p.x,p.y]]))
+    expect(coords(next)).toEqual(coords(d));expect(next.curves[1]).toEqual(d.curves[1]);expect(next.curves[0].points.map(p=>p.id).slice(0,4)).toEqual(['p0','p1','manual','p2'])
+    expect(undo(commit(h,next)).present).toEqual(d)
+  })
+})
+
+
+it('局部重连不会对整段密集峰执行全局重排', () => {
+  const d=clone(base);d.calibration.direction='y';d.curves[0].pathOrdered=true
+  d.curves[0].points=[{id:'a',x:20,y:60,segment:'s',status:'原始'},{id:'peak',x:90,y:59,segment:'s',manual:true,status:'人工补选'},{id:'c',x:20,y:58,segment:'s',status:'原始'}]
+  expect(reconnectManualPoints(d,'a')).toBe(d)
 })

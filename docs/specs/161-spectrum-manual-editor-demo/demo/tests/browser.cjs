@@ -13,7 +13,7 @@ async function main() {
  context.on('page', page => {page.on('pageerror',e=>report.errors.push(e.message));page.on('download',d=>report.downloads.push(d.suggestedFilename()))});
  context.on('request', r => { if(new URL(r.url()).pathname.startsWith('/api/')) report.apiRequests.push({url:r.url(),method:r.method()}) });
  const page = await context.newPage();page.setDefaultTimeout(10000);
- const shot = async name => {await page.screenshot({path:path.join(out,'iteration-'+name+'.png'),fullPage:true});report.screenshots.push('iteration-'+name+'.png')};
+ const shot = async name => {await page.screenshot({path:path.join(out,'xy-'+name+'.png'),fullPage:true});report.screenshots.push('xy-'+name+'.png')};
  const button = name => page.getByRole('button',{name,exact:true});
  const svg = () => page.getByRole('application',{name:'谱线人工编辑画布'});
  const screen = (x,y) => svg().evaluate((el,p)=>{const v=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:v.x,y:v.y}}, {x,y});
@@ -25,9 +25,11 @@ async function main() {
   await page.goto(base);await button('✎ 编辑').waitFor();await shot('demo-alpha-detail');
   assert.equal(await page.getByRole('button',{name:/导出|下载/}).count(),0);
   await button('✎ 编辑').click();await svg().waitFor();const start=await points();assert.equal(Object.keys(start).length,samples[0].curves[0].points.length);
+  assert((await button('自由移动（X / Y）').getAttribute('class')).includes('active'));
+  await page.getByLabel('附近点联动').uncheck();await drag('a-200',3,-3);const xy=await points();assert(Math.abs(xy['a-200'].x-start['a-200'].x-3)<.01);assert(Math.abs(xy['a-200'].y-start['a-200'].y+3)<.01);await button('↶ 撤销').click();assert.deepEqual(await points(),start);await page.getByLabel('附近点联动').check();check('默认X/Y自由移动，竖向可越过旧邻点频率，撤销恢复原坐标');
   const id='a-200';assert(start[id]);await drag(id,8,0);const moved=await points();
   assert(Math.abs(moved[id].x-start[id].x-8)<.01);assert.equal(moved[id].y,start[id].y);assert(Object.keys(start).filter(k=>moved[k].x!==start[k].x).length>1);
-  assert.deepEqual(moved['a-50'],start['a-50']);assert.deepEqual(moved['a-legend-0'],start['a-legend-0']);check('α²F 默认幅值联动：中心/邻点变化，范围外及其他片段不变');
+  assert.deepEqual(moved['a-50'],start['a-50']);assert.deepEqual(moved['a-legend-0'],start['a-legend-0']);check('α²F 默认二维模式水平拖动：中心/邻点变化，范围外及其他片段不变');
 
   const centerIndex=samples[0].curves[0].points.findIndex(p=>p.id===id), originalPoints=samples[0].curves[0].points;
   for(const distance of [1,5,6,10,17,18]) {
@@ -55,7 +57,7 @@ async function main() {
   await button('恢复原始提取').click();assert.deepEqual(await points(),start);await button('↶ 撤销').click();assert.deepEqual(await points(),Object.fromEntries(savedAlpha.curves[0].points.map(p=>[p.id,{x:p.x,y:p.y}])));check('恢复原始提取也可撤销');
   await button('恢复原始提取').click();await button('← 返回详情').click();await page.getByRole('dialog').waitFor();await button('继续编辑').click();assert(await svg().isVisible());await button('← 返回详情').click();await button('放弃修改').click();assert.deepEqual(await stored('alpha2f'),savedAlpha);check('未保存退出：继续编辑或放弃，不覆盖此前保存');
   await button('声子 DOS').click();await shot('demo-dos-detail');await button('✎ 编辑').click();await page.getByRole('button',{name:/^H \d/}).click();const h=await points();const hid=Object.keys(h).find(k=>k==='H-200');assert(hid);await drag(hid,5,0);await shot('demo-dos-editor');await button('保存调整').click();const savedDos=await stored('phdos');for(const c of samples[1].curves.filter(c=>c.id!=='H'))assert.deepEqual(savedDos.curves.find(v=>v.id===c.id),c);check('PhDOS 只编辑所选 H 分波，La/Sc 保持原样');
-  await button('✎ 编辑').click();await page.getByRole('button',{name:/^La \d/}).click();const la=await points();await button('自由移动').click();await page.getByLabel('附近点联动').uncheck();await drag('La-420',2,-.2);const laAfter=await points();assert.notDeepEqual(laAfter['La-420'],la['La-420']);assert.deepEqual(laAfter['La-419'],la['La-419']);check('二维单点模式可同时改频率和幅值，其余点不动');
+  await button('✎ 编辑').click();await page.getByRole('button',{name:/^La \d/}).click();const la=await points();await button('自由移动（X / Y）').click();await page.getByLabel('附近点联动').uncheck();await drag('La-420',2,-.2);const laAfter=await points();assert.notDeepEqual(laAfter['La-420'],la['La-420']);assert.deepEqual(laAfter['La-419'],la['La-419']);check('二维单点模式可同时改频率和幅值，其余点不动');
   await button('← 返回详情').click();await button('保存并返回').click();await button('✎ 编辑').waitFor();check('未保存退出：保存并返回');
   await page.setViewportSize({width:390,height:844});await shot('demo-mobile-detail');assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await button('✎ 编辑').click();await svg().waitFor();assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await shot('demo-mobile-editor');check('390px 详情和全屏编辑器无页面横向溢出');
   await button('← 返回详情').click();await page.setViewportSize({width:1440,height:1000});
@@ -74,6 +76,23 @@ async function main() {
   assert.deepEqual((await points())['legacy-added'],{x:649,y:430.5});assert.equal(await page.evaluate(()=>localStorage.getItem('scwiki-spectrum-manual-v1:alpha2f')),oldJson);
   const oldPath=await page.locator('[data-curve="alpha"]').getAttribute('d');assert(oldPath.includes('M649,430.5 L'));await shot('legacy-connected');check('旧草稿已移动的人工散点恢复后自动连线，坐标和原存储不变');
   await clickAt(649,430.5);await page.getByRole('button',{name:/删除选中点/}).click();await button('↶ 撤销').click();assert((await page.locator('[data-curve="alpha"]').getAttribute('d')).includes('M649,430.5 L'));await button('保存调整').click();await page.reload();await button('✎ 编辑').click();assert((await page.locator('[data-curve="alpha"]').getAttribute('d')).includes('M649,430.5 L'));check('补点连线撤销及保存刷新后保持');
+
+  await button('← 返回详情').click();
+  const userRaw=fs.readFileSync(path.join(out,'user-saved-alpha-xy.json'),'utf8'),userDoc=JSON.parse(userRaw);
+  await page.evaluate(v=>localStorage.setItem('scwiki-spectrum-manual-v1:alpha2f',v),userRaw);await page.reload();await button('✎ 编辑').click();
+  const userCoords=Object.fromEntries(userDoc.curves[0].points.map(p=>[p.id,{x:p.x,y:p.y}]));assert.deepEqual(await points(),userCoords);assert.equal(await page.evaluate(()=>localStorage.getItem('scwiki-spectrum-manual-v1:alpha2f')),userRaw);
+  const oldUserPath=await page.locator('[data-curve="alpha"]').getAttribute('d');await shot('user-before-reconnect');await button('重新连接人工补点').click();assert.deepEqual(await points(),userCoords);await shot('user-after-reconnect');
+  if(await button('↶ 撤销').isEnabled()){await button('↶ 撤销').click();assert.equal(await page.locator('[data-curve="alpha"]').getAttribute('d'),oldUserPath);await button('↷ 重做').click()}
+  await button('保存调整').click();await page.reload();await button('✎ 编辑').click();assert.deepEqual(await points(),userCoords);check('真实399点43操作草稿恢复、局部重连和保存刷新，所有坐标不变');
+  await button('← 返回详情').click();
+  const small=structuredClone(samples[0]);small.curves[0].points=[{id:'before',x:679.7,y:302.51,segment:'s',status:'原始'},{id:'old-end',x:685.13,y:302.24,segment:'s',status:'原始'}];
+  await page.evaluate(v=>localStorage.setItem('scwiki-spectrum-manual-v1:alpha2f',JSON.stringify(v)),small);await page.reload();await button('✎ 编辑').click();
+  await svg().evaluate(el=>el.setAttribute('viewBox','676 300 15 5'));await button('＋ 增加点').click();await clickAt(687.8,302.30);
+  const pathAfter=await page.locator('[data-curve="alpha"]').getAttribute('d');assert(pathAfter.startsWith('M679.7,302.51 L685.13,302.24 L687.'));const idsAfter=await page.locator('[data-point]').evaluateAll(nodes=>nodes.map(n=>n.dataset.point));assert.deepEqual(idsAfter.slice(0,2),['before','old-end']);await shot('end-extension-regression');check('截图日志坐标真实点击：右侧新点y略大仍延长端点，不回折');
+  await button('保存调整').click();
+  const folded=structuredClone(small);folded.curves[0].points.push({id:'new-point',x:687.8,y:302.30,segment:'s',manual:true,status:'人工补选'});
+  await page.evaluate(v=>localStorage.setItem('scwiki-spectrum-manual-v1:alpha2f',JSON.stringify(v)),folded);await page.reload();await button('✎ 编辑').click();const foldedPath=await page.locator('[data-curve="alpha"]').getAttribute('d');assert(foldedPath.includes('L687.8,302.3 L685.13,302.24'));
+  await button('重新连接人工补点').click();const fixedPath=await page.locator('[data-curve="alpha"]').getAttribute('d');assert(fixedPath.includes('L685.13,302.24 L687.8,302.3'));await button('↶ 撤销').click();assert.equal(await page.locator('[data-curve="alpha"]').getAttribute('d'),foldedPath);await button('↷ 重做').click();assert.equal(await page.locator('[data-curve="alpha"]').getAttribute('d'),fixedPath);check('历史回折局部修正：点坐标不变，撤销和重做精确恢复连线');
   report.performance=await page.evaluate(async()=>{
     const engine=await import('/src/engine.ts');
     const doc={schemaVersion:1,id:'perf',source:{plot:[0,0,10000,100]},calibration:{direction:'x',frequency:{pixels:[0,10000],values:[0,100],unit:'THz'},amplitude:{pixels:[100,0],values:[0,1],unit:'pixel'}},curves:[{id:'a',points:Array.from({length:10000},(_,i)=>({id:String(i),x:i,y:50,segment:'s',status:'original'}))}]};
@@ -84,8 +103,8 @@ async function main() {
     return {points:10000,iterations:120,prepareMs,medianMoveAndPathMs:times[60],p95MoveAndPathMs:times[114],weightedPoints:prepared.byId.size,changedPoints:moved.curves[0].points.filter(p=>p.y!==50).length,includesReactRender:false};
   });assert.equal(report.performance.weightedPoints,35);assert.equal(report.performance.changedPoints,35);check('10000点只对35点施加位移，120次移动复用同一准备结果；记录核心计算与路径生成耗时');
   assert.equal(await page.getByRole('button',{name:/导出|下载/}).count(),0);assert.deepEqual(report.apiRequests,[]);assert.deepEqual(report.downloads,[]);assert.deepEqual(report.errors,[]);check('无业务 API 请求、无下载入口/下载事件、无页面脚本错误');
-  report.status='passed';fs.writeFileSync(path.join(out,'iteration-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
- } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'iteration-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
+  report.status='passed';fs.writeFileSync(path.join(out,'xy-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
+ } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'xy-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
  finally {await browser.close()}
 }
 main().catch(e=>{console.error(e);process.exit(1)});

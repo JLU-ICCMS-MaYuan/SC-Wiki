@@ -1,0 +1,24 @@
+{
+  "origin": "http://127.0.0.1:5187",
+  "access": "仅从该来源的指定 Demo localStorage 键只读取得，不写浏览器存储",
+  "sha256": "5f04314b12262c3aaac46b9ff1eef0f8b9a77b944e412a760edfc4a786765392",
+  "point_count": 399,
+  "operations": 43,
+  "evidence_points": [
+    [
+      685.13,
+      302.24
+    ],
+    [
+      687.8,
+      302.3
+    ]
+  ],
+  "finding": "旧图按频率/y排序；后点击点y更大因此排在旧端点前，产生x方向折返。当前快照已含后续删改，局部回归使用原操作日志。",
+  "post_verification": {
+    "saved_data_hash_unchanged": true,
+    "sha256": "5f04314b12262c3aaac46b9ff1eef0f8b9a77b944e412a760edfc4a786765392",
+    "points": 399,
+    "note": "完成验证后对原来源指定键再次只读核验，原始保存字节未变；浏览器写入测试在隔离上下文执行。"
+  }
+}

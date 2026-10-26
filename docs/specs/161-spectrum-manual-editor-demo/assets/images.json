@@ -52,6 +52,66 @@
         850
       ],
       "verification": "2026-10-26 原字节归档后解码并校验 SHA-256；未推送。"
+    },
+    {
+      "id": "IMG-004",
+      "upload_order": 4,
+      "original_name": "codex-clipboard-72841b8c-d113-46ff-8e8b-382e4eaf4a9c.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/IMG-004-xy-backtrack.png",
+      "status": "local_verified",
+      "user_context": "我希望在图中打叉的地方新增一个点，然后生成一个直线，但是为什么在那个位置生成点之后，却自动生成了折现。这是为什么？是你的算法导致的吗？甚至会生成这样的折线。你看看这是为什么？我刚刚保存了这些点了。",
+      "related": [
+        "FR-017",
+        "FR-018",
+        "SC-011"
+      ],
+      "sha256": "7bd999041316816650d5ae1b270dcdff5c7fa35a765094cbf70e6496d2d41cb9",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2750,
+        1582
+      ],
+      "verification": "2026-10-26 原字节复制、重新解码及哈希校验；未推送。"
+    },
+    {
+      "id": "IMG-005",
+      "upload_order": 5,
+      "original_name": "codex-clipboard-64830da4-29ca-49db-83be-330b2fcfe601.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/IMG-005-xy-backtrack.png",
+      "status": "local_verified",
+      "user_context": "我希望在图中打叉的地方新增一个点，然后生成一个直线，但是为什么在那个位置生成点之后，却自动生成了折现。这是为什么？是你的算法导致的吗？甚至会生成这样的折线。你看看这是为什么？我刚刚保存了这些点了。",
+      "related": [
+        "FR-017",
+        "FR-018",
+        "SC-011"
+      ],
+      "sha256": "338e70550692982aed652c4a5a1dc6fe22397859b78bd6da44866edb6be52b79",
+      "media_type": "image/png",
+      "dimensions_px": [
+        1988,
+        1094
+      ],
+      "verification": "2026-10-26 原字节复制、重新解码及哈希校验；未推送。"
+    },
+    {
+      "id": "IMG-006",
+      "upload_order": 6,
+      "original_name": "codex-clipboard-c04b493c-2ab6-42ed-b4eb-b53e92a4393f.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/IMG-006-xy-backtrack.png",
+      "status": "local_verified",
+      "user_context": "我希望在图中打叉的地方新增一个点，然后生成一个直线，但是为什么在那个位置生成点之后，却自动生成了折现。这是为什么？是你的算法导致的吗？甚至会生成这样的折线。你看看这是为什么？我刚刚保存了这些点了。",
+      "related": [
+        "FR-017",
+        "FR-018",
+        "SC-011"
+      ],
+      "sha256": "742f686992ac98cebe91269155c1f423ce15019aa0eed6625ac06f486de6a1ae",
+      "media_type": "image/png",
+      "dimensions_px": [
+        1940,
+        1102
+      ],
+      "verification": "2026-10-26 原字节复制、重新解码及哈希校验；未推送。"
     }
   ]
 }

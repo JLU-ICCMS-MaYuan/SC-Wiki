@@ -10,7 +10,7 @@ type Props = {
 }
 type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
-export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'amplitude', display = 'overlay', all = true, onSelect, onChange, onPick, onError }: Props) {
+export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, onSelect, onChange, onPick, onError }: Props) {
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
   const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 34, y - 3, w + 40, h + 10] }
   const [view, setView] = useState<Rect>(initial), [preview, setPreview] = useState<Document | null>(null)
