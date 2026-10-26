@@ -152,6 +152,25 @@
         1272
       ],
       "verification": "2026-10-26 原字节复制，重新解码及哈希核对；尚未推送。"
+    },
+    {
+      "id": "IMG-009",
+      "upload_order": 9,
+      "original_name": "codex-clipboard-a0654b39-e94b-4922-a28a-bc345f367574.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/IMG-009-integral-question.png",
+      "status": "local_verified",
+      "user_context": "为什么已经完成零频位置核对，还是不能算出来 λ和 wlog。还有这个核对是不是就是确定频率为 0，刻度为 0 的位置坐标。",
+      "related": [
+        "FR-046",
+        "SC-026"
+      ],
+      "sha256": "3dfae41c0a02052c330293e349792167de86cc3557916d9e291bf8b11b7c49b1",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3476,
+        1424
+      ],
+      "verification": "2026-10-26 原字节复制、重新解码及哈希核对，未推送。"
     }
   ]
 }

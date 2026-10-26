@@ -258,3 +258,30 @@ def test_mysql_concurrent_manual_saves_only_one_version_commits(manual_http):
         assert session.scalar(select(func.count()).select_from(models.SpectrumRun).where(models.SpectrumRun.collection_id==e["identity"]))==2
         assert session.get(models.SpectrumCollection,e["identity"]).version==e["body"]["expected_collection_version"]+1
         assert session.get(models.SpectrumRun,e["old_run"]).result_json==e["old_result"]
+
+
+def test_manual_chain_edges_persist_without_replacing_existing_edges(manual_http):
+    e=manual_http;body=copy.deepcopy(e["body"]);curve=body["document"]["curves"][0]
+    old_points=copy.deepcopy(curve["points"]);anchor=curve["points"][10]["id"]
+    curve["points"] += [dict(id="chain-1",x=110,y=40,segment="chain",status="人工连续描线",manual=True,breakBefore=True,connectTo=anchor),
+                        dict(id="chain-2",x=112,y=42,segment="chain",status="人工连续描线",manual=True,breakBefore=True,connectTo="chain-1")]
+    res=e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body)
+    assert res.status_code==200,res.text
+    item=res.json()["items"][0]
+    assert item["result"]["manual_documents"]["a"]["curves"][0]["points"][:-2]==old_points
+    assert item["result"]["curves"][0]["points"][-1]["connectTo"]=="chain-1"
+    params={**e["params"],"collection_version":item["version"],"run_id":item["run"]["id"]}
+    restored=e["client"].get(f"/api/rag/spectra/{e['identity']}/manual",params=params).json()["documents"][0]
+    assert restored["curves"][0]["points"][-2]["connectTo"]==anchor
+    public=service.mask_public(item["result"],{"a":{"status":"accepted_limited","frequency_intervals_thz":[[4,5]]}})
+    first=next(p for p in public["curves"][0]["points"] if p.get("id")=="chain-1")
+    assert "connectTo" not in first and first["breakBefore"]
+    assert public["curves"][0]["points"][-1]["connectTo"]=="chain-1"
+
+
+@pytest.mark.parametrize("parent",["missing","chain-1"])
+def test_manual_chain_rejects_missing_or_cyclic_parent(manual_http,parent):
+    e=manual_http;body=copy.deepcopy(e["body"])
+    body["document"]["curves"][0]["points"].append(dict(id="chain-1",x=110,y=40,segment="c",status="人工连续描线",manual=True,breakBefore=True,connectTo=parent))
+    res=e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body)
+    assert res.status_code==422

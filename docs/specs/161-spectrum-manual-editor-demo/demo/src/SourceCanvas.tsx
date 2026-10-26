@@ -1,30 +1,37 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import AxisOverlay from './AxisOverlay'
+import { recognizedAxes } from './axisGeometry'
 import { fitViewport, zoomViewport, wheelPixels, wheelFactor } from './viewport'
-import { addPoint, amplitudePixel, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
+import { addPoint, appendPoint, amplitudePixel, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
 
 export type Tool = 'select' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
 type Props = {
   doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool; imageOpacity?: number
   linked?: boolean; dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
-  onSelect?: (ids: string[]) => void; onChange?: (doc: Document, detail?: string) => void
-  onAdded?: (id: string) => void; onZeroMarked?: () => void
+  referenceCurves?: Document["curves"]; onSelect?: (ids: string[]) => void; onChange?: (doc: Document, detail?: string) => void
+  onFinishAdd?: () => void; onAdded?: (id: string) => void; onZeroMarked?: () => void
   onPick?: (x: number, y: number) => void; onError?: (error: string) => void
 }
 type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; clientStart?: {x:number;y:number}; screenScale?: number; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
-export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onZeroMarked }: Props) {
+export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onZeroMarked, onFinishAdd, referenceCurves=[] }: Props) {
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
   const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 46, y - 10, w + 62, h + 32] }
   const [view, setView] = useState<Rect>(initial), [preview, setPreview] = useState<Document | null>(null)
   const [showAxes, setShowAxes] = useState(true)
+  const tail=useRef<string|null>(null),latest=useRef(doc),pendingAdd=useRef<DOMPoint|null>(null)
+  latest.current=doc
+  useEffect(()=>{tail.current=null},[tool,active,doc.id])
+  useEffect(()=>{if(tail.current && !doc.curves.find(c=>c.id===active)?.points.some(p=>p.id===tail.current))tail.current=null},[doc,active])
+  useEffect(()=>{if(tail.current && selected[0]!==tail.current)tail.current=null},[selected])
   const [fit, setFit] = useState<Rect>(initial), fitRef = useRef<Rect>(initial()), manualView = useRef(false)
   const [box, setBox] = useState<Rect | null>(null), [imageFailed, setImageFailed] = useState(false), [retry, setRetry] = useState(0), [scale, setScale] = useState(1)
   const clip = useId().replace(/:/g, ''), scene = preview || doc
   const curve = scene.curves.find(c => c.id === active)!
   const influence = useMemo(() => gesture.current?.doc === doc && gesture.current.id === selected[0]
     ? gesture.current.prepared : prepareMove(doc, active, selected[0], linked), [doc, active, selected[0], linked])
-  const paths = useMemo(() => new Map(scene.curves.map(c => [c.id, curvePath(scene, c)])), [scene])
+  const renderCurves=[...scene.curves,...referenceCurves.filter(c=>!scene.curves.some(v=>v.id===c.id))]
+  const paths = new Map(renderCurves.map(c => [c.id, curvePath(scene, c)]))
   const [x0, y0, x1, y1] = scene.source.plot
   useEffect(() => { manualView.current=false; setImageFailed(false); setPreview(null) }, [doc.id])
   useEffect(() => {
@@ -83,17 +90,30 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       <button aria-label="放大" title="放大约5%" onClick={() => zoom(1 / 1.05)}>＋</button><button onClick={fitWindow}>适应窗口</button>
     </div>
     </div>
-    {showAxes && <div className="axis-legend"><span>蓝：当前标定</span><span>灰：已有识别 / THz</span>{doc.id === 'alpha2f' && <span>棕：累计 λ 参考</span>}</div>}
+    {showAxes && <div className="axis-legend"><span>蓝：当前标定</span><span>灰：已有识别 / {recognizedAxes(doc)?.frequencyUnit || '待核对'}</span>{Boolean(recognizedAxes(doc)?.lambdaTicks.length) && <span>棕：累计 λ 参考</span>}</div>}
     {imageFailed && <div className="canvas-error" role="alert">原图加载失败，暂不能选点。<button onClick={() => { setRetry(n => n + 1); setImageFailed(false) }}>重试图片</button></div>}
-    <svg ref={svg} className={'source-canvas tool-' + tool} role={editing ? 'application' : 'img'} aria-label={editing ? '谱线人工编辑画布' : '原图与提取结果'}
+    <svg ref={svg} className={'source-canvas tool-' + tool} role={editing ? 'application' : 'img'} aria-label={editing ? '谱线人工编辑画布' : display==='source'?'论文谱原图':display==='overlay'?'原图与提取数据叠加':`提取谱数据，频率沿${doc.calibration.direction==='y'?'竖轴':'横轴'}，与来源图一致`}
       data-source-crop={doc.source.viewport.join(',')} data-viewbox={view.join(',')} viewBox={view.join(' ')} preserveAspectRatio="xMidYMid meet"
       onContextMenu={e => e.preventDefault()}
+      onClick={event=>{
+        if(!editing || imageFailed || tool!=='add' || event.button!==0 || event.altKey)return
+        if(event.detail>=2){tail.current=null;onFinishAdd?.();return}
+        operate(()=>{
+          const current=latest.current,anchor=tail.current || (selected.length===1?selected[0]:''),position=pendingAdd.current || pointer(event.clientX,event.clientY)
+          pendingAdd.current=null
+          const parent=current.curves.find(c=>c.id===active)?.points.find(p=>p.id===anchor)
+          if(parent && Math.hypot(parent.x-position.x,parent.y-position.y)<=1e-4)return
+          const next=appendPoint(current,active,anchor,position.x,position.y),added=next.curves.find(c=>c.id===active)!.points.at(-1)!
+          latest.current=next;tail.current=added.id;onChange?.(next);onSelect?.([added.id]);onAdded?.(added.id)
+        })
+      }}
+      onDoubleClick={event=>{if(editing && tool==='add'){event.preventDefault();tail.current=null;onFinishAdd?.()}}}
       onPointerDown={event => {
         const pan = editing && tool === 'pan' || event.button === 1 || event.button === 2 || event.altKey
         if (!pan && (!editing || imageFailed || event.button !== 0)) return
         event.preventDefault(); const p = pointer(event.clientX, event.clientY)
         if (pan) { manualView.current=true; gesture.current = { kind:'pan', start:p, view, doc, clientStart:{x:event.clientX,y:event.clientY}, screenScale:svg.current!.getScreenCTM()!.a } }
-        else if (tool === 'add') return add(p.x, p.y)
+        else if (tool === 'add') {pendingAdd.current=p;return}
         else if (tool === 'zeroPoint') return add(p.x, p.y, true)
         else if (tool === 'zero') return operate(() => { onChange?.(markZero(doc, p.x, p.y)); onSelect?.([]); onZeroMarked?.() })
         else if (tool === 'calibrate') return onPick?.(p.x, p.y)
@@ -119,9 +139,9 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
         }
       }} onPointerUp={() => finish()} onPointerCancel={() => finish(true)}>
       <defs><clipPath id={clip}><rect x={scene.source.viewport[0]} y={scene.source.viewport[1]} width={scene.source.viewport[2]} height={scene.source.viewport[3]} /></clipPath></defs>
-      {display !== 'data' && <image data-testid="source-image" opacity={imageOpacity / 100} key={retry} href={scene.source.image} width={scene.source.width} height={scene.source.height} clipPath={`url(#${clip})`} onError={() => setImageFailed(true)} />}
+      {display !== 'data' && scene.source.image && <image data-testid="source-image" opacity={imageOpacity / 100} key={retry} href={scene.source.image} width={scene.source.width} height={scene.source.height} clipPath={`url(#${clip})`} onError={() => setImageFailed(true)} />}
       {display === 'data' && <rect x={x0} y={y0} width={x1 - x0} height={y1 - y0} fill="#fff" stroke="#9ea8b9" strokeWidth={1 / scale} />}
-      {display !== 'source' && scene.curves.filter(c => all || c.id === active).map(c => <g key={c.id} opacity={editing && c.id !== active ? .3 : 1}>
+      {display !== 'source' && renderCurves.filter(c => all || c.id === active).map(c => <g key={c.id} opacity={editing && c.id !== active ? .3 : 1}>
         <path d={paths.get(c.id)} fill="none" stroke="white" strokeWidth={4 / scale}/>
         <path data-curve={c.id} d={paths.get(c.id)} fill="none" stroke={c.color} strokeWidth={1.7 / scale}/>
         {editing && c.id === active && c.points.map(point => {
@@ -137,6 +157,6 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       {box && <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="#6455e822" stroke="#6455e8" strokeWidth={1 / scale} />}
 
     </svg>
-    <div className="canvas-caption">{editing ? '滚轮缩放 · 右键 / Alt 拖动平移 · 橙色点为联动范围' : '人工补点自动连线 · 未补选的缺口保留 · 演示数据'}</div>
+    <div className="canvas-caption">{editing ? '滚轮缩放 · 右键 / Alt 拖动平移 · 橙色点为联动范围' : '人工修订可追溯 · 未补选的缺口保留'}</div>
   </div>
 }

@@ -81,7 +81,7 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
     }
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key)
   }, [doc, selected, active, saving])
-  const selectCurve = (id: string) => { setActive(id); setSelected([]) }
+  const selectCurve = (id: string) => { setActive(id); setSelected([]);setTool('select') }
   const save = async (): Promise<boolean> => {
     if(saveLock.current)return false
     saveLock.current=true;setSaving(true)
@@ -153,10 +153,10 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
     {error && <div role="alert" className="callout error">{error}</div>}{notice && <div role="status" className="callout success">{notice}</div>}
     <fieldset className="production-editor-fields" disabled={saving}>
 <div className="editor-layout"><section className="workbench">
-        <div className="tool-strip">{([['select','↖ 选点 / 拖动'],['pan','✥ 平移'],['add','＋ 增加点'],['box','▣ 框选']] as [Tool,string][]).map(([value,label]) => <button key={value} className={tool === value ? 'active' : ''} onClick={() => { setTool(value); setPick(null) }}>{label}</button>)}<div className="tool-strip-end"><label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></div></div>
-        {!['select','pan'].includes(tool) && <div className="tool-hint">{tool === 'zero' ? '在原图 0 刻度对应的图框内位置点击，橙色线只表示标定位置。' : tool === 'zeroPoint' ? '在橙色零频线上的真实曲线位置点击，幅值取自你的点击。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? '点击在线段内插点或延伸最近端点；保留点击坐标和描线顺序。' : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : ''}</div>}
+        <div className="tool-strip">{([['select','↖ 选点 / 拖动'],['pan','✥ 平移'],['add','＋ 增加点'],['box','▣ 框选']] as [Tool,string][]).map(([value,label]) => <button key={value} className={tool === value ? 'active' : ''} onClick={() => { if(value==='add' && (selected.length!==1 || !point)){setError('请先选中当前曲线的一个已有点，再点击增加点。');return} setTool(value); setPick(null);setError('') }}>{label}</button>)}<div className="tool-strip-end"><label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></div></div>
+        {!['select','pan'].includes(tool) && <div className="tool-hint">{tool === 'zero' ? '在原图 0 刻度对应的图框内位置点击，橙色线只表示标定位置。' : tool === 'zeroPoint' ? '在橙色零频线上的真实曲线位置点击，幅值取自你的点击。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? '单击从选中点连续描线，每点只连接前一点。双击结束并保留已加点，点击保存调整后才提交。' : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : ''}</div>}
         <div className="editor-canvas-row"><ImageOpacityControl value={imageOpacity} onChange={setImageOpacity} disabled={display === 'data'}/>
-        <SourceCanvas doc={doc} active={active} selected={selected} referenceCurves={samples.filter(s=>s.id!==sampleId).flatMap(s=>s.curves)} imageOpacity={imageOpacity} editing tool={tool} linked={linked} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onAdded={focusCoordinates} onZeroMarked={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
+        <SourceCanvas doc={doc} active={active} selected={selected} referenceCurves={samples.filter(s=>s.id!==sampleId).flatMap(s=>s.curves)} imageOpacity={imageOpacity} editing tool={tool} linked={linked} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onFinishAdd={() => {setTool('select');setError('');setNotice('连续加点已结束，已加点保留在当前编辑中。请点击保存调整提交。')}} onAdded={focusCoordinates} onZeroMarked={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
           if (!pick) return
           const direction = pick.axis === 'frequency' ? calibration.direction : calibration.direction === 'x' ? 'y' : 'x'
           axisEdit(pick.axis, 'pixels', pick.index, direction === 'x' ? x : y); setTool('select'); setPick(null)
@@ -189,7 +189,8 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
             <label>对应值<input type="number" step="any" aria-label={`${axis}-${i}-value`} value={Number.isNaN(calibration[axis].values[i]) ? '' : calibration[axis].values[i]} onChange={e => axisEdit(axis,'values',i,e.target.value === '' ? NaN : Number(e.target.value))}/></label>
           </div>)}</fieldset>)}
           <label>幅值单位<select aria-label="幅值单位" value={calibration.amplitude.unit} onChange={e => setCalibration(c => ({...c, amplitude:{...c.amplitude,unit:e.target.value}}))}><option value="pixel">相对像素（刻度待核对）</option><option value="dimensionless">无量纲</option><option value="modes/THz">modes/THz</option><option value="unknown">其他 / 待核对</option>{!['pixel','dimensionless','modes/THz','unknown'].includes(calibration.amplitude.unit)&&<option value={calibration.amplitude.unit}>{calibration.amplitude.unit}</option>}</select></label>
-          <label>幅值标定依据<textarea aria-label="幅值标定依据" value={calibration.amplitudeEvidence} placeholder="来自原图哪条轴、哪组刻度；不要填写累计 λ 的刻度" onChange={e => setCalibration(c => ({...c,amplitudeEvidence:e.target.value}))}/></label>
+          <label>幅值标定依据<textarea aria-label="幅值标定依据" value={calibration.amplitudeEvidence} placeholder="例如：图3图注给出的α²F刻度为0和0.5；若论文没给出，保留未知，不填λ刻度" onChange={e => setCalibration(c => ({...c,amplitudeEvidence:e.target.value}))}/></label>
+          {kind==='alpha2f' && <p className="muted">幅值核对要有论文明确给出的 α²F 刻度或倍率。像素宽度不等于 α²F 数值，填依据也不会自动重算积分。</p>}
           <button className="secondary" onClick={applyCalibration}>应用标定</button><p className="muted">保留原图像素位置，只重新换算数值。修改后需重新核对零频选点。</p>
         </div></details></section>
         <section className="panel-section"><h3>逐点数据</h3><PointTable doc={doc} active={active} selected={selected} onSelect={setSelected} compact/></section>

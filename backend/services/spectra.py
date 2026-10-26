@@ -189,6 +189,11 @@ def mask_public(payload, reviews):
                 kept.append(point)
                 interrupted = False
             curve["points"] = kept
+            visible_ids={p.get("id") for p in kept}
+            for point in kept:
+                if point.get("connectTo") and point["connectTo"] not in visible_ids:
+                    point.pop("connectTo")
+                    point["breakBefore"]=True
         curve["acceptance"] = decision
         selected.append(curve)
     output["curves"] = selected
@@ -341,6 +346,10 @@ def review_curve(session, ctx, row, curve_id, status, intervals, reason, user):
     if any(not math.isfinite(v) for pair in intervals for v in pair):
         fail("spectra_interval_invalid", "有效频段必须为有限数值", 422)
     f = [p["frequency_thz"] for p in curve["points"]]
+    if status in {"accepted", "accepted_limited"} and curve.get("manual_trace") and any(
+            p.get("connectTo") and (i == 0 or p["connectTo"] != curve["points"][i-1].get("id"))
+            for i,p in enumerate(curve["points"])):
+        fail("spectra_manual_branch_unverified", "人工描线含分支，请整理成单条谱线后再采纳", 422)
     if status in {"accepted", "accepted_limited"} and curve.get("manual_trace") and (
             len(f) < 2 or any(value < 0 for value in f) or any(b <= a for a,b in zip(f,f[1:]))):
         fail("spectra_manual_trace_unverified", "人工描线为空、频率重复或回退，请整理并核对后再采纳", 422)

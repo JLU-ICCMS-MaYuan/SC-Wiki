@@ -1,0 +1,41 @@
+{
+  "checks": [
+    "没有起点时不能增加点，提示先选已有点",
+    "连续加点只连前驱，双击仅加入一个末点并退出，不自动提交或继续加点",
+    "连续描线可逐点撤销重做，原路径保留",
+    "保存入库及回读保留父点ID，不按最近距离改接",
+    "正式详情读取真实接口文档，人工坐标保存到数据库新运行，回跳新版本并显示零频检查",
+    "积分说明区分零频、幅值依据和人工谱尚未重算，不承诺填说明即出积分",
+    "刷新从持久数据库恢复人工结果，原始运行数值未被覆盖",
+    "并发新版本产生409冲突，编辑器保留用户坐标而不覆盖数据库",
+    "PhDOS分波使用自身标定保存，未编辑的La曲线逐点保持",
+    "正式页面及全屏编辑器在390px无水平溢出",
+    "正式保存不访问Demo草稿、不重提取，所有写入仅到隔离manual路由"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0271f1fb44bc4ba1aff89af8768ca51c/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0271f1fb44bc4ba1aff89af8768ca51c/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/8d7e116f4eca413794ba294322924e6e/manual"
+    }
+  ],
+  "screenshots": [
+    "chain-production-detail-before.png",
+    "chain-production-editor.png",
+    "chain-production-chain-ended.png",
+    "chain-production-saved-detail.png",
+    "chain-production-conflict.png",
+    "chain-production-mobile-detail.png",
+    "chain-production-mobile-editor.png"
+  ],
+  "status": "passed",
+  "database": "isolated SQLite file; production SQLAlchemy models and HTTP routes"
+}

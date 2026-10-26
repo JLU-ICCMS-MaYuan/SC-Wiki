@@ -95,7 +95,7 @@ export default function App() {
     }
     window.addEventListener('keydown', key); return () => window.removeEventListener('keydown', key)
   }, [doc, selected, active, editor])
-  const selectCurve = (id: string) => { setActive(id); setSelected([]) }
+  const selectCurve = (id: string) => { setActive(id); setSelected([]);setTool('select') }
   const save = (): boolean => {
     try {
       if (calibrationDirty) throw new Error('标定表单还有未应用的修改，请先应用标定，再保存。')
@@ -173,10 +173,10 @@ export default function App() {
         : <><div className="breadcrumbs">上传 / 材料状态 / 谱数据详情</div><header className="page-header"><div><p className="eyebrow">SPECTRUM WORKSPACE</p><h1>{doc.title}解析详情</h1><p className="muted">从原图出发，让每一个数据点都可核对。</p></div><div className="tabs">{samples.map(s => <button key={s.id} className={s.id === sampleId ? 'active' : ''} onClick={() => leave(() => switchSample(s.id))}>{s.title}</button>)}</div></header><div className="demo-banner"><span>交互 Demo</span>固定原图与演示点 · 保存仅在此浏览器 · 尚未连接数据库</div></>}
       {error && <div role="alert" className="callout error">{error}</div>}{notice && <div role="status" className="callout success">{notice}</div>}
       {editor ? <div className="editor-layout"><section className="workbench">
-        <div className="tool-strip">{([['select','↖ 选点 / 拖动'],['pan','✥ 平移'],['add','＋ 增加点'],['box','▣ 框选']] as [Tool,string][]).map(([value,label]) => <button key={value} className={tool === value ? 'active' : ''} onClick={() => { setTool(value); setPick(null) }}>{label}</button>)}<div className="tool-strip-end"><label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></div></div>
-        {!['select','pan'].includes(tool) && <div className="tool-hint">{tool === 'zero' ? '在原图 0 刻度对应的图框内位置点击，橙色线只表示标定位置。' : tool === 'zeroPoint' ? '在橙色零频线上的真实曲线位置点击，幅值取自你的点击。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? '点击在线段内插点或延伸最近端点；保留点击坐标和描线顺序。' : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : ''}</div>}
+        <div className="tool-strip">{([['select','↖ 选点 / 拖动'],['pan','✥ 平移'],['add','＋ 增加点'],['box','▣ 框选']] as [Tool,string][]).map(([value,label]) => <button key={value} className={tool === value ? 'active' : ''} onClick={() => { if(value==='add' && (selected.length!==1 || !point)){setError('请先选中当前曲线的一个已有点，再点击增加点。');return} setTool(value); setPick(null);setError('') }}>{label}</button>)}<div className="tool-strip-end"><label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></div></div>
+        {!['select','pan'].includes(tool) && <div className="tool-hint">{tool === 'zero' ? '在原图 0 刻度对应的图框内位置点击，橙色线只表示标定位置。' : tool === 'zeroPoint' ? '在橙色零频线上的真实曲线位置点击，幅值取自你的点击。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? '单击从选中点连续描线，每点只连接前一点。双击结束并保留已加点，点击保存调整后才提交。' : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : ''}</div>}
         <div className="editor-canvas-row"><ImageOpacityControl value={imageOpacity} onChange={setImageOpacity} disabled={display === 'data'}/>
-        <SourceCanvas doc={doc} active={active} selected={selected} imageOpacity={imageOpacity} editing tool={tool} linked={linked} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onAdded={focusCoordinates} onZeroMarked={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
+        <SourceCanvas doc={doc} active={active} selected={selected} imageOpacity={imageOpacity} editing tool={tool} linked={linked} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onFinishAdd={() => {setTool('select');setError('');setNotice('连续加点已结束，已加点保留在当前编辑中。请点击保存调整提交。')}} onAdded={focusCoordinates} onZeroMarked={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
           if (!pick) return
           const direction = pick.axis === 'frequency' ? calibration.direction : calibration.direction === 'x' ? 'y' : 'x'
           axisEdit(pick.axis, 'pixels', pick.index, direction === 'x' ? x : y); setTool('select'); setPick(null)

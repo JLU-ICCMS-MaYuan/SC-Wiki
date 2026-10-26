@@ -13,10 +13,10 @@ async function main() {
  context.on('page', page => {page.on('pageerror',e=>report.errors.push(e.message));page.on('download',d=>report.downloads.push(d.suggestedFilename()))});
  context.on('request', r => { if(new URL(r.url()).pathname.startsWith('/api/')) report.apiRequests.push({url:r.url(),method:r.method()}) });
  const page = await context.newPage();page.setDefaultTimeout(10000);
- const shot = async name => {await page.screenshot({path:path.join(out,'viewport-'+name+'.png'),fullPage:true});report.screenshots.push('viewport-'+name+'.png')};
+ const shot = async name => {await page.screenshot({path:path.join(out,'chain-demo-'+name+'.png'),fullPage:true});report.screenshots.push('chain-demo-'+name+'.png')};
  const button = name => page.getByRole('button',{name,exact:true});
  const svg = () => page.getByRole('application',{name:'谱线人工编辑画布'});
- const screen = (x,y) => svg().evaluate((el,p)=>{const v=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:v.x,y:v.y}}, {x,y});
+ const screen = (x,y) => svg().evaluate(async(el,p)=>{await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));const v=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:v.x,y:v.y}}, {x,y});
  const clickAt = async(x,y) => {const p=await screen(x,y);await page.mouse.click(p.x,p.y)};
  const points = () => page.locator('[data-point]').evaluateAll(nodes=>Object.fromEntries(nodes.map(n=>[n.dataset.point,{x:Number(n.dataset.x),y:Number(n.dataset.y)}])));
  const drag = async(id,dx,dy) => {const p=(await points())[id];const a=await screen(p.x,p.y),b=await screen(p.x+dx,p.y+dy);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:8});await page.mouse.up()};
@@ -80,13 +80,12 @@ async function main() {
 
   await page.locator('summary').click();
   await button('▣ 框选').click();let a=await screen(735,409),b=await screen(754,416);await page.mouse.move(a.x,a.y);await page.mouse.down();await page.mouse.move(b.x,b.y,{steps:5});await page.mouse.up();await page.getByRole('button',{name:/删除选中点/}).click();const deleted=await points();assert.equal(Object.keys(deleted).filter(k=>k.startsWith('a-legend')).length,0);check('框选删除图例误识别点');
-  await button('＋ 增加点').click();await clickAt(649,430.5);assert.equal(Object.keys(await points()).length,Object.keys(deleted).length+1);check('在原图缺失区域人工补点');
+  await page.locator('[data-row]').first().click();await button('＋ 增加点').click();await clickAt(649,430.5);assert.equal(Object.keys(await points()).length,Object.keys(deleted).length+1);check('在原图缺失区域人工补点');
   assert(await page.getByLabel('选中点频率').isVisible());assert(Math.abs(Number(await page.getByTestId('point-x').textContent())-649)<.001);assert(Math.abs(Number(await page.getByTestId('point-y').textContent())-430.5)<.001);assert(Math.abs(Number((await page.getByTestId('point-zero-distance').textContent()).replace(' px',''))-4.5)<.001);assert(await page.getByTestId('selected-point-projection').isVisible());check('新增点自动选中并显示X/Y、换算坐标、距零线距离及投影');
 
   const withAdded=await points();const addedId=Object.keys(withAdded).find(k=>!deleted[k]);
   const linkPath=await page.locator('[data-curve="alpha"]').getAttribute('d');
-  const addedCommand=new RegExp('[ML]'+withAdded[addedId].x+','+withAdded[addedId].y+' [ML]');
-  assert(addedCommand.test(linkPath));assert(!linkPath.includes('M'+withAdded[addedId].x+','+withAdded[addedId].y+' M'));check('人工端点补点与已有首点可见连续连线，未插入额外点');
+  assert(linkPath.includes(' L'+withAdded[addedId].x+','+withAdded[addedId].y));check('选中起点后补点只连接明确前驱，未插入额外点');const finishAt=await screen(withAdded[addedId].x,withAdded[addedId].y);await page.mouse.dblclick(finishAt.x,finishAt.y);assert.equal(await page.locator('.tool-add').count(),0);assert.equal(Object.keys(await points()).length,Object.keys(withAdded).length);check('Demo双击已有末点结束，不重复加点');
 
   await button('1 · 标记原图 0 频率位置').click();await clickAt(640,435);assert((await page.getByTestId('zero-status').textContent()).includes('不完整'));check('只标零频位置仍提示提取不完整');assert(Math.abs(Number((await page.getByTestId('marked-zero-pixel').textContent()).replace(' px',''))-435)<.001);check('标记零频线后右侧直接显示原图位置和频率');
   await button('2 · 补选曲线零频点').click();await clickAt(641,435);assert((await page.getByTestId('zero-status').textContent()).includes('已记录'));check('显式原图零频点与零频标定分开，幅值由点击位置提供');assert(Math.abs(Number(await page.getByLabel('选中点频率').inputValue()))<1e-6);assert.equal(await page.getByTestId('point-zero-distance').textContent(),'0 px');check('零频补点自动选中，频率0且距零线0像素');
@@ -127,8 +126,8 @@ async function main() {
   await button('← 返回详情').click();
   const small=structuredClone(samples[0]);small.curves[0].points=[{id:'before',x:679.7,y:302.51,segment:'s',status:'原始'},{id:'old-end',x:685.13,y:302.24,segment:'s',status:'原始'}];
   await page.evaluate(v=>localStorage.setItem('scwiki-spectrum-manual-v1:alpha2f',JSON.stringify(v)),small);await page.reload();await button('✎ 编辑').click();
-  await svg().evaluate(el=>el.setAttribute('viewBox','676 300 15 5'));await button('＋ 增加点').click();await clickAt(687.8,302.30);
-  const pathAfter=await page.locator('[data-curve="alpha"]').getAttribute('d');assert(pathAfter.startsWith('M679.7,302.51 L685.13,302.24 L687.'));const idsAfter=await page.locator('[data-point]').evaluateAll(nodes=>nodes.map(n=>n.dataset.point));assert.deepEqual(idsAfter.slice(0,2),['before','old-end']);await shot('end-extension-regression');check('截图日志坐标真实点击：右侧新点y略大仍延长端点，不回折');
+  await page.locator('[data-row="old-end"]').click();await svg().evaluate(el=>el.setAttribute('viewBox','676 300 15 5'));await button('＋ 增加点').click();await clickAt(687.8,302.30);
+  const pathAfter=await page.locator('[data-curve="alpha"]').getAttribute('d');assert(pathAfter.startsWith('M679.7,302.51 L685.13,302.24 M685.13,302.24 L687.'));const idsAfter=await page.locator('[data-point]').evaluateAll(nodes=>nodes.map(n=>n.dataset.point));assert.deepEqual(idsAfter.slice(0,2),['before','old-end']);await shot('end-extension-regression');check('截图日志坐标真实点击：右侧新点y略大仍延长端点，不回折');
   await button('保存调整').click();
   const folded=structuredClone(small);folded.curves[0].points.push({id:'new-point',x:687.8,y:302.30,segment:'s',manual:true,status:'人工补选'});
   await page.evaluate(v=>localStorage.setItem('scwiki-spectrum-manual-v1:alpha2f',JSON.stringify(v)),folded);await page.reload();await button('✎ 编辑').click();const foldedPath=await page.locator('[data-curve="alpha"]').getAttribute('d');assert(foldedPath.includes('L687.8,302.3 L685.13,302.24'));
@@ -136,7 +135,7 @@ async function main() {
   await button('保存调整').click();
   await page.evaluate(v=>localStorage.setItem('scwiki-spectrum-manual-v1:alpha2f',JSON.stringify(v)),samples[0]);await page.reload();
   assert.equal(await page.getByTestId('saved-zero-check').getAttribute('data-complete'),'false');
-  await button('✎ 编辑').click();await button('＋ 增加点').click();await clickAt(641,435);const candidateCoords=await points();await button('保存调整').click();
+  await button('✎ 编辑').click();await page.locator('[data-row]').first().click();await button('＋ 增加点').click();await clickAt(641,435);const candidateCoords=await points();await button('保存调整').click();
   assert.equal(await page.locator('[data-zero-curve="alpha"]').getAttribute('data-state'),'needs_boundary');assert.equal((await stored('alpha2f')).zero,null);check('普通新增数值0点保存后仍待确认边界，不自动制造人工依据');
   await button('继续核对 α²F').click();assert(Math.abs(Number(await page.getByLabel('选中点频率').inputValue()))<1e-6);await button('确认蓝色零频线与原图一致').click();assert.deepEqual(await points(),candidateCoords);await button('保存调整').click();
   assert.equal(await page.locator('[data-zero-curve="alpha"]').getAttribute('data-state'),'needs_confirmation');await shot('candidate-awaiting-confirmation');check('只确认蓝色零线仍需确认已有零点，点坐标未改');
@@ -161,8 +160,8 @@ async function main() {
     return {points:10000,iterations:120,prepareMs,medianMoveAndPathMs:times[60],p95MoveAndPathMs:times[114],weightedPoints:prepared.byId.size,changedPoints:moved.curves[0].points.filter(p=>p.y!==50).length,includesReactRender:false};
   });assert.equal(report.performance.weightedPoints,2*support-1);assert.equal(report.performance.changedPoints,2*support-1);check('10000点按用户配置的有限邻域移动，120次复用准备结果');
   assert.equal(await page.getByRole('button',{name:/导出|下载/}).count(),0);assert.deepEqual(report.apiRequests,[]);assert.deepEqual(report.downloads,[]);assert.deepEqual(report.errors,[]);check('无业务 API 请求、无下载入口/下载事件、无页面脚本错误');
-  report.status='passed';fs.writeFileSync(path.join(out,'viewport-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
- } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'viewport-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
+  report.status='passed';fs.writeFileSync(path.join(out,'chain-demo-browser-validation.json'),JSON.stringify(report,null,2)+'\n');
+ } catch(error) {report.status='failed';report.failure=error.stack;await page.screenshot({path:path.join(out,'browser-failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'chain-demo-browser-validation.json'),JSON.stringify(report,null,2)+'\n');throw error}
  finally {await browser.close()}
 }
 main().catch(e=>{console.error(e);process.exit(1)});

@@ -5,6 +5,7 @@ import SpectrumFigure from './SpectrumFigure'
 import SourceCanvas from './spectrumEditor/SourceCanvas'
 import ImageOpacityControl from './spectrumEditor/ImageOpacityControl'
 import ZeroFrequencyCheck from './spectrumEditor/ZeroFrequencyCheck'
+import AlphaIntegralHelp from './spectrumEditor/AlphaIntegralHelp'
 import { displayDocument, combinedZeroCheck } from './spectrumEditor/adapter'
 import './spectrumEditor/styles.css'
 import SpectrumViewSwitch from './SpectrumViewSwitch'
@@ -50,7 +51,7 @@ export function SpectrumMetrics({ item, curves, history, onContinue }: { item: I
   const alpha = curves.find(c => c.kind === 'alpha2f')
   const zeroCovered = curves.length > 0 && curves.every(c => c.points[0]?.frequency_thz === 0 && c.points[0]?.observed_amplitude != null)
   const alphaCal = item.result.calibration?.curves?.find((c: { id: string }) => c.id === alpha?.id)
-  const amplitudeEvidence=alpha && (item.result.manual_documents?.[alpha.id]?.calibration.amplitudeEvidence || alphaCal?.amplitude_evidence)
+  const amplitudeEvidence=alpha && (item.result.manual_documents?.[alpha.id] ? item.result.manual_documents[alpha.id].calibration.amplitudeEvidence : alphaCal?.amplitude_evidence)
   const alphaReason = !alpha ? '当前没有 α²F 数据' : item.review[alpha.id]?.status === 'accepted_limited' ? '当前只采纳限定频段，不能用整次运行积分代替该频段结果' : !amplitudeEvidence ? 'α²F 独立幅值刻度依据尚待核对，旧 λ 刻度不能代用' : raw.status === 'unavailable' ? raw.reason : !zeroCovered ? '当前结果未覆盖真实零频边界，请核对后重新提取' : raw.positive_frequency_complete === false ? '存在缺口，无法计算完整积分' : ''
   const mode = q.dos_mode_integral || { status: 'unavailable', reason: '此版本没有原始绝对 DOS 模式数核验；请核对单位、原胞及完整投影' }
   const modeAvailable = mode.status === 'available' && !item.stale && !history
@@ -68,6 +69,7 @@ export function SpectrumMetrics({ item, curves, history, onContinue }: { item: I
     </TableBody></Table></Box>
     <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>{dos ? item.stale || history ? '材料条件已变化或正在查看历史，当前 3N 对比不可用。' : mode.reason || '绝对偏差 = |全部分波积分 − 3N|；相对偏差 = 绝对偏差 / |3N| × 100%。只核验原始绝对密度，不用归一化候选自证。' : alphaReason || (item.stale || history ? '材料条件已变化或正在查看历史，论文参考对比不可用。' : '绝对偏差 = |积分值 − 同条件论文报告值|。缺少同条件参考时显示“—”。')}</Typography>
     {!dos && !alphaReason && !item.stale && !history && ['lambda', 'omega_log'].map(key => comparisons[key]?.source && <Typography variant="caption" display="block" key={key}>参考来源：{typeof comparisons[key].source === 'string' ? comparisons[key].source : JSON.stringify(comparisons[key].source)}</Typography>)}
+    {!dos && alpha && alphaReason && <AlphaIntegralHelp unit={alpha.unit} evidence={amplitudeEvidence || undefined} manual={Boolean(item.result.manual_documents?.[alpha.id])}/>}
   </DetailSection>
 }
 

@@ -2,7 +2,7 @@ import { createInfluenceKernel, DRAG_INFLUENCE } from './dragInfluence'
 
 // 源像素是编辑事实；标定只负责换算，不重写原图或初始提取。
 export type Axis = { pixels: [number, number]; values: [number, number]; unit: string }
-export type Point = { id: string; x: number; y: number; segment: string; status: string; manual?: boolean; breakBefore?: boolean }
+export type Point = { id: string; x: number; y: number; segment: string; status: string; manual?: boolean; breakBefore?: boolean; connectTo?: string }
 export type Curve = { id: string; name: string; color: string; points: Point[]; pathOrdered?: boolean }
 export type Rect = [number, number, number, number]
 export type Document = {
@@ -36,7 +36,7 @@ export function ordered(doc: Document, points: Point[]) {
   return sorted
 }
 /** 连线只检查频率相邻边；删除断口优先于人工点自动连接。 */
-export const connected = (left: Point, right: Point) => right.breakBefore !== undefined ? !right.breakBefore
+export const connected = (left: Point, right: Point) => right.connectTo !== undefined ? right.connectTo === left.id : right.breakBefore !== undefined ? !right.breakBefore
   : left.segment === right.segment || left.manual === true || right.manual === true
 export const tracePoints = (doc: Document, curve: Curve) => curve.pathOrdered ? curve.points : ordered(doc, curve.points)
 function freezeTrace(doc: Document, curve: Curve): Point[] {
@@ -84,10 +84,22 @@ export function prepareMove(doc: Document, curveId: string, pointId: string, lin
   if (index < 0) return null
   const weights = points.map(() => 0), byId = new Map<string, number>([[pointId, 1]])
   weights[index] = 1
-  if (linked) for (const step of [-1, 1]) for (let d = 1; d < kernel.length; d++) {
-    const i = index + step * d, previous = i - step
-    if (i < 0 || i >= points.length || !connected(points[Math.min(i, previous)], points[Math.max(i, previous)])) break
-    weights[i] = kernel[d]; byId.set(points[i].id, kernel[d])
+  if (linked) {
+    const indexById=new Map(points.map((p,i)=>[p.id,i])), neighbors=points.map(()=>[] as number[])
+    points.forEach((p,i)=>{
+      const parent=p.connectTo ? indexById.get(p.connectTo) : i>0&&connected(points[i-1],p)?i-1:undefined
+      if(parent!==undefined){neighbors[i].push(parent);neighbors[parent].push(i)}
+    })
+    // 沿明确描线前进，遇分叉停止扩散，避免带动未选择的分支。
+    if(neighbors[index].length<=2) for(const start of neighbors[index]) {
+      let previous=index,at=start
+      for(let d=1;d<kernel.length;d++) {
+        weights[at]=kernel[d];byId.set(points[at].id,kernel[d])
+        if(neighbors[at].length!==2)break
+        const next=neighbors[at].find(i=>i!==previous)!
+        previous=at;at=next
+      }
+    }
   }
   return { doc, curveId, points, weights, byId }
 }
@@ -119,7 +131,10 @@ export function removePoints(doc: Document, curveId: string, ids: string[]): Doc
   let interrupted = true
   for (const p of original) {
     if (selected.has(p.id)) { interrupted = true; continue }
-    points.push({ ...p, breakBefore: interrupted || p.breakBefore === true }); interrupted = false
+    if(p.connectTo && selected.has(p.connectTo)) {
+      const {connectTo,...rest}=p;points.push({...rest,breakBefore:true})
+    } else points.push({ ...p, breakBefore: interrupted || p.breakBefore === true })
+    interrupted = false
   }
   return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points, pathOrdered: true } : c), zero: doc.zero ? { ...doc.zero, pointIds: doc.zero.pointIds.filter(id => !selected.has(id)) } : null }, 'delete', `删除 ${ids.length} 个选中点，保留缺口`)
 }
@@ -154,7 +169,7 @@ export function reconnectManualPoints(doc: Document, curveId: string): Document 
   // 固定两遍 O(n)；原图像素、原有点的相对顺序以及所有断口均保留。
   for (let pass = 0; pass < 2; pass++) for (let i = 0; i + 1 < points.length; i++) {
     const before = points[i - 1], left = points[i], right = points[i + 1], after = points[i + 2]
-    if (!(left.manual || right.manual) || !connected(left, right)) continue
+    if (before?.connectTo || left.connectTo || right.connectTo || after?.connectTo || !(left.manual || right.manual) || !connected(left, right)) continue
     if (Math.abs(frequencyPixel(doc, left) - frequencyPixel(doc, right)) > .5) continue
     const previous = before && connected(before, left) ? before : undefined
     const next = after && connected(right, after) ? after : undefined
@@ -196,6 +211,16 @@ export function addPoint(doc: Document, curveId: string, x: number, y: number, z
   } else result = insertOnTrace(points, p)
   return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points: result, pathOrdered: true } : c), zero: zero && doc.zero ? { ...doc.zero, pointIds: [...new Set([...doc.zero.pointIds, p.id])] } : doc.zero }, zero ? 'zero-point' : 'add', `${curve.name}：在源像素 (${x.toFixed(2)}, ${y.toFixed(2)}) 选点`)
 }
+/** 普通连续描线只连接明确的前驱，旧点和旧连线不变。 */
+export function appendPoint(doc: Document, curveId: string, anchorId: string, x: number, y: number): Document {
+  const curve=doc.curves.find(c=>c.id===curveId),anchor=curve?.points.find(p=>p.id===anchorId)
+  if(!curve || !anchor)throw new Error('请先选中当前曲线的一个已有点，再增加点。')
+  ;[x,y]=clickInPlot(doc,x,y)
+  if(curve.points.some(p=>Math.hypot(p.x-x,p.y-y)<1e-8))throw new Error('该位置已有点，请换一个位置；不会自动连接其他点。')
+  const point:Point={id:uid(),x,y,segment:uid(),status:'人工连续描线',manual:true,breakBefore:true,connectTo:anchor.id}
+  const points=[...freezeTrace(doc,curve),point]
+  return record({...doc,curves:doc.curves.map(c=>c.id===curveId?{...c,points,pathOrdered:true}:c)},'add-chain','从点 '+anchor.id+' 连接到新点 '+point.id)
+}
 export function markZero(doc: Document, x: number, y: number): Document {
   ;[x,y] = clickInPlot(doc,x,y)
   const pixel = doc.calibration.direction === 'x' ? x : y
@@ -207,7 +232,9 @@ export function zeroCovered(doc: Document, curveId: string) {
 }
 export function curvePath(doc: Document, curve: Curve) {
   let previous: Point | undefined
+  const byId=new Map(curve.points.map(p=>[p.id,p]))
   return tracePoints(doc, curve).map(p => {
+    if(p.connectTo){const parent=byId.get(p.connectTo);previous=p;return parent?'M'+parent.x+','+parent.y+' L'+p.x+','+p.y:'M'+p.x+','+p.y}
     const command = previous && connected(previous, p) ? 'L' : 'M'; previous = p
     return `${command}${p.x},${p.y}`
   }).join(' ')
@@ -225,10 +252,12 @@ export function validateDocument(value: unknown, initial: Document): asserts val
       if (c.pathOrdered !== undefined && typeof c.pathOrdered !== 'boolean') throw Error()
       if (!source || curveIds.has(c.id) || c.name !== source.name || c.color !== source.color) throw Error()
       curveIds.add(c.id)
+      const earlier=new Set<string>()
       for (const p of c.points) {
         if (!p.id || ids.has(p.id) || !p.segment || typeof p.status !== 'string' || ![p.x, p.y].every(Number.isFinite) || p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) throw Error()
         if (p.manual !== undefined && typeof p.manual !== 'boolean' || p.breakBefore !== undefined && typeof p.breakBefore !== 'boolean') throw Error()
-        ids.add(p.id)
+        if(p.connectTo !== undefined && (typeof p.connectTo !== 'string' || !earlier.has(p.connectTo)))throw Error()
+        ids.add(p.id);earlier.add(p.id)
       }
       const sorted = ordered(d, c.points)
       if (!c.pathOrdered && sorted.some((p, i) => i > 0 && frequency(d, p) - frequency(d, sorted[i - 1]) < 1e-9)) throw Error()

@@ -11,7 +11,7 @@ async function main(){
  await context.route('**/api/**',async route=>{const req=route.request(),url=new URL(req.url());if(req.method()!=='GET')report.writes.push({method:req.method(),path:url.pathname});const response=await route.fetch({url:backend+url.pathname+url.search});await route.fulfill({response})});
  const page=await context.newPage();page.on('pageerror',e=>report.errors.push(e.message));page.setDefaultTimeout(15000);
  const check=name=>{report.checks.push(name);console.log('PASS',name)};
- const shot=async name=>{await page.screenshot({path:path.join(out,'production-'+name+'.png'),fullPage:!(await page.locator('.editor-app').count())});report.screenshots.push('production-'+name+'.png')};
+ const shot=async name=>{await page.screenshot({path:path.join(out,'chain-production-'+name+'.png'),fullPage:!(await page.locator('.editor-app').count())});report.screenshots.push('chain-production-'+name+'.png')};
  const btn=name=>page.getByRole('button',{name,exact:true});
  const api=async(p,body)=>{const r=await fetch(backend+p,body?{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)}:undefined);const data=await r.json();return {status:r.status,data}};
  const target={target:'upload',target_id:'manual-test'},query=new URLSearchParams(target).toString();
@@ -22,11 +22,22 @@ async function main(){
   await page.goto(address(alpha));await btn('编辑').waitFor({state:'visible'});await page.waitForFunction(()=>!Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='编辑')?.disabled);await page.getByRole('slider',{name:'原图不透明度'}).focus();await page.getByRole('slider',{name:'原图不透明度'}).press('Home');await page.getByRole('slider',{name:'原图不透明度'}).press('ArrowUp');await shot('detail-before');
   await btn('编辑').click();await page.getByRole('application',{name:'谱线人工编辑画布'}).waitFor();assert.equal(await page.locator('.editor-app input[aria-label="原图不透明度"]').inputValue(),'1');await page.locator('.editor-app input[aria-label="原图不透明度"]').focus();await page.locator('.editor-app input[aria-label="原图不透明度"]').press('End');await shot('editor');
   assert.equal(await page.locator('.spectrum-manual-editor.editor-app').count(),1);
+  const editor=page.locator('.editor-app'),canvas=editor.getByRole('application');
+  const currentPoints=()=>editor.locator('[data-point]').evaluateAll(nodes=>Object.fromEntries(nodes.map(n=>[n.dataset.point,{x:Number(n.dataset.x),y:Number(n.dataset.y)}])));
+  const clickPixel=async(x,y,double=false)=>{const p=await canvas.evaluate((el,v)=>{const p=new DOMPoint(v.x,v.y).matrixTransform(el.getScreenCTM());return {x:p.x,y:p.y}},{x,y});if(double)await page.mouse.dblclick(p.x,p.y);else await page.mouse.click(p.x,p.y)};
+  const beforeChain=await currentPoints(),beforePath=await editor.locator('[data-curve="a"]').getAttribute('d');
+  await btn('＋ 增加点').click();await page.getByRole('alert').filter({hasText:'请先选中'}).waitFor();assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length);check('没有起点时不能增加点，提示先选已有点');
+  await page.locator('[data-row="a:p50"]').click();await btn('＋ 增加点').click();await clickPixel(65,40);let added=Object.keys(await currentPoints()).filter(id=>!beforeChain[id]);assert.equal(added.length,1);const firstId=added[0];
+  await clickPixel(72,38);await clickPixel(75,35,true);added=Object.keys(await currentPoints()).filter(id=>!beforeChain[id]);assert.equal(added.length,3);assert.equal(await editor.locator('.tool-add').count(),0);
+  const trace=await editor.locator('[data-curve="a"]').getAttribute('d');assert(trace.startsWith(beforePath));const drawn=await currentPoints();for(let i=1;i<added.length;i++){const parent=drawn[added[i-1]],child=drawn[added[i]];assert(trace.includes('M'+parent.x+','+parent.y+' L'+child.x+','+child.y))}
+  await clickPixel(82,33);assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length+3);assert.equal(report.writes.length,0);check('连续加点只连前驱，双击仅加入一个末点并退出，不自动提交或继续加点');
+  await btn('↶ 撤销').click();assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length+2);await btn('↷ 重做').click();assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length+3);await shot('chain-ended');check('连续描线可逐点撤销重做，原路径保留');
+
   await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.08');await btn('应用坐标到此点').click();
   if(await btn('确认蓝色零频线与原图一致').isEnabled())await btn('确认蓝色零频线与原图一致').click();await page.locator('[data-row="a:p0"]').click();await btn('确认选中点为零频点').click();await btn('保存调整').click();
   await page.waitForFunction(()=>!document.querySelector('.editor-app'));await page.getByTestId('saved-zero-check').waitFor();assert.equal(await page.getByTestId('saved-zero-check').getAttribute('data-complete'),'true');
   const after=await listing(),saved=after.items.find(i=>i.id===alpha.id);assert.notEqual(saved.run.id,alpha.run.id);assert.equal(saved.version,alpha.version+1);assert.equal(saved.result.curves[0].points[50].reconstructed_amplitude,.08);assert.deepEqual(saved.review,{});assert(page.url().includes(saved.run.id));assert.equal(await page.getByRole('slider',{name:'原图不透明度'}).inputValue(),'100');
-  assert.equal(saved.result.quality.integrals.raw.status,'unavailable');check('正式详情读取真实接口文档，人工坐标保存到数据库新运行，回跳新版本并显示零频检查');await shot('saved-detail');
+  assert.equal(saved.result.manual_documents.a.curves[0].points.find(p=>p.id===firstId).connectTo,'a:p50');assert.equal(saved.result.curves[0].points.at(-1).connectTo,added[1]);check('保存入库及回读保留父点ID，不按最近距离改接');assert.equal(saved.result.quality.integrals.raw.status,'unavailable');check('正式详情读取真实接口文档，人工坐标保存到数据库新运行，回跳新版本并显示零频检查');assert(await page.getByTestId('manual-integral-boundary').isVisible());await page.getByText('α²F 幅值怎么核对？查看操作步骤',{exact:true}).click();assert(await page.getByText(/若论文没有提供独立刻度/).isVisible());check('积分说明区分零频、幅值依据和人工谱尚未重算，不承诺填说明即出积分');await shot('saved-detail');
   await page.reload();await btn('编辑').waitFor();await page.getByTestId('saved-zero-check').waitFor();assert.equal(await page.getByTestId('saved-zero-check').getAttribute('data-complete'),'true');
   const history=(await api('/api/rag/spectra/'+alpha.id+'/runs/'+alpha.run.id+'?'+query)).data;assert.deepEqual(history.result.curves,JSON.parse(old).curves);assert.deepEqual(history.result.calibration,JSON.parse(old).calibration);check('刷新从持久数据库恢复人工结果，原始运行数值未被覆盖');
   await btn('查看提取历史').click();await page.getByRole('button',{name:/合成|时间未记录/}).count(); // 历史载入仍走正式接口。
@@ -43,6 +54,6 @@ async function main(){
   assert.equal(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('scwiki-spectrum-manual')).length),0);assert.deepEqual(report.errors,[]);assert(report.writes.every(w=>w.path.endsWith('/manual')));check('正式保存不访问Demo草稿、不重提取，所有写入仅到隔离manual路由');
   report.status='passed';report.database='isolated SQLite file; production SQLAlchemy models and HTTP routes';
  }catch(error){report.status='failed';report.failure=error.stack;await shot('failure');throw error}
- finally{fs.writeFileSync(path.join(out,'production-browser-validation.json'),JSON.stringify(report,null,2)+'\n');await browser.close()}
+ finally{fs.writeFileSync(path.join(out,'chain-production-browser-validation.json'),JSON.stringify(report,null,2)+'\n');await browser.close()}
 }
 main().catch(e=>{console.error(e);process.exit(1)});

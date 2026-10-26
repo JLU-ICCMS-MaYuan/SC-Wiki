@@ -157,7 +157,7 @@ def csv_export(item):
               "normalized_dos_candidate", "normalized_dos_unit", "zero_baseline_candidate", "joint_candidate",
               "joint_cumulative_lambda", "boundary_mask", "review_status", "review_reason", "pdf_page", "source_sha256",
               "rejected_chromatic_pixels", "candidate_components", "reconstruction_blocked",
-              "point_id", "frequency_pixel", "amplitude_pixel", "manual", "segment", "break_before",
+              "point_id", "frequency_pixel", "amplitude_pixel", "manual", "segment", "break_before", "connect_to",
               "revision_author_id", "base_run_id"]
     writer = csv.DictWriter(output, fieldnames=fields); writer.writeheader()
     payload = item["result"]
@@ -186,7 +186,7 @@ def csv_export(item):
                 review_reason=decision.get("reason"), pdf_page=item["source"]["pdf_page"],
                 source_sha256=item["source"]["source_sha256"],point_id=p.get("id"),
                 frequency_pixel=p.get("frequency_pixel"),amplitude_pixel=p.get("amplitude_pixel"),
-                manual=p.get("manual",False),segment=p.get("segment"),break_before=p.get("breakBefore"),
+                manual=p.get("manual",False),segment=p.get("segment"),break_before=p.get("breakBefore"),connect_to=p.get("connectTo"),
                 revision_author_id=(payload.get("manual_provenance") or {}).get("author_id"),
                 base_run_id=(payload.get("manual_provenance") or {}).get("base_run_id")))
     return output.getvalue()

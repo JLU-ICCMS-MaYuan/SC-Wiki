@@ -25,7 +25,7 @@ export function displayDocument(item: PropertySpectrumItem, curves: PropertySpec
       if(fp==null||ap==null||!Number.isFinite(fp)||!Number.isFinite(ap)){broken=true;return []}
       if(broken)segment++
       const point={id:p.id||c.id+':p'+i,x:c.frequency_direction==='y'?ap:fp,y:c.frequency_direction==='y'?fp:ap,
-        segment:p.segment||String(segment),breakBefore:p.breakBefore??broken,status:p.status,manual:p.manual}
+        segment:p.segment||String(segment),breakBefore:p.breakBefore??broken,status:p.status,manual:p.manual,connectTo:p.connectTo}
       broken=false;return [point]
     })
   }
