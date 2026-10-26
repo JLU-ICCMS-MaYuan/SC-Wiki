@@ -11,8 +11,7 @@
       "input": "CIF / POSCAR / CONTCAR",
       "mode": "structure",
       "datasets": [
-        "bete-data",
-        "bete-support"
+        "bete-bundle"
       ],
       "paper": "https://www.nature.com/articles/s41524-024-01475-4",
       "code": "https://github.com/henniggroup/BETE-NET",
@@ -31,12 +30,11 @@
       "group": "ambient",
       "year": "2019",
       "tagline": "用电子–声子参数估算 Tc",
-      "description": "执行论文式 (4) 的学习公式。29 条原始训练输入与完整发布数据分别提供。",
+      "description": "执行论文式 (4) 的学习公式，提供作者实际使用的 29 条训练数据。",
       "input": "λ、ωlog、μ*",
       "mode": "parameters",
       "datasets": [
-        "sisso-train",
-        "sisso-published"
+        "sisso-train"
       ],
       "paper": "https://arxiv.org/abs/1905.06780",
       "code": "https://github.com/henniggroup/symbolic-regression-utilities",
@@ -129,8 +127,8 @@
     {
       "id": "sisso-train",
       "filename": "sisso-2019-train.dat",
-      "name": "作者原始训练输入",
-      "description": "原始 train.dat：29 个低 Tc 材料的 Tc、ωlog、λ、μ*；下载保持作者原字节。",
+      "name": "训练数据",
+      "description": "模型学习时使用的 29 条材料记录，包括 Tc、ωlog、λ 和 μ*。",
       "license": "Apache-2.0",
       "version": "11cf1f31888afe3a29140557dc7b3871102b8204",
       "source_url": "https://github.com/henniggroup/symbolic-regression-utilities/blob/11cf1f31888afe3a29140557dc7b3871102b8204/datasets/AllenDynes/train.dat",
@@ -157,8 +155,8 @@
     {
       "id": "xie-2022",
       "filename": "xie-2022-data_tables.zip",
-      "name": "作者训练描述符与 Tc 数据",
-      "description": "Materials Cloud 原始归档。元信息与许可可核查，但文件存储服务本次返回 503；暂未取得可供本地下载的原文件。",
+      "name": "训练数据",
+      "description": "作者发布的训练和验证数据。原始网站目前无法提供文件下载，恢复后可补齐。",
       "license": "Apache-2.0",
       "version": "Materials Cloud 2021.150 v1",
       "source_url": "https://archive.materialscloud.org/records/skdzy-kyx54",
@@ -182,6 +180,21 @@
       "kind": "训练输入",
       "size": 27719,
       "sha256": "bfff86078154a6431fc84702960c22a2bce02fe1d2ea633952ddc23354a8880f"
+    },
+    {
+      "id": "bete-bundle",
+      "filename": "bete-net-dataset.zip",
+      "name": "数据集",
+      "description": "包含作者公开的材料性质、晶体结构，以及训练和测试样本名单，已整理为一个下载包。原文件保持不变。",
+      "license": "Apache-2.0",
+      "version": "56bc783908a60e8a15e31b60018e6f3c3e48f593",
+      "source_url": "https://github.com/henniggroup/BETE-NET",
+      "original_url": "https://github.com/henniggroup/BETE-NET",
+      "rows": 806,
+      "kind": "本站整理下载包",
+      "size": 28981706,
+      "sha256": "e6c21e6bf90ce2f6a5030bbfb3fe965d41aa07e6406c80b9bd888bd2ac2af730",
+      "download_label": "下载数据集"
     }
   ]
 }

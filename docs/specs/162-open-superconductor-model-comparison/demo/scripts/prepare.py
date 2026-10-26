@@ -47,6 +47,43 @@ def blob(repo, entry, path):
         save(path, data, entry["sha"])
 
 
+def build_bete_dataset():
+    """把同一公开版本的数据、结构和样本名单合为一份下载，原文件字节不变。"""
+    tree = json.loads((CACHE / "bete-tree.json").read_text())
+    entries = {e["path"]: e for e in tree["tree"] if e["type"] == "blob"}
+    paths = [p for p in entries if p.startswith(("structures/", "indices/")) or p in ("database.json", "LICENSE")]
+    output = CACHE / "datasets/bete-net-dataset.zip"
+    temporary = output.with_suffix(".zip.part")
+    manifest = []
+    with zipfile.ZipFile(temporary, "w", zipfile.ZIP_DEFLATED) as archive:
+        for name in sorted(paths):
+            source = CACHE / "datasets/bete-net-database.json" if name == "database.json" else CACHE / "bete" / name
+            if not valid(source, entries[name]["sha"]):
+                raise ValueError(f"数据包内原文件校验失败：{name}")
+            data = source.read_bytes()
+            info = zipfile.ZipInfo(name, (2026, 10, 26, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, data)
+            manifest.append({"path": name, "git_blob": entries[name]["sha"], "sha256": hashlib.sha256(data).hexdigest()})
+        readme = (
+            "BETE-NET 作者公开数据集（SC-Wiki 整理下载包）\n\n"
+            "database.json：材料的谱和性质数据。\n"
+            "structures/：对应晶体结构，记录原子如何排列。\n"
+            "indices/：作者的训练、验证和测试样本名单。\n"
+            "LICENSE：作者发布的使用许可。SOURCE.json：固定版本、来源及原文件摘要。\n\n"
+            "这些文件是同一套公开资料的组成部分，不是不同模型的数据集。原文件字节未改写，只有外层打包由本站完成。\n"
+            "当前公开数据库含 806 条记录；论文和其他发布制品的样本数量存在差异。这个包收齐当前公开版本的上述文件，"
+            "不代表补齐了作者未公开或不同版本的全部原始计算文件，也不证明论文指标已经完全复现。\n"
+            f"原始网站：https://github.com/{REPO}\n固定版本：{REVISION}\n"
+        )
+        for name, data in [("README_SC_WIKI.txt", readme), ("SOURCE.json", json.dumps({"repository": REPO, "revision": REVISION, "packaged_by": "SC-Wiki Demo", "files": manifest}, ensure_ascii=False, indent=2))]:
+            info = zipfile.ZipInfo(name, (2026, 10, 26, 0, 0, 0))
+            info.compress_type = zipfile.ZIP_DEFLATED
+            archive.writestr(info, data.encode())
+    temporary.replace(output)
+    return output
+
+
 def main():
     CACHE.mkdir(parents=True, exist_ok=True)
     tree = json.loads(gh(f"repos/{REPO}/git/trees/{REVISION}?recursive=1"))
@@ -84,6 +121,7 @@ def main():
                 z.writestr(info, (CACHE / "bete" / e["path"]).read_bytes())
         info = zipfile.ZipInfo("SOURCE.json", (2026, 10, 26, 0, 0, 0))
         z.writestr(info, json.dumps({"repository": REPO, "revision": REVISION, "packaged_by": "SC-Wiki Demo", "files": [{"path": e["path"], "git_blob": e["sha"]} for e in texts if e["path"].startswith(("structures/", "indices/")) or e["path"] == "LICENSE"]}, indent=2))
+    build_bete_dataset()
     weights = [entries[f"CSO/model_cso_{i}.pt"] for i in range(100)]
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as pool:
         for i, _ in enumerate(pool.map(lambda e: blob(REPO, e, CACHE / "bete" / e["path"]), weights), 1):

@@ -101,16 +101,6 @@ main{width:calc(100% - 216px);margin-left:216px;padding:0 24px;max-width:1700px}
 .download{flex:1;background:var(--sc-primary-soft);color:var(--sc-primary);border-color:var(--sc-divider)}
 .download:hover{background:var(--sc-primary-soft)}
 .source-link{display:block;color:var(--sc-primary);font-size:12px;margin-top:12px}
-.original-url{padding:11px 0 0;margin-top:13px;border-top:1px solid var(--sc-divider)}
-.original-url>div{display:flex;justify-content:space-between;margin-bottom:5px;color:var(--sc-muted);font-size:12px}
-.original-url b{font-weight:500}
-.original-url button{border:0;background:none;padding:0;color:var(--sc-primary);font-size:12px}
-.original-url>a{display:block;font:12px/1.8 ui-monospace,SFMono-Regular,monospace;color:var(--sc-muted);overflow-wrap:anywhere}
-.original-url>a:hover{color:var(--sc-primary)}
-.dataset details{margin-top:13px;font-size:12px;color:var(--sc-muted)}
-.dataset summary{cursor:pointer}
-.dataset details p{margin-top:7px;overflow-wrap:anywhere;font-size:12px}
-.hash{font-family:monospace;font-size:12px!important}
 .parameter-caption{font-size:12px;color:var(--sc-muted);display:flex;gap:10px;justify-content:space-between;align-items:center;flex-wrap:wrap;margin-bottom:19px}
 .text-button{background:none;border:0;color:var(--sc-primary);padding:0;font-size:12px}
 .parameter-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
@@ -212,8 +202,6 @@ main{width:100%;margin:0;padding:0 18px}
 .data-panel{margin-top:12px}
 .dataset{padding:20px}
 .dataset>p{font-size:12px}
-.original-url>a{font-size:12px}
-.original-url>div{font-size:12px}
 .model-heading p,.hint{font-size:12px}
 .parameter-grid{gap:15px}
 .parameter-grid input{padding:12px}
@@ -246,7 +234,6 @@ main{width:100%;margin:0;padding:0 18px}
 .model-sources{padding:24px 20px}
 .model-sources h3{font-size:16px;font-weight:600}
 .model-sources .model-links{margin-top:14px;font-size:13px;gap:20px}
-.source-license{margin-top:12px;color:var(--sc-muted);font-size:12px}
 .legacy-files{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .file-upload{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1px dashed var(--sc-divider);background:var(--sc-surface-muted);padding:26px 16px;border-radius:12px;cursor:pointer;text-align:center;overflow-wrap:anywhere;min-width:0}
 .file-upload:hover,.file-upload:focus-within{border-color:var(--sc-primary);background:var(--sc-primary-soft)}

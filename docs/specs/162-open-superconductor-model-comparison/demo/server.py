@@ -9,9 +9,11 @@ from starlette.concurrency import run_in_threadpool
 from inference import CACHE, predict
 
 HERE = Path(__file__).resolve().parent
-CATALOG = json.loads((HERE / "catalog.json").read_text())
-FILES = {item["id"]: item for item in CATALOG["datasets"]}
 app = FastAPI(title="SC-Wiki 模型 Demo", docs_url=None, redoc_url=None, openapi_url=None)
+
+
+def source_catalog():
+    return json.loads((HERE / "catalog.json").read_text())
 
 
 def file_status(item):
@@ -36,7 +38,7 @@ def file_status(item):
 
 
 def checked_file(identifier):
-    item = FILES.get(identifier)
+    item = next((item for item in source_catalog()["datasets"] if item["id"] == identifier), None)
     if not item:
         raise HTTPException(404, "没有这个数据文件")
     error = file_status(item)
@@ -52,15 +54,16 @@ def health():
 
 @app.get("/demo-api/catalog")
 def catalog():
+    current = source_catalog()
     datasets = []
-    for item in CATALOG["datasets"]:
+    for item in current["datasets"]:
         error = file_status(item)
         view = {**item, "available": error is None, "error": error, "download_url": f"/demo-api/datasets/{item['id']}" if error is None else None}
         if not error and not item.get("sha256"):
             with (CACHE / "datasets" / item["filename"]).open("rb") as stream:
                 view["sha256"] = hashlib.file_digest(stream, "sha256").hexdigest()
         datasets.append(view)
-    return {"models": CATALOG["models"], "datasets": datasets}
+    return {"models": current["models"], "datasets": datasets}
 
 
 @app.api_route("/demo-api/datasets/{identifier}", methods=["GET", "HEAD"])

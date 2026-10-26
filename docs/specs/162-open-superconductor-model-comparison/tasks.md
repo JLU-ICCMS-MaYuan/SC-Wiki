@@ -39,3 +39,6 @@ T001：固定 Git blob 校验、100 权重与原数据实际获取；T002：asse
 
 - [x] T012 在 demo/src/App.tsx、styles.css 中集中右侧来源、实现等高并移除预览，在 demo/server.py 退役废弃接口；浏览器检查全部模型卡片几何与下载，覆盖 FR-019 至 FR-021、SC-012／013。
 - [x] T013 核查 model-name-source.md 所列论文，更新 demo/catalog.json 的模型原称，通过 demo/vite.config.mjs 和 App.tsx 复用原接口，实现当前页上传与结果；真实 API 对照和窄屏验收覆盖 FR-022／SC-014。
+
+- [x] T014 在 demo/src/App.tsx 收敛“论文链接／原始网站”文字入口、移除裸网址与许可版本、合并同仓库重复入口；浏览器验证 FR-023／024、SC-015。
+- [x] T015 在 demo/scripts/prepare.py 和 catalog.json 生成并展示一份 BETE 数据整包；assets/demo-bundle-validation.json 验证 1212 个作者原文件、806 个结构及来源说明，真实浏览器下载验证 FR-025／SC-016。

@@ -13,3 +13,5 @@
 下载返回真实 `Content-Length`、`Content-Disposition: attachment`，传输原字节。用户不能传入文件路径或 URL 让服务任意读取／下载。运行时不自动从互联网拉取模型；准备阶段显式获取、核查、缓存。
 
 预测只用于当前页面，没有业务数据库或服务器持久化结果；页面刷新可重新输入。Tc assessment model 在本页通过 `POST /api/tc-predict/` 调用原 API，由 Vite 转发到本机 8080。multipart 字段与原接口完全一致：单个 contcar、多个 pdos_files；直接显示 predicted_tc、f2_value、dos_h_ratio、dos_h_atom_bond、bonds_mean、bonds_var。没有跳转入口，也没有复制模型算法。
+
+用户可见链接只用“论文链接／原始网站”等短文案；同一作者仓库的代码和数据不提供重复入口。接口仍返回来源、许可、版本和摘要用于机器核验，不在卡片中展示技术元信息。bete-bundle 是本站整理的当前公开数据 ZIP，包含原始性质文件、结构、划分、许可证和来源清单；原来 bete-data／bete-support 的下载接口保留兼容，页面不再列出。

@@ -1,0 +1,16 @@
+{
+  "status": "passed",
+  "files": 1212,
+  "structures": 806,
+  "sha256": "e6c21e6bf90ce2f6a5030bbfb3fe965d41aa07e6406c80b9bd888bd2ac2af730",
+  "size": 28981706,
+  "revision": "56bc783908a60e8a15e31b60018e6f3c3e48f593",
+  "checks": [
+    "ZIP CRC 完整",
+    "包内原文件逐一匹配作者 Git blob 与 SHA-256",
+    "806 个 CIF 和训练测试名单齐全",
+    "包含原许可证与本站来源说明",
+    "不包含模型权重",
+    "范围是当前公开版本，不宣称补齐未发布文件"
+  ]
+}

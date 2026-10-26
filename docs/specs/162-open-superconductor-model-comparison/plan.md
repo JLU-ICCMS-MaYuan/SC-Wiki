@@ -60,3 +60,9 @@
 按用户最新四项要求，右侧改为一个与模型卡片等高的来源卡，内部容纳论文、代码、引用说明和多个数据文件分区；取消外置标题和预览。原模型采用经论文第六页核查的 Tc assessment model 名称。Demo 的 Vite 将 /api/tc-predict 原样代理到现有本机 Go 8080，再由既有链路交给 Python；浏览器使用原 multipart 字段 contcar／pdos_files，避免复制公式或产生两套算法。
 
 结果适配器保留 predicted_tc 和五项解释特征；使用合成结构与 PDOS 做真实接口一致性验证，不用该夹具证明科学准确度。全部交互留在当前页；参考截图及作者命名核查分别保存为用户证据和科学来源记录。
+
+## 简化数据说明和整包下载
+
+来源入口按作者仓库去重：同一个 GitHub 仓库的代码与数据共用“原始网站”，不同存储网站分别显示。页面只显示“论文链接”等文字，不渲染 URL、版本、许可详情或摘要；后台目录和下载文件的校验保留。
+
+prepare.py 的 build_bete_dataset 收集固定版本的 database.json、structures、indices 和 LICENSE，逐文件验证原 Git blob 后生成确定性 ZIP，附本站 README 和 SOURCE 清单。模型目录只引用 bete-bundle；原来两个文件的接口暂保留供既有链接兼容，但不再出现在页面。SISSO 2019 只展示实际训练输入。server.py 每次请求读取小型元信息目录，使原生开发中的新下载包配置及时生效。

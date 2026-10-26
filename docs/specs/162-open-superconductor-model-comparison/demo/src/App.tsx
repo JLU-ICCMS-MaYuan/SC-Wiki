@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-type Dataset = { id: string; filename: string; name: string; description: string; license: string; version: string; source_url: string; original_url: string; rows: number | null; kind: string; size: number; sha256: string | null; available: boolean; error: string | null; download_url: string | null }
+type Dataset = { id: string; filename: string; name: string; description: string; license: string; version: string; source_url: string; original_url: string; rows: number | null; kind: string; size: number; sha256: string | null; available: boolean; error: string | null; download_url: string | null; download_label?: string }
 type Model = { id: string; name: string; family: string; group: string; year: string; tagline: string; description: string; input: string; mode: string; datasets: string[]; paper: string | null; code: string | null; code_label?: string; license: string; boundary: string }
 type Result = { model_id: string; tc: number | null; parameters: Record<string, number>; method: string; warning: string; elapsed_seconds: number; ensemble_size?: number; formula?: string; spectrum?: { frequency: number[]; a2f: number[]; unit: string }; label: string; run: number }
 
@@ -13,6 +13,13 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   return data
 }
 const size = (n: number) => n > 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${(n / 1024).toFixed(1)} KB`
+// 同一个作者仓库的代码与数据共用入口，避免重复网址。
+function sameWebsite(a: string | null, b: string) {
+  if (!a) return false
+  const first = new URL(a), second = new URL(b)
+  const location = (url: URL) => url.hostname + (url.hostname === 'github.com' ? url.pathname.split('/').slice(0, 3).join('/') : url.pathname.replace(/\/$/, ''))
+  return location(first) === location(second)
+}
 const value = (n: number) => n.toLocaleString('zh-CN', { maximumFractionDigits: 4 })
 
 function Atom({ small = false }: { small?: boolean }) {
@@ -43,6 +50,7 @@ export default function App() {
   const [notice, setNotice] = useState('')
   const resultSection = useRef<HTMLElement>(null)
   const model = catalog?.models.find(m => m.id === selected)
+  const sharedWebsite = !!model?.code && !!model.datasets.length && model.datasets.every(id => sameWebsite(model.code, catalog!.datasets.find(d => d.id === id)!.source_url))
 
   const load = () => { setError(''); api<{ models: Model[]; datasets: Dataset[] }>('/demo-api/catalog').then(setCatalog).catch(e => setError(`目录加载失败：${e.message}`)) }
   useEffect(load, [])
@@ -83,7 +91,6 @@ export default function App() {
     } catch (e) { setError((e as Error).name === 'AbortError' ? '等待超过 180 秒；服务器可能仍在计算，请稍后重试。' : (e as Error).message) }
     finally { clearTimeout(timer); setRunning(null) }
   }
-  async function copy(text: string) { try { await navigator.clipboard.writeText(text); setNotice('原始网址已复制') } catch { setNotice('复制失败，可选中下方网址手动复制') } }
   function reuse(result: Result) {
     const p = result.parameters
     setParameters({ lambda: String(p.lambda), omega_log: String(p.omega_log), omega_2: String(p.omega_2 || p.omega_log), mu_star: String(p.mu_star) })
@@ -119,8 +126,13 @@ export default function App() {
             </div>
           </div>
           <aside className="data-panel">
-            <section className="model-sources"><h3>模型来源</h3><div className="model-links">{model.paper && <a href={model.paper} target="_blank" rel="noreferrer">原始论文 ↗</a>}{model.code && <a href={model.code} target="_blank" rel="noreferrer">{model.code_label || '模型代码'} ↗</a>}</div><p className="source-license">{model.license}</p></section>
-            {model.datasets.map(id => catalog.datasets.find(d => d.id === id)!).map(file => <article className="dataset" key={file.id} data-dataset={file.id}><div className="dataset-top"><span className="file-icon">{file.kind.includes('打包') ? 'ZIP' : file.id === 'bete-data' ? 'JSON' : file.id === 'sisso-train' ? 'DAT' : file.id === 'xie-2022' ? 'ZIP' : 'CSV'}</span><span className={file.available ? 'status ready' : 'status unavailable'}>{file.available ? '原文件已校验' : '上游暂不可用'}</span></div><h4>{file.name}</h4><div className="data-facts"><span>{file.rows ? `${file.rows} 条` : '作者发布归档'}</span><span>{size(file.size)}</span><span>{file.kind}</span></div><p>{file.description}</p><div className="data-actions">{file.download_url ? <a className="download" href={file.download_url} download>{file.id === 'bete-support' ? '↓ 下载辅助包' : '↓ 下载原文件'}</a> : <button disabled className="download">暂不可下载</button>}</div><a className="source-link" href={file.source_url} target="_blank" rel="noreferrer">查看原始发布页 ↗</a><div className="original-url"><div><b>原始网址</b><button onClick={() => copy(file.original_url)} aria-label={`复制${file.name}原始网址`}>复制</button></div><a href={file.original_url} target="_blank" rel="noreferrer">{file.original_url}</a></div><details><summary>许可与版本</summary><p>{file.license}<br/>版本：{file.version}</p>{file.sha256 && <p className="hash">SHA-256<br/>{file.sha256}</p>}</details></article>)}
+            <section className="model-sources"><h3>模型来源</h3><div className="model-links">{model.paper && <a href={model.paper} target="_blank" rel="noreferrer">论文链接</a>}{model.code && <a href={model.code} target="_blank" rel="noreferrer" title={sharedWebsite ? '作者代码和数据所在网站' : undefined}>{model.code_label || (sharedWebsite ? '原始网站' : '模型代码')}</a>}</div></section>
+            {model.datasets.map(id => catalog.datasets.find(d => d.id === id)!).map(file => <article className="dataset" key={file.id} data-dataset={file.id}>
+              <div className="dataset-top"><span className="file-icon">{file.filename.split('.').pop()?.toUpperCase()}</span><span className={file.available ? 'status ready' : 'status unavailable'}>{file.available ? '可下载' : '暂不可用'}</span></div>
+              <h4>{file.name}</h4><div className="data-facts"><span>{file.rows ? `${file.rows} 条` : '作者发布归档'}</span><span>{size(file.size)}</span></div><p>{file.description}</p>
+              <div className="data-actions">{file.download_url ? <a className="download" href={file.download_url} download>↓ {file.download_label || '下载原文件'}</a> : <button disabled className="download">暂不可下载</button>}</div>
+              {!sameWebsite(model.code, file.source_url) && <a className="source-link" href={file.source_url} target="_blank" rel="noreferrer">原始网站</a>}
+            </article>)}
             {!model.datasets.length && <div className="dataset unavailable-dataset"><h4>训练／校准数据待核实</h4><p>已核对论文模型名称和公式；原始训练文件及其下载授权仍待核实。请通过上方论文查看方法和数据说明。</p></div>}
           </aside>
         </section>}

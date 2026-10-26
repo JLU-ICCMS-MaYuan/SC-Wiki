@@ -4,11 +4,11 @@
     "论文／代码位于右卡，桌面左右卡片顶底和高度对齐",
     "可用的运行按钮使用主站主色",
     "Nb 结构真实运行作者 100 网络集成，返回 Tc 与 51 点谱",
-    "BETE 原始 JSON 与结构划分辅助包经浏览器下载，原字节摘要一致",
+    "BETE 只展示一个整包下载，浏览器实际下载摘要与准备包一致",
     "数据预览按钮及旧标题移除，废弃预览接口已退役",
-    "原始网址复制正确",
+    "论文链接／原始网站均为文字链接，同仓库入口去重，不展示裸网址、许可版本和校验码",
     "结构预测参数可带入 SISSO 实际计算，保留两个独立结果",
-    "29 条真实训练输入与 43 条发布数据分别下载、分别标注",
+    "SISSO 只展示作者实际使用的 29 条训练数据，不要求用户另选全集",
     "非法参数返回错误，已有结果不丢失、不产生伪结果",
     "高压参数模型真实计算；上游训练包失败明确显示且下载接口拒绝空文件",
     "论文原名显示，CONTCAR＋多个 PDOS 在当前页面真实运行，与原 API 逐字段一致且无跳转",
@@ -21,28 +21,16 @@
   "errors": [],
   "downloads": [
     {
-      "id": "bete-data",
-      "filename": "bete-net-database.json",
-      "bytes": 89104840,
-      "sha256": "8325db2edaaad8ed46908994866a97f752dcf07c3f58a1394f4209e37639b1b8"
-    },
-    {
-      "id": "bete-support",
-      "filename": "bete-structures-splits.zip",
-      "bytes": 1005819,
-      "sha256": "5d2371f6945bb38437c76997bb74328ebf2e5bf91efb8f5532b84a54cf55ae04"
+      "id": "bete-bundle",
+      "filename": "bete-net-dataset.zip",
+      "bytes": 28981706,
+      "sha256": "e6c21e6bf90ce2f6a5030bbfb3fe965d41aa07e6406c80b9bd888bd2ac2af730"
     },
     {
       "id": "sisso-train",
       "filename": "sisso-2019-train.dat",
       "bytes": 1846,
       "sha256": "28cf4500e570e62c110625766d6ebd45562f3fa471247497b14d0b76d342fe88"
-    },
-    {
-      "id": "sisso-published",
-      "filename": "sisso-2019-data.csv",
-      "bytes": 1192,
-      "sha256": "7ef3b796cf0e2f416e37de7c86cc9ad9107b73f665e0c28cf2937cff12b208b1"
     },
     {
       "id": "sisso-81",
@@ -180,7 +168,7 @@
         "omega_log": "K",
         "omega_2": "K"
       },
-      "elapsed_seconds": 1.051
+      "elapsed_seconds": 1.057
     },
     {
       "model_id": "sisso-2019",

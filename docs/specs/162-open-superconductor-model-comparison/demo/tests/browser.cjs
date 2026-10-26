@@ -12,7 +12,7 @@ function check(name) { report.checks.push(name); console.log('PASS', name) }
 async function digest(file) { const h = crypto.createHash('sha256'); for await (const chunk of fs.createReadStream(file)) h.update(chunk); return h.digest('hex') }
 async function main() {
  const browser = await chromium.launch({headless:true,channel:'chrome'});
- const context = await browser.newContext({viewport:{width:1440,height:1050},acceptDownloads:true,permissions:['clipboard-read','clipboard-write']});
+ const context = await browser.newContext({viewport:{width:1440,height:1050},acceptDownloads:true,permissions:[]});
  const page = await context.newPage(); page.setDefaultTimeout(15000);
  page.on('pageerror', e => report.errors.push(e.message));
  const button = name => page.getByRole('button', {name,exact:true});
@@ -25,15 +25,15 @@ async function main() {
  };
  const download = async id => {
   const expected = catalog.datasets.find(d=>d.id===id), card=page.locator(`[data-dataset="${id}"]`);
-  const event = page.waitForEvent('download');await card.getByRole('link',{name:id==='bete-support'?'↓ 下载辅助包':'↓ 下载原文件',exact:true}).click();const file=await event;
+  const event = page.waitForEvent('download');await card.getByRole('link',{name:expected.download_label?'↓ '+expected.download_label:'↓ 下载原文件',exact:true}).click();const file=await event;
   assert.equal(file.suggestedFilename(),expected.filename);const dest=path.join(downloads,expected.filename);await file.saveAs(dest);
   const sha=await digest(dest);assert.equal(sha,expected.sha256);assert.equal(fs.statSync(dest).size,expected.size);
   report.downloads.push({id,filename:file.suggestedFilename(),bytes:expected.size,sha256:sha});
-  assert.equal(await card.locator('.original-url>a').getAttribute('href'),expected.original_url);
-  assert.equal(await card.getByRole('link',{name:'查看原始发布页 ↗',exact:true}).getAttribute('href'),expected.source_url);
+  const source=page.locator('.data-panel').getByRole('link',{name:'原始网站',exact:true});assert.equal(await source.count(),1);const href=await source.getAttribute('href');assert(href.startsWith('https://'));
+  const repo=url=>new URL(url).hostname+new URL(url).pathname.split('/').slice(0,3).join('/');assert.equal(repo(href),repo(expected.source_url));
  };
  try {
-  await page.goto(base);await page.getByRole('heading',{name:'超导模型实验室Beta'}).waitFor();await page.locator('[data-dataset="bete-data"]').waitFor();
+  await page.goto(base);await page.getByRole('heading',{name:'超导模型实验室Beta'}).waitFor();await page.locator('[data-dataset="bete-bundle"]').waitFor();
   const reference = await context.newPage();await reference.goto('http://127.0.0.1:5173/tc-predict');await reference.getByRole('heading').first().waitFor();
   const siteTheme = await reference.evaluate(()=>({background:getComputedStyle(document.body).backgroundColor,text:getComputedStyle(document.body).color,font:getComputedStyle(document.body).fontFamily,primary:getComputedStyle(document.querySelector('nav button[aria-label^="SC-Wiki"] span')).backgroundColor}));
   const demoTheme = await page.evaluate(()=>({background:getComputedStyle(document.body).backgroundColor,text:getComputedStyle(document.body).color,font:getComputedStyle(document.body).fontFamily,primary:getComputedStyle(document.querySelector('.brand-mark')).backgroundColor}));
@@ -43,22 +43,23 @@ async function main() {
     assert(boxes.top<1 && boxes.bottom<1 && boxes.height<1,JSON.stringify(boxes));
     assert.equal(await page.locator('.model-panel .model-links').count(),0);
   };
-  await aligned();assert(await page.locator('.data-panel').getByRole('link',{name:'原始论文 ↗',exact:true}).isVisible());assert(await page.locator('.data-panel').getByRole('link',{name:'模型代码 ↗',exact:true}).isVisible());check('论文／代码位于右卡，桌面左右卡片顶底和高度对齐');
+  await aligned();assert(await page.locator('.data-panel').getByRole('link',{name:'论文链接',exact:true}).isVisible());assert(await page.locator('.data-panel').getByRole('link',{name:'原始网站',exact:true}).isVisible());check('论文／代码位于右卡，桌面左右卡片顶底和高度对齐');
   await shot('demo-desktop');await button('Nb 铌').click();await page.waitForFunction(()=>document.querySelector('#structure').value.includes('Nb'));
   assert.equal(await page.locator('.run').evaluate(el=>getComputedStyle(el).backgroundColor),siteTheme.primary);check('可用的运行按钮使用主站主色');
   const nn = await predict();assert.equal(nn.ensemble_size,100);assert(Number.isFinite(nn.tc) && nn.tc>0);assert.equal(nn.spectrum.a2f.length,51);check('Nb 结构真实运行作者 100 网络集成，返回 Tc 与 51 点谱');
-  await download('bete-data');await download('bete-support');check('BETE 原始 JSON 与结构划分辅助包经浏览器下载，原字节摘要一致');
+  assert.equal(await page.locator('.data-panel [data-dataset]').count(),1);await download('bete-bundle');check('BETE 只展示一个整包下载，浏览器实际下载摘要与准备包一致');
   assert.equal(await page.getByRole('button',{name:'预览数据',exact:true}).count(),0);assert.equal(await page.getByText('它学习的数据',{exact:true}).count(),0);assert.equal((await context.request.get(base+'/demo-api/preview/bete-data')).status(),404);check('数据预览按钮及旧标题移除，废弃预览接口已退役');
-  await page.locator('[data-dataset="bete-data"]').getByRole('button',{name:'复制作者原始数据库原始网址',exact:true}).click();assert.equal(await page.evaluate(()=>navigator.clipboard.readText()),catalog.datasets[0].original_url);check('原始网址复制正确');
+  assert(!/https?:\/\/|SHA-256|许可与版本|原始网址|查看原始发布页/.test(await page.locator('.data-panel').innerText()));assert.equal(await page.locator('.data-panel').getByRole('link',{name:'模型代码',exact:true}).count(),0);check('论文链接／原始网站均为文字链接，同仓库入口去重，不展示裸网址、许可版本和校验码');
   await button('用此参数对比 SISSO →').click();assert.equal(Number(await page.getByRole('textbox',{name:'lambda',exact:true}).inputValue()),nn.parameters.lambda);
   const sr = await predict();assert.equal(sr.model_id,'sisso-2019');assert.equal(sr.parameters.lambda,nn.parameters.lambda);assert(await page.locator('[data-result="bete-cso"]').isVisible());check('结构预测参数可带入 SISSO 实际计算，保留两个独立结果');
-  await aligned();await download('sisso-train');await download('sisso-published');check('29 条真实训练输入与 43 条发布数据分别下载、分别标注');
+  await aligned();assert.equal(await page.locator('.data-panel [data-dataset]').count(),1);await download('sisso-train');check('SISSO 只展示作者实际使用的 29 条训练数据，不要求用户另选全集');
   const before = await page.locator('[data-result]').count();await page.getByRole('textbox',{name:'lambda',exact:true}).fill('-1');
   const badResponse=page.waitForResponse(r=>r.url().endsWith('/demo-api/predict'));await button('运行模型 →').click();assert.equal((await badResponse).status(),400);await page.getByRole('alert').waitFor();assert.equal(await page.locator('[data-result]').count(),before);check('非法参数返回错误，已有结果不丢失、不产生伪结果');
   await page.getByRole('tab',{name:/高压氢化物/}).click();await button('加载示例').click();await aligned();const hp=await predict();assert.equal(hp.model_id,'sisso-2022');assert(hp.tc>0);
   assert(await page.locator('[data-dataset="xie-2022"]').getByRole('button',{name:'暂不可下载',exact:true}).isDisabled());assert.equal((await context.request.get(base+'/demo-api/datasets/xie-2022')).status(),503);check('高压参数模型真实计算；上游训练包失败明确显示且下载接口拒绝空文件');
+  assert.equal(await page.locator('.data-panel').getByRole('link',{name:'模型代码',exact:true}).count(),1);assert.equal(await page.locator('.data-panel').getByRole('link',{name:'原始网站',exact:true}).getAttribute('href'),'https://archive.materialscloud.org/records/skdzy-kyx54');
   await choose('Tc assessment model');await aligned();assert.equal(await page.getByRole('link',{name:'打开原有估算 ↗',exact:true}).count(),0);
-  assert.equal(await page.locator('.data-panel').getByRole('link',{name:'原始论文 ↗',exact:true}).getAttribute('href'),'https://doi.org/10.1103/PhysRevB.111.054505');
+  assert.equal(await page.locator('.data-panel').getByRole('link',{name:'论文链接',exact:true}).getAttribute('href'),'https://doi.org/10.1103/PhysRevB.111.054505');
   const structureFile={name:'CONTCAR',mimeType:'text/plain',buffer:Buffer.from('H2La synthetic integration fixture\n1.0\n4 0 0\n0 4 0\n0 0 4\nH La\n2 1\nCartesian\n0 0 0\n1 0 0\n2 2 2\n')};
   const hydrogen={name:'PDOS_H.dat',mimeType:'text/plain',buffer:Buffer.from('-1 0.01\n0 0.02\n1 0.03\n')},metal={name:'PDOS_La.dat',mimeType:'text/plain',buffer:Buffer.from('-1 0.01\n0 0.01\n1 0.01\n')};
   await page.getByLabel('CONTCAR / POSCAR 文件',{exact:true}).setInputFiles(structureFile);await page.getByLabel('电子 PDOS 文件',{exact:true}).setInputFiles([hydrogen,metal]);
