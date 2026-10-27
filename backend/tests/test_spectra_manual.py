@@ -314,3 +314,42 @@ def test_snap_join_invalid_targets_or_duplicate_edges_rejected(manual_http,inval
     if invalid=="duplicate":points[0]["joinTo"]=points[1]["id"]
     if invalid=="reverse":points[0]["joinTo"]=points[10]["id"];points[10]["joinTo"]=points[0]["id"]
     assert e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body).status_code==422
+
+
+@pytest.mark.parametrize("mode",["insert","bridge"])
+def test_manual_points_between_neighbors_or_gap_roundtrip_remain_single_path(manual_http,mode):
+    from backend.spectra.topology import build_graph, graph_parts
+    from backend.spectra.recalculate import connected_samples
+    env=manual_http;request=copy.deepcopy(env["body"]);doc=request["document"];points=doc["curves"][0]["points"]
+    a,b=points[50],points[51];old=copy.deepcopy(points)
+    new1={**a,"id":"inserted-1","x":a["x"]+.35,"y":a["y"]-.1,"manual":True,"breakBefore":True,"connectTo":a["id"]}
+    new2={**a,"id":"inserted-2","x":a["x"]+.7,"y":a["y"]-.1,"manual":True,"breakBefore":True,"connectTo":new1["id"]}
+    if mode=="insert":
+        points[51:51]=[new1,new2]
+        b["connectTo"]=new2["id"];b["breakBefore"]=True
+    else:
+        b["breakBefore"]=True
+        new2["joinTo"]=b["id"]
+        points.extend([new1,new2])
+    doc["zero"]=dict(pixel=points[0]["x"],pointIds=[points[0]["id"]])
+    doc["operations"].append(dict(kind="insert-chain" if mode=="insert" else "snap-join",at="2026-10-27T00:00:00Z",detail="在线段插点或补接断口，保留原点"))
+    response=env["client"].post(f"/api/rag/spectra/{env['identity']}/manual",json=request)
+    assert response.status_code==200,response.text
+    item=response.json()["items"][0];curve=item["result"]["curves"][0]
+    nodes,edges,invalid=build_graph(curve);parts,cycles=graph_parts(edges)
+    assert not invalid and len(parts)==1 and not cycles and max(map(len,edges.values()))==2
+    assert b["id"] not in edges[a["id"]]
+    assert set(edges["inserted-1"])=={a["id"],"inserted-2"}
+    f,_=connected_samples(curve,item["result"]["manual_documents"]["a"])
+    assert len(f)==len(old)+2 and all(y>x for x,y in zip(f,f[1:]))
+    for original in old:
+        p=nodes[original["id"]]
+        assert p["frequency_pixel"]==original["x"] and p["amplitude_pixel"]==original["y"]
+    params={**env["params"],"collection_version":item["version"],"run_id":item["run"]["id"]}
+    returned=env["client"].get(f"/api/rag/spectra/{env['identity']}/manual",params=params)
+    assert returned.status_code==200 and returned.json()["documents"][0]["curves"][0]["points"]==points
+    response=env["client"].post(f"/api/rag/spectra/{env['identity']}/recalculate",json={
+        **env["query"],"expected_version":response.json()["version"],"expected_collection_version":item["version"],
+        "base_run_id":item["run"]["id"],"kind":"alpha2f"})
+    assert response.status_code==200,response.text
+    assert response.json()["items"][0]["result"]["quality"]["integrals"]["raw"]["parameters"]["lambda"]["status"]=="available"

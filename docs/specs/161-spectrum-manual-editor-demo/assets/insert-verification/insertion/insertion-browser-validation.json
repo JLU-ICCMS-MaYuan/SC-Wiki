@@ -1,0 +1,51 @@
+{
+  "checks": [
+    "已连接A/B之间多点插入，单击B结束，原直连被替换、原点不动，可撤销重做并成功积分",
+    "从高频端反向插入同样形成单值路径，刷新回读后继续编辑和积分正确",
+    "原本不连接的A/B仍可加点补接，旧断边标记不被误替换，保持原吸附/双击结束并成功积分",
+    "自由连续描线和空白处双击结束继续可用，没有被限制为只能插点",
+    "PhDOS相同工具插点且不影响La/H，390px保存回读及积分通过"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/7366c90c5c2a4ec2b3616d5ddba991e9/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/7366c90c5c2a4ec2b3616d5ddba991e9/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/7366c90c5c2a4ec2b3616d5ddba991e9/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/7366c90c5c2a4ec2b3616d5ddba991e9/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/7366c90c5c2a4ec2b3616d5ddba991e9/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/7366c90c5c2a4ec2b3616d5ddba991e9/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/007d1507c4904e1b99ac8265edae9184/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/007d1507c4904e1b99ac8265edae9184/recalculate"
+    }
+  ],
+  "screenshots": [
+    "insertion-connected-forward.png",
+    "insertion-reverse-saved.png",
+    "insertion-unconnected-bridge.png",
+    "insertion-dos-mobile-insert.png"
+  ],
+  "status": "passed"
+}

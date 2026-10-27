@@ -1,0 +1,26 @@
+[
+  {
+    "suite": "insertion",
+    "exit_code": 0,
+    "checks": 5,
+    "report": "assets/insert-verification/insertion/insertion-browser-validation.json"
+  },
+  {
+    "suite": "insertion_vertical",
+    "exit_code": 0,
+    "checks": 5,
+    "report": "assets/insert-verification/insertion_vertical/insertion-browser-validation.json"
+  },
+  {
+    "suite": "manual",
+    "exit_code": 0,
+    "checks": 15,
+    "report": "assets/insert-verification/manual/snap-production-browser-validation.json"
+  },
+  {
+    "suite": "diagnostics",
+    "exit_code": 0,
+    "checks": 7,
+    "report": "assets/insert-verification/diagnostics/diagnostics-browser-validation.json"
+  }
+]

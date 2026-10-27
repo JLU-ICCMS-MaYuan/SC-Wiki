@@ -1,0 +1,29 @@
+{
+  "suites": [
+    {
+      "suite": "insertion",
+      "status": "passed",
+      "checks": 5,
+      "report": "assets/insert-verification/insertion/insertion-browser-validation.json"
+    },
+    {
+      "suite": "insertion_vertical",
+      "status": "passed",
+      "checks": 5,
+      "report": "assets/insert-verification/insertion_vertical/insertion-browser-validation.json"
+    },
+    {
+      "suite": "manual",
+      "status": "passed",
+      "checks": 15,
+      "report": "assets/insert-verification/manual/snap-production-browser-validation.json"
+    },
+    {
+      "suite": "diagnostics",
+      "status": "passed",
+      "checks": 7,
+      "report": "assets/insert-verification/diagnostics/diagnostics-browser-validation.json"
+    }
+  ],
+  "total_checks": 32
+}

@@ -9,6 +9,7 @@ from fastapi import FastAPI, Request
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 from PIL import Image
+import numpy as np
 
 test_root=Path(os.environ["SCWIKI_MANUAL_TEST_ROOT"]).resolve()
 assert str(test_root).startswith("/tmp/scwiki-manual-test-") or str(test_root).startswith("/private/tmp/scwiki-manual-test-")
@@ -33,10 +34,17 @@ upload_tasks.get_draft=lambda identity:dict(material_states=states) if identity=
 identities={}
 with Session(engine) as session:
     ctx=service.context(session,"upload",task,owner,write=True)
-    rgb,panel=fixture();content=io.BytesIO();Image.fromarray(rgb).save(content,format="PNG");content.seek(0)
-    image=create_storage().put("spectra/test.png",content,"image/png")
     for kind in ("alpha2f","phonon_dos"):
         rgb,panel=fixture(kind)
+        if kind=="alpha2f" and os.environ.get("SCWIKI_INSERT_VERTICAL_FIXTURES")=="1":
+            # 测试原图与全部标定同步逆时针旋转，保留相同物理谱。
+            old_width=rgb.shape[1]
+            rgb=np.rot90(rgb).copy()
+            for curve in panel["curves"]:
+                x0,y0,x1,y1=curve["roi"]
+                curve["roi"]=[y0,old_width-1-x1,y1,old_width-1-x0]
+                curve["frequency_direction"]="y"
+                curve["frequency_ticks"]=[[old_width-1-p,v] for p,v in curve["frequency_ticks"]]
         if os.environ.get("SCWIKI_REVALIDATE_TEST_FIXTURES")=="1" and kind=="alpha2f":
             panel["curves"][0]["amplitude_evidence"]=None
             panel["caption"]="合成原图：H3S，200 GPa"
@@ -47,7 +55,9 @@ with Session(engine) as session:
             prototype=panel["curves"][0];panel["curves"]=[]
             for name in ["La","Sc","H"]:
                 curve=copy.deepcopy(prototype);curve.update(id=name,projection=name);panel["curves"].append(curve)
-        row=service.collection(session,ctx,kind,kind,dict(source_sha256="synthetic-source",image=asdict(image),size_px=[160,100],pdf_page=1,source_name="人工编辑隔离测试图"))
+        content=io.BytesIO();Image.fromarray(rgb).save(content,format="PNG");content.seek(0)
+        image=create_storage().put("spectra/test-"+kind+".png",content,"image/png")
+        row=service.collection(session,ctx,kind,kind,dict(source_sha256="synthetic-source",image=asdict(image),size_px=[rgb.shape[1],rgb.shape[0]],pdf_page=1,source_name="人工编辑隔离测试图"))
         run,_=service.new_run(session,row,panel,ctx["states"][0]);service.complete_run(run,extract_panel(rgb,panel));service.activate(row,run,ctx["states"][0])
         identities[kind]=row.id
     session.commit()

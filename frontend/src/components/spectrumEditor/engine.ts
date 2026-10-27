@@ -249,6 +249,47 @@ export function joinExistingPoint(doc:Document,curveId:string,tailId:string,targ
   if(tail.joinTo)throw new Error('该末点已有吸附连接，请先新增一段描线，不会覆盖旧连接。')
   return record({...doc,curves:doc.curves.map(c=>c.id===curveId?{...c,pathOrdered:true,points:points.map(p=>p.id===tailId?{...p,joinTo:targetId}:p)}:c)},'snap-join','描线末点 '+tailId+' 吸附连接到已有点 '+targetId)
 }
+/** 把本次描线插入原有直边；只重接局部边，原点坐标和其他边保持。 */
+export function insertDrawnPoints(doc:Document,curveId:string,anchorId:string,targetId:string,addedIds:string[]):Document {
+  const curve=doc.curves.find(c=>c.id===curveId)
+  if(!curve||!addedIds.length||anchorId===targetId||!hasPointConnection(doc,curve,anchorId,targetId))
+    throw new Error('原线段已变化，请重新选择相连的两个端点。')
+  const original=freezeTrace(doc,curve),byId=new Map(original.map(p=>[p.id,p])),added=new Set(addedIds)
+  if(!byId.has(anchorId)||!byId.has(targetId)||added.size!==addedIds.length||added.has(anchorId)||added.has(targetId))
+    throw new Error('插入点身份无效，原曲线未改变。')
+  let previous=anchorId
+  for(const id of addedIds){
+    const p=byId.get(id)
+    if(!p?.manual||p.connectTo!==previous||p.joinTo)throw new Error('本次新增链已变化，请重新开始插点。')
+    previous=id
+  }
+  if(original.some(p=>!added.has(p.id)&&(p.connectTo&&added.has(p.connectTo)||p.joinTo&&added.has(p.joinTo))))
+    throw new Error('新增链已连接其他点，请重新选择插入路径。')
+  const anchorIndex=original.findIndex(p=>p.id===anchorId),targetIndex=original.findIndex(p=>p.id===targetId)
+  const earlyId=anchorIndex<targetIndex?anchorId:targetId,lateId=anchorIndex<targetIndex?targetId:anchorId
+  const lateIndex=Math.max(anchorIndex,targetIndex),late=original[lateIndex],oldPrevious=original[lateIndex-1]
+  const parentEdge=late.connectTo===earlyId||!late.connectTo&&oldPrevious?.id===earlyId&&connected(oldPrevious,late)
+  const matches=(a:string,b:string)=>a===anchorId&&b===targetId||a===targetId&&b===anchorId
+  const base=original.filter(p=>!added.has(p.id)).map(p=>{
+    const copy={...p}
+    if(copy.joinTo&&matches(copy.id,copy.joinTo))delete copy.joinTo
+    if(copy.connectTo&&matches(copy.id,copy.connectTo)){delete copy.connectTo;copy.breakBefore=true}
+    if(p.id===lateId){
+      if(parentEdge)copy.breakBefore=true
+      else if(!p.connectTo&&oldPrevious&&connected(oldPrevious,p))copy.connectTo=oldPrevious.id
+    }
+    return copy
+  })
+  const sequence=earlyId===anchorId?addedIds:[...addedIds].reverse()
+  const inserted=sequence.map((id,i):Point=>({...byId.get(id)!,breakBefore:true,connectTo:i?sequence[i-1]:earlyId,status:'人工插点'}))
+  const last=inserted.at(-1)!
+  const at=base.findIndex(p=>p.id===lateId)
+  if(parentEdge)base[at]={...base[at],connectTo:last.id,breakBefore:true}
+  else last.joinTo=lateId
+  const points=[...base.slice(0,at),...inserted,...base.slice(at)]
+  return record({...doc,curves:doc.curves.map(c=>c.id===curveId?{...c,points,pathOrdered:true}:c)},
+    'insert-chain','在线段 '+anchorId+' — '+targetId+' 之间插入 '+addedIds.length+' 个点，替换原直连')
+}
 export function markZero(doc: Document, x: number, y: number): Document {
   ;[x,y] = clickInPlot(doc,x,y)
   const pixel = doc.calibration.direction === 'x' ? x : y

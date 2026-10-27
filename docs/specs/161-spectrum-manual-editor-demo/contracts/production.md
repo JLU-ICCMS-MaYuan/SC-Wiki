@@ -58,3 +58,6 @@ quality.automatic_repairs[kind]记录本次精确断端连接的曲线/点ID与�
 
 ## 已取消高频末端核对
 highEndpoint已废弃，GET manual不提供，POST manual忽略旧客户端此字段，不校验其中内容；历史存档不改。重算不执行high_endpoint/projection_range检查，不读取末端确认。α²F最高频点和DOS各分波自身最高频点直接作为各自积分上限。此前末端证据/差距规则全部由本条取代。
+
+## 已有线段插入
+沿用manual点契约；插入更新局部前驱/断边/吸附关系，不新增字段。正常邻边插入保存为A—N1—N2—B，原A—B边删除，新增点ID保留，其他边不变。点数组可为满足既有connectTo前驱顺序而插入到原边较后端点前；数值和ID不因重排改变。操作kind=insert-chain保留起点/终点和新增点数。
