@@ -37,3 +37,6 @@
 ## 主动重算
 POST /api/rag/spectra/{collection_id}/recalculate：target、target_id、expected_version、expected_collection_version、base_run_id、kind(alpha2f/phonon_dos)。客户端不得提交积分数值。返回完整listing及新版本；科学条件不足作为200中的unavailable及具体原因，权限403、旧版本409；失败不覆盖原记录。仅同步数值积分，不读取图像/调用AI。
 quality.integrals.raw新增parameters.lambda/omega_log独立status/value/reason，兼容lambda_integral/omega_log_k；DOS积分status与comparison_status独立。quality.recalculations[kind]包含base_run_id/calculated_at/author_id/algorithm_version。历史数据按旧显示条件兼容。
+
+## 拓扑诊断
+重算响应quality.trace_diagnostics[kind]含curves列表，每项curve_id/name/component_count/point_count/issues。issue包含kind/message/points，points含point_id/frequency_thz/amplitude/x/y，像素不可确定时为null。问题类型disconnected/isolated/cycle/branch/invalid。诊断属于返回的新run，编辑保存后失效；公开接口移除。无新写入接口。

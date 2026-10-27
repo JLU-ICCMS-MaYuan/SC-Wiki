@@ -16,7 +16,7 @@ export default function SpectrumDetailPage() {
   const targetKind = params.get('target'), targetId = params.get('target_id')
   const target = ['upload', 'paper', 'revision'].includes(targetKind || '') && targetId ? { target: targetKind, target_id: targetId } as PropertySpectrumTarget : undefined
   const { listing, loading, error, reload, replaceListing } = usePropertySpectra(target)
-  const [editorInput,setEditorInput]=useState<{documents:EditorDocument[];base_run_id:string;collection_version:number;version:string;initialPointId?:string}|null>(null)
+  const [editorInput,setEditorInput]=useState<{documents:EditorDocument[];base_run_id:string;collection_version:number;version:string;initialPointId?:string;focusPointId?:string}|null>(null)
   const [imageOpacity,setImageOpacity]=useState(100)
   const [openingEditor,setOpeningEditor]=useState(false)
   const [recalculating,setRecalculating]=useState(false)
@@ -68,15 +68,17 @@ export default function SpectrumDetailPage() {
     }catch(error:any){if(calculationTarget.current===context)setActionError(error.message||'重新计算失败，已保存数据保持不变。')}
     finally{calculationLock.current=false;setRecalculating(false)}
   }
-  const openEditor=async(selectedCurve?:string,focusZero=false)=>{
+  const openEditor=async(selectedCurve?:string,focusZero=false,pointId?:string)=>{
     if(!canEdit || !validItem || openingEditor || calculationLock.current)return
     setOpeningEditor(true);setActionError('')
     try {
       const input=await api.get<{documents:EditorDocument[];base_run_id:string;collection_version:number;version:string}>(SPECTRUM_API+'/'+encodeURIComponent(validItem.id)+'/manual?'+query+'&kind='+kind+'&collection_version='+validItem.version+'&run_id='+encodeURIComponent(validItem.run.id||''))
       const documents=input.documents.map(doc=>({...doc,source:{...doc.source,image}}))
       documents.sort((a,b)=>Number(b.curves[0].id===selectedCurve)-Number(a.curves[0].id===selectedCurve))
+      if(pointId && (documents[0]?.curves[0]?.id!==selectedCurve || !documents[0].curves[0].points.some(p=>p.id===pointId)))
+        throw new Error('该问题点已变化或缺少有效原图位置，请重新计算后定位。')
       const zero=focusZero?checkZeroFrequency(documents[0]).curves[0]:null
-      setEditorInput({...input,documents,initialPointId:zero?.pointId||zero?.nearest?.id})
+      setEditorInput({...input,documents,initialPointId:pointId||zero?.pointId||zero?.nearest?.id,focusPointId:pointId})
     }catch(error:any){setActionError(error.message||'无法打开人工编辑器')}
     finally{setOpeningEditor(false)}
   }
@@ -205,9 +207,9 @@ export default function SpectrumDetailPage() {
       {!primary.length && <Alert severity="info" sx={{ mb: 2 }}>尚未得到数值曲线。{(selected.result.failures || selected.result.quality?.limitations || []).map((value: unknown) => typeof value === 'string' ? value : JSON.stringify(value)).join('；')}</Alert>}
       <Box data-testid="spectrum-analysis-grid" sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0,1fr)', lg: primary.length ? 'minmax(0,.85fr) minmax(0,1.15fr)' : 'minmax(0,1fr)' }, gap: 2, alignItems: 'start', mb: 2, '& > .MuiPaper-root': { mb: 0 } }}>
         <SpectrumResult key={selected.id + selected.run.id + kind} item={selected} curves={primary} image={image} retryImage={() => setImageRetry(value => value + 1)} onEdit={listing?.can_edit && !historical ? openEditor : undefined} editingDisabled={!canEdit || openingEditor || recalculating} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} />
-        {!!primary.length && <SpectrumMetrics item={selected} curves={primary} history={historical} onContinue={canEdit&&!recalculating?(id)=>openEditor(id,true):undefined} onRecalculate={listing?.can_edit?recalculate:undefined} recalculating={recalculating} calculationDisabled={!canCalculate||openingEditor||Boolean(editorInput)}/>}
+        {!!primary.length && <SpectrumMetrics item={selected} curves={primary} history={historical} onContinue={canEdit&&!recalculating?(id)=>openEditor(id,true):undefined} onLocate={canEdit?(curve,point)=>openEditor(curve,false,point):undefined} onRecalculate={listing?.can_edit?recalculate:undefined} recalculating={recalculating} calculationDisabled={!canCalculate||openingEditor||Boolean(editorInput)}/>}
       </Box>
     </>}
-    <Dialog fullScreen transitionDuration={0} open={Boolean(editorInput)} onClose={()=>{}}>{editorInput && <SpectrumManualEditor documents={editorInput.documents} initialPointId={editorInput.initialPointId} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} kind={kind} onSave={saveEditor} onClose={()=>setEditorInput(null)}/>}</Dialog>
+    <Dialog fullScreen transitionDuration={0} open={Boolean(editorInput)} onClose={()=>{}}>{editorInput && <SpectrumManualEditor documents={editorInput.documents} initialPointId={editorInput.initialPointId} focusPointId={editorInput.focusPointId} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} kind={kind} onSave={saveEditor} onClose={()=>setEditorInput(null)}/>}</Dialog>
   </Box>
 }

@@ -5,6 +5,7 @@ import SpectrumFigure from './SpectrumFigure'
 import SourceCanvas from './spectrumEditor/SourceCanvas'
 import ImageOpacityControl from './spectrumEditor/ImageOpacityControl'
 import ZeroFrequencyCheck from './spectrumEditor/ZeroFrequencyCheck'
+import TraceDiagnostics from './spectrumEditor/TraceDiagnostics'
 import { displayDocument, combinedZeroCheck } from './spectrumEditor/adapter'
 import './spectrumEditor/styles.css'
 import SpectrumViewSwitch from './SpectrumViewSwitch'
@@ -42,9 +43,9 @@ export function SpectrumResult({ item, curves, image, retryImage, onEdit, editin
   </DetailSection>
 }
 
-export function SpectrumMetrics({ item, curves, history, onContinue, onRecalculate, recalculating=false, calculationDisabled=false }: {
+export function SpectrumMetrics({ item, curves, history, onContinue, onRecalculate, onLocate, recalculating=false, calculationDisabled=false }: {
   item: Item; curves: Curve[]; history: boolean; onContinue?: (curveId?: string) => void;
-  onRecalculate?: () => void; recalculating?: boolean; calculationDisabled?: boolean
+  onLocate?: (curveId:string,pointId:string)=>void; onRecalculate?: () => void; recalculating?: boolean; calculationDisabled?: boolean
 }) {
   const dos = curves[0]?.kind === 'phonon_dos', q = item.result.quality || {}, raw = q.integrals?.raw || {}, comparisons = q.comparisons?.raw || {}
   const manualZero=combinedZeroCheck(item,curves)
@@ -61,8 +62,16 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
   const modeComparable=modeAvailable && (mode.comparison_status ? mode.comparison_status==='available' : mode.target_modes != null)
   const calculation=q.recalculations?.[dos?'phonon_dos':'alpha2f']
   const anyAlphaAvailable=!restricted && Object.values(parameters).some((v:any)=>v.status==='available')
+  const diagnostics=q.trace_diagnostics?.[dos?'phonon_dos':'alpha2f']
+  const reasonGroups=new Map<string,string[]>()
+  for(const [key,value] of Object.entries(parameters) as [string,any][]){
+    if(value.status!=='available'){
+      const reason=value.reason||'尚无可用结果'
+      reasonGroups.set(reason,[...(reasonGroups.get(reason)||[]),key==='lambda'?'λ':'ωlog'])
+    }
+  }
   const reasons=restricted ? ['当前为历史、失效或限定频段版本，不展示完整谱计算结果。'] : dos ? [mode.reason].filter(Boolean)
-    : [...new Set(Object.entries(parameters).filter(([,v]:any)=>v.status!=='available').map(([key,v]:any)=>(key==='lambda'?'λ':'ωlog')+'：'+(v.reason||'尚无可用结果')))]
+    : [...reasonGroups].map(([reason,labels])=>labels.join('、')+'：'+reason)
   return <DetailSection title={dos ? '03 · 频段与数据完整性' : '03 · 积分结果与参考值对比'} action={onRecalculate && <Button variant="outlined" onClick={onRecalculate} disabled={calculationDisabled||recalculating} aria-busy={recalculating}>{recalculating?'计算中…':'重新计算'}</Button>}>
     <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', mb: 2 }}><Box><Typography variant="caption" color="text.secondary">实际提取频率范围</Typography><Typography fontWeight={600}>{spectrumInterval(curves)}</Typography></Box>
       <Box><Typography variant="caption" color="text.secondary">{dos ? '原胞原子数 N / 目标 3N' : '实际积分范围'}</Typography><Typography fontWeight={600}>{dos ? `${spectrumNumber(mode.primitive_atoms, 0)} / ${spectrumNumber(mode.target_modes, 0)}` : anyAlphaAvailable && raw.minimum_integrated_thz != null ? `${spectrumNumber(raw.minimum_integrated_thz)}–${spectrumNumber(raw.maximum_integrated_thz ?? Math.max(...(alpha?.points.map(p=>p.frequency_thz)||[])))} THz` : '暂不可计算'}</Typography></Box></Box>
@@ -76,6 +85,7 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
         })}
     </TableBody></Table></Box>
     {reasons.map(reason=><Typography key={String(reason)} variant="body2" color="text.secondary" sx={{mt:1}}>{String(reason)}</Typography>)}
+    {!restricted && diagnostics && <TraceDiagnostics key={item.run.id} report={diagnostics} onLocate={onLocate} disabled={recalculating||calculationDisabled}/> }
     {calculation && <Typography variant="caption" display="block" sx={{mt:1}}>本版本计算时间：{new Date(calculation.calculated_at).toLocaleString()}</Typography>}
     {!dos && !restricted && ['lambda','omega_log'].map(key=>comparisons[key]?.source && <Typography variant="caption" display="block" key={key}>参考来源：{typeof comparisons[key].source==='string'?comparisons[key].source:JSON.stringify(comparisons[key].source)}</Typography>)}
   </DetailSection>

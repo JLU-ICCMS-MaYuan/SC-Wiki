@@ -30,3 +30,5 @@
 
 - [x] CHK019 FR-050至054/SC-028至030对应用户确认的两份增补稿，原话及截图原字节保存；“ok”是本轮确认，未冒用先前授权。代码与数值/HTTP/MySQL/浏览器证据见recalculate-validation.md。
 - [x] CHK020 正式页面重算/精简已经落地并更新Overview；Demo及用户联动参数前后哈希一致，未夹入本轮提交。
+
+- [x] CHK021 FR-055至057/SC-031至032依照用户已确认增补稿实现。原话/截图登记见Spec，拓扑/HTTP/MySQL/浏览器证据见diagnostics-validation.md；只读复核记录与用户后续新编辑分开，不自动修改业务点。

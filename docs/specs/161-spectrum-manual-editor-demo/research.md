@@ -76,3 +76,11 @@ FR-050至054/SC-028至030：新增独立recalculate模块与POST /{collection_id
 复用spectral_integrals的分段线性精确积分；λ/ωlog状态独立，幅值依据来自当前manual_documents（优先）或初始calibration。相对谱依据须描述零基线及统一倍率，物理频率定义继续沿用已确认来源，不能由普通文本自动改变。DOS按各曲线自身网格积分，完整范围一致才合计；3N比较另检查原胞证据，不要求网格采样点完全一致。
 结果写新SpectrumRun，copy原曲线/标定，quality记录每种谱的recalculation来源run/时间/操作者；新运行清除审核，不自动采纳。人工save既有quality重置行为自然使重算失效。公开受限频段过滤不得泄漏全谱结果。
 前端页面持有忙碌锁和请求目标，POST成功replaceListing并导航新run/version；结果组件只展示服务端状态。零频详情compact模式仅一条摘要和未完成分波，编辑器维持原检查组件默认行为。删除仅详情的旧解释组件与逐点表。
+
+
+## 计算异常定位设计
+
+FR-055/057→独立topology模块构建稳定ID邻接表并迭代遍历连通分量/DFS回边，O(V+E)；connected_samples复用同一图，诊断与积分不采用不同连接规则。断片列各片段真实端点，孤立点独立列出；闭环列实际回边两端，分叉列中心及邻点。像素优先保存的frequency_pixel/amplitude_pixel，缺失时由当前标定换算；无有效像素不提供可点击定位。旧自动点ID使用与manual.editor_document一致的curve:p索引。
+FR-055→重算quality.trace_diagnostics[kind]存报告，原run不修改；新失败和成功重算均生成诊断，人工save质量重置使旧诊断失效。旧重算结果没有诊断时通过现有重新计算入口更新，不增加迁移或后台业务写入。公开结果剥离该内部诊断，避免暴露未采纳点。
+FR-056→SpectrumMetrics传curveId/pointId到页面openEditor，沿用GET manual版本核对并确认点存在。editor初始选点传给SourceCanvas一次性定位，初始化fit/ResizeObserver完成后将点置于图窗中心并适度放大；之后用户自由缩放/平移，不随每帧拖动重新居中。坐标与点表使用现有selected同步。
+FR-057→前端每页12条诊断，仅渲染当前页；坐标和文案不复制到λ/ωlog两个参数中。SC-031/032→拓扑单元测试、正式HTTP保存/重算、当前MySQL保护和浏览器点击/删除/撤销/版本冲突/窄屏证据。

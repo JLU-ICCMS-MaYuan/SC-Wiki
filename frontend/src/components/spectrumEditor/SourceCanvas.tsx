@@ -6,7 +6,7 @@ import { addPoint, appendPoint, snapTarget, joinExistingPoint, hasPointConnectio
 
 export type Tool = 'select' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
 type Props = {
-  doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool; imageOpacity?: number
+  focusPointId?: string; doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool; imageOpacity?: number
   linked?: boolean; dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
   referenceCurves?: Document["curves"]; onSelect?: (ids: string[]) => void; onChange?: (doc: Document, detail?: string) => void
   onFinishAdd?: () => void; onAdded?: (id: string) => void; onZeroMarked?: () => void
@@ -14,7 +14,8 @@ type Props = {
 }
 type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; clientStart?: {x:number;y:number}; screenScale?: number; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
-export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onZeroMarked, onFinishAdd, referenceCurves=[] }: Props) {
+export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onZeroMarked, onFinishAdd, referenceCurves=[], focusPointId }: Props) {
+  const focused=useRef('')
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
   const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 46, y - 10, w + 62, h + 32] }
   const [view, setView] = useState<Rect>(initial), [preview, setPreview] = useState<Document | null>(null)
@@ -43,7 +44,7 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
   const paths = new Map(renderCurves.map(c => [c.id, curvePath(scene, c)]))
   const snappedPoint=curve.points.find(p=>p.id===snapId)
   const [x0, y0, x1, y1] = scene.source.plot
-  useEffect(() => { manualView.current=false; setImageFailed(false); setPreview(null) }, [doc.id])
+  useEffect(() => { manualView.current=false; focused.current=''; setImageFailed(false); setPreview(null) }, [doc.id])
   useEffect(() => {
     const element=svg.current!
     const update=()=>{
@@ -51,12 +52,18 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       if (!width || !height) return
       const next=fitViewport(doc.source.viewport,width,height,showAxes)
       fitRef.current=next; setFit(next)
-      if (!manualView.current) setView(next)
+      const focusKey=doc.id+':'+(focusPointId||'')
+      const point=focusPointId && doc.curves.find(c=>c.id===active)?.points.find(p=>p.id===focusPointId)
+      if(point && focused.current!==focusKey){
+        const w=next[2]/4,h=next[3]/4
+        setView([point.x-w/2,point.y-h/2,w,h])
+        manualView.current=true;focused.current=focusKey
+      }else if (!manualView.current) setView(next)
       setScale(element.getScreenCTM()?.a || 1)
     }
     update(); const observer=new ResizeObserver(update);observer.observe(element)
     return ()=>observer.disconnect()
-  }, [doc.id,showAxes])
+  }, [doc.id,showAxes,focusPointId,active])
   useEffect(()=>{setScale(svg.current?.getScreenCTM()?.a || 1)},[view])
   const pointer=(clientX:number,clientY:number)=>new DOMPoint(clientX,clientY).matrixTransform(svg.current!.getScreenCTM()!.inverse())
   const zoom=(factor:number,anchor?:DOMPoint)=>{

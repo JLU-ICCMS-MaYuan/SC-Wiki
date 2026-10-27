@@ -12,8 +12,9 @@ from .context import primitive_for, references_for
 from .contracts import fingerprint
 from .digitize import spectral_integrals
 from .engine import comparison, unavailable
+from .topology import build_graph, graph_parts, diagnose
 
-VERSION = "spectra-recalculate-v1"
+VERSION = "spectra-recalculate-v2"
 
 
 def demand(condition, reason):
@@ -25,31 +26,19 @@ def connected_samples(curve, document=None):
     """线性复杂度遍历真实连接，拒绝断片/分叉/环；不按频率排序来填缺口。"""
     points = curve.get("points") or []
     demand(len(points) >= 2, "至少需要两个有效数据点")
-    ids = [p.get("id", str(i)) for i, p in enumerate(points)]
-    demand(len(set(ids)) == len(ids), "数据点身份重复")
-    nodes = dict(zip(ids, points))
-    edges = {identity: set() for identity in ids}
-    for i, p in enumerate(points):
-        parent = p.get("connectTo")
-        if parent is None and i:
-            previous = points[i - 1]
-            connected = not p["breakBefore"] if "breakBefore" in p else (
-                previous.get("segment") == p.get("segment") or previous.get("manual") or p.get("manual"))
-            if connected:
-                parent = ids[i - 1]
-        for target in (parent, p.get("joinTo")):
-            if target is not None:
-                demand(target in nodes and target != ids[i], "描线含失效连接")
-                edges[ids[i]].add(target)
-                edges[target].add(ids[i])
-    demand(all(len(e) <= 2 for e in edges.values()), "曲线存在分叉，请在编辑器中整理为单条曲线")
+    nodes, edges, invalid = build_graph(curve)
+    demand(not invalid, "描线含失效连接")
+    demand(all(len(e) <= 2 for e in edges.values()), "曲线存在分叉，请检查下方问题坐标")
+    components, cycles = graph_parts(edges)
+    demand(not cycles, "曲线存在闭环，请检查下方问题坐标")
+    demand(len(components) == 1, "曲线存在缺口或孤立点，请检查下方未连接片段坐标")
     ends = [identity for identity, e in edges.items() if len(e) == 1]
-    demand(len(ends) == 2, "曲线存在缺口或闭环，不能计算完整积分")
+    demand(len(ends) == 2, "曲线缺少有效端点")
     ordered, seen, current = [], set(), ends[0]
     while current not in seen:
         seen.add(current)
         ordered.append(nodes[current])
-        next_ids = edges[current] - seen
+        next_ids = [key for key in edges[current] if key not in seen]
         if not next_ids:
             break
         current = next(iter(next_ids))
@@ -165,6 +154,7 @@ def save(session, ctx, row, run, state, kind, user):
     payload = copy.deepcopy(run.result_json)
     manual.require(any(c["kind"] == kind for c in payload["curves"]), "当前谱类型没有可计算数据")
     quality = payload.setdefault("quality", {})
+    quality.setdefault("trace_diagnostics", {})[kind] = diagnose(payload, kind)
     if kind == "alpha2f":
         raw = alpha_integrals(payload)
         quality["integrals"] = {"raw": raw}

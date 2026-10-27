@@ -39,3 +39,6 @@ Point.joinTo可选字符串指向同曲线另一已有点，表达尾点附加�
 
 ## 重算结果
 复用不可变SpectrumRun，无DDL。quality.recalculations按kind存来源和时间；parameters独立保存λ/ωlog状态；dos_mode_integral分开表示积分及3N比较。点、连线、manual_documents及来源保持不变；编辑保存清除重算派生值。
+
+## 拓扑诊断与定位
+quality.trace_diagnostics为重算派生JSON，无DDL；点坐标及ID由保存谱生成，不改变点或连接。编辑器initialPointId只作选中，focusPointId作一次性视图定位，不写数据库或撤销历史。

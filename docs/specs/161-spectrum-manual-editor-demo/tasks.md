@@ -109,3 +109,11 @@ Issue [#161](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/161) 是协作�
 - [x] T043 验证数值/HTTP/当前MySQL/浏览器，回写Overview、保护Demo并提交。
 
 本轮验证见recalculate-validation.md：54项正式前端、108项后端/2项仅MySQL跳过、当前MySQL56项含双重算竞争通过、8个正式浏览器场景通过；Demo内容哈希一致。
+
+## 计算异常坐标定位
+- [x] T044 确认增补稿、原话、拓扑实查与设计契约。
+- [x] T045 共用图诊断/积分，按谱类型保存诊断、公开过滤。
+- [x] T046 问题坐标分批列表、版本保护的正确曲线选点和画布定位。
+- [x] T047 数值/HTTP/MySQL/浏览器验证、Overview、Demo保护与提交。
+
+本轮验证：57项前端、113项后端通过/2项仅MySQL跳过、当前MySQL61项、正式浏览器7场景及构建通过；见diagnostics-validation.md。

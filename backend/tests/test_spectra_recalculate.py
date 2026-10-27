@@ -204,3 +204,86 @@ def test_mysql_concurrent_recalculations_only_one_commits(manual_http):
     with Session(env["engine"]) as session:
         assert session.scalar(select(func.count()).select_from(models.SpectrumRun).where(models.SpectrumRun.collection_id==env["identity"]))==2
         assert session.get(models.SpectrumRun,env["old_run"]).result_json==env["old_result"]
+
+
+def test_topology_distinguishes_parts_isolated_cycle_and_branch():
+    from backend.spectra.topology import diagnose_curve
+    payload=alpha_payload();curve=payload["curves"][0]
+    curve.update(frequency_direction="y",axis_calibration={"frequency":{"slope":-2,"intercept":20},"amplitude":{"slope":1,"intercept":-30}})
+    curve["points"][1]["breakBefore"]=True
+    report=diagnose_curve(curve)
+    assert report["component_count"]==2
+    assert [i["kind"] for i in report["issues"]]==["isolated","disconnected"]
+    point=report["issues"][0]["points"][0]
+    assert point==dict(point_id="0",frequency_thz=0.,amplitude=0.,x=30.,y=10.)
+    # 同一曲线可能同时含闭环和分叉，回边两端确实在环中。
+    curve["points"][1].pop("breakBefore")
+    curve["points"][-1]["joinTo"]="0"
+    curve["points"].append(dict(id="tail",frequency_thz=7.,reconstructed_amplitude=.07,connectTo="2"))
+    report=diagnose_curve(curve)
+    assert {i["kind"] for i in report["issues"]}=={"branch","cycle"}
+    cycle=next(i for i in report["issues"] if i["kind"]=="cycle")
+    assert {p["point_id"] for p in cycle["points"]} <= {"0","1","2"}
+    assert "tail" not in {p["point_id"] for p in cycle["points"]}
+
+
+def test_topology_legacy_ids_match_editor_and_no_close_point_autojoin():
+    from backend.spectra.topology import diagnose_curve
+    curve=alpha_payload()["curves"][0]
+    for p in curve["points"]:p.pop("id")
+    curve["points"][1]["breakBefore"]=True
+    curve["points"][1]["frequency_thz"]=1e-9
+    report=diagnose_curve(curve)
+    assert report["component_count"]==2
+    assert report["issues"][0]["points"][0]["point_id"]=="a:p0"
+    assert report["issues"][1]["points"][0]["point_id"]=="a:p1"
+
+
+def test_topology_long_curve_no_recursion_or_pairwise_distance():
+    from backend.spectra.topology import diagnose_curve
+    curve=alpha_payload()["curves"][0]
+    curve["points"]=[dict(id=str(i),frequency_thz=i,reconstructed_amplitude=0) for i in range(20000)]
+    before=copy.deepcopy(curve)
+    assert diagnose_curve(curve)["issues"]==[]
+    curve["points"][-1]["joinTo"]="0"
+    report=diagnose_curve(curve)
+    assert len(report["issues"])==1 and report["issues"][0]["kind"]=="cycle"
+    curve["points"][-1].pop("joinTo")
+    assert curve==before
+
+
+def test_topology_http_versioned_and_invalidated_on_save(manual_http):
+    env=manual_http;client=env["client"];url=f"/api/rag/spectra/{env['identity']}"
+    body=copy.deepcopy(env["body"])
+    pts=body["document"]["curves"][0]["points"]
+    pts[50]["breakBefore"]=True;pts[51]["breakBefore"]=True
+    saved=client.post(url+"/manual",json=body).json()["items"][0]
+    response=client.post(url+"/recalculate",json=recalc_body(env,saved))
+    assert response.status_code==200,response.text
+    item=response.json()["items"][0]
+    report=item["result"]["quality"]["trace_diagnostics"]["alpha2f"]["curves"][0]
+    isolated=next(i for i in report["issues"] if i["kind"]=="isolated")
+    point=isolated["points"][0]
+    assert point["point_id"]==pts[50]["id"] and point["x"]==pts[50]["x"] and point["y"]==pts[50]["y"]
+    assert not any(i["kind"]=="cycle" for i in report["issues"])
+    assert item["result"]["curves"]==saved["result"]["curves"]
+    params={**env["query"],"kind":"alpha2f","collection_version":item["version"],"run_id":item["run"]["id"]}
+    seed=client.get(url+"/manual",params=params).json()
+    assert any(p["id"]==point["point_id"] for p in seed["documents"][0]["curves"][0]["points"])
+    body={**body,"expected_collection_version":item["version"],"base_run_id":item["run"]["id"],"document":seed["documents"][0]}
+    fresh=client.post(url+"/manual",json=body).json()["items"][0]
+    assert "trace_diagnostics" not in fresh["result"]["quality"]
+    assert client.get(url+"/manual",params=params).status_code==409
+    public=mask_public(item["result"],{"a":{"status":"accepted"}})
+    assert "trace_diagnostics" not in public["quality"]
+
+
+def test_topology_dos_reports_all_projections_even_if_units_unavailable():
+    from backend.spectra.topology import diagnose
+    payload=dos_payload()
+    other=copy.deepcopy(payload["curves"][0]);other.update(id="Sc",projection="Sc")
+    other["points"][1]["breakBefore"]=True
+    payload["curves"].append(other)
+    report=diagnose(payload,"phonon_dos")
+    assert report["curves"][0]["issues"]==[]
+    assert report["curves"][1]["curve_id"]=="Sc" and report["curves"][1]["issues"]

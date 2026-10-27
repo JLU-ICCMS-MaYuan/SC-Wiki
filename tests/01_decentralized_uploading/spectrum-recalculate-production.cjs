@@ -68,7 +68,7 @@ async function main(){
   current=(await listing()).items.find(i=>i.id===alpha.id);const points=JSON.stringify(current.result.curves);
   await calculate();current=(await listing()).items.find(i=>i.id===alpha.id);
   assert.equal(current.result.quality.integrals.raw.status,'unavailable');assert(current.result.quality.integrals.raw.reason.includes('缺口'));
-  assert.equal(JSON.stringify(current.result.curves),points);await page.getByText(/λ：曲线存在缺口/).waitFor();check('删点保留缺口，重算显示具体阻塞原因，不跨缺口补点或积分');
+  assert.equal(JSON.stringify(current.result.curves),points);await page.getByText(/λ、ωlog：曲线存在缺口/).waitFor();check('删点保留缺口，重算显示具体阻塞原因，不跨缺口补点或积分');
 
   const dos=(await listing()).items.find(i=>i.result.curves[0].kind==='phonon_dos');
   await page.goto(address(dos));await ready();await calculate();
