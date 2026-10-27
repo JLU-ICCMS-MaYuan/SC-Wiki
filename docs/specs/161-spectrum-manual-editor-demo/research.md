@@ -92,3 +92,14 @@ FR-058→listing增加stale_reasons（historical/source_changed/state_missing/st
 FR-059/060→POST /{collection_id}/revalidate复用权限、集合锁、内容版本/集合版本/基础run校验，唯一例外为允许state_signature不一致；仍要求同state_key存在、来源文件哈希有效、当前同类最新集合，必须confirmed=true。按当前ctx state_signature更新集合，新建immutable run，复制全部点/标定/编辑文档/操作，不重新提取。派生质量清理与manual.save共用，零频按保存文档重建；旧采纳和候选清除。顶层state_revalidation记录来源run、旧/新签名、作者、时间及当前材料摘要；公开过滤移除。
 FR-061→前端确认对话框读取当前材料摘要及原图caption，复核提示只能说明原记录和当前条件，不能伪造旧条件快照。提交携带已展示listing.version/state_key，成功替换listing并导航新版本；随后可继续点击编辑。取消不发写请求；失败保留详情。编辑原因另补原图/材料加载原因，不将幅值警告混作编辑门槛。
 SC-033/034→正式HTTP/当前MySQL并发、浏览器复现state_changed且source有效、取消不写、恢复后编辑/重算、来源变化拒绝、历史和材料删除拒绝、公开字段过滤与Demo保护。用户真实谱保持只读。
+
+
+## 统一预检查与末端策略
+
+FR-062→diagnose在既有O(V+E)拓扑图上增加样本/路径和端点诊断，不因首个异常就停止后续检查。数值积分仍拒绝不安全输入；诊断独立于幅值依据，因此幅值未确认也能先处理形状。
+FR-063→Document.highEndpoint可选{pointId,x,y,frequencyTHz,evidence}，服务器校验来源/曲线身份和有限快照；当前最高频点及快照匹配才有效。高频目标若在图框内且已显式确认，采用实际点频率作为积分上限；未确认且未达图框高端时发high_endpoint，不构造边界幅值。图框本身只作为“覆盖到图框上限”的一种可检验边界，不能强迫用户把真实端点移到上沿。
+FR-064→prepare_repairs对人工文档中的开放片段端点用精确位置/数值键分组，唯一配对且一个为高端、另一个为低端，连接不会形成分叉/环/频率回折时添加joinTo；使用并查集跟踪片段合并，避免全点两两计算。只复制工作payload，在新run及manual_documents操作中记录，不覆盖父run。不删除任何点、不合并近似坐标。积分遍历只折叠具有显式边且原图/数值完全一致的连续重复样本。
+FR-065→删除SpectrumMetrics中的时间/参考JSON渲染；仍保留quality.recalculations/comparisons后台数据。TraceDiagnostics扩充问题类型与参考边界读数，已自动处理项另列。
+SC-035至037→数值/自动修复正反例、proof失效、HTTP持久化/公开过滤、当前MySQL保护与浏览器定位→证据确认→保存→重算、窄屏和Demo哈希。
+
+PhDOS各分波可有不同真实截止；在每条边界已由图框覆盖或显式末端证据独立核对时，分别在各自区间积分后相加，不通过补零或插值凑成公共网格。未全部核对时保留分波截止问题坐标。返回component_intervals记录实际区间；此规则取代此前一概要求同高频端的限制。

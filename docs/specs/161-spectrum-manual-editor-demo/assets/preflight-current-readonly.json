@@ -1,0 +1,40 @@
+{
+  "version": 14,
+  "run_id": "34ae86dbfaae4a2cbc8de3bf07bdb9c3",
+  "read_only": true,
+  "automatic_repairs_preview": [],
+  "report": {
+    "curves": [
+      {
+        "curve_id": "3C-alpha2f",
+        "name": "α²F",
+        "amplitude_unit": "pixel",
+        "point_count": 424,
+        "component_count": 1,
+        "issues": [
+          {
+            "kind": "high_endpoint",
+            "message": "请核对实际高频末端；图框上限只是参考，不要求把曲线延伸到图框边缘",
+            "points": [
+              {
+                "point_id": "3C-alpha2f:p434",
+                "frequency_thz": 64.4839245707294,
+                "amplitude": 0.0,
+                "x": 663,
+                "y": 896
+              }
+            ],
+            "meta": {
+              "actual_thz": 64.4839245707294,
+              "frame_thz": 67.60195434892236,
+              "difference_thz": 3.1180297781929625,
+              "difference_px": 21,
+              "reference_pixel": 875
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "note": "仅内存预检查，未调用业务重算/保存；真实末端需对照原图确认。"
+}

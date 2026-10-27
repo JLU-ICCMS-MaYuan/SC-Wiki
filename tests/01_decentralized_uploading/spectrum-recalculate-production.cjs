@@ -36,10 +36,10 @@ async function main(){
   let current=(await listing()).items.find(i=>i.id===alpha.id),raw=current.result.quality.integrals.raw;
   assert.equal(raw.parameters.lambda.status,'available');assert.equal(raw.parameters.omega_log.status,'available');
   assert.deepEqual(current.result.curves,alpha.result.curves);assert.deepEqual(current.review,{});
-  await page.getByText(/本版本计算时间/).waitFor();
+  assert.equal(await page.getByText(/本版本计算时间/).count(),0);assert.equal(await page.getByText(/参考来源：/).count(),0);
   assert.equal(await page.getByText('04 · 逐点数据核对',{exact:true}).count(),0);assert.equal(await page.getByText(/为什么零频完成/).count(),0);
   check('α²F主动计算真实持久化且不改点，计算中防重复提交，详情移除旧说明和04表');
-  await page.reload();await ready();await page.getByText(/本版本计算时间/).waitFor();check('刷新恢复计算结果与时间，路由指向新运行');
+  await page.reload();await ready();assert.equal(await page.getByText(/本版本计算时间/).count(),0);assert.equal(await page.getByText(/参考来源：/).count(),0);check('刷新恢复计算记录，03不展示时间或原始来源');
 
   await btn('编辑').click();await page.getByRole('application').waitFor();
   assert(await page.getByText('逐点数据',{exact:true}).isVisible());

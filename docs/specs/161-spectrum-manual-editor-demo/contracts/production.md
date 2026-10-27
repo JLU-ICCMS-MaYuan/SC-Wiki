@@ -46,3 +46,12 @@ quality.integrals.raw新增parameters.lambda/omega_log独立status/value/reason�
 
 POST /api/rag/spectra/{id}/revalidate：target/target_id/expected_version/expected_collection_version/base_run_id/kind/state_key/confirmed:true。仅同来源、当前存在的同state_key允许重新确认；不接受点/标定/新材料身份替换。不满足前提409/403/422；成功返回listing和新run。确认说明：沿用当前谱到当前已保存材料条件，不等于科学采纳。
 listing的stale_reasons为historical/source_changed/state_missing/state_changed数组，只读展示。内部state_revalidation不公开。
+
+
+## 真实高频末端与预检查
+
+manual文档highEndpoint可选/null：pointId、x、y、frequencyTHz、evidence。保存时须指向当前最高频点并匹配坐标/THz；依据不得空白。修改导致失效时清空证据，不移动点。缺省旧文档保持未确认。
+trace_diagnostics问题增加high_endpoint/low_endpoint/zero_confirmation/nonzero_zero/negative_amplitude/negative_frequency/nonfinite_sample/duplicate_frequency/frequency_backtrack；高端meta包含actual_thz/frame_thz/difference_thz/difference_px/reference_pixel，points仅含实际点，不伪造目标幅值。
+quality.automatic_repairs[kind]记录本次精确断端连接的曲线/点ID与位置；人工文档写入auto-connect-exact-endpoints操作，源run保持。公开过滤移除内部操作报告，后台参考与时间继续保留。
+
+撤销自动连接以undo-auto-connect操作记录端点ID；再次重算不重新加入同一对连接。DOS的component_intervals记录各分波独立且已核对的实际积分范围；未全部核对时发projection_range定位项，不通过补零对齐。

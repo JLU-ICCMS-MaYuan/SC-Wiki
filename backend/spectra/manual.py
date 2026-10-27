@@ -56,6 +56,7 @@ def editor_document(row, run, curve):
     stored = (run.result_json or {}).get("manual_documents", {}).get(curve["id"])
     if stored:
         doc=copy.deepcopy(stored)
+        doc.setdefault("highEndpoint",None)
         # 返修复制会生成新集合身份，保留点和来源像素，但编辑文档不能仍指向旧集合。
         doc["id"]=f"{row.id}:{curve['id']}"
         doc["source"]["id"]=row.id
@@ -114,7 +115,7 @@ def editor_document(row, run, curve):
                 calibration=dict(direction=direction,frequency=axis_from_result(faxis,fb,"THz"),amplitude=amp,
                                  amplitudeEvidence=spec.get("amplitude_evidence") or ""),
                 curves=[dict(id=curve["id"],name=curve.get("projection") or "α²F",color={"La":"#6256dd","Sc":"#d84491","H":"#07996c"}.get(curve.get("projection"),"#e9526b"),points=points,pathOrdered=True)],
-                zero=None,operations=[],recognizedAxes=reference)
+                zero=None,highEndpoint=None,operations=[],recognizedAxes=reference)
 
 
 def documents(session, ctx, row, run, kind):
@@ -194,6 +195,13 @@ def checked_document(body, seed):
             require(abs(axis_value(cal["frequency"],zero["pixel"])) < 1e-6, "零频位置与标定不一致")
             low,high=(x0,x1) if cal["direction"]=="x" else (y0,y1)
             require(low <= zero["pixel"] <= high, "零频标记不在图框内")
+        endpoint=body.get("highEndpoint")
+        if endpoint is not None:
+            from .preflight import endpoint_valid
+            require(isinstance(endpoint,dict) and set(endpoint)=={"pointId","x","y","frequencyTHz","evidence"}
+                    and all(finite(endpoint.get(k)) for k in ("x","y","frequencyTHz"))
+                    and isinstance(endpoint.get("evidence"),str) and len(endpoint["evidence"])<=4000
+                    and endpoint_valid(body), "高频末端确认与当前最高频点或标定不一致，请重新核对")
         require(isinstance(body["operations"],list) and len(body["operations"]) <= 5000, "操作记录过多")
         for op in body["operations"]:
             require(set(op)=={"kind","at","detail"} and all(isinstance(v,str) and len(v)<=4000 for v in op.values()), "操作记录无效")

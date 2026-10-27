@@ -61,9 +61,9 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
   const mode = q.dos_mode_integral || { status: 'unavailable', reason: '尚无计算结果，请点击重新计算。' }
   const modeAvailable = mode.status === 'available' && !restricted
   const modeComparable=modeAvailable && (mode.comparison_status ? mode.comparison_status==='available' : mode.target_modes != null)
-  const calculation=q.recalculations?.[dos?'phonon_dos':'alpha2f']
   const anyAlphaAvailable=!restricted && Object.values(parameters).some((v:any)=>v.status==='available')
   const diagnostics=q.trace_diagnostics?.[dos?'phonon_dos':'alpha2f']
+  const repairs=q.automatic_repairs?.[dos?'phonon_dos':'alpha2f']||[]
   const reasonGroups=new Map<string,string[]>()
   for(const [key,value] of Object.entries(parameters) as [string,any][]){
     if(value.status!=='available'){
@@ -87,8 +87,10 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
     </TableBody></Table></Box>
     {!restricted && calculationDisabled && calculationDisabledReason && <Typography variant="body2" color="text.secondary" sx={{mt:1}}>{calculationDisabledReason}</Typography>}
     {reasons.map(reason=><Typography key={String(reason)} variant="body2" color="text.secondary" sx={{mt:1}}>{String(reason)}</Typography>)}
+    {!restricted && repairs.length>0 && <Alert severity="success" sx={{mt:2}} data-testid="automatic-repairs">
+      已自动处理 {repairs.length} 处像素和数值完全重合的唯一断端，全部点与坐标保留。
+      {repairs.map((repair:any,i:number)=><Box key={i}>{repair.points?.slice(0,1).map((point:any)=><Button key={point.point_id} size="small" disabled={!onLocate} onClick={()=>onLocate?.(repair.curve_id,point.point_id)}>查看自动连接 ({spectrumNumber(point.x,6)}, {spectrumNumber(point.y,6)})</Button>)}</Box>)}
+    </Alert>}
     {!restricted && diagnostics && <TraceDiagnostics key={item.run.id} report={diagnostics} onLocate={onLocate} disabled={recalculating||calculationDisabled}/> }
-    {calculation && <Typography variant="caption" display="block" sx={{mt:1}}>本版本计算时间：{new Date(calculation.calculated_at).toLocaleString()}</Typography>}
-    {!dos && !restricted && ['lambda','omega_log'].map(key=>comparisons[key]?.source && <Typography variant="caption" display="block" key={key}>参考来源：{typeof comparisons[key].source==='string'?comparisons[key].source:JSON.stringify(comparisons[key].source)}</Typography>)}
   </DetailSection>
 }

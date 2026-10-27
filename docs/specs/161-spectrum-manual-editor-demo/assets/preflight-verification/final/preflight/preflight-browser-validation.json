@@ -1,0 +1,65 @@
+{
+  "checks": [
+    "高频末端低于图框时给出实际端点、参考边界和差距，03无时间或来源JSON",
+    "坐标直达真实末端，确认可撤销重做，保存重算按5.95截止，不移动/增加任何点",
+    "移动末端后原确认自动失效，保存重算重新给出准确坐标，不沿用旧确认",
+    "唯一完全重合断端先自动连接并成功计算，点数/坐标/数值保持且有修订记录",
+    "自动连接可定位检查、撤销重做并保存；再次重算尊重已撤销连接，不自动加回",
+    "PhDOS末端同样可定位到正确分波并确认，390px布局无溢出"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab2d50f32eea42019cf2b7006e3f3de0/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab2d50f32eea42019cf2b7006e3f3de0/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab2d50f32eea42019cf2b7006e3f3de0/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab2d50f32eea42019cf2b7006e3f3de0/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab2d50f32eea42019cf2b7006e3f3de0/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab2d50f32eea42019cf2b7006e3f3de0/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab2d50f32eea42019cf2b7006e3f3de0/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab2d50f32eea42019cf2b7006e3f3de0/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/97ea562271b141c4b6ae9a12ca95d9e3/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/97ea562271b141c4b6ae9a12ca95d9e3/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/97ea562271b141c4b6ae9a12ca95d9e3/recalculate"
+    }
+  ],
+  "screenshots": [
+    "preflight-endpoint-problem.png",
+    "preflight-endpoint-confirmed-editor.png",
+    "preflight-actual-range-result.png",
+    "preflight-auto-connected.png",
+    "preflight-dos-mobile-endpoint.png"
+  ],
+  "status": "passed"
+}

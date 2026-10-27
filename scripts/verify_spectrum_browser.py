@@ -13,6 +13,7 @@ import time
 import urllib.request
 
 SUITES = {
+    "preflight": "spectrum-preflight-production.cjs",
     "revalidation": "spectrum-revalidation-production.cjs",
     "version": "spectrum-version-production.cjs",
     "manual": "spectrum-manual-production.cjs",

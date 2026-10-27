@@ -45,3 +45,6 @@ quality.trace_diagnostics为重算派生JSON，无DDL；点坐标及ID由保存�
 
 ## 材料确认版本
 复用SpectrumRun，无DDL。state_revalidation记录base_run_id、previous_state_signature、state_signature、author_id、confirmed_at及material_summary；旧run保留。数值点/标定/编辑文档原样复制，派生积分与采纳清空。
+
+## 高频末端证据及自动修订
+Document.highEndpoint存人工确认快照，默认为空；不是科学采纳。quality.automatic_repairs为本次可追溯连接报告，全部点及其ID保留；重算创建新run。后台已有时间/参考信息保留，前端03不展示。

@@ -40,3 +40,16 @@ it('DOS积分可显示而3N比较缺失，未完成分波有独立入口',()=>{
   expect(screen.getByText('12')).toBeVisible();expect(screen.getByText('缺少原胞依据')).toBeVisible()
   fireEvent.click(screen.getByRole('button',{name:'继续核对 H'}));expect(onContinue).toHaveBeenCalledWith('a')
 })
+
+
+it('03移除计算时间和所有来源JSON，但不影响结果或后台数据',()=>{
+  const data=item()
+  data.result.quality!.recalculations={alpha2f:{calculated_at:'2026-10-27T01:00:00Z'}}
+  data.result.quality!.comparisons={raw:{omega_log:{status:'unavailable',source:{quote:'秘密的内部原始JSON字段',file_id:'internal'}}}}
+  render(<SpectrumMetrics item={data} curves={data.result.curves} history={false}/>)
+  expect(screen.queryByText(/本版本计算时间/)).toBeNull()
+  expect(screen.queryByText(/参考来源/)).toBeNull()
+  expect(screen.queryByText(/秘密的内部原始JSON字段/)).toBeNull()
+  expect(screen.getByText('106.123')).toBeVisible()
+  expect(data.result.quality!.recalculations.alpha2f.calculated_at).toBeTruthy()
+})

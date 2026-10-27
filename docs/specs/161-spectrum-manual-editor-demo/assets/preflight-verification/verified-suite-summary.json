@@ -1,0 +1,35 @@
+{
+  "suites": [
+    {
+      "suite": "preflight",
+      "status": "passed",
+      "checks": 6,
+      "report": "assets/preflight-verification/final/preflight/preflight-browser-validation.json"
+    },
+    {
+      "suite": "recalculate",
+      "status": "passed",
+      "checks": 8,
+      "report": "assets/preflight-verification/final/recalculate/recalculate-browser-validation.json"
+    },
+    {
+      "suite": "diagnostics",
+      "status": "passed",
+      "checks": 7,
+      "report": "assets/preflight-verification/final/diagnostics/diagnostics-browser-validation.json"
+    },
+    {
+      "suite": "revalidation",
+      "status": "passed",
+      "checks": 8,
+      "report": "assets/preflight-verification/final/revalidation/revalidation-browser-validation.json"
+    },
+    {
+      "suite": "manual",
+      "status": "passed",
+      "checks": 15,
+      "report": "assets/preflight-verification/final/manual/snap-production-browser-validation.json"
+    }
+  ],
+  "total_checks": 44
+}

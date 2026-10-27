@@ -13,8 +13,9 @@ from .contracts import fingerprint
 from .digitize import spectral_integrals
 from .engine import comparison, unavailable
 from .topology import build_graph, graph_parts, diagnose
+from .preflight import high_info, coincident, prepare_repairs
 
-VERSION = "spectra-recalculate-v2"
+VERSION = "spectra-recalculate-v3"
 
 
 def demand(condition, reason):
@@ -43,6 +44,13 @@ def connected_samples(curve, document=None):
             break
         current = next(iter(next_ids))
     demand(len(seen) == len(points), "曲线存在未连接片段，不能跨缺口积分")
+    samples=[]
+    for p in ordered:
+        if samples and coincident(samples[-1],p):
+            continue
+        samples.append(p)
+    ordered=samples
+    demand(len(ordered)>=2, "至少需要两个不同的有效采样位置")
     f = [p.get("frequency_thz") for p in ordered]
     a = [p.get("reconstructed_amplitude") for p in ordered]
     demand(all(manual.finite(v) for v in f + a), "曲线含缺失或非有限数值")
@@ -64,16 +72,9 @@ def connected_samples(curve, document=None):
     f[0] = 0.
     if document is not None:
         demand(manual.zero_report(document)["complete"], "当前曲线的零频位置或零频点尚未确认")
-    axis = curve.get("axis_calibration", {}).get("frequency")
-    roi = curve.get("roi")
-    if axis and roi:
-        bounds = (roi[0], roi[2]) if curve.get("frequency_direction") == "x" else (roi[1], roi[3])
-        if document:
-            plot = document["source"]["plot"]
-            bounds = (plot[0], plot[2]) if document["calibration"]["direction"] == "x" else (plot[1], plot[3])
-        upper = max(axis["slope"] * p + axis["intercept"] for p in bounds)
-        demand(math.isclose(f[-1], upper, rel_tol=1e-10, abs_tol=1e-10),
-               "曲线未覆盖当前图框的完整高频端，请核对末端数据")
+    endpoint = high_info(curve,document)
+    demand(endpoint is None or endpoint["confirmed"],
+           "高频末端尚待核对，请点击下方末端坐标；图框上限不等于曲线真实截止")
     return f, a
 
 
@@ -132,12 +133,14 @@ def dos_integrals(payload, primitive):
             f, a = connected_samples(curve, payload.get("manual_documents", {}).get(curve["id"]))
             integrals[curve["id"]] = math.fsum((y-x)*(v+w)/2 for x,y,v,w in zip(f,f[1:],a,a[1:]))
             intervals.append([f[0], f[-1]])
-        demand(all(math.isclose(interval[1], intervals[0][1], rel_tol=1e-10, abs_tol=1e-10) for interval in intervals),
-               "DOS各分波覆盖的频率范围不一致")
+        same_ends=all(math.isclose(interval[1],intervals[0][1],rel_tol=1e-10,abs_tol=1e-10) for interval in intervals)
+        boundaries=[high_info(c,payload.get("manual_documents",{}).get(c["id"])) for c in curves]
+        demand(same_ends or all(b and b["confirmed"] for b in boundaries),
+               "DOS分波截止不同且未全部核对，请检查下方各分波末端坐标")
         value = math.fsum(integrals.values())
         demand(math.isfinite(value), "DOS积分数值溢出")
         result = dict(status="available", integral=value, component_integrals=integrals,
-                      frequency_interval_thz=intervals[0], comparison_status="unavailable",
+                      frequency_interval_thz=[0.,max(v[1] for v in intervals)], component_intervals=dict(zip((c["id"] for c in curves),intervals)), comparison_status="unavailable",
                       reason="缺少原胞原子数或每原胞绝对密度依据，暂不比较3N")
         atoms = (primitive or {}).get("primitive_atoms")
         if units == {"modes/THz/primitive_cell"} and isinstance(atoms, int) and not isinstance(atoms, bool) and atoms > 0:
@@ -153,7 +156,10 @@ def save(session, ctx, row, run, state, kind, user):
     manual.assert_latest(session, ctx, row, kind)
     payload = copy.deepcopy(run.result_json)
     manual.require(any(c["kind"] == kind for c in payload["curves"]), "当前谱类型没有可计算数据")
+    now = datetime.now(timezone.utc)
+    repairs = prepare_repairs(payload,kind,now.isoformat())
     quality = payload.setdefault("quality", {})
+    quality.setdefault("automatic_repairs",{})[kind]=repairs
     quality.setdefault("trace_diagnostics", {})[kind] = diagnose(payload, kind)
     if kind == "alpha2f":
         raw = alpha_integrals(payload)
@@ -165,7 +171,6 @@ def save(session, ctx, row, run, state, kind, user):
             for name in ("lambda", "omega_log")}}
     else:
         quality["dos_mode_integral"] = dos_integrals(payload, primitive_for(state, ctx.get("draft", {})))
-    now = datetime.now(timezone.utc)
     quality.setdefault("recalculations", {})[kind] = dict(base_run_id=run.id, calculated_at=now.isoformat(),
                                                          author_id=user.id, algorithm_version=VERSION)
     payload["status"] = "needs_review"

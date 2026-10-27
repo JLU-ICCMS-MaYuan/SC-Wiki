@@ -2,10 +2,10 @@ import { useState } from 'react'
 import { Box, Button, Typography } from '@mui/material'
 
 type Location = { point_id: string; frequency_thz: number | null; amplitude: number | null; x: number | null; y: number | null }
-type Issue = { kind: string; message: string; points: Location[] }
+type Issue = { kind: string; message: string; points: Location[]; meta?:{actual_thz:number;frame_thz:number;difference_thz:number;difference_px:number|null;reference_pixel:number} }
 export type TraceReport = { curves: { curve_id: string; name: string; amplitude_unit: string; component_count: number; point_count: number; issues: Issue[] }[] }
 const number = (value: number | null) => value != null && Number.isFinite(value) ? Number(value.toFixed(6)).toString() : '未知'
-const names: Record<string, string> = { disconnected:'未连接片段', isolated:'孤立点', cycle:'闭环', branch:'分叉', invalid:'连接无效' }
+const names: Record<string, string> = { disconnected:'未连接片段', isolated:'孤立点', cycle:'闭环', branch:'分叉', invalid:'连接无效',high_endpoint:'高频末端待核对',low_endpoint:'零频覆盖不足',zero_confirmation:'零频待确认',nonzero_zero:'零频幅值需核对',negative_amplitude:'负幅值',negative_frequency:'负频率',nonfinite_sample:'缺少有效数值',duplicate_frequency:'频率重复',frequency_backtrack:'频率回折',projection_range:'分波截止待核对' }
 
 export default function TraceDiagnostics({report, onLocate, disabled=false}: {
   report: TraceReport; onLocate?: (curveId:string,pointId:string)=>void; disabled?:boolean
@@ -20,6 +20,9 @@ export default function TraceDiagnostics({report, onLocate, disabled=false}: {
     {issues.slice(current*12,(current+1)*12).map(({curve,issue},i)=><Box key={current*12+i} sx={{mt:1,p:1,border:1,borderColor:'divider',borderRadius:1}} data-issue-kind={issue.kind}>
       <Typography variant="body2" fontWeight={600}>{curve.name} · {names[issue.kind]||issue.kind}</Typography>
       <Typography variant="body2" color="text.secondary">{issue.message}</Typography>
+      {issue.meta && <Typography variant="body2" data-testid="endpoint-difference">
+        实际末端 {number(issue.meta.actual_thz)} THz · 图框参考上限 {number(issue.meta.frame_thz)} THz · 相差 {number(issue.meta.difference_thz)} THz / {number(issue.meta.difference_px)} px（频率轴参考位置 {number(issue.meta.reference_pixel)} px）
+      </Typography>}
       {issue.points.map(point=>{
         const located=point.x!=null && point.y!=null
         const label=`原图 (x=${number(point.x)}, y=${number(point.y)}) px`

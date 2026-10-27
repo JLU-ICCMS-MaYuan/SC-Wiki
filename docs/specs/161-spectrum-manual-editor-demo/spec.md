@@ -489,3 +489,29 @@ ok
 
 截图1，ID revalidate-user-1，codex-clipboard-ea80f64c-86f6-48ba-b44d-be89bb75a055.png→assets/revalidate-user-1.png，SHA256 0d326d703599bf78377aa5edc459b2ecfbf699d74e3c26d86151010a4a56d603，原图可读，仅作材料。
 截图2，ID revalidate-user-2，codex-clipboard-fd88b5ec-f4f9-4fed-9119-b56358510c04.png→assets/revalidate-user-2.png，SHA256 d2f365cc67cd1001a0e9072256115b8097cb76d19a677fec182316c7d6a1a20e，原图可读，仅作材料。
+
+
+## 计算前检查、真实末端与问题处理闭环
+
+### 原始需求追加
+
+刚刚又报出“λ、ωlog：曲线未覆盖当前图框的完整高频端，请核对末端数据”这个错。这是为什么。而且：在 03下面写这么一堆：**本版本计算时间：2026/10/27 12:29:12参考来源：{"quote":"Table 1. The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa).","file_id":"fc404abeb1e74ac2bd33d8691af97564","section":"Predicted hot superconductivity in LaSc2H24 under pressure","chunk_id":null,"page_end":4,"page_start":4,"chunk_index":21,"origin_kind":null,"source_name":"2024 La-Sc-H 何新玲.pdf","section_role":"result","locator_status":"verified_text_layer"}参考来源：{"quote":"Table 1. The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa).","file_id":"fc404abeb1e74ac2bd33d8691af97564","section":"Predicted hot superconductivity in LaSc2H24 under pressure","chunk_id":null,"page_end":4,"page_start":4,"chunk_index":21,"origin_kind":null,"source_name":"2024 La-Sc-H 何新玲.pdf","section_role":"result","locator_status":"verified_text_layer"}**
+对于我解决λ、ωlog：曲线未覆盖当前图框的完整高频端，请核对末端数据一点用都没有。我之前说：给我坐标，然后点击坐标后，自动跳转到编辑页面里面。我看看到底是哪里出现了缺口或者闭环或者未核对的末端数据，我来手动删除调整这些点。而且你为什么自己不能优先把“缺口或者闭环或者未核对的末端数据”问题先解决好了，再来和我说。你先润色调整我的话，确保你理解了我的需求再开始。
+
+用户确认润色后的六项需求原话：
+
+对，这这个需求去做事。
+
+### 本轮功能与验收
+
+- FR-062：重算统一预检查拓扑、频率异常、非有限/负幅值、零频和高频末端，尽可能一次列出全部可定位问题。各项提供曲线/稳定点ID/频率/幅值/原图坐标，点击进入正确编辑器并居中选点。
+- FR-063：图框上限仅作参考，不等于真实截止。未覆盖上沿时显示实际末端、参考边界、频率/像素差距。支持在编辑器选中当前最高频点、填写原图依据并确认其是真实末端；保存证据与坐标快照，不延伸曲线、不补零点。移动/删除端点、改变频率标定或增加更高频点使确认失效。
+- FR-064：先可靠自动处理再提供人工入口。仅对人工文档中原图像素、频率和幅值完全一致且唯一成对的断端、且可连接成连续单值路径时自动补记连接；保留全部点和ID，记录操作与基础run。近似相邻、环、分叉或缺失曲线值不自动猜接/删点。完全重合的显式连接在积分副本中按一个样本计算，源点不删除。
+- FR-065：03主区域只显示结果/问题/处理入口，移除计算时间及所有重复来源JSON；后台时间、参考来源和修订依据保留。
+- SC-035：缺口/闭环/频率异常/零频/高频末端均有精确定位；确认真实截止低于图框上沿后可按实际频段积分，确认失效后重新提示，无假造目标幅值。
+- SC-036：安全自动连接有可回查记录，原点/坐标不变，近邻和不安全连接不处理；操作撤销/保存/重算/刷新闭环通过。
+- SC-037：α²F与PhDOS共用，真实HTTP/当前MySQL/浏览器覆盖新增行为，原业务数据只读、Demo及用户参数不变。
+
+沿用#161/type:feature及原关联，更新Spec/契约/验收/Overview。用户已确认本轮需求；可靠自动修复限定在可证明的表示性连接，不扩展为依据不足的曲线重建。旧URL恢复问题V1至V4仍独立。
+
+本轮截图1：codex-clipboard-2e7949b6-7584-4b99-9d41-047702d29e16.png→assets/preflight-user-request.png，SHA256 771f08a21bea24b3ccb83cdcb8c627cf0fc0fefa43c3c23b21d11d7e8e1e1b7b；原图可读，仅作为问题材料。

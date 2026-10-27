@@ -175,6 +175,7 @@ def mask_public(payload, reviews):
     output.get("quality", {}).pop("manual_zero_checks", None)
     output.get("quality", {}).pop("recalculations", None)
     output.get("quality", {}).pop("trace_diagnostics", None)
+    output.get("quality", {}).pop("automatic_repairs", None)
     selected = []
     for curve in output.get("curves") or []:
         decision = reviews.get(curve["id"], {})
