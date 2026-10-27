@@ -7,7 +7,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 // JSDOM没有图像布局API；真实缩放/平移由浏览器回归验证。
 Object.defineProperty(globalThis,'ResizeObserver',{configurable:true,value:class {observe(){} unobserve(){} disconnect(){}}})
 Object.defineProperty(SVGElement.prototype,'getScreenCTM',{configurable:true,value:()=>({a:1})})
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom'
 import { PropertySpectraProvider, PropertySpectrumControls, PropertySpectrumSection, PropertySpectrumState, MissingPropertySpectrumModules, UnassignedPropertySpectra } from '../../frontend/src/components/PropertySpectra'
 import PropertyModuleEditor from '../../frontend/src/components/PropertyModuleEditor'
 import { emptyPropertyModule } from '../../frontend/src/lib/propertyModules'
@@ -117,7 +117,7 @@ it('详情不再展示重复点表，缺失曲线不展示伪积分', async () =
   expect(within(screen.getAllByRole('table').at(-1)!).queryByText('2.2')).not.toBeInTheDocument()
 })
 
-it.each(['state_key=other', 'collection_version=1', 'run=old'])('直接路由拒绝不匹配身份 %s', async replace => {
+it.each(['state_key=other', 'curve=missing'])('直接路由拒绝不匹配身份 %s', async replace => {
   const key = replace.split('=')[0]
   const url = address().replace(new RegExp(`${key}=[^&]*`), replace)
   render(<MemoryRouter initialEntries={[url]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage />} /></Routes></MemoryRouter>)
@@ -125,6 +125,28 @@ it.each(['state_key=other', 'collection_version=1', 'run=old'])('直接路由拒
   expect(api.download).not.toHaveBeenCalled()
   expect(screen.queryByRole('table')).not.toBeInTheDocument()
 })
+it.each(['collection_version=1','run=old'])('旧版本地址自动使用最新结果并替换URL：%s', async replace=>{
+ const key=replace.split('=')[0],url=address().replace(new RegExp(key+'=[^&]*'),replace)
+ function Probe(){const location=useLocation(),navigate=useNavigate();return <><output data-testid="current-address">{location.pathname+location.search}</output><button onClick={()=>navigate(-1)}>测试后退</button></>}
+ render(<MemoryRouter initialEntries={['/previous',url]} initialIndex={1}><Probe/><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage/>}/><Route path="/previous" element={<div>前一页</div>}/></Routes></MemoryRouter>)
+ await screen.findByText('03 · 频段与数据完整性')
+ await waitFor(()=>{
+  const current=new URL('http://local'+screen.getByTestId('current-address').textContent)
+  expect(current.searchParams.get('collection_version')).toBe('2')
+  expect(current.searchParams.get('run')).toBe('run1')
+  expect(current.searchParams.get('curve')).toBe('dos')
+  expect(current.searchParams.get('state_key')).toBe('sample')
+  expect(current.searchParams.get('return')).toBe('/upload')
+ })
+ expect(screen.queryByText('谱版本已变化，请打开最新结果。')).toBeNull()
+ expect(screen.queryByRole('link',{name:'打开最新结果'})).toBeNull()
+ expect(api.download).toHaveBeenCalled()
+ expect(api.post).not.toHaveBeenCalled();expect(api.put).not.toHaveBeenCalled()
+ fireEvent.click(screen.getByRole('button',{name:'测试后退'}))
+ await screen.findByText('前一页')
+ expect(screen.getByTestId('current-address')).toHaveTextContent('/previous')
+})
+
 it('接口失败明确呈现，不能以示例曲线填充', async () => {
   vi.mocked(api.get).mockRejectedValue(new Error('谱服务尚未迁移'))
   mountEdit()

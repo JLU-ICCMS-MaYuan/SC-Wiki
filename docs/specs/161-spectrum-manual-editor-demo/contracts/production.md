@@ -61,3 +61,7 @@ highEndpoint已废弃，GET manual不提供，POST manual忽略旧客户端此�
 
 ## 已有线段插入
 沿用manual点契约；插入更新局部前驱/断边/吸附关系，不新增字段。正常邻边插入保存为A—N1—N2—B，原A—B边删除，新增点ID保留，其他边不变。点数组可为满足既有connectTo前驱顺序而插入到原边较后端点前；数值和ID不因重排改变。操作kind=insert-chain保留起点/终点和新增点数。
+
+## 普通查看版本URL
+
+身份通过时，普通详情使用GET列表的当前item；URL中的run/collection_version仅同步为最新值，自动replace导航，无业务写请求。错误target/集合/材料/curve不得通过自动导航绕过。显式历史及编辑/请求进行中暂停自动导航。保存/重算仍携带打开时各级版本并由后端核验；本轮无后端契约变化。

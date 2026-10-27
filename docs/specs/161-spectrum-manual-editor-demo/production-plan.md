@@ -92,3 +92,11 @@ SourceCanvas一次点击终点即完成插入，通知父组件退出工具，�
 复杂度O(n+k)，只在加点/完成插入时线性处理，不增加拖动逐帧计算；源码不依赖Demo。契约沿用既有点字段，无API或表结构变更。
 
 用户追加确认加点也可补接原本未连接点：SourceCanvas仅在本次起点与目标原有直连时调用insertDrawnPoints，其余仍走joinExistingPoint；测试同时覆盖二者，禁止以insertDrawnPoints的直边前提限制appendPoint或普通吸附。会话ID校验使用Set，保持每次操作O(n+k)。
+
+## 普通查看自动同步最新版本
+
+本轮用户明确要求去除额外“打开最新结果”选择。SpectrumDetailPage将身份校验与URL版本差异分开：身份通过即使用当前listing中的item，版本差异只生成同集合/同材料/同曲线的canonical URL并replace导航。自动导航在loading、editorInput、openingEditor、historyOpen/historyItem、recalculating、revalidating/revalidationInput及assigning期间暂停。
+
+没有新增请求、接口或数据库状态；GET列表仍为事实来源，服务端保存/重算的expected_version/collection_version/base_run_id不改。保留编辑器独立快照，旧编辑409继续保护未保存内容。普通URL中的run参数不是永久历史阅读入口，页面内显式选择历史记录继续保持。
+
+FR-073/SC-043对应组件旧URL导航测试和版本浏览器；FR-074/SC-044对应身份拒绝、历史、跨页冲突及响应丢失刷新场景。共享组件单点修改，不拓展为自动重试写请求或跨集合自动合并。

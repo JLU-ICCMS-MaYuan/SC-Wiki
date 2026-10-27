@@ -1,8 +1,8 @@
-// 版本流程特征测试：重现已有缺陷，不把“成功复现”冒充用户体验通过。
+// 普通查看自动追新验收：保留真实HTTP并发保护，全部API仅进入隔离测试服务。
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const runtime=path.join(process.env.HOME,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules');
 const {chromium}=require(require.resolve('playwright',{paths:[runtime]}));
-const backend='http://127.0.0.1:8191',frontend='http://127.0.0.1:5173';
+const backend=process.env.SPECTRUM_TEST_BACKEND||'http://127.0.0.1:8197',frontend=process.env.SPECTRUM_FRONTEND||'http://127.0.0.1:5173';
 const out=process.env.SCWIKI_SPECTRUM_BROWSER_OUT||path.resolve('docs/specs/161-spectrum-manual-editor-demo/assets/full-verification');
 const report={checks:[],findings:[],errors:[],writes:[],screenshots:[]};
 async function main(){
@@ -24,7 +24,7 @@ async function main(){
  for(const p of [page,other]){p.setDefaultTimeout(15000);p.on('pageerror',e=>report.errors.push(e.message))}
  const btn=(p,name)=>p.getByRole('button',{name,exact:true});
  const check=name=>{report.checks.push(name);console.log('PASS',name)};
- const find=(id,message)=>{report.findings.push({id,message});console.log('REPRODUCED',id,message)};
+
  const shot=async(p,name)=>{const file='version-'+name+'.png';await p.screenshot({path:path.join(out,file),fullPage:true});report.screenshots.push(file)};
  const api=async(p)=>{const r=await fetch(backend+p);assert.equal(r.status,200);return r.json()};
  const target={target:'upload',target_id:'manual-test'},query=new URLSearchParams(target).toString();
@@ -32,8 +32,11 @@ async function main(){
  const address=item=>frontend+'/spectra/'+item.id+'?'+new URLSearchParams({...target,state_key:'s1',collection_version:String(item.version),run:item.run.id,curve:item.result.curves[0].id,return:'/upload'});
  const ready=async p=>{await btn(p,'编辑').waitFor();await p.waitForFunction(()=>{const b=Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='编辑');return b&&!b.disabled})};
  const recalc=async p=>{const old=p.url();await btn(p,'重新计算').click();await p.waitForURL(u=>u.href!==old);await ready(p)};
- const mismatch=async p=>{await p.getByRole('alert').filter({hasText:'谱版本已变化，请打开最新结果。'}).waitFor();assert.equal(await p.getByText('02 · 原图与提取结果',{exact:true}).count(),0)};
- const openLatest=async p=>{await p.getByRole('link',{name:'打开最新结果',exact:true}).click();await ready(p)};
+ const automaticLatest=async(p,expected)=>{
+   await ready(p);await p.waitForURL(u=>u.searchParams.get('run')===new URL(expected).searchParams.get('run'));
+   assert.equal(await p.getByRole('link',{name:'打开最新结果',exact:true}).count(),0);
+   assert.equal(await p.getByText('谱版本已变化，请打开最新结果。',{exact:true}).count(),0);
+ };
  try{
   let data=await listing(),alpha=data.items.find(i=>i.result.curves[0].kind==='alpha2f');
   const originalUrl=address(alpha);
@@ -43,17 +46,13 @@ async function main(){
   await other.goto(originalUrl);await ready(other);
   await recalc(page);const newUrl=page.url();await page.reload();await ready(page);assert.equal(page.url(),newUrl);
   check('本页主动重算→新版本地址→刷新正常');
-  await other.reload();await mismatch(other);assert.equal(other.url(),originalUrl);await shot(other,'stale-after-refresh');
-  find('V1','两个标签页打开同版本，一个重算后另一个刷新，旧地址触发整页版本错误。');
-  const getResponse=other.waitForResponse(r=>r.url().includes('/api/rag/spectra?')&&r.request().method()==='GET');
-  await btn(other,'重新读取').click();await getResponse;await mismatch(other);
-  assert.equal(other.url(),originalUrl);await shot(other,'reread-still-stale');
-  find('V2','重新读取只更新数据，不更新URL版本，因此仍停留在同一个错误页。');
-  const countBefore=report.writes.length;await openLatest(other);
-  assert.equal(other.url(),newUrl);assert.equal(report.writes.length,countBefore);
-  check('打开最新结果可恢复页面且不写数据库');
-  await page.goto(originalUrl);await mismatch(page);await openLatest(page);
-  check('重用旧链接稳定复现同样提示，打开最新结果可恢复');
+  const countBefore=report.writes.length;
+  await other.reload();await automaticLatest(other,newUrl);assert.equal(other.url(),newUrl);await shot(other,'auto-latest-after-refresh');
+  assert.equal(report.writes.length,countBefore);
+  check('另一标签页重算后，旧页刷新自动使用最新版本和URL，无额外选择或写请求');
+  await page.goto(originalUrl);await automaticLatest(page,newUrl);
+  assert.equal(report.writes.length,countBefore);
+  check('重用旧链接自动恢复同一谱最新结果，无恢复按钮');
 
   // 人工保存使用真编辑器，检查生成的新地址刷新稳定。
   await btn(page,'编辑').click();await page.getByRole('application').waitFor();
@@ -62,8 +61,8 @@ async function main(){
   const savedUrl=page.url();await page.reload();await ready(page);assert.equal(page.url(),savedUrl);
   const saved=(await listing()).items.find(i=>i.id===alpha.id);assert.equal(saved.result.curves[0].points[50].reconstructed_amplitude,.08);
   check('本页编辑保存→新版本地址→刷新正常，人工点持久化');
-  await other.reload();await mismatch(other);await openLatest(other);
-  check('另一标签页人工保存也使旧详情地址失效，恢复链接有效');
+  await other.reload();await automaticLatest(other,savedUrl);
+  check('另一标签页人工保存后，旧地址刷新直接恢复最新结果');
 
   // 编辑器打开后竞争写入，必须保持未保存输入。
   await btn(other,'编辑').click();await other.getByRole('application').waitFor();
@@ -91,26 +90,28 @@ async function main(){
   await btn(page,'重新计算').click();await page.getByRole('alert').waitFor();
   const persisted=(await listing()).items.find(i=>i.id===alpha.id);assert.notEqual(persisted.run.id,current.run.id);
   await btn(page,'重新计算').click();await page.getByRole('alert').filter({hasText:/版本已变化/}).waitFor();
-  await page.reload();await mismatch(page);await shot(page,'lost-response-refresh');
-  find('V3','重算已提交但响应丢失时，页面地址未升级；重试遇到409，刷新后仍显示旧版本错误，需要打开最新结果。');
-  await openLatest(page);check('响应丢失后最新运行仍可恢复，无谱数据丢失');
+  const writesBeforeRecovery=report.writes.length;
+  await page.reload();await automaticLatest(page,address(persisted));await shot(page,'lost-response-refresh');
+  assert.equal(report.writes.length,writesBeforeRecovery);
+  check('响应丢失后刷新自动恢复服务端已保存运行，不重复提交计算');
+
 
   // DOS使用同一正式路由，重复刷新/陈旧链接测试。
   const dos=(await listing()).items.find(i=>i.result.curves[0].kind==='phonon_dos'),dosUrl=address(dos);
   await page.goto(dosUrl);await ready(page);await other.goto(dosUrl);await ready(other);
   await recalc(page);await page.reload();await ready(page);
-  await other.reload();await mismatch(other);await openLatest(other);
-  assert.equal(page.url(),other.url());check('声子DOS同页重算刷新正常、跨页旧版本提示同样可复现');
-  await other.setViewportSize({width:390,height:844});await other.goto(dosUrl);await mismatch(other);
-  await other.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);await shot(other,'mobile-version-error');await openLatest(other);
-  check('窄屏旧版本错误页和恢复链接可操作，无水平溢出');
+  await other.reload();await automaticLatest(other,page.url());
+  assert.equal(page.url(),other.url());check('声子DOS跨页旧版本同样自动恢复当前结果');
+  await other.setViewportSize({width:390,height:844});await other.goto(dosUrl);await automaticLatest(other,page.url());
+  await other.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);await shot(other,'mobile-auto-latest');
+  check('窄屏旧链接自动恢复结果，无额外选择或水平溢出');
 
   // 故意错误身份必须继续拒绝，不能以自动追新掩盖权限/材料错误。
   const u=new URL(page.url());u.searchParams.set('state_key','wrong-state');
   await page.goto(u.href);await page.getByRole('alert').filter({hasText:/不可访问/}).waitFor();
   assert.equal(await btn(page,'编辑').count(),0);check('材料身份不匹配被拒绝，没有打开其他材料或可写编辑器');
   assert.deepEqual(report.errors,[]);assert(report.writes.every(w=>/\/(manual|recalculate)$/.test(w.path)));
-  report.status='characterization_passed';report.acceptance='needs_fix';report.note='成功复现V1/V2/V3不代表版本恢复体验通过；无业务源码修改。';
+  report.status='passed';report.acceptance='auto-latest-refresh-verified';report.note='仅自动恢复同身份普通查看；编辑冲突和身份校验继续保留。';
  }catch(error){report.status='failed';report.failure=error.stack;await shot(page,'failure');throw error}
  finally{fs.writeFileSync(path.join(out,'version-browser-validation.json'),JSON.stringify(report,null,2)+'\n');await browser.close()}
 }

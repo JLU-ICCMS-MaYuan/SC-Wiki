@@ -154,3 +154,10 @@ T048测试执行已完成，V1至V4版本恢复问题仍未修复，不能据此
 - [x] T062 单元/HTTP/MySQL/浏览器双谱验证、Overview与Demo保护、提交。
 
 本轮插点与补接验收：前端73项、后端148项/3项SQLite跳过、当前MySQL97项、横纵轴插点各5场景/普通编辑15场景/诊断7场景共32场景及构建通过。见insert-validation.md。
+
+## 普通查看自动同步最新版本
+
+- [x] T063 在frontend/src/pages/SpectrumDetailPage.tsx分离身份校验与版本URL同步，普通查看自动replace到最新同身份结果，保护历史和未保存编辑。
+- [x] T064 更新tests/01_decentralized_uploading/property-spectra-navigation.test.tsx和spectrum-version-production.cjs，验证旧链接/刷新/并发/历史/错误身份/响应丢失；同步Overview与验证记录，仅任务文件本地提交。
+
+T063/T064证据见auto-latest-validation.md：103项前端、构建和12组隔离正式浏览器通过。此前T048关于V1/V2及V3刷新阻断的结论由本轮修复取代；未增加焦点轮询或自动写重试。

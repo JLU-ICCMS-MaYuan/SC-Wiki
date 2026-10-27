@@ -41,8 +41,7 @@ export default function SpectrumDetailPage() {
   const mismatch = !target ? '谱详情地址缺少有效目标。'
     : listing && (!item || (curveId ? !routeCurve : Boolean(item.result.curves.length)) || (item.state_key || 'unassigned') !== params.get('state_key'))
       ? '该目标或材料状态下的谱曲线不可访问，可能已删除或没有查看权限。'
-      : item && (String(item.version) !== params.get('collection_version') || (params.get('run') && item.run.id !== params.get('run')))
-        ? '谱版本已变化，请打开最新结果。' : ''
+      : ''
   const validItem = !mismatch ? item : undefined
   const selected = historyItem || validItem
   const kind = routeCurve?.kind === 'phonon_dos' || !routeCurve && params.get('kind') === 'phonon_dos' ? 'phonon_dos' : 'alpha2f'
@@ -51,6 +50,14 @@ export default function SpectrumDetailPage() {
   const primary = fallback
   const group = validItem?.state_key ? spectrumGroups(listing?.items || [], validItem.state_key).find(value => value.kind === kind) : undefined
   const historical = Boolean(historyItem || group && group.item.id !== validItem?.id)
+  const versionChanged = Boolean(validItem && (String(validItem.version) !== params.get('collection_version') || (params.get('run') && validItem.run.id !== params.get('run'))))
+  const latestPath = versionChanged && target && validItem
+    ? spectrumDetailPath(target, validItem, safeSpectrumReturn(params.get('return')), routeCurve, kind) : ''
+  useEffect(() => {
+    // 普通查看跟随当前可访问结果；编辑快照和主动历史查看仍独立保护。
+    if (!latestPath || loading || editorInput || openingEditor || historyOpen || historyItem || recalculating || revalidating || revalidationInput || assigning) return
+    navigate(latestPath, { replace: true })
+  }, [latestPath, loading, editorInput, openingEditor, historyOpen, historyItem, recalculating, revalidating, revalidationInput, assigning, navigate])
   const attempt = Boolean(validItem && !hasSpectrumData(validItem))
   const unassigned = Boolean(validItem && (!validItem.state_key || statesLoaded && !material))
   const calibration = validItem?.result.calibration
@@ -211,7 +218,6 @@ export default function SpectrumDetailPage() {
     } catch (error: any) { if (request === historyRequest.current) setActionError('历史结果读取失败：' + error.message) }
   }
   const title = routeCurve ? spectrumNames[kind] + '解析详情' : attempt ? '谱提取记录' : '谱图候选 · 核对归属'
-  const latestLink = target && item ? spectrumDetailPath(target, item, safeSpectrumReturn(params.get('return')), routeCurve || item.result.curves[0]) : ''
   return <Box sx={{ minWidth: 0, pb: 4 }}>
     <Button component="a" href={safeSpectrumReturn(params.get('return'))}>返回原模块</Button>
     <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, flexWrap: 'wrap', my: 2 }}>
@@ -219,7 +225,7 @@ export default function SpectrumDetailPage() {
       {selected && <Box><Button onClick={() => void download('json')}>导出 JSON</Button><Button onClick={() => void download('csv')}>导出 CSV</Button></Box>}
     </Box>
     {loading && <Typography role="status">正在读取谱结果…</Typography>}
-    {(error || mismatch) && <Alert severity="error">{mismatch || '谱数据暂不可读取：' + error}<Button onClick={reload}>重新读取</Button>{mismatch && item && <Button component="a" href={latestLink}>打开最新结果</Button>}</Alert>}
+    {(error || mismatch) && <Alert severity="error">{mismatch || '谱数据暂不可读取：' + error}<Button onClick={reload}>重新读取</Button></Alert>}
     {selected && <>
       <DetailSection title="01 · 材料与来源">
         <Typography fontWeight={700}>{historical ? selected.recorded_caption || '历史提取 · 材料条件以该次标定为准' : attempt ? '尚未生成可分配的谱数据' : unassigned ? '归属待确认' : material || '正在读取材料状态…'}</Typography>

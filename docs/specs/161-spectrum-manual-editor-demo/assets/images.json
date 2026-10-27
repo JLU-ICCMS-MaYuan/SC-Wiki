@@ -171,6 +171,25 @@
         1424
       ],
       "verification": "2026-10-26 原字节复制、重新解码及哈希核对，未推送。"
+    },
+    {
+      "id": "IMG-VERSION-AUTO-001",
+      "upload_order": 10,
+      "original_name": "codex-clipboard-2aa71038-c550-4d18-b7c3-b8a8abe8adf3.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/version-auto-latest-user.png",
+      "status": "local_verified",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3258,
+        610
+      ],
+      "sha256": "5592b9b80f32199750bc43055860f6424b7561e380a17606e8f6b3b70ad28e6d",
+      "user_context": "为什么每次修改代码之后，刷新页面，你都要我选择一次：打开最新结果。你直接给我正常的好用的页面就行了啊。为什么每次让我选择。",
+      "related": [
+        "FR-073",
+        "SC-043"
+      ],
+      "verification": "2026-10-27原字节归档并重读校验哈希/尺寸，完整解码在验证阶段核验；Pillow完整解码通过"
     }
   ]
 }

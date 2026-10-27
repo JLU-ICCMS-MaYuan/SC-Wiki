@@ -121,3 +121,9 @@ SourceCanvas一次点击终点即完成插入，通知父组件退出工具，�
 复杂度O(n+k)，只在加点/完成插入时线性处理，不增加拖动逐帧计算；源码不依赖Demo。契约沿用既有点字段，无API或表结构变更。
 
 用户追加确认加点也可补接原本未连接点：SourceCanvas仅在本次起点与目标原有直连时调用insertDrawnPoints，其余仍走joinExistingPoint；测试同时覆盖二者，禁止以insertDrawnPoints的直边前提限制appendPoint或普通吸附。会话ID校验使用Set，保持每次操作O(n+k)。
+
+## 版本恢复改为普通查看自动追新
+
+已确认根因在SpectrumDetailPage的mismatch：run/collection_version变化会令validItem为空，且reload只刷新列表、不会改变URL。旧spectrum-version-production.cjs已记录V1/V2/V3重现。
+
+设计采用同身份下读取最新item，并把版本参数同步为该item的版本。使用navigate(...,{replace:true})避免回退栈累积旧链接；明确身份失败继续阻断。历史查看与打开编辑器/写请求期间不导航，写入仍使用独立打开快照。拒绝直接删除后端版本校验或自动重新提交POST，因为会覆盖编辑或重复运行。旧链接能自恢复即可解决本轮刷新问题，不增加后台轮询。
