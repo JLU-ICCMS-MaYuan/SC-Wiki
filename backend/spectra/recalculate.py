@@ -1,4 +1,4 @@
-"""对当前保存谱主动积分；不重新读图、不修补点、不授予科学采纳。"""
+"""对当前保存谱重算；受限修正微小回折，不重新读图、不授予科学采纳。"""
 from __future__ import annotations
 
 import copy
@@ -11,11 +11,12 @@ from .context import primitive_for, reference_choices, composition_for
 from .contracts import fingerprint
 from .topology import diagnose
 from .preflight import prepare_repairs
+from .frequency_repair import repair_frequencies
 from .samples import connected_samples
 from .relative import calculate_alpha, pixel_curve
 from .dos import calculate_dos, dos_integrals, apply_dos
 
-VERSION = "spectra-recalculate-dos-relative-v2"
+VERSION = "spectra-recalculate-frequency-repair-v1"
 
 
 def alpha_integrals(payload, references=None):
@@ -31,6 +32,7 @@ def save(session, ctx, row, run, state, kind, user):
     repairs = prepare_repairs(payload,kind,now.isoformat())
     quality = payload.setdefault("quality", {})
     quality.setdefault("automatic_repairs",{})[kind]=repairs
+    quality.setdefault("frequency_repairs",{})[kind]=repair_frequencies(payload,kind,now.isoformat())
     diagnostic_payload=payload
     if kind=="alpha2f":
         try:

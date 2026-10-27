@@ -1,0 +1,17 @@
+[
+  {
+    "point_count": 1000,
+    "elapsed_seconds": 0.003379916975973174,
+    "corrected_points": 2
+  },
+  {
+    "point_count": 5000,
+    "elapsed_seconds": 0.01557675001095049,
+    "corrected_points": 2
+  },
+  {
+    "point_count": 20000,
+    "elapsed_seconds": 0.11415216702152975,
+    "corrected_points": 2
+  }
+]

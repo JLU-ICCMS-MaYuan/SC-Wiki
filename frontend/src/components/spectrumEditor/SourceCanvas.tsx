@@ -206,10 +206,11 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       {display !== 'source' && renderCurves.filter(c => all || c.id === active).map(c => <g key={c.id} opacity={editing && c.id !== active ? .3 : 1}>
         <path d={paths.get(c.id)} fill="none" stroke="white" strokeWidth={4 / scale}/>
         <path data-curve={c.id} d={paths.get(c.id)} fill="none" stroke={c.color} strokeWidth={1.7 / scale}/>
-        {editing && c.id === active && c.points.map(point => {
+        {c.points.filter(point => editing ? c.id === active : point.status === '自动频率微调').map(point => {
+          const corrected = point.status === '自动频率微调'
           const picked = selected.includes(point.id), affected = (influence?.byId.get(point.id) || 0) > 0
-          return <circle key={point.id} data-point={point.id} data-x={point.x} data-y={point.y} cx={point.x} cy={point.y} r={(picked ? 5 : affected ? 3.5 : 2) / scale}
-            fill={picked ? '#fff' : affected ? '#f5ad35' : c.color} stroke={picked ? '#4f46e5' : '#fff'} strokeWidth={(picked ? 2.5 : .6) / scale} pointerEvents="none" />
+          return <circle key={point.id} data-frequency-repaired={corrected || undefined} data-point={point.id} data-x={point.x} data-y={point.y} cx={point.x} cy={point.y} r={(picked ? 5 : affected || corrected ? 3.5 : 2) / scale}
+            fill={picked ? '#fff' : affected ? '#f5ad35' : corrected ? '#0891b2' : c.color} stroke={picked ? '#4f46e5' : '#fff'} strokeWidth={(picked ? 2.5 : .6) / scale} pointerEvents="none" />
         })}
       </g>)}
       {showAxes && <AxisOverlay doc={scene} scale={scale} point={curve.points.find(p => p.id === selected[0])}/>}

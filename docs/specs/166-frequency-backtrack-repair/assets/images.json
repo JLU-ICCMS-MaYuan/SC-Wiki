@@ -1,0 +1,23 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-cb203539-fec3-411d-b87b-544019f32fa1.png",
+      "locator": "docs/specs/166-frequency-backtrack-repair/assets/IMG-001.png",
+      "status": "local_verified",
+      "media_type": "image/png",
+      "dimensions_px": [
+        1698,
+        1642
+      ],
+      "sha256": "ee248c1441edecd6e209af8a721e7f54b982b5185f8f8f32363591d6a4b69df8",
+      "user_context": "你有没有什么办法在我手动调整之后，我点击重新计算，你发现有很多点都有微小的“相连点频率回折”的问题，把那个问题解决了！",
+      "related": [
+        "US1",
+        "FR-001"
+      ],
+      "verification": "2026-10-27 原字节复制、重新读取并校验PNG头、尺寸和SHA256；解码另在验收记录验证；Pillow完整解码与归档后哈希/尺寸再次检查通过"
+    }
+  ]
+}

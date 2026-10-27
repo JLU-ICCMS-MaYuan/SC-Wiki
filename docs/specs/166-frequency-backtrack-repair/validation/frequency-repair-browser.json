@@ -1,0 +1,53 @@
+{
+  "checks": [
+    "纵轴α²F真实重算修正两点，幅值保持，积分可用，详情高亮并显示最大位移",
+    "刷新和重复重算不累积移动，已有修正报告保留",
+    "点击定位后在编辑器撤销并保存，再次重算尊重撤销意图，保留真实回折诊断",
+    "继续人工编辑后允许新一轮修正；随后改动频率时禁用直接撤销，避免覆盖新编辑",
+    "横轴DOS同样修正且不改变其他分波，窄屏报告可用",
+    "超过0.5px可修范围的回折保持原点和诊断，未伪造修复成功"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/414aee8453ca49998c5dd7c28017e965/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/414aee8453ca49998c5dd7c28017e965/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/414aee8453ca49998c5dd7c28017e965/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/414aee8453ca49998c5dd7c28017e965/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/414aee8453ca49998c5dd7c28017e965/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/414aee8453ca49998c5dd7c28017e965/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/51d700ec7f964112a7248981aa98deca/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/51d700ec7f964112a7248981aa98deca/recalculate"
+    }
+  ],
+  "screenshots": [
+    "recalculated.png",
+    "editor-undo.png",
+    "undo-respected.png",
+    "dos-mobile.png",
+    "large-kept.png"
+  ],
+  "status": "passed"
+}

@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { alpha, useTheme } from '@mui/material/styles'
 import { checkZeroFrequency, confirmCurrentZeroBoundary, confirmExistingZeroPoint } from './zeroCheck'
 import ImageOpacityControl from './ImageOpacityControl'
 import SourceCanvas, { type Tool } from './SourceCanvas'
 import './styles.css'
+import { latestFrequencyRepair, undoFrequencyRepair } from './frequencyRepairs'
 import { DRAG_INFLUENCE } from './dragInfluence'
 import { pointReadout, zeroReadout, recognizedAxes } from './axisGeometry'
 import { amplitude, axisValid, automaticConnections, undoAutomaticConnections, clone, commit, frequency, move, restoreManualMarkers, reconnectManualPoints, ordered, pixelAt, record, redo, removePoints, undo, validateDocument, type Document, type History, type Point } from './engine'
@@ -43,6 +44,7 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
   const [loaded] = useState(() => ({doc:clone(samples[0]),error:'',blocked:false}))
   const [saved, setSaved] = useState<Document>(loaded.doc), [history, setHistory] = useState<History>({ past: [], present: loaded.doc, future: [] })
   const doc = history.present
+  const frequencyRepair = useMemo(() => latestFrequencyRepair(doc), [doc])
   const [active, setActive] = useState(doc.curves[0].id), [selected, setSelected] = useState<string[]>(initialPointId?[initialPointId]:[])
   const [tool, setTool] = useState<Tool>('idle'), [dragMode, setDragMode] = useState<'amplitude' | 'free'>('free')
   const [display, setDisplay] = useState('overlay'), [all, setAll] = useState(true)
@@ -174,6 +176,11 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
         <footer className="workbench-footer"><span><i style={{ background: curve.color }}/>{curve.name} · {curve.points.length} 个点</span><span>{displayedRange}</span><span>{doc.operations.length} 次人工操作</span></footer>
       </section><aside className="inspector">
         {selectedPanel}
+        {frequencyRepair&&<section className="panel-section" data-testid="frequency-repair-controls"><h3>自动频率微调</h3>
+          <p className="muted">最近一批修正 {frequencyRepair.pointCount} 个点，最大移动 {number(frequencyRepair.maxShiftPx)} 原图像素。撤销仅恢复频率方向，保留幅值。</p>
+          <button className="secondary" disabled={!frequencyRepair.canUndo} onClick={()=>{change(undoFrequencyRepair(doc));setSelected([]);exitTool();setNotice('已撤销自动频率微调；保存后生效。未继续人工编辑时，重新计算不会立即重做。')}}>撤销自动频率微调</button>
+          {!frequencyRepair.canUndo&&<p className="muted">这些点的频率、标定或点身份已改变，不能直接撤销覆盖后续修改。</p>}
+        </section>}
         {automaticConnections(doc).length>0&&<section className="panel-section"><h3>自动连接记录</h3><button className="secondary" onClick={()=>change(undoAutomaticConnections(doc))}>撤销已记录的自动连接</button></section>}
         <section className="panel-section"><div className="section-heading"><h3>编辑曲线</h3><span className="tag">单条编辑</span></div>{curvePicker}<p className="muted">{kind === 'phonon_dos' ? '其他分波只作参照，不随当前曲线移动。' : '累计 λ 只在原图中参照，不作为 α²F 幅值刻度。'}</p></section>
         <section className="panel-section"><div className="section-heading"><h3>拖动方向与联动范围</h3></div>
