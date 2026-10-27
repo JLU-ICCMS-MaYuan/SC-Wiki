@@ -24,14 +24,19 @@ class LinearAxis:
             raise ValueError("至少需要两个有限的坐标标定点")
         if len(np.unique(a[:, 0])) != len(a) or np.ptp(a[:, 1]) == 0:
             raise ValueError("坐标标定退化或像素位置重复")
-        slope, intercept = np.polyfit(a[:, 0], a[:, 1], 1)
+        centered_x = a[:, 0] - np.mean(a[:, 0])
+        centered_y = a[:, 1] - np.mean(a[:, 1])
+        slope = np.dot(centered_x, centered_y) / np.dot(centered_x, centered_x)
+        intercept = np.mean(a[:, 1]) - slope * np.mean(a[:, 0])
         if abs(slope) < 1e-12:
             raise ValueError("坐标斜率为零")
         return cls(float(slope), float(intercept),
                    float(np.max(np.abs(a[:, 1] - (slope * a[:, 0] + intercept)))))
 
     def value(self, pixel: float) -> float:
-        return self.slope * pixel + self.intercept
+        value = self.slope * pixel + self.intercept
+        roundoff = 8 * np.finfo(float).eps * (abs(self.slope * pixel) + abs(self.intercept))
+        return 0.0 if abs(value) <= roundoff else value
 
     def pixel(self, value: float) -> float:
         return (value - self.intercept) / self.slope
@@ -145,30 +150,13 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
     # 在排除图例之后计算邻域，不能借被屏蔽文字/图例取得支持。
     recovery_support = binary_dilation(mask | chromatic_core, structure=np.ones((3, 3), dtype=bool), iterations=2) & allowed
     pixels = list(range(y0, y1 + 1) if orientation == "y" else range(x0, x1 + 1))
-    zero_pixel = spec.get("zero_frequency_pixel")
-    if zero_pixel is not None and zero_pixel not in pixels:
-        pixels.append(zero_pixel)
     rows: list[dict[str, Any]] = []
     clipped = []
     for pos in pixels:
-        fractional = int(pos) != pos
-        if fractional:
-            lo, hi = int(np.floor(pos)), int(np.ceil(pos))
-            weight = pos - lo
-            strip = ((1 - weight) * rgb[lo:lo+1] + weight * rgb[hi:hi+1] if orientation == "y" else
-                     (1 - weight) * rgb[:, lo:lo+1] + weight * rgb[:, hi:hi+1])
-            permitted = (allowed[lo] & allowed[hi] if orientation == "y" else allowed[:, lo] & allowed[:, hi])
-            direct = color_mask(strip, spec["color"]).reshape(-1) & permitted
-            raw_recovered = chromatic_mask(strip, spec["color"]).reshape(-1) & permitted
-            supported = (recovery_support[lo] | recovery_support[hi] if orientation == "y"
-                         else recovery_support[:, lo] | recovery_support[:, hi])
-            recovered = raw_recovered & supported
-        else:
-            pos = int(pos)
-            direct = mask[pos, :] if orientation == "y" else mask[:, pos]
-            raw_recovered = recovered_mask[pos, :] if orientation == "y" else recovered_mask[:, pos]
-            supported = recovery_support[pos, :] if orientation == "y" else recovery_support[:, pos]
-            recovered = raw_recovered & supported
+        direct = mask[pos, :] if orientation == "y" else mask[:, pos]
+        raw_recovered = recovered_mask[pos, :] if orientation == "y" else recovered_mask[:, pos]
+        supported = recovery_support[pos, :] if orientation == "y" else recovery_support[:, pos]
+        recovered = raw_recovered & supported
         coords = np.flatnonzero(direct)
         detection_mode = "strict_color" if len(coords) else None
         rejected = 0
@@ -187,9 +175,7 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
             coords = np.array([], dtype=int)
             detection_mode = "ambiguous_components"
             blocked = True
-        if fractional and len(coords):
-            detection_mode = "subpixel_color"
-        freq = 0.0 if zero_pixel is not None and pos == zero_pixel else frequency_axis.value(pos)
+        freq = frequency_axis.value(pos)
         if freq < 0:
             continue
         lo = hi = center = value = None
@@ -287,7 +273,7 @@ def spectral_integrals(frequency: list, amplitude: list, cutoff_thz: float = 0.0
         raise ValueError("谱幅值必须非负或为 null")
     # 对已重建的分段线性 α²F 精确积分；不能用丢弃零频点回避首区间。
     lam = log_moment = zero_interval_lambda = 0.0
-    complete = True
+    complete = bool(f[0] == 0 and cutoff_thz == 0)
     first_integrated = None
     for x, y, a, b in zip(f[:-1], f[1:], amplitude[:-1], amplitude[1:]):
         lo = max(float(x), cutoff_thz)

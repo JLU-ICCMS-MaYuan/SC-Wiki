@@ -129,7 +129,6 @@ def _repair_curve(curve, doc, timestamp, report):
     low,high = (bounds[0],bounds[2]) if direction=="x" else (bounds[1],bounds[3])
     low,high = sorted((sign*low, sign*high))
     step = max(MIN_STEP_PX, 64*math.ulp(max(1.,abs(low),abs(high))))
-    zero_ids = set((doc.get("zero") or {}).get("pointIds",[]))
     changes, block_count = [], 0
     for bi,(start,end,total,count) in enumerate(blocks):
         if count == 1:
@@ -140,7 +139,7 @@ def _repair_curve(curve, doc, timestamp, report):
         locks = []
         for j,index in enumerate(range(start,end)):
             group=groups[index];value=values[index];f=group[0]["frequency_thz"]
-            locked = index in {0,len(groups)-1} or f == 0 or any(p["id"] in zero_ids for p in group)
+            locked = index in {0,len(groups)-1} or f == 0
             locked = locked or curve["kind"] == "alpha2f" and f/abs(slope) <= 1
             locks.append(locked)
             radius = 0 if locked else MAX_SHIFT_PX

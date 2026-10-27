@@ -9,7 +9,7 @@ export default function AxisOverlay({ doc, scale, point }: { doc: Document; scal
   const unit = doc.calibration.amplitude.unit === 'pixel' ? '相对像素' : doc.calibration.amplitude.unit
   const frequencyTicks = currentTicks(doc.calibration.frequency, vertical ? y0 : x0, vertical ? y1 : x1)
   const amplitudeTicks = currentTicks(doc.calibration.amplitude, vertical ? x0 : y0, vertical ? x1 : y1)
-  const fzero = pixelAt(doc.calibration.frequency, 0), azero = pixelAt(doc.calibration.amplitude, 0)
+  const azero = pixelAt(doc.calibration.amplitude, 0)
   const line = (props: React.SVGProps<SVGLineElement>) => <line strokeWidth={1.2} vectorEffect="non-scaling-stroke" {...props}/>
   // 窄图窗只减少当前标定的辅助标签；已有识别刻度仍全部显示。
   const readableTicks = (values: {pixel:number;value:number}[], horizontal: boolean) => {
@@ -46,10 +46,6 @@ export default function AxisOverlay({ doc, scale, point }: { doc: Document; scal
     <text x={(x0+x1)/2} y={vertical?y0-23/scale:y1+(doc.id==='alpha2f'?48:33)/scale} textAnchor="middle" fontSize={10/scale} fill={blue}>
       {vertical ? `幅值 / ${unit}` : `频率 / ${doc.calibration.frequency.unit}`} · 当前标定
     </text>
-    {(vertical ? fzero>=y0&&fzero<=y1 : fzero>=x0&&fzero<=x1) && <g data-testid="calibrated-zero" data-pixel={fzero}>
-      {line(vertical?{x1:x0,x2:x1,y1:fzero,y2:fzero,stroke:blue,strokeDasharray:'5 4'}:{x1:fzero,x2:fzero,y1:y0,y2:y1,stroke:blue,strokeDasharray:'5 4'})}
-      <text x={vertical?x1-4/scale:fzero+4/scale} y={vertical?fzero-5/scale:y0+13/scale} textAnchor={vertical?'end':'start'} fill={blue} fontSize={10/scale}>标定 0 频率</text>
-    </g>}
     {point && <g data-testid="selected-point-projection" stroke="#6366c4">
       {line({x1:point.x,x2:x0,y1:point.y,y2:point.y,strokeDasharray:'3 4',opacity:.7})}
       {line({x1:point.x,x2:point.x,y1:point.y,y2:vertical?y0:y1,strokeDasharray:'3 4',opacity:.7})}

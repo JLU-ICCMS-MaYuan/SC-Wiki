@@ -5,13 +5,13 @@ type Location = { point_id: string; frequency_thz: number | null; amplitude: num
 type Issue = { kind: string; message: string; points: Location[] }
 export type TraceReport = { curves: { curve_id: string; name: string; amplitude_unit: string; component_count: number; point_count: number; issues: Issue[] }[] }
 const number = (value: number | null) => value != null && Number.isFinite(value) ? Number(value.toFixed(6)).toString() : '未知'
-const names: Record<string, string> = { disconnected:'未连接片段', isolated:'孤立点', cycle:'闭环', branch:'分叉', invalid:'连接无效',low_endpoint:'零频覆盖不足',zero_confirmation:'零频待确认',nonzero_zero:'零频幅值需核对',negative_amplitude:'负幅值',negative_frequency:'负频率',nonfinite_sample:'缺少有效数值',duplicate_frequency:'频率重复',frequency_backtrack:'频率回折' }
+const names: Record<string, string> = { disconnected:'未连接片段', isolated:'孤立点', cycle:'闭环', branch:'分叉', invalid:'连接无效',negative_amplitude:'负幅值',negative_frequency:'负频率',nonfinite_sample:'缺少有效数值',duplicate_frequency:'频率重复',frequency_backtrack:'频率回折' }
 
 export default function TraceDiagnostics({report, onLocate, disabled=false}: {
   report: TraceReport; onLocate?: (curveId:string,pointId:string)=>void; disabled?:boolean
 }) {
   const [page,setPage]=useState(0)
-  const issues=report.curves.flatMap(curve=>curve.issues.filter(issue=>!['high_endpoint','projection_range'].includes(issue.kind)).map(issue=>({curve,issue})))
+  const issues=report.curves.flatMap(curve=>curve.issues.filter(issue=>!['high_endpoint','projection_range','low_endpoint','zero_confirmation','nonzero_zero'].includes(issue.kind)).map(issue=>({curve,issue})))
   if(!issues.length)return null
   const count=Math.ceil(issues.length/12),current=Math.min(page,count-1)
   return <Box sx={{mt:2}} data-testid="trace-diagnostics">

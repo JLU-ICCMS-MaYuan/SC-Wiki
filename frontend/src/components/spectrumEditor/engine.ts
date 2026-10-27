@@ -11,7 +11,6 @@ export type Document = {
   source: { id: string; sha256: string; image: string; width: number; height: number; viewport: Rect; plot: Rect }
   calibration: { direction: 'x' | 'y'; frequency: Axis; amplitude: Axis; amplitudeEvidence?: string }
   curves: Curve[]
-  zero: { pixel: number; pointIds: string[] } | null
   operations: { kind: string; at: string; detail: string }[]
 }
 export type History = { past: Document[]; present: Document; future: Document[] }
@@ -142,7 +141,7 @@ export function removePoints(doc: Document, curveId: string, ids: string[]): Doc
     } else points.push({ ...survivor, breakBefore: interrupted || p.breakBefore === true })
     interrupted = false
   }
-  return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points, pathOrdered: true } : c), zero: doc.zero ? { ...doc.zero, pointIds: doc.zero.pointIds.filter(id => !selected.has(id)) } : null }, 'delete', `删除 ${ids.length} 个选中点，保留缺口`)
+  return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points, pathOrdered: true } : c) }, 'delete', `删除 ${ids.length} 个选中点，保留缺口`)
 }
 /** 只在点击时线性检查已有边/开放端点；不按频率重排、不改变点击坐标。 */
 function insertOnTrace(points: Point[], point: Point): Point[] {
@@ -196,26 +195,15 @@ function clickInPlot(doc: Document, x: number, y: number): [number, number] {
   if (![x,y].every(Number.isFinite) || x < x0-epsilon || x > x1+epsilon || y < y0-epsilon || y > y1+epsilon) throw new Error('请在原图图框内选点')
   return [Math.max(x0,Math.min(x1,x)), Math.max(y0,Math.min(y1,y))]
 }
-export function addPoint(doc: Document, curveId: string, x: number, y: number, zero = false): Document {
+export function addPoint(doc: Document, curveId: string, x: number, y: number): Document {
   const curve = doc.curves.find(c => c.id === curveId)
   if (!curve) throw new Error('请先选择一条曲线')
   ;[x,y] = clickInPlot(doc,x,y)
-  if (zero) {
-    if (!doc.zero) throw new Error('请先标记原图的真实零频位置')
-    const at = doc.calibration.direction === 'x' ? x : y
-    if (Math.abs(at - doc.zero.pixel) > 3) throw new Error('请在已标记的零频线上点选曲线；幅值来自你的点击位置')
-    if (doc.calibration.direction === 'x') x = doc.zero.pixel; else y = doc.zero.pixel
-  }
-  const p: Point = { id: uid(), x, y, segment: uid(), manual: true, status: zero ? '人工零频选点' : '人工补选' }
+  const p: Point = { id: uid(), x, y, segment: uid(), manual: true, status: '人工补选' }
   const points = freezeTrace(doc, curve)
-  const existing = zero ? points.find(v => Math.abs(frequency(doc, v) - frequency(doc, p)) < 1e-6) : undefined
-  if (!zero && points.some(v => Math.hypot(v.x - x, v.y - y) < 1e-8)) throw new Error('该位置已有点，请选中后调整坐标')
-  let result: Point[]
-  if (existing) {
-    p.id = existing.id; p.segment = existing.segment; p.breakBefore = existing.breakBefore
-    result = points.map(v => v.id === p.id ? p : v)
-  } else result = insertOnTrace(points, p)
-  return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points: result, pathOrdered: true } : c), zero: zero && doc.zero ? { ...doc.zero, pointIds: [...new Set([...doc.zero.pointIds, p.id])] } : doc.zero }, zero ? 'zero-point' : 'add', `${curve.name}：在源像素 (${x.toFixed(2)}, ${y.toFixed(2)}) 选点`)
+  if (points.some(v => Math.hypot(v.x - x, v.y - y) < 1e-8)) throw new Error('该位置已有点，请选中后调整坐标')
+  const result = insertOnTrace(points, p)
+  return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points: result, pathOrdered: true } : c) }, 'add', curve.name+'：在源像素 ('+x.toFixed(2)+', '+y.toFixed(2)+') 选点')
 }
 /** 普通连续描线只连接明确的前驱，旧点和旧连线不变。 */
 export function appendPoint(doc: Document, curveId: string, anchorId: string, x: number, y: number): Document {
@@ -290,15 +278,6 @@ export function insertDrawnPoints(doc:Document,curveId:string,anchorId:string,ta
   return record({...doc,curves:doc.curves.map(c=>c.id===curveId?{...c,points,pathOrdered:true}:c)},
     'insert-chain','在线段 '+anchorId+' — '+targetId+' 之间插入 '+addedIds.length+' 个点，替换原直连')
 }
-export function markZero(doc: Document, x: number, y: number): Document {
-  ;[x,y] = clickInPlot(doc,x,y)
-  const pixel = doc.calibration.direction === 'x' ? x : y
-  const axis = doc.calibration.frequency, offset = valueAt(axis, pixel)
-  return record({ ...doc, calibration: { ...doc.calibration, frequency: { ...axis, values: [axis.values[0] - offset, axis.values[1] - offset] } }, zero: { pixel, pointIds: [] } }, 'zero-line', '人工标记原图零频位置，仍需补选当前曲线零频点')
-}
-export function zeroCovered(doc: Document, curveId: string) {
-  return Boolean(doc.zero && doc.curves.find(c => c.id === curveId)?.points.some(p => doc.zero!.pointIds.includes(p.id) && Math.abs(frequency(doc, p)) < 1e-6))
-}
 export function curvePath(doc: Document, curve: Curve) {
   let previous: Point | undefined
   const byId=new Map(curve.points.map(p=>[p.id,p]))
@@ -334,7 +313,6 @@ export function validateDocument(value: unknown, initial: Document): asserts val
       const sorted = ordered(d, c.points)
       if (!c.pathOrdered && sorted.some((p, i) => i > 0 && frequency(d, p) - frequency(d, sorted[i - 1]) < 1e-9)) throw Error()
     }
-    if (d.zero && (!Number.isFinite(d.zero.pixel) || Math.abs(valueAt(d.calibration.frequency, d.zero.pixel)) > 1e-6 || !Array.isArray(d.zero.pointIds) || !d.zero.pointIds.every(id => ids.has(id)))) throw Error()
   } catch { throw new Error('草稿格式、来源或坐标无效，未覆盖已有数据。可恢复原始示例后再保存。') }
 }
 

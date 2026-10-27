@@ -53,7 +53,6 @@ def coverage(curve):
     return dict(total_points=size, counts=counts,
                 rejected_chromatic_pixels=sum(p.get("rejected_chromatic_pixels", 0) for p in points),
                 ambiguous_samples=sum(p.get("detection_mode") == "ambiguous_components" for p in points),
-                zero_frequency_observed=points[0]["frequency_thz"] == 0 and points[0]["observed_amplitude"] is not None,
                 frequency_interval_thz=[points[0]["frequency_thz"],points[-1]["frequency_thz"]],
                 omitted_low_frequency_interval_thz=([0.,points[0]["frequency_thz"]] if points[0]["frequency_thz"]>0 else None),
                 missing_frequency_intervals_thz=missing_intervals,
@@ -90,23 +89,9 @@ def extract_panel(rgb: np.ndarray, calibration: dict, *, references: dict | None
             if c.display_bbox and (c.display_bbox[2] >= rgb.shape[1] or c.display_bbox[3] >= rgb.shape[0]):
                 raise ValueError("显示裁切框超出原图")
             ticks = [[p, v * FREQUENCY_FACTORS[c.frequency_unit]] for p, v in c.frequency_ticks]
-            zero_ticks = [p for p, value in ticks if value == 0]
-            if len(zero_ticks) != 1:
-                raise ValueError("必须从原图明确定位唯一零频刻度，不能补造零点")
-            zero = zero_ticks[0]
-            offsets = np.asarray([p - zero for p, _ in ticks])
-            values = np.asarray([v for _, v in ticks])
-            slope = float(np.dot(offsets, values) / np.dot(offsets, offsets))
-            residual = float(np.max(np.abs(slope * offsets - values)))
-            if abs(slope) < 1e-12 or residual > abs(slope):
-                raise ValueError("零频约束后的刻度残差超过一个像素，请核对频率标定")
-            axis = LinearAxis(slope, -slope * zero, residual)
-            spec["zero_frequency_pixel"] = zero
-            # 只扩展到标定明确给出的原图零频位置；不在图外生成点。
-            low, high = (1, 3) if c.frequency_direction == "y" else (0, 2)
-            spec["roi"] = list(spec["roi"])
-            spec["roi"][low] = min(spec["roi"][low], int(np.floor(zero)))
-            spec["roi"][high] = max(spec["roi"][high], int(np.ceil(zero)))
+            axis = LinearAxis.fit(ticks)
+            if axis.residual > abs(axis.slope):
+                raise ValueError("坐标刻度残差超过一个像素，请核对标定")
             spec["zero_boundaries_thz"] = [None, None]
             curve = extract_curve(rgb, spec, axis)
         except ValueError as exc:
@@ -133,7 +118,7 @@ def extract_panel(rgb: np.ndarray, calibration: dict, *, references: dict | None
                             linearity_independently_checkable=len(c.frequency_ticks)>2 and len(c.amplitude_ticks)>2)
     result = dict(algorithm_version=ALGORITHM_VERSION, calibration=panel.model_dump(), curves=curves,
                   failures=failures, quality=dict(curves=metrics, limitations=[]), candidates={})
-    if failures or any(not metric["zero_frequency_observed"] or metric["ambiguous_samples"] for metric in metrics.values()):
+    if failures or any(metric["ambiguous_samples"] for metric in metrics.values()):
         result["status"] = "needs_review"
     q = result["quality"]
     alpha = next((c for c in curves if c["kind"] == "alpha2f"), None)

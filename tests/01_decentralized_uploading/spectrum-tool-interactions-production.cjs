@@ -34,7 +34,7 @@ async function main(){
  const seed=async(item,kind,cid,edit)=>{
   const input=await api('/api/rag/spectra/'+item.id+'/manual?'+query+'&kind='+kind+'&collection_version='+item.version+'&run_id='+item.run.id);
   const doc=input.documents.find(d=>d.curves[0].id===cid);
-  doc.zero={pixel:doc.curves[0].points[0][doc.calibration.direction],pointIds:[doc.curves[0].points[0].id]};
+
   edit?.(doc);
   return (await api('/api/rag/spectra/'+item.id+'/manual',{...target,expected_version:input.version,expected_collection_version:item.version,base_run_id:item.run.id,document:doc})).items.find(i=>i.id===item.id);
  };

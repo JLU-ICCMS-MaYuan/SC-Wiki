@@ -1,0 +1,6 @@
+# 数据模型
+
+Document退休zero人工确认属性，新读取/新保存不生成；旧请求和历史记录在读取边界忽略该字段，不强制迁移旧run。
+quality.manual_zero_checks停止生成；前端不再消费。low_endpoint/zero_confirmation等退休诊断在旧数据展示边界过滤。
+计算结果记录minimum_integrated_thz/maximum_integrated_thz、frequency_interval_thz及逐分波component_intervals的实际上下限。正频起点不得输出positive_frequency_complete=true。
+方法版本区分新计算与旧缓存；论文λ和3N仍是归一化输入，数值结果不自动成为human_confirmed。

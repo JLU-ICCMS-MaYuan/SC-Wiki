@@ -313,7 +313,7 @@ def test_frequency_metadata_cannot_block_current_samples(marker, upper):
     before = copy.deepcopy(p)
     result = calculate_dos(p, PRIMITIVE)
     relative = result["relative"]
-    assert relative["method"] == "dos-relative-v2"
+    assert relative["method"] == "dos-relative-v3"
     assert relative["normalization"]["status"] == "available"
     assert relative["normalization"]["total_mode_integral"] == pytest.approx(9)
     assert relative["components"][0]["frequency_interval_thz"] == [0., .9]

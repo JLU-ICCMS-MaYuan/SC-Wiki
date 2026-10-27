@@ -12,17 +12,9 @@ export function currentTicks(axis: Axis, low: number, high: number): Tick[] {
   return values.map(value => ({ pixel: pixelAt(axis, value), value })).filter(t => Number.isFinite(t.pixel) && t.pixel >= low - 1e-6 && t.pixel <= high + 1e-6)
 }
 export function pointReadout(doc: Document, point: Point) {
-  const zeroPixel = pixelAt(doc.calibration.frequency, 0)
   return {
     x: point.x, y: point.y,
     frequency: valueAt(doc.calibration.frequency, frequencyPixel(doc, point)),
     amplitude: valueAt(doc.calibration.amplitude, amplitudePixel(doc, point)),
-    zeroPixel, distanceToZeroPx: Math.abs(frequencyPixel(doc, point) - zeroPixel),
   }
-}
-export function zeroReadout(doc: Document) {
-  const ref = recognizedAxes(doc), zeroPixel = pixelAt(doc.calibration.frequency, 0)
-  const originalZero = ref && ref.direction === doc.calibration.direction ? ref.frequencyTicks.find(([, value]) => value === 0)?.[0] ?? null : null
-  return { zeroPixel, originalZero, differencePx: originalZero === null ? null : zeroPixel - originalZero,
-    markedPixel: doc.zero?.pixel ?? null, markedValue: doc.zero ? valueAt(doc.calibration.frequency, doc.zero.pixel) : null }
 }

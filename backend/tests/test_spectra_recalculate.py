@@ -34,7 +34,7 @@ def test_exact_alpha_and_relative_scale_cancel():
     assert payload==alpha_payload()
 
 
-@pytest.mark.parametrize("problem",["gap","branch","cycle","backtrack","duplicate","nonzero_zero","missing_start","negative"])
+@pytest.mark.parametrize("problem",["gap","branch","cycle","backtrack","duplicate","nonzero_zero","negative"])
 def test_unsafe_spectra_remain_unavailable(problem):
     payload=alpha_payload();curve=payload["curves"][0];points=curve["points"]
     if problem=="gap":points[1]["breakBefore"]=True
@@ -45,7 +45,6 @@ def test_unsafe_spectra_remain_unavailable(problem):
     elif problem=="nonzero_zero":points[0]["reconstructed_amplitude"]=.1;points[0]["amplitude_pixel"]=.1
     elif problem=="missing_evidence":payload["calibration"]["curves"][0]["amplitude_evidence"]=""
     elif problem=="unknown_frequency":curve["physical_definition_confirmed"]=False
-    elif problem=="missing_start":points[0]["frequency_thz"]=.00001
     elif problem=="negative":points[1]["reconstructed_amplitude"]=-1;points[1]["amplitude_pixel"]=-1
     r=alpha_integrals(payload)
     assert r["status"]=="unavailable"

@@ -29,7 +29,7 @@ async function main(){
   let data=await listing(),alpha=data.items.find(i=>i.result.curves[0].kind==='alpha2f');
   alpha=await seed(alpha,'alpha2f','a',doc=>{
     doc.curves[0].points.at(-1).x=139.999998;
-    doc.zero={pixel:20,pointIds:[doc.curves[0].points[0].id]}
+
   });
   const sourcePoints=JSON.stringify(alpha.result.curves);
   await page.goto(address(alpha));await ready();await recalc();
@@ -96,7 +96,7 @@ async function main(){
   let dos=(await listing()).items.find(i=>i.result.curves[0].kind==='phonon_dos');
   dos=await seed(dos,'phonon_dos','Sc',doc=>{
     doc.curves[0].points=doc.curves[0].points.slice(0,100);
-    doc.zero={pixel:20,pointIds:[doc.curves[0].points[0].id]}
+
   });
   const originalDos=JSON.stringify(dos.result.curves);
   await page.goto(address(dos));await ready();await recalc();

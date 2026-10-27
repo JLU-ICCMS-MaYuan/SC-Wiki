@@ -50,7 +50,7 @@ def test_precheck_reports_all_numerical_boundaries_instead_of_only_first_error()
     curve["points"][1]["reconstructed_amplitude"]=-.1
     doc["zero"]=None
     kinds={i["kind"] for i in diagnose(data,"alpha2f")["curves"][0]["issues"]}
-    assert {"frequency_backtrack","negative_amplitude","low_endpoint","zero_confirmation"}<=kinds
+    assert {"frequency_backtrack","negative_amplitude"}<=kinds
     for issue in diagnose(data,"alpha2f")["curves"][0]["issues"]:
         assert issue["points"] and issue["points"][0]["point_id"]
 

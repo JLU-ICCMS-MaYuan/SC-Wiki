@@ -22,10 +22,9 @@ async function main(){
  const manual=async(item,kind,cid,change)=>{
   const input=await api('/api/rag/spectra/'+item.id+'/manual?'+query+'&kind='+kind+'&collection_version='+item.version+'&run_id='+item.run.id);
   const doc=input.documents.find(d=>d.curves[0].id===cid);delete doc.calibration.amplitudeEvidence;
-  doc.zero={pixel:doc.curves[0].points[0][doc.calibration.direction],pointIds:[doc.curves[0].points[0].id]};change?.(doc);
+  change?.(doc);
   return (await api('/api/rag/spectra/'+item.id+'/manual',{...target,expected_version:input.version,expected_collection_version:item.version,base_run_id:item.run.id,document:doc})).items.find(i=>i.id===item.id)
  };
- const confirmZero=async cid=>{if(await btn('确认蓝色零频线与原图一致').isEnabled())await btn('确认蓝色零频线与原图一致').click();await page.locator('[data-row="'+cid+':p0"]').click();await btn('确认选中点为零频点').click()};
  const closeEditor=async()=>{await btn('← 返回详情').click();await ready()};
  try{
   let items=(await listing()).items,alpha=items.find(i=>i.state_key==='s1'&&i.result.curves[0].kind==='alpha2f');
@@ -59,7 +58,7 @@ async function main(){
   await btn('编辑').click();await page.getByRole('application').waitFor();
   await page.locator('summary').filter({hasText:'坐标标定'}).click();
   assert.equal(await page.getByLabel('幅值标定依据').count(),0);
-  await page.getByLabel('幅值单位',{exact:true}).selectOption('dimensionless');await btn('应用标定').click();await confirmZero('a');
+  await page.getByLabel('幅值单位',{exact:true}).selectOption('dimensionless');await btn('应用标定').click();
   await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('12');await btn('应用坐标到此点').click();
   await save();await recalc();current=(await listing()).items.find(i=>i.id===alpha.id);
   assert.equal(current.result.quality.integrals.raw.parameters.omega_log.status,'available');
@@ -89,7 +88,7 @@ async function main(){
   let dos=items.find(i=>i.result.curves[0].kind==='phonon_dos');await page.goto(address(dos));await ready();await btn('编辑').click();await page.getByRole('application').waitFor();
   await btn('Sc').click();await page.locator('summary').filter({hasText:'坐标标定'}).click();
   assert.equal(await page.getByLabel('幅值标定依据').count(),0);
-  await page.getByLabel('amplitude-1-value').fill('0.5');await btn('应用标定').click();await confirmZero('Sc');await save();await recalc();
+  await page.getByLabel('amplitude-1-value').fill('0.5');await btn('应用标定').click();await save();await recalc();
   dos=(await listing()).items.find(i=>i.id===dos.id);assert.equal(dos.result.quality.dos_mode_integral.status,'available');
   await page.setViewportSize({width:390,height:844});await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);await shot('dos-mobile');
   check('DOS编辑器同样无说明，空说明修改幅值标定可保存计算；3N路径和窄屏保持');

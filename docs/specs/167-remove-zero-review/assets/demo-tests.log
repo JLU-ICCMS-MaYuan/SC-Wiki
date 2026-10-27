@@ -1,0 +1,16 @@
+
+> test
+> node ../../../../frontend/node_modules/vitest/vitest.mjs run
+
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki/docs/specs/161-spectrum-manual-editor-demo/demo
+
+ ✓ tests/engine.test.ts (25 tests) 19ms
+ ✓ tests/dragInfluence.test.ts (3 tests) 2ms
+ ✓ tests/viewport.test.ts (4 tests) 2ms
+ ✓ tests/axes.test.ts (4 tests) 2ms
+
+ Test Files  4 passed (4)
+      Tests  36 passed (36)
+   Start at  01:21:20
+   Duration  316ms (transform 75ms, setup 0ms, collect 115ms, tests 25ms, environment 0ms, prepare 179ms)

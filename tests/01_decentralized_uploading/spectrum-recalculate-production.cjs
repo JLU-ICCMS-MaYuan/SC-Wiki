@@ -26,7 +26,6 @@ async function main(){
  const ready=async()=>{await btn('重新计算').waitFor();await page.waitForFunction(()=>!Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='重新计算')?.disabled)};
  const calculate=async()=>{const oldUrl=page.url();await btn('重新计算').click();await page.waitForURL(url=>url.href!==oldUrl);await ready()};
  const save=async()=>{await btn('保存调整').click();await page.waitForFunction(()=>!document.querySelector('.editor-app'));await ready()};
- const confirmZero=async()=>{if(await btn('确认蓝色零频线与原图一致').isEnabled())await btn('确认蓝色零频线与原图一致').click();await page.locator('[data-row="a:p0"]').click();await btn('确认选中点为零频点').click()};
  try{
   const initial=await listing(),alpha=initial.items.find(i=>i.result.curves[0].kind==='alpha2f');
   await page.goto(address(alpha));await ready();
@@ -44,20 +43,20 @@ async function main(){
   await btn('编辑').click();await page.getByRole('application').waitFor();
   assert(await page.getByText('逐点数据',{exact:true}).isVisible());
   await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.08');await btn('应用坐标到此点').click();
-  await confirmZero();await save();
-  assert.equal(await page.getByText('零频位置核对完成',{exact:true}).count(),1);
+  await save();
+  assert.equal(await page.getByText('零频位置核对完成',{exact:true}).count(),0);
   assert.equal(await page.getByText(/本版本计算时间/).count(),0);
   current=(await listing()).items.find(i=>i.id===alpha.id);
   assert.equal(current.result.quality.integrals.raw.status,'unavailable');assert(!current.result.quality.recalculations);
   await calculate();current=(await listing()).items.find(i=>i.id===alpha.id);
   assert.equal(current.result.quality.integrals.raw.parameters.lambda.status,'available');
-  await shot('alpha-result');check('人工保存使旧结果失效，点击重算才得到新积分；零频只显示一次，编辑器仍保留点表');
+  await shot('alpha-result');check('人工保存使旧结果失效，点击重算才得到新积分；没有零频确认步骤，编辑器仍保留点表');
 
   await btn('编辑').click();await page.getByRole('application').waitFor();
   await page.locator('summary').filter({hasText:'坐标标定'}).click();
   await page.getByLabel('幅值单位',{exact:true}).selectOption('pixel');
   assert.equal(await page.getByLabel('幅值标定依据',{exact:true}).count(),0);
-  await btn('应用标定').click();await confirmZero();await save();await calculate();
+  await btn('应用标定').click();await save();await calculate();
   current=(await listing()).items.find(i=>i.id===alpha.id);raw=current.result.quality.integrals.raw;
   assert.equal(raw.normalization.status,'available');assert.equal(raw.parameters.omega_log.status,'available');
   await page.getByTestId('alpha-normalization').getByText('依据论文 λ 归一化',{exact:true}).waitFor();await shot('relative-omega');

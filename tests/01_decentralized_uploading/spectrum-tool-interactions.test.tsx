@@ -89,7 +89,7 @@ it('切换和Esc取消未完成拖动，清除预览和临时手势',()=>{
 })
 it('所有持续工具可反选，标定同槽退出/异槽切换，主题颜色来自站点',()=>{
  setup()
- for(const name of ['联动选点／拖动','单点选点／拖动','＋ 增加点','✥ 平移','▣ 框选','1 · 标记原图 0 频率位置','2 · 补选曲线零频点']){
+ for(const name of ['联动选点／拖动','单点选点／拖动','＋ 增加点','✥ 平移','▣ 框选']){
   const b=button(name);fireEvent.click(b);expect(b).toHaveAttribute('aria-pressed','true')
   fireEvent.click(b);expect(b).toHaveAttribute('aria-pressed','false')
  }

@@ -1,7 +1,6 @@
 """已有谱连接/频率与数值有效性，供正式提取及重算共用。"""
 import math
-from . import manual
-from .topology import build_graph, graph_parts
+from .topology import build_graph, graph_parts, finite
 from .preflight import coincident
 
 def demand(condition,reason):
@@ -37,10 +36,10 @@ def connected_samples(curve, document=None):
     demand(len(ordered)>=2, "至少需要两个不同的有效采样位置")
     f = [p.get("frequency_thz") for p in ordered]
     a = [p.get("reconstructed_amplitude") for p in ordered]
-    demand(all(manual.finite(v) for v in f + a), "曲线含缺失或非有限数值")
+    demand(all(finite(v) for v in f + a), "曲线含缺失或非有限数值")
     amplitude_axis = curve.get("axis_calibration", {}).get("amplitude", {})
     for i, point in enumerate(ordered):
-        if amplitude_axis and manual.finite(point.get("amplitude_pixel")):
+        if amplitude_axis and finite(point.get("amplitude_pixel")):
             terms = (amplitude_axis["slope"] * point["amplitude_pixel"], amplitude_axis["intercept"])
             error = 8 * sum(math.ulp(abs(term)) for term in terms)
             if abs(a[i]) <= error:
@@ -50,10 +49,5 @@ def connected_samples(curve, document=None):
         a.reverse()
     demand(all(y > x for x, y in zip(f, f[1:])), "曲线存在重复或回折频率，不能作为单值谱积分")
     demand(all(v >= 0 for v in a), "幅值存在负数，请核对零基线")
-    # 只消除标定浮点舍入；不把邻近频率的真实数据改成零。
-    tolerance = 1e-12 * max(1., abs(f[-1]))
-    demand(abs(f[0]) <= tolerance, "当前曲线未从真实零频开始")
-    f[0] = 0.
-    if document is not None:
-        demand(manual.zero_report(document)["complete"], "当前曲线的零频位置或零频点尚未确认")
+    demand(all(v >= 0 for v in f), "频率为负，请核对坐标标定")
     return f, a

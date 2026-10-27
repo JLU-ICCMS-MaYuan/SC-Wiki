@@ -2,7 +2,7 @@ import { Box, Chip, Table, TableBody, TableCell, TableHead, TableRow, Typography
 
 const number=(value:unknown,digits=6)=>typeof value==='number'&&Number.isFinite(value)?Number(value.toPrecision(digits)).toString():'—'
 export default function AlphaRelativeMetrics({raw,comparison,restricted}: {raw:any;comparison:any;restricted:boolean}) {
-  const current=raw.method==='alpha2f-relative-v1'
+  const current=raw.method==='alpha2f-relative-v2'
   const omega=current?raw.parameters?.omega_log:undefined
   const normalization=current?raw.normalization||{}:{}
   const available=!restricted&&omega?.status==='available'

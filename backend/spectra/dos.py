@@ -6,7 +6,7 @@ from .relative import pixel_curve
 from .samples import connected_samples
 from .topology import finite
 
-METHOD = "dos-relative-v2"
+METHOD = "dos-relative-v3"
 
 
 def unavailable(reason):
@@ -190,7 +190,7 @@ def dos_integrals(payload, primitive):
         value = math.fsum(integrals.values())
         demand(math.isfinite(value), "DOS积分数值溢出")
         result = dict(status="available", integral=value, component_integrals=integrals,
-                      frequency_interval_thz=[0.,max(v[1] for v in intervals)], component_intervals=dict(zip((c["id"] for c in curves),intervals)), comparison_status="unavailable",
+                      frequency_interval_thz=[min(v[0] for v in intervals),max(v[1] for v in intervals)], component_intervals=dict(zip((c["id"] for c in curves),intervals)), comparison_status="unavailable",
                       reason="缺少原胞原子数或每原胞绝对密度依据，暂不比较3N")
         atoms = (primitive or {}).get("primitive_atoms")
         if units == {"modes/THz/primitive_cell"} and isinstance(atoms, int) and not isinstance(atoms, bool) and atoms > 0:

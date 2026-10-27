@@ -18,7 +18,7 @@ const percent = (v: number | undefined) => v == null ? '—' : number(v * 100, 4
 
 export default function DosRelativeMetrics({ report, restricted }: { report?: DosRelativeReport; restricted: boolean }) {
   if (restricted) return <Typography color="text.secondary" sx={{my:1}}>当前为历史、失效或限定频段版本，不展示完整谱计算结果。</Typography>
-  if (report?.method !== 'dos-relative-v2') return <Typography color="text.secondary" sx={{my:1}}>请点击重新计算，查看相对面积与按 3N 归一化结果。</Typography>
+  if (report?.method !== 'dos-relative-v3') return <Typography color="text.secondary" sx={{my:1}}>请点击重新计算，查看相对面积与按 3N 归一化结果。</Typography>
   const { components, shares, normalization: norm } = report
   const comparable = shares.status === 'available', normalized = norm.status === 'available'
   const ratio = shares.element_ratio

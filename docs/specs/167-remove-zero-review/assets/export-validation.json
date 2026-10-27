@@ -1,0 +1,15 @@
+{
+  "status": "passed",
+  "checks": [
+    {
+      "state": "s1",
+      "first_frequency": 0.2000000000000004,
+      "row_count": 117
+    },
+    {
+      "state": "dos-positive",
+      "first_frequency": 0.2,
+      "row_count": 6
+    }
+  ]
+}

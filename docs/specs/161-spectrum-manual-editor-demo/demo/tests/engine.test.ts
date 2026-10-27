@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { addPoint, amplitude, axisValid, clone, commit, curvePath, frequency, markZero, move, pixelAt, record, redo, removePoints, undo, validateDocument, valueAt, neighborWeight, prepareMove, movePrepared, connected, restoreManualMarkers, tracePoints, reconnectManualPoints, zeroCovered, type Document, type History } from '../src/engine'
+import { addPoint, amplitude, axisValid, clone, commit, curvePath, frequency, move, pixelAt, record, redo, removePoints, undo, validateDocument, valueAt, neighborWeight, prepareMove, movePrepared, connected, restoreManualMarkers, tracePoints, reconnectManualPoints, type Document, type History } from '../src/engine'
 import fixtures from '../src/fixtures.json'
 import { DRAG_INFLUENCE } from '../src/dragInfluence'
 const expectedWeight = (d: number) => {
@@ -13,7 +13,7 @@ const base: Document = {
   source: { id: 'source', sha256: 'hash', width: 101, height: 101, image: '', plot: [0,0,100,100], viewport: [0,0,100,100] },
   calibration: { direction: 'x', frequency: {pixels:[0,100],values:[0,10],unit:'THz'}, amplitude:{pixels:[100,0],values:[0,10],unit:'pixel'},amplitudeEvidence:'' },
   curves: [{id:'a',name:'A',color:'#abc',points:[10,20,30,40,50,60].map((x,i)=>({id:'p'+i,x,y:50,segment:i<5?'s':'gap',status:'原始'}))}, {id:'b',name:'B',color:'#def',points:[{id:'other',x:20,y:30,segment:'s',status:'原始'}]}],
-  zero:null,operations:[],
+  operations:[],
 }
 describe('坐标与示例契约', () => {
   it('实际两个固定样本满足草稿校验，保留未知幅值', () => {
@@ -75,22 +75,9 @@ describe('片段与真实零频选点', () => {
     const d=removePoints(base,'a',base.curves[0].points.map(p=>p.id));expect(addPoint(d,'a',15,20).curves[0].points).toHaveLength(1)
     expect(()=>addPoint(base,'a',20,50)).toThrow('已有点');expect(()=>validateDocument(addPoint(base,'a',20,20),base)).not.toThrow()
   })
-  it('标零不自动补点；零幅值来自用户点选', () => {
-    const d=markZero(base,0,50);expect(d.curves).toEqual(base.curves);expect(zeroCovered(d,'a')).toBe(false)
-    const withPoint=addPoint(d,'a',.2,37,true);expect(zeroCovered(withPoint,'a')).toBe(true)
-    const p=withPoint.curves[0].points.find(p=>p.status==='人工零频选点')!
-    expect(p.x).toBe(0);expect(p.y).toBe(37);expect(amplitude(withPoint,p)).toBeCloseTo(6.3)
-    expect(zeroCovered(withPoint,'b')).toBe(false)
-  })
-  it('零频补点必须在已标记位置附近', () => {
-    expect(()=>addPoint(base,'a',0,40,true)).toThrow('先标记')
-    expect(()=>addPoint(markZero(base,0,50),'a',40,30,true)).toThrow('零频线上')
-  })
-  it('删除或移走零频点会恢复不完整提示', () => {
-    const d=addPoint(markZero(base,0,50),'a',0,35,true), id=d.zero!.pointIds[0]
-    expect(zeroCovered(removePoints(d,'a',[id]),'a')).toBe(false)
-    expect(zeroCovered(move(d,'a',id,2,0,false,'free'),'a')).toBe(false)
-  })
+
+
+
 })
 describe('历史', () => {
   it('一次拖动一次提交，撤销重做精确恢复', () => {

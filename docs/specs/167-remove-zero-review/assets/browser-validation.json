@@ -1,0 +1,48 @@
+{
+  "checks": [
+    "没有零刻度/人工确认，0.2–6 THz α²F直接计算ωlog和论文λ归一化，点数据不变",
+    "正式编辑器改点保存后无需核对即可重算，新文档不携带zero或核对报告",
+    "旧地址自动打开最新保存/计算结果，不要求再次选择，也不新增写请求",
+    "LaH2的正起点DOS在实际0.2–1.2 THz范围按共同倍率归一化到3N=9",
+    "切换元素保存并继续编辑使用最新版本，两个元素均持久化，刷新和重新3N计算无需零频核对",
+    "正式详情390px窄屏无横向溢出"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/8c7dd3efbb114e0c9c92ecf7a1489410/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/8c7dd3efbb114e0c9c92ecf7a1489410/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/8c7dd3efbb114e0c9c92ecf7a1489410/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3170ab9f2de946139213a552dc62a545/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3170ab9f2de946139213a552dc62a545/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3170ab9f2de946139213a552dc62a545/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3170ab9f2de946139213a552dc62a545/recalculate"
+    }
+  ],
+  "screenshots": [
+    "alpha-positive-range.png",
+    "alpha-mobile.png",
+    "dos-positive-3n.png",
+    "dos-mobile.png"
+  ],
+  "status": "passed"
+}

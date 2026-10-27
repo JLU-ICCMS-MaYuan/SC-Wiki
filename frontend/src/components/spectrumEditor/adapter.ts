@@ -1,6 +1,5 @@
 import type { PropertySpectrumCurve, PropertySpectrumItem } from '../../lib/propertySpectra'
 import type { Document, Point } from './engine'
-import type { ZeroCheck } from './zeroCheck'
 import { spectrumCurveColor, spectrumGeometry } from '../../lib/spectrumGeometry'
 
 /** 详情只读适配；真正编辑必须向服务端取得带版本的文档。 */
@@ -37,16 +36,5 @@ export function displayDocument(item: PropertySpectrumItem, curves: PropertySpec
     recognizedAxes:saved?.recognizedAxes||{sourceId:item.id,sourceSha256:String(item.source.source_sha256||''),direction,
       frequencyUnit:spec?.frequency_unit||'THz',frequencyTicks:spec?.frequency_ticks||[],lambdaTicks:[]},
     curves:curves.map((c,i)=>({id:c.id,name:c.projection||'α²F',color:spectrumCurveColor(c,i),points:readPoints(c),pathOrdered:true})),
-    zero:saved?.zero||null,operations:[]}
-}
-
-export function combinedZeroCheck(item: PropertySpectrumItem, curves: PropertySpectrumCurve[]): ZeroCheck | null {
-  const checks=item.result.quality?.manual_zero_checks
-  if(!checks)return null
-  const values=curves.map(c=>checks[c.id]).filter(Boolean)
-  const rows=curves.map(c=>checks[c.id]?.curves?.[0]||{id:c.id,name:c.projection||'α²F',status:'needs_boundary'})
-  const completedCount=rows.filter(c=>c.status==='complete').length
-  const pixel=values[0]?.zeroPixel
-  return {complete:rows.length>0&&completedCount===rows.length,boundary:values.length===curves.length&&values.every(v=>v.boundary==='confirmed')?'confirmed':'missing',
-    zeroPixel:Number.isFinite(pixel)&&values.every(v=>v.zeroPixel===pixel)?pixel:NaN,completedCount,curves:rows}
+    operations:[]}
 }

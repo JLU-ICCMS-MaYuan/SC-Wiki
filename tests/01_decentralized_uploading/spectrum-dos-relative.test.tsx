@@ -7,7 +7,7 @@ import { SpectrumMetrics } from '../../frontend/src/components/SpectrumDetailVie
 
 afterEach(cleanup)
 const report = (): DosRelativeReport => ({
-  method:'dos-relative-v2',
+  method:'dos-relative-v3',
   components:[{curve_id:'La',projection:'La',status:'available',area:4,frequency_interval_thz:[0,1]},
     {curve_id:'H',projection:'H',status:'available',area:5,frequency_interval_thz:[0,1]}],
   shares:{status:'available',total_area:9,fractions:{La:4/9,H:5/9},expected_fractions:{La:1/3,H:2/3}},

@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import ZeroFrequencyCheck from './ZeroFrequencyCheck'
-import { checkZeroFrequency, confirmCurrentZeroBoundary, confirmExistingZeroPoint, type ZeroCurveCheck } from './zeroCheck'
 import ImageOpacityControl from './ImageOpacityControl'
 import SourceCanvas, { type Tool } from './SourceCanvas'
 import fixtures from './fixtures.json'
 import { DRAG_INFLUENCE } from './dragInfluence'
-import { pointReadout, zeroReadout, recognizedAxes } from './axisGeometry'
-import { amplitude, amplitudePixel, axisValid, clone, commit, frequency, frequencyPixel, move, restoreManualMarkers, reconnectManualPoints, ordered, pixelAt, record, redo, removePoints, undo, validateDocument, zeroCovered, type Axis, type Document, type History, type Point } from './engine'
+import { pointReadout, recognizedAxes } from './axisGeometry'
+import { amplitude, amplitudePixel, axisValid, clone, commit, frequency, frequencyPixel, move, restoreManualMarkers, reconnectManualPoints, ordered, pixelAt, record, redo, removePoints, undo, validateDocument, type Axis, type Document, type History, type Point } from './engine'
 
 const samples = fixtures as unknown as Document[]
 samples.forEach(sample => validateDocument(sample, sample))
@@ -16,7 +14,7 @@ function load(initial: Document) {
   try {
     const value = localStorage.getItem(storageKey(initial.id))
     if (!value) return { doc: clone(initial), error: '', blocked: false }
-    const doc: unknown = JSON.parse(value); validateDocument(doc, initial)
+    const doc: unknown = JSON.parse(value); if(doc && typeof doc==='object')delete (doc as {zero?:unknown}).zero; validateDocument(doc, initial)
     return { doc: restoreManualMarkers(doc, initial), error: '', blocked: false }
   } catch { return { doc: clone(initial), error: '本机草稿不可读取或校验失败，未覆盖原草稿。请检查浏览器存储，或显式恢复原始提取后重新保存。', blocked: true } }
 }
@@ -31,7 +29,6 @@ function PointForm({ doc, point, onApply }: { doc: Document; point: Point; onApp
     <div className="point-readout" data-testid="point-readout">
       <div><span>原图像素 X</span><output data-testid="point-x">{number(reading.x)}</output></div>
       <div><span>原图像素 Y</span><output data-testid="point-y">{number(reading.y)}</output></div>
-      <div className="full"><span>距当前标定零频线</span><output data-testid="point-zero-distance">{number(reading.distanceToZeroPx)} px</output></div>
     </div>
     <p className="muted">{point.status} · 频率与幅值按当前标定换算</p>
     <button className="secondary" type="submit">应用坐标到此点</button>
@@ -51,8 +48,6 @@ export default function App() {
   const [loaded] = useState(() => load(samples[0]))
   const [saved, setSaved] = useState<Document>(loaded.doc), [history, setHistory] = useState<History>({ past: [], present: loaded.doc, future: [] })
   const doc = history.present
-  const [savedCheck, setSavedCheck] = useState(() => checkZeroFrequency(loaded.doc))
-  const [checkedAfterSave, setCheckedAfterSave] = useState(false)
   const [editor, setEditor] = useState(false), [active, setActive] = useState(doc.curves[0].id), [selected, setSelected] = useState<string[]>([])
   const [tool, setTool] = useState<Tool>('select'), [linked, setLinked] = useState(true), [dragMode, setDragMode] = useState<'amplitude' | 'free'>('free')
   const [imageOpacity, setImageOpacity] = useState(100)
@@ -61,11 +56,10 @@ export default function App() {
   const [exitModal, setExitModal] = useState(false), exitAction = useRef<() => void>(() => {})
   const [calibration, setCalibration] = useState(clone(doc.calibration)), [pick, setPick] = useState<{ axis: 'frequency' | 'amplitude'; index: 0 | 1 } | null>(null)
   const curve = doc.curves.find(c => c.id === active)!, point = curve.points.find(p => p.id === selected[0])
-  const zeroInfo = zeroReadout(doc), reference = recognizedAxes(doc)
+  const reference = recognizedAxes(doc)
   const focusCoordinates = () => requestAnimationFrame(() => document.querySelector('.inspector')?.scrollTo({ top: 0, behavior: 'instant' }))
   const calibrationDirty = JSON.stringify(calibration) !== JSON.stringify(doc.calibration)
   const dirty = JSON.stringify(doc) !== JSON.stringify(saved) || calibrationDirty
-  const currentCheck = checkZeroFrequency(doc), activeCheck = currentCheck.curves.find(c => c.id === active)!, covered = activeCheck.status === 'complete'
   useEffect(() => { setCalibration(clone(doc.calibration)); setPick(null) }, [doc.calibration])
   useEffect(() => {
     if (selected.length !== 1) return
@@ -102,7 +96,6 @@ export default function App() {
       if (blocked) throw new Error('旧草稿不可读取，需先显式恢复原始提取，才能替换本机草稿。')
       validateDocument(doc, initial)
       localStorage.setItem(storageKey(sampleId), JSON.stringify(doc))
-      setSavedCheck(checkZeroFrequency(doc)); setCheckedAfterSave(true)
       setSaved(clone(doc)); setHistory({ past: [], present: clone(doc), future: [] }); setEditor(false); setError(''); setSelected([])
       setNotice('调整已保存，并已检查本次保存的零频位置。结果见详情下方；草稿仅在此浏览器，尚未写入数据库。')
       return true
@@ -114,18 +107,8 @@ export default function App() {
   }
   const switchSample = (id: string) => {
     const next = samples.find(s => s.id === id)!, state = load(next)
-    setSavedCheck(checkZeroFrequency(state.doc)); setCheckedAfterSave(false)
     setSampleId(id); setSaved(state.doc); setHistory({ past: [], present: state.doc, future: [] }); setActive(next.curves[0].id)
     setSelected([]); setEditor(false); setError(state.error); setBlocked(state.blocked); setNotice(''); setAll(true); setTool('select')
-  }
-  const continueZeroCheck = (value: ZeroCurveCheck) => {
-    setActive(value.id); setSelected(value.pointId ? [value.pointId] : value.nearest ? [value.nearest.id] : [])
-    setTool('select'); setEditor(true); setDisplay('overlay'); setNotice('请对照原图核对零频线和选中点，完成后保存会重新检查。')
-    focusCoordinates()
-  }
-  const confirmZero = (action: () => Document) => {
-    try { change(action()); setNotice('零频核对依据已记录，点击保存调整后会检查保存结果。') }
-    catch (e) { setError((e as Error).message) }
   }
   const restore = () => {
     change(record({ ...clone(initial), operations: doc.operations }, 'restore', '恢复不可变初始提取样本'))
@@ -143,25 +126,13 @@ export default function App() {
   const applyCalibration = () => {
     if (!axisValid(calibration.frequency) || !axisValid(calibration.amplitude)) { setError('每根轴的两个位置和数值必须有限、互不重合'); return }
     if (calibration.amplitude.unit !== 'pixel' && !calibration.amplitudeEvidence.trim()) { setError('填写物理幅值刻度前，请注明来自原图何处的幅值依据；不能借用累计 λ'); return }
-    const next = record({ ...restoreManualMarkers(doc, initial), calibration: clone(calibration), zero: null }, 'calibration', '修改线性标定，保留全部源像素位置；零频选点需重新核对')
+    const next = record({ ...restoreManualMarkers(doc, initial), calibration: clone(calibration) }, 'calibration', '修改线性标定，保留全部源像素位置')
     try { validateDocument(next, initial); change(next); setTool('select'); setPick(null) } catch (e) { setError((e as Error).message) }
   }
   const displayedRange = curve.points.length ? (() => { const ps = ordered(doc, curve.points); return number(frequency(doc, ps[0])) + '–' + number(frequency(doc, ps.at(-1)!)) + ' ' + doc.calibration.frequency.unit })() : '尚无数据点'
-  const zeroWarning = <div className={'callout ' + (covered ? 'info' : 'warning')} data-testid="zero-status">{covered ? '已记录原图零频位置与当前曲线的人工选点；科学依据仍待核对。' : doc.zero ? '零频提取不完整：零频线已标记，当前曲线还没有确认的零频点。可在右侧核对位置后补选。' : '零频位置尚待核对：蓝色虚线是当前标定的 0 频率，可对照灰色已有识别刻度和右侧像素坐标。'}</div>
   const curvePicker = <div className="curve-picker">{doc.curves.map(c => <button key={c.id} className={active === c.id ? 'active' : ''} onClick={() => selectCurve(c.id)}><i style={{ background: c.color }}/>{c.name}<span>{c.points.length}</span></button>)}</div>
-  const selectedPanel = <section className="panel-section" data-testid="coordinate-panel"><div className="section-heading"><h3>坐标与零频核对</h3><span className="badge">{selected.length} 个</span></div>
+  const selectedPanel = <section className="panel-section" data-testid="coordinate-panel"><div className="section-heading"><h3>坐标调整</h3><span className="badge">{selected.length} 个</span></div>
     {selected.length === 1 && point ? <PointForm key={point.id + ':' + point.x + ':' + point.y + ':' + JSON.stringify(doc.calibration)} doc={doc} point={point} onApply={applyCoordinates} /> : <p className="muted">在图上点选或框选，也可在下方数据表中选择。</p>}
-    <div className="zero-readout" data-testid="zero-readout">
-      <strong>零频线位置 / 原图像素 {doc.calibration.direction.toUpperCase()}</strong>
-      <div><span>当前标定 0 频率</span><output data-testid="calibrated-zero-pixel">{number(zeroInfo.zeroPixel)} px</output></div>
-      {zeroInfo.originalZero !== null && <><div><span>已有识别 0 刻度</span><output>{number(zeroInfo.originalZero)} px</output></div><div><span>与已有识别位置之差</span><output>{number(zeroInfo.differencePx!)} px</output></div></>}
-      <div><span>人工标记</span><output data-testid="marked-zero-pixel">{zeroInfo.markedPixel === null ? '尚未标记' : number(zeroInfo.markedPixel) + ' px'}</output></div>
-      {zeroInfo.markedValue !== null && <div><span>标记处换算频率</span><output>{number(zeroInfo.markedValue)} {doc.calibration.frequency.unit}</output></div>}
-      <p className="muted">数字相符表示标定一致；真实零边界仍需与原图核对。</p>
-      <button className="secondary" disabled={currentCheck.boundary === 'confirmed'} onClick={() => confirmZero(() => confirmCurrentZeroBoundary(doc))}>确认蓝色零频线与原图一致</button>
-      <button className="secondary" disabled={selected.length !== 1 || !point || currentCheck.boundary !== 'confirmed'} onClick={() => confirmZero(() => confirmExistingZeroPoint(doc, active, point!.id))}>确认选中点为零频点</button>
-      {activeCheck.status === 'needs_confirmation' && <p className="muted">已有零频候选点，可确认它，无需删除重画。</p>}
-    </div>
     <button className="secondary" disabled={!curve.points.some(p => p.manual)} onClick={() => { const next = reconnectManualPoints(doc, active); change(next); setSelected([]); setNotice(next === doc ? '未发现需要修正的局部回折，点坐标保持不变。' : '已调整局部连线，点坐标保持不变；可撤销，保存后才写入本机草稿。') }}>重新连接人工补点</button>
     <p className="muted">已有折返可重新连线；坐标不变，操作可撤销。</p>
     <button className="danger" disabled={!selected.length} onClick={remove}>删除选中点{selected.length > 1 ? `（${selected.length}）` : ''}</button>
@@ -174,9 +145,9 @@ export default function App() {
       {error && <div role="alert" className="callout error">{error}</div>}{notice && <div role="status" className="callout success">{notice}</div>}
       {editor ? <div className="editor-layout"><section className="workbench">
         <div className="tool-strip">{([['select','↖ 选点 / 拖动'],['pan','✥ 平移'],['add','＋ 增加点'],['box','▣ 框选']] as [Tool,string][]).map(([value,label]) => <button key={value} className={tool === value ? 'active' : ''} onClick={() => { if(value==='add' && (selected.length!==1 || !point)){setError('请先选中当前曲线的一个已有点，再点击增加点。');return} setTool(value); setPick(null);setError('') }}>{label}</button>)}<div className="tool-strip-end"><label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></div></div>
-        {!['select','pan'].includes(tool) && <div className="tool-hint">{tool === 'zero' ? '在原图 0 刻度对应的图框内位置点击，橙色线只表示标定位置。' : tool === 'zeroPoint' ? '在橙色零频线上的真实曲线位置点击，幅值取自你的点击。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? '单击从选中点连续描线，每点只连接前一点。双击结束并保留已加点，点击保存调整后才提交。' : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : ''}</div>}
+        {!['select','pan'].includes(tool) && <div className="tool-hint">{tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? '单击从选中点连续描线，每点只连接前一点。双击结束并保留已加点，点击保存调整后才提交。' : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : ''}</div>}
         <div className="editor-canvas-row"><ImageOpacityControl value={imageOpacity} onChange={setImageOpacity} disabled={display === 'data'}/>
-        <SourceCanvas doc={doc} active={active} selected={selected} imageOpacity={imageOpacity} editing tool={tool} linked={linked} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onFinishAdd={() => {setTool('select');setError('');setNotice('连续加点已结束，已加点保留在当前编辑中。请点击保存调整提交。')}} onAdded={focusCoordinates} onZeroMarked={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
+        <SourceCanvas doc={doc} active={active} selected={selected} imageOpacity={imageOpacity} editing tool={tool} linked={linked} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onFinishAdd={() => {setTool('select');setError('');setNotice('连续加点已结束，已加点保留在当前编辑中。请点击保存调整提交。')}} onAdded={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
           if (!pick) return
           const direction = pick.axis === 'frequency' ? calibration.direction : calibration.direction === 'x' ? 'y' : 'x'
           axisEdit(pick.axis, 'pixels', pick.index, direction === 'x' ? x : y); setTool('select'); setPick(null)
@@ -190,9 +161,6 @@ export default function App() {
           <p className="range-label">主要影响区 <strong>两侧各 {DRAG_INFLUENCE.coreNeighbors} 个点</strong></p>
           <p className="muted">按描线顺序计数。前 {DRAG_INFLUENCE.coreNeighbors} 个邻点明显跟随，之后指数衰减；很远的点不动。未连接的断口和其他分波不受影响。{dragMode === 'amplitude' && `当前频率沿${doc.calibration.direction === 'y' ? '竖轴，左右' : '横轴，上下'}拖动改变幅值。`}</p>
         </section>
-        <section className="panel-section"><h3>零频边界</h3>
-          <ol className="zero-steps" data-testid="zero-steps"><li>先选要核对的曲线；PhDOS 的 La、Sc、H 分别处理。</li><li>在原图频率轴找到 0 刻度。蓝线正确时，在上方确认蓝色零频线；不正确时，点下方第 1 步并在 0 刻度对应的图框内位置点击。</li><li>在零频线上找当前曲线的点。已有点就选中，并在上方确认选中点；缺点则点下方第 2 步，在原图曲线上补选。</li><li>检查右侧频率为 0、距零线为 0 px，然后保存调整。回到详情查看结果；PhDOS 要全部分波完成。</li></ol>
-          {zeroWarning}<div className="stack"><button className={tool === 'zero' ? 'active' : ''} onClick={() => setTool('zero')}>1 · 标记原图 0 频率位置</button><button disabled={!doc.zero} className={tool === 'zeroPoint' ? 'active' : ''} onClick={() => setTool('zeroPoint')}>2 · 补选曲线零频点</button></div><p className="muted">零频率不代表零幅值。看不清时保留待核对。</p></section>
         <section className="panel-section"><details><summary>坐标标定 <span>线性 · 两点</span></summary><div className="calibration-form">
           <p className="muted">{reference ? '灰色刻度来自已有识别记录：0、20、40、60 THz；蓝色为当前标定，二者独立显示。' : '没有可匹配的识别记录，当前只显示两点标定。'}{sampleId === 'alpha2f' ? ' 棕色0–4为累计λ参考，不能作为α²F幅值。' : ' 原图没有DOS数字幅值刻度，当前使用相对像素。'}</p>
           <label>频率轴方向<select aria-label="频率轴方向" value={calibration.direction} onChange={e => {
@@ -210,7 +178,7 @@ export default function App() {
           </div>)}</fieldset>)}
           <label>幅值单位<select aria-label="幅值单位" value={calibration.amplitude.unit} onChange={e => setCalibration(c => ({...c, amplitude:{...c.amplitude,unit:e.target.value}}))}><option value="pixel">相对像素（刻度待核对）</option><option value="dimensionless">无量纲</option><option value="modes/THz">modes/THz</option><option value="unknown">其他 / 待核对</option></select></label>
           <label>幅值标定依据<textarea aria-label="幅值标定依据" value={calibration.amplitudeEvidence} placeholder="来自原图哪条轴、哪组刻度；不要填写累计 λ 的刻度" onChange={e => setCalibration(c => ({...c,amplitudeEvidence:e.target.value}))}/></label>
-          <button className="secondary" onClick={applyCalibration}>应用标定</button><p className="muted">保留原图像素位置，只重新换算数值。修改后需重新核对零频选点。</p>
+          <button className="secondary" onClick={applyCalibration}>应用标定</button><p className="muted">保留原图像素位置，只重新换算数值。</p>
         </div></details></section>
         <section className="panel-section"><h3>逐点数据</h3><PointTable doc={doc} active={active} selected={selected} onSelect={setSelected} compact/></section>
       </aside></div> : <>
@@ -221,7 +189,7 @@ export default function App() {
           {doc.curves.length > 1 && <div className="detail-curves">{curvePicker}<label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>全部分波</label></div>}
           <SourceCanvas doc={doc} active={active} selected={[]} imageOpacity={imageOpacity} display={display} all={all}/><div className="plot-footnote"><span style={{color:curve.color}}>● {curve.name}</span><span>源图与提取点共用像素坐标</span></div>
           </div></div>
-        </section><div className="result-column"><section className="card"><div className="card-title"><div><span className="section-number">03</span><h2>{sampleId === 'phdos' ? '频段与数据完整性' : '积分结果与参考值对比'}</h2></div></div><div className="metric-pair"><div><small>实际数据频率范围</small><strong data-testid="frequency-range">{displayedRange}</strong></div><div><small>当前曲线数据点</small><strong>{curve.points.length} <small>个</small></strong></div></div>{<ZeroFrequencyCheck result={savedCheck} unit={saved.calibration.frequency.unit} afterSave={checkedAfterSave} onContinue={continueZeroCheck}/>}<div className="metric-placeholder"><span>{sampleId === 'phdos' ? '总振动模式数 / 3N 核验' : 'λ / ωlog 积分'}</span><strong>暂不可计算</strong></div><p className="muted">幅值刻度和科学依据待核对。人工选点或调整完成，不代表积分条件已满足。</p></section><section className="card guide-card"><span className="eyebrow">MANUAL CORRECTION</span><h2>把判断交还给你</h2><p>删掉图例误识别，补上漏掉的点，<br/>或揪住一个点，轻轻修正整段曲线。</p><ol><li>点击左侧“编辑”，放大原图。</li><li>选择曲线和数据点，调整局部形状。</li><li>保存后回到这里，查看修改结果。</li></ol><div className="callout info">本机 Demo 草稿 · 无下载与导出<br/>后续正式接入才会写入数据库。</div></section></div></div>
+        </section><div className="result-column"><section className="card"><div className="card-title"><div><span className="section-number">03</span><h2>{sampleId === 'phdos' ? '频段与数据完整性' : '积分结果与参考值对比'}</h2></div></div><div className="metric-pair"><div><small>实际数据频率范围</small><strong data-testid="frequency-range">{displayedRange}</strong></div><div><small>当前曲线数据点</small><strong>{curve.points.length} <small>个</small></strong></div></div><div className="metric-placeholder"><span>{sampleId === 'phdos' ? '总振动模式数 / 3N 核验' : 'λ / ωlog 积分'}</span><strong>暂不可计算</strong></div><p className="muted">幅值刻度和科学依据待核对。人工选点或调整完成，不代表积分条件已满足。</p></section><section className="card guide-card"><span className="eyebrow">MANUAL CORRECTION</span><h2>把判断交还给你</h2><p>删掉图例误识别，补上漏掉的点，<br/>或揪住一个点，轻轻修正整段曲线。</p><ol><li>点击左侧“编辑”，放大原图。</li><li>选择曲线和数据点，调整局部形状。</li><li>保存后回到这里，查看修改结果。</li></ol><div className="callout info">本机 Demo 草稿 · 无下载与导出<br/>后续正式接入才会写入数据库。</div></section></div></div>
         <section className="card"><div className="card-title"><div><span className="section-number">04</span><h2>逐数据点核对</h2></div><span className="muted">{curve.name} · 幅值为{doc.calibration.amplitude.unit === 'pixel' ? '相对像素' : doc.calibration.amplitude.unit}</span></div><PointTable doc={doc} active={active} selected={selected} onSelect={setSelected}/></section>
       </>}
     </main>

@@ -24,7 +24,7 @@ async function main(){
  const seed=async(item,kind,cid,large=false)=>{
   const input=await api('/api/rag/spectra/'+item.id+'/manual?'+query+'&kind='+kind+'&collection_version='+item.version+'&run_id='+item.run.id);
   const doc=input.documents.find(d=>d.curves[0].id===cid),axis=doc.calibration.direction,points=doc.curves[0].points;
-  doc.zero={pixel:points[0][axis],pointIds:[points[0].id]};
+
   const sign=Math.sign((doc.calibration.frequency.values[1]-doc.calibration.frequency.values[0])/(doc.calibration.frequency.pixels[1]-doc.calibration.frequency.pixels[0]));
   const center=(points[50][axis]+points[51][axis])/2;
   points[50][axis]=center+sign*(large?1.1:.1);points[51][axis]=center-sign*(large?1.1:.1);

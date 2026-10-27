@@ -16,7 +16,7 @@
 | [上传、审核与默认结构](upload-review-and-default-selection.md) | 管理晶体结构 pending/approved/rejected 状态和默认项 | 用户认证、管理员权限 |
 | [上传数据结构与表单映射](data-structure-and-form-mapping.md) | 三入口统一研究材料与状态字段、退役独立材料关系、紧凑可折叠结构及草稿与 MySQL 的映射 | 上传任务、科学数据模型 |
 | [数据表关系与内容说明](table-relationships-AI-writed.md) | 核心地图、39 张数据表、表单定义及本地数据快照 | MySQL、科学数据模型、版本化表单 |
-| [谱线人工编辑与联动调参](spectrum-manual-editor-demo.md) | 正式谱点人工修订、零频核对与历史保存；独立Demo另行保留 | React、SVG、谱运行表、版本与权限 |
+| [谱线人工编辑与联动调参](spectrum-manual-editor-demo.md) | 正式谱点人工修订、实际区间积分与历史保存；独立Demo另行保留 | React、SVG、谱运行表、版本与权限 |
 
 ## 功能组成
 
@@ -68,7 +68,7 @@
 
 声子 DOS、α²F/累计 λ 的独立存储、原图回绘、分项质量和逐谱审核见[声子谱与提取质量](data-structure-and-form-mapping.md#声子谱与提取质量137)。本机谱表已迁移；其他环境须核验对应迁移与模型能力。
 
-#154/#155 的新标签谱详情、单图三模式、提取历史和真实零频采样见 [正式详情、历史和零频采样](data-structure-and-form-mapping.md#正式详情历史和零频采样154--155)。历史业务谱不会自动重提取；缺失幅值与未确认标定仍需核对。
+#154/#155 的新标签谱详情、单图三模式、提取历史和采样范围规则见 [正式详情、历史和零频采样](data-structure-and-form-mapping.md#正式详情历史和零频采样154--155)。历史业务谱不会自动重提取；缺失幅值与未确认标定仍需核对。
 
 DOS 的相对面积、元素占比、按 3N 共同归一化与独立绝对积分见[谱详情计算规则](data-structure-and-form-mapping.md#正式详情历史和零频采样154--155)。缺少原胞 N 不再阻止有效像素面积计算，条件不足的派生项单独说明原因。
 

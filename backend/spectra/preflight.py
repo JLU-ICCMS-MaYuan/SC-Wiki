@@ -50,14 +50,12 @@ def sample_issues(curve, document=None):
         issue=dict(kind=kind,message=message,points=[location(curve,k,p) for k,p in pairs])
         if meta:issue["meta"]=meta
         issues.append(issue)
-    finite_pairs=[]
     keys={id(p):point_id(curve,p,i) for i,p in enumerate(points)}
     for i,p in enumerate(points):
         key=point_id(curve,p,i); f,a=p.get("frequency_thz"),p.get("reconstructed_amplitude")
         if not finite(f) or not finite(a):
             add("nonfinite_sample","样本缺少有效频率或幅值，请对照原图补选或调整",[(key,p)])
         if finite(f):
-            finite_pairs.append((key,p))
             if f<0:add("negative_frequency","频率为负，请核对频率轴或该点",[(key,p)])
         if finite(a) and a<0 and not numerical_zero(curve,p):
             add("negative_amplitude","幅值为负，请核对幅值零基线或该点",[(key,p)])
@@ -69,16 +67,6 @@ def sample_issues(curve, document=None):
                 "相连点频率重复，无法作为单值谱积分" if y==x else "相连点频率回折，请对照原图调整连线或坐标",
                 [(keys[id(a)],a),
                  (keys[id(b)],b)])
-    if finite_pairs:
-        key,first=min(finite_pairs,key=lambda pair:pair[1]["frequency_thz"])
-        if abs(first["frequency_thz"]) > 1e-12*max(1.,max(p["frequency_thz"] for _,p in finite_pairs)):
-            add("low_endpoint","实际低频端未到0频率，请核对原图真实边界",[(key,first)])
-        elif curve["kind"]=="alpha2f" and finite(first.get("reconstructed_amplitude")) and not numerical_zero(curve,first):
-            add("nonzero_zero","零频点幅值非零，当前分段线性积分发散；请核对原图，系统不会将幅值改零",[(key,first)])
-        if document is not None:
-            from .manual import zero_report
-            if not zero_report(document)["complete"]:
-                add("zero_confirmation","请核对原图零频线及曲线对应点，并在编辑器中明确确认",[(key,first)])
     return issues
 
 

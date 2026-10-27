@@ -57,6 +57,7 @@ def editor_document(row, run, curve):
     if stored:
         doc=copy.deepcopy(stored)
         doc.pop("highEndpoint",None)
+        doc.pop("zero",None)
         # 返修复制会生成新集合身份，保留点和来源像素，但编辑文档不能仍指向旧集合。
         doc["id"]=f"{row.id}:{curve['id']}"
         doc["source"]["id"]=row.id
@@ -73,10 +74,7 @@ def editor_document(row, run, curve):
     plot = list(curve["roi"])
     faxis = curve.get("axis_calibration", {}).get("frequency")
     require(faxis and faxis.get("slope"), "缺少频率标定")
-    zero = -faxis["intercept"]/faxis["slope"]
-    lo, hi, extent = (1, 3, height) if direction == "y" else (0, 2, width)
-    if 0 <= zero < extent:
-        plot[lo], plot[hi] = min(plot[lo], zero), max(plot[hi], zero)
+    lo, hi = (1,3) if direction=="y" else (0,2)
     require(0 <= plot[0] < plot[2] < width and 0 <= plot[1] < plot[3] < height, "图框不在来源图片内")
     crop = curve.get("display_bbox") or [max(0,plot[0]-8),max(0,plot[1]-8),min(width-1,plot[2]+12),min(height-1,plot[3]+24)]
     require(len(crop) == 4 and 0 <= crop[0] <= plot[0] < plot[2] <= crop[2] < width
@@ -115,7 +113,7 @@ def editor_document(row, run, curve):
                 calibration=dict(direction=direction,frequency=axis_from_result(faxis,fb,"THz"),amplitude=amp,
                                  amplitudeEvidence=spec.get("amplitude_evidence") or ""),
                 curves=[dict(id=curve["id"],name=curve.get("projection") or "α²F",color={"La":"#6256dd","Sc":"#d84491","H":"#07996c"}.get(curve.get("projection"),"#e9526b"),points=points,pathOrdered=True)],
-                zero=None,operations=[],recognizedAxes=reference)
+                operations=[],recognizedAxes=reference)
 
 
 def documents(session, ctx, row, run, kind):
@@ -135,9 +133,10 @@ def checked_document(body, seed):
     try:
         require(len(json.dumps(body,allow_nan=False)) <= 4_000_000, "编辑数据超过4MB限制")
         body=copy.deepcopy(body)
+        body.pop("zero",None)  # 退休的人工确认字段不再参与保存校验。
         body.pop("highEndpoint",None)  # 废弃字段只作历史兼容，不再核对或用于计算。
         require(set(body) <= set(seed), "含不支持的编辑字段")
-        require({"schemaVersion","id","title","description","source","calibration","curves","zero","operations"} <= set(body), "编辑文档缺少必要字段")
+        require({"schemaVersion","id","title","description","source","calibration","curves","operations"} <= set(body), "编辑文档缺少必要字段")
         require(body["schemaVersion"] == 1 and body["id"] == seed["id"], "编辑身份不匹配")
         source = {**body["source"], "image":""}
         require(source == seed["source"], "来源图片或图框已变化，不能替换来源")
@@ -190,13 +189,6 @@ def checked_document(body, seed):
                 edge=tuple(sorted((p["id"],p["joinTo"])))
                 require(edge not in edges, "吸附连接已存在，不能重复添加")
                 edges.add(edge)
-        zero=body.get("zero")
-        if zero is not None:
-            require(set(zero)=={"pixel","pointIds"} and finite(zero["pixel"]) and isinstance(zero["pointIds"],list)
-                    and set(zero["pointIds"])<=ids, "零频记录无效")
-            require(abs(axis_value(cal["frequency"],zero["pixel"])) < 1e-6, "零频位置与标定不一致")
-            low,high=(x0,x1) if cal["direction"]=="x" else (y0,y1)
-            require(low <= zero["pixel"] <= high, "零频标记不在图框内")
         require(isinstance(body["operations"],list) and len(body["operations"]) <= 5000, "操作记录过多")
         for op in body["operations"]:
             require(set(op)=={"kind","at","detail"} and all(isinstance(v,str) and len(v)<=4000 for v in op.values()), "操作记录无效")
@@ -209,36 +201,18 @@ def checked_document(body, seed):
 
 
 def axis_value(axis,pixel):
-    return axis["values"][0]+(pixel-axis["pixels"][0])*(axis["values"][1]-axis["values"][0])/(axis["pixels"][1]-axis["pixels"][0])
-
-
-def zero_report(doc):
-    axis=doc["calibration"]["frequency"];slope=(axis["values"][1]-axis["values"][0])/(axis["pixels"][1]-axis["pixels"][0])
-    pixel=axis["pixels"][0]-axis["values"][0]/slope
-    direction=doc["calibration"]["direction"];lo,hi=(0,2) if direction=="x" else (1,3)
-    boundary="invalid" if not doc["source"]["plot"][lo]<=pixel<=doc["source"]["plot"][hi] else "missing" if doc["zero"] is None else "confirmed"
-    curve=doc["curves"][0];ids=set((doc["zero"] or {}).get("pointIds",[]));nearest=None;candidate=None;confirmed=None
-    for p in curve["points"]:
-        distance=abs(p[direction]-pixel)
-        if nearest is None or distance<nearest["distancePx"]:
-            nearest=dict(id=p["id"],frequency=axis_value(axis,p[direction])*FREQUENCY_FACTORS[axis["unit"]],distancePx=distance)
-        if distance<=1e-4:
-            candidate=candidate or p["id"]
-            if p["id"] in ids:confirmed=confirmed or p["id"]
-    status="needs_boundary" if boundary!="confirmed" else "complete" if confirmed else "needs_confirmation" if candidate else "missing_point"
-    return dict(complete=status=="complete",boundary=boundary,zeroPixel=pixel,completedCount=int(status=="complete"),
-                curves=[dict(id=curve["id"],name=curve["name"],status=status,pointId=confirmed or candidate,nearest=nearest)])
+    base = axis["values"][0]
+    offset = (pixel-axis["pixels"][0])*(axis["values"][1]-base)/(axis["pixels"][1]-axis["pixels"][0])
+    value = base + offset
+    # 仅消除两项相消的机器舍入，不把可分辨的正频率吸附到0。
+    roundoff = 8 * (math.ulp(abs(base)) + math.ulp(abs(offset)))
+    return 0.0 if abs(value) <= roundoff else value
 
 
 def invalidate_derived(payload, reason):
-    checks={key:zero_report(value) for key,value in payload.get("manual_documents",{}).items()}
-    for c in payload["curves"]:
-        if c["kind"] in KINDS and c["id"] not in checks:
-            checks[c["id"]]=dict(complete=False,boundary="missing",zeroPixel=None,completedCount=0,
-                curves=[dict(id=c["id"],name=c.get("projection") or "α²F",status="needs_boundary",pointId=None,nearest=None)])
     payload["quality"]={"curves":{c["id"]:{"total_points":len(c["points"])} for c in payload["curves"]},
         "integrals":{"raw":{"status":"unavailable","reason":reason}},"comparisons":{},
-        "dos_mode_integral":{"status":"unavailable","reason":reason},"manual_zero_checks":checks,"limitations":[reason]}
+        "dos_mode_integral":{"status":"unavailable","reason":reason},"limitations":[reason]}
     payload["candidates"]={};payload["failures"]=[];payload["status"]="needs_review"
 
 

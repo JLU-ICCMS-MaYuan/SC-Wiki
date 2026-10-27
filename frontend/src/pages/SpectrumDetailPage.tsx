@@ -3,7 +3,6 @@ import { Alert, Box, Button, Chip, Dialog, MenuItem, TextField, Typography } fro
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { DetailSection, SpectrumResult, SpectrumMetrics } from '../components/SpectrumDetailView'
 import SpectrumManualEditor from '../components/spectrumEditor/SpectrumManualEditor'
-import { checkZeroFrequency } from '../components/spectrumEditor/zeroCheck'
 import type { Document as EditorDocument } from '../components/spectrumEditor/engine'
 import type { PropertySpectrumListing } from '../lib/propertySpectra'
 import { materialStateSummary } from '../lib/materialStateSummary'
@@ -109,7 +108,7 @@ export default function SpectrumDetailPage() {
     }catch(error:any){if(calculationTarget.current===context)setActionError(error.message||'重新计算失败，已保存数据保持不变。')}
     finally{calculationLock.current=false;setRecalculating(false)}
   }
-  const openEditor=async(selectedCurve?:string,focusZero=false,pointId?:string)=>{
+  const openEditor=async(selectedCurve?:string,pointId?:string)=>{
     if(!canEdit || !validItem || editorInput || openingEditor || calculationLock.current)return
     savedEditorResult.current=null
     setOpeningEditor(true);setActionError('')
@@ -119,8 +118,7 @@ export default function SpectrumDetailPage() {
       documents.sort((a,b)=>Number(b.curves[0].id===selectedCurve)-Number(a.curves[0].id===selectedCurve))
       if(pointId && (documents[0]?.curves[0]?.id!==selectedCurve || !documents[0].curves[0].points.some(p=>p.id===pointId)))
         throw new Error('该问题点已变化或缺少有效原图位置，请重新计算后定位。')
-      const zero=focusZero?checkZeroFrequency(documents[0]).curves[0]:null
-      setEditorInput({...input,documents,initialPointId:pointId||zero?.pointId||zero?.nearest?.id,focusPointId:pointId})
+      setEditorInput({...input,documents,initialPointId:pointId,focusPointId:pointId})
     }catch(error:any){setActionError(error.message||'无法打开人工编辑器')}
     finally{setOpeningEditor(false)}
   }
@@ -274,7 +272,7 @@ export default function SpectrumDetailPage() {
       {!primary.length && <Alert severity="info" sx={{ mb: 2 }}>尚未得到数值曲线。{(selected.result.failures || selected.result.quality?.limitations || []).map((value: unknown) => typeof value === 'string' ? value : JSON.stringify(value)).join('；')}</Alert>}
       <Box data-testid="spectrum-analysis-grid" sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0,1fr)', lg: primary.length ? 'minmax(0,.85fr) minmax(0,1.15fr)' : 'minmax(0,1fr)' }, gap: 2, alignItems: 'start', mb: 2, '& > .MuiPaper-root': { mb: 0 } }}>
         <SpectrumResult history={historical} key={selected.id + selected.run.id + kind} item={selected} curves={primary} image={image} retryImage={() => setImageRetry(value => value + 1)} onEdit={listing?.can_edit && !historical ? openEditor : undefined} editingDisabled={!canEdit || openingEditor || recalculating} editingDisabledReason={editDisabledReason} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} />
-        {!!primary.length && <SpectrumMetrics item={selected} curves={primary} history={historical} onContinue={canEdit&&!recalculating?(id)=>openEditor(id,true):undefined} onLocate={canEdit?(curve,point)=>openEditor(curve,false,point):undefined} onRecalculate={listing?.can_edit?recalculate:undefined} recalculating={recalculating} calculationDisabled={!canCalculate||openingEditor||Boolean(editorInput)} calculationDisabledReason={disabledReason||undefined}/>}
+        {!!primary.length && <SpectrumMetrics item={selected} curves={primary} history={historical} onLocate={canEdit?(curve,point)=>openEditor(curve,point):undefined} onRecalculate={listing?.can_edit?recalculate:undefined} recalculating={recalculating} calculationDisabled={!canCalculate||openingEditor||Boolean(editorInput)} calculationDisabledReason={disabledReason||undefined}/>}
       </Box>
     </>}
     <Dialog open={Boolean(revalidationInput)} onClose={()=>{if(!revalidating)setRevalidationInput(null)}} maxWidth="sm" fullWidth aria-labelledby="revalidate-material-title">

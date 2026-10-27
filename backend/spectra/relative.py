@@ -6,7 +6,7 @@ from .digitize import spectral_integrals
 from .samples import connected_samples
 from .topology import finite
 
-METHOD = "alpha2f-relative-v1"
+METHOD = "alpha2f-relative-v2"
 
 
 def unavailable(reason):
@@ -78,7 +78,7 @@ def calculate_alpha(payload,references=None,reference_reasons=None):
         omega=omega_value if finite(omega_value) else None
         ip=weighted["lambda_integral"]*peak if peak else 0.
         raw.update(status="available",relative_basis=basis,minimum_integrated_thz=f[0],maximum_integrated_thz=f[-1],
-                   positive_frequency_complete=True,frequency_log_thz=weighted["frequency_log_thz"] if finite(weighted["frequency_log_thz"]) else None,
+                   positive_frequency_complete=bool(f[0]==0),frequency_log_thz=weighted["frequency_log_thz"] if finite(weighted["frequency_log_thz"]) else None,
                    omega_log_k=omega,
                    pixel_integral=ip if finite(ip) and basis["kind"]!="stored_relative_values" else None)
         raw["pixel_integral_status"]="available" if raw["pixel_integral"] is not None else "unavailable"

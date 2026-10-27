@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { displayDocument, combinedZeroCheck } from '../../frontend/src/components/spectrumEditor/adapter'
+import { displayDocument } from '../../frontend/src/components/spectrumEditor/adapter'
 import { addPoint, move, tracePoints, validateDocument, type Document } from '../../frontend/src/components/spectrumEditor/engine'
-import { checkZeroFrequency, confirmCurrentZeroBoundary, confirmExistingZeroPoint } from '../../frontend/src/components/spectrumEditor/zeroCheck'
 import { recognizedAxes } from '../../frontend/src/components/spectrumEditor/axisGeometry'
 import { createInfluenceKernel, DRAG_INFLUENCE } from '../../frontend/src/components/spectrumEditor/dragInfluence'
 import type { PropertySpectrumItem } from '../../frontend/src/lib/propertySpectra'
@@ -31,12 +30,7 @@ describe('正式数据适配',()=>{
     const next=displayDocument(source,source.result.curves,'blob:new')!
     expect(next.curves).toBe(doc.curves);expect(next.source.image).toBe('blob:new');expect(doc.source.image).toBe('')
   })
-  it('服务端零频报告按当前类型的所有曲线合并，不以选中一条替代整体',()=>{
-    const source=item();source.result.curves.push({...source.result.curves[0],id:'other'})
-    source.result.quality={manual_zero_checks:{alpha:{boundary:'confirmed',zeroPixel:280,curves:[{id:'alpha',name:'A',status:'complete'}]}}}
-    const check=combinedZeroCheck(source,source.result.curves)!
-    expect(check.complete).toBe(false);expect(check.completedCount).toBe(1);expect(check.curves).toHaveLength(2)
-  })
+
 })
 describe('正式编辑核心',()=>{
   function document():Document {const source=item();return displayDocument(source,source.result.curves,'blob:source')!}
@@ -46,13 +40,7 @@ describe('正式编辑核心',()=>{
     expect(tracePoints(moved,moved.curves[0])[0]).toMatchObject({id,x:35,y:240})
     expect(doc.curves[0].points[0].x).toBe(25)
   })
-  it('零频位置与点需明确操作，数值零不自动科学确认',()=>{
-    const doc=document();expect(checkZeroFrequency(doc).complete).toBe(false)
-    const marked=confirmCurrentZeroBoundary(doc),id=marked.curves[0].points[0].id
-    expect(checkZeroFrequency(marked).complete).toBe(false)
-    const confirmed=confirmExistingZeroPoint(marked,'alpha',id)
-    expect(checkZeroFrequency(confirmed).complete).toBe(true);expect(confirmed.curves).toBe(doc.curves)
-  })
+
   it('新增后可校验源身份并拒绝越界，旧数据不被覆盖',()=>{
     const doc=document(),next=addPoint(doc,'alpha',29,277)
     expect(()=>validateDocument(next,doc)).not.toThrow();expect(next.curves[0].points).toHaveLength(3)

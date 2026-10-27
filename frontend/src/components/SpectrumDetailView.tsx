@@ -4,12 +4,11 @@ import type { PropertySpectrumCurve as Curve, PropertySpectrumItem as Item } fro
 import SpectrumFigure from './SpectrumFigure'
 import SourceCanvas from './spectrumEditor/SourceCanvas'
 import ImageOpacityControl from './spectrumEditor/ImageOpacityControl'
-import ZeroFrequencyCheck from './spectrumEditor/ZeroFrequencyCheck'
 import TraceDiagnostics from './spectrumEditor/TraceDiagnostics'
 import FrequencyRepairReport from './spectrumEditor/FrequencyRepairReport'
 import AlphaRelativeMetrics from './spectrumEditor/AlphaRelativeMetrics'
 import DosRelativeMetrics from './spectrumEditor/DosRelativeMetrics'
-import { displayDocument, combinedZeroCheck } from './spectrumEditor/adapter'
+import { displayDocument } from './spectrumEditor/adapter'
 import './spectrumEditor/styles.css'
 import SpectrumViewSwitch from './SpectrumViewSwitch'
 import { spectrumCurveColor } from '../lib/spectrumGeometry'
@@ -64,14 +63,12 @@ export function SpectrumResult({ item, curves, image, retryImage, onEdit, editin
   </DetailSection>
 }
 
-export function SpectrumMetrics({ item, curves, history, onContinue, onRecalculate, onLocate, recalculating=false, calculationDisabled=false, calculationDisabledReason }: {
-  item: Item; curves: Curve[]; history: boolean; onContinue?: (curveId?: string) => void;
+export function SpectrumMetrics({ item, curves, history, onRecalculate, onLocate, recalculating=false, calculationDisabled=false, calculationDisabledReason }: {
+  item: Item; curves: Curve[]; history: boolean;
   onLocate?: (curveId:string,pointId:string)=>void; onRecalculate?: () => void; recalculating?: boolean; calculationDisabled?: boolean; calculationDisabledReason?:string
 }) {
   const dos = curves[0]?.kind === 'phonon_dos', q = item.result.quality || {}, raw = q.integrals?.raw || {}, comparisons = q.comparisons?.raw || {}
-  const manualZero=combinedZeroCheck(item,curves)
   const alpha = curves.find(c => c.kind === 'alpha2f')
-  const zeroCovered = curves.length > 0 && curves.every(c => c.points[0]?.frequency_thz === 0 && c.points[0]?.observed_amplitude != null)
   const limited=dos ? curves.some(c=>item.review[c.id]?.status==='accepted_limited') : alpha && item.review[alpha.id]?.status === 'accepted_limited'
   const restricted=item.stale || history || limited
   const mode = q.dos_mode_integral || { status: 'unavailable', reason: '尚无计算结果，请点击重新计算。' }
@@ -80,15 +77,13 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
   const displayedTarget=dosRelative?.normalization?.target_modes??mode.target_modes
   const modeAvailable = mode.status === 'available' && !restricted
   const modeComparable=modeAvailable && (mode.comparison_status ? mode.comparison_status==='available' : mode.target_modes != null)
-  const anyAlphaAvailable=!restricted&&raw.method==='alpha2f-relative-v1'&&(raw.parameters?.omega_log?.status==='available'||raw.pixel_integral_status==='available')
+  const anyAlphaAvailable=!restricted&&raw.method==='alpha2f-relative-v2'&&(raw.parameters?.omega_log?.status==='available'||raw.pixel_integral_status==='available')
   const diagnostics=q.trace_diagnostics?.[dos?'phonon_dos':'alpha2f']
   const repairs=q.automatic_repairs?.[dos?'phonon_dos':'alpha2f']||[]
-  const reasons=restricted?[calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。']:dos?[mode.reason].filter(Boolean):[]
+  const reasons=restricted?[calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。']:dos&&(mode.status==='available'||dosRelative?.method==='dos-relative-v3')?[mode.reason].filter(Boolean):[]
   return <DetailSection title={dos ? '03 · 频段与数据完整性' : '03 · 积分结果与参考值对比'} action={onRecalculate && <Button variant="outlined" onClick={onRecalculate} disabled={calculationDisabled||recalculating} aria-busy={recalculating}>{recalculating?'计算中…':'重新计算'}</Button>}>
     <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', mb: 2 }}><Box><Typography variant="caption" color="text.secondary">实际提取频率范围</Typography><Typography fontWeight={600}>{spectrumInterval(curves)}</Typography></Box>
       <Box><Typography variant="caption" color="text.secondary">{dos ? '原胞原子数 N / 目标 3N' : '实际积分范围'}</Typography><Typography fontWeight={600}>{dos ? `${restricted?'—':spectrumNumber(displayedAtoms, 0)} / ${restricted?'—':spectrumNumber(displayedTarget, 0)}` : anyAlphaAvailable && raw.minimum_integrated_thz != null ? `${spectrumNumber(raw.minimum_integrated_thz)}–${spectrumNumber(raw.maximum_integrated_thz ?? Math.max(...(alpha?.points.map(p=>p.frequency_thz)||[])))} THz` : '暂不可计算'}</Typography></Box></Box>
-    {manualZero && <div className="spectrum-manual-editor"><ZeroFrequencyCheck compact result={manualZero} unit="THz" afterSave={false} onContinue={value=>onContinue?.(value.id)} readOnly={!onContinue}/></div>}
-    {!manualZero && !zeroCovered && <Alert severity="warning" sx={{ mb: 2 }}>零频提取不完整，请在编辑器中核对真实零频边界与曲线点。</Alert>}
     {dos&&<DosRelativeMetrics report={dosRelative} restricted={Boolean(restricted)}/>}
     {dos&&<Typography fontWeight={600} sx={{mt:2}}>原始绝对密度积分（独立检查）</Typography>}
     {dos?<Box sx={{overflowX:'auto'}}><Table size="small" sx={{minWidth:540}}><TableHead><TableRow>{['全部分波积分','目标 3N','绝对偏差','相对偏差（%）'].map(label=><TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>

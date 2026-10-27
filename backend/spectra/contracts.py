@@ -6,7 +6,7 @@ import json
 import math
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-ALGORITHM_VERSION = "spectra-production-relative-v1"
+ALGORITHM_VERSION = "spectra-production-sampled-range-v1"
 FREQUENCY_FACTORS = {"THz": 1., "cm-1": .0299792458, "meV": .2417989242084918}
 
 

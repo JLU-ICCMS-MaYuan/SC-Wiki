@@ -2,19 +2,19 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import AxisOverlay from './AxisOverlay'
 import { recognizedAxes } from './axisGeometry'
 import { fitViewport, zoomViewport, wheelPixels, wheelFactor } from './viewport'
-import { addPoint, appendPoint, amplitudePixel, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
+import { appendPoint, curvePath, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
 
-export type Tool = 'select' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
+export type Tool = 'select' | 'pan' | 'add' | 'box' | 'calibrate'
 type Props = {
   doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool; imageOpacity?: number
   linked?: boolean; dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
   referenceCurves?: Document["curves"]; onSelect?: (ids: string[]) => void; onChange?: (doc: Document, detail?: string) => void
-  onFinishAdd?: () => void; onAdded?: (id: string) => void; onZeroMarked?: () => void
+  onFinishAdd?: () => void; onAdded?: (id: string) => void
   onPick?: (x: number, y: number) => void; onError?: (error: string) => void
 }
 type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; clientStart?: {x:number;y:number}; screenScale?: number; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
-export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onZeroMarked, onFinishAdd, referenceCurves=[] }: Props) {
+export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onFinishAdd, referenceCurves=[] }: Props) {
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
   const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 46, y - 10, w + 62, h + 32] }
   const [view, setView] = useState<Rect>(initial), [preview, setPreview] = useState<Document | null>(null)
@@ -75,14 +75,6 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
     gesture.current = null; setPreview(null); setBox(null)
   }
   const operate = (action: () => void) => { try { action() } catch (e) { onError?.((e as Error).message) } }
-  const add = (x: number, y: number, zero = false) => operate(() => {
-    const ids = new Set(curve.points.map(p => p.id)), next = addPoint(doc, active, x, y, zero)
-    const nextCurve = next.curves.find(c => c.id === active)!
-    const added = nextCurve.points.find(p => !ids.has(p.id)) || (zero ? nextCurve.points.find(p => next.zero?.pointIds.includes(p.id)
-      && Math.abs(frequency(next, p)) < 1e-6 && Math.abs(amplitudePixel(next, p) - (next.calibration.direction === 'y' ? x : y)) <= 1e-4) : undefined)
-    onChange?.(next)
-    if (added) { onSelect?.([added.id]); onAdded?.(added.id) }
-  })
   return <div className={'canvas-shell ' + (editing ? 'interactive' : 'detail-canvas')}>
     <div className="canvas-toolbar"><button className="axis-toggle" aria-pressed={showAxes} onClick={() => setShowAxes(v => !v)}>轴与刻度</button>
     <div className="canvas-controls">
@@ -114,8 +106,6 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
         event.preventDefault(); const p = pointer(event.clientX, event.clientY)
         if (pan) { manualView.current=true; gesture.current = { kind:'pan', start:p, view, doc, clientStart:{x:event.clientX,y:event.clientY}, screenScale:svg.current!.getScreenCTM()!.a } }
         else if (tool === 'add') {pendingAdd.current=p;return}
-        else if (tool === 'zeroPoint') return add(p.x, p.y, true)
-        else if (tool === 'zero') return operate(() => { onChange?.(markZero(doc, p.x, p.y)); onSelect?.([]); onZeroMarked?.() })
         else if (tool === 'calibrate') return onPick?.(p.x, p.y)
         else if (tool === 'box') { gesture.current = { kind: 'box', start: p, view, doc }; setBox([p.x, p.y, 0, 0]) }
         else {
@@ -151,9 +141,6 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
         })}
       </g>)}
       {showAxes && <AxisOverlay doc={scene} scale={scale} point={curve.points.find(p => p.id === selected[0])}/>}
-      {scene.zero && (scene.calibration.direction === 'y'
-        ? <line data-testid="zero-line" x1={x0} x2={x1} y1={scene.zero.pixel} y2={scene.zero.pixel} stroke="#e28a19" strokeWidth={1.5 / scale} strokeDasharray={`${5 / scale} ${4 / scale}`} />
-        : <line data-testid="zero-line" y1={y0} y2={y1} x1={scene.zero.pixel} x2={scene.zero.pixel} stroke="#e28a19" strokeWidth={1.5 / scale} strokeDasharray={`${5 / scale} ${4 / scale}`} />)}
       {box && <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="#6455e822" stroke="#6455e8" strokeWidth={1 / scale} />}
 
     </svg>

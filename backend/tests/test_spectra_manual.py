@@ -100,7 +100,8 @@ def test_manual_http_persistent_new_run_zero_history_and_conflict(manual_http):
     assert new_run!=env["old_run"] and item["version"]==body["expected_collection_version"]+1
     assert item["review"]=={} and item["result"]["candidates"]=={}
     assert item["result"]["quality"]["integrals"]["raw"]["status"]=="unavailable"
-    assert item["result"]["quality"]["manual_zero_checks"]["a"]["complete"]
+    assert "manual_zero_checks" not in item["result"]["quality"]
+    assert "zero" not in item["result"]["manual_documents"]["a"]
     assert item["result"]["curves"][0]["points"][10]["status"]=="manual_adjusted"
     assert item["result"]["curves"][0]["points"][10]["observed_amplitude"] is None
     with Session(env["engine"]) as session:
@@ -115,19 +116,17 @@ def test_manual_http_persistent_new_run_zero_history_and_conflict(manual_http):
     assert env["client"].get(f"/api/rag/spectra/{env['identity']}/manual",params=env["params"]).status_code==409
 
 
-@pytest.mark.parametrize("mutation",["pixel","identity","source","axis","zero","unknown_field","duplicate","unit","shape","missing_zero","overflow"])
+@pytest.mark.parametrize("mutation",["pixel","identity","source","axis","unknown_field","duplicate","unit","shape","overflow"])
 def test_manual_invalid_input_rolls_back(manual_http,mutation):
     env=manual_http;body=copy.deepcopy(env["body"]);doc=body["document"]
     if mutation=="pixel":doc["curves"][0]["points"][0]["x"]=-5
     if mutation=="identity":doc["curves"][0]["id"]="foreign"
     if mutation=="source":doc["source"]["width"]=999
     if mutation=="axis":doc["calibration"]["frequency"]["pixels"]=[20,20]
-    if mutation=="zero":doc["zero"]={"pixel":20,"pointIds":["fake-point"]}
     if mutation=="unknown_field":doc["quality"]={"accepted":True}
     if mutation=="duplicate":doc["curves"][0]["points"].append(doc["curves"][0]["points"][0])
     if mutation=="unit":doc["calibration"]["frequency"]["unit"]="GHz"
     if mutation=="shape":doc["curves"]=[42]
-    if mutation=="missing_zero":del doc["zero"]
     if mutation=="overflow":
         doc["calibration"]["frequency"]["values"]=[-1e308,1e308]
         doc["curves"][0]["points"]=[]
@@ -201,22 +200,17 @@ def test_manual_trace_frequency_return_can_save_but_not_be_accepted(manual_http)
         assert exc.value.status_code==422
 
 
-def test_manual_zero_candidate_not_auto_confirmed_and_deleted_point_invalidates(manual_http):
+def test_retired_zero_field_ignored_and_positive_start_saves(manual_http):
     e=manual_http;body=copy.deepcopy(e["body"]);doc=body["document"]
-    doc["zero"]={"pixel":20,"pointIds":[]}
-    response=e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body)
-    assert response.status_code==200
-    item=response.json()["items"][0]
-    assert item["result"]["quality"]["manual_zero_checks"]["a"]["curves"][0]["status"]=="needs_confirmation"
-    doc=copy.deepcopy(item["result"]["manual_documents"]["a"])
-    doc["zero"]["pointIds"]=[doc["curves"][0]["points"][0]["id"]]
-    body.update(document=doc,base_run_id=item["run"]["id"],expected_collection_version=item["version"])
-    confirmed=e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body).json()["items"][0]
-    assert confirmed["result"]["quality"]["manual_zero_checks"]["a"]["complete"]
+    assert "zero" not in doc
+    doc["zero"]={"pixel":999,"pointIds":["missing"]}
     doc["curves"][0]["points"][0]["x"]+=.1
-    body.update(document=doc,base_run_id=confirmed["run"]["id"],expected_collection_version=confirmed["version"])
-    moved=e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body).json()["items"][0]
-    assert not moved["result"]["quality"]["manual_zero_checks"]["a"]["complete"]
+    response=e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body)
+    assert response.status_code==200,response.text
+    item=response.json()["items"][0]
+    assert "manual_zero_checks" not in item["result"]["quality"]
+    assert "zero" not in item["result"]["manual_documents"]["a"]
+    assert item["result"]["curves"][0]["points"][0]["frequency_thz"]>0
 
 
 def test_manual_export_contains_current_pixels_and_provenance(manual_http):

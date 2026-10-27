@@ -1,4 +1,4 @@
-"""#154/#155 正式零频像素采样、原始 DOS 核验与历史权限。"""
+"""正式采样范围（#167）、原始 DOS 核验与历史权限。"""
 import copy
 import numpy as np
 import pytest
@@ -10,7 +10,7 @@ from backend.services import spectra as service
 
 
 @pytest.mark.parametrize("direction", ["x", "y"])
-def test_zero_tick_extends_roi_and_reads_real_colored_pixel(direction):
+def test_roi_is_not_extended_for_zero_tick(direction):
     image, panel = fixture()
     panel["curves"][0]["roi"][0] = 21  # 原框漏掉零频像素，刻度与原图仍有证据。
     if direction == "y":
@@ -19,12 +19,12 @@ def test_zero_tick_extends_roi_and_reads_real_colored_pixel(direction):
     before = copy.deepcopy(panel)
     result = extract_panel(image, panel)
     first = result["curves"][0]["points"][0]
-    assert first["frequency_thz"] == 0
-    assert first["frequency_pixel"] == 20
+    assert first["frequency_thz"] == pytest.approx(.05)
+    assert first["frequency_pixel"] == 21
     assert first["observed_amplitude"] == 0
     assert first["status"] == "observed"
     assert panel == before
-    assert result["quality"]["integrals"]["raw"]["minimum_integrated_thz"] == 0
+    assert result["quality"]["integrals"]["raw"]["minimum_integrated_thz"] == pytest.approx(.05)
 
 
 def test_zero_without_colored_pixel_is_missing_not_fabricated():
@@ -38,22 +38,26 @@ def test_zero_without_colored_pixel_is_missing_not_fabricated():
     assert result["quality"]["integrals"]["raw"]["status"] == "unavailable"
 
 
-def test_subpixel_zero_samples_image_not_old_first_frequency():
+def test_fractional_zero_does_not_add_samples_before_existing_interval():
     image, panel = fixture()
     curve = panel["curves"][0]
     curve["frequency_ticks"] = [[20.5, 0], [80.5, 3], [140.5, 6]]
     result = extract_panel(image, panel)
     first = result["curves"][0]["points"][0]
-    assert first["frequency_pixel"] == 20.5 and first["frequency_thz"] == 0
-    assert first["detection_mode"] == "subpixel_color"
+    assert first["frequency_pixel"] == 21 and first["frequency_thz"] == pytest.approx(.025)
+    assert first["detection_mode"] == "strict_color"
     assert first["observed_amplitude"] == 0
 
 
 @pytest.mark.parametrize("ticks", [[[20,1],[80,4],[140,7]], [[-1,0],[80,4],[140,7]]])
-def test_no_real_zero_evidence_or_out_of_image_does_not_create_curve(ticks):
+def test_visible_nonzero_ticks_are_accepted_but_out_of_image_ticks_are_rejected(ticks):
     image, panel = fixture(); panel["curves"][0]["frequency_ticks"] = ticks
     result = extract_panel(image, panel)
-    assert not result["curves"] and result["failures"]
+    if ticks[0][0] < 0:
+        assert not result["curves"] and result["failures"]
+    else:
+        assert result["curves"][0]["points"][0]["frequency_thz"] == pytest.approx(1)
+        assert result["quality"]["integrals"]["raw"]["status"] == "available"
 
 
 def test_alpha_without_amplitude_explanation_has_independent_omega():

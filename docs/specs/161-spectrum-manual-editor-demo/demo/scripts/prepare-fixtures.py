@@ -21,7 +21,7 @@ def document(kind, title, viewport, plot):
         source=dict(id='lasc-290-figure-A', sha256=digest, image='/fixtures/source.png', width=image.width, height=image.height, viewport=viewport, plot=plot),
         calibration=dict(direction='y', frequency=dict(pixels=[435, 65], values=[0, 60], unit='THz'),
             amplitude=dict(pixels=[plot[0], plot[2]], values=[0, plot[2]-plot[0]], unit='pixel'), amplitudeEvidence=''),
-        curves=[], zero=None, operations=[])
+        curves=[], operations=[])
 
 alpha = document('alpha2f', 'α²F 谱函数', [632, 8, 170, 460], [637, 17, 790, 435])
 snapshot_path = ROOT / 'docs/specs/154-alpha2f-detail-demo/assets/false-peak-after.json'

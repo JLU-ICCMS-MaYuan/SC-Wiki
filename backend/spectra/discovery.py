@@ -24,7 +24,7 @@ roi 是完整坐标框内的取数区域，不能只围住有色曲线或最大�
 所有坐标以给定原图像素为准，不能以缩略图像素作答。优先采用至少三个可见刻度，两点可用但不能称已独立验证线性。
 DOS 无幅值刻度时以幅值零轴为0，幅值方向一个像素为1，unit=pixel；有模式数密度单位时unit=modes_per_source_frequency。
 α²F 与累计λ的幅值刻度分别识别，不能借用λ刻度标定α²F。α²F没有独立幅值刻度时，以幅值零基线为0、每像素为1，unit=pixel；amplitude_evidence可为null，仅保留可见来源说明，不是计算通行条件。绝对幅值未知不妨碍已知频率/曲线身份的physical_definition_confirmed标记。
-所有谱必须识别原图真实零频刻度并包含在 frequency_ticks 中，roi 覆盖该边界；无证据不得猜造零点，记录待核对原因。
+频率标定使用可见刻度，至少两个不同值，不要求包含0刻度。按真实取数区域读取，不为覆盖零频扩展ROI，不补造低频点。
 physical_definition_confirmed=true 仅限图注/坐标明确支持普通频率和标准 α²F/累计λ，或标准未加权的原子振动DOS投影（每种元素合计所有原子及三个方向，非每原子平均）；不按目标值推断。
 声子DOS没有幅值刻度时同样使用零基线为0、每像素为1的pixel单位。
 projection_complete 与 projection_scale_confirmed 仅在完整元素合计、同一坐标框依据明确时为true。

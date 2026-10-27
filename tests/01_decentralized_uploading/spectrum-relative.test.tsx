@@ -6,7 +6,7 @@ import AlphaRelativeMetrics from '../../frontend/src/components/spectrumEditor/A
 import { createInfluenceKernel } from '../../frontend/src/components/spectrumEditor/dragInfluence'
 
 afterEach(cleanup)
-const raw=()=>({method:'alpha2f-relative-v1',pixel_integral:100,parameters:{omega_log:{status:'available',value:200}},
+const raw=()=>({method:'alpha2f-relative-v2',pixel_integral:100,parameters:{omega_log:{status:'available',value:200}},
  normalization:{status:'available',lambda_reference:2,coefficient:.02,lambda_normalized:2}})
 it('只比较ωlog并展示论文λ/像素积分/C，没有λ准确度表或通过门槛',()=>{
  render(<AlphaRelativeMetrics raw={raw()} comparison={{status:'available',reference:50,absolute_difference:150,relative_difference_pct:300}} restricted={false}/>)
