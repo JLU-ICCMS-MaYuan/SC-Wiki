@@ -119,16 +119,4 @@ def diagnose_curve(curve, document=None):
 def diagnose(payload, kind):
     curves=[c for c in payload.get("curves",[]) if c["kind"]==kind]
     reports=[diagnose_curve(c,payload.get("manual_documents",{}).get(c["id"])) for c in curves]
-    if kind=="phonon_dos":
-        from .preflight import high_info
-        ends=[max((p["frequency_thz"] for p in c.get("points",[]) if finite(p.get("frequency_thz"))),default=None) for c in curves]
-        known=[v for v in ends if v is not None]
-        boundaries=[high_info(c,payload.get("manual_documents",{}).get(c["id"])) for c in curves]
-        if known and any(not math.isclose(v,known[0],rel_tol=1e-10,abs_tol=1e-10) for v in known) and not all(b and b["confirmed"] for b in boundaries):
-            for c,report,end in zip(curves,reports,ends):
-                if end is None:continue
-                i,p=max(enumerate(c["points"]),key=lambda pair:pair[1].get("frequency_thz",float("-inf")) if finite(pair[1].get("frequency_thz")) else float("-inf"))
-                report["issues"].append(dict(kind="projection_range",
-                    message=f"该分波实际高频端为{end:.6g} THz；各分波截止不同，请分别核对真实末端，系统不会自动补零。",
-                    points=[location(c,point_id(c,p,i),p)]))
     return dict(curves=reports)

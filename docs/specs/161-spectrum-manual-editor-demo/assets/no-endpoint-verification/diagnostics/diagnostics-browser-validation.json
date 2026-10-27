@@ -1,0 +1,37 @@
+{
+  "checks": [
+    "重算分别列出闭环、分叉、孤立点和未连接片段，λ/ωlog共用诊断",
+    "点击孤立坐标自动打开编辑器、放大居中并选中正确点，返回不写数据",
+    "闭环实际连接坐标可定位环内点，无误选邻近点",
+    "手动删除可撤销重做；保存清除旧诊断，重算后已删除点不再列出",
+    "PhDOS定位打开正确Sc分波，不误选同坐标的La或H",
+    "390px窄屏坐标入口与编辑器定位可用，无页面水平溢出",
+    "诊断版本过期时拒绝打开编辑，不静默选择新版本的其他点"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/440faf4b51884ddb9fa5a7b67b7fa073/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/440faf4b51884ddb9fa5a7b67b7fa073/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/440faf4b51884ddb9fa5a7b67b7fa073/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/b9b9ea1525294a96a8a7e9f716615de3/recalculate"
+    }
+  ],
+  "screenshots": [
+    "diagnostics-issues.png",
+    "diagnostics-isolated-focus.png",
+    "diagnostics-dos-focus.png",
+    "diagnostics-mobile-focus.png"
+  ],
+  "status": "passed"
+}

@@ -33,7 +33,7 @@ def test_exact_alpha_and_relative_scale_cancel():
     assert payload==alpha_payload()
 
 
-@pytest.mark.parametrize("problem",["gap","branch","cycle","backtrack","duplicate","nonzero_zero","missing_evidence","unknown_frequency","missing_end","missing_start","negative"])
+@pytest.mark.parametrize("problem",["gap","branch","cycle","backtrack","duplicate","nonzero_zero","missing_evidence","unknown_frequency","missing_start","negative"])
 def test_unsafe_spectra_remain_unavailable(problem):
     payload=alpha_payload();curve=payload["curves"][0];points=curve["points"]
     if problem=="gap":points[1]["breakBefore"]=True
@@ -44,7 +44,6 @@ def test_unsafe_spectra_remain_unavailable(problem):
     elif problem=="nonzero_zero":points[0]["reconstructed_amplitude"]=.1
     elif problem=="missing_evidence":payload["calibration"]["curves"][0]["amplitude_evidence"]=""
     elif problem=="unknown_frequency":curve["physical_definition_confirmed"]=False
-    elif problem=="missing_end":curve.update(frequency_direction="x",roi=[0,0,7,1],axis_calibration={"frequency":{"slope":1,"intercept":0}})
     elif problem=="missing_start":points[0]["frequency_thz"]=.00001
     elif problem=="negative":points[1]["reconstructed_amplitude"]=-1
     r=alpha_integrals(payload)
@@ -86,7 +85,7 @@ def test_dos_integral_and_comparison_are_independent():
     assert dos_integrals(payload,{"primitive_atoms":4})["integral"]==12
 
 
-@pytest.mark.parametrize("problem",["pixel","incomplete","duplicate","total","range","gap"])
+@pytest.mark.parametrize("problem",["pixel","incomplete","duplicate","total","gap"])
 def test_dos_rejects_invalid_total(problem):
     payload=dos_payload()
     if problem=="pixel":payload["curves"][0]["unit"]="pixel"
@@ -95,7 +94,6 @@ def test_dos_rejects_invalid_total(problem):
     else:
         other=copy.deepcopy(payload["curves"][0]);other["id"]="b"
         if problem=="total":other["projection"]="total"
-        if problem=="range":other["projection"]="S";other["points"][-1]["frequency_thz"]=5
         payload["curves"].append(other)
     assert dos_integrals(payload,{"primitive_atoms":2})["status"]=="unavailable"
 

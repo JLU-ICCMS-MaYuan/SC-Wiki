@@ -32,3 +32,11 @@ it('只读、忙碌或缺坐标时不能定位',()=>{
   fireEvent.click(screen.getByRole('button',{name:'原图 (x=42, y=20) px'}))
   expect(locate).not.toHaveBeenCalled()
 })
+
+
+it('历史保存的高频末端和分波截止诊断不再显示',()=>{
+ const data=report()
+ data.curves[0].issues=[{kind:'high_endpoint',message:'旧高端限制',points:[]},{kind:'projection_range',message:'旧分波截止限制',points:[]}]
+ render(<TraceDiagnostics report={data} onLocate={()=>{}}/>)
+ expect(screen.queryByTestId('trace-diagnostics')).toBeNull()
+})

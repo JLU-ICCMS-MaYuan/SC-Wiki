@@ -53,3 +53,12 @@ it('03移除计算时间和所有来源JSON，但不影响结果或后台数据'
   expect(screen.getByText('106.123')).toBeVisible()
   expect(data.result.quality!.recalculations.alpha2f.calculated_at).toBeTruthy()
 })
+
+
+it('旧计算记录的末端限制不继续显示，提示按保存范围重新计算',()=>{
+ const data=item()
+ data.result.quality!.integrals.raw.parameters={lambda:{status:'unavailable',reason:'高频末端尚待核对，请点击下方末端坐标；图框上限不等于曲线真实截止'},omega_log:{status:'unavailable',reason:'高频末端尚待核对，请点击下方末端坐标；图框上限不等于曲线真实截止'}}
+ render(<SpectrumMetrics item={data} curves={data.result.curves} history={false}/>)
+ expect(screen.queryByText(/高频末端尚待核对/)).toBeNull()
+ expect(screen.getByText(/请点击重新计算，按当前保存曲线的数据范围计算/)).toBeVisible()
+})

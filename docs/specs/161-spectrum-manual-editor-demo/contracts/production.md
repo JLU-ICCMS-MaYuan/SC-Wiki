@@ -55,3 +55,6 @@ trace_diagnostics问题增加high_endpoint/low_endpoint/zero_confirmation/nonzer
 quality.automatic_repairs[kind]记录本次精确断端连接的曲线/点ID与位置；人工文档写入auto-connect-exact-endpoints操作，源run保持。公开过滤移除内部操作报告，后台参考与时间继续保留。
 
 撤销自动连接以undo-auto-connect操作记录端点ID；再次重算不重新加入同一对连接。DOS的component_intervals记录各分波独立且已核对的实际积分范围；未全部核对时发projection_range定位项，不通过补零对齐。
+
+## 已取消高频末端核对
+highEndpoint已废弃，GET manual不提供，POST manual忽略旧客户端此字段，不校验其中内容；历史存档不改。重算不执行high_endpoint/projection_range检查，不读取末端确认。α²F最高频点和DOS各分波自身最高频点直接作为各自积分上限。此前末端证据/差距规则全部由本条取代。

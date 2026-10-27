@@ -1,0 +1,32 @@
+[
+  {
+    "suite": "preflight",
+    "exit_code": 0,
+    "checks": 6,
+    "report": "assets/no-endpoint-verification/preflight/preflight-browser-validation.json"
+  },
+  {
+    "suite": "recalculate",
+    "exit_code": 0,
+    "checks": 8,
+    "report": "assets/no-endpoint-verification/recalculate/recalculate-browser-validation.json"
+  },
+  {
+    "suite": "diagnostics",
+    "exit_code": 0,
+    "checks": 7,
+    "report": "assets/no-endpoint-verification/diagnostics/diagnostics-browser-validation.json"
+  },
+  {
+    "suite": "manual",
+    "exit_code": 0,
+    "checks": 15,
+    "report": "assets/no-endpoint-verification/manual/snap-production-browser-validation.json"
+  },
+  {
+    "suite": "revalidation",
+    "exit_code": 0,
+    "checks": 8,
+    "report": "assets/no-endpoint-verification/revalidation/revalidation-browser-validation.json"
+  }
+]

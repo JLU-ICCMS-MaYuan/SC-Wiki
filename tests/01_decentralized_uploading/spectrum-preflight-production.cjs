@@ -1,4 +1,4 @@
-// 真实末端/安全修复全流程；生产React及HTTP，全部请求仅到隔离测试服务。
+// 不核对高频末端/安全修复全流程；生产React及HTTP，全部请求仅到隔离测试服务。
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const runtime=path.join(process.env.HOME,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules');
 const {chromium}=require(require.resolve('playwright',{paths:[runtime]}));
@@ -27,39 +27,47 @@ async function main(){
  };
  try{
   let data=await listing(),alpha=data.items.find(i=>i.result.curves[0].kind==='alpha2f');
-  alpha=await seed(alpha,'alpha2f','a',doc=>{doc.curves[0].points.pop();doc.zero={pixel:20,pointIds:[doc.curves[0].points[0].id]}});
+  alpha=await seed(alpha,'alpha2f','a',doc=>{
+    doc.curves[0].points.at(-1).x=139.999998;
+    doc.zero={pixel:20,pointIds:[doc.curves[0].points[0].id]}
+  });
   const sourcePoints=JSON.stringify(alpha.result.curves);
   await page.goto(address(alpha));await ready();await recalc();
-  let issue=page.locator('[data-issue-kind="high_endpoint"]');await issue.waitFor();
-  assert((await issue.getByTestId('endpoint-difference').innerText()).includes('5.95'));
-  assert((await issue.getByTestId('endpoint-difference').innerText()).includes('6 THz'));
-  assert.equal(await page.getByText(/本版本计算时间|参考来源：/).count(),0);
-  await shot('endpoint-problem');check('高频末端低于图框时给出实际端点、参考边界和差距，03无时间或来源JSON');
-
-  await issue.locator('[data-diagnostic-point="a:p119"]').click();await page.getByRole('application').waitFor();
-  assert.equal(await page.locator('[data-row="a:p119"]').getAttribute('aria-selected'),'true');
-  await page.getByLabel('高频末端依据').fill('合成原图红线在5.95 THz结束，图框6THz为留白，不补造终点');
-  await btn('确认选中点为真实高频末端').click();
-  await btn('↶ 撤销').click();assert(await page.getByText('尚未确认独立于图框边界的真实高频末端。',{exact:true}).isVisible());
-  await btn('↷ 重做').click();await shot('endpoint-confirmed-editor');
-  await save();assert.equal(JSON.stringify((await listing()).items.find(i=>i.id===alpha.id).result.curves),sourcePoints);
-  await recalc();let current=(await listing()).items.find(i=>i.id===alpha.id);
+  let current=(await listing()).items.find(i=>i.id===alpha.id);
   assert.equal(current.result.quality.integrals.raw.parameters.lambda.status,'available');
-  assert(Math.abs(current.result.quality.integrals.raw.maximum_integrated_thz-5.95)<1e-9);
-  assert.equal(await page.locator('[data-issue-kind="high_endpoint"]').count(),0);await shot('actual-range-result');
-  check('坐标直达真实末端，确认可撤销重做，保存重算按5.95截止，不移动/增加任何点');
+  assert(Math.abs(current.result.quality.integrals.raw.maximum_integrated_thz-5.9999999)<1e-12);
+  assert.equal(JSON.stringify(current.result.curves),sourcePoints);
+  assert.equal(await page.locator('[data-issue-kind="high_endpoint"],[data-issue-kind="projection_range"]').count(),0);
+  assert.equal(await page.getByText(/本版本计算时间|参考来源：/).count(),0);
+  await shot('no-endpoint-near-frame');
+  check('相差0.000002像素也直接按保存范围计算，不要求末端核对，不改点');
 
-  await page.reload();await ready();await btn('编辑').click();await page.getByRole('application').waitFor();
-  await page.locator('[data-row="a:p119"]').click();await page.getByLabel('选中点幅值').fill('0.07');await btn('应用坐标到此点').click();
-  assert(await page.getByText('尚未确认独立于图框边界的真实高频末端。',{exact:true}).isVisible());
-  await save();await recalc();await page.locator('[data-issue-kind="high_endpoint"]').waitFor();
-  check('移动末端后原确认自动失效，保存重算重新给出准确坐标，不沿用旧确认');
-
+  await btn('编辑').click();await page.getByRole('application').waitFor();
+  assert.equal(await page.getByTestId('high-endpoint-panel').count(),0);
+  assert.equal(await page.getByLabel('高频末端依据').count(),0);
+  assert.equal(await btn('确认选中点为真实高频末端').count(),0);
+  await page.locator('[data-row="a:p120"]').click();
+  await page.getByLabel('选中点频率').fill('5.975');await btn('应用坐标到此点').click();
+  await save();await recalc();
   current=(await listing()).items.find(i=>i.id===alpha.id);
+  assert.equal(current.result.quality.integrals.raw.parameters.lambda.status,'available');
+  assert(Math.abs(current.result.quality.integrals.raw.maximum_integrated_thz-5.975)<1e-12);
+  await shot('edited-without-confirmation');
+  check('编辑器无末端依据或确认控件，移动最高频点后保存重算无需确认');
+
   current=await seed(current,'alpha2f','a',doc=>{
-    // 恢复末端位置确认，同时构造一对完全重合的唯一断端。
-    const end=doc.curves[0].points.at(-1);
-    doc.highEndpoint={pointId:end.id,x:end.x,y:end.y,frequencyTHz:5.95,evidence:'原图真实末端'};
+    doc.curves[0].points=doc.curves[0].points.slice(0,101);
+    doc.highEndpoint={pointId:'missing-old-point',frequencyTHz:999,evidence:''};
+  });
+  await page.goto(address(current));await ready();await recalc();
+  current=(await listing()).items.find(i=>i.id===alpha.id);
+  assert.equal(current.result.quality.integrals.raw.parameters.lambda.status,'available');
+  assert.equal(current.result.quality.integrals.raw.maximum_integrated_thz,5);
+  assert(!('highEndpoint' in current.result.manual_documents.a));
+  await shot('far-below-frame');
+  check('明显不到图框边缘仍按最高频5THz计算，旧确认错误或缺失均不构成限制');
+
+  current=await seed(current,'alpha2f','a',doc=>{
     const p=structuredClone(doc.curves[0].points[60]);p.id='exact-duplicate';p.breakBefore=true;
     doc.curves[0].points.splice(61,0,p);
   });
@@ -86,15 +94,25 @@ async function main(){
   check('自动连接可定位检查、撤销重做并保存；再次重算尊重已撤销连接，不自动加回');
 
   let dos=(await listing()).items.find(i=>i.result.curves[0].kind==='phonon_dos');
-  dos=await seed(dos,'phonon_dos','Sc',doc=>{doc.curves[0].points.pop();doc.zero={pixel:20,pointIds:[doc.curves[0].points[0].id]}});
+  dos=await seed(dos,'phonon_dos','Sc',doc=>{
+    doc.curves[0].points=doc.curves[0].points.slice(0,100);
+    doc.zero={pixel:20,pointIds:[doc.curves[0].points[0].id]}
+  });
+  const originalDos=JSON.stringify(dos.result.curves);
   await page.goto(address(dos));await ready();await recalc();
-  issue=page.locator('[data-issue-kind="high_endpoint"]').filter({hasText:'Sc'});await issue.waitFor();
-  await page.setViewportSize({width:390,height:844});await issue.locator('[data-diagnostic-point]').click();await page.getByRole('application').waitFor();
-  assert.equal(await page.locator('[data-row="Sc:p119"]').getAttribute('aria-selected'),'true');
-  await page.getByLabel('高频末端依据').fill('原图Sc分波此处终止');
-  await btn('确认选中点为真实高频末端').click();await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);await shot('dos-mobile-endpoint');
-  await save();await recalc();assert.equal(await page.locator('[data-issue-kind="high_endpoint"]').count(),0);
-  check('PhDOS末端同样可定位到正确分波并确认，390px布局无溢出');
+  let fresh=(await listing()).items.find(i=>i.id===dos.id);
+  assert.equal(fresh.result.quality.dos_mode_integral.status,'available');
+  assert(Math.abs(fresh.result.quality.dos_mode_integral.component_intervals.Sc[1]-4.95)<1e-9);
+  assert.equal(JSON.stringify(fresh.result.curves),originalDos);
+  assert.equal(await page.locator('[data-issue-kind="high_endpoint"],[data-issue-kind="projection_range"]').count(),0);
+  await page.setViewportSize({width:390,height:844});await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);
+  await shot('dos-different-ranges');
+  await btn('编辑').click();await page.getByRole('application').waitFor();
+  await btn('Sc').click();
+  assert.equal(await page.getByTestId('high-endpoint-panel').count(),0);
+  await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);await shot('dos-mobile-no-setting');
+  await btn('← 返回详情').click();await ready();
+  check('PhDOS不同最高频范围直接分别积分，界面无分波末端检查或确认设置，窄屏可用');
 
   assert.deepEqual(report.errors,[]);assert(report.writes.every(w=>/\/(manual|recalculate)$/.test(w.path)));
   report.status='passed';

@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import json
 import math
-from .contracts import FREQUENCY_FACTORS
 from .topology import build_graph, graph_parts, point_id, location, finite
 
 
@@ -32,47 +31,6 @@ def path_points(curve):
     if all(finite(p.get("frequency_thz")) for p in (ordered[0], ordered[-1])) and ordered[0]["frequency_thz"] > ordered[-1]["frequency_thz"]:
         ordered.reverse()
     return ordered
-
-
-def endpoint_valid(document):
-    proof = (document or {}).get("highEndpoint")
-    if not isinstance(proof, dict) or not isinstance(proof.get("evidence"), str) or not proof["evidence"].strip():
-        return False
-    try:
-        points = document["curves"][0]["points"]
-        point = next(p for p in points if p["id"] == proof["pointId"])
-        axis = document["calibration"]["frequency"]
-        direction = document["calibration"]["direction"]
-        slope = (axis["values"][1]-axis["values"][0])/(axis["pixels"][1]-axis["pixels"][0])
-        factor = FREQUENCY_FACTORS[axis["unit"]]
-        value = lambda p: (axis["values"][0]+(p[direction]-axis["pixels"][0])*slope)*factor
-        actual = value(point)
-        return (point["x"] == proof["x"] and point["y"] == proof["y"] and finite(proof["frequencyTHz"])
-                and math.isclose(actual, proof["frequencyTHz"], rel_tol=1e-12, abs_tol=1e-12)
-                and actual == max(value(p) for p in points))
-    except (KeyError, TypeError, StopIteration, ValueError, ZeroDivisionError):
-        return False
-
-
-def high_info(curve, document=None):
-    pairs = [(point_id(curve,p,i), p) for i,p in enumerate(curve.get("points",[])) if finite(p.get("frequency_thz"))]
-    axis = curve.get("axis_calibration", {}).get("frequency", {})
-    bounds = (document or {}).get("source", {}).get("plot") or curve.get("roi")
-    if not pairs or not bounds or not finite(axis.get("slope")) or not finite(axis.get("intercept")):
-        return None
-    direction = (document or {}).get("calibration", {}).get("direction") or curve.get("frequency_direction")
-    if direction not in {"x","y"}:
-        return None
-    key, point = max(pairs, key=lambda pair:pair[1]["frequency_thz"])
-    lo, hi = (0,2) if direction == "x" else (1,3)
-    reference = max((bounds[lo],bounds[hi]),key=lambda p:axis["slope"]*p+axis["intercept"])
-    frame = axis["slope"]*reference+axis["intercept"]
-    actual = point["frequency_thz"]
-    fp = point.get("frequency_pixel")
-    at_frame = math.isclose(actual,frame,rel_tol=1e-10,abs_tol=1e-10)
-    return dict(point_id=key, actual_thz=actual, frame_thz=frame, difference_thz=frame-actual,
-                difference_px=abs(reference-fp) if finite(fp) else None, reference_pixel=reference,
-                confirmed=at_frame or (actual<=frame and endpoint_valid(document)))
 
 
 def numerical_zero(curve, point):
@@ -121,11 +79,6 @@ def sample_issues(curve, document=None):
             from .manual import zero_report
             if not zero_report(document)["complete"]:
                 add("zero_confirmation","请核对原图零频线及曲线对应点，并在编辑器中明确确认",[(key,first)])
-    info=high_info(curve,document)
-    if info and not info["confirmed"]:
-        point=next(p for i,p in enumerate(points) if point_id(curve,p,i)==info["point_id"])
-        add("high_endpoint","请核对实际高频末端；图框上限只是参考，不要求把曲线延伸到图框边缘",
-            [(info["point_id"],point)],{k:v for k,v in info.items() if k not in {"point_id","confirmed"}})
     return issues
 
 

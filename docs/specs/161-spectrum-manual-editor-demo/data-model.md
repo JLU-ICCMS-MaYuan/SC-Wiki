@@ -48,3 +48,6 @@ quality.trace_diagnostics为重算派生JSON，无DDL；点坐标及ID由保存�
 
 ## 高频末端证据及自动修订
 Document.highEndpoint存人工确认快照，默认为空；不是科学采纳。quality.automatic_repairs为本次可追溯连接报告，全部点及其ID保留；重算创建新run。后台已有时间/参考信息保留，前端03不展示。
+
+## 高频确认字段已废弃
+highEndpoint只作为旧run历史记录保留。GET编辑文档移除该字段，POST编辑保存忽略旧客户端字段；当前计算完全不依赖它。高频上限来自保存点，DOS分别记录各分波区间。

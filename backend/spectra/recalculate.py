@@ -13,9 +13,9 @@ from .contracts import fingerprint
 from .digitize import spectral_integrals
 from .engine import comparison, unavailable
 from .topology import build_graph, graph_parts, diagnose
-from .preflight import high_info, coincident, prepare_repairs
+from .preflight import coincident, prepare_repairs
 
-VERSION = "spectra-recalculate-v3"
+VERSION = "spectra-recalculate-v4"
 
 
 def demand(condition, reason):
@@ -72,9 +72,6 @@ def connected_samples(curve, document=None):
     f[0] = 0.
     if document is not None:
         demand(manual.zero_report(document)["complete"], "当前曲线的零频位置或零频点尚未确认")
-    endpoint = high_info(curve,document)
-    demand(endpoint is None or endpoint["confirmed"],
-           "高频末端尚待核对，请点击下方末端坐标；图框上限不等于曲线真实截止")
     return f, a
 
 
@@ -133,10 +130,6 @@ def dos_integrals(payload, primitive):
             f, a = connected_samples(curve, payload.get("manual_documents", {}).get(curve["id"]))
             integrals[curve["id"]] = math.fsum((y-x)*(v+w)/2 for x,y,v,w in zip(f,f[1:],a,a[1:]))
             intervals.append([f[0], f[-1]])
-        same_ends=all(math.isclose(interval[1],intervals[0][1],rel_tol=1e-10,abs_tol=1e-10) for interval in intervals)
-        boundaries=[high_info(c,payload.get("manual_documents",{}).get(c["id"])) for c in curves]
-        demand(same_ends or all(b and b["confirmed"] for b in boundaries),
-               "DOS分波截止不同且未全部核对，请检查下方各分波末端坐标")
         value = math.fsum(integrals.values())
         demand(math.isfinite(value), "DOS积分数值溢出")
         result = dict(status="available", integral=value, component_integrals=integrals,

@@ -71,8 +71,9 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
       reasonGroups.set(reason,[...(reasonGroups.get(reason)||[]),key==='lambda'?'λ':'ωlog'])
     }
   }
-  const reasons=restricted ? [calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。'] : dos ? [mode.reason].filter(Boolean)
-    : [...reasonGroups].map(([reason,labels])=>labels.join('、')+'：'+reason)
+  const displayReason=(reason:string)=>/高频末端尚待核对|曲线未覆盖当前图框的完整高频端|DOS分波截止不同且未全部核对|DOS各分波覆盖的频率范围不一致/.test(reason)?'请点击重新计算，按当前保存曲线的数据范围计算。':reason
+  const reasons=restricted ? [calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。'] : dos ? [mode.reason&&displayReason(mode.reason)].filter(Boolean)
+    : [...reasonGroups].map(([reason,labels])=>labels.join('、')+'：'+displayReason(reason))
   return <DetailSection title={dos ? '03 · 频段与数据完整性' : '03 · 积分结果与参考值对比'} action={onRecalculate && <Button variant="outlined" onClick={onRecalculate} disabled={calculationDisabled||recalculating} aria-busy={recalculating}>{recalculating?'计算中…':'重新计算'}</Button>}>
     <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', mb: 2 }}><Box><Typography variant="caption" color="text.secondary">实际提取频率范围</Typography><Typography fontWeight={600}>{spectrumInterval(curves)}</Typography></Box>
       <Box><Typography variant="caption" color="text.secondary">{dos ? '原胞原子数 N / 目标 3N' : '实际积分范围'}</Typography><Typography fontWeight={600}>{dos ? `${spectrumNumber(mode.primitive_atoms, 0)} / ${spectrumNumber(mode.target_modes, 0)}` : anyAlphaAvailable && raw.minimum_integrated_thz != null ? `${spectrumNumber(raw.minimum_integrated_thz)}–${spectrumNumber(raw.maximum_integrated_thz ?? Math.max(...(alpha?.points.map(p=>p.frequency_thz)||[])))} THz` : '暂不可计算'}</Typography></Box></Box>

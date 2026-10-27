@@ -11,7 +11,6 @@ export type Document = {
   source: { id: string; sha256: string; image: string; width: number; height: number; viewport: Rect; plot: Rect }
   calibration: { direction: 'x' | 'y'; frequency: Axis; amplitude: Axis; amplitudeEvidence: string }
   curves: Curve[]
-  highEndpoint?: {pointId:string;x:number;y:number;frequencyTHz:number;evidence:string}|null
   zero: { pixel: number; pointIds: string[] } | null
   operations: { kind: string; at: string; detail: string }[]
 }
@@ -299,24 +298,6 @@ export function validateDocument(value: unknown, initial: Document): asserts val
 }
 
 
-const frequencyFactor:Record<string,number>={THz:1,'cm-1':.0299792458,meV:.2417989242084918}
-export function highEndpointValid(doc:Document):boolean {
-  const proof=doc.highEndpoint,points=doc.curves[0]?.points||[]
-  if(!proof||!proof.evidence.trim())return false
-  const point=points.find(p=>p.id===proof.pointId),factor=frequencyFactor[doc.calibration.frequency.unit]
-  if(!point||!factor||point.x!==proof.x||point.y!==proof.y)return false
-  const f=frequency(doc,point)*factor
-  return Math.abs(f-proof.frequencyTHz)<=1e-12*Math.max(1,Math.abs(f))
-    && points.every(p=>frequency(doc,p)*factor<=f)
-}
-export function confirmHighEndpoint(doc:Document,id:string,evidence:string):Document {
-  const point=doc.curves[0].points.find(p=>p.id===id)
-  if(!point||!evidence.trim())throw new Error('先选中实际最高频点，并填写来自原图何处的末端依据。')
-  const proof={pointId:id,x:point.x,y:point.y,frequencyTHz:frequency(doc,point)*frequencyFactor[doc.calibration.frequency.unit],evidence:evidence.trim()}
-  const next={...doc,highEndpoint:proof}
-  if(!highEndpointValid(next))throw new Error('当前点不是最高频点，请先处理更高频的无关点，再确认真实末端。')
-  return record(next,'high-endpoint-confirm','人工对照原图确认真实高频末端；不延伸到图框边缘')
-}
 export function automaticConnections(doc:Document):{from_id:string;to_id:string}[] {
   const lastUndo=doc.operations.map(o=>o.kind).lastIndexOf('undo-auto-connect')
   return doc.operations.slice(lastUndo+1).filter(o=>o.kind==='auto-connect-exact-endpoints').flatMap(o=>{

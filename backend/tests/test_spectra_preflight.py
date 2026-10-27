@@ -2,7 +2,7 @@
 import copy
 import pytest
 
-from backend.spectra.preflight import prepare_repairs, endpoint_valid
+from backend.spectra.preflight import prepare_repairs
 from backend.spectra.topology import diagnose
 from backend.spectra.recalculate import alpha_integrals
 from backend.tests.test_spectra_manual import manual_storage, manual_http
@@ -22,40 +22,25 @@ def payload(frame=10):
                           "amplitude":{"pixels":[0,10],"values":[0,10],"unit":"dimensionless"},"amplitudeEvidence":"原图有独立尺度"},
              curves=[dict(id="a",name="α²F",points=[dict(id=p["id"],x=p["frequency_pixel"],y=p["amplitude_pixel"],
                                               breakBefore=p["breakBefore"],segment=p["segment"]) for p in points])],
-             highEndpoint=None,zero={"pixel":0,"pointIds":["p0"]},operations=[])
+             zero={"pixel":0,"pointIds":["p0"]},operations=[])
     return dict(curves=[curve],manual_documents={"a":doc},calibration={"curves":[]})
 
 
-def proof(doc):
-    p=max(doc["curves"][0]["points"],key=lambda p:p["x"])
-    doc["highEndpoint"]=dict(pointId=p["id"],x=p["x"],y=p["y"],frequencyTHz=p["x"],evidence="原图红线在此截止，图框上沿为额外留白")
-
-
-def test_real_endpoint_below_frame_can_be_confirmed_without_moving_or_extending():
-    data=payload()
-    issues=diagnose(data,"alpha2f")["curves"][0]["issues"]
-    high=next(i for i in issues if i["kind"]=="high_endpoint")
-    assert high["points"][0]["point_id"]=="p2"
-    assert high["meta"]["actual_thz"]==6 and high["meta"]["frame_thz"]==10 and high["meta"]["difference_px"]==4
-    assert alpha_integrals(data)["status"]=="unavailable"
-    original=copy.deepcopy(data["curves"])
-    proof(data["manual_documents"]["a"])
-    assert endpoint_valid(data["manual_documents"]["a"])
+@pytest.mark.parametrize("frame",[6.000002,10.,1000.])
+def test_saved_maximum_is_used_without_any_frame_comparison(frame):
+    data=payload(frame=frame);original=copy.deepcopy(data["curves"])
+    result=alpha_integrals(data)
+    assert result["parameters"]["lambda"]["value"]==pytest.approx(.12)
+    assert result["maximum_integrated_thz"]==6.
     assert not diagnose(data,"alpha2f")["curves"][0]["issues"]
-    assert alpha_integrals(data)["parameters"]["lambda"]["value"]==pytest.approx(.12)
     assert data["curves"]==original
 
 
-@pytest.mark.parametrize("change",["move","delete","new_higher","calibration","empty_evidence"])
-def test_endpoint_evidence_invalidates_on_relevant_changes(change):
-    data=payload();doc=data["manual_documents"]["a"];proof(doc)
-    if change=="move":doc["curves"][0]["points"][-1]["y"]+=1
-    elif change=="delete":doc["curves"][0]["points"].pop()
-    elif change=="new_higher":doc["curves"][0]["points"].append(dict(id="new",x=7,y=.07))
-    elif change=="calibration":doc["calibration"]["frequency"]["values"]=[0,20]
-    else:doc["highEndpoint"]["evidence"]=""
-    assert not endpoint_valid(doc)
-    assert alpha_integrals(data)["status"]=="unavailable"
+@pytest.mark.parametrize("legacy",[None,{},{"pointId":"missing","frequencyTHz":999,"evidence":""},"old-invalid-field"])
+def test_legacy_endpoint_confirmation_is_completely_ignored(legacy):
+    data=payload();data["manual_documents"]["a"]["highEndpoint"]=legacy
+    assert alpha_integrals(data)["parameters"]["lambda"]["status"]=="available"
+    assert not diagnose(data,"alpha2f")["curves"][0]["issues"]
 
 
 def test_precheck_reports_all_numerical_boundaries_instead_of_only_first_error():
@@ -65,7 +50,7 @@ def test_precheck_reports_all_numerical_boundaries_instead_of_only_first_error()
     curve["points"][1]["reconstructed_amplitude"]=-.1
     doc["zero"]=None
     kinds={i["kind"] for i in diagnose(data,"alpha2f")["curves"][0]["issues"]}
-    assert {"frequency_backtrack","negative_amplitude","low_endpoint","high_endpoint","zero_confirmation"}<=kinds
+    assert {"frequency_backtrack","negative_amplitude","low_endpoint","zero_confirmation"}<=kinds
     for issue in diagnose(data,"alpha2f")["curves"][0]["issues"]:
         assert issue["points"] and issue["points"][0]["point_id"]
 
@@ -109,32 +94,36 @@ def test_auto_repair_never_guesses_near_or_ambiguous_connections(problem):
     assert data==before
 
 
-def test_endpoint_confirmation_http_persists_and_unlocks_actual_frequency_range(manual_http):
+@pytest.mark.parametrize("pixel",[139.999998,139.,100.])
+def test_saved_endpoint_http_needs_no_confirmation_and_does_not_add_points(manual_http,pixel):
     env=manual_http;body=copy.deepcopy(env["body"]);doc=body["document"]
-    end=doc["curves"][0]["points"].pop()
-    last=doc["curves"][0]["points"][-1]
+    # 截短有效路径，仅保留频率小于目标末点的前驱，避免引入回折。
+    doc["curves"][0]["points"]=[p for p in doc["curves"][0]["points"] if p["x"]<pixel]+[{
+        **doc["curves"][0]["points"][-1],"id":"last-saved","x":pixel}]
     first=doc["curves"][0]["points"][0]
     doc["zero"]=dict(pixel=first["x"],pointIds=[first["id"]])
-    doc["highEndpoint"]=dict(pointId=last["id"],x=last["x"],y=last["y"],frequencyTHz=5.95,evidence="合成原图在此截止，上沿留白")
     response=env["client"].post(f"/api/rag/spectra/{env['identity']}/manual",json=body)
     assert response.status_code==200,response.text
-    item=response.json()["items"][0]
-    assert len(item["result"]["curves"][0]["points"])==len(doc["curves"][0]["points"])
+    item=response.json()["items"][0];original=copy.deepcopy(item["result"]["curves"])
     response=env["client"].post(f"/api/rag/spectra/{env['identity']}/recalculate",json=recalc_body(env,item))
     assert response.status_code==200,response.text
     fresh=response.json()["items"][0]
-    assert fresh["result"]["quality"]["integrals"]["raw"]["maximum_integrated_thz"]==pytest.approx(5.95)
+    assert fresh["result"]["quality"]["integrals"]["raw"]["maximum_integrated_thz"]==pytest.approx((pixel-20)*.05)
     assert fresh["result"]["quality"]["integrals"]["raw"]["parameters"]["lambda"]["status"]=="available"
-    assert fresh["result"]["manual_documents"]["a"]["highEndpoint"]==doc["highEndpoint"]
-    assert not any(i["kind"]=="high_endpoint" for i in fresh["result"]["quality"]["trace_diagnostics"]["alpha2f"]["curves"][0]["issues"])
+    assert fresh["result"]["curves"]==original
+    assert not any(i["kind"] in {"high_endpoint","projection_range"} for i in fresh["result"]["quality"]["trace_diagnostics"]["alpha2f"]["curves"][0]["issues"])
 
 
-def test_server_rejects_forged_endpoint_and_does_not_save(manual_http):
+def test_old_client_endpoint_field_does_not_block_save_and_is_not_returned(manual_http):
     env=manual_http;request=copy.deepcopy(env["body"]);doc=request["document"]
-    p=doc["curves"][0]["points"][10]
-    doc["highEndpoint"]=dict(pointId=p["id"],x=p["x"],y=p["y"],frequencyTHz=.5,evidence="不是最高频点")
-    r=env["client"].post(f"/api/rag/spectra/{env['identity']}/manual",json=request)
-    assert r.status_code==422 and "高频末端确认" in r.text
+    doc["highEndpoint"]={"pointId":"does-not-exist","evidence":""}
+    response=env["client"].post(f"/api/rag/spectra/{env['identity']}/manual",json=request)
+    assert response.status_code==200,response.text
+    item=response.json()["items"][0]
+    assert "highEndpoint" not in item["result"]["manual_documents"]["a"]
+    params={**env["params"],"collection_version":item["version"],"run_id":item["run"]["id"]}
+    result=env["client"].get(f"/api/rag/spectra/{env['identity']}/manual",params=params)
+    assert result.status_code==200 and "highEndpoint" not in result.json()["documents"][0]
 
 
 def test_http_exact_gap_repair_is_persisted_without_dropping_source_points(manual_http):
@@ -156,21 +145,17 @@ def test_http_exact_gap_repair_is_persisted_without_dropping_source_points(manua
     assert "automatic_repairs" not in mask_public(result,{"a":{"status":"accepted"}})["quality"]
 
 
-def test_dos_confirmed_individual_cutoffs_integrate_without_padding():
+def test_dos_different_saved_maxima_integrate_without_confirmation_or_padding():
     from backend.spectra.recalculate import dos_integrals
     data=payload(frame=10);first=data["curves"][0]
     first.update(kind="phonon_dos",projection="H",unit="modes/THz/primitive_cell")
-    proof(data["manual_documents"]["a"])
     other=copy.deepcopy(first);other.update(id="b",projection="S")
     other["points"][-1].update(frequency_thz=5.,frequency_pixel=5.)
     doc=copy.deepcopy(data["manual_documents"]["a"])
     doc["curves"][0]["id"]="b";doc["curves"][0]["points"][-1]["x"]=5.
-    doc["highEndpoint"]=None
     data["curves"].append(other);data["manual_documents"]["b"]=doc
     data["calibration"].update(projection_complete=True,projection_scale_confirmed=True)
-    assert any(i["kind"]=="projection_range" for r in diagnose(data,"phonon_dos")["curves"] for i in r["issues"])
-    proof(doc)
-    assert not any(i["kind"]=="projection_range" for r in diagnose(data,"phonon_dos")["curves"] for i in r["issues"])
+    assert not any(i["kind"] in {"high_endpoint","projection_range"} for r in diagnose(data,"phonon_dos")["curves"] for i in r["issues"])
     original=copy.deepcopy(data["curves"])
     result=dos_integrals(data,None)
     assert result["status"]=="available"

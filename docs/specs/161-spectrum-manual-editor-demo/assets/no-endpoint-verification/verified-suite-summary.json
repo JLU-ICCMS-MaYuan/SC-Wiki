@@ -1,0 +1,35 @@
+{
+  "suites": [
+    {
+      "suite": "preflight",
+      "checks": 6,
+      "status": "passed",
+      "report": "assets/no-endpoint-verification/preflight/preflight-browser-validation.json"
+    },
+    {
+      "suite": "recalculate",
+      "checks": 8,
+      "status": "passed",
+      "report": "assets/no-endpoint-verification/recalculate/recalculate-browser-validation.json"
+    },
+    {
+      "suite": "diagnostics",
+      "checks": 7,
+      "status": "passed",
+      "report": "assets/no-endpoint-verification/diagnostics/diagnostics-browser-validation.json"
+    },
+    {
+      "suite": "manual",
+      "checks": 15,
+      "status": "passed",
+      "report": "assets/no-endpoint-verification/manual/snap-production-browser-validation.json"
+    },
+    {
+      "suite": "revalidation",
+      "checks": 8,
+      "status": "passed",
+      "report": "assets/no-endpoint-verification/revalidation/revalidation-browser-validation.json"
+    }
+  ],
+  "total_checks": 44
+}

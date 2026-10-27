@@ -5,7 +5,7 @@ import SourceCanvas, { type Tool } from './SourceCanvas'
 import './styles.css'
 import { DRAG_INFLUENCE } from './dragInfluence'
 import { pointReadout, zeroReadout, recognizedAxes } from './axisGeometry'
-import { amplitude, axisValid, highEndpointValid, confirmHighEndpoint, automaticConnections, undoAutomaticConnections, clone, commit, frequency, move, restoreManualMarkers, reconnectManualPoints, ordered, pixelAt, record, redo, removePoints, undo, validateDocument, type Document, type History, type Point } from './engine'
+import { amplitude, axisValid, automaticConnections, undoAutomaticConnections, clone, commit, frequency, move, restoreManualMarkers, reconnectManualPoints, ordered, pixelAt, record, redo, removePoints, undo, validateDocument, type Document, type History, type Point } from './engine'
 
 const number = (n: number) => Number.isFinite(n) ? Number(n.toFixed(4)).toString() : '—'
 
@@ -43,7 +43,6 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
   const [active, setActive] = useState(doc.curves[0].id), [selected, setSelected] = useState<string[]>(initialPointId?[initialPointId]:[])
   const [tool, setTool] = useState<Tool>('select'), [linked, setLinked] = useState(true), [dragMode, setDragMode] = useState<'amplitude' | 'free'>('free')
   const [display, setDisplay] = useState('overlay'), [all, setAll] = useState(true)
-  const [endpointEvidence,setEndpointEvidence]=useState(samples[0].highEndpoint?.evidence||'')
   const [error, setError] = useState(loaded.error), [notice, setNotice] = useState('')
   const [exitModal, setExitModal] = useState(false), exitAction = useRef<() => void>(() => {})
   const [calibration, setCalibration] = useState(clone(doc.calibration)), [pick, setPick] = useState<{ axis: 'frequency' | 'amplitude'; index: 0 | 1 } | null>(null)
@@ -53,7 +52,6 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
   const calibrationDirty = JSON.stringify(calibration) !== JSON.stringify(doc.calibration)
   const dirty = JSON.stringify(doc) !== JSON.stringify(saved) || calibrationDirty
   const currentCheck = checkZeroFrequency(doc), activeCheck = currentCheck.curves.find(c => c.id === active)!, covered = activeCheck.status === 'complete'
-  useEffect(()=>{setEndpointEvidence(doc.highEndpoint?.evidence||'')},[doc.id])
   useEffect(() => { setCalibration(clone(doc.calibration)); setPick(null) }, [doc.calibration])
   useEffect(() => {
     if (selected.length !== 1) return
@@ -71,7 +69,6 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
   const change = (next: Document, detail?: string) => {
     setError(''); setNotice('')
     if (next === doc) return
-    if(next.highEndpoint && !highEndpointValid(next))next={...next,highEndpoint:null}
     setHistory(h => commit(h, detail ? record(next, 'move', detail) : next))
   }
   const remove = () => { change(removePoints(doc, active, selected)); setSelected([]) }
@@ -127,7 +124,7 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
   const applyCalibration = () => {
     if (!axisValid(calibration.frequency) || !axisValid(calibration.amplitude)) { setError('每根轴的两个位置和数值必须有限、互不重合'); return }
     if (calibration.amplitude.unit !== 'pixel' && !calibration.amplitudeEvidence.trim()) { setError('填写物理幅值刻度前，请注明来自原图何处的幅值依据；不能借用累计 λ'); return }
-    const next = record({ ...restoreManualMarkers(doc, initial), calibration: clone(calibration), zero: null, highEndpoint:null }, 'calibration', '修改线性标定，保留全部源像素位置；零频选点需重新核对')
+    const next = record({ ...restoreManualMarkers(doc, initial), calibration: clone(calibration), zero: null }, 'calibration', '修改线性标定，保留全部源像素位置；零频选点需重新核对')
     try { validateDocument(next, initial); change(next); setTool('select'); setPick(null) } catch (e) { setError((e as Error).message) }
   }
   const displayedRange = curve.points.length ? (() => { const ps = ordered(doc, curve.points); return number(frequency(doc, ps[0])) + '–' + number(frequency(doc, ps.at(-1)!)) + ' ' + doc.calibration.frequency.unit })() : '尚无数据点'
@@ -167,16 +164,7 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
         <footer className="workbench-footer"><span><i style={{ background: curve.color }}/>{curve.name} · {curve.points.length} 个点</span><span>{displayedRange}</span><span>{doc.operations.length} 次人工操作</span></footer>
       </section><aside className="inspector">
         {selectedPanel}
-        <section className="panel-section" data-testid="high-endpoint-panel">
-          <h3>真实高频末端</h3>
-          <p className="muted">图框上限不一定是曲线截止。先选最高频点，对照原图确认它是否为真实末端；无需把点拖到图框上沿。</p>
-          <label className="endpoint-evidence">原图末端依据<textarea aria-label="高频末端依据" value={endpointEvidence} onChange={e=>setEndpointEvidence(e.target.value)} placeholder="例如：原图目标曲线在此结束，图注给出截止频率；写明图号或可核对的位置"/></label>
-          <button className="secondary" disabled={!point||selected.length!==1||!endpointEvidence.trim()} onClick={()=>{
-            try{change(confirmHighEndpoint(doc,point!.id,endpointEvidence));setNotice('已确认真实高频末端，保存后按此截止检查计算。')}catch(e){setError((e as Error).message)}
-          }}>确认选中点为真实高频末端</button>
-          <p className="muted">{highEndpointValid(doc)?'当前末端确认有效。移动/删除末端或更改频率标定后需重新核对。':'尚未确认独立于图框边界的真实高频末端。'}</p>
-          {automaticConnections(doc).length>0&&<button className="secondary" onClick={()=>change(undoAutomaticConnections(doc))}>撤销已记录的自动连接</button>}
-        </section>
+        {automaticConnections(doc).length>0&&<section className="panel-section"><h3>自动连接记录</h3><button className="secondary" onClick={()=>change(undoAutomaticConnections(doc))}>撤销已记录的自动连接</button></section>}
         <section className="panel-section"><div className="section-heading"><h3>编辑曲线</h3><span className="tag">单条编辑</span></div>{curvePicker}<p className="muted">{kind === 'phonon_dos' ? '其他分波只作参照，不随当前曲线移动。' : '累计 λ 只在原图中参照，不作为 α²F 幅值刻度。'}</p></section>
         <section className="panel-section"><div className="section-heading"><h3>局部形状调整</h3><label className="switch"><input aria-label="附近点联动" type="checkbox" checked={linked} onChange={e => setLinked(e.target.checked)}/><span>附近点联动</span></label></div>
           <div className="segmented"><button className={dragMode === 'amplitude' ? 'active' : ''} onClick={() => setDragMode('amplitude')}>只改幅值</button><button className={dragMode === 'free' ? 'active' : ''} onClick={() => setDragMode('free')}>自由移动（X / Y）</button></div>

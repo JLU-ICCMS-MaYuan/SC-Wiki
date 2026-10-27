@@ -22,7 +22,3 @@
 .spectrum-manual-editor .production-editor-fields{border:0;padding:0;margin:0;display:flex;flex:1;min-height:0;min-width:0}.spectrum-manual-editor .production-editor-fields>.editor-layout{width:100%}.spectrum-manual-editor .production-curve-tabs{display:flex;gap:8px;padding:8px 20px;flex-wrap:wrap;background:white}.spectrum-manual-editor .production-curve-tabs button{font-size:12px}
 
 .spectrum-manual-editor .production-editor-fields:disabled{pointer-events:none;opacity:.7}
-
-
-.spectrum-manual-editor .endpoint-evidence { display:grid; gap:6px; margin:12px 0; font-size:12px; }
-.spectrum-manual-editor .endpoint-evidence textarea { box-sizing:border-box; width:100%; min-height:88px; resize:vertical; padding:9px; border:1px solid #dce0ef; border-radius:8px; font:inherit; line-height:1.6; color:inherit; background:#fff; }
