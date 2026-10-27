@@ -1,0 +1,79 @@
+{
+  "checks": [
+    "版本未变化：刷新当前α²F详情正常，地址不变",
+    "本页主动重算→新版本地址→刷新正常",
+    "打开最新结果可恢复页面且不写数据库",
+    "重用旧链接稳定复现同样提示，打开最新结果可恢复",
+    "本页编辑保存→新版本地址→刷新正常，人工点持久化",
+    "另一标签页人工保存也使旧详情地址失效，恢复链接有效",
+    "跨标签页版本冲突拒绝旧保存，保留用户未保存坐标且不覆盖已保存谱",
+    "重算请求发送前网络失败不产生新运行，重试成功",
+    "响应丢失后最新运行仍可恢复，无谱数据丢失",
+    "声子DOS同页重算刷新正常、跨页旧版本提示同样可复现",
+    "窄屏旧版本错误页和恢复链接可操作，无水平溢出",
+    "材料身份不匹配被拒绝，没有打开其他材料或可写编辑器"
+  ],
+  "findings": [
+    {
+      "id": "V1",
+      "message": "两个标签页打开同版本，一个重算后另一个刷新，旧地址触发整页版本错误。"
+    },
+    {
+      "id": "V2",
+      "message": "重新读取只更新数据，不更新URL版本，因此仍停留在同一个错误页。"
+    },
+    {
+      "id": "V3",
+      "message": "重算已提交但响应丢失时，页面地址未升级；重试遇到409，刷新后仍显示旧版本错误，需要打开最新结果。"
+    }
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/68b5c09eeb5c423db8b9ecc068f110d7/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/68b5c09eeb5c423db8b9ecc068f110d7/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/68b5c09eeb5c423db8b9ecc068f110d7/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/68b5c09eeb5c423db8b9ecc068f110d7/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/68b5c09eeb5c423db8b9ecc068f110d7/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/68b5c09eeb5c423db8b9ecc068f110d7/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/68b5c09eeb5c423db8b9ecc068f110d7/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/68b5c09eeb5c423db8b9ecc068f110d7/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/d6dcd53938884d07ad337ee40b788019/recalculate"
+    }
+  ],
+  "screenshots": [
+    "version-stale-after-refresh.png",
+    "version-reread-still-stale.png",
+    "version-unsaved-conflict-preserved.png",
+    "version-lost-response-refresh.png",
+    "version-mobile-version-error.png"
+  ],
+  "status": "characterization_passed",
+  "acceptance": "needs_fix",
+  "note": "成功复现V1/V2/V3不代表版本恢复体验通过；无业务源码修改。"
+}

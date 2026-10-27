@@ -1,0 +1,48 @@
+{
+  "version": 23,
+  "run_id": "f77b9e8c8df94faa9fb916521ba33090",
+  "algorithm": "spectra-recalculate-v2",
+  "read_only": true,
+  "points": 352,
+  "topology": {
+    "curves": [
+      {
+        "curve_id": "A-alpha2f",
+        "name": "α²F",
+        "amplitude_unit": "pixel",
+        "point_count": 352,
+        "component_count": 1,
+        "issues": []
+      }
+    ]
+  },
+  "saved_integral": {
+    "reason": "α²F幅值标定依据尚待核对；相对谱也须提供零基线和统一倍率依据",
+    "status": "unavailable",
+    "parameters": {
+      "lambda": {
+        "reason": "α²F幅值标定依据尚待核对；相对谱也须提供零基线和统一倍率依据",
+        "status": "unavailable"
+      },
+      "omega_log": {
+        "reason": "α²F幅值标定依据尚待核对；相对谱也须提供零基线和统一倍率依据",
+        "status": "unavailable"
+      }
+    }
+  },
+  "calculated_in_memory": {
+    "status": "unavailable",
+    "reason": "α²F幅值标定依据尚待核对；相对谱也须提供零基线和统一倍率依据",
+    "parameters": {
+      "lambda": {
+        "status": "unavailable",
+        "reason": "α²F幅值标定依据尚待核对；相对谱也须提供零基线和统一倍率依据"
+      },
+      "omega_log": {
+        "status": "unavailable",
+        "reason": "α²F幅值标定依据尚待核对；相对谱也须提供零基线和统一倍率依据"
+      }
+    }
+  },
+  "result_sha256": "26f11fa8a445d1595d7d9d94b353cf1f5f2d2eb51401c60ea4da86f5b7377910"
+}

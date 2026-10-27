@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const runtime=path.join(process.env.HOME,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules');
 const {chromium}=require(require.resolve('playwright',{paths:[runtime]}));
 const backend='http://127.0.0.1:8191',frontend='http://127.0.0.1:5173';
-const out=path.resolve('docs/specs/161-spectrum-manual-editor-demo/assets');
+const out=process.env.SCWIKI_SPECTRUM_BROWSER_OUT||path.resolve('docs/specs/161-spectrum-manual-editor-demo/assets');
 const report={checks:[],writes:[],errors:[],screenshots:[]};
 async function main(){
  const browser=await chromium.launch({headless:true,channel:'chrome'});

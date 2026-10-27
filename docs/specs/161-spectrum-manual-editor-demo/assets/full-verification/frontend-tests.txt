@@ -1,0 +1,29 @@
+
+> sc-wiki-frontend@1.0.0 test:upload-ui
+> vitest run --config ../vitest.config.ts tests/01_decentralized_uploading/spectrum-diagnostics.test.tsx tests/01_decentralized_uploading/spectrum-recalculate.test.tsx tests/01_decentralized_uploading/property-spectra-navigation.test.tsx tests/01_decentralized_uploading/spectrum-manual-editor.test.tsx tests/01_decentralized_uploading/spectrum-chain.test.tsx tests/01_decentralized_uploading/spectrum-geometry.test.tsx tests/01_decentralized_uploading/spectrum-workspace.test.tsx tests/01_decentralized_uploading/upload-spectrum-save-navigation.test.tsx
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+ ✓ tests/01_decentralized_uploading/spectrum-geometry.test.tsx (4 tests) 3ms
+ ✓ tests/01_decentralized_uploading/spectrum-chain.test.tsx (9 tests) 6ms
+ ✓ tests/01_decentralized_uploading/spectrum-manual-editor.test.tsx (8 tests) 7ms
+ ✓ tests/01_decentralized_uploading/spectrum-diagnostics.test.tsx (3 tests) 100ms
+ ✓ tests/01_decentralized_uploading/spectrum-recalculate.test.tsx (3 tests) 70ms
+ ✓ tests/01_decentralized_uploading/spectrum-workspace.test.tsx (2 tests) 164ms
+stderr | tests/01_decentralized_uploading/property-spectra-navigation.test.tsx > 新标签链接不保存主表单，保留未保存输入并携带谱身份
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/01_decentralized_uploading/upload-spectrum-save-navigation.test.tsx > 新标签页查看谱不会触发保存，已有改动=false
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/01_decentralized_uploading/upload-spectrum-save-navigation.test.tsx (2 tests) 377ms
+ ✓ tests/01_decentralized_uploading/property-spectra-navigation.test.tsx (26 tests) 731ms
+
+ Test Files  8 passed (8)
+      Tests  57 passed (57)
+   Start at  11:06:39
+   Duration  1.87s (transform 712ms, setup 0ms, collect 3.03s, tests 1.46s, environment 1.82s, prepare 506ms)

@@ -117,3 +117,10 @@ Issue [#161](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/161) 是协作�
 - [x] T047 数值/HTTP/MySQL/浏览器验证、Overview、Demo保护与提交。
 
 本轮验证：57项前端、113项后端通过/2项仅MySQL跳过、当前MySQL61项、正式浏览器7场景及构建通过；见diagnostics-validation.md。
+
+
+## 全流程验证
+
+- [x] T048 复测现有正式编辑/重算/坐标诊断与当前MySQL保护，新增多标签刷新、旧链接、响应丢失、原模块旧链接特征测试；区分测试通过与未修复体验问题，记录证据。
+
+T048测试执行已完成，V1至V4版本恢复问题仍未修复，不能据此关闭Issue或认定体验验收通过。详见full-verification.md。

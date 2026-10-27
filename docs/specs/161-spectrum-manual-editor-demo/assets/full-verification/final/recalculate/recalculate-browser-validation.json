@@ -1,0 +1,146 @@
+{
+  "checks": [
+    "α²F主动计算真实持久化且不改点，计算中防重复提交，详情移除旧说明和04表",
+    "刷新恢复计算结果与时间，路由指向新运行",
+    "人工保存使旧结果失效，点击重算才得到新积分；零频只显示一次，编辑器仍保留点表",
+    "有零基线和统一倍率依据的相对谱只显示ωlog，不伪造λ",
+    "删点保留缺口，重算显示具体阻塞原因，不跨缺口补点或积分",
+    "DOS同样主动积分，有积分但缺原胞依据时仅3N比较留空",
+    "并发新版本后旧页面重算返回409，不覆盖新的结果",
+    "390px窄屏无水平溢出，重算按钮可操作"
+  ],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/4d9d5d7b637a4e83837e3ebfe4f2163f/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "5234d630dc714940aaa9bbe318c0aa87",
+      "kind": "alpha2f"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/4d9d5d7b637a4e83837e3ebfe4f2163f/manual",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "document"
+      ],
+      "base_run_id": "7cae6ed0279c403089769b47bef3e90b"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/4d9d5d7b637a4e83837e3ebfe4f2163f/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "8d79cfb71dac48e18c3290bd51d53ca4",
+      "kind": "alpha2f"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/4d9d5d7b637a4e83837e3ebfe4f2163f/manual",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "document"
+      ],
+      "base_run_id": "1482930a24804123b0532c988114cc9d"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/4d9d5d7b637a4e83837e3ebfe4f2163f/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "6261c5fc6c464b32a078da7686bdd378",
+      "kind": "alpha2f"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/4d9d5d7b637a4e83837e3ebfe4f2163f/manual",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "document"
+      ],
+      "base_run_id": "588b78edee3e44e6b2bebea1a9b043d1"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/4d9d5d7b637a4e83837e3ebfe4f2163f/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "e9e2cc46e6114935824633513f9545b9",
+      "kind": "alpha2f"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0b68ecfbddb94148a7878d32ab75c8d7/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "7dc4d9f9d49242cfb6425d309b3a12f2",
+      "kind": "phonon_dos"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0b68ecfbddb94148a7878d32ab75c8d7/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "2fba0f13ee3a435d923adbba6840f9fa",
+      "kind": "phonon_dos"
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    "recalculate-alpha-result.png",
+    "recalculate-relative-omega.png",
+    "recalculate-dos-result.png",
+    "recalculate-mobile-detail.png"
+  ],
+  "status": "passed",
+  "database": "isolated SQLite; production routes and SQLAlchemy; all browser API traffic redirected"
+}

@@ -453,3 +453,14 @@ ok
 沿用#161的type:feature及#137/#154/#155关联。只修改正式页面，不修改Demo或联动配置，不批量修复用户曲线、不部署、不推送。更新现有Spec、契约、验收与Overview；远程Spec链接保持待验证。之前刷新旧详情地址的现象单独保留，不扩展本轮为路由刷新改造。
 
 本轮截图1，ID diagnostics-user-request，来源codex-clipboard-7467a150-37a7-4f09-97c3-97132015e543.png，归档assets/diagnostics-user-request.png，SHA256 1f05ca4c2c9e0e473a1ff80452e9f399024c693fba0de7d427d54780875457c3，可读取；仅作为材料。
+
+
+## 全流程验证需求追加（2026-10-27）
+
+用户原话：
+
+你来帮我彻底测试一下
+
+本轮只补充现有功能测试与证据，覆盖截图版本错误、同页保存/重算/刷新、多个标签页、失败恢复、编辑吸附、诊断定位、MySQL并发保护。不改变已确认产品行为或科学边界；发现未修复问题单独记录，不以测试脚本通过冒充用户体验验收。
+
+本轮截图1：codex-clipboard-52290125-cf68-4981-b8cd-3d6091ee88e0.png；归档assets/full-verification/user-version-error.png；SHA256 c9dde3dc7d4b4d659b39808c2ac8f541fbca8184dc35e233952617eb6e6ad071，原文件可读。

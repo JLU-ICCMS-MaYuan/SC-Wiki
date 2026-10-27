@@ -8,7 +8,7 @@ import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 Object.defineProperty(globalThis,'ResizeObserver',{configurable:true,value:class {observe(){} unobserve(){} disconnect(){}}})
 Object.defineProperty(SVGElement.prototype,'getScreenCTM',{configurable:true,value:()=>({a:1})})
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
-import { PropertySpectraProvider, PropertySpectrumSection, PropertySpectrumState, MissingPropertySpectrumModules, UnassignedPropertySpectra } from '../../frontend/src/components/PropertySpectra'
+import { PropertySpectraProvider, PropertySpectrumControls, PropertySpectrumSection, PropertySpectrumState, MissingPropertySpectrumModules, UnassignedPropertySpectra } from '../../frontend/src/components/PropertySpectra'
 import PropertyModuleEditor from '../../frontend/src/components/PropertyModuleEditor'
 import { emptyPropertyModule } from '../../frontend/src/lib/propertyModules'
 import { clearFormDefinitionCache } from '../../frontend/src/lib/formDefinitions'
@@ -334,4 +334,24 @@ it.each([false, true])('已有模块内的谱入口与空态随模块折叠，re
   expect(noAlpha).toBeVisible()
   expect(changed).not.toHaveBeenCalled()
   expect(api.download).not.toHaveBeenCalled()
+})
+
+
+it('版本恢复特征：原模块保留旧链接，手动刷新谱状态后链接更新且表单输入不变', async () => {
+  render(<MemoryRouter><input aria-label="未保存主表单" defaultValue="用户正在编辑" />
+    <PropertySpectraProvider context={{target:{target:'upload',target_id:'task'}}}>
+      <PropertySpectrumControls />
+      <PropertySpectrumState stateKey="sample" summary="当前材料">
+        <PropertySpectrumSection moduleCode="superconductive_properties" />
+      </PropertySpectrumState>
+    </PropertySpectraProvider>
+  </MemoryRouter>)
+  const old=await screen.findByRole('link',{name:'查看 α²F'})
+  expect(old.getAttribute('href')).toContain('collection_version=2')
+  listing.items[0].version=3;listing.items[0].run.id='run2'
+  fireEvent(window,new Event('focus'));fireEvent(document,new Event('visibilitychange'))
+  expect(screen.getByRole('link',{name:'查看 α²F'}).getAttribute('href')).toContain('collection_version=2')
+  fireEvent.click(screen.getByRole('button',{name:'刷新谱状态'}))
+  await waitFor(()=>expect(screen.getByRole('link',{name:'查看 α²F'}).getAttribute('href')).toContain('collection_version=3'))
+  expect(screen.getByLabelText('未保存主表单')).toHaveValue('用户正在编辑')
 })

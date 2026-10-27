@@ -3,7 +3,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const runtime=process.env.CODEX_RUNTIME_NODE_MODULES||path.join(process.env.HOME,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules');
 const {chromium}=require(require.resolve('playwright',{paths:[runtime]}));
 const backend='http://127.0.0.1:8191',frontend=process.env.SPECTRUM_FRONTEND||'http://127.0.0.1:5173';
-const out=path.resolve('docs/specs/161-spectrum-manual-editor-demo/assets');
+const out=process.env.SCWIKI_SPECTRUM_BROWSER_OUT||path.resolve('docs/specs/161-spectrum-manual-editor-demo/assets');
 const report={checks:[],errors:[],writes:[],screenshots:[]};
 async function main(){
  const browser=await chromium.launch({headless:true,channel:'chrome'}),context=await browser.newContext({viewport:{width:1440,height:1000}});
@@ -23,6 +23,18 @@ async function main(){
   await btn('编辑').click();await page.getByRole('application',{name:'谱线人工编辑画布'}).waitFor();assert.equal(await page.locator('.editor-app input[aria-label="原图不透明度"]').inputValue(),'1');await page.locator('.editor-app input[aria-label="原图不透明度"]').focus();await page.locator('.editor-app input[aria-label="原图不透明度"]').press('End');await shot('editor');
   assert.equal(await page.locator('.spectrum-manual-editor.editor-app').count(),1);
   const editor=page.locator('.editor-app'),canvas=editor.getByRole('application');
+  // 工具提示改变画布高度；等待ResizeObserver完成布局后再记录屏幕坐标。
+  const stableCanvas=()=>canvas.evaluate(async el=>{
+    let previous='',stable=0;
+    for(let i=0;i<30;i++){
+      await new Promise(resolve=>requestAnimationFrame(resolve));
+      const m=el.getScreenCTM(),box=el.getBoundingClientRect();
+      const current=JSON.stringify([m.a,m.d,m.e,m.f,box.width,box.height,el.getAttribute('viewBox')]);
+      stable=current===previous?stable+1:0;previous=current;
+      if(stable>=3)return;
+    }
+    throw new Error('画布布局未稳定，不能使用旧屏幕坐标验证吸附');
+  });
   const currentPoints=()=>editor.locator('[data-point]').evaluateAll(nodes=>Object.fromEntries(nodes.map(n=>[n.dataset.point,{x:Number(n.dataset.x),y:Number(n.dataset.y)}])));
   const clickPixel=async(x,y,double=false)=>{const p=await canvas.evaluate((el,v)=>{const p=new DOMPoint(v.x,v.y).matrixTransform(el.getScreenCTM());return {x:p.x,y:p.y}},{x,y});if(double)await page.mouse.dblclick(p.x,p.y);else await page.mouse.click(p.x,p.y)};
   const beforeChain=await currentPoints(),beforePath=await editor.locator('[data-curve="a"]').getAttribute('d');
@@ -34,7 +46,7 @@ async function main(){
   await btn('↶ 撤销').click();assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length+2);await btn('↷ 重做').click();assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length+3);await shot('chain-ended');check('连续描线可逐点撤销重做，原路径保留');
   const chainPoints=await currentPoints(),lastId=added.at(-1),targetId='a:p100',snapCoordinates=chainPoints[targetId];
   await page.locator(`[data-row="${lastId}"]`).click();await btn('＋ 增加点').click();
-  const targetScreen=await canvas.evaluate((el,p)=>{const c=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:c.x,y:c.y,scale:el.getScreenCTM().a}},snapCoordinates);
+  await stableCanvas();const targetScreen=await canvas.evaluate((el,p)=>{const c=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:c.x,y:c.y,scale:el.getScreenCTM().a}},snapCoordinates);
   const previewPosition=await canvas.evaluate((el,p)=>{const c=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:c.x,y:c.y}},chainPoints[added[0]]);
   await page.mouse.move(previewPosition.x+9,previewPosition.y);assert.equal(await editor.getByTestId('snap-target').count(),0);
   await page.mouse.move(previewPosition.x+7,previewPosition.y);await editor.getByTestId('snap-target').waitFor();assert.equal(await editor.getByTestId('snap-target').getAttribute('data-point-id'),added[0]);check('8px外不吸附、8px内高亮最近目标，阈值按屏幕距离');

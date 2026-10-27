@@ -1,0 +1,22 @@
+[
+  {
+    "suite": "version",
+    "exit_code": 0,
+    "test_root": "/tmp/scwiki-manual-test-full-version-sjjri9oc"
+  },
+  {
+    "suite": "manual",
+    "exit_code": 0,
+    "test_root": "/tmp/scwiki-manual-test-full-manual-59ios1id"
+  },
+  {
+    "suite": "recalculate",
+    "exit_code": 0,
+    "test_root": "/tmp/scwiki-manual-test-full-recalculate-r_h9h7pm"
+  },
+  {
+    "suite": "diagnostics",
+    "exit_code": 0,
+    "test_root": "/tmp/scwiki-manual-test-full-diagnostics-h5ziepc5"
+  }
+]
