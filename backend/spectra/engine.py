@@ -7,6 +7,7 @@ from .digitize import LinearAxis, extract_curve, normalize_dos, spectral_integra
 from .quality import zero_baseline_candidate, cumulative_moments
 from .joint_reconstruction import reconstruct_joint, increment_envelope
 from .scientific_review import independent_integral
+from .relative import calculate_alpha
 
 
 def comparison(value, reference, source=None, same_conditions=False):
@@ -213,6 +214,14 @@ def extract_panel(rgb: np.ndarray, calibration: dict, *, references: dict | None
                     if s in norm.get("component_mode_integrals", {}) else None)) for s, n in counts.items()}
     q["limitations"] = ["图像包络不是统计置信区间", "积分一致是物理约束，不独立证明准确度",
                         "抵框峰只提供带掩膜候选，不唯一恢复峰顶", "质量指标不自动授予科学采纳"]
+    if alpha:
+        relative=calculate_alpha(result,refs)
+        q["integrals"]["raw"]=relative["raw"]
+        for comparisons in q["comparisons"].values():
+            comparisons.pop("lambda",None)
+        q["comparisons"]["raw"]={"omega_log":relative["comparison"]}
+        if relative["candidate"] is not None:
+            result["candidates"]["alpha2f_lambda_normalized"]=relative["candidate"]
     return copy.deepcopy(result)
 
 

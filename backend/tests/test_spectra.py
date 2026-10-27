@@ -47,27 +47,28 @@ def fixture(kind="alpha2f", unit="THz"):
 def test_alpha_only_has_integral_without_cumulative_or_reference():
     image,p=fixture()
     result=extract_panel(image,p)
-    assert result["quality"]["integrals"]["raw"]["lambda_integral"]>0
-    assert result["quality"]["comparisons"]["raw"]["lambda"]["status"]=="unavailable"
+    assert result["quality"]["integrals"]["raw"]["pixel_integral"]>0
+    assert "lambda" not in result["quality"]["comparisons"]["raw"]
     assert "joint" not in result["candidates"]
     assert result["curves"][0]["point_counts"]["observed"]==121
 
 
-def test_unknown_definition_does_not_produce_physical_integrals():
+def test_unknown_absolute_scale_does_not_block_relative_omega():
     image,p=fixture();p["curves"][0]["physical_definition_confirmed"]=False
     r=extract_panel(image,p)
-    assert r["quality"]["integrals"]["raw"]["status"]=="unavailable"
-    assert "lambda_integral" not in r["quality"]["integrals"]["raw"]
+    assert r["quality"]["integrals"]["raw"]["parameters"]["omega_log"]["status"]=="available"
+    assert r["quality"]["integrals"]["raw"]["lambda_integral"] is None
 
 
-def test_reference_is_posthoc_and_condition_mismatch_not_compared():
+def test_lambda_reference_only_normalizes_source_shape_and_condition_mismatch_not_compared():
     image,p=fixture()
     before=extract_panel(image,p)
     refs={"lambda":dict(value=999.,source={"page":1,"quote":"λ=999"},same_conditions=True)}
     after=extract_panel(image,p,references=refs)
     assert after["curves"]==before["curves"]
-    assert after["quality"]["integrals"]==before["quality"]["integrals"]
-    assert after["quality"]["comparisons"]["raw"]["lambda"]["signed_difference"]<0
+    assert after["quality"]["integrals"]["raw"]["omega_log_k"]==before["quality"]["integrals"]["raw"]["omega_log_k"]
+    assert after["quality"]["integrals"]["raw"]["normalization"]["lambda_normalized"]==pytest.approx(999.)
+    assert "lambda" not in after["quality"]["comparisons"]["raw"]
     assert comparison(2,3,{"page":1},False)["status"]=="unavailable"
     assert comparison(2,0,{"page":1},True)["relative_difference_pct"] is None
 
@@ -309,7 +310,7 @@ def test_olive_spectrum_is_extracted_without_confusing_green_or_axes():
     panel["curves"][0]["color"] = "olive"
     result = extract_panel(image, panel)
     assert result["curves"][0]["point_counts"]["observed"] == 121
-    assert result["quality"]["integrals"]["raw"]["lambda_integral"] > 0
+    assert result["quality"]["integrals"]["raw"]["pixel_integral"] > 0
 
 
 def test_split_native_figure_is_composed_and_text_only_methods_skipped(tmp_path):

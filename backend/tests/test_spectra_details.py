@@ -56,9 +56,9 @@ def test_no_real_zero_evidence_or_out_of_image_does_not_create_curve(ticks):
     assert not result["curves"] and result["failures"]
 
 
-def test_alpha_independent_amplitude_evidence_required():
+def test_alpha_without_amplitude_explanation_has_independent_omega():
     image, panel = fixture(); panel["curves"][0].pop("amplitude_evidence")
-    assert extract_panel(image, panel)["quality"]["integrals"]["raw"]["status"] == "unavailable"
+    assert extract_panel(image, panel)["quality"]["integrals"]["raw"]["parameters"]["omega_log"]["status"] == "available"
 
 
 def test_display_crop_retains_source_coordinates_and_does_not_change_points():

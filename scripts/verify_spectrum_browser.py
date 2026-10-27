@@ -13,6 +13,7 @@ import time
 import urllib.request
 
 SUITES = {
+    "relative": "spectrum-relative-production.cjs",
     "insertion_vertical": "spectrum-insert-production.cjs",
     "insertion": "spectrum-insert-production.cjs",
     "preflight": "spectrum-preflight-production.cjs",
@@ -49,7 +50,8 @@ def main():
                "SCWIKI_RECALCULATE_TEST_FIXTURES": "0" if name == "manual" else "1",
                "SCWIKI_SPECTRUM_BROWSER_OUT": str(dest),
                "SCWIKI_REVALIDATE_TEST_FIXTURES": "1" if name == "revalidation" else "0",
-               "SCWIKI_INSERT_VERTICAL_FIXTURES": "1" if name == "insertion_vertical" else "0"}
+               "SCWIKI_INSERT_VERTICAL_FIXTURES": "1" if name == "insertion_vertical" else "0",
+               "SCWIKI_RELATIVE_TEST_FIXTURES": "1" if name == "relative" else "0"}
         with (test_root/"server.log").open("w") as log:
             server = subprocess.Popen([sys.executable, "-m", "uvicorn", "backend.tests.manual_editor_server:app",
                                        "--host", "127.0.0.1", "--port", "8191"],

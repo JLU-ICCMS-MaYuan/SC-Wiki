@@ -1,12 +1,13 @@
 """只从当前材料状态提取同条件参考和可核验原胞；不让读图模型猜模式数。"""
 from __future__ import annotations
 from collections import Counter
+import math
 from .contracts import fingerprint, conventional_structure_text
 
 
-def references_for(state):
+def reference_choices(state):
     if not state:
-        return {}
+        return {}, {k:"当前材料没有可用论文参考" for k in ("lambda","omega_log")}
     references = {"lambda": [], "omega_log": []}
     for module in state.get("property_modules") or []:
         for record in module.get("records") or []:
@@ -27,12 +28,22 @@ def references_for(state):
                 value = raw.get("value_number") if isinstance(raw, dict) else raw
                 if record.get("property_code") in keys:
                     value = record.get("value_number")
-                if isinstance(value, (float, int)):
+                if isinstance(value, (float, int)) and not isinstance(value,bool) and math.isfinite(value):
                     references[name].append(dict(value=float(value), source=source, same_conditions=True,
                         record_key=record.get("record_key"), method=record.get("method_code")))
-    # 同状态多个不同方法值并存时不随意挑“最接近”的参考。
-    return {k: values[0] for k, values in references.items()
-            if values and len({(v["value"], v["method"]) for v in values}) == 1}
+    values, reasons = {}, {}
+    for key, choices in references.items():
+        if not choices:
+            reasons[key]="缺少同条件、可定位的论文"+("λ" if key=="lambda" else "ωlog")
+        elif len({(v["value"],v["method"]) for v in choices})!=1:
+            reasons[key]="同条件存在多个不同的"+("λ" if key=="lambda" else "ωlog")+"参考，尚未确定唯一输入"
+        else:
+            values[key]=choices[0]
+    return values,reasons
+
+
+def references_for(state):
+    return reference_choices(state)[0]
 
 
 def primitive_for(state, draft):

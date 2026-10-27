@@ -1,0 +1,57 @@
+{
+  "read_only": true,
+  "collection": "afd8723697e84425b75790cfbafb4862",
+  "version": 20,
+  "run_id": "2b75e286ce3d4983902e88dbc56f0c9f",
+  "omega_log": {
+    "status": "available",
+    "value": 1024.917029944645
+  },
+  "pixel_integral": 96.36371739862061,
+  "normalization": {
+    "status": "available",
+    "method": "paper_lambda",
+    "label": "依据论文 λ 归一化",
+    "lambda_reference": 3.34,
+    "source": {
+      "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa).",
+      "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+      "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+      "chunk_id": null,
+      "page_end": 4,
+      "page_start": 4,
+      "chunk_index": 21,
+      "origin_kind": null,
+      "source_name": "2024 La-Sc-H 何新玲.pdf",
+      "section_role": "result",
+      "locator_status": "verified_text_layer"
+    },
+    "record_key": "legacy-tc-0",
+    "coefficient": 0.03466034821159577,
+    "lambda_normalized": 3.340000000000003,
+    "reason": null,
+    "pixel_integral": 96.36371739862061
+  },
+  "comparison": {
+    "reference": 968.0,
+    "source": {
+      "quote": "Table 1.   The calculated EPC constant λ, phonon frequency logarithmic average ωlog (K), electronic density of states at the Fermi level N(Ef) (states/spin/Ry/f.u.), and superconducting critical temperature Tc (K) with μ∗ = 0.16 to 0.1 by numerically solving the isotropic Eliashberg equations for LaSc2H24 within the harmonic and anharmonic approxi- mation at different pressures (GPa).",
+      "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+      "section": "Predicted hot superconductivity in LaSc2H24 under pressure",
+      "chunk_id": null,
+      "page_end": 4,
+      "page_start": 4,
+      "chunk_index": 21,
+      "origin_kind": null,
+      "source_name": "2024 La-Sc-H 何新玲.pdf",
+      "section_role": "result",
+      "locator_status": "verified_text_layer"
+    },
+    "value": 1024.917029944645,
+    "absolute_difference": 56.91702994464504,
+    "relative_difference_pct": 5.879858465355892,
+    "signed_difference": 56.91702994464504,
+    "status": "available",
+    "relative_reason": null
+  }
+}

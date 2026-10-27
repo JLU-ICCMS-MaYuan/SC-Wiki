@@ -30,7 +30,7 @@ def payload(frame=10):
 def test_saved_maximum_is_used_without_any_frame_comparison(frame):
     data=payload(frame=frame);original=copy.deepcopy(data["curves"])
     result=alpha_integrals(data)
-    assert result["parameters"]["lambda"]["value"]==pytest.approx(.12)
+    assert result["pixel_integral"]==pytest.approx(.12)
     assert result["maximum_integrated_thz"]==6.
     assert not diagnose(data,"alpha2f")["curves"][0]["issues"]
     assert data["curves"]==original
@@ -39,7 +39,7 @@ def test_saved_maximum_is_used_without_any_frame_comparison(frame):
 @pytest.mark.parametrize("legacy",[None,{},{"pointId":"missing","frequencyTHz":999,"evidence":""},"old-invalid-field"])
 def test_legacy_endpoint_confirmation_is_completely_ignored(legacy):
     data=payload();data["manual_documents"]["a"]["highEndpoint"]=legacy
-    assert alpha_integrals(data)["parameters"]["lambda"]["status"]=="available"
+    assert alpha_integrals(data)["parameters"]["omega_log"]["status"]=="available"
     assert not diagnose(data,"alpha2f")["curves"][0]["issues"]
 
 
@@ -69,7 +69,7 @@ def test_exact_unique_gap_is_automatically_connected_all_points_remain():
     repairs=prepare_repairs(data,"alpha2f","2026-10-27T00:00:00Z")
     assert len(repairs)==1
     assert not diagnose(data,"alpha2f")["curves"][0]["issues"]
-    assert alpha_integrals(data)["lambda_integral"]==pytest.approx(.12)
+    assert alpha_integrals(data)["pixel_integral"]==pytest.approx(.12)
     after=data["curves"][0]["points"]
     assert len(after)==len(before)
     assert [{k:v for k,v in p.items() if k!="joinTo"} for p in after]==before

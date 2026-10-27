@@ -23,7 +23,7 @@ roi 是完整坐标框内的取数区域，不能只围住有色曲线或最大�
 共享频率轴位于相邻子图时，从共享轴读取频率标定，但不要为了把该轴裁进来而包含相邻子图。所有矩形都使用同一原图绝对像素坐标，不把裁切后坐标混入标定。不能确认显示框时返回 null，保留 roi 并说明限制，不猜框。
 所有坐标以给定原图像素为准，不能以缩略图像素作答。优先采用至少三个可见刻度，两点可用但不能称已独立验证线性。
 DOS 无幅值刻度时以幅值零轴为0，幅值方向一个像素为1，unit=pixel；有模式数密度单位时unit=modes_per_source_frequency。
-α²F 与 λ 的幅值必须分别读取真正刻度，unit=dimensionless；不能因同为无量纲就借用 λ 刻度标定 α²F。α²F 还须提供 amplitude_evidence 字符串，摘录支持其独立幅值刻度/缩放的图注或轴标签；不确定时设 null，unit=unknown、physical_definition_confirmed=false。
+α²F 与累计λ的幅值刻度分别识别，不能借用λ刻度标定α²F。α²F没有独立幅值刻度时，以幅值零基线为0、每像素为1，unit=pixel；amplitude_evidence可为null，仅保留可见来源说明，不是计算通行条件。绝对幅值未知不妨碍已知频率/曲线身份的physical_definition_confirmed标记。
 所有谱必须识别原图真实零频刻度并包含在 frequency_ticks 中，roi 覆盖该边界；无证据不得猜造零点，记录待核对原因。
 physical_definition_confirmed=true 仅限图注/坐标明确支持普通频率和标准 α²F/累计λ；不按目标值推断。
 projection_complete 与 projection_scale_confirmed 仅在完整元素合计、同一坐标框依据明确时为true。

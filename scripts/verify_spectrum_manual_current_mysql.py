@@ -41,7 +41,7 @@ def main():
     # 测试依赖提供身份和临时草稿上下文；正式context仍校验权限，实际MySQL执行事务。
     env={**os.environ,'JWT_SECRET_KEY':'current-mysql-manual-verification-test-only',
          'SCWIKI_MANUAL_TEST_DATABASE_URL':url.render_as_string(hide_password=False),'SCWIKI_MANUAL_CURRENT_MYSQL':'1'}
-    run=subprocess.run([sys.executable,'-m','pytest','backend/tests/test_spectra_manual.py','backend/tests/test_spectra_recalculate.py','backend/tests/test_spectra_revalidation.py','backend/tests/test_spectra_preflight.py','-q'],cwd=root,env=env,capture_output=True,text=True)
+    run=subprocess.run([sys.executable,'-m','pytest','backend/tests/test_spectra_manual.py','backend/tests/test_spectra_recalculate.py','backend/tests/test_spectra_revalidation.py','backend/tests/test_spectra_preflight.py','backend/tests/test_alpha2f_relative.py','-q'],cwd=root,env=env,capture_output=True,text=True)
     after=snapshot()
     changes={name:dict(changed=[key for key,value in rows.items() if key in after[name] and after[name][key]!=value],
                        missing=sorted(set(rows)-set(after[name])),added=sorted(set(after[name])-set(rows))) for name,rows in before.items()}

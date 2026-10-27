@@ -56,19 +56,19 @@ async function main(){
   await btn('编辑').click();await page.getByRole('application').waitFor();
   await page.locator('summary').filter({hasText:'坐标标定'}).click();
   await page.getByLabel('幅值单位',{exact:true}).selectOption('pixel');
-  await page.getByLabel('幅值标定依据',{exact:true}).fill('合成测试原图：幅值零基线y=80；整条线使用统一线性正倍率，绝对倍率未知。');
+  assert.equal(await page.getByLabel('幅值标定依据',{exact:true}).count(),0);
   await btn('应用标定').click();await confirmZero();await save();await calculate();
   current=(await listing()).items.find(i=>i.id===alpha.id);raw=current.result.quality.integrals.raw;
-  assert.equal(raw.parameters.lambda.status,'unavailable');assert.equal(raw.parameters.omega_log.status,'available');
-  await page.getByText(/λ：λ需要α²F绝对幅值刻度/).waitFor();await shot('relative-omega');
-  check('有零基线和统一倍率依据的相对谱只显示ωlog，不伪造λ');
+  assert.equal(raw.normalization.status,'available');assert.equal(raw.parameters.omega_log.status,'available');
+  await page.getByTestId('alpha-normalization').getByText('依据论文 λ 归一化',{exact:true}).waitFor();await shot('relative-omega');
+  check('相对谱无需说明独立计算ωlog，论文λ只生成归一化C');
 
   await btn('编辑').click();await page.getByRole('application').waitFor();
   await page.locator('[data-row="a:p50"]').click();await btn('删除选中点').click();await save();
   current=(await listing()).items.find(i=>i.id===alpha.id);const points=JSON.stringify(current.result.curves);
   await calculate();current=(await listing()).items.find(i=>i.id===alpha.id);
   assert.equal(current.result.quality.integrals.raw.status,'unavailable');assert(current.result.quality.integrals.raw.reason.includes('缺口'));
-  assert.equal(JSON.stringify(current.result.curves),points);await page.getByText(/λ、ωlog：曲线存在缺口/).waitFor();check('删点保留缺口，重算显示具体阻塞原因，不跨缺口补点或积分');
+  assert.equal(JSON.stringify(current.result.curves),points);await page.getByText(/曲线存在缺口/).first().waitFor();check('删点保留缺口，重算显示具体阻塞原因，不跨缺口补点或积分');
 
   const dos=(await listing()).items.find(i=>i.result.curves[0].kind==='phonon_dos');
   await page.goto(address(dos));await ready();await calculate();

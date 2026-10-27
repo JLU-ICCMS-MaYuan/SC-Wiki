@@ -1,0 +1,38 @@
+........................................................................ [ 42%]
+..s................................s.................s.................. [ 85%]
+.........................                                                [100%]
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+backend/tests/test_spectra.py::test_confirmed_structure_candidate_provides_primitive_count
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/cell.py:152: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error()
+
+backend/tests/test_alpha2f_relative.py::test_overflow_of_one_result_does_not_poison_serialization_or_other_result
+  /Users/mayuan/Codes/SC-Wiki/backend/spectra/digitize.py:306: RuntimeWarning: overflow encountered in scalar multiply
+    segment_moment = 2 * slope * (hi * np.log(hi) - hi)
+
+backend/tests/test_alpha2f_relative.py::test_overflow_of_one_result_does_not_poison_serialization_or_other_result
+  /Users/mayuan/Codes/SC-Wiki/backend/spectra/digitize.py:311: RuntimeWarning: overflow encountered in scalar multiply
+    segment_moment = (2 * slope * (hi * np.log(hi) - hi - lo * np.log(lo) + lo)
+
+backend/tests/test_alpha2f_relative.py::test_overflow_of_one_result_does_not_poison_serialization_or_other_result
+  /Users/mayuan/Codes/SC-Wiki/backend/spectra/digitize.py:311: RuntimeWarning: invalid value encountered in scalar subtract
+    segment_moment = (2 * slope * (hi * np.log(hi) - hi - lo * np.log(lo) + lo)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+166 passed, 3 skipped, 10 warnings in 4.32s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

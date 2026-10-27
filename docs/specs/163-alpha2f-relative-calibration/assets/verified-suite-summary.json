@@ -1,0 +1,53 @@
+{
+  "suites": [
+    {
+      "suite": "relative",
+      "status": "passed",
+      "checks": 9,
+      "report": "assets/browser-final/relative/relative-browser-validation.json"
+    },
+    {
+      "suite": "insertion",
+      "status": "passed",
+      "checks": 5,
+      "report": "assets/browser-final/insertion/insertion-browser-validation.json"
+    },
+    {
+      "suite": "insertion_vertical",
+      "status": "passed",
+      "checks": 5,
+      "report": "assets/browser-final/insertion_vertical/insertion-browser-validation.json"
+    },
+    {
+      "suite": "preflight",
+      "status": "passed",
+      "checks": 6,
+      "report": "assets/browser-final/preflight/preflight-browser-validation.json"
+    },
+    {
+      "suite": "recalculate",
+      "status": "passed",
+      "checks": 8,
+      "report": "assets/browser-final/recalculate/recalculate-browser-validation.json"
+    },
+    {
+      "suite": "diagnostics",
+      "status": "passed",
+      "checks": 7,
+      "report": "assets/browser-final/diagnostics/diagnostics-browser-validation.json"
+    },
+    {
+      "suite": "revalidation",
+      "status": "passed",
+      "checks": 8,
+      "report": "assets/browser-final/revalidation/revalidation-browser-validation.json"
+    },
+    {
+      "suite": "manual",
+      "status": "passed",
+      "checks": 15,
+      "report": "assets/browser-final/manual/snap-production-browser-validation.json"
+    }
+  ],
+  "total_checks": 63
+}

@@ -45,7 +45,7 @@ async function main(){
   await page.goto(address(alpha));await ready();await recalc();
   const diagnostics=page.getByTestId('trace-diagnostics');await diagnostics.waitFor();
   for(const kind of ['cycle','branch','isolated','disconnected'])assert(await diagnostics.locator('[data-issue-kind="'+kind+'"]').count()>0);
-  assert.equal(await page.getByText('λ、ωlog：曲线存在分叉，请检查下方问题坐标',{exact:true}).count(),1);
+  assert.equal(await page.getByText('曲线存在分叉，请检查下方问题坐标',{exact:true}).count(),1);
   await shot('issues');
   check('重算分别列出闭环、分叉、孤立点和未连接片段，λ/ωlog共用诊断');
   const beforeWrites=report.writes.length;await locate('a','a:p50');await shot('isolated-focus');

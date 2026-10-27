@@ -220,6 +220,7 @@ def mask_public(payload, reviews):
             reviews.get(c["id"], {}).get("status") == "accepted_limited" for c in dos):
         output["quality"]["dos_mode_integral"] = dict(status="unavailable", reason="当前公开分波或频段不完整，不能展示全部模式数积分")
     if alpha is None:
+        output["candidates"].pop("alpha2f_lambda_normalized",None)
         for k in ("zero_baseline", "joint"):
             output["candidates"].pop(k, None)
         for k in ("integrals", "comparisons", "frequency_bins", "joint_validation", "one_pixel_sensitivity"):
@@ -234,6 +235,7 @@ def mask_public(payload, reviews):
                 if isinstance(values, list) and len(values) == len(f) and f:
                     candidate[name] = [values[i] for i in keep]
         if reviews.get(alpha["id"], {}).get("status") == "accepted_limited":
+            output["candidates"].pop("alpha2f_lambda_normalized",None)
             output["quality"].pop("integrals", None)
             output["quality"].pop("comparisons", None)
             output["quality"]["metric_domain_note"] = "质量指标描述原提取运行的完整频域；已采纳数值仅限标注频段"

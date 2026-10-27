@@ -22,12 +22,24 @@ from backend.ingest import upload_tasks
 from backend.storage import create_storage
 from backend.services import spectra as service
 from backend.spectra.engine import extract_panel
+from backend.spectra.context import references_for
 from backend.tests.test_spectra import fixture
 
 engine=create_engine(os.environ["DATABASE_URL"])
 models.Base.metadata.create_all(engine,tables=[models.SpectrumCollection.__table__,models.SpectrumRun.__table__])
 owner=SimpleNamespace(id=161,role="user",is_approved=True)
-states=[dict(state_key="s1",material="H3S",material_name="隔离浏览器验证",pressure_value_gpa=200,property_modules=[])]
+relative_test=os.environ.get("SCWIKI_RELATIVE_TEST_FIXTURES")=="1"
+reference_module=dict(records=[dict(property_code="lambda",value_number=.12,method_code="test",
+    payload={"parameters":{"omega_log":10. if relative_test else 100.}},
+    evidences=[dict(quote="合成同条件参考",page_start=1,source_name="fixture.pdf")])])
+states=[dict(state_key="s1",material="H3S",material_name="隔离浏览器验证",pressure_value_gpa=200,property_modules=[reference_module])]
+if relative_test:
+    states.extend([
+        dict(state_key="s2",material="H3S",pressure_value_gpa=210,property_modules=[dict(records=[dict(
+            property_code="omega_log",value_number=0.,method_code="test",evidences=[dict(quote="合成零参考",page_start=1)])])]),
+        dict(state_key="s3",material="H3S",pressure_value_gpa=220,property_modules=[dict(records=[dict(
+            property_code="lambda",value_number=.12,method_code="test",evidences=[dict(quote="合成λ参考",page_start=1)])])])
+    ])
 task="manual-test"
 upload_tasks.get_state=lambda identity: dict(user_id=owner.id,status="ready",files=[dict(file_id="main",kind="pdf",role="main",sha256="synthetic-source")]) if identity==task else None
 upload_tasks.get_draft=lambda identity:dict(material_states=states) if identity==task else None
@@ -36,6 +48,10 @@ with Session(engine) as session:
     ctx=service.context(session,"upload",task,owner,write=True)
     for kind in ("alpha2f","phonon_dos"):
         rgb,panel=fixture(kind)
+        if relative_test:
+            for curve in panel["curves"]:curve["amplitude_evidence"]=None
+            if kind=="alpha2f":
+                panel["curves"][0].update(unit="pixel",physical_definition_confirmed=False,amplitude_ticks=[[80,0],[60,20]])
         if kind=="alpha2f" and os.environ.get("SCWIKI_INSERT_VERTICAL_FIXTURES")=="1":
             # 测试原图与全部标定同步逆时针旋转，保留相同物理谱。
             old_width=rgb.shape[1]
@@ -56,10 +72,19 @@ with Session(engine) as session:
             for name in ["La","Sc","H"]:
                 curve=copy.deepcopy(prototype);curve.update(id=name,projection=name);panel["curves"].append(curve)
         content=io.BytesIO();Image.fromarray(rgb).save(content,format="PNG");content.seek(0)
+        image_bytes=content.getvalue()
         image=create_storage().put("spectra/test-"+kind+".png",content,"image/png")
         row=service.collection(session,ctx,kind,kind,dict(source_sha256="synthetic-source",image=asdict(image),size_px=[rgb.shape[1],rgb.shape[0]],pdf_page=1,source_name="人工编辑隔离测试图"))
-        run,_=service.new_run(session,row,panel,ctx["states"][0]);service.complete_run(run,extract_panel(rgb,panel));service.activate(row,run,ctx["states"][0])
+        run,_=service.new_run(session,row,panel,ctx["states"][0]);service.complete_run(run,extract_panel(rgb,panel,references=references_for(ctx["states"][0])));service.activate(row,run,ctx["states"][0])
         identities[kind]=row.id
+    if relative_test:
+        for state in states[1:]:
+            rgb,panel=fixture("alpha2f")
+            panel["state_key"]=state["state_key"]
+            panel["curves"][0].update(unit="pixel",physical_definition_confirmed=False,amplitude_evidence=None,amplitude_ticks=[[80,0],[60,20]])
+            source=dict(source_sha256="synthetic-source",image=asdict(create_storage().put("spectra/relative-extra.png",io.BytesIO(image_bytes),"image/png")),size_px=[160,100],pdf_page=1)
+            row=service.collection(session,ctx,"alpha-"+state["state_key"],"alpha-"+state["state_key"],source)
+            run,_=service.new_run(session,row,panel,state);service.complete_run(run,extract_panel(rgb,panel,references=references_for(state)));service.activate(row,run,state)
     session.commit()
 
 if os.environ.get("SCWIKI_REVALIDATE_TEST_FIXTURES")=="1":

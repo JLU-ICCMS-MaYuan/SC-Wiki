@@ -123,7 +123,6 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
   })
   const applyCalibration = () => {
     if (!axisValid(calibration.frequency) || !axisValid(calibration.amplitude)) { setError('每根轴的两个位置和数值必须有限、互不重合'); return }
-    if (calibration.amplitude.unit !== 'pixel' && !calibration.amplitudeEvidence.trim()) { setError('填写物理幅值刻度前，请注明来自原图何处的幅值依据；不能借用累计 λ'); return }
     const next = record({ ...restoreManualMarkers(doc, initial), calibration: clone(calibration), zero: null }, 'calibration', '修改线性标定，保留全部源像素位置；零频选点需重新核对')
     try { validateDocument(next, initial); change(next); setTool('select'); setPick(null) } catch (e) { setError((e as Error).message) }
   }
@@ -189,9 +188,8 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
             <label>源像素<input type="number" step="any" aria-label={`${axis}-${i}-pixel`} value={Number.isNaN(calibration[axis].pixels[i]) ? '' : calibration[axis].pixels[i]} onChange={e => axisEdit(axis,'pixels',i,e.target.value === '' ? NaN : Number(e.target.value))}/></label>
             <label>对应值<input type="number" step="any" aria-label={`${axis}-${i}-value`} value={Number.isNaN(calibration[axis].values[i]) ? '' : calibration[axis].values[i]} onChange={e => axisEdit(axis,'values',i,e.target.value === '' ? NaN : Number(e.target.value))}/></label>
           </div>)}</fieldset>)}
-          <label>幅值单位<select aria-label="幅值单位" value={calibration.amplitude.unit} onChange={e => setCalibration(c => ({...c, amplitude:{...c.amplitude,unit:e.target.value}}))}><option value="pixel">相对像素（刻度待核对）</option><option value="dimensionless">无量纲</option><option value="modes/THz">modes/THz</option><option value="unknown">其他 / 待核对</option>{!['pixel','dimensionless','modes/THz','unknown'].includes(calibration.amplitude.unit)&&<option value={calibration.amplitude.unit}>{calibration.amplitude.unit}</option>}</select></label>
-          <label>幅值标定依据<textarea aria-label="幅值标定依据" value={calibration.amplitudeEvidence} placeholder="绝对幅值：注明α²F刻度/单位来源；相对幅值用于ωlog时：注明零基线位置和全曲线统一倍率的依据，不填λ刻度" onChange={e => setCalibration(c => ({...c,amplitudeEvidence:e.target.value}))}/></label>
-          {kind==='alpha2f' && <p className="muted">幅值核对要有论文明确给出的 α²F 刻度或倍率。像素宽度不等于 α²F 数值，填依据也不会自动重算积分。</p>}
+          <label>幅值单位<select aria-label="幅值单位" value={calibration.amplitude.unit} onChange={e => setCalibration(c => ({...c, amplitude:{...c.amplitude,unit:e.target.value}}))}><option value="pixel">相对像素</option><option value="dimensionless">无量纲</option><option value="modes/THz">modes/THz</option><option value="unknown">其他 / 待核对</option>{!['pixel','dimensionless','modes/THz','unknown'].includes(calibration.amplitude.unit)&&<option value={calibration.amplitude.unit}>{calibration.amplitude.unit}</option>}</select></label>
+          {kind==='alpha2f' && <p className="muted">ωlog直接使用相对谱形；论文已有λ用于确定幅值倍率。保存后点击重新计算，无需填写说明。</p>}
           <button className="secondary" onClick={applyCalibration}>应用标定</button><p className="muted">保留原图像素位置，只重新换算数值。修改后需重新核对零频选点。</p>
         </div></details></section>
         <section className="panel-section"><h3>逐点数据</h3><PointTable doc={doc} active={active} selected={selected} onSelect={setSelected} compact/></section>

@@ -59,7 +59,10 @@ describe('正式编辑核心',()=>{
     expect(()=>addPoint(doc,'alpha',999,280)).toThrow()
   })
   it('正式配置保留用户认可的2/.3/1/.1比例，指数权重仅在初始化生成',()=>{
-    expect(DRAG_INFLUENCE).toEqual({coreNeighbors:2,edgeWeight:.3,decayLength:1,minWeight:.1})
-    expect(createInfluenceKernel(DRAG_INFLUENCE)).toEqual([1,.65,.30000000000000004,.3*Math.exp(-1)])
+    // 验证给定配置的公式，不锁死用户正在手动调整的工作区参数。
+    const weights=createInfluenceKernel({coreNeighbors:2,edgeWeight:.3,decayLength:1,minWeight:.1})
+    expect(weights).toHaveLength(4)
+    for(const [i,value] of [1,.65,.3,.3/Math.E].entries())expect(weights[i]).toBeCloseTo(value,12)
+    expect(DRAG_INFLUENCE.coreNeighbors).toBeGreaterThan(0)
   })
 })

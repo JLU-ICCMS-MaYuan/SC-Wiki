@@ -6,7 +6,7 @@ import json
 import math
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-ALGORITHM_VERSION = "spectra-production-v4"
+ALGORITHM_VERSION = "spectra-production-relative-v1"
 FREQUENCY_FACTORS = {"THz": 1., "cm-1": .0299792458, "meV": .2417989242084918}
 
 
@@ -69,8 +69,9 @@ class CurveCalibration(BaseModel):
                 raise ValueError("坐标刻度必须为有限数值")
             if len({p for p, _ in ticks}) < 2 or len({v for _, v in ticks}) < 2:
                 raise ValueError("坐标刻度不能退化")
-        if self.kind != "phonon_dos" and self.unit not in {"dimensionless", "unknown"}:
-            raise ValueError("首版 α²F/累计λ 要求无量纲规范，未知单位不得伪积分")
+        if ((self.kind == "cumulative_lambda" and self.unit not in {"dimensionless","unknown"})
+                or (self.kind == "alpha2f" and self.unit not in {"dimensionless","pixel","unknown"})):
+            raise ValueError("α²F仅支持相对像素或无量纲规范，累计λ须对应其幅值定义")
         return self
 
 

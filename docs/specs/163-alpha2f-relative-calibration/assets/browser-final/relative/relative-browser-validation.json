@@ -1,0 +1,65 @@
+{
+  "checks": [
+    "无绝对刻度/说明也独立计算ωlog；偏差超过100%仍可编辑保存，λ只作为归一化输入",
+    "相对/归一化显示只改数值刻度，源曲线几何不变；刷新重复计算不累乘C",
+    "真实源像素幅值翻倍，ωlog不变、C减半、归一化谱一致",
+    "α²F编辑器没有说明输入；物理单位标定、改点、保存和重算不因说明为空被拒绝",
+    "缺论文λ仍显示独立ωlog，ω参考为0保留值/绝对偏差，相对偏差不生成无穷大",
+    "缺论文ωlog仍显示计算值与论文λ归一化，参考不连带隐藏其他结果",
+    "α²F新对比表和倍率卡在390px不溢出，偏差不禁用操作",
+    "DOS编辑器同样无说明，空说明修改幅值标定可保存计算；3N路径和窄屏保持",
+    "零积分逐项说明ωlog/C无定义，保留参考和编辑入口，不制造数值或锁死操作"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0c96f78dba0846d29bc427f483dbbc1d/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0c96f78dba0846d29bc427f483dbbc1d/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0c96f78dba0846d29bc427f483dbbc1d/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0c96f78dba0846d29bc427f483dbbc1d/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0c96f78dba0846d29bc427f483dbbc1d/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/f582e8ecd58c4800913ea45b4b3fdd34/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3d7630c7c6e444db835d5de99b287c38/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/611ec7e754944b15b2156e79da21c441/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/611ec7e754944b15b2156e79da21c441/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0c96f78dba0846d29bc427f483dbbc1d/recalculate"
+    }
+  ],
+  "screenshots": [
+    "relative-large-deviation-normalized.png",
+    "relative-missing-lambda-zero-omega-reference.png",
+    "relative-missing-omega-reference.png",
+    "relative-alpha-mobile.png",
+    "relative-dos-mobile.png",
+    "relative-zero-integral.png"
+  ],
+  "status": "passed"
+}

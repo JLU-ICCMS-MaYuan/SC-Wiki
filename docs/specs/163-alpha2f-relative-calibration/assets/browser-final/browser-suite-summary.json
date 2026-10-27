@@ -1,0 +1,50 @@
+[
+  {
+    "suite": "relative",
+    "exit_code": 0,
+    "checks": 9,
+    "report": "assets/browser-final/relative/relative-browser-validation.json"
+  },
+  {
+    "suite": "insertion",
+    "exit_code": 0,
+    "checks": 5,
+    "report": "assets/browser-final/insertion/insertion-browser-validation.json"
+  },
+  {
+    "suite": "insertion_vertical",
+    "exit_code": 0,
+    "checks": 5,
+    "report": "assets/browser-final/insertion_vertical/insertion-browser-validation.json"
+  },
+  {
+    "suite": "preflight",
+    "exit_code": 0,
+    "checks": 6,
+    "report": "assets/browser-final/preflight/preflight-browser-validation.json"
+  },
+  {
+    "suite": "recalculate",
+    "exit_code": 0,
+    "checks": 8,
+    "report": "assets/browser-final/recalculate/recalculate-browser-validation.json"
+  },
+  {
+    "suite": "diagnostics",
+    "exit_code": 0,
+    "checks": 7,
+    "report": "assets/browser-final/diagnostics/diagnostics-browser-validation.json"
+  },
+  {
+    "suite": "revalidation",
+    "exit_code": 0,
+    "checks": 8,
+    "report": "assets/browser-final/revalidation/revalidation-browser-validation.json"
+  },
+  {
+    "suite": "manual",
+    "exit_code": 0,
+    "checks": 15,
+    "report": "assets/browser-final/manual/snap-production-browser-validation.json"
+  }
+]

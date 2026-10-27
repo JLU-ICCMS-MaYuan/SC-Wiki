@@ -13,7 +13,8 @@ from backend.tests.test_spectra_manual import manual_storage, manual_http
 
 def alpha_payload(unit="dimensionless"):
     curve = dict(id="a",kind="alpha2f",unit=unit,physical_definition_confirmed=True,
-                 points=[dict(id=str(i),frequency_thz=f,reconstructed_amplitude=.01*f)
+                 axis_calibration={"amplitude":{"slope":1.,"intercept":0.}},
+                 points=[dict(id=str(i),frequency_thz=f,reconstructed_amplitude=.01*f,amplitude_pixel=.01*f)
                          for i,f in enumerate([0.,3.,6.])])
     return dict(curves=[curve],calibration={"curves":[{"id":"a","amplitude_evidence":"原图零基线及全谱统一线性倍率"}]})
 
@@ -21,11 +22,11 @@ def alpha_payload(unit="dimensionless"):
 def test_exact_alpha_and_relative_scale_cancel():
     payload=alpha_payload()
     result=alpha_integrals(payload)
-    assert result["parameters"]["lambda"]["value"]==pytest.approx(.12)
+    assert result["pixel_integral"]==pytest.approx(.12)
     assert result["parameters"]["omega_log"]["value"]==pytest.approx(6/math.e*47.99243073366221)
     for scale in [1.,37.]:
         relative=alpha_payload("pixel")
-        for p in relative["curves"][0]["points"]:p["reconstructed_amplitude"]*=scale
+        for p in relative["curves"][0]["points"]:p["reconstructed_amplitude"]*=scale;p["amplitude_pixel"]*=scale
         r=alpha_integrals(relative)
         assert r["parameters"]["lambda"]["status"]=="unavailable"
         assert r["lambda_integral"] is None
@@ -33,7 +34,7 @@ def test_exact_alpha_and_relative_scale_cancel():
     assert payload==alpha_payload()
 
 
-@pytest.mark.parametrize("problem",["gap","branch","cycle","backtrack","duplicate","nonzero_zero","missing_evidence","unknown_frequency","missing_start","negative"])
+@pytest.mark.parametrize("problem",["gap","branch","cycle","backtrack","duplicate","nonzero_zero","missing_start","negative"])
 def test_unsafe_spectra_remain_unavailable(problem):
     payload=alpha_payload();curve=payload["curves"][0];points=curve["points"]
     if problem=="gap":points[1]["breakBefore"]=True
@@ -41,11 +42,11 @@ def test_unsafe_spectra_remain_unavailable(problem):
     elif problem=="cycle":points[-1]["joinTo"]="0"
     elif problem=="backtrack":points[1]["frequency_thz"]=7
     elif problem=="duplicate":points[1]["frequency_thz"]=0
-    elif problem=="nonzero_zero":points[0]["reconstructed_amplitude"]=.1
+    elif problem=="nonzero_zero":points[0]["reconstructed_amplitude"]=.1;points[0]["amplitude_pixel"]=.1
     elif problem=="missing_evidence":payload["calibration"]["curves"][0]["amplitude_evidence"]=""
     elif problem=="unknown_frequency":curve["physical_definition_confirmed"]=False
     elif problem=="missing_start":points[0]["frequency_thz"]=.00001
-    elif problem=="negative":points[1]["reconstructed_amplitude"]=-1
+    elif problem=="negative":points[1]["reconstructed_amplitude"]=-1;points[1]["amplitude_pixel"]=-1
     r=alpha_integrals(payload)
     assert r["status"]=="unavailable"
     assert all(p["status"]=="unavailable" and p["reason"] for p in r["parameters"].values())
@@ -55,7 +56,7 @@ def test_join_edge_restores_a_path_without_sorting_or_mutating():
     payload=alpha_payload();points=payload["curves"][0]["points"]
     points[1]["breakBefore"]=True;points[0]["joinTo"]="1"
     before=copy.deepcopy(points)
-    assert alpha_integrals(payload)["parameters"]["lambda"]["value"]==pytest.approx(.12)
+    assert alpha_integrals(payload)["pixel_integral"]==pytest.approx(.12)
     assert points==before
     points.reverse()
     for p in points:p.pop("joinTo",None);p.pop("breakBefore",None)
@@ -181,8 +182,9 @@ def test_recalculate_roundoff_only_not_real_nonzero_baseline():
     curve=payload["curves"][0]
     curve["axis_calibration"]={"amplitude":{"slope":-.005,"intercept":.4}}
     curve["points"][0].update(amplitude_pixel=80.,reconstructed_amplitude=5e-17)
-    assert alpha_integrals(payload)["parameters"]["lambda"]["status"]=="available"
+    assert alpha_integrals(payload)["parameters"]["omega_log"]["status"]=="available"
     curve["points"][0]["reconstructed_amplitude"]=1e-10
+    curve["points"][0]["amplitude_pixel"]=79.99999998
     assert alpha_integrals(payload)["status"]=="unavailable"
 
 
@@ -208,6 +210,7 @@ def test_topology_distinguishes_parts_isolated_cycle_and_branch():
     from backend.spectra.topology import diagnose_curve
     payload=alpha_payload();curve=payload["curves"][0]
     curve.update(frequency_direction="y",axis_calibration={"frequency":{"slope":-2,"intercept":20},"amplitude":{"slope":1,"intercept":-30}})
+    for point in curve["points"]:point.pop("amplitude_pixel",None)
     curve["points"][1]["breakBefore"]=True
     report=diagnose_curve(curve)
     assert report["component_count"]==2

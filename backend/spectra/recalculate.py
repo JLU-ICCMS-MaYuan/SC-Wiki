@@ -8,14 +8,15 @@ from datetime import datetime, timezone
 
 from backend import models
 from . import manual
-from .context import primitive_for, references_for
+from .context import primitive_for, reference_choices
 from .contracts import fingerprint
-from .digitize import spectral_integrals
-from .engine import comparison, unavailable
-from .topology import build_graph, graph_parts, diagnose
-from .preflight import coincident, prepare_repairs
+from .engine import unavailable
+from .topology import diagnose
+from .preflight import prepare_repairs
+from .samples import connected_samples
+from .relative import calculate_alpha, pixel_curve
 
-VERSION = "spectra-recalculate-v4"
+VERSION = "spectra-recalculate-relative-v1"
 
 
 def demand(condition, reason):
@@ -23,93 +24,10 @@ def demand(condition, reason):
         raise ValueError(reason)
 
 
-def connected_samples(curve, document=None):
-    """线性复杂度遍历真实连接，拒绝断片/分叉/环；不按频率排序来填缺口。"""
-    points = curve.get("points") or []
-    demand(len(points) >= 2, "至少需要两个有效数据点")
-    nodes, edges, invalid = build_graph(curve)
-    demand(not invalid, "描线含失效连接")
-    demand(all(len(e) <= 2 for e in edges.values()), "曲线存在分叉，请检查下方问题坐标")
-    components, cycles = graph_parts(edges)
-    demand(not cycles, "曲线存在闭环，请检查下方问题坐标")
-    demand(len(components) == 1, "曲线存在缺口或孤立点，请检查下方未连接片段坐标")
-    ends = [identity for identity, e in edges.items() if len(e) == 1]
-    demand(len(ends) == 2, "曲线缺少有效端点")
-    ordered, seen, current = [], set(), ends[0]
-    while current not in seen:
-        seen.add(current)
-        ordered.append(nodes[current])
-        next_ids = [key for key in edges[current] if key not in seen]
-        if not next_ids:
-            break
-        current = next(iter(next_ids))
-    demand(len(seen) == len(points), "曲线存在未连接片段，不能跨缺口积分")
-    samples=[]
-    for p in ordered:
-        if samples and coincident(samples[-1],p):
-            continue
-        samples.append(p)
-    ordered=samples
-    demand(len(ordered)>=2, "至少需要两个不同的有效采样位置")
-    f = [p.get("frequency_thz") for p in ordered]
-    a = [p.get("reconstructed_amplitude") for p in ordered]
-    demand(all(manual.finite(v) for v in f + a), "曲线含缺失或非有限数值")
-    amplitude_axis = curve.get("axis_calibration", {}).get("amplitude", {})
-    for i, point in enumerate(ordered):
-        if amplitude_axis and manual.finite(point.get("amplitude_pixel")):
-            terms = (amplitude_axis["slope"] * point["amplitude_pixel"], amplitude_axis["intercept"])
-            error = 8 * sum(math.ulp(abs(term)) for term in terms)
-            if abs(a[i]) <= error:
-                a[i] = 0.  # 仅消除线性标定的浮点消去误差，不回写源数据。
-    if f[0] > f[-1]:
-        f.reverse()
-        a.reverse()
-    demand(all(y > x for x, y in zip(f, f[1:])), "曲线存在重复或回折频率，不能作为单值谱积分")
-    demand(all(v >= 0 for v in a), "幅值存在负数，请核对零基线")
-    # 只消除标定浮点舍入；不把邻近频率的真实数据改成零。
-    tolerance = 1e-12 * max(1., abs(f[-1]))
-    demand(abs(f[0]) <= tolerance, "当前曲线未从真实零频开始")
-    f[0] = 0.
-    if document is not None:
-        demand(manual.zero_report(document)["complete"], "当前曲线的零频位置或零频点尚未确认")
-    return f, a
-
-
-def amplitude_evidence(payload, curve):
-    document = payload.get("manual_documents", {}).get(curve["id"])
-    if document is not None:
-        return document["calibration"].get("amplitudeEvidence", "").strip()
-    spec = next((s for s in payload.get("calibration", {}).get("curves", []) if s["id"] == curve["id"]), {})
-    return (spec.get("amplitude_evidence") or "").strip()
-
-
-def alpha_integrals(payload):
-    params = {}
-    try:
-        curves = [c for c in payload["curves"] if c["kind"] == "alpha2f"]
-        demand(len(curves) == 1, "当前需要一条明确的α²F目标曲线")
-        curve = curves[0]
-        demand(curve.get("physical_definition_confirmed"), "α²F物理定义及普通频率定义尚未确认")
-        f, a = connected_samples(curve, payload.get("manual_documents", {}).get(curve["id"]))
-        evidence = amplitude_evidence(payload, curve)
-        demand(evidence, "α²F幅值标定依据尚待核对；相对谱也须提供零基线和统一倍率依据")
-        absolute = curve.get("unit") == "dimensionless"
-        demand(absolute or curve.get("unit") == "pixel", "α²F幅值单位尚待核对")
-        values = spectral_integrals(f, a)
-        demand(all(v is None or not isinstance(v, (int, float)) or math.isfinite(v) for v in values.values()),
-               "积分数值溢出，请核对幅值与频率")
-        params["lambda"] = (dict(status="available", value=values["lambda_integral"]) if absolute
-                            else unavailable("λ需要α²F绝对幅值刻度；当前只有相对幅值"))
-        params["omega_log"] = (dict(status="available", value=values["omega_log_k"]) if values["omega_log_k"] is not None
-                               else unavailable("谱积分为零，ωlog无定义"))
-        # 相对尺度下的中间λ不是物理λ，不发布该值。
-        if not absolute:
-            values.pop("zero_interval_lambda", None)
-            values["lambda_integral"] = None
-        return {**values, "status": "available", "parameters": params,
-                "maximum_integrated_thz": f[-1], "amplitude_basis": "absolute" if absolute else "relative_uniform_scale"}
-    except (ValueError, OverflowError) as exc:
-        return {**unavailable(exc), "parameters": {k: unavailable(exc) for k in ("lambda", "omega_log")}}
+def alpha_integrals(payload, references=None):
+    """兼容调用入口；λ仅发布论文参考归一化结果。"""
+    from .relative import calculate_alpha, pixel_curve
+    return calculate_alpha(payload,references or {})["raw"]
 
 
 def dos_integrals(payload, primitive):
@@ -153,15 +71,22 @@ def save(session, ctx, row, run, state, kind, user):
     repairs = prepare_repairs(payload,kind,now.isoformat())
     quality = payload.setdefault("quality", {})
     quality.setdefault("automatic_repairs",{})[kind]=repairs
-    quality.setdefault("trace_diagnostics", {})[kind] = diagnose(payload, kind)
+    diagnostic_payload=payload
+    if kind=="alpha2f":
+        try:
+            diagnostic_payload={**payload,"curves":[pixel_curve(payload,c)[0] if c["kind"]=="alpha2f" else c for c in payload["curves"]]}
+        except (ValueError,ZeroDivisionError):
+            pass
+    quality.setdefault("trace_diagnostics", {})[kind] = diagnose(diagnostic_payload, kind)
     if kind == "alpha2f":
-        raw = alpha_integrals(payload)
-        quality["integrals"] = {"raw": raw}
-        refs = references_for(state)
-        quality["comparisons"] = {"raw": {
-            name: comparison(raw["parameters"][name].get("value"), refs.get(name, {}).get("value"),
-                             refs.get(name, {}).get("source"), refs.get(name, {}).get("same_conditions", False))
-            for name in ("lambda", "omega_log")}}
+        references, reasons = reference_choices(state)
+        computed = calculate_alpha(payload,references,reasons)
+        quality["integrals"] = {"raw": computed["raw"]}
+        quality["comparisons"] = {"raw": {"omega_log": computed["comparison"]}}
+        payload.setdefault("candidates",{}).pop("alpha2f_lambda_normalized",None)
+        if computed["candidate"] is not None:
+            computed["candidate"]["base_run_id"]=run.id
+            payload["candidates"]["alpha2f_lambda_normalized"]=computed["candidate"]
     else:
         quality["dos_mode_integral"] = dos_integrals(payload, primitive_for(state, ctx.get("draft", {})))
     quality.setdefault("recalculations", {})[kind] = dict(base_run_id=run.id, calculated_at=now.isoformat(),

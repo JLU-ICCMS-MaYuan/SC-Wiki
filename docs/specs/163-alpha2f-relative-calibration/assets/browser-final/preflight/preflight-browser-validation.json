@@ -1,0 +1,54 @@
+{
+  "checks": [
+    "相差0.000002像素也直接按保存范围计算，不要求末端核对，不改点",
+    "编辑器无末端依据或确认控件，移动最高频点后保存重算无需确认",
+    "明显不到图框边缘仍按最高频5THz计算，旧确认错误或缺失均不构成限制",
+    "唯一完全重合断端先自动连接并成功计算，点数/坐标/数值保持且有修订记录",
+    "自动连接可定位检查、撤销重做并保存；再次重算尊重已撤销连接，不自动加回",
+    "PhDOS不同最高频范围直接分别积分，界面无分波末端检查或确认设置，窄屏可用"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ec21bf26134740f79864b646cdfe9a6e/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ec21bf26134740f79864b646cdfe9a6e/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ec21bf26134740f79864b646cdfe9a6e/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ec21bf26134740f79864b646cdfe9a6e/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ec21bf26134740f79864b646cdfe9a6e/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ec21bf26134740f79864b646cdfe9a6e/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ec21bf26134740f79864b646cdfe9a6e/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/669555c50ebd4a4987a34d37247696e5/recalculate"
+    }
+  ],
+  "screenshots": [
+    "preflight-no-endpoint-near-frame.png",
+    "preflight-edited-without-confirmation.png",
+    "preflight-far-below-frame.png",
+    "preflight-auto-connected.png",
+    "preflight-dos-different-ranges.png",
+    "preflight-dos-mobile-no-setting.png"
+  ],
+  "status": "passed"
+}

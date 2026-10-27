@@ -142,7 +142,10 @@ def checked_document(body, seed):
         source = {**body["source"], "image":""}
         require(source == seed["source"], "来源图片或图框已变化，不能替换来源")
         cal = body["calibration"]
-        require(set(cal) == {"direction","frequency","amplitude","amplitudeEvidence"} and cal["direction"] in {"x","y"}, "标定字段无效")
+        require({"direction","frequency","amplitude"} <= set(cal) <= {"direction","frequency","amplitude","amplitudeEvidence"} and cal["direction"] in {"x","y"}, "标定字段无效")
+        # 说明不再是用户输入或保存条件，仅沿用已有历史文本。
+        history_note=seed["calibration"].get("amplitudeEvidence")
+        cal["amplitudeEvidence"]=history_note if isinstance(history_note,str) else ""
         for name in ("frequency","amplitude"):
             axis = cal[name]
             require(set(axis) == {"pixels","values","unit"}, "标定字段无效")
@@ -156,10 +159,7 @@ def checked_document(body, seed):
             intercept=axis["values"][0]-slope*axis["pixels"][0]
             require(finite(slope) and slope != 0 and finite(intercept), "标定换算系数溢出或退化")
         require(cal["frequency"]["unit"] in FREQUENCY_FACTORS, "频率单位不支持")
-        require(isinstance(cal["amplitudeEvidence"],str) and len(cal["amplitudeEvidence"]) <= 4000, "幅值依据过长")
         require(cal["amplitude"]["unit"] in {seed["calibration"]["amplitude"]["unit"],"pixel","dimensionless","modes/THz","unknown"}, "幅值单位不支持")
-        require(cal["amplitude"] == seed["calibration"]["amplitude"] or cal["amplitude"]["unit"] in {"pixel","unknown"}
-                or bool(cal["amplitudeEvidence"].strip()), "物理幅值标定修改必须提供原图依据")
         require(len(body["curves"]) == 1, "每次只能保存一条曲线")
         curve, original = body["curves"][0], seed["curves"][0]
         require(set(curve) <= {"id","name","color","points","pathOrdered"} and curve.get("pathOrdered") is True, "曲线字段或描线顺序标记无效")

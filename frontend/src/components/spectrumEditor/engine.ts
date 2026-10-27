@@ -9,7 +9,7 @@ export type Document = {
   recognizedAxes?: {sourceId:string;sourceSha256:string;direction:"x"|"y";frequencyUnit:string;frequencyTicks:number[][];lambdaTicks:number[][]}
   schemaVersion: 1; id: string; title: string; description: string
   source: { id: string; sha256: string; image: string; width: number; height: number; viewport: Rect; plot: Rect }
-  calibration: { direction: 'x' | 'y'; frequency: Axis; amplitude: Axis; amplitudeEvidence: string }
+  calibration: { direction: 'x' | 'y'; frequency: Axis; amplitude: Axis; amplitudeEvidence?: string }
   curves: Curve[]
   zero: { pixel: number; pointIds: string[] } | null
   operations: { kind: string; at: string; detail: string }[]
@@ -314,7 +314,7 @@ export function validateDocument(value: unknown, initial: Document): asserts val
   try {
     if (!d || d.schemaVersion !== 1 || d.id !== initial.id || JSON.stringify(d.source) !== JSON.stringify(initial.source)) throw Error()
     if (!['x', 'y'].includes(d.calibration.direction) || !axisValid(d.calibration.frequency) || !axisValid(d.calibration.amplitude)) throw Error()
-    if (typeof d.calibration.amplitudeEvidence !== 'string' || !['THz', 'cm-1', 'meV'].includes(d.calibration.frequency.unit) || typeof d.calibration.amplitude.unit !== 'string') throw Error()
+    if (!['THz', 'cm-1', 'meV'].includes(d.calibration.frequency.unit) || typeof d.calibration.amplitude.unit !== 'string') throw Error()
     if (d.curves.length !== initial.curves.length || !Array.isArray(d.operations) || !d.operations.every(o => typeof o.kind === 'string' && typeof o.at === 'string' && typeof o.detail === 'string')) throw Error()
     const ids = new Set<string>(), curveIds = new Set<string>(), [x0, y0, x1, y1] = d.source.plot
     for (const c of d.curves) {

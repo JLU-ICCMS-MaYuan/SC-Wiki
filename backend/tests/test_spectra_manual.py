@@ -59,7 +59,10 @@ def manual_storage(tmp_path):
 def manual_http(manual_storage, monkeypatch):
     engine,task=manual_storage
     actor=[SimpleNamespace(id=1,role="user",is_approved=True)]
-    draft={"material_states":[dict(state_key="s1",material="H3S",pressure_value_gpa=200,property_modules=[])]}
+    draft={"material_states":[dict(state_key="s1",material="H3S",pressure_value_gpa=200,property_modules=[dict(records=[dict(
+        property_code="lambda",value_number=.12,method_code="test",
+        payload={"parameters":{"omega_log":100.}},
+        evidences=[dict(quote="合成同条件参考",page_start=1,source_name="fixture.pdf")])])])]}
     monkeypatch.setattr(upload_tasks,"get_state",lambda identity:dict(user_id=1,status="ready",files=[dict(file_id="main",kind="pdf",role="main",sha256="source")]) if identity==task else None)
     monkeypatch.setattr(upload_tasks,"get_draft",lambda _:draft)
     def db():

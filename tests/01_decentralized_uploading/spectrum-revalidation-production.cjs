@@ -33,7 +33,7 @@ async function main(){
    assert.deepEqual(alpha.stale_reasons,['state_changed']);assert.deepEqual(dos.stale_reasons,['state_changed']);
    await page.goto(address(alpha));await btn('核对材料条件并继续编辑').waitFor();
    assert(await btn('编辑').isDisabled());assert(await btn('重新计算').isDisabled());
-   assert(await page.getByText('α²F 幅值标定待核对，可在编辑器中补充刻度与依据；不影响编辑和保存。',{exact:true}).isVisible());
+   assert.equal(await page.getByText(/幅值标定待核对/).count(),0);
    assert((await page.getByText('材料条件待重新核对，请点击“核对材料条件并继续编辑”。',{exact:true}).count())>=1);
    await shot('stale-with-action');check('原图相同但材料签名过期时显示具体原因及可用恢复入口，幅值提示不冒充禁用原因');
 
@@ -66,7 +66,7 @@ async function main(){
 
    await btn('← 返回详情').click();await ready();await page.reload();await ready();
    assert(await btn('重新计算').isEnabled());assert.equal(await btn('核对材料条件并继续编辑').count(),0);
-   assert(await page.getByText(/幅值标定待核对，可在编辑器中补充/).isVisible());
+   assert.equal(await page.getByText(/幅值标定待核对/).count(),0);
    check('刷新仍保持恢复后的新版本，幅值依据缺失时编辑和重算按钮可用');
 
    await btn('编辑').click();await page.getByRole('application').waitFor();
