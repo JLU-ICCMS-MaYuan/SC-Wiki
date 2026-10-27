@@ -17,7 +17,7 @@ CALIBRATION_PROMPT = """你为科学谱图生成图像数字化标定，不生�
 只支持线性坐标、red/blue/green/magenta/olive 五种有色曲线（olive 包括橄榄黄）。不支持的图在 issues 中说明，不伪造标定。
 返回 JSON {panels:[{panel_id,state_key,caption,projection_scale_confirmed,projection_complete,curves:[...]}],issues:[]}。
 每个面板属于单一材料条件；只用给定 state_key，归属不唯一为 null。不同条件或多条α²F须拆面板。
-每个曲线对象严格包含：id、kind(phonon_dos|alpha2f|cumulative_lambda)、projection(元素字符串或null)、color、roi([x0,y0,x1,y1]整数且包含边框内侧)、display_bbox([x0,y0,x1,y1]或null)、frequency_direction(x|y)、frequency_ticks([[频率轴像素,刻度值],...])、amplitude_ticks([[幅值轴像素,刻度值],...])、frequency_unit(THz|cm-1|meV)、frequency_scale(linear)、amplitude_scale(linear)、unit、physical_definition_confirmed、amplitude_evidence、exclude(图例框数组)、zero_boundaries_thz([低端,高端])、zero_reference_band_thz([低,高]或null)。
+每个曲线对象严格包含：id、kind(phonon_dos|alpha2f|cumulative_lambda)、projection(元素字符串或null)、color、roi([x0,y0,x1,y1]整数且包含边框内侧)、display_bbox([x0,y0,x1,y1]或null)、frequency_direction(x|y)、frequency_ticks([[频率轴像素,刻度值],...])、amplitude_ticks([[幅值轴像素,刻度值],...])、frequency_unit(THz|cm-1|meV)、frequency_scale(linear)、amplitude_scale(linear)、unit、physical_definition_confirmed、frequency_range_confirmed、amplitude_evidence、exclude(图例框数组)、zero_boundaries_thz([低端,高端])、zero_reference_band_thz([低,高]或null)。
 先按材料、压力和面板标签定位一行，再按谱类型定位该行子图，最后读取坐标，不把整张组合图当作一个子图。
 roi 是完整坐标框内的取数区域，不能只围住有色曲线或最大峰；display_bbox 是供用户查看的最小完整子图，包含该子图边框、刻度与图例，不包含其他压力行、相邻声子色散或其他谱种类。α²F 与同框累计 λ 可共用显示框，同一 DOS 的各分波共用显示框。
 共享频率轴位于相邻子图时，从共享轴读取频率标定，但不要为了把该轴裁进来而包含相邻子图。所有矩形都使用同一原图绝对像素坐标，不把裁切后坐标混入标定。不能确认显示框时返回 null，保留 roi 并说明限制，不猜框。
@@ -25,7 +25,8 @@ roi 是完整坐标框内的取数区域，不能只围住有色曲线或最大�
 DOS 无幅值刻度时以幅值零轴为0，幅值方向一个像素为1，unit=pixel；有模式数密度单位时unit=modes_per_source_frequency。
 α²F 与累计λ的幅值刻度分别识别，不能借用λ刻度标定α²F。α²F没有独立幅值刻度时，以幅值零基线为0、每像素为1，unit=pixel；amplitude_evidence可为null，仅保留可见来源说明，不是计算通行条件。绝对幅值未知不妨碍已知频率/曲线身份的physical_definition_confirmed标记。
 所有谱必须识别原图真实零频刻度并包含在 frequency_ticks 中，roi 覆盖该边界；无证据不得猜造零点，记录待核对原因。
-physical_definition_confirmed=true 仅限图注/坐标明确支持普通频率和标准 α²F/累计λ；不按目标值推断。
+physical_definition_confirmed=true 仅限图注/坐标明确支持普通频率和标准 α²F/累计λ，或标准未加权的原子振动DOS投影（每种元素合计所有原子及三个方向，非每原子平均）；不按目标值推断。
+声子DOS没有幅值刻度时同样使用零基线为0、每像素为1的pixel单位。frequency_range_confirmed=true 仅在原图/图注明确支持覆盖完整振动频段时设置；仅到图框末端、最高刻度或末点幅值为零不能作为完整性证明，未知为false。
 projection_complete 与 projection_scale_confirmed 仅在完整元素合计、同一坐标框依据明确时为true。
 exclude 必须屏蔽同色图例和文字，尤其是图内“λ=…”数值注记、面板字母和压力文字；这些文字绝不能作为曲线或累计 λ 终点。分别圈住文字/图例，不用覆盖整行的大框误删真实轨迹；与真实线重叠而无法分离时在 issues 记录限制。
 exclude 还必须屏蔽其他颜色的图例示意线以及全部图例文字（例如 λ(ω)、α²F(ω)）。黑字和其他颜色的抗锯齿彩边也可能落入本色通道，不能因为主色不同就不排除；遮挡处保留未知，不根据曲线应平滑或论文目标值补点。

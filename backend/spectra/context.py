@@ -46,6 +46,22 @@ def references_for(state):
     return reference_choices(state)[0]
 
 
+def composition_for(state):
+    """化学式只提供元素比例，不推断原胞倍数或原胞 N。"""
+    formula = (state or {}).get("material")
+    if not isinstance(formula, str) or not formula.strip():
+        return None
+    from pymatgen.core import Composition
+    try:
+        counts = Composition(formula, strict=True).get_el_amt_dict()
+    except (ValueError, TypeError):
+        return None
+    if not counts or any(not math.isfinite(v) or v <= 0 for v in counts.values()):
+        return None
+    return dict(species_counts=counts, source=dict(kind="material_formula", formula=formula,
+                                                  state_key=state.get("state_key")))
+
+
 def primitive_for(state, draft):
     if not state:
         return None

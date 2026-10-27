@@ -1,0 +1,30 @@
+{
+  "checks": [
+    "正式重新计算保存新版本，N=3且模式4/5保留偏差；原始描线不变",
+    "归一化/相对切换仅改变数值刻度，无写请求或几何变化",
+    "刷新后重复计算仍使用原始数据，共同系数不累乘",
+    "390px 页面无整体横向溢出，结果表可局部滚动",
+    "只有化学式时面积与实测/预期占比可用，N与模式归一化保持未知"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab1e8bcc058f462f8deae4ee2d1e136d/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ab1e8bcc058f462f8deae4ee2d1e136d/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/786f65d3cf8043bf82755fb43002a95d/recalculate"
+    }
+  ],
+  "screenshots": [
+    "dos-desktop.png",
+    "dos-mobile.png",
+    "dos-mobile.png",
+    "dos-no-n.png"
+  ]
+}

@@ -90,10 +90,10 @@ def run_job(run_id, target, target_id, user_id, expected_version):
             result = discover(ctx, user_id, expected_version)
         else:
             from .engine import extract_panel
-            from .context import references_for, primitive_for
+            from .context import references_for, primitive_for, composition_for
             state = next((s for s in ctx["states"] if s["state_key"] == calibration.get("state_key")), None)
             result = extract_panel(read_image(source), calibration, references=references_for(state),
-                                   primitive=primitive_for(state, ctx["draft"]))
+                                   primitive=primitive_for(state, ctx["draft"]), composition=composition_for(state))
         with SessionLocal.begin() as session:
             ctx_now = service.context(session, target, target_id, session.get(models.User, user_id), write=True)
             service.assert_version(ctx_now["version"], expected_version)
@@ -123,7 +123,7 @@ def discover(ctx, user_id, version):
     from .vision import verify_image_capability
     from .discovery import pdf_figures, calibrate
     from .engine import extract_panel
-    from .context import references_for, primitive_for
+    from .context import references_for, primitive_for, composition_for
     states = {s["state_key"]: s for s in ctx["states"]}
     try:
         supported = verify_image_capability()
@@ -175,7 +175,7 @@ def discover(ctx, user_id, version):
             for panel in panels:
                 state = states.get(panel.get("state_key")) if panel else None
                 result = (extract_panel(np.asarray(Image.open(io.BytesIO(figure["image"])).convert("RGB")), panel,
-                            references=references_for(state), primitive=primitive_for(state, ctx["draft"])) if panel else
+                            references=references_for(state), primitive=primitive_for(state, ctx["draft"]), composition=composition_for(state)) if panel else
                           dict(curves=[], candidates={}, quality=dict(limitations=panel_issues), failures=panel_issues))
                 with SessionLocal.begin() as session:
                     fresh = service.context(session, ctx["target"], ctx["target_id"], session.get(models.User, user_id), write=True)

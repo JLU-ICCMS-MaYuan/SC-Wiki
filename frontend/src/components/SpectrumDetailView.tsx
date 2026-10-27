@@ -7,6 +7,7 @@ import ImageOpacityControl from './spectrumEditor/ImageOpacityControl'
 import ZeroFrequencyCheck from './spectrumEditor/ZeroFrequencyCheck'
 import TraceDiagnostics from './spectrumEditor/TraceDiagnostics'
 import AlphaRelativeMetrics from './spectrumEditor/AlphaRelativeMetrics'
+import DosRelativeMetrics from './spectrumEditor/DosRelativeMetrics'
 import { displayDocument, combinedZeroCheck } from './spectrumEditor/adapter'
 import './spectrumEditor/styles.css'
 import SpectrumViewSwitch from './SpectrumViewSwitch'
@@ -20,20 +21,25 @@ export function DetailSection({ title, children, action }: { title: string; chil
   return <Paper variant="outlined" sx={boxStyle}><Box sx={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:1,flexWrap:'wrap',mb:2}}><Typography variant="h6" sx={{ fontSize: 17 }}>{title}</Typography>{action}</Box>{children}</Paper>
 }
 
-export function SpectrumResult({ item, curves, image, retryImage, onEdit, editingDisabled = false, editingDisabledReason, imageOpacity, onOpacityChange }: { item: Item; curves: Curve[]; image: string; retryImage: () => void; onEdit?: (curveId?: string) => void; editingDisabled?: boolean; editingDisabledReason?:string; imageOpacity?:number; onOpacityChange?:(value:number)=>void }) {
+export function SpectrumResult({ item, curves, image, retryImage, onEdit, editingDisabled = false, editingDisabledReason, imageOpacity, onOpacityChange, history=false }: { history?: boolean; item: Item; curves: Curve[]; image: string; retryImage: () => void; onEdit?: (curveId?: string) => void; editingDisabled?: boolean; editingDisabledReason?:string; imageOpacity?:number; onOpacityChange?:(value:number)=>void }) {
   const [mode, setMode] = useState('overlay'), [projection, setProjection] = useState('all'), [localOpacity, setLocalOpacity] = useState(100)
   const opacity=imageOpacity??localOpacity, setOpacity=onOpacityChange||setLocalOpacity
   const dos = curves[0]?.kind === 'phonon_dos'
   const selected = projection === 'all' ? curves : curves.filter(c => c.id === projection)
   const [amplitudeView,setAmplitudeView]=useState('normalized')
-  const normalization=item.result.candidates?.alpha2f_lambda_normalized
+  const normalization=dos?item.result.candidates?.dos_relative_normalized:item.result.candidates?.alpha2f_lambda_normalized
   const relative=item.result.quality?.integrals?.raw?.relative_basis
-  const basis=normalization?.amplitude_basis||relative
-  const canShowNormalized=Boolean(!dos&&normalization?.status==='available'&&normalization.coefficient>0&&Number.isFinite(basis?.baseline_pixel))
+  const dosBases=selected.map(c=>normalization?.curves?.[c.id]?.amplitude_basis)
+  const basis=dos?dosBases[0]:normalization?.amplitude_basis||relative
+  const dosAllowed=!history&&!item.stale&&!selected.some(c=>item.review[c.id]?.status==='accepted_limited')
+  const commonBasis=!dos||dosBases.every(b=>b&&b.baseline_pixel===basis?.baseline_pixel&&b.direction===basis?.direction)
+  const canShowNormalized=Boolean((!dos||dosAllowed)&&commonBasis&&normalization?.status==='available'&&normalization.coefficient>0&&Number.isFinite(basis?.baseline_pixel))
   const originalDocument=displayDocument(item,selected,image)
-  const multiplier=canShowNormalized&&amplitudeView==='normalized'?normalization.coefficient:1
-  const document=!dos&&originalDocument&&Number.isFinite(basis?.baseline_pixel)?{...originalDocument,calibration:{...originalDocument.calibration,
-    amplitude:{...originalDocument.calibration.amplitude,unit:multiplier!==1||canShowNormalized&&amplitudeView==='normalized'?'dimensionless':'pixel',
+  const useNormalized=canShowNormalized&&amplitudeView==='normalized'
+  const multiplier=useNormalized?normalization.coefficient:1
+  const transform=(!dos||canShowNormalized)&&originalDocument&&Number.isFinite(basis?.baseline_pixel)
+  const document=transform?{...originalDocument,calibration:{...originalDocument.calibration,
+    amplitude:{...originalDocument.calibration.amplitude,unit:useNormalized?(dos?'modes/THz/primitive_cell':'dimensionless'):'pixel',
       values:originalDocument.calibration.amplitude.pixels.map(p=>multiplier*basis.direction*(p-basis.baseline_pixel)) as [number,number]}}}:originalDocument
   return <DetailSection title="02 · 原图与提取结果">
     {onEdit && <Box sx={{textAlign:'right',mb:1}}><Button variant="contained" disabled={editingDisabled} onClick={()=>onEdit(selected[0]?.id)}>编辑</Button></Box>}
@@ -46,7 +52,7 @@ export function SpectrumResult({ item, curves, image, retryImage, onEdit, editin
     </Box>
     {canShowNormalized&&<Box sx={{display:'flex',gap:1,mb:1,flexWrap:'wrap'}} data-testid="amplitude-display">
       <Button size="small" variant={amplitudeView==='relative'?'contained':'outlined'} onClick={()=>setAmplitudeView('relative')}>相对像素幅值</Button>
-      <Button size="small" variant={amplitudeView==='normalized'?'contained':'outlined'} onClick={()=>setAmplitudeView('normalized')}>依据论文 λ 归一化</Button>
+      <Button size="small" variant={amplitudeView==='normalized'?'contained':'outlined'} onClick={()=>setAmplitudeView('normalized')}>{dos?'按 3N 归一化':'依据论文 λ 归一化'}</Button>
     </Box>}
     {document ? <div className="spectrum-manual-editor"><div className="detail-plot-body"><ImageOpacityControl value={opacity} onChange={setOpacity} disabled={mode==='data'}/><div className="detail-plot-content"><SourceCanvas doc={document} active={selected[0].id} selected={[]} display={mode} imageOpacity={opacity}/></div></div></div>
       : <SpectrumFigure item={item} curves={selected} allCurves={curves} image={image} mode={mode} opacity={.85} />}
@@ -65,9 +71,12 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
   const manualZero=combinedZeroCheck(item,curves)
   const alpha = curves.find(c => c.kind === 'alpha2f')
   const zeroCovered = curves.length > 0 && curves.every(c => c.points[0]?.frequency_thz === 0 && c.points[0]?.observed_amplitude != null)
-  const limited=alpha && item.review[alpha.id]?.status === 'accepted_limited'
+  const limited=dos ? curves.some(c=>item.review[c.id]?.status==='accepted_limited') : alpha && item.review[alpha.id]?.status === 'accepted_limited'
   const restricted=item.stale || history || limited
   const mode = q.dos_mode_integral || { status: 'unavailable', reason: '尚无计算结果，请点击重新计算。' }
+  const dosRelative=q.dos_relative
+  const displayedAtoms=dosRelative?.normalization?.primitive_atoms??mode.primitive_atoms
+  const displayedTarget=dosRelative?.normalization?.target_modes??mode.target_modes
   const modeAvailable = mode.status === 'available' && !restricted
   const modeComparable=modeAvailable && (mode.comparison_status ? mode.comparison_status==='available' : mode.target_modes != null)
   const anyAlphaAvailable=!restricted&&raw.method==='alpha2f-relative-v1'&&(raw.parameters?.omega_log?.status==='available'||raw.pixel_integral_status==='available')
@@ -76,9 +85,11 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
   const reasons=restricted?[calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。']:dos?[mode.reason].filter(Boolean):[]
   return <DetailSection title={dos ? '03 · 频段与数据完整性' : '03 · 积分结果与参考值对比'} action={onRecalculate && <Button variant="outlined" onClick={onRecalculate} disabled={calculationDisabled||recalculating} aria-busy={recalculating}>{recalculating?'计算中…':'重新计算'}</Button>}>
     <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', mb: 2 }}><Box><Typography variant="caption" color="text.secondary">实际提取频率范围</Typography><Typography fontWeight={600}>{spectrumInterval(curves)}</Typography></Box>
-      <Box><Typography variant="caption" color="text.secondary">{dos ? '原胞原子数 N / 目标 3N' : '实际积分范围'}</Typography><Typography fontWeight={600}>{dos ? `${spectrumNumber(mode.primitive_atoms, 0)} / ${spectrumNumber(mode.target_modes, 0)}` : anyAlphaAvailable && raw.minimum_integrated_thz != null ? `${spectrumNumber(raw.minimum_integrated_thz)}–${spectrumNumber(raw.maximum_integrated_thz ?? Math.max(...(alpha?.points.map(p=>p.frequency_thz)||[])))} THz` : '暂不可计算'}</Typography></Box></Box>
+      <Box><Typography variant="caption" color="text.secondary">{dos ? '原胞原子数 N / 目标 3N' : '实际积分范围'}</Typography><Typography fontWeight={600}>{dos ? `${restricted?'—':spectrumNumber(displayedAtoms, 0)} / ${restricted?'—':spectrumNumber(displayedTarget, 0)}` : anyAlphaAvailable && raw.minimum_integrated_thz != null ? `${spectrumNumber(raw.minimum_integrated_thz)}–${spectrumNumber(raw.maximum_integrated_thz ?? Math.max(...(alpha?.points.map(p=>p.frequency_thz)||[])))} THz` : '暂不可计算'}</Typography></Box></Box>
     {manualZero && <div className="spectrum-manual-editor"><ZeroFrequencyCheck compact result={manualZero} unit="THz" afterSave={false} onContinue={value=>onContinue?.(value.id)} readOnly={!onContinue}/></div>}
     {!manualZero && !zeroCovered && <Alert severity="warning" sx={{ mb: 2 }}>零频提取不完整，请在编辑器中核对真实零频边界与曲线点。</Alert>}
+    {dos&&<DosRelativeMetrics report={dosRelative} restricted={Boolean(restricted)}/>}
+    {dos&&<Typography fontWeight={600} sx={{mt:2}}>原始绝对密度积分（独立检查）</Typography>}
     {dos?<Box sx={{overflowX:'auto'}}><Table size="small" sx={{minWidth:540}}><TableHead><TableRow>{['全部分波积分','目标 3N','绝对偏差','相对偏差（%）'].map(label=><TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>
       <TableRow><TableCell>{modeAvailable?spectrumNumber(mode.integral):'—'}</TableCell><TableCell>{restricted?'—':spectrumNumber(mode.target_modes)}</TableCell><TableCell>{modeComparable?spectrumNumber(mode.absolute_difference):'—'}</TableCell><TableCell>{modeComparable&&mode.relative_difference_pct!=null?spectrumNumber(mode.relative_difference_pct,2)+'%':'—'}</TableCell></TableRow>
     </TableBody></Table></Box>:<AlphaRelativeMetrics raw={raw} comparison={comparisons.omega_log} restricted={Boolean(restricted)}/>}

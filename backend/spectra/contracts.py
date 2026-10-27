@@ -44,6 +44,7 @@ class CurveCalibration(BaseModel):
     amplitude_scale: Literal["linear"] = "linear"
     unit: str
     physical_definition_confirmed: bool = False
+    frequency_range_confirmed: bool = False
     amplitude_evidence: str | None = None
     exclude: list[tuple[int, int, int, int]] = Field(default_factory=list)
     zero_boundaries_thz: tuple[float | None, float | None] = (None, None)

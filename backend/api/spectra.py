@@ -202,9 +202,12 @@ def csv_export(item):
     bmap = dict(zip(base.get("frequency_thz") or [], base.get("amplitude") or []))
     jmap = dict(zip(joint.get("frequency_thz") or [], joint.get("alpha2f") or []))
     cmap = dict(zip(joint.get("frequency_thz") or [], joint.get("cumulative_lambda") or []))
-    norm=candidates.get("dos_normalization") or {}
+    norm=candidates.get("dos_relative_normalized") or candidates.get("dos_normalization") or {}
     for c in payload.get("curves") or []:
         normalized=dict(zip(norm.get("frequency_thz") or [], norm.get("components",{}).get(c["projection"] or c["id"],[])))
+        if norm.get("method") == "dos-relative-v1":
+            component = norm.get("curves", {}).get(c["id"], {})
+            normalized = dict(zip(component.get("frequency_thz", []), component.get("density", [])))
         decision = item["review"].get(c["id"], {})
         for p in c["points"]:
             freq = p["frequency_thz"]; alpha = c["kind"] == "alpha2f"

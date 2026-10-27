@@ -2,65 +2,25 @@
 from __future__ import annotations
 
 import copy
-import math
 import uuid
 from datetime import datetime, timezone
 
 from backend import models
 from . import manual
-from .context import primitive_for, reference_choices
+from .context import primitive_for, reference_choices, composition_for
 from .contracts import fingerprint
-from .engine import unavailable
 from .topology import diagnose
 from .preflight import prepare_repairs
 from .samples import connected_samples
 from .relative import calculate_alpha, pixel_curve
+from .dos import calculate_dos, dos_integrals, apply_dos
 
-VERSION = "spectra-recalculate-relative-v1"
-
-
-def demand(condition, reason):
-    if not condition:
-        raise ValueError(reason)
+VERSION = "spectra-recalculate-dos-relative-v1"
 
 
 def alpha_integrals(payload, references=None):
     """兼容调用入口；λ仅发布论文参考归一化结果。"""
-    from .relative import calculate_alpha, pixel_curve
     return calculate_alpha(payload,references or {})["raw"]
-
-
-def dos_integrals(payload, primitive):
-    try:
-        curves = [c for c in payload["curves"] if c["kind"] == "phonon_dos"]
-        demand(curves, "当前没有声子DOS曲线")
-        panel = payload.get("calibration", {})
-        demand(panel.get("projection_complete") and panel.get("projection_scale_confirmed"),
-               "声子DOS的完整投影与共同幅值尺度尚待核对")
-        labels = [(c.get("projection") or c["id"]).strip().lower() for c in curves]
-        demand(len(set(labels)) == len(labels) and not (len(labels) > 1 and "total" in labels),
-               "投影重复或总谱与分波同时存在，不能相加")
-        units = {c.get("unit") for c in curves}
-        demand(len(units) == 1 and units <= {"modes/THz", "modes/THz/primitive_cell"},
-               "DOS绝对密度单位尚待核对，不能积分相对像素")
-        integrals, intervals = {}, []
-        for curve in curves:
-            f, a = connected_samples(curve, payload.get("manual_documents", {}).get(curve["id"]))
-            integrals[curve["id"]] = math.fsum((y-x)*(v+w)/2 for x,y,v,w in zip(f,f[1:],a,a[1:]))
-            intervals.append([f[0], f[-1]])
-        value = math.fsum(integrals.values())
-        demand(math.isfinite(value), "DOS积分数值溢出")
-        result = dict(status="available", integral=value, component_integrals=integrals,
-                      frequency_interval_thz=[0.,max(v[1] for v in intervals)], component_intervals=dict(zip((c["id"] for c in curves),intervals)), comparison_status="unavailable",
-                      reason="缺少原胞原子数或每原胞绝对密度依据，暂不比较3N")
-        atoms = (primitive or {}).get("primitive_atoms")
-        if units == {"modes/THz/primitive_cell"} and isinstance(atoms, int) and not isinstance(atoms, bool) and atoms > 0:
-            result.update(comparison_status="available", primitive_atoms=atoms, target_modes=3*atoms,
-                          absolute_difference=abs(value-3*atoms), relative_difference_pct=100*abs(value-3*atoms)/(3*atoms),
-                          structure_evidence=primitive, reason="")
-        return result
-    except (ValueError, OverflowError) as exc:
-        return unavailable(exc)
 
 
 def save(session, ctx, row, run, state, kind, user):
@@ -88,7 +48,7 @@ def save(session, ctx, row, run, state, kind, user):
             computed["candidate"]["base_run_id"]=run.id
             payload["candidates"]["alpha2f_lambda_normalized"]=computed["candidate"]
     else:
-        quality["dos_mode_integral"] = dos_integrals(payload, primitive_for(state, ctx.get("draft", {})))
+        apply_dos(payload, calculate_dos(payload, primitive_for(state, ctx.get("draft", {})), composition_for(state)), run.id)
     quality.setdefault("recalculations", {})[kind] = dict(base_run_id=run.id, calculated_at=now.isoformat(),
                                                          author_id=user.id, algorithm_version=VERSION)
     payload["status"] = "needs_review"

@@ -3,11 +3,12 @@ from __future__ import annotations
 import copy
 import numpy as np
 from .contracts import PanelCalibration, FREQUENCY_FACTORS, ALGORITHM_VERSION
-from .digitize import LinearAxis, extract_curve, normalize_dos, spectral_integrals, integrate_contiguous
+from .digitize import LinearAxis, extract_curve, spectral_integrals
 from .quality import zero_baseline_candidate, cumulative_moments
 from .joint_reconstruction import reconstruct_joint, increment_envelope
 from .scientific_review import independent_integral
 from .relative import calculate_alpha
+from .dos import calculate_dos, apply_dos, dos_integrals
 
 
 def comparison(value, reference, source=None, same_conditions=False):
@@ -68,7 +69,7 @@ def coverage(curve):
 
 
 def extract_panel(rgb: np.ndarray, calibration: dict, *, references: dict | None = None,
-                  primitive: dict | None = None) -> dict:
+                  primitive: dict | None = None, composition: dict | None = None) -> dict:
     panel = PanelCalibration.model_validate(calibration)
     refs = references or {}
     curves, failures, metrics = [], [], {}
@@ -195,23 +196,8 @@ def extract_panel(rgb: np.ndarray, calibration: dict, *, references: dict | None
         refs.get(name, {}).get("source"), refs.get(name, {}).get("same_conditions", False))
         for name, key in (("lambda", "lambda_integral"), ("omega_log", "omega_log_k"))}
         for variant, values in q["integrals"].items()}
-    dos = [c for c in curves if c["kind"] == "phonon_dos"]
-    q["dos_mode_integral"] = dos_mode_integral(dos, primitive, panel.projection_complete, panel.projection_scale_confirmed)
-    q["dos_normalization"] = unavailable("缺少原胞模式数证据或完整共同尺度投影")
-    if dos and primitive and panel.projection_complete and panel.projection_scale_confirmed:
-        grid = [p["frequency_thz"] for p in dos[0]["points"]]
-        if all(grid == [p["frequency_thz"] for p in c["points"]] for c in dos):
-            norm = attempt(lambda: normalize_dos(grid,
-                {c["projection"] or c["id"]: [p["reconstructed_amplitude"] for p in c["points"]] for c in dos},
-                primitive["primitive_atoms"], assumptions_confirmed=True))
-            norm["accepted"] = False
-            norm["structure_evidence"] = primitive
-            result["candidates"]["dos_normalization"] = norm
-            q["dos_normalization"] = {k: v for k, v in norm.items() if k not in ("components", "total", "frequency_thz")}
-            counts = primitive.get("species_counts") or {}
-            q["projection_mode_check"] = {s: dict(expected=3*n, measured=norm.get("component_mode_integrals", {}).get(s),
-                relative_difference_pct=(100*(norm["component_mode_integrals"][s]/(3*n)-1)
-                    if s in norm.get("component_mode_integrals", {}) else None)) for s, n in counts.items()}
+    if any(c["kind"] == "phonon_dos" for c in curves):
+        apply_dos(result, calculate_dos(result, primitive, composition))
     q["limitations"] = ["图像包络不是统计置信区间", "积分一致是物理约束，不独立证明准确度",
                         "抵框峰只提供带掩膜候选，不唯一恢复峰顶", "质量指标不自动授予科学采纳"]
     if alpha:
@@ -226,28 +212,7 @@ def extract_panel(rgb: np.ndarray, calibration: dict, *, references: dict | None
 
 
 def dos_mode_integral(curves, primitive, complete, common_scale):
-    """只核验原始绝对密度，不用归一化候选自证 3N。"""
-    if not curves or not primitive or not complete or not common_scale:
-        return unavailable("缺少原胞原子数证据或完整共同尺度投影")
-    atoms = primitive.get("primitive_atoms")
-    if not isinstance(atoms, int) or isinstance(atoms, bool) or atoms <= 0:
-        return unavailable("原胞原子数无效")
-    target = 3 * atoms
-    info = dict(primitive_atoms=atoms, target_modes=target, structure_evidence=primitive)
-    if any(c.get("unit") != "modes/THz/primitive_cell" for c in curves):
-        return {**unavailable("DOS 未确认绝对模式密度单位，不能将相对幅值与 3N 比较"), **info}
-    projections = [c.get("projection") or c["id"] for c in curves]
-    if len(set(projections)) != len(projections) or (len(curves) > 1 and any(p.lower() == "total" for p in projections)):
-        return {**unavailable("投影重复或同时包含总谱和分波，不能相加"), **info}
-    grid = [p["frequency_thz"] for p in curves[0]["points"]]
-    if not grid or grid[0] != 0 or any(grid != [p["frequency_thz"] for p in c["points"]] for c in curves):
-        return {**unavailable("DOS 未覆盖零频或分波网格不一致"), **info}
-    values = []
-    for curve in curves:
-        value, covered = integrate_contiguous(np.asarray(grid), [p["reconstructed_amplitude"] for p in curve["points"]])
-        if not covered:
-            return {**unavailable("DOS 存在缺口，不能计算全部积分"), **info}
-        values.append(value)
-    value = sum(values)
-    return dict(status="available", **info, integral=value, absolute_difference=abs(value - target),
-                relative_difference_pct=100 * abs(value - target) / target, frequency_interval_thz=[grid[0], grid[-1]])
+    """兼容旧调用，绝对积分使用与正式重算相同的实现。"""
+    return dos_integrals(dict(curves=[{**c, "kind": "phonon_dos"} for c in curves],
+                              calibration=dict(projection_complete=complete,
+                                               projection_scale_confirmed=common_scale)), primitive)

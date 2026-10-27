@@ -1,0 +1,39 @@
+[
+  {
+    "id": "IMG-001",
+    "upload_order": 1,
+    "original_name": "codex-clipboard-9846da93-0d6b-46f1-a2db-90f6d39b52a1.png",
+    "locator": "docs/specs/164-dos-relative-normalization/assets/IMG-001.png",
+    "status": "local_verified",
+    "sha256": "6f9dc7058f78db9691dc50809d533de384e9561afa84894d64b695bd6b0b97bc",
+    "media_type": "image/png",
+    "dimensions_px": [
+      2686,
+      1626
+    ],
+    "user_context": "为什么会把这几个点判断为折回点？能不能给我讲一下 。是不是我的代码设计的有问题",
+    "related": [
+      "FR-009"
+    ],
+    "verification": "2026-10-27 原字节复制并重新读取，校验 PNG 签名、尺寸与 SHA-256；临时原文件与归档字节相同；Pillow 完整解码通过"
+  },
+  {
+    "id": "IMG-002",
+    "upload_order": 2,
+    "original_name": "codex-clipboard-cf1ab259-3470-43d2-aca1-c68be8f2e791.png",
+    "locator": "docs/specs/164-dos-relative-normalization/assets/IMG-002.png",
+    "status": "local_verified",
+    "sha256": "ca04466397a75b8e14f944d62e7d87947b2eec64261b2f2e45b43078d78ab49b",
+    "media_type": "image/png",
+    "dimensions_px": [
+      1908,
+      650
+    ],
+    "user_context": "和a2f相同的问题：像素点的积分没有物理意义，但是每种元素的积分值应该是这种元素的原子数*3，代表振动模式数。总得原子数*\\*3 就是总的振动模式数也就是 TDOS 的积分值。那么DOS绝对密度单位是态/cm-1。但如果没有给出刻度，可无法判断对吧。但是我在想这个积分之后的像素值是不是和 3N 有什么联系呢？",
+    "related": [
+      "US1",
+      "FR-001"
+    ],
+    "verification": "2026-10-27 原字节复制并重新读取，校验 PNG 签名、尺寸与 SHA-256；临时原文件与归档字节相同；Pillow 完整解码通过"
+  }
+]

@@ -219,6 +219,17 @@ def mask_public(payload, reviews):
     if len(dos) != sum(c["kind"] == "phonon_dos" for c in payload.get("curves", [])) or any(
             reviews.get(c["id"], {}).get("status") == "accepted_limited" for c in dos):
         output["quality"]["dos_mode_integral"] = dict(status="unavailable", reason="当前公开分波或频段不完整，不能展示全部模式数积分")
+        # 共同系数、占比和旧质量摘要也可能反推出未公开分波。
+        for key in ("dos_normalization", "projection_mode_check"):
+            output["quality"].pop(key, None)
+        output["candidates"].pop("dos_normalization", None)
+        output["candidates"].pop("dos_relative_normalized", None)
+        relative = output["quality"].get("dos_relative")
+        if relative:
+            relative["components"] = [c for c in relative.get("components", [])
+                                      if c["curve_id"] in ids and reviews.get(c["curve_id"], {}).get("status") == "accepted"]
+            for key in ("shares", "normalization"):
+                relative[key] = dict(status="unavailable", reason="当前公开分波或频段不完整，不能展示依赖全部分波的结果")
     if alpha is None:
         output["candidates"].pop("alpha2f_lambda_normalized",None)
         for k in ("zero_baseline", "joint"):
