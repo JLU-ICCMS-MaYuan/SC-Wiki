@@ -4,17 +4,18 @@ import { recognizedAxes } from './axisGeometry'
 import { fitViewport, zoomViewport, wheelPixels, wheelFactor } from './viewport'
 import { addPoint, appendPoint, insertDrawnPoints, snapTarget, joinExistingPoint, hasPointConnection, SNAP_RADIUS_PX, amplitudePixel, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
 
-export type Tool = 'select' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
+export type Tool = 'idle' | 'dragLinked' | 'dragSingle' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
 type Props = {
   focusPointId?: string; doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool; imageOpacity?: number
-  linked?: boolean; dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
+  dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
   referenceCurves?: Document["curves"]; onSelect?: (ids: string[]) => void; onChange?: (doc: Document, detail?: string) => void
   onFinishAdd?: (message?:string) => void; onAdded?: (id: string) => void; onZeroMarked?: () => void
   onPick?: (x: number, y: number) => void; onError?: (error: string) => void
 }
-type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; clientStart?: {x:number;y:number}; screenScale?: number; id?: string; prepared?: PreparedMove | null; moved?: Document }
+type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; pointerId?: number; clientStart?: {x:number;y:number}; screenScale?: number; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
-export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'select', linked = true, dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onZeroMarked, onFinishAdd, referenceCurves=[], focusPointId }: Props) {
+export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'idle', dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onZeroMarked, onFinishAdd, referenceCurves=[], focusPointId }: Props) {
+  const linked = tool === 'dragLinked', dragging = linked || tool === 'dragSingle'
   const focused=useRef('')
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
   const initial = (): Rect => { const [x, y, w, h] = doc.source.viewport; return [x - 46, y - 10, w + 62, h + 32] }
@@ -24,7 +25,12 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
   const drawing=useRef<{base:Document;anchorId:string;addedIds:string[]}|null>(null)
   const [snapId,setSnapId]=useState<string|null>(null), snappedEnd=useRef<{tailId:string;targetId:string}|null>(null)
   latest.current=doc
-  useEffect(()=>{tail.current=null;drawing.current=null;snappedEnd.current=null;setSnapId(null);pendingAdd.current=null},[tool,active,doc.id])
+  useEffect(()=>{
+    const pointerId=gesture.current?.pointerId
+    gesture.current=null;setPreview(null);setBox(null)
+    if(pointerId!=null && svg.current?.hasPointerCapture(pointerId))svg.current.releasePointerCapture(pointerId)
+    tail.current=null;drawing.current=null;snappedEnd.current=null;setSnapId(null);pendingAdd.current=null
+  },[tool,active,doc.id,editing])
   useEffect(()=>{
     const current=doc.curves.find(c=>c.id===active),ids=new Set(current?.points.map(p=>p.id)||[])
     if(tail.current && !ids.has(tail.current)){tail.current=null;drawing.current=null}
@@ -43,8 +49,8 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
   const [box, setBox] = useState<Rect | null>(null), [imageFailed, setImageFailed] = useState(false), [retry, setRetry] = useState(0), [scale, setScale] = useState(1)
   const clip = useId().replace(/:/g, ''), scene = preview || doc
   const curve = scene.curves.find(c => c.id === active)!
-  const influence = useMemo(() => gesture.current?.doc === doc && gesture.current.id === selected[0]
-    ? gesture.current.prepared : prepareMove(doc, active, selected[0], linked), [doc, active, selected[0], linked])
+  const influence = useMemo(() => !dragging ? null : gesture.current?.doc === doc && gesture.current.id === selected[0]
+    ? gesture.current.prepared : prepareMove(doc, active, selected[0], linked), [doc, active, selected[0], linked, dragging])
   const renderCurves=[...scene.curves,...referenceCurves.filter(c=>!scene.curves.some(v=>v.id===c.id))]
   const paths = new Map(renderCurves.map(c => [c.id, curvePath(scene, c)]))
   const snappedPoint=curve.points.find(p=>p.id===snapId)
@@ -95,6 +101,8 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       }
     }
     gesture.current = null; setPreview(null); setBox(null)
+    if(cancel)pendingAdd.current=null
+    if(g?.pointerId!=null && svg.current?.hasPointerCapture(g.pointerId))svg.current.releasePointerCapture(g.pointerId)
   }
   const operate = (action: () => void) => { try { action() } catch (e) { onError?.((e as Error).message) } }
   const add = (x: number, y: number, zero = false) => operate(() => {
@@ -104,6 +112,7 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       && Math.abs(frequency(next, p)) < 1e-6 && Math.abs(amplitudePixel(next, p) - (next.calibration.direction === 'y' ? x : y)) <= 1e-4) : undefined)
     onChange?.(next)
     if (added) { onSelect?.([added.id]); onAdded?.(added.id) }
+    if (zero) onZeroMarked?.()
   })
   return <div className={'canvas-shell ' + (editing ? 'interactive' : 'detail-canvas')}>
     <div className="canvas-toolbar"><button className="axis-toggle" aria-pressed={showAxes} onClick={() => setShowAxes(v => !v)}>轴与刻度</button>
@@ -127,6 +136,10 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
           const parent=current.curves.find(c=>c.id===active)?.points.find(p=>p.id===anchor)
           const currentCurve=current.curves.find(c=>c.id===active)!
           const target=snapTarget(currentCurve,position.x,position.y,svg.current!.getScreenCTM()!.a,anchor)
+          if(!parent){
+            if(target){tail.current=target.id;setSnapId(null);onSelect?.([target.id]);onAdded?.(target.id)}
+            return
+          }
           if(target && parent){
             const chain=drawing.current,baseCurve=chain?.base.curves.find(c=>c.id===active)
             if(chain&&baseCurve&&hasPointConnection(chain.base,baseCurve,chain.anchorId,target.id)){
@@ -162,8 +175,11 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
           const candidates = curve.points.map(point => ({ point, distance: Math.hypot(point.x - p.x, point.y - p.y) * scale })).filter(v => v.distance <= 9).sort((a, b) => a.distance - b.distance)
           if (!candidates.length) { onSelect?.([]); return }
           const point = candidates[0].point
-          onSelect?.([point.id]); gesture.current = { kind: 'point', start: p, view, doc, id: point.id, prepared: prepareMove(doc, active, point.id, linked) }
+          onSelect?.([point.id])
+          if(!dragging)return
+          gesture.current = { kind: 'point', start: p, view, doc, id: point.id, prepared: prepareMove(doc, active, point.id, linked) }
         }
+        if(gesture.current)gesture.current.pointerId=event.pointerId
         svg.current!.setPointerCapture(event.pointerId)
       }}
       onPointerMove={event => {
@@ -203,7 +219,7 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       {editing && tool==='add' && snappedPoint && <g data-testid="snap-target" data-point-id={snappedPoint.id} pointerEvents="none">
         <circle cx={snappedPoint.x} cy={snappedPoint.y} r={SNAP_RADIUS_PX/scale} fill="#0baf7622" stroke="#0b9f6a" strokeWidth={1.8/scale}/>
         <text x={snappedPoint.x+(snappedPoint.x>view[0]+view[2]/2?-12:12)/scale} y={snappedPoint.y+(snappedPoint.y<view[1]+28/scale?20:-12)/scale}
-          textAnchor={snappedPoint.x>view[0]+view[2]/2?'end':'start'} fontSize={11/scale} fill="#078653" stroke="white" strokeWidth={3/scale} paintOrder="stroke">吸附到已有点 · 插点或补接</text>
+          textAnchor={snappedPoint.x>view[0]+view[2]/2?'end':'start'} fontSize={11/scale} fill="#078653" stroke="white" strokeWidth={3/scale} paintOrder="stroke">{tail.current||selected.length===1&&curve.points.some(p=>p.id===selected[0])?'吸附到已有点 · 插点或补接':'吸附到已有点 · 点击设为起点'}</text>
       </g>}
       {box && <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="#6455e822" stroke="#6455e8" strokeWidth={1 / scale} />}
 

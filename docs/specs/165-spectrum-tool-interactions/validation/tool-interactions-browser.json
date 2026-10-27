@@ -1,0 +1,62 @@
+{
+  "checks": [
+    "默认无工具只选不拖；两个按钮直接进入单点/联动，单点其余坐标不变，撤销重做有效",
+    "联动沿原权重影响邻点；选中主题深紫/白字，未选中浅紫，反选退出",
+    "增加点可先激活，缩放后8px吸附，首次只确定起点；再次点按钮退出并保留已加点",
+    "纵轴α²F：先选工具后的插点替换原直连，结束回到无工具，保存刷新保留连线",
+    "原有未连接点加点补接保留，按钮退出后正常保存",
+    "横轴DOS单点拖动保存不影响其他分波；390px双按钮可达且无整体溢出"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/d168569a38da47d290823d0f8a05aeab/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/d168569a38da47d290823d0f8a05aeab/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/b37f16dbfbf4488895cc9dfc6b9694a2/manual"
+    }
+  ],
+  "screenshots": [
+    "linked-dark-single-light.png",
+    "mobile-two-buttons.png"
+  ],
+  "colors": [
+    {
+      "label": "联动选点／拖动",
+      "pressed": "true",
+      "background": "rgb(79, 70, 229)",
+      "color": "rgb(255, 255, 255)"
+    },
+    {
+      "label": "单点选点／拖动",
+      "pressed": "false",
+      "background": "rgba(79, 70, 229, 0.08)",
+      "color": "rgb(79, 70, 229)"
+    },
+    {
+      "label": "✥ 平移",
+      "pressed": "false",
+      "background": "rgba(79, 70, 229, 0.08)",
+      "color": "rgb(79, 70, 229)"
+    },
+    {
+      "label": "＋ 增加点",
+      "pressed": "false",
+      "background": "rgba(79, 70, 229, 0.08)",
+      "color": "rgb(79, 70, 229)"
+    },
+    {
+      "label": "▣ 框选",
+      "pressed": "false",
+      "background": "rgba(79, 70, 229, 0.08)",
+      "color": "rgb(79, 70, 229)"
+    }
+  ],
+  "status": "passed"
+}

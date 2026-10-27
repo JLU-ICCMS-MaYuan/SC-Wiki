@@ -1,6 +1,6 @@
 # 验证步骤
 
-本轮仅文档创建，以下为实施后的执行路径，尚未运行。
+业务实现与验证已完成，实际结果见[validation.md](validation.md)。下述步骤供复验。
 
 ## 前置条件
 
@@ -13,7 +13,7 @@
     npm run test:upload-ui -- tests/01_decentralized_uploading/spectrum-tool-interactions.test.tsx tests/01_decentralized_uploading/spectrum-chain.test.tsx tests/01_decentralized_uploading/spectrum-insert.test.tsx tests/01_decentralized_uploading/spectrum-manual-editor.test.tsx
     npm run build
 
-新测试文件须在实施时创建；本轮不把不存在的测试命令标为通过。
+工具交互测试已创建；完整回归命令见validation.md。
 
 ## 正式页面验收顺序
 
@@ -25,3 +25,6 @@
 6. 在DOS、横/纵频率轴及不同缩放重复；390px窄屏检查按钮可达、不造成页面整体横向溢出。
 7. 检查默认/选中/悬停/焦点/禁用的计算样式，选中为主题深色、未选中浅色，aria-pressed同步；保存刷新与撤销回归。
 8. 记录实际验证与截图到validation.md；不得将本计划视为测试证据。
+
+## 本轮隔离浏览器命令
+使用新建的 /tmp/scwiki-manual-test- 前缀目录，SQLite和FILE_STORAGE_LOCAL_ROOT均指向该目录，FILE_STORAGE_BACKEND=local、JWT_SECRET_KEY使用测试值，SCWIKI_MANUAL_TEST_ROOT指向目录；设SCWIKI_INSERT_VERTICAL_FIXTURES=1、SCWIKI_RECALCULATE_TEST_FIXTURES=1。启动python -m uvicorn backend.tests.manual_editor_server:app --host 127.0.0.1 --port 8195。另在frontend启动npm run dev -- --host 127.0.0.1 --port 5175 --strictPort。创建browser输出目录并设置SCWIKI_SPECTRUM_BROWSER_OUT后运行node tests/01_decentralized_uploading/spectrum-tool-interactions-production.cjs。测试会修改隔离谱，完整复验应使用新目录。

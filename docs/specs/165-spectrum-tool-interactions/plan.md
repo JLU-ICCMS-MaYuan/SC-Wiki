@@ -3,7 +3,7 @@
 **Issue**：[#165](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/165)
 **日期**：2026-10-27
 **Spec**：[spec.md](spec.md)
-**阶段边界**：本轮只交付计划，不执行以下代码修改。
+**阶段边界**：文档交付后用户明确要求“开始”，本轮执行以下已确认计划。
 
 ## 摘要
 
@@ -16,7 +16,7 @@
 - 存储：沿用编辑器 Document/History 和现有正式保存接口，不新增数据库字段。
 - 测试：Vitest/Testing Library（tests/01_decentralized_uploading）、隔离Playwright正式页面与HTTP后端。
 - 性能：复用单次线性吸附搜索及拖动开始时的权重准备，不改变算法复杂度。
-- 约束：mayuan分支，保护已有两个dragInfluence.ts改动，独立Demo不修改；当前无实施、推送、部署授权。
+- 约束：mayuan分支，保护已有两个dragInfluence.ts改动，独立Demo不修改；实施已获授权，未授权推送或部署。
 
 ## 质量门
 
