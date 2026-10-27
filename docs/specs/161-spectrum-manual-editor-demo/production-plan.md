@@ -39,3 +39,11 @@ SourceCanvas在add工具中用click事件处理，detail>=2仅结束、不加重
 ## 正式末端吸附
 
 Point.joinTo可选字段表示尾点到已有目标的附加边，不复制或重新排序目标。吸附查找是当前曲线一次O(n)平方距离比较，屏幕阈值8px换算到源像素；鼠标预览只在目标变化时更新状态，点击重新求值避免旧缓存。点击吸附后锁定终点直到双击/退出，不继续误追加。服务端二次校验ID范围和自连；绘图/联动/删除/公开过滤/CSV同步joinTo。Demo实现和数据均不修改。
+
+
+## 主动重算实施（已确认）
+
+FR-050至054/SC-028至030：新增独立recalculate模块与POST /{collection_id}/recalculate。复用manual.current/assert_latest完成鉴权、行锁、材料及版本验证，来源是当前run.result_json；按稳定ID恢复显式连线图，只有一个无分支/无环的连续单值频率路径可进入积分。按频率方向遍历而不改动原始点数组，不跨缺口排序拼接。
+复用spectral_integrals的分段线性精确积分；λ/ωlog状态独立，幅值依据来自当前manual_documents（优先）或初始calibration。相对谱依据须描述零基线及统一倍率，物理频率定义继续沿用已确认来源，不能由普通文本自动改变。DOS按各曲线自身网格积分，完整范围一致才合计；3N比较另检查原胞证据，不要求网格采样点完全一致。
+结果写新SpectrumRun，copy原曲线/标定，quality记录每种谱的recalculation来源run/时间/操作者；新运行清除审核，不自动采纳。人工save既有quality重置行为自然使重算失效。公开受限频段过滤不得泄漏全谱结果。
+前端页面持有忙碌锁和请求目标，POST成功replaceListing并导航新run/version；结果组件只展示服务端状态。零频详情compact模式仅一条摘要和未完成分波，编辑器维持原检查组件默认行为。删除仅详情的旧解释组件与逐点表。

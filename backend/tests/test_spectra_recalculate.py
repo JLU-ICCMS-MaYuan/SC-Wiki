@@ -1,0 +1,206 @@
+"""重算数值、真实路由和持久化版本边界；复用当前MySQL授权隔离夹具。"""
+import copy
+import math
+
+import pytest
+from sqlalchemy.orm import Session
+
+from backend import models
+from backend.spectra.recalculate import alpha_integrals, connected_samples, dos_integrals
+from backend.services.spectra import mask_public
+from backend.tests.test_spectra_manual import manual_storage, manual_http
+
+
+def alpha_payload(unit="dimensionless"):
+    curve = dict(id="a",kind="alpha2f",unit=unit,physical_definition_confirmed=True,
+                 points=[dict(id=str(i),frequency_thz=f,reconstructed_amplitude=.01*f)
+                         for i,f in enumerate([0.,3.,6.])])
+    return dict(curves=[curve],calibration={"curves":[{"id":"a","amplitude_evidence":"原图零基线及全谱统一线性倍率"}]})
+
+
+def test_exact_alpha_and_relative_scale_cancel():
+    payload=alpha_payload()
+    result=alpha_integrals(payload)
+    assert result["parameters"]["lambda"]["value"]==pytest.approx(.12)
+    assert result["parameters"]["omega_log"]["value"]==pytest.approx(6/math.e*47.99243073366221)
+    for scale in [1.,37.]:
+        relative=alpha_payload("pixel")
+        for p in relative["curves"][0]["points"]:p["reconstructed_amplitude"]*=scale
+        r=alpha_integrals(relative)
+        assert r["parameters"]["lambda"]["status"]=="unavailable"
+        assert r["lambda_integral"] is None
+        assert r["parameters"]["omega_log"]["value"]==pytest.approx(result["omega_log_k"])
+    assert payload==alpha_payload()
+
+
+@pytest.mark.parametrize("problem",["gap","branch","cycle","backtrack","duplicate","nonzero_zero","missing_evidence","unknown_frequency","missing_end","missing_start","negative"])
+def test_unsafe_spectra_remain_unavailable(problem):
+    payload=alpha_payload();curve=payload["curves"][0];points=curve["points"]
+    if problem=="gap":points[1]["breakBefore"]=True
+    elif problem=="branch":points.append(dict(id="branch",frequency_thz=4.,reconstructed_amplitude=.04,connectTo="1"))
+    elif problem=="cycle":points[-1]["joinTo"]="0"
+    elif problem=="backtrack":points[1]["frequency_thz"]=7
+    elif problem=="duplicate":points[1]["frequency_thz"]=0
+    elif problem=="nonzero_zero":points[0]["reconstructed_amplitude"]=.1
+    elif problem=="missing_evidence":payload["calibration"]["curves"][0]["amplitude_evidence"]=""
+    elif problem=="unknown_frequency":curve["physical_definition_confirmed"]=False
+    elif problem=="missing_end":curve.update(frequency_direction="x",roi=[0,0,7,1],axis_calibration={"frequency":{"slope":1,"intercept":0}})
+    elif problem=="missing_start":points[0]["frequency_thz"]=.00001
+    elif problem=="negative":points[1]["reconstructed_amplitude"]=-1
+    r=alpha_integrals(payload)
+    assert r["status"]=="unavailable"
+    assert all(p["status"]=="unavailable" and p["reason"] for p in r["parameters"].values())
+
+
+def test_join_edge_restores_a_path_without_sorting_or_mutating():
+    payload=alpha_payload();points=payload["curves"][0]["points"]
+    points[1]["breakBefore"]=True;points[0]["joinTo"]="1"
+    before=copy.deepcopy(points)
+    assert alpha_integrals(payload)["parameters"]["lambda"]["value"]==pytest.approx(.12)
+    assert points==before
+    points.reverse()
+    for p in points:p.pop("joinTo",None);p.pop("breakBefore",None)
+    assert connected_samples(payload["curves"][0])[0]==[0,3,6]
+
+
+def dos_payload():
+    payload=alpha_payload();c=payload["curves"][0]
+    c.update(kind="phonon_dos",unit="modes/THz/primitive_cell",projection="H")
+    for p in c["points"]:p["reconstructed_amplitude"]=1.
+    payload["calibration"].update(projection_complete=True,projection_scale_confirmed=True)
+    return payload
+
+
+def test_dos_integral_and_comparison_are_independent():
+    payload=dos_payload()
+    result=dos_integrals(payload,None)
+    assert result["integral"]==6
+    assert result["comparison_status"]=="unavailable"
+    result=dos_integrals(payload,{"primitive_atoms":2})
+    assert result["comparison_status"]=="available"
+    assert result["absolute_difference"]==0 and result["target_modes"]==6
+    # 各分波可有自己的采样网格，但频段/密度单位必须一致。
+    other=copy.deepcopy(payload["curves"][0]);other.update(id="b",projection="S")
+    other["points"]=[other["points"][0],other["points"][-1]]
+    payload["curves"].append(other)
+    assert dos_integrals(payload,{"primitive_atoms":4})["integral"]==12
+
+
+@pytest.mark.parametrize("problem",["pixel","incomplete","duplicate","total","range","gap"])
+def test_dos_rejects_invalid_total(problem):
+    payload=dos_payload()
+    if problem=="pixel":payload["curves"][0]["unit"]="pixel"
+    elif problem=="incomplete":payload["calibration"]["projection_complete"]=False
+    elif problem=="gap":payload["curves"][0]["points"][1]["breakBefore"]=True
+    else:
+        other=copy.deepcopy(payload["curves"][0]);other["id"]="b"
+        if problem=="total":other["projection"]="total"
+        if problem=="range":other["projection"]="S";other["points"][-1]["frequency_thz"]=5
+        payload["curves"].append(other)
+    assert dos_integrals(payload,{"primitive_atoms":2})["status"]=="unavailable"
+
+
+def recalc_body(env, item=None):
+    return {k:v for k,v in env["body"].items() if k!="document"}|{"kind":"alpha2f"}|(
+        {"expected_collection_version":item["version"],"base_run_id":item["run"]["id"]} if item else {})
+
+
+def test_recalculate_http_history_conflicts_and_manual_invalidation(manual_http):
+    env=manual_http;client=env["client"];url=f"/api/rag/spectra/{env['identity']}/recalculate"
+    before=copy.deepcopy(env["old_result"])
+    response=client.post(url,json=recalc_body(env));assert response.status_code==200,response.text
+    item=response.json()["items"][0];raw=item["result"]["quality"]["integrals"]["raw"]
+    assert raw["parameters"]["lambda"]["status"]=="available"
+    assert raw["parameters"]["omega_log"]["status"]=="available"
+    assert item["result"]["curves"]==before["curves"]
+    assert item["result"]["quality"]["recalculations"]["alpha2f"]["base_run_id"]==env["old_run"]
+    assert item["review"]=={} and item["run"]["id"]!=env["old_run"]
+    assert client.post(url,json=recalc_body(env)).status_code==409
+    with Session(env["engine"]) as session:
+        assert session.get(models.SpectrumRun,env["old_run"]).result_json==before
+    fresh=client.get("/api/rag/spectra",params=env["query"]).json()["items"][0]
+    assert fresh["result"]["quality"]["integrals"]["raw"]==raw
+    params={**env["query"],"kind":"alpha2f","collection_version":item["version"],"run_id":item["run"]["id"]}
+    doc=client.get(f"/api/rag/spectra/{env['identity']}/manual",params=params).json()
+    document=doc["documents"][0]
+    document["zero"]={"pixel":20,"pointIds":[document["curves"][0]["points"][0]["id"]]}
+    body={**env["body"],"expected_collection_version":item["version"],"base_run_id":item["run"]["id"],"document":document}
+    saved=client.post(f"/api/rag/spectra/{env['identity']}/manual",json=body).json()["items"][0]
+    assert "recalculations" not in saved["result"]["quality"]
+    assert saved["result"]["quality"]["integrals"]["raw"]["status"]=="unavailable"
+    recalculated=client.post(url,json=recalc_body(env,saved))
+    assert recalculated.status_code==200,recalculated.text
+    assert recalculated.json()["items"][0]["result"]["quality"]["integrals"]["raw"]["parameters"]["lambda"]["status"]=="available", recalculated.json()["items"][0]["result"]["quality"]["integrals"]["raw"]
+
+
+def test_recalculate_http_permission_and_state_guard(manual_http):
+    env=manual_http;url=f"/api/rag/spectra/{env['identity']}/recalculate";body=recalc_body(env)
+    env["actor"][0].id=999
+    assert env["client"].post(url,json=body).status_code==403
+    env["actor"][0].id=1
+    env["draft"]["material_states"][0]["pressure_value_gpa"]=300
+    assert env["client"].post(url,json=body).status_code==409
+
+
+def test_recalculate_http_unavailable_is_persisted_without_changing_points(manual_http):
+    env=manual_http
+    body=copy.deepcopy(env["body"]);body["document"]["curves"][0]["points"][10]["breakBefore"]=True
+    saved=env["client"].post(f"/api/rag/spectra/{env['identity']}/manual",json=body).json()["items"][0]
+    response=env["client"].post(f"/api/rag/spectra/{env['identity']}/recalculate",json=recalc_body(env,saved))
+    assert response.status_code==200,response.text
+    result=response.json()["items"][0]["result"]
+    assert result["quality"]["integrals"]["raw"]["status"]=="unavailable"
+    assert "缺口" in result["quality"]["integrals"]["raw"]["reason"]
+    assert result["curves"]==saved["result"]["curves"]
+
+
+def test_public_limited_spectrum_cannot_expose_full_integral():
+    payload=alpha_payload();payload["quality"]={"integrals":{"raw":alpha_integrals(payload)},"comparisons":{"raw":{}},"recalculations":{"alpha2f":{"author_id":1}}};payload["candidates"]={}
+    output=mask_public(payload,{"a":{"status":"accepted_limited","frequency_intervals_thz":[[0,3]]}})
+    assert "integrals" not in output["quality"]
+    assert "recalculations" not in output["quality"]
+
+
+def test_recalculate_dos_http_integral_without_primitive(manual_http):
+    env=manual_http
+    with Session(env["engine"]) as session:
+        run=session.get(models.SpectrumRun,env["old_run"])
+        run.result_json=dos_payload()
+        session.commit()
+    before=dos_payload()["curves"]
+    body=recalc_body(env);body["kind"]="phonon_dos"
+    response=env["client"].post(f"/api/rag/spectra/{env['identity']}/recalculate",json=body)
+    assert response.status_code==200,response.text
+    result=response.json()["items"][0]["result"]
+    assert result["curves"]==before
+    assert result["quality"]["dos_mode_integral"]["integral"]==6
+    assert result["quality"]["dos_mode_integral"]["comparison_status"]=="unavailable"
+    assert "phonon_dos" in result["quality"]["recalculations"]
+
+
+def test_recalculate_roundoff_only_not_real_nonzero_baseline():
+    payload=alpha_payload()
+    curve=payload["curves"][0]
+    curve["axis_calibration"]={"amplitude":{"slope":-.005,"intercept":.4}}
+    curve["points"][0].update(amplitude_pixel=80.,reconstructed_amplitude=5e-17)
+    assert alpha_integrals(payload)["parameters"]["lambda"]["status"]=="available"
+    curve["points"][0]["reconstructed_amplitude"]=1e-10
+    assert alpha_integrals(payload)["status"]=="unavailable"
+
+
+def test_mysql_concurrent_recalculations_only_one_commits(manual_http):
+    from concurrent.futures import ThreadPoolExecutor
+    from threading import Barrier
+    from sqlalchemy import select, func
+    env=manual_http
+    if env["engine"].dialect.name!="mysql":
+        pytest.skip("重算行锁竞争仅在明确授权的MySQL上验证")
+    barrier=Barrier(2)
+    def calculate(_):
+        barrier.wait(timeout=10)
+        return env["client"].post(f"/api/rag/spectra/{env['identity']}/recalculate",json=recalc_body(env)).status_code
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        assert sorted(executor.map(calculate,[1,2]))==[200,409]
+    with Session(env["engine"]) as session:
+        assert session.scalar(select(func.count()).select_from(models.SpectrumRun).where(models.SpectrumRun.collection_id==env["identity"]))==2
+        assert session.get(models.SpectrumRun,env["old_run"]).result_json==env["old_result"]

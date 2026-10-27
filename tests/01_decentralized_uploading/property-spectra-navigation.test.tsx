@@ -16,7 +16,7 @@ import SpectrumDetailPage from '../../frontend/src/pages/SpectrumDetailPage'
 import { api } from '../../frontend/src/lib/api'
 import { safeSpectrumReturn, spectrumGroups, spectrumInterval, type PropertySpectrumListing } from '../../frontend/src/lib/propertySpectra'
 
-vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn(), download: vi.fn(), put: vi.fn() } }))
+vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn(), download: vi.fn(), put: vi.fn(), post: vi.fn() } }))
 const point = { frequency_thz: 1, observed_amplitude: 2, reconstructed_amplitude: 2.2, status: 'observed', detection_mode: 'chromatic' }
 const fixture = (): PropertySpectrumListing => ({ version: 'v1', jobs: [], can_edit: true, can_review: false, items: [{ id: 'collection', version: 2, state_key: 'sample', stale: false,
   source: { source_name: 'paper.pdf', pdf_page: 3 }, run: { id: 'run1', status: 'succeeded' }, review: { dos: { status: 'needs_review' }, a2f: { status: 'accepted' } },
@@ -95,26 +95,25 @@ it('历史读取失败保留当前谱，成功后使用历史运行并禁止当�
   await userEvent.click(await screen.findByRole('button', {name:'查看提取历史'}))
   await userEvent.click(await screen.findByRole('button', {name:/2026-10-01.*历史原始标定/}))
   expect(await screen.findByText('历史原始标定', {selector:'p'})).toBeInTheDocument()
-  expect(screen.getByText('材料条件已变化或正在查看历史，当前 3N 对比不可用。')).toBeInTheDocument()
+  expect(screen.getByText('当前为历史、失效或限定频段版本，不展示完整谱计算结果。')).toBeInTheDocument()
 })
-it('正式详情移除候选与重复审核，点表定高显示真实状态和绝对差', async () => {
+it('正式详情移除候选、重复审核与详情逐点表', async () => {
   render(<MemoryRouter initialEntries={[address()]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage />} /></Routes></MemoryRouter>)
   await screen.findByText('声子 DOS解析详情')
   expect(screen.getByRole('heading', { name: '02 · 原图与提取结果' })).toBeInTheDocument()
   expect(screen.queryByLabelText('谱候选')).not.toBeInTheDocument()
   expect(screen.queryByText('原图叠加、标定校对与逐谱审核')).not.toBeInTheDocument()
-  expect(screen.getByText('短缺口插值')).toBeInTheDocument()
-  expect(screen.getByRole('region', { name: '可滚动的逐点数据表' })).toHaveStyle({ overflow: 'auto' })
-  expect(within(screen.getAllByRole('table').at(-1)!).getByText('0.2')).toBeInTheDocument()
+  expect(screen.queryByText('04 · 逐点数据核对')).toBeNull()
+  expect(screen.queryByRole('region', { name: '可滚动的逐点数据表' })).toBeNull()
 })
-it('有歧义的彩边和多轨迹保留待核对状态，不展示插值伪值', async () => {
+it('详情不再展示重复点表，缺失曲线不展示伪积分', async () => {
   listing.items[0].result.curves[0].points = [
     { ...point, observed_amplitude:null, reconstructed_amplitude:null, status:'missing', detection_mode:'ambiguous_components' },
     { ...point, frequency_thz:2, observed_amplitude:null, reconstructed_amplitude:null, status:'missing', detection_mode:'unsupported_chromatic' },
   ]
   render(<MemoryRouter initialEntries={[address()]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage />} /></Routes></MemoryRouter>)
-  expect(await screen.findByText('多条轨迹，待核对')).toBeInTheDocument()
-  expect(screen.getByText('彩边证据不足，待核对')).toBeInTheDocument()
+  expect(await screen.findByText('03 · 频段与数据完整性')).toBeInTheDocument()
+  expect(screen.queryByText('04 · 逐点数据核对')).toBeNull()
   expect(within(screen.getAllByRole('table').at(-1)!).queryByText('2.2')).not.toBeInTheDocument()
 })
 

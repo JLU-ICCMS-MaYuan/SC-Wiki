@@ -172,6 +172,7 @@ def mask_public(payload, reviews):
     output.pop("manual_documents", None)
     output.pop("manual_provenance", None)
     output.get("quality", {}).pop("manual_zero_checks", None)
+    output.get("quality", {}).pop("recalculations", None)
     selected = []
     for curve in output.get("curves") or []:
         decision = reviews.get(curve["id"], {})
@@ -230,6 +231,8 @@ def mask_public(payload, reviews):
                 if isinstance(values, list) and len(values) == len(f) and f:
                     candidate[name] = [values[i] for i in keep]
         if reviews.get(alpha["id"], {}).get("status") == "accepted_limited":
+            output["quality"].pop("integrals", None)
+            output["quality"].pop("comparisons", None)
             output["quality"]["metric_domain_note"] = "质量指标描述原提取运行的完整频域；已采纳数值仅限标注频段"
     norm = output["candidates"].get("dos_normalization", {})
     if norm:

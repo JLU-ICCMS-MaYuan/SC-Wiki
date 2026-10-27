@@ -8,9 +8,19 @@ const messages = {
 }
 const number = (value: number) => Math.abs(value) > 0 && Math.abs(value) < .0001 ? value.toExponential(2) : Number(value.toFixed(4)).toString()
 
-export default function ZeroFrequencyCheck({ result, unit, afterSave, onContinue, readOnly=false }: {
-  result: ZeroCheck; unit: string; afterSave: boolean; readOnly?: boolean; onContinue: (curve: ZeroCurveCheck) => void
+export default function ZeroFrequencyCheck({ result, unit, afterSave, onContinue, readOnly=false, compact=false }: {
+  result: ZeroCheck; unit: string; afterSave: boolean; readOnly?: boolean; compact?: boolean; onContinue: (curve: ZeroCurveCheck) => void
 }) {
+  if (compact) return <section className="zero-check" data-testid="saved-zero-check" data-complete={result.complete}>
+    <div className={'callout '+(result.complete?'success':'warning')} role="status" data-testid="saved-zero-summary">
+      <strong>{result.complete?'零频位置核对完成':'零频位置核对未完成'}</strong>
+      <span>{result.completedCount}/{result.curves.length} 条曲线完成{Number.isFinite(result.zeroPixel) ? ` · 原图零频位置 ${number(result.zeroPixel)} px` : ''}</span>
+      {result.curves.filter(curve=>curve.status!=='complete').map(curve=><div key={curve.id} data-zero-curve={curve.id} data-state={curve.status}>
+        <span>{curve.name}：{messages[curve.status]}</span>
+        {!readOnly && <button onClick={()=>onContinue(curve)}>继续核对 {curve.name}</button>}
+      </div>)}
+    </div>
+  </section>
   return <section className="zero-check" data-testid="saved-zero-check" data-complete={result.complete}>
     <div className={'callout '+(result.complete?'success':'warning')} role="status" data-testid="saved-zero-summary">
       <strong>{result.complete ? '零频位置核对完成' : '零频位置核对未完成'}</strong>

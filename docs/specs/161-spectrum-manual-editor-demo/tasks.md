@@ -100,3 +100,12 @@ Issue [#161](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/161) 是协作�
 - [x] T039 验证阈值/缩放/无重复点/保存刷新/撤销及Demo哈希不变，记录并提交。
 
 正式吸附验收：53项前端、82后端通过/1项MySQL专用跳过、当前MySQL29项通过，正式浏览器15场景及构建通过；Demo41文件哈希一致。见 snap-validation.md。
+
+
+## 正式主动重算与精简
+- [x] T040 用户确认增补稿，记录FR-050至054/SC-028至030、契约、研究与图片。
+- [x] T041 实现连续路径校验、α²F独立参数、DOS积分及版本化重算接口。
+- [x] T042 两种详情按钮、单一零频摘要、移除解释区及04表。
+- [x] T043 验证数值/HTTP/当前MySQL/浏览器，回写Overview、保护Demo并提交。
+
+本轮验证见recalculate-validation.md：54项正式前端、108项后端/2项仅MySQL跳过、当前MySQL56项含双重算竞争通过、8个正式浏览器场景通过；Demo内容哈希一致。

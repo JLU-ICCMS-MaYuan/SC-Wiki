@@ -32,3 +32,8 @@
 ## 末端吸附
 
 可选point.joinTo为同曲线存在且非自身的ID，允许引用早于或晚于尾点的已有目标；不改变connectTo前驱。保存前校验，不复制目标点。数值曲线及CSV同时保留join_to；公开裁剪删除不可见目标引用。仅正式页面生效，双击只结束工作副本描线，保存调整才入库。
+
+
+## 主动重算
+POST /api/rag/spectra/{collection_id}/recalculate：target、target_id、expected_version、expected_collection_version、base_run_id、kind(alpha2f/phonon_dos)。客户端不得提交积分数值。返回完整listing及新版本；科学条件不足作为200中的unavailable及具体原因，权限403、旧版本409；失败不覆盖原记录。仅同步数值积分，不读取图像/调用AI。
+quality.integrals.raw新增parameters.lambda/omega_log独立status/value/reason，兼容lambda_integral/omega_log_k；DOS积分status与comparison_status独立。quality.recalculations[kind]包含base_run_id/calculated_at/author_id/algorithm_version。历史数据按旧显示条件兼容。

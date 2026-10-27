@@ -36,3 +36,6 @@ Curve.pathOrdered（可选布尔）为真时 points 数组表达描线顺序；�
 ## 正式末端吸附边
 
 Point.joinTo可选字符串指向同曲线另一已有点，表达尾点附加连接；允许引用任意顺序目标，但禁止自连/悬空/重复边。既有connectTo父点约束不变。保存数值点、CSV join_to与编辑文档保持；删除/公开裁剪移除丢失目标引用。旧格式无此字段继续兼容，无表结构变更。Demo数据契约不变。
+
+## 重算结果
+复用不可变SpectrumRun，无DDL。quality.recalculations按kind存来源和时间；parameters独立保存λ/ωlog状态；dos_mode_integral分开表示积分及3N比较。点、连线、manual_documents及来源保持不变；编辑保存清除重算派生值。

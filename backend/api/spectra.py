@@ -39,6 +39,23 @@ class ManualRequest(ExtractRequest):
     document: dict
 
 
+class RecalculateRequest(ExtractRequest):
+    expected_collection_version: int = Field(ge=1)
+    base_run_id: str = Field(min_length=1, max_length=64)
+    kind: Literal["alpha2f", "phonon_dos"]
+
+
+@router.post("/{collection_id}/recalculate")
+def recalculate(collection_id: str, body: RecalculateRequest, user=Depends(get_current_user), session: Session=Depends(get_db)):
+    from backend.spectra import manual, recalculate as calculation
+    ctx = service.context(session, body.target, body.target_id, user, write=True)
+    service.assert_version(ctx["version"], body.expected_version)
+    row, run, state = manual.current(session, ctx, collection_id, body.expected_collection_version, body.base_run_id)
+    calculation.save(session, ctx, row, run, state, body.kind, user)
+    session.commit()
+    return service.listing(session, ctx)
+
+
 @router.get("/{collection_id}/manual")
 def manual_document(collection_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
                     kind: Literal["alpha2f", "phonon_dos"], collection_version: int, run_id: str,

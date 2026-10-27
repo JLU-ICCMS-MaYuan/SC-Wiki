@@ -263,7 +263,7 @@ def save(session,ctx,row,run,document,user):
              "source_frequency_unit":cal["frequency"]["unit"],"manual_trace":True,"clipped_frequencies_thz":[]}
     payload["curves"]=[changed if c["id"]==cid else c for c in payload["curves"]]
     payload.setdefault("manual_documents",{})[cid]=doc
-    reason="人工修订后旧积分、比较与重建候选已失效；需重新核对科学定义、单值性和幅值依据。"
+    reason="人工修订已保存，旧积分已失效；请点击“重新计算”检查并计算当前谱。"
     checks={key:zero_report(value) for key,value in payload["manual_documents"].items()}
     for c in payload["curves"]:
         if c["kind"] in KINDS and c["id"] not in checks:

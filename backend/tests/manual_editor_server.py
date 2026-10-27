@@ -37,6 +37,9 @@ with Session(engine) as session:
     image=create_storage().put("spectra/test.png",content,"image/png")
     for kind in ("alpha2f","phonon_dos"):
         rgb,panel=fixture(kind)
+        if kind=="phonon_dos" and os.environ.get("SCWIKI_RECALCULATE_TEST_FIXTURES")=="1":
+            panel["curves"][0]["unit"]="modes/THz/primitive_cell"
+            panel.update(projection_complete=True,projection_scale_confirmed=True)
         if kind=="phonon_dos":
             prototype=panel["curves"][0];panel["curves"]=[]
             for name in ["La","Sc","H"]:

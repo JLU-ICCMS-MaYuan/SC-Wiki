@@ -1,0 +1,149 @@
+{
+  "checks": [
+    "α²F主动计算真实持久化且不改点，计算中防重复提交，详情移除旧说明和04表",
+    "刷新恢复计算结果与时间，路由指向新运行",
+    "人工保存使旧结果失效，点击重算才得到新积分；零频只显示一次，编辑器仍保留点表",
+    "有零基线和统一倍率依据的相对谱只显示ωlog，不伪造λ",
+    "删点保留缺口，重算显示具体阻塞原因，不跨缺口补点或积分",
+    "DOS同样主动积分，有积分但缺原胞依据时仅3N比较留空",
+    "并发新版本后旧页面重算返回409，不覆盖新的结果",
+    "390px窄屏无水平溢出，重算按钮可操作"
+  ],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/957b7a4ce8df4202b8092d77754d6499/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "88853f10b11d456683492ed2a0a887f0",
+      "kind": "alpha2f"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/957b7a4ce8df4202b8092d77754d6499/manual",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "document"
+      ],
+      "base_run_id": "b8e0a4289cfa4945ab1d1ebf91182cc1",
+      "kind": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/957b7a4ce8df4202b8092d77754d6499/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "94fb7ef8137648e392513eb5b63bca45",
+      "kind": "alpha2f"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/957b7a4ce8df4202b8092d77754d6499/manual",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "document"
+      ],
+      "base_run_id": "187c581e2ce64a9cbe4ce87034f04d90",
+      "kind": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/957b7a4ce8df4202b8092d77754d6499/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "31554452fc394edaad05ca1c37c39210",
+      "kind": "alpha2f"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/957b7a4ce8df4202b8092d77754d6499/manual",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "document"
+      ],
+      "base_run_id": "b1d8d77bc915407495b905423b73df2c",
+      "kind": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/957b7a4ce8df4202b8092d77754d6499/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "107d86dc85804a869e733a0a476de53e",
+      "kind": "alpha2f"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/eac6c7d65b2445388ecdf71ae992615a/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "2966760fad304b73851294208f528e07",
+      "kind": "phonon_dos"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/eac6c7d65b2445388ecdf71ae992615a/recalculate",
+      "fields": [
+        "target",
+        "target_id",
+        "expected_version",
+        "expected_collection_version",
+        "base_run_id",
+        "kind"
+      ],
+      "base_run_id": "a09b7aed2f114162a32b557cf08600f8",
+      "kind": "phonon_dos"
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    "recalculate-alpha-result.png",
+    "recalculate-relative-omega.png",
+    "recalculate-dos-result.png",
+    "recalculate-mobile-detail.png"
+  ],
+  "status": "passed",
+  "database": "isolated SQLite; production routes and SQLAlchemy; all browser API traffic redirected"
+}
