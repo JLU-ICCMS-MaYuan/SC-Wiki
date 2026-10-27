@@ -1,0 +1,46 @@
+{
+  "checks": [
+    "H保存后直接进入Sc，编辑器保持打开，只有H已入库",
+    "保存切换后原图blob仍有效，隐藏再显示不会丢图",
+    "连续保存使用新版本，回切H/Sc保留已保存坐标，不退回初始文档",
+    "网络失败留在H且输入保留，窄屏错误可见；重试成功且保存中禁止重复操作",
+    "取消留在当前元素，放弃切换仅丢未保存修改，不覆盖已保存结果",
+    "真正退出仍保存并返回；URL更新和刷新回读保留全部元素最新保存结果"
+  ],
+  "errors": [],
+  "saves": [
+    {
+      "curve": "H",
+      "request_version": 2,
+      "request_run": "493ba9b72b374e9c8259dd5624272390",
+      "result_version": 3,
+      "result_run": "62d9a19f793740a6a4627768b1a6e651"
+    },
+    {
+      "curve": "Sc",
+      "request_version": 3,
+      "request_run": "62d9a19f793740a6a4627768b1a6e651",
+      "result_version": 4,
+      "result_run": "4d35ecd2a3f14492a9ea1d7ef9a9ac9b"
+    },
+    {
+      "curve": "H",
+      "request_version": 4,
+      "request_run": "4d35ecd2a3f14492a9ea1d7ef9a9ac9b",
+      "result_version": 5,
+      "result_run": "fc974f8b663b42af9be5f86be92bfb86"
+    },
+    {
+      "curve": "La",
+      "request_version": 5,
+      "request_run": "fc974f8b663b42af9be5f86be92bfb86",
+      "result_version": 6,
+      "result_run": "523f640efe124bc9bf56e2fbf6d5f1ca"
+    }
+  ],
+  "screenshots": [
+    "save-and-continue-dialog.png",
+    "mobile-save-failure.png"
+  ],
+  "status": "passed"
+}

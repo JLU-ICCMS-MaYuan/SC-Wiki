@@ -190,6 +190,25 @@
         "SC-043"
       ],
       "verification": "2026-10-27原字节归档并重读校验哈希/尺寸，完整解码在验证阶段核验；Pillow完整解码通过"
+    },
+    {
+      "id": "IMG-SAVE-CONTINUE-001",
+      "upload_order": 11,
+      "original_name": "codex-clipboard-3dadba58-6947-470f-96a3-b5c8c2d72a9d.png",
+      "locator": "docs/specs/161-spectrum-manual-editor-demo/assets/save-continue-user.png",
+      "status": "local_verified",
+      "media_type": "image/png",
+      "dimensions_px": [
+        2576,
+        1298
+      ],
+      "sha256": "da8bea955845d61ba00ddff4e1fea0c5b26bbb1c781255319c9346a3f041c97e",
+      "user_context": "这里我点击元素换其他元素之后，我希望这里的功能是“继续编辑”是“保存并继续编辑”。",
+      "related": [
+        "FR-075",
+        "SC-045"
+      ],
+      "verification": "2026-10-27原字节归档并重读核对哈希/尺寸，解码在验证阶段核验；Pillow完整解码通过"
     }
   ]
 }

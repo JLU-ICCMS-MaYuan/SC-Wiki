@@ -127,3 +127,11 @@ SourceCanvas一次点击终点即完成插入，通知父组件退出工具，�
 已确认根因在SpectrumDetailPage的mismatch：run/collection_version变化会令validItem为空，且reload只刷新列表、不会改变URL。旧spectrum-version-production.cjs已记录V1/V2/V3重现。
 
 设计采用同身份下读取最新item，并把版本参数同步为该item的版本。使用navigate(...,{replace:true})避免回退栈累积旧链接；明确身份失败继续阻断。历史查看与打开编辑器/写请求期间不导航，写入仍使用独立打开快照。拒绝直接删除后端版本校验或自动重新提交POST，因为会覆盖编辑或重复运行。旧链接能自恢复即可解决本轮刷新问题，不增加后台轮询。
+
+## 切换元素保存退出问题
+
+当前save()无条件调用onClose，切换弹窗保存后还调用exitAction，所以元素切换被保存返回抢先关闭。父页面原onSave不更新editorInput版本，因为原流程每次保存都会关闭；仅移除onClose会导致下一次保存继续携带旧版本。
+
+采用显式close/switch意图、服务端文档更新和父级版本推进。其他元素的规范文档保留初次GET/manual的身份重绑定结果，不直接用返回JSON中可能保留旧集合身份的历史文档覆盖它们。保存当前元素的规范文档来自响应manual_documents；所有共享版本使用新响应。
+
+父页面保存最近成功响应，退出编辑器时才替换详情listing，使原图blob在连续编辑期间保持有效；数据已通过POST实时保存。失败时不推进版本、不切换，重试仍受后端并发校验保护。不新增批量保存、后台自动提交或数据合并。

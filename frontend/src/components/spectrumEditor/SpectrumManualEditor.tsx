@@ -36,10 +36,13 @@ function PointTable({ doc, active, selected, onSelect, compact = false }: { doc:
   </tbody></table>{!curve.points.length && <p className="empty">当前曲线没有点，可以在原图上补选。</p>}</div>
 }
 
-export default function SpectrumManualEditor({documents:samples,onSave,onClose,kind,imageOpacity,onOpacityChange:setImageOpacity,initialPointId,focusPointId}: {imageOpacity:number;onOpacityChange:(value:number)=>void;initialPointId?:string;focusPointId?:string;documents:Document[];onSave:(doc:Document)=>Promise<void>;onClose:()=>void;kind:'alpha2f'|'phonon_dos'}) {
+type LeaveIntent = { kind: 'close' } | { kind: 'switch'; id: string }
+
+export default function SpectrumManualEditor({documents:initialDocuments,onSave,onClose,kind,imageOpacity,onOpacityChange:setImageOpacity,initialPointId,focusPointId}: {imageOpacity:number;onOpacityChange:(value:number)=>void;initialPointId?:string;focusPointId?:string;documents:Document[];onSave:(doc:Document)=>Promise<Document[]|void>;onClose:()=>void;kind:'alpha2f'|'phonon_dos'}) {
   const theme = useTheme()
   const toolColors = { '--tool-active': theme.palette.primary.main, '--tool-active-hover': theme.palette.primary.dark, '--tool-active-text': theme.palette.primary.contrastText, '--tool-light': alpha(theme.palette.primary.main, .08), '--tool-light-hover': alpha(theme.palette.primary.main, .14), '--tool-border': alpha(theme.palette.primary.main, .25) } as CSSProperties
   const [saving,setSaving]=useState(false), saveLock=useRef(false)
+  const [samples,setSamples] = useState(initialDocuments)
   const [sampleId, setSampleId] = useState(samples[0].id), initial = samples.find(s => s.id === sampleId)!
   const [loaded] = useState(() => ({doc:clone(samples[0]),error:'',blocked:false}))
   const [saved, setSaved] = useState<Document>(loaded.doc), [history, setHistory] = useState<History>({ past: [], present: loaded.doc, future: [] })
@@ -49,7 +52,7 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
   const [tool, setTool] = useState<Tool>('idle'), [dragMode, setDragMode] = useState<'amplitude' | 'free'>('free')
   const [display, setDisplay] = useState('overlay'), [all, setAll] = useState(true)
   const [error, setError] = useState(loaded.error), [notice, setNotice] = useState('')
-  const [exitModal, setExitModal] = useState(false), exitAction = useRef<() => void>(() => {})
+  const [exitIntent, setExitIntent] = useState<LeaveIntent|null>(null)
   const [calibration, setCalibration] = useState(clone(doc.calibration)), [pick, setPick] = useState<{ axis: 'frequency' | 'amplitude'; index: 0 | 1 } | null>(null)
   const exitTool = () => { setTool('idle'); setPick(null) }
   const chooseTool = (next: Tool, target: typeof pick = null) => {
@@ -86,6 +89,10 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
       if (saving) return
+      if (exitIntent) {
+        if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); setExitIntent(null) }
+        return
+      }
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); exitTool(); setSelected([]); return }
       if ((e.target as HTMLElement).closest('input,select,textarea')) return
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); setHistory(h => e.shiftKey ? redo(h) : undo(h)) }
@@ -93,27 +100,31 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
     }
     // 全屏 Dialog 会在冒泡阶段截获 Esc；先处理编辑器的工具退出。
     window.addEventListener('keydown', key, true); return () => window.removeEventListener('keydown', key, true)
-  }, [doc, selected, active, saving])
+  }, [doc, selected, active, saving, exitIntent])
   const selectCurve = (id: string) => { setActive(id); setSelected([]);exitTool() }
-  const save = async (): Promise<boolean> => {
+  const save = async (nextId?: string): Promise<boolean> => {
     if(saveLock.current)return false
-    saveLock.current=true;setSaving(true)
+    saveLock.current=true;setSaving(true);setError('')
     try {
       if (calibrationDirty) throw new Error('标定表单还有未应用的修改，请先应用标定，再保存。')
       validateDocument(doc, initial)
-      await onSave(doc)
-      setSaved(clone(doc)); setHistory({ past: [], present: clone(doc), future: [] }); setError(''); setSelected([])
+      const updated = await onSave(doc)
+      const nextSamples = updated || samples.map(s => s.id === doc.id ? clone(doc) : s)
+      const savedDoc = nextSamples.find(s => s.id === doc.id) || doc
+      setSamples(nextSamples);setExitIntent(null)
+      if (nextId) { switchSample(nextId, nextSamples); return true }
+      setSaved(clone(savedDoc)); setHistory({ past: [], present: clone(savedDoc), future: [] }); setError(''); setSelected([])
       setNotice('人工修订已保存到数据库，并生成新的历史版本。')
       onClose();return true
     } catch (e) { setError('保存失败：' + (e as Error).message); return false } finally {saveLock.current=false;setSaving(false)}
   }
-  const leave = (action: () => void) => {
-    if(saving)return
-    if (!dirty) return action()
-    exitAction.current = action; setExitModal(true)
+  const leave = (intent: LeaveIntent) => {
+    if(saveLock.current || intent.kind === 'switch' && intent.id === sampleId)return
+    if (!dirty) { if(intent.kind === 'switch')switchSample(intent.id);else onClose();return }
+    setExitIntent(intent)
   }
-  const switchSample = (id: string) => {
-    const next = samples.find(s => s.id === id)!, state = {doc:clone(next),error:'',blocked:false}
+  const switchSample = (id: string, documents = samples) => {
+    const next = documents.find(s => s.id === id)!, state = {doc:clone(next),error:'',blocked:false}
     setSampleId(id); setSaved(state.doc); setHistory({ past: [], present: state.doc, future: [] }); setActive(next.curves[0].id)
     setSelected([]); setError(state.error); setNotice(''); setAll(true); exitTool()
   }
@@ -160,9 +171,9 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
     <button className="danger" disabled={!selected.length} onClick={remove}>删除选中点{selected.length > 1 ? `（${selected.length}）` : ''}</button>
   </section>
   return <div className="spectrum-manual-editor app editor-app" style={toolColors}><main>
-<header className="editor-header"><button onClick={() => leave(onClose)}>← 返回详情</button><div><strong>{doc.title} · 人工调整</strong><span className="badge">{dirty ? '未保存' : '数据库版本'}</span></div><div className="header-actions"><button disabled={saving || !history.past.length} onClick={() => setHistory(undo)}>↶ 撤销</button><button disabled={saving || !history.future.length} onClick={() => setHistory(redo)}>↷ 重做</button><button disabled={saving} onClick={restore}>恢复打开时数据</button><button className="primary" disabled={saving} onClick={() => void save()}>{saving?'正在保存…':'保存调整'}</button></div></header>
-    {samples.length>1 && <div className="production-curve-tabs" aria-label="选择编辑分波">{samples.map(s=><button key={s.id} disabled={saving} className={s.id===sampleId?'active':''} onClick={()=>leave(()=>switchSample(s.id))}>{s.title}</button>)}</div>}
-    {error && <div role="alert" className="callout error">{error}</div>}{notice && <div role="status" className="callout success">{notice}</div>}
+<header className="editor-header"><button onClick={() => leave({kind:'close'})}>← 返回详情</button><div><strong>{doc.title} · 人工调整</strong><span className="badge">{dirty ? '未保存' : '数据库版本'}</span></div><div className="header-actions"><button disabled={saving || !history.past.length} onClick={() => setHistory(undo)}>↶ 撤销</button><button disabled={saving || !history.future.length} onClick={() => setHistory(redo)}>↷ 重做</button><button disabled={saving} onClick={restore}>恢复打开时数据</button><button className="primary" disabled={saving} onClick={() => void save()}>{saving?'正在保存…':'保存调整'}</button></div></header>
+    {samples.length>1 && <div className="production-curve-tabs" aria-label="选择编辑分波">{samples.map(s=><button key={s.id} disabled={saving} className={s.id===sampleId?'active':''} onClick={()=>leave({kind:'switch',id:s.id})}>{s.title}</button>)}</div>}
+    {error && !exitIntent && <div role="alert" className="callout error">{error}</div>}{notice && <div role="status" className="callout success">{notice}</div>}
     <fieldset className="production-editor-fields" disabled={saving}>
 <div className="editor-layout"><section className="workbench">
         <div className="tool-strip">{([['dragLinked','联动选点／拖动'],['dragSingle','单点选点／拖动'],['pan','✥ 平移'],['add','＋ 增加点'],['box','▣ 框选']] as [Tool,string][]).map(([value,label]) => <button key={value} className="editor-tool" aria-pressed={tool === value} onClick={() => chooseTool(value)}>{label}</button>)}<div className="tool-strip-end"><label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></div></div>
@@ -213,6 +224,21 @@ export default function SpectrumManualEditor({documents:samples,onSave,onClose,k
         <section className="panel-section"><h3>逐点数据</h3><PointTable doc={doc} active={active} selected={selected} onSelect={setSelected} compact/></section>
       </aside></div>
     </fieldset></main>
-    {exitModal && <div className="modal-backdrop"><div role="dialog" aria-modal="true" aria-labelledby="leave-title" className="modal"><span className="eyebrow">UNSAVED CHANGES</span><h2 id="leave-title">保留这次调整吗？</h2><p>当前修改尚未保存到数据库。</p><div className="modal-actions"><button onClick={() => setExitModal(false)}>继续编辑</button><button className="danger" onClick={() => { setHistory({past:[],present:clone(saved),future:[]}); setCalibration(clone(saved.calibration)); setExitModal(false); exitAction.current() }}>放弃修改</button><button className="primary" onClick={async () => { if (await save()) { setExitModal(false); exitAction.current() } }}>保存并返回</button></div></div></div>}
+    {exitIntent && <div className="modal-backdrop"><div role="dialog" aria-modal="true" aria-labelledby="leave-title" className="modal">
+      <span className="eyebrow">UNSAVED CHANGES</span><h2 id="leave-title">保留这次调整吗？</h2>
+      <p>{exitIntent.kind==='switch'?'当前修改尚未保存到数据库。保存后将继续编辑 '+samples.find(s=>s.id===exitIntent.id)?.curves[0].name+'。':'当前修改尚未保存到数据库。'}</p>
+      {error&&<div role="alert" className="callout error">{error}</div>}
+      <div className="modal-actions">
+        <button disabled={saving} onClick={() => setExitIntent(null)}>{exitIntent.kind==='switch'?'留在当前元素':'继续编辑'}</button>
+        <button disabled={saving} className="danger" onClick={() => {
+          const intent=exitIntent;setExitIntent(null)
+          if(intent.kind==='switch')switchSample(intent.id)
+          else onClose()
+        }}>放弃修改</button>
+        <button disabled={saving} className="primary" onClick={() => void save(exitIntent.kind==='switch'?exitIntent.id:undefined)}>
+          {saving?'正在保存…':exitIntent.kind==='switch'?'保存并继续编辑':'保存并返回'}
+        </button>
+      </div>
+    </div></div>}
   </div>
 }

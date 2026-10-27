@@ -17,6 +17,7 @@ export default function SpectrumDetailPage() {
   const target = ['upload', 'paper', 'revision'].includes(targetKind || '') && targetId ? { target: targetKind, target_id: targetId } as PropertySpectrumTarget : undefined
   const { listing, loading, error, reload, replaceListing } = usePropertySpectra(target)
   const [editorInput,setEditorInput]=useState<{documents:EditorDocument[];base_run_id:string;collection_version:number;version:string;initialPointId?:string;focusPointId?:string}|null>(null)
+  const savedEditorResult=useRef<{listing:PropertySpectrumListing;item:PropertySpectrumItem;curveId:string;context:string}|null>(null)
   const [imageOpacity,setImageOpacity]=useState(100)
   const [openingEditor,setOpeningEditor]=useState(false)
   const [recalculating,setRecalculating]=useState(false)
@@ -109,7 +110,8 @@ export default function SpectrumDetailPage() {
     finally{calculationLock.current=false;setRecalculating(false)}
   }
   const openEditor=async(selectedCurve?:string,focusZero=false,pointId?:string)=>{
-    if(!canEdit || !validItem || openingEditor || calculationLock.current)return
+    if(!canEdit || !validItem || editorInput || openingEditor || calculationLock.current)return
+    savedEditorResult.current=null
     setOpeningEditor(true);setActionError('')
     try {
       const input=await api.get<{documents:EditorDocument[];base_run_id:string;collection_version:number;version:string}>(SPECTRUM_API+'/'+encodeURIComponent(validItem.id)+'/manual?'+query+'&kind='+kind+'&collection_version='+validItem.version+'&run_id='+encodeURIComponent(validItem.run.id||''))
@@ -124,12 +126,28 @@ export default function SpectrumDetailPage() {
   }
   const saveEditor=async(document:EditorDocument)=>{
     if(!target || !validItem || !editorInput)throw new Error('编辑目标已变化，请重新打开。')
+    const context=calculationTarget.current
     const updated=await api.post<PropertySpectrumListing>(SPECTRUM_API+'/'+encodeURIComponent(validItem.id)+'/manual',{
       ...target,expected_version:editorInput.version,expected_collection_version:editorInput.collection_version,base_run_id:editorInput.base_run_id,document})
+    if(calculationTarget.current!==context)throw new Error('保存已提交，但页面目标发生变化，请重新打开原谱核对。')
     const fresh=updated.items.find(i=>i.id===validItem.id)
     if(!fresh)throw new Error('保存响应缺少新版本，请刷新详情核对；编辑内容仍保留。')
-    replaceListing(updated)
-    navigate(spectrumDetailPath(target,fresh,safeSpectrumReturn(params.get('return')),fresh.result.curves.find(c=>c.id===document.curves[0].id)||fresh.result.curves[0]),{replace:true})
+    const curveId=document.curves[0].id,stored=fresh.result.manual_documents?.[curveId]
+    if(!stored || !fresh.run.id)throw new Error('保存响应缺少规范编辑文档，请重新打开核对；当前编辑内容仍保留。')
+    // 其他分波未被此次POST修改，保留GET/manual已校验、已重绑定身份的文档。
+    const documents=editorInput.documents.map(doc=>doc.curves[0].id===curveId?{...stored,source:{...stored.source,image:doc.source.image}}:doc)
+    setEditorInput({documents,version:updated.version,collection_version:fresh.version,base_run_id:fresh.run.id})
+    savedEditorResult.current={listing:updated,item:fresh,curveId,context}
+    return documents
+  }
+  const closeEditor=()=>{
+    const saved=savedEditorResult.current;savedEditorResult.current=null
+    setEditorInput(null)
+    // 连续编辑时保留原图blob，真正退出时才更新背后的只读详情和URL。
+    if(saved && target && saved.context===calculationTarget.current){
+      replaceListing(saved.listing)
+      navigate(spectrumDetailPath(target,saved.item,safeSpectrumReturn(params.get('return')),saved.item.result.curves.find(c=>c.id===saved.curveId)||saved.item.result.curves[0]),{replace:true})
+    }
   }
   useEffect(() => { historyRequest.current++; setHistoryItem(null); setHistoryRuns([]); setHistoryOpen(false); setHistoryLoading(false); return () => { historyRequest.current++ } }, [collectionId, query])
   useEffect(() => {
@@ -272,6 +290,6 @@ export default function SpectrumDetailPage() {
         </Box>
       </Box>
     </Dialog>
-    <Dialog fullScreen transitionDuration={0} open={Boolean(editorInput)} onClose={()=>{}}>{editorInput && <SpectrumManualEditor documents={editorInput.documents} initialPointId={editorInput.initialPointId} focusPointId={editorInput.focusPointId} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} kind={kind} onSave={saveEditor} onClose={()=>setEditorInput(null)}/>}</Dialog>
+    <Dialog fullScreen transitionDuration={0} open={Boolean(editorInput)} onClose={()=>{}}>{editorInput && <SpectrumManualEditor documents={editorInput.documents} initialPointId={editorInput.initialPointId} focusPointId={editorInput.focusPointId} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} kind={kind} onSave={saveEditor} onClose={closeEditor}/>}</Dialog>
   </Box>
 }

@@ -1,0 +1,65 @@
+{
+  "checks": [
+    "版本未变化：刷新当前α²F详情正常，地址不变",
+    "本页主动重算→新版本地址→刷新正常",
+    "另一标签页重算后，旧页刷新自动使用最新版本和URL，无额外选择或写请求",
+    "重用旧链接自动恢复同一谱最新结果，无恢复按钮",
+    "本页编辑保存→新版本地址→刷新正常，人工点持久化",
+    "另一标签页人工保存后，旧地址刷新直接恢复最新结果",
+    "跨标签页版本冲突拒绝旧保存，保留用户未保存坐标且不覆盖已保存谱",
+    "重算请求发送前网络失败不产生新运行，重试成功",
+    "响应丢失后刷新自动恢复服务端已保存运行，不重复提交计算",
+    "声子DOS跨页旧版本同样自动恢复当前结果",
+    "窄屏旧链接自动恢复结果，无额外选择或水平溢出",
+    "材料身份不匹配被拒绝，没有打开其他材料或可写编辑器"
+  ],
+  "findings": [],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/bab7a1c3284b465da7b75c248f60afb4/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/bab7a1c3284b465da7b75c248f60afb4/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/bab7a1c3284b465da7b75c248f60afb4/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/bab7a1c3284b465da7b75c248f60afb4/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/bab7a1c3284b465da7b75c248f60afb4/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/bab7a1c3284b465da7b75c248f60afb4/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/bab7a1c3284b465da7b75c248f60afb4/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/bab7a1c3284b465da7b75c248f60afb4/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/b05712e8137640e69eeba9f7bac6b7c9/recalculate"
+    }
+  ],
+  "screenshots": [
+    "version-auto-latest-after-refresh.png",
+    "version-unsaved-conflict-preserved.png",
+    "version-lost-response-refresh.png",
+    "version-mobile-auto-latest.png"
+  ],
+  "status": "passed",
+  "acceptance": "auto-latest-refresh-verified",
+  "note": "仅自动恢复同身份普通查看；编辑冲突和身份校验继续保留。"
+}

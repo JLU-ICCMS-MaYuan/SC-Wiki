@@ -161,3 +161,10 @@ T048测试执行已完成，V1至V4版本恢复问题仍未修复，不能据此
 - [x] T064 更新tests/01_decentralized_uploading/property-spectra-navigation.test.tsx和spectrum-version-production.cjs，验证旧链接/刷新/并发/历史/错误身份/响应丢失；同步Overview与验证记录，仅任务文件本地提交。
 
 T063/T064证据见auto-latest-validation.md：103项前端、构建和12组隔离正式浏览器通过。此前T048关于V1/V2及V3刷新阻断的结论由本轮修复取代；未增加焦点轮询或自动写重试。
+
+## 切换元素保存并继续编辑
+
+- [x] T065 修改frontend/src/components/spectrumEditor/SpectrumManualEditor.tsx与frontend/src/pages/SpectrumDetailPage.tsx，区分保存切换/返回、更新规范文档和共享版本、保留图像与失败编辑。
+- [x] T066 在tests/01_decentralized_uploading/验证连续元素保存、回切、取消/放弃、失败/重复点击和最终刷新，记录save-continue-validation.md并同步Overview及Issue。
+
+T065/T066证据见save-continue-validation.md：109项前端、构建、新增6组保存切换与既有12组版本浏览器通过；原图资源、连续版本及失败输入保留。
