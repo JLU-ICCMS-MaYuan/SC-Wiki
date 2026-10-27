@@ -19,7 +19,7 @@ def require(condition, message, status=422):
         service.fail("spectra_manual_invalid", message, status)
 
 
-def current(session, ctx, identity, expected=None, base_run=None):
+def current(session, ctx, identity, expected=None, base_run=None, *, allow_state_changed=False):
     require(ctx.get("can_edit"), "没有编辑谱数据的权限", 403)
     row = session.scalar(select(models.SpectrumCollection).where(models.SpectrumCollection.id == identity)
                          .with_for_update().execution_options(populate_existing=True))
@@ -31,7 +31,8 @@ def current(session, ctx, identity, expected=None, base_run=None):
     if ctx["target"] == "paper":
         service.assert_version(row.paper_revision, ctx["paper_revision"])
     state = next((s for s in ctx["states"] if s["state_key"] == row.state_key), None)
-    require(state is not None and row.state_signature == state_signature(state), "材料状态已变化或尚未归属，请刷新核对", 409)
+    require(state is not None, "材料归属已不存在，请返回材料表单核对", 409)
+    require(allow_state_changed or row.state_signature == state_signature(state), "材料状态已变化，请先核对材料条件后继续编辑", 409)
     require("files" not in ctx or row.source_json.get("source_sha256") in {f.get("sha256") for f in ctx["files"]}, "来源文件已变化", 409)
     run = session.get(models.SpectrumRun, row.current_run_id)
     require(run and run.status in {"succeeded", "needs_review"} and (run.result_json or {}).get("curves"), "当前运行尚无可编辑谱数据", 409)
@@ -226,6 +227,18 @@ def zero_report(doc):
                 curves=[dict(id=curve["id"],name=curve["name"],status=status,pointId=confirmed or candidate,nearest=nearest)])
 
 
+def invalidate_derived(payload, reason):
+    checks={key:zero_report(value) for key,value in payload.get("manual_documents",{}).items()}
+    for c in payload["curves"]:
+        if c["kind"] in KINDS and c["id"] not in checks:
+            checks[c["id"]]=dict(complete=False,boundary="missing",zeroPixel=None,completedCount=0,
+                curves=[dict(id=c["id"],name=c.get("projection") or "α²F",status="needs_boundary",pointId=None,nearest=None)])
+    payload["quality"]={"curves":{c["id"]:{"total_points":len(c["points"])} for c in payload["curves"]},
+        "integrals":{"raw":{"status":"unavailable","reason":reason}},"comparisons":{},
+        "dos_mode_integral":{"status":"unavailable","reason":reason},"manual_zero_checks":checks,"limitations":[reason]}
+    payload["candidates"]={};payload["failures"]=[];payload["status"]="needs_review"
+
+
 def save(session,ctx,row,run,document,user):
     require(isinstance(document.get("curves"),list) and len(document["curves"])==1 and isinstance(document["curves"][0],dict), "每次须提交一条曲线")
     cid=document["curves"][0].get("id")
@@ -264,15 +277,7 @@ def save(session,ctx,row,run,document,user):
     payload["curves"]=[changed if c["id"]==cid else c for c in payload["curves"]]
     payload.setdefault("manual_documents",{})[cid]=doc
     reason="人工修订已保存，旧积分已失效；请点击“重新计算”检查并计算当前谱。"
-    checks={key:zero_report(value) for key,value in payload["manual_documents"].items()}
-    for c in payload["curves"]:
-        if c["kind"] in KINDS and c["id"] not in checks:
-            checks[c["id"]]=dict(complete=False,boundary="missing",zeroPixel=None,completedCount=0,
-                curves=[dict(id=c["id"],name=c.get("projection") or "α²F",status="needs_boundary",pointId=None,nearest=None)])
-    payload["quality"]={"curves":{c["id"]:{"total_points":len(c["points"])} for c in payload["curves"]},
-        "integrals":{"raw":{"status":"unavailable","reason":reason}},"comparisons":{},
-        "dos_mode_integral":{"status":"unavailable","reason":reason},"manual_zero_checks":checks,"limitations":[reason]}
-    payload["candidates"]={};payload["failures"]=[];payload["status"]="needs_review"
+    invalidate_derived(payload,reason)
     payload["algorithm_version"]=VERSION
     payload["manual_provenance"]=dict(base_run_id=run.id,author_id=user.id,curve_id=cid,created_at=datetime.now(timezone.utc).isoformat())
     fresh=models.SpectrumRun(id=uuid.uuid4().hex,collection_id=row.id,
@@ -280,4 +285,33 @@ def save(session,ctx,row,run,document,user):
         status="succeeded",calibration_json=copy.deepcopy(run.calibration_json),result_json=payload,completed_at=datetime.now(timezone.utc))
     session.add(fresh);session.flush()
     row.current_run_id=fresh.id;row.version+=1;row.review_json={}
+    return fresh
+
+
+def revalidate(session, ctx, row, run, state, kind, user):
+    require(kind in KINDS, "只支持α²F和声子DOS材料核对")
+    assert_latest(session, ctx, row, kind)
+    require(any(c["kind"] == kind for c in run.result_json["curves"]), "当前谱类型没有数据")
+    signature = state_signature(state)
+    require(row.state_signature != signature, "当前材料条件有效，无需重复核对", 409)
+    payload = copy.deepcopy(run.result_json)
+    now = datetime.now(timezone.utc)
+    payload["state_revalidation"] = dict(base_run_id=run.id, previous_state_signature=row.state_signature,
+        state_signature=signature, author_id=user.id, confirmed_at=now.isoformat(),
+        material_summary={k:state.get(k) for k in (
+            "state_key", "material", "material_name", "pressure_value_gpa", "pressure_min_gpa", "pressure_max_gpa",
+            "reported_space_group_symbol", "temperature_value_k")})
+    invalidate_derived(payload, "材料条件已重新核对；旧积分已失效，请点击重新计算。")
+    version = "spectra-state-revalidation-v1"
+    payload["algorithm_version"] = version
+    fresh = models.SpectrumRun(id=uuid.uuid4().hex, collection_id=row.id,
+        input_hash=fingerprint(dict(parent=run.id, state=signature, actor=user.id, algorithm=version)),
+        algorithm_version=version, status="succeeded", calibration_json=copy.deepcopy(run.calibration_json),
+        result_json=payload, completed_at=now)
+    session.add(fresh)
+    session.flush()
+    row.state_signature = signature
+    row.current_run_id = fresh.id
+    row.version += 1
+    row.review_json = {}
     return fresh

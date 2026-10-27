@@ -37,6 +37,9 @@ with Session(engine) as session:
     image=create_storage().put("spectra/test.png",content,"image/png")
     for kind in ("alpha2f","phonon_dos"):
         rgb,panel=fixture(kind)
+        if os.environ.get("SCWIKI_REVALIDATE_TEST_FIXTURES")=="1" and kind=="alpha2f":
+            panel["curves"][0]["amplitude_evidence"]=None
+            panel["caption"]="合成原图：H3S，200 GPa"
         if kind=="phonon_dos" and os.environ.get("SCWIKI_RECALCULATE_TEST_FIXTURES")=="1":
             panel["curves"][0]["unit"]="modes/THz/primitive_cell"
             panel.update(projection_complete=True,projection_scale_confirmed=True)
@@ -48,6 +51,10 @@ with Session(engine) as session:
         run,_=service.new_run(session,row,panel,ctx["states"][0]);service.complete_run(run,extract_panel(rgb,panel));service.activate(row,run,ctx["states"][0])
         identities[kind]=row.id
     session.commit()
+
+if os.environ.get("SCWIKI_REVALIDATE_TEST_FIXTURES")=="1":
+    # 模拟材料模块更新、来源原图不变；仅浏览器专用服务，未提供业务写入入口。
+    states[0]["property_modules"]=[dict(module_code="superconductive_properties",records=[])]
 
 def database():
     with Session(engine) as session:yield session

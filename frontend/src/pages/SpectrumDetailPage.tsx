@@ -26,6 +26,10 @@ export default function SpectrumDetailPage() {
   const [materialStates, setMaterialStates] = useState<any[]>([]), [statesLoaded, setStatesLoaded] = useState(false)
   const [material, setMaterial] = useState(''), [materialError, setMaterialError] = useState('')
   const [assignedState, setAssignedState] = useState(''), [assigning, setAssigning] = useState(false)
+  const [imageRun,setImageRun]=useState('')
+  const [revalidationInput,setRevalidationInput]=useState<{version:string;collectionVersion:number;runId:string;stateKey:string;material:string;caption:string}|null>(null)
+  const [revalidating,setRevalidating]=useState(false), revalidationLock=useRef(false)
+  const [resumeEditing,setResumeEditing]=useState<string|null>(null)
   const [image, setImage] = useState(''), [imageError, setImageError] = useState(''), [imageRetry, setImageRetry] = useState(0)
   const [actionError, setActionError] = useState(''), [historyItem, setHistoryItem] = useState<PropertySpectrumItem | null>(null)
   const [historyRuns, setHistoryRuns] = useState<Array<{ item: PropertySpectrumItem; run: HistoryRun }>>([])
@@ -51,8 +55,37 @@ export default function SpectrumDetailPage() {
   const unassigned = Boolean(validItem && (!validItem.state_key || statesLoaded && !material))
   const calibration = validItem?.result.calibration
   const canAssign = listing?.can_edit && !historical && statesLoaded && materialStates.length > 0 && Array.isArray(calibration?.curves) && calibration.curves.length > 0
-  const canEdit=Boolean(listing?.can_edit && validItem && !historical && !validItem.stale && !unassigned && !attempt && statesLoaded && image && !imageError && !loading && primary.some(c=>c.kind===kind))
+  const canEdit=Boolean(listing?.can_edit && validItem && !historical && !validItem.stale && !unassigned && !attempt && statesLoaded && image && imageRun===validItem.run.id && !imageError && !loading && primary.some(c=>c.kind===kind))
   const canCalculate=Boolean(listing?.can_edit && validItem && !historical && !validItem.stale && !unassigned && !attempt && statesLoaded && !loading && primary.some(c=>c.kind===kind))
+  const staleReasons=validItem?.stale_reasons||[]
+  const canRevalidate=Boolean(listing?.can_edit && validItem?.stale && !historical && !unassigned && !attempt && statesLoaded && staleReasons.length===1 && staleReasons[0]==='state_changed')
+  const disabledReason=!listing?.can_edit?'当前没有谱数据编辑权限。'
+    : historical?'正在查看历史谱，请打开当前版本后编辑。'
+    : staleReasons.includes('source_changed')?'来源文件已变化，请返回原模块核对来源后重新提取。'
+    : staleReasons.includes('state_missing')||unassigned?'材料归属已不存在或尚未确认，请先核对材料归属。'
+    : validItem?.stale?canRevalidate?'材料条件待重新核对，请点击“核对材料条件并继续编辑”。':'材料条件或来源已变化，请先核对材料与来源。'
+    : materialError||!statesLoaded?materialError||'正在读取材料条件…'
+    : attempt?'当前尚无可编辑的数值曲线。'
+    : loading?'正在读取谱数据…':''
+  const editDisabledReason=disabledReason || (imageError?imageError:!image||imageRun!==validItem?.run.id?'正在读取本版本原图…':recalculating?'正在计算，请稍候。':openingEditor?'正在打开编辑器…':'')
+  const revalidateMaterial=async()=>{
+    if(!canRevalidate||!target||!validItem||!revalidationInput||revalidationLock.current)return
+    revalidationLock.current=true;setRevalidating(true);setActionError('')
+    const input=revalidationInput,context=calculationTarget.current
+    try{
+      const updated=await api.post<PropertySpectrumListing>(SPECTRUM_API+'/'+encodeURIComponent(validItem.id)+'/revalidate',{
+        ...target,expected_version:input.version,expected_collection_version:input.collectionVersion,base_run_id:input.runId,
+        state_key:input.stateKey,kind,confirmed:true})
+      if(calculationTarget.current!==context)return
+      const fresh=updated.items.find(i=>i.id===validItem.id)
+      if(!fresh)throw new Error('核对响应缺少新版本，请刷新后确认。')
+      setRevalidationInput(null);replaceListing(updated)
+      const curve=fresh.result.curves.find(c=>c.id===curveId)||fresh.result.curves.find(c=>c.kind===kind)
+      setResumeEditing(curve?.id||null)
+      navigate(spectrumDetailPath(target,fresh,safeSpectrumReturn(params.get('return')),curve),{replace:true})
+    }catch(error:any){if(calculationTarget.current===context)setActionError(error.message||'材料核对失败，已保存曲线保持不变。')}
+    finally{revalidationLock.current=false;setRevalidating(false)}
+  }
   const recalculate=async()=>{
     if(!canCalculate || !target || !validItem || !listing || calculationLock.current)return
     calculationLock.current=true;setRecalculating(true);setActionError('')
@@ -94,10 +127,10 @@ export default function SpectrumDetailPage() {
   useEffect(() => { historyRequest.current++; setHistoryItem(null); setHistoryRuns([]); setHistoryOpen(false); setHistoryLoading(false); return () => { historyRequest.current++ } }, [collectionId, query])
   useEffect(() => {
     let active = true, url = ''
-    setImage(''); setImageError('')
+    setImage(''); setImageRun(''); setImageError('')
     if (selected) void api.download(SPECTRUM_API + '/' + encodeURIComponent(selected.id) + '/image?' + query).then(blob => {
       url = URL.createObjectURL(blob)
-      if (active) setImage(url); else URL.revokeObjectURL(url)
+      if (active) {setImage(url);setImageRun(selected.run.id||'')} else URL.revokeObjectURL(url)
     }).catch(error => { if (active) setImageError('原图暂不可读取：' + error.message) })
     return () => { active = false; if (url) URL.revokeObjectURL(url) }
   }, [selected?.id, selected?.version, query, imageRetry])
@@ -121,6 +154,12 @@ export default function SpectrumDetailPage() {
     }).catch(error => { if (!controller.signal.aborted) setMaterialError('当前材料条件暂不可读取：' + error.message) })
     return () => controller.abort()
   }, [validItem?.id, validItem?.state_key, query, params.get('return')])
+  useEffect(()=>{
+    if(resumeEditing && canEdit && !revalidating && !editorInput){
+      setResumeEditing(null);void openEditor(resumeEditing)
+    }
+  },[resumeEditing,canEdit,revalidating,editorInput,imageRun])
+  useEffect(()=>{setRevalidationInput(null);setResumeEditing(null)},[collectionId,query])
   const confirmAssignment = async () => {
     if (!target || !validItem || !assignedState || !canAssign || assigning) return
     setAssigning(true); setActionError('')
@@ -196,6 +235,10 @@ export default function SpectrumDetailPage() {
           {historyRuns.map(value => <Box key={value.run.id}><Button size="small" onClick={() => void readHistory(value)}>{value.run.created_at || '时间未记录'} · {value.run.caption || value.item.source.source_name} · {spectrumNames[value.run.status] || value.run.status}</Button></Box>)}
         </Box>}
       </DetailSection>
+      {canRevalidate && <Alert severity="warning" sx={{mb:2}} data-testid="material-revalidation-entry">
+        当前材料条件与这条谱保存时的校验记录不一致。请对照原图核对后继续编辑。
+        <Button disabled={revalidating} onClick={()=>{setActionError('');if(listing&&validItem)setRevalidationInput({version:listing.version,collectionVersion:validItem.version,runId:validItem.run.id||'',stateKey:validItem.state_key||'',material,caption:validItem.result.calibration?.caption||''})}}>核对材料条件并继续编辑</Button>
+      </Alert>}
       {actionError && <Alert severity="error" sx={{ mb: 2 }}>{actionError}</Alert>}
       {selected.run.error_message && <Alert severity="warning" sx={{ mb: 2 }}>{selected.run.error_message}</Alert>}
       {unassigned && !attempt && !historical && <DetailSection title="材料归属待确认">
@@ -206,10 +249,23 @@ export default function SpectrumDetailPage() {
       {imageError && <Alert severity="warning" sx={{ mb: 2 }}>{imageError}<Button onClick={() => setImageRetry(value => value + 1)}>重新读取原图</Button></Alert>}
       {!primary.length && <Alert severity="info" sx={{ mb: 2 }}>尚未得到数值曲线。{(selected.result.failures || selected.result.quality?.limitations || []).map((value: unknown) => typeof value === 'string' ? value : JSON.stringify(value)).join('；')}</Alert>}
       <Box data-testid="spectrum-analysis-grid" sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0,1fr)', lg: primary.length ? 'minmax(0,.85fr) minmax(0,1.15fr)' : 'minmax(0,1fr)' }, gap: 2, alignItems: 'start', mb: 2, '& > .MuiPaper-root': { mb: 0 } }}>
-        <SpectrumResult key={selected.id + selected.run.id + kind} item={selected} curves={primary} image={image} retryImage={() => setImageRetry(value => value + 1)} onEdit={listing?.can_edit && !historical ? openEditor : undefined} editingDisabled={!canEdit || openingEditor || recalculating} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} />
-        {!!primary.length && <SpectrumMetrics item={selected} curves={primary} history={historical} onContinue={canEdit&&!recalculating?(id)=>openEditor(id,true):undefined} onLocate={canEdit?(curve,point)=>openEditor(curve,false,point):undefined} onRecalculate={listing?.can_edit?recalculate:undefined} recalculating={recalculating} calculationDisabled={!canCalculate||openingEditor||Boolean(editorInput)}/>}
+        <SpectrumResult key={selected.id + selected.run.id + kind} item={selected} curves={primary} image={image} retryImage={() => setImageRetry(value => value + 1)} onEdit={listing?.can_edit && !historical ? openEditor : undefined} editingDisabled={!canEdit || openingEditor || recalculating} editingDisabledReason={editDisabledReason} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} />
+        {!!primary.length && <SpectrumMetrics item={selected} curves={primary} history={historical} onContinue={canEdit&&!recalculating?(id)=>openEditor(id,true):undefined} onLocate={canEdit?(curve,point)=>openEditor(curve,false,point):undefined} onRecalculate={listing?.can_edit?recalculate:undefined} recalculating={recalculating} calculationDisabled={!canCalculate||openingEditor||Boolean(editorInput)} calculationDisabledReason={disabledReason||undefined}/>}
       </Box>
     </>}
+    <Dialog open={Boolean(revalidationInput)} onClose={()=>{if(!revalidating)setRevalidationInput(null)}} maxWidth="sm" fullWidth aria-labelledby="revalidate-material-title">
+      <Box sx={{p:3}}>
+        <Typography id="revalidate-material-title" variant="h6">核对这条谱的材料条件</Typography>
+        <Typography sx={{mt:2}} fontWeight={600}>当前已保存材料：{revalidationInput?.material}</Typography>
+        <Typography sx={{mt:1}}>原图说明：{revalidationInput?.caption||'原记录没有图注，请对照来源原图核对。'}</Typography>
+        <Typography variant="body2" sx={{mt:2}}>请确认这条谱仍属于以上材料条件。确认后保留全部点、连线、坐标标定和人工记录，并打开编辑器；旧积分和采纳状态失效。此次确认不代表幅值刻度已核对或科学采纳。</Typography>
+        {actionError && <Alert severity="error" sx={{mt:1}}>{actionError}</Alert>}
+        <Box sx={{display:'flex',gap:1,justifyContent:'flex-end',mt:3}}>
+          <Button disabled={revalidating} onClick={()=>setRevalidationInput(null)}>取消</Button>
+          <Button variant="contained" disabled={revalidating} onClick={revalidateMaterial}>{revalidating?'正在确认…':'确认属于当前材料并继续编辑'}</Button>
+        </Box>
+      </Box>
+    </Dialog>
     <Dialog fullScreen transitionDuration={0} open={Boolean(editorInput)} onClose={()=>{}}>{editorInput && <SpectrumManualEditor documents={editorInput.documents} initialPointId={editorInput.initialPointId} focusPointId={editorInput.focusPointId} imageOpacity={imageOpacity} onOpacityChange={setImageOpacity} kind={kind} onSave={saveEditor} onClose={()=>setEditorInput(null)}/>}</Dialog>
   </Box>
 }

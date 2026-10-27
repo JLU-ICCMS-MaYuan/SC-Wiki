@@ -42,3 +42,6 @@ Point.joinTo可选字符串指向同曲线另一已有点，表达尾点附加�
 
 ## 拓扑诊断与定位
 quality.trace_diagnostics为重算派生JSON，无DDL；点坐标及ID由保存谱生成，不改变点或连接。编辑器initialPointId只作选中，focusPointId作一次性视图定位，不写数据库或撤销历史。
+
+## 材料确认版本
+复用SpectrumRun，无DDL。state_revalidation记录base_run_id、previous_state_signature、state_signature、author_id、confirmed_at及material_summary；旧run保留。数值点/标定/编辑文档原样复制，派生积分与采纳清空。

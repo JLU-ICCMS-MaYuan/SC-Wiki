@@ -40,3 +40,9 @@ quality.integrals.raw新增parameters.lambda/omega_log独立status/value/reason�
 
 ## 拓扑诊断
 重算响应quality.trace_diagnostics[kind]含curves列表，每项curve_id/name/component_count/point_count/issues。issue包含kind/message/points，points含point_id/frequency_thz/amplitude/x/y，像素不可确定时为null。问题类型disconnected/isolated/cycle/branch/invalid。诊断属于返回的新run，编辑保存后失效；公开接口移除。无新写入接口。
+
+
+## 显式重新核对材料条件
+
+POST /api/rag/spectra/{id}/revalidate：target/target_id/expected_version/expected_collection_version/base_run_id/kind/state_key/confirmed:true。仅同来源、当前存在的同state_key允许重新确认；不接受点/标定/新材料身份替换。不满足前提409/403/422；成功返回listing和新run。确认说明：沿用当前谱到当前已保存材料条件，不等于科学采纳。
+listing的stale_reasons为historical/source_changed/state_missing/state_changed数组，只读展示。内部state_revalidation不公开。

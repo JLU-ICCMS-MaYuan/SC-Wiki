@@ -55,3 +55,11 @@ FR-055/057→独立topology模块构建稳定ID邻接表并迭代遍历连通分
 FR-055→重算quality.trace_diagnostics[kind]存报告，原run不修改；新失败和成功重算均生成诊断，人工save质量重置使旧诊断失效。旧重算结果没有诊断时通过现有重新计算入口更新，不增加迁移或后台业务写入。公开结果剥离该内部诊断，避免暴露未采纳点。
 FR-056→SpectrumMetrics传curveId/pointId到页面openEditor，沿用GET manual版本核对并确认点存在。editor初始选点传给SourceCanvas一次性定位，初始化fit/ResizeObserver完成后将点置于图窗中心并适度放大；之后用户自由缩放/平移，不随每帧拖动重新居中。坐标与点表使用现有selected同步。
 FR-057→前端每页12条诊断，仅渲染当前页；坐标和文案不复制到λ/ωlog两个参数中。SC-031/032→拓扑单元测试、正式HTTP保存/重算、当前MySQL保护和浏览器点击/删除/撤销/版本冲突/窄屏证据。
+
+
+## 材料状态重新核对恢复
+
+FR-058→listing增加stale_reasons（historical/source_changed/state_missing/state_changed），前端在02/03操作区域显示具体禁用原因。老响应缺字段时仅显示材料/来源待核对，不猜已满足恢复条件。
+FR-059/060→POST /{collection_id}/revalidate复用权限、集合锁、内容版本/集合版本/基础run校验，唯一例外为允许state_signature不一致；仍要求同state_key存在、来源文件哈希有效、当前同类最新集合，必须confirmed=true。按当前ctx state_signature更新集合，新建immutable run，复制全部点/标定/编辑文档/操作，不重新提取。派生质量清理与manual.save共用，零频按保存文档重建；旧采纳和候选清除。顶层state_revalidation记录来源run、旧/新签名、作者、时间及当前材料摘要；公开过滤移除。
+FR-061→前端确认对话框读取当前材料摘要及原图caption，复核提示只能说明原记录和当前条件，不能伪造旧条件快照。提交携带已展示listing.version/state_key，成功替换listing并导航新版本；随后可继续点击编辑。取消不发写请求；失败保留详情。编辑原因另补原图/材料加载原因，不将幅值警告混作编辑门槛。
+SC-033/034→正式HTTP/当前MySQL并发、浏览器复现state_changed且source有效、取消不写、恢复后编辑/重算、来源变化拒绝、历史和材料删除拒绝、公开字段过滤与Demo保护。用户真实谱保持只读。

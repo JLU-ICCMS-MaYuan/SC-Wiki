@@ -1,0 +1,12 @@
+[
+  {
+    "suite": "diagnostics",
+    "exit_code": 0,
+    "test_root": "/tmp/scwiki-manual-test-full-diagnostics-8g_yfyct"
+  },
+  {
+    "suite": "recalculate",
+    "exit_code": 0,
+    "test_root": "/tmp/scwiki-manual-test-full-recalculate-8b8sdd7b"
+  }
+]

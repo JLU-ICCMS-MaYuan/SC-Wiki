@@ -95,7 +95,7 @@ it('历史读取失败保留当前谱，成功后使用历史运行并禁止当�
   await userEvent.click(await screen.findByRole('button', {name:'查看提取历史'}))
   await userEvent.click(await screen.findByRole('button', {name:/2026-10-01.*历史原始标定/}))
   expect(await screen.findByText('历史原始标定', {selector:'p'})).toBeInTheDocument()
-  expect(screen.getByText('当前为历史、失效或限定频段版本，不展示完整谱计算结果。')).toBeInTheDocument()
+  expect(screen.getAllByText('正在查看历史谱，请打开当前版本后编辑。').length).toBeGreaterThan(0)
 })
 it('正式详情移除候选、重复审核与详情逐点表', async () => {
   render(<MemoryRouter initialEntries={[address()]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage />} /></Routes></MemoryRouter>)
@@ -354,4 +354,36 @@ it('版本恢复特征：原模块保留旧链接，手动刷新谱状态后链�
   fireEvent.click(screen.getByRole('button',{name:'刷新谱状态'}))
   await waitFor(()=>expect(screen.getByRole('link',{name:'查看 α²F'}).getAttribute('href')).toContain('collection_version=3'))
   expect(screen.getByLabelText('未保存主表单')).toHaveValue('用户正在编辑')
+})
+
+
+it('材料失效解释禁用原因，确认窗口取消不写，提交携带展示的内容与谱版本', async () => {
+  listing.items[0].stale=true;listing.items[0].stale_reasons=['state_changed']
+  render(<MemoryRouter initialEntries={[address()]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage/>}/></Routes></MemoryRouter>)
+  const entry=await screen.findByRole('button',{name:'核对材料条件并继续编辑'})
+  expect(screen.getByRole('button',{name:'编辑',exact:true})).toBeDisabled()
+  expect(screen.getByRole('button',{name:'重新计算',exact:true})).toBeDisabled()
+  expect(screen.getAllByText(/材料条件待重新核对/).length).toBeGreaterThan(0)
+  fireEvent.click(entry)
+  expect(await screen.findByRole('dialog',{name:'核对这条谱的材料条件'})).toBeInTheDocument()
+  fireEvent.click(screen.getByRole('button',{name:'取消',exact:true}))
+  expect(api.post).not.toHaveBeenCalled()
+  fireEvent.click(entry)
+  vi.mocked(api.post).mockRejectedValueOnce(new Error('内容或谱版本已变化，请刷新后重试'))
+  fireEvent.click(screen.getByRole('button',{name:'确认属于当前材料并继续编辑'}))
+  await waitFor(()=>expect(api.post).toHaveBeenCalledWith('/api/rag/spectra/collection/revalidate',{
+    target:'upload',target_id:'task',expected_version:'v1',expected_collection_version:2,base_run_id:'run1',
+    state_key:'sample',kind:'phonon_dos',confirmed:true
+  }))
+  expect((await screen.findAllByText(/内容或谱版本已变化/)).length).toBeGreaterThan(0)
+  expect(screen.getByRole('dialog')).toBeInTheDocument()
+})
+
+it.each(['source_changed','state_missing'])('来源或材料已丢失时不提供核对恢复入口：%s',async reason=>{
+  listing.items[0].stale=true;listing.items[0].stale_reasons=[reason]
+  render(<MemoryRouter initialEntries={[address()]}><Routes><Route path="/spectra/:collectionId" element={<SpectrumDetailPage/>}/></Routes></MemoryRouter>)
+  await screen.findByRole('button',{name:'编辑',exact:true})
+  await waitFor(()=>expect(screen.queryByText('正在读取材料条件…')).toBeNull())
+  expect(screen.getByRole('button',{name:'编辑',exact:true})).toBeDisabled()
+  expect(screen.queryByRole('button',{name:'核对材料条件并继续编辑'})).toBeNull()
 })

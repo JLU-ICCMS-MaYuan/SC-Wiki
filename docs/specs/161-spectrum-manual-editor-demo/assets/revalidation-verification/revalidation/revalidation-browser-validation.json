@@ -1,0 +1,43 @@
+{
+  "checks": [
+    "原图相同但材料签名过期时显示具体原因及可用恢复入口，幅值提示不冒充禁用原因",
+    "确认窗口展示当前材料/原图说明，取消不产生任何写入",
+    "恢复提交发生版本冲突时保留对话框，不打开错误数据或覆盖谱",
+    "显式确认后新建版本并自动打开编辑器，全部曲线/标定保持不变，重复点击受限",
+    "刷新仍保持恢复后的新版本，幅值依据缺失时编辑和重算按钮可用",
+    "恢复后可以真实编辑保存并主动重算，科学依据不足返回原因而非锁死操作",
+    "声子DOS使用相同恢复流程，分波点逐项保持，390px确认/编辑/详情均可操作",
+    "旧运行保留，浏览器无脚本错误，写入均限于隔离恢复/保存/重算路由"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0b3af38acc5e4bd1a7cc232581c60659/revalidate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0b3af38acc5e4bd1a7cc232581c60659/revalidate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0b3af38acc5e4bd1a7cc232581c60659/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/0b3af38acc5e4bd1a7cc232581c60659/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ad9f2567f9314d2ca876905b44f20091/revalidate"
+    }
+  ],
+  "screenshots": [
+    "revalidation-stale-with-action.png",
+    "revalidation-confirm-dialog.png",
+    "revalidation-alpha-editor-unlocked.png",
+    "revalidation-dos-mobile-editor.png",
+    "revalidation-dos-mobile-detail.png"
+  ],
+  "status": "passed"
+}

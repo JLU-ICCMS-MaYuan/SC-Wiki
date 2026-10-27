@@ -4,7 +4,7 @@ export type PropertySpectrumTarget = { target: 'upload' | 'paper' | 'revision'; 
 export interface PropertySpectrumPoint { id?: string; connectTo?: string; joinTo?: string; segment?: string; breakBefore?: boolean; manual?: boolean;  frequency_thz: number; frequency_pixel?: number; amplitude_pixel?: number | null; observed_amplitude: number | null; reconstructed_amplitude: number | null; status: string; detection_mode?: string }
 export interface PropertySpectrumCurve { manual_trace?: boolean;  id: string; kind: string; projection?: string | null; unit: string; points: PropertySpectrumPoint[]; frequency_direction?: 'x' | 'y'; roi?: number[]; display_bbox?: number[] | null; axis_calibration?: { amplitude: { slope: number; intercept: number }; frequency: { slope: number; intercept: number } } }
 export interface PropertySpectrumItem {
-  id: string; version: number; state_key: string | null; stale: boolean
+  id: string; version: number; state_key: string | null; stale: boolean; stale_reasons?: string[]
   recorded_at?: string; historical?: boolean; recorded_state_key?: string | null; recorded_caption?: string
   source: { source_name?: string; pdf_page?: number; panel_id?: string; size_px?: number[]; [key: string]: unknown }
   run: { id?: string; status: string; error_message?: string; algorithm_version?: string }

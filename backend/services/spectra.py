@@ -171,6 +171,7 @@ def mask_public(payload, reviews):
     output = copy.deepcopy(payload)
     output.pop("manual_documents", None)
     output.pop("manual_provenance", None)
+    output.pop("state_revalidation", None)
     output.get("quality", {}).pop("manual_zero_checks", None)
     output.get("quality", {}).pop("recalculations", None)
     output.get("quality", {}).pop("trace_diagnostics", None)
@@ -281,7 +282,16 @@ def listing(session, ctx, *, run_override=None):
             continue
         source_stale = ("files" in ctx and row.source_json.get("source_sha256") not in
                         {f.get("sha256") for f in ctx["files"]})
-        stale = historical or source_stale or row.state_signature != state_signature(states.get(row.state_key))
+        stale_reasons = []
+        if historical:
+            stale_reasons.append("historical")
+        if source_stale:
+            stale_reasons.append("source_changed")
+        if row.state_key not in states:
+            stale_reasons.append("state_missing")
+        elif row.state_signature != state_signature(states[row.state_key]):
+            stale_reasons.append("state_changed")
+        stale = bool(stale_reasons)
         reviews = {} if stale else row.review_json or {}
         payload = run.result_json or dict(curves=[], candidates={}, quality={}, failures=[])
         # 排队或失败的新运行也保留其真实标定，供按谱类型导航；不生成数值曲线。
@@ -299,7 +309,7 @@ def listing(session, ctx, *, run_override=None):
             payload = mask_public(payload, reviews)
             if not payload["curves"]:
                 continue
-        result.append(dict(id=row.id, version=row.version, state_key=row.state_key, stale=stale,
+        result.append(dict(id=row.id, version=row.version, state_key=row.state_key, stale=stale, stale_reasons=stale_reasons,
             source=row.source_json, run=dict(id=run.id, status=status, error_code=run.error_code,
                 error_message=run.error_message, algorithm_version=run.algorithm_version, model_name=run.model_name),
             result=payload, review=reviews, historical=historical,

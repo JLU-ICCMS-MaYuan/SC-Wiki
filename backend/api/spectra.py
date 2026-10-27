@@ -45,6 +45,24 @@ class RecalculateRequest(ExtractRequest):
     kind: Literal["alpha2f", "phonon_dos"]
 
 
+class RevalidateRequest(RecalculateRequest):
+    state_key: str = Field(min_length=1, max_length=96)
+    confirmed: Literal[True]
+
+
+@router.post("/{collection_id}/revalidate")
+def revalidate(collection_id: str, body: RevalidateRequest, user=Depends(get_current_user), session: Session=Depends(get_db)):
+    from backend.spectra import manual
+    ctx = service.context(session, body.target, body.target_id, user, write=True)
+    service.assert_version(ctx["version"], body.expected_version)
+    row, run, state = manual.current(session, ctx, collection_id, body.expected_collection_version,
+                                     body.base_run_id, allow_state_changed=True)
+    service.assert_version(row.state_key, body.state_key)
+    manual.revalidate(session, ctx, row, run, state, body.kind, user)
+    session.commit()
+    return service.listing(session, ctx)
+
+
 @router.post("/{collection_id}/recalculate")
 def recalculate(collection_id: str, body: RecalculateRequest, user=Depends(get_current_user), session: Session=Depends(get_db)):
     from backend.spectra import manual, recalculate as calculation

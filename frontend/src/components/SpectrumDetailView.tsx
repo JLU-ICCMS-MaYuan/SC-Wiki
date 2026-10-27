@@ -19,7 +19,7 @@ export function DetailSection({ title, children, action }: { title: string; chil
   return <Paper variant="outlined" sx={boxStyle}><Box sx={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:1,flexWrap:'wrap',mb:2}}><Typography variant="h6" sx={{ fontSize: 17 }}>{title}</Typography>{action}</Box>{children}</Paper>
 }
 
-export function SpectrumResult({ item, curves, image, retryImage, onEdit, editingDisabled = false, imageOpacity, onOpacityChange }: { item: Item; curves: Curve[]; image: string; retryImage: () => void; onEdit?: (curveId?: string) => void; editingDisabled?: boolean; imageOpacity?:number; onOpacityChange?:(value:number)=>void }) {
+export function SpectrumResult({ item, curves, image, retryImage, onEdit, editingDisabled = false, editingDisabledReason, imageOpacity, onOpacityChange }: { item: Item; curves: Curve[]; image: string; retryImage: () => void; onEdit?: (curveId?: string) => void; editingDisabled?: boolean; editingDisabledReason?:string; imageOpacity?:number; onOpacityChange?:(value:number)=>void }) {
   const [mode, setMode] = useState('overlay'), [projection, setProjection] = useState('all'), [localOpacity, setLocalOpacity] = useState(100)
   const opacity=imageOpacity??localOpacity, setOpacity=onOpacityChange||setLocalOpacity
   const dos = curves[0]?.kind === 'phonon_dos'
@@ -27,6 +27,7 @@ export function SpectrumResult({ item, curves, image, retryImage, onEdit, editin
   const document=displayDocument(item,selected,image)
   return <DetailSection title="02 · 原图与提取结果">
     {onEdit && <Box sx={{textAlign:'right',mb:1}}><Button variant="contained" disabled={editingDisabled} onClick={()=>onEdit(selected[0]?.id)}>编辑</Button></Box>}
+    {editingDisabled && editingDisabledReason && <Typography role="status" variant="body2" color="text.secondary" sx={{mb:1}}>{editingDisabledReason}</Typography>}
     <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'space-between', mb: 2 }}>
       {dos ? <TextField select size="small" label="分波态密度" value={projection} onChange={e => setProjection(e.target.value)} sx={{ minWidth: 180 }}>
         <MenuItem value="all">全部分波</MenuItem>{curves.map(c => <MenuItem key={c.id} value={c.id}>仅 {c.projection || c.id}</MenuItem>)}
@@ -37,15 +38,15 @@ export function SpectrumResult({ item, curves, image, retryImage, onEdit, editin
       : <SpectrumFigure item={item} curves={selected} allCurves={curves} image={image} mode={mode} opacity={.85} />}
     {curves[0]?.kind === 'alpha2f' && mode !== 'source' && <Typography variant="caption" sx={{ color: spectrumCurveColor(curves[0], 0) }}>红线：α²F 提取数据</Typography>}
 
-    {curves.some(c => c.kind === 'alpha2f' && !item.result.manual_documents?.[c.id]?.calibration.amplitudeEvidence && !item.result.calibration?.curves?.find((value: { id: string; amplitude_evidence?: string }) => value.id === c.id)?.amplitude_evidence) && <Alert severity="info" sx={{ mt: 1 }}>此版本的 α²F 幅值标定尚待核对，显示旧提取记录不代表其刻度已确认。</Alert>}
+    {curves.some(c => c.kind === 'alpha2f' && !item.result.manual_documents?.[c.id]?.calibration.amplitudeEvidence && !item.result.calibration?.curves?.find((value: { id: string; amplitude_evidence?: string }) => value.id === c.id)?.amplitude_evidence) && <Alert severity="info" sx={{ mt: 1 }}>α²F 幅值标定待核对，可在编辑器中补充刻度与依据；不影响编辑和保存。</Alert>}
     {mode !== 'data' && !image && <Button onClick={retryImage}>重新读取原图</Button>}
     {dos && <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 1 }}>{selected.map((c, i) => <Typography key={c.id} variant="caption" sx={{ color: spectrumCurveColor(c, i) }}>{c.projection || c.id}</Typography>)}</Box>}
   </DetailSection>
 }
 
-export function SpectrumMetrics({ item, curves, history, onContinue, onRecalculate, onLocate, recalculating=false, calculationDisabled=false }: {
+export function SpectrumMetrics({ item, curves, history, onContinue, onRecalculate, onLocate, recalculating=false, calculationDisabled=false, calculationDisabledReason }: {
   item: Item; curves: Curve[]; history: boolean; onContinue?: (curveId?: string) => void;
-  onLocate?: (curveId:string,pointId:string)=>void; onRecalculate?: () => void; recalculating?: boolean; calculationDisabled?: boolean
+  onLocate?: (curveId:string,pointId:string)=>void; onRecalculate?: () => void; recalculating?: boolean; calculationDisabled?: boolean; calculationDisabledReason?:string
 }) {
   const dos = curves[0]?.kind === 'phonon_dos', q = item.result.quality || {}, raw = q.integrals?.raw || {}, comparisons = q.comparisons?.raw || {}
   const manualZero=combinedZeroCheck(item,curves)
@@ -70,7 +71,7 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
       reasonGroups.set(reason,[...(reasonGroups.get(reason)||[]),key==='lambda'?'λ':'ωlog'])
     }
   }
-  const reasons=restricted ? ['当前为历史、失效或限定频段版本，不展示完整谱计算结果。'] : dos ? [mode.reason].filter(Boolean)
+  const reasons=restricted ? [calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。'] : dos ? [mode.reason].filter(Boolean)
     : [...reasonGroups].map(([reason,labels])=>labels.join('、')+'：'+reason)
   return <DetailSection title={dos ? '03 · 频段与数据完整性' : '03 · 积分结果与参考值对比'} action={onRecalculate && <Button variant="outlined" onClick={onRecalculate} disabled={calculationDisabled||recalculating} aria-busy={recalculating}>{recalculating?'计算中…':'重新计算'}</Button>}>
     <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', mb: 2 }}><Box><Typography variant="caption" color="text.secondary">实际提取频率范围</Typography><Typography fontWeight={600}>{spectrumInterval(curves)}</Typography></Box>
@@ -84,6 +85,7 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
           return <TableRow key={key}><TableCell>{label}</TableCell><TableCell>{available ? spectrumNumber(parameters[key].value) : '—'}</TableCell><TableCell>{comparable ? spectrumNumber(c.reference) : '—'}</TableCell><TableCell>{comparable ? spectrumNumber(c.absolute_difference) : '—'}</TableCell></TableRow>
         })}
     </TableBody></Table></Box>
+    {!restricted && calculationDisabled && calculationDisabledReason && <Typography variant="body2" color="text.secondary" sx={{mt:1}}>{calculationDisabledReason}</Typography>}
     {reasons.map(reason=><Typography key={String(reason)} variant="body2" color="text.secondary" sx={{mt:1}}>{String(reason)}</Typography>)}
     {!restricted && diagnostics && <TraceDiagnostics key={item.run.id} report={diagnostics} onLocate={onLocate} disabled={recalculating||calculationDisabled}/> }
     {calculation && <Typography variant="caption" display="block" sx={{mt:1}}>本版本计算时间：{new Date(calculation.calculated_at).toLocaleString()}</Typography>}

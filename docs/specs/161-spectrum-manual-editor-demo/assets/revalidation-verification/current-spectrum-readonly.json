@@ -1,0 +1,12 @@
+{
+  "read_only": true,
+  "collection_id": "afd8723697e84425b75790cfbafb4862",
+  "version": 5,
+  "run_id": "069e542aba8e45dca77a60d5ba0b9d22",
+  "stale": true,
+  "stale_reasons": [
+    "state_changed"
+  ],
+  "can_edit": true,
+  "recovery_precondition": true
+}
