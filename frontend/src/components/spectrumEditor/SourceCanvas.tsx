@@ -2,7 +2,7 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 import AxisOverlay from './AxisOverlay'
 import { recognizedAxes } from './axisGeometry'
 import { fitViewport, zoomViewport, wheelPixels, wheelFactor } from './viewport'
-import { addPoint, appendPoint, amplitudePixel, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
+import { addPoint, appendPoint, snapTarget, joinExistingPoint, hasPointConnection, SNAP_RADIUS_PX, amplitudePixel, curvePath, frequency, markZero, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
 
 export type Tool = 'select' | 'pan' | 'add' | 'box' | 'zero' | 'zeroPoint' | 'calibrate'
 type Props = {
@@ -20,10 +20,19 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
   const [view, setView] = useState<Rect>(initial), [preview, setPreview] = useState<Document | null>(null)
   const [showAxes, setShowAxes] = useState(true)
   const tail=useRef<string|null>(null),latest=useRef(doc),pendingAdd=useRef<DOMPoint|null>(null)
+  const [snapId,setSnapId]=useState<string|null>(null), snappedEnd=useRef<{tailId:string;targetId:string}|null>(null)
   latest.current=doc
-  useEffect(()=>{tail.current=null},[tool,active,doc.id])
+  useEffect(()=>{tail.current=null;snappedEnd.current=null;setSnapId(null);pendingAdd.current=null},[tool,active,doc.id])
   useEffect(()=>{if(tail.current && !doc.curves.find(c=>c.id===active)?.points.some(p=>p.id===tail.current))tail.current=null},[doc,active])
-  useEffect(()=>{if(tail.current && selected[0]!==tail.current)tail.current=null},[selected])
+  useEffect(()=>{
+    const end=snappedEnd.current,current=doc.curves.find(c=>c.id===active)
+    if(!end||!current)return
+    if(!current.points.some(p=>p.id===end.tailId)||!current.points.some(p=>p.id===end.targetId)
+      ||end.tailId!==end.targetId&&!hasPointConnection(doc,current,end.tailId,end.targetId)){
+      snappedEnd.current=null;setSnapId(null);tail.current=null
+    }
+  },[doc,active])
+  useEffect(()=>{if(tail.current && selected[0]!==tail.current)tail.current=null;if(snappedEnd.current&&selected[0]!==snappedEnd.current.targetId){snappedEnd.current=null;setSnapId(null)}},[selected])
   const [fit, setFit] = useState<Rect>(initial), fitRef = useRef<Rect>(initial()), manualView = useRef(false)
   const [box, setBox] = useState<Rect | null>(null), [imageFailed, setImageFailed] = useState(false), [retry, setRetry] = useState(0), [scale, setScale] = useState(1)
   const clip = useId().replace(/:/g, ''), scene = preview || doc
@@ -32,6 +41,7 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
     ? gesture.current.prepared : prepareMove(doc, active, selected[0], linked), [doc, active, selected[0], linked])
   const renderCurves=[...scene.curves,...referenceCurves.filter(c=>!scene.curves.some(v=>v.id===c.id))]
   const paths = new Map(renderCurves.map(c => [c.id, curvePath(scene, c)]))
+  const snappedPoint=curve.points.find(p=>p.id===snapId)
   const [x0, y0, x1, y1] = scene.source.plot
   useEffect(() => { manualView.current=false; setImageFailed(false); setPreview(null) }, [doc.id])
   useEffect(() => {
@@ -97,17 +107,25 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       onContextMenu={e => e.preventDefault()}
       onClick={event=>{
         if(!editing || imageFailed || tool!=='add' || event.button!==0 || event.altKey)return
-        if(event.detail>=2){tail.current=null;onFinishAdd?.();return}
+        if(event.detail>=2){tail.current=null;snappedEnd.current=null;setSnapId(null);onFinishAdd?.();return}
+        if(snappedEnd.current)return
         operate(()=>{
           const current=latest.current,anchor=tail.current || (selected.length===1?selected[0]:''),position=pendingAdd.current || pointer(event.clientX,event.clientY)
           pendingAdd.current=null
           const parent=current.curves.find(c=>c.id===active)?.points.find(p=>p.id===anchor)
+          const currentCurve=current.curves.find(c=>c.id===active)!
+          const target=snapTarget(currentCurve,position.x,position.y,svg.current!.getScreenCTM()!.a,anchor)
+          if(target && parent){
+            const next=joinExistingPoint(current,active,parent.id,target.id)
+            latest.current=next;snappedEnd.current={tailId:parent.id,targetId:target.id};setSnapId(target.id)
+            onChange?.(next);onSelect?.([target.id]);onAdded?.(target.id);return
+          }
           if(parent && Math.hypot(parent.x-position.x,parent.y-position.y)<=1e-4)return
           const next=appendPoint(current,active,anchor,position.x,position.y),added=next.curves.find(c=>c.id===active)!.points.at(-1)!
           latest.current=next;tail.current=added.id;onChange?.(next);onSelect?.([added.id]);onAdded?.(added.id)
         })
       }}
-      onDoubleClick={event=>{if(editing && tool==='add'){event.preventDefault();tail.current=null;onFinishAdd?.()}}}
+      onDoubleClick={event=>{if(editing && tool==='add'){event.preventDefault();tail.current=null;snappedEnd.current=null;setSnapId(null);onFinishAdd?.()}}}
       onPointerDown={event => {
         const pan = editing && tool === 'pan' || event.button === 1 || event.button === 2 || event.altKey
         if (!pan && (!editing || imageFailed || event.button !== 0)) return
@@ -128,7 +146,13 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       }}
       onPointerMove={event => {
         const g = gesture.current
-        if (!g) return
+        if (!g) {
+          if(editing && tool==='add' && !imageFailed && !snappedEnd.current) {
+            const p=pointer(event.clientX,event.clientY),target=snapTarget(curve,p.x,p.y,svg.current!.getScreenCTM()!.a,tail.current||(selected.length===1?selected[0]:undefined))
+            setSnapId(previous=>previous===(target?.id||null)?previous:target?.id||null)
+          }
+          return
+        }
         const p = pointer(event.clientX, event.clientY)
         if (g.kind === 'pan') {
           setView([g.view[0]-(event.clientX-g.clientStart!.x)/g.screenScale!,g.view[1]-(event.clientY-g.clientStart!.y)/g.screenScale!,g.view[2],g.view[3]])
@@ -154,6 +178,11 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
       {scene.zero && (scene.calibration.direction === 'y'
         ? <line data-testid="zero-line" x1={x0} x2={x1} y1={scene.zero.pixel} y2={scene.zero.pixel} stroke="#e28a19" strokeWidth={1.5 / scale} strokeDasharray={`${5 / scale} ${4 / scale}`} />
         : <line data-testid="zero-line" y1={y0} y2={y1} x1={scene.zero.pixel} x2={scene.zero.pixel} stroke="#e28a19" strokeWidth={1.5 / scale} strokeDasharray={`${5 / scale} ${4 / scale}`} />)}
+      {editing && tool==='add' && snappedPoint && <g data-testid="snap-target" data-point-id={snappedPoint.id} pointerEvents="none">
+        <circle cx={snappedPoint.x} cy={snappedPoint.y} r={SNAP_RADIUS_PX/scale} fill="#0baf7622" stroke="#0b9f6a" strokeWidth={1.8/scale}/>
+        <text x={snappedPoint.x+(snappedPoint.x>view[0]+view[2]/2?-12:12)/scale} y={snappedPoint.y+(snappedPoint.y<view[1]+28/scale?20:-12)/scale}
+          textAnchor={snappedPoint.x>view[0]+view[2]/2?'end':'start'} fontSize={11/scale} fill="#078653" stroke="white" strokeWidth={3/scale} paintOrder="stroke">吸附到已有点 · 双击结束</text>
+      </g>}
       {box && <rect x={box[0]} y={box[1]} width={box[2]} height={box[3]} fill="#6455e822" stroke="#6455e8" strokeWidth={1 / scale} />}
 
     </svg>

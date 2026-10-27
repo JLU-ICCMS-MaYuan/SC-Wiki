@@ -194,6 +194,8 @@ def mask_public(payload, reviews):
                 if point.get("connectTo") and point["connectTo"] not in visible_ids:
                     point.pop("connectTo")
                     point["breakBefore"]=True
+                if point.get("joinTo") and point["joinTo"] not in visible_ids:
+                    point.pop("joinTo")
         curve["acceptance"] = decision
         selected.append(curve)
     output["curves"] = selected
@@ -346,6 +348,8 @@ def review_curve(session, ctx, row, curve_id, status, intervals, reason, user):
     if any(not math.isfinite(v) for pair in intervals for v in pair):
         fail("spectra_interval_invalid", "有效频段必须为有限数值", 422)
     f = [p["frequency_thz"] for p in curve["points"]]
+    if status in {"accepted", "accepted_limited"} and curve.get("manual_trace") and any(p.get("joinTo") for p in curve["points"]):
+        fail("spectra_manual_join_unverified", "人工描线含吸附连接，请整理并核对单值谱后再采纳", 422)
     if status in {"accepted", "accepted_limited"} and curve.get("manual_trace") and any(
             p.get("connectTo") and (i == 0 or p["connectTo"] != curve["points"][i-1].get("id"))
             for i,p in enumerate(curve["points"])):

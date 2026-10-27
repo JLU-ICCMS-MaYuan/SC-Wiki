@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from './api'
 export type PropertySpectrumTarget = { target: 'upload' | 'paper' | 'revision'; target_id: string }
-export interface PropertySpectrumPoint { id?: string; connectTo?: string; segment?: string; breakBefore?: boolean; manual?: boolean;  frequency_thz: number; frequency_pixel?: number; amplitude_pixel?: number | null; observed_amplitude: number | null; reconstructed_amplitude: number | null; status: string; detection_mode?: string }
+export interface PropertySpectrumPoint { id?: string; connectTo?: string; joinTo?: string; segment?: string; breakBefore?: boolean; manual?: boolean;  frequency_thz: number; frequency_pixel?: number; amplitude_pixel?: number | null; observed_amplitude: number | null; reconstructed_amplitude: number | null; status: string; detection_mode?: string }
 export interface PropertySpectrumCurve { manual_trace?: boolean;  id: string; kind: string; projection?: string | null; unit: string; points: PropertySpectrumPoint[]; frequency_direction?: 'x' | 'y'; roi?: number[]; display_bbox?: number[] | null; axis_calibration?: { amplitude: { slope: number; intercept: number }; frequency: { slope: number; intercept: number } } }
 export interface PropertySpectrumItem {
   id: string; version: number; state_key: string | null; stale: boolean

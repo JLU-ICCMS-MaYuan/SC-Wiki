@@ -161,15 +161,31 @@ def checked_document(body, seed):
         require(set(curve) <= {"id","name","color","points","pathOrdered"} and curve.get("pathOrdered") is True, "曲线字段或描线顺序标记无效")
         require(all(curve[k] == original[k] for k in ("id","name","color")), "曲线身份不匹配")
         require(isinstance(curve["points"],list) and len(curve["points"]) <= 20000, "数据点超过20000个")
+        require(all(isinstance(p,dict) for p in curve["points"]), "点结构无效")
         ids=set();x0,y0,x1,y1=source["plot"]
+        curve_ids={p.get("id") for p in curve["points"]}
         for p in curve["points"]:
-            require(set(p) <= {"id","x","y","segment","status","manual","breakBefore","connectTo"}, "点含不支持字段")
+            require(set(p) <= {"id","x","y","segment","status","manual","breakBefore","connectTo","joinTo"}, "点含不支持字段")
             require(isinstance(p["id"],str) and 0<len(p["id"])<=160 and p["id"] not in ids, "点身份重复或无效")
             require("connectTo" not in p or isinstance(p["connectTo"],str) and p["connectTo"] in ids, "描线前驱必须属于当前曲线且位于该点之前")
+            require("joinTo" not in p or isinstance(p["joinTo"],str) and p["joinTo"] != p["id"] and p["joinTo"] in curve_ids, "吸附目标必须是同曲线其他已有点")
             ids.add(p["id"])
             require(finite(p["x"]) and finite(p["y"]) and x0<=p["x"]<=x1 and y0<=p["y"]<=y1, "点像素超出图框或不是有限值")
             require(isinstance(p["segment"],str) and len(p["segment"])<=160 and isinstance(p["status"],str) and len(p["status"])<=96, "点来源字段无效")
             require(all(k not in p or isinstance(p[k],bool) for k in ("manual","breakBefore")), "连线标记无效")
+        edges=set()
+        for i,p in enumerate(curve["points"]):
+            previous=curve["points"][i-1] if i else None
+            parent=p.get("connectTo")
+            if parent is None and previous:
+                connected=(not p["breakBefore"]) if "breakBefore" in p else previous["segment"]==p["segment"] or previous.get("manual") or p.get("manual")
+                if connected: parent=previous["id"]
+            if parent: edges.add(tuple(sorted((p["id"],parent))))
+        for p in curve["points"]:
+            if p.get("joinTo"):
+                edge=tuple(sorted((p["id"],p["joinTo"])))
+                require(edge not in edges, "吸附连接已存在，不能重复添加")
+                edges.add(edge)
         zero=body.get("zero")
         if zero is not None:
             require(set(zero)=={"pixel","pointIds"} and finite(zero["pixel"]) and isinstance(zero["pointIds"],list)
@@ -239,7 +255,8 @@ def save(session,ctx,row,run,document,user):
             observed_amplitude=old.get("observed_amplitude") if unchanged else None,
             status=old.get("status","manual_adjusted") if unchanged else "manual_adjusted", manual=not unchanged,
             segment=p["segment"],breakBefore=p.get("breakBefore",False),
-            **({"connectTo":p["connectTo"]} if "connectTo" in p else {})))
+            **({"connectTo":p["connectTo"]} if "connectTo" in p else {}),
+            **({"joinTo":p["joinTo"]} if "joinTo" in p else {})))
     require(all(finite(p[k]) for p in numeric for k in ("frequency_thz","reconstructed_amplitude")), "换算结果溢出")
     payload=copy.deepcopy(run.result_json)
     changed={**original,"points":numeric,"frequency_direction":direction,"axis_calibration":axes,"unit":cal["amplitude"]["unit"],

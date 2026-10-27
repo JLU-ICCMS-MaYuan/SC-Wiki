@@ -2,7 +2,7 @@ import { createInfluenceKernel, DRAG_INFLUENCE } from './dragInfluence'
 
 // 源像素是编辑事实；标定只负责换算，不重写原图或初始提取。
 export type Axis = { pixels: [number, number]; values: [number, number]; unit: string }
-export type Point = { id: string; x: number; y: number; segment: string; status: string; manual?: boolean; breakBefore?: boolean; connectTo?: string }
+export type Point = { id: string; x: number; y: number; segment: string; status: string; manual?: boolean; breakBefore?: boolean; connectTo?: string; joinTo?: string }
 export type Curve = { id: string; name: string; color: string; points: Point[]; pathOrdered?: boolean }
 export type Rect = [number, number, number, number]
 export type Document = {
@@ -86,18 +86,22 @@ export function prepareMove(doc: Document, curveId: string, pointId: string, lin
   weights[index] = 1
   if (linked) {
     const indexById=new Map(points.map((p,i)=>[p.id,i])), neighbors=points.map(()=>[] as number[])
+    const link=(a:number,b:number)=>{if(a!==b&&!neighbors[a].includes(b)){neighbors[a].push(b);neighbors[b].push(a)}}
     points.forEach((p,i)=>{
       const parent=p.connectTo ? indexById.get(p.connectTo) : i>0&&connected(points[i-1],p)?i-1:undefined
-      if(parent!==undefined){neighbors[i].push(parent);neighbors[parent].push(i)}
+      if(parent!==undefined)link(i,parent)
+      const joined=p.joinTo?indexById.get(p.joinTo):undefined
+      if(joined!==undefined)link(i,joined)
     })
     // 沿明确描线前进，遇分叉停止扩散，避免带动未选择的分支。
-    if(neighbors[index].length<=2) for(const start of neighbors[index]) {
-      let previous=index,at=start
-      for(let d=1;d<kernel.length;d++) {
-        weights[at]=kernel[d];byId.set(points[at].id,kernel[d])
-        if(neighbors[at].length!==2)break
-        const next=neighbors[at].find(i=>i!==previous)!
-        previous=at;at=next
+    const visited=new Set([index]),queue=[{at:index,distance:0}]
+    for(let cursor=0;cursor<queue.length;cursor++) {
+      const {at,distance}=queue[cursor]
+      if(distance+1>=kernel.length||neighbors[at].length>2)continue
+      for(const next of neighbors[at]) {
+        if(visited.has(next))continue
+        visited.add(next);weights[next]=kernel[distance+1];byId.set(points[next].id,kernel[distance+1])
+        queue.push({at:next,distance:distance+1})
       }
     }
   }
@@ -131,9 +135,11 @@ export function removePoints(doc: Document, curveId: string, ids: string[]): Doc
   let interrupted = true
   for (const p of original) {
     if (selected.has(p.id)) { interrupted = true; continue }
+    const survivor={...p}
+    if(survivor.joinTo && selected.has(survivor.joinTo))delete survivor.joinTo
     if(p.connectTo && selected.has(p.connectTo)) {
-      const {connectTo,...rest}=p;points.push({...rest,breakBefore:true})
-    } else points.push({ ...p, breakBefore: interrupted || p.breakBefore === true })
+      const {connectTo,...rest}=survivor;points.push({...rest,breakBefore:true})
+    } else points.push({ ...survivor, breakBefore: interrupted || p.breakBefore === true })
     interrupted = false
   }
   return record({ ...doc, curves: doc.curves.map(c => c.id === curveId ? { ...c, points, pathOrdered: true } : c), zero: doc.zero ? { ...doc.zero, pointIds: doc.zero.pointIds.filter(id => !selected.has(id)) } : null }, 'delete', `删除 ${ids.length} 个选中点，保留缺口`)
@@ -169,7 +175,7 @@ export function reconnectManualPoints(doc: Document, curveId: string): Document 
   // 固定两遍 O(n)；原图像素、原有点的相对顺序以及所有断口均保留。
   for (let pass = 0; pass < 2; pass++) for (let i = 0; i + 1 < points.length; i++) {
     const before = points[i - 1], left = points[i], right = points[i + 1], after = points[i + 2]
-    if (before?.connectTo || left.connectTo || right.connectTo || after?.connectTo || !(left.manual || right.manual) || !connected(left, right)) continue
+    if (before?.joinTo || left.joinTo || right.joinTo || after?.joinTo || before?.connectTo || left.connectTo || right.connectTo || after?.connectTo || !(left.manual || right.manual) || !connected(left, right)) continue
     if (Math.abs(frequencyPixel(doc, left) - frequencyPixel(doc, right)) > .5) continue
     const previous = before && connected(before, left) ? before : undefined
     const next = after && connected(right, after) ? after : undefined
@@ -221,6 +227,28 @@ export function appendPoint(doc: Document, curveId: string, anchorId: string, x:
   const points=[...freezeTrace(doc,curve),point]
   return record({...doc,curves:doc.curves.map(c=>c.id===curveId?{...c,points,pathOrdered:true}:c)},'add-chain','从点 '+anchor.id+' 连接到新点 '+point.id)
 }
+export const SNAP_RADIUS_PX=8
+/** 单次线性查找，阈值按屏幕距离；不扫描其他分波或按坐标复制已有点。 */
+export function snapTarget(curve: Curve, x: number, y: number, scale: number, excludeId?: string): Point | null {
+  if(![x,y,scale].every(Number.isFinite)||scale<=0)return null
+  let nearest:Point|null=null, best=(SNAP_RADIUS_PX/scale)**2
+  for(const p of curve.points){if(p.id===excludeId)continue;const d=(p.x-x)**2+(p.y-y)**2;if(d<=best && (!nearest||d<best)){nearest=p;best=d}}
+  return nearest
+}
+export function hasPointConnection(doc:Document,curve:Curve,tailId:string,targetId:string):boolean {
+  const points=freezeTrace(doc,curve)
+  return points.some((p,i)=>p.id===tailId&&p.joinTo===targetId||p.id===targetId&&p.joinTo===tailId
+    ||p.id===tailId&&p.connectTo===targetId||p.id===targetId&&p.connectTo===tailId
+    ||i>0&&connected(points[i-1],p)&&((points[i-1].id===tailId&&p.id===targetId)||(points[i-1].id===targetId&&p.id===tailId)))
+}
+export function joinExistingPoint(doc:Document,curveId:string,tailId:string,targetId:string):Document {
+  const curve=doc.curves.find(c=>c.id===curveId),tail=curve?.points.find(p=>p.id===tailId),target=curve?.points.find(p=>p.id===targetId)
+  if(!curve||!tail||!target)throw new Error('吸附目标或描线末点已不存在，请重新选择。')
+  if(tailId===targetId || hasPointConnection(doc,curve,tailId,targetId))return doc
+  const points=freezeTrace(doc,curve)
+  if(tail.joinTo)throw new Error('该末点已有吸附连接，请先新增一段描线，不会覆盖旧连接。')
+  return record({...doc,curves:doc.curves.map(c=>c.id===curveId?{...c,pathOrdered:true,points:points.map(p=>p.id===tailId?{...p,joinTo:targetId}:p)}:c)},'snap-join','描线末点 '+tailId+' 吸附连接到已有点 '+targetId)
+}
 export function markZero(doc: Document, x: number, y: number): Document {
   ;[x,y] = clickInPlot(doc,x,y)
   const pixel = doc.calibration.direction === 'x' ? x : y
@@ -233,11 +261,12 @@ export function zeroCovered(doc: Document, curveId: string) {
 export function curvePath(doc: Document, curve: Curve) {
   let previous: Point | undefined
   const byId=new Map(curve.points.map(p=>[p.id,p]))
-  return tracePoints(doc, curve).map(p => {
+  const trace=tracePoints(doc, curve).map(p => {
     if(p.connectTo){const parent=byId.get(p.connectTo);previous=p;return parent?'M'+parent.x+','+parent.y+' L'+p.x+','+p.y:'M'+p.x+','+p.y}
     const command = previous && connected(previous, p) ? 'L' : 'M'; previous = p
     return `${command}${p.x},${p.y}`
   }).join(' ')
+  return trace+curve.points.filter(p=>p.joinTo&&byId.has(p.joinTo)).map(p=>{const target=byId.get(p.joinTo!)!;return ' M'+p.x+','+p.y+' L'+target.x+','+target.y}).join('')
 }
 export function validateDocument(value: unknown, initial: Document): asserts value is Document {
   const d = value as Document
@@ -253,10 +282,12 @@ export function validateDocument(value: unknown, initial: Document): asserts val
       if (!source || curveIds.has(c.id) || c.name !== source.name || c.color !== source.color) throw Error()
       curveIds.add(c.id)
       const earlier=new Set<string>()
+      const pointIds=new Set(c.points.map(p=>p.id))
       for (const p of c.points) {
         if (!p.id || ids.has(p.id) || !p.segment || typeof p.status !== 'string' || ![p.x, p.y].every(Number.isFinite) || p.x < x0 || p.x > x1 || p.y < y0 || p.y > y1) throw Error()
         if (p.manual !== undefined && typeof p.manual !== 'boolean' || p.breakBefore !== undefined && typeof p.breakBefore !== 'boolean') throw Error()
         if(p.connectTo !== undefined && (typeof p.connectTo !== 'string' || !earlier.has(p.connectTo)))throw Error()
+        if(p.joinTo !== undefined && (typeof p.joinTo !== 'string' || p.joinTo===p.id || !pointIds.has(p.joinTo)))throw Error()
         ids.add(p.id);earlier.add(p.id)
       }
       const sorted = ordered(d, c.points)

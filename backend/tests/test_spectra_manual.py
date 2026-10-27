@@ -285,3 +285,32 @@ def test_manual_chain_rejects_missing_or_cyclic_parent(manual_http,parent):
     body["document"]["curves"][0]["points"].append(dict(id="chain-1",x=110,y=40,segment="c",status="人工连续描线",manual=True,breakBefore=True,connectTo=parent))
     res=e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body)
     assert res.status_code==422
+
+
+def test_snap_join_reuses_existing_id_and_survives_storage_and_public_mask(manual_http):
+    e=manual_http;body=copy.deepcopy(e["body"]);points=body["document"]["curves"][0]["points"]
+    points.append(dict(id="snap-tail",x=110,y=40,segment="c",status="人工连续描线",manual=True,breakBefore=True,connectTo=points[10]["id"],joinTo=points[20]["id"]))
+    result=e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body)
+    assert result.status_code==200,result.text
+    item=result.json()["items"][0];payload=item["result"]
+    assert len(payload["curves"][0]["points"])==len(points)
+    assert payload["curves"][0]["points"][-1]["joinTo"]==points[20]["id"]
+    params={**e["params"],"collection_version":item["version"],"run_id":item["run"]["id"]}
+    restored=e["client"].get(f"/api/rag/spectra/{e['identity']}/manual",params=params).json()["documents"][0]
+    assert restored["curves"][0]["points"]==points
+    public=service.mask_public(payload,{"a":{"status":"accepted_limited","frequency_intervals_thz":[[4,5]]}})
+    tail=next(p for p in public["curves"][0]["points"] if p.get("id")=="snap-tail")
+    assert "joinTo" not in tail and "connectTo" not in tail
+    exported=e["client"].get(f"/api/rag/spectra/{e['identity']}/export",params={**e["query"],"format":"csv"})
+    import csv,io
+    assert list(csv.DictReader(io.StringIO(exported.text)))[-1]["join_to"]==points[20]["id"]
+
+
+@pytest.mark.parametrize("invalid",["self","missing","duplicate","reverse"])
+def test_snap_join_invalid_targets_or_duplicate_edges_rejected(manual_http,invalid):
+    e=manual_http;body=copy.deepcopy(e["body"]);points=body["document"]["curves"][0]["points"]
+    if invalid=="self":points[0]["joinTo"]=points[0]["id"]
+    if invalid=="missing":points[0]["joinTo"]="other-curve-point"
+    if invalid=="duplicate":points[0]["joinTo"]=points[1]["id"]
+    if invalid=="reverse":points[0]["joinTo"]=points[10]["id"];points[10]["joinTo"]=points[0]["id"]
+    assert e["client"].post(f"/api/rag/spectra/{e['identity']}/manual",json=body).status_code==422
