@@ -1,0 +1,53 @@
+{
+  "checks": [
+    "纵轴α²F真实重算应用修正点，幅值保持且积分可用；详情不再显示修正清单或标记",
+    "刷新和重复重算继续使用修正结果，不累积移动，也不重复展示修正过程",
+    "通过编辑入口撤销并保存，再次重算尊重撤销意图，保留真实回折诊断",
+    "继续人工编辑后允许新一轮修正；随后改动频率时禁用直接撤销，避免覆盖新编辑",
+    "横轴DOS同样应用修正且不改变其他分波，窄屏不显示已处理清单",
+    "超过0.5px可修范围的回折保持原点和诊断，未伪造修复成功"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3f9b3b87f10b4b3396e8373002fb2fee/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3f9b3b87f10b4b3396e8373002fb2fee/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3f9b3b87f10b4b3396e8373002fb2fee/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3f9b3b87f10b4b3396e8373002fb2fee/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3f9b3b87f10b4b3396e8373002fb2fee/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/3f9b3b87f10b4b3396e8373002fb2fee/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ccb5446f9615471a9d5fb47b8c1fb08b/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ccb5446f9615471a9d5fb47b8c1fb08b/recalculate"
+    }
+  ],
+  "screenshots": [
+    "recalculated.png",
+    "editor-undo.png",
+    "undo-respected.png",
+    "dos-mobile.png",
+    "large-kept.png"
+  ],
+  "status": "passed"
+}

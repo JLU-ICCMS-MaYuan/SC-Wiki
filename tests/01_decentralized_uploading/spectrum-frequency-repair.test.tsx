@@ -1,6 +1,6 @@
 import React from 'react'
-import { afterEach, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, expect, it } from 'vitest'
+import { cleanup, render, screen } from '@testing-library/react'
 import '@testing-library/jest-dom/vitest'
 import { latestFrequencyRepair, undoFrequencyRepair } from '../../frontend/src/components/spectrumEditor/frequencyRepairs'
 import FrequencyRepairReport from '../../frontend/src/components/spectrumEditor/FrequencyRepairReport'
@@ -51,13 +51,18 @@ it('越限或空批次不能用于回写坐标',()=>{
   expect(latestFrequencyRepair(doc)).toBeNull();expect(undoFrequencyRepair(doc)).toBe(doc)
  }
 })
-it('详情显示实际位移和定位，明确未修正块，不标科学通过',()=>{
- const locate=vi.fn()
- render(<FrequencyRepairReport reports={[{curve_id:'a',name:'H',new_point_count:2,point_count:2,max_shift_px:.234,
- points:[{point_id:'p1',x:5,y:3,shift_px:.234},{point_id:'p2',x:4,y:5,shift_px:.234}],
- skipped:[{reason:'超过0.5原图像素'}]}]} onLocate={locate}/>)
- expect(screen.getByText(/当前 2 个点/)).toBeVisible()
- expect(screen.getByText(/不代表科学准确性已验证/)).toBeVisible()
- fireEvent.click(screen.getByRole('button',{name:/H · \(5, 3\)/}));expect(locate).toHaveBeenCalledWith('a','p1')
+it('已处理修正无论首次或刷新都不显示清单，仅未处理原因保留',()=>{
+ const report={curve_id:'a',name:'H',new_point_count:2,point_count:17,max_shift_px:.234,
+ points:[{point_id:'p1',x:5,y:3,shift_px:.234},{point_id:'p2',x:4,y:5,shift_px:.234}],skipped:[] as {reason:string}[]}
+ const before=structuredClone(report)
+ const {container,rerender}=render(<FrequencyRepairReport reports={[report]}/>)
+ expect(container).toBeEmptyDOMElement()
+ rerender(<FrequencyRepairReport reports={[{...report,new_point_count:0}]}/>)
+ expect(container).toBeEmptyDOMElement()
+ rerender(<FrequencyRepairReport reports={[{...report,skipped:[{reason:'超过0.5原图像素'}]}]}/>)
  expect(screen.getByText(/未自动修正.*超过0.5/)).toBeVisible()
+ expect(screen.queryByRole('button')).toBeNull()
+ expect(screen.queryByText(/自动频率微调：当前/)).toBeNull()
+ expect(screen.queryByText(/最大移动/)).toBeNull()
+ expect(report).toEqual(before)
 })

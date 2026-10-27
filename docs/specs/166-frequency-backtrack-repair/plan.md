@@ -6,7 +6,7 @@ Issue：[#166](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/166)。日期�
 
 Python3.12/FastAPI/SQLAlchemy、React19/TypeScript5.6。沿用SpectrumRun JSON及Document.operations，无数据库迁移。
 新增backend/spectra/frequency_repair.py：PAVA分块、受限修正、报告与历史判断；recalculate.py在既有精确端点连接之后、诊断和积分之前调用。
-新增frontend/src/components/spectrumEditor/frequencyRepairs.ts：解析批次和受保护撤销；SpectrumManualEditor提供操作，SourceCanvas高亮，SpectrumDetailView显示报告；公开过滤隐藏内部报告。
+新增frontend/src/components/spectrumEditor/frequencyRepairs.ts：解析批次和受保护撤销；SpectrumManualEditor提供操作，SourceCanvas高亮，SpectrumDetailView仅显示未处理原因；公开过滤隐藏内部报告。
 pytest检验数学/HTTP/版本，Vitest检验编辑撤销与显示，Playwright使用隔离正式服务验收。
 
 ## 质量门与事实来源
@@ -28,3 +28,6 @@ mayuan开发，保护已有dragInfluence.ts及Demo；Issue为协作状态，文�
 
 T001文档→T002测试→T003后端算法→T004重算与存储→T005前端→T006验证→T007文档收尾。
 PAVA栈式合并为O(n)，每块只扫描自己的点；记录分片遵守每条操作4000字符/文档4MB和5000操作约束。不为了支持大历史引入新表或另一套保存机制。
+
+## 展示收敛
+后续用户要求已处理修正不长期展示：FrequencyRepairReport只渲染skipped原因，SourceCanvas仅编辑模式显示修正点标记。后端计算与保存不变；回归测试覆盖修正后立即显示新结果、刷新/重复重算无清单，进入编辑器仍可撤销。

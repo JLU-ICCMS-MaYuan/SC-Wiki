@@ -70,3 +70,16 @@
 - 详细脱敏记录见[本机运行核验](validation/local-native-runtime.json)。Git未推送，远程Spec链接仍待验证。
 
 检查脚本首次按requests默认编码读取JavaScript时中文特征误判为不存在，改为明确UTF-8解码后全部通过；这是核验脚本解码问题，未据此修改应用代码。
+
+## 修正后直接展示结果
+
+用户反馈后，详情页删除已处理修正的常驻摘要、坐标列表、分页和只读青色标记；当前及已有报告都按新规则展示。结果早已随重算保存，本轮不增加“应用确认”或修改任何后端数值。未处理原因和诊断定位、编辑器内高亮/撤销仍保留。
+
+- 16项相关前端测试通过；生产构建通过，后端未改动。
+- 复用实际本地Vite 5173前端，浏览器全部API重定向至8196的隔离FastAPI/SQLite，文件与库位于/tmp/scwiki-manual-test-repair166-clean/，未触发真实业务谱写入。
+- 6组浏览器场景通过：修正后直接显示新结果；刷新/重复重算不展示旧过程；编辑器撤销/保存仍有效；后续频率编辑保护；横轴DOS/390px；超限问题继续显示。pageerror为0。
+- 原始反馈图IMG-002原字节归档、哈希/尺寸/完整解码通过。
+- 本机5173已提供新前端，无需重启；不推送、不发布到其他环境。
+
+[浏览器记录](validation/results-only/frequency-repair-browser.json) · [精简后的详情](validation/results-only/recalculated.png) · [窄屏DOS](validation/results-only/dos-mobile.png)。
+此前截图中的修正清单属于旧版本，不再描述当前详情行为。

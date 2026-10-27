@@ -15,3 +15,7 @@
 完成依据见validation.md：T002/T003数学与规模测试；T004真实HTTP/版本/公开；T005组件和绘图；T006浏览器6组场景；T007已回写Overview及Issue，本地提交结果记录于Issue。远程链接门仍未完成。
 
 - [x] T008 按用户追加的本地实时开发目标核验当前原生Vite/Python及本机数据库/存储；热重载已生效，无需重启，证据见validation.md本地核验节及validation/local-native-runtime.json。
+
+- [x] T009 按用户反馈精简frontend/src/components/spectrumEditor/FrequencyRepairReport.tsx及只读SourceCanvas，保留未处理诊断和编辑撤销，更新原有组件/浏览器回归与Overview。
+
+T009证据：validation.md「修正后直接展示结果」，16项前端测试、构建和本地5173配合隔离后端的6组浏览器场景；后端数值不变。

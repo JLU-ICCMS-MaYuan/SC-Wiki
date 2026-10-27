@@ -100,7 +100,7 @@ export function SpectrumMetrics({ item, curves, history, onContinue, onRecalcula
       已自动连接 {repairs.length} 处像素和数值完全重合的唯一断端；该连接操作本身不移动点。
       {repairs.map((repair:any,i:number)=><Box key={i}>{repair.points?.slice(0,1).map((point:any)=><Button key={point.point_id} size="small" disabled={!onLocate} onClick={()=>onLocate?.(repair.curve_id,point.point_id)}>查看自动连接 ({spectrumNumber(point.x,6)}, {spectrumNumber(point.y,6)})</Button>)}</Box>)}
     </Alert>}
-    {!restricted && <FrequencyRepairReport key={item.run.id+'-frequency'} reports={q.frequency_repairs?.[dos?'phonon_dos':'alpha2f']||[]} onLocate={onLocate} disabled={recalculating||calculationDisabled}/>}
+    {!restricted && <FrequencyRepairReport key={item.run.id+'-frequency'} reports={q.frequency_repairs?.[dos?'phonon_dos':'alpha2f']||[]}/>}
     {!restricted && diagnostics && <TraceDiagnostics key={item.run.id} report={diagnostics} onLocate={onLocate} disabled={recalculating||calculationDisabled}/> }
   </DetailSection>
 }

@@ -18,6 +18,25 @@
         "FR-001"
       ],
       "verification": "2026-10-27 原字节复制、重新读取并校验PNG头、尺寸和SHA256；解码另在验收记录验证；Pillow完整解码与归档后哈希/尺寸再次检查通过"
+    },
+    {
+      "id": "IMG-002",
+      "upload_order": 2,
+      "original_name": "codex-clipboard-4f44ff28-6c06-4c6c-9691-135213b864a9.png",
+      "locator": "docs/specs/166-frequency-backtrack-repair/assets/IMG-002.png",
+      "status": "local_verified",
+      "media_type": "image/png",
+      "dimensions_px": [
+        1900,
+        740
+      ],
+      "sha256": "79024d356cca7465a3b18576b653a38f2b5fe111a4bb96937439b572176af0d7",
+      "user_context": "调整一次之后，就应用新的调整后的结果，不要每次都展示这些内容。",
+      "related": [
+        "FR-007",
+        "SC-004"
+      ],
+      "verification": "2026-10-27 原字节归档并重读核对哈希和尺寸；Pillow解码在验证阶段检查；Pillow完整解码通过"
     }
   ]
 }

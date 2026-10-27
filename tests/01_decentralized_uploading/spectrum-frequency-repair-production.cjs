@@ -2,7 +2,7 @@
 const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');
 const runtime=path.join(process.env.HOME,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules');
 const {chromium}=require(require.resolve('playwright',{paths:[runtime]}));
-const backend='http://127.0.0.1:8196',frontend='http://127.0.0.1:5175',out=process.env.SCWIKI_SPECTRUM_BROWSER_OUT;
+const backend='http://127.0.0.1:8196',frontend=process.env.SPECTRUM_FRONTEND||'http://127.0.0.1:5175',out=process.env.SCWIKI_SPECTRUM_BROWSER_OUT;
 assert(out);fs.mkdirSync(out,{recursive:true});
 const report={checks:[],errors:[],writes:[],screenshots:[]};
 async function main(){
@@ -40,19 +40,22 @@ async function main(){
   assert.equal(rep.new_point_count,2);assert(rep.max_shift_px<=.5);
   for(let i=0;i<curve.points.length;i++)assert.equal(curve.points[i].amplitude_pixel,before.points[i].amplitude_pixel);
   assert.equal(item.result.quality.integrals.raw.parameters.omega_log.status,'available');
-  await page.getByTestId('frequency-repair-report').waitFor();
-  assert.equal(await page.locator('[data-frequency-repaired=true]').count(),2);
+  assert.equal(await page.getByTestId('frequency-repair-report').count(),0);
+  assert.equal(await page.locator('[data-frequency-repaired=true]').count(),0);
   await shot('recalculated');
-  check('纵轴α²F真实重算修正两点，幅值保持，积分可用，详情高亮并显示最大位移');
+  check('纵轴α²F真实重算应用修正点，幅值保持且积分可用；详情不再显示修正清单或标记');
 
   const repaired=structuredClone(curve.points);await page.reload();await ready();await recalc();
   item=await current(alpha.id);
   assert.deepEqual(item.result.curves[0].points,repaired);
   assert.equal(item.result.quality.frequency_repairs.alpha2f[0].new_point_count,0);
-  check('刷新和重复重算不累积移动，已有修正报告保留');
+  assert.equal(await page.getByTestId('frequency-repair-report').count(),0);
+  assert.equal(await page.getByRole('button',{name:'下一页',exact:true}).count(),0);
+  check('刷新和重复重算继续使用修正结果，不累积移动，也不重复展示修正过程');
 
-  await page.getByTestId('frequency-repair-report').getByRole('button').first().click();
+  await btn('编辑').click();
   await editor.waitFor();
+  await editor.locator('[data-row="a:p50"]').click();
   assert.equal(await editor.locator('[data-frequency-repaired=true]').count(),2);
   await btn('撤销自动频率微调').scrollIntoViewIfNeeded();await shot('editor-undo');
   await btn('撤销自动频率微调').click();
@@ -65,7 +68,7 @@ async function main(){
   assert.equal(item.result.quality.integrals.raw.status,'unavailable');
   assert(await page.locator('[data-issue-kind="frequency_backtrack"]').count()>0);
   await shot('undo-respected');
-  check('点击定位后在编辑器撤销并保存，再次重算尊重撤销意图，保留真实回折诊断');
+  check('通过编辑入口撤销并保存，再次重算尊重撤销意图，保留真实回折诊断');
 
   await btn('编辑').click();await editor.waitFor();
   await editor.locator('[data-row="a:p50"]').click();
@@ -74,7 +77,8 @@ async function main(){
   await btn('应用坐标到此点').click();await save();await recalc();
   item=await current(alpha.id);
   assert.equal(item.result.quality.frequency_repairs.alpha2f[0].new_point_count,2);
-  await page.getByTestId('frequency-repair-report').getByRole('button').first().click();await editor.waitFor();
+  await btn('编辑').click();await editor.waitFor();
+  await editor.locator('[data-row="a:p50"]').click();
   const f=Number(await page.getByLabel('选中点频率',{exact:true}).inputValue());
   await page.getByLabel('选中点频率',{exact:true}).fill(String(f+.002));
   await btn('应用坐标到此点').click();
@@ -90,7 +94,7 @@ async function main(){
   assert.deepEqual(item.result.curves.filter(c=>c.id!=='Sc'),unchanged);
   await page.setViewportSize({width:390,height:1000});await page.waitForTimeout(500);
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-  await shot('dos-mobile');check('横轴DOS同样修正且不改变其他分波，窄屏报告可用');
+  await shot('dos-mobile');check('横轴DOS同样应用修正且不改变其他分波，窄屏不显示已处理清单');
 
   dos=await seed(item,'phonon_dos','Sc',true);
   const large=structuredClone(dos.result.curves);
