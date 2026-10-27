@@ -13,3 +13,5 @@
 按T001→T002→T003→T004→T005→T006→T007执行，共享文件串行。未完成任务不勾选。
 
 完成依据见validation.md：T002/T003数学与规模测试；T004真实HTTP/版本/公开；T005组件和绘图；T006浏览器6组场景；T007已回写Overview及Issue，本地提交结果记录于Issue。远程链接门仍未完成。
+
+- [x] T008 按用户追加的本地实时开发目标核验当前原生Vite/Python及本机数据库/存储；热重载已生效，无需重启，证据见validation.md本地核验节及validation/local-native-runtime.json。

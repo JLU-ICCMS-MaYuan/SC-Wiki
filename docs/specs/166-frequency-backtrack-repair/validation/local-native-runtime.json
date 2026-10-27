@@ -1,0 +1,73 @@
+{
+  "storage": {
+    "mode": "s3",
+    "host": "127.0.0.1",
+    "port": 39110,
+    "bucket": "scwiki-business"
+  },
+  "runtime_config_matches": {
+    "DATABASE_URL": true,
+    "RAG_DATABASE_URL": true,
+    "REDIS_URL": true,
+    "SC_WIKI_DATA_DIR": true,
+    "FILE_STORAGE_BACKEND": true,
+    "S3_ENDPOINT_URL": true,
+    "S3_BUCKET": true
+  },
+  "database_actual": {
+    "database": "scwiki",
+    "port": 3307
+  },
+  "http://127.0.0.1:8000/health": {
+    "status": 200
+  },
+  "http://127.0.0.1:8000/readyz": {
+    "status": 200,
+    "result": {
+      "ready": true,
+      "dependencies": {
+        "mysql": true,
+        "redis": true,
+        "storage": true,
+        "qdrant": true,
+        "neo4j": true
+      }
+    }
+  },
+  "http://127.0.0.1:8080/health": {
+    "status": 200
+  },
+  "http://127.0.0.1:5173/": {
+    "status": 200
+  },
+  "/src/components/spectrumEditor/FrequencyRepairReport.tsx": {
+    "status": 200,
+    "features": {
+      "自动频率微调": true,
+      "0.5": true
+    }
+  },
+  "/src/components/spectrumEditor/frequencyRepairs.ts": {
+    "status": 200,
+    "features": {
+      "undo-frequency-repair": true,
+      "auto-frequency-repair": true
+    }
+  },
+  "/src/components/spectrumEditor/SpectrumManualEditor.tsx": {
+    "status": 200,
+    "features": {
+      "撤销自动频率微调": true,
+      "单点选点／拖动": true,
+      "联动选点／拖动": true
+    }
+  },
+  "verified_at": "2026-10-27T20:54:40.604756+08:00",
+  "execution_environment": "local-native",
+  "code_commit": "ecd682c8",
+  "python_pid": 25237,
+  "python_started_at": "2026-10-27T20:26:11.751771+08:00",
+  "workspace": "/Users/mayuan/Codes/SC-Wiki",
+  "runtime_restart_performed": false,
+  "business_spectrum_recalculation_performed": false
+}
