@@ -52,3 +52,25 @@ it('正式03同时展示相对、归一化与独立绝对结果，N不被单位�
   expect(screen.getByRole('table',{name:'DOS 相对面积'})).toBeVisible()
   expect(screen.getByText('没有独立刻度')).toBeVisible()
 })
+
+it('无需N即可对照近似元素比和化学式，并显示范围限制及占比差',()=>{
+  const r=report()
+  r.shares.element_ratio={status:'available',elements:['La','H'],reference_element:'La',
+    estimated_ratio:[1,1.25],expected_ratio:[1,2],formula:'LaH2',reference_label:'化学式比例',max_share_difference_pp:100/9}
+  r.shares.coverage_note='面积比仅按当前已积分频段估算；完整频段尚未确认。'
+  r.normalization={status:'unavailable',reason:'La、H：尚未记录完整振动频段的确认；不表示已发现频段缺失'}
+  render(<DosRelativeMetrics report={r} restricted={false}/>)
+  const summary=screen.getByTestId('dos-element-ratio')
+  expect(within(summary).getByText('面积估计：1 : 1.25')).toBeVisible()
+  expect(within(summary).getByText('化学式比例（LaH2）：1 : 2')).toBeVisible()
+  expect(within(summary).getByText('最大原子占比差：11.11 个百分点')).toBeVisible()
+  expect(screen.getByText(/面积比仅按当前已积分频段估算/)).toBeVisible()
+  expect(screen.getByText(/不表示已发现频段缺失/)).toBeVisible()
+})
+it('投影元素不匹配时不展示伪造元素比，仍保留原始面积',()=>{
+  const r=report();r.shares.element_ratio={status:'unavailable',reason:'分波元素与化学计量元素集合不一致'}
+  render(<DosRelativeMetrics report={r} restricted={false}/>)
+  expect(screen.queryByTestId('dos-element-ratio')).toBeNull()
+  expect(screen.getByText('分波元素与化学计量元素集合不一致')).toBeVisible()
+  expect(screen.getByRole('table',{name:'DOS 相对面积'})).toBeVisible()
+})

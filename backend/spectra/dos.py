@@ -35,6 +35,29 @@ def area(f, a):
     return value
 
 
+def element_ratio(components, expected, source):
+    """同一参考元素下比较比例；接近程度用与参考选择无关的占比差表示。"""
+    if not expected:
+        return unavailable("缺少化学计量依据，暂不能比较元素比例")
+    if {c["projection"] for c in components} != set(expected):
+        return unavailable("分波元素与化学计量元素集合不一致，暂不能比较元素比例")
+    observed = fractions({c["projection"]: c["area"] for c in components if c["area"] > 0})
+    if not observed:
+        return unavailable("没有正的面积，无法选择比例参考元素")
+    reference = min(observed, key=lambda k: (expected[k], k))
+    elements = [reference] + [c["projection"] for c in components if c["projection"] != reference]
+    estimated = [observed.get(k, 0)/observed[reference] for k in elements]
+    target = [expected[k]/expected[reference] for k in elements]
+    if not all(finite(v) for v in estimated + target):
+        return unavailable("元素比例数值溢出")
+    differences = {k: 100*(observed.get(k, 0)-expected[k]) for k in elements}
+    formula = (source or {}).get("formula") if (source or {}).get("kind") == "material_formula" else None
+    return dict(status="available", reference_element=reference, elements=elements,
+                estimated_ratio=estimated, expected_ratio=target, formula=formula,
+                reference_label="化学式比例" if formula else "结构原子数比例",
+                share_difference_pp=differences, max_share_difference_pp=max(abs(v) for v in differences.values()))
+
+
 def coverage_reason(curve, calibration, frequency):
     """完整范围必须有来源声明且实际采样覆盖；图框本身不自动证明完整。"""
     if curve.get("clipped_frequencies_thz"):
@@ -42,7 +65,7 @@ def coverage_reason(curve, calibration, frequency):
     upper = (calibration.get("zero_boundaries_thz") or [None, None])[1]
     if not finite(upper):
         if not calibration.get("frequency_range_confirmed"):
-            return "原图完整频段尚待核对"
+            return "尚未记录完整振动频段的确认，暂不能按 3N 归一化；不表示已发现频段缺失"
         ticks = calibration.get("frequency_ticks") or []
         roi = calibration.get("roi")
         if len(ticks) < 2 or not roi:
@@ -87,8 +110,8 @@ def calculate_dos(payload, primitive=None, composition=None):
     valid_atoms = isinstance(atoms, int) and not isinstance(atoms, bool) and atoms > 0
     primitive_fractions = fractions((primitive or {}).get("species_counts"))
     formula_fractions = fractions((composition or {}).get("species_counts"))
-    expected = primitive_fractions or formula_fractions
-    source = primitive if primitive_fractions else (composition or {}).get("source")
+    expected = formula_fractions or primitive_fractions
+    source = (composition or {}).get("source") if formula_fractions else primitive
     try:
         demand(curves, "当前没有声子 DOS 曲线")
         demand(all(c["status"] == "available" for c in components), "部分曲线不能积分，不能计算全部分波占比")
@@ -109,14 +132,20 @@ def calculate_dos(payload, primitive=None, composition=None):
         if standard:
             shares["expected_fractions"] = {c["curve_id"]: expected[c["projection"]]
                                            for c in components if c["projection"] in expected}
+            shares["element_ratio"] = element_ratio(components, expected, source)
         else:
             shares["expected_reason"] = "标准原子振动投影定义尚待核对，暂不套用原子数占比"
         if not expected:
             shares["expected_reason"] = "缺少明确的化学计量或结构计数依据"
-        demand(standard, "标准原子振动投影定义尚待核对，不能套用 3N")
+        coverage_issues = {}
         for curve in curves:
             reason = coverage_reason(curve, calibrations.get(curve["id"], {}), samples[curve["id"]][0])
-            demand(reason is None, f"{curve.get('projection') or curve['id']}：{reason}")
+            if reason:
+                coverage_issues.setdefault(reason, []).append(curve.get("projection") or curve["id"])
+        if coverage_issues:
+            shares["coverage_note"] = "面积比仅按当前已积分频段估算；完整频段尚未确认或存在覆盖问题，暂不能据此验证化学计量。"
+        demand(standard, "标准原子振动投影定义尚待核对，不能套用 3N")
+        demand(not coverage_issues, "；".join(f"{'、'.join(names)}：{reason}" for reason, names in coverage_issues.items()))
         demand(valid_atoms, "缺少可信原胞原子数 N；化学式比例不能确定原胞倍数")
         if primitive_fractions and formula_fractions:
             demand(primitive_fractions.keys() == formula_fractions.keys() and all(

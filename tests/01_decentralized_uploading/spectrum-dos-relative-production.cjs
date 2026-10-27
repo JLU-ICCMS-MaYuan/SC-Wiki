@@ -38,6 +38,9 @@ async function main(){
    assert.deepEqual(current.result.curves,curves);
    await page.getByRole('table',{name:'DOS 相对面积'}).waitFor();
    await page.getByRole('table',{name:'DOS 归一化模式积分'}).getByText('33.33%',{exact:true}).waitFor();
+   await page.getByTestId('dos-element-ratio').getByText('面积估计：1 : 1.25',{exact:true}).waitFor();
+   await page.getByTestId('dos-element-ratio').getByText('化学式比例（LaH2）：1 : 2',{exact:true}).waitFor();
+   check('面积比换算为近似元素比，与当前化学式对照');
    check('正式重新计算保存新版本，N=3且模式4/5保留偏差；原始描线不变');
    const before=await page.locator('[data-curve="La"]').getAttribute('d'),writes=report.writes.length;
    await button('相对像素幅值').click();assert.equal(await page.locator('[data-curve="La"]').getAttribute('d'),before);

@@ -13,3 +13,7 @@
 依赖按 T001→T002→T003→T004→T005→T006→T007 串行执行。覆盖映射见 plan.md。先实现独立面积，再增加比例/共同归一化，最后确认原有绝对模式和 α²F 回归。
 
 验证依据：T002–T006 见 [validation.md](validation.md) 的 SC 映射、194 项后端/45 项前端及浏览器报告。T007 的 Overview 已按实际代码回写；远程文档链接门仍未完成。
+
+- [x] T008 [US2] 在 backend/spectra/dos.py 和 frontend/src/components/spectrumEditor/DosRelativeMetrics.tsx 将面积比换算为近似元素比，说明完整频段提示，补充原有测试并更新 Overview。
+
+T008 验证依据见 validation.md「元素比例展示补充验证」；无需原胞 N 或 3N 归一化，限制原样保留。

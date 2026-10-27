@@ -252,3 +252,54 @@ def test_csv_uses_current_per_curve_normalization_and_keeps_original_values():
     assert rows[1]["normalized_dos_candidate"] == "8.0"
     assert rows[1]["normalized_dos_unit"] == "modes/THz/primitive_cell"
     assert len(rows) == 6
+
+
+def test_element_ratio_uses_formula_without_n_or_full_range_confirmation():
+    p = payload()
+    for c in p["calibration"]["curves"]:
+        c.pop("frequency_range_confirmed")
+    r = calculate_dos(p, composition=composition_for({"material": "LaH2"}))["relative"]
+    ratio = r["shares"]["element_ratio"]
+    assert ratio["elements"] == ["La", "H"]
+    assert ratio["estimated_ratio"] == pytest.approx([1, 1.25])
+    assert ratio["expected_ratio"] == [1, 2]
+    assert ratio["formula"] == "LaH2"
+    assert ratio["max_share_difference_pp"] == pytest.approx(100/9)
+    assert "当前已积分频段" in r["shares"]["coverage_note"]
+    assert "La、H" in r["normalization"]["reason"]
+    assert "不表示已发现频段缺失" in r["normalization"]["reason"]
+
+
+def test_element_ratio_scaling_does_not_change_comparison():
+    original = calculate_dos(payload(), composition=composition_for({"material": "LaH2"}))["relative"]["shares"]["element_ratio"]
+    p = payload()
+    for c in p["curves"]:
+        for point in c["points"]:
+            point["amplitude_pixel"] = 20-7*point["reconstructed_amplitude"]
+            point["reconstructed_amplitude"] *= 7
+    result = calculate_dos(p, composition=composition_for({"material": "LaH2"}))["relative"]["shares"]["element_ratio"]
+    assert result == original
+
+
+def test_element_ratio_prefers_current_formula_when_structure_disagrees():
+    r = calculate_dos(payload(), PRIMITIVE, composition_for({"material": "LaH3"}))["relative"]
+    assert r["shares"]["element_ratio"]["expected_ratio"] == [1, 3]
+    assert r["shares"]["expected_fractions"] == {"La": .25, "H": .75}
+    assert r["normalization"]["status"] == "unavailable"
+
+
+def test_zero_area_is_not_rounded_into_a_positive_atom_count():
+    p = payload()
+    for point in p["curves"][0]["points"]:
+        point.update(amplitude_pixel=20, reconstructed_amplitude=0)
+    ratio = calculate_dos(p, composition=composition_for({"material": "LaH2"}))["relative"]["shares"]["element_ratio"]
+    assert ratio["elements"] == ["H", "La"]
+    assert ratio["estimated_ratio"] == [1, 0]
+    assert ratio["expected_ratio"] == [1, .5]
+
+
+def test_element_mismatch_does_not_generate_an_approximate_formula():
+    p = payload();p["curves"][1]["projection"] = "Sc"
+    r = calculate_dos(p, composition=composition_for({"material": "LaH2"}))["relative"]
+    assert r["shares"]["status"] == "available"
+    assert r["shares"]["element_ratio"]["status"] == "unavailable"

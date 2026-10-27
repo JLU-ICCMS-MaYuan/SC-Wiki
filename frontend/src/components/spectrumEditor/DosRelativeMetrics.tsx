@@ -2,10 +2,11 @@ import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } fro
 
 type Status = { status: string; reason?: string }
 type Component = Status & { curve_id: string; projection: string; area?: number; frequency_interval_thz?: number[] }
+type ElementRatio = Status & { elements?: string[]; estimated_ratio?: number[]; expected_ratio?: number[]; reference_element?: string; reference_label?: string; formula?: string; max_share_difference_pp?: number }
 export type DosRelativeReport = {
   method: string
   components: Component[]
-  shares: Status & { total_area?: number; fractions?: Record<string, number>; expected_fractions?: Record<string, number>; expected_reason?: string }
+  shares: Status & { total_area?: number; fractions?: Record<string, number>; expected_fractions?: Record<string, number>; expected_reason?: string; coverage_note?: string; element_ratio?: ElementRatio }
   normalization: Status & {
     coefficient?: number; primitive_atoms?: number; target_modes?: number; total_mode_integral?: number
     component_mode_integrals?: Record<string, number>; expected_modes?: Record<string, number>
@@ -20,6 +21,7 @@ export default function DosRelativeMetrics({ report, restricted }: { report?: Do
   if (report?.method !== 'dos-relative-v1') return <Typography color="text.secondary" sx={{my:1}}>请点击重新计算，查看相对面积与按 3N 归一化结果。</Typography>
   const { components, shares, normalization: norm } = report
   const comparable = shares.status === 'available', normalized = norm.status === 'available'
+  const ratio = shares.element_ratio
   return <Box data-testid="dos-relative-metrics" sx={{mt:2}}>
     <Typography fontWeight={600}>相对面积与元素占比</Typography>
     <Typography variant="caption" color="text.secondary">面积单位：像素·THz；表示相对面积，不是振动模式数。</Typography>
@@ -35,6 +37,16 @@ export default function DosRelativeMetrics({ report, restricted }: { report?: Do
       </Table>
     </Box>
     {comparable&&<Typography variant="body2" sx={{mt:1}}>全部分波相对面积：{number(shares.total_area)} 像素·THz</Typography>}
+    {comparable&&ratio?.status==='available'&&<Box data-testid="dos-element-ratio" sx={{mt:2}}>
+      <Typography fontWeight={600}>面积推算的近似元素比</Typography>
+      <Typography variant="body2">元素顺序：{ratio.elements?.join(' : ')}（以 {ratio.reference_element} = 1）</Typography>
+      <Typography variant="body2">面积估计：{ratio.estimated_ratio?.map(v=>number(v,4)).join(' : ')}</Typography>
+      <Typography variant="body2">{ratio.reference_label}{ratio.formula?'（'+ratio.formula+'）':''}：{ratio.expected_ratio?.map(v=>number(v,4)).join(' : ')}</Typography>
+      <Typography variant="body2">最大原子占比差：{number(ratio.max_share_difference_pp,4)} 个百分点</Typography>
+      <Typography variant="caption" color="text.secondary">占比差越小，比例越接近；不设自动通过阈值，也不把小数强行凑成整数。</Typography>
+    </Box>}
+    {comparable&&ratio?.reason&&<Typography variant="body2" color="text.secondary" sx={{mt:1}}>{ratio.reason}</Typography>}
+    {shares.coverage_note&&<Typography variant="body2" color="text.secondary" sx={{mt:1}}>{shares.coverage_note}</Typography>}
     {[shares.reason,shares.expected_reason].filter(Boolean).map(reason=><Typography key={reason} variant="body2" color="text.secondary" sx={{mt:1}}>{reason}</Typography>)}
     <Box data-testid="dos-normalization" sx={{mt:2}}>
       <Typography fontWeight={600}>按 3N 归一化</Typography>
