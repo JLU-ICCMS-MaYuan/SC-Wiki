@@ -6,7 +6,7 @@ type ElementRatio = Status & { elements?: string[]; estimated_ratio?: number[]; 
 export type DosRelativeReport = {
   method: string
   components: Component[]
-  shares: Status & { total_area?: number; fractions?: Record<string, number>; expected_fractions?: Record<string, number>; expected_reason?: string; coverage_note?: string; element_ratio?: ElementRatio }
+  shares: Status & { total_area?: number; fractions?: Record<string, number>; expected_fractions?: Record<string, number>; expected_reason?: string; element_ratio?: ElementRatio }
   normalization: Status & {
     coefficient?: number; primitive_atoms?: number; target_modes?: number; total_mode_integral?: number
     component_mode_integrals?: Record<string, number>; expected_modes?: Record<string, number>
@@ -18,7 +18,7 @@ const percent = (v: number | undefined) => v == null ? '—' : number(v * 100, 4
 
 export default function DosRelativeMetrics({ report, restricted }: { report?: DosRelativeReport; restricted: boolean }) {
   if (restricted) return <Typography color="text.secondary" sx={{my:1}}>当前为历史、失效或限定频段版本，不展示完整谱计算结果。</Typography>
-  if (report?.method !== 'dos-relative-v1') return <Typography color="text.secondary" sx={{my:1}}>请点击重新计算，查看相对面积与按 3N 归一化结果。</Typography>
+  if (report?.method !== 'dos-relative-v2') return <Typography color="text.secondary" sx={{my:1}}>请点击重新计算，查看相对面积与按 3N 归一化结果。</Typography>
   const { components, shares, normalization: norm } = report
   const comparable = shares.status === 'available', normalized = norm.status === 'available'
   const ratio = shares.element_ratio
@@ -46,7 +46,6 @@ export default function DosRelativeMetrics({ report, restricted }: { report?: Do
       <Typography variant="caption" color="text.secondary">占比差越小，比例越接近；不设自动通过阈值，也不把小数强行凑成整数。</Typography>
     </Box>}
     {comparable&&ratio?.reason&&<Typography variant="body2" color="text.secondary" sx={{mt:1}}>{ratio.reason}</Typography>}
-    {shares.coverage_note&&<Typography variant="body2" color="text.secondary" sx={{mt:1}}>{shares.coverage_note}</Typography>}
     {[shares.reason,shares.expected_reason].filter(Boolean).map(reason=><Typography key={reason} variant="body2" color="text.secondary" sx={{mt:1}}>{reason}</Typography>)}
     <Box data-testid="dos-normalization" sx={{mt:2}}>
       <Typography fontWeight={600}>按 3N 归一化</Typography>

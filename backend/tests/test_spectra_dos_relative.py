@@ -25,7 +25,7 @@ def payload():
                     for i, (f, a) in enumerate(((0., 0.), (.5, 2*amplitude), (1., 0.)))]))
     return dict(curves=curves, calibration=dict(projection_complete=True, projection_scale_confirmed=True,
         curves=[dict(id=c["id"], roi=[0, 0, 1, 20], frequency_direction="x", frequency_unit="THz",
-                     frequency_ticks=[[0, 0], [1, 1]], frequency_range_confirmed=True) for c in curves]),
+                     frequency_ticks=[[0, 0], [1, 1]]) for c in curves]),
         quality={}, candidates={})
 
 
@@ -74,15 +74,13 @@ def test_bad_curve_preserves_other_area(problem):
     assert r["normalization"]["status"] == "unavailable"
 
 
-@pytest.mark.parametrize("condition", ["scale", "projections", "definition", "range", "clipped", "shortened", "zero"])
+@pytest.mark.parametrize("condition", ["scale", "projections", "definition", "clipped", "zero"])
 def test_normalization_requires_all_evidence(condition):
     p = payload()
     if condition == "scale": p["calibration"]["projection_scale_confirmed"] = False
     if condition == "projections": p["calibration"]["projection_complete"] = False
     if condition == "definition": p["curves"][0]["physical_definition_confirmed"] = False
-    if condition == "range": p["calibration"]["curves"][0]["frequency_range_confirmed"] = False
     if condition == "clipped": p["curves"][0]["clipped_frequencies_thz"] = [.5]
-    if condition == "shortened": p["curves"][0]["points"][-1]["frequency_thz"] = .9
     if condition == "zero":
         for c in p["curves"]:
             for point in c["points"]:
@@ -165,7 +163,7 @@ def test_actual_extraction_converts_frequency_and_density_together():
     from backend.spectra.engine import extract_panel
     image, cal = fixture("phonon_dos")
     c = cal["curves"][0]
-    c.update(unit="modes_per_source_frequency", frequency_range_confirmed=True)
+    c.update(unit="modes_per_source_frequency")
     cal.update(projection_complete=True, projection_scale_confirmed=True)
     primitive = dict(primitive_atoms=1, species_counts={"H": 1})
     thz = extract_panel(image, cal, primitive=primitive)
@@ -256,8 +254,6 @@ def test_csv_uses_current_per_curve_normalization_and_keeps_original_values():
 
 def test_element_ratio_uses_formula_without_n_or_full_range_confirmation():
     p = payload()
-    for c in p["calibration"]["curves"]:
-        c.pop("frequency_range_confirmed")
     r = calculate_dos(p, composition=composition_for({"material": "LaH2"}))["relative"]
     ratio = r["shares"]["element_ratio"]
     assert ratio["elements"] == ["La", "H"]
@@ -265,9 +261,8 @@ def test_element_ratio_uses_formula_without_n_or_full_range_confirmation():
     assert ratio["expected_ratio"] == [1, 2]
     assert ratio["formula"] == "LaH2"
     assert ratio["max_share_difference_pp"] == pytest.approx(100/9)
-    assert "当前已积分频段" in r["shares"]["coverage_note"]
-    assert "La、H" in r["normalization"]["reason"]
-    assert "不表示已发现频段缺失" in r["normalization"]["reason"]
+    assert "coverage_note" not in r["shares"]
+    assert "缺少可信原胞原子数" in r["normalization"]["reason"]
 
 
 def test_element_ratio_scaling_does_not_change_comparison():
@@ -303,3 +298,39 @@ def test_element_mismatch_does_not_generate_an_approximate_formula():
     r = calculate_dos(p, composition=composition_for({"material": "LaH2"}))["relative"]
     assert r["shares"]["status"] == "available"
     assert r["shares"]["element_ratio"]["status"] == "unavailable"
+
+
+@pytest.mark.parametrize("marker", [None, False, True])
+@pytest.mark.parametrize("upper", [None, .1, 100.])
+def test_frequency_metadata_cannot_block_current_samples(marker, upper):
+    p = payload()
+    for c in p["calibration"]["curves"]:
+        if marker is not None:
+            c["frequency_range_confirmed"] = marker
+        c["zero_boundaries_thz"] = [None, upper]
+    # 末点未到来源图框/刻度上限，同样只使用保存的实际样本积分。
+    p["curves"][0]["points"][-1]["frequency_thz"] = .9
+    before = copy.deepcopy(p)
+    result = calculate_dos(p, PRIMITIVE)
+    relative = result["relative"]
+    assert relative["method"] == "dos-relative-v2"
+    assert relative["normalization"]["status"] == "available"
+    assert relative["normalization"]["total_mode_integral"] == pytest.approx(9)
+    assert relative["components"][0]["frequency_interval_thz"] == [0., .9]
+    assert "coverage_note" not in relative["shares"]
+    assert p == before
+
+
+def test_retired_confirmation_is_ignored_without_loosening_other_schema_checks():
+    from backend.spectra.contracts import PanelCalibration
+    from backend.tests.test_spectra import fixture
+    from pydantic import ValidationError
+    _, cal = fixture("phonon_dos")
+    cal["curves"][0]["frequency_range_confirmed"] = False
+    before = copy.deepcopy(cal)
+    parsed = PanelCalibration.model_validate(cal).model_dump()
+    assert "frequency_range_confirmed" not in parsed["curves"][0]
+    assert cal == before
+    cal["curves"][0]["unexpected_key"] = True
+    with pytest.raises(ValidationError):
+        PanelCalibration.model_validate(cal)

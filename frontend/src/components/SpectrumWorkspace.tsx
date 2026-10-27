@@ -171,7 +171,6 @@ function CalibrationEditor({item,onClose}: {item:Item;onClose:()=>void}) {
       <TextField size="small" label="元素投影" value={c.projection||''} onChange={e=>edit(i,'projection',e.target.value||null)}/>
       <Select size="small" value={c.unit} aria-label={`${c.id} 幅值单位`} onChange={e=>edit(i,'unit',e.target.value)}>{['pixel','dimensionless','modes_per_source_frequency','unknown'].map((v,n)=><MenuItem key={v} value={v}>{['相对像素幅值','无量纲规范','模式数/原频率单位','未知'][n]}</MenuItem>)}</Select>
       <FormControlLabel control={<Checkbox checked={c.physical_definition_confirmed} onChange={e=>edit(i,'physical_definition_confirmed',e.target.checked)}/>} label="普通频率与谱定义已核对"/>
-      {c.kind==='phonon_dos'&&<FormControlLabel control={<Checkbox checked={Boolean(c.frequency_range_confirmed)} onChange={e=>edit(i,'frequency_range_confirmed',e.target.checked)}/>} label="已核对原图覆盖完整振动频段"/>}
     </Box>)}
     <FormControlLabel control={<Checkbox checked={value.projection_complete} onChange={e=>setValue({...value,projection_complete:e.target.checked})}/>} label="元素投影完整"/><FormControlLabel control={<Checkbox checked={value.projection_scale_confirmed} onChange={e=>setValue({...value,projection_scale_confirmed:e.target.checked})}/>} label="各分波共享幅值尺度"/>
     <Button onClick={()=>setValue({...value,curves:[...value.curves,emptyCurve()]})}>增加曲线标定</Button>

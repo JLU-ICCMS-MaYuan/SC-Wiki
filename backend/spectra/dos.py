@@ -2,12 +2,11 @@
 from __future__ import annotations
 
 import math
-from .contracts import FREQUENCY_FACTORS
 from .relative import pixel_curve
 from .samples import connected_samples
 from .topology import finite
 
-METHOD = "dos-relative-v1"
+METHOD = "dos-relative-v2"
 
 
 def unavailable(reason):
@@ -58,35 +57,9 @@ def element_ratio(components, expected, source):
                 share_difference_pp=differences, max_share_difference_pp=max(abs(v) for v in differences.values()))
 
 
-def coverage_reason(curve, calibration, frequency):
-    """完整范围必须有来源声明且实际采样覆盖；图框本身不自动证明完整。"""
-    if curve.get("clipped_frequencies_thz"):
-        return "曲线存在抵框裁峰，无法确定完整模式面积"
-    upper = (calibration.get("zero_boundaries_thz") or [None, None])[1]
-    if not finite(upper):
-        if not calibration.get("frequency_range_confirmed"):
-            return "尚未记录完整振动频段的确认，暂不能按 3N 归一化；不表示已发现频段缺失"
-        ticks = calibration.get("frequency_ticks") or []
-        roi = calibration.get("roi")
-        if len(ticks) < 2 or not roi:
-            return "完整频段缺少可核对的原图边界"
-        (p0, v0), (p1, v1) = ticks[0], ticks[-1]
-        if p1 == p0:
-            return "频率标定退化"
-        factor = FREQUENCY_FACTORS.get(calibration.get("frequency_unit", "THz"))
-        if factor is None:
-            return "频率单位未知"
-        indices = (1, 3) if calibration.get("frequency_direction") == "y" else (0, 2)
-        upper = max((v0+(roi[i]-p0)*(v1-v0)/(p1-p0))*factor for i in indices)
-    if not finite(upper) or upper <= 0 or frequency[-1] < upper - 1e-9*max(1, upper):
-        return "实际采样未覆盖已核对的完整高频边界"
-    return None
-
-
 def calculate_dos(payload, primitive=None, composition=None):
     curves = [c for c in payload.get("curves", []) if c["kind"] == "phonon_dos"]
     panel = payload.get("calibration") or {}
-    calibrations = {c["id"]: c for c in panel.get("curves", [])}
     components, samples = [], {}
     for curve in curves:
         row = dict(curve_id=curve["id"], projection=curve.get("projection") or curve["id"],
@@ -137,15 +110,9 @@ def calculate_dos(payload, primitive=None, composition=None):
             shares["expected_reason"] = "标准原子振动投影定义尚待核对，暂不套用原子数占比"
         if not expected:
             shares["expected_reason"] = "缺少明确的化学计量或结构计数依据"
-        coverage_issues = {}
-        for curve in curves:
-            reason = coverage_reason(curve, calibrations.get(curve["id"], {}), samples[curve["id"]][0])
-            if reason:
-                coverage_issues.setdefault(reason, []).append(curve.get("projection") or curve["id"])
-        if coverage_issues:
-            shares["coverage_note"] = "面积比仅按当前已积分频段估算；完整频段尚未确认或存在覆盖问题，暂不能据此验证化学计量。"
         demand(standard, "标准原子振动投影定义尚待核对，不能套用 3N")
-        demand(not coverage_issues, "；".join(f"{'、'.join(names)}：{reason}" for reason, names in coverage_issues.items()))
+        clipped = [c.get("projection") or c["id"] for c in curves if c.get("clipped_frequencies_thz")]
+        demand(not clipped, "、".join(clipped) + "：曲线存在已记录的抵框裁峰，无法确定完整模式面积")
         demand(valid_atoms, "缺少可信原胞原子数 N；化学式比例不能确定原胞倍数")
         if primitive_fractions and formula_fractions:
             demand(primitive_fractions.keys() == formula_fractions.keys() and all(

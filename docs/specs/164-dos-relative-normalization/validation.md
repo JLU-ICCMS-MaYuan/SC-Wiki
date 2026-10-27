@@ -2,6 +2,8 @@
 
 日期：2026-10-27（Asia/Shanghai）。Issue：[#164](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/164)。
 
+本文保留各次历史验证；最新有效规则见文末“删除频段确认门槛”。此前关于频段确认的行为描述已被该修订取代。
+
 ## 自动验证
 
 - 后端：194 passed、6 skipped。覆盖全部 test_spectra*.py 与 test_alpha2f_relative.py。6 项跳过为需明确授权 MySQL 的集成/并发验证，本次使用 SQLite，不能视为 MySQL 验收。
@@ -50,3 +52,15 @@
 - 频段提示现明确缺少确认记录不等于发现缺失，合并所有受影响元素；频段不完整或未知时注明比例仅为当前已积分范围估计，仍不自动授予完整频段确认。
 
 [补充浏览器报告](validation/element-ratio/browser-report.json) · [桌面](validation/element-ratio/dos-desktop.png) · [窄屏](validation/element-ratio/dos-mobile.png) · [无N](validation/element-ratio/dos-no-n.png)
+
+
+## 删除频段确认门槛
+
+2026-10-27，按用户明确要求删除完整频段确认字段/勾选项和高频边界记录的 DOS 归一化检查。实际计算使用已保存样本，不重新读原图；保留断线、回折、零频、无效值和已记录裁峰检查。
+- 后端全部 test_spectra*.py 加 test_alpha2f_relative.py：207 passed、6 skipped；跳过项为需授权 MySQL 的测试。
+- 前端 DOS、重新计算和工作区组件：14 项通过；生产构建通过。
+- 新增 9 组标记/高频边界组合验证：标记缺失/false/true 与上限未知/低于末点/远高于末点均不阻止当前样本归一化，实际积分范围保持0–0.9 THz，总模式归一化为9，源点不改写。
+- 旧标定字段可读但不重新保存，新字段模型不包含该标记；其他未知字段仍拒绝。
+- 旧方法 dos-relative-v1 的已保存失败原因不再渲染，提示重新计算；dos-relative-v2 按新规则计算。CSV 两版候选兼容。
+- 本轮未重复运行浏览器；已有浏览器截图属于此前版本，不能作为移除门槛后的界面截图。当前变更通过实际 HTTP 路由回归、组件测试及构建核验。
+- 未回填、未重新提取业务谱，未推送或部署。

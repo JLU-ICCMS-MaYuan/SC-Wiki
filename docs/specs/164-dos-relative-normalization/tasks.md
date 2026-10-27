@@ -17,3 +17,7 @@
 - [x] T008 [US2] 在 backend/spectra/dos.py 和 frontend/src/components/spectrumEditor/DosRelativeMetrics.tsx 将面积比换算为近似元素比，说明完整频段提示，补充原有测试并更新 Overview。
 
 T008 验证依据见 validation.md「元素比例展示补充验证」；无需原胞 N 或 3N 归一化，限制原样保留。
+
+- [x] T009 [US3] 按最新要求删除 backend/spectra/dos.py 的频段元数据门槛及合同/控件，兼容旧记录，补充测试和文档。
+
+T009 证据：validation.md「删除频段确认门槛」，207项后端、14项前端及构建；旧报告提示重新计算，原始历史数据不批量重写。

@@ -205,7 +205,7 @@ def csv_export(item):
     norm=candidates.get("dos_relative_normalized") or candidates.get("dos_normalization") or {}
     for c in payload.get("curves") or []:
         normalized=dict(zip(norm.get("frequency_thz") or [], norm.get("components",{}).get(c["projection"] or c["id"],[])))
-        if norm.get("method") == "dos-relative-v1":
+        if norm.get("method") in {"dos-relative-v1", "dos-relative-v2"}:
             component = norm.get("curves", {}).get(c["id"], {})
             normalized = dict(zip(component.get("frequency_thz", []), component.get("density", [])))
         decision = item["review"].get(c["id"], {})

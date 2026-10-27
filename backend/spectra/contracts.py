@@ -44,11 +44,18 @@ class CurveCalibration(BaseModel):
     amplitude_scale: Literal["linear"] = "linear"
     unit: str
     physical_definition_confirmed: bool = False
-    frequency_range_confirmed: bool = False
     amplitude_evidence: str | None = None
     exclude: list[tuple[int, int, int, int]] = Field(default_factory=list)
     zero_boundaries_thz: tuple[float | None, float | None] = (None, None)
     zero_reference_band_thz: tuple[float, float] | None = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def discard_retired_frequency_confirmation(cls, value):
+        # 只兼容这一项退休字段；其余未知字段仍由 extra=forbid 拒绝。
+        if isinstance(value, dict) and "frequency_range_confirmed" in value:
+            return {k: v for k, v in value.items() if k != "frequency_range_confirmed"}
+        return value
 
     @field_validator("zero_boundaries_thz", "zero_reference_band_thz", mode="before")
     @classmethod
