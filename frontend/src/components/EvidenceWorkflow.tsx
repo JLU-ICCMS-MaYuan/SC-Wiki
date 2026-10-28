@@ -1,6 +1,8 @@
 import ReviewSection from './ReviewSection'
 import EvidenceReviewSummary from './EvidenceReviewSummary'
 import ReviewFieldSettings from './ReviewFieldSettings'
+import FieldAICandidate, { type FieldCandidate } from './FieldAICandidate'
+import type { EvidencePatch } from '../lib/evidenceProposals'
 import EvidenceHistoryTimeline, { type AuditEvent } from './EvidenceHistoryTimeline'
 import type { ManualRecord } from '../lib/manualEvidenceDrafts'
 import { EvidenceRegion } from './EvidenceRegion'
@@ -37,7 +39,7 @@ export interface EvidenceHistory {
 }
 export interface EvidenceRecord { detail_ref?: string; field_decision?: {contract: string; action: 'approve' | 'reject'; actor_user_id: number; actor_name?: string; occurred_at: string}; settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
-interface FieldDetail { record?: Partial<EvidenceRecord>; history?: EvidenceHistory[]; review_token?: string; can_approve?: boolean; source_state?: string }
+interface FieldDetail { record?: Partial<EvidenceRecord>; history?: EvidenceHistory[]; review_token?: string; can_approve?: boolean; source_state?: string; candidate?: FieldCandidate | null }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
 export interface EvidenceTarget { target: 'upload' | 'paper' | 'revision'; target_id: string }
@@ -78,6 +80,7 @@ export function useEvidenceWorkflow(options?: {
   readOnly?: boolean
   getCurrentValue?: (record: EvidenceRecord) => { value: unknown; field: string; record_key?: string; manualValue?: unknown; comparisonValue?: unknown } | undefined
   saveCurrent?: () => Promise<boolean>
+  saveCandidate?: (patches: EvidencePatch[]) => Promise<boolean>
 }) {
   const { t } = useLanguage()
   const [view, setView] = useState<View | null>(null)
@@ -103,6 +106,7 @@ export function useEvidenceWorkflow(options?: {
   const [manualNotice, setManualNotice] = useState('')
   const [saving, setSaving] = useState(false)
   const [confirming, setConfirming] = useState(false)
+  const candidateResume = useRef<{ target: EvidenceTarget; item_key: string; preparation_id: string } | undefined>(undefined)
   const confirmingRef = useRef(false)
   const decisionEpoch = useRef(0)
   const fieldDecisionEpoch = useRef(new Map<string, number>())
@@ -547,6 +551,7 @@ export function useEvidenceWorkflow(options?: {
             const selectedResults = (result.records || []).filter(r => retryItems.has(r.item_key || r.key))
             setRecords(old => old.map(r => selectedResults.find(fresh => (fresh.item_key || fresh.key) === (r.item_key || r.key)) || r))
             setView(null)
+            setDetailReload(n => n + 1)
             const reviewed = selectedResults[0]
             if (reviewed?.status === 'supported' && !reviewed.stale && !reviewed.pending_review) setManualNotice(t('evidence.fieldReviewSaved'))
             else if (reviewed) openIssue(reviewed.key)
@@ -647,6 +652,48 @@ export function useEvidenceWorkflow(options?: {
     || activeRecord.human_modified || hasLocalManualEdit(activeRecord)))
   const canApprove = Boolean(summaryRecord && activeRecord && problematic(summaryRecord) && problematic(activeRecord)
     && currentDetail?.data?.can_approve && !hasLocalManualEdit(activeRecord) && !settingsPending)
+  const applyCandidate = async () => {
+    const record = activeRecord, target = targetRef.current
+    if (!record || !target || confirmingRef.current || optionsRef.current?.readOnly || settingsPendingRef.current) return
+    const item_key = record.item_key || record.key
+    const resume = candidateResume.current
+    const candidate = currentDetail?.data?.candidate
+    const retrying = (resume?.item_key === item_key && resume.target.target === target.target && resume.target.target_id === target.target_id) || Boolean(candidate?.preparation_id)
+    if (!retrying && (!candidate?.can_apply || !candidate.token || hasLocalManualEdit(record))) return
+    confirmingRef.current = true; setConfirming(true); setSaveError('')
+    const session = drawerSession.current
+    const valueIdentity = () => manualValueIdentity(optionsRef.current?.getCurrentValue?.(record)?.value ?? record.current_value)
+    const originalValue = valueIdentity()
+    try {
+      let preparation_id = retrying ? candidate?.preparation_id || resume!.preparation_id : ''
+      if (!retrying) {
+        if (optionsRef.current?.saveCurrent && !(await optionsRef.current.saveCurrent())) throw new Error(t('evidence.saveFirstFailed'))
+        const prepared = await api.post<{ preparation_id: string; patches: EvidencePatch[] }>(`${base}/field-candidate/prepare`, {
+          ...target, item_key, candidate_token: candidate!.token,
+        })
+        if (settingsPendingRef.current || valueIdentity() !== originalValue
+            || targetRef.current?.target !== target.target || targetRef.current?.target_id !== target.target_id) {
+          throw new Error(t('evidence.changedDuringSave'))
+        }
+        if (!optionsRef.current?.saveCandidate || !(await optionsRef.current.saveCandidate(prepared.patches))) throw new Error(t('evidence.saveFirstFailed'))
+        preparation_id = prepared.preparation_id
+        candidateResume.current = { target, item_key, preparation_id }
+      }
+      const result = await api.post<FieldDetail>(`${base}/field-candidate/finalize`, { ...target, item_key, preparation_id })
+      if (result.record?.status !== 'supported' || result.record.field_decision?.action !== 'approve') throw new Error(t('evidence.decisionResponseInvalid'))
+      candidateResume.current = undefined
+      decisionEpoch.current += 1
+      fieldDecisionEpoch.current.set(record.key, (fieldDecisionEpoch.current.get(record.key) || 0) + 1)
+      observedValues.current.set(item_key, copyValue(optionsRef.current?.getCurrentValue?.(record)?.comparisonValue ?? result.record.current_value))
+      const update = (old: EvidenceRecord[]) => old.map(r => r.key === record.key ? { ...r, ...result.record, pending_review: false } : r)
+      recordsRef.current = update(recordsRef.current); setRecords(update)
+      if (drawerSession.current === session) {
+        setSourceDetail({ key: record.key, ref: summaryRecord?.detail_ref, data: result })
+        setManualNotice(t('evidence.candidateApplied')); closeDrawer()
+      }
+    } catch (error) { setSaveError((error as Error).message) }
+    finally { confirmingRef.current = false; if (mounted.current) setConfirming(false) }
+  }
   const decideField = async (action: 'approve' | 'reject') => {
     if (!activeRecord || !currentDetail?.data?.review_token || confirmingRef.current) return
     if (action === 'approve' && !canApprove) return
@@ -776,11 +823,16 @@ export function useEvidenceWorkflow(options?: {
         <Tabs value={drawerTab} onChange={(_, value) => setDrawerTab(value)} variant="fullWidth">
           <Tab value="settings" label={t('evidence.settingsTab')} /><Tab value="source" label={t('evidence.sourceTab')} /><Tab value="history" label={t('evidence.historyLabel')} />
         </Tabs>
-        <Box hidden={drawerTab !== 'settings'} key={'settings:' + activeRecord.key} sx={{ pt: 2 }}>
+        <Box component="fieldset" disabled={confirming} hidden={drawerTab !== 'settings'} key={'settings:' + activeRecord.key} sx={{ pt: 2, px: 0, m: 0, border: 0, minWidth: 0 }}>
           <ReviewFieldSettings identity={activeRecord.item_key || activeRecord.key} field={options?.getCurrentValue?.(activeRecord)?.field || activeRecord.field}
             settingsField={activeRecord.settings_field} sourceField={activeRecord.field}
             enabled={drawerTab === 'settings'} onDone={closeDrawer} onPendingChange={reportSettingsPending}
             label={activeRecord.label} value={activeCurrent ? activeCurrent.value : activeRecord.current_value} />
+          <FieldAICandidate candidate={currentDetail?.data?.candidate} target={targetRef.current}
+            loading={!currentDetail?.data && !currentDetail?.error} error={currentDetail?.error}
+            disabled={Boolean(options?.readOnly || !options?.saveCandidate || settingsPending || (hasLocalManualEdit(activeRecord) && !currentDetail?.data?.candidate?.preparation_id && candidateResume.current?.item_key !== (activeRecord.item_key || activeRecord.key)))}
+            busy={confirming} retrying={Boolean(currentDetail?.data?.candidate?.preparation_id || candidateResume.current?.item_key === (activeRecord.item_key || activeRecord.key))} onApply={() => void applyCandidate()} />
+          {saveError && <Alert severity="error" sx={{ mt: 1 }}>{saveError}</Alert>}
         </Box>
         <Box hidden={drawerTab !== 'source'} key={'source:' + activeRecord.key}>
         <ReviewSection title={t('evidence.foundSources')} initialOpen>

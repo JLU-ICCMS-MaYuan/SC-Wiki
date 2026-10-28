@@ -203,6 +203,13 @@ def field_detail(target: str, target_id: str, item_key: str, history: bool = Fal
         bind_support_versions(snapshot, session)
         cached = science.load_results(session, snapshot, user.id, include_stale=True)
     view = detail(snapshot, cached)
+    from backend.ingest.field_candidates import candidate_view, pending_application
+    record = snapshot['records'][0]
+    current = cached.get(record['key']) or {}
+    with SessionLocal() as session:
+        draft, _ = authorized_draft(session, target, target_id, user)
+        view['candidate'] = (pending_application(session, snapshot, user, current)
+                             or candidate_view(snapshot, record, current, draft))
     view['record'].pop('history', None)
     view['record'].pop('audit_events', None)
     return view
@@ -212,6 +219,49 @@ class FieldDecision(Target):
     item_key: str
     action: Literal['approve', 'reject']
     review_token: str
+
+
+class FieldCandidateRequest(Target):
+    item_key: str
+    candidate_token: str = ''
+    preparation_id: str = ''
+
+
+def candidate_operation(body, user, finalize=False):
+    from backend.ingest import field_candidates as candidates, field_source_metadata as metadata
+    from backend.ingest.field_drafts import target_lock, authorized_draft
+    from backend.ingest.field_review import bind_support_versions
+    from backend.ingest.field_decisions import detail
+    item_key = _manual_record_key(body.item_key)
+    _manual_snapshots(body.target, body.target_id, user, item_key)
+    with target_lock(body.target, body.target_id), SessionLocal.begin() as session:
+        draft, _ = authorized_draft(session, body.target, body.target_id, user, lock=True)
+        source = metadata.read(session, body.target, body.target_id)
+        if source is None:
+            ev.fail('evidence_stale', '来源已变化，请重新打开字段')
+        def project(value):
+            snapshot, _ = metadata.field_snapshot(session, body.target, body.target_id, user,
+                                                  item_key, source, draft_override=value)
+            bind_support_versions(snapshot, session)
+            if len(snapshot['records']) != 1:
+                ev.fail('evidence_field_missing', '字段已删除或无法唯一定位')
+            return snapshot
+        snapshot = project(draft)
+        if finalize:
+            result = candidates.finalize(session, snapshot, user, body.preparation_id)
+            return {**detail(snapshot, {snapshot['records'][0]['key']: result}), 'candidate': None}
+        cached = science.load_results(session, snapshot, user.id, include_stale=True)
+        return candidates.prepare(session, snapshot, cached, draft, user, body.candidate_token, project)
+
+
+@router.post('/field-candidate/prepare')
+def prepare_field_candidate(body: FieldCandidateRequest, user=Depends(get_current_user)):
+    return candidate_operation(body, user)
+
+
+@router.post('/field-candidate/finalize')
+def finalize_field_candidate(body: FieldCandidateRequest, user=Depends(get_current_user)):
+    return candidate_operation(body, user, finalize=True)
 
 
 @router.post('/field-decision')
@@ -388,7 +438,8 @@ def enqueue_review(body, user, snapshot, cached):
     # 程序仅检查人工记录是否齐全；理由是否科学成立由随后模型判断。
     from backend.ingest.state_field_review import initial_state_value
     modified = [r for r in snapshot['records'] if r['key'] in requested and r.get('human_modified')
-                and not initial_state_value(snapshot, r)]
+                and not initial_state_value(snapshot, r)
+                and not (reusable(r, prior.get(r['key'])) and prior[r['key']].get('status') == 'supported')]
     if modified:
         with SessionLocal() as session:
             issues = []

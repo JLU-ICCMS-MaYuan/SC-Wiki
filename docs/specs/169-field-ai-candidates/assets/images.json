@@ -1,0 +1,40 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-218e486e-fa38-4d85-9aa5-7f42315577a8.png",
+      "locator": "docs/specs/169-field-ai-candidates/assets/IMG-001.png",
+      "status": "local_verified",
+      "sha256": "78ec430fe88d13f5a61618c50bfd4b9096bfbf5091f4069bf3de772dcb78bec8",
+      "media_type": "image/png",
+      "dimensions_px": [
+        934,
+        1648
+      ],
+      "related": [
+        "US2"
+      ],
+      "user_context": "生成的候选就放在侧边栏的字段按照图中方式设计。",
+      "verification": "2026-10-28 copied and read original PNG bytes; dimensions and SHA-256 verified"
+    },
+    {
+      "id": "IMG-002",
+      "upload_order": 2,
+      "original_name": "codex-clipboard-1d1d76c6-7cf1-41f5-9533-9f97475e4d74.png",
+      "locator": "docs/specs/169-field-ai-candidates/assets/IMG-002.png",
+      "status": "local_verified",
+      "sha256": "563f9c2ba96226bf0e6f4dda169b606f53f4bc2280c92599480bdac5a52677de",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3350,
+        1190
+      ],
+      "related": [
+        "US2"
+      ],
+      "user_context": "不要把所有的待候选内容都无脑的堆在表单的开头。",
+      "verification": "2026-10-28 copied and read original PNG bytes; dimensions and SHA-256 verified"
+    }
+  ]
+}

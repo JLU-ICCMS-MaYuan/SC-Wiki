@@ -87,6 +87,17 @@ const AdminPaperEditPage: React.FC = () => {
     target: paperId ? { target: 'paper', target_id: String(paperId) } : undefined,
     getCurrentValue: record => currentEvidenceField(record, {...editForm, material_families: editMaterialFamilies}, editMaterialStates),
     saveCurrent: () => handleEditSave([], undefined, undefined, false),
+    saveCandidate: async patches => {
+      if (!fieldSaver.current || editReviewSaving) return false
+      const next = applyEvidencePatches(editableDraft(), patches)
+      setEditReviewSaving(true)
+      try {
+        await fieldSaver.current.save(next)
+        setEditForm(next.paper); setEditMaterialFamilies(next.paper.material_families)
+        setEditMaterialStates(next.material_states)
+        return true
+      } finally { setEditReviewSaving(false) }
+    },
   })
   const [editStructureCandidates, setEditStructureCandidates] = useState<StructureCandidate[]>([])
   const [editStructuralObservations, setEditStructuralObservations] = useState<LatticeObservation[]>([])

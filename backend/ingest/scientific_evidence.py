@@ -577,6 +577,9 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
             models.ScientificEvidenceCheck.item_key == record['item_key'], models.ScientificEvidenceCheck.content_hash == record['content_hash'],
             models.ScientificEvidenceCheck.source_hash == record['source_hash'], models.ScientificEvidenceCheck.rule_version.in_(COMPATIBLE_RULES)).order_by(models.ScientificEvidenceCheck.id.desc()).limit(1).with_for_update())
         existing = session.get(models.ScientificEvidenceCheck,existing_id) if existing_id is not None else None
+        if existing is not None and not update_decision and result.get('field_candidate'):
+            from .field_candidates import preserve_candidate
+            existing.result = preserve_candidate(existing.result, result)
         if existing is not None and not update_decision:
             from .field_review import valid_field_decision
             previous_decision = (existing.result or {}).get('field_decision') or {}

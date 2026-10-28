@@ -129,6 +129,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [applyingCandidate, setApplyingCandidate] = useState(false)
   const [revision, setRevision] = useState<RevisionDraftResponse | null>(null)
   const revisionMeta = useRef<RevisionDraftResponse | null>(null)
   const draftUrl = revisionPaperId ? `/api/rag/papers/${revisionPaperId}/revision-draft` : `/api/rag/upload-tasks/${taskId}/draft`
@@ -140,6 +141,16 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     readOnly,
     getCurrentValue: record => draft ? currentEvidenceField(record, { ...draft.paper }, draft.material_states) : undefined,
     saveCurrent: () => saveDraft(false, false),
+    saveCandidate: async patches => {
+      if (!draft || readOnly || saving || submitting || revision?.conflict) return false
+      const next = applyEvidencePatches(draft, patches)
+      setSaving(true); setApplyingCandidate(true)
+      try {
+        await persistDraft(next)
+        setDraft(next); setDirty(false)
+        return true
+      } finally { setSaving(false); setApplyingCandidate(false) }
+    },
   })
   const revisionIdentity = () => revisionMeta.current
     ? { revision_id: revisionMeta.current.revision_id, draft_version: revisionMeta.current.draft_version } : {}
@@ -561,7 +572,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const classificationEvidence = draft.classification_evidence || []
 
   return (
-    <Box component="fieldset" data-evidence-scope="upload-editor" disabled={submitting || Boolean(revision?.conflict)} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
+    <Box component="fieldset" data-evidence-scope="upload-editor" disabled={submitting || applyingCandidate || Boolean(revision?.conflict)} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
       {!!draft.parsing_conflicts?.length && <Alert severity="warning" sx={{ mb: 2 }}>
         {t('upload.parsingDifferences', { count: draft.parsing_conflicts.length })}
         <details><summary>{t('upload.viewParsingDifferences')}</summary>
@@ -623,15 +634,11 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           : evidenceWorkflow.automaticView.message || t('evidence.checking')}
       </Alert>}
       {draft.field_suggestions_error && evidenceWorkflow.records.some(r => r.status === 'unchecked') && <Alert severity="warning" sx={{ mb: 2 }}>{t('evidence.generationFailed')}</Alert>}
-      {Boolean(draft.generation_issues?.length) && <Alert severity="warning" sx={{ mb: 2 }}>
+      {Boolean(draft.generation_issues?.some(issue => issue.candidate == null && issue.message !== '已纠正角色；只保存新候选供人工比较')) && <Alert severity="warning" sx={{ mb: 2 }}>
         <strong>{t('upload.generationIssuesTitle')}</strong>
         <Box component="ul" sx={{ my: 0.5, pl: 2 }}>
-          {draft.generation_issues?.map((issue, index) => <li key={`${issue.field}:${issue.code}:${index}`}>
+          {draft.generation_issues?.filter(issue => issue.candidate == null && issue.message !== '已纠正角色；只保存新候选供人工比较').map((issue, index) => <li key={`${issue.field}:${issue.code}:${index}`}>
             {issue.field}: {issue.message}
-            {issue.candidate != null && <Box component="div" sx={{ whiteSpace: 'pre-wrap', maxHeight: 180, overflow: 'auto' }}>
-              {t('upload.generationPendingCandidate')}: {typeof issue.candidate === 'string'
-                ? issue.candidate : JSON.stringify(issue.candidate)}
-            </Box>}
           </li>)}
         </Box>
       </Alert>}

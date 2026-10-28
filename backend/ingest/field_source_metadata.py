@@ -39,9 +39,11 @@ def read(session, target, target_id):
         models.ScientificEvidenceCheck.source_hash == token))
 
 
-def field_snapshot(session, target, target_id, user, item_key, metadata):
+def field_snapshot(session, target, target_id, user, item_key, metadata, *, draft_override=None):
     from .field_drafts import authorized_draft, draft_version
     draft, saved = authorized_draft(session, target, target_id, user)
+    if draft_override is not None:
+        draft = draft_override
     chunks = [{'file_id': file_id, 'content': '来源已读取', 'chunk_index': 0} for file_id in metadata.get('_source_readable') or []]
     context = {**draft, '_source_digest': metadata['_source_digest']}
     snapshot = ev.complete_snapshot(target, target_id, ev.draft_records(draft, {}), chunks, context, metadata_only=True)

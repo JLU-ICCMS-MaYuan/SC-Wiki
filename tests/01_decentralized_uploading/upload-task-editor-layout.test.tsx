@@ -209,14 +209,15 @@ describe('上传校对页布局与材料状态折叠', () => {
     expect(screen.getByText(/按 1\.、2\.、3\. 逐行填写/)).toBeVisible()
   })
 
-  it('重算冲突保留原表单值并展示待审候选', () => {
+  it('历史候选不再堆在表单顶部，原值保留', () => {
     const draft = makeDraft([makeState()])
     draft.paper.research_motivation = '1. Existing supported motivation remains.'
     draft.generation_issues = [{ field: 'paper.research_motivation', code: 'conflict',
       message: '首值与新候选尚不能判优', candidate: '1. New motivation for review.' }]
     render(<UploadTaskEditor taskId={'0'.repeat(32)} onSubmitted={vi.fn()} draftOverride={draft} />)
     expect(screen.getByRole('textbox', { name: '研究驱动力' })).toHaveValue(draft.paper.research_motivation)
-    expect(screen.getByText(/待审模型候选.*New motivation for review/)).toBeVisible()
+    expect(screen.queryByText(/New motivation for review/)).not.toBeInTheDocument()
+    expect(screen.queryByText('首值与新候选尚不能判优')).not.toBeInTheDocument()
   })
 
   it('论文级 Material family 与 Superconductor type 在同一分类网格行', async () => {

@@ -868,6 +868,15 @@ proposal 增加 basis_kind：paper_quote（原文直接记载）、paper_inferen
 任务 purpose=review_all 时，独立检查所有 previous_result 的判断、建议及引句，而非照抄旧结论。对已有建议返回 proposal_review={"status":"reasonable|questionable|uncertain","explanation":"简要理由"}；即使合理，推测仍不是原文直接支持。
 """
 
+FIELD_CANDIDATE_PROMPT = """
+本次为用户主动单字段核对，以下规则替代普通解析的仅补空值限制：
+可以重新审核当前值，也可以为已有值生成更合适的归纳或候选；无必要时省略 proposal。
+候选不会自动填入表单，只在该字段侧栏展示，用户明确应用才改值。
+每个候选必须提供独立 explanation，说明候选依据及局限；原文依据需要真实引句。
+当前值的 status 和 reason 与候选的 explanation 分开，不能因候选更好而认定原值错误。
+材料家族仍使用专门目录分类，不生成目录外自由名称；不猜测未报告计算条件，不生成结构或派生值。
+"""
+
 
 def verify_model_image_capability() -> bool:
     """兼容旧测试和显式诊断入口；正常审核路径不调用此探针。"""
@@ -942,8 +951,9 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         'human_provided_evidence': visible_human}, ensure_ascii=False, default=str)
     image_request_succeeded = True
     association_prompt = REVIEW_PROMPT if any(r.get('source_associations') and not r.get('condition_context') for r in records) else ''
+    suggestion_prompt = SUGGESTION_PROMPT + (FIELD_CANDIDATE_PROMPT if purpose == 'field' else '')
     try:
-        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT + association_prompt + condition_rules.PROMPT,
+        parsed = complete_json(SYSTEM_PROMPT + suggestion_prompt + association_prompt + condition_rules.PROMPT,
                                prompt, on_partial=on_partial, retries=1,
                                **({'images': [item['data_url'] for item in image_refs]} if image_refs else {}))
     except APIStatusError as exc:
@@ -953,7 +963,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         image_request_succeeded = False
         if image_read_out is not None:
             image_read_out.extend((item, False) for item in image_refs)
-        parsed = complete_json(SYSTEM_PROMPT + SUGGESTION_PROMPT + association_prompt + condition_rules.PROMPT,
+        parsed = complete_json(SYSTEM_PROMPT + suggestion_prompt + association_prompt + condition_rules.PROMPT,
                                prompt, on_partial=on_partial, retries=1)
     if not isinstance(parsed.get('results'), list):
         raise ValueError('invalid result schema')
@@ -991,7 +1001,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
             except GeneratedFieldLanguageError:
                 safe.pop('proposal')
         previous = prior.get(key, {})
-        if previous.get('auto_filled'):
+        if previous.get('auto_filled') and purpose != 'field':
             safe.pop('proposal', None)
         review = raw.get('proposal_review')
         if isinstance(review, dict) and review.get('status') in {'reasonable', 'questionable', 'uncertain'}:
@@ -1361,6 +1371,12 @@ def run_evidence_job(job_id: str):
             finished = [r for r in batch_records if processed[r['key']] == source_batch_count]
             if finished:
                 fresh = aggregate_candidates(finished, candidates, location_errors, config.model, snapshot['chunks'])
+                if job.get('purpose') == 'field':
+                    from .field_candidates import capture
+                    for record in finished:
+                        candidate = capture(record, fresh[record['key']], job.get('review_started_at') or '')
+                        if candidate:
+                            fresh[record['key']]['field_candidate'] = candidate
                 if read_job_status(job_id, job['owner'])['status'] == 'cancelled':
                     return
                 persist_completed_results({**snapshot, 'records': finished}, fresh, job['owner'])
