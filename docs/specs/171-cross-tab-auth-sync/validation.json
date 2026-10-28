@@ -1,0 +1,99 @@
+{
+  "scenarios": [
+    "五页真实认证与原生 storage 分发；两登录页安全自动回跳；各页通用 API 使用一致身份",
+    "五页连续十轮退出/登录与账号交替；普通业务页 URL、输入及文档实例保留",
+    "真实 CDP 冻结后台页，其他页退出重登后恢复，在两秒内识别新账号",
+    "真实旧 /me 成功响应迟到，不得恢复旧用户",
+    "故障注入：旧 /me 401 不得清除新会话"
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "logoutMs": 406,
+      "loginIncludingFormMs": 440,
+      "synchronizationAfterSourceMs": 28
+    },
+    {
+      "round": 2,
+      "logoutMs": 396,
+      "loginIncludingFormMs": 774,
+      "synchronizationAfterSourceMs": 19
+    },
+    {
+      "round": 3,
+      "logoutMs": 360,
+      "loginIncludingFormMs": 426,
+      "synchronizationAfterSourceMs": 37
+    },
+    {
+      "round": 4,
+      "logoutMs": 385,
+      "loginIncludingFormMs": 494,
+      "synchronizationAfterSourceMs": 11
+    },
+    {
+      "round": 5,
+      "logoutMs": 371,
+      "loginIncludingFormMs": 490,
+      "synchronizationAfterSourceMs": 24
+    },
+    {
+      "round": 6,
+      "logoutMs": 345,
+      "loginIncludingFormMs": 613,
+      "synchronizationAfterSourceMs": 21
+    },
+    {
+      "round": 7,
+      "logoutMs": 323,
+      "loginIncludingFormMs": 500,
+      "synchronizationAfterSourceMs": 13
+    },
+    {
+      "round": 8,
+      "logoutMs": 377,
+      "loginIncludingFormMs": 395,
+      "synchronizationAfterSourceMs": 22
+    },
+    {
+      "round": 9,
+      "logoutMs": 376,
+      "loginIncludingFormMs": 478,
+      "synchronizationAfterSourceMs": 33
+    },
+    {
+      "round": 10,
+      "logoutMs": 350,
+      "loginIncludingFormMs": 517,
+      "synchronizationAfterSourceMs": 22
+    }
+  ],
+  "authRequests": {
+    "/api/auth/login": 14,
+    "/api/auth/me": 130
+  },
+  "errors": [],
+  "environment": {
+    "database": "isolated SQLite",
+    "cache": "isolated miniredis",
+    "browser": "156.0.8078.48"
+  },
+  "resumeMs": 12,
+  "result": "passed",
+  "identityRequestLatencyMs": {
+    "count": 130,
+    "min": 0,
+    "max": 6
+  },
+  "unitTests": {
+    "authAndNavigation": 60,
+    "unsavedProtection": 2,
+    "total": 62,
+    "result": "passed"
+  },
+  "build": {
+    "typescript": "passed",
+    "vite": "passed"
+  },
+  "date": "2026-10-28"
+}

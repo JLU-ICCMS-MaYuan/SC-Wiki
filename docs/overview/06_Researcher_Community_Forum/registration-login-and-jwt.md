@@ -20,6 +20,8 @@
 - 用户写入失败时，只有 MySQL `1062` 唯一键冲突返回“邮箱或用户名已被占用”；其他数据库错误返回“注册失败”并记录服务端错误。
 - 历史账号迁移后获得 `sc_` 加 12 位安全随机字符的临时用户名，可通过 `PATCH /api/auth/username` 成功自行更名一次；失败不消耗资格。
 - 前端 `AuthContext` 将 token 和不含实名的用户信息保存到 `localStorage`，启动时通过 `GET /api/auth/me` 刷新服务端身份；通用 API 客户端自动附加 `Authorization: Bearer`。
+- 同一浏览器配置、同源站点的标签页通过共享存储事件同步登录和退出；恢复可见或获得焦点时核对当前会话。新凭据通过现有身份接口核验，普通业务页面不因同步而强制刷新或跳转；已打开的登录页识别登录后按安全站内来源返回，无来源则进入热点。本页注册验证仍沿用用户中心回跳规则。
+- 登录和退出使用独立会话世代标记隔离迟到响应，即使两次登录获得相同 JWT，旧核验及资料修改也不能覆盖新会话。身份核验不重新写入 token；当前会话明确返回 401/403 时清理认证，网络异常或 5xx 保留共享凭据并允许恢复页面后重试。
 - JWT 包含 `session_version`。Go 和 Python 权限解析都会校验数据库中的账号状态与会话版本；改密、封禁、注销或角色变化会递增版本，使旧 JWT 立即失效。
 
 ## 工作流程
@@ -52,6 +54,8 @@
 - `goserver/middleware/auth.go`
 - `goserver/handlers/username_test.go`
 - `frontend/src/context/AuthContext.tsx`
+- `tests/02_identity_governance/auth-sync.test.tsx`
+- `tests/02_identity_governance/auth-cross-tab-browser.mjs`
 - frontend/src/pages/AuthPage.tsx
 - frontend/src/features/auth/
 - frontend/src/lib/authNavigation.ts
@@ -68,12 +72,16 @@
 
 ## 相关变更记录
 
+- [修复 #171：同源多标签页认证同步](../../specs/171-cross-tab-auth-sync/spec.md)，[验收证据与边界](../../specs/171-cross-tab-auth-sync/validation.md)。
+
 - [Feature #151：独立登录注册与邮箱找回密码](../../specs/151-superconducting-auth-page/spec.md)
 
 - [Feature #31：唯一公开用户名与贡献榜身份](../../specs/31-community-ranking-visuals/spec.md)
 - [GitHub Issue #31](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/31)
 
 ## 已知问题
+
+- 多标签页同步已通过真实 Chrome 五页十轮及后台冻结恢复测试，认证请求连接隔离 Go 处理器；不包含不同浏览器、设备、配置或普通与无痕窗口之间的同步，也不证明用户在线站点已经发布该修复。
 
 - 当前提供邮箱验证码忘记密码，不提供邮箱变更流程。
 - #151 已通过真实 Go 处理器与正式前端的隔离 HTTP 流程（SQLite、miniredis、邮件接口捕获），并通过邮件组件的本地 TLS/SMTP 测试。此验证不证明公网邮箱投递或生产 MySQL 并发锁行为已全部实测。

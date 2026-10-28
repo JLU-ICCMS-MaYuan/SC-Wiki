@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 
 export interface User {
   id: number
@@ -46,13 +46,37 @@ export const useAuth = () => useContext(AuthContext)
 
 const TOKEN_KEY = 'auth_token'
 const USER_KEY = 'auth_user'
+const REVISION_KEY = 'auth_session_revision'
+
+interface SessionIdentity {
+  token: string | null
+  revision: string
+}
+interface Session extends SessionIdentity {
+  user: User | null
+}
+
+function readIdentity(): SessionIdentity {
+  return { token: getStoredToken(), revision: localStorage.getItem(REVISION_KEY) || '' }
+}
+
+function sameIdentity(a: SessionIdentity, b: SessionIdentity) {
+  return a.token === b.token && a.revision === b.revision
+}
+
+function advanceRevision() {
+  // 同秒重新登录可能拿到相同 JWT，仍须区分两次会话。
+  localStorage.setItem(REVISION_KEY, Array.from(crypto.getRandomValues(new Uint32Array(4)), n => n.toString(16)).join('-'))
+}
 
 function saveAuth(token: string, user: User) {
-  localStorage.setItem(TOKEN_KEY, token)
   localStorage.setItem(USER_KEY, JSON.stringify(user))
+  advanceRevision()
+  localStorage.setItem(TOKEN_KEY, token)
 }
 
 function clearAuth() {
+  advanceRevision()
   localStorage.removeItem(TOKEN_KEY)
   localStorage.removeItem(USER_KEY)
 }
@@ -119,57 +143,116 @@ export function getStoredToken(): string | null {
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null)
-  const [token, setToken] = useState<string | null>(null)
+  const [session, setSession] = useState<Session>(() => ({ ...readIdentity(), user: null }))
   const [loading, setLoading] = useState(true)
+  const current = useRef(session)
+  const mounted = useRef(false)
+  const validation = useRef(0)
+  const authentication = useRef(0)
+  const pending = useRef<SessionIdentity | null>(null)
+
+  const applySession = useCallback((next: Session) => {
+    current.current = next
+    setSession(next)
+  }, [])
+
+  const invalidateValidation = useCallback(() => {
+    validation.current += 1
+    pending.current = null
+  }, [])
+
+  const syncAuth = useCallback(() => {
+    const identity = readIdentity()
+    if (!sameIdentity(identity, current.current)) {
+      invalidateValidation()
+      // 两个旧存储键不是原子记录；新凭据只采用服务端核验出的匹配身份。
+      applySession({ ...identity, user: null })
+    }
+    if (!identity.token) {
+      setLoading(false)
+      return
+    }
+    if (current.current.user && localStorage.getItem(USER_KEY) === JSON.stringify(current.current.user)) return
+    if (pending.current && sameIdentity(pending.current, identity)) return
+    pending.current = identity
+    const request = ++validation.current
+    const isCurrent = () => mounted.current && request === validation.current && sameIdentity(identity, readIdentity())
+    setLoading(!current.current.user)
+    void authFetch('/api/auth/me', { headers: { Authorization: `Bearer ${identity.token}` } })
+      .then(async response => {
+        if (!isCurrent()) return
+        if (response.status === 401 || response.status === 403) {
+          clearAuth()
+          applySession({ ...readIdentity(), user: null })
+          return
+        }
+        if (!response.ok) return
+        const data = await response.json()
+        if (!isCurrent() || !data.user?.username) return
+        // 核验响应绝不写回 token；相同 user 字符串不会再次触发 storage 事件。
+        localStorage.setItem(USER_KEY, JSON.stringify(data.user))
+        applySession({ ...identity, user: data.user })
+      })
+      .catch(() => {
+        // 网络或服务暂时故障不等于会话失效；保留凭据，恢复页面时可重试。
+      })
+      .finally(() => {
+        if (mounted.current && request === validation.current) {
+          pending.current = null
+          setLoading(false)
+        }
+      })
+  }, [applySession, invalidateValidation])
 
   useEffect(() => {
-    const savedToken = localStorage.getItem(TOKEN_KEY)
-    const savedUser = localStorage.getItem(USER_KEY)
-    if (savedToken && savedUser) {
-      try {
-        const parsed = JSON.parse(savedUser) as User
-        if (!parsed.username) {
-          clearAuth()
-        } else {
-          setToken(savedToken)
-          setUser(parsed)
-          void authFetch('/api/auth/me', { headers: { Authorization: `Bearer ${savedToken}` } })
-            .then(async response => {
-              if (!response.ok) throw new Error('sessionExpired')
-              const data = await response.json()
-              saveAuth(savedToken, data.user)
-              setUser(data.user)
-            })
-            .catch(() => {
-              clearAuth()
-              setToken(null)
-              setUser(null)
-            })
-        }
-      } catch {
-        clearAuth()
-      }
+    mounted.current = true
+    let timer: ReturnType<typeof setTimeout> | undefined
+    const onStorage = (event: StorageEvent) => {
+      if (event.storageArea !== localStorage) return
+      if (event.key !== null && ![TOKEN_KEY, USER_KEY, REVISION_KEY].includes(event.key)) return
+      // 合并一次登录产生的多键通知，读取最新值而不是重放旧事件。
+      clearTimeout(timer)
+      timer = setTimeout(syncAuth, 0)
     }
-    setLoading(false)
-  }, [])
+    const onVisible = () => { if (document.visibilityState === 'visible') syncAuth() }
+    window.addEventListener('storage', onStorage)
+    window.addEventListener('focus', syncAuth)
+    document.addEventListener('visibilitychange', onVisible)
+    syncAuth()
+    return () => {
+      mounted.current = false
+      authentication.current += 1
+      invalidateValidation()
+      clearTimeout(timer)
+      window.removeEventListener('storage', onStorage)
+      window.removeEventListener('focus', syncAuth)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [syncAuth, invalidateValidation])
 
-  const login = useCallback(async (email: string, password: string) => {
-    const res = await authFetch('/api/auth/login', {
+  const authenticate = useCallback(async (path: string, body: object, fallback: string) => {
+    const identity = readIdentity()
+    const operation = ++authentication.current
+    const res = await authFetch(path, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(body),
     })
-    if (!res.ok) {
-      throw await responseError(res, 'loginFailed')
-    }
+    if (!res.ok) throw await responseError(res, fallback)
     const data = await res.json()
-    const loggedUser: User = data.user
-    saveAuth(data.access_token, loggedUser)
-    setToken(data.access_token)
-    setUser(loggedUser)
+    if (!mounted.current || operation !== authentication.current || !sameIdentity(identity, readIdentity())) {
+      throw new Error('sessionExpired')
+    }
+    saveAuth(data.access_token, data.user)
+    invalidateValidation()
+    applySession({ ...readIdentity(), user: data.user })
+    setLoading(false)
+  }, [applySession, invalidateValidation])
+
+  const login = useCallback(async (email: string, password: string) => {
+    await authenticate('/api/auth/login', { email, password }, 'loginFailed')
     return {}
-  }, [])
+  }, [authenticate])
 
   const register = useCallback(async (email: string, password: string, username: string, realName: string) => {
     const res = await authFetch('/api/auth/register', {
@@ -185,38 +268,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const replaceUser = useCallback((nextUser: User) => {
-    const authToken = token || getStoredToken()
-    if (authToken) saveAuth(authToken, nextUser)
-    setUser(nextUser)
-  }, [token])
+    if (!session.token || !sameIdentity(session, readIdentity()) || nextUser.id !== session.user?.id) return
+    invalidateValidation()
+    localStorage.setItem(USER_KEY, JSON.stringify(nextUser))
+    applySession({ ...session, user: nextUser })
+    setLoading(false)
+  }, [session, applySession, invalidateValidation])
 
   const updateUsername = useCallback(async (username: string) => {
-    const authToken = token || getStoredToken()
+    if (!session.token || !sameIdentity(session, readIdentity())) throw new Error('sessionExpired')
     const res = await authFetch('/api/auth/username', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authToken}` },
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.token}` },
       body: JSON.stringify({ username }),
     })
     if (!res.ok) throw await responseError(res, 'usernameUpdateFailed')
     const data = await res.json()
     const updatedUser: User = data.user
     replaceUser(updatedUser)
-  }, [replaceUser, token])
+  }, [replaceUser, session])
 
   const verifyEmail = useCallback(async (email: string, code: string) => {
-    const res = await authFetch('/api/auth/verify-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, code }),
-    })
-    if (!res.ok) {
-      throw await responseError(res, 'verifyFailed')
-    }
-    const data = await res.json()
-    saveAuth(data.access_token, data.user)
-    setToken(data.access_token)
-    setUser(data.user)
-  }, [])
+    await authenticate('/api/auth/verify-email', { email, code }, 'verifyFailed')
+  }, [authenticate])
 
   const resendVerification = useCallback(async (email: string, password: string) => {
     const res = await authFetch('/api/auth/resend-verification', {
@@ -230,13 +304,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [])
 
   const logout = useCallback(() => {
+    authentication.current += 1
+    invalidateValidation()
     clearAuth()
-    setToken(null)
-    setUser(null)
-  }, [])
+    applySession({ ...readIdentity(), user: null })
+    setLoading(false)
+  }, [applySession, invalidateValidation])
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, updateUsername, replaceUser, verifyEmail, resendVerification, logout }}>
+    <AuthContext.Provider value={{ user: session.user, token: session.token, loading, login, register, updateUsername, replaceUser, verifyEmail, resendVerification, logout }}>
       {children}
     </AuthContext.Provider>
   )

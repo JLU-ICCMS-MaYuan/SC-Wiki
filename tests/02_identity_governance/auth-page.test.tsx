@@ -101,3 +101,18 @@ it('已失效改密凭证不能落成成功页面', async () => {
   fetchMock.mockResolvedValueOnce(response(400, { code: 'invalid_reset_token' }))
   await expect(auth.resetPassword('real@example.test', 'a'.repeat(64), 'changedPassword123')).rejects.toThrow('expired')
 })
+
+it.each([
+  ['/auth?returnTo=%2Fupload%3Ftask%3D12%23draft', '/upload?task=12#draft'],
+  ['/auth?returnTo=https%3A%2F%2Fevil.test', '/news'],
+  ['/auth', '/news'],
+])('其他标签页登录后自动安全返回：%s', async (path, destination) => {
+  fetchMock.mockResolvedValue(response(200, { user: { id: 1, username: 'Researcher' } }))
+  mount(path)
+  localStorage.setItem('auth_token', 'external-token')
+  localStorage.setItem('auth_user', JSON.stringify({ id: 1, username: 'Researcher' }))
+  localStorage.setItem('auth_session_revision', 'external-session')
+  fireEvent(window, new StorageEvent('storage', { key: 'auth_token', storageArea: localStorage }))
+  await screen.findByText(destination)
+  expect(fetchMock.mock.calls.map(([url]) => url)).toEqual(['/api/auth/me'])
+})

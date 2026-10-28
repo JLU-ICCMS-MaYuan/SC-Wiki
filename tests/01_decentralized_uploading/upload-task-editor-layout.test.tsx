@@ -12,7 +12,7 @@ import zhUpload from '../../frontend/src/i18n/zh/upload'
 import enUpload from '../../frontend/src/i18n/en/upload'
 
 vi.mock('../../frontend/src/lib/api', () => ({
-  api: { get: vi.fn(), put: vi.fn(), post: vi.fn() },
+  api: { get: vi.fn(), put: vi.fn(), post: vi.fn(), patch: vi.fn() },
 }))
 
 vi.mock('../../frontend/src/lib/classifications', async importOriginal => {
@@ -97,6 +97,7 @@ beforeEach(() => {
     return Promise.resolve({ ok: true, data: makeDraft([makeState()]) } as never)
   })
   mockedApi.put.mockResolvedValue({ ok: true } as never)
+  mockedApi.patch.mockResolvedValue({ changed: true, version: 'saved-test-version' } as never)
   submitRequest.mockReset().mockResolvedValue({ ok: true, paper_id: 99, review_status: 'pending' })
   mockedApi.post.mockImplementation(async (path, body) => {
     if (path === '/api/rag/evidence/proposals/prepare') return {patches:[]} as never
