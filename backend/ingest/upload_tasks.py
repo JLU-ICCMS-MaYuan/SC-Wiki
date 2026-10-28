@@ -32,6 +32,7 @@ from backend.ingest.upload_contracts import (
     apply_state_changes,
     apply_user_activity,
     convert_legacy_scientific_draft,
+    new_extraction_timing,
     public_task_state,
     validate_manifest,
 )
@@ -183,6 +184,7 @@ def create_task(
         "total_chunks": 0,
         "created_at": now,
         "updated_at": now,
+        "extraction_timing": new_extraction_timing(),
         "last_progress_at": now,
         "cleanup_at": None,
         "revision": 1,

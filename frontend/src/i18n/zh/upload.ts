@@ -4,6 +4,10 @@
 // PROCESSING_STAGES（处理阶段）与 UploadTaskStatus（任务状态）的显示标签，
 // 键与后端 value 对齐；`role` 是上传文件角色，`cell` 是晶胞表示。
 export default {
+  extractionTime: '提取内容用时：{duration}',
+  extractionDuration: '{minutes} 分 {seconds} 秒',
+  extractionNotStarted: '尚未开始',
+  extractionUnrecorded: '未记录',
   taskDetailTitle: '解析与校对',
   backToUploads: '返回上传记录',
   openTaskNewTab: '在新标签页打开 {filename} 的解析详情',

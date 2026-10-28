@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, Box, Button, Card, CardContent, Checkbox, Chip, CircularProgress, Typography } from '@mui/material'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { api } from '../lib/api'
 import { UploadTaskState, unwrapData } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
+import { extractionElapsedSeconds } from '../lib/uploadExtractionTiming'
 
 
 // 倒计时归零时的显示文案由 zh 字典 upload.cleanupPending 提供；源码中的「等待清理」
@@ -41,13 +42,17 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [batchDeleting, setBatchDeleting] = useState(false)
   const [notice, setNotice] = useState('')
+  const requestVersion = useRef(0)
 
-  const load = async () => {
+  const load = useCallback(async () => {
+    const version = ++requestVersion.current
     setLoading(true)
     try {
       const response = await api.get<{ ok: boolean; data: UploadTaskState[] }>('/api/upload-tasks')
       const next = unwrapData(response)
+      if (version !== requestVersion.current) return
       setTasks(next)
+      setNow(Date.now())
       // 清除已被清理或过期的选中项，避免向批量接口提交无效 ID。
       setSelectedIds(prev => {
         const alive = new Set(next.map(task => task.task_id))
@@ -56,22 +61,40 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
       })
       setError('')
     } catch (reason: any) {
-      setError(reason.message || t('upload.recordsLoadFailed'))
+      if (version === requestVersion.current) setError(reason.message || t('upload.recordsLoadFailed'))
     } finally {
-      setLoading(false)
+      if (version === requestVersion.current) setLoading(false)
     }
-  }
+  }, [t])
 
-  useEffect(() => { void load() }, [refreshKey])
+  useEffect(() => {
+    void load()
+    return () => { requestVersion.current += 1 }
+  }, [refreshKey, load])
   useEffect(() => {
     const refresh = () => { void load() }
     window.addEventListener('focus', refresh)
     return () => window.removeEventListener('focus', refresh)
-  }, [])
+  }, [load])
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(timer)
   }, [])
+
+  const hasPendingTasks = tasks.some(task => [
+    'uploading', 'queued', 'extracting', 'reading', 'summarizing', 'cancelling', 'needs_role_review',
+  ].includes(task.status || ''))
+  useEffect(() => {
+    if (!hasPendingTasks) return
+    let stopped = false
+    // 每次读取结束后再排下次，慢请求不会叠加；终态与卸载停止轮询。
+    const refresh = async () => {
+      await load()
+      if (!stopped) timer = window.setTimeout(refresh, 3000)
+    }
+    let timer = window.setTimeout(refresh, 3000)
+    return () => { stopped = true; window.clearTimeout(timer) }
+  }, [hasPendingTasks, load])
 
   const activeCount = useMemo(() => tasks.filter(task => task.status !== 'submitted').length, [tasks])
 
@@ -164,6 +187,10 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
       <Box sx={{ display: 'grid', gap: 1 }}>
         {tasks.map(task => {
           const remaining = countdownParts(task.cleanup_at, now)
+          const elapsed = extractionElapsedSeconds(task.extraction_timing, now)
+          const duration = elapsed === null ? t('upload.extractionUnrecorded')
+            : elapsed === 'notStarted' ? t('upload.extractionNotStarted')
+              : t('upload.extractionDuration', { minutes: Math.floor(elapsed / 60), seconds: elapsed % 60 })
           const running = ['uploading', 'queued', 'extracting', 'reading', 'summarizing', 'submitting', 'cancelling']
             .includes(task.status || '')
           const statusText = task.status && (STATUS_KEYS as readonly string[]).includes(task.status)
@@ -180,14 +207,19 @@ const UploadTaskCenter: React.FC<Props> = ({ refreshKey }) => {
                   inputProps={{ 'aria-label': t('upload.toggleSelectAria', { filename: task.filename || task.files?.[0]?.original_filename || task.task_id }) }}
                 />
                 <Box sx={{ minWidth: 0, flex: 1 }}>
-                  <Typography component="a"
-                    href={`/upload/tasks/${encodeURIComponent(task.task_id)}`}
-                    target="_blank" rel="noopener"
-                    aria-label={t('upload.openTaskNewTab', { filename: task.filename || task.files?.[0]?.original_filename || task.task_id })}
-                    fontWeight={700} noWrap sx={{ display: 'block', color: 'inherit', textDecoration: 'none',
-                      '&::after': { content: '\'\'', position: 'absolute', inset: 0, zIndex: 1 },
-                      '&:focus-visible': { outline: 'none', '&::after': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: '-2px' } },
-                    }}>{task.filename || task.files?.[0]?.original_filename || task.task_id}</Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'baseline', columnGap: 1.5, rowGap: 0.25, flexWrap: { xs: 'wrap', sm: 'nowrap' } }}>
+                    <Typography component="a"
+                      href={`/upload/tasks/${encodeURIComponent(task.task_id)}`}
+                      target="_blank" rel="noopener"
+                      aria-label={t('upload.openTaskNewTab', { filename: task.filename || task.files?.[0]?.original_filename || task.task_id })}
+                      fontWeight={700} noWrap sx={{ display: 'block', minWidth: 0, flexShrink: 1, maxWidth: '100%', flexBasis: { xs: '100%', sm: 'auto' }, color: 'inherit', textDecoration: 'none',
+                        '&::after': { content: '\'\'', position: 'absolute', inset: 0, zIndex: 1 },
+                        '&:focus-visible': { outline: 'none', '&::after': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: '-2px' } },
+                      }}>{task.filename || task.files?.[0]?.original_filename || task.task_id}</Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ flexShrink: 0, whiteSpace: 'nowrap', fontVariantNumeric: 'tabular-nums' }}>
+                      {t('upload.extractionTime', { duration })}
+                    </Typography>
+                  </Box>
                   <Typography variant="caption" color="text.secondary">
                     {statusText}
                     {task.total_chunks > 0 ? t('upload.chunkCount', { done: task.completed_chunks, total: task.total_chunks }) : ''}

@@ -1,0 +1,26 @@
+{
+  "baseline_commit": "881583c9a5baeac1d3d1317db2d6608aeb8ee8ad",
+  "method": "将HEAD的upload_contracts和upload_tasks加载到隔离测试进程，工作区不回退，其他模块保持相同。",
+  "before": [
+    "tests/01_decentralized_uploading/test_issue24_task_contract.py::test_manifest_requires_exactly_one_main_and_supported_types",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_scheduled_cleanup_keeps_context_after_redis_state_expires",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_cleanup_fails_closed_when_mysql_is_unavailable",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_successful_submit_cleans_transient_only_after_snapshot",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_snapshot_failure_keeps_transient_recovery_data",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_submitted_review_snapshot_keeps_only_review_fields",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_pending_paper_transaction_matches_current_revision_schema",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_pending_review_snapshot_requires_current_paper_revision"
+  ],
+  "after": [
+    "tests/01_decentralized_uploading/test_issue24_task_contract.py::test_manifest_requires_exactly_one_main_and_supported_types",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_scheduled_cleanup_keeps_context_after_redis_state_expires",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_cleanup_fails_closed_when_mysql_is_unavailable",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_successful_submit_cleans_transient_only_after_snapshot",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_snapshot_failure_keeps_transient_recovery_data",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_submitted_review_snapshot_keeps_only_review_fields",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_pending_paper_transaction_matches_current_revision_schema",
+    "tests/01_decentralized_uploading/test_issue35_cleanup_lifecycle.py::test_pending_review_snapshot_requires_current_paper_revision"
+  ],
+  "same_failures": true,
+  "remaining_checks": "27 passed, 8 deselected"
+}

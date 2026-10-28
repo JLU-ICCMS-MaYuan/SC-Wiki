@@ -221,6 +221,13 @@ export interface UploadDraft {
   field_evidence?: Record<string, SourceEvidence[]>
 }
 
+export interface UploadExtractionTiming {
+  elapsed_seconds: number
+  started_at: number | null
+  running_since: number | null
+  finished_at: number | null
+}
+
 export interface UploadTaskState {
   task_id: string
   filename?: string
@@ -243,6 +250,7 @@ export interface UploadTaskState {
   status?: UploadTaskStatus
   cleanup_at?: number | null
   updated_at?: number
+  extraction_timing?: UploadExtractionTiming | null
   files?: UploadTaskFile[]
   revision?: number
   role_assessment?: UploadRoleAssessment

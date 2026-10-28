@@ -23,8 +23,39 @@ FIXED_TERMINAL_STATUSES = {"failed", "duplicate", "cancelled"}
 FINAL_STATUSES = FIXED_TERMINAL_STATUSES | {"submitted"}
 FILE_ROLES = {"main", "supplementary", "attachment"}
 FILE_SUFFIXES = {".pdf", ".txt", ".md", ".cif", ".poscar", ".vasp"}
-PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state", "role_assessment"}
+PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state", "role_assessment", "extraction_timing"}
 PUBLIC_FILE_FIELDS = {"file_id", "role", "declared_role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
+
+
+def new_extraction_timing() -> dict[str, int | None]:
+    """新一轮解析尚未开始；排队时间不计入用时。"""
+    return {"elapsed_seconds": 0, "started_at": None, "running_since": None, "finished_at": None}
+
+
+def _advance_extraction_timing(state: dict[str, Any], target: str, now: int) -> None:
+    timing = state.get("extraction_timing")
+    # 历史任务没有可靠起点，不用created_at或updated_at伪造解析耗时。
+    if not isinstance(timing, dict) or timing.get("finished_at") is not None:
+        return
+    if (type(timing.get("elapsed_seconds")) is not int or timing["elapsed_seconds"] < 0
+            or any(key not in timing or (timing[key] is not None and
+                   (type(timing[key]) is not int or timing[key] < 0))
+                   for key in ("started_at", "running_since", "finished_at"))):
+        return
+    timing = dict(timing)
+    running_since = timing["running_since"]
+    stopped = target in {"ready", "failed", "cancelled", "duplicate"}
+    paused = target in {"needs_role_review", "queued"}
+    if running_since is not None and (stopped or paused):
+        timing["elapsed_seconds"] += max(0, now - running_since)
+        timing["running_since"] = None
+    if stopped:
+        timing["finished_at"] = now
+    elif target == "extracting" and timing["running_since"] is None:
+        if timing["started_at"] is None:
+            timing["started_at"] = now
+        timing["running_since"] = now
+    state["extraction_timing"] = timing
 
 @dataclass(frozen=True)
 class CleanupContext:
@@ -46,6 +77,10 @@ def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> d
     if current in FINAL_STATUSES and target not in {current, "submitted"} and not retrying_failed:
         raise ValueError("终态任务不能恢复为运行状态")
     result = {**state, **changes, "updated_at": now}
+    if retrying_failed:
+        result["extraction_timing"] = new_extraction_timing()
+    else:
+        _advance_extraction_timing(result, target, now)
     if target != current:
         result["revision"] = int(state.get("revision") or 0) + 1
         if target in {"ready", "needs_role_review"}:

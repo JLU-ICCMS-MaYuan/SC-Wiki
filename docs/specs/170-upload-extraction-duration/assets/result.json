@@ -1,0 +1,38 @@
+{
+  "checks": [
+    {
+      "width": 1440,
+      "language": "zh",
+      "live": true,
+      "frozen": true,
+      "reload": true,
+      "paused": true,
+      "legacy": true,
+      "layout": true,
+      "controls": true
+    },
+    {
+      "width": 390,
+      "language": "zh",
+      "live": true,
+      "frozen": true,
+      "reload": true,
+      "paused": true,
+      "legacy": true,
+      "layout": true,
+      "controls": true
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "live": true,
+      "frozen": true,
+      "reload": true,
+      "paused": true,
+      "legacy": true,
+      "layout": true,
+      "controls": true
+    }
+  ],
+  "errors": []
+}

@@ -2,6 +2,10 @@
 // 推导，缺键或多键会在 `tsc -b` 阶段报错。处理阶段/任务状态/文件角色/晶胞表示等
 // 枚举标签与后端 value 对齐，仅展示文案随语言变化。
 export default {
+  extractionTime: 'Extraction time: {duration}',
+  extractionDuration: '{minutes}m {seconds}s',
+  extractionNotStarted: 'Not started',
+  extractionUnrecorded: 'Not recorded',
   taskDetailTitle: 'Parsing and proofreading',
   backToUploads: 'Back to uploads',
   openTaskNewTab: 'Open parsing details for {filename} in a new tab',
