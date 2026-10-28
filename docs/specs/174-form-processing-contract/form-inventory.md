@@ -10,6 +10,7 @@
 | `/papers/:id/revise` 返修 | PaperRevisionPage、UploadTaskEditor | 完整宿主回归通过 |
 | `/admin/papers/:id/edit` 管理员与超级管理员编辑 | AdminPaperEditPage、MaterialStatesEditor | 两种角色分别完整宿主回归通过 |
 | 上述页面的来源与字段设置侧栏 | EvidenceWorkflow、EvidenceFieldMarkers、ReviewPaperTextField、ScientificFieldBox、ManualEvidenceSection、FieldAICandidate | 首轮科学表单验证范围 |
+| 上传/返修的解析差异面板 | ParsingDiagnosticsPanel、parsingDiagnostics、EvidenceRegion | #172增量：90来源完整上传宿主、四宿主既有回归、独立来源快照与真实草稿隔离浏览器验证；原图点击加载，非科学审核入口 |
 | 上述页面的结构、谱图子区 | PaperStructuralWorkspace、StructureCandidatePanel、PropertySpectra | 首轮覆盖父表单更新的联动影响，不重写独立编辑器 |
 | `/upload` 文件选择及正文角色确认 | UploadPage、MultiFileUploadPanel、UploadRoleReview | 已定位，未做本轮性能验收 |
 | `/auth` 登录、注册与找回密码 | AuthPage 委托 AuthExperience 和 production auth 服务 | 已定位，未做本轮性能验收 |
@@ -55,3 +56,7 @@
 | 共享模型／分类控件 | 值由宿主或现有配置上下文持有，选项变更、提交或显式目录操作按各自契约执行 | FR-001–003/006–009；需关联实际使用方，不宣称单控件通过等于全站通过 |
 
 此清单记录已查明的数据归属和触发类别；未验证项不推断其请求计数或性能正确。新入口及共享依赖变动必须更新清单、适用检查与证据，行动状态由 #174 或后续对应 Issue 管理。
+
+## #172 解析差异增量验证
+
+解析原文与备选属于服务端来源账本；面板仅展示快照，不保存第二份科学值。外部草稿加载/刷新才更新快照，表单输入只更新真实依赖的题录当前值。原图按点击加载，完整记录按需挂载，没有“全部通过”按钮。`test:form-contract`含新增parsing-diagnostics套件，共64项通过；mutation仍验证四宿主8项能检出缓存回退。真实CaH6草稿副本页面在输入期间无请求、无全表扫描、无诊断DOM变化。浏览器API隔离，不代替真实登录的全站端到端验收；详细数据及源码见[#172增量验收](../172-phonon-method-parsing/difference-triage-validation.md)。

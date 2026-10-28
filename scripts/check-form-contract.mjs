@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 
 const root = dirname(dirname(fileURLToPath(import.meta.url)))
 const vitest = join(root, 'frontend/node_modules/vitest/vitest.mjs')
-const suites = ['form-contract', 'graph-title-form', 'paper-field-settings', 'two-stage-review', 'state-review-convergence']
+const suites = ['form-contract', 'graph-title-form', 'paper-field-settings', 'two-stage-review', 'state-review-convergence', 'parsing-diagnostics']
 const paths = suites.map(name => `tests/01_decentralized_uploading/${name}.test.tsx`)
 if (!process.argv.includes('--mutation')) {
   const result = spawnSync(process.execPath, [vitest, 'run', '--config', join(root, 'vitest.config.ts'), ...paths], { cwd: root, stdio: 'inherit' })

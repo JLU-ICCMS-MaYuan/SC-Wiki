@@ -18,6 +18,8 @@ import {
 import { useLanguage } from '../context/LanguageContext'
 import MaterialStatesEditor, { EvidenceNotes, SpaceGroupOption, ValidationIssue } from './MaterialStatesEditor'
 import CitationExtractionPanel from './CitationExtractionPanel'
+import ParsingDiagnosticsPanel from './ParsingDiagnosticsPanel'
+import { EMPTY_PARSING_SNAPSHOT, retainParsingSnapshot } from '../lib/parsingDiagnostics'
 import PaperMetadataRow from './PaperMetadataRow'
 import ReviewPaperTextField from './ReviewPaperTextField'
 import {
@@ -125,6 +127,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 }) => {
   const { t, lang, dict } = useLanguage()
   const [draft, setDraft] = useState<UploadDraft | null>(null)
+  // 只读解析来源与可编辑科学值分开，避免每次输入重新遍历差异清单。
+  const [parsingSnapshot, setParsingSnapshot] = useState(EMPTY_PARSING_SNAPSHOT)
   const [loading, setLoading] = useState(true)
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -215,6 +219,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     if (draftOverride !== undefined) {
       const normalized = normalizeUploadDraft(draftOverride)
       if (revisionMeta.current || !revisionPaperId) { fieldSaver.current = createFieldDraftSaver(revisionMeta.current ? {target: 'revision', target_id: revisionMeta.current.revision_id} : {target: 'upload', target_id: taskId}); fieldSaver.current.initialize(normalized) }
+      setParsingSnapshot(previous => retainParsingSnapshot(previous, normalized))
       setDraft(normalized)
       setLoading(false)
       setDirty(false)
@@ -239,6 +244,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       }
       const normalized = preserveRawNumbers(unwrapData(response), normalizeUploadDraft(unwrapData(response)))
       if (revisionMeta.current || !revisionPaperId) { fieldSaver.current = createFieldDraftSaver(revisionMeta.current ? {target: 'revision', target_id: revisionMeta.current.revision_id} : {target: 'upload', target_id: taskId}); fieldSaver.current.initialize(normalized) }
+      setParsingSnapshot(previous => retainParsingSnapshot(previous, normalized))
       setDraft(normalized)
       setDirty(false)
       setError('')
@@ -268,6 +274,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         if (JSON.stringify(next) !== JSON.stringify(latest.draft)) {
           fieldSaver.current = createFieldDraftSaver({target: 'upload', target_id: taskId})
           fieldSaver.current.initialize(next)
+          setParsingSnapshot(previous => retainParsingSnapshot(previous, next))
           setDraft(next)
           setIssues([])
           setError('')
@@ -573,29 +580,9 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
   return (
     <Box component="fieldset" data-evidence-scope="upload-editor" disabled={submitting || applyingCandidate || Boolean(revision?.conflict)} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
-      {!!draft.parsing_conflicts?.length && <Alert severity="warning" sx={{ mb: 2 }}>
-        {t('upload.parsingDifferences', { count: draft.parsing_conflicts.length })}
-        <details><summary>{t('upload.viewParsingDifferences')}</summary>
-          {draft.parsing_conflicts.map((item, index) => <Box key={index} sx={{ mt: 1, overflowWrap: 'anywhere' }}>
-            <Typography variant="caption">{item.file_id} · {t('upload.sourcePage', { page: item.pdf_page })}</Typography>
-            {item.engine && <Typography variant="caption">{item.engine}</Typography>}
-            <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>{item.selected_text}</Typography>
-            {item.alternatives.map((alternative, i) => <Box key={i}>
-              {alternative.engine && <Typography variant="caption">{alternative.engine}</Typography>}
-              <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', color: 'text.secondary' }}>{alternative.text}</Typography>
-            </Box>)}
-          </Box>)}
-        </details>
-      </Alert>}
-      {!!draft.bibliography_conflicts?.length && <Alert severity="info" sx={{ mb: 2 }}>
-        <details><summary>{t('upload.bibliographyDifferences')}</summary>
-          {draft.bibliography_conflicts.map((item, index) => <Box key={index} sx={{ mt: 1, overflowWrap: 'anywhere' }}>
-            <Typography variant="caption">{item.field}</Typography>
-            <Typography variant="body2">GROBID: {JSON.stringify(item.grobid_value)}</Typography>
-            <Typography variant="body2">{t('upload.extractedCandidate')}: {JSON.stringify(item.extracted_value)}</Typography>
-          </Box>)}
-        </details>
-      </Alert>}
+      <ParsingDiagnosticsPanel snapshot={parsingSnapshot} paper={draft.paper}
+        target={revisionPaperId ? revision ? { target: 'revision', target_id: revision.revision_id } : undefined
+          : { target: 'upload', target_id: taskId }} />
       {revision && <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.revisionNotice')}</Alert>}
       {revision?.review_comment && <Alert severity="warning" sx={{ mb: 2 }}>{revision.review_comment}</Alert>}
       {revision?.warnings?.map(warning => <Alert key={warning} severity="warning" sx={{ mb: 2 }}>{warning}</Alert>)}

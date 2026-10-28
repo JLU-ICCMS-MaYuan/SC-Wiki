@@ -20,7 +20,8 @@ function CropView({ crop, label, onClick, onFailure }: { crop: Crop; label: stri
   </Box>
 }
 
-export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; source: EvidenceSource }) {
+// 直接按PDF块定位时没有RAG分段编号，不编造chunk_index。
+export function EvidenceRegion({ target, source, hideQuote = false }: { target?: EvidenceTarget; source: Omit<EvidenceSource, 'chunk_index'> & { chunk_index?: number }; hideQuote?: boolean }) {
   const { t } = useLanguage()
   const [result, setResult] = useState<Region | null>(null)
   const [busy, setBusy] = useState(false)
@@ -55,7 +56,7 @@ export function EvidenceRegion({ target, source }: { target?: EvidenceTarget; so
     : result?.status === 'unlocated' ? t('evidence.regionQuoteUnlocated')
       : result?.status === 'render_unavailable' ? t('evidence.regionRenderFailed')
         : t('evidence.regionUnavailable')
-  const quote = source.quote || source.content || ''
+  const quote = hideQuote ? '' : source.quote || source.content || ''
   return <Box sx={{ my: 1 }}>
     <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {page ? t('evidence.page', { page }) : t('evidence.pageUnknown')}{quote ? `：${quote.length > 500 ? quote.slice(0, 360) + '…' : quote}` : ''}</Typography>
     {quote.length > 500 && <Box component="details" sx={{ my: 1 }}><Typography component="summary" variant="caption" sx={{ cursor: 'pointer' }}>{t('evidence.fullQuote')}</Typography>

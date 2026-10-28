@@ -2244,8 +2244,11 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         bibliography_patch = {"paper": dict(raw_paper)}
         if state.get("parser_profile") == "complementary":
             from .grobid_document import apply_bibliography
+            from .publication_year import verify_document_year
             apply_bibliography(bibliography_patch, citation_extraction,
-                               main_ir=document_set.get(citation_extraction.get("file_id")))
+                               main_ir=document_set.get(citation_extraction.get("file_id")),
+                               publication_verification=verify_document_year(
+                                   citation_extraction, raw_paper, source_pdf=citation_source))
             raw_paper = bibliography_patch["paper"]
         abstract = raw_paper.get("abstract") or next((
             item.get("metadata", {}).get("abstract") for item in summary_candidates
@@ -2448,6 +2451,11 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                        for result in suggestion_results.values() if isinstance(result, dict)],
             "suggestions_status": "failed" if draft.get("field_suggestions_error") else "completed",
         })
+        from .parsing_diagnostics import annotate_differences, read_pdf_regions
+        diagnostic_paths = {item["file_id"]: _source_path(state, item, source) for item in sources
+                            if item.get("file_id") in document_set}
+        draft = annotate_differences(draft, document_set, sources,
+                                     pdf_regions=read_pdf_regions(document_set, diagnostic_paths))
         # 已完成草稿的受控重跑必须保护期间的人工编辑；失败时保留原稿。
         expected_draft_hash = state.get("reparse_expected_draft_hash")
         with upload_task_lock(task_id) if expected_draft_hash else nullcontext():

@@ -1,0 +1,240 @@
+{
+  "date": "2026-10-28",
+  "task_id": "29b2dd4604b64ee58c669c0efddb8cab",
+  "regions": 90,
+  "alternatives": 103,
+  "categories": {
+    "notation": 27,
+    "layout": 24,
+    "identifier": 13,
+    "table": 11,
+    "symbol": 12,
+    "segmentation": 3
+  },
+  "region_statuses": {
+    "system_checked": 43,
+    "system_pending": 47
+  },
+  "bibliography_statuses": {
+    "system_checked": 3
+  },
+  "year": 2012,
+  "persistence": {
+    "year": 2012,
+    "regions": 90,
+    "alternatives": 103,
+    "bibliography_statuses": {
+      "system_checked": 3
+    },
+    "mysql_scientific_and_diagnostic_states_match": true,
+    "raw_regions_preserved": true,
+    "final_rule_matches_saved": true
+  },
+  "field_run": {
+    "passed": true,
+    "source_task": "29b2dd4604b64ee58c669c0efddb8cab",
+    "source_commit": "f8d058cc23adf8cf771d236b5b66e8eb1d8baa2a",
+    "sources": [
+      {
+        "file_id": "c463643719b3420eb4e1936d95780c6b",
+        "role": "supplementary",
+        "pdf_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+        "pages": [
+          1
+        ],
+        "ir_sha256": "1494b5544027405e46ea54a55ab5ffb88334ceeec0de43d9284bf83ace595637"
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "role": "main",
+        "pdf_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+        "pages": [
+          1
+        ],
+        "ir_sha256": "4b0f3cdf7a0dbdc3f9352de0f479fdb6b53c2cb090dc97d18a31009cc2ebf6f6"
+      }
+    ],
+    "reused": [
+      "同源PDF的已保存IR文字",
+      "同源GROBID原始题录"
+    ],
+    "rerun": [
+      "题录AI提取",
+      "出版年核验",
+      "正式题录组装",
+      "正式归一化",
+      "差异分类",
+      "隔离草稿保存重读"
+    ],
+    "not_run": [
+      "全文OCR",
+      "无关科学字段验收与业务写回",
+      "正式论文提交"
+    ],
+    "source_hashes": {
+      "backend/ingest/grobid_document.py": "71786bb59a267624656e0671b9b8c25fa2a54c2301dca4f69af1ed1571dcb054",
+      "backend/ingest/publication_year.py": "6d215d629a4e4fe5aac7ded8a9867162b34bf8cf959b98df554b7721730ccec6",
+      "backend/ingest/parsing_diagnostics.py": "b026c699a152df95780d5fab3a524f795c530d8ef3b7438ce616a50e591998e3",
+      "backend/ingest/upload_jobs.py": "6caba7d278830bfbfd56a683bf06ac678efeb0b7d8c82e89bea737ab27ab1640"
+    },
+    "model": {
+      "provider": "server:LLM1",
+      "model": "deepseek-v4-pro"
+    },
+    "ignored_extra_fields": [
+      "builds_on",
+      "co_first_authors",
+      "corresponding_authors",
+      "key_finding",
+      "keywords_evidences",
+      "keywords_reason",
+      "keywords_tags",
+      "knowledge_graph_title",
+      "material_families",
+      "material_family_reason",
+      "methodology",
+      "paper_type",
+      "research_materials",
+      "research_motivation",
+      "research_motivation_evidences",
+      "summary",
+      "superconductor_kind",
+      "theoretical_subtype",
+      "theoretical_subtype_evidences",
+      "theoretical_subtype_reason"
+    ],
+    "year": 2012,
+    "publication_verification": {
+      "provider": "crossref",
+      "url": "https://api.crossref.org/works/10.1073/pnas.1118168109",
+      "doi": "10.1073/pnas.1118168109",
+      "status": "verified",
+      "year": 2012,
+      "dates": {
+        "published": [
+          2012,
+          4,
+          6
+        ],
+        "published-online": [
+          2012,
+          4,
+          6
+        ],
+        "published-print": [
+          2012,
+          4,
+          24
+        ],
+        "issued": [
+          2012,
+          4,
+          6
+        ]
+      },
+      "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "verified_at": "2026-10-28T11:01:19.612906+00:00",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "original_year": 2021,
+      "download_date_match": {
+        "date": "2021-09-16",
+        "quote": "Downloaded by guest on September 16, 2021 "
+      },
+      "doi_source": {
+        "kind": "pdf_text_layer",
+        "pdf_page": 1,
+        "doi": "10.1073/pnas.1118168109",
+        "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+      }
+    },
+    "saved_roundtrip_equal": true,
+    "business_draft_unchanged": true
+  },
+  "browser": [
+    {
+      "mode": "baseline",
+      "field": "paper.volume",
+      "baselineCommit": "f8d058cc23adf8cf771d236b5b66e8eb1d8baa2a",
+      "dom": 5615,
+      "delays": [
+        113.2000000178814,
+        32.29999998211861,
+        29.700000017881393,
+        30,
+        28.30000001192093,
+        28.80000001192093,
+        29.100000023841858,
+        30.19999998807907,
+        28.400000005960464,
+        99.30000001192093,
+        28.099999994039536,
+        30.599999994039536
+      ],
+      "scans": 0,
+      "diagMutations": 0,
+      "mutationDetails": [],
+      "requests": [],
+      "errors": [],
+      "input_latency_median_ms": 29.85,
+      "input_latency_max_ms": 113.2
+    },
+    {
+      "mode": "current",
+      "field": "paper.volume",
+      "baselineCommit": "f8d058cc23adf8cf771d236b5b66e8eb1d8baa2a",
+      "dom": 5026,
+      "delays": [
+        50,
+        43,
+        51.30000001192093,
+        52.30000001192093,
+        26.30000001192093,
+        18.30000001192093,
+        17.599999994039536,
+        17.799999982118607,
+        17.19999998807907,
+        18.599999994039536,
+        17.80000001192093,
+        18.900000005960464
+      ],
+      "scans": 0,
+      "diagMutations": 0,
+      "mutationDetails": [],
+      "requests": [],
+      "errors": [],
+      "input_latency_median_ms": 18.75,
+      "input_latency_max_ms": 52.3
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "assets/IMG-004-classified-differences.png",
+      "sha256": "ce930d23ba939ef0ef82b044fc5c8523829ba6c382d2b198110dfe48e5a662cb",
+      "kind": "isolated_browser_screenshot"
+    },
+    {
+      "path": "assets/IMG-005-difference-original-region.png",
+      "sha256": "dafe2162867dbdc1bec6884859f76ec18552b270d32904e68ef0586112cd04e5",
+      "kind": "isolated_browser_screenshot"
+    }
+  ],
+  "checks": {
+    "backend_passed": 62,
+    "form_contract_passed": 64,
+    "mutation_detected_regressions": 8,
+    "frontend_build": "passed"
+  },
+  "limitations": [
+    "47项仍待系统核查；没有持续后台队列",
+    "原图API真实只读定位，浏览器业务API隔离",
+    "来源字段关联是解析快照；谱图和页码/引句关联未完整建立",
+    "无远端CI、推送、生产部署或科学批准"
+  ],
+  "frontend_source_hashes": {
+    "frontend/src/components/ParsingDiagnosticsPanel.tsx": "17b98eea74761a3aa995a8485bcc7de7e1cac17c43f3c132b161de323f9fef78",
+    "frontend/src/components/UploadTaskEditor.tsx": "2304ae9251555f65100d743d60eada88d8c8599811db6928fea5d829dfdc3927",
+    "frontend/src/components/EvidenceRegion.tsx": "a1d49a708ceadf061b824790bbc308f8075da357a871b017f4c24dbdad69c367",
+    "frontend/src/lib/parsingDiagnostics.ts": "89ba1a40e0359676661eaebfc7bb8aedb340ec8fcc3173d047281ba8c781b535",
+    "tests/01_decentralized_uploading/parsing-diagnostics-browser.mjs": "3ca48ad3c3f7f4cadfdf9cd1994e162995e744590ba4a932fd87c3a739fae9be"
+  }
+}

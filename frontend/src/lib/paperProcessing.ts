@@ -199,8 +199,8 @@ export interface PaperDraftFields {
 }
 
 export interface UploadDraft {
-  parsing_conflicts?: Array<{ file_id: string; pdf_page: number; kind: string; engine?: string; selected_text?: string; alternatives: Array<{ engine?: string; text: string }> }>
-  bibliography_conflicts?: Array<{ field: string; grobid_value: unknown; extracted_value: unknown }>
+  parsing_conflicts?: import('./parsingDiagnostics').ParsingDifference[]
+  bibliography_conflicts?: import('./parsingDiagnostics').BibliographyDifference[]
   field_suggestions_error?: string | null
   summary_error?: string | null
   research_motivation_error?: string | null

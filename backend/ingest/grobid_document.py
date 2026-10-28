@@ -114,16 +114,38 @@ def _bounded_abstract(document, ir):
     return document
 
 
-def apply_bibliography(draft, document, *, main_ir=None):
+def apply_bibliography(draft, document, *, main_ir=None, publication_verification=None):
     """只用已确定的正文题录组装字段；保留模型分歧，不改科学分类。"""
     if not document or document.get("status") != "succeeded":
         return
-    document = _bounded_abstract(document, main_ir)
+    original_metadata = deepcopy(document.get("metadata", {}))
+    document = deepcopy(_bounded_abstract(document, main_ir))
+    if publication_verification:
+        from .publication_year import _doi, _title
+        evidence = deepcopy(publication_verification)
+        metadata = document["metadata"]
+        same_file = evidence.get("source_sha256") == document.get("source_sha256")
+        doi_source = evidence.get("doi_source") or {}
+        matched_doi = _doi(metadata.get("doi")) or (
+            _doi(draft.get("paper", {}).get("doi"))
+            if doi_source.get("source_sha256") == document.get("source_sha256") and doi_source.get("doi") == evidence.get("doi") else "")
+        valid = (same_file and evidence.get("status") == "verified"
+                 and matched_doi == evidence.get("doi")
+                 and _title(metadata.get("title")) == _title(evidence.get("title")))
+        if evidence.get("status") == "verified" and not valid:
+            evidence["status"] = "identity_mismatch"
+        if valid:
+            metadata["year"] = evidence["year"]
+        elif same_file and evidence.get("download_date_match"):
+            metadata["year"] = None
+        document.setdefault("metadata_sources", {}).setdefault("year", {}).update(publication_verification=evidence)
     paper = draft.setdefault("paper", {})
     conflicts = []
     for field, value in document.get("metadata", {}).items():
-        if paper.get(field) not in (None, "", [], value):
-            conflicts.append({"field": field, "grobid_value": value, "extracted_value": paper[field]})
+        original = original_metadata.get(field, value)
+        if paper.get(field) not in (None, "", [], original) or original != value:
+            conflicts.append({"field": field, "grobid_value": original,
+                              "extracted_value": paper.get(field), "selected_value": value})
         paper[field] = value
     draft["bibliography_sources"] = {"file_id": document["file_id"], "source_sha256": document["source_sha256"],
                                      "parser_version": document["parser_version"], "fields": document["metadata_sources"]}
