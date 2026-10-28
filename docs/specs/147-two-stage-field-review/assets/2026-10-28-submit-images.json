@@ -1,0 +1,24 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-0b5f6bda-1d1c-4d2b-bd37-5a4987547888.png",
+      "locator": "assets/2026-10-28-submit-IMG-001.png",
+      "status": "local_verified",
+      "user_context": "全部处理提交失败，完成后汇报",
+      "related": [
+        "T028",
+        "T031",
+        "evidence_missing"
+      ],
+      "sha256": "89f5982f5798f8ac792a3528f249a6839b62ce54cdf83ef3c80350e0c56edd64",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3380,
+        946
+      ],
+      "verification": "2026-10-28 原字节复制、哈希与图片解码通过，未推送"
+    }
+  ]
+}

@@ -798,6 +798,7 @@ def _paper_review_context(paper_id: int) -> dict[str, Any] | None:
 def _artifact_by_paper_id(
     paper_id: int,
     task_id: str | None = None,
+    paper_revision: int = 1,
 ) -> tuple[str, Path, dict[str, Any]] | None:
     from backend.ingest.upload_tasks import data_path, read_artifact_path
     from backend.storage import FileIntegrityError, FileNotFound, FileStorageUnavailable
@@ -808,7 +809,7 @@ def _artifact_by_paper_id(
         if not task_id:
             return None
         try:
-            candidates = [read_artifact_path(task_id)]
+            candidates = [read_artifact_path(task_id, paper_id=paper_id, paper_revision=paper_revision)]
         except (FileNotFoundError, FileNotFound):
             return None
         except FileIntegrityError as exc:
@@ -816,7 +817,8 @@ def _artifact_by_paper_id(
         except FileStorageUnavailable as exc:
             raise _upload_error(503, "file_storage_unavailable", "文件存储暂时不可用") from exc
     else:
-        candidates = [root / task_id / "result.json"] if task_id else root.glob("*/result.json")
+        from backend.ingest.upload_tasks import submitted_artifact_key
+        candidates = [data_path('') / submitted_artifact_key(task_id, paper_id, paper_revision), root / task_id / "result.json"] if task_id else root.glob("*/result.json")
     for result_path in candidates:
         try:
             payload = json.loads(result_path.read_text(encoding="utf-8"))
@@ -1922,7 +1924,14 @@ async def _create_pending_paper(
                     actor_user_id=int(state["user_id"]),
                     actor_username_snapshot=(uploader.username if uploader else None),
                     operation_id=task_id,
+                    classification_snapshot={'upload_submission': {
+                        'paper': {key: paper_data.get(key) for key in ('material_families', 'co_first_authors', 'corresponding_authors')},
+                        'material_states': [{key: st.get(key) for key in ('state_key', 'structure_families')} for st in material_states]}},
                 )
+
+                from backend.services.classification_catalog import save_paper_material_families
+                await save_paper_material_families(session, paper,
+                    [item for item in paper_data.get('material_families', []) if item.get('id') is not None])
 
                 paper_files: dict[str, PaperFile] = {}
                 source_files = state.get("files") or []
@@ -2012,6 +2021,8 @@ async def _create_pending_paper(
                         paper_chunks[(str(file_id), chunk['chunk_index'])] = paper_chunk
                         source_locations.append(chunk)
 
+                from backend.ingest.submission_sources import reviewed_legacy_targets
+                scientific_targets = reviewed_legacy_targets(scientific_targets, evidence_checks, draft, source_locations)
                 evidence_groups = [
                     ("classification", draft.get("classification_evidence") or []),
                     *[(target.field_path, [target.evidence]) for target in scientific_targets],
@@ -2058,14 +2069,26 @@ async def _create_pending_paper(
                     await session.execute(sql_update(models.ScientificStructureOrigin).where(
                         models.ScientificStructureOrigin.target == 'upload', models.ScientificStructureOrigin.target_id == task_id,
                     ).values(target='paper', target_id=str(paper.id)))
-                    persisted = await session.run_sync(lambda sync: paper_snapshot(sync, paper.id, 0, '', check_access=False))
+                    file_mapping = {key: file.id for key, file in paper_files.items()}
+                    formal_chunks = [{**chunk, 'file_id': str(file_mapping[str(chunk['file_id'])]),
+                        'chunk_id': paper_chunks[(str(chunk['file_id']), chunk['chunk_index'])].id}
+                        for chunk in source_locations]
+                    provenance = {r['field']: science.rebind_source_references(r.get('provenance'), formal_chunks, file_mapping)
+                                  for r in evidence_checks if r['field'] in {'paper.theoretical_subtype', 'paper.keywords_tags'}}
+                    persisted = await session.run_sync(lambda sync: paper_snapshot(sync, paper.id, 0, '', check_access=False, review_provenance=provenance))
+                    if manual_snapshot is not None and manual_baseline is not None:
+                        await session.run_sync(lambda sync: manual_evidence.transfer_to_paper(
+                            sync, manual_snapshot, manual_baseline, paper.id, paper.content_revision, persisted))
+                        from backend.ingest.field_review import bind_support_versions
+                        await session.run_sync(lambda sync: bind_support_versions(persisted, sync))
+                    same_sources = science.source_transfer_matches((manual_snapshot or {}).get('chunks') or [], persisted['chunks'], file_mapping)
                     by_item = {r['item_key']: r for r in evidence_checks}
                     transferred = {}
                     for r in persisted['records']:
                         old = by_item.get(r['item_key'])
                         if old:
                             # 新 chunk ID 由同原文重新定位。来源限定以服务端来源记录为准。
-                            updated = science.transfer_result(r, old, persisted['chunks'], {key: file.id for key, file in paper_files.items()})
+                            updated = science.transfer_result(r, old, persisted['chunks'], file_mapping, source_transfer_verified=same_sources)
                             if updated is not None:
                                 transferred[r['key']] = updated
                     from backend.ingest.property_evidence import digest as evidence_digest
@@ -2073,9 +2096,8 @@ async def _create_pending_paper(
                         persisted['target_id'], sorted((r['item_key'], r['content_hash'], r['source_hash'])
                                                         for r in persisted['records'])])
                     await session.run_sync(lambda sync: science.save_results(sync, persisted, transferred, int(state['user_id'])))
-                    if manual_snapshot is not None and manual_baseline is not None:
-                        await session.run_sync(lambda sync: manual_evidence.transfer_to_paper(
-                            sync, manual_snapshot, manual_baseline, paper.id, paper.content_revision, persisted))
+                    from backend.ingest.field_source_metadata import remember
+                    await session.run_sync(lambda sync: remember(sync, persisted, int(state['user_id'])))
                     # 原上传核对历史保留，可从正式论文的字段历史追溯。
                     await session.execute(sql_delete(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == task_id))
                 paper_id = paper.id
@@ -2128,7 +2150,11 @@ def _record_submitted_upload(
 
     from backend.storage.paths import object_mode
 
-    result_path = read_artifact_path(task_id) if object_mode() else artifact_path(task_id)
+    from backend.storage import FileNotFound
+    try:
+        result_path = read_artifact_path(task_id, paper_id=paper_id, paper_revision=paper_revision)
+    except (FileNotFound, FileNotFoundError):
+        result_path = artifact_path(task_id)
     artifact = json.loads(result_path.read_text(encoding="utf-8")) if result_path.exists() else {}
     canonical_ai_values = artifact.get("ai_values") or draft
     if isinstance(canonical_ai_values, dict):
@@ -2145,6 +2171,10 @@ def _record_submitted_upload(
         "user_values": {key: value for key, value in draft.items() if key != "ai_original"},
         "evidence": artifact.get("evidence") or {},
     }
+    if artifact.get('paper_id') == paper_id and artifact.get('paper_revision') == paper_revision:
+        if artifact.get('task_id') != task_id:
+            raise ValueError('送审快照的任务身份不一致')
+        snapshot = artifact  # 已提交快照不可由重试时的旧草稿重新生成。
     destination = artifact_path(task_id)
     temporary = destination.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(snapshot, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -2329,7 +2359,7 @@ async def get_paper_review_artifact(
     if submitted is not None:
         return {'ok': True, 'data': {'task_id': context.get('task_id'), 'paper_id': paper_id,
             'paper_revision': context['paper_revision'], 'ai_values': {}, 'user_values': submitted, 'evidence': {}}}
-    found = _artifact_by_paper_id(paper_id, context.get("task_id"))
+    found = _artifact_by_paper_id(paper_id, context.get("task_id"), context['paper_revision'])
     if not found:
         raise _upload_error(404, "review_artifact_not_found", "该论文没有待审 AI 证据")
     task_id, _path, payload = found
@@ -2913,7 +2943,7 @@ async def delete_paper_review_artifact(
         stable_keys = storage.list_prefix(prefix)
         if review_files or stable_keys:
             try:
-                payload = json.loads(read_artifact_path(task_id).read_text(encoding="utf-8"))
+                payload = json.loads(read_artifact_path(task_id, paper_id=paper_id, paper_revision=context['paper_revision']).read_text(encoding="utf-8"))
             except (FileNotFoundError, FileNotFound):
                 payload = None  # 上次清理中断；继续完成幂等删除。
             except (FileIntegrityError, json.JSONDecodeError, UnicodeDecodeError) as exc:
@@ -2930,7 +2960,7 @@ async def delete_paper_review_artifact(
         if review_files:
             update_state(task_id, artifact_manifest=[item for item in current if item not in review_files])
         return {"ok": True, "paper_id": paper_id, "cleaned": bool(keys or review_files)}
-    found = _artifact_by_paper_id(paper_id, context.get("task_id"))
+    found = _artifact_by_paper_id(paper_id, context.get("task_id"), context['paper_revision'])
     if not found:
         return {"ok": True, "paper_id": paper_id, "cleaned": False}
     task_id, result_path, payload = found

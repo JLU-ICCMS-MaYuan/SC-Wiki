@@ -528,6 +528,13 @@ def artifact_path(task_id: str) -> Path:
     return artifact_directory(task_id) / "result.json"
 
 
+def submitted_artifact_key(task_id: str, paper_id: int, paper_revision: int) -> str:
+    task_id = _validated_task_id(task_id)
+    if int(paper_id) <= 0 or int(paper_revision) <= 0:
+        raise ValueError('送审快照必须包含有效论文及版本')
+    return f'review_artifacts/{task_id}/submitted-{int(paper_id)}-r{int(paper_revision)}.json'
+
+
 def read_published_path(task_id: str, logical: str) -> Path:
     """从已提交的产物清单读取当前版本，不读取其他节点的本地目录。"""
     from backend.storage.paths import object_mode, resolve_file, resolve_known_key
@@ -551,7 +558,16 @@ def read_published_path(task_id: str, logical: str) -> Path:
                         namespace=task_id)
 
 
-def read_artifact_path(task_id: str) -> Path:
+def read_artifact_path(task_id: str, *, paper_id: int | None = None, paper_revision: int = 1) -> Path:
+    if paper_id is not None:
+        from backend.storage.paths import resolve_known_key
+        from backend.storage import FileNotFound
+        try:
+            path = resolve_known_key(submitted_artifact_key(task_id, paper_id, paper_revision), namespace=task_id)
+            if path.is_file():
+                return path
+        except (FileNotFound, FileNotFoundError):
+            pass  # 有界读取旧版只使用 result.json 的已提交任务。
     return read_published_path(task_id, f"review_artifacts/{task_id}/result.json")
 
 
@@ -582,11 +598,13 @@ def publish_artifact_path(task_id: str, *, submitted: bool = False) -> list[dict
     from backend.storage.paths import publish_replacement
 
     state = get_state(task_id) or {}
-    if submitted and object_mode():
+    if submitted:
         path = artifact_path(task_id)
         logical = f"review_artifacts/{task_id}/result.json"
+        snapshot = json.loads(path.read_text(encoding='utf-8'))
+        key = submitted_artifact_key(task_id, snapshot['paper_id'], snapshot['paper_revision'])
         with path.open("rb") as source:
-            ref = create_storage().put(logical, source, "application/json")
+            ref = create_storage().put(key, source, "application/json")
         return [item for item in state.get("artifact_manifest") or []
                 if item.get("logical_path") != logical] + [{
                     "logical_path": logical, "key": ref.key, "size": ref.size,

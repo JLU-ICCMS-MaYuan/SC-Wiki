@@ -4,6 +4,8 @@
 
 **创建日期**：2026-10-21
 
+**2026-10-28 完整提交收敛**：[正式保存、审核迁移与归档收尾](submission-completion.md)。此前字段门禁验收未覆盖最终持久化；本轮已贯通真实草稿完整回放，并补齐真实论文 271 的提交收尾。
+
 **2026-10-28 本地已验收**：[人工通过、修改门禁与提交状态一致性](approval-submit-consistency.md)。保留普通修改的理由和模型核对要求；完成指定 La–Sc–H 任务的一次性历史修正，验证 α²F、phDOS 不参与提交审核。范围及证据见 [本轮验收](approval-submit-validation.md)。
 
 **状态**：人工决定与三个模型入口修订已实施，验收见 [human-review-validation.md](human-review-validation.md)。真实草稿未代审，远程链接待推送授权。

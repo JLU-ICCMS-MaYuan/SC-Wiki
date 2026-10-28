@@ -38,7 +38,8 @@ def scope_matches(record, result):
     if not scope:
         return True
     if result.get('state_review_context') is not None:
-        return result['state_review_context'] == scope
+        from .scientific_evidence import canonical
+        return canonical(result['state_review_context']) == canonical(scope)
     # 有界兼容：不跨字段/状态继承；旧摘要匹配之外，较晚的范围编辑必须使旧结果失效。
     if result.get('state_key') not in (None, record.get('state_key')):
         return False

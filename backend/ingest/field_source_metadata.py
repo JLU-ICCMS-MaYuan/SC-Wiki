@@ -25,6 +25,9 @@ def remember(session, snapshot, actor):
         return
     token = ev.digest(manifest(session, snapshot['target'], snapshot['target_id']))
     metadata = {k: snapshot.get(k) for k in ('_source_digest', '_source_documents', '_source_expected', '_source_readable')}
+    for field, key in [('paper.theoretical_subtype', 'theoretical_subtype_assessment'), ('paper.keywords_tags', 'keyword_assessment')]:
+        record = next((r for r in snapshot['records'] if r['field'] == field), {})
+        metadata[key] = (record.get('provenance') or {}).get('assessment')
     stmt = insert(models.ScientificEvidenceCheck).values(target=snapshot['target'], target_id=snapshot['target_id'],
         item_key=KEY, content_hash=token, source_hash=token, rule_version='field-source-metadata-v1',
         result=metadata, resolutions={}, actor_user_id=actor)
@@ -44,9 +47,13 @@ def field_snapshot(session, target, target_id, user, item_key, metadata, *, draf
     draft, saved = authorized_draft(session, target, target_id, user)
     if draft_override is not None:
         draft = draft_override
+    draft = dict(draft)
+    for key in ('theoretical_subtype_assessment', 'keyword_assessment'):
+        if key not in draft and metadata.get(key) is not None:
+            draft[key] = metadata[key]
     chunks = [{'file_id': file_id, 'content': '来源已读取', 'chunk_index': 0} for file_id in metadata.get('_source_readable') or []]
     context = {**draft, '_source_digest': metadata['_source_digest']}
-    snapshot = ev.complete_snapshot(target, target_id, ev.draft_records(draft, {}), chunks, context, metadata_only=True)
+    snapshot = ev.complete_snapshot(target, target_id, ev.draft_records(draft, science.origins_for(session, target, target_id)), chunks, context, metadata_only=True)
     from .scientific_context import bind_snapshot_source_documents
     bind_snapshot_source_documents(snapshot, metadata.get('_source_documents') or {}, set(metadata.get('_source_expected') or []))
     if item_key is not None:

@@ -1,5 +1,15 @@
 # 实施任务
 
+## 完整提交收敛任务
+
+- [x] T028 [US4,US6] 在 backend/ingest/submission_sources.py、backend/api/rag.py 修复旧空间群/结构来源二次阻塞，保留未定位历史与严格无审核边界。
+- [x] T029 [US4,US6] 在 scientific_evidence.py、property_evidence.py、field_source_metadata.py、state_field_review.py、manual_evidence.py、submission_metadata.py、paper_revisions.py 保留正式审核、作者角色和分类，不自动创建待确认目录项。
+- [x] T030 [US4] 在 backend/ingest/upload_tasks.py、backend/api/rag.py 分离解析与送审快照键，按论文版本读取并验证重复提交。
+- [x] T031 [US4,US6,US7] 用 scripts/verify-upload-submit.py 完整回放真实草稿；用 scripts/repair-submission-completion.py 备份并补齐现有论文 271，验证 1,111 项确认、快照和唯一性。
+- [x] T032 更新 submission-completion.md、Overview 及 Issue，隔离并行改动后本地提交。验收证据见该收敛文档及 assets/2026-10-28-submit-verification.json。
+
+依赖：T028→T029→T030→T031→T032。此前 T026 的谱提交小样本和字段门禁通过不再作为整篇真实提交已通过的证据。
+
 ## 2026-10-28 新增实施任务
 
 - [x] T021 [US4,US5] 在 tests/01_decentralized_uploading/test_field_decisions_mysql.py 和 approval-state.test.tsx 复现未核对灰色、修改拒绝及确认后提交复用。

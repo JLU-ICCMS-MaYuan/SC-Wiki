@@ -360,7 +360,7 @@ def draft_records(draft, origins):
     return records
 
 
-def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_access: bool = True, legacy=False) -> dict:
+def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_access: bool = True, legacy=False, review_provenance=None) -> dict:
     paper = session.get(models.Paper, paper_id)
     if paper is None:
         raise HTTPException(404, detail='论文不存在')
@@ -376,7 +376,8 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
     record_indexes = {}
     paper_files = list(session.scalars(select(models.PaperFile).where(models.PaperFile.paper_id == paper_id)))
     filenames = {f.id: f.original_filename for f in paper_files}
-    chunks = [dict(chunk_id=c.id, file_id=str(c.paper_file_id), source_name=filenames.get(c.paper_file_id), chunk_index=c.chunk_index, content=c.content,
+    file_roles = {f.id: f.role for f in paper_files}
+    chunks = [dict(chunk_id=c.id, file_id=str(c.paper_file_id), file_role=file_roles.get(c.paper_file_id), source_name=filenames.get(c.paper_file_id), chunk_index=c.chunk_index, content=c.content,
                    page_start=c.page_start, page_end=c.page_end, section=c.section_name)
               for c in session.scalars(select(models.PaperChunk).where(models.PaperChunk.paper_id == paper_id, models.PaperChunk.paper_revision == paper.content_revision).order_by(models.PaperChunk.id))]
     roles = {}
@@ -417,8 +418,13 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             tc_range_origin_kind=((record.payload_json or {}).get('tc_range_origin') or {}).get('value_kind'),
             tc_method_key=((record.payload_json or {}).get('tc_group') or {}).get('method_key')))
     paper_data = row_dict(paper)
+    from backend.services.submission_metadata import submitted_metadata, pending_selections, AUTHOR_ROLES
+    submission = submitted_metadata(session, paper)
+    for name in AUTHOR_ROLES:
+        paper_data[name] = [author for author in submission.get('paper', {}).get(name, []) if author in (paper.authors or [])]
     families = session.execute(select(models.MaterialFamily.name_zh).join(models.PaperMaterialFamily, models.PaperMaterialFamily.material_family_id == models.MaterialFamily.id).where(models.PaperMaterialFamily.paper_id == paper_id)).scalars().all()
-    paper_data['material_families'] = sorted(families)
+    paper_data['material_families'] = sorted(item['name'] for item in pending_selections(submission, 'paper.material_families',
+        [{'name': name} for name in families], submission.get('paper', {}).get('material_families')))
     prior_subtype = session.scalar(select(models.ScientificEvidenceSource).where(
         models.ScientificEvidenceSource.paper_id == paper_id,
         models.ScientificEvidenceSource.paper_revision == paper.content_revision,
@@ -431,11 +437,21 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             models.ScientificEvidenceCheck.item_key == item_identity('paper', 'theoretical_subtype'))
             .order_by(models.ScientificEvidenceCheck.id.desc()).limit(1))
     assessment = ((prior_subtype.result or {}).get('provenance') or {}).get('assessment') if prior_subtype else None
+    if review_provenance and 'paper.theoretical_subtype' in review_provenance:
+        assessment = (review_provenance['paper.theoretical_subtype'] or {}).get('assessment')
     prior_keywords = session.scalar(select(models.ScientificEvidenceSource).where(
         models.ScientificEvidenceSource.paper_id == paper_id,
         models.ScientificEvidenceSource.paper_revision == paper.content_revision,
         models.ScientificEvidenceSource.field_path == 'paper.keywords_tags'))
     keyword_assessment = ((prior_keywords.result or {}).get('provenance') or {}).get('assessment') if prior_keywords else None
+    if prior_keywords is None:
+        prior_keywords = session.scalar(select(models.ScientificEvidenceCheck).where(
+            models.ScientificEvidenceCheck.target == 'paper', models.ScientificEvidenceCheck.target_id == str(paper_id),
+            models.ScientificEvidenceCheck.item_key == science.item_identity('paper', 'keywords_tags'))
+            .order_by(models.ScientificEvidenceCheck.id.desc()).limit(1))
+        keyword_assessment = ((prior_keywords.result or {}).get('provenance') or {}).get('assessment') if prior_keywords else None
+    if review_provenance and 'paper.keywords_tags' in review_provenance:
+        keyword_assessment = (review_provenance['paper.keywords_tags'] or {}).get('assessment')
     records.extend(science.field_records('paper', 'paper', paper_data, science.PAPER_FIELDS,
                                          assessment=assessment, keyword_assessment=keyword_assessment))
     origins = science.origins_for(session, 'paper', str(paper_id))
@@ -443,9 +459,12 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
         data = row_dict(state)
         data['material'] = next((x['chemical_formula'] for x in contexts['superconductors'] if x['id'] == state.superconductor_id), '')
         data['structure_families'] = sorted(session.execute(select(models.StructureFamily.name_zh).join(models.MaterialStateStructureFamily, models.MaterialStateStructureFamily.structure_family_id == models.StructureFamily.id).where(models.MaterialStateStructureFamily.material_state_id == state.id)).scalars().all())
+        saved_state = next((s for s in submission.get('material_states', []) if s.get('state_key') == state.state_key), {})
+        data['structure_families'] = sorted(item['name'] for item in pending_selections(submission,
+            f'material_states[{si}].structure_families', [{'name': name} for name in data['structure_families']], saved_state.get('structure_families')))
         records.extend(science.state_records(data, si))
         for structure in (x for x in contexts['structure_models'] if x['material_state_id'] == state.id):
-            records.append(science.structure_record(structure, state.state_key, f'material_states[{si}].structures[{structure['id']}]', origins.get(structure['structure_hash']), data))
+            records.append(science.structure_record(structure, state.state_key, f'material_states[{si}].structures[{structure['id']}]', origins.get(structure['structure_hash']), science.structure_context(data)))
     for r in records:
         if r.get('kind') != 'property' and not r.get('record_field'):
             r['evidences'] = [dict(chunk_map[e.paper_chunk_id], quote=e.quote,
@@ -468,7 +487,7 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
         for f in paper_files if f.paper_revision == paper.content_revision and
         f.original_filename and f.original_filename.lower().endswith('.pdf')]
     from .field_review import bind_support_versions
-    return bind_support_versions(snapshot)
+    return bind_support_versions(snapshot, session)
 
 
 def cached_results(session, snapshot: dict) -> dict:

@@ -139,6 +139,10 @@ def record_identity(state_key, module_key, record_key):
     return item_identity('record', state_key, module_key, record_key)
 
 
+def structure_context(state):
+    return {key: state.get(key) for key in ('material', 'material_name', 'pressure_value_gpa', 'reported_space_group_symbol', 'state_kind')}
+
+
 def record_claim(record, state):
     from backend.services.scientific_draft_rewrite import _record_snapshot
     value = copy.deepcopy(_record_snapshot(record, module_code=record.get('module_code', '') if isinstance(record, dict) else ''))
@@ -313,7 +317,7 @@ def augment_upload(draft, records, origins):
                 hash_value = validate_structure_text(structure['structure_format'], structure['structure_text'])['structure_hash']
             except (ValueError, KeyError):
                 hash_value = ''
-            records.append(structure_record(structure, state.get('state_key') or f'state-{index+1}', path, origins.get(hash_value), {k: state.get(k) for k in ('material', 'material_name', 'pressure_value_gpa', 'reported_space_group_symbol', 'state_kind')}))
+            records.append(structure_record(structure, state.get('state_key') or f'state-{index+1}', path, origins.get(hash_value), structure_context(state)))
 
 
 def ordered_check_rows(session, target, target_id, *, lock=False):
@@ -511,45 +515,69 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
     return found
 
 
-def transfer_result(record, result, chunks, file_ids=None):
-    """上传落库后重定位所有嵌套引句；文件 ID 变化不能抹掉候选或人工来源。"""
-    from .property_evidence import digest, locate, normalized_text
-    subtype = record.get('field') == 'paper.theoretical_subtype'
-    if subtype and (result.get('provenance') or {}).get('assessment'):
-        record['provenance'] = copy.deepcopy(result['provenance'])
-        source_hash = digest(sorted(normalized_text(c['content']) for c in chunks))
-        record['source_hash'] = digest([source_hash, record['provenance']])
-    if result.get('content_hash') != record['content_hash'] or result.get('source_hash') != record['source_hash']:
-        history = [{name: copy.deepcopy(result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'adopted_basis', 'content_hash', 'source_hash', 'audit_events')}]
-        return {**record, 'status': 'unchecked', 'reason': '上传值与保存后的内容或来源不同，请重新核对',
-                'history': [*(result.get('history') or []), *history]}
+def source_transfer_matches(before, after, file_ids):
+    """验证文件命名空间转换前后每份来源的正文和角色完全一致。"""
+    from .property_evidence import normalized_text
+    if not before or not after or any(str(c['file_id']) not in file_ids for c in before):
+        return False
+    old = sorted((str(file_ids[str(c['file_id'])]), c.get('file_role'), normalized_text(c['content'])) for c in before)
+    new = sorted((str(c['file_id']), c.get('file_role'), normalized_text(c['content'])) for c in after)
+    return old == new
+
+
+def rebind_source_references(value, chunks, file_ids):
+    from .property_evidence import locate
+    if isinstance(value, list):
+        return [rebind_source_references(item, chunks, file_ids) for item in value]
+    if not isinstance(value, dict):
+        return value
     def relocate(source):
-        mapped = (file_ids or {}).get(str(source.get('file_id')))
-        locator = {k: source.get(k) for k in ('quote', 'page_start', 'page_end', 'origin_kind', 'locator_status')}
+        mapped = file_ids.get(str(source.get('file_id')))
+        locator = {key: source.get(key) for key in ('quote', 'page_start', 'page_end', 'origin_kind', 'locator_status')}
         if mapped is not None:
             locator.update(file_id=str(mapped), chunk_index=source.get('chunk_index'))
         return locate(locator, chunks)
-    def rebind(value):
-        if isinstance(value, list):
-            return [rebind(item) for item in value]
-        if not isinstance(value, dict):
-            return value
-        return {key: ([found for source in item if isinstance(source, dict) and
-                       (found := relocate(source))]
-                      if key in {'evidences', 'fact_evidences', 'scope_evidences', 'software_evidences'} and isinstance(item, list) else rebind(item)) for key, item in value.items()}
-    rebound = rebind(copy.deepcopy(result))
+    return {key: ([found for source in item if isinstance(source, dict) and (found := relocate(source))]
+                 if key in {'evidences', 'fact_evidences', 'scope_evidences', 'software_evidences'} and isinstance(item, list)
+                 else rebind_source_references(item, chunks, file_ids)) for key, item in value.items()}
+
+
+def transfer_result(record, result, chunks, file_ids=None, *, source_transfer_verified=False):
+    """上传落库后重定位所有嵌套引句；文件 ID 变化不能抹掉候选或人工来源。"""
+    from .property_evidence import digest, locate, normalized_text
+    subtype = record.get('field') == 'paper.theoretical_subtype'
+    if subtype and (result.get('provenance') or {}).get('assessment') and not source_transfer_verified:
+        record['provenance'] = copy.deepcopy(result['provenance'])
+        source_hash = digest(sorted(normalized_text(c['content']) for c in chunks))
+        record['source_hash'] = digest([source_hash, record['provenance']])
+    if (result.get('content_hash') != record['content_hash'] or result.get('stale')
+            or (result.get('source_hash') != record['source_hash'] and not source_transfer_verified)):
+        history = [{name: copy.deepcopy(result.get(name)) for name in ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'proposal', 'decision', 'field_decision', 'adopted_basis', 'content_hash', 'source_hash', 'audit_events', 'legacy_source_history')}]
+        return {**record, 'status': 'unchecked', 'reason': '上传值与保存后的内容或来源不同，请重新核对',
+                'history': [*(result.get('history') or []), *history]}
+    rebound = rebind_source_references(copy.deepcopy(result), chunks, file_ids or {})
+    def finish(evidences):
+        from .field_review import valid_field_decision
+        output = {**rebound, **record, 'evidences': evidences,
+                  'state_review_context': record.get('state_review_context')}
+        if source_transfer_verified and valid_field_decision(result, result):
+            output['field_decision'] = {**result['field_decision'],
+                'content_hash': record['content_hash'], 'source_hash': record['source_hash'],
+                'transferred_from': {key: result.get(key) for key in ('content_hash', 'source_hash')}}
+            output.update(stale=False, pending_review=False)
+        return output
     if rebound.get('association_review'):
         from .association_review import association_id
         rebound['association_review']['inputs'] = sorted(association_id(a) for a in record.get('source_associations') or [])
-    if subtype and (rebound.get('provenance') or {}).get('assessment'):
+    if subtype and (rebound.get('provenance') or {}).get('assessment') and not source_transfer_verified:
         record['provenance'] = copy.deepcopy(rebound['provenance'])
         source_hash = digest(sorted(normalized_text(c['content']) for c in chunks))
         record['source_hash'] = digest([source_hash, record['provenance']])
         rebound['source_hash'] = record['source_hash']
-        return {**rebound, **record, 'source_kind': rebound.get('source_kind', 'paper_synthesis'),
+        return {**finish(rebound.get('evidences') or record.get('evidences') or []), 'source_kind': rebound.get('source_kind', 'paper_synthesis'),
                 'ai_reason': rebound.get('ai_reason'),
                 'evidences': rebound.get('evidences') or record.get('evidences') or []}
-    return {**rebound, **record, 'evidences': record.get('evidences') or rebound.get('evidences', [])}
+    return finish(record.get('evidences') or rebound.get('evidences', []))
 
 
 def _review_time(value):

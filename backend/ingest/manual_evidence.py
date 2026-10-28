@@ -498,6 +498,10 @@ def transfer_to_paper(session, snapshot: dict, baseline: dict, paper_id: int, re
         row = _current(session, snapshot, record, for_update=True)
         if row is None:
             continue
+        if not row.reason.strip() and not row.items and not row.no_evidence_reason.strip():
+            # 打开修改区留下的空占位不属于人工依据，也不能成为已通过字段的第二道门禁。
+            row.status = 'historical'
+            continue
         if not row.reason.strip() or (not row.items and not row.no_evidence_reason.strip()):
             raise ManualEvidenceError("manual_evidence_incomplete", "人工修改依据已变化，请补齐后重新提交",
                                       field=record["field"], status=409)

@@ -65,16 +65,15 @@ def current_draft(session, paper):
             except ValueError:
                 data[key] = [data[key]] if data[key].strip() else []
         data[key] = data[key] or []
-    last_submission = session.scalar(select(models.PaperHistoryEvent).where(
-        models.PaperHistoryEvent.paper_id == paper.id, models.PaperHistoryEvent.operation_id.like('revision:%'))
-        .order_by(models.PaperHistoryEvent.id.desc()).limit(1))
-    saved_paper = ((last_submission.classification_snapshot or {}).get('revision_submission', {}).get('paper', {})
-                   if last_submission else {})
+    from .submission_metadata import submitted_metadata, pending_selections
+    submission = submitted_metadata(session, paper)
+    saved_paper = submission.get('paper', {})
     for key in AUTHOR_ROLE_FIELDS:
         data[key] = [author for author in saved_paper.get(key, []) if author in data['authors']]
     data['material_families'] = [term(f) for f in session.scalars(select(models.MaterialFamily)
         .join(models.PaperMaterialFamily, models.PaperMaterialFamily.material_family_id == models.MaterialFamily.id)
         .where(models.PaperMaterialFamily.paper_id == paper.id).order_by(models.MaterialFamily.id))]
+    data['material_families'] = pending_selections(submission, 'paper.material_families', data['material_families'], saved_paper.get('material_families'))
     states, candidates = [], []
     source_evidence = {e.id: e for e in rows(session, models.PaperEvidence, paper.id)}
     from sqlalchemy.orm import load_only
@@ -88,6 +87,8 @@ def current_draft(session, paper):
             for link, f in session.execute(select(models.MaterialStateStructureFamily, models.StructureFamily)
                 .join(models.StructureFamily, models.StructureFamily.id == models.MaterialStateStructureFamily.structure_family_id)
                 .where(models.MaterialStateStructureFamily.material_state_id == state.id).order_by(models.StructureFamily.id))]
+        saved_state = next((s for s in submission.get('material_states', []) if s.get('state_key') == state.state_key), {})
+        item['structure_families'] = pending_selections(submission, f'material_states[{index}].structure_families', item['structure_families'], saved_state.get('structure_families'))
         item.update(schema_version=2, property_modules=[], deleted_record_keys=[], deleted_module_keys=[])
         for module in session.scalars(select(models.PropertyModule).where(models.PropertyModule.material_state_id == state.id)
                                       .order_by(models.PropertyModule.display_order, models.PropertyModule.id)):
