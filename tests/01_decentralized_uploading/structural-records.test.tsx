@@ -45,6 +45,36 @@ it('重提取先预览数量，明确应用前不修改表单', async () => {
   expect(apply).toHaveBeenCalledTimes(1)
 })
 
+it('保留后按钮禁用，不保留移除对应结构，表单序列化后保持选择', () => {
+  const other = { ...candidate, candidate_id: 'other', material_state_ref: 'material_states[0]' }
+  let saved: StructureCandidate[] = []
+  function Editor() {
+    const [values, setValues] = React.useState([other, candidate])
+    return <PaperStructuralWorkspace candidates={values} observations={[]} onCandidates={next => { saved = next; setValues(next) }} onObservations={vi.fn()} />
+  }
+  const view = render(<Editor />)
+  fireEvent.click(screen.getByRole('button', { name: '保留此结构' }))
+  expect(screen.getByRole('button', { name: '已保留' })).toBeDisabled()
+  const retained = normalizeUploadDraft(JSON.parse(JSON.stringify({ paper: {}, material_states: [], structure_candidates: saved })))
+  view.unmount()
+  const reopened = render(<PaperStructuralWorkspace candidates={retained.structure_candidates || []} observations={[]} onCandidates={next => { saved = next }} onObservations={vi.fn()} />)
+  expect(screen.getByRole('button', { name: '已保留' })).toBeDisabled()
+  fireEvent.click(screen.getByRole('button', { name: '不保留' }))
+  expect(saved).toEqual([other])
+  const deleted = normalizeUploadDraft(JSON.parse(JSON.stringify({ paper: {}, material_states: [], structure_candidates: saved })))
+  reopened.rerender(<PaperStructuralWorkspace candidates={deleted.structure_candidates || []} observations={[]} onCandidates={vi.fn()} onObservations={vi.fn()} />)
+  expect(screen.queryByRole('button', { name: '不保留' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: '已保留' })).not.toBeInTheDocument()
+  expect(screen.getByText(/暂无独立结构资料/)).toBeVisible()
+})
+
+it('只读结构不提供保留或删除操作', () => {
+  render(<PaperStructuralWorkspace candidates={[{ ...candidate, retention: 'retained' }]} observations={[]} onCandidates={vi.fn()} onObservations={vi.fn()} readOnly />)
+  expect(screen.queryByRole('button', { name: '已保留' })).not.toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: '不保留' })).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: '下载 CIF' })).toBeVisible()
+})
+
 it('重提取保留人工决定与结构附件，同来源新结果只出现一次', () => {
   const retained = { ...candidate, retention: 'retained' as const }
   const fresh = { ...candidate, retention: 'pending' as const }

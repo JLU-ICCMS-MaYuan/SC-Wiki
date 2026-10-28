@@ -163,4 +163,6 @@ La–Sc–H 已通过表格／Methods 专项、隔离 MySQL、正式组件浏览
 
 论文结构资料只收录完整可建模结构；已在材料状态卡展示的模型不重复列入独立资料区。缺参数或原子位置的观测不再生成独立资料及人工决定，原PDF保留。历史非模型资料不进入当前查询／下载，旧客户端字段不产生新的非模型记录；完整模型的来源、规范几何确认及公开审核边界不变。本节覆盖前文相冲突的旧展示与收录规则。
 
+上传表单的独立结构点击“保留此结构”后，按钮显示“已保留”并禁用；已有保留决定重开后同样显示禁用状态。点击“不保留”直接从当前表单移除该结构卡片及对应候选，不再仅切换为“排除”状态。保留和删除均随主表单保存；只读视图没有这两个操作。
+
 设计与验证入口：[状态修复](../../specs/120-upload-llm-extraction-quality/state-review-convergence-20261020.md)、[核对依赖](../../specs/109-field-evidence-and-ai-suggestions/state-review-convergence-20261020.md)、[结构收录](../../specs/49-pdf-crystal-structure-extraction/state-review-convergence-20261020.md)。

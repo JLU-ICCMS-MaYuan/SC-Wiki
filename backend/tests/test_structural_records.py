@@ -152,6 +152,16 @@ def test_unassigned_model_survives_and_partial_parameters_are_not_collected(data
     assert len(service.current_items(session, paper)) == 1
 
 
+def test_removing_independent_structure_is_persisted_and_not_restored(database):
+    session, paper = database
+    save(session, paper)
+    assert len(service.current_items(session, paper)) == 1
+    save(session, paper, candidates=[], observations=[])
+    assert service.current_items(session, paper) == []
+    restored = service.supplement_draft(session, paper, dict(material_states=[], structure_candidates=[]))
+    assert restored["structure_candidates"] == []
+
+
 def test_invalid_client_geometry_cannot_erase_saved_records(database):
     session, paper = database
     save(session, paper)
