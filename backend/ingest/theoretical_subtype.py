@@ -8,7 +8,7 @@ import re
 from pathlib import Path
 from typing import Any, Callable
 
-from .property_evidence import locate, source_batches, source_chunks
+from .property_evidence import locate, source_batches, source_chunks, resolve_review_sources
 
 RULE_VERSION = "fulltext-theoretical-subtype-v1"
 SUBTYPES = {"calculation", "method", "theory"}
@@ -21,11 +21,13 @@ CLASSIFY_PROMPT = """你是超导论文的全文分类审核员。输入包含�
 - theory：以解析推导、理论模型或物理机制解释为主要贡献，而非主要报告计算结果。
 “新路线”或使用 USPEX、VASP、DFT 等不单独证明开发了新方法。引用他人工作和参考文献不代表本文贡献。
 通读研究目标、摘要、结果、讨论、结论及方法后，返回 JSON：
-{"value":"calculation|method|theory|null","reason":"简体中文简述主要贡献及排除另两类的依据，不超过180字", "evidences":[{"file_id":"来源ID","chunk_index":0,"quote":"输入中逐字复制的完整原句"}]}。
+{"value":"calculation|method|theory|null","reason":"简体中文简述主要贡献及排除另两类的依据，不超过180字", "evidences":[{"source_id":"review-source-N"}]}。
+只返回本次提供的 source_id，不另写 quote，服务器取回完整原文。至少一个编号的 section_role 应为 abstract/result/discussion/conclusion。
 选择类别需 1–3 条代表性原句，至少一条来自摘要、结果、讨论或结论，不能只用 Methods；无法确定时 value 为 null、说明缺口且不编造引句。"""
 
 WINDOW_PROMPT = """你在阅读一篇论文的其中一组连续原文。只记录本文作者的研究目标、实际结果、是否开发新方法或提出理论机制。
-不得把参考文献或方法软件名直接当分类结论。返回 JSON：{"summary":"简短事实摘要","evidences":[{"file_id":"来源ID","chunk_index":0,"quote":"逐字原句"}]}。
+不得把参考文献或方法软件名直接当分类结论。返回 JSON：{"summary":"简短事实摘要","evidences":[{"source_id":"review-source-N"}]}。
+只使用输入给出的编号，不另写 quote，避免改写原文公式。
 这一步不决定最终类别；保留可以区分 calculation、method、theory 的信息。"""
 
 
@@ -52,7 +54,7 @@ def assess_candidate(chunks: list[dict], raw: dict, *, model: str = "",
     value = raw.get("value")
     reason = str(raw.get("reason") or "").strip()[:500]
     evidence = []
-    for item in (raw.get("evidences") or [])[:3]:
+    for item in resolve_review_sources((raw.get("evidences") or [])[:3], chunks):
         if not isinstance(item, dict):
             continue
         found = locate(item, chunks)
@@ -73,7 +75,7 @@ def classify(chunks: list[dict], *, complete: Callable | None = None, model: str
     complete = complete or complete_json
     signature = hashlib.sha256(json.dumps([(c["file_id"], c["content"]) for c in chunks],
         ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
-    batches = source_batches(chunks)
+    batches = source_batches([{**chunk, "source_id": f"review-source-{index}"} for index, chunk in enumerate(chunks)])
     base = {"rule_version": RULE_VERSION, "source_hash": signature, "model": model,
             "covered_batches": 0, "total_batches": len(batches)}
     if not chunks:
@@ -130,12 +132,16 @@ def rerun_ready_upload(task_id: str, *, expected_filename: str, complete: Callab
         if not preserved_edit:
             current["paper"]["theoretical_subtype"] = assessment["value"]
         current["theoretical_subtype_assessment"] = assessment
+        if assessment["status"] == "completed" and current["paper"].get("theoretical_subtype") == assessment["value"]:
+            current["generation_issues"] = [item for item in current.get("generation_issues") or []
+                                            if not isinstance(item, dict) or item.get("field") != "paper.theoretical_subtype"]
         save_draft(task_id, current)
         artifact = json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {}
         ai_values = artifact.get("ai_values") or {}
         if isinstance(ai_values, dict):
             ai_values.setdefault("paper", {})["theoretical_subtype"] = assessment["value"]
             ai_values["theoretical_subtype_assessment"] = assessment
+            ai_values["generation_issues"] = current.get("generation_issues") or []
             artifact["ai_values"] = ai_values
             destination = artifact_path(task_id)
             temporary = destination.with_suffix(".json.tmp")

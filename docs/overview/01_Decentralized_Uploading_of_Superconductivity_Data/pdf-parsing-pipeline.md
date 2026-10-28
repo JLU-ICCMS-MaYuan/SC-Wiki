@@ -43,10 +43,12 @@
 
 相关字段修复按 `AGENTS.md` 从必要正文／补充材料来源重跑受影响字段，复用未改动的文字提取，保留失败响应重放与真实字段重新提取两类证据。字段通过不代表全篇覆盖、正式提交或整站验收通过。
 
+覆盖排除清单中只有表号而没有行号的提议不会使整篇提取失败，也不具有有效排除资格；保留诊断后进入逐行检查。未覆盖段落的分类读取完整目标、相邻页上下文和已有记录，不能把跨页续句或已有结果概述误作新数据。直接引句在分段阶段校验，改写公式、拼接文字或不属于声明来源的引句利用既有有限纠错处理，不能推迟到整篇汇总才发现。
+
 - `chunker.py` 把合并前的各文件 Markdown 切成 `Chunk`，`_chunks_with_preamble` 为每个文件补一个前言段；分段清单写入 `review_artifacts/{task_id}/chunk_manifest.json`，每段状态在 `waiting / processing / completed / failed` 间流转。
 - 读取前由 `_merge_extraction_windows` 把相邻小段合并为约 12000 字符的提取窗口（`EXTRACTION_WINDOW_CHARS`），页码取窗口起点所在页，再逐窗口调用 `_read_chunk`（使用当前请求选择的 OpenAI 兼容 LLM），减少过细分段造成的上下文断裂与调用次数。分段中的 AI 生成研究材料、方法和核心发现必须为英文；服务端在写入 `review_artifacts/{task_id}/chunks/` 前拒绝这些字段中的中日韩字符。论文标题、摘要和 `quote` 属于来源文本，保持输入语言，不翻译也不拦截；`quote` 可能来自 PDF 文本提取或 OCR，不承诺与扫描版逐字一致。
-- 分段结果以 JSON 存到 `review_artifacts/{task_id}/chunks/`；任一分段异常（包括生成字段语言不符合约束）即整任务失败。
-- 每完成一段更新 `completed_chunks / total_chunks`，前端进度条（如“4/28 段”）即来源于此。分段缓存契约版本为 9（`CHUNK_RESULT_SCHEMA_VERSION`），旧缓存重读时重新提取。
+- 分段结果以 JSON 存到 `review_artifacts/{task_id}/chunks/`；未能通过既有有限纠错的科学格式、来源及生成语言错误会使任务失败。不完整的排除提议单独进入覆盖审查，不等于科学结果可放行。
+- 每完成一段更新 `completed_chunks / total_chunks`，前端进度条（如“4/28 段”）即来源于此。分段缓存契约版本为 14（`CHUNK_RESULT_SCHEMA_VERSION`），旧缓存重读时重新提取。
 
 ### 第 4 步：AI 汇总草稿（summarizing）
 
@@ -131,7 +133,7 @@
 六方面引导 AI 输出英文自由描述，只使用原文事实，不要求六项齐全，不把缺失条件补成猜测。
 每条测量 Tc 的条件分别写入该条 `experimental_conditions.description`，经既有草稿转换进入
 `property_modules[].records[].payload.experimental_conditions.description`。同材料状态下的多条
-测量结果不共享或相互覆盖条件；预测 Tc 保持计算 Conditions。分段缓存契约版本为 9，旧缓存
+测量结果不共享或相互覆盖条件；预测 Tc 保持计算 Conditions。分段缓存契约版本为 14，旧缓存
 重读时重新提取。对应表单采用单个多行框；定义版本继续保存在数据内。（[Issue #94](../../specs/94-property-record-editor/spec.md)）
 
 此链路通过模拟 LLM 返回、执行真实分段与汇总调用、草稿归一化、记录校验、SQLite 持久化及导出
@@ -249,3 +251,7 @@ Token/GPU/费用实测数据时保持为空；CPU 只记录 Worker 进程自身�
 页侧原生文字层明确确认为下载 URL 水印、文件 SHA 与区域匹配且未被科学 Claim 引用的窄长版面块，可记录为非结果排除并保留核验信息；不可读科学内容、无原生文字层或文件不符仍走人工复核门。稳定区间不替代逐结果明确压力，通用字段的分批核对失败保留原因且不阻断独立 Methods 关联。
 
 La–Sc–H 已通过表格／Methods 专项、隔离 MySQL、正式组件浏览器及完整 Worker 验证；最终真实任务 ready，7 个压力状态中的 8 行参数和阶段条件逐项比较通过，详见 [#139 验收记录](../../specs/139-table-parameters-shared-methods/validation.md)。总结／研究驱动力仍可能要求人工核对；历史人工草稿不批量重写。
+
+### 已完成草稿的受控重跑
+
+内部重跑指定原草稿内容哈希时，保存前在任务锁内再次核对；期间发生编辑会拒绝覆盖当前草稿和解析初稿。普通解析与既有重试次数保持原流程；本次原任务恢复与字段收尾证据见 [#172全流程验收](../../specs/172-phonon-method-parsing/full-run-validation.md)。

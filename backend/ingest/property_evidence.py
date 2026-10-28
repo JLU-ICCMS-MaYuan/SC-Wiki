@@ -952,6 +952,10 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
     image_request_succeeded = True
     association_prompt = REVIEW_PROMPT if any(r.get('source_associations') and not r.get('condition_context') for r in records) else ''
     suggestion_prompt = SUGGESTION_PROMPT + (FIELD_CANDIDATE_PROMPT if purpose == 'field' else '')
+    if any(record.get('field') in {'paper.summary', 'paper.theoretical_subtype', 'paper.research_motivation'} for record in records):
+        suggestion_prompt += ('\nFor paper.summary, paper.theoretical_subtype and paper.research_motivation evidence, return ONLY the supplied source_id references '
+                              '(review-source-N); do not transcribe quote text or formulas. '
+                              'The server retrieves the exact original source. This does not replace semantic review.\n')
     try:
         parsed = complete_json(SYSTEM_PROMPT + suggestion_prompt + association_prompt + condition_rules.PROMPT,
                                prompt, on_partial=on_partial, retries=1,

@@ -152,7 +152,7 @@ def test_structured_table_contract_retry_is_bounded_and_keeps_raw_attempts(tmp_p
         'tables':[{'table_id':'t','row_count':2}]}]}
     chunk=Chunk(0,0,'Table',None,json.dumps(source),100)
     invalid={'extraction_version':'1','material_states':[],'coverage_exclusions':[{
-        'file_id':'f','table_id':'t','category':'out_of_model_scope','reason':'lattice coordinates'}]}
+        'file_id':'f','table_id':'t','row_index':-1,'category':'out_of_model_scope','reason':'lattice coordinates'}]}
     calls=[]
     def model(system,prompt,**kw):
         calls.append(prompt)

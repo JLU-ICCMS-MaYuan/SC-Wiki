@@ -71,7 +71,8 @@ def main():
             before[input_path] = digest(input_path)
             original = json.loads(input_path.read_text())
             prompt = original["prompt"]
-            context = json.loads(prompt[prompt.index("{"):])
+            # 契约重试的原提示在来源 JSON 后附加错误反馈；只解码首个来源对象。
+            context, _ = json.JSONDecoder().raw_decode(prompt[prompt.index("{"):])
             contexts = context.get("source_documents", [context])
             raw = json.loads(args.response.read_text())
             report["response_path"] = str(args.response)

@@ -9,6 +9,7 @@ import logging
 import re
 import shutil
 import time
+from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
 
@@ -148,7 +149,7 @@ with increasing bounds, no scalar mu_star; without explicit pairing use key=mu_s
 CHUNK_SYSTEM_PROMPT += "\nRead table headers, groups, units, title and footnotes with ALL data rows. Preserve per-result lambda_ep, omega_log (K), mu_star and harmonic/anharmonic identity. Only explicit inverse Tc–mu pairing uses the special mu_star range; otherwise use mu_star_reported_range. Never broadcast state-level parameters across methods.\n"
 
 CHUNK_SYSTEM_PROMPT += METHOD_SEMANTICS_PROMPT
-CHUNK_RESULT_SCHEMA_VERSION = 13
+CHUNK_RESULT_SCHEMA_VERSION = 14
 
 PUBLIC_CHUNK_RESULT_FIELDS = {
     "metadata", "paper_type_evidence", "research_materials",
@@ -441,17 +442,25 @@ def _atomic_write_json(path: Path, payload: Any) -> None:
     temporary.replace(path)
 
 
-def _uncovered_classifier_items(file_id: str, ir, uncovered: list[str]) -> list[dict]:
+def _uncovered_classifier_items(file_id: str, ir, uncovered: list[str], *, claims=()) -> list[dict]:
     """把未覆盖标识还原为带原文的分类输入；只处理块/图/公式和表格行。"""
     blocks = {b.block_id: b for b in ir.blocks}
     tables = {t.table_id: t for t in ir.tables}
+    selected = sorted((b for b in ir.blocks if b.metadata.get("selected_for_reading") is not False),
+                      key=lambda b: (b.pdf_page, b.reading_order))
+    # 跨页续句不能只看孤立片段；明确给出已经提取的结果，供判断重复叙述。
+    known_results = [{"value": c.value, "source_blocks": [e.block_id for e in c.evidences if e.file_id == file_id]}
+                     for c in claims if c.status == "validated" and isinstance(c.value, dict)
+                     and c.value.get("property_code") and any(e.file_id == file_id for e in c.evidences)]
     items = []
     for name in uncovered:
         if name.startswith(("block:", "region:")):
             block = blocks.get(name.split(":", 1)[1])
             if block is not None:
                 items.append({"id": name, "file_id": file_id, "block_id": block.block_id,
-                              "text": (block.text or "")[:300]})
+                              "text": block.text or "", "already_extracted_records": known_results,
+                              "page_context": [{"block_id": b.block_id, "pdf_page": b.pdf_page, "text": b.text}
+                                               for b in selected if abs(b.pdf_page - block.pdf_page) <= 1 and b.text]})
         elif name.startswith("table:"):
             parts = name.split(":")
             if len(parts) == 4 and parts[2] == "row":
@@ -464,7 +473,7 @@ def _uncovered_classifier_items(file_id: str, ir, uncovered: list[str]) -> list[
                     cells = " | ".join((c.text or "").strip() for c in sorted(
                         (c for c in table.cells if c.row_index == row), key=lambda c: c.column_index))
                     items.append({"id": name, "file_id": file_id, "table_id": parts[1],
-                                  "row_index": row, "text": cells[:300]})
+                                  "row_index": row, "text": cells})
     return items[:200]
 
 
@@ -2155,11 +2164,13 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                              if name.startswith(("block:", "region:")) or re.fullmatch(r"table:[\w-]+:row:\d+", name)]
                 if not uncovered:
                     continue
-                items = _uncovered_classifier_items(file_id, ir, uncovered)
+                items = _uncovered_classifier_items(file_id, ir, uncovered, claims=claims)
                 if not items:
                     continue
                 try:
                     decisions = classify_uncovered(items)
+                    _atomic_write_json(artifact_directory(task_id) / f"coverage-classification-{file_id}.json",
+                                       {"items": items, "decisions": decisions})
                 except Exception as exc:
                     logging.getLogger(__name__).warning("未覆盖项分类失败 task=%s file=%s type=%s", task_id, file_id, type(exc).__name__)
                     continue
@@ -2233,7 +2244,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         bibliography_patch = {"paper": dict(raw_paper)}
         if state.get("parser_profile") == "complementary":
             from .grobid_document import apply_bibliography
-            apply_bibliography(bibliography_patch, citation_extraction)
+            apply_bibliography(bibliography_patch, citation_extraction,
+                               main_ir=document_set.get(citation_extraction.get("file_id")))
             raw_paper = bibliography_patch["paper"]
         abstract = raw_paper.get("abstract") or next((
             item.get("metadata", {}).get("abstract") for item in summary_candidates
@@ -2241,10 +2253,15 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             and item["metadata"].get("abstract")
         ), None)
         with call_phase("summary_retry"):
+            summary_attempts = []
+            def save_summary_attempt(attempt):
+                summary_attempts.append(attempt)
+                _atomic_write_json(artifact_directory(task_id) / "summary_attempts.json", summary_attempts)
             summary, summary_error = choose_summary(
                 raw_paper.get("summary") or raw_draft.get("summary"), abstract,
                 summary_candidates,
                 lambda prompt, payload: complete_json(prompt, json.dumps(payload, ensure_ascii=False)),
+                on_attempt=save_summary_attempt,
             )
         motivation_attempts: list[dict[str, Any]] = []
         motivation_started = time.monotonic()
@@ -2259,8 +2276,13 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         if summary_error:
             logging.getLogger(__name__).warning("论文总结需要人工核对 task=%s reason=%s", task_id, summary_error)
         from backend.ingest.state_optimization import resolve_candidates, assemble_candidates
+        optimization_attempts = []
+        def save_optimization_response(response):
+            optimization_attempts.append(response)
+            _atomic_write_json(artifact_directory(task_id) / "structure_optimization_response.json", optimization_attempts)
         resolved_candidates, optimization_issues = resolve_candidates(
-            candidates if document_set else summary_candidates, scientific_sources, complete_json)
+            candidates if document_set else summary_candidates, scientific_sources, complete_json,
+            on_response=save_optimization_response)
         _atomic_write_json(artifact_directory(task_id) / "structure_optimization_assessment.json", {
             "issues": optimization_issues,
             "states": [{"material": item.get("material"), "pressure_value_gpa": item.get("pressure_value_gpa"),
@@ -2426,39 +2448,48 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                        for result in suggestion_results.values() if isinstance(result, dict)],
             "suggestions_status": "failed" if draft.get("field_suggestions_error") else "completed",
         })
-        ai_values = json.loads(json.dumps(draft, ensure_ascii=False))
-        artifact_path(task_id).write_text(
-            json.dumps(
-                {
-                    "task_id": task_id,
-                    "paper_id": None,
-                    "ai_values": ai_values,
-                    "user_values": None,
-                    "evidence": {
-                        "classification": draft.get("classification_evidence", []),
-                        "classification_scope": _classification_scope_evidence(candidates),
-                        "material_states": [
-                            {
-                                "space_group": item.get("space_group_evidence"),
-                                "calculation_context": (
-                                    item.get("calculation_context") or {}
-                                ).get("evidence"),
-                                "tc_results": [
-                                    result.get("evidence")
-                                    for result in item.get("tc_results") or []
-                                    if isinstance(result, dict)
-                                ],
-                            }
-                            for item in draft["material_states"]
-                        ],
+        # 已完成草稿的受控重跑必须保护期间的人工编辑；失败时保留原稿。
+        expected_draft_hash = state.get("reparse_expected_draft_hash")
+        with upload_task_lock(task_id) if expected_draft_hash else nullcontext():
+            if expected_draft_hash:
+                from .upload_tasks import redis_client, draft_key
+                current_draft = redis_client().get(draft_key(task_id)) or ""
+                if hashlib.sha256(current_draft.encode()).hexdigest() != expected_draft_hash:
+                    raise ParserError("draft_changed_during_parsing", "解析期间草稿已变化，已保留当前草稿，请核对后重试",
+                                      profile=state.get("parser_profile", "legacy"), parser="draft_guard")
+            ai_values = json.loads(json.dumps(draft, ensure_ascii=False))
+            artifact_path(task_id).write_text(
+                json.dumps(
+                    {
+                        "task_id": task_id,
+                        "paper_id": None,
+                        "ai_values": ai_values,
+                        "user_values": None,
+                        "evidence": {
+                            "classification": draft.get("classification_evidence", []),
+                            "classification_scope": _classification_scope_evidence(candidates),
+                            "material_states": [
+                                {
+                                    "space_group": item.get("space_group_evidence"),
+                                    "calculation_context": (
+                                        item.get("calculation_context") or {}
+                                    ).get("evidence"),
+                                    "tc_results": [
+                                        result.get("evidence")
+                                        for result in item.get("tc_results") or []
+                                        if isinstance(result, dict)
+                                    ],
+                                }
+                                for item in draft["material_states"]
+                            ],
+                        },
                     },
-                },
-                ensure_ascii=False,
-                indent=2,
-            ),
-            encoding="utf-8",
-        )
-        save_draft(task_id, draft)
+                    ensure_ascii=False,
+                    indent=2,
+                ),
+                encoding="utf-8",
+            )
+            save_draft(task_id, draft)
         artifact_manifest = None
         from backend.storage.paths import object_mode, publish_tree
         if object_mode():
@@ -2477,7 +2508,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         ready = update_state(
             task_id, status="ready", stage="ready", stage_index=5, processing_status="succeeded",
             processing_error=None, completed_chunks=len(all_chunks), total_chunks=len(all_chunks),
-            duplicate=False, partial_draft=None, artifact_manifest=artifact_manifest,
+            duplicate=False, partial_draft=None, artifact_manifest=artifact_manifest, reparse_expected_draft_hash=None,
         )
         if not state.get("is_shadow"):
             # 解析中的字段核对已完成；ready后不再排队重复检查。

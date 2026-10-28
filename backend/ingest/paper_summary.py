@@ -68,22 +68,45 @@ def valid_summary(value: Any, abstract: str | None) -> bool:
 
 
 def choose_summary(initial: Any, abstract: str | None, candidates: Any,
-                   complete: Callable[..., dict[str, Any]]) -> tuple[str, str | None]:
+                   complete: Callable[..., dict[str, Any]], *,
+                   on_attempt: Callable[[dict], None] | None = None) -> tuple[str, str | None]:
     """先用全文汇总结果；无效时只重新调用一次总结模型。"""
     first = initial.strip() if isinstance(initial, str) else ""
+    words = len((abstract or "").split())
+    requirements = {"numbered_single_sentence_lines": "3-5", "abstract_word_count": words,
+                    "summary_min_words": words + 1 if words >= 70 else None,
+                    "summary_max_words": int(1.5 * words) if words >= 70 else None}
+    def record(attempt, value):
+        if on_attempt:
+            on_attempt({"attempt": attempt, "summary": value, "requirements": requirements,
+                        "valid": valid_summary(value, abstract)})
+    record("initial", initial)
     if valid_summary(initial, abstract):
         return first, None
     try:
-        retry = complete(RETRY_PROMPT, {"abstract": abstract or "", "candidates": candidates})
+        retry_prompt = RETRY_PROMPT
+        if words >= 70:
+            retry_prompt += (f"\nFor this retry return {{\"conclusions\":[five complete English sentences]}} instead of a summary string. "
+                             f"Each sentence must contain {(words + 5) // 5}–{int(1.5 * words) // 5} whitespace-separated words; "
+                             f"aim for {max(1, int(1.2 * words) // 5)} words per sentence. The server adds numbering. "
+                             "Use only supported facts, rewrite rather than copying the failed previous summary.")
+        retry = complete(retry_prompt, {"abstract": abstract or "", "candidates": candidates,
+                         "previous_summary": first, "requirements": requirements,
+                         "validation_feedback": "上一总结未满足格式、字数或摘要重复限制，请按明确的上下界重新组织结论，不补造事实。"})
         text = retry.get("summary") if isinstance(retry, dict) else None
+        if isinstance(retry, dict) and isinstance(retry.get("conclusions"), list) and all(
+                isinstance(point, str) for point in retry["conclusions"]):
+            text = "\n".join(f"{index}. {point.strip()}" for index, point in enumerate(retry["conclusions"], 1))
     except Exception:
         return first, "retry_failed"
+    record("retry", text)
     if valid_summary(text, abstract):
         return text.strip(), None
     return first, "invalid_summary"
 
 
-def rerun_ready_upload(task_id: str, *, expected_filename: str, expected_main_sha256: str) -> dict[str, Any]:
+def rerun_ready_upload(task_id: str, *, expected_filename: str, expected_main_sha256: str,
+                       generated_summary: str | None = None) -> dict[str, Any]:
     """对一份已完成、未人工改写的上传草稿定向重算总结和核对。"""
     from sqlalchemy import select
 
@@ -143,12 +166,17 @@ def rerun_ready_upload(task_id: str, *, expected_filename: str, expected_main_sh
         sources = task_sources(task_id, state, data_path("parsed_markdown"))
         abstract = str((draft.get("paper") or {}).get("abstract") or "")
 
-    summary, error = choose_summary("", abstract, sources,
+    if generated_summary is not None and not valid_summary(generated_summary, abstract):
+        raise ValueError("已有生成候选未通过当前摘要的格式检查")
+    summary, error = choose_summary(generated_summary or "", abstract, sources,
         lambda prompt, payload: complete_json(prompt, json.dumps(payload, ensure_ascii=False)))
     if error:
         raise ValueError(f"模型未生成可靠总结：{error}")
     updated = json.loads(json.dumps(draft, ensure_ascii=False))
     updated["paper"]["summary"] = summary
+    updated["summary_error"] = None
+    updated["generation_issues"] = [item for item in updated.get("generation_issues") or []
+                                    if not isinstance(item, dict) or item.get("field") != "paper.summary"]
     candidate_snapshot = evidence.upload_snapshot(task_id, owner, parsing_draft=updated)
     record = next(row for row in candidate_snapshot["records"] if row["field"] == "paper.summary")
     candidates, errors = [], []
@@ -180,6 +208,14 @@ def rerun_ready_upload(task_id: str, *, expected_filename: str, expected_main_sh
             science.save_results(session, {**candidate_snapshot, "records": [record]},
                                  {record["key"]: checked}, owner)
         latest_artifact.setdefault("ai_values", {}).setdefault("paper", {})["summary"] = summary
+        latest_artifact["ai_values"]["summary_error"] = None
+        latest_artifact["ai_values"]["generation_issues"] = updated["generation_issues"]
+        (artifact_path(task_id).parent / "summary_recovery.json").write_text(json.dumps({
+            "summary": summary, "review_model": get_llm_config().model, "source_fingerprint": fingerprint,
+            "selection": "existing_generated_candidate" if generated_summary is not None else "regenerated",
+            "status": checked["status"], "reason": checked.get("reason"),
+            "evidences": checked.get("evidences"), "backup": str(backup),
+        }, ensure_ascii=False, indent=2), encoding="utf-8")
         temporary = artifact_path(task_id).with_suffix(".json.summary.tmp")
         temporary.write_text(json.dumps(latest_artifact, ensure_ascii=False, indent=2), encoding="utf-8")
         temporary.replace(artifact_path(task_id))

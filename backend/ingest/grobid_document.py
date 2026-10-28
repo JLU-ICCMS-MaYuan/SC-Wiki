@@ -4,6 +4,8 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
+from copy import deepcopy
 from pathlib import Path
 import time
 from xml.etree import ElementTree as ET
@@ -82,10 +84,41 @@ def extract_document(source, directory, *, timeout=90):
     return result
 
 
-def apply_bibliography(draft, document):
+def _bounded_abstract(document, ir):
+    """仅在独立版面块确认关键词分隔时截去误串入摘要的正文，保留原解析。"""
+    if ir is None or ir.source_sha256 != document.get("source_sha256"):
+        return document
+    abstract = document.get("metadata", {}).get("abstract")
+    if not isinstance(abstract, str):
+        return document
+    blocks = sorted((b for b in ir.blocks if b.pdf_page == 1 and b.text
+                     and b.metadata.get("selected_for_reading") is not False), key=lambda b: b.reading_order)
+    def words(value):
+        return re.findall(r"[a-z]+", value.lower())
+    for index, block in enumerate(blocks):
+        marker = " ".join(block.text.split())
+        if index == 0 or "|" not in marker or not 2 <= len(marker.split()) <= 20 or abstract.count(marker) != 1:
+            continue
+        prefix, suffix = abstract.split(marker)
+        prior = words(blocks[index - 1].text)
+        selected = words(prefix)
+        if (len(prior) < 70 or len(selected) < 70 or len(suffix.split()) < 30
+                or selected[:12] != prior[:12] or selected[-8:] != prior[-8:]):
+            continue
+        corrected = deepcopy(document)
+        corrected["metadata"]["abstract"] = prefix.strip()
+        corrected.setdefault("metadata_sources", {}).setdefault("abstract", {"text": abstract}).update(
+            selected_text=prefix.strip(), selection_rule="layout-keyword-boundary-v1",
+            boundary_block_id=block.block_id, abstract_block_id=blocks[index - 1].block_id)
+        return corrected
+    return document
+
+
+def apply_bibliography(draft, document, *, main_ir=None):
     """只用已确定的正文题录组装字段；保留模型分歧，不改科学分类。"""
     if not document or document.get("status") != "succeeded":
         return
+    document = _bounded_abstract(document, main_ir)
     paper = draft.setdefault("paper", {})
     conflicts = []
     for field, value in document.get("metadata", {}).items():

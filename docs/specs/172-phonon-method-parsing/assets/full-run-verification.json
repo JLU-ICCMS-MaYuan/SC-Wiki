@@ -1,0 +1,157 @@
+{
+  "task_id": "29b2dd4604b64ee58c669c0efddb8cab",
+  "status": "ready",
+  "stage": 5,
+  "completed_chunks": 2,
+  "total_chunks": 2,
+  "suggestions_status": "completed",
+  "suggestions_completed": 11,
+  "suggestions_total": 11,
+  "generation_issues": [],
+  "summary_valid": true,
+  "abstract_words": 168,
+  "summary_words": 174,
+  "subtype_status": "completed",
+  "subtype": "calculation",
+  "state_count": 6,
+  "record_counts": {
+    "band_gap": 2,
+    "dos_fermi": 1,
+    "tc": 6
+  },
+  "tc_records": [
+    {
+      "pressure_gpa": 150.0,
+      "value_kind": "text",
+      "tc": null,
+      "min": null,
+      "max": null,
+      "mu": null,
+      "method": "unknown"
+    },
+    {
+      "pressure_gpa": 150.0,
+      "value_kind": "range",
+      "tc": null,
+      "min": 220.0,
+      "max": 235.0,
+      "mu": null,
+      "method": "isotropic_eliashberg"
+    },
+    {
+      "pressure_gpa": 150.0,
+      "value_kind": "number",
+      "tc": 235.0,
+      "min": null,
+      "max": null,
+      "mu": 0.1,
+      "method": "isotropic_eliashberg"
+    },
+    {
+      "pressure_gpa": 150.0,
+      "value_kind": "number",
+      "tc": 220.0,
+      "min": null,
+      "max": null,
+      "mu": 0.13,
+      "method": "isotropic_eliashberg"
+    },
+    {
+      "pressure_gpa": 200.0,
+      "value_kind": "number",
+      "tc": 201.0,
+      "min": null,
+      "max": null,
+      "mu": 0.13,
+      "method": "isotropic_eliashberg"
+    },
+    {
+      "pressure_gpa": 250.0,
+      "value_kind": "number",
+      "tc": 187.0,
+      "min": null,
+      "max": null,
+      "mu": 0.13,
+      "method": "isotropic_eliashberg"
+    }
+  ],
+  "claims": 15,
+  "coverage": {
+    "c463643719b3420eb4e1936d95780c6b": {
+      "status": "complete",
+      "processed_pages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30
+      ],
+      "uncovered_candidates": [],
+      "limitations": [],
+      "requires_human": false
+    },
+    "5d2884b8fc0b4331881cb78a347f489c": {
+      "status": "complete",
+      "processed_pages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "uncovered_candidates": [],
+      "limitations": [],
+      "requires_human": false
+    }
+  },
+  "paper_id": null,
+  "reparse_guard": null,
+  "mysql_redis_scientific_equal": true,
+  "layout_coordinate_rounding_max_abs": 5.684341886080802e-14,
+  "field_reviews": [
+    {
+      "field": "paper.summary",
+      "status": "supported",
+      "reason": "总结中的五项核心结论均能在原文中找到对应依据：结构搜索发现CaH6在150 GPa以上稳定为Im-3m方钠石笼结构；H4单元构成三维笼且Ca位于笼中心；150 GPa下EPC参数λ=2.69，主要由T2g和Eg模式贡献；Eliashberg方程给出Tc=220–235 K（μ*=0.13–0.1）；Tc随压力升高降至201 K（200 GPa）和187 K（250 GPa）。总结忠实概括了原文主要结果，未引入原文没有的事实或数值。",
+      "evidence_count": 4
+    },
+    {
+      "field": "paper.research_motivation",
+      "status": "supported",
+      "reason": "研究动机的三点均能在原文找到依据：摘要和引言提出在高压下寻找富氢钙氢化物高温超导，并引用预压缩H2概念；引言明确提到已知CaH2并探索更高氢含量，且引用Li/Na氢化物电荷转移工作；方法部分说明使用粒子群优化结构搜索系统研究CaH2n(n=2-6)。",
+      "evidence_count": 3
+    },
+    {
+      "field": "paper.theoretical_subtype",
+      "status": "supported",
+      "reason": "本文通过CALYPSO结构搜索和DFT计算，预测了高压下CaH6的sodalite笼状结构，并计算其超导Tc为220-235 K。主要贡献是发现具体材料的新结构及超导性质，属于计算研究。未提出新算法或解析理论，故排除method和theory。",
+      "evidence_count": 3
+    }
+  ],
+  "summary_content_words": 169,
+  "summary_word_count_note": "summary_words包含编号；summary_content_words为去掉编号后的正文词数。"
+}
