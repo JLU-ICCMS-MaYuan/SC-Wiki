@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test:upload-ui": "vitest run --config ../vitest.config.ts"
+    "test:upload-ui": "vitest run --config ../vitest.config.ts",
+    "test:form-contract": "node ../scripts/check-form-contract.mjs",
+    "test:form-contract:mutation": "node ../scripts/check-form-contract.mjs --mutation"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

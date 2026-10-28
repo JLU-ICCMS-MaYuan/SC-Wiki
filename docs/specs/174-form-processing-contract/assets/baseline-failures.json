@@ -1,0 +1,84 @@
+{
+  "baseline": "d8e42242",
+  "baseline_failed": 19,
+  "current_failed_same_names": true,
+  "failures": [
+    {
+      "test": "作者标签合并作者角色证据，隐藏菜单不使证据失去入口",
+      "failure": "AssertionError: expected \"spy\" to be called with arguments: [ 'roles', [ 'roles' ] ]"
+    },
+    {
+      "test": "排序后按稳定身份标记原记录，修改仍映射到对应核对项",
+      "failure": "AssertionError: expected \"spy\" to be called with arguments: [ …(2) ]"
+    },
+    {
+      "test": "同框问题聚合为一个文字入口，已接受后仍可查看",
+      "failure": "Error: expect(element).not.toHaveAttribute(\"data-evidence-problem\") // element.hasAttribute(\"data-evidence-problem\")"
+    },
+    {
+      "test": "Issue #96 上传表单性能回归 非法元素种类数即时更新当前卡片，不写草稿且不重绘其他卡片",
+      "failure": "AssertionError: expected \"spy\" to not be called at all, but actually been called 1 times"
+    },
+    {
+      "test": "真实编辑器只改核处理时，三个派生项及其人工说明保持有效；重复通知不误标",
+      "failure": "AssertionError: expected undefined to be true // Object.is equality"
+    },
+    {
+      "test": "迟到核对不能覆盖请求之后的编辑，失败恢复也保留无关项",
+      "failure": "AssertionError: expected undefined to be true // Object.is equality"
+    },
+    {
+      "test": "真实 input 事件清空带红框压强时五个字段同步清空，不影响其他状态",
+      "failure": "Error: Found multiple elements with the role \"button\" and name \"压强 (GPa)\""
+    },
+    {
+      "test": "带核对标记的小数输入不跳回旧值，零有效，标签仍打开抽屉",
+      "failure": "Error: Found multiple elements with the role \"button\" and name \"压强 (GPa)\""
+    },
+    {
+      "test": "输入未完成的指数不清空任何条件，直接替换数值保留原始记录",
+      "failure": "Error: Found multiple elements with the role \"button\" and name \"压强 (GPa)\""
+    },
+    {
+      "test": "修改后填写理由先保留本地，完成保存新值并绑定 v2，零模型和批准请求",
+      "failure": "Error: Unable to find an element with the text: /压力 · 已接受/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible."
+    },
+    {
+      "test": "保存失败保留新值和理由，重试完成时不复用旧接受状态",
+      "failure": "Error: Unable to find an element with the text: /压力 · 已接受/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible."
+    },
+    {
+      "test": "普通保存刷新后不再展示已清空的压强问题",
+      "failure": "Error: Unable to find an element with the text: /压力 · 已接受/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible."
+    },
+    {
+      "test": "排序后实际修改锡压强只失效锡，另一状态的已接受结果保留",
+      "failure": "Error: Found multiple elements with the role \"button\" and name \"压强 (GPa)\""
+    },
+    {
+      "test": "普通保存刷新保留尚未提交的新理由，不继承旧候选",
+      "failure": "Error: Unable to find an element with the text: /压力 · 已接受/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible."
+    },
+    {
+      "test": "完成保存期间继续编辑时保留最新值和理由，不确认较早内容",
+      "failure": "Error: Found multiple elements with the role \"button\" and name \"压强 (GPa)\""
+    },
+    {
+      "test": "普通保存的迟到快照不能覆盖更晚编辑及理由",
+      "failure": "Error: Found multiple elements with the role \"button\" and name \"压强 (GPa)\""
+    },
+    {
+      "test": "重新查找先保存，保存失败不会请求模型且保留理由",
+      "failure": "Error: Unable to find an element with the text: /压力 · 已接受/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible."
+    },
+    {
+      "test": "完成 等待队列时切换论文不会误保存新论文",
+      "failure": "TestingLibraryElementError: Unable to find a label with the text of: 人工核对理由"
+    },
+    {
+      "test": "让系统重新查找 等待队列时切换论文不会误保存新论文",
+      "failure": "TestingLibraryElementError: Unable to find a label with the text of: 人工核对理由"
+    }
+  ],
+  "method": "在临时 Vite 转换中加载 Git 基线的四个变更组件；其余测试和依赖相同。当前两轮扩展测试的失败名称与这 19 项一致。"
+}

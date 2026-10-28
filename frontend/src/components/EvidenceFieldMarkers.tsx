@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Box, Button, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
@@ -26,9 +26,8 @@ function matchesField(node: HTMLElement, record: EvidenceRecord, suffix: string)
   return suffix !== '' && Boolean(node.dataset.issueField?.endsWith(suffix) || (suffix.includes('.payload.parameters.') && suffix.endsWith('.value_number') && node.dataset.issueField?.endsWith(suffix.slice(0, -13))))
 }
 
-function recordOwner(record: EvidenceRecord, scope: string) {
+function recordOwner(record: EvidenceRecord, state?: HTMLElement) {
   if (!record.state_key) return '论文'
-  const state = Array.from(document.querySelectorAll<HTMLElement>(`[data-evidence-scope="${scope}"] [data-state-key]`)).find(node => node.dataset.stateKey === record.state_key)
   const index = state?.dataset.materialStateIndex ?? record.field.match(/^material_states\[(\d+)\]/)?.[1]
   const name = state?.dataset.stateLabel
   return [name, index == null ? `材料状态 ${record.state_key}` : `材料状态 ${Number(index) + 1}${state ? '' : '（已移除）'}`].filter(Boolean).join(' · ')
@@ -47,7 +46,13 @@ function fieldCaption(node: HTMLElement) {
       (!caption.closest('[data-issue-field]') || caption.closest('[data-issue-field]') === node)) || null
 }
 
-function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; node: HTMLElement; onOpen: Props['onOpen'] }) {
+function currentPlaceholder(record: EvidenceRecord, node: HTMLElement): EvidenceRecord {
+  if (!record.placeholder) return record
+  const input = node.querySelector<HTMLInputElement | HTMLTextAreaElement>('input,textarea')
+  return { ...record, current_value: input?.value ?? node.querySelector('[role="combobox"]')?.textContent ?? node.parentElement?.textContent ?? record.current_value }
+}
+
+const FieldTrigger = memo(function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; node: HTMLElement; onOpen: Props['onOpen'] }) {
   const [host] = useState(() => document.createElement('span'))
   const [caption, setCaption] = useState<HTMLElement | null>(null)
   const names = [...new Set(records.map(r => r.label))].join('、')
@@ -75,7 +80,7 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
       event.preventDefault()
       event.stopPropagation()
       target.focus()
-      if (records[0].placeholder) onOpen(records[0].key, [records[0].key], records[0])
+      if (records[0].placeholder) onOpen(records[0].key, [records[0].key], currentPlaceholder(records[0], node))
       else onOpen(records[0].key, records.map(r => r.key))
     }
     const keydown = (event: KeyboardEvent) => {
@@ -92,13 +97,29 @@ function FieldTrigger({ records, node, onOpen }: { records: EvidenceRecord[]; no
       }
     }
   }, [host, node, records, onOpen, label, names, hasProblem])
-  return caption ? null : createPortal(<Button data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : 'primary'} size="small" sx={node.hasAttribute('data-scientific-field') ? { minWidth: 20, p: 0 } : undefined} aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], records[0]); else onOpen(records[0].key, records.map(r => r.key)) }}>{node.hasAttribute('data-scientific-field') ? '•' : names}</Button>, host)
-}
+  return caption ? null : createPortal(<Button data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : 'primary'} size="small" sx={node.hasAttribute('data-scientific-field') ? { minWidth: 20, p: 0 } : undefined} aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], currentPlaceholder(records[0], node)); else onOpen(records[0].key, records.map(r => r.key)) }}>{node.hasAttribute('data-scientific-field') ? '•' : names}</Button>, host)
+})
 
 /** 在现有表单的字段锚点附加标记，避免复制动态表单和科学校验。 */
-export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange }: Props) {
+export default function EvidenceFieldMarkers({ records, scope, onOpen: openCallback, onChange: changeCallback }: Props) {
   const theme = useTheme()
-  const [targets, setTargets] = useState<Array<{ record: EvidenceRecord; node: HTMLElement }>>([])
+  const callbacks = useRef({ openCallback, changeCallback })
+  callbacks.current = { openCallback, changeCallback }
+  const onOpen = useCallback<Props['onOpen']>((...args) => callbacks.current.openCallback(...args), [])
+  const onChange = useCallback<Props['onChange']>((...args) => callbacks.current.changeCallback(...args), [])
+  const currentRecords = useRef(records)
+  currentRecords.current = records
+  // 核对颜色/理由改变不改变节点拓扑；只在身份或实际 DOM 结构变化时重新定位。
+  const topology = JSON.stringify(records.map(r => [r.key, r.field, r.fields, r.state_key, r.module_key, r.record_key,
+    r.record_field, r.record_field_key, r.structure_hash, r.structure_field]))
+  const [bindings, setTargets] = useState<Array<{ record: EvidenceRecord; node: HTMLElement }>>([])
+  const targets = useMemo(() => {
+    const latest = new Map(records.map(record => [record.key, record]))
+    return bindings.flatMap(binding => {
+      const record = latest.get(binding.record.key) || (binding.record.placeholder ? binding.record : undefined)
+      return record ? [{ node: binding.node, record }] : []
+    })
+  }, [bindings, records])
   const [owners, setOwners] = useState<Record<string, string>>({})
   useEffect(() => {
     const root = document.querySelector<HTMLElement>(`[data-evidence-scope="${scope}"]`)
@@ -110,7 +131,7 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
       if (!node) return
       request.handled = true
       const found = targets.find(target => target.node === node)?.record
-      if (found) onOpen(found.key, [found.key], found.placeholder ? found : undefined, 'settings')
+      if (found) onOpen(found.key, [found.key], found.placeholder ? currentPlaceholder(found, node) : undefined, 'settings')
       else {
         // 新增或尚未载入核对结果的字段仍使用同一侧栏，不伪造来源资格。
         const field = request.field.replace(/\.(\d+)(?=\.|$)/g, '[$1]')
@@ -150,13 +171,15 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
     let active = true
     let frame: ReturnType<typeof setTimeout> | undefined
     const find = () => {
-      const nextOwners = Object.fromEntries(records.map(record => [record.key, recordOwner(record, scope)]))
+      const records = currentRecords.current
+      const stateNodes = new Map(Array.from(root.querySelectorAll<HTMLElement>('[data-state-key]')).map(node => [node.dataset.stateKey, node]))
+      const nextOwners = Object.fromEntries(records.map(record => [record.key, recordOwner(record, stateNodes.get(record.state_key))]))
       setOwners(old => JSON.stringify(old) === JSON.stringify(nextOwners) ? old : nextOwners)
       const nodes = Array.from(root.querySelectorAll<HTMLElement>('[data-issue-field]')).filter(node => !node.closest('[data-evidence-fallback]'))
       const next = records.flatMap(record => {
         let area: HTMLElement = root
         if (record.state_key) {
-          const state = Array.from(root.querySelectorAll<HTMLElement>('[data-state-key]')).find(n => n.dataset.stateKey === record.state_key)
+          const state = stateNodes.get(record.state_key)
           if (!state) return []
           area = state
         }
@@ -233,7 +256,20 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
       setTargets(old => old.length === next.length && old.every((x, i) => x.node === next[i].node && (x.record === next[i].record || (x.record.placeholder && JSON.stringify(x.record) === JSON.stringify(next[i].record)))) ? old : next)
     }
     find()
-    const observer = new MutationObserver(() => { clearTimeout(frame); frame = setTimeout(find, 0) })
+    const anchors = '[data-issue-field],[data-state-key],[data-module-key],[data-record-key],[data-scientific-structure],[data-evidence-readonly],.MuiInputBase-root,label,[data-scientific-settings]'
+    const observer = new MutationObserver(changes => {
+      const renamed = new Map(changes.filter(change => change.type === 'attributes' && change.attributeName === 'data-state-label')
+        .map(change => { const node = change.target as HTMLElement; return [node.dataset.stateKey, node] }))
+      if (renamed.size) setOwners(old => {
+        const next = { ...old }
+        for (const record of currentRecords.current) if (renamed.has(record.state_key)) next[record.key] = recordOwner(record, renamed.get(record.state_key))
+        return next
+      })
+      // 文本/标记自身的变动不代表新字段；新增、删除和身份改变才需要重建定位。
+      if (!changes.some(change => (change.type === 'attributes' && change.attributeName !== 'data-state-label') || [...change.addedNodes, ...change.removedNodes]
+        .some(node => node instanceof Element && (node.matches(anchors) || node.querySelector(anchors))))) return
+      clearTimeout(frame); frame = setTimeout(find, 0)
+    })
     observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-issue-field', 'data-state-key', 'data-state-label', 'data-module-key', 'data-record-key', 'data-structure-hash'] })
     const changed = (event: Event) => {
       // 文本在 input 时已通知；失焦后的 change 不能再次使刚保存的版本失效。
@@ -244,7 +280,7 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
       const stateKey = node.closest<HTMLElement>('[data-state-key]')?.dataset.stateKey
       const moduleKey = node.closest<HTMLElement>('[data-module-key]')?.dataset.moduleKey
       const recordKey = node.closest<HTMLElement>('[data-record-key]')?.dataset.recordKey
-      const record = records.find(r => r.state_key === stateKey && r.module_key === moduleKey && r.record_key === recordKey)
+      const record = currentRecords.current.find(r => r.state_key === stateKey && r.module_key === moduleKey && r.record_key === recordKey)
       const currentBase = field.match(/^material_states\[\d+\]\.property_modules\[\d+\]\.records\[\d+\]/)?.[0]
       const snapshotBase = record?.record_field ? record.field.slice(0, -record.record_field.length - 1) : record?.field
       const changedField = stateKey && record
@@ -258,21 +294,40 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen, onChange 
     root.addEventListener('input', changed)
     root.addEventListener('change', changed)
     return () => { active = false; observer.disconnect(); clearTimeout(frame); root.removeEventListener('input', changed); root.removeEventListener('change', changed) }
-  }, [records, scope, onChange])
+  }, [topology, scope, onChange])
+  const annotated = useRef(new Map<HTMLElement, boolean>())
   useEffect(() => {
-    for (const {node} of targets) node.dataset.evidenceAnnotated = 'true'
-    const problematic = targets.filter(x => evidenceProblem(x.record))
-    const marked = [...new Set(problematic.map(x => x.node))]
-    for (const node of marked) { node.dataset.evidenceProblem = 'true' }
-    return () => { for (const node of marked) delete node.dataset.evidenceProblem; for (const {node} of targets) delete node.dataset.evidenceAnnotated }
+    const next = new Map<HTMLElement, boolean>()
+    for (const { node, record } of targets) next.set(node, Boolean(next.get(node) || evidenceProblem(record)))
+    for (const node of annotated.current.keys()) if (!next.has(node)) { delete node.dataset.evidenceProblem; delete node.dataset.evidenceAnnotated }
+    for (const [node, problem] of next) {
+      if (!annotated.current.has(node)) node.dataset.evidenceAnnotated = 'true'
+      if (annotated.current.get(node) !== problem) {
+        if (problem) node.dataset.evidenceProblem = 'true'
+        else delete node.dataset.evidenceProblem
+      }
+    }
+    annotated.current = next
   }, [targets])
+  useEffect(() => () => {
+    for (const node of annotated.current.keys()) { delete node.dataset.evidenceProblem; delete node.dataset.evidenceAnnotated }
+  }, [])
   const missing = records.filter(r => !targets.some(x => x.record.key === r.key) && evidenceProblem(r))
-  const groups = new Map<HTMLElement, EvidenceRecord[]>()
-  for (const { node, record } of targets) {
-    const group = groups.get(node) || []
-    if (!group.some(r => r.key === record.key)) group.push(record)
-    groups.set(node, group)
-  }
+  const previousGroups = useRef(new Map<HTMLElement, EvidenceRecord[]>())
+  const groups = useMemo(() => {
+    const next = new Map<HTMLElement, EvidenceRecord[]>()
+    for (const { node, record } of targets) {
+      const group = next.get(node) || []
+      if (!group.some(r => r.key === record.key)) group.push(record)
+      next.set(node, group)
+    }
+    for (const [node, group] of next) {
+      const old = previousGroups.current.get(node)
+      if (old?.length === group.length && old.every((record, index) => record === group[index])) next.set(node, old)
+    }
+    previousGroups.current = next
+    return next
+  }, [targets])
   return <>
     {/* outlined 控件复用原有标签缺口；额外 outline 会穿过浮动文字。 */}
     <style>{`

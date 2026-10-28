@@ -1,0 +1,27 @@
+[
+  {
+    "mode": "full",
+    "nodes": 7711,
+    "fields": 412,
+    "reviewRecords": 1111,
+    "rootScans": 22,
+    "wallMs": 6224,
+    "paintMeanMs": 301.2545454583385,
+    "paintMaxMs": 532.2000000178814,
+    "longTaskCount": 33,
+    "longTaskMaxMs": 312,
+    "requestsWhileTyping": [],
+    "requestsIncludingAutosave": [
+      {
+        "method": "GET",
+        "path": "/api/rag/evidence/draft-state"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": [],
+    "topSelfMs": []
+  }
+]

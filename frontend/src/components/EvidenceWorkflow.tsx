@@ -117,6 +117,7 @@ export function useEvidenceWorkflow(options?: {
   const optionsRef = useRef(options)
   optionsRef.current = options
   const observedValues = useRef(new Map<string, unknown>())
+  const observedRecords = useRef(new Map<string, EvidenceRecord>())
   const invalidationTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const pendingEdits = useRef<Array<{ field: string; pathKind: 'current' | 'snapshot' }>>([])
   const copyValue = (value: unknown) => value === undefined ? undefined : JSON.parse(JSON.stringify(value))
@@ -124,7 +125,9 @@ export function useEvidenceWorkflow(options?: {
   useLayoutEffect(() => {
     for (const record of records) {
       const key = record.item_key || record.key
+      if (observedRecords.current.get(key) === record && observedValues.current.has(key)) continue
       const current = optionsRef.current?.getCurrentValue?.(record)
+      if (current) observedRecords.current.set(key, record)
       if (current && !observedValues.current.has(key)) observedValues.current.set(key, copyValue(current.comparisonValue ?? current.value))
       else if (current && manualValueIdentity(observedValues.current.get(key)) !== manualValueIdentity(current.comparisonValue ?? current.value)) invalidate(current.field)
       else if (!current && optionsRef.current?.getCurrentValue && !record.structure_hash && !record.placeholder) invalidate(record.field, 'snapshot')
@@ -358,6 +361,7 @@ export function useEvidenceWorkflow(options?: {
       if (generation.current !== current || editRevision.current !== revision || epoch !== decisionEpoch.current) return
       preflightRef.current = result
       observedValues.current.clear()
+      observedRecords.current.clear()
       recordsRef.current = result.records || []
       setRecords(result.records || [])
       if (!queueFor(target).hasPending()) {
@@ -591,9 +595,19 @@ export function useEvidenceWorkflow(options?: {
       invalidationTimer.current = undefined
       const edits = pendingEdits.current.splice(0)
       const getCurrent = optionsRef.current?.getCurrentValue
+      const overlaps = (a: string, b: string) => a === b || a.startsWith(b + '.') || a.startsWith(b + '[') || b.startsWith(a + '.') || b.startsWith(a + '[')
+      // 集合增删需要重定位；普通叶字段只读取自己的当前值，不逐键扫描所有科学值。
+      const structural = edits.some(({ field }) => /^(material_states(?:\[\d+\](?:\.property_modules(?:\[\d+\](?:\.records(?:\[\d+\])?)?)?)?)?|structure_candidates|structural_observations)$/.test(field))
+      const relevant = (record: EvidenceRecord) => structural || edits.some(edit => overlaps(edit.field, record.field) || record.fields?.some(field => overlaps(edit.field, field)))
+      const currentValues = new Map<string, ReturnType<NonNullable<typeof getCurrent>>>()
+      const readCurrent = (record: EvidenceRecord) => {
+        if (!currentValues.has(record.key)) currentValues.set(record.key, getCurrent?.(record))
+        return currentValues.get(record.key)
+      }
       const currentRecords = recordsRef.current.map(record => {
-        const current = getCurrent?.(record)
-        return current ? { ...record, field: current.field, record_key: current.record_key || record.record_key,
+        if (!relevant(record)) return record
+        const current = readCurrent(record)
+        return current && (current.field !== record.field || (current.record_key && current.record_key !== record.record_key)) ? { ...record, field: current.field, record_key: current.record_key || record.record_key,
           fields: record.fields?.map(field => field.startsWith(record.field) ? current.field + field.slice(record.field.length) : field) } : record
       })
       const changes = new Set<string>()
@@ -601,8 +615,9 @@ export function useEvidenceWorkflow(options?: {
       const removedPaths: string[] = []
       if (getCurrent) {
         for (const record of recordsRef.current) {
+          if (!relevant(record)) continue
           const key = record.item_key || record.key
-          const current = getCurrent(record)
+          const current = readCurrent(record)
           if (observedValues.current.has(key)) {
             if (current) changedScientificFields(observedValues.current.get(key), current.comparisonValue ?? current.value, current.field).forEach(path => changes.add(path))
             else if (!record.structure_hash) { removed.add(record.key); removedPaths.push(record.field) }
@@ -616,7 +631,7 @@ export function useEvidenceWorkflow(options?: {
         const owner = recordsRef.current.find(record => record.field === edit.field || edit.field.startsWith(record.field + '.') || edit.field.startsWith(record.field + '[')
           || record.field.startsWith(edit.field + '.') || record.field.startsWith(edit.field + '['))
         if (!getCurrent || !owner || owner.structure_hash) {
-          const current = owner && getCurrent?.(owner)
+          const current = owner && readCurrent(owner)
           changes.add(edit.pathKind === 'snapshot' && owner && current ? edit.field.replace(owner.field, current.field) : edit.field)
         }
       }
@@ -633,11 +648,12 @@ export function useEvidenceWorkflow(options?: {
           || path.startsWith(record.field + '['))).map(record => record.key))
       const next = currentRecords.filter(r => !removed.has(r.key)).map(r => {
         if (!affected.has(r.key)) return r
-        const current = getCurrent?.(r)
-        return { ...r, pending_review: r.status !== 'supported' || manualValueIdentity(current?.value) !== manualValueIdentity(r.current_value) }
+        const current = readCurrent(r)
+        const pending_review = r.status !== 'supported' || manualValueIdentity(current?.value) !== manualValueIdentity(r.current_value)
+        return r.pending_review === pending_review ? r : { ...r, pending_review }
       })
       recordsRef.current = next
-      setRecords(next)
+      setRecords(old => old.length === next.length && old.every((record, i) => record === next[i]) ? old : next)
     }
     if (!optionsRef.current?.getCurrentValue) flush()
     else if (invalidationTimer.current === undefined) invalidationTimer.current = setTimeout(flush, 0)

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type PropsWithChildren } from 'react'
 import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { useLocation } from 'react-router-dom'
@@ -12,12 +12,20 @@ const Spectra = createContext<(PropertySpectraContext & ReturnType<typeof usePro
 const Material = createContext({ stateKey: '', summary: '' })
 export function PropertySpectraProvider({ context, stateKeys, readOnly = false, children }: PropsWithChildren<{ context?: PropertySpectraContext; stateKeys?: string[]; readOnly?: boolean }>) {
   const state = usePropertySpectra(context?.target)
+  const navigation = useRef(context?.beforeNavigate)
+  navigation.current = context?.beforeNavigate
+  const beforeNavigate = useCallback(() => navigation.current?.() ?? Promise.resolve(true), [])
+  const stateKeysIdentity = JSON.stringify(stateKeys)
+  const stableStateKeys = useMemo(() => stateKeys, [stateKeysIdentity])
+  const value = useMemo(() => context ? { target: context.target, beforeNavigate, ...state, stateKeys: stableStateKeys, readOnly } : null,
+    [context?.target.target, context?.target.target_id, beforeNavigate, stableStateKeys, readOnly, state.listing, state.loading, state.error, state.reload, state.replaceListing])
   const busy = state.listing?.jobs.some(job => ['queued', 'running'].includes(job.status)) || state.listing?.items.some(item => ['queued', 'running'].includes(item.run.status))
   useEffect(() => { if (!busy) return; const timer = window.setInterval(state.reload, 3000); return () => window.clearInterval(timer) }, [busy, state.reload])
-  return <Spectra.Provider value={context ? { ...context, ...state, stateKeys, readOnly } : null}>{children}</Spectra.Provider>
+  return <Spectra.Provider value={value}>{children}</Spectra.Provider>
 }
 export function PropertySpectrumState({ stateKey, summary, children }: PropsWithChildren<{ stateKey: string; summary: string }>) {
-  return <Material.Provider value={{ stateKey, summary }}>{children}</Material.Provider>
+  const value = useMemo(() => ({ stateKey, summary }), [stateKey, summary])
+  return <Material.Provider value={value}>{children}</Material.Provider>
 }
 
 /** 提取控制与未归属摘要都不挂载原图、图表或点表。 */

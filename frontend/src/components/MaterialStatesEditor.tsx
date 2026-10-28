@@ -232,6 +232,7 @@ const SpaceGroupAutocomplete: React.FC<SpaceGroupAutocompleteProps> = ({ value, 
  * 所有编辑逻辑（化学式、分类、元素种类数、维度、晶系与空间群联动、
  * 压强、Tc 列表、普通物性、结构候选面板）内聚于此，统一通过 onChange 传出完整状态数组。
  */
+const EMPTY_SPACE_GROUPS: SpaceGroupOption[] = []
 const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   states,
   onChange,
@@ -242,7 +243,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   reviewFields,
   structureCandidates,
   onStructureCandidatesChange,
-  spaceGroups = [],
+  spaceGroups = EMPTY_SPACE_GROUPS,
   catalogLoading = false,
   catalogError = '',
   taskId,
@@ -259,6 +260,9 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   const editorRef = useRef<HTMLDivElement>(null)
   const statesRef = useRef(states)
   statesRef.current = states
+  // 复用卡片时事件仍读取最新宿主回调，避免保存旧标题或覆盖其他卡片的编辑。
+  const latest = useRef({ onChange, onScientificEdit, onUploadStructure, onStructureCandidatesChange, onError, structureCandidates, taskId, readOnly })
+  latest.current = { onChange, onScientificEdit, onUploadStructure, onStructureCandidatesChange, onError, structureCandidates, taskId, readOnly }
   // 折叠状态与元素种类数编辑仅存在于浏览器会话内，不写入草稿、不参与自动保存
   const [collapsedStates, setCollapsedStates] = useState<Record<number, boolean>>({})
   const restoredSpectrumAnchor = useRef('')
@@ -292,17 +296,16 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     isCollapsed: boolean
     uploading: boolean
     elementCountEdit: { text: string; invalid: boolean } | undefined
+    feedback: string
+    candidates: StructureCandidate[]
     element: React.ReactElement
   }>())
   const cardEnvironmentRef = useRef<{
     catalogs: ClassificationCatalogs | null
     catalogLoading: boolean
     catalogError: string
-    structureCandidates?: StructureCandidate[]
     spaceGroups: SpaceGroupOption[]
     paperType?: string
-    issues?: ValidationIssue[]
-    reviewFields?: string[]
     readOnly: boolean
     lang: 'zh' | 'en'
     dict: ReturnType<typeof useLanguage>['dict']
@@ -310,9 +313,9 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
   // 只读模式下任何编辑都不应触达父级：变更函数统一在此拦截
   const emitStates = (nextStates: DraftMaterialState[]) => {
-    if (!readOnly) {
-      if (onScientificEdit) changedScientificFields(statesRef.current, nextStates, 'material_states').forEach(field => onScientificEdit(field))
-      onChange(nextStates)
+    if (!latest.current.readOnly) {
+      if (latest.current.onScientificEdit) changedScientificFields(statesRef.current, nextStates, 'material_states').forEach(field => latest.current.onScientificEdit?.(field))
+      latest.current.onChange(nextStates)
     }
   }
 
@@ -356,28 +359,28 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     if (readOnly) return
     setStructureUploading(current => ({ ...current, [stateIndex]: true }))
     try {
-      if (onUploadStructure) {
+      if (latest.current.onUploadStructure) {
         // 论文宿主（管理端编辑弹窗，T034）：父组件调用论文结构端点并
         // 把候选并入本地 structureCandidates 状态（不落库，保存时随 C1 提交）。
-        await onUploadStructure(stateIndex, file)
+        await latest.current.onUploadStructure(stateIndex, file)
       } else {
         // 上传任务宿主（校对页）：沿用上传任务结构端点，候选写入草稿。
         const body = new FormData()
         body.append('material_state_index', String(stateIndex))
         body.append('file', file)
         const response = await api.post<{ ok: boolean; data: StructureCandidate }>(
-          `/api/rag/upload-tasks/${taskId}/structure-candidates`, body,
+          `/api/rag/upload-tasks/${latest.current.taskId}/structure-candidates`, body,
         )
         const candidate = unwrapData(response)
-        onStructureCandidatesChange?.([
-          ...(structureCandidates || []).filter(item => item.candidate_id !== candidate.candidate_id),
+        latest.current.onStructureCandidatesChange?.([
+          ...(latest.current.structureCandidates || []).filter(item => item.candidate_id !== candidate.candidate_id),
           candidate,
         ])
       }
-      onError?.('')
+      latest.current.onError?.('')
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : t('upload.structureUploadFailed')
-      onError?.(message)
+      latest.current.onError?.(message)
     } finally {
       setStructureUploading(current => ({ ...current, [stateIndex]: false }))
     }
@@ -513,6 +516,13 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   }
 
   const deleteState = (index: number) => {
+    // 删除导致位置前移时，会话内提示与折叠状态跟随原材料，不留在旧行号。
+    const shift = <T,>(values: Record<number, T>): Record<number, T> => Object.fromEntries(
+      Object.entries(values).filter(([key]) => Number(key) !== index).map(([key, value]) => [Number(key) > index ? Number(key) - 1 : Number(key), value]),
+    )
+    setElementCountEdits(shift)
+    setCollapsedStates(shift)
+    setStructureUploading(shift)
     emitStates(statesRef.current.filter((_, itemIndex) => itemIndex !== index))
   }
 
@@ -539,7 +549,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
   const updateStructureCandidate = (candidateId: string, changes: Partial<StructureCandidate>) => {
     if (readOnly) return
-    onStructureCandidatesChange?.((structureCandidates || []).map(candidate =>
+    latest.current.onStructureCandidatesChange?.((latest.current.structureCandidates || []).map(candidate =>
       candidate.candidate_id === candidateId ? { ...candidate, ...changes } : candidate,
     ))
   }
@@ -611,7 +621,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     return <FormHelperText error>{issue.message}</FormHelperText>
   }
 
-  const environment = { catalogs, catalogLoading, catalogError, structureCandidates, spaceGroups, paperType, issues, reviewFields, readOnly, lang, dict }
+  const environment = { catalogs, catalogLoading, catalogError, spaceGroups, paperType, readOnly, lang, dict }
   const previousEnvironment = cardEnvironmentRef.current
   if (!previousEnvironment || Object.entries(environment).some(([key, value]) => value !== previousEnvironment[key as keyof typeof previousEnvironment])) {
     cardCacheRef.current.clear()
@@ -646,9 +656,14 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
             const isCollapsed = !readOnly && Boolean(collapsedStates[index])
             const uploading = Boolean(structureUploading[index])
             const elementCountEdit = elementCountEdits[index]
+            const prefix = `material_states[${index}]`
+            const cardIssues = (issues || []).filter(item => item.stateIndex === index || item.field === prefix || item.field.startsWith(prefix + '.'))
+            const cardReviews = (reviewFields || []).filter(field => field === prefix || field.startsWith(prefix + '.'))
+            const feedback = JSON.stringify([cardIssues, [...new Set(cardReviews)].sort()])
+            const stateCandidates = (structureCandidates || []).filter(candidate => candidate.material_state_ref === prefix)
             const cached = cardCacheRef.current.get(index)
-            if (cached && cached.state === state && cached.isCollapsed === isCollapsed && cached.uploading === uploading && cached.elementCountEdit === elementCountEdit) return cached.element
-            const stateCandidates = (structureCandidates || []).filter(candidate => candidate.material_state_ref === `material_states[${index}]`)
+            if (cached && cached.state === state && cached.isCollapsed === isCollapsed && cached.uploading === uploading && cached.elementCountEdit === elementCountEdit
+              && cached.feedback === feedback && cached.candidates.length === stateCandidates.length && cached.candidates.every((candidate, i) => candidate === stateCandidates[i])) return cached.element
             // 晶系未知时显示全部 230 条空间群，否则仅显示该晶系群号范围内的符号
             const crystalSystem = state.crystal_system || 'unknown'
             const spaceGroupOptions = crystalSystem === 'unknown'
@@ -889,8 +904,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                       modules={state.property_modules || []}
                       readOnly={readOnly}
                       basePath={`material_states.${index}.property_modules`}
-                      issues={(issues || []).map(item => ({ field: item.field.replace(/\[(\d+)\]/g, '.$1'), code: 'schema_validation_failed', message: item.message }))}
-                      reviewFields={(reviewFields || []).map(field => field.replace(/\[(\d+)\]/g, '.$1'))}
+                      issues={cardIssues.map(item => ({ field: item.field.replace(/\[(\d+)\]/g, '.$1'), code: 'schema_validation_failed', message: item.message }))}
+                      reviewFields={cardReviews.map(field => field.replace(/\[(\d+)\]/g, '.$1'))}
                       onChange={(modules, deletion) => emitStates(statesRef.current.map((item, itemIndex) => itemIndex === index ? {
                         ...item,
                         property_modules: modules,
@@ -911,7 +926,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                 </CardContent>
               </Card>
             )
-            cardCacheRef.current.set(index, { state, isCollapsed, uploading, elementCountEdit, element })
+            cardCacheRef.current.set(index, { state, isCollapsed, uploading, elementCountEdit, feedback, candidates: stateCandidates, element })
             return element
           })}
           {states.length === 0 && !readOnly && (

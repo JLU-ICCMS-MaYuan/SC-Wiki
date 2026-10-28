@@ -1,0 +1,19 @@
+{
+  "baseline_commit": "d8e42242995185dd5766fead678851eb445e7723",
+  "after_source_sha256": {
+    "frontend/src/components/MaterialStatesEditor.tsx": "ab481b16374d9ddcf248d7c7a5157ada6fbd40ef77b8403a2c1a8c126b4677d6",
+    "frontend/src/components/EvidenceFieldMarkers.tsx": "bd957ee1c353e3d3e2a3761028ee3e0f565738df2f25fc549284f9faf450f380",
+    "frontend/src/components/EvidenceWorkflow.tsx": "619537827519e5efc006cd29ce638a24bc1d99a767da573a9aa63e8e57cea48b",
+    "frontend/src/components/PropertySpectra.tsx": "40b66e7b671ccbd2b01e65ed7342c9f05eea90f80a4fab54442acf34d30938f2"
+  },
+  "fixture_sha256": {
+    "scwiki173-live-draft.json": "f4213e6bc11dc0549b1bdf256aa45bbd2eb592b83970f599455c312b0ab00ae3",
+    "scwiki173-live-summary.json": "753e28420cc57aa02d31fa810bc5d03004161619aedf4c1cd455bca8c5113628"
+  },
+  "fixture_location": "仅本地临时只读副本，未提交正文或用户数据",
+  "browser": "本机 Google Chrome，1440×1100，Vite 开发模式，未启用 CPU 采样",
+  "timing": "连续输入11个字符，keydown 到两次 requestAnimationFrame；同一夹具前后串行运行",
+  "form_contract_tests": 62,
+  "mutation_detected_failures": 8,
+  "remote_ci": "未推送、未运行；只配置工作流并本地验证相同命令"
+}
