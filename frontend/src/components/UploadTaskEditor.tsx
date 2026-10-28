@@ -505,10 +505,10 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         response = await api.post<SubmitResponse | { data: SubmitResponse }>(submitUrl, { ...evidencePayload, ...revisionIdentity() })
       } catch (reason) {
         const apiError = reason as ApiError
-        if (apiError.code !== 'consistency_ack_required' || !window.confirm(t('upload.consistencyConfirm'))) throw reason
+        if (apiError.code !== 'consistency_ack_required' || !window.confirm(`${apiError.message}\n\n${t('upload.consistencyConfirm')}`)) throw reason
         response = await api.post<SubmitResponse | { data: SubmitResponse }>(
           submitUrl,
-          { ...evidencePayload, ...revisionIdentity(), consistency_acknowledged: true },
+          { ...evidencePayload, ...revisionIdentity(), consistency_acknowledged: true, consistency_version: apiError.consistencyVersion },
         )
       }
       onSubmitted(unwrapData(response).paper_id)

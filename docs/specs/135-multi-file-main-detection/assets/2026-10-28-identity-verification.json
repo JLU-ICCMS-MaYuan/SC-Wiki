@@ -1,0 +1,85 @@
+{
+  "latest_model_verification": {
+    "passed": true,
+    "model": {
+      "provider": "server:LLM1",
+      "provider_name": "deepseek",
+      "model": "deepseek-v4-pro",
+      "source": "server"
+    },
+    "calls": 1,
+    "sources": [
+      {
+        "file_id": "261650f32fe54375af8abbd83d7576f6",
+        "role": "supplementary",
+        "filename": "2024 La-Sc-H 何新玲-SI.pdf",
+        "pdf_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+        "text_sha256": "13f058d1f479ce28b7ecf854ad0ab4004e7f4daf283d904cd7ca7e02295af6a9",
+        "page": 1
+      },
+      {
+        "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+        "role": "main",
+        "filename": "2024 La-Sc-H 何新玲.pdf",
+        "pdf_sha256": "7fccce6780e71f826519256542a5416f5b256e1aa2b546b68e194468688e2bbd",
+        "text_sha256": "32de8ed4fa2142ad411a4f9827dce00615b7420edd2e56110cc772506d549e23",
+        "page": 1
+      }
+    ],
+    "source_version": "24520309684c0c6243b9f910e28e94b2d0ce2ff43ef4d06dd84bc52234e56546",
+    "formal_result": "ok",
+    "isolated_mysql_reread": true,
+    "original_draft_written": false,
+    "code_sha256": {
+      "backend/ingest/document_identity.py": "e2781529304b90e25be7bd98f12a7eb6cb4cd8bac12d6dc784921c52ac1fb2c7",
+      "backend/ingest/upload_contracts.py": "b5c0b289893c12437d9fef6a6aa867034f4f2c41031a7b66194961947ac52177"
+    }
+  },
+  "fresh_model_fields": {
+    "files": [
+      {
+        "file_id": "261650f32fe54375af8abbd83d7576f6",
+        "title": "Predicted hot superconductivity in LaSc2H24 under pressure",
+        "doi": null,
+        "title_quote": "Predicted hot superconductivity in LaSc2H24 under pressure",
+        "doi_quote": null
+      },
+      {
+        "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+        "title": "Predicted hot superconductivity in LaSc2H24 under pressure",
+        "doi": "10.1073/pnas.2401840121",
+        "title_quote": "Predicted hot superconductivity in LaSc2H24 under pressure",
+        "doi_quote": "https://doi.org/10.1073/pnas.2401840121"
+      }
+    ]
+  },
+  "verification_model_calls_total": 2,
+  "live": {
+    "live_consistency": "ok",
+    "live_conflicts": 0,
+    "human_confirmed": 1111,
+    "pending_review": 0,
+    "total_fields": 1111,
+    "idempotent": true,
+    "actual_paper_submitted": false
+  },
+  "repair": {
+    "status": "repaired",
+    "repair_id": "135-lasch-file-identity-20261028-v2",
+    "target_id": "c16cc627a0c04dc8ad4289624d1da80a",
+    "consistency": "ok",
+    "draft_bytes_unchanged": true,
+    "scientific_checks_unchanged": true,
+    "redis_mysql_equal": true,
+    "actual_paper_submitted": false,
+    "backup_sha256": "44f791e3c29baeab0e9c4f684cb13dcc5ec5d53d8141dbf7baaca390d08bc5f3"
+  },
+  "tests": {
+    "targeted_backend_passed": 13,
+    "frontend_passed": 2,
+    "browser_passed": true,
+    "build_passed": true,
+    "existing_failures_reproduced_on_head": 4,
+    "baseline_commit": "1287b567"
+  }
+}

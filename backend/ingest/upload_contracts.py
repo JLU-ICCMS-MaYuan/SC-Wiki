@@ -121,17 +121,8 @@ def public_task_state(state: dict[str, Any]) -> dict[str, Any]:
     return public
 
 def compare_file_identities(identities: list[dict[str, Any]]) -> dict[str, Any]:
-    main = next((item for item in identities if item.get("role") == "main"), None)
-    if not main: return {"status": "unknown", "conflicts": []}
-    conflicts = []; comparable = False
-    for item in identities:
-        if item is main: continue
-        for field in ("doi", "title", "authors"):
-            left, right = main.get(field), item.get(field)
-            if not left or not right: continue
-            comparable = True
-            if " ".join(str(left).lower().split()) != " ".join(str(right).lower().split()): conflicts.append({"file_id": item.get("file_id"), "field": field, "main_value": left, "file_value": right})
-    return {"status": "warning" if conflicts else ("ok" if comparable else "unknown"), "conflicts": conflicts}
+    from .document_identity import compare_identities
+    return compare_identities(identities)
 
 
 class UploadContractError(ValueError):

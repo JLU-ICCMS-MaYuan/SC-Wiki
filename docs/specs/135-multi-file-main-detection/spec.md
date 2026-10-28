@@ -4,6 +4,8 @@
 **父 Epic**：[#24](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/24)  
 **状态**：按用户已确认的总体方案实施
 
+**2026-10-28 修复完成**：[正文与补充材料身份一致性误报](identity-consistency-fix.md)。本轮 FR-006—011、SC-005—008 已完成本地验收及指定任务修正；证据与边界见 [验收记录](identity-consistency-validation.md)。
+
 ## 原始需求记录
 
 > PLEASE IMPLEMENT THIS PLAN:

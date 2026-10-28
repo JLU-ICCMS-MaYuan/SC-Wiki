@@ -5,3 +5,7 @@
 - 仅状态为 `needs_role_review`、源文件哈希未变且版本匹配时更新；成功返回新任务状态并继续使用已解析文本。重复的同版本内容采用幂等响应；冲突为 409、无权为 403、非法角色为 422。
 - 自动纠正高置信错误角色时无额外前端请求，但返回 `role_assessment` 和更新后的 `files[].role`；UI 显示系统判断依据。
 - 下游读取采用当前有效角色；来源版本变化使旧字段核对过期。API 不允许在 submitted Paper 上改角色。
+
+## 身份冲突确认
+
+提交返回 consistency_ack_required 时同时返回真实 conflicts 和 consistency_version；message 仅列实际冲突，含双方文件名和值。明确确认请求携带 consistency_acknowledged=true 和 consistency_version；当前文件角色、哈希或冲突改变则拒绝旧令牌并返回新差异。没有冲突时不要求确认。现有字段审核结果和权限保护保持。

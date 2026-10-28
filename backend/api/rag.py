@@ -50,6 +50,7 @@ DOI_PATTERN = re.compile(r"^10\.\d{4,9}/\S+$", re.IGNORECASE)
 
 class SubmitUploadOptions(BaseModel):
     consistency_acknowledged: bool = False
+    consistency_version: str | None = None
     evidence_job_id: str | None = None
     expected_evidence_version: str | None = None
 
@@ -2194,6 +2195,7 @@ async def submit_upload_draft(
         with upload_task_lock(task_id):
             return await _submit_upload_draft_locked(
                 task_id, current_user, consistency_acknowledged=bool(options and options.consistency_acknowledged),
+                consistency_version=options.consistency_version if options else None,
                 evidence_job_id=options.evidence_job_id if options else None,
                 expected_evidence_version=options.expected_evidence_version if options else None,
             )
@@ -2206,6 +2208,7 @@ async def _submit_upload_draft_locked(
     current_user: User,
     *,
     consistency_acknowledged: bool = False,
+    consistency_version: str | None = None,
     evidence_job_id: str | None = None,
     expected_evidence_version: str | None = None,
 ) -> dict[str, Any]:
@@ -2233,11 +2236,13 @@ async def _submit_upload_draft_locked(
             409, "duplicate_doi", "该论文已经存在",
             existing_paper_id=state.get("existing_paper_id"),
         )
-    if (state.get("consistency") or {}).get("status") == "warning" and not consistency_acknowledged:
-        raise _upload_error(
-            409, "consistency_ack_required",
-            "正文与附件的标题、DOI 或作者存在明确差异，请确认这些文件属于同一篇论文",
-        )
+    if (state.get("consistency") or {}).get("status") == "warning":
+        from backend.ingest.document_identity import confirmation
+        message, current_consistency_version = confirmation(state)
+        if not consistency_acknowledged or consistency_version != current_consistency_version:
+            raise _upload_error(409, "consistency_ack_required", message,
+                conflicts=state['consistency'].get('conflicts') or [],
+                consistency_version=current_consistency_version)
     if state.get("stage") != "ready" or state.get("processing_status") != "succeeded":
         raise _upload_error(409, "draft_not_ready", "草稿尚未准备完成")
     draft = get_draft(task_id)

@@ -372,20 +372,8 @@ def _structure_format_for_file(file_item: dict[str, Any], source: Path) -> str |
 
 
 def _lightweight_identity(file_item: dict[str, Any], markdown: str) -> dict[str, Any]:
-    head = markdown[:12000]
-    doi_match = re.search(r"10\.\d{4,9}/[^\s<>\"]+", head, re.IGNORECASE)
-    lines = [
-        re.sub(r"^#+\s*", "", line).strip()
-        for line in head.splitlines()
-        if line.strip() and not line.lstrip().startswith("<!--")
-    ]
-    return {
-        "file_id": file_item.get("file_id"),
-        "role": file_item.get("role"),
-        "title": lines[0] if lines else None,
-        "doi": doi_match.group(0).rstrip(".,;)") if doi_match else None,
-        "authors": None,
-    }
+    from .document_identity import extract_identity
+    return extract_identity(file_item, markdown)
 
 
 # 提取窗口：相、压力、Tc、λ 常分布在相邻段落，过小的分段会丢失对应关系并拆碎材料状态。

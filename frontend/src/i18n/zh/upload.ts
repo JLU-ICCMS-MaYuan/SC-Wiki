@@ -282,7 +282,7 @@ export default {
   negativeCalcParam: '{label}的计算参数不能为负数',
   tcMissingValue: '{label}的第 {n} 条 Tc 缺少数值',
   propertyIncomplete: '{label}的第 {n} 条普通物性不完整',
-  consistencyConfirm: '正文与附件的标题、DOI 或作者存在差异。确认这些文件属于同一篇论文并继续提交吗？',
+  consistencyConfirm: '以上比较来自上传文件，不是当前校对表单。确认这些文件属于同一篇论文并继续提交吗？',
   doiExists: '该 DOI 已存在（论文 #{id}），没有创建重复记录。',
   draftMissing: '草稿不存在或已过期',
   aiDraftTitle: '解析草稿（实时生成中）',

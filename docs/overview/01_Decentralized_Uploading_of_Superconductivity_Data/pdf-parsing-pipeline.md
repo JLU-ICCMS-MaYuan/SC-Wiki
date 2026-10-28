@@ -33,7 +33,8 @@
 - CIF/POSCAR 原生附件不走文本提取，而是经 ASE 校验（`structure_extractor.build_structure_candidate`）生成结构候选；校验失败的候选标记为 `blocked`，等待人工处理。
 - 任务解析生成的结构候选以 `material_state_ref="unassigned:*"` 标记，需在校对页「未分配结构候选」区分配到具体材料状态并确认（`material_state_ref` 变为 `material_states[N]`、`confirmation=confirmed`）后才会在提交时写入 `structure_models`；未确认的候选只作为附件文件保存，不落库。（[Issue #77](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/77)）
 - 非结构 PDF 的正文还会经 `extract_structure_candidates` 从文本中抽取结构候选。
-- 多文件任务逐文件处理并更新 `extraction_status`。全部文本提取后先依据文件名、标题、作者、摘要、DOI、章节及 SI 图表编号评估角色；唯一可靠主文自动纠正声明角色，歧义则进入 `needs_role_review`，在任何分段模型调用前等待用户带版本确认。恢复后复用已提取文本。`compare_file_identities` 随后检查同一论文的 DOI/标题线索，结果写入 `consistency`。
+- 多文件任务逐文件处理并更新 `extraction_status`。全部文本提取后先依据文件名、标题、作者、摘要、DOI、章节及 SI 图表编号评估角色；唯一可靠主文自动纠正声明角色，歧义则进入 `needs_role_review`，在任何分段模型调用前等待用户带版本确认。恢复后复用已提取文本。`compare_file_identities` 随后按最终有效角色比较可信首页标题和论文自身 DOI，结果及来源/规则版本写入 `consistency`；页码、页眉页脚、通用 SI 标题、章节及参考文献条目不冒充身份，无法可靠识别则留空。未知不等于匹配，也不制造冲突。
+- 文件身份检查不比较人工校对表单，不调用模型。真正冲突时，提交确认框列出具体文件、字段和两边值；确认令牌绑定当前差异、文件角色及哈希，过期确认不能继续。历史误报仅经已授权定向修正处理，不自动批量重写其他草稿。验证边界见 [#135 身份检查修复](../../specs/135-multi-file-main-detection/identity-consistency-validation.md)。
 - 正文为空时直接失败（`论文正文为空，无法生成可校对草稿`）。
 
 ### 第 3 步：AI 分段阅读（reading）

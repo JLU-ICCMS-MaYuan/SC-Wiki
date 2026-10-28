@@ -280,7 +280,7 @@ export default {
   negativeCalcParam: 'The calculation parameters of {label} cannot be negative',
   tcMissingValue: 'Tc entry {n} of {label} is missing a value',
   propertyIncomplete: 'Property entry {n} of {label} is incomplete',
-  consistencyConfirm: 'The title, DOI, or authors differ between the main text and attachments. Confirm these files belong to the same paper and continue submitting?',
+  consistencyConfirm: 'This comparison concerns the uploaded files, not the edited form. Confirm these files belong to the same paper and continue submitting?',
   doiExists: 'This DOI already exists (paper #{id}); no duplicate record was created.',
   draftMissing: 'Draft does not exist or has expired',
   aiDraftTitle: 'Parsed draft (generating live)',

@@ -23,3 +23,15 @@
 ## 依赖与覆盖
 
 T001→T002→T003；T004→T005→T006；T007 依赖 T002～T005，T008～T009 在集成后。FR-001～002 对应 T001～T003；FR-003 对应 T004～T006；FR-004～005 对应 T007～T009。
+
+## 2026-10-28 身份一致性修复
+
+- [x] T010 [US4] 在 backend/ingest/document_identity.py、upload_jobs.py、upload_contracts.py 修复可信标题/DOI 提取及最终角色比较，新增固定失败重放及边界回归。
+- [x] T011 [US5] 在 backend/api/rag.py、frontend/src/lib/api.ts、UploadTaskEditor.tsx 展示具体冲突并绑定确认令牌，验证真实差异、取消、确认和过期行为。
+- [x] T012 [US4] 从原 PDF/SI 首页及已核验文本定向重提标题/DOI，使用真实配置模型并保留输入/输出/来源；通过正式比较及隔离保存重读。
+- [x] T013 [US6] 定向备份并重算指定 La–Sc–H consistency，验证草稿/字段结果不变、Redis/MySQL一致及幂等。
+- [x] T014 更新 Overview、Spec 验收及 Issue，并按明确路径提交任务差异，不推送。
+
+依赖：T010→T011/T012→T013→T014。不能以本轮通过勾选旧功能的其他未完成项。
+
+本轮证据：[身份一致性验收](identity-consistency-validation.md)。13 项定向后端、2 项前端、真实浏览器及构建通过；真实模型两轮各 1 次，最终元数据与原 PDF/正式处理一致；定向修正及幂等回读完成。旧套件四项失败及修改前基线已单列，未勾选本轮无关的旧验收。

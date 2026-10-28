@@ -1,0 +1,24 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-017db428-c52e-45cf-9e00-87ef1258db4e.png",
+      "locator": "assets/2026-10-28-identity-IMG-001.png",
+      "status": "local_verified",
+      "user_context": "La–Sc–H 提交时提示正文与附件的标题、DOI 或作者存在差异",
+      "related": [
+        "FR-006",
+        "FR-008",
+        "SC-005"
+      ],
+      "sha256": "5ab6636d3d7820c2277be49b7083f5b9658607e047e968c4940208fae0b9c5b4",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3840,
+        1948
+      ],
+      "verification": "2026-10-28 原文件字节复制、哈希与解码通过；未推送"
+    }
+  ]
+}
