@@ -13,11 +13,13 @@ const paper = {title: 'Field review isolated browser verification', year: 2024, 
 let decision, revision = 0, releaseFirstDetail, firstDetail = true, manualWrites = 0
 const originalReason = '摘要支持当前概括，等待人工确认。'
 const record = () => ({key: 'finding', item_key: item, field: 'paper.key_finding', fields: ['paper.key_finding'], label: '主要发现',
-  current_value: paper.key_finding, required: true, status: decision?.action === 'approve' ? 'supported' : 'uncertain',
+  current_value: paper.key_finding, required: true, status: decision?.action === 'approve' ? 'supported' : decision ? 'uncertain' : 'unchecked',
   reason: originalReason, ai_reason: originalReason, evidences: [], detail_ref: `r${revision}`, field_decision: decision,
-  human_confirmed: decision?.action === 'approve', pending_review: false})
+  human_confirmed: decision?.action === 'approve', pending_review: !decision, human_modified: manual.changed})
 const detail = () => ({record: {...record(), evidences: [{file_id: 'main', source_name: 'fixture.pdf', page_start: 1, quote: 'The ternary hydride exhibits a high critical temperature.'}]},
-  review_token: `token${revision}`, can_approve: true, source_state: 'available'})
+  review_token: `token${revision}`, can_approve: !manual.changed && decision?.action !== 'approve', source_state: 'available',
+  approval_state: decision?.action === 'approve' ? 'human_approved' : manual.changed ? 'modification_required' : 'ready',
+  approval_message: manual.changed ? '此字段已修改，请填写人工修改理由及证据说明，并完成大模型核对。' : ''})
 let manual = {changed: false, reason: '', no_evidence_reason: '', items: []}
 try {
   const context = await browser.newContext({viewport: {width: 1500, height: 1100}})
@@ -42,6 +44,8 @@ try {
     }
     if (path.endsWith('/field-decision')) {
       const body = request.postDataJSON()
+      if (body.action === 'approve' && manual.changed) return json({detail: {code: 'evidence_review_required',
+        message: '此字段已修改，请填写人工修改理由及证据说明，并完成大模型核对。'}}, 409)
       assert.equal(body.review_token, `token${revision}`); assert.equal(body.item_key, item); assert.equal(body.reason, undefined)
       decision = {contract: 'field-review-v2', action: body.action, actor_user_id: 7, actor_name: 'fixture', occurred_at: new Date().toISOString()}
       revision++
@@ -96,6 +100,16 @@ try {
   assert.equal(manualWrites, 1)
   assert.equal(await page.getByRole('dialog').count(), 1, '保存应保留侧栏')
   await page.screenshot({path: `${output}/manual-save-sidebar.png`})
+  manual = {changed: true, reason: '', no_evidence_reason: '', items: []}
+  decision = undefined; revision++; paper.key_finding = 'Changed scientific finding'
+  await page.reload(); await open()
+  await page.getByText('此字段已修改，请填写人工修改理由及证据说明，并完成大模型核对。', {exact: true}).waitFor()
+  assert.equal(await page.getByRole('button', {name: '人工审核通过', exact: true}).isEnabled(), true)
+  await page.getByRole('button', {name: '人工审核通过', exact: true}).click()
+  await page.waitForTimeout(200)
+  assert.equal(decision, undefined)
+  assert.equal(await page.getByRole('dialog').count(), 1)
+  await page.screenshot({path: `${output}/modified-refusal-sidebar.png`})
   assert.equal(requests.filter(r => r.path.endsWith('/jobs') || r.path.endsWith('/submit-check')).length, 0)
   assert.deepEqual(errors, [])
   await writeFile(`${output}/result.json`, JSON.stringify({passed: true, requests, manualWrites, errors}, null, 2))

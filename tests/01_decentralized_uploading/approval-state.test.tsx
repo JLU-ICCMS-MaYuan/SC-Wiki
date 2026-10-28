@@ -36,6 +36,26 @@ async function open() {
   await waitFor(() => expect(screen.getByRole('button', { name: '人工审核不通过', exact: true })).toBeEnabled())
 }
 const pass = () => screen.getByRole('button', { name: '人工审核通过', exact: true })
+it('未修改但待核对的字段提供可用确认入口，不伪装成灰色已通过', async () => {
+  rows = [{ ...original, status: 'unchecked', pending_review: true }]
+  vi.mocked(api.get).mockImplementation(async () => ({ ...detail(rows[0]), approval_state: 'ready', approval_message: '' }) as never)
+  render(<Form />); await open(); expect(pass()).toBeEnabled()
+  fireEvent.click(pass())
+  await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  expect(vi.mocked(api.post).mock.calls.filter(([p]) => p.endsWith('/jobs'))).toHaveLength(0)
+})
+it('修改待核对允许点击查看明确拒绝，不使用灰色冒充通过', async () => {
+  rows = [{ ...original, pending_review: true, human_modified: true }]
+  const message = '此字段已修改，请填写人工修改理由及证据说明，并完成大模型核对。'
+  vi.mocked(api.get).mockImplementation(async () => ({ ...detail(rows[0]), can_approve: false,
+    approval_state: 'modification_required', approval_message: message }) as never)
+  render(<Form />); await open(); expect(pass()).toBeEnabled()
+  vi.mocked(api.post).mockRejectedValueOnce(new Error(message))
+  fireEvent.click(pass())
+  await waitFor(() => expect(screen.getByRole('dialog')).toHaveTextContent(message))
+  expect(screen.getByRole('dialog')).toBeVisible()
+  expect(flow.records[0].field_decision).toBeUndefined()
+})
 it.each([
   { status: 'supported' },
   { status: 'supported', field_decision: decision },
@@ -70,7 +90,7 @@ it.each(['network', 'invalid'])('保存异常 %s 保留侧栏与红框，不伪�
   if (kind === 'network') vi.mocked(api.post).mockRejectedValueOnce(new Error('保存失败'))
   else vi.mocked(api.post).mockResolvedValueOnce({})
   fireEvent.click(pass())
-  await screen.findByText(kind === 'network' ? '保存失败' : '未收到已保存的人工审核结果，请重试；当前问题仍保留。')
+  await waitFor(() => expect(screen.getByRole('dialog')).toHaveTextContent(kind === 'network' ? '保存失败' : '未收到已保存的人工审核结果，请重试；当前问题仍保留。'))
   expect(screen.getByRole('dialog')).toBeVisible()
   expect(screen.getByTestId('red-count')).toHaveTextContent('1')
   expect(pass()).toBeEnabled()

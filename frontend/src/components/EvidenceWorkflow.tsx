@@ -39,7 +39,7 @@ export interface EvidenceHistory {
 }
 export interface EvidenceRecord { detail_ref?: string; field_decision?: {contract: string; action: 'approve' | 'reject'; actor_user_id: number; actor_name?: string; occurred_at: string}; settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
-interface FieldDetail { record?: Partial<EvidenceRecord>; history?: EvidenceHistory[]; review_token?: string; can_approve?: boolean; source_state?: string; candidate?: FieldCandidate | null }
+interface FieldDetail { record?: Partial<EvidenceRecord>; history?: EvidenceHistory[]; review_token?: string; can_approve?: boolean; approval_state?: 'human_approved' | 'supported' | 'exempt' | 'ready' | 'modification_required' | 'blocked'; approval_message?: string; source_state?: string; candidate?: FieldCandidate | null }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
 export interface EvidenceTarget { target: 'upload' | 'paper' | 'revision'; target_id: string }
@@ -650,8 +650,12 @@ export function useEvidenceWorkflow(options?: {
     pending_review: summaryRecord.pending_review || currentDetail.data.record.pending_review} : summaryRecord
   const manualVisible = Boolean(activeRecord && (manualOpenKey === activeRecord.key || activeRecord.field_decision?.action === 'reject'
     || activeRecord.human_modified || hasLocalManualEdit(activeRecord)))
-  const canApprove = Boolean(summaryRecord && activeRecord && problematic(summaryRecord) && problematic(activeRecord)
-    && currentDetail?.data?.can_approve && !hasLocalManualEdit(activeRecord) && !settingsPending)
+  const approvalState = currentDetail?.data?.approval_state
+  const canApprove = Boolean(summaryRecord && activeRecord && currentDetail?.data?.review_token
+    && (approvalState ? !['human_approved', 'supported', 'exempt'].includes(approvalState)
+      || hasLocalManualEdit(activeRecord) || settingsPending
+      : problematic(summaryRecord) && problematic(activeRecord) && currentDetail?.data?.can_approve
+        && !hasLocalManualEdit(activeRecord) && !settingsPending))
   const applyCandidate = async () => {
     const record = activeRecord, target = targetRef.current
     if (!record || !target || confirmingRef.current || optionsRef.current?.readOnly || settingsPendingRef.current) return
@@ -697,6 +701,11 @@ export function useEvidenceWorkflow(options?: {
   const decideField = async (action: 'approve' | 'reject') => {
     if (!activeRecord || !currentDetail?.data?.review_token || confirmingRef.current) return
     if (action === 'approve' && !canApprove) return
+    if (action === 'approve' && (hasLocalManualEdit(activeRecord) || settingsPending)) {
+      setSaveError('当前有尚未保存的修改，请先保存并填写人工修改记录，再完成大模型核对。')
+      setManualOpenKey(activeRecord.key)
+      return
+    }
     confirmingRef.current = true; setConfirming(true); setSaveError('')
     const record = activeRecord, session = drawerSession.current, target = targetRef.current
     const currentValue = () => {
@@ -880,6 +889,9 @@ export function useEvidenceWorkflow(options?: {
         </Box>)}
         </ReviewSection>
         {settingsPending && <Typography color="text.secondary">{t('evidence.settingsPending')}</Typography>}
+        {currentDetail?.data?.approval_message && <Alert severity={approvalState === 'modification_required' || approvalState === 'blocked' ? 'warning' : 'info'}>
+          {currentDetail.data.approval_message}
+        </Alert>}
         {!options?.readOnly && !activeRecord.placeholder && <Box data-field-review-actions sx={{display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: .75, my: 2, '& .MuiButton-root': {minWidth: 0, px: .5, overflowWrap: 'anywhere'}}}>
           <Button disabled={settingsPending || confirming || !currentDetail?.data?.review_token || hasLocalManualEdit(activeRecord)}
             onClick={() => void decideField('reject')}>{t('evidence.humanReject')}</Button>

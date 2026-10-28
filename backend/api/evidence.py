@@ -287,7 +287,6 @@ def save_field_decision(body: FieldDecision, user=Depends(get_current_user)):
 @router.post('/summary')
 def field_summary(body: 'Target', user=Depends(get_current_user)):
     preparation_progress(body, user, 0)
-    from sqlalchemy import func
     from backend.ingest.field_drafts import authorized_draft, draft_version
     from backend.ingest.field_review import independent_fields, compact_result
     from backend.ingest.property_field_review import expand_property_fields
@@ -296,14 +295,6 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
         draft, _ = authorized_draft(session, body.target, body.target_id, user)
         records = independent_fields(expand_property_fields(ev.draft_records(draft, {})))
         table = models.ScientificEvidenceCheck
-        latest = select(func.max(table.id)).where(table.target == body.target,
-            table.target_id == body.target_id).group_by(table.item_key)
-        # 只投影摘要字段；MySQL不把数十MB历史和PDF原文送回应用。
-        rows = session.execute(select(table.item_key, table.result['current_value'], table.result['status'],
-            table.result['reason'], table.result['ai_reason'], table.result['source_kind'],
-            table.result['field_decision'], table.content_hash, table.source_hash, table.id,
-            table.result['state_review_context'], table.result['review_started_at'],
-            table.result['state_key']).where(table.id.in_(latest))).all()
         from backend.ingest.field_source_metadata import read, field_snapshot
         from backend.ingest.field_review import bind_support_versions, valid_field_decision
         metadata = read(session, body.target, body.target_id)
@@ -312,6 +303,23 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
             current, _ = field_snapshot(session, body.target, body.target_id, user, None, metadata)
             bind_support_versions(current, session)
             current_fields = {r['item_key']: r for r in current['records']}
+        # 与详情相同：优先当前版本，而不是把较晚写入的旧版本当作最新状态。
+        versions = session.execute(select(table.id, table.item_key, table.content_hash, table.source_hash).where(
+            table.target == body.target, table.target_id == body.target_id).order_by(table.id)).all()
+        chosen, exact = {}, set()
+        for row_id, key, content, source in versions:
+            current = current_fields.get(key)
+            matches = current and (content, source) == (current['content_hash'], current['source_hash'])
+            if matches or key not in exact:
+                chosen[key] = row_id
+                if matches:
+                    exact.add(key)
+        # 只投影摘要字段；不加载完整历史或论文原文。
+        rows = session.execute(select(table.item_key, table.result['current_value'], table.result['status'],
+            table.result['reason'], table.result['ai_reason'], table.result['source_kind'],
+            table.result['field_decision'], table.content_hash, table.source_hash, table.id,
+            table.result['state_review_context'], table.result['review_started_at'],
+            table.result['state_key']).where(table.id.in_(chosen.values()))).all()
         results = {row[0]: row for row in rows}
         from backend.ingest.field_review import changed_keys
         modified = changed_keys({'records': records, '_field_change_events': (get_state(body.target_id) or {}).get('_field_change_events') or []}) if body.target == 'upload' else changed_keys({'records': records, '_field_change_events': draft.get('_field_change_events') or []})
@@ -324,7 +332,8 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
             valid_decision = bool(decision_current and valid_field_decision(decision_current, decision))
             matches = row is not None and (row[5] != 'human_review' or valid_decision) and science.canonical(row[1]) == science.canonical(record.get('current_value'))
             if row and decision_current:
-                matches = matches and (row[7], row[8]) == (decision_current['content_hash'], decision_current['source_hash'])
+                # 精确字段摘要才是版本事实；MySQL JSON 对浮点展示值可能改变末位表示。
+                matches = (row[5] != 'human_review' or valid_decision) and (row[7], row[8]) == (decision_current['content_hash'], decision_current['source_hash'])
                 from backend.ingest.state_field_review import scope_matches
                 matches = matches and scope_matches(decision_current, {'state_review_context': row[10],
                     'review_started_at': row[11], 'state_key': row[12], 'field_decision': row[6]})
@@ -337,7 +346,8 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
                 'detail_ref': ev.digest([row[9], row[7], row[8], row[2], row[3], row[6],
                     (decision_current or {}).get('content_hash'), (decision_current or {}).get('source_hash'),
                     (decision_current or {}).get('state_review_context')]) if row else '',
-                'pending_review': not matches, 'human_modified': record['item_key'] in modified or bool((decision_current or {}).get('paper_source_hash')),
+                'pending_review': not matches, 'human_modified': (record['item_key'] in modified or bool((decision_current or {}).get('paper_source_hash')))
+                    and not (valid_decision and row[6].get('action') == 'approve'),
                 'resolution': (draft.get('_review_notes', {}).get(record['item_key']) or {}).get('reason', '')}))
         preparation_progress(body, user, 5)
         return {'version': draft_version(draft), 'records': output, 'needs_check': False}

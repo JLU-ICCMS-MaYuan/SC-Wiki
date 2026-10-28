@@ -34,12 +34,14 @@ def detail(snapshot, cached):
     # 历史引句仍可阅读，但不能冒充当前内容已核对；依据不可读取与没有依据分开。
     displayed = {**record, **previous, 'key': record['key'], 'item_key': record['item_key'],
                  'field': record['field'], 'fields': record['fields'], 'current_value': record.get('current_value'),
-                 'status': previous.get('status', 'unchecked'), 'pending_review': modified or not same_value,
+                 'status': previous.get('status', 'unchecked'), 'pending_review': modified or (not exact and not same_value),
                  'human_modified': record['item_key'] in changed_keys(snapshot) or bool(record.get('paper_source_hash')),
                  'stale': bool(previous) and not exact,
                  'evidences': deepcopy(previous.get('evidences') or record.get('evidences') or []),
                  'reason': previous.get('reason') or '', 'ai_reason': previous.get('ai_reason') or previous.get('reason') or ''}
     displayed['human_confirmed'] = valid_field_decision(record, previous, 'approve')
+    if displayed['human_confirmed']:
+        displayed['human_modified'] = False  # 当前确认后未变；旧编辑事件继续保留在历史中。
     displayed['automatic_source_lookup'] = initial_state_value(snapshot, record)
     if displayed['automatic_source_lookup']:
         displayed['human_modified'] = False  # 原值与创建归因仍在审计中；不展示逐项人工补证门。
@@ -49,13 +51,21 @@ def detail(snapshot, cached):
     displayed['ai_reason'] = display_reason(displayed['ai_reason'])
     displayed['reason'] = display_reason(displayed['reason'])
     invalid_derived = record.get('kind') == 'derived' and not (record.get('provenance') or {}).get('verified')
-    unresolved = (not displayed['pending_review'] and not displayed['stale']
-                  and (record.get('required', True) or displayed['human_modified']
-                       or (displayed.get('field_decision') or {}).get('action') == 'reject')
-                  and displayed['status'] in {'unsupported', 'uncertain', 'missing'})
+    if displayed['human_confirmed']:
+        approval_state, message = 'human_approved', '已人工审核通过，当前版本无需重复审核。'
+    elif exact and previous.get('status') == 'supported':
+        approval_state, message = 'supported', '当前版本已核对通过，无需重复审核。'
+    elif (not record.get('required', True) and not displayed['human_modified']
+          and (displayed.get('field_decision') or {}).get('action') != 'reject'):
+        approval_state, message = 'exempt', '此字段无需审核，不阻止提交。'
+    elif modified:
+        approval_state, message = 'modification_required', '此字段已修改，请填写人工修改理由及证据或不提供证据的原因，并完成大模型核对；不能直接人工通过。'
+    elif invalid_derived or previous.get('source_kind') == 'program' or not scope_matches(record, previous):
+        approval_state, message = 'blocked', '此字段存在程序校验错误或适用范围变化，请先修正并核对；当前尚未通过。'
+    else:
+        approval_state, message = 'ready', '当前内容尚待确认；认可后可直接人工审核通过，无需修改理由。'
     return {'record': displayed, 'review_token': review_token(snapshot, record, previous),
-            'can_approve': unresolved and not modified and not invalid_derived and previous.get('source_kind') != 'program'
-                           and scope_matches(record, previous),
+            'can_approve': approval_state == 'ready', 'approval_state': approval_state, 'approval_message': message,
             'source_state': 'historical' if previous and not exact else 'available' if displayed['evidences'] else 'empty'}
 
 
@@ -68,7 +78,7 @@ def decide(session, snapshot, cached, actor, action, expected_token):
     if expected_token != view['review_token']:
         ev.fail('evidence_stale', '当前字段或依据已变化，请重新打开后审核；输入已保留')
     if action == 'approve' and not view['can_approve']:
-        ev.fail('evidence_review_required', '人工修改尚未通过模型核对，或存在程序输入错误；请保存后提交或主动核对')
+        ev.fail('evidence_review_required', view['approval_message'])
     if action == 'approve':
         from .evidence_proposals import valid_value
         if record.get('field_schema') and not valid_value(record.get('current_value'), record['field_schema']):
@@ -77,7 +87,9 @@ def decide(session, snapshot, cached, actor, action, expected_token):
     decision = {'contract': 'field-review-v2', 'action': action, 'actor_user_id': actor.id,
                 'actor_name': getattr(actor, 'username', ''), 'occurred_at': now,
                 'content_hash': record['content_hash'], 'source_hash': record['source_hash']}
-    result = {**previous, 'status': 'supported' if action == 'approve' else 'uncertain',
+    result = {**previous, 'current_value': deepcopy(record.get('current_value')),
+              'content_hash': record['content_hash'], 'source_hash': record['source_hash'],
+              'claim': deepcopy(record.get('claim')), 'status': 'supported' if action == 'approve' else 'uncertain',
               'stale': False, 'pending_review': False, 'field_decision': decision,
               'human_confirmed': action == 'approve', 'check_method': 'human',
               'state_review_context': record.get('state_review_context'),

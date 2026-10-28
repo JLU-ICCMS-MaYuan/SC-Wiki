@@ -1,0 +1,44 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-8a425b11-ce8b-4e60-bf04-6a74a492e662.png",
+      "locator": "assets/2026-10-28-approval-IMG-001.png",
+      "status": "local_verified",
+      "user_context": "人工通过按钮灰色，但提交要求填写人工修改理由",
+      "related": [
+        "FR-027",
+        "FR-030",
+        "FR-031"
+      ],
+      "sha256": "4a1c49a6784f53145e719dbe8e34b1c5d127d25c104f01aae12571c766187677",
+      "media_type": "image/png",
+      "dimensions_px": [
+        850,
+        250
+      ],
+      "verification": "2026-10-28T13:06:40.041706+08:00 原字节复制、哈希及图片解码核验通过；尚未推送。"
+    },
+    {
+      "id": "IMG-002",
+      "upload_order": 2,
+      "original_name": "codex-clipboard-209e7311-0d26-44cb-b577-23e9d6a2733e.png",
+      "locator": "assets/2026-10-28-approval-IMG-002.png",
+      "status": "local_verified",
+      "user_context": "人工通过按钮灰色，但提交要求填写人工修改理由",
+      "related": [
+        "FR-027",
+        "FR-030",
+        "FR-031"
+      ],
+      "sha256": "f9862974b409396435252324247437d2c0eab0216d115d730965ea4bf52f819b",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3840,
+        1948
+      ],
+      "verification": "2026-10-28T13:06:40.053014+08:00 原字节复制、哈希及图片解码核验通过；尚未推送。"
+    }
+  ]
+}

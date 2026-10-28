@@ -11,9 +11,12 @@ export default function EvidenceReviewSummary({ record }: { record: EvidenceReco
     <Typography variant="body2">{decision.actor_name || `#${decision.actor_user_id}`} · {new Date(decision.occurred_at).toLocaleString()}</Typography>
   </Box>
   if (record.settings_part && record.settings_part !== 'raw' && record.current_value == null) return <Typography variant="body2" color="text.secondary">使用系统默认显示设置，无需科学核对。</Typography>
+  if (record.required === false && !record.human_modified && decision?.action !== 'reject') return <Typography variant="body2" color="text.secondary">此字段无需审核，不阻止提交。</Typography>
   if (record.pending_review || record.stale) return <Box data-evidence-review-summary sx={{ my: 1.5 }}>
-    <Typography variant="body2" fontWeight={600}>待提交检查</Typography>
-    <Typography variant="body2" color="text.secondary">已保存修改；下方理由属于上次内容。</Typography>
+    <Typography variant="body2" fontWeight={600}>{record.human_modified ? '修改后待核对' : '待确认当前内容'}</Typography>
+    <Typography variant="body2" color="text.secondary">{record.human_modified
+      ? '当前修改尚未完成核对；下方已有理由不代表新内容已通过。'
+      : '当前内容尚无有效通过结果；认可后可点击人工审核通过。'}</Typography>
   </Box>
   const status = record.human_confirmed ? 'human' : record.stale ? 'stale'
     : record.required === false && record.current_value == null ? 'unreported' : record.status

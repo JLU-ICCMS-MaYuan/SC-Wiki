@@ -1,5 +1,21 @@
 # 实施任务
 
+## 2026-10-28 新增实施任务
+
+- [x] T021 [US4,US5] 在 tests/01_decentralized_uploading/test_field_decisions_mysql.py 和 approval-state.test.tsx 复现未核对灰色、修改拒绝及确认后提交复用。
+- [x] T022 [US4,US5] 在 backend/ingest/field_decisions.py、backend/api/evidence.py 统一字段状态、未修改确认与修改拒绝原因。
+- [x] T023 [US4,US5] 在 frontend/src/components/EvidenceWorkflow.tsx、EvidenceReviewSummary.tsx 显示明确状态并验证真实浏览器交互及迟到响应。
+- [x] T024 [US6] 在 scripts/repair-upload-review-baseline.py 实现固定目标清单、备份、版本保护、授权修正和幂等回读；backend/ingest/field_review.py 支持确认基线事件，并以隔离持久化验证。
+- [x] T025 [US6] 在隔离验证通过后，对指定 La–Sc–H 任务执行已授权修正，保存备份和前后核验，验证当前值/历史及其他任务不变。
+- [x] T026 [US7] 在 tests/01_decentralized_uploading 验证真实提交携带未采纳 α²F/phDOS 并重读；不改谱提取算法。
+- [x] T027 同步 docs/overview 已验证行为、Issue 进度和 Spec 验证，执行任务专属本地提交，不推送。
+
+验收：37 项后端、41 项前端、真实浏览器、生产构建及指定任务回读通过；证据见 [本轮验收](approval-submit-validation.md)。
+
+依赖：T021→T022→T023；T024 在 T022 后进行，T025 必须在 T024 的隔离验收后；T026 复用现有提交路径；T027 在实现和验证完成后收尾。FR/SC 映射见 plan.md 的 2026-10-28 表格。
+
+## 既有实施任务
+
 输入：[Spec](spec.md)、[Plan](plan.md)、[研究](research.md)、[数据](data-model.md)、[接口](contracts/review.md)。按依赖顺序实施，复选框只在生产路径和对应验证完成后勾选。
 
 - [x] T001 建立docs/specs/147-two-stage-field-review完整文档并核对Issue类型、原话和关联。

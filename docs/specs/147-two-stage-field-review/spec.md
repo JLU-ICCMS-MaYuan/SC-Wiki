@@ -4,6 +4,8 @@
 
 **创建日期**：2026-10-21
 
+**2026-10-28 本地已验收**：[人工通过、修改门禁与提交状态一致性](approval-submit-consistency.md)。保留普通修改的理由和模型核对要求；完成指定 La–Sc–H 任务的一次性历史修正，验证 α²F、phDOS 不参与提交审核。范围及证据见 [本轮验收](approval-submit-validation.md)。
+
 **状态**：人工决定与三个模型入口修订已实施，验收见 [human-review-validation.md](human-review-validation.md)。真实草稿未代审，远程链接待推送授权。
 
 **2026-10-23 人工决定状态回归**：用户原话、字段定位及 FR-025—026 / SC-020—021 见 [按钮与红框回归](approval-state-regression.md)。归入现有 #147，不另建重复 Issue；不将 #148 的布局改动扩展为新页面设计。

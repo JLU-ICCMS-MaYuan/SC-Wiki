@@ -1,5 +1,13 @@
 # 接口契约
 
+## 2026-10-28 已确认补充
+
+字段详情增加 approval_state（human_approved / supported / exempt / ready / modification_required / blocked）及 approval_message。can_approve 仍是服务端可授予通过资格；前端不能把 false 一律渲染成“已通过”式禁用。修改待核对可以点击发起检查，但服务端拒绝且说明须补记录及模型核对；未修改的待核对字段可确认当前令牌。已通过/免审不重复确认。
+
+历史修正仅由固定目标的一次性脚本写入，决定附 authorization_origin 与 repair_id，审计明确本次授权修正，不伪造旧点击。field_review_baseline 事件保留基线值并重置“自上次确认以来”的修改比较；普通草稿 API 不接收该事件。决定仍绑定 content_hash/source_hash/适用范围；未来变更失效，旧事件不删除。
+
+α²F/phDOS 不加入 evidence 提交核对记录，其结果沿谱绑定接口保存，不要求 review_json 先存在采纳决定。其他字段门禁与谱 API 权限不变。
+
 统一前缀 `/api/rag/evidence`，目标沿用 upload / revision / paper。所有写入检查登录、所有权和目标版本。
 
 - 当前摘要：仅字段定位、当前值摘要、结果/理由与版本；不回传整篇历史及PDF正文。

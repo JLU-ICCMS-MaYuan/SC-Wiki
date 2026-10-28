@@ -1,0 +1,26 @@
+{
+  "verified_at": "2026-10-28T13:26:39.751382+08:00",
+  "target_id": "c16cc627a0c04dc8ad4289624d1da80a",
+  "fields": 1111,
+  "supported": 1111,
+  "would_need_model": 0,
+  "submission_field_gate_passed": true,
+  "actual_paper_submitted": false,
+  "scientific_draft_unchanged": true,
+  "original_events_unchanged": true,
+  "backup_sha256": "0123c6d30cfe1a922b2ce111eb2d7f4339ed17a41d76c14be8120fef96e1e252",
+  "idempotent_no_new_decisions_or_events": true,
+  "validation": {
+    "backend_tests_passed": 37,
+    "frontend_tests_passed": 41,
+    "browser_passed": true,
+    "browser_model_jobs": 0,
+    "build_passed": true
+  },
+  "live_http_summary": {
+    "total": 1111,
+    "human_confirmed": 1111,
+    "pending_review": 0,
+    "human_modified": 0
+  }
+}

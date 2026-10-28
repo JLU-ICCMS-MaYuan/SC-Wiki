@@ -241,11 +241,13 @@ def content_claim(record):
 
 
 def changed_keys(snapshot):
-    """比较本次最终值与第一次人工编辑前的值，不以曾经输入过作为变化。"""
+    """比较最终值与编辑前/已确认基线；保留旧事件，不以曾经输入过作为变化。"""
     from .scientific_evidence import canonical
     before = {}
     for event in snapshot.get('_field_change_events') or []:
-        if event.get('item_key'):
+        if event.get('kind') == 'field_review_baseline' and event.get('item_key') and event.get('repair_id'):
+            before[event['item_key']] = event.get('after_value')
+        elif event.get('item_key'):
             before.setdefault(event['item_key'], event.get('before_value'))
     return {r['item_key'] for r in snapshot['records'] if r['item_key'] in before
             and canonical(before[r['item_key']]) != canonical(r.get('current_value'))}

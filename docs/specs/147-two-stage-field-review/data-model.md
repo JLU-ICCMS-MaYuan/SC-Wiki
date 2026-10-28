@@ -1,5 +1,11 @@
 # 数据模型
 
+## 2026-10-28 已确认基线与展示状态
+
+不新增表。字段详情返回 approval_state 和 approval_message，区分有效通过/免审与仍待处理；can_approve 保留服务端资格语义。
+
+本次定向修正的 field_decision 附 repair_id 和 authorization_origin；发生时间是本次授权修正时间，不是假定的旧按钮点击。上传状态追加 kind=field_review_baseline 事件，包含字段身份、精确值的规范化表示、内容/来源版本及相同 repair_id。旧 field_change 事件保留；changed_keys 从最近基线比较未来修改。数字采用科学字段已有 canonical 表示存入基线，避免 MySQL JSON 浮点末位变化；不改原草稿科学值。该事件只能由固定目标修正脚本写入，普通字段 API 不接收。
+
 | 实体 | 内容与约束 |
 |---|---|
 | 字段身份 | 稳定state/module/record/extension身份与现有键；不以数组位置、名称或值作为身份 |

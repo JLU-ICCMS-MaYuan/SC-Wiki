@@ -115,6 +115,53 @@ def test_machine_pass_cannot_be_approved_but_can_be_rejected(context):
     assert rejected['can_approve']
 
 
+def test_unmodified_unchecked_field_can_be_confirmed_and_reused(context):
+    from sqlalchemy import delete
+    target, actor, draft, state, snap, record, factory = context
+    with factory.begin() as db:
+        db.execute(delete(models.ScientificEvidenceCheck).where(
+            models.ScientificEvidenceCheck.target_id == target,
+            models.ScientificEvidenceCheck.item_key == record['item_key']))
+    view = api.field_detail('upload', target, record['item_key'], user=actor)
+    assert view['approval_state'] == 'ready' and view['can_approve']
+    result = api.save_field_decision(api.FieldDecision(target='upload', target_id=target,
+        item_key=record['item_key'], action='approve', review_token=view['review_token']), actor)
+    assert result['approval_state'] == 'human_approved'
+    assert not result['record']['pending_review']
+    with factory() as db:
+        cached = science.load_results(db, snap, actor.id)
+    one = {**snap, 'records': [record]}
+    assert ev.resolve_results(one, cached, actor.id, None, snap['version'])[0]['status'] == 'supported'
+
+
+def test_modified_field_reports_actionable_refusal_without_false_pass(context):
+    target, actor, draft, state, snap, record, factory = context
+    draft['paper']['title'] = 'Changed title'
+    state['_field_change_events'] = [{'item_key': record['item_key'], 'before_value': 'LaScH'}]
+    view = api.field_detail('upload', target, record['item_key'], user=actor)
+    assert view['approval_state'] == 'modification_required'
+    assert not view['can_approve'] and '修改理由' in view['approval_message']
+    with pytest.raises(HTTPException) as error:
+        api.save_field_decision(api.FieldDecision(target='upload', target_id=target,
+            item_key=record['item_key'], action='approve', review_token=view['review_token']), actor)
+    assert '修改理由' in error.value.detail['message']
+    assert not api.field_detail('upload', target, record['item_key'], user=actor)['record']['human_confirmed']
+
+
+def test_later_old_version_cannot_hide_current_approval_in_summary(context):
+    target, actor, draft, state, snap, record, factory = context
+    view = api.field_detail('upload', target, record['item_key'], user=actor)
+    api.save_field_decision(api.FieldDecision(target='upload', target_id=target, item_key=record['item_key'],
+        action='approve', review_token=view['review_token']), actor)
+    with factory.begin() as db:
+        db.add(models.ScientificEvidenceCheck(target='upload', target_id=target, item_key=record['item_key'],
+            content_hash='older-version', source_hash=record['source_hash'], rule_version=snap['rule_version'],
+            result={**record, 'current_value': 'older title', 'status': 'unsupported'}, resolutions={}, actor_user_id=actor.id))
+    summary = api.field_summary(api.Target(target='upload', target_id=target), actor)
+    current = next(r for r in summary['records'] if r['item_key'] == record['item_key'])
+    assert current['human_confirmed'] and not current['pending_review']
+
+
 def test_reject_blocks_without_change_and_stale_token_cannot_approve(context):
     target, actor, draft, state, snap, record, factory = context
     view = api.field_detail('upload', target, record['item_key'], user=actor)
