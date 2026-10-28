@@ -165,4 +165,6 @@ La–Sc–H 已通过表格／Methods 专项、隔离 MySQL、正式组件浏览
 
 上传表单的独立结构点击“保留此结构”后，按钮显示“已保留”并禁用；已有保留决定重开后同样显示禁用状态。点击“不保留”直接从当前表单移除该结构卡片及对应候选，不再仅切换为“排除”状态。保留和删除均随主表单保存；只读视图没有这两个操作。
 
+保留／已保留、不保留、下载 CIF、下载 POSCAR 按顺序并列在同一操作行，统一间距；窄屏空间不足时自然换行。
+
 设计与验证入口：[状态修复](../../specs/120-upload-llm-extraction-quality/state-review-convergence-20261020.md)、[核对依赖](../../specs/109-field-evidence-and-ai-suggestions/state-review-convergence-20261020.md)、[结构收录](../../specs/49-pdf-crystal-structure-extraction/state-review-convergence-20261020.md)。

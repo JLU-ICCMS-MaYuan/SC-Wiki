@@ -51,11 +51,11 @@ export default function PaperStructuralWorkspace({ candidates, observations: _ob
         {candidate.status === 'blocked' && <Alert severity="warning">{candidate.validation?.message || '尚不能构造可靠模型'}</Alert>}
         {candidate.status !== 'blocked' && <TextField select size="small" label="晶胞表示" value={cell} onChange={event => setCells({ ...cells, [candidate.candidate_id]: event.target.value as typeof cell })} sx={{ minWidth: 140, my: 1 }}><MenuItem value="conventional">惯用胞</MenuItem><MenuItem value="primitive">原胞</MenuItem></TextField>}
         <StructuralRecordView item={{ id: candidate.candidate_id, kind: 'model', material: String(reported.material || ''), data: candidate }} cell={cell} />
-        {candidate.status !== 'blocked' && <Box sx={{ mt: 1 }}>
+        {candidate.status !== 'blocked' && <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1 }}>
           {!readOnly && <Button disabled={retained === 'retained'} onClick={() => onCandidates(candidates.map((c, i) => i === index ? { ...c, retention: 'retained' } : c))}>{retained === 'retained' ? '已保留' : '保留此结构'}</Button>}
+          {!readOnly && <Button onClick={() => onCandidates(candidates.filter((_, i) => i !== index))}>不保留</Button>}
           <Button onClick={() => download(candidate, 'cif', cell)}>下载 CIF</Button><Button onClick={() => download(candidate, 'poscar', cell)}>下载 POSCAR</Button>
         </Box>}
-        {!readOnly && <Button onClick={() => onCandidates(candidates.filter((_, i) => i !== index))}>不保留</Button>}
       </Card>
     })}
   </Box>
