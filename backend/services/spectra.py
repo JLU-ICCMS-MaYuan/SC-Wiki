@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import uuid
 from fastapi import HTTPException
 from fastapi.encoders import jsonable_encoder
-from sqlalchemy import select, inspect
+from sqlalchemy import select, inspect, delete
 from backend import models
 from backend.spectra.contracts import fingerprint, state_signature, ALGORITHM_VERSION, conventional_structure_text
 
@@ -356,6 +356,29 @@ def checked_row(session, ctx, row_id, version):
         fail("spectra_collection_missing", "谱集合不属于当前目标", 404)
     assert_version(row.version, version)
     return row
+
+
+def delete_unassigned(session, ctx, row_id, version):
+    """用户明确删除草稿候选；整组及其运行不再进入正式提交。"""
+    if ctx["target"] not in {"upload", "revision"} or not ctx["can_edit"]:
+        fail("spectra_delete_forbidden", "只能在可编辑的上传或返修草稿中删除未归属记录", 403)
+    row = checked_row(session, ctx, row_id, version)
+    if row.panel_key == "__discovery__" or row.panel_key.startswith("history-"):
+        fail("spectra_delete_forbidden", "该记录不是待处理的谱集合", 403)
+    if row.state_key and row.state_key in {s["state_key"] for s in ctx["states"]}:
+        fail("spectra_already_assigned", "该谱已归属材料状态，请刷新后核对")
+    # 自动发现会写入多组结果；运行期间不允许删除后又被同一任务写回。
+    pending = session.scalar(select(models.SpectrumRun.id).join(models.SpectrumCollection,
+        models.SpectrumRun.collection_id == models.SpectrumCollection.id).where(
+            models.SpectrumCollection.target == ctx["target"],
+            models.SpectrumCollection.target_id == ctx["target_id"],
+            models.SpectrumRun.status.in_(["queued", "running"])).limit(1))
+    if pending:
+        fail("spectra_extraction_busy", "谱提取正在排队或运行，请完成后再删除")
+    # 图片按哈希共享，不随集合删除；显式删除运行也适用于隔离 SQLite 验证。
+    session.execute(delete(models.SpectrumRun).where(models.SpectrumRun.collection_id == row.id))
+    session.delete(row)
+    session.flush()
 
 
 def review_curve(session, ctx, row, curve_id, status, intervals, reason, user):

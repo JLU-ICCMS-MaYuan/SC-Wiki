@@ -3,7 +3,7 @@ from typing import Literal
 import csv
 import io
 import json
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Query, Response
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from backend.database import get_db
@@ -99,6 +99,17 @@ def save_manual(collection_id: str, body: ManualRequest, user=Depends(get_curren
 def list_spectra(target: Literal["upload", "paper", "revision"], target_id: str,
                  user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
     ctx = service.context(session, target, target_id, user)
+    return service.listing(session, ctx)
+
+
+@router.delete("/{collection_id}")
+def delete_unassigned(collection_id: str, target: Literal["upload", "revision"], target_id: str,
+                      expected_version: str, expected_collection_version: int = Query(ge=1),
+                      user=Depends(get_current_user), session: Session=Depends(get_db)):
+    ctx = service.context(session, target, target_id, user, write=True)
+    service.assert_version(ctx["version"], expected_version)
+    service.delete_unassigned(session, ctx, collection_id, expected_collection_version)
+    session.commit()
     return service.listing(session, ctx)
 
 

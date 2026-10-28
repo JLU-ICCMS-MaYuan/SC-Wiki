@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useRef, useState, type PropsWithChildren } from 'react'
-import { Alert, Box, Button, Chip, Typography } from '@mui/material'
+import { Alert, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
 import { useLocation } from 'react-router-dom'
 import { api } from '../lib/api'
-import { hasSpectrumData, loadPropertySpectra, spectrumDetailPath, spectrumGroups, spectrumInterval, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumTarget, type PropertySpectrumItem, type PropertySpectrumCurve } from '../lib/propertySpectra'
+import { hasSpectrumData, loadPropertySpectra, spectrumDetailPath, spectrumGroups, spectrumInterval, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumListing, type PropertySpectrumTarget, type PropertySpectrumItem, type PropertySpectrumCurve } from '../lib/propertySpectra'
 import type { PropertyModuleCode } from '../lib/propertyModules'
 import PropertyModuleSection from './PropertyModuleSection'
 
@@ -88,12 +88,51 @@ function SpectrumSummary({ item, curves, dos, unassigned = false, attempt = fals
         {unassigned && !attempt && <Typography variant="caption" color="text.secondary">材料条件尚未确定，请先检查图注与归属。</Typography>}
         {attempt && <Typography variant="caption" color="text.secondary" display="block" sx={{ overflowWrap: 'anywhere', maxHeight: 120, overflowY: 'auto' }}>{failures.map((value: unknown) => typeof value === 'string' ? value : JSON.stringify(value)).join('；') || item.run.error_message || '尚无可供分配的谱数据。'}</Typography>}
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, ml: 'auto' }}>
+      <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, ml: 'auto', '& .MuiButton-root': { whiteSpace: 'nowrap', flexShrink: 0 } }}>
         <Typography variant="caption" color="text.secondary">{item.stale ? '条件已变化，需重新核对' : ['queued', 'running', 'failed', 'needs_review'].includes(item.run.status) ? spectrumNames[item.run.status] : review}</Typography>
+        {unassigned && !ctx.readOnly && ctx.listing?.can_edit && ctx.target.target !== 'paper' && <DeleteUnassignedSpectrum item={item} attempt={attempt} />}
         <Button component="a" href={spectrumDetailPath(ctx.target, item, returnTo, first, unassigned ? undefined : dos ? 'phonon_dos' : 'alpha2f')} target="_blank" rel="noopener noreferrer" variant="outlined" size="small" endIcon={<OpenInNewIcon sx={{ fontSize: '14px !important' }} />}>{attempt ? '查看提取记录' : unassigned ? '核对归属' : dos ? '查看声子 DOS' : hasAlpha ? '查看 α²F' : '查看累计 λ'}</Button>
       </Box>
     </Box>
   </Box>
+}
+
+function DeleteUnassignedSpectrum({ item, attempt }: { item: PropertySpectrumItem; attempt: boolean }) {
+  const ctx = useContext(Spectra)!
+  const [open, setOpen] = useState(false), [busy, setBusy] = useState(false), [error, setError] = useState('')
+  const extracting = ctx.listing?.jobs.some(job => ['queued', 'running'].includes(job.status))
+    || ctx.listing?.items.some(value => ['queued', 'running'].includes(value.run.status))
+  const label = attempt ? '删除提取记录' : '删除谱数据'
+  const remove = async () => {
+    setBusy(true); setError('')
+    try {
+      if (ctx.beforeNavigate && !(await ctx.beforeNavigate())) {
+        setError('主表单尚未保存，未删除记录。请先处理保存提示。')
+        return
+      }
+      const current = await loadPropertySpectra(ctx.target)
+      const query = new URLSearchParams({ ...ctx.target, expected_version: current.version, expected_collection_version: String(item.version) })
+      const next = await api.del<PropertySpectrumListing>(`/api/rag/spectra/${encodeURIComponent(item.id)}?${query}`)
+      ctx.replaceListing(next)
+      setOpen(false)
+    } catch (error: any) { setError(error.message || '删除失败，记录已保留。') }
+    finally { setBusy(false) }
+  }
+  return <>
+    <Button color="error" size="small" disabled={busy || extracting} onClick={() => { setError(''); setOpen(true) }}>{label}</Button>
+    <Dialog open={open} onClose={() => { if (!busy) setOpen(false) }} aria-labelledby={`delete-spectrum-${item.id}`}>
+      <DialogTitle id={`delete-spectrum-${item.id}`}>{label}？</DialogTitle>
+      <DialogContent>
+        <DialogContentText>{item.source.source_name || '来源未命名'} · 第 {item.source.pdf_page ?? '未知'} 页</DialogContentText>
+        <DialogContentText sx={{ mt: 1 }}>删除后不再保留这条记录及其提取历史，也不会随论文提交审核。原 PDF 和其他谱数据不受影响。此操作无法撤销。</DialogContentText>
+        {error && <Alert severity="error" sx={{ mt: 1 }}>{error}</Alert>}
+      </DialogContent>
+      <DialogActions>
+        <Button disabled={busy} onClick={() => setOpen(false)}>取消</Button>
+        <Button color="error" disabled={busy || extracting} onClick={() => void remove()}>{busy ? '正在删除…' : '确认删除'}</Button>
+      </DialogActions>
+    </Dialog>
+  </>
 }
 
 export function UnassignedPropertySpectra() {

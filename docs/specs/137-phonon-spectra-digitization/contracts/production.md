@@ -11,6 +11,8 @@
 
 ## HTTP 合同
 
+草稿候选逐条删除使用 `DELETE /api/rag/spectra/{collection_id}`，参数、错误码与持久化边界见 [T027 删除契约](../unassigned-deletion.md#http-契约)。已删除集合不再进入提交绑定；未删除集合保留原流程。
+
 公共前缀 `/api/rag/spectra`，Go 已有代理转发到 Python。
 
 | 方法 | 路径 | 行为 |
