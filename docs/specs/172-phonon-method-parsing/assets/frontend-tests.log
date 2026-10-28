@@ -1,0 +1,14 @@
+
+> sc-wiki-frontend@1.0.0 test:upload-ui
+> vitest run --config ../vitest.config.ts ../tests/01_decentralized_uploading/phonon-method.test.tsx ../tests/01_decentralized_uploading/issue139-parameters.test.tsx
+
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+ ✓ tests/01_decentralized_uploading/phonon-method.test.tsx (2 tests) 130ms
+ ✓ tests/01_decentralized_uploading/issue139-parameters.test.tsx (4 tests) 170ms
+
+ Test Files  2 passed (2)
+      Tests  6 passed (6)
+   Start at  11:22:34
+   Duration  877ms (transform 137ms, setup 0ms, collect 686ms, tests 300ms, environment 257ms, prepare 81ms)

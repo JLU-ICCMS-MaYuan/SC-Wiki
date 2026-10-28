@@ -125,7 +125,9 @@ def expand_property_fields(records):
             identity = identity if isinstance(identity, str) and identity else None
             # 无稳定key的历史扩展不能依重排后的数组位置继承审核资格。
             identity = identity or item_identity('legacy-extension', extension)
-            specifications.append((f'payload.calculation_conditions.extensions.{i}', extension.get('name_raw') or extension.get('name') or extension.get('key') or '补充计算条件', 'object', 'conditions.extension.' + identity, True))
+            name = extension.get('name_raw') or ('声子方法' if str(extension.get('key') or '').split('.')[-1] == 'phonon_method'
+                else extension.get('name') or extension.get('key') or '补充计算条件')
+            specifications.append((f'payload.calculation_conditions.extensions.{i}', name, 'object', 'conditions.extension.' + identity, True))
         for path, label, kind, identity, common in specifications:
             prior_owner = item_identity('tc-group', parent.get('state_key'), parent.get('module_key'), group,
                                        parent.get('tc_method_key') if path == 'method_code' else '') if group and common else parent['item_key']

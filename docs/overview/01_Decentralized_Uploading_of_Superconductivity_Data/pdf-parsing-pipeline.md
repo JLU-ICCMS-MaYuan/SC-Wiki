@@ -38,6 +38,10 @@
 
 ### 第 3 步：AI 分段阅读（reading）
 
+结构化候选先校验计算条件扩展结构，再执行方法语义与原文依据检查。扩展使用带非空键的对象数组；空值／空对象转为空数组，本次已识别的 `electron_phonon → phonon_method` 文本分组有界转为标准数组。其他对象形状、非对象数组项，以及没有阶段标记的已知条件扩展明确拒绝，避免结构错误使检查崩溃或绕过软件归属检查。现有有限纠错和失败次数不变，不能通过丢弃条件或撤销原文检查来获得成功。见 [#172](../../specs/172-phonon-method-parsing/spec.md)。
+
+相关字段修复按 `AGENTS.md` 从必要正文／补充材料来源重跑受影响字段，复用未改动的文字提取，保留失败响应重放与真实字段重新提取两类证据。字段通过不代表全篇覆盖、正式提交或整站验收通过。
+
 - `chunker.py` 把合并前的各文件 Markdown 切成 `Chunk`，`_chunks_with_preamble` 为每个文件补一个前言段；分段清单写入 `review_artifacts/{task_id}/chunk_manifest.json`，每段状态在 `waiting / processing / completed / failed` 间流转。
 - 读取前由 `_merge_extraction_windows` 把相邻小段合并为约 12000 字符的提取窗口（`EXTRACTION_WINDOW_CHARS`），页码取窗口起点所在页，再逐窗口调用 `_read_chunk`（使用当前请求选择的 OpenAI 兼容 LLM），减少过细分段造成的上下文断裂与调用次数。分段中的 AI 生成研究材料、方法和核心发现必须为英文；服务端在写入 `review_artifacts/{task_id}/chunks/` 前拒绝这些字段中的中日韩字符。论文标题、摘要和 `quote` 属于来源文本，保持输入语言，不翻译也不拦截；`quote` 可能来自 PDF 文本提取或 OCR，不承诺与扫描版逐字一致。
 - 分段结果以 JSON 存到 `review_artifacts/{task_id}/chunks/`；任一分段异常（包括生成字段语言不符合约束）即整任务失败。

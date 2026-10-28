@@ -11,6 +11,16 @@ DFPT (density functional perturbation theory), finite displacement and frozen ph
 phonon/response methods, NEVER electronic_method. Extract them as key=phonon_method in the
 appropriate phonon/EPC stage; in record payloads use calculation_conditions.extensions with
 key=electron_phonon.phonon_method, value_kind=text and value_raw as reported.
+The field's display name is "phonon method" (声子方法), without an EPC prefix.
+calculation_conditions.extensions MUST be an array of objects, for example:
+[{"key":"electron_phonon.phonon_method","value_kind":"text","value_raw":"DFPT"}].
+Use [] when absent. Never output an object grouped by stage; the stage stays in key.
+The EPC calculation_code, electronic_method and exchange_correlation_functional are flat
+calculation_conditions fields. Other stages use stage.parameter extension keys.
+Never put a known condition under an unqualified extension key (e.g. exchange_correlation_functional).
+For phonon_method, preserve the method wording actually reported in value_raw. Do not replace
+it with an acronym absent from the source: a reported linear-response method must retain that
+wording rather than becoming an unsupported literal "DFPT" claim.
 PBE/LDA/GGA/HSE are exchange-correlation functionals/approximations, not the electronic
 theory field. Quantum ESPRESSO/VASP are calculation_code, not a method or functional.
 If a sentence mentions software and DFPT, extract the software AND phonon_method separately.

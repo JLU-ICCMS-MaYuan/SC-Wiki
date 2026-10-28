@@ -1,0 +1,41 @@
+FFF                                                                      [100%]
+=================================== FAILURES ===================================
+_____________ test_one_bounded_repair_preserves_original_response ______________
+tests/01_decentralized_uploading/test_condition_auto_review.py:194: in test_one_bounded_repair_preserves_original_response
+    assert len(calls)==2 and calls[1]['validation_feedback']
+E   AssertionError: assert (1 == 2)
+E    +  where 1 = len([{'purpose': 'check', 'records': [{'key': '292c5403069f258a11af07f48ce16408a5e67d27335e0a5e5503879ab96b9417', 'field':...tion, with 850 eV and a force threshold of 1 meV/Å.', 'source_id': 'review-source-0'}], 'human_provided_evidence': {}}])
+___________ test_bounded_repair_does_not_swallow_upload_cancellation ___________
+tests/01_decentralized_uploading/test_condition_auto_review.py:208: in test_bounded_repair_does_not_swallow_upload_cancellation
+    with pytest.raises(UploadCancelled):ev.evaluate_batch([row],snap['chunks'])
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   Failed: DID NOT RAISE UploadCancelled
+_______________ test_new_upload_rechecks_final_filled_conditions _______________
+tests/01_decentralized_uploading/test_condition_auto_review.py:358: in test_new_upload_rechecks_final_filled_conditions
+    assert None in checked_values and '24×24×24' in checked_values
+E   AssertionError: assert (None in ['24×24×24'])
+----------------------------- Captured stdout call -----------------------------
+warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.
+=============================== warnings summary ===============================
+tests/01_decentralized_uploading/test_condition_auto_review.py: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+tests/01_decentralized_uploading/test_condition_auto_review.py::test_new_upload_rechecks_final_filled_conditions
+tests/01_decentralized_uploading/test_condition_auto_review.py::test_new_upload_rechecks_final_filled_conditions
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+tests/01_decentralized_uploading/test_condition_auto_review.py::test_new_upload_rechecks_final_filled_conditions
+tests/01_decentralized_uploading/test_condition_auto_review.py::test_new_upload_rechecks_final_filled_conditions
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+tests/01_decentralized_uploading/test_condition_auto_review.py::test_new_upload_rechecks_final_filled_conditions
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/01_decentralized_uploading/test_condition_auto_review.py::test_one_bounded_repair_preserves_original_response
+FAILED tests/01_decentralized_uploading/test_condition_auto_review.py::test_bounded_repair_does_not_swallow_upload_cancellation
+FAILED tests/01_decentralized_uploading/test_condition_auto_review.py::test_new_upload_rechecks_final_filled_conditions
+3 failed, 535 warnings in 0.96s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

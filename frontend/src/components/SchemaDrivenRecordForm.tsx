@@ -10,7 +10,7 @@ import ThermodynamicStabilityFields from './ThermodynamicStabilityFields'
 import { isThermodynamicStability } from '../lib/thermodynamicStability'
 import TcRecordFields from './TcRecordFields'
 import PropertyRecordRow from './PropertyRecordRow'
-import CalculationConditionFields from './CalculationConditionFields'
+import CalculationConditionFields, { conditionName } from './CalculationConditionFields'
 import { DOS_SOURCE_KEY, hasDosConflict, isFermiDos } from '../lib/fermiDos'
 import { muRangeIndex } from '../lib/tcParameters'
 import type { FormDefinition, FormIssue, JsonSchema } from '../lib/formDefinitions'
@@ -40,6 +40,7 @@ const settingNames: Record<string, string> = { calculation_code: '计算软件',
   k_grid: 'k 网格', q_grid: 'q 网格', q_grid_interpolated: '插值 q 网格', supercell: '超胞', atoms: '原子数',
   temperature_k: '温度', convergence_energy: '能量收敛阈值', convergence_force: '力收敛阈值', matsubara_frequency_cutoff: 'Matsubara 频率截断' }
 const extensionName = (item: Record<string, any>): string => {
+  if (String(item.key || '').split('.')[1] === 'phonon_method') return conditionName(item)
   if (item.name_raw != null) return item.name_raw
   const [stage, key] = String(item.key || '').split('.')
   const automatic = !item.name || item.name === `${stage} · ${key}` || item.name === item.key

@@ -13,6 +13,7 @@ const settings: Record<string, string> = { calculation_code: '计算软件', ele
 export function conditionName(item: Record<string, any>): string {
   if (item.name_raw != null) return item.name_raw
   const [stage, key] = String(item.key || '').split('.')
+  if (key === 'phonon_method') return '声子方法'
   return (!item.name || item.name === `${stage} · ${key}` || item.name === item.key) && stages[stage] && settings[key]
     ? `${stages[stage]} · ${settings[key]}` : item.name || item.key || '补充字段'
 }

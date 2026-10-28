@@ -354,6 +354,11 @@ def normalize_extraction(raw: dict, *, allowed_blocks: set[tuple[str, int, str]]
                          allowed_quote_text: dict[tuple[str, int, str], str] | None = None) -> dict:
     """拒绝格式错配和越范围来源，服务端生成现有科学契约需要的稳定键。"""
     result = Extraction.model_validate(raw).model_dump(mode="json")
+    from .property_extensions import normalize_extracted_conditions
+    for state in result["material_states"]:
+        for module in state["property_modules"]:
+            for record in module["records"]:
+                normalize_extracted_conditions(record)
     for state in result["material_states"]:
         for node in [state, *(r for m in state["property_modules"] for r in m["records"])]:
             for evidence in node["evidences"]:

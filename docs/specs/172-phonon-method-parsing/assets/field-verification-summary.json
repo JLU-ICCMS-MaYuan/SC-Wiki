@@ -1,0 +1,92 @@
+{
+  "passed": true,
+  "model": {
+    "provider": "server:LLM1",
+    "model": "deepseek-v4-pro"
+  },
+  "source_commit": "a005c11613b472bc11e80dc125442d92c0cecd95",
+  "source_hashes": {
+    "backend/ingest/domain_extraction.py": "b50f9911554c03de6578273890f353b81fa1a7352bb35328a27febc4c6723250",
+    "backend/ingest/property_extensions.py": "07e1fc57fea0c5ef91f943272670967d21ed27649d942dc613cf1f64c8ec0e93",
+    "backend/ingest/calculation_methods.py": "464880ec1442e0c1f899cec0fc0db313a2948d47a5eff82a2aa98c26777b1bd0",
+    "backend/ingest/condition_rules.py": "689c75ee551fad73ac5ee7f96eebb2e4c1ad21b24ffe5325215d1c2d3a7f96dc"
+  },
+  "sources": [
+    {
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "filename": "2012 CaH6-王晖.pdf",
+      "role": "main",
+      "pdf_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "ir_sha256": "4b0f3cdf7a0dbdc3f9352de0f479fdb6b53c2cb090dc97d18a31009cc2ebf6f6",
+      "pages": [
+        1,
+        4
+      ]
+    },
+    {
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "filename": "2012 CaH6--suppliment-王晖.pdf",
+      "role": "supplementary",
+      "pdf_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "ir_sha256": "1494b5544027405e46ea54a55ab5ffb88334ceeec0de43d9284bf83ace595637",
+      "pages": [
+        2,
+        3
+      ]
+    }
+  ],
+  "phonon_candidates_before_source_check": [
+    {
+      "key": "electron_phonon.phonon_method",
+      "value_kind": "text",
+      "value_raw": "density functional (linear-response) theory"
+    }
+  ],
+  "phonon_methods": [
+    {
+      "key": "electron_phonon.phonon_method",
+      "value_kind": "text",
+      "value_raw": "density functional (linear-response) theory"
+    }
+  ],
+  "conditions": [
+    {
+      "calculation_code": "QUANTUM ESPRESSO",
+      "electronic_method": null,
+      "exchange_correlation_functional": null,
+      "extensions": [
+        {
+          "key": "electron_phonon.phonon_method",
+          "value_kind": "text",
+          "value_raw": "density functional (linear-response) theory"
+        }
+      ]
+    }
+  ],
+  "saved_roundtrip_equal": true,
+  "original_files_unchanged": true,
+  "elapsed_seconds": 81.582,
+  "reused": [
+    "PDF 文字提取和 IR"
+  ],
+  "not_run": [
+    "整篇 PDF 工具解析",
+    "无关字段提取",
+    "全篇覆盖门",
+    "业务任务重新排队",
+    "MySQL 正式提交"
+  ],
+  "local_evidence": ".data/issue172-live-3/",
+  "superseded_runs": [
+    {
+      "path": ".data/issue172-live-1/",
+      "accepted": false,
+      "reason": "无阶段泛函扩展及首版验证脚本漏检，原始报告保留但不得作为通过依据；最终代码重放明确拒绝。"
+    },
+    {
+      "path": ".data/issue172-live-2/",
+      "accepted": false,
+      "reason": "模型将原文长名称改成DFPT，原文检查剔除，字段验收未通过。"
+    }
+  ]
+}
