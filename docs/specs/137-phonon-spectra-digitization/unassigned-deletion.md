@@ -2,6 +2,20 @@
 
 关联 [Issue #137](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/137)，FR-017／SC-014／T027。完整用户原话保存在 [Spec](spec.md#原始需求记录2026-10-28-补充)。
 
+## 修改追踪入口
+
+| 记录 | 定位与用途 |
+| --- | --- |
+| 协作入口 | [Issue #137](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/137)，正文顶部登记本次删除功能，Issue 继续管理整个谱功能的未完成事项 |
+| 原始需求与验收 | [spec.md](spec.md#草稿未归属谱与失败提取记录删除)：FR-017 定义删除行为，SC-014 定义验收边界 |
+| 实施任务 | [tasks.md](tasks.md)：T027，完成证据指向本文验证记录 |
+| 方案与接口 | [production-plan.md](production-plan.md)、[research.md](research.md)、[contracts/production.md](contracts/production.md) |
+| 实现提交 | 本地 `mayuan` 提交 `b4a2c361`，包含代码、测试及首轮 Spec／Overview 记录；未推送 |
+| GitHub 实施记录 | [删除功能实施与验证评论](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/137#issuecomment-6458703249) |
+| 已实现使用说明 | [上传数据结构与表单映射](../../overview/01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md) |
+
+本次只补齐追踪入口，不重复实施或删除业务数据。GitHub 上已登记需求和验证摘要；本地增量尚未推送，因此不把远程代码／Spec 链接标为已验证，也不因 T027 完成而关闭整个 #137。
+
 ## 原行为与提交边界
 
 `bind_to_paper` 会把上传/返修目标下仍存在的谱集合绑定正式论文，包括未归属谱与无曲线提取记录；无有效材料状态时 `material_state_id` 为空。审核者可见这些记录，但公共读取另受论文批准版本和逐谱采纳状态过滤。提交不等于采纳。
