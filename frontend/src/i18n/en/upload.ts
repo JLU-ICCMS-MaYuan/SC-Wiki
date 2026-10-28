@@ -293,6 +293,8 @@ export default {
   saveNow: 'Save now',
   submitReview: 'Submit for review',
   title: 'Title',
+  knowledgeGraphTitle: 'Knowledge graph title',
+  knowledgeGraphTitleHint: 'A short title displayed on knowledge graph nodes. Field: paper.knowledge_graph_title.',
   authorsField: 'Authors',
   correspondingAuthor: 'Corresponding author',
   coFirstAuthor: 'Co-first author',

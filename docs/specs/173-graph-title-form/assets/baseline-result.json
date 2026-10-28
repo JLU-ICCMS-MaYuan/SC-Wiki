@@ -1,0 +1,13 @@
+{
+  "baseline": "fd0a1f424bb173b2b74b8076e3387681c2127530",
+  "files_equal_to_HEAD": [
+    "backend/ingest/extractor.py",
+    "backend/ingest/paper_summary.py",
+    "backend/ingest/upload_jobs.py",
+    "backend/tests/test_narrative_english_output.py"
+  ],
+  "test": "test_prompts_forbid_unsupported_narrative_content",
+  "baseline_result": "failed",
+  "missing_literal": "100-200 words in English",
+  "current_result": "same failure"
+}

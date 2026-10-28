@@ -653,6 +653,13 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
             onValueChange={value => setPaperField('title', value)} />
         </Box>
         <Box sx={{ gridColumn: '1 / -1' }}>
+          <ReviewPaperTextField fullWidth label={t('upload.knowledgeGraphTitle')} value={draft.paper.knowledge_graph_title ?? ''}
+            readOnly={readOnly} disabled={submitting || Boolean(revision?.conflict)}
+            {...issueProps('paper.knowledge_graph_title')}
+            helperText={t('upload.knowledgeGraphTitleHint')}
+            onValueChange={value => setPaperField('knowledge_graph_title', value)} />
+        </Box>
+        <Box sx={{ gridColumn: '1 / -1' }}>
           <Autocomplete
             multiple
             freeSolo

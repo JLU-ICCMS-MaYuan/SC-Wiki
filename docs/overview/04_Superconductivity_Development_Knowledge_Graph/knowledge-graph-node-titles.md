@@ -7,6 +7,7 @@
 ## 当前行为
 
 - MySQL `papers.knowledge_graph_title` 是可空的 `VARCHAR(200)` 字段，独立于原标题 `title`。
+- 上传及返修校对表单在原标题下方提供“图谱科学标题”输入框，显示当前值、用途和字段键名。空值仍可见；点击字段标签进入来源核对与字段设置，修改后使用现有字段保存流程，旧核对结论按内容变化失效。
 - 上传解析的 `SUMMARY_SYSTEM_PROMPT` 要求用 10–15 个英文词概括核心发现和材料体系，避免系列编号和冗长修饰。字段与其他论文叙述字段统一按英文生成，内容不随界面语言切换；缺少原文依据时允许为空。
 - 管理员和超级管理员可在论文编辑页修改“知识图谱标题”。字段随论文信息保存，Go 管理员更新与普通论文 PATCH 的字段白名单均包含 `knowledge_graph_title`，实际写入仍受各接口权限约束。
 - 引用图概览、搜索和邻居 API 直接读取 MySQL。`nodes[].label` 优先取非空的 `knowledge_graph_title`；值为 `NULL` 或空字符串时回退到 `title`，同时返回完整原标题。
@@ -39,6 +40,7 @@
 ## 相关变更记录
 
 - [Issue #70：知识图谱节点专用标题](../../specs/70-knowledge-graph-title/spec.md)
+- [Issue #173：上传校对表单标题入口与核对验证](../../specs/173-graph-title-form/validation.md)
 - [Feature #74：全站中英文界面与英文叙述字段](../../specs/74-site-wide-i18n/spec.md)
 - [Feature #81：基于 MySQL 的引用图谱](../../specs/81-citation-graph/spec.md)
 

@@ -295,6 +295,8 @@ export default {
   saveNow: '立即保存',
   submitReview: '提交审核',
   title: '标题',
+  knowledgeGraphTitle: '图谱科学标题',
+  knowledgeGraphTitleHint: '用于知识图谱节点展示的简短标题。字段：paper.knowledge_graph_title。',
   authorsField: '作者',
   correspondingAuthor: '通讯作者',
   coFirstAuthor: '共同第一作者',

@@ -174,6 +174,7 @@ export interface DraftMaterialState {
 
 export interface PaperDraftFields {
   title?: string
+  knowledge_graph_title?: string | null
   doi?: string
   authors?: string[]
   corresponding_authors?: string[]
