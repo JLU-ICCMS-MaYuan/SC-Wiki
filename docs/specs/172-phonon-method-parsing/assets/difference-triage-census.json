@@ -1,0 +1,1526 @@
+{
+  "task_id": "29b2dd4604b64ee58c669c0efddb8cab",
+  "captured_at": "2026-10-28T16:10:42.179707+08:00",
+  "state_revision": 44,
+  "method": "对当前90区域逐项初分组（AI代码与文本核查，非人工审核）；先分出表格/分块/版面，其余正文和图注按风险从严归类。表格中的字符风险另列，不代表整表已通过。不是生产分类器或科学裁决。",
+  "counts": {
+    "页码、页脚和下载水印": 24,
+    "公式写法、空格及普通标点差异候选": 27,
+    "同一目录的分块差异": 3,
+    "结构表的格式与标签差异": 11,
+    "相名、化学式等字符疑似误识": 15,
+    "数学符号、单位及混合差异": 10
+  },
+  "region_count": 90,
+  "file_counts": {
+    "c463643719b3420eb4e1936d95780c6b": 70,
+    "5d2884b8fc0b4331881cb78a347f489c": 20
+  },
+  "alternative_count": 103,
+  "table_decimal_items_compared": 249,
+  "paste_headers_match_live": true,
+  "input_text_sha256": "d932c2d6eaaf8fbb8e7afd7110e4863a56abe28845e1a3ad35445de990afea48",
+  "records": [
+    {
+      "snapshot_ordinal": 1,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 5,
+      "kind": "paragraph",
+      "selected_block_id": "84c472b2efdb56789c503402e687df89c932af0d01f15b72b5dcf3c5da6bdecc",
+      "anchor": "84c472b2efdb56789c503402e687df89c932af0d01f15b72b5dcf3c5da6bdecc",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "7f74a29c591d69025435c28923b04a9a5fd457d4a40630908f98bde8064e4600"
+      ],
+      "source_version_fingerprint": "cf6b303ed65b01fa17a4b5436748dba31679e2c662e13958a783f92aebd0bbed",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 2,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 5,
+      "kind": "caption",
+      "selected_block_id": "2734093f9420fc5294ed86e0b2b595ac5a7aa406097ad37b09933064890be689",
+      "anchor": "2734093f9420fc5294ed86e0b2b595ac5a7aa406097ad37b09933064890be689",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "37dab740a1a013f004275f5116dcd92daa4bc88e71c4ffa9ba42c0a433305cbb"
+      ],
+      "source_version_fingerprint": "18a8c80b09ead6d8cb674859d996754908457584ae662cd7ed5e2f2099777d22",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 3,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 5,
+      "kind": "caption",
+      "selected_block_id": "6d62b6e138192341466b80972fe60a37d7caf9ec4a14b4254f0885633b615bcd",
+      "anchor": "6d62b6e138192341466b80972fe60a37d7caf9ec4a14b4254f0885633b615bcd",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "1b7f8ee6b0d514d8769e0fb2df3dfe7cc009e674581a6b8f57ce5c1673d0fd0e"
+      ],
+      "source_version_fingerprint": "abe66aabeeebd93778e676c5ba827b170564850ced6587bb90b160ac539c10b9",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 4,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 5,
+      "kind": "paragraph",
+      "selected_block_id": "d91c28f12b2cbc4b82b2f8c10d836dc0288b774bd40a611c30a46b15ea9c4280",
+      "anchor": "d91c28f12b2cbc4b82b2f8c10d836dc0288b774bd40a611c30a46b15ea9c4280",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "5e0bcec2690e8293340101e9c8b61ee912d19e2b80b1b6716f6929e883e7b058"
+      ],
+      "source_version_fingerprint": "059f0b30e024e0c4a4f853af5417cf10f12cc23a60b905bb49dd4d59893dddad",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 5,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 7,
+      "kind": "paragraph",
+      "selected_block_id": "98f66ae1bae129782503dc2e3900a0d7cf2d38d233c767caaf5e9e262b786d29",
+      "anchor": "98f66ae1bae129782503dc2e3900a0d7cf2d38d233c767caaf5e9e262b786d29",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "b510e8f0610b7972b41577d01c39f335c6464162be897146a4a5d07479ad03c5"
+      ],
+      "source_version_fingerprint": "bf0d7166765065719148ceb5236cb47c893fbfe2e334a5cf47a47b458ab5c58f",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 6,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 7,
+      "kind": "paragraph",
+      "selected_block_id": "64970aa856b9a37f0c45446f8cfb4a17dcbadf11e62a1ed030fe91ec6ad89bf6",
+      "anchor": "64970aa856b9a37f0c45446f8cfb4a17dcbadf11e62a1ed030fe91ec6ad89bf6",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "30506e83307f950165edfd7e21151943c0786f86074faad2edff946b4b43c84e"
+      ],
+      "source_version_fingerprint": "5a90d83292c51e3121cfa4a0f688647c5f897b381ea0ed199203b216678c9612",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 7,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 7,
+      "kind": "caption",
+      "selected_block_id": "9236d0c9b90e9a18712eff1d8ec3d8eb33eaf1f7b15a31a81aa450baf3550738",
+      "anchor": "9236d0c9b90e9a18712eff1d8ec3d8eb33eaf1f7b15a31a81aa450baf3550738",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "47cef80a2c09b71a66447a0ee564842b03f3eba23302c80a85b55f4cc9f30c4d"
+      ],
+      "source_version_fingerprint": "868200eb708599c631cd4cf2a6eea58e30c9ce1cd21ca5533300df47c0566185",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 8,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 7,
+      "kind": "paragraph",
+      "selected_block_id": "b53f36a49fa04e798820f819d6dfeaa0f5279efe183dc38c13ea10cab3df2b47",
+      "anchor": "b53f36a49fa04e798820f819d6dfeaa0f5279efe183dc38c13ea10cab3df2b47",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "48f5189d8a6b25981ee10c3e6e19a830d7ee36f7a485ff1a933c760f63c163a5"
+      ],
+      "source_version_fingerprint": "7c5e62eb14640742dc64c9d77b25b78d61b4550af769a69e89be2f3650c9cc87",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 9,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 8,
+      "kind": "table",
+      "selected_block_id": "cbb1ae0788d73ae7398dd3d0c813851a69f0f8289267e6c5d593e8d643982518",
+      "anchor": "4dac047bab50906432a76dce75a125e6cf2b80d78913a22b6769704f3d0858b4",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "4dac047bab50906432a76dce75a125e6cf2b80d78913a22b6769704f3d0858b4"
+      ],
+      "source_version_fingerprint": "3fdc6c370e9b2c777f76c7ebc5691235159702fc40c04699c989e2bf2652be1c",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 15,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 10,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 8,
+      "kind": "table",
+      "selected_block_id": "6fd26ff2bacab6c631d8992fb1007a67584b56abd512fecb6d762c1eb1846da7",
+      "anchor": "952493cbb857d5dfaf740d8947182ff4e03801efe68a099cc8a58aa4af65854b",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "952493cbb857d5dfaf740d8947182ff4e03801efe68a099cc8a58aa4af65854b"
+      ],
+      "source_version_fingerprint": "10b9a70bfd9b75af7b948984eacfd7b7025eeb5752c1e66d46b77ec092f8f751",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 15,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 11,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 9,
+      "kind": "caption",
+      "selected_block_id": "df803f5f7c2096338f3efd258c1bdd4a57853b7de9d6df9af33aad8137997167",
+      "anchor": "df803f5f7c2096338f3efd258c1bdd4a57853b7de9d6df9af33aad8137997167",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "0f0800b09437d7438da2068b6d9b99e266e7ad9115c869a3a5aa6f43bc78ed86"
+      ],
+      "source_version_fingerprint": "5389aeb628d7bc631f6a2daa02c56df2ce43246c19c4931295749e032175e1b2",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 12,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 9,
+      "kind": "caption",
+      "selected_block_id": "a476e359b10da292db6c7fd88c1b61b6591e7963cfa408fb845b60ffdf4405fc",
+      "anchor": "a476e359b10da292db6c7fd88c1b61b6591e7963cfa408fb845b60ffdf4405fc",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "11dd9db544fa2835fc7885d1be9379234690d2aeeae83042ae2738b8fecb51f9"
+      ],
+      "source_version_fingerprint": "dc92fb60b58cb4139457c8f2dcb8720658cfe0123113ed419b93a7138f1f5a0a",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 13,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 9,
+      "kind": "paragraph",
+      "selected_block_id": "c3487be427495d158e76741a3acf4ff4c598c9c76907af3060996a72bd69d70b",
+      "anchor": "c3487be427495d158e76741a3acf4ff4c598c9c76907af3060996a72bd69d70b",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "402a4aa60a6daf6e22bff6a3f59a8db8ac99b295a6dbbe2e7036bedbd1cb650b"
+      ],
+      "source_version_fingerprint": "d0c6a1aeb6233381380617603df083d1195f6ee6d02262b79cc98467e7acea2d",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 14,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 10,
+      "kind": "caption",
+      "selected_block_id": "4abd65eaf39a33e28d0f5587549130059bdcb4f999a806b16a23d61dbfaae7ce",
+      "anchor": "4abd65eaf39a33e28d0f5587549130059bdcb4f999a806b16a23d61dbfaae7ce",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "2aec28d4483234c21370064ca3d2d7c5344d85f95eacb3a4da270c6be6f9e377"
+      ],
+      "source_version_fingerprint": "a1c76f258bc77888c84c1ddcc496ec5f1e78421dced3539cef3e6e26e73ecd67",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 15,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 10,
+      "kind": "caption",
+      "selected_block_id": "497194b65a180c57e15ef2766bf66689bbd3f802b078cec0c274722d85d767a5",
+      "anchor": "497194b65a180c57e15ef2766bf66689bbd3f802b078cec0c274722d85d767a5",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "ca5d2a64a795037c613ad710eda8da3cfe842986da0b71f3852e0419f71dce89"
+      ],
+      "source_version_fingerprint": "e1bcab9a0d96409ba3b394a439110c830663df0243a83480a22422dc72e5cd88",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 16,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 10,
+      "kind": "paragraph",
+      "selected_block_id": "8ecc3c14c0f4f4d70a04122886af29da25220d5ac760e268e43b34b9294a17ef",
+      "anchor": "8ecc3c14c0f4f4d70a04122886af29da25220d5ac760e268e43b34b9294a17ef",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "f71790bcd5f5734e1e9ed9a0e934aa006e2e9b8688d069fde3a399a24ab4931e"
+      ],
+      "source_version_fingerprint": "088f9f9af9ae7ba240f663a4eacd603b9c486fd12023fb22f65b033925b3956e",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 17,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 11,
+      "kind": "caption",
+      "selected_block_id": "1395172069649fd5e63f694316767f1173bb43f33d38ce7ccaa50dcb0ce58528",
+      "anchor": "1395172069649fd5e63f694316767f1173bb43f33d38ce7ccaa50dcb0ce58528",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "ad445e2ceb130cff6e87dba6065ba064433f87e85f524d9849f3bc50905c8562"
+      ],
+      "source_version_fingerprint": "9dff301d85a0dc0d8842e8cefb88eab1017c998f49c1f84c70de6ca32835987b",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 18,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 11,
+      "kind": "caption",
+      "selected_block_id": "ba7d0fe1c5a8420e3e29115f89a748dcfae127ff912ab869e35488650918bb53",
+      "anchor": "ba7d0fe1c5a8420e3e29115f89a748dcfae127ff912ab869e35488650918bb53",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "be371a2d036d80ca8af4d9140d2351e0224eb440616652e67721a22cca51d16b"
+      ],
+      "source_version_fingerprint": "2213fd1871316e0d75fe14a7e65099d7dd5d75831a4ec4b71139feb42436de5f",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 19,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 11,
+      "kind": "paragraph",
+      "selected_block_id": "934f1a336052e813187e11d792efceaf4e913e9f9a87fe498ce04f27948e0295",
+      "anchor": "934f1a336052e813187e11d792efceaf4e913e9f9a87fe498ce04f27948e0295",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "0e1fb580cc8fb6c4db0af35cbd924e7d1c02d82fa2bf46cebe6723d6f02cee46"
+      ],
+      "source_version_fingerprint": "a6ff34db888b8aa4c33521099c67c909896fc12386eefe68ba144ac8225c7c6f",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 20,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 14,
+      "kind": "caption",
+      "selected_block_id": "0ce1495c9ef7dff6d5ce4867b731f2bdb678ed0aeaee57b9ff6964fe0ccc3190",
+      "anchor": "0ce1495c9ef7dff6d5ce4867b731f2bdb678ed0aeaee57b9ff6964fe0ccc3190",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "115a9586cb94bd8d4a4ed6ac6d6897ba86148861b42ba463c56ac2ab946e9033"
+      ],
+      "source_version_fingerprint": "f32aa180d2d8a2f4a7d15b0eaee7a2776d06097892853299812ff06fb1a9f9a8",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 21,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 14,
+      "kind": "caption",
+      "selected_block_id": "95a2404d0758b2339822abba3cfb2f227ed713ec1c400ceaaae704f8b7e6ff66",
+      "anchor": "95a2404d0758b2339822abba3cfb2f227ed713ec1c400ceaaae704f8b7e6ff66",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "b869bdaa8cf7cfb7a01cee01376bc2468a1bb4eb6bb7c1b797f98285987064d3"
+      ],
+      "source_version_fingerprint": "29973a6ea3b9c2053a8b9b68e5c67a61c6fd24fe866a958ccb606bcc5e57639d",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 22,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 14,
+      "kind": "paragraph",
+      "selected_block_id": "2ef26d4ff4da47a86b82bf34de9e9878adaa5e3d7b034db56ac36bb3a32e1613",
+      "anchor": "2ef26d4ff4da47a86b82bf34de9e9878adaa5e3d7b034db56ac36bb3a32e1613",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "02706512892ae96b8bab279b9e0f05d83d18d79b772c593d6b05ef302be93993"
+      ],
+      "source_version_fingerprint": "f6e0848337cfa997d0bbf6c3ad606695e7d532fc4ed45844897c458ea2a0463f",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 23,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 15,
+      "kind": "caption",
+      "selected_block_id": "05754ce42788d2bad1cbee87468ed87664ed7934aed8cfb533b1f88493fe422a",
+      "anchor": "05754ce42788d2bad1cbee87468ed87664ed7934aed8cfb533b1f88493fe422a",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "90e67560d43763d92b5c2e6c64dd7c6137187545b356ee8f7005ce9fbe6a7107"
+      ],
+      "source_version_fingerprint": "eab578cd158999dd119283773e312b3e3aa53924130b3165d1012c4b8e9d1b73",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 24,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 15,
+      "kind": "table",
+      "selected_block_id": "695d41f9c3ff12c40750a72fe0cb00d943921acafc7ef6ce3d274735fdf99e40",
+      "anchor": "0b300748fb57b1353eb26a9c4a7e8cf128ba053201496f3612b0e26feddd0c8f",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "0b300748fb57b1353eb26a9c4a7e8cf128ba053201496f3612b0e26feddd0c8f"
+      ],
+      "source_version_fingerprint": "833a6a7ec8ec8d3527f51393ad0afe95a54047a44f61e3965da59a0d16209605",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 27,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 25,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 15,
+      "kind": "caption",
+      "selected_block_id": "c0edbd9e5e9a80863d1d55ddf723705ed75cd89dde12e6205636430dedfa4142",
+      "anchor": "c0edbd9e5e9a80863d1d55ddf723705ed75cd89dde12e6205636430dedfa4142",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "f887f093f7ac72f7722f1b1fdadac4e8de04a0454f32e528d09f827bdcb00d4b"
+      ],
+      "source_version_fingerprint": "1bbc11a9b3edc911e507c429274976024ac81b85021809a63f6c6d920fdb12d2",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 26,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 15,
+      "kind": "table",
+      "selected_block_id": "160a2781b66e7c13e6a450fee7b99e1a549426bc530fbf610a3bb800692f67f1",
+      "anchor": "923adf49736b76aa2c1ce71c0fad0788e3cdb6d4bea27a58c75121e78ac1804c",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "923adf49736b76aa2c1ce71c0fad0788e3cdb6d4bea27a58c75121e78ac1804c"
+      ],
+      "source_version_fingerprint": "2913d35efb5ae2f95275245a74e5ef1abd487f9398dad868e80cea483005413f",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 27,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 27,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 15,
+      "kind": "caption",
+      "selected_block_id": "6f4e25140f5bb9ab21b9764bdb53d040dbc13266b92a8ca7a92bdbcad6bf811a",
+      "anchor": "6f4e25140f5bb9ab21b9764bdb53d040dbc13266b92a8ca7a92bdbcad6bf811a",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "59ce0163317286b26cfad931aa7bf78f35605bf7be644fd770c10538132ff70b"
+      ],
+      "source_version_fingerprint": "924bf30b2944d4d261711ed0200af384a86f8d64a19882e1be0946b7f77bcc79",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 28,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 15,
+      "kind": "table",
+      "selected_block_id": "71216fea55d9413cf205e127d1d4ba4027242c357d7ab428d37cb0ddd48d8435",
+      "anchor": "e5a32c58306c10a87ecd700984b22757fc20567808809bd25c8bca76aa1c35cc",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "e5a32c58306c10a87ecd700984b22757fc20567808809bd25c8bca76aa1c35cc"
+      ],
+      "source_version_fingerprint": "c884e095387b6a7035ab1764cfab81f9754b0d23d380e49ae1ef1da8e67dcb40",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 12,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 29,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 16,
+      "kind": "caption",
+      "selected_block_id": "335a5fd49a86f39c1fc70a6dc9e891eeedd774770ea8d350268107e9fc809fb2",
+      "anchor": "335a5fd49a86f39c1fc70a6dc9e891eeedd774770ea8d350268107e9fc809fb2",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "d960b57ffc1422da94deaef71590e661a13352d58fc4ae758215b225c1fad10a"
+      ],
+      "source_version_fingerprint": "1f75aa4f89b8a90d8710a2b7c8ac6bfe399c42c0480b55205eaf324faccb8044",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 30,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 16,
+      "kind": "paragraph",
+      "selected_block_id": "504e04fb44b61150214dcb8adfae02053511a75e211837c30d0db862dcd96a67",
+      "anchor": "504e04fb44b61150214dcb8adfae02053511a75e211837c30d0db862dcd96a67",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "6b4bceb7cf8d23ad497d24c7eca6549965e72fcbf641e56fa270196a893d9599"
+      ],
+      "source_version_fingerprint": "942b0aeeb4da77b35b7c9c268a79afbc07d00bdca27011c3863ff210edd637d4",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 31,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 17,
+      "kind": "caption",
+      "selected_block_id": "6e00e239ba384a58c9093d2e54eb6ee0de614a4e0d886c2363223c966a9ec9d4",
+      "anchor": "6e00e239ba384a58c9093d2e54eb6ee0de614a4e0d886c2363223c966a9ec9d4",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "1732ea08bce3876990a2270a9883bc2189697eb099a938033bf5d02bca0f0154"
+      ],
+      "source_version_fingerprint": "fbbefc195134ce2e9421833a4118e0a6da8ef8bf00887397b60033badbc75fdb",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 32,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 17,
+      "kind": "caption",
+      "selected_block_id": "46f12c8de293eb2b142c7e920bd295bc700be48a2f6c499788d284698dbdbbdd",
+      "anchor": "46f12c8de293eb2b142c7e920bd295bc700be48a2f6c499788d284698dbdbbdd",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "9eb929879ee9527e452ac27856892ea7d2248a618de96ed3dd820f3968580ab7"
+      ],
+      "source_version_fingerprint": "8c4924ab77fc8364b6b6e334b64bf9269f282db7d1223cda4f58179ed6534ee9",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 33,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 17,
+      "kind": "paragraph",
+      "selected_block_id": "2ec5aad08511a2581331910e7e9a8066a84a2934b38242d80a9573eeef3190ce",
+      "anchor": "2ec5aad08511a2581331910e7e9a8066a84a2934b38242d80a9573eeef3190ce",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "c231160c84d94e1eec299e04e24114eeea96ca32914293d5a3d756d8500f07cd"
+      ],
+      "source_version_fingerprint": "faaf65ee6b1bb48fe4c1574920a34669228db0d7ccac05ad843cbd078fa5d827",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 34,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 18,
+      "kind": "caption",
+      "selected_block_id": "e5daf06e8ddba1e840cc231d5ff071693692b0cc4bd6ac616177388d784503cd",
+      "anchor": "e5daf06e8ddba1e840cc231d5ff071693692b0cc4bd6ac616177388d784503cd",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "b7569980f202526c853baced33b507d14a694160ead10d20e206c3b5c4181b7f"
+      ],
+      "source_version_fingerprint": "ce978c7996db1013093efe1250ffa93b7437ed46b30b80eea357bf0afb18bad7",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 35,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 18,
+      "kind": "caption",
+      "selected_block_id": "dfd5003df388560a34352853c5ad9cb9c22218526c626ac890aeff0335223574",
+      "anchor": "dfd5003df388560a34352853c5ad9cb9c22218526c626ac890aeff0335223574",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "9482edd3b4708d2fe6fef1d6e33fb09e0a615d8e63d98531bcc77ce2cf0ed34d"
+      ],
+      "source_version_fingerprint": "ccd3e8521ba45b4fb9623d1df153226c11d0742e4e35927921134d5aace57739",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 36,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 18,
+      "kind": "paragraph",
+      "selected_block_id": "a82571418f1fc89b340236076c93425be9d9f5160b8ed4ce6355ca2f972981dd",
+      "anchor": "a82571418f1fc89b340236076c93425be9d9f5160b8ed4ce6355ca2f972981dd",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "4e2d5194e99ef996b03e3abcf7d070312c9d417b7ec8214e6c2104b5d0e0965a"
+      ],
+      "source_version_fingerprint": "98437bbdd599c36b355b5c7f0545ee9013071615624315fc8171bcdf8b67d42c",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 37,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 19,
+      "kind": "caption",
+      "selected_block_id": "d944e6b8140efae6c2ebab5bb307e4f8f3f6725a5b56d4ac938fe51f3d1918f7",
+      "anchor": "d944e6b8140efae6c2ebab5bb307e4f8f3f6725a5b56d4ac938fe51f3d1918f7",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "e23fc6a3194221123430d24d343e8975c2a52204abc3b9d174a18c96e34786cb"
+      ],
+      "source_version_fingerprint": "05b88c0b80ed12d66c4ed57cc778aa7171ba298c479e9903e3c008969c1e955f",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 38,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 19,
+      "kind": "caption",
+      "selected_block_id": "30dc683dec23f6221241b192b37faae12210a8b3e81ed46945adb7f4cfabbc23",
+      "anchor": "30dc683dec23f6221241b192b37faae12210a8b3e81ed46945adb7f4cfabbc23",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "a0f2f281ed78c94d175078a9204e045dc3eaaf7e019422765cd6a03be3f95642"
+      ],
+      "source_version_fingerprint": "f5fe54544f007463b973b3ed77c9228d80a217c547cc055c1880617121660643",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 39,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 19,
+      "kind": "paragraph",
+      "selected_block_id": "b5175a2a9450d548961be857b02afb8738082b2197a7873bc1b4458dfd5ac2e2",
+      "anchor": "b5175a2a9450d548961be857b02afb8738082b2197a7873bc1b4458dfd5ac2e2",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "8567649b07f603148d46859d4e198a22a185e999f052279905d47e88a9ac23e9"
+      ],
+      "source_version_fingerprint": "773d565222fd99025ea5a8820cd889a59b2df2a80eba7c98c9e8c1111d3f8676",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 40,
+      "category": "segmentation",
+      "category_zh": "同一目录的分块差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 20,
+      "kind": "paragraph",
+      "selected_block_id": "171bdb87109a221e21d97c77d6aadc8d2685400356a0006e302f23958788e291",
+      "anchor": "171bdb87109a221e21d97c77d6aadc8d2685400356a0006e302f23958788e291",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "001ecfad258e076668b9d3ba49280fe6d948f965f78aff4b24cb28b30cd53e95",
+        "cb3ed4e5ef65568545b350d68ff3414d23ac38a892fe42e25b7f7b49a108c2af",
+        "95bcaa5bd9204c0118808560b2ada5e43963d3e7313ca8f1bc583ee4f48325bb",
+        "6d4728887ddf71849d210c138e92e4451380a6d5d8da9e2cb3f323bda8157148"
+      ],
+      "source_version_fingerprint": "6b4d51e3a579b697dca2a881fa2f41567f886f9de79a4c06142139851765a139",
+      "scientific_verdict": "not_adjudicated",
+      "joined_alternatives_equal_ignoring_whitespace": true
+    },
+    {
+      "snapshot_ordinal": 41,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 20,
+      "kind": "paragraph",
+      "selected_block_id": "827e879960df70d85435b0fd4fbf295aff6344ad79ae43ad953b3a83b6ee3258",
+      "anchor": "827e879960df70d85435b0fd4fbf295aff6344ad79ae43ad953b3a83b6ee3258",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "b7b0c11a5e3656fcb4fed1d9645326562249efc227477ef0c99283ba519f2c54"
+      ],
+      "source_version_fingerprint": "4a17e8c9866bde17c2a03f41293bde0c06f5cd68c767989c5e3fab4c2d90696b",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 42,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 20,
+      "kind": "caption",
+      "selected_block_id": "938db1a60a58126af4828edb971baa0d08cba63a9129b5f3d2422306ee612899",
+      "anchor": "938db1a60a58126af4828edb971baa0d08cba63a9129b5f3d2422306ee612899",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "1c92f780e10ff7ca49f832d0b4dffdbaeccccac5a80a15680e2f6168e4ad467b"
+      ],
+      "source_version_fingerprint": "3d7ab58fc7db28dc6310d10429c090e14571869ff9bb6314bf8c78cd89c91c68",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 43,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 20,
+      "kind": "paragraph",
+      "selected_block_id": "0376f3b3111e4a0d5df2852cdd1a03df82b344e5f22a9eb59fe33c936bd37c0d",
+      "anchor": "0376f3b3111e4a0d5df2852cdd1a03df82b344e5f22a9eb59fe33c936bd37c0d",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "b8a9a0f2943b132851ddb60379408555c6a676684c5d6e15af474e23bd8a92fc"
+      ],
+      "source_version_fingerprint": "a03046d90f0d39137e96fcfa62e6d7e7260a7346a43c8b21ac28d5603f7a585d",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 44,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 21,
+      "kind": "table",
+      "selected_block_id": "ab93874566f822d09bf8aefb1ab477045833424eb99c7292334120ed31593ccc",
+      "anchor": "3b2f87755af0b6314d7c400bf767e98e0f6e4484dd3191508178b19b1869c733",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "3b2f87755af0b6314d7c400bf767e98e0f6e4484dd3191508178b19b1869c733"
+      ],
+      "source_version_fingerprint": "1776578aa985e429de4170439ec0bf99c09efb8ff643e9938ecd21f57bbf490e",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 33,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 45,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 21,
+      "kind": "table",
+      "selected_block_id": "8bcc6990c30b41996b6a498f2a9ac3b10cdcd87ece23b747a9925fcc09ed5603",
+      "anchor": "647e098cb607a7827268480fb878d9b02cf6d5ee7d721699775eb49711580128",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "647e098cb607a7827268480fb878d9b02cf6d5ee7d721699775eb49711580128"
+      ],
+      "source_version_fingerprint": "5fcd7b3bb88e34816336f2e4ffce682a18c9745a7fd5bedb47b45322267db595",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 24,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 46,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 22,
+      "kind": "paragraph",
+      "selected_block_id": "7aae35d97658cb799dcd5d57ecd08a28ab9de0be418dc360fede85a5a285145a",
+      "anchor": "7aae35d97658cb799dcd5d57ecd08a28ab9de0be418dc360fede85a5a285145a",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "ce69e54d34e6348c635770c6022476fa4304a67e5df8e149d22b3b2bacd9333a"
+      ],
+      "source_version_fingerprint": "ed197c928cac28efd4eeb797dbe664219a7aed9c9574fd5eeff9247cf295bb03",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 47,
+      "category": "segmentation",
+      "category_zh": "同一目录的分块差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 23,
+      "kind": "paragraph",
+      "selected_block_id": "2da3d184a5d7f37a03e1a67c5d7e7584bf2c448e30c9d2334b26b5caa33cd61f",
+      "anchor": "2da3d184a5d7f37a03e1a67c5d7e7584bf2c448e30c9d2334b26b5caa33cd61f",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "679ae0415fd99929de8b6672a8e54577bbe3761ef64ff67ce48f005a617b594e",
+        "03135c4c4e7684f00d68ecde6bdd254b2aa048a539a54b8ef76a8db1de65d173",
+        "14ce9555d113a340d54af7690fe9c18c474d8ecc47d2fa14c5412f5637fc02af",
+        "d0cf5defe675bcf7c1cdc2017177a8df9778f9ca15200c7602a5f69f24a1f6d0"
+      ],
+      "source_version_fingerprint": "430c5b009e9da63bd9f4dd97cc0fc597a41b12d20419f6cec35c92990a9342f5",
+      "scientific_verdict": "not_adjudicated",
+      "joined_alternatives_equal_ignoring_whitespace": true
+    },
+    {
+      "snapshot_ordinal": 48,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 23,
+      "kind": "paragraph",
+      "selected_block_id": "424025841b2ee104a49fa9df72e268d39bca69a985fa395f709e8144eeefbe45",
+      "anchor": "424025841b2ee104a49fa9df72e268d39bca69a985fa395f709e8144eeefbe45",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "ac5790d439fe038514c38fda09fe610f4428d3bc270150c1ec8c94ed9677e928"
+      ],
+      "source_version_fingerprint": "2eed0269b2bd3251dd92970d6bfa9b22926fe1aa93069b480bd2b4da38f7e3a3",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 49,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 23,
+      "kind": "caption",
+      "selected_block_id": "bfe46ee5dcf691069cdfc6bcd33ab2d04b7be2766c523cb2d7449ffff6780ade",
+      "anchor": "bfe46ee5dcf691069cdfc6bcd33ab2d04b7be2766c523cb2d7449ffff6780ade",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "fb9693bc7862092f622b2e2fd4af12c2ee51e2117f28ca9cc574f9fbe7385a0b"
+      ],
+      "source_version_fingerprint": "b30503d952b316fb2357b10af2d234c07af901ac5978a0682296c8d57c2ee33a",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 50,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 23,
+      "kind": "paragraph",
+      "selected_block_id": "0b7f80031c9b35bdd181c4e6b0fb037e157f4e9335f3a1e747fbf7563f8a227a",
+      "anchor": "0b7f80031c9b35bdd181c4e6b0fb037e157f4e9335f3a1e747fbf7563f8a227a",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "a561fb0c5e82aa04c101b2a7d5cc0a5ff618e39b968a6743632f73475da1cbbf"
+      ],
+      "source_version_fingerprint": "a1c5f0deeacabb909ab1fa2be4de99e05ebfa4eac3a6187062963ba06fd9db97",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 51,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 24,
+      "kind": "caption",
+      "selected_block_id": "b82f29e18d41e6ba84c75b9915b82fee10eaf1c4b2ff5c56aa20fe166eca057d",
+      "anchor": "b82f29e18d41e6ba84c75b9915b82fee10eaf1c4b2ff5c56aa20fe166eca057d",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "1deb4925575ce82f641d33d34f0ac4628e4d2544b6a45d1d3203399167eddcfa"
+      ],
+      "source_version_fingerprint": "96fe0bd343b6c635cdd4597e14fe4f1902bb6b3ef4ac250ba0f905d564a33606",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 52,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 24,
+      "kind": "table",
+      "selected_block_id": "e414338a4e48d78e8a51e875b1b7ba028bbe5c6648029ae176bc941564d56ee7",
+      "anchor": "4923cc99c8a119039ea192f24ff0734b0705a720418b5712a6369b5bda8ea7ca",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "4923cc99c8a119039ea192f24ff0734b0705a720418b5712a6369b5bda8ea7ca"
+      ],
+      "source_version_fingerprint": "a1b8c916acf59cbb2a15faf2b4d3f2284849d0e1a4a285c2305c0012bd461d5c",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 33,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 53,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 24,
+      "kind": "caption",
+      "selected_block_id": "b63b34abe2a1ef030d0e4ed6605579bf5e5ceb9440c38c894b94d89736ba23cf",
+      "anchor": "b63b34abe2a1ef030d0e4ed6605579bf5e5ceb9440c38c894b94d89736ba23cf",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "5e99cbbcb5832da53f508d81487f58d686ecc11bfee3a5f42cb1586ceef362d3"
+      ],
+      "source_version_fingerprint": "c8775063eda172177e72737e3ffdc3ed8bbf92d0be98f8111084e422c83f6384",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 54,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 24,
+      "kind": "table",
+      "selected_block_id": "2500a31ba18c1a8ba2688e5e38feae5e581336841620a3049adb9494d7a970b8",
+      "anchor": "ae1fc60663c2c0a5a3344071c8ec8be5574a5cfe5395ec2ece813a228aef79d1",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "ae1fc60663c2c0a5a3344071c8ec8be5574a5cfe5395ec2ece813a228aef79d1"
+      ],
+      "source_version_fingerprint": "ad2ed5840e1cd39dd0172b398c18cdbe143891716e3d681e253999fee0f2d1fb",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 21,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 55,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 25,
+      "kind": "caption",
+      "selected_block_id": "85bbccbc68dc2ccde731e5a6a513020efd38f7b0a586eb28cee7fa974eebbf18",
+      "anchor": "85bbccbc68dc2ccde731e5a6a513020efd38f7b0a586eb28cee7fa974eebbf18",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "8b97ddafbb13d076942fe241f323751696cb8591d26b5cee2dac001188aaa3c3"
+      ],
+      "source_version_fingerprint": "a043855c20beeb2d3d852285117002202dadbb6c645af870c519f81c9a8f67dc",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 56,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 25,
+      "kind": "caption",
+      "selected_block_id": "d0783286922048d8a3efaa797a95e3333d050208589b3741147d6d12546b13d9",
+      "anchor": "d0783286922048d8a3efaa797a95e3333d050208589b3741147d6d12546b13d9",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "43eeb636a40ff65d4ef0b5e8f1aebd97e4432e796d1780e8fa64835d4202f32c"
+      ],
+      "source_version_fingerprint": "5fc10b973f38294e39ffc87ec42a3873f79d3eb7fa85ddeb40d630de295c5f10",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 57,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 25,
+      "kind": "paragraph",
+      "selected_block_id": "80e8cbb95ea4c41442dee4e571fd67841255c7cac9f4494e685b41a2db81a19a",
+      "anchor": "80e8cbb95ea4c41442dee4e571fd67841255c7cac9f4494e685b41a2db81a19a",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "84d315db1d469362d13f938a44ce06c5acb6a5d4ea5d4b3f9fae0a7d4e4e1e36"
+      ],
+      "source_version_fingerprint": "e61b77308b75f59d0145eb9b5e2e8b4febb03f4954dc615c9eac79440b8fd051",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 58,
+      "category": "segmentation",
+      "category_zh": "同一目录的分块差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 26,
+      "kind": "paragraph",
+      "selected_block_id": "67eecd32300596cd4df28d530e1d4ca68441be91c46019316f22c9b0be84b3df",
+      "anchor": "67eecd32300596cd4df28d530e1d4ca68441be91c46019316f22c9b0be84b3df",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "f700c892962f769bde96af03f326e7b1298cb45d39c5d14e64c53646f96ae869",
+        "d3f0c3e72d2cc563ad47e968f88247ad5eef657cc2f3ae4a7040530281dc9789",
+        "22d116f6e885683563869591ea3c396a766d6558f039f0bd3500a051a16139da",
+        "d4b4751f742cc332aeaf7a8985edb4cada18d6cb9e82a7254e1a5d70ed629cc6",
+        "00d60399d118182b6b302a4694a2d7f9a1f574509ad6fceccf5463ba2e3a7cb6"
+      ],
+      "source_version_fingerprint": "4aab36e79c2fb94813a14270ec6c1c6f571a604f53dcb20765a5b88f66c88853",
+      "scientific_verdict": "not_adjudicated",
+      "joined_alternatives_equal_ignoring_whitespace": true
+    },
+    {
+      "snapshot_ordinal": 59,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 26,
+      "kind": "paragraph",
+      "selected_block_id": "f09c4a0b496e8dde9142e2a8401713971ea330484adf03554ba8d49b97045192",
+      "anchor": "f09c4a0b496e8dde9142e2a8401713971ea330484adf03554ba8d49b97045192",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "9e8f45d1bc10b3615fffc3954da3ec7592a0fb5029bc4b53494b6016e393fddb"
+      ],
+      "source_version_fingerprint": "0ae92f6b512696041f72c90ca70e42fd72ddea821699b48d406f16ff1133920f",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 60,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 26,
+      "kind": "caption",
+      "selected_block_id": "3a58b6e895c33dcfef32eff55b59b27b0f89d1a75eea4ae15097d452f22bfbb9",
+      "anchor": "3a58b6e895c33dcfef32eff55b59b27b0f89d1a75eea4ae15097d452f22bfbb9",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "7b6189b888d77fd5abec711ad55167be80c877142a9ef97982e70cce3762ecb4"
+      ],
+      "source_version_fingerprint": "5d3d607320ea62b46f863db83f3425e0976f6ee167448a4eedc61aa6d9786d02",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 61,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 26,
+      "kind": "paragraph",
+      "selected_block_id": "b1227fbbcd672561496e26b16b79eabe561131085a56cda4bf78b61d9628102d",
+      "anchor": "b1227fbbcd672561496e26b16b79eabe561131085a56cda4bf78b61d9628102d",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "4e57c198d9a9b9deae51555edd503cd4ff79bc3176bae9227db57b57376c1881"
+      ],
+      "source_version_fingerprint": "0cfeb6d23df51191b161a469f11a018b13ab82943ff5220540245fc740d1f012",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 62,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 27,
+      "kind": "caption",
+      "selected_block_id": "0f3e0bd82f048c28264e0559ce43e4ecd47b7e7e82695fe6ba0e9f84197954c7",
+      "anchor": "0f3e0bd82f048c28264e0559ce43e4ecd47b7e7e82695fe6ba0e9f84197954c7",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "de272bf53352ef6b371232929e67e4ab27744347f9118e2b5f91bda721b07cf5"
+      ],
+      "source_version_fingerprint": "6e2b87060c0af46f2d29a84b99996abde42e3a87866388d6466fea9282e7a5b7",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 63,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 27,
+      "kind": "table",
+      "selected_block_id": "2e1a9f7ff3b7f4ee6e069ed38feca3fe2cb89257c34654912eadbe5776b921be",
+      "anchor": "e2be3b7a206e38d12bfafbaae6989d4998301a3eccc3c7e10c0781272efbad9c",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "e2be3b7a206e38d12bfafbaae6989d4998301a3eccc3c7e10c0781272efbad9c"
+      ],
+      "source_version_fingerprint": "a0d837deea89aa1cf7d9958c2704d38065f08198cd37a6efcf3b4d55fd30f0ea",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 15,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 64,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 27,
+      "kind": "caption",
+      "selected_block_id": "c25920c619a13971086596e0cd10e803dabce59fed940db3c5c1626060d7c252",
+      "anchor": "c25920c619a13971086596e0cd10e803dabce59fed940db3c5c1626060d7c252",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "c960089cc03d1c68e173962daff5970b04b5e7390cf7e7c4fce81f50ee3cd5b4"
+      ],
+      "source_version_fingerprint": "06daf76eb5226811d17b4c000fea0f18c19cd8c0a5cc7b252b140868ae6a8b6e",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 65,
+      "category": "table_comparison",
+      "category_zh": "结构表的格式与标签差异",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 27,
+      "kind": "table",
+      "selected_block_id": "6366b969b214101821ecfbd6b1101c1b9b01142b3677fceda1514c7e99144b43",
+      "anchor": "55d7361c3ccd15fa2f3fe7ba490cba4291e6ce7adaa6982d9453fa8ebc39271b",
+      "selected_engine": "docling",
+      "alternative_block_ids": [
+        "55d7361c3ccd15fa2f3fe7ba490cba4291e6ce7adaa6982d9453fa8ebc39271b"
+      ],
+      "source_version_fingerprint": "a047f1ff1e0a16682beb4807c00f460774393ab7c469494168e132f341810f8c",
+      "scientific_verdict": "not_adjudicated",
+      "decimal_items": 27,
+      "decimal_sequence_equal": true
+    },
+    {
+      "snapshot_ordinal": 66,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 28,
+      "kind": "caption",
+      "selected_block_id": "5c777b797e218da5f48988385ab8af0ee9375a0785d1b82812b8f1e293a9a895",
+      "anchor": "5c777b797e218da5f48988385ab8af0ee9375a0785d1b82812b8f1e293a9a895",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "09f3deab878587a08012a7393bc4026f406204d73c8da03f7a8a2adb8e1091cd"
+      ],
+      "source_version_fingerprint": "864f7374793e4976436a9d3d70676f9a99b2ed46bab07651c12fc77a3a24c27a",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 67,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 28,
+      "kind": "caption",
+      "selected_block_id": "b7db2a4f7367dfddcf91629a97ea3da2488b1329cea0ac93e3d7216b321f6dd5",
+      "anchor": "b7db2a4f7367dfddcf91629a97ea3da2488b1329cea0ac93e3d7216b321f6dd5",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "472e667147ecc51bcf533b34e759ff2076ce1dc57d067d41e01bcc2d2c12ba0a"
+      ],
+      "source_version_fingerprint": "8323c0c0b2ab4ffd359a3713f86ba631bea1d47be7597e182875150952c4bcbf",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 68,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 28,
+      "kind": "paragraph",
+      "selected_block_id": "d2e46f22f4da30ee31ce2754875e118b2f5e81bcf5f233aee1bb3397c0e1e61b",
+      "anchor": "d2e46f22f4da30ee31ce2754875e118b2f5e81bcf5f233aee1bb3397c0e1e61b",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "f96f1a22128ce4beaa567a169fe787a4c8f4b25ee994e8a781d9a96ac87d2053"
+      ],
+      "source_version_fingerprint": "8a8f7be0421d640d90a6e92e7f2edb5bc093811a391c7a170689b57806e0c4c4",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 69,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 29,
+      "kind": "caption",
+      "selected_block_id": "83ee168502336094927444100b64e7b2ec53aaebdddcfbd002707a362ed0a340",
+      "anchor": "83ee168502336094927444100b64e7b2ec53aaebdddcfbd002707a362ed0a340",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "2d49cc18409ebe0e04a0ad4ac877b9e4c1c776abe605b106e6353dfd7ac85835"
+      ],
+      "source_version_fingerprint": "04dcbaac4866f7a658edd517a6da6f8473e21da5f61fcc43b0155818cc1b4d2b",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 70,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "pdf_page": 29,
+      "kind": "paragraph",
+      "selected_block_id": "bfcd5f3c9d37d7571fb20aefc1590b8dfcedb086c703f1b936c5e0cab64b61e7",
+      "anchor": "bfcd5f3c9d37d7571fb20aefc1590b8dfcedb086c703f1b936c5e0cab64b61e7",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "4563322ace3780139039de2875d0c17229224ea59a3375636693cc7621e941e3"
+      ],
+      "source_version_fingerprint": "a8117d25f0efa137fcdceb5e64631dfdf2de78817729bc8ce2d2c4cdfb59b5cc",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 71,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "paragraph",
+      "selected_block_id": "9e76d97457b61d01202fbe19f74eedb4d391363276ff7c8ca08949c44c5fa1ea",
+      "anchor": "9e76d97457b61d01202fbe19f74eedb4d391363276ff7c8ca08949c44c5fa1ea",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "fc9d8ab60be4ad4ffa2145be98cb7ac187586f9af09545cf0e137d09c3160e24"
+      ],
+      "source_version_fingerprint": "70431504240a6a0fb9fdba2a02b8aac6a5c612fc77cafe5d99f17f8623e9417a",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 72,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "caption",
+      "selected_block_id": "2187d9504ab4d5babd750920e0fa1d8610b18a448e098503af3114203b2274d9",
+      "anchor": "2187d9504ab4d5babd750920e0fa1d8610b18a448e098503af3114203b2274d9",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "bb878dd67e1b25da5b091323197af5368e4c6f3a9ca224e107b0c1d9a6d91120"
+      ],
+      "source_version_fingerprint": "fb6e5580463c9edad8fdc8b80da7432e7ac78aa82690ad912535e1f6425ee184",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 73,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "paragraph",
+      "selected_block_id": "234bb30e21a146a3bfd442b357676617f7f935452c88447e076659f8ccc9f758",
+      "anchor": "234bb30e21a146a3bfd442b357676617f7f935452c88447e076659f8ccc9f758",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "44e3f9405e5722a2fdf62d725878d583c3d93fe8762d1f2a1ce11dd5f3a035ac"
+      ],
+      "source_version_fingerprint": "1fc107cd852b183c2ab83397ffb66ae2186fe57b06f8cc54e7e47be8dc81540c",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 74,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "caption",
+      "selected_block_id": "76bb3710bfa058e22e0028c4535a433936a4f04bc4b3cf7bc61d2bef78ad3654",
+      "anchor": "76bb3710bfa058e22e0028c4535a433936a4f04bc4b3cf7bc61d2bef78ad3654",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "9b418b132291e4dad0f56f8b2ec88834e5df27ec642cca33cf07804410f821dd"
+      ],
+      "source_version_fingerprint": "14836f049fbf0fce48dae74565aefd5409a41a71a42590524f62dc6603a35bd6",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 75,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "paragraph",
+      "selected_block_id": "8196f6d8a896817f25bd2b862c0098a04a9638c22a8e7070cabc58e9206f6ed0",
+      "anchor": "8196f6d8a896817f25bd2b862c0098a04a9638c22a8e7070cabc58e9206f6ed0",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "fc5601bebb9d23bbd401986bb16a7475071d60e1807ab7d45877c244316c4bcf"
+      ],
+      "source_version_fingerprint": "9ca1c94b235d2ad4be5ba0c749edb761111cdc027410b693282bce63b7775737",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 76,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "paragraph",
+      "selected_block_id": "c2b14bbecc609fdd844c803a192b93ff4287e9f831fc72c62af639178ac98d50",
+      "anchor": "c2b14bbecc609fdd844c803a192b93ff4287e9f831fc72c62af639178ac98d50",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "95346c58255971e10e18acc2a619252314f59b0e620975d6f23e17b9fbd2b285"
+      ],
+      "source_version_fingerprint": "42420c5bc1bf3440d4fdc15eca45fc79c97715ba21dc48f5d1c3784da62e9a40",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 77,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "paragraph",
+      "selected_block_id": "6ad2596dd71afaf832ab8c578a0149c257489192eae3e7b3cc86e60a3164f9cf",
+      "anchor": "6ad2596dd71afaf832ab8c578a0149c257489192eae3e7b3cc86e60a3164f9cf",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "8c31d795c9dde2ef873e3767644b7292246a0dee772d7077735a1f8624c5d396"
+      ],
+      "source_version_fingerprint": "364d133fb3a33c0d86048aa23936423e15d38715a729f2540bedbfcda70b1d93",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 78,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "paragraph",
+      "selected_block_id": "21857c8b396928b26fc38f77d5a7070a7e0f79b48b139a0ec9b4cae827ff719b",
+      "anchor": "21857c8b396928b26fc38f77d5a7070a7e0f79b48b139a0ec9b4cae827ff719b",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "e73e653595728c389bef9f32c9478a096fd3b992137f6d322780f6ff99134ba0"
+      ],
+      "source_version_fingerprint": "c5e2d7dc6b2701912fa4e67f385a3e9927884a3db72011ebeade899df6f08333",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 79,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "paragraph",
+      "selected_block_id": "6aea1c4414e7cccda269e8174c44ff2b2a8272fd1543012899fee06f3bcc1901",
+      "anchor": "6aea1c4414e7cccda269e8174c44ff2b2a8272fd1543012899fee06f3bcc1901",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "51802dab97cd7dfce2133e62b824b2347befdebbfabe5c2bab8acb2140855305"
+      ],
+      "source_version_fingerprint": "282eb316eadfc36f68979a4da33fcc6c64784e8329751090e081bd95e03cc360",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 80,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "paragraph",
+      "selected_block_id": "a3ff1a4a7576c8f8dde5cc90abd836b079623482ebc4852682753b64e26230c9",
+      "anchor": "a3ff1a4a7576c8f8dde5cc90abd836b079623482ebc4852682753b64e26230c9",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "4f5e4ea2e90f20354b095d541e90f600adf93226c8bd4bf2ee2dc58c027b721d"
+      ],
+      "source_version_fingerprint": "29061803607af455dca5f72dcbf2db9396f404bca2215495c7bc231bfe1fdbf3",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 81,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "kind": "paragraph",
+      "selected_block_id": "67a5451889f70cfd1ad8aeb55104f5dd1fedc98c037828d9749303d9fc28549f",
+      "anchor": "67a5451889f70cfd1ad8aeb55104f5dd1fedc98c037828d9749303d9fc28549f",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "4f5e4ea2e90f20354b095d541e90f600adf93226c8bd4bf2ee2dc58c027b721d",
+        "f448016cdeba8b195cc576525b4d1e084c278df98562af4ef96e8df4808043eb"
+      ],
+      "source_version_fingerprint": "dbcab8a41c03603365d67aa2065a83e6b2c61e33a4ea3439993a794b542c2e1d",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 82,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "kind": "paragraph",
+      "selected_block_id": "839d41a835e6eed148a743e76d51b05e82f452b47a6446e919df08301bfa5ff2",
+      "anchor": "839d41a835e6eed148a743e76d51b05e82f452b47a6446e919df08301bfa5ff2",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "ef6c5fc77964141b655b629682b6917c6c18ddd074798faccc9d53ef48ab6158",
+        "1e9ef37e48ffa4831d1562828db90483695ff110e71000221367d5154726b243"
+      ],
+      "source_version_fingerprint": "c398b045346fa8f073f5bbdcb749f4dc5f3cfa782da36e1f540cf249744035c7",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 83,
+      "category": "identifier_ocr",
+      "category_zh": "相名、化学式等字符疑似误识",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "kind": "caption",
+      "selected_block_id": "95947e31c20d0f3e94c514ee915ea23c6f036b39a10d5594f02c7dba5dc9015c",
+      "anchor": "95947e31c20d0f3e94c514ee915ea23c6f036b39a10d5594f02c7dba5dc9015c",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "618f43d67dace51dcf1edc3dcf7fea8b96af4c6ebed00ddd7fe5933a5dbb6065"
+      ],
+      "source_version_fingerprint": "b9db109920ef027df5c832dfc24305565a77066248ae4279972d424ddaee1a57",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 84,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "kind": "paragraph",
+      "selected_block_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+      "anchor": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "ea74bcc0dd25185f37161abcf23ab0c59aee048a3ce1cec6c5f56acbc92c6c7d"
+      ],
+      "source_version_fingerprint": "e92aea5fbbad1035f014f925872af2f5cc08bdf296279a3fa207dae03b83eca2",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 85,
+      "category": "notation_format",
+      "category_zh": "公式写法、空格及普通标点差异候选",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "kind": "paragraph",
+      "selected_block_id": "e59d89642ca94357dc40f4d78a0c50e2e232a583fdc49bd97ef46d6a53b58432",
+      "anchor": "e59d89642ca94357dc40f4d78a0c50e2e232a583fdc49bd97ef46d6a53b58432",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "4f24c46be18bcd57ab212f44db0b8030ae48307e0748e9c9bc60263f1a54b5ce"
+      ],
+      "source_version_fingerprint": "f46d34610a0886f954e0825a5ceafbbffbdce0fe1d27ebbc302fb8d26d5b0997",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 86,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "kind": "paragraph",
+      "selected_block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+      "anchor": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "c3cc3e6715d3f8f6193256bcaea21744bcac6409f64589642643f13b93b0a104"
+      ],
+      "source_version_fingerprint": "4e48447976d07b969848dc24db9faac972bf788b627f3d0cb9bd3ef33e41a481",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 87,
+      "category": "symbol_unit_mixed",
+      "category_zh": "数学符号、单位及混合差异",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "kind": "caption",
+      "selected_block_id": "8949e52ba01ec97abe887521eccf3b4f1ed9be86f222150ff10e62616baba69a",
+      "anchor": "8949e52ba01ec97abe887521eccf3b4f1ed9be86f222150ff10e62616baba69a",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "e0f1105de1407328b704b30a025b8ee33b1d23c149799d9a711907c128ccee33"
+      ],
+      "source_version_fingerprint": "e78647eaed40e4946a441e228d1bdd16c2d72a36e20173d73bd9d3ff6c97d3c6",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 88,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "kind": "paragraph",
+      "selected_block_id": "623a375fdcf15955da1606aff2a788393a983570ffef936dad82248c5938a1aa",
+      "anchor": "623a375fdcf15955da1606aff2a788393a983570ffef936dad82248c5938a1aa",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "a8cc921dc6c398b3bc792b5f03710100db63bcc9a885dff9fac02b85c959d3bb",
+        "e53ae04b1c00ba9717fe6d5be62512a4fb92531e0f54de1d4fa27369bef419c5"
+      ],
+      "source_version_fingerprint": "a802cbcffb789ad0840b6047ff880ac3affe697fbe07c67edeed7d43dd82b7f8",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 89,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "kind": "paragraph",
+      "selected_block_id": "5d6f8c7182cfd22a0f3ae0059210e0354e82797eb728ddfdbaafa2405a6b320b",
+      "anchor": "5d6f8c7182cfd22a0f3ae0059210e0354e82797eb728ddfdbaafa2405a6b320b",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "e53ae04b1c00ba9717fe6d5be62512a4fb92531e0f54de1d4fa27369bef419c5"
+      ],
+      "source_version_fingerprint": "976c5a092f4b198745f2673b17a52870d597b9fc84277f106a8478b61171078b",
+      "scientific_verdict": "not_adjudicated"
+    },
+    {
+      "snapshot_ordinal": 90,
+      "category": "layout_noise",
+      "category_zh": "页码、页脚和下载水印",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "kind": "paragraph",
+      "selected_block_id": "9dbf4a5d6c5cf36b43531d5dbfa64dd7faf0a2e19074b7c7e69832b2ead2aec9",
+      "anchor": "9dbf4a5d6c5cf36b43531d5dbfa64dd7faf0a2e19074b7c7e69832b2ead2aec9",
+      "selected_engine": "mineru",
+      "alternative_block_ids": [
+        "e53ae04b1c00ba9717fe6d5be62512a4fb92531e0f54de1d4fa27369bef419c5"
+      ],
+      "source_version_fingerprint": "c5289a020f5cb2120124ebc67449b4c9c443a6c9d5b2c2d61bfdba3a53ae4d5c",
+      "scientific_verdict": "not_adjudicated"
+    }
+  ],
+  "current_year": 2021,
+  "crossref": {
+    "url": "https://api.crossref.org/works/10.1073/pnas.1118168109",
+    "published_online": [
+      2012,
+      4,
+      6
+    ],
+    "published_print": [
+      2012,
+      4,
+      24
+    ],
+    "volume": "109",
+    "issue": "17",
+    "page": "6463-6466"
+  },
+  "limitations": [
+    "27条表示差异是初分类，尚未完成逐项原图裁决。",
+    "表格只核对小数序列，不代表行列、整数标签和整体结构已验收。",
+    "未完成全部差异到表单、结构、谱数据的影响映射，不能把未建立链接称为无影响。",
+    "只读盘点，未改用户草稿、解析原文或审核状态。"
+  ]
+}
