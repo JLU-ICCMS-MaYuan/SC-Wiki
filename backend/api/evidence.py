@@ -20,6 +20,7 @@ from backend.ingest import property_evidence as ev
 from backend.ingest import scientific_evidence as science
 from backend.ingest import evidence_proposals as proposals
 from backend.ingest import manual_evidence as manual
+from backend.ingest import evidence_progress
 from backend.storage import FileRef, create_storage
 from backend.ingest.upload_tasks import redis_client, upload_queue, save_llm_config, TASK_TTL, get_draft, get_state, save_draft, upload_task_lock
 
@@ -34,6 +35,33 @@ class Target(BaseModel):
     candidates: dict[str, list[dict]] = Field(default_factory=dict)
     retry_keys: list[str] | None = None
     purpose: Literal['check', 'review_all', 'parse', 'submit', 'field'] = 'submit'
+    progress_id: str | None = Field(default=None, pattern=r'^[0-9a-f]{32}$')
+
+
+def preparation_progress(body, user, percent):
+    evidence_progress.advance(body.progress_id, user.id,
+        f'{body.purpose}:{body.target}:{body.target_id}', percent)
+
+
+def prepared_response(body, user, result):
+    try:
+        preparation_progress(body, user, 20)
+    except HTTPException:
+        # 取消可能发生在排队和返回之间，清理刚创建或复用的同用户任务。
+        if result.get('id') and result.get('status') in {'queued', 'running'}:
+            cancel_job(result['id'], user)
+        raise
+    return result
+
+
+@router.get('/preparations/{progress_id}')
+def get_preparation(progress_id: str, user=Depends(get_current_user)):
+    return evidence_progress.read(progress_id, user.id)
+
+
+@router.delete('/preparations/{progress_id}')
+def cancel_preparation(progress_id: str, user=Depends(get_current_user)):
+    return evidence_progress.cancel(progress_id, user.id)
 
 
 def review_response(snapshot, cached):
@@ -208,6 +236,7 @@ def save_field_decision(body: FieldDecision, user=Depends(get_current_user)):
 
 @router.post('/summary')
 def field_summary(body: 'Target', user=Depends(get_current_user)):
+    preparation_progress(body, user, 0)
     from sqlalchemy import func
     from backend.ingest.field_drafts import authorized_draft, draft_version
     from backend.ingest.field_review import independent_fields, compact_result
@@ -260,6 +289,7 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
                     (decision_current or {}).get('state_review_context')]) if row else '',
                 'pending_review': not matches, 'human_modified': record['item_key'] in modified or bool((decision_current or {}).get('paper_source_hash')),
                 'resolution': (draft.get('_review_notes', {}).get(record['item_key']) or {}).get('reason', '')}))
+        preparation_progress(body, user, 5)
         return {'version': draft_version(draft), 'records': output, 'needs_check': False}
 
 
@@ -313,6 +343,7 @@ def preflight(body: Target, user=Depends(get_current_user)):
 
 @router.post('/jobs')
 def create_job(body: Target, user=Depends(get_current_user)):
+    preparation_progress(body, user, 0)
     # 摘要只承诺草稿版本，不能与包含来源的科学快照版本混用。
     if body.expected_draft_version is not None:
         from backend.ingest.field_drafts import authorized_draft, draft_version, target_lock
@@ -321,11 +352,14 @@ def create_job(body: Target, user=Depends(get_current_user)):
                 draft, _ = authorized_draft(session, body.target, body.target_id, user)
             if body.expected_draft_version != draft_version(draft):
                 ev.fail('evidence_stale', '核对前草稿已发生变化，当前输入保留，请重新打开后核对')
+            preparation_progress(body, user, 5)
             snapshot, cached = snapshot_for(body, user)
+            preparation_progress(body, user, 10)
             snapshot['draft_version_token'] = body.expected_draft_version
-            return enqueue_review(body.model_copy(update={'expected_version': snapshot['version']}), user, snapshot, cached)
+            return prepared_response(body, user, enqueue_review(body.model_copy(update={'expected_version': snapshot['version']}), user, snapshot, cached))
     snapshot, cached = snapshot_for(body, user)
-    return enqueue_review(body, user, snapshot, cached)
+    preparation_progress(body, user, 10)
+    return prepared_response(body, user, enqueue_review(body, user, snapshot, cached))
 
 
 def enqueue_review(body, user, snapshot, cached):
@@ -389,6 +423,7 @@ def enqueue_review(body, user, snapshot, cached):
     config = get_llm_config()
     if not config.api_key:
         ev.fail('evidence_model_config', '尚未配置模型，请先填写模型配置')
+    preparation_progress(body, user, 10)
     client = redis_client()
     lock_keys = ['field-review-job:' + ev.digest([body.target, body.target_id, r['item_key'], r['content_hash'], r['source_hash']])
                  for r in snapshot['records'] if r['key'] in requested]
@@ -429,6 +464,8 @@ def enqueue_review(body, user, snapshot, cached):
 
 @router.post('/submit-check')
 def submit_check(body: Target, user=Depends(get_current_user)):
+    body = body.model_copy(update={'purpose': 'submit'})
+    preparation_progress(body, user, 0)
     from backend.ingest.field_drafts import authorized_draft
     from backend.api.rag import _validate_draft
     with SessionLocal() as session:
@@ -450,7 +487,9 @@ def submit_check(body: Target, user=Depends(get_current_user)):
         with SessionLocal.begin() as session:
             science.save_results(session, snapshot, program, user.id)
         return {'status': 'completed', **review_response(snapshot, {**cached, **program}), 'program_issues': issues}
+    preparation_progress(body, user, 5)
     snapshot, cached = snapshot_for(body, user)
+    preparation_progress(body, user, 10)
     from backend.ingest.field_review import merge_program_results
     merge_program_results(snapshot, cached)
     from backend.ingest.field_review_migration import migrated, migrate
@@ -470,7 +509,7 @@ def submit_check(body: Target, user=Depends(get_current_user)):
     body.expected_version = snapshot['version']
     body.purpose = 'submit'
     body.retry_keys = None
-    return enqueue_review(body, user, snapshot, cached)
+    return prepared_response(body, user, enqueue_review(body, user, snapshot, cached))
 
 
 @router.get('/jobs/{job_id}')

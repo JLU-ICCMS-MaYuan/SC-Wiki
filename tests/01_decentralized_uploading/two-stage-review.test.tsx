@@ -106,7 +106,7 @@ it('主动核对使用草稿令牌，通过后关闭且提交直接复用', asyn
   fireEvent.click(await screen.findByRole('button', {name: '大模型核对'}))
   await waitFor(() => expect(flow!.records[0].status).toBe('supported'))
   expect(api.post).toHaveBeenCalledWith('/api/rag/evidence/jobs', {target: 'upload', target_id: 'test',
-    expected_draft_version: 'draft-v1', purpose: 'field', retry_keys: ['name']})
+    expected_draft_version: 'draft-v1', purpose: 'field', retry_keys: ['name'], progress_id: expect.stringMatching(/^[0-9a-f]{32}$/)})
   expect(screen.queryByRole('button', {name: '大模型核对'})).not.toBeInTheDocument()
   let result
   await act(async () => { result = await flow!.gate({target: 'upload', target_id: 'test'}) })
@@ -164,7 +164,7 @@ it('提交同版本失败不会进入旧人工理由绕过路径', async () => {
   let answer
   await act(async () => { answer = await flow!.gate({target: 'upload', target_id: 'test'}) })
   expect(answer).toBeNull()
-  expect(api.post).toHaveBeenCalledWith('/api/rag/evidence/submit-check', {target: 'upload', target_id: 'test'})
+  expect(api.post).toHaveBeenCalledWith('/api/rag/evidence/submit-check', {target: 'upload', target_id: 'test', progress_id: expect.stringMatching(/^[0-9a-f]{32}$/)})
 })
 
 it('原文加载中或失败不显示无证据，重试和同版本摘要刷新不丢原文', async () => {

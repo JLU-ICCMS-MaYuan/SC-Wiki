@@ -163,7 +163,7 @@ it('草稿已排队自动核对时只轮询原任务，不重复创建模型任�
   }
   render(<Automatic/>)
   await act(async () => { fireEvent.click(screen.getByText('自动核对')) })
-  expect(api.get).toHaveBeenCalledWith('/api/rag/evidence/jobs/existing')
+  expect(api.get).toHaveBeenCalledWith('/api/rag/evidence/jobs/existing', expect.objectContaining({signal: expect.anything()}))
   expect(vi.mocked(api.post).mock.calls.filter(([path]) => path === '/api/rag/evidence/jobs')).toHaveLength(0)
 })
 it('上传语义疑点显示抽屉等待手动提交',async()=>{vi.mocked(api.get).mockResolvedValue({status:'completed',records:[{...record,status:'unsupported'}]});render(<Harness target="upload"/>);await start();await advance();expect(done).toHaveBeenCalledWith(expect.objectContaining({evidence_job_id:'job'}))})
@@ -213,12 +213,12 @@ it('管理员可对未核对项填写理由完成，连续输入合并且失败�
 })
 it('服务失败不提交并可重试',async()=>{vi.mocked(api.get).mockResolvedValue({status:'failed',error:{message:'模型服务异常'}});render(<Harness/>);await start();await advance();expect(screen.getByText('模型服务异常')).toBeInTheDocument();expect(done).not.toHaveBeenCalled()})
 it('离页停止续提但后台继续持久保存',async()=>{vi.mocked(api.get).mockResolvedValue({status:'running'});const {unmount}=render(<Harness/>);await start();await advance();await act(async()=>unmount());expect(api.del).not.toHaveBeenCalled();expect(done).toHaveBeenCalledWith(null)})
-it('缓存有效无需倒计时或调用模型',async()=>{vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[record],sources:[]});render(<Harness target="upload"/>);await start();expect(api.post).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledTimes(1)})
-it('复用尚未落库的任务结果仍携带服务端任务身份',async()=>{vi.mocked(api.post).mockResolvedValue({job_id:'cached-job',version:'v1',needs_check:false,records:[record],sources:[]});render(<Harness target="upload"/>);await start();expect(api.post).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledWith(expect.objectContaining({evidence_job_id:'cached-job'}))})
-it('请求返回前离页也会取消迟到的后台任务',async()=>{
+it('缓存有效无需倒计时或调用模型',async()=>{vi.mocked(api.post).mockResolvedValue({version:'v1',needs_check:false,records:[record],sources:[]});render(<Harness target="upload"/>);await start();await act(async()=>vi.advanceTimersByTimeAsync(400));expect(api.post).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledTimes(1)})
+it('复用尚未落库的任务结果仍携带服务端任务身份',async()=>{vi.mocked(api.post).mockResolvedValue({job_id:'cached-job',version:'v1',needs_check:false,records:[record],sources:[]});render(<Harness target="upload"/>);await start();await act(async()=>vi.advanceTimersByTimeAsync(400));expect(api.post).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledWith(expect.objectContaining({evidence_job_id:'cached-job'}))})
+it('准备请求返回前离页会取消准备及迟到任务',async()=>{
  let deliver!: (value: unknown) => void
  vi.mocked(api.post).mockImplementation(async path=>path.endsWith('preflight')?{version:'v1',needs_check:true,records:[record],sources:[]} as never:new Promise(resolve=>{deliver=resolve}) as never)
- const {unmount}=render(<Harness/>);await start();await advance();await act(async()=>unmount());await act(async()=>deliver({id:'late-job'}));expect(api.del).not.toHaveBeenCalled();expect(done).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledWith(null)
+ const {unmount}=render(<Harness/>);await start();await advance();await act(async()=>unmount());await act(async()=>deliver({id:'late-job',status:'queued'}));expect(api.del).toHaveBeenCalledWith(expect.stringContaining('/preparations/'));expect(api.del).toHaveBeenCalledWith('/api/rag/evidence/jobs/late-job');expect(done).toHaveBeenCalledTimes(1);expect(done).toHaveBeenCalledWith(null)
 })
 
 it('已有原文直接用于裁决，不要求选择片段或编辑引句', async () => {
@@ -294,7 +294,7 @@ it('重新查找绕过旧疑点缓存，找到证据后仍等待手动提交', a
   expect(api.post).toHaveBeenCalledTimes(3)
   expect(api.post).not.toHaveBeenCalledWith('/api/rag/evidence/jobs/new-job/save-draft')
   expect(done).toHaveBeenCalledTimes(1)
-  expect(api.get).toHaveBeenCalledWith('/api/rag/evidence/jobs/new-job')
+  expect(api.get).toHaveBeenCalledWith('/api/rag/evidence/jobs/new-job', expect.objectContaining({signal: expect.anything()}))
 })
 
 it('重新查找的倒计时仍可取消，不创建任务或自动续提', async () => {
@@ -309,15 +309,15 @@ it('重新查找的倒计时仍可取消，不创建任务或自动续提', asyn
   expect(vi.mocked(api.post).mock.calls.some(([path])=>path.endsWith('/jobs'))).toBe(false)
 })
 
-it('排队显示动态进度条和持续更新的等待时间，不伪造百分比', async () => {
+it('排队显示20%和持续更新的等待时间，不虚增进度', async () => {
   vi.mocked(api.get).mockResolvedValue({ status: 'queued' })
   render(<Harness />)
   await start()
   await advance()
-  expect(screen.getByRole('progressbar', { name: '原文核对进度' })).not.toHaveAttribute('aria-valuenow')
+  expect(screen.getByRole('progressbar', { name: '原文核对进度' })).toHaveAttribute('aria-valuenow', '20')
   expect(screen.getByRole('status')).toHaveTextContent('正在排队')
   await act(async () => { await vi.advanceTimersByTimeAsync(5000) })
-  expect(screen.getByText('已等待 0 分 5 秒')).toBeInTheDocument()
+  expect(screen.getByText('已等待 0 分 8 秒')).toBeInTheDocument()
   await act(async () => fireEvent.click(screen.getByText('取消')))
   expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   expect(done).toHaveBeenCalledWith(null)
@@ -328,15 +328,17 @@ it('按后台完成组数推进百分比，显示当前组且完成后结束进�
   render(<Harness />)
   await start()
   await advance()
-  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '0')
+  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '20')
   expect(screen.getByText('正在核对第 1/2 组原文…')).toBeInTheDocument()
   vi.mocked(api.get).mockResolvedValue({ status: 'running', completed_batches: 1, total_batches: 2, current_batch: 2 })
   await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
-  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '50')
-  expect(screen.getByText('已核对 1/2 组原文 · 50%')).toBeInTheDocument()
+  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '57')
+  expect(screen.getByText('已核对 1/2 组原文 · 57%')).toBeInTheDocument()
   expect(screen.getByText('正在核对第 2/2 组原文…')).toBeInTheDocument()
   vi.mocked(api.get).mockResolvedValue({ status: 'completed', records: [record], completed_batches: 2, total_batches: 2 })
   await act(async () => { await vi.advanceTimersByTimeAsync(1000) })
+  expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '100')
+  await act(async () => { await vi.advanceTimersByTimeAsync(400) })
   expect(done).toHaveBeenCalledTimes(1)
   expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
 })

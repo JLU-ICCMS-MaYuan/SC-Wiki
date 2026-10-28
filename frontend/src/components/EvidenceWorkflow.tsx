@@ -13,6 +13,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, Snackbar, Tabs, Tab, TextField, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { api } from '../lib/api'
+import { evidencePercent, startEvidencePreparation } from '../lib/evidenceProgress'
 import { evidenceProblem } from './EvidenceFieldMarkers'
 import { createEvidenceDraftQueue } from '../lib/evidenceDraftQueue'
 import { createManualEvidenceDrafts, manualDraftKey, manualFieldIdentity, manualValueIdentity, type PreparedManualEvidence } from '../lib/manualEvidenceDrafts'
@@ -40,7 +41,7 @@ interface FieldDetail { record?: Partial<EvidenceRecord>; history?: EvidenceHist
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
 export interface EvidenceTarget { target: 'upload' | 'paper' | 'revision'; target_id: string }
-interface View { phase: 'checking' | 'countdown' | 'running' | 'error'; seconds?: number; message?: string; job?: Job }
+interface View { phase: 'checking' | 'countdown' | 'running' | 'completed' | 'error'; percent?: number; seconds?: number; message?: string; job?: Job }
 const base = '/api/rag/evidence'
 const problematic = evidenceProblem
 function dosValueInput(record: EvidenceRecord) {
@@ -156,9 +157,12 @@ export function useEvidenceWorkflow(options?: {
   const recordsRef = useRef(records)
   recordsRef.current = records
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
+  const elapsedStarted = useRef(Date.now())
   const generation = useRef(0)
   const cancelLateJob = useRef(true)
   const jobID = useRef<string | undefined>(undefined)
+  const cancelPreparation = useRef<(() => void) | undefined>(undefined)
+  const jobPollAbort = useRef<AbortController | undefined>(undefined)
   const lastRetryKeys = useRef<string[] | undefined>(undefined)
   const completed = useRef(false)
   const pending = useRef<((value: EvidencePayload | null) => void) | undefined>(undefined)
@@ -269,12 +273,11 @@ export function useEvidenceWorkflow(options?: {
     document.addEventListener('keydown', escape)
     return () => document.removeEventListener('keydown', escape)
   }, [selected, closeDrawer])
-  const waiting = view?.phase === 'checking' || view?.phase === 'running'
+  const waiting = view !== null && view.phase !== 'error'
   useEffect(() => {
     setElapsedSeconds(0)
     if (!waiting) return
-    const started = Date.now()
-    const interval = setInterval(() => setElapsedSeconds(Math.floor((Date.now() - started) / 1000)), 1000)
+    const interval = setInterval(() => setElapsedSeconds(Math.floor((Date.now() - elapsedStarted.current) / 1000)), 1000)
     return () => clearInterval(interval)
   }, [waiting])
   const pause = (ms: number) => new Promise<void>(resolve => { timerDone.current = resolve; timer.current = setTimeout(resolve, ms) })
@@ -284,6 +287,9 @@ export function useEvidenceWorkflow(options?: {
     clearTimeout(timer.current)
     timerDone.current?.()
     timerDone.current = undefined
+    cancelPreparation.current?.()
+    cancelPreparation.current = undefined
+    jobPollAbort.current?.abort()
     if (cancelJob && value === null && jobID.current && !completed.current) void api.del(`${base}/jobs/${jobID.current}`).catch(() => undefined)
     pending.current?.(value)
     pending.current = undefined
@@ -292,12 +298,48 @@ export function useEvidenceWorkflow(options?: {
   }, [])
   useEffect(() => () => { finish(null, false) }, [finish])
 
+  const prepare = async <T,>(path: string, body: object, current: number) => {
+    const request = startEvidencePreparation<T>(path, body, percent => {
+      if (mounted.current && current === generation.current) {
+        setView(old => old && ({ ...old, percent: Math.max(old.percent || 0, percent) }))
+      }
+    })
+    cancelPreparation.current = request.cancel
+    try { return await request.result }
+    finally { if (cancelPreparation.current === request.cancel) cancelPreparation.current = undefined }
+  }
+  const showRunning = (job: Job, message?: string) => setView(old => ({
+    phase: 'running', job, message,
+    percent: Math.max(old?.percent || 0, evidencePercent(job)),
+  }))
+  const pollJob = async <T,>(id: string, deadline: number): Promise<T> => {
+    const controller = new AbortController()
+    jobPollAbort.current = controller
+    const timeout = setTimeout(() => controller.abort(), Math.max(0, deadline - Date.now()))
+    try { return await api.get<T>(`${base}/jobs/${id}`, { signal: controller.signal }) }
+    catch (error) { if (controller.signal.aborted) throw new Error(t('evidence.timeout')); throw error }
+    finally {
+      clearTimeout(timeout)
+      if (jobPollAbort.current === controller) jobPollAbort.current = undefined
+    }
+  }
+  const showCompleted = async (current: number) => {
+    if (!mounted.current || current !== generation.current) return false
+    setView({ phase: 'completed', percent: 100, message: t('evidence.progressComplete') })
+    // 让完成状态可见，再沿用原结果流程；取消仍可阻止原操作继续。
+    await pause(400)
+    return mounted.current && current === generation.current
+  }
+
   const restore = useCallback(async (target: EvidenceTarget) => {
     const epoch = decisionEpoch.current
     const current = ++generation.current
     const revision = editRevision.current
     const identity = `${target.target}:${target.target_id}`
     if (targetIdentity.current !== identity) {
+      cancelPreparation.current?.()
+      cancelPreparation.current = undefined
+      jobPollAbort.current?.abort()
       localReasons.current.clear(); dirty.current = false
       setSourceDetail(undefined); setSelected(null); setManualOpenKey(undefined)
       clearTimeout(invalidationTimer.current); pendingEdits.current = []
@@ -375,16 +417,22 @@ export function useEvidenceWorkflow(options?: {
   }
   // 提交复用已通过项；后端只为尚未核对的实际修改排队。
   const gate = async (target: EvidenceTarget): Promise<EvidencePayload | null> => {
+    cancelPreparation.current?.()
+    jobPollAbort.current?.abort()
     const current = ++generation.current
     setSaveError('')
     completed.current = false
-    await flushDrafts()
+    jobID.current = undefined
     targetRef.current = target
     setAutomatic(false)
-    setView({ phase: 'checking', message: '正在检查本次提交的必要字段' })
+    elapsedStarted.current = Date.now()
+    setElapsedSeconds(0)
+    setView({ phase: 'checking', percent: 0, message: t('evidence.checkingRequired') })
     try {
+      await flushDrafts()
+      if (current !== generation.current) return null
       if (manualDrafts.hasPending(target)) throw new Error(t('evidence.saveManualBeforeSubmit'))
-      let result = await api.post<Job & Preflight & { program_issues?: Array<{field: string; message: string}> }>(`${base}/submit-check`, target)
+      let result = await prepare<Job & Preflight & { program_issues?: Array<{field: string; message: string}> }>(`${base}/submit-check`, target, current)
       if (current !== generation.current) return null
       if (result.program_issues?.length) { setRecords(result.records || []); throw new Error(result.program_issues.map(i => '程序检查：' + i.message).join('；')) }
       const id = result.id
@@ -392,14 +440,15 @@ export function useEvidenceWorkflow(options?: {
       while (result.status === 'queued' || result.status === 'running') {
         if (Date.now() > deadline) throw new Error(t('evidence.timeout'))
         jobID.current = id
-        setView({ phase: 'running', job: result, message: result.progress || '等待必要字段核对' })
+        showRunning(result, result.status === 'queued' ? t('evidence.queued') : t('evidence.running'))
         await pause(1000)
         if (current !== generation.current) return null
-        result = await api.get<Job & Preflight>(`${base}/jobs/${id}`)
+        result = await pollJob<Job & Preflight>(id, deadline)
         if (current !== generation.current) return null
       }
       if (result.status !== 'completed') throw new Error(result.error?.message || '核对未完成，未提交')
       completed.current = true
+      if (!(await showCompleted(current))) return null
       const next = (result.records || []).map(r => ({ ...r, pending_review: false }))
       recordsRef.current = next
       setRecords(next)
@@ -407,14 +456,16 @@ export function useEvidenceWorkflow(options?: {
       if (blocked.length) { openIssue(blocked[0].key); setSaveError('这些字段尚未通过审核，未提交'); return null }
       return { evidence_job_id: id, expected_evidence_version: result.version, evidence_resolutions: {} }
     } catch (error) {
+      if (current !== generation.current) return null
+      if (jobID.current && !completed.current) void api.del(`${base}/jobs/${jobID.current}`).catch(() => undefined)
       const failure = error as import('../lib/api').ApiError
       setSaveError(failure.issues?.map(issue => {
         const label = recordsRef.current.find(r => r.field === issue.field)?.label
         return (label ? label + '：' : '') + issue.message
-      }).join('；') || failure.message)
+      }).join('；') || (failure.code === 'evidence_preparation_timeout' ? t('evidence.timeout') : failure.message))
       return null
     }
-    finally { setView(null) }
+    finally { if (current === generation.current) setView(null) }
   }
   const applyAccepted = async (target: EvidenceTarget, save: (patches: import('../lib/evidenceProposals').EvidencePatch[], preparationId: string, resumeStage?: 'scientific' | 'finalize') => Promise<boolean>) => {
     await flushDrafts()
@@ -428,6 +479,8 @@ export function useEvidenceWorkflow(options?: {
   }
 
   const execute = async (target: EvidenceTarget, retryKeys?: string[], silent = false, attempt = 0) => {
+    cancelPreparation.current?.()
+    jobPollAbort.current?.abort()
     lastRetryKeys.current = retryKeys
     const retryItems = retryKeys && new Set(retryKeys.map(key => {
       const record = recordsRef.current.find(r => r.key === key)
@@ -442,6 +495,8 @@ export function useEvidenceWorkflow(options?: {
     completed.current = false
     jobID.current = undefined
     setSaveError('')
+    elapsedStarted.current = Date.now()
+    setElapsedSeconds(0)
     try {
       // 先保存当前侧栏的人工依据，再卸载侧栏；不能静默核对旧说明。
       if (retryKeys && saveManualBeforeReview.current && !(await saveManualBeforeReview.current())) return
@@ -456,34 +511,37 @@ export function useEvidenceWorkflow(options?: {
         dirty.current = false
       }
       if (!active()) return
-      setView({ phase: 'checking', message: t('evidence.checking') })
-      const preflight = await api.post<Preflight>(`${base}/summary`, target)
+      setView({ phase: 'checking', percent: 0, message: t('evidence.checking') })
+      const preflight = await prepare<Preflight>(`${base}/summary`, target, current)
       if (!active()) return
       if (revision !== editRevision.current) throw new Error(t('evidence.changedDuringSave'))
       preflightRef.current = preflight
+      setView(old => old && ({ ...old, percent: Math.max(old.percent || 0, 5) }))
       if (retryItems) {
         retryKeys = preflight.records.filter(r => retryItems.has(r.item_key || r.key)).map(r => r.key)
         if (!retryKeys.length) { showResults(preflight.records, preflight, silent); return }
       }
-      if (target.target !== 'paper' && !retryKeys && !preflight.needs_check && !preflight.records.some(r => r.status === 'unchecked')) { jobID.current = preflight.job_id; completed.current = true; showResults(preflight.records, preflight, silent); return }
+      if (target.target !== 'paper' && !retryKeys && !preflight.needs_check && !preflight.records.some(r => r.status === 'unchecked')) { jobID.current = preflight.job_id; completed.current = true; if (await showCompleted(current)) showResults(preflight.records, preflight, silent); return }
       for (let seconds = silent || retryKeys ? 0 : 3; seconds > 0; seconds--) {
-        setView({ phase: 'countdown', seconds, message: t('evidence.startHint') })
+        setView(old => ({ phase: 'countdown', percent: old?.percent || 5, seconds, message: t('evidence.startHint') }))
         await pause(1000)
         if (!active()) return
       }
-      setView({ phase: 'running', message: t('evidence.starting') })
+      setView(old => ({ phase: 'checking', percent: old?.percent || 5, message: t('evidence.starting') }))
       const job = preflight.job_id && !retryKeys
         ? { id: preflight.job_id, timeout_seconds: 1800 }
-        : await api.post<Job>(`${base}/jobs`, { ...target, expected_draft_version: preflight.version, purpose: retryKeys ? 'field' : 'submit', ...(retryKeys ? { retry_keys: retryKeys } : {}) })
+        : await prepare<Job & Partial<Preflight>>(`${base}/jobs`, { ...target, expected_draft_version: preflight.version, purpose: retryKeys ? 'field' : 'submit', ...(retryKeys ? { retry_keys: retryKeys } : {}) }, current)
       if (!active()) { if (cancelLateJob.current) void api.del(`${base}/jobs/${job.id}`).catch(() => undefined); return }
       jobID.current = job.id
+      if (!('status' in job) || job.status !== 'completed') showRunning(job as Job, t('evidence.queued'))
       const deadline = Date.now() + ((job.timeout_seconds || 600) + 60) * 1000
       while (active()) {
-        const result = await api.get<Job>(`${base}/jobs/${job.id}`)
+        const result = 'status' in job && job.status === 'completed' ? job : await pollJob<Job>(job.id, deadline)
         if (!active()) return
         if (result.status === 'completed') {
           if (revision !== editRevision.current) throw new Error(t('evidence.changedDuringSave'))
           completed.current = true
+          if (!(await showCompleted(current))) return
           if (result.version) preflight.version = result.version
           if (retryItems) {
             const selectedResults = (result.records || []).filter(r => retryItems.has(r.item_key || r.key))
@@ -498,14 +556,14 @@ export function useEvidenceWorkflow(options?: {
         if (result.status === 'failed') throw new Error(result.error?.message || t('evidence.failed'))
         if (result.status === 'cancelled') { finish(null); return }
         if (Date.now() > deadline) throw new Error(t('evidence.timeout'))
-        setView({ phase: 'running', job: result, message: result.status === 'queued' ? t('evidence.queued') : result.progress || t('evidence.running') })
+        showRunning(result, result.status === 'queued' ? t('evidence.queued') : t('evidence.running'))
         await pause(1000)
       }
     } catch (error) {
       if (active()) {
         if (jobID.current && !completed.current) void api.del(`${base}/jobs/${jobID.current}`).catch(() => undefined)
         if (silent && attempt === 0) void execute(target, retryKeys, true, 1)
-        else setView({ phase: 'error', message: (error as Error).message })
+        else setView({ phase: 'error', message: (error as import('../lib/api').ApiError).code === 'evidence_preparation_timeout' ? t('evidence.timeout') : (error as Error).message })
       }
     }
   }
@@ -633,8 +691,14 @@ export function useEvidenceWorkflow(options?: {
   }
   const total = view?.job?.total_batches || 0
   const done = Math.min(total, Math.max(0, view?.job?.completed_batches || 0))
-  const percent = total > 0 ? Math.floor(done / total * 100) : undefined
+  const percent = view?.percent || 0
   const batch = view?.job?.current_batch || 0
+  const progressMessage = view?.phase === 'completed' ? t('evidence.progressComplete')
+    : percent >= 95 ? t('evidence.finalizing')
+    : total > 0 && batch > done ? t('evidence.currentBatch', { current: batch, total })
+    : view?.phase === 'checking' && percent >= 10 ? t('evidence.preparingTask')
+    : view?.phase === 'checking' && percent >= 5 ? t('evidence.preparingSources')
+    : view?.message
   const activeGroup = activeRecord ? [activeRecord] : []
   const activeDos = activeRecord ? dosRecordForEvidence(activeRecord) : undefined
   const activeDosConflict = Boolean(activeDos && hasDosConflict(activeDos))
@@ -691,10 +755,11 @@ export function useEvidenceWorkflow(options?: {
       <DialogContent>
         {view?.phase === 'countdown' && <Alert severity="info">{t('evidence.countdown', { seconds: view.seconds || 0 })}{view.message}</Alert>}
         {waiting && <Box sx={{ py: 1 }}>
-          <Typography role="status" sx={{ mb: 2 }}>{total > 0 && batch > done ? t('evidence.currentBatch', { current: batch, total }) : view?.message}</Typography>
-          <LinearProgress aria-label={t('evidence.progressLabel')} variant={percent === undefined ? 'indeterminate' : 'determinate'} value={percent} sx={{ height: 8, borderRadius: 4 }} />
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 2, mt: 1 }}>
-            <Typography variant="body2">{percent === undefined ? t('evidence.waitingHint') : t('evidence.batchProgress', { completed: done, total, percent })}</Typography>
+          <Typography role="status" sx={{ mb: 2 }}>{progressMessage}</Typography>
+          <LinearProgress aria-label={t('evidence.progressLabel')} variant="determinate" value={percent}
+            sx={{ height: 8, borderRadius: 4, '& .MuiLinearProgress-bar': { transition: percent === 100 ? 'none' : undefined } }} />
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+            <Typography variant="body2">{total > 0 ? t('evidence.batchProgress', { completed: done, total, percent }) : t('evidence.flowProgress', { percent })}</Typography>
             <Typography variant="body2">{t('evidence.elapsed', { minutes: Math.floor(elapsedSeconds / 60), seconds: elapsedSeconds % 60 })}</Typography>
           </Box>
         </Box>}

@@ -1,0 +1,63 @@
+{
+  "checks": [
+    {
+      "target": "upload",
+      "width": 1440,
+      "language": "zh",
+      "percentages": [
+        0,
+        5,
+        10,
+        20,
+        50,
+        95,
+        100
+      ],
+      "overflow": false
+    },
+    {
+      "target": "paper",
+      "width": 390,
+      "language": "zh",
+      "percentages": [
+        0,
+        5,
+        10,
+        20,
+        50,
+        95,
+        100
+      ],
+      "overflow": false
+    },
+    {
+      "target": "revision",
+      "width": 390,
+      "language": "en",
+      "percentages": [
+        0,
+        5,
+        10,
+        20,
+        50,
+        95,
+        100
+      ],
+      "overflow": false
+    },
+    {
+      "cancelDuringPreparation": true,
+      "retryReusesResult": true
+    },
+    {
+      "mode": "failed",
+      "falseCompletion": false
+    },
+    {
+      "mode": "stale",
+      "falseCompletion": false
+    }
+  ],
+  "errors": [],
+  "limitation": "正式共用React组件与FastAPI进度/任务读取路由、真实隔离Redis；科学来源、排队和模型结果为受控夹具，不调用真实模型或用户数据库。"
+}
