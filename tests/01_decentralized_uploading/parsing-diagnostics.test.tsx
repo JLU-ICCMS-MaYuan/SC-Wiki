@@ -26,19 +26,26 @@ beforeEach(() => {
 })
 afterEach(() => {cleanup();vi.restoreAllMocks();vi.clearAllMocks()})
 
-it('完整上传宿主按类别显示90来源，标题输入不重新分组或启动模型', async () => {
+it('完整上传宿主仅保留解析检查入口，90来源详情按点击进入侧栏，输入不重新分组或启动模型', async () => {
   const grouped = vi.spyOn(diagnostics, 'groupParsingDifferences')
   render(<LanguageProvider><UploadTaskEditor taskId={'a'.repeat(32)} onSubmitted={()=>{}} /></LanguageProvider>)
   await screen.findByDisplayValue('CaH6 source test')
   expect(screen.getByText('解析来源检查')).toBeVisible()
+  expect(screen.queryByText('题录核查')).not.toBeInTheDocument()
+  expect(screen.queryByRole('button',{name:'查看本类代表例'})).not.toBeInTheDocument()
   expect(screen.queryByText('Original source 89')).not.toBeInTheDocument()
   const before = grouped.mock.calls.length
   fireEvent.change(screen.getByDisplayValue('CaH6 source test'), {target:{value:'Edited title'}})
   await act(async()=>{await new Promise(resolve=>setTimeout(resolve,30))})
   expect(grouped.mock.calls.length).toBe(before)
   expect(vi.mocked(api.post).mock.calls.some(([url])=>url.endsWith('/jobs')||url.endsWith('/region'))).toBe(false)
+  fireEvent.click(screen.getByRole('button',{name:'解析来源检查'}))
+  expect(screen.getByRole('dialog',{name:'解析来源检查'})).toBeVisible()
   fireEvent.click(screen.getAllByRole('button',{name:'查看本类代表例'})[0])
   expect(document.querySelectorAll('[data-diagnostic-region]')).toHaveLength(1)
+  fireEvent.click(screen.getByRole('button',{name:'关闭',exact:true}))
+  await waitFor(()=>expect(screen.getByRole('button',{name:'解析来源检查'})).toHaveFocus())
+  expect(screen.queryByText('题录核查')).not.toBeInTheDocument()
 })
 
 it('相同新来源容器复用快照；真正来源变化更新，年份变化不继承旧已核实结论', () => {
@@ -47,6 +54,7 @@ it('相同新来源容器复用快照；真正来源变化更新，年份变化�
   const changed=structuredClone(draft);changed.parsing_conflicts[0].selected_text='New actual source'
   expect(diagnostics.retainParsingSnapshot(first,changed)).not.toBe(first)
   const view=render(<LanguageProvider><ParsingDiagnosticsPanel snapshot={first} paper={draft.paper} /></LanguageProvider>)
+  fireEvent.click(screen.getByRole('button',{name:'解析来源检查'}))
   expect(screen.queryByText(/当前值已变化/)).not.toBeInTheDocument()
   view.rerender(<LanguageProvider><ParsingDiagnosticsPanel snapshot={first} paper={{...draft.paper,year:2013}} /></LanguageProvider>)
   expect(screen.getByText(/当前值已变化/)).toBeVisible()

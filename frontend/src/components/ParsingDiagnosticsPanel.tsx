@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react'
-import { Alert, Box, Button, Chip, Typography } from '@mui/material'
+import React, { useMemo, useRef, useState } from 'react'
+import { Alert, Box, Button, Chip, Drawer, IconButton, Typography } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import { useLanguage } from '../context/LanguageContext'
 import { EvidenceRegion } from './EvidenceRegion'
 import type { EvidenceTarget } from './EvidenceWorkflow'
@@ -50,6 +51,9 @@ const StableRegionDetails = React.memo(RegionDetails)
 
 function ParsingDiagnosticsPanel({ snapshot, paper, target }: Props) {
   const { t } = useLanguage()
+  const host = useRef<HTMLDivElement>(null)
+  const returnFocus = useRef<HTMLElement | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
   const [opened, setOpened] = useState<string | null>(null)
   const [all, setAll] = useState(false)
   const [bibliographyOpen, setBibliographyOpen] = useState<string | null>(null)
@@ -70,7 +74,24 @@ function ParsingDiagnosticsPanel({ snapshot, paper, target }: Props) {
   const counts = { ...regionCounts }
   for (const item of snapshot.bibliography) counts[bibliographyStatus(item)]++
   if (!snapshot.regions.length && !snapshot.bibliography.length) return null
-  return <Box sx={{ mb: 2 }} data-parsing-diagnostics>
+  return <Box ref={host} sx={{ mb: 2 }} data-parsing-diagnostics>
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+      <Button onClick={event => { returnFocus.current = event.currentTarget; setDrawerOpen(true) }} aria-haspopup="dialog">{t('upload.diagnosticTitle')}</Button>
+      {(['system_pending', 'user_review'] as const).map(status => <Chip key={status} size="small"
+        label={`${t(`upload.diagnosticStatus.${status}`)}：${counts[status]}`} />)}
+    </Box>
+    <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)} ModalProps={{ disableRestoreFocus: true }}
+      slotProps={{ transition: { onExited: () => {
+        const field = returnFocus.current
+        if (!field?.isConnected) return
+        if (field.hasAttribute('data-issue-field')) field.scrollIntoView({ block: 'center', behavior: 'smooth' })
+        const focusable = field.matches('button,input,textarea,[tabindex]') ? field : field.querySelector<HTMLElement>('input,textarea,button,[tabindex]')
+        focusable?.focus({ preventScroll: true })
+      } }, paper: { role: 'dialog', 'aria-label': t('upload.diagnosticTitle'), sx: { width: { xs: '100vw', sm: 520 }, maxWidth: '100vw', p: 3 } } }}>
+    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+      <Typography variant="h6">{t('upload.diagnosticTitle')}</Typography>
+      <IconButton aria-label={t('common.close')} onClick={() => setDrawerOpen(false)}><CloseIcon /></IconButton>
+    </Box>
     <Alert severity={counts.user_review ? 'warning' : 'info'}>
       <Typography fontWeight={600}>{t('upload.diagnosticTitle')}</Typography>
       <Typography variant="body2">{t('upload.diagnosticScope', { regions: snapshot.regions.length, bibliography: snapshot.bibliography.length })}</Typography>
@@ -90,9 +111,10 @@ function ParsingDiagnosticsPanel({ snapshot, paper, target }: Props) {
           <Typography color="warning.main" variant="body2">{t('upload.diagnosticValueChanged')}</Typography>}
         {item.triage?.evidence?.url?.startsWith('https://api.crossref.org/works/') &&
           <a href={item.triage.evidence.url} target="_blank" rel="noreferrer">{t('upload.diagnosticAuthority')}</a>}
-        <Button size="small" onClick={event => {
-          const field = event.currentTarget.closest('[data-evidence-scope]')?.querySelector(`[data-issue-field="${CSS.escape(`paper.${item.field}`)}"]`)
-          field?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+        <Button size="small" onClick={() => {
+          const field = host.current?.closest('[data-evidence-scope]')?.querySelector<HTMLElement>(`[data-issue-field="${CSS.escape(`paper.${item.field}`)}"]`)
+          if (field) returnFocus.current = field
+          setDrawerOpen(false)
         }}>{t('upload.diagnosticGoField')}</Button>
         <Button size="small" onClick={() => setBibliographyOpen(bibliographyOpen === item.field ? null : item.field)}>{t('upload.diagnosticRaw')}</Button>
         {bibliographyOpen === item.field && <Box>
@@ -115,6 +137,7 @@ function ParsingDiagnosticsPanel({ snapshot, paper, target }: Props) {
         </>}
       </Box>
     })}
+    </Drawer>
   </Box>
 }
 

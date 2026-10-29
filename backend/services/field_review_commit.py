@@ -1,6 +1,7 @@
 """管理员暂存内容与批准在一个数据库事务中应用。"""
 from copy import deepcopy
 from datetime import datetime, timezone
+from hashlib import sha256
 import json
 
 from sqlalchemy import select, Text, String
@@ -8,6 +9,28 @@ from sqlalchemy.dialects.mysql import insert
 from backend import models
 from backend.ingest import scientific_evidence as science, property_evidence as ev
 from backend.ingest.field_drafts import authorized_draft, draft_version
+
+
+def review_history_snapshot(checks, draft):
+    """旧来源与校验上下文按内容共享存储，保留全部信息及原字段审计结构。"""
+    contexts, records = {}, []
+    for check in checks:
+        record, refs = dict(check), {}
+        for name in ('legacy_evidences', 'validation_record'):
+            if name not in record:
+                continue
+            value = record.pop(name)
+            encoded = json.dumps(value, sort_keys=True, ensure_ascii=False, default=str, separators=(',', ':'))
+            key = sha256(encoded.encode()).hexdigest()
+            contexts.setdefault(key, value)
+            refs[name] = key
+        if refs:
+            record['_history_context_refs'] = refs
+        records.append(record)
+    return json.loads(json.dumps({'evidence_review': records,
+        'history_contexts': {'version': 1, 'values': contexts},
+        'field_changes': draft.get('_field_change_events') or [],
+        'field_notes': draft.get('_review_notes_history') or []}, default=str))
 
 
 async def commit_review(session, body, user):
@@ -78,6 +101,6 @@ async def commit_review(session, body, user):
     await append_paper_history_event(session, paper_id=paper.id, paper_revision=paper.content_revision,
         event_type='reviewed', actor_user_id=user.id, actor_username_snapshot=user.username,
         operation_id=body.review_request_id or None, review_status='approved', review_comment=body.comment,
-        occurred_at=now, classification_snapshot=json.loads(json.dumps({'evidence_review': checks, 'field_changes': draft.get('_field_change_events') or [], 'field_notes': draft.get('_review_notes_history') or []}, default=str)))
+        occurred_at=now, classification_snapshot=review_history_snapshot(checks, draft))
     await session.flush()
     return {'ok': True, 'paper_id': paper.id, 'review_status': 'approved'}

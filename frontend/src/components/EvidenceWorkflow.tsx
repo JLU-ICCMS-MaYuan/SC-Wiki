@@ -803,7 +803,7 @@ export function useEvidenceWorkflow(options?: {
   }
   const dialog = <>
     {saveError && !activeRecord && !view && <Alert severity="error" sx={{my: 1}}>{saveError}</Alert>}
-    {records.length > 0 && <Button data-evidence-pending-navigation onClick={() => setIssueListOpen(true)}>{t('evidence.pendingItems')}（{issues.length}）</Button>}
+    {records.length > 0 && <Button data-evidence-pending-navigation color={issues.length ? 'error' : 'primary'} onClick={() => setIssueListOpen(true)}>{t('evidence.pendingItems')}（{issues.length}）</Button>}
     <Dialog open={issueListOpen} onClose={() => setIssueListOpen(false)} fullWidth maxWidth="sm">
       <DialogTitle>{t('evidence.pendingItems')}</DialogTitle><DialogContent>
         {!issues.length && <Typography>{t('evidence.noPendingItems')}</Typography>}

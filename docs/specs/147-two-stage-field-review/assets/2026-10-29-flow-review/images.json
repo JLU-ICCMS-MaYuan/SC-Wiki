@@ -1,0 +1,32 @@
+[
+  {
+    "id": "IMG-001",
+    "order": 1,
+    "path": "IMG-001-system-parse.png",
+    "original_filename": "codex-clipboard-42b3e919-512c-48de-a435-bb030ab10490.png",
+    "width": 574,
+    "height": 178,
+    "sha256": "f5b646aefd0721368a07b0bd35b1d675e0491627223d16f47a00276b704eee9c",
+    "readable": true
+  },
+  {
+    "id": "IMG-002",
+    "order": 2,
+    "path": "IMG-002-cah6-diagnostics.png",
+    "original_filename": "codex-clipboard-81fc3b1c-4388-4379-9c53-1a8528b8ae1f.png",
+    "width": 3406,
+    "height": 3957,
+    "sha256": "7c0775a67427643cc0b3f00c266a397647097ba17dc45a3b3fb4fd00b748f0a6",
+    "readable": true
+  },
+  {
+    "id": "IMG-003",
+    "order": 3,
+    "path": "IMG-003-approval-gate.png",
+    "original_filename": "codex-clipboard-a38cb502-7fb9-4970-994d-1464b67e7bd7.png",
+    "width": 578,
+    "height": 194,
+    "sha256": "0b9858a16300a4a73871bd41d483e8011cc95e57c8d49f06041f586cf5f47bad",
+    "readable": true
+  }
+]

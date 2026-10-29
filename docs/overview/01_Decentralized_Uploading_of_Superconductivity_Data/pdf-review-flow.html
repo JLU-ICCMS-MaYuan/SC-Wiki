@@ -52,6 +52,7 @@
     .node small { display:block; font-size:10px; line-height:1.4; color:var(--muted); letter-spacing:.04em; margin-bottom:3px; }
     .node strong { display:block; font-size:15px; line-height:1.4; }
     .node .summary { display:block; font-size:11px; line-height:1.5; color:var(--muted); margin-top:3px; white-space:nowrap; }
+    .node.has-detail::after { content:'详细流程 ↗'; position:absolute; right:12px; top:10px; font-size:10px; color:var(--blue); }
     .node.check { border-left-color:#c39148; background:#fffcf6; }
     .node.result { border-left-color:var(--green); border-color:#a5d1c5; background:#f1faf6; }
     .node.branch { width:230px; border-left-color:#a8b6c1; background:#f9fbfc; }
@@ -67,6 +68,20 @@
     .detail-body ul { margin:0; padding-left:19px; }
     .detail-body li + li { margin-top:7px; }
     .state { display:inline-block; margin-top:12px; border:1px solid var(--line); border-radius:5px; padding:2px 8px; font-size:12px; color:var(--muted); }
+    .detail-action { margin-top:16px; border:1px solid #b9cfe5; background:#edf4fc; color:var(--blue); border-radius:7px; padding:8px 12px; }
+    .flow-dialog { width:min(940px,calc(100vw - 28px)); max-height:90vh; border:1px solid var(--line); border-radius:16px; padding:0; color:var(--ink); }
+    .flow-dialog::backdrop { background:#172c3866; }
+    .flow-dialog header { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:20px 24px; border-bottom:1px solid var(--line); position:sticky; top:0; background:white; z-index:1; }
+    .flow-dialog h2 { margin:0; font-size:22px; }
+    .flow-dialog header button { border:1px solid var(--line); border-radius:6px; background:white; padding:6px 12px; }
+    .flow-content { padding:20px 24px 26px; }
+    .flow-content > p { margin:0 0 20px; color:var(--muted); font-size:14px; }
+    .flow-steps { list-style:none; padding:0; margin:0; counter-reset:step; }
+    .flow-steps li { position:relative; margin:0 0 14px 14px; padding:14px 18px 14px 42px; border:1px solid var(--line); border-radius:10px; background:#f9fbfd; counter-increment:step; }
+    .flow-steps li::before { content:counter(step); position:absolute; left:-15px; top:13px; width:30px; height:30px; display:grid; place-items:center; border-radius:50%; background:var(--blue); color:white; font-size:13px; }
+    .flow-steps h3 { margin:0 0 5px; font-size:15px; }
+    .flow-steps p { margin:0; font-size:14px; color:var(--muted); }
+    .flow-outcome { margin:18px 0 0; padding:14px 18px; border-left:3px solid var(--green); background:#f0f8f5; font-size:14px; }
     .note { border-top:1px solid var(--line); padding:16px 22px; font-size:12px; color:var(--muted); }
     footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:12px; margin-top:20px; color:var(--muted); font-size:12px; }
     noscript { display:block; padding:24px; background:#fff4db; }
@@ -122,11 +137,16 @@
           <h3>关键边界</h3><ul id="detail-notes"></ul>
           <span class="state" id="detail-state"></span>
           <h3>进一步阅读</h3><a id="detail-link">查看对应说明 ↗</a>
+          <button type="button" class="detail-action" id="detail-expand" hidden>展开详细流程 ↗</button>
         </div>
       </aside>
     </div>
     <footer><span>依据当前实现整理 · 主干与主要分支 · 非实时任务监控</span><a href="pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程">文字说明与实现依据 ↗</a></footer>
   </main>
+  <dialog class="flow-dialog" id="flow-dialog" aria-labelledby="flow-title">
+    <header><h2 id="flow-title"></h2><button type="button" id="flow-close">关闭详细流程</button></header>
+    <div class="flow-content"><p id="flow-intro"></p><ol class="flow-steps" id="flow-steps"></ol><div class="flow-outcome" id="flow-outcome"></div></div>
+  </dialog>
   <script>
     'use strict';
     // 节点与连线集中维护；页面只展示流程，不读写真实任务或审核数据。
@@ -164,6 +184,34 @@
       {from:'approved', to:'index', branch:true, publication:true, points:[[580,1112],[755,1112],[755,1188]], label:'批准后发布', labelX:702, labelY:1097}
     );
     const byId = new Map(nodes.map(node => [node.id, node]));
+    const detailedFlows = {
+      parse: {
+        title:'系统解析与 AI 提取：具体流程',
+        intro:'输入是主文、补充材料和附件；输出是带来源及字段核对状态的可校对草稿。下面把解析技术检查与科学字段核对分开说明。',
+        steps:[
+          ['保存与读取文件','保留原始文件和哈希。PDF 由 MinerU 主干及 Docling、Marker 补强解析，GROBID 提取题录与参考文献；结构附件走独立校验。'],
+          ['识别正文与补充材料','根据文件内容识别角色。存在歧义时等待用户确认，再继续读取；已提取的正文按规则复用。'],
+          ['分段提取科学候选','按材料、物相、压强、计算或实验条件提取 Tc 等记录，保留对应文件、页码和原文，不让汇总模型任意改写数值。'],
+          ['检查来源定位与覆盖','核查引句、区域、表格行及结果段落。有限纠错仍不满足要求时明确失败；“原文位置找到”本身不证明科学含义正确。'],
+          ['汇总草稿与首次字段核对','整理题录、研究材料及材料状态，执行程序检查和必要的模型核对。每个字段保留结果、理由和依据；通过、存疑、不通过与未完成分别记录。'],
+          ['查重并进入校对','DOI 或文件哈希命中已有论文时结束新建；否则保存草稿进入 ready，交给上传者校对，尚未创建本次上传的待审论文。']
+        ],
+        outcome:'如何读页面：解析器差异的“系统待核查”不等于科学字段错误。科学不通过项标红；来源定位或版本核对未完成不伪装成科学错误。折叠或未定位字段通过紧凑待处理入口查看。保存不启动模型，字段通过不自动批准论文。'
+      },
+      gate: {
+        title:'批准前检查：具体流程',
+        intro:'输入是管理员当前编辑版本及已保存的字段核对结果。超级管理员具有审核入口权限，但仍要满足内容、来源和版本条件。',
+        steps:[
+          ['确认身份与操作对象','确认管理员或超级管理员权限，禁止审核自己的论文；读取并锁定当前论文，避免同时批准两个不同版本。'],
+          ['核对当前暂存修改','界面先保存实际编辑。服务端核对暂存草稿与正式论文的基准版本，冲突时停止并保留输入，不能用旧页面覆盖新内容。'],
+          ['检查格式与分类','检查必填、字段类型、材料及分类等现有数据约束；程序问题直接提示，不调用模型来代替格式检查。'],
+          ['收齐当前版本的字段结果','按值、来源及适用范围判断已有人工或模型结果是否仍有效。直接复用未变化的有效结果；实际修改而尚未核对的字段才按需进入模型核对。'],
+          ['区分阻断原因','科学不通过返回对应字段与依据；缺少结果或结果过期显示未完成；网络、模型或数据库故障显示技术失败。任一项未满足都不能标记批准。'],
+          ['在一个事务中正式批准','检查满足后保存正式内容、来源、审核历史和 approved 状态。历史的重复旧上下文按内容共享引用保存，保留完整审计，避免巨大的重复快照导致数据库写入失败。']
+        ],
+        outcome:'成功后：公开查询读取已批准版本，再独立发布向量索引。失败时：事务回滚、论文仍待审，暂存修改保留；不能把“字段全通过”误当成“数据库批准事务已经成功”。'
+      }
+    };
     const ns = 'http://www.w3.org/2000/svg';
     const edgeGroups = [];
     const nodeButtons = new Map();
@@ -182,13 +230,18 @@
         button.style.top = node.y + 'px';
         button.setAttribute('aria-pressed', 'false');
         button.setAttribute('aria-controls', 'detail-title detail-description');
+        if (detailedFlows[node.id]) {
+          button.classList.add('has-detail');
+          button.setAttribute('aria-haspopup', 'dialog');
+          button.setAttribute('aria-controls', 'detail-title detail-description flow-dialog');
+        }
         for (const [tag, text, className] of [['small', node.step, ''], ['strong', node.title, ''], ['span', node.summary, 'summary']]) {
           const element = document.createElement(tag);
           element.textContent = text;
           element.className = className;
           button.append(element);
         }
-        button.addEventListener('click', () => selectNode(node.id));
+        button.addEventListener('click', () => { selectNode(node.id); if (detailedFlows[node.id]) openDetailedFlow(node.id); });
         host.append(button);
         nodeButtons.set(node.id, button);
       }
@@ -233,6 +286,9 @@
         return item;
       }));
       document.querySelector('#detail-link').setAttribute('href', node.link);
+      const expand = document.querySelector('#detail-expand');
+      expand.hidden = !detailedFlows[id];
+      expand.onclick = () => openDetailedFlow(id);
       document.querySelector('.details').scrollTop = 0;
       for (const {edge, path} of edgeGroups) {
         path.setAttribute('class', ['edge', edge.branch ? 'branch' : '', edge.publication ? 'publication' : '', edge.from === id || edge.to === id ? 'active' : ''].join(' '));
@@ -240,6 +296,20 @@
       // URL 保存阅读位置，刷新或分享同一节点链接时恢复。
       history.replaceState(null, '', '#' + id);
     }
+
+    function openDetailedFlow(id) {
+      const flow = detailedFlows[id];
+      if (!flow) return;
+      document.querySelector('#flow-title').textContent = flow.title;
+      document.querySelector('#flow-intro').textContent = flow.intro;
+      document.querySelector('#flow-outcome').textContent = flow.outcome;
+      document.querySelector('#flow-steps').replaceChildren(...flow.steps.map(([title, description]) => {
+        const item = document.createElement('li'), heading = document.createElement('h3'), body = document.createElement('p');
+        heading.textContent = title; body.textContent = description; item.append(heading, body); return item;
+      }));
+      document.querySelector('#flow-dialog').showModal();
+    }
+    document.querySelector('#flow-close').addEventListener('click', () => document.querySelector('#flow-dialog').close());
 
     function fitCanvas() {
       // 桌面适配可用宽度；手机保留最小字号，通过画布横向滚动阅读。
