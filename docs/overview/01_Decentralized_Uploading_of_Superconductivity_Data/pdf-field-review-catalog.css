@@ -1,0 +1,48 @@
+.field-catalog { margin:0 0 30px; background:white; border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.catalog-head { padding:22px 24px; border-bottom:1px solid var(--line); }
+.catalog-head h2 { margin:0 0 7px; font-size:23px; }
+.catalog-head p { margin:0; color:var(--muted); font-size:14px; }
+.execution { padding:18px 24px; background:#f5f9fd; border-bottom:1px solid var(--line); }
+.execution h3 { margin:0 0 8px; font-size:15px; }
+.execution p { margin:0 0 9px; font-size:13px; }
+.execution-path { display:flex; flex-wrap:wrap; align-items:center; gap:8px; font-size:12px; }
+.execution-path span { padding:7px 10px; border:1px solid #cbdbe9; border-radius:6px; background:white; }
+.catalog-filters { display:flex; flex-wrap:wrap; gap:10px; padding:18px 24px 10px; align-items:end; }
+.catalog-filters label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:var(--muted); }
+.catalog-filters label:first-child { flex:1; min-width:200px; }
+.catalog-filters input,.catalog-filters select,.catalog-filters button { font:inherit; font-size:14px; border:1px solid #b9cad7; border-radius:6px; padding:9px 10px; background:white; color:var(--ink); }
+.catalog-filters input { width:100%; }
+.catalog-filters button { cursor:pointer; }
+.catalog-count { margin:0; padding:0 24px 14px; color:var(--muted); font-size:12px; }
+.catalog-layout { display:grid; grid-template-columns:295px minmax(0,1fr); border-top:1px solid var(--line); }
+.catalog-list { max-height:790px; overflow:auto; border-right:1px solid var(--line); padding:10px; }
+.catalog-list button { display:block; width:100%; padding:11px 12px; margin:0 0 5px; border:1px solid transparent; border-radius:8px; background:white; color:var(--ink); text-align:left; font:inherit; cursor:pointer; }
+.catalog-list button:hover { background:#f3f7fb; }
+.catalog-list button[aria-pressed="true"] { background:#eef5ff; border-color:#98b9df; }
+.catalog-list strong { display:block; font-size:14px; overflow-wrap:anywhere; }
+.catalog-list small { display:block; color:var(--muted); font-size:11px; overflow-wrap:anywhere; }
+.catalog-entry { min-width:0; padding:22px 26px 28px; }
+.catalog-entry h3 { margin:7px 0; font-size:24px; line-height:1.4; overflow-wrap:anywhere; }
+.catalog-badges { display:flex; gap:8px; flex-wrap:wrap; }
+.catalog-badges span { border-radius:5px; padding:3px 8px; font-size:11px; color:var(--blue); background:#edf3fa; }
+.catalog-key { display:block; padding:9px 12px; background:#f6f8fb; border-radius:6px; font:12px/1.7 ui-monospace,monospace; overflow-wrap:anywhere; }
+.catalog-graph { overflow:auto; margin:16px 0; }
+.catalog-graph svg { width:100%; min-width:720px; display:block; }
+.catalog-graph .box { fill:#f5f9fe; stroke:#a6c3df; }
+.catalog-graph .gate { fill:#fffaf0; stroke:#c59c58; }
+.catalog-graph .result { fill:#f1f9f4; stroke:#9ac4af; }
+.catalog-graph text { fill:var(--ink); text-anchor:middle; font:13px system-ui,-apple-system,"PingFang SC",sans-serif; }
+.catalog-graph .caption { fill:var(--muted); font-size:11px; }
+.catalog-sections { display:grid; grid-template-columns:1fr 1fr; gap:18px 26px; }
+.catalog-sections section { min-width:0; }
+.catalog-sections h4 { margin:0 0 7px; font-size:13px; color:var(--muted); }
+.catalog-sections p,.catalog-sections ul { margin:0; font-size:14px; }
+.catalog-sections ul { padding-left:19px; }
+.catalog-sections li + li { margin-top:6px; }
+.catalog-sections .wide { grid-column:1/-1; }
+.catalog-sources { padding-top:16px; border-top:1px solid var(--line); margin-top:22px; }
+.catalog-sources h4 { margin:0 0 7px; font-size:12px; color:var(--muted); }
+.catalog-sources code { display:block; font:11px/1.8 ui-monospace,monospace; overflow-wrap:anywhere; color:var(--muted); }
+.catalog-scope { margin:0; padding:14px 24px; border-top:1px solid var(--line); font-size:12px; color:var(--muted); }
+@media(max-width:1000px) { .catalog-layout { grid-template-columns:235px minmax(0,1fr); } .catalog-entry { padding:18px; } .catalog-sections { grid-template-columns:1fr; } }
+@media(max-width:650px) { .catalog-layout { grid-template-columns:1fr; } .catalog-list { max-height:260px; border-right:0; border-bottom:1px solid var(--line); } .catalog-head,.execution { padding:18px; } .catalog-filters { padding:16px 18px 10px; } .catalog-entry h3 { font-size:21px; } }

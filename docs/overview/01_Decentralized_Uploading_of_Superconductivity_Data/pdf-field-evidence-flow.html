@@ -5,13 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>生成字段核对结果与候选 · 程序流程图 · SC-Wiki</title>
   <link rel="stylesheet" href="pdf-stage-flow.css">
+  <link rel="stylesheet" href="pdf-field-review-catalog.css">
   <script defer src="pdf-stage-flow.js"></script>
+  <script defer src="pdf-field-review-data.js"></script>
+  <script defer src="pdf-field-review-catalog.js"></script>
 </head>
 <body>
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="pdf-review-flow.html#parse">收录主流程</a> / <a href="pdf-parsing-flow.html#evidence">解析与草稿</a> / 生成字段核对结果与候选</nav>
   <header><p class="eyebrow">SC-WIKI · 解析内部流程</p><h1>生成字段核对结果与候选</h1><p class="intro">展开逐字段生成的内部控制流：来源分批、结果校验与合并、受限补空、Methods 条件关联、最终版本核对和审计保存。这里展示解析阶段的生成路径，后续人工编辑与主动核对另沿既有入口处理。</p></header>
-  <nav class="page-links" aria-label="流程页面导航"><a href="pdf-parsing-flow.html#evidence">← 返回上层解析流程</a><a href="pdf-parsing-diagnostics-flow.html">查看解析差异与责任分类 →</a></nav>
+  <nav class="page-links" aria-label="流程页面导航"><a href="pdf-parsing-flow.html#evidence">← 返回上层解析流程</a><a href="#field-catalog">按字段查核对规则</a><a href="#program-flow">查看整体控制流</a><a href="pdf-parsing-diagnostics-flow.html">查看解析差异与责任分类 →</a></nav>
+  <section class="field-catalog" id="field-catalog" aria-labelledby="catalog-title">
+    <header class="catalog-head"><p class="eyebrow">字段核对知识库</p><h2 id="catalog-title">具体到每一个字段，程序在检查什么</h2><p>选择字段，查看取值来源、程序规则、模型核对、候选处理、真实依赖和排错入口。这里记录当前实现；共用机制、专门过程、提示词约束和程序硬检查分别说明。</p></header>
+    <div class="execution">
+      <h3>是不是按页面字段顺序，从头到尾一个个核对？</h3>
+      <p><strong>不是按页面顺序逐字段调用。</strong>在 generate_upload_suggestions 内，“字段批 × 来源批”按循环串行执行；通常每批最多20项，存在计算条件时最多12项。来源尽量使用完整正文与补充材料，超过约120000字符才分窗。一个字段可能经过多个来源窗口，最后合并结果。不能据此推断整个站点只有一个任务，或所有提取工具都串行。</p>
+      <div class="execution-path" aria-label="执行顺序"><span>题录及专门生成阶段</span>→<span>构造独立字段与来源快照</span>→<span>筛选需要核对的科学项</span>→<span>字段批 × 来源窗口逐批调用</span>→<span>合并、补空及条件复核</span>→<span>按最终版本保存</span></div>
+      <p>参考文献、题录、程序派生、结构内部量及独立谱处理<strong>并不都进入同一模型生成批</strong>。默认题录 required=false，派生项由程序按输入核验；实际修改后的提交规则另行适用。</p>
+    </div>
+    <div class="catalog-filters">
+      <label>字段、字段键或报错关键词<input id="catalog-search" type="search" placeholder="例如：图谱科学标题、QE 泛函、value_kind、N(EF)" autocomplete="off"></label>
+      <label>所属区域<select id="catalog-group"><option value="">全部区域</option></select></label>
+      <label>核对方式<select id="catalog-mode"><option value="">全部方式</option></select></label>
+      <button id="catalog-reset" type="button">清空筛选</button>
+    </div>
+    <p class="catalog-count" id="catalog-count" aria-live="polite"></p>
+    <div class="catalog-layout">
+      <nav class="catalog-list" id="catalog-list" aria-label="字段规则目录"></nav>
+      <article class="catalog-entry" aria-labelledby="catalog-field-title">
+        <div class="catalog-badges" id="catalog-field-badges"></div><h3 id="catalog-field-title"></h3><code class="catalog-key" id="catalog-field-key"></code>
+        <div class="catalog-graph" id="catalog-graph"></div>
+        <div class="catalog-sections">
+          <section class="wide"><h4>值从哪里来</h4><p id="catalog-read"></p></section>
+          <section><h4>当前实现中的检查与约束</h4><ul id="catalog-checks"></ul></section>
+          <section><h4>模型具体负责什么</h4><p id="catalog-model-description"></p></section>
+          <section><h4>候选如何生成、能否补入</h4><p id="catalog-candidate"></p></section>
+          <section><h4>何时需要核对、什么会使结果失效</h4><p id="catalog-required"></p><ul id="catalog-dependencies"></ul></section>
+          <section><h4>出错通常表现为什么</h4><ul id="catalog-failures"></ul><p id="catalog-error-codes"></p></section>
+          <section><h4>先怎么处理，程序该查哪里</h4><ul id="catalog-fixes"></ul></section>
+          <section class="wide"><h4>具体例子</h4><p id="catalog-example"></p></section>
+        </div>
+        <div class="catalog-sources"><h4>已核对的源码入口与行号</h4><div id="catalog-source-refs"></div></div>
+      </article>
+    </div>
+    <p class="catalog-scope" id="catalog-version"></p>
+    <p class="catalog-scope">此目录是当前源码与本机发布定义的规则快照，不读取真实论文草稿，不表示所有科学判断均已验证正确。开放 payload、阶段化扩展和用户自定义性质按明确模板覆盖；没有专门核对算法的字段会如实标注共用机制。更改程序后需同步目录，运行环境的定义版本以实际保存目标为准。</p>
+  </section>
+  <div id="program-flow"></div>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
       <div class="diagram-head"><div><h2 id="chart-title">生成字段核对结果与候选：程序控制流</h2><p>点击节点查看处理规则、输出与源码入口</p></div><div class="legend"><span><i></i>处理</span><span><i class="check"></i>判断</span><span><i class="stop"></i>异常或待处理</span></div></div>

@@ -42,7 +42,7 @@
     }
   }
   const controls=new Map();
-  function select(id) {
+  function select(id,writeHash=true) {
     const node=nodes.get(id);if(!node)return;
     for (const [key,control] of controls) {
       if (nodes.get(key).href) {
@@ -59,7 +59,7 @@
       if(node.href) { open.href=node.href;open.target='_blank';open.rel='noopener noreferrer'; }
       else open.removeAttribute('href');
     }
-    history.replaceState(null,'','#'+id);
+    if(writeHash) history.replaceState(null,'','#'+id);
   }
   for (const node of nodes.values()) {
     const control=element(node.href?'a':'g',{class:'node '+(node.kind||''),role:node.href?'link':'button',tabindex:0,'aria-label':node.title+(node.href?'：在新标签页查看详细程序流程':'：查看程序说明'),'data-node':node.id,
@@ -73,6 +73,6 @@
     if(!node.href) control.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();select(node.id)}});
     controls.set(node.id,control);nodeLayer.append(control);
   }
-  function fromHash(){const id=location.hash.slice(1);select(nodes.has(id)?id:data.start)}
+  function fromHash(){const id=location.hash.slice(1);select(nodes.has(id)?id:data.start,nodes.has(id)||!location.hash)}
   fromHash();window.addEventListener('hashchange',fromHash);
 })();
