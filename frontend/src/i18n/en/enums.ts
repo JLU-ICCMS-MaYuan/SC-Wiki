@@ -51,7 +51,7 @@ export default {
     experimental: 'Experimental',
     unknown: 'Unspecified',
   },
-  structureOptimization: { unknown: 'Unspecified', classical_static: 'Classical static optimization', sscha: 'Quantum anharmonic optimization (SSCHA)' },
+  structureOptimization: { unknown: 'Unspecified', classical_static: 'Static lattice optimization', quasi_harmonic: 'Quasi-harmonic free-energy optimization', anharmonic_quantum: 'Quantum anharmonic free-energy optimization', sscha: 'SSCHA (legacy optimization label)' },
   reviewStatus: {
     pending: 'Pending review',
     approved: 'Approved',

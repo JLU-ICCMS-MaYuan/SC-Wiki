@@ -1,0 +1,51 @@
+{
+  "passed": true,
+  "model": "deepseek-v4-pro",
+  "image_sha256": "b7a0f62b5930094a2f051cf9d1e0fb9e897042a25c26a547ffe2d6d9fee81e33",
+  "rows": [
+    [
+      "CaH4",
+      50.0,
+      "dos_fermi",
+      0.02234
+    ]
+  ],
+  "elapsed_seconds": 7.111169815063477,
+  "roundtrip_equal": true,
+  "source_task_unchanged": true,
+  "source_pdf_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+  "source_file_identity_preserved": true,
+  "not_run": [
+    "原任务写入",
+    "数据库正式论文写入",
+    "批准"
+  ],
+  "current_source_hashes": {
+    "backend/ingest/domain_extraction.py": "c5bdbe2059ddf17f4caca197b634b10c6e1ee68684110fb691abe1a9c99efcfe",
+    "backend/ingest/calculation_methods.py": "c71c17027776f62257bf77c217c193e979796349bd61903add9471ead519d151",
+    "backend/ingest/state_optimization.py": "bce584df348b52ce92e5789c8a2ffdc733dfb8d7656e207639b65744914459d5",
+    "backend/ingest/material_state_contract.py": "228e46dfd458ba70afbb9b8a42f4f568b031f792ca419e1ddadb3da89559cb5a",
+    "backend/ingest/condition_rules.py": "e6532e8a81dfad15b6d42d1f08911c7749cab28e48876e3fb2fdc04a6188782a"
+  },
+  "source_crop": {
+    "page": 10,
+    "box_pixels": [
+      200,
+      780,
+      865,
+      935
+    ],
+    "content": "原图Figure S7含插图的电子DOS面板；未改像素、未添加文字、未从曲线读数"
+  },
+  "current_processing_replay": {
+    "passed": true,
+    "kind": "当前正式处理规则重放本轮真实图像响应，不是再次模型调用",
+    "normalized_equal": true,
+    "source_hashes": {
+      "backend/ingest/domain_extraction.py": "42c868e4b28feb8230c5794dd5b339ccc509ad235e05c68e35e5864dd4e96ab8",
+      "backend/ingest/calculation_methods.py": "c71c17027776f62257bf77c217c193e979796349bd61903add9471ead519d151",
+      "backend/ingest/state_optimization.py": "bce584df348b52ce92e5789c8a2ffdc733dfb8d7656e207639b65744914459d5",
+      "backend/ingest/condition_rules.py": "e43f32ed7bb1db4dac20cf1392edd5040e2852ff160f0d1fd58066a3302ba9f2"
+    }
+  }
+}

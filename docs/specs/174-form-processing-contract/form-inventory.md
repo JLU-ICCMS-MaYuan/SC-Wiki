@@ -69,3 +69,7 @@ test:form-contract 已加入 sidebar-field-save、sidebar-field-workflow、sideb
 ## #179 用户指定上传文件身份
 
 正文恰好一份，补充材料和结构源数据允许多份，选择位置决定角色；不把文件名或文本样式作为新任务角色权威。选择、移除、错区或重复正文拒绝不发创建/模型请求；上传队列使用稳定文件身份，仍限三路并发。UploadPage 宿主与 1440px/390px 浏览器已验证数量、格式、键盘选择和清单请求。规定的表单契约 79 项及变异 8 项通过；影响回归、独立 HEAD 旧失败基线和真实 PDF 定向验证见 [#179 验收记录](../179-manual-upload-file-roles/validation.md)。不据此声称全站、真实业务写入或整篇 PDF 已验收。
+
+## #181 方法语义与结构优化详情
+
+StructureOptimizationFields与既有CalculationConditionFields接入上传、返修、管理员及超级管理员。四类完整宿主验证四目标/几何约束、电子理论与数值分开显示、无变化零写、当前字段保存与来源侧栏；只读、中文组合输入及保存失败重试单列。正式表单入口增加physical-method-hosts，不删除旧回归。新JSON列只做隔离迁移/存取验证，业务库与部署未执行，实际结果及旧失败基线见[验收记录](../181-physical-method-scope/validation.md)。

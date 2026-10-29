@@ -868,7 +868,7 @@ unsupported 表示原文明显不支持所填结论，uncertain 表示歧义，m
 
 SYSTEM_PROMPT += METHOD_SEMANTICS_PROMPT
 SYSTEM_PROMPT += '''
-状态基本字段同时提供 state_review_context，其中 structure_optimization 区分 classical_static 与 sscha。
+状态基本字段同时提供 state_review_context，其中 structure_optimization 区分静态、QHA自由能和量子非谐自由能目标，structure_optimization_details记录实际方法和几何自由度；0K不等于静态，SSCHA名称不能单独证明几何优化。结构目标不决定当前物性的振动处理。
 即使材料与压力相同，也必须核对该优化方式下的适用范围；不可把静态晶格或超导结果直接用于 SSCHA。
 evidences 优先返回本次 sources 中的 source_id（review-source-N），可加从该片段原样复制的短 quote；
 没有 quote 时服务端取回该编号的完整原段。不得捏造编号，不得用另一个文件的编号承载引句。

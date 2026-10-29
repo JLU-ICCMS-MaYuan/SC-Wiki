@@ -20,6 +20,8 @@ def state_paths(associations=()):
     # 核处理仅在来源明确限定了该字段适用范围时成为依赖。
     if any((a.get("scope") or {}).get("structure_optimization") for a in associations):
         keys.add("structure_optimization")
+    if any((a.get("scope") or {}).get("structure_optimization_details") for a in associations):
+        keys.add("structure_optimization_details")
     return sorted(keys)
 
 
@@ -32,6 +34,14 @@ def state_inputs(state, associations=()):
 def record_inputs(record, path):
     """返回相对当前物性记录的直接输入路径，不使用整个条件对象。"""
     payload = record.get("payload") or {}
+    from .calculation_methods import vibrational_treatment
+    treatment = vibrational_treatment(record)
+    if record.get("property_code") in {"band_gap", "dos_fermi"} and path.startswith("value_"):
+        conditions = payload.get("calculation_conditions") or {}
+        keys = ["electronic_method", "exchange_correlation_functional", "calculation_code"]
+        if (conditions.get("method_scope") or {}).get("relation") == "electron_phonon_renormalization":
+            keys.extend(["phonon_method", "vibrational_treatment", "method_scope"])
+        return ["payload.calculation_conditions." + key for key in keys if conditions.get(key) is not None]
     parameters = payload.get("parameters") or {}
     dependencies = []
     is_value = path.startswith("value_")
@@ -44,6 +54,12 @@ def record_inputs(record, path):
     )
     if is_value or is_mu:
         dependencies.append("method_code")
+    if is_value and record.get("record_type") == "predicted_tc":
+        conditions = payload.get("calculation_conditions") or {}
+        if conditions.get("vibrational_treatment") is not None:
+            dependencies.append("payload.calculation_conditions.vibrational_treatment")
+        elif payload.get("approximation") is not None:
+            dependencies.append("payload.approximation")
     if is_value:
         dependencies.extend(
             "payload.parameters." + k for k in ("lambda_ep", "omega_log") if parameters.get(k) is not None
@@ -79,7 +95,7 @@ def record_inputs(record, path):
             if (
                 stage == "electron_phonon"
                 or stage == "sscha"
-                and payload.get("approximation") == "anharmonic"
+                and treatment in {"anharmonic", "anharmonic_quantum", "anharmonic_classical"}
             ):
                 dependencies.append(f"payload.calculation_conditions.extensions.{i}")
     # 网格、截断能等设置只依赖同阶段软件/理论/泛函。
@@ -91,6 +107,8 @@ def record_inputs(record, path):
             except (KeyError, IndexError, ValueError):
                 entry = {}
             stage = str(entry.get("key") or "").split(".")[0]
+            if stage == "sscha":
+                dependencies.append("payload.calculation_conditions.vibrational_treatment" if conditions.get("vibrational_treatment") else "payload.approximation")
             if str(entry.get("key") or "").split(".")[-1] in {
                 "calculation_code",
                 "electronic_method",

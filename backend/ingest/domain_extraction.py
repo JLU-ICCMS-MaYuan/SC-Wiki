@@ -118,7 +118,8 @@ class ExtractedState(Contract):
     material: str = ""
     material_name: str | None = None
     state_kind: Literal["theoretical", "experimental", "unknown"] = "unknown"
-    structure_optimization: Literal["unknown", "classical_static", "sscha"] = "unknown"
+    structure_optimization: Literal["unknown", "classical_static", "quasi_harmonic", "anharmonic_quantum", "sscha"] = "unknown"
+    structure_optimization_details: dict[str, JsonValue] | None = None
     pressure_value_gpa: float | None = None
     pressure_min_gpa: float | None = None
     pressure_max_gpa: float | None = None
@@ -192,6 +193,7 @@ preserve their actual names in method_raw. Fixed UI labels are not scientific da
 Keep value_raw/unit_raw as reported, including ranges and uncertainty. Each payload preserves reported
 calculation parameters or experimental description; missing information remains empty, never invented.
 Server generates record_key and definition_key/version; omit these fields. No database IDs or structures.
+For a multi-pressure figure caption with one reported scalar, do not select one pressure unless the text explicitly ties that scalar to it. Keep the pressure unknown and preserve the source ambiguity.
 Only band gaps and density of states at the Fermi level are supported non-Tc records. Use
 record_type=property, module_code=electronic_properties and property_code=band_gap or dos_fermi.
 Do not put lattice parameters, atomic coordinates or other unregistered quantities in property_modules.
@@ -203,7 +205,7 @@ Rows that are headers/units use header_or_unit_row; figures without scientific d
 background or referenced results use reference_or_background; content you cannot read MUST use unreadable.
 Extract ALL reported lambda_ep, omega_log and mu_star into EACH corresponding predicted record's payload.parameters.
 Read table title, headers, units, group rows, continuation blocks and footnotes together with every data row.
-Preserve harmonic/anharmonic approximation in payload.approximation and table row identity in payload.table_row_ref
+Preserve the reported phonon/EPC vibrational_treatment in payload.calculation_conditions, with its method_scope; never broadcast it to electronic results. Preserve table row identity in payload.table_row_ref
 (file_id, table_id, row_index, group when present). Same pressure with different approximation must remain distinct.
 Table context candidates are original surrounding blocks, not automatically associated captions; establish their
 relationship from the original labels/wording, and cite each supporting header/note block separately.
@@ -404,7 +406,15 @@ def normalize_extraction(raw: dict, *, allowed_blocks: set[tuple[str, int, str]]
                 if any((quote["file_id"], quote["pdf_page"], quote["block_id"]) not in allowed_blocks
                        for quote in record["evidences"]):
                     raise ValueError("未注册物性引用了未提供的文件、页面或块")
+                # 名称明确指向声子时不能转成电子带隙/DOS；保留来源以便重提或排除。
+                if re.search(r"phonon(?:ic)?\s+(?:band.?gap|DOS|density of states)|声子.*(?:带隙|态密度)", str(record.get("name_raw") or ""), re.I):
+                    raise ValueError("声子带隙或声子DOS不能归为电子物性；请按原文保留来源并排除未支持物性")
                 code = record["property_code"]
+                source_text = " ".join(e.get("quote") or "" for e in record["evidences"])
+                phonon_source = re.search(r"phonon(?:ic)?\s+(?:band.?gap|DOS|density of states)|声子.*(?:带隙|态密度)", source_text, re.I)
+                electronic_source = re.search(r"electronic\s+(?:band.?gap|DOS|densit)|Fermi|电子.*(?:带隙|态密度)", source_text, re.I)
+                if code in {"band_gap", "dos_fermi", "custom"} and phonon_source and not electronic_source:
+                    raise ValueError("原文物理对象是声子，不能仅因名称相似写入电子带隙或电子DOS")
                 if code == "custom":
                     code = canonical_electronic_property(record.get("name_raw")) or "custom"
                 if code in {"band_gap", "dos_fermi"}:

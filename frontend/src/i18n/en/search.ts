@@ -8,7 +8,7 @@ export default {
   paperStructures: "Independent structures reported in this paper",
 
   systemRetired: 'System discussions have been retired. Find source papers through search.',
-  optimization: {"sscha": "SSCHA", "classical_static": "Static optimization", "unknown": "Optimization unspecified"},
+  optimization: {quasi_harmonic: 'QHA free-energy optimization', anharmonic_quantum: 'Quantum anharmonic free-energy optimization', "sscha": "SSCHA", "classical_static": "Static optimization", "unknown": "Optimization unspecified"},
   viewStructure: "View structure and download",
   viewPaper: "View source paper",
   matchedStates: "Matching states: {count}",

@@ -8,7 +8,7 @@ export default {
   paperStructures: "本文提供的独立结构资料",
 
   systemRetired: '体系讨论功能已移除，请使用检索结果查看来源论文。',
-  optimization: {"sscha": "SSCHA", "classical_static": "静态优化", "unknown": "优化方式未说明"},
+  optimization: {quasi_harmonic: '准简谐自由能优化', anharmonic_quantum: '量子非谐自由能优化', "sscha": "SSCHA", "classical_static": "静态优化", "unknown": "优化方式未说明"},
   viewStructure: "查看结构与下载",
   viewPaper: "查看来源论文",
   matchedStates: "匹配状态：{count} 个",

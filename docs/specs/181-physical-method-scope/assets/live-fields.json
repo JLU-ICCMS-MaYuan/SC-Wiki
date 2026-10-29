@@ -1,0 +1,200 @@
+{
+  "passed": true,
+  "model": {
+    "provider": "server:LLM1",
+    "model": "deepseek-v4-pro"
+  },
+  "reused": [
+    "已核对同源IR文字，未更改文字提取"
+  ],
+  "rerun": [
+    "受影响字段AI提取",
+    "结构工作流关联",
+    "正式科学整理",
+    "正式组装归一化",
+    "隔离草稿保存重读"
+  ],
+  "not_run": [
+    "原任务恢复或业务写入",
+    "旧47项核查",
+    "全文OCR",
+    "论文提交批准"
+  ],
+  "sources": [
+    {
+      "role": "supplementary",
+      "sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "ir_sha256": "1494b5544027405e46ea54a55ab5ffb88334ceeec0de43d9284bf83ace595637",
+      "reextracted_pages": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        9,
+        10,
+        19
+      ],
+      "pdf_checked": true
+    },
+    {
+      "role": "main",
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "ir_sha256": "4b0f3cdf7a0dbdc3f9352de0f479fdb6b53c2cb090dc97d18a31009cc2ebf6f6",
+      "reextracted_pages": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "pdf_checked": true
+    }
+  ],
+  "rows": [
+    {
+      "material": "CaH6",
+      "pressure": 150.0,
+      "optimization": "classical_static",
+      "code": "tc",
+      "value": 235,
+      "name": "Tc",
+      "conditions": {
+        "electronic_method": null,
+        "exchange_correlation_functional": null,
+        "calculation_code": "Quantum ESPRESSO",
+        "vibrational_treatment": null,
+        "extensions": [
+          {
+            "key": "electron_phonon.phonon_method",
+            "value_kind": "text",
+            "value_raw": "density functional (linear-response) theory"
+          }
+        ]
+      },
+      "sources": 3
+    },
+    {
+      "material": "CaH6",
+      "pressure": 150.0,
+      "optimization": "classical_static",
+      "code": "tc",
+      "value": 220,
+      "name": "Tc",
+      "conditions": {
+        "electronic_method": null,
+        "exchange_correlation_functional": null,
+        "calculation_code": "Quantum ESPRESSO",
+        "vibrational_treatment": null,
+        "extensions": [
+          {
+            "key": "electron_phonon.phonon_method",
+            "value_kind": "text",
+            "value_raw": "density functional (linear-response) theory"
+          }
+        ]
+      },
+      "sources": 3
+    },
+    {
+      "material": "CaH6",
+      "pressure": 200.0,
+      "optimization": "classical_static",
+      "code": "tc",
+      "value": 201,
+      "name": "Tc",
+      "conditions": {
+        "electronic_method": null,
+        "exchange_correlation_functional": null,
+        "calculation_code": "Quantum ESPRESSO",
+        "vibrational_treatment": null,
+        "extensions": [
+          {
+            "key": "electron_phonon.phonon_method",
+            "value_kind": "text",
+            "value_raw": "density functional (linear-response) theory"
+          }
+        ]
+      },
+      "sources": 3
+    },
+    {
+      "material": "CaH6",
+      "pressure": 250.0,
+      "optimization": "classical_static",
+      "code": "tc",
+      "value": 187,
+      "name": "Tc",
+      "conditions": {
+        "electronic_method": null,
+        "exchange_correlation_functional": null,
+        "calculation_code": "Quantum ESPRESSO",
+        "vibrational_treatment": null,
+        "extensions": [
+          {
+            "key": "electron_phonon.phonon_method",
+            "value_kind": "text",
+            "value_raw": "density functional (linear-response) theory"
+          }
+        ]
+      },
+      "sources": 3
+    },
+    {
+      "material": "CaH2",
+      "pressure": 0.0,
+      "optimization": "classical_static",
+      "code": "band_gap",
+      "value": 3.05,
+      "name": "band gap",
+      "conditions": {
+        "electronic_method": null,
+        "exchange_correlation_functional": null,
+        "calculation_code": "VASP",
+        "extensions": []
+      },
+      "sources": 2
+    },
+    {
+      "material": "CaH2",
+      "pressure": 150.0,
+      "optimization": "classical_static",
+      "code": "band_gap",
+      "value": 0.48,
+      "name": "band gap",
+      "conditions": {
+        "electronic_method": null,
+        "exchange_correlation_functional": null,
+        "calculation_code": "VASP",
+        "extensions": []
+      },
+      "sources": 3
+    },
+    {
+      "material": "CaH4",
+      "pressure": null,
+      "optimization": "classical_static",
+      "code": "dos_fermi",
+      "value": 0.02234,
+      "name": "DOS at Fermi level",
+      "conditions": {
+        "electronic_method": null,
+        "exchange_correlation_functional": null,
+        "calculation_code": "Quantum ESPRESSO",
+        "extensions": []
+      },
+      "sources": 2
+    }
+  ],
+  "roundtrip_equal": true,
+  "source_task_unchanged": true,
+  "source_hashes": {
+    "backend/ingest/domain_extraction.py": "c5bdbe2059ddf17f4caca197b634b10c6e1ee68684110fb691abe1a9c99efcfe",
+    "backend/ingest/calculation_methods.py": "0b30d9df61da1b115e83b9c12eff199536f7c556b3a12a5517e346b4e658ca91",
+    "backend/ingest/state_optimization.py": "bce584df348b52ce92e5789c8a2ffdc733dfb8d7656e207639b65744914459d5",
+    "backend/ingest/scientific_form_filling.py": "1acc3a292cb7480ffba51336f3e6f25b744a7148d1e4891ccb77f5ecde6131d2",
+    "backend/ingest/material_state_contract.py": "228e46dfd458ba70afbb9b8a42f4f568b031f792ca419e1ddadb3da89559cb5a"
+  },
+  "elapsed_seconds": 416.9679560661316
+}

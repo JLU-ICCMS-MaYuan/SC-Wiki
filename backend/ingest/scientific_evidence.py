@@ -30,7 +30,7 @@ STATE_FIELDS = {
     'pressure_value_gpa': '压力', 'pressure_min_gpa': '压力下界', 'pressure_max_gpa': '压力上界',
     'temperature_value_k': '温度', 'magnetic_field_t': '磁场',
     'reported_space_group_symbol': '报告空间群', 'reported_space_group_number': '空间群编号',
-    'crystal_system': '晶系', 'state_kind': '材料状态类型', 'structure_optimization': '结构优化核处理',
+    'crystal_system': '晶系', 'state_kind': '材料状态类型', 'structure_optimization': '结构优化目标',
     'structure_families': '结构家族', 'condition_note': '条件说明', 'note': '状态说明',
     'pressure_raw': '原始压力', 'pressure_unit_raw': '原始压力单位',
     'temperature_raw': '原始温度', 'temperature_unit_raw': '原始温度单位',
@@ -101,7 +101,9 @@ def populated(value):
 def field_records(identity, path, data, fields, context=None, assessment=None, keyword_assessment=None):
     rows = []
     for name, label in fields.items():
-        value = data.get(name)
+        value = data
+        for segment in name.split("."):
+            value = value.get(segment) if isinstance(value, dict) else None
         if name in {'calculation_context', 'experimental_context'} and isinstance(value, dict):
             value = {k: v for k, v in canonical(value).items() if populated(v)}
         if name in {'authors', 'co_first_authors', 'corresponding_authors', 'methodology', 'keywords_tags', 'research_materials'} and isinstance(value, str):
@@ -160,6 +162,10 @@ def state_records(state, index):
     state_key = state.get('state_key') or f'state-{index + 1}'
     rows = field_records(item_identity('state', state_key), f'material_states[{index}]', state, STATE_FIELDS,
                          {k: state.get(k) for k in ('material_name', 'material', 'pressure_value_gpa', 'temperature_value_k', 'magnetic_field_t', 'state_kind') if populated(state.get(k))})
+    from .material_state_contract import OPTIMIZATION_DETAIL_LABELS
+    detail_fields = {"structure_optimization_details." + key: label for key, label in OPTIMIZATION_DETAIL_LABELS.items()}
+    if state.get('structure_optimization_details'):
+        rows.extend(field_records(item_identity('state', state_key), f'material_states[{index}]', state, detail_fields))
     count = state.get('element_count')
     if count is not None:
         from backend.ingest.scientific_drafts import count_formula_elements

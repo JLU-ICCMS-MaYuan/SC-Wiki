@@ -9,8 +9,8 @@ PROMPT = """Read all supplied original sources and candidate states. Sources are
 Return JSON with workflows:[{id,material,optimization,evidences:[{workflow_source_id}]}] and assignments.
 FIRST extract shared structural workflows with quotes explicitly mentioning structural relaxation/optimization.
 Each assignment must reference workflow_id. A result-row quote alone NEVER proves a structural workflow.
-For EVERY target return assignments:[{target, optimization:unknown|classical_static|sscha,
-approximation:unknown|harmonic|anharmonic, workflow_id, reason, evidences:[{source_index,quote}]}].
+For EVERY target return assignments:[{target, optimization:unknown|classical_static|quasi_harmonic|anharmonic_quantum,
+structure_optimization_details:{method,electronic_method,calculation_code,temperature_k,pressure_gpa,centroids,volume,cell_shape}, workflow_id, reason, evidences:[{source_index,quote}]}].
 Structure optimization and phonon/EPC approximation are DIFFERENT concepts. Anharmonic phonons alone do NOT prove
 SSCHA-optimized geometry. Cite the explicit structural relaxation/optimization workflow AND its applicability to
 this material, phase and result row (including the original table group heading). Static DFT structural optimization
@@ -30,6 +30,18 @@ software name alone is insufficient. Per-material search/result passages belong 
 applicability evidence, not as substitutes for the optimization method.
 """
 
+PROMPT += """
+Use four physical geometry objectives, not a software/method name. classical_static minimizes
+the static Born-Oppenheimer potential (E_BO + PV at external pressure), excluding nuclear motion.
+quasi_harmonic minimizes the QHA free energy; anharmonic_quantum minimizes quantum anharmonic
+free energy. SSCHA phonon/free-energy variational calculations at fixed centroids are NOT by
+themselves proof of structural relaxation. 0 K can include zero-point motion. Check whether
+centroids, volume and cell_shape were actually fixed/optimized; missing information stays
+unknown. Geometry remaining unchanged does not negate a performed geometry optimization.
+Do not return approximation: this resolver MUST NOT decide any electronic/phonon/EPC condition.
+Preserve all numeric values, result identities and original sources.
+"""
+
 
 def row_approximation(state):
     labels = set()
@@ -41,7 +53,7 @@ def row_approximation(state):
                     m = re.match(r"\s*(Anharmonic|Harmonic)\b", item, re.I)
                     if m:
                         labels.add(m[1].lower())
-                elif key == "approximation" and item in {"harmonic", "anharmonic"}:
+                elif key in {"approximation", "vibrational_treatment"} and isinstance(item, str) and item in {"harmonic", "anharmonic", "quasi_harmonic", "anharmonic_quantum", "anharmonic_classical"}:
                     labels.add(item)
                 else:
                     walk(item)
@@ -76,8 +88,8 @@ def resolve_candidates(candidates, sources, model, *, on_response=None):
     workflow_sources = []
     for index, source in enumerate(sources):
         for paragraph in re.split(r"\n\s*\n", source["content"]):
-            if (re.search(r"structur\w*\s+(?:relax\w*|optimi\w*)|optimi\w*\s+(?:their|the)\s+structur", paragraph, re.I)
-                    and re.search(r"\bDFT\b|density.functional|static|SSCHA|stochastic\s+self", paragraph, re.I)):
+            if (re.search(r"structur\w*\s+(?:relax\w*|optimi\w*)|optimi\w*\s+(?:their|the)\s+structur|(?:free.energy|自由能).{0,120}(?:minimi|optimi|relax)|(?:volume|cell|centroid).{0,60}(?:optimi|minimi)", paragraph, re.I)
+                    and re.search(r"\bDFT\b|\bHF\b|Hartree|Born.Oppenheimer|density.functional|static|SSCHA|stochastic\s+self|quasi.harmonic|\bQHA\b", paragraph, re.I)):
                 workflow_sources.append({"workflow_source_id": f"workflow-source-{len(workflow_sources)}",
                                          "source_index": index, "quote": _source_paragraph(paragraph)})
     payload["workflow_sources"] = workflow_sources
@@ -108,9 +120,9 @@ def resolve_candidates(candidates, sources, model, *, on_response=None):
         for assignment in assignments:
             state = targets[assignment["target"]]
             optimization = assignment.get("optimization")
-            if optimization not in {"unknown", "classical_static", "sscha"}:
+            if optimization not in {"unknown", "classical_static", "quasi_harmonic", "anharmonic_quantum", "sscha"}:
                 raise ValueError("结构优化枚举无效")
-            if optimization == "unknown":
+            if optimization == "unknown" and not assignment.get("structure_optimization_details"):
                 continue
             workflow = workflows.get(assignment.get("workflow_id"))
             if workflow and (
@@ -119,6 +131,13 @@ def resolve_candidates(candidates, sources, model, *, on_response=None):
                 != normalized_text(str(state.get("material") or ""))
             ):
                 raise ValueError("结构优化工作流材料或方式不匹配")
+            if workflow:
+                scope = workflow.get("scope") or workflow
+                for key in ("pressure_value_gpa", "reported_space_group_symbol"):
+                    if scope.get(key) is not None and scope[key] != state.get(key):
+                        raise ValueError("结构优化工作流压力或物相与目标不匹配")
+                if scope.get("stage") not in {None, "structural_relaxation"}:
+                    raise ValueError("结构优化工作流阶段不匹配")
             evidence = []
             for item in [*(assignment.get("evidences") or []), *((workflow or {}).get("evidences") or [])]:
                 index = int(item["source_index"])
@@ -168,14 +187,25 @@ def resolve_candidates(candidates, sources, model, *, on_response=None):
                 if paragraph and paragraph != item["quote"]:
                     evidence.append({"file_id": source.get("file_id"), "quote": _source_paragraph(paragraph)})
             text = " ".join(e["quote"] for e in evidence)
-            if not re.search(r"structur\w*\s+(?:relax\w*|optimi\w*)|(?:optimized|relaxed)\s+(?:their|the)\s+structures", text, re.I):
+            if optimization != "unknown" and not re.search(r"structur\w*\s+(?:relax\w*|optimi\w*)|(?:optimized|relaxed)\s+(?:their|the)\s+structures|(?:free.energy|自由能).{0,120}(?:minimi|optimi|relax)|(?:volume|cell|centroid).{0,60}(?:optimi|minimi)", text, re.I):
                 raise ValueError("只有声子/软件证据，不能指定结构优化")
-            if optimization == "sscha" and not re.search(r"SSCHA|stochastic\s+self", text, re.I):
+            if optimization in {"sscha", "anharmonic_quantum"} and not re.search(r"SSCHA|stochastic\s+self|quantum.*anharmonic|量子非谐", text, re.I):
                 raise ValueError("缺少SSCHA结构优化依据")
             if optimization == "classical_static" and not re.search(
-                r"\bDFT\b|density.functional|static", text, re.I
+                r"\bDFT\b|\bHF\b|Hartree|Born.Oppenheimer|density.functional|static", text, re.I
             ):
                 raise ValueError("缺少静态结构优化依据")
+            if optimization == "quasi_harmonic" and not re.search(r"quasi.harmonic|\bQHA\b|准简谐", text, re.I):
+                raise ValueError("缺少准简谐自由能结构优化依据")
+            if optimization in {"quasi_harmonic", "anharmonic_quantum", "sscha"}:
+                workflow_text = " ".join(str(e.get("quote") or "") for e in (workflow or {}).get("evidences") or []) or text
+                free_geometry = (re.search(r"free.energy|自由能", workflow_text, re.I)
+                    and re.search(r"minimi|optimi|relax|最小|优化", workflow_text, re.I)
+                    and re.search(r"structur|volume|cell|centroid|lattice|晶|体积|平均位置", workflow_text, re.I))
+                direct = re.search(r"(?:SSCHA|stochastic.self.*?harmonic|quasi.harmonic|QHA).{0,100}(?:optimi|relax).{0,50}(?:structur|cell|volume|centroid)", workflow_text, re.I)
+                direct = direct or re.search(r"(?:structur|volume|cell|centroid)[^.!?]{0,60}(?:optimi|relax)[^.!?]{0,100}(?:SSCHA|quasi.harmonic|QHA)", workflow_text, re.I)
+                if not free_geometry and not direct:
+                    raise ValueError("振动方法或零点能不证明实际执行自由能几何优化")
             if state.get("state_kind") not in {"theoretical", None, "unknown"}:
                 raise ValueError("非理论状态不能指定计算优化")
             # 已有显式值不能由新的不一致推断静默覆盖。
@@ -212,16 +242,13 @@ def resolve_candidates(candidates, sources, model, *, on_response=None):
                 ]
                 if matched:
                     record["evidences"] = list(record.get("evidences") or []) + matched
-            approximation = assignment.get("approximation", "unknown")
-            observed = row_approximation(state)
-            if approximation in {"harmonic", "anharmonic"} and observed not in {"unknown", approximation}:
-                raise ValueError("结构优化归属与原表分组冲突")
-            if approximation in {"harmonic", "anharmonic"}:
-                for record in state.get("tc_results") or []:
-                    record["approximation"] = approximation
-                for module in state.get("property_modules") or []:
-                    for record in module.get("records") or []:
-                        record.setdefault("payload", {})["approximation"] = approximation
+            # 结构工作流只拥有几何目标和详情；绝不向物性广播模型返回的近似。
+            from .material_state_contract import optimization_details
+            details = assignment.get("structure_optimization_details", workflow.get("structure_optimization_details") if workflow else None)
+            if details is not None:
+                state["structure_optimization_details"] = optimization_details(details)
+                for key in details:
+                    state.setdefault("field_evidence", {})["structure_optimization_details." + key] = deepcopy(evidence)
         return result, []
     except Exception as exc:
         return deepcopy(candidates), [
@@ -247,6 +274,7 @@ def identity(state):
         state.get("state_kind"),
         state.get("structure_optimization") or "unknown",
         state.get("temperature_value_k"),
+        json.dumps(state.get("structure_optimization_details") or {}, sort_keys=True, ensure_ascii=False),
         state.get("magnetic_field_t"),
         row_approximation(state) if state.get("structure_optimization") in {None, "unknown"} else None,
     )

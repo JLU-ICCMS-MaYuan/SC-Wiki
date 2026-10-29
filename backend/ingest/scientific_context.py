@@ -9,10 +9,10 @@ import re
 import unicodedata
 from .calculation_methods import METHOD_SEMANTICS_PROMPT, method_field_issue
 
-CONTEXT_VERSION = "scientific-context-v7-no-functional-inference"
+CONTEXT_VERSION = "scientific-context-v8-physical-method-scope"
 STAGES = {"electron_phonon", "structural_relaxation", "electronic_structure", "sscha", "aimd", "superconductivity"}
 PARAMETERS = {"lambda_ep", "omega_log", "mu_star"}
-CONDITIONS = {"calculation_code", "electronic_method", "exchange_correlation_functional", "k_grid", "q_grid", "k_broadening", "q_broadening"}
+CONDITIONS = {"vibrational_treatment", "calculation_code", "electronic_method", "exchange_correlation_functional", "k_grid", "q_grid", "k_broadening", "q_broadening"}
 
 
 def fingerprint(value):
@@ -35,7 +35,7 @@ def scientific_fingerprint(record):
 def state_fingerprint(state):
     from .scientific_evidence import canonical
     fields = {k:state.get(k) for k in (
-        'material','material_name','state_kind','structure_optimization','pressure_value_gpa','pressure_min_gpa',
+        'material','material_name','state_kind','structure_optimization','structure_optimization_details','pressure_value_gpa','pressure_min_gpa',
         'pressure_max_gpa','reported_space_group_symbol','reported_space_group_number','temperature_value_k')}
     from backend.services.space_groups import lookup_number
     derived = lookup_number(str(fields.get('reported_space_group_symbol') or ''))
@@ -387,7 +387,7 @@ def targets(draft):
     for si,state in enumerate(draft.get("material_states", [])):
         for module in state.get("property_modules", []):
             for record in module.get("records", []):
-                if record.get("record_type") != "predicted_tc":
+                if record.get("record_type") != "predicted_tc" and record.get("property_code") not in {"band_gap", "dos_fermi"}:
                     continue
                 key = "/".join([state.get("state_key") or f"state-{si+1}", module["module_key"], record["record_key"]])
                 result[key] = (state,module,record)
@@ -430,7 +430,7 @@ def association_issues(record):
                 errors.append((f'payload.source_associations.{i}.source_documents','完整来源指纹无效'))
         if isinstance(item, dict) and item.get('field_binding') is not None:
             binding = item['field_binding']
-            if (not isinstance(binding, dict) or binding.get('version') != 1
+            if (not isinstance(binding, dict) or binding.get('version') not in {1, 2}
                 or not re.fullmatch(r'[a-f0-9]{64}', str(binding.get('fingerprint') or ''))
                 or binding.get('field_key') is not None and not isinstance(binding['field_key'], str)):
                 errors.append((f'payload.source_associations.{i}.field_binding', '字段来源绑定无效'))
@@ -489,7 +489,7 @@ def bind_snapshot_source_documents(snapshot, documents, expected_file_ids=None):
         sorted((r['item_key'],r['content_hash'],r['source_hash']) for r in snapshot['records'])])
 
 
-def _scope_matches(scope, state, record):
+def _scope_matches(scope, state, record, stage=None):
     if not isinstance(scope,dict) or not scope.get("material") or scope["material"] != state.get("material"):
         return False
     known = {**state, "method_code":record.get("method_code")}
@@ -503,6 +503,17 @@ def _scope_matches(scope, state, record):
                 return False
             if p is None or (key=="pressure_min_gpa" and p<scope[key]) or (key=="pressure_max_gpa" and p>scope[key]):
                 return False
+    conditions = (record.get("payload") or {}).get("calculation_conditions") or {}
+    primary = "electron_phonon" if record.get("record_type") == "predicted_tc" else "electronic_structure"
+    software = conditions.get("calculation_code") if stage in {None, primary} else next(
+        (e.get("value_text") or e.get("value_raw") for e in conditions.get("extensions") or []
+         if e.get("key") == stage + ".calculation_code"), None)
+    workflow_id = (conditions.get("method_scope") or {}).get("workflow_id") if stage in {None, primary} else None
+    for key, actual in (("workflow_id", workflow_id),
+                        ("software", software),
+                        ("property_code", record.get("property_code"))):
+        if scope.get(key) is not None and actual is not None and scope[key] != actual:
+            return False
     return not scope.get("ambiguous") and not scope.get("excluded")
 
 
@@ -574,15 +585,21 @@ def apply_associations(draft, candidates, context):
         elif not entry or c.get("expected_fingerprint") != initial_hashes[target]:
             reason = "target_stale"
         elif (not association_path(path) or c.get("basis_kind") not in {"paper_quote","paper_inference"}
-              or c.get("stage") not in STAGES or not _scope_matches(c.get("scope"),entry[0],entry[2])
+              or c.get("stage") not in STAGES or not _scope_matches(c.get("scope"),entry[0],entry[2],c.get("stage"))
               or not str(c.get("explanation") or "").strip()
-              or (path.startswith("/payload/calculation_conditions/") and "/extensions/" not in path and c.get("stage") != "electron_phonon")):
+              or (path.startswith("/payload/calculation_conditions/") and "/extensions/" not in path and c.get("stage") != ("electron_phonon" if entry[2].get("record_type") == "predicted_tc" else "electronic_structure"))):
+            reason = "scope_ambiguous"
+        if (not reason and entry[2].get("property_code") in {"band_gap", "dos_fermi"}
+                and c.get("stage") in {"electron_phonon", "sscha"}
+                and (c.get("scope") or {}).get("relation") != "electron_phonon_renormalization"):
             reason = "scope_ambiguous"
         if not reason:
-            approximation = entry[2].get('payload',{}).get('approximation')
+            from .calculation_methods import vibrational_treatment
+            approximation = vibrational_treatment(entry[2])
             reported_approximation = c.get('scope',{}).get('approximation')
             if (approximation and reported_approximation and approximation != reported_approximation
-                or approximation == 'harmonic' and c.get('stage') == 'sscha'):
+                    and not (reported_approximation == 'anharmonic' and approximation in {'anharmonic_quantum', 'anharmonic_classical'})
+                or approximation in {'harmonic', 'quasi_harmonic'} and c.get('stage') == 'sscha'):
                 reason = 'scope_ambiguous'
         facts = [located(e,context["sources"]) for e in c.get("fact_evidences") or []]
         scopes = [located(e,context["sources"]) for e in c.get("scope_evidences") or []]
@@ -640,6 +657,15 @@ def apply_associations(draft, candidates, context):
                 if value in (None,"",[],{}):
                     continue
                 parent[parts[-1]] = deepcopy(value)
+            if c.get("scope", {}).get("relation") == "electron_phonon_renormalization":
+                updated.setdefault("payload", {}).setdefault("calculation_conditions", {})["method_scope"] = {
+                    "physical_object": "electronic", "stage": c["stage"],
+                    "relation": "electron_phonon_renormalization", "relation_evidences": scopes}
+                updated.setdefault("evidences", []).extend(e for e in scopes if e not in updated.get("evidences", []))
+            from .calculation_methods import record_method_issue
+            semantic_issue = record_method_issue(updated)
+            if semantic_issue:
+                raise ValueError(semantic_issue)
             association = {k:deepcopy(c[k]) for k in ("basis_kind","stage","scope","explanation","reported_value_raw","unit_raw","table_row_ref","inference_rule","source_setting_ids") if k in c}
             association.update(version=1,target_path=path,fact_evidences=facts,scope_evidences=scopes,
                                source_fingerprint=context["source_fingerprint"],target_fingerprint=scientific_fingerprint(updated),

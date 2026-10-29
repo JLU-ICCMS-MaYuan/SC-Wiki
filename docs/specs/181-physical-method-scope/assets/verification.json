@@ -1,0 +1,171 @@
+{
+  "date": "2026-10-29",
+  "isolated_base_commit": "95958c4de35924b1f98aceed3377b19bc0867b1c",
+  "form_contract": {
+    "files": 10,
+    "passed": 98
+  },
+  "mutation": {
+    "detected_regressions": 8,
+    "hosts": 4
+  },
+  "python": {
+    "passed": 250,
+    "failed": 9,
+    "skipped": 3,
+    "baseline_passed": 204,
+    "baseline_failed": 10,
+    "shared_case_count": 217,
+    "shared_statuses_equal": false,
+    "new_tests_passed": 45,
+    "baseline_failures": [
+      {
+        "class": "tests.01_decentralized_uploading.test_issue139_scientific_context",
+        "name": "test_nested_fill_protects_existing_values_and_is_idempotent",
+        "reason": "AssertionError: assert not [('payload.source_associations.0.field_binding', '字段来源绑定无效')]\n +  where [('payload.source_associations.0.field_binding', '字段来源绑定无效')] = association_issues({'record_key': 'r', 'module_code': 'superconductive_properties', 're",
+        "current_status": "passed"
+      },
+      {
+        "class": "tests.01_decentralized_uploading.test_condition_auto_review",
+        "name": "test_one_bounded_repair_preserves_original_response",
+        "reason": "AssertionError: assert (1 == 2)\n +  where 1 = len([{'purpose': 'check', 'records': [{'key': '292c5403069f258a11af07f48ce16408a5e67d27335e0a5e5503879ab96b9417', 'field':...tion, with 850 eV and a force threshold of 1 meV/Å.', 'source_id': 'review-sour",
+        "current_status": "failed"
+      },
+      {
+        "class": "tests.01_decentralized_uploading.test_condition_auto_review",
+        "name": "test_bounded_repair_does_not_swallow_upload_cancellation",
+        "reason": "Failed: DID NOT RAISE UploadCancelled",
+        "current_status": "failed"
+      },
+      {
+        "class": "tests.01_decentralized_uploading.test_condition_auto_review",
+        "name": "test_new_upload_rechecks_final_filled_conditions",
+        "reason": "AssertionError: assert (None in ['24×24×24'])",
+        "current_status": "failed"
+      },
+      {
+        "class": "backend.tests.test_property_field_review",
+        "name": "test_leaf_claims_scope_dependencies_and_no_parent_grant",
+        "reason": "AssertionError: assert 40 == 14\n +  where 40 = len({'method_code': {'state_index': 0, 'module_code': 'superconductive_properties', 'module_key': 'm', 'record_key': 'r', ..._raw': {'state_index': 0, 'module_code': 'superconductive_properties', 'module",
+        "current_status": "failed"
+      },
+      {
+        "class": "backend.tests.test_property_field_review",
+        "name": "test_stable_extensions_and_shared_groups_do_not_merge_methods_or_points",
+        "reason": "KeyError: 'payload.calculation_conditions.extensions.0'",
+        "current_status": "failed"
+      },
+      {
+        "class": "backend.tests.test_property_field_review",
+        "name": "test_annotation_changes_only_own_leaf_and_new_events_are_authoritative",
+        "reason": "AssertionError: assert '30bfc756b9f39d96bf575c2eb8be7b27f916509b41566985fe032718a960c084' != '30bfc756b9f39d96bf575c2eb8be7b27f916509b41566985fe032718a960c084'",
+        "current_status": "failed"
+      },
+      {
+        "class": "backend.tests.test_property_field_review",
+        "name": "test_explicit_range_split_keeps_field_identities_and_scientific_versions",
+        "reason": "AssertionError: assert {'053caf0b95a...4baa58d', ...} == {'053caf0b95a...b8e99fb', ...}\n  \n  Extra items in the right set:\n  '11fffbfed23fe4d95cc9dc3b3bff2d194eb570375e93ae316b4a0a2d9b8e99fb'\n  '2773f2f998b2f06784170b5e80963d15eb62794bb3081dbfa31907c",
+        "current_status": "failed"
+      },
+      {
+        "class": "backend.tests.test_property_field_review",
+        "name": "test_saved_changes_track_actor_values_settings_without_dependency_noise",
+        "reason": "ValueError: too many values to unpack (expected 1)",
+        "current_status": "failed"
+      },
+      {
+        "class": "backend.tests.test_property_field_review",
+        "name": "test_upload_save_audit_is_server_owned_atomic_and_does_not_change_retention",
+        "reason": "ValueError: too many values to unpack (expected 1)",
+        "current_status": "failed"
+      }
+    ],
+    "shared_new_failures": [],
+    "shared_fixed_failures": [
+      {
+        "class": "tests.01_decentralized_uploading.test_issue139_scientific_context",
+        "name": "test_nested_fill_protects_existing_values_and_is_idempotent"
+      }
+    ]
+  },
+  "go": {
+    "all_packages_run": true,
+    "baseline_and_candidate_same_failure": [
+      "TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction"
+    ],
+    "reason": "旧SQL模拟仍等待DELETE FROM scientific_evidence_checks；两边均未匹配",
+    "other_packages_passed": true
+  },
+  "build": "TypeScript/Vite通过",
+  "migration": {
+    "sqlite_upgrade_and_lossy_downgrade_guard": "passed",
+    "mysql_offline_sql": "passed",
+    "business_database_applied": false
+  },
+  "counterexamples": {
+    "old_optimizer_replay": "原16项行为失败；专用广播改变电子标签",
+    "sscha_full_name": "先失败，修复后通过",
+    "unrelated_field_save": "先错误阻断，修复后独立保存",
+    "generic_dos_phonon_source": "原逻辑未拒绝，修复后拒绝",
+    "vibration_layer_source": "harmonic不得从anharmonic、quasi-harmonic或SSCHA全称子串授信，先失败后通过",
+    "source_binding_v2": "当前生产者的v2绑定先被旧v1验证器拒绝；现有回归与新作用域保存反例均证明修复，未知99仍拒绝"
+  },
+  "live_artifacts": [
+    ".data/issue181-live-final/",
+    ".data/issue181-figure-live-crop/",
+    ".data/issue181-pdf-qa/"
+  ],
+  "intermediate_source_attempts_kept": [
+    ".data/issue181-live-1/",
+    ".data/issue181-live-2/",
+    ".data/issue181-live-3/",
+    ".data/issue181-live-4/",
+    ".data/issue181-figure-live/",
+    ".data/issue181-figure-live-focused/",
+    ".data/issue181-figure-live-reference/",
+    ".data/issue181-figure-live-valid/"
+  ],
+  "boundaries": [
+    "目标字段验证，不代表整篇PDF或量子计算科学通过",
+    "图像补充提取与正文/SI提取分别留证，压力50不是由程序预填",
+    "真实调用时和当前处理源码hash分别保留，当前重放不冒充再次模型调用",
+    "未推送部署，未迁移业务数据库，远程文档链接未核验"
+  ],
+  "completed_on": "2026-10-30",
+  "current_task_source_hashes": {
+    "backend/ingest/calculation_methods.py": "c71c17027776f62257bf77c217c193e979796349bd61903add9471ead519d151",
+    "backend/ingest/material_state_contract.py": "228e46dfd458ba70afbb9b8a42f4f568b031f792ca419e1ddadb3da89559cb5a",
+    "backend/ingest/state_optimization.py": "bce584df348b52ce92e5789c8a2ffdc733dfb8d7656e207639b65744914459d5",
+    "backend/ingest/domain_extraction.py": "42c868e4b28feb8230c5794dd5b339ccc509ad235e05c68e35e5864dd4e96ab8",
+    "backend/ingest/upload_jobs.py": "4d633217a98db77deda8fc94c21dceca44da6294c67dd9cbcb1e454dcd3bc391",
+    "backend/models.py": "15f4063331af4277b0bb4439aac0b30d41b31b43a59d4ece315d44eb03c67eed",
+    "backend/services/scientific_draft_rewrite.py": "d1a73c263a81774be02b88a9da7cf2c3ce250f6c0315dc820aec1c653c8cadc5",
+    "backend/api/material_state_export.py": "e9ea9fd04658e412425a93066aa15a3260a466544b8467b779d8c67292aa84b1",
+    "goserver/models/models.go": "5603c0f1cb7f7d1a777d158b0140d6aea4a81eb3bf8f5af997949f8804c8a646",
+    "goserver/handlers/papers.go": "5e47f7a3149530b75200c382d1dad5f1466bc37405d16b824d444f9d3c213ea1",
+    "backend/ingest/evidence_proposals.py": "7376cd63bc6445bbe6f81a501d013651b01fec479d9b395bfc68aa301bef695a",
+    "backend/ingest/scientific_evidence.py": "bf190f3f8034f57b1c37f0754941fc9f1ad4724dd3505221c749e53e6ce641c3",
+    "backend/ingest/state_field_review.py": "c655207a74fdf52008118f52c49b166963340531296563c38f32a5fdfb7ccfa9",
+    "backend/ingest/property_evidence.py": "a25edc60e8a3bf53c1085ba30079800ad32b76ef3f388dc2b4b3c83aa390f452",
+    "alembic/versions/20261029_0181_physical_method_scope.py": "09999a7b3dbe520c4c52991316ceac8c952b27d1af64f388612a326b9dfcb75a",
+    "backend/ingest/scientific_context.py": "4c688074aaf3375feaaf1774aa2679e32ebaeebc9f758025f121ab8110715612",
+    "backend/ingest/property_field_review.py": "1ad554c4a2af92c686311b9e75f1aa0be954c9c98bb1ed16b6154e4386839e48",
+    "backend/ingest/scientific_form_filling.py": "1acc3a292cb7480ffba51336f3e6f25b744a7148d1e4891ccb77f5ecde6131d2",
+    "frontend/src/lib/paperProcessing.ts": "2534ac4d51b5bcba8ff05c775d1be989788581da452b098bc786e5d44225270b",
+    "frontend/src/i18n/zh/enums.ts": "cd0521ba2b69ad56081cb3460cd09ca90ef7937fcd0f814fea3b054a749715bc",
+    "frontend/src/i18n/en/enums.ts": "9dc6baa12db658ee72cb37031508e3faea901cf32b7c0242d307686b4b266bfa",
+    "frontend/src/i18n/zh/upload.ts": "6cf08a8610788d441f4d49d0990022fb1473f116aaee4369ec7e29da42f25f4f",
+    "frontend/src/i18n/en/upload.ts": "d76aea541220943f6ac34ca066470cea723257d57d5c62518e1ce0b8c19cf7e7",
+    "frontend/src/i18n/zh/search.ts": "5ffd592829392d34cd9fb87d6f62385f596225f3de662a7bd54bc1b2a5f4d317",
+    "frontend/src/i18n/en/search.ts": "ecb2c120423b0f9a087cb97912c23e5aaf7c23eeac998991d61568bbc33ede7d",
+    "frontend/src/components/StructureOptimizationFields.tsx": "09d6b3d2b68c4e170300deaf27bb4cc62a6a16270a60b80b360c70a848499e22",
+    "frontend/src/components/MaterialStatesEditor.tsx": "72e2bf69e613246315223863b78789e190343ba6718410edf49df473d0275197",
+    "frontend/src/components/SchemaDrivenRecordForm.tsx": "0d153b7fb408b3ab237c4f9c01ea378fdaaaaf2e5b23cc1b25f13896070ae8ab",
+    "frontend/src/components/CalculationConditionFields.tsx": "380f28de05413674d6d7eec417e667f71f1968c3d023b41813f2bf831669b3c5",
+    "backend/ingest/field_drafts.py": "5fac1fa5d7168a8363c7158894f108e349a0057cb90f428054da4f27aa933271",
+    "backend/ingest/review_dependencies.py": "202f2cfe66fd2801e387d527a07d6a02f84f2b0241edcbfe5c4ef14028eb3a33",
+    "scripts/verify-physical-method-scope.py": "8e5c623ada396400162d465567b090c74e010a640b62bceba74663850afdb16f",
+    "scripts/check-form-contract.mjs": "8f1bc084e8504c2c48009a4426a12bd6cc9897e82e369e662524fd7acc319ed9",
+    "backend/ingest/condition_rules.py": "e43f32ed7bb1db4dac20cf1392edd5040e2852ff160f0d1fd58066a3302ba9f2"
+  }
+}

@@ -1,13 +1,13 @@
 import { draftNumber } from '../lib/fieldDrafts'
 import { useState } from 'react'
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
 import type { JsonSchema } from '../lib/formDefinitions'
 import { newStableKey, type PropertyRecordDraft, type PropertyValueKind } from '../lib/propertyModules'
 import ScientificFieldBox, { type FieldSettingsPresentation } from './ScientificFieldBox'
 import ScientificFieldSettingsDrawer from './ScientificFieldSettingsDrawer'
 
 const stages: Record<string, string> = { electron_phonon: '声子／电声耦合', structural_relaxation: '结构优化', electronic_structure: '电子结构', sscha: 'SSCHA', aimd: '分子动力学', superconductivity: '超导计算' }
-const settings: Record<string, string> = { calculation_code: '计算软件', electronic_method: '电子结构方法', exchange_correlation_functional: '交换关联泛函',
+const settings: Record<string, string> = { phonon_method: '声子计算技术', vibrational_treatment: '振动处理层次', calculation_code: '计算软件', electronic_method: '电子结构方法', exchange_correlation_functional: '交换关联泛函',
   energy_cutoff: '截断能', charge_density_cutoff: '电荷密度截断能', k_grid: 'k 网格', q_grid: 'q 网格', q_grid_interpolated: '插值 q 网格',
   supercell: '超胞', atoms: '原子数', temperature_k: '温度', convergence_energy: '能量收敛阈值', convergence_force: '力收敛阈值', matsubara_frequency_cutoff: 'Matsubara 频率截断' }
 export function conditionName(item: Record<string, any>): string {
@@ -34,7 +34,8 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
   const write = (next: Record<string, any>) => onChange({ ...record, payload: { ...record.payload, calculation_conditions: next } })
   const open = (next: Editing, host?: FieldSettingsPresentation) => { setPresentation(host); setError(''); setEditing({ ...next, recordKey: record.record_key }) }
   const rawValue = (key: string) => Array.isArray(conditions[key]) ? conditions[key].join(' × ') : String(conditions[key] ?? '')
-  const fixed = Object.entries(schema.properties || {}).filter(([key, child]) => key !== 'extensions' && child.type !== 'object')
+  const fixed = Object.entries(schema.properties || {}).filter(([key, child]) => key !== 'extensions' && child.type !== 'object'
+    && !(key === 'phonon_method' && extensions.some(e => e.key === 'electron_phonon.phonon_method')))
   const save = () => {
     if (!editing || readOnly) return
     if (presentation?.part) { setEditing(null); return }
@@ -76,6 +77,18 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
   }
   return <Box sx={{ minWidth: 0 }}>
     <Typography variant="body2" color="text.secondary">计算条件</Typography>
+    {['band_gap', 'dos_fermi'].includes(record.property_code) && <FormControl size="small" sx={{ my: 1, minWidth: 240 }}
+      data-issue-field={basePath + '.method_scope'}>
+      <InputLabel id={record.record_key + '-method-relation'}>振动条件与电子结果的关系</InputLabel>
+      <Select labelId={record.record_key + '-method-relation'} label="振动条件与电子结果的关系"
+        value={conditions.method_scope?.relation || 'unknown'} disabled={readOnly}
+        onChange={event => write({ ...conditions, method_scope: { ...(conditions.method_scope || {}),
+          physical_object: 'electronic', stage: 'electronic_structure', relation: event.target.value,
+          relation_evidences: record.evidences || [] } })}>
+        <MenuItem value="unknown">未说明</MenuItem>
+        <MenuItem value="electron_phonon_renormalization">电子—声子修正（需原文明确关联）</MenuItem>
+      </Select>
+    </FormControl>}
     <Box data-condition-row sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, py: 1 }}>
       {fixed.map(([key, child]) => {
         const display = conditions.field_settings?.[key], name = display?.name_raw || child.title || settings[key] || key

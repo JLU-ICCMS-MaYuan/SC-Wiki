@@ -17,15 +17,15 @@ from . import property_evidence as ev
 from . import scientific_evidence as science
 
 PREFIX = 'proposal:'
-NUMBERS = {'value_number', 'value_min', 'value_max', 'uncertainty', 'pressure_value_gpa',
+NUMBERS = {'temperature_k', 'pressure_gpa', 'value_number', 'value_min', 'value_max', 'uncertainty', 'pressure_value_gpa',
            'pressure_min_gpa', 'pressure_max_gpa', 'temperature_value_k', 'magnetic_field_t'}
 INTEGERS = {'element_count', 'reported_space_group_number', 'year'}
 LIST_FIELDS = {'authors', 'co_first_authors', 'corresponding_authors', 'methodology', 'keywords_tags', 'research_materials', 'material_families', 'structure_families'}
 BASIS_KINDS = {'paper_quote', 'paper_inference', 'general_knowledge'}
-ENUMS = {'superconductor_kind': ['conventional', 'unconventional', 'unknown'],
+ENUMS = {'centroids': ['unknown', 'fixed', 'optimized'], 'volume': ['unknown', 'fixed', 'optimized'], 'cell_shape': ['unknown', 'fixed', 'optimized'], 'superconductor_kind': ['conventional', 'unconventional', 'unknown'],
          'material_dimensionality': sorted(MATERIAL_DIMENSIONALITIES), 'crystal_system': sorted(CRYSTAL_SYSTEMS),
          'state_kind': ['theoretical', 'experimental', 'unknown'],
-         'structure_optimization': ['unknown', 'classical_static', 'sscha'],
+         'structure_optimization': ['unknown', 'classical_static', 'quasi_harmonic', 'anharmonic_quantum', 'sscha'],
          'paper_type': ['theoretical', 'experimental', 'review'],
          'theoretical_subtype': ['calculation', 'method', 'theory']}
 IMMUTABLE = {'is_representative', 'record_key', 'record_type', 'property_code', 'custom_property_key', 'definition_key',

@@ -1,7 +1,7 @@
-// 当前代码与本机已发布定义的只读规则快照；不是用户草稿数据库。
+// 当前字段规则与来源索引；历史混装标签不作为新字段契约。
 window.SC_WIKI_FIELD_REVIEW_CATALOG = {
-  "date": "2026-10-29",
-  "revision": "0ceaf7c6f9f9df126136d98bae94f4f1be52bc62",
+  "date": "2026-10-30",
+  "revision": "181-physical-method-scope",
   "profiles": {
     "parser": {
       "label": "解析器专门路径",
@@ -504,7 +504,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 79,
+          "line": 81,
           "symbol": "CHUNK_SYSTEM_PROMPT"
         },
         {
@@ -554,7 +554,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 79,
+          "line": 81,
           "symbol": "CHUNK_SYSTEM_PROMPT"
         },
         {
@@ -1083,7 +1083,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 160,
+          "line": 162,
           "symbol": "SUMMARY_SYSTEM_PROMPT"
         },
         {
@@ -1134,7 +1134,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 160,
+          "line": 162,
           "symbol": "SUMMARY_SYSTEM_PROMPT"
         },
         {
@@ -1328,7 +1328,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 160,
+          "line": 162,
           "symbol": "SUMMARY_SYSTEM_PROMPT"
         },
         {
@@ -1453,7 +1453,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 1455,
+          "line": 1457,
           "symbol": "_normalize_draft"
         },
         {
@@ -1505,7 +1505,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 1596,
+          "line": 1598,
           "symbol": "_classify_material_family_draft"
         },
         {
@@ -1556,7 +1556,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 1848,
+          "line": 1850,
           "symbol": "_process_upload_task"
         },
         {
@@ -1603,7 +1603,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 160,
+          "line": 162,
           "symbol": "SUMMARY_SYSTEM_PROMPT"
         },
         {
@@ -1676,7 +1676,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -1722,7 +1722,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -1767,7 +1767,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -1810,12 +1810,12 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 221,
+          "line": 227,
           "symbol": "converted_state_value"
         }
       ]
@@ -1855,7 +1855,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -1900,7 +1900,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -1943,12 +1943,12 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 221,
+          "line": 227,
           "symbol": "converted_state_value"
         }
       ]
@@ -1988,7 +1988,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2034,7 +2034,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2076,12 +2076,12 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 208,
+          "line": 214,
           "symbol": "derived_symmetry_value"
         }
       ]
@@ -2118,12 +2118,12 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 208,
+          "line": 214,
           "symbol": "derived_symmetry_value"
         }
       ]
@@ -2163,7 +2163,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2175,14 +2175,15 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
     },
     {
       "id": "material_states[*].structure_optimization",
-      "label": "结构优化核处理",
+      "label": "结构优化目标",
       "path": "material_states[*].structure_optimization",
       "group": "材料状态",
       "mode": "special",
-      "read": "结构优化方法原段和结构表行、工作流归属。",
+      "read": "原文实际结构优化目标、具体方法与几何自由度。",
       "checks": [
-        "静态优化与 SSCHA 几何状态分别保留。",
-        "仅有非谐声子证据或VASP名称，不能推出SSCHA结构优化或DFT方法。"
+        "新目标区分unknown、classical_static、quasi_harmonic、anharmonic_quantum；sscha仅旧值兼容。",
+        "0 K可含零点贡献，SSCHA名称或晶格是否变化不能单独决定优化类别。",
+        "实际自由能几何优化须有对应材料/物相/压力及工作流依据，不由声子非谐或ZPE推定。"
       ],
       "dependencies": [
         "本字段的实际值、来源及适用范围；稳定对象身份不随数组位置变化。"
@@ -2192,10 +2193,10 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         "未完成定位、过期或技术故障不能当作科学通过。"
       ],
       "fixes": [
-        "对照结构优化方法原段和对应结构表行，区分静态、SSCHA及仅声子非谐处理。",
-        "查看structure_optimization_assessment及state_optimization.resolve_candidates；同压强不同优化工作流保留不同状态。"
+        "回看实际优化原子平均位置、体积和晶胞形状的原句；与具体算法、软件和电子理论分开。",
+        "结构工作流不向任何物性广播approximation；不批量改写旧sscha标签。"
       ],
-      "example": "例：150 GPa 的静态优化结构与相同压强的SSCHA结构是不同优化状态，不能只按压强拼接。",
+      "example": "固定几何的SSCHA声子计算不自动成为量子非谐结构优化；QHA体积自由能最小化可发生在0 K。",
       "scope": "专门过程",
       "errorCodes": [
         "schema_validation_failed",
@@ -2208,17 +2209,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/state_optimization.py",
-          "line": 61,
+          "line": 73,
           "symbol": "resolve_candidates"
         },
         {
           "path": "backend/ingest/state_optimization.py",
-          "line": 255,
+          "line": 283,
           "symbol": "assemble_candidates"
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         }
       ]
@@ -2259,7 +2260,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2304,7 +2305,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2349,7 +2350,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2394,7 +2395,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2439,7 +2440,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2484,7 +2485,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2529,7 +2530,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2575,7 +2576,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2620,7 +2621,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2662,7 +2663,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 159,
+          "line": 161,
           "symbol": "state_records"
         },
         {
@@ -2709,12 +2710,12 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 298,
+          "line": 304,
           "symbol": "augment_upload"
         },
         {
@@ -2760,7 +2761,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         },
         {
@@ -2806,7 +2807,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         },
         {
@@ -2852,7 +2853,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         },
         {
@@ -2898,7 +2899,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         },
         {
@@ -2944,7 +2945,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         },
         {
@@ -2990,7 +2991,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         },
         {
@@ -3036,7 +3037,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         },
         {
@@ -3087,7 +3088,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         }
       ]
@@ -3133,7 +3134,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         }
       ]
@@ -3179,7 +3180,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         }
       ]
@@ -3225,7 +3226,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         }
       ]
@@ -3271,7 +3272,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         }
       ]
@@ -3317,7 +3318,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/scientific_evidence.py",
-          "line": 251,
+          "line": 257,
           "symbol": "structure_record"
         }
       ]
@@ -6707,7 +6708,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/domain_extraction.py",
-          "line": 21,
+          "line": 22,
           "symbol": "canonical_electronic_property"
         },
         {
@@ -6810,7 +6811,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         },
         {
@@ -6825,7 +6826,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/review_dependencies.py",
-          "line": 32,
+          "line": 34,
           "symbol": "record_inputs"
         }
       ]
@@ -6867,7 +6868,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         },
         {
@@ -6882,7 +6883,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/review_dependencies.py",
-          "line": 32,
+          "line": 34,
           "symbol": "record_inputs"
         }
       ]
@@ -6924,7 +6925,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         },
         {
@@ -6939,7 +6940,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/review_dependencies.py",
-          "line": 32,
+          "line": 34,
           "symbol": "record_inputs"
         }
       ]
@@ -6981,7 +6982,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         },
         {
@@ -6996,21 +6997,21 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/review_dependencies.py",
-          "line": 32,
+          "line": 34,
           "symbol": "record_inputs"
         }
       ]
     },
     {
       "id": "predicted_tc.payload.approximation",
-      "label": "核处理近似",
+      "label": "历史近似标签（原义待核对）",
       "path": "predicted_tc.payload.approximation",
       "group": "超导性质",
       "mode": "fact",
-      "read": "本文对应压力、方法、核处理、表行及表注中的预测结果。",
+      "read": "只读取历史混装标签、原始响应和对应原句；新生成不使用此字段。",
       "checks": [
-        "区分谐波、非谐等当前EPC近似，不由结构优化方式一对一推断。",
-        "共享组内λ/ωlog/条件可共用稳定身份；Tc与μ*按点身份独立核对。"
+        "不把旧DFT改名成振动层次，也不把旧harmonic迁移成电子理论。",
+        "电子数值与方法标签分别核对；不由错误标签否定正确数值，不升级为人工通过。"
       ],
       "dependencies": [
         "当前状态的材料、压力、温度、物相等真实输入。",
@@ -7021,9 +7022,8 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         "未完成定位、过期或技术故障不能当作科学通过。"
       ],
       "fixes": [
-        "按记录稳定身份和当前方法找到原文表行，逐点比较Tc–μ*配对及该组λ/ωlog。",
-        "检查value_kind与实际值槽位、tc_group/point_key及property_field_review的实际路径；不要只因数组前移把结果移给另一点。",
-        "只修改当前错误点或真正共用条件，再保存说明并核对所影响字段，其他通过结果保留。"
+        "新输入按电子理论、声子技术与振动处理分别填写；旧值及来源保留。",
+        "只处理实际错误标签及必要依赖，不清空整条记录或整张材料卡。"
       ],
       "example": "例：同一方法下两组Tc–μ*是两个结果点，不允许只保留高Tc或把端点与μ*配反。",
       "scope": "共用机制，非独立字段算法",
@@ -7038,7 +7038,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         },
         {
@@ -7053,7 +7053,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/review_dependencies.py",
-          "line": 32,
+          "line": 34,
           "symbol": "record_inputs"
         }
       ]
@@ -7095,7 +7095,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         },
         {
@@ -7110,7 +7110,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/review_dependencies.py",
-          "line": 32,
+          "line": 34,
           "symbol": "record_inputs"
         }
       ]
@@ -7152,7 +7152,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         },
         {
@@ -7167,7 +7167,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/review_dependencies.py",
-          "line": 32,
+          "line": 34,
           "symbol": "record_inputs"
         }
       ]
@@ -7209,7 +7209,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         },
         {
@@ -7224,7 +7224,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/review_dependencies.py",
-          "line": 32,
+          "line": 34,
           "symbol": "record_inputs"
         }
       ]
@@ -7454,7 +7454,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -7500,7 +7500,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -7546,7 +7546,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -7594,17 +7594,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -7617,9 +7617,9 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "mode": "condition",
       "read": "对应本文或SI的Methods、计算参数表、表注及其适用范围。",
       "checks": [
-        "DFT、Hartree–Fock等与声子方法分开；DFPT不直接当作泛函。",
-        "白名单条件需完整来源、材料/物相/软件/阶段都成立，且不存在例外与冲突。",
-        "普通直接字段、阶段扩展和SSCHA条件按真实键保留，不按页面位置继承。"
+        "电子理论如DFT、HF、DFT+U；DFPT、harmonic、SSCHA、软件和泛函不能混填。",
+        "原文与材料、物相、计算阶段和具体结果的关系成立；不从软件或harmonic猜电子理论。",
+        "交换关联泛函、U等参数仅按报告填写，DFPT定义推断保留推断身份。"
       ],
       "dependencies": [
         "该字段读取的软件、电子理论、泛函和明确阶段；不是整个计算条件对象。",
@@ -7652,17 +7652,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -7710,17 +7710,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -7768,17 +7768,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -7826,17 +7826,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -7884,17 +7884,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -7942,17 +7942,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8000,17 +8000,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8058,17 +8058,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8116,17 +8116,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8174,17 +8174,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8232,17 +8232,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8290,17 +8290,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8348,17 +8348,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8406,17 +8406,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8464,17 +8464,17 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/condition_rules.py",
-          "line": 406,
+          "line": 419,
           "symbol": "current_review"
         },
         {
           "path": "backend/ingest/scientific_context.py",
-          "line": 547,
+          "line": 558,
           "symbol": "apply_associations"
         },
         {
           "path": "backend/ingest/calculation_methods.py",
-          "line": 55,
+          "line": 57,
           "symbol": "method_field_issue"
         }
       ]
@@ -8894,7 +8894,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/upload_jobs.py",
-          "line": 1402,
+          "line": 1404,
           "symbol": "_prune_generated_properties"
         }
       ]
@@ -8945,7 +8945,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -8996,7 +8996,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9047,7 +9047,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9098,7 +9098,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9149,7 +9149,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9200,7 +9200,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9251,7 +9251,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9302,7 +9302,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9353,7 +9353,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9404,7 +9404,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9455,7 +9455,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9506,7 +9506,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9557,7 +9557,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9608,7 +9608,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9659,7 +9659,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -9710,7 +9710,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_field_review.py",
-          "line": 80,
+          "line": 85,
           "symbol": "expand_property_fields"
         }
       ]
@@ -11563,6 +11563,515 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
           "symbol": "validate_record"
         }
       ]
+    },
+    {
+      "id": "records[*].payload.calculation_conditions.phonon_method",
+      "label": "声子计算技术",
+      "path": "records[*].payload.calculation_conditions.phonon_method",
+      "group": "计算条件",
+      "mode": "condition",
+      "read": "对应工作流的DFPT、有限位移、SSCHA及复合技术原句。",
+      "checks": [
+        "与电子理论和振动层次分别记录，可表达不同阶段的复合流程。",
+        "普通电子带隙/DOS不接收无关声子/EPC条件，明确修正关系时才允许。"
+      ],
+      "dependencies": [
+        "该字段读取的软件、电子理论、泛函和明确阶段；不是整个计算条件对象。",
+        "来源中明确限定的材料/物相/压强/结构优化范围。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "先检查此参数所属材料、物相、软件和计算阶段，回看同一表行/表注或Methods原句。",
+        "查看scientific_context.json中的关联、fact_evidences、scope_evidences与gaps，以及condition_window/rule_review是否完整且当前有效。",
+        "原文未报告则留空；泛函尤其不得从另一软件推算。若阶段或软件错误，修正关联范围，不把所有条件一起重置。"
+      ],
+      "example": "只归入当前结果和对应工作流，不按同卡或同压强复制。",
+      "scope": "条件化程序规则",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/calculation_methods.py",
+          "line": 95,
+          "symbol": "record_method_issue"
+        },
+        {
+          "path": "backend/ingest/property_field_review.py",
+          "line": 85,
+          "symbol": "expand_property_fields"
+        }
+      ]
+    },
+    {
+      "id": "records[*].payload.calculation_conditions.vibrational_treatment",
+      "label": "振动处理层次",
+      "path": "records[*].payload.calculation_conditions.vibrational_treatment",
+      "group": "计算条件",
+      "mode": "condition",
+      "read": "对应结果的harmonic、quasi_harmonic或量子/经典非谐处理。",
+      "checks": [
+        "不从结构优化目标广播；不把DFT、HF或DFPT填在振动层次。",
+        "原文未区分量子/经典时保留未知，不由0 K补猜。"
+      ],
+      "dependencies": [
+        "该字段读取的软件、电子理论、泛函和明确阶段；不是整个计算条件对象。",
+        "来源中明确限定的材料/物相/压强/结构优化范围。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "先检查此参数所属材料、物相、软件和计算阶段，回看同一表行/表注或Methods原句。",
+        "查看scientific_context.json中的关联、fact_evidences、scope_evidences与gaps，以及condition_window/rule_review是否完整且当前有效。",
+        "原文未报告则留空；泛函尤其不得从另一软件推算。若阶段或软件错误，修正关联范围，不把所有条件一起重置。"
+      ],
+      "example": "只归入当前结果和对应工作流，不按同卡或同压强复制。",
+      "scope": "条件化程序规则",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/calculation_methods.py",
+          "line": 95,
+          "symbol": "record_method_issue"
+        },
+        {
+          "path": "backend/ingest/property_field_review.py",
+          "line": 85,
+          "symbol": "expand_property_fields"
+        }
+      ]
+    },
+    {
+      "id": "records[*].payload.calculation_conditions.method_scope",
+      "label": "计算适用关系",
+      "path": "records[*].payload.calculation_conditions.method_scope",
+      "group": "计算条件",
+      "mode": "fact",
+      "read": "当前结果的物理对象、阶段、工作流及明确的电子—声子修正关系。",
+      "checks": [
+        "修正关系须有逐字原文及实际引用，不能用推断理由代替引句。",
+        "选择关系本身不等于通过；材料、物相、压力、阶段、软件不相符时拒绝复用。"
+      ],
+      "dependencies": [
+        "该字段读取的软件、电子理论、泛函和明确阶段；不是整个计算条件对象。",
+        "来源中明确限定的材料/物相/压强/结构优化范围。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "先检查此参数所属材料、物相、软件和计算阶段，回看同一表行/表注或Methods原句。",
+        "查看scientific_context.json中的关联、fact_evidences、scope_evidences与gaps，以及condition_window/rule_review是否完整且当前有效。",
+        "原文未报告则留空；泛函尤其不得从另一软件推算。若阶段或软件错误，修正关联范围，不把所有条件一起重置。"
+      ],
+      "example": "只归入当前结果和对应工作流，不按同卡或同压强复制。",
+      "scope": "字段语义与来源核对，不是条件白名单自动通过",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/calculation_methods.py",
+          "line": 95,
+          "symbol": "record_method_issue"
+        },
+        {
+          "path": "backend/ingest/property_field_review.py",
+          "line": 85,
+          "symbol": "expand_property_fields"
+        }
+      ]
+    },
+    {
+      "id": "material_states[*].structure_optimization_details.method",
+      "label": "结构优化方法",
+      "path": "material_states[*].structure_optimization_details.method",
+      "group": "材料状态",
+      "mode": "special",
+      "read": "原文明确报告的结构优化方法及其结构工作流。",
+      "checks": [
+        "未报告保持未知；温度为0 K不等于没有核零点贡献。",
+        "几何自由度区分固定、已优化和未说明，不能从SSCHA名称补全。",
+        "详情只属于结构优化工作流，不替代物性结果自身的电子/声子计算条件。"
+      ],
+      "dependencies": [
+        "本字段的实际值、来源及适用范围；稳定对象身份不随数组位置变化。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "回看实际优化原子平均位置、体积和晶胞形状的原句；与具体算法、软件和电子理论分开。",
+        "结构工作流不向任何物性广播approximation；不批量改写旧sscha标签。"
+      ],
+      "example": "固定几何的SSCHA声子计算不自动成为量子非谐结构优化；QHA体积自由能最小化可发生在0 K。",
+      "scope": "专门过程",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/material_state_contract.py",
+          "line": 59,
+          "symbol": "optimization_details"
+        },
+        {
+          "path": "frontend/src/components/StructureOptimizationFields.tsx",
+          "line": 1,
+          "symbol": "StructureOptimizationFields"
+        }
+      ]
+    },
+    {
+      "id": "material_states[*].structure_optimization_details.electronic_method",
+      "label": "优化求力电子理论",
+      "path": "material_states[*].structure_optimization_details.electronic_method",
+      "group": "材料状态",
+      "mode": "special",
+      "read": "原文明确报告的优化求力电子理论及其结构工作流。",
+      "checks": [
+        "未报告保持未知；温度为0 K不等于没有核零点贡献。",
+        "几何自由度区分固定、已优化和未说明，不能从SSCHA名称补全。",
+        "详情只属于结构优化工作流，不替代物性结果自身的电子/声子计算条件。"
+      ],
+      "dependencies": [
+        "本字段的实际值、来源及适用范围；稳定对象身份不随数组位置变化。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "回看实际优化原子平均位置、体积和晶胞形状的原句；与具体算法、软件和电子理论分开。",
+        "结构工作流不向任何物性广播approximation；不批量改写旧sscha标签。"
+      ],
+      "example": "固定几何的SSCHA声子计算不自动成为量子非谐结构优化；QHA体积自由能最小化可发生在0 K。",
+      "scope": "专门过程",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/material_state_contract.py",
+          "line": 59,
+          "symbol": "optimization_details"
+        },
+        {
+          "path": "frontend/src/components/StructureOptimizationFields.tsx",
+          "line": 1,
+          "symbol": "StructureOptimizationFields"
+        }
+      ]
+    },
+    {
+      "id": "material_states[*].structure_optimization_details.calculation_code",
+      "label": "结构优化软件",
+      "path": "material_states[*].structure_optimization_details.calculation_code",
+      "group": "材料状态",
+      "mode": "special",
+      "read": "原文明确报告的结构优化软件及其结构工作流。",
+      "checks": [
+        "未报告保持未知；温度为0 K不等于没有核零点贡献。",
+        "几何自由度区分固定、已优化和未说明，不能从SSCHA名称补全。",
+        "详情只属于结构优化工作流，不替代物性结果自身的电子/声子计算条件。"
+      ],
+      "dependencies": [
+        "本字段的实际值、来源及适用范围；稳定对象身份不随数组位置变化。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "回看实际优化原子平均位置、体积和晶胞形状的原句；与具体算法、软件和电子理论分开。",
+        "结构工作流不向任何物性广播approximation；不批量改写旧sscha标签。"
+      ],
+      "example": "固定几何的SSCHA声子计算不自动成为量子非谐结构优化；QHA体积自由能最小化可发生在0 K。",
+      "scope": "专门过程",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/material_state_contract.py",
+          "line": 59,
+          "symbol": "optimization_details"
+        },
+        {
+          "path": "frontend/src/components/StructureOptimizationFields.tsx",
+          "line": 1,
+          "symbol": "StructureOptimizationFields"
+        }
+      ]
+    },
+    {
+      "id": "material_states[*].structure_optimization_details.temperature_k",
+      "label": "优化温度",
+      "path": "material_states[*].structure_optimization_details.temperature_k",
+      "group": "材料状态",
+      "mode": "special",
+      "read": "原文明确报告的优化温度及其结构工作流。",
+      "checks": [
+        "未报告保持未知；温度为0 K不等于没有核零点贡献。",
+        "几何自由度区分固定、已优化和未说明，不能从SSCHA名称补全。",
+        "详情只属于结构优化工作流，不替代物性结果自身的电子/声子计算条件。"
+      ],
+      "dependencies": [
+        "本字段的实际值、来源及适用范围；稳定对象身份不随数组位置变化。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "回看实际优化原子平均位置、体积和晶胞形状的原句；与具体算法、软件和电子理论分开。",
+        "结构工作流不向任何物性广播approximation；不批量改写旧sscha标签。"
+      ],
+      "example": "固定几何的SSCHA声子计算不自动成为量子非谐结构优化；QHA体积自由能最小化可发生在0 K。",
+      "scope": "专门过程",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/material_state_contract.py",
+          "line": 59,
+          "symbol": "optimization_details"
+        },
+        {
+          "path": "frontend/src/components/StructureOptimizationFields.tsx",
+          "line": 1,
+          "symbol": "StructureOptimizationFields"
+        }
+      ]
+    },
+    {
+      "id": "material_states[*].structure_optimization_details.pressure_gpa",
+      "label": "优化外压",
+      "path": "material_states[*].structure_optimization_details.pressure_gpa",
+      "group": "材料状态",
+      "mode": "special",
+      "read": "原文明确报告的优化外压及其结构工作流。",
+      "checks": [
+        "未报告保持未知；温度为0 K不等于没有核零点贡献。",
+        "几何自由度区分固定、已优化和未说明，不能从SSCHA名称补全。",
+        "详情只属于结构优化工作流，不替代物性结果自身的电子/声子计算条件。"
+      ],
+      "dependencies": [
+        "本字段的实际值、来源及适用范围；稳定对象身份不随数组位置变化。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "回看实际优化原子平均位置、体积和晶胞形状的原句；与具体算法、软件和电子理论分开。",
+        "结构工作流不向任何物性广播approximation；不批量改写旧sscha标签。"
+      ],
+      "example": "固定几何的SSCHA声子计算不自动成为量子非谐结构优化；QHA体积自由能最小化可发生在0 K。",
+      "scope": "专门过程",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/material_state_contract.py",
+          "line": 59,
+          "symbol": "optimization_details"
+        },
+        {
+          "path": "frontend/src/components/StructureOptimizationFields.tsx",
+          "line": 1,
+          "symbol": "StructureOptimizationFields"
+        }
+      ]
+    },
+    {
+      "id": "material_states[*].structure_optimization_details.centroids",
+      "label": "原子平均位置",
+      "path": "material_states[*].structure_optimization_details.centroids",
+      "group": "材料状态",
+      "mode": "special",
+      "read": "原文明确报告的原子平均位置及其结构工作流。",
+      "checks": [
+        "未报告保持未知；温度为0 K不等于没有核零点贡献。",
+        "几何自由度区分固定、已优化和未说明，不能从SSCHA名称补全。",
+        "详情只属于结构优化工作流，不替代物性结果自身的电子/声子计算条件。"
+      ],
+      "dependencies": [
+        "本字段的实际值、来源及适用范围；稳定对象身份不随数组位置变化。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "回看实际优化原子平均位置、体积和晶胞形状的原句；与具体算法、软件和电子理论分开。",
+        "结构工作流不向任何物性广播approximation；不批量改写旧sscha标签。"
+      ],
+      "example": "固定几何的SSCHA声子计算不自动成为量子非谐结构优化；QHA体积自由能最小化可发生在0 K。",
+      "scope": "专门过程",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/material_state_contract.py",
+          "line": 59,
+          "symbol": "optimization_details"
+        },
+        {
+          "path": "frontend/src/components/StructureOptimizationFields.tsx",
+          "line": 1,
+          "symbol": "StructureOptimizationFields"
+        }
+      ]
+    },
+    {
+      "id": "material_states[*].structure_optimization_details.volume",
+      "label": "体积",
+      "path": "material_states[*].structure_optimization_details.volume",
+      "group": "材料状态",
+      "mode": "special",
+      "read": "原文明确报告的体积及其结构工作流。",
+      "checks": [
+        "未报告保持未知；温度为0 K不等于没有核零点贡献。",
+        "几何自由度区分固定、已优化和未说明，不能从SSCHA名称补全。",
+        "详情只属于结构优化工作流，不替代物性结果自身的电子/声子计算条件。"
+      ],
+      "dependencies": [
+        "本字段的实际值、来源及适用范围；稳定对象身份不随数组位置变化。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "回看实际优化原子平均位置、体积和晶胞形状的原句；与具体算法、软件和电子理论分开。",
+        "结构工作流不向任何物性广播approximation；不批量改写旧sscha标签。"
+      ],
+      "example": "固定几何的SSCHA声子计算不自动成为量子非谐结构优化；QHA体积自由能最小化可发生在0 K。",
+      "scope": "专门过程",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/material_state_contract.py",
+          "line": 59,
+          "symbol": "optimization_details"
+        },
+        {
+          "path": "frontend/src/components/StructureOptimizationFields.tsx",
+          "line": 1,
+          "symbol": "StructureOptimizationFields"
+        }
+      ]
+    },
+    {
+      "id": "material_states[*].structure_optimization_details.cell_shape",
+      "label": "晶胞形状",
+      "path": "material_states[*].structure_optimization_details.cell_shape",
+      "group": "材料状态",
+      "mode": "special",
+      "read": "原文明确报告的晶胞形状及其结构工作流。",
+      "checks": [
+        "未报告保持未知；温度为0 K不等于没有核零点贡献。",
+        "几何自由度区分固定、已优化和未说明，不能从SSCHA名称补全。",
+        "详情只属于结构优化工作流，不替代物性结果自身的电子/声子计算条件。"
+      ],
+      "dependencies": [
+        "本字段的实际值、来源及适用范围；稳定对象身份不随数组位置变化。"
+      ],
+      "failures": [
+        "原文不支持当前值，或来源、所属状态与当前字段不一致。",
+        "未完成定位、过期或技术故障不能当作科学通过。"
+      ],
+      "fixes": [
+        "回看实际优化原子平均位置、体积和晶胞形状的原句；与具体算法、软件和电子理论分开。",
+        "结构工作流不向任何物性广播approximation；不批量改写旧sscha标签。"
+      ],
+      "example": "固定几何的SSCHA声子计算不自动成为量子非谐结构优化；QHA体积自由能最小化可发生在0 K。",
+      "scope": "专门过程",
+      "errorCodes": [
+        "schema_validation_failed",
+        "evidence_stale",
+        "evidence_review_required",
+        "unchecked",
+        "missing"
+      ],
+      "failureRoute": "保留本字段问题，检查值、来源及真实依赖",
+      "sources": [
+        {
+          "path": "backend/ingest/material_state_contract.py",
+          "line": 59,
+          "symbol": "optimization_details"
+        },
+        {
+          "path": "frontend/src/components/StructureOptimizationFields.tsx",
+          "line": 1,
+          "symbol": "StructureOptimizationFields"
+        }
+      ]
     }
   ],
   "coverage": {
@@ -11613,7 +12122,8 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "temperature_unit_raw",
       "calculation_context",
       "experimental_context",
-      "element_count"
+      "element_count",
+      "structure_optimization_details"
     ],
     "record_input_fields": [
       "record_key",
@@ -11658,7 +12168,8 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "q_grid",
       "q_grid_interpolated",
       "supercell",
-      "temperature_k"
+      "temperature_k",
+      "vibrational_treatment"
     ],
     "dynamic_fields": "按extensions与开放payload模板，不枚举未来所有用户定义叶子"
   },
@@ -12176,7 +12687,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
   ],
   "source_index": {
     "backend/ingest/scientific_evidence.py": {
-      "sha256": "b17a500dc536d59c5125e0d294a0997a3acac6dd9eb4d8e4a7f205d1a2fbe45e"
+      "sha256": "bf190f3f8034f57b1c37f0754941fc9f1ad4724dd3505221c749e53e6ce641c3"
     },
     "backend/ingest/grobid_document.py": {
       "sha256": "71786bb59a267624656e0671b9b8c25fa2a54c2301dca4f69af1ed1571dcb054"
@@ -12188,13 +12699,13 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sha256": "41bbc793f0a80a85841967458b5d2c273b03393d8c7ef1aa22a8956342c22a3a"
     },
     "backend/ingest/upload_jobs.py": {
-      "sha256": "7148a1a211a4c774466ce2af8e16a00ccc42296d29411a93ac7ae0baec480c98"
+      "sha256": "4d633217a98db77deda8fc94c21dceca44da6294c67dd9cbcb1e454dcd3bc391"
     },
     "backend/ingest/publication_year.py": {
       "sha256": "6d215d629a4e4fe5aac7ded8a9867162b34bf8cf959b98df554b7721730ccec6"
     },
     "backend/ingest/property_evidence.py": {
-      "sha256": "5ce3052bc8acaebccc44cea621ab6172ff6c09a585b440b8a28f5d0687311188"
+      "sha256": "a25edc60e8a3bf53c1085ba30079800ad32b76ef3f388dc2b4b3c83aa390f452"
     },
     "backend/ingest/paper_summary.py": {
       "sha256": "5ab706dd7fc82ae598e7f13b7528b7bc48a118ff6e9fc7fb83aab937d1ae13f0"
@@ -12218,7 +12729,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sha256": "562698eec31b74e4c4ac8610aa6f98f816e8eda5842df474023e7f5c51ed2f8b"
     },
     "backend/ingest/state_optimization.py": {
-      "sha256": "6b86e6332552103ade843e388e5f75548a710307564cfcebf04fe3bcb5bb7d81"
+      "sha256": "bce584df348b52ce92e5789c8a2ffdc733dfb8d7656e207639b65744914459d5"
     },
     "backend/ingest/scientific_drafts.py": {
       "sha256": "040c26e90ae8c309441f73791524f07488ef295be937091c5f869b2f0e22bf57"
@@ -12230,28 +12741,28 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sha256": "a36b4a8d44d32f9e9811022965bd5f1234a731690364a34f2e8cfcce977cf954"
     },
     "backend/ingest/domain_extraction.py": {
-      "sha256": "48daa8b254d46cbc5a39ddcdea5aeb137b5b2f77563294b35d01b33fa0dee400"
+      "sha256": "42c868e4b28feb8230c5794dd5b339ccc509ad235e05c68e35e5864dd4e96ab8"
     },
     "backend/ingest/fermi_dos.py": {
       "sha256": "916d0bf4f79541c51e86c06fd75cf0bfc6e0f70ac8581df5fec308c029919c68"
     },
     "backend/ingest/property_field_review.py": {
-      "sha256": "75fa8157cff9b414facfe9f90e1a5be1be2389c90425c488a722df8001bd5d94"
+      "sha256": "1ad554c4a2af92c686311b9e75f1aa0be954c9c98bb1ed16b6154e4386839e48"
     },
     "backend/ingest/tc_parameters.py": {
       "sha256": "e4c994cbef6563a61f79c9e8c8761451aeffe37b71215a75253a48d78efa0278"
     },
     "backend/ingest/review_dependencies.py": {
-      "sha256": "140324ec7b1b6b0a7ee31c285270a676d64a757d87449d8a88a98b6cfd174370"
+      "sha256": "202f2cfe66fd2801e387d527a07d6a02f84f2b0241edcbfe5c4ef14028eb3a33"
     },
     "backend/ingest/condition_rules.py": {
-      "sha256": "689c75ee551fad73ac5ee7f96eebb2e4c1ad21b24ffe5325215d1c2d3a7f96dc"
+      "sha256": "e43f32ed7bb1db4dac20cf1392edd5040e2852ff160f0d1fd58066a3302ba9f2"
     },
     "backend/ingest/scientific_context.py": {
-      "sha256": "9f7c836e015d80564841ea2f3ced9517af0e4712a24d2147dac5bfb712c727a1"
+      "sha256": "4c688074aaf3375feaaf1774aa2679e32ebaeebc9f758025f121ab8110715612"
     },
     "backend/ingest/calculation_methods.py": {
-      "sha256": "464880ec1442e0c1f899cec0fc0db313a2948d47a5eff82a2aa98c26777b1bd0"
+      "sha256": "c71c17027776f62257bf77c217c193e979796349bd61903add9471ead519d151"
     },
     "backend/ingest/thermodynamic_stability.py": {
       "sha256": "5fbb6bfff1e53c2120ee6c88ebf5667bf812e33c3773e6027b62910225555485"
@@ -12270,6 +12781,12 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
     },
     "backend/ingest/form_definitions.py": {
       "sha256": "e8836c6dcfda4ad958958d7374634079849d5622ec792c8c7a837a9e260b7bf5"
+    },
+    "backend/ingest/material_state_contract.py": {
+      "sha256": "228e46dfd458ba70afbb9b8a42f4f568b031f792ca419e1ddadb3da89559cb5a"
+    },
+    "frontend/src/components/StructureOptimizationFields.tsx": {
+      "sha256": "09d6b3d2b68c4e170300deaf27bb4cc62a6a16270a60b80b360c70a848499e22"
     }
   }
 };

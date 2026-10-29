@@ -2,7 +2,7 @@
 from copy import deepcopy
 
 LABELS = {'method_code': '预测方法', 'lambda_ep': '电声耦合强度 λ', 'omega_log': 'ωlog', 'mu_star': 'μ*',
-          'calculation_code': '计算软件', 'electronic_method': '电子结构方法', 'exchange_correlation_functional': '交换关联泛函',
+          'method_scope': '计算适用关系', 'phonon_method': '声子计算技术', 'vibrational_treatment': '振动处理层次', 'calculation_code': '计算软件', 'electronic_method': '电子结构方法', 'exchange_correlation_functional': '交换关联泛函',
           'k_grid': 'k 网格', 'q_grid': 'q 网格', 'k_broadening': 'k 展宽', 'q_broadening': 'q 展宽'}
 CONDITIONS = tuple(key for key in LABELS if key not in {'method_code', 'lambda_ep', 'omega_log', 'mu_star'})
 METHODS = {'isotropic_eliashberg': '各向同性 Eliashberg', 'anisotropic_eliashberg': '各向异性 Eliashberg',
@@ -39,8 +39,13 @@ def review_context(record, state, path):
     is_mu = path.startswith('payload.parameters.mu_star') or path.startswith('payload.parameters.extensions.')
     if path == 'method_code' or path.startswith('value_') or is_mu:
         context['definition'] = [record.get('definition_key'), record.get('definition_version')]
-    if payload.get('approximation'):
+    from .calculation_methods import vibrational_treatment
+    treatment = vibrational_treatment(record)
+    if payload.get('approximation') and record.get('property_code') not in {'band_gap', 'dos_fermi'}:
         context['approximation'] = payload['approximation']
+    if treatment and (path.startswith(('payload.parameters.lambda_ep', 'payload.parameters.omega_log'))
+                      or '.sscha.' in path or path.endswith('.vibrational_treatment')):
+        context['approximation'] = treatment
     annotations = None
     if path.startswith('payload.parameters.'):
         name = path.split('.')[2].replace('omega_log_k', 'omega_log')
@@ -73,7 +78,7 @@ def review_context(record, state, path):
         context['method_code'] = record.get('method_code')
     context['direct_inputs'] = {key: deepcopy(read_path(record, key)) for key in record_inputs(record, path)}
     if '.sscha.' in path:
-        context['approximation'] = payload.get('approximation')
+        context['approximation'] = vibrational_treatment(record)
     return context
 
 
@@ -82,7 +87,9 @@ def expand_property_fields(records):
     result, shared = [], set()
     for parent in records:
         original = (parent.get('claim') or {}).get('record') or {}
-        if parent.get('kind') != 'property' or original.get('record_type') != 'predicted_tc':
+        electronic = original.get('property_code') in {'band_gap', 'dos_fermi'} and bool(
+            (original.get('payload') or {}).get('calculation_conditions') or (original.get('payload') or {}).get('approximation'))
+        if parent.get('kind') != 'property' or (original.get('record_type') != 'predicted_tc' and not electronic):
             result.append(parent)
             continue
         source = deepcopy(original)
@@ -98,28 +105,37 @@ def expand_property_fields(records):
         group = (payload.get('tc_group') or {}).get('group_key')  # snapshot通常已去除UI身份，调用者可显式提供。
         group = parent.get('tc_group_key') or group
         meta = parent.get('tc_group_meta') or {}
-        specifications = [('method_code', LABELS['method_code'], 'text', 'method_code', True),
-                          ('payload.approximation', '核处理近似', 'text', 'approximation', True)]
-        for key in ('lambda_ep', 'omega_log'):
-            actual = 'omega_log_k' if key == 'omega_log' and key not in parameters and 'omega_log_k' in parameters else key
-            value = parameters.get(actual)
-            path = 'payload.parameters.' + actual + ('.value_number' if isinstance(value, dict) else '')
-            specifications.append((path, LABELS[key], 'number', 'parameters.' + key, True))
-        if source.get('value_kind') == 'range':
-            specifications.extend((name, 'Tc · ' + label, 'number', name, False) for name, label in [('value_min', '第1组'), ('value_max', '第2组')])
-        elif source.get('value_kind') == 'number':
-            specifications.append(('value_number', 'Tc', 'number', 'value_number', False))
+        specifications = []
+        if electronic:
+            kind = source.get('value_kind')
+            for slot in (['value_min', 'value_max'] if kind == 'range' else ['value_number'] if kind == 'number' else ['value_text']):
+                specifications.append((slot, parent['label'], 'number' if kind in {'number', 'range'} else 'text', slot, False))
+            if payload.get('approximation') is not None:
+                specifications.append(('payload.approximation', '历史近似标签（原义待核对）', 'text', 'approximation', False))
         else:
-            name = 'value_boolean' if source.get('value_kind') == 'boolean' else 'value_text'
-            specifications.append((name, 'Tc', source.get('value_kind') or 'text', name, False))
-        mu = parameters.get('mu_star')
-        if mu is not None or not any(e.get('key') == 'mu_star' and e.get('value_kind') == 'range' for e in parameters.get('extensions') or []):
-            specifications.append(('payload.parameters.mu_star' + ('.value_number' if isinstance(mu, dict) else ''), 'μ*', 'number', 'parameters.mu_star', False))
-        for i, extension in enumerate(parameters.get('extensions') or []):
-            if extension.get('key') == 'mu_star' and extension.get('value_kind') == 'range':
-                for key, name in [('value_max', 'μ* · 第1组'), ('value_min', 'μ* · 第2组')]:
-                    specifications.append((f'payload.parameters.extensions.{i}.{key}', name, 'number', 'parameters.mu_star.' + key, False))
-        specifications.extend(('payload.calculation_conditions.' + key, LABELS[key], 'number' if key.endswith('broadening') else 'text', 'conditions.' + key, True) for key in CONDITIONS)
+            specifications = [('method_code', LABELS['method_code'], 'text', 'method_code', True)]
+            if payload.get('approximation') is not None:
+                specifications.append(('payload.approximation', '历史近似标签（原义待核对）', 'text', 'approximation', True))
+            for key in ('lambda_ep', 'omega_log'):
+                actual = 'omega_log_k' if key == 'omega_log' and key not in parameters and 'omega_log_k' in parameters else key
+                value = parameters.get(actual)
+                path = 'payload.parameters.' + actual + ('.value_number' if isinstance(value, dict) else '')
+                specifications.append((path, LABELS[key], 'number', 'parameters.' + key, True))
+            if source.get('value_kind') == 'range':
+                specifications.extend((name, 'Tc · ' + label, 'number', name, False) for name, label in [('value_min', '第1组'), ('value_max', '第2组')])
+            elif source.get('value_kind') == 'number':
+                specifications.append(('value_number', 'Tc', 'number', 'value_number', False))
+            else:
+                name = 'value_boolean' if source.get('value_kind') == 'boolean' else 'value_text'
+                specifications.append((name, 'Tc', source.get('value_kind') or 'text', name, False))
+            mu = parameters.get('mu_star')
+            if mu is not None or not any(e.get('key') == 'mu_star' and e.get('value_kind') == 'range' for e in parameters.get('extensions') or []):
+                specifications.append(('payload.parameters.mu_star' + ('.value_number' if isinstance(mu, dict) else ''), 'μ*', 'number', 'parameters.mu_star', False))
+            for i, extension in enumerate(parameters.get('extensions') or []):
+                if extension.get('key') == 'mu_star' and extension.get('value_kind') == 'range':
+                    for key, name in [('value_max', 'μ* · 第1组'), ('value_min', 'μ* · 第2组')]:
+                        specifications.append((f'payload.parameters.extensions.{i}.{key}', name, 'number', 'parameters.mu_star.' + key, False))
+        specifications.extend(('payload.calculation_conditions.' + key, LABELS[key], 'object' if key == 'method_scope' else 'number' if key.endswith('broadening') else 'text', 'conditions.' + key, not electronic) for key in CONDITIONS)
         for i, extension in enumerate(conditions.get('extensions') or []):
             identity = extension.get('field_key') or extension.get('key')
             identity = identity if isinstance(identity, str) and identity else None
@@ -127,7 +143,7 @@ def expand_property_fields(records):
             identity = identity or item_identity('legacy-extension', extension)
             name = extension.get('name_raw') or ('声子方法' if str(extension.get('key') or '').split('.')[-1] == 'phonon_method'
                 else extension.get('name') or extension.get('key') or '补充计算条件')
-            specifications.append((f'payload.calculation_conditions.extensions.{i}', name, 'object', 'conditions.extension.' + identity, True))
+            specifications.append((f'payload.calculation_conditions.extensions.{i}', name, 'object', 'conditions.extension.' + identity, not electronic))
         for path, label, kind, identity, common in specifications:
             prior_owner = item_identity('tc-group', parent.get('state_key'), parent.get('module_key'), group,
                                        parent.get('tc_method_key') if path == 'method_code' else '') if group and common else parent['item_key']
@@ -136,12 +152,12 @@ def expand_property_fields(records):
                                   parent.get('tc_method_key') or parent['record_key'] if path == 'method_code' else '') if common else parent['item_key']
             semantic = identity
             point = None
-            if path in {'value_min', 'value_max'}:
+            if not electronic and path in {'value_min', 'value_max'}:
                 point = parent['record_key'] + (':0' if path == 'value_min' else ':1')
                 semantic = 'tc'
-            elif path == 'value_number':
+            elif not electronic and path == 'value_number':
                 point = meta.get('point_key') or parent['record_key']; semantic = 'tc'
-            elif identity.startswith('parameters.mu_star') and ('.extensions.' in path or source.get('value_kind') != 'range'):
+            elif not electronic and identity.startswith('parameters.mu_star') and ('.extensions.' in path or source.get('value_kind') != 'range'):
                 point = (parent['record_key'] + (':0' if path.endswith('.value_max') else ':1')) if '.extensions.' in path else meta.get('point_key') or parent['record_key']
                 semantic = 'mu_star'
             if point:

@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 SCOPE_FIELDS = ('material', 'material_name', 'pressure_value_gpa', 'pressure_min_gpa',
                 'pressure_max_gpa', 'reported_space_group_symbol', 'state_kind',
-                'structure_optimization', 'temperature_value_k', 'magnetic_field_t')
+                'structure_optimization', 'structure_optimization_details', 'temperature_value_k', 'magnetic_field_t')
 
 
 def context(state):

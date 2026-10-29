@@ -43,6 +43,8 @@ def _text(value):
 
 def electronic_method_issue(value):
     text = _text(value)
+    if re.search(r"\b(?:harmonic|anharmonic|quasi harmonic|sscha|qha)\b|简谐|非谐|准简谐", text):
+        return "振动处理或SSCHA不能作为电子结构理论；请分别记录电子理论、声子技术和振动处理层次。"
     if re.search(r"\bdfpt\b|density functional perturbation|finite displacement|frozen phonon|密度泛函微扰|有限位移|冻结声子", text):
         return "DFPT／有限位移等属于声子或响应方法，请单独记录；电子结构方法应按原文填写DFT、HF等理论，不能直接替换或猜测。"
     if re.fullmatch(r"(?:quantum espresso|qe|vasp|abinit|quantum espresso software)(?:\s+v?[\d.]+)?", text):
@@ -58,6 +60,18 @@ def method_field_issue(path, value):
         return electronic_method_issue(value)
     if isinstance(value, dict) and str(value.get("key") or "").rsplit(".", 1)[-1] == "electronic_method":
         return electronic_method_issue(value)
+    key = str(value.get("key") or "").rsplit(".", 1)[-1] if isinstance(value, dict) else path.rsplit(".", 1)[-1]
+    text = _text(value)
+    if key == "approximation" and re.search(r"\bdft\b|\bdfpt\b|\bhf\b|hartree|density functional|电子结构", text):
+        return "历史approximation混入了电子理论或声子技术，请分别填写；保留旧值，不按字符串迁移。"
+    if key == "phonon_method" and (re.fullmatch(r"dft|hf|hartree fock|density functional theory", text)
+            or re.search(r"\bharmonic\b|\banharmonic\b|简谐近似|非谐近似", text)
+            and not re.search(r"self consistent harmonic|\bsscha\b|自洽谐", text)):
+        return "声子计算技术应与电子理论、振动处理层次分开。"
+    if key == "vibrational_treatment" and text and text not in {
+            "unknown", "harmonic", "quasi harmonic", "anharmonic",
+            "anharmonic quantum", "anharmonic classical", "简谐", "准简谐", "量子非谐", "经典非谐"}:
+        return "振动处理层次不能填写DFT、HF、DFPT等电子理论或响应技术。"
     return None
 
 
@@ -67,6 +81,10 @@ def condition_method_issue(conditions):
     issue = electronic_method_issue(conditions.get("electronic_method"))
     if issue:
         return issue
+    for key in ("phonon_method", "vibrational_treatment"):
+        issue = method_field_issue(key, conditions.get(key))
+        if issue:
+            return issue
     for extension in conditions.get("extensions") or []:
         issue = method_field_issue("extensions", extension)
         if issue:
@@ -74,8 +92,44 @@ def condition_method_issue(conditions):
     return None
 
 
-def record_method_issue(record):
-    return condition_method_issue((record.get("payload") or {}).get("calculation_conditions"))
+def record_method_issue(record, *, check_legacy=True):
+    conditions = (record.get("payload") or {}).get("calculation_conditions") or {}
+    issue = condition_method_issue(conditions)
+    if issue:
+        return issue
+    if check_legacy:
+        issue = method_field_issue("approximation", (record.get("payload") or {}).get("approximation"))
+        if issue:
+            return issue
+    if record.get("property_code") in {"band_gap", "dos_fermi"}:
+        vibrational = any(conditions.get(k) for k in ("phonon_method", "vibrational_treatment")) or any(
+            str(e.get("key") or "").rsplit(".", 1)[-1] in {"phonon_method", "vibrational_treatment"}
+            for e in conditions.get("extensions") or [])
+        if vibrational and not electronic_vibration_relation(conditions, record.get("evidences") or []):
+            return "普通电子带隙或电子DOS不能继承声子/EPC条件；需明确的电子—声子修正关系及原文依据。"
+        legacy = (record.get("payload") or {}).get("approximation")
+        if check_legacy and legacy not in (None, "", "unknown"):
+            return "历史混装近似字段的科学含义未明确；保留原值和来源，请按电子理论及具体工作流核对。"
+    return None
+
+
+def electronic_vibration_relation(conditions, evidences):
+    scope = conditions.get("method_scope") or {}
+    if scope.get("relation") != "electron_phonon_renormalization":
+        return False
+    relations = scope.get("relation_evidences") or []
+    def supported(relation):
+        quote = str(relation.get("quote") or "").strip()
+        return quote and any(quote in str(e.get("quote") or "")
+            and all(relation.get(k) is None or relation.get(k) == e.get(k) for k in ("file_id", "block_id"))
+            for e in evidences)
+    if not relations or not all(supported(e) for e in relations):
+        return False
+    text = " ".join(str(e.get("quote") or "") for e in relations)
+    return bool(re.search(r"band.?gap|electronic.*(?:DOS|density of states)|电子.*(?:带隙|态密度)", text, re.I)
+        and re.search(r"phonon|声子", text, re.I)
+        and re.search(r"renorm|correct|shift|modify|modified|修正|重整|改变", text, re.I))
+
 
 
 def review_method_issue(record, values=None):
@@ -87,6 +141,21 @@ def review_method_issue(record, values=None):
         return record_method_issue(candidate)
     value = values.get("", record.get("current_value"))
     path = record.get("record_field") or record.get("field", "")
+    validation = record.get("validation_record") or {}
+    if path == "payload.approximation" and validation.get("property_code") in {"band_gap", "dos_fermi"} and value:
+        return "历史混装近似标签需按电子理论或明确工作流核对；电子结果数值保持不变。"
+    if validation.get("property_code") in {"band_gap", "dos_fermi"} and (
+            path.endswith((".phonon_method", ".vibrational_treatment")) or isinstance(value, dict)
+            and str(value.get("key") or "").rsplit(".", 1)[-1] in {"phonon_method", "vibrational_treatment"}):
+        conditions = (validation.get("payload") or {}).get("calculation_conditions") or {}
+        candidate = deepcopy(validation)
+        candidate["evidences"] = deepcopy(record.get("legacy_evidences") or record.get("evidences") or [])
+        candidate["payload"] = {"calculation_conditions": {"method_scope": conditions.get("method_scope") or {}}}
+        if isinstance(value, dict):
+            candidate["payload"]["calculation_conditions"]["extensions"] = [value]
+        else:
+            candidate["payload"]["calculation_conditions"][path.rsplit(".", 1)[-1]] = value
+        return record_method_issue(candidate)
     if path.endswith((".calculation_context", ".calculation_conditions")):
         return condition_method_issue(value)
     return method_field_issue(path, value)
@@ -107,3 +176,39 @@ def validate_extracted_methods(draft):
                 issue = record_method_issue(record)
                 if issue:
                     raise ValueError(f"material_states[{index}].calculation_conditions：{issue}")
+
+# 新调用采用明确字段；旧approximation不按字符串自动迁移。
+METHOD_SEMANTICS_PROMPT += """
+PHYSICAL METHOD SCOPE v181: electronic_method is the electronic theory (DFT, HF, DFT+U),
+phonon_method is the response/force-constant technique (DFPT, finite displacement, SSCHA or a
+reported composite workflow); vibrational_treatment is harmonic, quasi_harmonic, anharmonic,
+anharmonic_quantum or anharmonic_classical, as reported, never infer quantum from 0 K.
+Store these separately in calculation_conditions; do not generate payload.approximation.
+Each condition must belong to this material/phase, stage, workflow and specific result.
+method_scope carries physical_object, stage and workflow_id when explicitly known.
+Ordinary electronic band_gap/dos_fermi NEVER inherit EPC/phonon approximations. An explicitly
+reported electron-phonon renormalization of electronic results is allowed only with
+method_scope.relation=electron_phonon_renormalization and exact relation_evidences quotes.
+Do not label a phononic band gap or phonon DOS as an electronic result; exclude unsupported
+phononic results with their original source. Do not change scientific numbers to fix labels.
+No whole-state propagation and no inference of electronic theory, functional or U from
+harmonic, finite displacement, SSCHA or a software name. Separate unreported, ambiguous,
+conflicting, unreadable and technical-failure cases and preserve their sources.
+"""
+
+
+def vibrational_treatment(record):
+    """只读取当前结果的明确振动层次；旧字段仅作有界兼容，不写回科学值。"""
+    payload = record.get("payload") or {}
+    conditions = payload.get("calculation_conditions") or {}
+    value = conditions.get("vibrational_treatment")
+    if value:
+        return value
+    stages = {"electron_phonon"} if record.get("record_type") == "predicted_tc" else {"electronic_structure"}
+    values = {e.get("value_text") or e.get("value_raw") for e in conditions.get("extensions") or []
+              if e.get("key") in {stage + ".vibrational_treatment" for stage in stages}}
+    if len(values) == 1:
+        return next(iter(values))
+    legacy = payload.get("approximation")
+    return legacy if record.get("record_type") == "predicted_tc" and legacy in {
+        "harmonic", "anharmonic", "quasi_harmonic", "anharmonic_quantum", "anharmonic_classical"} else None

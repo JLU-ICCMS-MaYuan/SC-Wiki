@@ -1,0 +1,1001 @@
+{
+  "origin": "run-6-ready/structure_optimization_response.json + targeted-final-2/optimization-2.json",
+  "original_response_sha256": "dcd95fa3be8c38aecb4b7eef4947467a0f3e1bb7e8e57cfa431a96042cffb67d",
+  "candidates": [
+    {
+      "material_states": [
+        {
+          "scope": "current_paper",
+          "material": "CaH2",
+          "state_kind": "theoretical",
+          "structure_optimization": "classical_static",
+          "pressure_value_gpa": 0.0,
+          "evidences": [
+            {
+              "file_id": "c463643719b3420eb4e1936d95780c6b",
+              "pdf_page": 4,
+              "block_id": "364919bf64696ae3f3eb14e4f4960d5d4a82cc5cbe604b0334957a04af777c27",
+              "quote": "By using CALYPSO technique on crystal structure prediction of \\mathrm { C a H } _ { 2 } with four formula units per simulation cell at pressures of 0, 5, 50, 100, 150, and 200 GPa, we predicted the Pnma (Pearson symbol: oP12), P63/mmc (Pearson symbol: hP6), and P6/mmm (Pearson symbol: hP3) structures at elevated pressures. Specifically, the oP12 structure was predicted at 0 and 5 GPa, while the hP6 structure at 50, 100, and 150 GPa, and the hP3 structure at 200 GPa. As a result, the derived phase transitions take the sequence of oP12→hP6→hP3, in excellent agreement with previous experimental8 and theoreticalº results. The calculated transition pressures are 16 and 178 GPa for these two phase transitions, respectively. All the three phases were demonstrated to be dynamically stable at their stable pressure ranges by direct phonon calculations. The zero-point energies (ZPE) through the quasiharmonic model are calculated to be 0.228 and 0.236 eV/atom at 150 GPa and 200 GPa, respectively."
+            }
+          ],
+          "property_modules": [
+            {
+              "module_code": "electronic_properties",
+              "records": [
+                {
+                  "record_key": "ir-83b7b348ce0e465ed08ea5cfcac3a0a3",
+                  "module_code": "electronic_properties",
+                  "record_type": "property",
+                  "property_code": "band_gap",
+                  "custom_property_key": null,
+                  "definition_key": "record.electronic_properties.band_gap",
+                  "definition_version": 1,
+                  "name_raw": "band gap",
+                  "value_kind": "number",
+                  "value_raw": "3.05",
+                  "value_number": 3.05,
+                  "value_min": null,
+                  "value_max": null,
+                  "value_text": null,
+                  "value_boolean": null,
+                  "uncertainty": null,
+                  "unit_raw": "eV",
+                  "canonical_unit": "eV",
+                  "method_code": null,
+                  "method_raw": null,
+                  "criterion_code": null,
+                  "criterion_raw": null,
+                  "structure_key": null,
+                  "payload": {
+                    "calculation_conditions": {
+                      "calculation_code": null,
+                      "electronic_method": null,
+                      "exchange_correlation_functional": null,
+                      "extensions": []
+                    },
+                    "parameters": {},
+                    "approximation": "static",
+                    "table_row_ref": null
+                  },
+                  "evidence": null,
+                  "evidences": [
+                    {
+                      "file_id": "c463643719b3420eb4e1936d95780c6b",
+                      "pdf_page": 4,
+                      "block_id": "f37e5be5741ce2b38efe238e91e3cc76a67b0603815faeee23be7120fce9e606",
+                      "quote": "The calculated densities of states (DOS) of the three phases of \\mathrm { C a H } _ { 2 } are shown in Fig. S2. Our results suggest that \\mathrm { C a H } _ { 2 } in both oP12 and hP6 structures are non-metallic, characterized by the obvious band gaps of 3.05 eV (at 0 GPa) and 0.48"
+                    }
+                  ],
+                  "is_representative": false,
+                  "basis_kind": "paper_quote"
+                }
+              ],
+              "module_key": "module-electronic_properties",
+              "definition_key": "module.electronic_properties",
+              "definition_version": 1
+            }
+          ]
+        },
+        {
+          "scope": "current_paper",
+          "material": "CaH2",
+          "state_kind": "theoretical",
+          "structure_optimization": "classical_static",
+          "pressure_value_gpa": 150.0,
+          "evidences": [
+            {
+              "file_id": "c463643719b3420eb4e1936d95780c6b",
+              "pdf_page": 4,
+              "block_id": "364919bf64696ae3f3eb14e4f4960d5d4a82cc5cbe604b0334957a04af777c27",
+              "quote": "By using CALYPSO technique on crystal structure prediction of \\mathrm { C a H } _ { 2 } with four formula units per simulation cell at pressures of 0, 5, 50, 100, 150, and 200 GPa, we predicted the Pnma (Pearson symbol: oP12), P63/mmc (Pearson symbol: hP6), and P6/mmm (Pearson symbol: hP3) structures at elevated pressures. Specifically, the oP12 structure was predicted at 0 and 5 GPa, while the hP6 structure at 50, 100, and 150 GPa, and the hP3 structure at 200 GPa. As a result, the derived phase transitions take the sequence of oP12→hP6→hP3, in excellent agreement with previous experimental8 and theoreticalº results. The calculated transition pressures are 16 and 178 GPa for these two phase transitions, respectively. All the three phases were demonstrated to be dynamically stable at their stable pressure ranges by direct phonon calculations. The zero-point energies (ZPE) through the quasiharmonic model are calculated to be 0.228 and 0.236 eV/atom at 150 GPa and 200 GPa, respectively."
+            }
+          ],
+          "property_modules": [
+            {
+              "module_code": "electronic_properties",
+              "records": [
+                {
+                  "record_key": "ir-cfe1b3ede8b26401ccd5bb475cbbc717",
+                  "module_code": "electronic_properties",
+                  "record_type": "property",
+                  "property_code": "band_gap",
+                  "custom_property_key": null,
+                  "definition_key": "record.electronic_properties.band_gap",
+                  "definition_version": 1,
+                  "name_raw": "band gap",
+                  "value_kind": "number",
+                  "value_raw": "0.48",
+                  "value_number": 0.48,
+                  "value_min": null,
+                  "value_max": null,
+                  "value_text": null,
+                  "value_boolean": null,
+                  "uncertainty": null,
+                  "unit_raw": "eV",
+                  "canonical_unit": "eV",
+                  "method_code": null,
+                  "method_raw": null,
+                  "criterion_code": null,
+                  "criterion_raw": null,
+                  "structure_key": null,
+                  "payload": {
+                    "calculation_conditions": {
+                      "calculation_code": null,
+                      "electronic_method": null,
+                      "exchange_correlation_functional": null,
+                      "extensions": []
+                    },
+                    "parameters": {},
+                    "approximation": "static",
+                    "table_row_ref": null
+                  },
+                  "evidence": null,
+                  "evidences": [
+                    {
+                      "file_id": "c463643719b3420eb4e1936d95780c6b",
+                      "pdf_page": 4,
+                      "block_id": "f37e5be5741ce2b38efe238e91e3cc76a67b0603815faeee23be7120fce9e606",
+                      "quote": "The calculated densities of states (DOS) of the three phases of \\mathrm { C a H } _ { 2 } are shown in Fig. S2. Our results suggest that \\mathrm { C a H } _ { 2 } in both oP12 and hP6 structures are non-metallic, characterized by the obvious band gaps of 3.05 eV (at 0 GPa) and 0.48"
+                    },
+                    {
+                      "file_id": "c463643719b3420eb4e1936d95780c6b",
+                      "pdf_page": 5,
+                      "block_id": "84c472b2efdb56789c503402e687df89c932af0d01f15b72b5dcf3c5da6bdecc",
+                      "quote": "eV (at 150 GPa), respectively, however, \\mathrm { C a H } _ { 2 } becomes metallic at 178 GPa when it transforms into hP3 structure."
+                    }
+                  ],
+                  "is_representative": false,
+                  "basis_kind": "paper_quote"
+                }
+              ],
+              "module_key": "module-electronic_properties",
+              "definition_key": "module.electronic_properties",
+              "definition_version": 1
+            }
+          ]
+        },
+        {
+          "scope": "current_paper",
+          "material": "CaH4",
+          "state_kind": "theoretical",
+          "structure_optimization": "classical_static",
+          "pressure_value_gpa": 50.0,
+          "evidences": [
+            {
+              "file_id": "c463643719b3420eb4e1936d95780c6b",
+              "pdf_page": 6,
+              "block_id": "58963e1f82016b72fcb030c5ba25965f392ff7d02c7c2741f159ee8eba3f043f",
+              "quote": "By using CALYPSO technique on crystal structure prediction of \\mathrm { C a H _ { 4 } } with simulation cells containing up to four formula units at pressures of 50, 100, 150 and 200 GPa, we found that the I4/mmm (Pearson symbol: tI10, Figure S4) and Cmcm (Pearson symbol: oC20, Figure S5) structures are the most stable modifications at low (50 -150 GPa) and high pressures (200 GPa), respectively. The calculated tI10→oC20 transition pressure is 180.6 GPa (Figure S3). Both phases are dynamically stable at their stable pressure ranges as suggested by the phonon calculations. As is shown in Figure 1 of main text, \\mathrm { C a H _ { 4 } } within tI10 structure is the globally most stable stoichiometry of \\mathrm{CaH_{2n}~(n = 1-6)} at the pressure range of 50-150 GPa. We also estimated ZPE of \\mathrm{tI10-CaH_{4}} at 150 and 200 GPa, which are 0.251 and 0.262 eV/atom, respectively. For \\mathrm { C a H } _ { 2 } the calculated ZPE are 0.228 and 0.236 eV/atom at 150 and 200 GPa, whereas the ZPE of \\mathrm { H } _ { 2 } at 150 and 200 GPa are 0.280 and 0.296 eV/atom , respectively, derived from an interpolation of earlier reliable results10. The resulting difference of the zero-point energy, i.e., \\Delta  ZPE = ZPE ( CaH _4) - ZPE ( H _2) - ZPE ( CaH _2) is very small, 2.2 and 2.0 meV/atom at 150 and 200 GPa, respectively, which have negligible effect on the phase stability of CaH4."
+            }
+          ],
+          "property_modules": [
+            {
+              "module_code": "electronic_properties",
+              "records": [
+                {
+                  "record_key": "ir-03b01ad91dc87179cf5b2bc21abe8567",
+                  "module_code": "electronic_properties",
+                  "record_type": "property",
+                  "property_code": "dos_fermi",
+                  "custom_property_key": null,
+                  "definition_key": "record.electronic_properties.dos_fermi",
+                  "definition_version": 1,
+                  "name_raw": "DOS at Fermi level",
+                  "value_kind": "number",
+                  "value_raw": "0.02234",
+                  "value_number": 0.02234,
+                  "value_min": null,
+                  "value_max": null,
+                  "value_text": null,
+                  "value_boolean": null,
+                  "uncertainty": null,
+                  "unit_raw": "states/eV/f.u.",
+                  "canonical_unit": "states/eV/f.u.",
+                  "method_code": null,
+                  "method_raw": null,
+                  "criterion_code": null,
+                  "criterion_raw": null,
+                  "structure_key": null,
+                  "payload": {
+                    "calculation_conditions": {
+                      "calculation_code": null,
+                      "electronic_method": null,
+                      "exchange_correlation_functional": null,
+                      "extensions": []
+                    },
+                    "parameters": {},
+                    "approximation": "static",
+                    "table_row_ref": null
+                  },
+                  "evidence": null,
+                  "evidences": [
+                    {
+                      "file_id": "c463643719b3420eb4e1936d95780c6b",
+                      "pdf_page": 10,
+                      "block_id": "497194b65a180c57e15ef2766bf66689bbd3f802b078cec0c274722d85d767a5",
+                      "quote": "Figure S7 Electronic DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} and \\mathrm{oC20-CaH_{4}} at 5 0 / 1 5 0 and 200 GPa, respectively. The dashed lines denote the Fermi level. The inset figure is plotted to zoom in the DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} near the Fermi level. The calculated DOS of \\mathrm{t}10\\text{-}\\mathrm{CaH}_{4} is 0.02234 states/eV/f.u. at the Fermi level."
+                    }
+                  ],
+                  "is_representative": false,
+                  "basis_kind": "paper_quote"
+                }
+              ],
+              "module_key": "module-electronic_properties",
+              "definition_key": "module.electronic_properties",
+              "definition_version": 1
+            }
+          ]
+        },
+        {
+          "scope": "current_paper",
+          "material": "CaH6",
+          "state_kind": "theoretical",
+          "structure_optimization": "classical_static",
+          "pressure_value_gpa": 150.0,
+          "evidences": [
+            {
+              "file_id": "c463643719b3420eb4e1936d95780c6b",
+              "pdf_page": 12,
+              "block_id": "c8d3790206d4d9cfc0197493d6bb5a1b4adb05156037227952aa50e62c2360ad",
+              "quote": "By using CALYPSO technique on crystal structure prediction of \\mathrm { C a H _ { 6 } } with system sizes up to four formula units at pressures of 50, 100, 150 and 200 GPa, we found that the C2/m (Pearson symbol: mC28, Figure S12), P 2 _ { 1 } / m (Pearson symbol: mP14, Figure S13) and Im-3m (Pearson symbol: cI14, Figure S14) structures are the most stable forms at the pressures of 50, 100 and 150–200 GPa, respectively. Besides, a simulation with eight formula units per cell (56 atoms/unit cell) was used to double check the simulation result at 150 GPa, where the cI14 structure was confirmed Figure S10 shows the enthalpy curves as a function of pressure calculated at a higher level of accuracy. As is shown by the convex hull’ phase diagram of the main text (Figure 1), cI14 structure of \\mathrm { C a H _ { 6 } } becomes the global optimal structure of \\mathrm { C a H } _ { 2 \\mathrm { n } } (n=1-6) at pressure of approximate 150 GPa, while mC28 and cP14 structures are metastable. Therefore, we mainly focus our discussions on the cI14 structure."
+            }
+          ],
+          "property_modules": [
+            {
+              "module_code": "superconductive_properties",
+              "records": [
+                {
+                  "record_key": "ir-d80e59f89bdfa713dbbb62cc169c17a5",
+                  "module_code": "superconductive_properties",
+                  "record_type": "predicted_tc",
+                  "property_code": "tc",
+                  "custom_property_key": null,
+                  "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+                  "definition_version": 1,
+                  "name_raw": "Tc",
+                  "value_kind": "text",
+                  "value_raw": "from Eliashberg and McMilan equations",
+                  "value_number": null,
+                  "value_min": null,
+                  "value_max": null,
+                  "value_text": "from Eliashberg and McMilan equations",
+                  "value_boolean": null,
+                  "uncertainty": null,
+                  "unit_raw": "K",
+                  "canonical_unit": "K",
+                  "method_code": "unknown",
+                  "method_raw": "Eliashberg and McMilan equations",
+                  "criterion_code": null,
+                  "criterion_raw": null,
+                  "structure_key": null,
+                  "payload": {
+                    "calculation_conditions": {
+                      "calculation_code": "Quantum-ESPRESSO",
+                      "electronic_method": null,
+                      "exchange_correlation_functional": null,
+                      "extensions": []
+                    },
+                    "parameters": {},
+                    "approximation": "harmonic",
+                    "table_row_ref": null
+                  },
+                  "evidence": null,
+                  "evidences": [
+                    {
+                      "file_id": "c463643719b3420eb4e1936d95780c6b",
+                      "pdf_page": 19,
+                      "block_id": "30dc683dec23f6221241b192b37faae12210a8b3e81ed46945adb7f4cfabbc23",
+                      "quote": "Figure S19 Calculated T _ { \\mathrm { c } } of \\mathrm{cI14-CaH_{6}} at 150 GPa as a function of \\mu ^ { * } ( \\omega _ { \\mathrm { m a x } } ) from Eliashberg and McMilan equations, respectively."
+                    },
+                    {
+                      "file_id": "c463643719b3420eb4e1936d95780c6b",
+                      "pdf_page": 3,
+                      "block_id": "82605d3e3b639805f4f4a95b05793d786c9c5f23a8f2387a64061714aa0f97f3",
+                      "quote": "Band structure, density of state, phonon dispersion and electron-phonon coupling calculations for \\mathrm{tI10-CaH_{4}} and cI14-CaH _6 (as well as \\mathrm { { C a _ { 0 } H _ { 6 } } } and \\mathrm { C a H _ { 0 } ) } were performed with Quantum-ESPRESSO package (Q-E). Troullier-Martins norm-conserving pseudopotentials² for H and Ca were generated by the Opium code³ with 1 s ^ { 1 } and 3 s ^ { 2 } 3 p ^ { 6 } 4 s ^ { 2 } as valence electrons, respectively. Based on convergence tests, we adopted a kinetic energy cutoff of 90 Ry and 3 2 \\times 3 2 \\times 3 2 \\; ( 4 8 \\times 4 8 \\times 4 8 ) k-points mesh in the first BZ for \\mathrm{tI10-CaH_{4}} cI14-CaH _6 ) . Phonon dynamic matrix elements of CaH \\mathrm{I}_{6}(Im - 3m) were performed in the first BZ on a 1 2 \\times 1 2 \\times 1 2   q mesh. To ensure the convergence of the electron-phonon coupling matrix elements, a large 4 8 \\times 4 8 \\times 4 8 k-points mesh is required in the electronic calculation."
+                    }
+                  ],
+                  "is_representative": true,
+                  "basis_kind": "paper_quote"
+                }
+              ],
+              "module_key": "module-superconductive_properties",
+              "definition_key": "module.superconductive_properties",
+              "definition_version": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "material_states": [
+        {
+          "scope": "current_paper",
+          "material": "CaH6",
+          "state_kind": "theoretical",
+          "structure_optimization": "classical_static",
+          "pressure_value_gpa": 150.0,
+          "evidences": [
+            {
+              "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+              "pdf_page": 1,
+              "block_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+              "quote": "Hydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of \\mathbf { H _ { 2 } } fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particleswam optimization structural search, we show that in the stoichiometry \\mathsf { C a H _ { 6 } } a body-centered cubic structure with hydrogen that forms unusual“sodalite\" cagescontainingenclathratedCa stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance bytwo \\mathbf { H _ { 2 } } of electrons donated by Ca forming an \\mathbf { H _ { 4 } } unitas the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupationof thedegenerated orbitals at the zone center. The resultant dynamicJahn–Teller effecthelps to enhance electronphonon coupling and leads to superconductivity of \\mathbf { C a H _ { 6 } } . A superconducting critical temperature ( \\mathbf { I } _ { c } ) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far."
+            },
+            {
+              "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+              "pdf_page": 1,
+              "block_id": "4d0a9dc9341a89a381bf402f89e48276923db8ade408a35c369e595b33904a6a",
+              "quote": "The structures of the stable phases for each stoichiometry at 150 GPa are shown in Fig. 1 B)–(D. Three types of hydrogen species, \\text{\" H}_{4} \\text{\" } units, monatomic \\mathbf { H } + \\mathbf { H } _ { 2 } , and molecular \\mathbf { H } _ { 2 } , were observed. CaH4 had a tetragonal (I4/mmm, Pearson symbol tI10) structure and included a body-centered arrangement of Ca and two molecular and four monatomic hydrogen units ( \\mathrm { C a } _ { 2 } ( \\mathrm { H } _ { 2 } ) _ { 2 } ( \\mathrm { H } ) _ { 4 } ) _ { ; } The structure of \\mathrm { C a H _ { 6 } } adopted a remarkable cubic form ( I m 3   m , Pearson symbol cI14), with body-centered Ca atoms and, on each face, squared \\mathrm { H } _ { 4 } units tilted 4 5 ^ { \\circ } with respect to the plane of the Ca atoms. These \\mathrm { H } _ { 4 } units were interlinked to form asodalite frameworkwith a Ca atom enclathrated at the center of each cage. The next stablepolymorph, \\mathrm { C a H } _ { 1 2 } , had a rhombohedral (R3, Pearson symbol hR13) structure consisting entirely of molecular H2"
+            },
+            {
+              "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+              "pdf_page": 4,
+              "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+              "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+            }
+          ],
+          "property_modules": [
+            {
+              "module_code": "superconductive_properties",
+              "records": [
+                {
+                  "record_key": "ir-31a8ac3879bd5bc98f378d2cc4dbc3b9",
+                  "module_code": "superconductive_properties",
+                  "record_type": "predicted_tc",
+                  "property_code": "tc",
+                  "custom_property_key": null,
+                  "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+                  "definition_version": 1,
+                  "name_raw": "Tc",
+                  "value_kind": "range",
+                  "value_raw": "220–235 K",
+                  "value_number": null,
+                  "value_min": 220.0,
+                  "value_max": 235.0,
+                  "value_text": null,
+                  "value_boolean": null,
+                  "uncertainty": null,
+                  "unit_raw": "K",
+                  "canonical_unit": "K",
+                  "method_code": "isotropic_eliashberg",
+                  "method_raw": "solution of the Eliashberg equations",
+                  "criterion_code": null,
+                  "criterion_raw": null,
+                  "structure_key": null,
+                  "payload": {
+                    "calculation_conditions": {
+                      "calculation_code": "QUANTUM ESPRESSO",
+                      "electronic_method": null,
+                      "exchange_correlation_functional": null,
+                      "extensions": [
+                        {
+                          "key": "electron_phonon.phonon_method",
+                          "value_kind": "text",
+                          "value_raw": "density functional (linear-response) theory"
+                        }
+                      ]
+                    },
+                    "parameters": {
+                      "lambda_ep": 2.69,
+                      "extensions": [
+                        {
+                          "key": "lambda_ep_reported",
+                          "value_kind": "text",
+                          "value_raw": "2.69",
+                          "unit_raw": "1",
+                          "reported": {
+                            "value_kind": "number",
+                            "value_raw": "2.69",
+                            "value_number": 2.69,
+                            "unit_raw": "1"
+                          }
+                        },
+                        {
+                          "key": "mu_star_reported_range",
+                          "name": "mu_star",
+                          "value_kind": "range",
+                          "value_raw": "0.1 and 0.13",
+                          "value_min": 0.1,
+                          "value_max": 0.13,
+                          "unit_raw": "1",
+                          "reported": {
+                            "value_kind": "range",
+                            "value_raw": "0.1 and 0.13",
+                            "value_min": 0.1,
+                            "value_max": 0.13,
+                            "unit_raw": "1",
+                            "extensions": [
+                              {
+                                "key": "mu_star_reported_range",
+                                "value_kind": "range",
+                                "value_raw": "0.1 and 0.13",
+                                "value_min": 0.1,
+                                "value_max": 0.13,
+                                "unit_raw": "1"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    },
+                    "approximation": "harmonic",
+                    "table_row_ref": null
+                  },
+                  "evidence": null,
+                  "evidences": [
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 1,
+                      "block_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+                      "quote": "Hydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of \\mathbf { H _ { 2 } } fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particleswam optimization structural search, we show that in the stoichiometry \\mathsf { C a H _ { 6 } } a body-centered cubic structure with hydrogen that forms unusual“sodalite\" cagescontainingenclathratedCa stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance bytwo \\mathbf { H _ { 2 } } of electrons donated by Ca forming an \\mathbf { H _ { 4 } } unitas the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupationof thedegenerated orbitals at the zone center. The resultant dynamicJahn–Teller effecthelps to enhance electronphonon coupling and leads to superconductivity of \\mathbf { C a H _ { 6 } } . A superconducting critical temperature ( \\mathbf { I } _ { c } ) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far."
+                    },
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 3,
+                      "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                      "quote": "Tcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+                    },
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 3,
+                      "block_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+                      "quote": "Sodalite cage was constructed from linking of \\mathrm { H } _ { 4 } units and this topologically resulted in the formation of \\mathbf { H } _ { 6 } faces. In fact, a primitive cell of \\mathrm { C a H _ { 6 } } can be seen as composed of a \\mathrm { H } _ { 6 } hexagon and a \\mathbf { C a } . Band structure analysis suggested that four conduction bands of \\text{\" } Ca _{0} H _{6} \\text{\" } sodalite cage (Fig. 3D) were half-filled and the addition of maximal two electrons to \\mathrm { H } _ { 6 } gave rise to partial occupancy of the degenerate bands at Γ as indicated in \\mathrm { C a H _ { 6 } } (Fig. 3C). Partial occupancy of a degenerate orbital results in an orbitally degenerate state and is subject to Jahn-Teller (JT) distortion (22) (Fig. 2). The JT effect involves coupling between the electron and nuclear degrees of freedom, leading to distortions in the structure, and it lifts the orbital degeneracy. If the distortion is dynamic, JT vibrations can contribute to superconductivity. The same mechanism has been invoked to explain the superconductivity in B-doped diamond (23).To investigate this possibility, electron-phonon coupling (EPC) calculations on the sodalite structure of \\mathrm { \\bar { C a H } _ { 6 } } at 150 GPa were performed. The phonon dispersion curves, phonon linewidth \\gamma ( \\omega ) , EPC parameter \\lambda , and Eliashberg spectral function \\alpha ^ { 2 } F ( \\omega ) were calculated. A gap at 430\\  cm ^{-1} (Fig. 4) separated the phonon spectrum into two regions: The lower frequency branches were associated with the motions of both Ca and H, whereas the higher frequency branches were mainly associated with H atoms. The combined contribution (19% and 81%, respectively) gave an EPC parameterλ of 2.69.The calculated phonon linewidths (Fig. 4) showed that the EPC was derived primarily from the T _ { 2 g } and E _ { g } modes at the zone center Γ. Incidentally, these two bands, respectively, were the in-plane breathing and rocking vibrations of the H atoms belonging to the \\mathrm { H } _ { 4 } unit. The corresponding atomic vibrations led to distortions in the square planar structure. Moreover, both phonon branches showed significant phonon softening along all symmetric directions. A large EPC also benefited from the high density of states at the Fermi level caused by a Van Hove singularity at Γ (Fig. 3C). The very large EPC was unprecedented for the main group hydrides. Previous calculations on a variety of systems predicted an EPC in the range of 0.5–1.6 (11). The mechanism suggested here is not inconsistent with the mechanisms found in JT-induced superconductivity in alkali intercalated \\mathbf { C } _ { 6 0 } , in which the intramolecular vibrations are responsible for"
+                    },
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 4,
+                      "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+                      "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+                    }
+                  ],
+                  "is_representative": true,
+                  "basis_kind": "paper_quote"
+                },
+                {
+                  "record_key": "ir-c5e968bb2f16295ccc01b594f835adde",
+                  "module_code": "superconductive_properties",
+                  "record_type": "predicted_tc",
+                  "property_code": "tc",
+                  "custom_property_key": null,
+                  "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+                  "definition_version": 1,
+                  "name_raw": "Tc",
+                  "value_kind": "number",
+                  "value_raw": "235 K",
+                  "value_number": 235.0,
+                  "value_min": null,
+                  "value_max": null,
+                  "value_text": null,
+                  "value_boolean": null,
+                  "uncertainty": null,
+                  "unit_raw": "K",
+                  "canonical_unit": "K",
+                  "method_code": "isotropic_eliashberg",
+                  "method_raw": "solution of the Eliashberg equations",
+                  "criterion_code": null,
+                  "criterion_raw": null,
+                  "structure_key": null,
+                  "payload": {
+                    "calculation_conditions": {
+                      "calculation_code": "QUANTUM ESPRESSO",
+                      "electronic_method": null,
+                      "exchange_correlation_functional": null,
+                      "extensions": [
+                        {
+                          "key": "electron_phonon.phonon_method",
+                          "value_kind": "text",
+                          "value_raw": "density functional (linear-response) theory"
+                        }
+                      ]
+                    },
+                    "parameters": {
+                      "lambda_ep": 2.69,
+                      "mu_star": 0.1,
+                      "extensions": [
+                        {
+                          "key": "lambda_ep_reported",
+                          "value_kind": "text",
+                          "value_raw": "2.69",
+                          "unit_raw": "1",
+                          "reported": {
+                            "value_kind": "number",
+                            "value_raw": "2.69",
+                            "value_number": 2.69,
+                            "unit_raw": "1"
+                          }
+                        },
+                        {
+                          "key": "mu_star_reported",
+                          "value_kind": "text",
+                          "value_raw": "0.1",
+                          "unit_raw": "1",
+                          "reported": {
+                            "value_kind": "number",
+                            "value_raw": "0.1",
+                            "value_number": 0.1,
+                            "unit_raw": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "approximation": "harmonic",
+                    "table_row_ref": null
+                  },
+                  "evidence": null,
+                  "evidences": [
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 3,
+                      "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                      "quote": "Tcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+                    },
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 3,
+                      "block_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+                      "quote": "Sodalite cage was constructed from linking of \\mathrm { H } _ { 4 } units and this topologically resulted in the formation of \\mathbf { H } _ { 6 } faces. In fact, a primitive cell of \\mathrm { C a H _ { 6 } } can be seen as composed of a \\mathrm { H } _ { 6 } hexagon and a \\mathbf { C a } . Band structure analysis suggested that four conduction bands of \\text{\" } Ca _{0} H _{6} \\text{\" } sodalite cage (Fig. 3D) were half-filled and the addition of maximal two electrons to \\mathrm { H } _ { 6 } gave rise to partial occupancy of the degenerate bands at Γ as indicated in \\mathrm { C a H _ { 6 } } (Fig. 3C). Partial occupancy of a degenerate orbital results in an orbitally degenerate state and is subject to Jahn-Teller (JT) distortion (22) (Fig. 2). The JT effect involves coupling between the electron and nuclear degrees of freedom, leading to distortions in the structure, and it lifts the orbital degeneracy. If the distortion is dynamic, JT vibrations can contribute to superconductivity. The same mechanism has been invoked to explain the superconductivity in B-doped diamond (23).To investigate this possibility, electron-phonon coupling (EPC) calculations on the sodalite structure of \\mathrm { \\bar { C a H } _ { 6 } } at 150 GPa were performed. The phonon dispersion curves, phonon linewidth \\gamma ( \\omega ) , EPC parameter \\lambda , and Eliashberg spectral function \\alpha ^ { 2 } F ( \\omega ) were calculated. A gap at 430\\  cm ^{-1} (Fig. 4) separated the phonon spectrum into two regions: The lower frequency branches were associated with the motions of both Ca and H, whereas the higher frequency branches were mainly associated with H atoms. The combined contribution (19% and 81%, respectively) gave an EPC parameterλ of 2.69.The calculated phonon linewidths (Fig. 4) showed that the EPC was derived primarily from the T _ { 2 g } and E _ { g } modes at the zone center Γ. Incidentally, these two bands, respectively, were the in-plane breathing and rocking vibrations of the H atoms belonging to the \\mathrm { H } _ { 4 } unit. The corresponding atomic vibrations led to distortions in the square planar structure. Moreover, both phonon branches showed significant phonon softening along all symmetric directions. A large EPC also benefited from the high density of states at the Fermi level caused by a Van Hove singularity at Γ (Fig. 3C). The very large EPC was unprecedented for the main group hydrides. Previous calculations on a variety of systems predicted an EPC in the range of 0.5–1.6 (11). The mechanism suggested here is not inconsistent with the mechanisms found in JT-induced superconductivity in alkali intercalated \\mathbf { C } _ { 6 0 } , in which the intramolecular vibrations are responsible for"
+                    },
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 4,
+                      "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+                      "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+                    }
+                  ],
+                  "is_representative": false,
+                  "basis_kind": "paper_quote"
+                },
+                {
+                  "record_key": "ir-588e8b069587549e45a3e2d2e0ccfcf9",
+                  "module_code": "superconductive_properties",
+                  "record_type": "predicted_tc",
+                  "property_code": "tc",
+                  "custom_property_key": null,
+                  "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+                  "definition_version": 1,
+                  "name_raw": "Tc",
+                  "value_kind": "number",
+                  "value_raw": "220 K",
+                  "value_number": 220.0,
+                  "value_min": null,
+                  "value_max": null,
+                  "value_text": null,
+                  "value_boolean": null,
+                  "uncertainty": null,
+                  "unit_raw": "K",
+                  "canonical_unit": "K",
+                  "method_code": "isotropic_eliashberg",
+                  "method_raw": "solution of the Eliashberg equations",
+                  "criterion_code": null,
+                  "criterion_raw": null,
+                  "structure_key": null,
+                  "payload": {
+                    "calculation_conditions": {
+                      "calculation_code": "QUANTUM ESPRESSO",
+                      "electronic_method": null,
+                      "exchange_correlation_functional": null,
+                      "extensions": [
+                        {
+                          "key": "electron_phonon.phonon_method",
+                          "value_kind": "text",
+                          "value_raw": "density functional (linear-response) theory"
+                        }
+                      ]
+                    },
+                    "parameters": {
+                      "lambda_ep": 2.69,
+                      "mu_star": 0.13,
+                      "extensions": [
+                        {
+                          "key": "lambda_ep_reported",
+                          "value_kind": "text",
+                          "value_raw": "2.69",
+                          "unit_raw": "1",
+                          "reported": {
+                            "value_kind": "number",
+                            "value_raw": "2.69",
+                            "value_number": 2.69,
+                            "unit_raw": "1"
+                          }
+                        },
+                        {
+                          "key": "mu_star_reported",
+                          "value_kind": "text",
+                          "value_raw": "0.13",
+                          "unit_raw": "1",
+                          "reported": {
+                            "value_kind": "number",
+                            "value_raw": "0.13",
+                            "value_number": 0.13,
+                            "unit_raw": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "approximation": "harmonic",
+                    "table_row_ref": null
+                  },
+                  "evidence": null,
+                  "evidences": [
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 3,
+                      "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                      "quote": "Tcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+                    },
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 3,
+                      "block_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+                      "quote": "Sodalite cage was constructed from linking of \\mathrm { H } _ { 4 } units and this topologically resulted in the formation of \\mathbf { H } _ { 6 } faces. In fact, a primitive cell of \\mathrm { C a H _ { 6 } } can be seen as composed of a \\mathrm { H } _ { 6 } hexagon and a \\mathbf { C a } . Band structure analysis suggested that four conduction bands of \\text{\" } Ca _{0} H _{6} \\text{\" } sodalite cage (Fig. 3D) were half-filled and the addition of maximal two electrons to \\mathrm { H } _ { 6 } gave rise to partial occupancy of the degenerate bands at Γ as indicated in \\mathrm { C a H _ { 6 } } (Fig. 3C). Partial occupancy of a degenerate orbital results in an orbitally degenerate state and is subject to Jahn-Teller (JT) distortion (22) (Fig. 2). The JT effect involves coupling between the electron and nuclear degrees of freedom, leading to distortions in the structure, and it lifts the orbital degeneracy. If the distortion is dynamic, JT vibrations can contribute to superconductivity. The same mechanism has been invoked to explain the superconductivity in B-doped diamond (23).To investigate this possibility, electron-phonon coupling (EPC) calculations on the sodalite structure of \\mathrm { \\bar { C a H } _ { 6 } } at 150 GPa were performed. The phonon dispersion curves, phonon linewidth \\gamma ( \\omega ) , EPC parameter \\lambda , and Eliashberg spectral function \\alpha ^ { 2 } F ( \\omega ) were calculated. A gap at 430\\  cm ^{-1} (Fig. 4) separated the phonon spectrum into two regions: The lower frequency branches were associated with the motions of both Ca and H, whereas the higher frequency branches were mainly associated with H atoms. The combined contribution (19% and 81%, respectively) gave an EPC parameterλ of 2.69.The calculated phonon linewidths (Fig. 4) showed that the EPC was derived primarily from the T _ { 2 g } and E _ { g } modes at the zone center Γ. Incidentally, these two bands, respectively, were the in-plane breathing and rocking vibrations of the H atoms belonging to the \\mathrm { H } _ { 4 } unit. The corresponding atomic vibrations led to distortions in the square planar structure. Moreover, both phonon branches showed significant phonon softening along all symmetric directions. A large EPC also benefited from the high density of states at the Fermi level caused by a Van Hove singularity at Γ (Fig. 3C). The very large EPC was unprecedented for the main group hydrides. Previous calculations on a variety of systems predicted an EPC in the range of 0.5–1.6 (11). The mechanism suggested here is not inconsistent with the mechanisms found in JT-induced superconductivity in alkali intercalated \\mathbf { C } _ { 6 0 } , in which the intramolecular vibrations are responsible for"
+                    },
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 4,
+                      "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+                      "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+                    }
+                  ],
+                  "is_representative": false,
+                  "basis_kind": "paper_quote"
+                }
+              ],
+              "module_key": "module-superconductive_properties",
+              "definition_key": "module.superconductive_properties",
+              "definition_version": 1
+            }
+          ]
+        },
+        {
+          "scope": "current_paper",
+          "material": "CaH6",
+          "state_kind": "theoretical",
+          "structure_optimization": "classical_static",
+          "pressure_value_gpa": 200.0,
+          "evidences": [
+            {
+              "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+              "pdf_page": 3,
+              "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+              "quote": "Tcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+            },
+            {
+              "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+              "pdf_page": 4,
+              "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+              "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+            }
+          ],
+          "property_modules": [
+            {
+              "module_code": "superconductive_properties",
+              "records": [
+                {
+                  "record_key": "ir-47a5bab9c9f9390c0b553891792eff29",
+                  "module_code": "superconductive_properties",
+                  "record_type": "predicted_tc",
+                  "property_code": "tc",
+                  "custom_property_key": null,
+                  "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+                  "definition_version": 1,
+                  "name_raw": "Tc",
+                  "value_kind": "number",
+                  "value_raw": "201 K",
+                  "value_number": 201.0,
+                  "value_min": null,
+                  "value_max": null,
+                  "value_text": null,
+                  "value_boolean": null,
+                  "uncertainty": null,
+                  "unit_raw": "K",
+                  "canonical_unit": "K",
+                  "method_code": "isotropic_eliashberg",
+                  "method_raw": "solution of the Eliashberg equations",
+                  "criterion_code": null,
+                  "criterion_raw": null,
+                  "structure_key": null,
+                  "payload": {
+                    "calculation_conditions": {
+                      "calculation_code": "QUANTUM ESPRESSO",
+                      "electronic_method": null,
+                      "exchange_correlation_functional": null,
+                      "extensions": [
+                        {
+                          "key": "electron_phonon.phonon_method",
+                          "value_kind": "text",
+                          "value_raw": "density functional (linear-response) theory"
+                        }
+                      ]
+                    },
+                    "parameters": {
+                      "mu_star": 0.13,
+                      "extensions": [
+                        {
+                          "key": "mu_star_reported",
+                          "value_kind": "text",
+                          "value_raw": "0.13",
+                          "unit_raw": "1",
+                          "reported": {
+                            "value_kind": "number",
+                            "value_raw": "0.13",
+                            "value_number": 0.13,
+                            "unit_raw": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "approximation": "harmonic",
+                    "table_row_ref": null
+                  },
+                  "evidence": null,
+                  "evidences": [
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 3,
+                      "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                      "quote": "Tcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+                    },
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 4,
+                      "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+                      "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+                    }
+                  ],
+                  "is_representative": false,
+                  "basis_kind": "paper_quote"
+                }
+              ],
+              "module_key": "module-superconductive_properties",
+              "definition_key": "module.superconductive_properties",
+              "definition_version": 1
+            }
+          ]
+        },
+        {
+          "scope": "current_paper",
+          "material": "CaH6",
+          "state_kind": "theoretical",
+          "structure_optimization": "classical_static",
+          "pressure_value_gpa": 250.0,
+          "evidences": [
+            {
+              "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+              "pdf_page": 3,
+              "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+              "quote": "Tcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+            },
+            {
+              "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+              "pdf_page": 4,
+              "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+              "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+            }
+          ],
+          "property_modules": [
+            {
+              "module_code": "superconductive_properties",
+              "records": [
+                {
+                  "record_key": "ir-33ee7c08cee29958caa9532f695ca24f",
+                  "module_code": "superconductive_properties",
+                  "record_type": "predicted_tc",
+                  "property_code": "tc",
+                  "custom_property_key": null,
+                  "definition_key": "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+                  "definition_version": 1,
+                  "name_raw": "Tc",
+                  "value_kind": "number",
+                  "value_raw": "187 K",
+                  "value_number": 187.0,
+                  "value_min": null,
+                  "value_max": null,
+                  "value_text": null,
+                  "value_boolean": null,
+                  "uncertainty": null,
+                  "unit_raw": "K",
+                  "canonical_unit": "K",
+                  "method_code": "isotropic_eliashberg",
+                  "method_raw": "solution of the Eliashberg equations",
+                  "criterion_code": null,
+                  "criterion_raw": null,
+                  "structure_key": null,
+                  "payload": {
+                    "calculation_conditions": {
+                      "calculation_code": "QUANTUM ESPRESSO",
+                      "electronic_method": null,
+                      "exchange_correlation_functional": null,
+                      "extensions": [
+                        {
+                          "key": "electron_phonon.phonon_method",
+                          "value_kind": "text",
+                          "value_raw": "density functional (linear-response) theory"
+                        }
+                      ]
+                    },
+                    "parameters": {
+                      "mu_star": 0.13,
+                      "extensions": [
+                        {
+                          "key": "mu_star_reported",
+                          "value_kind": "text",
+                          "value_raw": "0.13",
+                          "unit_raw": "1",
+                          "reported": {
+                            "value_kind": "number",
+                            "value_raw": "0.13",
+                            "value_number": 0.13,
+                            "unit_raw": "1"
+                          }
+                        }
+                      ]
+                    },
+                    "approximation": "harmonic",
+                    "table_row_ref": null
+                  },
+                  "evidence": null,
+                  "evidences": [
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 3,
+                      "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                      "quote": "Tcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+                    },
+                    {
+                      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                      "pdf_page": 4,
+                      "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+                      "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+                    }
+                  ],
+                  "is_representative": false,
+                  "basis_kind": "paper_quote"
+                }
+              ],
+              "module_key": "module-superconductive_properties",
+              "definition_key": "module.superconductive_properties",
+              "definition_version": 1
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "response": {
+    "workflows": [
+      {
+        "id": "workflow-1",
+        "material": "CaH2",
+        "optimization": "classical_static",
+        "evidences": [
+          {
+            "workflow_source_id": "workflow-source-0"
+          }
+        ]
+      },
+      {
+        "id": "workflow-2",
+        "material": "CaH4",
+        "optimization": "classical_static",
+        "evidences": [
+          {
+            "workflow_source_id": "workflow-source-0"
+          }
+        ]
+      },
+      {
+        "id": "workflow-3",
+        "material": "CaH6",
+        "optimization": "classical_static",
+        "evidences": [
+          {
+            "workflow_source_id": "workflow-source-0"
+          }
+        ]
+      }
+    ],
+    "assignments": [
+      {
+        "target": "0/0",
+        "optimization": "classical_static",
+        "approximation": "harmonic",
+        "workflow_id": "workflow-1",
+        "reason": "The target CaH2 at 0 GPa (Pnma) is from the current paper. The shared workflow-source-0 explicitly states 'The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation as implemented in the Vienna Ab Initio Simulation Package (VASP) code.' This applies to all materials in the paper, including CaH2. The target's own evidence mentions CALYPSO structure prediction and phonon calculations, but the structural relaxation method is provided by the shared workflow. The approximation is harmonic because the target's evidence mentions 'direct phonon calculations' and 'quasiharmonic model' for ZPE, which are harmonic methods.",
+        "evidences": [
+          {
+            "source_index": 0,
+            "quote": "By using CALYPSO technique on crystal structure prediction of \\mathrm { C a H } _ { 2 } with four formula units per simulation cell at pressures of 0, 5, 50, 100, 150, and 200 GPa, we predicted the Pnma (Pearson symbol: oP12), P63/mmc (Pearson symbol: hP6), and P6/mmm (Pearson symbol: hP3) structures at elevated pressures. Specifically, the oP12 structure was predicted at 0 and 5 GPa, while the hP6 structure at 50, 100, and 150 GPa, and the hP3 structure at 200 GPa. As a result, the derived phase transitions take the sequence of oP12→hP6→hP3, in excellent agreement with previous experimental8 and theoreticalº results. The calculated transition pressures are 16 and 178 GPa for these two phase transitions, respectively. All the three phases were demonstrated to be dynamically stable at their stable pressure ranges by direct phonon calculations. The zero-point energies (ZPE) through the quasiharmonic model are calculated to be 0.228 and 0.236 eV/atom at 150 GPa and 200 GPa, respectively."
+          }
+        ]
+      },
+      {
+        "target": "0/1",
+        "optimization": "classical_static",
+        "approximation": "harmonic",
+        "workflow_id": "workflow-1",
+        "reason": "The target CaH2 at 150 GPa (P63/mmc) is from the current paper. The shared workflow-source-0 explicitly states 'The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation as implemented in the Vienna Ab Initio Simulation Package (VASP) code.' This applies to all materials in the paper, including CaH2. The target's own evidence mentions CALYPSO structure prediction and phonon calculations, but the structural relaxation method is provided by the shared workflow. The approximation is harmonic because the target's evidence mentions 'direct phonon calculations' and 'quasiharmonic model' for ZPE, which are harmonic methods.",
+        "evidences": [
+          {
+            "source_index": 0,
+            "quote": "By using CALYPSO technique on crystal structure prediction of \\mathrm { C a H } _ { 2 } with four formula units per simulation cell at pressures of 0, 5, 50, 100, 150, and 200 GPa, we predicted the Pnma (Pearson symbol: oP12), P63/mmc (Pearson symbol: hP6), and P6/mmm (Pearson symbol: hP3) structures at elevated pressures. Specifically, the oP12 structure was predicted at 0 and 5 GPa, while the hP6 structure at 50, 100, and 150 GPa, and the hP3 structure at 200 GPa. As a result, the derived phase transitions take the sequence of oP12→hP6→hP3, in excellent agreement with previous experimental8 and theoreticalº results. The calculated transition pressures are 16 and 178 GPa for these two phase transitions, respectively. All the three phases were demonstrated to be dynamically stable at their stable pressure ranges by direct phonon calculations. The zero-point energies (ZPE) through the quasiharmonic model are calculated to be 0.228 and 0.236 eV/atom at 150 GPa and 200 GPa, respectively."
+          }
+        ]
+      },
+      {
+        "target": "0/2",
+        "optimization": "classical_static",
+        "approximation": "harmonic",
+        "workflow_id": "workflow-2",
+        "reason": "The target CaH4 at 50 GPa (I4/mmm) is from the current paper. The shared workflow-source-0 explicitly states 'The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation as implemented in the Vienna Ab Initio Simulation Package (VASP) code.' This applies to all materials in the paper, including CaH4. The target's own evidence mentions CALYPSO structure prediction and phonon calculations, but the structural relaxation method is provided by the shared workflow. The approximation is harmonic because the target's evidence mentions 'phonon calculations' and 'ZPE' which are harmonic methods.",
+        "evidences": [
+          {
+            "source_index": 0,
+            "quote": "By using CALYPSO technique on crystal structure prediction of \\mathrm { C a H _ { 4 } } with simulation cells containing up to four formula units at pressures of 50, 100, 150 and 200 GPa, we found that the I4/mmm (Pearson symbol: tI10, Figure S4) and Cmcm (Pearson symbol: oC20, Figure S5) structures are the most stable modifications at low (50 -150 GPa) and high pressures (200 GPa), respectively. The calculated tI10→oC20 transition pressure is 180.6 GPa (Figure S3). Both phases are dynamically stable at their stable pressure ranges as suggested by the phonon calculations. As is shown in Figure 1 of main text, \\mathrm { C a H _ { 4 } } within tI10 structure is the globally most stable stoichiometry of \\mathrm{CaH_{2n}~(n = 1-6)} at the pressure range of 50-150 GPa. We also estimated ZPE of \\mathrm{tI10-CaH_{4}} at 150 and 200 GPa, which are 0.251 and 0.262 eV/atom, respectively. For \\mathrm { C a H } _ { 2 } the calculated ZPE are 0.228 and 0.236 eV/atom at 150 and 200 GPa, whereas the ZPE of \\mathrm { H } _ { 2 } at 150 and 200 GPa are 0.280 and 0.296 eV/atom , respectively, derived from an interpolation of earlier reliable results10. The resulting difference of the zero-point energy, i.e., \\Delta  ZPE = ZPE ( CaH _4) - ZPE ( H _2) - ZPE ( CaH _2) is very small, 2.2 and 2.0 meV/atom at 150 and 200 GPa, respectively, which have negligible effect on the phase stability of CaH4."
+          }
+        ]
+      },
+      {
+        "target": "0/3",
+        "optimization": "classical_static",
+        "approximation": "harmonic",
+        "workflow_id": "workflow-3",
+        "reason": "The target CaH6 at 150 GPa (Im-3m) is from the current paper. The shared workflow-source-0 explicitly states 'The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation as implemented in the Vienna Ab Initio Simulation Package (VASP) code.' This applies to all materials in the paper, including CaH6. The target's own evidence mentions CALYPSO structure prediction and phonon calculations, but the structural relaxation method is provided by the shared workflow. The approximation is harmonic because the target's evidence mentions 'phonon calculations' and the superconductive property module indicates 'approximation: harmonic'.",
+        "evidences": [
+          {
+            "source_index": 0,
+            "quote": "By using CALYPSO technique on crystal structure prediction of \\mathrm { C a H _ { 6 } } with system sizes up to four formula units at pressures of 50, 100, 150 and 200 GPa, we found that the C2/m (Pearson symbol: mC28, Figure S12), P 2 _ { 1 } / m (Pearson symbol: mP14, Figure S13) and Im-3m (Pearson symbol: cI14, Figure S14) structures are the most stable forms at the pressures of 50, 100 and 150–200 GPa, respectively. Besides, a simulation with eight formula units per cell (56 atoms/unit cell) was used to double check the simulation result at 150 GPa, where the cI14 structure was confirmed Figure S10 shows the enthalpy curves as a function of pressure calculated at a higher level of accuracy. As is shown by the convex hull’ phase diagram of the main text (Figure 1), cI14 structure of \\mathrm { C a H _ { 6 } } becomes the global optimal structure of \\mathrm { C a H } _ { 2 \\mathrm { n } } (n=1-6) at pressure of approximate 150 GPa, while mC28 and cP14 structures are metastable. Therefore, we mainly focus our discussions on the cI14 structure."
+          }
+        ]
+      },
+      {
+        "target": "1/0",
+        "optimization": "classical_static",
+        "approximation": "harmonic",
+        "workflow_id": "workflow-3",
+        "reason": "The target CaH6 at 150 GPa (Im-3m, sodalite-like clathrate) is from the current paper. The shared workflow-source-0 explicitly states 'The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation as implemented in the Vienna Ab Initio Simulation Package (VASP) code.' This applies to all materials in the paper, including CaH6. The target's own evidence includes the Methods section which is the same as workflow-source-0. The approximation is harmonic because the superconductive property module indicates 'approximation: harmonic' and the paper mentions 'The calculation of the EPC is based on the harmonic approximation'.",
+        "evidences": [
+          {
+            "source_index": 1,
+            "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+          }
+        ]
+      },
+      {
+        "target": "1/1",
+        "optimization": "classical_static",
+        "approximation": "harmonic",
+        "workflow_id": "workflow-3",
+        "reason": "The target CaH6 at 200 GPa (Im-3m, sodalite-like clathrate) is from the current paper. The shared workflow-source-0 explicitly states 'The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation as implemented in the Vienna Ab Initio Simulation Package (VASP) code.' This applies to all materials in the paper, including CaH6. The target's own evidence includes the Methods section which is the same as workflow-source-0. The approximation is harmonic because the superconductive property module indicates 'approximation: harmonic' and the paper mentions 'The calculation of the EPC is based on the harmonic approximation'.",
+        "evidences": [
+          {
+            "source_index": 1,
+            "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+          }
+        ]
+      },
+      {
+        "target": "1/2",
+        "optimization": "classical_static",
+        "approximation": "harmonic",
+        "workflow_id": "workflow-3",
+        "reason": "The target CaH6 at 250 GPa (Im-3m, sodalite-like clathrate) is from the current paper. The shared workflow-source-0 explicitly states 'The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation as implemented in the Vienna Ab Initio Simulation Package (VASP) code.' This applies to all materials in the paper, including CaH6. The target's own evidence includes the Methods section which is the same as workflow-source-0. The approximation is harmonic because the superconductive property module indicates 'approximation: harmonic' and the paper mentions 'The calculation of the EPC is based on the harmonic approximation'.",
+        "evidences": [
+          {
+            "source_index": 1,
+            "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+          }
+        ]
+      }
+    ]
+  },
+  "sources": [
+    {
+      "file_id": "main",
+      "content": "By using CALYPSO technique on crystal structure prediction of \\mathrm { C a H } _ { 2 } with four formula units per simulation cell at pressures of 0, 5, 50, 100, 150, and 200 GPa, we predicted the Pnma (Pearson symbol: oP12), P63/mmc (Pearson symbol: hP6), and P6/mmm (Pearson symbol: hP3) structures at elevated pressures. Specifically, the oP12 structure was predicted at 0 and 5 GPa, while the hP6 structure at 50, 100, and 150 GPa, and the hP3 structure at 200 GPa. As a result, the derived phase transitions take the sequence of oP12→hP6→hP3, in excellent agreement with previous experimental8 and theoreticalº results. The calculated transition pressures are 16 and 178 GPa for these two phase transitions, respectively. All the three phases were demonstrated to be dynamically stable at their stable pressure ranges by direct phonon calculations. The zero-point energies (ZPE) through the quasiharmonic model are calculated to be 0.228 and 0.236 eV/atom at 150 GPa and 200 GPa, respectively.\n\nBy using CALYPSO technique on crystal structure prediction of \\mathrm { C a H _ { 4 } } with simulation cells containing up to four formula units at pressures of 50, 100, 150 and 200 GPa, we found that the I4/mmm (Pearson symbol: tI10, Figure S4) and Cmcm (Pearson symbol: oC20, Figure S5) structures are the most stable modifications at low (50 -150 GPa) and high pressures (200 GPa), respectively. The calculated tI10→oC20 transition pressure is 180.6 GPa (Figure S3). Both phases are dynamically stable at their stable pressure ranges as suggested by the phonon calculations. As is shown in Figure 1 of main text, \\mathrm { C a H _ { 4 } } within tI10 structure is the globally most stable stoichiometry of \\mathrm{CaH_{2n}~(n = 1-6)} at the pressure range of 50-150 GPa. We also estimated ZPE of \\mathrm{tI10-CaH_{4}} at 150 and 200 GPa, which are 0.251 and 0.262 eV/atom, respectively. For \\mathrm { C a H } _ { 2 } the calculated ZPE are 0.228 and 0.236 eV/atom at 150 and 200 GPa, whereas the ZPE of \\mathrm { H } _ { 2 } at 150 and 200 GPa are 0.280 and 0.296 eV/atom , respectively, derived from an interpolation of earlier reliable results10. The resulting difference of the zero-point energy, i.e., \\Delta  ZPE = ZPE ( CaH _4) - ZPE ( H _2) - ZPE ( CaH _2) is very small, 2.2 and 2.0 meV/atom at 150 and 200 GPa, respectively, which have negligible effect on the phase stability of CaH4.\n\nBy using CALYPSO technique on crystal structure prediction of \\mathrm { C a H _ { 6 } } with system sizes up to four formula units at pressures of 50, 100, 150 and 200 GPa, we found that the C2/m (Pearson symbol: mC28, Figure S12), P 2 _ { 1 } / m (Pearson symbol: mP14, Figure S13) and Im-3m (Pearson symbol: cI14, Figure S14) structures are the most stable forms at the pressures of 50, 100 and 150–200 GPa, respectively. Besides, a simulation with eight formula units per cell (56 atoms/unit cell) was used to double check the simulation result at 150 GPa, where the cI14 structure was confirmed Figure S10 shows the enthalpy curves as a function of pressure calculated at a higher level of accuracy. As is shown by the convex hull’ phase diagram of the main text (Figure 1), cI14 structure of \\mathrm { C a H _ { 6 } } becomes the global optimal structure of \\mathrm { C a H } _ { 2 \\mathrm { n } } (n=1-6) at pressure of approximate 150 GPa, while mC28 and cP14 structures are metastable. Therefore, we mainly focus our discussions on the cI14 structure."
+    },
+    {
+      "file_id": "si",
+      "content": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information."
+    }
+  ]
+}

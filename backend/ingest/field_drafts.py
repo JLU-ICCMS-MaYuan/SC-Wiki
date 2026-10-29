@@ -71,7 +71,10 @@ def apply_changes(draft, changes):
     forbidden = {'__proto__', 'constructor', 'prototype', 'field_evidence', 'evidences', 'evidence',
                  'source_associations', 'paper_id', 'review_status', 'uploaded_by_user_id'}
     allowed_roots = {'paper', 'material_states', 'structure_candidates', 'structural_observations'}
+    affected_methods = {}
+    affected_parameters = {}
     for change in changes:
+        owner = None
         path = change.get('path') or []
         if not path or path[0] not in allowed_roots:
             fail('draft_field_invalid', '字段不允许编辑', 400)
@@ -84,6 +87,8 @@ def apply_changes(draft, changes):
                 if len(matches) != 1:
                     fail('draft_field_missing', '字段已移除或身份不唯一')
                 node = matches[0]
+                if part["key"] == "record_key":
+                    owner = node
             elif isinstance(part, str) and part not in forbidden and not part.startswith('_') and isinstance(node, dict):
                 node = node.setdefault(part, {})
             else:
@@ -97,6 +102,39 @@ def apply_changes(draft, changes):
             node.pop(key, None)
         else:
             node[key] = deepcopy(change.get('value'))
+        from .calculation_methods import method_field_issue
+        method_issue = method_field_issue(key, node.get(key))
+        if key in {"value_raw", "value_text"} and node.get("key"):
+            method_issue = method_field_issue("extension", node)
+        if method_issue:
+            fail("method_category_mismatch", method_issue, 400)
+        parameter = str(node.get("key") or "").rsplit(".", 1)[-1] if key in {"value_raw", "value_text"} else key
+        if "method_scope" in path:
+            parameter = "method_scope"
+        if owner is not None and parameter in {"phonon_method", "vibrational_treatment", "method_scope", "calculation_conditions"}:
+            affected_methods[id(owner)] = owner
+            affected_parameters.setdefault(id(owner), set()).add(parameter)
+        if key == "structure_optimization_details":
+            from .material_state_contract import optimization_details
+            try:
+                optimization_details(node.get(key) or {})
+            except ValueError as exc:
+                fail("invalid_optimization_details", str(exc), 400)
+    from .calculation_methods import record_method_issue
+    for identity, record in affected_methods.items():
+        parameters = affected_parameters[identity]
+        candidate = record
+        if "calculation_conditions" not in parameters:
+            conditions = (record.get("payload") or {}).get("calculation_conditions") or {}
+            relevant = {"phonon_method", "vibrational_treatment"} if "method_scope" in parameters else parameters
+            selected = {key: deepcopy(conditions[key]) for key in relevant if key in conditions}
+            selected["method_scope"] = deepcopy(conditions.get("method_scope") or {})
+            selected["extensions"] = [deepcopy(e) for e in conditions.get("extensions") or []
+                if str(e.get("key") or "").rsplit(".", 1)[-1] in relevant]
+            candidate = {**record, "payload": {"calculation_conditions": selected}}
+        issue = record_method_issue(candidate, check_legacy=False)
+        if issue:
+            fail("method_scope_mismatch", issue, 400)
     return updated
 
 

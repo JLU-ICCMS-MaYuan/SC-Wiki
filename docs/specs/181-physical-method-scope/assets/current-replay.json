@@ -1,0 +1,27 @@
+{
+  "passed": true,
+  "kind": "本轮真实新响应的当前规则固定重放，不是再次模型调用",
+  "record_count": 7,
+  "scientific_values_conditions_equal": true,
+  "redis_roundtrip_equal": true,
+  "source_task_unchanged": true,
+  "live_source_hashes": {
+    "backend/ingest/domain_extraction.py": "c5bdbe2059ddf17f4caca197b634b10c6e1ee68684110fb691abe1a9c99efcfe",
+    "backend/ingest/calculation_methods.py": "0b30d9df61da1b115e83b9c12eff199536f7c556b3a12a5517e346b4e658ca91",
+    "backend/ingest/state_optimization.py": "bce584df348b52ce92e5789c8a2ffdc733dfb8d7656e207639b65744914459d5",
+    "backend/ingest/scientific_form_filling.py": "1acc3a292cb7480ffba51336f3e6f25b744a7148d1e4891ccb77f5ecde6131d2",
+    "backend/ingest/material_state_contract.py": "228e46dfd458ba70afbb9b8a42f4f568b031f792ca419e1ddadb3da89559cb5a"
+  },
+  "current_source_hashes": {
+    "backend/ingest/domain_extraction.py": "42c868e4b28feb8230c5794dd5b339ccc509ad235e05c68e35e5864dd4e96ab8",
+    "backend/ingest/calculation_methods.py": "c71c17027776f62257bf77c217c193e979796349bd61903add9471ead519d151",
+    "backend/ingest/state_optimization.py": "bce584df348b52ce92e5789c8a2ffdc733dfb8d7656e207639b65744914459d5",
+    "backend/ingest/scientific_form_filling.py": "1acc3a292cb7480ffba51336f3e6f25b744a7148d1e4891ccb77f5ecde6131d2",
+    "backend/ingest/material_state_contract.py": "228e46dfd458ba70afbb9b8a42f4f568b031f792ca419e1ddadb3da89559cb5a"
+  },
+  "additional_current_sources": {
+    "backend/ingest/condition_rules.py": "e43f32ed7bb1db4dac20cf1392edd5040e2852ff160f0d1fd58066a3302ba9f2",
+    "backend/ingest/property_field_review.py": "1ad554c4a2af92c686311b9e75f1aa0be954c9c98bb1ed16b6154e4386839e48",
+    "backend/ingest/review_dependencies.py": "202f2cfe66fd2801e387d527a07d6a02f84f2b0241edcbfe5c4ef14028eb3a33"
+  }
+}

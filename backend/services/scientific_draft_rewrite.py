@@ -8,6 +8,7 @@ Issue #76：管理员在审核编辑页修改材料状态、Tc、普通物性与
 的 persist_scientific_draft 承担（与上传提交链路同实现，保证产出一致）。
 """
 from __future__ import annotations
+from copy import deepcopy
 
 import json
 from decimal import Decimal
@@ -327,6 +328,7 @@ def _requested_scientific_snapshot(paper: Paper, draft: dict[str, Any]) -> dict[
             "magnetic_field_t": _number(state_data.get("magnetic_field_t")),
             "state_kind": state_data.get("state_kind") or "unknown",
             "structure_optimization": state_data.get("structure_optimization") or "unknown",
+            "structure_optimization_details": deepcopy(state_data.get("structure_optimization_details")),
             "crystal_system": crystal_system,
             "note": state_data.get("note"),
             "structures": _sorted_snapshot(structures),

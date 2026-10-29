@@ -5,7 +5,7 @@ import re
 import unicodedata
 
 VERSION = 'condition-rules-v2'
-PARAMETERS = {'calculation_code', 'electronic_method', 'exchange_correlation_functional',
+PARAMETERS = {'vibrational_treatment', 'calculation_code', 'electronic_method', 'exchange_correlation_functional',
               'phonon_method', 'k_grid', 'q_grid', 'q_grid_interpolated', 'energy_cutoff',
               'charge_density_cutoff', 'convergence_energy', 'convergence_force',
               'supercell', 'atoms', 'temperature_k'}
@@ -86,22 +86,24 @@ def descriptor(record):
         stages = {a.get('stage') for a in record.get('source_associations') or []}
         if len(stages) > 1:
             return None
-        stage = next(iter(stages), 'electron_phonon')
+        stage = next(iter(stages), 'electronic_structure' if source.get('property_code') in {'band_gap', 'dos_fermi'} else 'electron_phonon')
     if parameter not in PARAMETERS or stage not in STAGES:
         return None
     if parameter in {'supercell', 'atoms', 'temperature_k'} and stage != 'sscha':
         return None
     if parameter == 'calculation_code':
         software = scalar(record.get('current_value'))
-    elif stage == 'electron_phonon':
+    elif stage == ('electronic_structure' if source.get('property_code') in {'band_gap', 'dos_fermi'} else 'electron_phonon'):
         software = conditions.get('calculation_code')
     else:
         values = [scalar(e) for e in conditions.get('extensions') or [] if e.get('key') == stage + '.calculation_code']
         software = values[0] if len(values) == 1 else None
+    from .calculation_methods import vibrational_treatment
+    treatment = vibrational_treatment(source) or context.get('approximation')
     result = {'version': VERSION, 'parameter': parameter, 'stage': stage, 'software': software_key(software),
             'material': context.get('material'),
             'phase': context.get('reported_space_group_symbol') or context.get('reported_space_group_number'),
-            'approximation': context.get('approximation'), 'structure_optimization': context.get('structure_optimization')}
+            'approximation': treatment, 'structure_optimization': context.get('structure_optimization')}
     return result
 
 
@@ -180,7 +182,7 @@ def material_phase_anchor(context, chunks):
 PROMPT = '''
 计算条件规则 condition-rules-v2：有 condition_context 的记录，额外在每个 results[i] 内输出 condition_review：
 {"verdict":"supported|not_reported|conflict|uncertain","value_origin":"reported|dfpt_definition",
- "scope":{"material":"当前材料","phase":"当前物相","software":"对应软件","stage":"对应阶段","parameter":"对应参数用途","approximation":"anharmonic|harmonic|unknown"},
+ "scope":{"material":"当前材料","phase":"当前物相","software":"对应软件","stage":"对应阶段","parameter":"对应参数用途","approximation":"anharmonic|anharmonic_quantum|anharmonic_classical|quasi_harmonic|harmonic|unknown"},
  "exceptions":"none|present|unknown","explanation":"简短中文依据及适用范围",
  "fact_evidences":[{"source_id":"review-source-N"}],"scope_evidences":[{"source_id":"review-source-N"}],
  "software_evidences":[{"source_id":"review-source-N"}]}。
@@ -255,6 +257,17 @@ def value_matches(value, parameter, facts):
     from .scientific_context import reported_value_matches
     if scalar(value) in (None, ''):
         return False
+    if parameter == 'vibrational_treatment':
+        # 只比较振动层次词；不能从anharmonic、quasi-harmonic或SSCHA全称截出harmonic。
+        text = normalized(' '.join(str(e.get('quote') or '') for e in facts))
+        text = re.sub(r'self[-\s]+consistent[-\s]+harmonic', 'selfconsistentharmonic', text)
+        text = re.sub(r'quasi[-_\s]+harmonic', 'quasiharmonic', text)
+        key = str(scalar(value)).casefold()
+        aliases = {'quasi_harmonic': ['quasiharmonic'],
+                   'anharmonic_quantum': ['quantum anharmonic', 'anharmonic quantum'],
+                   'anharmonic_classical': ['classical anharmonic', 'anharmonic classical']}
+        return any(re.search(r'(?<![a-z])' + re.escape(word) + r'(?![a-z])', text)
+                   for word in aliases.get(key, [key]))
     if parameter not in {'energy_cutoff', 'charge_density_cutoff', 'convergence_energy', 'convergence_force', 'temperature_k'}:
         return reported_value_matches(value, str(scalar(value)), facts)
     # 数值与单位一起比较，避免1 meV被1 eV或其他用途的裸数字授信。
@@ -319,7 +332,7 @@ def validate_assessment(record, raw, chunks):
         if scope.get('approximation') == 'harmonic':
             return None
         # 非谐流程必须有依据；结果数值不是共用条件事实的身份。
-        if scope.get('approximation') != 'anharmonic' or not re.search(r'\banharmonic\b|非谐', normalized(scope_text + ' ' + software_text)):
+        if scope.get('approximation') not in {'anharmonic', 'anharmonic_quantum', 'anharmonic_classical'} or not re.search(r'\banharmonic\b|非谐', normalized(scope_text + ' ' + software_text)):
             return None
     origin = raw.get('value_origin')
     value = record.get('current_value')

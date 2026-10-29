@@ -53,7 +53,9 @@ const FALLBACK_GROUP_SCHEMAS: Record<string, JsonSchema> = {
     title: '计算条件',
     properties: {
       calculation_code: { type: 'string', title: '计算软件' },
-      electronic_method: { type: 'string', title: '电子结构方法' },
+      electronic_method: { type: 'string', title: '电子结构计算方法' },
+      phonon_method: { type: 'string', title: '声子计算技术' },
+      vibrational_treatment: { type: 'string', title: '振动处理层次' },
       exchange_correlation_functional: { type: 'string', title: '交换关联泛函' },
       k_grid: { type: 'string', title: 'k 网格' },
       q_grid: { type: 'string', title: 'q 网格' },
@@ -103,11 +105,15 @@ const titleFor = (definition: FormDefinition | undefined, path: string, schema: 
   return configured?.label || configured?.title || schema.title || fallback
 }
 
-const effectivePayloadSchema = (definition: FormDefinition | undefined, recordType: PropertyRecordDraft['record_type']): JsonSchema => {
+const effectivePayloadSchema = (definition: FormDefinition | undefined, recordType: PropertyRecordDraft['record_type'], legacyApproximation = false): JsonSchema => {
   const schema = structuredClone(definition?.json_schema || { type: 'object', properties: {} }) as JsonSchema
   schema.type ||= 'object'
   const properties: Record<string, JsonSchema> = schema.properties || {}
   schema.properties = properties
+  if (legacyApproximation) properties.approximation = {type: 'string', title: '历史近似标签（原义待核对）'}
+  if (recordType === 'property' && ['band_gap', 'dos_fermi'].includes(definition?.property_code || '')) {
+    properties.calculation_conditions ||= FALLBACK_GROUP_SCHEMAS.calculation_conditions
+  }
   if (recordType === 'predicted_tc') {
     properties.calculation_conditions ||= FALLBACK_GROUP_SCHEMAS.calculation_conditions
     properties.parameters ||= FALLBACK_GROUP_SCHEMAS.parameters
@@ -124,7 +130,7 @@ const effectivePayloadSchema = (definition: FormDefinition | undefined, recordTy
     properties[group] = {
       ...fallback,
       ...declared,
-      properties: { ...(recordType === 'predicted_tc' ? fallback.properties : {}), ...(declared.properties || {}) },
+      properties: { ...(group === 'calculation_conditions' || recordType === 'predicted_tc' ? fallback.properties : {}), ...(declared.properties || {}) },
     }
   }
   return schema
@@ -160,7 +166,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
   tcCore,
 }) => {
   const issues = externalIssues
-  const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type), [definition, record.record_type])
+  const payloadSchema = useMemo(() => effectivePayloadSchema(definition, record.record_type, Boolean(record.payload.approximation)), [definition, record.record_type, Boolean(record.payload.approximation)])
   const isTc = record.record_type === 'predicted_tc' || record.record_type === 'measured_tc'
   const isDosFermi = isFermiDos(record)
   const mirroredTextValue = record.value_kind === 'text' && record.value_text === record.value_raw
@@ -245,7 +251,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
 
   const renderSchema = (schema: JsonSchema, path: string, fallbackLabel: string): React.ReactNode => {
     const label = titleFor(definition, path, schema, fallbackLabel)
-    if (record.record_type === 'predicted_tc' && path === 'payload.calculation_conditions') {
+    if (path === 'payload.calculation_conditions') {
       const resolved = { ...schema, properties: Object.fromEntries(Object.entries(schema.properties || {}).map(([key, child]) =>
         [key, { ...child, title: titleFor(definition, `${path}.${key}`, child, key) }])) }
       return <CalculationConditionFields key={path} record={record} schema={resolved} readOnly={readOnly}
