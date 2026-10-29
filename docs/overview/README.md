@@ -8,7 +8,7 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 
 ## 全局导航
 
-了解 PDF 上传后如何校对、送审和最终成为已批准数据，先看[从 PDF 上传到审核入库的主流程图](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程)。图中区分提交时的待审入库与最终批准，并保留字段处理、拒绝返修和批准后向量发布的主要分支。
+了解 PDF 上传后如何校对、送审和最终成为已批准数据，先看[从 PDF 上传到审核入库的 HTML 交互流程图](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-review-flow.html)。可点击节点查看说明、切换主干与主要分支；图中区分待审入库与最终批准，并保留字段处理、拒绝返修和批准后向量发布。对应[文字说明与实现依据](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程)保留在解析管线文档。
 
 上传与管理员编辑共用材料名/化学式至少一项规则；命名材料可没有化学式，当前编辑保存后可逐项填写人工理由确认。详见[上传数据结构](01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md)与[论文审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 
