@@ -27,9 +27,7 @@
     .toolbar { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 22px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
     .toolbar h2 { font-size:16px; margin:0; }
     .toolbar p { color:var(--muted); font-size:12px; margin:3px 0 0; }
-    .switch { display:flex; background:#eff3f6; padding:3px; border-radius:8px; }
-    .switch button { border:0; background:transparent; color:var(--muted); padding:7px 12px; font-size:12px; border-radius:6px; }
-    .switch button[aria-pressed="true"] { color:var(--ink); background:white; box-shadow:0 1px 4px #162c3814; }
+    .view-label { background:#eff3f6; color:var(--ink); padding:7px 12px; font-size:12px; border-radius:8px; }
     .legend { display:flex; align-items:center; gap:18px; padding:14px 22px 0; font-size:12px; color:var(--muted); flex-wrap:wrap; }
     .legend span { display:inline-flex; align-items:center; gap:6px; }
     .dot { width:9px; height:9px; border-radius:50%; background:var(--blue); }
@@ -58,7 +56,6 @@
     .node.result { border-left-color:var(--green); border-color:#a5d1c5; background:#f1faf6; }
     .node.branch { width:230px; border-left-color:#a8b6c1; background:#f9fbfc; }
     .node.rejected { border-left-color:#bd876c; }
-    .node[hidden], .connections [hidden] { display:none; }
     .details { position:sticky; top:20px; overflow:hidden; }
     .detail-head { padding:22px 22px 18px; background:#f8fafc; border-bottom:1px solid var(--line); }
     .detail-head .eyebrow { font-size:11px; margin-bottom:8px; }
@@ -94,10 +91,7 @@
       <section class="diagram" aria-labelledby="diagram-title">
         <div class="toolbar">
           <div><h2 id="diagram-title">收录流程</h2><p>由上向下阅读主干，侧向连线表示主要分支</p></div>
-          <div class="switch" role="group" aria-label="流程显示范围">
-            <button type="button" data-mode="all" aria-pressed="true">主流程与主要分支</button>
-            <button type="button" data-mode="main" aria-pressed="false">仅主流程</button>
-          </div>
+          <span class="view-label">主流程</span>
         </div>
         <div class="legend" aria-label="图例"><span><i class="dot" aria-hidden="true"></i>处理步骤</span><span><i class="dot check" aria-hidden="true"></i>检查或决定</span><span><i class="dot result" aria-hidden="true"></i>已批准结果</span></div>
         <noscript>请启用 JavaScript 查看流程图，或阅读 <a href="pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程">文字与 Mermaid 流程图</a>。</noscript>
@@ -170,8 +164,6 @@
       {from:'approved', to:'index', branch:true, publication:true, points:[[580,1112],[755,1112],[755,1188]], label:'批准后发布', labelX:702, labelY:1097}
     );
     const byId = new Map(nodes.map(node => [node.id, node]));
-    let selectedId = 'pending';
-    let mode = 'all';
     const ns = 'http://www.w3.org/2000/svg';
     const edgeGroups = [];
     const nodeButtons = new Map();
@@ -223,14 +215,13 @@
           group.append(label);
         }
         document.querySelector('#edges').append(group);
-        edgeGroups.push({edge, group, path});
+        edgeGroups.push({edge, path});
       }
     }
 
     function selectNode(id) {
       const node = byId.get(id);
       if (!node) return;
-      selectedId = id;
       for (const [key, button] of nodeButtons) button.setAttribute('aria-pressed', String(key === id));
       for (const [key, value] of Object.entries({step:node.step, title:node.title, owner:node.owner, description:node.description, state:node.state})) {
         document.querySelector('#detail-' + key).textContent = value;
@@ -250,15 +241,6 @@
       history.replaceState(null, '', '#' + id);
     }
 
-    function setMode(nextMode) {
-      mode = nextMode;
-      const showBranches = mode === 'all';
-      for (const node of nodes) nodeButtons.get(node.id).hidden = Boolean(node.branch && !showBranches);
-      for (const {edge, group} of edgeGroups) group.toggleAttribute('hidden', Boolean(edge.branch && !showBranches));
-      for (const button of document.querySelectorAll('[data-mode]')) button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
-      if (!showBranches && byId.get(selectedId).branch) selectNode('pending');
-    }
-
     function fitCanvas() {
       // 桌面适配可用宽度；手机保留最小字号，通过画布横向滚动阅读。
       const scale = Math.max(.72, Math.min(1, viewport.clientWidth/900));
@@ -269,16 +251,14 @@
 
     renderNodes();
     renderEdges();
-    for (const button of document.querySelectorAll('[data-mode]')) button.addEventListener('click', () => setMode(button.dataset.mode));
     function selectFromHash() {
       const id = location.hash.slice(1);
       if (byId.has(id)) {
-        if (byId.get(id).branch && mode === 'main') setMode('all');
         selectNode(id);
       }
     }
     const initialId = location.hash.slice(1);
-    selectNode(byId.has(initialId) ? initialId : selectedId);
+    selectNode(byId.has(initialId) ? initialId : 'pending');
     window.addEventListener('hashchange', selectFromHash);
     new ResizeObserver(fitCanvas).observe(viewport);
     fitCanvas();
