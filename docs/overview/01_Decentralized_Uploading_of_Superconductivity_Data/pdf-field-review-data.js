@@ -629,7 +629,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "path": "paper.year",
       "group": "论文题录",
       "mode": "bibliography",
-      "read": "GROBID 出版日期，并结合 publication_year 的原 PDF 与同身份出版资料核验。",
+      "read": "GROBID 出版日期，并结合 publication_year 的原 PDF 与同身份出版资料核验；独立解析差异分类已撤销，不生成责任分类待办。",
       "checks": [
         "采用正文文件的 GROBID 题录，保留与提取候选的分歧及来源。",
         "不默认进入 required 科学字段生成批；有 verified_front_matter 且字面覆盖当前值时可由程序核实。",
@@ -12188,7 +12188,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sha256": "41bbc793f0a80a85841967458b5d2c273b03393d8c7ef1aa22a8956342c22a3a"
     },
     "backend/ingest/upload_jobs.py": {
-      "sha256": "6caba7d278830bfbfd56a683bf06ac678efeb0b7d8c82e89bea737ab27ab1640"
+      "sha256": "7148a1a211a4c774466ce2af8e16a00ccc42296d29411a93ac7ae0baec480c98"
     },
     "backend/ingest/publication_year.py": {
       "sha256": "6d215d629a4e4fe5aac7ded8a9867162b34bf8cf959b98df554b7721730ccec6"

@@ -10,7 +10,6 @@
 | `/papers/:id/revise` 返修 | PaperRevisionPage、UploadTaskEditor | 完整宿主回归通过 |
 | `/admin/papers/:id/edit` 管理员与超级管理员编辑 | AdminPaperEditPage、MaterialStatesEditor | 两种角色分别完整宿主回归通过 |
 | 上述页面的来源与字段设置侧栏 | EvidenceWorkflow、EvidenceFieldMarkers、ReviewPaperTextField、ScientificFieldBox、ManualEvidenceSection、FieldAICandidate | 首轮科学表单验证范围 |
-| 上传/返修的解析差异侧栏 | ParsingDiagnosticsPanel、parsingDiagnostics、EvidenceRegion | #172增量：主表单只留入口与数量，详情按点击进入右侧栏；90来源完整上传宿主、四宿主既有回归、独立来源快照与真实草稿隔离浏览器验证；原图点击加载，非科学审核入口 |
 | 上述页面的结构、谱图子区 | PaperStructuralWorkspace、StructureCandidatePanel、PropertySpectra | 首轮覆盖父表单更新的联动影响，不重写独立编辑器 |
 | `/upload` 三类文件选择及历史角色恢复 | UploadPage、MultiFileUploadPanel、UploadRoleReview（仅历史任务） | #179：三个指定区域、单正文/格式校验、五文件三并发、完整 UploadPage 与桌面/390px 隔离浏览器通过；未作全站性能验收 |
 | `/auth` 登录、注册与找回密码 | AuthPage 委托 AuthExperience 和 production auth 服务 | 已定位，未做本轮性能验收 |
@@ -63,11 +62,9 @@
 
 test:form-contract 已加入 sidebar-field-save、sidebar-field-workflow、sidebar-field-hosts；本轮 79 项通过，mutation 仍为四宿主 8 项检出。MySQL／隔离 Redis 和浏览器验证及六项旧失败的独立基线见 [#177](../177-sidebar-field-review/validation.md)，不据此宣称全站或远端 CI 已验证。
 
-## #172 解析差异增量验证
+## #180 撤回独立解析差异分类
 
-解析原文与备选属于服务端来源账本；面板仅展示快照，不保存第二份科学值。外部草稿加载/刷新才更新快照，表单输入只更新真实依赖的题录当前值。原图按点击加载，完整记录按需挂载，没有“全部通过”按钮。`test:form-contract`含新增parsing-diagnostics套件，共64项通过；mutation仍验证四宿主8项能检出缓存回退。真实CaH6草稿副本页面在输入期间无请求、无全表扫描、无诊断DOM变化。浏览器API隔离，不代替真实登录的全站端到端验收；详细数据及源码见[#172增量验收](../172-phonon-method-parsing/difference-triage-validation.md)。
-
-2026-10-29：解析详情从主表单移入右侧栏，关闭恢复焦点，定位字段返回当前控件；科学待处理入口有问题时为红色，数量和判定规则不变。完整宿主、真实草稿副本及新问题先失败后通过的证据见[#147 诊断与验证](../147-two-stage-field-review/2026-10-29-flow-and-review-diagnosis.md)，既有独立回归失败与基线单列，不算本次通过。
+#172 分类面板及后续移入侧栏的设计已撤销。原始区域和备选文本保留在服务端账本；含历史 triage 的草稿可存取，不恢复分类入口或计算。正式表单契约入口以 `parsing-triage-removal` 替换退役的 `parsing-diagnostics` 套件，覆盖上传、返修、管理员及超级管理员的紧凑字段标记、来源侧栏、真实输入错误和保存行为。#177 单字段保存与核对入口继续保留。实际结果和隔离边界见 [#180 验收](../180-remove-parsing-triage/validation.md)。此前 #172 与 #147 的浏览器记录仅证明当时实现，不是当前恢复分类的依据。
 
 ## #179 用户指定上传文件身份
 

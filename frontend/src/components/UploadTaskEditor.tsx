@@ -18,8 +18,6 @@ import {
 import { useLanguage } from '../context/LanguageContext'
 import MaterialStatesEditor, { EvidenceNotes, SpaceGroupOption, ValidationIssue } from './MaterialStatesEditor'
 import CitationExtractionPanel from './CitationExtractionPanel'
-import ParsingDiagnosticsPanel from './ParsingDiagnosticsPanel'
-import { EMPTY_PARSING_SNAPSHOT, retainParsingSnapshot } from '../lib/parsingDiagnostics'
 import PaperMetadataRow from './PaperMetadataRow'
 import ReviewPaperTextField from './ReviewPaperTextField'
 import {
@@ -127,8 +125,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 }) => {
   const { t, lang, dict } = useLanguage()
   const [draft, setDraft] = useState<UploadDraft | null>(null)
-  // 只读解析来源与可编辑科学值分开，避免每次输入重新遍历差异清单。
-  const [parsingSnapshot, setParsingSnapshot] = useState(EMPTY_PARSING_SNAPSHOT)
   const [loading, setLoading] = useState(true)
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -240,7 +236,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     if (draftOverride !== undefined) {
       const normalized = normalizeUploadDraft(draftOverride)
       if (revisionMeta.current || !revisionPaperId) { fieldSaver.current = createFieldDraftSaver(revisionMeta.current ? {target: 'revision', target_id: revisionMeta.current.revision_id} : {target: 'upload', target_id: taskId}); fieldSaver.current.initialize(normalized) }
-      setParsingSnapshot(previous => retainParsingSnapshot(previous, normalized))
       setDraft(normalized)
       setLoading(false)
       setDirty(false)
@@ -265,7 +260,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       }
       const normalized = preserveRawNumbers(unwrapData(response), normalizeUploadDraft(unwrapData(response)))
       if (revisionMeta.current || !revisionPaperId) { fieldSaver.current = createFieldDraftSaver(revisionMeta.current ? {target: 'revision', target_id: revisionMeta.current.revision_id} : {target: 'upload', target_id: taskId}); fieldSaver.current.initialize(normalized) }
-      setParsingSnapshot(previous => retainParsingSnapshot(previous, normalized))
       setDraft(normalized)
       setDirty(false)
       setError('')
@@ -295,7 +289,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         if (JSON.stringify(next) !== JSON.stringify(latest.draft)) {
           fieldSaver.current = createFieldDraftSaver({target: 'upload', target_id: taskId})
           fieldSaver.current.initialize(next)
-          setParsingSnapshot(previous => retainParsingSnapshot(previous, next))
           setDraft(next)
           setIssues([])
           setError('')
@@ -601,9 +594,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
   return (
     <Box component="fieldset" data-evidence-scope="upload-editor" disabled={submitting || applyingCandidate || Boolean(revision?.conflict)} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
-      <ParsingDiagnosticsPanel snapshot={parsingSnapshot} paper={draft.paper}
-        target={revisionPaperId ? revision ? { target: 'revision', target_id: revision.revision_id } : undefined
-          : { target: 'upload', target_id: taskId }} />
       {revision && <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.revisionNotice')}</Alert>}
       {revision?.review_comment && <Alert severity="warning" sx={{ mb: 2 }}>{revision.review_comment}</Alert>}
       {revision?.warnings?.map(warning => <Alert key={warning} severity="warning" sx={{ mb: 2 }}>{warning}</Alert>)}

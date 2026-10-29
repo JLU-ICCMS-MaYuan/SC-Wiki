@@ -10,7 +10,7 @@
 <body>
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="pdf-review-flow.html#parse">收录主流程</a> / 解析与草稿</nav>
-  <header><p class="eyebrow">SC-WIKI · 解析与草稿</p><h1>PDF 如何变成可校对草稿</h1><p class="intro">从上传 Worker 开始，展开正文提取、用户指定角色、科学候选、来源覆盖、查重和草稿保存。菱形是程序判断，侧向连线展示等待、补证和失败路径。点击普通节点查看源码入口与处理边界；字段核对和解析差异两个节点可在新标签页继续展开。</p></header>
+  <header><p class="eyebrow">SC-WIKI · 解析与草稿</p><h1>PDF 如何变成可校对草稿</h1><p class="intro">从上传 Worker 开始，展开正文提取、用户指定角色、科学候选、来源覆盖、查重和草稿保存。菱形是程序判断，侧向连线展示等待、补证和失败路径。点击普通节点查看源码入口与处理边界；字段核对节点可在新标签页继续展开。</p></header>
   <nav class="page-links" aria-label="流程页面导航"><a href="pdf-review-flow.html#parse">← 返回主流程</a><a href="pdf-approval-check-flow.html">查看批准前检查程序流程 →</a></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
@@ -23,7 +23,7 @@
       <div class="detail-body"><h3>执行方</h3><p id="detail-owner"></p><h3>程序行为</h3><p id="detail-description"></p><h3>边界与分支</h3><ul id="detail-notes"></ul><h3>源码定位</h3><code id="detail-code"></code><a id="detail-open" class="detail-open" hidden>在新标签页查看详细流程 ↗</a></div>
     </aside>
   </div>
-  <p class="boundary">本页是当前程序的说明图，不操作真实任务。ready 表示草稿可校对，不表示每个字段已通过，更不表示整篇论文已批准。解析差异进入独立诊断侧栏，科学字段问题沿原字段核对入口处理。</p>
+  <p class="boundary">本页是当前程序的说明图，不操作真实任务。ready 表示草稿可校对，不表示每个字段已通过，更不表示整篇论文已批准。原始来源和备选文本随草稿保留，科学字段问题沿原字段核对入口处理，不生成独立分类待办。</p>
   <footer><a href="pdf-review-flow.html#parse">← 返回主流程的解析节点</a><a href="pdf-parsing-pipeline.md">阅读解析管线与实现依据</a></footer>
 </main>
 <script type="application/json" id="flow-data">
@@ -47,7 +47,6 @@
     {"id":"duplicate","row":10,"column":"right","kind":"stop","title":"提示已有论文","summary":"duplicate；不重复新建","owner":"上传 Worker","description":"返回已有论文信息或权限提示，结束本次新建任务。","notes":["已有论文仍按账号权限控制可见性。"],"code":"backend/ingest/upload_jobs.py::_handle_duplicate"},
     {"id":"evidence","href":"pdf-field-evidence-flow.html","row":11,"title":"生成字段核对结果与候选","summary":"逐字段保存状态、理由和依据","owner":"共享科学核对程序 / LLM","description":"使用本次来源生成逐字段结论和必要候选。字段可为通过、存疑、不通过或未完成，不把 ready 解释为所有字段都通过。","notes":["已提取内容不会因建议生成的技术异常被清空。","上传者后续保存不触发模型核对。"],"code":"backend/ingest/property_evidence.py::generate_upload_suggestions"},
     {"id":"suggestion-error","row":11,"column":"right","kind":"wait","title":"保留草稿及核对故障","summary":"已提取内容继续保留","owner":"上传 Worker","description":"建议或字段核对生成异常被记录，保留提取内容及故障说明，后续通过原核对入口处理。","notes":["技术故障不能伪装成科学不通过或科学通过。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
-    {"id":"diagnostics","href":"pdf-parsing-diagnostics-flow.html","row":12,"title":"保存解析差异与责任分类","summary":"区域差异、题录及系统待核查项","owner":"解析诊断程序","description":"保留原解析差异并分类，区分系统已核实、系统待核查和需要用户判断。","notes":["诊断详情按点击进入右侧栏，不铺满科学表单。","原始区域数不等于科学错误数。"],"code":"backend/ingest/parsing_diagnostics.py::annotate_differences"},
     {"id":"save","row":13,"title":"保存草稿与审核产物","summary":"保留快照、来源和产物清单","owner":"上传 Worker / 草稿存储","description":"写入解析与证据快照、持久化草稿并在适用存储模式发布产物清单。受控重跑时核对原草稿哈希，保护期间的人工修改。","notes":["保存草稿不等于创建待审论文。","受控重跑发现人工编辑后停止覆盖。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/upload_tasks.py::save_draft"},
     {"id":"conflict","row":13,"column":"left","kind":"stop","title":"保留已有人工草稿","summary":"并发修改时不覆盖","owner":"草稿版本保护程序","description":"受控重跑发现原草稿在解析期间已变化时拒绝覆盖，保留当前人工编辑供核对。","notes":["该分支适用于带预期草稿哈希的受控重跑。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
     {"id":"ready","row":14,"kind":"result","title":"标记 ready，等待校对","summary":"解析成功；字段状态分别保留","owner":"上传 Worker","description":"任务进入可校对状态，保留首次字段核对结论和解析诊断，不在 ready 后重新排队同一轮全量字段检查。","notes":["谱提取等后续独立任务不等于整篇科学审核通过。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
@@ -66,8 +65,8 @@
     {"from":"recheck","to":"failed","fromSide":"left","toSide":"left","via":[[8,1208],[8,358]],"label":"否","labelAt":[24,1080]},
     {"from":"summary","to":"duplicate-check"},{"from":"duplicate-check","to":"evidence","label":"否"},
     {"from":"duplicate-check","to":"duplicate","label":"是"},
-    {"from":"evidence","to":"diagnostics"},{"from":"evidence","to":"suggestion-error","label":"技术异常"},
-    {"from":"suggestion-error","to":"diagnostics"},{"from":"diagnostics","to":"save"},
+    {"from":"evidence","to":"save"},{"from":"evidence","to":"suggestion-error","label":"技术异常"},
+    {"from":"suggestion-error","to":"save"},
     {"from":"save","to":"conflict","label":"草稿已修改","labelAt":[305,1880]},
     {"from":"save","to":"ready"},{"from":"ready","to":"handoff"}
   ]

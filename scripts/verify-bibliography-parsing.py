@@ -31,7 +31,6 @@ def main():
     from backend.ingest.upload_jobs import SUMMARY_SYSTEM_PROMPT, _normalize_draft
     from backend.ingest.grobid_document import apply_bibliography
     from backend.ingest.publication_year import verify_document_year
-    from backend.ingest.parsing_diagnostics import annotate_differences
     from backend.rag.llm import complete_json
     from backend.rag.llm_context import get_llm_config
     from backend.storage.paths import resolve_file, clear_namespace, object_mode
@@ -47,11 +46,11 @@ def main():
     report = {'passed': False, 'source_task': args.task_id, 'source_commit': subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(), 'sources': [],
         'reused': ['同源PDF的已保存IR文字', '同源GROBID原始题录'],
-        'rerun': ['题录AI提取', '出版年核验', '正式题录组装', '正式归一化', '差异分类', '隔离草稿保存重读'],
+        'rerun': ['题录AI提取', '出版年核验', '正式题录组装', '正式归一化', '隔离草稿保存重读'],
         'not_run': ['全文OCR', '无关科学字段验收与业务写回', '正式论文提交'],
         'source_hashes': {name: hashlib.sha256((ROOT/name).read_bytes()).hexdigest() for name in (
             'backend/ingest/grobid_document.py', 'backend/ingest/publication_year.py',
-            'backend/ingest/parsing_diagnostics.py', 'backend/ingest/upload_jobs.py')}}
+            'backend/ingest/upload_jobs.py')}}
     try:
         docs, paths, contexts = {}, {}, []
         for file in files:
@@ -88,7 +87,6 @@ def main():
         normalized = _normalize_draft(draft)
         for key in ('bibliography_sources', 'bibliography_conflicts'):
             normalized[key] = draft[key]
-        normalized = annotate_differences(normalized, docs, files)
         shadow = uuid4().hex
         keys = [tasks.task_key(shadow), tasks.draft_key(shadow)]
         assert client.set(keys[0], json.dumps({'task_id': shadow, 'is_shadow': True,

@@ -199,8 +199,17 @@ export interface PaperDraftFields {
 }
 
 export interface UploadDraft {
-  parsing_conflicts?: import('./parsingDiagnostics').ParsingDifference[]
-  bibliography_conflicts?: import('./parsingDiagnostics').BibliographyDifference[]
+  // 原始解析账本及历史扩展原样随草稿保存，不产生派生分类或用户待办。
+  parsing_conflicts?: Array<{
+    file_id: string; pdf_page: number; kind: string; selected?: string; anchor?: string
+    engine?: string; selected_text?: string
+    alternatives: Array<{ block_id?: string; engine?: string; text: string }>
+    [key: string]: unknown
+  }>
+  bibliography_conflicts?: Array<{
+    field: string; grobid_value: unknown; extracted_value: unknown; selected_value?: unknown
+    [key: string]: unknown
+  }>
   field_suggestions_error?: string | null
   summary_error?: string | null
   research_motivation_error?: string | null
