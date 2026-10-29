@@ -11,7 +11,9 @@
 | 小功能 | 职责 | 依赖 |
 | --- | --- | --- |
 | [上传 LLM 工作链路与 Agent 抽象分析](upload-llm-workflow-and-agent-analysis.md) | 解释现有分段提取、提示词、表单映射及其与问答的关系；单独标明 Agent 与联网建议 | 上传 Worker、来源核对、问答工具 |
-| [PDF 上传到审核入库交互流程图](pdf-review-flow.html) | HTML 统一主流程视图，包含主要分支；点击节点查看说明、高亮相邻连线 | 独立 HTML、CSS、JavaScript，无外部依赖 |
+| [PDF 上传到审核入库交互流程图](pdf-review-flow.html) | 主流程入口；点击解析阶段或批准前检查进入独立程序流程图页面，其他节点显示概要 | 独立 HTML、CSS、JavaScript，无外部依赖 |
+| [解析与草稿程序流程图](pdf-parsing-flow.html) | 展开正文提取、角色确认、来源覆盖、查重、草稿保存及主要失败路径；可返回主流程 | 上传 Worker、解析与字段核对代码 |
+| [批准前检查程序流程图](pdf-approval-check-flow.html) | 展开结果复用、必要模型核对、权限与版本、正式保存、事务回滚及索引发布 | 工作台、共享证据服务、批准事务 |
 | [PDF 解析管线](pdf-parsing-pipeline.md) | [上传到审核入库主流程图](pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程)，以及四工具解析、五阶段处理、来源核对和向量发布 | MinerU、GROBID、Docling、Marker、RQ、Redis、LLM、MySQL、Qdrant |
 | [PDF 摄入](pdf-ingestion.md) | 校验并摄入论文、保留独立结构模型与晶格观测 | 上传目录、摄入流水线 |
 | [上传、审核与默认结构](upload-review-and-default-selection.md) | 管理晶体结构 pending/approved/rejected 状态和默认项 | 用户认证、管理员权限 |

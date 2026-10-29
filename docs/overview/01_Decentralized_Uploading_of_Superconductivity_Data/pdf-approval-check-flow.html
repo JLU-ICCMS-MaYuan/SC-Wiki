@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>批准前检查 · 程序流程图 · SC-Wiki</title>
+  <link rel="stylesheet" href="pdf-stage-flow.css">
+  <script defer src="pdf-stage-flow.js"></script>
+</head>
+<body>
+<main class="page">
+  <nav class="breadcrumb" aria-label="文档导航"><a href="pdf-review-flow.html#gate">收录主流程</a> / 批准前检查</nav>
+  <header><p class="eyebrow">SC-WIKI · 批准前检查</p><h1>一次批准请求如何通过检查</h1><p class="intro">展开“点击通过”之后的程序路径：保存编辑、检查权限与格式、复用字段结果、必要模型核对，再进入正式批准事务。图中保留未完成、科学不通过、技术失败和事务回滚的区别。</p></header>
+  <nav class="page-links" aria-label="流程页面导航"><a href="pdf-review-flow.html#gate">← 返回主流程</a><a href="pdf-parsing-flow.html">查看解析与草稿程序流程 →</a></nav>
+  <div class="layout">
+    <section class="diagram" aria-labelledby="chart-title">
+      <div class="diagram-head"><div><h2 id="chart-title">批准前检查：程序控制流</h2><p>字段通过后仍需成功提交数据库事务</p></div><div class="legend"><span><i></i>处理</span><span><i class="check"></i>判断</span><span><i class="stop"></i>停止或回滚</span></div></div>
+      <noscript>此程序流程图需要 JavaScript。可阅读 <a href="../02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md">论文审核文档</a>。</noscript>
+      <div class="viewport" role="region" aria-label="批准检查程序流程图，窄屏可横向滚动" tabindex="0"><svg id="flow-chart" class="flow-chart" role="group" aria-labelledby="chart-title"></svg></div>
+    </section>
+    <aside class="details" aria-label="所选程序节点说明" aria-live="polite" aria-atomic="true">
+      <div class="detail-head"><p class="eyebrow">程序节点说明</p><h2 id="detail-title"></h2></div>
+      <div class="detail-body"><h3>执行方</h3><p id="detail-owner"></p><h3>程序行为</h3><p id="detail-description"></p><h3>边界与分支</h3><ul id="detail-notes"></ul><h3>源码定位</h3><code id="detail-code"></code></div>
+    </aside>
+  </div>
+  <p class="boundary">本页只说明当前工作台批准路径，不执行真实审核。管理员和超级管理员均受相同内容、来源与版本检查约束；不能自审。批准后索引发布失败，不撤销已经提交的批准。</p>
+  <footer><a href="pdf-review-flow.html#gate">← 返回主流程的批准前检查</a><a href="../02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md">阅读论文审核与实现依据</a></footer>
+</main>
+<script type="application/json" id="flow-data">
+{
+  "start":"request",
+  "nodes":[
+    {"id":"request","row":0,"title":"选择通过，提交审核","summary":"管理员或超级管理员明确操作","owner":"审核人员 / 工作台","description":"当前工作台收到整篇论文的通过决定，开始提交前保存和共享字段检查。","notes":["字段的人工通过不能代替这个论文级动作。","拒绝和退回待审使用另一条审核路径。"],"code":"frontend/src/pages/AdminPaperEditPage.tsx::handleEditReview；frontend/src/pages/AdminPage.tsx"},
+    {"id":"save","row":1,"title":"保存实际编辑与人工说明","summary":"失败则保留输入，停止本次提交","owner":"前端字段保存器 / 服务端草稿","description":"先保存实际变化并等待人工说明队列完成。未保存成功或存在未完成的人工说明时，不继续批准。","notes":["相同数据保存不发起无意义写入。","普通保存不启动模型，也不直接改成 approved。"],"code":"frontend/src/components/EvidenceWorkflow.tsx::gate；frontend/src/pages/AdminPaperEditPage.tsx::handleEditSave"},
+    {"id":"auth","row":2,"kind":"check","title":"有权审核且不是自审？","summary":"确认身份、角色和论文对象","owner":"服务端权限检查","description":"读取当前论文草稿前检查管理员权限及上传者身份。正式批准事务中还会再次检查。","notes":["超级管理员也不能审核自己上传的论文。"],"code":"backend/ingest/field_drafts.py::authorized_draft；backend/services/field_review_commit.py::commit_review"},
+    {"id":"forbidden","row":2,"column":"left","kind":"stop","title":"拒绝无权或自审请求","summary":"不执行批准事务","owner":"服务端","description":"身份或论文对象不满足要求时返回权限错误，不把无权操作变成字段科学问题。","notes":["更换权限不足的账号或处理对象后才可重新操作。"],"code":"backend/ingest/field_drafts.py::authorized_draft"},
+    {"id":"format","row":3,"kind":"check","title":"格式与数据约束通过？","summary":"必填、字段类型、材料与分类","owner":"程序校验","description":"先按现有科学草稿契约检查输入。程序问题直接返回字段定位，不用模型代替格式校验。","notes":["正式批准事务也再次校验当前草稿。","检查失败不授予科学通过。"],"code":"backend/api/evidence.py::submit_check；backend/api/rag.py::_validate_draft"},
+    {"id":"input-error","row":3,"column":"left","kind":"stop","title":"返回输入问题并保留草稿","summary":"修改对应字段后再提交","owner":"前端 / 服务端","description":"展示真实格式或数据约束问题，保留未提交内容，停止本次操作。","notes":["格式错误与来源核对理由是独立通道。"],"code":"backend/api/evidence.py::submit_check"},
+    {"id":"snapshot","row":4,"title":"构造当前字段与来源快照","summary":"值、来源、适用范围与稳定身份","owner":"共享证据服务","description":"读取当前草稿、来源和既有字段结果；按既有规则承接旧格式记录，建立本次检查版本。","notes":["源文件或适用范围变化后，旧通过不能默认复用。","页面摘要不替代服务端正式版本检查。"],"code":"backend/api/evidence.py::snapshot_for / submit_check；backend/ingest/field_review.py::prepare_submission"},
+    {"id":"reuse","row":5,"kind":"check","title":"字段已有同版本有效结果？","summary":"按字段判断，不整体重审","owner":"字段复用策略","description":"检查每个字段的值、来源与状态范围，复用未变化的有效模型或人工结果。已有不通过同样不会靠反复提交重问模型。","notes":["可选且确实免审的字段保留免审语义。","修改后的新版本不能借用旧决定。"],"code":"backend/ingest/field_review.py::reusable / needs_review；backend/api/evidence.py::enqueue_review"},
+    {"id":"needs-model","row":5,"column":"right","kind":"check","title":"实际修改且需要核对？","summary":"提交只审核必要字段","owner":"字段复用策略","description":"没有可用结果时，只有实际修改且当前版本尚未核对的必要字段才进入提交中的模型审核。其他未处理项继续阻断，需人工处理或主动核对。","notes":["不会仅因点击提交就全量再审核一遍。"],"code":"backend/api/evidence.py::enqueue_review"},
+    {"id":"prerequisites","row":6,"column":"right","kind":"check","title":"人工记录与来源齐全？","summary":"理由、依据或缺证说明","owner":"程序前置检查","description":"核对修改理由、证据或无证据说明，以及必要正文和补充材料是否读取完整；首次新增状态按既有例外规则处理。","notes":["缺少内容时不启动模型。","不能把没读到的内容当成论文未报告。"],"code":"backend/api/evidence.py::enqueue_review"},
+    {"id":"model","row":7,"column":"right","title":"排队核对必要修改字段","summary":"复用其他字段的有效结果","owner":"RQ Worker / LLM","description":"只对本次需要审核的字段执行模型核对，保留对应理由与依据；页面等待任务完成及当前版本结果。","notes":["模型不通过仅归属对应字段。","网络、超时或模型格式错误属于技术失败。"],"code":"backend/api/evidence.py::enqueue_review；frontend/src/components/EvidenceWorkflow.tsx::gate"},
+    {"id":"technical","row":8,"column":"left","kind":"stop","title":"技术失败，保留有效结果","summary":"修复故障后按原入口重试","owner":"核对任务 / 前端","description":"模型调用或网络故障停止本次提交，不制造科学不通过，也不清除其他已通过结果。","notes":["必要核对未完成时不能批准。"],"code":"frontend/src/components/EvidenceWorkflow.tsx::gate；backend/ingest/property_evidence.py"},
+    {"id":"gather","row":8,"title":"收齐结果并核对当前版本","summary":"复用结果与本次结果汇合","owner":"共享证据服务 / 前端","description":"读取已有结果和必要模型结果，并检查任务完成及内容、来源版本；此步不再发起一轮模型审核。","notes":["已通过项不会因另一个字段失败而被清空。"],"code":"backend/api/evidence.py::get_job / review_response；frontend/src/components/EvidenceWorkflow.tsx::gate"},
+    {"id":"all-pass","row":9,"kind":"check","title":"所有适用字段都满足？","summary":"通过或合法免审；无未完成项","owner":"前端门禁 / 服务端结果判定","description":"判断是否还有被拒绝、未完成、未通过或失效的必要字段；全部满足才发起正式批准请求。","notes":["按钮可点击不代表服务端已批准。"],"code":"frontend/src/components/EvidenceWorkflow.tsx::gate；backend/ingest/property_evidence.py::resolve_results"},
+    {"id":"blocked","row":9,"column":"right","kind":"stop","title":"停止提交，返回字段处理","summary":"区分未完成与科学不通过","owner":"审核人员 / 字段侧栏","description":"只展示当前需要处理的项目，必要时补理由、改内容或主动核对；本图不自动替人作出人工确认。","notes":["原样不通过结果不会因重复提交被自动重问。","保存成功不等于科学通过。"],"code":"frontend/src/components/EvidenceWorkflow.tsx::gate / openIssue"},
+    {"id":"transaction","row":10,"title":"开启批准事务并锁定论文","summary":"再次核对权限与基准版本","owner":"服务端数据库事务","description":"进入 review-commit，锁定论文并重读正式内容和暂存草稿，检查基准指纹和当前字段版本。","notes":["前端检查通过不能绕过事务内检查。","并发修改时保留管理员暂存输入。"],"code":"backend/api/evidence.py::commit_field_review；backend/services/field_review_commit.py::commit_review"},
+    {"id":"conflict","row":10,"column":"left","kind":"stop","title":"版本冲突，取消本次批准","summary":"保留当前输入供合并核对","owner":"服务端版本检查","description":"暂存内容基于旧正式版本或字段来源版本已失效时，取消本次批准，不覆盖其他人的更新。","notes":["不能在旧草稿上强行批准新内容。"],"code":"backend/services/field_review_commit.py::commit_review；backend/ingest/property_evidence.py::resolve_results"},
+    {"id":"materialize","row":11,"title":"应用暂存修改并转接来源","summary":"仅有暂存修改时重建必要正式实体","owner":"正式科学数据保存程序","description":"在同一事务中应用待审修改，按正式身份重新绑定字段与来源；没有暂存修改时继续使用当前正式内容。","notes":["保存失败整体回滚。","来源、人工决定和科学数据不分成两次独立批准。"],"code":"backend/services/field_review_commit.py::commit_review；backend/api/rag.py::_rewrite_paper_scientific_draft_in_tx"},
+    {"id":"mapped","row":12,"kind":"check","title":"转存后字段内容仍一致？","summary":"正式字段与已核对内容对应","owner":"正式保存后检查","description":"按字段和结构稳定身份重新映射核对结果。正式保存若改变必要字段内容，取消事务，不能把旧结果附到不同内容上。","notes":["不按数组位置猜测字段归属。"],"code":"backend/services/field_review_commit.py::commit_review"},
+    {"id":"persist","row":13,"title":"保存正式来源与审核历史","summary":"状态及当前批准版本一并保存","owner":"数据库事务","description":"写入永久科学来源、审核人、意见、历史和 approved 状态。历史中重复旧上下文共享存储，完整信息仍可还原。","notes":["数据包或其他数据库写入错误仍必须回滚。","不通过删除历史或放松科学门禁来缩小写入。"],"code":"backend/services/field_review_commit.py::review_history_snapshot / commit_review；backend/services/paper_history.py"},
+    {"id":"rollback","row":13,"column":"left","kind":"stop","title":"回滚整个批准事务","summary":"正式论文保持原状态","owner":"数据库事务","description":"正式转存、来源、历史或事务提交失败时撤销本次写入。暂存输入保留，允许故障修复后重新操作。","notes":["字段全通过也可能因数据库写入故障而未批准。"],"code":"backend/api/evidence.py::commit_field_review；backend/services/field_review_commit.py::commit_review"},
+    {"id":"approved","row":14,"kind":"result","title":"事务提交，批准当前版本","summary":"approved 与当前内容版本绑定","owner":"数据库事务","description":"正式数据、来源、审核历史及状态成功提交后，当前版本才成为已批准数据。","notes":["这是整篇批准成功的数据库边界。"],"code":"backend/api/evidence.py::commit_field_review"},
+    {"id":"public","row":15,"kind":"result","title":"公开查询使用已批准版本","summary":"材料检索、物性读取与统计","owner":"公开查询服务","description":"公开科学查询读取当前已批准版本及其对应记录，不等待向量索引发布成功。","notes":["论文公开与问答向量发布是不同结果。"],"code":"goserver/handlers/papers.go；backend/rag/scientific_sources.py"},
+    {"id":"publish","row":14,"column":"right","title":"独立发布问答向量索引","summary":"批准事务已经提交","owner":"向量化 / Qdrant 发布服务","description":"批准成功后发布正文与科学来源向量供问答检索，发布错误不撤销此前事务。","notes":["发布与科学数据批准分开验证。"],"code":"backend/api/rag.py::publish_approved_paper"},
+    {"id":"publication-pending","row":15,"column":"right","kind":"wait","title":"索引待发布，批准仍有效","summary":"publication_pending","owner":"发布接口","description":"索引发布失败时可返回 publication_pending；论文已批准的数据库事实保持。","notes":["该状态不能被解释为论文批准失败。"],"code":"backend/api/evidence.py::commit_field_review"}
+  ],
+  "edges":[
+    {"from":"request","to":"save"},{"from":"save","to":"auth","label":"保存成功"},{"from":"save","to":"input-error","label":"保存失败","labelAt":[307,270]},
+    {"from":"auth","to":"format","label":"是"},{"from":"auth","to":"forbidden","label":"否"},
+    {"from":"format","to":"snapshot","label":"是"},{"from":"format","to":"input-error","label":"否"},
+    {"from":"snapshot","to":"reuse"},{"from":"reuse","to":"gather","label":"复用","labelAt":[572,1008]},
+    {"from":"reuse","to":"needs-model","label":"否"},
+    {"from":"needs-model","to":"prerequisites","label":"是"},{"from":"needs-model","to":"blocked","fromSide":"right","toSide":"right","via":[[1090,788],[1090,1338]],"label":"否，需先处理","labelAt":[1010,1275]},
+    {"from":"prerequisites","to":"model","label":"是"},
+    {"from":"prerequisites","to":"blocked","fromSide":"right","toSide":"right","via":[[1084,928],[1084,1338]],"label":"不齐全","labelAt":[1048,1110]},
+    {"from":"model","to":"gather","label":"任务完成","labelAt":[758,1140]},
+    {"from":"model","to":"technical","fromSide":"right","toSide":"top","via":[[1090,1058],[1090,1136],[149,1136]],"label":"技术失败","labelAt":[205,1124]},
+    {"from":"gather","to":"all-pass"},{"from":"all-pass","to":"transaction","label":"是"},{"from":"all-pass","to":"blocked","label":"否"},
+    {"from":"transaction","to":"materialize","label":"检查通过"},{"from":"transaction","to":"conflict","label":"冲突"},
+    {"from":"materialize","to":"mapped"},{"from":"mapped","to":"persist","label":"是"},{"from":"mapped","to":"rollback","label":"否"},
+    {"from":"persist","to":"approved","label":"提交成功"},{"from":"persist","to":"rollback","label":"写入失败"},
+    {"from":"approved","to":"public"},{"from":"approved","to":"publish","label":"批准后"},{"from":"publish","to":"publication-pending","label":"发布失败"}
+  ]
+}
+</script>
+</body>
+</html>

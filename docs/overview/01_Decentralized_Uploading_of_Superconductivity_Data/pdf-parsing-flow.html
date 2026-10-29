@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>解析与草稿 · 程序流程图 · SC-Wiki</title>
+  <link rel="stylesheet" href="pdf-stage-flow.css">
+  <script defer src="pdf-stage-flow.js"></script>
+</head>
+<body>
+<main class="page">
+  <nav class="breadcrumb" aria-label="文档导航"><a href="pdf-review-flow.html#parse">收录主流程</a> / 解析与草稿</nav>
+  <header><p class="eyebrow">SC-WIKI · 解析与草稿</p><h1>PDF 如何变成可校对草稿</h1><p class="intro">从上传 Worker 开始，展开正文提取、角色确认、科学候选、来源覆盖、查重和草稿保存。菱形是程序判断，侧向连线展示等待、补证和失败路径。点击节点可查看对应源码入口与处理边界。</p></header>
+  <nav class="page-links" aria-label="流程页面导航"><a href="pdf-review-flow.html#parse">← 返回主流程</a><a href="pdf-approval-check-flow.html">查看批准前检查程序流程 →</a></nav>
+  <div class="layout">
+    <section class="diagram" aria-labelledby="chart-title">
+      <div class="diagram-head"><div><h2 id="chart-title">解析与草稿：程序控制流</h2><p>主干由上向下；有限补证不表示无限重试</p></div><div class="legend"><span><i></i>处理</span><span><i class="check"></i>判断</span><span><i class="stop"></i>停止或失败</span></div></div>
+      <noscript>此程序流程图需要 JavaScript。可阅读 <a href="pdf-parsing-pipeline.md">PDF 解析管线文档</a>。</noscript>
+      <div class="viewport" role="region" aria-label="解析程序流程图，窄屏可横向滚动" tabindex="0"><svg id="flow-chart" class="flow-chart" role="group" aria-labelledby="chart-title"></svg></div>
+    </section>
+    <aside class="details" aria-label="所选程序节点说明" aria-live="polite" aria-atomic="true">
+      <div class="detail-head"><p class="eyebrow">程序节点说明</p><h2 id="detail-title"></h2></div>
+      <div class="detail-body"><h3>执行方</h3><p id="detail-owner"></p><h3>程序行为</h3><p id="detail-description"></p><h3>边界与分支</h3><ul id="detail-notes"></ul><h3>源码定位</h3><code id="detail-code"></code></div>
+    </aside>
+  </div>
+  <p class="boundary">本页是当前程序的说明图，不操作真实任务。ready 表示草稿可校对，不表示每个字段已通过，更不表示整篇论文已批准。解析差异进入独立诊断侧栏，科学字段问题沿原字段核对入口处理。</p>
+  <footer><a href="pdf-review-flow.html#parse">← 返回主流程的解析节点</a><a href="pdf-parsing-pipeline.md">阅读解析管线与实现依据</a></footer>
+</main>
+<script type="application/json" id="flow-data">
+{
+  "start":"files",
+  "nodes":[
+    {"id":"files","row":0,"title":"接收已上传的文件任务","summary":"原文件、文件角色、哈希与任务状态","owner":"上传 API / RQ Worker","description":"文件上传保存后，任务进入上传队列，Worker 取得任务状态和原文件，再进入解析。","notes":["创建任务和上传文件发生在读取正文之前。","本页不展开账号、上传进度及队列调度的细枝。"],"code":"backend/api/upload_tasks.py → backend/ingest/upload_jobs.py::process_upload_task"},
+    {"id":"extract","row":1,"title":"提取正文与结构候选","summary":"PDF 转正文；结构附件单独校验","owner":"上传 Worker / 本地解析工具","description":"按文件提取带来源位置的正文与结构候选。新 PDF 使用 MinerU 主干，Docling / Marker 补强，GROBID 提取题录和参考文献；结构附件不当作正文读取。","notes":["实际提取失败进入 failed，保留阶段与错误。","确认正文角色后恢复时按规则复用已有提取结果。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/pdf_extractor.py"},
+    {"id":"text","row":2,"kind":"check","title":"有效正文是否可用？","summary":"空正文不能生成可校对草稿","owner":"程序检查","description":"检查可以参与阅读的论文正文。正文为空或必要解析失败时停止，不用空输入生成科学草稿。","notes":["结构附件不能代替论文正文。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"failed","row":2,"column":"left","kind":"stop","title":"解析失败，记录阶段","summary":"保留错误，按现有入口重试","owner":"上传 Worker","description":"记录 failed、failed_stage 与安全错误信息，保留可追查产物。重试受原文件有效性和当前任务状态限制。","notes":["不是科学字段不通过，也不伪造 ready。","有界处理仍失败时不会无限循环调用模型。"],"code":"backend/ingest/upload_jobs.py::process_upload_task / _process_upload_task"},
+    {"id":"roles","row":3,"title":"识别主文与补充材料","summary":"按文件内容评估最终有效角色","owner":"正文角色识别程序 / 上传者","description":"从题录和内容线索判断哪个文件是主文、哪个是补充材料；唯一可靠结论可纠正原声明。","notes":["在正文角色确认之前，不进行分段模型阅读。","角色歧义由用户确认后恢复，不能按上传顺序猜测。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task；backend/api/upload_tasks.py"},
+    {"id":"role-check","row":4,"kind":"check","title":"正文角色是否明确？","summary":"唯一可靠结论或用户已确认","owner":"程序检查","description":"角色明确才继续使用最终文件角色构建来源。存在歧义则进入 needs_role_review 等待输入。","notes":["等待用户输入与技术失败是不同状态。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"role-wait","row":4,"column":"right","kind":"wait","title":"等待上传者确认角色","summary":"needs_role_review","owner":"上传者","description":"用户按当前任务版本确认正文和补充材料角色，再恢复处理；不要求重新提取已有效保存的全部正文。","notes":["确认只解决文件角色，不等于科学审核。"],"code":"backend/api/upload_tasks.py；backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"sources","row":5,"title":"核对文件身份并建立来源","summary":"文件、页码、片段和正文关联","owner":"上传 Worker","description":"按最终角色检查文件身份并组织带来源信息的正文片段，同时保留身份冲突诊断。","notes":["真正的文件身份冲突可在正式提交时要求确认。","身份未知不等于匹配，不用参考文献中的 DOI 冒充本文 DOI。"],"code":"backend/ingest/document_identity.py；backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"read","row":6,"title":"分段读取并提取科学候选","summary":"按材料、条件、记录保留原文依据","owner":"领域提取程序 / LLM","description":"分段提取材料状态、方法、Tc 等科学记录及原文依据，执行格式、方法语义和引句等检查。","notes":["失败使用已有有限纠错次数；仍不合格则停止。","不同材料、压强或方法不能被汇总成同一条结果。"],"code":"backend/ingest/upload_jobs.py::_read_chunk / _process_upload_task"},
+    {"id":"coverage","row":7,"kind":"check","title":"来源与覆盖检查满足？","summary":"核查候选、原文及未覆盖结果","owner":"来源定位与覆盖检查程序","description":"核查候选来源及仍未覆盖的结果、表格行等。符合规则的非结果排除独立留痕，不算作科学证据。","notes":["定位成功不证明科学语义正确。","未覆盖的真实结果不能靠排除标签隐藏。"],"code":"backend/ingest/coverage_audit.py；backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"repair","row":7,"column":"left","title":"执行有限补证与分类","summary":"保留当前候选及原始诊断","owner":"程序 / 必要模型调用","description":"按现有预算补足可靠定位或分类未覆盖内容，再重新检查；不是新增无限重试或重写科学值。","notes":["补证只在可核实的来源范围内进行。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/coverage_audit.py"},
+    {"id":"recheck","row":8,"column":"left","kind":"check","title":"补证后满足要求？","summary":"仍不满足则失败","owner":"程序检查","description":"对补证后的候选和覆盖情况重新判断。仍未满足必要检查时保留诊断并进入失败终态。","notes":["不通过增加重试次数掩盖缺失。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"summary","row":9,"title":"汇总并归一化草稿","summary":"题录、论文信息与科学实体分开组装","owner":"汇总模型 / 程序","description":"生成论文概要等信息，按当前契约组装材料状态和科学记录，保留原始来源。","notes":["科学数值由提取候选组装，不能让主汇总随意改写。","结构候选的分配和确认继续留给校对。"],"code":"backend/ingest/upload_jobs.py::_normalize_draft / _process_upload_task"},
+    {"id":"duplicate-check","row":10,"kind":"check","title":"数据库已有这篇论文？","summary":"先 DOI，再按文件哈希查重","owner":"查重程序","description":"用归一化 DOI 和主文文件哈希查询已有论文，命中则结束本次新建流程。","notes":["查重命中与原论文是否已批准无关。"],"code":"backend/ingest/upload_jobs.py::_find_existing_paper / _find_existing_by_hash"},
+    {"id":"duplicate","row":10,"column":"right","kind":"stop","title":"提示已有论文","summary":"duplicate；不重复新建","owner":"上传 Worker","description":"返回已有论文信息或权限提示，结束本次新建任务。","notes":["已有论文仍按账号权限控制可见性。"],"code":"backend/ingest/upload_jobs.py::_handle_duplicate"},
+    {"id":"evidence","row":11,"title":"生成字段核对结果与候选","summary":"逐字段保存状态、理由和依据","owner":"共享科学核对程序 / LLM","description":"使用本次来源生成逐字段结论和必要候选。字段可为通过、存疑、不通过或未完成，不把 ready 解释为所有字段都通过。","notes":["已提取内容不会因建议生成的技术异常被清空。","上传者后续保存不触发模型核对。"],"code":"backend/ingest/property_evidence.py::generate_upload_suggestions"},
+    {"id":"suggestion-error","row":11,"column":"right","kind":"wait","title":"保留草稿及核对故障","summary":"已提取内容继续保留","owner":"上传 Worker","description":"建议或字段核对生成异常被记录，保留提取内容及故障说明，后续通过原核对入口处理。","notes":["技术故障不能伪装成科学不通过或科学通过。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"diagnostics","row":12,"title":"保存解析差异与责任分类","summary":"区域差异、题录及系统待核查项","owner":"解析诊断程序","description":"保留原解析差异并分类，区分系统已核实、系统待核查和需要用户判断。","notes":["诊断详情按点击进入右侧栏，不铺满科学表单。","原始区域数不等于科学错误数。"],"code":"backend/ingest/parsing_diagnostics.py::annotate_differences"},
+    {"id":"save","row":13,"title":"保存草稿与审核产物","summary":"保留快照、来源和产物清单","owner":"上传 Worker / 草稿存储","description":"写入解析与证据快照、持久化草稿并在适用存储模式发布产物清单。受控重跑时核对原草稿哈希，保护期间的人工修改。","notes":["保存草稿不等于创建待审论文。","受控重跑发现人工编辑后停止覆盖。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/upload_tasks.py::save_draft"},
+    {"id":"conflict","row":13,"column":"left","kind":"stop","title":"保留已有人工草稿","summary":"并发修改时不覆盖","owner":"草稿版本保护程序","description":"受控重跑发现原草稿在解析期间已变化时拒绝覆盖，保留当前人工编辑供核对。","notes":["该分支适用于带预期草稿哈希的受控重跑。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"ready","row":14,"kind":"result","title":"标记 ready，等待校对","summary":"解析成功；字段状态分别保留","owner":"上传 Worker","description":"任务进入可校对状态，保留首次字段核对结论和解析诊断，不在 ready 后重新排队同一轮全量字段检查。","notes":["谱提取等后续独立任务不等于整篇科学审核通过。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"handoff","row":15,"kind":"result","title":"转入用户校对与提交","summary":"回到主流程的校对阶段","owner":"上传者","description":"查看来源，处理字段问题，保存实际修改，再明确点击提交送审。","notes":["全部满足提交要求后才创建 pending 论文。","最终整篇批准仍由管理员执行。"],"code":"frontend/src/components/UploadTaskEditor.tsx"}
+  ],
+  "edges":[
+    {"from":"files","to":"extract"},{"from":"extract","to":"text"},
+    {"from":"text","to":"roles","label":"是"},{"from":"text","to":"failed","label":"否"},
+    {"from":"roles","to":"role-check"},{"from":"role-check","to":"sources","label":"是"},
+    {"from":"role-check","to":"role-wait","label":"否"},
+    {"from":"role-wait","to":"roles","fromSide":"right","toSide":"right","via":[[1090,638],[1090,498]],"label":"确认后恢复","labelAt":[955,480]},
+    {"from":"sources","to":"read"},{"from":"read","to":"coverage"},
+    {"from":"read","to":"failed","label":"提取仍失败","labelAt":[305,835]},
+    {"from":"coverage","to":"summary","label":"是"},{"from":"coverage","to":"repair","label":"否"},
+    {"from":"repair","to":"recheck"},{"from":"recheck","to":"summary","label":"是"},
+    {"from":"recheck","to":"failed","fromSide":"left","toSide":"left","via":[[8,1208],[8,358]],"label":"否","labelAt":[24,1080]},
+    {"from":"summary","to":"duplicate-check"},{"from":"duplicate-check","to":"evidence","label":"否"},
+    {"from":"duplicate-check","to":"duplicate","label":"是"},
+    {"from":"evidence","to":"diagnostics"},{"from":"evidence","to":"suggestion-error","label":"技术异常"},
+    {"from":"suggestion-error","to":"diagnostics"},{"from":"diagnostics","to":"save"},
+    {"from":"save","to":"conflict","label":"草稿已修改","labelAt":[305,1880]},
+    {"from":"save","to":"ready"},{"from":"ready","to":"handoff"}
+  ]
+}
+</script>
+</body>
+</html>
