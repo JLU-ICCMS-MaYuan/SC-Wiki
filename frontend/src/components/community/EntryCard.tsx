@@ -23,14 +23,14 @@ export default function EntryCard({ entry, reload, children }: { entry: Communit
     {visible ? <>
       <Stack direction="row" gap={1} alignItems="center" flexWrap="wrap">
         {entry.origin === 'ai' ? <><Chip size="small" label={t(entry.human_edited ? 'community.aiEdited' : 'community.aiGenerated')} /><Typography variant="body2">{entry.model_name} · {entry.model}</Typography></>
-          : <>{entry.author?.username ? <Link component={RouterLink} to={`/users/${entry.author.username}`}>{entry.author.username}</Link> : <Typography>{t('community.deactivated')}</Typography>}{entry.human_edited && <Chip size="small" label={t('community.humanEdited')} />}</>}
+          : <>{entry.author?.username ? <Link component={RouterLink} target="_blank" rel="noopener noreferrer" to={`/users/${entry.author.username}`}>{entry.author.username}</Link> : <Typography>{t('community.deactivated')}</Typography>}{entry.human_edited && <Chip size="small" label={t('community.humanEdited')} />}</>}
         <Typography variant="caption" color="text.secondary">{new Date(entry.created_at).toLocaleString(lang === 'zh' ? 'zh-CN' : 'en-US')}</Typography>
         {entry.category && <Chip size="small" label={t(`community.categories.${entry.category}`)} />}
       </Stack>
       {entry.title && <Typography variant="h2" sx={{ my: 2 }}>{entry.title}</Typography>}
       {entry.sources_available === false ? <Alert severity="info">{t('community.sourcesUnavailable')}</Alert> : editing ? <CommunityComposer initialBody={entry.body} markdown maxLength={20000} submitLabel="community.save" onCancel={() => setEditing(false)} onSubmit={async body => { await api.patch(`${COMMUNITY_API}/entries/${entry.id}`, { body, revision: entry.revision }); setEditing(false); reload() }} />
         : ['question', 'answer'].includes(entry.kind) ? <CommunityMarkdown content={entry.body} /> : <Typography sx={{ my: 1, whiteSpace: 'pre-wrap' }}>{entry.body}</Typography>}
-      {!!entry.citations?.length && <Box sx={{ my: 1 }}><Typography fontWeight={600}>{t('community.sources')}</Typography>{entry.citations.map(source => <Typography key={source.id}><Link component={RouterLink} to={`/papers/${source.paper_id}`}>[{source.id}] {source.title}</Link></Typography>)}</Box>}
+      {!!entry.citations?.length && <Box sx={{ my: 1 }}><Typography fontWeight={600}>{t('community.sources')}</Typography>{entry.citations.map(source => <Typography key={source.id}><Link component={RouterLink} target="_blank" rel="noopener noreferrer" to={`/papers/${source.paper_id}`}>[{source.id}] {source.title}</Link></Typography>)}</Box>}
     </> : <Typography>{t(entry.status === 'hidden' ? 'community.hidden' : 'community.deleted')} #{entry.id}</Typography>}
     {manager && <Stack direction="row" gap={1} flexWrap="wrap">
       {visible && entry.can_edit && <Button onClick={() => setEditing(v => !v)}>{t('community.edit')}</Button>}

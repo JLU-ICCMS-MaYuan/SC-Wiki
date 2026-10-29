@@ -24,7 +24,7 @@ export default function AIGenerationPanel({ version, pendingId, onChanged }: { v
     {active && <LinearProgress />}{(list.error || error) && <Alert severity="error">{t(list.error || error)}</Alert>}
     {list.data?.items.map(item => <Box key={item.id} sx={{ py: 1, borderBottom: '1px solid', borderColor: 'divider' }}>
       <Stack direction="row" gap={1} alignItems="center" flexWrap="wrap"><Typography>{t('community.questionGeneration')} · {t(`community.states.${item.state}`)}</Typography>
-        {item.question_id && <Button component={RouterLink} to={`/share/discussions/${item.question_id}`}>{t('community.open')} #{item.question_id}</Button>}
+        {item.question_id && <Button component={RouterLink} to={`/share/discussions/${item.question_id}`} target="_blank" rel="noopener noreferrer">{t('community.open')} #{item.question_id}</Button>}
         {item.can_retry && <Button disabled={busy} onClick={() => void retry(item.id)}>{t('community.retry')}</Button>}
       </Stack>{item.error && <Typography color="error">{t(`community.jobErrors.${item.error}`)}</Typography>}
 

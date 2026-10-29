@@ -4,7 +4,7 @@
 
 ## 地址
 
-拟采用 `/search?elements=H,La,Sc&mode=elements_exact_search&view=papers&paper_page=1&state_page=1&structure_page=1`。化学式使用 `formula`；筛选使用既有字段的明确键，不存浏览器组件对象。
+当前使用 `/search?elements=H,La,Sc&mode=elements_exact_search&view=papers&paper_page=1&state_page=1&structure_page=1`。返回元素配置时用entry=1恢复原元素／模式，且不触发结果查询。化学式使用 `formula`；筛选使用既有字段的明确键，不存浏览器组件对象。
 
 - view只接受papers／states，缺省和非法值为papers；默认页码1。元素顺序规范化且去重，不改既有匹配语义。
 - 独立的paper_page／state_page保留各视图位置；切换在同一标签页更新地址，保持查询。查询变化重置相关页码，实际总数变化时纠正越界。

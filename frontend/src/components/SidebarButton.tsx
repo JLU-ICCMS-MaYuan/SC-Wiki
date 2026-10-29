@@ -2,6 +2,9 @@ import React from 'react'
 import { Box, ButtonBase, Tooltip, Typography, type ButtonBaseProps } from '@mui/material'
 
 interface Props extends ButtonBaseProps {
+  href?: string
+  target?: string
+  rel?: string
   icon: React.ReactNode
   label: string
   detail?: string

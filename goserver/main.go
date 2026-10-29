@@ -73,6 +73,7 @@ func main() {
 		papers.GET("/:id/material-states/:stateKey/export", handlers.ExportMaterialState)
 		papers.PATCH("/:id", handlers.PatchPaper)
 		papers.POST("/search/records", handlers.SearchRecords)
+		papers.POST("/search/results", handlers.SearchResults)
 	}
 
 	// 知识图谱 API（替代 Python /api/knowledge-graph/*）

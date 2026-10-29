@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, useParams } from 'react-router-dom'
 import { Box, Button, CircularProgress, Typography } from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { api } from '../lib/api'
 import type { ApiError } from '../lib/api'
 import PaperEditView from '../components/PaperEditView'
-import PaperCommunity from '../components/community/PaperCommunity'
+import { safeReturn } from '../lib/searchNavigation'
 import { useLanguage } from '../context/LanguageContext'
 
 // 论文可见性完全由后端 GET /api/papers/{id} 逐篇裁决（canViewPaper）。
@@ -44,9 +44,11 @@ const PaperDetailPage: React.FC = () => {
   const [failure, setFailure] = useState<FailureKind | null>(paperId === null ? 'invalid' : null)
   const [paper, setPaper] = useState<any>(null)
 
-  const handleBack = useCallback(() => { navigate('/upload') }, [navigate])
+  const [params] = useSearchParams()
+  const returnTo = safeReturn(params.get('return'))
+  const backLabel = returnTo.startsWith('/search') ? t('search.backResults') : t('common.back')
+  const handleBack = useCallback(() => { navigate(returnTo) }, [navigate, returnTo])
   // 「我的论文」列表在用户中心，离开详情页后仍可由此回到任意已提交论文
-  const handleOpenMyPapers = useCallback(() => { navigate('/account') }, [navigate])
 
   useEffect(() => {
     if (paperId === null) {
@@ -79,12 +81,12 @@ const PaperDetailPage: React.FC = () => {
     return (
       <Box sx={{ textAlign: 'center', py: 8 }}>
         <Typography color="error" gutterBottom>{t(FAILURE_KEYS[failure || 'error'])}</Typography>
-        <Button onClick={handleBack} startIcon={<ArrowBackIcon />}>{t('paperDetail.backToUpload')}</Button>
+        <Button onClick={handleBack} startIcon={<ArrowBackIcon />}>{backLabel}</Button>
       </Box>
     )
   }
 
-  return <><PaperEditView paper={paper} onBack={handleBack} onOpenMyPapers={handleOpenMyPapers} /><PaperCommunity key={paper.id} paper={paper} /></>
+  return <PaperEditView paper={paper} onBack={handleBack} backLabel={backLabel} myPapersHref="/account" />
 }
 
 export default PaperDetailPage

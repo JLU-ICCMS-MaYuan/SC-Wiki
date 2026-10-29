@@ -1,0 +1,684 @@
+The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+stderr | tests/03_data_search_and_database_discovery/search-results.test.tsx > defaults to papers and switches to stable states in the same result page
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ tests/03_data_search_and_database_discovery/search-results.test.tsx (1 test | 1 failed) 1064ms
+   × defaults to papers and switches to stable states in the same result page 1064ms
+     → Unable to find role="button" and name "按论文"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-15umhv4"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary css-1wo9ui5-MuiButtonBase-root-MuiButton-root"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall css-d8i980-MuiButton-startIcon"
+            >
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
+                data-testid="ArrowBackIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"
+                />
+              </svg>
+            </span>
+            返回元素搜索
+          </button>
+          <span
+            class="MuiTypography-root MuiTypography-overline css-1c7xfgu-MuiTypography-root"
+          >
+            Layer 2 · Data Table
+          </span>
+          <h1
+            class="MuiTypography-root MuiTypography-h1 css-10l7o3s-MuiTypography-root"
+          >
+            H-La-Sc 体系结果
+          </h1>
+          <p
+            class="MuiTypography-root MuiTypography-body2 css-849rhd-MuiTypography-root"
+          >
+            点击表格行展开详情。
+          </p>
+          <a
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-b6dts-MuiButtonBase-root-MuiButton-root"
+            href="/systems/H-La-Sc"
+            tabindex="0"
+          >
+            H-La-Sc 体系讨论
+          </a>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1r3mp9y"
+      >
+        <aside
+          class="MuiBox-root css-7dihw3"
+        >
+          <div
+            class="MuiBox-root css-mbx0dj"
+          >
+            <div
+              class="MuiBox-root css-axw7ok"
+            >
+              <h2
+                class="MuiTypography-root MuiTypography-h2 css-o2za6n-MuiTypography-root"
+              >
+                筛选
+              </h2>
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-18aq377"
+          >
+            <div
+              class="MuiBox-root css-0"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    Formula 关键词
+                  </p>
+                </div>
+              </div>
+              <div
+                class="MuiBox-root css-hiele9"
+              >
+                <input
+                  class="MuiBox-root css-1ju5k0i"
+                  placeholder="如 LaH10"
+                  value=""
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-whh5e5"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    代表 Tc
+                  </p>
+                </div>
+                <p
+                  class="MuiTypography-root MuiTypography-body1 css-1entpvm-MuiTypography-root"
+                >
+                  K
+                </p>
+              </div>
+              <div
+                class="MuiBox-root css-hiele9"
+              >
+                <input
+                  class="MuiBox-root css-1utje9n"
+                  type="number"
+                  value="0"
+                />
+                <p
+                  class="MuiTypography-root MuiTypography-body1 css-156qy44-MuiTypography-root"
+                >
+                  –
+                </p>
+                <input
+                  class="MuiBox-root css-1utje9n"
+                  type="number"
+                  value="9999"
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-whh5e5"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    压强
+                  </p>
+        ...
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-15umhv4"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary css-1wo9ui5-MuiButtonBase-root-MuiButton-root"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall css-d8i980-MuiButton-startIcon"
+            >
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
+                data-testid="ArrowBackIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"
+                />
+              </svg>
+            </span>
+            返回元素搜索
+          </button>
+          <span
+            class="MuiTypography-root MuiTypography-overline css-1c7xfgu-MuiTypography-root"
+          >
+            Layer 2 · Data Table
+          </span>
+          <h1
+            class="MuiTypography-root MuiTypography-h1 css-10l7o3s-MuiTypography-root"
+          >
+            H-La-Sc 体系结果
+          </h1>
+          <p
+            class="MuiTypography-root MuiTypography-body2 css-849rhd-MuiTypography-root"
+          >
+            点击表格行展开详情。
+          </p>
+          <a
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-b6dts-MuiButtonBase-root-MuiButton-root"
+            href="/systems/H-La-Sc"
+            tabindex="0"
+          >
+            H-La-Sc 体系讨论
+          </a>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1r3mp9y"
+      >
+        <aside
+          class="MuiBox-root css-7dihw3"
+        >
+          <div
+            class="MuiBox-root css-mbx0dj"
+          >
+            <div
+              class="MuiBox-root css-axw7ok"
+            >
+              <h2
+                class="MuiTypography-root MuiTypography-h2 css-o2za6n-MuiTypography-root"
+              >
+                筛选
+              </h2>
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-18aq377"
+          >
+            <div
+              class="MuiBox-root css-0"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    Formula 关键词
+                  </p>
+                </div>
+              </div>
+              <div
+                class="MuiBox-root css-hiele9"
+              >
+                <input
+                  class="MuiBox-root css-1ju5k0i"
+                  placeholder="如 LaH10"
+                  value=""
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-whh5e5"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    代表 Tc
+                  </p>
+                </div>
+                <p
+                  class="MuiTypography-root MuiTypography-body1 css-1entpvm-MuiTypography-root"
+                >
+                  K
+                </p>
+              </div>
+              <div
+                class="MuiBox-root css-hiele9"
+              >
+                <input
+                  class="MuiBox-root css-1utje9n"
+                  type="number"
+                  value="0"
+                />
+                <p
+                  class="MuiTypography-root MuiTypography-body1 css-156qy44-MuiTypography-root"
+                >
+                  –
+                </p>
+                <input
+                  class="MuiBox-root css-1utje9n"
+                  type="number"
+                  value="9999"
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-whh5e5"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    压强
+                  </p>
+        ...
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/03_data_search_and_database_discovery/search-results.test.tsx > defaults to papers and switches to stable states in the same result page
+TestingLibraryElementError: Unable to find role="button" and name "按论文"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-15umhv4"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary css-1wo9ui5-MuiButtonBase-root-MuiButton-root"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall css-d8i980-MuiButton-startIcon"
+            >
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
+                data-testid="ArrowBackIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"
+                />
+              </svg>
+            </span>
+            返回元素搜索
+          </button>
+          <span
+            class="MuiTypography-root MuiTypography-overline css-1c7xfgu-MuiTypography-root"
+          >
+            Layer 2 · Data Table
+          </span>
+          <h1
+            class="MuiTypography-root MuiTypography-h1 css-10l7o3s-MuiTypography-root"
+          >
+            H-La-Sc 体系结果
+          </h1>
+          <p
+            class="MuiTypography-root MuiTypography-body2 css-849rhd-MuiTypography-root"
+          >
+            点击表格行展开详情。
+          </p>
+          <a
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-b6dts-MuiButtonBase-root-MuiButton-root"
+            href="/systems/H-La-Sc"
+            tabindex="0"
+          >
+            H-La-Sc 体系讨论
+          </a>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1r3mp9y"
+      >
+        <aside
+          class="MuiBox-root css-7dihw3"
+        >
+          <div
+            class="MuiBox-root css-mbx0dj"
+          >
+            <div
+              class="MuiBox-root css-axw7ok"
+            >
+              <h2
+                class="MuiTypography-root MuiTypography-h2 css-o2za6n-MuiTypography-root"
+              >
+                筛选
+              </h2>
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-18aq377"
+          >
+            <div
+              class="MuiBox-root css-0"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    Formula 关键词
+                  </p>
+                </div>
+              </div>
+              <div
+                class="MuiBox-root css-hiele9"
+              >
+                <input
+                  class="MuiBox-root css-1ju5k0i"
+                  placeholder="如 LaH10"
+                  value=""
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-whh5e5"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    代表 Tc
+                  </p>
+                </div>
+                <p
+                  class="MuiTypography-root MuiTypography-body1 css-1entpvm-MuiTypography-root"
+                >
+                  K
+                </p>
+              </div>
+              <div
+                class="MuiBox-root css-hiele9"
+              >
+                <input
+                  class="MuiBox-root css-1utje9n"
+                  type="number"
+                  value="0"
+                />
+                <p
+                  class="MuiTypography-root MuiTypography-body1 css-156qy44-MuiTypography-root"
+                >
+                  –
+                </p>
+                <input
+                  class="MuiBox-root css-1utje9n"
+                  type="number"
+                  value="9999"
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-whh5e5"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    压强
+                  </p>
+        ...
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-15umhv4"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <button
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary css-1wo9ui5-MuiButtonBase-root-MuiButton-root"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="MuiButton-icon MuiButton-startIcon MuiButton-iconSizeSmall css-d8i980-MuiButton-startIcon"
+            >
+              <svg
+                aria-hidden="true"
+                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"
+                data-testid="ArrowBackIcon"
+                focusable="false"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"
+                />
+              </svg>
+            </span>
+            返回元素搜索
+          </button>
+          <span
+            class="MuiTypography-root MuiTypography-overline css-1c7xfgu-MuiTypography-root"
+          >
+            Layer 2 · Data Table
+          </span>
+          <h1
+            class="MuiTypography-root MuiTypography-h1 css-10l7o3s-MuiTypography-root"
+          >
+            H-La-Sc 体系结果
+          </h1>
+          <p
+            class="MuiTypography-root MuiTypography-body2 css-849rhd-MuiTypography-root"
+          >
+            点击表格行展开详情。
+          </p>
+          <a
+            class="MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-b6dts-MuiButtonBase-root-MuiButton-root"
+            href="/systems/H-La-Sc"
+            tabindex="0"
+          >
+            H-La-Sc 体系讨论
+          </a>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1r3mp9y"
+      >
+        <aside
+          class="MuiBox-root css-7dihw3"
+        >
+          <div
+            class="MuiBox-root css-mbx0dj"
+          >
+            <div
+              class="MuiBox-root css-axw7ok"
+            >
+              <h2
+                class="MuiTypography-root MuiTypography-h2 css-o2za6n-MuiTypography-root"
+              >
+                筛选
+              </h2>
+            </div>
+          </div>
+          <div
+            class="MuiBox-root css-18aq377"
+          >
+            <div
+              class="MuiBox-root css-0"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    Formula 关键词
+                  </p>
+                </div>
+              </div>
+              <div
+                class="MuiBox-root css-hiele9"
+              >
+                <input
+                  class="MuiBox-root css-1ju5k0i"
+                  placeholder="如 LaH10"
+                  value=""
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-whh5e5"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    代表 Tc
+                  </p>
+                </div>
+                <p
+                  class="MuiTypography-root MuiTypography-body1 css-1entpvm-MuiTypography-root"
+                >
+                  K
+                </p>
+              </div>
+              <div
+                class="MuiBox-root css-hiele9"
+              >
+                <input
+                  class="MuiBox-root css-1utje9n"
+                  type="number"
+                  value="0"
+                />
+                <p
+                  class="MuiTypography-root MuiTypography-body1 css-156qy44-MuiTypography-root"
+                >
+                  –
+                </p>
+                <input
+                  class="MuiBox-root css-1utje9n"
+                  type="number"
+                  value="9999"
+                />
+              </div>
+            </div>
+            <div
+              class="MuiBox-root css-whh5e5"
+            >
+              <div
+                class="MuiBox-root css-c8vzka"
+              >
+                <div
+                  class="MuiBox-root css-172hjuw"
+                >
+                  <p
+                    class="MuiTypography-root MuiTypography-body1 css-16btk02-MuiTypography-root"
+                  >
+                    压强
+                  </p>
+        ...
+ ❯ waitForWrapper frontend/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tests/03_data_search_and_database_discovery/search-results.test.tsx:16:23
+     14|   }) as any)
+     15|   render(<MemoryRouter initialEntries={['/search?elements=H,La,Sc&mode…
+     16|   expect(await screen.findByRole('button',{name:'按论文'})).toHaveAttr…
+       |                       ^
+     17|   expect(await screen.findByText('来源论文')).toBeInTheDocument()
+     18|   fireEvent.click(screen.getByRole('button',{name:'按材料状态'}))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  21:04:11
+   Duration  2.20s (transform 151ms, setup 0ms, collect 657ms, tests 1.06s, environment 262ms, prepare 56ms)

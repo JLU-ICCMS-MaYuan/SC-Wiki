@@ -66,7 +66,7 @@ describe('身份与工作台导航', () => {
       height: '100dvh',
       overflowY: 'auto',
     })
-    expect(screen.getByRole('button', { name: '用户' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '用户' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: '打开账户菜单' }))
     expect(screen.getByRole('menuitem', { name: '退出登录' })).toBeInTheDocument()
     expect(screen.queryByText('用户中心')).not.toBeInTheDocument()

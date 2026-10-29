@@ -24,6 +24,8 @@ interface PaperEditViewProps {
   paper: any
   onBack: () => void
   onOpenMyPapers?: () => void
+  backLabel?: string
+  myPapersHref?: string
 }
 
 // 审核状态的颜色映射；标签文案按 value 查 dict.enums.reviewStatus。
@@ -37,7 +39,7 @@ const reviewStatusLabel = (dict: any, value: string | null | undefined): string 
   return (value && table[value]) || value || ''
 }
 
-const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPapers }) => {
+const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPapers, backLabel, myPapersHref }) => {
   const { t, lang, dict } = useLanguage()
 
   // 只读展示状态：用于展示的本地状态，切换论文时重新填充
@@ -100,13 +102,13 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 3 }}>
         <Box>
           <Button size="small" startIcon={<ArrowBackIcon />} onClick={onBack} sx={{ mb: 1 }}>
-            {t('paperDetail.backToUpload')}
+            {backLabel || t('common.back')}
           </Button>
           <Typography variant="overline" color="text.secondary">{t('paperDetail.readOnlyMode')}</Typography>
           <Typography variant="h4" fontWeight={800}>{t('paperDetail.paperDetailTitle')}</Typography>
         </Box>
         {/* 离开详情页后仍能经界面回到任意已提交论文，无需手工拼接网址 */}
-        {onOpenMyPapers && (
+        {myPapersHref ? <Button component={Link} to={myPapersHref} target="_blank" rel="noopener noreferrer" variant="outlined">{t('paperDetail.myPapers')}</Button> : onOpenMyPapers && (
           <Button size="small" variant="outlined" onClick={onOpenMyPapers}>{t('paperDetail.myPapers')}</Button>
         )}
       </Box>
@@ -114,7 +116,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
       {paper.can_revise ? <Box sx={{ mb: 2 }}>
         <Alert severity="info" sx={{ mb: 1 }}>{t('paperDetail.revisionAvailable')}</Alert>
         {paper.review_comment && <Alert severity="warning" sx={{ mb: 1 }}>{paper.review_comment}</Alert>}
-        <Button component={Link} variant="contained" to={`/papers/${paper.id}/revise`}>{t('paperDetail.revise')}</Button>
+        <Button component={Link} variant="contained" to={`/papers/${paper.id}/revise`} target="_blank" rel="noopener noreferrer">{t('paperDetail.revise')}</Button>
       </Box> : <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.submittedNotice')}</Alert>}
 
       <Box sx={{

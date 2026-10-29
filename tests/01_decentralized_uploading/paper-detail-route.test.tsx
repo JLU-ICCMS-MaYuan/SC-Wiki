@@ -92,12 +92,12 @@ describe('论文详情路由 /papers/:id', () => {
     expect(screen.getByText('Nature')).toBeInTheDocument()
   })
 
-  it('点击返回上传列表导航到 /upload', async () => {
+  it('按合法上传来源返回而不强制所有来源回上传', async () => {
     mockedApi.get.mockResolvedValue(makePaper())
 
-    renderAt('/papers/4')
+    renderAt('/papers/4?return=%2Fupload')
 
-    fireEvent.click(await screen.findByRole('button', { name: '返回上传列表' }))
+    fireEvent.click(await screen.findByRole('button', { name: '返回' }))
 
     expect(await screen.findByTestId('upload-page')).toBeInTheDocument()
   })
@@ -143,12 +143,12 @@ describe('论文详情路由的失败分流', () => {
     expect(screen.queryByText('论文详情')).not.toBeInTheDocument()
   })
 
-  it('失败页仍提供返回上传列表的操作', async () => {
+  it('失败页仍提供按来源返回的操作', async () => {
     mockedApi.get.mockRejectedValue(apiError(403, '无权查看该论文'))
 
-    renderAt('/papers/4')
+    renderAt('/papers/4?return=%2Fupload')
 
-    fireEvent.click(await screen.findByRole('button', { name: '返回上传列表' }))
+    fireEvent.click(await screen.findByRole('button', { name: '返回' }))
 
     expect(await screen.findByTestId('upload-page')).toBeInTheDocument()
   })
@@ -167,9 +167,9 @@ describe('详情页前往「我的论文」的入口', () => {
       </MemoryRouter>,
     )
 
-    fireEvent.click(await screen.findByRole('button', { name: '我的论文' }))
-
-    expect(await screen.findByTestId('account-page')).toBeInTheDocument()
+    const link=await screen.findByRole('link', { name: '我的论文' })
+    expect(link).toHaveAttribute('href','/account');expect(link).toHaveAttribute('target','_blank')
+    expect(screen.queryByTestId('account-page')).not.toBeInTheDocument()
   })
 })
 
@@ -195,8 +195,9 @@ describe('我的论文列表', () => {
     expect(screen.getByText('待审核')).toBeInTheDocument()
     expect(mockedApi.get).toHaveBeenCalledWith('/api/papers/my-uploads')
 
-    fireEvent.click(screen.getByText('LaH10 高压超导'))
-    expect(await screen.findByTestId('detail-page')).toBeInTheDocument()
+    const link=screen.getByRole('link',{name:/LaH10 高压超导/})
+    expect(link).toHaveAttribute('target','_blank');expect(link.getAttribute('href')).toContain('/papers/4?return=')
+    expect(screen.queryByTestId('detail-page')).not.toBeInTheDocument()
   })
 
   it('没有已提交论文时显示空状态', async () => {

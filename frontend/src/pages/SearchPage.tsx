@@ -1,52 +1,13 @@
-import React, { useState, useEffect } from 'react'
-import { StructuralResults } from '../components/PaperStructuralCollection'
-import { Link as RouterLink, useSearchParams } from 'react-router-dom'
-import {
-  Box, Typography, Card, CardContent, Chip, Button,
-  Snackbar, Alert, LinearProgress, Select, MenuItem,
-} from '@mui/material'
+import React, {useState,useEffect} from 'react'
+import {Link as RouterLink, Navigate, useLocation, useSearchParams} from 'react-router-dom'
+import {Box,Typography,Card,CardContent,Chip,Button,Select,MenuItem,ToggleButton,ToggleButtonGroup} from '@mui/material'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import PeriodicTable from '../components/PeriodicTable'
-import PaperCommunity from '../components/community/PaperCommunity'
-import StructureViewer3D from '../components/StructureViewer3D'
-import { ELEMENTS } from '../lib/periodicElements'
-import { api } from '../lib/api'
-import { materialLabel } from '../lib/materialIdentity'
-import { collectPropertyRows, collectStructures, viewerFormat } from '../lib/paperDetailView'
-import { useLanguage } from '../context/LanguageContext'
-
-/* ── mock data matching 03 demo records exactly ── */
-interface SuperconductorRecord {
-  sourceSystem: string; sourceRecordId: string; formula: string; year: number
-  type: string; pressureValue: number; pressure: string; tcValue: number; tc: string
-  tcField: string; source: string; status: string; doi: string; journal: string
-  title: string; spaceGroupNumber: number; spaceGroup: string; showInChart: boolean
-  lambda: string; omegaLog: string; nef: string; method: string; software: string; note: string
-  record_id?: number; paper_id?: number
-}
-
-const MOCK_RECORDS: SuperconductorRecord[] = [
-  { sourceSystem:'local',sourceRecordId:'123',formula:'LaH10',year:2019,type:'Hydride',pressureValue:200,pressure:'200 GPa',tcValue:250,tc:'250 K',tcField:'experimental_tc',source:'Local',status:'Approved',doi:'10.1038/s41586-demo',journal:'Nature',title:'High-pressure superconductivity in lanthanum hydride',spaceGroupNumber:225,spaceGroup:'Fm-3m',showInChart:true,lambda:'3.41',omegaLog:'1120 K',nef:'0.48',method:'DFT + EPC',software:'Quantum ESPRESSO',note:'Mock record for future-plan demo.' },
-  { sourceSystem:'local',sourceRecordId:'124',formula:'H3S',year:2015,type:'Hydride',pressureValue:155,pressure:'155 GPa',tcValue:203,tc:'203 K',tcField:'experimental_tc',source:'Local',status:'Approved',doi:'10.1038/s41586-demo2',journal:'Nature',title:'Conventional superconductivity at 203 kelvin',spaceGroupNumber:229,spaceGroup:'Im-3m',showInChart:true,lambda:'2.19',omegaLog:'1010 K',nef:'0.36',method:'Experiment + DFT',software:'VASP',note:'Classic sulfur hydride benchmark.' },
-]
-
-const REVIEW_MAP: {[k:string]:string} = {
-  pending:'Pending', approved:'Approved', reviewed:'Approved', rejected:'Rejected',
-}
-
-/* ── helpers ── */
-const CAT_COLORS: globalThis.Record<string,string> = {
-  'alkali-metal':'#f4bcc2','alkaline-earth':'#e3bd91','transition-metal':'#edcda9',
-  'post-transition':'#ededab','metalloid':'#9cd5a8','nonmetal':'#a3d7dc',
-  'halogen':'#b7a0db','noble-gas':'#cfb5d6','lanthanide':'#cea1ce','actinide':'#c782ab',
-}
-
+import SearchResults from '../components/SearchResults'
+import {StructuralResults} from '../components/PaperStructuralCollection'
+import {useLanguage} from '../context/LanguageContext'
+import {SEARCH_FILTER_DEFAULTS as FILTER_DEFAULTS,searchFilters,updateFilters,searchRequest,searchURL,searchPageNumber,type SearchFilters} from '../lib/searchNavigation'
 /* ── Layer 2 筛选侧栏 ── */
-const FILTER_DEFAULTS = {
-  formula:'', tcMin:0, tcMax:9999, pMin:0, pMax:9999,
-  yMin:1900, yMax:2030, type:'All',
-  review:'All', chartOnly:false,
-}
 // 联排输入壳：聚焦时主色描边 + 浅靛光环
 const shellSx = {
   display:'flex',alignItems:'center',minWidth:0,border:'1px solid',borderColor:'divider',borderRadius:2,
@@ -115,166 +76,19 @@ const RangeFieldContent: React.FC<{
   </Box>
 }
 
-/* ── main component ── */
-const SearchPage: React.FC = () => {
-  const { lang, t } = useLanguage()
-  const [searchParams] = useSearchParams()
-  // 从 URL 参数读取初始值
-  // 无 elements 参数时不预选任何元素：默认选中某个体系会把检索静默限定在该体系，
-  // 用户未必察觉自己并非在做全库检索。
-  const initElements = (searchParams.get('elements') || '').split(',').filter(Boolean)
-  const initMode = searchParams.get('mode') || 'elements_combination_search'
-  const initPaperId = searchParams.get('paper_id')
-  const [stage, setStage] = useState<'explore'|'results'|'detail'>(
-    initPaperId ? 'detail' : (searchParams.get('elements') ? 'results' : 'explore')
-  )
-  const [selected, setSelected] = useState<Set<string>>(new Set(initElements))
-  const [mode, setMode] = useState(initMode)
-  const elementSearchModes = [
-    { value:'elements_combination_search', label:'search.modeCombination', description:'search.modeCombinationDescription' },
-    { value:'elements_exact_search', label:'search.modeExact', description:'search.modeExactDescription' },
-    { value:'elements_contained_search', label:'search.modeContained', description:'search.modeContainedDescription' },
-  ]
-  const currentElementSearchMode = elementSearchModes.find(option => option.value === mode)
-  const [formula, setFormula] = useState(initElements.join(''))
-  const [selectedRecord, setSelectedRecord] = useState<SuperconductorRecord>(MOCK_RECORDS[0])
-  const [snackbar, setSnackbar] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [paperDetail, setPaperDetail] = useState<any>(null)
-  const [structureData, setStructureData] = useState<any>(null)
-  const [structureMsg, setStructureMsg] = useState(() => t('search.noStructure'))
-  const [apiError, setApiError] = useState('')
-  const [apiRecords, setApiRecords] = useState<SuperconductorRecord[]>([])
-  const [page, setPage] = useState(0)
-  const [total, setTotal] = useState(0)
-  const [totalPages, setTotalPages] = useState(0)
-  const [retryTick, setRetryTick] = useState(0)
-  const PAGE_SIZE = 50
-
-  const [filters, setFilters] = useState({ ...FILTER_DEFAULTS })
-
-  const formulaQuery = formula.trim()
-  const elementsKey = [...selected].sort().join(',')
-  const filtersKey = JSON.stringify(filters)
-  const structuralElements = [...selected].sort()
-  const structuralFormulaSearch = structuralElements.length === 0 && !!formulaQuery
-
-  // 直接从图表跳转——加载论文详情
-  useEffect(() => {
-    if (!initPaperId) return
-    const pid = parseInt(initPaperId)
-    api.get<any>(`/api/papers/${pid}`).then(data => {
-      const r: SuperconductorRecord = {
-        sourceSystem: 'local', sourceRecordId: String(pid),
-        formula: data.key_properties?.[0]?.material || data.chemical_formula || '-',
-        year: data.year || 0, type: data.superconductor_types?.[0] || '',
-        pressureValue: 0, pressure: '-', tcValue: 0, tc: '-', tcField: '',
-        source: 'Local', status: data.review_status || 'Pending',
-        doi: data.doi || '', journal: data.journal || '',
-        title: data.title || '', spaceGroupNumber: 0, spaceGroup: '-',
-        showInChart: false, lambda: '', omegaLog: '', nef: '',
-        method: '', software: '', note: '',
-        paper_id: pid,
-      }
-      setSelectedRecord(r)
-      setStage('detail')
-    }).catch(() => {})
-  }, [initPaperId])
-
-  useEffect(() => {
-    if (stage !== 'results') return
-    const elementList = [...selected].sort()
-    // 未选元素时走化学式检索
-    const isFormulaSearch = elementList.length === 0 && !!formulaQuery
-    if (elementList.length === 0 && !isFormulaSearch) return
-    // 防抖：筛选输入连续变化时只发最后一次请求
-    const timer = setTimeout(() => {
-      setLoading(true)
-      setApiError('')
-      // 仅传用户实际收紧过的筛选，避免默认区间误伤缺失字段的记录
-      const backendFilters: any = {}
-      if (filters.formula) backendFilters.keyword = filters.formula
-      if (filters.tcMin > 0) backendFilters.tc_min = filters.tcMin
-      if (filters.tcMax < 9999) backendFilters.tc_max = filters.tcMax
-      if (filters.pMin > 0) backendFilters.pressure_min = filters.pMin
-      if (filters.pMax < 9999) backendFilters.pressure_max = filters.pMax
-      if (filters.yMin > 1900) backendFilters.year_min = filters.yMin
-      if (filters.yMax < 2030) backendFilters.year_max = filters.yMax
-      if (filters.type !== 'All') backendFilters.superconductor_type = filters.type
-      if (filters.review !== 'All') backendFilters.review_status = filters.review.toLowerCase()
-      if (filters.chartOnly) backendFilters.chart_only = true
-      const paging = { limit: PAGE_SIZE, offset: page * PAGE_SIZE }
-      const url = '/api/papers/search/records'
-      const body = isFormulaSearch
-        ? { elements: [], mode: 'formula_search', formula: formulaQuery, ...backendFilters, ...paging }
-        : { elements: elementList, mode, ...backendFilters, ...paging }
-
-      api.post(url, body)
-      .then((res: any) => {
-        const items = res.items || []
-        const rows: SuperconductorRecord[] = []
-        const addRow = (rec: any, paper: any) => {
-          // 后端扁平记录：year/formula/type/pressure/tc/space_group/source/status/doi
-          const isFlat = rec.year !== undefined && rec.type !== undefined
-          rows.push({
-            sourceSystem: 'local',
-            // 本地物性记录标识
-            sourceRecordId: String(rec.record_id || rec.id || ''),
-            record_id: rec.record_id,
-            paper_id: rec.paper_id,
-            formula: materialLabel({ material_name: rec.material_name, material: isFlat ? rec.formula : (rec.formula || rec.chemical_formula || paper?.chemical_formula) }) || '-',
-            year: isFlat ? rec.year : (rec.year || paper?.year || 1900),
-            type: isFlat ? rec.type : t(`search.scType.${paper?.superconductor_types?.[0] || rec.type || 'unknown'}`),
-            pressureValue: isFlat ? parseFloat(rec.pressure) || 0 : (Number(rec.pressure_gpa ?? rec.pressure) || 0),
-            pressure: isFlat ? rec.pressure : ((rec.pressure_gpa ?? rec.pressure) != null ? `${rec.pressure_gpa ?? rec.pressure} GPa` : '-'),
-            tcValue: isFlat ? parseFloat(rec.tc) || 0 : (rec.tc ?? 0),
-            tc: isFlat ? rec.tc : ((rec.tc) != null ? `${Number(rec.tc).toFixed(1)} K` : '-'),
-            tcField: 'tc_max',
-            source: 'Local',
-            status: isFlat ? rec.status : (REVIEW_MAP[paper?.review_status] || 'Pending'),
-            doi: isFlat ? rec.doi : (rec.doi || paper?.doi || '-'),
-            journal: isFlat ? '-' : (rec.journal || paper?.journal || '-'),
-            title: isFlat ? '-' : (rec.title || paper?.title || '-'),
-            spaceGroupNumber: rec.space_group_number ?? rec.spg ?? 0,
-            spaceGroup: isFlat ? rec.space_group : (rec.space_group_symbol || (rec.spg ? `#${rec.spg}` : '-')),
-            showInChart: rec.show_in_chart !== false,
-            lambda: '-', omegaLog: '-', nef: '-', method: '-', software: '-', note: '-',
-          })
-        }
-
-        items.forEach((item: any) => addRow(item, null))
-        setApiRecords(rows)
-
-        // 后端真分页：total/total_pages 来自服务端
-        const totalCount = res.total ?? rows.length
-        setTotal(totalCount)
-        setTotalPages(Math.ceil(totalCount / PAGE_SIZE))
-      }).catch((err: any) => {
-        setApiError(err.message || t('search.searchFailed'))
-      }).finally(() => setLoading(false))
-    }, 300)
-    return () => clearTimeout(timer)
-  }, [stage, mode, elementsKey, filtersKey, formulaQuery, page, retryTick, lang, t])
-
-  const toast = (msg: string) => setSnackbar(msg)
-
-  // Stage 3: fetch paper detail + 从 material_states[].structures[] 取结构
-  useEffect(() => {
-    if (stage !== 'detail' || !selectedRecord.paper_id) return
-    setPaperDetail(null)
-    setStructureData(null)
-    setStructureMsg(t('search.noStructure'))
-    api.get(`/api/papers/${selectedRecord.paper_id}`)
-      .then((data: any) => {
-        setPaperDetail(data)
-        const structures = collectStructures(data)
-        setStructureData(structures.length > 0 ? structures : null)
-      })
-      .catch(() => setPaperDetail(null))
-  }, [stage, selectedRecord.paper_id, lang, t])
-
-  /* ── Stage 1: Explore ── */
-  if (stage === 'explore') {
+const SearchPage:React.FC=()=>{
+ const {t}=useLanguage(),[params,setParams]=useSearchParams(),location=useLocation()
+ const [selected,setSelected]=useState(new Set<string>((params.get('elements')||'').split(',').filter(Boolean))),[formula,setFormula]=useState(params.get('formula')||''),[mode,setMode]=useState(params.get('mode')||'elements_combination_search')
+ const elementSearchModes=[
+ {value:'elements_combination_search',label:'search.modeCombination',description:'search.modeCombinationDescription'},
+ {value:'elements_exact_search',label:'search.modeExact',description:'search.modeExactDescription'},
+ {value:'elements_contained_search',label:'search.modeContained',description:'search.modeContainedDescription'}]
+ const currentElementSearchMode=elementSearchModes.find(x=>x.value===mode),formulaQuery=formula.trim()
+ const entry=params.get('entry')==='1', paramsKey=params.toString()
+ useEffect(()=>{if(entry){setSelected(new Set((params.get('elements')||'').split(',').filter(Boolean)));setFormula(params.get('formula')||'');setMode(params.get('mode')||'elements_combination_search')}},[entry,paramsKey])
+ const filters=searchFilters(params),setFilters=(next:SearchFilters)=>setParams(updateFilters(params,next),{replace:true})
+ if(params.has('paper_id'))return <Navigate replace to={`/papers/${encodeURIComponent(params.get('paper_id')||'')}`} />
+ if(entry || (!params.has('elements')&&!params.has('formula'))) {
     return (
       <Box>
         <Box sx={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:2,mb:3 }}>
@@ -295,7 +109,7 @@ const SearchPage: React.FC = () => {
                 <Box component="input" value={formula} onChange={e=>setFormula(e.target.value)}
                   sx={{ border:'none',outline:'none',fontSize:15,fontWeight:600,mt:0.5,width:'100%',bgcolor:'transparent',fontFamily:'inherit' }} />
               </Box>
-              <Button variant="contained" onClick={()=>{setStage('results');toast(t('search.formulaRefreshed'))}} disabled={!formulaQuery}>{t('search.search')}</Button>
+              <Button variant="contained" component={RouterLink} to={searchURL([],mode,formula)} target="_blank" rel="noopener noreferrer" disabled={!formulaQuery}>{t('search.search')}</Button>
             </Box>
           </CardContent>
         </Card>
@@ -328,7 +142,7 @@ const SearchPage: React.FC = () => {
                     ))}
                   </Box>
                   <Button variant="contained" disabled={selected.size===0 && !formulaQuery}
-                    onClick={()=>{setStage('results');toast(t('search.elementsRefreshed'))}}>{t('search.enterPage')}</Button>
+                    component={RouterLink} to={searchURL(selected,mode,formula)} target="_blank" rel="noopener noreferrer">{t('search.enterPage')}</Button>
                   <Button variant="outlined" onClick={()=>setSelected(new Set())}>{t('search.clearSelection')}</Button>
                 </Box>
               </Box>
@@ -343,14 +157,10 @@ const SearchPage: React.FC = () => {
             </Box>
           </CardContent>
         </Card>
-        <Snackbar open={!!snackbar} autoHideDuration={2200} onClose={()=>setSnackbar('')}><Alert severity="success" variant="filled">{snackbar}</Alert></Snackbar>
       </Box>
     )
-  }
 
-  /* ── Stage 2: Results ── */
-  if (stage === 'results') {
-    // 各筛选组是否已被收紧（用于生效指示与计数）
+ }
     const groupActive = {
       formula: !!filters.formula,
       tc: filters.tcMin > 0 || filters.tcMax < 9999,
@@ -361,22 +171,20 @@ const SearchPage: React.FC = () => {
       chart: filters.chartOnly,
     }
     const activeCount = Object.values(groupActive).filter(Boolean).length
-    return (
-      <Box>
-        <Box sx={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:2,mb:3 }}>
-          <Box>
-            <Button size="small" startIcon={<ArrowBackIcon/>} onClick={()=>setStage('explore')} sx={{ mb:1 }}>{t('search.backElementSearch')}</Button>
-            <Typography variant="overline">Layer 2 · Data Table</Typography>
-            <Typography variant="h1">{t('search.systemResults', { system: selected.size ? [...selected].sort().join('-') : formulaQuery })}</Typography>
-            <Typography variant="body2" sx={{ mt:1 }}>{t('search.resultHint')}</Typography>
-            {selected.size > 0 && <Button component={RouterLink} to={`/systems/${[...selected].sort().join('-')}`} sx={{ mt: 1 }}>{t('community.systemDiscussion', { key: [...selected].sort().join('-') })}</Button>}
-          </Box>
-        </Box>
-
-        {/* Three-column layout */}
-        <Box sx={{ display:'grid',gridTemplateColumns:'280px 1fr',gap:3,alignItems:'start',minWidth:0,overflow:'hidden',
-          '@media (max-width:1180px)':{gridTemplateColumns:'1fr'} }}>
-          {/* Filter sidebar */}
+ const view=params.get('view')==='states'?'states':'papers',pageKey=view==='papers'?'paper_page':'state_page'
+ const request=searchRequest(params),returnTo=location.pathname+location.search
+ const {tc_min: _tcMin,tc_max: _tcMax,chart_only: _chartOnly,...structuralQuery}=request
+ const setPage=(key:string,page:number)=>{const next=new URLSearchParams(params);next.set(key,String(page));setParams(next)}
+ const entryParams=new URLSearchParams(params);entryParams.set('entry','1')
+ const system=(params.get('elements')||params.get('formula')||'').split(',').sort().join('-')
+ return <Box>
+  <Box sx={{display:'flex',justifyContent:'space-between',alignItems:'start',gap:2,mb:3,flexWrap:'wrap'}}>
+   <Box><Button component={RouterLink} to={'/search?'+entryParams} startIcon={<ArrowBackIcon/>}>{t('search.backElementSearch')}</Button><Typography variant="h1">{t('search.systemResults',{system})}</Typography><Typography>{t('search.resultHint')}</Typography></Box>
+   <ToggleButtonGroup exclusive value={view} aria-label={t('search.viewMode')} onChange={(_,value)=>{if(value){const next=new URLSearchParams(params);next.set('view',value);setParams(next)}}}>
+    <ToggleButton value="papers">{t('search.byPapers')}</ToggleButton><ToggleButton value="states">{t('search.byStates')}</ToggleButton>
+   </ToggleButtonGroup>
+  </Box>
+  <Box sx={{display:'grid',gridTemplateColumns:{xs:'minmax(0,1fr)',lg:'280px minmax(0,1fr)'},gap:3,alignItems:'start',minWidth:0}}>
           <Box component="aside" sx={{ minWidth:0, maxWidth:'100%', overflow:'hidden', p:2.5, bgcolor:'background.paper', borderRadius:4, border:'1px solid', borderColor:'divider', boxShadow:1 }}>
             {/* 标题行：生效计数 + 按需出现的重置 */}
             <Box sx={{ display:'flex',alignItems:'center',justifyContent:'space-between',mb:2 }}>
@@ -455,225 +263,9 @@ const SearchPage: React.FC = () => {
             </Box>
           </Box>
 
-          {/* Data table */}
-          <StructuralResults query={structuralFormulaSearch
-            ? { elements: [], mode: 'formula_search', formula: formulaQuery, keyword: filters.formula,
-                pressure_min: filters.pMin > 0 ? filters.pMin : null, pressure_max: filters.pMax < 9999 ? filters.pMax : null,
-                year_min: filters.yMin > 1900 ? filters.yMin : null, year_max: filters.yMax < 2030 ? filters.yMax : null }
-            : structuralElements.length ? { elements: structuralElements, mode, keyword: filters.formula,
-                pressure_min: filters.pMin > 0 ? filters.pMin : null, pressure_max: filters.pMax < 9999 ? filters.pMax : null,
-                year_min: filters.yMin > 1900 ? filters.yMin : null, year_max: filters.yMax < 2030 ? filters.yMax : null } : null} />
-          <Card sx={{ position:'relative' }}>
-            <CardContent>
-              <Typography variant="h2" gutterBottom>{t('search.resultTable')}</Typography>
-              {loading && <LinearProgress sx={{ mb: 2, borderRadius: 999, height: 4 }} />}
-              {apiError && (
-                <Box sx={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:1.5,mb:1.5,p:1.5,border:'1px solid',borderColor:'divider',borderRadius:2,bgcolor:'grey.50' }}>
-                  <Typography variant="body2" color="error">{apiError}</Typography>
-                  <Button size="small" variant="text" onClick={() => setRetryTick(value => value + 1)}>{t('search.retry')}</Button>
-                </Box>
-              )}
-              <Box sx={{ overflowX:'auto',border:'1px solid',borderColor:'divider',borderRadius:2,bgcolor:'background.paper' }}>
-                <Box component="table" sx={{ width:'100%',minWidth:980,borderCollapse:'separate',borderSpacing:0,fontSize:14 }}>
-                  <Box component="thead">
-                    <Box component="tr">
-                      {[t('search.headers.year'),t('search.headers.system'),t('search.headers.type'),t('search.headers.pressure'),t('search.headers.tc'),t('search.headers.spaceGroup'),t('search.headers.source'),t('search.headers.status'),t('search.headers.doi')].map(h=>(
-                        <Box key={h} component="th" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',color:'text.secondary',fontSize:12,fontWeight:800,letterSpacing:'.02em',textTransform:'uppercase',textAlign:'left',whiteSpace:'nowrap',bgcolor:'grey.50',position:'sticky',top:0,zIndex:1 }}>{h}</Box>
-                      ))}
-                    </Box>
-                  </Box>
-                  <Box component="tbody">
-                    {apiRecords.map((r,i)=>(
-                      <Box key={i} component="tr"
-                        onClick={()=>{setSelectedRecord(r);setStage('detail')}}
-                        sx={{ cursor:'pointer','&:hover':{bgcolor:'grey.50'} }}>
-                        <Box component="td" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap' }}>{r.year}</Box>
-                        <Box component="td" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap' }}>{r.formula}</Box>
-                        <Box component="td" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap' }}>{r.type}</Box>
-                        <Box component="td" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap' }}>{r.pressure}</Box>
-                        <Box component="td" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap',color:'primary.main',fontWeight:800 }}>{r.tc}</Box>
-                        <Box component="td" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap' }}>{r.spaceGroup}</Box>
-                        <Box component="td" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap' }}><Chip label={r.source} size="small" color="primary" /></Box>
-                        <Box component="td" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap' }}><Chip label={r.status} size="small" color={r.status==='Approved'?'success':r.status==='Pending'?'warning':'default'} /></Box>
-                        <Box component="td" sx={{ p:'14px 12px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap' }}>{r.doi}</Box>
-                      </Box>
-                    ))}
-                    {apiRecords.length===0&&(
-                      <Box component="tr"><Box component="td" colSpan={9} sx={{ p:4,textAlign:'center',color:'text.secondary' }}>
-                        <Typography variant="h3">{t('search.noResults')}</Typography>
-                        <Typography variant="body2">{t('search.noResultsHint')}</Typography>
-                        <Button variant="contained" sx={{ mt:2 }} onClick={()=>setFilters({ ...FILTER_DEFAULTS })}>{t('search.resetFilters')}</Button>
-                      </Box></Box>
-                    )}
-                  </Box>
-                </Box>
-              </Box>
-              {totalPages > 1 && (
-                <Box sx={{ display:'flex',alignItems:'center',justifyContent:'center',gap:2,mt:2 }}>
-                  <Button size="small" variant="outlined" disabled={page===0} onClick={()=>setPage(p=>p-1)}>{t('search.previousPage')}</Button>
-                  <Typography variant="body2" color="text.secondary">
-                    {t('search.pagination', { page: page + 1, pages: totalPages, total })}
-                  </Typography>
-                  <Button size="small" variant="outlined" disabled={page+1>=totalPages} onClick={()=>setPage(p=>p+1)}>{t('search.nextPage')}</Button>
-                </Box>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Detail preview side sheet */}
-        </Box>
-        <Snackbar open={!!snackbar} autoHideDuration={2200} onClose={()=>setSnackbar('')}><Alert severity="success" variant="filled">{snackbar}</Alert></Snackbar>
-      </Box>
-    )
-  }
-
-  /* ── Stage 3: Detail ── */
-  const r = selectedRecord
-  // Tc 与计算参数不在 key_properties 里，须跨三张来源表汇总（见 lib/paperDetailView）
-  const propertyRows = collectPropertyRows(paperDetail, t)
-  return (
-    <Box>
-      <Box sx={{ display:'flex',alignItems:'center',justifyContent:'space-between',gap:2,mb:3 }}>
-        <Box>
-          <Button size="small" startIcon={<ArrowBackIcon/>} onClick={()=>setStage('results')} sx={{ mb:1 }}>{t('search.backResults')}</Button>
-          <Typography variant="overline">Layer 3 · Research Record</Typography>
-          <Typography variant="h1">{t('search.detailTitle', { formula: r.formula })}</Typography>
-        </Box>
-        <Box sx={{ display:'flex',gap:1 }}>
-          <Button variant="contained" color="secondary" onClick={()=>toast(t('search.generatedJson'))}>{t('search.downloadJson')}</Button>
-          <Button variant="outlined" onClick={()=>toast(t('search.generatedRis'))}>{t('search.exportRis')}</Button>
-          <Button variant="outlined" onClick={()=>{navigator.clipboard.writeText(r.doi);toast(t('search.doiCopied'))}}>{t('search.copyDoi')}</Button>
-        </Box>
-      </Box>
-
-      <Box sx={{ display:'grid',gridTemplateColumns:'1fr 360px',gap:3,alignItems:'start','@media (max-width:1180px)':{gridTemplateColumns:'1fr'} }}>
-        {/* Detail main — accordion sections matching demo */}
-        <Card sx={{ boxShadow: 3 }}>
-          <CardContent>
-            {/* 基础信息 */}
-            <Box component="details" open sx={{ border:'1px solid',borderColor:'divider',borderRadius:2,mb:1.5,overflow:'hidden' }}>
-              <Box component="summary" sx={{ cursor:'pointer',p:2,fontSize:18,fontWeight:800 }}>{t('search.basicInfo')}</Box>
-              <Box sx={{ px:2,pb:2,borderTop:'1px solid',borderColor:'divider' }}>
-                <Box sx={{ display:'grid',gridTemplateColumns:'1fr 1fr',gap:1.5 }}>
-                  <Box><Typography variant="caption">Formula</Typography><Typography fontWeight={600}>{r.formula}</Typography></Box>
-                  <Box><Typography variant="caption">{t('search.year')}</Typography><Typography fontWeight={600}>{r.year}</Typography></Box>
-                  <Box><Typography variant="caption">DOI</Typography><Typography fontWeight={600}>{r.doi}</Typography></Box>
-                  <Box><Typography variant="caption">{t('search.journal')}</Typography><Typography fontWeight={600}>{paperDetail?.journal || r.journal}</Typography></Box>
-                  <Box sx={{ gridColumn:'1/-1' }}><Typography variant="caption">{t('search.paperTitle')}</Typography><Typography fontWeight={600}>{paperDetail?.title || r.title}</Typography></Box>
-                  {/* summary 常含分条结构的真实换行，pre-wrap 须保留；否则多条记录会被挤成一段 */}
-                  {paperDetail?.summary && (
-                    <Box sx={{ gridColumn:'1/-1' }}><Typography variant="caption">{t('search.paperSummary')}</Typography><Typography variant="body2" sx={{ fontSize:12,lineHeight:1.8,whiteSpace:'pre-wrap' }}>{paperDetail.summary}</Typography></Box>
-                  )}
-                  <Box><Typography variant="caption">{t('search.reviewStatus')}</Typography><Chip label={r.status} size="small" color={r.status==='Approved'?'success':'warning'} /></Box>
-                  <Box><Typography variant="caption">{t('search.source')}</Typography><Chip label={r.source} size="small" color="primary" /></Box>
-                </Box>
-              </Box>
-            </Box>
-            {/* 关键物性：Tc（tc_results）+ 计算参数（calculation_contexts）+ 普通物性（key_properties）*/}
-            <Box component="details" open sx={{ border:'1px solid',borderColor:'divider',borderRadius:2,mb:1.5,overflow:'hidden' }}>
-              <Box component="summary" sx={{ cursor:'pointer',p:2,fontSize:18,fontWeight:800 }}>{t('search.keyProperties')}</Box>
-              <Box sx={{ px:2,pb:2,borderTop:'1px solid',borderColor:'divider',overflowX:'auto' }}>
-                {propertyRows.length > 0 ? (
-                  <Box component="table" sx={{ width:'100%',borderCollapse:'collapse',fontSize:13,mt:1 }}>
-                    <Box component="thead">
-                      <Box component="tr">
-                        {[t('search.propertyHeaders.material'),t('search.propertyHeaders.property'),t('search.propertyHeaders.value'),t('search.propertyHeaders.condition'),t('search.propertyHeaders.note')].map(h=>(
-                          <Box key={h} component="th" sx={{ p:'6px 10px',borderBottom:'2px solid',borderColor:'divider',textAlign:'left',color:'text.secondary',fontSize:12,whiteSpace:'nowrap' }}>{h}</Box>
-                        ))}
-                      </Box>
-                    </Box>
-                    <Box component="tbody">
-                      {propertyRows.map(row => (
-                        <Box component="tr" key={row.key}>
-                          <Box component="td" sx={{ p:'6px 10px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap',fontWeight:600 }}>{row.material}</Box>
-                          <Box component="td" sx={{ p:'6px 10px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap' }}>{row.label}</Box>
-                          <Box component="td" sx={{ p:'6px 10px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap',fontWeight:700,color:'primary.main' }}>{row.value}</Box>
-                          <Box component="td" sx={{ p:'6px 10px',borderBottom:'1px solid',borderColor:'divider',whiteSpace:'nowrap',color:'text.secondary' }}>{row.condition}</Box>
-                          <Box component="td" sx={{ p:'6px 10px',borderBottom:'1px solid',borderColor:'divider',color:'text.secondary',minWidth:180 }}>{row.note}</Box>
-                        </Box>
-                      ))}
-                    </Box>
-                  </Box>
-                ) : (
-                  <Typography variant="body2" color="text.secondary" sx={{ mt:1 }}>{paperDetail ? t('search.noProperties') : t('search.loading')}</Typography>
-                )}
-              </Box>
-            </Box>
-            {/* 研究方法与发现（clean_results 结构化成果）*/}
-            <Box component="details" sx={{ border:'1px solid',borderColor:'divider',borderRadius:2,mb:1.5,overflow:'hidden' }}>
-              <Box component="summary" sx={{ cursor:'pointer',p:2,fontSize:18,fontWeight:800 }}>{t('search.methodsFindings')}</Box>
-              <Box sx={{ px:2,pb:2,borderTop:'1px solid',borderColor:'divider' }}>
-                <Box sx={{ display:'grid',gap:1.5,mt:1 }}>
-                  <Box>
-                    <Typography variant="caption">{t('search.methodology')}</Typography>
-                    <Box sx={{ display:'flex',gap:0.75,flexWrap:'wrap',mt:0.5 }}>
-                      {(() => { try { const m = JSON.parse(paperDetail?.methodology || '[]'); return Array.isArray(m) && m.length ? m.map((x: string) => <Chip key={x} label={x} size="small" variant="outlined" />) : <Typography variant="body2">-</Typography> } catch { return <Typography variant="body2">{paperDetail?.methodology || '-'}</Typography> } })()}
-                    </Box>
-                  </Box>
-                  <Box>
-                    <Typography variant="caption">{t('search.keyFinding')}</Typography>
-                    {/* 用户按「一个要点一行」录入，换行是内容结构，须保留。
-                        标签是 caption(12px/600)，正文不加粗且不超过标签字号，避免层级颠倒；
-                        与同区块的论文总结保持一致 */}
-                    <Typography variant="body2" sx={{ fontSize:12,lineHeight:1.8,whiteSpace:'pre-wrap' }}>
-                      {(() => { try { return JSON.parse(paperDetail?.key_finding || '""') || '-' } catch { return paperDetail?.key_finding || '-' } })()}
-                    </Typography>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
-
-        {/* Structure preview */}
-        <Card sx={{ alignSelf:'start',position:'sticky',top:96,boxShadow:'0 6px 16px rgba(15,23,42,.16),0 10px 24px rgba(15,23,42,.10)' }}>
-          <CardContent>
-            <Typography variant="h2" gutterBottom>{t('search.structurePreview')}</Typography>
-            {structureData && Array.isArray(structureData) && structureData.length > 0 ? (
-              <Box>
-                {structureData.map((s: any, i: number) => (
-                  <Box key={i} sx={{ mb: i < structureData.length - 1 ? 2.5 : 0 }}>
-                    {s.name_note && (
-                      <Typography variant="body2" fontWeight={700} sx={{ mb:0.5 }}>
-                        {s.material} · {s.name_note}{s.pressure_gpa != null ? ` @ ${s.pressure_gpa} GPa` : ''}
-                      </Typography>
-                    )}
-                    <Typography variant="body2" color="text.secondary" sx={{ mb:1 }}>
-                      {t('search.structureHelp', { format: s.structure_format || 'cif' })}
-                    </Typography>
-                    <StructureViewer3D
-                      data={s.structure_text}
-                      format={viewerFormat(s.structure_format)}
-                      height={240}
-                    />
-                    <Box component="details" sx={{ mt:1 }}>
-                      <Box component="summary" sx={{ cursor:'pointer',fontSize:12,fontWeight:700,color:'text.secondary' }}>{t('search.viewStructureText')}</Box>
-                      <Box component="pre" sx={{ mt:1,p:1.5,borderRadius:2,bgcolor:'grey.50',maxHeight:200,overflow:'auto',fontFamily:'"Roboto Mono",monospace',fontSize:11 }}>
-                        {s.structure_text.slice(0, 1500)}
-                      </Box>
-                    </Box>
-                  </Box>
-                ))}
-              </Box>
-            ) : (
-              <Box sx={{ minHeight:240,borderRadius:2,border:'1px solid',borderColor:'divider',
-                background:`radial-gradient(circle at 22% 28%, #4f46e5 0 9px, transparent 10px), radial-gradient(circle at 66% 34%, #0891b2 0 9px, transparent 10px), radial-gradient(circle at 42% 70%, #4f46e5 0 9px, transparent 10px), linear-gradient(145deg, #fff, #f1f5f9)`,
-                position:'relative',overflow:'hidden',
-                '&::before,&::after':{content:'""',position:'absolute',left:'25%',right:'25%',top:'34%',height:2,bgcolor:'#cbd5e1',transform:'rotate(18deg)'},
-                '&::after':{top:'58%',transform:'rotate(-25deg)'},
-              }}>
-                <Typography variant="body2" sx={{ position:'absolute',bottom:12,left:12,color:'text.secondary' }}>
-                  {structureMsg}
-                </Typography>
-              </Box>
-            )}
-          </CardContent>
-        </Card>
-      </Box>
-      {paperDetail && <PaperCommunity key={paperDetail.id} paper={paperDetail} />}
-      <Snackbar open={!!snackbar} autoHideDuration={2200} onClose={()=>setSnackbar('')}><Alert severity="success" variant="filled">{snackbar}</Alert></Snackbar>
-    </Box>
-  )
+<Box sx={{minWidth:0}}>
+  <SearchResults query={request} view={view} page={searchPageNumber(params,pageKey)} returnTo={returnTo} onPageChange={page=>setPage(pageKey,page)} />
+  <StructuralResults query={structuralQuery} page={searchPageNumber(params,'structure_page')-1} onPageChange={page=>setPage('structure_page',page+1)} />
+  </Box></Box></Box>
 }
-
 export default SearchPage

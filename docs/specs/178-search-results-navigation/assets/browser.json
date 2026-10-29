@@ -1,0 +1,326 @@
+{
+  "passed": true,
+  "cases": [
+    "new-result-tab",
+    "default-paper",
+    "same-page-eight-states",
+    "no-tc-table",
+    "refresh",
+    "paper-popup-return",
+    "structure-popup",
+    "back",
+    "mobile",
+    "independent-source-paper",
+    "unsafe-return",
+    "page-two-return",
+    "keyboard-toggle"
+  ],
+  "errors": [],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"view\":\"papers\",\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"view\":\"states\",\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"view\":\"states\",\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/papers/271",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/papers/271",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/structural-records/paper/271",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/structural-records/paper/271",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"view\":\"states\",\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/structural-records/model1",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/structural-records/model1",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"view\":\"papers\",\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[],\"mode\":\"formula_search\",\"formula\":\"LaSc2H24\",\"view\":\"states\",\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[\"La\",\"Sc\"],\"mode\":\"elements_exact_search\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[\"La\",\"Sc\"],\"mode\":\"elements_exact_search\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[\"La\",\"Sc\"],\"mode\":\"elements_exact_search\",\"view\":\"papers\",\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[\"La\",\"Sc\"],\"mode\":\"elements_exact_search\",\"view\":\"states\",\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[\"Fe\"],\"mode\":\"elements_exact_search\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[\"Fe\"],\"mode\":\"elements_exact_search\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[\"Fe\"],\"mode\":\"elements_exact_search\",\"view\":\"states\",\"limit\":20,\"offset\":20}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/papers/275",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/papers/275",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/structural-records/paper/275",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/structural-records/paper/275",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra",
+      "body": null
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[\"Fe\"],\"mode\":\"elements_exact_search\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search",
+      "body": "{\"elements\":[\"Fe\"],\"mode\":\"elements_exact_search\",\"independent_only\":true,\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[\"Fe\"],\"mode\":\"elements_exact_search\",\"view\":\"states\",\"limit\":20,\"offset\":20}"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results",
+      "body": "{\"elements\":[\"Fe\"],\"mode\":\"elements_exact_search\",\"view\":\"papers\",\"limit\":20,\"offset\":0}"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/papers/271",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/papers/271",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/structural-records/paper/271",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/structural-records/paper/271",
+      "body": null
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/spectra",
+      "body": null
+    }
+  ]
+}

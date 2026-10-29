@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { Badge } from '@mui/material'
 import NotificationsOutlined from '@mui/icons-material/NotificationsOutlined'
 import { api } from '../../lib/api'
@@ -8,7 +7,7 @@ import { useLanguage } from '../../context/LanguageContext'
 import SidebarButton from '../SidebarButton'
 
 export default function CommunityNotificationLink({ collapsed }: { collapsed: boolean }) {
-  const { user, token } = useAuth(); const { t } = useLanguage(); const navigate = useNavigate(); const [count, setCount] = useState(0)
+  const { user, token } = useAuth(); const { t } = useLanguage(); const [count, setCount] = useState(0)
   useEffect(() => {
     setCount(0); if (!user) return
     let stopped = false, pending = false
@@ -18,5 +17,5 @@ export default function CommunityNotificationLink({ collapsed }: { collapsed: bo
     window.addEventListener('community-notifications-changed', load); document.addEventListener('visibilitychange', load)
     return () => { stopped = true; controller.abort(); window.clearInterval(timer); window.removeEventListener('community-notifications-changed', load); document.removeEventListener('visibilitychange', load) }
   }, [user?.id, token])
-  return <SidebarButton collapsed={collapsed} icon={<Badge badgeContent={count} color="error" max={99}><NotificationsOutlined /></Badge>} label={t('community.notifications')} onClick={() => navigate('/account/notifications')} />
+  return <SidebarButton collapsed={collapsed} icon={<Badge badgeContent={count} color="error" max={99}><NotificationsOutlined /></Badge>} label={t('community.notifications')} href="/account/notifications" target="_blank" rel="noopener noreferrer" />
 }

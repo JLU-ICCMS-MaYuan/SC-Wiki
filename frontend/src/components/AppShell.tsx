@@ -117,9 +117,9 @@ const AppShell: React.FC = () => {
             {user ? (
               <>
               <CommunityNotificationLink collapsed={collapsed} />
-              {user.role === 'superadmin' && <SidebarButton icon={<AdminPanelSettingsOutlined />} label={t('community.moderation')} collapsed={collapsed} selected={isActive('/admin/community')} onClick={() => navigate('/admin/community')} />}
+              {user.role === 'superadmin' && <SidebarButton icon={<AdminPanelSettingsOutlined />} label={t('community.moderation')} collapsed={collapsed} selected={isActive('/admin/community')} href="/admin/community" target="_blank" rel="noopener noreferrer" />}
               <Box sx={{ display: 'flex', alignItems: 'center', flexDirection: collapsed ? 'column' : 'row', gap: 0.5, mt: 1, pt: 1, borderTop: '1px solid', borderColor: 'divider' }}>
-                <SidebarButton icon={<RoleIcon />} label={t(`enums.role.${user.role}`)} detail={user.username} collapsed={collapsed} selected={accountActive} onClick={() => navigate('/account')} />
+                <SidebarButton icon={<RoleIcon />} label={t(`enums.role.${user.role}`)} detail={user.username} collapsed={collapsed} selected={accountActive} href="/account" target="_blank" rel="noopener noreferrer" />
                 <Tooltip title={t('nav.accountMenu')} placement="right" arrow>
                   <IconButton aria-label={t('nav.accountMenu')} aria-haspopup="menu" aria-expanded={Boolean(anchorEl)} onClick={event => setAnchorEl(event.currentTarget)} sx={{ p: 0.5 }}>
                     <Avatar src={user.avatar_url || undefined} sx={{ width: 28, height: 28, bgcolor: 'primary.main', fontSize: 12, fontWeight: 700 }}>

@@ -135,16 +135,19 @@ func TestCommunityHistoricalThreads(t *testing.T) {
 	for i := 0; i < 23; i++ {
 		last = f.seed(models.CommunityEntry{Kind: "comment", Body: fmt.Sprintf("回复%d", i), SystemKey: &key, ParentID: &root, ReplyToID: &root, AuthorID: f.users[1].ID})
 	}
-	got := f.request("GET", fmt.Sprintf("/entries?kind=comment&system_key=Hg&focus_id=%d", last), nil, -1, 200)
-	if got["offset"] != float64(20) || len(got["context"].([]any)) != 1 {
-		t.Fatal(got)
+	f.request("GET", fmt.Sprintf("/entries?kind=comment&system_key=Hg&focus_id=%d", last), nil, -1, 410)
+	f.request("GET", fmt.Sprintf("/entries/%d", last), nil, -1, 410)
+	var retained int64
+	f.db.Model(&models.CommunityEntry{}).Where("kind = ?", "comment").Count(&retained)
+	if retained != 24 {
+		t.Fatal("retired comments were deleted")
 	}
 	legacy := f.seed(models.CommunityEntry{Kind: "danmaku", Body: "历史弹幕", SystemKey: &key, AuthorID: f.users[0].ID})
 	f.request("GET", fmt.Sprintf("/entries/%d", legacy), nil, -1, 404)
 	f.request("GET", "/entries?kind=danmaku&system_key=Hg", nil, -1, 400)
 	f.db.Create(&models.CommunityNotification{EntryID: last, RecipientID: f.users[0].ID, ActorID: f.users[1].ID, Kind: "reply"})
-	if f.request("GET", "/notifications/unread", nil, 0, 200)["count"] != float64(1) {
-		t.Fatal("historical notice missing")
+	if f.request("GET", "/notifications/unread", nil, 0, 200)["count"] != float64(0) {
+		t.Fatal("retired comment notice leaked")
 	}
 	f.request("PATCH", "/notifications/read", map[string]any{}, 0, 204)
 }

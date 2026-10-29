@@ -481,3 +481,30 @@ def test_reextract_is_owner_authorized_hash_verified_preview_only(client, tmp_pa
         ).status_code
         == 404
     )
+
+
+def test_independent_only_is_applied_before_count_and_pagination(client):
+    client, session, paper, app = client
+    row = next(r for r in service.current_items(session, paper) if r.kind == "model")
+    path = "/api/rag/structural-records/search"
+    assert client.post(path, json={"independent_only": True}).json()["total"] == 1
+    row.state_key = "linked-state"
+    session.commit()
+    assert client.post(path, json={}).json()["total"] == 1
+    result = client.post(path, json={"independent_only": True, "limit": 1}).json()
+    assert result == {"items": [], "total": 0}
+    assert client.post(path, json={"review_status": "pending"}).json()["total"] == 0
+
+
+def test_independent_structure_family_filter_uses_current_paper_family(client):
+    client, session, paper, app = client
+    models.MaterialFamily.__table__.create(session.get_bind(), checkfirst=True)
+    models.PaperMaterialFamily.__table__.create(session.get_bind(), checkfirst=True)
+    family = models.MaterialFamily(code="hydride", name_zh="氢化物", name_en="Hydride", normalized_name="hydride")
+    session.add(family)
+    session.flush()
+    session.add(models.PaperMaterialFamily(paper_id=paper.id, paper_revision=paper.content_revision, material_family_id=family.id))
+    session.commit()
+    path = "/api/rag/structural-records/search"
+    assert client.post(path, json={"superconductor_type": "hydride"}).json()["total"] == 1
+    assert client.post(path, json={"superconductor_type": "cuprate"}).json()["total"] == 0

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
+import {detailURL} from '../lib/searchNavigation'
 import {
   Box, Button, Chip, CircularProgress, Stack, Typography, TextField, MenuItem, Pagination,
 } from '@mui/material'
@@ -27,7 +28,7 @@ const STATUS_COLORS: Record<string, 'warning' | 'success' | 'error' | 'info'> = 
 // 已提交论文永久保存在 MySQL，与上传页那份 24 小时后清理、受活动任务配额限制的
 // 「上传解析记录」性质不同，因此单独放在用户中心，不混入上传工作区。
 const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews' }> = ({ kind = 'uploads' }) => {
-  const navigate = useNavigate()
+  const location = useLocation()
   const { t, dict } = useLanguage()
   const [items, setItems] = useState<MyPaper[] | null>(null)
   const [error, setError] = useState('')
@@ -91,21 +92,12 @@ const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews' }> = ({ kind = 'uplo
       {(items || []).map(paper => (
         <Box
           key={paper.id}
-          role="button"
-          tabIndex={0}
-          onClick={() => navigate(`/papers/${paper.id}`)}
-          onKeyDown={event => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              event.preventDefault()
-              navigate(`/papers/${paper.id}`)
-            }
-          }}
           sx={{
             p: 1.5, borderRadius: 2, border: '1px solid', borderColor: 'divider',
             cursor: 'pointer', '&:hover': { bgcolor: 'action.hover' },
           }}
         >
-          <Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between" spacing={1}>
+          <Box component={Link} to={detailURL(`/papers/${paper.id}`,location.pathname+location.search)} target="_blank" rel="noopener noreferrer" sx={{display:'block',color:'inherit',textDecoration:'none'}}><Stack direction={{ xs: 'column', sm: 'row' }} alignItems={{ xs: 'flex-start', sm: 'center' }} justifyContent="space-between" spacing={1}>
             <Box sx={{ minWidth: 0 }}>
               <Typography variant="body2" fontWeight={600} sx={{ overflowWrap: 'anywhere' }}>
                 {paper.title || t('paperDetail.paperIndexFallback', { n: paper.id })}
@@ -121,10 +113,8 @@ const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews' }> = ({ kind = 'uplo
               label={(dict.enums.reviewStatus as Record<string, string>)[paper.checked_status || paper.review_status || ''] || paper.checked_status || paper.review_status || (dict.enums.reviewStatus as Record<string, string>).pending}
               color={STATUS_COLORS[paper.checked_status || paper.review_status || ''] || 'default'}
             />
-          </Stack>
-          {paper.can_revise && <Button size="small" onClick={event => {
-            event.stopPropagation(); navigate(`/papers/${paper.id}/revise`)
-          }} onKeyDown={event => event.stopPropagation()}>{t('paperDetail.revise')}</Button>}
+          </Stack></Box>
+          {paper.can_revise && <Button size="small" component={Link} to={`/papers/${paper.id}/revise`} target="_blank" rel="noopener noreferrer">{t('paperDetail.revise')}</Button>}
         </Box>
       ))}
     </Stack>

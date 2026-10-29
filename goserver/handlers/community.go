@@ -279,6 +279,9 @@ func (t *communityTarget) validate(db *gorm.DB, kind string, user *models.User) 
 	return nil
 }
 func communityAccess(db *gorm.DB, entry models.CommunityEntry, user *models.User, placeholder bool) error {
+	if entry.Kind == "comment" {
+		return communityError{410, "comments_retired"}
+	}
 	if !communitySupportedKind(entry.Kind) {
 		return gorm.ErrRecordNotFound
 	}
@@ -289,7 +292,7 @@ func communityAccess(db *gorm.DB, entry models.CommunityEntry, user *models.User
 	return t.validate(db, entry.Kind, user)
 }
 func communitySupportedKind(kind string) bool {
-	return kind == "question" || kind == "answer" || kind == "comment"
+	return kind == "question" || kind == "answer"
 }
 func communitySameTarget(a, b models.CommunityEntry) bool {
 	aa, _ := json.Marshal(communityTargetOf(a))

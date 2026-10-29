@@ -1,0 +1,24 @@
+{
+  "frontend_commit": "8d84f5793b236454775e8b5683f94509c0ead695",
+  "go_commit": "cbc555a2988be7d69d6a0cfc2a0710b1d595a530",
+  "frontend_current": [
+    "tests/01_decentralized_uploading/paper-detail-form-parity.test.tsx > 只读详情页与校对表单字段一致（Issue #59） > 压强单臂区间不补造缺失的一侧",
+    "tests/01_decentralized_uploading/paper-detail-form-parity.test.tsx > 只读详情页与校对表单字段一致（Issue #59） > 材料状态分类区 9 项均渲染",
+    "tests/01_decentralized_uploading/paper-detail-form-parity.test.tsx > 只读详情页与校对表单字段一致（Issue #59） > 物性字段集无多余项（无最小值/最大值）",
+    "tests/03_data_search_and_database_discovery/english-ui-sweep.test.tsx > 英文界面全站巡检（SC-001） > TcPredictPage / 预测页无中日韩字符"
+  ],
+  "frontend_baseline": [
+    "tests/01_decentralized_uploading/paper-detail-form-parity.test.tsx > 只读详情页与校对表单字段一致（Issue #59） > 压强单臂区间不补造缺失的一侧",
+    "tests/01_decentralized_uploading/paper-detail-form-parity.test.tsx > 只读详情页与校对表单字段一致（Issue #59） > 材料状态分类区 9 项均渲染",
+    "tests/01_decentralized_uploading/paper-detail-form-parity.test.tsx > 只读详情页与校对表单字段一致（Issue #59） > 物性字段集无多余项（无最小值/最大值）",
+    "tests/03_data_search_and_database_discovery/english-ui-sweep.test.tsx > 英文界面全站巡检（SC-001） > TcPredictPage / 预测页无中日韩字符"
+  ],
+  "go_current": [
+    "TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction"
+  ],
+  "go_baseline": [
+    "TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction"
+  ],
+  "identical_failure_names": true,
+  "note": "独立Git归档源码复现；本次相关检查通过不等于扩展测试全部通过。"
+}

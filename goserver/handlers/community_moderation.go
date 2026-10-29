@@ -21,7 +21,7 @@ func communityReports(c *gin.Context) {
 		communityFail(c, communityBad())
 		return
 	}
-	activeEntries := database.DB.Model(&models.CommunityEntry{}).Select("id").Where("kind IN ?", []string{"question", "answer", "comment"})
+	activeEntries := database.DB.Model(&models.CommunityEntry{}).Select("id").Where("kind IN ?", []string{"question", "answer"})
 	q := database.DB.Model(&models.CommunityReport{}).Where("status = ?", status).Where("entry_id IN (?)", activeEntries)
 	var total int64
 	if err = q.Count(&total).Error; err != nil {

@@ -68,6 +68,9 @@ class Search(BaseModel):
     pressure_max: float | None = None
     year_min: int | None = None
     year_max: int | None = None
+    independent_only: bool = False
+    superconductor_type: str = ""
+    review_status: str = ""
     limit: int = Field(default=20, ge=1, le=100)
     offset: int = Field(default=0, ge=0)
 
@@ -98,6 +101,19 @@ def search_records(body: Search, db: Session = Depends(get_db)):
             models.Paper.approved_revision == models.Paper.content_revision,
         )
     )
+    if body.review_status and body.review_status.lower() != "approved":
+        query = query.where(Record.paper_id < 0)
+    if body.superconductor_type:
+        family = select(models.PaperMaterialFamily.paper_id).join(
+            models.MaterialFamily, models.MaterialFamily.id == models.PaperMaterialFamily.material_family_id
+        ).where(
+            models.PaperMaterialFamily.paper_id == models.Paper.id,
+            models.PaperMaterialFamily.paper_revision == models.Paper.content_revision,
+            models.MaterialFamily.code == body.superconductor_type,
+        )
+        query = query.where(family.exists())
+    if body.independent_only:
+        query = query.where(or_(Record.state_key.is_(None), Record.state_key == ""))
     if selected:
         systems = db.scalars(select(Record.system_key).distinct()).all()
         matched = [

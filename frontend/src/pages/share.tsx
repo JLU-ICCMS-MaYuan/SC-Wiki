@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import {
   Box, Typography, Card, CardContent, Button,
   Select, MenuItem, FormControl, InputLabel, IconButton,
@@ -19,7 +19,6 @@ import { ClassificationTerm, familyName, loadClassificationCatalogs } from '../l
 import { useLanguage } from '../context/LanguageContext'
 import ChartScatter, { CHART_ASPECT_RATIO } from '../components/ChartScatter'
 import StructureViewer3D from '../components/StructureViewer3D'
-import PaperCommunity from '../components/community/PaperCommunity'
 import PublicationStats from '../components/community/PublicationStats'
 import { collectPropertyRows, collectStructures, viewerFormat } from '../lib/paperDetailView'
 import {
@@ -77,7 +76,6 @@ const CHART_CONTROLS_SX = {
 
 // ═══════════════════════════════════════════════════════
 const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) => {
-  const navigate = useNavigate()
   const { user } = useAuth()
   const { t, lang } = useLanguage()
 
@@ -404,7 +402,7 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
                   <Avatar sx={{ width: 34, height: 34, fontSize: 15 }}>{row.avatar_text}</Avatar>
                   <Typography
                     noWrap
-                    onClick={() => row.account_status !== 'deactivated' && navigate(`/users/${row.username}`)}
+                    component={row.account_status === 'deactivated' ? 'span' : RouterLink} to={`/users/${encodeURIComponent(row.username)}`} target="_blank" rel="noopener noreferrer"
                     sx={{ flex: 1, minWidth: 0, fontWeight: 650, cursor: row.account_status === 'deactivated' ? 'default' : 'pointer', '&:hover': row.account_status === 'deactivated' ? undefined : { color: 'primary.main' } }}
                   >{row.username}{row.account_status === 'banned' ? ` · ${t('share.banned')}` : ''}</Typography>
                   <Typography fontWeight={800} sx={{ flexShrink: 0 }}>{row.contribution_count} {unit}</Typography>
@@ -697,7 +695,6 @@ const SharePage: React.FC<{ section?: 'rankings' | 'charts' }> = ({ section }) =
               </Box>
             </>
           )}
-          {paperDetail && !detailLoading && <PaperCommunity key={paperDetail.id} paper={paperDetail} />}
         </Box>
       </Drawer>
 

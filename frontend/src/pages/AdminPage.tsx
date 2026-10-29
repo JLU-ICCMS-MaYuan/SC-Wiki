@@ -21,7 +21,7 @@ import { type User, useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import PaperReviewStatusSelect from '../components/PaperReviewStatusSelect'
 import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload } from '../lib/paperReview'
-import { Link as RouterLink, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import ChartGroupEditor from '../components/ChartGroupEditor'
 import NewsManager from '../components/NewsManager'
 import SuperAdminGovernance from '../components/SuperAdminGovernance'
@@ -100,7 +100,6 @@ interface AdminPageProps { mode?: 'admin' | 'superadmin'; embedded?: boolean }
 const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false }) => {
   const { user, replaceUser } = useAuth()
   const { t, lang, dict } = useLanguage()
-  const navigate = useNavigate()
   const isSuper = mode === 'superadmin'
   const locale = lang === 'zh' ? 'zh-CN' : 'en-US'
 
@@ -532,7 +531,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
                           {t('admin.thUploader')}: {p.uploader_name ? (
                             <Link
                               component={RouterLink}
-                              to={`/users/${encodeURIComponent(p.uploader_name)}`}
+                              to={`/users/${encodeURIComponent(p.uploader_name)}`} target="_blank" rel="noopener noreferrer"
                               underline="hover"
                             >
                               {p.uploader_name}
@@ -546,7 +545,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
                           </IconButton>
                         </Tooltip>
                         <Tooltip title={t('common.edit')}><IconButton size="small" color="info"
-                          onClick={()=>navigate(`/admin/papers/${p.id}/edit`)}>
+                          component={RouterLink} to={`/admin/papers/${p.id}/edit`} target="_blank" rel="noopener noreferrer">
                           <EditIcon fontSize="small" /></IconButton></Tooltip>
                         <Tooltip title={t('admin.reviewAction')}><IconButton size="small" color="primary"
                           onClick={() => void openReview(p)}>

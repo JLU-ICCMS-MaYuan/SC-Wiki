@@ -1,6 +1,6 @@
-# 检索结果接口草案
+# 检索结果接口
 
-关联：[Spec](../spec.md) FR-002～012、FR-017～019；事实所有权见[数据模型](../data-model.md)。这是拟实现契约，当前服务器尚无此端点。
+关联：[Spec](../spec.md) FR-002～012、FR-017～019；事实所有权见[数据模型](../data-model.md)。本地实现契约；运行中的后端须加载本次源码才具备新端点。
 
 ## 新接口
 
@@ -22,7 +22,7 @@
 }
 ```
 
-示例total为固定夹具的预期值，不代表当前接口已存在。view=papers的items为论文摘要（paper_id、revision、标题、年份、期刊、DOI、匹配状态数、匹配材料）；view=states为状态摘要（state_id、state_key、paper_id、revision、材料名／化学式、压强、报告空间群号／符号、优化条件、来源论文摘要、可用结构引用）。完整正文、原子坐标不在列表响应重复发送。
+示例total为隔离固定夹具的值，不代表业务库的恒定数量。view=papers的items为论文摘要（paper_id、revision、标题、年份、期刊、DOI、匹配状态数、匹配材料）；view=states为状态摘要（state_id、state_key、paper_id、revision、材料名／化学式、压强、报告空间群号／符号、优化条件、来源论文摘要、可用结构引用）。完整正文、原子坐标不在列表响应重复发送。
 
 公开候选必须属于approved且approved_revision=content_revision的论文；结构只读同revision的retained完整model。状态身份不跨论文去重。
 
@@ -32,7 +32,7 @@
 
 ## 独立结构区
 
-沿用 `/api/rag/structural-records/search` 的详情权限、模型与来源表示；新页面需通过服务端先排除state_key已关联项再计数／分页，不能在当前页前端过滤后沿用未过滤total。实施选择扩展现有接口独立项过滤参数或给出等价未分页候选查询，保持已有消费者不受影响。论文聚合查询仍以完整结构来源集合参与去重，而非依赖该区域当页items。
+沿用 `/api/rag/structural-records/search` 的详情权限、模型与来源表示；新页面需通过服务端先排除state_key已关联项再计数／分页，不能在当前页前端过滤后沿用未过滤total。通过扩展现有接口的independent_only参数实现，保持已有消费者不受影响。论文聚合查询仍以完整结构来源集合参与去重，而非依赖该区域当页items。
 
 ## 请求生命周期
 

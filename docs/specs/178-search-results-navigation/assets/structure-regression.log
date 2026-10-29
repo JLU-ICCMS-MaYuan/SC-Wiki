@@ -1,0 +1,35 @@
+...................                                                      [100%]
+=============================== warnings summary ===============================
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+backend/tests/test_structural_records.py::test_unassigned_model_survives_and_partial_parameters_are_not_collected
+backend/tests/test_structural_records.py::test_unassigned_model_survives_and_partial_parameters_are_not_collected
+backend/tests/test_structural_records.py::test_unassigned_model_survives_and_partial_parameters_are_not_collected
+backend/tests/test_structural_records.py::test_reextract_is_owner_authorized_hash_verified_preview_only
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:438: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+backend/tests/test_structural_records.py: 62 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/cell.py:106: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error()
+
+backend/tests/test_structural_records.py::test_tc_table_followed_by_structural_prose_is_not_a_lattice_table
+backend/tests/test_structural_records.py::test_tc_table_followed_by_structural_prose_is_not_a_lattice_table
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+backend/tests/test_structural_records.py::test_tc_table_followed_by_structural_prose_is_not_a_lattice_table
+backend/tests/test_structural_records.py::test_tc_table_followed_by_structural_prose_is_not_a_lattice_table
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+backend/tests/test_structural_records.py::test_tc_table_followed_by_structural_prose_is_not_a_lattice_table
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+backend/tests/test_structural_records.py: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+19 passed, 602 warnings in 2.95s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

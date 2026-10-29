@@ -5,7 +5,6 @@ import { useLanguage } from '../context/LanguageContext'
 import { CommunityEntry, useCommunityLoad } from '../lib/community'
 import ModelAnswerCard from '../components/community/ModelAnswerCard'
 import EntryCard from '../components/community/EntryCard'
-import CommentPanel from '../components/community/CommentPanel'
 
 export default function DiscussionAnswerPage() {
   const { id, answerId } = useParams(); const { t } = useLanguage(); const location = useLocation()
@@ -29,7 +28,7 @@ export default function DiscussionAnswerPage() {
     <Button component={RouterLink} to={valid ? `/share/discussions/${id}#entry-${answerId}` : '/share/discussions'} sx={{ mb: 1.5 }}>{t('community.backToQuestion')}</Button>
     {answer.loading && !answer.data && <CircularProgress />}
     {(!valid || answer.error || (!answer.loading && !answer.data)) && <Alert severity="error" action={valid ? <Button onClick={answer.reload}>{t('community.retry')}</Button> : undefined}>{t(answer.error || 'community.unavailable')}</Alert>}
-    {question.data && <Typography variant="h1" sx={{ fontSize: { xs: 19, sm: 23 }, lineHeight: 1.5, mb: 2.5 }}><RouterLink to={`/share/discussions/${id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{question.data.title}</RouterLink></Typography>}
-    {answer.data && !answer.error && (answer.data.origin === 'ai' ? <ModelAnswerCard key={answer.data.id} entry={answer.data} reload={reload} /> : <Box sx={{ bgcolor: 'background.paper', p: 2.5, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}><EntryCard entry={answer.data} reload={reload}><CommentPanel target={{ answer_id: answer.data.id }} /></EntryCard></Box>)}
+    {question.data && <Typography variant="h1" sx={{ fontSize: { xs: 19, sm: 23 }, lineHeight: 1.5, mb: 2.5 }}><RouterLink target="_blank" rel="noopener noreferrer" to={`/share/discussions/${id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{question.data.title}</RouterLink></Typography>}
+    {answer.data && !answer.error && (answer.data.origin === 'ai' ? <ModelAnswerCard key={answer.data.id} entry={answer.data} reload={reload} /> : <Box sx={{ bgcolor: 'background.paper', p: 2.5, borderRadius: 2, border: '1px solid', borderColor: 'divider' }}><EntryCard entry={answer.data} reload={reload}></EntryCard></Box>)}
   </Box>
 }

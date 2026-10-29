@@ -19,13 +19,13 @@
   状态，结构文本属于 `structure_models`，物性记录不重复承载这些事实。
 - Go API `GET /api/papers/:id` 在论文顶层返回 `material_families[]` 与 `superconductor_kind`，并按材料
   状态嵌套 `structure_families[]`、`structures` 和 `property_modules[]`。
-- `tc_max`、搜索结果和统计图表从 `PropertyRecord` 的规范固定列聚合；自定义且未规范化的性质不会
-  误入 Tc 聚合。Go API `POST /api/papers/search/records` 返回包含 `record_id`、`paper_id`、`year`、
+- `tc_max`和统计图表从 `PropertyRecord` 的规范固定列聚合；检索结果默认按论文归并，并可同页切换真实材料状态，物性条数不增加状态数；自定义且未规范化的性质不会
+  误入 Tc 聚合。旧Go API `POST /api/papers/search/records`仍为其他调用方保留，返回包含 `record_id`、`paper_id`、`year`、
   `formula`、`type`、`pressure`、`tc`、`space_group`、`source`、`status` 和 `doi` 的扁平列表行。
 - `/search` 页面按 `paper_id` 请求论文详情。结构预览读取材料状态下的 `structures`，物性展示统一读取
   `property_modules`。Tc 排在关键物性最前，其后展示记录内参数和其他物性；空值不生成表格行。
-- 独立详情、搜索详情与图表抽屉共用按论文 ID 关联的[评论与回复](../06_Researcher_Community_Forum/community-discussion.md)，版本更新不会丢失评论。材料状态响应中的 `system_key` 用于跳转跨论文共享的体系讨论；没有元素组合时不生成体系入口。
-- 探索页默认不预选元素，Formula 输入框默认为空；只有 URL 显式包含 `elements` 时才预选。
+- 论文详情、搜索与图表抽屉不再展示社区评论；[AI问题和答案](../06_Researcher_Community_Forum/community-discussion.md)保留。状态响应的system_key用于组成检索，体系讨论入口已退役。
+- 无查询地址进入元素选择页，不预选元素且Formula为空；带elements／formula的地址恢复结果，默认按论文。
 - 论文总结和核心发现以纯文本 `pre-wrap` 显示，保留用户录入的换行，不进行 Markdown 再解释。
 - 详情区块中，标签使用紧凑 caption；长文本使用较轻的正文层级，短值字段保持适合扫描的强调层级。
 - 知识图谱节点优先使用 `knowledge_graph_title`，缺失时回退论文 `title`。
@@ -40,8 +40,7 @@
 
 ## 工作流程
 
-材料检索先按规范化字段确定候选材料和论文。Go API 以目标 `property_records` 的 Tc 固定列关联材料
-状态与论文并生成扁平结果，前端展示本地记录。详情阶段按论文 ID 加载完整论文、
+材料检索先按规范化字段确定候选材料和论文。Go API直接匹配真实材料状态及完整结构来源，按论文或状态去重、计数和分页；实际启用的Tc条件通过状态相关存在查询应用。前端默认展示论文并可同页切换状态。详情阶段按论文 ID 加载完整论文、
 结构和按材料状态嵌套的模块记录，供详情、结构预览、审核编辑和图表点击抽屉复用。
 
 ```mermaid

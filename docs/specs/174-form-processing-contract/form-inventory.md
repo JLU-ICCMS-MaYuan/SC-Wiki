@@ -14,7 +14,7 @@
 | `/upload` 三类文件选择及历史角色恢复 | UploadPage、MultiFileUploadPanel、UploadRoleReview（仅历史任务） | #179：三个指定区域、单正文/格式校验、五文件三并发、完整 UploadPage 与桌面/390px 隔离浏览器通过；未作全站性能验收 |
 | `/auth` 登录、注册与找回密码 | AuthPage 委托 AuthExperience 和 production auth 服务 | 已定位，未做本轮性能验收 |
 | `/account` 资料、账号安全 | AccountPage、AccountSecurity、UsernameField | 已定位，未做本轮性能验收 |
-| `/search` 检索与筛选 | SearchPage | 已定位，未做本轮性能验收 |
+| `/search` 检索与筛选 | SearchPage／SearchResults，query及view由URL持有 | #178宿主验证同页双视图、过滤与页码恢复、错误重试、迟到响应；主视图／Tc变化不重查无关独立结构。固定性能基准未验收，不宣称全站性能通过 |
 | `/knowledge` 图谱检索与筛选 | KnowledgeGraphPage | 已定位，未做本轮性能验收 |
 | `/rag` 对话输入和会话操作 | RagPage、LlmProviderSwitcher | 已定位，未做本轮性能验收 |
 | `/tc-predict` 预测输入 | TcPredictPage 委托预测功能组件 | 已定位，未做本轮性能验收 |

@@ -1,0 +1,55 @@
+{
+  "environment": "本地原生实时开发，localhost:5173代理至现有本地API",
+  "date": "2026-10-29",
+  "read_only_queries": 4,
+  "papers_total": 1,
+  "states_total": 8,
+  "states": [
+    {
+      "pressure_gpa": 150,
+      "structure_optimization": "sscha",
+      "paper_id": 271
+    },
+    {
+      "pressure_gpa": 167,
+      "structure_optimization": "sscha",
+      "paper_id": 271
+    },
+    {
+      "pressure_gpa": 200,
+      "structure_optimization": "sscha",
+      "paper_id": 271
+    },
+    {
+      "pressure_gpa": 250,
+      "structure_optimization": "sscha",
+      "paper_id": 271
+    },
+    {
+      "pressure_gpa": 290,
+      "structure_optimization": "classical_static",
+      "paper_id": 271
+    },
+    {
+      "pressure_gpa": 300,
+      "structure_optimization": "classical_static",
+      "paper_id": 271
+    },
+    {
+      "pressure_gpa": 300,
+      "structure_optimization": "sscha",
+      "paper_id": 271
+    },
+    {
+      "pressure_gpa": 350,
+      "structure_optimization": "classical_static",
+      "paper_id": 271
+    }
+  ],
+  "ternary_independent_models": 0,
+  "binary_independent_models": 1,
+  "manual_restart": false,
+  "existing_watcher_loaded_new_endpoint": true,
+  "business_writes": 0,
+  "aliyun_deployment": false
+}

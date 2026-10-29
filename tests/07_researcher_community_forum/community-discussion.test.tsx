@@ -5,8 +5,8 @@ import '@testing-library/jest-dom/vitest'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import CommunityMarkdown from '../../frontend/src/components/community/CommunityMarkdown'
 import CommunityComposer from '../../frontend/src/components/community/CommunityComposer'
-import CommentPanel from '../../frontend/src/components/community/CommentPanel'
-import PaperCommunity from '../../frontend/src/components/community/PaperCommunity'
+import PaperDetailPage from '../../frontend/src/pages/PaperDetailPage'
+import SystemCommunityPage from '../../frontend/src/pages/SystemCommunityPage'
 import ModelAnswerCard from '../../frontend/src/components/community/ModelAnswerCard'
 import EntryCard from '../../frontend/src/components/community/EntryCard'
 import DiscussionPage from '../../frontend/src/pages/DiscussionPage'
@@ -28,14 +28,12 @@ describe('只读社区与多模型问答', () => {
     expect(screen.getByText('结论').tagName).toBe('STRONG'); expect(container.querySelector('.katex')).not.toBeNull()
     expect(container.querySelector('img,script')).toBeNull(); expect(screen.getByText('danger')).not.toHaveAttribute('href')
   })
-  it.each(['user', 'admin', 'superadmin'])('所有身份的论文与体系评论均只读：%s', async role => {
-    auth.user.role = role; vi.mocked(api.get).mockResolvedValue({ items: [comment], total: 1 })
-    render(<MemoryRouter><PaperCommunity paper={{ id: 7, chemical_systems: [{ system_key: 'Hg' }] }} /></MemoryRouter>)
-    await screen.findByText('已有评论'); expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '回复' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: '举报' })).not.toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Hg 体系讨论' })).toHaveAttribute('href', '/systems/Hg')
-    expect(api.post).not.toHaveBeenCalled()
+  it.each(['user', 'admin', 'superadmin'])('所有身份的体系评论入口均退役：%s', role => {
+    auth.user.role=role
+    render(<MemoryRouter><SystemCommunityPage /></MemoryRouter>)
+    expect(screen.getByText('体系讨论功能已移除，请使用检索结果查看来源论文。')).toBeInTheDocument()
+    expect(screen.queryByText('已有评论')).not.toBeInTheDocument()
+    expect(api.get).not.toHaveBeenCalled();expect(api.post).not.toHaveBeenCalled()
   })
   it.each(['user', 'admin', null])('非超级管理员没有提问按钮：%s', async role => {
     auth.user = role ? { ...auth.user, role } : null
@@ -126,7 +124,10 @@ describe('只读社区与多模型问答', () => {
     vi.mocked(api.get).mockImplementation(async url => url === '/api/community/questions/7/answers/42' ? entry : { ...comment, id: 7, kind: 'question', title: '原问题' })
     render(<MemoryRouter initialEntries={['/summary']}><Routes><Route path="/summary" element={<ModelAnswerCard entry={entry} reload={() => {}} compact />} /><Route path="/share/discussions/:id/answers/:answerId" element={<DiscussionAnswerPage />} /></Routes></MemoryRouter>)
     expect(screen.queryByText('这是完整的补充')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('link', { name: '查看 DeepSeek 的完整回答' }))
+    const link=screen.getByRole('link', { name: '查看 DeepSeek 的完整回答' })
+    expect(link).toHaveAttribute('target','_blank');expect(link).toHaveAttribute('href','/share/discussions/7/answers/42')
+    cleanup()
+    render(<MemoryRouter initialEntries={['/share/discussions/7/answers/42']}><Routes><Route path="/share/discussions/:id/answers/:answerId" element={<DiscussionAnswerPage/>}/></Routes></MemoryRouter>)
     await screen.findByText('这是完整的补充')
     expect(screen.getByText('这是完整的首答')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: '返回问题' })).toHaveAttribute('href', '/share/discussions/7#entry-42')
@@ -139,7 +140,7 @@ describe('只读社区与多模型问答', () => {
   })
   it('论文权限失败不显示历史内容或输入', async () => {
     vi.mocked(api.get).mockRejectedValue({ code: 'paper_forbidden', status: 403 })
-    render(<MemoryRouter><CommentPanel target={{ paper_id: 7 }} /></MemoryRouter>)
-    await screen.findByText('你目前无权访问这篇论文及其讨论。'); expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    render(<MemoryRouter initialEntries={['/papers/7']}><Routes><Route path="/papers/:id" element={<PaperDetailPage/>}/></Routes></MemoryRouter>)
+    await screen.findByText('无权查看该论文'); expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
   })
 })

@@ -72,7 +72,7 @@ func communityVisibleNotifications(user *models.User, unread bool) ([]communityV
 			if err == gorm.ErrRecordNotFound {
 				continue
 			}
-			if problem, ok := err.(communityError); ok && problem.status == 403 {
+			if problem, ok := err.(communityError); ok && (problem.status == 403 || problem.status == 410) {
 				continue
 			}
 			return nil, err

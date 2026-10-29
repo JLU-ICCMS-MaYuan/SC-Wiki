@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   Box, Typography, Card, CardContent, Button, TextField,
   Paper, Chip, Alert, Snackbar, CircularProgress, LinearProgress,
@@ -489,7 +489,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                   {taskState?.duplicate && taskState.existing_paper_id && (
                     <Alert severity="warning" sx={{ mt: 2 }}
                       action={taskState.allowed_actions?.includes('view')
-                        ? <Button color="inherit" size="small" onClick={() => openExistingPaper(taskState.existing_paper_id!)}>{t('upload.openExistingPaper')}</Button>
+                        ? <Button color="inherit" size="small" component={RouterLink} to={`/papers/${taskState.existing_paper_id}?return=%2Fupload`} target="_blank" rel="noopener noreferrer">{t('upload.openExistingPaper')}</Button>
                         : undefined}>
                       {taskState.duplicate_reason || t('upload.duplicateExisting')}
                     </Alert>

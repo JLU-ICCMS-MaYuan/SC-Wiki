@@ -80,7 +80,7 @@ func communityManagedEntries(c *gin.Context) {
 		communityFail(c, communityBad())
 		return
 	}
-	q := database.DB.Model(&models.CommunityEntry{}).Where("status = ? AND kind IN ?", status, []string{"question", "answer", "comment"})
+	q := database.DB.Model(&models.CommunityEntry{}).Where("status = ? AND kind IN ?", status, []string{"question", "answer"})
 	communityList(c, q, "id DESC", limit, offset)
 }
 

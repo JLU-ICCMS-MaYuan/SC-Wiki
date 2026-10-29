@@ -1,0 +1,42 @@
+{
+  "frontend": {
+    "files": 12,
+    "passed": 115
+  },
+  "go_feature": {
+    "passed": 7
+  },
+  "mysql": {
+    "passed": 1,
+    "scope": "隔离MySQL，新建仅本次测试库"
+  },
+  "python_structure": {
+    "passed": 19
+  },
+  "form_contract": {
+    "passed": 79
+  },
+  "mutation": {
+    "hosts": 4,
+    "detected_failures": 8
+  },
+  "browser": {
+    "passed": 13,
+    "widths": [
+      1400,
+      390
+    ],
+    "chrome_version": "156.0.8078.49",
+    "playwright_version": "1.64.1"
+  },
+  "build": "passed",
+  "unrelated_baseline_failures": {
+    "frontend": 4,
+    "go": 1
+  },
+  "scientific_data_writes": 0,
+  "ai_calls": 0,
+  "pushed": false,
+  "deployed": false,
+  "live_local_smoke": "passed; 1 paper / 8 states; independent binary model retained; existing watcher auto reload"
+}
