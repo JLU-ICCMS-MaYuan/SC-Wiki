@@ -1,0 +1,125 @@
+{
+  "activation": {
+    "source_commit": "cedc11d4818ce4af4886eb7e2dba62f29a4e6ef6",
+    "source_branch": "remote",
+    "application_content_commit": "11c7e10a1a35175e29bb8a601f7d29632c4804ad",
+    "source_archive_sha256": "5719c5d352d7eb75a369016908826112e7cc94a876245fe857ef16a7b1e63d42",
+    "release": "/home/mayuan/sc-wiki/releases/cedc11d4",
+    "images": {
+      "PYTHON_IMAGE": "sha256:19a077cb3555e06020bb2d8f44fd0d7f7371b3f44a5921b839c0a483747d12ae",
+      "FRONTEND_IMAGE": "sha256:64fc3e9f57fba54bdcb2b8091f03fa1a40d213ca8136633f4eaf067eaf06e20f",
+      "GOSERVER_IMAGE": "sha256:72562eaa1ea9bbce58781e6614e99acbe232ab3c7e8c373345cf77d58c3ab4a7"
+    },
+    "base_images": {
+      "PYTHON_IMAGE": "sha256:d9d1ea2b9affd6c0231e4655f7316e12b753c728b045d6a7601a498de630494e",
+      "FRONTEND_IMAGE": "sha256:008dfc89eb2da17f32e237a79d6f7d713372604b7c9fa8e2caaab03bde8f0f49",
+      "GOSERVER_IMAGE": "sha256:e6b5a79624f5ebca3d00d9123a4ee7d049b9733c5c76a433bce05deba83cbbfe"
+    },
+    "application_build_images": {
+      "PYTHON_IMAGE": "sha256:91440c5883433fb1822c0f347a23758d77adedae0306c9d5091b4724d68da355",
+      "FRONTEND_IMAGE": "sha256:e69c227a4c60b1cce946e4c2f0a09ff626bc5d18759bdbab6e306c6b3d2b5d4b",
+      "GOSERVER_IMAGE": "sha256:d52b921ed23fae44b8d36605d35be2be974191087f6b5efdf59b2979d8374fc2"
+    },
+    "mode": "full-committed-source-on-pinned-runtime",
+    "activated_at": "2026-10-29T01:36:31.415877+00:00",
+    "backup": "/home/mayuan/sc-wiki/backups/release-20261029-cedc11d4-attempt2",
+    "unchanged_containers": [
+      "/scwiki-app-caddy-1",
+      "/scwiki-compute-grobid-1",
+      "/scwiki-data-redis-1",
+      "/scwiki-data-mysql-1",
+      "/scwiki-data-neo4j-1",
+      "/scwiki-data-qdrant-1",
+      "/scwiki-data-garage-1"
+    ],
+    "running_containers": 14,
+    "static_permissions_fix": {
+      "previous_image": "sha256:7eafdc0ac2d9e52a1799764690f757d86f63d6df5d221c8de969da1dcb1beb11",
+      "final_image": "sha256:64fc3e9f57fba54bdcb2b8091f03fa1a40d213ca8136633f4eaf067eaf06e20f",
+      "directories": "0755",
+      "files": "0644",
+      "scope": "/usr/share/nginx/html",
+      "content_unchanged": true
+    }
+  },
+  "runtime": {
+    "source_commit": "cedc11d4818ce4af4886eb7e2dba62f29a4e6ef6",
+    "source_branch": "remote",
+    "python_files_verified": 401,
+    "frontend_files_verified": 164,
+    "go_binary_verified": true,
+    "application_image_ids_verified": 7
+  },
+  "public_browser": {
+    "transport": "Chrome on local Mac directly accessing the public HTTPS domain; no SSH tunnel or host override",
+    "routes": [
+      {
+        "path": "/news",
+        "nobel_faces": 11,
+        "status": 200
+      },
+      {
+        "path": "/nobel/giaever",
+        "refresh": true,
+        "share": "1/4"
+      },
+      {
+        "path": "/auth",
+        "input_count": 2
+      }
+    ],
+    "api": [
+      {
+        "path": "/health",
+        "status": 200
+      },
+      {
+        "path": "/api/news",
+        "status": 200
+      },
+      {
+        "path": "/api/news/feed?kind=news&period=week&page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/news/feed?kind=preprint&period=week&page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/news/feed?kind=journal_article&period=history&page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/papers?page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/classification-catalogs",
+        "status": 200
+      },
+      {
+        "path": "/api/account/profile",
+        "status": 401
+      }
+    ],
+    "mobile": {
+      "width": 390,
+      "content": 390
+    },
+    "passed": true,
+    "errors": [],
+    "server_errors": []
+  },
+  "backup": {
+    "verified": true,
+    "files": 106,
+    "bytes": 170017220,
+    "remote": "/home/mayuan/sc-wiki/backups/release-20261029-cedc11d4-attempt2",
+    "local": "/Users/mayuan/SC-Wiki-backups/release-20261029-cedc11d4/server"
+  },
+  "ci": {
+    "url": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/actions/runs/40800857457",
+    "source_commit": "cedc11d4818ce4af4886eb7e2dba62f29a4e6ef6",
+    "conclusion": "success"
+  }
+}
