@@ -11,6 +11,7 @@
 | 小功能 | 职责 | 依赖 |
 | --- | --- | --- |
 | [上传 LLM 工作链路与 Agent 抽象分析](upload-llm-workflow-and-agent-analysis.md) | 解释现有分段提取、提示词、表单映射及其与问答的关系；单独标明 Agent 与联网建议 | 上传 Worker、来源核对、问答工具 |
+| [固定表单填写与科学关系整理](../../specs/176-scientific-form-filling/validation.md) | LLM 主动查缺、多方法 Tc 分组、其他方法名称及真实验证边界 | 科学整理、固定表单、保存重读 |
 | [PDF 上传到审核入库交互流程图](pdf-review-flow.html) | 主流程入口；点击解析阶段或批准前检查进入独立程序流程图页面，其他节点显示概要 | 独立 HTML、CSS、JavaScript，无外部依赖 |
 | [解析与草稿程序流程图](pdf-parsing-flow.html) | 展开正文提取、角色确认、来源覆盖、查重、草稿保存及主要失败路径；可返回主流程 | 上传 Worker、解析与字段核对代码 |
 | [字段核对规则库与程序流程图](pdf-field-evidence-flow.html) | 按字段、区域或报错检索具体来源、程序检查、模型职责、候选、依赖及排错入口；保留分批处理控制流 | 字段规则快照、本机发布定义、共享核对与专门生成代码 |

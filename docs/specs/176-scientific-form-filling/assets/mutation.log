@@ -1,0 +1,5 @@
+
+> sc-wiki-frontend@1.0.0 test:form-contract:mutation
+> node ../scripts/check-form-contract.mjs --mutation
+
+通过：注入新数组导致整体缓存失效后，四类宿主的 8 项行为回归均检出失败；工作树未修改。

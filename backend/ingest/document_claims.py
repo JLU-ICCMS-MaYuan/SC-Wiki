@@ -131,7 +131,7 @@ def apply_claim_evidence(root: dict, claims: list[Claim]) -> None:
             node["evidences"] = [e.model_dump(mode="json") | {"page":e.pdf_page} for e in claim.evidences]
 
 
-def missing_tc_measurements(before: list[Claim], after: list[Claim]) -> list[str]:
+def missing_tc_measurements(before: list[Claim], after: list[Claim], *, allow_paired_range=False) -> list[str]:
     """防止汇总丢掉同一段落中的不同 Tc、压力或方法；未知条件允许后续补全。"""
     from decimal import Decimal, InvalidOperation
     from .property_modules import THEORETICAL_METHODS, EXPERIMENTAL_METHODS
@@ -175,5 +175,14 @@ def missing_tc_measurements(before: list[Claim], after: list[Claim]) -> list[str
             items.append((claim.claim_id,item))
         return items
     actual=[item for _,item in measurements(after)]
-    return [key for key,expected in measurements(before)
-            if not any(all(found.get(k)==v for k,v in expected.items()) for found in actual)]
+    def retained(expected):
+        if any(all(found.get(k) == v for k, v in expected.items()) for found in actual):
+            return True
+        # 仅供已验证候选去向的模型整理路径：范围两端均须存在于相同科学条件下。
+        if not allow_paired_range or expected["low"] == expected["high"] or None in (expected["low"], expected["high"]):
+            return False
+        conditions = {k: v for k, v in expected.items() if k not in {"low", "high"}}
+        return all(any(found["low"] == bound == found["high"] and
+                       all(found.get(k) == v for k, v in conditions.items()) for found in actual)
+                   for bound in (expected["low"], expected["high"]))
+    return [key for key, expected in measurements(before) if not retained(expected)]

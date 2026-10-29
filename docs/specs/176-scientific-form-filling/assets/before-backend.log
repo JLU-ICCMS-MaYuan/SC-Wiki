@@ -1,0 +1,83 @@
+FFFFFFFF                                                                 [100%]
+=================================== FAILURES ===================================
+____ test_real_four_candidates_become_one_group_two_points_with_all_origins ____
+
+    def test_real_four_candidates_become_one_group_two_points_with_all_origins():
+>       from backend.ingest.scientific_form_filling import apply_plan
+E       ModuleNotFoundError: No module named 'backend.ingest.scientific_form_filling'
+
+tests/01_decentralized_uploading/test_scientific_form_filling.py:35: ModuleNotFoundError
+_____ test_invalid_plan_cannot_drop_or_misplace_results[missing_candidate] _____
+
+bad = 'missing_candidate'
+
+    @pytest.mark.parametrize('bad', ['missing_candidate', 'unknown_source', 'lost_point', 'mixed_method', 'invented_candidate'])
+    def test_invalid_plan_cannot_drop_or_misplace_results(bad):
+>       from backend.ingest.scientific_form_filling import apply_plan
+E       ModuleNotFoundError: No module named 'backend.ingest.scientific_form_filling'
+
+tests/01_decentralized_uploading/test_scientific_form_filling.py:52: ModuleNotFoundError
+______ test_invalid_plan_cannot_drop_or_misplace_results[unknown_source] _______
+
+bad = 'unknown_source'
+
+    @pytest.mark.parametrize('bad', ['missing_candidate', 'unknown_source', 'lost_point', 'mixed_method', 'invented_candidate'])
+    def test_invalid_plan_cannot_drop_or_misplace_results(bad):
+>       from backend.ingest.scientific_form_filling import apply_plan
+E       ModuleNotFoundError: No module named 'backend.ingest.scientific_form_filling'
+
+tests/01_decentralized_uploading/test_scientific_form_filling.py:52: ModuleNotFoundError
+________ test_invalid_plan_cannot_drop_or_misplace_results[lost_point] _________
+
+bad = 'lost_point'
+
+    @pytest.mark.parametrize('bad', ['missing_candidate', 'unknown_source', 'lost_point', 'mixed_method', 'invented_candidate'])
+    def test_invalid_plan_cannot_drop_or_misplace_results(bad):
+>       from backend.ingest.scientific_form_filling import apply_plan
+E       ModuleNotFoundError: No module named 'backend.ingest.scientific_form_filling'
+
+tests/01_decentralized_uploading/test_scientific_form_filling.py:52: ModuleNotFoundError
+_______ test_invalid_plan_cannot_drop_or_misplace_results[mixed_method] ________
+
+bad = 'mixed_method'
+
+    @pytest.mark.parametrize('bad', ['missing_candidate', 'unknown_source', 'lost_point', 'mixed_method', 'invented_candidate'])
+    def test_invalid_plan_cannot_drop_or_misplace_results(bad):
+>       from backend.ingest.scientific_form_filling import apply_plan
+E       ModuleNotFoundError: No module named 'backend.ingest.scientific_form_filling'
+
+tests/01_decentralized_uploading/test_scientific_form_filling.py:52: ModuleNotFoundError
+____ test_invalid_plan_cannot_drop_or_misplace_results[invented_candidate] _____
+
+bad = 'invented_candidate'
+
+    @pytest.mark.parametrize('bad', ['missing_candidate', 'unknown_source', 'lost_point', 'mixed_method', 'invented_candidate'])
+    def test_invalid_plan_cannot_drop_or_misplace_results(bad):
+>       from backend.ingest.scientific_form_filling import apply_plan
+E       ModuleNotFoundError: No module named 'backend.ingest.scientific_form_filling'
+
+tests/01_decentralized_uploading/test_scientific_form_filling.py:52: ModuleNotFoundError
+_____ test_missing_source_is_requested_once_and_no_information_loop_stops ______
+
+    def test_missing_source_is_requested_once_and_no_information_loop_stops():
+>       from backend.ingest.scientific_form_filling import fill_scientific_forms
+E       ModuleNotFoundError: No module named 'backend.ingest.scientific_form_filling'
+
+tests/01_decentralized_uploading/test_scientific_form_filling.py:65: ModuleNotFoundError
+_____________ test_numeric_result_cannot_be_excluded_as_curve_text _____________
+
+    def test_numeric_result_cannot_be_excluded_as_curve_text():
+>       from backend.ingest.scientific_form_filling import apply_plan
+E       ModuleNotFoundError: No module named 'backend.ingest.scientific_form_filling'
+
+tests/01_decentralized_uploading/test_scientific_form_filling.py:79: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_real_four_candidates_become_one_group_two_points_with_all_origins
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_invalid_plan_cannot_drop_or_misplace_results[missing_candidate]
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_invalid_plan_cannot_drop_or_misplace_results[unknown_source]
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_invalid_plan_cannot_drop_or_misplace_results[lost_point]
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_invalid_plan_cannot_drop_or_misplace_results[mixed_method]
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_invalid_plan_cannot_drop_or_misplace_results[invented_candidate]
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_missing_source_is_requested_once_and_no_information_loop_stops
+FAILED tests/01_decentralized_uploading/test_scientific_form_filling.py::test_numeric_result_cannot_be_excluded_as_curve_text
+8 failed in 0.08s

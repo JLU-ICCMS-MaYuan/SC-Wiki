@@ -107,6 +107,16 @@ def test_worker_finishes_direct_claim_gate_before_common_methods_fill(tmp_path,m
     saved=[]
     monkeypatch.setattr(jobs,'save_draft',lambda _,value:saved.append(deepcopy(value)))
     def direct(system,prompt,**kw):
+        from backend.ingest.scientific_form_filling import PROMPT as FILL_PROMPT
+        if system == FILL_PROMPT:
+            request = json.loads(prompt)
+            row = request['candidates'][0]
+            source = next(s for s in request['sources'] if '200 K' in s['content'])
+            return {'done': True, 'records': [{'candidate_ids': [row['candidate_id']],
+                'group': 'same-conditions', 'method': 'unknown',
+                'values': {'value_kind': 'number', 'value_number': 200, 'method_code': 'unknown'},
+                'source_ids': [source['source_id']], 'reason': '保留原文数值，方法未报告'}],
+                'excluded': [], 'unresolved': []}
         if system==DOMAIN_SYSTEM_PROMPT:
             context=json.loads(prompt[prompt.index('{'):])
             b=context['pages'][0]['blocks'][0]
@@ -136,7 +146,9 @@ def test_worker_finishes_direct_claim_gate_before_common_methods_fill(tmp_path,m
             'explanation':'原文说明各压力共用声子网格，依据同物相结果关联，仍需人工核对。'}]}
     monkeypatch.setattr('backend.rag.llm.complete_json',methods)
     assert jobs._process_upload_task(task)['status']=='ready'
+    assert saved[0]['form_filling_report']['status'] == 'completed'
     r=saved[0]['material_states'][0]['property_modules'][0]['records'][0]
+    assert r['payload']['tc_group']['version'] == 1
     assert r['payload']['calculation_conditions']['k_grid']=='24x24x24'
     assert r['payload']['source_associations'][0]['basis_kind']=='paper_inference'
 

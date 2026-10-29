@@ -1,0 +1,59 @@
+{
+  "passed": true,
+  "task": "29b2dd4604b64ee58c669c0efddb8cab",
+  "started": 1793258374.161497,
+  "source_commit": "8b59244eec2e31131ea4fa050f2239208d9e69b9",
+  "reused": [
+    "已核对原 PDF 文字与 IR"
+  ],
+  "rerun": [
+    "科学字段 AI 提取",
+    "模型整理与查缺",
+    "来源定位",
+    "隔离草稿保存重读"
+  ],
+  "not_run": [
+    "原任务写入",
+    "整篇 PDF 工具重跑",
+    "整篇业务提交"
+  ],
+  "model": {
+    "provider": "server:LLM1",
+    "model": "deepseek-v4-pro"
+  },
+  "source_hashes": {
+    "backend/ingest/scientific_form_filling.py": "5d5b24bd276b5d0706b1f10424e113d6c517bf51d30ecf1c4bbd96c9bd93c70d",
+    "backend/ingest/domain_extraction.py": "488b4b7a7194dca6a82829ab123a7d558ddd1fe95729057528e91f8c1df2ef5e",
+    "backend/ingest/document_claims.py": "f0fa8f83fd1ad5c87ba549d8fcc4baeecbf4ba9d57151ec24aa915232e9c251b"
+  },
+  "sources": [
+    {
+      "file_id": "c463643719b3420eb4e1936d95780c6b",
+      "sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "pages_reextracted": [
+        1,
+        2,
+        3,
+        19
+      ],
+      "ir_sha256": "1494b5544027405e46ea54a55ab5ffb88334ceeec0de43d9284bf83ace595637"
+    },
+    {
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "pages_reextracted": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "ir_sha256": "4b0f3cdf7a0dbdc3f9352de0f479fdb6b53c2cb090dc97d18a31009cc2ebf6f6"
+    }
+  ],
+  "disposition_count": 4,
+  "record_count": 4,
+  "roundtrip_equal": true,
+  "original_state_unchanged": true,
+  "original_draft_unchanged": true,
+  "elapsed_seconds": 157.45926785469055
+}

@@ -12,7 +12,7 @@ vi.mock('../../frontend/src/lib/api', () => ({ api: { get: vi.fn() } }))
 const definition = (method: string): FormDefinition => ({ definition_key: `record.superconductive_properties.predicted_tc.${method}`,
   version: 1, target_kind: 'property_record', module_code: 'superconductive_properties', record_type: 'predicted_tc',
   method_code: method, property_code: 'tc', status: 'published', checksum: 'fixture', core_schema: {}, json_schema: { type: 'object' }, ui_schema: {} })
-const defs = ['unknown', 'allen_dynes', 'isotropic_eliashberg'].map(definition)
+const defs = ['unknown', 'allen_dynes', 'isotropic_eliashberg', 'anisotropic_eliashberg', 'mcmillan', 'scdft', 'other'].map(definition)
 const range = (): PropertyRecordDraft => ({ record_key: 'source', module_code: 'superconductive_properties', record_type: 'predicted_tc',
   property_code: 'tc', definition_key: defs[2].definition_key, definition_version: 1, method_code: 'isotropic_eliashberg',
   name_raw: 'Tc', value_kind: 'range', value_min: 281, value_max: 311, value_raw: '281–311', canonical_unit: 'K', unit_raw: 'K',
@@ -64,7 +64,7 @@ it('生产共享表单保存三组与两种方法，按具体组合互斥选择�
   fireEvent.click(within(core()).getByRole('button', { name: '新增字段', exact: true }))
   const secondMethod = within(core()).getByRole('group', { name: '第2种预测方法' })
   fireEvent.mouseDown(within(secondMethod).getByLabelText('预测方法'))
-  fireEvent.click(await screen.findByRole('option', { name: 'Allen–Dynes' }))
+  fireEvent.click(await screen.findByRole('option', { name: 'Allen–Dynes 修正 McMillan' }))
   fireEvent.change(within(secondMethod).getByLabelText('Tc'), { target: { value: '250' } })
   fireEvent.change(within(secondMethod).getByLabelText('μ*'), { target: { value: '0.12' } })
   fireEvent.click(within(core()).getByLabelText('选择第2种方法第1组为代表结果'))
@@ -87,4 +87,47 @@ it('只读不选择、不拆分旧范围且所有输入禁用', async () => {
   expect(screen.getAllByRole('checkbox').every(input => (input as HTMLInputElement).disabled && !(input as HTMLInputElement).checked)).toBe(true)
   expect(screen.queryByRole('button', { name: '新增字段' })).not.toBeInTheDocument()
   expect(changed).not.toHaveBeenCalled()
+})
+
+it('文本型历史 Tc 仍用固定表单，恢复数值时保留原始文字', async () => {
+  let latest: PropertyModuleDraft[] = []
+  const bad = { ...range(), value_kind: 'text' as const, value_number: null, value_min: null, value_max: null,
+    value_text: 'from Eliashberg and McMillan equations', value_raw: 'from Eliashberg and McMillan equations', payload: {} }
+  function Host() {
+    const [modules, setModules] = useState<PropertyModuleDraft[]>([{module_key:'m',module_code:'superconductive_properties',
+      definition_key:'module.superconductive_properties',definition_version:1,display_order:0,records:[bad]}])
+    latest = modules
+    return <PropertyModuleEditor modules={modules} onChange={setModules} />
+  }
+  render(<Host />)
+  fireEvent.click(screen.getByText('超导性质'))
+  expect(await screen.findByTestId('predicted-tc-core')).toBeVisible()
+  expect(screen.queryByLabelText('文本值')).not.toBeInTheDocument()
+  expect(within(screen.getByTestId('predicted-tc-core')).getByText(/from Eliashberg and McMillan equations/)).toBeVisible()
+  expect(screen.queryByText('超导转变温度 Tc', {exact:true})).not.toBeInTheDocument()
+  fireEvent.change(screen.getByLabelText('Tc'), {target:{value:'235'}})
+  expect(latest[0].records[0]).toMatchObject({value_kind:'number',value_number:235})
+  expect(latest[0].records[0].payload.tc_range_origin).toMatchObject({value_text:bad.value_text})
+})
+
+it('固定七种方法，其他方法名称可编辑并在重开后保留', async () => {
+  let latest: PropertyModuleDraft[] = []
+  const point = {...expandTcPoints([range()])[0], method_code:'other', method_raw:'Custom theory',
+    definition_key:definition('other').definition_key}
+  function Host() {
+    const [modules, setModules] = useState<PropertyModuleDraft[]>([{module_key:'m',module_code:'superconductive_properties',
+      definition_key:'module.superconductive_properties',definition_version:1,display_order:0,records:[point]}])
+    latest = modules
+    return <><button onClick={()=>setModules(JSON.parse(JSON.stringify(modules)))}>重读</button>
+      <PropertyModuleEditor modules={modules} onChange={setModules} /></>
+  }
+  render(<Host />)
+  fireEvent.click(screen.getByText('超导性质'))
+  const input = await screen.findByLabelText('具体方法名称')
+  fireEvent.change(input,{target:{value:'User corrected method'}})
+  fireEvent.click(screen.getByText('重读'))
+  expect(screen.getByLabelText('具体方法名称')).toHaveValue('User corrected method')
+  expect(latest[0].records[0].method_raw).toBe('User corrected method')
+  fireEvent.mouseDown(screen.getByLabelText('预测方法'))
+  expect(await screen.findAllByRole('option')).toHaveLength(7)
 })

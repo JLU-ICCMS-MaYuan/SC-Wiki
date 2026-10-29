@@ -220,6 +220,8 @@ Phys.org 只能补回当前 RSS 窗口；Crossref 不转载摘要；该版本不
 
 ## 上传任务解析详情（#140）
 
+科学结果现在按固定表单整理：共同参数独立显示，每种 Tc 预测方法一行，同方法可以有多个 Tc／μ* 组合。“其他方法”允许填写具体名称。模型会结合正文、表格、表注和补充材料判断重复表达并查找缺项；找不到或存在冲突时保留具体说明，不从曲线提取 Tc。历史错误文本不会改变表单布局，查看页面不会自动修改旧草稿。验证与边界见 [#176](docs/specs/176-scientific-form-filling/validation.md)。
+
 修改表单及共享组件后，运行 `npm run test:form-contract --prefix frontend` 与 `npm run test:form-contract:mutation --prefix frontend`，检查完整页面的局部更新、输入／保存及已知回退检出能力。规则和实际覆盖范围见[表单更新与回归检查](docs/overview/form-processing.md)。
 
 校对表单在论文原标题下方显示“图谱科学标题”，用于知识图谱节点展示。可直接查看、编辑并保存；点击字段标签进入来源核对或字段设置。没有标题时输入框保持为空，不自动复制原标题。见 [#173 操作与验收](docs/specs/173-graph-title-form/quickstart.md)。

@@ -1,0 +1,135 @@
+[
+  {
+    "id": "IMG-001",
+    "upload_order": 1,
+    "original_name": "codex-clipboard-12fcd04b-94bc-4907-a4f7-ecdcd2c2c8ed.png",
+    "locator": "docs/specs/176-scientific-form-filling/assets/IMG-001.png",
+    "status": "local_verified",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3094,
+      1508
+    ],
+    "sha256": "b827ab1a29df8bdea5164c92a27fc8a02d6b3ebf69c4875cc2117d200a01d943",
+    "user_context": "这是我要你干的事情吗？我给出的图片是我之前填写 La-Sc-H时满意的表单。图 2是你填写的CaH6的表单。",
+    "related": [
+      "US1",
+      "US2"
+    ],
+    "verification": "2026-10-29 原图复制后解码并核对尺寸、SHA-256及字节一致；远程链接待推送验证"
+  },
+  {
+    "id": "IMG-002",
+    "upload_order": 2,
+    "original_name": "codex-clipboard-b14ff00c-062f-4ce5-9d36-7bdc640e1a63.png",
+    "locator": "docs/specs/176-scientific-form-filling/assets/IMG-002.png",
+    "status": "local_verified",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3280,
+      5476
+    ],
+    "sha256": "3656f6a46b88169c26efe53dcb0eadf26719c37abdceabe95e2b7586638df78d",
+    "user_context": "所以你在材料状态 4 Im-3m. CaH6 150 GPa里面的超导性质里面填写了4 组数据。",
+    "related": [
+      "US1",
+      "US2"
+    ],
+    "verification": "2026-10-29 原图复制后解码并核对尺寸、SHA-256及字节一致；远程链接待推送验证"
+  },
+  {
+    "id": "IMG-003",
+    "upload_order": 3,
+    "original_name": "codex-clipboard-f138f251-f605-4034-8f71-44e9399c56bc.png",
+    "locator": "docs/specs/176-scientific-form-filling/assets/IMG-003.png",
+    "status": "local_verified",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3258,
+      864
+    ],
+    "sha256": "ea7902c8e203b98171ddafd911f86f4ba67200737a814d7c886e16128a8f6c77",
+    "user_context": "图 3里面的各个字段的布局都完全颠覆了我超导性质的字段布局的设计。",
+    "related": [
+      "US1",
+      "US2"
+    ],
+    "verification": "2026-10-29 原图复制后解码并核对尺寸、SHA-256及字节一致；远程链接待推送验证"
+  },
+  {
+    "id": "IMG-004",
+    "upload_order": 4,
+    "original_name": "codex-clipboard-9c452692-bb7a-4a79-815b-21cab7e0f891.png",
+    "locator": "docs/specs/176-scientific-form-filling/assets/IMG-004.png",
+    "status": "local_verified",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3262,
+      1346
+    ],
+    "sha256": "12a74b6f6eb1b75844f6f802d39c22abdfc93814a13158c1667950e6178cabdf",
+    "user_context": "图 4 还算比较符合我之前的超导性质字段的布局。",
+    "related": [
+      "US1",
+      "US2"
+    ],
+    "verification": "2026-10-29 原图复制后解码并核对尺寸、SHA-256及字节一致；远程链接待推送验证"
+  },
+  {
+    "id": "IMG-005",
+    "upload_order": 5,
+    "original_name": "codex-clipboard-6679e7cb-c7e7-4d80-aeb8-0d3e93b4b4cf.png",
+    "locator": "docs/specs/176-scientific-form-filling/assets/IMG-005.png",
+    "status": "local_verified",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3064,
+      1264
+    ],
+    "sha256": "a812ba3f0e49a1f430a6680a90a9cdc71744de60cca156614b12baa7250751ee",
+    "user_context": "图 5 ，6 都是对于超导温度的判断。",
+    "related": [
+      "US1",
+      "US2"
+    ],
+    "verification": "2026-10-29 原图复制后解码并核对尺寸、SHA-256及字节一致；远程链接待推送验证"
+  },
+  {
+    "id": "IMG-006",
+    "upload_order": 6,
+    "original_name": "codex-clipboard-fd515543-aad1-48e8-8e00-1ec26a40d957.png",
+    "locator": "docs/specs/176-scientific-form-filling/assets/IMG-006.png",
+    "status": "local_verified",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3296,
+      1124
+    ],
+    "sha256": "c3c00f8697bf9f627223fa6a708b89bafa558c2610de65c99e557dc9d4beb994",
+    "user_context": "图 5 ，6 都是对于超导温度的判断。",
+    "related": [
+      "US1",
+      "US2"
+    ],
+    "verification": "2026-10-29 原图复制后解码并核对尺寸、SHA-256及字节一致；远程链接待推送验证"
+  },
+  {
+    "id": "IMG-007",
+    "upload_order": 7,
+    "original_name": "codex-clipboard-ec2dbde8-e843-4644-bf45-07e97696c02c.png",
+    "locator": "docs/specs/176-scientific-form-filling/assets/IMG-007.png",
+    "status": "local_verified",
+    "media_type": "image/png",
+    "dimensions_px": [
+      2554,
+      504
+    ],
+    "sha256": "1cb3c2411e9130cc66a2554dbd1ec3dcf3a07e2fd359b0a915dea354161de9d4",
+    "user_context": "图 7 里面的方框框住的内容根本不需要啊！",
+    "related": [
+      "US1",
+      "US2"
+    ],
+    "verification": "2026-10-29 原图复制后解码并核对尺寸、SHA-256及字节一致；远程链接待推送验证"
+  }
+]

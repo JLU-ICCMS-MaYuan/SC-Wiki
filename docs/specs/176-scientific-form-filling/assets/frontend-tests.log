@@ -1,0 +1,16 @@
+
+> sc-wiki-frontend@1.0.0 test:upload-ui
+> vitest run --config ../vitest.config.ts ../tests/01_decentralized_uploading/predicted-tc-groups.test.tsx ../tests/01_decentralized_uploading/issue139-parameters.test.tsx
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+ ✓ tests/01_decentralized_uploading/issue139-parameters.test.tsx (4 tests) 299ms
+ ✓ tests/01_decentralized_uploading/predicted-tc-groups.test.tsx (5 tests) 1077ms
+   ✓ 生产共享表单保存三组与两种方法，按具体组合互斥选择并显式删除 851ms
+
+ Test Files  2 passed (2)
+      Tests  9 passed (9)
+   Start at  15:41:53
+   Duration  2.48s (transform 287ms, setup 0ms, collect 1.46s, tests 1.38s, environment 679ms, prepare 114ms)

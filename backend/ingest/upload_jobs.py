@@ -2311,6 +2311,17 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             excluded_properties = _prune_generated_properties(draft)
             if excluded_properties:
                 _atomic_write_json(artifact_directory(task_id) / "unclassified_properties.json", excluded_properties)
+        # 模型负责科学关系与主动查缺，程序保留每个候选的去向及最终来源门。
+        from backend.ingest.scientific_form_filling import fill_scientific_forms, form_sources
+        with call_phase("scientific_form_filling"):
+            draft["material_states"], form_filling = fill_scientific_forms(
+                draft["material_states"], form_sources(document_set, scientific_sources), complete_json,
+                cancelled=lambda: _ensure_not_cancelled(task_id),
+                on_attempt=lambda report: _atomic_write_json(
+                    artifact_directory(task_id) / "scientific_form_filling.json", report))
+        _atomic_write_json(artifact_directory(task_id) / "scientific_form_filling.json", form_filling)
+        draft["form_filling_report"] = {k: v for k, v in form_filling.items() if k != "attempts"}
+        draft.setdefault("generation_issues", []).extend(form_filling.get("issues") or [])
         if document_set and optimization_issues:
             draft.setdefault("generation_issues", []).extend(optimization_issues)
         if motivation_error:
@@ -2357,7 +2368,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 raise ParserError("document_review_required", "汇总草稿含无法在原文定位的科学字段，请重新核对",
                                   profile=state["parser_profile"], parser="claim_validator")
         if document_set:
-            if missing_tc_measurements(claims, final_claims):
+            if missing_tc_measurements(claims, final_claims, allow_paired_range=form_filling["status"] == "completed"):
                 raise ParserError("summary_records_missing", "汇总遗漏了已识别的 Tc、压力或方法记录，请重新核对",
                                   profile=state["parser_profile"], parser="coverage_audit")
             apply_claim_evidence(draft, final_claims)

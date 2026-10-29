@@ -1,0 +1,11 @@
+{
+  "mode": "final_source_response_replay",
+  "passed": true,
+  "live_source_run": ".data/issue176-live-3",
+  "outputs_identical": true,
+  "source_hashes": {
+    "backend/ingest/scientific_form_filling.py": "ffbea5cdff1908abd1f29a1a401c256756a8f483cd8560647dec2f429aa8ae51",
+    "backend/ingest/domain_extraction.py": "53ef09d8215044e92dff944ee13715e76da606103b9513e752c944d7bcb7bee5",
+    "backend/ingest/upload_jobs.py": "f31436d73d702f551ad929f0be5007db53bcf74acc4f362b2145d349b165f2ee"
+  }
+}

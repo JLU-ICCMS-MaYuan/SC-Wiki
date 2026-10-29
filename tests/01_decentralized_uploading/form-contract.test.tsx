@@ -1,4 +1,6 @@
 import '@testing-library/jest-dom/vitest'
+import formSeeds from '../fixtures/issue176/form-definitions.json'
+import { clearFormDefinitionCache } from '../../frontend/src/lib/formDefinitions'
 import React from 'react'
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
@@ -187,4 +189,40 @@ it('材料摘要名称变化只更新所属标签，不扫描所有字段', asyn
   await act(async () => { (root.querySelector('[data-state-key]') as HTMLElement).dataset.stateLabel = '新名称'; await new Promise(resolve => setTimeout(resolve, 20)) })
   expect(screen.getByText(/新名称.*未显示字段/)).toBeInTheDocument()
   expect(scan.mock.calls.filter(([selector]) => selector === '[data-issue-field]')).toHaveLength(0)
+})
+
+it.each(['upload', 'revision', 'admin', 'superadmin'])('#176 %s 固定 Tc 表单和其他方法编辑保持宿主隔离', async kind => {
+  clearFormDefinitionCache()
+  const defs = formSeeds.filter(d => d.target_kind === 'property_record' && d.module_code === 'superconductive_properties')
+  const oldGet = vi.mocked(api.get).getMockImplementation()!
+  vi.mocked(api.get).mockImplementation(async (...args) => {
+    const path = args[0]
+    if (path.startsWith('/api/form-definitions?')) return defs as never
+    if (path.startsWith('/api/form-definitions/')) return defs.find(d => path.includes(encodeURIComponent(d.definition_key))) as never
+    return oldGet(...args)
+  })
+  ;(states[0] as any).property_modules = [{module_key:'tc176',module_code:'superconductive_properties',
+    definition_key:'module.superconductive_properties',definition_version:1,display_order:0,records:[{
+      record_key:'point176',module_code:'superconductive_properties',property_code:'tc',record_type:'predicted_tc',
+      definition_key:'record.superconductive_properties.predicted_tc.other',definition_version:1,method_code:'other',
+      method_raw:'Original method',name_raw:'Tc',value_kind:'number',value_number:235,value_raw:'235 K',unit_raw:'K',
+      canonical_unit:'K',is_representative:false,payload:{parameters:{lambda_ep:2.69,mu_star:0.1},
+        calculation_conditions:{},tc_group:{version:1,group_key:'g176',method_key:'m176',point_key:'p176'}},
+    }]}]
+  try {
+    await host(kind)
+    fireEvent.click(screen.getAllByText('超导性质').find(node => node.closest('[data-property-module-toggle]'))!)
+    const input = await screen.findByLabelText('具体方法名称')
+    counters.cards=[]
+    fireEvent.change(input,{target:{value:'用户自定义方法'}})
+    await act(async()=>{await new Promise(resolve=>setTimeout(resolve,20))})
+    expect(screen.getByLabelText('具体方法名称')).toHaveValue('用户自定义方法')
+    expect(screen.getByLabelText('Tc')).toHaveValue('235')
+    expect(screen.queryByLabelText('文本值')).not.toBeInTheDocument()
+    expect(new Set(counters.cards)).toEqual(new Set([0]))
+    expect(vi.mocked(api.post).mock.calls.some(([path])=>/jobs|preflight|submit-check/.test(path))).toBe(false)
+  } finally {
+    states[0].property_modules=[]
+    clearFormDefinitionCache()
+  }
 })

@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 import json
+import re
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
@@ -183,6 +184,11 @@ explicitly tied to this record; experimental is NOT a measurement method.
 Measured Tc uses record_type=measured_tc and payload.experimental_conditions; predicted Tc uses
 record_type=predicted_tc and payload.calculation_conditions. Never copy one record's conditions to another.
 Tc belongs to module_code=superconductive_properties, property_code=tc, canonical_unit=K.
+Tc results must describe numeric temperatures/ranges, never a sentence naming calculation methods.
+Do not digitize Tc from curves. A curve-only caption is retained as an out_of_model_scope exclusion
+with its locator, not a text-valued Tc or a representative result. Search supplied body/table/notes
+for reported numbers before deciding information is missing. Keep other methods under other and
+preserve their actual names in method_raw. Fixed UI labels are not scientific data to generate.
 Keep value_raw/unit_raw as reported, including ranges and uncertainty. Each payload preserves reported
 calculation parameters or experimental description; missing information remains empty, never invented.
 Server generates record_key and definition_key/version; omit these fields. No database IDs or structures.
@@ -246,9 +252,11 @@ and do not replace the measurement pressure with the phase stability range.
 
 SUMMARY_BOUNDARY = """
 SCIENTIFIC RECORD OWNERSHIP: Scientific material_states are assembled from chunk candidates by the server.
-Summarize paper metadata and classification only. Return material_states=[]; do not regenerate, merge,
-drop, complete or rewrite any scientific record, method, pressure or condition. Return key_properties=[].
-The server retains all scientific candidates for validation and deterministic assembly.
+This call summarizes paper metadata and classification only; return material_states=[] and key_properties=[].
+Scientific candidates are subsequently organized by the dedicated source-grounded form-filling LLM:
+it may merge repeated descriptions, establish Tc/mu pairs, group methods and actively look up missing
+reported values. The server retains original candidates and validates that every one has a recorded
+disposition and that numerical results and sources survive that organization.
 """
 
 
@@ -328,6 +336,11 @@ def _normalize_tc_method(raw: object, kind: str) -> str:
     if text in allowed:
         return text
     folded = " ".join(text.replace("-", " ").replace("_", " ").split())
+    # 同句列举不同方法不能由第一个关键词决定；Allen–Dynes 修正 McMillan 是一个方法。
+    families = [bool(re.search(pattern, folded)) for pattern in
+                (r"eliashberg", r"mcmill?an|allen dynes|allen dyne", r"scdft|superconducting density functional")]
+    if sum(families) > 1:
+        return "unknown"
     for code in sorted(allowed):
         if folded == code.replace("_", " "):
             return code

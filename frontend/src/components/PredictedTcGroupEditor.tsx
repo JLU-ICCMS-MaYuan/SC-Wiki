@@ -1,5 +1,5 @@
 import { useId } from 'react'
-import { Alert, Box, Button, Checkbox, FormControl, IconButton, InputLabel, MenuItem, Select, Tooltip, Typography } from '@mui/material'
+import { Alert, Box, Button, Checkbox, FormControl, IconButton, InputLabel, MenuItem, Select, TextField, Tooltip, Typography } from '@mui/material'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import type { FormDefinition, FormIssue } from '../lib/formDefinitions'
@@ -22,7 +22,7 @@ interface Props {
   onChange: (records: PropertyRecordDraft[], selected?: boolean) => void
 }
 const names: Record<string, string> = { isotropic_eliashberg: '各向同性 Eliashberg', anisotropic_eliashberg: '各向异性 Eliashberg',
-  allen_dynes: 'Allen–Dynes', mcmillan: 'McMillan', scdft: 'SCDFT', other: '其他', unknown: '未说明' }
+  allen_dynes: 'Allen–Dynes 修正 McMillan', mcmillan: 'McMillan', scdft: '超导密度泛函理论 SCDFT', other: '其他方法', unknown: '未说明方法' }
 
 export default function PredictedTcGroupEditor({ records, definitions, definition, errors = [], issues, basePath, recordIndices, readOnly, onChange }: Props) {
   const helpId = useId(), root = records[0]
@@ -49,7 +49,9 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
       }} />
   </Box>
   const core = <Box data-testid="predicted-tc-core" sx={{ minWidth: 0 }}>
-    <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>超导转变温度 Tc</Typography>
+    {records.filter(r => !['number', 'range'].includes(r.value_kind)).map(r => <Alert key={r.record_key} severity="warning" sx={{ mb: 1 }}>
+      原提取内容不是可填写的 Tc 数值：{r.value_text || r.value_raw}。请通过来源核对查找数值，或在下方填写；原内容保留。
+    </Alert>)}
     <Box data-testid="tc-parameter-line" sx={{ display: 'flex', gap: 1, overflowX: 'auto', py: 1 }}>
       {parameter('lambda_ep', '电声耦合强度 λ')}{parameter('omega_log', 'ωlog', 'K')}
     </Box>
@@ -73,9 +75,13 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
               <InputLabel id={`${helpId}-${methodIndex}`}>预测方法</InputLabel>
               <Select labelId={`${helpId}-${methodIndex}`} label="预测方法" value={first.method_code || 'unknown'} disabled={readOnly}
                 onChange={event => replaceMethod(method, event.target.value)}>
-                {[...new Set([first.method_code || 'unknown', ...choices.map(d => d.method_code || 'unknown')])].map(code => <MenuItem key={code} value={code}>{names[code] || code}</MenuItem>)}
+                {Object.entries(names).map(([code, label]) => <MenuItem key={code} value={code}>{label}</MenuItem>)}
               </Select>
             </FormControl>
+            {first.method_code === 'other' && <TextField size="small" label="具体方法名称" value={first.method_raw || ''}
+              disabled={readOnly} sx={{ width: 220 }} data-issue-field={`${path(first)}.method_raw`}
+              onChange={event => onChange(records.map(record => tcMethodKey(record) === method
+                ? { ...record, method_raw: event.target.value } : record))} />}
             {!readOnly && <Button size="small" aria-label="添加 Tc／μ* 组合" startIcon={<AddIcon />} onClick={() => {
               const expanded = expandTcPoints(records), template = expanded.find(r => tcMethodKey(r) === method)!
               onChange([...expanded, newTcPoint(template, method)])

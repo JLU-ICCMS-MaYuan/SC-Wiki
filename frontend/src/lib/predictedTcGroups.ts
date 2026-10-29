@@ -3,7 +3,7 @@ import { muRangeIndex, readTcPairs, readTcParameter, setTcParameter, tcParameter
 
 export interface TcGroupMeta { version: 1; group_key: string; method_key: string; point_key?: string }
 export interface TcPointView { key: string; record: PropertyRecordDraft; tc: number | null; mu: ParameterValue; selected: boolean }
-export const isGroupedTc = (r: PropertyRecordDraft) => r.record_type === 'predicted_tc' && ['number', 'range'].includes(r.value_kind)
+export const isGroupedTc = (r: PropertyRecordDraft) => r.record_type === 'predicted_tc'
 export const tcGroupMeta = (r: PropertyRecordDraft): TcGroupMeta | undefined => {
   const value = r.payload.tc_group as TcGroupMeta | undefined
   return value?.version === 1 && value.group_key && value.method_key ? value : undefined
@@ -38,9 +38,9 @@ export function expandTcPoints(records: PropertyRecordDraft[]): PropertyRecordDr
     const payload = setTcParameter(record, 'mu_star', point.mu)
     const parameters = payload.parameters as Record<string, any>
     if (muRangeIndex(record) >= 0) parameters.extensions = (parameters.extensions || []).filter((item: any) => item.key !== 'mu_star')
-    if (record.value_kind === 'range' || record.value_min != null || record.value_max != null) {
+    if (record.value_kind !== 'number' || record.value_min != null || record.value_max != null) {
       payload.tc_range_origin ||= { value_kind: record.value_kind, value_raw: record.value_raw,
-        value_number: record.value_number, value_min: record.value_min, value_max: record.value_max,
+        value_number: record.value_number, value_min: record.value_min, value_max: record.value_max, value_text: record.value_text,
         parameters: structuredClone(tcParameters(record)), is_representative: Boolean(record.is_representative) }
     }
     payload.tc_group = { version: 1, group_key: group, method_key: tcMethodKey(record), point_key: point.key } satisfies TcGroupMeta
