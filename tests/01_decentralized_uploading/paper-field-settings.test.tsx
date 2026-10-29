@@ -26,8 +26,15 @@ beforeEach(() => {
     if (path.includes('/draft')) return { ok: true, data: draft } as never
     return { data: {}, space_groups: [], modules: [] } as never
   })
-  vi.mocked(api.post).mockImplementation(async path => path.endsWith('/summary')
-    ? { version: 'v1', records, needs_check: false } as never : { ok: true, data: draft, revision_id: 'revision-148', draft_version: 1 } as never)
+  vi.mocked(api.post).mockImplementation(async (path, body) => {
+    if (path.endsWith('/summary')) return { version: 'v1', records, needs_check: false } as never
+    if (path.endsWith('/identify-field')) {
+      const record = records.find(item => item.field === (body as { field: string }).field)
+      if (!record) throw new Error('测试请求了未定义的字段记录')
+      return { record } as never
+    }
+    return { ok: true, data: draft, revision_id: 'revision-148', draft_version: 1 } as never
+  })
   vi.mocked(api.patch).mockResolvedValue({ changed: true, version: 'v2' })
 })
 afterEach(() => { cleanup(); vi.resetAllMocks() })
@@ -48,6 +55,18 @@ async function open(field = 'methodology') {
   await within(dialog).findByLabelText('字段名称（key）')
   return dialog
 }
+it('返修汇总尚未返回时，先定位字段再打开设置仍保留当前值', async () => {
+  const post = vi.mocked(api.post).getMockImplementation()!
+  let finishSummary!: () => void
+  const summary = new Promise(resolve => { finishSummary = () => resolve({ version: 'v1', records, needs_check: false }) })
+  vi.mocked(api.post).mockImplementation((path, body) => path.endsWith('/summary') ? summary as never : post(path, body))
+  host('revision')
+  try {
+    const dialog = await open()
+    expect(within(dialog).getByLabelText('当前值')).toHaveValue('DFT\nSSCHA')
+    expect(api.post).toHaveBeenCalledWith(expect.stringMatching(/\/identify-field$/), expect.objectContaining({ field: 'paper.methodology' }))
+  } finally { finishSummary() }
+})
 it.each(['upload', 'revision', 'admin'] as const)('%s 的真实宿主显示研究方法并仅保存该列表，无额外模型调用', async kind => {
   host(kind)
   let dialog = await open()
