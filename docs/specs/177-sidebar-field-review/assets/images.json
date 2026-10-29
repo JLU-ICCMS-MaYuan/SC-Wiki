@@ -1,0 +1,42 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-e34803ef-b2d9-4393-a815-fedc97d2261f.png",
+      "locator": "docs/specs/177-sidebar-field-review/assets/IMG-001.png",
+      "status": "local_verified",
+      "user_context": "等待界面如图，就是这样一个条，在运行大模型核对，导致我无法修改其他内容。所以正确的流程就是：\n\n1. 保存你刚修改的 **μ**\\*，以及对应的人工理由和证据。\n2. AI 核对这个 μ\\*；需要理解所属压力、材料状态时，读取当前已有内容作为背景。\n3. 等待期间无法编辑，回答回来后，将结果保存到这个 μ\\* 字段。",
+      "related": [
+        "US1",
+        "US2",
+        "FR-003",
+        "FR-005",
+        "SC-002"
+      ],
+      "sha256": "401ea75fee38765b9b236f0354481ed577a4fd2a67f41a73e5f381a04fc173d1",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3838,
+        1948
+      ],
+      "size_bytes": 769781,
+      "verification": {
+        "time": "2026-10-29T15:09:21.124695+08:00",
+        "actions": [
+          "从原文件和归档路径分别重读并核对字节一致",
+          "验证 PNG 签名、所有分块 CRC、图像数据解压与宽高"
+        ],
+        "result": "原图字节完整、可解码，本地归档验证通过；未验证远程可访问",
+        "source_temporary_path": "/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/codex-clipboard-e34803ef-b2d9-4393-a815-fedc97d2261f.png"
+      }
+    }
+  ],
+  "observations": [
+    {
+      "image_id": "IMG-001",
+      "kind": "AI观察",
+      "text": "截图为科学数据来源核对遮罩弹窗，提示保存期间内容又发生变化，请检查当前值后重新确认，输入已保留；背景为 CaH6 上传校对页。截图不能证明模型已经开始运行或用户在等待时修改其他字段。"
+    }
+  ]
+}
