@@ -38,14 +38,14 @@
 
 ## 手动调整联动比例
 
-正式调参入口是 [dragInfluence.ts](../../../frontend/src/components/spectrumEditor/dragInfluence.ts) 顶部的 `DRAG_INFLUENCE`；独立Demo继续使用 [Demo原文件](../../specs/161-spectrum-manual-editor-demo/demo/src/dragInfluence.ts)。每条运行路径的界面和拖动共用各自配置。正式初值复制用户已认可的2/.3/1/.1，Demo原文件的未提交修改未被覆盖或纳入正式接入提交。
+正式调参入口是 [dragInfluence.ts](../../../frontend/src/components/spectrumEditor/dragInfluence.ts) 顶部的 `DRAG_INFLUENCE`；独立Demo继续使用 [Demo原文件](../../specs/161-spectrum-manual-editor-demo/demo/src/dragInfluence.ts)。每条运行路径的界面和拖动共用各自配置。当前正式参数为2/.1/1/.1，第1、2邻点分别跟随55%和10%，第3个开始停止；Demo为2/.3/1/.1。参数只影响之后的拖动，不修改已保存谱线。
 
 | 参数 | 含义 | 怎么调整 |
 | --- | --- | --- |
 | `coreNeighbors` | 按描线顺序，每侧明显跟随的邻点数 | 正整数；减小后主要影响区更局部 |
 | `edgeWeight` | 主要影响区最外侧邻点的跟随比例 | 在 `(0, 1]` 内；增大使附近点跟随更强 |
 | `decayLength` | 核心区外的指数衰减长度，单位为点数 | 必须大于 0；减小则衰减更快，增大则影响更远 |
-| `minWeight` | 极小影响的截断比例 | 大于 0 且小于 `edgeWeight`；增大后更远的点更早停止移动 |
+| `minWeight` | 极小影响的截断比例 | 正式允许大于 0 且小于等于 `edgeWeight`，Demo要求严格小于；增大后更远的点更早停止移动 |
 
 以距离选中点的描线序号差 `d` 计：核心区权重为 `1 − (1 − edgeWeight) × d / coreNeighbors`，外侧为 `edgeWeight × exp(−(d − coreNeighbors) / decayLength)`。选中点始终 100% 跟随；低于 `minWeight` 的权重不再参与。断口和其他分波不参与当前曲线的联动。
 

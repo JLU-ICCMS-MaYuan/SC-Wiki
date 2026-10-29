@@ -3,9 +3,7 @@ name: Build and publish Docker images
 on:
   push:
     branches:
-      - mayuan
-    tags:
-      - "v*"
+      - remote
   workflow_dispatch:
 
 permissions:
@@ -13,6 +11,7 @@ permissions:
 
 jobs:
   build:
+    if: github.ref == 'refs/heads/remote'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -47,9 +46,8 @@ jobs:
         with:
           images: mayuanmark/${{ matrix.image }}
           tags: |
-            type=raw,value=mayuan,enable=${{ github.ref == 'refs/heads/mayuan' }}
+            type=raw,value=remote
             type=sha,prefix=sha-
-            type=ref,event=tag
 
       - name: Build and push image
         uses: docker/build-push-action@v6

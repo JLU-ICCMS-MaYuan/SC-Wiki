@@ -1,7 +1,12 @@
 import { it, expect } from 'vitest'
+import { createInfluenceKernel } from '../../frontend/src/components/spectrumEditor/dragInfluence'
 import { appendPoint, curvePath, removePoints, prepareMove, validateDocument, commit, undo, redo, snapTarget, joinExistingPoint, movePrepared, type Document } from '../../frontend/src/components/spectrumEditor/engine'
 
 const doc:Document={schemaVersion:1,id:'chain',title:'谱',description:'',source:{id:'source',sha256:'hash',image:'',width:101,height:101,plot:[0,0,100,100],viewport:[0,0,100,100]},calibration:{direction:'x',frequency:{pixels:[0,100],values:[0,10],unit:'THz'},amplitude:{pixels:[100,0],values:[0,10],unit:'pixel'},amplitudeEvidence:''},curves:[{id:'a',name:'A',color:'red',pathOrdered:true,points:[{id:'a0',x:10,y:50,segment:'s',status:'observed',breakBefore:true},{id:'a1',x:30,y:40,segment:'s',status:'observed',breakBefore:false},{id:'a2',x:50,y:50,segment:'s',status:'observed',breakBefore:false}]},{id:'b',name:'B',color:'blue',points:[{id:'b0',x:60,y:50,segment:'b',status:'observed'}]}],zero:null,operations:[]}
+
+it('跟随边界等于截断值时保留最外侧邻点，严格低于边界的尾部不参与',()=>{
+  expect(createInfluenceKernel({coreNeighbors:2,edgeWeight:.1,decayLength:1,minWeight:.1})).toEqual([1,.55,.1])
+})
 
 it('没有起点、跨曲线起点、图外点不能开始描线',()=>{
   for(const anchor of ['', 'missing','b0'])expect(()=>appendPoint(doc,'a',anchor,40,80)).toThrow('已有点')

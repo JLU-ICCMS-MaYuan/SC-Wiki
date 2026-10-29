@@ -9,6 +9,12 @@
 
 ## 首次准备
 
+阿里云只从 `origin/remote` 的固定提交发布，本地开发继续使用 `mayuan`。先验证并合并代码到
+`remote`，记录完整 SHA，再构建和部署；推送不会自动更新服务器。镜像构建工作流只接受
+`remote`，发布 `remote` 与 `sha-<短提交>` 标签，实际运行仍固定 digest 或已核验的本地镜像 ID。
+发布清单同时记录 `SOURCE_BRANCH=remote` 和实际 `SOURCE_COMMIT`；不能只修改版本记录而不更新程序。
+表单约束工作流在 `remote` 推送后执行。Git 推送、Docker Hub 镜像推送和线上切换分别按本次授权执行。
+
 Compose 至少使用 2.30，以支持 `env_file.format: raw`。私有 env 使用不带外层引号的
 `KEY=value` 行；Compose 与维护容器均按原值读取，密码中的美元符号和引号不会再次展开。
 
@@ -99,8 +105,9 @@ Caddy 将 API 直接转发给 Go，并用实际连接来源覆盖 X-Real-IP；Go
 ### 网络受限时的同版本镜像差分
 
 服务器保留了上一版本的完整 `image.tar.gz` 时，可以使用
-`.github/workflows/export-deployment-delta.yml` 生成 VCDIFF 包。当前工作流固定本次基准和目标
-GitHub 制品 ID；下一次发布必须先核对并更新输入，不能把旧差分用于新镜像。
+`.github/workflows/export-deployment-delta.yml` 生成 VCDIFF 包。该工作流只允许从 `remote` 手动运行，
+必须输入仍可下载的基准/目标运行 ID、制品 ID 和目标源码完整 SHA，并检查该提交属于发布分支。
+完整镜像导出也只允许从 `remote` 手动运行，必须显式填写本次镜像引用 JSON；不再自动使用历史清单。
 导出端验证完整压缩归档摘要，实际还原并比较目标 tar 的 SHA-256。
 
 服务器需要 `xdelta3`，使用 `scripts/deployment_image_delta.py restore`，分别通过

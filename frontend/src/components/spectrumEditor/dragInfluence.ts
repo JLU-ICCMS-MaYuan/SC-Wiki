@@ -1,7 +1,7 @@
 // 手动调参入口：只改下面这四个值，界面说明与拖动权重会共用同一配置。
 export const DRAG_INFLUENCE = {
   coreNeighbors: 2,    // 选中点两侧各几个点明显跟随；正整数。
-  edgeWeight: 0.3,     // 主要影响区最外一个点的跟随比例；0 < 值 <= 1。
+  edgeWeight: 0.1,     // 主要影响区最外一个点的跟随比例；0 < 值 <= 1。
   decayLength: 1,     // 指数衰减长度（点数）；越小衰减越快，必须 > 0。
   minWeight: 0.1,   // 小于该跟随比例就不再移动；0 < 值 <= edgeWeight。
 }

@@ -1,5 +1,7 @@
 name: Form contract
 on:
+  push:
+    branches: [remote]
   pull_request:
   workflow_dispatch:
 permissions:

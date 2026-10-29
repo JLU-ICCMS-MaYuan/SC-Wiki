@@ -1,11 +1,28 @@
 name: Export verified deployment image delta
 
 on:
-  push:
-    branches: [mayuan]
-    paths:
-      - .github/workflows/export-deployment-delta.yml
-      - scripts/deployment_image_delta.py
+  workflow_dispatch:
+    inputs:
+      base_run_id:
+        description: '基准归档的工作流运行 ID'
+        required: true
+        type: string
+      base_artifact_id:
+        description: '基准归档制品 ID（必须仍可下载）'
+        required: true
+        type: string
+      target_run_id:
+        description: '目标归档的工作流运行 ID'
+        required: true
+        type: string
+      target_artifact_id:
+        description: '目标归档制品 ID（必须仍可下载）'
+        required: true
+        type: string
+      source_commit:
+        description: '目标镜像的完整源码提交 SHA（必须属于 remote）'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -13,9 +30,18 @@ permissions:
 
 jobs:
   export:
+    if: github.ref == 'refs/heads/remote'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify source belongs to release branch
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+        run: |
+          [[ "$SOURCE_COMMIT" =~ ^[a-f0-9]{40}$ ]]
+          git merge-base --is-ancestor "$SOURCE_COMMIT" HEAD
       - name: Prepare archive workspace
         run: |
           sudo rm -rf /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL /usr/share/dotnet
@@ -26,25 +52,27 @@ jobs:
         run: python3 -m unittest discover -s tests/02_maintenance_and_verification -p test_deployment_image_delta.py
       - uses: actions/download-artifact@v4
         with:
-          artifact-ids: 12341215651
-          run-id: 39588691825
+          artifact-ids: ${{ inputs.base_artifact_id }}
+          run-id: ${{ inputs.base_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: base
           merge-multiple: true
       - uses: actions/download-artifact@v4
         with:
-          artifact-ids: 12350119050
-          run-id: 39607553751
+          artifact-ids: ${{ inputs.target_artifact_id }}
+          run-id: ${{ inputs.target_run_id }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path: target
           merge-multiple: true
       - name: Create delta and verify exact reconstruction
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
         run: |
           python3 scripts/deployment_image_delta.py create --base base --target target --output delta \
-            --source-commit 39bdcac3f8ead28103d98188d4178b23044820c2
+            --source-commit "$SOURCE_COMMIT"
       - uses: actions/upload-artifact@v4
         with:
-          name: deployment-python-delta-39bdcac
+          name: deployment-image-delta-${{ inputs.source_commit }}
           path: delta/
           compression-level: 0
           retention-days: 2
