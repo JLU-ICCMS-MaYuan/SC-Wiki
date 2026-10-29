@@ -1,0 +1,16 @@
+{
+  "baseline_commit": "8d84f5793b236454775e8b5683f94509c0ead695",
+  "files": {
+    "backend/ingest/upload_contracts.py": "231724e6c6a62524c9b1d48358dc43f9c7071c74fe04d56c43941d1d59f84286",
+    "backend/ingest/upload_tasks.py": "326f41c75d95a946c947dd2e89ceaba3a7371e0229033db36faf2cf26db5e7bf",
+    "backend/ingest/upload_jobs.py": "871c56f62fdc01c55cf7e8543170ff54743998e25cdd33d70beaff0af583f60f",
+    "frontend/src/components/MultiFileUploadPanel.tsx": "89df3724052145c64d2789ec9f5911eae49bfb4bfbc3134054c2e3d7ef2ab63b",
+    "frontend/src/i18n/zh/upload.ts": "2fa39f9411609df50365d9a4397e128683a06fd2d73ba91b720b750d0ed270c8",
+    "frontend/src/i18n/en/upload.ts": "a491025ce3dca265000b46062fff4730e7853755b7fbc2c07506fa450fef9211",
+    "tests/01_decentralized_uploading/test_manual_upload_roles.py": "a3bf51b01732c1b391aa590b636053cb173ba7db479ecca11289bcd0e80bc0c4",
+    "tests/01_decentralized_uploading/manual-upload-files.test.tsx": "ec263caff818f64028c73c2682735e2dde9fb280de5e9bb9bcab37ee89a587df",
+    "tests/01_decentralized_uploading/upload-task-workspace.test.tsx": "f356c20087909d77b39cd5029473de790182c2e99a24799fc52a2acea82583b8",
+    "tests/01_decentralized_uploading/test_issue24_task_repository.py": "1c9e2765712fcd93e0f09a191eab4169bd061075be3374344973ee92c9cee603"
+  },
+  "scope": "独立源码副本中实际验证的源码，不以共享工作树其他功能修改作为本次验证基线"
+}

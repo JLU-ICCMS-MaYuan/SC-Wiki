@@ -114,14 +114,16 @@ describe('论文上传工作区', () => {
 
     const main = new File(['paper'], 'paper.pdf', { type: 'application/pdf' })
     const supplement = new File(['notes'], 'notes.md', { type: 'text/markdown' })
-    fireEvent.drop(screen.getByLabelText('拖拽或选择论文文件'), {
-      dataTransfer: { files: [main, supplement] },
+    fireEvent.drop(screen.getByRole('region', { name: '论文正文' }), {
+      dataTransfer: { files: [main] },
     })
+
+    fireEvent.drop(screen.getByRole('region', { name: '补充材料' }), { dataTransfer: { files: [supplement] } })
 
     expect(screen.getByText('paper.pdf')).toBeVisible()
     expect(screen.getByText('notes.md')).toBeVisible()
     expect(screen.queryByRole('combobox', { name: 'PDF 解析方案' })).not.toBeInTheDocument()
-    expect(screen.getAllByRole('combobox')).toHaveLength(2)
+    expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: '清空' }))
 
@@ -134,9 +136,11 @@ describe('论文上传工作区', () => {
 
     const main = new File(['paper'], 'paper.pdf', { type: 'application/pdf' })
     const structure = new File(['POSCAR'], 'Li2MgH16.vasp', { type: 'text/plain' })
-    fireEvent.drop(screen.getByLabelText('拖拽或选择论文文件'), {
-      dataTransfer: { files: [main, structure] },
+    fireEvent.drop(screen.getByRole('region', { name: '论文正文' }), {
+      dataTransfer: { files: [main] },
     })
+
+    fireEvent.drop(screen.getByRole('region', { name: '源数据文件' }), { dataTransfer: { files: [structure] } })
 
     expect(screen.getByText('Li2MgH16.vasp')).toBeVisible()
     expect(screen.queryByText(/Li2MgH16\.vasp：仅支持/)).not.toBeInTheDocument()
@@ -623,7 +627,7 @@ describe('论文上传工作区', () => {
 
     render(<MemoryRouter><AuthProvider><UploadPage /></AuthProvider></MemoryRouter>)
 
-    const dropArea = await screen.findByLabelText('拖拽或选择论文文件')
+    const dropArea = await screen.findByRole('region', { name: '论文正文' })
     fireEvent.drop(dropArea, {
       dataTransfer: { files: [new File(['draft'], '待上传.pdf', { type: 'application/pdf' })] },
     })
@@ -636,7 +640,7 @@ describe('论文上传工作区', () => {
     fireEvent.click(screen.getByRole('checkbox', { name: '选择 第一篇.pdf 的解析记录' }))
     fireEvent.click(link)
     expect(screen.getByText('待上传.pdf')).toBeVisible()
-    expect(screen.getByLabelText('拖拽或选择论文文件')).toBeVisible()
+    expect(screen.getByRole('region', { name: '论文正文' })).toBeVisible()
     expect(screen.getByRole('checkbox', { name: '选择 第一篇.pdf 的解析记录' })).toBeChecked()
     expect(screen.queryByRole('button', { name: /查看.*解析详情|收起解析/ })).not.toBeInTheDocument()
     expect(screen.queryByRole('region', { name: '当前解析任务操作' })).not.toBeInTheDocument()

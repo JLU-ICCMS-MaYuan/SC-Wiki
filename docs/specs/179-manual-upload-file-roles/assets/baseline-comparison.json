@@ -1,0 +1,87 @@
+{
+  "baseline_commit": "8d84f5793b236454775e8b5683f94509c0ead695",
+  "baseline_method": "git archive HEAD 独立临时副本；未修改业务源码，node_modules 仅复用依赖",
+  "new_regression_before": {
+    "python": {
+      "failed": 14,
+      "passed": 7
+    },
+    "ui": {
+      "failed": 4
+    }
+  },
+  "new_regression_after": {
+    "python": {
+      "failed": 0,
+      "passed": 21
+    },
+    "ui": {
+      "failed": 0,
+      "passed": 4
+    }
+  },
+  "python_affected": {
+    "passed": 55,
+    "failed": 0
+  },
+  "expanded_python": {
+    "passed": 11,
+    "failed": 13,
+    "baseline_passed": 11,
+    "baseline_failed": 13,
+    "same_failure_cases": true,
+    "failure_cases": [
+      "tests/test_structure_storage.py::test_create_structure_starts_pending_and_serializes",
+      "tests/test_structure_storage.py::test_approve_structure_sets_latest_default_for_same_identity",
+      "tests/test_structure_storage.py::test_approve_structure_clears_unflushed_same_identity_defaults",
+      "tests/test_structure_storage.py::test_approve_structure_keeps_defaults_for_different_pending_parents",
+      "tests/test_structure_storage.py::test_reject_structure_marks_rejected_and_clears_default",
+      "tests/test_structure_storage.py::test_representative_structure_uses_lowest_pressure_default",
+      "tests/test_structure_storage.py::test_default_structure_for_record_matches_record_identity",
+      "tests/test_structure_storage.py::test_default_structure_for_record_matches_nullable_space_group_identity",
+      "tests/01_decentralized_uploading/test_issue24_persistence_and_ui.py::test_upload_task_id_is_unique_and_multifile_transaction_rolls_back",
+      "tests/01_decentralized_uploading/test_issue24_persistence_and_ui.py::test_parsing_detail_builds_one_read_only_form_with_conflicting_sourced_candidates",
+      "tests/01_decentralized_uploading/test_issue24_persistence_and_ui.py::test_parsing_detail_scopes_li_mg_h_classification_without_hiding_references",
+      "tests/01_decentralized_uploading/test_issue35_duplicate_contract.py::test_worker_writes_complete_versioned_duplicate_contract",
+      "tests/01_decentralized_uploading/test_issue35_duplicate_contract.py::test_duplicate_lookup_uses_current_paper_file_schema"
+    ],
+    "failure_reasons": [
+      "旧结构夹具缺少 chemical_systems.paper_id",
+      "旧持久化/来源/重复检测用例与当前数据契约不一致"
+    ]
+  },
+  "expanded_ui": {
+    "passed": 20,
+    "failed": 3,
+    "baseline_passed": 14,
+    "baseline_failed": 3,
+    "same_failure_cases_and_first_error": true,
+    "failure_cases": [
+      {
+        "test": "tests/01_decentralized_uploading/upload-task-workspace.test.tsx > 论文上传工作区 > 作者保持单行并可标记通讯作者和共同第一作者",
+        "error": "AssertionError: expected [] to have a length of 1 but got +0"
+      },
+      {
+        "test": "tests/01_decentralized_uploading/upload-task-workspace.test.tsx > 论文上传工作区 > 按材料状态显示压强与空间群，并以新契约保存",
+        "error": "AssertionError: expected [] to have a length of 1 but got +0"
+      },
+      {
+        "test": "tests/01_decentralized_uploading/upload-task-workspace.test.tsx > 论文上传工作区 > 晶体结构只在所属材料状态内显示且材料状态列表占满页面",
+        "error": "TestingLibraryElementError: Unable to find an accessible element with the role \"button\" and name \"下载结构\""
+      }
+    ]
+  },
+  "form_contract": {
+    "passed": 79,
+    "failed": 0
+  },
+  "mutation": {
+    "detected": 8,
+    "expected": 8
+  },
+  "build": {
+    "isolated_current": "passed",
+    "shared_worktree_first_run": "failed in unrelated SearchPage ongoing changes",
+    "claim": "仅声明独立 HEAD 加本次前端修改构建通过"
+  }
+}

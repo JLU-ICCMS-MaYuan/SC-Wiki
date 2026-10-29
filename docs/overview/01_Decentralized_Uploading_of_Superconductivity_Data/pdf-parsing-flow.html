@@ -10,7 +10,7 @@
 <body>
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="pdf-review-flow.html#parse">收录主流程</a> / 解析与草稿</nav>
-  <header><p class="eyebrow">SC-WIKI · 解析与草稿</p><h1>PDF 如何变成可校对草稿</h1><p class="intro">从上传 Worker 开始，展开正文提取、角色确认、科学候选、来源覆盖、查重和草稿保存。菱形是程序判断，侧向连线展示等待、补证和失败路径。点击普通节点查看源码入口与处理边界；字段核对和解析差异两个节点可在新标签页继续展开。</p></header>
+  <header><p class="eyebrow">SC-WIKI · 解析与草稿</p><h1>PDF 如何变成可校对草稿</h1><p class="intro">从上传 Worker 开始，展开正文提取、用户指定角色、科学候选、来源覆盖、查重和草稿保存。菱形是程序判断，侧向连线展示等待、补证和失败路径。点击普通节点查看源码入口与处理边界；字段核对和解析差异两个节点可在新标签页继续展开。</p></header>
   <nav class="page-links" aria-label="流程页面导航"><a href="pdf-review-flow.html#parse">← 返回主流程</a><a href="pdf-approval-check-flow.html">查看批准前检查程序流程 →</a></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
@@ -34,9 +34,9 @@
     {"id":"extract","row":1,"title":"提取正文与结构候选","summary":"PDF 转正文；结构附件单独校验","owner":"上传 Worker / 本地解析工具","description":"按文件提取带来源位置的正文与结构候选。新 PDF 使用 MinerU 主干，Docling / Marker 补强，GROBID 提取题录和参考文献；结构附件不当作正文读取。","notes":["实际提取失败进入 failed，保留阶段与错误。","确认正文角色后恢复时按规则复用已有提取结果。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/pdf_extractor.py"},
     {"id":"text","row":2,"kind":"check","title":"有效正文是否可用？","summary":"空正文不能生成可校对草稿","owner":"程序检查","description":"检查可以参与阅读的论文正文。正文为空或必要解析失败时停止，不用空输入生成科学草稿。","notes":["结构附件不能代替论文正文。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
     {"id":"failed","row":2,"column":"left","kind":"stop","title":"解析失败，记录阶段","summary":"保留错误，按现有入口重试","owner":"上传 Worker","description":"记录 failed、failed_stage 与安全错误信息，保留可追查产物。重试受原文件有效性和当前任务状态限制。","notes":["不是科学字段不通过，也不伪造 ready。","有界处理仍失败时不会无限循环调用模型。"],"code":"backend/ingest/upload_jobs.py::process_upload_task / _process_upload_task"},
-    {"id":"roles","row":3,"title":"识别主文与补充材料","summary":"按文件内容评估最终有效角色","owner":"正文角色识别程序 / 上传者","description":"从题录和内容线索判断哪个文件是主文、哪个是补充材料；唯一可靠结论可纠正原声明。","notes":["在正文角色确认之前，不进行分段模型阅读。","角色歧义由用户确认后恢复，不能按上传顺序猜测。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task；backend/api/upload_tasks.py"},
-    {"id":"role-check","row":4,"kind":"check","title":"正文角色是否明确？","summary":"唯一可靠结论或用户已确认","owner":"程序检查","description":"角色明确才继续使用最终文件角色构建来源。存在歧义则进入 needs_role_review 等待输入。","notes":["等待用户输入与技术失败是不同状态。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
-    {"id":"role-wait","row":4,"column":"right","kind":"wait","title":"等待上传者确认角色","summary":"needs_role_review","owner":"上传者","description":"用户按当前任务版本确认正文和补充材料角色，再恢复处理；不要求重新提取已有效保存的全部正文。","notes":["确认只解决文件角色，不等于科学审核。"],"code":"backend/api/upload_tasks.py；backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"roles","row":3,"title":"读取用户指定文件角色","summary":"新任务按上传区域指定，不重新判断","owner":"上传者 / 清单校验程序","description":"论文正文、补充材料、源数据文件由上传位置确定；服务器标记用户指定策略，正文恰好一个，区域格式必须匹配。","notes":["新任务不根据文件名或内容改角色，不要求二次角色确认。","只有无策略标记的历史任务保留原角色评估。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task；backend/api/upload_tasks.py"},
+    {"id":"role-check","row":4,"kind":"check","title":"指定角色可直接使用？","summary":"新任务直接继续；仅旧任务可能歧义","owner":"程序检查","description":"新任务清单合法即按指定角色继续。无策略标记的历史任务沿旧规则评估；只有这类旧任务的歧义会进入 needs_role_review。","notes":["新任务数量或格式不合法时报清单错误，不进入角色确认。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
+    {"id":"role-wait","row":4,"column":"right","kind":"wait","title":"仅旧任务：恢复角色确认","summary":"历史 needs_role_review","owner":"上传者","description":"只为已有历史任务保留带版本的人工恢复，复用已有提取文本。新任务不会进入此步骤。","notes":["不批量改写旧分类，也不把历史入口用作新任务常规流程。"],"code":"backend/api/upload_tasks.py；backend/ingest/upload_jobs.py::_process_upload_task"},
     {"id":"sources","row":5,"title":"核对文件身份并建立来源","summary":"文件、页码、片段和正文关联","owner":"上传 Worker","description":"按最终角色检查文件身份并组织带来源信息的正文片段，同时保留身份冲突诊断。","notes":["真正的文件身份冲突可在正式提交时要求确认。","身份未知不等于匹配，不用参考文献中的 DOI 冒充本文 DOI。"],"code":"backend/ingest/document_identity.py；backend/ingest/upload_jobs.py::_process_upload_task"},
     {"id":"read","row":6,"title":"分段读取并提取科学候选","summary":"按材料、条件、记录保留原文依据","owner":"领域提取程序 / LLM","description":"分段提取材料状态、方法、Tc 等科学记录及原文依据，执行格式、方法语义和引句等检查。","notes":["失败使用已有有限纠错次数；仍不合格则停止。","不同材料、压强或方法不能被汇总成同一条结果。"],"code":"backend/ingest/upload_jobs.py::_read_chunk / _process_upload_task"},
     {"id":"coverage","row":7,"kind":"check","title":"来源与覆盖检查满足？","summary":"核查候选、原文及未覆盖结果","owner":"来源定位与覆盖检查程序","description":"核查候选来源及仍未覆盖的结果、表格行等。符合规则的非结果排除独立留痕，不算作科学证据。","notes":["定位成功不证明科学语义正确。","未覆盖的真实结果不能靠排除标签隐藏。"],"code":"backend/ingest/coverage_audit.py；backend/ingest/upload_jobs.py::_process_upload_task"},
@@ -57,7 +57,7 @@
     {"from":"files","to":"extract"},{"from":"extract","to":"text"},
     {"from":"text","to":"roles","label":"是"},{"from":"text","to":"failed","label":"否"},
     {"from":"roles","to":"role-check"},{"from":"role-check","to":"sources","label":"是"},
-    {"from":"role-check","to":"role-wait","label":"否"},
+    {"from":"role-check","to":"role-wait","label":"仅旧任务歧义"},
     {"from":"role-wait","to":"roles","fromSide":"right","toSide":"right","via":[[1090,638],[1090,498]],"label":"确认后恢复","labelAt":[955,480]},
     {"from":"sources","to":"read"},{"from":"read","to":"coverage"},
     {"from":"read","to":"failed","label":"提取仍失败","labelAt":[305,835]},

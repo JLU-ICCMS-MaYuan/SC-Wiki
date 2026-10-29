@@ -12,7 +12,7 @@
 | 上述页面的来源与字段设置侧栏 | EvidenceWorkflow、EvidenceFieldMarkers、ReviewPaperTextField、ScientificFieldBox、ManualEvidenceSection、FieldAICandidate | 首轮科学表单验证范围 |
 | 上传/返修的解析差异侧栏 | ParsingDiagnosticsPanel、parsingDiagnostics、EvidenceRegion | #172增量：主表单只留入口与数量，详情按点击进入右侧栏；90来源完整上传宿主、四宿主既有回归、独立来源快照与真实草稿隔离浏览器验证；原图点击加载，非科学审核入口 |
 | 上述页面的结构、谱图子区 | PaperStructuralWorkspace、StructureCandidatePanel、PropertySpectra | 首轮覆盖父表单更新的联动影响，不重写独立编辑器 |
-| `/upload` 文件选择及正文角色确认 | UploadPage、MultiFileUploadPanel、UploadRoleReview | 已定位，未做本轮性能验收 |
+| `/upload` 三类文件选择及历史角色恢复 | UploadPage、MultiFileUploadPanel、UploadRoleReview（仅历史任务） | #179：三个指定区域、单正文/格式校验、五文件三并发、完整 UploadPage 与桌面/390px 隔离浏览器通过；未作全站性能验收 |
 | `/auth` 登录、注册与找回密码 | AuthPage 委托 AuthExperience 和 production auth 服务 | 已定位，未做本轮性能验收 |
 | `/account` 资料、账号安全 | AccountPage、AccountSecurity、UsernameField | 已定位，未做本轮性能验收 |
 | `/search` 检索与筛选 | SearchPage | 已定位，未做本轮性能验收 |
@@ -46,7 +46,7 @@
 | 上传、返修 | UploadTaskEditor 的 draft；编辑记录变化，停顿自动保存／点击保存；提交才走必要审核 | FR-001–008；form-contract、graph-title-form、paper-field-settings、two-stage-review |
 | 两种管理员 | AdminPaperEditPage 的编辑草稿；点击保存与明确人工决定／批准各自执行 | FR-001–008；form-contract 四宿主、paper-field-settings、state-review-convergence |
 | 科学侧栏 | 主表单值与设置暂存分开，应用回写当前字段；来源按需加载、主动模型核对及人工决定分开 | FR-002–008；上述门禁与来源状态、最新值、删除重定位测试 |
-| 上传文件和角色选择 | UploadPage／上传组件拥有选择值，显式上传或角色确认发请求 | FR-001–003/005–009；当前仅代码核查，未验证全部时序 |
+| 上传文件选择与历史角色恢复 | MultiFileUploadPanel 拥有唯一文件清单，三个区域直接赋予角色；选择/移除无请求，显式上传才创建任务；旧角色确认仅服务历史任务 | FR-001–003/005–009；#179 完整宿主、三并发和浏览器交互通过，详见验收记录 |
 | 登录、注册、账号安全 | AuthExperience／AccountSecurity 本地输入；提交及验证码按钮调用对应服务 | FR-001–003/006–009；不套用科学审核流程，未做本轮验收 |
 | 个人资料、用户名 | AccountPage 拥有资料编辑值，保存调用 PATCH；UsernameField 失焦后按需检查可用性 | FR-001–003/006–009；未做本轮性能或迟到响应验收 |
 | 检索与图谱筛选 | SearchPage／KnowledgeGraphPage 拥有查询条件，查询、筛选或展开触发读取；图谱标记为明确写操作 | FR-001–003/006–009；必要查询不禁用，具体请求合并与并发未验收 |
@@ -68,3 +68,7 @@ test:form-contract 已加入 sidebar-field-save、sidebar-field-workflow、sideb
 解析原文与备选属于服务端来源账本；面板仅展示快照，不保存第二份科学值。外部草稿加载/刷新才更新快照，表单输入只更新真实依赖的题录当前值。原图按点击加载，完整记录按需挂载，没有“全部通过”按钮。`test:form-contract`含新增parsing-diagnostics套件，共64项通过；mutation仍验证四宿主8项能检出缓存回退。真实CaH6草稿副本页面在输入期间无请求、无全表扫描、无诊断DOM变化。浏览器API隔离，不代替真实登录的全站端到端验收；详细数据及源码见[#172增量验收](../172-phonon-method-parsing/difference-triage-validation.md)。
 
 2026-10-29：解析详情从主表单移入右侧栏，关闭恢复焦点，定位字段返回当前控件；科学待处理入口有问题时为红色，数量和判定规则不变。完整宿主、真实草稿副本及新问题先失败后通过的证据见[#147 诊断与验证](../147-two-stage-field-review/2026-10-29-flow-and-review-diagnosis.md)，既有独立回归失败与基线单列，不算本次通过。
+
+## #179 用户指定上传文件身份
+
+正文恰好一份，补充材料和结构源数据允许多份，选择位置决定角色；不把文件名或文本样式作为新任务角色权威。选择、移除、错区或重复正文拒绝不发创建/模型请求；上传队列使用稳定文件身份，仍限三路并发。UploadPage 宿主与 1440px/390px 浏览器已验证数量、格式、键盘选择和清单请求。规定的表单契约 79 项及变异 8 项通过；影响回归、独立 HEAD 旧失败基线和真实 PDF 定向验证见 [#179 验收记录](../179-manual-upload-file-roles/validation.md)。不据此声称全站、真实业务写入或整篇 PDF 已验收。

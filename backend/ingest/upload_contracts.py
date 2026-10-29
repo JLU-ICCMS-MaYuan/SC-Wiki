@@ -22,6 +22,7 @@ RUNNING_STATUSES = {"uploading", "queued", "extracting", "reading", "summarizing
 FIXED_TERMINAL_STATUSES = {"failed", "duplicate", "cancelled"}
 FINAL_STATUSES = FIXED_TERMINAL_STATUSES | {"submitted"}
 FILE_ROLES = {"main", "supplementary", "attachment"}
+USER_FILE_ROLE_POLICY = "user-specified-v1"
 FILE_SUFFIXES = {".pdf", ".txt", ".md", ".cif", ".poscar", ".vasp"}
 PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state", "role_assessment", "extraction_timing"}
 PUBLIC_FILE_FIELDS = {"file_id", "role", "declared_role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
@@ -103,6 +104,22 @@ def structure_format_for_filename(filename: str) -> str | None:
     if path.suffix.lower() == ".cif": return "cif"
     return None
 
+def validate_file_roles(files: list[dict[str, Any]]) -> None:
+    """只校验用户清单，不按文件内容推断或改写角色。"""
+    if sum(item.get("role") == "main" for item in files) != 1:
+        raise ValueError("必须恰好一个正文文件")
+    for item in files:
+        role = item.get("role")
+        filename = str(item.get("original_filename") or "")
+        if role not in FILE_ROLES:
+            raise ValueError("文件角色不支持")
+        if role == "attachment":
+            if structure_format_for_filename(filename) is None:
+                raise ValueError("源数据文件仅支持 CIF、POSCAR/VASP 结构格式")
+        elif Path(filename).suffix.lower() not in {".pdf", ".txt", ".md"}:
+            raise ValueError("正文和补充材料仅支持 PDF、TXT、MD 文件")
+
+
 def validate_manifest(files: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
     normalized = []
     for index, item in enumerate(files):
@@ -112,7 +129,7 @@ def validate_manifest(files: Iterable[dict[str, Any]]) -> list[dict[str, Any]]:
         if suffix not in FILE_SUFFIXES and structure_format is None: raise ValueError("文件类型不支持")
         if size < 0 or size > MAX_UPLOAD_BYTES: raise ValueError("文件超过 50 MB 限制")
         normalized.append({"file_id": uuid4().hex, "client_id": str(item.get("client_id") or index), "role": role, "declared_role": role, "original_filename": filename, "media_type": item.get("media_type"), "kind": structure_format or suffix.lstrip("."), "size": size, "sort_order": index, "upload_status": "waiting", "extraction_status": "waiting", "error": None})
-    # 上传前的角色只是声明；有效正文在文本提取后统一判定。
+    validate_file_roles(normalized)
     return normalized
 
 def public_task_state(state: dict[str, Any]) -> dict[str, Any]:

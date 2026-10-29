@@ -1,0 +1,28 @@
+[
+  {
+    "width": 1440,
+    "files": 5,
+    "creations": 1,
+    "uploads": 5,
+    "role_confirmation_requests": 0,
+    "keyboard": true,
+    "wrong_area": true,
+    "duplicate_main": true,
+    "zero_selection_writes": true,
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "width": 390,
+    "files": 5,
+    "creations": 1,
+    "uploads": 5,
+    "role_confirmation_requests": 0,
+    "keyboard": true,
+    "wrong_area": true,
+    "duplicate_main": true,
+    "zero_selection_writes": true,
+    "overflow": false,
+    "errors": []
+  }
+]

@@ -102,9 +102,9 @@ export default {
   },
   // ── 文件角色 ──
   role: {
-    main: '正文',
+    main: '论文正文',
     supplementary: '补充材料',
-    attachment: '附件',
+    attachment: '源数据文件',
   },
   // ── 晶胞表示 ──
   cell: {
@@ -225,6 +225,17 @@ export default {
   noChunksYet: '尚未生成分段，正在等待正文提取完成。',
   pageRange: '第 {start}{end} 页',
 
+  onlyOneMain: '只能上传一个正文，请先移除已有正文再重新选择。',
+  unsupportedTextFile: '{name}：正文和补充材料仅支持 PDF、TXT、MD 文件',
+  unsupportedSourceFile: '{name}：源数据文件仅支持 CIF、POSCAR/VASP 结构格式',
+  chooseForRole: '选择或拖入{role}',
+  uploadLimits: '每个文件最大 {size} MB · 同时上传最多 {count} 个',
+  fileAreaHelp: {
+    main: '必填，限一个 · PDF、TXT、MD',
+    supplementary: '可选，可多个 · PDF、TXT、MD；包括发表后的补充说明和纠正文稿',
+    attachment: '可选，可多个 · CIF、POSCAR、VASP、CONTCAR 结构文件',
+  },
+
   // ── MultiFileUploadPanel ──
   unsupportedExtension: '{name}：仅支持 PDF、TXT、MD、CIF、POSCAR/VASP',
   fileTooLargeNamed: '{name}：超过 50 MB',
@@ -241,7 +252,7 @@ export default {
   confirmRoles: '确认角色并继续解析',
   batchUploadFailed: '批量上传失败',
   newTaskTitle: '新建论文上传任务',
-  newTaskHint: '一个正文，可添加补充材料或附件；每组文件共同填写一张论文表单。',
+  newTaskHint: '分别上传一个正文、可选的多份补充材料和结构源数据文件，共同填写一张论文表单。',
   dropZoneAria: '拖拽或选择论文文件',
   dropHint: '拖拽文件到这里，或点击选择',
   limit: 'PDF、TXT、MD、CIF、POSCAR · 每个最大 {size} MB · 同时上传最多 {count} 个',

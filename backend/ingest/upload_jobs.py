@@ -42,6 +42,8 @@ from backend.ingest.upload_tasks import (
 )
 from backend.ingest.upload_contracts import (
     UPLOAD_STATE_SCHEMA_VERSION,
+    USER_FILE_ROLE_POLICY,
+    validate_file_roles,
     compare_file_identities,
     convert_legacy_scientific_draft,
     structure_format_for_filename,
@@ -1853,7 +1855,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
     try:
         _ensure_not_cancelled(task_id)
         source = _original_path(state)
-        # 正文尚未识别，不能用首文件的哈希提前判断整篇论文重复。
+        # 论文重复仍在取得实际主文来源后判断，不能使用首文件哈希。
         md_path = markdown_path(task_id)
         update_state(
             task_id, status="extracting", stage="extracting", stage_index=2, processing_status="processing",
@@ -1992,40 +1994,45 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 for chunk in chunks:
                     all_chunks.append((file_item, chunk))
         md_path.write_text("".join(combined_markdown), encoding="utf-8")
-        from backend.ingest.document_roles import assess_roles
+        assessment = None
+        if state.get("file_role_policy") == USER_FILE_ROLE_POLICY:
+            validate_file_roles(sources)
+        else:
+            # 仅无策略标记的历史任务保留角色评估及人工恢复。
+            from backend.ingest.document_roles import assess_roles
 
-        assessment = assess_roles(sources, extracted_texts)
-        previous_assessment = state.get("role_assessment") or {}
-        confirmed = (previous_assessment.get("status") == "user_confirmed"
-                     and previous_assessment.get("source_hash") == assessment["source_hash"])
-        if confirmed:
-            assessment = previous_assessment
-        elif assessment["status"] == "needs_review":
-            role_artifacts = None
-            from backend.storage.paths import object_mode, publish_tree
-            if object_mode():
-                from backend.rag.config import settings
-                from uuid import uuid4
+            assessment = assess_roles(sources, extracted_texts)
+            previous_assessment = state.get("role_assessment") or {}
+            confirmed = (previous_assessment.get("status") == "user_confirmed"
+                         and previous_assessment.get("source_hash") == assessment["source_hash"])
+            if confirmed:
+                assessment = previous_assessment
+            elif assessment["status"] == "needs_review":
+                role_artifacts = None
+                from backend.storage.paths import object_mode, publish_tree
+                if object_mode():
+                    from backend.rag.config import settings
+                    from uuid import uuid4
 
-                role_artifacts = publish_tree(
-                    data_path("parsed_markdown") / task_id,
-                    data_root=settings.sc_wiki_data_dir, task_id=task_id, run_id=uuid4().hex,
+                    role_artifacts = publish_tree(
+                        data_path("parsed_markdown") / task_id,
+                        data_root=settings.sc_wiki_data_dir, task_id=task_id, run_id=uuid4().hex,
+                    )
+                waiting = update_state(
+                    task_id, status="needs_role_review", stage="extracting", processing_status="needs_input",
+                    role_assessment=assessment, files=sources, artifact_manifest=role_artifacts,
                 )
-            waiting = update_state(
-                task_id, status="needs_role_review", stage="extracting", processing_status="needs_input",
-                role_assessment=assessment, files=sources, artifact_manifest=role_artifacts,
-            )
-            schedule_cleanup(task_id)
-            return waiting
-        role_by_id = {item["file_id"]: item["effective_role"] for item in assessment["files"]}
-        for item in sources:
-            item.setdefault("declared_role", item.get("role"))
-            item["role"] = role_by_id[item["file_id"]]
-        for item in identities:
-            item["role"] = role_by_id.get(str(item.get("file_id")), item.get("role"))
-        for candidate in structure_candidates:
-            for origin in candidate.get("sources") or []:
-                origin["role"] = role_by_id.get(str(origin.get("file_id")), origin.get("role"))
+                schedule_cleanup(task_id)
+                return waiting
+            role_by_id = {item["file_id"]: item["effective_role"] for item in assessment["files"]}
+            for item in sources:
+                item.setdefault("declared_role", item.get("role"))
+                item["role"] = role_by_id[item["file_id"]]
+            for item in identities:
+                item["role"] = role_by_id.get(str(item.get("file_id")), item.get("role"))
+            for candidate in structure_candidates:
+                for origin in candidate.get("sources") or []:
+                    origin["role"] = role_by_id.get(str(origin.get("file_id")), origin.get("role"))
         main_source = next(item for item in sources if item["role"] == "main")
         state = update_state(task_id, files=sources, role_assessment=assessment,
                              consistency=compare_file_identities(identities),

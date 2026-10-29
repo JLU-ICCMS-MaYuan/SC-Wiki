@@ -101,9 +101,9 @@ export default {
   },
   // ── File roles ──
   role: {
-    main: 'Main text',
+    main: 'Main article',
     supplementary: 'Supplementary',
-    attachment: 'Attachment',
+    attachment: 'Source data files',
   },
   // ── Cell representation ──
   cell: {
@@ -223,6 +223,17 @@ export default {
   noChunksYet: 'No chunks generated yet; waiting for the text extraction to finish.',
   pageRange: 'pp. {start}{end}',
 
+  onlyOneMain: 'Only one main article is allowed. Remove it before choosing another.',
+  unsupportedTextFile: '{name}: main and supplementary files support PDF, TXT and MD only',
+  unsupportedSourceFile: '{name}: source data files support CIF and POSCAR/VASP structures only',
+  chooseForRole: 'Choose or drop {role}',
+  uploadLimits: 'Up to {size} MB per file · up to {count} uploads at once',
+  fileAreaHelp: {
+    main: 'Required, one file · PDF, TXT, MD',
+    supplementary: 'Optional, multiple files · PDF, TXT, MD; includes later additions and corrections',
+    attachment: 'Optional, multiple files · CIF, POSCAR, VASP and CONTCAR structures',
+  },
+
   // ── MultiFileUploadPanel ──
   unsupportedExtension: '{name}: only PDF, TXT, MD, CIF, POSCAR/VASP are supported',
   fileTooLargeNamed: '{name}: exceeds 50 MB',
@@ -239,7 +250,7 @@ export default {
   confirmRoles: 'Confirm roles and continue',
   batchUploadFailed: 'Batch upload failed',
   newTaskTitle: 'New paper upload task',
-  newTaskHint: 'One main text, plus optional supplementary materials or attachments; each group of files shares one paper form.',
+  newTaskHint: 'Upload one main article, optional supplementary materials and structure source files. All files share one paper form.',
   dropZoneAria: 'Drag or choose paper files',
   dropHint: 'Drag files here, or click to choose',
   limit: 'PDF, TXT, MD, CIF, POSCAR · up to {size} MB each · up to {count} at once',

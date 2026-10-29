@@ -1,0 +1,138 @@
+{
+  "model": "deepseek-v4-pro",
+  "reuse": "已核验源 PDF 哈希的现有 Document IR；不复用旧模型字段结果",
+  "rerun": "正式 complementary _read_chunk 及 normalize_extraction，隔离文件保存重读",
+  "samples": [
+    {
+      "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+      "role": "main",
+      "pdf_sha256": "7fccce6780e71f826519256542a5416f5b256e1aa2b546b68e194468688e2bbd",
+      "pdf_page": 3,
+      "ir_path": ".data/review_artifacts/18c2a3d5a94c404395abaf17ed2825fc/document_ir/fc404abeb1e74ac2bd33d8691af97564.json",
+      "input_chars": 10879,
+      "status": "passed",
+      "elapsed_seconds": 34.77,
+      "result_keys": [
+        "extraction_version",
+        "metadata",
+        "paper_type_evidence",
+        "research_materials",
+        "referenced_materials",
+        "methodology",
+        "key_findings",
+        "coverage_exclusions",
+        "material_states",
+        "_schema_version",
+        "_document_signature",
+        "_extraction_model",
+        "_source"
+      ],
+      "source": {
+        "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+        "filename": "fc404abeb1e74ac2bd33d8691af97564.pdf",
+        "file_role": "main",
+        "chunk_index": 0,
+        "section": "Document IR",
+        "page_start": 3,
+        "page_end": 3
+      },
+      "normalization": "正式 normalize_extraction 通过，保存并重读一致",
+      "claim_statuses": [
+        "validated",
+        "validated",
+        "validated",
+        "validated",
+        "validated",
+        "validated"
+      ],
+      "scientific_records": [
+        {
+          "material": "LaSc2H24",
+          "pressure_gpa": 167.0,
+          "name": "Tc",
+          "value": 316.0,
+          "value_raw": "316 K",
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "pdf_page": 3,
+              "block_id": "51429d7652cb8ecaa4ef04cba6f26edd85c85d64535563c68f735d067cbfe2d5",
+              "quote": "than La, allowing us to expect to tune the superconductivity in the La-H system by the introduction of Sc. To this end, using the swarm-intelligence-based CALYPSO structure prediction method (37, 38) in combination with first-principles calculations, we systematically investigated the crystal structure and superconductivity of the \\dot { \\mathrm { L a } } { - } \\mathrm { S c } { - } \\mathrm { H } system under pressure. \\mathrm { A } remarkable clathrate structure of \\mathrm { \\hat { L a S c _ { 2 } H _ { 2 4 } } } with two unusual \\mathrm { H } _ { 2 4 } and \\mathrm { H } _ { 3 0 } cages was found and shown to be thermodynamically stable above 167 GPa with considering anharmonic effects.Further electron-phonon coupling (EPC) simulations that include anharmonic effects reveal that the predicted phase is a promising hot superconductor with an estimated T _ { c } of 316 K at 167 GPa (peaking at 331 K at 250 GPa). The results indicate the structure has the lowest stability pressure of any hot superconductor studied to date."
+            }
+          ]
+        },
+        {
+          "material": "LaSc2H24",
+          "pressure_gpa": 250.0,
+          "name": "Tc",
+          "value": 331.0,
+          "value_raw": "331 K",
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "pdf_page": 3,
+              "block_id": "51429d7652cb8ecaa4ef04cba6f26edd85c85d64535563c68f735d067cbfe2d5",
+              "quote": "than La, allowing us to expect to tune the superconductivity in the La-H system by the introduction of Sc. To this end, using the swarm-intelligence-based CALYPSO structure prediction method (37, 38) in combination with first-principles calculations, we systematically investigated the crystal structure and superconductivity of the \\dot { \\mathrm { L a } } { - } \\mathrm { S c } { - } \\mathrm { H } system under pressure. \\mathrm { A } remarkable clathrate structure of \\mathrm { \\hat { L a S c _ { 2 } H _ { 2 4 } } } with two unusual \\mathrm { H } _ { 2 4 } and \\mathrm { H } _ { 3 0 } cages was found and shown to be thermodynamically stable above 167 GPa with considering anharmonic effects.Further electron-phonon coupling (EPC) simulations that include anharmonic effects reveal that the predicted phase is a promising hot superconductor with an estimated T _ { c } of 316 K at 167 GPa (peaking at 331 K at 250 GPa). The results indicate the structure has the lowest stability pressure of any hot superconductor studied to date."
+            }
+          ]
+        },
+        {
+          "material": "LaSc2H24",
+          "pressure_gpa": 300.0,
+          "name": "H-derived DOS at Fermi level",
+          "value": 0.11,
+          "value_raw": "0.11 states/spin/Ry/Å³",
+          "evidences": [
+            {
+              "file_id": "fc404abeb1e74ac2bd33d8691af97564",
+              "pdf_page": 3,
+              "block_id": "e372c4ad5315c9e0f921f56723f5cfbf490dc3eed15f6769f3788bab7c3bfafc",
+              "quote": "To examine the electronic properties, we calculated the electronic band structure and projected electronic density of states (PDOS) of \\mathrm { L a S c } _ { 2 } \\mathrm { H } _ { 2 4 } at 300 GPa. As shown in Fig. 2 \\dot { \\vec { B } } , several electronic bands cross the Fermi level, indicating the metallic character of \\mathrm { L a S c _ { 2 } H _ { 2 4 } } . The PDOS of \\mathrm { L a S c } _ { 2 } \\mathrm { H } _ { 2 4 } (Fig. 2C) also shows a large H-derived DOS (0.11 states/spin/Ry/Å³)at the Fermi level which is slightly higher than that in Laf \\mathrm { I _ { 1 0 } } (0.09 states/spin/Ry/Å³)"
+            }
+          ]
+        }
+      ],
+      "coverage_exclusions": 7
+    },
+    {
+      "file_id": "261650f32fe54375af8abbd83d7576f6",
+      "role": "supplementary",
+      "pdf_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+      "pdf_page": 8,
+      "ir_path": ".data/review_artifacts/18c2a3d5a94c404395abaf17ed2825fc/document_ir/261650f32fe54375af8abbd83d7576f6.json",
+      "input_chars": 56396,
+      "status": "passed",
+      "elapsed_seconds": 15.93,
+      "result_keys": [
+        "extraction_version",
+        "metadata",
+        "paper_type_evidence",
+        "research_materials",
+        "referenced_materials",
+        "methodology",
+        "key_findings",
+        "coverage_exclusions",
+        "material_states",
+        "_schema_version",
+        "_document_signature",
+        "_extraction_model",
+        "_source"
+      ],
+      "source": {
+        "file_id": "261650f32fe54375af8abbd83d7576f6",
+        "filename": "261650f32fe54375af8abbd83d7576f6.pdf",
+        "file_role": "supplementary",
+        "chunk_index": 0,
+        "section": "Document IR",
+        "page_start": 8,
+        "page_end": 8
+      },
+      "normalization": "正式 normalize_extraction 通过，保存并重读一致",
+      "claim_statuses": [],
+      "scientific_records": [],
+      "coverage_exclusions": 16
+    }
+  ],
+  "scope": "主文第3页和SI第8页定向真实重提；未重提整篇；SI该页结构内容按当前数值提取契约保留为范围外项",
+  "source_code": "源码 SHA256 记录见 verified-source.json"
+}

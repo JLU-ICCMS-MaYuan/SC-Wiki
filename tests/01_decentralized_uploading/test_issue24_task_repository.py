@@ -87,7 +87,7 @@ def test_manifest_locks_once_and_rejects_duplicate_content(monkeypatch):
     monkeypatch.setattr(upload_tasks, "redis_client", lambda: redis)
     task = upload_tasks.create_task(9, files=[
         {"client_id": "m", "role": "main", "filename": "paper.pdf", "size": 3},
-        {"client_id": "a", "role": "attachment", "filename": "notes.md", "size": 3},
+        {"client_id": "a", "role": "supplementary", "filename": "notes.md", "size": 3},
     ])
     main, attachment = task["files"]
     upload_tasks.update_task_file(

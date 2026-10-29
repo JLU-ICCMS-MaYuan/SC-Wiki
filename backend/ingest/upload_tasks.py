@@ -35,6 +35,7 @@ from backend.ingest.upload_contracts import (
     new_extraction_timing,
     public_task_state,
     validate_manifest,
+    USER_FILE_ROLE_POLICY,
 )
 
 
@@ -168,11 +169,12 @@ def create_task(
     parser_profile = "complementary"
     now = int(time.time())
     manifest = validate_manifest(files) if files is not None else []
+    main_file = next((item for item in manifest if item["role"] == "main"), {})
     state = {
         "task_id": task_id,
         "user_id": user_id,
-        "filename": filename or (manifest[0]["original_filename"] if manifest else ""),
-        "file_kind": file_kind or (manifest[0]["kind"] if manifest else ""),
+        "filename": filename or main_file.get("original_filename", ""),
+        "file_kind": file_kind or main_file.get("kind", ""),
         "files": manifest,
         "status": "uploading",
         "stage": "saving_file",
@@ -190,6 +192,7 @@ def create_task(
         "revision": 1,
         "state_schema_version": UPLOAD_STATE_SCHEMA_VERSION,
         "parser_profile": parser_profile,
+        "file_role_policy": USER_FILE_ROLE_POLICY,
         "parser_runs": [],
         "reading_state": None,
     }
