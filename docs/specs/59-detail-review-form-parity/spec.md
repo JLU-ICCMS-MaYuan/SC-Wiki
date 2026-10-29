@@ -82,7 +82,7 @@ Bug 分类：**原设计缺陷**。详情页与校对页从一开始就是各自
 - **FR-008**：研究方法必须以可读列表展示，不得暴露 JSON 数组原文。
 - **FR-009**：结构预览必须取自材料状态下的结构数据；无结构数据时显示明确空态。
 - **FR-010**：详情页不得保留无法持久化的编辑态控件与其对应的增删改函数。
-- **FR-011**：既有行为不得回归，包括详情页的权限提示分流、返回上传列表与「我的论文」入口、以及 [#56](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/56) 确立的地址驱动行为。
+- **FR-011**：既有行为不得回归，包括详情页的权限提示分流、按合法来源返回与「我的论文」入口、以及 [#56](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/56) 确立的地址驱动行为；原固定返回上传列表的约束由 [#178 后续需求](../178-search-results-navigation/spec.md) 取代，尚待功能实施。
 
 ### 关键实体
 
@@ -124,3 +124,10 @@ Bug 分类：**原设计缺陷**。详情页与校对页从一开始就是各自
 
 - 问：#59 修复范围第 5 项提出「以 `UploadTaskEditor` 的 `readOnly` 模式承载详情页，替代 `PaperEditView`」。核查发现 `readOnly` 模式已成熟、draft 字段与 #57 新增的详情响应高度重合，但存在三处形态差异（详情响应的 `calculation_contexts`/`structures` 是数组而 draft 是单数 `calculation_context`/`structure`；draft 物性含 `pressure_gpa`/`temperature_k` 而这些概念已归属材料状态）。选哪条路线？→ 答：改造 `PaperEditView`，对齐字段集与排版。理由：复用 readOnly 需要「已提交论文 → draft」适配层，而数组→单数必须人为定丢弃或合并规则（paper 4 即有 2 条计算上下文，其中 1 条全为 NULL），存在丢数据风险；改造 `PaperEditView` 改动可控、无需适配层，且能按数组完整展示计算上下文与结构。代价是仍为两套代码、未来仍可能漂移，由 SC-001 的字段集一致性测试约束。
 - 问：`PaperEditView` 的死代码清理是否在本 Feature 完成？→ 答：是。#57 已将其移交本 Feature，且本 Feature 既然重写该组件的字段集与排版，一并清理不构成重复劳动。据此设 FR-010 与 SC-005。
+
+
+## 2026-10-29：检索与导航后续需求
+
+关联 [Issue #178](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/178) 与[新Spec](../178-search-results-navigation/spec.md)。
+
+原 FR-011 中的“返回上传列表”作为历史验收要求保留记录，2026-10-29用户已明确取消固定上传返回。当前有效后续需求改为按合法来源返回，搜索来源恢复检索条件／展示方式／页码；权限分流、只读字段、可寻址能力和其他表单合同不因此改变。旧Quickstart中的返回上传入口为历史验收，本次功能实现前不得声称已变更。
