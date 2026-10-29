@@ -1,9 +1,6 @@
 name: Build and publish Docker images
 
 on:
-  push:
-    branches:
-      - remote
   workflow_dispatch:
 
 permissions:

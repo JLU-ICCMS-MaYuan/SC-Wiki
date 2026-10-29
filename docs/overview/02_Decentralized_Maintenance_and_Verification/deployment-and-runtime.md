@@ -17,7 +17,7 @@
 ### 生产：三个独立 Docker Compose 项目
 
 - 阿里云发布分支为 `remote`，本地开发分支仍为 `mayuan`。已验证开发提交先合并到 `origin/remote`，再以固定 SHA 构建、部署并记录实际镜像摘要；推送本身不触发服务器切换。
-- GitHub 镜像构建仅接受 `remote`，生成 `remote` 和源码 SHA 标签；表单约束在 `remote` 推送后运行。完整镜像及差分导出改为从 `remote` 手动触发、显式输入本次制品，避免复用历史转运记录。线上仍通过固定镜像清单管理，未配置自动拉取或自动部署。
+- GitHub 镜像构建仅接受从 `remote` 手动触发，向 Docker Hub 发布 `remote` 和源码 SHA 标签；普通 Git 推送只触发表单约束，不发布镜像。完整镜像及差分导出也从 `remote` 手动触发、显式输入本次制品，避免复用历史转运记录。线上仍通过固定镜像清单管理，也可从该分支固定提交在服务器本地构建，未配置自动拉取或自动部署。
 
 - 网站、数据、解析分别由 `docker/compose.app.yaml`、`compose.data.yaml`、`compose.compute.yaml` 定义，共用 `compose.runtime.yaml`。入口为 `scripts/deploy.py --release <绝对路径> <动作> --group <组>`；旧 `docker/compose.yaml` 已退役为空服务提示。
 - 网站组包含 Caddy、Nginx 前端、Go/Python API、社区与资讯 Worker/调度器；计算组包含上传/证据 Worker 和 GROBID；数据组包含 MySQL、Redis、Neo4j、Qdrant 和 Garage。

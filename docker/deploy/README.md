@@ -10,8 +10,9 @@
 ## 首次准备
 
 阿里云只从 `origin/remote` 的固定提交发布，本地开发继续使用 `mayuan`。先验证并合并代码到
-`remote`，记录完整 SHA，再构建和部署；推送不会自动更新服务器。镜像构建工作流只接受
-`remote`，发布 `remote` 与 `sha-<短提交>` 标签，实际运行仍固定 digest 或已核验的本地镜像 ID。
+`remote`，记录完整 SHA，再构建和部署；推送不会自动更新服务器。镜像构建工作流只允许从
+`remote` 手动触发，手动运行会向 Docker Hub 发布 `remote` 与 `sha-<短提交>` 标签；普通 Git
+推送不发布镜像。也可在服务器使用该提交本地构建，实际运行仍固定 digest 或已核验的本地镜像 ID。
 发布清单同时记录 `SOURCE_BRANCH=remote` 和实际 `SOURCE_COMMIT`；不能只修改版本记录而不更新程序。
 表单约束工作流在 `remote` 推送后执行。Git 推送、Docker Hub 镜像推送和线上切换分别按本次授权执行。
 
