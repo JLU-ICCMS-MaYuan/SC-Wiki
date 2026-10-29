@@ -1,0 +1,437 @@
+{
+  "activation": {
+    "source_commit": "e2560d1fafb468637d9faf523f2576a3cccfe222",
+    "source_branch": "remote",
+    "release": "/home/mayuan/sc-wiki/releases/e2560d1f-actions",
+    "images": {
+      "FRONTEND_IMAGE": "sha256:a0cdd6665f5e99adad5587d8b29bde15b2f2eefa5c26105cf219357143cf382c",
+      "GOSERVER_IMAGE": "sha256:6382fafb3c3b1e6476ef26108461315f9327a2be054470c7e7d52f837f062013",
+      "PYTHON_IMAGE": "sha256:e33d36127eff453cbdc94ac9b7055b7eb4eebd72e54b932ea2d00f7ff2f6feb0"
+    },
+    "provenance": {
+      "FRONTEND_IMAGE": {
+        "repository": "docker.io/mayuanmark/scwiki-frontend",
+        "hub_digest": "sha256:71de9472b1db5c5d758bb2a4429b3f4d624d55ab322bdd3ce50e5d6afbf67362",
+        "actual_image_id": "sha256:a0cdd6665f5e99adad5587d8b29bde15b2f2eefa5c26105cf219357143cf382c",
+        "config_sha256": "sha256:31374606a6bb232074209807f11cb245c44c05995b5868d8b8420f0a16cc09a8",
+        "archive_sha256": "3bf2943fe98ae602b68fd655a0e00ea9be1518cabb5d65563577e7a77756a267",
+        "archive_file": "image.tar.gz",
+        "local_tag": "scwiki-actions/frontend:e2560d1f"
+      },
+      "GOSERVER_IMAGE": {
+        "repository": "docker.io/mayuanmark/scwiki-goserver",
+        "hub_digest": "sha256:90bab83ba89f1feef0cdefdb30ccbb2f90a9a49939380a4d815dfcd4b256ae15",
+        "actual_image_id": "sha256:6382fafb3c3b1e6476ef26108461315f9327a2be054470c7e7d52f837f062013",
+        "config_sha256": "sha256:191ed7a713d4de31d163cf1f5c0c89c8c239a39dd14b20515595511b589bc35c",
+        "archive_sha256": "e4d7c4175a737a56a1c88a1eaa8839358b0112e4b720820b02a0f78c640bdd43",
+        "archive_file": "image.tar.gz",
+        "local_tag": "scwiki-actions/goserver:e2560d1f"
+      },
+      "PYTHON_IMAGE": {
+        "repository": "docker.io/mayuanmark/scwiki-python",
+        "hub_digest": "sha256:18fa5c3070f998c9f2249850d69fb4cf8ecb4a3f8b31f1c6c0d02214ccb6de3c",
+        "actual_image_id": "sha256:e33d36127eff453cbdc94ac9b7055b7eb4eebd72e54b932ea2d00f7ff2f6feb0",
+        "config_sha256": "sha256:a09f91968475277ce4b82451586e74897ffab637fa22166830f020edf13b7f3e",
+        "archive_sha256": "5f926553b47c57aa26e45751b1744406a0a75446f1d681ff4decc9cbf249f832",
+        "archive_file": "image.tar.gz",
+        "local_tag": "scwiki-actions/python:e2560d1f"
+      }
+    },
+    "build_run": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/actions/runs/40808730628",
+    "mode": "github-actions-images",
+    "activated_at": "2026-10-29T04:37:49.486226+00:00",
+    "backup": "/home/mayuan/sc-wiki/backups/actions-20261029-e2560d1f",
+    "unchanged_containers": [
+      "/scwiki-app-caddy-1",
+      "/scwiki-compute-grobid-1",
+      "/scwiki-data-redis-1",
+      "/scwiki-data-mysql-1",
+      "/scwiki-data-neo4j-1",
+      "/scwiki-data-qdrant-1",
+      "/scwiki-data-garage-1"
+    ],
+    "running_containers": 14
+  },
+  "runtime": {
+    "source_commit": "e2560d1fafb468637d9faf523f2576a3cccfe222",
+    "source_branch": "remote",
+    "python_files_verified": 401,
+    "application_image_ids_verified": 7,
+    "origin": "GitHub Actions",
+    "provenance": {
+      "FRONTEND_IMAGE": {
+        "repository": "docker.io/mayuanmark/scwiki-frontend",
+        "hub_digest": "sha256:71de9472b1db5c5d758bb2a4429b3f4d624d55ab322bdd3ce50e5d6afbf67362",
+        "actual_image_id": "sha256:a0cdd6665f5e99adad5587d8b29bde15b2f2eefa5c26105cf219357143cf382c",
+        "config_sha256": "sha256:31374606a6bb232074209807f11cb245c44c05995b5868d8b8420f0a16cc09a8",
+        "archive_sha256": "3bf2943fe98ae602b68fd655a0e00ea9be1518cabb5d65563577e7a77756a267",
+        "archive_file": "image.tar.gz",
+        "local_tag": "scwiki-actions/frontend:e2560d1f"
+      },
+      "GOSERVER_IMAGE": {
+        "repository": "docker.io/mayuanmark/scwiki-goserver",
+        "hub_digest": "sha256:90bab83ba89f1feef0cdefdb30ccbb2f90a9a49939380a4d815dfcd4b256ae15",
+        "actual_image_id": "sha256:6382fafb3c3b1e6476ef26108461315f9327a2be054470c7e7d52f837f062013",
+        "config_sha256": "sha256:191ed7a713d4de31d163cf1f5c0c89c8c239a39dd14b20515595511b589bc35c",
+        "archive_sha256": "e4d7c4175a737a56a1c88a1eaa8839358b0112e4b720820b02a0f78c640bdd43",
+        "archive_file": "image.tar.gz",
+        "local_tag": "scwiki-actions/goserver:e2560d1f"
+      },
+      "PYTHON_IMAGE": {
+        "repository": "docker.io/mayuanmark/scwiki-python",
+        "hub_digest": "sha256:18fa5c3070f998c9f2249850d69fb4cf8ecb4a3f8b31f1c6c0d02214ccb6de3c",
+        "actual_image_id": "sha256:e33d36127eff453cbdc94ac9b7055b7eb4eebd72e54b932ea2d00f7ff2f6feb0",
+        "config_sha256": "sha256:a09f91968475277ce4b82451586e74897ffab637fa22166830f020edf13b7f3e",
+        "archive_sha256": "5f926553b47c57aa26e45751b1744406a0a75446f1d681ff4decc9cbf249f832",
+        "archive_file": "image.tar.gz",
+        "local_tag": "scwiki-actions/python:e2560d1f"
+      }
+    }
+  },
+  "manual_cleanup": {
+    "manual_image_ids_before": [
+      "sha256:1024d5f4c163e9e9f29a730022625035fb55776c3ac8c52a0188cf207d460c82",
+      "sha256:14f928db762df657b8def0396ec69b1f1cfbb9a886e98076afa0ec6f469a6e3b",
+      "sha256:19a077cb3555e06020bb2d8f44fd0d7f7371b3f44a5921b839c0a483747d12ae",
+      "sha256:427e41f3d99b2ab4a690dfe9b70b6978049aaae618397bdf0751da00ebad771a",
+      "sha256:64fc3e9f57fba54bdcb2b8091f03fa1a40d213ca8136633f4eaf067eaf06e20f",
+      "sha256:675ba5d6dae155f883871525c4bae6f60f17cbd03b0594914a6ad5d40c438835",
+      "sha256:72562eaa1ea9bbce58781e6614e99acbe232ab3c7e8c373345cf77d58c3ab4a7",
+      "sha256:7eafdc0ac2d9e52a1799764690f757d86f63d6df5d221c8de969da1dcb1beb11",
+      "sha256:88f85a10baa4eda83a78503a2cf7112f9ec8f867a4b60208a5404ddda763b230",
+      "sha256:8f752f832f32e44401316486827049a8cbd8908b6e4d0e6903bc6b606ae8a7b4",
+      "sha256:91440c5883433fb1822c0f347a23758d77adedae0306c9d5091b4724d68da355",
+      "sha256:916c3e498f39182efccdd97626b95bfc278e9503d4a15eff04b1c84bd3c7ba47",
+      "sha256:bb610e215982b4fa0862749e796de6faac061881b2d908aa66e732bfed17d019",
+      "sha256:cddbd8294bc1bc53119409ccd3a142b042172832dddc5238b4b1a7c1fefd3d6d",
+      "sha256:cf5e084b7355d7c278207e5d31a07c56df2f5482e67402a9d60ab22f21d60975",
+      "sha256:d52b921ed23fae44b8d36605d35be2be974191087f6b5efdf59b2979d8374fc2",
+      "sha256:df76b3a8d6d77e74a176a88c77d128c4b298807a0aec4abb9423473407af1c29",
+      "sha256:e69c227a4c60b1cce946e4c2f0a09ff626bc5d18759bdbab6e306c6b3d2b5d4b"
+    ],
+    "removed_image_ids": [
+      "sha256:1024d5f4c163e9e9f29a730022625035fb55776c3ac8c52a0188cf207d460c82",
+      "sha256:14f928db762df657b8def0396ec69b1f1cfbb9a886e98076afa0ec6f469a6e3b",
+      "sha256:19a077cb3555e06020bb2d8f44fd0d7f7371b3f44a5921b839c0a483747d12ae",
+      "sha256:427e41f3d99b2ab4a690dfe9b70b6978049aaae618397bdf0751da00ebad771a",
+      "sha256:64fc3e9f57fba54bdcb2b8091f03fa1a40d213ca8136633f4eaf067eaf06e20f",
+      "sha256:675ba5d6dae155f883871525c4bae6f60f17cbd03b0594914a6ad5d40c438835",
+      "sha256:72562eaa1ea9bbce58781e6614e99acbe232ab3c7e8c373345cf77d58c3ab4a7",
+      "sha256:7eafdc0ac2d9e52a1799764690f757d86f63d6df5d221c8de969da1dcb1beb11",
+      "sha256:88f85a10baa4eda83a78503a2cf7112f9ec8f867a4b60208a5404ddda763b230",
+      "sha256:8f752f832f32e44401316486827049a8cbd8908b6e4d0e6903bc6b606ae8a7b4",
+      "sha256:91440c5883433fb1822c0f347a23758d77adedae0306c9d5091b4724d68da355",
+      "sha256:916c3e498f39182efccdd97626b95bfc278e9503d4a15eff04b1c84bd3c7ba47",
+      "sha256:bb610e215982b4fa0862749e796de6faac061881b2d908aa66e732bfed17d019",
+      "sha256:cddbd8294bc1bc53119409ccd3a142b042172832dddc5238b4b1a7c1fefd3d6d",
+      "sha256:cf5e084b7355d7c278207e5d31a07c56df2f5482e67402a9d60ab22f21d60975",
+      "sha256:d52b921ed23fae44b8d36605d35be2be974191087f6b5efdf59b2979d8374fc2",
+      "sha256:df76b3a8d6d77e74a176a88c77d128c4b298807a0aec4abb9423473407af1c29",
+      "sha256:e69c227a4c60b1cce946e4c2f0a09ff626bc5d18759bdbab6e306c6b3d2b5d4b"
+    ],
+    "remaining_image_ids": [],
+    "failures": {},
+    "removed_source_copies": [
+      {
+        "path": "/home/mayuan/sc-wiki/releases/11c7e10a",
+        "files": 3808,
+        "bytes": 213950468
+      },
+      {
+        "path": "/home/mayuan/sc-wiki/releases/cedc11d4",
+        "files": 3806,
+        "bytes": 213936003
+      }
+    ],
+    "fallback_preserved": "/home/mayuan/sc-wiki/releases/c9310bdf",
+    "fallback_image_ids_preserved": [
+      "sha256:008dfc89eb2da17f32e237a79d6f7d713372604b7c9fa8e2caaab03bde8f0f49",
+      "sha256:d9d1ea2b9affd6c0231e4655f7316e12b753c728b045d6a7601a498de630494e",
+      "sha256:e6b5a79624f5ebca3d00d9123a4ee7d049b9733c5c76a433bce05deba83cbbfe"
+    ],
+    "data_and_backups_preserved": true
+  },
+  "previous_server_cleanup": {
+    "removed": [
+      {
+        "path": "/home/mayuan/sc-wiki/incoming/release-20261029-11c7e10a",
+        "files": 183,
+        "bytes": 284528710
+      },
+      {
+        "path": "/home/mayuan/sc-wiki/incoming/release-20261029-cedc11d4",
+        "files": 356,
+        "bytes": 313725625
+      }
+    ],
+    "current_preserved": "/home/mayuan/sc-wiki/releases/cedc11d4",
+    "backup_directories_preserved": true,
+    "images_not_removed_until_replacement": true
+  },
+  "downloads": {
+    "frontend": {
+      "image": "frontend",
+      "artifact_id": 12869926810,
+      "artifact_digest": "sha256:8b646c52eaa952b4619f1dfe5ee9569cd1507f5756431598028648c1cb8c7e8f",
+      "bytes": 36780165,
+      "seconds": 10.641115644015372,
+      "source_commit": "e2560d1fafb468637d9faf523f2576a3cccfe222",
+      "transport": "GitHub artifact directly to Aliyun",
+      "verified": true
+    },
+    "goserver": {
+      "image": "goserver",
+      "artifact_id": 12869219193,
+      "artifact_digest": "sha256:027f6261624b3f43b7a4d3595ddefca77f9873e1c20b1767a37593fed2c20c53",
+      "bytes": 15422708,
+      "seconds": 33.92528141301591,
+      "source_commit": "e2560d1fafb468637d9faf523f2576a3cccfe222",
+      "transport": "GitHub artifact directly to Aliyun",
+      "verified": true
+    },
+    "python": {
+      "image": "python-full",
+      "artifact_id": 12870546824,
+      "artifact_digest": "sha256:4ea383bf8cbd6a61e468cb08d07ebb1d5c718552ea7202d110e1ecb84e5fe179",
+      "bytes": 4742567015,
+      "seconds": 465.32284783001523,
+      "source_commit": "e2560d1fafb468637d9faf523f2576a3cccfe222",
+      "transport": "GitHub artifact directly to Aliyun",
+      "verified": true
+    }
+  },
+  "data_verification": {
+    "mysql_tables_unchanged": 71,
+    "objects_verified": 89,
+    "redis_business_unchanged": true,
+    "checked_at": "2026-10-29T04:37:43.486863+00:00"
+  },
+  "final_containers": [
+    {
+      "name": "/scwiki-app-community-worker-1",
+      "image": "sha256:e33d36127eff453cbdc94ac9b7055b7eb4eebd72e54b932ea2d00f7ff2f6feb0",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "name": "/scwiki-app-news-scheduler-1",
+      "image": "sha256:e33d36127eff453cbdc94ac9b7055b7eb4eebd72e54b932ea2d00f7ff2f6feb0",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "name": "/scwiki-app-news-worker-1",
+      "image": "sha256:e33d36127eff453cbdc94ac9b7055b7eb4eebd72e54b932ea2d00f7ff2f6feb0",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "name": "/scwiki-compute-worker-1",
+      "image": "sha256:e33d36127eff453cbdc94ac9b7055b7eb4eebd72e54b932ea2d00f7ff2f6feb0",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "name": "/scwiki-app-frontend-1",
+      "image": "sha256:a0cdd6665f5e99adad5587d8b29bde15b2f2eefa5c26105cf219357143cf382c",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "name": "/scwiki-app-python-1",
+      "image": "sha256:e33d36127eff453cbdc94ac9b7055b7eb4eebd72e54b932ea2d00f7ff2f6feb0",
+      "running": true,
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "name": "/scwiki-app-goserver-1",
+      "image": "sha256:6382fafb3c3b1e6476ef26108461315f9327a2be054470c7e7d52f837f062013",
+      "running": true,
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "name": "/scwiki-app-caddy-1",
+      "image": "sha256:26320133519c733eee0f60ada729632231388e98d2aec6607913fb182b123d61",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "name": "/scwiki-compute-grobid-1",
+      "image": "sha256:364bc52f4d735274d744155bfe6e81c0c3814bea8e94ff86842b3a78854acd0e",
+      "running": true,
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "name": "/scwiki-data-redis-1",
+      "image": "sha256:8a1efc5f479551822b47424ccae982026b633f28818eab0387348120a61e10e2",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "name": "/scwiki-data-mysql-1",
+      "image": "sha256:ac80b6e09e5b12b4f9d5cd4f6425e43464247aa4ba4f6169da5daf59e5877f7d",
+      "running": true,
+      "restarts": 0,
+      "health": "healthy"
+    },
+    {
+      "name": "/scwiki-data-neo4j-1",
+      "image": "sha256:fe960dc9fe795d3dcf519a0c6f4d35251b59f58e0004ffc6e46f4ae403842be8",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "name": "/scwiki-data-qdrant-1",
+      "image": "sha256:90636e5441d8710f9ac5bb293c5add78b0b8515aa097938591c163180a4410a2",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    },
+    {
+      "name": "/scwiki-data-garage-1",
+      "image": "sha256:0b46f1a5f2ac58d1d08f36d7d6196b195f18b09f14bde2776d185a847c2b9868",
+      "running": true,
+      "restarts": 0,
+      "health": null
+    }
+  ],
+  "public_browser": {
+    "transport": "Chrome on local Mac directly accessing the public HTTPS domain; no SSH tunnel or host override",
+    "routes": [
+      {
+        "path": "/news",
+        "nobel_faces": 11,
+        "status": 200
+      },
+      {
+        "path": "/nobel/giaever",
+        "refresh": true,
+        "share": "1/4"
+      },
+      {
+        "path": "/auth",
+        "input_count": 2
+      }
+    ],
+    "api": [
+      {
+        "path": "/health",
+        "status": 200
+      },
+      {
+        "path": "/api/news",
+        "status": 200
+      },
+      {
+        "path": "/api/news/feed?kind=news&period=week&page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/news/feed?kind=preprint&period=week&page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/news/feed?kind=journal_article&period=history&page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/papers?page=1&page_size=5",
+        "status": 200
+      },
+      {
+        "path": "/api/classification-catalogs",
+        "status": 200
+      },
+      {
+        "path": "/api/account/profile",
+        "status": 401
+      }
+    ],
+    "mobile": {
+      "width": 390,
+      "content": 390
+    },
+    "passed": true,
+    "errors": [],
+    "server_errors": []
+  },
+  "backup_download": {
+    "verified": true,
+    "files": 106,
+    "bytes": 170019487,
+    "remote": "/home/mayuan/sc-wiki/backups/actions-20261029-e2560d1f",
+    "local": "/Users/mayuan/SC-Wiki-backups/actions-20261029-e2560d1f/server"
+  },
+  "previous_local_cleanup": {
+    "path": "/tmp/scwiki-remote-release-20261029",
+    "files": 4007,
+    "bytes": 696043461,
+    "retained_operational_helpers": [
+      "freeze_backup.py",
+      "activate_server.py",
+      "public-browser-smoke.mjs"
+    ],
+    "backup_preserved": "/Users/mayuan/SC-Wiki-backups/release-20261029-cedc11d4"
+  },
+  "generated_output_cleanup": {
+    "removed_demo_output": "/Users/mayuan/Codes/SC-Wiki/docs/specs/161-spectrum-manual-editor-demo/demo/dist",
+    "files": 4,
+    "bytes": 1014888,
+    "frontend_static_preserved": "Another task rebuilt it at 10:22; not the earlier output owned by this task."
+  },
+  "build": {
+    "url": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/actions/runs/40808730628",
+    "source_commit": "e2560d1fafb468637d9faf523f2576a3cccfe222",
+    "branch": "remote",
+    "platform": "linux/amd64",
+    "conclusion": "success",
+    "digests": {
+      "goserver": "sha256:90bab83ba89f1feef0cdefdb30ccbb2f90a9a49939380a4d815dfcd4b256ae15",
+      "frontend": "sha256:71de9472b1db5c5d758bb2a4429b3f4d624d55ab322bdd3ce50e5d6afbf67362",
+      "python": "sha256:18fa5c3070f998c9f2249850d69fb4cf8ecb4a3f8b31f1c6c0d02214ccb6de3c"
+    }
+  },
+  "form_ci": {
+    "url": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/actions/runs/40809830310",
+    "source_commit": "40d2ad26c68da60b2ac5301509bf574239e93aad",
+    "conclusion": "success",
+    "tests": 65,
+    "mutation_checks": 8,
+    "application_changed": false,
+    "fixed_failed_run": 40808689153
+  },
+  "cancelled_optional_runs": [
+    {
+      "run": 40804668374,
+      "reason": "arm64 emulation was unnecessary for the x86_64 target"
+    },
+    {
+      "run": 40812873246,
+      "reason": "verified full archive download completed first; delta was not deployed"
+    }
+  ],
+  "final_transport": "Original Actions archives downloaded directly to Aliyun and verified; no local/server image rebuild",
+  "actions_server_staging_cleanup": {
+    "path": "/home/mayuan/sc-wiki/incoming/actions-20261029-e2560d1f",
+    "files": 31,
+    "bytes": 4794883949,
+    "removed": true
+  },
+  "actions_local_staging_cleanup": {
+    "path": "/tmp/scwiki-actions-release-20261029",
+    "files": 40,
+    "bytes": 12761818,
+    "removed": true
+  }
+}
