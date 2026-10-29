@@ -11,7 +11,7 @@
 | 小功能 | 职责 | 依赖 |
 | --- | --- | --- |
 | [上传 LLM 工作链路与 Agent 抽象分析](upload-llm-workflow-and-agent-analysis.md) | 解释现有分段提取、提示词、表单映射及其与问答的关系；单独标明 Agent 与联网建议 | 上传 Worker、来源核对、问答工具 |
-| [PDF 解析管线](pdf-parsing-pipeline.md) | MinerU 主干的唯一四工具流程、五阶段处理、来源核对、落库与向量发布 | GROBID、Docling、Marker、RQ、Redis、LLM、MySQL、Qdrant |
+| [PDF 解析管线](pdf-parsing-pipeline.md) | [上传到审核入库主流程图](pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程)，以及四工具解析、五阶段处理、来源核对和向量发布 | MinerU、GROBID、Docling、Marker、RQ、Redis、LLM、MySQL、Qdrant |
 | [PDF 摄入](pdf-ingestion.md) | 校验并摄入论文、保留独立结构模型与晶格观测 | 上传目录、摄入流水线 |
 | [上传、审核与默认结构](upload-review-and-default-selection.md) | 管理晶体结构 pending/approved/rejected 状态和默认项 | 用户认证、管理员权限 |
 | [上传数据结构与表单映射](data-structure-and-form-mapping.md) | 三入口统一研究材料与状态字段、退役独立材料关系、紧凑可折叠结构及草稿与 MySQL 的映射 | 上传任务、科学数据模型 |

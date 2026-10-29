@@ -8,6 +8,8 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 
 ## 全局导航
 
+了解 PDF 上传后如何校对、送审和最终成为已批准数据，先看[从 PDF 上传到审核入库的主流程图](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程)。图中区分提交时的待审入库与最终批准，并保留字段处理、拒绝返修和批准后向量发布的主要分支。
+
 上传与管理员编辑共用材料名/化学式至少一项规则；命名材料可没有化学式，当前编辑保存后可逐项填写人工理由确认。详见[上传数据结构](01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md)与[论文审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 
 业务页面的所有角色与访客共享左侧导航，页面不再保留全宽顶部栏。SC-Wiki 位于最上方，点击返回默认热点页；下方依次为热点、探索、脉络、社区、上传、对话、预测。社区展开排行榜、Tc~X 演变和 AI 学术讨论，侧栏收起时通过菜单选择。底部留白后依次提供模型配置、中文/英文；已登录者其后可访问通知，超级管理员另有社区管理，最后为角色入口及头像菜单；访客最后为登录。侧栏和上传页登录入口统一跳转到独立白色 /auth 页面（不显示业务侧栏），登录或注册验证完成后返回合法站内来源；没有来源时登录返回热点，新注册进入用户中心。该页提供邮箱登录、注册及邮箱验证码找回密码；视觉与动画沿用已确认的超导轨道设计，详见 [Feature #151](../specs/151-superconducting-auth-page/spec.md)。

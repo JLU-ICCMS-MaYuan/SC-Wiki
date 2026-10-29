@@ -4,6 +4,59 @@
 
 本功能描述上传任务从文件接收到生成待校对草稿、再到提交落库与发布向量索引的完整处理链路，是 01 目录的主线文档。文件校验与摄入约束见 [PDF 摄入](pdf-ingestion.md)；晶体结构附件的审核与默认结构选择见 [上传、审核与默认结构](upload-review-and-default-selection.md)。
 
+## 从 PDF 上传到审核入库的主流程
+
+上传 PDF 后，系统先生成可校对草稿；上传者处理字段问题并提交，系统将论文写入 MySQL 等待管理员审核；管理员批准后，该版本才作为已审核数据对外提供。
+
+**“写入数据库”有两个不同节点：提交送审时已创建待审核记录，最终批准时再确认正式内容、来源与审核历史，并标记为已批准。** 解析成功、保存草稿、字段核对通过，都不能代替整篇论文批准。
+
+下图只保留主干及主要分支。正文角色确认、具体解析工具、单字段操作、附件分配、取消和技术重试等细节，留在后文及关联文档。
+
+```mermaid
+flowchart TD
+    U["上传主文 PDF 与补充材料"] --> P["系统解析与 AI 提取<br/>整理正文、材料、物性和来源，生成草稿"]
+    P --> D["解析成功，等待校对<br/>保留首次字段核对结果"]
+    P -->|查重命中| X["提示已有论文<br/>结束本次新建流程"]
+    D --> E["上传者校对并保存<br/>确认现有内容，或修改并补充理由与依据"]
+    E --> G{"点击提交送审<br/>格式、来源与字段核对是否通过？"}
+    G -->|未通过或未完成| E
+    G -->|通过| W["MySQL 保存待审核论文<br/>pending；首次创建，返修更新原论文"]
+    W --> A["管理员或超级管理员审阅<br/>查看原文、字段核对结果，必要时编辑"]
+    A --> R{"整篇论文的审核决定"}
+    R -->|选择通过| V{"批准前检查<br/>当前内容、分类、来源与权限是否满足要求？"}
+    V -->|不满足，继续处理| A
+    V -->|满足| O["批准事务提交<br/>正式内容、来源、审核历史一并保存<br/>approved，绑定当前内容版本"]
+    R -->|退回待审核| A
+    R -->|拒绝| J["rejected<br/>保留论文及审核意见"]
+    J -->|原上传者发起返修| F["在原论文上建立返修草稿<br/>复用原文，修改后重新送审"]
+    F --> E
+    O --> Q["已批准数据可用于公开查询<br/>材料检索与统计读取已批准记录"]
+    O -.批准后的发布.-> I["生成向量并写入 Qdrant<br/>供文献问答检索"]
+```
+
+### 读图时需要区分的几个动作
+
+| 动作 | 实际结果 |
+| --- | --- |
+| 解析完成、保存草稿 | 得到可继续编辑的内容。例如提取出某材料在某压强下的 Tc 及原文位置；仍未创建本次上传的待审核论文。草稿、文件、核对结果等可以分别持久化，不等于论文已批准。 |
+| 字段核对与人工处理 | 判断当前字段的值、理由和依据能否用于送审。例如修改 Tc 后，只对受影响字段及真实依赖重新核对；同版本有效结果复用。正常输入和保存不启动模型核对。 |
+| 提交送审 | 先保存，再检查格式和当前字段结果，必要时核对修改后的字段；全部满足要求才在事务中创建 `pending` 论文、材料状态、物性、结构和来源关联。结构只写入符合确认与校验条件的候选。 |
+| 管理员批准 | 管理员和超级管理员是两个可执行审核的角色，不是必须依次通过的两级审批；不能审核自己的论文。当前工作台的编辑先暂存，批准事务将暂存内容、来源、审核历史及 `approved` 状态一并提交；检查失败则保留待处理输入。 |
+| 拒绝后返修 | 由原上传者针对 `rejected` 论文发起。复用已有文件，在同一论文 ID 上提交新内容版本，回到 `pending` 再审；“退回待审核”只是保留待审状态，与上传者返修入口不同。 |
+| 批准后发布向量索引 | 主业务数据的批准先提交，再执行向量发布。发布失败可以返回 `publication_pending`，已提交的批准不回滚，因此批准成功不代表问答索引已经建立。 |
+
+待审核记录已入库，但不作为已批准科学数据进入材料检索、物性工具和统计。论文列表另按身份控制可见性：登录用户可以查看待审论文，匿名用户只看已批准论文，不能将“待审核”理解为“只有管理员能看”。
+
+本节按当前代码核对主流程，未为编写文档重新上传真实 PDF、调用模型或执行审核。单字段的三个模型入口和结果复用规则见[逐字段审核流程图](../02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md#逐字段审核流程图)，返修细节见[已拒绝论文返修](pdf-ingestion.md#已拒绝论文返修)。
+
+主要实现依据：
+
+- 解析与草稿：`backend/ingest/upload_jobs.py` 的 `_process_upload_task`。
+- 校对和提交：`frontend/src/components/UploadTaskEditor.tsx` 的 `saveDraft`、`submit`；`backend/api/rag.py` 的 `_submit_upload_draft_locked`、`_create_pending_paper`。
+- 当前工作台批准：`frontend/src/pages/AdminPaperEditPage.tsx`、`frontend/src/pages/AdminPage.tsx` → `backend/api/evidence.py` 的 `commit_field_review` → `backend/services/field_review_commit.py` 的 `commit_review`；拒绝和退回由 `goserver/handlers/admin.go` 的 `ReviewPaper` 处理。
+- 返修与发布：`backend/services/paper_revisions.py` 的 `submit_draft`；`backend/api/rag.py` 的 `publish_approved_paper`。
+- 论文可见性：`goserver/handlers/papers.go` 的 `ListPapers`；科学记录读取规则见[混合检索](../05_Retrieval-Augmented_AI_Question_Answering/hybrid-retrieval.md)。
+
 ## 入口与任务创建
 
 - 前端入口是 `/upload`。用户声明一组文件，每个文件带 `client_id`、`role`（`main` / `supplementary` / `attachment`）、文件名和大小；支持 PDF、TXT、MD、CIF、POSCAR，单文件最大 50 MB，同时上传最多 3 个。
