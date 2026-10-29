@@ -2,6 +2,16 @@ name: Build and publish Docker images
 
 on:
   workflow_dispatch:
+    inputs:
+      platforms:
+        description: '目标服务器架构；当前阿里云 x86_64 使用 linux/amd64'
+        type: choice
+        required: true
+        default: linux/amd64
+        options:
+          - linux/amd64
+          - linux/arm64
+          - linux/amd64,linux/arm64
 
 permissions:
   contents: read
@@ -26,6 +36,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up QEMU (支持 linux/arm64 模拟构建)
+        if: contains(inputs.platforms, 'arm64')
         uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
@@ -52,9 +63,8 @@ jobs:
           context: .
           file: ${{ matrix.dockerfile }}
           push: true
-          # 同时构建 amd64 与 arm64（倚天 ECS 用）；push:true 会自动生成多架构 manifest。
-          # arm64 在 amd64 runner 上经 QEMU 模拟，构建较慢，属预期代价。
-          platforms: linux/amd64,linux/arm64
+          # 按实际服务器选择架构；需要倚天 ECS 或多架构发布时显式选择 arm64。
+          platforms: ${{ inputs.platforms }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=${{ matrix.image }}
