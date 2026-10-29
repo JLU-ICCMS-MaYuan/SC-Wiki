@@ -10,7 +10,7 @@
 <body>
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="pdf-review-flow.html#parse">收录主流程</a> / 解析与草稿</nav>
-  <header><p class="eyebrow">SC-WIKI · 解析与草稿</p><h1>PDF 如何变成可校对草稿</h1><p class="intro">从上传 Worker 开始，展开正文提取、角色确认、科学候选、来源覆盖、查重和草稿保存。菱形是程序判断，侧向连线展示等待、补证和失败路径。点击节点可查看对应源码入口与处理边界。</p></header>
+  <header><p class="eyebrow">SC-WIKI · 解析与草稿</p><h1>PDF 如何变成可校对草稿</h1><p class="intro">从上传 Worker 开始，展开正文提取、角色确认、科学候选、来源覆盖、查重和草稿保存。菱形是程序判断，侧向连线展示等待、补证和失败路径。点击普通节点查看源码入口与处理边界；字段核对和解析差异两个节点可在新标签页继续展开。</p></header>
   <nav class="page-links" aria-label="流程页面导航"><a href="pdf-review-flow.html#parse">← 返回主流程</a><a href="pdf-approval-check-flow.html">查看批准前检查程序流程 →</a></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
@@ -20,7 +20,7 @@
     </section>
     <aside class="details" aria-label="所选程序节点说明" aria-live="polite" aria-atomic="true">
       <div class="detail-head"><p class="eyebrow">程序节点说明</p><h2 id="detail-title"></h2></div>
-      <div class="detail-body"><h3>执行方</h3><p id="detail-owner"></p><h3>程序行为</h3><p id="detail-description"></p><h3>边界与分支</h3><ul id="detail-notes"></ul><h3>源码定位</h3><code id="detail-code"></code></div>
+      <div class="detail-body"><h3>执行方</h3><p id="detail-owner"></p><h3>程序行为</h3><p id="detail-description"></p><h3>边界与分支</h3><ul id="detail-notes"></ul><h3>源码定位</h3><code id="detail-code"></code><a id="detail-open" class="detail-open" hidden>在新标签页查看详细流程 ↗</a></div>
     </aside>
   </div>
   <p class="boundary">本页是当前程序的说明图，不操作真实任务。ready 表示草稿可校对，不表示每个字段已通过，更不表示整篇论文已批准。解析差异进入独立诊断侧栏，科学字段问题沿原字段核对入口处理。</p>
@@ -45,9 +45,9 @@
     {"id":"summary","row":9,"title":"汇总并归一化草稿","summary":"题录、论文信息与科学实体分开组装","owner":"汇总模型 / 程序","description":"生成论文概要等信息，按当前契约组装材料状态和科学记录，保留原始来源。","notes":["科学数值由提取候选组装，不能让主汇总随意改写。","结构候选的分配和确认继续留给校对。"],"code":"backend/ingest/upload_jobs.py::_normalize_draft / _process_upload_task"},
     {"id":"duplicate-check","row":10,"kind":"check","title":"数据库已有这篇论文？","summary":"先 DOI，再按文件哈希查重","owner":"查重程序","description":"用归一化 DOI 和主文文件哈希查询已有论文，命中则结束本次新建流程。","notes":["查重命中与原论文是否已批准无关。"],"code":"backend/ingest/upload_jobs.py::_find_existing_paper / _find_existing_by_hash"},
     {"id":"duplicate","row":10,"column":"right","kind":"stop","title":"提示已有论文","summary":"duplicate；不重复新建","owner":"上传 Worker","description":"返回已有论文信息或权限提示，结束本次新建任务。","notes":["已有论文仍按账号权限控制可见性。"],"code":"backend/ingest/upload_jobs.py::_handle_duplicate"},
-    {"id":"evidence","row":11,"title":"生成字段核对结果与候选","summary":"逐字段保存状态、理由和依据","owner":"共享科学核对程序 / LLM","description":"使用本次来源生成逐字段结论和必要候选。字段可为通过、存疑、不通过或未完成，不把 ready 解释为所有字段都通过。","notes":["已提取内容不会因建议生成的技术异常被清空。","上传者后续保存不触发模型核对。"],"code":"backend/ingest/property_evidence.py::generate_upload_suggestions"},
+    {"id":"evidence","href":"pdf-field-evidence-flow.html","row":11,"title":"生成字段核对结果与候选","summary":"逐字段保存状态、理由和依据","owner":"共享科学核对程序 / LLM","description":"使用本次来源生成逐字段结论和必要候选。字段可为通过、存疑、不通过或未完成，不把 ready 解释为所有字段都通过。","notes":["已提取内容不会因建议生成的技术异常被清空。","上传者后续保存不触发模型核对。"],"code":"backend/ingest/property_evidence.py::generate_upload_suggestions"},
     {"id":"suggestion-error","row":11,"column":"right","kind":"wait","title":"保留草稿及核对故障","summary":"已提取内容继续保留","owner":"上传 Worker","description":"建议或字段核对生成异常被记录，保留提取内容及故障说明，后续通过原核对入口处理。","notes":["技术故障不能伪装成科学不通过或科学通过。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
-    {"id":"diagnostics","row":12,"title":"保存解析差异与责任分类","summary":"区域差异、题录及系统待核查项","owner":"解析诊断程序","description":"保留原解析差异并分类，区分系统已核实、系统待核查和需要用户判断。","notes":["诊断详情按点击进入右侧栏，不铺满科学表单。","原始区域数不等于科学错误数。"],"code":"backend/ingest/parsing_diagnostics.py::annotate_differences"},
+    {"id":"diagnostics","href":"pdf-parsing-diagnostics-flow.html","row":12,"title":"保存解析差异与责任分类","summary":"区域差异、题录及系统待核查项","owner":"解析诊断程序","description":"保留原解析差异并分类，区分系统已核实、系统待核查和需要用户判断。","notes":["诊断详情按点击进入右侧栏，不铺满科学表单。","原始区域数不等于科学错误数。"],"code":"backend/ingest/parsing_diagnostics.py::annotate_differences"},
     {"id":"save","row":13,"title":"保存草稿与审核产物","summary":"保留快照、来源和产物清单","owner":"上传 Worker / 草稿存储","description":"写入解析与证据快照、持久化草稿并在适用存储模式发布产物清单。受控重跑时核对原草稿哈希，保护期间的人工修改。","notes":["保存草稿不等于创建待审论文。","受控重跑发现人工编辑后停止覆盖。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/upload_tasks.py::save_draft"},
     {"id":"conflict","row":13,"column":"left","kind":"stop","title":"保留已有人工草稿","summary":"并发修改时不覆盖","owner":"草稿版本保护程序","description":"受控重跑发现原草稿在解析期间已变化时拒绝覆盖，保留当前人工编辑供核对。","notes":["该分支适用于带预期草稿哈希的受控重跑。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},
     {"id":"ready","row":14,"kind":"result","title":"标记 ready，等待校对","summary":"解析成功；字段状态分别保留","owner":"上传 Worker","description":"任务进入可校对状态，保留首次字段核对结论和解析诊断，不在 ready 后重新排队同一轮全量字段检查。","notes":["谱提取等后续独立任务不等于整篇科学审核通过。"],"code":"backend/ingest/upload_jobs.py::_process_upload_task"},

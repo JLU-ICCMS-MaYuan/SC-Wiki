@@ -13,6 +13,8 @@
 | [上传 LLM 工作链路与 Agent 抽象分析](upload-llm-workflow-and-agent-analysis.md) | 解释现有分段提取、提示词、表单映射及其与问答的关系；单独标明 Agent 与联网建议 | 上传 Worker、来源核对、问答工具 |
 | [PDF 上传到审核入库交互流程图](pdf-review-flow.html) | 主流程入口；点击解析阶段或批准前检查进入独立程序流程图页面，其他节点显示概要 | 独立 HTML、CSS、JavaScript，无外部依赖 |
 | [解析与草稿程序流程图](pdf-parsing-flow.html) | 展开正文提取、角色确认、来源覆盖、查重、草稿保存及主要失败路径；可返回主流程 | 上传 Worker、解析与字段核对代码 |
+| [字段核对结果与候选程序流程图](pdf-field-evidence-flow.html) | 从解析图对应节点在新标签页打开，继续展开分批核对、候选补空、条件关联、原文复核与审计保存 | 共享字段核对、科学上下文、计算条件规则 |
+| [解析差异与责任分类程序流程图](pdf-parsing-diagnostics-flow.html) | 从解析图对应节点在新标签页打开，继续展开分类优先级、原文可用性、影响关联及题录责任分流 | 解析诊断、原 PDF、既有题录核验资料 |
 | [批准前检查程序流程图](pdf-approval-check-flow.html) | 展开结果复用、必要模型核对、权限与版本、正式保存、事务回滚及索引发布 | 工作台、共享证据服务、批准事务 |
 | [PDF 解析管线](pdf-parsing-pipeline.md) | [上传到审核入库主流程图](pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程)，以及四工具解析、五阶段处理、来源核对和向量发布 | MinerU、GROBID、Docling、Marker、RQ、Redis、LLM、MySQL、Qdrant |
 | [PDF 摄入](pdf-ingestion.md) | 校验并摄入论文、保留独立结构模型与晶格观测 | 上传目录、摄入流水线 |

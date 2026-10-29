@@ -44,20 +44,33 @@
   const controls=new Map();
   function select(id) {
     const node=nodes.get(id);if(!node)return;
-    for (const [key,control] of controls) control.setAttribute('aria-pressed',String(key===id));
+    for (const [key,control] of controls) {
+      if (nodes.get(key).href) {
+        if (key===id) control.setAttribute('aria-current','step');
+        else control.removeAttribute('aria-current');
+      } else control.setAttribute('aria-pressed',String(key===id));
+    }
     for (const {edge,path} of paths) path.setAttribute('class','edge'+(edge.from===id||edge.to===id?' active':''));
     for (const [key,value] of Object.entries({title:node.title,owner:node.owner,description:node.description,code:node.code||'同一流程内的状态或控制分支'})) document.querySelector('#detail-'+key).textContent=value;
     document.querySelector('#detail-notes').replaceChildren(...(node.notes||[]).map(text=>{const item=document.createElement('li');item.textContent=text;return item}));
+    const open=document.querySelector('#detail-open');
+    if (open) {
+      open.hidden=!node.href;
+      if(node.href) { open.href=node.href;open.target='_blank';open.rel='noopener noreferrer'; }
+      else open.removeAttribute('href');
+    }
     history.replaceState(null,'','#'+id);
   }
   for (const node of nodes.values()) {
-    const control=element('g',{class:'node '+(node.kind||''),role:'button',tabindex:0,'aria-label':node.title+'：查看程序说明','aria-controls':'detail-title detail-description','aria-pressed':'false','data-node':node.id});
+    const control=element(node.href?'a':'g',{class:'node '+(node.kind||''),role:node.href?'link':'button',tabindex:0,'aria-label':node.title+(node.href?'：在新标签页查看详细程序流程':'：查看程序说明'),'data-node':node.id,
+      ...(node.href?{href:node.href,target:'_blank',rel:'noopener noreferrer'}:{'aria-controls':'detail-title detail-description','aria-pressed':'false'})});
     const shape=node.kind==='check'
       ? element('polygon',{points:`${node.x+node.w/2},${node.y} ${node.x+node.w},${node.y+node.h/2} ${node.x+node.w/2},${node.y+node.h} ${node.x},${node.y+node.h/2}`,class:'shape'})
       : element('rect',{x:node.x,y:node.y,width:node.w,height:node.h,rx:node.kind==='result'||node.kind==='stop'?25:10,class:'shape'});
     control.append(shape,element('text',{x:node.x+node.w/2,y:node.y+node.h/2-6,class:'node-title'},node.title),element('text',{x:node.x+node.w/2,y:node.y+node.h/2+17,class:'node-summary'},node.summary));
+    if(node.href) control.append(element('text',{x:node.x+node.w-12,y:node.y+15,class:'node-open'},'新标签页 ↗'));
     control.addEventListener('click',()=>select(node.id));
-    control.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();select(node.id)}});
+    if(!node.href) control.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();select(node.id)}});
     controls.set(node.id,control);nodeLayer.append(control);
   }
   function fromHash(){const id=location.hash.slice(1);select(nodes.has(id)?id:data.start)}
