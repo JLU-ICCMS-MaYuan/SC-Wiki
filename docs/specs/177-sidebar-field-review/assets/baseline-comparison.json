@@ -1,0 +1,17 @@
+{
+  "base_commit": "e7dcc2129bc3f18e7a384cb8a39a0a7bb7d13ffd",
+  "new_case_old_workflow_fails": true,
+  "old_failure_message_present": true,
+  "existing_manual_ui_failures_unchanged": [
+    "主表单保存失败保留人工输入且不发送说明请求",
+    "保存响应和旧读取都不能清除在途请求期间的新输入",
+    "拖拽/图片粘贴共用校验，普通文本粘贴不拦截，待上传图片可预览",
+    "立即打开未保存字段即可填写说明，显式保存先保存主值并使用新版本",
+    "部分文件上传失败只保留失败项，重试不再上传已成功项"
+  ],
+  "existing_manual_transfer_failure": "test_transfer_rechecks_explanation_after_preflight",
+  "source_hashes": {
+    "/tmp/scwiki177-baseline/EvidenceWorkflow.tsx": "a344b45d9c6d4c3a4d5dbe6f2b028f1c93bde5fc987db2d187a4f284c330d844",
+    "/tmp/scwiki177-baseline/ManualEvidenceSection.tsx": "8608ff7861945190e601336a09180047f0588c25f73da60d6879757f88499ff0"
+  }
+}

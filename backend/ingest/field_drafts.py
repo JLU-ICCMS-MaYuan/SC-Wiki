@@ -100,10 +100,10 @@ def apply_changes(draft, changes):
     return updated
 
 
-def save_fields(session, target, target_id, user, expected_version, changes):
+def save_fields(session, target, target_id, user, expected_version, changes, *, field_scope=False):
     draft, saved = authorized_draft(session, target, target_id, user, lock=True)
     version = draft_version(draft)
-    if expected_version != version:
+    if not field_scope and expected_version != version:
         fail('draft_version_conflict', '草稿版本已变化，当前输入未被覆盖')
     updated = apply_changes(draft, changes)
     if updated == draft:

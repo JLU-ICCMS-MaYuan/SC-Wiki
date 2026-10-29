@@ -444,13 +444,15 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
     current = {r['item_key']: r for r in snapshot['records']}
     if not current:
         return {}
-    versions = session.execute(select(table.id, table.item_key, table.content_hash, table.source_hash).where(
+    versions = session.execute(select(table.id, table.item_key, table.content_hash, table.source_hash,
+        table.result['field_review_binding']['token']).where(
         table.target == snapshot['target'], table.target_id == snapshot['target_id'],
         table.item_key.in_(current))).all()
     chosen, exact = {}, set()
-    for row_id, key, content, source in sorted(versions):
+    for row_id, key, content, source, field_token in sorted(versions):
         record = current[key]
-        valid = (content, source) == (record['content_hash'], record['source_hash'])
+        valid = (content, source) == (record['content_hash'], record['source_hash']) or (
+            bool(record.get('field_input_token')) and field_token == record['field_input_token'])
         if valid or (include_stale and key not in exact):
             chosen[key] = row_id
             if valid:
@@ -464,6 +466,8 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
         result.pop('audit_events', None)
         result.update(content_hash=row.content_hash, source_hash=row.source_hash,
                       stale=row.item_key not in exact, stored_result=True)
+        from .field_input import project
+        result = project(record, result)
         from .state_field_review import scope_matches
         if not scope_matches(record, result):
             result.update(stale=True, pending_review=True)

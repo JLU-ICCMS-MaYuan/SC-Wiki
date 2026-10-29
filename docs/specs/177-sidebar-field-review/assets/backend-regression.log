@@ -1,0 +1,44 @@
+......................................F................................. [ 97%]
+..                                                                       [100%]
+=================================== FAILURES ===================================
+______________ test_transfer_rechecks_explanation_after_preflight ______________
+
+session = <sqlalchemy.orm.session.Session object at 0x31fd63cb0>
+
+    def test_transfer_rechecks_explanation_after_preflight(session):
+        before, current = snapshot("old"), snapshot()
+        manual.save_explanation(session, current, before, "stable-field", 7,
+                                reason="人工核验", no_evidence_reason="无可共享文件", text_items=[])
+        assert manual.validate_submission(session, current, before) == []
+        manual.save_explanation(session, current, before, "stable-field", 7,
+                                reason="", no_evidence_reason="", text_items=[])
+>       with pytest.raises(manual.ManualEvidenceError) as stale:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ManualEvidenceError
+
+tests/01_decentralized_uploading/test_issue109_manual_evidence.py:104: Failed
+=============================== warnings summary ===============================
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_transfer_rechecks_explanation_after_preflight
+1 failed, 73 passed, 536 warnings in 2.63s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

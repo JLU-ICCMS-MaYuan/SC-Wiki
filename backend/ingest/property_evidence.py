@@ -1341,6 +1341,8 @@ def run_evidence_job(job_id: str):
         token = set_llm_config(config)
         update_job(job_id, status='running')
         snapshot = job['snapshot']
+        if snapshot.get('field_review_input'):
+            snapshot['field_review_job_id'] = job_id
         if snapshot.get('condition_source_manifest_complete') is False and any(r.get('condition_context') for r in snapshot['records']):
             update_job(job_id, status='failed', error={'code': 'evidence_source_incomplete',
                        'message': '正文或补充材料缺少完整可读来源，不能把未读内容当作未报告。'})
@@ -1568,6 +1570,43 @@ def persist_completed_results(snapshot, results, owner):
     from .scientific_evidence import save_results
     from .pdf_source_pages import current_pdf_results
     from .field_review import validate_support_versions
+    if snapshot.get('field_review_input'):
+        from backend.ingest.field_drafts import target_lock, authorized_draft
+        from backend.ingest.field_input import select_field, bind
+        from backend.api.evidence import snapshot_for, Target
+        with target_lock(snapshot['target'], snapshot['target_id']), SessionLocal.begin() as session:
+            if snapshot.get('field_review_job_id') and read_job_status(snapshot['field_review_job_id'], owner)['status'] == 'cancelled':
+                raise InterruptedError('字段核对已取消，结果未写入')
+            user = session.get(models.User, owner)
+            if user is None:
+                fail('evidence_forbidden', '当前核对用户不存在')
+            authorized_draft(session, snapshot['target'], snapshot['target_id'], user, lock=True)
+            current, current_cached = snapshot_for(Target(target=snapshot['target'], target_id=snapshot['target_id']), user)
+            current = select_field(current, snapshot['field_review_input']['item_key'])
+            bind(current, session)
+            if current['records'][0]['field_input_token'] != snapshot['field_review_input']['token']:
+                fail('evidence_stale', '当前字段或其依据已变化，旧任务结果未覆盖新输入')
+            if snapshot['target'] == 'paper':
+                paper = session.get(models.Paper, int(snapshot['target_id']))
+                if paper.review_status == 'approved' and snapshot.get('review_state') != [paper.review_status, str(paper.reviewed_at), paper.content_revision]:
+                    fail('evidence_stale', '论文已被批准，旧任务结果不再应用')
+            from .field_review import reusable, valid_field_decision
+            from .scientific_evidence import _review_time
+            row = current['records'][0]
+            previous = current_cached.get(row['key'])
+            incoming_time = max((_review_time(r.get('review_started_at')) for r in results.values()), default=_review_time(None))
+            if reusable(row, previous):
+                decision = (previous or {}).get('field_decision') or {}
+                if (_review_time(previous.get('review_started_at')) > incoming_time
+                        or valid_field_decision(row, previous) and (decision.get('action') == 'approve'
+                        or _review_time(decision.get('occurred_at')) >= incoming_time)):
+                    results[row['key']] = copy.deepcopy(previous)
+                    return
+            for record in snapshot['records']:
+                if record['key'] in results:
+                    results[record['key']]['field_review_binding'] = copy.deepcopy(snapshot['field_review_input'])
+            save_results(session, snapshot, results, owner)
+        return
     if snapshot['target'] == 'upload':
         from backend.ingest.upload_tasks import upload_task_lock
         with upload_task_lock(snapshot['target_id']):

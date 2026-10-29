@@ -32,6 +32,7 @@ class Target(BaseModel):
     target_id: str
     expected_version: str | None = None
     expected_draft_version: str | None = None
+    expected_field_token: str | None = None
     candidates: dict[str, list[dict]] = Field(default_factory=dict)
     retry_keys: list[str] | None = None
     purpose: Literal['check', 'review_all', 'parse', 'submit', 'field'] = 'submit'
@@ -82,6 +83,7 @@ class FieldDraftRequest(BaseModel):
     target_id: str
     expected_version: str
     changes: list[dict] = Field(default_factory=list, max_length=5000)
+    field_scope: bool = False
 
 
 class FieldLocator(Target):
@@ -137,7 +139,8 @@ def field_draft_state(target: str, target_id: str, user=Depends(get_current_user
 def patch_field_draft(body: FieldDraftRequest, user=Depends(get_current_user)):
     from backend.ingest.field_drafts import target_lock, save_fields
     with target_lock(body.target, body.target_id), SessionLocal.begin() as session:
-        return save_fields(session, body.target, body.target_id, user, body.expected_version, body.changes)
+        return save_fields(session, body.target, body.target_id, user, body.expected_version, body.changes,
+                           field_scope=body.field_scope)
 
 
 class FieldNote(BaseModel):
@@ -291,6 +294,7 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
     from backend.ingest.field_review import independent_fields, compact_result
     from backend.ingest.property_field_review import expand_property_fields
     from backend.ingest.field_decisions import display_reason
+    from backend.ingest.field_input import CONTRACT, matches as field_matches
     with SessionLocal() as session:
         draft, _ = authorized_draft(session, body.target, body.target_id, user)
         records = independent_fields(expand_property_fields(ev.draft_records(draft, {})))
@@ -304,12 +308,14 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
             bind_support_versions(current, session)
             current_fields = {r['item_key']: r for r in current['records']}
         # 与详情相同：优先当前版本，而不是把较晚写入的旧版本当作最新状态。
-        versions = session.execute(select(table.id, table.item_key, table.content_hash, table.source_hash).where(
+        versions = session.execute(select(table.id, table.item_key, table.content_hash, table.source_hash,
+            table.result['field_review_binding']['token']).where(
             table.target == body.target, table.target_id == body.target_id).order_by(table.id)).all()
         chosen, exact = {}, set()
-        for row_id, key, content, source in versions:
+        for row_id, key, content, source, field_token in versions:
             current = current_fields.get(key)
-            matches = current and (content, source) == (current['content_hash'], current['source_hash'])
+            matches = current and ((content, source) == (current['content_hash'], current['source_hash'])
+                                  or bool(current.get('field_input_token')) and field_token == current['field_input_token'])
             if matches or key not in exact:
                 chosen[key] = row_id
                 if matches:
@@ -319,7 +325,8 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
             table.result['reason'], table.result['ai_reason'], table.result['source_kind'],
             table.result['field_decision'], table.content_hash, table.source_hash, table.id,
             table.result['state_review_context'], table.result['review_started_at'],
-            table.result['state_key']).where(table.id.in_(chosen.values()))).all()
+            table.result['state_key'], table.result['field_review_binding']['contract'],
+            table.result['field_review_binding']['token']).where(table.id.in_(chosen.values()))).all()
         results = {row[0]: row for row in rows}
         from backend.ingest.field_review import changed_keys
         modified = changed_keys({'records': records, '_field_change_events': (get_state(body.target_id) or {}).get('_field_change_events') or []}) if body.target == 'upload' else changed_keys({'records': records, '_field_change_events': draft.get('_field_change_events') or []})
@@ -337,7 +344,12 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
                 from backend.ingest.state_field_review import scope_matches
                 matches = matches and scope_matches(decision_current, {'state_review_context': row[10],
                     'review_started_at': row[11], 'state_key': row[12], 'field_decision': row[6]})
+                if field_matches(decision_current, {'field_review_binding': {'contract': row[13], 'token': row[14]}}):
+                    matches = True
             if row and row[6] and not valid_decision:
+                matches = False
+            if row and row[13] == CONTRACT and not decision_current:
+                # 无当前来源版本时不能仅凭值相同展示新协议结果已通过。
                 matches = False
             output.append(compact_result({**record, 'status': row[2] if matches else 'unchecked',
                 'reason': display_reason(row[3]) if row else '', 'ai_reason': display_reason(row[4]) if row else '',
@@ -401,9 +413,37 @@ def preflight(body: Target, user=Depends(get_current_user)):
     return {**review_response(snapshot, cached), 'job_id': active_job}
 
 
+@router.get('/field-input')
+def field_input_context(target: str, target_id: str, item_key: str, user=Depends(get_current_user)):
+    from backend.ingest.field_input import bind, select_field
+    from backend.ingest.field_review import compact_result
+    snapshot, _ = snapshot_for(Target(target=target, target_id=target_id), user)
+    snapshot = select_field(snapshot, _manual_record_key(item_key))
+    with SessionLocal() as session:
+        bind(snapshot, session)
+    record = snapshot['records'][0]
+    return {'field_token': record['field_input_token'], 'version': record['field_input_token'],
+            'records': [compact_result(record)], 'needs_check': True}
+
+
 @router.post('/jobs')
 def create_job(body: Target, user=Depends(get_current_user)):
     preparation_progress(body, user, 0)
+    if body.expected_field_token is not None:
+        if body.purpose != 'field' or len(body.retry_keys or []) != 1:
+            ev.fail('evidence_target_invalid', '字段令牌仅用于侧栏单字段核对')
+        from backend.ingest.field_input import select_field, bind, binding
+        snapshot, cached = snapshot_for(body, user)
+        snapshot = select_field(snapshot, body.retry_keys[0])
+        with SessionLocal() as session:
+            bind(snapshot, session)
+        if snapshot['records'][0]['field_input_token'] != body.expected_field_token:
+            ev.fail('evidence_stale', '当前字段或其依据已变化，未启动旧内容核对')
+        snapshot['field_review_input'] = binding(snapshot)
+        snapshot.pop('draft_version_token', None)
+        cached = {r['key']: cached[r['key']] for r in snapshot['records'] if r['key'] in cached}
+        return prepared_response(body, user, enqueue_review(
+            body.model_copy(update={'expected_version': snapshot['version']}), user, snapshot, cached))
     # 摘要只承诺草稿版本，不能与包含来源的科学快照版本混用。
     if body.expected_draft_version is not None:
         from backend.ingest.field_drafts import authorized_draft, draft_version, target_lock
@@ -478,15 +518,22 @@ def enqueue_review(body, user, snapshot, cached):
     from backend.ingest.field_drafts import authorized_draft, draft_version
     with SessionLocal() as session:
         draft, _ = authorized_draft(session, body.target, body.target_id, user)
-    if snapshot.get('draft_version_token') and snapshot['draft_version_token'] != draft_version(draft):
+    if snapshot.get('field_review_input'):
+        current = field_input_context(body.target, body.target_id, snapshot['records'][0]['item_key'], user)
+        if current['field_token'] != snapshot['field_review_input']['token']:
+            ev.fail('evidence_stale', '构建核对依据期间当前字段或其依据发生变化')
+    elif snapshot.get('draft_version_token') and snapshot['draft_version_token'] != draft_version(draft):
         ev.fail('evidence_stale', '构建核对依据期间草稿发生变化，未启动旧内容的核对')
-    snapshot['draft_version_token'] = draft_version(draft)
+    if not snapshot.get('field_review_input'):
+        snapshot['draft_version_token'] = draft_version(draft)
     config = get_llm_config()
     if not config.api_key:
         ev.fail('evidence_model_config', '尚未配置模型，请先填写模型配置')
     preparation_progress(body, user, 10)
     client = redis_client()
-    lock_keys = ['field-review-job:' + ev.digest([body.target, body.target_id, r['item_key'], r['content_hash'], r['source_hash']])
+    lock_keys = ['field-review-job:' + ev.digest([body.target, body.target_id, r['item_key'],
+                 snapshot['field_review_input']['token']] if snapshot.get('field_review_input') else
+                 [body.target, body.target_id, r['item_key'], r['content_hash'], r['source_hash']])
                  for r in snapshot['records'] if r['key'] in requested]
     job_id = uuid.uuid4().hex
     conflict = client.eval("""
@@ -580,6 +627,23 @@ def get_job(job_id: str, user=Depends(get_current_user)):
     if job['status'] == 'completed':
         stored = ev.read_job(job_id, user.id)
         from backend.ingest.field_drafts import authorized_draft, draft_version
+        if stored['snapshot'].get('field_review_input'):
+            from backend.ingest.field_input import select_field, bind
+            original = stored['snapshot']
+            with SessionLocal() as session:
+                authorized_draft(session, original['target'], original['target_id'], user)
+            current, _ = snapshot_for(Target(target=original['target'], target_id=original['target_id']), user)
+            current = select_field(current, original['field_review_input']['item_key'])
+            with SessionLocal() as session:
+                bind(current, session)
+                if current['records'][0]['field_input_token'] != original['field_review_input']['token']:
+                    ev.fail('evidence_stale', '当前字段或其依据已变化，旧结果未覆盖当前内容')
+                cached = science.load_results(session, current, user.id)
+            if current['records'][0]['key'] not in cached:
+                ev.fail('evidence_task_not_complete', '当前字段结果尚未完成持久化，请重试')
+            current['version'] = current['records'][0]['field_input_token']
+            result.update(review_response(current, cached))
+            return result
         if not stored['snapshot'].get('draft_version_token'):
             snapshot, cached = snapshot_for(Target(target=stored['snapshot']['target'], target_id=stored['snapshot']['target_id']), user)
             result.update(review_response(snapshot, cached))
@@ -816,9 +880,10 @@ def _manual_snapshots(target: str, target_id: str, user, item_key=None):
 
 
 @router.get('/manual-context')
-def manual_context(target: str, target_id: str, item_key: str, user=Depends(get_current_user)):
+def manual_context(target: str, target_id: str, item_key: str, user=Depends(get_current_user), field_scope: bool = False):
     snapshot, _ = _manual_snapshots(target, target_id, user, _manual_record_key(item_key))
-    return {'version': snapshot['version'], 'record': snapshot['records'][0] if snapshot['records'] else None}
+    from backend.ingest.field_input import manual_version
+    return {'version': manual_version(snapshot) if field_scope else snapshot['version'], 'record': snapshot['records'][0] if snapshot['records'] else None}
 
 
 def _manual_record_key(item_key: str) -> str:
@@ -828,8 +893,9 @@ def _manual_record_key(item_key: str) -> str:
 
 
 @router.get("/{target}/{target_id}/manual/{item_key}")
-def get_manual_evidence(target: str, target_id: str, item_key: str, user=Depends(get_current_user)):
+def get_manual_evidence(target: str, target_id: str, item_key: str, user=Depends(get_current_user), field_scope: bool = False):
     snapshot, baseline = _manual_snapshots(target, target_id, user, item_key)
+    snapshot['_manual_field_scope'] = field_scope
     try:
         with SessionLocal() as session:
             data = manual.read_field(session, snapshot, baseline, _manual_record_key(item_key), include_history=False)
@@ -842,8 +908,8 @@ def get_manual_evidence(target: str, target_id: str, item_key: str, user=Depends
 def put_manual_evidence(target: str, target_id: str, item_key: str, body: ManualExplanation,
                         user=Depends(get_current_user)):
     snapshot, baseline = _manual_snapshots(target, target_id, user, item_key)
-    if body.expected_version != snapshot["version"]:
-        raise HTTPException(409, detail={"code": "manual_evidence_stale", "message": "字段或来源已变化，请刷新后重新填写"})
+    from backend.ingest.field_input import check_manual_version
+    check_manual_version(snapshot, body.expected_version)
     try:
         with SessionLocal.begin() as session:
             data = manual.save_explanation(session, snapshot, baseline, _manual_record_key(item_key), user.id,
@@ -859,8 +925,8 @@ async def post_manual_evidence_file(target: str, target_id: str, item_key: str,
                                     expected_version: str = Form(...), source_description: str = Form(""),
                                     file: UploadFile = File(...), user=Depends(get_current_user)):
     snapshot, baseline = _manual_snapshots(target, target_id, user, item_key)
-    if expected_version != snapshot["version"]:
-        raise HTTPException(409, detail={"code": "manual_evidence_stale", "message": "字段或来源已变化，请刷新后重新上传"})
+    from backend.ingest.field_input import check_manual_version
+    check_manual_version(snapshot, expected_version)
     try:
         raw = await file.read(manual.MAX_FILE_BYTES + 1)
     finally:
@@ -883,8 +949,9 @@ async def post_manual_evidence_file(target: str, target_id: str, item_key: str,
 
 @router.get("/{target}/{target_id}/manual/{item_key}/files/{item_id}")
 def get_manual_evidence_file(target: str, target_id: str, item_key: str, item_id: str,
-                             user=Depends(get_current_user)):
+                             user=Depends(get_current_user), field_scope: bool = False):
     snapshot, _ = _manual_snapshots(target, target_id, user, item_key)
+    snapshot['_manual_field_scope'] = field_scope
     try:
         with SessionLocal() as session:
             _, entry, path = manual.file_entry(session, snapshot, _manual_record_key(item_key), item_id)
@@ -898,8 +965,9 @@ def get_manual_evidence_file(target: str, target_id: str, item_key: str, item_id
 
 @router.delete("/{target}/{target_id}/manual/{item_key}/files/{item_id}")
 def delete_manual_evidence_file(target: str, target_id: str, item_key: str, item_id: str,
-                                user=Depends(get_current_user)):
+                                user=Depends(get_current_user), field_scope: bool = False):
     snapshot, _ = _manual_snapshots(target, target_id, user, item_key)
+    snapshot['_manual_field_scope'] = field_scope
     try:
         with SessionLocal.begin() as session:
             path = manual.remove_file(session, snapshot, _manual_record_key(item_key), item_id, user.id)

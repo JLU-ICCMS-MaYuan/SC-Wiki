@@ -19,7 +19,7 @@ function PendingImage({ file, alt }: { file: File; alt: string }) {
 }
 
 export default function ManualEvidenceSection({ target, record, version, drafts, value = record.current_value,
-  localChanged = false, prepare, readOnly = false, showHistory = true, onRecords, saveBeforeReview }: {
+  localChanged = false, prepare, readOnly = false, showHistory = true, onRecords, saveBeforeReview, fieldScoped = false }: {
   target?: EvidenceTarget
   record: EvidenceRecord
   version?: string
@@ -28,6 +28,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
   localChanged?: boolean
   prepare?: () => Promise<PreparedManualEvidence>
   saveBeforeReview?: MutableRefObject<(() => Promise<boolean>) | null>
+  fieldScoped?: boolean
   readOnly?: boolean; showHistory?: boolean; onRecords?: (key: string, entries: ManualRecord[]) => void
 }) {
   const { t } = useLanguage()
@@ -52,12 +53,12 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
     setLoading(true)
     if (!endpoint) { setLoading(false); return }
     const writes = store.read(key).writes
-    void api.get<{ ok: boolean; data: ManualRecord }>(endpoint).then(response => {
+    void api.get<{ ok: boolean; data: ManualRecord }>(endpoint + (fieldScoped ? '?field_scope=true' : '')).then(response => {
       if (active) store.hydrate(key, response.data, writes)
     }).catch(error => { if (active) store.patch(key, { error: error.message || t('evidence.manualLoadFailed') }) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
-  }, [endpoint, key, version, store, t, reload])
+  }, [endpoint, key, version, store, t, reload, fieldScoped])
   useEffect(() => { setPreview(null) }, [key])
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview.url) }, [preview])
 
@@ -147,7 +148,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
 
   const showFile = async (item: ManualItem) => {
     try {
-      const blob = await api.download(`${endpoint}/files/${item.id}`)
+      const blob = await api.download(`${endpoint}/files/${item.id}${fieldScoped ? '?field_scope=true' : ''}`)
       if (currentKey.current === key) setPreview({ url: URL.createObjectURL(blob), kind: item.kind })
     } catch (error: any) { store.patch(key, { error: error.message || t('evidence.manualLoadFailed') }) }
   }
@@ -162,7 +163,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
         const remaining = (saved?.items || []).filter(entry => entry.kind === 'text' && entry.id !== item.id && entry.text)
           .map(entry => ({ text: entry.text!, source_description: entry.source_description }))
         await api.put(ready.endpoint, { expected_version: ready.version, reason, no_evidence_reason: '', text_items: remaining })
-      } else await api.del(`${ready.endpoint}/files/${item.id}`)
+      } else await api.del(`${ready.endpoint}/files/${item.id}${fieldScoped ? '?field_scope=true' : ''}`)
       const current = store.read(key)
       if (current.saved) store.patch(key, { saved: { ...current.saved, items: current.saved.items.filter(entry => entry.id !== item.id) }, writes: current.writes + 1 })
     } catch (error: any) { store.patch(key, { error: error.message || t('evidence.manualSaveFailed') }) }

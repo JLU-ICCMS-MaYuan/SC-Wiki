@@ -1,0 +1,51 @@
+......................................................                   [100%]
+=============================== warnings summary ===============================
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py: 12 warnings
+  /Users/mayuan/Codes/SC-Wiki/backend/api/evidence.py:559: DeprecationWarning: Call to deprecated setex. (Use 'set' instead.) -- Deprecated since version 2.6.12.
+    client.setex(ev.task_key(job_id), TASK_TTL, json.dumps(job, ensure_ascii=False, default=str))
+
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py: 12 warnings
+  /Users/mayuan/Codes/SC-Wiki/backend/ingest/property_evidence.py:776: DeprecationWarning: Call to deprecated setex. (Use 'set' instead.) -- Deprecated since version 2.6.12.
+    client.setex(job_control_key(job['id']), TASK_TTL, json.dumps(job_control(job), ensure_ascii=False))
+
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py: 64 warnings
+  /Users/mayuan/Codes/SC-Wiki/backend/ingest/property_evidence.py:823: DeprecationWarning: Call to deprecated setex. (Use 'set' instead.) -- Deprecated since version 2.6.12.
+    pipe.setex(task_key(job_id), TASK_TTL, json.dumps(job, ensure_ascii=False, default=str))
+
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py: 64 warnings
+  /Users/mayuan/Codes/SC-Wiki/backend/ingest/property_evidence.py:824: DeprecationWarning: Call to deprecated setex. (Use 'set' instead.) -- Deprecated since version 2.6.12.
+    pipe.setex(job_control_key(job_id), TASK_TTL, json.dumps(job_control(job), ensure_ascii=False))
+
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py::test_worker_result_is_persisted_and_returned_for_only_one_field[upload-supported]
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py::test_worker_result_is_persisted_and_returned_for_only_one_field[upload-unsupported]
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py::test_worker_result_is_persisted_and_returned_for_only_one_field[revision-supported]
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py::test_worker_result_is_persisted_and_returned_for_only_one_field[revision-unsupported]
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py::test_worker_result_is_persisted_and_returned_for_only_one_field[admin-supported]
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py::test_worker_result_is_persisted_and_returned_for_only_one_field[admin-unsupported]
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py::test_worker_result_is_persisted_and_returned_for_only_one_field[superadmin-supported]
+tests/01_decentralized_uploading/test_sidebar_field_review_mysql.py::test_worker_result_is_persisted_and_returned_for_only_one_field[superadmin-unsupported]
+  /Users/mayuan/Codes/SC-Wiki/backend/ingest/property_evidence.py:1417: DeprecationWarning: Call to deprecated setex. (Use 'set' instead.) -- Deprecated since version 2.6.12.
+    redis_client().setex(cache_key(snapshot, job['owner']), TASK_TTL, job_id)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+54 passed, 696 warnings in 6.52s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

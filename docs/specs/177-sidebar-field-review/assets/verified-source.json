@@ -1,0 +1,34 @@
+{
+  "source_hashes": {
+    "backend/api/evidence.py": "3a53391695d984b010e15f7f6546a44b7940c36fcfd87b23c3934661e0252ee9",
+    "backend/ingest/field_input.py": "35d3ea2a51787b803ff9ae26b9c939a83381d1e051e9251af1c82fb15193da9d",
+    "backend/ingest/field_drafts.py": "2707c6f2b5ee87c7be1316266e4312acf8e27e1890434fcbc470295a474c5684",
+    "backend/ingest/field_review.py": "bd396cb626cb1f3bd8bf3529277e4cf4b9c954321d4937ae2e5364d312eb23f3",
+    "backend/ingest/manual_evidence.py": "636859cefe763f11bb346615f07b82fdc3c50737848427c11cfc2288125c2ed5",
+    "backend/ingest/property_evidence.py": "0d8eb2761ee175591777e5ec9db007982cd2271488d59220df7b9fab6680b3b7",
+    "backend/ingest/scientific_evidence.py": "10d230f2ea67b1a11f26878751bb287d53a82ccab98e8d0f67683e29ddd815d1",
+    "frontend/src/components/EvidenceWorkflow.tsx": "163e5a70ce95ad8bef0e578d43a7e59316fc1c914e544c7028cd38057455435f",
+    "frontend/src/components/ManualEvidenceSection.tsx": "69f749f6625ab378182b8f1bd37c3ca878bee7f186a230ef59103479c3bf54a0",
+    "frontend/src/components/UploadTaskEditor.tsx": "769d8cf7d472677b76a15b7219791ffa1d6315623f489c5b6cf8c7c4dadd9c6c",
+    "frontend/src/pages/AdminPaperEditPage.tsx": "c8ed689eac7af589817f660eabec9a0bc84f9289644c039c7ba751069834e73a",
+    "frontend/src/lib/fieldDrafts.ts": "371742f295bb437c738e4edd8f00cdb96e82d53868b4a3596645c4baa28092da"
+  },
+  "checks": {
+    "form_contract": 79,
+    "mysql_redis": 54,
+    "backend_regression_passed": 73,
+    "backend_existing_failure": 1,
+    "manual_ui_passed": 27,
+    "manual_ui_existing_failures": 5,
+    "browser_outcomes": [
+      "supported",
+      "unsupported",
+      "failed",
+      "cancelled"
+    ],
+    "mutation_detected": 8,
+    "production_build": true
+  },
+  "real_llm_calls": 0,
+  "user_drafts_changed": false
+}

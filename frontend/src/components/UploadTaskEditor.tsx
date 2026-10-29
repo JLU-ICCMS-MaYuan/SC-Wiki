@@ -145,6 +145,27 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     readOnly,
     getCurrentValue: record => draft ? currentEvidenceField(record, { ...draft.paper }, draft.material_states) : undefined,
     saveCurrent: () => saveDraft(false, false),
+    hasUnsavedFields: () => Boolean(fieldSaver.current?.hasChanges(currentEditor.current.draft)),
+    saveField: async record => {
+      if (!draft || !fieldSaver.current || readOnly || revision?.conflict) return false
+      const saver = fieldSaver.current
+      const field = currentEvidenceField(record, {...draft.paper}, draft.material_states)
+      if (!field) {
+        if (record.structure_hash) return true
+        throw new Error('当前字段已删除或身份已变化')
+      }
+      setSaving(true)
+      try {
+        const result = await saver.saveField(draft, field.field)
+        if (fieldSaver.current !== saver) return true
+        if (revisionMeta.current && result.draft_version !== undefined) {
+          revisionMeta.current = {...revisionMeta.current, draft_version: result.draft_version}
+          setRevision(revisionMeta.current)
+        }
+        setDirty(saver.hasChanges(currentEditor.current.draft))
+        return true
+      } finally { if (fieldSaver.current === saver) setSaving(false) }
+    },
     saveCandidate: async patches => {
       if (!draft || readOnly || saving || submitting || revision?.conflict) return false
       const next = applyEvidencePatches(draft, patches)
@@ -380,10 +401,10 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }, [dirty, draft, saving, readOnly, t, lang, persistDraft, revision?.conflict])
 
   useEffect(() => {
-    if (!dirty || !draft || saving || submitting || revision?.conflict) return
+    if (!dirty || !draft || saving || submitting || revision?.conflict || evidenceWorkflow.busy) return
     const timer = window.setTimeout(() => { void saveDraft(false) }, 5000)
     return () => window.clearTimeout(timer)
-  }, [dirty, draft, saveDraft, saving, submitting, revision?.conflict])
+  }, [dirty, draft, saveDraft, saving, submitting, revision?.conflict, evidenceWorkflow.busy])
 
   // 详情会在独立标签页中打开；关闭、刷新或返回前保护尚未完成保存的主表单。
   useEffect(() => {

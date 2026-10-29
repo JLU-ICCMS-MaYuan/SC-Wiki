@@ -1,0 +1,22 @@
+baseline source sha256 603f7b6285f69f5c50650781035d88a4921ac5f5026ed3d02ee564db084b89c8
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_transfer_rechecks_explanation_after_preflight ______________
+
+session = <sqlalchemy.orm.session.Session object at 0x109c3f2f0>
+
+    def test_transfer_rechecks_explanation_after_preflight(session):
+        before, current = snapshot("old"), snapshot()
+        manual.save_explanation(session, current, before, "stable-field", 7,
+                                reason="人工核验", no_evidence_reason="无可共享文件", text_items=[])
+        assert manual.validate_submission(session, current, before) == []
+        manual.save_explanation(session, current, before, "stable-field", 7,
+                                reason="", no_evidence_reason="", text_items=[])
+>       with pytest.raises(manual.ManualEvidenceError) as stale:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ManualEvidenceError
+
+tests/01_decentralized_uploading/test_issue109_manual_evidence.py:104: Failed
+=========================== short test summary info ============================
+FAILED tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_transfer_rechecks_explanation_after_preflight
+1 failed, 17 deselected in 0.12s

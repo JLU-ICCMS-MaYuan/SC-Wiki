@@ -87,6 +87,19 @@ const AdminPaperEditPage: React.FC = () => {
     target: paperId ? { target: 'paper', target_id: String(paperId) } : undefined,
     getCurrentValue: record => currentEvidenceField(record, {...editForm, material_families: editMaterialFamilies}, editMaterialStates),
     saveCurrent: () => handleEditSave([], undefined, undefined, false),
+    hasUnsavedFields: () => Boolean(fieldSaver.current?.hasChanges(editableDraft())),
+    saveField: async record => {
+      if (!fieldSaver.current) return false
+      const saver = fieldSaver.current
+      const field = currentEvidenceField(record, {...editForm, material_families: editMaterialFamilies}, editMaterialStates)
+      if (!field) {
+        if (record.structure_hash) return true
+        throw new Error('当前字段已删除或身份已变化')
+      }
+      setEditReviewSaving(true)
+      try { await saver.saveField(editableDraft(), field.field); return true }
+      finally { if (fieldSaver.current === saver) setEditReviewSaving(false) }
+    },
     saveCandidate: async patches => {
       if (!fieldSaver.current || editReviewSaving) return false
       const next = applyEvidencePatches(editableDraft(), patches)

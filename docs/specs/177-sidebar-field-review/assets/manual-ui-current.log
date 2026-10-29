@@ -1,0 +1,1544 @@
+
+> sc-wiki-frontend@1.0.0 test:upload-ui
+> vitest run --config ../vitest.config.ts ../tests/01_decentralized_uploading/manual-evidence-editor.test.tsx ../tests/01_decentralized_uploading/manual-evidence-section.test.tsx ../tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx ../tests/01_decentralized_uploading/approval-state.test.tsx
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+ ✓ tests/01_decentralized_uploading/manual-evidence-section.test.tsx (7 tests) 466ms
+ ❯ tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx (9 tests | 3 failed) 584ms
+   × 部分文件上传失败只保留失败项，重试不再上传已成功项 70ms
+     → Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"MuiBox-root css-ws92mx"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-cmpglg-MuiFormControl-root-MuiTextField-root"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined css-113d811-MuiFormLabel-root-MuiInputLabel-root"[39m
+          [33mdata-shrink[39m=[32m"true"[39m
+          [33mfor[39m=[32m"_r_10_"[39m
+          [33mid[39m=[32m"_r_10_-label"[39m
+        [36m>[39m
+          [0m人工修改判断理由（必填）[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline css-zsp0bh-MuiInputBase-root-MuiOutlinedInput-root"[39m
+        [36m>[39m
+          [36m<textarea[39m
+            [33maria-invalid[39m=[32m"false"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mid[39m=[32m"_r_10_"[39m
+            [33mstyle[39m=[32m"height: 0px; overflow: hidden;"[39m
+          [36m>[39m
+            [0m完整理由[0m
+          [36m</textarea>[39m
+          [36m<textarea[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mreadonly[39m=[32m""[39m
+            [33mstyle[39m=[32m"visibility: hidden; position: absolute; overflow: hidden; height: 0px; top: 0px; left: 0px; transform: translateZ(0); padding-top: 0px; padding-bottom: 0px; width: 100%;"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m/>[39m
+          [36m<fieldset[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"[39m
+          [36m>[39m
+            [36m<legend[39m
+              [33mclass[39m=[32m"css-ex8a5f-MuiNotchedOutlined-root"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0m人工修改判断理由（必填）[0m
+              [36m</span>[39m
+            [36m</legend>[39m
+          [36m</fieldset>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"人工证据选择"[39m
+        [33mclass[39m=[32m"MuiFormGroup-root MuiRadioGroup-root css-1mac7pt-MuiFormGroup-root"[39m
+        [33mrole[39m=[32m"radiogroup"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary Mui-checked MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_11_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"provide"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1pqw2bl-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_11_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"none"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-cpa8b4-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m不提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"人工证据拖拽与粘贴区域"[39m
+        [33mclass[39m=[32m"MuiBox-root css-1kmethv"[39m
+        [33mrole[39m=[32m"region"[39m
+        [33mtabindex[39m=[32m"0"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 css-rizt0-MuiTypography-root"[39m
+        [36m>[39m
+          [0m拖入图片、文本或 PDF，或在此处粘贴截图（Cmd/Ctrl+V）[0m
+        [36m</p>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-caption css-mpaqru-MuiTypography-root"[39m
+        [36m>[39m
+          [0mPNG/JPEG/WebP、TXT/MD、PDF；每份最大 10 MiB，每字段最多 5 项。[0m
+        [36m</span>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary css-wyro15-MuiButtonBase-root-MuiButton-root"[39m
+          [33mrole[39m=[32m"button"[39m
+          [33mtabindex[39m=[32m"0"[39m
+        [36m>[39m
+          [0m选择图片、文本或 PDF[0m
+          [36m<input[39m
+            [33maccept[39m=[32m".png,.jpg,.jpeg,.webp,.txt,.md,.pdf"[39m
+            [33mhidden[39m=[32m""[39m
+            [33mmultiple[39m=[32m""[39m
+            [33mtype[39m=[32m"file"[39m
+          [36m/>[39m
+        [36m</label>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiBox-root css-0"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-caption css-mpaqru-MuiTypography-root"[39m
+        [36m>[39m
+          [0m待上传[0m
+          [0m：[0m
+          [0mone.txt[0m
+        [36m</span>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary css-1ccsd5i-MuiButtonBase-root-MuiButton-root"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m移除待提交证据[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiBox-root css-0"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-caption css-mpaqru-MuiTypography-root"[39m
+        [36m>[39m
+          [0m待上传[0m
+          [0m：[0m
+          [0mtwo.txt[0m
+        [36m</span>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary css-1ccsd5i-MuiButtonBase-root-MuiButton-root"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m移除待提交证据[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<button[39m
+        [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-tw6tsg-MuiButtonBase-root-MuiButton-root"[39m
+        [33mtabindex[39m=[32m"0"[39m
+        [33mtype[39m=[32m"button"[39m
+      [36m>[39m
+        [0m保存[0m
+      [36m</button>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × 拖拽/图片粘贴共用校验，普通文本粘贴不拦截，待上传图片可预览 48ms
+     → Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"MuiBox-root css-ws92mx"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-cmpglg-MuiFormControl-root-MuiTextField-root"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-outlined css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root"[39m
+          [33mdata-shrink[39m=[32m"false"[39m
+          [33mfor[39m=[32m"_r_16_"[39m
+          [33mid[39m=[32m"_r_16_-label"[39m
+        [36m>[39m
+          [0m人工修改判断理由（必填）[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline css-zsp0bh-MuiInputBase-root-MuiOutlinedInput-root"[39m
+        [36m>[39m
+          [36m<textarea[39m
+            [33maria-invalid[39m=[32m"false"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mid[39m=[32m"_r_16_"[39m
+            [33mstyle[39m=[32m"height: 0px; overflow: hidden;"[39m
+          [36m/>[39m
+          [36m<textarea[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mreadonly[39m=[32m""[39m
+            [33mstyle[39m=[32m"visibility: hidden; position: absolute; overflow: hidden; height: 0px; top: 0px; left: 0px; transform: translateZ(0); padding-top: 0px; padding-bottom: 0px; width: 100%;"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m/>[39m
+          [36m<fieldset[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"[39m
+          [36m>[39m
+            [36m<legend[39m
+              [33mclass[39m=[32m"css-1n64csd-MuiNotchedOutlined-root"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0m人工修改判断理由（必填）[0m
+              [36m</span>[39m
+            [36m</legend>[39m
+          [36m</fieldset>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"人工证据选择"[39m
+        [33mclass[39m=[32m"MuiFormGroup-root MuiRadioGroup-root css-1mac7pt-MuiFormGroup-root"[39m
+        [33mrole[39m=[32m"radiogroup"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary Mui-checked MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_17_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"provide"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1pqw2bl-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_17_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"none"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.4...
+   × 保存响应和旧读取都不能清除在途请求期间的新输入 49ms
+     → Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"MuiBox-root css-ws92mx"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-cmpglg-MuiFormControl-root-MuiTextField-root"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined css-113d811-MuiFormLabel-root-MuiInputLabel-root"[39m
+          [33mdata-shrink[39m=[32m"true"[39m
+          [33mfor[39m=[32m"_r_1b_"[39m
+          [33mid[39m=[32m"_r_1b_-label"[39m
+        [36m>[39m
+          [0m人工修改判断理由（必填）[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline css-zsp0bh-MuiInputBase-root-MuiOutlinedInput-root"[39m
+        [36m>[39m
+          [36m<textarea[39m
+            [33maria-invalid[39m=[32m"false"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mid[39m=[32m"_r_1b_"[39m
+            [33mstyle[39m=[32m"height: 0px; overflow: hidden;"[39m
+          [36m>[39m
+            [0m送出的理由[0m
+          [36m</textarea>[39m
+          [36m<textarea[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mreadonly[39m=[32m""[39m
+            [33mstyle[39m=[32m"visibility: hidden; position: absolute; overflow: hidden; height: 0px; top: 0px; left: 0px; transform: translateZ(0); padding-top: 0px; padding-bottom: 0px; width: 100%;"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m/>[39m
+          [36m<fieldset[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"[39m
+          [36m>[39m
+            [36m<legend[39m
+              [33mclass[39m=[32m"css-ex8a5f-MuiNotchedOutlined-root"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0m人工修改判断理由（必填）[0m
+              [36m</span>[39m
+            [36m</legend>[39m
+          [36m</fieldset>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"人工证据选择"[39m
+        [33mclass[39m=[32m"MuiFormGroup-root MuiRadioGroup-root css-1mac7pt-MuiFormGroup-root"[39m
+        [33mrole[39m=[32m"radiogroup"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_1c_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"provide"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-cpa8b4-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary Mui-checked MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_1c_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"none"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1pqw2bl-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m不提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-cmpglg-MuiFormControl-root-MuiTextField-root"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined css-113d811-MuiFormLabel-root-MuiInputLabel-root"[39m
+          [33mdata-shrink[39m=[32m"true"[39m
+          [33mfor[39m=[32m"_r_1e_"[39m
+          [33mid[39m=[32m"_r_1e_-label"[39m
+        [36m>[39m
+          [0m不提供证据的理由（必填）[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline css-zsp0bh-MuiInputBase-root-MuiOutlinedInput-root"[39m
+        [36m>[39m
+          [36m<textarea[39m
+            [33maria-invalid[39m=[32m"false"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mid[39m=[32m"_r_1e_"[39m
+            [33mstyle[39m=[32m"height: 0px; overflow: hidden;"[39m
+          [36m>[39m
+            [0m暂无附件[0m
+          [36m</textarea>[39m
+          [36m<textarea[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mreadonly[39m=[32m""[39m
+            [33mstyle[39m=[32m"visibility: hidden; position: absolute; overflow: hidden; height: 0px; top: 0px; left: 0px; transform: translateZ(0); padding-top: 0px; padding-bottom: 0px; width: 100%;"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m/>[39m
+          [36m<fieldset[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"[39m
+          [36m>[39m
+            [36m<legend[39m
+              [33mclass[39m=[32m"css-ex8a5f-MuiNotchedOutlined-root"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0m不提供证据的理由（必填）[0m
+              [36m</span>[39m
+            [36m</legend>[39m
+          [36m</fieldset>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<button[39m
+        [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-tw6tsg-MuiButtonBase-root-MuiButton-root"[39m
+        [33mtabindex[39m=[32m"0"[39m
+        [33mtype[39m=[32m"button"[39m
+      [36m>[39m
+        [0m保存[0m
+      [36m</button>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ tests/01_decentralized_uploading/manual-evidence-editor.test.tsx (2 tests | 2 failed) 1255ms
+   × 立即打开未保存字段即可填写说明，显式保存先保存主值并使用新版本 1066ms
+     → Unable to find a label with the text of: 人工修改判断理由（必填）
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<input[39m
+      [33maria-label[39m=[32m"主表单标题"[39m
+      [33mvalue[39m=[32m"人工标题"[39m
+    [36m/>[39m
+    [36m<button>[39m
+      [0m查看标题[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<input[39m
+      [33maria-label[39m=[32m"主表单标题"[39m
+      [33mvalue[39m=[32m"人工标题"[39m
+    [36m/>[39m
+    [36m<button>[39m
+      [0m查看标题[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</body>[39m
+   × 主表单保存失败保留人工输入且不发送说明请求 189ms
+     → Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m"padding-right: 1024px; overflow: hidden;"[39m
+[36m>[39m
+  [36m<div[39m
+    [33maria-hidden[39m=[32m"true"[39m
+  [36m>[39m
+    [36m<button>[39m
+      [0m查看标题[0m
+    [36m</button>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-1uent87-MuiButtonBase-root-MuiButton-root"[39m
+      [33mdata-evidence-pending-navigation[39m=[32m"true"[39m
+      [33mtabindex[39m=[32m"0"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0m待处理项[0m
+      [0m（[0m
+      [0m0[0m
+      [0m）[0m
+    [36m</button>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"MuiDrawer-root MuiDrawer-anchorRight MuiDrawer-modal MuiModal-root css-2soe65-MuiModal-root-MuiDrawer-root"[39m
+    [33mrole[39m=[32m"presentation"[39m
+  [36m>[39m
+    [36m<div[39m
+      [33maria-hidden[39m=[32m"true"[39m
+      [33mclass[39m=[32m"MuiBackdrop-root MuiModal-backdrop css-4nmryk-MuiBackdrop-root-MuiModal-backdrop"[39m
+      [33mstyle[39m=[32m"opacity: 1; transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;"[39m
+    [36m/>[39m
+    [36m<div[39m
+      [33mdata-testid[39m=[32m"sentinelStart"[39m
+      [33mtabindex[39m=[32m"0"[39m
+    [36m/>[39m
+    [36m<div[39m
+      [33maria-label[39m=[32m"科学数据来源核对"[39m
+      [33maria-modal[39m=[32m"true"[39m
+      [33mclass[39m=[32m"MuiPaper-root MuiPaper-elevation MuiPaper-elevation16 MuiDrawer-paper MuiDrawer-paperAnchorRight evidence-review-drawer css-1s7b1qc-MuiPaper-root-MuiDrawer-paper"[39m
+      [33mdata-mui-focusable[39m=[32m""[39m
+      [33mrole[39m=[32m"dialog"[39m
+      [33mstyle[39m=[32m"--Paper-shadow: 0px 8px 10px -5px rgba(0,0,0,0.2),0px 16px 24px 2px rgba(0,0,0,0.14),0px 6px 30px 5px rgba(0,0,0,0.12); transform: none; transition: transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;"[39m
+      [33mtabindex[39m=[32m"-1"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiBox-root css-1lekzkb"[39m
+      [36m>[39m
+        [36m<h6[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-h6 css-1miy0lu-MuiTypography-root"[39m
+        [36m>[39m
+          [0m标题[0m
+        [36m</h6>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"关闭来源详情"[39m
+          [33mclass[39m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[39m
+            [33mdata-testid[39m=[32m"CloseIcon"[39m
+            [33mfocusable[39m=[32m"false"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<span[39m
+        [33mclass[39m=[32m"MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiTabs-root css-jhczcq-MuiTabs-root"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiTabs-scroller MuiTabs-fixed css-s2t35c-MuiTabs-scroller"[39m
+          [33mstyle[39m=[32m"overflow: hidden; margin-bottom: 0px;"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"MuiTabs-list MuiTabs-flexContainer css-hzcega-MuiTabs-list"[39m
+            [33mrole[39m=[32m"tablist"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-selected[39m=[32m"false"[39m
+              [33mclass[39m=[32m"MuiButtonBase-root MuiTab-root MuiTab-textColorPrimary MuiTab-fullWidth css-hmk518-MuiButtonBase-root-MuiTab-root"[39m
+              [33mrole[39m=[32m"tab"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0m字段设置[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-selected[39m=[32m"true"[39m
+              [33mclass[39m=[32m"MuiButtonBase-root MuiTab-root MuiTab-textColorPrimary MuiTab-fullWidth Mui-selected css-hmk518-MuiButtonBase-root-MuiTab-root"[39m
+              [33mrole[39m=[32m"tab"[39m
+              [33mtabindex[39m=[32m"0"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0m来源核对[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-selected[39m=[32m"false"[39m
+              [33mclass[39m=[32m"MuiButtonBase-root MuiTab-root MuiTab-textColorPrimary MuiTab-fullWidth css-hmk518-MuiButtonBase-root-MuiTab-root"[39m
+              [33mrole[39m=[32m"tab"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0m历史记录[0m
+            [36m</button>[39m
+          [36m</div>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTabs-indicator css-1qltlow-MuiTabs-indicator"[39m
+            [33mstyle[39m=[32m"left: 0px; width: 0px;"[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<fieldset[39m
+        [33mclass[39m=[32m"MuiBox-root css-1jfqeke"[39m
+        [33mhidden[39m=[32m""[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiBox-root css-0"[39m
+          [33mdata-evidence-ignore[39m=[32m"true"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"MuiBox-root css-0"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"AI 候选值"[39m
+          [33mclass[39m=[32m"MuiBox-root css-1abq6wt"[39m
+          [33mdata-evidence-ignore[39m=[32m"true"[39m
+        [36m>[39m
+          [36m<h6[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-subtitle1 css-or3kzz-MuiTypography-root"[39m
+          [36m>[39m
+            [0mAI 候选值[0m
+          [36m</h6>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorError MuiAlert-standardError MuiAlert-standard css-3lhuho-MuiPaper-root-MuiAlert-root"[39m
+            [33mrole[39m=[32m"alert"[39m
+            [33mstyle[39m=[32m"--Paper-shadow: none;"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"MuiA...
+ ✓ tests/01_decentralized_uploading/approval-state.test.tsx (14 tests) 2423ms
+   ✓ 未修改但待核对的字段提供可用确认入口，不伪装成灰色已通过 405ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx > 部分文件上传失败只保留失败项，重试不再上传已成功项
+TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"MuiBox-root css-ws92mx"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-cmpglg-MuiFormControl-root-MuiTextField-root"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined css-113d811-MuiFormLabel-root-MuiInputLabel-root"[39m
+          [33mdata-shrink[39m=[32m"true"[39m
+          [33mfor[39m=[32m"_r_10_"[39m
+          [33mid[39m=[32m"_r_10_-label"[39m
+        [36m>[39m
+          [0m人工修改判断理由（必填）[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline css-zsp0bh-MuiInputBase-root-MuiOutlinedInput-root"[39m
+        [36m>[39m
+          [36m<textarea[39m
+            [33maria-invalid[39m=[32m"false"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mid[39m=[32m"_r_10_"[39m
+            [33mstyle[39m=[32m"height: 0px; overflow: hidden;"[39m
+          [36m>[39m
+            [0m完整理由[0m
+          [36m</textarea>[39m
+          [36m<textarea[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mreadonly[39m=[32m""[39m
+            [33mstyle[39m=[32m"visibility: hidden; position: absolute; overflow: hidden; height: 0px; top: 0px; left: 0px; transform: translateZ(0); padding-top: 0px; padding-bottom: 0px; width: 100%;"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m/>[39m
+          [36m<fieldset[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"[39m
+          [36m>[39m
+            [36m<legend[39m
+              [33mclass[39m=[32m"css-ex8a5f-MuiNotchedOutlined-root"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0m人工修改判断理由（必填）[0m
+              [36m</span>[39m
+            [36m</legend>[39m
+          [36m</fieldset>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"人工证据选择"[39m
+        [33mclass[39m=[32m"MuiFormGroup-root MuiRadioGroup-root css-1mac7pt-MuiFormGroup-root"[39m
+        [33mrole[39m=[32m"radiogroup"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary Mui-checked MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_11_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"provide"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1pqw2bl-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_11_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"none"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-cpa8b4-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m不提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"人工证据拖拽与粘贴区域"[39m
+        [33mclass[39m=[32m"MuiBox-root css-1kmethv"[39m
+        [33mrole[39m=[32m"region"[39m
+        [33mtabindex[39m=[32m"0"[39m
+      [36m>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 css-rizt0-MuiTypography-root"[39m
+        [36m>[39m
+          [0m拖入图片、文本或 PDF，或在此处粘贴截图（Cmd/Ctrl+V）[0m
+        [36m</p>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-caption css-mpaqru-MuiTypography-root"[39m
+        [36m>[39m
+          [0mPNG/JPEG/WebP、TXT/MD、PDF；每份最大 10 MiB，每字段最多 5 项。[0m
+        [36m</span>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButton-colorPrimary css-wyro15-MuiButtonBase-root-MuiButton-root"[39m
+          [33mrole[39m=[32m"button"[39m
+          [33mtabindex[39m=[32m"0"[39m
+        [36m>[39m
+          [0m选择图片、文本或 PDF[0m
+          [36m<input[39m
+            [33maccept[39m=[32m".png,.jpg,.jpeg,.webp,.txt,.md,.pdf"[39m
+            [33mhidden[39m=[32m""[39m
+            [33mmultiple[39m=[32m""[39m
+            [33mtype[39m=[32m"file"[39m
+          [36m/>[39m
+        [36m</label>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiBox-root css-0"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-caption css-mpaqru-MuiTypography-root"[39m
+        [36m>[39m
+          [0m待上传[0m
+          [0m：[0m
+          [0mone.txt[0m
+        [36m</span>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary css-1ccsd5i-MuiButtonBase-root-MuiButton-root"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m移除待提交证据[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiBox-root css-0"[39m
+      [36m>[39m
+        [36m<span[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-caption css-mpaqru-MuiTypography-root"[39m
+        [36m>[39m
+          [0m待上传[0m
+          [0m：[0m
+          [0mtwo.txt[0m
+        [36m</span>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeSmall MuiButton-textSizeSmall MuiButton-colorPrimary css-1ccsd5i-MuiButtonBase-root-MuiButton-root"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [0m移除待提交证据[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<button[39m
+        [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-tw6tsg-MuiButtonBase-root-MuiButton-root"[39m
+        [33mtabindex[39m=[32m"0"[39m
+        [33mtype[39m=[32m"button"[39m
+      [36m>[39m
+        [0m保存[0m
+      [36m</button>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError frontend/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx:101:26
+     99|   const one = new File(['1'], 'one.txt'), two = new File(['2'], 'two.t…
+    100|   fireEvent.drop(screen.getByRole('region'), { dataTransfer: { files: …
+    101|   fireEvent.click(screen.getByText('保存并完成'))
+       |                          ^
+    102|   await screen.findByText(/上传证据文件：连接中断/)
+    103|   expect(screen.getByText(/人工理由已保存/)).toBeInTheDocument()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx > 拖拽/图片粘贴共用校验，普通文本粘贴不拦截，待上传图片可预览
+TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"MuiBox-root css-ws92mx"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-cmpglg-MuiFormControl-root-MuiTextField-root"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-outlined css-19qnlrw-MuiFormLabel-root-MuiInputLabel-root"[39m
+          [33mdata-shrink[39m=[32m"false"[39m
+          [33mfor[39m=[32m"_r_16_"[39m
+          [33mid[39m=[32m"_r_16_-label"[39m
+        [36m>[39m
+          [0m人工修改判断理由（必填）[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline css-zsp0bh-MuiInputBase-root-MuiOutlinedInput-root"[39m
+        [36m>[39m
+          [36m<textarea[39m
+            [33maria-invalid[39m=[32m"false"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mid[39m=[32m"_r_16_"[39m
+            [33mstyle[39m=[32m"height: 0px; overflow: hidden;"[39m
+          [36m/>[39m
+          [36m<textarea[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mreadonly[39m=[32m""[39m
+            [33mstyle[39m=[32m"visibility: hidden; position: absolute; overflow: hidden; height: 0px; top: 0px; left: 0px; transform: translateZ(0); padding-top: 0px; padding-bottom: 0px; width: 100%;"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m/>[39m
+          [36m<fieldset[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"[39m
+          [36m>[39m
+            [36m<legend[39m
+              [33mclass[39m=[32m"css-1n64csd-MuiNotchedOutlined-root"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0m人工修改判断理由（必填）[0m
+              [36m</span>[39m
+            [36m</legend>[39m
+          [36m</fieldset>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"人工证据选择"[39m
+        [33mclass[39m=[32m"MuiFormGroup-root MuiRadioGroup-root css-1mac7pt-MuiFormGroup-root"[39m
+        [33mrole[39m=[32m"radiogroup"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary Mui-checked MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_17_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"provide"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1pqw2bl-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_17_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"none"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.4...
+ ❯ Object.getElementError frontend/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx:130:17
+    128|   expect(screen.getByRole('alert')).toHaveTextContent(/不支持的文件类…
+    129|   expect(screen.getByAltText('人工提供的截图')).toBeInTheDocument()
+    130|   expect(screen.getByText('保存并完成')).toBeDisabled()
+       |                 ^
+    131|   expect(screen.getByText('请填写人工修改说明。')).toBeInTheDocument()
+    132|   expect(api.put).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx > 保存响应和旧读取都不能清除在途请求期间的新输入
+TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"MuiBox-root css-ws92mx"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-cmpglg-MuiFormControl-root-MuiTextField-root"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined css-113d811-MuiFormLabel-root-MuiInputLabel-root"[39m
+          [33mdata-shrink[39m=[32m"true"[39m
+          [33mfor[39m=[32m"_r_1b_"[39m
+          [33mid[39m=[32m"_r_1b_-label"[39m
+        [36m>[39m
+          [0m人工修改判断理由（必填）[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline css-zsp0bh-MuiInputBase-root-MuiOutlinedInput-root"[39m
+        [36m>[39m
+          [36m<textarea[39m
+            [33maria-invalid[39m=[32m"false"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mid[39m=[32m"_r_1b_"[39m
+            [33mstyle[39m=[32m"height: 0px; overflow: hidden;"[39m
+          [36m>[39m
+            [0m送出的理由[0m
+          [36m</textarea>[39m
+          [36m<textarea[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mreadonly[39m=[32m""[39m
+            [33mstyle[39m=[32m"visibility: hidden; position: absolute; overflow: hidden; height: 0px; top: 0px; left: 0px; transform: translateZ(0); padding-top: 0px; padding-bottom: 0px; width: 100%;"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m/>[39m
+          [36m<fieldset[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"[39m
+          [36m>[39m
+            [36m<legend[39m
+              [33mclass[39m=[32m"css-ex8a5f-MuiNotchedOutlined-root"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0m人工修改判断理由（必填）[0m
+              [36m</span>[39m
+            [36m</legend>[39m
+          [36m</fieldset>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33maria-label[39m=[32m"人工证据选择"[39m
+        [33mclass[39m=[32m"MuiFormGroup-root MuiRadioGroup-root css-1mac7pt-MuiFormGroup-root"[39m
+        [33mrole[39m=[32m"radiogroup"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_1c_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"provide"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-cpa8b4-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormControlLabel-root MuiFormControlLabel-labelPlacementEnd css-19opgx6-MuiFormControlLabel-root"[39m
+        [36m>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiButtonBase-root MuiRadio-root MuiRadio-colorPrimary PrivateSwitchBase-root MuiRadio-root MuiRadio-colorPrimary Mui-checked MuiRadio-root MuiRadio-colorPrimary css-1q72ply-MuiButtonBase-root-MuiSwitchBase-root-MuiRadio-root"[39m
+          [36m>[39m
+            [36m<input[39m
+              [33mclass[39m=[32m"PrivateSwitchBase-input css-12xagqm-MuiSwitchBase-root"[39m
+              [33mname[39m=[32m"_r_1c_"[39m
+              [33mtype[39m=[32m"radio"[39m
+              [33mvalue[39m=[32m"none"[39m
+            [36m/>[39m
+            [36m<span[39m
+              [33mclass[39m=[32m"css-9oxshb-MuiRadioButtonIcon-root"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-iy8fvg-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonUncheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<svg[39m
+                [33maria-hidden[39m=[32m"true"[39m
+                [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1pqw2bl-MuiSvgIcon-root-MuiRadioButtonIcon-root"[39m
+                [33mdata-testid[39m=[32m"RadioButtonCheckedIcon"[39m
+                [33mfocusable[39m=[32m"false"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8.465 8.465C9.37 7.56 10.62 7 12 7C14.76 7 17 9.24 17 12C17 13.38 16.44 14.63 15.535 15.535C14.63 16.44 13.38 17 12 17C9.24 17 7 14.76 7 12C7 10.62 7.56 9.37 8.465 8.465Z"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</span>[39m
+          [36m</span>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-body1 MuiFormControlLabel-label css-rizt0-MuiTypography-root"[39m
+          [36m>[39m
+            [0m不提供证据[0m
+          [36m</span>[39m
+        [36m</label>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiFormControl-root MuiFormControl-fullWidth MuiTextField-root css-cmpglg-MuiFormControl-root-MuiTextField-root"[39m
+      [36m>[39m
+        [36m<label[39m
+          [33mclass[39m=[32m"MuiFormLabel-root MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined MuiFormLabel-colorPrimary MuiFormLabel-filled MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined css-113d811-MuiFormLabel-root-MuiInputLabel-root"[39m
+          [33mdata-shrink[39m=[32m"true"[39m
+          [33mfor[39m=[32m"_r_1e_"[39m
+          [33mid[39m=[32m"_r_1e_-label"[39m
+        [36m>[39m
+          [0m不提供证据的理由（必填）[0m
+        [36m</label>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-fullWidth MuiInputBase-formControl MuiInputBase-multiline css-zsp0bh-MuiInputBase-root-MuiOutlinedInput-root"[39m
+        [36m>[39m
+          [36m<textarea[39m
+            [33maria-invalid[39m=[32m"false"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mid[39m=[32m"_r_1e_"[39m
+            [33mstyle[39m=[32m"height: 0px; overflow: hidden;"[39m
+          [36m>[39m
+            [0m暂无附件[0m
+          [36m</textarea>[39m
+          [36m<textarea[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputMultiline css-w4nesw-MuiInputBase-input-MuiOutlinedInput-input"[39m
+            [33mreadonly[39m=[32m""[39m
+            [33mstyle[39m=[32m"visibility: hidden; position: absolute; overflow: hidden; height: 0px; top: 0px; left: 0px; transform: translateZ(0); padding-top: 0px; padding-bottom: 0px; width: 100%;"[39m
+            [33mtabindex[39m=[32m"-1"[39m
+          [36m/>[39m
+          [36m<fieldset[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"[39m
+          [36m>[39m
+            [36m<legend[39m
+              [33mclass[39m=[32m"css-ex8a5f-MuiNotchedOutlined-root"[39m
+            [36m>[39m
+              [36m<span>[39m
+                [0m不提供证据的理由（必填）[0m
+              [36m</span>[39m
+            [36m</legend>[39m
+          [36m</fieldset>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<button[39m
+        [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary MuiButton-sizeSmall MuiButton-containedSizeSmall MuiButton-colorPrimary css-tw6tsg-MuiButtonBase-root-MuiButton-root"[39m
+        [33mtabindex[39m=[32m"0"[39m
+        [33mtype[39m=[32m"button"[39m
+      [36m>[39m
+        [0m保存[0m
+      [36m</button>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ Object.getElementError frontend/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/01_decentralized_uploading/manual-evidence-drafts.test.tsx:146:26
+    144|   fireEvent.click(screen.getByLabelText('不提供证据'))
+    145|   fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'), …
+    146|   fireEvent.click(screen.getByText('保存并完成'))
+       |                          ^
+    147|   await waitFor(() => expect(api.put).toHaveBeenCalled())
+    148|   fireEvent.change(input, { target: { value: '请求期间的新理由' } })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  tests/01_decentralized_uploading/manual-evidence-editor.test.tsx > 立即打开未保存字段即可填写说明，显式保存先保存主值并使用新版本
+TestingLibraryElementError: Unable to find a label with the text of: 人工修改判断理由（必填）
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<input[39m
+      [33maria-label[39m=[32m"主表单标题"[39m
+      [33mvalue[39m=[32m"人工标题"[39m
+    [36m/>[39m
+    [36m<button>[39m
+      [0m查看标题[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<input[39m
+      [33maria-label[39m=[32m"主表单标题"[39m
+      [33mvalue[39m=[32m"人工标题"[39m
+    [36m/>[39m
+    [36m<button>[39m
+      [0m查看标题[0m
+    [36m</button>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper frontend/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ tests/01_decentralized_uploading/manual-evidence-editor.test.tsx:41:31
+     39|   fireEvent.change(screen.getByLabelText('主表单标题'), { target: { va…
+     40|   fireEvent.click(screen.getByText('查看标题'))
+     41|   const reason = await screen.findByLabelText('人工修改判断理由（必填…
+       |                               ^
+     42|   expect(calls).toEqual([])
+     43|   fireEvent.change(reason, { target: { value: '对照作者稿' } })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  tests/01_decentralized_uploading/manual-evidence-editor.test.tsx > 主表单保存失败保留人工输入且不发送说明请求
+TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mstyle[39m=[32m"padding-right: 1024px; overflow: hidden;"[39m
+[36m>[39m
+  [36m<div[39m
+    [33maria-hidden[39m=[32m"true"[39m
+  [36m>[39m
+    [36m<button>[39m
+      [0m查看标题[0m
+    [36m</button>[39m
+    [36m<button[39m
+      [33mclass[39m=[32m"MuiButtonBase-root MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButton-colorPrimary css-1uent87-MuiButtonBase-root-MuiButton-root"[39m
+      [33mdata-evidence-pending-navigation[39m=[32m"true"[39m
+      [33mtabindex[39m=[32m"0"[39m
+      [33mtype[39m=[32m"button"[39m
+    [36m>[39m
+      [0m待处理项[0m
+      [0m（[0m
+      [0m0[0m
+      [0m）[0m
+    [36m</button>[39m
+  [36m</div>[39m
+  [36m<div[39m
+    [33mclass[39m=[32m"MuiDrawer-root MuiDrawer-anchorRight MuiDrawer-modal MuiModal-root css-2soe65-MuiModal-root-MuiDrawer-root"[39m
+    [33mrole[39m=[32m"presentation"[39m
+  [36m>[39m
+    [36m<div[39m
+      [33maria-hidden[39m=[32m"true"[39m
+      [33mclass[39m=[32m"MuiBackdrop-root MuiModal-backdrop css-4nmryk-MuiBackdrop-root-MuiModal-backdrop"[39m
+      [33mstyle[39m=[32m"opacity: 1; transition: opacity 225ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;"[39m
+    [36m/>[39m
+    [36m<div[39m
+      [33mdata-testid[39m=[32m"sentinelStart"[39m
+      [33mtabindex[39m=[32m"0"[39m
+    [36m/>[39m
+    [36m<div[39m
+      [33maria-label[39m=[32m"科学数据来源核对"[39m
+      [33maria-modal[39m=[32m"true"[39m
+      [33mclass[39m=[32m"MuiPaper-root MuiPaper-elevation MuiPaper-elevation16 MuiDrawer-paper MuiDrawer-paperAnchorRight evidence-review-drawer css-1s7b1qc-MuiPaper-root-MuiDrawer-paper"[39m
+      [33mdata-mui-focusable[39m=[32m""[39m
+      [33mrole[39m=[32m"dialog"[39m
+      [33mstyle[39m=[32m"--Paper-shadow: 0px 8px 10px -5px rgba(0,0,0,0.2),0px 16px 24px 2px rgba(0,0,0,0.14),0px 6px 30px 5px rgba(0,0,0,0.12); transform: none; transition: transform 225ms cubic-bezier(0.0, 0, 0.2, 1) 0ms;"[39m
+      [33mtabindex[39m=[32m"-1"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiBox-root css-1lekzkb"[39m
+      [36m>[39m
+        [36m<h6[39m
+          [33mclass[39m=[32m"MuiTypography-root MuiTypography-h6 css-1miy0lu-MuiTypography-root"[39m
+        [36m>[39m
+          [0m标题[0m
+        [36m</h6>[39m
+        [36m<button[39m
+          [33maria-label[39m=[32m"关闭来源详情"[39m
+          [33mclass[39m=[32m"MuiButtonBase-root MuiIconButton-root MuiIconButton-sizeMedium css-53g0n7-MuiButtonBase-root-MuiIconButton-root"[39m
+          [33mtabindex[39m=[32m"0"[39m
+          [33mtype[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33maria-hidden[39m=[32m"true"[39m
+            [33mclass[39m=[32m"MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-1umw9bq-MuiSvgIcon-root"[39m
+            [33mdata-testid[39m=[32m"CloseIcon"[39m
+            [33mfocusable[39m=[32m"false"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<span[39m
+        [33mclass[39m=[32m"MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"[39m
+      [36m/>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"MuiTabs-root css-jhczcq-MuiTabs-root"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiTabs-scroller MuiTabs-fixed css-s2t35c-MuiTabs-scroller"[39m
+          [33mstyle[39m=[32m"overflow: hidden; margin-bottom: 0px;"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"MuiTabs-list MuiTabs-flexContainer css-hzcega-MuiTabs-list"[39m
+            [33mrole[39m=[32m"tablist"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33maria-selected[39m=[32m"false"[39m
+              [33mclass[39m=[32m"MuiButtonBase-root MuiTab-root MuiTab-textColorPrimary MuiTab-fullWidth css-hmk518-MuiButtonBase-root-MuiTab-root"[39m
+              [33mrole[39m=[32m"tab"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0m字段设置[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-selected[39m=[32m"true"[39m
+              [33mclass[39m=[32m"MuiButtonBase-root MuiTab-root MuiTab-textColorPrimary MuiTab-fullWidth Mui-selected css-hmk518-MuiButtonBase-root-MuiTab-root"[39m
+              [33mrole[39m=[32m"tab"[39m
+              [33mtabindex[39m=[32m"0"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0m来源核对[0m
+            [36m</button>[39m
+            [36m<button[39m
+              [33maria-selected[39m=[32m"false"[39m
+              [33mclass[39m=[32m"MuiButtonBase-root MuiTab-root MuiTab-textColorPrimary MuiTab-fullWidth css-hmk518-MuiButtonBase-root-MuiTab-root"[39m
+              [33mrole[39m=[32m"tab"[39m
+              [33mtabindex[39m=[32m"-1"[39m
+              [33mtype[39m=[32m"button"[39m
+            [36m>[39m
+              [0m历史记录[0m
+            [36m</button>[39m
+          [36m</div>[39m
+          [36m<span[39m
+            [33mclass[39m=[32m"MuiTabs-indicator css-1qltlow-MuiTabs-indicator"[39m
+            [33mstyle[39m=[32m"left: 0px; width: 0px;"[39m
+          [36m/>[39m
+        [36m</div>[39m
+      [36m</div>[39m
+      [36m<fieldset[39m
+        [33mclass[39m=[32m"MuiBox-root css-1jfqeke"[39m
+        [33mhidden[39m=[32m""[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"MuiBox-root css-0"[39m
+          [33mdata-evidence-ignore[39m=[32m"true"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"MuiBox-root css-0"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33maria-label[39m=[32m"AI 候选值"[39m
+          [33mclass[39m=[32m"MuiBox-root css-1abq6wt"[39m
+          [33mdata-evidence-ignore[39m=[32m"true"[39m
+        [36m>[39m
+          [36m<h6[39m
+            [33mclass[39m=[32m"MuiTypography-root MuiTypography-subtitle1 css-or3kzz-MuiTypography-root"[39m
+          [36m>[39m
+            [0mAI 候选值[0m
+          [36m</h6>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation0 MuiAlert-root MuiAlert-colorError MuiAlert-standardError MuiAlert-standard css-3lhuho-MuiPaper-root-MuiAlert-root"[39m
+            [33mrole[39m=[32m"alert"[39m
+            [33mstyle[39m=[32m"--Paper-shadow: none;"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"MuiA...
+ ❯ Object.getElementError frontend/node_modules/@testing-library/dom/dist/config.js:37:19
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:76:38
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:52:17
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:95:19
+ ❯ tests/01_decentralized_uploading/manual-evidence-editor.test.tsx:64:26
+     62|   fireEvent.click(screen.getByLabelText('不提供证据'))
+     63|   fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'), …
+     64|   fireEvent.click(screen.getByText('保存并完成'))
+       |                          ^
+     65|   await screen.findByText(/请先保存当前编辑|保存当前内容失败|主表单/)
+     66|   expect(screen.getByLabelText('人工修改判断理由（必填）')).toHaveValu…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  5 failed | 27 passed (32)
+   Start at  19:52:55
+   Duration  4.48s (transform 424ms, setup 0ms, collect 3.95s, tests 4.73s, environment 1.88s, prepare 450ms)

@@ -381,6 +381,8 @@ def bind_support_versions(snapshot, session=None):
         sorted(field_version(r) for r in snapshot['records'])])
     with (nullcontext(session) if session is not None else SessionLocal()) as db:
         if not table_available(db):
+            from .field_input import bind
+            bind(snapshot, db)
             return snapshot
         rows = db.execute(select(ScientificManualEvidence.id, ScientificManualEvidence.item_key,
             ScientificManualEvidence.value_hash, ScientificManualEvidence.source_hash,
@@ -402,6 +404,9 @@ def bind_support_versions(snapshot, session=None):
             record['source_hash'] = digest([source, versions])
     snapshot['version'] = digest([snapshot['target'], snapshot['target_id'],
         sorted(field_version(r) for r in snapshot['records'])])
+    from .field_input import bind
+    with (nullcontext(session) if session is not None else SessionLocal()) as db:
+        bind(snapshot, db)
     return snapshot
 
 

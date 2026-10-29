@@ -120,6 +120,9 @@ def mark_changes(session, snapshot: dict, baseline: dict, actor_id: int, actor_n
 
 
 def _current(session, snapshot: dict, record: dict, *, for_update: bool = False) -> ScientificManualEvidence | None:
+    if snapshot.get('field_review_input') or snapshot.get('_manual_field_scope'):
+        from .field_input import current_manual
+        return current_manual(session, snapshot, record, for_update=for_update)
     query = select(ScientificManualEvidence).where(
         ScientificManualEvidence.target == snapshot["target"],
         ScientificManualEvidence.target_id == str(snapshot["target_id"]),
@@ -153,7 +156,10 @@ def _ensure(session, snapshot: dict, baseline: dict, item_key: str, actor_id: in
         ScientificManualEvidence.item_key == item_key,
         ScientificManualEvidence.status == "draft",
     ).with_for_update()):
-        if old.actor_user_id != actor_id and old.value_hash == current["content_hash"] and old.source_hash == current.get("paper_source_hash", current["source_hash"]):
+        from .scientific_evidence import canonical
+        same_value = old.value_hash == current["content_hash"] or (
+            snapshot.get('_manual_field_scope') and canonical(old.after_value) == canonical(current.get('current_value')))
+        if old.actor_user_id != actor_id and same_value and old.source_hash == current.get("paper_source_hash", current["source_hash"]):
             raise ManualEvidenceError("manual_evidence_conflict", "该字段正由其他人修改，请刷新后重试", field=current["field"], status=409)
         old.status = "historical"
     row = ScientificManualEvidence(
@@ -422,6 +428,9 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
         if snapshot["target"] == "paper":
             query = query.where(ScientificManualEvidence.paper_revision == int(snapshot.get("review_state", [None, None, 1])[2] or 1))
         rows = list(session.scalars(query.order_by(ScientificManualEvidence.created_at, ScientificManualEvidence.id)))
+        if snapshot.get('field_review_input'):
+            from .field_input import rows_for, matching_rows
+            rows = matching_rows(record, rows_for(session, {**snapshot, 'records': [record]}))
         if not rows:
             continue
         items: list[dict[str, Any]] = []

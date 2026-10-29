@@ -1,0 +1,54 @@
+{
+  "checks": [
+    {
+      "outcome": "supported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "outcome": "unsupported",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "outcome": "failed",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    },
+    {
+      "outcome": "cancelled",
+      "order": [
+        "value-save",
+        "manual-save",
+        "field-input",
+        "job",
+        "cancel"
+      ],
+      "mouseBlocked": true,
+      "keyboardTrapped": true,
+      "otherValueUnchanged": true
+    }
+  ],
+  "errors": []
+}

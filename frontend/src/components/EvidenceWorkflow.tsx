@@ -80,6 +80,8 @@ export function useEvidenceWorkflow(options?: {
   readOnly?: boolean
   getCurrentValue?: (record: EvidenceRecord) => { value: unknown; field: string; record_key?: string; manualValue?: unknown; comparisonValue?: unknown } | undefined
   saveCurrent?: () => Promise<boolean>
+  saveField?: (record: EvidenceRecord) => Promise<boolean>
+  hasUnsavedFields?: () => boolean
   saveCandidate?: (patches: EvidencePatch[]) => Promise<boolean>
 }) {
   const { t } = useLanguage()
@@ -166,6 +168,7 @@ export function useEvidenceWorkflow(options?: {
   const [elapsedSeconds, setElapsedSeconds] = useState(0)
   const elapsedStarted = useRef(Date.now())
   const generation = useRef(0)
+  const fieldRun = useRef<number | null>(null)
   const cancelLateJob = useRef(true)
   const jobID = useRef<string | undefined>(undefined)
   const cancelPreparation = useRef<(() => void) | undefined>(undefined)
@@ -289,6 +292,7 @@ export function useEvidenceWorkflow(options?: {
   }, [waiting])
   const pause = (ms: number) => new Promise<void>(resolve => { timerDone.current = resolve; timer.current = setTimeout(resolve, ms) })
   const finish = useCallback((value: EvidencePayload | null, cancelJob = true) => {
+    fieldRun.current = null
     cancelLateJob.current = cancelJob
     generation.current += 1
     clearTimeout(timer.current)
@@ -339,6 +343,7 @@ export function useEvidenceWorkflow(options?: {
   }
 
   const restore = useCallback(async (target: EvidenceTarget) => {
+    if (fieldRun.current !== null && targetRef.current?.target === target.target && targetRef.current.target_id === target.target_id) return
     const epoch = decisionEpoch.current
     const current = ++generation.current
     const revision = editRevision.current
@@ -393,10 +398,13 @@ export function useEvidenceWorkflow(options?: {
       && (!optionsRef.current?.target || `${optionsRef.current.target.target}:${optionsRef.current.target.target_id}` === identity)
       && (!hadCurrent || Boolean(optionsRef.current?.getCurrentValue?.(record)))
       && manualValueIdentity(value()) === expectedValue
-    const saveCurrent = optionsRef.current?.saveCurrent
-    if (saveCurrent && !(await saveCurrent())) throw new Error(t('evidence.saveFirstFailed'))
+    const save = optionsRef.current?.saveField
+      ? () => optionsRef.current!.saveField!(record) : optionsRef.current?.saveCurrent
+    if (save && !(await save())) throw new Error(t('evidence.saveFirstFailed'))
+    if (optionsRef.current?.hasUnsavedFields) dirty.current = optionsRef.current.hasUnsavedFields()
     if (!isCurrent()) throw new Error(t('evidence.changedDuringSave'))
-    const params = new URLSearchParams({...target, item_key: record.item_key || record.key})
+    const params = new URLSearchParams({...target, item_key: record.item_key || record.key,
+      ...(optionsRef.current?.saveField ? {field_scope: 'true'} : {})})
     const fresh = await api.get<{version: string; record: EvidenceRecord}>(`${base}/manual-context?${params}`)
     if (!fresh || !isCurrent()) throw new Error(t('evidence.changedDuringSave'))
     const current = fresh.record
@@ -486,7 +494,101 @@ export function useEvidenceWorkflow(options?: {
     return true
   }
 
+  const executeField = async (target: EvidenceTarget, key: string) => {
+    if (fieldRun.current !== null) return
+    const record = recordsRef.current.find(r => r.key === key || r.item_key === key)
+    if (!record || !optionsRef.current?.saveField || optionsRef.current.readOnly) return
+    cancelPreparation.current?.(); jobPollAbort.current?.abort()
+    const current = ++generation.current
+    fieldRun.current = current
+    lastRetryKeys.current = [record.key]
+    targetRef.current = target
+    targetIdentity.current = `${target.target}:${target.target_id}`
+    cancelLateJob.current = true; completed.current = false; jobID.current = undefined
+    const hadCurrent = Boolean(optionsRef.current?.getCurrentValue?.(record))
+    const fieldValue = () => {
+      const value = optionsRef.current?.getCurrentValue?.(record)
+      return manualValueIdentity(value ? value.value : hadCurrent ? undefined : record.current_value)
+    }
+    const value = fieldValue()
+    const manualKey = manualDraftKey(target, record, manualCurrentValue(record))
+    const manualRevision = manualDrafts.read(manualKey).revision
+    const active = () => mounted.current && current === generation.current
+      && targetRef.current?.target === target.target && targetRef.current.target_id === target.target_id
+    const unchanged = () => fieldValue() === value && manualDrafts.read(manualKey).revision === manualRevision
+    let saved = false
+    elapsedStarted.current = Date.now(); setElapsedSeconds(0); setSaveError('')
+    setView({phase: 'checking', percent: 0, message: '正在保存当前字段及人工依据…'})
+    try {
+      if (!(await optionsRef.current.saveField(record))) throw new Error(t('evidence.saveFirstFailed'))
+      if (optionsRef.current.hasUnsavedFields) dirty.current = optionsRef.current.hasUnsavedFields()
+      if (!active()) return
+      if (saveManualBeforeReview.current && !(await saveManualBeforeReview.current())) {
+        throw new Error(manualDrafts.read(manualKey).error || '人工理由或证据未保存')
+      }
+      if (!active()) return
+      if (!unchanged()) throw new Error(t('evidence.changedDuringSave'))
+      saved = true
+      setSelected(null)
+      setView({phase: 'checking', percent: 5, message: t('evidence.preparingSources')})
+      const prepared = await api.get<Preflight & {field_token: string}>(`${base}/field-input?${new URLSearchParams({
+        ...target, item_key: record.item_key || record.key})}`)
+      if (!active()) return
+      if (!unchanged()) throw new Error(t('evidence.changedDuringSave'))
+      if (prepared.records.length !== 1 || !prepared.field_token) throw new Error('当前字段准备失败，未启动核对')
+      if (typeof prepared.records[0].current_value !== 'object' && manualValueIdentity(prepared.records[0].current_value) !== value) {
+        throw new Error('当前字段与已保存内容不一致，输入已保留，尚未启动核对')
+      }
+      setView({phase: 'checking', percent: 10, message: t('evidence.starting')})
+      const job = await prepare<Job & Partial<Preflight>>(`${base}/jobs`, {
+        ...target, purpose: 'field', expected_field_token: prepared.field_token,
+        retry_keys: [prepared.records[0].key],
+      }, current)
+      if (!active()) {
+        if (cancelLateJob.current && job.id) void api.del(`${base}/jobs/${job.id}`).catch(() => undefined)
+        return
+      }
+      jobID.current = job.id
+      if (job.status !== 'completed') showRunning(job, t('evidence.queued'))
+      const deadline = Date.now() + ((job.timeout_seconds || 600) + 60) * 1000
+      while (active()) {
+        const result = job.status === 'completed' ? job : await pollJob<Job>(job.id, deadline)
+        if (!active()) return
+        if (result.status === 'completed') {
+          if (!unchanged()) throw new Error(t('evidence.changedDuringSave'))
+          const reviewed = result.records?.find(r => (r.item_key || r.key) === (record.item_key || record.key))
+          if (!reviewed) throw new Error('后台未返回当前字段的持久化结果')
+          completed.current = true
+          if (!(await showCompleted(current))) return
+          decisionEpoch.current += 1
+          fieldDecisionEpoch.current.set(record.key, (fieldDecisionEpoch.current.get(record.key) || 0) + 1)
+          const next = recordsRef.current.map(r => (r.item_key || r.key) === (record.item_key || record.key) ? reviewed : r)
+          recordsRef.current = next; setRecords(next); setView(null); setDetailReload(n => n + 1)
+          if (reviewed.status === 'supported' && !reviewed.stale && !reviewed.pending_review) setManualNotice(t('evidence.fieldReviewSaved'))
+          else openIssue(reviewed.key)
+          return
+        }
+        if (result.status === 'failed') throw new Error(result.error?.message || t('evidence.failed'))
+        if (result.status === 'cancelled') { finish(null); return }
+        showRunning(result, result.status === 'queued' ? t('evidence.queued') : t('evidence.running'))
+        await pause(1000)
+      }
+    } catch (error) {
+      if (!active()) return
+      const message = (error as Error).message
+      if (!saved) {
+        setView(null); setSaveError('保存失败，尚未开始核对：' + message)
+      } else setView({phase: 'error', message})
+    } finally {
+      if (fieldRun.current === current) fieldRun.current = null
+    }
+  }
+
   const execute = async (target: EvidenceTarget, retryKeys?: string[], silent = false, attempt = 0) => {
+    if (retryKeys && optionsRef.current?.saveField) {
+      if (retryKeys.length !== 1) { setSaveError('侧栏核对只能指定一个字段'); return }
+      return executeField(target, retryKeys[0])
+    }
     cancelPreparation.current?.()
     jobPollAbort.current?.abort()
     lastRetryKeys.current = retryKeys
@@ -918,7 +1020,7 @@ export function useEvidenceWorkflow(options?: {
         </Box>}
         {manualVisible && <ReviewSection title={t('evidence.manualEditRecords')} initialOpen expand={manualOpenKey === activeRecord.key}>
         <ManualEvidenceSection readOnly={options?.readOnly} showHistory={false} onRecords={receiveManualHistory} target={targetRef.current} record={activeRecord} version={preflightRef.current?.version}
-          saveBeforeReview={saveManualBeforeReview}
+          saveBeforeReview={saveManualBeforeReview} fieldScoped={Boolean(options?.saveField)}
           drafts={manualDrafts} value={manualCurrentValue(activeRecord)}
           localChanged={hasLocalManualEdit(activeRecord)}
           prepare={() => prepareManual(activeRecord)} />
