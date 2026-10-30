@@ -6,15 +6,49 @@
   <title>生成字段核对结果与候选 · 程序流程图 · SC-Wiki</title>
   <link rel="stylesheet" href="pdf-stage-flow.css">
   <link rel="stylesheet" href="pdf-field-review-catalog.css">
+  <link rel="stylesheet" href="pdf-review-audit.css">
   <script defer src="pdf-stage-flow.js"></script>
   <script defer src="pdf-field-review-data.js"></script>
   <script defer src="pdf-field-review-catalog.js"></script>
+  <script defer src="pdf-review-audit.js"></script>
 </head>
 <body>
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="pdf-review-flow.html#parse">收录主流程</a> / <a href="pdf-parsing-flow.html#evidence">解析与草稿</a> / 生成字段核对结果与候选</nav>
   <header><p class="eyebrow">SC-WIKI · 解析内部流程</p><h1>生成字段核对结果与候选</h1><p class="intro">展开逐字段生成的内部控制流：来源分批、结果校验与合并、受限补空、Methods 条件关联、最终版本核对和审计保存。这里展示解析阶段的生成路径，后续人工编辑与主动核对另沿既有入口处理。</p></header>
-  <nav class="page-links" aria-label="流程页面导航"><a href="pdf-parsing-flow.html#evidence">← 返回上层解析流程</a><a href="#field-catalog">按字段查核对规则</a><a href="#program-flow">查看整体控制流</a></nav>
+  <nav class="page-links" aria-label="流程页面导航"><a href="pdf-parsing-flow.html#evidence">← 返回上层解析流程</a><a href="#review-audit">核对次数、问题归属与建议</a><a href="#field-catalog">按字段查核对规则</a><a href="#program-flow">查看当前整体控制流</a></nav>
+  <section class="review-audit" id="review-audit" aria-labelledby="audit-title">
+    <header class="audit-head"><p class="eyebrow">2026-10-30 · 按现有功能模块解释</p><h2 id="audit-title">为什么模型已判断通过，提交时又被拦住？</h2><p>模型理解科学内容、程序核实来源、提交汇总已有资格是三件事。当前实现把它们接在多个阶段；下方可切换查看实际断点和本次讨论方案。</p><p class="audit-scope"><strong>本次只更新说明与流程图。</strong>“建议流程”尚未实施；页面不连接草稿、模型、OCR 或审核接口。</p></header>
+    <div class="audit-ledger">
+      <h3>到底核对几次，每次由谁做？</h3><p><strong>有三个模型调用入口，不代表固定调用三次。</strong>解析内部有提取、整理、专门归纳和字段核对，字段批与来源窗口会增加调用次数；只有部分阶段会启动工具补查。程序检查本身不等于再次调用模型。</p>
+      <div class="audit-table-scroll" tabindex="0" role="region" aria-label="当前核对阶段与工具"><table><thead><tr><th>现有功能／阶段</th><th>谁处理、用什么</th><th>处理范围与调用条件</th></tr></thead><tbody>
+        <tr><td>解析与草稿：文档读取</td><td>所选解析方案；默认组合 MinerU、GROBID 等工具，部分路径使用视觉能力</td><td>把正文、补充材料转成带文件、页码或块身份的内容；不能只凭“解析成功”认定科学值正确</td></tr>
+        <tr><td>解析与草稿：提取及补查</td><td>LLM 提取；程序验证候选；必要时使用受限文档工具</td><td>按来源窗口读取；前期候选不合格才进入已有的有限补证循环</td></tr>
+        <tr><td>解析与草稿：整理与归纳</td><td>LLM 固定表单整理、专门分类／总结；程序核查去向与格式</td><td>科学记录、论文概述和分类有不同过程，不能当成一次通用核对；不同阶段不一定都重复运行</td></tr>
+        <tr><td>字段核对：判断值与依据</td><td>LLM；evaluate_batch、checked_result 和条件规则</td><td>字段批 × 来源批；归纳按语义判断，条件还检查材料、软件、阶段与适用范围</td></tr>
+        <tr class="audit-row-problem"><td>字段核对：额外 PDF 复查</td><td>程序用 PyMuPDF 读取原 PDF 文字层</td><td>当前再匹配引句；没有有效块来源且不能唯一匹配时，可把 supported 改为 unchecked；此处没有模型补查</td></tr>
+        <tr><td>侧栏主动大模型核对</td><td>LLM 与共享字段处理程序</td><td>用户显式点击，先保存当前字段及依据，仅该字段成为核对目标；有效结果按版本保存</td></tr>
+        <tr><td>提交／管理员批准前</td><td>程序复用结果；当前仅必要人工修改进入提交模型核对</td><td>不对有效同版本结果重复调用模型；最后汇总资格与执行事务，存在未通过或未完成项仍阻止提交</td></tr>
+      </tbody></table></div>
+      <p>精确次数须读取某一次任务的调用记录，不能用流程框数量推算。现有入口①解析、②提交中的必要核对、③侧栏主动核对，沿用 #147；管理员批准事务又是独立的保存动作。</p>
+    </div>
+    <div class="audit-workbench">
+      <div class="audit-modes" role="tablist" aria-label="当前实现与建议流程">
+        <button type="button" id="audit-current-tab" role="tab" aria-selected="true" aria-controls="audit-panel" data-audit-mode="current">当前实现 · 断点标红</button>
+        <button type="button" id="audit-proposed-tab" role="tab" aria-selected="false" aria-controls="audit-panel" data-audit-mode="proposed" tabindex="-1">建议流程 · 尚未实施</button>
+      </div>
+      <nav class="audit-modules" aria-label="按现有模块定位问题" id="audit-modules"></nav>
+      <div id="audit-panel" role="tabpanel" aria-labelledby="audit-current-tab">
+        <div class="audit-module-head"><p class="eyebrow" id="audit-module-owner"></p><h3 id="audit-module-title"></h3><p id="audit-module-summary"></p><p class="audit-mode-notice" id="audit-mode-notice"></p></div>
+        <div class="audit-flow-scroll" tabindex="0" role="region" aria-label="所选模块程序流程"><ol class="audit-flow" id="audit-flow"></ol></div>
+        <article class="audit-explanation" aria-live="polite" aria-atomic="true"><div><p class="eyebrow" id="audit-step-owner"></p><h4 id="audit-step-title"></h4><p id="audit-step-detail"></p></div><div class="audit-example"><h4>映射回实际问题</h4><p id="audit-example"></p></div></article>
+        <div class="audit-conclusion"><p><strong>问题归属：</strong><span id="audit-root"></span></p><p><strong>建议怎么改：</strong><span id="audit-change"></span></p><p><strong>还不能下的结论：</strong><span id="audit-limit"></span></p></div>
+        <div class="audit-references"><strong>实现与历史依据</strong><ul id="audit-references"></ul></div>
+      </div>
+    </div>
+    <div class="audit-case"><strong>CaH6 与 La–Sc–H 为什么不能只比较“最后能否提交”？</strong><p>前轮 CaH6 只读快照的43项为22项定位未完成、12项批次技术失败和9项派生等待。9项的输入原因中，4项随定位失败等待，5项随批次异常等待；不是全部由 PDF 引句匹配造成。这是历史调查快照，不是此页实时计数。La–Sc–H 曾按明确授权记录1,111项人工确认与新基线，不能据此声称其全部字段均由模型一次自动核对通过；旧来源、正式保存和审核历史写入也曾出现独立故障。</p><p><a href="../../specs/147-two-stage-field-review/approval-submit-validation.md">La–Sc–H 状态修正的范围与边界</a> · <a href="../../specs/147-two-stage-field-review/submission-completion.md">正式提交的旧来源问题</a></p></div>
+    <noscript>交互模块需要 JavaScript。上表仍可阅读，下方原程序流程图保留文字与源码入口。</noscript>
+  </section>
   <p class="boundary">方法核对区分电子理论、声子技术、振动处理与结构优化目标。电子结果数值和错误历史标签分别核对；仅明确关联的电子—声子修正允许绑定振动条件。字段来源与实际依赖继续决定审核资格。</p>
   <section class="field-catalog" id="field-catalog" aria-labelledby="catalog-title">
     <header class="catalog-head"><p class="eyebrow">字段核对知识库</p><h2 id="catalog-title">具体到每一个字段，程序在检查什么</h2><p>选择字段，查看取值来源、程序规则、模型核对、候选处理、真实依赖和排错入口。这里记录当前实现；共用机制、专门过程、提示词约束和程序硬检查分别说明。</p></header>
@@ -110,7 +144,7 @@
       "row": 3,
       "title": "逐批调用生成与核对",
       "summary": "模型返回字段状态、理由和候选",
-      "description": "使用 generate 目的调用共享 evaluate_batch；服务端校验结果字段、状态、引句、关联和候选结构。",
+      "description": "使用 generate 目的调用共享 evaluate_batch。模型负责科学含义和归纳理由；checked_result 校验字段、引句、关联及候选。响应没有覆盖本批全部键时会抛出 ValueError，现有批次异常分支会统一记录技术未完成。",
       "owner": "共享核对程序 / LLM",
       "code": "backend/ingest/property_evidence.py::evaluate_batch / checked_result",
       "notes": [
@@ -297,12 +331,14 @@
       "row": 14,
       "title": "按原 PDF 复核引句位置",
       "summary": "读取原文件，保留 OCR 几何来源",
-      "description": "核对当前引用页码与原 PDF 文本层，保留有效的图表或 OCR 块几何来源，并执行首页题录规则。",
+      "description": "前面模型与解析来源已给出结果后，再用 PyMuPDF 读取原 PDF 文字层，整理空白及大小写后查找连续引句。首页题录和有效图表／OCR 块另有处理。这一步是程序检查，不调用模型。",
       "owner": "字段核对程序",
       "code": "backend/ingest/pdf_source_pages.py::current_pdf_results",
       "notes": [
         "纯文字引句不能通过不唯一匹配冒充定位成功。",
-        "已有有效块几何来源不会仅因文字层搜索无结果而丢失资格。"
+        "已有有效块几何来源不会仅因文字层搜索无结果而丢失资格。",
+        "本分支没有按 check_mode=synthesis 豁免，也没有将失败引句及页面上下文交回模型补查。",
+        "当前目的为防止虚构或错页出处；连续文字匹配无法正确覆盖断词、OCR 与版面表达差异。"
       ]
     },
     {
@@ -310,7 +346,7 @@
       "row": 15,
       "title": "原通过结果有有效定位？",
       "summary": "仅对适用的 PDF 来源结果判断",
-      "description": "如果原结果为 supported，但其 PDF 引句没有可验证的定位，则不能保留该支持状态。",
+      "description": "当前实现把模型支持与定位资格合成一个状态：原结果为 supported、所有依据均属 PDF 且没有任何有效定位时，直接撤回 supported。它不等于再次得出了科学不通过结论。",
       "owner": "字段核对程序",
       "code": "backend/ingest/pdf_source_pages.py::correct_pdf_source_pages",
       "notes": [],
@@ -321,11 +357,11 @@
       "row": 15,
       "title": "撤回通过，标记 unchecked",
       "summary": "未完成定位，不判科学值错误",
-      "description": "保存原模型意见和引句，显示原文出处验证未完成，提示检查读取或定位后再处理。",
+      "description": "保存原模型意见及引句，将状态改为 unchecked。此处没有后续补查环节；界面红色问题谓词又排除 unchecked，而提交仍要求通过，因此出现看起来没有红色问题却不能提交的断点。",
       "owner": "字段核对程序",
       "code": "backend/ingest/pdf_source_pages.py::correct_pdf_source_pages",
-      "notes": [],
-      "kind": "wait",
+      "notes": ["这条红色路径表示当前已查到的流程缺口，不表示本次已修复后台。", "建议对照本页上方的模块说明及尚未实施的方案。"],
+      "kind": "stop",
       "column": "left"
     },
     {
