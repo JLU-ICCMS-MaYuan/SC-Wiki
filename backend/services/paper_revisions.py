@@ -1,6 +1,7 @@
 """上传者返修：独立草稿、并发保护及原子重新送审（#108）。"""
 from __future__ import annotations
 
+from backend.ingest.evidence_audit import current_change_events
 import copy
 import json
 import uuid
@@ -36,7 +37,12 @@ def require_owner(paper, user):
         error(403, 'revision_forbidden', '只有原上传者可以返修这篇论文')
 
 
-def require_rejected(paper):
+def require_rejected(paper, *, session=None, user=None):
+    if paper.review_status=='approved' and session is not None and user is not None:
+        from backend.services.manuscript_handoffs import latest, require_writer
+        if latest(session,paper.id):
+            require_writer(session,paper,user,author=True)
+            return
     if paper.review_status != 'rejected':
         error(409, 'revision_status_changed', '论文已不处于拒绝状态，请返回详情查看最新审核结果')
 
@@ -69,7 +75,7 @@ def current_draft(session, paper):
     submission = submitted_metadata(session, paper)
     saved_paper = submission.get('paper', {})
     for key in AUTHOR_ROLE_FIELDS:
-        data[key] = [author for author in saved_paper.get(key, []) if author in data['authors']]
+        data[key] = [author for author in (saved_paper.get(key) or []) if author in data['authors']]
     data['material_families'] = [term(f) for f in session.scalars(select(models.MaterialFamily)
         .join(models.PaperMaterialFamily, models.PaperMaterialFamily.material_family_id == models.MaterialFamily.id)
         .where(models.PaperMaterialFamily.paper_id == paper.id).order_by(models.MaterialFamily.id))]
@@ -104,7 +110,8 @@ def current_draft(session, paper):
                         r['evidences'].append(dict(file_id=str(c.paper_file_id), chunk_id=c.id,
                             chunk_index=c.chunk_index, quote=e.quote, page_start=e.page_start, page_end=e.page_end))
                 m['records'].append(r)
-            item['property_modules'].append(m)
+            from backend.ingest.tc_contexts import expand_module
+            item['property_modules'].append(expand_module(m))
         states.append(item)
         for structure in session.scalars(select(models.StructureModel).where(models.StructureModel.material_state_id == state.id).order_by(models.StructureModel.id)):
             text = structure.structure_text
@@ -137,13 +144,17 @@ def fingerprint(session, paper, draft=None):
 
 
 def assert_current(session, paper, saved):
-    require_rejected(paper)
+    from types import SimpleNamespace
+    require_rejected(paper,session=session,user=SimpleNamespace(id=saved.owner_id))
+    from backend.services.manuscript_handoffs import require_writer
+    require_writer(session,paper,SimpleNamespace(id=saved.owner_id),author=True)
     if saved.draft is None or saved.base_revision != paper.content_revision or saved.base_fingerprint != fingerprint(session, paper):
         error(409, 'revision_conflict', '论文内容或审核结果已变化；返修草稿已保留，请先核对最新论文')
 
 
 def response(saved, paper, *, conflict=False):
-    draft = copy.deepcopy(saved.draft)
+    from backend.ingest.tc_contexts import map_draft
+    draft = map_draft(saved.draft)
     if isinstance((draft or {}).get('paper'), dict):
         draft['paper'].pop('material_relations', None)
     missing = not (draft or {}).get('paper', {}).get('material_families')
@@ -163,7 +174,7 @@ async def locked_paper(session, paper_id, user):
 
 async def open_draft(session, paper_id, user, *, create=False):
     paper = await locked_paper(session, paper_id, user)
-    require_rejected(paper)
+    await session.run_sync(lambda s:require_rejected(paper,session=s,user=user))
     saved = await session.get(models.PaperRevisionDraft, paper_id, with_for_update=True)
     if saved is None or saved.draft is None:
         if not create:
@@ -212,15 +223,17 @@ def revision_snapshot(session, revision_id, owner, *, legacy=False):
     chunks = [dict(chunk_id=c.id, file_id=str(c.paper_file_id), source_name=files.get(c.paper_file_id),
         chunk_index=c.chunk_index, content=c.content, page_start=c.page_start, page_end=c.page_end, section=c.section_name)
         for c in rows(session, models.PaperChunk, paper.id)]
-    records = ev.draft_records(saved.draft, science.origins_for(session, 'revision', revision_id))
-    snapshot = ev.complete_snapshot('revision', revision_id, records, chunks, saved.draft, split_fields=not legacy)
+    from backend.ingest.tc_contexts import map_draft
+    expanded_draft = map_draft(saved.draft)
+    records = ev.draft_records(expanded_draft, science.origins_for(session, 'revision', revision_id))
+    snapshot = ev.complete_snapshot('revision', revision_id, records, chunks, expanded_draft, split_fields=not legacy)
     from backend.ingest.scientific_context import bind_snapshot_source_documents, source_documents
     bind_snapshot_source_documents(snapshot,source_documents([
         {'file_id':str(f.id),'file_role':f.role,'source_sha256':f.sha256}
         for f in paper_files if f.paper_revision==paper.content_revision and f.role in {'main','supplementary'}]),
         {str(f.id) for f in paper_files if f.paper_revision==paper.content_revision and f.role in {'main','supplementary'}})
     snapshot['draft_version'] = saved.draft_version
-    snapshot['_field_change_events'] = copy.deepcopy(saved.draft.get('_field_change_events') or [])
+    snapshot['_field_change_events'] = current_change_events(saved.draft)
     snapshot['pdf_manifest'] = [dict(file_id=str(f.id), role=f.role, kind='pdf',
         stored_path=f.stored_path, sha256=f.sha256, size=f.size,
         media_type=f.media_type, original_filename=f.original_filename)
@@ -251,9 +264,10 @@ async def save_draft(session, paper_id, user, payload):
     from backend.ingest.evidence_audit import draft_change_events
     # 客户端不能回传或伪造修改日志；只追加服务器比较结果。
     draft.pop('_field_change_events', None)
-    events = [*(saved.draft.get('_field_change_events') or []), *draft_change_events(saved.draft, draft, user)]
-    if events:
-        draft['_field_change_events'] = events
+    from backend.ingest.evidence_audit import update_field_baselines
+    draft['_field_change_events']=copy.deepcopy(saved.draft.get('_field_change_events') or [])
+    draft['_field_baselines']=copy.deepcopy(saved.draft.get('_field_baselines') or {})
+    update_field_baselines(draft,draft_change_events(saved.draft,draft,user))
     if draft != saved.draft:
         saved.draft, saved.draft_version = draft, saved.draft_version + 1
     await session.flush()
@@ -274,7 +288,8 @@ async def submit_draft(session, paper_id, user, payload):
     if done is not None:
         return dict(ok=True, paper_id=paper_id, content_revision=done.paper_revision, review_status=paper.review_status)
     paper, saved = await load_for_write(session, paper_id, user, payload.revision_id, payload.draft_version)
-    draft = copy.deepcopy(saved.draft)
+    from backend.ingest.tc_contexts import map_draft
+    draft = map_draft(saved.draft)
     if isinstance(draft.get('paper'), dict):
         draft['paper'].pop('material_relations', None)
     await _resolve_draft_classifications(session, draft)
@@ -287,6 +302,52 @@ async def submit_draft(session, paper_id, user, payload):
     manual_baseline = await session.run_sync(lambda s: ev.paper_snapshot(s, paper_id, user.id, user.role, check_access=False))
     cached = await session.run_sync(lambda s: science.load_results(s, snapshot, user.id, include_stale=True))
     checks = ev.resolve_results(snapshot, cached, user.id, payload.evidence_job_id, payload.expected_evidence_version)
+    from backend.services import manuscript_handoffs as handoffs
+    workflow=await session.run_sync(lambda s:handoffs.latest(s,paper.id))
+    if workflow is not None:
+        draft['_spectrum_target_id']=saved.revision_id
+        # 新交接合同中，送审只移交工作稿。尤其公开稿修订不能提前重写公开实体。
+        baseline=await session.run_sync(lambda s:current_draft(s,paper))
+        staged=await session.get(models.ScientificReviewDraft,paper.id,with_for_update=True)
+        if staged is None:
+            staged=models.ScientificReviewDraft(paper_id=paper.id,owner_id=user.id,
+                base_revision=paper.content_revision,base_fingerprint=ev.digest({k:v for k,v in baseline.items()
+                    if k not in {'_field_change_events','_review_notes','_review_notes_history'}}),draft=draft)
+            session.add(staged)
+        else:
+            staged.draft=copy.deepcopy(draft)
+            staged.owner_id=user.id
+            staged.base_revision=paper.content_revision
+            from backend.ingest.field_drafts import draft_version
+            staged.base_fingerprint=draft_version(baseline)
+        await session.flush()
+        formal=await session.run_sync(lambda s:ev.paper_snapshot(s,paper.id,0,'',check_access=False))
+        pending={**formal,**ev.complete_snapshot('paper',str(paper.id),ev.draft_records(draft,{}),formal['chunks'],draft)}
+        snapshot['_workdraft_current']=True
+        try:
+            await session.run_sync(lambda s:manual_evidence.transfer_to_paper(s,snapshot,manual_baseline,
+                paper.id,paper.content_revision,pending))
+        except manual_evidence.ManualEvidenceError as exc:
+            error(409,exc.code,str(exc))
+        from backend.ingest.field_review import bind_support_versions
+        await session.run_sync(lambda s:bind_support_versions(pending,s))
+        old={r['item_key']:r for r in checks}
+        transferred={r['key']:science.transfer_result(r,old[r['item_key']],pending['chunks'],
+            source_transfer_verified=True) for r in pending['records'] if r['item_key'] in old}
+        pending['_handoff_transfer'] = True
+        await session.run_sync(lambda s:science.save_results(s,pending,transferred,user.id))
+        content=await session.run_sync(lambda s:handoffs.capture(s,paper,draft,pending,
+            ev.public_snapshot(pending,transferred)['records']))
+        await session.run_sync(lambda s:handoffs.record_handoff(s,paper,user,action='submit',holder='review',
+            operation_id=operation_id,**content))
+        if paper.review_status!='approved':
+            paper.review_status='pending'
+            paper.review_comment=None
+            paper.reviewed_at=paper.reviewed_by_user_id=None
+        saved.draft=None
+        saved.submitted_revision=paper.content_revision
+        await session.flush()
+        return dict(ok=True,paper_id=paper.id,content_revision=paper.content_revision,review_status='pending')
     for result in checks:
         if result.get('kind') == 'property' or result.get('record_field'):
             state = draft['material_states'][result['state_index']]

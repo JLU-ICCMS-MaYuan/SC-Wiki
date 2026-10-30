@@ -4,6 +4,7 @@ import CloseIcon from '@mui/icons-material/Close'
 import { api } from '../lib/api'
 import { useLanguage } from '../context/LanguageContext'
 import type { EvidenceSource, EvidenceTarget } from './EvidenceWorkflow'
+import SnapshotFileButton from './SnapshotFileButton'
 
 type Crop = { image: string; highlights: number[][]; width?: number; height?: number; pdf_page?: number; source_raster_dpi?: number }
 type Region = { status: string; image?: string; region?: number[]; regions?: number[][]; crops?: Crop[]; dpi?: number; pdf_page?: number; printed_page?: number; message?: string; parser?: { name: string; mode: string } }
@@ -58,6 +59,7 @@ export function EvidenceRegion({ target, source, hideQuote = false }: { target?:
         : t('evidence.regionUnavailable')
   const quote = hideQuote ? '' : source.quote || source.content || ''
   return <Box sx={{ my: 1 }}>
+    {source.snapshot_file_url&&<SnapshotFileButton url={source.snapshot_file_url} name={source.source_name||source.file_id}/>}
     <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {page ? t('evidence.page', { page }) : t('evidence.pageUnknown')}{quote ? `：${quote.length > 500 ? quote.slice(0, 360) + '…' : quote}` : ''}</Typography>
     {quote.length > 500 && <Box component="details" sx={{ my: 1 }}><Typography component="summary" variant="caption" sx={{ cursor: 'pointer' }}>{t('evidence.fullQuote')}</Typography>
       <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{quote}</Typography>

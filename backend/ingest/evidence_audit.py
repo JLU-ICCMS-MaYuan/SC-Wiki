@@ -4,6 +4,26 @@ from datetime import datetime, timezone
 from uuid import uuid4
 
 
+def update_field_baselines(container, changes):
+    """每字段只覆盖一份当前修改基线；旧审计数组原样保留但不再追加。"""
+    baseline=deepcopy(container.get('_field_baselines') or {})
+    for change in changes:
+        key=change.get('item_key')
+        if not key:continue
+        previous=baseline.get(key)
+        entry={**deepcopy(change),'id':'working:'+key}
+        if previous is not None:
+            entry['before_value']=previous.get('before_value')
+        baseline[key]=entry
+    container['_field_baselines']=baseline
+
+
+def current_change_events(container):
+    """审核时临时组合旧归因及当前基线，不将组合结果作为新历史写回。"""
+    return deepcopy([*(container.get('_field_change_events') or []),
+                     *(container.get('_field_baselines') or {}).values()])
+
+
 def field_change_events(before, after, user, *, value_origin='human_input'):
     """只比较字段自身的值与标注；依赖失效不冒充用户修改。"""
     if value_origin not in {'human_input', 'model_extraction', 'system_assembly'}:

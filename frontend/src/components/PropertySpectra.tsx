@@ -6,21 +6,32 @@ import { api } from '../lib/api'
 import { hasSpectrumData, loadPropertySpectra, spectrumDetailPath, spectrumGroups, spectrumInterval, spectrumNames, spectrumQuery, usePropertySpectra, type PropertySpectrumListing, type PropertySpectrumTarget, type PropertySpectrumItem, type PropertySpectrumCurve } from '../lib/propertySpectra'
 import type { PropertyModuleCode } from '../lib/propertyModules'
 import PropertyModuleSection from './PropertyModuleSection'
+import SpectrumFigure from './SpectrumFigure'
 
-export interface PropertySpectraContext { target: PropertySpectrumTarget; beforeNavigate?: () => Promise<boolean> }
-const Spectra = createContext<(PropertySpectraContext & ReturnType<typeof usePropertySpectra> & { stateKeys?: string[]; readOnly: boolean }) | null>(null)
+export interface PropertySpectraContext { target: PropertySpectrumTarget; beforeNavigate?: () => Promise<boolean>; frozenListing?: PropertySpectrumListing; initialListing?: PropertySpectrumListing }
+const Spectra = createContext<(PropertySpectraContext & Omit<ReturnType<typeof usePropertySpectra>, 'listing'> & { listing:PropertySpectrumListing|null; stateKeys?: string[]; readOnly: boolean }) | null>(null)
 const Material = createContext({ stateKey: '', summary: '' })
 export function PropertySpectraProvider({ context, stateKeys, readOnly = false, children }: PropsWithChildren<{ context?: PropertySpectraContext; stateKeys?: string[]; readOnly?: boolean }>) {
-  const state = usePropertySpectra(context?.target)
+  const state = usePropertySpectra(context?.frozenListing ? undefined : context?.target)
   const navigation = useRef(context?.beforeNavigate)
   navigation.current = context?.beforeNavigate
   const beforeNavigate = useCallback(() => navigation.current?.() ?? Promise.resolve(true), [])
   const stateKeysIdentity = JSON.stringify(stateKeys)
   const stableStateKeys = useMemo(() => stateKeys, [stateKeysIdentity])
-  const value = useMemo(() => context ? { target: context.target, beforeNavigate, ...state, stateKeys: stableStateKeys, readOnly } : null,
-    [context?.target.target, context?.target.target_id, beforeNavigate, stableStateKeys, readOnly, state.listing, state.loading, state.error, state.reload, state.replaceListing])
+  const value = useMemo(() => context ? { ...context, target: context.target, beforeNavigate, ...state, listing: context.frozenListing || state.listing, stateKeys: stableStateKeys, readOnly } : null,
+    [context?.target.target, context?.target.target_id, beforeNavigate, stableStateKeys, readOnly, context?.frozenListing, state.listing, state.loading, state.error, state.reload, state.replaceListing])
+  useEffect(() => { if (context?.initialListing) state.replaceListing(context.initialListing) }, [context?.initialListing, state.replaceListing])
+  useEffect(()=>{
+    if(!context || context.frozenListing)return
+    const opened=(event:Event)=>{
+      const target=(event as CustomEvent).detail
+      if(target.target===context.target.target && target.target_id===context.target.target_id)state.reload()
+    }
+    window.addEventListener('workdraft-opened',opened)
+    return()=>window.removeEventListener('workdraft-opened',opened)
+  },[context?.target.target,context?.target.target_id,context?.frozenListing,state.reload])
   const busy = state.listing?.jobs.some(job => ['queued', 'running'].includes(job.status)) || state.listing?.items.some(item => ['queued', 'running'].includes(item.run.status))
-  useEffect(() => { if (!busy) return; const timer = window.setInterval(state.reload, 3000); return () => window.clearInterval(timer) }, [busy, state.reload])
+  useEffect(() => { if (!busy || context?.frozenListing) return; const timer = window.setInterval(state.reload, 3000); return () => window.clearInterval(timer) }, [busy, state.reload, context?.frozenListing])
   return <Spectra.Provider value={value}>{children}</Spectra.Provider>
 }
 export function PropertySpectrumState({ stateKey, summary, children }: PropsWithChildren<{ stateKey: string; summary: string }>) {
@@ -31,7 +42,7 @@ export function PropertySpectrumState({ stateKey, summary, children }: PropsWith
 /** 提取控制与未归属摘要都不挂载原图、图表或点表。 */
 export function PropertySpectrumControls() {
   const ctx = useContext(Spectra), [busy, setBusy] = useState(false), [error, setError] = useState('')
-  if (!ctx) return null
+  if (!ctx || ctx.frozenListing) return null
   const start = async () => {
     setBusy(true); setError('')
     try {
@@ -99,7 +110,7 @@ function SpectrumSummary({ item, curves, dos, unassigned = false, attempt = fals
       <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 1.5, ml: 'auto', '& .MuiButton-root': { whiteSpace: 'nowrap', flexShrink: 0 } }}>
         <Typography variant="caption" color="text.secondary">{item.stale ? '条件已变化，需重新核对' : ['queued', 'running', 'failed', 'needs_review'].includes(item.run.status) ? spectrumNames[item.run.status] : review}</Typography>
         {unassigned && !ctx.readOnly && ctx.listing?.can_edit && ctx.target.target !== 'paper' && <DeleteUnassignedSpectrum item={item} attempt={attempt} />}
-        <Button component="a" href={spectrumDetailPath(ctx.target, item, returnTo, first, unassigned ? undefined : dos ? 'phonon_dos' : 'alpha2f')} target="_blank" rel="noopener noreferrer" variant="outlined" size="small" endIcon={<OpenInNewIcon sx={{ fontSize: '14px !important' }} />}>{attempt ? '查看提取记录' : unassigned ? '核对归属' : dos ? '查看声子 DOS' : hasAlpha ? '查看 α²F' : '查看累计 λ'}</Button>
+        {ctx.frozenListing ? <FrozenSpectrumDetails item={item} curves={curves} /> : <Button component="a" href={spectrumDetailPath(ctx.target, item, returnTo, first, unassigned ? undefined : dos ? 'phonon_dos' : 'alpha2f')} target="_blank" rel="noopener noreferrer" variant="outlined" size="small" endIcon={<OpenInNewIcon sx={{ fontSize: '14px !important' }} />}>{attempt ? '查看提取记录' : unassigned ? '核对归属' : dos ? '查看声子 DOS' : hasAlpha ? '查看 α²F' : '查看累计 λ'}</Button>}
       </Box>
     </Box>
   </Box>
@@ -181,4 +192,23 @@ export function MissingPropertySpectrumModules({ existing }: { existing: Propert
   return <>{modules.filter(module => !existing.includes(module.code)).map(module => <Box key={module.code} data-testid={'property-module-' + module.code} sx={{ borderTop: 1, borderColor: 'divider', pt: 1.5 }}>
     <PropertyModuleSection title={module.label}><PropertySpectrumSection moduleCode={module.code} /></PropertyModuleSection>
   </Box>)}</>
+}
+
+function FrozenSpectrumDetails({item,curves}:{item:PropertySpectrumItem;curves:PropertySpectrumCurve[]}) {
+  const [open,setOpen]=useState(false)
+  const download=()=>{
+    const url=URL.createObjectURL(new Blob([JSON.stringify({source:item.source,curves,review:item.review},null,2)],{type:'application/json'}))
+    const link=document.createElement('a');link.href=url;link.download='冻结谱数据.json';link.click();URL.revokeObjectURL(url)
+  }
+  return <>
+    <Button variant="outlined" size="small" onClick={()=>setOpen(true)}>查看冻结谱数据</Button>
+    <Dialog open={open} onClose={()=>setOpen(false)} fullWidth maxWidth="md">
+      <DialogTitle>冻结谱数据</DialogTitle>
+      <DialogContent>
+        <SpectrumFigure item={item} curves={curves} allCurves={curves} image="" mode="data" opacity={1}/>
+        <Typography variant="caption">这是交出时的曲线与当时审核状态；原图可从整稿附件打开。</Typography>
+      </DialogContent>
+      <DialogActions><Button onClick={download}>下载完整冻结数据</Button><Button onClick={()=>setOpen(false)}>关闭</Button></DialogActions>
+    </Dialog>
+  </>
 }

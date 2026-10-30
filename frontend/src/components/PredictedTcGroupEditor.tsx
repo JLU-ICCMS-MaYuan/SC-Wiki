@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add'
 import type { FormDefinition, FormIssue } from '../lib/formDefinitions'
 import { newStableKey, type PropertyRecordDraft } from '../lib/propertyModules'
 import { muRangeIndex, readTcParameter, setTcParameter } from '../lib/tcParameters'
-import { completeTcNumber, expandTcPoints, newTcPoint, selectTcPoint, tcMethodKey, tcPointKey, tcPointViews, updateTcCommon, updateTcPoint } from '../lib/predictedTcGroups'
+import { completeTcNumber, completeTcMu, expandTcPoints, newTcPoint, selectTcPoint, tcMethodKey, tcPointKey, tcPointViews, updateTcCommon, updateTcPoint } from '../lib/predictedTcGroups'
 import TcScientificField from './TcScientificField'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
 import PropertyRecordRow from './PropertyRecordRow'
@@ -56,7 +56,7 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
       {parameter('lambda_ep', '电声耦合强度 λ')}{parameter('omega_log', 'ωlog', 'K')}
     </Box>
     <Typography id={helpId} variant="caption" color="text.secondary" component="p" sx={{ my: 1 }}>
-      勾选 Tc 前的方框，将该预测方法、该 μ* 对应的 Tc 作为代表结果。同一材料状态只选一组，改选会取消原选择，再次点击可取消。请先填写 Tc 和 μ*。
+      勾选 Tc 前的方框，将该预测方法、该 μ* 对应的 Tc 作为代表结果。同一材料状态只选一组，改选会取消原选择，再次点击可取消。请先填写 Tc 和 μ*；μ* 可明确填写“不适用”“未报告”或“未知”。
     </Typography>
     {records.some(r => r.value_kind === 'range' && r.is_representative) && <Alert severity="info" sx={{ mb: 1 }}
       action={readOnly ? undefined : <Button size="small" onClick={() => onChange(records.map(r => r.value_kind === 'range' ? { ...r, is_representative: false } : r))}>取消旧标记</Button>}>
@@ -95,7 +95,7 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
               return <Box key={point.key} role="group" aria-label={`第${index + 1}组 Tc 与 μ*`} data-record-key={point.record.record_key}
                 sx={{ display: 'flex', alignItems: 'center', gap: 1, p: '12px 8px', borderRadius: 1, bgcolor: theme => theme.palette.mode === 'dark' ? '#302c43' : '#F4F3FF' }}>
                 <Checkbox size="small" sx={{ p: 0, alignSelf: 'center', flex: '0 0 auto' }} checked={point.selected}
-                  disabled={readOnly || !completeTcNumber(point.tc) || !completeTcNumber(point.mu)}
+                  disabled={readOnly || !completeTcNumber(point.tc) || !completeTcMu(point.record, point.mu)}
                   slotProps={{ input: { 'aria-label': `选择第${methodIndex + 1}种方法第${index + 1}组为代表结果`, 'aria-describedby': helpId } }}
                   data-issue-field={`${path(point.record)}.is_representative`}
                   onChange={(_, checked) => onChange(selectTcPoint(records, point.key, checked), checked)} />
@@ -106,6 +106,7 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
                     ? { ...r, payload: { ...r.payload, field_settings: { ...(r.payload.field_settings as any || {}), tc: settings } } } : r))}
                   onChange={value => onChange(updateTcPoint(records, point.key, 'tc', value))} /></Box>
                 <Box sx={{ width: 150 }}><TcScientificField value={point.mu} label="μ*" readOnly={readOnly}
+                  emptyLabel={({not_applicable:'不适用',not_reported:'未报告',unknown:'未知'} as Record<string,string>)[String((point.record.payload.parameters as any)?.mu_star_status)] || ''}
                   field={`${path(point.record)}.${muField}`} error={error(`${path(point.record)}.${muField}`)}
                   settings={(point.record.payload.field_settings as any)?.mu_star}
                   onApply={(value, settings) => onChange(updateTcPoint(records, point.key, 'mu', value).map(r => tcPointKey(r) === point.key

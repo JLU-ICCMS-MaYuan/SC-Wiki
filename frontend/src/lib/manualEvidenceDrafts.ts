@@ -55,6 +55,7 @@ export const manualDraftKey = (target: EvidenceTarget | undefined, record: Evide
 
 /** 编辑工作流持有；侧栏卸载不丢草稿，整体版本变化不改变字段/值身份。 */
 export function createManualEvidenceDrafts() {
+  let inputRevision = 0
   const drafts = new Map<string, ManualDraft>()
   const aliases = new Map<string, string>()
   const listeners = new Set<() => void>()
@@ -71,6 +72,9 @@ export function createManualEvidenceDrafts() {
   }
   return {
     read, patch,
+    revision: () => inputRevision,
+    reset() { drafts.clear(); aliases.clear(); listeners.forEach(listener => listener()) },
+    isWriting: () => [...drafts.values()].some(draft => draft.busy),
     adopt(from: string, to: string) {
       if (from === to || !drafts.has(from)) return
       if (drafts.get(to)?.dirty || drafts.get(to)?.busy) return
@@ -81,6 +85,7 @@ export function createManualEvidenceDrafts() {
     },
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
     edit(key: string, changes: Partial<Pick<ManualDraft, 'reason' | 'absence' | 'choice' | 'files'>>) {
+      inputRevision += 1
       patch(key, { ...changes, revision: read(key).revision + 1, dirty: true, error: '', notice: '' })
     },
     hydrate(key: string, saved: ManualRecord, writes: number) {

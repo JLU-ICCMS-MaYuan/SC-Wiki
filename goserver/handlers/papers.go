@@ -353,14 +353,14 @@ const searchTcValueExpr = "COALESCE(property_records.value_number, (property_rec
 // approvedRecordSearchQuery 的每一行对应一条统一 Tc 记录。
 func approvedRecordSearchQuery(db *gorm.DB) *gorm.DB {
 	return db.Table("property_records").
-		Select(`property_records.record_key AS record_key,
+		Select(fmt.Sprintf(`property_records.record_key AS record_key,
 			property_records.value_number AS tc_value_k,
 			property_records.value_min AS tc_min_k,
 			property_records.value_max AS tc_max_k,
 			property_records.value_raw AS value_raw,
 			property_records.unit_raw AS unit_raw,
 			property_records.record_type AS record_type,
-			property_records.method_code AS method_code,
+			%s AS method_code,
 			property_records.is_representative AS is_representative,
 			material_states.pressure_value_gpa AS pressure_value_gpa,
 			material_states.reported_space_group_symbol AS reported_space_group_symbol,
@@ -368,7 +368,7 @@ func approvedRecordSearchQuery(db *gorm.DB) *gorm.DB {
 			material_states.material_name AS material_name,
 			superconductors.chemical_formula AS chemical_formula,
 			papers.id AS paper_id, papers.year AS year, papers.review_status AS review_status,
-			papers.doi AS doi`).
+			papers.doi AS doi`, tcMethodSQL(db, "property_records", "property_modules"))).
 		Joins("JOIN property_modules ON property_modules.id = property_records.module_id").
 		Joins("JOIN material_states ON material_states.id = property_records.material_state_id").
 		Joins("LEFT JOIN superconductors ON superconductors.id = material_states.superconductor_id").
@@ -662,6 +662,7 @@ func propertyModulesToDict(modules []models.PropertyModule) []gin.H {
 				"evidences": record.Evidences,
 			})
 		}
+		expandTcContexts(module.MetadataJSON, records)
 		output = append(output, gin.H{"module_key": module.ModuleKey, "module_code": module.ModuleCode, "definition_key": module.DefinitionKey, "definition_version": module.DefinitionVersion, "display_order": module.DisplayOrder, "metadata": json.RawMessage(module.MetadataJSON), "records": records})
 	}
 	return output

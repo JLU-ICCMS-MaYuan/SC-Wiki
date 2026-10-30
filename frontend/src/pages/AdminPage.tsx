@@ -1,7 +1,9 @@
+import { rememberWorkdraft } from '../lib/workdraftSession'
+import ManuscriptHistoryLink from '../components/ManuscriptHistoryLink'
 
 import { EvidenceRecordList } from '../components/EvidenceFieldMarkers'
 import { useEvidenceWorkflow } from '../components/EvidenceWorkflow'
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import {
   Box, Typography, Card, CardActionArea, CardContent, Button, Chip,
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
@@ -138,6 +140,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
   const [reviewDlg, setReviewDlg] = useState<{paper:PaperRecord,open:boolean}>({paper:null!,open:false})
   const [reviewStatus, setReviewStatus] = useState('')
   const [reviewSaving, setReviewSaving] = useState(false)
+  const reviewOperation=useRef<{key:string;id:string}|undefined>(undefined)
   const evidenceWorkflow = useEvidenceWorkflow()
   const [reviewComment, setReviewComment] = useState('')
   const [historyPaper, setHistoryPaper] = useState<PaperRecord | null>(null)
@@ -219,10 +222,16 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
 
   /* ── Review actions ──────────────────────────── */
   const openReview = async (paper: PaperRecord) => {
-    setReviewDlg({ paper, open: true })
-    setReviewStatus(initialPaperReviewStatus(paper.review_status))
-    setReviewComment(paper.review_comment || '')
-    void evidenceWorkflow.restore({ target: 'paper', target_id: String(paper.id) })
+    const target={target:'paper' as const,target_id:String(paper.id)}
+    try {
+      const lease=await api.post<{write_epoch:string;paper_header?:Partial<PaperRecord>}>('/api/rag/evidence/open-workdraft',target)
+      rememberWorkdraft(target,lease.write_epoch)
+      setReviewDlg({paper:{...paper,...lease.paper_header,id:paper.id},open:true})
+      reviewOperation.current=undefined
+      setReviewStatus(initialPaperReviewStatus(paper.review_status))
+      setReviewComment(paper.review_comment || '')
+      void evidenceWorkflow.restore(target)
+    } catch(error) {setSnackbar((error as Error).message)}
   }
 
   const handleReview = async () => {
@@ -234,7 +243,10 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
         : paperReviewPayload(reviewStatus, reviewComment)
       const evidence = reviewStatus === 'approved' ? await evidenceWorkflow.gate({ target: 'paper', target_id: String(reviewDlg.paper.id) }) : {}
       if (!evidence) return
-      await api.post(reviewStatus === 'approved' ? '/api/rag/evidence/review-commit' : `/api/admin/papers/${reviewDlg.paper.id}/review`, { ...payload, ...evidence, paper_id: reviewDlg.paper.id })
+      const key=JSON.stringify([reviewDlg.paper.id,reviewStatus,reviewComment])
+      if(reviewOperation.current?.key!==key)reviewOperation.current={key,id:crypto.randomUUID()}
+      await api.post('/api/rag/evidence/review-commit', { ...payload, ...evidence, paper_id: reviewDlg.paper.id,
+        review_request_id:reviewOperation.current.id })
       setSnackbar(t('admin.reviewDone'))
       setReviewDlg({paper:null!,open:false})
       loadPapers()
@@ -751,6 +763,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
           <Typography variant="body2" fontWeight={600} noWrap>
             {reviewDlg.paper?.title || t('admin.noTitle')}
           </Typography>
+          {reviewDlg.paper&&<ManuscriptHistoryLink target="paper" targetId={String(reviewDlg.paper.id)}/>}
           <Box sx={{ display:'flex',gap:1,flexWrap:'wrap' }}>
             <Chip size="small" label={t('admin.doiChip', { value: reviewDlg.paper?.doi || '-' })} variant="outlined" />
             <Chip size="small" label={t('admin.yearChip', { value: reviewDlg.paper?.year || '-' })} variant="outlined" />

@@ -380,6 +380,9 @@ def bind_support_versions(snapshot, session=None):
     snapshot['version'] = digest([snapshot['target'], snapshot['target_id'],
         sorted(field_version(r) for r in snapshot['records'])])
     with (nullcontext(session) if session is not None else SessionLocal()) as db:
+        from backend.services.workdrafts import context_token
+        snapshot['_workdraft_epoch'] = context_token(db,snapshot['target'],snapshot['target_id'])
+        snapshot['_workdraft_current']=not snapshot['_workdraft_epoch'].startswith('cycle:')
         if not table_available(db):
             from .field_input import bind
             bind(snapshot, db)

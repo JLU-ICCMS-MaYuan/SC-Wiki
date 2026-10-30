@@ -2175,9 +2175,9 @@ class PropertyRecord(Base):
         CheckConstraint("(value_min IS NULL AND value_max IS NULL) OR (value_min IS NOT NULL AND value_max IS NOT NULL AND value_min <= value_max)", name="ck_property_records_range"),
         CheckConstraint("uncertainty IS NULL OR uncertainty >= 0", name="ck_property_records_uncertainty"),
         CheckConstraint("(value_kind <> 'number' OR value_number IS NOT NULL) AND (value_kind <> 'range' OR (value_min IS NOT NULL AND value_max IS NOT NULL)) AND (value_kind <> 'text' OR value_text IS NOT NULL) AND (value_kind <> 'boolean' OR value_boolean IS NOT NULL)", name="ck_property_records_value_shape"),
-        CheckConstraint("(record_type NOT IN ('predicted_tc','measured_tc')) OR (property_code = 'tc' AND method_code IS NOT NULL)", name="ck_property_records_tc_identity"),
+        CheckConstraint("(record_type NOT IN ('predicted_tc','measured_tc')) OR (property_code = 'tc' AND (method_code IS NOT NULL OR (record_type = 'predicted_tc' AND (JSON_EXTRACT(payload_json, '$.tc_context_ref.version') = 1 AND JSON_EXTRACT(payload_json, '$.tc_context_ref.group_key') IS NOT NULL AND JSON_EXTRACT(payload_json, '$.tc_context_ref.method_key') IS NOT NULL))))", name="ck_property_records_tc_identity"),
         CheckConstraint("(property_code = 'custom' AND record_type = 'property' AND custom_property_key IS NOT NULL) OR (property_code <> 'custom' AND custom_property_key IS NULL)", name="ck_property_records_custom_identity"),
-        CheckConstraint("(record_type <> 'predicted_tc' OR (payload_json IS NOT NULL AND JSON_EXTRACT(payload_json, '$.calculation_conditions') IS NOT NULL AND JSON_EXTRACT(payload_json, '$.experimental_conditions') IS NULL)) AND (record_type <> 'measured_tc' OR (payload_json IS NOT NULL AND JSON_EXTRACT(payload_json, '$.experimental_conditions') IS NOT NULL AND JSON_EXTRACT(payload_json, '$.calculation_conditions') IS NULL))", name="ck_property_records_condition_type"),
+        CheckConstraint("(record_type <> 'predicted_tc' OR (payload_json IS NOT NULL AND (JSON_EXTRACT(payload_json, '$.calculation_conditions') IS NOT NULL OR (JSON_EXTRACT(payload_json, '$.tc_context_ref.version') = 1 AND JSON_EXTRACT(payload_json, '$.tc_context_ref.group_key') IS NOT NULL AND JSON_EXTRACT(payload_json, '$.tc_context_ref.method_key') IS NOT NULL)) AND JSON_EXTRACT(payload_json, '$.experimental_conditions') IS NULL)) AND (record_type <> 'measured_tc' OR (payload_json IS NOT NULL AND JSON_EXTRACT(payload_json, '$.experimental_conditions') IS NOT NULL AND JSON_EXTRACT(payload_json, '$.calculation_conditions') IS NULL))", name="ck_property_records_condition_type"),
         UniqueConstraint("module_id", "record_key", name="uq_property_records_module_key"),
         UniqueConstraint("paper_id", "paper_revision", "source_fingerprint", name="uq_property_records_source"),
         UniqueConstraint("id", "paper_id", "paper_revision", name="uq_property_records_identity_rev"),
@@ -2524,3 +2524,8 @@ class SpectrumRun(Base):
     error_message = Column(String(500), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     completed_at = Column(DateTime(timezone=True), nullable=True)
+
+# 当前工作稿与正式交接模型；与存量逐字段历史表隔离。
+from backend.workdraft_models import (  # noqa: E402,F401
+    ScientificSourceItem, ScientificFieldSourceUse, ScientificWorkDraft,
+)

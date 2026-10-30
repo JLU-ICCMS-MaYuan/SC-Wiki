@@ -1,6 +1,7 @@
 """物性证据的来源定位、内容核对与任务结果契约。"""
 from __future__ import annotations
 
+from backend.ingest.evidence_audit import current_change_events
 import copy
 import base64
 import hashlib
@@ -320,7 +321,7 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
         origins = science.origins_for(session, 'upload', task_id)
     role_context = ({**draft, '_source_roles': True} if state.get('role_assessment') else draft)
     snapshot = complete_snapshot('upload', task_id, draft_records(draft, origins), chunks, role_context, split_fields=not legacy)
-    snapshot['_field_change_events'] = copy.deepcopy(state.get('_field_change_events') or [])
+    snapshot['_field_change_events'] = current_change_events(state)
     from .scientific_context import bind_snapshot_source_documents, source_documents
     source_manifest = state.get('files') or [{'file_id':'main','role':'main','sha256':state.get('file_sha256')}]
     bind_snapshot_source_documents(snapshot,source_documents([
@@ -393,6 +394,7 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
     contexts = {}
     for model in (models.Superconductor, models.ChemicalSystem, models.StructureModel):
         contexts[model.__tablename__] = [row_dict(x) for x in session.scalars(select(model).where(model.paper_id == paper_id).order_by(model.id))]
+    from .tc_contexts import expanded_record
     for record in session.scalars(select(models.PropertyRecord).where(models.PropertyRecord.paper_id == paper_id, models.PropertyRecord.paper_revision == paper.content_revision).order_by(models.PropertyRecord.id)):
         evs = []
         for link in session.scalars(select(models.PropertyRecordEvidence).where(models.PropertyRecordEvidence.record_id == record.id).order_by(models.PropertyRecordEvidence.paper_evidence_id)):
@@ -412,7 +414,7 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             item_key=science.record_identity(state_data['state_key'], module.module_key, record.record_key),
             state_key=state_data['state_key'], module_code=module.module_code, module_key=module.module_key, record_key=record.record_key,
             field=field, label=f'{state_data.get("material_name") or material or "材料状态 " + str(record.material_state_id)} · {record.name_raw} · {record.value_raw} {record.unit_raw or ""}',
-            claim=science.record_claim(record, state_data), evidences=evs,
+            claim=science.record_claim(expanded_record(record), state_data), evidences=evs,
             tc_group_key=((record.payload_json or {}).get('tc_group') or {}).get('group_key'),
             tc_group_meta=copy.deepcopy((record.payload_json or {}).get('tc_group')),
             tc_range_origin_kind=((record.payload_json or {}).get('tc_range_origin') or {}).get('value_kind'),
@@ -421,7 +423,7 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
     from backend.services.submission_metadata import submitted_metadata, pending_selections, AUTHOR_ROLES
     submission = submitted_metadata(session, paper)
     for name in AUTHOR_ROLES:
-        paper_data[name] = [author for author in submission.get('paper', {}).get(name, []) if author in (paper.authors or [])]
+        paper_data[name] = [author for author in (submission.get('paper', {}).get(name) or []) if author in (paper.authors or [])]
     families = session.execute(select(models.MaterialFamily.name_zh).join(models.PaperMaterialFamily, models.PaperMaterialFamily.material_family_id == models.MaterialFamily.id).where(models.PaperMaterialFamily.paper_id == paper_id)).scalars().all()
     paper_data['material_families'] = sorted(item['name'] for item in pending_selections(submission, 'paper.material_families',
         [{'name': name} for name in families], submission.get('paper', {}).get('material_families')))
@@ -924,6 +926,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
     from openai import APIStatusError
     from .association_review import REVIEW_PROMPT, review_inputs, checked_review, without_source_ids
     from . import condition_rules
+    from .point_binding import expected_point, verify as verify_point, PROMPT as POINT_PROMPT
     from datetime import datetime, timezone
     if review_started_at is None:
         review_started_at = datetime.now(timezone.utc).isoformat()
@@ -957,6 +960,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         'purpose': purpose,
         'records': [{'key': r['key'], 'field': r['field'], 'claim': r['claim'],
                      'state_review_context': r.get('state_review_context'),
+                     'expected_point': expected_point(r),
                      'editable_fields': r.get('editable_fields', []), 'existing_evidences': without_source_ids(r['evidences']),
                      'check_mode': r.get('check_mode'), 'review_relationships': r.get('review_relationships', []),
                      'source_associations': review_inputs(r),
@@ -984,7 +988,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
                           '(review-source-N); do not transcribe quote text or formulas. '
                           'The server retrieves the exact original source. This does not replace semantic review.\n')
     try:
-        parsed = complete_json(SYSTEM_PROMPT + suggestion_prompt + association_prompt + condition_rules.PROMPT,
+        parsed = complete_json(SYSTEM_PROMPT + suggestion_prompt + association_prompt + condition_rules.PROMPT + POINT_PROMPT,
                                prompt, on_partial=on_partial, retries=1,
                                **({'images': [item['data_url'] for item in image_refs]} if image_refs else {}))
     except APIStatusError as exc:
@@ -994,7 +998,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         image_request_succeeded = False
         if image_read_out is not None:
             image_read_out.extend((item, False) for item in image_refs)
-        parsed = complete_json(SYSTEM_PROMPT + suggestion_prompt + association_prompt + condition_rules.PROMPT,
+        parsed = complete_json(SYSTEM_PROMPT + suggestion_prompt + association_prompt + condition_rules.PROMPT + POINT_PROMPT,
                                prompt, on_partial=on_partial, retries=1)
     if not isinstance(parsed.get('results'), list):
         raise ValueError('invalid result schema')
@@ -1093,6 +1097,7 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
                 result[name] = copy.deepcopy(previous[name])
         if result.get('adopted_basis') in {'paper_inference', 'general_knowledge'} and result['status'] == 'supported' and result.get('source_kind') not in {'model_reasoning', 'contributor_evidence'}:
             result['status'] = 'uncertain'
+        result = verify_point(by_key[key],raw,result)
         results[key] = result
     for key in set(by_key) - set(results):
         results[key] = checked_result(by_key[key], {'status': 'unchecked',
@@ -1498,7 +1503,6 @@ def persist_failed_fields(job, error):
         except Exception as exc:
             # 权限、版本或取消变化时不写入旧字段；任务的原始技术错误仍保留。
             logging.getLogger(__name__).warning('字段失败状态未写入 type=%s', type(exc).__name__)
-
 
 
 def release_field_jobs(client, job):

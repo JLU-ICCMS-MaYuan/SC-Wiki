@@ -223,6 +223,9 @@ func UpdatePaper(c *gin.Context) {
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&paper, id).Error; err != nil {
 			return err
 		}
+		if paperUsesHandoffs(tx, paper.ID) {
+			return &evidencePrepareError{409, json.RawMessage(`{"code":"workdraft_required","message":"请通过当前工作稿保存并正式交接"}`)}
+		}
 		if preparation, ok := body["evidence_preparation_id"].(string); ok && preparation != "" {
 			if err := validatePaperProposalSave(paper.ID, c.GetHeader("Authorization"), preparation); err != nil {
 				return err
@@ -428,6 +431,9 @@ func ReviewPaper(c *gin.Context) {
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&paper, paper.ID).Error; err != nil {
 			return err
+		}
+		if paperUsesHandoffs(tx, paper.ID) {
+			return &evidencePrepareError{409, json.RawMessage(`{"code":"workdraft_required","message":"请通过当前工作稿保存并正式交接"}`)}
 		}
 		if body.ReviewRequestID != "" {
 			exists, err := paperHistoryOperationExists(tx, body.ReviewRequestID)

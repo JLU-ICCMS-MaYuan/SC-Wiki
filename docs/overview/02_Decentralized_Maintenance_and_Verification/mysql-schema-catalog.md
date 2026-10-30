@@ -298,3 +298,9 @@ flowchart LR
 - MySQL `information_schema.tables`
 - MySQL `information_schema.columns`
 - MySQL `information_schema.key_column_usage`
+
+## 工作稿与采用来源增量
+
+源码迁移 20261030_0192 增加 scientific_work_drafts、scientific_source_items、scientific_field_source_uses；分别保存权威工作稿与周期、不可变来源及当前字段使用关系。property_records 的 Tc 身份与条件约束允许版本为 1、分组和方法身份齐备的共同引用；普通测量记录约束保留。
+
+部署结构清单包含这三表和新的 Tc 约束。该说明描述源码及隔离迁移验证，不表示现有业务库已升级；迁移不会批量改写真实草稿、旧核对结果或历史。实际验收见 [#192](../../specs/192-handoff-snapshots/validation.md)。

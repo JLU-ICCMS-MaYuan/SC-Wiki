@@ -5,6 +5,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from sqlalchemy import and_, func, or_, select
+from sqlalchemy.orm import selectinload
 
 from backend.models import ChemicalSystem, MaterialState, Paper, PropertyRecord, Superconductor
 
@@ -24,6 +25,7 @@ def property_records_statement():
     """记录、状态和材料必须属于同一论文版本；允许只有材料名的状态。"""
     return (
         select(PropertyRecord, MaterialState, Paper, Superconductor)
+        .options(selectinload(PropertyRecord.module))
         .join(MaterialState, and_(
             MaterialState.id == PropertyRecord.material_state_id,
             MaterialState.paper_id == PropertyRecord.paper_id,
@@ -49,6 +51,8 @@ def _number(value):
 
 def format_property_record(record, state, paper, material) -> dict:
     """保留原值和完整范围，不把范围中点伪装成论文报告的单值。"""
+    from backend.ingest.tc_contexts import expanded_record
+    expanded = expanded_record(record)
     values = {
         "number": _number(record.value_number),
         "range": None,
@@ -78,9 +82,9 @@ def format_property_record(record, state, paper, material) -> dict:
         "pressure_max_gpa": _number(state.pressure_max_gpa), "pressure_raw": state.pressure_raw,
         "temperature_k": _number(state.temperature_value_k),
         "condition_note": state.note, "is_primary": record.is_representative,
-        "method_code": record.method_code, "method_raw": record.method_raw,
+        "method_code": expanded.get("method_code"), "method_raw": expanded.get("method_raw"),
         "superconductor_type": state.state_kind, "article_type": paper.paper_type,
-        "source_label": "SC-Wiki", "payload": record.payload_json,
+        "source_label": "SC-Wiki", "payload": expanded["payload"],
         "paper_doi": paper.doi, "paper_title": paper.title, "paper_year": paper.year,
     }
 

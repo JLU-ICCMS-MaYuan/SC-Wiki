@@ -11,6 +11,13 @@ def _number(value):
     return isinstance(value, (int, float, Decimal)) and not isinstance(value, bool) and math.isfinite(value) and value >= 0
 
 
+def valid_mu(record, value):
+    if _number(value):return True
+    parameters=(record.get('payload') or {}).get('parameters') or {}
+    return (record.get('method_code')=='scdft' and value is None and
+            parameters.get('mu_star_status')=='not_applicable')
+
+
 def tc_record_issues(record):
     metadata = (record.get("payload") or {}).get("tc_group")
     if metadata is None:
@@ -28,7 +35,7 @@ def tc_record_issues(record):
         mu = ((record.get("payload") or {}).get("parameters") or {}).get("mu_star")
         if isinstance(mu, dict):
             mu = mu.get("value_number")
-        if not _number(record.get("value_number")) or not _number(mu):
+        if not _number(record.get("value_number")) or not valid_mu(record, mu):
             return [("is_representative", "incomplete_representative_tc", "代表结果必须明确到非负有限 Tc 和 μ* 组合")]
     return []
 
@@ -37,6 +44,7 @@ def _shared(record):
     payload = record.get("payload") or {}
     parameters = dict(payload.get("parameters") or {})
     parameters.pop("mu_star", None)
+    parameters.pop("mu_star_status", None)
     extensions = [item for item in parameters.get("extensions") or []
                   if isinstance(item, dict) and item.get("key") not in {"mu_star", "mu_star_reported_range", "mu_star_reported"}]
     parameters.pop("extensions", None)
@@ -57,7 +65,7 @@ def tc_collection_issues(records, *, strict_representative=False):
             mu = ((record.get('payload') or {}).get('parameters') or {}).get('mu_star')
             if isinstance(mu, dict):
                 mu = mu.get('value_number')
-            if record.get('value_kind') != 'number' or not _number(record.get('value_number')) or not _number(mu):
+            if record.get('value_kind') != 'number' or not _number(record.get('value_number')) or not valid_mu(record, mu):
                 issues.append((f'records[{index}].is_representative', 'incomplete_representative_tc', '请明确选择具体 Tc／μ* 组合，或取消旧代表标记'))
         issues.extend((f"records[{index}].{field}", code, message) for field, code, message in tc_record_issues(record))
         metadata = (record.get("payload") or {}).get("tc_group")

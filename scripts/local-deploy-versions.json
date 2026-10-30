@@ -2,8 +2,19 @@
   "format_version": 1,
   "platform": "linux-x86_64",
   "python": "3.12",
-  "conda_packages": ["python=3.12", "pip", "mysql-server=8.4.2", "mysql-client=8.4.2", "redis-server=8.10.1", "openjdk=21.0.9", "nodejs=22"],
-  "schema_heads": ["20261020_0049", "20261022_0153"],
+  "conda_packages": [
+    "python=3.12",
+    "pip",
+    "mysql-server=8.4.2",
+    "mysql-client=8.4.2",
+    "redis-server=8.10.1",
+    "openjdk=21.0.9",
+    "nodejs=22"
+  ],
+  "schema_heads": [
+    "20261020_0049",
+    "20261030_0192"
+  ],
   "miniforge": {
     "version": "26.7.2-0",
     "url": "https://github.com/conda-forge/miniforge/releases/download/26.7.2-0/Miniforge3-26.7.2-0-Linux-x86_64.sh",
@@ -24,7 +35,9 @@
     "version": "5.26.29",
     "image": "neo4j@sha256:037cf5756f0135cbfd66b739b6df7c7c4bb100f9ce11602f6f9538e17e02c74d",
     "url": "https://dist.neo4j.org/neo4j-community-5.26.29-unix.tar.gz",
-    "fallback_urls": ["https://s3.eu-west-1.amazonaws.com/dist.neo4j.org/neo4j-community-5.26.29-unix.tar.gz"],
+    "fallback_urls": [
+      "https://s3.eu-west-1.amazonaws.com/dist.neo4j.org/neo4j-community-5.26.29-unix.tar.gz"
+    ],
     "sha256": "a45ca9644100d995500f7ea7f5bb4874e16e588891fdfbdff65d21321331caa2"
   },
   "grobid": {
@@ -33,7 +46,11 @@
     "url": "https://codeload.github.com/grobidOrg/grobid/tar.gz/refs/tags/0.8.1",
     "sha256": "8458082c409f98247ce853e8286082c36033dfd656c55c87fa9e616f68c85a69",
     "java_version": "17.0.18",
-    "conda_packages": ["openjdk=17.0.18", "libxml2", "fontconfig"],
+    "conda_packages": [
+      "openjdk=17.0.18",
+      "libxml2",
+      "fontconfig"
+    ],
     "gradle": {
       "version": "7.6.4",
       "url": "https://downloads.gradle.org/distributions/gradle-7.6.4-bin.zip",

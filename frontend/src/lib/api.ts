@@ -1,5 +1,6 @@
 import { getStoredToken } from '../context/AuthContext'
 import { buildLlmHeaders } from './llmProvider'
+import { workdraftHeaders } from './workdraftSession'
 
 export interface ApiError extends Error {
   status?: number
@@ -64,31 +65,31 @@ function buildHeaders(data?: unknown): HeadersInit | undefined {
 }
 
 export const api = {
-  get: <T>(url: string, init?: RequestInit) => request<T>(url, init),
+  get: <T>(url: string, init?: RequestInit) => request<T>(url, { ...init, headers: { ...workdraftHeaders(url), ...init?.headers } }),
 
   post: <T>(url: string, data?: unknown) =>
     request<T>(url, {
       method: 'POST',
-      headers: buildHeaders(data),
+      headers: { ...buildHeaders(data), ...workdraftHeaders(url,data) },
       body: buildBody(data),
     }),
 
   put: <T>(url: string, data?: unknown) =>
     request<T>(url, {
       method: 'PUT',
-      headers: buildHeaders(data),
+      headers: { ...buildHeaders(data), ...workdraftHeaders(url,data) },
       body: buildBody(data),
     }),
 
   patch: <T>(url: string, data?: unknown) =>
     request<T>(url, {
       method: 'PATCH',
-      headers: buildHeaders(data),
+      headers: { ...buildHeaders(data), ...workdraftHeaders(url,data) },
       body: buildBody(data),
     }),
 
   del: <T>(url: string) =>
-    request<T>(url, { method: 'DELETE' }),
+    request<T>(url, { method: 'DELETE', headers: workdraftHeaders(url) }),
 
   download: async (url: string) => {
     const response = await fetch(url, { headers: authHeaders() })

@@ -12,13 +12,16 @@ export const tcGroupKey = (r: PropertyRecordDraft) => tcGroupMeta(r)?.group_key 
 export const tcMethodKey = (r: PropertyRecordDraft) => tcGroupMeta(r)?.method_key || r.record_key
 export const tcPointKey = (r: PropertyRecordDraft) => tcGroupMeta(r)?.point_key || r.record_key
 export const completeTcNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0
+export const completeTcMu = (record: PropertyRecordDraft, value: unknown) => completeTcNumber(value) ||
+  (record.method_code === 'scdft' && value == null && (record.payload.parameters as any)?.mu_star_status === 'not_applicable')
+
 
 /** 展示旧范围不改写记录，也不从未配对 μ* 范围猜端点。 */
 export function tcPointViews(record: PropertyRecordDraft): TcPointView[] {
   if (record.value_kind !== 'range') {
     const mu = readTcParameter(record, 'mu_star')
     return [{ key: tcPointKey(record), record, tc: record.value_number ?? null, mu,
-      selected: Boolean(record.is_representative) && completeTcNumber(record.value_number) && completeTcNumber(mu) }]
+      selected: Boolean(record.is_representative) && completeTcNumber(record.value_number) && completeTcMu(record, mu) }]
   }
   return readTcPairs(record).map((pair, index) => ({ key: `${record.record_key}:${index}`, record, ...pair, selected: false }))
 }
@@ -26,6 +29,7 @@ export function tcPointViews(record: PropertyRecordDraft): TcPointView[] {
 export function sharedTcParameters(record: PropertyRecordDraft): Record<string, any> {
   const parameters = structuredClone(tcParameters(record))
   delete parameters.mu_star
+  delete parameters.mu_star_status
   parameters.extensions = (parameters.extensions || []).filter((item: any) => !['mu_star', 'mu_star_reported_range', 'mu_star_reported'].includes(item.key))
   if (!parameters.extensions.length) delete parameters.extensions
   return parameters
@@ -70,14 +74,20 @@ export function updateTcPoint(records: PropertyRecordDraft[], key: string, field
     if (tcPointKey(record) !== key) return record
     const updated = field === 'tc' ? { ...record, value_number: value as number | null }
       : { ...record, payload: setTcParameter(record, 'mu_star', value) }
-    if (!completeTcNumber(updated.value_number) || !completeTcNumber(readTcParameter(updated, 'mu_star'))) updated.is_representative = false
+    if (field === 'mu') {
+      const meanings: Record<string,string> = {'不适用':'not_applicable','未报告':'not_reported','未知':'unknown'}
+      const status = typeof value === 'string' ? meanings[value.trim()] : undefined
+      updated.payload = {...updated.payload,parameters:{...tcParameters(updated),
+        mu_star:status ? null : value, mu_star_status:status || (value == null ? 'unknown' : 'reported')}}
+    }
+    if (!completeTcNumber(updated.value_number) || !completeTcMu(updated, readTcParameter(updated, 'mu_star'))) updated.is_representative = false
     return normalizeCurrentTcValue(updated)
   })
 }
 
 export function selectTcPoint(records: PropertyRecordDraft[], key: string, selected: boolean) {
   return expandTcPoints(records).map(record => ({ ...record, is_representative: selected && tcPointKey(record) === key
-    && completeTcNumber(record.value_number) && completeTcNumber(readTcParameter(record, 'mu_star')) }))
+    && completeTcNumber(record.value_number) && completeTcMu(record, readTcParameter(record, 'mu_star')) }))
 }
 
 /** 共同输入只传播给用户明确创建的组，保留各结果的 μ* 和来源。 */
@@ -86,6 +96,7 @@ export function updateTcCommon(records: PropertyRecordDraft[], root: PropertyRec
     const own = tcParameters(record), shared = sharedTcParameters(root)
     const ownMu = (own.extensions || []).filter((item: any) => ['mu_star', 'mu_star_reported_range', 'mu_star_reported'].includes(item.key))
     const parameters = { ...shared, ...('mu_star' in own ? { mu_star: structuredClone(own.mu_star) } : {}),
+      ...('mu_star_status' in own ? { mu_star_status: own.mu_star_status } : {}),
       ...((shared.extensions?.length || ownMu.length) ? { extensions: [...(shared.extensions || []), ...ownMu] } : {}) }
     return { ...record, payload: { ...record.payload, parameters,
       calculation_conditions: structuredClone(root.payload.calculation_conditions || {}) } }

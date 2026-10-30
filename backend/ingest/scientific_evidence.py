@@ -48,7 +48,8 @@ SYNTHESIS_FIELDS = frozenset({
     'condition_note', 'note',
 })
 
-COMPATIBLE_RULES = {'scientific-evidence-v2', 'scientific-evidence-v3', 'scientific-evidence-v4', 'scientific-evidence-v5', 'scientific-evidence-v6', 'scientific-evidence-v7'}
+WORKING_RULE = 'working-current-v1'
+COMPATIBLE_RULES = {'scientific-evidence-v2', 'scientific-evidence-v3', 'scientific-evidence-v4', 'scientific-evidence-v5', 'scientific-evidence-v6', 'scientific-evidence-v7', WORKING_RULE}
 
 
 def adopted_suggestion(record):
@@ -400,7 +401,8 @@ def load_result_history(session, snapshot, actor_id=None, include_stale=False):
                     valid = canonical(reconstructed) == canonical(old_claim)
 
         if valid or (include_stale and (r['key'] not in found or found[r['key']].get('stale'))):
-            result = copy.deepcopy(row.result)
+            from .field_sources import expand
+            result = expand(session, row.result)
             result['stale'] = not valid
             result['resolution'] = (row.resolutions or {}).get(str(actor_id), '') if valid else ''
             result['proposal_draft'] = copy.deepcopy((row.resolutions or {}).get('proposal:' + str(actor_id))) if valid else None
@@ -467,7 +469,8 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
     rows = session.scalars(select(table).where(table.id.in_(chosen.values()))) if chosen else []
     for row in rows:
         record = current[row.item_key]
-        result = copy.deepcopy(row.result)
+        from .field_sources import expand
+        result = expand(session, row.result)
         result.pop('history', None)
         result.pop('audit_events', None)
         result.update(content_hash=row.content_hash, source_hash=row.source_hash,
@@ -490,7 +493,8 @@ def load_results(session, snapshot, actor_id=None, include_stale=False):
             if row.item_key in exact:
                 continue
             if (row.content_hash, row.source_hash) == (record['content_hash'], record['source_hash']):
-                result = copy.deepcopy(row.result)
+                from .field_sources import expand
+                result = expand(session, row.result)
                 result.pop('history', None)
                 result.pop('audit_events', None)
                 result.update(content_hash=row.content_hash, source_hash=row.source_hash, stale=False, stored_result=True)
@@ -601,11 +605,32 @@ def _review_time(value):
 def save_results(session, snapshot, results, actor_id, *, update_decision=False):
     # 现有目标行串行化JSON事件追加；不创建新的审计表，也不覆盖并发事件。
     if snapshot['target'] == 'upload':
+        from backend.services.workdrafts import row as work_row
+        work_row(session,'upload',snapshot['target_id'],True)
         session.scalar(select(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == snapshot['target_id']).with_for_update())
     elif snapshot['target'] == 'paper':
         session.scalar(select(models.Paper).where(models.Paper.id == int(snapshot['target_id'])).with_for_update())
     elif snapshot['target'] == 'revision':
         session.scalar(select(models.PaperRevisionDraft).where(models.PaperRevisionDraft.revision_id == snapshot['target_id']).with_for_update())
+    from backend.services.workdrafts import row
+    work = row(session,snapshot['target'],snapshot['target_id'],True)
+    if work is None and snapshot['target']=='paper' and not snapshot.get('_handoff_transfer'):
+        from backend.services.manuscript_handoffs import latest,require_writer
+        if latest(session,int(snapshot['target_id'])):
+            from backend.services.workdrafts import context_token
+            from backend.ingest.property_evidence import fail
+            actor=session.get(models.User,actor_id)
+            require_writer(session,session.get(models.Paper,int(snapshot['target_id'])),actor)
+            if snapshot.get('_workdraft_epoch')!=context_token(session,snapshot['target'],snapshot['target_id']):
+                fail('workdraft_ended','旧工作稿的迟到结果未写入')
+    if work is not None and not snapshot.get('_handoff_transfer'):
+        from backend.services.workdrafts import require
+        from backend.ingest.property_evidence import fail
+        actor = session.get(models.User,actor_id)
+        if actor is None:fail('draft_forbidden','工作稿写入者不存在')
+        require(session,snapshot['target'],snapshot['target_id'],actor,snapshot.get('_workdraft_epoch'))
+        if snapshot.get('_workdraft_epoch') != work.write_epoch:
+            fail('workdraft_ended','旧工作稿的迟到结果未写入')
     for record in snapshot['records']:
         if record['key'] not in results:
             continue
@@ -615,9 +640,20 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
             models.ScientificEvidenceCheck.item_key == record['item_key'], models.ScientificEvidenceCheck.content_hash == record['content_hash'],
             models.ScientificEvidenceCheck.source_hash == record['source_hash'], models.ScientificEvidenceCheck.rule_version.in_(COMPATIBLE_RULES)).order_by(models.ScientificEvidenceCheck.id.desc()).limit(1).with_for_update())
         existing = session.get(models.ScientificEvidenceCheck,existing_id) if existing_id is not None else None
+        if existing is not None:
+            from .field_sources import expand
+            # 不改ORM行的旧JSON；只在本次比较时使用展开视图。
+            from types import SimpleNamespace
+            existing = SimpleNamespace(result=expand(session,existing.result), resolutions=existing.resolutions,
+                content_hash=existing.content_hash, source_hash=existing.source_hash)
+        working = session.scalar(select(models.ScientificEvidenceCheck).where(
+            models.ScientificEvidenceCheck.target==snapshot['target'],
+            models.ScientificEvidenceCheck.target_id==snapshot['target_id'],
+            models.ScientificEvidenceCheck.item_key==record['item_key'],
+            models.ScientificEvidenceCheck.rule_version==WORKING_RULE).with_for_update())
         if existing is not None and not update_decision and result.get('field_candidate'):
             from .field_candidates import preserve_candidate
-            existing.result = preserve_candidate(existing.result, result)
+            result = preserve_candidate(existing.result, result)
         if existing is not None and not update_decision:
             from .field_review import valid_field_decision
             previous_decision = (existing.result or {}).get('field_decision') or {}
@@ -646,25 +682,11 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
         if existing is not None and not update_decision and existing.result.get('decision'):
             result['decision'] = copy.deepcopy(existing.result['decision'])
             result['adopted_basis'] = existing.result.get('adopted_basis')
-        if existing is not None and existing.result.get('history') and not result.get('history'):
-            result['history'] = copy.deepcopy(existing.result['history'])
-        if existing is not None and result.get('model') and any(
-                existing.result.get(k) != result.get(k) for k in ('status', 'reason', 'evidences')):
-            previous_check = {k: copy.deepcopy(existing.result.get(k)) for k in
-                ('current_value', 'status', 'reason', 'ai_reason', 'evidences', 'content_hash',
-                 'source_hash', 'state_review_context', 'model', 'review_started_at')}
-            history = result.setdefault('history', [])
-            if previous_check not in history:
-                history.append(previous_check)
-        if existing is not None and existing.result.get('association_review') != result.get('association_review') and existing.result.get('association_review'):
-            previous_review = {name: copy.deepcopy(existing.result.get(name)) for name in
-                               ('status', 'reason', 'ai_reason', 'evidences', 'association_review', 'content_hash', 'source_hash')}
-            history = result.setdefault('history', [])
-            if previous_review not in history:
-                history.append(previous_review)
-        from .evidence_audit import append_review_event
-        append_review_event(session, record, result, existing.result if existing is not None else None, actor_id, human=update_decision)
-        result.pop('validation_record', None)  # 服务端临时校验数据，不复制整张记录进每个子项。
+        # 当前工作结果只覆盖同一行。既有旧版本与审计行不动；正式交接另冻结整稿。
+        for name in ('history','audit_events','legacy_evidences','validation_record','_audit_action','_audit_event_id'):
+            result.pop(name,None)
+        result.setdefault('rule_version',snapshot['rule_version'])
+        result['_working_current']=True
         resolutions = copy.deepcopy((existing.resolutions or {}) if existing is not None else {})
         if not update_decision:
             from .evidence_proposals import editable_fields
@@ -680,14 +702,23 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
                 if not still_supported:
                     # 保留输入，但撤回尚未提交的旧通过资格；正式人工决定不受模型改写。
                     draft.update(accepted=False, supported=False, previous_review={'status': draft.get('ai_status'), 'reason': draft.get('ai_reason')})
-        stmt = insert(models.ScientificEvidenceCheck).values(
-            target=snapshot['target'], target_id=snapshot['target_id'], item_key=record['item_key'],
-            content_hash=record['content_hash'], source_hash=record['source_hash'], rule_version=snapshot['rule_version'],
-            result=json.loads(json.dumps(result, default=str)), resolutions={}, actor_user_id=actor_id)
-        session.execute(stmt.on_duplicate_key_update(result=stmt.inserted.result, resolutions=resolutions, actor_user_id=actor_id))
-        if existing is not None:
-            session.expire(existing, ['result', 'resolutions'])
+        from .field_sources import compact
+        result = compact(session, snapshot, record, result)
+        data=dict(target=snapshot['target'],target_id=snapshot['target_id'],item_key=record['item_key'],
+            content_hash=record['content_hash'],source_hash=record['source_hash'],rule_version=WORKING_RULE,
+            result=json.loads(json.dumps(result,default=str)),resolutions=resolutions,actor_user_id=actor_id)
+        if working is None:
+            session.add(models.ScientificEvidenceCheck(**data))
+        else:
+            for name,value in data.items():
+                setattr(working,name,value)
+        session.flush()
 
+
+
+    if work is not None and results and not snapshot.get('_handoff_transfer'):
+        work.revision += 1
+        session.flush()
 
 def save_resolutions(session, snapshot, actor_id, reasons):
     from .property_evidence import fail
@@ -699,7 +730,7 @@ def save_resolutions(session, snapshot, actor_id, reasons):
         row = session.scalar(select(models.ScientificEvidenceCheck).where(
             models.ScientificEvidenceCheck.target == snapshot['target'], models.ScientificEvidenceCheck.target_id == snapshot['target_id'],
             models.ScientificEvidenceCheck.item_key == r['item_key'], models.ScientificEvidenceCheck.content_hash == r['content_hash'],
-            models.ScientificEvidenceCheck.source_hash == r['source_hash'], models.ScientificEvidenceCheck.rule_version == snapshot['rule_version'],
+            models.ScientificEvidenceCheck.source_hash == r['source_hash'], models.ScientificEvidenceCheck.rule_version.in_(COMPATIBLE_RULES),
         ).with_for_update())
         if row is None:
             fail('evidence_stale', '核对结果已变化，请刷新后填写理由')
@@ -719,9 +750,15 @@ def delete_target(session, target, target_id):
 
 
 def persist_upload(session, task_id, state, draft):
+    from .tc_contexts import map_draft
+    draft = map_draft(draft, compact=True)
     values = dict(task_id=task_id, owner_id=int(state['user_id']), state={**state, 'cleanup_at': None}, draft=draft)
-    stmt = insert(models.ScientificUploadDraft).values(**values)
-    session.execute(stmt.on_duplicate_key_update(state=stmt.inserted.state, draft=stmt.inserted.draft))
+    saved = session.get(models.ScientificUploadDraft, task_id, with_for_update=True)
+    if saved is None:
+        session.add(models.ScientificUploadDraft(**values))
+    else:
+        saved.state, saved.draft = values['state'], draft
+    session.flush()
 
 
 def restore_upload(task_id):

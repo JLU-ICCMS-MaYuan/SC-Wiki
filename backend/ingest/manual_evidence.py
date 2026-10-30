@@ -7,6 +7,7 @@ import io
 import json
 import uuid
 import copy
+from copy import deepcopy
 import base64
 import shutil
 import os
@@ -16,7 +17,7 @@ from typing import Any
 
 from PIL import Image, UnidentifiedImageError
 import pymupdf
-from sqlalchemy import case, inspect, select
+from sqlalchemy import and_, or_, case, inspect, select
 
 from backend.manual_evidence_models import ScientificManualEvidence
 from backend.rag.config import settings
@@ -127,7 +128,8 @@ def _current(session, snapshot: dict, record: dict, *, for_update: bool = False)
         ScientificManualEvidence.target == snapshot["target"],
         ScientificManualEvidence.target_id == str(snapshot["target_id"]),
         ScientificManualEvidence.item_key == record["item_key"],
-        ScientificManualEvidence.value_hash == record["content_hash"],
+        or_(ScientificManualEvidence.value_hash == record["content_hash"],
+            and_(ScientificManualEvidence.status=='draft', bool(snapshot.get('_workdraft_current')))),
         ScientificManualEvidence.source_hash == record.get("paper_source_hash", record["source_hash"]),
         ScientificManualEvidence.status != "historical",
     )
@@ -139,6 +141,28 @@ def _current(session, snapshot: dict, record: dict, *, for_update: bool = False)
                                         ScientificManualEvidence.created_at.desc(), ScientificManualEvidence.id.desc()).limit(1))
 
 
+def _working_writer(session,snapshot,actor_id):
+    from backend.services.workdrafts import metadata
+    from types import SimpleNamespace
+    from backend.services.workdrafts import _scope_index
+    work=_scope_index(session,snapshot['target'],snapshot['target_id'])
+    if work is None or work.owner_id!=actor_id:return False
+    return metadata(session,snapshot['target'],snapshot['target_id'],SimpleNamespace(id=actor_id))['revision'] is not None
+
+def _inherited_items(row):
+    items=deepcopy(row.items or [])
+    for item in items:
+        item.setdefault('submitted_by_user_id',row.actor_user_id)
+        if item.get('kind')!='text':
+            item.setdefault('storage_key',f"manual_evidence/{row.id}/{item['id']}")
+    return items
+
+def _set_editor(row,actor_id,actor_name=None):
+    if row.actor_user_id!=actor_id:
+        row.items=_inherited_items(row)
+        row.actor_user_id=actor_id
+        row.actor_name_snapshot=(actor_name or '')[:100]
+
 def _ensure(session, snapshot: dict, baseline: dict, item_key: str, actor_id: int,
             actor_name: str | None = None) -> tuple[ScientificManualEvidence, dict]:
     current = _by_item(snapshot).get(item_key)
@@ -146,22 +170,41 @@ def _ensure(session, snapshot: dict, baseline: dict, item_key: str, actor_id: in
         raise ManualEvidenceError("manual_field_not_found", "当前字段不存在", status=404)
     prior = _by_item(baseline).get(item_key)
     row = _current(session, snapshot, current, for_update=True)
-    if row is not None and row.status == "draft" and row.actor_user_id == actor_id:
+    working_writer=_working_writer(session,snapshot,actor_id)
+    if row is not None and row.status == "draft" and (row.actor_user_id == actor_id or working_writer):
         if actor_name and not row.actor_name_snapshot and row.actor_user_id == actor_id:
             row.actor_name_snapshot = actor_name[:100]
         return row, current
-    for old in session.scalars(select(ScientificManualEvidence).where(
+    drafts = list(session.scalars(select(ScientificManualEvidence).where(
         ScientificManualEvidence.target == snapshot["target"],
         ScientificManualEvidence.target_id == str(snapshot["target_id"]),
         ScientificManualEvidence.item_key == item_key,
         ScientificManualEvidence.status == "draft",
-    ).with_for_update()):
+    ).order_by(ScientificManualEvidence.created_at.desc(),ScientificManualEvidence.id.desc()).with_for_update()))
+    for old in drafts:
         from .scientific_evidence import canonical
         same_value = old.value_hash == current["content_hash"] or (
             snapshot.get('_manual_field_scope') and canonical(old.after_value) == canonical(current.get('current_value')))
-        if old.actor_user_id != actor_id and same_value and old.source_hash == current.get("paper_source_hash", current["source_hash"]):
+        if not working_writer and old.actor_user_id != actor_id and same_value and old.source_hash == current.get("paper_source_hash", current["source_hash"]):
             raise ManualEvidenceError("manual_evidence_conflict", "该字段正由其他人修改，请刷新后重试", field=current["field"], status=409)
-        old.status = "historical"
+    if drafts:
+        # 当前工作稿只覆盖一个可编辑说明；既有historical/submitted行不改不删。
+        row=drafts[0]
+        row.value_hash=str(current['content_hash'])
+        row.source_hash=str(current.get('paper_source_hash',current['source_hash']))
+        row.after_value=json.loads(json.dumps(current.get('current_value'),default=str))
+        # 数值变化不代表用户修改了理由或证据，保留这些独立资料。
+        row.evidence_version=(row.evidence_version or 0)+1
+        session.flush()
+        return row,current
+    seed=row
+    if seed is None:
+        query=select(ScientificManualEvidence).where(ScientificManualEvidence.target==snapshot['target'],
+            ScientificManualEvidence.target_id==str(snapshot['target_id']),
+            ScientificManualEvidence.item_key==item_key,ScientificManualEvidence.status=='submitted')
+        if snapshot['target']=='paper':
+            query=query.where(ScientificManualEvidence.paper_revision==int(snapshot.get('review_state',[None,None,1])[2] or 1))
+        seed=session.scalar(query.order_by(ScientificManualEvidence.created_at.desc(),ScientificManualEvidence.id.desc()).limit(1))
     row = ScientificManualEvidence(
         id=uuid.uuid4().hex, target=snapshot["target"], target_id=str(snapshot["target_id"]),
         paper_id=int(snapshot["target_id"]) if snapshot["target"] == "paper" else None,
@@ -171,7 +214,8 @@ def _ensure(session, snapshot: dict, baseline: dict, item_key: str, actor_id: in
         before_value=json.loads(json.dumps(prior.get("current_value") if prior else None, default=str)),
         after_value=json.loads(json.dumps(current.get("current_value"), default=str)),
         actor_user_id=actor_id, actor_name_snapshot=(actor_name or "")[:100],
-        reason="", no_evidence_reason="", items=[], status="draft",
+        reason=seed.reason if seed else "", no_evidence_reason=seed.no_evidence_reason if seed else "",
+        items=_inherited_items(seed) if seed else [], status="draft",
     )
     session.add(row)
     session.flush()
@@ -202,7 +246,7 @@ def read_field(session, snapshot: dict, baseline: dict, item_key: str, *, includ
     changed = prior is None or _semantic_value(current) != _semantic_value(prior)
     result = public_record(row, changed=changed)
     result["before_value"] = row.before_value if changed and row else (prior or {}).get("current_value")
-    result["after_value"] = row.after_value if changed and row else current.get("current_value")
+    result["after_value"] = current.get("current_value") if snapshot.get('_workdraft_current') else row.after_value if changed and row else current.get("current_value")
     if not include_history:
         result['history'] = []
         return result
@@ -218,26 +262,41 @@ def read_field(session, snapshot: dict, baseline: dict, item_key: str, *, includ
 
 
 def save_explanation(session, snapshot: dict, baseline: dict, item_key: str, actor_id: int,
-                     *, reason: str, no_evidence_reason: str, text_items: list[dict], actor_name: str | None = None) -> dict[str, Any]:
+                     *, reason: str, no_evidence_reason: str, text_items: list[dict], actor_name: str | None = None, changed_fields=None) -> dict[str, Any]:
+    if changed_fields is not None and not changed_fields:
+        return read_field(session,snapshot,baseline,item_key,include_history=False)
     row, current = _ensure(session, snapshot, baseline, item_key, actor_id, actor_name)
     if len(reason) > 4000 or len(no_evidence_reason) > 4000:
         raise ManualEvidenceError("manual_reason_too_long", "人工理由最多 4000 字", field=current["field"])
+    changed_fields = {'reason','no_evidence_reason','text_items'} if changed_fields is None else set(changed_fields)
     direct = []
-    for item in text_items:
+    for item in text_items if 'text_items' in changed_fields else []:
         text = str(item.get("text") or "").strip()
         source = str(item.get("source_description") or "").strip()
         if not text or len(text) > MAX_TEXT_CHARS or not source or len(source) > 200:
             raise ManualEvidenceError("manual_text_invalid", "文字证据和来源说明不能为空，文字最多 2 万字", field=current["field"])
-        direct.append({"id": uuid.uuid4().hex, "kind": "text", "text": text,
+        existing=next((entry for entry in row.items or [] if entry.get('kind')=='text'
+            and entry.get('text')==text and entry.get('source_description')==source
+            and entry.get('id') not in {value['id'] for value in direct}),None)
+        direct.append(deepcopy(existing) if existing else {"id": uuid.uuid4().hex, "kind": "text", "text": text,
                        "source_description": source, "sha256": hashlib.sha256(text.encode()).hexdigest(),
-                       "size": len(text.encode()), "ai_read_status": "not_read"})
+                       "size": len(text.encode()), "ai_read_status": "not_read","submitted_by_user_id":actor_id})
     files = [item for item in row.items or [] if item.get("kind") != "text"]
     if len(files) + len(direct) > MAX_ITEMS:
         raise ManualEvidenceError("manual_evidence_limit", "单个字段最多 5 项人工证据", field=current["field"])
-    row.reason = reason.strip()
-    row.items = [*files, *direct]
-    row.no_evidence_reason = "" if row.items else no_evidence_reason.strip()
+    next_reason=reason.strip() if 'reason' in changed_fields else row.reason
+    next_items=[*files,*direct] if 'text_items' in changed_fields else row.items
+    next_absence=("" if next_items else no_evidence_reason.strip()) if 'no_evidence_reason' in changed_fields else row.no_evidence_reason
+    if (next_reason,next_items,next_absence)==(row.reason,row.items,row.no_evidence_reason):
+        return public_record(row,changed=True)
+    if row.actor_user_id!=actor_id:
+        inherited={item['id']:item for item in _inherited_items(row)}
+        next_items=[inherited.get(item['id'],item) for item in next_items]
+        _set_editor(row,actor_id,actor_name)
+    row.reason,row.items,row.no_evidence_reason=next_reason,next_items,next_absence
     row.evidence_version = (row.evidence_version or 1) + 1
+    from backend.services.workdrafts import bump
+    bump(session,snapshot['target'],snapshot['target_id'])
     session.flush()
     return public_record(row, changed=True)
 
@@ -316,6 +375,7 @@ def add_file(session, snapshot: dict, baseline: dict, item_key: str, actor_id: i
         raise ManualEvidenceError("manual_source_invalid", "请填写人工证据的来源说明", field=current["field"])
     if not raw or len(raw) > MAX_FILE_BYTES:
         raise ManualEvidenceError("manual_file_size", "单份人工证据最大 10 MiB", field=current["field"], status=413)
+    _set_editor(row,actor_id,actor_name)
     items = list(row.items or [])
     if len(items) >= MAX_ITEMS:
         raise ManualEvidenceError("manual_evidence_limit", "单个字段最多 5 项人工证据", field=current["field"])
@@ -334,10 +394,12 @@ def add_file(session, snapshot: dict, baseline: dict, item_key: str, actor_id: i
             raise ManualEvidenceError("manual_file_storage_unavailable", "人工证据存储暂时不可用", status=503) from exc
         items.append({"id": item_id, "kind": kind, "filename": name, "media_type": media_type,
                       "source_description": source, "storage_key": ref.key, "sha256": ref.sha256,
-                      "size": ref.size, "ai_read_status": "not_read"})
+                      "size": ref.size, "ai_read_status": "not_read","submitted_by_user_id":actor_id})
         row.items = items
         row.no_evidence_reason = ""
         row.evidence_version = (row.evidence_version or 1) + 1
+        from backend.services.workdrafts import bump
+        bump(session,snapshot['target'],snapshot['target_id'])
         session.flush()
     except Exception:
         if ref is not None:
@@ -367,15 +429,22 @@ def file_entry(session, snapshot: dict, item_key: str, item_id: str) -> tuple[Sc
     raise ManualEvidenceError("manual_file_not_found", "人工证据不存在", status=404)
 
 
-def remove_file(session, snapshot: dict, item_key: str, item_id: str, actor_id: int) -> Path | FileRef:
+def remove_file(session, snapshot: dict, item_key: str, item_id: str, actor_id: int, actor_name=None) -> Path | FileRef | None:
     row, entry, path = file_entry(session, snapshot, item_key, item_id)
-    if row.status != "draft" or row.actor_user_id != actor_id:
+    if row.status != "draft" or row.actor_user_id != actor_id and not _working_writer(session,snapshot,actor_id):
         if os.environ.get("FILE_STORAGE_BACKEND", "local") == "s3":
             path.unlink(missing_ok=True)
         raise ManualEvidenceError("manual_file_forbidden", "已提交或非本人提供的证据不能删除", status=403)
+    _set_editor(row,actor_id,actor_name)
     row.items = [item for item in row.items if item.get("id") != item_id]
     row.evidence_version = (row.evidence_version or 1) + 1
+    from backend.services.workdrafts import bump
+    bump(session,snapshot['target'],snapshot['target_id'])
     session.flush()
+    shared=entry.get('storage_key') and entry['storage_key']!=f"manual_evidence/{row.id}/{entry['id']}"
+    if shared:
+        if os.environ.get("FILE_STORAGE_BACKEND","local")=="s3":path.unlink(missing_ok=True)
+        return None
     if os.environ.get("FILE_STORAGE_BACKEND", "local") == "s3":
         path.unlink(missing_ok=True)
         return _file_ref(row.id, entry)
@@ -421,7 +490,8 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
             ScientificManualEvidence.target == snapshot["target"],
             ScientificManualEvidence.target_id == str(snapshot["target_id"]),
             ScientificManualEvidence.item_key == record["item_key"],
-            ScientificManualEvidence.value_hash == record["content_hash"],
+            or_(ScientificManualEvidence.value_hash == record["content_hash"],
+            and_(ScientificManualEvidence.status=='draft', bool(snapshot.get('_workdraft_current')))),
             ScientificManualEvidence.source_hash == record.get("paper_source_hash", record["source_hash"]),
             ScientificManualEvidence.status != "historical",
         )
@@ -430,7 +500,9 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
         rows = list(session.scalars(query.order_by(ScientificManualEvidence.created_at, ScientificManualEvidence.id)))
         if snapshot.get('field_review_input'):
             from .field_input import rows_for, matching_rows
-            rows = matching_rows(record, rows_for(session, {**snapshot, 'records': [record]}))
+            rows = matching_rows(record, rows_for(session, {**snapshot, 'records': [record]}),working=bool(snapshot.get('_workdraft_current')))
+        drafts=[row for row in rows if row.status=='draft']
+        if drafts:rows=drafts[-1:]
         if not rows:
             continue
         items: list[dict[str, Any]] = []
@@ -439,7 +511,7 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
         for row in rows:
             for item in row.items or []:
                 visible = {"kind": item["kind"], "source_description": item["source_description"],
-                           "submitted_by_user_id": row.actor_user_id, "sha256": item["sha256"]}
+                           "submitted_by_user_id": item.get("submitted_by_user_id",row.actor_user_id), "sha256": item["sha256"]}
                 if item["kind"] == "text":
                     visible["content"] = str(item.get("text") or "")[:MAX_TEXT_CHARS]
                 else:
@@ -519,9 +591,10 @@ def transfer_to_paper(session, snapshot: dict, baseline: dict, paper_id: int, re
             raise ManualEvidenceError("manual_evidence_transfer_failed", "人工证据对应的正式字段已变化，原草稿已保留",
                                       field=record["field"], status=409)
         row.target, row.target_id = "paper", str(paper_id)
-        row.paper_id, row.paper_revision, row.status = paper_id, revision, "submitted"
+        row.paper_id, row.paper_revision, row.status = paper_id, revision, "draft" if snapshot.get("_workdraft_current") else "submitted"
         if mapped is not None:
             row.value_hash = str(mapped["content_hash"])
+            row.after_value=deepcopy(mapped.get('current_value'))
             row.source_hash = str(mapped.get("paper_source_hash", mapped["source_hash"]))
     # 旧版本补充材料仍属于这篇论文；保留为历史，不随上传临时数据清理。
     for row in session.scalars(select(ScientificManualEvidence).where(

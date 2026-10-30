@@ -177,6 +177,12 @@ func TestReviewPaperCommitsBeforeReviewArtifactCleanupFailure(t *testing.T) {
 	mock.ExpectBegin()
 	mock.ExpectQuery("SELECT \\* FROM `papers`").
 		WillReturnRows(paperRows(reviewStatusPending))
+	mock.ExpectQuery("SELECT count.*JSON_EXTRACT").
+		WithArgs(uint(42), "manuscript-handoff-v1").
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+	mock.ExpectQuery("SELECT count.*scientific_work_drafts").WithArgs("paper", "42").
+		WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(0))
+
 	mock.ExpectExec("INSERT INTO `paper_history_events`").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectExec("UPDATE `papers` SET").

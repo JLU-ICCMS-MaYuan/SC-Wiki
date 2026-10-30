@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,6 +17,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 const contributionCacheKey = "community:contributions:v2"
@@ -260,7 +263,7 @@ func chartTcPredicate(tcField, method string) (string, []any) {
 	if tcField == "experimental_tc" {
 		return "t.record_type = ?", []any{"measured_tc"}
 	}
-	return "t.record_type = ? AND t.method_code = ?", []any{"predicted_tc", method}
+	return "t.record_type = ? AND " + tcMethodSQL(database.DB, "t", "pm") + " = ?", []any{"predicted_tc", method}
 }
 
 // ═══════════════════════════════════════════════
@@ -491,6 +494,12 @@ func BatchReview(c *gin.Context) {
 	now := time.Now()
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
 		for i := range papers {
+			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&papers[i], papers[i].ID).Error; err != nil {
+				return err
+			}
+			if paperUsesHandoffs(tx, papers[i].ID) {
+				return &evidencePrepareError{409, json.RawMessage(`{"code":"workdraft_required","message":"请逐份通过当前工作稿正式交接"}`)}
+			}
 			requestID := body.ReviewRequestID
 			if requestID != "" {
 				requestID = fmt.Sprintf("%s:%d", requestID, papers[i].ID)
@@ -501,6 +510,11 @@ func BatchReview(c *gin.Context) {
 		}
 		return nil
 	}); err != nil {
+		var gate *evidencePrepareError
+		if errors.As(err, &gate) {
+			c.JSON(gate.Status, gin.H{"detail": gate.Detail})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "批量审核失败"})
 		return
 	}

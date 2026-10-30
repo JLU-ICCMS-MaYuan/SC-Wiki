@@ -87,6 +87,8 @@ def _record_snapshot(record: Any, *, module_code: str) -> dict[str, Any]:
 
 
 def _module_snapshot(module: dict[str, Any]) -> dict[str, Any]:
+    from backend.ingest.tc_contexts import expand_module
+    module = expand_module(module)
     code = module["module_code"]
     return {
         "module_key": module["module_key"],
@@ -411,6 +413,8 @@ async def scientific_draft_matches_current_revision(
                     key=lambda item: str(item["record_key"]),
                 ),
             })
+        from backend.ingest.tc_contexts import expand_module
+        module_values = [expand_module(module) for module in module_values]
         stored.append({
             "state_key": state.state_key, "material": str(formula or "").strip(),
             **{key: getattr(state, key) for key in material_state_values({})},

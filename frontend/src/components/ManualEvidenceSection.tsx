@@ -113,6 +113,10 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
       const response = await api.put<{ ok: boolean; data: ManualRecord }>(ready.endpoint, {
         expected_version: ready.version, reason: input.reason,
         no_evidence_reason: input.choice === 'none' ? input.absence : '', text_items: direct,
+        changed_fields: [
+          ...(input.reason !== (input.saved?.reason || '') ? ['reason'] : []),
+          ...((input.choice === 'none' ? input.absence : '') !== (input.saved?.no_evidence_reason || '') ? ['no_evidence_reason'] : []),
+        ],
       })
       store.acknowledge(key, response.data, input.revision)
       explanationSaved = true
@@ -162,7 +166,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
       if (item.kind === 'text') {
         const remaining = (saved?.items || []).filter(entry => entry.kind === 'text' && entry.id !== item.id && entry.text)
           .map(entry => ({ text: entry.text!, source_description: entry.source_description }))
-        await api.put(ready.endpoint, { expected_version: ready.version, reason, no_evidence_reason: '', text_items: remaining })
+        await api.put(ready.endpoint, { expected_version: ready.version, reason, no_evidence_reason: '', text_items: remaining, changed_fields: ['text_items'] })
       } else await api.del(`${ready.endpoint}/files/${item.id}${fieldScoped ? '?field_scope=true' : ''}`)
       const current = store.read(key)
       if (current.saved) store.patch(key, { saved: { ...current.saved, items: current.saved.items.filter(entry => entry.id !== item.id) }, writes: current.writes + 1 })

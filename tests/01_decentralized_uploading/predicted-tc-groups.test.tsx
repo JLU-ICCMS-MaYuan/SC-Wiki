@@ -131,3 +131,24 @@ it('固定七种方法，其他方法名称可编辑并在重开后保留', asyn
   fireEvent.mouseDown(screen.getByLabelText('预测方法'))
   expect(await screen.findAllByRole('option')).toHaveLength(7)
 })
+
+it('SCDFT用原μ*控件表达不适用，代表点可选；真实0仍保存为0', async()=>{
+  let latest:PropertyModuleDraft[]=[]
+  const point={...expandTcPoints([range()])[0],method_code:'scdft',definition_key:definition('scdft').definition_key,
+    payload:{...range().payload,parameters:{lambda_ep:3.94,mu_star:null,mu_star_status:'unknown'}}}
+  function Host(){
+    const [modules,setModules]=useState<PropertyModuleDraft[]>([{module_key:'m',module_code:'superconductive_properties',
+      definition_key:'module.superconductive_properties',definition_version:1,display_order:0,records:[point]}])
+    latest=modules
+    return <PropertyModuleEditor modules={modules} basePath="material_states.0.property_modules" onChange={setModules}/>
+  }
+  render(<Host/>);fireEvent.click(screen.getByText('超导性质'))
+  const mu=await screen.findByLabelText('μ*')
+  fireEvent.change(mu,{target:{value:'不适用'}})
+  expect((latest[0].records[0].payload.parameters as any)).toMatchObject({mu_star:null,mu_star_status:'not_applicable'})
+  const representative=screen.getByRole('checkbox',{name:'选择第1种方法第1组为代表结果'})
+  expect(representative).toBeEnabled()
+  fireEvent.click(representative);expect(latest[0].records[0].is_representative).toBe(true)
+  fireEvent.change(mu,{target:{value:'0'}})
+  expect((latest[0].records[0].payload.parameters as any)).toMatchObject({mu_star:0,mu_star_status:'reported'})
+})

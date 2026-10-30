@@ -457,6 +457,11 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
                     "definition_version": r.definition_version, "payload": r.payload_json, "is_representative": r.is_representative}
                    for r in existing_records_list if r.record_key not in deleted_record_keys
                    and (module_key_by_id.get(r.module_id), r.record_key) not in submitted_record_keys]
+    from .tc_contexts import expand_module
+    retained_tc = [expand_module({'metadata': existing[module_key_by_id[r.module_id]].metadata_json or {},
+        'records': [value]})['records'][0] for r, value in zip(
+        [r for r in existing_records_list if r.record_key not in deleted_record_keys and
+         (module_key_by_id.get(r.module_id), r.record_key) not in submitted_record_keys], retained_tc)]
     tc_issues = tc_collection_issues([*retained_tc, *(r for m in normalized_modules for r in m["records"])], strict_representative=True)
     if tc_issues:
         raise PropertyValidationError([_issue(field, code, message) for field, code, message in tc_issues])
@@ -544,7 +549,9 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
             raise PropertyValidationError([_issue("evidences", "cross_revision_reference", f"Evidence 不属于当前论文 revision: {missing[0]}")])
 
     output: list[models.PropertyRecord] = []
-    for module in normalized_modules:
+    from .tc_contexts import compact_module
+    for original_module in normalized_modules:
+        module = compact_module(original_module)
         if module["module_key"] in deleted_module_keys:
             continue
         db_module = existing.get(module["module_key"])
@@ -558,6 +565,18 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
             )
             session.add(db_module)
             await session.flush()
+        from copy import deepcopy
+        previous_metadata = deepcopy(db_module.metadata_json or {})
+        incoming_metadata = deepcopy(module.get("metadata") or {})
+        old_directory = previous_metadata.get("tc_contexts") or {}
+        new_directory = incoming_metadata.get("tc_contexts") or {}
+        if old_directory:
+            directory = deepcopy(old_directory)
+            directory.setdefault('groups', {}).update(new_directory.get('groups') or {})
+            for group_key, methods in (new_directory.get('methods') or {}).items():
+                directory.setdefault('methods', {}).setdefault(group_key, {}).update(methods)
+            incoming_metadata['tc_contexts'] = directory
+        db_module.metadata_json = {**previous_metadata, **incoming_metadata}
         for record in module["records"]:
             if record["record_key"] in deleted_record_keys:
                 continue

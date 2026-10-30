@@ -44,6 +44,8 @@ export function createEvidenceDraftQueue(notify: (state: { saving: boolean; erro
       return flush()
     },
     hasPending: () => pending.size > 0,
+    isRunning: () => Boolean(running),
+    discardAll() { clearTimeout(timer); pending.clear(); failure = undefined },
     error: () => failure,
   }
 }

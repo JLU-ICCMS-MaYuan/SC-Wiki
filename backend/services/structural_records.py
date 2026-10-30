@@ -21,7 +21,7 @@ def fingerprint(value):
 
 
 def available(session):
-    return inspect(session.get_bind()).has_table(Record.__tablename__)
+    return inspect(session.connection()).has_table(Record.__tablename__)
 
 
 def number(value, *, positive=False):

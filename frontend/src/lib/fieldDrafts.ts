@@ -1,8 +1,9 @@
 import { api } from './api'
+import { rememberWorkdraft, workdraftEpoch } from './workdraftSession'
 import type { EvidenceTarget } from '../components/EvidenceWorkflow'
 
 type Segment = string | { key: string; value: unknown }
-interface Change { path: Segment[]; before: unknown; value?: unknown; remove?: boolean }
+interface Change { path: Segment[]; before?: unknown; value?: unknown; remove?: boolean; op?: string; key?: string; identity?: { key: string; value: unknown }; order?: unknown[]; after?: unknown }
 const identityKeys = ['state_key', 'module_key', 'record_key', 'field_key', 'candidate_id']
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
@@ -38,9 +39,22 @@ export function preserveRawNumbers<T>(raw: any, normalized: T): T {
 export function fieldChanges(before: any, after: any, path: Segment[] = []): Change[] {
   if (same(before, after)) return []
   if (Array.isArray(before) && Array.isArray(after)) {
-    const key = identityKeys.find(k => before.length && before.every(v => v?.[k] != null) && after.every(v => v?.[k] != null))
-    if (key && same(before.map(v => v[key]), after.map(v => v[key]))) {
-      return after.flatMap(v => fieldChanges(before.find(b => b[key] === v[key]), v, [...path, { key, value: v[key] }]))
+    const rows = [...before, ...after]
+    const key = identityKeys.find(k => rows.length && rows.every(v => typeof v?.[k] === 'string' && v[k]) &&
+      [before, after].every(values => new Set(values.map(v => v[k])).size === values.length))
+    if (key) {
+      const previous = new Map(before.map(v => [v[key], v]))
+      const current = new Set(after.map(v => v[key]))
+      const changes: Change[] = before.filter(v => !current.has(v[key]))
+        .map(v => ({op: 'remove_item', path, identity: {key, value: v[key]}}))
+      after.forEach((v, index) => {
+        if (!previous.has(v[key])) changes.push({op: 'insert', path, key, after: index ? after[index-1][key] : null, value: v})
+        else changes.push(...fieldChanges(previous.get(v[key]), v, [...path, {key, value: v[key]}]))
+      })
+      const retained = before.filter(v => current.has(v[key])).map(v => v[key])
+      const order = after.filter(v => previous.has(v[key])).map(v => v[key])
+      if (!same(retained, order)) changes.push({op: 'reorder', path, key, order: after.map(v => v[key])})
+      return changes
     }
   }
   if (before && after && !Array.isArray(before) && !Array.isArray(after) && typeof before === 'object' && typeof after === 'object') {
@@ -62,14 +76,19 @@ export function createFieldDraftSaver(target: EvidenceTarget) {
       const selected = field ? fieldDraft(localBaseline, requested, field) : requested
       const changes = fieldChanges(localBaseline, selected).filter(c => ['paper', 'material_states', 'structure_candidates', 'structural_observations'].includes(String(c.path[0])))
       if (!changes.length) return { changed: false, draft_version: undefined as number | undefined }
+      if (!serverVersion && workdraftEpoch(target)) serverVersion = workdraftEpoch(target) + ':local'
       if (!serverVersion) {
-        const state = await api.get<{ version: string; draft: unknown }>(`/api/rag/evidence/draft-state?target=${target.target}&target_id=${encodeURIComponent(target.target_id)}`)
+        const params = new URLSearchParams({target:target.target,target_id:target.target_id})
+        const state = await api.get<{version:string}>('/api/rag/evidence/draft-state?' + params)
         serverVersion = state.version
+        rememberWorkdraft(target,state.version.includes(':') ? state.version.split(':')[0] : undefined)
       }
-      const result = await api.patch<{ version: string; changed: boolean; draft_version?: number }>('/api/rag/evidence/draft', {
+      const result = await api.patch<{ version: string; changed: boolean; draft_version?: number; revision?: number }>('/api/rag/evidence/draft', {
         ...target, expected_version: serverVersion, changes, ...(field ? { field_scope: true } : {}),
       })
       serverVersion = result.version
+      if (result.revision !== undefined) window.dispatchEvent(new CustomEvent('workdraft-saved', {
+        detail: {target, revision:result.revision, write_epoch:result.version.split(':')[0]} }))
       localBaseline = selected
       return result
     })

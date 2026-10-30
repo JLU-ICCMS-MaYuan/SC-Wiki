@@ -1,0 +1,7 @@
+# 接口与读写契约
+
+复用PropertyModule.metadata_json的版本化tc_contexts目录保存明确组与方法的共同资料；不再逐点存共同parameters／calculation_conditions／method_code／method_raw。点保留Tc、µ*、代表标记、独有覆盖和稳定组／方法引用。SQL点的科学方法由引用读取，现有definition_key仅作为表单定义引用保留；读适配恢复原前端形状，不改变共同参数区或方法／点排列。
+工作稿JSON及快照使用相同压缩表示，API及前端读取按引用投影视图。共同字段修改更新其目录一次，点修改不改目录。只共享已明确声明的稳定组及真实相同资料，不因同名／同压或软件自动合并；未声明的旧记录只读兼容，读取不写库。
+SCDFT可空µ*，显式mu_star_status区分unknown/not_reported/not_applicable/reported；真0保留为0。特殊实现有报告值时照原文保存。状态通过原控件占位与已有设置表达，不另建表单。
+
+新接口明确schema_version／工作稿id／write_epoch／内容修订号。内容修订允许同经手人后保存覆盖；写租约只用于正式交接后的拒写和角色／周期隔离。列表仅分页元信息；字段及快照详情按需读取；不因查看或普通保存调用模型。

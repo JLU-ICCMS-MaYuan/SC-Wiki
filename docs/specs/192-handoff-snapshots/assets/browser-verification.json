@@ -1,0 +1,61 @@
+{
+  "events": 4,
+  "new_tab": true,
+  "title": "公开原稿",
+  "read_only": true,
+  "tabs": [
+    "字段设置",
+    "来源核对"
+  ],
+  "requests": [
+    {
+      "path": "/api/rag/llm/current",
+      "method": "GET"
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/llm/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/community/notifications/unread",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/handoffs",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/llm/current",
+      "method": "GET"
+    },
+    {
+      "path": "/api/auth/me",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/llm/catalog",
+      "method": "GET"
+    },
+    {
+      "path": "/api/community/notifications/unread",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/handoffs/817/snapshots/e2fea742d46d4519b0d80cce2cceb93b",
+      "method": "GET"
+    },
+    {
+      "path": "/api/classification-catalogs",
+      "method": "GET"
+    },
+    {
+      "path": "/api/rag/space-groups",
+      "method": "GET"
+    }
+  ],
+  "errors": []
+}

@@ -1,4 +1,5 @@
 """保存已读来源的版本元数据，使字段说明保存不再打开PDF或扫描旧历史。"""
+from backend.ingest.evidence_audit import current_change_events
 from sqlalchemy import select
 from sqlalchemy.dialects.mysql import insert
 from backend import models
@@ -59,15 +60,18 @@ def field_snapshot(session, target, target_id, user, item_key, metadata, *, draf
     if item_key is not None:
         snapshot['records'] = [r for r in snapshot['records'] if r['item_key'] == item_key]
     from .upload_tasks import get_state
-    snapshot['_field_change_events'] = ((get_state(target_id) or {}).get('_field_change_events') or []) if target == 'upload' else draft.get('_field_change_events') or []
+    snapshot['_field_change_events'] = current_change_events(get_state(target_id) or {}) if target == 'upload' else current_change_events(draft)
     # 说明与附件保存使用草稿版本；附件自身的变化不会让同批上传的下一份文件误判过期。
-    snapshot['version'] = ev.digest([draft_version(draft), manifest(session, target, target_id)])
+    from backend.services.workdrafts import context_token
+    snapshot['_workdraft_epoch'] = context_token(session,target,target_id)
+    snapshot['_workdraft_current']=not snapshot['_workdraft_epoch'].startswith('cycle:')
+    snapshot['version'] = ev.digest([draft_version(draft), manifest(session, target, target_id), snapshot['_workdraft_epoch']])
     if target == 'paper':
         paper = session.get(models.Paper, int(target_id))
         snapshot['review_state'] = [paper.review_status, str(paper.reviewed_at), paper.content_revision]
     baseline = {'records': []}
     for record in snapshot['records']:
-        event = next((e for e in draft.get('_field_change_events') or [] if e.get('item_key') == item_key), None)
+        event = next((e for e in current_change_events(draft) if e.get('item_key') == item_key), None)
         if event:
             baseline['records'].append({**record, 'current_value': event.get('before_value')})
     return snapshot, baseline

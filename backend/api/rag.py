@@ -1916,18 +1916,19 @@ async def _create_pending_paper(
                 uploader = await session.get(User, int(state["user_id"]))
                 from backend.services.paper_history import append_paper_history_event
 
-                await append_paper_history_event(
-                    session,
-                    paper_id=paper.id,
-                    paper_revision=paper.content_revision or 1,
-                    event_type="uploaded",
-                    actor_user_id=int(state["user_id"]),
-                    actor_username_snapshot=(uploader.username if uploader else None),
-                    operation_id=task_id,
-                    classification_snapshot={'upload_submission': {
-                        'paper': {key: paper_data.get(key) for key in ('material_families', 'co_first_authors', 'corresponding_authors')},
-                        'material_states': [{key: st.get(key) for key in ('state_key', 'structure_families')} for st in material_states]}},
-                )
+                if evidence_checks is None:
+                    await append_paper_history_event(
+                        session,
+                        paper_id=paper.id,
+                        paper_revision=paper.content_revision or 1,
+                        event_type="uploaded",
+                        actor_user_id=int(state["user_id"]),
+                        actor_username_snapshot=(uploader.username if uploader else None),
+                        operation_id=task_id,
+                        classification_snapshot={'upload_submission': {
+                            'paper': {key: paper_data.get(key) for key in ('material_families', 'co_first_authors', 'corresponding_authors')},
+                            'material_states': [{key: st.get(key) for key in ('state_key', 'structure_families')} for st in material_states]}},
+                    )
 
                 from backend.services.classification_catalog import save_paper_material_families
                 await save_paper_material_families(session, paper,
@@ -2077,6 +2078,7 @@ async def _create_pending_paper(
                                   for r in evidence_checks if r['field'] in {'paper.theoretical_subtype', 'paper.keywords_tags'}}
                     persisted = await session.run_sync(lambda sync: paper_snapshot(sync, paper.id, 0, '', check_access=False, review_provenance=provenance))
                     if manual_snapshot is not None and manual_baseline is not None:
+                        manual_snapshot['_workdraft_current']=True
                         await session.run_sync(lambda sync: manual_evidence.transfer_to_paper(
                             sync, manual_snapshot, manual_baseline, paper.id, paper.content_revision, persisted))
                         from backend.ingest.field_review import bind_support_versions
@@ -2098,7 +2100,16 @@ async def _create_pending_paper(
                     await session.run_sync(lambda sync: science.save_results(sync, persisted, transferred, int(state['user_id'])))
                     from backend.ingest.field_source_metadata import remember
                     await session.run_sync(lambda sync: remember(sync, persisted, int(state['user_id'])))
-                    # 原上传核对历史保留，可从正式论文的字段历史追溯。
+                    from backend.services import manuscript_handoffs as handoffs
+                    from backend.services.paper_revisions import current_draft
+                    formal_draft = await session.run_sync(lambda sync: current_draft(sync, paper))
+                    frozen = await session.run_sync(lambda sync: handoffs.capture(sync, paper, formal_draft,
+                        persisted, science.load_results(sync, persisted, int(state['user_id'])).values()))
+                    from types import SimpleNamespace
+                    actor = uploader or SimpleNamespace(id=int(state['user_id']), username='unknown')
+                    await session.run_sync(lambda sync: handoffs.record_handoff(sync, paper, actor,
+                        action='submit', holder='review', operation_id=task_id, initial=True, **frozen))
+                    # 正式交接才冻结整稿；旧上传历史保留，不新增逐字段时间线。
                     await session.execute(sql_delete(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == task_id))
                 paper_id = paper.id
         return paper_id
@@ -2568,6 +2579,9 @@ async def rewrite_paper_scientific_draft(
     try:
         async with async_session_factory() as session:
             async with session.begin():
+                from backend.services.manuscript_handoffs import latest
+                if await session.run_sync(lambda s: latest(s,paper_id)):
+                    raise _upload_error(409,'workdraft_required','请通过当前工作稿保存，再正式交接')
                 return await _rewrite_paper_scientific_draft_in_tx(
                     session, paper_id, draft, current_user
                 )

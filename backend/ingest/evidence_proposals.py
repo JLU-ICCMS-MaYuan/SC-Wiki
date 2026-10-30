@@ -246,7 +246,7 @@ def save_draft(session, snapshot, actor, key, values, accepted, reason):
              'supported': supported, 'human_confirmed': human, 'actor_user_id': actor, 'updated_at': datetime.now(timezone.utc).isoformat(),
              'base_version': snapshot['version'], 'original_value': record.get('current_value'),
              'ai_proposal': copy.deepcopy(proposal), 'ai_status': result['status'], 'ai_reason': result['reason'],
-             'history': [*(prior.get('history') or []), *([{k: prior.get(k) for k in ('values', 'accepted', 'reason', 'updated_at', 'actor_user_id')}] if prior and (prior.get('accepted') or accepted) else [])]}
+             'history': copy.deepcopy(prior.get('history') or [])}
     # 旧模型结论留作审计，不能成为新值的支持资格或自动候选。
     previous_review = prior.get('previous_review')
     if previous is not None and not row_matches(previous, record):

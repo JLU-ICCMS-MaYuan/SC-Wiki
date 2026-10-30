@@ -1,0 +1,63 @@
+{
+  "source_task": "52a25d2c68c04ff78e8346715dbbe717",
+  "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+  "source_file_id": "c900e237f152476f95fcc28e79857055",
+  "pages": [
+    3
+  ],
+  "model": "deepseek-v4-pro",
+  "text_reused": "已按原PDF核验的IR；字段AI提取重新执行",
+  "source_unchanged": true,
+  "extraction_completed": true,
+  "review_contract": "tc-point-binding-v1：本轮代码变更后重新核对目标字段",
+  "fresh_fields": [
+    {
+      "field": "material_states[0].property_modules[0].records[0].payload.parameters.lambda_ep",
+      "value": 2.69,
+      "status": "supported"
+    },
+    {
+      "field": "material_states[0].property_modules[0].records[0].value_number",
+      "value": 235.0,
+      "status": "supported"
+    },
+    {
+      "field": "material_states[0].property_modules[0].records[0].payload.parameters.mu_star",
+      "value": 0.1,
+      "status": "supported"
+    },
+    {
+      "field": "material_states[0].property_modules[0].records[1].value_number",
+      "value": 220.0,
+      "status": "supported"
+    },
+    {
+      "field": "material_states[0].property_modules[0].records[1].payload.parameters.mu_star",
+      "value": 0.13,
+      "status": "supported"
+    }
+  ],
+  "mismatched_pair_status": "unsupported",
+  "sql_roundtrip": {
+    "pair_values": [
+      [
+        0.1,
+        235
+      ],
+      [
+        0.13,
+        220
+      ]
+    ],
+    "current_results": 5,
+    "shared_context_count": 1,
+    "isolated_database": "scwiki_issue139_test_six_d3c34e7944"
+  },
+  "validated": true,
+  "scope": "正文第3页的五个目标字段；相邻未改动计算条件沿用原稿隔离副本，不代表整篇科学验收",
+  "source_code_sha256": {
+    "backend/ingest/point_binding.py": "5047b91bd1f1558192ca297980c4d7fedf66a6f143417a7c35020505a641da56",
+    "backend/ingest/field_sources.py": "d96bf2dbfa53b997f638f0b7107b7bf07fa7bd15dff98a6303f25d362edfa079",
+    "backend/ingest/tc_contexts.py": "83a8c1596eb819239bbf76dbabc5ba3ff1a96b375010a85c06a1d8c9157a0e7d"
+  }
+}

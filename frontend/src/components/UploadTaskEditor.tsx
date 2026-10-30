@@ -1,3 +1,5 @@
+import type { PropertySpectrumListing } from '../lib/propertySpectra'
+import WorkdraftRefresh, { useWorkdraftRefresh } from './WorkdraftRefresh'
 import { createFieldDraftSaver, preserveRawNumbers } from '../lib/fieldDrafts'
 import { currentEvidenceField, evidenceFieldsForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
@@ -29,6 +31,8 @@ import PaperMaterialsSection from './PaperMaterialsSection'
 import { researchMaterials } from '../lib/paperMaterials'
 import PaperStructuralWorkspace from './PaperStructuralWorkspace'
 import { mergeStructuralPreview } from '../lib/structuralRecords'
+import ManuscriptHistoryLink from './ManuscriptHistoryLink'
+import type { EvidenceRecord,FrozenManualEvidence } from './EvidenceWorkflow'
 
 interface UploadTaskEditorProps {
   taskId: string
@@ -37,6 +41,9 @@ interface UploadTaskEditorProps {
   readOnly?: boolean
   statusNote?: string
   revisionPaperId?: number
+  frozenEvidenceRecords?: EvidenceRecord[]
+  frozenManualEvidence?: FrozenManualEvidence[]
+  frozenSpectra?: PropertySpectrumListing
 }
 
 interface RevisionDraftResponse {
@@ -121,9 +128,11 @@ const normalizeIssueField = (field: string): string => field.replace(
 )
 
 const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
-  taskId, onSubmitted, draftOverride, readOnly = false, statusNote, revisionPaperId,
+  taskId, onSubmitted, draftOverride, readOnly = false, statusNote, revisionPaperId,frozenEvidenceRecords,frozenManualEvidence,frozenSpectra,
 }) => {
   const { t, lang, dict } = useLanguage()
+  const [loadedSpectra,setLoadedSpectra] = useState<PropertySpectrumListing | undefined>(undefined)
+  const frozenSnapshot = frozenEvidenceRecords !== undefined
   const [draft, setDraft] = useState<UploadDraft | null>(null)
   const [loading, setLoading] = useState(true)
   const [dirty, setDirty] = useState(false)
@@ -139,6 +148,8 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     : { target: 'upload', target_id: taskId }
   const evidenceWorkflow = useEvidenceWorkflow({ target: evidenceTarget,
     readOnly,
+    frozenRecords:frozenEvidenceRecords,
+    frozenManualEvidence,
     getCurrentValue: record => draft ? currentEvidenceField(record, { ...draft.paper }, draft.material_states) : undefined,
     saveCurrent: () => saveDraft(false, false),
     hasUnsavedFields: () => Boolean(fieldSaver.current?.hasChanges(currentEditor.current.draft)),
@@ -199,8 +210,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const revisionRef = useRef(0)
   const currentEditor = useRef({ draft, loading, dirty, saving, submitting })
   currentEditor.current = { draft, loading, dirty, saving, submitting }
-  const refreshEvidence = useRef(evidenceWorkflow.restore)
-  refreshEvidence.current = evidenceWorkflow.restore
 
   useEffect(() => {
     let active = true
@@ -269,49 +278,20 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
     return () => { cancelled = true; controller.abort() }
   }, [taskId, draftOverride, draftUrl, revisionPaperId])
 
-  useEffect(() => {
-    if (draftOverride !== undefined || readOnly || revisionPaperId) return undefined
-    let disposed = false
-    let refreshing = false
-    let controller: AbortController | null = null
-    const refresh = async () => {
-      const editor = currentEditor.current
-      if (document.visibilityState === 'hidden' || refreshing || !editor.draft || editor.loading
-        || editor.dirty || editor.saving || editor.submitting || evidenceWorkflow.hasManualDrafts()) return
-      const editVersion = revisionRef.current
-      controller = new AbortController()
-      refreshing = true
-      try {
-        const response = await api.get<{ ok: boolean; data: UploadDraft }>(draftUrl, { signal: controller.signal })
-        const latest = currentEditor.current
-        if (disposed || editVersion !== revisionRef.current || latest.dirty || latest.saving || latest.submitting || evidenceWorkflow.hasManualDrafts()) return
-        const next = preserveRawNumbers(unwrapData(response), normalizeUploadDraft(unwrapData(response)))
-        if (JSON.stringify(next) !== JSON.stringify(latest.draft)) {
-          fieldSaver.current = createFieldDraftSaver({target: 'upload', target_id: taskId})
-          fieldSaver.current.initialize(next)
-          setDraft(next)
-          setIssues([])
-          setError('')
-          setLastSavedAt(null)
-        }
-        void refreshEvidence.current({ target: 'upload', target_id: taskId })
-      } catch {
-        // 失焦后刷新失败时保留当前草稿，下一次获得焦点仍可重试。
-      } finally {
-        refreshing = false
-      }
-    }
-    const onVisible = () => { if (document.visibilityState === 'visible') void refresh() }
-    const onFocus = () => { void refresh() }
-    window.addEventListener('focus', onFocus)
-    document.addEventListener('visibilitychange', onVisible)
-    return () => {
-      disposed = true
-      controller?.abort()
-      window.removeEventListener('focus', onFocus)
-      document.removeEventListener('visibilitychange', onVisible)
-    }
-  }, [draftOverride, draftUrl, readOnly, revisionPaperId, taskId])
+  const refreshState = useWorkdraftRefresh(evidenceTarget, {
+    enabled: draftOverride === undefined && !readOnly && !loading && Boolean(draft),
+    busy: () => saving || submitting || evidenceWorkflow.busy || evidenceWorkflow.hasPendingWrites(),
+    dirty: () => dirty || evidenceWorkflow.hasUnsavedRefreshInput(),
+    editVersion: () => revisionRef.current + ':' + evidenceWorkflow.getRefreshRevision(),
+    apply: async (value, fieldState, spectra) => {
+      setLoadedSpectra(spectra)
+      const next = preserveRawNumbers(value, normalizeUploadDraft(value))
+      fieldSaver.current = createFieldDraftSaver(evidenceTarget!)
+      fieldSaver.current.initialize(next)
+      setDraft(next); setDirty(false); setIssues([]); setError('')
+      await evidenceWorkflow.restore(evidenceTarget!, true, fieldState)
+    },
+  })
 
   const changeDraft = useCallback((updater: (current: UploadDraft) => UploadDraft) => {
     setDraft(current => current ? updater(current) : current)
@@ -394,10 +374,10 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   }, [dirty, draft, saving, readOnly, t, lang, persistDraft, revision?.conflict])
 
   useEffect(() => {
-    if (!dirty || !draft || saving || submitting || revision?.conflict || evidenceWorkflow.busy) return
+    if (!dirty || !draft || saving || submitting || revision?.conflict || evidenceWorkflow.busy || refreshState.loading) return
     const timer = window.setTimeout(() => { void saveDraft(false) }, 5000)
     return () => window.clearTimeout(timer)
-  }, [dirty, draft, saveDraft, saving, submitting, revision?.conflict, evidenceWorkflow.busy])
+  }, [dirty, draft, saveDraft, saving, submitting, revision?.conflict, evidenceWorkflow.busy, refreshState.loading])
 
   // 详情会在独立标签页中打开；关闭、刷新或返回前保护尚未完成保存的主表单。
   useEffect(() => {
@@ -602,13 +582,14 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
       <EvidenceFieldMarkers records={evidenceWorkflow.records} scope="upload-editor" onOpen={evidenceWorkflow.openIssue} onChange={evidenceWorkflow.invalidate} />
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 2, flexWrap: 'wrap' }}>
         <Box>
-          <Typography variant="h6" fontWeight={700}>{revisionPaperId ? t('paperDetail.revisionTitle') : readOnly ? t('upload.aiDraftTitle') : t('upload.checkAiDraftTitle')}</Typography>
+          <Typography variant="h6" fontWeight={700}>{frozenSnapshot ? '正式交出内容' : revisionPaperId ? t('paperDetail.revisionTitle') : readOnly ? t('upload.aiDraftTitle') : t('upload.checkAiDraftTitle')}</Typography>
+          {!frozenEvidenceRecords&&<ManuscriptHistoryLink target={revisionPaperId?'paper':'upload'} targetId={revisionPaperId?String(revisionPaperId):taskId}/>}
           <Typography variant="body2" color="text.secondary">
-            {readOnly ? (statusNote || t('upload.defaultNote')) : t('upload.editorSubtitle')}
+            {frozenSnapshot ? '显示当时保存的整份内容及采用资料。' : readOnly ? (statusNote || t('upload.defaultNote')) : t('upload.editorSubtitle')}
           </Typography>
         </Box>
         {readOnly ? (
-          <Chip size="small" color="info" label={t('upload.readOnlyBadge')} />
+          <Chip size="small" color="info" label={frozenSnapshot ? '只读正式内容' : t('upload.readOnlyBadge')} />
         ) : (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
           <Typography variant="caption" color={error ? 'error' : 'text.secondary'}>
@@ -622,6 +603,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         )}
       </Box>
 
+      <WorkdraftRefresh state={refreshState} busy={saving || submitting || evidenceWorkflow.busy} />
       {error && <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError('')}>{error}</Alert>}
       {evidenceWorkflow.automaticView && <Alert severity={evidenceWorkflow.automaticView.phase === 'error' ? 'warning' : 'info'} role="status" sx={{ mb: 2 }}>
         {evidenceWorkflow.automaticView.phase === 'error'
@@ -854,7 +836,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
       <MaterialStatesEditor
         independentStructureWorkspace
-        propertySpectra={{ target: revisionPaperId && revisionMeta.current
+        propertySpectra={{ frozenListing: frozenSpectra, initialListing: loadedSpectra, target: revisionPaperId && revisionMeta.current
           ? { target: 'revision', target_id: revisionMeta.current.revision_id }
           : { target: 'upload', target_id: taskId }, beforeNavigate: async () => {
             if (readOnly) return true

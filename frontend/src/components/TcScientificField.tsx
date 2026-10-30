@@ -6,16 +6,16 @@ import type { ParameterValue } from '../lib/tcParameters'
 
 export interface TcFieldSettings { name_raw?: string; unit_raw?: string }
 const numeric = /^[+]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/
-export default function TcScientificField({ value, label, unit = '', field, readOnly, error, settings, currentTc = false, onChange, onApply }: {
+export default function TcScientificField({ value, label, unit = '', field, readOnly, error, settings, currentTc = false, emptyLabel = '', onChange, onApply }: {
   value: ParameterValue; label: string; unit?: string; field: string; readOnly: boolean; error?: string
-  settings?: TcFieldSettings; currentTc?: boolean; onChange: (value: ParameterValue) => void; onApply: (value: ParameterValue, settings: TcFieldSettings) => void
+  settings?: TcFieldSettings; currentTc?: boolean; emptyLabel?: string; onChange: (value: ParameterValue) => void; onApply: (value: ParameterValue, settings: TcFieldSettings) => void
 }) {
   const [editing, setEditing] = useState<(ScientificFieldSettings & { signature: string }) | null>(null), [message, setMessage] = useState('')
-  const [text, setText] = useState(String(value ?? '')), published = useRef(value)
+  const [text, setText] = useState(String(value ?? emptyLabel)), published = useRef(value)
   useEffect(() => {
-    if (!Object.is(value, published.current)) setText(String(value ?? ''))
+    if (!Object.is(value, published.current) || value == null && emptyLabel) setText(String(value ?? emptyLabel))
     published.current = value
-  }, [value])
+  }, [value, emptyLabel])
   const [presentation, setPresentation] = useState<FieldSettingsPresentation>()
   const signature = JSON.stringify([field, value, settings])
   const convert = (raw: string): ParameterValue => raw === '' ? null : numeric.test(raw) && Number.isFinite(Number(raw)) ? Number(raw) : raw

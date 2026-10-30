@@ -15,6 +15,9 @@ from backend.ingest.property_modules import canonical_json, record_checksum, val
 
 def record_snapshot(record: models.PropertyRecord) -> dict[str, Any]:
     # MySQL 数值列读取为 Decimal；审计 JSON 与 HTTP 预览必须使用同一可序列化快照。
+    from backend.ingest.tc_contexts import expanded_record
+    if (record.payload_json or {}).get('tc_context_ref'):
+        return jsonable_encoder(expanded_record(record))
     return jsonable_encoder({
         "record_key": record.record_key, "module_code": record.module.module_code if record.module else None,
         "record_type": record.record_type, "property_code": record.property_code,
@@ -71,6 +74,12 @@ def apply_upgrade(db, record: models.PropertyRecord, target: models.FormDefiniti
     record.definition = target
     record.definition_key = target.definition_key
     record.definition_version = target.version
+    if (record.payload_json or {}).get('tc_context_ref'):
+        from backend.ingest.tc_contexts import compact_module
+        packed = compact_module({'metadata':record.module.metadata_json or {},'records':[after]})
+        record.module.metadata_json = packed['metadata']
+        after = packed['records'][0]
+        record.method_code, record.method_raw = after.get('method_code'), after.get('method_raw')
     record.payload_json = after["payload"]
     record.record_checksum = preview["target_checksum"]
     previous = db.query(models.PropertyRecordDefinitionEvent).filter_by(record_id=record.id).order_by(models.PropertyRecordDefinitionEvent.id.desc()).first()

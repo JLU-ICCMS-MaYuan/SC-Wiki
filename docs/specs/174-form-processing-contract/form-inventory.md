@@ -73,3 +73,9 @@ test:form-contract 已加入 sidebar-field-save、sidebar-field-workflow、sideb
 ## #181 方法语义与结构优化详情
 
 StructureOptimizationFields与既有CalculationConditionFields接入上传、返修、管理员及超级管理员。四类完整宿主验证四目标/几何约束、电子理论与数值分开显示、无变化零写、当前字段保存与来源侧栏；只读、中文组合输入及保存失败重试单列。正式表单入口增加physical-method-hosts，不删除旧回归。新JSON列只做隔离迁移/存取验证，业务库与部署未执行，实际结果及旧失败基线见[验收记录](../181-physical-method-scope/validation.md)。
+
+## 正式交接只读入口（#192）
+
+- /manuscripts/:target/:targetId/handoffs：分页交接元信息列表，不载入全部整稿。
+- /papers/:id/snapshots/:snapshotId：共享完整科学表单的冻结只读宿主；字段侧栏两个页签，谱使用冻结曲线与文件，不访问当前工作稿或当前谱。
+- 上传、返修、管理员、超级管理员的标题入口已在完整宿主覆盖；独立列表→新标签整稿→只读侧栏和零写请求由 manuscript-handoff-browser.mjs 验证，冻结谱由 frozen-spectra.test.tsx 及实际 SQL 交接隔离回归覆盖。

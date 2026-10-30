@@ -1,0 +1,578 @@
+{
+  "source": "frontend/src/lib/fieldDrafts.ts",
+  "source_sha256": "e44f3888a9216833d38924d455fe33a49a1c09e2b5f750606511a3bc99dddc89",
+  "node": "v22.21.1",
+  "date": "2026-10-30T15:40:09.216Z",
+  "boundaries": [
+    "真实保存器CPU路径，API为隔离立即响应替身；不是生产网络或数据库耗时",
+    "autosave测相同保存处理，不把5000ms等待计为CPU成本",
+    "helper_no_change不是UI无变化保存：原宿主可在dirty=false时直接返回",
+    "输入延迟另用完整宿主浏览器测量，不能由这里的复制时间直接认定输入卡顿原因"
+  ],
+  "measurements": [
+    {
+      "states": 5,
+      "points": 30,
+      "bytes": 582668,
+      "fixture_sha256": "8733bd15918228fea4765e800ec1145aa22a974440fd3ad8b9ce8d65fb0366c6",
+      "mode": "single_field",
+      "repeats": 8,
+      "total_mean_ms": 4.559838499999998,
+      "total_p95_ms": 5.4043339999999915,
+      "clone_mean_ms": 1.1447917499999996,
+      "comparison_mean_ms": 2.196083375000004,
+      "changes_serialization_mean_ms": 0.0011667500000029918,
+      "requestCounts": [
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        }
+      ]
+    },
+    {
+      "states": 5,
+      "points": 30,
+      "bytes": 582668,
+      "fixture_sha256": "8733bd15918228fea4765e800ec1145aa22a974440fd3ad8b9ce8d65fb0366c6",
+      "mode": "whole_save",
+      "repeats": 8,
+      "total_mean_ms": 3.4624530000000036,
+      "total_p95_ms": 4.123625000000004,
+      "clone_mean_ms": 1.0998592500000015,
+      "comparison_mean_ms": 2.2152603749999997,
+      "changes_serialization_mean_ms": 0.0010470000000033508,
+      "requestCounts": [
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        }
+      ]
+    },
+    {
+      "states": 5,
+      "points": 30,
+      "bytes": 582668,
+      "fixture_sha256": "8733bd15918228fea4765e800ec1145aa22a974440fd3ad8b9ce8d65fb0366c6",
+      "mode": "autosave",
+      "repeats": 8,
+      "total_mean_ms": 3.1861823750000084,
+      "total_p95_ms": 4.371542000000005,
+      "clone_mean_ms": 1.0548698749999978,
+      "comparison_mean_ms": 2.165051875000003,
+      "changes_serialization_mean_ms": 0.0010312499999969305,
+      "requestCounts": [
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        }
+      ]
+    },
+    {
+      "states": 5,
+      "points": 30,
+      "bytes": 582668,
+      "fixture_sha256": "8733bd15918228fea4765e800ec1145aa22a974440fd3ad8b9ce8d65fb0366c6",
+      "mode": "helper_no_change",
+      "repeats": 8,
+      "total_mean_ms": 2.676557250000002,
+      "total_p95_ms": 3.386000000000024,
+      "clone_mean_ms": 1.0375782499999886,
+      "comparison_mean_ms": 1.2391821249999992,
+      "changes_serialization_mean_ms": 0.000911249999994368,
+      "requestCounts": [
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        }
+      ]
+    },
+    {
+      "states": 40,
+      "points": 240,
+      "bytes": 4659253,
+      "fixture_sha256": "0cc45c7bc40d36789498e2b86a4b6fdac14091ebdfc153f3fcd3900e77159f71",
+      "mode": "single_field",
+      "repeats": 8,
+      "total_mean_ms": 33.51410399999999,
+      "total_p95_ms": 35.57687499999997,
+      "clone_mean_ms": 7.420130374999999,
+      "comparison_mean_ms": 17.720515374999998,
+      "changes_serialization_mean_ms": 0.0016146250000232953,
+      "requestCounts": [
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        }
+      ]
+    },
+    {
+      "states": 40,
+      "points": 240,
+      "bytes": 4659253,
+      "fixture_sha256": "0cc45c7bc40d36789498e2b86a4b6fdac14091ebdfc153f3fcd3900e77159f71",
+      "mode": "whole_save",
+      "repeats": 8,
+      "total_mean_ms": 24.175838500000012,
+      "total_p95_ms": 24.99245800000017,
+      "clone_mean_ms": 7.167770875000016,
+      "comparison_mean_ms": 16.876344125000017,
+      "changes_serialization_mean_ms": 0.0013595000000492519,
+      "requestCounts": [
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        }
+      ]
+    },
+    {
+      "states": 40,
+      "points": 240,
+      "bytes": 4659253,
+      "fixture_sha256": "0cc45c7bc40d36789498e2b86a4b6fdac14091ebdfc153f3fcd3900e77159f71",
+      "mode": "autosave",
+      "repeats": 8,
+      "total_mean_ms": 24.786619624999986,
+      "total_p95_ms": 27.184416000000056,
+      "clone_mean_ms": 7.25641150000007,
+      "comparison_mean_ms": 16.794057250000037,
+      "changes_serialization_mean_ms": 0.0015681250000056934,
+      "requestCounts": [
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        }
+      ]
+    },
+    {
+      "states": 40,
+      "points": 240,
+      "bytes": 4659253,
+      "fixture_sha256": "0cc45c7bc40d36789498e2b86a4b6fdac14091ebdfc153f3fcd3900e77159f71",
+      "mode": "helper_no_change",
+      "repeats": 8,
+      "total_mean_ms": 17.601635500000043,
+      "total_p95_ms": 18.63124999999991,
+      "clone_mean_ms": 7.785328250000106,
+      "comparison_mean_ms": 10.389150999999998,
+      "changes_serialization_mean_ms": 0.0013802499999826523,
+      "requestCounts": [
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        }
+      ]
+    },
+    {
+      "states": 100,
+      "points": 600,
+      "bytes": 11647813,
+      "fixture_sha256": "e10bb80fca857b594bd07ee326d7fb8397c209f71ada9632bd54f106d9a9f19a",
+      "mode": "single_field",
+      "repeats": 8,
+      "total_mean_ms": 71.75405174999997,
+      "total_p95_ms": 75.8527079999999,
+      "clone_mean_ms": 19.26651562499984,
+      "comparison_mean_ms": 32.472177000000045,
+      "changes_serialization_mean_ms": 0.0023646250000979308,
+      "requestCounts": [
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        }
+      ]
+    },
+    {
+      "states": 100,
+      "points": 600,
+      "bytes": 11647813,
+      "fixture_sha256": "e10bb80fca857b594bd07ee326d7fb8397c209f71ada9632bd54f106d9a9f19a",
+      "mode": "whole_save",
+      "repeats": 8,
+      "total_mean_ms": 55.068942499999935,
+      "total_p95_ms": 59.61999999999989,
+      "clone_mean_ms": 18.300078124999914,
+      "comparison_mean_ms": 32.58917199999996,
+      "changes_serialization_mean_ms": 0.0023644999999987704,
+      "requestCounts": [
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        }
+      ]
+    },
+    {
+      "states": 100,
+      "points": 600,
+      "bytes": 11647813,
+      "fixture_sha256": "e10bb80fca857b594bd07ee326d7fb8397c209f71ada9632bd54f106d9a9f19a",
+      "mode": "autosave",
+      "repeats": 8,
+      "total_mean_ms": 54.48031287499998,
+      "total_p95_ms": 58.24291699999958,
+      "clone_mean_ms": 18.551077875000146,
+      "comparison_mean_ms": 32.15930712499983,
+      "changes_serialization_mean_ms": 0.002057250000007116,
+      "requestCounts": [
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        },
+        {
+          "gets": 1,
+          "writes": 1
+        }
+      ]
+    },
+    {
+      "states": 100,
+      "points": 600,
+      "bytes": 11647813,
+      "fixture_sha256": "e10bb80fca857b594bd07ee326d7fb8397c209f71ada9632bd54f106d9a9f19a",
+      "mode": "helper_no_change",
+      "repeats": 8,
+      "total_mean_ms": 41.25385937500016,
+      "total_p95_ms": 45.693459000000075,
+      "clone_mean_ms": 18.31808824999996,
+      "comparison_mean_ms": 18.861828249999917,
+      "changes_serialization_mean_ms": 0.001505500000007487,
+      "requestCounts": [
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        },
+        {
+          "gets": 0,
+          "writes": 0
+        }
+      ]
+    }
+  ]
+}

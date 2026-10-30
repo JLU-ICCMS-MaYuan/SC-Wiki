@@ -118,6 +118,9 @@ def build_material_state_export(db: Session, *, paper_id: int, state_key: str, u
             "display_order": module.display_order, "metadata": module.metadata_json or {}, "records": record_payloads,
         })
 
+    from backend.ingest.tc_contexts import expand_module
+    module_payloads = [expand_module(module) for module in module_payloads]
+
     end_revision = db.query(models.Paper.content_revision).filter(models.Paper.id == paper_id).scalar()
     if end_revision != revision:
         raise HTTPException(status_code=409, detail={"code": "export_revision_conflict", "message": "导出期间论文 revision 已变化"})

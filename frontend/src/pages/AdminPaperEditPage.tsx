@@ -1,3 +1,5 @@
+import type { PropertySpectrumListing } from '../lib/propertySpectra'
+import WorkdraftRefresh, { useWorkdraftRefresh } from '../components/WorkdraftRefresh'
 import { createFieldDraftSaver } from '../lib/fieldDrafts'
 import { currentEvidenceField, evidenceFieldsForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
@@ -27,6 +29,7 @@ import MaterialStatesEditor, { SpaceGroupOption } from '../components/MaterialSt
 import PaperStructuralWorkspace from '../components/PaperStructuralWorkspace'
 import type { LatticeObservation } from '../lib/structuralRecords'
 import PaperMetadataRow from '../components/PaperMetadataRow'
+import ManuscriptHistoryLink from '../components/ManuscriptHistoryLink'
 import ReviewPaperTextField from '../components/ReviewPaperTextField'
 import { useLanguage } from '../context/LanguageContext'
 import { convertLegacyPropertyModules, PROPERTY_SCHEMA_VERSION } from '../lib/propertyModules'
@@ -79,8 +82,10 @@ const AdminPaperEditPage: React.FC = () => {
   const [editReviewStatus, setEditReviewStatus] = useState('')
   const [editReviewComment, setEditReviewComment] = useState('')
   const [editReviewSaving, setEditReviewSaving] = useState(false)
+  const reviewOperation=useRef<{key:string;id:string}|undefined>(undefined)
 
   /* ── 科学数据（Issue #76）：材料状态与结构候选受控于共享编辑器，保存时随 C1 提交 ─ */
+  const [loadedSpectra,setLoadedSpectra] = useState<PropertySpectrumListing | undefined>(undefined)
   const [editMaterialStates, setEditMaterialStates] = useState<DraftMaterialState[]>([])
   const [editMaterialFamilies, setEditMaterialFamilies] = useState<FamilySelection[]>([])
   const evidenceWorkflow = useEvidenceWorkflow({
@@ -245,6 +250,30 @@ const AdminPaperEditPage: React.FC = () => {
     void loadDetail()
   }, [paperId])
 
+  const refreshIdentity = useRef({ form: editForm, states: editMaterialStates, families: editMaterialFamilies,
+    structures: editStructureCandidates, observations: editStructuralObservations, revision: 0 })
+  const previousRefresh = refreshIdentity.current
+  if (previousRefresh.form !== editForm || previousRefresh.states !== editMaterialStates ||
+      previousRefresh.families !== editMaterialFamilies || previousRefresh.structures !== editStructureCandidates ||
+      previousRefresh.observations !== editStructuralObservations) refreshIdentity.current = {
+    form: editForm, states: editMaterialStates, families: editMaterialFamilies,
+    structures: editStructureCandidates, observations: editStructuralObservations, revision: previousRefresh.revision + 1 }
+  const refreshState = useWorkdraftRefresh(paperId ? { target:'paper', target_id:String(paperId) } : undefined, {
+    enabled: !editLoading && Boolean(paperId),
+    busy: () => editReviewSaving || evidenceWorkflow.busy || evidenceWorkflow.hasPendingWrites(),
+    dirty: () => Boolean(fieldSaver.current?.hasChanges(editableDraft())) || evidenceWorkflow.hasUnsavedRefreshInput(),
+    editVersion: () => refreshIdentity.current.revision + ':' + evidenceWorkflow.getRefreshRevision(),
+    apply: async (draft, fieldState, spectra) => {
+      setLoadedSpectra(spectra)
+      fieldSaver.current = createFieldDraftSaver({target:'paper',target_id:String(paperId)})
+      fieldSaver.current.initialize(draft)
+      setEditForm(draft.paper); setEditMaterialFamilies(draft.paper.material_families || [])
+      setEditMaterialStates(draft.material_states || []); setEditStructureCandidates(draft.structure_candidates || [])
+      setEditStructuralObservations(draft.structural_observations || [])
+      await evidenceWorkflow.restore({target:'paper',target_id:String(paperId)}, true, fieldState)
+    },
+  })
+
   // 编辑页内提交审核；批准时由后端校验当前论文级 family 和状态分类完整性。
   const handleEditReview = async () => {
     setEditReviewSaving(true)
@@ -255,7 +284,10 @@ const AdminPaperEditPage: React.FC = () => {
         : paperReviewPayload(editReviewStatus, editReviewComment)
       const evidence = editReviewStatus === 'approved' ? await evidenceWorkflow.gate({ target: 'paper', target_id: String(paperId) }) : {}
       if (!evidence) return
-      await api.post(editReviewStatus === 'approved' ? '/api/rag/evidence/review-commit' : `/api/admin/papers/${paperId}/review`, { ...payload, ...evidence, paper_id: Number(paperId) })
+      const key=JSON.stringify([paperId,editReviewStatus,editReviewComment])
+      if(reviewOperation.current?.key!==key)reviewOperation.current={key,id:crypto.randomUUID()}
+      await api.post('/api/rag/evidence/review-commit', { ...payload, ...evidence, paper_id: Number(paperId),
+        review_request_id:reviewOperation.current.id })
       navigate(workspacePath)
     } catch (e: unknown) {
       setSnackbar(t('admin.reviewFailed', { reason: (e as Error).message }))
@@ -319,6 +351,8 @@ const AdminPaperEditPage: React.FC = () => {
           <ArrowBackIcon fontSize="small" />
         </IconButton>
         <Typography variant="h5" fontWeight={700}>{t('admin.editPaperTitle')}</Typography>
+        {paperId&&<ManuscriptHistoryLink target="paper" targetId={String(paperId)}/>}
+        <WorkdraftRefresh state={refreshState} busy={editReviewSaving || evidenceWorkflow.busy}/>
         {editLoading && <CircularProgress size={20} />}
       </Box>
 
@@ -579,7 +613,7 @@ const AdminPaperEditPage: React.FC = () => {
               编辑结果随保存时的 C1 请求整体替换（T020/T030/T034）。 */}
           <MaterialStatesEditor
             independentStructureWorkspace
-            propertySpectra={{ target: { target: 'paper', target_id: String(paperId) }, beforeNavigate: async () => {
+            propertySpectra={{ initialListing: loadedSpectra, target: { target: 'paper', target_id: String(paperId) }, beforeNavigate: async () => {
               if (evidenceWorkflow.hasManualDrafts()) throw new Error('请先保存或处理来源核对中的人工修改草稿，再打开谱详情。')
               const version = evidenceWorkflow.getEditRevision()
               const saved = await handleEditSave()

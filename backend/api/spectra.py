@@ -13,7 +13,8 @@ from backend.services import spectra as service
 from backend.spectra import jobs
 from backend.spectra.contracts import SpectrumTarget, PanelCalibration
 
-router = APIRouter(prefix="/api/rag/spectra", tags=["spectra"])
+from backend.services.workdraft_context import request_workdraft
+router = APIRouter(prefix="/api/rag/spectra", tags=["spectra"], dependencies=[Depends(request_workdraft)])
 
 
 class ExtractRequest(SpectrumTarget):
@@ -51,7 +52,7 @@ class RevalidateRequest(RecalculateRequest):
 
 
 @router.post("/{collection_id}/revalidate")
-def revalidate(collection_id: str, body: RevalidateRequest, user=Depends(get_current_user), session: Session=Depends(get_db)):
+def revalidate(collection_id: str, body: RevalidateRequest, user=Depends(get_current_user), session: Session=Depends(get_db,use_cache=False)):
     from backend.spectra import manual
     ctx = service.context(session, body.target, body.target_id, user, write=True)
     service.assert_version(ctx["version"], body.expected_version)
@@ -64,7 +65,7 @@ def revalidate(collection_id: str, body: RevalidateRequest, user=Depends(get_cur
 
 
 @router.post("/{collection_id}/recalculate")
-def recalculate(collection_id: str, body: RecalculateRequest, user=Depends(get_current_user), session: Session=Depends(get_db)):
+def recalculate(collection_id: str, body: RecalculateRequest, user=Depends(get_current_user), session: Session=Depends(get_db,use_cache=False)):
     from backend.spectra import manual, recalculate as calculation
     ctx = service.context(session, body.target, body.target_id, user, write=True)
     service.assert_version(ctx["version"], body.expected_version)
@@ -77,7 +78,7 @@ def recalculate(collection_id: str, body: RecalculateRequest, user=Depends(get_c
 @router.get("/{collection_id}/manual")
 def manual_document(collection_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
                     kind: Literal["alpha2f", "phonon_dos"], collection_version: int, run_id: str,
-                    user=Depends(get_current_user), session: Session=Depends(get_db)):
+                    user=Depends(get_current_user), session: Session=Depends(get_db,use_cache=False)):
     from backend.spectra import manual
     ctx = service.context(session, target, target_id, user, write=True)
     row, run, _ = manual.current(session, ctx, collection_id, collection_version, run_id)
@@ -85,7 +86,7 @@ def manual_document(collection_id: str, target: Literal["upload", "paper", "revi
 
 
 @router.post("/{collection_id}/manual")
-def save_manual(collection_id: str, body: ManualRequest, user=Depends(get_current_user), session: Session=Depends(get_db)):
+def save_manual(collection_id: str, body: ManualRequest, user=Depends(get_current_user), session: Session=Depends(get_db,use_cache=False)):
     from backend.spectra import manual
     ctx = service.context(session, body.target, body.target_id, user, write=True)
     service.assert_version(ctx["version"], body.expected_version)
@@ -97,7 +98,7 @@ def save_manual(collection_id: str, body: ManualRequest, user=Depends(get_curren
 
 @router.get("")
 def list_spectra(target: Literal["upload", "paper", "revision"], target_id: str,
-                 user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
+                 user=Depends(get_current_user_optional), session: Session=Depends(get_db,use_cache=False)):
     ctx = service.context(session, target, target_id, user)
     return service.listing(session, ctx)
 
@@ -105,7 +106,7 @@ def list_spectra(target: Literal["upload", "paper", "revision"], target_id: str,
 @router.delete("/{collection_id}")
 def delete_unassigned(collection_id: str, target: Literal["upload", "revision"], target_id: str,
                       expected_version: str, expected_collection_version: int = Query(ge=1),
-                      user=Depends(get_current_user), session: Session=Depends(get_db)):
+                      user=Depends(get_current_user), session: Session=Depends(get_db,use_cache=False)):
     ctx = service.context(session, target, target_id, user, write=True)
     service.assert_version(ctx["version"], expected_version)
     service.delete_unassigned(session, ctx, collection_id, expected_collection_version)
@@ -114,7 +115,7 @@ def delete_unassigned(collection_id: str, target: Literal["upload", "revision"],
 
 
 @router.post("/extract", dependencies=[Depends(request_llm_config)], status_code=202)
-def extract(body: ExtractRequest, user=Depends(get_current_user), session: Session=Depends(get_db)):
+def extract(body: ExtractRequest, user=Depends(get_current_user), session: Session=Depends(get_db,use_cache=False)):
     ctx = service.context(session, body.target, body.target_id, user, write=True)
     job = jobs.enqueue(session, ctx, expected_version=body.expected_version, config=get_llm_config())
     session.commit()
@@ -124,7 +125,7 @@ def extract(body: ExtractRequest, user=Depends(get_current_user), session: Sessi
 
 @router.put("/{collection_id}/calibration", dependencies=[Depends(request_llm_config)], status_code=202)
 def correct_calibration(collection_id: str, body: CalibrationRequest, user=Depends(get_current_user),
-                        session: Session=Depends(get_db)):
+                        session: Session=Depends(get_db,use_cache=False)):
     ctx = service.context(session, body.target, body.target_id, user, write=True)
     row = service.checked_row(session, ctx, collection_id, body.expected_collection_version)
     job = jobs.enqueue(session, ctx, expected_version=body.expected_version, config=get_llm_config(), row=row,
@@ -135,7 +136,7 @@ def correct_calibration(collection_id: str, body: CalibrationRequest, user=Depen
 
 
 @router.post("/{collection_id}/review")
-def review(collection_id: str, body: ReviewRequest, user=Depends(get_current_user), session: Session=Depends(get_db)):
+def review(collection_id: str, body: ReviewRequest, user=Depends(get_current_user), session: Session=Depends(get_db,use_cache=False)):
     ctx = service.context(session, body.target, body.target_id, user, write=True)
     service.assert_version(ctx["version"], body.expected_version)
     row = service.checked_row(session, ctx, collection_id, body.expected_collection_version)
@@ -159,20 +160,20 @@ def visible_item(session, target, target_id, collection_id, user, run_id=None):
 
 @router.get("/{collection_id}/history")
 def history(collection_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
-            user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
+            user=Depends(get_current_user_optional), session: Session=Depends(get_db,use_cache=False)):
     ctx = service.context(session, target, target_id, user)
     return dict(items=service.history(session, ctx, collection_id))
 
 
 @router.get("/{collection_id}/runs/{run_id}")
 def historical_run(collection_id: str, run_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
-                   user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
+                   user=Depends(get_current_user_optional), session: Session=Depends(get_db,use_cache=False)):
     return visible_item(session, target, target_id, collection_id, user, run_id)
 
 
 @router.get("/material-state/{paper_id}/{state_key}")
 def state_spectra(paper_id: int, state_key: str, expected_revision: int,
-                  user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
+                  user=Depends(get_current_user_optional), session: Session=Depends(get_db,use_cache=False)):
     ctx = service.context(session, "paper", str(paper_id), user)
     service.assert_version(ctx["paper_revision"], expected_revision)
     return dict(paper_revision=ctx["paper_revision"],
@@ -181,7 +182,7 @@ def state_spectra(paper_id: int, state_key: str, expected_revision: int,
 
 @router.get("/{collection_id}/image")
 def image(collection_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
-          user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
+          user=Depends(get_current_user_optional), session: Session=Depends(get_db,use_cache=False)):
     from backend.storage import FileRef, create_storage
     from backend.storage.files import FileIntegrityError, FileStorageUnavailable
     item = visible_item(session, target, target_id, collection_id, user)
@@ -244,7 +245,7 @@ def csv_export(item):
 @router.get("/{collection_id}/export")
 def export(collection_id: str, target: Literal["upload", "paper", "revision"], target_id: str,
            format: Literal["json", "csv"]="json", run_id: str | None = None,
-           user=Depends(get_current_user_optional), session: Session=Depends(get_db)):
+           user=Depends(get_current_user_optional), session: Session=Depends(get_db,use_cache=False)):
     item = visible_item(session, target, target_id, collection_id, user, run_id)
     data = csv_export(item) if format == "csv" else json.dumps(item, ensure_ascii=False, allow_nan=False)
     return Response(data, media_type="text/csv; charset=utf-8" if format == "csv" else "application/json",

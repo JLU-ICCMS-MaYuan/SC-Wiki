@@ -1,7 +1,7 @@
 {
   "schema_heads": [
     "20261020_0049",
-    "20261022_0153"
+    "20261030_0192"
   ],
   "tables": {
     "admin_applications": {
@@ -1631,7 +1631,7 @@
         "((element_countisnull)or(element_countbetween1and118))",
         "((pressure_min_gpaisnull)or(pressure_max_gpaisnull)or(pressure_min_gpa<=pressure_max_gpa))",
         "((reported_space_group_numberisnull)or(reported_space_group_numberbetween1and230))",
-        "((structure_optimizationin('unknown','classical_static','sscha'))and((state_kind='theoretical')or(structure_optimization='unknown')))",
+        "((structure_optimizationin('unknown','classical_static','quasi_harmonic','anharmonic_quantum','sscha'))and((state_kind='theoretical')or(structure_optimization='unknown')))",
         "(crystal_systemin('triclinic','monoclinic','orthorhombic','tetragonal','trigonal','hexagonal','cubic','unknown'))",
         "(material_dimensionalityin('zero_dimensional','one_dimensional','two_dimensional','three_dimensional','quasi_one_dimensional','quasi_two_dimensional','unknown'))",
         "(state_kindin('theoretical','experimental','unknown'))"
@@ -1716,6 +1716,10 @@
         "structure_optimization": {
           "nullable": false,
           "type": "varchar(32)"
+        },
+        "structure_optimization_details": {
+          "nullable": true,
+          "type": "json"
         },
         "superconductor_id": {
           "nullable": true,
@@ -3924,10 +3928,10 @@
     "property_records": {
       "checks": [
         "(((property_code='custom')and(record_type='property')and(custom_property_keyisnotnull))or((property_code<>'custom')and(custom_property_keyisnull)))",
-        "(((record_type<>'predicted_tc')or((json_extract(payload_json,'$.calculation_conditions')isnotnull)and(json_extract(payload_json,'$.experimental_conditions')isnull)))and((record_type<>'measured_tc')or((json_extract(payload_json,'$.experimental_conditions')isnotnull)and(json_extract(payload_json,'$.calculation_conditions')isnull))))",
+        "(((record_type<>'predicted_tc')or((payload_jsonisnotnull)and((json_extract(payload_json,'$.calculation_conditions')isnotnull)or((json_extract(payload_json,'$.tc_context_ref.version')=1)and(json_extract(payload_json,'$.tc_context_ref.group_key')isnotnull)and(json_extract(payload_json,'$.tc_context_ref.method_key')isnotnull)))and(json_extract(payload_json,'$.experimental_conditions')isnull)))and((record_type<>'measured_tc')or((payload_jsonisnotnull)and(json_extract(payload_json,'$.experimental_conditions')isnotnull)and(json_extract(payload_json,'$.calculation_conditions')isnull))))",
         "(((value_kind<>'number')or(value_numberisnotnull))and((value_kind<>'range')or((value_minisnotnull)and(value_maxisnotnull)))and((value_kind<>'text')or(value_textisnotnull))and((value_kind<>'boolean')or(value_booleanisnotnull)))",
         "(((value_minisnull)and(value_maxisnull))or((value_minisnotnull)and(value_maxisnotnull)and(value_min<=value_max)))",
-        "((record_typenotin('predicted_tc','measured_tc'))or((property_code='tc')and(method_codeisnotnull)))",
+        "((record_typenotin('predicted_tc','measured_tc'))or((property_code='tc')and((method_codeisnotnull)or((record_type='predicted_tc')and(json_extract(payload_json,'$.tc_context_ref.version')=1)and(json_extract(payload_json,'$.tc_context_ref.group_key')isnotnull)and(json_extract(payload_json,'$.tc_context_ref.method_key')isnotnull)))))",
         "((uncertaintyisnull)or(uncertainty>=0))",
         "(record_typein('predicted_tc','measured_tc','property'))",
         "(value_kindin('number','range','text','boolean'))"
@@ -4359,6 +4363,49 @@
         ]
       ]
     },
+    "scientific_field_source_uses": {
+      "checks": [],
+      "columns": {
+        "binding_json": {
+          "nullable": false,
+          "type": "json"
+        },
+        "item_key": {
+          "nullable": false,
+          "type": "varchar(64) collate \"utf8mb4_unicode_ci\""
+        },
+        "role": {
+          "nullable": false,
+          "type": "varchar(16) collate \"utf8mb4_unicode_ci\""
+        },
+        "source_id": {
+          "nullable": false,
+          "type": "varchar(64) collate \"utf8mb4_unicode_ci\""
+        },
+        "work_key": {
+          "nullable": false,
+          "type": "varchar(128) collate \"utf8mb4_unicode_ci\""
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "source_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "scientific_source_items"
+        }
+      ],
+      "primary_key": [
+        "work_key",
+        "item_key",
+        "source_id",
+        "role"
+      ],
+      "unique": []
+    },
     "scientific_manual_evidence": {
       "checks": [],
       "columns": {
@@ -4502,6 +4549,32 @@
       ],
       "unique": []
     },
+    "scientific_source_items": {
+      "checks": [],
+      "columns": {
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "id": {
+          "nullable": false,
+          "type": "varchar(64) collate \"utf8mb4_unicode_ci\""
+        },
+        "namespace": {
+          "nullable": false,
+          "type": "varchar(128) collate \"utf8mb4_unicode_ci\""
+        },
+        "payload": {
+          "nullable": false,
+          "type": "json"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "id"
+      ],
+      "unique": []
+    },
     "scientific_structure_origins": {
       "checks": [],
       "columns": {
@@ -4571,6 +4644,71 @@
         "task_id"
       ],
       "unique": []
+    },
+    "scientific_work_drafts": {
+      "checks": [],
+      "columns": {
+        "body": {
+          "nullable": false,
+          "type": "json"
+        },
+        "created_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "document_key": {
+          "nullable": false,
+          "type": "varchar(128) collate \"utf8mb4_unicode_ci\""
+        },
+        "id": {
+          "nullable": false,
+          "type": "varchar(64) collate \"utf8mb4_unicode_ci\""
+        },
+        "owner_id": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "revision": {
+          "nullable": false,
+          "type": "bigint"
+        },
+        "target": {
+          "nullable": false,
+          "type": "varchar(16) collate \"utf8mb4_unicode_ci\""
+        },
+        "target_id": {
+          "nullable": false,
+          "type": "varchar(64) collate \"utf8mb4_unicode_ci\""
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "datetime"
+        },
+        "write_epoch": {
+          "nullable": false,
+          "type": "varchar(32) collate \"utf8mb4_unicode_ci\""
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "owner_id"
+          ],
+          "references": [
+            "id"
+          ],
+          "table": "users"
+        }
+      ],
+      "primary_key": [
+        "id"
+      ],
+      "unique": [
+        [
+          "target",
+          "target_id"
+        ]
+      ]
     },
     "spectrum_collections": {
       "checks": [

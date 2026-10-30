@@ -1,4 +1,5 @@
 """共享证据核对入口。后台任务只读科学数据，应用结果由原提交/审核事务负责。"""
+from backend.ingest.evidence_audit import current_change_events
 import json
 import hashlib
 import uuid
@@ -24,7 +25,8 @@ from backend.ingest import evidence_progress
 from backend.storage import FileRef, create_storage
 from backend.ingest.upload_tasks import redis_client, upload_queue, save_llm_config, TASK_TTL, get_draft, get_state, save_draft, upload_task_lock
 
-router = APIRouter(prefix='/api/rag/evidence', tags=['evidence'], dependencies=[Depends(request_llm_config)])
+from backend.services.workdraft_context import request_workdraft
+router = APIRouter(prefix='/api/rag/evidence', tags=['evidence'], dependencies=[Depends(request_llm_config), Depends(request_workdraft)])
 
 
 class Target(BaseModel):
@@ -128,12 +130,60 @@ def identify_field(body: FieldLocator, user=Depends(get_current_user)):
 
 
 @router.get('/draft-state')
-def field_draft_state(target: str, target_id: str, user=Depends(get_current_user)):
+def field_draft_state(target: str, target_id: str, include_fields: bool=False, user=Depends(get_current_user)):
     from backend.ingest.field_drafts import authorized_draft, draft_version
     with SessionLocal() as session:
-        draft, saved = authorized_draft(session, target, target_id, user)
-        return {'version': draft_version(draft), 'draft': draft, 'staged': isinstance(saved, models.ScientificReviewDraft)}
+        draft, saved = authorized_draft(session, target, target_id, user, lock=True, allow_new_cycle=True)
+        from backend.services.workdrafts import metadata
+        result = {'version': draft_version(draft), 'draft': draft, 'staged': isinstance(saved, models.ScientificReviewDraft), **metadata(session,target,target_id,user)}
+        if include_fields:
+            snapshot, cached = snapshot_for(Target(target=target,target_id=target_id),user)
+            from backend.ingest.field_review import compact_result
+            view = ev.public_snapshot(snapshot,cached)
+            result['field_state'] = {**view,'records':[compact_result(record) for record in view['records']]}
+            from backend.services import spectra
+            if spectra.available(session):
+                result['spectra']=spectra.listing(session,spectra.context(session,target,target_id,user))
 
+        return result
+
+
+class WorkdraftTarget(BaseModel):
+    target: Literal['upload','paper','revision']
+    target_id: str
+
+@router.post('/open-workdraft')
+def open_workdraft(body: WorkdraftTarget, user=Depends(get_current_user)):
+    from backend.services import workdrafts
+    from backend.ingest.field_drafts import target_lock, draft_version
+    with target_lock(body.target,body.target_id), SessionLocal.begin() as session:
+        row=workdrafts.open_draft(session,body.target,body.target_id,user)
+        return dict(version=row.write_epoch+':'+str(row.revision),
+                    revision=row.revision,write_epoch=row.write_epoch,paper_header=row._paper_header)
+
+@router.get('/draft-revision')
+def draft_revision(target: str,target_id: str,user=Depends(get_current_user)):
+    from backend.services import workdrafts
+    with SessionLocal() as session:
+        if target=='upload':
+            from backend.ingest.upload_tasks import get_state
+            state=get_state(target_id) or {}
+            if state.get('user_id')!=user.id or state.get('paper_id'):
+                ev.fail('draft_forbidden','稿件不存在或已交出')
+        elif target=='revision':
+            saved=session.scalar(select(models.PaperRevisionDraft).where(models.PaperRevisionDraft.revision_id==target_id))
+            if saved is None or saved.owner_id!=user.id or saved.submitted_revision:
+                ev.fail('draft_forbidden','返修稿不存在或已交出')
+            from backend.services.manuscript_handoffs import require_writer
+            require_writer(session,session.get(models.Paper,saved.paper_id),user,author=True)
+        elif target=='paper':
+            from backend.services.manuscript_handoffs import require_writer
+            paper=session.get(models.Paper,int(target_id))
+            if paper is None or user.role not in {'admin','superadmin'} or paper.uploaded_by_user_id==user.id:
+                ev.fail('draft_forbidden','无权读取工作稿')
+            require_writer(session,paper,user)
+        else:ev.fail('draft_target_invalid','稿件目标无效')
+        return workdrafts.metadata(session,target,target_id,user)
 
 @router.patch('/draft')
 def patch_field_draft(body: FieldDraftRequest, user=Depends(get_current_user)):
@@ -154,7 +204,8 @@ class FieldNote(BaseModel):
 class FieldReviewCommit(BaseModel):
     paper_id: int
     evidence_job_id: str | None = None
-    expected_evidence_version: str
+    expected_evidence_version: str | None = None
+    status: Literal['approved','rejected','pending'] = 'approved'
     comment: str = ''
     review_request_id: str = Field(default='', max_length=64)
 
@@ -165,11 +216,12 @@ async def commit_field_review(body: FieldReviewCommit, user=Depends(get_current_
     from backend.services.field_review_commit import commit_review
     async with async_session_factory() as session, session.begin():
         result = await commit_review(session, body, user)
-    from backend.api.rag import publish_approved_paper
-    try:
-        await publish_approved_paper(body.paper_id, _current_user=user)
-    except Exception:
-        result['publication_pending'] = True
+    if body.status=='approved':
+        from backend.api.rag import publish_approved_paper
+        try:
+            await publish_approved_paper(body.paper_id, _current_user=user)
+        except Exception:
+            result['publication_pending'] = True
     return result
 
 
@@ -181,7 +233,8 @@ def save_field_note(body: FieldNote, user=Depends(get_current_user)):
 
 
 @router.get('/field-detail')
-def field_detail(target: str, target_id: str, item_key: str, history: bool = False, user=Depends(get_current_user)):
+def field_detail(target: str, target_id: str, item_key: str, history: bool = False, user=Depends(get_current_user),
+                 expected_content_hash: str | None=None, expected_source_hash: str | None=None):
     from backend.ingest.field_drafts import authorized_draft
     with SessionLocal() as session:
         authorized_draft(session, target, target_id, user)
@@ -204,6 +257,10 @@ def field_detail(target: str, target_id: str, item_key: str, history: bool = Fal
     from backend.ingest.field_decisions import detail
     with SessionLocal() as session:
         bind_support_versions(snapshot, session)
+        record=snapshot['records'][0]
+        if ((expected_content_hash and record['content_hash']!=expected_content_hash) or
+                (expected_source_hash and record['source_hash']!=expected_source_hash)):
+            ev.fail('workdraft_field_updated','字段或依据已在其他页面更新，请先载入最新稿')
         cached = science.load_results(session, snapshot, user.id, include_stale=True)
     view = detail(snapshot, cached)
     from backend.ingest.field_candidates import candidate_view, pending_application
@@ -329,7 +386,7 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
             table.result['field_review_binding']['token'], table.result['review_error']).where(table.id.in_(chosen.values()))).all()
         results = {row[0]: row for row in rows}
         from backend.ingest.field_review import changed_keys
-        modified = changed_keys({'records': records, '_field_change_events': (get_state(body.target_id) or {}).get('_field_change_events') or []}) if body.target == 'upload' else changed_keys({'records': records, '_field_change_events': draft.get('_field_change_events') or []})
+        modified = changed_keys({'records': records, '_field_change_events': current_change_events(get_state(body.target_id) or {})}) if body.target == 'upload' else changed_keys({'records': records, '_field_change_events': current_change_events(draft)})
         output = []
         for record in records:
             row = results.get(record['item_key'])
@@ -388,7 +445,7 @@ def snapshot_for(body, user):
             draft, _ = authorized_draft(session, body.target, body.target_id, user)
             snapshot = {**snapshot, **ev.complete_snapshot('paper', body.target_id,
                 ev.draft_records(draft, science.origins_for(session, 'paper', body.target_id)), snapshot['chunks'], draft)}
-            snapshot['_field_change_events'] = draft.get('_field_change_events') or []
+            snapshot['_field_change_events'] = current_change_events(draft)
             from backend.ingest.field_review import bind_support_versions
             bind_support_versions(snapshot, session)
         return snapshot, science.load_results(session, snapshot, user.id, include_stale=True)
@@ -835,6 +892,7 @@ class ManualExplanation(BaseModel):
     reason: str = Field(default="", max_length=4000)
     no_evidence_reason: str = Field(default="", max_length=4000)
     text_items: list[ManualTextItem] = Field(default_factory=list, max_length=manual.MAX_ITEMS)
+    changed_fields: set[Literal['reason','no_evidence_reason','text_items']] | None = None
 
 
 def _manual_error(exc: manual.ManualEvidenceError) -> HTTPException:
@@ -903,6 +961,16 @@ def get_manual_evidence(target: str, target_id: str, item_key: str, user=Depends
         raise _manual_error(exc) from exc
 
 
+def claim_manual_work(session,target,target_id,user):
+    from backend.ingest.field_drafts import authorized_draft
+    from backend.services import workdrafts
+    from sqlalchemy import inspect
+    from backend.workdraft_models import ScientificWorkDraft
+    authorized_draft(session,target,target_id,user,lock=True)
+    if inspect(session.connection()).has_table(ScientificWorkDraft.__tablename__) and workdrafts.row(session,target,target_id) is None:
+        workdrafts.open_draft(session,target,target_id,user)
+    return workdrafts.row(session,target,target_id) is not None
+
 @router.put("/{target}/{target_id}/manual/{item_key}")
 def put_manual_evidence(target: str, target_id: str, item_key: str, body: ManualExplanation,
                         user=Depends(get_current_user)):
@@ -911,9 +979,11 @@ def put_manual_evidence(target: str, target_id: str, item_key: str, body: Manual
     check_manual_version(snapshot, body.expected_version)
     try:
         with SessionLocal.begin() as session:
+            from backend.ingest.field_drafts import authorized_draft
+            snapshot['_workdraft_current']=claim_manual_work(session,target,target_id,user)
             data = manual.save_explanation(session, snapshot, baseline, _manual_record_key(item_key), user.id,
                 reason=body.reason, no_evidence_reason=body.no_evidence_reason,
-                text_items=[item.model_dump() for item in body.text_items], actor_name=user.username)
+                text_items=[item.model_dump() for item in body.text_items], actor_name=user.username, changed_fields=body.changed_fields)
         return {"ok": True, "data": data}
     except manual.ManualEvidenceError as exc:
         raise _manual_error(exc) from exc
@@ -933,6 +1003,8 @@ async def post_manual_evidence_file(target: str, target_id: str, item_key: str,
     data = None
     try:
         with SessionLocal.begin() as session:
+            from backend.ingest.field_drafts import authorized_draft
+            snapshot['_workdraft_current']=claim_manual_work(session,target,target_id,user)
             data = manual.add_file(session, snapshot, baseline, _manual_record_key(item_key), user.id,
                                    filename=file.filename or "", raw=raw, source_description=source_description,
                                    actor_name=user.username)
@@ -969,10 +1041,12 @@ def delete_manual_evidence_file(target: str, target_id: str, item_key: str, item
     snapshot['_manual_field_scope'] = field_scope
     try:
         with SessionLocal.begin() as session:
-            path = manual.remove_file(session, snapshot, _manual_record_key(item_key), item_id, user.id)
+            from backend.ingest.field_drafts import authorized_draft
+            snapshot['_workdraft_current']=claim_manual_work(session,target,target_id,user)
+            path = manual.remove_file(session, snapshot, _manual_record_key(item_key), item_id, user.id,actor_name=user.username)
         if isinstance(path, FileRef):
             create_storage(local_root=manual.settings.sc_wiki_data_dir).delete(path)
-        else:
+        elif path is not None:
             path.unlink(missing_ok=True)
         return {"ok": True}
     except manual.ManualEvidenceError as exc:

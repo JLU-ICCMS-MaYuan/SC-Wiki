@@ -224,7 +224,26 @@ def create_task(
     return state
 
 
+def authoritative_state(task_id: str, session=None):
+    """新工作稿只读SQL状态列，缓存失败不会丢失当前人工修改基线。"""
+    from contextlib import nullcontext
+    from sqlalchemy import select,inspect,exists
+    from backend.database import SessionLocal
+    from backend import models
+    from backend.workdraft_models import ScientificWorkDraft
+    with (nullcontext(session) if session is not None else SessionLocal()) as db:
+        if not inspect(db.connection()).has_table(ScientificWorkDraft.__tablename__):
+            return None
+        active=exists(select(ScientificWorkDraft.id).where(
+            ScientificWorkDraft.target=='upload',ScientificWorkDraft.target_id==task_id))
+        query=select(models.ScientificUploadDraft.state).where(models.ScientificUploadDraft.task_id==task_id,active)
+        if session is not None:query=query.with_for_update(read=True)
+        return db.scalar(query)
+
 def get_state(task_id: str) -> dict[str, Any] | None:
+    authoritative = authoritative_state(task_id)
+    if authoritative is not None:
+        return dict(authoritative)
     raw = redis_client().get(task_key(task_id))
     if raw:
         return json.loads(raw)
@@ -254,7 +273,7 @@ def update_state(task_id: str, **changes: Any) -> dict[str, Any]:
                 raw = pipeline.get(key)
                 if not raw:
                     raise KeyError("上传任务不存在或已过期")
-                state = apply_state_changes(json.loads(raw), now=int(time.time()), **changes)
+                state = apply_state_changes(authoritative_state(task_id) or json.loads(raw), now=int(time.time()), **changes)
                 pipeline.multi()
                 cleanup_at = state.get("cleanup_at")
                 if cleanup_at:
@@ -450,6 +469,14 @@ def lock_uploaded_manifest(task_id: str) -> tuple[dict[str, Any], bool]:
 
 
 def get_draft(task_id: str) -> dict[str, Any] | None:
+    from backend.database import SessionLocal
+    from backend.services.workdrafts import row
+    with SessionLocal() as session:
+        current = row(session, 'upload', task_id)
+        if current is not None:
+            from copy import deepcopy
+            from .tc_contexts import map_draft
+            return map_draft(current.body)
     raw = redis_client().get(draft_key(task_id))
     if not raw:
         from backend.ingest.scientific_evidence import restore_upload
@@ -457,7 +484,8 @@ def get_draft(task_id: str) -> dict[str, Any] | None:
         raw = redis_client().get(draft_key(task_id))
     if not raw:
         return None
-    decoded = json.loads(raw)
+    from .tc_contexts import map_draft
+    decoded = map_draft(json.loads(raw))
     draft = decoded if decoded.get('_field_edit_format') == 1 else convert_legacy_scientific_draft(decoded)
     if isinstance(draft.get("paper"), dict):
         draft["paper"].pop("material_relations", None)
@@ -467,7 +495,7 @@ def get_draft(task_id: str) -> dict[str, Any] | None:
     return draft
 
 
-def save_draft(task_id: str, draft: dict[str, Any], *, editor=None, changes=None, value_origin='human_input') -> dict[str, Any]:
+def save_draft(task_id: str, draft: dict[str, Any], *, editor=None, changes=None, value_origin='human_input', work_session=None) -> dict[str, Any]:
     draft = draft if draft.get('_field_edit_format') == 1 else convert_legacy_scientific_draft(draft)
     if isinstance(draft.get("paper"), dict):
         draft["paper"].pop("material_relations", None)
@@ -478,22 +506,52 @@ def save_draft(task_id: str, draft: dict[str, Any], *, editor=None, changes=None
     raw_state = client.get(task_key(task_id))
     if not raw_state:
         raise KeyError("上传任务不存在或已过期")
-    state = apply_user_activity(json.loads(raw_state), now=int(time.time()))
+    state = apply_user_activity(authoritative_state(task_id, work_session) or json.loads(raw_state), now=int(time.time()))
     if editor is not None:
         from .evidence_audit import draft_change_events
         previous = client.get(draft_key(task_id))
-        state['_field_change_events'] = [*(state.get('_field_change_events') or []),
-            *draft_change_events(json.loads(previous) if previous else {}, draft, editor, changes, value_origin=value_origin)]
+        from .evidence_audit import update_field_baselines
+        update_field_baselines(state,draft_change_events(json.loads(previous) if previous else {},draft,editor,changes,value_origin=value_origin))
     ttl = max(1, int(state.get("cleanup_at") or (int(time.time()) + TASK_TTL)) - int(time.time()))
-    with client.pipeline(transaction=True) as pipeline:
-        pipeline.setex(task_key(task_id), ttl, _encoded(state))
-        pipeline.setex(draft_key(task_id), ttl, json.dumps(draft, ensure_ascii=False))
-        pipeline.execute()
-    if state.get("is_shadow"):
-        return draft
+    def publish_cache():
+        with client.pipeline(transaction=True) as pipeline:
+            pipeline.setex(task_key(task_id), ttl, _encoded(state))
+            pipeline.setex(draft_key(task_id), ttl, json.dumps(draft, ensure_ascii=False))
+            pipeline.execute()
     from backend.database import SessionLocal
     from backend.ingest.scientific_evidence import has_upload_checks, persist_upload
+    if work_session is not None:
+        from sqlalchemy import event
+        from redis.exceptions import RedisError
+        persist_upload(work_session, task_id, state, draft)
+        completed = False
+        def after_commit(session):
+            nonlocal completed
+            if completed or session.in_nested_transaction():
+                return
+            completed = True
+            try:
+                publish_cache()
+            except RedisError:
+                # SQL已保存且读取以SQL为准；缓存故障不伪装成数据库回滚。
+                log.warning('工作稿已保存，缓存同步等待恢复：task_id=%s', task_id)
+        def after_rollback(session):
+            nonlocal completed
+            if not session.in_nested_transaction():
+                completed = True
+        event.listen(work_session, 'after_commit', after_commit)
+        event.listen(work_session, 'after_rollback', after_rollback)
+        return draft
+    publish_cache()
+    if state.get("is_shadow"):
+        return draft
     with SessionLocal.begin() as session:
+        from backend.services.workdrafts import row
+        current = row(session, 'upload', task_id, True)
+        if current is not None:
+            from .tc_contexts import map_draft
+            current.body = map_draft(draft, compact=True)
+            current.revision += 1
         if has_upload_checks(session, task_id):
             persist_upload(session, task_id, state, draft)
             client.persist(task_key(task_id))

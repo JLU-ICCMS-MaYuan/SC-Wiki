@@ -1,0 +1,47 @@
+{
+  "database": "scwiki_issue139_test_six_d3c34e7944",
+  "host": "本机127.0.0.1",
+  "fixture_bytes": 4716762,
+  "source_sha256": {
+    "backend/ingest/field_drafts.py": "e397d18377ecd13c46250a7a7209aca4c1e3521b8a329d323c7618a9d9551830",
+    "backend/ingest/upload_tasks.py": "3cdc5f0155442b0da8696f00e00dd2f825c06160460faedf085b6e6ee21e5ecf"
+  },
+  "samples": [
+    {
+      "service_and_commit_ms": 539.7092080092989,
+      "sql_driver_and_loopback_ms": 86.33395814104006,
+      "sql_statements": 21,
+      "http_delta_bytes": 112
+    },
+    {
+      "service_and_commit_ms": 273.6480419989675,
+      "sql_driver_and_loopback_ms": 94.04008317505941,
+      "sql_statements": 21,
+      "http_delta_bytes": 113
+    },
+    {
+      "service_and_commit_ms": 251.466374960728,
+      "sql_driver_and_loopback_ms": 91.41383582027629,
+      "sql_statements": 21,
+      "http_delta_bytes": 113
+    },
+    {
+      "service_and_commit_ms": 285.8099589939229,
+      "sql_driver_and_loopback_ms": 91.04150213534012,
+      "sql_statements": 21,
+      "http_delta_bytes": 113
+    },
+    {
+      "service_and_commit_ms": 291.8277909629978,
+      "sql_driver_and_loopback_ms": 98.33958192029968,
+      "sql_statements": 21,
+      "http_delta_bytes": 113
+    }
+  ],
+  "mean_service_and_commit_ms": 328.49227498518303,
+  "mean_sql_driver_and_loopback_ms": 92.23379223840311,
+  "limits": [
+    "SQL时间含驱动及本机传输；其余时间含Python、JSON、缓存发布及提交，不等于纯CPU",
+    "未测真实浏览器HTTP网络；浏览器测量采用隔离立即响应API，不冒充端到端生产延迟"
+  ]
+}

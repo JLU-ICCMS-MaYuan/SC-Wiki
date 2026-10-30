@@ -173,3 +173,13 @@ Material family 属于论文当前 revision，通过 `paper_material_families(pa
 核对规则 v3 增加类型化 `proposal` 和独立 `decision`；旧 v2 结果在原科学覆盖范围内继续复用，不将说明文字当作替换值。`scientific_evidence_checks.resolutions` 的按用户命名空间保存候选、接受状态、理由、原 AI 判断和分阶段提交准备，无额外表迁移。写入前检查准备版本，保存后精确比对实际断言及来源；成功批准才将决定转入永久来源与审核历史并清理临时项。
 
 规则 v4 允许创建 status=unchecked 的理由/候选草稿，读取 v2/v3 原覆盖范围。decision.human_confirmed、accepted、actor_user_id、reason 与 final_content_hash/source_hash 表达独立人工来源；不把未核对或 missing 原 AI 状态改成 supported。人工来源永久保存并以 human_review 发布到 RAG。未核对占位不跳过后续模型任务；规则升级和后台结果不清除已有用户草稿或人工决定。
+
+### 工作稿、采用来源和 Tc 共同目录
+
+scientific_work_drafts 保存上传工作稿，以及各入口的当前经手人、周期凭证和修订号。返修和审核正文复用既有 paper_revision_drafts／scientific_review_drafts，不保存第二份可修改科学值。scientific_source_items 保存不可变来源对象；scientific_field_source_uses 保存当前字段对来源的直接、共同或辅助使用关系。现有 scientific_evidence_checks 复用一条当前工作结果，旧规则行保留；不另建一套重复当前结果表。
+
+正式内容快照与交接在逻辑上分开，复用不可变的 paper_history_events.classification_snapshot 存储：首次引用保存一份 manuscript_snapshot，后续交接仅引用相同快照身份。工作稿不修改这些冻结对象；公开引用只在合法批准时推进。
+
+明确的 Tc 组在模块 metadata_json.tc_contexts 中保存共同参数、计算条件和方法。点记录保留自己的 Tc、μ*、代表标记和 tc_context_ref；适用范围相同且对象完全相同的共同来源关联也可共享。不同点的独有依据与适用绑定继续独立。旧记录不根据同名方法、压力或软件自动合并。
+
+上传 JSON、返修／审核工作稿、SQL 记录及快照使用同一压缩契约；详情、字段核对、搜索和导出按引用投影为原来的表单结构。SCDFT 的 μ* 可记录为不适用，未知、未报告和真实 0 分别保存。来源与值的对应、三组结果往返及迁移保护见 [#189](../../specs/189-tc-shared-context/validation.md)。迁移 20261030_0192 新建上述三表并允许受版本约束的共同引用；非空工作稿、来源或共同引用阻止有损降级。

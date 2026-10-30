@@ -16,7 +16,7 @@ def fail(code, message, status=409):
 
 
 def available(session):
-    schema = inspect(session.get_bind())
+    schema = inspect(session.connection())
     return all(schema.has_table(name) for name in ("spectrum_collections", "spectrum_runs"))
 
 
@@ -33,6 +33,9 @@ def context(session, target, target_id, user, *, write=False):
     """先鉴权再读取 PDF 清单；公开调用不允许查看草稿。"""
     require_tables(session)
     paper = None
+    review_work = False
+    work_target, work_id = target, target_id
+    workflow = None
     if target == "upload":
         from backend.ingest.upload_tasks import get_state, get_draft
         state = get_state(target_id)
@@ -51,14 +54,31 @@ def context(session, target, target_id, user, *, write=False):
     else:
         if target == "revision":
             saved = session.scalar(select(models.PaperRevisionDraft).where(models.PaperRevisionDraft.revision_id == target_id))
-            if not saved or not saved.draft:
-                fail("spectra_target_missing", "返修草稿不存在", 404)
-            paper = session.get(models.Paper, saved.paper_id)
-            if not user or user.id != saved.owner_id:
-                fail("spectra_forbidden", "无权访问该返修谱", 403)
-            if saved.base_revision != paper.content_revision:
+            staged=session.scalar(select(models.ScientificReviewDraft).where(
+                models.ScientificReviewDraft.draft['_spectrum_target_id'].as_string()==target_id))
+            if not saved and staged is None:
+                fail("spectra_target_missing", "返修或审核谱工作稿不存在", 404)
+            paper = session.get(models.Paper, saved.paper_id if saved else staged.paper_id)
+            from backend.services.manuscript_handoffs import latest
+            workflow = latest(session,paper.id)
+            from backend.ingest.field_drafts import authorized_draft
+            if (workflow and workflow['holder']=='review' and staged and
+                    staged.draft.get('_spectrum_target_id')==target_id and admin(user) and user.id!=paper.uploaded_by_user_id):
+                draft,_=authorized_draft(session,'paper',str(paper.id),user,lock=write)
+                work_target,work_id='paper',str(paper.id)
+                owner_id=paper.uploaded_by_user_id
+                review_work=True
+            else:
+                if not saved or not saved.draft or not user or user.id!=saved.owner_id:
+                    fail("spectra_forbidden","无权访问该返修谱",403)
+                if workflow:
+                    draft,_=authorized_draft(session,'revision',target_id,user,lock=write)
+                else:
+                    from backend.ingest.tc_contexts import map_draft
+                    draft=map_draft(saved.draft)
+                owner_id=saved.owner_id
+            if saved is not None and saved.base_revision != paper.content_revision:
                 fail("spectra_revision_stale", "论文版本已变化，请重新打开返修草稿")
-            draft, owner_id = saved.draft, saved.owner_id
         elif target == "paper" and str(target_id).isdigit():
             paper = session.get(models.Paper, int(target_id))
             if paper is None:
@@ -70,7 +90,19 @@ def context(session, target, target_id, user, *, write=False):
             if write and not admin(user):
                 fail("spectra_revision_required", "请通过上传或返修草稿修正谱；正式论文由审核者编辑", 403)
             from backend.services.paper_revisions import current_draft
-            draft = current_draft(session, paper)
+            from backend.services.manuscript_handoffs import latest,require_writer
+            workflow=latest(session,paper.id)
+            staged=session.get(models.ScientificReviewDraft,paper.id)
+            assigned_other=bool(staged and staged.owner_id not in {user.id if user else None,(workflow or {}).get('actor_user_id')})
+            if admin(user) and user.id!=paper.uploaded_by_user_id and (workflow and workflow['holder']=='review' or not workflow and staged and staged.draft.get('_spectrum_target_id')) and not (assigned_other and not write):
+                from backend.ingest.field_drafts import authorized_draft
+                draft,_=authorized_draft(session,'paper',str(paper.id),user,lock=write)
+                reference=draft.get('_spectrum_target_id')
+                if reference:target,target_id='revision',reference
+                review_work=True
+            else:
+                if workflow and write:require_writer(session,paper,user)
+                draft=current_draft(session,paper)
             owner_id = paper.uploaded_by_user_id or (user.id if user else 0)
         else:
             fail("spectra_target_invalid", "谱目标无效", 422)
@@ -79,6 +111,26 @@ def context(session, target, target_id, user, *, write=False):
                  for f in session.scalars(select(models.PaperFile).where(models.PaperFile.paper_id == paper.id,
                               models.PaperFile.paper_revision == paper.content_revision))
                  if f.original_filename.lower().endswith(".pdf")]
+    from backend.services import workdrafts
+    if write and work_target=='paper' and not review_work:
+        from backend.workdraft_models import ScientificWorkDraft
+        from sqlalchemy import inspect
+        if inspect(session.connection()).has_table(ScientificWorkDraft.__tablename__):
+            fail('spectra_workdraft_required','请先从稿件编辑入口领取当前工作稿，再修改谱')
+    if write and (work_target!='paper' or workflow):
+        from backend.ingest.field_drafts import authorized_draft
+        from backend.workdraft_models import ScientificWorkDraft
+        from sqlalchemy import inspect
+        if inspect(session.connection()).has_table(ScientificWorkDraft.__tablename__):
+            authorized_draft(session,work_target,work_id,user,lock=True)
+            if workdrafts.row(session,work_target,work_id) is None:
+                workdrafts.open_draft(session,work_target,work_id,user)
+                if work_target=='paper':
+                    from backend.ingest.field_drafts import authorized_draft
+                    draft,_=authorized_draft(session,'paper',str(paper.id),user)
+                    reference=draft.get('_spectrum_target_id')
+                    if reference:target,target_id='revision',reference
+            workdrafts.watch_spectra(session,work_target,work_id)
     states = jsonable_encoder(draft.get("material_states") or [])
     for i, s in enumerate(states):
         s["state_key"] = s.get("state_key") or f"state-{i+1}"
@@ -86,10 +138,12 @@ def context(session, target, target_id, user, *, write=False):
     files = [f for f in files if f.get("role") in {"main", "supplementary"} and f.get("kind") == "pdf"]
     identity = dict(target=target, target_id=target_id, states=states,
                     files=[{k: f.get(k) for k in ("file_id", "sha256", "role")} for f in files],
-                    paper_revision=paper.content_revision if paper else None)
+                    paper_revision=paper.content_revision if paper else None,
+                    work_cycle=workdrafts.cycle(session,work_target,work_id) if workflow else None)
     return dict(**{**identity, "files": files}, owner_id=owner_id, version=fingerprint(identity),
                 paper=paper, draft=draft, privileged=(target != "paper" or bool(user and (admin(user) or user.id == owner_id))),
-                can_edit=(target != "paper" or admin(user)), can_review=(target == "paper" and admin(user)))
+                can_edit=(target != "paper" or admin(user)) and not (workflow and work_target=='paper' and not review_work),
+                can_review=(review_work or target == "paper" and admin(user) and not workflow))
 
 
 def structure_dependencies(draft, index):
@@ -420,7 +474,7 @@ def review_curve(session, ctx, row, curve_id, status, intervals, reason, user):
     row.version += 1
 
 
-async def bind_to_paper(session, paper, draft, *, target=None, target_id=None):
+async def bind_to_paper(session, paper, draft, *, target=None, target_id=None, preserve_review=False):
     """原提交/返修事务内关联当前状态；保持历史运行，条件变化撤回采纳。"""
     if not await session.run_sync(available):
         return
@@ -454,32 +508,34 @@ async def bind_to_paper(session, paper, draft, *, target=None, target_id=None):
         matched = next((f for f in files if f.sha256 == source.get("source_sha256")), None)
         row.paper_file_id = matched.id if matched else None
         signature = state_signature(by_key.get(row.state_key))
-        if row.state_signature != signature or target in {"upload", "revision"}:
+        if row.state_signature != signature or target in {"upload", "revision"} and not preserve_review:
             row.review_json = {}
         # 旧数值不能通过绑定新状态签名被“洗成”有效；变化后必须重新提取。
         row.version += 1
 
 
-async def copy_to_revision(session, paper, revision_id):
-    if not await session.run_sync(available):
-        return
-    rows = (await session.scalars(select(models.SpectrumCollection).where(
-        models.SpectrumCollection.target == "paper", models.SpectrumCollection.paper_id == paper.id,
-        models.SpectrumCollection.paper_revision == paper.content_revision))).all()
+def copy_to_revision_sync(session,paper,revision_id,*,source_target='paper',source_id=None,preserve_review=False):
+    if not available(session):return
+    query=select(models.SpectrumCollection).where(models.SpectrumCollection.target==source_target,
+        models.SpectrumCollection.target_id==str(source_id or paper.id))
+    if source_target=='paper':query=query.where(models.SpectrumCollection.paper_revision==paper.content_revision)
+    rows=session.scalars(query).all()
     for original in rows:
-        if original.panel_key == "__discovery__" or original.panel_key.startswith("history-"):
-            continue
-        row = models.SpectrumCollection(id=uuid.uuid4().hex, target="revision", target_id=revision_id,
-            owner_id=original.owner_id, paper_id=paper.id, paper_revision=paper.content_revision,
-            paper_file_id=original.paper_file_id, material_state_id=original.material_state_id,
-            state_key=original.state_key, state_signature=original.state_signature,
-            source_key=original.source_key, panel_key=original.panel_key,
-            source_json=copy.deepcopy(original.source_json), review_json={}, version=1)
-        session.add(row); await session.flush()
-        run = await session.get(models.SpectrumRun, original.current_run_id)
+        if original.panel_key=='__discovery__' or original.panel_key.startswith('history-'):continue
+        row=models.SpectrumCollection(id=uuid.uuid4().hex,target='revision',target_id=revision_id,
+            owner_id=paper.uploaded_by_user_id,paper_id=paper.id,paper_revision=paper.content_revision,
+            paper_file_id=original.paper_file_id,material_state_id=original.material_state_id,
+            state_key=original.state_key,state_signature=original.state_signature,
+            source_key=original.source_key,panel_key=original.panel_key,source_json=copy.deepcopy(original.source_json),
+            review_json=copy.deepcopy(original.review_json) if preserve_review else {},version=1)
+        session.add(row);session.flush()
+        run=session.get(models.SpectrumRun,original.current_run_id) if original.current_run_id else None
         if run:
-            duplicate = models.SpectrumRun(id=uuid.uuid4().hex, collection_id=row.id,
-                input_hash=run.input_hash, algorithm_version=run.algorithm_version, model_name=run.model_name,
-                status=run.status, calibration_json=copy.deepcopy(run.calibration_json),
-                result_json=copy.deepcopy(run.result_json), completed_at=run.completed_at)
-            session.add(duplicate); row.current_run_id = duplicate.id
+            duplicate=models.SpectrumRun(id=uuid.uuid4().hex,collection_id=row.id,input_hash=run.input_hash,
+                algorithm_version=run.algorithm_version,model_name=run.model_name,status=run.status,
+                calibration_json=copy.deepcopy(run.calibration_json),result_json=copy.deepcopy(run.result_json),
+                completed_at=run.completed_at)
+            session.add(duplicate);session.flush();row.current_run_id=duplicate.id
+
+async def copy_to_revision(session,paper,revision_id):
+    await session.run_sync(lambda db:copy_to_revision_sync(db,paper,revision_id))

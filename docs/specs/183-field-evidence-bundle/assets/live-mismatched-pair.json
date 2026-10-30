@@ -1,0 +1,171 @@
+{
+  "1c2dbe0ce8b379a90dff411613231ee770804d9ae04abfac0aecc5871a57666f": {
+    "state_index": 0,
+    "module_code": "superconductive_properties",
+    "module_key": "module-superconductive_properties",
+    "record_key": "fill-44c909ee394d3c9632de1dbdbcdb",
+    "state_key": "live-ca150",
+    "tc_group_key": "fill-923be91d43ebc8355587ecee",
+    "tc_group_meta": {
+      "version": 1,
+      "group_key": "fill-923be91d43ebc8355587ecee",
+      "method_key": "fill-f48703259d204bc3d8a28572",
+      "point_key": "9ad1e57cedb26b0a8573448e"
+    },
+    "tc_range_origin_kind": null,
+    "tc_method_key": "fill-f48703259d204bc3d8a28572",
+    "key": "1c2dbe0ce8b379a90dff411613231ee770804d9ae04abfac0aecc5871a57666f",
+    "item_key": "1c2dbe0ce8b379a90dff411613231ee770804d9ae04abfac0aecc5871a57666f",
+    "kind": "field",
+    "record_field": "value_number",
+    "record_group_key": null,
+    "record_dependencies": [
+      "method_code",
+      "payload.approximation",
+      "payload.parameters.lambda_ep",
+      "payload.parameters.mu_star"
+    ],
+    "state_dependencies": [
+      "magnetic_field_t",
+      "material",
+      "material_name",
+      "pressure_max_gpa",
+      "pressure_min_gpa",
+      "pressure_value_gpa",
+      "reported_space_group_symbol",
+      "state_kind",
+      "temperature_value_k"
+    ],
+    "dependency_policy_version": 1,
+    "legacy_item_key": "a4fb531ba3c17dddee6a063b6d6c3ea5b45e874166bfedf7dd4f8736b75bfafc",
+    "previous_field_item_key": "8e887b943b9786be6e6a885413bc62f458e122b5d55b68e349d3817ecb469129",
+    "field": "material_states[0].property_modules[0].records[0].value_number",
+    "record_field_key": null,
+    "owner_label": "CaH6 · 150.0 GPa · 各向同性 Eliashberg · 235 K",
+    "fields": [
+      "material_states[0].property_modules[0].records[0].value_number"
+    ],
+    "label": "Tc",
+    "current_value": 235.0,
+    "required": true,
+    "evidences": [
+      {
+        "file_id": "c900e237f152476f95fcc28e79857055",
+        "chunk_id": null,
+        "chunk_index": 21,
+        "page_start": 3,
+        "page_end": 3,
+        "section": "全文",
+        "section_role": "result",
+        "source_name": "2012 CaH6-王晖.pdf",
+        "quote": "<!-- block: bf5a639aa431dea205e27595f0f82ae34d5da70cb83b64dad1c70ecf2b86dbd0 -->\nTcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+      }
+    ],
+    "source_associations": [],
+    "claim": {
+      "value": 235.0,
+      "field": "Tc",
+      "context": {
+        "material": "CaH6",
+        "material_name": "CaH6",
+        "pressure_value_gpa": 150.0,
+        "reported_space_group_symbol": "Im-3m",
+        "state_kind": "theoretical",
+        "definition": [
+          "record.superconductive_properties.predicted_tc.isotropic_eliashberg",
+          1
+        ],
+        "approximation": "harmonic",
+        "unit": "K",
+        "paired_mu_star": 0.13,
+        "method_code": "isotropic_eliashberg",
+        "direct_inputs": {
+          "method_code": "isotropic_eliashberg",
+          "payload.approximation": "harmonic",
+          "payload.parameters.lambda_ep": 2.69,
+          "payload.parameters.mu_star": 0.13
+        }
+      }
+    },
+    "field_schema": {
+      "type": "number",
+      "nullable": true
+    },
+    "legacy_evidences": [
+      {
+        "file_id": "c900e237f152476f95fcc28e79857055",
+        "pdf_page": 3,
+        "block_id": "bf5a639aa431dea205e27595f0f82ae34d5da70cb83b64dad1c70ecf2b86dbd0",
+        "quote": "Tcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+      },
+      {
+        "file_id": "c900e237f152476f95fcc28e79857055",
+        "pdf_page": 3,
+        "block_id": "a3a1a33579a41129f32f8533b56a70d972e2fdc30ca5f3752c7dd2077b21d26b",
+        "quote": "Sodalite cage was constructed from linking of \\mathrm { H } _ { 4 } units and this topologically resulted in the formation of \\mathbf { H } _ { 6 } faces. In fact, a primitive cell of \\mathrm { C a H _ { 6 } } can be seen as composed of a \\mathrm { H } _ { 6 } hexagon and a \\mathbf { C a } . Band structure analysis suggested that four conduction bands of \\text{\" } Ca _{0} H _{6} \\text{\" } sodalite cage (Fig. 3D) were half-filled and the addition of maximal two electrons to \\mathrm { H } _ { 6 } gave rise to partial occupancy of the degenerate bands at Γ as indicated in \\mathrm { C a H _ { 6 } } (Fig. 3C). Partial occupancy of a degenerate orbital results in an orbitally degenerate state and is subject to Jahn-Teller (JT) distortion (22) (Fig. 2). The JT effect involves coupling between the electron and nuclear degrees of freedom, leading to distortions in the structure, and it lifts the orbital degeneracy. If the distortion is dynamic, JT vibrations can contribute to superconductivity. The same mechanism has been invoked to explain the superconductivity in B-doped diamond (23).To investigate this possibility, electron-phonon coupling (EPC) calculations on the sodalite structure of \\mathrm { \\bar { C a H } _ { 6 } } at 150 GPa were performed. The phonon dispersion curves, phonon linewidth \\gamma ( \\omega ) , EPC parameter \\lambda , and Eliashberg spectral function \\alpha ^ { 2 } F ( \\omega ) were calculated. A gap at 430\\  cm ^{-1} (Fig. 4) separated the phonon spectrum into two regions: The lower frequency branches were associated with the motions of both Ca and H, whereas the higher frequency branches were mainly associated with H atoms. The combined contribution (19% and 81%, respectively) gave an EPC parameterλ of 2.69.The calculated phonon linewidths (Fig. 4) showed that the EPC was derived primarily from the T _ { 2 g } and E _ { g } modes at the zone center Γ. Incidentally, these two bands, respectively, were the in-plane breathing and rocking vibrations of the H atoms belonging to the \\mathrm { H } _ { 4 } unit. The corresponding atomic vibrations led to distortions in the square planar structure. Moreover, both phonon branches showed significant phonon softening along all symmetric directions. A large EPC also benefited from the high density of states at the Fermi level caused by a Van Hove singularity at Γ (Fig. 3C). The very large EPC was unprecedented for the main group hydrides. Previous calculations on a variety of systems predicted an EPC in the range of 0.5–1.6 (11). The mechanism suggested here is not inconsistent with the mechanisms found in JT-induced superconductivity in alkali intercalated \\mathbf { C } _ { 6 0 } , in which the intramolecular vibrations are responsible for"
+      }
+    ],
+    "settings_field": "material_states[0].property_modules[0].records[0].value_number",
+    "settings_part": "raw",
+    "editable_fields": [
+      {
+        "path": "",
+        "label": "Tc",
+        "value": 235.0,
+        "schema": {
+          "type": "number",
+          "nullable": true
+        }
+      }
+    ],
+    "content_hash": "af7676725e44fa0fd5b31334a74b6062e1c23a4a77f4057b4740ef3fe5143115",
+    "source_hash": "e4151828b31800f0de56ea4ac2a5fa84df711c24b78c9ac65d2bc13de57b755b",
+    "proposal": null,
+    "proposal_draft": null,
+    "decision": null,
+    "source_kind": "paper_quote",
+    "status": "unsupported",
+    "model_opinion": null,
+    "location_check": null,
+    "human_confirmed": false,
+    "adopted_basis": null,
+    "proposal_review": null,
+    "ai_reason": null,
+    "association_review": null,
+    "association_conflict": false,
+    "condition_window": null,
+    "rule_review": null,
+    "auto_filled": false,
+    "auto_filled_content_hash": null,
+    "auto_filled_source_hash": null,
+    "history": [],
+    "reason": "原文中的Tc与μ*对应关系不支持当前结果点。当前记录将 Tc=235 K 与 μ*=0.13 配对，但原文明确给出 150 GPa 下 μ*=0.1 对应 235 K、μ*=0.13 对应 220 K。因此该数值与 μ* 的配对关系错误，不能支持当前值。",
+    "suggestion": "若保留 μ*=0.13，则 Tc 应改为 220 K；若保留 Tc=235 K，则 μ* 应改为 0.1。",
+    "location_errors": [],
+    "model": "",
+    "audit_events": [],
+    "review_revalidation": null,
+    "review_attempt": null,
+    "review_error": null,
+    "review_followup": null,
+    "auto_corrected": false,
+    "invalidation_details": null,
+    "resolution": "",
+    "stale": false,
+    "_model_reviewed": true,
+    "review_started_at": "2026-10-30T16:00:43.308525+00:00",
+    "point_binding": {
+      "contract": "tc-point-binding-v1",
+      "expected_point": {
+        "mu_star": 0.13,
+        "tc_k": 235.0
+      },
+      "source_pair": {
+        "mu_star": 0.13,
+        "tc_k": 220.0
+      },
+      "verdict": "conflict"
+    },
+    "pending_review": false
+  }
+}

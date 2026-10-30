@@ -354,9 +354,9 @@ describe('论文快速审核三状态', () => {
     await user.click(await screen.findByRole('option', { name: /退回待审核/ }))
     await user.click(screen.getByRole('button', { name: '确认审核' }))
 
-    await waitFor(() => expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))).toHaveLength(1))
-    const [path, body] = mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))[0]
-    expect(path).toBe('/api/admin/papers/51/review')
+    await waitFor(() => expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review-commit'))).toHaveLength(1))
+    const [path, body] = mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review-commit'))[0]
+    expect(path).toBe('/api/rag/evidence/review-commit')
     expect(body).toMatchObject({
       status: 'pending',
       comment: '',
@@ -375,9 +375,9 @@ describe('论文快速审核三状态', () => {
     await user.click(await screen.findByRole('option', { name: status === 'pending' ? /退回待审核/ : /拒绝/ }))
     await user.click(screen.getByRole('button', { name: '确认审核' }))
 
-    await waitFor(() => expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))).toHaveLength(1))
-    expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))[0][1]).toMatchObject({ status })
-    expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review'))[0][1]).not.toHaveProperty('material_families')
+    await waitFor(() => expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review-commit'))).toHaveLength(1))
+    expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review-commit'))[0][1]).toMatchObject({ status })
+    expect(mockedApi.post.mock.calls.filter(([path]) => path.endsWith('/review-commit'))[0][1]).not.toHaveProperty('material_families')
     expect(mockedApi.get.mock.calls.some(([path]) => String(path).includes('/review-artifact'))).toBe(false)
     expect(mockedApi.get.mock.calls.some(([path]) => String(path).includes('/api/admin/papers/51'))).toBe(false)
   })

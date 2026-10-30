@@ -37,6 +37,8 @@ const Spin: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 )
 
 const PaperRevisionPage = React.lazy(() => import('./pages/PaperRevisionPage'))
+const ManuscriptHandoffsPage = React.lazy(() => import('./pages/ManuscriptHandoffsPage'))
+const ManuscriptSnapshotPage = React.lazy(() => import('./pages/ManuscriptSnapshotPage'))
 
 const LazyRoutes: React.FC = () => (
   <Routes>
@@ -58,6 +60,8 @@ const LazyRoutes: React.FC = () => (
     <Route path="/spectra/:collectionId" element={<Spin><SpectrumDetailPage /></Spin>} />
     <Route path="/papers/:id" element={<Spin><PaperDetailPage /></Spin>} />
     <Route path="/papers/:id/revise" element={<Spin><RoleRoute allow={['user', 'admin', 'superadmin']}><PaperRevisionPage /></RoleRoute></Spin>} />
+    <Route path="/manuscripts/:target/:targetId/handoffs" element={<Spin><RoleRoute allow={['user','admin','superadmin']}><ManuscriptHandoffsPage /></RoleRoute></Spin>} />
+    <Route path="/papers/:id/snapshots/:snapshotId" element={<Spin><RoleRoute allow={['user','admin','superadmin']}><ManuscriptSnapshotPage /></RoleRoute></Spin>} />
     <Route path="/rag" element={<Spin><RagPage /></Spin>} />
     <Route path="/tc-predict" element={<Spin><TcPredictPage /></Spin>} />
     <Route path="/knowledge" element={<Spin><KnowledgeGraphPage /></Spin>} />

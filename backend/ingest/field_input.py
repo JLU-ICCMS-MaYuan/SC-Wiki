@@ -20,16 +20,18 @@ def rows_for(session, snapshot, *, for_update=False):
     return list(session.scalars(query.with_for_update() if for_update else query))
 
 
-def matching_rows(record, rows):
+def matching_rows(record, rows, *, working=False):
     from .scientific_evidence import canonical
     from .manual_evidence import _semantic_value
     source = record.get('paper_source_hash', record['source_hash'])
-    return [r for r in rows if r.item_key == record['item_key'] and r.source_hash == source
-            and canonical(r.after_value) == canonical(_semantic_value(record))]
+    matched=[r for r in rows if r.item_key == record['item_key'] and r.source_hash == source
+            and (working and r.status=='draft' or canonical(r.after_value) == canonical(_semantic_value(record)))]
+    drafts=[r for r in matched if r.status=='draft']
+    return drafts[-1:] if drafts else matched
 
 
 def current_manual(session, snapshot, record, *, for_update=False):
-    rows = matching_rows(record, rows_for(session, {**snapshot, 'records': [record]}, for_update=for_update))
+    rows = matching_rows(record, rows_for(session, {**snapshot, 'records': [record]}, for_update=for_update),working=bool(snapshot.get('_workdraft_current')))
     drafts = [r for r in rows if r.status == 'draft']
     return (drafts or rows)[-1] if rows else None
 
@@ -39,13 +41,23 @@ def bind(snapshot, session):
     from .scientific_evidence import canonical
     rows = rows_for(session, snapshot)
     for record in snapshot['records']:
-        manual = matching_rows(record, rows)
+        manual = matching_rows(record, rows,working=bool(snapshot.get('_workdraft_current')))
         evidence = [(r.id, r.reason, r.no_evidence_reason,
                      [(i.get('id'), i.get('sha256'), i.get('kind'), i.get('source_description'), i.get('text')) for i in r.items or []])
                     for r in manual]
-        record['field_input_token'] = digest([CONTRACT, snapshot['target'], snapshot['target_id'],
-            record['item_key'], canonical(record.get('current_value')),
-            record.get('paper_source_hash', record['source_hash']), evidence])
+        inputs=[CONTRACT, snapshot['target'], snapshot['target_id'],record['item_key'],
+            canonical(record.get('current_value')),record.get('paper_source_hash',record['source_hash']),evidence]
+        context=(record.get('claim') or {}).get('context') or {}
+        definition=context.get('definition') or []
+        if (record.get('record_field') in {'value_number','payload.parameters.mu_star'} and
+                definition and '.predicted_tc.' in str(definition[0])):
+            if record['record_field']=='value_number':
+                inputs.append(['tc-point-dependencies-v1',record['content_hash']])
+            else:
+                # μ* 本身沿用单字段背景合同，但不能借用另一 Tc／方法点的通过结论。
+                inputs.append(['mu-point-dependencies-v1',canonical(context.get('paired_tc')),
+                    context.get('method_code'),definition])
+        record['field_input_token']=digest(inputs)
     return snapshot
 
 
@@ -74,7 +86,7 @@ def select_field(snapshot, item_key):
 
 def binding(snapshot):
     r = snapshot['records'][0]
-    return {'contract': CONTRACT, 'token': r['field_input_token'], 'item_key': r['item_key'],
+    return {'workdraft_epoch': snapshot.get('_workdraft_epoch'), 'contract': CONTRACT, 'token': r['field_input_token'], 'item_key': r['item_key'],
             'background': deepcopy((r.get('claim') or {}).get('context')),
             'state_review_context': deepcopy(r.get('state_review_context'))}
 
@@ -85,7 +97,7 @@ def manual_version(snapshot):
     if len(snapshot['records']) != 1:
         fail('manual_field_not_found', '当前字段已删除或无法唯一定位，人工输入已保留')
     r = snapshot['records'][0]
-    return 'manual-field-v1:' + digest([snapshot['target'], snapshot['target_id'], r['item_key'],
+    return 'manual-field-v1:' + digest([snapshot['target'], snapshot['target_id'], r['item_key'], snapshot.get('_workdraft_epoch'),
         canonical(r.get('current_value')), r.get('paper_source_hash', r['source_hash'])])
 
 

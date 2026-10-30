@@ -1,0 +1,34 @@
+{
+  "base_commit": "a871fbbd",
+  "backend": {
+    "passed": 81,
+    "new_targeted": 29,
+    "existing_spectra": 52
+  },
+  "mysql": {
+    "passed": 51,
+    "scope": "Tc往返、四宿主单字段、公开修订、谱送审及RR并发"
+  },
+  "frontend": {
+    "form_contract": 111,
+    "targeted": 14,
+    "mutation_detected": 8
+  },
+  "go": "相关详情/导出/检索/统计/审核及批量越权回归通过",
+  "browser": "四条交接、两份完整内容；新标签只读与两页签，零写请求、零当前谱请求",
+  "faults": {
+    "point_mismatch": "修复前错误通过，修复后拒绝",
+    "paired_cache": "修复前借用旧令牌通过，修复后失效",
+    "first_save": "修复前覆盖权威副本/修改基线，修复后保留",
+    "rollback": "修复前缓存先写，修复后事务成功才发布",
+    "rr_mutation": "移除锁后身份映射刷新时，2027年被旧稿覆盖成2026；候选拒绝该回退",
+    "batch_gate": "独立HEAD故障回放失败，当前批量请求被409拒绝"
+  },
+  "schema": "新隔离MySQL升级/空回退/再升级通过；非空有损回退拒绝，业务库未应用",
+  "boundaries": [
+    "未推送",
+    "未部署",
+    "未清理真实历史",
+    "原始用户草稿未修改"
+  ]
+}
