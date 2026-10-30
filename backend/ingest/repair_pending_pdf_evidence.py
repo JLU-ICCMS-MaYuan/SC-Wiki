@@ -17,7 +17,7 @@ from backend.database import SessionLocal
 from backend.rag.config import settings
 from . import property_evidence as evidence
 from .pdf_front_matter import verified_title_source
-from .pdf_source_pages import current_pdf_results
+from .pdf_front_matter import correct_front_matter_results
 
 
 def _old_citation(source, title, file_id):
@@ -100,7 +100,7 @@ def _repair_target(session, target, target_id):
                     for item in (entry.get("evidences") or []))
                 for entry in old.get("history") or [] if isinstance(entry, dict)):
             continue
-        repaired = current_pdf_results(session, snapshot, {title["key"]: old})[title["key"]]
+        repaired = correct_front_matter_results(session, snapshot, {title["key"]: old})[title["key"]]
         repaired = _remove_old_history(repaired, source["quote"], source["file_id"])
         changes.append({"table": "scientific_evidence_checks", "id": row.id, "before": old,
                         "after": repaired, "row": row})
@@ -111,7 +111,7 @@ def _repair_target(session, target, target_id):
             old = row.result or {}
             if any(_old_citation(item, source["quote"], source["file_id"])
                    for item in old.get("evidences") or []):
-                repaired = _remove_old_history(current_pdf_results(session, snapshot,
+                repaired = _remove_old_history(correct_front_matter_results(session, snapshot,
                     {title["key"]: old})[title["key"]], source["quote"], source["file_id"])
                 changes.append({"table": "scientific_evidence_sources", "id": row.id,
                                 "before": old, "after": repaired, "row": row})

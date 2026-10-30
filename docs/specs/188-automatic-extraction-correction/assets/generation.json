@@ -1,0 +1,186 @@
+{
+  "b7af8512848971657cc20e53aeabd67e39bc572db9dd41d3da13070aee38348a": {
+    "key": "b7af8512848971657cc20e53aeabd67e39bc572db9dd41d3da13070aee38348a",
+    "item_key": "b7af8512848971657cc20e53aeabd67e39bc572db9dd41d3da13070aee38348a",
+    "field": "material_states[0].material_dimensionality",
+    "fields": [
+      "material_states[0].material_dimensionality"
+    ],
+    "label": "材料维度",
+    "current_value": "three_dimensional",
+    "claim": {
+      "value": "three_dimensional",
+      "field": "材料维度",
+      "context": {
+        "material_name": "CaH6",
+        "material": "CaH6",
+        "pressure_value_gpa": 150.0,
+        "state_kind": "theoretical"
+      }
+    },
+    "required": true,
+    "evidences": [
+      {
+        "file_id": "c900e237f152476f95fcc28e79857055",
+        "chunk_id": null,
+        "chunk_index": 3,
+        "page_start": 1,
+        "page_end": 1,
+        "section": "全文",
+        "section_role": "other",
+        "source_name": "2012 CaH6-王晖.pdf",
+        "quote": "<!-- block: 60c1a812c5bc3fd153bc5f1b7bd56434c5bd1ba4e352aa94afa63c8d340d0cf7 -->\nHydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of \\mathbf { H _ { 2 } } fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particleswam optimization structural search, we show that in the stoichiometry \\mathsf { C a H _ { 6 } } a body-centered cubic structure with hydrogen that forms unusual“sodalite\" cagescontainingenclathratedCa stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance bytwo \\mathbf { H _ { 2 } } of electrons donated by Ca forming an \\mathbf { H _ { 4 } } unitas the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupationof thedegenerated orbitals at the zone center. The resultant dynamicJahn–Teller effecthelps to enhance electronphonon coupling and leads to superconductivity of \\mathbf { C a H _ { 6 } } . A superconducting critical temperature ( \\mathbf { I } _ { c } ) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far.\n\n<!-- block: 62b1f7f3a7ce05a2bd2dd8d466ae88a41e1f5305c2dc17caada9225ae6a3ba38 -->\ncalcium hydride | sodalite structure"
+      },
+      {
+        "file_id": "c900e237f152476f95fcc28e79857055",
+        "chunk_id": null,
+        "chunk_index": 7,
+        "page_start": 1,
+        "page_end": 1,
+        "section": "全文",
+        "section_role": "result",
+        "source_name": "2012 CaH6-王晖.pdf",
+        "quote": "<!-- block: c8d80468f23bbdc9d6f432ed91e72201dc1ba5037a90d1e99f9f115601871558 -->\nThe structures of the stable phases for each stoichiometry at 150 GPa are shown in Fig. 1 B)–(D. Three types of hydrogen species, \\text{\" H}_{4} \\text{\" } units, monatomic \\mathbf { H } + \\mathbf { H } _ { 2 } , and molecular \\mathbf { H } _ { 2 } , were observed. CaH4 had a tetragonal (I4/mmm, Pearson symbol tI10) structure and included a body-centered arrangement of Ca and two molecular and four monatomic hydrogen units ( \\mathrm { C a } _ { 2 } ( \\mathrm { H } _ { 2 } ) _ { 2 } ( \\mathrm { H } ) _ { 4 } ) _ { ; } The structure of \\mathrm { C a H _ { 6 } } adopted a remarkable cubic form ( I m 3   m , Pearson symbol cI14), with body-centered Ca atoms and, on each face, squared \\mathrm { H } _ { 4 } units tilted 4 5 ^ { \\circ } with respect to the plane of the Ca atoms. These \\mathrm { H } _ { 4 } units were interlinked to form asodalite frameworkwith a Ca atom enclathrated at the center of each cage. The next stablepolymorph, \\mathrm { C a H } _ { 1 2 } , had a rhombohedral (R3, Pearson symbol hR13) structure consisting entirely of molecular H2"
+      },
+      {
+        "file_id": "c900e237f152476f95fcc28e79857055",
+        "chunk_id": null,
+        "chunk_index": 17,
+        "page_start": 2,
+        "page_end": 2,
+        "section": "全文",
+        "section_role": "result",
+        "source_name": "2012 CaH6-王晖.pdf",
+        "quote": "<!-- block: 897b684edea657dd848cb2c4162e2a12b024cfa65922185644320c396d781e3f -->\nThe three-dimentional sodalite cage in \\mathrm { C a H _ { 6 } } is the result of interlink of other \\underline { { \\mathrm { H } } } _ { 4 } units via each H atom at the corner of one \\mathrm { H } _ { 4 } unit.So, what is the electronic factor promoting the formation of these \\mathrm { H } _ { 4 } units?To answer this question, the electron localization functions (ELF) of a hypothetical bare bcc Ca lattice with the H atoms removed and \\widetilde { \\mathrm { C a H } _ { 6 } } hydride (Fig. 3A and 3B) were examined. In bare body-centered cubic (bcc) Ca, regions with ELF values of 0.58 were found to localize at the H atom sites in the \\mathrm { H } _ { 4 } units on the faces of the cube. The ELF of \\overline { { \\mathrm { C a H _ { 6 } } } } hydride suggested that no bonds were present between the Ca and H.A weak “pairing” covalent interaction with an \\overline { { \\mathrm { E L F } } } of 0 . 6 1 however, was found between the H atoms that formed a square \\mathrm { H } _ { 4 } lattice.Their formation resulted from the accommodation by \\mathrm { H } _ { 2 } of excess electrons from the Ca. An electron topological analysis also showed the presence of a bond-critical point (21) along the path connecting neighboring H atoms. The integrated charge within the H atomic basin was 1.17 e, which corresponded to a charge transfer of 1.02 e from each Ca.A partially ionized Ca was also clearly supported by the band structure and the density of states as reported in Fig. 3C and Fig. S15. At 150 GPa, Ca underwent an s { - } d hybridizationwith an electron transferred from the 4 s to the 3 d orbital.In \\mathrm { C a H } _ { 6 } , the Ca site symmetrywas m3 m ( O _ { h } ) and the Ca 3 d manifold was clearly split into the e _ { g } and t _ { 2 g } bands, with the lower energy e _ { g } band partially occupied."
+      }
+    ],
+    "kind": "field",
+    "check_mode": "synthesis",
+    "state_key": "fresh-150",
+    "state_review_context": {
+      "material": "CaH6",
+      "material_name": "CaH6",
+      "pressure_value_gpa": 150.0,
+      "pressure_min_gpa": null,
+      "pressure_max_gpa": null,
+      "reported_space_group_symbol": null,
+      "state_kind": "theoretical",
+      "structure_optimization": "unknown",
+      "structure_optimization_details": null,
+      "temperature_value_k": null,
+      "magnetic_field_t": null
+    },
+    "editable_fields": [
+      {
+        "path": "",
+        "label": "材料维度",
+        "value": "three_dimensional",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "one_dimensional",
+            "quasi_one_dimensional",
+            "quasi_two_dimensional",
+            "three_dimensional",
+            "two_dimensional",
+            "unknown",
+            "zero_dimensional"
+          ]
+        }
+      }
+    ],
+    "content_hash": "81af8b7f712e9c9194c007a8510ef39e318889961747db1b2861e4d54f3e8af3",
+    "source_hash": "e4151828b31800f0de56ea4ac2a5fa84df711c24b78c9ac65d2bc13de57b755b",
+    "source_associations": [],
+    "proposal_draft": null,
+    "decision": null,
+    "source_kind": "paper_synthesis",
+    "status": "supported",
+    "model_opinion": null,
+    "location_check": null,
+    "human_confirmed": false,
+    "adopted_basis": null,
+    "proposal_review": null,
+    "ai_reason": "本文明确描述 CaH6 在 150 GPa 下形成体心立方结构，H4 单元相互连接构成三维方钠石笼，因此材料维度为三维。",
+    "association_review": null,
+    "association_conflict": false,
+    "condition_window": null,
+    "rule_review": null,
+    "auto_filled": null,
+    "auto_filled_content_hash": null,
+    "auto_filled_source_hash": null,
+    "history": [],
+    "reason": "本文明确描述 CaH6 在 150 GPa 下形成体心立方结构，H4 单元相互连接构成三维方钠石笼，因此材料维度为三维。",
+    "suggestion": "请核对物性类型、数值、单位和实验条件，并根据原文修正记录。",
+    "location_errors": [],
+    "model": "",
+    "audit_events": [],
+    "review_revalidation": null,
+    "review_attempt": null,
+    "review_error": null,
+    "review_followup": null,
+    "auto_corrected": true,
+    "invalidation_details": null,
+    "resolution": "",
+    "stale": false,
+    "proposal": null
+  },
+  "867c7a4174a37fc1f0808e7dbdfcb513a7603e261c658e1bcd8b4dadf95152c5": {
+    "status": "supported",
+    "proposal": null,
+    "proposal_review": null,
+    "decision": null,
+    "adopted_basis": null,
+    "auto_filled": null,
+    "auto_filled_content_hash": null,
+    "auto_filled_source_hash": null,
+    "ai_reason": null,
+    "source_kind": "paper_quote",
+    "supplemental_evidences": null,
+    "manual_reason_review": null,
+    "resolved_generation_issue": null,
+    "model_opinion": null,
+    "location_check": null,
+    "review_error": null,
+    "review_followup": null,
+    "auto_corrected": null,
+    "review_started_at": "2026-10-30T16:31:32.680398+00:00",
+    "association_review": null,
+    "association_conflict": false,
+    "condition_conflict": false,
+    "condition_window_errors": [],
+    "reason": "原文多处明确给出CaH6在150 GPa下的计算和超导性质，压力值150 GPa与原文一致。",
+    "evidences": [
+      {
+        "file_id": "c900e237f152476f95fcc28e79857055",
+        "chunk_id": null,
+        "chunk_index": 3,
+        "page_start": 1,
+        "page_end": 1,
+        "section": "全文",
+        "section_role": "other",
+        "source_name": "2012 CaH6-王晖.pdf",
+        "quote": "<!-- block: 60c1a812c5bc3fd153bc5f1b7bd56434c5bd1ba4e352aa94afa63c8d340d0cf7 -->\nHydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of \\mathbf { H _ { 2 } } fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particleswam optimization structural search, we show that in the stoichiometry \\mathsf { C a H _ { 6 } } a body-centered cubic structure with hydrogen that forms unusual“sodalite\" cagescontainingenclathratedCa stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance bytwo \\mathbf { H _ { 2 } } of electrons donated by Ca forming an \\mathbf { H _ { 4 } } unitas the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupationof thedegenerated orbitals at the zone center. The resultant dynamicJahn–Teller effecthelps to enhance electronphonon coupling and leads to superconductivity of \\mathbf { C a H _ { 6 } } . A superconducting critical temperature ( \\mathbf { I } _ { c } ) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far.\n\n<!-- block: 62b1f7f3a7ce05a2bd2dd8d466ae88a41e1f5305c2dc17caada9225ae6a3ba38 -->\ncalcium hydride | sodalite structure"
+      },
+      {
+        "file_id": "c900e237f152476f95fcc28e79857055",
+        "chunk_id": null,
+        "chunk_index": 21,
+        "page_start": 3,
+        "page_end": 3,
+        "section": "全文",
+        "section_role": "result",
+        "source_name": "2012 CaH6-王晖.pdf",
+        "quote": "<!-- block: bf5a639aa431dea205e27595f0f82ae34d5da70cb83b64dad1c70ecf2b86dbd0 -->\nTcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+      }
+    ],
+    "model": "deepseek-v4-pro",
+    "suggestion": "请核对物性类型、数值、单位和实验条件，并根据原文修正记录。",
+    "fields": [
+      "material_states[0].pressure_value_gpa"
+    ],
+    "_audit_action": "ai_review",
+    "_audit_event_id": "a5e31f0ffd494211b37c5c3fcfd5360d",
+    "field": "material_states[0].pressure_value_gpa"
+  }
+}

@@ -192,7 +192,6 @@ def test_pdf_evidence_reads_remote_source_without_business_mount(monkeypatch: py
     boto3 = pytest.importorskip("boto3")
     moto = pytest.importorskip("moto")
     from backend.ingest.pdf_front_matter import _main_file
-    from backend.ingest.pdf_source_pages import _files
     from backend.storage import create_storage
 
     with moto.mock_aws():
@@ -207,8 +206,6 @@ def test_pdf_evidence_reads_remote_source_without_business_mount(monkeypatch: py
         snapshot = {"target_id": "task", "pdf_manifest": [{"file_id": "main", "role": "main",
             "kind": "pdf", "stored_path": ref.key, "size": ref.size, "sha256": ref.sha256,
             "media_type": ref.media_type}]}
-        resolved = list(_files(None, snapshot))
-        assert len(resolved) == 1 and resolved[0][1].read_bytes() == b"PDF source"
         assert _main_file(None, snapshot)[0].read_bytes() == b"PDF source"
         assert not (tmp_path / "upload_PDFs").exists()
 

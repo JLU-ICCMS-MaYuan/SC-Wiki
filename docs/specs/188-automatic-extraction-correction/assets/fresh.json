@@ -1,0 +1,274 @@
+{
+  "extraction_version": "1",
+  "metadata": {
+    "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+    "authors": "Hui Wang, John S. Tse, Kaori Tanaka, Toshiaki Iitaka, Yanming Ma",
+    "journal": "PNAS",
+    "year": "2012",
+    "doi": "10.1073/pnas.1118168109",
+    "abstract": "Hydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of H2 fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particle-swarm optimization structural search, we show that in the stoichiometry CaH6 a body-centered cubic structure with hydrogen that forms unusual \"sodalite\" cages containing enclathrated Ca stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance by two H2 of electrons donated by Ca forming an H4 unit as the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupation of the degenerated orbitals at the zone center. The resultant dynamic Jahn–Teller effect helps to enhance electron-phonon coupling and leads to superconductivity of CaH6. A superconducting critical temperature (Tc) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far."
+  },
+  "paper_type_evidence": [
+    {
+      "candidate": "theoretical",
+      "scope": "current_paper",
+      "pdf_page": 1,
+      "block_id": "60c1a812c5bc3fd153bc5f1b7bd56434c5bd1ba4e352aa94afa63c8d340d0cf7",
+      "quote": null
+    }
+  ],
+  "research_materials": [
+    {
+      "material": "CaH6",
+      "scope": "current_paper",
+      "pdf_page": 1,
+      "block_id": "60c1a812c5bc3fd153bc5f1b7bd56434c5bd1ba4e352aa94afa63c8d340d0cf7",
+      "quote": null
+    }
+  ],
+  "referenced_materials": [],
+  "methodology": [],
+  "key_findings": [],
+  "coverage_exclusions": [
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "60d82bccd3d6b97d6f2cee71accc8de81b96912ad27db6a4354d4968e4e6cf7b",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Page number artifact, not scientific content."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "ced991029e465610c22d28ea786d7fb21bdce94951523cf7a4c06754459de1c4",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Title block, no material state or property data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "e525b59cd74a69dab95750481b08950f6c26887c7e9988fcd5cd6806d779ea84",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Author list, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "3428993e7dbcd2467d0272fcf55c1ef0c1bb13120946c834dddd11003eeedbd7",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Affiliations, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "ff28801e2ec708512a165c2fb39d965e973795076a5595edaba1dc7f8a7d03f6",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Editorial history, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "62b1f7f3a7ce05a2bd2dd8d466ae88a41e1f5305c2dc17caada9225ae6a3ba38",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Keywords, no material state or property data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "5bdaa780442fcad03f0bfb682c5cf6a7e361711108635b8aa569b4bb87cfd654",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "reference_or_background",
+      "reason": "Background discussion of prior hydride studies, not current paper results."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "07c7b63e427d88afd451804026462996c96e9f022cf3ac23f871438a60f0c519",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Section heading, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "4efe134299133c4ec3229b5749235e6683373a2ba0acafd0f32e3b9ddb1e80bf",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Method description of structure search, no material state or property data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "78c49db25c7f05870095417691a67fcdd3e2e6c3cb60b42aaf5006831e72dcbd",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Enthalpy stability summary, no material state or property data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "c8d80468f23bbdc9d6f432ed91e72201dc1ba5037a90d1e99f9f115601871558",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Structural description of phases, no material state or property data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "404159b22289c764d3b66cfdb5c915974bcd67832f421cc33055f40257af11c7",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Chemical bonding discussion, no material state or property data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "28782f16fda09ba9fa15e2a4dd351aa90319b0348c4b9b5ef97b2534c828d749",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Author contributions, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "2b58bc9acbc3e80c4c8aa137dbb55260cf7ac04d94ead2b30a11b3ab39f56330",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Journal section label, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "594715a1c3b4ed426a865e6c34ec421f58685d97ba4e4f242f4ef756278b5b00",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Conflict of interest statement, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "745eb68ce4562dd4f646cea097b59d3779e0c54e2cc4cdaa3bad5479453ac828",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Submission type, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "8d3a85ff9ef5da5968d30c2d2a479f5abee7397758757eadcb02634122abce0b",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Correspondence email, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "547e8b8eb976674e49af09613ed98ba142ee23e3213e9810cec6cdf19e93f56c",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Supporting information link, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "17c48cd8012a0a556419c0430f73ad69ba8b35f4303b4178f01c139e7594f085",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "DOI link, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "f57dff57c14ac092a99e8786d37cfc3b4d277da7dba757d074e0041b3dd834ba",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Journal issue label, no scientific data."
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "block_id": "6b3ae4191116dca0a85f983cb6b64c4e02ad16868b1b99b7a197d8344da8c7bb",
+      "table_id": null,
+      "row_index": null,
+      "pdf_page": 1,
+      "category": "non_result_content",
+      "reason": "Page number, no scientific data."
+    }
+  ],
+  "material_states": [
+    {
+      "scope": "current_paper",
+      "material": "CaH6",
+      "material_name": "CaH6",
+      "state_kind": "theoretical",
+      "structure_optimization": "unknown",
+      "structure_optimization_details": null,
+      "pressure_value_gpa": 150.0,
+      "pressure_min_gpa": null,
+      "pressure_max_gpa": null,
+      "pressure_raw": "150 GPa",
+      "pressure_unit_raw": "GPa",
+      "temperature_value_k": null,
+      "magnetic_field_t": null,
+      "temperature_raw": null,
+      "temperature_unit_raw": null,
+      "note": null,
+      "reported_space_group_symbol": null,
+      "reported_space_group_number": null,
+      "material_dimensionality": "three_dimensional",
+      "material_family": null,
+      "structure_families": [],
+      "basis_kind": "paper_quote",
+      "evidences": [
+        {
+          "file_id": "c900e237f152476f95fcc28e79857055",
+          "pdf_page": 1,
+          "block_id": "60c1a812c5bc3fd153bc5f1b7bd56434c5bd1ba4e352aa94afa63c8d340d0cf7",
+          "quote": "Hydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of \\mathbf { H _ { 2 } } fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particleswam optimization structural search, we show that in the stoichiometry \\mathsf { C a H _ { 6 } } a body-centered cubic structure with hydrogen that forms unusual“sodalite\" cagescontainingenclathratedCa stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance bytwo \\mathbf { H _ { 2 } } of electrons donated by Ca forming an \\mathbf { H _ { 4 } } unitas the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupationof thedegenerated orbitals at the zone center. The resultant dynamicJahn–Teller effecthelps to enhance electronphonon coupling and leads to superconductivity of \\mathbf { C a H _ { 6 } } . A superconducting critical temperature ( \\mathbf { I } _ { c } ) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far."
+        }
+      ],
+      "property_modules": [],
+      "schema_version": 2
+    }
+  ],
+  "_schema_version": 14,
+  "_document_signature": "ef9b5a778f1f6e3bf76270250c19eb682a53121750e235e6ab6834009053d0fd",
+  "_extraction_model": {
+    "provider": "server:LLM1",
+    "model": "deepseek-v4-pro"
+  },
+  "_source": {
+    "file_id": "c900e237f152476f95fcc28e79857055",
+    "filename": "2012 CaH6-王晖.pdf",
+    "file_role": "main",
+    "chunk_index": 0,
+    "section": "Document IR",
+    "page_start": 1,
+    "page_end": 1
+  }
+}

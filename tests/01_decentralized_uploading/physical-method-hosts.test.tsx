@@ -62,8 +62,8 @@ async function host(kind:string){
 function save(kind:string){fireEvent.click(screen.getByRole('button',{name:['admin','superadmin'].includes(kind)?'保存修改':'立即保存',exact:true}))}
 it.each(['upload','revision','admin','superadmin'])('%s 四层语义与优化约束读取一致，无变化保存零写请求',async kind=>{
  await host(kind)
- expect(screen.getByLabelText('优化求力电子理论')).toHaveValue('HF')
- expect(screen.getByLabelText('优化温度 (K)')).toHaveValue('0')
+ expect(screen.getByLabelText('优化求力电子理论',{selector:'input'})).toHaveValue('HF')
+ expect(screen.getByLabelText('优化温度 (K)',{selector:'input'})).toHaveValue('0')
  expect(screen.getByRole('combobox',{name:'结构优化目标'})).toHaveTextContent('准简谐自由能结构优化')
  expect(screen.getByRole('combobox',{name:'体积'})).toHaveTextContent('已优化')
  fireEvent.click(screen.getByRole('heading',{name:'电子性质',exact:true}))
@@ -87,7 +87,7 @@ it.each(['upload','revision','admin','superadmin'])('%s 只保存当前几何字
  const body=vi.mocked(api.patch).mock.calls[0][1]as any
  expect(body.changes).toEqual([{path:['material_states',{key:'state_key',value:'s'},'structure_optimization_details','method'],
   before:'QHA volume scan',value:'用户报告的自由能优化'}])
- expect(screen.getByLabelText('优化求力电子理论')).toHaveValue('HF')
+ expect(screen.getByLabelText('优化求力电子理论',{selector:'input'})).toHaveValue('HF')
  expect(vi.mocked(api.post).mock.calls.filter(([path])=>/jobs|preflight|submit-check/.test(path))).toEqual([])
  const marker=document.querySelector('[data-evidence-key="volume-review"]')as HTMLElement
  await waitFor(()=>expect(marker).not.toBeNull())
@@ -115,7 +115,7 @@ it('新方法字段保留中文组合输入，保存失败后输入与相邻电�
  save('upload')
  expect(await screen.findByText(/本次方法保存失败，请重试/)).toBeVisible()
  expect(input).toHaveValue('量子自由能优化')
- expect(screen.getByLabelText('优化求力电子理论')).toHaveValue('HF')
+ expect(screen.getByLabelText('优化求力电子理论',{selector:'input'})).toHaveValue('HF')
  save('upload')
  await waitFor(()=>expect(api.patch).toHaveBeenCalledTimes(2))
  const body=vi.mocked(api.patch).mock.calls[1][1]as any

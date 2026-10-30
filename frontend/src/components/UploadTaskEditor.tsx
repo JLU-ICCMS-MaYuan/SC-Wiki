@@ -614,9 +614,6 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           <Typography variant="caption" color={error ? 'error' : 'text.secondary'}>
             {saving ? t('common.saving') : dirty ? t('upload.autoSaveHint') : lastSavedAt ? t('upload.savedAt', { time: lastSavedAt }) : t('upload.draftLoaded')}
           </Typography>
-          {evidenceWorkflow.automaticView?.phase === 'error' && (
-            <Button variant="outlined" disabled={saving || submitting || Boolean(revision?.conflict)} onClick={evidenceWorkflow.showResults}>{t('evidence.viewResults')}</Button>
-          )}
           <Button variant="outlined" startIcon={saving ? <CircularProgress size={16} /> : <SaveIcon />}
             disabled={saving || submitting || Boolean(revision?.conflict)} onClick={() => void saveDraft(true)}>{t('upload.saveNow')}</Button>
           <Button variant="contained" startIcon={submitting ? <CircularProgress size={16} /> : <SendIcon />}

@@ -1,0 +1,101 @@
+{
+  "response": {
+    "results": [
+      {
+        "key": "b7af8512848971657cc20e53aeabd67e39bc572db9dd41d3da13070aee38348a",
+        "status": "unsupported",
+        "reason": "CaH6在150 GPa下为体心立方sodalite笼状结构，属于三维晶体，不是二维材料。原文明确描述其为三维sodalite框架，未提及二维层状特征。",
+        "suggestion": "将材料维度改为 three_dimensional。",
+        "fields": [
+          "material_states[0].material_dimensionality"
+        ],
+        "evidences": [
+          {
+            "source_id": "review-source-3"
+          },
+          {
+            "source_id": "review-source-7"
+          }
+        ],
+        "proposal": {
+          "values": {
+            "material_states[0].material_dimensionality": "three_dimensional"
+          },
+          "supported": true,
+          "unique": true,
+          "explanation": "原文明确描述CaH6为体心立方结构，H4单元连接形成三维sodalite笼，因此维度为三维。",
+          "evidences": [
+            {
+              "source_id": "review-source-3"
+            },
+            {
+              "source_id": "review-source-7"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "note": "本轮真实回答固定重放；来源编号由本轮来源材料展开，不含凭据。",
+  "sources": [
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "chunk_index": 0,
+      "content": "<!-- page: 1 -->\n\n<!-- block: 60d82bccd3d6b97d6f2cee71accc8de81b96912ad27db6a4354d4968e4e6cf7b -->\nDowd s e o   oo21\n\n<!-- block: ced991029e465610c22d28ea786d7fb21bdce94951523cf7a4c06754459de1c4 -->\nSuperconductive sodalite-like clathrate calcium hydride at high pressures\n\n<!-- block: e525b59cd74a69dab95750481b08950f6c26887c7e9988fcd5cd6806d779ea84 -->\nHui Wangª, John S. Tseb, Kaori Tanakab, Toshiaki litaka, and Yanming Maa,1",
+      "page_start": 1,
+      "page_end": 1
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "chunk_index": 1,
+      "content": "<!-- block: 3428993e7dbcd2467d0272fcf55c1ef0c1bb13120946c834dddd11003eeedbd7 -->\naState Key Lab of Superhard Materials, Jilin University, Changchun 130012, Peoples Republic of China; bDepartment of Physics and Engineering Physics, University of Saskatchewan, Saskatoon, Saskatchewan, S7N 5E2, Canada; and Computational Astrophysics Laboratory, Rikagaku Kenkyūjo, 2-1 Hirosawa, Wako, Saitama 351-0198, Japan",
+      "page_start": 1,
+      "page_end": 1
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "chunk_index": 2,
+      "content": "<!-- block: ff28801e2ec708512a165c2fb39d965e973795076a5595edaba1dc7f8a7d03f6 -->\nEdited by Michael L. Klein, Temple University, Philadelphia, PA, and approved February 17, 2012 (received for review November 5, 2011)",
+      "page_start": 1,
+      "page_end": 1
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "chunk_index": 3,
+      "content": "<!-- block: 60c1a812c5bc3fd153bc5f1b7bd56434c5bd1ba4e352aa94afa63c8d340d0cf7 -->\nHydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of \\mathbf { H _ { 2 } } fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particleswam optimization structural search, we show that in the stoichiometry \\mathsf { C a H _ { 6 } } a body-centered cubic structure with hydrogen that forms unusual“sodalite\" cagescontainingenclathratedCa stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance bytwo \\mathbf { H _ { 2 } } of electrons donated by Ca forming an \\mathbf { H _ { 4 } } unitas the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupationof thedegenerated orbitals at the zone center. The resultant dynamicJahn–Teller effecthelps to enhance electronphonon coupling and leads to superconductivity of \\mathbf { C a H _ { 6 } } . A superconducting critical temperature ( \\mathbf { I } _ { c } ) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far.\n\n<!-- block: 62b1f7f3a7ce05a2bd2dd8d466ae88a41e1f5305c2dc17caada9225ae6a3ba38 -->\ncalcium hydride | sodalite structure",
+      "page_start": 1,
+      "page_end": 1
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "chunk_index": 4,
+      "content": "<!-- block: 5bdaa780442fcad03f0bfb682c5cf6a7e361711108635b8aa569b4bb87cfd654 -->\nurrent studies of the hydrides of simple elements at high pressures are motivated by the proposition that a high T _ { \\mathrm { c } } may be achieved from “precompressed\" \\mathbf { H } _ { 2 } indense hydrogen-dominant hydrides (1). Superconductivity has been reported in \\underline { { \\mathrm { S i H _ { 4 } } ( 2 ) } } , although controversy surroundsmodels of the origin of superconductivityand the structure of the superconducting state (3 - 5) Many theoretical structures have the predicted T _ { \\mathrm { c } } values ranging from 10 to 139 K (6–12). Except for \\mathrm { A l H } _ { 3 } (13), in which superconductivity was predicted but not observed, a common feature of these structures is theubiquitous presence of molecular hydrogen fragments. At high pressures, unfavorable electron-electron repulsion in the atomic valence shells can be reduced by migration and localization in the empty interstitial regions (14, 15) Introduction of anelectronegative element, as was demonstrated in the case of \\mathbf { K } \\mathbf { - } \\mathbf { A } \\mathbf { g } (16), increases the ability of the electronegative Ag atoms to accommodate electrons from K into theoutermost \\check { 5 } s and 5 p valence shells, thereby forming a bonding network and stabilizing the alloy structures that otherwise would not be observed under ambient pressures. Recently, Zurek et al. (17, 18) demonstrated that charge transfer from lithium or sodium to hydrogen molecules under high pressures could lead to the formation of newmetallic lithium- or sodium-hydride alloys. Depending on the stoichiometry, the structures consist of “pre-dissociated\"molecular \\mathrm { H } _ { 2 } and/or monoatomic hydrogen.\n\n<!-- block: 07c7b63e427d88afd451804026462996c96e9f022cf3ac23f871438a60f0c519 -->\nResults and Discussion",
+      "page_start": 1,
+      "page_end": 1
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "chunk_index": 5,
+      "content": "<!-- block: 4efe134299133c4ec3229b5749235e6683373a2ba0acafd0f32e3b9ddb1e80bf -->\nThe known calcium hydrides have a stoichiometry of CaH2 at ambient pressure. Here, we explored other calcium hydrides with larger hydrogen contents by compressing a mixture containing Ca + hydrogen or \\mathrm{CaH_{2}+hydropen} The search for stable \\mathrm { C a H _ { 2 n } ^ { \\mathrm { ~ \\bar { ~ } ~ } } } ( n = 2 – 6 ) structures at high pressures was performed using the particle-swam optimization structure prediction algorithm (19) in combination with ab initio calculations. For each stoichiometry, calculations were performed at pressures of 50–200 GPa with",
+      "page_start": 1,
+      "page_end": 1
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "chunk_index": 6,
+      "content": "<!-- block: 78c49db25c7f05870095417691a67fcdd3e2e6c3cb60b42aaf5006831e72dcbd -->\nup to 4 formula units (f.u.). in the model. The enthalpies of candidate structures relative to the products of dissociation into CaH2 + solid H2 at the appropriate pressures are summarized in Fig. 1A. The essential information can be summarized as follows: (i) except for \\mathrm { C a H _ { 1 0 } } _ { : } stable structures began toemerge at pressures <50 GPa; (ii) CaH4 was the most stable phase at pressures between 50 and 150 GPa,whereas at 200 GPa \\mathrm { C a H _ { 6 } } had the lowest enthalpy of formation;(iii) the breakup of hydrogen molecules depended on the Ca/H ratio, and a higher susceptibility to dissociation was observed at higher ratios. Notably, calcium hydrides with stoichiometry having an odd number of hydrogen (e.g., \\mathrm { C a H } _ { 3 } , CaH, and \\dot { \\mathrm { C a H } } _ { 7 } , etc.) were found to be energetically very unfavorable and were excluded in the discussions(Supporting Information).",
+      "page_start": 1,
+      "page_end": 1
+    },
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "chunk_index": 7,
+      "content": "<!-- block: c8d80468f23bbdc9d6f432ed91e72201dc1ba5037a90d1e99f9f115601871558 -->\nThe structures of the stable phases for each stoichiometry at 150 GPa are shown in Fig. 1 B)–(D. Three types of hydrogen species, \\text{\" H}_{4} \\text{\" } units, monatomic \\mathbf { H } + \\mathbf { H } _ { 2 } , and molecular \\mathbf { H } _ { 2 } , were observed. CaH4 had a tetragonal (I4/mmm, Pearson symbol tI10) structure and included a body-centered arrangement of Ca and two molecular and four monatomic hydrogen units ( \\mathrm { C a } _ { 2 } ( \\mathrm { H } _ { 2 } ) _ { 2 } ( \\mathrm { H } ) _ { 4 } ) _ { ; } The structure of \\mathrm { C a H _ { 6 } } adopted a remarkable cubic form ( I m 3   m , Pearson symbol cI14), with body-centered Ca atoms and, on each face, squared \\mathrm { H } _ { 4 } units tilted 4 5 ^ { \\circ } with respect to the plane of the Ca atoms. These \\mathrm { H } _ { 4 } units were interlinked to form asodalite frameworkwith a Ca atom enclathrated at the center of each cage. The next stablepolymorph, \\mathrm { C a H } _ { 1 2 } , had a rhombohedral (R3, Pearson symbol hR13) structure consisting entirely of molecular H2",
+      "page_start": 1,
+      "page_end": 1
+    }
+  ],
+  "source_sha256": {
+    "c900e237f152476f95fcc28e79857055": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+  }
+}

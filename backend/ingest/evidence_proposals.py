@@ -140,15 +140,28 @@ def validate_values(record, values):
 def checked_proposal(record, raw, chunks):
     if not isinstance(raw, dict) or not raw.get('values') or not editable_fields(record):
         return None
+    values = raw['values']
+    if isinstance(values, dict):
+        allowed = {f['path'] for f in editable_fields(record)}
+        normalized = {}
+        for path, value in values.items():
+            local = '' if path == record['field'] else path[len(record['field']) + 1:] if path.startswith(record['field'] + '.') else path
+            if path in allowed:
+                local = path
+            if local not in allowed or local in normalized:
+                return None
+            normalized[local] = value
+        values = normalized
     try:
-        values = validate_values(record, raw['values'])
+        values = validate_values(record, values)
     except HTTPException:
         return None
     basis = raw.get('basis_kind', 'paper_quote')
     explanation = str(raw.get('explanation') or '').strip()
     if basis not in BASIS_KINDS or (basis != 'paper_quote' and (not explanation or len(explanation) > 160)):
         return None
-    sources = [ev.locate(e, chunks) for e in raw.get('evidences', []) if isinstance(e, dict)]
+    sources = [ev.locate(e, chunks) for e in ev.resolve_review_sources(raw.get('evidences'), chunks)
+               if isinstance(e, dict)]
     if len(sources) != len(raw.get('evidences', [])) or not all(sources) or (not sources and basis != 'general_knowledge'):
         return None
     from .condition_rules import proposal_allowed
@@ -156,6 +169,7 @@ def checked_proposal(record, raw, chunks):
         return None
     return {'version': ev.RULE_VERSION, 'values': values, 'evidences': sources,
             'basis_kind': basis, 'explanation': explanation,
+            'unique': raw.get('unique') is True,
             'supported': basis == 'paper_quote' and raw.get('supported') is True, 'content_hash': record['content_hash'],
             'source_hash': record['source_hash']}
 

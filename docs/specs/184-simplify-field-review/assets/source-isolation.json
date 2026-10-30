@@ -1,0 +1,9 @@
+{
+  "base": "f3bcd28009c504c6ab97a06325434f8c1743af9b",
+  "code_tree": "6b9f377cec3e2f701723b32feb19d64cbdc79ac2",
+  "excluded_parallel_features": [
+    187,
+    192
+  ],
+  "note": "用于验收的独立源码与测试树；仅文档不在此树。只含四项授权变更，#187/#192并行修改保持原样。"
+}

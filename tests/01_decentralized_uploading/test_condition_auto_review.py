@@ -352,7 +352,7 @@ def test_new_upload_rechecks_final_filled_conditions(monkeypatch,tmp_path):
     monkeypatch.setattr('backend.database.SessionLocal',SimpleNamespace(begin=begin))
     saved=[]
     monkeypatch.setattr(science,'save_results',lambda session,snap,results,owner:saved.append((snap,results)))
-    monkeypatch.setattr('backend.ingest.pdf_source_pages.current_pdf_results',lambda session,snap,results:results)
+    monkeypatch.setattr('backend.ingest.pdf_front_matter.correct_front_matter_results',lambda session,snap,results:results)
     ev.generate_upload_suggestions('new-upload',d,7,scientific_sources=chunks)
     snap,results=saved[-1];row=grid(snap)
     assert None in checked_values and '24×24×24' in checked_values

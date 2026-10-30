@@ -8,4 +8,4 @@
 - [x] CHK004 用户对完整第4项 Issue 正文答复“确认”；仅建档，未授权实施。
 - [x] CHK005 本份 Spec 已完整展示，用户答复“确认”；[原话记录](../requirements-source.md)单独追加，不借用 Issue 确认，不授予实施权限。
 - [ ] CHK006 Issue 已登记本地 Spec 路径，Spec 指回 #191；未推送，双向远程文件链接待验证。
-- [ ] CHK007 行为未实施，Overview 与 HTML 暂不改写；实现后再同步。
+- [x] CHK007 本地行为、验证记录及Overview/HTML已同步，见../validation.md；不表示已部署。

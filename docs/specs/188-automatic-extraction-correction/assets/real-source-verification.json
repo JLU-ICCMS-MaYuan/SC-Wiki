@@ -1,0 +1,93 @@
+{
+  "model": "deepseek-v4-pro",
+  "source_task": "52a25d2c68c04ff78e8346715dbbe717",
+  "sources": [
+    {
+      "file_id": "c900e237f152476f95fcc28e79857055",
+      "role": "main",
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "reused": "来源核验后的IR和文字；不是旧提取答案"
+    }
+  ],
+  "steps": [
+    {
+      "step": "重新提取",
+      "source": "正文第1页，正式_read_chunk入口",
+      "input": "无预设压力或维度答案；复用已核验IR文字",
+      "output": "CaH6，150 GPa，三维"
+    },
+    {
+      "step": "故障重放与自纠",
+      "input": "私有副本维度改为二维",
+      "processing": "正式generate_upload_suggestions、自纠、最终值重新核对",
+      "output": "三维supported；相邻150 GPa仍supported"
+    },
+    {
+      "step": "持久化",
+      "processing": "MySQL外层事务中保存并重读两个字段",
+      "output": "值、状态和auto_corrected标志符合预期；最终回滚"
+    },
+    {
+      "step": "工具补查",
+      "input": "压力字段设为未完成",
+      "processing": "真实模型选择search_within_document，程序返回原文后继续判断",
+      "output": "一次文档搜索，supported"
+    },
+    {
+      "step": "草稿保护",
+      "processing": "比较原任务Redis state及draft前后字节",
+      "output": "未变化"
+    }
+  ],
+  "auto_correction": {
+    "value": "three_dimensional",
+    "results": [
+      {
+        "field": "material_states[0].material_dimensionality",
+        "value": "three_dimensional",
+        "status": "supported",
+        "auto_corrected": true
+      },
+      {
+        "field": "material_states[0].pressure_value_gpa",
+        "value": 150.0,
+        "status": "supported",
+        "auto_corrected": null
+      }
+    ]
+  },
+  "tool_followup": {
+    "status": "supported",
+    "details": {
+      "actions": 1,
+      "calls": [
+        {
+          "tool": "search_within_document",
+          "file_id": "c900e237f152476f95fcc28e79857055",
+          "action": 1,
+          "status": "completed",
+          "arguments": {},
+          "result_summary": {
+            "truncated": false
+          }
+        }
+      ],
+      "reason": "文档补查已完成。"
+    }
+  },
+  "original_draft_unchanged": true,
+  "database_rolled_back": true,
+  "source_state": {
+    "head": "f3bcd280",
+    "worktree_modified": true,
+    "description": "独立索引源码快照执行；对应源码树见第184项source-isolation.json。",
+    "files": [
+      "backend/ingest/property_evidence.py",
+      "backend/ingest/extraction_correction.py",
+      "backend/ingest/field_document_followup.py",
+      "backend/ingest/evidence_proposals.py",
+      "backend/ingest/domain_extraction.py"
+    ]
+  },
+  "scope": "从无预设压力/维度答案的正文页重新提取CaH6状态，仅验证压力与维度，随后故障重放、自纠、工具补查、保存重读；不代表整篇通过"
+}

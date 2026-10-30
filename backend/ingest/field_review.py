@@ -61,7 +61,7 @@ def compact_result(result):
     keys = ('key', 'item_key', 'field', 'fields', 'label', 'current_value', 'status', 'reason',
             'ai_reason', 'resolution', 'required', 'stale', 'pending_review', 'human_modified', 'content_hash',
             'source_hash', 'field_decision', 'human_confirmed', 'detail_ref', 'record_field', 'record_field_key', 'record_group_key', 'state_key',
-            'module_key', 'record_key', 'structure_hash', 'structure_field', 'settings_field', 'settings_part', 'owner_label', 'source_kind', 'check_mode')
+            'module_key', 'record_key', 'structure_hash', 'structure_field', 'settings_field', 'settings_part', 'owner_label', 'source_kind', 'check_mode', 'review_error', 'review_followup', 'auto_corrected')
     return {key: deepcopy(result[key]) for key in keys if key in result} | {'evidences': []}
 
 

@@ -755,7 +755,6 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
             <Chip size="small" label={t('admin.doiChip', { value: reviewDlg.paper?.doi || '-' })} variant="outlined" />
             <Chip size="small" label={t('admin.yearChip', { value: reviewDlg.paper?.year || '-' })} variant="outlined" />
           </Box>
-          <Button variant="outlined" disabled={reviewSaving || evidenceWorkflow.busy} onClick={evidenceWorkflow.showResults}>{t('evidence.viewResults')}</Button>
           <EvidenceRecordList records={evidenceWorkflow.records} onOpen={evidenceWorkflow.openIssue} />
           <PaperReviewStatusSelect id="paper-review-status" value={reviewStatus}
             onChange={setReviewStatus} disabled={reviewSaving} />

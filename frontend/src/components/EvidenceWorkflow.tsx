@@ -37,7 +37,7 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { detail_ref?: string; field_decision?: {contract: string; action: 'approve' | 'reject'; actor_user_id: number; actor_name?: string; occurred_at: string}; settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+export interface EvidenceRecord { review_error?: string; review_failure_message?: string; review_in_progress?: boolean; review_followup?: { actions: number; reason: string }; detail_ref?: string; field_decision?: {contract: string; action: 'approve' | 'reject'; actor_user_id: number; actor_name?: string; occurred_at: string}; settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
 interface FieldDetail { record?: Partial<EvidenceRecord>; history?: EvidenceHistory[]; review_token?: string; can_approve?: boolean; approval_state?: 'human_approved' | 'supported' | 'exempt' | 'ready' | 'modification_required' | 'blocked'; approval_message?: string; source_state?: string; candidate?: FieldCandidate | null }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
@@ -95,7 +95,6 @@ export function useEvidenceWorkflow(options?: {
   const reportSettingsPending = useCallback((pending: boolean) => {
     settingsPendingRef.current = pending; setSettingsPending(pending)
   }, [])
-  const [issueListOpen, setIssueListOpen] = useState(false)
   const [manualHistory, setManualHistory] = useState<Record<string, ManualRecord[]>>({})
   const receiveManualHistory = useCallback((key: string, entries: ManualRecord[]) => setManualHistory(old => JSON.stringify(old[key]) === JSON.stringify(entries) ? old : { ...old, [key]: entries }), [])
   const [selected, setSelected] = useState<string | null>(null)
@@ -216,7 +215,7 @@ export function useEvidenceWorkflow(options?: {
   // 核对记录变化时在绘制前保持阅读位置，避免关闭动画期间先下移再跳回。
   useLayoutEffect(() => { preserveDrawerPosition() }, [records])
   const openIssue = (key: string, keys?: string[], fallback?: EvidenceRecord, tab: 'source' | 'settings' = 'source') => {
-    setDrawerTab(tab); setIssueListOpen(false)
+    setDrawerTab(tab)
     setFallbackRecord(fallback)
     drawerSession.current += 1
     const trigger = document.activeElement
@@ -501,6 +500,7 @@ export function useEvidenceWorkflow(options?: {
     cancelPreparation.current?.(); jobPollAbort.current?.abort()
     const current = ++generation.current
     fieldRun.current = current
+    setRecords(old => old.map(r => r.key === record.key ? { ...r, review_in_progress: true } : r))
     lastRetryKeys.current = [record.key]
     targetRef.current = target
     targetIdentity.current = `${target.target}:${target.target_id}`
@@ -578,9 +578,17 @@ export function useEvidenceWorkflow(options?: {
       const message = (error as Error).message
       if (!saved) {
         setView(null); setSaveError('保存失败，尚未开始核对：' + message)
-      } else setView({phase: 'error', message})
+      } else {
+        setRecords(old => old.map(r => r.key === record.key
+          && (r.status !== 'supported' || r.stale || r.pending_review)
+          ? { ...r, review_in_progress: false, review_error: 'field_review_failed', review_failure_message: message } : r))
+        setView({phase: 'error', message})
+      }
     } finally {
-      if (fieldRun.current === current) fieldRun.current = null
+      if (fieldRun.current === current) {
+        fieldRun.current = null
+        setRecords(old => old.map(r => r.key === record.key ? { ...r, review_in_progress: false } : r))
+      }
     }
   }
 
@@ -754,8 +762,22 @@ export function useEvidenceWorkflow(options?: {
         const pending_review = r.status !== 'supported' || manualValueIdentity(current?.value) !== manualValueIdentity(r.current_value)
         return r.pending_review === pending_review ? r : { ...r, pending_review }
       })
-      recordsRef.current = next
-      setRecords(old => old.length === next.length && old.every((record, i) => record === next[i]) ? old : next)
+      const locations = new Map(next.map(record => [record.key, record]))
+      setRecords(old => {
+        // 延迟输入通知只更新位置与真实待核对状态，不能覆写刚返回的结果或失败原因。
+        const merged = old.filter(r => !removed.has(r.key)).map(record => {
+          const location = locations.get(record.key)
+          if (!location) return record
+          const relocated = location.field !== record.field || location.record_key !== record.record_key
+          const row = relocated ? { ...record, field: location.field, record_key: location.record_key } : record
+          if (!affected.has(record.key)) return row
+          const latest = readCurrent(row)
+          const pending = row.status !== 'supported' || manualValueIdentity(latest?.value) !== manualValueIdentity(row.current_value)
+          return row.pending_review === pending ? row : { ...row, pending_review: pending }
+        })
+        recordsRef.current = merged
+        return old.length === merged.length && old.every((record, i) => record === merged[i]) ? old : merged
+      })
     }
     if (!optionsRef.current?.getCurrentValue) flush()
     else if (invalidationTimer.current === undefined) invalidationTimer.current = setTimeout(flush, 0)
@@ -905,15 +927,6 @@ export function useEvidenceWorkflow(options?: {
   }
   const dialog = <>
     {saveError && !activeRecord && !view && <Alert severity="error" sx={{my: 1}}>{saveError}</Alert>}
-    {records.length > 0 && <Button data-evidence-pending-navigation color={issues.length ? 'error' : 'primary'} onClick={() => setIssueListOpen(true)}>{t('evidence.pendingItems')}（{issues.length}）</Button>}
-    <Dialog open={issueListOpen} onClose={() => setIssueListOpen(false)} fullWidth maxWidth="sm">
-      <DialogTitle>{t('evidence.pendingItems')}</DialogTitle><DialogContent>
-        {!issues.length && <Typography>{t('evidence.noPendingItems')}</Typography>}
-        {issues.map(record => <Button key={record.key} fullWidth sx={{ justifyContent: 'start', textAlign: 'left', display: 'block', my: 1 }} onClick={() => openIssue(record.key)}>
-          <Typography variant="caption" color="text.secondary">{record.owner_label}</Typography><Typography>{record.label}</Typography>
-        </Button>)}
-      </DialogContent><DialogActions><Button onClick={() => setIssueListOpen(false)}>{t('common.close')}</Button></DialogActions>
-    </Dialog>
     <Snackbar open={Boolean(manualNotice)} autoHideDuration={4000} onClose={() => setManualNotice('')} message={manualNotice} />
     <Dialog open={discardSettingsOpen} onClose={() => setDiscardSettingsOpen(false)} aria-labelledby="discard-field-settings-title">
       <DialogTitle id="discard-field-settings-title">{t('evidence.settingsDiscardTitle')}</DialogTitle>
@@ -989,7 +1002,7 @@ export function useEvidenceWorkflow(options?: {
             {activeRecord.provenance.original_text && <Box component="details"><Box component="summary">{t('evidence.originalStructure')}</Box><Typography component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{activeRecord.provenance.original_text}</Typography></Box>}
           </Alert>}
           {currentDetail?.data?.source_state === 'historical' && <Alert severity="info">{t('evidence.historicalSource')}</Alert>}
-          {!activeRecord.placeholder && activeGroup.map(r => <EvidenceReviewSummary key={r.key} record={r} />)}
+          {!activeRecord.placeholder && activeGroup.map(r => <EvidenceReviewSummary key={r.key} record={r} readOnly={optionsRef.current?.readOnly} />)}
           {Boolean(activeRecord.legacy_evidences?.length) && !activeRecord.evidences.length && <ReviewSection title={t('evidence.legacySources')}>
             {activeRecord.legacy_evidences!.map((source, index) => <EvidenceRegion key={index} target={targetRef.current} source={source} />)}
           </ReviewSection>}
@@ -1037,5 +1050,5 @@ export function useEvidenceWorkflow(options?: {
       </>}
     </Drawer>
   </>
-  return { showResults: () => setIssueListOpen(true), hasManualDrafts: manualDrafts.hasPending, refreshAfterSave, getEditRevision: () => editRevision.current, hasUnsavedChanges: () => dirty.current, hasAccepted: records.some(r => !r.stale && r.proposal_draft?.accepted), run, runAutomatic, automaticView: automatic ? view : null, gate, applyAccepted, dialog, busy: view !== null, issues, records, restore, invalidate, openIssue, clearIssues: () => finish(null), saveError }
+  return { hasManualDrafts: manualDrafts.hasPending, refreshAfterSave, getEditRevision: () => editRevision.current, hasUnsavedChanges: () => dirty.current, hasAccepted: records.some(r => !r.stale && r.proposal_draft?.accepted), run, runAutomatic, automaticView: automatic ? view : null, gate, applyAccepted, dialog, busy: view !== null, issues, records, restore, invalidate, openIssue, clearIssues: () => finish(null), saveError }
 }

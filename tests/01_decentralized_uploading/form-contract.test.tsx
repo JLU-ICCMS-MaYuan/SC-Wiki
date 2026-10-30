@@ -44,6 +44,27 @@ beforeEach(() => {
   vi.mocked(api.patch).mockResolvedValue({ changed: true, version: 'v2' })
 })
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.clearAllMocks() })
+it.each(['upload', 'revision', 'admin', 'superadmin'])('191 四类宿主：%s 未完成字段可见并从自身侧栏恢复', async kind => {
+  const record = { key: 'graph-review', item_key: 'graph-review', field: 'paper.knowledge_graph_title',
+    label: '图谱科学标题', current_value: 'Graph title', required: true,
+    status: 'unchecked', pending_review: true, reason: '模型技术失败，输入已保留。', evidences: [] }
+  const originalPost = vi.mocked(api.post).getMockImplementation()!
+  vi.mocked(api.post).mockImplementation(async path => path.endsWith('/summary')
+    ? { version: 'v1', records: [record], needs_check: false } as never : originalPost(path))
+  const original = vi.mocked(api.get).getMockImplementation()!
+  vi.mocked(api.get).mockImplementation(async path => path.includes('/field-detail')
+    ? { record, review_token: 'graph-token', approval_state: 'ready', source_state: 'empty' } as never : original(path))
+  await host(kind)
+  expect(document.querySelector('[data-evidence-pending-navigation]')).toBeNull()
+  const caption = await screen.findByRole('button', { name: /图谱.*标题/ })
+  expect(caption).toHaveAttribute('data-evidence-status', 'failed')
+  expect(caption).toHaveAttribute('data-evidence-caption-problem', 'true')
+  fireEvent.click(caption)
+  fireEvent.click(await screen.findByRole('tab', { name: '来源核对' }))
+  await waitFor(() => expect(document.querySelector('[data-evidence-review-summary]')).toHaveTextContent(record.reason))
+  expect(document.querySelector('[data-evidence-review-summary]')).toHaveTextContent('重试')
+  expect(vi.mocked(api.post).mock.calls.filter(([path]) => path.endsWith('/jobs'))).toHaveLength(0)
+})
 async function host(kind: string) {
   counters.role = kind === 'superadmin' ? 'superadmin' : 'admin'
   render(<LanguageProvider><MemoryRouter initialEntries={['/admin/papers/174/edit']}>

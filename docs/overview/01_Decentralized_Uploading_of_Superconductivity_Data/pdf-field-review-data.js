@@ -1,7 +1,7 @@
 // 当前字段规则与来源索引；历史混装标签不作为新字段契约。
 window.SC_WIKI_FIELD_REVIEW_CATALOG = {
-  "date": "2026-10-30",
-  "revision": "181-physical-method-scope",
+  "date": "2026-10-31",
+  "revision": "184-188-190-191-local-validation",
   "profiles": {
     "parser": {
       "label": "解析器专门路径",
@@ -62,7 +62,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
     "semantic": {
       "label": "共用语义核对",
       "model": "在对应来源和当前语义上下文中调用共享 evaluate_batch / checked_result；并非每个字段都有独立模型或独立专用算法。不能只定位到原句就断言分类或归纳正确。",
-      "candidate": "候选检查字段类型、来源类别与依据；只在允许路径补空，不覆盖已有非空值。侧栏主动候选的应用与整篇批准分开。",
+      "candidate": "通用补空保留；解析系统草稿有唯一、实际来源支持的候选时，核实最终值后纠正。人工修改或确认不自动覆盖；主动候选应用与整篇批准分开。",
       "required": "有实际值且适用时参与核对；合法可选空值与未完成读取不同。修改内容、来源或真实依赖使旧结果失效。",
       "flow": [
         [
@@ -135,7 +135,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         ],
         [
           "候选有限处理",
-          "不覆盖非空值"
+          "核实唯一候选；保护人工"
         ],
         [
           "保存字段结果",
@@ -1510,7 +1510,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "backend/ingest/property_evidence.py",
-          "line": 1134,
+          "line": 1144,
           "symbol": "_fill_empty_fields"
         },
         {
@@ -9748,7 +9748,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -9796,7 +9796,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -9844,7 +9844,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -9892,7 +9892,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -9940,7 +9940,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -9988,7 +9988,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -10036,7 +10036,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -10084,7 +10084,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -10135,7 +10135,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -10183,7 +10183,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -10231,7 +10231,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -10280,7 +10280,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
       "sources": [
         {
           "path": "backend/ingest/upload_contracts.py",
-          "line": 138,
+          "line": 155,
           "symbol": "PropertyRecordInput"
         },
         {
@@ -11746,7 +11746,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "frontend/src/components/StructureOptimizationFields.tsx",
-          "line": 1,
+          "line": 6,
           "symbol": "StructureOptimizationFields"
         }
       ]
@@ -11792,7 +11792,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "frontend/src/components/StructureOptimizationFields.tsx",
-          "line": 1,
+          "line": 6,
           "symbol": "StructureOptimizationFields"
         }
       ]
@@ -11838,7 +11838,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "frontend/src/components/StructureOptimizationFields.tsx",
-          "line": 1,
+          "line": 6,
           "symbol": "StructureOptimizationFields"
         }
       ]
@@ -11884,7 +11884,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "frontend/src/components/StructureOptimizationFields.tsx",
-          "line": 1,
+          "line": 6,
           "symbol": "StructureOptimizationFields"
         }
       ]
@@ -11930,7 +11930,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "frontend/src/components/StructureOptimizationFields.tsx",
-          "line": 1,
+          "line": 6,
           "symbol": "StructureOptimizationFields"
         }
       ]
@@ -11976,7 +11976,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "frontend/src/components/StructureOptimizationFields.tsx",
-          "line": 1,
+          "line": 6,
           "symbol": "StructureOptimizationFields"
         }
       ]
@@ -12022,7 +12022,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "frontend/src/components/StructureOptimizationFields.tsx",
-          "line": 1,
+          "line": 6,
           "symbol": "StructureOptimizationFields"
         }
       ]
@@ -12068,7 +12068,7 @@ window.SC_WIKI_FIELD_REVIEW_CATALOG = {
         },
         {
           "path": "frontend/src/components/StructureOptimizationFields.tsx",
-          "line": 1,
+          "line": 6,
           "symbol": "StructureOptimizationFields"
         }
       ]

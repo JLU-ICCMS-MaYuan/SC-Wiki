@@ -9,7 +9,6 @@ from sqlalchemy.orm import Session, sessionmaker
 from backend import models
 from backend.database import Base
 from backend.ingest import property_evidence as evidence
-from backend.ingest import pdf_source_pages
 from backend.ingest import repair_pending_pdf_evidence as repair
 from backend.ingest.document_parsers import DocumentSource
 from backend.ingest.pdf_front_matter import correct_front_matter_results
@@ -68,20 +67,12 @@ def test_title_and_authors_use_main_pdf_front_page_not_last_citation(tmp_path, m
     assert evidence.locate_with_reason(corrected["title"]["evidences"][0], snapshot["chunks"])[0]["page_start"] == 1
 
 
-def test_wrong_page_hint_is_corrected_and_repeated_quote_loses_support(tmp_path, monkeypatch):
+def test_front_page_correction_preserves_scientific_fields(tmp_path, monkeypatch):
     _, snapshot = fixture(tmp_path, monkeypatch)
     old = {"tc": {"status": "supported", "evidences": [{"file_id": "main", "chunk_index": 1,
         "page_start": 2, "quote": "Tc reaches 200 K at 150 GPa."}]}}
-    corrected = pdf_source_pages.correct_pdf_source_pages(None, snapshot, old)
-    assert corrected["tc"]["status"] == "supported"
-    assert corrected["tc"]["evidences"][0]["page_start"] == 1
-    assert corrected["tc"]["evidences"][0]["locator_status"] == "verified_text_layer"
-    repeated = {"tc": {"status": "supported", "evidences": [{"file_id": "main", "chunk_index": 1,
-        "quote": "H2S"}]}}
-    ambiguous = pdf_source_pages.correct_pdf_source_pages(None, snapshot, repeated)
-    assert ambiguous["tc"]["status"] == "unchecked"
-    assert ambiguous["tc"]["location_check"] == "failed"
-    assert ambiguous["tc"]["evidences"][0]["locator_status"] == "ambiguous"
+    corrected = correct_front_matter_results(None, snapshot, old)
+    assert corrected["tc"] == old["tc"]
 
 
 def test_unverified_front_page_is_a_gap_and_approved_history_is_untouched(tmp_path, monkeypatch):
@@ -89,11 +80,11 @@ def test_unverified_front_page_is_a_gap_and_approved_history_is_untouched(tmp_pa
     old = {"title": {"status": "supported", "evidences": [{"file_id": "main", "chunk_index": 2,
         "quote": "How to cite this article: " + snapshot["records"][0]["current_value"]}]}}
     snapshot["pdf_manifest"][0]["sha256"] = "0" * 64
-    missing = pdf_source_pages.current_pdf_results(None, snapshot, old)
+    missing = correct_front_matter_results(None, snapshot, old)
     assert missing["title"]["status"] == "missing"
     assert missing["title"]["evidences"] == []
     approved = {**snapshot, "target": "paper", "target_id": "29", "review_state": ["approved", None, 1]}
-    assert pdf_source_pages.current_pdf_results(None, approved, old) == old
+    assert correct_front_matter_results(None, approved, old) == old
 
 
 def test_pending_title_repair_backs_up_before_write_and_is_idempotent(tmp_path, monkeypatch):

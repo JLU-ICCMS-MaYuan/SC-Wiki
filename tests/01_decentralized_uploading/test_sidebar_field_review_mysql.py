@@ -216,6 +216,14 @@ def test_worker_result_is_persisted_and_returned_for_only_one_field(context,prog
         return [ev.checked_result(records[0],{'status':outcome,'reason':'固定模型结果',
             'evidences':[{'file_id':'main','chunk_index':0,'quote':chunks[0]['content']}]},chunks)]
     monkeypatch.setattr(ev,'evaluate_batch',evaluate)
+    def followup_model(system,prompt,**kwargs):
+        import json
+        request=json.loads(prompt)
+        if 'observation' not in request:
+            return {'action':{'name':'read_document','arguments':{'file_id':request['documents'][0]['file_id']}}}
+        return {'results':[{'key':record['key'],'status':outcome,'reason':'固定供应商返回当前字段的科学结论。',
+            'evidences':[{'source_id':'review-source-0'}]}]}
+    monkeypatch.setattr('backend.rag.llm.complete_json',followup_model)
     result=api.create_job(api.Target(target=target,target_id=tid,purpose='field',
         expected_field_token=snap['field_review_input']['token'],retry_keys=[record['key']]),actor)
     ev.run_evidence_job(result['id'])
@@ -231,7 +239,12 @@ def test_worker_result_is_persisted_and_returned_for_only_one_field(context,prog
     with factory() as db:
         assert db.scalar(select(func.count()).select_from(models.ScientificEvidenceCheck).where(
             models.ScientificEvidenceCheck.target==target,models.ScientificEvidenceCheck.target_id==tid,
-            models.ScientificEvidenceCheck.item_key==record['item_key']))==(0 if outcome=='timeout' else 1)
+            models.ScientificEvidenceCheck.item_key==record['item_key']))==1
+        if outcome=='timeout':
+            restored=science.load_results(db,snap,actor.id)[record['key']]
+            assert restored['status']=='unchecked'
+            assert restored['review_error']=='evidence_model_timeout'
+            assert not restored.get('human_confirmed')
 
 
 def test_revoked_permission_does_not_save_result(context,monkeypatch):

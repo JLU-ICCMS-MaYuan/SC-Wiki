@@ -31,6 +31,8 @@ let currentReviews:any[]=reviews
 beforeEach(()=>{
  currentReviews=structuredClone(reviews)
  vi.mocked(api.get).mockImplementation(async path=>{
+  if(path.includes('/draft-state'))return {version:'v1',draft:structuredClone(draft),staged:false}as never
+  if(path.includes('/draft-revision'))return {revision:null,write_epoch:null}as never
   if(path.includes('/form-definitions'))return (path.includes('?')?[definition]:definition)as never
   if(path.endsWith('/draft'))return {ok:true,data:structuredClone(draft)}as never
   if(path.includes('/field-detail')){const key=new URLSearchParams(path.split('?')[1]).get('item_key');return {record:currentReviews.find(r=>r.key===key)||currentReviews[6],review_token:'token',approval_state:'uncertain',can_approve:false,source_state:'available'}as never}
@@ -52,7 +54,8 @@ async function show(mode='upload'){
  identity.role=mode==='superadmin'?'superadmin':'admin'
  await act(async()=>render(['admin','superadmin'].includes(mode)?<MemoryRouter initialEntries={['/admin/papers/15/edit']}><Routes><Route path="/admin/papers/:id/edit" element={<AdminPaperEditPage/>}/></Routes></MemoryRouter>:<UploadTaskEditor taskId="test" revisionPaperId={mode==='revision'?15:undefined} onSubmitted={()=>{}}/>))
  fireEvent.click(await screen.findByRole('heading',{name:'超导性质',exact:true}))
- await screen.findByRole('button',{name:'待处理项（20）'})
+ await waitFor(()=>expect(document.querySelector('[data-evidence-key]')).not.toBeNull())
+ expect(document.querySelector('[data-evidence-pending-navigation]')).toBeNull()
 }
 it.each(['upload','revision','admin','superadmin'])('%s 完整宿主无独立分类入口，字段来源、标记与阻断保持',async mode=>{
  await show(mode)
@@ -79,12 +82,13 @@ it('真实输入错误仍就地显示，来源理由不会混进校验辅助文�
  expect(await screen.findByText('请输入 1–118 的整数')).toBeVisible()
  for(const item of reviews)expect(screen.queryByText(item.reason)).not.toBeInTheDocument()
 })
-it('未定位来源项保留独立入口和问题数，不生成正文警告',async()=>{
+it('未定位字段保留自身侧栏入口，不增加独立待处理导航或正文警告',async()=>{
  currentReviews=[{...reviews[0],key:'not-rendered',record_key:'not-rendered',label:'未定位字段'}]
  await act(async()=>render(<UploadTaskEditor taskId="test" onSubmitted={()=>{}}/>))
- await screen.findByRole('button',{name:'待处理项（1）'})
+ fireEvent.click(await screen.findByText('待定位的来源核对（1）'))
+ await screen.findByRole('button',{name:/未定位字段/})
  expect(screen.queryByText(reviews[0].reason)).not.toBeInTheDocument()
- fireEvent.click(screen.getByRole('button',{name:'待处理项（1）'}))
+ expect(document.querySelector('[data-evidence-pending-navigation]')).toBeNull()
  fireEvent.click(screen.getByRole('button',{name:/未定位字段/}))
  const drawer=document.querySelector('.evidence-review-drawer')as HTMLElement
  expect((await within(drawer).findAllByText(reviews[0].reason))[0]).toBeVisible()

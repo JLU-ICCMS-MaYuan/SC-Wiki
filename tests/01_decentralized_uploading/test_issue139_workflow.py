@@ -33,7 +33,7 @@ def test_suggestion_pipeline_preserves_direct_facts_and_marks_inference(tmp_path
         yield object()
     monkeypatch.setattr('backend.database.SessionLocal',SimpleNamespace(begin=begin))
     monkeypatch.setattr(science,'save_results',lambda s,snap,results,owner:stored.append((deepcopy(snap),deepcopy(results))))
-    monkeypatch.setattr('backend.ingest.pdf_source_pages.current_pdf_results',lambda s,snap,results:results)
+    monkeypatch.setattr('backend.ingest.pdf_front_matter.correct_front_matter_results',lambda s,snap,results:results)
     c = candidate(d)
     def model(system,body,**kw):
         if '"settings"' in system and '"associations"' not in system:
@@ -103,7 +103,7 @@ def test_worker_finishes_direct_claim_gate_before_common_methods_fill(tmp_path,m
     def begin():yield object()
     monkeypatch.setattr('backend.database.SessionLocal',SimpleNamespace(begin=begin))
     monkeypatch.setattr(science,'save_results',lambda *a:None)
-    monkeypatch.setattr('backend.ingest.pdf_source_pages.current_pdf_results',lambda s,snap,results:results)
+    monkeypatch.setattr('backend.ingest.pdf_front_matter.correct_front_matter_results',lambda s,snap,results:results)
     saved=[]
     monkeypatch.setattr(jobs,'save_draft',lambda _,value:saved.append(deepcopy(value)))
     def direct(system,prompt,**kw):

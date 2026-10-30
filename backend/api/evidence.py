@@ -326,7 +326,7 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
             table.result['field_decision'], table.content_hash, table.source_hash, table.id,
             table.result['state_review_context'], table.result['review_started_at'],
             table.result['state_key'], table.result['field_review_binding']['contract'],
-            table.result['field_review_binding']['token']).where(table.id.in_(chosen.values()))).all()
+            table.result['field_review_binding']['token'], table.result['review_error']).where(table.id.in_(chosen.values()))).all()
         results = {row[0]: row for row in rows}
         from backend.ingest.field_review import changed_keys
         modified = changed_keys({'records': records, '_field_change_events': (get_state(body.target_id) or {}).get('_field_change_events') or []}) if body.target == 'upload' else changed_keys({'records': records, '_field_change_events': draft.get('_field_change_events') or []})
@@ -358,6 +358,7 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
                 'detail_ref': ev.digest([row[9], row[7], row[8], row[2], row[3], row[6],
                     (decision_current or {}).get('content_hash'), (decision_current or {}).get('source_hash'),
                     (decision_current or {}).get('state_review_context')]) if row else '',
+                'review_error': row[15] if row else None,
                 'pending_review': not matches, 'human_modified': (record['item_key'] in modified or bool((decision_current or {}).get('paper_source_hash')))
                     and not (valid_decision and row[6].get('action') == 'approve'),
                 'resolution': (draft.get('_review_notes', {}).get(record['item_key']) or {}).get('reason', '')}))
@@ -368,7 +369,6 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
 
 
 def snapshot_for(body, user):
-    from backend.ingest.pdf_source_pages import current_pdf_results
     if body.target == 'revision':
         from backend.services.paper_revisions import revision_snapshot
         with SessionLocal() as session:
@@ -481,8 +481,7 @@ def enqueue_review(body, user, snapshot, cached):
     cached = {r['key']: cached[r['key']] for r in snapshot['records']
               if reusable(r, cached.get(r['key'])) and r['key'] not in retry_keys}
     requested = retry_keys if body.purpose == 'field' else {
-        r['key'] for r in snapshot['records'] if needs_review(r, cached.get(r['key']))
-        and (body.purpose != 'submit' or r.get('human_modified'))}
+        r['key'] for r in snapshot['records'] if needs_review(r, cached.get(r['key']))}
     if not requested:
         return {'status': 'completed', **review_response(snapshot, cached)}
     # 程序仅检查人工记录是否齐全；理由是否科学成立由随后模型判断。

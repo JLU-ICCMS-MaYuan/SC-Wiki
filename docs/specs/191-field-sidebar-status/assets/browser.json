@@ -1,0 +1,30 @@
+[
+  {
+    "mode": "upload",
+    "failed_marker": true,
+    "sidebar_reason": true,
+    "independent_navigation": false,
+    "model_jobs": 0
+  },
+  {
+    "mode": "revision",
+    "failed_marker": true,
+    "sidebar_reason": true,
+    "independent_navigation": false,
+    "model_jobs": 0
+  },
+  {
+    "mode": "admin",
+    "failed_marker": true,
+    "sidebar_reason": true,
+    "independent_navigation": false,
+    "model_jobs": 0
+  },
+  {
+    "mode": "superadmin",
+    "failed_marker": true,
+    "sidebar_reason": true,
+    "independent_navigation": false,
+    "model_jobs": 0
+  }
+]

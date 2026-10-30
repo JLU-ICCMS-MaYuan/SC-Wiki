@@ -1,0 +1,82 @@
+{
+  "code_tree": "6b9f377cec3e2f701723b32feb19d64cbdc79ac2",
+  "runtime": "sc-wiki Conda Python 3.12 / Node 22",
+  "storage": "本机MySQL外层事务回滚；FILE_STORAGE_BACKEND=local",
+  "backend": {
+    "passed": 134,
+    "deselected_existing_failures": 5,
+    "tests": [
+      "test_remove_pdf_recheck.py",
+      "test_extraction_correction.py",
+      "test_field_document_followup.py",
+      "test_submit_unfinished_fields.py",
+      "test_sidebar_field_review_mysql.py",
+      "test_condition_auto_review.py",
+      "test_issue109_pdf_source_quality.py",
+      "test_issue139_workflow.py",
+      "test_file_storage_workflows.py"
+    ]
+  },
+  "form_contract": {
+    "passed": 106
+  },
+  "mutation": {
+    "detected_regressions": 8,
+    "hosts": [
+      "upload",
+      "revision",
+      "admin",
+      "superadmin"
+    ]
+  },
+  "build": "passed",
+  "baseline": {
+    "commit": "f3bcd28009c504c6ab97a06325434f8c1743af9b",
+    "passed": 43,
+    "failed": 5,
+    "same_failures_on_changed_tree": true,
+    "failures": {
+      "test_condition_auto_review.py": [
+        "test_one_bounded_repair_preserves_original_response",
+        "test_bounded_repair_does_not_swallow_upload_cancellation",
+        "test_new_upload_rechecks_final_filled_conditions"
+      ],
+      "test_file_storage_workflows.py": [
+        "test_submitted_review_snapshot_survives_state_expiry",
+        "test_review_artifact_storage_failure_is_desensitized"
+      ]
+    }
+  },
+  "logs": {
+    "backend": {
+      "path": "backend.txt",
+      "sha256": "ec308b6cf4610b0891e1c0b49de3c497bf9090514cc4022110c19971ddbabfaf",
+      "original_sha256": "ec308b6cf4610b0891e1c0b49de3c497bf9090514cc4022110c19971ddbabfaf",
+      "normalization": "归档仅移除行尾空白"
+    },
+    "form_contract": {
+      "path": "form_contract.txt",
+      "sha256": "1fe46283a56cd001b726eb2eb5b6badc33470f444d3f28d49b80246df3c924b6",
+      "original_sha256": "cde94429f19691312e56f7fc0059ae7193274fd8be07bd659dd743ba47cbafd6",
+      "normalization": "归档仅移除行尾空白"
+    },
+    "mutation": {
+      "path": "mutation.txt",
+      "sha256": "9ad5e5be6f1ae43d417ad887d9e3d94826c3c3da98cace5a4add641b5f62668e",
+      "original_sha256": "9ad5e5be6f1ae43d417ad887d9e3d94826c3c3da98cace5a4add641b5f62668e",
+      "normalization": "归档仅移除行尾空白"
+    },
+    "build": {
+      "path": "build.txt",
+      "sha256": "39adb90917007b195c857912000f1a674086c76e8c0974134f466c73cb1bdbb5",
+      "original_sha256": "39adb90917007b195c857912000f1a674086c76e8c0974134f466c73cb1bdbb5",
+      "normalization": "归档仅移除行尾空白"
+    },
+    "baseline": {
+      "path": "baseline.txt",
+      "sha256": "3ccd79fadbb3b1c9531c9d1a4ea8a63188c0945c47ca935a15d16487e93f638f",
+      "original_sha256": "d65b8cd844282ec2c50a99ed04873b953647b0ec2557de288b301c53f716637a",
+      "normalization": "归档仅移除行尾空白"
+    }
+  }
+}

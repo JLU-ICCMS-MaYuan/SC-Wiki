@@ -50,7 +50,5 @@
 .audit-references ul { padding-left:18px; margin:7px 0 0; }
 .audit-references li + li { margin-top:6px; }
 .audit-case { font-size:13px; border-top:1px solid var(--line); background:#f9fafb; }
-#flow-chart .node[data-node="unlocated"] .shape { fill:#fff0ed; stroke:#bb3933; stroke-width:2; }
-#flow-chart .edge[data-to="unlocated"] { stroke:#bb3933; stroke-width:2.5; }
 @media(max-width:900px) { .audit-modules { grid-template-columns:repeat(3,minmax(0,1fr)); } .audit-explanation { grid-template-columns:1fr; } .audit-example { border-left:0; border-top:1px solid #cbdbe8; padding:14px 0 0; } }
 @media(max-width:600px) { .audit-head,.audit-ledger,.audit-workbench,.audit-case { padding:18px 15px; } .audit-modules { grid-template-columns:repeat(2,minmax(0,1fr)); } .audit-modes button { flex:1; padding:9px; } }

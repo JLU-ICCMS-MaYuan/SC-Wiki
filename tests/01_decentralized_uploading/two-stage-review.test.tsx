@@ -44,7 +44,7 @@ it('局部写入只传变化字段及稳定实体身份', () => {
 it('人工理由与旧接受标记不能解除有效的失败红框', () => {
   expect(evidenceProblem({...base, resolution: '我确认', human_confirmed: true,
     proposal_draft: { accepted: true, reason: '说明', values: {} }})).toBe(true)
-  expect(evidenceProblem({...base, pending_review: true})).toBe(false)
+  expect(evidenceProblem({...base, pending_review: true})).toBe(true)
 })
 
 it('字段设置入口无论原字段分项如何定位，都展示完整纵向设置表单', async () => {
@@ -114,7 +114,7 @@ it('主动核对使用草稿令牌，通过后关闭且提交直接复用', asyn
   expect(vi.mocked(api.post).mock.calls.filter(([path]) => path.endsWith('/jobs'))).toHaveLength(1)
 })
 
-it('编辑只去当前键旧红框，不预检查、不启动模型；恢复旧值不实时新增红框', async () => {
+it('编辑保持当前字段待核对提示，不预检查、不启动模型；恢复旧值不伪造通过', async () => {
   let value = 'old'
   let flow: ReturnType<typeof useEvidenceWorkflow>
   function Harness() {
@@ -125,11 +125,11 @@ it('编辑只去当前键旧红框，不预检查、不启动模型；恢复旧�
   render(<Harness />)
   await screen.findByText('红')
   await act(async () => { value = 'new'; flow!.invalidate('paper.title'); await new Promise(r => setTimeout(r, 5)) })
-  expect(screen.getByText('不红')).toBeInTheDocument()
+  expect(screen.getByText('红')).toBeInTheDocument()
   expect(api.post).toHaveBeenCalledTimes(1)
   expect(api.post).toHaveBeenCalledWith('/api/rag/evidence/summary', {target: 'upload', target_id: 'test'})
   await act(async () => { value = 'old'; flow!.invalidate('paper.title'); await new Promise(r => setTimeout(r, 5)) })
-  expect(screen.getByText('不红')).toBeInTheDocument()
+  expect(screen.getByText('红')).toBeInTheDocument()
   expect(api.post).toHaveBeenCalledTimes(1)
 })
 

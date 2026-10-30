@@ -126,3 +126,13 @@ it('保存失败保留最新理由且不启动模型任务',async()=>{
  expect(api.put).not.toHaveBeenCalled()
  expect(vi.mocked(api.post).mock.calls.some(([path])=>path.endsWith('/jobs'))).toBe(false)
 })
+
+it.each(['upload','revision','admin','superadmin'])('%s 技术失败落在原字段，不隐藏成无问题',async kind=>{
+ await open(kind)
+ fireEvent.click(screen.getByRole('button',{name:'大模型核对',exact:true}))
+ await waitFor(()=>expect(order).toContain('job'))
+ await act(async()=>finishJob({id:'job',status:'failed',error:{code:'evidence_model_timeout',message:'隔离模型超时，请重试当前字段'}}))
+ await screen.findByText('隔离模型超时，请重试当前字段')
+ await waitFor(()=>expect(document.querySelector(`[data-evidence-key="${item}"]`)).toHaveAttribute('data-evidence-status','failed'))
+ expect(document.querySelector('[data-evidence-pending-navigation]')).toBeNull()
+})

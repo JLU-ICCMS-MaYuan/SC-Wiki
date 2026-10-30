@@ -1,0 +1,208 @@
+...........................FF........F....F...F.                         [100%]
+=================================== FAILURES ===================================
+_____________ test_one_bounded_repair_preserves_original_response ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1714ac530>
+
+    def test_one_bounded_repair_preserves_original_response(monkeypatch):
+        snap, row = snapshot(); calls=[]; captures=[]
+        def model(system, payload, **kwargs):
+            calls.append(json.loads(payload))
+            raw=assessment(row)
+            if len(calls)==1: raw['scope_evidences']=[]
+            return {'results':[{'key':row['key'],'status':'supported','evidences':[],'condition_review':raw}]}
+        monkeypatch.setattr('backend.rag.llm.complete_json',model)
+        evaluated=ev.evaluate_batch([row],snap['chunks'],on_response=captures.append)
+>       assert len(calls)==2 and calls[1]['validation_feedback']
+E       AssertionError: assert (1 == 2)
+E        +  where 1 = len([{'purpose': 'check', 'records': [{'key': '292c5403069f258a11af07f48ce16408a5e67d27335e0a5e5503879ab96b9417', 'field':...tion, with 850 eV and a force threshold of 1 meV/Å.', 'source_id': 'review-source-0'}], 'human_provided_evidence': {}}])
+
+tests/01_decentralized_uploading/test_condition_auto_review.py:194: AssertionError
+___________ test_bounded_repair_does_not_swallow_upload_cancellation ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1714ae240>
+
+    def test_bounded_repair_does_not_swallow_upload_cancellation(monkeypatch):
+        class UploadCancelled(Exception):pass
+        snap,row=snapshot();calls=[]
+        def model(*args,**kwargs):
+            calls.append(1)
+            if len(calls)>1:raise UploadCancelled()
+            raw=assessment(row);raw['scope_evidences']=[]
+            return {'results':[{'key':row['key'],'status':'supported','condition_review':raw}]}
+        monkeypatch.setattr('backend.rag.llm.complete_json',model)
+>       with pytest.raises(UploadCancelled):ev.evaluate_batch([row],snap['chunks'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UploadCancelled
+
+tests/01_decentralized_uploading/test_condition_auto_review.py:208: Failed
+_______________ test_new_upload_rechecks_final_filled_conditions _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1714ac620>
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-215/test_new_upload_rechecks_final0')
+
+    def test_new_upload_rechecks_final_filled_conditions(monkeypatch,tmp_path):
+        from contextlib import contextmanager
+        from types import SimpleNamespace
+        from backend.ingest.scientific_context import scientific_fingerprint
+        d=setup();state=d['material_states'][0];state['reported_space_group_symbol']='P6/mmm'
+        source=state['property_modules'][0]['records'][0]
+        source['payload']['source_associations']=[]
+        source['payload']['calculation_conditions']={'calculation_code':'Quantum ESPRESSO'}
+        chunks=[{'file_id':'main','chunk_index':0,'content':TEXT}]
+        def build(task,owner,*,parsing_draft):
+            snap=ev.complete_snapshot('upload',task,ev.draft_records(parsing_draft,{}),chunks,parsing_draft)
+            bind_snapshot_source_documents(snap,{'main':{'sha256':'a'*64,'role':'main'}})
+            return snap
+        monkeypatch.setattr(ev,'upload_snapshot',build)
+        monkeypatch.setattr('backend.ingest.upload_jobs._ensure_not_cancelled',lambda *_:None)
+        monkeypatch.setattr('backend.ingest.upload_tasks.artifact_directory',lambda _:tmp_path)
+        def ledger(draft,context,*args,**kwargs):
+            row=draft['material_states'][0]['property_modules'][0]['records'][0]
+            e={'file_id':'main','chunk_index':0,'quote':TEXT}
+            return {'complete':True,'gaps':[],'associations':[{'target':'s/m/r','expected_fingerprint':scientific_fingerprint(row),
+                'target_path':'/payload/calculation_conditions/k_grid','value':'24×24×24','reported_value_raw':'24×24×24',
+                'basis_kind':'paper_inference','stage':'electron_phonon','scope':{'material':'LaSc2H24'},
+                'explanation':'当前材料物相共用QE网格','fact_evidences':[e],'scope_evidences':[e]}]}
+        monkeypatch.setattr('backend.ingest.scientific_context.generate_context_associations',ledger)
+        checked_values=[]
+        def model(system,payload,**kwargs):
+            request=json.loads(payload);results=[]
+            for row in request['records']:
+                condition=row.get('condition_context')
+                item={'key':row['key'],'status':'supported','evidences':[{'file_id':'main','quote':TEXT}],'reason':'本文依据'}
+                if condition:
+                    value=row['claim']['value']
+                    if condition['parameter']=='k_grid':checked_values.append(value)
+                    item['condition_review']={'verdict':'supported' if value else 'not_reported','value_origin':'reported',
+                        'scope':condition,'exceptions':'none','explanation':'原文明确当前材料物相的软件和设置，未见例外',
+                        **{k:[{'source_id':'review-source-0'}] for k in ['fact_evidences','scope_evidences','software_evidences']}}
+                results.append(item)
+            return {'results':results}
+        monkeypatch.setattr('backend.rag.llm.complete_json',model)
+        @contextmanager
+        def begin():yield object()
+        monkeypatch.setattr('backend.database.SessionLocal',SimpleNamespace(begin=begin))
+        saved=[]
+        monkeypatch.setattr(science,'save_results',lambda session,snap,results,owner:saved.append((snap,results)))
+        monkeypatch.setattr('backend.ingest.pdf_source_pages.current_pdf_results',lambda session,snap,results:results)
+        ev.generate_upload_suggestions('new-upload',d,7,scientific_sources=chunks)
+        snap,results=saved[-1];row=grid(snap)
+>       assert None in checked_values and '24×24×24' in checked_values
+E       AssertionError: assert (None in ['24×24×24'])
+
+tests/01_decentralized_uploading/test_condition_auto_review.py:358: AssertionError
+----------------------------- Captured stdout call -----------------------------
+warning: The `fitz` API is deprecated and will be removed in future. Use `import pymupdf` instead.
+_____________ test_submitted_review_snapshot_survives_state_expiry _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x17289eae0>
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-215/test_submitted_review_snapshot0')
+
+    def test_submitted_review_snapshot_survives_state_expiry(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+        boto3 = pytest.importorskip("boto3")
+        moto = pytest.importorskip("moto")
+        from backend.api import rag
+        from backend.ingest import upload_tasks
+        from backend.storage.paths import publish_tree
+
+        with moto.mock_aws():
+            boto3.client("s3", region_name="us-east-1").create_bucket(Bucket="scwiki-storage-test")
+            monkeypatch.setenv("FILE_STORAGE_BACKEND", "s3")
+            monkeypatch.setenv("S3_ENDPOINT_URL", "https://s3.amazonaws.com")
+            monkeypatch.setenv("S3_BUCKET", "scwiki-storage-test")
+            monkeypatch.setenv("S3_ACCESS_KEY_ID", "test")
+            monkeypatch.setenv("S3_SECRET_ACCESS_KEY", "test")
+            monkeypatch.setenv("FILE_STORAGE_TMP_DIR", str(tmp_path / "cache"))
+            monkeypatch.setattr(upload_tasks, "settings", SimpleNamespace(sc_wiki_data_dir=tmp_path))
+            task_id = "d" * 32
+            source = upload_tasks.artifact_path(task_id)
+            source.write_text(json.dumps({"task_id": task_id, "paper_id": None,
+                                          "ai_values": {"paper": {"summary": "old"}}, "evidence": {}}))
+            state = {"status": "ready", "file_contract_version": 1,
+                     "artifact_manifest": publish_tree(source, data_root=tmp_path, task_id=task_id, run_id="first")}
+            original_key = state["artifact_manifest"][0]["key"]
+            source.unlink()
+            monkeypatch.setattr(upload_tasks, "get_state", lambda _: state)
+            monkeypatch.setattr(upload_tasks, "update_state", lambda _task, **changes: state.update(changes) or state)
+            rag._record_submitted_upload(task_id, 42, {"paper": {"summary": "reviewed"}})
+            assert state["artifact_manifest"][0]["key"] != original_key
+>           assert state["artifact_manifest"][0]["key"] == f"review_artifacts/{task_id}/result.json"
+E           AssertionError: assert 'review_artif...ed-42-r1.json' == 'review_artif...d/result.json'
+E
+E             Skipping 40 identical leading characters in diff, use -v to show
+E             - ddddddddd/result.json
+E             + ddddddddd/submitted-42-r1.json
+
+tests/01_decentralized_uploading/test_file_storage_workflows.py:244: AssertionError
+_____________ test_review_artifact_storage_failure_is_desensitized _____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x172939850>
+
+    def test_review_artifact_storage_failure_is_desensitized(monkeypatch: pytest.MonkeyPatch) -> None:
+        from fastapi import HTTPException
+        from backend.api import rag
+        from backend.ingest import upload_tasks
+        from backend.storage import FileStorageUnavailable
+
+        monkeypatch.setenv("FILE_STORAGE_BACKEND", "s3")
+        def unavailable(_task: str) -> None:
+            raise FileStorageUnavailable("secret endpoint")
+
+        monkeypatch.setattr(upload_tasks, "read_artifact_path", unavailable)
+        with pytest.raises(HTTPException) as exc:
+>           rag._artifact_by_paper_id(42, "a" * 32)
+
+tests/01_decentralized_uploading/test_file_storage_workflows.py:372:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+paper_id = 42, task_id = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', paper_revision = 1
+
+    def _artifact_by_paper_id(
+        paper_id: int,
+        task_id: str | None = None,
+        paper_revision: int = 1,
+    ) -> tuple[str, Path, dict[str, Any]] | None:
+        from backend.ingest.upload_tasks import data_path, read_artifact_path
+        from backend.storage import FileIntegrityError, FileNotFound, FileStorageUnavailable
+        from backend.storage.paths import object_mode
+
+        root = data_path("review_artifacts")
+        if object_mode():
+            if not task_id:
+                return None
+            try:
+>               candidates = [read_artifact_path(task_id, paper_id=paper_id, paper_revision=paper_revision)]
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E               TypeError: test_review_artifact_storage_failure_is_desensitized.<locals>.unavailable() got an unexpected keyword argument 'paper_id'
+
+backend/api/rag.py:812: TypeError
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+tests/01_decentralized_uploading/test_condition_auto_review.py: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+tests/01_decentralized_uploading/test_file_storage_workflows.py::test_canonical_upload_publishes_object_key_before_queue
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/01_decentralized_uploading/test_condition_auto_review.py::test_one_bounded_repair_preserves_original_response
+FAILED tests/01_decentralized_uploading/test_condition_auto_review.py::test_bounded_repair_does_not_swallow_upload_cancellation
+FAILED tests/01_decentralized_uploading/test_condition_auto_review.py::test_new_upload_rechecks_final_filled_conditions
+FAILED tests/01_decentralized_uploading/test_file_storage_workflows.py::test_submitted_review_snapshot_survives_state_expiry
+FAILED tests/01_decentralized_uploading/test_file_storage_workflows.py::test_review_artifact_storage_failure_is_desensitized
+5 failed, 43 passed, 536 warnings in 2.65s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

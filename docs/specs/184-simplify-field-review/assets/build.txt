@@ -1,0 +1,167 @@
+
+> sc-wiki-frontend@1.0.0 build
+> tsc -b && vite build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 12985 modules transformed.
+../../../../../../../../../Users/mayuan/Codes/SC-Wiki/frontend/node_modules/3dmol/build/3Dmol.js (43198:19): Use of eval in "../../../../../../../../../Users/mayuan/Codes/SC-Wiki/frontend/node_modules/3dmol/build/3Dmol.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+computing gzip size...
+static/index.html                                           0.50 kB │ gzip:   0.47 kB
+static/assets/KaTeX_Size3-Regular-CTq5MqoE.woff             4.42 kB
+static/assets/KaTeX_Size4-Regular-Dl5lxZxV.woff2            4.93 kB
+static/assets/KaTeX_Size2-Regular-Dy4dx90m.woff2            5.21 kB
+static/assets/KaTeX_Size1-Regular-mCD8mA8B.woff2            5.47 kB
+static/assets/KaTeX_Size4-Regular-BF-4gkZK.woff             5.98 kB
+static/assets/KaTeX_Size2-Regular-oD1tc_U0.woff             6.19 kB
+static/assets/KaTeX_Size1-Regular-C195tn64.woff             6.50 kB
+static/assets/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2      6.91 kB
+static/assets/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2         6.91 kB
+static/assets/KaTeX_Size3-Regular-DgpXs0kz.ttf              7.59 kB
+static/assets/KaTeX_Caligraphic-Regular-CTRA-rTL.woff       7.66 kB
+static/assets/KaTeX_Caligraphic-Bold-BEiXGLvX.woff          7.72 kB
+static/assets/KaTeX_Script-Regular-D3wIWfF6.woff2           9.64 kB
+static/assets/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2       10.34 kB
+static/assets/KaTeX_Size4-Regular-DWFBv043.ttf             10.36 kB
+static/assets/KaTeX_Script-Regular-D5yQViql.woff           10.59 kB
+static/assets/KaTeX_Fraktur-Regular-CTYiF6lA.woff2         11.32 kB
+static/assets/KaTeX_Fraktur-Bold-CL6g_b3V.woff2            11.35 kB
+static/assets/KaTeX_Size2-Regular-B7gKUWhC.ttf             11.51 kB
+static/assets/KaTeX_SansSerif-Italic-C3H0VqGB.woff2        12.03 kB
+static/assets/KaTeX_SansSerif-Bold-D1sUS0GD.woff2          12.22 kB
+static/assets/KaTeX_Size1-Regular-Dbsnue_I.ttf             12.23 kB
+static/assets/KaTeX_SansSerif-Regular-CS6fqUqJ.woff        12.32 kB
+static/assets/KaTeX_Caligraphic-Regular-wX97UBjC.ttf       12.34 kB
+static/assets/KaTeX_Caligraphic-Bold-ATXxdsX0.ttf          12.37 kB
+static/assets/KaTeX_Fraktur-Regular-Dxdc4cR9.woff          13.21 kB
+static/assets/KaTeX_Fraktur-Bold-BsDP51OF.woff             13.30 kB
+static/assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2      13.57 kB
+static/assets/KaTeX_SansSerif-Italic-DN2j7dab.woff         14.11 kB
+static/assets/KaTeX_SansSerif-Bold-DbIhKOiC.woff           14.41 kB
+static/assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff       16.03 kB
+static/assets/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2         16.40 kB
+static/assets/KaTeX_Math-Italic-t53AETM-.woff2             16.44 kB
+static/assets/KaTeX_Script-Regular-C5JkGWo-.ttf            16.65 kB
+static/assets/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2         16.78 kB
+static/assets/KaTeX_Main-Italic-NWA7e6Wa.woff2             16.99 kB
+static/assets/john-schrieffer-Dbw99985.jpg                 17.98 kB
+static/assets/KaTeX_Math-BoldItalic-iY-2wyZ7.woff          18.67 kB
+static/assets/KaTeX_Math-Italic-DA0__PXp.woff              18.75 kB
+static/assets/KaTeX_Main-BoldItalic-SpSLRI95.woff          19.41 kB
+static/assets/KaTeX_SansSerif-Regular-BNo7hRIc.ttf         19.44 kB
+static/assets/KaTeX_Fraktur-Regular-CB_wures.ttf           19.57 kB
+static/assets/KaTeX_Fraktur-Bold-BdnERNNW.ttf              19.58 kB
+static/assets/KaTeX_Main-Italic-BMLOBm91.woff              19.68 kB
+static/assets/KaTeX_SansSerif-Italic-YYjJ1zSn.ttf          22.36 kB
+static/assets/KaTeX_SansSerif-Bold-CFMepnvq.ttf            24.50 kB
+static/assets/KaTeX_Main-Bold-Cx986IdX.woff2               25.32 kB
+static/assets/KaTeX_Main-Regular-B22Nviop.woff2            26.27 kB
+static/assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf        27.56 kB
+static/assets/KaTeX_AMS-Regular-BQhdFMY1.woff2             28.08 kB
+static/assets/KaTeX_Main-Bold-Jm3AIy58.woff                29.91 kB
+static/assets/KaTeX_Main-Regular-Dr94JaBh.woff             30.77 kB
+static/assets/KaTeX_Math-BoldItalic-B3XSjfu4.ttf           31.20 kB
+static/assets/KaTeX_Math-Italic-flOr_0UB.ttf               31.31 kB
+static/assets/KaTeX_Main-BoldItalic-DzxPMmG6.ttf           32.97 kB
+static/assets/KaTeX_AMS-Regular-DMm9YOAa.woff              33.52 kB
+static/assets/KaTeX_Main-Italic-3WenGoN9.ttf               33.58 kB
+static/assets/heike-onnes-BbO1v1U-.jpg                     37.67 kB
+static/assets/alex-mueller-CzNZe-tE.jpg                    40.88 kB
+static/assets/KaTeX_Main-Bold-waoOVXN0.ttf                 51.34 kB
+static/assets/KaTeX_Main-Regular-ypZvNtVU.ttf              53.58 kB
+static/assets/georg-bednorz-BO0guLhv.jpg                   57.57 kB
+static/assets/john-bardeen-AN-xj0N0.jpg                    63.54 kB
+static/assets/KaTeX_AMS-Regular-DRggAlZN.ttf               63.63 kB
+static/assets/alexei-abrikosov-Cs02qBbJ.jpg                78.87 kB
+static/assets/vitaly-ginzburg-Dceg5Qc8.jpg                 82.75 kB
+static/assets/ivar-giaever-KVFHpxqq.jpg                   312.29 kB
+static/assets/anthony-leggett-CXrDd4x6.jpg                801.85 kB
+static/assets/brian-josephson-Dodk_e1g.jpg              1,328.53 kB
+static/assets/leon-cooper-BOCqSSRX.jpg                  2,964.50 kB
+static/assets/AccountPage-Fx0HlpWB.css                      4.18 kB │ gzip:   1.19 kB
+static/assets/NobelExperience-D5ZhGOiW.css                  6.29 kB │ gzip:   1.80 kB
+static/assets/AuthPage-BrR6DtDS.css                        10.11 kB │ gzip:   2.91 kB
+static/assets/TcPredictPage-Ds4Wrnvt.css                   24.36 kB │ gzip:   4.36 kB
+static/assets/SpectrumDetailPage-B8l5PxNb.css              25.66 kB │ gzip:   5.03 kB
+static/assets/EntryCard-BYZTj3zW.css                       29.29 kB │ gzip:   8.07 kB
+static/assets/vis-network-FxWgca-S.css                    220.21 kB │ gzip:  30.90 kB
+static/assets/Add-DHiA8enE.js                               0.13 kB │ gzip:   0.14 kB
+static/assets/Send-pxUSMqrV.js                              0.13 kB │ gzip:   0.14 kB
+static/assets/ExpandMore-CKf6Dra7.js                        0.14 kB │ gzip:   0.14 kB
+static/assets/Check-CWcmNqAs.js                             0.14 kB │ gzip:   0.15 kB
+static/assets/ArrowBack-D1uujlgt.js                         0.15 kB │ gzip:   0.15 kB
+static/assets/DeleteOutline-X4JdiB6S.js                     0.18 kB │ gzip:   0.18 kB
+static/assets/Close-Cet_Y8yf.js                             0.20 kB │ gzip:   0.16 kB
+static/assets/OpenInNew-DTVUrsi6.js                         0.22 kB │ gzip:   0.20 kB
+static/assets/Save-bE8X9pMv.js                              0.23 kB │ gzip:   0.20 kB
+static/assets/SystemCommunityPage-NbKwBF6r.js               0.26 kB │ gzip:   0.20 kB
+static/assets/Refresh-B5Zq96t3.js                           0.29 kB │ gzip:   0.23 kB
+static/assets/LockOutlined-BcFB2Wy_.js                      0.31 kB │ gzip:   0.23 kB
+static/assets/NobelLaureatePage-BaoEi1bN.js                 0.43 kB │ gzip:   0.31 kB
+static/assets/username-CY-Pe13H.js                          0.47 kB │ gzip:   0.34 kB
+static/assets/NotFoundPage-CQZB8xZ1.js                      0.69 kB │ gzip:   0.42 kB
+static/assets/RoleRoute-qLy04src.js                         0.71 kB │ gzip:   0.45 kB
+static/assets/SuperAdminPage-D1-jZoxG.js                    0.72 kB │ gzip:   0.43 kB
+static/assets/CardContent-DbzhlZmQ.js                       0.94 kB │ gzip:   0.45 kB
+static/assets/UploadTaskPage-DdKUFqwu.js                    1.30 kB │ gzip:   0.73 kB
+static/assets/CommunityModerationPage-BuJCxi_k.js           1.39 kB │ gzip:   0.70 kB
+static/assets/PaperRevisionPage-DtfaIdGW.js                 1.43 kB │ gzip:   0.82 kB
+static/assets/CardActionArea-z_u85f6w.js                    1.56 kB │ gzip:   0.77 kB
+static/assets/community-D9NZS8YW.js                         1.79 kB │ gzip:   0.95 kB
+static/assets/CommunityNotificationsPage-BqNPsmHC.js        1.81 kB │ gzip:   0.88 kB
+static/assets/ListItemText-d_x2I7Lj.js                      1.87 kB │ gzip:   0.90 kB
+static/assets/searchNavigation-CfJbUmb2.js                  1.97 kB │ gzip:   0.97 kB
+static/assets/DiscussionAnswerPage-CQRkUvBB.js              2.04 kB │ gzip:   1.07 kB
+static/assets/StructuralRecordPage-CjlqisaE.js              2.27 kB │ gzip:   1.36 kB
+static/assets/FormControlLabel-C-odbsP9.js                  2.59 kB │ gzip:   1.23 kB
+static/assets/PaperReviewStatusSelect-BRJM1dNK.js           2.76 kB │ gzip:   1.18 kB
+static/assets/Link-CjkQ44Ge.js                              3.23 kB │ gzip:   1.32 kB
+static/assets/PaperStructuralCollection-CGzJ7j0l.js         3.39 kB │ gzip:   1.75 kB
+static/assets/propertySpectra-qSTup8hF.js                   3.45 kB │ gzip:   1.93 kB
+static/assets/Divider-wuNFYcIt.js                           3.65 kB │ gzip:   1.26 kB
+static/assets/StructuralRecordView-C5iE9juq.js              3.94 kB │ gzip:   1.91 kB
+static/assets/CrystalStructureView-DZt6TNxm.js              4.75 kB │ gzip:   1.64 kB
+static/assets/PublicUserPage-C0bKsgoR.js                    4.80 kB │ gzip:   2.22 kB
+static/assets/classifications-BkIFIS-w.js                   5.86 kB │ gzip:   2.45 kB
+static/assets/ToggleButtonGroup-DJvq3ef4.js                 6.10 kB │ gzip:   2.00 kB
+static/assets/TableRow-CVfVaOyw.js                          6.11 kB │ gzip:   2.06 kB
+static/assets/EntryCard-4Lud94Oc.js                         6.28 kB │ gzip:   2.53 kB
+static/assets/LinearProgress-DJYnqW-A.js                    6.37 kB │ gzip:   1.86 kB
+static/assets/Drawer-COVVkhp9.js                            6.95 kB │ gzip:   2.61 kB
+static/assets/Snackbar-13OqPbgN.js                          7.10 kB │ gzip:   2.68 kB
+static/assets/ModelAnswerCard-CQRMpPze.js                   7.71 kB │ gzip:   2.93 kB
+static/assets/LazyRoutes-D4C7cesS.js                        8.15 kB │ gzip:   2.41 kB
+static/assets/Chip-oK_gSvIX.js                              9.17 kB │ gzip:   2.85 kB
+static/assets/paperDetailView-C87KpOI_.js                   9.56 kB │ gzip:   4.01 kB
+static/assets/KnowledgeGraphPage-DY0KoaWU.js               10.53 kB │ gzip:   4.24 kB
+static/assets/formDefinitions-Fjz2vIIx.js                  11.95 kB │ gzip:   4.71 kB
+static/assets/DiscussionPage-BLeaYVhu.js                   12.17 kB │ gzip:   4.23 kB
+static/assets/PaperDetailPage-DH-tSeGg.js                  13.62 kB │ gzip:   4.07 kB
+static/assets/TcPredictPage-D17c6HUu.js                    16.35 kB │ gzip:   6.69 kB
+static/assets/NewsPage-tRINWocK.js                         17.18 kB │ gzip:   5.87 kB
+static/assets/AccountPage-CIkS9S0J.js                      22.24 kB │ gzip:   7.49 kB
+static/assets/AdminPaperEditPage-96oC_EXe.js               23.33 kB │ gzip:   7.74 kB
+static/assets/SearchPage-li8ZWLkF.js                       24.16 kB │ gzip:   6.58 kB
+static/assets/Autocomplete-BDWec5hB.js                     25.66 kB │ gzip:   8.97 kB
+static/assets/RagPage-DL1e4PqN.js                          28.05 kB │ gzip:   9.94 kB
+static/assets/UploadTaskEditor-BUlPCxG5.js                 28.42 kB │ gzip:   9.45 kB
+static/assets/NobelExperience-oBo6KFX5.js                  31.01 kB │ gzip:  12.96 kB
+static/assets/UploadPage-BVgZxqyF.js                       33.62 kB │ gzip:  11.00 kB
+static/assets/AuthPage-Yk8qUN7d.js                         41.73 kB │ gzip:  15.67 kB
+static/assets/ReviewPaperTextField-BRcxtj_E.js             51.21 kB │ gzip:  16.86 kB
+static/assets/AdminPage-HCcOX1JF.js                        57.85 kB │ gzip:  15.70 kB
+static/assets/PropertyModuleEditor-C3eIPsFv.js             81.19 kB │ gzip:  27.41 kB
+static/assets/SpectrumDetailPage-Ws9RN1g1.js               84.11 kB │ gzip:  32.85 kB
+static/assets/EvidenceWorkflow-BC52WXwL.js                116.16 kB │ gzip:  37.80 kB
+static/assets/share-icblJPZm.js                           417.27 kB │ gzip: 114.69 kB
+static/assets/index-BAjkZGmA.js                           430.74 kB │ gzip: 129.69 kB
+static/assets/vis-network-DBnqH0Hh.js                     520.99 kB │ gzip: 157.33 kB
+static/assets/3Dmol-Dwch1HSn.js                           588.12 kB │ gzip: 168.49 kB
+static/assets/index-CO3nJnNQ.js                           644.33 kB │ gzip: 218.08 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.27s

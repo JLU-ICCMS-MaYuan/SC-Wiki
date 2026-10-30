@@ -368,6 +368,25 @@ def normalize_extraction(raw: dict, *, allowed_blocks: set[tuple[str, int, str]]
                          form_parameters: bool = False,
                          allowed_quote_text: dict[tuple[str, int, str], str] | None = None) -> dict:
     """拒绝格式错配和越范围来源，服务端生成现有科学契约需要的稳定键。"""
+    if allowed_quote_text is not None:
+        raw = deepcopy(raw)
+        def bind_reference(node):
+            if isinstance(node, dict):
+                for name, value in node.items():
+                    if name == 'evidences' and isinstance(value, list):
+                        for evidence in value:
+                            if not isinstance(evidence, dict):
+                                continue
+                            identity = (evidence.get('file_id'), evidence.get('pdf_page'), evidence.get('block_id'))
+                            # 只补evidence中的当前已知块编号；排除项、元数据不进入此分支。
+                            if (identity in allowed_blocks and identity in allowed_quote_text
+                                    and not evidence.get('quote') and not evidence.get('quote_id')):
+                                evidence.update(quote_id=evidence['block_id'], quote=None)
+                    bind_reference(value)
+            elif isinstance(node, list):
+                for value in node:
+                    bind_reference(value)
+        bind_reference(raw)
     result = Extraction.model_validate(raw).model_dump(mode="json")
     from .property_extensions import normalize_extracted_conditions
     for state in result["material_states"]:

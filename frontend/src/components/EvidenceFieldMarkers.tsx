@@ -4,6 +4,7 @@ import { Box, Button, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import type { EvidenceRecord } from './EvidenceWorkflow'
 import type { PropertyRecordDraft } from '../lib/propertyModules'
+import { evidenceStatus, evidenceStatusLabel } from '../lib/evidenceStatus'
 
 interface Props {
   records: EvidenceRecord[]
@@ -33,7 +34,7 @@ function recordOwner(record: EvidenceRecord, state?: HTMLElement) {
   return [name, index == null ? `材料状态 ${record.state_key}` : `材料状态 ${Number(index) + 1}${state ? '' : '（已移除）'}`].filter(Boolean).join(' · ')
 }
 
-export const evidenceProblem = (record: EvidenceRecord) => !record.pending_review && !record.stale && (record.required !== false || record.human_modified || record.field_decision?.action === 'reject') && ['unsupported', 'uncertain', 'missing'].includes(record.status)
+export const evidenceProblem = (record: EvidenceRecord) => ['attention', 'failed'].includes(evidenceStatus(record))
 
 /** 优先复用控件自己的标签，不把整个输入框变成按钮。 */
 function fieldCaption(node: HTMLElement) {
@@ -58,6 +59,8 @@ const FieldTrigger = memo(function FieldTrigger({ records, node, onOpen }: { rec
   const names = [...new Set(records.map(r => r.label))].join('、')
   const label = `${names}：查看来源核对（${records.length}）`
   const hasProblem = records.some(evidenceProblem)
+  const status = records.some(r => evidenceStatus(r) === 'failed') ? 'failed'
+    : records.some(r => evidenceStatus(r) === 'processing') ? 'processing' : hasProblem ? 'attention' : 'passed'
   useEffect(() => {
     if (node.hasAttribute('data-scientific-field')) {
       host.style.cssText = 'position:absolute;right:4px;top:4px;line-height:1'
@@ -73,9 +76,12 @@ const FieldTrigger = memo(function FieldTrigger({ records, node, onOpen }: { rec
       role: 'button', tabindex: '0', 'aria-description': label,
       title: label, 'aria-haspopup': 'dialog', 'data-evidence-key': records[0].key, 'data-evidence-caption': 'true',
       'data-evidence-caption-problem': String(hasProblem),
+      'data-evidence-status': status,
     }
     const previous = Object.keys(attributes).map(name => [name, target.getAttribute(name)] as const)
     for (const [name, value] of Object.entries(attributes)) target.setAttribute(name, value)
+    host.style.cssText = 'margin-inline-start:6px;font-size:11px;white-space:nowrap'
+    target.append(host)
     const activate = (event: Event) => {
       event.preventDefault()
       event.stopPropagation()
@@ -91,13 +97,14 @@ const FieldTrigger = memo(function FieldTrigger({ records, node, onOpen }: { rec
     return () => {
       target.removeEventListener('click', activate)
       target.removeEventListener('keydown', keydown)
+      host.remove()
       for (const [name, value] of previous) {
         if (value === null) target.removeAttribute(name)
         else target.setAttribute(name, value)
       }
     }
-  }, [host, node, records, onOpen, label, names, hasProblem])
-  return caption ? null : createPortal(<Button data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : 'primary'} size="small" sx={node.hasAttribute('data-scientific-field') ? { minWidth: 20, p: 0 } : undefined} aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], currentPlaceholder(records[0], node)); else onOpen(records[0].key, records.map(r => r.key)) }}>{node.hasAttribute('data-scientific-field') ? '•' : names}</Button>, host)
+  }, [host, node, records, onOpen, label, names, hasProblem, status])
+  return caption ? createPortal(status === 'passed' ? null : <span aria-hidden="true" data-evidence-status-text>{evidenceStatusLabel[status]}</span>, host) : createPortal(<Button data-evidence-status={status} data-evidence-key={records[0].key} color={records.some(evidenceProblem) ? 'error' : 'primary'} size="small" sx={node.hasAttribute('data-scientific-field') ? { minWidth: 20, p: 0 } : undefined} aria-label={label} title={label} aria-haspopup="dialog" onClick={event => { event.stopPropagation(); if (records[0].placeholder) onOpen(records[0].key, [records[0].key], currentPlaceholder(records[0], node)); else onOpen(records[0].key, records.map(r => r.key)) }}>{node.hasAttribute('data-scientific-field') ? '•' : names}</Button>, host)
 })
 
 /** 在现有表单的字段锚点附加标记，避免复制动态表单和科学校验。 */

@@ -338,7 +338,6 @@ const AdminPaperEditPage: React.FC = () => {
             <EvidenceFieldMarkers records={evidenceWorkflow.records} scope="paper-edit" onOpen={evidenceWorkflow.openIssue} onChange={evidenceWorkflow.invalidate} />
             <Box data-evidence-ignore><Typography variant="subtitle2" fontWeight={700} gutterBottom>{t('admin.editReviewSection')}</Typography>
             <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-              <Button variant="outlined" disabled={editReviewSaving || evidenceWorkflow.busy} onClick={evidenceWorkflow.showResults}>{t('evidence.viewResults')}</Button>
           <Box sx={{ minWidth: 170 }}>
                 <PaperReviewStatusSelect id="edit-review-status" value={editReviewStatus}
                   onChange={setEditReviewStatus} disabled={editReviewSaving} />

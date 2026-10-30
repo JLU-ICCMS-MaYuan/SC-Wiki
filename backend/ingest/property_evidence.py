@@ -712,6 +712,8 @@ def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
             'location_errors': errors, 'model': result.get('model') or '', 'fields': fields,
             'audit_events': result.get('audit_events') or [], 'history': result.get('history') or [],
             'review_revalidation': result.get('review_revalidation'), 'review_attempt': result.get('review_attempt'),
+            'review_error': result.get('review_error'), 'review_followup': result.get('review_followup'),
+            'auto_corrected': result.get('auto_corrected', False),
             'invalidation_details': result.get('invalidation_details'),
             'resolution': '' if method_error else result.get('resolution', ''), 'stale': result.get('stale', False)}
 
@@ -971,10 +973,16 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
     image_request_succeeded = True
     association_prompt = REVIEW_PROMPT if any(r.get('source_associations') and not r.get('condition_context') for r in records) else ''
     suggestion_prompt = SUGGESTION_PROMPT + (FIELD_CANDIDATE_PROMPT if purpose == 'field' else '')
-    if any(record.get('field') in {'paper.summary', 'paper.theoretical_subtype', 'paper.research_motivation'} for record in records):
-        suggestion_prompt += ('\nFor paper.summary, paper.theoretical_subtype and paper.research_motivation evidence, return ONLY the supplied source_id references '
-                              '(review-source-N); do not transcribe quote text or formulas. '
-                              'The server retrieves the exact original source. This does not replace semantic review.\n')
+    if purpose == 'generate':
+        suggestion_prompt += ('\n本次为系统解析草稿自检，以下规则替代上文“仅补空值、不提供非空替换建议”的限制：'
+            '当前值有明确错误且原文能唯一确定正确值时，必须在proposal给出纠正值，values使用editable_fields中的path，'
+            '并标supported:true、unique:true，给出实际来源source_id及简短explanation。'
+            '当前错误值的status仍判不通过，不能因为候选正确就把旧值判为通过。'
+            '同材料、压力、方法、μ*等条件下有多个答案或依据不足时unique:false，不能按惯例猜值。'
+            '程序另行核实最终值并保护人工修改；模型本身不直接改草稿。')
+    suggestion_prompt += ('\nFor ALL field evidences and proposal.evidences, prefer the supplied source_id references '
+                          '(review-source-N); do not transcribe quote text or formulas. '
+                          'The server retrieves the exact original source. This does not replace semantic review.\n')
     try:
         parsed = complete_json(SYSTEM_PROMPT + suggestion_prompt + association_prompt + condition_rules.PROMPT,
                                prompt, on_partial=on_partial, retries=1,
@@ -1086,8 +1094,10 @@ def evaluate_batch(records, chunks, purpose='check', prior=None, on_partial=None
         if result.get('adopted_basis') in {'paper_inference', 'general_knowledge'} and result['status'] == 'supported' and result.get('source_kind') not in {'model_reasoning', 'contributor_evidence'}:
             result['status'] = 'uncertain'
         results[key] = result
-    if set(results) != set(by_key):
-        raise ValueError('incomplete result schema')
+    for key in set(by_key) - set(results):
+        results[key] = checked_result(by_key[key], {'status': 'unchecked',
+            'reason': '模型返回缺少此字段，已有输入保留，需定向补查。', 'evidences': []}, chunks)
+        results[key]['review_error'] = 'incomplete_result_schema'
     if image_read_out is not None:
         image_read_out.extend((item, True) for item in pdf_refs)
         if image_request_succeeded:
@@ -1213,7 +1223,27 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
             errors[r['key']].extend(result['location_errors'])
     from backend.rag.llm_context import get_llm_config
     results = aggregate_candidates(records, candidates, errors, get_llm_config().model, snapshot['chunks'])
-    filled = copy.deepcopy(draft)
+    from .field_document_followup import follow_up_fields
+    from .extraction_correction import correct_extracted_fields, human_protected_keys
+    def cancelled():
+        _ensure_not_cancelled(task_id)
+        return False
+    selected_items = {r['item_key'] for r in records}
+    def correct(value, current, checked):
+        protected = set()
+        if any((r.get('proposal') or {}).get('unique') for r in checked.values()):
+            with SessionLocal() as session:
+                protected = human_protected_keys(session, current)
+        return correct_extracted_fields(current, value, checked,
+            rebuild=lambda candidate: upload_snapshot(task_id, owner, parsing_draft=candidate),
+            evaluate=evaluate_batch, cancelled=cancelled, protected_keys=protected,
+            protected_fields=skip_auto_fill or ())
+    filled, snapshot, results = correct(draft, snapshot, results)
+    records = [r for r in snapshot['records'] if r['item_key'] in selected_items]
+    results = follow_up_fields(records, results, snapshot['chunks'], cancelled=cancelled,
+                              on_partial=lambda _: _ensure_not_cancelled(task_id))
+    filled, snapshot, results = correct(filled, snapshot, results)
+    records = [r for r in snapshot['records'] if r['item_key'] in selected_items]
     auto_filled = {}
     for record in records:
         proposal = results[record['key']].get('proposal')
@@ -1305,8 +1335,8 @@ def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip
                     'status': 'uncertain', 'reason': '计算条件规则核对未完成；提取值已保留，请重新核对。'}
     with SessionLocal.begin() as session:
         from .scientific_evidence import save_results
-        from .pdf_source_pages import current_pdf_results
-        current_results = current_pdf_results(session, current, current_results)
+        from .pdf_front_matter import correct_front_matter_results
+        current_results = correct_front_matter_results(session, current, current_results)
         save_results(session, current, current_results, owner)
     draft.clear()
     draft.update(filled)
@@ -1341,6 +1371,9 @@ def run_evidence_job(job_id: str):
         token = set_llm_config(config)
         update_job(job_id, status='running')
         snapshot = job['snapshot']
+        from .field_document_followup import tools_for_chunks
+        followup_tools = tools_for_chunks(snapshot['chunks'],
+            lambda: read_job_status(job_id, job['owner'])['status'] == 'cancelled')
         if snapshot.get('field_review_input'):
             snapshot['field_review_job_id'] = job_id
         if snapshot.get('condition_source_manifest_complete') is False and any(r.get('condition_context') for r in snapshot['records']):
@@ -1396,6 +1429,10 @@ def run_evidence_job(job_id: str):
             finished = [r for r in batch_records if processed[r['key']] == source_batch_count]
             if finished:
                 fresh = aggregate_candidates(finished, candidates, location_errors, config.model, snapshot['chunks'])
+                from .field_document_followup import follow_up_fields
+                fresh = follow_up_fields(finished, fresh, snapshot['chunks'],
+                    cancelled=lambda: read_job_status(job_id, job['owner'])['status'] == 'cancelled',
+                    on_partial=on_partial, tools=followup_tools)
                 if job.get('purpose') == 'field':
                     from .field_candidates import capture
                     for record in finished:
@@ -1430,12 +1467,38 @@ def run_evidence_job(job_id: str):
             error = dict(code='evidence_model_format', message='模型返回的核对结果缺少必要记录或格式不完整，原操作未继续')
         else:
             error = dict(code='evidence_model_service', message='模型服务异常或返回格式不完整，原操作未继续，请重试')
+        persist_failed_fields(job, error)
         update_job(job_id, status='failed', error=error)
     finally:
         if token is not None:
             reset_llm_config(token)
         delete_llm_config(job_id)
         release_field_jobs(redis_client(), job)
+
+
+def persist_failed_fields(job, error):
+    """记录本次目标的技术失败，刷新后仍可恢复；不覆盖通过或伪造科学结论。"""
+    from .field_review import reusable
+    snapshot = job.get('snapshot') or {}
+    requested = set(job.get('requested_keys') or [])
+    records, failures = [], {}
+    for record in snapshot.get('records') or []:
+        if record['key'] not in requested:
+            continue
+        previous = (job.get('prior') or {}).get(record['key']) or {}
+        if reusable(record, previous) and previous.get('status') == 'supported':
+            continue
+        result = copy.deepcopy(previous) if reusable(record, previous) else {'status': 'unchecked', 'evidences': []}
+        result.update(review_error=error['code'], review_started_at=job.get('review_started_at'),
+                      reason=(str(result.get('reason') or '') + '；' + error['message']).lstrip('；'))
+        records.append(record); failures[record['key']] = result
+    if records:
+        try:
+            persist_completed_results({**snapshot, 'records': records}, failures, job['owner'])
+        except Exception as exc:
+            # 权限、版本或取消变化时不写入旧字段；任务的原始技术错误仍保留。
+            logging.getLogger(__name__).warning('字段失败状态未写入 type=%s', type(exc).__name__)
+
 
 
 def release_field_jobs(client, job):
@@ -1568,7 +1631,7 @@ def save_completed_upload(snapshot, results, owner, *, locked=False):
 def persist_completed_results(snapshot, results, owner):
     from backend.database import SessionLocal
     from .scientific_evidence import save_results
-    from .pdf_source_pages import current_pdf_results
+    from .pdf_front_matter import correct_front_matter_results
     from .field_review import validate_support_versions
     if snapshot.get('field_review_input'):
         from backend.ingest.field_drafts import target_lock, authorized_draft
@@ -1638,7 +1701,7 @@ def persist_completed_results(snapshot, results, owner):
             current = revision_snapshot(session, snapshot['target_id'], owner)
             if current['version'] != snapshot['version'] or current['draft_version'] != snapshot.get('draft_version'):
                 fail('evidence_stale', '返修草稿已变化，旧核对结果未应用，请重新核对')
-        results.update(current_pdf_results(session, snapshot, results))
+        results.update(correct_front_matter_results(session, snapshot, results))
         save_results(session, snapshot, results, owner)
 
 
@@ -1670,10 +1733,11 @@ def aggregate_candidates(records, candidates, location_errors, model, source_cat
         proposal = copy.deepcopy(next(iter(unique.values()))) if len(unique) == 1 else None
         if proposal:
             proposal['supported'] = all(p['supported'] for p in proposals)
+            proposal['unique'] = all(p.get('unique') is True for p in proposals)
         reviews = [i['proposal_review'] for i in all_items if i.get('proposal_review')]
         review = None if not reviews else {'status': 'reasonable' if all(x['status'] == 'reasonable' for x in reviews) else 'questionable' if any(x['status'] == 'questionable' for x in reviews) else 'uncertain',
                     'explanation': '；'.join(dict.fromkeys(x['explanation'] for x in reviews))}
-        retained = {name: next((i[name] for i in items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason', 'source_kind', 'supplemental_evidences', 'manual_reason_review', 'resolved_generation_issue', 'model_opinion', 'location_check')}
+        retained = {name: next((i[name] for i in items if i.get(name)), None) for name in ('decision', 'adopted_basis', 'auto_filled', 'auto_filled_content_hash', 'auto_filled_source_hash', 'ai_reason', 'source_kind', 'supplemental_evidences', 'manual_reason_review', 'resolved_generation_issue', 'model_opinion', 'location_check', 'review_error', 'review_followup', 'auto_corrected')}
         results[record['key']] = dict(status=status, proposal=proposal, proposal_review=review, **retained,
             review_started_at=min((i['review_started_at'] for i in all_items if i.get('review_started_at')), default=None),
             association_review=aggregate_reviews(record, all_items),
