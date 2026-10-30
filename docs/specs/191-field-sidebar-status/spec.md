@@ -2,7 +2,7 @@
 
 **Issue**：[#191](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/191)
 
-**日期**：2026-10-30。**状态**：Spec 草案待审；仅建档，未授权实施。
+**日期**：2026-10-30。**状态**：Spec 已确认；仅建档，未授权实施。
 
 ## 原始需求记录
 
@@ -45,4 +45,4 @@ flowchart TD
 
 ## 确认与文档影响
 
-本份 Spec 待确认，无新增业务决策；未进入 Plan、Tasks 或实施。实现后更新 #109 展示规则、Overview 与 HTML 图。
+用户已审阅本份 Spec 并回复“确认”；无新增业务决策，未进入 Plan、Tasks 或实施。实现后更新 #109 展示规则、Overview 与 HTML 图。
