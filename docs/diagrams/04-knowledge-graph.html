@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>04 知识图谱 · 程序流程图 · SC-Wiki</title>
+<link rel="stylesheet" href="flow.css">
+<script defer src="flow.js"></script>
+</head>
+<body>
+<main class="page">
+  <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">流程图总览</a> / <a href="../overview/README.md">功能总览</a> / 04 知识图谱</nav>
+  <header>
+    <p class="eyebrow">SC-WIKI · 04 超导论文引用发展知识图谱</p>
+    <h1>引用事实如何变成图谱里的有向边</h1>
+    <p class="intro">主干从上传解析走到前端筛选展开，左右分支是解析失败、未匹配留库、题名歧义、人工标记与去重。点击任意节点查看执行方、程序行为、边界与源码入口。文稿说明保留在 <a href="../overview/04_Superconductivity_Development_Knowledge_Graph/superconductivity-knowledge-graph.md">超导知识图谱</a>。</p>
+  </header>
+  <nav class="page-links" aria-label="流程页面导航">
+    <a href="index.html">← 七个模块</a>
+    <a href="03-search.html">← 03 检索与发现</a>
+    <a href="05-rag-qa.html">下一个：05 AI 问答 →</a>
+  </nav>
+  <div class="layout">
+    <section class="diagram" aria-labelledby="chart-title">
+      <div class="toolbar"><div><h2 id="chart-title">引用图谱：程序控制流</h2><p>主干由上向下；MySQL 是引用事实的唯一来源</p></div><span class="mode-label">程序控制流</span></div>
+      <div class="legend" aria-label="图例"><span><i></i>处理</span><span><i class="check"></i>判断</span><span><i class="stop"></i>失败或拒绝</span><span><i class="result"></i>结果或旁路</span></div>
+      <noscript>此流程图需要 JavaScript。文字说明见 <a href="../overview/04_Superconductivity_Development_Knowledge_Graph/superconductivity-knowledge-graph.md">超导知识图谱</a>。</noscript>
+      <div class="viewport" tabindex="0" role="region" aria-label="引用知识图谱程序流程图，窄屏可横向滚动"><div class="canvas-wrap"><div class="canvas"></div></div></div>
+    </section>
+    <aside class="details" aria-label="所选节点说明" aria-live="polite" aria-atomic="true">
+      <div class="detail-head"><p class="eyebrow" id="detail-step"></p><h2 id="detail-title"></h2></div>
+      <div class="detail-body">
+        <h3>执行方</h3><p id="detail-owner"></p>
+        <h3>程序行为</h3><p id="detail-description"></p>
+        <section><h3>边界与分支</h3><ul id="detail-notes"></ul></section>
+        <h3>源码定位</h3><code id="detail-code"></code>
+        <div><h3>相关支线</h3><div class="branch-links" id="detail-branches"></div></div>
+      </div>
+    </aside>
+  </div>
+  <p class="boundary">本页只读展示引用图程序，不访问真实图谱。公开节点与边的两端都必须是当前已审核论文；未匹配引文留在库中等待重试，不由人工创建引用边。</p>
+  <footer><span>依据当前实现整理 · 非实时图谱监控</span><a href="../overview/04_Superconductivity_Development_Knowledge_Graph/superconductivity-knowledge-graph.md">文字说明与实现依据 ↗</a></footer>
+</main>
+<script type="application/json" id="flow-data">
+{
+  "main": [
+    {"id":"upload-worker","title":"上传论文 PDF","summary":"Worker 定位正文文件","owner":"Python 上传 Worker","description":"论文 PDF 上传后由后台 Worker 任务定位正文文件，作为引文解析的输入，不经过 Neo4j 同步链路。","notes":["引用图不依赖 Neo4j 同步。","Worker 与 Python 共用 GROBID_URL。"],"code":"backend/ingest/upload_jobs.py"},
+    {"id":"grobid-parse","title":"GROBID 解析引文","summary":"提取 biblStruct 各字段","owner":"GROBID / Python Worker","description":"调用 processFulltextDocument，从 TEI 的 biblStruct 中提取 DOI、题名、作者、年份和原始引文。","notes":["解析结果不保证 100% 成功。","失败信息与未匹配原文同样保留。"],"code":"backend/services/citation_graph.py"},
+    {"id":"redis-draft","title":"草稿写入 Redis","summary":"校对页默认显示 5 条","owner":"Python Worker / Redis","description":"解析状态与参考文献先放入 Redis 草稿，校对页默认展示前 5 条，其余由用户展开查看。","notes":["GROBID 不可用时保留 unavailable 状态。","不阻断人工校对。"],"code":"backend/ingest/upload_jobs.py"},
+    {"id":"submit-persist","title":"提交保存引文","summary":"落库可追溯引用事实","owner":"Python API / MySQL","description":"提交论文时把当前版本的解析结果写入 paper_reference_extractions 和 paper_references，作为引用事实唯一来源。","notes":["LLM 不得从正文生成引用边。","旧版本引用不随版本级联继承。"],"code":"backend/api/rag.py"},
+    {"id":"match-ref","kind":"check","title":"DOI／题名匹配","summary":"精确或唯一题名命中","owner":"Python 引用服务","description":"先按规范化 DOI 精确匹配，再按规范化题名加不冲突年份做唯一匹配；多个候选记入 ambiguous。","notes":["不使用模糊相似度自动造边。","源端绑定当前 paper_revision。"],"code":"backend/services/citation_graph.py"},
+    {"id":"review-approve","title":"论文审核通过","summary":"进入公开图查询范围","owner":"管理员 / Go 审核接口","description":"论文审核通过且 approved_revision 等于 content_revision 后，节点与边才进入公开图查询范围。","notes":["公开节点与边两端都须为当前已审核论文。"],"code":"goserver/handlers/admin.go"},
+    {"id":"reconcile","title":"审核后重试匹配","summary":"重扫未匹配引文","owner":"Python 引用服务","description":"审核通过后重试该论文的出边，并扫描历史 unmatched／ambiguous 记录，目标论文入库后即可形成关系。","notes":["升版时先读旧版主 PDF 重新解析。","主 PDF 不可用只记 failed 状态。"],"code":"backend/services/citation_graph.py"},
+    {"id":"build-edge","title":"匹配成功成边","summary":"投影 cites 有向边","owner":"MySQL / Go 查询","description":"查询时由 match_status=matched 且两端均为当前已审核论文的记录投影出 citing → cited 边，节点键为 paper_id。","notes":["同一对论文只保留一条边。","被引数为 COUNT(DISTINCT citing_paper_id)。"],"code":"goserver/handlers/knowledge_graph.go"},
+    {"id":"go-graph-api","title":"Go 图查询接口","summary":"概览／邻居／搜索／统计","owner":"Go API / MySQL","description":"Go API 直接查 MySQL 提供 overview、neighbors、search、stats 四个接口，概览默认最多返回 30 个节点。","notes":["不读 graph.json、不代理 Neo4j。","邻居单方向默认 5 篇并返回剩余数量。"],"code":"goserver/handlers/knowledge_graph.go"},
+    {"id":"frontend-graph","title":"前端筛选与展开","summary":"筛选固定节点并分页","owner":"React / vis-network","description":"支持 Material family 多选、超导类型组合筛选和标题或 DOI 搜索固定节点，点击节点分上下游行按被引数分页展开。","notes":["节点键为 paper:<paper_id>，合并时去重。","标签超过 42 字符截断。"],"code":"frontend/src/pages/KnowledgeGraphPage.tsx"}
+  ],
+  "branches": [
+    {"id":"grobid-down","attachTo":"grobid-parse","side":"right","kind":"stop","label":"解析失败","title":"解析失败留空","summary":"只记 unavailable 状态","owner":"GROBID / Python Worker","description":"GROBID 不可用或解析失败时，只记录 unavailable／failed 状态，不创建任何引用边，也不阻断论文人工校对。","notes":["新版本文档不保留旧引用。","缺少主 PDF 时同样记可观察状态。"],"code":"backend/ingest/upload_jobs.py"},
+    {"id":"unmatched-wait","attachTo":"match-ref","side":"left","kind":"wait","label":"匹配未命中","title":"未匹配留库","summary":"等待目标论文入库","owner":"Python 引用服务 / MySQL","description":"未命中记录以 unmatched 保存在库，目标论文以后审核通过时由审核后重试流程再次匹配成边。","notes":["解析原文与失败信息一并保留。","不人工创建引用边。"],"code":"backend/services/citation_graph.py"},
+    {"id":"ambiguous-wait","attachTo":"match-ref","side":"right","kind":"wait","label":"题名歧义","title":"多候选歧义","summary":"记为 ambiguous 待重扫","owner":"Python 引用服务","description":"题名匹配到多个候选时记入 ambiguous，与 unmatched 一起进入审核后的历史重扫范围。","notes":["不按相似度猜选唯一目标。"],"code":"backend/services/citation_graph.py"},
+    {"id":"mark-denied","attachTo":"review-approve","side":"left","kind":"stop","label":"非管理员","title":"非管理员拒绝","summary":"无标记权限被拦截","owner":"Go 中间件","description":"标记接口挂 AdminRequired 中间件，非管理员请求被拒绝；未登录或用户不存在返回 401。","notes":["只能标记已审核论文。","普通用户仍可只读查看标记。"],"code":"goserver/handlers/paper_graph_marks.go"},
+    {"id":"mark-admin","attachTo":"review-approve","side":"right","kind":"result","label":"人工标记","title":"人工里程碑标记","summary":"维护源头与突破标记","owner":"管理员 / Go 标记接口","description":"管理员与超级管理员可整体替换 origin、breakthrough 标记，系统不会用引用数自动认定里程碑。","notes":["marks 只允许 origin 或 breakthrough。","引用边不允许人工写入。"],"code":"goserver/handlers/paper_graph_marks.go"},
+    {"id":"title-fallback","attachTo":"go-graph-api","side":"right","kind":"result","label":"标题缺失","title":"标题缺失回退","summary":"退回论文原标题","owner":"Go API / MySQL","description":"节点 label 优先取非空 knowledge_graph_title，为 NULL 或空串时回退 title，同时返回完整原标题。","notes":["重新发布不会为缺失标题再调 AI。","历史论文由管理员编辑页补充。"],"code":"goserver/handlers/knowledge_graph.go"},
+    {"id":"cycle-dedupe","attachTo":"frontend-graph","side":"left","kind":"result","label":"循环去重","title":"循环引用去重","summary":"合并节点不重复展开","owner":"React 前端","description":"真实文献即使成环也不删除，前端按 paper_id 合并节点、避免重复展开，服务端不递归加载整图。","notes":["当前无环检测与异常核验流程。","去重不代表异常已核验。"],"code":"frontend/src/pages/KnowledgeGraphPage.tsx"}
+  ]
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>七大功能模块 · 程序流程图 · SC-Wiki</title>
+<link rel="stylesheet" href="flow.css">
+<style>
+  .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin-top: 22px; }
+  .module-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    padding: 18px 20px;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .module-card:hover { border-color: var(--blue); box-shadow: 0 4px 16px #275d9f14; }
+  .module-card .no { font-size: 12px; font-weight: 700; color: var(--green); letter-spacing: .1em; }
+  .module-card h2 { margin: 6px 0 6px; font-size: 18px; }
+  .module-card p { margin: 0; font-size: 13px; color: var(--muted); }
+  .module-card .stat { display: block; margin-top: 10px; font-size: 12px; color: #6a7d8a; }
+  .notes { margin-top: 26px; border-top: 1px solid var(--line); padding-top: 18px; }
+  .notes h2 { font-size: 16px; margin: 0 0 8px; }
+  .notes ul { margin: 0; padding-left: 20px; color: var(--muted); font-size: 13px; }
+  .notes li + li { margin-top: 5px; }
+</style>
+</head>
+<body>
+<main class="page">
+  <nav class="breadcrumb" aria-label="文档导航"><a href="../overview/README.md">SC-Wiki 功能总览</a> / 流程图</nav>
+  <header>
+    <p class="eyebrow">SC-WIKI · 程序流程图</p>
+    <h1>七大功能模块的程序控制流</h1>
+    <p class="intro">每个页面只放程序流程图：主干纵向排列，支线横置在左右两侧。点击任意节点查看执行方、程序行为、边界与源码入口；点击主干节点可跳到它挂载的支线。文字说明不在这套页面里，仍保留在 <code>docs/overview/</code> 对应模块文档。</p>
+  </header>
+  <div class="module-grid">
+    <a class="module-card" href="01-upload-parse.html">
+      <span class="no">01</span>
+      <h2>上传与解析</h2>
+      <p>PDF 从上传任务到可校对草稿：正文提取、文件角色、来源覆盖、查重与字段核对。</p>
+      <span class="stat">主干 14 步 · 支线 7 条</span>
+    </a>
+    <a class="module-card" href="02-review-audit.html">
+      <span class="no">02</span>
+      <h2>审核与维护</h2>
+      <p>管理员审核决定、AI 核对、人工裁决与批准事务：自审、版本失效与证据门禁。</p>
+      <span class="stat">主干 11 步 · 支线 8 条</span>
+    </a>
+    <a class="module-card" href="03-search.html">
+      <span class="no">03</span>
+      <h2>检索与发现</h2>
+      <p>周期表与化学式检索：公开范围约束、去重分页、双视图、结构预览与导出。</p>
+      <span class="stat">主干 11 步 · 支线 8 条</span>
+    </a>
+    <a class="module-card" href="04-knowledge-graph.html">
+      <span class="no">04</span>
+      <h2>引用知识图谱</h2>
+      <p>GROBID 解析引文、DOI 与题名匹配、审核后重试、边投影与前端分页展开。</p>
+      <span class="stat">主干 10 步 · 支线 7 条</span>
+    </a>
+    <a class="module-card" href="05-rag-qa.html">
+      <span class="no">05</span>
+      <h2>检索增强问答</h2>
+      <p>可用性检查、意图分流、SQL 与向量检索、融合排序、LLM 生成与 SSE 返回。</p>
+      <span class="stat">主干 10 步 · 支线 8 条</span>
+    </a>
+    <a class="module-card" href="06-community.html">
+      <span class="no">06</span>
+      <h2>研究社区</h2>
+      <p>注册登录与 JWT 会话、贡献排行与家族统计、AI 学术讨论排队与生成核验。</p>
+      <span class="stat">主干 11 步 · 支线 8 条</span>
+    </a>
+    <a class="module-card" href="07-tc-predict.html">
+      <span class="no">07</span>
+      <h2>Tc 估算</h2>
+      <p>结构文件校验、特征提取、经验公式与隔离模型推理、结果横条展示。</p>
+      <span class="stat">主干 10 步 · 支线 7 条</span>
+    </a>
+  </div>
+  <section class="notes">
+    <h2>这套页面怎么读</h2>
+    <ul>
+      <li>主干代表程序的主要控制流；菱形标记的判断节点决定走哪条支线。</li>
+      <li>支线只画文档与源码能确认的路径：失败、等待人工、权限拒绝与结果旁路。</li>
+      <li>节点详情里的「源码定位」给出实现入口；没有精确路径时标注文档依据。</li>
+      <li>页面是只读说明图，不连接任务、草稿、审核或模型接口。</li>
+    </ul>
+  </section>
+  <footer><span>依据当前实现整理 · 7 个模块 · 与文字说明分开放置</span><a href="../overview/README.md">回到功能总览 ↗</a></footer>
+</main>
+</body>
+</html>

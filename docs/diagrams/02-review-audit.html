@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>02 审核与维护 · 程序流程图 · SC-Wiki</title>
+<link rel="stylesheet" href="flow.css">
+<script defer src="flow.js"></script>
+</head>
+<body>
+<main class="page">
+  <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">流程图总览</a> / <a href="../overview/README.md">功能总览</a> / 02 审核与维护</nav>
+  <header>
+    <p class="eyebrow">SC-WIKI · 02 去中心化维护与验证</p>
+    <h1>管理员作出整篇审核决定</h1>
+    <p class="intro">主干从进入工作台到批准事务落库，左右分支是提交检查、自审、版本失效、证据门禁与回滚。点击任意节点查看执行方、程序行为、边界与源码入口。文稿说明保留在 <a href="../overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md">论文与记录审核</a>。</p>
+  </header>
+  <nav class="page-links" aria-label="流程页面导航">
+    <a href="index.html">← 七个模块</a>
+    <a href="01-upload-parse.html">← 01 上传解析</a>
+    <a href="03-search.html">下一个：03 检索与发现 →</a>
+  </nav>
+  <div class="layout">
+    <section class="diagram" aria-labelledby="chart-title">
+      <div class="toolbar"><div><h2 id="chart-title">审核与批准：程序控制流</h2><p>主干由上向下；批准事务内任一步失败整体回滚</p></div><span class="mode-label">程序控制流</span></div>
+      <div class="legend" aria-label="图例"><span><i></i>处理</span><span><i class="check"></i>判断</span><span><i class="stop"></i>拒绝或中止</span><span><i class="result"></i>落库结果</span></div>
+      <noscript>此流程图需要 JavaScript。文字说明见 <a href="../overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md">论文与记录审核</a>。</noscript>
+      <div class="viewport" tabindex="0" role="region" aria-label="审核与批准程序流程图，窄屏可横向滚动"><div class="canvas-wrap"><div class="canvas"></div></div></div>
+    </section>
+    <aside class="details" aria-label="所选节点说明" aria-live="polite" aria-atomic="true">
+      <div class="detail-head"><p class="eyebrow" id="detail-step"></p><h2 id="detail-title"></h2></div>
+      <div class="detail-body">
+        <h3>执行方</h3><p id="detail-owner"></p>
+        <h3>程序行为</h3><p id="detail-description"></p>
+        <section><h3>边界与分支</h3><ul id="detail-notes"></ul></section>
+        <h3>源码定位</h3><code id="detail-code"></code>
+        <div><h3>相关支线</h3><div class="branch-links" id="detail-branches"></div></div>
+      </div>
+    </aside>
+  </div>
+  <p class="boundary">本页只读展示审核程序，不连接真实论文。保存、AI 核对、人工确认与正式批准分别生效；批准失败时正式论文不变，待审修改保留。</p>
+  <footer><span>依据当前实现整理 · 非实时审核监控</span><a href="../overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md">文字说明与实现依据 ↗</a></footer>
+</main>
+<script type="application/json" id="flow-data">
+{
+  "main": [
+    {"id":"workbench-entry","title":"进入审核工作台","summary":"角色校验后装载论文列表","owner":"Go 权限中间件 / React 工作台","description":"后端路由组按角色校验 active admin 或 active superadmin 身份，前端工作台以统计卡片承载入口，只请求论文数据并完成筛选、编辑与审核。","notes":["/admin 只允许 active admin，/superadmin 只允许 active superadmin，越权访问返回 403。","superadmin 访问 /admin 时前端重定向 /superadmin。","统计未加载完时显示占位符而非 0。"],"code":"goserver/middleware/auth.go；文档依据：roles-and-administrator-approval.md#当前行为"},
+    {"id":"open-review-page","title":"打开论文编辑页","summary":"读取详情、核对结果与分类","owner":"React 独立编辑页 / Go 详情接口","description":"编辑页为独立路由 /admin/papers/:id/edit，读取正式详情、待审正式关联与现有核对结果，展示科学数据、分类、已接受建议与三状态选择器。","notes":["选择器顺序固定为「通过」「退回待审核」「拒绝」，快速审核与编辑页共用。","管理员与超级管理员编辑页共用 MaterialStatesEditor 与上传页同一实现。"],"code":"frontend/src/pages/AdminPaperEditPage.tsx；文档依据：literature-and-record-review.md#当前行为"},
+    {"id":"save-edit","title":"保存当前编辑","summary":"写值并刷新内容与来源版本","owner":"Python 科学保存 / Go 字段 PATCH","description":"保存表单当前值及论文基础、列表字段，刷新对应内容与来源版本，相关旧确认随之失效；按语义比较，完全无变化时不重建、不升版、不新增修改历史。","notes":["pending 论文原地重建，版本号不变。","approved 论文升版重审：content_revision 递增、approved_revision 清空、状态回到 pending。","仅删除结构也算有效修改。"],"code":"backend/api/rag.py#scientific-draft；文档依据：literature-and-record-review.md#当前行为"},
+    {"id":"run-evidence","title":"进行 AI 核对","summary":"先保存再全量复核当前字段","owner":"Python 证据服务 + RQ","description":"用户点击「进行 AI 审核」后先保存当前编辑，再在 RQ 中刷新核对版本并复核当前字段、已有建议与论文及附件，结果持久保存，已有通过缓存不跳过。","notes":["保存失败不启动模型；核对结束不自动提交或批准。","已有结果且内容、来源未变时复用，否则显示可取消的 3 秒倒计时。","模型只搜索当前论文及附件，候选来源与字段类型由程序验证。"],"code":"backend/api/evidence.py#/jobs；文档依据：literature-and-record-review.md#物性补证与人工裁决"},
+    {"id":"manual-decision","kind":"wait","title":"逐条人工裁决","summary":"理由绑定当前值与来源版本","owner":"React 侧栏 / Python field-decision","description":"管理员对未核对、无直接原文或 AI 存疑的字段逐条填写推理或专业判断理由并保存，服务端把决定绑定当前字段与内容、来源版本后才允许批准。","notes":["认可现有内容时点「人工审核通过」，不填理由、不调用模型。","未保存人工草稿阻止直接提交；人工证据不改变原文支持与批准资格。"],"code":"backend/api/evidence.py#/field-decision；文档依据：literature-and-record-review.md#保存与人工审核决定"},
+    {"id":"submit-gate","kind":"check","title":"提交前检查","summary":"自动保存后检查全量核对结果","owner":"React 编辑页 / Python submit-check","description":"选择「通过」时先自动保存当前编辑及已接受建议，保存成功后重新读取分类并检查现有核对结果，再提交审核请求；提交只读检查，不启动模型。","notes":["保存或核对失败不会批准。","结果缺失或失效时提示先审核，不自动重问模型。","技术失败与科学问题分开处理，不伪造成科学错误。"],"code":"backend/api/evidence.py#/submit-check；文档依据：literature-and-record-review.md#点击提交复用与必要模型审核"},
+    {"id":"server-guard","kind":"check","title":"服务端准入校验","summary":"校验角色、状态与提交人身份","owner":"Go 审核事务","description":"审核请求进入后校验审核状态合法性与请求体结构，读取论文并比对当前用户与上传者，命中自审即拒绝，不进入事务。","notes":["所有审核操作需要 active admin 或 active superadmin 身份。","权限、自审、内容版本与分类检查始终由服务端执行。","批量接口不允许批准论文，避免绕过逐篇材料分类确认。"],"code":"goserver/handlers/admin.go#ReviewPaper；文档依据：literature-and-record-review.md#约束"},
+    {"id":"lock-idempotency","kind":"check","title":"行锁与幂等校验","summary":"锁论文行并核对请求与版本","owner":"Go 审核事务 / MySQL","description":"事务内以 SELECT ... FOR UPDATE 锁住论文行，按 review_request_id 判断请求是否已处理，并把预期核对版本交给 Python 只读准备接口比对。","notes":["重复审核请求继续使用原 review_request_id 幂等机制。","模型调用发生在该事务之前。"],"code":"goserver/handlers/admin.go#ReviewPaper、#applyPaperReview；文档依据：literature-and-record-review.md#物性补证与人工裁决"},
+    {"id":"classification-evidence-gate","kind":"check","title":"分类与证据完整性","summary":"应用裁决后校验关联完整性","owner":"Go 审核事务","description":"仅在批准路径执行：准备并应用逐字段证据与人工裁决，再校验论文级 Material family、元素种类数、主结构唯一性与证据关联完整性。","notes":["当前 revision 至少需有一个论文级 Material family，不完整返回 409 classification_incomplete。","退回待审核和拒绝不要求来源核对，也不依赖分类读取。"],"code":"goserver/handlers/admin.go#validatePaperClassificationComplete、#validatePaperEvidenceComplete；文档依据：literature-and-record-review.md#当前行为"},
+    {"id":"approve-commit","kind":"result","title":"批准事务落库","summary":"原子写入状态、来源与历史","owner":"Go 审核事务 / MySQL","description":"同一事务写入逐字段来源、原文、人工裁决、审核历史、批准状态与分类快照，并清理临时判断；任一步失败则整体回滚。","notes":["批准事件保存分类及证据核对快照。","每次实际审核写入 reviewed 事件并保留审核意见。"],"code":"goserver/handlers/admin.go#applyPaperReview；文档依据：literature-and-record-review.md#保存与人工审核决定"},
+    {"id":"publish-index","title":"发布与索引重建","summary":"批准后走既有 publish 链路","owner":"Go → Python /publish","description":"事务提交后调用 Python 发布端点，按既有 publish 链路重建索引，使 approved 论文进入检索与问答，随后清理该论文的临时核对产物。","notes":["重新批准后走既有 publish 链路重建索引。","审核请求成功后立即返回当前角色工作台：管理员回 /admin，超级管理员回 /superadmin。"],"code":"goserver/handlers/admin.go#publishApprovedPaperAt、#finalizeReviewArtifacts；文档依据：literature-and-record-review.md#当前行为"}
+  ],
+  "branches": [
+    {"id":"admin-application-approval","attachTo":"workbench-entry","side":"left","kind":"result","label":"资格申请","title":"管理员资格审批","summary":"批准后 user 角色改为 admin","owner":"Go 管理接口 / 超级管理员","description":"普通用户在邮箱已验证且真实姓名、所属机构齐全时提交申请，超级管理员在独立工作台批准后把角色从 user 改为 admin。","notes":["同一时间只允许一个待审申请，可撤回、被拒后再次申请。","申请、角色、封禁等治理动作均保留审计。"],"code":"goserver/handlers/admin_applications.go；文档依据：roles-and-administrator-approval.md#工作流程"},
+    {"id":"structure-format-invalid","attachTo":"save-edit","side":"left","kind":"stop","label":"结构非法","title":"结构格式拒绝","summary":"非 CIF/POSCAR 或解析失败即拒","owner":"Python 结构服务","description":"结构载荷类型不是 CIF/POSCAR、文本为空或 ASE 无法解析时服务层直接拒绝，不计算摘要也不创建结构记录。","notes":["结构科学正确性与文本可解析性不是同一保证。","大体积结构文本的存储与性能边界待核验。"],"code":"backend/services/structure_storage.py；文档依据：format-validation-and-storage.md#工作流程"},
+    {"id":"reject-or-return","attachTo":"submit-gate","side":"left","kind":"result","label":"拒绝或退回","title":"拒绝或退回待审核","summary":"不校验分类与来源直接落库","owner":"Go 审核事务","description":"选择「拒绝」或「退回待审核」时不读取分类、不要求来源核对，直接写 reviewed 事件与审核意见并更新论文状态。","notes":["拒绝或退回不会污染正式目录，新名称只在批准事务中创建。","被拒后原上传者获得 can_revise，可走返修重新提交。"],"code":"goserver/handlers/admin.go#ReviewPaper；文档依据：literature-and-record-review.md#当前行为"},
+    {"id":"submit-check-blocked","attachTo":"submit-gate","side":"right","kind":"stop","label":"检查未通过","title":"阻止提交","summary":"保留输入，只标对应字段","owner":"Python 证据服务 / React 编辑页","description":"仍有未通过或未完成字段、结果缺失失效或人工材料不齐时返回阻止结论，指出哪项不对及相关依据，请求不进入审核事务。","notes":["已通过字段不因另一个字段失败而失去结果。","修改内容或补充证据后再次点击提交才重新检查。"],"code":"backend/api/evidence.py#/submit-check；文档依据：literature-and-record-review.md#点击提交复用与必要模型审核"},
+    {"id":"self-review-blocked","attachTo":"server-guard","side":"left","kind":"stop","label":"自审请求","title":"禁止审核自提交","summary":"操作者与上传者相同即 403","owner":"Go 审核事务","description":"提交用户与论文上传者为同一人时返回 403「不能审核自己提交的论文」，请求在开启事务前即终止。","notes":["上传者不具备管理员裁决权限。","服务端验证管理员权限、禁止自审、任务归属及预期内容版本。"],"code":"goserver/handlers/admin.go#ReviewPaper；文档依据：literature-and-record-review.md#物性补证与人工裁决"},
+    {"id":"version-conflict","attachTo":"lock-idempotency","side":"right","kind":"stop","label":"版本失效","title":"版本失效冲突","summary":"内容或来源已变则不写入","owner":"Go 审核事务 / Python 证据服务","description":"锁行后比对请求携带的预期核对版本与当前内容、来源版本，不一致时返回冲突（evidence_stale），不改变论文状态与分类。","notes":["并发编辑或审核返回冲突，失败整体回滚、重试不重复升版。","迟到结果不覆盖当前内容。"],"code":"goserver/handlers/paper_evidence.go#preparePaperEvidence；文档依据：literature-and-record-review.md#上传者返修与再次审核"},
+    {"id":"evidence-gate-blocked","attachTo":"classification-evidence-gate","side":"right","kind":"stop","label":"证据不完整","title":"证据门禁拦截","summary":"缺出处或未核对则拒绝批准","owner":"Go 审核事务","description":"按缺少有效出处、未核对、疑点未填理由、内容变化分别返回 evidence_missing、evidence_check_required、evidence_review_required、evidence_stale，批准不执行。","notes":["关联层仍保留 evidence_incomplete 防线。","批准检查失败时审核事务不改变论文状态和分类。"],"code":"goserver/handlers/admin.go#validatePaperEvidenceComplete；文档依据：literature-and-record-review.md#当前行为"},
+    {"id":"transaction-rollback","attachTo":"approve-commit","side":"right","kind":"stop","label":"写入失败","title":"事务整体回滚","summary":"正式论文不变，暂存保留","owner":"Go 审核事务 / MySQL","description":"历史事件、状态更新、证据归档或清理任一步失败时整个事务回滚，正式论文保持原状，暂存输入与待审修改保留以便重试。","notes":["审核失败时正式论文不变，暂存输入保留。","重复批准不重复写历史。"],"code":"goserver/handlers/admin.go#ReviewPaper；文档依据：literature-and-record-review.md#批准历史的重复上下文存储"}
+  ]
+}
+</script>
+</body>
+</html>
