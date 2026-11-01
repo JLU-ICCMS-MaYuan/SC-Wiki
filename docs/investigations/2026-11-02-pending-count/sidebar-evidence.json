@@ -1,0 +1,186 @@
+{
+  "checked_at": "2026-11-02T07:46:52.384561+08:00",
+  "source_commit": "a999a5b4e098713a89b2e4e5e301afe263fa2aed",
+  "scope": "仅调查顶部待核对项与所属字段侧栏的关联遗漏；未修改业务代码、用户草稿或审核结果",
+  "historical_constraints": [
+    {
+      "issue": 147,
+      "spec": "docs/specs/147-two-stage-field-review/spec.md",
+      "fact": "名称、数值、单位、值类型独立身份与核对，恢复同一侧栏纵向编辑；不合并科学结论或无关依赖"
+    },
+    {
+      "issue": 148,
+      "url": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/148",
+      "remote_body_read": true,
+      "spec": "docs/specs/148-sidebar-field-editing/spec.md",
+      "contract": "docs/specs/148-sidebar-field-editing/contracts/field-settings.md",
+      "research": "docs/specs/148-sidebar-field-editing/research.md",
+      "fact": "字段名称入口与来源入口均定位同一稳定字段，侧栏使用现有设置编辑器，不新增另一套值副本"
+    },
+    {
+      "issue": 109,
+      "url": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/109",
+      "remote_body_read": true,
+      "spec": "docs/specs/109-field-evidence-and-ai-suggestions/source-review-presentation.md",
+      "fact": "主表单只保留标记和数量，来源理由进入字段侧栏；未定位兜底是防止问题入口丢失的旧保护，不是将已知归属的子项长期放在顶部的理由"
+    },
+    {
+      "issue": 200,
+      "url": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/200",
+      "remote_body_read": true,
+      "spec": "docs/specs/200-field-color-only/spec.md",
+      "fact": "主表单问题仅标红，原因与操作保留在已有侧栏"
+    }
+  ],
+  "history_feature_boundary": "上述旧Spec曾描述三个页签；当前Overview及代码只有字段设置/来源核对两个页签。尊重用户已删除逐字段历史功能的后续要求，不恢复历史展示。",
+  "source_samples": [
+    {
+      "key": "50bb593c4ebeb5957d7784081bfe121c46a4cf06dd0396430d2def22b3102801",
+      "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.method_scope",
+      "record_field_key": null,
+      "settings_field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.method_scope",
+      "settings_part": "raw",
+      "label": "计算适用关系",
+      "current_value": {
+        "stage": "epc",
+        "workflow_id": "epc_150GPa",
+        "physical_object": "electron_phonon"
+      }
+    },
+    {
+      "key": "f0136fc258e88f8638cbc64fefcb97bdea695e842fe44477e645d426412fd3f7",
+      "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.0.value_kind",
+      "record_field_key": "electron_phonon.phonon_method",
+      "settings_field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.0.value_raw",
+      "settings_part": "kind",
+      "label": "值类型",
+      "current_value": "text"
+    },
+    {
+      "key": "53d08dc543c051bfac3f62ccabb90038afcd34706c718cfd6eacbf709bdfc039",
+      "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.name_raw",
+      "record_field_key": "field-3854aadc-8f12-4c76-a96f-b4e932689ccd",
+      "settings_field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.value_raw",
+      "settings_part": "name",
+      "label": "名称",
+      "current_value": "声子／电声耦合 · q 网格"
+    },
+    {
+      "key": "d2f78590a4c5088c28571397fcbeb2f0bd1ed4c607baf8782128b3051a97db9f",
+      "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.unit_raw",
+      "record_field_key": "field-3854aadc-8f12-4c76-a96f-b4e932689ccd",
+      "settings_field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.value_raw",
+      "settings_part": "unit",
+      "label": "单位",
+      "current_value": ""
+    },
+    {
+      "key": "d1b3bd4dfda4b77eecb484ba05d758ced4aecca40c6f48a476a912ea8445bb13",
+      "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.value_kind",
+      "record_field_key": "field-3854aadc-8f12-4c76-a96f-b4e932689ccd",
+      "settings_field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.value_raw",
+      "settings_part": "kind",
+      "label": "值类型",
+      "current_value": "text"
+    },
+    {
+      "key": "4c2a1ad86ed59525a0fdfba74ca9b5a1676f32e1f774ec3f1d283b0c0c4d5e12",
+      "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.name_raw",
+      "record_field_key": "field-90105114-c2fb-4a20-8320-135ccb87b6c3",
+      "settings_field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.value_raw",
+      "settings_part": "name",
+      "label": "名称",
+      "current_value": "声子／电声耦合 · 截断能"
+    },
+    {
+      "key": "f3bca68f3355d8e19e6cbf7f6a4bba1db0c8611c51af4899d0aa9178f5a1b39a",
+      "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.unit_raw",
+      "record_field_key": "field-90105114-c2fb-4a20-8320-135ccb87b6c3",
+      "settings_field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.value_raw",
+      "settings_part": "unit",
+      "label": "单位",
+      "current_value": "Ry"
+    },
+    {
+      "key": "618cd5eba02e72e61e7e47b2072b5bd27695dd94ef9219f3967963347326ad8a",
+      "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.value_kind",
+      "record_field_key": "field-90105114-c2fb-4a20-8320-135ccb87b6c3",
+      "settings_field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.value_raw",
+      "settings_part": "kind",
+      "label": "值类型",
+      "current_value": "number"
+    }
+  ],
+  "code_references": [
+    {
+      "path": "backend/ingest/field_review.py",
+      "line": 183,
+      "symbol": "independent_fields",
+      "fact": "为扩展子项赋予同一个settings_field主值地址，并以settings_part标识name/kind/unit/raw"
+    },
+    {
+      "path": "frontend/src/components/EvidenceFieldMarkers.tsx",
+      "line": 23,
+      "symbol": "matchesField",
+      "fact": "要求子项末段匹配主表单锚点，未使用settings_field；value_kind等无法匹配value_raw"
+    },
+    {
+      "path": "frontend/src/components/EvidenceFieldMarkers.tsx",
+      "line": 134,
+      "symbol": "openSettings",
+      "fact": "普通字段名称按钮使用targets.find，仅选已匹配到主值控件的首个核对项"
+    },
+    {
+      "path": "frontend/src/components/EvidenceFieldMarkers.tsx",
+      "line": 322,
+      "fact": "无法匹配的子项另入顶部兜底清单"
+    },
+    {
+      "path": "frontend/src/components/ReviewFieldSettings.tsx",
+      "line": 18,
+      "fact": "设置页已优先使用settingsField定位现有编辑器，因此直接进入类型子项时可以正确打开所属字段编辑器"
+    },
+    {
+      "path": "frontend/src/components/EvidenceWorkflow.tsx",
+      "line": 918,
+      "fact": "来源区activeGroup仅含当前activeRecord，未自动汇总所属字段的其他子项"
+    },
+    {
+      "path": "frontend/src/components/CalculationConditionFields.tsx",
+      "line": 80,
+      "fact": "计算适用关系只对band_gap/dos_fermi提供专用入口，超导Tc缺少对应入口，不能将其伪装为某个已有参数的名称/单位子项"
+    }
+  ],
+  "fallback_origin": {
+    "commit": "148c8c4c",
+    "date": "2026-09-17",
+    "method": "git log -S 待定位的来源核对",
+    "boundary": "仅证明兜底入口的代码起源；不据此推断用户曾要求将已知所属字段的子项放到顶部"
+  },
+  "isolated_replay": {
+    "runner": "Vitest 2.1.9 + jsdom",
+    "result": "2 passed",
+    "new_check": {
+      "scope": "真实生产组件的隔离入口重放；非真实浏览器，不写业务库",
+      "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.0.value_kind",
+      "ownerSettingsField": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.0.value_raw",
+      "ownerMatchesRaw": true,
+      "normalEntryOpens": "ca4169f6fa8fc1effb1d9994f119e5360dd60cab725e6ce1d144e8dd15435f70",
+      "topEntryOpens": "f0136fc258e88f8638cbc64fefcb97bdea695e842fe44477e645d426412fd3f7",
+      "directSettingsRouteWorks": true,
+      "settingsTypeText": "文本"
+    },
+    "fixture_and_script_hashes": {
+      ".local/pending-count-investigation/fixture.json": "371edf7ff9174f6c2c5e9e6c1810795e9d9c224f6df3e34ed97ec95c5aa613c7",
+      ".local/pending-count-investigation/replay.test.tsx": "10168ff0d49adfb5308b6d3bd7b491664e3a9c28e1121740c436c7cd47ed3dbc",
+      ".local/pending-count-investigation/sidebar-routing-report.json": "89787bee7c36f9fe3395df335e49a47facf7f61e4fc31288be492499eca0d5a1"
+    },
+    "boundary": "使用既有私有只读草稿副本及22项实际发布定义，API全部为隔离模拟，写回调遇到调用即报错；不声称真实浏览器验收"
+  },
+  "proposed_correction": {
+    "display": "同一字段的名称/值/类型/单位通过稳定所属关系进入同一侧栏，逐项保留问题与操作",
+    "semantics": "展示归组不合并独立科学结论、版本、保存或真实依赖",
+    "unmapped_context": "计算适用关系须明确所属计算条件入口；不猜测绑定到任意参数",
+    "status": "仅建议，未实施"
+  }
+}
