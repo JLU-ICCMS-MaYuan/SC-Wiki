@@ -119,5 +119,45 @@
       "storage_backend": "SQLite",
       "purpose": "最终身份保护补丁的机械重放；真实MySQL验证保留于finish-report"
     }
+  },
+  "ui_operation_redesign": {
+    "date": "2026-11-01",
+    "source_base": "7bb1fd78",
+    "test_file": "tests/01_decentralized_uploading/upload-task-workspace.test.tsx",
+    "test_sha256": "7306a6cc3f50c171c0d99083bc4fb7daa68fad827de84a8eb5c5178b0f98a4b5",
+    "before": {
+      "passed": 14,
+      "failed": 3,
+      "report": ".local/issue194-195-validation/ui-redesign-before.json"
+    },
+    "after": {
+      "workspace_passed": 17,
+      "workspace_failed": 0,
+      "regression_passed": 32,
+      "regression_failed": 0,
+      "files": [
+        "tests/01_decentralized_uploading/upload-task-workspace.test.tsx",
+        "tests/01_decentralized_uploading/parsing-preview-sync.test.tsx",
+        "tests/01_decentralized_uploading/workdraft-saver.test.tsx",
+        "tests/01_decentralized_uploading/sidebar-field-save.test.tsx",
+        "tests/01_decentralized_uploading/structure-attachment-collapse.test.tsx",
+        "tests/01_decentralized_uploading/structure-detail-collapse.test.tsx",
+        "tests/01_decentralized_uploading/workdraft-refresh.test.tsx"
+      ],
+      "report": ".local/issue194-195-validation/ui-redesign-regression.json"
+    },
+    "rerun_command": "\"/Users/mayuan/software/miniconda3/envs/sc-wiki/bin/node\" \"frontend/node_modules/vitest/vitest.mjs\" run --config \"vitest.config.ts\" \"tests/01_decentralized_uploading/upload-task-workspace.test.tsx\" \"tests/01_decentralized_uploading/parsing-preview-sync.test.tsx\" \"tests/01_decentralized_uploading/workdraft-saver.test.tsx\" \"tests/01_decentralized_uploading/sidebar-field-save.test.tsx\" \"tests/01_decentralized_uploading/structure-attachment-collapse.test.tsx\" \"tests/01_decentralized_uploading/structure-detail-collapse.test.tsx\" \"tests/01_decentralized_uploading/workdraft-refresh.test.tsx\"",
+    "checks": [
+      "作者角色仅发送对应字段PATCH，保存后重新挂载并读取服务端副本",
+      "无变化保存零写入；压强300改310，以state_key寻址；重读保留空间群和lambda",
+      "结构仅归属对应状态；默认折叠、展开下载、原胞和格式切换、收起重开保留选择",
+      "校验CIF和POSCAR的Blob内容、类型、文件名及URL释放",
+      "采用、不采用与恢复状态可见；未预期接口包括旧PUT和模型请求使测试失败"
+    ],
+    "verification_boundary": "完整React上传宿主交互，模拟API和3D查看器；未覆盖真实数据库、浏览器磁盘下载或真实3D渲染",
+    "historical_baseline_preserved": true,
+    "business_code_changed": false,
+    "real_drafts_changed": false,
+    "new_issue_created": false
   }
 }

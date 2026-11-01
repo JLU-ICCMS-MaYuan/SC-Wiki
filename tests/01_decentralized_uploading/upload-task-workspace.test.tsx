@@ -1,13 +1,15 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { afterEach, describe, expect, it, onTestFinished, vi } from 'vitest'
 import { MemoryRouter, useLocation } from 'react-router-dom'
 
 import MultiFileUploadPanel from '../../frontend/src/components/MultiFileUploadPanel'
 import UploadParsingDetail from '../../frontend/src/components/UploadParsingDetail'
 import UploadPage from '../../frontend/src/pages/UploadPage'
 import { AuthProvider } from '../../frontend/src/context/AuthContext'
+import { normalizeUploadDraft } from '../../frontend/src/lib/paperProcessing'
+import formDefinitions from '../fixtures/issue176/form-definitions.json'
 
 vi.mock('../../frontend/src/components/StructureViewer3D', () => ({
   default: ({ data, format }: { data: string; format: string }) => (
@@ -44,6 +46,73 @@ const authenticatedUser = {
 const seedAuthenticatedUser = () => {
   localStorage.setItem('auth_token', 'test-token')
   localStorage.setItem('auth_user', JSON.stringify(authenticatedUser))
+}
+
+// 只模拟这组操作实际使用的接口；保存后重开必须读取服务端副本。
+const mockEditableDraft = (taskId: string, initial: unknown) => {
+  const persisted = normalizeUploadDraft(initial)
+  const writes: any[] = []
+  const unexpected: string[] = []
+  const epoch = taskId
+  let revision = 0
+  let draftReads = 0
+  const response = (body: unknown) => new Response(JSON.stringify(body), {
+    status: 200, headers: { 'Content-Type': 'application/json' },
+  })
+  vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = new URL(String(input), 'http://test')
+    const path = url.pathname
+    const method = init?.method || 'GET'
+    const version = `${epoch}:${revision}`
+    if (method === 'PATCH' && path === '/api/rag/evidence/draft') {
+      const body = JSON.parse(String(init?.body))
+      expect(body).toMatchObject({ target: 'upload', target_id: taskId })
+      expect([version, `${epoch}:local`]).toContain(body.expected_version)
+      for (const change of body.changes) {
+        // 这里的场景只更新已有字段，不接受整稿替换或列表增删。
+        expect(change.op).toBeUndefined()
+        let parent: any = persisted
+        for (const segment of change.path.slice(0, -1)) {
+          parent = typeof segment === 'string' ? parent[segment]
+            : parent.find((row: any) => row[segment.key] === segment.value)
+          expect(parent).toBeDefined()
+        }
+        const leaf = change.path.at(-1)
+        expect(parent[leaf] ?? null).toEqual(change.before)
+        if (change.remove) delete parent[leaf]
+        else parent[leaf] = structuredClone(change.value)
+      }
+      writes.push(body)
+      revision += 1
+      return response({ version: `${epoch}:${revision}`, revision, changed: true })
+    }
+    if (method === 'GET' && path === `/api/upload-tasks/${taskId}/parsing`) return response({ ok: true, data: {
+      status: 'ready', stage: 'ready', files: [], chunks: [],
+      form_preview: { status: 'ready', read_only: false, groups: [] },
+      summary: { status: 'completed', completed: 1, total: 1 }, next_poll_ms: null,
+    } })
+    if (method === 'GET' && path === `/api/rag/upload-tasks/${taskId}/draft`) {
+      draftReads += 1
+      return response({ ok: true, data: persisted })
+    }
+    if (method === 'GET' && ['/api/rag/evidence/draft-state', '/api/rag/evidence/draft-revision'].includes(path)) {
+      expect(url.searchParams.get('target_id')).toBe(taskId)
+      return response({ version, revision, write_epoch: epoch, draft: persisted, staged: false })
+    }
+    if (method === 'POST' && path === '/api/rag/evidence/summary') return response({ version, records: [] })
+    if (method === 'GET' && path === '/api/classification-catalogs') return response({ material_families: [], structure_families: [], material_dimensionalities: [] })
+    if (method === 'GET' && path === '/api/rag/space-groups') return response({ space_groups: [] })
+    if (method === 'GET' && path === '/api/rag/spectra') return response({ items: [], jobs: [], version, can_edit: true, can_review: true })
+    if (method === 'GET' && path === '/api/form-definitions') return response(formDefinitions.filter(item =>
+      item.target_kind === url.searchParams.get('target_kind') && item.module_code === url.searchParams.get('module_code')))
+    if (method === 'GET' && path.startsWith('/api/form-definitions/')) {
+      const definition = formDefinitions.find(item => path.includes(encodeURIComponent(item.definition_key)))
+      if (definition) return response(definition)
+    }
+    unexpected.push(`${method} ${path}`)
+    return new Response(JSON.stringify({ detail: `未预期请求：${method} ${path}` }), { status: 501 })
+  }))
+  return { persisted, writes, unexpected, draftReads: () => draftReads }
 }
 
 describe('论文上传工作区', () => {
@@ -206,35 +275,16 @@ describe('论文上传工作区', () => {
   })
 
   it('作者保持单行并可标记通讯作者和共同第一作者', async () => {
-    const savedBodies: any[] = []
-    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      if (init?.method === 'PUT') {
-        const body = JSON.parse(String(init.body))
-        savedBodies.push(body)
-        return new Response(JSON.stringify({ ok: true, data: body }), {
-          status: 200, headers: { 'Content-Type': 'application/json' },
-        })
-      }
-      const data = String(input).endsWith('/parsing')
-        ? {
-            status: 'ready', stage: 'ready', files: [], chunks: [],
-            form_preview: { status: 'ready', read_only: false, groups: [] },
-            summary: { status: 'completed', completed: 1, total: 1 }, next_poll_ms: null,
-          }
-        : {
-            paper: {
-              title: 'Hydride study', authors: ['Ying Sun', 'Jian Lv', 'Hanyu Liu'],
-              corresponding_authors: ['Hanyu Liu'], co_first_authors: ['Ying Sun', 'Jian Lv'],
-              paper_type: 'review', research_materials: [],
-            },
-            material_states: [], classification_evidence: [], field_evidence: {},
-          }
-      return new Response(JSON.stringify({ ok: true, data }), {
-        status: 200, headers: { 'Content-Type': 'application/json' },
-      })
-    }))
+    const fixture = mockEditableDraft('n'.repeat(32), {
+      paper: {
+        title: 'Hydride study', authors: ['Ying Sun', 'Jian Lv', 'Hanyu Liu'],
+        corresponding_authors: ['Hanyu Liu'], co_first_authors: ['Ying Sun', 'Jian Lv'],
+        paper_type: 'review', research_materials: [],
+      },
+      material_states: [], classification_evidence: [], field_evidence: {},
+    })
 
-    render(<UploadParsingDetail taskId={'n'.repeat(32)} onSubmitted={vi.fn()} />)
+    const view = render(<UploadParsingDetail taskId={'n'.repeat(32)} onSubmitted={vi.fn()} />)
 
     expect(await screen.findByRole('combobox', { name: '作者' })).toBeInstanceOf(HTMLInputElement)
     expect(screen.getByText('Ying Sun · 共同第一作者')).toBeVisible()
@@ -244,65 +294,57 @@ describe('论文上传工作区', () => {
     fireEvent.keyDown(screen.getByRole('menu'), { key: 'Escape' })
     fireEvent.click(screen.getByRole('button', { name: '立即保存' }))
 
-    await waitFor(() => expect(savedBodies).toHaveLength(1))
-    expect(savedBodies[0].paper).toMatchObject({
+    await waitFor(() => expect(fixture.writes).toHaveLength(1))
+    await waitFor(() => expect(screen.getByRole('button', { name: '立即保存' })).toBeEnabled())
+    expect(fixture.writes[0].changes).toEqual([{
+      path: ['paper', 'co_first_authors'], before: ['Ying Sun', 'Jian Lv'],
+      value: ['Ying Sun', 'Jian Lv', 'Hanyu Liu'],
+    }])
+    expect(fixture.persisted.paper).toMatchObject({
       authors: ['Ying Sun', 'Jian Lv', 'Hanyu Liu'],
       corresponding_authors: ['Hanyu Liu'],
       co_first_authors: ['Ying Sun', 'Jian Lv', 'Hanyu Liu'],
     })
+    view.unmount()
+    render(<UploadParsingDetail taskId={'n'.repeat(32)} onSubmitted={vi.fn()} />)
+    expect(await screen.findByText('Hanyu Liu · 通讯作者 · 共同第一作者')).toBeVisible()
+    expect(fixture.draftReads()).toBe(2)
+    expect(fixture.unexpected.join('\n')).toBe('')
   })
 
   it('按材料状态显示压强与空间群，并以新契约保存', async () => {
-    const savedBodies: unknown[] = []
-    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-      const url = String(input)
-      if (init?.method === 'PUT') {
-        savedBodies.push(JSON.parse(String(init.body)))
-        return new Response(JSON.stringify({ ok: true, data: JSON.parse(String(init.body)) }), {
-          status: 200, headers: { 'Content-Type': 'application/json' },
-        })
-      }
-      const data = url.endsWith('/parsing')
-        ? {
-            status: 'ready', stage: 'ready', files: [], chunks: [],
-            form_preview: { status: 'ready', read_only: false, groups: [] },
-            summary: { status: 'completed', completed: 1, total: 1 }, next_poll_ms: null,
-          }
-        : {
-            paper: {
-              title: 'Li2MgH16 study', authors: [], paper_type: 'theoretical',
-              theoretical_subtype: 'calculation', research_materials: ['Li2MgH16'],
+    const fixture = mockEditableDraft('f'.repeat(32), {
+      paper: {
+        title: 'Li2MgH16 study', authors: [], paper_type: 'theoretical',
+        theoretical_subtype: 'calculation', research_materials: ['Li2MgH16'],
+      },
+      material_states: [{
+        state_key: 'state-li2mgh16-300',
+        material: 'Li2MgH16',
+        pressure_value_gpa: 300,
+        pressure_raw: '300',
+        pressure_unit_raw: 'GPa',
+        state_kind: 'theoretical',
+        reported_space_group_symbol: 'Fd-3m',
+        reported_space_group_number: 227,
+        schema_version: 2,
+        property_modules: [{
+          module_key: 'module-superconductive', module_code: 'superconductive_properties',
+          definition_key: 'module.superconductive_properties', definition_version: 1, display_order: 0,
+          records: [{
+            record_key: 'record-tc', module_code: 'superconductive_properties', record_type: 'predicted_tc',
+            property_code: 'tc', definition_key: 'record.superconductive_properties.predicted_tc.mcmillan',
+            definition_version: 1, name_raw: 'critical temperature', value_kind: 'number',
+            value_raw: '300', value_number: 300, unit_raw: 'K', method_code: 'mcmillan', payload: {
+              calculation_conditions: {}, parameters: { lambda_ep: 3.35, omega_log: null },
             },
-            material_states: [{
-              material: 'Li2MgH16',
-              pressure_value_gpa: 300,
-              pressure_raw: '300',
-              pressure_unit_raw: 'GPa',
-              state_kind: 'theoretical',
-              reported_space_group_symbol: 'Fd-3m',
-              reported_space_group_number: 227,
-              schema_version: 2,
-              property_modules: [{
-                module_key: 'module-superconductive', module_code: 'superconductive_properties',
-                definition_key: 'module.superconductive_properties', definition_version: 1, display_order: 0,
-                records: [{
-                  record_key: 'record-tc', module_code: 'superconductive_properties', record_type: 'predicted_tc',
-                  property_code: 'tc', definition_key: 'record.superconductive_properties.predicted_tc.mcmillan',
-                  definition_version: 1, name_raw: 'critical temperature', value_kind: 'number',
-                  value_raw: '300', value_number: 300, unit_raw: 'K', method_code: 'mcmillan', payload: {
-                    calculation_conditions: {}, parameters: { lambda_ep: 3.35, omega_log: null },
-                  },
-                }],
-              }],
-            }],
-            sc_type: '高压氢化物', classification_evidence: [], field_evidence: {},
-          }
-      return new Response(JSON.stringify({ ok: true, data }), {
-        status: 200, headers: { 'Content-Type': 'application/json' },
-      })
-    }))
+          }],
+        }],
+      }],
+      classification_evidence: [], field_evidence: {},
+    })
 
-    render(<UploadParsingDetail taskId={'f'.repeat(32)} onSubmitted={vi.fn()} />)
+    const view = render(<UploadParsingDetail taskId={'f'.repeat(32)} onSubmitted={vi.fn()} />)
 
     expect(await screen.findByRole('textbox', { name: '化学式' })).toHaveValue('Li2MgH16')
     expect(screen.queryByRole('textbox', { name: '物相' })).not.toBeInTheDocument()
@@ -314,80 +356,105 @@ describe('论文上传工作区', () => {
     expect(document.querySelector('input[type="file"]')?.getAttribute('accept')).toContain('.vasp')
 
     fireEvent.click(screen.getByRole('button', { name: '立即保存' }))
-    await waitFor(() => expect(savedBodies).toHaveLength(1))
-    expect(savedBodies[0]).toMatchObject({
-      material_states: [{
-        material: 'Li2MgH16',
-        pressure_value_gpa: 300,
-        reported_space_group_symbol: 'Fd-3m',
-        reported_space_group_number: 227,
-        schema_version: 2,
-        property_modules: [{
-          records: [{ payload: { parameters: { lambda_ep: 3.35, omega_log: null } } }],
-        }],
-      }],
-    })
-    expect(savedBodies[0]).not.toHaveProperty('key_properties')
-    expect(savedBodies[0]).not.toHaveProperty('material_states.0.phase_label')
+    expect(fixture.writes).toHaveLength(0)
+    fireEvent.change(screen.getByRole('textbox', { name: '压强 (GPa)' }), { target: { value: '310' } })
+    fireEvent.click(screen.getByRole('button', { name: '立即保存' }))
+    await waitFor(() => expect(fixture.writes).toHaveLength(1))
+    await waitFor(() => expect(screen.getByRole('button', { name: '立即保存' })).toBeEnabled())
+    expect(fixture.writes[0].changes).toEqual([{
+      path: ['material_states', { key: 'state_key', value: 'state-li2mgh16-300' }, 'pressure_value_gpa'],
+      before: 300, value: 310,
+    }])
+    view.unmount()
+    render(<UploadParsingDetail taskId={'f'.repeat(32)} onSubmitted={vi.fn()} />)
+    expect(await screen.findByRole('textbox', { name: '压强 (GPa)' })).toHaveValue('310')
+    expect(screen.getByRole('combobox', { name: '空间群符号' })).toHaveValue('Fd-3m')
+    expect(screen.getByRole('spinbutton', { name: '空间群号' })).toHaveValue(227)
+    expect(screen.getByRole('textbox', { name: '电声耦合强度 λ' })).toHaveValue('3.35')
+    expect(fixture.draftReads()).toBe(2)
+    expect(fixture.unexpected.join('\n')).toBe('')
   })
 
-  // 重度交互用例：并行下实测约 4.4s，默认 5s 上限余量不足
-  it('晶体结构只在所属材料状态内显示且材料状态列表占满页面', { timeout: 15000 }, async () => {
-    vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
-      const data = String(input).endsWith('/parsing')
-        ? {
-            status: 'ready', stage: 'ready', files: [], chunks: [],
-            form_preview: { status: 'ready', read_only: false, groups: [] },
-            summary: { status: 'completed', completed: 1, total: 1 }, next_poll_ms: null,
-          }
-        : {
-            paper: {
-              title: 'Two-state hydride study', authors: [], paper_type: 'theoretical',
-              theoretical_subtype: 'calculation', research_materials: ['Li2MgH16'],
-            },
-            material_states: [
-              {
-                material: 'Li2MgH16', pressure_value_gpa: 300, state_kind: 'theoretical',
-                calculation_context: {}, tc_results: [], properties: [],
-              },
-              {
-                material: 'Li2MgH16', pressure_value_gpa: 250, state_kind: 'theoretical',
-                calculation_context: {}, tc_results: [], properties: [],
-              },
-            ],
-            structure_candidates: [{
-              candidate_id: 'structure-state-1', material_state_ref: 'material_states[0]',
-              status: 'valid', confirmation: 'unreviewed',
-              sources: [{ filename: 'Li2MgH16.vasp' }],
-              validation: { atom_count: 2, elements: ['Li', 'H'], volume: 20 },
-              representations: {
-                conventional: {
-                  cif: { text: 'data_conventional' },
-                  poscar: { text: 'conventional POSCAR' },
-                },
-                primitive: {
-                  cif: { text: 'data_primitive' },
-                  poscar: { text: 'primitive POSCAR' },
-                },
-              },
-            }],
-            classification_evidence: [], field_evidence: {},
-          }
-      return new Response(JSON.stringify({ ok: true, data }), {
-        status: 200, headers: { 'Content-Type': 'application/json' },
+  it('晶体结构只在所属材料状态内显示且材料状态列表占满页面', async () => {
+    const fixture = mockEditableDraft('o'.repeat(32), {
+      paper: {
+        title: 'Two-state hydride study', authors: [], paper_type: 'theoretical',
+        theoretical_subtype: 'calculation', research_materials: ['Li2MgH16'],
+      },
+      material_states: [
+        {
+          material: 'Li2MgH16', pressure_value_gpa: 300, state_kind: 'theoretical',
+          calculation_context: {}, tc_results: [], properties: [],
+        },
+        {
+          material: 'Li2MgH16', pressure_value_gpa: 250, state_kind: 'theoretical',
+          calculation_context: {}, tc_results: [], properties: [],
+        },
+      ],
+      structure_candidates: [{
+        candidate_id: 'structure-state-1', material_state_ref: 'material_states[0]',
+        status: 'valid', confirmation: 'unreviewed',
+        sources: [{ filename: 'Li2MgH16.vasp' }],
+        validation: { atom_count: 2, elements: ['Li', 'H'], volume: 20 },
+        representations: {
+          conventional: {
+            cif: { text: 'data_conventional' },
+            poscar: { text: 'conventional POSCAR' },
+          },
+          primitive: {
+            cif: { text: 'data_primitive' },
+            poscar: { text: 'primitive POSCAR' },
+          },
+        },
+      }],
+      classification_evidence: [], field_evidence: {},
+    })
+    const blobs: Blob[] = []
+    const downloads: Array<{ filename: string; href: string }> = []
+    const createObjectURL = vi.fn((blob: Blob) => { blobs.push(blob); return `blob:structure-${blobs.length}` })
+    const revokeObjectURL = vi.fn()
+    for (const [key, value] of Object.entries({ createObjectURL, revokeObjectURL })) {
+      const descriptor = Object.getOwnPropertyDescriptor(URL, key)
+      Object.defineProperty(URL, key, { configurable: true, value })
+      onTestFinished(() => {
+        if (descriptor) Object.defineProperty(URL, key, descriptor)
+        else Reflect.deleteProperty(URL, key)
       })
-    }))
+    }
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () {
+      downloads.push({ filename: this.download, href: this.href })
+    })
+    const blobText = (blob: Blob) => new Promise<string>((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(String(reader.result))
+      reader.onerror = () => reject(reader.error)
+      reader.readAsText(blob)
+    })
 
     render(<UploadParsingDetail taskId={'o'.repeat(32)} onSubmitted={vi.fn()} />)
 
     expect(await screen.findByText('材料状态 #1')).toBeVisible()
     expect(screen.getByText('材料状态 #2')).toBeVisible()
     expect(screen.getAllByTestId('structure-viewer')).toHaveLength(1)
-    expect(screen.getByTestId('structure-viewer')).toHaveTextContent('data_conventional')
+    const firstState = within(document.querySelector('[data-material-state-index="0"]') as HTMLElement)
+    const secondState = within(document.querySelector('[data-material-state-index="1"]') as HTMLElement)
+    expect(firstState.getByTestId('structure-viewer')).toHaveTextContent('data_conventional')
+    expect(secondState.queryByTestId('structure-viewer')).not.toBeInTheDocument()
     expect(screen.getByTestId('material-states-list')).toHaveStyle({ width: '100%' })
     expect(screen.queryByRole('heading', { name: '晶体结构' })).not.toBeInTheDocument()
+    const toggle = firstState.getByRole('button', { name: '晶体结构 待确认' })
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.getByTestId('structure-viewer')).not.toBeVisible()
+    expect(screen.queryByRole('button', { name: '下载结构' })).not.toBeInTheDocument()
+    fireEvent.click(toggle)
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    expect(screen.getByTestId('structure-viewer')).toBeVisible()
     expect(screen.getByRole('button', { name: '下载结构' })).toBeVisible()
     expect(screen.getByText('当前显示：惯用胞 · CIF')).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: '下载结构' }))
+    expect(downloads[0]).toEqual({ filename: 'structure-state-1-conventional.cif', href: 'blob:structure-1' })
+    expect(blobs[0].type).toBe('chemical/x-cif')
+    expect(await blobText(blobs[0])).toBe('data_conventional')
 
     fireEvent.mouseDown(screen.getByRole('combobox', { name: '晶胞表示' }))
     fireEvent.click(screen.getByRole('option', { name: '原胞' }))
@@ -397,17 +464,29 @@ describe('论文上传工作区', () => {
     expect(screen.getByTestId('structure-viewer')).toHaveTextContent('primitive POSCAR')
     expect(screen.getByTestId('structure-viewer')).toHaveAttribute('data-format', 'vasp')
     expect(screen.getByText('当前显示：原胞 · POSCAR')).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: '下载结构' }))
+    expect(downloads[1]).toEqual({ filename: 'structure-state-1-primitive.POSCAR', href: 'blob:structure-2' })
+    expect(blobs[1].type).toBe('text/plain')
+    expect(await blobText(blobs[1])).toBe('primitive POSCAR')
+    expect(revokeObjectURL.mock.calls).toEqual([['blob:structure-1'], ['blob:structure-2']])
+
+    fireEvent.click(toggle)
+    expect(screen.getByTestId('structure-viewer')).not.toBeVisible()
+    fireEvent.click(toggle)
+    expect(screen.getByTestId('structure-viewer')).toHaveTextContent('primitive POSCAR')
 
     fireEvent.click(screen.getByRole('button', { name: '采用此结构' }))
-    expect(screen.getByText('已采用'))
+    expect(firstState.getByRole('button', { name: '晶体结构 已采用' })).toBeVisible()
     fireEvent.click(screen.getByRole('button', { name: '恢复为待确认' }))
-    expect(screen.getByText('待确认')).toBeVisible()
+    expect(firstState.getByRole('button', { name: '晶体结构 待确认' })).toBeVisible()
 
     fireEvent.click(screen.getByRole('button', { name: '不采用' }))
-    expect(screen.getByText('已不采用')).toBeVisible()
+    expect(firstState.getByRole('button', { name: '晶体结构 已不采用' })).toBeVisible()
     fireEvent.click(screen.getByRole('button', { name: '恢复为待确认' }))
     expect(screen.getByRole('button', { name: '采用此结构' })).toBeVisible()
     expect(screen.getByRole('button', { name: '不采用' })).toBeVisible()
+    expect(fixture.writes).toHaveLength(0)
+    expect(fixture.unexpected.join('\n')).toBe('')
   })
 
   it('分段解析页签并列显示各分段来源与解析结果', async () => {
