@@ -14,7 +14,7 @@
 | [固定表单填写与科学关系整理](../../specs/176-scientific-form-filling/validation.md) | LLM 主动查缺、多方法 Tc 分组、其他方法名称及真实验证边界 | 科学整理、固定表单、保存重读 |
 | [PDF 上传到审核入库交互流程图](pdf-review-flow.html) | 主流程入口；点击解析阶段或批准前检查进入独立程序流程图页面，其他节点显示概要 | 独立 HTML、CSS、JavaScript，无外部依赖 |
 | [解析与草稿程序流程图](pdf-parsing-flow.html) | 展开正文提取、用户指定角色与历史角色恢复、来源覆盖、查重、草稿保存及主要失败路径；可返回主流程 | 上传 Worker、解析与字段核对代码 |
-| [字段自检、文档补查与提交复用](field-review-automation.md) | 唯一候选自纠、有限文档补查、字段状态与有效复用；额外PDF引句复查已移除 | #184、#188、#190、#191 |
+| [统一模型核对与复用](field-review-automation.md) | 模型统一查证与自纠，程序逐批保存，已有有效结果复用；阶段预览分区同步 | #194、#195 |
 | [字段核对规则库与程序流程图](pdf-field-evidence-flow.html) | 按字段、区域或报错检索规则；按五个现有模块查看核对阶段、工具与已知断点，并将本次讨论方案单独标为尚未实施 | 字段规则快照、本机发布定义、共享核对与专门生成代码 |
 | [批准前检查程序流程图](pdf-approval-check-flow.html) | 展开结果复用、必要模型核对、权限与版本、正式保存、事务回滚及索引发布 | 工作台、共享证据服务、批准事务 |
 | [PDF 解析管线](pdf-parsing-pipeline.md) | [上传到审核入库主流程图](pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程)，以及四工具解析、五阶段处理、来源核对和向量发布 | MinerU、GROBID、Docling、Marker、RQ、Redis、LLM、MySQL、Qdrant |

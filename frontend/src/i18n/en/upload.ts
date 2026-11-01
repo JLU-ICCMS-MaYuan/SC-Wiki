@@ -168,6 +168,13 @@ export default {
   detailLoadFailed: 'Failed to load parsing details',
   operationFailed: 'Operation failed',
   summarizingNote: 'Summarizing the full-text draft; the form updates in real time and is ready for review once finished.',
+  previewNotes: {
+    assembling: 'Showing extracted content read-only while assembling the draft; unfinished sections remain empty.',
+    organizing: 'Organizing materials and properties; available content is shown read-only.',
+    reviewing: 'Reviewing sources and calculation conditions; available content is read-only and is not yet fully verified.',
+    saving: 'Saving the final draft and review results; editing will be available when saving completes.',
+  },
+  failedPreviewNote: 'Processing failed. Generated content is retained as a read-only preview; see the failure message above.',
   readingNote: 'Parsing chunks {completed}/{total}; fields light up as chunks complete.',
   extractingNote: 'Extracting paper text; chunk parsing will follow.',
   queuedNote: 'Queued for parsing…',

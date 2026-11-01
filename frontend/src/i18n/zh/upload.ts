@@ -170,6 +170,13 @@ export default {
   detailLoadFailed: '解析详情加载失败',
   operationFailed: '操作失败',
   summarizingNote: '正在汇总全文草稿，表单内容实时更新；生成完成后即可校对。',
+  previewNotes: {
+    assembling: '已提取的内容只读展示，正在组装全文草稿；尚未生成的区域暂时留空。',
+    organizing: '正在整理材料与物性关系；已有内容只读展示。',
+    reviewing: '正在核对来源与计算条件；已有内容只读展示，尚不代表全部通过。',
+    saving: '正在保存最终草稿与核对结果；保存完成后即可校对。',
+  },
+  failedPreviewNote: '本次处理失败，已生成内容保留为只读预览；失败原因见上方提示。',
   readingNote: '正在分段解析 {completed}/{total}，字段随分段完成逐步点亮。',
   extractingNote: '正在提取论文正文，完成后逐段解析。',
   queuedNote: '排队等待解析…',

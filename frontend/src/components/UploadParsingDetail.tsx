@@ -36,6 +36,7 @@ interface ParsingDetail {
   }>
   chunks: ChunkDetail[]
   partial_draft?: UploadDraft | null
+  preview_phase?: string | null
   citation_extraction_status?: CitationExtractionStatus | null
   citation_extraction_error?: string | null
   citation_reference_count?: number
@@ -99,7 +100,12 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
   const statusNote = (value: ParsingDetail): string => {
     switch (value.status) {
       case 'summarizing':
+        if (value.preview_phase && ['assembling', 'organizing', 'reviewing', 'saving'].includes(value.preview_phase)) {
+          return t(`upload.previewNotes.${value.preview_phase}`)
+        }
         return t('upload.summarizingNote')
+      case 'failed':
+        return t('upload.failedPreviewNote')
       case 'reading':
         return t('upload.readingNote', { completed: value.summary.completed, total: value.summary.total })
       case 'extracting':
@@ -171,7 +177,7 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
             <Box role="tabpanel" aria-label={t('upload.tabAiForm')}>
               {detail.status === 'ready' ? (
                 <UploadTaskEditor taskId={taskId} onSubmitted={onSubmitted} />
-              ) : detail.status === 'failed' ? (
+              ) : detail.status === 'failed' && !detail.partial_draft ? (
                 <Typography variant="body2" color="text.secondary">
                   {t('upload.parseIncomplete')}
                 </Typography>

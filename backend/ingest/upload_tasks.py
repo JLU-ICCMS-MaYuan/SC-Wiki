@@ -323,7 +323,7 @@ def handle_upload_job_failure(
             processing_error=WORKER_FAILURE_MESSAGE,
             error_code="upload_worker_execution_failed",
             failed_stage=failed_stage,
-            partial_draft=None,
+            partial_draft=state.get('partial_draft'),
         )
         schedule_cleanup(task_id)
         from .document_shadow import refresh_comparison

@@ -499,6 +499,12 @@ def cached_results(session, snapshot: dict) -> dict:
 
 def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     from .scientific_evidence import populated
+    from .model_review import current_result
+    if not result.get('field_decision') and current_result(record, result, chunks):
+        # 模型已核实最终内容，程序只接受绑定本字段和实际来源版本的结论。
+        return {**{k: v for k, v in record.items() if k != 'validation_record'}, **result,
+                'field': record['field'], 'fields': record['fields'], 'human_confirmed': False,
+                'location_errors': []}
     if (result.get('stored_result') and not result.get('stale') and
             result.get('content_hash') == record.get('content_hash') and
             result.get('source_hash') == record.get('source_hash')):
@@ -1199,156 +1205,53 @@ def _fill_empty_fields(draft, record, proposal):
     return True
 
 
-def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None, scientific_sources=None,
-                                requested_fields=None):
-    """解析后补入有效推断与推测，并把理由绑定到补入后的字段版本。"""
+def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None,
+                                scientific_sources=None, requested_fields=None, on_preview=None):
+    """统一模型流程查证并保存最终字段结论，不串联独立科学匹配链。"""
     from backend.database import SessionLocal
-    from backend.ingest.upload_jobs import _ensure_not_cancelled
-    snapshot = upload_snapshot(task_id, owner, parsing_draft=draft)
-    records = [r for r in snapshot['records'] if r.get('kind') != 'derived' and r.get('required', True)
-               and (requested_fields is None or r['field'] in requested_fields)]
-    batches = [(batch, chunks) for batch in record_batches(records) for chunks in source_batches(snapshot['chunks'])]
-    candidates = {r['key']: [] for r in records}
-    errors = {r['key']: [] for r in records}
-    for index, (rows, chunks) in enumerate(batches):
-        _ensure_not_cancelled(task_id)
-        if on_progress:
-            on_progress(index, len(batches))
-        try:
-            evaluated = evaluate_batch(rows,chunks,'generate',on_partial=lambda _:_ensure_not_cancelled(task_id), source_catalog=snapshot['chunks'])
-        except Exception as exc:
-            _ensure_not_cancelled(task_id)
-            if type(exc).__name__=='UploadCancelled':
-                raise
-            logging.getLogger(__name__).warning('字段建议分批核对失败 task=%s batch=%s type=%s',task_id,index,type(exc).__name__)
-            evaluated = [checked_result(r,{'status':'unchecked','reason':'模型技术失败，已保留提取值；提交时可重试。',
-                'evidences':r.get('evidences') or []},chunks) for r in rows]
-        for r, result in zip(rows,evaluated):
-            candidates[r['key']].append(result)
-            errors[r['key']].extend(result['location_errors'])
+    from backend.ingest.upload_tasks import artifact_directory
+    from backend.ingest.upload_jobs import _ensure_not_cancelled, _atomic_write_json
     from backend.rag.llm_context import get_llm_config
-    results = aggregate_candidates(records, candidates, errors, get_llm_config().model, snapshot['chunks'])
-    from .field_document_followup import follow_up_fields
-    from .extraction_correction import correct_extracted_fields, human_protected_keys
+    from .model_review import review_draft
+    from .extraction_correction import human_protected_keys
+    from .scientific_evidence import save_results
+    def rebuild(value):
+        snap = upload_snapshot(task_id, owner, parsing_draft=value)
+        if requested_fields is not None:
+            snap['records'] = [r for r in snap['records'] if r['field'] in requested_fields]
+        return snap
     def cancelled():
         _ensure_not_cancelled(task_id)
         return False
-    selected_items = {r['item_key'] for r in records}
-    def correct(value, current, checked):
-        protected = set()
-        if any((r.get('proposal') or {}).get('unique') for r in checked.values()):
-            with SessionLocal() as session:
-                protected = human_protected_keys(session, current)
-        return correct_extracted_fields(current, value, checked,
-            rebuild=lambda candidate: upload_snapshot(task_id, owner, parsing_draft=candidate),
-            evaluate=evaluate_batch, cancelled=cancelled, protected_keys=protected,
-            protected_fields=skip_auto_fill or ())
-    filled, snapshot, results = correct(draft, snapshot, results)
-    records = [r for r in snapshot['records'] if r['item_key'] in selected_items]
-    results = follow_up_fields(records, results, snapshot['chunks'], cancelled=cancelled,
-                              on_partial=lambda _: _ensure_not_cancelled(task_id))
-    filled, snapshot, results = correct(filled, snapshot, results)
-    records = [r for r in snapshot['records'] if r['item_key'] in selected_items]
-    auto_filled = {}
-    for record in records:
-        proposal = results[record['key']].get('proposal')
-        if proposal and record['field'] not in (skip_auto_fill or ()) and _fill_empty_fields(filled, record, proposal):
-            auto_filled[record['item_key']] = proposal
-    # 已通过最终直接 Claim 的结果保持原值；Methods 的共用推断在此补入空叶子。
-    from .scientific_context import build_context, generate_context_associations, apply_associations
-    from .upload_tasks import artifact_directory
-    from .upload_jobs import _atomic_write_json
-    from backend.rag.llm import complete_json
-    config = get_llm_config()
-    context = build_context(scientific_sources if scientific_sources is not None else snapshot['chunks'])
-    ledger = generate_context_associations(filled, context, complete_json,
-        cache_dir=artifact_directory(task_id) / 'scientific_context_cache',
-        model_identity={'provider':config.provider,'model':config.model,'endpoint':config.base_url,
-                        'associate_prompt_version':context['version']},
-        ensure_active=lambda:_ensure_not_cancelled(task_id)) if any(r.get('kind')=='property' or r.get('record_field') for r in records) else None
-    applied = []
-    if ledger is not None:
-        applied, gaps = apply_associations(filled, ledger['associations'], context | {'complete':ledger['complete']})
-        ledger['gaps'].extend(gaps)
-        ledger['applied_count'] = len(applied)
-        _atomic_write_json(artifact_directory(task_id) / 'scientific_context.json', ledger)
-        for item in applied:
-            pointer = str(item.get('association', {}).get('target_path') or '').strip('/').replace('/', '.')
-            match = next((r for r in records if '/'.join([r.get('state_key') or '',r.get('module_key') or '',r.get('record_key') or ''])==item['target']
-                          and (not r.get('record_field') or pointer == r['record_field'] or pointer.startswith(r['record_field'] + '.'))),None)
-            if match:
-                a = item['association']
-                prior = auto_filled.get(match['item_key']) or {}
-                auto_filled[match['item_key']] = {'basis_kind':'paper_inference',
-                    'explanation':'；'.join(dict.fromkeys(filter(None,[prior.get('explanation'),a['explanation']]))),
-                    'evidences':[*(prior.get('evidences') or []),*a['fact_evidences'],*a['scope_evidences']]}
-    current = upload_snapshot(task_id, owner, parsing_draft=filled) if auto_filled or applied else snapshot
-    previous = {record['item_key']: record for record in snapshot['records']}
-    previous_results = {record['item_key']: results.get(record['key']) for record in records}
-    current_results = {}
-    for record in current['records']:
-        old = previous.get(record['item_key'])
-        result = previous_results.get(record['item_key'])
-        if record.get('record_field'):
-            matched = [item['association'] for item in applied
-                       if '/'.join([record.get('state_key') or '', record.get('module_key') or '', record.get('record_key') or '']) == item['target']
-                       and str(item['association'].get('target_path') or '').strip('/').replace('/', '.') == record['record_field']]
-            if matched:
-                from uuid import uuid4
-                auto_filled[record['item_key']] = {'basis_kind': 'paper_inference', 'explanation': '；'.join(dict.fromkeys(a['explanation'] for a in matched)),
-                    'evidences': [e for a in matched for e in [*a['fact_evidences'], *a['scope_evidences']]]}
-                result = {**(result or {}), 'model': config.model, '_audit_action': 'auto_fill', '_audit_event_id': uuid4().hex}
-        if result is None:
-            continue
-        proposal = auto_filled.get(record['item_key'])
-        if proposal:
-            from uuid import uuid4
-            current_results[record['key']] = {**result, 'status': 'uncertain', 'reason': proposal['explanation'],
-                'evidences': proposal['evidences'], 'proposal': None, 'adopted_basis': proposal['basis_kind'],
-                'ai_reason': proposal['explanation'],
-                'auto_filled': True, 'auto_filled_content_hash': record['content_hash'],
-                'auto_filled_source_hash': record['source_hash'],
-                '_audit_action': 'auto_fill', '_audit_event_id': result.get('_audit_event_id') or uuid4().hex}
-        elif old and old['content_hash'] == record['content_hash'] and old['source_hash'] == record['source_hash']:
-            current_results[record['key']] = {**result, 'proposal': None}
-        else:
-            current_results[record['key']] = {'status': 'unchecked', 'reason': '相关字段自动填写后需重新核对', 'evidences': []}
-    _ensure_not_cancelled(task_id)
-    # 条件补空会改变字段/软件上下文；在最终值上执行与独立重核相同的规则，不能沿用空值结论。
-    from . import condition_rules
-    condition_rows = [r for r in current['records'] if r['key'] in current_results and r.get('condition_context') and r.get('required')
-                      and r.get('condition_sources_complete') and not condition_rules.current_review(
-                          r, current_results.get(r['key']) or {}, current['chunks'])]
-    for batch in record_batches(condition_rows):
-        pending, location_errors = {r['key']: [] for r in batch}, {r['key']: [] for r in batch}
-        try:
-            for chunks in source_batches(current['chunks']):
-                _ensure_not_cancelled(task_id)
-                evaluated = evaluate_batch(batch, chunks, 'check', prior=current_results,
-                    on_partial=lambda _: _ensure_not_cancelled(task_id), source_catalog=current['chunks'])
-                for row, result in zip(batch, evaluated):
-                    pending[row['key']].append(result)
-                    location_errors[row['key']].extend(result.get('location_errors') or [])
-            current_results.update(aggregate_candidates(batch, pending, location_errors, config.model, current['chunks']))
-        except Exception as exc:
-            _ensure_not_cancelled(task_id)
-            if type(exc).__name__ == 'UploadCancelled':
-                raise
-            logging.getLogger(__name__).warning('计算条件规则核对未完成 task=%s type=%s', task_id, type(exc).__name__)
-            for row in batch:
-                current_results[row['key']] = {**(current_results.get(row['key']) or {}), 'rule_review': None,
-                    'status': 'uncertain', 'reason': '计算条件规则核对未完成；提取值已保留，请重新核对。'}
-    with SessionLocal.begin() as session:
-        from .scientific_evidence import save_results
-        from .pdf_front_matter import correct_front_matter_results
-        current_results = correct_front_matter_results(session, current, current_results)
-        save_results(session, current, current_results, owner)
-    draft.clear()
-    draft.update(filled)
-    if on_progress:
-        on_progress(len(batches), len(batches))
-    return {record['key']: {**current_results[record['key']], 'field': record['field']}
-            for record in current['records'] if record['key'] in current_results}
+    initial = rebuild(draft)
+    with SessionLocal() as session:
+        protected = human_protected_keys(session, initial)
+        previous = cached_results(session, initial)
+    def save(snapshot, results, report):
+        cancelled()
+        _atomic_write_json(artifact_directory(task_id) / 'model_review.json', report)
+        from .model_review import current_result
+        current = {r['key']: r for r in snapshot['records']}
+        eligible = {key: result for key, result in results.items() if key in current
+                    and current_result(current[key], result, snapshot['chunks'])}
+        with SessionLocal.begin() as session:
+            save_results(session, snapshot, eligible, owner)
+    def published(value):
+        # 后续批次或存储失败时，调用者也保留此前已成功保存的纠错内容。
+        draft.clear()
+        draft.update(copy.deepcopy(value))
+        if on_preview:
+            on_preview(value)
+    filled, snapshot, results, report = review_draft(draft, rebuild,
+        model_name=get_llm_config().model, cancelled=cancelled, skip_auto_fill=skip_auto_fill or (),
+        protected_keys=protected, save=save, on_progress=on_progress, on_preview=published,
+        initial_results=previous)
+    draft.clear(); draft.update(filled)
+    draft['model_review_report'] = report
+    save(snapshot, results, report)
+    return {key: {**result, 'field': next(r['field'] for r in snapshot['records'] if r['key'] == key)}
+            for key, result in results.items()}
+
 
 def run_evidence_job(job_id: str):
     from backend.ingest.upload_tasks import load_llm_config, delete_llm_config
@@ -1376,83 +1279,52 @@ def run_evidence_job(job_id: str):
         token = set_llm_config(config)
         update_job(job_id, status='running')
         snapshot = job['snapshot']
-        from .field_document_followup import tools_for_chunks
-        followup_tools = tools_for_chunks(snapshot['chunks'],
-            lambda: read_job_status(job_id, job['owner'])['status'] == 'cancelled')
+        from .model_review import review_fields
         if snapshot.get('field_review_input'):
             snapshot['field_review_job_id'] = job_id
-        if snapshot.get('condition_source_manifest_complete') is False and any(r.get('condition_context') for r in snapshot['records']):
-            update_job(job_id, status='failed', error={'code': 'evidence_source_incomplete',
-                       'message': '正文或补充材料缺少完整可读来源，不能把未读内容当作未报告。'})
-            return
-        vision_verified = None
-        records = [r for r in snapshot['records'] if (r.get('kind') != 'derived' or r.get('human_modified') or job.get('purpose') == 'field') and r['key'] not in job['cached'] and (not job.get('requested_keys') or r['key'] in job['requested_keys'])]
+        records = [r for r in snapshot['records']
+                   if (r.get('kind') != 'derived' or r.get('human_modified') or job.get('purpose') == 'field')
+                   and r['key'] not in job['cached']
+                   and (not job.get('requested_keys') or r['key'] in job['requested_keys'])]
         results = dict(job['cached'])
-        # 完整扫描来源，按上下文大小分批，不以检索排名截断整篇论文。
-        batches = source_batches(snapshot['chunks']) if records else []
-        source_batch_count = len(batches)
-        batches = [(source_batch, batch) for batch in record_batches(records) for source_batch in batches]
-        deadline_seconds = min(1740, max(480, len(batches) * 150))
-        processed = {r['key']: 0 for r in records}
-        update_job(job_id, completed_batches=0, total_batches=len(batches), current_batch=0)
-        candidates = {r['key']: [] for r in records}
-        location_errors = {r['key']: [] for r in records}
+        batches = record_batches(records)
         started = time.monotonic()
-        for index, (chunks, batch_records) in enumerate(batches):
-            if read_job_status(job_id, job['owner'])['status'] == 'cancelled':
+        deadline_seconds = min(1740, max(480, len(batches) * 150))
+        update_job(job_id, completed_batches=0, total_batches=len(batches), current_batch=0)
+        for index, batch_records in enumerate(batches):
+            def cancelled():
+                return read_job_status(job_id, job['owner'])['status'] == 'cancelled'
+            if cancelled():
                 return
             if time.monotonic() - started > deadline_seconds:
                 raise TimeoutError('evidence deadline')
-            update_job(job_id, current_batch=index + 1, progress=f'正在核对第 {index+1}/{len(batches)} 组原文')
-            on_partial = evidence_stream_guard(job_id, job['owner'], started, deadline_seconds)
-            human_context = {}
-            if job.get('purpose') in {'review_all', 'submit', 'field'}:
-                from backend.database import SessionLocal
-                from backend.ingest import manual_evidence
-                with SessionLocal() as session:
-                    human_context = manual_evidence.review_context(session, {**snapshot, 'records': batch_records})
-            if vision_verified is None and any(entry.get('images') for entry in human_context.values()):
-                vision_verified = True  # 直接使用实际证据请求；不另发测试图片的模型预检查。
-            image_read_out = []
-            evaluated = evaluate_batch(batch_records, chunks, job.get('purpose', 'check'), job.get('prior'), on_partial,
-                                       snapshot['chunks'], human_context=human_context, image_read_out=image_read_out,
-                                       vision_verified=bool(vision_verified),
-                                       review_started_at=job.get('review_started_at') or '')
-            if image_read_out:
-                from backend.database import SessionLocal
-                from backend.ingest import manual_evidence
+            update_job(job_id, current_batch=index + 1, progress=f'正在核对第 {index+1}/{len(batches)} 组字段')
+            from backend.database import SessionLocal
+            from . import manual_evidence
+            with SessionLocal() as session:
+                human_context = manual_evidence.review_context(session, {**snapshot, 'records': batch_records})
+            fresh = review_fields(batch_records, snapshot['chunks'], model_name=config.model,
+                cancelled=cancelled,
+                on_partial=evidence_stream_guard(job_id, job['owner'], started, deadline_seconds),
+                manifest=snapshot.get('pdf_manifest') or [], human_context=human_context,
+                review_started_at=job.get('review_started_at'))
+            if human_context:
                 with SessionLocal.begin() as session:
-                    for image_ref, read in image_read_out:
-                        manual_evidence.mark_ai_read(session, [image_ref], read=read)
-            for record, result in zip(batch_records, evaluated):
-                key = record['key']
-                location_errors[key].extend(result['location_errors'])
-                candidates[key].append(result)
-            update_job(job_id, completed_batches=index + 1, progress=f'已核对 {index+1}/{len(batches)} 组原文')
-            for record in batch_records:
-                processed[record['key']] += 1
-            finished = [r for r in batch_records if processed[r['key']] == source_batch_count]
-            if finished:
-                fresh = aggregate_candidates(finished, candidates, location_errors, config.model, snapshot['chunks'])
-                from .field_document_followup import follow_up_fields
-                fresh = follow_up_fields(finished, fresh, snapshot['chunks'],
-                    cancelled=lambda: read_job_status(job_id, job['owner'])['status'] == 'cancelled',
-                    on_partial=on_partial, tools=followup_tools)
-                if job.get('purpose') == 'field':
-                    from .field_candidates import capture
-                    for record in finished:
-                        candidate = capture(record, fresh[record['key']], job.get('review_started_at') or '')
-                        if candidate:
-                            fresh[record['key']]['field_candidate'] = candidate
-                if read_job_status(job_id, job['owner'])['status'] == 'cancelled':
-                    return
-                persist_completed_results({**snapshot, 'records': finished}, fresh, job['owner'])
-                results.update(fresh)
-                update_job(job_id, results=results)
-        if not batches and records:
-            fresh = aggregate_candidates(records, candidates, location_errors, config.model, snapshot['chunks'])
-            persist_completed_results({**snapshot, 'records': records}, fresh, job['owner'])
+                    refs = [image for value in human_context.values() for image in value.get('images', [])]
+                    if refs:
+                        manual_evidence.mark_ai_read(session, refs,
+                            read=any(r.get('review_images_read') for r in fresh.values()))
+            if job.get('purpose') == 'field':
+                from .field_candidates import capture
+                for record in batch_records:
+                    candidate = capture(record, fresh[record['key']], job.get('review_started_at') or '')
+                    if candidate:
+                        fresh[record['key']]['field_candidate'] = candidate
+            if cancelled():
+                return
+            persist_completed_results({**snapshot, 'records': batch_records}, fresh, job['owner'])
             results.update(fresh)
+            update_job(job_id, results=results, completed_batches=index + 1)
         update_job(job_id, status='completed', results=results, progress='核对完成', completed_batches=len(batches), current_batch=0)
         if read_job_status(job_id, job['owner'])['status'] == 'completed':
             from backend.ingest.upload_tasks import TASK_TTL

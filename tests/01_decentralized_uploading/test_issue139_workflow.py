@@ -13,7 +13,7 @@ import pytest
 
 
 @pytest.mark.parametrize('generic_failure',[False,True])
-def test_suggestion_pipeline_preserves_direct_facts_and_marks_inference(tmp_path,monkeypatch,generic_failure):
+def test_suggestion_pipeline_preserves_direct_facts_and_marks_inference(tmp_path,monkeypatch,generic_failure,db_session):
     d = draft()
     sources = context()['sources']
     stored = []
@@ -21,48 +21,48 @@ def test_suggestion_pipeline_preserves_direct_facts_and_marks_inference(tmp_path
         rows = [r for r in ev.draft_records(parsing_draft,{}) if r['kind']=='property']
         return ev.complete_snapshot('upload',task,rows,sources,parsing_draft)
     monkeypatch.setattr(ev,'upload_snapshot',snapshot)
-    monkeypatch.setattr(ev,'evaluate_batch',lambda rows,*a,**kw:[{'status':'supported','reason':'表行直接报告 Tc',
-        'evidences':[{'file_id':'main','quote':'24×24×24 k grid'}],'location_errors':[]} for _ in rows])
-    if generic_failure:
-        def fail_batch(*a,**kw):raise ValueError('invalid optional field response')
-        monkeypatch.setattr(ev,'evaluate_batch',fail_batch)
     monkeypatch.setattr('backend.ingest.upload_jobs._ensure_not_cancelled',lambda *_:None)
     monkeypatch.setattr('backend.ingest.upload_tasks.artifact_directory',lambda _:tmp_path)
-    @contextmanager
-    def begin():
-        yield object()
-    monkeypatch.setattr('backend.database.SessionLocal',SimpleNamespace(begin=begin))
+    from sqlalchemy.orm import sessionmaker
+    monkeypatch.setattr('backend.database.SessionLocal',sessionmaker(db_session.get_bind()))
     monkeypatch.setattr(science,'save_results',lambda s,snap,results,owner:stored.append((deepcopy(snap),deepcopy(results))))
     monkeypatch.setattr('backend.ingest.pdf_front_matter.correct_front_matter_results',lambda s,snap,results:results)
-    c = candidate(d)
+    failed_key = []
     def model(system,body,**kw):
-        if '"settings"' in system and '"associations"' not in system:
-            return {'settings':[ {'key':'k_grid','value':c['value'],**{k:c[k] for k in ('stage','scope','reported_value_raw','fact_evidences','scope_evidences','explanation')}} ]}
         data=json.loads(body)
-        return {'assignments':[{'setting_id':data['settings'][0]['setting_id'],'targets':[data['targets'][0]['target']],
-            **{k:c[k] for k in ('basis_kind','scope','scope_evidences','explanation')}}]}
+        if generic_failure and not failed_key:
+            failed_key.append(data['records'][0]['key'])
+        if generic_failure and [r['key'] for r in data['records']] == failed_key:
+            raise TimeoutError('isolated unrelated field failure')
+        results=[]
+        for row in data['records']:
+            if generic_failure and row['key'] in failed_key:
+                continue
+            result={'key':row['key'],'status':'supported','reason':'原文的同物相计算流程说明该设置的适用关系',
+                    'source_ids':[data['sources'][0]['source_id']], 'basis_kind':'paper_inference'}
+            if row.get('record_field')=='payload.calculation_conditions.k_grid':
+                result.update(final_value='24×24×24',unique=True)
+            results.append(result)
+        return {'results':results}
     monkeypatch.setattr('backend.rag.llm.complete_json',model)
     results=ev.generate_upload_suggestions('task',d,1,scientific_sources=sources)
     r=d['material_states'][0]['property_modules'][0]['records'][0]
     assert r['value_min']==281 and r['value_max']==311
     assert r['payload']['parameters']['lambda_ep']==3.94
     assert r['payload']['calculation_conditions']['k_grid']=='24×24×24'
-    snap,checks=stored[0]
+    snap,checks=stored[-1]
     field=next(row for row in snap['records'] if row.get('record_field')=='payload.calculation_conditions.k_grid')
     result=results[field['key']]
-    assert result['status']=='uncertain' and result['adopted_basis']=='paper_inference'
-    assert result['auto_filled'] and result['auto_filled_content_hash']
-    assert field['source_associations'][0]['stale'] is False
-    # 后续模型不能把推断提升为“原文直接支持”；人工改值使说明失效。
-    checked=ev.checked_result(field,{'status':'supported','evidences':[c['fact_evidences'][0]]},sources)
-    assert checked['status']=='uncertain' and checked['source_kind']=='paper_inference'
+    assert result['status']=='supported' and result['adopted_basis']=='paper_inference'
+    assert result['auto_corrected'] and not result['human_confirmed']
+    checked=ev.checked_result(field,result,snap['chunks'])
+    assert checked['status']=='supported' and checked['source_kind']=='paper_inference'
     r['payload']['calculation_conditions']['k_grid']='12×12×12'
     changed=next(row for row in snapshot('task',1,parsing_draft=d)['records'] if row.get('record_field')=='payload.calculation_conditions.k_grid')
-    assert changed['source_associations'][0]['stale'] is True
-    assert ev.checked_result(changed,{'status':'supported','evidences':[c['fact_evidences'][0]]},sources)['status']=='uncertain'
+    assert ev.checked_result(changed,result,sources)['status']!='supported'
 
 
-def test_worker_finishes_direct_claim_gate_before_common_methods_fill(tmp_path,monkeypatch):
+def test_worker_finishes_direct_claim_gate_before_common_methods_fill(tmp_path,monkeypatch,db_session):
     import pymupdf
     from backend.ingest import upload_jobs as jobs
     from backend.ingest.scientific_context import READ_PROMPT,scientific_fingerprint
@@ -99,9 +99,8 @@ def test_worker_finishes_direct_claim_gate_before_common_methods_fill(tmp_path,m
     monkeypatch.setattr(ev,'upload_snapshot',snapshot)
     monkeypatch.setattr(ev,'evaluate_batch',lambda rows,*a,**kw:[{'status':'supported','reason':'原文报告该结果',
         'evidences':[{'file_id':'main','quote':'200 K'}],'location_errors':[]} for _ in rows])
-    @contextmanager
-    def begin():yield object()
-    monkeypatch.setattr('backend.database.SessionLocal',SimpleNamespace(begin=begin))
+    from sqlalchemy.orm import sessionmaker
+    monkeypatch.setattr('backend.database.SessionLocal',sessionmaker(db_session.get_bind()))
     monkeypatch.setattr(science,'save_results',lambda *a:None)
     monkeypatch.setattr('backend.ingest.pdf_front_matter.correct_front_matter_results',lambda s,snap,results:results)
     saved=[]
@@ -135,22 +134,22 @@ def test_worker_finishes_direct_claim_gate_before_common_methods_fill(tmp_path,m
         assert claims and all(c['status']=='validated' for c in claims)
         assert all(c['basis_kind']=='paper_quote' for c in claims)
         data=json.loads(body)
-        if system==READ_PROMPT:
-            e={'source_id':next(s['source_id'] for s in data['sources'] if '24x24x24' in s['content'])}
-            return {'settings':[{'key':'k_grid','value':'24x24x24','stage':'electron_phonon','fact_evidences':[e],'scope_evidences':[e],
-                'scope':{'material':'LaH10'},'reported_value_raw':'24x24x24','explanation':'各压力的声子共用网格'}]}
-        t=data['targets'][0]
-        return {'assignments':[{'setting_id':data['settings'][0]['setting_id'],'targets':[t['target']],
-            'scope':{'material':'LaH10'},'basis_kind':'paper_inference','reported_value_raw':'24x24x24',
-            'fact_evidences':data['settings'][0]['fact_evidences'],'scope_evidences':data['settings'][0]['scope_evidences'],
-            'explanation':'原文说明各压力共用声子网格，依据同物相结果关联，仍需人工核对。'}]}
+        results=[]
+        for row in data['records']:
+            result={'key':row['key'],'status':'supported','reason':'原文明确该压力的结果及共用声子网格',
+                    'source_ids':[data['sources'][0]['source_id']], 'basis_kind':'paper_inference'}
+            if row.get('record_field')=='payload.calculation_conditions.k_grid':
+                result.update(final_value='24x24x24',unique=True)
+            results.append(result)
+        return {'results':results}
     monkeypatch.setattr('backend.rag.llm.complete_json',methods)
     assert jobs._process_upload_task(task)['status']=='ready'
     assert saved[0]['form_filling_report']['status'] == 'completed'
     r=saved[0]['material_states'][0]['property_modules'][0]['records'][0]
     assert r['payload']['tc_group']['version'] == 1
     assert r['payload']['calculation_conditions']['k_grid']=='24x24x24'
-    assert r['payload']['source_associations'][0]['basis_kind']=='paper_inference'
+    assert state['suggestions_status']=='completed'
+    assert state['preview_phase']=='saving'
 
 
 def test_structured_table_contract_retry_is_bounded_and_keeps_raw_attempts(tmp_path,monkeypatch):

@@ -15,17 +15,17 @@
 <body>
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="pdf-review-flow.html#parse">收录主流程</a> / <a href="pdf-parsing-flow.html#evidence">解析与草稿</a> / 生成字段核对结果与候选</nav>
-  <header><p class="eyebrow">SC-WIKI · 解析内部流程</p><h1>生成字段核对结果与候选</h1><p class="intro">展开逐字段生成的内部控制流：来源分批、结果校验与合并、受限补空、Methods 条件关联、最终版本核对和审计保存。解析阶段先处理唯一纠正候选，再对未解项做工具补查；主动字段核对复用同一补查程序。</p></header>
+  <header><p class="eyebrow">SC-WIKI · 解析内部流程</p><h1>生成字段核对结果与候选</h1><p class="intro">第3阶段和主动核对共用模型工具循环：模型查证来源、定位、值、关系、补空与纠错；程序执行工具、类型、权限、人工保护和版本保存。</p></header>
   <nav class="page-links" aria-label="流程页面导航"><a href="pdf-parsing-flow.html#evidence">← 返回上层解析流程</a><a href="#review-audit">核对次数、问题归属与建议</a><a href="#field-catalog">按字段查核对规则</a><a href="#program-flow">查看当前整体控制流</a></nav>
   <section class="review-audit" id="review-audit" aria-labelledby="audit-title">
-    <header class="audit-head"><p class="eyebrow">2026-10-30 · 按现有功能模块解释</p><h2 id="audit-title">字段自检、工具补查与提交如何衔接</h2><p>模型理解科学内容、程序核实来源、提交汇总已有资格是三件事。当前实现把它们接在多个阶段；下方可切换查看当前实现和实施前的历史流程。</p><p class="audit-scope"><strong>四项流程已完成本地实现与范围验证。</strong>页面只读展示，不连接真实草稿、模型或审核接口；历史重构仍归#192。</p></header>
+    <header class="audit-head"><p class="eyebrow">2026-11-01 · 统一模型核对</p><h2 id="audit-title">字段自检、工具补查与提交如何衔接</h2><p>模型统一查证科学支持，程序绑定实际读取的资料与版本，提交复用有效结论。下方区分当前实现和历史流程。</p><p class="audit-scope"><strong>四项流程已完成本地实现与范围验证。</strong>页面只读展示，不连接真实草稿、模型或审核接口；历史重构仍归#192。</p></header>
     <div class="audit-ledger">
       <h3>到底核对几次，每次由谁做？</h3><p><strong>有三个模型调用入口，不代表固定调用三次。</strong>解析内部有提取、整理、专门归纳和字段核对，字段批与来源窗口会增加调用次数；只有部分阶段会启动工具补查。程序检查本身不等于再次调用模型。</p>
       <div class="audit-table-scroll" tabindex="0" role="region" aria-label="当前核对阶段与工具"><table><thead><tr><th>现有功能／阶段</th><th>谁处理、用什么</th><th>处理范围与调用条件</th></tr></thead><tbody>
         <tr><td>解析与草稿：文档读取</td><td>所选解析方案；默认组合 MinerU、GROBID 等工具，部分路径使用视觉能力</td><td>把正文、补充材料转成带文件、页码或块身份的内容；不能只凭“解析成功”认定科学值正确</td></tr>
         <tr><td>解析与草稿：提取及补查</td><td>LLM 提取；程序验证候选；必要时使用受限文档工具</td><td>按来源窗口读取；前期候选不合格才进入已有的有限补证循环</td></tr>
         <tr><td>解析与草稿：整理与归纳</td><td>LLM 固定表单整理、专门分类／总结；程序核查去向与格式</td><td>科学记录、论文概述和分类有不同过程，不能当成一次通用核对；不同阶段不一定都重复运行</td></tr>
-        <tr><td>字段核对：判断值与依据</td><td>LLM；evaluate_batch、checked_result 和条件规则</td><td>字段批 × 来源批；归纳按语义判断，条件还检查材料、软件、阶段与适用范围</td></tr>
+        <tr><td>字段核对：判断值与依据</td><td>LLM；model_review.review_fields</td><td>字段按批进入同一工具循环，模型核实材料、软件、阶段、配对及适用范围；程序不再用值的文本匹配重判科学支持</td></tr>
         <tr><td>侧栏主动大模型核对</td><td>LLM 与共享字段处理程序</td><td>用户显式点击，先保存当前字段及依据，仅该字段成为核对目标；有效结果按版本保存</td></tr>
         <tr><td>提交／管理员批准前</td><td>程序复用结果；必要变化及尚未完成项进入提交模型核对</td><td>不对有效同版本结果重复调用模型；最后汇总资格与执行事务，存在未通过或未完成项仍阻止提交</td></tr>
       </tbody></table></div>
@@ -50,11 +50,11 @@
   </section>
   <p class="boundary">方法核对区分电子理论、声子技术、振动处理与结构优化目标。电子结果数值和错误历史标签分别核对；仅明确关联的电子—声子修正允许绑定振动条件。字段来源与实际依赖继续决定审核资格。</p>
   <section class="field-catalog" id="field-catalog" aria-labelledby="catalog-title">
-    <header class="catalog-head"><p class="eyebrow">字段核对知识库</p><h2 id="catalog-title">具体到每一个字段，程序在检查什么</h2><p>选择字段，查看取值来源、程序规则、模型核对、候选处理、真实依赖和排错入口。这里记录当前实现；共用机制、专门过程、提示词约束和程序硬检查分别说明。</p></header>
+    <header class="catalog-head"><p class="eyebrow">字段核对知识库</p><h2 id="catalog-title">具体到每一个字段，程序在检查什么</h2><p>以下字段条目保留初次提取、结构格式及历史兼容的规则快照；第3阶段当前职责以本页统一流程及#194为准。按字段查看领域含义、来源和实际依赖。</p></header>
     <div class="execution">
       <h3>是不是按页面字段顺序，从头到尾一个个核对？</h3>
-      <p><strong>不是按页面顺序逐字段调用。</strong>在 generate_upload_suggestions 内，“字段批 × 来源批”按循环串行执行；通常每批最多20项，存在计算条件时最多12项。来源尽量使用完整正文与补充材料，超过约120000字符才分窗。一个字段可能经过多个来源窗口，最后合并结果。不能据此推断整个站点只有一个任务，或所有提取工具都串行。</p>
-      <div class="execution-path" aria-label="执行顺序"><span>题录及专门生成阶段</span>→<span>构造独立字段与来源快照</span>→<span>筛选需要核对的科学项</span>→<span>字段批 × 来源窗口逐批调用</span>→<span>合并、补空及条件复核</span>→<span>按最终版本保存</span></div>
+      <p><strong>不是按页面顺序逐字段调用。</strong>在 generate_upload_suggestions 内，通常每批最多20项，含计算条件时最多12项；每批进入统一模型工具循环，初始原文块及其余目录一并提供，模型可继续读取。不能据此推断整个站点只有一个任务，或所有提取工具都串行。</p>
+      <div class="execution-path" aria-label="执行顺序"><span>题录及专门生成阶段</span>→<span>构造独立字段与来源快照</span>→<span>筛选需要核对的科学项</span>→<span>统一模型核对及工具补查</span>→<span>模型给出最终值与依据</span>→<span>按最终版本保存</span></div>
       <p>参考文献、题录、程序派生、结构内部量及独立谱处理<strong>并不都进入同一模型生成批</strong>。默认题录 required=false，派生项由程序按输入核验；实际修改后的提交规则另行适用。</p>
     </div>
     <div class="catalog-filters">
@@ -97,7 +97,7 @@
       <div class="detail-body"><h3>执行方</h3><p id="detail-owner"></p><h3>程序行为</h3><p id="detail-description"></p><h3>边界与分支</h3><ul id="detail-notes"></ul><h3>源码定位</h3><code id="detail-code"></code></div>
     </aside>
   </div>
-  <p class="boundary">本页只读展示程序，不调用模型或写入草稿。模型支持、程序规则支持、人工确认与整篇批准是不同结果；自动补空保留原来源类别，不覆盖已有非空值，技术未完成不伪装成科学不通过。</p>
+  <p class="boundary">本页只读展示程序，不调用模型或写入草稿。模型核对、人工确认与整篇批准独立。模型唯一自纠和补空保护人工内容，技术未完成保留具体原因及成功项。</p>
   <footer><a href="pdf-parsing-flow.html#evidence">← 返回上层解析流程</a><a href="pdf-review-flow.html#parse">返回收录主流程</a><a href="pdf-parsing-pipeline.md">阅读解析管线与实现依据</a></footer>
 </main>
 <script type="application/json" id="flow-data">
@@ -107,283 +107,96 @@
     {
       "id": "snapshot",
       "row": 0,
-      "title": "构造字段与来源快照",
-      "summary": "输入为已组装草稿及本次正文",
-      "description": "读取解析草稿、材料状态、科学记录及本次正文来源，形成可逐字段核对的稳定身份和版本。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::upload_snapshot",
+      "title": "构造字段和来源快照",
+      "owner": "程序",
+      "summary": "稳定身份、值与实际来源版本",
+      "description": "绑定当前值及本任务资料，权限和存储边界沿用现有规则。",
+      "code": "backend/ingest/model_review.py::review_fields / review_draft；backend/ingest/property_evidence.py::generate_upload_suggestions",
       "notes": []
     },
     {
       "id": "filter",
       "row": 1,
-      "title": "筛选本次需要生成的字段",
-      "summary": "排除派生项，按需要限定字段",
-      "description": "取非派生、必需核对的字段；如果调用方指定 requested_fields，则仅处理指定范围。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions",
-      "notes": [
-        "不会把整条记录或数组位置当作独立字段身份。"
-      ]
-    },
-    {
-      "id": "batches",
-      "row": 2,
-      "title": "按字段批与来源批组合",
-      "summary": "记录批 × 正文及补充来源批",
-      "description": "把字段批和来源窗口组合，分批读取，避免单次模型输入承载整篇所有内容。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::record_batches / source_batches",
-      "notes": [
-        "每批只看到部分来源，本批未提及不能等同于整篇未报告。"
-      ]
-    },
-    {
-      "id": "evaluate",
-      "row": 3,
-      "title": "逐批调用生成与核对",
-      "summary": "模型返回字段状态、理由和候选",
-      "description": "使用 generate 目的调用共享 evaluate_batch。模型负责科学含义和归纳理由；checked_result 校验字段、引句、关联及候选。响应没有覆盖本批全部键时会抛出 ValueError，现有批次异常分支会统一记录技术未完成。",
-      "owner": "共享核对程序 / LLM",
-      "code": "backend/ingest/property_evidence.py::evaluate_batch / checked_result",
-      "notes": [
-        "模型不能伪造人工确认。",
-        "模型引句仍须回到本次来源定位，不因回答 supported 就直接通过。"
-      ]
-    },
-    {
-      "id": "batch-ok",
-      "row": 4,
-      "title": "本批调用与结构有效？",
-      "summary": "取消信号按原任务取消处理",
-      "description": "模型调用或响应结构异常时保留提取值，记录本批技术未完成；正常批次继续汇总。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions",
-      "notes": [],
-      "kind": "check"
-    },
-    {
-      "id": "batch-error",
-      "row": 4,
-      "title": "保留值，标记 unchecked",
-      "summary": "技术异常不伪造科学不通过",
-      "description": "为该批保留现有证据和提取值，记录模型技术失败，再与其他批次一起汇总。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions",
-      "notes": [
-        "上传取消仍会向外传播，不被吞成普通批次失败。"
-      ],
-      "kind": "wait",
-      "column": "left"
-    },
-    {
-      "id": "aggregate",
-      "row": 5,
-      "title": "合并各来源批次的判断",
-      "summary": "定位到的依据优先，冲突留疑",
-      "description": "优先采用有定位依据的批次；不同有效结论冲突时保留 uncertain，合并依据与理由。只有值和来源类别一致的唯一候选才保留。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::aggregate_candidates",
-      "notes": [
-        "一个窗口没有提及，不能抹掉另一窗口已找到的有效依据。",
-        "计算条件还需通过适用范围和完整来源规则。"
-      ]
-    },
-    {
-      "id": "fill-check",
-      "row": 9,
-      "title": "候选满足有限补空规则？",
-      "summary": "推断或通用知识，且目标为空",
-      "description": "仅对允许补空的字段检查类型、身份、已有值和候选内容；排除受保护字段及科学子项的通用补空路径。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::_fill_empty_fields",
-      "notes": [
-        "不覆盖原有非空值。",
-        "理论二级类型、材料家族、关键词不经这条通用补空路径。"
-      ],
-      "kind": "check"
-    },
-    {
-      "id": "fill",
-      "row": 9,
-      "title": "只补空值并记来源类别",
-      "summary": "仍是推断或推测，不冒充原文",
-      "description": "在草稿副本中补入通过类型和身份检查的空字段，记录理由、依据和采用类别。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::_fill_empty_fields",
-      "notes": [
-        "候选不满足规则时不补值，继续后续流程。"
-      ],
-      "column": "right"
-    },
-    {
-      "id": "context",
-      "row": 10,
-      "title": "建立 Methods 与表格上下文",
-      "summary": "区分事实依据与适用范围依据",
-      "description": "读取本次来源上下文，整理可用于具体科学记录的参数、方法和适用范围。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/scientific_context.py::build_context",
+      "title": "复用有效结果并分批",
+      "owner": "程序",
+      "summary": "实际变化才需要新核对",
+      "description": "已有有效通过或科学不通过不重复请求；计算条件空叶子可进入查缺。",
+      "code": "backend/ingest/model_review.py::review_fields / review_draft；backend/ingest/property_evidence.py::generate_upload_suggestions",
       "notes": []
     },
     {
-      "id": "associate-check",
-      "row": 11,
-      "title": "存在需关联的科学记录？",
-      "summary": "物性记录或科学子字段",
-      "description": "有物性或科学子项时才生成共享条件关联；没有这些记录则跳过该阶段。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions",
+      "id": "model",
+      "row": 2,
+      "title": "模型统一核对",
+      "owner": "大模型",
+      "summary": "来源、定位、值、配对及条件",
+      "description": "同一流程查证并给出最终值、依据与结论；原文表示差异由模型结合上下文判断。",
+      "code": "backend/ingest/model_review.py::review_fields / review_draft；backend/ingest/property_evidence.py::generate_upload_suggestions",
+      "notes": []
+    },
+    {
+      "id": "result",
+      "row": 3,
+      "title": "模型查证结果？",
+      "owner": "大模型",
+      "summary": "能确定、补查、冲突或未完成",
+      "description": "明确结果可采用；需资料则读源；真实冲突交人；技术失败保留已完成项。",
+      "code": "backend/ingest/model_review.py::review_fields / review_draft；backend/ingest/property_evidence.py::generate_upload_suggestions",
       "notes": [],
       "kind": "check"
     },
     {
-      "id": "associations",
-      "row": 11,
-      "title": "生成并校验条件关联",
-      "summary": "材料、物相、软件与阶段必须对应",
-      "description": "模型提出事实及范围关联，程序校验适用对象，仅把满足规则的关联应用到草稿副本，保留缺口账本。",
-      "owner": "上下文程序 / LLM",
-      "code": "backend/ingest/scientific_context.py::generate_context_associations / apply_associations",
-      "notes": [
-        "软件未报告的泛函不能由其他软件推算。",
-        "关联理由、事实依据与适用范围依据分别保留。"
-      ],
-      "column": "right"
-    },
-    {
-      "id": "outer-error",
-      "row": 12,
-      "title": "退出本节点，保留原草稿",
-      "summary": "由上层记录建议生成异常",
-      "description": "上下文生成等未在批次内处理的异常向上传播；上传主流程记录故障并保留已提取内容。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/upload_jobs.py::_process_upload_task",
-      "notes": [
-        "不是宣称当前函数已经完成结果持久化。",
-        "本页不会实际启动核对或改写用户草稿。"
-      ],
-      "kind": "stop",
-      "column": "right"
-    },
-    {
-      "id": "rebuild",
-      "row": 13,
-      "title": "按最终补空值重建快照",
-      "summary": "必要时更新内容与来源版本",
-      "description": "发生补空或关联应用后重新构造字段版本；没有变化时复用原快照。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions",
-      "notes": [
-        "只在最终值和来源版本上决定结果是否可沿用。"
-      ]
-    },
-    {
-      "id": "rebind",
-      "row": 14,
-      "title": "按稳定身份转接字段结果",
-      "summary": "补空后保留理由，变化项待核对",
-      "description": "自动补空项先保留 uncertain、理由和采用类别；内容与来源未变的结果复用；其他相关变化项标记 unchecked。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions",
-      "notes": [
-        "字段新版本不能继承空值时的旧通过。",
-        "不会把自动补空伪造成 human_confirmed。"
-      ]
-    },
-    {
-      "id": "conditions",
-      "row": 15,
-      "title": "计算条件需在最终值上核对？",
-      "summary": "适用、来源完整且无有效规则结果",
-      "description": "筛选有计算条件上下文、来源完整、且缺少当前规则核对的必要字段。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions；backend/ingest/condition_rules.py::current_review",
+      "id": "tools",
+      "row": 3,
+      "title": "执行只读文档工具",
+      "owner": "程序",
+      "summary": "读文档、表格、区域或原页",
+      "description": "只访问本任务文件，记录真实读取编号；失败和重试计入预算，不提供科学判断工具。",
+      "code": "backend/ingest/model_review.py::review_fields / review_draft；backend/ingest/property_evidence.py::generate_upload_suggestions",
       "notes": [],
-      "kind": "check"
+      "column": "left"
     },
     {
-      "id": "condition-review",
-      "row": 15,
-      "title": "核对最终计算条件",
-      "summary": "复用同一来源、软件与范围规则",
-      "description": "针对筛出的条件分批调用 check，重新汇总规则结论；不是再做一次整篇所有字段审核。",
-      "owner": "条件规则程序 / LLM",
-      "code": "backend/ingest/property_evidence.py::evaluate_batch / aggregate_candidates",
+      "id": "human",
+      "row": 4,
+      "title": "保留具体分歧",
+      "owner": "大模型",
+      "summary": "双方依据与无法裁决原因",
+      "description": "模型确认的科学分歧仍需人工决定；不把技术失败包装成科学疑问。",
+      "code": "backend/ingest/model_review.py::review_fields / review_draft；backend/ingest/property_evidence.py::generate_upload_suggestions",
       "notes": [],
-      "column": "right"
+      "column": "right",
+      "kind": "wait"
     },
     {
-      "id": "condition-error",
-      "row": 16,
-      "title": "条件未完成，保留提取值",
-      "summary": "uncertain，清除无效规则资格",
-      "description": "条件规则核对异常时保留已有值，撤销本轮规则通过资格，提示重新核对。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions",
-      "notes": [],
-      "kind": "wait",
-      "column": "right"
+      "id": "apply",
+      "row": 6,
+      "title": "保护人工内容并绑定最终值",
+      "owner": "程序",
+      "summary": "身份、类型与版本",
+      "description": "唯一系统纠错可采用，人工内容不自动覆盖；只补模型明确关联的空设置。",
+      "code": "backend/ingest/model_review.py::review_fields / review_draft；backend/ingest/property_evidence.py::generate_upload_suggestions",
+      "notes": []
     },
     {
       "id": "persist",
-      "row": 17,
-      "title": "首页题录核验后保存结果",
-      "summary": "无额外PDF引句复查",
-      "description": "仅保留标题作者首页核验；按最终内容与来源版本保存结果和审计，不再重扫原PDF文字撤回科学资格。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/pdf_front_matter.py::correct_front_matter_results；backend/ingest/scientific_evidence.py::save_results",
-      "notes": [
-        "未完成仍保存为未完成，不凭任务完成状态授予通过。"
-      ]
+      "row": 7,
+      "title": "逐批保存并发布预览",
+      "owner": "程序",
+      "summary": "成功项保留、只读阶段同步",
+      "description": "当前值和出处按最终版本保存，未完成字段保留原因；预览不写可编辑稿。",
+      "code": "backend/ingest/model_review.py::review_fields / review_draft；backend/ingest/property_evidence.py::generate_upload_suggestions",
+      "notes": []
     },
     {
       "id": "return",
-      "row": 18,
-      "title": "更新内存草稿并返回结果",
-      "summary": "回到上层解析流程",
-      "description": "使用处理后的草稿副本更新本次解析内存对象，回传结果及字段路径，随后由上层保存草稿及产物。",
-      "owner": "字段核对程序",
-      "code": "backend/ingest/property_evidence.py::generate_upload_suggestions",
-      "notes": [
-        "本步骤不是正式论文提交或管理员批准。"
-      ],
-      "kind": "result"
-    },
-    {
-      "id": "autocorrect",
-      "row": 6,
-      "title": "核实并应用唯一纠正候选",
-      "summary": "仅系统草稿；保护人工内容",
-      "owner": "自检程序 / LLM",
-      "description": "来源和类型有效且答案唯一时，生成候选副本，按最终值重新核对；通过才应用，不保留错误字段作为正式证据。",
-      "notes": [
-        "不覆盖人工修改或确认；不是直接采信模型的一句建议。"
-      ],
-      "code": "backend/ingest/extraction_correction.py::correct_extracted_fields"
-    },
-    {
-      "id": "followup",
-      "row": 7,
-      "title": "未解项进入文档工具补查",
-      "summary": "模型选工具，程序只读本任务",
-      "owner": "DocumentTools / LLM",
-      "description": "模型选择读取页面、区域、表格或搜索；返回原文后继续科学判断。12次行动、每工具2次重试，失败计入预算，取消及时终止。",
-      "notes": [
-        "通过项不发起补查；工具成功不等于科学通过。",
-        "技术失败保留已有有效结果和科学意见，并明确恢复方法。"
-      ],
-      "code": "backend/ingest/field_document_followup.py::follow_up_fields"
-    },
-    {
-      "id": "verify-correction",
       "row": 8,
-      "title": "核实补查得到的纠正候选",
-      "summary": "新候选仍需最终值核对",
-      "owner": "自检程序 / LLM",
-      "description": "补查新发现的唯一候选沿同一自纠规则核实；不新增人工确认标记，不绕过来源、版本和格式约束。",
-      "notes": [],
-      "code": "backend/ingest/extraction_correction.py::correct_extracted_fields"
+      "title": "返回可校对草稿",
+      "owner": "程序",
+      "summary": "字段结果分别保留",
+      "description": "ready不代表所有字段通过或整篇批准。有效结论供提交复用。",
+      "code": "backend/ingest/model_review.py::review_fields / review_draft；backend/ingest/property_evidence.py::generate_upload_suggestions",
+      "notes": []
     }
   ],
   "edges": [
@@ -393,119 +206,48 @@
     },
     {
       "from": "filter",
-      "to": "batches"
+      "to": "model"
     },
     {
-      "from": "batches",
-      "to": "evaluate"
+      "from": "model",
+      "to": "result"
     },
     {
-      "from": "evaluate",
-      "to": "batch-ok"
+      "from": "result",
+      "to": "tools",
+      "label": "补查"
     },
     {
-      "from": "batch-ok",
-      "to": "aggregate",
-      "label": "是"
+      "from": "tools",
+      "to": "model",
+      "label": "实际资料"
     },
     {
-      "from": "batch-ok",
-      "to": "batch-error",
-      "label": "否"
+      "from": "result",
+      "to": "human",
+      "label": "真实分歧"
     },
     {
-      "from": "batch-error",
-      "to": "aggregate"
+      "from": "human",
+      "to": "persist"
     },
     {
-      "from": "aggregate",
-      "to": "autocorrect"
+      "from": "result",
+      "to": "apply",
+      "label": "明确结论"
     },
     {
-      "from": "fill-check",
-      "to": "fill",
-      "label": "是"
-    },
-    {
-      "from": "fill-check",
-      "to": "context",
-      "label": "否"
-    },
-    {
-      "from": "fill",
-      "to": "context"
-    },
-    {
-      "from": "context",
-      "to": "associate-check"
-    },
-    {
-      "from": "associate-check",
-      "to": "associations",
-      "label": "是"
-    },
-    {
-      "from": "associate-check",
-      "to": "rebuild",
-      "label": "否"
-    },
-    {
-      "from": "associations",
-      "to": "rebuild",
-      "label": "成功"
-    },
-    {
-      "from": "associations",
-      "to": "outer-error",
-      "label": "异常"
-    },
-    {
-      "from": "rebuild",
-      "to": "rebind"
-    },
-    {
-      "from": "rebind",
-      "to": "conditions"
-    },
-    {
-      "from": "conditions",
-      "to": "condition-review",
-      "label": "是"
-    },
-    {
-      "from": "conditions",
+      "from": "result",
       "to": "persist",
-      "label": "否"
+      "label": "技术未完成"
     },
     {
-      "from": "condition-review",
-      "to": "persist",
-      "label": "完成"
-    },
-    {
-      "from": "condition-review",
-      "to": "condition-error",
-      "label": "异常"
-    },
-    {
-      "from": "condition-error",
+      "from": "apply",
       "to": "persist"
     },
     {
       "from": "persist",
       "to": "return"
-    },
-    {
-      "from": "autocorrect",
-      "to": "followup"
-    },
-    {
-      "from": "followup",
-      "to": "verify-correction"
-    },
-    {
-      "from": "verify-correction",
-      "to": "fill-check"
     }
   ]
 }

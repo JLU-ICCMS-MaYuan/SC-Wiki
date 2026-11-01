@@ -933,8 +933,12 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
         chunks.append(public)
     stable = state.get("status") in {"ready", "failed", "duplicate", "cancelled", "submitted"}
     task_status = state.get("status")
-    if task_status == "summarizing":
+    if task_status in {"summarizing", "failed"}:
         partial_draft = state.get("partial_draft")
+        if task_status == 'summarizing' and not (partial_draft or {}).get('material_states'):
+            candidate = _build_candidate_draft(chunks)
+            partial_draft = {**candidate, **(partial_draft or {}),
+                             'material_states': candidate.get('material_states') or []}
     elif task_status in {"queued", "extracting", "reading"}:
         partial_draft = _build_candidate_draft(chunks)
     else:
@@ -956,6 +960,7 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
         ],
         "chunks": chunks,
         "partial_draft": partial_draft,
+        "preview_phase": state.get('preview_phase'),
         "summary": {
             "status": "completed" if state.get("status") == "ready" else state.get("stage"),
             "completed": state.get("completed_chunks", 0),
@@ -1773,7 +1778,7 @@ def _handle_duplicate_locked(task_id: str, state: dict[str, Any], existing: Any)
         processing_status="succeeded",
         processing_error=None,
         duplicate=True,
-        partial_draft=None,
+        partial_draft=None, preview_phase=None,
         existing_paper_id=existing.id,
         existing_paper_status=existing.review_status,
         allowed_actions=allowed_actions,
@@ -2207,6 +2212,12 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
 
         _ensure_not_cancelled(task_id)
         update_state(task_id, status="summarizing", stage="summarizing", stage_index=4)
+        from .upload_preview import publish_preview as publish_stage_preview
+        def publish_preview(task, **kwargs):
+            publish_stage_preview(task, read=get_state, write=update_state, **kwargs)
+        initial_preview = _build_candidate_draft([{'result': candidate} for candidate in candidates])
+        publish_preview(task_id, paper=initial_preview.get('paper'),
+                        states=initial_preview.get('material_states'), phase='assembling')
         summary_candidates = _summary_classification_candidates(candidates)
         partial_write = {"last_at": 0.0}
 
@@ -2221,7 +2232,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             if isinstance(partial_draft.get('paper'), dict):
                 partial_draft['paper']['theoretical_subtype'] = None
             partial_write["last_at"] = now
-            update_state(task_id, partial_draft=partial_draft)
+            publish_preview(task_id, paper=partial_draft.get('paper'), phase='assembling')
 
         from backend.ingest.domain_extraction import SUMMARY_BOUNDARY
 
@@ -2319,6 +2330,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             if excluded_properties:
                 _atomic_write_json(artifact_directory(task_id) / "unclassified_properties.json", excluded_properties)
         # 模型负责科学关系与主动查缺，程序保留每个候选的去向及最终来源门。
+        publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='organizing')
         from backend.ingest.scientific_form_filling import fill_scientific_forms, form_sources
         with call_phase("scientific_form_filling"):
             draft["material_states"], form_filling = fill_scientific_forms(
@@ -2327,6 +2339,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 on_attempt=lambda report: _atomic_write_json(
                     artifact_directory(task_id) / "scientific_form_filling.json", report))
         _atomic_write_json(artifact_directory(task_id) / "scientific_form_filling.json", form_filling)
+        publish_preview(task_id, states=draft['material_states'], phase='reviewing')
         draft["form_filling_report"] = {k: v for k, v in form_filling.items() if k != "attempts"}
         draft.setdefault("generation_issues", []).extend(form_filling.get("issues") or [])
         if document_set and optimization_issues:
@@ -2441,6 +2454,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
 
         # 候选单独持久保存，不能把推断或通用知识写进提取值。
         from backend.ingest.property_evidence import generate_upload_suggestions
+        publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='reviewing')
         update_state(task_id, suggestions_status='running', suggestions_error=None)
         suggestion_results: dict[str, Any] = {}
         try:
@@ -2450,10 +2464,15 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                         scientific_sources=[{**source,"file_role":next((item.get('role') or 'main' for item in sources if item.get('file_id')==source['file_id']),source['file_role'])}
                                             for source in scientific_sources],
                         on_progress=lambda done, total: update_state(task_id, suggestions_completed=done, suggestions_total=total),
+                        on_preview=lambda value: publish_preview(task_id, paper=value.get('paper'),
+                            states=value.get('material_states'), phase='reviewing'),
                         skip_auto_fill=({"paper.summary"} if summary_error else set()) |
                                        ({"paper.research_motivation"} if motivation_error else set())) or {}
-            draft['field_suggestions_error'] = None
-            update_state(task_id, suggestions_status='completed')
+            unfinished = sum(bool(result.get('review_error')) for result in suggestion_results.values()) + len(
+                (draft.get('model_review_report') or {}).get('errors') or [])
+            draft['field_suggestions_error'] = f'{unfinished}项模型核对未完成，已保留其他结果；可在对应字段重试。' if unfinished else None
+            update_state(task_id, suggestions_status='failed' if unfinished else 'completed',
+                         suggestions_error=draft['field_suggestions_error'])
         except UploadCancelled:
             raise
         except Exception as suggestion_error:
@@ -2469,6 +2488,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                        for result in suggestion_results.values() if isinstance(result, dict)],
             "suggestions_status": "failed" if draft.get("field_suggestions_error") else "completed",
         })
+        publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='saving')
         # 已完成草稿的受控重跑必须保护期间的人工编辑；失败时保留原稿。
         expected_draft_hash = state.get("reparse_expected_draft_hash")
         with upload_task_lock(task_id) if expected_draft_hash else nullcontext():
@@ -2552,7 +2572,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         update_state(
             task_id, status="failed", processing_status="failed", processing_error=str(exc),
             error_code=exc.code if isinstance(exc, ParserError) else "paper_processing_failed",
-            failed_stage=current.get("stage"), partial_draft=None,
+            failed_stage=current.get("stage"),
         )
         _schedule_terminal_cleanup(task_id)
         raise
