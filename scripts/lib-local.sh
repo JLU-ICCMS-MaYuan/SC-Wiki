@@ -79,6 +79,9 @@ load_env() {
   local original_dir="$PWD"
   cd "$REPO_ROOT"
   export_entries python3 -m scripts.local_deploy.environment "$REPO_ROOT" --go-env || die "Go 环境配置读取失败"
+  local schema_heads
+  schema_heads="$(python3 -c 'from pathlib import Path; import sys; from scripts.local_deploy.environment import versions; print(",".join(versions(Path(sys.argv[1]))["schema_heads"]))' "$REPO_ROOT")" || die "数据库版本清单读取失败"
+  export SCWIKI_SCHEMA_HEADS="$schema_heads"
   cd "$original_dir"
   export PATH="$PY_BIN:$GO_ROOT/bin:$PATH"
   export PYTHONNOUSERSITE=1

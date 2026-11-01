@@ -21,14 +21,16 @@ def upgrade():
         sa.Column('id',sa.String(64),primary_key=True),
         sa.Column('namespace',sa.String(128),nullable=False),
         sa.Column('payload',sa.JSON(),nullable=False),
-        sa.Column('created_at',sa.DateTime(),nullable=False,server_default=sa.func.now()))
+        sa.Column('created_at',sa.DateTime(),nullable=False,server_default=sa.func.now()),
+        mysql_charset='utf8mb4',mysql_collate='utf8mb4_unicode_ci')
     op.create_index('ix_scientific_source_items_namespace','scientific_source_items',['namespace'])
     op.create_table('scientific_field_source_uses',
         sa.Column('work_key',sa.String(128),primary_key=True),
         sa.Column('item_key',sa.String(64),primary_key=True),
         sa.Column('source_id',sa.String(64),sa.ForeignKey('scientific_source_items.id',ondelete='RESTRICT'),primary_key=True),
         sa.Column('role',sa.String(16),primary_key=True),
-        sa.Column('binding_json',sa.JSON(),nullable=False))
+        sa.Column('binding_json',sa.JSON(),nullable=False),
+        mysql_charset='utf8mb4',mysql_collate='utf8mb4_unicode_ci')
     op.create_index('ix_field_source_use_source','scientific_field_source_uses',['source_id'])
     op.create_table('scientific_work_drafts',
         sa.Column('id',sa.String(64),primary_key=True),
@@ -41,7 +43,8 @@ def upgrade():
         sa.Column('body',sa.JSON(),nullable=False),
         sa.Column('created_at',sa.DateTime(),nullable=False,server_default=sa.func.now()),
         sa.Column('updated_at',sa.DateTime(),nullable=False,server_default=sa.func.now()),
-        sa.UniqueConstraint('target','target_id',name='uq_work_draft_target'))
+        sa.UniqueConstraint('target','target_id',name='uq_work_draft_target'),
+        mysql_charset='utf8mb4',mysql_collate='utf8mb4_unicode_ci')
     op.create_index('ix_scientific_work_drafts_document_key','scientific_work_drafts',['document_key'])
 
 def downgrade():

@@ -806,8 +806,9 @@ def test_corrupt_configuration_has_no_shell_side_effects_in_real_loader(tmp_path
     local.mkdir()
     (local / 'deployment-environment.json').write_text(json.dumps({'prefix': str(Path(sys.executable).parent.parent)}))
     (tmp_path / '.env').write_text("SAFE='spaces $literal'\n")
-    script = 'source "$1"; load_env; [[ "$SAFE" == \'spaces $literal\' ]]'
-    result = subprocess.run(['bash', '-c', script, 'bash', str(scripts / 'lib-local.sh')], capture_output=True, text=True)
+    expected_heads = ','.join(module('environment').versions(ROOT)['schema_heads'])
+    script = 'source "$1"; load_env; [[ "$SAFE" == \'spaces $literal\' && "$SCWIKI_SCHEMA_HEADS" == "$2" ]]'
+    result = subprocess.run(['bash', '-c', script, 'bash', str(scripts / 'lib-local.sh'), expected_heads], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     marker = tmp_path / 'executed'
     (tmp_path / '.env').write_text(f'EVIL=$(touch {marker})\n')

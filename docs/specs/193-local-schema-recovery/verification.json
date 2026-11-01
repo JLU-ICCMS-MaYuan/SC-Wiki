@@ -1,0 +1,114 @@
+{
+  "date": "2026-11-01",
+  "issue": 193,
+  "source_base": "e9edd5bfc643c1e13152d81f2f0325e87a6d11a3",
+  "target": "本机原生开发",
+  "backup": "/Users/mayuan/Codes/SC-Wiki/.local/backups/issue193-20261101-schema",
+  "backup_sha256": "d24754a168554c48c310155ff6945fd5d2e6426d479d9db761f4dd6cc6623ab3",
+  "rehearsal": {
+    "database": "scwiki_issue193_test_20261101",
+    "before_heads": [
+      "20261020_0049",
+      "20261022_0153"
+    ],
+    "after_heads": [
+      "20261020_0049",
+      "20261030_0192"
+    ],
+    "tables_before": 71,
+    "tables_after": 74,
+    "existing_row_counts_unchanged": true,
+    "schema_verified": true,
+    "mysql_default_collation": "utf8mb4_0900_ai_ci",
+    "new_table_collation": "utf8mb4_unicode_ci",
+    "initial_rehearsal_failure": "new table collation differs from authoritative schema"
+  },
+  "migration": {
+    "before_heads": [
+      "20261020_0049",
+      "20261022_0153"
+    ],
+    "after_heads": [
+      "20261020_0049",
+      "20261030_0192"
+    ],
+    "tables_before": 71,
+    "tables_after": 74,
+    "existing_row_counts_unchanged": true,
+    "protected_hashes_unchanged": true,
+    "schema_verified": true,
+    "protected_hashes": {
+      "papers": "21ddec6e7ad647c327e18116af68603ab265fc8dc4667e3c0e0f32dc5eb72e45",
+      "material_states": "ee7d361ca9fac3e90feadae8bde44ff88d4bb35f35100fee16c015f35a0b5034",
+      "property_records": "2c90d4f439c1fed4c9c60aeb46f73b35c6b1ea707a97b092db2274bc0e48e785",
+      "scientific_upload_drafts": "8af97c9275b7b036796477ffb689f9bf3e2efaffa4882cdf7b0d2641e3d193a0"
+    }
+  },
+  "persistence": {
+    "task_id": "15ff204867f64e1290edb79523c543e5",
+    "field": "material_states[0].property_modules[0].records[0].value_number",
+    "model": "deepseek-v4-pro",
+    "status": "supported",
+    "evidence_count": 1,
+    "draft_hash_unchanged": true,
+    "draft_hash": "6eac29ab3767a83eb3cbd52e41b45f9c4afaf730e9a4ddb95b37df313fde7806",
+    "source_items": 1,
+    "source_uses": 1,
+    "saved_and_reloaded": true,
+    "point_binding": {
+      "verdict": "match",
+      "contract": "tc-point-binding-v1",
+      "source_pair": {
+        "tc_k": 235,
+        "mu_star": 0.1
+      },
+      "expected_point": {
+        "tc_k": 235,
+        "mu_star": 0.1
+      }
+    },
+    "field_review_binding": true,
+    "final_persistence_uses_single_field_result": true,
+    "verification_note": "真实模型响应经正式单字段处理回放后保存；回放没有再次调用模型"
+  },
+  "http": {
+    "frontend_status": 200,
+    "python_health": 200,
+    "go_readiness": 200,
+    "field_summary_status": "supported",
+    "field_pending_review": false,
+    "go_dependencies": {
+      "mysql": true,
+      "redis": true,
+      "schema": true,
+      "storage": true
+    }
+  },
+  "tests": {
+    "schema_head_regression_before_fix": "failed",
+    "native_loader_regression_before_fix": "failed: SCWIKI_SCHEMA_HEADS unbound",
+    "local_deployment": {
+      "passed": 44,
+      "skipped": 9,
+      "unrelated_deselected": 2
+    },
+    "unrelated_baseline": {
+      "source": "independent HEAD archive",
+      "failed": 2,
+      "reason": "isolated port ownership tests reject already-running local MySQL 3307",
+      "log_sha256": "7f8897cf5c92c09b35c28b071d552f2654c9bfb70e339abca76fd0d9e83fb6c1"
+    }
+  },
+  "limitations": [
+    "只验证CaH6一个字段的真实模型结果保存重读，其余字段未批量重核",
+    "未执行阿里云发布或Git推送",
+    "远程Spec文件链接待推送后核验"
+  ],
+  "short_document_characters": 299,
+  "source_sha256": {
+    "alembic/versions/20261030_0192_workdraft_sources.py": "81a3a745a909ad9c002b905345f05155bc76c853760c7fb6da15b150edbfee32",
+    "scripts/local-deploy-macos.json": "2c142b809126ae5395df5e81caa7bd6362e3a869bdc46f06a6d9477b52e8cf99",
+    "scripts/lib-local.sh": "500bf4aab2c650167d10e54833e39bec74aa211f655ea7e614fad8c42ba6b828",
+    "tests/02_maintenance_and_verification/test_local_deployment.py": "f654471caabe61d859399eae550449a82d66cf46edcef4d564e807db3eee92b1"
+  }
+}
