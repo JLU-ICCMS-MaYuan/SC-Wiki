@@ -142,7 +142,6 @@ def build_material_state_export(db: Session, *, paper_id: int, state_key: str, u
             "temperature_raw": state.temperature_raw, "temperature_unit_raw": state.temperature_unit_raw,
             "magnetic_field_t": state.magnetic_field_t, "state_kind": state.state_kind,
             "structure_optimization": state.structure_optimization,
-            "structure_optimization_details": state.structure_optimization_details,
             "crystal_system": state.crystal_system, "note": state.note,
             "structures": [{
                 "id": item.id, "structure_key": f"structure-{item.id}",

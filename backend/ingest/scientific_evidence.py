@@ -30,7 +30,7 @@ STATE_FIELDS = {
     'pressure_value_gpa': '压力', 'pressure_min_gpa': '压力下界', 'pressure_max_gpa': '压力上界',
     'temperature_value_k': '温度', 'magnetic_field_t': '磁场',
     'reported_space_group_symbol': '报告空间群', 'reported_space_group_number': '空间群编号',
-    'crystal_system': '晶系', 'state_kind': '材料状态类型', 'structure_optimization': '结构优化目标',
+    'crystal_system': '晶系', 'state_kind': '材料状态类型', 'structure_optimization': '结构优化方法',
     'structure_families': '结构家族', 'condition_note': '条件说明', 'note': '状态说明',
     'pressure_raw': '原始压力', 'pressure_unit_raw': '原始压力单位',
     'temperature_raw': '原始温度', 'temperature_unit_raw': '原始温度单位',
@@ -120,6 +120,8 @@ def field_records(identity, path, data, fields, context=None, assessment=None, k
                          required=populated(value) and not (path == 'paper' and name in BIBLIOGRAPHY_FIELDS),
                          evidences=[], kind='field',
                          **({'check_mode': 'synthesis'} if name in SYNTHESIS_FIELDS else {}))
+        if path == 'paper' and name in {'volume', 'issue_number', 'pages'}:
+            row['claim']['context']['paper_identity'] = {k: data.get(k) for k in ('doi', 'title')}
         row['evidences'] = copy.deepcopy((data.get('field_evidence') or {}).get(name) or [])
         if path == 'paper' and name == 'theoretical_subtype':
             from .theoretical_subtype import RULE_VERSION
@@ -163,10 +165,6 @@ def state_records(state, index):
     state_key = state.get('state_key') or f'state-{index + 1}'
     rows = field_records(item_identity('state', state_key), f'material_states[{index}]', state, STATE_FIELDS,
                          {k: state.get(k) for k in ('material_name', 'material', 'pressure_value_gpa', 'temperature_value_k', 'magnetic_field_t', 'state_kind') if populated(state.get(k))})
-    from .material_state_contract import OPTIMIZATION_DETAIL_LABELS
-    detail_fields = {"structure_optimization_details." + key: label for key, label in OPTIMIZATION_DETAIL_LABELS.items()}
-    if state.get('structure_optimization_details'):
-        rows.extend(field_records(item_identity('state', state_key), f'material_states[{index}]', state, detail_fields))
     count = state.get('element_count')
     if count is not None:
         from backend.ingest.scientific_drafts import count_formula_elements
@@ -185,6 +183,10 @@ def state_records(state, index):
             rows[-1].pop('provenance', None)
     for row in rows:
         row['state_key'] = state_key
+        if row['field'].rsplit('.', 1)[-1] in {'material', 'reported_space_group_symbol', 'pressure_value_gpa', 'element_count', 'crystal_system', 'reported_space_group_number'}:
+            row['state_results'] = [{k: copy.deepcopy(r.get(k)) for k in
+                ('property_code', 'record_type', 'method_code', 'value_number', 'value_min', 'value_max', 'value_raw')}
+                for m in state.get('property_modules') or [] for r in m.get('records') or []]
         from .state_field_review import context as state_review_context
         if row.get('kind') == 'field':
             row['state_review_context'] = state_review_context(state)
@@ -805,6 +807,9 @@ def apply_derived(records):
     for record in records:
         if valid_field_decision(record, record):
             continue
+        from .model_review import current_result
+        if current_result(record, record, []) and not record.get('pending_review'):
+            continue
         if record.get('kind') != 'derived' or record.get('human_modified'):
             continue
         source = by_item.get(record.get('dependency'))
@@ -829,7 +834,7 @@ def apply_derived(records):
                           evidences=source.get('evidences', []))
         elif source and source['status'] == 'supported' and not source.get('stale'):
             record.update(status='supported', reason='由已核验输入确定性计算得到：' + record['provenance']['rule'],
-                          suggestion='无需修改', evidences=source['evidences'])
+                          suggestion='无需修改', evidences=source['evidences'], pending_review=False, stale=False)
         elif source and (source['status'] == 'unchecked' or source.get('stale')):
             record.update(status='unchecked', reason='计算一致；输入来源尚未核对，请继续核对或由管理员说明依据后确认', evidences=[])
         elif source:

@@ -43,6 +43,10 @@ def _run_worker(with_scheduler: bool) -> None:
 
 
 def main() -> NoReturn:
+    from backend.ingest.grobid_document import service_available
+    if not service_available():
+        import logging
+        logging.getLogger(__name__).warning('GROBID服务未就绪：请检查解析服务；题录可由模型继续查询，参考文献不会伪造成功。')
     count = max(1, settings.upload_llm_concurrency)
     processes = [
         multiprocessing.Process(target=_run_worker, args=(index == 0,))

@@ -1,0 +1,271 @@
+{
+  "date": "2026-11-01T18:53:06.749963+08:00",
+  "base": "8cd51549777dbd54da72ea74e867330b3e5a5ae1",
+  "backend": {
+    "passed": 97,
+    "skipped": 1,
+    "failed": 0
+  },
+  "form_contract": {
+    "passed": 119,
+    "failed": 0,
+    "hosts": [
+      "upload",
+      "revision",
+      "admin",
+      "superadmin"
+    ]
+  },
+  "mutation": {
+    "detected": 8
+  },
+  "adjacent_ui": {
+    "passed": 26,
+    "failed": 0
+  },
+  "external_ui": {
+    "passed": 2
+  },
+  "types": "passed",
+  "frontend_build": "passed",
+  "known_failure": {
+    "Go": "TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction",
+    "isolated_HEAD_reproduced": true,
+    "baseline": "docs/specs/198-single-optimization-method/assets/go-baseline.txt",
+    "actual": "docs/specs/198-single-optimization-method/assets/go-current-failure.txt",
+    "reason": "旧测试仍期待已撤销的DELETE scientific_evidence_checks语句，当前基线也失败",
+    "baseline_source": "8cd51549777dbd54da72ea74e867330b3e5a5ae1"
+  },
+  "real_source": {
+    "original_task": "37688f914394419e8914e5ebf486df7d",
+    "model": "deepseek-v4-pro",
+    "sources": [
+      {
+        "file_id": "123722d2531c42d48d5cb067a98a1224",
+        "file_role": "main",
+        "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+        "pages_used": 4
+      },
+      {
+        "file_id": "2d41b930bc404310bc1c3a930d1a0e06",
+        "file_role": "supplementary",
+        "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+        "pages_used": 2
+      }
+    ],
+    "text_reused": "原PDF哈希匹配的既有IR，正文4页与SI前2页；不复用旧字段答案",
+    "rerun": [
+      "受影响字段AI提取",
+      "结构优化方法关联",
+      "正式草稿归一化",
+      "统一模型查证补全",
+      "隔离MySQL保存重读"
+    ],
+    "passed": true,
+    "fresh_extraction_reused_from_this_run": true,
+    "source_binding": "本轮新提取的有效来源ID，通过正式quote_id机制读回原块；不改科学值，随后由统一模型再次查证",
+    "reused_successful_checks_from_this_run": 27,
+    "fields": {
+      "paper.superconductor_kind": {
+        "value": "conventional",
+        "status": "supported",
+        "reason": "论文明确通过Eliashberg方程计算Tc，并讨论电子-声子耦合机制，属于声子介导的常规超导体。"
+      },
+      "paper.title": {
+        "value": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+        "status": "supported",
+        "reason": "标题在正文第1页明确出现，与当前值一致。"
+      },
+      "paper.issue_number": {
+        "value": "17",
+        "status": "supported",
+        "reason": "Crossref题录明确给出期号为17，且DOI与标题与当前论文一致。"
+      },
+      "paper.volume": {
+        "value": "109",
+        "status": "supported",
+        "reason": "Crossref正式题录显示该论文卷号为109，且题录DOI与论文DOI一致，标题匹配，可确认属于当前论文。"
+      },
+      "paper.pages": {
+        "value": "6463-6466",
+        "status": "supported",
+        "reason": "Crossref题录明确给出页码为6463-6466，且DOI与标题与当前论文一致。"
+      },
+      "paper.doi": {
+        "value": "10.1073/pnas.1118168109",
+        "status": "supported",
+        "reason": "DOI在正文第1页和第4页多次出现，与当前值一致。"
+      },
+      "material_states[0].material": {
+        "value": "CaH6",
+        "status": "supported",
+        "reason": "材料化学式CaH6在摘要和正文中明确出现。"
+      },
+      "material_states[0].pressure_value_gpa": {
+        "value": 150.0,
+        "status": "supported",
+        "reason": "摘要和正文均报告150 GPa下CaH6的超导性。"
+      },
+      "material_states[0].reported_space_group_symbol": {
+        "value": "Im-3m",
+        "status": "supported",
+        "reason": "正文明确给出CaH6在150 GPa下为Im-3m结构（原文写作Im3m，OCR差异），与当前值一致。"
+      },
+      "material_states[0].reported_space_group_number": {
+        "value": 229,
+        "status": "supported",
+        "reason": "空间群符号Im-3m对应国际表编号229，与当前值一致。"
+      },
+      "material_states[0].crystal_system": {
+        "value": "cubic",
+        "status": "supported",
+        "reason": "Im-3m空间群属于立方晶系。"
+      },
+      "material_states[0].structure_optimization": {
+        "value": "classical_static",
+        "status": "supported",
+        "reason": "结构优化采用VASP进行静态DFT弛豫，未涉及准谐波或SSCHA，故为classical_static。"
+      },
+      "material_states[0].element_count": {
+        "value": 2,
+        "status": "supported",
+        "reason": "化学式CaH6包含Ca和H两种元素。"
+      },
+      "material_states[1].material": {
+        "value": "CaH6",
+        "status": "supported",
+        "reason": "材料化学式CaH6在200 GPa下同样适用。"
+      },
+      "material_states[1].pressure_value_gpa": {
+        "value": 200.0,
+        "status": "supported",
+        "reason": "正文报告200 GPa下Tc为201 K。"
+      },
+      "material_states[1].reported_space_group_symbol": {
+        "value": "Im-3m",
+        "status": "supported",
+        "reason": "CaH6在200 GPa下仍为Im-3m结构（cI14）。"
+      },
+      "material_states[1].reported_space_group_number": {
+        "value": 229,
+        "status": "supported",
+        "reason": "Im-3m对应空间群编号229。"
+      },
+      "material_states[1].crystal_system": {
+        "value": "cubic",
+        "status": "supported",
+        "reason": "Im-3m属于立方晶系。"
+      },
+      "material_states[1].structure_optimization": {
+        "value": "classical_static",
+        "status": "supported",
+        "reason": "结构优化采用静态DFT弛豫，未涉及准谐波或SSCHA。"
+      },
+      "material_states[1].element_count": {
+        "value": 2,
+        "status": "supported",
+        "reason": "CaH6包含Ca和H两种元素。"
+      },
+      "material_states[2].material": {
+        "value": "CaH6",
+        "status": "supported",
+        "reason": "摘要和正文多处明确给出CaH6化学式，如review-source-5、review-source-11等。"
+      },
+      "material_states[2].pressure_value_gpa": {
+        "value": 250.0,
+        "status": "supported",
+        "reason": "正文review-source-42明确给出250 GPa下Tc为187 K，对应压力250 GPa。"
+      },
+      "material_states[2].reported_space_group_symbol": {
+        "value": "Im-3m",
+        "status": "supported",
+        "reason": "正文review-source-11明确给出CaH6结构为Im-3m（cI14）。"
+      },
+      "material_states[2].reported_space_group_number": {
+        "value": 229,
+        "status": "supported",
+        "reason": "Im-3m空间群对应国际表编号229，与当前值一致。"
+      },
+      "material_states[2].crystal_system": {
+        "value": "cubic",
+        "status": "supported",
+        "reason": "Im-3m空间群属于立方晶系，与当前值cubic一致。"
+      },
+      "material_states[2].structure_optimization": {
+        "value": "classical_static",
+        "status": "supported",
+        "reason": "结构优化采用VASP进行静态DFT计算，未提及准谐波或SSCHA，因此为classical_static。"
+      },
+      "material_states[2].element_count": {
+        "value": 2,
+        "status": "supported",
+        "reason": "CaH6由Ca和H两种元素组成，元素种类数为2。"
+      }
+    },
+    "mysql_migration_verified": true,
+    "fields_verified": 27,
+    "test_database": "scwiki_goals_test_0015aafda64b",
+    "roundtrip_equal": true,
+    "isolated_database_removed": true,
+    "original_draft_unchanged": true,
+    "original_redis_unchanged": true,
+    "calls_in_final_persistence_resume": 1,
+    "model_call_scope": "最后一步复用本轮成功结论并核验最终依赖；此计数不是本轮全部模型调用数。",
+    "live_model_evidence": [
+      "first-failure-report.json：本轮实际科学提取调用",
+      "geometry-responses.json：本轮结构优化方法模型回答",
+      "before-volume-schema-fix/review-responses.json：实际模型核对与题录查询",
+      "before-mysql-clone-fix/review-responses.json：卷号补全",
+      "review-responses.json：最终依赖收窄后的实际查证"
+    ]
+  },
+  "source_hashes": {
+    "backend/api/material_state_export.py": "c1f26d74fc330a0dbe5c12d99217741b81677c82ec9bf48bffe8e4a7f3b33854",
+    "backend/ingest/domain_extraction.py": "2d5fd003ce75a51bded178acdc0fa347e59b73cf5d8a5734e43f092ef6be2514",
+    "backend/ingest/evidence_proposals.py": "123f60b9f271cee2e47194c5ad188ccb377a9a398f9e9c4e7ca800763c6943ce",
+    "backend/ingest/field_drafts.py": "8e4b2f04f709822b15fd157dd7c633944318c2eb7355dabadbc8268b9ffc3528",
+    "backend/ingest/grobid_document.py": "d6654a0f37a3a7b95d41396bd47c06364286928b171fe11c304712bfce6a126a",
+    "backend/ingest/material_state_contract.py": "529b451708e4e956c2dc170d3cad81d68dd4cd00036f5c18c8c823266a266072",
+    "backend/ingest/model_review.py": "f8eedfe074e8a76becef3c0c9eeb9d82900fbf27be0703f504e4d568eea24b85",
+    "backend/ingest/property_evidence.py": "239aaa49e0687ca612868a3d2fc5888ffffdf79a98926c28808889d810d9fa50",
+    "backend/ingest/review_dependencies.py": "cfc011a7638e794897c82a1af2a61bb001d14dedf44017ebf8c2d3548a97744f",
+    "backend/ingest/scientific_context.py": "ac4ced7065f1dbe731e68848ed06b49f5b615d0b5383d604941adc2bb803583f",
+    "backend/ingest/scientific_evidence.py": "7a2d674cd9266c06ea44ddf89ec7711e4d9fdf4a3b0030d2ec586edbbc0514ee",
+    "backend/ingest/state_field_review.py": "d309d4f24bfbfe80412c5d9cddb7b31f4ae09954b84b2a79b4eaebd2693b0ebf",
+    "backend/ingest/state_optimization.py": "e0651e5faa005e793328ab4307094e90c689f9219697470672eead73faf044ae",
+    "backend/ingest/tc_contexts.py": "a4ad2ff4b7078e79d463cb059460cb9c4c0e45c7c943239bc5f434cd9d4c32a3",
+    "backend/ingest/upload_jobs.py": "d071a336113963ecd2b4b32e1d0d155920691f35297c2cb2e76196000889b6e4",
+    "backend/models.py": "4c2228b70d4c2595b911eacc40c9aab3009e05703cdc5d78469d5af204d0118c",
+    "backend/scripts/run_upload_workers.py": "29cb6b107be156795bad730b7f2ab5fa48eb8e479814aa1e2cbc3b677310fbeb",
+    "backend/services/scientific_draft_rewrite.py": "21297cbd2479468e765cd6b48101df3f6470e6c8a1e81bd36eccbb3ceb31e814",
+    "frontend/src/components/EvidenceFieldMarkers.tsx": "47da97635e95a0c41001d80a23986e5775f0929ed05927437f78fcbb4cac97f4",
+    "frontend/src/components/EvidenceRegion.tsx": "ef1b00170dd8c8643e8b8689b1ddaef13117906316d24ba0c1bc7d42877efe7c",
+    "frontend/src/components/EvidenceWorkflow.tsx": "86c68465aa40ad8faff821ad9fe722b77693048cd7f5b9d060eb24dc54a17cba",
+    "frontend/src/components/MaterialStatesEditor.tsx": "401f6b1823a9bbea26c1ae6603f7728bba4fc3ed7f954c128a2a0884a27ef11c",
+    "frontend/src/i18n/en/enums.ts": "32a520c1cdc30679171e802790531262a59864b4277a60123736881ac3705d3d",
+    "frontend/src/i18n/en/upload.ts": "9fa0d53cc0f18f809710e89dede342f55011ae82f9f90a26f8ac7a286fe23db2",
+    "frontend/src/i18n/zh/enums.ts": "9b7d6503a26c0893535d325219efac5eb9fdc44dd2b610d656a3d81e7cc63d40",
+    "frontend/src/i18n/zh/upload.ts": "85274eeaeb7fa18a9e88b01fe1be69dbae082ed7fc1102a68368ae64f76dd9ae",
+    "frontend/src/lib/paperProcessing.ts": "9e8f5151029536173e55106498fd29f5177d31fd614475c3e67725b2e8cf53f5",
+    "goserver/handlers/papers.go": "c7f3d2684eee99d358252fdcb1991ecab16aa5d423e45daaa23283a262a8eba5",
+    "goserver/models/models.go": "3b201118a9e6b5ba12d975bcb2086b844a13342b63c7536cce79a8d7e6bec298"
+  },
+  "real_report_path": "/Users/mayuan/Codes/SC-Wiki/.data/goal196-200-real-validation/report.json",
+  "real_report_sha256": "9d6ff34bb1305b90d0465966677fe76966ce1ca451d5f72ecb713c09f3fae221",
+  "remote_spec": "未推送，待核验；Issue保持OPEN",
+  "business_migration": "未执行；20261101_0198已在隔离SQLite及MySQL验证",
+  "not_done": [
+    "Git推送",
+    "阿里云或Docker发布",
+    "改写用户真实草稿",
+    "整篇科学批准"
+  ],
+  "issue": 196,
+  "remote_spec_verification": {
+    "host": "github.com",
+    "identity": "gh当前已登录仓库账号",
+    "ref": "mayuan",
+    "result": "HTTP 404",
+    "reason": "本轮未推送；不能关闭Issue或声称远程Spec已可读"
+  }
+}

@@ -35,7 +35,7 @@ def scientific_fingerprint(record):
 def state_fingerprint(state):
     from .scientific_evidence import canonical
     fields = {k:state.get(k) for k in (
-        'material','material_name','state_kind','structure_optimization','structure_optimization_details','pressure_value_gpa','pressure_min_gpa',
+        'material','material_name','state_kind','structure_optimization','pressure_value_gpa','pressure_min_gpa',
         'pressure_max_gpa','reported_space_group_symbol','reported_space_group_number','temperature_value_k')}
     from backend.services.space_groups import lookup_number
     derived = lookup_number(str(fields.get('reported_space_group_symbol') or ''))

@@ -48,6 +48,22 @@ explanation:"具体理由"}；仅说我确认不证明数值正确。Tc/μ*结�
 说明查到的source_pair与当前结果点是否对应，不以数字出现代替关系查证。
 每次行动（含失败）都计入预算；无法完成时保留具体疑问，不伪造通过。'''
 
+PROMPT += '''
+未知或空分类也需要查证。超导类型根据本文实际配对机制判断，明确的声子介导机制可支持
+conventional，按论文推断保留依据；不能仅凭Eliashberg、DFT或材料化学式猜测。
+元素数、晶系、空间群号的provenance包含计算或查表依据，仍由你结合已读原文核实输入。
+同一种材料可以分别有150、200、250 GPa等多个结果。摘要的150 GPa不能否定正文200 GPa。
+核对压力、空间群时先读当前state_key的state_results与材料，搜索对应压力和结果所在段落、
+表格及SI。不同材料的结构不能互相代填；首次似乎不支持时继续补读，查实后自纠。
+题录未报告卷期页时可调用lookup_bibliography，参数仅doi。用原文DOI及标题核实返回题录
+确属当前论文，再用其source_id填写volume/issue_number/pages；保留external_bibliography来源，
+不能把正式页码说成早期PDF中的页码，也不能将参考文献的卷期页填给本文。
+结构优化仅保留一个structure_optimization方法字段：classical_static、quasi_harmonic、sscha、
+unknown。SSCHA须确实用于结构自由能优化；仅计算声子或出现0K不能确定优化方法。
+不生成已退役的structure_optimization_details八项参数，也不通过condition_additions重建这些
+结构优化专用参数（方法、电子理论、软件、温压、平均位置、体积、晶胞形状）。
+'''
+
 
 def source_catalog(chunks):
     from .scientific_context import build_context
@@ -82,6 +98,13 @@ def bind_result(record, result, chunks):
 
 
 def _reviewable(row):
+    from .scientific_evidence import PAPER_FIELDS
+    if row.get('field', '').removeprefix('paper.') in PAPER_FIELDS and row.get('field', '').startswith('paper.'):
+        return True
+    if re.fullmatch(r'material_states\[\d+\]\.[a-z_]+', row.get('field', '')) and row['field'].rsplit('.', 1)[-1] in {
+            'material', 'reported_space_group_symbol', 'element_count', 'crystal_system',
+            'reported_space_group_number', 'pressure_value_gpa', 'structure_optimization'}:
+        return True
     path = row.get('record_field') or ''
     return row.get('kind') != 'derived' and (row.get('required', True)
         or path.startswith('payload.calculation_conditions.') and '.field_settings.' not in path
@@ -112,6 +135,10 @@ def _add_conditions(draft, additions, batch):
             for extension in addition.get('extensions', []):
                 if (not isinstance(extension, dict) or not isinstance(extension.get('key'), str)
                         or '.' not in extension['key'] or extension['key'] in old_keys):
+                    continue
+                if extension['key'].startswith('structural_relaxation.') and extension['key'].split('.')[-1] in {
+                        'method', 'electronic_method', 'calculation_code', 'temperature_k', 'pressure_gpa',
+                        'temperature', 'pressure', 'centroids', 'volume', 'cell_shape'}:
                     continue
                 index = len(extensions)
                 # 系统身份不由模型指定；新扩展沿实际阶段键生成稳定身份。
@@ -217,7 +244,7 @@ def _evidences(ids, catalog, read):
     for key in dict.fromkeys(ids):
         source = catalog[key]
         output.append({**{k: deepcopy(v) for k, v in source.items() if k in {
-            'file_id', 'chunk_index', 'block_id', 'page_start', 'page_end', 'source_name'}},
+            'file_id', 'chunk_index', 'block_id', 'page_start', 'page_end', 'source_name', 'source_url', 'origin_kind'}},
             'quote': source['content'], 'source_id': key})
     return output
 
@@ -291,12 +318,16 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
     repeated_error = 0
     started = review_started_at or datetime.now(timezone.utc).isoformat()
     allowed_tools = [name for name in READ_TOOLS if name != 'read_original_page' or manifest]
+    from .scientific_evidence import BIBLIOGRAPHY_FIELDS
+    if any(r['field'].startswith('paper.') and r['field'].split('.')[-1] in BIBLIOGRAPHY_FIELDS for r in records):
+        allowed_tools.append('lookup_bibliography')
     for _ in range(max_rounds):
         if cancelled():
             raise InterruptedError('模型核对已取消')
         request = {'records': [{k: deepcopy(v) for k, v in r.items() if k in {
                        'key', 'field', 'label', 'claim', 'current_value', 'editable_fields', 'required',
-                       'state_key', 'module_key', 'record_key', 'record_field', 'record_group_key'}} for r in pending.values()],
+                       'state_key', 'module_key', 'record_key', 'record_field', 'record_group_key',
+                       'provenance', 'state_review_context', 'state_results'}} for r in pending.values()],
                    'sources': list(read.values()),
                    'source_index': [{k: s.get(k) for k in ('source_id', 'file_id', 'page_start', 'block_id')}
                                     | {'preview': s['content'][:100]} for s in catalog.values()],
@@ -324,6 +355,15 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                         continue
                     try:
                         status = raw.get('status')
+                        identity = (row.get('claim', {}).get('context') or {}).get('paper_identity') or {}
+                        known_doi = identity.get('doi') or next((r.get('current_value') for r in records if r['field'] == 'paper.doi'), None)
+                        if (row['field'] in {'paper.volume', 'paper.issue_number', 'paper.pages'} and known_doi
+                                and raw.get('status') == 'missing'
+                                and not any(s.get('origin_kind') == 'external_bibliography' for s in read.values())):
+                            raise ValueError('原PDF缺正式卷期页且当前论文有DOI，请先调用lookup_bibliography查询后再判定未报告')
+                        if (status == 'supported' and raw.get('final_value', row.get('current_value')) != row.get('current_value')
+                                and 'unique' not in raw):
+                            raise ValueError('更正或补空的最终值尚未说明是否唯一：请结合原文明确返回unique，不能把已给出的纠正遗漏在表单外')
                         if raw.get('basis_kind', 'paper_quote') not in {'paper_quote', 'paper_inference', 'paper_synthesis'}:
                             raise ValueError('科学结论必须保留直接原文、论文推断或概括的来源身份')
                         if status not in {'supported', 'unsupported', 'uncertain', 'missing'} or not str(raw.get('reason') or '').strip():
@@ -352,7 +392,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                                             and assessment.get('status') == 'reasonable'
                                             and str(assessment.get('explanation') or '').strip())
                         if status == 'supported' and not evs and not supplemental and not reason_supported and not (raw.get('not_reported') is True
-                                and not row.get('required') and row.get('current_value') in (None, '', [], {})):
+                                and not row.get('required') and row.get('current_value') in (None, '', 'unknown', [], {})):
                             raise ValueError('通过结论未引用实际已读原文，请重新定位')
                         value = raw.get('final_value', row.get('current_value'))
                         proposal = None
@@ -375,6 +415,10 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                                   'not_reported': raw.get('not_reported') is True}
                         if supplemental:
                             result.update(supplemental_evidences=supplemental, source_kind='contributor_evidence')
+                        if any(e.get('origin_kind') == 'external_bibliography' for e in evs):
+                            if not row['field'].startswith('paper.') or row['field'].split('.')[-1] not in BIBLIOGRAPHY_FIELDS:
+                                raise ValueError('外部题录只能支持当前论文题录字段')
+                            result['source_kind'] = 'external_bibliography'
                         if assessment:
                             result['manual_reason_review'] = deepcopy(assessment)
                         if reason_supported and not evs and not supplemental:
@@ -412,7 +456,24 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
             if name not in allowed_tools:
                 tools.budget.consume('invalid_tool')
                 raise ValueError('请仅使用给定只读文档工具')
-            if name == 'read_original_page':
+            if name == 'lookup_bibliography':
+                from .bibliography_lookup import lookup
+                from urllib.parse import quote
+                tools.budget.consume(name, retry=bool(tool_failures.get(name)))
+                if set(arguments) != {'doi'}:
+                    raise ValueError('题录工具只接受doi')
+                try:
+                    metadata = lookup(arguments['doi'])
+                except Exception as exc:
+                    raise ValueError('正式题录查询未完成，请重试或保留技术失败：' + type(exc).__name__) from exc
+                key = 'bibliography-' + str(len(catalog))
+                source = {'source_id': key, 'file_id': 'crossref:' + metadata['DOI'], 'chunk_index': 0,
+                    'source_name': 'Crossref正式题录', 'origin_kind': 'external_bibliography',
+                    'source_url': 'https://api.crossref.org/works/' + quote(metadata['DOI'], safe=''),
+                    'content': json.dumps(metadata, ensure_ascii=False)}
+                catalog[key] = read[key] = source
+                observation = source
+            elif name == 'read_original_page':
                 observation, image = _read_original_page(arguments, manifest, tools, retry=bool(tool_failures.get(name)))
                 images = [image]
             else:

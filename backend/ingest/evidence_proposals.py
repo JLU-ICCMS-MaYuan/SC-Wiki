@@ -4,6 +4,7 @@ from __future__ import annotations
 import copy
 import json
 import math
+import re
 import uuid
 from datetime import datetime, timezone
 from decimal import Decimal
@@ -22,10 +23,10 @@ NUMBERS = {'temperature_k', 'pressure_gpa', 'value_number', 'value_min', 'value_
 INTEGERS = {'element_count', 'reported_space_group_number', 'year'}
 LIST_FIELDS = {'authors', 'co_first_authors', 'corresponding_authors', 'methodology', 'keywords_tags', 'research_materials', 'material_families', 'structure_families'}
 BASIS_KINDS = {'paper_quote', 'paper_inference', 'general_knowledge'}
-ENUMS = {'centroids': ['unknown', 'fixed', 'optimized'], 'volume': ['unknown', 'fixed', 'optimized'], 'cell_shape': ['unknown', 'fixed', 'optimized'], 'superconductor_kind': ['conventional', 'unconventional', 'unknown'],
+ENUMS = {'superconductor_kind': ['conventional', 'unconventional', 'unknown'],
          'material_dimensionality': sorted(MATERIAL_DIMENSIONALITIES), 'crystal_system': sorted(CRYSTAL_SYSTEMS),
          'state_kind': ['theoretical', 'experimental', 'unknown'],
-         'structure_optimization': ['unknown', 'classical_static', 'quasi_harmonic', 'anharmonic_quantum', 'sscha'],
+         'structure_optimization': ['unknown', 'classical_static', 'quasi_harmonic', 'sscha'],
          'paper_type': ['theoretical', 'experimental', 'review'],
          'theoretical_subtype': ['calculation', 'method', 'theory']}
 IMMUTABLE = {'is_representative', 'record_key', 'record_type', 'property_code', 'custom_property_key', 'definition_key',
@@ -77,7 +78,10 @@ def editable_fields(record):
         schema = schema_for(value)
         schema.update(record.get('field_schema') or {})
         return [{'path': '', 'label': record['label'], 'value': value, 'schema': schema}]
-    if record.get('kind') in {'structure', 'derived'}:
+    if record.get('kind') == 'structure':
+        return []
+    if record.get('kind') == 'derived' and not (re.fullmatch(r'material_states\[\d+\]\.[a-z_]+', record['field'])
+            and record['field'].rsplit('.', 1)[-1] in {'element_count', 'crystal_system', 'reported_space_group_number', 'pressure_value_gpa'}):
         return []
     # 条件已归属于物性记录；旧状态级汇总只供查阅，通过原物性入口修改。
     if record.get('kind') == 'field' and record['field'].rsplit('.', 1)[-1] in {'calculation_context', 'experimental_context'}:

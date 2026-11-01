@@ -124,7 +124,7 @@ issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测�
     "pressure_value_gpa": null, "pressure_min_gpa": null, "pressure_max_gpa": null,
     "pressure_raw": null, "pressure_unit_raw": null,
     "state_kind": "theoretical|experimental|unknown",
-    "structure_optimization": "unknown|classical_static|quasi_harmonic|anharmonic_quantum（仅结构优化；不是声子/EPC近似，只有理论状态可填写；未提及为unknown）",
+    "structure_optimization": "unknown|classical_static|quasi_harmonic|sscha（仅结构优化方法；SSCHA须确实优化结构，不是只算声子；只有理论状态可填写；未提及为unknown）",
     "reported_space_group_symbol": null, "reported_space_group_number": null,
     "calculation_context": {"lambda_ep": null, "omega_log_k": null, "mu_star": null},
     "tc_results": [], "properties": [],

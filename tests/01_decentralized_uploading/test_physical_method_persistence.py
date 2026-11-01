@@ -54,12 +54,12 @@ def test_real_persistence_read_and_export_keep_objective_constraints_and_electro
                 restored=await session.run_sync(lambda sync:current_draft(sync,paper))
                 exported=await session.run_sync(lambda sync:build_material_state_export(sync,paper_id=1,state_key="s",user=SimpleNamespace(id=7,role="admin",is_approved=True)))
                 state=restored["material_states"][0]
-                assert state["structure_optimization"]==objective
-                assert state["structure_optimization_details"]==details
+                assert state["structure_optimization"]==("unknown" if objective=="anharmonic_quantum" else objective)
+                assert "structure_optimization_details" not in state
                 r=state["property_modules"][0]["records"][0]
                 assert float(r["value_number"])==.48 and r["property_code"]=="band_gap"
                 assert r["payload"]["calculation_conditions"]["electronic_method"]=="HF"
-                assert details==exported["material_state"]["structure_optimization_details"]
+                assert "structure_optimization_details" not in exported["material_state"]
         finally:
             await engine.dispose()
     asyncio.run(run())

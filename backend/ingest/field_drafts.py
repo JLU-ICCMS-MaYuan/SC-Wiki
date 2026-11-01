@@ -242,11 +242,7 @@ def apply_changes(draft, changes):
             affected_methods[id(owner)] = owner
             affected_parameters.setdefault(id(owner), set()).add(parameter)
         if key == "structure_optimization_details":
-            from .material_state_contract import optimization_details
-            try:
-                optimization_details(node.get(key) or {})
-            except ValueError as exc:
-                fail("invalid_optimization_details", str(exc), 400)
+            fail("retired_optimization_details", "结构优化详情已取消，请只修改结构优化方法", 400)
     from .calculation_methods import record_method_issue
     for identity, record in affected_methods.items():
         parameters = affected_parameters[identity]

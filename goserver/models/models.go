@@ -413,7 +413,6 @@ type MaterialState struct {
 	MagneticFieldT               *float64                       `json:"magnetic_field_t"`
 	StateKind                    string                         `gorm:"size:20;not null;default:unknown" json:"state_kind"`
 	StructureOptimization        string                         `gorm:"size:32;not null;default:unknown" json:"structure_optimization"`
-	StructureOptimizationDetails json.RawMessage                `gorm:"type:json" json:"structure_optimization_details,omitempty"`
 	Note                         *string                        `json:"note"`
 	CreatedAt                    time.Time                      `json:"created_at"`
 	UpdatedAt                    time.Time                      `json:"updated_at"`

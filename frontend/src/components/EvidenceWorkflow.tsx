@@ -21,7 +21,7 @@ import { createManualEvidenceDrafts, manualDraftKey, manualFieldIdentity, manual
 import { changedScientificFields } from '../lib/evidenceFields'
 import { useLanguage } from '../context/LanguageContext'
 
-export interface EvidenceSource { snapshot_file_url?:string; paper_evidence_id?: number; block_id?: string; evidence_kind?: 'text' | 'pdf_image'; file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
+export interface EvidenceSource { source_url?: string; origin_kind?: string; snapshot_file_url?:string; paper_evidence_id?: number; block_id?: string; evidence_kind?: 'text' | 'pdf_image'; file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
 export interface FrozenManualEvidence {item_key:string;reason:string;no_evidence_reason?:string;evidences:EvidenceSource[]}
 export interface ProposalField { path: string; label: string; value: unknown; schema: { type: string; enum?: string[] } }
 export interface ProposalDraft { values: Record<string, unknown>; accepted: boolean; reason: string; supported?: boolean }

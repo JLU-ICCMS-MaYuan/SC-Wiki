@@ -1,5 +1,7 @@
 # 电子结构、振动处理与结构优化的语义分层
 
+> 2026-11-01：本轮由[#198](../198-single-optimization-method/spec.md)的用户最新要求替代相关约定：结构优化仅一个方法字段，原八项详情退役。下方原话与旧验收保留，不代表仍采用旧展示。
+
 **类型**：type:feature。建立明确的数据契约，并修复既有跨物性标签污染。
 **Issue**：[#181](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/181)
 

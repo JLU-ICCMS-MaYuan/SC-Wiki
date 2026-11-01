@@ -119,7 +119,6 @@ class ExtractedState(Contract):
     material_name: str | None = None
     state_kind: Literal["theoretical", "experimental", "unknown"] = "unknown"
     structure_optimization: Literal["unknown", "classical_static", "quasi_harmonic", "anharmonic_quantum", "sscha"] = "unknown"
-    structure_optimization_details: dict[str, JsonValue] | None = None
     pressure_value_gpa: float | None = None
     pressure_min_gpa: float | None = None
     pressure_max_gpa: float | None = None

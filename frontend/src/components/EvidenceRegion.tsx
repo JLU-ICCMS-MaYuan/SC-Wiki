@@ -58,6 +58,19 @@ export function EvidenceRegion({ target, source, hideQuote = false }: { target?:
       : result?.status === 'render_unavailable' ? t('evidence.regionRenderFailed')
         : t('evidence.regionUnavailable')
   const quote = hideQuote ? '' : source.quote || source.content || ''
+  if (source.origin_kind === 'external_bibliography' && source.source_url?.startsWith('https://api.crossref.org/works/')) {
+    let citation = quote
+    try {
+      const data = JSON.parse(source.quote || source.content || '{}')
+      citation = [data.title?.join('；'), data['container-title']?.join('；'),
+        data.volume && `${data.volume} 卷`, data.issue && `${data.issue} 期`,
+        data.page || data['article-number'], data.DOI].filter(Boolean).join(' · ')
+    } catch { /* 旧文字来源仍直接可读。 */ }
+    return <Box sx={{ my: 1 }}>
+      <Typography component="a" href={source.source_url} target="_blank" rel="noopener noreferrer">Crossref 正式题录（外部来源）</Typography>
+      <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{citation}</Typography>
+    </Box>
+  }
   return <Box sx={{ my: 1 }}>
     {source.snapshot_file_url&&<SnapshotFileButton url={source.snapshot_file_url} name={source.source_name||source.file_id}/>}
     <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {page ? t('evidence.page', { page }) : t('evidence.pageUnknown')}{quote ? `：${quote.length > 500 ? quote.slice(0, 360) + '…' : quote}` : ''}</Typography>

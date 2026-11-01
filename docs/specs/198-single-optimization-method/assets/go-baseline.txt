@@ -1,0 +1,12 @@
+--- FAIL: TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction (0.00s)
+    paper_evidence_manual_test.go:30: there is a remaining expectation which was not matched: ExpectedExec => expecting Exec or ExecContext which:
+          - matches sql: 'DELETE FROM scientific_evidence_checks'
+          - is with arguments:
+            0 - paper
+            1 - 29
+          - should return Result having:
+              LastInsertId: 0
+              RowsAffected: 1
+FAIL
+FAIL	scwiki/server/handlers	0.904s
+FAIL

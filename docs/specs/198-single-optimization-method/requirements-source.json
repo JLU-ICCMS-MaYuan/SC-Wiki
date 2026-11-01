@@ -1,0 +1,30 @@
+{
+  "原始需求记录": [
+    "我觉得别的都没必要保留，只需要保留“结构优化方法”（也就是你说的结构优化目标，我现在就想叫“结构优化方法”）：静态结构优化还是 sscha 考虑量子非谐的优化方法还是准简谐近似的优化方法。其他内容都不需要保留。而且，你帮我联网检查是不是合理。",
+    "认可。下一个"
+  ],
+  "实施授权": "认可。开始为每个目标新建 issue，spec。然后开始落地实现所有的代码。",
+  "已确认方案": "docs/investigations/2026-11-01-structure-optimization/goal-3.md",
+  "确认": "各目标逐一讨论并获得认可；本轮授权为每项目标新建Issue、Spec并实施。",
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-15863996-77cf-4704-ada8-a247dda3310e.png",
+      "locator": "docs/investigations/2026-11-01-basic-field-review/screenshot.png",
+      "status": "local_verified",
+      "sha256": "e118c92c0e67da09cb15ac85873852a2ae0db5a64d56d7c5552b62378985d753",
+      "related": [
+        "US1",
+        "FR-001"
+      ],
+      "dimensions_px": [
+        1682,
+        244
+      ],
+      "media_type": "image/png",
+      "user_context": "我觉得别的都没必要保留，只需要保留“结构优化方法”（也就是你说的结构优化目标，我现在就想叫“结构优化方法”）：静态结构优化还是 sscha 考虑量子非谐的优化方法还是准简谐近似的优化方法。其他内容都不需要保留。而且，你帮我联网检查是不是合理。",
+      "verification": "原字节解码、尺寸与SHA-256验证；仅本地可读，远程未推送。"
+    }
+  ]
+}

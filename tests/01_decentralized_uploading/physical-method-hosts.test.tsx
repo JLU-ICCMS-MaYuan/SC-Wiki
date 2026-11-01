@@ -30,7 +30,7 @@ const paper={id:181,title:'Electronic and vibrational methods',authors:[],year:2
   theoretical_subtype:'calculation',material_families:[],research_materials:['CaH2'],review_status:'pending',uploaded_by_user_id:7}
 const draft={paper,material_states:[state],structure_candidates:[]}
 const review={key:'volume-review',item_key:'volume-review',state_key:'s',
- field:'material_states[0].structure_optimization_details.volume',label:'体积',current_value:'optimized',
+ field:'material_states[0].structure_optimization',label:'结构优化方法',current_value:'quasi_harmonic',
  status:'supported',required:true,reason:'Original QHA volume minimization',evidences:[{file_id:'main',quote:'The QHA free energy was minimized over volume at 0 K.'}]}
 let focusRevision=1, remoteTitle=paper.title
 beforeEach(()=>{
@@ -61,15 +61,62 @@ async function host(kind:string){
  :<UploadTaskEditor taskId="scope181" revisionPaperId={kind==='revision'?181:undefined} onSubmitted={()=>{}}/>}
  </MemoryRouter></LanguageProvider>)
  await screen.findByDisplayValue(paper.title)
- await screen.findByDisplayValue('QHA volume scan')
+ await screen.findByRole('combobox',{name:'结构优化方法'})
 }
 function save(kind:string){fireEvent.click(screen.getByRole('button',{name:['admin','superadmin'].includes(kind)?'保存修改':'立即保存',exact:true}))}
+it.each(['upload','revision','admin','superadmin'])('%s 题录侧栏展示真实外部来源链接，不请求伪造PDF区域',async kind=>{
+ const external={key:'external-title',item_key:'external-title',field:'paper.title',fields:['paper.title'],
+  label:'标题',current_value:paper.title,status:'supported',required:true,reason:'正式题录身份已核实',
+  evidences:[{file_id:'crossref:10.1073/pnas.1118168109',chunk_index:0,origin_kind:'external_bibliography',
+   source_url:'https://api.crossref.org/works/10.1073%2Fpnas.1118168109',
+   quote:JSON.stringify({DOI:'10.1073/pnas.1118168109',title:[paper.title],volume:'109',issue:'17',page:'6463-6466'})}]}
+ const get=vi.mocked(api.get).getMockImplementation()!
+ vi.mocked(api.get).mockImplementation(async(path,init)=>path.includes('/field-detail')?
+  {record:external,review_token:'token',source_state:'available',approval_state:'supported'}as never:get(path,init))
+ vi.mocked(api.post).mockImplementation(async path=>{
+  if(path.endsWith('/open-workdraft'))return{revision:1,write_epoch:'current-cycle'}as never
+  if(path.endsWith('/summary'))return{version:'v1',records:[external]}as never
+  if(path.endsWith('/revision-draft'))return{data:structuredClone(draft),revision_id:'revision181',draft_version:1}as never
+  throw new Error('Unexpected model/write: '+path)
+ })
+ await host(kind)
+ const caption=await waitFor(()=>{
+  const node=document.querySelector('[data-evidence-key="external-title"][data-evidence-caption="true"]')as HTMLElement
+  expect(node).not.toBeNull();return node
+ })
+ fireEvent.click(caption)
+ expect(await screen.findByRole('link',{name:'Crossref 正式题录（外部来源）'})).toHaveAttribute('href','https://api.crossref.org/works/10.1073%2Fpnas.1118168109')
+ expect(screen.getByText(/109 卷 · 17 期 · 6463-6466/)).toBeVisible()
+ expect(vi.mocked(api.post).mock.calls.filter(([p])=>p.includes('/region')||p.includes('/jobs'))).toEqual([])
+})
+it.each(['upload','revision','admin','superadmin'])('%s 真实疑问只标红，无状态文字后缀，键盘仍可打开来源',async kind=>{
+ vi.mocked(api.post).mockImplementation(async path=>{
+  if(path.endsWith('/open-workdraft'))return{revision:1,write_epoch:'current-cycle'}as never
+  if(path.endsWith('/summary'))return{version:'v1',records:[{...review,status:'uncertain'}]}as never
+  if(path.endsWith('/revision-draft'))return{data:structuredClone(draft),revision_id:'revision181',draft_version:1}as never
+  throw new Error('Unexpected model/write: '+path)
+ })
+ await host(kind)
+ const caption=await waitFor(()=>{
+  const node=document.querySelector('[data-evidence-key="volume-review"][data-evidence-caption="true"]')as HTMLElement
+  expect(node).not.toBeNull();return node
+ })
+ expect(caption).toHaveAttribute('data-evidence-caption-problem','true')
+ expect(caption.textContent).toBe('结构优化方法')
+ expect(document.querySelector('[data-evidence-status-text]')).toBeNull()
+ fireEvent.keyDown(caption,{key:'Enter'})
+ const drawer=await waitFor(()=>{
+  const node=document.querySelector('.evidence-review-drawer')as HTMLElement;expect(node).not.toBeNull();return node
+ })
+ expect(await within(drawer).findByText(/QHA free energy was minimized/)).toBeVisible()
+})
 it.each(['upload','revision','admin','superadmin'])('%s 四层语义与优化约束读取一致，无变化保存零写请求',async kind=>{
  await host(kind)
- expect(screen.getByLabelText('优化求力电子理论',{selector:'input'})).toHaveValue('HF')
- expect(screen.getByLabelText('优化温度 (K)',{selector:'input'})).toHaveValue('0')
- expect(screen.getByRole('combobox',{name:'结构优化目标'})).toHaveTextContent('准简谐自由能结构优化')
- expect(screen.getByRole('combobox',{name:'体积'})).toHaveTextContent('已优化')
+ expect(screen.queryByLabelText('优化求力电子理论')).not.toBeInTheDocument()
+ expect(screen.queryByLabelText('优化温度 (K)')).not.toBeInTheDocument()
+ expect(screen.getByRole('combobox',{name:'结构优化方法'})).toHaveTextContent('准简谐结构优化')
+ expect(screen.queryByRole('combobox',{name:'体积'})).not.toBeInTheDocument()
+ expect(document.querySelector('[data-evidence-status-text]')).toBeNull()
  fireEvent.click(screen.getByRole('heading',{name:'电子性质',exact:true}))
  expect(await screen.findByLabelText('数值')).toHaveValue('0.48')
  expect(screen.getByLabelText('电子结构计算方法')).toHaveValue('HF')
@@ -78,20 +125,21 @@ it.each(['upload','revision','admin','superadmin'])('%s 四层语义与优化约
  save(kind)
  await act(async()=>{await new Promise(resolve=>setTimeout(resolve,20))})
  expect(api.patch).not.toHaveBeenCalled();expect(api.put).not.toHaveBeenCalled()
- fireEvent.mouseDown(screen.getByRole('combobox',{name:'结构优化目标'}))
- expect(screen.getByRole('option',{name:'量子非谐自由能结构优化'})).toBeVisible()
- expect(screen.queryByRole('option',{name:'SSCHA（历史优化标签）'})).not.toBeInTheDocument()
+ fireEvent.mouseDown(screen.getByRole('combobox',{name:'结构优化方法'}))
+ expect(screen.getByRole('option',{name:'SSCHA量子非谐结构优化'})).toBeVisible()
+ expect(screen.queryByRole('option',{name:'量子非谐自由能结构优化'})).not.toBeInTheDocument()
  fireEvent.keyDown(screen.getByRole('listbox'),{key:'Escape'})
 })
 it.each(['upload','revision','admin','superadmin'])('%s 只保存当前几何字段，电子带隙数值和理论不串改，来源仍可查看',async kind=>{
  await host(kind)
- fireEvent.change(screen.getByLabelText('结构优化方法'),{target:{value:'用户报告的自由能优化'}})
+ fireEvent.mouseDown(screen.getByRole('combobox',{name:'结构优化方法'}))
+ fireEvent.click(screen.getByRole('option',{name:'SSCHA量子非谐结构优化'}))
  save(kind)
  await waitFor(()=>expect(api.patch).toHaveBeenCalledTimes(1))
  const body=vi.mocked(api.patch).mock.calls[0][1]as any
- expect(body.changes).toEqual([{path:['material_states',{key:'state_key',value:'s'},'structure_optimization_details','method'],
-  before:'QHA volume scan',value:'用户报告的自由能优化'}])
- expect(screen.getByLabelText('优化求力电子理论')).toHaveValue('HF')
+ expect(body.changes).toEqual([{path:['material_states',{key:'state_key',value:'s'},'structure_optimization'],
+  before:'quasi_harmonic',value:'sscha'}])
+ expect(screen.queryByLabelText('优化求力电子理论')).not.toBeInTheDocument()
  expect(vi.mocked(api.post).mock.calls.filter(([path])=>/jobs|preflight|submit-check/.test(path))).toEqual([])
  const marker=document.querySelector('[data-evidence-key="volume-review"]')as HTMLElement
  await waitFor(()=>expect(marker).not.toBeNull())
@@ -103,28 +151,25 @@ it('只读旧sscha和历史混装标签保持可查看，不自动转成新类�
  const legacy=structuredClone(draft)
  legacy.material_states[0].structure_optimization='sscha'
  render(<LanguageProvider><UploadTaskEditor taskId="legacy" draftOverride={legacy as any} readOnly onSubmitted={()=>{}}/></LanguageProvider>)
- await screen.findByDisplayValue('QHA volume scan')
- expect(screen.getByRole('combobox',{name:'结构优化目标'})).toHaveTextContent('SSCHA（历史优化标签）')
- expect(screen.getByLabelText('结构优化方法')).toBeDisabled()
+ await screen.findByRole('combobox',{name:'结构优化方法'})
+ expect(screen.getByRole('combobox',{name:'结构优化方法'})).toHaveTextContent('SSCHA量子非谐结构优化')
+ expect(screen.getByRole('combobox',{name:'结构优化方法'})).toHaveAttribute('aria-disabled','true')
  expect(api.patch).not.toHaveBeenCalled();expect(api.put).not.toHaveBeenCalled()
 })
 
-it('新方法字段保留中文组合输入，保存失败后输入与相邻电子理论保持，重试只写当前字段',async()=>{
+it('优化方法保存失败后保留选择，重试只写当前字段',async()=>{
  await host('upload')
- const input=screen.getByLabelText('结构优化方法')
- fireEvent.compositionStart(input)
- fireEvent.change(input,{target:{value:'量子自由能优化'}})
- fireEvent.compositionEnd(input,{data:'量子自由能优化'})
+ fireEvent.mouseDown(screen.getByRole('combobox',{name:'结构优化方法'}))
+ fireEvent.click(screen.getByRole('option',{name:'静态结构优化'}))
  vi.mocked(api.patch).mockRejectedValueOnce(Object.assign(new Error('network save failed'),{detail:{message:'本次方法保存失败，请重试'}}))
  save('upload')
  expect(await screen.findByText(/本次方法保存失败，请重试/)).toBeVisible()
- expect(input).toHaveValue('量子自由能优化')
- expect(screen.getByLabelText('优化求力电子理论')).toHaveValue('HF')
+ expect(screen.getByRole('combobox',{name:'结构优化方法'})).toHaveTextContent('静态结构优化')
  save('upload')
  await waitFor(()=>expect(api.patch).toHaveBeenCalledTimes(2))
  const body=vi.mocked(api.patch).mock.calls[1][1]as any
  expect(body.changes).toHaveLength(1)
- expect(body.changes[0].path.at(-1)).toBe('method')
+ expect(body.changes[0].path.at(-1)).toBe('structure_optimization')
 })
 
 it.each(['upload','revision','admin','superadmin'])('%s 切回只提示，确认后载入整稿且不调用模型',async kind=>{

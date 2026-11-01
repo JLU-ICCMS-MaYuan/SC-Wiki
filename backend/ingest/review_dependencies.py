@@ -20,8 +20,6 @@ def state_paths(associations=()):
     # 核处理仅在来源明确限定了该字段适用范围时成为依赖。
     if any((a.get("scope") or {}).get("structure_optimization") for a in associations):
         keys.add("structure_optimization")
-    if any((a.get("scope") or {}).get("structure_optimization_details") for a in associations):
-        keys.add("structure_optimization_details")
     return sorted(keys)
 
 

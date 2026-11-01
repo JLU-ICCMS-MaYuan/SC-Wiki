@@ -158,7 +158,7 @@ export interface DraftMaterialState {
   pressure_unit_raw?: string | null
   state_kind?: 'theoretical' | 'experimental' | 'unknown' | string
   structure_optimization?: 'unknown' | 'classical_static' | 'quasi_harmonic' | 'anharmonic_quantum' | 'sscha'
-  structure_optimization_details?: Record<string, unknown> | null
+  field_evidence?: Record<string, unknown>
   reported_space_group_symbol?: string | null
   reported_space_group_number?: number | null
   structure?: Record<string, unknown> | null
@@ -436,8 +436,10 @@ export function normalizeUploadDraft(value: unknown): UploadDraft {
         throw new Error(`不支持的物性草稿 Schema 版本：${state.schema_version}`)
       }
       if (!['theoretical', 'experimental', 'unknown'].includes(state.state_kind || 'unknown')) throw new Error('材料状态类型已退役或无效，请重新选择理论、实验或未说明')
-      if (!['unknown', 'classical_static', 'quasi_harmonic', 'anharmonic_quantum', 'sscha'].includes(state.structure_optimization || 'unknown') || (state.state_kind !== 'theoretical' && state.structure_optimization && state.structure_optimization !== 'unknown')) throw new Error('结构优化核处理仅适用于理论状态')
-      const normalizedState = { ...state, structure_optimization: state.structure_optimization || 'unknown' as const }
+      if (!['unknown', 'classical_static', 'quasi_harmonic', 'anharmonic_quantum', 'sscha'].includes(state.structure_optimization || 'unknown') || (state.state_kind !== 'theoretical' && state.structure_optimization && state.structure_optimization !== 'unknown')) throw new Error('结构优化方法仅适用于理论状态')
+      const normalizedState = { ...state, structure_optimization: state.structure_optimization === 'anharmonic_quantum' ? 'unknown' as const : state.structure_optimization || 'unknown' as const }
+      delete (normalizedState as Record<string, unknown>).structure_optimization_details
+      if (normalizedState.field_evidence) normalizedState.field_evidence = Object.fromEntries(Object.entries(normalizedState.field_evidence).filter(([key]) => !key.startsWith('structure_optimization_details')))
       delete (normalizedState as { phase_label?: unknown }).phase_label
       delete (normalizedState as { material_family?: unknown }).material_family
       delete (normalizedState as { superconductor_kind?: unknown }).superconductor_kind

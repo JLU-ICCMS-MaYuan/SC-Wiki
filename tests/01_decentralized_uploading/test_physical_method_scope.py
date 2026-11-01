@@ -31,14 +31,14 @@ def test_vibrations_are_not_electronic_theories(value):
 
 @pytest.mark.parametrize("optimization,nuclear", [
     ("classical_static", "classical_static"), ("quasi_harmonic", "quasi_harmonic"),
-    ("anharmonic_quantum", "anharmonic_quantum"), ("unknown", "unknown"),
+    ("anharmonic_quantum", "unknown"), ("unknown", "unknown"),
     ("sscha", "anharmonic_quantum"),
 ])
 def test_structural_objectives_and_legacy_alias(optimization, nuclear):
     state={"state_kind":"theoretical","structure_optimization":optimization,
            "structure_optimization_details":{"method":"reported method","temperature_k":0,
              "centroids":"optimized","volume":"fixed","cell_shape":"unknown"}}
-    assert state_metadata(state)["structure_optimization_details"] == state["structure_optimization_details"]
+    assert "structure_optimization_details" not in state_metadata(state)
     assert structure_nuclear_treatment(state) == nuclear
 
 
@@ -70,13 +70,11 @@ def test_other_method_fields_reject_category_errors(field,value):
     assert record_method_issue(record("tc",**{field:value}))
 
 
-def test_bad_geometry_constraints_and_electronic_category_are_rejected():
-    with pytest.raises(ValueError):
-        state_metadata({"state_kind":"theoretical","structure_optimization":"quasi_harmonic",
-          "structure_optimization_details":{"volume":"automatic"}})
-    with pytest.raises(ValueError):
-        state_metadata({"state_kind":"theoretical","structure_optimization":"classical_static",
-          "structure_optimization_details":{"electronic_method":"harmonic"}})
+def test_retired_geometry_details_are_ignored_not_written_as_active_parameters():
+    for value in ({"volume":"automatic"}, {"electronic_method":"harmonic"}):
+        assert "structure_optimization_details" not in state_metadata({
+            "state_kind":"theoretical", "structure_optimization":"classical_static",
+            "structure_optimization_details":value})
 
 
 def test_partial_save_validates_only_changed_method_and_preserves_history():
@@ -167,7 +165,7 @@ def test_fixed_centroid_sscha_does_not_imply_geometry_optimization():
     result,issues=resolve_candidates([{"material_states":[state]}],[{"file_id":"main","content":text}],lambda *a:response)
     assert not issues
     assert result[0]["material_states"][0]["structure_optimization"]=="unknown"
-    assert result[0]["material_states"][0]["structure_optimization_details"]["centroids"]=="fixed"
+    assert "structure_optimization_details" not in result[0]["material_states"][0]
 
 
 def test_epc_setting_cannot_be_attached_to_electronic_result_by_same_card():

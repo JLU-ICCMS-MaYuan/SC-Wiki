@@ -107,6 +107,11 @@ def compact_module(module):
 def map_draft(draft,compact=False):
     draft=deepcopy(draft)
     for state in draft.get('material_states') or []:
+        state.pop('structure_optimization_details', None)
+        if state.get('structure_optimization') == 'anharmonic_quantum':
+            state['structure_optimization'] = 'unknown'
+        if isinstance(state.get('field_evidence'), dict):
+            state['field_evidence'] = {k:v for k,v in state['field_evidence'].items() if not k.startswith('structure_optimization_details')}
         state['property_modules']=[(compact_module if compact else expand_module)(module)
             for module in state.get('property_modules') or []]
     return draft

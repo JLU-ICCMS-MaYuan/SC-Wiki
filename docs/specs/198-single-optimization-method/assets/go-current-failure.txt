@@ -1,0 +1,86 @@
+--- FAIL: TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction (0.00s)
+    paper_evidence_manual_test.go:30: there is a remaining expectation which was not matched: ExpectedExec => expecting Exec or ExecContext which:
+          - matches sql: 'DELETE FROM scientific_evidence_checks'
+          - is with arguments:
+            0 - paper
+            1 - 29
+          - should return Result having:
+              LastInsertId: 0
+              RowsAffected: 1
+
+2026/11/01 18:27:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/password_reset.go:99 record not found
+[0.014ms] [rows:0] SELECT * FROM `users` WHERE email = "nobody@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/01 18:27:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/password_reset.go:149 record not found
+[0.012ms] [rows:0] SELECT * FROM `users` WHERE email = "nobody@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/01 18:27:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/password_reset.go:189 record not found
+[0.010ms] [rows:0] SELECT * FROM `users` WHERE email = "nobody@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/01 18:27:41 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/publication_stats.go:76 no such table: papers
+[0.013ms] [rows:-]
+SELECT f.id AS family_id, f.name_zh, COALESCE(f.name_en, '') AS name_en,
+       counts.year, COALESCE(counts.paper_count, 0) AS paper_count
+FROM material_families f
+LEFT JOIN (
+    SELECT pmf.material_family_id,
+           CASE WHEN p.year BETWEEN 1 AND 9999 THEN p.year ELSE NULL END AS year,
+           COUNT(DISTINCT p.id) AS paper_count
+    FROM papers p
+    JOIN paper_material_families pmf
+      ON pmf.paper_id = p.id AND pmf.paper_revision = p.content_revision
+    WHERE p.review_status = 'approved'
+    GROUP BY pmf.material_family_id,
+             CASE WHEN p.year BETWEEN 1 AND 9999 THEN p.year ELSE NULL END
+) counts ON counts.material_family_id = f.id
+UNION ALL
+SELECT 0 AS family_id, '未分类' AS name_zh, 'Unclassified' AS name_en,
+       CASE WHEN p.year BETWEEN 1 AND 9999 THEN p.year ELSE NULL END AS year,
+       COUNT(DISTINCT p.id) AS paper_count
+FROM papers p
+WHERE p.review_status = 'approved'
+  AND NOT EXISTS (
+      SELECT 1 FROM paper_material_families pmf
+      WHERE pmf.paper_id = p.id AND pmf.paper_revision = p.content_revision
+  )
+GROUP BY CASE WHEN p.year BETWEEN 1 AND 9999 THEN p.year ELSE NULL END
+redis: 2026/11/01 18:27:42 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:42 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:43 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:43 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:44 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:44 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:44 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:45 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:45 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:46 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:46 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+redis: 2026/11/01 18:27:46 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64654: connect: connection refused
+
+2026/11/01 18:27:46 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.099ms] [rows:0] SELECT * FROM `users` WHERE email = "another@example.test" ORDER BY `users`.`id` LIMIT 1
+
+2026/11/01 18:27:46 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/registration_username_test.go:39 UNIQUE constraint failed: users.username
+[0.096ms] [rows:0] INSERT INTO `users` (`email`,`username`,`username_change_allowed`,`password_hash`,`real_name`,`affiliation`,`avatar_key`,`orcid`,`research_interests`,`role`,`is_approved`,`is_email_verified`,`session_version`,`account_status`,`created_at`,`updated_at`,`approved_at`) VALUES ("direct@example.test","ExistingUser",false,"unused","",NULL,NULL,NULL,(NULL),"user",false,false,0,"active","2026-11-01 18:27:46.985","2026-11-01 18:27:46.985",NULL) RETURNING `id`
+
+2026/11/01 18:27:46 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/auth.go:196 record not found
+[0.046ms] [rows:0] SELECT * FROM `users` WHERE email = "race@example.test" ORDER BY `users`.`id` LIMIT 1
+redis: 2026/11/01 18:27:47 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:47 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:48 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:48 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:49 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:49 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:50 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:50 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:50 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:51 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:51 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:52 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:52 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:53 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:53 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+redis: 2026/11/01 18:27:53 pool.go:724: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:64717: connect: connection refused
+
+2026/11/01 18:27:53 /Users/mayuan/Codes/SC-Wiki/goserver/handlers/username.go:222 audit unavailable
+[0.077ms] [rows:0] INSERT INTO `username_change_audit_events` (`target_user_id`,`changed_by_user_id`,`old_username`,`new_username`,`reason`,`created_at`) VALUES (9,1,'OldName','NewName','修正拼写','2026-11-01 18:27:53.924')

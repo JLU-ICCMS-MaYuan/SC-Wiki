@@ -15,6 +15,16 @@ import httpx
 NS = {"t": "http://www.tei-c.org/ns/1.0"}
 
 
+def service_available():
+    """启动时探测当前服务，不覆盖历史任务的解析状态。"""
+    endpoint = (os.environ.get('GROBID_URL') or 'http://127.0.0.1:8070').rstrip('/')
+    try:
+        response = httpx.get(endpoint + '/api/isalive', timeout=3)
+        return response.is_success and response.text.strip().lower() == 'true'
+    except httpx.HTTPError:
+        return False
+
+
 def text(node):
     return " ".join(" ".join(node.itertext()).split()) if node is not None else None
 
@@ -78,7 +88,10 @@ def extract_document(source, directory, *, timeout=90):
         xml_path.write_bytes(response.content)
         result.update(parse_document(response.content), status="succeeded", tei_sha256=hashlib.sha256(response.content).hexdigest())
     except (OSError, httpx.HTTPError, ET.ParseError) as exc:
-        result.update(error_type=type(exc).__name__, error_message="GROBID 题录/引用解析未完成，需要人工核对")
+        message = ('GROBID解析服务无法连接，请检查服务是否启动；题录将由模型继续查证'
+                   if isinstance(exc, httpx.ConnectError) else
+                   'GROBID题录/引用解析未完成：' + type(exc).__name__ + '；可重试解析服务')
+        result.update(error_type=type(exc).__name__, error_message=message)
     result["elapsed_seconds"] = time.monotonic()-started
     (directory / "document.json").write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
     return result

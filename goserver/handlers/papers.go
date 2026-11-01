@@ -621,7 +621,6 @@ func materialStatesToDict(states []models.MaterialState) []gin.H {
 			"crystal_system":                 state.CrystalSystem,
 			"state_kind":                     state.StateKind,
 			"structure_optimization":         state.StructureOptimization,
-			"structure_optimization_details": state.StructureOptimizationDetails,
 			// 压强单臂区间：缺失的一侧保持 null，不补造边界（Issue #54 入库语义）。
 			"pressure_value_gpa":          state.PressureValueGPa,
 			"pressure_min_gpa":            state.PressureMinGPa,

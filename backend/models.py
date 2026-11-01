@@ -1237,7 +1237,6 @@ class MaterialState(Base):
     )
 
     structure_optimization = Column(String(32), nullable=False, default="unknown", server_default="unknown")
-    structure_optimization_details = Column(JSON, nullable=True)
     id = Column(BIGINT_ID, primary_key=True, autoincrement=True)
     state_key = Column(String(96), nullable=False)
     paper_id = Column(Integer, nullable=False)

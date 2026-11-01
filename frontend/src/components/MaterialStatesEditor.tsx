@@ -1,4 +1,3 @@
-import StructureOptimizationFields from './StructureOptimizationFields'
 import { changedScientificFields } from '../lib/evidenceFields'
 import { materialStateSummary } from '../lib/materialStateSummary'
 import { PropertySpectraProvider, PropertySpectrumState, PropertySpectrumControls, UnassignedPropertySpectra, type PropertySpectraContext } from './PropertySpectra'
@@ -776,15 +775,12 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                     {state.state_kind === 'theoretical' && <FormControl fullWidth data-issue-field={`material_states[${index}].structure_optimization`}>
                       <InputLabel id={`structure-optimization-${index}`}>{t('upload.structureOptimizationField')}</InputLabel>
                       <Select labelId={`structure-optimization-${index}`} label={t('upload.structureOptimizationField')}
-                        value={state.structure_optimization || 'unknown'} onChange={event => updateMaterialState(index, 'structure_optimization', event.target.value)}>
-                        {(['unknown', 'classical_static', 'quasi_harmonic', 'anharmonic_quantum', ...(state.structure_optimization === 'sscha' ? ['sscha' as const] : [])] as const).map(value => <MenuItem key={value} value={value}>{dict.enums.structureOptimization[value]}</MenuItem>)}
+                        disabled={readOnly} value={state.structure_optimization || 'unknown'} onChange={event => updateMaterialState(index, 'structure_optimization', event.target.value)}>
+                        {(['unknown', 'classical_static', 'quasi_harmonic', 'sscha'] as const).map(value => <MenuItem key={value} value={value}>{dict.enums.structureOptimization[value]}</MenuItem>)}
                       </Select>
                     </FormControl>}
                     <PressureEditor state={state} index={index} onChange={patch => emitStates(statesRef.current.map((item, i) => i === index ? {...item, ...patch} : item))} />
                   </Box>
-                  {state.state_kind === 'theoretical' && <StructureOptimizationFields
-                    value={state.structure_optimization_details} basePath={`material_states[${index}].structure_optimization_details`}
-                    readOnly={readOnly} onChange={value => updateMaterialState(index, 'structure_optimization_details', value)} />}
                   <Box data-material-family-row sx={{ minWidth: 0 }}>
                     <Autocomplete<ClassificationTerm | string, true, false, true> data-issue-field={`material_states[${index}].structure_families`}
                       multiple
