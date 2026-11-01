@@ -1,0 +1,195 @@
+{
+  "目标": "目标1：GROBID服务不可用与卷期页缺失，只读调查",
+  "记录时间": "2026-11-01T17:15:17.915040+08:00",
+  "源码提交": "eba10bd3baa7273d5e887c97a103bfa52d1d319d",
+  "主机": "本机macOS，原生开发服务；未操作阿里云或Docker",
+  "任务": {
+    "task_id": "37688f914394419e8914e5ebf486df7d",
+    "filename": "2012 CaH6-王晖.pdf",
+    "doi": "10.1073/pnas.1118168109",
+    "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+  },
+  "当次解析失败": {
+    "artifact": ".data/review_artifacts/37688f914394419e8914e5ebf486df7d/four_tools/123722d2531c42d48d5cb067a98a1224/e6117a108a17492c81f18e6c847b6421/grobid/document.json",
+    "artifact_sha256": "1ecefb519410d1892693dfd45c206986c673cab352b6af64b52d66e76a0ab0f1",
+    "mtime": "2026-11-01T16:39:29.844834+08:00",
+    "status": "unavailable",
+    "error_type": "ConnectError",
+    "elapsed_seconds": 0.024618583000119543,
+    "metadata": {}
+  },
+  "初次服务检查": {
+    "endpoint": "http://127.0.0.1:8070",
+    "api_isalive": "ConnectError: [Errno 61] Connection refused",
+    "api_version": "ConnectError: [Errno 61] Connection refused",
+    "listening_processes": 0,
+    "pid_file_value": 3798,
+    "pid_process_exists": false
+  },
+  "服务状态变化": {
+    "观察": "调查中服务被本轮之外的操作启动；本轮未执行启停",
+    "current_pid": 60877,
+    "process_start_local": "2026-11-01T17:10:53+08:00",
+    "api_isalive": {
+      "http_status": 200,
+      "body": "true"
+    },
+    "api_version": {
+      "http_status": 200,
+      "body": "0.8.1"
+    },
+    "unresolved": "日志未给出旧进程退出或未启动原因，不能认定为崩溃、内存不足或重启遗漏"
+  },
+  "原PDF核对": {
+    "storage": "本机Garage对象存储，仅GET读取",
+    "sha256_verified": true,
+    "pdf_pages": 4,
+    "quotes": [
+      {
+        "pdf_page": 1,
+        "text": "PNAS Early Edition"
+      },
+      {
+        "pdf_page": 1,
+        "text": "1 of 4"
+      },
+      {
+        "pdf_page": 4,
+        "text": "4 of 4"
+      }
+    ],
+    "结论": "这是早期在线版本，未印正式卷号、期号与正式起止页；1 of 4不能当作正式页码1-4"
+  },
+  "模型与草稿追踪": {
+    "chunk_artifact": ".data/review_artifacts/37688f914394419e8914e5ebf486df7d/chunks/123722d2531c42d48d5cb067a98a1224/00000.json",
+    "chunk_metadata": {
+      "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "doi": "10.1073/pnas.1118168109",
+      "journal": "PNAS",
+      "year": 2012,
+      "issue_number": null,
+      "volume": null,
+      "pages": null
+    },
+    "最终AI草稿": {
+      "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "doi": "10.1073/pnas.1118168109",
+      "journal": "PNAS",
+      "year": 2012,
+      "issue_number": null,
+      "volume": null,
+      "pages": null
+    },
+    "当前Redis草稿核对": "paper.issue_number、paper.volume、paper.pages均为null，citation_extraction仍为unavailable；缺失发生在服务端草稿，非前端丢字段"
+  },
+  "恢复后同源GROBID实测": {
+    "endpoint": "/api/processFulltextDocument",
+    "http_status": 200,
+    "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+    "source_sha256_verified": true,
+    "params": {
+      "consolidateHeader": "0",
+      "consolidateCitations": "0",
+      "includeRawCitations": "1",
+      "teiCoordinates": [
+        "title",
+        "persName",
+        "biblStruct",
+        "ref"
+      ]
+    },
+    "tei_sha256": "88f4215862b167429f93f3b44770e884cd188163b680a81bbb980f43aaf74519",
+    "references_count": 37,
+    "header_biblScope": [],
+    "volume": null,
+    "issue_number": null,
+    "pages": null,
+    "metadata_keys": [
+      "title",
+      "abstract",
+      "authors",
+      "year"
+    ],
+    "year_raw": 2021,
+    "year_raw_note": "来自2021-09-16下载水印；此处仅测试GROBID原始返回，未运行正式年份纠正与摘要修整，不是整篇新解析验收",
+    "原任务未更新": true
+  },
+  "正式题录核实": {
+    "provider": "Crossref",
+    "url": "https://api.crossref.org/works/10.1073/pnas.1118168109",
+    "http_status": 200,
+    "DOI": "10.1073/pnas.1118168109",
+    "title": [
+      "Superconductive sodalite-like clathrate calcium hydride at high pressures"
+    ],
+    "same_doi_and_title": true,
+    "volume": "109",
+    "issue": "17",
+    "page": "6463-6466",
+    "published_print": [
+      2012,
+      4,
+      24
+    ],
+    "published_online": [
+      2012,
+      4,
+      6
+    ]
+  },
+  "代码原因": [
+    {
+      "file": "backend/ingest/grobid_document.py",
+      "symbols": [
+        "extract_document",
+        "apply_bibliography"
+      ],
+      "结论": "GROBID连接失败保留unavailable；成功时采用TEI已有题录；consolidateHeader=0，不主动补正式题录"
+    },
+    {
+      "file": "backend/ingest/domain_extraction.py",
+      "symbols": [
+        "DOMAIN_SYSTEM_PROMPT"
+      ],
+      "结论": "分段模型只提取原文事实；该次原始响应未给卷号与页码，期号也未报告；当前metadata提示列表亦未显式列卷页"
+    },
+    {
+      "file": "backend/ingest/publication_year.py",
+      "symbols": [
+        "verify_document_year",
+        "lookup_publication_year",
+        "publication_evidence"
+      ],
+      "结论": "仅在出版年份分歧或下载日期问题时按DOI与标题查询Crossref，结果只用于年份；没有卷期页通用补全路径"
+    },
+    {
+      "file": "frontend/src/components/UploadTaskEditor.tsx",
+      "symbols": [
+        "UploadTaskEditor"
+      ],
+      "结论": "卷期页按draft.paper现值显示，服务端已为空"
+    }
+  ],
+  "建议_尚未实施": [
+    "为本机GROBID增加可见的启动和运行健康检查，并区分当前服务健康与旧任务解析状态",
+    "原文题录不全时按DOI查询正式记录，由模型核实当前论文身份与字段来源，保留外部题录来源",
+    "对既有任务只做明确范围的题录与引用重试，保留科学草稿；不因服务恢复自动改写已保存内容"
+  ],
+  "边界": {
+    "修改业务代码": false,
+    "修改真实数据库草稿": false,
+    "修改Redis草稿": false,
+    "新调用大模型": false,
+    "执行服务启停": false,
+    "新建Issue": false,
+    "完成目标2或3": false
+  },
+  "源码哈希": {
+    "backend/ingest/grobid_document.py": "71786bb59a267624656e0671b9b8c25fa2a54c2301dca4f69af1ed1571dcb054",
+    "backend/ingest/upload_jobs.py": "8bc0e1dedaa51008f422fdfe2dd63879d0bdcc66fe0fa29478e396fa8e0a2ff7",
+    "backend/ingest/publication_year.py": "6d215d629a4e4fe5aac7ded8a9867162b34bf8cf959b98df554b7721730ccec6",
+    "backend/ingest/domain_extraction.py": "7590d7bf4c07c27c576c31c117f66a156c703e51108285fe620cf26830afdccc",
+    "frontend/src/components/UploadTaskEditor.tsx": "0cd6c9f1c3ec0eb16d037873e859829bd19983f5c5568f19d4bf47f924aef658",
+    "scripts/dev.sh": "3f6c6c19d6bb4a4bf51e0c06fce4071498f886cf42a4849272c826173fa5b3bb"
+  }
+}
