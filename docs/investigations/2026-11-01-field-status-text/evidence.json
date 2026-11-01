@@ -1,0 +1,89 @@
+{
+  "目标": "目标5：字段后待核对文字的来源与取消方案",
+  "记录时间": "2026-11-01T18:04:44.983005+08:00",
+  "源码提交": "ef90834c3d06702a5d2852a84c0817e1d0c333a0",
+  "用户本次明确要求": "另外这里每个待核对的字段后面都带上了“待核对”三个字，我之前没有要求过这个内容，为什么你要给我加上？我什么时候要求了，只需要按照之前的要求标红带核对项就行了。",
+  "引入提交": {
+    "sha": "a871fbbd644adb0a0b4a26f4492b735d7bad9ded",
+    "date": "2026-10-31T00:56:18+08:00",
+    "subject": "[修改目的] 落地 #184 #188 #190 #191 字段自纠、补查与侧栏流程",
+    "feature_issue": 191,
+    "previous_commit_had_suffix": false,
+    "introduced_commit_has_suffix": true
+  },
+  "具体实现": [
+    {
+      "file": "frontend/src/components/EvidenceFieldMarkers.tsx",
+      "symbol": "FieldTrigger",
+      "line": 107,
+      "事实": "字段caption存在时在标签内部追加span；未通过状态显示evidenceStatusLabel，passed不显示"
+    },
+    {
+      "file": "frontend/src/lib/evidenceStatus.ts",
+      "symbol": "evidenceStatusLabel",
+      "line": 17,
+      "事实": "attention映射待核对，processing映射处理中，failed映射处理失败"
+    },
+    {
+      "file": "frontend/src/components/EvidenceFieldMarkers.tsx",
+      "line": 83,
+      "事实": "状态文字追加到浮动标签并设置11px字号及左边距；这解释了截图每个红标签后的额外文字"
+    }
+  ],
+  "需求记录核对": {
+    "file": "docs/specs/191-field-sidebar-status/requirements-source.md",
+    "用户原话": [
+      "啥呀啥呀？啥时候冒出来的“待处理问题列表”了？所有的待处理问题都详细的落在各个字段的侧边栏了。哪来的列表。",
+      "我觉得没必要保留这个东西，我之前的 spec 和 issue 也没要求过这个，你读一读所有的代码和文档。我甚至明确要求对应字段的待处理问题都需要放到字段侧栏。",
+      "认可。",
+      "确认",
+      "确认",
+      "确认"
+    ],
+    "逐字段文字后缀的明确原话": false,
+    "AI归纳": "用户确认文档4和Spec的记录存在；主表单简短提示是当时AI整理并被整体确认的方案，逐字段追加具体状态文字是实现细化选择",
+    "Spec依据": {
+      "file": "docs/specs/191-field-sidebar-status/spec.md",
+      "FR-002": "字段区分通过、处理中、科学疑问和技术失败；主表单只保留简短提示"
+    },
+    "结论边界": "未找到明确要求每个字段名后必须添加待核对三个字的用户原话，不把整体确认解释为用户逐字要求，也不把旧确认改写成从未存在"
+  },
+  "较早约定": {
+    "file": "docs/specs/109-field-evidence-and-ai-suggestions/spec.md",
+    "FR-003": "未解决问题才标红；来源与理由在字段侧栏",
+    "事实": "此前已有标红和点击字段入口，不需要依靠文字后缀才能定位字段"
+  },
+  "截图": {
+    "path": "../2026-11-01-basic-field-review/screenshot.png",
+    "sha256": "e118c92c0e67da09cb15ac85873852a2ae0db5a64d56d7c5552b62378985d753"
+  },
+  "修改方案_尚未实施": {
+    "主表单": "移除字段名后面的状态后缀，包括待核对、处理中、处理失败；问题仅标红，通过正常显示",
+    "侧栏": "详细状态、原文、AI理由、人工判断和重试操作继续在当前字段侧栏查看",
+    "核对进度": "沿用现有真实核对进度，不另加一套字段后缀",
+    "保留入口": "字段名可点击，鼠标、键盘及焦点返回继续有效；不删除来源与未完成状态",
+    "数据语义": "只修改展示，不将待核对或技术失败冒充支持，不改变保存、模型核对和批准权限",
+    "四类宿主": "上传、返修、管理员、超级管理员共用同一展示规则"
+  },
+  "后续验证重点": [
+    "主表单无状态文字后缀，有真实问题仍标红，通过字段正常",
+    "鼠标和键盘可打开正确字段侧栏，状态和原因仍完整",
+    "输入、保存、已通过结果复用与正式审核门禁保持",
+    "完整宿主与表单契约验证，不以删除问题或放宽断言取得通过"
+  ],
+  "本轮边界": {
+    "业务代码修改": false,
+    "真实草稿修改": false,
+    "模型调用": false,
+    "UI修复已完成": false,
+    "未新建Issue": true
+  },
+  "源码与文档哈希": {
+    "frontend/src/components/EvidenceFieldMarkers.tsx": "2738fe0f471d42b96aa03ddcc7981503c29b681d1a0f73eddcf996869939a295",
+    "frontend/src/lib/evidenceStatus.ts": "6532e1297958645d557d3e55eb266794ed6e4e432622278758575ac05356ecd0",
+    "docs/specs/191-field-sidebar-status/requirements-source.md": "46705299357492cfba5f5f3c0654d4c69e9332e7a5835d7fd117ebe2b41e3903",
+    "docs/specs/191-field-sidebar-status/spec.md": "3f5044380b14b9b429e9f7a1dc1a5aea291e50db9c91a7c2fc3fc1237f4d111f",
+    "docs/specs/191-field-sidebar-status/implementation-authorization.md": "7dfeabeb2b9ffd8e46bc66919b4734f50392ee3b21da184816cfa9ce8060c77b",
+    "docs/specs/109-field-evidence-and-ai-suggestions/spec.md": "a282df74fc8aae3b66b3f91f63967e8ad124460608ebf670a42467c7e194a5ce"
+  }
+}
