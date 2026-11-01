@@ -1,0 +1,112 @@
+{
+  "目标": "目标2：超导类型为何未填写，只读调查",
+  "记录时间": "2026-11-01T17:21:55.474221+08:00",
+  "源码提交": "614f7a5ebcad080cefdb65adb4e98f98a978200b",
+  "任务": {
+    "task_id": "37688f914394419e8914e5ebf486df7d",
+    "filename": "2012 CaH6-王晖.pdf",
+    "field": "paper.superconductor_kind",
+    "ai_draft_value": "unknown",
+    "redis_draft_value_observed": "unknown"
+  },
+  "原文": {
+    "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+    "sha256_verified": true,
+    "read_method": "从本机Garage只读取得当前任务原PDF，PyMuPDF读取文本",
+    "pdf_page": 1,
+    "exact_text": "The resultant dynamic Jahn–Teller effect helps to enhance electron–\nphonon coupling and leads to superconductivity of CaH6.",
+    "解释": "原文明确将电声耦合与超导相联系，可作为模型判断常规声子介导超导的机制依据；不只是从Eliashberg方法名或化学式推断"
+  },
+  "实际核对报告": {
+    "artifact": ".data/review_artifacts/37688f914394419e8914e5ebf486df7d/generation_report.json",
+    "artifact_sha256": "45f29fdeecbab6ebb667115f89dc621dfb0e0175aedbd306e6b1b5998355072b",
+    "field_count": 191,
+    "contains_superconductor_kind": false
+  },
+  "流程根因": [
+    {
+      "file": "backend/ingest/scientific_evidence.py",
+      "symbol": "populated",
+      "line": 98,
+      "事实": "unknown被视为空值"
+    },
+    {
+      "file": "backend/ingest/scientific_evidence.py",
+      "symbol": "field_records",
+      "line": 120,
+      "事实": "以是否已填写计算required，未填写的超导类型得到required=false"
+    },
+    {
+      "file": "backend/ingest/model_review.py",
+      "symbol": "_reviewable",
+      "line": 84,
+      "事实": "仅required项和列明的计算条件或参数进入核对；未填写分类不在例外中"
+    },
+    {
+      "file": "backend/ingest/model_review.py",
+      "symbol": "review_draft",
+      "line": 148,
+      "事实": "在模型调用前过滤掉该字段，模型无法读取后补全"
+    },
+    {
+      "file": "frontend/src/components/UploadTaskEditor.tsx",
+      "line": 748,
+      "事实": "显示草稿superconductor_kind，未填时显示unknown；不是浏览器丢值"
+    }
+  ],
+  "上游提示约束": {
+    "file": "backend/ingest/upload_jobs.py",
+    "line": 183,
+    "内容": "仅明确报告常规或非常规机制时填写；仅凭Tc计算方法推断时留unknown",
+    "证据边界": "没有完整原始汇总响应，不能断言模型因哪一句提示而返回unknown；已确认的是整理后草稿未知且核对筛选跳过"
+  },
+  "隔离机械重放": {
+    "调用实际程序函数": [
+      "field_records",
+      "_reviewable",
+      "review_draft"
+    ],
+    "比较": [
+      {
+        "current_value": null,
+        "required": false,
+        "reviewable": false
+      },
+      {
+        "current_value": "unknown",
+        "required": false,
+        "reviewable": false
+      },
+      {
+        "current_value": "conventional",
+        "required": true,
+        "reviewable": true
+      }
+    ],
+    "unknown送入核对次数": 0,
+    "final_value": "unknown",
+    "passes": [],
+    "results": {},
+    "使用模型替身": "review_fields一旦调用即抛错，实际未调用；未发起真实模型请求",
+    "无数据库读写": true
+  },
+  "建议_待确认且尚未实施": [
+    "将是否需要模型查证与是否已填或必填分开；空白与unknown的分类也进入核对",
+    "由模型结合本文机制、正文和补充材料判断，支持时补conventional并标为论文推断，保留原句和判断理由",
+    "有冲突或依据不足时保留unknown并说明原因；不按计算方法名硬编码分类，不覆盖人工内容"
+  ],
+  "边界": {
+    "本轮验证科学分类的大模型调用": false,
+    "科学分类建议已批准": false,
+    "业务代码已修改": false,
+    "真实草稿已修改": false,
+    "新建Issue": false,
+    "目标3已调查": false
+  },
+  "源码哈希": {
+    "backend/ingest/scientific_evidence.py": "83587c0ac55bfccf83cf9bd0618cc1f6fe344feda4c73dd88e41ea62f28042da",
+    "backend/ingest/model_review.py": "769f5286c45ea00ff0effa0c2a02be6e9c02e83df6635e616720a60f97fc64ec",
+    "backend/ingest/upload_jobs.py": "8bc0e1dedaa51008f422fdfe2dd63879d0bdcc66fe0fa29478e396fa8e0a2ff7",
+    "frontend/src/components/UploadTaskEditor.tsx": "0cd6c9f1c3ec0eb16d037873e859829bd19983f5c5568f19d4bf47f924aef658"
+  }
+}
