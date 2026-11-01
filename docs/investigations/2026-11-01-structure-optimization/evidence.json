@@ -198,11 +198,156 @@
       }
     }
   ],
-  "建议_待确认且尚未实施": {
+  "已被用户新要求替代的旧建议": {
     "主表单": "仅保留一个结构优化方式主字段，继续区分未说明、静态、准简谐和量子非谐",
     "详情": "取消8项常驻输入，保留后台数据和真实来源，在已有来源侧栏按需查看",
     "科学边界": "目标、算法、电子理论和几何约束仍保持不同含义，模型依据原文核实；不因简化界面把DFT或SSCHA方法名混成优化目标",
     "历史": "不删除数据库列、草稿已有值或历史来源；不把界面精简变成数据清空"
+  },
+  "联网核实与最新方案": {
+    "用户原话": "我觉得别的都没必要保留，只需要保留“结构优化方法”（也就是你说的结构优化目标，我现在就想叫“结构优化方法”）：静态结构优化还是 sscha 考虑量子非谐的优化方法还是准简谐近似的优化方法。其他内容都不需要保留。而且，你帮我联网检查是不是合理。",
+    "核实日期": "2026-11-01",
+    "代码基线": "b25e1acef0b2cc85c09e5882a991079e8a9d03b1",
+    "结论": "可作为网站的三类结构优化方法选项；不声称覆盖所有优化算法。",
+    "名称": "结构优化方法",
+    "选项": [
+      {
+        "label": "静态结构优化",
+        "含义": "寻找不含核振动贡献的静态能量最低结构；固定外压时考虑PV项"
+      },
+      {
+        "label": "SSCHA量子非谐结构优化",
+        "含义": "使用SSCHA考虑核量子涨落及非谐效应，对结构进行相应自由能优化"
+      },
+      {
+        "label": "准简谐结构优化",
+        "含义": "以随体积或晶格参数变化的谐波振动自由能结合静态能量，求平衡结构"
+      }
+    ],
+    "未知值": "原文不足时保留未说明；它是空值状态，不是第四种优化方法。",
+    "关键边界": [
+      "模型结合原文判断实际进行的结构优化，不能仅凭SSCHA、DFT或0K字样分类。",
+      "SSCHA优化不必然使几何改变，对称性可能使平均位置不变。",
+      "SSCHA只是量子非谐方法的一种，旧anharmonic_quantum泛标签不能未经原文核实直接改称SSCHA。",
+      "0K仍可能含零点运动，不能单凭0K认定静态。"
+    ],
+    "当前取消范围": "取消8项独立结构优化详情，覆盖提取输出、新保存、主表单、侧栏及导出，不另外隐藏保留；仅保留一个方法字段及原文核对依据。现存数据清理属于后续实施，当前尚未触碰真实数据库。",
+    "取消字段": [
+      "structure_optimization_details.method",
+      "structure_optimization_details.electronic_method",
+      "structure_optimization_details.calculation_code",
+      "structure_optimization_details.temperature_k",
+      "structure_optimization_details.pressure_gpa",
+      "structure_optimization_details.centroids",
+      "structure_optimization_details.volume",
+      "structure_optimization_details.cell_shape"
+    ],
+    "范围说明": "模型仍可阅读原文中的温压和约束以判断优化方法，不再拆成8项独立参数保存；本项不取消其他物性结果本身的计算条件。",
+    "旧建议处理": "撤回保留后台和侧栏详情的旧建议；原建议仅作为历史讨论保留。",
+    "网页证据": [
+      {
+        "url": "https://sscha.eu/",
+        "http_status": 200,
+        "title": "SSCHA",
+        "excerpts": [
+          {
+            "term": "free energy",
+            "text": "u need the SSCHA code. The method is based on a full-quantum variational method that optimizes the nuclear wave-functions (or density matrix at finite temperature) to minimize the free energy. In this way it can be used to calculate thermodynamic properties of strongly anharmonic systems and the conditions at which first- and second-order phase transitions occur, estimate the phonon frequencies expected experimentally, obtain spectral functions, phonon lifetimes, determine the structural changes imposed by quantum effects, the electron"
+          }
+        ]
+      },
+      {
+        "url": "https://sscha.eu/Tutorials/tutorial_01_first_simulations/",
+        "http_status": 200,
+        "title": "First SSCHA simulations",
+        "excerpts": [
+          {
+            "term": "relax",
+            "text": "simulations In this hands-on tutorial we provide ready to use examples to setup your first SSCHA calculation. Here we show how the SSCHA can be used to calculate free energies and relax a structure. This tutorial was prepared for the 2023 SSCHA School by Diego Martinez Gutierrez. You can see here the video os the hands-on session: The material needed for this tutorial can be downloaded here . The free energy of gold: a simulation in the NVT ensemble This simple tutorial explains how to setup a SSCHA calculation starting just from"
+          },
+          {
+            "term": "pressure",
+            "text": "fo () ioinfo . SetupSaving ( \"minim_info\" ) relax . setup_custom_functions ( custom_function_post = ioinfo . CFP_SaveAll ) # Run the NVT simulation (save the stress to compute the pressure) relax . relax ( get_stress = True ) # Save the final dynamical matrix # And print in stdout the info about the minimization relax . minim . finalize () relax . minim . dyn . save_qe ( \"sscha_T {} _dyn\" . format ( TEMPERATURE )) Now save the file as sscha_gold.py and execute it with: $ python sscha_gold.py > output.log And that’s it. The code will"
+          },
+          {
+            "term": "pressure",
+            "text": "ady for the next step: NPT, or relaxing the lattice. With python-sscha it is very easy to run NPT simulation, you simply have to replace the line of the NVT script with the target pressure for the simulation: # Replace the line # relax.relax(get_stress = True) # with relax . vc_relax ( target_press = 0 ) And that is all! The target pressure is expressed in GPa, in this case 0 is ambient conditions (1 atm = 0.0001 GPa) You can also perform NVT simulation with variable lattice parameters: In this case the system will constrain the tot"
+          },
+          {
+            "term": "pressure",
+            "text": "VT script with the target pressure for the simulation: # Replace the line # relax.relax(get_stress = True) # with relax . vc_relax ( target_press = 0 ) And that is all! The target pressure is expressed in GPa, in this case 0 is ambient conditions (1 atm = 0.0001 GPa) You can also perform NVT simulation with variable lattice parameters: In this case the system will constrain the total volume to remain constant, but the lattice parameter will be optimized (if the system is not cubic and has some degrees of freedom, which is not the ca"
+          },
+          {
+            "term": "atomic positions",
+            "text": "e free energy gradients, which must go to zero to converge. The top-right is the gradient of the SSCHA dynamical matrix, while on bottom-right there is the gradient of the average atomic positions. Indeed, since the gold atomic positions are all fixed by symmetries, it is always zero (but it will be different from zero in more complex system). Fig. 3 All the SSCHA phonon frequencies as a function of the step in the NVT simulation. Instead, Fig. 3 represents the evolution of the SSCHA phonon frequencies. Here, all the frequencies in the supe"
+          }
+        ]
+      },
+      {
+        "url": "https://phonopy.github.io/phonopy/qha.html",
+        "http_status": 200,
+        "title": "Quasi harmonic approximation — Phonopy v.4.8.6",
+        "excerpts": [
+          {
+            "term": "Gibbs",
+            "text": "e (Cp) of a crystal with phonopy. The calculation needs a phonon calculation at each of several volumes of the crystal. Gibbs free energy and thermal expansion # At each volume, the phonons are calculated in the harmonic approximation. The phonon frequencies change with the volume, so the phonon Helmholtz free energy \\(F_\\mathrm{phonon}(T;\\,V)\\) depends on both the temperature \\(T\\) and the volume \\(V\\) . When the phonons are the only source of the temperature dependence"
+          },
+          {
+            "term": "Gibbs",
+            "text": "th the temperature \\(T\\) and the volume \\(V\\) . When the phonons are the only source of the temperature dependence, the Gibbs free energy at the temperature \\(T\\) and the pressure \\(p\\) is approximated by \\[G(T, p) = \\min_V \\left[ U(V) + F_\\mathrm{phonon}(T;\\,V) + pV \\right],\\] where \\(U(V)\\) is the total energy of the static lattice at the volume \\(V\\) . \\(U(V)\\) does not depend on the temperature. The temperature dependence comes from \\(F_\\mathrm{phonon}(T;\\,V)\\) . \\(\\"
+          },
+          {
+            "term": "minimiz",
+            "text": "e. The term is used for a wider range of calculations in the literature. Anisotropic thermal expansion from free-energy minimization uses the same approximation, and it minimizes the free energy over the lattice parameters instead of the volume. Calculations at each volume # At each volume, phonopy calculates the thermal properties ( TPROP ) and writes them to thermal_properties.yaml . The calculator that gives the forces, such as VASP, also gives the total energy of the s"
+          },
+          {
+            "term": "minimiz",
+            "text": "ions in the literature. Anisotropic thermal expansion from free-energy minimization uses the same approximation, and it minimizes the free energy over the lattice parameters instead of the volume. Calculations at each volume # At each volume, phonopy calculates the thermal properties ( TPROP ) and writes them to thermal_properties.yaml . The calculator that gives the forces, such as VASP, also gives the total energy of the static lattice at each volume. The fitting to the "
+          }
+        ]
+      },
+      {
+        "url": "https://vasp.at/wiki/index.php/Structure_optimization",
+        "http_status": 200,
+        "title": "Structure optimization - VASP Wiki",
+        "excerpts": [
+          {
+            "term": "energy",
+            "text": " Overview Structure optimization describes the task of finding the lattice vectors and atom positions that minimize the energy of the system. In its most general form, this optimization problem is extremely challenging because there are usually many local minima. Therefore, we typically limit ourselves to the simpler problem of finding the closest local minimum for a given starting structure. As user, this limitation has two important consequences: (i) You need to make su"
+          }
+        ]
+      },
+      {
+        "url": "https://vasp.at/wiki/index.php/ISIF",
+        "http_status": 200,
+        "title": "ISIF - VASP Wiki",
+        "excerpts": [
+          {
+            "term": "degrees",
+            "text": "FCALC = .TRUE. (hybrid functionals) = 2 else Description: Determines if the stress tensor is calculated and which ionic degrees of freedom are varied. For ISIF [math]\\displaystyle{ \\ge }[/math] 2, the stress tensor is calculated. It is defined as the negative of the derivative of the energy [math]\\displaystyle{ E }[/math] with respect to the strain tensor [math]\\displaystyle{ \\eta_{ji} }[/math] : [math]\\displaystyle{ \\sigma_{ij} = - \\frac{\\delta E} {\\delta \\eta_{ji}} }[/ma"
+          }
+        ]
+      },
+      {
+        "url": "https://vasp.at/wiki/index.php/PSTRESS",
+        "http_status": 200,
+        "title": "PSTRESS — VASP Wiki",
+        "excerpts": [
+          {
+            "term": "energy",
+            "text": "rrections to the stress tensor. The unit of PSTRESS is kB. During ionic minimization , an energy term [math]\\displaystyle{ E= V \\times \\mathrm{PSTRESS} }[/math] is added to the total energy and the value of PSTRESS is subtracted from the diagonals of the stress tensor. This allows to perform structure optimization at a specific external pressure. In molecular-dynamics calculations within the NpT ensemble , PSTRESS controls"
+          }
+        ]
+      }
+    ],
+    "附加检索失败": [
+      {
+        "url": "https://raw.githubusercontent.com/SSCHAcode/python-sscha/master/Modules/SchaMinimizer.py",
+        "error": "[Errno 54] Connection reset by peer",
+        "used_for_conclusion": false
+      }
+    ],
+    "实施状态": "本轮只修订调查结论，未修改业务代码、数据库或真实草稿。"
   },
   "本轮范围": {
     "业务代码修改": false,
