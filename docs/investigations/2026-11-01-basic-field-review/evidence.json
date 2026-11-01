@@ -1,0 +1,292 @@
+{
+  "目标": "目标4：元素种类数、晶系、空间群号和压强为何需要核对",
+  "记录时间": "2026-11-01T17:55:17.213940+08:00",
+  "源码提交": "c1041ce65e94e77c27d2d65219ace8556c5ea239",
+  "任务": "37688f914394419e8914e5ebf486df7d",
+  "截图": {
+    "archived": "screenshot.png",
+    "sha256": "e118c92c0e67da09cb15ac85873852a2ae0db5a64d56d7c5552b62378985d753",
+    "观察": "元素种类数、晶系、空间群号标红；150 GPa压强标签蓝色，没有待核对文字",
+    "限制": "裁剪未含材料卡编号，不能单凭截图确定为第0或第6状态"
+  },
+  "当前真实摘要接口": {
+    "方法": "直接执行field_summary，实际读取本机MySQL；事务只读并用SQL事件拒绝写语句；仅将进度回调设为无操作",
+    "readonly_SQL_count": 45,
+    "所选字段": [
+      "material_states[0].crystal_system",
+      "material_states[0].element_count",
+      "material_states[0].reported_space_group_number",
+      "material_states[1].pressure_value_gpa",
+      "material_states[6].crystal_system",
+      "material_states[6].element_count",
+      "material_states[6].material",
+      "material_states[6].pressure_value_gpa",
+      "material_states[6].reported_space_group_number",
+      "material_states[6].reported_space_group_symbol"
+    ],
+    "selected_rows": [
+      {
+        "field": "material_states[0].reported_space_group_number",
+        "current_value": 229,
+        "status": "supported",
+        "pending_review": false,
+        "required": true,
+        "human_confirmed": true,
+        "reason": "",
+        "human_modified": false,
+        "frontend_status": "passed"
+      },
+      {
+        "field": "material_states[0].crystal_system",
+        "current_value": "cubic",
+        "status": "supported",
+        "pending_review": false,
+        "required": true,
+        "human_confirmed": true,
+        "reason": "",
+        "human_modified": false,
+        "frontend_status": "passed"
+      },
+      {
+        "field": "material_states[0].element_count",
+        "current_value": 2,
+        "status": "supported",
+        "pending_review": false,
+        "required": null,
+        "human_confirmed": true,
+        "reason": "",
+        "human_modified": false,
+        "frontend_status": "passed"
+      },
+      {
+        "field": "material_states[1].pressure_value_gpa",
+        "current_value": 200.0,
+        "status": "unsupported",
+        "pending_review": false,
+        "required": true,
+        "human_confirmed": false,
+        "reason": "主文摘要和正文多处指出CaH6在150 GPa下稳定并计算超导性质。当前值200.0 GPa与原文不符，原文为150 GPa。",
+        "human_modified": false,
+        "frontend_status": "attention"
+      },
+      {
+        "field": "material_states[6].material",
+        "current_value": "CaH6",
+        "status": "supported",
+        "pending_review": false,
+        "required": true,
+        "human_confirmed": false,
+        "reason": "论文研究CaH6，当前材料化学式CaH6正确。",
+        "human_modified": false,
+        "frontend_status": "passed"
+      },
+      {
+        "field": "material_states[6].pressure_value_gpa",
+        "current_value": 150.0,
+        "status": "supported",
+        "pending_review": false,
+        "required": true,
+        "human_confirmed": false,
+        "reason": "摘要和正文多处指出CaH6在150 GPa下稳定，Tc计算也在150 GPa进行，压力值150 GPa有明确依据。",
+        "human_modified": false,
+        "frontend_status": "passed"
+      },
+      {
+        "field": "material_states[6].reported_space_group_symbol",
+        "current_value": "Im-3m",
+        "status": "supported",
+        "pending_review": false,
+        "required": true,
+        "human_confirmed": false,
+        "reason": "正文指出CaH6采用Im-3m空间群（cI14），SI表S5也列出cI14 (space group Im-3m)在150 GPa的结构参数。",
+        "human_modified": false,
+        "frontend_status": "passed"
+      },
+      {
+        "field": "material_states[6].reported_space_group_number",
+        "current_value": 229,
+        "status": "unchecked",
+        "pending_review": true,
+        "required": true,
+        "human_confirmed": false,
+        "reason": "",
+        "human_modified": false,
+        "frontend_status": "attention"
+      },
+      {
+        "field": "material_states[6].crystal_system",
+        "current_value": "cubic",
+        "status": "unchecked",
+        "pending_review": true,
+        "required": true,
+        "human_confirmed": false,
+        "reason": "",
+        "human_modified": false,
+        "frontend_status": "attention"
+      },
+      {
+        "field": "material_states[6].element_count",
+        "current_value": 2,
+        "status": "unchecked",
+        "pending_review": true,
+        "required": null,
+        "human_confirmed": false,
+        "reason": "",
+        "human_modified": false,
+        "frontend_status": "attention"
+      }
+    ]
+  },
+  "相关持久记录": [
+    {
+      "item_key": "111650d9589bce1581f0c0806e7480220089fce0ba4b622d1c189ba326876fb8",
+      "field": "material_states[0].element_count",
+      "status": "supported",
+      "created_at": "2026-11-01 16:57:02",
+      "has_model_proof": false,
+      "has_human_approval": true
+    },
+    {
+      "item_key": "1da5f61c9dc59e847b4e5ec883d88fefca7862cd82a2598e1d475b9134da41b8",
+      "field": "material_states[0].reported_space_group_number",
+      "status": "supported",
+      "created_at": "2026-11-01 16:59:14",
+      "has_model_proof": false,
+      "has_human_approval": true
+    },
+    {
+      "item_key": "73771b191f1fd02954050d1bdb1b987af30819e2d9f6c50b7a724c9b6e5d59f0",
+      "field": "material_states[0].crystal_system",
+      "status": "supported",
+      "created_at": "2026-11-01 16:57:07",
+      "has_model_proof": false,
+      "has_human_approval": true
+    },
+    {
+      "item_key": "7797ee414fd86fe88126942fe5baa05a480b8b72e7b015f3f252f61d6611dd44",
+      "field": "material_states[6].reported_space_group_symbol",
+      "status": "supported",
+      "created_at": "2026-11-01 16:56:31",
+      "has_model_proof": true,
+      "has_human_approval": false
+    },
+    {
+      "item_key": "7b3a53f263ee5b80f9adc7b4659ba477b98976004a0443c7603d4ae6a5bb1df3",
+      "field": "material_states[1].pressure_value_gpa",
+      "status": "unsupported",
+      "created_at": "2026-11-01 16:54:36",
+      "has_model_proof": true,
+      "has_human_approval": false
+    },
+    {
+      "item_key": "fde6361be49f5af5e1e05f48484d14e38f7f66eca5bbf68ba6518020dfa01a55",
+      "field": "material_states[6].material",
+      "status": "supported",
+      "created_at": "2026-11-01 16:56:13",
+      "has_model_proof": true,
+      "has_human_approval": false
+    },
+    {
+      "item_key": "ffe47c4057b09041ce133fcfbed6bfa649f2bcf6a9fa261fca1e04579becb07e",
+      "field": "material_states[6].pressure_value_gpa",
+      "status": "supported",
+      "created_at": "2026-11-01 16:56:31",
+      "has_model_proof": true,
+      "has_human_approval": false
+    }
+  ],
+  "派生字段隔离重放": {
+    "方法": "实际执行state_records和apply_derived；实际TypeScript evidenceStatus经esbuild加载，无手写镜像判断",
+    "source_formula": "CaH6",
+    "space_group_symbol": "Im-3m",
+    "依赖字段预设": "化学式及空间群符号已supported且无待核对标记",
+    "结果": [
+      {
+        "field": "material_states[0].reported_space_group_number",
+        "current_value": 229,
+        "kind": "derived",
+        "reviewable": false,
+        "status": "supported",
+        "pending_review": true,
+        "reason": "由已核验输入确定性计算得到：空间群符号查国际表得到群号",
+        "frontend_status": "attention"
+      },
+      {
+        "field": "material_states[0].crystal_system",
+        "current_value": "cubic",
+        "kind": "derived",
+        "reviewable": false,
+        "status": "supported",
+        "pending_review": true,
+        "reason": "由已核验输入确定性计算得到：空间群符号 → 群号 → 晶系",
+        "frontend_status": "attention"
+      },
+      {
+        "field": "material_states[0].element_count",
+        "current_value": 2,
+        "kind": "derived",
+        "reviewable": false,
+        "status": "supported",
+        "pending_review": true,
+        "reason": "由已核验输入确定性计算得到：化学式中不同元素的数量",
+        "frontend_status": "attention"
+      }
+    ]
+  },
+  "根因": [
+    {
+      "file": "backend/ingest/model_review.py",
+      "symbol": "_reviewable",
+      "事实": "kind=derived被排除，三项无解析模型核对结果"
+    },
+    {
+      "file": "backend/api/evidence.py",
+      "symbol": "field_summary",
+      "事实": "直接按各字段持久记录组装摘要；派生字段没有独立结果时标unchecked和pending_review=true，未继承已通过的输入字段"
+    },
+    {
+      "file": "backend/ingest/scientific_evidence.py",
+      "symbol": "apply_derived",
+      "事实": "另一完整核对路径虽可继承supported，但原pending_review=true未被清除；实际前端仍映射attention"
+    },
+    {
+      "file": "frontend/src/lib/evidenceStatus.ts",
+      "symbol": "evidenceStatus",
+      "事实": "supported仍要求pending_review为false才显示passed，因此只改状态字符串不够"
+    }
+  ],
+  "压强另案": {
+    "150GPa": "当前第0和第6状态均已有模型通过，截图同样显示未标红",
+    "200GPa": "当前第1状态为unsupported，模型理由错误地用150GPa否定200GPa；原文明确还有200和250GPa计算",
+    "原PDF": {
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "verified": true,
+      "pdf_page": 3,
+      "exact_quote": "EPC calculations were also performed for\n200 GPa and 250 GPa, in which the calculated Tc was found to\ndecrease with pressure (201 K at 200 GPa and 187 K at 250 GPa"
+    },
+    "结论": "不能一律清除所有红项；需要按材料、压力、具体结果点重新查证模型误判"
+  },
+  "当前与截图时期的区别": "第0状态三项现有16:57至16:59的人工approve记录；其他未人工确认的对应项仍显示待核对。人工确认不是自动核对已完成的证据。",
+  "相邻发现_未独立科学验收": "当前CaH2 150GPa空间群的模型理由引用CaH6，并自动改成Im-3m，提示跨材料归属风险；本轮未重提或修复该字段，不据此宣称已确认全部空间群科学值。",
+  "建议_待确认且尚未实施": [
+    "四项及其真实来源或推导依据同批交模型核验，取消派生值跳过；计算和空间群查表结果作为工具依据，科学关系由模型查证",
+    "模型按当前材料、压力与具体结果点读取正文和SI，不以150GPa摘要概括否定200GPa独立结果",
+    "同版本通过结论保存并复用，页面摘要与来源详情使用一致结果；通过清除待核对，真实疑问才标红，保留人工决定",
+    "对截图相关真实任务的修复先在隔离副本核对，不在调查中改写用户数据"
+  ],
+  "边界": {
+    "业务代码修改": false,
+    "真实SQL写入": false,
+    "真实Redis写入": false,
+    "真实模型调用": false,
+    "目标5文字来源调查": false,
+    "模型核对不等于管理员最终批准": true
+  },
+  "源码哈希": {
+    "backend/api/evidence.py": "6eaab8b08ce5c38a9adbd422d96c1c4d6c4f600d80ccf51bb25a734f7fb5b9ee",
+    "backend/ingest/model_review.py": "769f5286c45ea00ff0effa0c2a02be6e9c02e83df6635e616720a60f97fc64ec",
+    "backend/ingest/scientific_evidence.py": "83587c0ac55bfccf83cf9bd0618cc1f6fe344feda4c73dd88e41ea62f28042da",
+    "backend/ingest/property_evidence.py": "cd99c49ff88c288c51ce5ecde03c7a7b2f2bfe575265b277e11eda94ecd56fab",
+    "frontend/src/lib/evidenceStatus.ts": "6532e1297958645d557d3e55eb266794ed6e4e432622278758575ac05356ecd0"
+  }
+}
