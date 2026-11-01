@@ -114,7 +114,10 @@ def _add_conditions(draft, additions, batch):
                         or '.' not in extension['key'] or extension['key'] in old_keys):
                     continue
                 index = len(extensions)
-                extensions.append(deepcopy(extension)); old_keys.add(extension['key'])
+                # 系统身份不由模型指定；新扩展沿实际阶段键生成稳定身份。
+                extensions.append({k: deepcopy(v) for k, v in extension.items()
+                                   if k not in {'field_key', 'item_key', 'record_key', 'state_key', 'module_key'}})
+                old_keys.add(extension['key'])
                 for part in ('value_raw', 'unit_raw'):
                     candidate.setdefault('evidences', []).extend({**deepcopy(e),
                         'field_path': f'payload.calculation_conditions.extensions.{index}.{part}'} for e in addition['evidences'])

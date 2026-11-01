@@ -2,11 +2,11 @@
   "date": "2026-11-01",
   "source_base": "7cbc4bed89305865d948c4c0aaa32f13dbab63a4",
   "targeted_backend": {
-    "tests": 50,
+    "tests": 51,
     "failures": 0,
     "errors": 0,
     "skipped": 1,
-    "passed": 49
+    "passed": 50
   },
   "related_backend": {
     "tests": 109,
@@ -83,7 +83,7 @@
   ],
   "remote_spec_links": "未推送，远程文件链接待核验",
   "source_sha256": {
-    "backend/ingest/model_review.py": "61fa74fa18fbc7eb92afd139308597f971fcab532c963e38cb6f228fd4c955ab",
+    "backend/ingest/model_review.py": "769f5286c45ea00ff0effa0c2a02be6e9c02e83df6635e616720a60f97fc64ec",
     "backend/ingest/property_evidence.py": "cd99c49ff88c288c51ce5ecde03c7a7b2f2bfe575265b277e11eda94ecd56fab",
     "backend/ingest/upload_preview.py": "e2f1ff660c1f3754449c93ff43095b30fc3e7b64efb678e02d332ddfe3c592f8",
     "backend/ingest/upload_jobs.py": "8bc0e1dedaa51008f422fdfe2dd63879d0bdcc66fe0fa29478e396fa8e0a2ff7",
@@ -98,5 +98,26 @@
     "RQ失败保留快照",
     "ready只读正式稿",
     "预览无科学写请求和模型任务"
-  ]
+  ],
+  "model_field_identity_guard": {
+    "model_cannot_assign_system_ids": true,
+    "regression_test_passed": true,
+    "final_fixed_response_replay": {
+      "passed": true,
+      "replayed_current_fields": 25,
+      "supported": 21,
+      "optional_missing": 4,
+      "source_sha256": {
+        "backend/ingest/model_review.py": "769f5286c45ea00ff0effa0c2a02be6e9c02e83df6635e616720a60f97fc64ec",
+        "backend/ingest/property_evidence.py": "cd99c49ff88c288c51ce5ecde03c7a7b2f2bfe575265b277e11eda94ecd56fab",
+        "backend/ingest/upload_preview.py": "e2f1ff660c1f3754449c93ff43095b30fc3e7b64efb678e02d332ddfe3c592f8",
+        "backend/ingest/upload_jobs.py": "8bc0e1dedaa51008f422fdfe2dd63879d0bdcc66fe0fa29478e396fa8e0a2ff7"
+      },
+      "actual_real_source_report": "/Users/mayuan/Codes/SC-Wiki/.data/issue194-real-source-final/finish-report.json",
+      "not_a_new_live_model_call": true,
+      "saved_and_reloaded": true,
+      "storage_backend": "SQLite",
+      "purpose": "最终身份保护补丁的机械重放；真实MySQL验证保留于finish-report"
+    }
+  }
 }

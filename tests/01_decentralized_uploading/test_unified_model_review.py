@@ -90,6 +90,20 @@ def test_original_page_tool_cannot_escape_task_and_has_bounded_retries():
     assert len(calls) == 4 and result['review_error'] == 'agent_retry_exhausted'
 
 
+def test_model_condition_addition_cannot_choose_system_field_identity():
+    from backend.ingest.model_review import _add_conditions
+    record = {'record_key': 'r', 'module_code': 'electronic_properties', 'record_type': 'property',
+        'property_code': 'band_gap', 'name_raw': 'Gap', 'value_kind': 'number', 'value_number': 1,
+        'value_raw': '1', 'unit_raw': 'eV', 'payload': {'calculation_conditions': {}}}
+    draft = {'material_states': [{'state_key': 's', 'property_modules': [{'module_key': 'm', 'records': [record]}]}]}
+    owner = {'state_key': 's', 'module_key': 'm', 'record_key': 'r'}
+    _add_conditions(draft, [{**owner, 'extensions': [{'key': 'electronic_structure.energy_cutoff',
+        'field_key': 'impersonated-existing-field', 'value_kind': 'number', 'value_raw': '90',
+        'value_number': 90, 'unit_raw': 'Ry'}], 'evidences': [{'file_id': 'main', 'quote': 'Reported setting.'}]}], [owner])
+    extension = record['payload']['calculation_conditions']['extensions'][0]
+    assert extension['value_number'] == 90 and 'field_key' not in extension
+
+
 def test_real_storage_roundtrip_preserves_model_inference_and_source(db_session, monkeypatch):
     from backend.ingest.model_review import review_fields
     from backend.ingest import scientific_evidence as science
