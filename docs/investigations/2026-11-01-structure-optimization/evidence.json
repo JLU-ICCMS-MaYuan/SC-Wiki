@@ -1,0 +1,222 @@
+{
+  "目标": "目标3：结构优化字段的来源、必要性和界面精简建议",
+  "记录时间": "2026-11-01T17:29:49.195570+08:00",
+  "源码提交": "bd19b0592274cac42914b49cd9f6bbf2c101bf48",
+  "新增时间": {
+    "主选项": {
+      "issue": 94,
+      "sha": "fb7c8bdce0903e732d330c1fb59834754c46732b",
+      "date": "2026-10-15T16:26:27+08:00",
+      "subject": "[修改目的] 落地材料状态三行布局、结构核处理及单份规范几何",
+      "原标签": "结构优化核处理"
+    },
+    "详情": {
+      "issue": 181,
+      "sha": "6ed8216a7af8262d8a1b773738ceb2a4f2e138f0",
+      "date": "2026-10-30T00:24:04+08:00",
+      "subject": "[修改目的] 实现 #181 方法语义分层与结构优化目标，阻止跨物性标签污染",
+      "更名主标签": "结构优化目标",
+      "新增详情字段": {
+        "method": "结构优化方法",
+        "electronic_method": "优化求力电子理论",
+        "calculation_code": "结构优化软件",
+        "temperature_k": "优化温度",
+        "pressure_gpa": "优化外压",
+        "centroids": "原子平均位置",
+        "volume": "体积",
+        "cell_shape": "晶胞形状"
+      },
+      "frontend_file_first_added": "6ed8216a7af8262d8a1b773738ceb2a4f2e138f0"
+    }
+  },
+  "需求依据": {
+    "spec": "docs/specs/181-physical-method-scope/spec.md",
+    "FR-004": "区分未说明、静态晶格、QHA自由能、量子非谐自由能优化，目标与具体方法或软件分开",
+    "FR-005": "记录论文报告的温压及平均位置、体积、晶胞形状各自固定或优化的约束",
+    "原问题": "旧代码把结构优化返回的近似广播到全部物性，造成电子带隙或DOS被混入harmonic等声子标签",
+    "解释": "目标说明最小化哪种能量或自由能，方法说明如何求解，电子理论提供能量和力；这些含义不同，但不要求主表单同时常驻显示所有输入"
+  },
+  "字段含义": [
+    {
+      "field": "structure_optimization",
+      "含义": "静态晶格或考虑核振动自由能的结构优化类别"
+    },
+    {
+      "field": "structure_optimization_details.method",
+      "含义": "具体结构优化方法或算法"
+    },
+    {
+      "field": "structure_optimization_details.electronic_method",
+      "含义": "优化过程中计算能量与力采用的电子理论，如DFT、HF"
+    },
+    {
+      "field": "structure_optimization_details.calculation_code",
+      "含义": "执行结构优化的软件，如VASP；软件名不能代替物理理论"
+    },
+    {
+      "field": "structure_optimization_details.temperature_k",
+      "含义": "该结构优化计算采用的温度，不自动等于Tc"
+    },
+    {
+      "field": "structure_optimization_details.pressure_gpa",
+      "含义": "优化时的外压，概念上不必与下游所有结果的压力相同"
+    },
+    {
+      "field": "structure_optimization_details.centroids",
+      "含义": "原子平均位置在优化中固定、优化或未说明；不是原子坐标数值"
+    },
+    {
+      "field": "structure_optimization_details.volume",
+      "含义": "晶胞体积是否固定或优化；不是以体积单位填写的数值"
+    },
+    {
+      "field": "structure_optimization_details.cell_shape",
+      "含义": "晶胞形状是否固定或优化；不是晶格矩阵或晶系"
+    }
+  ],
+  "当前展示根因": {
+    "host": "frontend/src/components/MaterialStatesEditor.tsx:785",
+    "condition": "state.state_kind === theoretical即挂载详情组件，不要求详情有值",
+    "component": "frontend/src/components/StructureOptimizationFields.tsx:16",
+    "text_inputs": 5,
+    "selects": 3,
+    "empty_behavior": "value为空仍用{}生成5个空文本框和3个未说明下拉框；组件无折叠或按需出现逻辑",
+    "contract": "详情可空，温压及几何约束也允许缺失；并非必须填满的字段",
+    "inspection_level": "源码与当前草稿只读核对，未重新做浏览器截图验收"
+  },
+  "当前CaH6任务例子": [
+    {
+      "state_index": 0,
+      "material": "CaH6",
+      "pressure_gpa": 150.0,
+      "optimization": "classical_static",
+      "details": {
+        "method": "particle-swarm optimization structural search",
+        "electronic_method": "DFT",
+        "calculation_code": "VASP",
+        "temperature_k": null,
+        "pressure_gpa": 150.0,
+        "centroids": null,
+        "volume": null,
+        "cell_shape": null
+      }
+    },
+    {
+      "state_index": 1,
+      "material": "CaH6",
+      "pressure_gpa": 200.0,
+      "optimization": "classical_static",
+      "details": {
+        "method": "particle-swarm optimization structural search",
+        "electronic_method": "DFT",
+        "calculation_code": "VASP",
+        "temperature_k": null,
+        "pressure_gpa": 200.0,
+        "centroids": null,
+        "volume": null,
+        "cell_shape": null
+      }
+    },
+    {
+      "state_index": 2,
+      "material": "CaH6",
+      "pressure_gpa": 250.0,
+      "optimization": "classical_static",
+      "details": {
+        "method": "particle-swarm optimization structural search",
+        "electronic_method": "DFT",
+        "calculation_code": "VASP",
+        "temperature_k": null,
+        "pressure_gpa": 250.0,
+        "centroids": null,
+        "volume": null,
+        "cell_shape": null
+      }
+    },
+    {
+      "state_index": 3,
+      "material": "CaH2",
+      "pressure_gpa": 0.0,
+      "optimization": "classical_static",
+      "details": {
+        "method": "CALYPSO structure prediction with local optimization",
+        "electronic_method": "DFT",
+        "calculation_code": "VASP",
+        "temperature_k": null,
+        "pressure_gpa": 0.0,
+        "centroids": null,
+        "volume": null,
+        "cell_shape": null
+      }
+    },
+    {
+      "state_index": 4,
+      "material": "CaH2",
+      "pressure_gpa": 150.0,
+      "optimization": "classical_static",
+      "details": {
+        "method": "CALYPSO structure prediction with local optimization",
+        "electronic_method": "DFT",
+        "calculation_code": "VASP",
+        "temperature_k": null,
+        "pressure_gpa": 150.0,
+        "centroids": null,
+        "volume": null,
+        "cell_shape": null
+      }
+    },
+    {
+      "state_index": 5,
+      "material": "CaH4",
+      "pressure_gpa": 50.0,
+      "optimization": "classical_static",
+      "details": {
+        "method": "CALYPSO structure prediction with local optimization",
+        "electronic_method": "DFT",
+        "calculation_code": "VASP",
+        "temperature_k": null,
+        "pressure_gpa": 50.0,
+        "centroids": null,
+        "volume": null,
+        "cell_shape": null
+      }
+    },
+    {
+      "state_index": 6,
+      "material": "CaH6",
+      "pressure_gpa": 150.0,
+      "optimization": "classical_static",
+      "details": {
+        "method": "CALYPSO structure prediction with local optimization",
+        "electronic_method": "DFT",
+        "calculation_code": "VASP",
+        "temperature_k": null,
+        "pressure_gpa": 150.0,
+        "centroids": null,
+        "volume": null,
+        "cell_shape": null
+      }
+    }
+  ],
+  "建议_待确认且尚未实施": {
+    "主表单": "仅保留一个结构优化方式主字段，继续区分未说明、静态、准简谐和量子非谐",
+    "详情": "取消8项常驻输入，保留后台数据和真实来源，在已有来源侧栏按需查看",
+    "科学边界": "目标、算法、电子理论和几何约束仍保持不同含义，模型依据原文核实；不因简化界面把DFT或SSCHA方法名混成优化目标",
+    "历史": "不删除数据库列、草稿已有值或历史来源；不把界面精简变成数据清空"
+  },
+  "本轮范围": {
+    "业务代码修改": false,
+    "数据库迁移": false,
+    "草稿修改": false,
+    "新模型调用": false,
+    "新建Issue": false,
+    "提议已确认": false
+  },
+  "源码哈希": {
+    "frontend/src/components/StructureOptimizationFields.tsx": "09d6b3d2b68c4e170300deaf27bb4cc62a6a16270a60b80b360c70a848499e22",
+    "frontend/src/components/MaterialStatesEditor.tsx": "72e2bf69e613246315223863b78789e190343ba6718410edf49df473d0275197",
+    "backend/ingest/material_state_contract.py": "228e46dfd458ba70afbb9b8a42f4f568b031f792ca419e1ddadb3da89559cb5a",
+    "backend/ingest/state_optimization.py": "bce584df348b52ce92e5789c8a2ffdc733dfb8d7656e207639b65744914459d5",
+    "docs/specs/181-physical-method-scope/spec.md": "1a5500697060e149e4e98079db0cabadced48100719ff16b8882c50ae79bbf65"
+  }
+}
