@@ -1,0 +1,181 @@
+{
+  "checked_at": "2026-11-02T07:34:04.029087+08:00",
+  "task_id": "5dab6b2fb9fa46998f180d71c3742d43",
+  "source_commit": "d654bcbc2cb4e957291642c30037f04718ee1426",
+  "scope": "只读草稿查询、真实生产组件的隔离DOM重放与调查文档；未改业务代码、未写业务库、未调用模型",
+  "source": {
+    "workdraft_revision_observed": 42,
+    "fixture_captured_at": "2026-11-02T07:31:23.758482+08:00",
+    "fixture_sha256": "371edf7ff9174f6c2c5e9e6c1810795e9d9c224f6df3e34ed97ec95c5aa613c7",
+    "screenshot_sha256": "04616c971bba9c3d4bea652467c652c8524494ca61ff6d14636829e7df5c406d"
+  },
+  "verification": {
+    "runner": "现有Vitest 2.1.9 + jsdom",
+    "production_components": [
+      "PropertyModuleEditor",
+      "PredictedTcGroupEditor",
+      "SchemaDrivenRecordForm",
+      "CalculationConditionFields",
+      "EvidenceFieldMarkers"
+    ],
+    "published_definitions_from_business_db": 22,
+    "result": "1 passed",
+    "browser_status": "未操作真实用户浏览器；使用用户截图与隔离DOM重放，不宣称真实浏览器验收",
+    "mutations": "只在五项机制重放的内存副本中，把其他字段设为通过；原草稿与真实核对结果未修改"
+  },
+  "dom_replays": [
+    {
+      "mode": "current",
+      "header": "超导性质11 项待处理",
+      "problemCount": 11,
+      "visibleRed": [
+        {
+          "field": "material_states.0.property_modules.0.records.0.payload.parameters.lambda_ep",
+          "name": "电声耦合强度 λ"
+        },
+        {
+          "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.extensions.1.value_raw",
+          "name": "声子／电声耦合 · q 网格"
+        },
+        {
+          "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.extensions.2.value_raw",
+          "name": "声子／电声耦合 · 截断能"
+        }
+      ],
+      "unlocatedProblems": [
+        {
+          "key": "50bb593c4ebeb5957d7784081bfe121c46a4cf06dd0396430d2def22b3102801",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.method_scope",
+          "label": "计算适用关系"
+        },
+        {
+          "key": "f0136fc258e88f8638cbc64fefcb97bdea695e842fe44477e645d426412fd3f7",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.0.value_kind",
+          "label": "值类型"
+        },
+        {
+          "key": "53d08dc543c051bfac3f62ccabb90038afcd34706c718cfd6eacbf709bdfc039",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.name_raw",
+          "label": "名称"
+        },
+        {
+          "key": "d2f78590a4c5088c28571397fcbeb2f0bd1ed4c607baf8782128b3051a97db9f",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.unit_raw",
+          "label": "单位"
+        },
+        {
+          "key": "d1b3bd4dfda4b77eecb484ba05d758ced4aecca40c6f48a476a912ea8445bb13",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.value_kind",
+          "label": "值类型"
+        },
+        {
+          "key": "4c2a1ad86ed59525a0fdfba74ca9b5a1676f32e1f774ec3f1d283b0c0c4d5e12",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.name_raw",
+          "label": "名称"
+        },
+        {
+          "key": "f3bca68f3355d8e19e6cbf7f6a4bba1db0c8611c51af4899d0aa9178f5a1b39a",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.unit_raw",
+          "label": "单位"
+        },
+        {
+          "key": "618cd5eba02e72e61e7e47b2072b5bd27695dd94ef9219f3967963347326ad8a",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.value_kind",
+          "label": "值类型"
+        }
+      ],
+      "fallbackCount": 8
+    },
+    {
+      "mode": "five-hidden",
+      "header": "超导性质5 项待处理",
+      "problemCount": 5,
+      "visibleRed": [],
+      "unlocatedProblems": [
+        {
+          "key": "50bb593c4ebeb5957d7784081bfe121c46a4cf06dd0396430d2def22b3102801",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.method_scope",
+          "label": "计算适用关系"
+        },
+        {
+          "key": "f0136fc258e88f8638cbc64fefcb97bdea695e842fe44477e645d426412fd3f7",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.0.value_kind",
+          "label": "值类型"
+        },
+        {
+          "key": "53d08dc543c051bfac3f62ccabb90038afcd34706c718cfd6eacbf709bdfc039",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.name_raw",
+          "label": "名称"
+        },
+        {
+          "key": "d1b3bd4dfda4b77eecb484ba05d758ced4aecca40c6f48a476a912ea8445bb13",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.value_kind",
+          "label": "值类型"
+        },
+        {
+          "key": "4c2a1ad86ed59525a0fdfba74ca9b5a1676f32e1f774ec3f1d283b0c0c4d5e12",
+          "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.name_raw",
+          "label": "名称"
+        }
+      ],
+      "fallbackCount": 5,
+      "fields": [
+        "material_states[0].property_modules[0].records[0].payload.calculation_conditions.method_scope",
+        "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.0.value_kind",
+        "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.name_raw",
+        "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.1.value_kind",
+        "material_states[0].property_modules[0].records[0].payload.calculation_conditions.extensions.2.name_raw"
+      ]
+    }
+  ],
+  "code_references": [
+    {
+      "path": "frontend/src/components/PropertyModuleEditor.tsx",
+      "line": 250,
+      "finding": "标题按issues与reviewFields中的字段路径去重计数，不要求能定位到可见控件"
+    },
+    {
+      "path": "frontend/src/components/CalculationConditionFields.tsx",
+      "line": 80,
+      "finding": "method_scope关系输入仅在band_gap与dos_fermi显示，截图超导Tc没有对应控件"
+    },
+    {
+      "path": "frontend/src/components/CalculationConditionFields.tsx",
+      "line": 101,
+      "finding": "扩展字段的主表单锚点固定为value_raw，名称、类型和单位留给侧栏"
+    },
+    {
+      "path": "frontend/src/components/EvidenceFieldMarkers.tsx",
+      "line": 25,
+      "finding": "扩展子字段要求key及最后一段路径匹配，value_kind、name_raw、unit_raw不会匹配主表单value_raw"
+    },
+    {
+      "path": "frontend/src/components/EvidenceFieldMarkers.tsx",
+      "line": 218,
+      "finding": "找不到精确子字段时不绑定到可见主字段"
+    },
+    {
+      "path": "frontend/src/components/EvidenceFieldMarkers.tsx",
+      "line": 322,
+      "finding": "未定位的问题进入missing列表，模块计数不受影响"
+    },
+    {
+      "path": "frontend/src/components/EvidenceFieldMarkers.tsx",
+      "line": 353,
+      "finding": "missing列表默认折叠为待定位的来源核对"
+    },
+    {
+      "path": "frontend/src/components/UploadTaskEditor.tsx",
+      "line": 582,
+      "finding": "该折叠列表位于上传表单顶部，截图已滚动到超导物性模块"
+    }
+  ],
+  "limits": [
+    "截图标题为5项；当前持久稿已变化，首个超导模块是11项。未取得截图时的浏览器响应，不能断言当时五项的完整清单",
+    "five-hidden为选取当前实际问题中的五个隐藏子项后进行的受控复现，用于证明机制，不是还原截图时的精确核对状态"
+  ],
+  "accepted_prior_corrections": [
+    "失效旧评语直接清空，不继续展示，不恢复历史功能",
+    "保留本轮新填写、新核验的结果；本轮只更新调查建议，没有实施清理"
+  ]
+}
