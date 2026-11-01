@@ -346,3 +346,5 @@ La–Sc–H 已通过表格／Methods 专项、隔离 MySQL、正式组件浏览
 未知超导类型也进入模型核对，声子介导机制可支持常规分类并保留论文推断身份。元素数、晶系、群号及压强由同一模型流程结合原文、计算或查表依据核实，不因可推导而跳过；模型读取当前材料、压力和结果点，不能以150 GPa段落否定200 GPa结果。通过结果绑定最终版本后保存复用，已有人工决定受保护。
 
 主表单字段名不追加状态文字，仅问题标红，通过正常显示；字段名及键盘仍打开已有侧栏，完整状态、理由与恢复操作在侧栏，核对进度沿用现有提示。相关代码与隔离验收见[#196](../../specs/196-bibliography-model-completion/validation.md)、[#197](../../specs/197-unknown-kind-review/validation.md)、[#199](../../specs/199-basic-field-model-review/validation.md)、[#200](../../specs/200-field-color-only/validation.md)。
+
+模型核对物性子项时同时获得实际记录类型、物性代码和扩展字段键值，避免把声子条件放入电子DOS，或在论文中搜索程序内部键名。本机原CaH6稿已完整重跑并自动补核，必要未完成项为0，三项人工确认及SQL／Redis一致性已验证；未报告的可选值保持空。运行边界见[#199本机记录](../../specs/199-basic-field-model-review/runtime-application.md)。

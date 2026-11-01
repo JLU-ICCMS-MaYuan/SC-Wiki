@@ -197,6 +197,12 @@ def expand_property_fields(records):
                 'dependency_policy_version': 1,
                 'legacy_item_key': legacy_parent, 'previous_field_item_key': prior_field if prior_field != key else None,
                 'validation_record': validation, 'field': field,
+                # 只补充给模型的语义身份，不将无关整条记录加入字段版本。
+                'scientific_record': {k: deepcopy(source.get(k)) for k in
+                    ('record_type', 'property_code', 'name_raw', 'method_code', 'value_kind', 'value_number', 'unit_raw')},
+                'extension_context': {k: deepcopy(v) for k, v in extension_value.items()
+                    if k in {'key', 'name', 'name_raw', 'value_kind', 'value_raw', 'value_number', 'unit_raw'}}
+                    if isinstance(extension_value, dict) else None,
                 'record_field_key': (extension_value.get('field_key') or extension_value.get('key')) if isinstance(extension_value, dict) else None,
                 'owner_label': ' · '.join(str(x) for x in [context.get('material_name') or context.get('material') or '材料',
                     str(context.get('pressure_value_gpa')) + ' GPa' if context.get('pressure_value_gpa') is not None else '',

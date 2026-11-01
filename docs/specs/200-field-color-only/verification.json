@@ -267,5 +267,7 @@
     "ref": "mayuan",
     "result": "HTTP 404",
     "reason": "本轮未推送；不能关闭Issue或声称远程Spec已可读"
-  }
+  },
+  "runtime_application": "runtime-application.json",
+  "history_note": "原代码验收当时未迁移、未改原稿的记录保留；后续本机迁移和重跑以runtime-application.json为准。"
 }

@@ -1,0 +1,124 @@
+{
+  "date": "2026-11-01T21:17:04.883198+08:00",
+  "authorization": "执行业务库迁移，原草稿自动重跑",
+  "environment": {
+    "host": "本机macOS",
+    "runtime": "原生Python/Go/Vite",
+    "database": "127.0.0.1:3307/scwiki"
+  },
+  "migration": {
+    "passed": true,
+    "before": [
+      "20261020_0049",
+      "20261030_0192"
+    ],
+    "after": [
+      "20261020_0049",
+      "20261101_0198"
+    ],
+    "table_counts_preserved": true,
+    "column_removed": true,
+    "backup_dir": "/Users/mayuan/Codes/SC-Wiki/.local/backups/goal196-200-20261101-210323"
+  },
+  "backup": {
+    "database": "scwiki",
+    "sql_gzip": "business.sql.gz",
+    "compressed_bytes": 36778602,
+    "sql_sha256": "6ec6720755a123b037526a8caf2536313769aef6b40cda7238d90f8da9532313",
+    "task_id": "37688f914394419e8914e5ebf486df7d"
+  },
+  "rerun": {
+    "task_id": "37688f914394419e8914e5ebf486df7d",
+    "job_id": "b691028e-d34b-4617-8fdb-b8424cfa049f",
+    "started_at": "2026-11-01T21:11:53.774909+08:00",
+    "model": "deepseek-v4-pro",
+    "machine_results_invalidated": 54,
+    "manual_results_preserved": 3,
+    "workdraft_revision_before": 41,
+    "backup": "/Users/mayuan/Codes/SC-Wiki/.local/backups/goal196-200-20261101-210323"
+  },
+  "completion": "迁移与原草稿自动重跑完成",
+  "finished_at": "2026-11-01T22:27:20.408333+08:00",
+  "passed": true,
+  "full_rerun_complete": true,
+  "required_unfinished": 0,
+  "status_counts": {
+    "supported": 163,
+    "unchecked": 158,
+    "missing": 31
+  },
+  "manual_decisions_preserved": 3,
+  "workdraft_revision_after": 107,
+  "sql_redis_equal": true,
+  "references": 37,
+  "paper": {
+    "year": 2012,
+    "volume": "109",
+    "issue_number": "17",
+    "pages": "6463-6466",
+    "superconductor_kind": "conventional"
+  },
+  "states": [
+    {
+      "material": "CaH6",
+      "pressure_value_gpa": 150.0,
+      "reported_space_group_symbol": "Im-3m",
+      "reported_space_group_number": 229,
+      "crystal_system": "cubic",
+      "element_count": 2
+    },
+    {
+      "material": "CaH6",
+      "pressure_value_gpa": 200.0,
+      "reported_space_group_symbol": "Im-3m",
+      "reported_space_group_number": 229,
+      "crystal_system": "cubic",
+      "element_count": 2
+    },
+    {
+      "material": "CaH6",
+      "pressure_value_gpa": 250.0,
+      "reported_space_group_symbol": "Im-3m",
+      "reported_space_group_number": 229,
+      "crystal_system": "cubic",
+      "element_count": 2
+    },
+    {
+      "material": "CaH2",
+      "pressure_value_gpa": 0.0,
+      "reported_space_group_symbol": "Pnma",
+      "reported_space_group_number": 62,
+      "crystal_system": "orthorhombic",
+      "element_count": 2
+    },
+    {
+      "material": "CaH2",
+      "pressure_value_gpa": 150.0,
+      "reported_space_group_symbol": "P63/mmc",
+      "reported_space_group_number": 194,
+      "crystal_system": "hexagonal",
+      "element_count": 2
+    },
+    {
+      "material": "CaH4",
+      "pressure_value_gpa": 50.0,
+      "reported_space_group_symbol": "I4/mmm",
+      "reported_space_group_number": 139,
+      "crystal_system": "tetragonal",
+      "element_count": 2
+    }
+  ],
+  "context_fix": {
+    "reason": "物性条件子项缺少所属记录类型与扩展实际键值，模型误将声子设置移给电子DOS",
+    "files": {
+      "backend/ingest/model_review.py": "8b825e3e681b07264ab9e3936d63e808353779a57e5d6fc9262d52f768673db3",
+      "backend/ingest/property_field_review.py": "b80ffeb1e3ba7928e0d6bf27b98575db6d73f2f3997823309d4a426ad5d131a2"
+    },
+    "backend_passed": 98,
+    "backend_skipped": 1,
+    "form_passed": 119,
+    "mutation_detected": 8
+  },
+  "scope": "仅本机原生网站与127.0.0.1:3307/scwiki；不涉及阿里云或Docker，不自动提交或科学批准",
+  "published_paper_data_changed": false
+}

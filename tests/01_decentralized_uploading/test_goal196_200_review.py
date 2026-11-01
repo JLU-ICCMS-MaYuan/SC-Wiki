@@ -138,3 +138,21 @@ def test_grobid_probe_reports_current_service_without_changing_task(monkeypatch)
     def offline(*a, **k): raise httpx.ConnectError('offline')
     monkeypatch.setattr(httpx, 'get', offline)
     assert not service_available()
+
+
+def test_electronic_and_extension_fields_keep_their_actual_record_context():
+    from backend.ingest.property_evidence import complete_snapshot, draft_records
+    record = {'record_key': 'r', 'record_type': 'property', 'property_code': 'dos_fermi',
+        'module_code': 'electronic_properties', 'name_raw': 'Electronic DOS', 'value_kind': 'number',
+        'value_number': .02234, 'value_raw': '0.02234', 'unit_raw': 'states/eV/f.u.',
+        'payload': {'calculation_conditions': {'electronic_method': 'DFT', 'extensions': [
+            {'field_key': 'cutoff', 'key': 'electronic_structure.energy_cutoff', 'value_kind': 'number',
+             'value_raw': '1000', 'value_number': 1000, 'unit_raw': 'eV'}]}}}
+    draft = {'paper': {}, 'material_states': [{'state_key': 's', 'material': 'CaH4', 'pressure_value_gpa': 50,
+        'property_modules': [{'module_key': 'm', 'module_code': 'electronic_properties', 'records': [record]}]}]}
+    snap = complete_snapshot('upload', 'isolate', draft_records(draft, {}), [], draft)
+    field = next(r for r in snap['records'] if r.get('record_field') == 'payload.calculation_conditions.phonon_method')
+    assert field['scientific_record']['property_code'] == 'dos_fermi'
+    extension = next(r for r in snap['records'] if r['field'].endswith('.extensions.0.value_kind'))
+    assert extension['extension_context']['key'] == 'electronic_structure.energy_cutoff'
+    assert extension['extension_context']['unit_raw'] == 'eV'

@@ -62,6 +62,11 @@ conventional，按论文推断保留依据；不能仅凭Eliashberg、DFT或材�
 unknown。SSCHA须确实用于结构自由能优化；仅计算声子或出现0K不能确定优化方法。
 不生成已退役的structure_optimization_details八项参数，也不通过condition_additions重建这些
 结构优化专用参数（方法、电子理论、软件、温压、平均位置、体积、晶胞形状）。
+scientific_record是当前字段所属的实际物性记录，必须先识别物性再核对条件。
+电子DOS/电子带隙不是声子或EPC记录，除非本文明确报告适用的电子—声子修正关系，
+不能因同材料做过声子计算就填写该电子记录的phonon_method或vibrational_treatment。
+extension_context给出扩展字段实际键、值与单位；value_kind、unit_raw等子项须结合它判断，
+而不是在论文里寻找程序内部字段名。原文未报告或不适用的可选字段，核实后保持空值。
 '''
 
 
@@ -327,7 +332,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
         request = {'records': [{k: deepcopy(v) for k, v in r.items() if k in {
                        'key', 'field', 'label', 'claim', 'current_value', 'editable_fields', 'required',
                        'state_key', 'module_key', 'record_key', 'record_field', 'record_group_key',
-                       'provenance', 'state_review_context', 'state_results'}} for r in pending.values()],
+                       'provenance', 'state_review_context', 'state_results', 'scientific_record', 'extension_context'}} for r in pending.values()],
                    'sources': list(read.values()),
                    'source_index': [{k: s.get(k) for k in ('source_id', 'file_id', 'page_start', 'block_id')}
                                     | {'preview': s['content'][:100]} for s in catalog.values()],
