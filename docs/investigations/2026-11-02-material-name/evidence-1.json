@@ -1,0 +1,223 @@
+{
+  "checked_at": "2026-11-02T06:13:53.311719+08:00",
+  "scope": "仅问题1：材料名空值起点与传播路径；未修改业务数据、未调用模型、未进行界面操作",
+  "source_commit": "b97d3a14523cffdb489304562d00177abdbfc031",
+  "task_id": "37688f914394419e8914e5ebf486df7d",
+  "workdraft_revision": 108,
+  "original_model_response_matches_raw": true,
+  "artifacts": [
+    {
+      "path": ".data/review_artifacts/37688f914394419e8914e5ebf486df7d/chunks/2d41b930bc404310bc1c3a930d1a0e06/extraction_attempts/00000/6560eb21a1cd43b2bfd7038c7eab7a4d/raw.json",
+      "sha256": "ad0f60cc58411e06b3ba00b5591437f3bbf8c47748e2ceba507a67d3980ff0dc"
+    },
+    {
+      "path": ".data/review_artifacts/37688f914394419e8914e5ebf486df7d/chunks/2d41b930bc404310bc1c3a930d1a0e06/extraction_attempts/00000/6560eb21a1cd43b2bfd7038c7eab7a4d/call-1.response.txt",
+      "sha256": "ad0f60cc58411e06b3ba00b5591437f3bbf8c47748e2ceba507a67d3980ff0dc"
+    },
+    {
+      "path": ".local/backups/goal196-200-20261101-210323/workdraft-before.json",
+      "sha256": "3fa8c2a0360a99cbb8f89cd8b52e530c5fd388310e2750e25cb29350bc4a54c2"
+    },
+    {
+      "path": ".data/review_artifacts/37688f914394419e8914e5ebf486df7d/scientific_form_filling.json",
+      "sha256": "21698e4fbecd12f4313d4bff127f572e275106c3d83a09656c4327e30eee2c3c"
+    },
+    {
+      "path": ".data/review_artifacts/37688f914394419e8914e5ebf486df7d/result.json",
+      "sha256": "ec4b1186c2742679b9ac09db8f1a53c8a2da0a560c033e21467e9e373f20c966"
+    }
+  ],
+  "states": [
+    {
+      "card_number": 4,
+      "before_rerun": {
+        "state_key": "state-4",
+        "material": "CaH2",
+        "material_name": "CaH2",
+        "pressure_value_gpa": 0.0
+      },
+      "migration_preserves_name": true,
+      "source_extraction": {
+        "state_key": null,
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 0.0
+      },
+      "normalized": {
+        "state_key": null,
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 0.0
+      },
+      "form_filling_input": {
+        "state_key": null,
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 0.0
+      },
+      "initial_rerun_result": {
+        "state_key": "state-4",
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 0.0
+      },
+      "final_result": {
+        "state_key": "state-4",
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 0.0
+      },
+      "current_sql": {
+        "state_key": "state-4",
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 0.0
+      },
+      "redis_and_draft_read_match": true,
+      "review_filter": {
+        "field": "material_states[3].material_name",
+        "current_value": null,
+        "required": false,
+        "model_reviewable": false
+      }
+    },
+    {
+      "card_number": 5,
+      "before_rerun": {
+        "state_key": "state-5",
+        "material": "CaH2",
+        "material_name": "CaH2",
+        "pressure_value_gpa": 150.0
+      },
+      "migration_preserves_name": true,
+      "source_extraction": {
+        "state_key": null,
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 150.0
+      },
+      "normalized": {
+        "state_key": null,
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 150.0
+      },
+      "form_filling_input": {
+        "state_key": null,
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 150.0
+      },
+      "initial_rerun_result": {
+        "state_key": "state-5",
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 150.0
+      },
+      "final_result": {
+        "state_key": "state-5",
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 150.0
+      },
+      "current_sql": {
+        "state_key": "state-5",
+        "material": "CaH2",
+        "material_name": null,
+        "pressure_value_gpa": 150.0
+      },
+      "redis_and_draft_read_match": true,
+      "review_filter": {
+        "field": "material_states[4].material_name",
+        "current_value": null,
+        "required": false,
+        "model_reviewable": false
+      }
+    },
+    {
+      "card_number": 6,
+      "before_rerun": {
+        "state_key": "state-6",
+        "material": "CaH4",
+        "material_name": "CaH4",
+        "pressure_value_gpa": 50.0
+      },
+      "migration_preserves_name": true,
+      "source_extraction": {
+        "state_key": null,
+        "material": "CaH4",
+        "material_name": null,
+        "pressure_value_gpa": 50.0
+      },
+      "normalized": {
+        "state_key": null,
+        "material": "CaH4",
+        "material_name": null,
+        "pressure_value_gpa": 50.0
+      },
+      "form_filling_input": {
+        "state_key": null,
+        "material": "CaH4",
+        "material_name": null,
+        "pressure_value_gpa": 50.0
+      },
+      "initial_rerun_result": {
+        "state_key": "state-6",
+        "material": "CaH4",
+        "material_name": null,
+        "pressure_value_gpa": 50.0
+      },
+      "final_result": {
+        "state_key": "state-6",
+        "material": "CaH4",
+        "material_name": null,
+        "pressure_value_gpa": 50.0
+      },
+      "current_sql": {
+        "state_key": "state-6",
+        "material": "CaH4",
+        "material_name": null,
+        "pressure_value_gpa": 50.0
+      },
+      "redis_and_draft_read_match": true,
+      "review_filter": {
+        "field": "material_states[5].material_name",
+        "current_value": null,
+        "required": false,
+        "model_reviewable": false
+      }
+    }
+  ],
+  "code_references": [
+    {
+      "path": "backend/ingest/domain_extraction.py",
+      "line": 119,
+      "finding": "材料名允许为空；第146行要求名称或化学式至少一项"
+    },
+    {
+      "path": "backend/ingest/upload_jobs.py",
+      "line": 1251,
+      "finding": "仅当化学式无法解析时将原始写法保留为材料名，不会将有效化学式自动复制到材料名"
+    },
+    {
+      "path": "backend/ingest/scientific_evidence.py",
+      "line": 120,
+      "finding": "空字段required为false"
+    },
+    {
+      "path": "backend/ingest/model_review.py",
+      "line": 105,
+      "finding": "空值核对名单包含material化学式，不含material_name材料名"
+    },
+    {
+      "path": "frontend/src/components/MaterialStatesEditor.tsx",
+      "line": 706,
+      "finding": "材料名输入框直接读取state.material_name；空值显示空字符串"
+    }
+  ],
+  "limitations": [
+    "记录为当前只读数据与既有原始模型响应核查，未重跑模型",
+    "页面绑定由源码与用户截图核对，未声称完成真实浏览器验收",
+    "标红与正确说明之间的原因将在问题2单独展开"
+  ]
+}
