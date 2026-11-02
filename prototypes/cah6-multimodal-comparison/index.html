@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CaH₆ · 多模态输入对照</title>
+<style>
+:root{color-scheme:light;--ink:#17253b;--muted:#657185;--line:#e0e5eb;--paper:#fff;--blue:#2563a8;--purple:#6952b4;--green:#187154;--amber:#a96915}
+*{box-sizing:border-box}body{margin:0;background:#f5f6f8;color:var(--ink);font:14px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}button,select,input{font:inherit}button,a,select,input{outline-offset:4px}button{cursor:pointer}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+nav{border-bottom:1px solid var(--line);background:white;padding:16px max(24px,calc((100vw - 1340px)/2));display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{font-size:17px;font-weight:750;letter-spacing:.5px}.brand small{font-size:12px;color:var(--muted);font-weight:500;margin-left:14px}.badge{padding:4px 10px;border:1px solid var(--line);border-radius:6px;font-size:12px;white-space:nowrap}
+main{max-width:1388px;padding:30px 24px 50px;margin:auto}header.hero{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:20px}h1{font-size:29px;letter-spacing:-.7px;margin:0 0 7px}h2{font-size:17px;margin:0}h3{font-size:14px;margin:0}.subtle,p.note{color:var(--muted)}p{margin:5px 0}.primary{border:1px solid var(--line);background:white;border-radius:7px;padding:8px 13px;color:var(--ink)}.primary:hover{border-color:var(--blue)}
+.status{background:#edf3fa;border:1px solid #d7e4f2;border-radius:8px;padding:11px 14px;margin-bottom:20px;display:flex;gap:10px;align-items:center}.dot{width:8px;height:8px;border-radius:50%;background:#ce9446;flex:none}.dot.done{background:var(--green)}.status small{margin-left:auto;color:var(--muted)}
+.arms{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}.arm{background:white;border:1px solid var(--line);border-top:3px solid var(--blue);border-radius:9px;padding:18px 21px}.arm.vision{border-top-color:var(--purple)}.arm-title{display:flex;gap:11px;align-items:center;margin-bottom:14px}.icon{width:34px;height:34px;display:grid;place-items:center;color:var(--blue);background:#edf3fb;border-radius:8px;font-weight:800}.vision .icon{color:var(--purple);background:#f1eef9}.arm-title .badge{margin-left:auto}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.metric span{font-size:12px;color:var(--muted);display:block}.metric strong{display:block;font-size:23px;line-height:1.45;font-variant-numeric:tabular-nums;letter-spacing:-.5px}.costs{border-top:1px solid var(--line);margin-top:17px;padding-top:12px;display:flex;gap:25px;flex-wrap:wrap}.costs span{color:var(--muted);font-size:12px}.costs b{font-size:15px;color:var(--ink);margin-left:5px;font-variant-numeric:tabular-nums}.arm-foot{font-size:11px;color:var(--muted);margin-top:11px}
+.workspace{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);gap:20px;align-items:start}.panel{background:white;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-bottom:18px}.panel-head{padding:15px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;align-items:center}.panel-head small{color:var(--muted)}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th{text-align:left;font-size:12px;background:#f8f9fb;color:var(--muted);font-weight:600;padding:10px 15px}td{padding:12px 15px;border-top:1px solid #edf0f3;vertical-align:top}td:first-child{width:35%}.label{font-weight:650}.tiny{font-size:11px;color:var(--muted)}.good{color:var(--green)}.warn{color:var(--amber)}.missing{color:#9b4d47}.source-btn{border:0;background:transparent;color:var(--blue);padding:3px 0;font-size:11px;text-align:left}.source-btn:hover{text-decoration:underline}.source-btn:disabled{cursor:default;color:var(--muted)}.table-note{padding:10px 16px;color:var(--muted);font-size:11px;background:#fafbfc;border-top:1px solid var(--line)}
+.source{position:sticky;top:14px}.controls{display:flex;align-items:center;gap:8px;padding:12px 14px;flex-wrap:wrap}.controls select,.controls input{border:1px solid var(--line);border-radius:5px;background:white;padding:5px 7px;max-width:150px}.controls input{width:55px}.controls button{padding:4px 9px;border:1px solid var(--line);background:white;border-radius:5px}.page-scroll{max-height:650px;overflow:auto;background:#e8edf2;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.page-canvas{position:relative;width:100%;min-height:100px}.page-canvas img{width:100%;display:block}.region{position:absolute;border:2px solid #d04d58;background:#d04d580c;pointer-events:none}.quote{padding:13px 16px;max-height:150px;overflow:auto;font-size:12px;color:var(--muted);white-space:pre-wrap}.source-links{padding:0 16px 14px;display:flex;gap:16px;font-size:12px}
+details{padding:14px 17px}summary{cursor:pointer;font-weight:600}.notes-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:14px 18px}ul{padding-left:19px;margin:7px 0;font-size:12px;color:var(--muted)}.calls td,.calls th{font-size:11px;padding:8px 12px}.footnote{font-size:12px;color:var(--muted);padding:12px 0;line-height:1.9}pre{white-space:pre-wrap;word-break:break-word;font-size:11px}.empty{padding:30px;text-align:center;color:var(--muted)}
+@media(max-width:900px){.workspace{grid-template-columns:1fr}.source{position:static}.arms{gap:12px}.arm{padding:14px}.metrics{grid-template-columns:repeat(2,1fr)}.status small{display:none}h1{font-size:24px}.brand small{display:none}.costs{gap:12px}main{padding:22px 14px}.notes-grid{grid-template-columns:1fr}}
+@media(max-width:540px){.arms{grid-template-columns:1fr}header.hero{align-items:flex-start}header.hero .primary{white-space:nowrap}.metrics{grid-template-columns:repeat(4,1fr)}.metric strong{font-size:20px}.metric span{font-size:10px}td,th{padding:10px}nav{padding:13px 16px}.badge{font-size:10px}.page-scroll{max-height:550px}}
+</style>
+<nav><div class="brand">CaH₆ <small>模型输入对照实验</small></div><span class="badge">独立 Demo · 不写业务草稿</span></nav>
+<main>
+<header class="hero"><div><h1>同一篇论文，两种输入方式。</h1><p class="subtle" id="subtitle">读取真实实验结果…</p></div><button class="primary" id="refresh">刷新结果</button></header>
+<div class="status" role="status"><i class="dot" id="dot"></i><span id="status">等待实验数据</span><small>刷新与翻页不会调用模型</small></div>
+<div class="arms" id="arms"></div>
+<div class="workspace">
+<div>
+ <section class="panel"><div class="panel-head"><h2>科学结果与配对</h2><small>参考项在运行前单独保存</small></div><div class="table-wrap"><table><thead><tr><th>已核对参考项</th><th>OCR 文本</th><th>直接页面图像</th></tr></thead><tbody id="records"></tbody></table></div><div class="table-note">来源指标仅检查是否指向参考页；引句和区域需查看原页，不代表科学批准。CaH₄ 单值 DOS 的压力归属单独保留歧义。</div></section>
+ <section class="panel"><div class="panel-head"><h2>目标图谱识别</h2><small>识别图谱 ≠ 数字化谱线</small></div><div class="table-wrap"><table><thead><tr><th>原图</th><th>OCR 文本</th><th>直接页面图像</th></tr></thead><tbody id="figures"></tbody></table></div><div class="table-note">图注能够帮助文字组找到图号；本表不把图号识别当作已提取数值曲线。</div></section>
+ <section class="panel"><div class="panel-head"><h2>补充核对</h2><small>不计入 7 项标量完整率</small></div><div class="table-wrap"><table><thead><tr><th>观察项</th><th>OCR 文本</th><th>直接页面图像</th></tr></thead><tbody id="review"></tbody></table></div></section>
+ <section class="panel"><details><summary>分批未确定内容与额外识别</summary><div class="notes-grid" id="uncertainties"></div></details></section>
+ <section class="panel"><details><summary>实际调用与 token 明细</summary><div class="table-wrap"><table class="calls"><thead><tr><th>输入方式／页组</th><th>状态</th><th>秒</th><th>输入 token</th><th>输出 token</th></tr></thead><tbody id="calls"></tbody></table></div><p class="tiny">用量来自接口返回的 usage。未返回时显示“未提供”，不使用字符估算冒充实际 token。</p></details></section>
+</div>
+<aside class="panel source"><div class="panel-head"><h2>原页核对</h2><small id="page-label">正文 · 第 3 页</small></div>
+<div class="controls"><label>文件 <select id="role"><option value="main">正文</option><option value="supplementary">补充材料</option></select></label><label>页 <input id="page" type="number" min="1" value="3"></label><button id="previous" aria-label="上一页">‹</button><button id="next" aria-label="下一页">›</button><select id="zoom" aria-label="页面缩放"><option value="1">适应宽度</option><option value="2">放大 2 倍</option><option value="3">放大 3 倍</option></select></div>
+<div class="page-scroll" id="page-scroll"><div class="page-canvas" id="canvas"><img id="page-image" alt="原 PDF 页面"><div class="region" id="region" hidden></div></div></div>
+<div class="quote" id="quote">点击结果下方的来源，查看该组模型引用的原页。红框若存在，是模型提供的区域，仍需核对。</div>
+<div class="source-links"><a id="large" target="_blank" rel="noopener">打开原页大图 ↗</a><a id="pdf" target="_blank" rel="noopener">打开原 PDF ↗</a></div>
+</aside>
+</div>
+<div class="footnote" id="method"></div>
+<section class="panel"><details><summary>实验开始时的完整流程状态（独立列示）</summary><p id="production" class="note"></p></details></section>
+</main>
+<script>
+const $=id=>document.getElementById(id), names={text:'OCR 文本',vision:'直接页面图像'}, roles={main:'正文',supplementary:'补充材料'};
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>typeof v==='number'?v.toLocaleString('en-US'):'未提供';
+let report=null, timer=null, sourceItems=[], loading=false;
+const expected=[
+ {material:'CaH6',pressure_gpa:150,tc_k:235,mu_star:.1,role:'main',pages:[3]},
+ {material:'CaH6',pressure_gpa:150,tc_k:220,mu_star:.13,role:'main',pages:[3]},
+ {material:'CaH6',pressure_gpa:200,tc_k:201,mu_star:.13,role:'main',pages:[3,4]},
+ {material:'CaH6',pressure_gpa:250,tc_k:187,mu_star:.13,role:'main',pages:[3,4]},
+ {material:'CaH2',pressure_gpa:0,property:'band_gap',value:3.05,unit:'eV',role:'supplementary',pages:[4,5]},
+ {material:'CaH2',pressure_gpa:150,property:'band_gap',value:.48,unit:'eV',role:'supplementary',pages:[4,5]},
+ {material:'CaH4',pressure_gpa:null,property:'dos_fermi',value:.02234,unit:'states/eV/f.u.',role:'supplementary',pages:[10]},
+];
+function sourceButton(source,label){const index=sourceItems.push(source)-1;return `<button class="source-btn" data-source="${index}">${esc(label)}</button>`}
+function rowCell(row){
+ if(!row?.found)return '<span class="missing">尚未提取</span>';
+ const f=row.found,tc='tc_k' in row.expected;
+ const status=tc&&!row.paired?'值已提取，μ* 未正确配对':!row.unit_ok?'值已提取，单位需核对':'已提取';
+ let content=`<span class="${row.paired&&row.unit_ok?'good':'warn'}">${esc(status)}</span><div class="tiny">${tc?esc(f.tc_k)+' K · μ* '+esc(f.mu_star??'未报告'):esc(f.value)+' '+esc(f.unit)}</div><div class="tiny">相：${esc(f.phase||'未报告')}</div>`;
+ const sources=Array.isArray(f.sources)?f.sources:[];
+ if(sources.length)content+=sources.map(s=>sourceButton(s,`${roles[s.role]||s.role} p.${s.page}${s.role===row.expected.role&&row.expected.pages.includes(s.page)?' · 参考页':''}`)).join('<br>');
+ else content+='<div class="warn tiny">没有给出来源</div>';
+ return content;
+}
+function render(r){
+ report=r;sourceItems=[];
+ $('subtitle').textContent=`${r.model} · ${r.files.reduce((s,f)=>s+f.pages,0)} 页 · 每组 ${r.batches.length} 次调用 · 同一提取要求`;
+ const running=Object.entries(r.arms).flatMap(([arm,x])=>x.calls.filter(c=>c.status==='running').map(c=>`${names[arm]} · ${roles[c.role]}第 ${c.pages[0]}–${c.pages.at(-1)} 页`));
+ const failures=Object.values(r.arms).flatMap(a=>a.calls).filter(c=>c.status==='failed').length;
+ $('status').textContent=r.status==='completed'?(failures?`本轮结束，有 ${failures} 次调用失败；失败结果不计为提取成功。`:'本轮实验结束；请结合来源核对结果判断。'):running.length?'正在运行：'+running.join(' / '):'正在准备原页';
+ $('dot').className='dot'+(r.status==='completed'&&!failures?' done':'');
+ $('arms').innerHTML=Object.entries(r.arms).map(([name,arm])=>{
+   const m=arm.resources,s=arm.score,ready=arm.calls.filter(c=>c.status==='completed').length;
+   return `<section class="arm ${name}"><div class="arm-title"><span class="icon">${name==='text'?'T':'V'}</span><div><h2>${names[name]}</h2><div class="tiny">${name==='text'?'同源 OCR 选用文字，不含页面像素':'原 PDF 页面 · 144 dpi，不含 OCR 文字'}</div></div><span class="badge">${ready}/${r.batches.length} 完成</span></div><div class="metrics"><div class="metric"><span>找到参考结果</span><strong>${s.present}/7</strong></div><div class="metric"><span>Tc–μ* 配对</span><strong>${s.tc_pairs}/4</strong></div><div class="metric"><span>指向参考页</span><strong>${s.source_pages}/7</strong></div><div class="metric"><span>目标图谱</span><strong>${s.figure_matches}/3</strong></div></div><div class="costs"><span>输入 token<b>${num(m.input_tokens)}</b></span><span>输出 token<b>${num(m.output_tokens)}</b></span><span>模型耗时<b>${m.seconds.toFixed(1)} s</b></span></div><div class="arm-foot">${r.status==='completed'?'本轮累计':'当前已完成调用小计'}；来源页命中不等于引句和科学语义已审核。</div></section>`;
+ }).join('');
+ $('records').innerHTML=expected.map((e,i)=>`<tr><td><div class="label">${esc(e.material)} · ${e.pressure_gpa===null?'压力待确定':e.pressure_gpa+' GPa'}</div><div>${'tc_k' in e?'Tc '+e.tc_k+' K · μ* '+e.mu_star:(e.property==='band_gap'?'带隙 ':'费米能级 DOS ')+e.value+' '+e.unit}</div>${sourceButton({role:e.role,page:e.pages[0]},'查看参考原页 ↗')}</td><td>${rowCell(r.arms.text.score.records[i])}</td><td>${rowCell(r.arms.vision.score.records[i])}</td></tr>`).join('');
+ $('figures').innerHTML=r.arms.text.score.figures.map((x,i)=>`<tr><td><div class="label">${roles[x.expected.role]} · 图 ${x.expected.figure_label}</div><div class="tiny">${x.expected.kinds.join(' / ')}</div>${sourceButton({role:x.expected.role,page:x.expected.page},'PDF 第 '+x.expected.page+' 页 ↗')}</td>${['text','vision'].map(a=>{
+ const f=r.arms[a].score.figures[i];return `<td><span class="${f.present?'good':'missing'}">${f.present?'已识别':'尚未识别'}</span>${f.found?'<div class="tiny">'+esc(f.found.material||'')+' · '+esc((f.found.pressures_gpa||[]).join(', '))+' GPa</div>':''}</td>`;
+ }).join('')}</tr>`).join('');
+ const boxes=a=>r.arms[a].score.records.filter(row=>(row.found?.sources||[]).some(s=>Array.isArray(s.bbox)&&s.bbox.length===4)).length;
+ $('review').innerHTML=`<tr><td>提供原页区域框</td><td>${boxes('text')}/7</td><td>${boxes('vision')}/7</td></tr><tr><td>150 GPa CaH₆ 空间群符号</td><td>${esc(r.arms.text.output.tc_points[0]?.phase||'未报告')}</td><td>${esc(r.arms.vision.output.tc_points[0]?.phase||'未报告')}</td></tr><tr><td>额外图谱列表项</td><td>${r.arms.text.score.unexpected_spectra.length} 项；详见下方分批结果</td><td>${r.arms.vision.score.unexpected_spectra.length} 项</td></tr>`;
+ $('uncertainties').innerHTML=Object.entries(r.arms).map(([a,x])=>`<div><h3>${names[a]}</h3>${x.calls.filter(c=>c.result?.uncertainties?.length).map(c=>'<p class="tiny">'+esc(roles[c.role])+' · PDF 第 '+esc(c.pages[0])+'–'+esc(c.pages.at(-1))+' 页</p><ul>'+c.result.uncertainties.map(v=>'<li>'+esc(typeof v==='string'?v:JSON.stringify(v))+'</li>').join('')+'</ul>').join('')||'<p class="tiny">尚未报告不确定项</p>'}${x.score.unexpected_spectra.length?'<p class="warn tiny">额外／可能误识别图谱：</p><pre>'+esc(JSON.stringify(x.score.unexpected_spectra,null,2))+'</pre>':''}</div>`).join('');
+ $('calls').innerHTML=Object.entries(r.arms).flatMap(([a,x])=>x.calls.map(c=>`<tr><td>${names[a]} · ${esc(c.batch)}</td><td>${esc(c.status)}${c.error?'<div class="missing">'+esc(c.error.message)+'</div>':''}</td><td>${(c.seconds||0).toFixed(1)}</td><td>${num(c.usage?.prompt_tokens)}</td><td>${num(c.usage?.completion_tokens)}</td></tr>`)).join('');
+ $('method').textContent=`本次仅比较 7 个已核对标量结果与 3 幅目标图，不代表整篇全部科学信息的准确率。两组提示、模型和页组一致；参考答案不进入请求。OCR 文字复用已生成的同源结果，属于精简文字基线；共同准备（文件核验及页面渲染）耗时 ${r.preparation_seconds.toFixed(1)} 秒。表中仅比较模型调用耗时，未重跑 OCR 预处理，不能据此判断完整流程谁更快。未提供单价，本轮不估算金额。${r.input_archive||''}`;
+ $('production').textContent=`实验开始时原任务状态：${r.production_baseline.status}。${r.production_baseline.error||''} ${r.production_baseline.note}。${r.business_state_note||''}`;
+}
+function pageView(source){
+ const role=source?.role||$('role').value, file=report?.files.find(f=>f.role===role);
+ if(!file)return;
+ const page=Math.max(1,Math.min(file.pages,Number(source?.page||$('page').value)||1));
+ $('role').value=role;$('page').value=page;$('page').max=file.pages;
+ $('page-label').textContent=`${roles[role]} · 第 ${page} 页`;
+ const url=`/page/${role}/${page}.jpg`;
+ if($('page-image').getAttribute('src')!==url)$('page-image').src=url;
+ $('large').href=url;$('pdf').href=`/source/${role}.pdf#page=${page}`;
+ $('quote').textContent=source?.quote?'模型引句（需核对）：'+source.quote:'参考原页。请结合正文、图注及相邻页核对结果和条件。红框若存在，是模型提供的区域。';
+ const b=source?.bbox;
+ $('region').hidden=!(Array.isArray(b)&&b.length===4&&b.every(v=>typeof v==='number'&&v>=0&&v<=1000)&&b[2]>b[0]&&b[3]>b[1]);
+ if(!$('region').hidden)Object.assign($('region').style,{left:b[0]/10+'%',top:b[1]/10+'%',width:(b[2]-b[0])/10+'%',height:(b[3]-b[1])/10+'%'});
+}
+async function load(){
+ if(loading)return;loading=true;clearTimeout(timer);
+ try{const response=await fetch('/api/report',{cache:'no-store'});if(!response.ok)throw Error('实验数据尚未就绪');const r=await response.json();const initial=!report;render(r);if(initial)pageView({role:'main',page:3});if(r.status!=='completed')timer=setTimeout(load,2500)}
+ catch(e){$('status').textContent=e.message;timer=setTimeout(load,2500)}finally{loading=false}
+}
+document.addEventListener('click',e=>{const button=e.target.closest('[data-source]');if(button){pageView(sourceItems[Number(button.dataset.source)]);if(innerWidth<=900)document.querySelector('.source').scrollIntoView({behavior:'smooth',block:'start'})}});
+$('refresh').onclick=load;$('role').onchange=()=>pageView({role:$('role').value,page:1});$('page').onchange=()=>pageView();
+$('previous').onclick=()=>pageView({role:$('role').value,page:Number($('page').value)-1});$('next').onclick=()=>pageView({role:$('role').value,page:Number($('page').value)+1});
+$('zoom').onchange=()=>{$('canvas').style.width=Number($('zoom').value)*100+'%'};
+load();
+</script>
+</html>
