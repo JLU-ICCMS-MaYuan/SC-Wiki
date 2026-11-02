@@ -123,6 +123,8 @@ def _source_rows(candidates, sources):
 
 def assign_structures(draft, candidates, sources=(), model=None, *, on_response=None):
     states = draft.setdefault('material_states', [])
+    from .material_state_contract import ensure_state_keys
+    ensure_state_keys(states)
     issues = draft.setdefault('structural_extraction_issues', [])
     source_rows = _source_rows(candidates, sources)
     source_lookup = {row['source_id']: row for row in source_rows}

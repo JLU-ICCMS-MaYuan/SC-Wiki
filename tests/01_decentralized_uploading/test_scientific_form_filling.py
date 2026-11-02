@@ -8,6 +8,12 @@ import pytest
 
 def fixture():
     state = json.loads((Path(__file__).parents[1] / 'fixtures/issue176/cah6-candidates.json').read_text())
+    from backend.ingest.fixed_form_contract import convert_conditions
+    for module in state['property_modules']:
+        for record in module['records']:
+            old = record.get('payload', {}).get('calculation_conditions')
+            if old is not None:
+                record['payload']['calculation_conditions'] = convert_conditions(old)[0]
     sources = []
     for record in state['property_modules'][0]['records']:
         for evidence in record['evidences']:
@@ -125,7 +131,7 @@ def test_range_equivalence_requires_opt_in_and_matching_method():
     assert missing_tc_measurements(before,after,allow_paired_range=True) == ['range']
 
 
-@pytest.mark.parametrize('property_code,unit', [('band_gap','eV'),('dos_fermi','states/eV/f.u.')])
+@pytest.mark.parametrize('property_code,unit', [('dos_fermi','states/eV/f.u.')])
 def test_other_scientific_record_preserves_definition_units_and_sources(property_code,unit):
     from backend.ingest.scientific_form_filling import apply_plan
     state, sources = fixture()
@@ -140,6 +146,17 @@ def test_other_scientific_record_preserves_definition_units_and_sources(property
     r=result[0]['property_modules'][0]['records'][0]
     assert r['canonical_unit']==unit and 'tc_group' not in r['payload']
     assert r['definition_key']=='record.electronic_properties.'+property_code
+
+
+def test_retired_band_gap_remains_readable_without_new_model_generation():
+    from backend.ingest.scientific_form_filling import fill_scientific_forms
+    state, _ = fixture()
+    record = state['property_modules'][0]['records'][0]
+    record.update(property_code='band_gap', record_type='property', module_code='electronic_properties')
+    state['property_modules'][0]['records'] = [record]
+    original = deepcopy(state)
+    result, report = fill_scientific_forms([state], [], lambda *args: pytest.fail('历史带隙不能重新生成'))
+    assert result == [original] and report['status'] == 'not_needed'
 
 
 def test_cancel_propagates_and_technical_failure_keeps_candidates():

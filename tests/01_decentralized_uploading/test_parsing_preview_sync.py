@@ -66,3 +66,24 @@ def test_rq_worker_failure_keeps_last_published_preview(monkeypatch):
     monkeypatch.setattr('backend.ingest.document_shadow.refresh_comparison', lambda _: None)
     tasks.handle_upload_job_failure(SimpleNamespace(args=(state['task_id'],)), RuntimeError, RuntimeError('isolated'), None)
     assert captured[0]['partial_draft'] == preview and captured[0]['status'] == 'failed'
+
+
+def test_automatic_review_failure_cannot_be_published_as_ready(monkeypatch):
+    state = {'status': 'summarizing', 'partial_draft': {'paper': {'title': 'CaH6'}}}
+    def update(_, **changes):
+        state.update(changes)
+        return deepcopy(state)
+    monkeypatch.setattr(jobs, 'update_state', update)
+    failed = jobs.complete_parsing_state('task', {'field_suggestions_error': '自动核对处理异常'}, artifact_manifest=[])
+    assert failed['status'] == 'failed' and failed['processing_status'] == 'failed'
+    assert failed['error_code'] == 'automatic_review_incomplete'
+    assert failed['partial_draft']['paper']['title'] == 'CaH6'
+
+
+def test_successful_review_is_required_for_ready(monkeypatch):
+    monkeypatch.setattr(jobs, 'update_state', lambda task, **changes: changes)
+    complete = jobs.complete_parsing_state('task', {'form_filling_report': {'status': 'completed'}}, artifact_manifest=[])
+    assert complete['status'] == 'ready' and complete['processing_status'] == 'succeeded'
+    incomplete = jobs.complete_parsing_state('task', {'form_filling_report': {'status': 'incomplete',
+        'issues': [{'message': '整理失败'}]}}, artifact_manifest=[])
+    assert incomplete['status'] == 'failed'

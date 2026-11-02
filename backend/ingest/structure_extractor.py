@@ -168,6 +168,8 @@ def _extract_structure_candidate_block(
         return []
     cells = _cell_parameters(text)
     mode = _coordinate_mode(text)
+    if not cells and not _SITE_LABEL.search(text) and not _coordinate_rows(text, mode or 'fractional')[0] and '_atom_site_' not in text:
+        return []  # 方法介绍中的“生成坐标”不是一份待修复的结构表。
     if len(cells) < 6:
         return [_blocked_candidate(source, "PDF 结构缺少完整晶胞参数（a、b、c、alpha、beta、gamma）", page=_page_for_offset(text, cues.start()), quote=text[max(0, cues.start() - 160):cues.end() + 320], cell_parameters=cells)]
     wyckoff = _wyckoff_structure(text, cells)
@@ -223,6 +225,23 @@ def _extract_structure_candidate_block(
     return [original]
 
 
+def _table_space_group(symbol, cells):
+    """保持报告符号，计算时采用既有spglib表与原文晶胞对应的标准设置。"""
+    from pymatgen.symmetry.groups import SpaceGroup
+    from pymatgen.core import Lattice
+    from backend.services.space_groups import all_space_groups
+    compact = lambda value: value.replace('_', '').replace(' ', '')
+    canonical = next((row['symbol'] for row in all_space_groups() if compact(row['symbol']) == compact(symbol)), symbol)
+    factor = 1
+    if canonical.startswith('R') and all(key in cells for key in ('a', 'b', 'c', 'alpha', 'beta', 'gamma')):
+        lattice = Lattice.from_parameters(*(cells[key] for key in ('a', 'b', 'c', 'alpha', 'beta', 'gamma')))
+        hexagonal, rhombohedral = SpaceGroup(canonical + ':H'), SpaceGroup(canonical + ':R')
+        if not hexagonal.is_compatible(lattice) and rhombohedral.is_compatible(lattice):
+            factor = len(hexagonal.symmetry_ops) // len(rhombohedral.symmetry_ops)
+            canonical += ':R'
+    return SpaceGroup(canonical), canonical, factor
+
+
 def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list[dict[str, Any]], set[int]]:
     """按物相拆分带 Wyckoff 位点的结构表，避免把多相晶胞拼成一个模型。"""
     table = re.search(r"(?im)^Table\s+S?\d+\s*[.|:]\s*[^\n]*?structur(?:e|al)\s+parameters\b", markdown)
@@ -264,10 +283,14 @@ def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list
         try:
             from pymatgen.symmetry.groups import SpaceGroup
             from backend.services.wyckoff_rounding import restore_rounded_site
-            group_for_sites = SpaceGroup(symbol)
+            group_for_sites, _, multiplicity_factor = _table_space_group(symbol, cells)
             valid_rows = []
             for row in unique_rows.values():
                 multiplicity = int(re.match(r"\d+", row.group(2)).group())
+                if multiplicity % multiplicity_factor:
+                    invalid_sites += 1
+                    continue
+                multiplicity //= multiplicity_factor
                 try:
                     coords, adjustment = restore_rounded_site(group_for_sites, [row.group(i) for i in (3, 4, 5)], multiplicity)
                 except ValueError:
@@ -310,7 +333,7 @@ def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list
             from pymatgen.symmetry.groups import SpaceGroup
             from pymatgen.io.ase import AseAtomsAdaptor
 
-            group = SpaceGroup(symbol)
+            group, computational_symbol, multiplicity_factor = _table_space_group(symbol, cells)
             inferred: list[str] = []
             system = group.crystal_system
             if system == "cubic" and "a" in cells:
@@ -340,8 +363,8 @@ def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list
             species = [row.group(1) for row, _ in rows]
             coords = [point for _, point in rows]
             lattice = Lattice.from_parameters(*(cells[key] for key in ("a", "b", "c", "alpha", "beta", "gamma")))
-            structure = Structure.from_spacegroup(group.symbol, lattice, species, coords)
-            if len(structure) != sum(int(re.match(r"\d+", row.group(2)).group()) for row, _ in rows):
+            structure = Structure.from_spacegroup(computational_symbol, lattice, species, coords)
+            if len(structure) * multiplicity_factor != sum(int(re.match(r"\d+", row.group(2)).group()) for row, _ in rows):
                 raise ValueError("展开原子数与报告的位点多重性之和不一致")
             if part["material"]:
                 from pymatgen.core import Composition
@@ -362,6 +385,8 @@ def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list
                                         "label": "按原文精度恢复对称约束后展开" if part["rounding_adjustments"] else "空间群展开" if group.int_number != 1 else "原文直接报告",
                                         "inferred_cell_parameters": inferred,
                                         "rounding_adjustments": part["rounding_adjustments"],
+                                        "space_group_setting": computational_symbol,
+                                        "reported_multiplicity_factor": multiplicity_factor,
                                         "rounded_fractional_sites": [f"{row.group(1)}({row.group(2)})" for row, point in rows
                                                                      if point != [float(row.group(i)) for i in (3, 4, 5)]]}
             if part["pressure_source"] and part["pressure_source"]["quote"] != source_with_quote["quote"]:
@@ -377,6 +402,48 @@ def _phase_table_candidates(markdown: str, source: dict[str, Any]) -> tuple[list
     return candidates, pages
 
 
+def _listed_cell_table_candidates(markdown, source):
+    """读取显式a/b/c三列及Wyckoff表；复用既有几何/多重性校验。"""
+    clean = re.sub(r'<!--\s*block:[^>]*-->', lambda m: ' ' * len(m.group()), markdown)
+    heads = list(re.finditer(r'(?im)^\s*Table\s+S?\d+\s+Calculated\s+structural\s+parameters\s+of\s+'
+        r'[^\s]+[-–](?P<material>[A-Z][A-Za-z0-9]*)\s+at\s+(?P<pressure>\d+(?:\.\d+)?)\s*GPa[^\n]*', clean))
+    found, pages = [], set()
+    for index, head in enumerate(heads):
+        end = heads[index + 1].start() if index + 1 < len(heads) else len(clean)
+        following = re.search(r'(?im)^\s*(?:Figure|Fig\.)\s+S?\d+', clean[head.end():end])
+        if following:
+            end = head.end() + following.start()
+        segment = clean[head.start():end]
+        group = re.search(r'(?i)space\s+group\s+([A-Za-z0-9_/\-]+)', segment)
+        lengths = re.search(rf'a\s*,\s*b\s*,\s*c\s*\[[^\]]+\]\s*({_NUMBER})\s+({_NUMBER})\s+({_NUMBER})', segment)
+        angles = re.search(rf'alpha\s*,\s*beta\s*,\s*gamma\s*\[[^\]]+\]\s*({_NUMBER})\s+({_NUMBER})\s+({_NUMBER})', segment.translate(_GREEK_CELL_NAMES))
+        if not group or not lengths or not angles:
+            continue
+        rows = re.sub(r'(?m)^(\s*)([A-Z][a-z]?)\d+(?=\s*\()', r'\1\2', segment)
+        rows = re.sub(r'\((\d+)\s+([a-z])\)', r'(\1\2)', rows)
+        sites = list(_SITE_ROW.finditer(rows))
+        if not sites:
+            continue
+        material, pressure = head.group('material'), head.group('pressure')
+        page = _page_for_offset(markdown, head.start())
+        # 规范化仅供内部读取；对外依据始终是原表，不能把规范化文本当原文。
+        normalized = (f'<!-- page: {page or 1} -->\nTable S1. Structural parameters at {pressure} GPa\n'
+            f'Atomic coordinates (fractional)\n{material} {group.group(1)} '
+            + ' '.join(f'{key}={value}' for key, value in zip(('a', 'b', 'c', 'alpha', 'beta', 'gamma'),
+                [*lengths.groups(), *angles.groups()])) + '\n'
+            + '\n'.join(site.group() for site in sites))
+        candidates, _ = _phase_table_candidates(normalized, source)
+        for candidate in candidates:
+            candidate['sources'] = [{**source, 'page': page, 'quote': markdown[head.start():end].strip()}]
+            candidate.setdefault('derivation', {})
+            if candidate['derivation'] is not None:
+                candidate['derivation']['input_layout'] = 'reported_cell_columns'
+            found.append(candidate)
+        if page:
+            pages.add(page)
+    return found, pages
+
+
 def extract_structure_candidates(
     markdown: str,
     *,
@@ -388,12 +455,16 @@ def extract_structure_candidates(
     text = str(markdown or "")
     if not text.strip():
         return []
+    listed, listed_pages = _listed_cell_table_candidates(text, source) if pdf_path is None else ([], set())
     if pdf_path is not None:
         # 仅在坐标表页取原 PDF 的行布局；不从已丢列关系的 Markdown 猜测坐标。
         import pymupdf
         with pymupdf.open(pdf_path) as document:
             for index, page in enumerate(document):
                 rows = page.get_text(sort=True)
+                tabular, pages = _listed_cell_table_candidates(f'<!-- page: {index + 1} -->\n' + rows, source)
+                listed.extend(tabular)
+                listed_pages.update(pages)
                 if not re.search(r"Atomic\s+coordinates\s*\(fractional\)", rows, re.IGNORECASE):
                     continue
                 marker = f"<!-- page: {index + 1} -->"
@@ -406,6 +477,8 @@ def extract_structure_candidates(
     if len(blocks) == 1:
         blocks = [text]
     candidates, table_pages = _phase_table_candidates(text, source)
+    candidates.extend(listed)
+    table_pages.update(listed_pages)
     for block in blocks:
         page_match = _PAGE.search(block)
         if page_match and int(page_match.group(1)) in table_pages:

@@ -141,9 +141,10 @@ def apply_plan(states, sources, response):
         record["evidences"] = _evidence(entry.get("source_ids"), by_source)
         # 新版本不能继承旧来源关联或人工决定；原候选保存在报告中。
         payload = record.setdefault("payload", {})
+        legacy_labels = deepcopy(payload.pop("legacy_method_labels", []))
         legacy_approximation = payload.pop("approximation", None)
         if legacy_approximation is not None:
-            payload.setdefault("legacy_method_labels", []).append({
+            legacy_labels.append({
                 "field": "approximation", "value": legacy_approximation,
                 "evidences": deepcopy(base.get("evidences") or []), "status": "historical_unscoped"})
         if values.get("approximation") not in (None, "", "unknown"):
@@ -153,6 +154,7 @@ def apply_plan(states, sources, response):
         for k in ("parameters", "calculation_conditions", "approximation"):
             if k in values:
                 payload[k] = deepcopy(values[k])
+        group_metadata = None
         if record.get("record_type") == "predicted_tc":
             if record.get("value_kind") not in {"number", "range"}:
                 raise ValueError("Tc 不能用计算方法文字代替")
@@ -164,10 +166,10 @@ def apply_plan(states, sources, response):
             if not isinstance(group, str) or not group.strip() or not isinstance(method, str) or not method.strip():
                 raise ValueError("预测 Tc 缺少共同组或方法行")
             identity = fingerprint([VERSION, si, mi, sorted(ids), values])[:24]
-            payload["tc_group"] = {"version": 1, "group_key": "fill-" + fingerprint([si, mi, group])[:24],
-                                  "method_key": "fill-" + fingerprint([si, mi, group, method])[:24]}
+            group_metadata = {"version": 1, "group_key": "fill-" + fingerprint([si, mi, group])[:24],
+                              "method_key": "fill-" + fingerprint([si, mi, group, method])[:24]}
             if record["value_kind"] == "number":
-                payload["tc_group"]["point_key"] = identity
+                group_metadata["point_key"] = identity
         elif record.get("record_type") == "measured_tc" and record.get("method_code") not in EXPERIMENTAL_METHODS:
             raise ValueError("测量 Tc 方法无效")
         record["is_representative"] = False
@@ -180,7 +182,13 @@ def apply_plan(states, sources, response):
                 parameters["extensions"] = extensions
             else:
                 parameters.pop("extensions", None)
-        normalize_extracted_conditions(record)
+        if record.get('record_type') != 'measured_tc':
+            normalize_extracted_conditions(record)
+        # 模型字段检查完成后再装入服务器分组身份和历史，不放宽模型白名单。
+        if group_metadata is not None:
+            payload["tc_group"] = group_metadata
+        if legacy_labels:
+            payload["legacy_method_labels"] = legacy_labels
         from .calculation_methods import record_method_issue
         method_error = record_method_issue(record)
         if method_error:

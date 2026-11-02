@@ -224,3 +224,25 @@ def test_note_only_change_is_pending_in_summary_and_cannot_reuse_machine_pass(co
     assert second['pending_review'] and second['human_modified']
     assert first['detail_ref'] != second['detail_ref']
     assert not api.field_detail('upload', target, record['item_key'], user=actor)['can_approve']
+
+
+def test_structure_summary_reuses_verified_file_for_derived_parameters(context):
+    target, actor, draft, state, _, _, factory = context
+    draft['material_states'] = [{'state_key': 'geometry', 'material': 'H', 'structure': {
+        'review_key': 'geometry', 'structure_format': 'poscar',
+        'structure_text': 'H\n1\n2 0 0\n0 2 0\n0 0 2\nH\n1\nDirect\n0 0 0\n'}}]
+    snap = ev.complete_snapshot('upload', target, ev.draft_records(draft, {}),
+        [{'file_id': 'main', 'chunk_index': 0, 'content': 'Hydrogen cubic cell 2 Angstrom.'}], draft)
+    structure = next(r for r in snap['records'] if r.get('structure_field') == 'structure_text')
+    with factory.begin() as db:
+        metadata.remember(db, snap, actor.id)
+        science.save_results(db, snap, {structure['key']: {'status': 'supported', 'reason': '当前文件及归属已核对'}}, actor.id)
+    summary = api.field_summary(api.Target(target='upload', target_id=target), actor)
+    parts = [r for r in summary['records'] if r.get('structure_field') not in {None, 'structure_text'}]
+    assert len(parts) == 8
+    assert all(r['status'] == 'supported' and not r['pending_review'] for r in parts)
+    assert all(not r.get('human_confirmed') for r in parts)
+    draft['material_states'][0]['structure']['structure_text'] = draft['material_states'][0]['structure']['structure_text'].replace('2 0 0', '3 0 0')
+    changed = api.field_summary(api.Target(target='upload', target_id=target), actor)
+    assert all(r['status'] != 'supported' for r in changed['records']
+               if r.get('structure_field') not in {None, 'structure_text'})

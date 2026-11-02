@@ -1,0 +1,906 @@
+{
+  "verified_at": "2026-11-03T03:08:08.533546+08:00",
+  "task_id": "8d147f415a7b44a1abad6c971ac174cd",
+  "base_commit": "bdb81d6f",
+  "runtime": "本机原生开发；127.0.0.1:3307/scwiki；Vite 5173；真实HTTP上传与RQ处理",
+  "model": {
+    "catalog_id": "LLM2",
+    "model": "gpt-6.1-sol"
+  },
+  "sources": [
+    {
+      "filename": "2012 CaH6-王晖.pdf",
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "filename": "2012 CaH6--suppliment-王晖.pdf",
+      "sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348"
+    }
+  ],
+  "source_code_sha256": {
+    "backend/api/evidence.py": "4b42ea45163acc75ccd891724cd28ae3b8b79ca49fb10fec0641cbf49d6d36a5",
+    "backend/api/rag.py": "287567524cfce94d7a383bef49e24efce1d17e8b86edc4baeb2151f82d863c97",
+    "backend/ingest/canonical_structure.py": "9047159c834aa0e3ee404bed6a27a0242e75792d6a217effd574f5e96d507e46",
+    "backend/ingest/evidence_proposals.py": "11b12aa882e83e176d860b7ba73fca8dc9bdae80d6f75b3548e44750f1314e3e",
+    "backend/ingest/material_state_contract.py": "efe0d522d29ff7c4a339eed25032d22f47c4e3a1cb5c653f294b42e4bcd8d98c",
+    "backend/ingest/model_review.py": "b8a8953ab3106004e1e9109e6839f1c580895e3ef3580ac2b1662dbbb7c3e32f",
+    "backend/ingest/property_evidence.py": "b6cdcf10cf5f2c911972f045839ded5b01aceed3f66ceb58225e726b40a41308",
+    "backend/ingest/property_field_review.py": "ee39cb7bb3f07077c2f0c0727e2428fdaf4906e7f0e6b3b770a7be7ef63c2291",
+    "backend/ingest/scientific_evidence.py": "e00b65cab56a504a256604b765fbd0d95ac55b1b2fe44ec27bd429df6e96f79d",
+    "backend/ingest/scientific_form_filling.py": "2d4fc43f69a1dc3f91bca082a5d1da16125518fb8921ac3629f94d6be108d264",
+    "backend/ingest/structure_extractor.py": "1ffa15967f828d845bf1c8f875351bc86c9e874b5346d3cbf10bc5a7b5912884",
+    "backend/ingest/upload_jobs.py": "1943eb16e194a6abea59808ce68a10e8251d5d958486bd361f9ff8713ce93061",
+    "backend/services/manuscript_handoffs.py": "4daf23921b54c4a3148aaf2b5f5891e30f3cd33552903274e2c5aaa5cd5f3799",
+    "backend/services/spectra.py": "6218d4bc0633a0f0efddeba5728a75ff457b24bd38444821a4d2615644e0d423"
+  },
+  "parse": {
+    "state_count": 14,
+    "structure_count": 11,
+    "record_count": 790,
+    "cached_count": 269,
+    "statuses": {
+      "unchecked": 433,
+      "supported": 330,
+      "missing": 27
+    },
+    "technical_errors": [],
+    "visible_problems": [],
+    "submission_blocked": [],
+    "human_confirmed": 0,
+    "model_review_report": {
+      "errors": [],
+      "passes": [
+        {
+          "pass": 1,
+          "fields": 269,
+          "batches": 23
+        },
+        {
+          "pass": 2,
+          "fields": 115,
+          "batches": 10
+        }
+      ],
+      "batches": 33,
+      "contract": "unified-model-review-v1",
+      "completed_fields": 242,
+      "unfinished_fields": 0
+    }
+  },
+  "scientific_results": [
+    {
+      "state_key": "state-1",
+      "material": "CaH6",
+      "pressure_value_gpa": 150.0,
+      "reported_space_group_symbol": "Im-3m",
+      "structure_optimization": "classical_static",
+      "has_structure": true,
+      "records": [
+        {
+          "record_key": "fill-c2b149e4a5a677d8a3045f41b388",
+          "property_code": "tc",
+          "method_code": "unknown",
+          "value_kind": "number",
+          "value_number": 235,
+          "value_min": null,
+          "value_max": null,
+          "unit_raw": "K",
+          "parameters": {
+            "lambda_ep": 2.69,
+            "mu_star": 0.1
+          },
+          "tc_group": {
+            "version": 1,
+            "group_key": "fill-ec473376db682fb72fc74fbc",
+            "point_key": "c265661d4dfc7d96f1adbeb2",
+            "method_key": "fill-98af2da1987db9e0eaed2acb"
+          },
+          "calculation_conditions": {
+            "qe": {
+              "atoms": null,
+              "k_grid": [
+                48,
+                48,
+                48
+              ],
+              "q_grid": [
+                12,
+                12,
+                12
+              ],
+              "supercell": null,
+              "k_broadening": null,
+              "energy_cutoff": {
+                "reported": true,
+                "unit_raw": "Ry",
+                "evidences": null,
+                "value_max": null,
+                "value_min": null,
+                "value_raw": "90 Ry",
+                "value_kind": "number",
+                "value_text": null,
+                "value_number": 90,
+                "value_boolean": null
+              },
+              "temperature_k": null,
+              "convergence_force": null,
+              "convergence_energy": null,
+              "q_grid_interpolated": null,
+              "charge_density_cutoff": null
+            },
+            "epw": null,
+            "sscha": null,
+            "phonon_method": "density functional (linear-response) theory",
+            "calculation_code": "QUANTUM ESPRESSO",
+            "electronic_method": "DFT",
+            "vibrational_treatment": "harmonic",
+            "exchange_correlation_functional": null
+          }
+        },
+        {
+          "record_key": "fill-0e2e7268ae31f9aadb4f2ff7473b",
+          "property_code": "tc",
+          "method_code": "unknown",
+          "value_kind": "number",
+          "value_number": 220,
+          "value_min": null,
+          "value_max": null,
+          "unit_raw": "K",
+          "parameters": {
+            "lambda_ep": 2.69,
+            "mu_star": 0.13
+          },
+          "tc_group": {
+            "version": 1,
+            "group_key": "fill-ec473376db682fb72fc74fbc",
+            "point_key": "a03101ec46076435cb3fc962",
+            "method_key": "fill-98af2da1987db9e0eaed2acb"
+          },
+          "calculation_conditions": {
+            "qe": {
+              "atoms": null,
+              "k_grid": [
+                48,
+                48,
+                48
+              ],
+              "q_grid": [
+                12,
+                12,
+                12
+              ],
+              "supercell": null,
+              "k_broadening": null,
+              "energy_cutoff": {
+                "reported": true,
+                "unit_raw": "Ry",
+                "evidences": null,
+                "value_max": null,
+                "value_min": null,
+                "value_raw": "90 Ry",
+                "value_kind": "number",
+                "value_text": null,
+                "value_number": 90,
+                "value_boolean": null
+              },
+              "temperature_k": null,
+              "convergence_force": null,
+              "convergence_energy": null,
+              "q_grid_interpolated": null,
+              "charge_density_cutoff": null
+            },
+            "epw": null,
+            "sscha": null,
+            "phonon_method": "density functional (linear-response) theory",
+            "calculation_code": "QUANTUM ESPRESSO",
+            "electronic_method": "DFT",
+            "vibrational_treatment": "harmonic",
+            "exchange_correlation_functional": null
+          }
+        }
+      ]
+    },
+    {
+      "state_key": "state-2",
+      "material": "CaH6",
+      "pressure_value_gpa": 200.0,
+      "reported_space_group_symbol": "Im-3m",
+      "structure_optimization": "classical_static",
+      "has_structure": false,
+      "records": [
+        {
+          "record_key": "fill-5c3ac1bc3180fbf16f110ff14946",
+          "property_code": "tc",
+          "method_code": "unknown",
+          "value_kind": "number",
+          "value_number": 201,
+          "value_min": null,
+          "value_max": null,
+          "unit_raw": "K",
+          "parameters": {
+            "mu_star": 0.13
+          },
+          "tc_group": {
+            "version": 1,
+            "group_key": "fill-22e7d6b2f4040500533f0a5d",
+            "point_key": "9ee305c0ce482ae8c39c9627",
+            "method_key": "fill-29ce95aec69ceb41ad94952e"
+          },
+          "calculation_conditions": {
+            "qe": {
+              "atoms": null,
+              "k_grid": [
+                48,
+                48,
+                48
+              ],
+              "q_grid": [
+                12,
+                12,
+                12
+              ],
+              "supercell": null,
+              "k_broadening": null,
+              "energy_cutoff": {
+                "reported": true,
+                "unit_raw": "Ry",
+                "evidences": null,
+                "value_max": null,
+                "value_min": null,
+                "value_raw": "90 Ry",
+                "value_kind": "number",
+                "value_text": null,
+                "value_number": 90,
+                "value_boolean": null
+              },
+              "temperature_k": null,
+              "convergence_force": null,
+              "convergence_energy": null,
+              "q_grid_interpolated": null,
+              "charge_density_cutoff": null
+            },
+            "epw": null,
+            "sscha": null,
+            "phonon_method": "density functional (linear-response) theory",
+            "calculation_code": "QUANTUM ESPRESSO",
+            "electronic_method": "DFT",
+            "vibrational_treatment": "harmonic",
+            "exchange_correlation_functional": null
+          }
+        }
+      ]
+    },
+    {
+      "state_key": "state-3",
+      "material": "CaH6",
+      "pressure_value_gpa": 250.0,
+      "reported_space_group_symbol": "Im-3m",
+      "structure_optimization": "classical_static",
+      "has_structure": false,
+      "records": [
+        {
+          "record_key": "fill-16710238a50629bb3293e9faa81c",
+          "property_code": "tc",
+          "method_code": "unknown",
+          "value_kind": "number",
+          "value_number": 187,
+          "value_min": null,
+          "value_max": null,
+          "unit_raw": "K",
+          "parameters": {
+            "mu_star": 0.13
+          },
+          "tc_group": {
+            "version": 1,
+            "group_key": "fill-d33820f108fba1adb7f10a46",
+            "point_key": "570539640c725d5251beb86b",
+            "method_key": "fill-c630e77e59929e3cc823de46"
+          },
+          "calculation_conditions": {
+            "qe": {
+              "atoms": null,
+              "k_grid": [
+                48,
+                48,
+                48
+              ],
+              "q_grid": [
+                12,
+                12,
+                12
+              ],
+              "supercell": null,
+              "k_broadening": null,
+              "energy_cutoff": {
+                "reported": true,
+                "unit_raw": "Ry",
+                "evidences": null,
+                "value_max": null,
+                "value_min": null,
+                "value_raw": "90 Ry",
+                "value_kind": "number",
+                "value_text": null,
+                "value_number": 90,
+                "value_boolean": null
+              },
+              "temperature_k": null,
+              "convergence_force": null,
+              "convergence_energy": null,
+              "q_grid_interpolated": null,
+              "charge_density_cutoff": null
+            },
+            "epw": null,
+            "sscha": null,
+            "phonon_method": "density functional (linear-response) theory",
+            "calculation_code": "QUANTUM ESPRESSO",
+            "electronic_method": "DFT",
+            "vibrational_treatment": "harmonic",
+            "exchange_correlation_functional": null
+          }
+        }
+      ]
+    },
+    {
+      "state_key": "state-4",
+      "material": "CaH4",
+      "pressure_value_gpa": 50,
+      "reported_space_group_symbol": "I4/mmm",
+      "structure_optimization": "classical_static",
+      "has_structure": false,
+      "records": [
+        {
+          "record_key": "fill-372fae6c19c1ab0d59f45fcdc9eb",
+          "property_code": "dos_fermi",
+          "method_code": null,
+          "value_kind": "number",
+          "value_number": 0.02234,
+          "value_min": null,
+          "value_max": null,
+          "unit_raw": "states/eV/f.u.",
+          "parameters": null,
+          "tc_group": null,
+          "calculation_conditions": null
+        }
+      ]
+    }
+  ],
+  "browser": {
+    "task_id": "8d147f415a7b44a1abad6c971ac174cd",
+    "url": "http://127.0.0.1:5173/upload/tasks/8d147f415a7b44a1abad6c971ac174cd",
+    "errors": [],
+    "failures": [],
+    "writes": [
+      {
+        "method": "POST",
+        "url": "http://127.0.0.1:5173/api/upload-tasks/8d147f415a7b44a1abad6c971ac174cd/activity"
+      },
+      {
+        "method": "POST",
+        "url": "http://127.0.0.1:5173/api/upload-tasks/8d147f415a7b44a1abad6c971ac174cd/activity"
+      },
+      {
+        "method": "POST",
+        "url": "http://127.0.0.1:5173/api/rag/evidence/summary"
+      }
+    ],
+    "ready_title_visible": true,
+    "submit_visible": true,
+    "visible_red_controls": 0,
+    "fallback_items": []
+  },
+  "submit_rollback": {
+    "task_id": "8d147f415a7b44a1abad6c971ac174cd",
+    "original_fields": 790,
+    "actual_paper_submitted": false,
+    "storage_mode": "isolated_local",
+    "model_calls": 0,
+    "existing_paper_preserved": null,
+    "response": {
+      "ok": true,
+      "paper_id": 1150,
+      "review_status": "pending"
+    },
+    "paper_status": "pending",
+    "material_states": 14,
+    "property_records": 5,
+    "structures": 11,
+    "paper_evidence": 508,
+    "spectra": 36,
+    "formal_fields": 791,
+    "formal_supported": 327,
+    "formal_human_confirmed": 0,
+    "reviewed_property_quotes_preserved": true,
+    "summary_pending": 9,
+    "summary_human_confirmed": 0,
+    "virtual_task_status": "submitted",
+    "artifact_reader_verified": true,
+    "idempotent": true,
+    "formal_blocked": [],
+    "approval_roles": [
+      "admin",
+      "superadmin"
+    ],
+    "original_preserved": true
+  },
+  "protection": {
+    "business_counts": {
+      "papers": 1,
+      "material_states": 8,
+      "property_records": 20,
+      "structure_models": 1
+    },
+    "remaining_drafts": [
+      {
+        "target_id": "8d147f415a7b44a1abad6c971ac174cd",
+        "owner_id": 2
+      }
+    ],
+    "remaining_workdrafts": [
+      {
+        "target_id": "8d147f415a7b44a1abad6c971ac174cd",
+        "owner_id": 2
+      }
+    ],
+    "source_code_unchanged": true,
+    "tc_pairing_verified": true,
+    "original_form_preserved": true
+  },
+  "spectra": {
+    "status": "needs_review",
+    "result": {
+      "issues": [
+        {
+          "page": 1,
+          "reason": "给定原图（1300×1740）是论文首页，仅含正文和文本高亮，没有可识别的声子 DOS、α²F 或累计 λ 谱图及坐标框，无法进行图像数字化标定。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 1,
+          "reason": "正文中的材料条件与超导参数不能替代可见谱图和刻度；未据此生成面板、曲线或坐标标定。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 2,
+          "reason": "所给原图为形成焓与晶体结构组合图：A 为形成焓 ΔH 随组成 x 的变化，B–D 为晶体结构示意图。图中没有声子 DOS、α²F 或累计 λ，故无可支持的谱图面板，不生成坐标标定。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 2,
+          "reason": "A 图横轴含断轴，且并非频率轴；其中的有色曲线不能作为声子谱曲线处理。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 2,
+          "reason": "给定图像为 H4 与 H4²⁻ 的 Hückel 能级及电子占据示意图（A、B），不是声子 DOS、α²F 或累计 λ 谱图，故不生成标定。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 2,
+          "reason": "图中没有可用于受支持谱种类的频率轴或幅值刻度；黑色能级线、箭头及虚线不作为曲线提取。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 3,
+          "reason": "给定原图（1342×1041 像素）为 Fig. 3：A、B 是电子局域函数（ELF）结构示意，C、D、E 是电子能带；均不属于支持的声子 DOS、α²F 或累计 λ 谱图。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 3,
+          "reason": "上下文提及的 Fig. 4 声子谱和 Eliashberg 谱函数未出现在给定原图中，不能据此生成面板或坐标标定。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 3,
+          "reason": "右侧 α²F 实线和累计 λ 虚线均为黑色，不属于支持的 red、blue、green、magenta、olive 有色曲线，故不生成曲线标定。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 3,
+          "reason": "左侧为声子色散，不是声子 DOS，已排除。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 3,
+          "reason": "图中仅显示 150 GPa 条件；未为 200 GPa、250 GPa 或其他材料条件生成面板。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 3,
+          "reason": "模型标定未通过校验：1 validation error for PanelCalibration\ncurves\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/too_short",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 4,
+          "reason": "给定的1300×1740像素图片为论文正文、方法、致谢及参考文献页，未发现声子DOS、α²F或累计λ谱图，无法进行图像数字化标定。",
+          "file_id": "1e81d04d671b451382f2805a8d7618c7"
+        },
+        {
+          "page": 5,
+          "reason": "给定图像是 CaH2 形成焓随压力变化的曲线，横轴为 Pressure (GPa)，纵轴为 ΔH (meV/atom)，不是声子 DOS、α²F 或累计 λ，因此不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 5,
+          "reason": "图中材料 CaH2 不对应任何给定 state_key；不将其归属到 CaH4、CaH6 或其他材料条件。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 5,
+          "reason": "图中三行分别为 CaH2 在 0、150 和 200 GPa 下的电子 DOS；横轴为 Energy (eV)，纵轴为 DOS (states/eV/f.u.)，虚线标示费米能级。电子 DOS 不属于支持的声子 DOS、α²F 或累计 λ，因此全部排除，不生成坐标标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 5,
+          "reason": "图中 CaH2 条件与给定 material_states 中的材料条件不匹配，不能分配任何给定 state_key。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 5,
+          "reason": "可见曲线为黑色，也不属于支持的 red、blue、green、magenta 或 olive 有色曲线。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 7,
+          "reason": "该图为 CaH4 的 oC20 相相对于 tI10 相的焓差随压力变化图，横轴为 Pressure (GPa)，纵轴为 ΔH (meV/f.u.)，不属于支持的声子 DOS、α²F 或累计 λ 谱图，因此不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 9,
+          "reason": "给定的593×734像素图像为晶体结构示意图，不含可识别的声子DOS、α²F或累计λ谱图，无法进行坐标标定。未生成曲线或推测材料条件归属。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 9,
+          "reason": "给定图像为晶体结构示意图，不包含可识别的声子 DOS、α²F 或累计 λ 谱图，因此不生成曲线及坐标标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 9,
+          "reason": "图注上下文同时涉及两种 CaH4 结构，无法仅凭此图唯一确认材料条件；未分配 state_key。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "原图为 645×468 像素，包含三个不同材料条件的声子 DOS 子图，未将组合图视为单一面板。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "三个子图均使用黑色或灰色曲线，不属于支持的 red、blue、green、magenta、olive 有色曲线，因此不生成曲线对象或伪造标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "中排 tI10-CaH4、150 GPa 在给定 material_states 中没有对应状态，state_key 为 null。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "下排 tI10-CaH4、50 GPa 同时匹配 state-4 和 structure-state-e8490f7565fa333c7313，归属不唯一，state_key 为 null。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "纵轴标为 Phonon DOS (Arbitrary units)，图中未提供元素分波图例或完整元素合计依据，不能确认投影完整性及投影尺度。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "模型标定未通过校验：1 validation error for PanelCalibration\ncurves\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/too_short",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "模型标定未通过校验：1 validation error for PanelCalibration\ncurves\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/too_short",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "模型标定未通过校验：1 validation error for PanelCalibration\ncurves\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/too_short",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "给定原图为电子 DOS：横轴为 Energy (eV)，纵轴为 DOS (states/eV/f.u.)，并有费米能级虚线。三个面板分别标注 I4/mmm at 50 GPa、I4/mmm at 150 GPa 和 Cmcm at 200 GPa，均不属于支持的声子 DOS、α²F 或累计 λ，因此不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "caption_context 同时包含 Figure S6 声子 DOS 和 Figure S7 电子 DOS 的图注；原图内容与 Figure S7 一致，不能依据 Figure S6 图注将其识别为声子谱。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 10,
+          "reason": "原图曲线为黑灰色，不属于支持的 red、blue、green、magenta 或 olive 有色曲线。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 11,
+          "reason": "原图为电子能带图：纵轴为 Energy (eV)，横轴为高对称点路径 Z–Γ–X–P–N–Γ，黑色曲线为电子能带。不属于支持的声子 DOS、α²F 或累计 λ，故不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 11,
+          "reason": "图注上下文同时包含 tI10-CaH4 在 50 GPa 和 150 GPa 的能带图说明，无法唯一确定当前图片的材料条件，不指定 state_key。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 11,
+          "reason": "原图为电子能带图：纵轴为 Energy (eV)，横轴为 Z–Γ–X–P–N–Γ 高对称路径。电子能带不在支持范围内，图中没有可标定的声子 DOS、α²F 或累计 λ，因此不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 11,
+          "reason": "图注上下文同时提及 50 GPa 与 150 GPa，图内没有明确压力标识，无法唯一确定材料条件。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 14,
+          "reason": "原图为相对于 mC28 结构的焓差 ΔH（eV/f.u.）随压力（GPa）变化的图，包含 mP14 和 cI14 结构曲线；不是声子 DOS、α²F 或累计 λ，因此不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 14,
+          "reason": "提供的图注涉及焓差和生成焓，不能用于确认任何声子谱的频率或幅值坐标。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 14,
+          "reason": "原图为形成焓图：纵轴为 ΔH (meV/atom)，横轴为 H₂ 组分比例 x，并标注不同压力及结构。不是声子 DOS、α²F 或累计 λ，因此不生成谱图标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 14,
+          "reason": "提供的图注上下文涉及形成焓，不能用于将图中的有色焓曲线认定为所支持的谱曲线。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 16,
+          "reason": "给定原图（537×723 像素）为晶体结构/超胞示意图，未包含可识别的声子 DOS、α²F 或累计 λ 谱图，因此不生成曲线标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 16,
+          "reason": "图注上下文列出两个不同材料条件的超胞，无法仅凭当前结构图唯一确定其归属；未推测 state_key。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 16,
+          "reason": "给定的639×689像素图片为晶体结构示意图，仅含原子球、键、晶胞边框及晶轴标记；未发现声子DOS、α²F或累计λ谱图，无法生成坐标标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 16,
+          "reason": "图注上下文同时提及50 GPa的mC28-CaH6和100 GPa的mP14-CaH6，当前图片缺乏可唯一确定归属的面板标签；未据此猜测state_key。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 17,
+          "reason": "给定的 710×706 像素原图为晶体结构示意图，对应图注中的 Figure S14；图中未出现声子 DOS、α²F 或累计 λ 谱图，无法进行坐标标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 17,
+          "reason": "上下文虽提及 Figure S15 的 150 和 200 GPa 声子 DOS，但该谱图未包含在所提供的原图中，不能据此生成面板或标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 17,
+          "reason": "原图为 1010×726 像素；两个压力条件已分别定位为独立子图。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 17,
+          "reason": "两个子图的声子 DOS 曲线均为黑色，不属于支持的 red、blue、green、magenta、olive 有色曲线，因此不生成曲线对象或伪造颜色标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 17,
+          "reason": "图中未提供元素分波及其归一化依据，不能确认完整元素投影或投影间尺度。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 17,
+          "reason": "模型标定未通过校验：1 validation error for PanelCalibration\ncurves\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/too_short",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 17,
+          "reason": "模型标定未通过校验：1 validation error for PanelCalibration\ncurves\n  List should have at least 1 item after validation, not 0 [type=too_short, input_value=[], input_type=list]\n    For further information visit https://errors.pydantic.dev/2.13/v/too_short",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 18,
+          "reason": "给定图像为电子分波态密度（电子 DOS），不是声子 DOS、α²F 或累计 λ，因此不生成标定。横轴为 Energy (eV)，纵轴为 DOS (eV⁻¹ atom⁻¹)，图例标示 H s、Ca d、Ca p、Ca s 电子轨道投影；图中费米能级虚线及图注亦支持该识别。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 18,
+          "reason": "所给图像为电子能带图：纵轴标注 Energy (eV)，横轴为高对称波矢路径 G–H–N–P–G–N。电子能带不属于支持的声子 DOS、α²F 或累计 λ，因此不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 18,
+          "reason": "图注上下文同时提及电子 partial DOS（Figure S16）和能带（Figure S17），但当前图像未显示可支持的声子谱，不能据此推定或生成声子谱标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 19,
+          "reason": "给定原图（613×673 像素）展示费米面及布里渊区示意图，不含可识别的声子 DOS、α²F 或累计 λ 曲线，因此不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 19,
+          "reason": "给定图像为 Tc（K）随 μ*(ωmax) 变化的曲线，图例分别为 Eliashberg 和 McMillan；不是声子 DOS、α²F 或累计 λ，不在支持的谱图范围内。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 19,
+          "reason": "未生成坐标标定或曲线数值。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 20,
+          "reason": "该图为 CaH8 的相对焓 ΔH（eV/f.u.）随压力（GPa）变化图，不是声子 DOS、α²F 或累计 λ 谱图，不在支持范围内。未生成曲线标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 22,
+          "reason": "所给472×458像素图像为晶体结构示意图，未见声子DOS、α²F或累计λ曲线，也没有可用于谱图数字化的坐标框和刻度，因此不生成标定。图注中的材料与压力信息不能替代可见谱图。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 22,
+          "reason": "给定原图（696×598像素）为原子结构与晶胞示意图，不包含可识别的声子DOS、α²F或累计λ谱图，也没有可用于标定的频率轴和幅值轴，因此不生成曲线标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 22,
+          "reason": "图注上下文同时提及50 GPa的aP18-CaH8和150 GPa的mC36-CaH8，当前图像没有可唯一确定归属的面板标签，不能据此指定state_key。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 23,
+          "reason": "图像为 CaH10 的相对焓随压力变化图（横轴 Pressure，单位 GPa；纵轴 ΔH，单位 eV/f.u.），不是声子 DOS、α²F 或累计 λ。该谱图类型不受支持，不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 25,
+          "reason": "给定图像为晶体结构球棍示意图，未发现声子 DOS、α²F 或累计 λ 谱图，无可支持的坐标标定对象。图注上下文不能用于将结构图推定为谱图。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 25,
+          "reason": "给定的444×495像素图像为晶体结构示意图，不包含可识别的声子DOS、α²F或累计λ谱图，无法进行坐标标定。图注中的结构信息不作为谱图或坐标的替代依据。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 26,
+          "reason": "所给图为 CaH12 的相对焓 ΔH（eV/f.u.）随压力（GPa）变化图（Figure S26），不是声子 DOS、α²F 或累计 λ。该图不属于支持的谱图类型，因此不生成曲线对象或坐标标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 28,
+          "reason": "给定原图（681×615 像素）为晶体结构示意图，不包含可识别的声子 DOS、α²F 或累计 λ 谱图及坐标轴，因此不生成数字化标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 28,
+          "reason": "图注上下文涉及两个晶体结构及不同压力，无法仅凭本图唯一确定材料条件；未分配 state_key。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 28,
+          "reason": "给定图像为晶体结构球棍示意图，不含声子 DOS、α²F 或累计 λ 曲线及其坐标轴，无法进行谱图数字化标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 29,
+          "reason": "图中两个子图均为电子态密度：横轴为 Energy (eV)，纵轴为 DOS (states/eV/f.u.)，虚线表示费米能级。它们不是声子 DOS、α²F 或累计 λ，因此不生成标定。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 29,
+          "reason": "图中曲线为黑色，不属于支持的 red、blue、green、magenta、olive 有色曲线。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        },
+        {
+          "page": 29,
+          "reason": "上图标注 hR13 at 100 GPa，而给定 hR13-CaH12 状态为 150 GPa，不能将上图归入该状态。",
+          "file_id": "a252a1d82afa455db887aff32b3e8cb0"
+        }
+      ],
+      "status": "needs_review",
+      "collections": 35,
+      "curve_count": 0,
+      "extracted_collections": 0,
+      "image_capability_verified": true
+    },
+    "collections": 35,
+    "curves": 0,
+    "boundary": "黑灰色谱线超出现有#137五种彩色曲线支持范围；不把谱质量待核对当成主表单入库失败"
+  },
+  "scientific_boundary": "原文数值、分组和来源已验证；Eliashberg原文保留在method_raw，模型未确认各向同性/各向异性细分，method_code保留unknown；不宣称全篇所有科学判断均已由人工验收",
+  "baseline_failures": {
+    "base_commit": "bdb81d6f",
+    "upload_old_failures": [
+      "backend/tests/test_upload_jobs.py::test_normalize_draft_preserves_structure_candidates_for_user_confirmation",
+      "backend/tests/test_upload_jobs.py::test_structure_candidate_binds_only_unique_phase_and_pressure",
+      "backend/tests/test_upload_workflow.py::test_create_pending_paper_derives_research_materials",
+      "backend/tests/test_upload_workflow.py::test_submit_failure_rolls_state_back_to_ready",
+      "tests/01_decentralized_uploading/test_issue139_workflow.py::test_suggestion_pipeline_preserves_direct_facts_and_marks_inference[False]",
+      "tests/01_decentralized_uploading/test_issue139_workflow.py::test_suggestion_pipeline_preserves_direct_facts_and_marks_inference[True]",
+      "tests/01_decentralized_uploading/test_issue139_workflow.py::test_worker_finishes_direct_claim_gate_before_common_methods_fill"
+    ],
+    "types_old_failures": [
+      "backend/tests/test_property_field_review.py::test_annotation_changes_only_own_leaf_and_new_events_are_authoritative",
+      "backend/tests/test_property_field_review.py::test_explicit_range_split_keeps_field_identities_and_scientific_versions",
+      "backend/tests/test_property_field_review.py::test_leaf_claims_scope_dependencies_and_no_parent_grant",
+      "backend/tests/test_property_field_review.py::test_saved_changes_track_actor_values_settings_without_dependency_noise",
+      "backend/tests/test_property_field_review.py::test_stable_extensions_and_shared_groups_do_not_merge_methods_or_points",
+      "backend/tests/test_property_field_review.py::test_upload_save_audit_is_server_owned_atomic_and_does_not_change_retention",
+      "tests/01_decentralized_uploading/test_field_suggestions.py::test_adopted_guess_can_enter_pending_but_cannot_approve_without_human",
+      "tests/01_decentralized_uploading/test_field_suggestions.py::test_derived_value_inherits_pending_adoption_but_not_human_authority",
+      "tests/01_decentralized_uploading/test_field_suggestions.py::test_full_audit_does_not_reuse_supported_cache",
+      "tests/01_decentralized_uploading/test_field_suggestions.py::test_generation_fills_empty_field_and_binds_reason_to_new_version",
+      "tests/01_decentralized_uploading/test_field_suggestions.py::test_reasonable_model_result_cannot_erase_adopted_guess"
+    ],
+    "new_failures": [],
+    "additional": [
+      "test_field_decisions_mysql.py::test_human_approval_survives_summary_reopen_and_submission_without_model：修改前后同为旧audit_events断言失败",
+      "Go TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction：修改前后同为旧DELETE审计断言失败"
+    ]
+  },
+  "regression": {
+    "定向Python回归": [
+      "backend/tests/test_canonical_structure_assignment.py: 14 warnings",
+      "  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/cell.py:106: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.",
+      "    _set_no_error()",
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "72 passed, 596 warnings in 2.25s",
+      "sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute"
+    ],
+    "MySQL与提交回归，明确排除已证旧失败": [
+      "tests/01_decentralized_uploading/test_reviewed_source_persistence_mysql.py::test_revision_keeps_reviewed_reference_without_matching_text",
+      "  /Users/mayuan/Codes/SC-Wiki/backend/services/paper_revisions.py:195: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).",
+      "    saved.created_at = datetime.utcnow()",
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "20 passed, 1 deselected, 537 warnings in 4.97s",
+      "sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute"
+    ],
+    "谱相关回归": [
+      "backend/tests/test_spectra_delete.py: 530 warnings",
+      "  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.",
+      "    _set_no_error(_throw)",
+      "",
+      "-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html",
+      "151 passed, 3 skipped, 537 warnings in 3.59s",
+      "sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute"
+    ],
+    "固定字段契约": [
+      "",
+      "> sc-wiki-frontend@1.0.0 test:field-contract",
+      "> python3 ../scripts/check-scientific-field-contract.py",
+      "",
+      "科学字段契约v1基线通过：21论文字段、11材料字段、3软件组"
+    ],
+    "四类宿主表单契约": [
+      "   ✓ #176 superadmin 固定 Tc 表单和其他方法编辑保持宿主隔离 4214ms",
+      "",
+      " Test Files  11 passed (11)",
+      "      Tests  132 passed (132)",
+      "   Start at  02:21:56",
+      "   Duration  52.40s (transform 1.29s, setup 0ms, collect 15.15s, tests 184.56s, environment 5.01s, prepare 765ms)",
+      ""
+    ],
+    "故障注入": [
+      "",
+      "> sc-wiki-frontend@1.0.0 test:form-contract:mutation",
+      "> node ../scripts/check-form-contract.mjs --mutation",
+      "",
+      "通过：注入新数组导致整体缓存失效后，四类宿主的 8 项行为回归均检出失败；工作树未修改。"
+    ]
+  }
+}

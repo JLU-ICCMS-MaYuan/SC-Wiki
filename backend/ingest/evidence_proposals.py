@@ -66,17 +66,24 @@ def schema_for(value, name=''):
         value = value if isinstance(value, list) else []
         schema = {'type': 'array', 'items': schema_for(value[0]) if value else {'type': 'string'}}
     elif isinstance(value, dict):
-        schema = {'type': 'object', 'properties': {k: value_slot_schema(schema_for(v, k), k, value) for k, v in value.items()}, 'additionalProperties': False}
-    if name in OPTIONAL_FIELDS:
+        schema = {'type': 'object', 'properties': {k: value_slot_schema(schema_for(v, k), k, value) for k, v in value.items()},
+                  'required': list(value), 'additionalProperties': False}
+    if name in OPTIONAL_FIELDS or value is None:
         schema['nullable'] = True
     return schema
 
 
 def editable_fields(record):
+    if record.get('field') == 'paper.research_materials':
+        return []  # #103/#127：展示和保存均由材料状态汇总，不能独立改写。
     if record.get('record_field'):
         value = record.get('current_value')
         schema = schema_for(value)
-        schema.update(record.get('field_schema') or {})
+        declared = record.get('field_schema') or {}
+        if any(key in declared for key in ('anyOf', 'oneOf', 'allOf')):
+            schema = copy.deepcopy(declared)
+        else:
+            schema.update(declared)
         return [{'path': '', 'label': record['label'], 'value': value, 'schema': schema}]
     if record.get('kind') == 'structure':
         return []
@@ -96,25 +103,44 @@ def editable_fields(record):
              'schema': schema_for(value, record['field'].rsplit('.', 1)[-1])}]
 
 
-def valid_value(value, schema):
-    kind = schema['type']
-    if value is None:
-        return schema.get('nullable', False)
-    if 'enum' in schema and value not in schema['enum']:
-        return False
-    if kind in {'number', 'integer'}:
-        # SQL 定点值在快照中为字符串；提交候选必须是有限数值。
-        return isinstance(value, (int, float, Decimal)) and not isinstance(value, bool) and math.isfinite(value) and (kind != 'integer' or int(value) == value)
-    if kind == 'string':
-        return isinstance(value, str) and len(value) <= 100000
-    if kind == 'boolean':
-        return isinstance(value, bool)
-    if kind == 'array':
-        return isinstance(value, list) and len(value) <= 1000 and all(valid_value(v, schema['items']) for v in value)
-    if kind == 'object':
-        return (isinstance(value, dict) and set(schema.get('required', schema['properties'])) <= set(value)
-                and set(value) <= set(schema['properties']) and all(valid_value(v, schema['properties'][k]) for k, v in value.items()))
+def _json_review_schema(schema):
+    """将既有nullable标记转成JSON Schema，不自行推断未声明的子字段。"""
+    if not isinstance(schema, dict):
+        return schema
+    result = dict(schema)
+    nullable = result.pop('nullable', False)
+    for key in ('properties', 'patternProperties', '$defs'):
+        if key in result:
+            result[key] = {name: _json_review_schema(value) for name, value in result[key].items()}
+    for key in ('items', 'additionalProperties', 'not', 'if', 'then', 'else', 'contains'):
+        if key in result:
+            result[key] = _json_review_schema(result[key])
+    for key in ('anyOf', 'oneOf', 'allOf', 'prefixItems'):
+        if key in result:
+            result[key] = [_json_review_schema(value) for value in result[key]]
+    return {'anyOf': [result, {'type': 'null'}]} if nullable else result
+
+
+def _bounded_review_value(value):
+    if value is None or isinstance(value, bool):
+        return True
+    if isinstance(value, (int, float, Decimal)):
+        try:
+            return math.isfinite(value)
+        except OverflowError:
+            return False
+    if isinstance(value, str):
+        return len(value) <= 100000
+    if isinstance(value, list):
+        return len(value) <= 1000 and all(_bounded_review_value(item) for item in value)
+    if isinstance(value, dict):
+        return all(isinstance(key, str) and _bounded_review_value(item) for key, item in value.items())
     return False
+
+
+def valid_value(value, schema):
+    from jsonschema import Draft202012Validator
+    return _bounded_review_value(value) and Draft202012Validator(_json_review_schema(schema)).is_valid(value)
 
 
 def validate_values(record, values):

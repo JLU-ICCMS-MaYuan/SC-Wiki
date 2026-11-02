@@ -1783,6 +1783,24 @@ def _handle_duplicate_locked(task_id: str, state: dict[str, Any], existing: Any)
     return duplicate
 
 
+def complete_parsing_state(task_id, draft, **changes):
+    """填写和自动核对均完成才发布ready；技术失败保留已有预览和结果。"""
+    filling = draft.get('form_filling_report') or {}
+    errors = [draft.get('field_suggestions_error')]
+    if filling.get('status') == 'incomplete':
+        errors.extend(str(issue.get('message') or '表单整理未完成') for issue in filling.get('issues') or [])
+        if len(errors) == 1:
+            errors.append('表单整理未完成')
+    errors = [error for error in errors if error]
+    if errors:
+        return update_state(task_id, **changes, status='failed', processing_status='failed',
+            processing_error='自动整理或核对未完成：' + '；'.join(errors),
+            error_code='automatic_review_incomplete', failed_stage='summarizing')
+    return update_state(task_id, **changes, status='ready', stage='ready', stage_index=5,
+        processing_status='succeeded', processing_error=None, error_code=None, failed_stage=None,
+        partial_draft=None)
+
+
 def process_upload_task(task_id: str) -> dict[str, Any]:
     """Run a task with its short-lived request-scoped LLM configuration."""
     from backend.rag.llm_context import reset_llm_config, resolve_llm_config, set_llm_config
@@ -2463,7 +2481,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         except UploadCancelled:
             raise
         except Exception as suggestion_error:
-            logging.getLogger(__name__).warning('字段建议生成失败 task=%s type=%s', task_id, type(suggestion_error).__name__)
+            logging.getLogger(__name__).exception('字段建议生成失败 task=%s type=%s', task_id, type(suggestion_error).__name__)
             draft['field_suggestions_error'] = '建议生成失败，已提取内容已保留；可点击 AI 审核重试。'
             update_state(task_id, suggestions_status='failed', suggestions_error=draft['field_suggestions_error'])
         _atomic_write_json(artifact_directory(task_id) / "generation_report.json", {
@@ -2535,12 +2553,11 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 *publish_tree(data_path("parsed_markdown") / task_id, data_root=settings.sc_wiki_data_dir,
                               task_id=task_id, run_id=run_id),
             ]
-        ready = update_state(
-            task_id, status="ready", stage="ready", stage_index=5, processing_status="succeeded",
-            processing_error=None, completed_chunks=len(all_chunks), total_chunks=len(all_chunks),
-            duplicate=False, partial_draft=None, artifact_manifest=artifact_manifest, reparse_expected_draft_hash=None,
+        ready = complete_parsing_state(
+            task_id, draft, completed_chunks=len(all_chunks), total_chunks=len(all_chunks),
+            duplicate=False, artifact_manifest=artifact_manifest, reparse_expected_draft_hash=None,
         )
-        if not state.get("is_shadow"):
+        if ready.get('status') == 'ready' and not state.get("is_shadow"):
             # 解析中的字段核对已完成；ready后不再排队重复检查。
             from backend.spectra.jobs import enqueue_upload
             enqueue_upload(task_id)

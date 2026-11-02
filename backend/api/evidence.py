@@ -367,9 +367,10 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
         # 与详情相同：优先当前版本，而不是把较晚写入的旧版本当作最新状态。
         versions = session.execute(select(table.id, table.item_key, table.content_hash, table.source_hash,
             table.result['field_review_binding']['token']).where(
-            table.target == body.target, table.target_id == body.target_id).order_by(table.id)).all()
+            table.target == body.target, table.target_id == body.target_id)).all()
         chosen, exact = {}, set()
-        for row_id, key, content, source, field_token in versions:
+        # 仅对已投影的小行排序，避免MySQL把大型来源JSON带入filesort。
+        for row_id, key, content, source, field_token in sorted(versions, key=lambda row: row[0]):
             current = current_fields.get(key)
             matches = current and ((content, source) == (current['content_hash'], current['source_hash'])
                                   or bool(current.get('field_input_token')) and field_token == current['field_input_token'])
@@ -408,7 +409,7 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
             if row and row[13] == CONTRACT and not decision_current:
                 # 无当前来源版本时不能仅凭值相同展示新协议结果已通过。
                 matches = False
-            output.append(compact_result({**record, 'status': row[2] if matches else 'unchecked',
+            output.append({**record, 'status': row[2] if matches else 'unchecked',
                 'reason': display_reason(row[3]) if row else '', 'ai_reason': display_reason(row[4]) if row else '',
                 'field_decision': row[6] if valid_decision else None,
                 'human_confirmed': valid_decision and row[6].get('action') == 'approve',
@@ -418,7 +419,9 @@ def field_summary(body: 'Target', user=Depends(get_current_user)):
                 'review_error': row[15] if row else None,
                 'pending_review': not matches, 'human_modified': (record['item_key'] in modified or bool((decision_current or {}).get('paper_source_hash')))
                     and not (valid_decision and row[6].get('action') == 'approve'),
-                'resolution': (draft.get('_review_notes', {}).get(record['item_key']) or {}).get('reason', '')}))
+                'resolution': (draft.get('_review_notes', {}).get(record['item_key']) or {}).get('reason', '')})
+        # 与详情和提交共用确定性派生规则；文件未通过时不能放行其晶胞参数。
+        output = [compact_result(record) for record in science.apply_derived(output)]
         preparation_progress(body, user, 5)
         return {'version': draft_version(draft), 'records': output, 'needs_check': False}
 

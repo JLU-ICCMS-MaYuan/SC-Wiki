@@ -744,7 +744,7 @@ def public_snapshot(snapshot: dict, cached: dict) -> dict:
         records.append(checked_result(r, result, snapshot['chunks']) if result else {**r, 'status': 'unchecked', 'pending_review': True, 'reason': '待提交时核对'})
     from .scientific_evidence import apply_derived
     records = apply_derived(records)
-    records = [{key: value for key, value in row.items() if key != 'validation_record'} for row in records]
+    records = [{key: value for key, value in row.items() if key not in {'validation_record', '_structure_model_input'}} for row in records]
     return dict(version=snapshot['version'], needs_check=any(r.get('required', True) and ((r['status'] == 'unchecked' and not r.get('human_confirmed')) or r.get('stale')) for r in records), records=records,
                 sources=[{k: c.get(k) for k in ('file_id', 'chunk_id', 'chunk_index', 'page_start', 'page_end', 'content')} for c in snapshot['chunks']])
 
@@ -1422,6 +1422,8 @@ def resolve_results(snapshot: dict, cached: dict, user_id: int, job_id: str | No
         records.append({**record, **(result or {}), 'field': record['field'], 'fields': record['fields'],
                         'status': (result or {}).get('status', 'unchecked'),
                         'evidences': (result or {}).get('evidences', [])})
+    for record in records:
+        record.pop('_structure_model_input', None)
     records = apply_derived(records)
     blocked = [r for r in records if blocking(r, r)]
     if blocked:

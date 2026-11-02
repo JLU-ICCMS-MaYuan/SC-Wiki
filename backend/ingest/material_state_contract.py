@@ -13,6 +13,34 @@ class MaterialStateContractError(ValueError):
         self.field = field
 
 
+def ensure_state_keys(states):
+    """进入模型及字段绑定前补齐服务器身份，保留所有已有非空身份。"""
+    existing = [state['state_key'] for state in states if state.get('state_key')]
+    if len(set(existing)) != len(existing):
+        raise MaterialStateContractError('state_key', '材料状态身份重复，不能猜测结构归属')
+    used = set(existing)
+    for index, state in enumerate(states):
+        if state.get('state_key'):
+            continue
+        key, suffix = f'state-{index + 1}', 1
+        while key in used:
+            key = f'state-{index + 1}-{suffix}'
+            suffix += 1
+        state['state_key'] = key
+        used.add(key)
+
+
+def research_materials(states):
+    """按当前卡片出现顺序汇总名称或化学式，沿用既有保存与展示语义。"""
+    seen, result = set(), []
+    for state in states:
+        name = str(state.get('material_name') or '').strip() or str(state.get('material') or '').strip()
+        if name and name not in seen:
+            seen.add(name)
+            result.append(name)
+    return result
+
+
 def state_metadata(state: dict) -> dict:
     kind = state.get("state_kind") or "unknown"
     optimization = state.get("structure_optimization") or "unknown"

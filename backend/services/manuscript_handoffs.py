@@ -19,7 +19,7 @@ from backend import models
 CONTRACT = 'manuscript-handoff-v1'
 TRANSIENT = frozenset({'history', 'audit_events', 'legacy_evidences', 'validation_record',
     '_field_change_events', '_field_baselines', '_field_edit_format', '_spectrum_target_id', '_review_notes_history', 'review_started_at', 'detail_ref',
-    'field_input_token', 'field_review_binding', 'stored_result', 'created_at', 'updated_at'})
+    'field_input_token', 'field_review_binding', 'stored_result', 'created_at', 'updated_at', '_structure_model_input'})
 
 
 def error(code, message, status=409):

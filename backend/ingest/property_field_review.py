@@ -201,6 +201,14 @@ def expand_property_fields(records):
             extension_value = read_path(source, '.'.join(path.split('.')[:4])) if '.extensions.' in path else None
             from .review_dependencies import record_inputs, state_paths
             dependencies = record_inputs(source, path)
+            field_schema = {'type': 'array' if isinstance(value, list) else kind if kind in {'number', 'boolean', 'object'} else 'string', 'nullable': True}
+            if path.startswith('payload.calculation_conditions.'):
+                from .fixed_form_contract import conditions_schema
+                declared = conditions_schema()
+                for part in path.removeprefix('payload.calculation_conditions.').split('.'):
+                    declared = (declared.get('properties') or {}).get(part, {})
+                if declared:
+                    field_schema = {**deepcopy(declared), 'nullable': True}
             result.append({k: deepcopy(v) for k, v in parent.items() if k not in {'key', 'item_key', 'claim', 'evidences', 'current_value', 'fields', 'field', 'kind', 'label'}} | {
                 'key': key, 'item_key': key, 'kind': 'field', 'record_field': path,
                 'record_group_key': group if common and path != 'method_code' else None,
@@ -223,6 +231,6 @@ def expand_property_fields(records):
                 'current_value': deepcopy(value), 'required': populated(value), 'evidences': evs,
                 'source_associations': associations,
                 'claim': {'value': deepcopy(value), 'field': 'Tc' if semantic == 'tc' else 'μ*' if semantic == 'mu_star' else label, 'context': context},
-                'field_schema': {'type': 'array' if isinstance(value, list) else kind if kind in {'number', 'boolean', 'object'} else 'string', 'nullable': True},
+                'field_schema': field_schema,
                 'legacy_evidences': deepcopy(parent.get('evidences') or [])})
     return result

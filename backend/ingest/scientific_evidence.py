@@ -277,6 +277,8 @@ def structure_record(structure, state_key, path, origin=None, state_context=None
     key = item_identity('structure', state_key, review_key)
     return dict(key=key, item_key=key, field=path, fields=[path], label='晶体结构与晶格参数',
                 current_value=data, kind='structure', claim=data, evidences=deepcopy(structure.get('sources') or []), provenance=provenance, structure_hash=structure_hash, state_key=state_key,
+                _structure_model_input={key: deepcopy(structure[key]) for key in
+                    ('structure_format', 'structure_text', 'derivation', 'representations', 'validation') if key in structure},
                 legacy_structure_item_key=item_identity('structure', state_key, structure_hash), _state_context=state_context or {})
 
 
@@ -692,7 +694,7 @@ def save_results(session, snapshot, results, actor_id, *, update_decision=False)
             result['decision'] = copy.deepcopy(existing.result['decision'])
             result['adopted_basis'] = existing.result.get('adopted_basis')
         # 当前工作结果只覆盖同一行。既有旧版本与审计行不动；正式交接另冻结整稿。
-        for name in ('history','audit_events','legacy_evidences','validation_record','_audit_action','_audit_event_id'):
+        for name in ('history','audit_events','legacy_evidences','validation_record','_audit_action','_audit_event_id','_structure_model_input'):
             result.pop(name,None)
         result.setdefault('rule_version',snapshot['rule_version'])
         result['_working_current']=True
@@ -755,6 +757,10 @@ def delete_target(session, target, target_id):
     for model in (models.ScientificEvidenceCheck, models.ScientificStructureOrigin):
         session.execute(delete(model).where(model.target == target, model.target_id == str(target_id)))
     if target == 'upload':
+        from backend.workdraft_models import ScientificWorkDraft, ScientificFieldSourceUse
+        session.execute(delete(ScientificFieldSourceUse).where(ScientificFieldSourceUse.work_key == 'upload:' + str(target_id)))
+        session.execute(delete(ScientificWorkDraft).where(
+            ScientificWorkDraft.target == 'upload', ScientificWorkDraft.target_id == str(target_id)))
         session.execute(delete(models.ScientificUploadDraft).where(models.ScientificUploadDraft.task_id == str(target_id)))
 
 

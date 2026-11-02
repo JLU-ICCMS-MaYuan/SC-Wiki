@@ -34,6 +34,23 @@ def test_model_assigns_same_pressure_geometry_to_explicit_optimization():
     assert "structure_candidates" not in d
 
 
+def test_server_assigns_missing_state_identity_before_model_request():
+    import json
+    from backend.ingest.canonical_structure import assign_structures
+    c, d = candidate(), draft()
+    d['material_states'][1]['state_key'] = None
+    def model(system, payload):
+        states = json.loads(payload)['states']
+        assert all(state['state_key'] for state in states)
+        key = next(state['state_key'] for state in states if state['structure_optimization'] == 'sscha')
+        return {'assignments': [{'candidate_id': c['candidate_id'], 'state_key': key,
+            'structure_optimization': 'sscha', 'source_ids': ['structure-source-0'], 'reason': '原文SSCHA结构'}]}
+    assign_structures(d, [c], [], model)
+    assert d['material_states'][0]['state_key'] == 'static'
+    assert d['material_states'][1].get('structure')
+    assert not d['structural_extraction_issues']
+
+
 def test_missing_evidence_cannot_become_automatic_assignment():
     from backend.ingest.canonical_structure import assign_structures
     c = candidate(); d = draft()

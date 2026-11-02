@@ -110,6 +110,20 @@ def test_model_condition_addition_cannot_choose_system_field_identity():
     assert 'extensions' not in conditions and 'field_key' not in conditions['qe']['energy_cutoff']
 
 
+def test_condition_addition_fills_legal_null_software_group_without_losing_review():
+    from backend.ingest.model_review import _add_conditions
+    record = {'record_key': 'r', 'module_code': 'superconductive_properties', 'record_type': 'predicted_tc',
+        'property_code': 'tc', 'name_raw': 'Tc', 'value_kind': 'number', 'value_number': 235,
+        'value_raw': '235', 'unit_raw': 'K', 'canonical_unit': 'K', 'method_code': 'isotropic_eliashberg',
+        'payload': {'parameters': {'mu_star': .1}, 'calculation_conditions': {'qe': None}}}
+    draft = {'material_states': [{'state_key': 's', 'property_modules': [{'module_key': 'm', 'records': [record]}]}]}
+    owner = {'state_key': 's', 'module_key': 'm', 'record_key': 'r'}
+    _add_conditions(draft, [{**owner, 'values': {'qe': {'energy_cutoff': '90 Ry'}},
+        'evidences': [{'file_id': 'si', 'quote': 'The cutoff is 90 Ry.'}]}], [owner])
+    assert record['payload']['calculation_conditions']['qe']['energy_cutoff'] == '90 Ry'
+    assert record['value_number'] == 235 and record['payload']['parameters']['mu_star'] == .1
+
+
 
 def test_real_storage_roundtrip_preserves_model_inference_and_source(db_session, monkeypatch):
     from backend.ingest.model_review import review_fields
@@ -164,6 +178,27 @@ def test_same_version_saved_result_never_calls_model_again(monkeypatch):
     _, _, output, report = model_review.review_draft({'paper': {}, 'material_states': []}, lambda _: snap,
                                                    initial_results={row['key']: result})
     assert output[row['key']]['status'] == 'supported' and report['batches'] == 0
+
+
+def test_review_uses_current_material_card_summary_instead_of_stale_paper_cache(monkeypatch):
+    from backend.ingest import model_review
+    original = {'paper': {'research_materials': ['old']}, 'material_states': [
+        {'state_key': 'a', 'material': 'CaH6', 'material_name': 'CaH6'},
+        {'state_key': 'b', 'material': 'CaH4', 'material_name': 'tI10-CaH4'}]}
+    def rebuild(draft):
+        value = draft['paper']['research_materials']
+        return ev.complete_snapshot('upload', 'summary', [{'key': 'materials', 'item_key': 'materials',
+            'field': 'paper.research_materials', 'label': '研究材料', 'current_value': value,
+            'claim': {'value': value}, 'required': True, 'kind': 'field'}],
+            [{'file_id': 'main', 'chunk_index': 0, 'content': 'CaH6 and tI10-CaH4.'}], {})
+    def review(rows, chunks, **kwargs):
+        assert rows[0]['current_value'] == ['CaH6', 'tI10-CaH4']
+        return {r['key']: model_review.bind_result(r, {'status': 'supported', 'reason': '核对当前卡片汇总'}, chunks) for r in rows}
+    monkeypatch.setattr(model_review, 'review_fields', review)
+    fixed, _, result, _ = model_review.review_draft(original, rebuild)
+    assert fixed['paper']['research_materials'] == ['CaH6', 'tI10-CaH4']
+    assert original['paper']['research_materials'] == ['old']
+    assert result['materials']['status'] == 'supported'
 
 
 def test_partial_response_budget_keeps_successes_without_unbound_tool_name():

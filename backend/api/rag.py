@@ -472,14 +472,8 @@ async def _resolve_draft_classifications(session, draft: dict[str, Any], *, crea
 
 def _derived_research_materials(material_states: list[dict[str, Any]]) -> list[str]:
     """按出现顺序汇总材料名或化学式，去空白、去重。"""
-    seen: set[str] = set()
-    derived: list[str] = []
-    for state in material_states:
-        material = str(state.get("material_name") or "").strip() or str(state.get("material") or "").strip()
-        if material and material not in seen:
-            seen.add(material)
-            derived.append(material)
-    return derived
+    from backend.ingest.material_state_contract import research_materials
+    return research_materials(material_states)
 
 
 def _validate_draft(

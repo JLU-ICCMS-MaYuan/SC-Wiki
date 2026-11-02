@@ -139,6 +139,8 @@ def _add_conditions(draft, additions, batch):
             values = addition.get('values') or {}
             validate_conditions(values, model_output=True)
             conditions = candidate.setdefault('payload', {}).setdefault('calculation_conditions', {})
+            if conditions is None:
+                conditions = candidate['payload']['calculation_conditions'] = {}
             changed = False
             for path, value in parameter_paths(values):
                 if value in (None, '', [], {}):
@@ -146,7 +148,11 @@ def _add_conditions(draft, additions, batch):
                 parts = path.split('.')
                 parent = conditions
                 for key in parts[:-1]:
-                    parent = parent.setdefault(key, {})
+                    if parent.get(key) is None:
+                        parent[key] = {}
+                    parent = parent[key]
+                    if not isinstance(parent, dict):
+                        raise ValueError('已有计算条件不是合法的软件参数组，不能覆盖')
                 if parent.get(parts[-1]) not in (None, '', [], {}):
                     continue
                 parent[parts[-1]] = deepcopy(value)
@@ -169,11 +175,17 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
     from .tc_contexts import map_draft
     current = map_draft(draft)
     from .scientific_drafts import _property_modules_for_state
+    from .material_state_contract import ensure_state_keys
+    ensure_state_keys(current.get('material_states') or [])
     for index, state in enumerate(current.get('material_states') or []):
-        state.setdefault('state_key', f'state-{index + 1}')
         state['property_modules'] = _property_modules_for_state(state)
     results, batch_count, errors = deepcopy(initial_results or {}), 0, []
-    snapshot = rebuild(current)
+    def current_snapshot():
+        from .material_state_contract import research_materials
+        if current.get('material_states'):
+            current.setdefault('paper', {})['research_materials'] = research_materials(current['material_states'])
+        return rebuild(current)
+    snapshot = current_snapshot()
     protected = set(protected_keys) | changed_keys(snapshot)
     report = {'contract': CONTRACT, 'passes': [], 'errors': errors}
     for turn in range(max_passes):
@@ -203,7 +215,7 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
                 _add_conditions(current, additions, batch)
             except (ValueError, TypeError, KeyError) as exc:
                 errors.append({'step': 'condition_type', 'message': str(exc)[:300]})
-            snapshot = rebuild(current)
+            snapshot = current_snapshot()
             latest = {r['key']: r for r in snapshot['records']}
             for row in batch:
                 if row['key'] in latest:
@@ -344,7 +356,9 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
         request = {'records': [{k: deepcopy(v) for k, v in r.items() if k in {
                        'key', 'field', 'label', 'claim', 'current_value', 'editable_fields', 'required',
                        'state_key', 'module_key', 'record_key', 'record_field', 'record_group_key',
-                       'provenance', 'state_review_context', 'state_results', 'scientific_record', 'extension_context'}} for r in pending.values()],
+                       'provenance', 'state_review_context', 'state_results', 'scientific_record', 'extension_context'}} |
+                       ({'structure_input': deepcopy(r['_structure_model_input'])} if r.get('_structure_model_input') else {})
+                       for r in pending.values()],
                    'sources': list(read.values()),
                    'source_index': [{k: s.get(k) for k in ('source_id', 'file_id', 'page_start', 'block_id')}
                                     | {'preview': s['content'][:100]} for s in catalog.values()],
@@ -418,7 +432,8 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                             raise ValueError('通过结论未引用实际已读原文，请重新定位')
                         value = raw.get('final_value', row.get('current_value'))
                         proposal = None
-                        if digest(value) != digest(row.get('current_value')):
+                        from .scientific_evidence import canonical
+                        if digest(canonical(value)) != digest(canonical(row.get('current_value'))):
                             from .evidence_proposals import validate_values
                             validate_values(row, {'': value})
                             if row['field'].startswith('paper.') and isinstance(value, (str, list)):
@@ -544,3 +559,12 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
 
 from .fixed_form_contract import MODEL_PROMPT as FIXED_FORM_PROMPT
 PROMPT += '\n' + FIXED_FORM_PROMPT
+PROMPT += '''
+结构字段的current_value是用于版本绑定的几何指纹，不是结构内容。structure_input提供当前
+完整CIF/POSCAR及已有派生表示和推导说明。必须读取其中晶胞与原子坐标，与原文结构表核对；
+保留原胞/惯用胞及空间群展开的已验证表示关系，不把不同表示的原子数差异当成几何冲突。
+不要改写指纹或为格式转换生成final_value。真实几何不支持时返回具体疑点，保留现有结构。
+paper.research_materials是当前材料状态卡片的只读汇总，核实列表各项的原文依据，
+不能按论文主材料把列表缩减，也不追加尚无当前卡片的材料。材料名称应在对应状态字段纠正，
+此汇总不要返回final_value；它会随状态自动更新。
+'''

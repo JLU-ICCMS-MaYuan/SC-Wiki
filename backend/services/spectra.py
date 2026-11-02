@@ -124,7 +124,13 @@ def context(session, target, target_id, user, *, write=False):
         if inspect(session.connection()).has_table(ScientificWorkDraft.__tablename__):
             authorized_draft(session,work_target,work_id,user,lock=True)
             if workdrafts.row(session,work_target,work_id) is None:
-                workdrafts.open_draft(session,work_target,work_id,user)
+                work = workdrafts.open_draft(session,work_target,work_id,user)
+                if work_target=='upload':
+                    # 首次入队也从持久工作稿计算版本，与Worker重读保持一致。
+                    # MySQL JSON往返可能改变浮点末位，不能误判成用户编辑。
+                    session.refresh(work, attribute_names=['body'])
+                    from backend.ingest.tc_contexts import map_draft
+                    draft=map_draft(work.body)
                 if work_target=='paper':
                     from backend.ingest.field_drafts import authorized_draft
                     draft,_=authorized_draft(session,'paper',str(paper.id),user)
