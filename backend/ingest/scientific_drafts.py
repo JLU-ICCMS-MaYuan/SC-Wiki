@@ -265,8 +265,8 @@ def material_state_values(data: dict[str, Any]) -> dict[str, Any]:
         'material_dimensionality': dimensionality,
         'crystal_system': crystal if crystal in CRYSTAL_SYSTEMS else 'unknown',
         **state_metadata(data),
-        **{key: _number(data.get(key)) for key in ('pressure_value_gpa', 'pressure_min_gpa', 'pressure_max_gpa', 'temperature_value_k', 'magnetic_field_t')},
-        **{key: data.get(key) for key in ('pressure_raw', 'pressure_unit_raw', 'reported_space_group_symbol',
+        **{key: _number(data.get(key)) for key in ('pressure_value_gpa', 'temperature_value_k', 'magnetic_field_t')},
+        **{key: data.get(key) for key in ('reported_space_group_symbol',
             'reported_space_group_number', 'temperature_raw', 'temperature_unit_raw', 'note')},
     }
 

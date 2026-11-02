@@ -26,6 +26,7 @@ export interface ModuleDeletion {
 }
 
 interface Props {
+  fixedContract?: boolean
   modules: PropertyModuleDraft[]
   issues?: FormIssue[]
   reviewFields?: string[]
@@ -153,6 +154,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
   issues = [],
   reviewFields = [],
   basePath = '',
+  fixedContract = false,
   readOnly = false,
   onChange,
 }) => {
@@ -216,7 +218,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
   }
 
   const choicesFor = (moduleCode: PropertyModuleCode) => (
-    definitions[moduleCode]?.length ? definitions[moduleCode] : fallbackDefinitionRefs(moduleCode)
+    (definitions[moduleCode]?.length ? definitions[moduleCode] : fallbackDefinitionRefs(moduleCode)).filter(item => !fixedContract || item.property_code !== 'band_gap' && item.record_type !== 'measured_tc')
   )
 
   const addRecord = (moduleIndex: number, identity: string) => {
@@ -266,6 +268,7 @@ const PropertyModuleEditor: React.FC<Props> = ({
             <PropertySpectrumSection moduleCode={module.module_code} />
             <Box sx={{ pt: 1 }}>
               {module.records.map((record, recordIndex) => {
+                if (fixedContract && record.property_code === 'band_gap') return null
                 if (isGroupedTc(record)) {
                   const group = tcGroups.find(items => tcGroupKey(items[0]) === tcGroupKey(record))!
                   if (group[0].record_key !== record.record_key) return null

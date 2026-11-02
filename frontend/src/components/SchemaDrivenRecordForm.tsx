@@ -1,3 +1,4 @@
+import { commonConditions, conditionSoftware, conditionLabels, softwareLabels } from '../lib/fixedFormContract'
 import { draftNumber } from '../lib/fieldDrafts'
 import React, { useMemo } from 'react'
 import {
@@ -52,15 +53,11 @@ const FALLBACK_GROUP_SCHEMAS: Record<string, JsonSchema> = {
     type: 'object',
     title: '计算条件',
     properties: {
-      calculation_code: { type: 'string', title: '计算软件' },
-      electronic_method: { type: 'string', title: '电子结构计算方法' },
-      phonon_method: { type: 'string', title: '声子计算技术' },
-      vibrational_treatment: { type: 'string', title: '振动处理层次' },
-      exchange_correlation_functional: { type: 'string', title: '交换关联泛函' },
-      k_grid: { type: 'string', title: 'k 网格' },
-      q_grid: { type: 'string', title: 'q 网格' },
-      k_broadening: { type: 'number', title: 'k 展宽' },
-      q_broadening: { type: 'number', title: 'q 展宽' },
+      ...Object.fromEntries(Object.entries(commonConditions).map(([key, title]) => [key, { type: 'string', title }])),
+      ...Object.fromEntries(Object.entries(conditionSoftware).map(([software, keys]) => [software, {
+        type: 'object', title: softwareLabels[software], additionalProperties: false,
+        properties: Object.fromEntries(keys.map(key => [key, { title: conditionLabels[key] }])),
+      }])),
       extensions: { type: 'array', title: '补充计算条件', items: { type: 'object' } },
     },
   },
@@ -328,7 +325,7 @@ const SchemaDrivenRecordForm: React.FC<Props> = ({
       {hasDosConflict(record) && <Button size="small" color="warning" sx={{ justifySelf: 'start' }} aria-haspopup="dialog" onClick={event => {
         event.currentTarget.dispatchEvent(new CustomEvent('scwiki:open-record-evidence', { bubbles: true, detail: { record, field: basePath } }))
       }}>数值有矛盾 · 查看来源对照</Button>}
-      {Object.entries(payloadSchema.properties || {}).sort(([a], [b]) => a === 'parameters' ? -1 : b === 'parameters' ? 1 : 0).filter(([key]) => !['thermodynamic_stability', 'source_associations', 'table_row_ref', DOS_SOURCE_KEY].includes(key)).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
+      {Object.entries(payloadSchema.properties || {}).sort(([a], [b]) => a === 'parameters' ? -1 : b === 'parameters' ? 1 : 0).filter(([key]) => record.definition_version >= 2 ? ['parameters', 'calculation_conditions', 'experimental_conditions'].includes(key) : !['thermodynamic_stability', 'source_associations', 'table_row_ref', DOS_SOURCE_KEY].includes(key)).map(([key, schema]) => renderSchema(schema, `payload.${key}`, key))}
       {!isDosFermi && <Box sx={{ gridColumn: '1 / -1', minWidth: 0 }}>
         {quotedSources.length ? <Box component="details" data-evidence-summary sx={{ color: 'text.secondary', fontSize: '0.8rem' }}>
           <Box component="summary" sx={{ cursor: 'pointer' }}>原文证据（{quotedSources.length}）</Box>

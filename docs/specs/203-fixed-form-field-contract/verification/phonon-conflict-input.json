@@ -1,0 +1,818 @@
+{
+  "targets": [
+    {
+      "target": "scientific_work_drafts:37461084ddd7453e8d1378b86c0bb89f:fill-2676557b2e72a887f8441f61bbe3",
+      "material": "CaH6",
+      "material_name": "CaH6",
+      "pressure_value_gpa": 150.0,
+      "method": "isotropic_eliashberg",
+      "tc": 235,
+      "field": "phonon_method",
+      "current_values": [
+        "DFPT",
+        "density functional (linear-response) theory"
+      ]
+    },
+    {
+      "target": "scientific_work_drafts:37461084ddd7453e8d1378b86c0bb89f:fill-958e196ff73ee6ad0e6356a714a0",
+      "material": "CaH6",
+      "material_name": "CaH6",
+      "pressure_value_gpa": 150.0,
+      "method": "isotropic_eliashberg",
+      "tc": 220,
+      "field": "phonon_method",
+      "current_values": [
+        "DFPT",
+        "density functional (linear-response) theory"
+      ]
+    },
+    {
+      "target": "scientific_work_drafts:37461084ddd7453e8d1378b86c0bb89f:fill-c8d89db561645d4b7046a154d055",
+      "material": "CaH6",
+      "material_name": "CaH6",
+      "pressure_value_gpa": 200.0,
+      "method": "isotropic_eliashberg",
+      "tc": 201,
+      "field": "phonon_method",
+      "current_values": [
+        "DFPT",
+        "density functional (linear-response) theory"
+      ]
+    },
+    {
+      "target": "scientific_work_drafts:cc598824574a497ab111c0552ff27e64:fill-c8d89db561645d4b7046a154d055",
+      "material": "CaH6",
+      "material_name": "CaH6",
+      "pressure_value_gpa": 200.0,
+      "method": "isotropic_eliashberg",
+      "tc": 201,
+      "field": "phonon_method",
+      "current_values": [
+        "DFPT",
+        "density functional (linear-response) theory"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "source_id": "source-0",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "a5d4fdbcea1e379e1d6959f42bc2033927ba2b02c4936939012cc2613a0de9f1",
+      "quote": "Dowd s e o   oo21",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-1",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "ac9ab08ea7d883e16d0571b37e57f9b2e172d94776cb9ceb121bd6cf9fbfa5e2",
+      "quote": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-2",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "747cf3d9381c6d824cbc7cf4301917017e2e50c3b9df2b85782a6beefc78f561",
+      "quote": "Hui Wangª, John S. Tseb, Kaori Tanakab, Toshiaki litaka, and Yanming Maa,1",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-3",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "defec3e3724f42c10a7e82faf1017d6129297c8b4b3bf4ac6877763a54690dc7",
+      "quote": "aState Key Lab of Superhard Materials, Jilin University, Changchun 130012, Peoples Republic of China; bDepartment of Physics and Engineering Physics, University of Saskatchewan, Saskatoon, Saskatchewan, S7N 5E2, Canada; and Computational Astrophysics Laboratory, Rikagaku Kenkyūjo, 2-1 Hirosawa, Wako, Saitama 351-0198, Japan",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-4",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "b394951ae5b6c1224c95e31b2ae53a2b7ea24483707782fe89c2c72ac0462788",
+      "quote": "Edited by Michael L. Klein, Temple University, Philadelphia, PA, and approved February 17, 2012 (received for review November 5, 2011)",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-5",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+      "quote": "Hydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of \\mathbf { H _ { 2 } } fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particleswam optimization structural search, we show that in the stoichiometry \\mathsf { C a H _ { 6 } } a body-centered cubic structure with hydrogen that forms unusual“sodalite\" cagescontainingenclathratedCa stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance bytwo \\mathbf { H _ { 2 } } of electrons donated by Ca forming an \\mathbf { H _ { 4 } } unitas the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupationof thedegenerated orbitals at the zone center. The resultant dynamicJahn–Teller effecthelps to enhance electronphonon coupling and leads to superconductivity of \\mathbf { C a H _ { 6 } } . A superconducting critical temperature ( \\mathbf { I } _ { c } ) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-6",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "4aa02ca3e057e46f97730b5005fc71dfd4141beb0b5ba8f2d6fbb96210102a93",
+      "quote": "calcium hydride | sodalite structure",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-7",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "46b78dd4fbaa1ed81e29869d2c8358e233d25ef9b197df4d6765c512c7175504",
+      "quote": "urrent studies of the hydrides of simple elements at high pressures are motivated by the proposition that a high T _ { \\mathrm { c } } may be achieved from “precompressed\" \\mathbf { H } _ { 2 } indense hydrogen-dominant hydrides (1). Superconductivity has been reported in \\underline { { \\mathrm { S i H _ { 4 } } ( 2 ) } } , although controversy surroundsmodels of the origin of superconductivityand the structure of the superconducting state (3 - 5) Many theoretical structures have the predicted T _ { \\mathrm { c } } values ranging from 10 to 139 K (6–12). Except for \\mathrm { A l H } _ { 3 } (13), in which superconductivity was predicted but not observed, a common feature of these structures is theubiquitous presence of molecular hydrogen fragments. At high pressures, unfavorable electron-electron repulsion in the atomic valence shells can be reduced by migration and localization in the empty interstitial regions (14, 15) Introduction of anelectronegative element, as was demonstrated in the case of \\mathbf { K } \\mathbf { - } \\mathbf { A } \\mathbf { g } (16), increases the ability of the electronegative Ag atoms to accommodate electrons from K into theoutermost \\check { 5 } s and 5 p valence shells, thereby forming a bonding network and stabilizing the alloy structures that otherwise would not be observed under ambient pressures. Recently, Zurek et al. (17, 18) demonstrated that charge transfer from lithium or sodium to hydrogen molecules under high pressures could lead to the formation of newmetallic lithium- or sodium-hydride alloys. Depending on the stoichiometry, the structures consist of “pre-dissociated\"molecular \\mathrm { H } _ { 2 } and/or monoatomic hydrogen.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-8",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "2d8d8c918773e7192b3711ae67d19fbe71069fa399ddd72c54c0dbb318d0d975",
+      "quote": "Results and Discussion",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-9",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "1f49ab509d9774e77c25ca895b7a8bf9246e9d3a93c7231ac6fcd5e71b563e55",
+      "quote": "The known calcium hydrides have a stoichiometry of CaH2 at ambient pressure. Here, we explored other calcium hydrides with larger hydrogen contents by compressing a mixture containing Ca + hydrogen or \\mathrm{CaH_{2}+hydropen} The search for stable \\mathrm { C a H _ { 2 n } ^ { \\mathrm { ~ \\bar { ~ } ~ } } } ( n = 2 – 6 ) structures at high pressures was performed using the particle-swam optimization structure prediction algorithm (19) in combination with ab initio calculations. For each stoichiometry, calculations were performed at pressures of 50–200 GPa with",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-10",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "fc4036e687cbb693d696041a203014c03dd814761d06339a3a901ed2e2a88c3f",
+      "quote": "up to 4 formula units (f.u.). in the model. The enthalpies of candidate structures relative to the products of dissociation into CaH2 + solid H2 at the appropriate pressures are summarized in Fig. 1A. The essential information can be summarized as follows: (i) except for \\mathrm { C a H _ { 1 0 } } _ { : } stable structures began toemerge at pressures <50 GPa; (ii) CaH4 was the most stable phase at pressures between 50 and 150 GPa,whereas at 200 GPa \\mathrm { C a H _ { 6 } } had the lowest enthalpy of formation;(iii) the breakup of hydrogen molecules depended on the Ca/H ratio, and a higher susceptibility to dissociation was observed at higher ratios. Notably, calcium hydrides with stoichiometry having an odd number of hydrogen (e.g., \\mathrm { C a H } _ { 3 } , CaH, and \\dot { \\mathrm { C a H } } _ { 7 } , etc.) were found to be energetically very unfavorable and were excluded in the discussions(Supporting Information).",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-11",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "4d0a9dc9341a89a381bf402f89e48276923db8ade408a35c369e595b33904a6a",
+      "quote": "The structures of the stable phases for each stoichiometry at 150 GPa are shown in Fig. 1 B)–(D. Three types of hydrogen species, \\text{\" H}_{4} \\text{\" } units, monatomic \\mathbf { H } + \\mathbf { H } _ { 2 } , and molecular \\mathbf { H } _ { 2 } , were observed. CaH4 had a tetragonal (I4/mmm, Pearson symbol tI10) structure and included a body-centered arrangement of Ca and two molecular and four monatomic hydrogen units ( \\mathrm { C a } _ { 2 } ( \\mathrm { H } _ { 2 } ) _ { 2 } ( \\mathrm { H } ) _ { 4 } ) _ { ; } The structure of \\mathrm { C a H _ { 6 } } adopted a remarkable cubic form ( I m 3   m , Pearson symbol cI14), with body-centered Ca atoms and, on each face, squared \\mathrm { H } _ { 4 } units tilted 4 5 ^ { \\circ } with respect to the plane of the Ca atoms. These \\mathrm { H } _ { 4 } units were interlinked to form asodalite frameworkwith a Ca atom enclathrated at the center of each cage. The next stablepolymorph, \\mathrm { C a H } _ { 1 2 } , had a rhombohedral (R3, Pearson symbol hR13) structure consisting entirely of molecular H2",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-12",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "cd295e5daa7acb9e58fc712c36ee1e1752496faba563d528423e816eb4cc5f8d",
+      "quote": "The presence of different types of hydrogen can berationalized based on the effective number of electrons contributed by the Ca atom and accepted by each \\mathrm { H } _ { 2 } molecule. Assuming that the two valence electrons of each Ca atom were completely “ionized” and accepted by \\mathbf { H } _ { 2 } molecules, the “formal”effectively added electron (EAE)per \\mathbf { H } _ { 2 } for \\mathrm { C a H _ { 4 } } was 1 e / \\mathrm { H } _ { 2 } , for \\mathrm { C a H _ { 6 } } was ( 2/3 ) e/ H _2 , and was \\widetilde { ( 1 / 3 ) } e / \\mathrm { H } _ { 2 } for \\mathrm { C a H _ { 1 2 } } . Because \\mathbf { H } _ { 2 } already had a filled σ bond, the added electronsresidedin the antibonding \\sigma ^ { * } orbitals, which weakened the H-H bond (i.e., lengthened the H-H bond length) and eventually resulted in complete dissociation. The presence of H and H2 units in the \\mathrm{CaH_{2n}} structures depended on the number of EAEs. Two formulae were present in each unit cell of CaH4. Because half (two) of each H2 molecule wasretained,the remaining two \\mathrm { H } _ { 2 } molecules had to accommodate four “excess\" electrons into their \\sigma ^ { * } orbital, which broke up the molecules into monatomic hydrides (H⁻). The formation of \\mathrm { H } _ { 4 } units in \\mathrm { C a H _ { 6 } } was not accidental. If molecular hydrogen atoms were present, each \\sigma ^ { * } orbital of \\mathbf { H } _ { 2 } had to accommodate",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-13",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "e4648d2d3d9ff5f8374a5474c62de4c40d9f494737fe6dbcb4ab08e542103ba7",
+      "quote": "Author contributions: Y.M. designed research; H.W., J.S.T., K.T., T.I., and Y.M. performed research; H.W., J.S.T., T.I., and Y.M. analyzed data; and H.W., J.S.T., and Y.M. wrote the paper.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-14",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "107d146fa02e52d346f13f1dffb321e7526c779686cc006c43933c6ebcd15847",
+      "quote": "PHYSICS",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-15",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "0bccf87e22a63d6e5a1d205b1b0ddb64fcb57ff946886a9591f61a1b93aa4110",
+      "quote": "The authors declare no conflict of interest.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-16",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "5b5b766b3ff1a685e684473253c2cf56b99122e692d15a34d0160049a2e13b34",
+      "quote": "This article is a PNAS Direct Submission.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-17",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "db445678e2ebb8d4ed1337007a871f1a197b0ee3fd3e9d9d3cb70e92d5942084",
+      "quote": "1To whom correspondence should be addressed. E-mail: mym@jlu.edu.cn.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-18",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "54bd0946d936b3319c04792347f7a6d91df98eb49552583c50a02873a0c8c69f",
+      "quote": "This article contains supporting information online at www.pnas.org/lookup/suppl/doi:10.1073/pnas.1118168109/-/DCSupplemental.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-19",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "d4e379c9d7b2c3310f734d8220653d318422d6b3b3f56a34f046601020467ce4",
+      "quote": "www.pnas.org/cgi/doi/10.1073/pnas.1118168109",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-20",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "bc57e1cc2243e60a38e1e064ccc5c826d1c5b1a6ecf8e8e641f6afa69b1f07d0",
+      "quote": "PNAS Early Edition",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-21",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 1,
+      "block_id": "f6c21fdc86204b9f1ade1fa91fa3b854e99f6f09c392100008ad2384fa463b03",
+      "quote": "1 of 4",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-22",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "9e76d97457b61d01202fbe19f74eedb4d391363276ff7c8ca08949c44c5fa1ea",
+      "quote": "Dow   o   o21",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-23",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "3a68652f645dc49de12815ffd43318394e783b10929333d2a2152c5e3eb6cdf4",
+      "quote": "A",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-25",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "f26860bf41aaa56c4484bdcdad1e9c390dd918281eeffe8b97b49d7e3959a752",
+      "quote": "B",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-27",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "bb86f644eeca71ce00ae1558ca067d591e8f3528861647bb80a1c859509796a8",
+      "quote": "tI10",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-29",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "10caa370515cf4061991f8a51ab92fe783970caa3e1ef51352a14fde9944db57",
+      "quote": "cI14",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-31",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "898a6b39ab5913995bfa4b999b1a5a264db7060cdfbcbdc7c20e2c5618ac4d74",
+      "quote": "hR13",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-32",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "2187d9504ab4d5babd750920e0fa1d8610b18a448e098503af3114203b2274d9",
+      "quote": "Fig. 1. Enthalpies of formation (∆H, with respect to CaH₂ and H₂) of \\mathsf { C a H _ { 2 n } } (n = 2 - 6) and crystal structures. (A) The abscissa x is the fraction of H₂ in the structures. The open, solid, and half-filled symbols indicate that the structures are composed of \\mathsf { H } _ { 4 } units, molecular \\mathsf { H } _ { 2 } , and the coexistence of \\mathsf { H } _ { 2 } and H, respectively. The metastable structures are indicated by circles. The stable pressure ranges for \\mathsf { C a H _ { 4 } } \\mathsf { C a H _ { 6 } } , and \\mathsf { C a H } _ { 1 2 } are 50–200 \\mathsf { G P a } , 150–200 GPa, and 100–200 GPa, respectively. The EAE (per H₂) is shown in brackets. The estimated stability fields were determined according to the static enthalpies and may shift upon inclusion of dynamic effects (the zero-point motion of the nuclei). (B) Structure of tI10- \\mathsf { C a H _ { 4 } } . (C) Structure of cl14. \\mathsf { C a H _ { 6 } } . (D)Structure of hR13-CaH12. Monatomic H, molecular \\mathsf { H } _ { 2 } , and Ca atoms are shown as cyan, green, and royal blue, respectively. The green cylinders and gray dashed lines are drawn to represent molecularH₂and the sodalite cage, respectively.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-33",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "234bb30e21a146a3bfd442b357676617f7f935452c88447e076659f8ccc9f758",
+      "quote": "( 2 / 3 ) e . This led to aphysically unfavorable structurewith significant weakening of theintramolecularH-H bonds. There is, however, an alternative lower energy structure, the one predicted here. From molecular orbital theory, a square \\mathrm { H } _ { 4 } unit should possess ahalf-filled degenerated “nonbonding” orbital(Fig. 2A). This orbital, in principle, can accommodate up to two electrons withoutdetrimentallyweakening the H-H bond (Fig. 2B). It should be noted that at 150 GPa, the H...H distance of \\mathrm { H } _ { 4 } in the cI14 structure of \\mathrm { C a H _ { 6 } } was 1.24 \\hat { \\mathrm { A } } , which was substantially shorter than both the monoatomic H...H distance of 1.95 Å and the H... . \\mathrm { H } _ { 2 } distance of 1.61 Å in \\mathrm { C a H _ { 4 } } but in good agreement",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-35",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "76bb3710bfa058e22e0028c4535a433936a4f04bc4b3cf7bc61d2bef78ad3654",
+      "quote": "Fig. 2. Hückel energy-level diagrams of \\mathsf { H } _ { 4 } and \\mathsf { H } _ { 4 } ^ { 2 } units. (A) Hückel energylevel diagram of \\mathsf { H } _ { 4 } .(B) Hückel energy-level diagram of H-. The partial occupation of electrons on the degenerate orbitals of \\mathsf { H } _ { 4 } units can lead to a JT distortion, but no JT distortion is expected for a closed shell electronic structure as shown in B.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-36",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "8196f6d8a896817f25bd2b862c0098a04a9638c22a8e7070cabc58e9206f6ed0",
+      "quote": "with those of 1.27 and 1 . 1 7   \\mathring { \\mathrm { A } } in isolated and \\mathrm { H } _ { 4 } squares, respectively. This suggested the presence of a weak covalent H...H interaction in \\widetilde { \\mathrm { C a H } _ { 6 } } . As will be described below, the \\mathrm { H } _ { 4 } unit is the fundamental building block of the sodalite cage.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-37",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "c2b14bbecc609fdd844c803a192b93ff4287e9f831fc72c62af639178ac98d50",
+      "quote": "In \\mathrm { C a H } _ { 1 2 } , the EAÉ was ( 1/3 ) e/ H _2 ; which could be taken up by \\mathrm { H } _ { 2 } without severing the bond. Extending this concept further then predicted that \\mathrm { C a H } _ { 1 2 } and hydride alloys with a high H content (smaller EAE) would be composed predominantly of molecular \\mathbf { H } _ { 2 } . An important observation in support of the EAE description given above is that the H-H bond in \\mathrm { C a H _ { 4 } } lengthened from 0.81 Å at 100 GPa to 0.82 Å at 150 GPa, whereas the H-H bond in \\mathrm { C a H } _ { 1 2 } shortened from 0.81 Å to 0.80 Å. Here, more Ca valence electrons in \\mathrm { C a H _ { 4 } } were available for transfer to the \\mathrm { H } _ { 2 }   \\sigma ^ { * } orbitals than were available in \\mathrm { C a H } _ { 1 2 } , thereby more severely weakening the bond in \\mathrm { C a H } _ { 4 } . This effect was relatively small for \\mathrm { C a H } _ { 1 2 } , in which the H-H bond was shortened due to compression.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-38",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "6ad2596dd71afaf832ab8c578a0149c257489192eae3e7b3cc86e60a3164f9cf",
+      "quote": "The zero-point motion was not included in the calculation of the formation enthalpy of the various hydrides (Fig. 1A), although it is expected to be very influential due to the presence of large amounts of hydrogen. We estimated the zero-point energies of \\mathrm { C a H _ { 6 } } and CaH4 using the quasiharmonic model (20) at 150 GPa. It was found that the inclusion of zero-point motion significantlylowered the formation enthalpyof Ca \\mathbf { I } _ { 6 } with respect to \\mathrm { C a H _ { 4 } } (Fig. S11). As a consequence, \\mathrm { C a H _ { 6 } } became more stable at and above 150 GPa. The physical mechanism underlying this effect stemmed from the \\vec { \\mathbf { H } } _ { 4 } ^ { \\mathrm { i } } moieties, which included much longer H-H distances and led to significantly softened phonons. This contrasted with other Ca hydrides studied (e.g., \\overline { { \\mathrm { C a H _ { 4 } } } } and \\underline { { \\mathrm { C a H } _ { 1 2 } } } ) in which the presence of \\mathrm { H } _ { 2 } molecular units gave rise tohigher frequency phonons and, thus, a larger zero-point energy.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-39",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "21857c8b396928b26fc38f77d5a7070a7e0f79b48b139a0ec9b4cae827ff719b",
+      "quote": "The three-dimentional sodalite cage in \\mathrm { C a H _ { 6 } } is the result of interlink of other \\underline { { \\mathrm { H } } } _ { 4 } units via each H atom at the corner of one \\mathrm { H } _ { 4 } unit.So, what is the electronic factor promoting the formation of these \\mathrm { H } _ { 4 } units?To answer this question, the electron localization functions (ELF) of a hypothetical bare bcc Ca lattice with the H atoms removed and \\widetilde { \\mathrm { C a H } _ { 6 } } hydride (Fig. 3A and 3B) were examined. In bare body-centered cubic (bcc) Ca, regions with ELF values of 0.58 were found to localize at the H atom sites in the \\mathrm { H } _ { 4 } units on the faces of the cube. The ELF of \\overline { { \\mathrm { C a H _ { 6 } } } } hydride suggested that no bonds were present between the Ca and H.A weak “pairing” covalent interaction with an \\overline { { \\mathrm { E L F } } } of 0 . 6 1 however, was found between the H atoms that formed a square \\mathrm { H } _ { 4 } lattice.Their formation resulted from the accommodation by \\mathrm { H } _ { 2 } of excess electrons from the Ca. An electron topological analysis also showed the presence of a bond-critical point (21) along the path connecting neighboring H atoms. The integrated charge within the H atomic basin was 1.17 e, which corresponded to a charge transfer of 1.02 e from each Ca.A partially ionized Ca was also clearly supported by the band structure and the density of states as reported in Fig. 3C and Fig. S15. At 150 GPa, Ca underwent an s { - } d hybridizationwith an electron transferred from the 4 s to the 3 d orbital.In \\mathrm { C a H } _ { 6 } , the Ca site symmetrywas m3 m ( O _ { h } ) and the Ca 3 d manifold was clearly split into the e _ { g } and t _ { 2 g } bands, with the lower energy e _ { g } band partially occupied.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-40",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "6aea1c4414e7cccda269e8174c44ff2b2a8272fd1543012899fee06f3bcc1901",
+      "quote": "A comparison of the band structures of \\mathrm{CaH_{6},  ^{\\alpha}H_{6}   (Ca_{0}H_{6})}, and bare Ca ( \\mathrm { C a H _ { 0 } } ) provided additional supporting evidence. Even without the presence of Ca,the valence band width of the hypothetical \\mathbf { H } _ { 6 } (Fig. 3D) was 15.2 eV, comparable to 16.4 eV for \\mathrm { C a H _ { 6 } } (Fig. 3C). In comparison, the valence band width of the bare bcc Ca was only 4.3 eV (Fig. 3E). The band structure of \\mathrm { C a H _ { 6 } } near the Fermi level was modified from \\mathrm { H } _ { 6 } due to the the hybridization between Ca 3 d and H 1 s orbital; however, the trend in the electronic band dispersions from -2\\; to -16.4\\; eV was remarkably similar to that of \\mathbf { H } _ { 6 } from 3 to -15.2 eV.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-41",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "a3ff1a4a7576c8f8dde5cc90abd836b079623482ebc4852682753b64e26230c9",
+      "quote": "2 of 4| www.pnas.org/cgi/doi/10.1073/pnas.1118168109",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-42",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 2,
+      "block_id": "67a5451889f70cfd1ad8aeb55104f5dd1fedc98c037828d9749303d9fc28549f",
+      "quote": "Wang et al.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-43",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "839d41a835e6eed148a743e76d51b05e82f452b47a6446e919df08301bfa5ff2",
+      "quote": "Down   ee o se q eeooz1",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-49",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "95947e31c20d0f3e94c514ee915ea23c6f036b39a10d5594f02c7dba5dc9015c",
+      "quote": "Fig. 3. ELF and band structure. (A) ELF of CaH0(cl14 structure with H removed). (B) ELF of CaH₆. (C) Band structure of \\mathsf { C a H _ { 6 } } (D) Band structure of \\mathsf { C a } _ { 0 } \\mathsf { H } _ { 6 } (cl14 structure with Ca removed). (E) Band structure of CaH0. The horizontal dotted lines indicate the Fermi level.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-50",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+      "quote": "Sodalite cage was constructed from linking of \\mathrm { H } _ { 4 } units and this topologically resulted in the formation of \\mathbf { H } _ { 6 } faces. In fact, a primitive cell of \\mathrm { C a H _ { 6 } } can be seen as composed of a \\mathrm { H } _ { 6 } hexagon and a \\mathbf { C a } . Band structure analysis suggested that four conduction bands of \\text{\" } Ca _{0} H _{6} \\text{\" } sodalite cage (Fig. 3D) were half-filled and the addition of maximal two electrons to \\mathrm { H } _ { 6 } gave rise to partial occupancy of the degenerate bands at Γ as indicated in \\mathrm { C a H _ { 6 } } (Fig. 3C). Partial occupancy of a degenerate orbital results in an orbitally degenerate state and is subject to Jahn-Teller (JT) distortion (22) (Fig. 2). The JT effect involves coupling between the electron and nuclear degrees of freedom, leading to distortions in the structure, and it lifts the orbital degeneracy. If the distortion is dynamic, JT vibrations can contribute to superconductivity. The same mechanism has been invoked to explain the superconductivity in B-doped diamond (23).To investigate this possibility, electron-phonon coupling (EPC) calculations on the sodalite structure of \\mathrm { \\bar { C a H } _ { 6 } } at 150 GPa were performed. The phonon dispersion curves, phonon linewidth \\gamma ( \\omega ) , EPC parameter \\lambda , and Eliashberg spectral function \\alpha ^ { 2 } F ( \\omega ) were calculated. A gap at 430\\  cm ^{-1} (Fig. 4) separated the phonon spectrum into two regions: The lower frequency branches were associated with the motions of both Ca and H, whereas the higher frequency branches were mainly associated with H atoms. The combined contribution (19% and 81%, respectively) gave an EPC parameterλ of 2.69.The calculated phonon linewidths (Fig. 4) showed that the EPC was derived primarily from the T _ { 2 g } and E _ { g } modes at the zone center Γ. Incidentally, these two bands, respectively, were the in-plane breathing and rocking vibrations of the H atoms belonging to the \\mathrm { H } _ { 4 } unit. The corresponding atomic vibrations led to distortions in the square planar structure. Moreover, both phonon branches showed significant phonon softening along all symmetric directions. A large EPC also benefited from the high density of states at the Fermi level caused by a Van Hove singularity at Γ (Fig. 3C). The very large EPC was unprecedented for the main group hydrides. Previous calculations on a variety of systems predicted an EPC in the range of 0.5–1.6 (11). The mechanism suggested here is not inconsistent with the mechanisms found in JT-induced superconductivity in alkali intercalated \\mathbf { C } _ { 6 0 } , in which the intramolecular vibrations are responsible for",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-51",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "e59d89642ca94357dc40f4d78a0c50e2e232a583fdc49bd97ef46d6a53b58432",
+      "quote": "distortions that lower the symmetry of the molecules, which is favorable for electron-phonon processes (24, 25).",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-52",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+      "quote": "Tcwas calculated bâsed on the spectral function \\alpha ^ { 2 } F ( \\omega ) by numerically solving the Eliashberg equations (26), which consist of coupled nonlinear equations describing the frequency-dependent order parameter and renormalization factor. The Coulomb repulsion is taken into account in terms of the Coulomb pseudopotential, \\mu * , scaled to a cutoff frequency (typically six times the maximum phonon frequency) (27). At 150 GPa, the predicted T _ { c } values were 235 K and 220 K using typical values for \\mu * of 0.1 and 0.13, respectively. EPC calculations were also performed for 200 GPa and 250 GPa, in which the calculated T _ { c } was found to decrease with pressure (201 K at 200 GPa and 187 K at 250 GPa",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-54",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "8949e52ba01ec97abe887521eccf3b4f1ed9be86f222150ff10e62616baba69a",
+      "quote": "Fig. 4. Phonon band structure and Eliashberg spectral function. Phonon dispersion curves of cl14 at 150 GPa (Left). Circles indicate the phonon linewidth with a radius proportional to the strength. Phonons with a larger linewidth at Γ belong to the t _ { 2 \\mathbf { g } } and \\mathsf { e } _ { \\mathsf { g } } modes, as indicated by the circles at 9 6 0 ~ \\mathsf { c m } ^ { - 1 } and 1 , 9 6 0 ~ \\mathsf { c m } ^ { - 1 } , respectively. Eliashberg electron-phonon coupling spectral function \\alpha ^ { 2 } F ( \\omega ) at 150 GPa (Right). Dashed line is the integration of the electron– phonon coupling strength as a function of phonon frequency. The horizon lines are drawn as a guide.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-55",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "6e5874f391d30d78ad96c7dfdbf501e77c042fdba410a9cd3344d19114cee28b",
+      "quote": "PHYSICS",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-56",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "623a375fdcf15955da1606aff2a788393a983570ffef936dad82248c5938a1aa",
+      "quote": "Wang et al.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-57",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "5d6f8c7182cfd22a0f3ae0059210e0354e82797eb728ddfdbaafa2405a6b320b",
+      "quote": "PNAS Early Edition",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-58",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 3,
+      "block_id": "9dbf4a5d6c5cf36b43531d5dbfa64dd7faf0a2e19074b7c7e69832b2ead2aec9",
+      "quote": "3 of 4",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-59",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "2b6d1b6503c772ea0815aedbc069ead4fe49fc7ea4c4f302bfc6cee7bf0bd437",
+      "quote": "for \\mu * = 0.13) with a pressure coefficient ( d T _ { c } / d P ) of -0.3\\overset{\\frown}{3} K/GPa. \\overset{\\frown}{T_c} of the order of 200 K is among the highest for all reported hydrides.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-60",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "15c6b096da5076b914d5a32bf04abee7ef97d686845ae044946d626fa0d5e3a7",
+      "quote": "The predicted high T _ { c } for \\mathrm { C a H _ { 6 } } is very encouraging, but it must be viewed with caution. Formally, there is no upper limit to the value of T _ { c } within the Midgal–Eliashberg theory of superconductivity. Two practical factors must be considered. The calculation of the EPČ is based on the harmonic approximation and without consideration of electron correlation effects. Because strong electron-phonon coupling in \\mathrm { C a H _ { 6 } } arises from the proximity of the electronic and structural instabilities, anharmonicity of the atomic motions can lead to renormalization of the vibrational modes, as demonstrated in a study of \\mathrm { A l H } _ { 3 } . In that study, lower renormalized frequencies were found to reduce the EPC and suppress superconductivity (28). On the other hand, the electron-phonon matrix elements may be enhanced by anharmonic vibrations, as in the case of disordered materials (29). In a recent hybrid functional study of \\mathbf { C } _ { 6 0 } anions, the inclusion of Hartree– Fock exchange contributions was shown to have little effect on the structural properties and phonon frequencies but resulted in a strong increase in the electron-phonon coupling (24).",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-61",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "5ebbdda19d70d202e698122af9afd5b79e4d59528ad3359bbe2ccca2433b4273",
+      "quote": "The formation of a hydrogen sodalite cage with enclathrated calcium in \\mathrm { C a H _ { 6 } } , reported here for hydrogen-rich compounds, provides an unexpected example of a good superconductor created by the compression of a mixture of elemental calcium+ hydrogen or \\bar{CaH_{2}} + hydrogen. This superconductor can also be viewed as consisting of unique square \\mathrm { H } _ { 4 } units and electrondonating calcium atoms subject to JT effects. Dense superconductive states, such as those reported here, may be favored in other mixtures of elemental metals + hydrogen or any hydride+ hydrogen upon compression. This work highlights the major role",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-62",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "6a8018ed154caefe6803c864ad5536bc0a8e965b374181a68df9065f852180f4",
+      "quote": "1. Ashcroft NW (2004) Hydrogen dominant metallic alloys: High temperature superconductors? Phys Rev Lett 92:187002.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-63",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "349d606d9c668f3fd1bb0b1ee2b19711b9435ba20cd84817295e6e0981bc9ec6",
+      "quote": "2. Eremets MI, Trojan IA, Medvedev SA, Tse JS, Yao Y (2008) Superconductivity in hydrogen dominant materials: Silane. Science 319:1506–1509.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-64",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "b48092761afd0834eb902ae0c33da55cb341ea2a0c4eb6d8d76f12dfa036d9bb",
+      "quote": "3. Degtyareva O, Proctor JE, Guillaume CL, Gregoryanz E, Hanfland M (2009) Formation of transition metal hydrides at high pressures. Solid State Commun 149:1583–1586.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-65",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "73192e38e6be6d9d44ded3447754163dbce72647c34a8be0cdb2f6fa71ac9d7f",
+      "quote": "4. Hanfland M, Proctor JE, Guillaume CL, Degtyareva O, Gregoryanz E (2011) High-pressure synthesis, amorphization, and decomposition of silane. Phys Rev Lett 106:095503.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-66",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "3c4335eeb2bce36ab2ffaebf45f1c3782a6de64fdba660e17c627fc1dc661145",
+      "quote": "5. Strobel TA, et al. (2011) High-pressure study of silane to 150 GPa. Phys Rev B 83:144102.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-67",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "518f2445565d4976f55af583efa31e0f73eba9e610d62e3ec110fb0aad6f3e6f",
+      "quote": "6. Feng J, et al. (2006) Structures and potential superconductivity in SiH4 at high pressure: En route to \"metallic hydrogen\". Phys Rev Lett 96:017006.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-68",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "538b1600121eff09058183553de3743bfbcddd37113d8a86be726c54f466697d",
+      "quote": "Down   ee o se q eeooz1",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-69",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "c4ef6b677121c22d93c188ba6b258aa05ebd7425aee7c7a31fdea03d5ebb69e3",
+      "quote": "7. Tse JS, Yao Y, Tanaka K (2007) Novel superconductivity in metallic SnH4 under high pressure. Phys Rev Lett 98:117004.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-70",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "bbb4a0e48b8ed91ae03501ebcdb89989b9d7135721c4824d9fe8674012ad2ffe",
+      "quote": "8. Gao G, et al. (2008) Superconducting high pressure phase of germane. Phys Rev Lett 101:107002.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-71",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "1a46a930be5ef95f13384bc4483df58a4b62dea229a4337166530008195e7561",
+      "quote": "9. Martinez-Canales M, et al. (2009) Novel structures and superconductivity of silane under pressure. Phys Rev Lett 102:087005.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-72",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "7b2e62ed1aef288983170515fcb17ae95692fa5850b6cedd216fee9324ad73e9",
+      "quote": "10. Kim DY, Scheicher RH, Mao H-K, Kang TW, Ahuja R (2010) General trend for pressurized superconducting hydrogen-dense materials. Proc Nat/ Acad Sci USA 107:2793–2796.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-73",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "33b05e7ac693196fdec75c40416005ebec21bdfaf9e56ca3db093824bf980644",
+      "quote": "11. Li Y, et al. (2010) Superconductivity at ~100 K in dense SiH4(H₂)2 predicted by first principles. Proc Natl Acad Sci USA 107:15708–15711.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-74",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "3e2f92fd7696930a86d7f4ebfebd88797f97bf04511b66417184976a20510fcc",
+      "quote": "12. Jin X, et al. (2010) Superconducting high-pressure phases of disilane. Proc Nat/ Acad Sci USA 107:9969-9973.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-75",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "b6d08999054b1bd2a6d41bf7e712ed08c296daf2fc5ef43ae482efe983ea5670",
+      "quote": "13. Goncharenko I, et al. (2008) Pressure-induced hydrogen-dominant metallic state in aluminum hydride. Phys Rev Lett 100:045504.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-76",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "b5d70abd117f1af79766c817cda2f973ccb29f5ef524e79d6ee681e4a70eb0a1",
+      "quote": "14. Neaton JB, Ashcroft NW (1999) Pairing in dense lithium. Nature 400:141–144.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-77",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "c5319e0c8848f05afd96b9783344a7f37e9a6d156641367239557c6844fe62a5",
+      "quote": "15. Tamblyn I, Raty J-Y, Bonev SA (2008) Tetrahedral clustering in molten lithium under pressure. Phys Rev Lett 101:075703.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-78",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "8697ae4919ad5b48407680ee684e92ee11de7cb84d8ec0d94c494d4632d14415",
+      "quote": "16. Tse JS (2005) Crystallography of selected high pressure elemental solids. Zeitschrift für Kristallographie 220:521–530.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-79",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "a40d8d0b778493890d6d12d7118e98b941057110d0e8d63c9dfab8308c77cede",
+      "quote": "17. Zurek E, Hoffmann R, Ashcroft NW, Oganov AR, Lyakhov AO (2009) A little bit of lithium does a lot for hydrogen. Proc Nat/ Acad Sci USA 106:17640–17643.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-80",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "7f95d495706ecbb61131214e26fa13017af8a174607b8df18f287f8fc336bcd3",
+      "quote": "18. Baettig P, Zurek E (2011) Pressure-stabilized sodium polyhydrides: NaH(n > 1). Phys Rev Lett 106:237002.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-81",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "1e0565cfc18bd37126d2f451f0a16d8019e0c30c660b9670b0c81e80d9433a11",
+      "quote": "19. Wang Y, Lv J, Zhu L, Ma Y (2010) Crystal structure prediction via particle-swarm optimization. Phys Rev B 82:094116.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-82",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "4a8128fd54823970f55c2ae51890a86ee1a93169536fb410d665e96c35192cd5",
+      "quote": "played by pressure in effectively overcoming the kinetic barrier to formation in the synthesis of hydrides.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-83",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "0dfe3306312c54ca15d304ce1abfc9a60d2cc23f096ee42b5586632605c1d4aa",
+      "quote": "Methods",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-84",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+      "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-85",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "bd0cf5105ba8dff9a5a764ad5c14197bbfd84cb9a128ad93200196bc6ebac60b",
+      "quote": "ACKNoWLEDGMENTS. H. W. and Y. M. acknowledge Prof. Aitor Bergara for the valuable discussions and are thankful to the financial support by Natural Science Foundation of China (NSFC) under 11104104, the China 973 Program (2011CB808200), NSFC under 11025418 and 91022029, Changjiang Scholar and Innovative Research Team in University (IRT1132), and the research fund of Key Laboratory of Surface Physics and Chemistry (SPC201103). T. I. was supported by Ministry of Education, Culture, Sports, Science and Technology of Japan (20103001–20103005). The calculations were performed in the computing facilities at Rikagaku Kenkyūjo Integrated Cluster of Clusters system (Japan) and the High Performance Computing Center of Jilin University.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-86",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "943cd3be238891a7fca12b40eb71ab413559bfc95feee6f931f1aa5b498b9a13",
+      "quote": "20. Ma Y, Tse JS (2007) Ab initio determination of crystal lattice constants and thermal expansion for germanium isotopes. Solid State Commun 143:161–165.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-87",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "a653be34c8c7dafb9c0f0b05c0f4bd6f619570dff95c04c6731dfee3cd00a28f",
+      "quote": "21. Richard FWB (1990) Atoms in molecules: a quantum theory (Oxford University Press, Oxford).",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-88",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "73f815e4e3d54891957d6194aa75b3e0fedb21f7075f4ac926c73444eb28761f",
+      "quote": "22. Jahn HA, Teller E (1937) Stability of polyatomic molecules in degenerate electronic states. I. Orbital degeneracy. Proc Roy Soc A 161:220–235.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-89",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "5e48f498330c3bd3373df54742401dbced978a14719a3cfc91b0f3616cfac522",
+      "quote": "23. Ma Y, et al. (2005) First-principles study of electron-phonon coupling in hole- and electron-doped diamonds in the virtual crystal approximation. Phys Rev B 72:014306.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-90",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "57f115d96b711da9ce013a746fcd2b9e7a0dcb7837ff9b6e4a54c2ef98a91374",
+      "quote": "24. Laflamme Janssen J, Côté M, Louie SG, Cohen ML (2010) Electron-phonon coupling in C60using hybrid functionals. Phys Rev B 81:073106.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-91",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "899d3af1cde14466727df038710669f596014170973db7045167252a0e2ad91c",
+      "quote": "25. Schlüter M, Lannoo M, Needels M, Baraff GA, Tománek D (1992) Superconductivity in alkali intercalated C _ { 6 0 } . J Phys Chem Solids 53:1473–1485.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-92",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "059231a6d73079f5477db87f61bd3e5aa09470432043489b1e6b215aa42d2500",
+      "quote": "26. Eliashberg GM (1960) Interactions between electrons and lattice vibrations in a superconductor. Sov Phys JETP 11:696.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-93",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "048bffb599cbb28af7f1673f6146a9fcfd618a0f8fea4223282f3c9e5a8ba18c",
+      "quote": "27. Yao Y, Tse JS, Tanaka K, Marsiglio F, Ma Y (2009) Superconductivity in lithium under high pressure investigated with density functional and Eliashberg theory. Phys Rev B 79:054524.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-94",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "62c81864573acb1d565ea29890dd431cc2275ffc0af026ba88b46e8bfbf88aa9",
+      "quote": "28. Rousseau B, Bergara A (2010) Giant anharmonicity suppresses superconductivity in AlH3under pressure. Phys Rev B 82:104504.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-95",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "7792ed1d199cd8c15f45241ebe533bc937daaed4578f34b3e1234683c4feaadb",
+      "quote": "29. Garland JW, Bennemann KH, Mueller FM (1968) Effect of lattice disorder on the superconducting transition temperature. Phys Rev Lett 21:1315.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-96",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "bd8946fbd1f7feb2d9249386974b242c4722a3d061e73eb319ba3243a0c00d97",
+      "quote": "30. Lv J, Wang Y, Zhu L, Ma Y (2011) Predicted novel high-pressure phases of lithium. Phys Rev Lett 106:015503.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-97",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "235d245acf3708f8cc258d4aee5a21a4c3555b99d3fd5ae5aa43f0a007188bb9",
+      "quote": "31. Li P, Gao G, Wang Y, Ma Y (2010) Crystal structures and exotic behavior of magnesium under pressure. J Phys Chem C 114:21745–21749.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-98",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "192b4cc9a7e3873101eee796f6db18e40563f16191b5661204b59d13f2a2441a",
+      "quote": "32. Zhu L, et al. (2011) Substitutional alloy of Bi and Te at high pressure. Phys Rev Lett 106:145501.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-99",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "574a1efd6277b03f6c8badf5c5b960cc3d3b15d0edf809e5dc189945eebae24e",
+      "quote": "33. Guillaume CL, et al. (2011) Cold melting and solid structures of dense lithium. Nat Phys 7:211-214.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-100",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "7850b4f907e499dd0bfe40224553dd861f84b851f83b14a3d96c02fdb24e7a24",
+      "quote": "34. Perdew JP, Burke K, Ernzerhof M (1996) Generalized gradient approximation made simple. Phys Rev Lett 77:3865.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-101",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "b67b4f1f9eca67a768c45803a57d787dcdec44c1689c633abd66f6a725555660",
+      "quote": "35. Kresse G, Furthmüller J (1996) Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set. Phys Rev B 54:11169.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-102",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "4f6f089f07e0ec9147163d6bad9dd9b8b35581f5d77845cc10010fcebe03bb9d",
+      "quote": "36. Blöchl PE (1994) Projector augmented-wave method. Phys Rev B 50:17953.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-103",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "ec0f5262b32bf1ad248654d20694ba5b9bda1397cfbd5867566489fed26f63c5",
+      "quote": "37. Giannozzi P, et al. (2009) QUANTUM ESPRESSO: A modular and open-source software project for quantum simulations of materials. J Phys: Condens Matter 21:395502.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-104",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "d1a90f6d44f9cbfe81d3aad1c280ffe5ef1698860b99dc4e1bb583f90fe9de1e",
+      "quote": "4 of 4| www.pnas.org/cgi/doi/10.1073/pnas.1118168109",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "source_id": "source-105",
+      "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+      "pdf_page": 4,
+      "block_id": "495b91d452f2c548a48401252319279cae3516ccf5b53c1c4cc98528a80fd73a",
+      "quote": "Wang et al.",
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    }
+  ]
+}

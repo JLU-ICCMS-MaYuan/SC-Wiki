@@ -1,0 +1,122 @@
+{
+  "scientific_work_drafts:37461084ddd7453e8d1378b86c0bb89f:fill-2676557b2e72a887f8441f61bbe3": {
+    "phonon_method": {
+      "value": "density functional (linear-response) theory",
+      "expected_values": [
+        "DFPT",
+        "density functional (linear-response) theory"
+      ],
+      "source_verified": true,
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "evidences": [
+        {
+          "source_id": "source-84",
+          "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+          "pdf_page": 4,
+          "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+          "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information.",
+          "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+        }
+      ],
+      "reason": "原文方法部分明确说明电子性质、晶格动力学和电子-声子耦合采用密度泛函（线性响应）理论，与当前值一致。",
+      "model": "deepseek-v4-pro",
+      "expected_context": {
+        "material": "CaH6",
+        "material_name": "CaH6",
+        "pressure_value_gpa": 150.0,
+        "method": "isotropic_eliashberg",
+        "tc": 235
+      }
+    }
+  },
+  "scientific_work_drafts:37461084ddd7453e8d1378b86c0bb89f:fill-958e196ff73ee6ad0e6356a714a0": {
+    "phonon_method": {
+      "value": "density functional (linear-response) theory",
+      "expected_values": [
+        "DFPT",
+        "density functional (linear-response) theory"
+      ],
+      "source_verified": true,
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "evidences": [
+        {
+          "source_id": "source-84",
+          "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+          "pdf_page": 4,
+          "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+          "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information.",
+          "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+        }
+      ],
+      "reason": "原文方法部分明确说明电子性质、晶格动力学和电子-声子耦合采用密度泛函（线性响应）理论，与当前值一致。",
+      "model": "deepseek-v4-pro",
+      "expected_context": {
+        "material": "CaH6",
+        "material_name": "CaH6",
+        "pressure_value_gpa": 150.0,
+        "method": "isotropic_eliashberg",
+        "tc": 220
+      }
+    }
+  },
+  "scientific_work_drafts:37461084ddd7453e8d1378b86c0bb89f:fill-c8d89db561645d4b7046a154d055": {
+    "phonon_method": {
+      "value": "density functional (linear-response) theory",
+      "expected_values": [
+        "DFPT",
+        "density functional (linear-response) theory"
+      ],
+      "source_verified": true,
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "evidences": [
+        {
+          "source_id": "source-84",
+          "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+          "pdf_page": 4,
+          "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+          "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information.",
+          "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+        }
+      ],
+      "reason": "原文方法部分明确说明电子性质、晶格动力学和电子-声子耦合采用密度泛函（线性响应）理论，与当前值一致。",
+      "model": "deepseek-v4-pro",
+      "expected_context": {
+        "material": "CaH6",
+        "material_name": "CaH6",
+        "pressure_value_gpa": 200.0,
+        "method": "isotropic_eliashberg",
+        "tc": 201
+      }
+    }
+  },
+  "scientific_work_drafts:cc598824574a497ab111c0552ff27e64:fill-c8d89db561645d4b7046a154d055": {
+    "phonon_method": {
+      "value": "density functional (linear-response) theory",
+      "expected_values": [
+        "DFPT",
+        "density functional (linear-response) theory"
+      ],
+      "source_verified": true,
+      "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "evidences": [
+        {
+          "source_id": "source-84",
+          "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+          "pdf_page": 4,
+          "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+          "quote": "Our structure prediction approach is based on a global minimization of free energy surfaces merging ab initio total-energy calculations via particle swarm optimization technique as implemented in CALYPSO (crystal structure analysis by particle swarm optimization) code (19). Our CALYPSO method unbiased by any known structural information has been benchmarked on various known systems 19 with various chemical bondings and had several successful prediction of high-pressure structures of Li, Mg, and Bi₂Te₃ (30–32), among which the insulating orthorhombic (Aba2, Pearson symbol oC40) structure of Li and the two low-pressure monoclinic structures of \\mathsf { B i } _ { 2 } \\mathsf { T e } _ { 3 } have been confirmed by independent experiments (32, 33). The underlying ab initio structural relaxations were carried out using density functional theory within the Perdew-Burke-Ernzerhof exchange-correlation (34) as implemented in the Vienna Ab Initio Simulation Package (VASP) code (35). The all-electron projector-augmented wave method (36) was adopted with 1s and 3 p ^ { 6 } 4 s ^ { 2 } treated as valence electrons for H and \\mathsf { C a } , respectively. Electronic properties, lattice dynamics and electron-phonon coupling were studied by density functional (linear-response) theory as implemented in the QUANTUM ESPRESSO package (37). More computational details can be found in the Supporting Information.",
+          "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+        }
+      ],
+      "reason": "原文方法部分明确说明电子性质、晶格动力学和电子-声子耦合采用密度泛函（线性响应）理论，与当前值一致。",
+      "model": "deepseek-v4-pro",
+      "expected_context": {
+        "material": "CaH6",
+        "material_name": "CaH6",
+        "pressure_value_gpa": 200.0,
+        "method": "isotropic_eliashberg",
+        "tc": 201
+      }
+    }
+  }
+}

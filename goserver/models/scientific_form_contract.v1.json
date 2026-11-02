@@ -1,0 +1,275 @@
+{
+  "version": 1,
+  "profile": "theoretical-conventional",
+  "issue": 203,
+  "paper_fields": {
+    "title": "text",
+    "knowledge_graph_title": "text",
+    "authors": "text[]",
+    "corresponding_authors": "text[]",
+    "co_first_authors": "text[]",
+    "journal": "text",
+    "year": "integer",
+    "volume": "text",
+    "issue_number": "text",
+    "pages": "text",
+    "doi": "text",
+    "paper_type": "enum",
+    "theoretical_subtype": "enum",
+    "superconductor_kind": "enum",
+    "material_families": "selection[]",
+    "abstract": "text",
+    "keywords_tags": "text[]",
+    "methodology": "text[]",
+    "summary": "text",
+    "key_finding": "text",
+    "research_motivation": "text"
+  },
+  "state_fields": {
+    "material_name": "text",
+    "material": "text",
+    "element_count": "integer",
+    "material_dimensionality": "enum",
+    "crystal_system": "enum",
+    "reported_space_group_symbol": "text",
+    "reported_space_group_number": "integer",
+    "structure_families": "selection[]",
+    "state_kind": "enum",
+    "pressure_value_gpa": "number:GPa",
+    "structure": "structure"
+  },
+  "state_scientific_fields": {
+    "structure_optimization": "enum"
+  },
+  "condition_fields": {
+    "calculation_code": "计算软件",
+    "electronic_method": "电子结构计算方法",
+    "exchange_correlation_functional": "交换关联泛函",
+    "phonon_method": "声子方法",
+    "vibrational_treatment": "振动处理层次"
+  },
+  "software": {
+    "qe": [
+      "k_grid",
+      "q_grid",
+      "q_grid_interpolated",
+      "k_broadening",
+      "energy_cutoff",
+      "charge_density_cutoff",
+      "supercell",
+      "atoms",
+      "temperature_k",
+      "convergence_energy",
+      "convergence_force"
+    ],
+    "epw": [
+      "k_grid",
+      "q_grid",
+      "q_grid_interpolated",
+      "k_broadening",
+      "q_broadening",
+      "temperature_k",
+      "matsubara_frequency_cutoff"
+    ],
+    "sscha": [
+      "k_grid",
+      "q_grid",
+      "q_grid_interpolated",
+      "k_broadening",
+      "energy_cutoff",
+      "charge_density_cutoff",
+      "supercell",
+      "atoms",
+      "temperature_k"
+    ]
+  },
+  "labels": {
+    "calculation_code": "计算软件",
+    "electronic_method": "电子结构计算方法",
+    "exchange_correlation_functional": "交换关联泛函",
+    "phonon_method": "声子方法",
+    "vibrational_treatment": "振动处理层次",
+    "k_grid": "k 网格",
+    "q_grid": "q 网格",
+    "q_grid_interpolated": "插值 q 网格",
+    "k_broadening": "k 展宽",
+    "q_broadening": "q 展宽",
+    "energy_cutoff": "波函数／平面波截断能",
+    "charge_density_cutoff": "电荷密度截断能",
+    "supercell": "超胞",
+    "atoms": "原子数",
+    "temperature_k": "计算温度",
+    "convergence_energy": "能量收敛阈值",
+    "convergence_force": "力收敛阈值",
+    "matsubara_frequency_cutoff": "Matsubara 频率截断"
+  },
+  "software_labels": {
+    "qe": "QE",
+    "epw": "EPW",
+    "sscha": "SSCHA"
+  },
+  "quantity_fields": [
+    "value_kind",
+    "value_raw",
+    "value_number",
+    "value_min",
+    "value_max",
+    "value_text",
+    "value_boolean",
+    "unit_raw",
+    "evidences",
+    "reported"
+  ],
+  "structure_fields": [
+    "structure_format",
+    "structure_text",
+    "space_group_symbol",
+    "space_group_number",
+    "nuclear_treatment",
+    "review_key",
+    "structure_hash",
+    "sources",
+    "validation",
+    "representations",
+    "derivation",
+    "user_note"
+  ],
+  "retired_state_fields": [
+    "pressure_min_gpa",
+    "pressure_max_gpa",
+    "pressure_raw",
+    "pressure_unit_raw"
+  ],
+  "retired_condition_fields": [
+    "method_scope"
+  ],
+  "standard_properties": [
+    "tc",
+    "dos_fermi"
+  ],
+  "spectrum_kinds": [
+    "phonon_dos",
+    "alpha2f",
+    "cumulative_lambda"
+  ],
+  "thermodynamic_fields": [
+    "version",
+    "basis",
+    "cases"
+  ],
+  "thermodynamic_case_fields": [
+    "stability",
+    "above_hull",
+    "unit",
+    "temperature_k",
+    "zpe",
+    "decomposition_path",
+    "source_description"
+  ],
+  "manual_extension_fields": [
+    "field_key",
+    "key",
+    "name_raw",
+    "name",
+    "value_kind",
+    "value_raw",
+    "value_number",
+    "value_min",
+    "value_max",
+    "value_text",
+    "value_boolean",
+    "unit_raw",
+    "evidences",
+    "origin"
+  ],
+  "units": {
+    "pressure_value_gpa": "GPa",
+    "temperature_k": "K",
+    "atoms": "1",
+    "cutoffs": [
+      "Ry",
+      "eV",
+      "Ha",
+      "meV"
+    ],
+    "grid": "reported"
+  },
+  "payload_fields": [
+    "parameters",
+    "calculation_conditions",
+    "tc_group",
+    "tc_context_ref",
+    "tc_range_origin",
+    "tc_legacy_text",
+    "source_associations",
+    "table_row_ref",
+    "thermodynamic_stability",
+    "dos_fermi_sources",
+    "field_settings",
+    "method_variant_status",
+    "mu_star_status"
+  ],
+  "enums": {
+    "paper_type": [
+      "theoretical",
+      "experimental",
+      "review",
+      "unknown"
+    ],
+    "theoretical_subtype": [
+      "calculation",
+      "method",
+      "theory"
+    ],
+    "superconductor_kind": [
+      "conventional",
+      "unconventional",
+      "unknown"
+    ],
+    "state_kind": [
+      "theoretical",
+      "experimental",
+      "unknown"
+    ],
+    "structure_optimization": [
+      "unknown",
+      "classical_static",
+      "quasi_harmonic",
+      "sscha"
+    ],
+    "crystal_system": [
+      "triclinic",
+      "monoclinic",
+      "orthorhombic",
+      "tetragonal",
+      "trigonal",
+      "hexagonal",
+      "cubic",
+      "unknown"
+    ],
+    "material_dimensionality": [
+      "zero_dimensional",
+      "one_dimensional",
+      "two_dimensional",
+      "three_dimensional",
+      "quasi_one_dimensional",
+      "quasi_two_dimensional",
+      "unknown"
+    ]
+  },
+  "parameter_types": {
+    "k_grid": "reported_grid",
+    "q_grid": "reported_grid",
+    "q_grid_interpolated": "reported_grid",
+    "k_broadening": "reported_quantity",
+    "energy_cutoff": "reported_quantity",
+    "charge_density_cutoff": "reported_quantity",
+    "supercell": "reported_grid",
+    "atoms": "integer_quantity",
+    "temperature_k": "kelvin_quantity",
+    "convergence_energy": "reported_quantity",
+    "convergence_force": "reported_quantity",
+    "q_broadening": "reported_quantity",
+    "matsubara_frequency_cutoff": "reported_quantity"
+  }
+}

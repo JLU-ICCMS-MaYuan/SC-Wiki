@@ -205,6 +205,13 @@ def apply_changes(draft, changes):
     normalized = []
     for change in changes:
         path = change.get("path") or []
+        from .fixed_form_contract import CONTRACT
+        if path and path[0] == "paper" and len(path) > 1 and isinstance(path[1], str):
+            if path[1] not in CONTRACT["paper_fields"]:
+                fail("form_contract_invalid", "论文字段未登记", 400)
+        if path and path[0] == "material_states" and len(path) > 2 and isinstance(path[2], str):
+            if path[2] in CONTRACT["retired_state_fields"]:
+                fail("form_contract_invalid", "压力辅助字段已退役", 400)
         if not path or path[0] not in ROOTS:
             fail("draft_field_invalid", "字段不允许编辑", 400)
         if change.get("op") in {"insert", "remove_item", "reorder"}:
@@ -216,15 +223,70 @@ def apply_changes(draft, changes):
         else:
             normalized.append(change)
     affected_methods, affected_parameters = {}, {}
+    condition_owners = {}
     for change in normalized:
         path = change["path"]
         if change.get("op") in {"insert", "remove_item", "reorder"}:
+            if "calculation_conditions" in path:
+                _, affected_owner = _node(updated, path)
+                if affected_owner is not None:
+                    condition_owners[id(affected_owner)] = affected_owner
+                if change.get("op") == "insert" and "extensions" in path:
+                    change = deepcopy(change)
+                    change["value"]["origin"] = "human_input"
             _structural_change(updated, change)
             continue
         node, owner = _node(updated, path[:-1])
         key = path[-1]
+        if path[0] == 'material_states' and len(path) >= 3 and isinstance(path[1], dict):
+            allowed_state = set(CONTRACT['state_fields']) | set(CONTRACT['state_scientific_fields']) | {
+                'property_modules', 'deleted_record_keys', 'deleted_module_keys', 'schema_version',
+                'element_count_locked', 'space_group_evidence', 'field_evidence'}
+            if path[2] not in allowed_state:
+                fail('form_contract_invalid', '材料状态字段未登记', 400)
+        if owner is not None:
+            positions = [i for i, part in enumerate(path) if isinstance(part, dict) and part.get('key') == 'record_key']
+            if positions:
+                relative = path[positions[-1] + 1:]
+                from .upload_contracts import PropertyRecordInput
+                allowed_record = set(PropertyRecordInput.model_fields) | {'basis_kind'}
+                if relative and relative[0] not in allowed_record:
+                    fail('form_contract_invalid', '物性记录字段未登记', 400)
+                if len(relative) > 1 and relative[0] == 'payload' and relative[1] not in CONTRACT['payload_fields']:
+                    fail('form_contract_invalid', '物性payload字段未登记', 400)
+                if len(relative) > 2 and relative[:2] == ['payload', 'parameters'] and relative[2] not in {
+                    'lambda_ep', 'omega_log', 'mu_star', 'extensions', 'field_settings', 'mu_star_status'}:
+                    fail('form_contract_invalid', '参数字段未登记', 400)
+        if owner is not None and "calculation_conditions" in path:
+            condition_owners[id(owner)] = owner
+        if "calculation_conditions" in path:
+            from .fixed_form_contract import COMMON, SOFTWARE, VALUE_FIELDS
+            offset = path.index("calculation_conditions") + 1
+            parts = path[offset:]
+            if parts and isinstance(parts[0], str):
+                group = parts[0]
+                if group not in COMMON and group not in SOFTWARE and group not in {"extensions", "field_settings"}:
+                    fail("form_contract_invalid", "计算条件字段未登记或已退役", 400)
+                if group in SOFTWARE and len(parts) > 1 and parts[1] not in SOFTWARE[group]:
+                    fail("form_contract_invalid", "软件参数未登记", 400)
+                if group in SOFTWARE and len(parts) > 2 and parts[2] not in VALUE_FIELDS:
+                    fail("form_contract_invalid", "参数子字段未登记", 400)
         if not isinstance(key, str) or key in FORBIDDEN or key.startswith("_") or not isinstance(node, dict):
             fail("draft_field_invalid", "字段路径无效", 400)
+        from .fixed_form_contract import validate_common_value
+        if path[0] == 'paper' and len(path) == 2:
+            try:
+                validate_common_value('paper', key, change.get('value'))
+            except ValueError as error:
+                fail('form_contract_invalid', str(error), 400)
+        if path[0] == 'material_states' and len(path) >= 3 and isinstance(path[1], dict) and len(path) == 3:
+            try:
+                validate_common_value('state', key, change.get('value'))
+            except ValueError as error:
+                fail('form_contract_invalid', str(error), 400)
+        if path[0] == 'material_states' and len(path) > 3 and path[2] == 'structure':
+            if path[3] not in CONTRACT['structure_fields']:
+                fail('form_contract_invalid', '结构子字段未登记', 400)
         if change.get("remove"):
             node.pop(key, None)
         else:
@@ -236,9 +298,7 @@ def apply_changes(draft, changes):
         if method_issue:
             fail("method_category_mismatch", method_issue, 400)
         parameter = str(node.get("key") or "").rsplit(".", 1)[-1] if key in {"value_raw", "value_text"} else key
-        if "method_scope" in path:
-            parameter = "method_scope"
-        if owner is not None and parameter in {"phonon_method", "vibrational_treatment", "method_scope", "calculation_conditions"}:
+        if owner is not None and parameter in {"phonon_method", "vibrational_treatment", "calculation_conditions"}:
             affected_methods[id(owner)] = owner
             affected_parameters.setdefault(id(owner), set()).add(parameter)
         if key == "structure_optimization_details":
@@ -249,15 +309,22 @@ def apply_changes(draft, changes):
         candidate = record
         if "calculation_conditions" not in parameters:
             conditions = (record.get("payload") or {}).get("calculation_conditions") or {}
-            relevant = {"phonon_method", "vibrational_treatment"} if "method_scope" in parameters else parameters
+            relevant = parameters
             selected = {key: deepcopy(conditions[key]) for key in relevant if key in conditions}
-            selected["method_scope"] = deepcopy(conditions.get("method_scope") or {})
             selected["extensions"] = [deepcopy(e) for e in conditions.get("extensions") or []
                 if str(e.get("key") or "").rsplit(".", 1)[-1] in relevant]
             candidate = {**record, "payload": {"calculation_conditions": selected}}
         issue = record_method_issue(candidate, check_legacy=False)
         if issue:
-            fail("method_scope_mismatch", issue, 400)
+            fail("method_category_mismatch", issue, 400)
+    from .fixed_form_contract import validate_conditions, FormContractError
+    for record in condition_owners.values():
+        if record.get("definition_version", 1) < 2:
+            continue
+        try:
+            validate_conditions((record.get("payload") or {}).get("calculation_conditions"))
+        except FormContractError as error:
+            fail("form_contract_invalid", str(error), 400)
     return updated
 
 

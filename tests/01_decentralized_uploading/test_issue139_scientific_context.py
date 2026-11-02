@@ -13,7 +13,7 @@ def record():
     return {"record_key":"r", "module_code":"superconductive_properties", "record_type":"predicted_tc",
             "property_code":"tc", "method_code":"isotropic_eliashberg", "name_raw":"Tc",
             "value_kind":"range", "value_min":281, "value_max":311, "value_raw":"281–311",
-            "unit_raw":"K", "canonical_unit":"K", "payload":{"calculation_conditions":{}, "parameters":{"lambda_ep":3.94}}}
+            "unit_raw":"K", "canonical_unit":"K", "payload":{"calculation_conditions":{"calculation_code":"Quantum ESPRESSO","qe":{}}, "parameters":{"lambda_ep":3.94}}}
 
 
 def draft():
@@ -29,7 +29,7 @@ def context():
 def candidate(d=None):
     d = d or draft()
     return {"target":"s/m/r", "expected_fingerprint":scientific_fingerprint(d['material_states'][0]['property_modules'][0]['records'][0]),
-            "target_path":"/payload/calculation_conditions/k_grid", "value":"24×24×24", "version":1,
+            "target_path":"/payload/calculation_conditions/qe/k_grid", "value":"24×24×24", "version":1,
             "basis_kind":"paper_inference", "stage":"electron_phonon", "scope":{"material":"LaSc2H24"},
             "reported_value_raw":"24×24×24", "unit_raw":"1",
             "fact_evidences":[{"file_id":"main", "chunk_index":0, "quote":"24×24×24 k grid"}],
@@ -44,7 +44,7 @@ def test_nested_fill_protects_existing_values_and_is_idempotent():
     assert len(applied) == 1 and not gaps
     r = d['material_states'][0]['property_modules'][0]['records'][0]
     assert r['payload']['parameters'] == original['material_states'][0]['property_modules'][0]['records'][0]['payload']['parameters']
-    assert r['payload']['calculation_conditions']['k_grid'] == '24×24×24'
+    assert r['payload']['calculation_conditions']['qe']['k_grid'] == '24×24×24'
     assert r['record_key'] == 'r' and r['record_checksum']
     assert not association_issues(r)
     again = deepcopy(d)
@@ -68,7 +68,7 @@ def test_rejects_unsupported_associations(change, reason):
     d = draft()
     c = candidate(d) | change
     assert apply_associations(d, [c], context())[1][0]['reason'] == reason
-    assert not d['material_states'][0]['property_modules'][0]['records'][0]['payload']['calculation_conditions']
+    assert d['material_states'][0]['property_modules'][0]['records'][0]['payload']['calculation_conditions'] == {'calculation_code':'Quantum ESPRESSO','qe':{}}
 
 
 def test_conflicting_candidates_do_not_depend_on_response_order():
@@ -133,13 +133,13 @@ def test_shared_pressures_local_exception_and_stage_are_not_broadcast():
     d=draft()
     second=deepcopy(d['material_states'][0])
     second.update(state_key='s2',pressure_value_gpa=300)
-    second['property_modules'][0]['records'][0]['payload']['calculation_conditions']['k_grid']='12×12×12'
+    second['property_modules'][0]['records'][0]['payload']['calculation_conditions']['qe']['k_grid']='12×12×12'
     d['material_states'].append(second)
     c=candidate(d)
     c2=c | {'target':'s2/m/r','expected_fingerprint':scientific_fingerprint(second['property_modules'][0]['records'][0])}
     applied,gaps=apply_associations(d,[c,c2],context())
     assert len(applied)==1 and gaps[0]['reason']=='condition_conflict'
-    assert second['property_modules'][0]['records'][0]['payload']['calculation_conditions']['k_grid']=='12×12×12'
+    assert second['property_modules'][0]['records'][0]['payload']['calculation_conditions']['qe']['k_grid']=='12×12×12'
     c3=candidate(d) | {'stage':'sscha','target_path':'/payload/calculation_conditions/extensions/-',
         'value':{'key':'sscha.k_grid','value_kind':'text','value_raw':'24×24×24'}}
     d['material_states'][0]['property_modules'][0]['records'][0]['payload']['approximation']='harmonic'
@@ -149,8 +149,8 @@ def test_shared_pressures_local_exception_and_stage_are_not_broadcast():
 
 def test_reference_only_source_and_unreported_numeric_value_cannot_fill():
     d=draft()
-    c=candidate(d) | {'target_path':'/payload/calculation_conditions/extensions/-','value':{
-        'key':'electron_phonon.energy_cutoff','value_kind':'number','value_number':100,'value_raw':'100','unit_raw':'Ry'}}
+    c=candidate(d) | {'target_path':'/payload/calculation_conditions/qe/energy_cutoff','value':{
+        'value_kind':'number','value_number':100,'value_raw':'100','unit_raw':'Ry'}}
     assert apply_associations(d,[c],context())[1][0]['reason']=='quote_unlocated'
     ctx=context()
     for s in ctx['sources']:s['section_role']='reference'
@@ -185,7 +185,7 @@ def test_atomic_assignment_copies_verified_values_and_protects_model_targets():
                 'explanation':'Methods 明确说明各压力沿用同样的 EPC 设置，仍需核对局部例外。'}]}
     ledger=generate_context_associations(d,ctx,model)
     assert ledger['complete'] and ledger['gaps'][0]['reason']=='target_stale'
-    assert ledger['associations'][0]['value']=='24×24×24'
+    assert ledger['associations'][0]['value']['value_text']=='24×24×24'
     assert apply_associations(d,ledger['associations'],ctx)[0]
 
 
@@ -214,7 +214,7 @@ def test_changed_document_hash_invalidates_even_when_old_quote_survives():
     apply_associations(d,[candidate(d)],ctx)
     rows=[r for r in ev.draft_records(d,{}) if r['kind']=='property']
     snap=ev.complete_snapshot('upload','task',rows,ctx['sources'],d)
-    snap['records'] = [r for r in snap['records'] if r.get('record_field') == 'payload.calculation_conditions.k_grid']
+    snap['records'] = [r for r in snap['records'] if r.get('record_field') == 'payload.calculation_conditions.qe.k_grid']
     bind_snapshot_source_documents(snap,{'main':{'sha256':'a'*64,'role':'main'}})
     before=snap['version']
     assert not snap['records'][0]['source_associations'][0]['stale']

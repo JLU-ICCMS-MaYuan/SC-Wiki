@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test:upload-ui": "vitest run --config ../vitest.config.ts",
     "test:form-contract": "node ../scripts/check-form-contract.mjs",
-    "test:form-contract:mutation": "node ../scripts/check-form-contract.mjs --mutation"
+    "test:form-contract:mutation": "node ../scripts/check-form-contract.mjs --mutation",
+    "test:field-contract": "python3 ../scripts/check-scientific-field-contract.py"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -97,11 +97,18 @@ def test_model_condition_addition_cannot_choose_system_field_identity():
         'value_raw': '1', 'unit_raw': 'eV', 'payload': {'calculation_conditions': {}}}
     draft = {'material_states': [{'state_key': 's', 'property_modules': [{'module_key': 'm', 'records': [record]}]}]}
     owner = {'state_key': 's', 'module_key': 'm', 'record_key': 'r'}
+    before = deepcopy(record)
     _add_conditions(draft, [{**owner, 'extensions': [{'key': 'electronic_structure.energy_cutoff',
         'field_key': 'impersonated-existing-field', 'value_kind': 'number', 'value_raw': '90',
         'value_number': 90, 'unit_raw': 'Ry'}], 'evidences': [{'file_id': 'main', 'quote': 'Reported setting.'}]}], [owner])
-    extension = record['payload']['calculation_conditions']['extensions'][0]
-    assert extension['value_number'] == 90 and 'field_key' not in extension
+    assert record == before
+    _add_conditions(draft, [{**owner, 'values': {'qe': {'energy_cutoff': {
+        'value_kind':'number','value_raw':'90','value_number':90,'unit_raw':'Ry'}}},
+        'evidences':[{'file_id':'main','quote':'Reported setting.'}]}], [owner])
+    conditions = record['payload']['calculation_conditions']
+    assert conditions['qe']['energy_cutoff']['value_number'] == 90
+    assert 'extensions' not in conditions and 'field_key' not in conditions['qe']['energy_cutoff']
+
 
 
 def test_real_storage_roundtrip_preserves_model_inference_and_source(db_session, monkeypatch):

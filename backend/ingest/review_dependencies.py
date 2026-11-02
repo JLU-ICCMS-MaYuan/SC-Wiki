@@ -37,8 +37,6 @@ def record_inputs(record, path):
     if record.get("property_code") in {"band_gap", "dos_fermi"} and path.startswith("value_"):
         conditions = payload.get("calculation_conditions") or {}
         keys = ["electronic_method", "exchange_correlation_functional", "calculation_code"]
-        if (conditions.get("method_scope") or {}).get("relation") == "electron_phonon_renormalization":
-            keys.extend(["phonon_method", "vibrational_treatment", "method_scope"])
         return ["payload.calculation_conditions." + key for key in keys if conditions.get(key) is not None]
     parameters = payload.get("parameters") or {}
     dependencies = []

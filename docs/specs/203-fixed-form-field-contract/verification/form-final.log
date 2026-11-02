@@ -1,0 +1,1347 @@
+
+> sc-wiki-frontend@1.0.0 test:form-contract
+> node ../scripts/check-form-contract.mjs
+
+The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+ ✓ tests/01_decentralized_uploading/sidebar-field-save.test.tsx (3 tests) 6ms
+ ✓ tests/01_decentralized_uploading/state-review-convergence.test.tsx (4 tests) 118ms
+stderr | tests/01_decentralized_uploading/paper-field-settings.test.tsx > 返修汇总尚未返回时，先定位字段再打开设置仍保留当前值
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/01_decentralized_uploading/sidebar-field-workflow.test.tsx (2 tests) 832ms
+   ✓ 内部无关编辑通知和摘要刷新不会阻断当前字段核对 653ms
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > upload 题录侧栏展示真实外部来源链接，不请求伪造PDF区域
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > upload 单字段自动保存最新依据、只排一个任务并隔离返回
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/field-sidebar-ownership.test.tsx > upload 完整宿主：类型问题归主字段并在同一侧栏独立选择
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > 191 四类宿主：upload 未完成字段可见并从自身侧栏恢复
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > revision 题录侧栏展示真实外部来源链接，不请求伪造PDF区域
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+ ✓ tests/01_decentralized_uploading/two-stage-review.test.tsx (14 tests) 2138ms
+   ✓ 主动核对使用草稿令牌，通过后关闭且提交直接复用 970ms
+   ✓ 提交同版本失败不会进入旧人工理由绕过路径 439ms
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > upload 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > admin 题录侧栏展示真实外部来源链接，不请求伪造PDF区域
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > 191 四类宿主：revision 未完成字段可见并从自身侧栏恢复
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > superadmin 题录侧栏展示真实外部来源链接，不请求伪造PDF区域
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > upload 真实疑问只标红，无状态文字后缀，键盘仍可打开来源
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/parsing-triage-removal.test.tsx > admin 完整宿主无独立分类入口，字段来源、标记与阻断保持
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > revision 真实疑问只标红，无状态文字后缀，键盘仍可打开来源
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > 191 四类宿主：admin 未完成字段可见并从自身侧栏恢复
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > upload 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > admin 真实疑问只标红，无状态文字后缀，键盘仍可打开来源
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > revision 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+ ✓ tests/01_decentralized_uploading/graph-title-form.test.tsx (10 tests) 6585ms
+   ✓ 显示草稿原值 Superconductivity in compressed hydrides，空值与缺失仍有输入框 612ms
+   ✓ 显示草稿原值 ，空值与缺失仍有输入框 354ms
+   ✓ 显示草稿原值 null，空值与缺失仍有输入框 359ms
+   ✓ 只保存图谱标题，重载后保留新值且不覆盖原标题 797ms
+   ✓ 问题记录定位到字段，设置侧栏编辑后旧通过结论变为待核对 1781ms
+   ✓ 待处理核对直接绑定输入框，不落入待定位列表 754ms
+   ✓ 保存失败保留编辑并显示错误，不报告成功 638ms
+   ✓ 只读显示真实值，侧栏禁止应用且不写入 502ms
+   ✓ 返修草稿版本冲突时禁用图谱标题输入 500ms
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > superadmin 真实疑问只标红，无状态文字后缀，键盘仍可打开来源
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > revision 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > revision 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > upload 四层语义与优化约束读取一致，无变化保存零写请求
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > 191 四类宿主：superadmin 未完成字段可见并从自身侧栏恢复
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > revision 四层语义与优化约束读取一致，无变化保存零写请求
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > upload 完整宿主：论文标题编辑不重绘无关材料卡片
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > revision 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > revision 完整宿主：论文标题编辑不重绘无关材料卡片
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > admin 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > admin 完整宿主：论文标题编辑不重绘无关材料卡片
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > admin 四层语义与优化约束读取一致，无变化保存零写请求
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > admin 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > superadmin 完整宿主：论文标题编辑不重绘无关材料卡片
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > upload 完整宿主：首卡晶系编辑不重绘其他四卡
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > upload 完整宿主：首卡晶系编辑不重绘其他四卡
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > superadmin 四层语义与优化约束读取一致，无变化保存零写请求
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > revision 完整宿主：首卡晶系编辑不重绘其他四卡
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > revision 完整宿主：首卡晶系编辑不重绘其他四卡
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > admin 完整宿主：首卡晶系编辑不重绘其他四卡
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > admin 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > upload 只保存当前几何字段，电子带隙数值和理论不串改，来源仍可查看
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > admin 完整宿主：首卡晶系编辑不重绘其他四卡
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > superadmin 完整宿主：首卡晶系编辑不重绘其他四卡
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > superadmin 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > superadmin 完整宿主：首卡晶系编辑不重绘其他四卡
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > superadmin 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > 临时错误只更新当前卡片，删除前卡后错误与输入仍属于原状态
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+ ✓ tests/01_decentralized_uploading/field-sidebar-ownership.test.tsx (9 tests) 20368ms
+   ✓ upload 完整宿主：类型问题归主字段并在同一侧栏独立选择 2674ms
+   ✓ revision 完整宿主：类型问题归主字段并在同一侧栏独立选择 2474ms
+   ✓ admin 完整宿主：类型问题归主字段并在同一侧栏独立选择 2638ms
+   ✓ superadmin 完整宿主：类型问题归主字段并在同一侧栏独立选择 2753ms
+   ✓ 未应用设置阻止切换子项，当前输入和独立通过结果保留 4537ms
+   ✓ 选择类型后主动核对只请求类型子项，切换本身不发模型或保存 3254ms
+   ✓ 只读完整宿主仍可切换子项查看，不出现写操作 1644ms
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > revision 只保存当前几何字段，电子带隙数值和理论不串改，来源仍可查看
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+ ✓ tests/01_decentralized_uploading/parsing-triage-removal.test.tsx (11 tests) 20571ms
+   ✓ upload 完整宿主无独立分类入口，字段来源、标记与阻断保持 2408ms
+   ✓ revision 完整宿主无独立分类入口，字段来源、标记与阻断保持 1922ms
+   ✓ admin 完整宿主无独立分类入口，字段来源、标记与阻断保持 2325ms
+   ✓ superadmin 完整宿主无独立分类入口，字段来源、标记与阻断保持 2194ms
+   ✓ 真实输入错误仍就地显示，来源理由不会混进校验辅助文本 2135ms
+   ✓ 未定位字段保留自身侧栏入口，不增加独立待处理导航或正文警告 1563ms
+   ✓ 真实保存错误继续提示，来源说明不会因此回到主表单 2071ms
+   ✓ 只读表单仍可从key进入侧栏查看，设置不提供写入操作 1335ms
+   ✓ upload 历史账本可编辑保存，未变化保存零请求且不派生分类任务 2268ms
+   ✓ revision 历史账本可编辑保存，未变化保存零请求且不派生分类任务 2347ms
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > admin 只保存当前几何字段，电子带隙数值和理论不串改，来源仍可查看
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > 临时错误只更新当前卡片，删除前卡后错误与输入仍属于原状态
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > upload 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > superadmin 单字段自动保存最新依据、只排一个任务并隔离返回
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > superadmin 只保存当前几何字段，电子带隙数值和理论不串改，来源仍可查看
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > 保存失败保留最新理由且不启动模型任务
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+ ✓ tests/01_decentralized_uploading/paper-field-settings.test.tsx (14 tests) 25409ms
+   ✓ 返修汇总尚未返回时，先定位字段再打开设置仍保留当前值 784ms
+   ✓ upload 的真实宿主显示研究方法并仅保存该列表，无额外模型调用 1608ms
+   ✓ revision 的真实宿主显示研究方法并仅保存该列表，无额外模型调用 1439ms
+   ✓ admin 的真实宿主显示研究方法并仅保存该列表，无额外模型调用 1859ms
+   ✓ 管理员设置读取主表单尚未保存的逐行文本，包括空行和逗号 985ms
+   ✓ upload 的七类论文设置均显示真实当前值，名称固定，无改应用被禁用 5068ms
+   ✓ admin 的七类论文设置均显示真实当前值，名称固定，无改应用被禁用 5307ms
+   ✓ 未应用修改关闭时可继续编辑或放弃，取消不改变主表单 1782ms
+   ✓ 同字段外部修改拒绝覆盖并保留侧栏输入，无关字段修改不阻止应用 1839ms
+   ✓ 只读宿主可查看名称和值，不能应用或发出保存请求 401ms
+   ✓ 长文本保留换行，可选空字段应用后保持空白；恢复原值不产生保存差异 2890ms
+   ✓ 没有核对摘要的字段也能打开设置，不顺带保存主表单其他未保存修改 541ms
+   ✓ 管理员 Go 详情的 JSON 列表以草稿数组作为保存前值，避免误报并发冲突 897ms
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > 保存失败保留最新理由且不启动模型任务
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > upload 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > revision 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > 优化方法保存失败后保留选择，重试只写当前字段
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > revision 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > admin 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > 保存失败保留最新理由且不启动模型任务
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > upload 切回只提示，确认后载入整稿且不调用模型
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > upload 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > revision 切回只提示，确认后载入整稿且不调用模型
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > upload 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > admin 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > superadmin 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > admin 切回只提示，确认后载入整稿且不调用模型
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > superadmin 切回只提示，确认后载入整稿且不调用模型
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > upload 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > upload 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > revision 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > superadmin 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/physical-method-hosts.test.tsx > 切回载入先保护未保存人工输入，拒绝替换不读整稿
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+MUI: You have provided an out-of-range value `record.electronic_properties.band_gap@1` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `record.electronic_properties.custom@1`.
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > 中文组合输入保留当前文本，未变化的数据保存不写请求
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > revision 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > revision 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > 中间指数和零值持续输入保留，清空不改其他卡片
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > revision 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > revision 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > admin 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > admin 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > 中间指数和零值持续输入保留，清空不改其他卡片
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > #176 upload 固定 Tc 表单和其他方法编辑保持宿主隔离
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+ ✓ tests/01_decentralized_uploading/physical-method-hosts.test.tsx (27 tests) 41096ms
+   ✓ upload 题录侧栏展示真实外部来源链接，不请求伪造PDF区域 1349ms
+   ✓ revision 题录侧栏展示真实外部来源链接，不请求伪造PDF区域 956ms
+   ✓ admin 题录侧栏展示真实外部来源链接，不请求伪造PDF区域 814ms
+   ✓ superadmin 题录侧栏展示真实外部来源链接，不请求伪造PDF区域 867ms
+   ✓ upload 真实疑问只标红，无状态文字后缀，键盘仍可打开来源 769ms
+   ✓ revision 真实疑问只标红，无状态文字后缀，键盘仍可打开来源 923ms
+   ✓ admin 真实疑问只标红，无状态文字后缀，键盘仍可打开来源 755ms
+   ✓ superadmin 真实疑问只标红，无状态文字后缀，键盘仍可打开来源 787ms
+   ✓ upload 四层语义与优化约束读取一致，无变化保存零写请求 2454ms
+   ✓ revision 四层语义与优化约束读取一致，无变化保存零写请求 2767ms
+   ✓ admin 四层语义与优化约束读取一致，无变化保存零写请求 2945ms
+   ✓ superadmin 四层语义与优化约束读取一致，无变化保存零写请求 2701ms
+   ✓ upload 只保存当前几何字段，电子带隙数值和理论不串改，来源仍可查看 2160ms
+   ✓ revision 只保存当前几何字段，电子带隙数值和理论不串改，来源仍可查看 2614ms
+   ✓ admin 只保存当前几何字段，电子带隙数值和理论不串改，来源仍可查看 2090ms
+   ✓ superadmin 只保存当前几何字段，电子带隙数值和理论不串改，来源仍可查看 2054ms
+   ✓ 只读旧sscha和历史混装标签保持可查看，不自动转成新类别或发起写入 552ms
+   ✓ 优化方法保存失败后保留选择，重试只写当前字段 1803ms
+   ✓ upload 切回只提示，确认后载入整稿且不调用模型 927ms
+   ✓ revision 切回只提示，确认后载入整稿且不调用模型 1181ms
+   ✓ admin 切回只提示，确认后载入整稿且不调用模型 1048ms
+   ✓ superadmin 切回只提示，确认后载入整稿且不调用模型 1056ms
+   ✓ 切回载入先保护未保存人工输入，拒绝替换不读整稿 914ms
+   ✓ upload 新版固定契约：软件参数独立、声子直接字段与材料类型可见 1975ms
+   ✓ revision 新版固定契约：软件参数独立、声子直接字段与材料类型可见 1546ms
+   ✓ admin 新版固定契约：软件参数独立、声子直接字段与材料类型可见 1648ms
+   ✓ superadmin 新版固定契约：软件参数独立、声子直接字段与材料类型可见 1440ms
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > admin 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > admin 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > superadmin 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > superadmin 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > #176 upload 固定 Tc 表单和其他方法编辑保持宿主隔离
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > #176 revision 固定 Tc 表单和其他方法编辑保持宿主隔离
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > superadmin 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx > superadmin 技术失败落在原字段，不隐藏成无问题
+MUI: You have provided an out-of-range value `three_dimensional` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+ ✓ tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx (9 tests) 46392ms
+   ✓ upload 单字段自动保存最新依据、只排一个任务并隔离返回 6011ms
+   ✓ revision 单字段自动保存最新依据、只排一个任务并隔离返回 5504ms
+   ✓ admin 单字段自动保存最新依据、只排一个任务并隔离返回 7288ms
+   ✓ superadmin 单字段自动保存最新依据、只排一个任务并隔离返回 6215ms
+   ✓ 保存失败保留最新理由且不启动模型任务 4637ms
+   ✓ upload 技术失败落在原字段，不隐藏成无问题 3831ms
+   ✓ revision 技术失败落在原字段，不隐藏成无问题 4876ms
+   ✓ admin 技术失败落在原字段，不隐藏成无问题 4191ms
+   ✓ superadmin 技术失败落在原字段，不隐藏成无问题 3839ms
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > #176 revision 固定 Tc 表单和其他方法编辑保持宿主隔离
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > #176 admin 固定 Tc 表单和其他方法编辑保持宿主隔离
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > #176 admin 固定 Tc 表单和其他方法编辑保持宿主隔离
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > #176 superadmin 固定 Tc 表单和其他方法编辑保持宿主隔离
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+stderr | tests/01_decentralized_uploading/form-contract.test.tsx > #176 superadmin 固定 Tc 表单和其他方法编辑保持宿主隔离
+MUI: You have provided an out-of-range value `unknown` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are "".
+
+ ✓ tests/01_decentralized_uploading/form-contract.test.tsx (29 tests) 59448ms
+   ✓ 191 四类宿主：upload 未完成字段可见并从自身侧栏恢复 2512ms
+   ✓ 191 四类宿主：revision 未完成字段可见并从自身侧栏恢复 2283ms
+   ✓ 191 四类宿主：admin 未完成字段可见并从自身侧栏恢复 2390ms
+   ✓ 191 四类宿主：superadmin 未完成字段可见并从自身侧栏恢复 2552ms
+   ✓ upload 完整宿主：论文标题编辑不重绘无关材料卡片 1005ms
+   ✓ revision 完整宿主：论文标题编辑不重绘无关材料卡片 1376ms
+   ✓ admin 完整宿主：论文标题编辑不重绘无关材料卡片 1219ms
+   ✓ superadmin 完整宿主：论文标题编辑不重绘无关材料卡片 1142ms
+   ✓ upload 完整宿主：首卡晶系编辑不重绘其他四卡 1142ms
+   ✓ revision 完整宿主：首卡晶系编辑不重绘其他四卡 1595ms
+   ✓ admin 完整宿主：首卡晶系编辑不重绘其他四卡 1182ms
+   ✓ superadmin 完整宿主：首卡晶系编辑不重绘其他四卡 1155ms
+   ✓ 临时错误只更新当前卡片，删除前卡后错误与输入仍属于原状态 3729ms
+   ✓ upload 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题 2428ms
+   ✓ revision 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题 2542ms
+   ✓ admin 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题 2551ms
+   ✓ superadmin 缓存事件使用最新宿主，先改标题再改材料不恢复旧标题 2618ms
+   ✓ 中文组合输入保留当前文本，未变化的数据保存不写请求 2431ms
+   ✓ 中间指数和零值持续输入保留，清空不改其他卡片 4216ms
+   ✓ #176 upload 固定 Tc 表单和其他方法编辑保持宿主隔离 5111ms
+   ✓ #176 revision 固定 Tc 表单和其他方法编辑保持宿主隔离 4381ms
+   ✓ #176 admin 固定 Tc 表单和其他方法编辑保持宿主隔离 4785ms
+   ✓ #176 superadmin 固定 Tc 表单和其他方法编辑保持宿主隔离 4643ms
+
+ Test Files  11 passed (11)
+      Tests  132 passed (132)
+   Start at  19:36:26
+   Duration  61.74s (transform 1.25s, setup 0ms, collect 14.90s, tests 222.96s, environment 4.40s, prepare 831ms)

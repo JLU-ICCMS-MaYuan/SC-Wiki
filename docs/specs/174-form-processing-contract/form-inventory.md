@@ -81,3 +81,8 @@ StructureOptimizationFields与既有CalculationConditionFields接入上传、返
 - /manuscripts/:target/:targetId/handoffs：分页交接元信息列表，不载入全部整稿。
 - /papers/:id/snapshots/:snapshotId：共享完整科学表单的冻结只读宿主；字段侧栏两个页签，谱使用冻结曲线与文件，不访问当前工作稿或当前谱。
 - 上传、返修、管理员、超级管理员的标题入口已在完整宿主覆盖；独立列表→新标签整稿→只读侧栏和零写请求由 manuscript-handoff-browser.mjs 验证，冻结谱由 frozen-spectra.test.tsx 及实际 SQL 交接隔离回归覆盖。
+
+
+## #203/#204 本轮补充
+
+原有上传、返修、管理员、超级管理员入口继续由完整宿主覆盖；四宿主新增软件分组、直接声子方法、材料状态类型可见性检查。132项表单契约通过，故障注入8项均检出预期失败。结构控件复用原查看/来源侧栏，正式草稿改为每卡一份 structure，候选只作内存投影。真实原页面缺失状态类型的问题仍未复现，不能用宿主测试代替该现场验收。

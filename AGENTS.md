@@ -197,3 +197,11 @@ description: 专业的软件工程师，严格遵循SOLID、KISS、DRY、YAGNI�
 - **代码注释：** 始终与现有代码库注释语言保持一致（自动检测），确保代码库语言统一
 
 **Most Important:Always respond in Chinese-simplified**
+
+
+### 科学表单标准键变更
+
+- 标准字段以 backend/data/scientific_form_contract.v1.json 为权威，锁定摘要及登记见对应 lock.json 和 docs/specs/203-fixed-form-field-contract/data-model.md。
+- 增删、改名、类型或含义变化必须先有用户审查的 Issue/Spec 变更登记，再显式升级契约与摘要；不得为修 Bug 自动重录快照或自造同义键。
+- 模型不能创建人工扩展；人工入口继续保留。软件参数不得跨 QE/EPW/SSCHA 复制，phonon_method 仅使用直接路径。
+- 修改相关路径同时运行 test:field-contract、test:form-contract、test:form-contract:mutation，并保留历史版本及原文依据。本机 #203/#204 迁移必须经专用工具隔离演练后执行。

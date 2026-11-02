@@ -78,8 +78,6 @@ def format_property_record(record, state, paper, material) -> dict:
         "display_value": display_value, "unit": record.canonical_unit or record.unit_raw,
         "unit_raw": record.unit_raw, "uncertainty": _number(record.uncertainty),
         "pressure_gpa": _number(state.pressure_value_gpa),
-        "pressure_min_gpa": _number(state.pressure_min_gpa),
-        "pressure_max_gpa": _number(state.pressure_max_gpa), "pressure_raw": state.pressure_raw,
         "temperature_k": _number(state.temperature_value_k),
         "condition_note": state.note, "is_primary": record.is_representative,
         "method_code": expanded.get("method_code"), "method_raw": expanded.get("method_raw"),

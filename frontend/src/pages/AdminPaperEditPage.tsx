@@ -118,6 +118,7 @@ const AdminPaperEditPage: React.FC = () => {
     },
   })
   const [editStructureCandidates, setEditStructureCandidates] = useState<StructureCandidate[]>([])
+  const [fixedContract, setFixedContract] = useState(false)
   const [editStructuralObservations, setEditStructuralObservations] = useState<LatticeObservation[]>([])
   const [structuralLoadError, setStructuralLoadError] = useState('')
   const scientificIdentityMap = useRef<ScientificIdentityMap>({})
@@ -203,6 +204,7 @@ const AdminPaperEditPage: React.FC = () => {
           (state.structures || []).map((model: any) =>
             candidateFromStructureModel(model, `material_states[${index}]`)))
         setEditMaterialStates(materialStates)
+        setFixedContract(materialStates.some(state => (state.property_modules || []).some(module => module.records.some(record => record.definition_version >= 2))))
         setEditStructureCandidates(structureCandidates)
         try {
           const collection = await api.get<any>(`/api/rag/structural-records/paper/${paperId}`)
@@ -230,6 +232,7 @@ const AdminPaperEditPage: React.FC = () => {
           setEditForm(staged.draft.paper)
           setEditMaterialFamilies(staged.draft.paper.material_families || [])
           setEditMaterialStates(staged.draft.material_states || [])
+          setFixedContract(staged.draft._form_contract_version === 1)
           setEditStructureCandidates(staged.draft.structure_candidates || [])
           setEditStructuralObservations(staged.draft.structural_observations || [])
         } else if (staged.draft?.paper) {
@@ -299,7 +302,7 @@ const AdminPaperEditPage: React.FC = () => {
   // （如无材料状态的综述）不需要触发整体替换。
   const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
   const editableDraft = () => ({ paper: { ...editForm, material_families: editMaterialFamilies },
-    material_states: editMaterialStates, structure_candidates: editStructureCandidates,
+    ...(fixedContract ? { _form_contract_version: 1 } : {}), material_states: editMaterialStates, structure_candidates: editStructureCandidates,
     structural_observations: editStructuralObservations })
   useEffect(() => {
     if (!editLoading && !fieldSaver.current && paperId) {
@@ -611,7 +614,7 @@ const AdminPaperEditPage: React.FC = () => {
           {/* 科学数据编辑区（Issue #76）：材料状态、物性模块、结构候选与补传。
               数据来自 /api/admin/papers/:id 的 material_states（含 property_modules/structures），
               编辑结果随保存时的 C1 请求整体替换（T020/T030/T034）。 */}
-          <MaterialStatesEditor
+          <MaterialStatesEditor fixedContract={fixedContract}
             independentStructureWorkspace
             propertySpectra={{ initialListing: loadedSpectra, target: { target: 'paper', target_id: String(paperId) }, beforeNavigate: async () => {
               if (evidenceWorkflow.hasManualDrafts()) throw new Error('请先保存或处理来源核对中的人工修改草稿，再打开谱详情。')

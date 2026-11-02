@@ -1,0 +1,21 @@
+{
+  "database": "scwiki_contract_203_204_20261102153920",
+  "checks": [
+    {
+      "case": "真实CaH6新提取",
+      "task_id": "1ed7706bf3f94904883197bf6cff5c41",
+      "states": 3,
+      "roundtrip_equal": true
+    },
+    {
+      "case": "真实LaSc2H24/LaSc2新归属",
+      "task_id": "a5d22be0168d42e3b785ff20149e66e5",
+      "states": 9,
+      "roundtrip_equal": true
+    }
+  ],
+  "passed": true,
+  "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+  "model": "deepseek-v4-pro",
+  "not_verified": "完整HTTP/RQ上传就绪；本轮真实提取已过正规normalize，隔离运行在制品发布时无业务任务状态，未计作整篇解析通过"
+}

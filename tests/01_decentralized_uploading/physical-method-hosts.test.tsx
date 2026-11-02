@@ -204,3 +204,53 @@ it('切回载入先保护未保存人工输入，拒绝替换不读整稿',async
  expect(vi.mocked(api.get).mock.calls.filter(([p])=>p.includes('/draft-state'))).toHaveLength(before)
  confirm.mockRestore()
 })
+
+it.each(['upload','revision','admin','superadmin'])('%s 新版固定契约：软件参数独立、声子直接字段与材料类型可见',async kind=>{
+ const modern:any=structuredClone(draft)
+ modern._form_contract_version=1
+ modern.material_states[0].material='CaH6'
+ modern.material_states[0].material_name='CaH6'
+ modern.material_states[0].property_modules=[{module_key:'sc',module_code:'superconductive_properties',
+  definition_key:'module.superconductive_properties',definition_version:1,display_order:0,records:[{
+   record_key:'tc-modern',module_code:'superconductive_properties',record_type:'predicted_tc',property_code:'tc',
+   definition_key:'record.superconductive_properties.predicted_tc.isotropic_eliashberg',definition_version:2,
+   method_code:'isotropic_eliashberg',name_raw:'Tc',value_kind:'number',value_number:235,value_raw:'235',unit_raw:'K',canonical_unit:'K',
+   payload:{parameters:{lambda_ep:2.69,mu_star:.1},calculation_conditions:{
+    calculation_code:'QE + SSCHA',phonon_method:'DFPT',vibrational_treatment:'anharmonic_quantum',
+    qe:{energy_cutoff:{value_kind:'number',value_raw:'90',value_number:90,unit_raw:'Ry'}},
+    sscha:{energy_cutoff:{value_kind:'number',value_raw:'80',value_number:80,unit_raw:'Ry'}}}},
+   evidences:[] }]}]
+ const modernDefinition:any={...definition,definition_key:'record.superconductive_properties.predicted_tc.isotropic_eliashberg',
+  version:2,module_code:'superconductive_properties',property_code:'tc',record_type:'predicted_tc',method_code:'isotropic_eliashberg',
+  json_schema:{type:'object',properties:{calculation_conditions:{type:'object'},parameters:{type:'object'}},additionalProperties:false}}
+ const previous=vi.mocked(api.get).getMockImplementation()!
+ vi.mocked(api.get).mockImplementation(async(path,init)=>{
+  if(path.includes('/form-definitions?'))return[modernDefinition]as never
+  if(path.includes('/form-definitions/'))return modernDefinition as never
+  if(path.includes('/draft-state'))return{version:'v1',draft:structuredClone(modern),staged:false}as never
+  if(path.endsWith('/draft'))return{data:structuredClone(modern)}as never
+  if(path==='/api/admin/papers/181')return{...modern.paper,material_states:structuredClone(modern.material_states)}as never
+  return previous(path,init)
+ })
+ vi.mocked(api.post).mockImplementation(async path=>{
+  if(path.endsWith('/open-workdraft'))return{revision:1,write_epoch:'current-cycle'}as never
+  if(path.endsWith('/summary'))return{version:'v1',records:[],needs_check:false}as never
+  if(path.endsWith('/revision-draft'))return{data:structuredClone(modern),revision_id:'revision181',draft_version:1}as never
+  throw new Error('Unexpected model/write: '+path)
+ })
+ await host(kind)
+ expect(screen.getByRole('combobox',{name:'材料状态类型'})).toBeVisible()
+ fireEvent.click(screen.getAllByText('超导性质').find(node=>node.closest('[data-property-module-toggle]'))!)
+ const qe=await waitFor(()=>{const node=document.querySelector('[data-software-condition-group="qe"]')as HTMLElement;expect(node).not.toBeNull();return node})
+ const sscha=document.querySelector('[data-software-condition-group="sscha"]')as HTMLElement
+ const input=within(qe).getByRole('textbox',{name:'波函数／平面波截断能'})
+ expect(input).toHaveValue('90')
+ expect(within(sscha).getByRole('textbox',{name:'波函数／平面波截断能'})).toHaveValue('80')
+ expect(screen.getByRole('textbox',{name:'声子方法'})).toHaveValue('DFPT')
+ expect(document.querySelector('[data-issue-field*="method_scope"]')).toBeNull()
+ expect(document.querySelector('[data-issue-field*="pressure_min_gpa"]')).toBeNull()
+ fireEvent.change(input,{target:{value:'95'}})
+ expect(within(qe).getByRole('textbox',{name:'波函数／平面波截断能'})).toHaveValue('95')
+ expect(within(sscha).getByRole('textbox',{name:'波函数／平面波截断能'})).toHaveValue('80')
+ expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.includes('/jobs')||path.includes('/check'))).toEqual([])
+})

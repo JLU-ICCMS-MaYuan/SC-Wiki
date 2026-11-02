@@ -51,7 +51,7 @@ async def search_property_records(
     stmt = property_records_statement()
     numeric = func.coalesce(PropertyRecord.value_number, PropertyRecord.value_max)
     if canonical == "pressure":
-        numeric = func.coalesce(MaterialState.pressure_value_gpa, MaterialState.pressure_max_gpa)
+        numeric = MaterialState.pressure_value_gpa
         stmt = stmt.where(numeric.isnot(None))
     elif canonical:
         stmt = stmt.where(or_(

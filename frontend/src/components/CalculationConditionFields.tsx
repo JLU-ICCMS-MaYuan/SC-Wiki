@@ -1,3 +1,4 @@
+import { commonConditions, conditionSoftware, conditionLabels, softwareLabels, getCondition, setCondition, conditionText, conditionPatch } from '../lib/fixedFormContract'
 import { draftNumber } from '../lib/fieldDrafts'
 import { useState } from 'react'
 import { Box, Button, FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/material'
@@ -33,9 +34,18 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
   const [presentation, setPresentation] = useState<FieldSettingsPresentation>()
   const write = (next: Record<string, any>) => onChange({ ...record, payload: { ...record.payload, calculation_conditions: next } })
   const open = (next: Editing, host?: FieldSettingsPresentation) => { setPresentation(host); setError(''); setEditing({ ...next, recordKey: record.record_key }) }
-  const rawValue = (key: string) => Array.isArray(conditions[key]) ? conditions[key].join(' × ') : String(conditions[key] ?? '')
-  const fixed = Object.entries(schema.properties || {}).filter(([key, child]) => key !== 'extensions' && child.type !== 'object'
-    && !(key === 'phonon_method' && extensions.some(e => e.key === 'electron_phonon.phonon_method')))
+  const rawValue = (key: string) => conditionText(getCondition(conditions, key))
+  // 旧快照的有界显示适配；新契约软件组不进入此分支。
+  const legacy = record.definition_version < 2 && !Object.keys(conditions).some(key => key in conditionSoftware)
+  const legacyProperties = { ...schema.properties, ...Object.fromEntries(['k_grid', 'q_grid', 'k_broadening', 'q_broadening'].map(key => [key,
+    schema.properties?.[key] || { type: key.endsWith('broadening') ? 'number' : 'string', title: settings[key] }])) }
+  const fixed = Object.entries(legacy ? legacyProperties : schema.properties || {}).filter(([key, child]) =>
+    (legacy ? key !== 'extensions' && child.type !== 'object' : key in commonConditions)
+    && !(legacy && key === 'phonon_method' && extensions.some(item => item.key === 'electron_phonon.phonon_method')))
+
+  const softwareFixed = Object.entries(conditionSoftware)
+  const numericParameter = (key: string, previous: any) => !['k_grid', 'q_grid', 'q_grid_interpolated', 'supercell'].includes(key)
+    && !(previous && typeof previous === 'object' && previous.value_kind === 'text')
   const save = () => {
     if (!editing || readOnly) return
     if (presentation?.part) { setEditing(null); return }
@@ -43,6 +53,15 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
     if (!editing.name.trim()) { setError('请填写字段名称'); return }
     if (editing.fixed) {
       const key = editing.key!, child = schema.properties?.[key] || {}
+      if (key.includes('.')) {
+        const previous = getCondition(conditions, key)
+        if (signature([previous, conditions.field_settings?.[key]]) !== editing.snapshot) { setError('字段已发生变化，请关闭后重新打开'); return }
+        const value = conditionPatch(previous, editing.raw, editing.kind === 'number', editing.unit.trim())
+        if (editing.kind === 'number' && editing.raw.trim() && value.value_number == null) { setError('请输入完整有效的数值'); return }
+        write({ ...setCondition(conditions, key, value), field_settings: { ...conditions.field_settings,
+          [key]: { name_raw: editing.name.trim(), unit_raw: editing.unit.trim() } } })
+        setEditing(null); return
+      }
       if (signature([conditions[key], conditions.field_settings?.[key]]) !== editing.snapshot) { setError('字段已发生变化，请关闭后重新打开'); return }
       let value: unknown = editing.raw
       if (['number', 'integer'].includes(child.type || '')) {
@@ -76,6 +95,7 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
     write({ ...conditions, extensions: updated }); setEditing(null)
   }
   return <Box sx={{ minWidth: 0 }}>
+    {legacy ? <>
     <Typography variant="body2" color="text.secondary"
       data-condition-review={conditions.method_scope && !['band_gap', 'dos_fermi'].includes(record.property_code) ? true : undefined}
       data-evidence-readonly={conditions.method_scope && !['band_gap', 'dos_fermi'].includes(record.property_code) ? true : undefined}
@@ -92,13 +112,30 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
         <MenuItem value="electron_phonon_renormalization">电子—声子修正（需原文明确关联）</MenuItem>
       </Select>
     </FormControl>}
+</> : <Typography variant="body2" color="text.secondary">计算条件</Typography>}
     <Box data-condition-row sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, py: 1 }}>
       {fixed.map(([key, child]) => {
-        const display = conditions.field_settings?.[key], name = display?.name_raw || child.title || settings[key] || key
+        const display = conditions.field_settings?.[key], name = display?.name_raw || (legacy && key === 'phonon_method' ? '声子计算技术' : child.title) || settings[key] || key
         return <ScientificFieldBox key={key} name={name} value={rawValue(key)} readOnly={readOnly} numeric={['number', 'integer'].includes(child.type || '')} field={`${basePath}.${key}`}
           onChange={value => write({ ...conditions, [key]: ['number', 'integer'].includes(child.type || '') ? value === '' ? null : Number(value) : child.type === 'array' ? value.split(/[x×,\s]+/).filter(Boolean).map(Number) : value })}
           onSettings={host => open({ fixed: true, key, snapshot: signature([conditions[key], display]), name, kind: ['number', 'integer'].includes(child.type || '') ? 'number' : 'text', raw: rawValue(key), unit: display?.unit_raw || '', }, host)} />
       })}
+      {!legacy && softwareFixed.map(([software, keys]) => <Box key={software} data-software-condition-group={software} sx={{ width: '100%', minWidth: 0 }}>
+        <Typography variant="caption" color="text.secondary">{softwareLabels[software]} 参数</Typography>
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: .5 }}>
+          {keys.map(parameter => {
+            const key = software + '.' + parameter, value = getCondition(conditions, key)
+            const display = conditions.field_settings?.[key], numeric = numericParameter(parameter, value)
+            const name = display?.name_raw || conditionLabels[parameter]
+            const invalid = numeric && value && typeof value === 'object' && value.value_raw?.trim() && value.value_number == null
+            return <ScientificFieldBox key={key} name={name} value={rawValue(key)} readOnly={readOnly} numeric={false}
+              field={basePath + '.' + key} fieldKey={key} error={invalid ? '请输入完整有效的数值' : undefined}
+              onChange={raw => write(setCondition(conditions, key, conditionPatch(value, raw, numeric)))}
+              onSettings={host => open({ fixed: true, key, snapshot: signature([value, display]), name,
+                kind: numeric ? 'number' : 'text', raw: rawValue(key), unit: value?.unit_raw || display?.unit_raw || '' }, host)} />
+          })}
+        </Box>
+      </Box>)}
       {extensions.filter(item => !String(item.key || '').startsWith('structural_relaxation.')).map(item => {
         const index = extensions.indexOf(item)
         return <ScientificFieldBox key={item.field_key || item.key || index} name={conditionName(item)} value={conditionValue(item)} readOnly={readOnly} field={`${basePath}.extensions.${index}.value_raw`} fieldKey={item.field_key || item.key}
@@ -121,6 +158,18 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
         if (!part || !editing) return
         if (editing.fixed) {
           const key = editing.key!
+          if (key.includes('.')) {
+            const previous = getCondition(conditions, key), display = conditions.field_settings?.[key]
+            if (signature([previous, display]) !== editing.snapshot) { setError('字段已发生变化，请关闭后重新打开'); return }
+            const patch = part === 'name' ? { ...conditions, field_settings: { ...conditions.field_settings,
+              [key]: { ...display, name_raw: value.name } } }
+              : setCondition(conditions, key, part === 'unit'
+                ? { ...(previous && typeof previous === 'object' ? previous : { value_raw: rawValue(key), value_kind: editing.kind }), unit_raw: value.unit }
+                : conditionPatch(previous, value.raw, editing.kind === 'number'))
+            write(patch)
+            setEditing(current => current && { ...current, snapshot: signature([getCondition(patch, key), patch.field_settings?.[key]]) })
+            return
+          }
           if (part === 'name' || part === 'unit') write({ ...conditions, field_settings: {
             ...conditions.field_settings, [key]: { ...conditions.field_settings?.[key], [part === 'name' ? 'name_raw' : 'unit_raw']: part === 'name' ? value.name : value.unit } } })
           else if (part === 'raw') write({ ...conditions, [key]: ['number', 'integer'].includes(schema.properties?.[key]?.type || '') ? draftNumber(value.raw) : value.raw })

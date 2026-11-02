@@ -3,39 +3,11 @@ import math
 
 
 def normalize_extracted_conditions(record):
-    """仅整理新提取候选；未知结构拒绝，不猜测阶段或丢弃字段。"""
+    """新模型只能填写已审定字段；旧数据转换由独立迁移负责。"""
     from .vibrational_terms import normalize_extracted_vibrational_treatment
     normalize_extracted_vibrational_treatment(record)
-    conditions = record.get("payload", {}).get("calculation_conditions")
-    if conditions is None:
-        return
-    if not isinstance(conditions, dict):
-        raise ValueError("calculation_conditions 必须是对象")
-    if "extensions" not in conditions:
-        return
-    items = conditions["extensions"]
-    if items is None or items == {}:
-        items = []
-    elif isinstance(items, dict):
-        # #172 的实际模型响应只多了一层明确的声子阶段分组。
-        group = items.get("electron_phonon")
-        if (set(items) != {"electron_phonon"} or not isinstance(group, dict)
-                or set(group) != {"phonon_method"}
-                or not isinstance(group["phonon_method"], str) or not group["phonon_method"].strip()):
-            raise ValueError("calculation_conditions.extensions 必须是带 key 的对象数组")
-        items = [{"key": "electron_phonon.phonon_method", "value_kind": "text",
-                  "value_raw": group["phonon_method"]}]
-    if not isinstance(items, list):
-        raise ValueError("calculation_conditions.extensions 必须是数组")
-    from .condition_rules import PARAMETERS
-    for index, item in enumerate(items):
-        if (not isinstance(item, dict) or not isinstance(item.get("key"), str)
-                or not item["key"].strip()):
-            raise ValueError(f"calculation_conditions.extensions[{index}] 必须是带非空 key 的对象")
-        if item["key"] in PARAMETERS:
-            raise ValueError(f"calculation_conditions.extensions[{index}].key 缺少计算阶段；"
-                             "已知条件使用对应固定字段或 stage.parameter 扩展，不猜测软件归属")
-    conditions["extensions"] = items
+    from .fixed_form_contract import validate_model_record
+    validate_model_record(record)
 
 
 def extension_issues(record):

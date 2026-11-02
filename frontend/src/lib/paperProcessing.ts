@@ -152,10 +152,6 @@ export interface DraftMaterialState {
   element_count_locked?: boolean
   material_dimensionality?: MaterialDimensionality
   pressure_value_gpa?: number | null
-  pressure_min_gpa?: number | null
-  pressure_max_gpa?: number | null
-  pressure_raw?: string | null
-  pressure_unit_raw?: string | null
   state_kind?: 'theoretical' | 'experimental' | 'unknown' | string
   structure_optimization?: 'unknown' | 'classical_static' | 'quasi_harmonic' | 'anharmonic_quantum' | 'sscha'
   field_evidence?: Record<string, unknown>
@@ -200,6 +196,7 @@ export interface PaperDraftFields {
 }
 
 export interface UploadDraft {
+  _form_contract_version?: number
   // 原始解析账本及历史扩展原样随草稿保存，不产生派生分类或用户待办。
   parsing_conflicts?: Array<{
     file_id: string; pdf_page: number; kind: string; selected?: string; anchor?: string
@@ -417,7 +414,7 @@ export function normalizeUploadDraft(value: unknown): UploadDraft {
       if (evidence.length) fieldEvidence[field] = evidence
     }
   }
-  return {
+  const normalized: UploadDraft = {
     ...empty,
     ...raw,
     citation_extraction: normalizeCitationExtraction(raw.citation_extraction),
@@ -473,6 +470,8 @@ export function normalizeUploadDraft(value: unknown): UploadDraft {
     field_evidence: fieldEvidence,
     field_suggestions_error: raw.field_suggestions_error || null,
   }
+  return normalized
+
 }
 
 function normalizePaperSuperconductorKind(rawPaper: Record<string, any>, rawStates: unknown): 'conventional' | 'unconventional' | 'unknown' {

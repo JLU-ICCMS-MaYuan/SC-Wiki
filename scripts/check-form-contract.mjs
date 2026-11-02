@@ -18,7 +18,7 @@ if (!process.argv.includes('--mutation')) {
 const temporary = mkdtempSync(join(tmpdir(), 'scwiki-form-contract-'))
 try {
   const config = join(temporary, 'mutation.config.ts'), report = join(temporary, 'result.json')
-  const marker = "const environment = { catalogs, catalogLoading, catalogError, spaceGroups, paperType, readOnly, lang, dict }"
+  const marker = "const environment = { catalogs, catalogLoading, catalogError, spaceGroups, paperType, readOnly, fixedContract, lang, dict }"
   const source = readFileSync(join(root, 'frontend/src/components/MaterialStatesEditor.tsx'), 'utf8')
   if (!source.includes(marker)) throw new Error('回退注入位置已变化；请更新注入器，不能跳过此检查。')
   writeFileSync(config, `import config from ${JSON.stringify(join(root, 'vitest.config.ts'))};

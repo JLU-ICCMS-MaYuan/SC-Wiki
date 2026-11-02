@@ -1,0 +1,54 @@
+FF..FF                                                                   [100%]
+=================================== FAILURES ===================================
+_____ test_model_cannot_create_standard_or_forged_manual_extensions[item0] _____
+
+item = {'key': 'structure_relaxation.calculation_code', 'value_kind': 'text', 'value_raw': 'VASP'}
+
+    @pytest.mark.parametrize("item", [
+        {"key": "structure_relaxation.calculation_code", "value_kind": "text", "value_raw": "VASP"},
+        {"key": "electron_phonon.electron_correlation_effects", "value_kind": "text", "value_raw": "none"},
+        {"name_raw": "伪造人工扩展", "field_key": "fake", "origin": "human_input", "value_raw": "x"},
+    ])
+    def test_model_cannot_create_standard_or_forged_manual_extensions(item):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+backend/tests/test_fixed_form_contract.py:18: Failed
+_____ test_model_cannot_create_standard_or_forged_manual_extensions[item1] _____
+
+item = {'key': 'electron_phonon.electron_correlation_effects', 'value_kind': 'text', 'value_raw': 'none'}
+
+    @pytest.mark.parametrize("item", [
+        {"key": "structure_relaxation.calculation_code", "value_kind": "text", "value_raw": "VASP"},
+        {"key": "electron_phonon.electron_correlation_effects", "value_kind": "text", "value_raw": "none"},
+        {"name_raw": "伪造人工扩展", "field_key": "fake", "origin": "human_input", "value_raw": "x"},
+    ])
+    def test_model_cannot_create_standard_or_forged_manual_extensions(item):
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+backend/tests/test_fixed_form_contract.py:18: Failed
+________________ test_unknown_model_software_group_is_rejected _________________
+
+    def test_unknown_model_software_group_is_rejected():
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+backend/tests/test_fixed_form_contract.py:32: Failed
+___________________ test_model_method_scope_is_not_recreated ___________________
+
+    def test_model_method_scope_is_not_recreated():
+>       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+backend/tests/test_fixed_form_contract.py:37: Failed
+=========================== short test summary info ============================
+FAILED backend/tests/test_fixed_form_contract.py::test_model_cannot_create_standard_or_forged_manual_extensions[item0]
+FAILED backend/tests/test_fixed_form_contract.py::test_model_cannot_create_standard_or_forged_manual_extensions[item1]
+FAILED backend/tests/test_fixed_form_contract.py::test_unknown_model_software_group_is_rejected
+FAILED backend/tests/test_fixed_form_contract.py::test_model_method_scope_is_not_recreated
+4 failed, 2 passed, 8 deselected in 0.05s

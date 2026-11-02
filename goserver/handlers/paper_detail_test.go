@@ -60,7 +60,7 @@ func strPtr(v string) *string   { return &v }
 func f64Ptr(v float64) *float64 { return &v }
 func i16Ptr(v int16) *int16     { return &v }
 
-// seedPaperFour 复刻 papers id=4 的真实入库形态（含压强单臂区间与全 NULL 的计算上下文）。
+// seedPaperFour 保留论文科学值；#203之后压力只使用单值字段。
 func seedPaperFour(t *testing.T, db *gorm.DB, reviewStatus string) {
 	t.Helper()
 	if err := db.Create(&models.Paper{
@@ -84,8 +84,7 @@ func seedPaperFour(t *testing.T, db *gorm.DB, reviewStatus string) {
 		ID: 1, StateKey: "state-lah10-170gpa", PaperID: 4, PaperRevision: 1, SuperconductorID: uintPtr(1),
 		MaterialDimensionality: "bulk",
 		CrystalSystem:          "cubic", StateKind: "theoretical",
-		PressureValueGPa: f64Ptr(250), PressureMinGPa: f64Ptr(200), PressureMaxGPa: nil,
-		PressureRaw:              strPtr("above 200 GPa"),
+		PressureValueGPa:         f64Ptr(250),
 		ReportedSpaceGroupSymbol: strPtr("Fm-3m"), ReportedSpaceGroupNumber: i16Ptr(225),
 	}).Error; err != nil {
 		t.Fatal(err)
@@ -301,8 +300,6 @@ func TestPaperDetailReturnsFullMaterialStateFields(t *testing.T) {
 
 	for field, want := range map[string]any{
 		"pressure_value_gpa":          float64(250),
-		"pressure_min_gpa":            float64(200),
-		"pressure_raw":                "above 200 GPa",
 		"reported_space_group_symbol": "Fm-3m",
 		"reported_space_group_number": float64(225),
 		"crystal_system":              "cubic",
@@ -313,16 +310,13 @@ func TestPaperDetailReturnsFullMaterialStateFields(t *testing.T) {
 		}
 	}
 
-	// 单臂区间：无上限必须是 null，不能是 0——否则「无上限」与「上限为 0」无法区分。
-	value, exists := state["pressure_max_gpa"]
-	if !exists {
-		t.Fatal("pressure_max_gpa 键缺失")
-	}
-	if value != nil {
-		t.Fatalf("pressure_max_gpa = %#v，期望 null", value)
+	for _, retired := range []string{"pressure_min_gpa", "pressure_max_gpa", "pressure_raw", "pressure_unit_raw"} {
+		if _, exists := state[retired]; exists {
+			t.Fatalf("退役字段 %s 不应出现在新响应中", retired)
+		}
 	}
 
-	for _, field := range []string{"pressure_unit_raw", "temperature_value_k", "temperature_raw", "magnetic_field_t", "note"} {
+	for _, field := range []string{"temperature_value_k", "temperature_raw", "magnetic_field_t", "note"} {
 		if _, exists := state[field]; !exists {
 			t.Fatalf("%s 键缺失", field)
 		}

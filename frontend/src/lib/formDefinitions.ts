@@ -1,3 +1,4 @@
+import { fixedConditionIssues } from './fixedFormContract'
 import { validatePropertyExtensions } from './propertyExtensions'
 import { validateStability } from './thermodynamicStability'
 import { api } from './api'
@@ -175,6 +176,7 @@ export function validateRecordClient(record: PropertyRecordDraft, definition?: F
     if (record.value_kind === 'text' && !record.value_text?.trim()) addIssue(issues, 'value_text', '请输入当前文本值')
     if (record.value_kind === 'boolean' && typeof record.value_boolean !== 'boolean') addIssue(issues, 'value_boolean', '请选择当前布尔值')
   }
+  if (record.definition_version >= 2) for (const item of fixedConditionIssues(record.payload.calculation_conditions)) addIssue(issues, item.field, item.message)
   const calculation = record.payload.calculation_conditions
   const experimental = record.payload.experimental_conditions
   if (experimental && typeof experimental === 'object' && 'description' in experimental && typeof experimental.description !== 'string') {

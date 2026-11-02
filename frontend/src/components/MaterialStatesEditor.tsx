@@ -127,6 +127,7 @@ export const EvidenceNotes: React.FC<{
 }
 
 interface MaterialStatesEditorProps {
+  fixedContract?: boolean
   independentStructureWorkspace?: boolean
   propertySpectra?: PropertySpectraContext
   spectrumTarget?: SpectrumTarget
@@ -234,7 +235,7 @@ const SpaceGroupAutocomplete: React.FC<SpaceGroupAutocompleteProps> = ({ value, 
  */
 const EMPTY_SPACE_GROUPS: SpaceGroupOption[] = []
 const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
-  states,
+  fixedContract = false, states,
   onChange,
   onScientificEdit,
   catalogs,
@@ -621,7 +622,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
     return <FormHelperText error>{issue.message}</FormHelperText>
   }
 
-  const environment = { catalogs, catalogLoading, catalogError, spaceGroups, paperType, readOnly, lang, dict }
+  const environment = { catalogs, catalogLoading, catalogError, spaceGroups, paperType, readOnly, fixedContract, lang, dict }
   const previousEnvironment = cardEnvironmentRef.current
   if (!previousEnvironment || Object.entries(environment).some(([key, value]) => value !== previousEnvironment[key as keyof typeof previousEnvironment])) {
     cardCacheRef.current.clear()
@@ -900,7 +901,7 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
                   <Box data-property-modules data-testid={`property-modules-${index}`} sx={{ mt: 2 }}>
                     <PropertySpectrumState stateKey={state.state_key || `state-${index + 1}`} summary={materialStateSummary(state)}>
-                    <PropertyModuleEditor
+                    <PropertyModuleEditor fixedContract={fixedContract}
                       modules={state.property_modules || []}
                       readOnly={readOnly}
                       basePath={`material_states.${index}.property_modules`}

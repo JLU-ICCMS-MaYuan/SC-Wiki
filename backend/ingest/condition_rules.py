@@ -5,10 +5,9 @@ import re
 import unicodedata
 
 VERSION = 'condition-rules-v2'
-PARAMETERS = {'vibrational_treatment', 'calculation_code', 'electronic_method', 'exchange_correlation_functional',
-              'phonon_method', 'k_grid', 'q_grid', 'q_grid_interpolated', 'energy_cutoff',
-              'charge_density_cutoff', 'convergence_energy', 'convergence_force',
-              'supercell', 'atoms', 'temperature_k'}
+from .fixed_form_contract import COMMON, PARAMETERS as SOFTWARE_PARAMETERS, SOFTWARE
+PARAMETERS = set(COMMON) | set(SOFTWARE_PARAMETERS)
+
 STAGES = {'structural_relaxation', 'electronic_structure', 'electron_phonon', 'superconductivity', 'sscha'}
 SOFTWARE_ALIASES = {
     'vasp': ('vasp', 'viennaabinitiosimulationpackage'),
@@ -87,11 +86,16 @@ def descriptor(record):
         if len(stages) > 1:
             return None
         stage = next(iter(stages), 'electronic_structure' if source.get('property_code') in {'band_gap', 'dos_fermi'} else 'electron_phonon')
+    parts = path.split('.')
+    software_group = parts[2] if len(parts) >= 4 and parts[2] in SOFTWARE else None
+    if software_group:
+        parameter = parts[3]
+        stage = 'sscha' if software_group == 'sscha' else 'electron_phonon'
     if parameter not in PARAMETERS or stage not in STAGES:
         return None
-    if parameter in {'supercell', 'atoms', 'temperature_k'} and stage != 'sscha':
-        return None
-    if parameter == 'calculation_code':
+    if software_group:
+        software = software_group
+    elif parameter == 'calculation_code':
         software = scalar(record.get('current_value'))
     elif stage == ('electronic_structure' if source.get('property_code') in {'band_gap', 'dos_fermi'} else 'electron_phonon'):
         software = conditions.get('calculation_code')

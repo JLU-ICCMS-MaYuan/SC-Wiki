@@ -1,0 +1,151 @@
+..............................................................FF........ [ 91%]
+F......                                                                  [100%]
+=================================== FAILURES ===================================
+_____________ test_one_bounded_repair_preserves_original_response ______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13f3c03e0>
+
+    def test_one_bounded_repair_preserves_original_response(monkeypatch):
+        snap, row = snapshot(); calls=[]; captures=[]
+        def model(system, payload, **kwargs):
+            calls.append(json.loads(payload))
+            raw=assessment(row)
+            if len(calls)==1: raw['scope_evidences']=[]
+            return {'results':[{'key':row['key'],'status':'supported','evidences':[],'condition_review':raw}]}
+        monkeypatch.setattr('backend.rag.llm.complete_json',model)
+        evaluated=ev.evaluate_batch([row],snap['chunks'],on_response=captures.append)
+>       assert len(calls)==2 and calls[1]['validation_feedback']
+E       AssertionError: assert (1 == 2)
+E        +  where 1 = len([{'purpose': 'check', 'records': [{'key': '292c5403069f258a11af07f48ce16408a5e67d27335e0a5e5503879ab96b9417', 'field':...tion, with 850 eV and a force threshold of 1 meV/Å.', 'source_id': 'review-source-0'}], 'human_provided_evidence': {}}])
+
+tests/01_decentralized_uploading/test_condition_auto_review.py:194: AssertionError
+___________ test_bounded_repair_does_not_swallow_upload_cancellation ___________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13f3c3f50>
+
+    def test_bounded_repair_does_not_swallow_upload_cancellation(monkeypatch):
+        class UploadCancelled(Exception):pass
+        snap,row=snapshot();calls=[]
+        def model(*args,**kwargs):
+            calls.append(1)
+            if len(calls)>1:raise UploadCancelled()
+            raw=assessment(row);raw['scope_evidences']=[]
+            return {'results':[{'key':row['key'],'status':'supported','condition_review':raw}]}
+        monkeypatch.setattr('backend.rag.llm.complete_json',model)
+>       with pytest.raises(UploadCancelled):ev.evaluate_batch([row],snap['chunks'])
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE UploadCancelled
+
+tests/01_decentralized_uploading/test_condition_auto_review.py:208: Failed
+_______________ test_new_upload_rechecks_final_filled_conditions _______________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x13f38ef30>
+tmp_path = PosixPath('/private/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/pytest-of-mayuan/pytest-53/test_new_upload_rechecks_final0')
+
+    def test_new_upload_rechecks_final_filled_conditions(monkeypatch,tmp_path):
+        from contextlib import contextmanager
+        from types import SimpleNamespace
+        from backend.ingest.scientific_context import scientific_fingerprint
+        d=setup();state=d['material_states'][0];state['reported_space_group_symbol']='P6/mmm'
+        source=state['property_modules'][0]['records'][0]
+        source['payload']['source_associations']=[]
+        source['payload']['calculation_conditions']={'calculation_code':'Quantum ESPRESSO'}
+        chunks=[{'file_id':'main','chunk_index':0,'content':TEXT}]
+        def build(task,owner,*,parsing_draft):
+            snap=ev.complete_snapshot('upload',task,ev.draft_records(parsing_draft,{}),chunks,parsing_draft)
+            bind_snapshot_source_documents(snap,{'main':{'sha256':'a'*64,'role':'main'}})
+            return snap
+        monkeypatch.setattr(ev,'upload_snapshot',build)
+        monkeypatch.setattr('backend.ingest.upload_jobs._ensure_not_cancelled',lambda *_:None)
+        monkeypatch.setattr('backend.ingest.upload_tasks.artifact_directory',lambda _:tmp_path)
+        def ledger(draft,context,*args,**kwargs):
+            row=draft['material_states'][0]['property_modules'][0]['records'][0]
+            e={'file_id':'main','chunk_index':0,'quote':TEXT}
+            return {'complete':True,'gaps':[],'associations':[{'target':'s/m/r','expected_fingerprint':scientific_fingerprint(row),
+                'target_path':'/payload/calculation_conditions/k_grid','value':'24×24×24','reported_value_raw':'24×24×24',
+                'basis_kind':'paper_inference','stage':'electron_phonon','scope':{'material':'LaSc2H24'},
+                'explanation':'当前材料物相共用QE网格','fact_evidences':[e],'scope_evidences':[e]}]}
+        monkeypatch.setattr('backend.ingest.scientific_context.generate_context_associations',ledger)
+        checked_values=[]
+        def model(system,payload,**kwargs):
+            request=json.loads(payload);results=[]
+            for row in request['records']:
+                condition=row.get('condition_context')
+                item={'key':row['key'],'status':'supported','evidences':[{'file_id':'main','quote':TEXT}],'reason':'本文依据'}
+                if condition:
+                    value=row['claim']['value']
+                    if condition['parameter']=='k_grid':checked_values.append(value)
+                    item['condition_review']={'verdict':'supported' if value else 'not_reported','value_origin':'reported',
+                        'scope':condition,'exceptions':'none','explanation':'原文明确当前材料物相的软件和设置，未见例外',
+                        **{k:[{'source_id':'review-source-0'}] for k in ['fact_evidences','scope_evidences','software_evidences']}}
+                results.append(item)
+            return {'results':results}
+        monkeypatch.setattr('backend.rag.llm.complete_json',model)
+        @contextmanager
+        def begin():yield object()
+        monkeypatch.setattr('backend.database.SessionLocal',SimpleNamespace(begin=begin))
+        saved=[]
+        monkeypatch.setattr(science,'save_results',lambda session,snap,results,owner:saved.append((snap,results)))
+        monkeypatch.setattr('backend.ingest.pdf_front_matter.correct_front_matter_results',lambda session,snap,results:results)
+>       ev.generate_upload_suggestions('new-upload',d,7,scientific_sources=chunks)
+
+tests/01_decentralized_uploading/test_condition_auto_review.py:356:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+task_id = 'new-upload'
+draft = {'material_states': [{'state_key': 's', 'material': 'LaSc2H24', 'pressure_value_gpa': 150, 'property_modules': [{'module_key': 'm', 'module_code': 'superconductive_properties', 'records': [{...}]}], ...}]}
+owner = 7, on_progress = None, skip_auto_fill = None
+scientific_sources = [{'file_id': 'main', 'chunk_index': 0, 'content': 'For LaSc2H24 in the P6/mmm phase, all pressures use these settings....toff is 90 Ry. VASP uses the PBE functional for structural relaxation, with 850 eV and a force threshold of 1 meV/Å.'}]
+requested_fields = None, on_preview = None
+
+    def generate_upload_suggestions(task_id, draft, owner, on_progress=None, *, skip_auto_fill=None,
+                                    scientific_sources=None, requested_fields=None, on_preview=None):
+        """统一模型流程查证并保存最终字段结论，不串联独立科学匹配链。"""
+        from backend.database import SessionLocal
+        from backend.ingest.upload_tasks import artifact_directory
+        from backend.ingest.upload_jobs import _ensure_not_cancelled, _atomic_write_json
+        from backend.rag.llm_context import get_llm_config
+        from .model_review import review_draft
+        from .extraction_correction import human_protected_keys
+        from .scientific_evidence import save_results
+        def rebuild(value):
+            snap = upload_snapshot(task_id, owner, parsing_draft=value)
+            if requested_fields is not None:
+                snap['records'] = [r for r in snap['records'] if r['field'] in requested_fields]
+            return snap
+        def cancelled():
+            _ensure_not_cancelled(task_id)
+            return False
+        initial = rebuild(draft)
+>       with SessionLocal() as session:
+             ^^^^^^^^^^^^^^
+E       TypeError: 'types.SimpleNamespace' object is not callable
+
+backend/ingest/property_evidence.py:1227: TypeError
+=============================== warnings summary ===============================
+../../../../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+../../../../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/01_decentralized_uploading/test_condition_auto_review.py::test_one_bounded_repair_preserves_original_response
+FAILED tests/01_decentralized_uploading/test_condition_auto_review.py::test_bounded_repair_does_not_swallow_upload_cancellation
+FAILED tests/01_decentralized_uploading/test_condition_auto_review.py::test_new_upload_rechecks_final_filled_conditions
+3 failed, 76 passed, 536 warnings in 1.70s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

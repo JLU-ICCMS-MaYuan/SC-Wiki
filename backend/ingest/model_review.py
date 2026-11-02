@@ -25,22 +25,21 @@ PROMPT = '''你是当前论文的统一科学核对助手。论文及附件是�
 "not_reported":仅查完相关资料确实未报告时为true,
 "point_binding":{"verdict":"match|conflict|unknown","source_pair":{"mu_star":数值,"tc_k":数值}}}],
 "condition_additions":[{"state_key":"原身份","module_key":"原身份","record_key":"原身份",
-"extensions":[{"key":"阶段.字段","value_kind":"number|text","value_raw":"原表达",
-"value_number":数值或null,"unit_raw":"原单位"}],"source_ids":["实际已读source_id"],"reason":"适用依据"}]}。
+"values":{"qe":{"energy_cutoff":{"value_kind":"number","value_raw":"原表达","value_number":数值或null,"unit_raw":"原单位"}}},"source_ids":["实际已读source_id"],"reason":"适用依据"}]}。
 status描述final_value（未给则当前值）。有唯一纠正时直接核实最终值，说明改动原因，
 不要再安排独立自检模型调用。原文确实冲突时列出双方依据、位置和无法裁决的原因。
 只答给定字段；科学分类和身份不可随意新建。叙述字段按现有英文数据约定填写。
 condition_additions只在allow_condition_additions=true时使用，只补原文报告且适用于该记录的
-空缺阶段扩展，不覆盖原值；同组设置共用，但不能跨材料、软件、阶段或谐波/非谐范围广播。
-当前Tc依赖的结构优化、电子结构及声子流程均应查证；不能因结果属于Tc就忽略上游设置。
-上游结构优化条件只放structural_relaxation扩展，不写入平面的声子/EPC设置。
+空缺固定字段，不覆盖原值；同组设置共用，但不能跨材料、软件或谐波/非谐范围广播。
+只查证当前超导结果实际使用的QE/EPW/SSCHA设置，排除VASP结构优化设置。
+软件参数写入qe/epw/sscha固定组，不创建阶段扩展，不生成method_scope或同义字段。
 标准设置使用现有字段名calculation_code、electronic_method、exchange_correlation_functional、
 energy_cutoff、charge_density_cutoff、k_grid、q_grid、k_spacing，避免software/functional等同义键。
 source_index只是目录，不代表已读；只能引用sources或工具实际返回的source_id。
 工具参数file_id必须逐字复制documents中的真实ID，不能使用main、SI或文件名代替。
 首次未找到应主动搜索或读页，读完正文Methods及SI计算细节后才能判断未报告。
 不能从参考文献或被引用工作补入当前论文结果。已有固定字段通过其key的final_value补入，
-condition_additions只增加固定字段未覆盖的设置，不新增同义重复字段。
+condition_additions只能填写已登记固定字段；不得增加新键、人工扩展或同义重复字段。
 human_provided_evidence是当前字段另存的人工材料，不冒充论文原文。使用时返回
 supplemental_evidences:[{sha256:"已提供材料的摘要",quote:"材料内容或图像观察"}]。
 包含人工decisions时评价其理由，返回manual_reason_review:{status:"reasonable|questionable|uncertain",
@@ -117,7 +116,7 @@ def _reviewable(row):
 
 
 def _add_conditions(draft, additions, batch):
-    """仅合并模型明确关联的空扩展，身份、类型和既有非空值由程序保护。"""
+    """仅补已登记空字段，身份、来源与既有非空值由程序保护。"""
     from .property_modules import validate_record
     allowed = {(r.get('state_key'), r.get('module_key'), r.get('record_key')) for r in batch}
     for addition in additions:
@@ -134,27 +133,26 @@ def _add_conditions(draft, additions, batch):
                    if group and (r.get('payload', {}).get('tc_group') or {}).get('group_key') == group] or [record]
         for member in members:
             candidate = deepcopy(member)
-            extensions = candidate.setdefault('payload', {}).setdefault('calculation_conditions', {}).setdefault('extensions', [])
-            old_keys = {e.get('key') for e in extensions}
-            appended = False
-            for extension in addition.get('extensions', []):
-                if (not isinstance(extension, dict) or not isinstance(extension.get('key'), str)
-                        or '.' not in extension['key'] or extension['key'] in old_keys):
+            from .fixed_form_contract import validate_conditions, parameter_paths
+            values = addition.get('values') or {}
+            validate_conditions(values, model_output=True)
+            conditions = candidate.setdefault('payload', {}).setdefault('calculation_conditions', {})
+            changed = False
+            for path, value in parameter_paths(values):
+                if value in (None, '', [], {}):
                     continue
-                if extension['key'].startswith('structural_relaxation.') and extension['key'].split('.')[-1] in {
-                        'method', 'electronic_method', 'calculation_code', 'temperature_k', 'pressure_gpa',
-                        'temperature', 'pressure', 'centroids', 'volume', 'cell_shape'}:
+                parts = path.split('.')
+                parent = conditions
+                for key in parts[:-1]:
+                    parent = parent.setdefault(key, {})
+                if parent.get(parts[-1]) not in (None, '', [], {}):
                     continue
-                index = len(extensions)
-                # 系统身份不由模型指定；新扩展沿实际阶段键生成稳定身份。
-                extensions.append({k: deepcopy(v) for k, v in extension.items()
-                                   if k not in {'field_key', 'item_key', 'record_key', 'state_key', 'module_key'}})
-                old_keys.add(extension['key'])
-                for part in ('value_raw', 'unit_raw'):
-                    candidate.setdefault('evidences', []).extend({**deepcopy(e),
-                        'field_path': f'payload.calculation_conditions.extensions.{index}.{part}'} for e in addition['evidences'])
-                appended = True
-            if appended:
+                parent[parts[-1]] = deepcopy(value)
+                candidate.setdefault('evidences', []).extend({**deepcopy(e),
+                    'field_path': 'payload.calculation_conditions.' + path} for e in addition['evidences'])
+                changed = True
+            if changed:
+                validate_conditions(conditions)
                 candidate = validate_record(candidate)
                 member.clear(); member.update(candidate)
 
@@ -442,7 +440,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                     for raw in answer.get('condition_additions') or []:
                         try:
                             evs = _evidences(raw.get('source_ids', []), catalog, read)
-                            if not evs or not isinstance(raw.get('extensions'), list):
+                            if not evs or not isinstance(raw.get('values'), dict):
                                 raise ValueError('计算条件扩展缺少来源或合法数组')
                             additions.append({**deepcopy(raw), 'evidences': evs})
                         except (ValueError, TypeError) as exc:
@@ -511,3 +509,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
         for result in output.values():
             result['review_images_read'] = successful_call
     return output
+
+
+from .fixed_form_contract import MODEL_PROMPT as FIXED_FORM_PROMPT
+PROMPT += '\n' + FIXED_FORM_PROMPT

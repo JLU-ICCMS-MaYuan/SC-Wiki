@@ -21,7 +21,11 @@ def snapshot(text=TEXT, target='upload', field='k_grid', value='24×24×24', ext
     state = draft['material_states'][0]
     state['reported_space_group_symbol'] = 'P6/mmm'
     record = state['property_modules'][0]['records'][0]
-    record['payload']['calculation_conditions'].update(calculation_code='Quantum ESPRESSO', **{field: value})
+    record['payload']['calculation_conditions']['calculation_code'] = 'Quantum ESPRESSO'
+    if field == 'k_grid':
+        record['payload']['calculation_conditions'].setdefault('qe', {})[field] = value
+    else:
+        record['payload']['calculation_conditions'][field] = value
     if field != 'k_grid':
         record['payload']['source_associations'] = []
     chunks = [{'file_id': 'main', 'chunk_index': 0, 'content': text}]
@@ -30,7 +34,7 @@ def snapshot(text=TEXT, target='upload', field='k_grid', value='24×24×24', ext
     snap = ev.complete_snapshot(target, 'rule-test', ev.draft_records(draft, {}), chunks, draft)
     docs = {str(c['file_id']): {'sha256': 'a'*64, 'role': 'main' if c['file_id']=='main' else 'supplementary'} for c in chunks}
     bind_snapshot_source_documents(snap, docs)
-    row = next(r for r in snap['records'] if r.get('record_field') == 'payload.calculation_conditions.' + field)
+    row = next(r for r in snap['records'] if r.get('record_field') == 'payload.calculation_conditions.' + ('qe.' if field == 'k_grid' else '') + field)
     return snap, row
 
 
@@ -328,7 +332,7 @@ def test_new_upload_rechecks_final_filled_conditions(monkeypatch,tmp_path):
         row=draft['material_states'][0]['property_modules'][0]['records'][0]
         e={'file_id':'main','chunk_index':0,'quote':TEXT}
         return {'complete':True,'gaps':[],'associations':[{'target':'s/m/r','expected_fingerprint':scientific_fingerprint(row),
-            'target_path':'/payload/calculation_conditions/k_grid','value':'24×24×24','reported_value_raw':'24×24×24',
+            'target_path':'/payload/calculation_conditions/qe/k_grid','value':'24×24×24','reported_value_raw':'24×24×24',
             'basis_kind':'paper_inference','stage':'electron_phonon','scope':{'material':'LaSc2H24'},
             'explanation':'当前材料物相共用QE网格','fact_evidences':[e],'scope_evidences':[e]}]}
     monkeypatch.setattr('backend.ingest.scientific_context.generate_context_associations',ledger)

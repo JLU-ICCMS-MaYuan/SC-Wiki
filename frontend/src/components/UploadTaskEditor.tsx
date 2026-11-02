@@ -834,7 +834,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         <EvidenceNotes evidence={classificationEvidence} />
       </Box>
 
-      <MaterialStatesEditor
+      <MaterialStatesEditor fixedContract={draft._form_contract_version === 1}
         independentStructureWorkspace
         propertySpectra={{ frozenListing: frozenSpectra, initialListing: loadedSpectra, target: revisionPaperId && revisionMeta.current
           ? { target: 'revision', target_id: revisionMeta.current.revision_id }

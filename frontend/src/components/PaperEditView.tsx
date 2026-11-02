@@ -247,7 +247,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
                           </Box>}
                           <Box>
                             <Typography variant="caption" color="text.secondary">{t('paperDetail.pressureSection')}</Typography>
-                            <Typography variant="body2">{state.pressure_value_gpa != null ? `${state.pressure_value_gpa} GPa` : state.pressure_min_gpa != null || state.pressure_max_gpa != null ? `${state.pressure_min_gpa ?? '?'}–${state.pressure_max_gpa ?? '?'} GPa` : state.pressure_raw ? `${state.pressure_raw}${state.pressure_unit_raw ? ` ${state.pressure_unit_raw}` : ''}` : t('common.notProvided')}</Typography>
+                            <Typography variant="body2">{state.pressure_value_gpa != null ? String(state.pressure_value_gpa) + ' GPa' : t('common.notProvided')}</Typography>
                           </Box>
                         </Box>
                         <Box data-material-family-row sx={{ minWidth: 0 }}>

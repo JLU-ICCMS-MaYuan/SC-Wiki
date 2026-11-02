@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "model": "deepseek-v4-pro",
+  "source_sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+  "states": 3,
+  "model_attempts": 1,
+  "text_reused": "原PDF哈希一致的已核对DocumentIR；未复用旧字段答案",
+  "rerun": [
+    "真实AI提取",
+    "正式normalize_extraction及英文数据检查",
+    "正式assemble_candidates",
+    "最终字段契约校验"
+  ],
+  "limitation": "仅受影响字段，不代表整篇HTTP/RQ上传与图像解析通过"
+}

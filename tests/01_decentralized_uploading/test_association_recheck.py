@@ -30,7 +30,7 @@ def snapshot(d):
 
 
 def grid(snap):
-    return next(r for r in snap['records'] if r.get('record_field') == 'payload.calculation_conditions.k_grid')
+    return next(r for r in snap['records'] if r.get('record_field') == 'payload.calculation_conditions.qe.k_grid')
 
 
 def raw_review(record, basis='paper_quote'):
@@ -66,7 +66,7 @@ def test_tc_edit_does_not_stale_grid_or_its_check_version():
 @pytest.mark.parametrize('change', ['grid', 'pressure', 'phase', 'software', 'approximation'])
 def test_related_change_stales_only_current_binding(change):
     d = setup(); s = d['material_states'][0]; r = s['property_modules'][0]['records'][0]
-    if change == 'grid': r['payload']['calculation_conditions']['k_grid'] = '12×12×12'
+    if change == 'grid': r['payload']['calculation_conditions']['qe']['k_grid'] = '12×12×12'
     if change == 'pressure': s['pressure_value_gpa'] = 200
     if change == 'phase': s['reported_space_group_symbol'] = 'Fm-3m'
     if change == 'software': r['payload']['calculation_conditions']['calculation_code'] = 'VASP'

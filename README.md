@@ -376,3 +376,10 @@ Shadow 已使用独立 RQ 作业与文件快照生成对照，禁止提交或改
 编辑科学数据时，电子结构理论、声子计算技术和振动处理层次分别填写；结构优化目标及几何约束属于材料状态。旧SSCHA与近似标签保留历史含义，不按名称自动转换。具体字段与来源规则见[字段映射](docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md)。
 
 新增数据库迁移 `20261029_0181` 提供优化详情JSON列与四目标约束，不回填旧数据。迁移文件和隔离验证不代表业务数据库或线上已更新；发布时沿既有迁移流程操作。
+
+
+### 科学表单字段与本机契约迁移
+
+科学表单的标准键以 [版本化字段清单](backend/data/scientific_form_contract.v1.json) 为准。更改键、类型或含义前，先按 [#203 字段契约](docs/specs/203-fixed-form-field-contract/spec.md) 审查并登记；运行 npm run test:field-contract --prefix frontend，以及现有表单契约和故障注入检查。人工扩展继续使用人工入口。
+
+本机迁移操作与恢复步骤见 [操作说明](docs/specs/203-fixed-form-field-contract/quickstart.md)。

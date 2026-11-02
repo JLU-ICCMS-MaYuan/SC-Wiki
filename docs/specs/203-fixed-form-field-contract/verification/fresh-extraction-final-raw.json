@@ -1,0 +1,1262 @@
+[
+  {
+    "extraction_version": "1",
+    "metadata": {
+      "title": "Superconductive sodalite-like clathrate calcium hydride at high pressures",
+      "authors": "Hui Wang, John S. Tse, Kaori Tanaka, Toshiaki Iitaka, Yanming Ma",
+      "journal": "PNAS",
+      "year": 2012,
+      "doi": "10.1073/pnas.1118168109",
+      "abstract": "Hydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of H2 fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particle-swarm optimization structural search, we show that in the stoichiometry CaH6 a body-centered cubic structure with hydrogen that forms unusual \"sodalite\" cages containing enclathrated Ca stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance by two H2 of electrons donated by Ca forming an H4 unit as the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupation of the degenerated orbitals at the zone center. The resultant dynamic Jahn–Teller effect helps to enhance electron-phonon coupling and leads to superconductivity of CaH6. A superconducting critical temperature (Tc) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far."
+    },
+    "paper_type_evidence": [
+      {
+        "candidate": "theoretical",
+        "scope": "current_paper",
+        "pdf_page": 1,
+        "block_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+        "quote": null
+      },
+      {
+        "candidate": "theoretical",
+        "scope": "current_paper",
+        "pdf_page": 4,
+        "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+        "quote": null
+      }
+    ],
+    "research_materials": [
+      {
+        "material": "CaH6",
+        "scope": "current_paper",
+        "pdf_page": 1,
+        "block_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+        "quote": null
+      }
+    ],
+    "referenced_materials": [
+      {
+        "material": "SiH4",
+        "scope": "referenced_work",
+        "pdf_page": 1,
+        "block_id": "46b78dd4fbaa1ed81e29869d2c8358e233d25ef9b197df4d6765c512c7175504",
+        "quote": null
+      },
+      {
+        "material": "AlH3",
+        "scope": "referenced_work",
+        "pdf_page": 1,
+        "block_id": "46b78dd4fbaa1ed81e29869d2c8358e233d25ef9b197df4d6765c512c7175504",
+        "quote": null
+      },
+      {
+        "material": "Li-H",
+        "scope": "referenced_work",
+        "pdf_page": 1,
+        "block_id": "46b78dd4fbaa1ed81e29869d2c8358e233d25ef9b197df4d6765c512c7175504",
+        "quote": null
+      },
+      {
+        "material": "Na-H",
+        "scope": "referenced_work",
+        "pdf_page": 1,
+        "block_id": "46b78dd4fbaa1ed81e29869d2c8358e233d25ef9b197df4d6765c512c7175504",
+        "quote": null
+      }
+    ],
+    "methodology": [
+      {
+        "method": "particle-swarm optimization structural search",
+        "scope": "current_paper",
+        "pdf_page": 1,
+        "block_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+        "quote": null
+      },
+      {
+        "method": "DFT-PBE with VASP",
+        "scope": "current_paper",
+        "pdf_page": 4,
+        "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+        "quote": null
+      },
+      {
+        "method": "DFPT with Quantum ESPRESSO",
+        "scope": "current_paper",
+        "pdf_page": 4,
+        "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+        "quote": null
+      },
+      {
+        "method": "Eliashberg equations",
+        "scope": "current_paper",
+        "pdf_page": 3,
+        "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+        "quote": null
+      }
+    ],
+    "key_findings": [
+      {
+        "finding": "CaH6 stabilizes in a sodalite-like bcc structure above 150 GPa",
+        "scope": "current_paper",
+        "pdf_page": 1,
+        "block_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+        "quote": null
+      },
+      {
+        "finding": "Predicted Tc of 220-235 K at 150 GPa for CaH6",
+        "scope": "current_paper",
+        "pdf_page": 1,
+        "block_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+        "quote": null
+      },
+      {
+        "finding": "EPC parameter lambda = 2.69 at 150 GPa",
+        "scope": "current_paper",
+        "pdf_page": 3,
+        "block_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+        "quote": null
+      }
+    ],
+    "coverage_exclusions": [
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "a5d4fdbcea1e379e1d6959f42bc2033927ba2b02c4936939012cc2613a0de9f1",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Page footer/header text, not scientific data."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "ac9ab08ea7d883e16d0571b37e57f9b2e172d94776cb9ceb121bd6cf9fbfa5e2",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Title of the paper."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "747cf3d9381c6d824cbc7cf4301917017e2e50c3b9df2b85782a6beefc78f561",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Author list."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "defec3e3724f42c10a7e82faf1017d6129297c8b4b3bf4ac6877763a54690dc7",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Author affiliations."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "b394951ae5b6c1224c95e31b2ae53a2b7ea24483707782fe89c2c72ac0462788",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Editorial information."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "4aa02ca3e057e46f97730b5005fc71dfd4141beb0b5ba8f2d6fbb96210102a93",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Keywords."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "46b78dd4fbaa1ed81e29869d2c8358e233d25ef9b197df4d6765c512c7175504",
+        "pdf_page": 1,
+        "category": "reference_or_background",
+        "reason": "Background discussion of previous hydride superconductivity studies."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "2d8d8c918773e7192b3711ae67d19fbe71069fa399ddd72c54c0dbb318d0d975",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Section heading."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "1f49ab509d9774e77c25ca895b7a8bf9246e9d3a93c7231ac6fcd5e71b563e55",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Methodology description of structure search."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "fc4036e687cbb693d696041a203014c03dd814761d06339a3a901ed2e2a88c3f",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Summary of enthalpy results, no specific numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "4d0a9dc9341a89a381bf402f89e48276923db8ade408a35c369e595b33904a6a",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Structural description of phases, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "cd295e5daa7acb9e58fc712c36ee1e1752496faba563d528423e816eb4cc5f8d",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Discussion of electron counting and bonding, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "e4648d2d3d9ff5f8374a5474c62de4c40d9f494737fe6dbcb4ab08e542103ba7",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Author contributions."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "107d146fa02e52d346f13f1dffb321e7526c779686cc006c43933c6ebcd15847",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Journal section label."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "0bccf87e22a63d6e5a1d205b1b0ddb64fcb57ff946886a9591f61a1b93aa4110",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Conflict of interest statement."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "5b5b766b3ff1a685e684473253c2cf56b99122e692d15a34d0160049a2e13b34",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Submission statement."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "db445678e2ebb8d4ed1337007a871f1a197b0ee3fd3e9d9d3cb70e92d5942084",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Corresponding author information."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "54bd0946d936b3319c04792347f7a6d91df98eb49552583c50a02873a0c8c69f",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Supporting information link."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "d4e379c9d7b2c3310f734d8220653d318422d6b3b3f56a34f046601020467ce4",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "DOI link."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "bc57e1cc2243e60a38e1e064ccc5c826d1c5b1a6ecf8e8e641f6afa69b1f07d0",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Journal name."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "f6c21fdc86204b9f1ade1fa91fa3b854e99f6f09c392100008ad2384fa463b03",
+        "pdf_page": 1,
+        "category": "non_result_content",
+        "reason": "Page number."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "9e76d97457b61d01202fbe19f74eedb4d391363276ff7c8ca08949c44c5fa1ea",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Page footer/header text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "3a68652f645dc49de12815ffd43318394e783b10929333d2a2152c5e3eb6cdf4",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Figure panel label."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "160a23be31702b319a895266bf19f952ed06df8c82138f9c2803c2ef547ffdcd",
+        "pdf_page": 2,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "f26860bf41aaa56c4484bdcdad1e9c390dd918281eeffe8b97b49d7e3959a752",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Figure panel label."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "08abd8ae8b6e1ddba1a7b17ac343a3d38f43c234c0c6e34de03aeca48d88cd12",
+        "pdf_page": 2,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "bb86f644eeca71ce00ae1558ca067d591e8f3528861647bb80a1c859509796a8",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Pearson symbol label."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "5bb8a746f93b6531006a86c8e257cdfc97e1e80fce8c51a5ac84bdf61308fb7c",
+        "pdf_page": 2,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "10caa370515cf4061991f8a51ab92fe783970caa3e1ef51352a14fde9944db57",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Pearson symbol label."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "374e8a280860334b87760b69351e13cae660e1cf3a2d5badcd0c93a19f8e7e43",
+        "pdf_page": 2,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "898a6b39ab5913995bfa4b999b1a5a264db7060cdfbcbdc7c20e2c5618ac4d74",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Pearson symbol label."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "2187d9504ab4d5babd750920e0fa1d8610b18a448e098503af3114203b2274d9",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Figure caption describing stability ranges and structures, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "234bb30e21a146a3bfd442b357676617f7f935452c88447e076659f8ccc9f758",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Discussion of H4 units and bond distances, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "6ec49c01c28dc4e02b68946c9a385cc285779de4843bc8d2c98d305fe1c362f1",
+        "pdf_page": 2,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "76bb3710bfa058e22e0028c4535a433936a4f04bc4b3cf7bc61d2bef78ad3654",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Figure caption describing Hückel diagrams, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "8196f6d8a896817f25bd2b862c0098a04a9638c22a8e7070cabc58e9206f6ed0",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Discussion of bond distances, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "c2b14bbecc609fdd844c803a192b93ff4287e9f831fc72c62af639178ac98d50",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Discussion of H-H bond lengths, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "6ad2596dd71afaf832ab8c578a0149c257489192eae3e7b3cc86e60a3164f9cf",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Discussion of zero-point motion and stability, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "21857c8b396928b26fc38f77d5a7070a7e0f79b48b139a0ec9b4cae827ff719b",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Discussion of ELF and electronic structure, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "6aea1c4414e7cccda269e8174c44ff2b2a8272fd1543012899fee06f3bcc1901",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Comparison of band structures, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "a3ff1a4a7576c8f8dde5cc90abd836b079623482ebc4852682753b64e26230c9",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Page footer."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "67a5451889f70cfd1ad8aeb55104f5dd1fedc98c037828d9749303d9fc28549f",
+        "pdf_page": 2,
+        "category": "non_result_content",
+        "reason": "Author name in footer."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "839d41a835e6eed148a743e76d51b05e82f452b47a6446e919df08301bfa5ff2",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Page footer/header text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "ba450442e7ffe97f280c6103369f45f4cb136a45e0f048686b09b22fe9cf09f4",
+        "pdf_page": 3,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "b35392b734d85f0fb39f813dcad054ea929786ad15faba1de177acac26654b23",
+        "pdf_page": 3,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "a57643b65dfcb9d2b9e29a0dc11187fbce14c1639ebe9d973f3a481b706db83f",
+        "pdf_page": 3,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "5ab88808a50120174c819d9b97470337d848df581f9e5dbe18eb370306885181",
+        "pdf_page": 3,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "fe904578b03af78ebd5ca0dd473f415781e841e4d06cd25ede53c401bbefcee2",
+        "pdf_page": 3,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "95947e31c20d0f3e94c514ee915ea23c6f036b39a10d5594f02c7dba5dc9015c",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Figure caption describing ELF and band structure, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Discussion of EPC and phonon calculations, contains lambda value but no Tc numeric."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "e59d89642ca94357dc40f4d78a0c50e2e232a583fdc49bd97ef46d6a53b58432",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Discussion of JT distortions, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Contains Tc values but will be extracted as records."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "f65b9266470c4ad2a236b992e615cd9b5796a6f110b5d0f6ff01003c486fb7fd",
+        "pdf_page": 3,
+        "category": "figure_without_data",
+        "reason": "Figure image without extractable numeric data in text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "8949e52ba01ec97abe887521eccf3b4f1ed9be86f222150ff10e62616baba69a",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Figure caption describing phonon band structure, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "6e5874f391d30d78ad96c7dfdbf501e77c042fdba410a9cd3344d19114cee28b",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Journal section label."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "623a375fdcf15955da1606aff2a788393a983570ffef936dad82248c5938a1aa",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Author name in footer."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "5d6f8c7182cfd22a0f3ae0059210e0354e82797eb728ddfdbaafa2405a6b320b",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Journal name."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "9dbf4a5d6c5cf36b43531d5dbfa64dd7faf0a2e19074b7c7e69832b2ead2aec9",
+        "pdf_page": 3,
+        "category": "non_result_content",
+        "reason": "Page number."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "2b6d1b6503c772ea0815aedbc069ead4fe49fc7ea4c4f302bfc6cee7bf0bd437",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Contains Tc values but will be extracted as records."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "15c6b096da5076b914d5a32bf04abee7ef97d686845ae044946d626fa0d5e3a7",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Discussion of limitations and anharmonicity, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "5ebbdda19d70d202e698122af9afd5b79e4d59528ad3359bbe2ccca2433b4273",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Summary of findings, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "6a8018ed154caefe6803c864ad5536bc0a8e965b374181a68df9065f852180f4",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "349d606d9c668f3fd1bb0b1ee2b19711b9435ba20cd84817295e6e0981bc9ec6",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "b48092761afd0834eb902ae0c33da55cb341ea2a0c4eb6d8d76f12dfa036d9bb",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "73192e38e6be6d9d44ded3447754163dbce72647c34a8be0cdb2f6fa71ac9d7f",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "3c4335eeb2bce36ab2ffaebf45f1c3782a6de64fdba660e17c627fc1dc661145",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "518f2445565d4976f55af583efa31e0f73eba9e610d62e3ec110fb0aad6f3e6f",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "538b1600121eff09058183553de3743bfbcddd37113d8a86be726c54f466697d",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Page footer/header text."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "c4ef6b677121c22d93c188ba6b258aa05ebd7425aee7c7a31fdea03d5ebb69e3",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "bbb4a0e48b8ed91ae03501ebcdb89989b9d7135721c4824d9fe8674012ad2ffe",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "1a46a930be5ef95f13384bc4483df58a4b62dea229a4337166530008195e7561",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "7b2e62ed1aef288983170515fcb17ae95692fa5850b6cedd216fee9324ad73e9",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "33b05e7ac693196fdec75c40416005ebec21bdfaf9e56ca3db093824bf980644",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "3e2f92fd7696930a86d7f4ebfebd88797f97bf04511b66417184976a20510fcc",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "b6d08999054b1bd2a6d41bf7e712ed08c296daf2fc5ef43ae482efe983ea5670",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "b5d70abd117f1af79766c817cda2f973ccb29f5ef524e79d6ee681e4a70eb0a1",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "c5319e0c8848f05afd96b9783344a7f37e9a6d156641367239557c6844fe62a5",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "8697ae4919ad5b48407680ee684e92ee11de7cb84d8ec0d94c494d4632d14415",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "a40d8d0b778493890d6d12d7118e98b941057110d0e8d63c9dfab8308c77cede",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "7f95d495706ecbb61131214e26fa13017af8a174607b8df18f287f8fc336bcd3",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "1e0565cfc18bd37126d2f451f0a16d8019e0c30c660b9670b0c81e80d9433a11",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "4a8128fd54823970f55c2ae51890a86ee1a93169536fb410d665e96c35192cd5",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Continuation of summary, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "0dfe3306312c54ca15d304ce1abfc9a60d2cc23f096ee42b5586632605c1d4aa",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Section heading."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Methods description, no numeric Tc or property values."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "bd0cf5105ba8dff9a5a764ad5c14197bbfd84cb9a128ad93200196bc6ebac60b",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Acknowledgments."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "943cd3be238891a7fca12b40eb71ab413559bfc95feee6f931f1aa5b498b9a13",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "a653be34c8c7dafb9c0f0b05c0f4bd6f619570dff95c04c6731dfee3cd00a28f",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "73f815e4e3d54891957d6194aa75b3e0fedb21f7075f4ac926c73444eb28761f",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "5e48f498330c3bd3373df54742401dbced978a14719a3cfc91b0f3616cfac522",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "57f115d96b711da9ce013a746fcd2b9e7a0dcb7837ff9b6e4a54c2ef98a91374",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "899d3af1cde14466727df038710669f596014170973db7045167252a0e2ad91c",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "059231a6d73079f5477db87f61bd3e5aa09470432043489b1e6b215aa42d2500",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "048bffb599cbb28af7f1673f6146a9fcfd618a0f8fea4223282f3c9e5a8ba18c",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "62c81864573acb1d565ea29890dd431cc2275ffc0af026ba88b46e8bfbf88aa9",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "7792ed1d199cd8c15f45241ebe533bc937daaed4578f34b3e1234683c4feaadb",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "bd8946fbd1f7feb2d9249386974b242c4722a3d061e73eb319ba3243a0c00d97",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "235d245acf3708f8cc258d4aee5a21a4c3555b99d3fd5ae5aa43f0a007188bb9",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "192b4cc9a7e3873101eee796f6db18e40563f16191b5661204b59d13f2a2441a",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "574a1efd6277b03f6c8badf5c5b960cc3d3b15d0edf809e5dc189945eebae24e",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "7850b4f907e499dd0bfe40224553dd861f84b851f83b14a3d96c02fdb24e7a24",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "b67b4f1f9eca67a768c45803a57d787dcdec44c1689c633abd66f6a725555660",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "4f6f089f07e0ec9147163d6bad9dd9b8b35581f5d77845cc10010fcebe03bb9d",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "ec0f5262b32bf1ad248654d20694ba5b9bda1397cfbd5867566489fed26f63c5",
+        "pdf_page": 4,
+        "category": "reference_or_background",
+        "reason": "Reference list entry."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "d1a90f6d44f9cbfe81d3aad1c280ffe5ef1698860b99dc4e1bb583f90fe9de1e",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Page footer."
+      },
+      {
+        "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+        "block_id": "495b91d452f2c548a48401252319279cae3516ccf5b53c1c4cc98528a80fd73a",
+        "pdf_page": 4,
+        "category": "non_result_content",
+        "reason": "Author name in footer."
+      }
+    ],
+    "material_states": [
+      {
+        "scope": "current_paper",
+        "material": "CaH6",
+        "material_name": "CaH6",
+        "state_kind": "theoretical",
+        "structure_optimization": "classical_static",
+        "pressure_value_gpa": 150,
+        "reported_space_group_symbol": "Im-3m",
+        "reported_space_group_number": 229,
+        "material_dimensionality": "three_dimensional",
+        "material_family": {
+          "family": "hydride",
+          "subfamily": "calcium hydride"
+        },
+        "structure_families": [
+          {
+            "family": "sodalite-like clathrate"
+          }
+        ],
+        "basis_kind": "paper_quote",
+        "evidences": [
+          {
+            "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+            "pdf_page": 1,
+            "block_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+            "quote_id": "a3470d8700599af0c071ababcf27a5430d782470e75d528804d23d433da99ba0",
+            "quote": null
+          },
+          {
+            "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+            "pdf_page": 1,
+            "block_id": "4d0a9dc9341a89a381bf402f89e48276923db8ade408a35c369e595b33904a6a",
+            "quote_id": "4d0a9dc9341a89a381bf402f89e48276923db8ade408a35c369e595b33904a6a",
+            "quote": null
+          },
+          {
+            "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+            "pdf_page": 4,
+            "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+            "quote_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+            "quote": null
+          }
+        ],
+        "property_modules": [
+          {
+            "module_code": "superconductive_properties",
+            "records": [
+              {
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "property_code": "tc",
+                "name_raw": "Tc",
+                "value_kind": "number",
+                "value_raw": "235",
+                "value_number": 235,
+                "unit_raw": "K",
+                "canonical_unit": "K",
+                "method_code": "isotropic_eliashberg",
+                "method_raw": "Eliashberg equations",
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "calculation_conditions": {
+                    "calculation_code": "quantum_espresso",
+                    "electronic_method": "DFT",
+                    "exchange_correlation_functional": "PBE",
+                    "phonon_method": "DFPT",
+                    "vibrational_treatment": "harmonic",
+                    "qe": {
+                      "k_grid": null,
+                      "q_grid": null,
+                      "q_grid_interpolated": null,
+                      "k_broadening": null,
+                      "energy_cutoff": null,
+                      "charge_density_cutoff": null,
+                      "supercell": null,
+                      "atoms": null,
+                      "temperature_k": null,
+                      "convergence_energy": null,
+                      "convergence_force": null
+                    },
+                    "epw": null,
+                    "sscha": null
+                  },
+                  "parameters": {
+                    "lambda_ep": 2.69,
+                    "omega_log": null,
+                    "mu_star": 0.1
+                  },
+                  "table_row_ref": null
+                },
+                "evidences": [
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 3,
+                    "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                    "quote_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                    "quote": null
+                  },
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 3,
+                    "block_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+                    "quote_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+                    "quote": null
+                  },
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 4,
+                    "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+                    "quote_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+                    "quote": null
+                  }
+                ],
+                "is_representative": true,
+                "basis_kind": "paper_quote"
+              },
+              {
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "property_code": "tc",
+                "name_raw": "Tc",
+                "value_kind": "number",
+                "value_raw": "220",
+                "value_number": 220,
+                "unit_raw": "K",
+                "canonical_unit": "K",
+                "method_code": "isotropic_eliashberg",
+                "method_raw": "Eliashberg equations",
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "calculation_conditions": {
+                    "calculation_code": "quantum_espresso",
+                    "electronic_method": "DFT",
+                    "exchange_correlation_functional": "PBE",
+                    "phonon_method": "DFPT",
+                    "vibrational_treatment": "harmonic",
+                    "qe": {
+                      "k_grid": null,
+                      "q_grid": null,
+                      "q_grid_interpolated": null,
+                      "k_broadening": null,
+                      "energy_cutoff": null,
+                      "charge_density_cutoff": null,
+                      "supercell": null,
+                      "atoms": null,
+                      "temperature_k": null,
+                      "convergence_energy": null,
+                      "convergence_force": null
+                    },
+                    "epw": null,
+                    "sscha": null
+                  },
+                  "parameters": {
+                    "lambda_ep": 2.69,
+                    "omega_log": null,
+                    "mu_star": 0.13
+                  },
+                  "table_row_ref": null
+                },
+                "evidences": [
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 3,
+                    "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                    "quote_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                    "quote": null
+                  },
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 3,
+                    "block_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+                    "quote_id": "6f1d60655532b769c4b75377a3e23e40ba8feb35d9f52bdb958186b8da3915dc",
+                    "quote": null
+                  },
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 4,
+                    "block_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+                    "quote_id": "04bcb98414e1c0a66a7684d1790082377fb7096b7a71149f7ae0d4bca1b2b01a",
+                    "quote": null
+                  }
+                ],
+                "is_representative": false,
+                "basis_kind": "paper_quote"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "scope": "current_paper",
+        "material": "CaH6",
+        "material_name": "CaH6",
+        "state_kind": "theoretical",
+        "structure_optimization": "classical_static",
+        "pressure_value_gpa": 200,
+        "reported_space_group_symbol": "Im-3m",
+        "reported_space_group_number": 229,
+        "material_dimensionality": "three_dimensional",
+        "material_family": {
+          "family": "hydride",
+          "subfamily": "calcium hydride"
+        },
+        "structure_families": [
+          {
+            "family": "sodalite-like clathrate"
+          }
+        ],
+        "basis_kind": "paper_quote",
+        "evidences": [
+          {
+            "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+            "pdf_page": 3,
+            "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+            "quote_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+            "quote": null
+          },
+          {
+            "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+            "pdf_page": 1,
+            "block_id": "4d0a9dc9341a89a381bf402f89e48276923db8ade408a35c369e595b33904a6a",
+            "quote_id": "4d0a9dc9341a89a381bf402f89e48276923db8ade408a35c369e595b33904a6a",
+            "quote": null
+          }
+        ],
+        "property_modules": [
+          {
+            "module_code": "superconductive_properties",
+            "records": [
+              {
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "property_code": "tc",
+                "name_raw": "Tc",
+                "value_kind": "number",
+                "value_raw": "201",
+                "value_number": 201,
+                "unit_raw": "K",
+                "canonical_unit": "K",
+                "method_code": "isotropic_eliashberg",
+                "method_raw": "Eliashberg equations",
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "calculation_conditions": {
+                    "calculation_code": "quantum_espresso",
+                    "electronic_method": "DFT",
+                    "exchange_correlation_functional": "PBE",
+                    "phonon_method": "DFPT",
+                    "vibrational_treatment": "harmonic",
+                    "qe": {
+                      "k_grid": null,
+                      "q_grid": null,
+                      "q_grid_interpolated": null,
+                      "k_broadening": null,
+                      "energy_cutoff": null,
+                      "charge_density_cutoff": null,
+                      "supercell": null,
+                      "atoms": null,
+                      "temperature_k": null,
+                      "convergence_energy": null,
+                      "convergence_force": null
+                    },
+                    "epw": null,
+                    "sscha": null
+                  },
+                  "parameters": {
+                    "lambda_ep": null,
+                    "omega_log": null,
+                    "mu_star": 0.13
+                  },
+                  "table_row_ref": null
+                },
+                "evidences": [
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 3,
+                    "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                    "quote_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                    "quote": null
+                  },
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 4,
+                    "block_id": "2b6d1b6503c772ea0815aedbc069ead4fe49fc7ea4c4f302bfc6cee7bf0bd437",
+                    "quote_id": "2b6d1b6503c772ea0815aedbc069ead4fe49fc7ea4c4f302bfc6cee7bf0bd437",
+                    "quote": null
+                  }
+                ],
+                "is_representative": false,
+                "basis_kind": "paper_quote"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "scope": "current_paper",
+        "material": "CaH6",
+        "material_name": "CaH6",
+        "state_kind": "theoretical",
+        "structure_optimization": "classical_static",
+        "pressure_value_gpa": 250,
+        "reported_space_group_symbol": "Im-3m",
+        "reported_space_group_number": 229,
+        "material_dimensionality": "three_dimensional",
+        "material_family": {
+          "family": "hydride",
+          "subfamily": "calcium hydride"
+        },
+        "structure_families": [
+          {
+            "family": "sodalite-like clathrate"
+          }
+        ],
+        "basis_kind": "paper_quote",
+        "evidences": [
+          {
+            "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+            "pdf_page": 3,
+            "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+            "quote_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+            "quote": null
+          }
+        ],
+        "property_modules": [
+          {
+            "module_code": "superconductive_properties",
+            "records": [
+              {
+                "module_code": "superconductive_properties",
+                "record_type": "predicted_tc",
+                "property_code": "tc",
+                "name_raw": "Tc",
+                "value_kind": "number",
+                "value_raw": "187",
+                "value_number": 187,
+                "unit_raw": "K",
+                "canonical_unit": "K",
+                "method_code": "isotropic_eliashberg",
+                "method_raw": "Eliashberg equations",
+                "criterion_code": null,
+                "criterion_raw": null,
+                "structure_key": null,
+                "payload": {
+                  "calculation_conditions": {
+                    "calculation_code": "quantum_espresso",
+                    "electronic_method": "DFT",
+                    "exchange_correlation_functional": "PBE",
+                    "phonon_method": "DFPT",
+                    "vibrational_treatment": "harmonic",
+                    "qe": {
+                      "k_grid": null,
+                      "q_grid": null,
+                      "q_grid_interpolated": null,
+                      "k_broadening": null,
+                      "energy_cutoff": null,
+                      "charge_density_cutoff": null,
+                      "supercell": null,
+                      "atoms": null,
+                      "temperature_k": null,
+                      "convergence_energy": null,
+                      "convergence_force": null
+                    },
+                    "epw": null,
+                    "sscha": null
+                  },
+                  "parameters": {
+                    "lambda_ep": null,
+                    "omega_log": null,
+                    "mu_star": 0.13
+                  },
+                  "table_row_ref": null
+                },
+                "evidences": [
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 3,
+                    "block_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                    "quote_id": "c9148d1f91b47bd699a65c975a951cca608439531816c8ba3a749dfe17af5d4a",
+                    "quote": null
+                  },
+                  {
+                    "file_id": "5d2884b8fc0b4331881cb78a347f489c",
+                    "pdf_page": 4,
+                    "block_id": "2b6d1b6503c772ea0815aedbc069ead4fe49fc7ea4c4f302bfc6cee7bf0bd437",
+                    "quote_id": "2b6d1b6503c772ea0815aedbc069ead4fe49fc7ea4c4f302bfc6cee7bf0bd437",
+                    "quote": null
+                  }
+                ],
+                "is_representative": false,
+                "basis_kind": "paper_quote"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

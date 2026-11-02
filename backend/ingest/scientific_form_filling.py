@@ -8,7 +8,7 @@ from .scientific_context import build_context, fingerprint
 from .property_modules import THEORETICAL_METHODS, EXPERIMENTAL_METHODS, validate_record
 
 VERSION = "scientific-form-filling-v2-physical-method-scope"
-SUPPORTED = {"tc", "band_gap", "dos_fermi"}
+SUPPORTED = {"tc", "dos_fermi"}
 VALUE_FIELDS = {"value_number", "value_min", "value_max", "value_text", "value_boolean"}
 PATCH_FIELDS = VALUE_FIELDS | {"value_kind", "value_raw", "method_code", "method_raw",
     "unit_raw", "canonical_unit", "parameters", "calculation_conditions", "approximation", "uncertainty"}
@@ -32,7 +32,7 @@ group when their shared calculation conditions agree. Do not create one group pe
 Tc is a temperature, not a sentence about how it was computed. No Tc digitization from curves.
 A caption describing an unquantified Tc curve is excluded as curve_only; keep its source and reason.
 Only numeric/range Tc records may be emitted. Preserve reported qualifiers in value_raw.
-Band_gap and dos_fermi use their existing units/definitions; do not apply Tc/mu rules to them.
+Only dos_fermi is a standard electronic property in this profile; do not generate band_gap. DOS uses its own units/definitions.
 Reuse parameters.lambda_ep, omega_log, mu_star; do not create synonymous extension fields.
 Unreported omega_log, smearing or QE functional stays empty. Never transfer VASP PBE to QE.
 Read Methods, table notes and SI to fill genuinely missing reported values, not just mark the first miss.

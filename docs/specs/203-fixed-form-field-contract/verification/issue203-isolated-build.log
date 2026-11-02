@@ -1,0 +1,169 @@
+
+> sc-wiki-frontend@1.0.0 build
+> tsc -b && vite build --outDir ../.validation-build
+
+vite v5.4.21 building for production...
+transforming...
+✓ 12992 modules transformed.
+../../../../frontend/node_modules/3dmol/build/3Dmol.js (43198:19): Use of eval in "../../../../frontend/node_modules/3dmol/build/3Dmol.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+computing gzip size...
+../.validation-build/index.html                                           0.50 kB │ gzip:   0.47 kB
+../.validation-build/assets/KaTeX_Size3-Regular-CTq5MqoE.woff             4.42 kB
+../.validation-build/assets/KaTeX_Size4-Regular-Dl5lxZxV.woff2            4.93 kB
+../.validation-build/assets/KaTeX_Size2-Regular-Dy4dx90m.woff2            5.21 kB
+../.validation-build/assets/KaTeX_Size1-Regular-mCD8mA8B.woff2            5.47 kB
+../.validation-build/assets/KaTeX_Size4-Regular-BF-4gkZK.woff             5.98 kB
+../.validation-build/assets/KaTeX_Size2-Regular-oD1tc_U0.woff             6.19 kB
+../.validation-build/assets/KaTeX_Size1-Regular-C195tn64.woff             6.50 kB
+../.validation-build/assets/KaTeX_Caligraphic-Regular-Di6jR-x-.woff2      6.91 kB
+../.validation-build/assets/KaTeX_Caligraphic-Bold-Dq_IR9rO.woff2         6.91 kB
+../.validation-build/assets/KaTeX_Size3-Regular-DgpXs0kz.ttf              7.59 kB
+../.validation-build/assets/KaTeX_Caligraphic-Regular-CTRA-rTL.woff       7.66 kB
+../.validation-build/assets/KaTeX_Caligraphic-Bold-BEiXGLvX.woff          7.72 kB
+../.validation-build/assets/KaTeX_Script-Regular-D3wIWfF6.woff2           9.64 kB
+../.validation-build/assets/KaTeX_SansSerif-Regular-DDBCnlJ7.woff2       10.34 kB
+../.validation-build/assets/KaTeX_Size4-Regular-DWFBv043.ttf             10.36 kB
+../.validation-build/assets/KaTeX_Script-Regular-D5yQViql.woff           10.59 kB
+../.validation-build/assets/KaTeX_Fraktur-Regular-CTYiF6lA.woff2         11.32 kB
+../.validation-build/assets/KaTeX_Fraktur-Bold-CL6g_b3V.woff2            11.35 kB
+../.validation-build/assets/KaTeX_Size2-Regular-B7gKUWhC.ttf             11.51 kB
+../.validation-build/assets/KaTeX_SansSerif-Italic-C3H0VqGB.woff2        12.03 kB
+../.validation-build/assets/KaTeX_SansSerif-Bold-D1sUS0GD.woff2          12.22 kB
+../.validation-build/assets/KaTeX_Size1-Regular-Dbsnue_I.ttf             12.23 kB
+../.validation-build/assets/KaTeX_SansSerif-Regular-CS6fqUqJ.woff        12.32 kB
+../.validation-build/assets/KaTeX_Caligraphic-Regular-wX97UBjC.ttf       12.34 kB
+../.validation-build/assets/KaTeX_Caligraphic-Bold-ATXxdsX0.ttf          12.37 kB
+../.validation-build/assets/KaTeX_Fraktur-Regular-Dxdc4cR9.woff          13.21 kB
+../.validation-build/assets/KaTeX_Fraktur-Bold-BsDP51OF.woff             13.30 kB
+../.validation-build/assets/KaTeX_Typewriter-Regular-CO6r4hn1.woff2      13.57 kB
+../.validation-build/assets/KaTeX_SansSerif-Italic-DN2j7dab.woff         14.11 kB
+../.validation-build/assets/KaTeX_SansSerif-Bold-DbIhKOiC.woff           14.41 kB
+../.validation-build/assets/KaTeX_Typewriter-Regular-C0xS9mPB.woff       16.03 kB
+../.validation-build/assets/KaTeX_Math-BoldItalic-CZnvNsCZ.woff2         16.40 kB
+../.validation-build/assets/KaTeX_Math-Italic-t53AETM-.woff2             16.44 kB
+../.validation-build/assets/KaTeX_Script-Regular-C5JkGWo-.ttf            16.65 kB
+../.validation-build/assets/KaTeX_Main-BoldItalic-DxDJ3AOS.woff2         16.78 kB
+../.validation-build/assets/KaTeX_Main-Italic-NWA7e6Wa.woff2             16.99 kB
+../.validation-build/assets/john-schrieffer-Dbw99985.jpg                 17.98 kB
+../.validation-build/assets/KaTeX_Math-BoldItalic-iY-2wyZ7.woff          18.67 kB
+../.validation-build/assets/KaTeX_Math-Italic-DA0__PXp.woff              18.75 kB
+../.validation-build/assets/KaTeX_Main-BoldItalic-SpSLRI95.woff          19.41 kB
+../.validation-build/assets/KaTeX_SansSerif-Regular-BNo7hRIc.ttf         19.44 kB
+../.validation-build/assets/KaTeX_Fraktur-Regular-CB_wures.ttf           19.57 kB
+../.validation-build/assets/KaTeX_Fraktur-Bold-BdnERNNW.ttf              19.58 kB
+../.validation-build/assets/KaTeX_Main-Italic-BMLOBm91.woff              19.68 kB
+../.validation-build/assets/KaTeX_SansSerif-Italic-YYjJ1zSn.ttf          22.36 kB
+../.validation-build/assets/KaTeX_SansSerif-Bold-CFMepnvq.ttf            24.50 kB
+../.validation-build/assets/KaTeX_Main-Bold-Cx986IdX.woff2               25.32 kB
+../.validation-build/assets/KaTeX_Main-Regular-B22Nviop.woff2            26.27 kB
+../.validation-build/assets/KaTeX_Typewriter-Regular-D3Ib7_Hf.ttf        27.56 kB
+../.validation-build/assets/KaTeX_AMS-Regular-BQhdFMY1.woff2             28.08 kB
+../.validation-build/assets/KaTeX_Main-Bold-Jm3AIy58.woff                29.91 kB
+../.validation-build/assets/KaTeX_Main-Regular-Dr94JaBh.woff             30.77 kB
+../.validation-build/assets/KaTeX_Math-BoldItalic-B3XSjfu4.ttf           31.20 kB
+../.validation-build/assets/KaTeX_Math-Italic-flOr_0UB.ttf               31.31 kB
+../.validation-build/assets/KaTeX_Main-BoldItalic-DzxPMmG6.ttf           32.97 kB
+../.validation-build/assets/KaTeX_AMS-Regular-DMm9YOAa.woff              33.52 kB
+../.validation-build/assets/KaTeX_Main-Italic-3WenGoN9.ttf               33.58 kB
+../.validation-build/assets/heike-onnes-BbO1v1U-.jpg                     37.67 kB
+../.validation-build/assets/alex-mueller-CzNZe-tE.jpg                    40.88 kB
+../.validation-build/assets/KaTeX_Main-Bold-waoOVXN0.ttf                 51.34 kB
+../.validation-build/assets/KaTeX_Main-Regular-ypZvNtVU.ttf              53.58 kB
+../.validation-build/assets/georg-bednorz-BO0guLhv.jpg                   57.57 kB
+../.validation-build/assets/john-bardeen-AN-xj0N0.jpg                    63.54 kB
+../.validation-build/assets/KaTeX_AMS-Regular-DRggAlZN.ttf               63.63 kB
+../.validation-build/assets/alexei-abrikosov-Cs02qBbJ.jpg                78.87 kB
+../.validation-build/assets/vitaly-ginzburg-Dceg5Qc8.jpg                 82.75 kB
+../.validation-build/assets/ivar-giaever-KVFHpxqq.jpg                   312.29 kB
+../.validation-build/assets/anthony-leggett-CXrDd4x6.jpg                801.85 kB
+../.validation-build/assets/brian-josephson-Dodk_e1g.jpg              1,328.53 kB
+../.validation-build/assets/leon-cooper-BOCqSSRX.jpg                  2,964.50 kB
+../.validation-build/assets/AccountPage-Fx0HlpWB.css                      4.18 kB │ gzip:   1.19 kB
+../.validation-build/assets/NobelExperience-D5ZhGOiW.css                  6.29 kB │ gzip:   1.80 kB
+../.validation-build/assets/AuthPage-BrR6DtDS.css                        10.11 kB │ gzip:   2.91 kB
+../.validation-build/assets/TcPredictPage-Ds4Wrnvt.css                   24.36 kB │ gzip:   4.36 kB
+../.validation-build/assets/SpectrumDetailPage-B8l5PxNb.css              25.66 kB │ gzip:   5.03 kB
+../.validation-build/assets/EntryCard-BYZTj3zW.css                       29.29 kB │ gzip:   8.07 kB
+../.validation-build/assets/vis-network-FxWgca-S.css                    220.21 kB │ gzip:  30.90 kB
+../.validation-build/assets/Add-CpGRqeo3.js                               0.13 kB │ gzip:   0.14 kB
+../.validation-build/assets/Send-CGf6LCLi.js                              0.13 kB │ gzip:   0.13 kB
+../.validation-build/assets/ExpandMore-CxsLlnfQ.js                        0.14 kB │ gzip:   0.14 kB
+../.validation-build/assets/Check-CDD2Z7bo.js                             0.14 kB │ gzip:   0.15 kB
+../.validation-build/assets/ArrowBack-DEY5Lhz9.js                         0.15 kB │ gzip:   0.15 kB
+../.validation-build/assets/DeleteOutline-CzjW0j24.js                     0.17 kB │ gzip:   0.17 kB
+../.validation-build/assets/Close-cUvBDMt-.js                             0.20 kB │ gzip:   0.16 kB
+../.validation-build/assets/OpenInNew-CuejI4O-.js                         0.22 kB │ gzip:   0.20 kB
+../.validation-build/assets/Save-DQK8XHkh.js                              0.23 kB │ gzip:   0.20 kB
+../.validation-build/assets/SystemCommunityPage-CIdIlQqu.js               0.26 kB │ gzip:   0.20 kB
+../.validation-build/assets/Refresh-DFTIid3U.js                           0.29 kB │ gzip:   0.24 kB
+../.validation-build/assets/LockOutlined-CjcGEhu9.js                      0.31 kB │ gzip:   0.23 kB
+../.validation-build/assets/NobelLaureatePage-BAoGEYN7.js                 0.43 kB │ gzip:   0.30 kB
+../.validation-build/assets/username-CY-Pe13H.js                          0.47 kB │ gzip:   0.34 kB
+../.validation-build/assets/NotFoundPage-ExdALSGo.js                      0.69 kB │ gzip:   0.42 kB
+../.validation-build/assets/RoleRoute-ZIcoxZSB.js                         0.71 kB │ gzip:   0.45 kB
+../.validation-build/assets/SuperAdminPage-BpKNmzSA.js                    0.72 kB │ gzip:   0.43 kB
+../.validation-build/assets/CardContent-CyBqC-NT.js                       0.95 kB │ gzip:   0.46 kB
+../.validation-build/assets/UploadTaskPage-Dnqxvu6Q.js                    1.33 kB │ gzip:   0.74 kB
+../.validation-build/assets/CommunityModerationPage-BEytctsT.js           1.38 kB │ gzip:   0.68 kB
+../.validation-build/assets/PaperRevisionPage-DA1PNs5G.js                 1.45 kB │ gzip:   0.83 kB
+../.validation-build/assets/CardActionArea-Dh0WAL0P.js                    1.56 kB │ gzip:   0.77 kB
+../.validation-build/assets/community-BonM-ldL.js                         1.79 kB │ gzip:   0.95 kB
+../.validation-build/assets/CommunityNotificationsPage-BRuWBlz2.js        1.81 kB │ gzip:   0.88 kB
+../.validation-build/assets/ListItemText-D2B82frD.js                      1.86 kB │ gzip:   0.89 kB
+../.validation-build/assets/searchNavigation-CfJbUmb2.js                  1.97 kB │ gzip:   0.97 kB
+../.validation-build/assets/DiscussionAnswerPage-DJAUaZsH.js              2.05 kB │ gzip:   1.07 kB
+../.validation-build/assets/StructuralRecordPage-BqG6IkrX.js              2.27 kB │ gzip:   1.35 kB
+../.validation-build/assets/FormControlLabel-BWyfbz7k.js                  2.59 kB │ gzip:   1.23 kB
+../.validation-build/assets/PaperReviewStatusSelect-C6xIubup.js           2.76 kB │ gzip:   1.18 kB
+../.validation-build/assets/ManuscriptHandoffsPage-6s9Bl7vR.js            2.90 kB │ gzip:   1.72 kB
+../.validation-build/assets/ManuscriptSnapshotPage-CHCIA-pd.js            2.93 kB │ gzip:   1.73 kB
+../.validation-build/assets/Link-CqQtOJfy.js                              3.23 kB │ gzip:   1.33 kB
+../.validation-build/assets/PaperStructuralCollection-BrZibQHx.js         3.39 kB │ gzip:   1.75 kB
+../.validation-build/assets/Divider-ALgNdr0f.js                           3.65 kB │ gzip:   1.26 kB
+../.validation-build/assets/StructuralRecordView-Ddwuyzvd.js              3.94 kB │ gzip:   1.91 kB
+../.validation-build/assets/CrystalStructureView-2OSNyFmM.js              4.75 kB │ gzip:   1.64 kB
+../.validation-build/assets/PublicUserPage-CL5DBOFg.js                    4.80 kB │ gzip:   2.22 kB
+../.validation-build/assets/classifications-D8069yPm.js                   5.86 kB │ gzip:   2.45 kB
+../.validation-build/assets/ToggleButtonGroup-UTD3VE-i.js                 6.10 kB │ gzip:   2.00 kB
+../.validation-build/assets/TableRow-C8o9j0_2.js                          6.11 kB │ gzip:   2.06 kB
+../.validation-build/assets/EntryCard-DfHvhKn9.js                         6.28 kB │ gzip:   2.52 kB
+../.validation-build/assets/LinearProgress-sVxCTjzw.js                    6.37 kB │ gzip:   1.87 kB
+../.validation-build/assets/Drawer-DF0ooXIk.js                            6.95 kB │ gzip:   2.61 kB
+../.validation-build/assets/Snackbar-Cg4EJVnb.js                          7.10 kB │ gzip:   2.68 kB
+../.validation-build/assets/ModelAnswerCard-D4D-tHrO.js                   7.71 kB │ gzip:   2.93 kB
+../.validation-build/assets/LazyRoutes-Pp8leFKR.js                        8.80 kB │ gzip:   2.49 kB
+../.validation-build/assets/Chip-DzNlVEjv.js                              9.17 kB │ gzip:   2.85 kB
+../.validation-build/assets/paperDetailView-Ca4A5zMN.js                   9.52 kB │ gzip:   4.00 kB
+../.validation-build/assets/SpectrumFigure-CJVity9g.js                   10.29 kB │ gzip:   5.18 kB
+../.validation-build/assets/KnowledgeGraphPage-DZg5_rGe.js               10.53 kB │ gzip:   4.24 kB
+../.validation-build/assets/DiscussionPage-C8thb_hf.js                   12.17 kB │ gzip:   4.22 kB
+../.validation-build/assets/PaperDetailPage-BoVgdMPi.js                  13.43 kB │ gzip:   4.01 kB
+../.validation-build/assets/formDefinitions-DQiJseR2.js                  14.77 kB │ gzip:   5.79 kB
+../.validation-build/assets/TcPredictPage-CT_tllBy.js                    16.35 kB │ gzip:   6.69 kB
+../.validation-build/assets/NewsPage-BFTfjJ6k.js                         16.70 kB │ gzip:   5.68 kB
+../.validation-build/assets/AccountPage-BgA43Tzo.js                      22.24 kB │ gzip:   7.49 kB
+../.validation-build/assets/SearchPage-Dil8djRb.js                       24.16 kB │ gzip:   6.57 kB
+../.validation-build/assets/AdminPaperEditPage-Ci4oq4n3.js               24.70 kB │ gzip:   8.17 kB
+../.validation-build/assets/Autocomplete-DnINJ8sJ.js                     25.66 kB │ gzip:   8.96 kB
+../.validation-build/assets/RagPage-Cj-uIwjV.js                          28.05 kB │ gzip:   9.93 kB
+../.validation-build/assets/UploadTaskEditor-II7Mz0T-.js                 28.19 kB │ gzip:   9.57 kB
+../.validation-build/assets/NobelExperience--dUhhErl.js                  31.01 kB │ gzip:  12.96 kB
+../.validation-build/assets/UploadPage-Ci8c0kS9.js                       34.34 kB │ gzip:  11.23 kB
+../.validation-build/assets/AuthPage-C_1L6m1_.js                         41.73 kB │ gzip:  15.68 kB
+../.validation-build/assets/ReviewPaperTextField-DdD1lm7Y.js             52.07 kB │ gzip:  17.27 kB
+../.validation-build/assets/AdminPage-Cr-6PZNJ.js                        58.23 kB │ gzip:  15.85 kB
+../.validation-build/assets/SpectrumDetailPage-BVT6Rhw_.js               77.05 kB │ gzip:  30.07 kB
+../.validation-build/assets/PropertyModuleEditor-BkVnqiEW.js             86.68 kB │ gzip:  29.17 kB
+../.validation-build/assets/EvidenceWorkflow-D59NbVn0.js                116.37 kB │ gzip:  38.14 kB
+../.validation-build/assets/share-DWbpak0z.js                           417.27 kB │ gzip: 114.69 kB
+../.validation-build/assets/index-Bopgt1Jp.js                           430.74 kB │ gzip: 129.69 kB
+../.validation-build/assets/vis-network-DBnqH0Hh.js                     520.99 kB │ gzip: 157.33 kB
+../.validation-build/assets/3Dmol-Dn3Whmna.js                           588.12 kB │ gzip: 168.49 kB
+../.validation-build/assets/index-BvIYMeeB.js                           645.99 kB │ gzip: 218.77 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.35s

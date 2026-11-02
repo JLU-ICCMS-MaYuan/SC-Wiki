@@ -45,8 +45,7 @@ const textOrNull = (value: unknown): string | null => {
 
 /** 材料状态的条件描述：压强优先用原文，缺失时回退解析值。 */
 const conditionOf = (state: any): string => {
-  const pressure = textOrNull(state?.pressure_raw)
-    ?? (state?.pressure_value_gpa != null ? `${state.pressure_value_gpa} GPa` : null)
+  const pressure = (state?.pressure_value_gpa != null ? `${state.pressure_value_gpa} GPa` : null)
   const temperature = state?.temperature_value_k != null ? `${state.temperature_value_k} K` : null
   return [pressure, temperature].filter(Boolean).join(' · ') || '-'
 }

@@ -316,6 +316,12 @@ def validate_record(
     issues.extend(_issue(f"{path}.{field}", code, message) for field, code, message in tc_record_issues(item))
     if isinstance(experimental, dict) and "description" in experimental and not isinstance(experimental["description"], str):
         issues.append(_issue(f"{path}.payload.experimental_conditions.description", "schema_validation_failed", "实验 Conditions 描述必须是文本"))
+    if definition is not None and definition.version >= 2:
+        from .fixed_form_contract import validate_conditions, FormContractError
+        try:
+            validate_conditions(item["payload"].get("calculation_conditions"))
+        except FormContractError as error:
+            issues.append(_issue(path + ".payload." + error.field, "form_contract_invalid", str(error)))
     if definition is not None:
         if definition.status != "published" and not (allow_retired and definition.status == "retired"):
             issues.append(_issue(f"{path}.definition_version", "definition_not_available", "定义版本不可用于记录"))

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "isolated_database": "scwiki_contract_203_204_20261102195507",
+  "source_backup": "issue203-204-local-applied/business.sql",
+  "implementation": {
+    "backend/data/scientific_form_contract.v1.json": "d4f8e5fe53038f7d103bc468c60ad022c1109f44b91b730b5ab29f52c13fe86a",
+    "backend/data/scientific_form_contract.lock.json": "456a37966d73f1a42def716f0602cc8bb131e25d2c70271654ff5fc96cc07424",
+    "backend/ingest/fixed_form_contract.py": "fa2da3c0721e7f6cd5584fb9bc6f4f95f88ba8244d78eb65f260288e2aea7483",
+    "backend/ingest/canonical_structure.py": "7101ec26406eaee4484b8c2909c1b238d358cc476c39853d77f1d875a075c1a8",
+    "backend/services/form_contract_migration.py": "bd52b8fb5e209fb154d45aa4530a1d9e6183d9f18c5118d50ddae274cfe3dc01",
+    "scripts/migrate_fixed_form_contract.py": "3a1109d2d2aeb99224e91002f4e79b142ca060a1e2858b98d9dc087c1d6fb2cf",
+    "alembic/versions/20261102_0203_merge_contract_heads.py": "93f6919538da5021b9e6ab3d0c4ae3fc4c7194334bd05368b5a226badeba4c73",
+    "alembic/versions/20261102_0203_fixed_form_contract.py": "39af26a81d2a11cf01ab3157196fcefd3e2845c0ca17085a4814bff61d3ab2dd",
+    "alembic/versions/20261102_0204_canonical_structure.py": "afb9018ffd2fb623156b054e45d3df9ddc3c9c972bb0c0bf2c2f0501d9e79366",
+    "resolutions": "550fd9704cf540c2dc930202e475b1630ca05eb1e891ae78d938b903648ef4b2"
+  },
+  "protected_values_equal_to_applied_report": true,
+  "workdraft_body_and_revision_equal": true,
+  "contract_checks": {
+    "draft_records_checked": 15,
+    "formal_records_checked": 20,
+    "retired_columns_absent": true,
+    "canonical_structures_only": true
+  },
+  "limitation": "每次真实迁移重新生成并发write_epoch及updated_at；仅这两个运行身份不比较。完整工作稿body、revision及其余科学保护摘要相等。最终回填仅限当前正式revision；原业务库唯一1行本来就是当前revision。"
+}

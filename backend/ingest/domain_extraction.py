@@ -95,7 +95,7 @@ class ExtractedRecord(PropertyRecordInput):
     record_key: str = ""
     definition_key: str = ""
     definition_version: int = 1
-    property_code: Literal["tc", "band_gap", "dos_fermi", "custom"]
+    property_code: Literal["tc", "dos_fermi", "custom"]
     basis_kind: Literal["paper_quote", "paper_inference", "general_knowledge"] = "paper_quote"
     evidences: list[SourceQuote] = Field(min_length=1)
     evidence: None = None
@@ -118,17 +118,8 @@ class ExtractedState(Contract):
     material: str = ""
     material_name: str | None = None
     state_kind: Literal["theoretical", "experimental", "unknown"] = "unknown"
-    structure_optimization: Literal["unknown", "classical_static", "quasi_harmonic", "anharmonic_quantum", "sscha"] = "unknown"
+    structure_optimization: Literal["unknown", "classical_static", "quasi_harmonic", "sscha"] = "unknown"
     pressure_value_gpa: float | None = None
-    pressure_min_gpa: float | None = None
-    pressure_max_gpa: float | None = None
-    pressure_raw: str | None = None
-    pressure_unit_raw: str | None = None
-    temperature_value_k: float | None = None
-    magnetic_field_t: float | None = None
-    temperature_raw: str | None = None
-    temperature_unit_raw: str | None = None
-    note: str | None = None
     reported_space_group_symbol: str | None = None
     reported_space_group_number: int | None = Field(default=None, ge=1, le=230)
     material_dimensionality: Literal["zero_dimensional", "one_dimensional", "two_dimensional",
@@ -147,11 +138,6 @@ class ExtractedState(Contract):
             raise ValueError("材料名与化学式至少提供一项")
         if len({m.module_code for m in self.property_modules}) != len(self.property_modules):
             raise ValueError("同一材料状态的物性模块不能重复")
-        if (self.pressure_min_gpa is None) != (self.pressure_max_gpa is None):
-            raise ValueError("压力范围必须同时提供上下界")
-        if self.pressure_min_gpa is not None:
-            if self.pressure_value_gpa is not None or self.pressure_min_gpa > self.pressure_max_gpa:
-                raise ValueError("压力单值与范围不能混用，范围不能倒置")
         return self
 
 
@@ -209,7 +195,7 @@ without an exclusion; the server retains its file/page/block as pending image re
 Actual unreadable text, table cells or nonempty regions still require unreadable with a reason.
 Extract ALL reported lambda_ep, omega_log and mu_star into EACH corresponding predicted record's payload.parameters.
 Read table title, headers, units, group rows, continuation blocks and footnotes together with every data row.
-Preserve the reported phonon/EPC vibrational_treatment in payload.calculation_conditions, with its method_scope; never broadcast it to electronic results. Preserve table row identity in payload.table_row_ref
+Preserve the reported phonon/EPC vibrational_treatment in payload.calculation_conditions, with its original source; never broadcast it to electronic results. Preserve table row identity in payload.table_row_ref
 (file_id, table_id, row_index, group when present). Same pressure with different approximation must remain distinct.
 Table context candidates are original surrounding blocks, not automatically associated captions; establish their
 relationship from the original labels/wording, and cite each supporting header/note block separately.

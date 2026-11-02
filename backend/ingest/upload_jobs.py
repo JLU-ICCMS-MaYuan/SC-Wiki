@@ -100,7 +100,7 @@ referenced_materials 仅作为后台排除误判的临时候选，不进入用�
   La0.5Ce0.5H9；论文把同一物质写成两种形式（如 (H2S)2H2 与 H3S）时，以本文正文主要使用的写法为准并保持一致。
   反应物、分解产物、前驱体（如 H2S 之于 H3S、LaH3 之于 LaH10）不是本文研究材料，不建立 material_state。
 - 同一相在同一压力下只建立一个 material_state；一个相跨压力报告多个 Tc 时，每个压力一个状态。
-  相的稳定压力区间（如 "stable above 180 GPa"）写入 pressure_raw，不要为此单独再建一个无 Tc 的状态。
+  仅记录当前状态明确的pressure_value_gpa；压力区间描述保留原文来源，不新增压力辅助字段。
 - 实验论文：只采用本文样品的测量结果；Tc 保留判据（onset、midpoint、zero resistance）写入 value_raw 或条件描述。
   理论论文：每条 Tc 对应的 μ*、方法（McMillan、Allen-Dynes、Eliashberg、SCDFT）必须来自同一句或同一表格。
 - 数值只取原文明确写出的值；“约”“~”“above” 等限定写入 value_raw，不得把范围端点或近似值改成精确值。
@@ -121,8 +121,7 @@ issue_number 是期号文本，可为 S1、3-4；不得从年份或卷号猜测�
     "material_family": {"name": "自由材料家族名称", "scope": "current_paper|referenced_work", "page": 1, "quote": ""},
     "structure_families": [{"name": "结构家族名称", "is_primary": true, "scope": "current_paper|referenced_work", "page": 1, "quote": ""}],
     "material_dimensionality": "zero_dimensional|one_dimensional|two_dimensional|three_dimensional|quasi_one_dimensional|quasi_two_dimensional|unknown",
-    "pressure_value_gpa": null, "pressure_min_gpa": null, "pressure_max_gpa": null,
-    "pressure_raw": null, "pressure_unit_raw": null,
+    "pressure_value_gpa": null,
     "state_kind": "theoretical|experimental|unknown",
     "structure_optimization": "unknown|classical_static|quasi_harmonic|sscha（仅结构优化方法；SSCHA须确实优化结构，不是只算声子；只有理论状态可填写；未提及为unknown）",
     "reported_space_group_symbol": null, "reported_space_group_number": null,
@@ -1299,16 +1298,11 @@ def _normalize_material_states(value: Any) -> list[dict[str, Any]]:
         }:
             dimensionality = "unknown"
         state["material_dimensionality"] = dimensionality
-        pressure_value, pressure_min, pressure_max, pressure_raw, pressure_unit = _condition_pressure(state)
-        explicit_raw = "pressure_raw" in state
-        # 仅缺失字段读取旧契约；显式 null 是用户清空，不能回填历史条件。
-        for field, fallback in (("pressure_value_gpa", pressure_value), ("pressure_min_gpa", pressure_min), ("pressure_max_gpa", pressure_max)):
-            state[field] = _numeric_value(state[field]) if field in state else fallback
-        state["pressure_raw"] = (state["pressure_raw"] or None) if explicit_raw else pressure_raw
-        state["pressure_unit_raw"] = (state["pressure_unit_raw"] or None) if "pressure_unit_raw" in state else pressure_unit
-        if not explicit_raw and state["pressure_raw"] in (None, "") and state["pressure_value_gpa"] is not None:
-            state["pressure_raw"] = str(state["pressure_value_gpa"])
-            state["pressure_unit_raw"] = state["pressure_unit_raw"] or "GPa"
+        pressure_value, *_ = _condition_pressure(state)
+        state["pressure_value_gpa"] = state.get("pressure_value_gpa", pressure_value)
+        for retired in ("pressure_min_gpa", "pressure_max_gpa", "pressure_raw", "pressure_unit_raw"):
+            state.pop(retired, None)
+
         state.setdefault("state_kind", "unknown")
         state.pop("superconductor_kind", None)
         state.setdefault("reported_space_group_symbol", None)
@@ -1605,7 +1599,14 @@ def _normalize_draft(
         for field in ("bibliography_sources", "bibliography_conflicts", "parsing_conflicts"):
             if field in raw:
                 normalized[field] = raw[field]
-    return convert_legacy_scientific_draft(normalized)
+    result = convert_legacy_scientific_draft(normalized)
+    result['_form_contract_version'] = 1
+    for state in result.get('material_states') or []:
+        for module in state.get('property_modules') or []:
+            for record in module.get('records') or []:
+                if record.get('property_code') != 'band_gap' and record.get('record_type') != 'measured_tc':
+                    record['definition_version'] = max(2, int(record.get('definition_version') or 1))
+    return result
 
 
 def _classify_material_family_draft(task_id: str, state: dict, draft: dict,
@@ -2336,6 +2337,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             if excluded_properties:
                 _atomic_write_json(artifact_directory(task_id) / "unclassified_properties.json", excluded_properties)
         # 模型负责科学关系与主动查缺，程序保留每个候选的去向及最终来源门。
+        from .fixed_form_contract import finalize_current_draft
+        finalize_current_draft(draft, model_output=True, legacy=not bool(document_set))
         publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='organizing')
         from backend.ingest.scientific_form_filling import fill_scientific_forms, form_sources
         with call_phase("scientific_form_filling"):
@@ -2494,6 +2497,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                        for result in suggestion_results.values() if isinstance(result, dict)],
             "suggestions_status": "failed" if draft.get("field_suggestions_error") else "completed",
         })
+        from .fixed_form_contract import finalize_current_draft
+        finalize_current_draft(draft, model_output=True, legacy=not bool(document_set))
         publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='saving')
         # 已完成草稿的受控重跑必须保护期间的人工编辑；失败时保留原稿。
         expected_draft_hash = state.get("reparse_expected_draft_hash")
@@ -2582,3 +2587,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         )
         _schedule_terminal_cleanup(task_id)
         raise
+
+
+from .fixed_form_contract import MODEL_PROMPT as FIXED_FORM_MODEL_PROMPT
+CHUNK_SYSTEM_PROMPT += '\n' + FIXED_FORM_MODEL_PROMPT

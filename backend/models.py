@@ -1172,16 +1172,7 @@ class MaterialState(Base):
             name="ck_material_states_structure_optimization"),
         CheckConstraint(
             """
-            pressure_min_gpa IS NULL
-            OR pressure_max_gpa IS NULL
-            OR pressure_min_gpa <= pressure_max_gpa
-            """,
-            name="ck_material_states_pressure_range",
-        ),
-        CheckConstraint(
-            """
             (pressure_value_gpa IS NULL OR pressure_value_gpa >= 0)
-            AND (pressure_min_gpa IS NULL OR pressure_min_gpa >= 0)
             AND (temperature_value_k IS NULL OR temperature_value_k >= 0)
             AND (magnetic_field_t IS NULL OR magnetic_field_t >= 0)
             """,
@@ -1250,10 +1241,6 @@ class MaterialState(Base):
         server_default="unknown",
     )
     pressure_value_gpa = Column(Numeric(14, 6))
-    pressure_min_gpa = Column(Numeric(14, 6))
-    pressure_max_gpa = Column(Numeric(14, 6))
-    pressure_raw = Column(String(255))
-    pressure_unit_raw = Column(String(50))
     reported_space_group_symbol = Column(String(100))
     reported_space_group_number = Column(SmallInteger)
     temperature_value_k = Column(Numeric(14, 6))

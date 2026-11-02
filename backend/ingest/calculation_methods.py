@@ -6,33 +6,12 @@ import unicodedata
 from .vibrational_terms import canonical_vibrational_wording
 
 
-METHOD_SEMANTICS_PROMPT = """
-CALCULATION METHOD SEMANTICS: electronic_method means the underlying electronic-structure
-theory, e.g. DFT (density functional theory), HF (Hartree-Fock), or another reported theory.
-DFPT (density functional perturbation theory), finite displacement and frozen phonon are
-phonon/response methods, NEVER electronic_method. Extract them as key=phonon_method in the
-appropriate phonon/EPC stage; in record payloads use calculation_conditions.extensions with
-key=electron_phonon.phonon_method, value_kind=text and value_raw as reported.
-The field's display name is "phonon method" (声子方法), without an EPC prefix.
-calculation_conditions.extensions MUST be an array of objects, for example:
-[{"key":"electron_phonon.phonon_method","value_kind":"text","value_raw":"DFPT"}].
-Use [] when absent. Never output an object grouped by stage; the stage stays in key.
-The EPC calculation_code, electronic_method and exchange_correlation_functional are flat
-calculation_conditions fields. Other stages use stage.parameter extension keys.
-Never put a known condition under an unqualified extension key (e.g. exchange_correlation_functional).
-For phonon_method, preserve the method wording actually reported in value_raw. Do not replace
-it with an acronym absent from the source: a reported linear-response method must retain that
-wording rather than becoming an unsupported literal "DFPT" claim.
-PBE/LDA/GGA/HSE are exchange-correlation functionals/approximations, not the electronic
-theory field. Quantum ESPRESSO/VASP are calculation_code, not a method or functional.
-If a sentence mentions software and DFPT, extract the software AND phonon_method separately.
-Separate mixed descriptions into their fields. A clearly applicable DFPT phonon workflow
-may justify electronic_method=DFT by the method definition in the separate association/review stage.
-Keep DFPT in phonon_method and record this as an inference, not a direct quotation.
-Never infer a functional from DFPT, software defaults, or another software's settings.
-VASP-PBE does NOT justify QE-PBE. Require an applicable report for the specific software or leave empty.
-When reviewing evidence, matching a word in the source is insufficient: its scientific
-category and calculation stage must match the target field as well.
+from .fixed_form_contract import MODEL_PROMPT
+METHOD_SEMANTICS_PROMPT = MODEL_PROMPT + """
+electronic_method is the electronic theory (DFT, HF, DFT+U), not DFPT or software.
+phonon_method is the reported phonon/response method (DFPT, finite displacement, SSCHA);
+vibrational_treatment is the reported physical vibrational treatment, not electronic theory.
+Preserve original wording and each field's exact source. Never infer quantum treatment from 0 K.
 
 For vibrational_treatment only, the reported phrase "harmonic approximation" has the canonical
 value "harmonic". Preserve the exact original wording in evidence quotes; do not rewrite quotes.
@@ -111,35 +90,8 @@ def record_method_issue(record, *, check_legacy=True):
         issue = method_field_issue("approximation", (record.get("payload") or {}).get("approximation"))
         if issue:
             return issue
-    if record.get("property_code") in {"band_gap", "dos_fermi"}:
-        vibrational = any(conditions.get(k) for k in ("phonon_method", "vibrational_treatment")) or any(
-            str(e.get("key") or "").rsplit(".", 1)[-1] in {"phonon_method", "vibrational_treatment"}
-            for e in conditions.get("extensions") or [])
-        if vibrational and not electronic_vibration_relation(conditions, record.get("evidences") or []):
-            return "普通电子带隙或电子DOS不能继承声子/EPC条件；需明确的电子—声子修正关系及原文依据。"
-        legacy = (record.get("payload") or {}).get("approximation")
-        if check_legacy and legacy not in (None, "", "unknown"):
-            return "历史混装近似字段的科学含义未明确；保留原值和来源，请按电子理论及具体工作流核对。"
+    # 科学适用性由当前字段原文核对；不再要求额外的method_scope。
     return None
-
-
-def electronic_vibration_relation(conditions, evidences):
-    scope = conditions.get("method_scope") or {}
-    if scope.get("relation") != "electron_phonon_renormalization":
-        return False
-    relations = scope.get("relation_evidences") or []
-    def supported(relation):
-        quote = str(relation.get("quote") or "").strip()
-        return quote and any(quote in str(e.get("quote") or "")
-            and all(relation.get(k) is None or relation.get(k) == e.get(k) for k in ("file_id", "block_id"))
-            for e in evidences)
-    if not relations or not all(supported(e) for e in relations):
-        return False
-    text = " ".join(str(e.get("quote") or "") for e in relations)
-    return bool(re.search(r"band.?gap|electronic.*(?:DOS|density of states)|电子.*(?:带隙|态密度)", text, re.I)
-        and re.search(r"phonon|声子", text, re.I)
-        and re.search(r"renorm|correct|shift|modify|modified|修正|重整|改变", text, re.I))
-
 
 
 def review_method_issue(record, values=None):
@@ -154,18 +106,6 @@ def review_method_issue(record, values=None):
     validation = record.get("validation_record") or {}
     if path == "payload.approximation" and validation.get("property_code") in {"band_gap", "dos_fermi"} and value:
         return "历史混装近似标签需按电子理论或明确工作流核对；电子结果数值保持不变。"
-    if validation.get("property_code") in {"band_gap", "dos_fermi"} and (
-            path.endswith((".phonon_method", ".vibrational_treatment")) or isinstance(value, dict)
-            and str(value.get("key") or "").rsplit(".", 1)[-1] in {"phonon_method", "vibrational_treatment"}):
-        conditions = (validation.get("payload") or {}).get("calculation_conditions") or {}
-        candidate = deepcopy(validation)
-        candidate["evidences"] = deepcopy(record.get("legacy_evidences") or record.get("evidences") or [])
-        candidate["payload"] = {"calculation_conditions": {"method_scope": conditions.get("method_scope") or {}}}
-        if isinstance(value, dict):
-            candidate["payload"]["calculation_conditions"]["extensions"] = [value]
-        else:
-            candidate["payload"]["calculation_conditions"][path.rsplit(".", 1)[-1]] = value
-        return record_method_issue(candidate)
     if path.endswith((".calculation_context", ".calculation_conditions")):
         return condition_method_issue(value)
     return method_field_issue(path, value)
@@ -186,25 +126,6 @@ def validate_extracted_methods(draft):
                 issue = record_method_issue(record)
                 if issue:
                     raise ValueError(f"material_states[{index}].calculation_conditions：{issue}")
-
-# 新调用采用明确字段；旧approximation不按字符串自动迁移。
-METHOD_SEMANTICS_PROMPT += """
-PHYSICAL METHOD SCOPE v181: electronic_method is the electronic theory (DFT, HF, DFT+U),
-phonon_method is the response/force-constant technique (DFPT, finite displacement, SSCHA or a
-reported composite workflow); vibrational_treatment is harmonic, quasi_harmonic, anharmonic,
-anharmonic_quantum or anharmonic_classical, as reported, never infer quantum from 0 K.
-Store these separately in calculation_conditions; do not generate payload.approximation.
-Each condition must belong to this material/phase, stage, workflow and specific result.
-method_scope carries physical_object, stage and workflow_id when explicitly known.
-Ordinary electronic band_gap/dos_fermi NEVER inherit EPC/phonon approximations. An explicitly
-reported electron-phonon renormalization of electronic results is allowed only with
-method_scope.relation=electron_phonon_renormalization and exact relation_evidences quotes.
-Do not label a phononic band gap or phonon DOS as an electronic result; exclude unsupported
-phononic results with their original source. Do not change scientific numbers to fix labels.
-No whole-state propagation and no inference of electronic theory, functional or U from
-harmonic, finite displacement, SSCHA or a software name. Separate unreported, ambiguous,
-conflicting, unreadable and technical-failure cases and preserve their sources.
-"""
 
 
 def vibrational_treatment(record):

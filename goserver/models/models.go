@@ -400,30 +400,26 @@ type MaterialState struct {
 	CrystalSystem          string  `gorm:"size:32;not null;default:unknown" json:"crystal_system"`
 	// 必须显式指定列名：GORM 默认命名策略会把 GPa 拆成 g_pa，
 	// 生成 pressure_value_g_pa 这类并不存在的列，导致压强字段读不出来。
-	PressureValueGPa             *float64                       `gorm:"column:pressure_value_gpa" json:"pressure_value_gpa"`
-	PressureMinGPa               *float64                       `gorm:"column:pressure_min_gpa" json:"pressure_min_gpa"`
-	PressureMaxGPa               *float64                       `gorm:"column:pressure_max_gpa" json:"pressure_max_gpa"`
-	PressureRaw                  *string                        `gorm:"size:255" json:"pressure_raw"`
-	PressureUnitRaw              *string                        `gorm:"size:50" json:"pressure_unit_raw"`
-	ReportedSpaceGroupSymbol     *string                        `gorm:"size:100" json:"reported_space_group_symbol"`
-	ReportedSpaceGroupNumber     *int16                         `json:"reported_space_group_number"`
-	TemperatureValueK            *float64                       `json:"temperature_value_k"`
-	TemperatureRaw               *string                        `gorm:"size:255" json:"temperature_raw"`
-	TemperatureUnitRaw           *string                        `gorm:"size:50" json:"temperature_unit_raw"`
-	MagneticFieldT               *float64                       `json:"magnetic_field_t"`
-	StateKind                    string                         `gorm:"size:20;not null;default:unknown" json:"state_kind"`
-	StructureOptimization        string                         `gorm:"size:32;not null;default:unknown" json:"structure_optimization"`
-	Note                         *string                        `json:"note"`
-	CreatedAt                    time.Time                      `json:"created_at"`
-	UpdatedAt                    time.Time                      `json:"updated_at"`
-	Structures                   []StructureModel               `gorm:"foreignKey:MaterialStateID" json:"structures,omitempty"`
-	CalculationContexts          []CalculationContext           `gorm:"foreignKey:MaterialStateID" json:"calculation_contexts,omitempty"`
-	ExperimentalContexts         []ExperimentalContext          `gorm:"foreignKey:MaterialStateID" json:"experimental_contexts,omitempty"`
-	TcResults                    []TcResult                     `gorm:"foreignKey:MaterialStateID" json:"tc_results,omitempty"`
-	Properties                   []SuperconductorProperty       `gorm:"foreignKey:MaterialStateID" json:"properties,omitempty"`
-	Superconductor               Superconductor                 `gorm:"foreignKey:SuperconductorID" json:"superconductor,omitempty"`
-	StructureFamilyLinks         []MaterialStateStructureFamily `gorm:"foreignKey:MaterialStateID" json:"structure_families,omitempty"`
-	PropertyModules              []PropertyModule               `gorm:"foreignKey:MaterialStateID" json:"property_modules,omitempty"`
+	PressureValueGPa         *float64                       `gorm:"column:pressure_value_gpa" json:"pressure_value_gpa"`
+	ReportedSpaceGroupSymbol *string                        `gorm:"size:100" json:"reported_space_group_symbol"`
+	ReportedSpaceGroupNumber *int16                         `json:"reported_space_group_number"`
+	TemperatureValueK        *float64                       `json:"temperature_value_k"`
+	TemperatureRaw           *string                        `gorm:"size:255" json:"temperature_raw"`
+	TemperatureUnitRaw       *string                        `gorm:"size:50" json:"temperature_unit_raw"`
+	MagneticFieldT           *float64                       `json:"magnetic_field_t"`
+	StateKind                string                         `gorm:"size:20;not null;default:unknown" json:"state_kind"`
+	StructureOptimization    string                         `gorm:"size:32;not null;default:unknown" json:"structure_optimization"`
+	Note                     *string                        `json:"note"`
+	CreatedAt                time.Time                      `json:"created_at"`
+	UpdatedAt                time.Time                      `json:"updated_at"`
+	Structures               []StructureModel               `gorm:"foreignKey:MaterialStateID" json:"structures,omitempty"`
+	CalculationContexts      []CalculationContext           `gorm:"foreignKey:MaterialStateID" json:"calculation_contexts,omitempty"`
+	ExperimentalContexts     []ExperimentalContext          `gorm:"foreignKey:MaterialStateID" json:"experimental_contexts,omitempty"`
+	TcResults                []TcResult                     `gorm:"foreignKey:MaterialStateID" json:"tc_results,omitempty"`
+	Properties               []SuperconductorProperty       `gorm:"foreignKey:MaterialStateID" json:"properties,omitempty"`
+	Superconductor           Superconductor                 `gorm:"foreignKey:SuperconductorID" json:"superconductor,omitempty"`
+	StructureFamilyLinks     []MaterialStateStructureFamily `gorm:"foreignKey:MaterialStateID" json:"structure_families,omitempty"`
+	PropertyModules          []PropertyModule               `gorm:"foreignKey:MaterialStateID" json:"property_modules,omitempty"`
 }
 
 // PropertyModule/PropertyRecord 是 Issue #90 的统一物性读取模型。

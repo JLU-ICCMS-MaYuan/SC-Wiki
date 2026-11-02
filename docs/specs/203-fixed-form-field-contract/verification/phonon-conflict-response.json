@@ -1,0 +1,36 @@
+{
+  "resolutions": [
+    {
+      "target": "scientific_work_drafts:37461084ddd7453e8d1378b86c0bb89f:fill-2676557b2e72a887f8441f61bbe3",
+      "value": "density functional (linear-response) theory",
+      "source_ids": [
+        "source-84"
+      ],
+      "reason": "原文方法部分明确说明电子性质、晶格动力学和电子-声子耦合采用密度泛函（线性响应）理论，与当前值一致。"
+    },
+    {
+      "target": "scientific_work_drafts:37461084ddd7453e8d1378b86c0bb89f:fill-958e196ff73ee6ad0e6356a714a0",
+      "value": "density functional (linear-response) theory",
+      "source_ids": [
+        "source-84"
+      ],
+      "reason": "原文方法部分明确说明电子性质、晶格动力学和电子-声子耦合采用密度泛函（线性响应）理论，与当前值一致。"
+    },
+    {
+      "target": "scientific_work_drafts:37461084ddd7453e8d1378b86c0bb89f:fill-c8d89db561645d4b7046a154d055",
+      "value": "density functional (linear-response) theory",
+      "source_ids": [
+        "source-84"
+      ],
+      "reason": "原文方法部分明确说明电子性质、晶格动力学和电子-声子耦合采用密度泛函（线性响应）理论，与当前值一致。"
+    },
+    {
+      "target": "scientific_work_drafts:cc598824574a497ab111c0552ff27e64:fill-c8d89db561645d4b7046a154d055",
+      "value": "density functional (linear-response) theory",
+      "source_ids": [
+        "source-84"
+      ],
+      "reason": "原文方法部分明确说明电子性质、晶格动力学和电子-声子耦合采用密度泛函（线性响应）理论，与当前值一致。"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "version": 1,
+  "issue": 203,
+  "sha256": "d4f8e5fe53038f7d103bc468c60ad022c1109f44b91b730b5ab29f52c13fe86a",
+  "spec": "docs/specs/203-fixed-form-field-contract/spec.md",
+  "reason": "用户已逐项审查并授权本次字段基线；后续变更必须有明确Issue/Spec和用户审查。"
+}

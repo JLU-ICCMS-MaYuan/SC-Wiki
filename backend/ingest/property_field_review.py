@@ -2,7 +2,7 @@
 from copy import deepcopy
 
 LABELS = {'method_code': '预测方法', 'lambda_ep': '电声耦合强度 λ', 'omega_log': 'ωlog', 'mu_star': 'μ*',
-          'method_scope': '计算适用关系', 'phonon_method': '声子计算技术', 'vibrational_treatment': '振动处理层次', 'calculation_code': '计算软件', 'electronic_method': '电子结构方法', 'exchange_correlation_functional': '交换关联泛函',
+          'phonon_method': '声子计算技术', 'vibrational_treatment': '振动处理层次', 'calculation_code': '计算软件', 'electronic_method': '电子结构方法', 'exchange_correlation_functional': '交换关联泛函',
           'k_grid': 'k 网格', 'q_grid': 'q 网格', 'k_broadening': 'k 展宽', 'q_broadening': 'q 展宽'}
 CONDITIONS = tuple(key for key in LABELS if key not in {'method_code', 'lambda_ep', 'omega_log', 'mu_star'})
 METHODS = {'isotropic_eliashberg': '各向同性 Eliashberg', 'anisotropic_eliashberg': '各向异性 Eliashberg',
@@ -135,7 +135,19 @@ def expand_property_fields(records):
                 if extension.get('key') == 'mu_star' and extension.get('value_kind') == 'range':
                     for key, name in [('value_max', 'μ* · 第1组'), ('value_min', 'μ* · 第2组')]:
                         specifications.append((f'payload.parameters.extensions.{i}.{key}', name, 'number', 'parameters.mu_star.' + key, False))
-        specifications.extend(('payload.calculation_conditions.' + key, LABELS[key], 'object' if key == 'method_scope' else 'number' if key.endswith('broadening') else 'text', 'conditions.' + key, not electronic) for key in CONDITIONS)
+        from .fixed_form_contract import parameter_paths, CONTRACT
+        legacy_conditions = source.get('definition_version', 1) < 2 and not any(key in conditions for key in CONTRACT['software'])
+        paths = ([(key, conditions.get(key)) for key in ('calculation_code', 'electronic_method', 'exchange_correlation_functional',
+                  'phonon_method', 'vibrational_treatment', 'k_grid', 'q_grid', 'k_broadening', 'q_broadening')]
+                 if legacy_conditions else parameter_paths(conditions))
+        for key, value in paths:
+            label = CONTRACT['labels'][key.rsplit('.', 1)[-1]]
+            if '.' in key:
+                software = key.split('.')[0]
+                label = CONTRACT['software_labels'][software] + ' · ' + label
+            specifications.append(('payload.calculation_conditions.' + key, label,
+                'object' if isinstance(value, dict) else 'number' if isinstance(value, (int, float)) else 'text',
+                'conditions.' + key, not electronic))
         for i, extension in enumerate(conditions.get('extensions') or []):
             identity = extension.get('field_key') or extension.get('key')
             identity = identity if isinstance(identity, str) and identity else None

@@ -31,18 +31,9 @@ export default function PressureEditor({ state, index, onChange }: {
 }) {
   const { t } = useLanguage()
   const path = `material_states[${index}]`
-  const factors: Record<string, number> = { pa: 1e-9, kpa: 1e-6, mpa: 0.001, gpa: 1, bar: 0.0001, kbar: 0.1, atm: 0.000101325 }
-  const raw = String(state.pressure_raw ?? '').trim()
-  const factor = factors[(state.pressure_unit_raw ?? '').trim().toLowerCase()]
-  const converted = raw !== '' && new RegExp(`^${numberPattern}$`).test(raw) && factor ? Number(raw) * factor : undefined
-  const value = state.pressure_value_gpa
-  const mismatch = value != null && converted !== undefined && Math.abs(value - converted) > Math.max(1e-12, Math.abs(converted) * 1e-6)
-  const outsideRange = value != null && ((state.pressure_min_gpa != null && value < state.pressure_min_gpa) || (state.pressure_max_gpa != null && value > state.pressure_max_gpa))
   return <Box sx={{ minWidth: 0 }}>
     <PressureNumber value={state.pressure_value_gpa} label={t('upload.pressureField')} field={`${path}.pressure_value_gpa`}
-      onChange={value => onChange(value === null
-        ? { pressure_value_gpa: null, pressure_raw: null, pressure_unit_raw: null, pressure_min_gpa: null, pressure_max_gpa: null }
-        : { pressure_value_gpa: value })} />
+      onChange={value => onChange({ pressure_value_gpa: value })} />
 
 
   </Box>
