@@ -76,7 +76,10 @@ export default function CalculationConditionFields({ record, schema, readOnly, b
     write({ ...conditions, extensions: updated }); setEditing(null)
   }
   return <Box sx={{ minWidth: 0 }}>
-    <Typography variant="body2" color="text.secondary">计算条件</Typography>
+    <Typography variant="body2" color="text.secondary"
+      data-condition-review={conditions.method_scope && !['band_gap', 'dos_fermi'].includes(record.property_code) ? true : undefined}
+      data-evidence-readonly={conditions.method_scope && !['band_gap', 'dos_fermi'].includes(record.property_code) ? true : undefined}
+      data-issue-field={conditions.method_scope && !['band_gap', 'dos_fermi'].includes(record.property_code) ? basePath + '.method_scope' : undefined}>计算条件</Typography>
     {['band_gap', 'dos_fermi'].includes(record.property_code) && <FormControl size="small" sx={{ my: 1, minWidth: 240 }}
       data-issue-field={basePath + '.method_scope'}>
       <InputLabel id={record.record_key + '-method-relation'}>振动条件与电子结果的关系</InputLabel>

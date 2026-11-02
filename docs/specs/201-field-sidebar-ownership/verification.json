@@ -1,0 +1,127 @@
+{
+  "checked_at": "2026-11-02T08:07:43.571194+08:00",
+  "branch": "mayuan",
+  "source_base": "2ee131f2",
+  "issue": 201,
+  "new_regression_before": {
+    "failed": 5,
+    "reason": "实际字段/侧栏缺陷，非导入编译失败"
+  },
+  "new_regression_after": {
+    "passed": 9,
+    "included_in_form_contract": true
+  },
+  "form_contract": {
+    "files": 11,
+    "passed": 128
+  },
+  "mutation": {
+    "expected_regressions_detected": 8
+  },
+  "build": {
+    "typescript": "passed",
+    "vite": "passed"
+  },
+  "adjacent": {
+    "passed": 42,
+    "failed": 35
+  },
+  "baseline_matches": true,
+  "actual_draft_copy": {
+    "mode": "实际草稿副本，生产组件DOM重放；API为只读隔离模拟，未调用模型",
+    "before": {
+      "pending": 11,
+      "red": 3,
+      "unlocated": 8
+    },
+    "after": {
+      "pending": 11,
+      "red": 5,
+      "unlocated": 0
+    },
+    "fields": [
+      {
+        "field": "material_states.0.property_modules.0.records.0.payload.parameters.lambda_ep",
+        "name": "电声耦合强度 λ"
+      },
+      {
+        "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.method_scope",
+        "name": "计算条件"
+      },
+      {
+        "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.extensions.0.value_raw",
+        "name": "声子方法"
+      },
+      {
+        "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.extensions.1.value_raw",
+        "name": "声子／电声耦合 · q 网格"
+      },
+      {
+        "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.extensions.2.value_raw",
+        "name": "声子／电声耦合 · 截断能"
+      }
+    ]
+  },
+  "local_vite": {
+    "workflow": {
+      "status": 200,
+      "content_type": "text/javascript",
+      "new_code": true
+    },
+    "markers": {
+      "status": 200,
+      "content_type": "text/javascript",
+      "new_code": true
+    }
+  },
+  "business_writes": 0,
+  "model_calls": 0,
+  "database_migrations": 0,
+  "push": false,
+  "deployment": false,
+  "browser_boundary": "生产组件jsdom与完整React宿主；没有声称真实浏览器全链验收",
+  "logs": {
+    "red": {
+      "path": "/tmp/scwiki201-red.log",
+      "sha256": "ab1da5ad1cac0f0f763f859053886ca084ea8ed39744b53b1f6a57ad39978c44"
+    },
+    "form": {
+      "path": "/tmp/scwiki201-form-final.log",
+      "sha256": "33de95818b41e6d40e81c6f2007a415819aff9a4d0fab3f899056458770e67e2"
+    },
+    "mutation": {
+      "path": "/tmp/scwiki201-mutation.log",
+      "sha256": "9ad5e5be6f1ae43d417ad887d9e3d94826c3c3da98cace5a4add641b5f62668e"
+    },
+    "build": {
+      "path": "/tmp/scwiki201-build.log",
+      "sha256": "9b5da7849cb010046e1f93ec6f5ee7528d35c2e3ab158166af8669f58b0746aa"
+    },
+    "adjacent": {
+      "path": "/tmp/scwiki201-adjacent.log",
+      "sha256": "1cdfa8f2c830642c6429b9e5514f72e941ae2efdbdfacfde7f8247dc962722e3"
+    },
+    "live_copy": {
+      "path": "/tmp/scwiki201-live-copy.log",
+      "sha256": "ec42fbe8cfe0f26a1262d116f82523cdf7b1ca2e9406e5dec9427be5e88b7b3f"
+    }
+  },
+  "remote_spec_link": {
+    "url": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/blob/mayuan/docs/specs/201-field-sidebar-ownership/spec.md",
+    "branch": "mayuan",
+    "checked_at": "2026-11-02T08:10:35.580199+08:00",
+    "identity": "JLU-ICCMS-MaYuan",
+    "status": "404",
+    "published": false,
+    "close_issue": false
+  },
+  "verified_sources": {
+    "frontend/src/lib/evidenceOwnership.ts": "6e5df3fa1cf1cef99e174c38a1441ca7741d7bf49fcca65693bc8db4e7233d53",
+    "frontend/src/components/EvidenceFieldMarkers.tsx": "b2bee0a732da05cd8699d9db4b4cde11fa54284843f2d658f486b51dffed6744",
+    "frontend/src/components/EvidenceWorkflow.tsx": "b941cede0037fce8cbac6cc51050ecd61d1fa6e602eee1385d418e85690e97df",
+    "frontend/src/components/CalculationConditionFields.tsx": "d6c7ce71ffb2dc31a0d6d57123cf4069dba4bffdbeef87841e4d16ea45708d2f",
+    "frontend/src/components/ReviewFieldSettings.tsx": "92402277cb1b6f3610a1116a8b72d34809bb9c6fd116621de963e9e4ed6e183c",
+    "scripts/check-form-contract.mjs": "c326794c7b778572dd0d7febb6fe9f7d58a43e39357b3bc63babd08f78db65b0",
+    "tests/01_decentralized_uploading/field-sidebar-ownership.test.tsx": "0e37a7b9136b4b6a544dc9aaf9efdd28670fac8a6742d5c4eac9ab2510f1f943"
+  }
+}

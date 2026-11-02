@@ -72,6 +72,8 @@ flowchart LR
 
 ## 文档维护
 
+字段名称、类型、单位等核对子项通过所属主字段进入同一侧栏，独立查看与操作；计算适用关系从所属记录的计算条件入口查看。计数按子项统计，红框按主字段汇总。见[字段子项归属](01_Decentralized_Uploading_of_Superconductivity_Data/source-association-review.md#字段子项归属与侧栏入口)。
+
 全站表单的局部更新、稳定身份及回归入口见[表单更新与回归检查](form-processing.md)。当前完整验证优先覆盖四类科学表单，其他页面按入口清单标注覆盖，不扩大宣称全站验收。
 
 谱线人工编辑器的正式接入、历史保存与联动参数说明见[谱线人工编辑](01_Decentralized_Uploading_of_Superconductivity_Data/spectrum-manual-editor-demo.md)；独立Demo与正式数据库保存路径分别记录，目标环境验证边界另列。

@@ -1,0 +1,35 @@
+{
+  "mode": "实际草稿副本，生产组件DOM重放；API为只读隔离模拟，未调用模型",
+  "before": {
+    "pending": 11,
+    "red": 3,
+    "unlocated": 8
+  },
+  "after": {
+    "pending": 11,
+    "red": 5,
+    "unlocated": 0
+  },
+  "fields": [
+    {
+      "field": "material_states.0.property_modules.0.records.0.payload.parameters.lambda_ep",
+      "name": "电声耦合强度 λ"
+    },
+    {
+      "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.method_scope",
+      "name": "计算条件"
+    },
+    {
+      "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.extensions.0.value_raw",
+      "name": "声子方法"
+    },
+    {
+      "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.extensions.1.value_raw",
+      "name": "声子／电声耦合 · q 网格"
+    },
+    {
+      "field": "material_states.0.property_modules.0.records.0.payload.calculation_conditions.extensions.2.value_raw",
+      "name": "声子／电声耦合 · 截断能"
+    }
+  ]
+}

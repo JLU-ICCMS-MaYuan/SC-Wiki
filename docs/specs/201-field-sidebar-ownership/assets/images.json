@@ -1,0 +1,24 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-373e9051-0c2b-4382-b954-85fea13bec6f.png",
+      "user_context": "为什么，这里显示有 5 个待处理，但是我没看到标红的字段？",
+      "related": [
+        "US1",
+        "FR-001",
+        "SC-001"
+      ],
+      "locator": "docs/specs/201-field-sidebar-ownership/assets/pending-count.png",
+      "status": "local_verified",
+      "sha256": "04616c971bba9c3d4bea652467c652c8524494ca61ff6d14636829e7df5c406d",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3024,
+        1780
+      ],
+      "verification": "原字节复制、解码和SHA-256已核实；尚未发布远程"
+    }
+  ]
+}

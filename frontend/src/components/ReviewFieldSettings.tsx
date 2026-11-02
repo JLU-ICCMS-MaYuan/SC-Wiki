@@ -31,7 +31,9 @@ export default function ReviewFieldSettings({ identity, field, enabled, onDone, 
     {!available && <Box sx={{ display: 'grid', gap: 1.5 }}>
       <Typography color="text.secondary">{t('evidence.settingsName')}</Typography><Typography>{label || field}</Typography>
       <Typography color="text.secondary">{t('evidence.settingsValue')}</Typography><EvidenceReadableValue value={value} />
-      <Typography color="text.secondary">{t('evidence.settingsInForm')}</Typography>
+      <Typography color="text.secondary">{field.endsWith('.method_scope')
+        ? '此项描述当前记录的计算适用关系，请在来源核对中查看依据与判断。'
+        : t('evidence.settingsInForm')}</Typography>
     </Box>}
   </Box>
 }

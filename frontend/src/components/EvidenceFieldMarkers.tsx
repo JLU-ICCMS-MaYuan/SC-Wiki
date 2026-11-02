@@ -22,8 +22,8 @@ export const readOnlyEvidenceFormSx = {
 } as const
 function matchesField(node: HTMLElement, record: EvidenceRecord, suffix: string) {
   suffix = suffix.replace('.omega_log_k', '.omega_log')
-  if (record.record_field_key && record.record_field?.startsWith('payload.calculation_conditions.extensions.')) return node.dataset.scientificFieldKey === record.record_field_key && (!record.record_field?.split('.extensions.')[1]?.includes('.') || Boolean(node.dataset.issueField?.endsWith('.' + record.record_field.split('.').at(-1))))
-  if (record.record_field?.startsWith('payload.parameters.extensions.')) return Boolean(node.dataset.issueField?.includes('.payload.parameters.extensions.') && node.dataset.issueField.endsWith('.' + record.record_field.split('.').at(-1)))
+  if (record.record_field_key && record.record_field?.startsWith('payload.calculation_conditions.extensions.')) return node.dataset.scientificFieldKey === record.record_field_key && (!record.record_field?.split('.extensions.')[1]?.includes('.') || Boolean(node.dataset.issueField?.endsWith('.' + (record.settings_field || record.record_field).split('.').at(-1))))
+  if (record.record_field?.startsWith('payload.parameters.extensions.')) return Boolean(node.dataset.issueField?.includes('.payload.parameters.extensions.') && node.dataset.issueField.endsWith('.' + (record.settings_field || record.record_field).split('.').at(-1)))
   return suffix !== '' && Boolean(node.dataset.issueField?.endsWith(suffix) || (suffix.includes('.payload.parameters.') && suffix.endsWith('.value_number') && node.dataset.issueField?.endsWith(suffix.slice(0, -13))))
 }
 
@@ -118,7 +118,7 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen: openCallb
   currentRecords.current = records
   // 核对颜色/理由改变不改变节点拓扑；只在身份或实际 DOM 结构变化时重新定位。
   const topology = JSON.stringify(records.map(r => [r.key, r.field, r.fields, r.state_key, r.module_key, r.record_key,
-    r.record_field, r.record_field_key, r.structure_hash, r.structure_field]))
+    r.record_field, r.record_field_key, r.settings_field, r.structure_hash, r.structure_field]))
   const [bindings, setTargets] = useState<Array<{ record: EvidenceRecord; node: HTMLElement }>>([])
   const targets = useMemo(() => {
     const latest = new Map(records.map(record => [record.key, record]))
@@ -137,8 +137,9 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen: openCallb
       const node = (event.target as HTMLElement).closest<HTMLElement>('[data-scientific-field]')
       if (!node) return
       request.handled = true
-      const found = targets.find(target => target.node === node)?.record
-      if (found) onOpen(found.key, [found.key], found.placeholder ? currentPlaceholder(found, node) : undefined, 'settings')
+      const matches = targets.filter(target => target.node === node).map(target => target.record)
+      const found = matches.find(record => record.settings_part === 'raw') || matches[0]
+      if (found) onOpen(found.key, matches.map(record => record.key), found.placeholder ? currentPlaceholder(found, node) : undefined, 'settings')
       else {
         // 新增或尚未载入核对结果的字段仍使用同一侧栏，不伪造来源资格。
         const field = request.field.replace(/\.(\d+)(?=\.|$)/g, '[$1]')
@@ -198,7 +199,7 @@ export default function EvidenceFieldMarkers({ records, scope, onOpen: openCallb
         const row = record.record_key ? Array.from(area.querySelectorAll<HTMLElement>('[data-record-key]')).find(n => n.dataset.recordKey === record.record_key) : undefined
         if (record.record_key && !row) return []
         const scopedNodes = nodes.filter(node => area.contains(node))
-        const fields = !record.record_field && row?.querySelector('[data-dos-current-value]')
+        const fields = record.settings_field ? [record.settings_field] : !record.record_field && row?.querySelector('[data-dos-current-value]')
           ? ['name_raw', 'value_raw', 'unit_raw'].map(name => record.field + '.' + name)
           : [...new Set(record.fields || [record.field])]
         return fields.filter(field => !fields.some(other => other !== field && other.startsWith(field + '.'))).flatMap(field => {

@@ -19,6 +19,8 @@ import { evidenceProblem } from './EvidenceFieldMarkers'
 import { createEvidenceDraftQueue } from '../lib/evidenceDraftQueue'
 import { createManualEvidenceDrafts, manualDraftKey, manualFieldIdentity, manualValueIdentity, type PreparedManualEvidence } from '../lib/manualEvidenceDrafts'
 import { changedScientificFields } from '../lib/evidenceFields'
+import { evidenceSiblings, evidencePartName } from '../lib/evidenceOwnership'
+import { evidenceStatusLabel, evidenceStatus } from '../lib/evidenceStatus'
 import { useLanguage } from '../context/LanguageContext'
 
 export interface EvidenceSource { source_url?: string; origin_kind?: string; snapshot_file_url?:string; paper_evidence_id?: number; block_id?: string; evidence_kind?: 'text' | 'pdf_image'; file_id: string; source_name?: string; chunk_id?: number; chunk_index: number; page_start?: number; page_end?: number; content?: string; quote?: string }
@@ -808,6 +810,15 @@ export function useEvidenceWorkflow(options?: {
   const activeRecord = summaryRecord && currentDetail?.data?.record ? {...summaryRecord, ...currentDetail.data.record,
     key: summaryRecord.key, field: summaryRecord.field, fields: summaryRecord.fields,
     pending_review: summaryRecord.pending_review || currentDetail.data.record.pending_review} : summaryRecord
+  const siblingRecords = useMemo(() => summaryRecord ? evidenceSiblings(summaryRecord, records) : [], [summaryRecord, records])
+  const selectSibling = (record: EvidenceRecord) => {
+    if (record.key === selected) return
+    if (settingsPending || confirming || saving) {
+      setSaveError('请先应用或取消当前字段设置，并等待保存完成，再切换核对子项。')
+      return
+    }
+    setSelected(record.key); setFallbackRecord(undefined); setSaveError('')
+  }
   const manualVisible = Boolean(activeRecord && (manualOpenKey === activeRecord.key || activeRecord.field_decision?.action === 'reject'
     || activeRecord.human_modified || hasLocalManualEdit(activeRecord)))
   const approvalState = currentDetail?.data?.approval_state
@@ -983,6 +994,11 @@ export function useEvidenceWorkflow(options?: {
         <Tabs value={drawerTab} onChange={(_, value) => setDrawerTab(value)} variant="fullWidth">
           <Tab value="settings" label={t('evidence.settingsTab')} /><Tab value="source" label={t('evidence.sourceTab')} />
         </Tabs>
+        {siblingRecords.length > 1 && <Box role="group" aria-label="字段核对子项" sx={{ display: 'flex', flexWrap: 'wrap', gap: .5, my: 1 }}>
+          {siblingRecords.map(record => <Button key={record.key} size="small" aria-pressed={record.key === selected}
+            variant={record.key === selected ? 'outlined' : 'text'} color={problematic(record) ? 'error' : 'primary'}
+            onClick={() => selectSibling(record)}>{evidencePartName(record)} · {evidenceStatusLabel[evidenceStatus(record)]}</Button>)}
+        </Box>}
         <Box component="fieldset" disabled={confirming} hidden={drawerTab !== 'settings'} key={'settings:' + activeRecord.key} sx={{ pt: 2, px: 0, m: 0, border: 0, minWidth: 0 }}>
           <ReviewFieldSettings identity={activeRecord.item_key || activeRecord.key} field={options?.getCurrentValue?.(activeRecord)?.field || activeRecord.field}
             settingsField={activeRecord.settings_field} sourceField={activeRecord.field}

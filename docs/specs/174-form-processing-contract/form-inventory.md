@@ -33,6 +33,8 @@
 
 ## 科学表单依赖核查
 
+#201字段子项归属共享EvidenceFieldMarkers与EvidenceWorkflow，四类完整宿主、只读、未应用设置保护、扩展重排和单子项模型请求由field-sidebar-ownership纳入正式form-contract入口；本轮128项通过、变异8项检出。实际草稿只读副本验证11个子项均可达，未定位8→0；相邻35项旧失败在未修改HEAD独立复现，未计作通过。详见[验收记录](../201-field-sidebar-ownership/validation.md)，不宣称真实浏览器或整篇科学核对验收。
+
 - 上传与返修共享 UploadTaskEditor；管理员及超级管理员共享 AdminPaperEditPage。两宿主均传入动态生成的 reviewFields。
 - 材料卡片环境比较包含全局 issues、reviewFields，导致数组引用变化能清空全部缓存。
 - PropertySpectraProvider 每次渲染创建新的共享 value，可能推动子区域更新；正式修复须验证其数据依赖及最新回调，不能只稳定引用而使用过期草稿。

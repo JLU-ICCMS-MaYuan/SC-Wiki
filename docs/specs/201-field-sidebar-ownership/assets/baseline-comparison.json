@@ -1,0 +1,156 @@
+{
+  "baseline_commit": "2ee131f2",
+  "method": "git archive HEAD至独立临时目录，复用依赖且使用归档源码/配置",
+  "baseline": {
+    "passed": 42,
+    "failed": 35
+  },
+  "current": {
+    "passed": 42,
+    "failed": 35
+  },
+  "same_failed_set": true,
+  "new_failures": [],
+  "failures": [
+    {
+      "file": "evidence-drawer-close.test.tsx",
+      "test": "保存失败保留抽屉和理由，重试成功才关闭"
+    },
+    {
+      "file": "evidence-drawer-close.test.tsx",
+      "test": "关闭回到原字段并禁止焦点滚动，不跳到顶部已接受按钮"
+    },
+    {
+      "file": "evidence-drawer-close.test.tsx",
+      "test": "同框多个核对项全部保存成功才关闭"
+    },
+    {
+      "file": "evidence-drawer-close.test.tsx",
+      "test": "完成保存成功后自动关闭，重新打开仍可撤销接受"
+    },
+    {
+      "file": "evidence-drawer-close.test.tsx",
+      "test": "完成请求迟到不能关闭后来打开的另一个项目"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "AI 理由不重复表单值，人工确认不会暗中采用旧候选"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "上传没有出处时只提示重新查找或修改记录，不要求手选证据"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "上传自动来源核对不弹倒计时，服务失败仅重试一次并保留结果"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "上传语义疑点显示抽屉等待手动提交"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "修改字段使旧结果失效，不能用旧理由批准"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "关闭右侧抽屉保留红框，重新打开保留理由且不调用模型"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "后台已保存结果后无需浏览器再写草稿，返回任务版本"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "已有原文直接用于裁决，不要求选择片段或编辑引句"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "提交先准备已接受补丁，保存失败时不绑定；成功后只读恢复"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "提交门禁拒绝未核对内容且绝不启动模型"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "替换建议的引句不冒充当前值的系统原文"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "来源优先且默认展开，作者等结构化值不在侧栏显示 JSON"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "核对存在疑点只显示处理抽屉，完成不会自动批准"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "核对完成返回任务与版本，不发送审核请求"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "没有有效出处不能点击完成"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "管理员可对未核对项填写理由完成，连续输入合并且失败不循环报错"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "自动填写的推测可送审，值变化后旧理由不能通过门禁"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "重新查找的倒计时仍可取消，不创建任务或自动续提"
+    },
+    {
+      "file": "evidence-workflow.test.tsx",
+      "test": "重新查找绕过旧疑点缓存，找到证据后仍等待手动提交"
+    },
+    {
+      "file": "field-review-layout.test.tsx",
+      "test": "从μ*字段名应用修改后关闭统一侧栏，只修改当前字段"
+    },
+    {
+      "file": "field-review-layout.test.tsx",
+      "test": "其他问题仅在独立导航中可达；只读不显示重查和完成"
+    },
+    {
+      "file": "field-review-layout.test.tsx",
+      "test": "方法只审自身，无Tc集合审核入口；三页签和四块分区不混入其他子项"
+    },
+    {
+      "file": "field-review-layout.test.tsx",
+      "test": "无核对记录的字段名仍进三页签，只读设置不出现写入操作"
+    },
+    {
+      "file": "field-review-layout.test.tsx",
+      "test": "点击字段名 μ* 直接进入统一侧栏设置页，原文/人工/AI/历史仍可访问"
+    },
+    {
+      "file": "field-review-layout.test.tsx",
+      "test": "点击字段名 电声耦合强度 λ 直接进入统一侧栏设置页，原文/人工/AI/历史仍可访问"
+    },
+    {
+      "file": "field-review-layout.test.tsx",
+      "test": "点击字段名 计算软件 直接进入统一侧栏设置页，原文/人工/AI/历史仍可访问"
+    },
+    {
+      "file": "field-review-layout.test.tsx",
+      "test": "设置页签复用现有编辑器，切换保留未应用输入，原PDF区域折叠重开不重复请求"
+    },
+    {
+      "file": "scientific-evidence-markers.test.tsx",
+      "test": "作者标签合并作者角色证据，隐藏菜单不使证据失去入口"
+    },
+    {
+      "file": "scientific-evidence-markers.test.tsx",
+      "test": "同框问题聚合为一个文字入口，已接受后仍可查看"
+    },
+    {
+      "file": "scientific-evidence-markers.test.tsx",
+      "test": "排序后按稳定身份标记原记录，修改仍映射到对应核对项"
+    }
+  ]
+}
