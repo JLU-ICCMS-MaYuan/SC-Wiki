@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate()
-  useEffect(() => { navigate('/news', { replace: true }) }, [navigate])
+  useEffect(() => { navigate('/search', { replace: true }) }, [navigate])
   return null
 }
 

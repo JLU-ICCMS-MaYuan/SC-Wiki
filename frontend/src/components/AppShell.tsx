@@ -16,8 +16,8 @@ import CommunityNotificationLink from './community/CommunityNotificationLink'
 
 // path 是业务路由契约，文案与图标仅负责呈现。
 const NAV_ITEMS = [
-  { key: 'nav.news', path: '/news', icon: LocalFireDepartmentOutlined },
   { key: 'nav.search', path: '/search', icon: ExploreOutlined },
+  { key: 'nav.news', path: '/news', icon: LocalFireDepartmentOutlined },
   { key: 'nav.knowledge', path: '/knowledge', icon: AccountTreeOutlined },
   { key: 'nav.share', path: '/share', icon: GroupsOutlined },
   { key: 'nav.upload', path: '/upload', icon: CloudUploadOutlined },
@@ -63,7 +63,7 @@ const AppShell: React.FC = () => {
   const handleLogout = () => {
     setAnchorEl(null)
     logout()
-    navigate('/news')
+    navigate('/search')
   }
 
   return (

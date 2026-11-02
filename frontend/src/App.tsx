@@ -4,7 +4,7 @@ import { Box, CircularProgress } from '@mui/material'
 import AppShell from './components/AppShell'
 
 // 首页 — 唯一在主 bundle 中的 lazy import
-const NewsPage = lazy(() => import('./pages/NewsPage'))
+const SearchPage = lazy(() => import('./pages/SearchPage'))
 const AuthPage = lazy(() => import('./pages/AuthPage'))
 
 // 其他页面的 import() 藏在 LazyRoutes 中惰性加载
@@ -21,8 +21,8 @@ const App: React.FC = () => (
   <Routes>
     <Route path="/auth" element={<Suspense fallback={<PageLoader />}><AuthPage /></Suspense>} />
     <Route element={<AppShell />}>
-      <Route path="/" element={<Navigate to="/news" replace />} />
-      <Route path="/news" element={<Suspense fallback={<PageLoader />}><NewsPage /></Suspense>} />
+      <Route path="/" element={<Navigate to="/search" replace />} />
+      <Route path="/search" element={<Suspense fallback={<PageLoader />}><SearchPage /></Suspense>} />
       <Route path="*" element={<Suspense fallback={<PageLoader />}><LazyRoutes /></Suspense>} />
     </Route>
   </Routes>

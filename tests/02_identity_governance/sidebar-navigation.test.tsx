@@ -29,11 +29,11 @@ function DraftPage() {
   </>
 }
 
-function renderShell(path = '/news') {
+function renderShell(path = '/search') {
   return render(<MemoryRouter initialEntries={[path]}><LanguageProvider><Routes>
     <Route path="/auth" element={<output aria-label="认证地址">{window.location.pathname}</output>} />
     <Route element={<AppShell />}>
-      <Route path="/" element={<Navigate to="/news" replace />} />
+      <Route path="/" element={<Navigate to="/search" replace />} />
       <Route path="*" element={<DraftPage />} />
     </Route>
   </Routes></LanguageProvider></MemoryRouter>)
@@ -47,19 +47,19 @@ beforeEach(() => {
 afterEach(() => { cleanup(); localStorage.clear(); vi.clearAllMocks() })
 
 describe('全角色统一侧栏', () => {
-  it('全部全局入口位于侧栏，业务顺序固定，品牌回到默认热点页', async () => {
+  it('全部全局入口位于侧栏，业务顺序固定，品牌回到默认搜索页', async () => {
     const user = userEvent.setup()
-    renderShell('/search')
+    renderShell('/news')
     const nav = screen.getByRole('navigation', { name: '主导航' })
     expect(screen.queryByRole('banner')).not.toBeInTheDocument()
     const labels = within(nav).getAllByRole('button').map(button => button.getAttribute('aria-label'))
     expect(labels).toEqual([
-      'SC-Wiki · 返回首页', '收起侧栏', '热点', '探索', '脉络', '社区', '上传', '对话', '预测',
+      'SC-Wiki · 返回首页', '收起侧栏', '探索', '热点', '脉络', '社区', '上传', '对话', '预测',
       '配置 AI 供应商', '切换为简体中文', '切换为英文', '登录',
     ])
     await user.click(within(nav).getByRole('button', { name: 'SC-Wiki · 返回首页' }))
-    expect(screen.getByLabelText('当前地址')).toHaveTextContent('/news')
-    expect(screen.getByRole('button', { name: '热点' })).toHaveAttribute('aria-current', 'page')
+    expect(screen.getByLabelText('当前地址')).toHaveTextContent('/search')
+    expect(screen.getByRole('button', { name: '探索' })).toHaveAttribute('aria-current', 'page')
   })
 
   it('收起与展开保留正文挂载、未保存输入和本地文件，图标仍可导航', async () => {
@@ -82,7 +82,7 @@ describe('全角色统一侧栏', () => {
     expect(main.parentElement).toHaveStyle({ gridTemplateColumns: '216px minmax(0, 1fr)' })
     expect(mounted).toHaveBeenCalledTimes(1)
     await user.click(screen.getByRole('button', { name: '收起侧栏' }))
-    for (const [label, path] of [['热点', '/news'], ['探索', '/search'], ['脉络', '/knowledge'], ['上传', '/upload'], ['对话', '/rag'], ['预测', '/tc-predict']]) {
+    for (const [label, path] of [['探索', '/search'], ['热点', '/news'], ['脉络', '/knowledge'], ['上传', '/upload'], ['对话', '/rag'], ['预测', '/tc-predict']]) {
       await user.click(screen.getByRole('button', { name: label }))
       expect(screen.getByLabelText('当前地址')).toHaveTextContent(path)
       expect(screen.getByRole('button', { name: label })).toHaveAttribute('aria-current', 'page')
@@ -109,7 +109,7 @@ describe('全角色统一侧栏', () => {
     expect(screen.getAllByRole('menuitem')).toHaveLength(1)
     await user.click(screen.getByRole('menuitem', { name: '退出登录' }))
     expect(logout).toHaveBeenCalledOnce()
-    expect(screen.getByLabelText('当前地址')).toHaveTextContent('/news')
+    expect(screen.getByLabelText('当前地址')).toHaveTextContent('/search')
     expect(screen.getByRole('button', { name: '登录' })).toBeInTheDocument()
   })
 
@@ -141,9 +141,9 @@ describe('全角色统一侧栏', () => {
     await user.keyboard('{Enter}')
     expect(screen.getByRole('button', { name: '展开侧栏' })).toHaveFocus()
     await user.tab()
-    expect(screen.getByRole('button', { name: '热点' })).toHaveFocus()
+    expect(screen.getByRole('button', { name: '探索' })).toHaveFocus()
     await user.tab()
     await user.keyboard('{Enter}')
-    expect(screen.getByLabelText('当前地址')).toHaveTextContent('/search')
+    expect(screen.getByLabelText('当前地址')).toHaveTextContent('/news')
   })
 })

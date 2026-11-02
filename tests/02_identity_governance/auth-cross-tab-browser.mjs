@@ -101,7 +101,7 @@ try {
   await login(users[0])
   await signedIn(pages, users[0])
   await pages[3].waitForURL(base + '/search?source=return#kept')
-  await pages[4].waitForURL(base + '/news')
+  await pages[4].waitForURL(base + '/search')
   await checkIdentity(users[0])
   report.scenarios.push('五页真实认证与原生 storage 分发；两登录页安全自动回跳；各页通用 API 使用一致身份')
 

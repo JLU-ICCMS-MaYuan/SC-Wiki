@@ -3,7 +3,7 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import { Box, CircularProgress } from '@mui/material'
 
 const NobelLaureatePage = lazy(() => import('./pages/NobelLaureatePage'))
-const SearchPage = lazy(() => import('./pages/SearchPage'))
+const NewsPage = lazy(() => import('./pages/NewsPage'))
 const RagPage = lazy(() => import('./pages/RagPage'))
 const TcPredictPage = lazy(() => import('./pages/TcPredictPage'))
 const SharePage = lazy(() => import('./pages/share'))
@@ -44,7 +44,7 @@ const LazyRoutes: React.FC = () => (
   <Routes>
     <Route path="/nobel/:personId" element={<Spin><NobelLaureatePage /></Spin>} />
     <Route path="/structures/:recordId" element={<Spin><StructuralRecordPage /></Spin>} />
-    <Route path="/search" element={<Spin><SearchPage /></Spin>} />
+    <Route path="/news" element={<Spin><NewsPage /></Spin>} />
     <Route path="/share" element={<Navigate to="/share/charts" replace />} />
     <Route path="/share/charts" element={<Spin><SharePage section="charts" /></Spin>} />
     <Route path="/share/rankings" element={<Spin><SharePage section="rankings" /></Spin>} />

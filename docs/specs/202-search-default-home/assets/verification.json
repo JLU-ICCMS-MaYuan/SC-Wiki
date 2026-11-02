@@ -1,0 +1,145 @@
+{
+  "passed": true,
+  "cases": [
+    "desktop-root-search-active-first-no-news-preload-or-search-request",
+    "news-brand-roundtrip",
+    "collapse-retains-search-input",
+    "new-result-tab-query-refresh",
+    "english-navigation-order",
+    "auth-exit-default-search",
+    "login-default-search",
+    "authenticated-unsafe-return-search",
+    "authenticated-safe-source-query-hash",
+    "logout-default-search",
+    "mobile-root-collapsed-order",
+    "mobile-input-retained",
+    "mobile-news-brand-roundtrip"
+  ],
+  "errors": [],
+  "initialModules": [
+    "/assets/index-CWY9IY49.js",
+    "/assets/SearchPage-DERZu236.js",
+    "/assets/ArrowBack-CX1o4F4y.js",
+    "/assets/searchNavigation-CfJbUmb2.js",
+    "/assets/CardContent-CKrDifAa.js",
+    "/assets/PaperStructuralCollection-NEyGYkH_.js",
+    "/assets/Chip-Y5iw_Nmz.js",
+    "/assets/ToggleButtonGroup-CEbhYQPN.js"
+  ],
+  "apiRequests": [
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/structural-records/search"
+    },
+    {
+      "method": "POST",
+      "path": "/api/papers/search/results"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/login"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/me"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/catalog"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    },
+    {
+      "method": "GET",
+      "path": "/api/community/notifications/unread"
+    },
+    {
+      "method": "GET",
+      "path": "/api/news/feed"
+    },
+    {
+      "method": "GET",
+      "path": "/api/news/feed"
+    },
+    {
+      "method": "GET",
+      "path": "/api/news/feed"
+    },
+    {
+      "method": "GET",
+      "path": "/api/news"
+    },
+    {
+      "method": "GET",
+      "path": "/api/rag/llm/current"
+    }
+  ],
+  "browser": "156.0.8078.76",
+  "verified_at": "2026-11-02T11:05:01+08:00",
+  "source_base_commit": "5afe02f268a55c67eb5363d9522651932e35c4f6",
+  "source_sha256": {
+    "frontend/src/App.tsx": "77125a875c910e00fb7ce886958f9a77e0b028ad1471dd4b591e9a62da0e1ecc",
+    "frontend/src/LazyRoutes.tsx": "fe0ae18c712d3a647ecc9e9b986a47e6d2966f4f4b6d3ce058cc6627a7688ef4",
+    "frontend/src/components/AppShell.tsx": "6ed4e0c93c32601be74c68c9230e26c7b76e7c3af22caae026d14671c1ccdb70",
+    "frontend/src/pages/AuthPage.tsx": "3c40c289f1ba4657b3cbb59e8ed6607221c0f8bea3ef14f77e9db67831a26822",
+    "frontend/src/pages/HomePage.tsx": "bf0a0cdcb987155ae5284804d0e0aec5189f1221f63e171467804140a82a894c",
+    "tests/02_identity_governance/sidebar-navigation.test.tsx": "1f4f63439d759db60c0fbd9ecbca2643bf8471fe1eea80e0ca70e3da60129037",
+    "tests/02_identity_governance/auth-page.test.tsx": "329fbcea2ca65d0d3e0e483af475d548e3fd416ddd21edc809e8eb179206cff1",
+    "tests/02_identity_governance/auth-cross-tab-browser.mjs": "3bc26aa61f59dbbc928bfd37d1f1dd97336d3e35ffe4cd562cada575c7ff1d10"
+  },
+  "tests": {
+    "files": 7,
+    "passed": 67,
+    "failed": 0,
+    "log_sha256": "c955fd04413c98671140aefc399c3ae934474800ad501d031b076f1581f14fdf"
+  },
+  "build": {
+    "typescript": "passed",
+    "vite": "passed",
+    "output": "/tmp/scwiki202-build",
+    "log_sha256": "fcfe4d87eb5d73b3a927209792da38bcc44fbe11b3031b6d97f8e2966eef9e8a"
+  },
+  "limits": [
+    "浏览器使用隔离 API 响应，仅验证页面路由与交互，未验证真实后端数据或发信",
+    "未运行依赖真实 Go 夹具的跨标签页浏览器全流程；其期望同步且语法检查通过，跨标签页认证回归由 auth-page 既有测试覆盖",
+    "未推送、未部署；未验证远程 Spec 链接"
+  ]
+}

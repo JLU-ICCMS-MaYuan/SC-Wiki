@@ -104,8 +104,8 @@ it('已失效改密凭证不能落成成功页面', async () => {
 
 it.each([
   ['/auth?returnTo=%2Fupload%3Ftask%3D12%23draft', '/upload?task=12#draft'],
-  ['/auth?returnTo=https%3A%2F%2Fevil.test', '/news'],
-  ['/auth', '/news'],
+  ['/auth?returnTo=https%3A%2F%2Fevil.test', '/search'],
+  ['/auth', '/search'],
 ])('其他标签页登录后自动安全返回：%s', async (path, destination) => {
   fetchMock.mockResolvedValue(response(200, { user: { id: 1, username: 'Researcher' } }))
   mount(path)

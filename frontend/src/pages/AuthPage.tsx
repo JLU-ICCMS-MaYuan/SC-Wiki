@@ -35,10 +35,10 @@ export default function AuthPage() {
   }, [login, register, verifyEmail, resendVerification])
   useEffect(() => {
     if (user && !loading && localAuthentication === 'idle') {
-      navigate(returnTo || '/news', { replace: true })
+      navigate(returnTo || '/search', { replace: true })
     }
   }, [user, loading, localAuthentication, navigate, returnTo])
   return <AuthExperience auth={service} sourceLabel={t('common.back')}
-    onExit={() => navigate(returnTo || '/news', { replace: true })}
-    onAuthenticated={registered => navigate(returnTo || (registered ? '/account' : '/news'), { replace: true })} />
+    onExit={() => navigate(returnTo || '/search', { replace: true })}
+    onAuthenticated={registered => navigate(returnTo || (registered ? '/account' : '/search'), { replace: true })} />
 }
