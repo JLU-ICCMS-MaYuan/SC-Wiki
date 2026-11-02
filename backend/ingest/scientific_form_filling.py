@@ -337,6 +337,13 @@ def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=N
             from .upload_jobs import UploadCancelled
             if isinstance(exc, UploadCancelled):
                 raise
+            from backend.rag.structured_output import StructuredOutputError
+            if isinstance(exc, StructuredOutputError):
+                attempt.update(error=str(exc), error_type=type(exc).__name__)
+                report["attempts"].append(attempt)
+                report["stop_reason"] = "invalid_output_structure"
+                error = str(exc)
+                break
             error = str(exc)
             attempt["error"] = error
             attempt["error_type"] = type(exc).__name__

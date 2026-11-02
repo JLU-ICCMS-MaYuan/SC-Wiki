@@ -489,7 +489,7 @@ def _read_chunk(
     structured = profile != "legacy" and (source or {}).get("kind") == "pdf"
     system_prompt = CHUNK_SYSTEM_PROMPT
     if structured:
-        from backend.ingest.domain_extraction import DOMAIN_SYSTEM_PROMPT, COMPLEMENTARY_SYSTEM_PROMPT, normalize_extraction
+        from backend.ingest.domain_extraction import DOMAIN_SYSTEM_PROMPT, COMPLEMENTARY_SYSTEM_PROMPT, normalize_extraction, EXTRACTION_OUTPUT_SCHEMA
         system_prompt = COMPLEMENTARY_SYSTEM_PROMPT if profile == "complementary" else DOMAIN_SYSTEM_PROMPT
     from backend.ingest.scientific_context import CONTEXT_VERSION
     from backend.rag.llm_context import get_llm_config
@@ -498,6 +498,7 @@ def _read_chunk(
     signature = hashlib.sha256(json.dumps({
         "profile": profile, "content": chunk.content, "model": model_metadata,
         "endpoint": config.base_url, "prompt": system_prompt, "thinking_policy": "disabled-v1", "scientific_context":CONTEXT_VERSION,
+        "output_schema": EXTRACTION_OUTPUT_SCHEMA if structured else None,
     }, sort_keys=True).encode("utf-8")).hexdigest()
 
     if result_path.exists():
@@ -515,7 +516,8 @@ def _read_chunk(
         attempt_directory = result_path.parent / "extraction_attempts" / result_path.stem / uuid4().hex
         attempt_directory.mkdir(parents=True, exist_ok=False)
         _atomic_write_json(attempt_directory / "input.json", {"system_prompt": system_prompt, "prompt": prompt,
-                            "model": model_metadata, "thinking": "disabled", "signature": signature})
+                            "model": model_metadata, "thinking": "disabled", "signature": signature,
+                            "response_schema": EXTRACTION_OUTPUT_SCHEMA})
     def archive_partial(text):
         (attempt_directory / "response.txt").write_text(text, encoding="utf-8")
     def archive_call(event):
@@ -524,10 +526,13 @@ def _read_chunk(
         if response.exists():
             response.replace(attempt_directory / f"call-{event['attempt']}.response.txt")
     callbacks = {"on_partial":archive_partial,"on_call":archive_call} if profile == "complementary" else {}
-    result = complete_json(system_prompt, prompt, **callbacks)
+    schema_options = {"response_schema": EXTRACTION_OUTPUT_SCHEMA} if structured else {}
+    result = complete_json(system_prompt, prompt, **schema_options, **callbacks)
     if attempt_directory:
         _atomic_write_json(attempt_directory / "raw.json", result)
     if structured:
+        from backend.ingest.scientific_output_schema import decode_optional_containers
+        result = decode_optional_containers(result)
         context = json.loads(chunk.content)
         allowed = {(context["file_id"], block["pdf_page"], block["block_id"])
                    for page in context["pages"] for block in page["blocks"]}
@@ -542,6 +547,10 @@ def _read_chunk(
                                           allowed_quote_text=({(context["file_id"], b["pdf_page"], b["block_id"]): b["text"]
                                               for p in context["pages"] for b in p["blocks"]} if profile == "complementary" else None))
         except ValueError as exc:
+            from backend.ingest.fixed_form_contract import FormContractError
+            from backend.rag.structured_output import StructuredOutputError
+            if isinstance(exc, FormContractError):
+                raise StructuredOutputError(str(exc)) from exc
             # 保留第一次原始响应，仅给同一完整来源一次契约纠错机会，不补造行号或放宽门。
             _ensure_not_cancelled(task_id)
             if attempt_directory:
@@ -551,9 +560,10 @@ def _read_chunk(
             if attempt_directory:
                 _atomic_write_json(attempt_directory / 'input.json',{'system_prompt':system_prompt,'prompt':retry_prompt,'signature':signature})
             try:
-                result = complete_json(system_prompt,retry_prompt,retries=0,**callbacks)
+                result = complete_json(system_prompt,retry_prompt,retries=0,**schema_options,**callbacks)
                 if attempt_directory:
                     _atomic_write_json(attempt_directory / 'raw.json',result)
+                result = decode_optional_containers(result)
                 result = normalize_extraction(result,allowed_blocks=allowed,allowed_tables=allowed_tables,allowed_pages=allowed_pages,
                     form_parameters=True,allowed_quote_text=({(context['file_id'],b['pdf_page'],b['block_id']):b['text']
                         for p in context['pages'] for b in p['blocks']} if profile=='complementary' else None))
@@ -2309,9 +2319,12 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         finalize_current_draft(draft, model_output=True, legacy=not bool(document_set))
         publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='organizing')
         from backend.ingest.scientific_form_filling import fill_scientific_forms, form_sources
+        from backend.ingest.scientific_output_schema import filling_schema, decode_optional_containers
+        def fill_existing_fields(prompt, content):
+            return decode_optional_containers(complete_json(prompt, content, response_schema=filling_schema()))
         with call_phase("scientific_form_filling"):
             draft["material_states"], form_filling = fill_scientific_forms(
-                draft["material_states"], form_sources(document_set, scientific_sources), complete_json,
+                draft["material_states"], form_sources(document_set, scientific_sources), fill_existing_fields,
                 cancelled=lambda: _ensure_not_cancelled(task_id),
                 on_attempt=lambda report: _atomic_write_json(
                     artifact_directory(task_id) / "scientific_form_filling.json", report))

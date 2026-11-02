@@ -1,0 +1,68 @@
+{
+  "model": "gpt-6.1-sol",
+  "source_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+  "extraction": {
+    "thinking": "provider_default",
+    "usage": {
+      "completion_tokens": 1178,
+      "prompt_tokens": 8252,
+      "total_tokens": 9430,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": null,
+        "reasoning_tokens": 84,
+        "rejected_prediction_tokens": null
+      },
+      "prompt_tokens_details": null
+    },
+    "finish_reason": "stop",
+    "attempt": 1,
+    "status": "completed",
+    "elapsed_seconds": 26.80921258300077
+  },
+  "filling_calls": [
+    {
+      "thinking": "provider_default",
+      "usage": {
+        "completion_tokens": 247,
+        "prompt_tokens": 5452,
+        "total_tokens": 5699,
+        "completion_tokens_details": null,
+        "prompt_tokens_details": null
+      },
+      "finish_reason": "stop",
+      "attempt": 1,
+      "status": "completed",
+      "elapsed_seconds": 11.459629791992484
+    }
+  ],
+  "persistence": {
+    "status": "passed",
+    "storage": "isolated SQLite in-memory",
+    "pressure": null,
+    "value": "0.02234",
+    "source_count": 1,
+    "quote_and_page_preserved": true,
+    "file_metadata": "isolated fixture; original PDF SHA verified separately"
+  },
+  "pressure_review": {
+    "status": "unchecked",
+    "error": "invalid_tool_arguments",
+    "human_confirmed": false
+  },
+  "artifacts": {
+    "filling-input-1.json": "1d814d5b8d43f3ecf50cd7ae71de0348a29a7055dafa401e8fa08bf6bed4093b",
+    "persisted-reread.json": "1ac2f2c010c0af4f231fe29b3e3d90813b67ab9105b7561fd9e5d4a8d811eabc",
+    "raw.json": "767828ef32cf2f971887e1e4423fa30a4e6f1d92ad9743704e1cb0a42d8a50d8",
+    "input.json": "1c07f1e0a3fe6f5a597f1d47480165c175f8d3e3ead4b82e18bf0e62bc92e49c",
+    "filling-raw-1.json": "d70336de0008114f9289797fd6eeb074a7608c701937ea1656b498d5af3bb4fd",
+    "filling-report.json": "0975948c94f91dd169d639c9d546509dff26ab4506e3011b677e9937c5e58e72",
+    "filling-calls.json": "0ad9f8cee2650aec61053beef1ffd757afaae381bcaa7263cc246c413907aa4d",
+    "call.json": "a57193ae5db28d75d74c0ee38d365f19af76f394c14b7ba1aaf99cf709d46c13",
+    "pressure-review-result.json": "0b0ee14d918f7eba9510412bbeb8d95f3c9be7e5a9d6aacc79571d246d32b1a1",
+    "normalized.json": "61f5d19026db8a5cab185bb5aba0a5a9399093ceec3cfc1c69e90ec0f11cd556",
+    "pressure-review-responses.json": "2c991213cc02a105b2d71e4311e7a8f97ae7a2e9c6a21e63f9a5fd67b27085af",
+    "persistence-report.json": "805dbe4f970c9c244f5d8ed22090bd4995799cdcdb084c220220df18a498b0b2",
+    "filled-states.json": "2d86542519c5eb68e9a8d48da88a598ab3b2d0a17792a79b744e95b1836d64ef"
+  }
+}

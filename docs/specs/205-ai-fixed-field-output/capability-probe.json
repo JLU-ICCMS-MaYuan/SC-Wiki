@@ -1,0 +1,20 @@
+{
+  "model": "gpt-6.1-sol",
+  "catalog_id": "LLM2",
+  "results": [
+    {
+      "case": "strict_adversarial",
+      "status": "returned",
+      "output": "{\"pressure_value_gpa\":50}",
+      "finish_reason": "stop",
+      "elapsed_seconds": 3.49
+    },
+    {
+      "case": "invalid_schema",
+      "status": "http_error",
+      "status_code": 400,
+      "error_code": "invalid_json_schema",
+      "elapsed_seconds": 0.58
+    }
+  ]
+}

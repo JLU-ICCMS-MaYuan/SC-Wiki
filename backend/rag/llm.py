@@ -11,7 +11,7 @@ from collections.abc import Callable
 from typing import Any
 
 import httpx
-from openai import APIConnectionError, APITimeoutError, OpenAI
+from openai import APIConnectionError, APITimeoutError, APIStatusError, OpenAI
 from backend.rag.llm_client import get_llm_client
 from backend.rag.llm_context import get_llm_config
 
@@ -61,6 +61,7 @@ def _stream_json(
     images: list[str] | None,
     on_partial: Callable[[str], None] | None,
     read_timeout: float,
+    response_format: dict | None = None,
 ) -> dict[str, Any]:
     """单次流式调用：逐块累积文本，可选回报中间内容，结束后解析 JSON。"""
     user_content: Any = user_prompt
@@ -76,7 +77,7 @@ def _stream_json(
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_content},
         ],
-        response_format={"type": "json_object"},
+        response_format=response_format or {"type": "json_object"},
         temperature=0.1,
         extra_body=({"thinking": {"type": "disabled"}} if deepseek else {}),
         **({"max_tokens": 65536, "stream_options": {"include_usage": True}} if deepseek else {}),
@@ -111,8 +112,11 @@ def complete_json(
     on_call: Callable[[dict], None] | None = None,
     read_timeout: float = 90.0,
     retries: int = 2,
+    response_schema: dict | None = None,
 ) -> dict[str, Any]:
     """流式请求 LLM 并解析 JSON。连接中断或读超时最多额外重试 retries 次。"""
+    from .structured_output import StructuredOutputError, output_format, validate_output
+    format_options = {"response_format": output_format(response_schema)} if response_schema is not None else {}
     last_error: Exception | None = None
     for attempt in range(retries + 1):
         started = time.monotonic()
@@ -120,7 +124,10 @@ def complete_json(
             result = _stream_json(
                 system_prompt, user_prompt,
                 images=images, on_partial=on_partial, read_timeout=read_timeout,
+                **format_options,
             )
+            if response_schema is not None:
+                validate_output(result, response_schema)
             if on_call:
                 on_call({**_call_stats.get(), "attempt": attempt + 1, "status": "completed",
                          "elapsed_seconds": time.monotonic() - started})
@@ -134,6 +141,10 @@ def complete_json(
                           "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4,
                           "output_tokens_estimate": (output_chars + 3) // 4})
             return result
+        except APIStatusError as exc:
+            if response_schema is not None and exc.status_code in (400, 422):
+                raise StructuredOutputError("当前模型接口拒绝严格输出结构；未降级或自动重试") from exc
+            raise
         # 流式响应中途断开（httpx.TransportError）不经 OpenAI 包装，同样按可重试处理。
         except (APITimeoutError, APIConnectionError, httpx.TransportError, json.JSONDecodeError, RuntimeError) as exc:
             if on_call:
@@ -147,6 +158,8 @@ def complete_json(
                           "input_chars": len(system_prompt) + len(user_prompt), "tokens": None,
                           "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4})
             last_error = exc
+            if response_schema is not None and isinstance(exc, (json.JSONDecodeError, RuntimeError)):
+                raise StructuredOutputError("严格输出未返回完整有效JSON；原响应保留，未自动纠错") from exc
             if attempt >= retries:
                 break
             print(f"  [LLM] 请求或响应格式异常，{attempt + 1}/{retries} 次重试")
