@@ -35,7 +35,12 @@ def verified_download_stamps(ir: DocumentIR, source_path, claims: list[Claim]) -
     with pymupdf.open(source_path) as pdf:
         for b in candidates:
             original = pdf[b.pdf_page-1].get_textbox(pymupdf.Rect(b.bbox))
-            if not re.match(r'downloadedfromhttps?://',re.sub(r'\s+','',original).casefold()):
+            stamp_text = re.sub(r'\s+', '', original).casefold()
+            # 访客格式只接受完整下载日期，不能吞掉同块中附带的科学文字。
+            guest_stamp = re.fullmatch(
+                r'downloadedbygueston(?:january|february|march|april|may|june|july|august|'
+                r'september|october|november|december)(?:0?[1-9]|[12]\d|3[01]),\d{4}\.?', stamp_text)
+            if not re.match(r'downloadedfromhttps?://', stamp_text) and not guest_stamp:
                 continue
             results.append({'file_id':ir.source_file_id,'block_id':b.block_id,
                 'category':'non_result_content','reason':'Publisher download stamp verified against the original PDF text layer; not scientific content.',
