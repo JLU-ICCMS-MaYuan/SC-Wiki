@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+from copy import deepcopy
 import json
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
@@ -270,12 +271,12 @@ def structure_record(structure, state_key, path, origin=None, state_context=None
         data = {k: parsed[k] for k in ('cell_parameters', 'atom_count', 'volume', 'elements')}
         data['structure_hash'] = structure_hash
     except (ValueError, KeyError):
-        structure_hash = item_identity(data.get('structure_text'))
+        structure_hash = item_identity(data.get('structure_text')) if data.get('structure_text') else None
         provenance['verified'] = False
     review_key = data.get('review_key') or structure.get('review_key') or (item_identity('structure-original-id', structure['id']) if structure.get('id') else item_identity('structure-candidate', structure['candidate_id']) if structure.get('candidate_id') else item_identity('inline-structure', state_key))
     key = item_identity('structure', state_key, review_key)
     return dict(key=key, item_key=key, field=path, fields=[path], label='晶体结构与晶格参数',
-                current_value=data, kind='structure', claim=data, evidences=[], provenance=provenance, structure_hash=structure_hash, state_key=state_key,
+                current_value=data, kind='structure', claim=data, evidences=deepcopy(structure.get('sources') or []), provenance=provenance, structure_hash=structure_hash, state_key=state_key,
                 legacy_structure_item_key=item_identity('structure', state_key, structure_hash), _state_context=state_context or {})
 
 
@@ -321,12 +322,30 @@ def augment_upload(draft, records, origins):
             representation = _candidate_conventional_representation(candidate)
             if representation:
                 structures.append(({'structure_format': 'cif', 'structure_text': representation[0], 'candidate_id': candidate.get('candidate_id'), 'review_key': candidate.get('review_key')}, f'structure_candidates[{ci}]'))
+        related = [issue for issue in draft.get('structural_extraction_issues') or []
+                   if issue.get('state_key') == state.get('state_key') or str(issue.get('field') or '').startswith(f'material_states[{index}].structure')]
+        if not structures:
+            structures = [({}, f'material_states[{index}].structure')]
         for structure, path in structures:
             try:
                 hash_value = validate_structure_text(structure['structure_format'], structure['structure_text'])['structure_hash']
             except (ValueError, KeyError):
                 hash_value = ''
-            records.append(structure_record(structure, state.get('state_key') or f'state-{index+1}', path, origins.get(hash_value), structure_context(state)))
+            record = structure_record(structure, state.get('state_key') or f'state-{index+1}', path, origins.get(hash_value), structure_context(state))
+            record['required'] = bool(structure.get('structure_text'))
+            if related and not record['provenance'].get('verified'):
+                record['_structure_issue'] = '；'.join(str(issue['reason']) for issue in related)
+                record['evidences'].extend(e for issue in related for e in issue.get('sources') or [])
+            records.append(record)
+    for index, issue in enumerate(draft.get('structural_extraction_issues') or []):
+        if issue.get('state_key') or issue.get('field'):
+            continue
+        key = item_identity('unassigned-structure', issue.get('candidate_id'), issue.get('reason'))
+        records.append(dict(key=key, item_key=key, field=f'structural_extraction_issues[{index}]',
+            fields=[f'structural_extraction_issues[{index}]'], label='结构归属待核对', kind='structure_issue',
+            current_value=None, claim={}, required=False, evidences=deepcopy(issue.get('sources') or []),
+            _structure_issue=issue.get('reason') or '结构归属无法确定'))
+
 
 
 def ordered_check_rows(session, target, target_id, *, lock=False):

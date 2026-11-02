@@ -63,6 +63,7 @@ async def submit_revision(paper_id: int, payload: RevisionSubmit, user: User = D
 
 @router.post('/{paper_id}/revision-draft/structure-candidates')
 async def upload_structure(paper_id: int, revision_id: str = Form(...), material_state_index: int = Form(..., ge=0),
+                           state_key: str | None = Form(None),
                            file: UploadFile = File(...), user: User = Depends(get_current_user)):
     from backend.api.rag import MAX_UPLOAD_BYTES
     from backend.ingest.upload_contracts import structure_format_for_filename
@@ -81,12 +82,18 @@ async def upload_structure(paper_id: int, revision_id: str = Form(...), material
 
     async def operation(session):
         _, saved = await revisions.load_for_write(session, paper_id, user, revision_id)
-        if material_state_index >= len(saved.draft.get('material_states') or []):
+        target_index = material_state_index
+        if state_key:
+            matches = [i for i, state in enumerate(saved.draft.get('material_states') or []) if state.get('state_key') == state_key]
+            if len(matches) != 1:
+                revisions.error(409, 'material_state_not_found', '目标材料状态已变化，结构未写入其他材料')
+            target_index = matches[0]
+        if target_index >= len(saved.draft.get('material_states') or []):
             revisions.error(400, 'material_state_not_found', '请先保存新增的材料状态，再上传结构')
         try:
             candidate = build_structure_candidate(structure_format=fmt, structure_text=raw.decode('utf-8'),
                 source={'file_id': uuid.uuid4().hex, 'filename': filename, 'role': 'attachment'},
-                material_state_ref=f'material_states[{material_state_index}]')
+                material_state_ref=f'material_states[{target_index}]')
         except (UnicodeDecodeError, StructureCandidateError, ValueError) as exc:
             revisions.error(400, 'structure_validation_failed', str(exc))
         await session.run_sync(lambda s: register_structure_origin(s, 'revision', revision_id, candidate, user.id, user.username, filename, raw))

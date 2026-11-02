@@ -116,6 +116,37 @@ async def structures_match_current(session, paper, draft):
     return sorted(requested) == sorted(stored)
 
 
+async def update_structure_metadata(session, paper, draft):
+    """同几何仅更新真正变化的来源/备注，不为此重建整张科学图。"""
+    from backend.ingest.canonical_structure import structure_metadata
+    requests = []
+    for state in draft.get('material_states') or []:
+        if isinstance(state.get('structure'), dict):
+            metadata = structure_metadata(state['structure'])
+            if metadata:
+                requests.append((state.get('state_key'), metadata))
+    if not requests:
+        return False
+    states = dict((await session.execute(select(models.MaterialState.id, models.MaterialState.state_key)
+        .where(models.MaterialState.paper_id == paper.id))).all())
+    rows = (await session.scalars(select(models.StructureModel).where(models.StructureModel.paper_id == paper.id))).all()
+    by_state = {states[row.material_state_id]: row for row in rows}
+    changed = False
+    for key, metadata in requests:
+        row = by_state.get(key)
+        if row is None:
+            continue
+        previous = row.metadata_json or {}
+        if not previous and not any(metadata.get(name) for name in ('sources', 'derivation', 'user_note')):
+            # 旧结构查看时补出的派生表示不是一次人工修改。
+            continue
+        updated = {**previous, **metadata}
+        if updated != previous:
+            row.metadata_json = updated
+            changed = True
+    return changed
+
+
 def remap_structure_key(key, id_map):
     if key and key.startswith('structure-'):
         suffix = key.removeprefix('structure-')
@@ -144,6 +175,8 @@ async def preserve_structure_metadata(session, paper, draft, originals, evidence
             id_map[old['id']] = new.id
             used_ids.add(new.id)
             unchanged.add(old['id'])
+            if not new.metadata_json and old.get('metadata_json'):
+                new.metadata_json = deepcopy(old['metadata_json'])
             for key in STRUCTURE_METADATA:
                 setattr(new, key, (old.get(key) or review_identity('structure-original-id', old['id'])) if key == 'review_key' else old[key])
     for candidate in confirmed_candidates(draft):
@@ -164,6 +197,8 @@ async def preserve_structure_metadata(session, paper, draft, originals, evidence
         id_map[old['id']] = new.id
         if unchanged_structure_text(old, representation[0]):
             unchanged.add(old['id'])
+            if not new.metadata_json and old.get('metadata_json'):
+                new.metadata_json = deepcopy(old['metadata_json'])
             for key in STRUCTURE_METADATA:
                 setattr(new, key, (old.get(key) or review_identity('structure-original-id', old['id'])) if key == 'review_key' else old[key])
     by_id = {s.id: s for s in new_structures}

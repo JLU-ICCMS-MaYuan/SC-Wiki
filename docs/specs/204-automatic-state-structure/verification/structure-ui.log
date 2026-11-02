@@ -1,0 +1,1785 @@
+The CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+ ✓ tests/01_decentralized_uploading/structure-rounding-notice.test.tsx (2 tests) 51ms
+ ✓ tests/01_decentralized_uploading/structure-detail-collapse.test.tsx (1 test) 97ms
+stderr | tests/02_identity_governance/admin-structure-upload.test.tsx > T032：论文结构补传（契约 C2） > 管理员书目行保存文本期号，保留原页码范围
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ❯ tests/02_identity_governance/admin-structure-upload.test.tsx (3 tests | 3 failed) 3278ms
+   × T032：论文结构补传（契约 C2） > 管理员书目行保存文本期号，保留原页码范围 1133ms
+     → Unable to find role="button" and name "编辑"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_7_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_8_"
+                placeholder="Formula"
+                type="text"
+                value=""[39...
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_7_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_8_"
+                placeholder="Formula"
+                type="text"
+                value=""[39...
+   × T032：论文结构补传（契约 C2） > 上传结构附件调用论文结构端点（multipart），候选出现在材料状态下 1073ms
+     → Unable to find role="button" and name "编辑"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_q_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_r_"
+                placeholder="Formula"
+                type="text"
+                value=""[39...
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_q_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_r_"
+                placeholder="Formula"
+                type="text"
+                value=""[39...
+   × T032：论文结构补传（契约 C2） > 删除（不采用）结构附件后保存，C1 body 不含该候选 1071ms
+     → Unable to find role="button" and name "编辑"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_1d_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_1e_"
+                placeholder="Formula"
+                type="text"
+                value=""[...
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_1d_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_1e_"
+                placeholder="Formula"
+                type="text"
+                value=""[...
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/02_identity_governance/admin-structure-upload.test.tsx > T032：论文结构补传（契约 C2） > 管理员书目行保存文本期号，保留原页码范围
+TestingLibraryElementError: Unable to find role="button" and name "编辑"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_7_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_8_"
+                placeholder="Formula"
+                type="text"
+                value=""[39...
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_7_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_8_"
+                placeholder="Formula"
+                type="text"
+                value=""[39...
+ ❯ waitForWrapper frontend/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ openEditDialog tests/02_identity_governance/admin-structure-upload.test.tsx:157:33
+    155|   renderAdminRoutes()
+    156|   await user.click(await screen.findByRole('button', { name: '论文审核…
+    157|   await user.click(await screen.findByRole('button', { name: '编辑' }))
+       |                                 ^
+    158|   expect(await screen.findByText('编辑论文')).toBeVisible()
+    159|   return user
+ ❯ tests/02_identity_governance/admin-structure-upload.test.tsx:164:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/02_identity_governance/admin-structure-upload.test.tsx > T032：论文结构补传（契约 C2） > 上传结构附件调用论文结构端点（multipart），候选出现在材料状态下
+TestingLibraryElementError: Unable to find role="button" and name "编辑"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_q_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_r_"
+                placeholder="Formula"
+                type="text"
+                value=""[39...
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_q_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_r_"
+                placeholder="Formula"
+                type="text"
+                value=""[39...
+ ❯ waitForWrapper frontend/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ openEditDialog tests/02_identity_governance/admin-structure-upload.test.tsx:157:33
+    155|   renderAdminRoutes()
+    156|   await user.click(await screen.findByRole('button', { name: '论文审核…
+    157|   await user.click(await screen.findByRole('button', { name: '编辑' }))
+       |                                 ^
+    158|   expect(await screen.findByText('编辑论文')).toBeVisible()
+    159|   return user
+ ❯ tests/02_identity_governance/admin-structure-upload.test.tsx:178:5
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  tests/02_identity_governance/admin-structure-upload.test.tsx > T032：论文结构补传（契约 C2） > 删除（不采用）结构附件后保存，C1 body 不含该候选
+TestingLibraryElementError: Unable to find role="button" and name "编辑"
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_1d_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_1e_"
+                placeholder="Formula"
+                type="text"
+                value=""[...
+
+Ignored nodes: comments, script, style
+<body>
+  <div>
+    <div
+      class="MuiBox-root css-0"
+    >
+      <div
+        class="MuiBox-root css-v08z5u"
+      >
+        <div
+          class="MuiBox-root css-0"
+        >
+          <span
+            class="MuiTypography-root MuiTypography-overline css-6mw38q-MuiTypography-root"
+          >
+            WORKSPACE
+          </span>
+          <h4
+            class="MuiTypography-root MuiTypography-h4 css-17509dz-MuiTypography-root"
+          >
+            管理员工作台
+          </h4>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1c6jmjg"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-ya23g-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <button
+            aria-label="论文审核"
+            class="MuiButtonBase-root Mui-focusVisible MuiCardActionArea-root css-coyn9m-MuiButtonBase-root-MuiCardActionArea-root"
+            tabindex="0"
+            type="button"
+          >
+            <div
+              class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+            >
+              <span
+                class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+              >
+                论文审核
+              </span>
+              <h3
+                class="MuiTypography-root MuiTypography-h3 css-njidxq-MuiTypography-root"
+              >
+                1
+              </h3>
+              <span
+                class="MuiTypography-root MuiTypography-caption css-nx0mzg-MuiTypography-root"
+              >
+                点击审核
+                 →
+              </span>
+            </div>
+            <span
+              class="MuiCardActionArea-focusHighlight css-1h5un5t-MuiCardActionArea-focusHighlight"
+            />
+            <span
+              class="MuiTouchRipple-root css-r3djoj-MuiTouchRipple-root"
+            />
+          </button>
+        </div>
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-1sp3tdw-MuiPaper-root-MuiCard-root"
+          style="--Paper-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2),0px 1px 1px 0px rgba(0,0,0,0.14),0px 1px 3px 0px rgba(0,0,0,0.12);"
+        >
+          <div
+            class="MuiCardContent-root css-1lt5qva-MuiCardContent-root"
+          >
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1374baf-MuiTypography-root"
+            >
+              当前角色
+            </span>
+            <h6
+              class="MuiTypography-root MuiTypography-h6 MuiTypography-noWrap css-1isxtvv-MuiTypography-root"
+              title="管理员"
+            >
+              管理员
+            </h6>
+            <span
+              class="MuiTypography-root MuiTypography-caption MuiTypography-noWrap css-13n9w9p-MuiTypography-root"
+              title="reviewer"
+            >
+              reviewer
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-0"
+      >
+        <div
+          class="MuiBox-root css-kinmfw"
+        >
+          <div
+            class="MuiFormControl-root MuiTextField-root css-up55c7-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_1d_"
+                placeholder="搜索标题/DOI/期刊…"
+                type="text"
+                value=""
+              />
+              <fieldset
+                aria-hidden="true"
+                class="MuiOutlinedInput-notchedOutline css-18p5xg2-MuiNotchedOutlined-root-MuiOutlinedInput-notchedOutline"
+              >
+                <legend
+                  class="css-1nf2c5d-MuiNotchedOutlined-root"
+                >
+                  <span
+                    aria-hidden="true"
+                    class="notranslate"
+                  >
+                    ​
+                  </span>
+                </legend>
+              </fieldset>
+            </div>
+          </div>
+          <div
+            class="MuiFormControl-root MuiTextField-root css-5enmrt-MuiFormControl-root-MuiTextField-root"
+          >
+            <div
+              class="MuiInputBase-root MuiOutlinedInput-root MuiInputBase-colorPrimary MuiInputBase-formControl MuiInputBase-sizeSmall css-quhxjy-MuiInputBase-root-MuiOutlinedInput-root"
+            >
+              <input
+                aria-invalid="false"
+                class="MuiInputBase-input MuiOutlinedInput-input MuiInputBase-inputSizeSmall css-1pzfmz2-MuiInputBase-input-MuiOutlinedInput-input"
+                id="_r_1e_"
+                placeholder="Formula"
+                type="text"
+                value=""[...
+ ❯ waitForWrapper frontend/node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ frontend/node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ openEditDialog tests/02_identity_governance/admin-structure-upload.test.tsx:157:33
+    155|   renderAdminRoutes()
+    156|   await user.click(await screen.findByRole('button', { name: '论文审核…
+    157|   await user.click(await screen.findByRole('button', { name: '编辑' }))
+       |                                 ^
+    158|   expect(await screen.findByText('编辑论文')).toBeVisible()
+    159|   return user
+ ❯ tests/02_identity_governance/admin-structure-upload.test.tsx:203:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 3 passed (6)
+   Start at  19:34:17
+   Duration  6.24s (transform 432ms, setup 0ms, collect 3.52s, tests 3.43s, environment 752ms, prepare 133ms)

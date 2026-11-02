@@ -542,6 +542,7 @@ type StructureModel struct {
 	NuclearTreatment    string    `gorm:"size:32;not null" json:"nuclear_treatment"`
 	ExchangeCorrelation *string   `gorm:"size:100" json:"exchange_correlation"`
 	CalculationCode     *string   `gorm:"size:100" json:"calculation_code"`
+	MetadataJSON        *string   `gorm:"type:json;column:metadata_json" json:"metadata,omitempty"`
 	MethodParameters    *string   `gorm:"type:json" json:"method_parameters"`
 	SourceLocator       *string   `gorm:"size:500" json:"source_locator"`
 	CreatedAt           time.Time `json:"created_at"`

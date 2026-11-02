@@ -1374,38 +1374,10 @@ def _legacy_state_superconductor_kind(material_states: list[dict[str, Any]]) -> 
     return next(iter(non_unknown)) if len(non_unknown) == 1 else "unknown"
 
 
-def _bind_structure_candidates(draft: dict[str, Any], candidates: list[dict[str, Any]]) -> None:
-    """只在空间群与压力唯一对应时，把 PDF 结构放入材料状态。"""
-    states = draft.get("material_states") or []
-    for candidate in candidates:
-        if not str(candidate.get("material_state_ref") or "").startswith("unassigned:"):
-            continue
-        reported = candidate.get("reported_structure") or {}
-        symbol = str(reported.get("space_group_symbol") or "").strip().casefold().replace(" ", "")
-        pressure = reported.get("pressure_value_gpa")
-        if symbol and pressure is not None:
-            matches = [index for index, state in enumerate(states)
-                       if str(state.get("reported_space_group_symbol") or "").strip().casefold().replace(" ", "") == symbol
-                       and state.get("pressure_value_gpa") is not None
-                       and abs(float(state["pressure_value_gpa"]) - float(pressure)) < 0.01]
-        elif not symbol and pressure is None and len(states) == 1:
-            matches = [0]
-        else:
-            matches = []
-        # 空间群和压力仍须与化学式同时相符，不能跨化合物分配同空间群结构。
-        material = str(reported.get("material") or "").strip()
-        if material:
-            from pymatgen.core import Composition
-            compatible = []
-            for index in matches:
-                try:
-                    if Composition(material).reduced_composition == Composition(states[index].get("material") or "").reduced_composition:
-                        compatible.append(index)
-                except ValueError:
-                    continue
-            matches = compatible
-        if len(matches) == 1:
-            candidate["material_state_ref"] = f"material_states[{matches[0]}]"
+def _bind_structure_candidates(draft: dict[str, Any], candidates: list[dict[str, Any]], *, sources=(), model=None, on_response=None) -> None:
+    """模型联合原文确定结构归属；正式草稿只写S.structure。"""
+    from .canonical_structure import assign_structures
+    assign_structures(draft, candidates, sources, model or complete_json, on_response=on_response)
 
 
 def _prune_generated_properties(draft: dict[str, Any]) -> list[dict[str, Any]]:
@@ -1576,15 +1548,11 @@ def _normalize_draft(
             if preserve_citation_extraction and isinstance(raw.get("citation_extraction"), dict)
             else None
         ),
-        "structure_candidates": [
-            item for item in _as_list(raw.get("structure_candidates"))
-            if isinstance(item, dict)
-        ],
         "research_motivation": paper["research_motivation"],
         "classification_evidence": _as_list(raw.get("classification_evidence")),
         "field_evidence": field_evidence,
     }
-    for field in ("structural_observations", "structural_extraction_version", "structural_extraction_issues"):
+    for field in ("structural_extraction_version", "structural_extraction_issues"):
         if field in raw:
             normalized[field] = raw[field]
     if isinstance(raw.get("theoretical_subtype_assessment"), dict):
@@ -2442,12 +2410,9 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                                     "seconds": motivation_seconds},
         })
         validate_draft_generated_english(draft)
-        _bind_structure_candidates(draft, structure_candidates)
-        draft["structure_candidates"] = structure_candidates
-        for candidate in structure_candidates:
-            candidate.setdefault("retention", "pending")
-        draft["structural_observations"] = structural_observations
         draft["structural_extraction_issues"] = structural_issues
+        _bind_structure_candidates(draft, structure_candidates, sources=form_sources(document_set, scientific_sources), model=complete_json,
+            on_response=lambda response: _atomic_write_json(artifact_directory(task_id) / 'structure_assignment_response.json', response))
         draft["structural_extraction_version"] = "structural-records-v1"
         draft["citation_extraction"] = citation_extraction
         if state.get("parser_profile") == "complementary":

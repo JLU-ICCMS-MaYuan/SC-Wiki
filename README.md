@@ -382,4 +382,4 @@ Shadow 已使用独立 RQ 作业与文件快照生成对照，禁止提交或改
 
 科学表单的标准键以 [版本化字段清单](backend/data/scientific_form_contract.v1.json) 为准。更改键、类型或含义前，先按 [#203 字段契约](docs/specs/203-fixed-form-field-contract/spec.md) 审查并登记；运行 npm run test:field-contract --prefix frontend，以及现有表单契约和故障注入检查。人工扩展继续使用人工入口。
 
-本机迁移操作与恢复步骤见 [操作说明](docs/specs/203-fixed-form-field-contract/quickstart.md)。
+[#204 规范结构](docs/specs/204-automatic-state-structure/spec.md) 统一保存到材料状态的 structure；模型自动归属仍需原文、几何与字段审核。迁移与备份恢复步骤见 [本机操作说明](docs/specs/203-fixed-form-field-contract/quickstart.md)。专用迁移工具限定 127.0.0.1:3307/scwiki；普通 Alembic 命令不能绕过预检执行该库的 #203/#204 迁移。不得据此部署其他数据库或阿里云。

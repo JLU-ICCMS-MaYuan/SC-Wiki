@@ -212,3 +212,12 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 独立容器运行目录可使用 `python3 scripts/export-llm-env.py <私有源.env> <专用输出.env>`，只导出编号组和 `LLM_DEFAULT`，输出文件权限为 0600，替换旧目录项但不触碰其他凭据。Compose 接收导出文件后，需重新创建 Python/Worker 容器以加载新值。
 
 这项配置传递不改变 #112 的操作系统范围、数据包兼容性门或当前 Makefile，也不自动修复已经缺失的运行目录。详细使用方式见[编号模型使用验收](../../specs/116-env-llm-catalog/quickstart.md)。
+
+
+## 固定字段与规范结构迁移（#203/#204）
+
+本机科学表单契约迁移使用scripts/migrate_fixed_form_contract.py，目标限定127.0.0.1:3307/scwiki及配套草稿缓存。执行真实SQL备份、JSON精确数字补档、隔离恢复和迁移演练，再在停写窗口转换当前工作稿及正式记录；不使用stamp，不改原始PDF或冻结历史。科学值、结构、谱、来源和缓存均须重读核验。MySQL DDL恢复依靠完整备份，不能宣称事务回滚可以撤销DDL。步骤及本次证据见[操作说明](../../specs/203-fixed-form-field-contract/quickstart.md)。
+
+受测本机版本清单固定已执行的20261102_0204。并行资讯任务20261102_0160未在本次执行，逐项登记在local-deploy-schema.json的deferred_source_heads；此清单不代表该任务完成。启动核验要求源码迁移头恰好等于“受测头+明确暂缓头”、数据库头恰好等于受测头，并核对各表列、约束及外键；未登记的新头、额外数据库头或结构差异仍阻止启动。Linux与Mac的受测头清单保持一致。
+
+这次恢复的是本机原生Python、Go、Vite及原先运行的相关worker，不涉及Git推送、镜像或阿里云发布。私有SQL/Redis备份和凭据不进入Git；冻结快照仍使用其原定义读取。

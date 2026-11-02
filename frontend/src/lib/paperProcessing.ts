@@ -470,6 +470,10 @@ export function normalizeUploadDraft(value: unknown): UploadDraft {
     field_evidence: fieldEvidence,
     field_suggestions_error: raw.field_suggestions_error || null,
   }
+  if (raw._form_contract_version === 1) {
+    delete normalized.structure_candidates
+    delete normalized.structural_observations
+  }
   return normalized
 
 }

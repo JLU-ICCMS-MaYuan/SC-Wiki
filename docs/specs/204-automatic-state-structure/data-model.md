@@ -1,0 +1,13 @@
+# 数据与所有权
+
+论文通用21项：title、knowledge_graph_title、authors、corresponding_authors、co_first_authors、journal、year、volume、issue_number、pages、doi、paper_type、theoretical_subtype、superconductor_kind、material_families、abstract、keywords_tags、methodology、summary、key_finding、research_motivation。
+
+材料状态通用11项：material_name、material、element_count、material_dimensionality、crystal_system、reported_space_group_symbol、reported_space_group_number、structure_families、state_kind、pressure_value_gpa、structure。结构优化沿structure_optimization保存。
+
+计算条件公共字段：calculation_code、electronic_method、exchange_correlation_functional、phonon_method、vibrational_treatment；软件组qe、epw、sscha。组内白名单由共享契约提供，保留原始值、类型及unit_raw。人工extensions与标准值分开，不信任模型自报human来源。
+
+Tc参数沿parameters.lambda_ep/omega_log/mu_star及既定范围表达；共同资料仍为metadata.tc_contexts/tc_context_ref。谱使用独立集合及curve.kind，不复制进payload。热力学为thermodynamic_stability.basis/cases及既有7项case字段。
+
+S.structure承接structure_format/structure_text、空间群、来源、校验、派生表示、派生依据及人工备注。解析临时候选不成为第二个正式结构容器。契约版本和业务身份由服务端负责。
+
+ScientificWorkDraft/原科学实体图持有当前值；Redis为缓存；PaperHistoryEvent冻结快照只读。迁移后旧核对绑定不得当作新内容自动通过。

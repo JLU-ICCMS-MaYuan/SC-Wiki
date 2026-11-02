@@ -1,0 +1,476 @@
+{
+  "paper": {
+    "paper_type": "theoretical",
+    "superconductor_kind": "conventional",
+    "theoretical_subtype": "calculation"
+  },
+  "material_states": [
+    {
+      "state_key": "state-1",
+      "material_name": null,
+      "pressure_value_gpa": 150.0,
+      "reported_space_group_symbol": "P6/mmm",
+      "structure_optimization": "sscha",
+      "state_kind": "theoretical",
+      "material": "LaSc2H24",
+      "property_modules": []
+    },
+    {
+      "state_key": "state-2",
+      "material_name": null,
+      "pressure_value_gpa": 167.0,
+      "reported_space_group_symbol": "P6/mmm",
+      "structure_optimization": "sscha",
+      "state_kind": "theoretical",
+      "material": "LaSc2H24",
+      "property_modules": []
+    },
+    {
+      "state_key": "state-3",
+      "material_name": null,
+      "pressure_value_gpa": 200.0,
+      "reported_space_group_symbol": "P6/mmm",
+      "structure_optimization": "sscha",
+      "state_kind": "theoretical",
+      "material": "LaSc2H24",
+      "property_modules": []
+    },
+    {
+      "state_key": "state-300-sscha",
+      "material_name": null,
+      "pressure_value_gpa": 300.0,
+      "reported_space_group_symbol": "P6/mmm",
+      "structure_optimization": "sscha",
+      "state_kind": "theoretical",
+      "material": "LaSc2H24",
+      "property_modules": []
+    },
+    {
+      "state_key": "state-4",
+      "material_name": null,
+      "pressure_value_gpa": 250.0,
+      "reported_space_group_symbol": "P6/mmm",
+      "structure_optimization": "sscha",
+      "state_kind": "theoretical",
+      "material": "LaSc2H24",
+      "property_modules": []
+    },
+    {
+      "state_key": "state-5",
+      "material_name": null,
+      "pressure_value_gpa": 290.0,
+      "reported_space_group_symbol": "P6/mmm",
+      "structure_optimization": "classical_static",
+      "state_kind": "theoretical",
+      "material": "LaSc2H24",
+      "property_modules": []
+    },
+    {
+      "state_key": "state-6",
+      "material_name": null,
+      "pressure_value_gpa": 300.0,
+      "reported_space_group_symbol": "P6/mmm",
+      "structure_optimization": "classical_static",
+      "state_kind": "theoretical",
+      "material": "LaSc2H24",
+      "property_modules": [],
+      "structure": {
+        "structure_format": "cif",
+        "structure_text": "data_image0\n_chemical_formula_structural       LaSc2H24\n_chemical_formula_sum              \"La1 Sc2 H24\"\n_cell_length_a       4.711999999999999\n_cell_length_b       4.711999999999999\n_cell_length_c       3.236\n_cell_angle_alpha    90.0\n_cell_angle_beta     90.0\n_cell_angle_gamma    120.00000000000001\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.0  0.0  0.49999999999999994  1.0000\n  Sc  Sc1       1.0  0.3333333333333334  0.6666666666666666  0.0  1.0000\n  Sc  Sc2       1.0  0.6666666666666667  0.3333333333333333  0.0  1.0000\n  H   H1        1.0  0.7594000000000002  0.5188  0.49999999999999994  1.0000\n  H   H2        1.0  0.2406000000000001  0.7594000000000001  0.49999999999999994  1.0000\n  H   H3        1.0  0.24059999999999995  0.48119999999999996  0.49999999999999994  1.0000\n  H   H4        1.0  0.7594000000000001  0.24059999999999998  0.49999999999999994  1.0000\n  H   H5        1.0  0.48119999999999996  0.24059999999999998  0.49999999999999994  1.0000\n  H   H6        1.0  0.5188  0.7594  0.49999999999999994  1.0000\n  H   H7        1.0  0.23799999999999996  0.0  0.0  1.0000\n  H   H8        1.0  0.23799999999999996  0.23799999999999996  0.0  1.0000\n  H   H9        1.0  0.762  0.762  0.0  1.0000\n  H   H10       1.0  0.9999999999999999  0.7619999999999999  0.0  1.0000\n  H   H11       1.0  0.762  4.712321836269765e-17  0.0  1.0000\n  H   H12       1.0  0.0  0.23799999999999996  0.0  1.0000\n  H   H13       1.0  0.386  0.0  0.711  1.0000\n  H   H14       1.0  0.386  0.386  0.711  1.0000\n  H   H15       1.0  0.386  0.0  0.28900000000000003  1.0000\n  H   H16       1.0  0.386  0.386  0.28900000000000003  1.0000\n  H   H17       1.0  0.614  0.614  0.28900000000000003  1.0000\n  H   H18       1.0  0.0  0.614  0.28900000000000003  1.0000\n  H   H19       1.0  0.614  0.0  0.28900000000000003  1.0000\n  H   H20       1.0  0.0  0.386  0.28900000000000003  1.0000\n  H   H21       1.0  0.0  0.386  0.711  1.0000\n  H   H22       1.0  0.614  0.0  0.711  1.0000\n  H   H23       1.0  0.614  0.614  0.711  1.0000\n  H   H24       1.0  0.0  0.614  0.711  1.0000\n",
+        "space_group_symbol": "P6/mmm",
+        "space_group_number": null,
+        "review_key": "d2de5cb93dda6a34f2b60990:dafe294d32814c12",
+        "structure_hash": "854f9f0316c6cecf0b0f78e11984141c1f41b5407ada5c2ee63e02388a576e28",
+        "validation": {
+          "structure_format": "cif",
+          "structure_hash": "854f9f0316c6cecf0b0f78e11984141c1f41b5407ada5c2ee63e02388a576e28",
+          "atom_count": 27,
+          "elements": [
+            "H",
+            "La",
+            "Sc"
+          ],
+          "cell_parameters": {
+            "a": 4.711999999999999,
+            "b": 4.712,
+            "c": 3.236,
+            "alpha": 90.0,
+            "beta": 90.0,
+            "gamma": 120.0
+          },
+          "volume": 62.22282262451137,
+          "ase_valid": true
+        },
+        "representations": {
+          "primitive": {
+            "cif": {
+              "cell_kind": "primitive",
+              "format": "cif",
+              "text": "data_image0\n_chemical_formula_structural       LaSc2H24\n_chemical_formula_sum              \"La1 Sc2 H24\"\n_cell_length_a       4.711999999999999\n_cell_length_b       4.711999999999999\n_cell_length_c       3.236\n_cell_angle_alpha    90.0\n_cell_angle_beta     90.0\n_cell_angle_gamma    120.00000000000001\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.0  0.0  0.49999999999999994  1.0000\n  Sc  Sc1       1.0  0.3333333333333334  0.6666666666666666  0.0  1.0000\n  Sc  Sc2       1.0  0.6666666666666667  0.3333333333333333  0.0  1.0000\n  H   H1        1.0  0.7594000000000002  0.5188  0.49999999999999994  1.0000\n  H   H2        1.0  0.2406000000000001  0.7594000000000001  0.49999999999999994  1.0000\n  H   H3        1.0  0.24059999999999995  0.48119999999999996  0.49999999999999994  1.0000\n  H   H4        1.0  0.7594000000000001  0.24059999999999998  0.49999999999999994  1.0000\n  H   H5        1.0  0.48119999999999996  0.24059999999999998  0.49999999999999994  1.0000\n  H   H6        1.0  0.5188  0.7594  0.49999999999999994  1.0000\n  H   H7        1.0  0.23799999999999996  0.0  0.0  1.0000\n  H   H8        1.0  0.23799999999999996  0.23799999999999996  0.0  1.0000\n  H   H9        1.0  0.762  0.762  0.0  1.0000\n  H   H10       1.0  0.9999999999999999  0.7619999999999999  0.0  1.0000\n  H   H11       1.0  0.762  4.712321836269765e-17  0.0  1.0000\n  H   H12       1.0  0.0  0.23799999999999996  0.0  1.0000\n  H   H13       1.0  0.386  0.0  0.711  1.0000\n  H   H14       1.0  0.386  0.386  0.711  1.0000\n  H   H15       1.0  0.386  0.0  0.28900000000000003  1.0000\n  H   H16       1.0  0.386  0.386  0.28900000000000003  1.0000\n  H   H17       1.0  0.614  0.614  0.28900000000000003  1.0000\n  H   H18       1.0  0.0  0.614  0.28900000000000003  1.0000\n  H   H19       1.0  0.614  0.0  0.28900000000000003  1.0000\n  H   H20       1.0  0.0  0.386  0.28900000000000003  1.0000\n  H   H21       1.0  0.0  0.386  0.711  1.0000\n  H   H22       1.0  0.614  0.0  0.711  1.0000\n  H   H23       1.0  0.614  0.614  0.711  1.0000\n  H   H24       1.0  0.0  0.614  0.711  1.0000\n",
+              "standardization_method": "pymatgen.get_primitive_standard_structure",
+              "validation": {
+                "structure_format": "cif",
+                "structure_hash": "854f9f0316c6cecf0b0f78e11984141c1f41b5407ada5c2ee63e02388a576e28",
+                "atom_count": 27,
+                "elements": [
+                  "H",
+                  "La",
+                  "Sc"
+                ],
+                "cell_parameters": {
+                  "a": 4.711999999999999,
+                  "b": 4.711999999999999,
+                  "c": 3.236,
+                  "alpha": 90.0,
+                  "beta": 90.0,
+                  "gamma": 120.0
+                },
+                "volume": 62.22282262451137,
+                "ase_valid": true
+              }
+            },
+            "poscar": {
+              "cell_kind": "primitive",
+              "format": "poscar",
+              "text": "La Sc H \n 1.0000000000000000\n     2.3559999999999999   -4.0807117026322741    0.0000000000000000\n     2.3559999999999999    4.0807117026322741    0.0000000000000000\n     0.0000000000000000    0.0000000000000000    3.2360000000000002\n La  Sc  H  \n   1   2  24\nCartesian\n  0.0000000000000000  0.0000000000000000  1.6180000000000001\n  2.3559999999999999  1.3602372342107578  0.0000000000000000\n  2.3559999999999999 -1.3602372342107583  0.0000000000000000\n  3.0114392000000003 -0.9818192356533255  1.6180000000000001\n  2.3560000000000003  2.1170732313256240  1.6180000000000001\n  1.7005607999999997  0.9818192356533253  1.6180000000000001\n  2.3559999999999999 -2.1170732313256240  1.6180000000000001\n  1.7005607999999999 -0.9818192356533249  1.6180000000000001\n  3.0114391999999999  0.9818192356533249  1.6180000000000001\n  0.5607279999999999 -0.9712093852264810  0.0000000000000000\n  1.1214559999999998  0.0000000000000000  0.0000000000000000\n  3.5905440000000000  0.0000000000000002  0.0000000000000000\n  1.7952720000000000  3.1095023174057927  0.0000000000000000\n  1.7952720000000000 -3.1095023174057927  0.0000000000000000\n  0.5607279999999999  0.9712093852264810  0.0000000000000000\n  0.9094160000000000 -1.5751547172160578  2.3007960000000001\n  1.8188320000000000  0.0000000000000000  2.3007960000000001\n  0.9094160000000000 -1.5751547172160578  0.9352040000000001\n  1.8188320000000000  0.0000000000000000  0.9352040000000001\n  2.8931679999999997  0.0000000000000002  0.9352040000000001\n  1.4465839999999999  2.5055569854162161  0.9352040000000001\n  1.4465839999999999 -2.5055569854162161  0.9352040000000001\n  0.9094160000000000  1.5751547172160578  0.9352040000000001\n  0.9094160000000000  1.5751547172160578  2.3007960000000001\n  1.4465839999999999 -2.5055569854162161  2.3007960000000001\n  2.8931679999999997  0.0000000000000002  2.3007960000000001\n  1.4465839999999999  2.5055569854162161  2.3007960000000001\n",
+              "standardization_method": "pymatgen.get_primitive_standard_structure",
+              "validation": {
+                "structure_format": "poscar",
+                "structure_hash": "e46917c9205cadd522a9e3369afd0a69d0879346675883489d39eb831f81d789",
+                "atom_count": 27,
+                "elements": [
+                  "H",
+                  "La",
+                  "Sc"
+                ],
+                "cell_parameters": {
+                  "a": 4.711999999999999,
+                  "b": 4.711999999999999,
+                  "c": 3.236,
+                  "alpha": 90.0,
+                  "beta": 90.0,
+                  "gamma": 120.0
+                },
+                "volume": 62.22282262451137,
+                "ase_valid": true
+              }
+            }
+          },
+          "conventional": {
+            "cif": {
+              "cell_kind": "conventional",
+              "format": "cif",
+              "text": "data_image0\n_chemical_formula_structural       LaSc2H24\n_chemical_formula_sum              \"La1 Sc2 H24\"\n_cell_length_a       4.711999999999999\n_cell_length_b       4.711999999999999\n_cell_length_c       3.236\n_cell_angle_alpha    90.0\n_cell_angle_beta     90.0\n_cell_angle_gamma    120.00000000000001\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.0  0.0  0.49999999999999994  1.0000\n  Sc  Sc1       1.0  0.3333333333333334  0.6666666666666666  0.0  1.0000\n  Sc  Sc2       1.0  0.6666666666666667  0.3333333333333333  0.0  1.0000\n  H   H1        1.0  0.7594000000000002  0.5188  0.49999999999999994  1.0000\n  H   H2        1.0  0.2406000000000001  0.7594000000000001  0.49999999999999994  1.0000\n  H   H3        1.0  0.24059999999999995  0.48119999999999996  0.49999999999999994  1.0000\n  H   H4        1.0  0.7594000000000001  0.24059999999999998  0.49999999999999994  1.0000\n  H   H5        1.0  0.48119999999999996  0.24059999999999998  0.49999999999999994  1.0000\n  H   H6        1.0  0.5188  0.7594  0.49999999999999994  1.0000\n  H   H7        1.0  0.23799999999999996  0.0  0.0  1.0000\n  H   H8        1.0  0.23799999999999996  0.23799999999999996  0.0  1.0000\n  H   H9        1.0  0.762  0.762  0.0  1.0000\n  H   H10       1.0  0.9999999999999999  0.7619999999999999  0.0  1.0000\n  H   H11       1.0  0.762  4.712321836269765e-17  0.0  1.0000\n  H   H12       1.0  0.0  0.23799999999999996  0.0  1.0000\n  H   H13       1.0  0.386  0.0  0.711  1.0000\n  H   H14       1.0  0.386  0.386  0.711  1.0000\n  H   H15       1.0  0.386  0.0  0.28900000000000003  1.0000\n  H   H16       1.0  0.386  0.386  0.28900000000000003  1.0000\n  H   H17       1.0  0.614  0.614  0.28900000000000003  1.0000\n  H   H18       1.0  0.0  0.614  0.28900000000000003  1.0000\n  H   H19       1.0  0.614  0.0  0.28900000000000003  1.0000\n  H   H20       1.0  0.0  0.386  0.28900000000000003  1.0000\n  H   H21       1.0  0.0  0.386  0.711  1.0000\n  H   H22       1.0  0.614  0.0  0.711  1.0000\n  H   H23       1.0  0.614  0.614  0.711  1.0000\n  H   H24       1.0  0.0  0.614  0.711  1.0000\n",
+              "standardization_method": "pymatgen.get_conventional_standard_structure",
+              "validation": {
+                "structure_format": "cif",
+                "structure_hash": "854f9f0316c6cecf0b0f78e11984141c1f41b5407ada5c2ee63e02388a576e28",
+                "atom_count": 27,
+                "elements": [
+                  "H",
+                  "La",
+                  "Sc"
+                ],
+                "cell_parameters": {
+                  "a": 4.711999999999999,
+                  "b": 4.711999999999999,
+                  "c": 3.236,
+                  "alpha": 90.0,
+                  "beta": 90.0,
+                  "gamma": 120.0
+                },
+                "volume": 62.22282262451137,
+                "ase_valid": true
+              }
+            },
+            "poscar": {
+              "cell_kind": "conventional",
+              "format": "poscar",
+              "text": "La Sc H \n 1.0000000000000000\n     2.3559999999999999   -4.0807117026322741    0.0000000000000000\n     2.3559999999999999    4.0807117026322741    0.0000000000000000\n     0.0000000000000000    0.0000000000000000    3.2360000000000002\n La  Sc  H  \n   1   2  24\nCartesian\n  0.0000000000000000  0.0000000000000000  1.6180000000000001\n  2.3559999999999999  1.3602372342107578  0.0000000000000000\n  2.3559999999999999 -1.3602372342107583  0.0000000000000000\n  3.0114392000000003 -0.9818192356533255  1.6180000000000001\n  2.3560000000000003  2.1170732313256240  1.6180000000000001\n  1.7005607999999997  0.9818192356533253  1.6180000000000001\n  2.3559999999999999 -2.1170732313256240  1.6180000000000001\n  1.7005607999999999 -0.9818192356533249  1.6180000000000001\n  3.0114391999999999  0.9818192356533249  1.6180000000000001\n  0.5607279999999999 -0.9712093852264810  0.0000000000000000\n  1.1214559999999998  0.0000000000000000  0.0000000000000000\n  3.5905440000000000  0.0000000000000002  0.0000000000000000\n  1.7952720000000000  3.1095023174057927  0.0000000000000000\n  1.7952720000000000 -3.1095023174057927  0.0000000000000000\n  0.5607279999999999  0.9712093852264810  0.0000000000000000\n  0.9094160000000000 -1.5751547172160578  2.3007960000000001\n  1.8188320000000000  0.0000000000000000  2.3007960000000001\n  0.9094160000000000 -1.5751547172160578  0.9352040000000001\n  1.8188320000000000  0.0000000000000000  0.9352040000000001\n  2.8931679999999997  0.0000000000000002  0.9352040000000001\n  1.4465839999999999  2.5055569854162161  0.9352040000000001\n  1.4465839999999999 -2.5055569854162161  0.9352040000000001\n  0.9094160000000000  1.5751547172160578  0.9352040000000001\n  0.9094160000000000  1.5751547172160578  2.3007960000000001\n  1.4465839999999999 -2.5055569854162161  2.3007960000000001\n  2.8931679999999997  0.0000000000000002  2.3007960000000001\n  1.4465839999999999  2.5055569854162161  2.3007960000000001\n",
+              "standardization_method": "pymatgen.get_conventional_standard_structure",
+              "validation": {
+                "structure_format": "poscar",
+                "structure_hash": "e46917c9205cadd522a9e3369afd0a69d0879346675883489d39eb831f81d789",
+                "atom_count": 27,
+                "elements": [
+                  "H",
+                  "La",
+                  "Sc"
+                ],
+                "cell_parameters": {
+                  "a": 4.711999999999999,
+                  "b": 4.711999999999999,
+                  "c": 3.236,
+                  "alpha": 90.0,
+                  "beta": 90.0,
+                  "gamma": 120.0
+                },
+                "volume": 62.22282262451137,
+                "ase_valid": true
+              }
+            }
+          }
+        },
+        "sources": [
+          {
+            "file_id": "124",
+            "filename": "2024 La-Sc-H 何新玲-SI.pdf",
+            "page": 8,
+            "role": "supplementary",
+            "source_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+            "quote": " \n8 \nTable S1. The calculated crystal structural parameters of thermodynamically stable La-\nSc and La-Sc-H compounds at 300 GPa. \nCompound \nSpace \ngroup \nLattice Parameters \n (Å, degree) \nAtomic coordinates (fractional) \nAtoms \nX \nY \nZ \nLaSc2 \nFddd \na = 4.248 \nb = 6.845 \nc = 7.682 \n = 90 \n = 90 \n = 90 \nLa (8b) \nSc (16f) \n0.000 \n0.000 \n0.000 \n0.843 \n0.500 \n0.000 \nLaSc2H24 \nP6/mmm \na = 4.712 \nb = 4.712 \nc = 3.236 \n = 90 \n = 90 \n = 120 \nLa (1b) \nSc (2c) \nH (6m) \nH (6j) \nH (12n) \n0.000 \n0.333 \n0.759 \n0.762 \n0.614 \n0.000 \n0.667 \n0.519 \n0.000 \n0.000 \n0.500 \n0.000 \n0.500 \n0.000 \n0.289 \n \n \n \n \n \n"
+          }
+        ],
+        "derivation": {
+          "kind": "space_group_expansion",
+          "label": "按原文精度恢复对称约束后展开",
+          "inferred_cell_parameters": [],
+          "rounding_adjustments": [
+            {
+              "site": "Sc(2c)",
+              "rule": "reported_precision_symmetry_projection",
+              "reported_tokens": [
+                "0.333",
+                "0.667",
+                "0.000"
+              ],
+              "reported_coordinates": [
+                0.333,
+                0.667,
+                0.0
+              ],
+              "derived_coordinates": [
+                0.33333333333333337,
+                0.6666666666666666,
+                0.0
+              ],
+              "rounding_half_width": [
+                0.0005,
+                0.0005,
+                0.0005
+              ],
+              "coordinate_changes": [
+                0.00033333333333335213,
+                -0.00033333333333340764,
+                0.0
+              ],
+              "multiplicity": 2,
+              "stabilizer_order": 12
+            },
+            {
+              "site": "H(6m)",
+              "rule": "reported_precision_symmetry_projection",
+              "reported_tokens": [
+                "0.759",
+                "0.519",
+                "0.500"
+              ],
+              "reported_coordinates": [
+                0.759,
+                0.519,
+                0.5
+              ],
+              "derived_coordinates": [
+                0.7594,
+                0.5188,
+                0.5
+              ],
+              "rounding_half_width": [
+                0.0005,
+                0.0005,
+                0.0005
+              ],
+              "coordinate_changes": [
+                0.00039999999999995595,
+                -0.00019999999999997797,
+                0.0
+              ],
+              "multiplicity": 6,
+              "stabilizer_order": 4
+            }
+          ],
+          "rounded_fractional_sites": [
+            "Sc(2c)",
+            "H(6m)"
+          ]
+        },
+        "user_note": null,
+        "nuclear_treatment": "classical_static"
+      }
+    },
+    {
+      "state_key": "state-7",
+      "material_name": null,
+      "pressure_value_gpa": 350.0,
+      "reported_space_group_symbol": "P6/mmm",
+      "structure_optimization": "classical_static",
+      "state_kind": "theoretical",
+      "material": "LaSc2H24",
+      "property_modules": []
+    },
+    {
+      "material": "LaSc2",
+      "material_name": null,
+      "pressure_value_gpa": 300.0,
+      "reported_space_group_symbol": "Fddd",
+      "structure_optimization": "classical_static",
+      "state_kind": "theoretical",
+      "state_key": "structure-state-ecf1f002534a22d34ffd",
+      "property_modules": [],
+      "schema_version": 2,
+      "structure": {
+        "structure_format": "cif",
+        "structure_text": "data_image0\n_chemical_formula_structural       La8Sc16\n_chemical_formula_sum              \"La8 Sc16\"\n_cell_length_a       4.248\n_cell_length_b       6.845\n_cell_length_c       7.682000000000002\n_cell_angle_alpha    90.0\n_cell_angle_beta     90.0\n_cell_angle_gamma    90.0\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.5  0.0  0.0  1.0000\n  La  La2       1.0  0.7499999999999999  0.7500000000000001  0.75  1.0000\n  La  La3       1.0  0.5  0.5  0.49999999999999994  1.0000\n  La  La4       1.0  0.7499999999999999  0.25  0.24999999999999997  1.0000\n  La  La5       1.0  0.0  0.0  0.49999999999999994  1.0000\n  La  La6       1.0  0.25  0.7500000000000001  0.24999999999999997  1.0000\n  La  La7       1.0  0.0  0.5  0.0  1.0000\n  La  La8       1.0  0.25  0.25  0.75  1.0000\n  Sc  Sc1       1.0  0.5  0.657  0.0  1.0000\n  Sc  Sc2       1.0  0.5  0.343  0.0  1.0000\n  Sc  Sc3       1.0  0.7499999999999999  0.4070000000000001  0.75  1.0000\n  Sc  Sc4       1.0  0.7499999999999999  0.09299999999999997  0.75  1.0000\n  Sc  Sc5       1.0  0.5  0.15700000000000006  0.49999999999999994  1.0000\n  Sc  Sc6       1.0  0.5  0.843  0.49999999999999994  1.0000\n  Sc  Sc7       1.0  0.7499999999999999  0.907  0.24999999999999997  1.0000\n  Sc  Sc8       1.0  0.7499999999999999  0.593  0.24999999999999997  1.0000\n  Sc  Sc9       1.0  0.0  0.657  0.49999999999999994  1.0000\n  Sc  Sc10      1.0  5.803178740149863e-33  0.343  0.49999999999999994  1.0000\n  Sc  Sc11      1.0  0.25  0.4070000000000001  0.24999999999999997  1.0000\n  Sc  Sc12      1.0  0.25  0.09299999999999997  0.24999999999999997  1.0000\n  Sc  Sc13      1.0  2.9015893700749314e-33  0.15700000000000006  0.0  1.0000\n  Sc  Sc14      1.0  0.0  0.843  0.0  1.0000\n  Sc  Sc15      1.0  0.25  0.907  0.75  1.0000\n  Sc  Sc16      1.0  0.25  0.593  0.75  1.0000\n",
+        "space_group_symbol": "Fddd",
+        "space_group_number": null,
+        "review_key": "24637b350db9c6e329aa76f8:c3bd8a4da5f8eb5f",
+        "structure_hash": "be2fe3c23c2add50381dd376ca23e2b13c7661f3fbd8fa7f5fa73d6ef9b3b74b",
+        "validation": {
+          "structure_format": "cif",
+          "structure_hash": "be2fe3c23c2add50381dd376ca23e2b13c7661f3fbd8fa7f5fa73d6ef9b3b74b",
+          "atom_count": 24,
+          "elements": [
+            "La",
+            "Sc"
+          ],
+          "cell_parameters": {
+            "a": 4.248,
+            "b": 6.845,
+            "c": 7.682000000000002,
+            "alpha": 90.0,
+            "beta": 90.0,
+            "gamma": 90.0
+          },
+          "volume": 223.37381592000008,
+          "ase_valid": true
+        },
+        "representations": {
+          "primitive": {
+            "cif": {
+              "cell_kind": "primitive",
+              "format": "cif",
+              "text": "data_image0\n_chemical_formula_structural       La2Sc4\n_chemical_formula_sum              \"La2 Sc4\"\n_cell_length_a       5.1445881516405185\n_cell_length_b       4.389152196039687\n_cell_length_c       4.028012195860385\n_cell_angle_alpha    75.21606299655014\n_cell_angle_beta     55.579898727969514\n_cell_angle_gamma    49.204038275480336\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.5  0.49999999999999994  0.5  1.0000\n  La  La2       1.0  0.7500000000000004  0.75  0.7499999999999998  1.0000\n  Sc  Sc1       1.0  0.1570000000000003  0.843  0.15699999999999995  1.0000\n  Sc  Sc2       1.0  0.8430000000000001  0.15699999999999995  0.8430000000000001  1.0000\n  Sc  Sc3       1.0  0.40700000000000014  0.09299999999999997  0.4070000000000001  1.0000\n  Sc  Sc4       1.0  0.09300000000000003  0.4069999999999998  0.09299999999999992  1.0000\n",
+              "standardization_method": "pymatgen.get_primitive_standard_structure",
+              "validation": {
+                "structure_format": "cif",
+                "structure_hash": "2ab039067bdfd245bc65a8653edcee5a7a9a7a78654b5b267275a0a0aa1324b8",
+                "atom_count": 6,
+                "elements": [
+                  "La",
+                  "Sc"
+                ],
+                "cell_parameters": {
+                  "a": 5.1445881516405185,
+                  "b": 4.389152196039687,
+                  "c": 4.028012195860385,
+                  "alpha": 75.21606299655014,
+                  "beta": 55.579898727969514,
+                  "gamma": 49.204038275480336
+                },
+                "volume": 55.843453980000014,
+                "ase_valid": true
+              }
+            },
+            "poscar": {
+              "cell_kind": "primitive",
+              "format": "poscar",
+              "text": "La Sc\n 1.0000000000000000\n    -0.0000000000000002    3.4224999999999999    3.8410000000000011\n     2.1240000000000001    0.0000000000000000    3.8410000000000011\n     2.1240000000000001    3.4224999999999999    0.0000000000000003\n La  Sc \n   2   4\nCartesian\n  2.1240000000000001  3.4224999999999999  3.8410000000000011\n  3.1859999999999995  5.1337500000000000  5.7615000000000034\n  2.1239999999999997  1.0746650000000002  3.8410000000000020\n  2.1240000000000001  5.7703350000000002  3.8410000000000020\n  1.0620000000000001  2.7859150000000006  1.9205000000000012\n  1.0619999999999994  0.6365849999999998  1.9204999999999999\n",
+              "standardization_method": "pymatgen.get_primitive_standard_structure",
+              "validation": {
+                "structure_format": "poscar",
+                "structure_hash": "57e544947346fdb6dd9bc75ada2f8ce1ae15dcceecb7d80c9afbc6b6934c0f59",
+                "atom_count": 6,
+                "elements": [
+                  "La",
+                  "Sc"
+                ],
+                "cell_parameters": {
+                  "a": 5.1445881516405185,
+                  "b": 4.389152196039687,
+                  "c": 4.028012195860385,
+                  "alpha": 75.21606299655014,
+                  "beta": 55.579898727969514,
+                  "gamma": 49.204038275480336
+                },
+                "volume": 55.843453980000014,
+                "ase_valid": true
+              }
+            }
+          },
+          "conventional": {
+            "cif": {
+              "cell_kind": "conventional",
+              "format": "cif",
+              "text": "data_image0\n_chemical_formula_structural       La8Sc16\n_chemical_formula_sum              \"La8 Sc16\"\n_cell_length_a       4.248\n_cell_length_b       6.845\n_cell_length_c       7.682000000000002\n_cell_angle_alpha    90.0\n_cell_angle_beta     90.0\n_cell_angle_gamma    90.0\n\n_space_group_name_H-M_alt    \"P 1\"\n_space_group_IT_number       1\n\nloop_\n  _space_group_symop_operation_xyz\n  'x, y, z'\n\nloop_\n  _atom_site_type_symbol\n  _atom_site_label\n  _atom_site_symmetry_multiplicity\n  _atom_site_fract_x\n  _atom_site_fract_y\n  _atom_site_fract_z\n  _atom_site_occupancy\n  La  La1       1.0  0.5  0.0  0.0  1.0000\n  La  La2       1.0  0.7499999999999999  0.7500000000000001  0.75  1.0000\n  La  La3       1.0  0.5  0.5  0.49999999999999994  1.0000\n  La  La4       1.0  0.7499999999999999  0.25  0.24999999999999997  1.0000\n  La  La5       1.0  0.0  0.0  0.49999999999999994  1.0000\n  La  La6       1.0  0.25  0.7500000000000001  0.24999999999999997  1.0000\n  La  La7       1.0  0.0  0.5  0.0  1.0000\n  La  La8       1.0  0.25  0.25  0.75  1.0000\n  Sc  Sc1       1.0  0.5  0.657  0.0  1.0000\n  Sc  Sc2       1.0  0.5  0.343  0.0  1.0000\n  Sc  Sc3       1.0  0.7499999999999999  0.4070000000000001  0.75  1.0000\n  Sc  Sc4       1.0  0.7499999999999999  0.09299999999999997  0.75  1.0000\n  Sc  Sc5       1.0  0.5  0.15700000000000006  0.49999999999999994  1.0000\n  Sc  Sc6       1.0  0.5  0.843  0.49999999999999994  1.0000\n  Sc  Sc7       1.0  0.7499999999999999  0.907  0.24999999999999997  1.0000\n  Sc  Sc8       1.0  0.7499999999999999  0.593  0.24999999999999997  1.0000\n  Sc  Sc9       1.0  0.0  0.657  0.49999999999999994  1.0000\n  Sc  Sc10      1.0  5.803178740149863e-33  0.343  0.49999999999999994  1.0000\n  Sc  Sc11      1.0  0.25  0.4070000000000001  0.24999999999999997  1.0000\n  Sc  Sc12      1.0  0.25  0.09299999999999997  0.24999999999999997  1.0000\n  Sc  Sc13      1.0  2.9015893700749314e-33  0.15700000000000006  0.0  1.0000\n  Sc  Sc14      1.0  0.0  0.843  0.0  1.0000\n  Sc  Sc15      1.0  0.25  0.907  0.75  1.0000\n  Sc  Sc16      1.0  0.25  0.593  0.75  1.0000\n",
+              "standardization_method": "pymatgen.get_conventional_standard_structure",
+              "validation": {
+                "structure_format": "cif",
+                "structure_hash": "be2fe3c23c2add50381dd376ca23e2b13c7661f3fbd8fa7f5fa73d6ef9b3b74b",
+                "atom_count": 24,
+                "elements": [
+                  "La",
+                  "Sc"
+                ],
+                "cell_parameters": {
+                  "a": 4.248,
+                  "b": 6.845,
+                  "c": 7.682000000000002,
+                  "alpha": 90.0,
+                  "beta": 90.0,
+                  "gamma": 90.0
+                },
+                "volume": 223.37381592000008,
+                "ase_valid": true
+              }
+            },
+            "poscar": {
+              "cell_kind": "conventional",
+              "format": "poscar",
+              "text": "La Sc\n 1.0000000000000000\n     4.2480000000000002    0.0000000000000000    0.0000000000000003\n    -0.0000000000000004    6.8449999999999998    0.0000000000000004\n     0.0000000000000000    0.0000000000000000    7.6820000000000022\n La  Sc \n   8  16\nCartesian\n  2.1240000000000001  0.0000000000000000  0.0000000000000001\n  3.1859999999999995  5.1337500000000000  5.7615000000000025\n  2.1240000000000001  3.4224999999999999  3.8410000000000015\n  3.1859999999999999  1.7112499999999999  1.9205000000000008\n  0.0000000000000000  0.0000000000000000  3.8410000000000011\n  1.0619999999999998  5.1337500000000000  1.9205000000000010\n -0.0000000000000002  3.4224999999999999  0.0000000000000002\n  1.0620000000000001  1.7112499999999999  5.7615000000000016\n  2.1239999999999997  4.4971649999999999  0.0000000000000004\n  2.1240000000000001  2.3478349999999999  0.0000000000000003\n  3.1859999999999999  2.7859150000000001  5.7615000000000016\n  3.1859999999999999  0.6365849999999997  5.7615000000000016\n  2.1240000000000001  1.0746650000000002  3.8410000000000011\n  2.1239999999999997  5.7703349999999993  3.8410000000000015\n  3.1859999999999995  6.2084149999999996  1.9205000000000012\n  3.1859999999999995  4.0590849999999996  1.9205000000000010\n -0.0000000000000003  4.4971649999999999  3.8410000000000015\n -0.0000000000000001  2.3478349999999999  3.8410000000000011\n  1.0619999999999998  2.7859150000000001  1.9205000000000008\n  1.0620000000000001  0.6365849999999997  1.9205000000000005\n -0.0000000000000001  1.0746650000000002  0.0000000000000001\n -0.0000000000000004  5.7703349999999993  0.0000000000000004\n  1.0619999999999996  6.2084149999999996  5.7615000000000025\n  1.0619999999999998  4.0590849999999996  5.7615000000000016\n",
+              "standardization_method": "pymatgen.get_conventional_standard_structure",
+              "validation": {
+                "structure_format": "poscar",
+                "structure_hash": "f7d284f9f6dc536ff45b38ce11024e4118d7e8898dc438628d17d13e1c141a69",
+                "atom_count": 24,
+                "elements": [
+                  "La",
+                  "Sc"
+                ],
+                "cell_parameters": {
+                  "a": 4.248,
+                  "b": 6.845,
+                  "c": 7.682000000000002,
+                  "alpha": 90.0,
+                  "beta": 90.0,
+                  "gamma": 90.0
+                },
+                "volume": 223.37381592000008,
+                "ase_valid": true
+              }
+            }
+          }
+        },
+        "sources": [
+          {
+            "file_id": "124",
+            "filename": "2024 La-Sc-H 何新玲-SI.pdf",
+            "page": 8,
+            "role": "supplementary",
+            "source_sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+            "quote": " \n8 \nTable S1. The calculated crystal structural parameters of thermodynamically stable La-\nSc and La-Sc-H compounds at 300 GPa. \nCompound \nSpace \ngroup \nLattice Parameters \n (Å, degree) \nAtomic coordinates (fractional) \nAtoms \nX \nY \nZ \nLaSc2 \nFddd \na = 4.248 \nb = 6.845 \nc = 7.682 \n = 90 \n = 90 \n = 90 \nLa (8b) \nSc (16f) \n0.000 \n0.000 \n0.000 \n0.843 \n0.500 \n0.000 \nLaSc2H24 \nP6/mmm \na = 4.712 \nb = 4.712 \nc = 3.236 \n = 90 \n = 90 \n = 120 \nLa (1b) \nSc (2c) \nH (6m) \nH (6j) \nH (12n) \n0.000 \n0.333 \n0.759 \n0.762 \n0.614 \n0.000 \n0.667 \n0.519 \n0.000 \n0.000 \n0.500 \n0.000 \n0.500 \n0.000 \n0.289 \n \n \n \n \n \n"
+          }
+        ],
+        "derivation": {
+          "kind": "space_group_expansion",
+          "label": "空间群展开",
+          "inferred_cell_parameters": [],
+          "rounding_adjustments": [],
+          "rounded_fractional_sites": []
+        },
+        "user_note": null,
+        "nuclear_treatment": "classical_static"
+      }
+    }
+  ],
+  "structural_extraction_issues": []
+}

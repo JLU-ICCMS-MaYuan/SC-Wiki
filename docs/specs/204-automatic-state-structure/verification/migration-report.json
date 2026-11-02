@@ -1,0 +1,110 @@
+{
+  "target": "127.0.0.1:3307/scwiki",
+  "before": {
+    "paper_history_events": {
+      "count": 3,
+      "sha256": "99d090581ac3a362307821e733cd332e3a8056f5515fc589cb19b08e03a4550f"
+    },
+    "paper_files": {
+      "count": 2,
+      "sha256": "59508668c96f6114179e5443ee89672993d419b05f1e930d5bb08cc563a6ab37"
+    },
+    "paper_chunks": {
+      "count": 48,
+      "sha256": "b574f7319f04b130555d9ff943b41def8ac5fc06d882ffd8e5fabb8bd8f17c3c"
+    },
+    "property_records": {
+      "count": 20,
+      "sha256": "e3b96ac3d6ff321654aa4d3bd146c7c9f9a3b652f13f5ed8d2b816649da00215"
+    },
+    "material_state_values": "fec632c0a3494b191ff3873accb224aeb4ec521b61e890f5a2b1636fe88169b8",
+    "material_states": {
+      "count": 8,
+      "sha256": "ee7d361ca9fac3e90feadae8bde44ff88d4bb35f35100fee16c015f35a0b5034"
+    },
+    "structure_values": "f17fa0c68d1209cce6460301d4666774f53b5b828eae4bfe69c254fe64b25dbd",
+    "structure_models": {
+      "count": 1,
+      "sha256": "f17fa0c68d1209cce6460301d4666774f53b5b828eae4bfe69c254fe64b25dbd"
+    },
+    "scientific_work_drafts": {
+      "count": 3,
+      "sha256": "deff4b4fe1774e3b86e6b6ec7acee75517dfd18d29317665e1edf7670902bc6b"
+    },
+    "spectrum_collections": {
+      "count": 171,
+      "sha256": "8f729d5771fc88091db6c0e3e2539536b23747e9c2ec707c8763e2585a101405"
+    },
+    "spectrum_runs": {
+      "count": 424,
+      "sha256": "21b7f28cbf13b8c5a03bc8249a13e4e658f8b5b7745c0d0fdc75e87fce7b2d7f"
+    },
+    "heads": [
+      "20261020_0049",
+      "20261101_0198"
+    ]
+  },
+  "after": {
+    "paper_history_events": {
+      "count": 3,
+      "sha256": "99d090581ac3a362307821e733cd332e3a8056f5515fc589cb19b08e03a4550f"
+    },
+    "paper_files": {
+      "count": 2,
+      "sha256": "59508668c96f6114179e5443ee89672993d419b05f1e930d5bb08cc563a6ab37"
+    },
+    "paper_chunks": {
+      "count": 48,
+      "sha256": "b574f7319f04b130555d9ff943b41def8ac5fc06d882ffd8e5fabb8bd8f17c3c"
+    },
+    "property_records": {
+      "count": 20,
+      "sha256": "e3b96ac3d6ff321654aa4d3bd146c7c9f9a3b652f13f5ed8d2b816649da00215"
+    },
+    "material_state_values": "fec632c0a3494b191ff3873accb224aeb4ec521b61e890f5a2b1636fe88169b8",
+    "material_states": {
+      "count": 8,
+      "sha256": "fec632c0a3494b191ff3873accb224aeb4ec521b61e890f5a2b1636fe88169b8"
+    },
+    "structure_values": "f17fa0c68d1209cce6460301d4666774f53b5b828eae4bfe69c254fe64b25dbd",
+    "structure_models": {
+      "count": 1,
+      "sha256": "c2ab8afe15b8c1b66ff1dd669f4d64292be0420a149c7d0cf0cf6a55c01d0c60"
+    },
+    "scientific_work_drafts": {
+      "count": 3,
+      "sha256": "97f4843c8a71a16a5898c61b079d5506177a0895178124f126479e26a50725a9"
+    },
+    "spectrum_collections": {
+      "count": 171,
+      "sha256": "8f729d5771fc88091db6c0e3e2539536b23747e9c2ec707c8763e2585a101405"
+    },
+    "spectrum_runs": {
+      "count": 424,
+      "sha256": "21b7f28cbf13b8c5a03bc8249a13e4e658f8b5b7745c0d0fdc75e87fce7b2d7f"
+    },
+    "heads": [
+      "20261102_0204"
+    ]
+  },
+  "backup_sha256": "e8ed39b67dd2ece5d93ed9b7c17e4c2fa1b28555f4d4875cdb55fc7761a982a0",
+  "passed": true,
+  "implementation": {
+    "backend/data/scientific_form_contract.v1.json": "d4f8e5fe53038f7d103bc468c60ad022c1109f44b91b730b5ab29f52c13fe86a",
+    "backend/data/scientific_form_contract.lock.json": "456a37966d73f1a42def716f0602cc8bb131e25d2c70271654ff5fc96cc07424",
+    "backend/ingest/fixed_form_contract.py": "fa2da3c0721e7f6cd5584fb9bc6f4f95f88ba8244d78eb65f260288e2aea7483",
+    "backend/ingest/canonical_structure.py": "7101ec26406eaee4484b8c2909c1b238d358cc476c39853d77f1d875a075c1a8",
+    "backend/services/form_contract_migration.py": "bd52b8fb5e209fb154d45aa4530a1d9e6183d9f18c5118d50ddae274cfe3dc01",
+    "scripts/migrate_fixed_form_contract.py": "3a1109d2d2aeb99224e91002f4e79b142ca060a1e2858b98d9dc087c1d6fb2cf",
+    "alembic/versions/20261102_0203_merge_contract_heads.py": "93f6919538da5021b9e6ab3d0c4ae3fc4c7194334bd05368b5a226badeba4c73",
+    "alembic/versions/20261102_0203_fixed_form_contract.py": "39af26a81d2a11cf01ab3157196fcefd3e2845c0ca17085a4814bff61d3ab2dd",
+    "alembic/versions/20261102_0204_canonical_structure.py": "ba46a59c61c43b28ead3cd298521d593a43a188fd71d5021723538633467fd9d",
+    "resolutions": "550fd9704cf540c2dc930202e475b1630ca05eb1e891ae78d938b903648ef4b2"
+  },
+  "contract_checks": {
+    "draft_records_checked": 15,
+    "formal_records_checked": 20,
+    "retired_columns_absent": true,
+    "canonical_structures_only": true
+  }
+}

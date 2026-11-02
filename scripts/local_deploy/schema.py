@@ -47,7 +47,11 @@ def verify_schema(root: Path, url: str):
     from alembic.script import ScriptDirectory
     from sqlalchemy import create_engine, inspect, text
     expected = set(versions(root)['schema_heads'])
-    if set(ScriptDirectory.from_config(config(root)).get_heads()) != expected:
+    expected_schema = json.loads((root / 'scripts/local-deploy-schema.json').read_text())
+    deferred = set(expected_schema.get('deferred_source_heads') or [])
+    # 并行分支只能在受审清单逐项登记暂缓，不隐式执行未授权的迁移。
+    if (expected & deferred or set(expected_schema['schema_heads']) != expected
+            or set(ScriptDirectory.from_config(config(root)).get_heads()) != expected | deferred):
         raise ValueError('源码迁移头与部署版本清单不一致')
     engine = create_engine(url)
     try:
@@ -58,7 +62,6 @@ def verify_schema(root: Path, url: str):
         with engine.connect() as conn:
             if set(conn.execute(text('SELECT version_num FROM alembic_version')).scalars()) != expected:
                 raise ValueError('数据库全部迁移分支与源码不一致')
-        expected_schema = json.loads((root / 'scripts/local-deploy-schema.json').read_text())
         for name, expected_table in expected_schema['tables'].items():
             if name not in tables:
                 raise ValueError(f'数据库缺少表 {name}')

@@ -1405,6 +1405,7 @@ class StructureModel(Base):
     exchange_correlation = Column(String(100))
     calculation_code = Column(String(100))
     method_parameters = Column(JSON)
+    metadata_json = Column(JSON, nullable=True)
     source_locator = Column(String(500))
     created_at = Column(
         DateTime(timezone=True),

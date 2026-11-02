@@ -348,3 +348,14 @@ La–Sc–H 已通过表格／Methods 专项、隔离 MySQL、正式组件浏览
 主表单字段名不追加状态文字，仅问题标红，通过正常显示；字段名及键盘仍打开已有侧栏，完整状态、理由与恢复操作在侧栏，核对进度沿用现有提示。相关代码与隔离验收见[#196](../../specs/196-bibliography-model-completion/validation.md)、[#197](../../specs/197-unknown-kind-review/validation.md)、[#199](../../specs/199-basic-field-model-review/validation.md)、[#200](../../specs/200-field-color-only/validation.md)。
 
 模型核对物性子项时同时获得实际记录类型、物性代码和扩展字段键值，避免把声子条件放入电子DOS，或在论文中搜索程序内部键名。本机原CaH6稿已完整重跑并自动补核，必要未完成项为0，三项人工确认及SQL／Redis一致性已验证；未报告的可选值保持空。运行边界见[#199本机记录](../../specs/199-basic-field-model-review/runtime-application.md)。
+
+
+## 新版字段与规范结构（#203/#204）
+
+新提取和补全过程遵守固定字段清单；退役方法范围和压力辅助键不能由组装器带回。软件参数按 QE、EPW、SSCHA 分组，科学适用性仍需其字段原文支持；程序不以另一个同义范围字段替代 method_scope。
+
+结构抽取候选只在解析内部临时存在。模型联合正文、SI、表头、结构表、压力与优化方法决定归属；程序检查来源、真实原子组成、压力、静态/准简谐/SSCHA 几何和每卡一份结构，再写 material_states[].structure。原胞/惯用胞与 CIF/POSCAR 是该结构的派生表示。完整伴随材料可有独立状态而没有 Tc；不会制造 Tc 记录。
+
+已有人工结构冲突时保留人工内容。已知归属的问题进入结构字段来源侧栏，未定位项进入已有兜底核对记录。自动填草稿不授予科学审核通过。根 structure_candidates、structural_observations 不进入新正式草稿；原始解析制品、失败响应和冻结历史继续保留。永久结构的 metadata_json 承接来源、校验及派生表示，不复用 method_parameters 改变旧含义。
+
+验证覆盖真实 CaH6 字段重提及 LaSc2H24/LaSc2 结构归属、隔离 MySQL 保存和新会话重读。尚不能据此认定整篇 HTTP/RQ 上传成功；实际页面“材料状态类型”缺失的旧现场仍未复现。详见两份 Spec 验收记录。

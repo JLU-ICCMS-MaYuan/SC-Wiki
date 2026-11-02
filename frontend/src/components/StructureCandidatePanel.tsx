@@ -12,6 +12,7 @@ import { StructureCandidate } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
 
 interface Props {
+  basePath?: string
   hasCanonicalStructure?: boolean
   materialName?: string
   candidates: StructureCandidate[]
@@ -24,7 +25,7 @@ interface Props {
 type CellKind = 'primitive' | 'conventional'
 type StructureFormat = 'cif' | 'poscar'
 
-const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, readOnly = false, onUpload, onChange, hasCanonicalStructure }) => {
+const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, readOnly = false, onUpload, onChange, hasCanonicalStructure, basePath }) => {
   const { t } = useLanguage()
   const preferredCandidate = useMemo(
     () => [...candidates].reverse().find(candidate => candidate.confirmation !== 'excluded') || candidates.at(-1),
@@ -85,14 +86,14 @@ const StructureCandidatePanel: React.FC<Props> = ({ candidates, uploading, readO
   const formatLabel = format === 'cif' ? 'CIF' : 'POSCAR'
 
   return (
-    <Box data-structure-attachment data-scientific-structure={candidate ? true : undefined} data-structure-hash={candidate?.validation?.structure_hash} data-structure-id={candidate?.candidate_id} sx={{ mt: 2, minWidth: 0, pointerEvents: 'auto', ...(readOnly ? { '& .MuiButton-root': { display: 'inline-flex' } } : {}) }}>
+    <Box data-issue-field={basePath ? basePath + '.structure_text' : undefined} data-structure-attachment data-scientific-structure={candidate ? true : undefined} data-structure-hash={candidate?.validation?.structure_hash} data-structure-id={candidate?.candidate_id} sx={{ mt: 2, minWidth: 0, pointerEvents: 'auto', ...(readOnly ? { '& .MuiButton-root': { display: 'inline-flex' } } : {}) }}>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ minHeight: 40 }}>
         <ButtonBase aria-expanded={expanded} aria-controls={contentId} onClick={() => setExpanded(value => !value)} sx={{ minWidth: 0, flex: 1, justifyContent: 'flex-start', textAlign: 'left', gap: 0.5, minHeight: 40, borderRadius: 1, '&.Mui-focusVisible': { outline: '2px solid', outlineColor: 'primary.main', outlineOffset: 2 } }}>
           <ChevronRightIcon fontSize="small" sx={{ flexShrink: 0, transform: expanded ? 'rotate(90deg)' : undefined }} />
           <Typography component="span" variant="subtitle2" fontWeight={700}>{t('upload.crystalStructureTitle')}</Typography>
           <Typography component="span" variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>{uploading ? t('upload.validating') : candidate ? statusLabel : t('upload.structureStatusEmpty')}</Typography>
         </ButtonBase>
-        {candidate && <Typography data-evidence-readonly data-structure-field="structure_text" component="span" variant="caption" sx={{ flexShrink: 0 }}>{t('upload.structureSourceReview')}</Typography>}
+        {<Typography data-issue-field={basePath ? basePath + '.structure_text' : undefined} data-evidence-readonly data-structure-field="structure_text" component="span" variant="caption" sx={{ flexShrink: 0 }}>{t('upload.structureSourceReview')}</Typography>}
       </Stack>
       {/* 隐藏而不卸载，保留画布、视角和选择；来源入口独立于折叠按钮。 */}
       <Box id={contentId} hidden={!expanded}>

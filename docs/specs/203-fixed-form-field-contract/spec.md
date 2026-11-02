@@ -42,9 +42,9 @@ Issue：[#203](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/203)
 
 ## Documentation Impact
 
-- [ ] 新增对应编号的fixed-form-field-contract Spec、Plan、Tasks、数据契约、检查表及验收。
-- [ ] 实现并验证后更新字段映射、PDF管线、来源核对和部署迁移Overview。
-- [ ] 更新README与AGENTS.md中的字段变更及回归约束。
+- [x] 新增对应编号的fixed-form-field-contract Spec、Plan、Tasks、数据契约、检查表及验收。
+- [x] 实现并验证后更新字段映射、PDF管线、来源核对和部署迁移Overview。
+- [x] 更新README与AGENTS.md中的字段变更及回归约束。
 - [ ] Spec远程链接待授权推送并实际验证；未完成不关闭Issue。
 
 ## 确认与实施授权

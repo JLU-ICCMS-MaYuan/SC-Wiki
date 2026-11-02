@@ -350,6 +350,8 @@ def finalize_current_draft(draft, *, model_output=False, legacy=False):
                     payload['calculation_conditions'], _ = convert_conditions(payload['calculation_conditions'])
                 validate_conditions(payload.get('calculation_conditions'), model_output=model_output)
                 record['definition_version'] = max(2, int(record.get('definition_version') or 1))
+    draft.pop('structure_candidates', None)
+    draft.pop('structural_observations', None)
     return draft
 
 

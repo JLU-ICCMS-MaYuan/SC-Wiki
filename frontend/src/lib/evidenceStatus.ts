@@ -6,6 +6,7 @@ export type EvidenceStatus = 'passed' | 'processing' | 'attention' | 'failed'
 export function evidenceStatus(record: EvidenceRecord): EvidenceStatus {
   if (record.review_in_progress) return 'processing'
   const rejected = record.field_decision?.action === 'reject'
+  if (record.review_error && record.status !== 'supported') return 'failed'
   if (record.required === false && !record.human_modified && !rejected) return 'passed'
   if (record.status === 'supported' && !record.stale && !record.pending_review && !rejected) return 'passed'
   if (record.review_error || record.status === 'unchecked'

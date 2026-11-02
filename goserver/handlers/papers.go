@@ -667,6 +667,10 @@ func propertyModulesToDict(modules []models.PropertyModule) []gin.H {
 func structureModelsToDict(structures []models.StructureModel) []gin.H {
 	output := make([]gin.H, 0, len(structures))
 	for _, item := range structures {
+		metadata := json.RawMessage("{}")
+		if item.MetadataJSON != nil && json.Valid([]byte(*item.MetadataJSON)) {
+			metadata = json.RawMessage(*item.MetadataJSON)
+		}
 		output = append(output, gin.H{
 			"id":                 item.ID,
 			"space_group_symbol": item.SpaceGroupSymbol,
@@ -679,6 +683,7 @@ func structureModelsToDict(structures []models.StructureModel) []gin.H {
 			"geometry_method":    item.GeometryMethod,
 			"calculation_code":   item.CalculationCode,
 			"source_locator":     item.SourceLocator,
+			"metadata":           metadata,
 		})
 	}
 	return output

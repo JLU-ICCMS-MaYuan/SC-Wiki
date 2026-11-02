@@ -347,6 +347,8 @@ def draft_records(draft, origins):
     for si, state_data in enumerate(draft.get('material_states') or []):
         for mi, module in enumerate(_property_modules_for_state(state_data)):
             for ri, record in enumerate(module.get('records') or []):
+                if draft.get('_form_contract_version') == 1 and record.get('property_code') == 'band_gap':
+                    continue
                 key = f'{si}/{module["module_key"]}/{record["record_key"]}'
                 records.append(dict(key=key, state_index=si, module_code=module['module_code'], module_key=module['module_key'], record_key=record['record_key'],
                     field=f'material_states[{si}].property_modules[{mi}].records[{ri}]',
@@ -730,6 +732,11 @@ def public_snapshot(snapshot: dict, cached: dict) -> dict:
     records = []
     for r in snapshot['records']:
         result = cached.get(r['key'])
+        if r.get('_structure_issue'):
+            records.append({**r, 'status': 'unchecked', 'pending_review': True,
+                            'reason': r['_structure_issue'],
+                            'review_error': {'code': 'structure_requires_review', 'message': r['_structure_issue']}})
+            continue
         records.append(checked_result(r, result, snapshot['chunks']) if result else {**r, 'status': 'unchecked', 'pending_review': True, 'reason': '待提交时核对'})
     from .scientific_evidence import apply_derived
     records = apply_derived(records)

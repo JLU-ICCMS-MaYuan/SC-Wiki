@@ -1,3 +1,4 @@
+import { canonicalStructureFromCandidate } from '../lib/canonicalStructure'
 import type { PropertySpectrumListing } from '../lib/propertySpectra'
 import WorkdraftRefresh, { useWorkdraftRefresh } from '../components/WorkdraftRefresh'
 import { createFieldDraftSaver } from '../lib/fieldDrafts'
@@ -235,6 +236,12 @@ const AdminPaperEditPage: React.FC = () => {
           setFixedContract(staged.draft._form_contract_version === 1)
           setEditStructureCandidates(staged.draft.structure_candidates || [])
           setEditStructuralObservations(staged.draft.structural_observations || [])
+        } else if (staged.draft?._form_contract_version === 1) {
+          setEditForm(current => ({ ...current, ...staged.draft.paper }))
+          setEditMaterialStates(staged.draft.material_states || [])
+          setFixedContract(true)
+          setEditStructureCandidates([])
+          setEditStructuralObservations([])
         } else if (staged.draft?.paper) {
           // Go 详情的列表为 JSON 文本；保存前值必须与草稿接口的实际数组一致。
           const canonicalPaper = staged.draft.paper
@@ -302,8 +309,8 @@ const AdminPaperEditPage: React.FC = () => {
   // （如无材料状态的综述）不需要触发整体替换。
   const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
   const editableDraft = () => ({ paper: { ...editForm, material_families: editMaterialFamilies },
-    ...(fixedContract ? { _form_contract_version: 1 } : {}), material_states: editMaterialStates, structure_candidates: editStructureCandidates,
-    structural_observations: editStructuralObservations })
+    material_states: editMaterialStates, ...(fixedContract ? { _form_contract_version: 1 } : {
+      structure_candidates: editStructureCandidates, structural_observations: editStructuralObservations }) })
   useEffect(() => {
     if (!editLoading && !fieldSaver.current && paperId) {
       fieldSaver.current = createFieldDraftSaver({target: 'paper', target_id: String(paperId)})
@@ -322,6 +329,9 @@ const AdminPaperEditPage: React.FC = () => {
   // 论文结构补传（契约 C2）：只产出并校验候选、不落库；成功后并入本地候选，
   // 由保存时的 C1 structure_candidates 字段一并提交（T034）。
   const handleUploadStructure = async (stateIndex: number, file: File) => {
+    const targetKey = editMaterialStates[stateIndex]?.state_key
+    const targetStructure = editMaterialStates[stateIndex]?.structure
+    if (!targetKey) throw new Error('目标材料状态缺少稳定身份，请刷新后重试')
     const body = new FormData()
     body.append('material_state_index', String(stateIndex))
     body.append('file', file)
@@ -340,10 +350,8 @@ const AdminPaperEditPage: React.FC = () => {
       representations: data.representations,
       sources: [{ file_id: String(data.candidate_id), filename: file.name, role: 'attachment' }],
     }
-    setEditStructureCandidates(current => [
-      ...current.filter(item => item.candidate_id !== candidate.candidate_id),
-      candidate,
-    ])
+    setEditMaterialStates(current => current.map(state => state.state_key === targetKey && state.structure === targetStructure
+      ? { ...state, structure: canonicalStructureFromCandidate(candidate) } : state))
   }
 
   return (

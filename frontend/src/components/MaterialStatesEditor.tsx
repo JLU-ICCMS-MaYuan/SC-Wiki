@@ -1,3 +1,4 @@
+import { canonicalStructureView, canonicalStructureFromCandidate } from '../lib/canonicalStructure'
 import { changedScientificFields } from '../lib/evidenceFields'
 import { materialStateSummary } from '../lib/materialStateSummary'
 import { PropertySpectraProvider, PropertySpectrumState, PropertySpectrumControls, UnassignedPropertySpectra, type PropertySpectraContext } from './PropertySpectra'
@@ -128,6 +129,7 @@ export const EvidenceNotes: React.FC<{
 
 interface MaterialStatesEditorProps {
   fixedContract?: boolean
+  beforeStructureUpload?: () => Promise<boolean>
   independentStructureWorkspace?: boolean
   propertySpectra?: PropertySpectraContext
   spectrumTarget?: SpectrumTarget
@@ -235,7 +237,7 @@ const SpaceGroupAutocomplete: React.FC<SpaceGroupAutocompleteProps> = ({ value, 
  */
 const EMPTY_SPACE_GROUPS: SpaceGroupOption[] = []
 const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
-  fixedContract = false, states,
+  fixedContract = false, beforeStructureUpload, states,
   onChange,
   onScientificEdit,
   catalogs,
@@ -262,8 +264,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
   const statesRef = useRef(states)
   statesRef.current = states
   // 复用卡片时事件仍读取最新宿主回调，避免保存旧标题或覆盖其他卡片的编辑。
-  const latest = useRef({ onChange, onScientificEdit, onUploadStructure, onStructureCandidatesChange, onError, structureCandidates, taskId, readOnly })
-  latest.current = { onChange, onScientificEdit, onUploadStructure, onStructureCandidatesChange, onError, structureCandidates, taskId, readOnly }
+  const latest = useRef({ onChange, onScientificEdit, onUploadStructure, onStructureCandidatesChange, onError, structureCandidates, taskId, readOnly, beforeStructureUpload })
+  latest.current = { onChange, onScientificEdit, onUploadStructure, onStructureCandidatesChange, onError, structureCandidates, taskId, readOnly, beforeStructureUpload }
   // 折叠状态与元素种类数编辑仅存在于浏览器会话内，不写入草稿、不参与自动保存
   const [collapsedStates, setCollapsedStates] = useState<Record<number, boolean>>({})
   const restoredSpectrumAnchor = useRef('')
@@ -358,6 +360,10 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
   const uploadStructureForState = async (stateIndex: number, file: File) => {
     if (readOnly) return
+    const originalTarget = statesRef.current[stateIndex]
+    if (!originalTarget) return
+    const targetKey = originalTarget.state_key
+    const isTarget = (item: DraftMaterialState) => targetKey ? item.state_key === targetKey : item === originalTarget
     setStructureUploading(current => ({ ...current, [stateIndex]: true }))
     try {
       if (latest.current.onUploadStructure) {
@@ -366,17 +372,23 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
         await latest.current.onUploadStructure(stateIndex, file)
       } else {
         // 上传任务宿主（校对页）：沿用上传任务结构端点，候选写入草稿。
+        if (latest.current.beforeStructureUpload && !(await latest.current.beforeStructureUpload())) return
+        const target = statesRef.current.find(isTarget)
+        if (!target) throw new Error('目标材料状态已移除')
         const body = new FormData()
-        body.append('material_state_index', String(stateIndex))
+        if (target.state_key) body.append('state_key', target.state_key)
+        body.append('expected_structure_hash', String(target.structure?.structure_hash || ''))
+        body.append('material_state_index', String(statesRef.current.indexOf(target)))
         body.append('file', file)
         const response = await api.post<{ ok: boolean; data: StructureCandidate }>(
           `/api/rag/upload-tasks/${latest.current.taskId}/structure-candidates`, body,
         )
         const candidate = unwrapData(response)
-        latest.current.onStructureCandidatesChange?.([
-          ...(latest.current.structureCandidates || []).filter(item => item.candidate_id !== candidate.candidate_id),
-          candidate,
-        ])
+        const currentTarget = statesRef.current.find(isTarget)
+        if (!currentTarget) throw new Error('目标材料状态已移除，结构未写入其他材料')
+        if (currentTarget.structure !== target.structure) throw new Error('上传期间结构已修改，请刷新核对后重试')
+        emitStates(statesRef.current.map(item => isTarget(item)
+          ? { ...item, structure: canonicalStructureFromCandidate(candidate) } : item))
       }
       latest.current.onError?.('')
     } catch (reason) {
@@ -550,6 +562,16 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
 
   const updateStructureCandidate = (candidateId: string, changes: Partial<StructureCandidate>) => {
     if (readOnly) return
+    const canonicalIndex = statesRef.current.findIndex((item, index) =>
+      canonicalStructureView(item.structure, item.state_key || 'state-' + (index + 1), index)?.candidate_id === candidateId)
+    if (canonicalIndex >= 0) {
+      emitStates(statesRef.current.map((item, index) => {
+        if (index !== canonicalIndex) return item
+        if (changes.confirmation === 'excluded') return { ...item, structure: null }
+        return { ...item, structure: { ...item.structure, ...(changes.user_note !== undefined ? { user_note: changes.user_note } : {}) } }
+      }))
+      return
+    }
     latest.current.onStructureCandidatesChange?.((latest.current.structureCandidates || []).map(candidate =>
       candidate.candidate_id === candidateId ? { ...candidate, ...changes } : candidate,
     ))
@@ -661,7 +683,8 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
             const cardIssues = (issues || []).filter(item => item.stateIndex === index || item.field === prefix || item.field.startsWith(prefix + '.'))
             const cardReviews = (reviewFields || []).filter(field => field === prefix || field.startsWith(prefix + '.'))
             const feedback = JSON.stringify([cardIssues, [...new Set(cardReviews)].sort()])
-            const stateCandidates = (structureCandidates || []).filter(candidate => candidate.material_state_ref === prefix)
+            const canonicalView = canonicalStructureView(state.structure, state.state_key || 'state-' + (index + 1), index)
+            const stateCandidates = canonicalView ? [canonicalView] : (structureCandidates || []).filter(candidate => candidate.material_state_ref === prefix)
             const cached = cardCacheRef.current.get(index)
             if (cached && cached.state === state && cached.isCollapsed === isCollapsed && cached.uploading === uploading && cached.elementCountEdit === elementCountEdit
               && cached.feedback === feedback && cached.candidates.length === stateCandidates.length && cached.candidates.every((candidate, i) => candidate === stateCandidates[i])) return cached.element
@@ -889,10 +912,10 @@ const MaterialStatesEditor: React.FC<MaterialStatesEditorProps> = ({
                   ))}
                   </>}
 
-                  <StructureCandidatePanel
+                  <StructureCandidatePanel basePath={prefix + '.structure'}
                     materialName={`${state.material_name || state.material || t('common.notProvided')} · ${t('upload.materialStateNumber', { index: index + 1 })}`}
                     candidates={stateCandidates}
-                    hasCanonicalStructure={Boolean(state.structure?.structure_text)}
+                    hasCanonicalStructure={false}
                     uploading={Boolean(structureUploading[index])}
                     readOnly={readOnly}
                     onUpload={file => void uploadStructureForState(index, file)}

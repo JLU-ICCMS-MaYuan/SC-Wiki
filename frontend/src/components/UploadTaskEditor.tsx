@@ -1,3 +1,4 @@
+import { canonicalStructureFromCandidate } from '../lib/canonicalStructure'
 import type { PropertySpectrumListing } from '../lib/propertySpectra'
 import WorkdraftRefresh, { useWorkdraftRefresh } from './WorkdraftRefresh'
 import { createFieldDraftSaver, preserveRawNumbers } from '../lib/fieldDrafts'
@@ -834,7 +835,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         <EvidenceNotes evidence={classificationEvidence} />
       </Box>
 
-      <MaterialStatesEditor fixedContract={draft._form_contract_version === 1}
+      <MaterialStatesEditor fixedContract={draft._form_contract_version === 1} beforeStructureUpload={() => saveDraft(false)}
         independentStructureWorkspace
         propertySpectra={{ frozenListing: frozenSpectra, initialListing: loadedSpectra, target: revisionPaperId && revisionMeta.current
           ? { target: 'revision', target_id: revisionMeta.current.revision_id }
@@ -864,19 +865,21 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
         spaceGroups={spaceGroups}
         taskId={taskId}
         onUploadStructure={revisionPaperId ? async (index, file) => {
-          if (!draft || !(await saveDraft(false)) || !revisionMeta.current) return
+          const targetKey = draft?.material_states[index]?.state_key
+          if (!targetKey || !(await saveDraft(false)) || !revisionMeta.current) return
           const body = new FormData()
           body.append('file', file)
           body.append('material_state_index', String(index))
           body.append('revision_id', revisionMeta.current.revision_id)
+          body.append('state_key', targetKey)
           const result = await api.post<{ ok: boolean; data: import('../lib/paperProcessing').StructureCandidate }>(`${draftUrl}/structure-candidates`, body)
-          changeDraft(current => ({ ...current, structure_candidates: [...(current.structure_candidates || []), unwrapData(result)] }))
+          changeDraft(current => ({ ...current, material_states: current.material_states.map(state => state.state_key === targetKey ? { ...state, structure: canonicalStructureFromCandidate(unwrapData(result)) } : state) }))
         } : undefined}
         paperType={draft.paper.paper_type}
         superconductorKind={draft.paper.superconductor_kind}
         onError={setError}
       />
-      <PaperStructuralWorkspace candidates={draft.structure_candidates || []} observations={draft.structural_observations || []}
+      {draft.structure_candidates?.length ? <PaperStructuralWorkspace candidates={draft.structure_candidates || []} observations={draft.structural_observations || []}
         readOnly={readOnly || submitting} issues={draft.structural_extraction_issues || []}
         onCandidates={values => setDraftField('structure_candidates', values)}
         onObservations={values => setDraftField('structural_observations', values)}
@@ -896,7 +899,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
             structural_extraction_issues: value.structural_extraction_issues,
             structural_extraction_version: value.structural_extraction_version,
           }))
-        }} />
+        }} /> : null}
     </Box>
     </Box>
   )

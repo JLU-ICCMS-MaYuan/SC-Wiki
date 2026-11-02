@@ -148,6 +148,7 @@ def build_material_state_export(db: Session, *, paper_id: int, state_key: str, u
                 "content": item.structure_text, "sha256": item.structure_hash,
                 "space_group_symbol": item.space_group_symbol, "space_group_number": item.space_group_number,
                 "cell_parameters": item.cell_parameters, "source_locator": item.source_locator,
+                "metadata": item.metadata_json or {},
             } for item in structures],
         },
         "property_modules": module_payloads,

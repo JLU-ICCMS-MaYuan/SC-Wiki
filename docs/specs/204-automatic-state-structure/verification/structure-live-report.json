@@ -1,0 +1,41 @@
+{
+  "model": "deepseek-v4-pro",
+  "sources": [
+    {
+      "file_id": 124,
+      "role": "supplementary",
+      "sha256": "a8db19670dfc30948c14d9792133288d8382588d84822f51666e5c36a476db3c",
+      "pages": 11
+    },
+    {
+      "file_id": 125,
+      "role": "main",
+      "sha256": "7fccce6780e71f826519256542a5416f5b256e1aa2b546b68e194468688e2bbd",
+      "pages": 6
+    }
+  ],
+  "reused": "来源已核对的旧候选坐标；丢弃旧归属和采用决定",
+  "rerun": [
+    "原PDF/SI读取并重新核对哈希",
+    "真实模型归属",
+    "正式几何/材料/压力/每卡一份校验"
+  ],
+  "assigned": [
+    {
+      "state_key": "state-6",
+      "material": "LaSc2H24",
+      "pressure_value_gpa": 300.0,
+      "optimization": "classical_static",
+      "hash": "854f9f0316c6cecf0b0f78e11984141c1f41b5407ada5c2ee63e02388a576e28"
+    },
+    {
+      "state_key": "structure-state-ecf1f002534a22d34ffd",
+      "material": "LaSc2",
+      "pressure_value_gpa": 300.0,
+      "optimization": "classical_static",
+      "hash": "be2fe3c23c2add50381dd376ca23e2b13c7661f3fbd8fa7f5fa73d6ef9b3b74b"
+    }
+  ],
+  "issues": [],
+  "passed": true
+}

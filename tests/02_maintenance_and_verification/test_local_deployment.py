@@ -823,9 +823,11 @@ def test_schema_heads_match_source_on_linux_and_macos(monkeypatch):
     env = module('environment')
     expected = set(ScriptDirectory.from_config(Config(str(ROOT / 'alembic.ini'))).get_heads())
     snapshot = json.loads((ROOT / 'scripts/local-deploy-schema.json').read_text())
-    assert set(snapshot['schema_heads']) == expected
+    applied = set(snapshot['schema_heads'])
+    deferred = set(snapshot.get('deferred_source_heads') or [])
+    assert not applied & deferred and applied | deferred == expected
     assert {'spectrum_collections', 'spectrum_runs'} <= snapshot['tables'].keys()
     for system, machine in [('Linux', 'x86_64'), ('Darwin', 'arm64')]:
         monkeypatch.setattr(env.platform, 'system', lambda: system)
         monkeypatch.setattr(env.platform, 'machine', lambda: machine)
-        assert set(env.versions(ROOT)['schema_heads']) == expected
+        assert set(env.versions(ROOT)['schema_heads']) == applied

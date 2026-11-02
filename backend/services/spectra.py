@@ -148,6 +148,10 @@ def context(session, target, target_id, user, *, write=False):
 
 def structure_dependencies(draft, index):
     hashes=[]
+    states = draft.get("material_states") or []
+    structure = (states[index].get("structure") or {}) if index < len(states) else {}
+    if structure.get("structure_text"):
+        hashes.append(fingerprint(structure["structure_text"]))
     for candidate in draft.get("structure_candidates") or []:
         if candidate.get("confirmation")!="confirmed" or candidate.get("material_state_ref")!=f"material_states[{index}]":
             continue

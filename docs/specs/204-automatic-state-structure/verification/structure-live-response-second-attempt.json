@@ -1,0 +1,45 @@
+[
+  {
+    "assignments": [
+      {
+        "candidate_id": "24637b350db9c6e329aa76f8:c3bd8a4da5f8eb5f",
+        "state_key": null,
+        "source_ids": [
+          "structure-source-7"
+        ],
+        "reason": "Candidate is LaSc2 at 300 GPa, a companion structure from Table S1. No existing state matches this material (all states are LaSc2H24). The source establishes a distinct material and geometry, so a new state is proposed.",
+        "geometry_evidence": {
+          "source_id": "structure-source-7",
+          "cell_parameters": {
+            "a": 4.248,
+            "c": 7.682
+          }
+        },
+        "new_state": {
+          "material": "LaSc2",
+          "material_name": null,
+          "pressure_value_gpa": 300.0,
+          "reported_space_group_symbol": "Fddd",
+          "structure_optimization": "classical_static"
+        }
+      },
+      {
+        "candidate_id": "d2de5cb93dda6a34f2b60990:dafe294d32814c12",
+        "state_key": "state-300-sscha",
+        "source_ids": [
+          "structure-source-7",
+          "structure-source-8"
+        ],
+        "reason": "Candidate is LaSc2H24 at 300 GPa with cell a=4.712, c=3.236 from Table S1. Table S2 lists anharmonic (SSCHA) lattice parameters at 300 GPa as a=4.741, c=3.271, which differ from the candidate's static geometry. The candidate's geometry matches the classical static structure from Table S1, not the SSCHA-optimized geometry. However, the existing state 'state-300-sscha' is labeled as SSCHA at 300 GPa, but its geometry is not explicitly given in the states. The candidate's cell parameters are from Table S1, which is a static optimization (classical_static). The source does not provide a separate SSCHA geometry for 300 GPa in Table S1; Table S2 gives anharmonic parameters but no atomic coordinates. Therefore, the candidate should be assigned to a state representing the static geometry at 300 GPa, not the SSCHA state. Since no existing state matches the static geometry at 300 GPa (state-6 is classical_static at 300 GPa but its cell parameters are not provided in the states), we need to check if state-6 could be the static geometry. The states list includes state-6 with pressure 300 GPa and structure_optimization classical_static, but no cell parameters. The candidate's geometry is from Table S1, which is a static optimization. Therefore, the candidate should be assigned to state-6 if that state represents the static geometry. However, the state-6 is not explicitly linked to any geometry. Given the ambiguity, we assign to state-300-sscha? No, because the candidate's geometry is static, not SSCHA. The instruction says: 'When candidate cell parameters are supplied, geometry_evidence MUST identify the actual source row and repeat its reported cell lengths in Angstrom. Match that geometry's exact reported values, not merely CLOSE lattice constants. A static coordinate table must not be reclassified as SSCHA using a different table's anharmonic cell. Different cells at the same pressure are different geometries.' So we must not assign to state-300-sscha because that state is SSCHA and the candidate's geometry is static. We need to find a state that matches the static geometry at 300 GPa. The states list has state-6: pressure 300, classical_static. That is likely the static geometry. But we don't have its cell parameters. However, the candidate's geometry is from Table S1, which is static. So we assign to state-6. But state-6 is not explicitly given cell parameters, but it is the only classical_static at 300 GPa. So we assign to state-6.",
+        "geometry_evidence": {
+          "source_id": "structure-source-7",
+          "cell_parameters": {
+            "a": 4.712,
+            "c": 3.236
+          }
+        },
+        "new_state": null
+      }
+    ]
+  }
+]

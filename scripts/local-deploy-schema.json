@@ -1,7 +1,9 @@
 {
+  "deferred_source_heads": [
+    "20261102_0160"
+  ],
   "schema_heads": [
-    "20261020_0049",
-    "20261101_0198"
+    "20261102_0204"
   ],
   "tables": {
     "admin_applications": {
@@ -1627,9 +1629,8 @@
     },
     "material_states": {
       "checks": [
-        "(((pressure_value_gpaisnull)or(pressure_value_gpa>=0))and((pressure_min_gpaisnull)or(pressure_min_gpa>=0))and((temperature_value_kisnull)or(temperature_value_k>=0))and((magnetic_field_tisnull)or(magnetic_field_t>=0)))",
+        "(((pressure_value_gpaisnull)or(pressure_value_gpa>=0))and((temperature_value_kisnull)or(temperature_value_k>=0))and((magnetic_field_tisnull)or(magnetic_field_t>=0)))",
         "((element_countisnull)or(element_countbetween1and118))",
-        "((pressure_min_gpaisnull)or(pressure_max_gpaisnull)or(pressure_min_gpa<=pressure_max_gpa))",
         "((reported_space_group_numberisnull)or(reported_space_group_numberbetween1and230))",
         "((structure_optimizationin('unknown','classical_static','quasi_harmonic','anharmonic_quantum','sscha'))and((state_kind='theoretical')or(structure_optimization='unknown')))",
         "(crystal_systemin('triclinic','monoclinic','orthorhombic','tetragonal','trigonal','hexagonal','cubic','unknown'))",
@@ -1676,22 +1677,6 @@
         "paper_revision": {
           "nullable": false,
           "type": "integer"
-        },
-        "pressure_max_gpa": {
-          "nullable": true,
-          "type": "decimal(14, 6)"
-        },
-        "pressure_min_gpa": {
-          "nullable": true,
-          "type": "decimal(14, 6)"
-        },
-        "pressure_raw": {
-          "nullable": true,
-          "type": "varchar(255)"
-        },
-        "pressure_unit_raw": {
-          "nullable": true,
-          "type": "varchar(50)"
         },
         "pressure_value_gpa": {
           "nullable": true,
@@ -5118,6 +5103,10 @@
         "material_state_id": {
           "nullable": false,
           "type": "bigint"
+        },
+        "metadata_json": {
+          "nullable": true,
+          "type": "json"
         },
         "method_parameters": {
           "nullable": true,

@@ -1,0 +1,46 @@
+[
+  {
+    "assignments": [
+      {
+        "candidate_id": "24637b350db9c6e329aa76f8:c3bd8a4da5f8eb5f",
+        "geometry_evidence": {
+          "source_id": "structure-source-7",
+          "cell_parameters": {
+            "a": 4.248,
+            "c": 7.682
+          }
+        },
+        "structure_optimization": "classical_static",
+        "state_key": null,
+        "source_ids": [
+          "structure-source-7"
+        ],
+        "reason": "LaSc2 Fddd structure from Table S1 at 300 GPa is a static DFT-optimized geometry; no matching state exists.",
+        "new_state": {
+          "material": "LaSc2",
+          "material_name": null,
+          "pressure_value_gpa": 300.0,
+          "reported_space_group_symbol": "Fddd",
+          "structure_optimization": "classical_static"
+        }
+      },
+      {
+        "candidate_id": "d2de5cb93dda6a34f2b60990:dafe294d32814c12",
+        "geometry_evidence": {
+          "source_id": "structure-source-7",
+          "cell_parameters": {
+            "a": 4.712,
+            "c": 3.236
+          }
+        },
+        "structure_optimization": "classical_static",
+        "state_key": "state-6",
+        "source_ids": [
+          "structure-source-7"
+        ],
+        "reason": "LaSc2H24 P6/mmm structure from Table S1 at 300 GPa is a static DFT-optimized geometry matching state-6.",
+        "new_state": null
+      }
+    ]
+  }
+]

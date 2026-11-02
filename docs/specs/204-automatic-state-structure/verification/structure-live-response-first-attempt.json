@@ -1,0 +1,31 @@
+[
+  {
+    "assignments": [
+      {
+        "candidate_id": "24637b350db9c6e329aa76f8:c3bd8a4da5f8eb5f",
+        "state_key": null,
+        "source_ids": [
+          "structure-source-7"
+        ],
+        "reason": "Candidate is LaSc2 at 300 GPa, but no state in the provided list matches this material; the states are all LaSc2H24. The source (Table S1) establishes a distinct material, but no corresponding state exists.",
+        "new_state": {
+          "material": "LaSc2",
+          "material_name": null,
+          "pressure_value_gpa": 300.0,
+          "reported_space_group_symbol": "Fddd",
+          "structure_optimization": "classical_static"
+        }
+      },
+      {
+        "candidate_id": "d2de5cb93dda6a34f2b60990:dafe294d32814c12",
+        "state_key": "state-300-sscha",
+        "source_ids": [
+          "structure-source-7",
+          "structure-source-8"
+        ],
+        "reason": "Candidate is LaSc2H24 at 300 GPa with P6/mmm. The source Table S1 gives the structure at 300 GPa, and Table S2 shows anharmonic (SSCHA) lattice parameters at 300 GPa (a=4.741, c=3.271) which are close to the candidate's a=4.712, c=3.236. The candidate's structure is from the SSCHA optimization at 300 GPa, matching state-300-sscha.",
+        "new_state": null
+      }
+    ]
+  }
+]

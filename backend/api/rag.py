@@ -1635,6 +1635,8 @@ async def upload_structure_candidate(
     task_id: str,
     material_state_index: int = Form(..., ge=0),
     file: UploadFile = File(...),
+    state_key: str | None = Form(None),
+    expected_structure_hash: str | None = Form(None),
     current_user: User = Depends(get_current_user),
 ):
     """Append a CIF/POSCAR after parsing and attach it to one material state."""
@@ -1669,6 +1671,11 @@ async def upload_structure_candidate(
     if draft is None:
         raise _upload_error(409, "draft_not_ready", "草稿尚未生成")
     normalized_draft = _normalize_draft(draft)
+    if state_key:
+        matches = [i for i, item in enumerate(normalized_draft.get('material_states') or []) if item.get('state_key') == state_key]
+        if len(matches) != 1:
+            raise _upload_error(409, 'draft_field_missing', '目标材料状态已变化')
+        material_state_index = matches[0]
     material_states = normalized_draft.get("material_states") or []
     if material_state_index >= len(material_states):
         raise _upload_error(400, "material_state_not_found", "指定材料状态不存在")
@@ -1724,17 +1731,50 @@ async def upload_structure_candidate(
         "stored_path": stored_path,
         "source_file_path": key,
     })
-    candidates = [item for item in normalized_draft.get("structure_candidates") or [] if isinstance(item, dict)]
-    candidates.append(candidate)
-    normalized_draft["structure_candidates"] = candidates
+    from backend.ingest.canonical_structure import structure_from_candidate
     try:
         from backend.database import SessionLocal
         from backend.ingest.scientific_evidence import register_structure_origin
-        with SessionLocal.begin() as origin_session:
+        from backend.ingest.upload_tasks import upload_task_lock, authoritative_state
+        from backend.services import workdrafts
+        from backend.ingest.scientific_evidence import persist_upload
+        from backend.ingest.evidence_audit import draft_change_events, update_field_baselines
+        from copy import deepcopy
+        with upload_task_lock(task_id), SessionLocal.begin() as origin_session:
+            latest_draft = deepcopy(get_draft(task_id))
+            latest_states = latest_draft.get('material_states') or []
+            if state_key:
+                matches = [i for i, item in enumerate(latest_states) if item.get('state_key') == state_key]
+                if len(matches) != 1:
+                    raise _upload_error(409, 'draft_field_missing', '目标材料状态已变化，结构未写入其他材料')
+                material_state_index = matches[0]
+            if material_state_index >= len(latest_states):
+                raise _upload_error(409, 'draft_field_missing', '目标材料状态已移除')
+            previous_structure = latest_states[material_state_index].get('structure') or {}
+            current_hash = str(previous_structure.get('structure_hash') or '')
+            if expected_structure_hash is not None and current_hash != expected_structure_hash:
+                raise _upload_error(409, 'structure_changed', '结构已由另一操作修改，请刷新后重试')
+            if expected_structure_hash is None and previous_structure.get('structure_text'):
+                raise _upload_error(409, 'structure_changed', '已有规范结构，旧请求不能直接覆盖')
+            before = deepcopy(latest_draft)
+            new_structure = structure_from_candidate(candidate)
+            from backend.ingest.canonical_structure import validate_structure_material
+            try:
+                validate_structure_material(new_structure, latest_states[material_state_index])
+            except ValueError as error:
+                raise _upload_error(400, 'structure_material_mismatch', str(error)) from error
+            candidate['material_state_ref'] = 'material_states[' + str(material_state_index) + ']'
+            latest_states[material_state_index]['structure'] = new_structure
+            latest_state = authoritative_state(task_id, origin_session) or state
+            if latest_state.get('paper_id'):
+                raise _upload_error(409, 'draft_already_submitted', '草稿已经提交，未覆盖结构')
+            latest_state = {**latest_state, 'files': [*(latest_state.get('files') or []), files[-1]]}
+            update_field_baselines(latest_state, draft_change_events(before, latest_draft, current_user))
             register_structure_origin(origin_session, 'upload', task_id, candidate,
                                       current_user.id, current_user.username, filename, raw)
-        update_state(task_id, files=files)
-        save_draft(task_id, normalized_draft)
+            persist_upload(origin_session, task_id, latest_state, latest_draft)
+            workdrafts.touch(origin_session, 'upload', task_id, current_user, body=latest_draft)
+            save_draft(task_id, latest_draft, work_session=origin_session)
     except Exception:
         try:
             update_state(task_id, files=previous_files)
@@ -2715,6 +2755,10 @@ async def _rewrite_paper_scientific_draft_in_tx(
     # persist_scientific_draft 相同的持久化语义，而不是浏览器请求的字面 JSON，避免
     # 数值格式、默认字段和候选来源元数据造成误判。
     if await scientific_draft_matches_current_revision(session, paper, full_draft):
+        from backend.services.scientific_graph_preservation import update_structure_metadata
+        metadata_changed = await update_structure_metadata(session, paper, full_draft)
+        if metadata_changed:
+            await session.commit()
         return {
             "ok": True,
             "data": {
@@ -2723,7 +2767,8 @@ async def _rewrite_paper_scientific_draft_in_tx(
                 "review_status": paper.review_status,
                 "revision_bumped": False,
                 "material_state_count": len(full_draft["material_states"]),
-                "unchanged": True,
+                "unchanged": not metadata_changed,
+                "metadata_updated": metadata_changed,
             },
         }
 

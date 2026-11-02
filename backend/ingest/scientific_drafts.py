@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from copy import deepcopy
+from backend.ingest.canonical_structure import structure_metadata
 from decimal import Decimal
 import hashlib
 import json
@@ -343,16 +344,20 @@ async def persist_scientific_draft(
                 structure_hash=hashlib.sha256(structure_text.encode("utf-8")).hexdigest(),
                 nuclear_treatment=structure_nuclear_treatment(state_data),
                 source_locator=_source_locator(structure_data.get("evidence")),
+                metadata_json=structure_metadata(structure_data, source_file_ids),
             )
             session.add(structure)
             await session.flush()
-            if isinstance(structure_data.get("evidence"), dict):
-                targets.append(ScientificEvidenceTarget(
-                    f"{state_path}.structure",
-                    structure_data["evidence"],
-                    "structure",
-                    structure,
-                ))
+            evidence_rows = [structure_data.get("evidence"), *(structure_data.get("sources") or [])]
+            seen_evidence = set()
+            for evidence in evidence_rows:
+                if not isinstance(evidence, dict) or not evidence.get("quote"):
+                    continue
+                identity = (str(evidence.get("file_id")), str(evidence.get("page") or evidence.get("pdf_page")), evidence["quote"])
+                if identity in seen_evidence:
+                    continue
+                seen_evidence.add(identity)
+                targets.append(ScientificEvidenceTarget(f"{state_path}.structure", evidence, "structure", structure))
 
         # Native CIF/POSCAR attachments are only persisted after explicit confirmation.
         # Store the conventional-cell CIF as the canonical representation; the draft

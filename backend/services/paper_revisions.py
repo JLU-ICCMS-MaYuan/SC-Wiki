@@ -118,14 +118,18 @@ def current_draft(session, paper):
             if structure.structure_format.lower() != 'cif':
                 from backend.services.structure_candidates import read_atoms, export_representations
                 text = export_representations(read_atoms(structure.structure_format, text))['conventional']['cif']['text']
-            candidates.append(dict(candidate_id=f'structure_{structure.id}', review_key=structure.review_key or science.item_identity('structure-original-id', structure.id),
-                material_state_ref=f'material_states[{index}]', status='confirmed', confirmation='confirmed',
-                source_kind='attachment', original_format=structure.structure_format, original_text=structure.structure_text,
-                representations={'conventional': {'cif': {'text': text, 'available': True}}},
-                validation={'structure_format': 'cif', 'atom_count': structure.atom_count, 'cell_parameters': structure.cell_parameters},
-                sources=[{'file_id': f'structure_{structure.id}', 'filename': f'structure_{structure.id}.cif', 'role': 'attachment'}]))
-    from backend.services.structural_records import supplement_draft
-    return jsonable_encoder(supplement_draft(session, paper, dict(paper=data, material_states=states, structure_candidates=candidates)))
+            from backend.services.structure_candidates import validate_structure_text
+            item['structure'] = {
+                'structure_format': structure.structure_format, 'structure_text': structure.structure_text,
+                'space_group_symbol': structure.space_group_symbol, 'space_group_number': structure.space_group_number,
+                'review_key': structure.review_key or science.item_identity('structure-original-id', structure.id),
+                'structure_hash': structure.structure_hash, 'nuclear_treatment': structure.nuclear_treatment,
+                'representations': {'conventional': {'cif': {'text': text, 'available': True}}},
+                'validation': validate_structure_text(structure.structure_format, structure.structure_text),
+                **(structure.metadata_json or {}),
+            }
+    return jsonable_encoder(dict(paper=data, material_states=states, _form_contract_version=1))
+
 
 
 def fingerprint(session, paper, draft=None):
