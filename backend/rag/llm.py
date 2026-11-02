@@ -62,6 +62,8 @@ def _stream_json(
     on_partial: Callable[[str], None] | None,
     read_timeout: float,
     response_format: dict | None = None,
+    tool_definitions: list[dict] | None = None,
+    tool_history: list[dict] | None = None,
 ) -> dict[str, Any]:
     """单次流式调用：逐块累积文本，可选回报中间内容，结束后解析 JSON。"""
     user_content: Any = user_prompt
@@ -71,36 +73,72 @@ def _stream_json(
     config = get_llm_config()
     deepseek = config.model.startswith("deepseek")
     _call_stats.set({"thinking": "disabled" if deepseek else "provider_default"})
+    messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_content}]
+    if tool_history:
+        messages.extend(tool_history)
     stream = _client(read_timeout).chat.completions.create(
         model=config.model,
-        messages=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_content},
-        ],
+        messages=messages,
         response_format=response_format or {"type": "json_object"},
         temperature=0.1,
         extra_body=({"thinking": {"type": "disabled"}} if deepseek else {}),
         **({"max_tokens": 65536, "stream_options": {"include_usage": True}} if deepseek else {}),
         stream=True,
+        **({"tools": tool_definitions, "parallel_tool_calls": False} if tool_definitions else {}),
     )
     accumulated: list[str] = []
+    actions: dict[int, dict] = {}
+    call_ids: dict[int, str] = {}
     finish_reason = None
     for chunk in stream:
         if getattr(chunk, "usage", None):
             _call_stats.set({**_call_stats.get(), "usage": chunk.usage.model_dump()})
         if not chunk.choices:
             continue
-        delta = chunk.choices[0].delta.content
+        delta_object = chunk.choices[0].delta
+        delta = delta_object.content
         finish_reason = getattr(chunk.choices[0], "finish_reason", None) or finish_reason
+        for call in getattr(delta_object, "tool_calls", None) or []:
+            if getattr(call, "id", None):
+                call_ids[call.index] = call.id
+            action = actions.setdefault(call.index, {"name": "", "arguments": ""})
+            if call.function is not None:
+                action["name"] += call.function.name or ""
+                action["arguments"] += call.function.arguments or ""
+            if on_partial:
+                on_partial(json.dumps({"tool_calls": list(actions.values())}, ensure_ascii=False))
         if not delta:
             continue
         accumulated.append(delta)
         if on_partial is not None:
             on_partial("".join(accumulated))
     _call_stats.set({**_call_stats.get(), "finish_reason": finish_reason})
+    if actions:
+        from .structured_output import StructuredOutputError, validate_tool_action
+        if len(actions) != 1 or finish_reason != "tool_calls" or not tool_definitions:
+            raise StructuredOutputError("只接受一次完整的已登记工具调用")
+        index, action = next(iter(actions.items()))
+        raw_arguments = action["arguments"]
+        try:
+            action["arguments"] = json.loads(action["arguments"])
+        except json.JSONDecodeError as exc:
+            raise StructuredOutputError("工具参数未形成完整JSON") from exc
+        validate_tool_action(action, tool_definitions)
+        result = {"action": action}
+        if index in call_ids:
+            result["_tool_call"] = {"id": call_ids[index], "type": "function",
+                "function": {"name": action["name"], "arguments": raw_arguments}}
+        return result
     if finish_reason not in (None, "stop"):
         raise RuntimeError("模型输出未完整结束")
-    return _extract_json("".join(accumulated))
+    result = _extract_json("".join(accumulated))
+    if tool_definitions and isinstance(result, dict) and "_tool_call" in result:
+        from .structured_output import StructuredOutputError
+        raise StructuredOutputError("模型文本不能伪造工具调用回执")
+    if tool_definitions and isinstance(result, dict) and "action" in result:
+        from .structured_output import validate_tool_action
+        validate_tool_action(result["action"], tool_definitions)
+    return result
 
 
 def complete_json(
@@ -113,10 +151,20 @@ def complete_json(
     read_timeout: float = 90.0,
     retries: int = 2,
     response_schema: dict | None = None,
+    tool_definitions: list[dict] | None = None,
+    tool_history: list[dict] | None = None,
 ) -> dict[str, Any]:
     """流式请求 LLM 并解析 JSON。连接中断或读超时最多额外重试 retries 次。"""
     from .structured_output import StructuredOutputError, output_format, validate_output
     format_options = {"response_format": output_format(response_schema)} if response_schema is not None else {}
+    if tool_definitions:
+        for definition in tool_definitions:
+            if definition.get("type") != "function" or definition["function"].get("strict") is not True:
+                raise StructuredOutputError("只接受严格定义的工具")
+            output_format(definition["function"]["parameters"])
+        format_options["tool_definitions"] = tool_definitions
+    if tool_history:
+        format_options["tool_history"] = tool_history
     last_error: Exception | None = None
     for attempt in range(retries + 1):
         started = time.monotonic()
@@ -142,7 +190,7 @@ def complete_json(
                           "output_tokens_estimate": (output_chars + 3) // 4})
             return result
         except APIStatusError as exc:
-            if response_schema is not None and exc.status_code in (400, 422):
+            if (response_schema is not None or tool_definitions) and exc.status_code in (400, 422):
                 raise StructuredOutputError("当前模型接口拒绝严格输出结构；未降级或自动重试") from exc
             raise
         # 流式响应中途断开（httpx.TransportError）不经 OpenAI 包装，同样按可重试处理。
@@ -158,7 +206,7 @@ def complete_json(
                           "input_chars": len(system_prompt) + len(user_prompt), "tokens": None,
                           "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4})
             last_error = exc
-            if response_schema is not None and isinstance(exc, (json.JSONDecodeError, RuntimeError)):
+            if (response_schema is not None or tool_definitions) and isinstance(exc, (json.JSONDecodeError, RuntimeError)):
                 raise StructuredOutputError("严格输出未返回完整有效JSON；原响应保留，未自动纠错") from exc
             if attempt >= retries:
                 break

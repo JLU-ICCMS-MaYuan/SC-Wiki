@@ -1,0 +1,48 @@
+{
+  "model": "gpt-6.1-sol",
+  "catalog_id": "LLM2",
+  "pdf_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+  "model_calls": 2,
+  "image_counts": [
+    0,
+    1
+  ],
+  "native_tool_names": [
+    [
+      "read_document",
+      "read_page",
+      "read_region",
+      "search_within_document",
+      "read_original_page"
+    ],
+    [
+      "read_document",
+      "read_page",
+      "read_region",
+      "search_within_document",
+      "read_original_page"
+    ]
+  ],
+  "candidate_pressure_gpa": 50,
+  "human_confirmed": false,
+  "review_images_read": true,
+  "reason": "当前状态对应的是CaH4费米能级电子DOS为0.02234 states/eV/f.u.的记录。PDF第10页图S7中，带有费米能级附近放大插图的上方面板明确标注“I4/mmm at 50 GPa”；图注所述0.02234数值与该近费米能级放大图对应。因此该记录的压力可确定为50 GPa，而非中间面板的150 GPa或下方面板的200 GPa。",
+  "source_page": 10,
+  "persistence": {
+    "status": "passed",
+    "storage": "isolated SQLite in-memory",
+    "candidate_pressure_gpa": 50,
+    "human_confirmed": false,
+    "reason": "当前状态对应的是CaH4费米能级电子DOS为0.02234 states/eV/f.u.的记录。PDF第10页图S7中，带有费米能级附近放大插图的上方面板明确标注“I4/mmm at 50 GPa”；图注所述0.02234数值与该近费米能级放大图对应。因此该记录的压力可确定为50 GPa，而非中间面板的150 GPa或下方面板的200 GPa。",
+    "source_file_id": "97758e92bd30496392518eec35b5bd7b",
+    "page": 10,
+    "review_images_read": true
+  },
+  "artifact_sha256": {
+    "result.json": "ae30298c165f74d7e21da67bd3e5ef1f0d3bba07e7c5c9de2467237273447fc2",
+    "snapshot.json": "89651ce936889ad204ba09de1feb618ee9598447d1e2ee4e6cc982aff8e4a676",
+    "responses.json": "9529b782d37c387cb597a7582fdab728c724c841db1950027c474e33c0493b42",
+    "persistence-report.json": "d8f861079b7d265aa5ab1e7fb0daa65696b689b9b4eec8a2fe63a26ccfdc57df",
+    "calls.json": "f3c4c233cc2ee0c47038b8f9cb27a60d43e64e128845ac0095ff1606604396d3"
+  }
+}

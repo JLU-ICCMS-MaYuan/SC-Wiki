@@ -37,3 +37,12 @@ def validate_output(value, schema):
         path = ".".join(str(p) for p in exc.absolute_path) or "$"
         # 不把模型内容、源文或凭据塞入错误提示。
         raise StructuredOutputError(f"模型输出未遵守固定字段结构：{path}（{exc.validator}）") from exc
+
+
+def validate_tool_action(action, definitions):
+    if not isinstance(action, dict) or set(action) != {"name", "arguments"}:
+        raise StructuredOutputError("工具调用必须仅包含名称和参数")
+    definition = next((item["function"] for item in definitions if item["function"]["name"] == action["name"]), None)
+    if definition is None:
+        raise StructuredOutputError("模型请求了当前不可用的工具")
+    validate_output(action["arguments"], definition["parameters"])

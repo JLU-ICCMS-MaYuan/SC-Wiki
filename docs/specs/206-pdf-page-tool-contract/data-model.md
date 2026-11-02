@@ -1,0 +1,5 @@
+# 数据所有权
+
+不新增业务字段或迁移。file_id/page/block_id/table_id来自本任务来源目录；模型只选择已有对象。manifest保存真实文件完整性信息，客户端日志不记录密钥或任意本地路径。工具定义和动作审计是内部协议，不是科学表单。
+
+现有字段结果的reason/proposal/evidences/human_confirmed继续拥有科学理由及人工审核状态。review_images_read只在图像成功送入模型调用后记录，不因渲染成功就宣称模型已读取。

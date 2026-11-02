@@ -34,3 +34,7 @@
 调查确认：inspect_figure实际要求block_id，且DocumentTools只返回IR块；当前review适配器把来源窗口建成paragraph，没有可供该工具识别的figure块。这次隔离核对又未传原PDF manifest，所以已有read_original_page工具没有启用。不得把验证接线遗漏宣称为生产缺少看图能力。
 
 已询问是否将工具参数问题纳入#205，用户回复“你要怎么修复？先告诉我方案。”。工具部分尚未获得实施确认，不修改该部分或主动重试。建议方案：向模型提供真实参数定义，严格限制工具调用；仅暴露当前资料实际可用的工具；复用带原PDF清单的read_original_page返回真实页面图像；无法判断时保留理由交人工。等待方案确认。
+
+## 后续验收闭合（#206）
+
+用户另行批准新建Issue/Spec实施查图方案，已由#206完成。真实PDF第10页送入LLM2，两次调用得到50 GPa候选与具体原图依据；正式审核结果隔离保存重读保持来源、理由及human_confirmed=false。此前未完成的压力理由路径现已验证，不改写上面的失败历史。详见[验收记录](../206-pdf-page-tool-contract/validation.md)。
