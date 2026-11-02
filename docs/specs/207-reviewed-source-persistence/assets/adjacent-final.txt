@@ -1,0 +1,20 @@
+.................................................                        [100%]
+=============================== warnings summary ===============================
+tests/01_decentralized_uploading/test_unified_model_review.py: 530 warnings
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/spglib/spg.py:514: DeprecationWarning: Set OLD_ERROR_HANDLING to false and catch the errors directly.
+    _set_no_error(_throw)
+
+tests/01_decentralized_uploading/test_unified_model_review.py::test_rq_entry_uses_one_model_workflow_and_real_result_storage
+tests/01_decentralized_uploading/test_unified_model_review.py::test_rq_entry_uses_one_model_workflow_and_real_result_storage
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+tests/01_decentralized_uploading/test_unified_model_review.py::test_rq_entry_uses_one_model_workflow_and_real_result_storage
+tests/01_decentralized_uploading/test_unified_model_review.py::test_rq_entry_uses_one_model_workflow_and_real_result_storage
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+tests/01_decentralized_uploading/test_unified_model_review.py::test_rq_entry_uses_one_model_workflow_and_real_result_storage
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+49 passed, 535 warnings in 1.32s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

@@ -561,24 +561,12 @@ def source_transfer_matches(before, after, file_ids):
 
 
 def rebind_source_references(value, chunks, file_ids):
-    from .property_evidence import locate
-    if isinstance(value, list):
-        return [rebind_source_references(item, chunks, file_ids) for item in value]
-    if not isinstance(value, dict):
-        return value
-    def relocate(source):
-        mapped = file_ids.get(str(source.get('file_id')))
-        locator = {key: source.get(key) for key in ('quote', 'page_start', 'page_end', 'origin_kind', 'locator_status')}
-        if mapped is not None:
-            locator.update(file_id=str(mapped), chunk_index=source.get('chunk_index'))
-        return locate(locator, chunks)
-    return {key: ([found for source in item if isinstance(source, dict) and (found := relocate(source))]
-                 if key in {'evidences', 'fact_evidences', 'scope_evidences', 'software_evidences'} and isinstance(item, list)
-                 else rebind_source_references(item, chunks, file_ids)) for key, item in value.items()}
+    from .reviewed_sources import rebind_references
+    return rebind_references(value, chunks, file_ids)
 
 
 def transfer_result(record, result, chunks, file_ids=None, *, source_transfer_verified=False):
-    """上传落库后重定位所有嵌套引句；文件 ID 变化不能抹掉候选或人工来源。"""
+    """上传落库后转接来源身份；文件 ID 变化不能抹掉候选或人工来源。"""
     from .property_evidence import digest, locate, normalized_text
     subtype = record.get('field') == 'paper.theoretical_subtype'
     if subtype and (result.get('provenance') or {}).get('assessment') and not source_transfer_verified:

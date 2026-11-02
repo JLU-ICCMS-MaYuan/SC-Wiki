@@ -2073,7 +2073,16 @@ async def _create_pending_paper(
                     for evidence in evidences:
                         if not isinstance(evidence, dict) or not str(evidence.get("quote") or "").strip():
                             continue
-                        located, location_error = locate_with_reason(evidence, source_locations)
+                        if evidence_checks is not None and field_path in targets_by_path:
+                            from backend.ingest.reviewed_sources import source_reference, SourceReferenceError
+                            try:
+                                located = source_reference(evidence, source_locations)
+                            except SourceReferenceError as exc:
+                                raise _upload_error(409, 'evidence_source_missing', str(exc),
+                                    issues=[{'field': field_path, 'message': str(exc)}]) from exc
+                            location_error = None
+                        else:
+                            located, location_error = locate_with_reason(evidence, source_locations)
                         if located is None:
                             if field_path in targets_by_path:
                                 raise _upload_error(409, 'evidence_missing', location_error,
@@ -2331,7 +2340,6 @@ async def _submit_upload_draft_locked(
         raise _upload_error(409, "draft_not_found", "草稿不存在或已过期")
 
     from backend.ingest.property_evidence import upload_snapshot, resolve_results
-    from backend.ingest.scientific_drafts import _property_modules_for_state
     import copy
     snapshot = upload_snapshot(task_id, current_user.id)
     from backend.database import SessionLocal
@@ -2344,20 +2352,8 @@ async def _submit_upload_draft_locked(
         cached = load_results(check_session, snapshot, current_user.id, include_stale=True)
     evidence_checks = resolve_results(snapshot, cached, current_user.id, evidence_job_id, expected_evidence_version)
     draft = copy.deepcopy(draft)
-    for state_data in draft.get('material_states') or []:
-        state_data['property_modules'] = _property_modules_for_state(state_data)
-    for result in evidence_checks:
-        if result.get('kind') != 'property' and not result.get('record_field'):
-            continue
-        state_data = draft['material_states'][result['state_index']]
-        module = next(m for m in state_data['property_modules'] if m['module_key'] == result['module_key'])
-        record = next(r for r in module['records'] if r['record_key'] == result['record_key'])
-        record.pop('evidence', None)
-        if result.get('record_field'):
-            record['evidences'] = [e for e in record.get('evidences') or [] if e.get('field_path') != result['record_field']]
-            record['evidences'].extend({**e, 'field_path': result['record_field']} for e in result['evidences'])
-        else:
-            record['evidences'] = result['evidences']
+    from backend.ingest.reviewed_sources import apply_property_sources
+    apply_property_sources(draft, evidence_checks)
 
     cleanup_context = CleanupContext.from_state(task_id, state)
     update_state(task_id, status="submitting", submission_status="submitting")
@@ -2687,6 +2683,8 @@ async def _rewrite_paper_scientific_draft_in_tx(
     paper_id: int,
     draft: dict[str, Any],
     current_user: User,
+    *,
+    evidence_checks: list[dict] | None = None,
 ) -> dict[str, Any]:
     """C1 的事务内实现（不管理 session/事务），便于测试直接调用。"""
     from backend.ingest.scientific_drafts import persist_scientific_draft
@@ -2745,6 +2743,9 @@ async def _rewrite_paper_scientific_draft_in_tx(
         full_draft["structural_observations"] = draft["structural_observations"]
     if "structural_extraction_issues" in draft:
         full_draft["structural_extraction_issues"] = draft["structural_extraction_issues"]
+    if evidence_checks is not None:
+        from backend.ingest.reviewed_sources import apply_property_sources
+        apply_property_sources(full_draft, evidence_checks)
     prepare_existing_structure_candidates(full_draft, old_structures)
     _validate_draft(full_draft)
     if current_user.role not in {"admin", "superadmin"}:
@@ -2794,7 +2795,7 @@ async def _rewrite_paper_scientific_draft_in_tx(
     from backend.services.classification_catalog import save_paper_material_families
     await save_paper_material_families(session, paper, full_draft["paper"]["material_families"])
     from backend.ingest.property_evidence import persist_existing_paper_targets
-    await persist_existing_paper_targets(session, paper, targets)
+    await persist_existing_paper_targets(session, paper, targets, reviewed=evidence_checks is not None)
     candidate_id_map = {}
     structure_id_map = await preserve_structure_metadata(session, paper, full_draft, old_structures, old_structure_evidence,
                                                         candidate_id_map=candidate_id_map)

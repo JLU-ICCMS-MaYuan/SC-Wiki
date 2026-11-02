@@ -1,0 +1,79 @@
+{
+  "task_id": "4d95a4d2565049b6b30a3659cdd054b8",
+  "original_fields": 577,
+  "actual_paper_submitted": false,
+  "storage_mode": "isolated_local",
+  "model_calls": 0,
+  "existing_paper_preserved": null,
+  "response": {
+    "ok": true,
+    "paper_id": 1144,
+    "review_status": "pending"
+  },
+  "paper_status": "pending",
+  "material_states": 4,
+  "property_records": 5,
+  "structures": 0,
+  "paper_evidence": 547,
+  "spectra": 1,
+  "formal_fields": 564,
+  "formal_supported": 130,
+  "formal_human_confirmed": 0,
+  "reviewed_property_quotes_preserved": true,
+  "summary_pending": 12,
+  "summary_human_confirmed": 0,
+  "virtual_task_status": "submitted",
+  "artifact_reader_verified": true,
+  "idempotent": true,
+  "formal_blocked": [],
+  "approval_roles": [
+    "admin",
+    "superadmin"
+  ],
+  "original_preserved": true,
+  "baseline_commit": "c3f53f9c3a9d3430fa20e79c51aa98ba4821f124",
+  "source_sha256": {
+    "backend/ingest/reviewed_sources.py": "4b57b9ab59f36635e7c8ad77aced52a22ad3c8d77a944f8e4583aca7a6925072",
+    "backend/api/rag.py": "b721403dcb34dceff677cd3cf448126062b1c8aa3d46f9cf806d7b95ecd813eb",
+    "backend/ingest/property_evidence.py": "f5eac634c175f0a2b3980c710d08da077190a83ddde05065971b834929d63703",
+    "backend/ingest/scientific_evidence.py": "d4bd2b359fb535139e06674c677493467c87db20d58c0b24429ec736675136c3",
+    "backend/ingest/submission_sources.py": "5f852f699db0a39bc6dbb5b0b36101cdc4e9b69a94da587d97600b8727a00d75",
+    "backend/services/field_review_commit.py": "5283edeefc5156a74adb8ac61a71aa25e266984bccb58c688dc01a9be4b90f88",
+    "backend/services/paper_revisions.py": "09eba4390b7b6a6fd1f1cd600dabbc0003f82615d78fe1edb3645994dded47b3",
+    "backend/services/submission_metadata.py": "c8941fc695e663df43b87d6ead50c9249af585f16807c0e628a10f2f12cc3b0a",
+    "backend/services/manuscript_handoffs.py": "0257641addcd87e699221fa4fffc782a8c6d0a40264ddf00736c3ad7f1f9b16d",
+    "scripts/verify-upload-submit.py": "84e7678ca18777ee93ba82999830c6134cc4044153962616c9076516b6b62739",
+    "tests/01_decentralized_uploading/test_reviewed_source_persistence.py": "f6a6c4a2dde5fa3d403182d11217421478c91b092db364186d7d015ba29aa449",
+    "tests/01_decentralized_uploading/test_reviewed_source_persistence_mysql.py": "c4d799e2d216a7704d926123b9bc52b687463b5f5eedb38ce160a8b8acecc7db",
+    "tests/01_decentralized_uploading/test_field_suggestions.py": "5ca2ec5489af32aaf2d5bc4154f58126c6ab0ed1e2d5163abc5a3e8cdd66e2e9"
+  },
+  "checks": {
+    "initial_new_regressions": {
+      "failed_before_fix": 5,
+      "passed_after_fix": 5
+    },
+    "unit": {
+      "passed": 68,
+      "skipped": 17,
+      "baseline_deselected": 5
+    },
+    "mysql": {
+      "passed": 22,
+      "skipped": 6,
+      "baseline_deselected": 1
+    },
+    "adjacent": {
+      "passed": 49
+    },
+    "field_contract": "passed",
+    "form_contract": {
+      "passed": 132,
+      "files": 11
+    },
+    "mutation": {
+      "expected_failures_detected": 8
+    },
+    "go": "定向回归除独立基线旧失败外通过",
+    "revision_roundtrip": "真实MySQL外层回滚；2版pending、引句与关系重读通过"
+  }
+}

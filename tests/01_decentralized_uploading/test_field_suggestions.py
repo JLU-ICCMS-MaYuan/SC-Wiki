@@ -308,7 +308,7 @@ def test_upload_to_paper_rebinds_nested_suggestion_sources():
     chunks = [dict(file_id='42', chunk_id=10, chunk_index=0, content='Tin is metallic.')]
     transfer = getattr(science, 'transfer_result', None)
     assert callable(transfer)
-    rebound = transfer(new, result, chunks)
+    rebound = transfer(new, result, chunks, {'main': '42'})
     assert rebound['key'] == 'permanent-summary'
     assert rebound['proposal']['evidences'][0]['file_id'] == '42'
     assert ev.checked_result(new, rebound, chunks)['proposal'] is not None

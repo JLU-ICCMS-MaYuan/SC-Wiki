@@ -352,17 +352,8 @@ async def submit_draft(session, paper_id, user, payload):
         saved.submitted_revision=paper.content_revision
         await session.flush()
         return dict(ok=True,paper_id=paper.id,content_revision=paper.content_revision,review_status='pending')
-    for result in checks:
-        if result.get('kind') == 'property' or result.get('record_field'):
-            state = draft['material_states'][result['state_index']]
-            module = next(m for m in state['property_modules'] if m['module_key'] == result['module_key'])
-            record = next(r for r in module['records'] if r['record_key'] == result['record_key'])
-            record.pop('evidence', None)
-            if result.get('record_field'):
-                record['evidences'] = [e for e in record.get('evidences') or [] if e.get('field_path') != result['record_field']]
-                record['evidences'].extend({**e, 'field_path': result['record_field']} for e in result['evidences'])
-            else:
-                record['evidences'] = result['evidences']
+    from backend.ingest.reviewed_sources import apply_property_sources
+    apply_property_sources(draft, checks)
     old_structures = await snapshot_structures(session, paper.id)
     old_structure_evidence = [ev.row_dict(r) for r in (await session.scalars(select(models.StructureModelEvidence)
         .where(models.StructureModelEvidence.paper_id == paper.id))).all()]
@@ -381,7 +372,7 @@ async def submit_draft(session, paper_id, user, payload):
     targets = await persist_scientific_draft(session, paper, draft)
     from backend.services.spectra import bind_to_paper
     await bind_to_paper(session, paper, draft, target="revision", target_id=saved.revision_id)
-    await ev.persist_existing_paper_targets(session, paper, targets)
+    await ev.persist_existing_paper_targets(session, paper, targets, reviewed=True)
     await preserve_structure_metadata(session, paper, draft, old_structures, old_structure_evidence)
     # 本轮模型结果只按内容和来源完全一致的项目转给待审论文；没有人工管理员裁决继承。
     for origin in (await session.scalars(select(models.ScientificStructureOrigin).where(

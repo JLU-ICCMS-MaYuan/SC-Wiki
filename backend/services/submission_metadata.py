@@ -11,8 +11,9 @@ def submitted_metadata(session, paper):
     rows = session.scalars(select(models.PaperHistoryEvent).where(
         models.PaperHistoryEvent.paper_id == paper.id,
         models.PaperHistoryEvent.paper_revision <= paper.content_revision,
-    ).order_by(models.PaperHistoryEvent.id.desc()))
-    for event in rows:
+    ))
+    # 大型送审快照不进入 MySQL filesort；事件身份排序与原查询语义一致。
+    for event in sorted(rows, key=lambda row: row.id, reverse=True):
         payload = event.classification_snapshot or {}
         saved = payload.get('revision_submission') or payload.get('upload_submission')
         if saved:

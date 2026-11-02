@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 
-async def verify(task_id, output):
+async def verify(task_id, output, *, allow_model_results=False, review_cycle=False):
     from sqlalchemy import select, func
     from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
     from sqlalchemy.pool import NullPool
@@ -121,6 +121,7 @@ async def verify(task_id, output):
                         (rag, '_record_submitted_upload', record_snapshot), (uploads, 'cleanup_transient_data', cleanup)]:
                         stack.enter_context(patch.object(owner, name, replacement))
                     stack.enter_context(patch.object(ev, 'upload_snapshot', lambda key, uid: deepcopy(snapshot)))
+                    stack.enter_context(patch.object(storage, 'create_storage', lambda **kw: LocalFileStorage(output / 'objects')))
                     from backend.rag import llm
                     stack.enter_context(patch.object(llm, 'complete_json', side_effect=AssertionError('已确认草稿提交不能调用模型')))
                     response = await rag.submit_upload_draft(task_id, actor,
@@ -141,6 +142,13 @@ async def verify(task_id, output):
                         from backend.api import evidence as evidence_api
                         from backend.ingest.field_review import valid_field_decision
                         report['formal_human_confirmed'] = sum(valid_field_decision(r, restored.get(r['key']), 'approve') for r in formal['records'])
+                        from collections import Counter
+                        expected_quotes = Counter(e['quote'] for r in checks if r.get('record_field') or r.get('kind') == 'property'
+                            for e in r.get('evidences') or [] if e.get('quote'))
+                        saved_quotes = Counter((await db.scalars(select(models.PaperEvidence.quote).where(
+                            models.PaperEvidence.paper_id == paper_id))).all())
+                        report['reviewed_property_quotes_preserved'] = not bool(expected_quotes - saved_quotes)
+                        assert report['reviewed_property_quotes_preserved']
                         def read_summary(session):
                             @contextmanager
                             def same_session(): yield session
@@ -169,11 +177,39 @@ async def verify(task_id, output):
                         rag.SubmitUploadOptions(expected_evidence_version=snapshot['version']))
                     assert repeated['paper_id'] == paper_id
                     report['idempotent'] = True
-                    assert report['formal_supported'] == report['formal_fields']
-                    assert report['formal_human_confirmed'] == report['original_fields']
-                    assert report['summary_pending'] == 0 and report['summary_human_confirmed'] == report['original_fields']
+                    from backend.ingest.field_review import blocking
+                    public = ev.public_snapshot(formal, restored)
+                    report['formal_blocked'] = [r['field'] for r in public['records'] if blocking(r, r)]
+                    assert not report['formal_blocked']
+                    if not allow_model_results:
+                        assert report['formal_supported'] == report['formal_fields']
+                        assert report['formal_human_confirmed'] == report['original_fields']
+                        assert report['summary_pending'] == 0 and report['summary_human_confirmed'] == report['original_fields']
+                    if review_cycle:
+                        from backend.api.evidence import FieldReviewCommit
+                        from backend.services.field_review_commit import commit_review
+                        from uuid import uuid4
+                        report['approval_roles'] = []
+                        for role in ('admin', 'superadmin'):
+                            nested = await connection.begin_nested()
+                            try:
+                                async with factory() as db:
+                                    reviewer_row = await db.scalar(select(models.User).where(models.User.id != actor.id))
+                                    reviewer = SimpleNamespace(id=reviewer_row.id, username=reviewer_row.username, role=role)
+                                    current = await db.run_sync(lambda s: ev.paper_snapshot(s, paper_id, reviewer.id, role))
+                                    result = await commit_review(db, FieldReviewCommit(paper_id=paper_id,
+                                        expected_evidence_version=current['version'], review_request_id=uuid4().hex), reviewer)
+                                    assert result['review_status'] == 'approved'
+                                    await db.commit()
+                                async with factory() as reader:
+                                    assert (await reader.get(models.Paper, paper_id)).review_status == 'approved'
+                                report['approval_roles'].append(role)
+                            finally:
+                                await nested.rollback()
             except Exception as error:
                 report['failure'] = {'type': type(error).__name__, 'detail': getattr(error, 'detail', str(error))}
+                import traceback
+                traceback.print_exc()
             finally:
                 await outer.rollback()
             assert await connection.scalar(select(models.Paper.id).where(models.Paper.upload_task_id == task_id)) == existing_id
@@ -191,10 +227,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--task', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--allow-model-results', action='store_true', help='允许同版本模型通过结果，不要求全部人工确认')
+    parser.add_argument('--review-cycle', action='store_true', help='在隔离事务内分别验证两管理员角色批准')
     args = parser.parse_args()
     from scripts.local_deploy.config import read_config, validate_local
     values = read_config(ROOT); validate_local(values, ROOT); os.environ.update(values)
-    report = asyncio.run(verify(args.task, args.output.resolve()))
+    report = asyncio.run(verify(args.task, args.output.resolve(), allow_model_results=args.allow_model_results,
+                               review_cycle=args.review_cycle))
     if report.get('failure'):
         raise SystemExit(1)
 

@@ -54,10 +54,10 @@ def event_headers(session, paper_id, *, limit=None, offset=0, descending=False, 
         models.PaperHistoryEvent.classification_snapshot['handoff']).where(
             models.PaperHistoryEvent.paper_id == paper_id,
             models.PaperHistoryEvent.classification_snapshot['handoff']['contract'].as_string() == CONTRACT)
-    query = query.order_by(models.PaperHistoryEvent.id.desc() if descending else models.PaperHistoryEvent.id)
-    if limit is not None: query = query.limit(limit).offset(offset)
     if current_read:query=query.with_for_update(read=True)
-    rows = session.execute(query).all()
+    # MySQL filesort 可能复制完整底层JSON；这里只排序已投影的小型交接头。
+    rows = sorted(session.execute(query).all(), key=lambda row: row[0], reverse=descending)
+    if limit is not None: rows = rows[offset:offset + limit]
     return [dict(event_id=r[0], occurred_at=r[1], actor_user_id=r[2], actor_name=r[3], **r[4])
             for r in rows if isinstance(r[4], dict) and r[4].get('contract') == CONTRACT]
 

@@ -3,7 +3,7 @@ from copy import deepcopy
 import re
 
 from .field_review import valid_field_decision
-from .property_evidence import locate_with_reason
+from .reviewed_sources import source_reference, SourceReferenceError
 from .scientific_drafts import ScientificEvidenceTarget
 from .scientific_evidence import item_identity
 
@@ -27,7 +27,11 @@ def reviewed_legacy_targets(targets, checks, draft, chunks):
         if not owner or owner.get('status') != 'supported':
             output.append(target)
             continue
-        _, old_error = locate_with_reason(target.evidence, chunks)
+        try:
+            source_reference(target.evidence, chunks)
+            old_error = None
+        except SourceReferenceError as exc:
+            old_error = str(exc)
         if old_error:
             history = owner.setdefault('legacy_source_history', [])
             entry = {'field': target.field_path, 'evidence': deepcopy(target.evidence),
@@ -44,7 +48,11 @@ def reviewed_legacy_targets(targets, checks, draft, chunks):
             continue
         emitted.add(owner['item_key'])
         for evidence in current:
-            located, error = locate_with_reason(evidence, chunks)
+            try:
+                located = source_reference(evidence, chunks)
+                error = None
+            except SourceReferenceError as exc:
+                located, error = None, str(exc)
             if error and human:
                 history = owner.setdefault('legacy_source_history', [])
                 entry = {'field': owner['field'], 'evidence': deepcopy(evidence),

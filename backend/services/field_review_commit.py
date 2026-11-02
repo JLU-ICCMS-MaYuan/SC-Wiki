@@ -95,7 +95,7 @@ async def commit_review(session, body, user):
             **draft, 'paper_type': draft['paper']['paper_type'],
             'superconductor_kind': draft['paper'].get('superconductor_kind'),
             'material_families': draft['paper'].get('material_families') or [],
-        }, user)
+        }, user, evidence_checks=checks)
         current = await session.run_sync(lambda sync: ev.paper_snapshot(sync, paper.id, user.id, user.role))
         previous = {r['field']: r for r in checks}
         rebound = []

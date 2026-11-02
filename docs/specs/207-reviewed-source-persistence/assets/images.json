@@ -1,0 +1,42 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-22a375af-e9cc-4a08-9414-fad3e7b9a1a0.png",
+      "user_context": "为什么还是提交不了？这里的结构归属待核对是什么意思？目前只有这 1 个待核对吗？",
+      "related": [
+        "US1",
+        "evidence_missing"
+      ],
+      "status": "local_verified",
+      "locator": "assets/IMG-001.png",
+      "sha256": "2ea3f60b0411c48f9486a8318e3cec0b90d496d392e0785b107f0efffdfbcf71",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3024,
+        1752
+      ],
+      "verification": "读取原始文件并核对尺寸及SHA256；图片仅作故障材料。"
+    },
+    {
+      "id": "IMG-002",
+      "upload_order": 2,
+      "original_name": "codex-clipboard-eeb070b1-774f-4699-902b-0e2c32052196.png",
+      "user_context": "为什么还是提交不了？这里的结构归属待核对是什么意思？目前只有这 1 个待核对吗？",
+      "related": [
+        "US1",
+        "evidence_missing"
+      ],
+      "status": "local_verified",
+      "locator": "assets/IMG-002.png",
+      "sha256": "182dbbd8b6f618b2b4e5500c89499b8eb306cd91e560f98dc8989d4afe89ce8d",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3024,
+        1752
+      ],
+      "verification": "读取原始文件并核对尺寸及SHA256；图片仅作故障材料。"
+    }
+  ]
+}

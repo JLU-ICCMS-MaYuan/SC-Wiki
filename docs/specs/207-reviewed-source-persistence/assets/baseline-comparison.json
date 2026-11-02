@@ -1,0 +1,26 @@
+{
+  "baseline_commit": "c3f53f9c3a9d3430fa20e79c51aa98ba4821f124",
+  "isolation": "git archive HEAD的独立源码副本；未切换工作区分支",
+  "python_unit": {
+    "baseline_failed": 5,
+    "current_same_failures": 5,
+    "names": [
+      "test_generation_fills_empty_field_and_binds_reason_to_new_version",
+      "test_adopted_guess_can_enter_pending_but_cannot_approve_without_human",
+      "test_reasonable_model_result_cannot_erase_adopted_guess",
+      "test_full_audit_does_not_reuse_supported_cache",
+      "test_derived_value_inherits_pending_adoption_but_not_human_authority"
+    ]
+  },
+  "python_mysql": {
+    "name": "test_human_approval_survives_summary_reopen_and_submission_without_model",
+    "baseline": "KeyError: audit_events",
+    "current": "相同KeyError: audit_events"
+  },
+  "go": {
+    "name": "TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction",
+    "baseline": "旧DELETE scientific_evidence_checks预期未匹配",
+    "current": "相同失败"
+  },
+  "fixture_update": "test_upload_to_paper_rebinds_nested_suggestion_sources显式提供文件ID映射；保留原重绑和候选断言，取消依赖全文猜文件的旧夹具。"
+}

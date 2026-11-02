@@ -440,20 +440,24 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             models.ScientificEvidenceCheck.target_id == str(paper_id),
             models.ScientificEvidenceCheck.item_key == item_identity('paper', 'theoretical_subtype'))
             .order_by(models.ScientificEvidenceCheck.id.desc()).limit(1))
-    assessment = ((prior_subtype.result or {}).get('provenance') or {}).get('assessment') if prior_subtype else None
+    from .field_sources import expand as expand_sources
+    assessment = ((expand_sources(session, prior_subtype.result or {}).get('provenance') or {}).get('assessment')
+                  if prior_subtype else None)
     if review_provenance and 'paper.theoretical_subtype' in review_provenance:
         assessment = (review_provenance['paper.theoretical_subtype'] or {}).get('assessment')
     prior_keywords = session.scalar(select(models.ScientificEvidenceSource).where(
         models.ScientificEvidenceSource.paper_id == paper_id,
         models.ScientificEvidenceSource.paper_revision == paper.content_revision,
         models.ScientificEvidenceSource.field_path == 'paper.keywords_tags'))
-    keyword_assessment = ((prior_keywords.result or {}).get('provenance') or {}).get('assessment') if prior_keywords else None
+    keyword_assessment = ((expand_sources(session, prior_keywords.result or {}).get('provenance') or {}).get('assessment')
+                          if prior_keywords else None)
     if prior_keywords is None:
         prior_keywords = session.scalar(select(models.ScientificEvidenceCheck).where(
             models.ScientificEvidenceCheck.target == 'paper', models.ScientificEvidenceCheck.target_id == str(paper_id),
             models.ScientificEvidenceCheck.item_key == science.item_identity('paper', 'keywords_tags'))
             .order_by(models.ScientificEvidenceCheck.id.desc()).limit(1))
-        keyword_assessment = ((prior_keywords.result or {}).get('provenance') or {}).get('assessment') if prior_keywords else None
+        keyword_assessment = ((expand_sources(session, prior_keywords.result or {}).get('provenance') or {}).get('assessment')
+                              if prior_keywords else None)
     if review_provenance and 'paper.keywords_tags' in review_provenance:
         keyword_assessment = (review_provenance['paper.keywords_tags'] or {}).get('assessment')
     records.extend(science.field_records('paper', 'paper', paper_data, science.PAPER_FIELDS,
@@ -1424,7 +1428,12 @@ def resolve_results(snapshot: dict, cached: dict, user_id: int, job_id: str | No
         fail('evidence_review_required', '存在尚未通过审核的字段，未提交；请修改内容、补充证据或主动核对',
              issues=[{'field': r['field'], 'message': r.get('reason') or '该字段尚未通过审核'} for r in blocked],
              records=blocked)
-    return records
+    from .reviewed_sources import checked_references, SourceReferenceError
+    try:
+        return checked_references(records, snapshot['chunks'])
+    except SourceReferenceError as exc:
+        fail('evidence_source_missing', str(exc),
+             issues=[{'field': getattr(exc, 'field', ''), 'message': str(exc)}])
 
 
 def evidence_job_failed(job, connection, *args):
@@ -1438,14 +1447,22 @@ def evidence_job_failed(job, connection, *args):
     delete_llm_config(job_id)
 
 
-async def persist_existing_paper_targets(session, paper, targets):
+async def persist_existing_paper_targets(session, paper, targets, *, reviewed=False):
     """编辑保存时补齐引句形式的来源；既有证据 ID 关联由物性持久层保存。"""
     from backend.ingest.scientific_drafts import add_scientific_evidence_link
     snapshot = await session.run_sync(lambda sync: paper_snapshot(sync, paper.id, 0, '', check_access=False))
     for target in targets:
         if target.kind != 'property_record':
             continue
-        located, error = locate_with_reason(target.evidence, snapshot['chunks'])
+        if reviewed:
+            from .reviewed_sources import source_reference, SourceReferenceError
+            try:
+                located = source_reference(target.evidence, snapshot['chunks'])
+            except SourceReferenceError as exc:
+                fail('evidence_source_missing', str(exc), issues=[{'field': target.field_path, 'message': str(exc)}])
+            error = None
+        else:
+            located, error = locate_with_reason(target.evidence, snapshot['chunks'])
         if located is None:
             fail('evidence_invalid_source', error, issues=[{'field':target.field_path,'message':error}])
         existing = await session.scalar(select(models.PaperEvidence).where(
