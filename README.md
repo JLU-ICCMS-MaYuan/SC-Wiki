@@ -158,7 +158,7 @@ Go 提供公开读取与首答治理，Python AI API 和独立 RQ 队列负责�
 
 ## 自动资讯采集（Feature #63 / #88）
 
-`/news` 定时从 arXiv、Crossref、OpenAlex、Phys.org 和 Google News RSS 发现超导资讯，按内容类型和自然周分页；保留人工快讯与诺奖展陈。APS、Nature、Science、Materials Today 接入官方期刊 RSS；八组来源均由 Crossref 补充发现，NSR、CPL、CPB、Materials Today 使用期刊 ISSN 过滤并逐条校验，其余使用出版商 DOI 前缀。页面保留实际发现来源与原文来源。
+`/news` 定时从 arXiv、Crossref、OpenAlex、Phys.org 和 Google News RSS 发现超导资讯，三栏各自按发表时间从新到旧连续浏览全部已收录内容，每页五条，不按自然周或最近七天截断；保留人工快讯与诺奖展陈。APS、Nature、Science、Materials Today 接入官方期刊 RSS；八组来源均由 Crossref 补充发现，NSR、CPL、CPB、Materials Today 使用期刊 ISSN 过滤并逐条校验，其余使用出版商 DOI 前缀。页面保留实际发现来源与原文来源。
 自动资讯标注“自动采集，未经本站审核”，只进入独立资讯表，不进入正式论文、材料或 PDF 解析队列。
 Crossref 使用最近至少 30 天的发表日期窗口及多种超导、氢化物和氢相关词形，避免将旧论文重新索引误当新发表；在线发表日期优先。OpenAlex 同样至少回看 30 天，接受期刊 `article/review`，拒绝明确未发表及 Zenodo 仓储 DOI；先查询超导再补充氢相关查询，保留各自分页结果。新期刊条目先进入独立候选表，由默认大模型依据标题、摘要和关键词判断；相关才公开，无关与信息不足保留内部记录。Phys.org 科研报道、出版社新闻和社会/产业资讯进入新闻栏，不能因出版商网站或 DOI 就归入期刊论文。详情只展示一个原文入口，后台多来源记录保留。
 

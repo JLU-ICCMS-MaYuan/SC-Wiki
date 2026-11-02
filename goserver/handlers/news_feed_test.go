@@ -135,15 +135,15 @@ func TestNewsFeedPaginationAndKinds(t *testing.T) {
 	}
 }
 
-func TestNewsNaturalWeekAndHistoryPartition(t *testing.T) {
+func TestNewsFeedAllDatesAndStablePagination(t *testing.T) {
 	db := newsTestDB(t)
 	for _, item := range []models.NewsFeedItem{
-		{ID: "before", PublishedAt: "2026-10-18T15:59:59Z", DatePrecision: "day"},
-		{ID: "start", PublishedAt: "2026-10-18T16:00:00Z", DatePrecision: "day"},
-		{ID: "middle", PublishedAt: "2026-10-21T00:00:00Z", DatePrecision: "day"},
-		{ID: "end", PublishedAt: "2026-10-25T15:59:59Z", DatePrecision: "day"},
-		{ID: "next", PublishedAt: "2026-10-25T16:00:00Z", DatePrecision: "day"},
-		{ID: "month", PublishedAt: "2026-10-21T00:00:00Z", DatePrecision: "month"},
+		{ID: "new", PublishedAt: "2026-11-02T00:00:00Z", DatePrecision: "day", FirstSeenAt: "2026-11-02T01:00:00Z"},
+		{ID: "sunday-a", PublishedAt: "2026-11-01T00:00:00Z", DatePrecision: "day", FirstSeenAt: "2026-11-02T00:02:06Z"},
+		{ID: "sunday-b", PublishedAt: "2026-11-01T00:00:00Z", DatePrecision: "day", FirstSeenAt: "2026-11-02T00:02:06Z"},
+		{ID: "older", PublishedAt: "2026-10-30T00:00:00Z", DatePrecision: "day", FirstSeenAt: "2026-11-03T00:00:00Z"},
+		{ID: "month", PublishedAt: "2026-10-01T00:00:00Z", DatePrecision: "month"},
+		{ID: "year", PublishedAt: "2025-01-01T00:00:00Z", DatePrecision: "year"},
 		{ID: "unknown", PublishedAt: "", DatePrecision: "unknown"},
 	} {
 		item.Kind, item.Authors, item.Links = "preprint", "[]", "[]"
@@ -151,61 +151,42 @@ func TestNewsNaturalWeekAndHistoryPartition(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	request := func(query string, now string) *httptest.ResponseRecorder {
-		n, err := time.Parse(time.RFC3339, now)
-		if err != nil {
-			t.Fatal(err)
-		}
-		r := gin.New()
-		r.GET("/api/news/feed", func(c *gin.Context) { listNewsFeedAt(c, n) })
-		w := httptest.NewRecorder()
-		r.ServeHTTP(w, httptest.NewRequest("GET", "/api/news/feed?kind=preprint&"+query, nil))
-		return w
-	}
-	for _, tc := range []struct {
-		query string
-		total int
-		ids   []string
-	}{
-		{"period=week&page_size=2", 3, []string{"end", "middle"}},
-		{"period=week&page_size=2&page=2", 3, []string{"start"}},
-		{"period=history", 4, []string{"next", "month", "before", "unknown"}},
-	} {
-		w := request(tc.query, "2026-10-23T00:00:00Z")
-		var got struct {
-			Items []newsFeedView
-			Total int
-			Week  string
-		}
-		if w.Code != 200 || json.Unmarshal(w.Body.Bytes(), &got) != nil {
-			t.Fatal(w.Body.String())
-		}
-		if got.Total != tc.total || got.Week != "2026-10-19" || len(got.Items) != len(tc.ids) {
-			t.Fatalf("%s: %+v", tc.query, got)
-		}
-		for i, id := range tc.ids {
-			if got.Items[i].ID != id {
-				t.Fatalf("%s: %s != %s", tc.query, got.Items[i].ID, id)
+	want := [][]string{{"new", "sunday-b"}, {"sunday-a", "older"}, {"month", "year"}, {"unknown"}}
+	for page, ids := range want {
+		// 无日期参数与旧缓存客户端的日期参数都必须读取同一连续列表。
+		for _, legacy := range []string{"", "&period=week&week=2026-11-02", "&period=history&week=invalid"} {
+			response := newsRequest(fmt.Sprintf("/api/news/feed?kind=preprint&page_size=2&page=%d%s", page+1, legacy))
+			if response.Code != 200 {
+				t.Fatal(response.Body.String())
+			}
+			var result struct {
+				Items []newsFeedView
+				Total int
+			}
+			if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
+				t.Fatal(err)
+			}
+			if result.Total != 7 || len(result.Items) != len(ids) {
+				t.Fatalf("%+v", result)
+			}
+			for i, id := range ids {
+				if result.Items[i].ID != id {
+					t.Fatalf("page %d: %+v", page+1, result.Items)
+				}
+				if id == "month" && result.Items[i].DatePrecision != "month" {
+					t.Fatal("日期精度丢失")
+				}
+			}
+			var fields map[string]json.RawMessage
+			if err := json.Unmarshal(response.Body.Bytes(), &fields); err != nil {
+				t.Fatal(err)
+			}
+			for _, field := range []string{"week", "week_end", "period", "timezone"} {
+				if _, ok := fields[field]; ok {
+					t.Fatalf("退役字段仍存在: %s", field)
+				}
 			}
 		}
-	}
-	// 跨周继续翻页时保留原周锚点，不把前一周页码套在新周数据上。
-	w := request("period=week&week=2026-10-19&page_size=2&page=2", "2026-10-26T00:00:00Z")
-	if w.Code != 200 || !strings.Contains(w.Body.String(), `"id":"start"`) {
-		t.Fatal(w.Body.String())
-	}
-	for _, query := range []string{"period=invalid", "week=2026-10-20", "week=2026-11-02", "week=bad"} {
-		if w := request(query, "2026-10-23T00:00:00Z"); w.Code != 400 {
-			t.Fatalf("%s: %d", query, w.Code)
-		}
-	}
-}
-
-func TestNewsWeekYearBoundary(t *testing.T) {
-	now, _ := time.Parse(time.RFC3339, "2026-12-31T23:00:00Z")
-	start, end, err := newsWeek(now, "")
-	if err != nil || start.Format("2006-01-02") != "2026-12-28" || end.Format("2006-01-02") != "2027-01-04" {
-		t.Fatal(start, end, err)
 	}
 }
 
@@ -351,9 +332,7 @@ func TestNewsFeedCandidatePrivacyMySQL(t *testing.T) {
 	t.Cleanup(func() { database.DB = old; sqlDB.Close() })
 	for _, period := range []string{"all", "week", "history"} {
 		router := gin.New()
-		router.GET("/api/news/feed", func(c *gin.Context) {
-			listNewsFeedAt(c, time.Date(2026, 11, 2, 8, 0, 0, 0, time.UTC))
-		})
+		router.GET("/api/news/feed", ListNewsFeed)
 		response := httptest.NewRecorder()
 		router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/api/news/feed?kind=journal_article&period="+period+"&week=2026-11-02", nil))
 		if response.Code != 200 {
@@ -367,9 +346,6 @@ func TestNewsFeedCandidatePrivacyMySQL(t *testing.T) {
 			t.Fatal(err)
 		}
 		want := 1
-		if period == "week" {
-			want = 0
-		}
 		if result.Total != want || len(result.Items) != want {
 			t.Fatalf("候选不应进入公开计数: %s %+v", period, result)
 		}

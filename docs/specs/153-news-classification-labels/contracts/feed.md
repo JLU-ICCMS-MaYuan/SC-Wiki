@@ -7,4 +7,6 @@ GET /api/news/feed 保持现有参数、总数、排序、来源和分页。每�
 
 尚未分类、失败和输入过期时三维均为空。不返回模型配置、密钥、后台尝试 token。读取不触发模型调用，家族名称来自数据库当前目录。
 
-新增 period=week/history/all（旧调用默认 all，页面显式 week）。week=YYYY-MM-DD 可固定一个不晚于当前周的周一；非法日期、非周一或未来周返回 400。自然周使用 Asia/Shanghai，条件为 date_precision=day 且时间落在周一零点至下周一零点的半开区间；history 是该条件的补集。计数与分页使用同一条件。响应追加 week、week_end、timezone 和 period。
+2026-11-02：取消period/week时间过滤，正式查询仅使用kind、page、page_size。旧调用附带period/week时作为不使用的额外参数忽略，一律计数和分页该类型全部已收录条目。响应不再包含period、week、week_end、timezone。
+
+排序固定为published_at倒序、first_seen_at倒序、id倒序；日期字段及原精度保留，缺日期的记录排在有日期记录之后。前端每栏page_size=5，页码独立；不再存在本周/历史两套数据集。

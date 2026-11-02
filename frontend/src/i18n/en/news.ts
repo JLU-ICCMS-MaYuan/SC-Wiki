@@ -1,10 +1,6 @@
 // 英文快讯域文案。键集必须与 zh/news.ts 完全一致——字典类型由中文侧推导，
 // 缺键会在 `tsc -b` 阶段报错，不会静默回退。
 export default {
-  currentWeek: 'This week · from Monday {start} (UTC+8)',
-  historyScope: 'Other collected items · newest first',
-  moreHistory: 'More history',
-  backToWeek: 'Back to this week',
   classificationNotice: 'Labels are inferred automatically from titles and abstracts',
   moreFamilies: '{count} more material families; open the item to view all',
 
@@ -31,9 +27,8 @@ export default {
   autoCollected: 'Auto-collected, not reviewed by this site',
   loadingFeed: 'Loading news…',
   feedLoadFailed: 'Failed to load the feed. Please retry. This does not mean there is no news.',
-  feedEmpty: 'No news matches the current filter',
-  weekEmptyHint: 'No items collected this week. Use More history to browse other items.',
-  historyEmptyHint: 'No historical items have been collected.',
+  feedEmpty: 'No collected items yet',
+  feedEmptyHint: 'Items will appear here when this category receives new collections.',
   publishedAt: 'Published: {date}',
   publishedLabel: 'Published: ',
   etAl: ' et al.',

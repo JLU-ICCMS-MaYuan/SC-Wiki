@@ -1,10 +1,6 @@
 // 快讯域文案：首页快讯 Hero、自动采集信息流（NewsFeed）、来源状态、详情抽屉与人工快讯（ManualNews）。
 // 通用按钮（重试等）复用 common 域；仅此页专有的文案放在这里。
 export default {
-  currentWeek: '本周 · 北京时间周一 {start} 起',
-  historyScope: '其他已收录内容 · 按发表时间从新到旧',
-  moreHistory: '历史更多',
-  backToWeek: '返回本周',
   classificationNotice: '标签依据标题和摘要自动判断',
   moreFamilies: '另有 {count} 个材料家族，点击条目查看全部',
 
@@ -31,9 +27,8 @@ export default {
   autoCollected: '自动采集，未经本站审核',
   loadingFeed: '正在加载资讯…',
   feedLoadFailed: '资讯读取失败，请重试。此状态不代表没有新闻。',
-  feedEmpty: '当前筛选下暂无资讯',
-  weekEmptyHint: '本周暂无已收录内容，可通过“历史更多”查看其他条目。',
-  historyEmptyHint: '暂无已收录的历史内容。',
+  feedEmpty: '暂无已收录资讯',
+  feedEmptyHint: '该类资讯尚未收录，后续采集到的内容会显示在这里。',
   publishedAt: '发表：{date}',
   publishedLabel: '发表：',
   etAl: ' 等',

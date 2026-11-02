@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Alert, Box, Button, Chip, Drawer, IconButton, Link, Paper, Skeleton, Stack, Typography } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
 import { api } from '../lib/api'
@@ -21,7 +21,7 @@ interface FeedItem extends NewsClassification {
   content_type: string; display_kind: Kind; discovery_source: string; original_source: string; relevance_evidence: string
   links: { source: string; url: string }[]
 }
-interface FeedResponse { items: FeedItem[]; total: number; page: number; page_size: number; week?: string; week_end?: string }
+interface FeedResponse { items: FeedItem[]; total: number; page: number; page_size: number }
 
 export function safeNewsLink(value: string): string | undefined {
   try {
@@ -64,8 +64,6 @@ interface FeedColumnProps {
 function FeedColumn({ kind, label, onSelect }: FeedColumnProps) {
   const { t, lang } = useLanguage()
   const [page, setPage] = useState(1)
-  const [period, setPeriod] = useState<'week' | 'history'>('week')
-  const week = useRef('')
   const [revision, setRevision] = useState(0)
   const [data, setData] = useState<FeedResponse | null>(null)
   const [loading, setLoading] = useState(true)
@@ -81,13 +79,10 @@ function FeedColumn({ kind, label, onSelect }: FeedColumnProps) {
     setLoading(true)
     setError(false)
     const params = new URLSearchParams({ kind, page: String(page), page_size: String(PAGE_SIZE) })
-    params.set('period', period)
-    if (week.current) params.set('week', week.current)
     api.get<FeedResponse>('/api/news/feed?' + params, { signal: controller.signal })
       .then(result => {
         if (!Array.isArray(result.items) || typeof result.total !== 'number') throw new Error('invalid feed response')
         if (!controller.signal.aborted) {
-          if (result.week) week.current = result.week
           setData(result)
           const lastPage = Math.max(1, Math.ceil(result.total / PAGE_SIZE))
           if (page > lastPage) setPage(lastPage)
@@ -96,18 +91,17 @@ function FeedColumn({ kind, label, onSelect }: FeedColumnProps) {
       .catch(() => { if (!controller.signal.aborted) setError(true) })
       .finally(() => { if (!controller.signal.aborted) setLoading(false) })
     return () => controller.abort()
-  }, [kind, page, period, revision])
+  }, [kind, page, revision])
 
   const pages = data ? Math.min(10000, Math.max(1, Math.ceil(data.total / PAGE_SIZE))) : 1
   return <Paper component="section" aria-label={label} variant="outlined" sx={{ minWidth: 0, height: '100%', display: 'flex', flexDirection: 'column', px: { xs: 2, md: 2.5 }, borderRadius: 2, boxShadow: 'none' }}>
     <Typography component="h3" variant="h3" sx={{ flexShrink: 0, pt: 2, pb: 1.5, borderBottom: '1px solid', borderColor: 'divider' }}>{label}</Typography>
-    <Typography variant="caption" color="text.secondary" sx={{ pt: 1 }}>{period === 'week' ? t('news.currentWeek', { start: data?.week || '…' }) : t('news.historyScope')}</Typography>
     <Box sx={{ height: { xs: 830, md: 930, lg: 730 }, display: 'flex', flexDirection: 'column' }}>
       {loading ? <FeedLoading label={t('news.loadingFeed')} /> : error ? <Alert severity="error" sx={{ my: 2 }} action={<Button color="inherit" onClick={() => setRevision(v => v + 1)}>{t('common.retry')}</Button>}>
         {t('news.feedLoadFailed')}
       </Alert> : data?.items.length === 0 ? <Box sx={{ py: 5 }} role="status">
         <Typography fontWeight={600}>{t('news.feedEmpty')}</Typography>
-        <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>{t(period === 'week' ? 'news.weekEmptyHint' : 'news.historyEmptyHint')}</Typography>
+        <Typography variant="body2" sx={{ mt: 1, color: 'text.secondary' }}>{t('news.feedEmptyHint')}</Typography>
       </Box> : <Box component="ul" sx={{ flex: 1, minHeight: 0, display: 'grid', gridTemplateRows: 'repeat(5, minmax(0, 1fr))', listStyle: 'none', m: 0, p: 0 }}>
         {data?.items.map(item => <Box
           component="li"
@@ -158,9 +152,6 @@ function FeedColumn({ kind, label, onSelect }: FeedColumnProps) {
         <Button variant="outlined" disabled={page <= 1} onClick={() => setPage(value => value - 1)}>{t('news.prevPage')}</Button>
         <Button variant="outlined" disabled={page >= pages} onClick={() => setPage(value => value + 1)}>{t('news.nextPage')}</Button>
       </Stack>
-      {(period === 'history' || page >= pages) && <Button variant="text" onClick={() => { setPeriod(period === 'week' ? 'history' : 'week'); setPage(1) }}>
-        {period === 'week' ? t('news.moreHistory') : t('news.backToWeek')}
-      </Button>}
     </Stack>}
   </Paper>
 }

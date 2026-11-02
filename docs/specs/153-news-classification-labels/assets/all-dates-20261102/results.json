@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "independentPagination": true,
+  "allDatePrecisions": true,
+  "noWeekNavigation": true,
+  "labelsAndDetail": true,
+  "mobileFeedOverflow": false,
+  "requests": [
+    {
+      "kind": "news",
+      "page": "1",
+      "size": "5"
+    },
+    {
+      "kind": "preprint",
+      "page": "1",
+      "size": "5"
+    },
+    {
+      "kind": "journal_article",
+      "page": "1",
+      "size": "5"
+    },
+    {
+      "kind": "preprint",
+      "page": "2",
+      "size": "5"
+    },
+    {
+      "kind": "preprint",
+      "page": "1",
+      "size": "5"
+    }
+  ],
+  "errors": []
+}

@@ -15,7 +15,7 @@
 - 相同 DOI 或规范化原文 URL 的条目在事务内合并，保留来源链接；两个已知不同 DOI 不因错误复用同一URL而合并，不按相似标题猜测。预印本补充信息不把已经发表的条目退回预印本；聚合索引笼统的 journal-article 类型也不覆盖出版商明确的新闻标识。
 - 自动条目保留 `content_type`、发现/原文来源与相关性依据，但分栏按内容语义：Phys.org 科研报道、出版社新闻及社会/产业资讯进入新闻；arXiv等进入预印本；正式期刊条目进入期刊栏。已知 Nature新闻、APS Physics、ACS C&EN 和 Science新闻栏目按报道识别。旧 display_kind 不再决定分栏，计数、分页和公开返回使用同一语义，不需先批量改写历史记录。新期刊类型使用 journal_article，不以元数据冒称完成同行评审核验。
 - 页面按发表时间倒序，以 News、Preprints、Articles 三列并列展示；每列固定请求所属类型且每页 5 条，三列独立维护页码和翻页状态。只有年/月的日期明确标注精度。
-- 三栏默认只显示北京时间当前自然周（周一零点至下周一零点）。翻页保留周锚点，末页或本周为空时提供“历史更多”，按发表时间从新到旧展示其余已收录条目，并可返回本周。仅年/月或未知日期不推定属于本周，保留在历史入口；计数和分页由服务端同一条件约束。旧 API 无 period 参数时保持全量兼容。
+- 三栏均按发表时间倒序连续浏览该类全部已收录内容，每页五条、各自翻页；没有自然周、最近七天或历史模式切换。同一发表时间按首次收录时间、ID倒序稳定排列，保留原日期精度，缺日期的记录排在有日期记录后。只在整类没有已收录条目时显示空状态。旧请求附带period/week时忽略，响应不再返回周锚点字段。
 - 公开页面不展示来源更新状态面板、采集告警、错误码、最后成功时间或订阅窗口说明；后台仍保存采集状态用于运行诊断。页面继续区分资讯加载中、暂无条目和请求失败，保留列表失败后的重试入口。
 - GET /api/news 保持人工快讯数组契约；数据库错误返回 HTTP 500，不再伪装为空结果。
 
@@ -95,6 +95,7 @@ RSS 只能补回当前订阅窗口；已移除的历史内容无法保证找回�
 本轮 Go 全包测试仍有论文证据审核测试 TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction 的既有失败，已在未修改 HEAD 副本复现；未把定向资讯测试当作全包通过。
 
 ## 相关变更记录
+2026-11-02 用户在 #153 撤销自然周限制，改为全量发表日期倒序浏览；旧上线和验收记录仍作为历史保留。[最新规则](../specs/153-news-classification-labels/spec.md)与[本轮验证](../specs/153-news-classification-labels/all-dates-validation.md)。
 [Feature #160](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/160) 更新内容分栏、单原文入口与期刊发现；[研究](../specs/160-news-source-semantics/research.md)和[验证记录](../specs/160-news-source-semantics/quickstart.md)区分代码实现、真实入口结果、外站访问限制与部署状态。
 [Bug #157](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/157) 修复 macOS 资讯采集的 fork 崩溃，恢复本地采集及本周展示；[诊断与验收](../specs/157-macos-news-worker/spec.md)。来源网络失败与 Worker 恢复分开记录，不将空列表解释为没有相关文献。
 [Feature #156](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/156) 移除公开资讯页的来源更新状态展示，保留条目来源信息与后台采集诊断；[规格](../specs/156-remove-news-source-status/spec.md)。

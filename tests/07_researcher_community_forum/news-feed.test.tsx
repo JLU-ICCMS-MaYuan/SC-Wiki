@@ -47,9 +47,9 @@ it('distinguishes failures from empty results and retries', async () => {
  vi.stubGlobal('fetch', fetcher)
  render(<NewsFeed />)
  expect((await screen.findAllByRole('alert'))[0]).toHaveTextContent('读取失败')
- expect(screen.queryByText('当前筛选下暂无资讯')).not.toBeInTheDocument()
+ expect(screen.queryByText('暂无已收录资讯')).not.toBeInTheDocument()
  fireEvent.click(screen.getAllByRole('button', { name: '重试' })[0])
- expect(await screen.findByText('当前筛选下暂无资讯')).toBeInTheDocument()
+ expect(await screen.findByText('暂无已收录资讯')).toBeInTheDocument()
 })
 
 it.each([
