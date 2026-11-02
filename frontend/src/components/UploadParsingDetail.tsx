@@ -35,6 +35,7 @@ interface ParsingDetail {
     error?: string | null
   }>
   chunks: ChunkDetail[]
+  pending_visual_regions?: Array<{ file_id: string; pdf_page: number; block_id: string }>
   partial_draft?: UploadDraft | null
   preview_phase?: string | null
   citation_extraction_status?: CitationExtractionStatus | null
@@ -198,6 +199,16 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
               <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
                 {t('upload.chunkProgressTitle', { completed: detail.summary.completed, total: detail.summary.total })}
               </Typography>
+              {!!detail.pending_visual_regions?.length && <Alert severity="info" sx={{ mb: 1.5 }}>
+                {t('upload.visualReadingPending', { count: detail.pending_visual_regions.length })}
+                {detail.files?.map(file => {
+                  const pages = [...new Set(detail.pending_visual_regions!.filter(region => region.file_id === file.file_id)
+                    .map(region => region.pdf_page))].sort((a, b) => a - b)
+                  return pages.length ? <Typography key={file.file_id} variant="body2">
+                    {t('upload.visualReadingPendingPages', { filename: file.original_filename, pages: pages.join(', ') })}
+                  </Typography> : null
+                })}
+              </Alert>}
               {detail.chunks.length === 0 && (
                 <Typography variant="body2" color="text.secondary">{t('upload.noChunksYet')}</Typography>
               )}

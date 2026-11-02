@@ -943,6 +943,13 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
         partial_draft = _build_candidate_draft(chunks)
     else:
         partial_draft = None
+    coverage_path = available_published_path(task_id, artifact_directory(task_id) / "coverage.json")
+    try:
+        coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        coverage = {}
+    pending_visual_regions = [region for report in coverage.values()
+                              for region in report.get("pending_visual_regions", [])]
     return {
         "task_id": task_id,
         "status": task_status,
@@ -959,6 +966,7 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
             for file in state.get("files") or []
         ],
         "chunks": chunks,
+        "pending_visual_regions": pending_visual_regions,
         "partial_draft": partial_draft,
         "preview_phase": state.get('preview_phase'),
         "summary": {
@@ -2201,13 +2209,11 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             incomplete = any(report["requires_human"] for report in coverage.values())
             update_state(task_id, reading_state="needs_review" if unresolved or incomplete else "coverage_checked")
             if unresolved or incomplete:
+                from backend.ingest.coverage_audit import coverage_failure_message
                 file_names = {str(item.get("file_id")): str(item.get("original_filename") or item.get("file_id"))
                               for item in state.get("files") or []}
-                parts = [f"{file_names.get(file_id, file_id[:8])} {len(report['uncovered_candidates'])} 项"
-                         for file_id, report in coverage.items() if report["uncovered_candidates"]]
-                detail = f"（{'；'.join(parts) or '存在无法定位的科学候选'}），完整清单见解析检查产物"
                 raise ParserError("document_review_required",
-                                  f"存在无法定位的科学候选或未覆盖内容{detail}，请核对解析结果后重试",
+                                  coverage_failure_message(claims, coverage, file_names, document_set),
                                   profile=state["parser_profile"], parser="claim_validator")
 
         _ensure_not_cancelled(task_id)

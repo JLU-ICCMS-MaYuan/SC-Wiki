@@ -202,6 +202,11 @@ emit a record for it, or declare it in coverage_exclusions with exactly one loca
 table_id+row_index, or pdf_page), a category from {", ".join(EXCLUSION_CATEGORIES)} and a short reason.
 Rows that are headers/units use header_or_unit_row; figures without scientific data use figure_without_data;
 background or referenced results use reference_or_background; content you cannot read MUST use unreadable.
+Exception: empty figure/formula text is an image-only region, and this text request does NOT
+include its pixels. Do not label it unreadable merely because image content was not supplied,
+and do not invent values or call it figure_without_data for that reason. Leave that empty region
+without an exclusion; the server retains its file/page/block as pending image reading.
+Actual unreadable text, table cells or nonempty regions still require unreadable with a reason.
 Extract ALL reported lambda_ep, omega_log and mu_star into EACH corresponding predicted record's payload.parameters.
 Read table title, headers, units, group rows, continuation blocks and footnotes together with every data row.
 Preserve the reported phonon/EPC vibrational_treatment in payload.calculation_conditions, with its method_scope; never broadcast it to electronic results. Preserve table row identity in payload.table_row_ref

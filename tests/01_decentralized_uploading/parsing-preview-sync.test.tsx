@@ -1,6 +1,6 @@
 import React from 'react'
 import '@testing-library/jest-dom/vitest'
-import {cleanup, render, screen, waitFor} from '@testing-library/react'
+import {cleanup, fireEvent, render, screen, waitFor} from '@testing-library/react'
 import {afterEach, expect, it, vi} from 'vitest'
 import UploadParsingDetail from '../../frontend/src/components/UploadParsingDetail'
 
@@ -12,6 +12,23 @@ const response = (data: unknown) => new Response(JSON.stringify(data), {
 })
 const state = {material: 'CaH6', material_name: 'CaH6', state_kind: 'theoretical',
   pressure_value_gpa: 150, tc_results: [], properties: []}
+
+it('图片待处理：在现有分段页显示文件和PDF页码，不声称已完成图像核对', async () => {
+  vi.stubGlobal('fetch', vi.fn(async () => response({ok: true, data: {
+    status: 'failed', stage: 'reading', chunks: [], partial_draft: null, next_poll_ms: null,
+    summary: {completed: 2, total: 2},
+    files: [{file_id: 'si', role: 'supplementary', original_filename: 'CaH6-SI.pdf'}],
+    pending_visual_regions: [
+      {file_id: 'si', pdf_page: 10, block_id: 'figure-a'},
+      {file_id: 'si', pdf_page: 5, block_id: 'figure-b'},
+      {file_id: 'si', pdf_page: 10, block_id: 'figure-c'},
+    ],
+  }})))
+  render(<UploadParsingDetail taskId={'c'.repeat(32)} />)
+  fireEvent.click(await screen.findByRole('tab', {name: '分段解析与证据'}))
+  expect(screen.getByText('有 3 个图片／公式区域尚未由文字步骤读取。已保留原文位置供后续图像处理，图像内容尚未核对。')).toBeVisible()
+  expect(screen.getByText('CaH6-SI.pdf · PDF 第 5, 10 页')).toBeVisible()
+})
 
 it('完整上传预览：核对中展示材料，晚到题录和失败均不清空科学区域', async () => {
   let reads = 0

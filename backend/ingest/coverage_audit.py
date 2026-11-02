@@ -57,9 +57,11 @@ class CoverageReport(BaseModel):
     uncovered_candidates: list[str] = Field(default_factory=list)
     exclusions: list[dict[str, object]] = Field(default_factory=list)
     figures_without_text_layer: int = 0
+    pending_visual_regions: list[dict[str, object]] = Field(default_factory=list)
+    unreadable_regions: list[dict[str, object]] = Field(default_factory=list)
     truncation_signals: list[str] = Field(default_factory=list)
     limitations: list[str] = Field(default_factory=list)
-    checker_version: str = "3"
+    checker_version: str = "4"
     requires_human: bool = True
 
 
@@ -93,6 +95,9 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
     excluded_blocks: set[str] = set()
     excluded_rows: set[tuple[str, int]] = set()
     recorded: list[dict[str, object]] = []
+    blocks = {b.block_id: b for b in ir.blocks}
+    tables = {t.table_id: t for t in ir.tables}
+    unreadable_regions = []
     unreadable = False
     for entry in exclusions or []:
         if entry.get("file_id") not in (ir.source_file_id, None):
@@ -104,7 +109,16 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
         if entry.get('verification'):
             recorded[-1]['verification'] = entry['verification']
         if entry.get("category") == "unreadable":
+            block = blocks.get(entry.get("block_id"))
+            if block and block.block_type in {"figure", "formula"} and not block.text.strip():
+                # 文字输入没有该区域的像素；保留原始标记，但不能据此断言图像读取失败。
+                recorded[-1].update(pdf_page=block.pdf_page, disposition="pending_image_reading")
+                continue
             unreadable = True
+            table = tables.get(entry.get("table_id"))
+            unreadable_regions.append({"file_id": ir.source_file_id,
+                "pdf_page": block.pdf_page if block else table.pdf_page if table else entry.get("pdf_page"),
+                "locator": recorded[-1]["locator"], "reason": recorded[-1]["reason"]})
         if entry.get("block_id") is not None:
             excluded_blocks.add(str(entry["block_id"]))
         elif entry.get("table_id") is not None and entry.get("row_index") is not None:
@@ -124,6 +138,7 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
             if not cells or not any(c.block_id in result_blocks for c in cells):
                 missing.append(f"table:{table.table_id}:row:{row}")
     figures_without_text = 0
+    pending_visual_regions = []
     for block in ir.blocks:
         if block.block_type in {"figure", "formula"} and block.block_id not in covered_blocks \
                 and block.block_id not in excluded_blocks:
@@ -131,6 +146,8 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
             # （#114 视觉/原生方案范围外），不要求提取覆盖，只记录计数供审计。
             if not (block.text or "").strip():
                 figures_without_text += 1
+                pending_visual_regions.append({"file_id": ir.source_file_id, "pdf_page": block.pdf_page,
+                    "block_id": block.block_id, "block_type": str(block.block_type), "status": "not_read_in_text_pass"})
             else:
                 missing.append(f"region:{block.block_id}")
     empty = sorted(p for p in pages if not any(b.pdf_page == p and
@@ -166,5 +183,53 @@ def audit_coverage(ir: DocumentIR, claims: list[Claim] | None = None, *, truncat
         suspected_result_blocks=suspected, covered_claim_ids=covered_claims,
         uncovered_candidates=list(dict.fromkeys(missing)),
         exclusions=recorded, figures_without_text_layer=figures_without_text,
+        pending_visual_regions=pending_visual_regions, unreadable_regions=unreadable_regions,
         truncation_signals=signals,
         limitations=limitations, requires_human=not complete)
+
+
+def coverage_failure_message(claims, reports, file_names, documents):
+    """按实际阻塞原因生成提示；没有未定位 Claim 时不能捏造定位失败。"""
+    parts = []
+    unlocated = [c for c in claims if c.status != "validated"]
+    if unlocated:
+        parts.append(f"{len(unlocated)} 组科学候选无法定位，请核对其原句与来源")
+    for file_id, report in reports.items():
+        if not report["requires_human"]:
+            continue
+        name = file_names.get(file_id, file_id[:8])
+        regions = report.get("unreadable_regions") or []
+        if regions:
+            pages = sorted({r["pdf_page"] for r in regions if r.get("pdf_page") is not None})
+            location = "第 " + ", ".join(map(str, pages)) + " 页" if pages else "页码未确定"
+            reasons = list(dict.fromkeys(str(r.get("reason") or "内容读取失败") for r in regions))
+            parts.append(f"{name} {location}：{len(regions)} 处内容读取失败（{'；'.join(reasons[:3])}）")
+        missing = report.get("uncovered_candidates") or []
+        if missing:
+            ir = documents[file_id]
+            block_pages = {b.block_id: b.pdf_page for b in ir.blocks}
+            table_pages = {t.table_id: t.pdf_page for t in ir.tables}
+            pages = set()
+            for locator in missing:
+                match = re.fullmatch(r"(?:block|region):(.+)", locator)
+                page = block_pages.get(match[1]) if match else None
+                table = re.fullmatch(r"table:(.+):(?:row:\d+|unread|structure_missing)", locator)
+                page = table_pages.get(table[1]) if table else page
+                if page is not None:
+                    pages.add(page)
+                if re.fullmatch(r"page:\d+", locator):
+                    pages.add(int(locator.split(":")[1]))
+            location = " 第 " + ", ".join(map(str, sorted(pages))) + " 页" if pages else ""
+            parts.append(f"{name}{location}：{len(missing)} 项内容尚未覆盖")
+        for limitation in report.get("limitations") or []:
+            if limitation == "unreadable_exclusion_present" and regions:
+                continue
+            label = {"unreadable_exclusion_present": "存在尚未解决的读取失败",
+                "empty_page_content_unconfirmed": "存在尚未确认的空白页",
+                "excluded_ratio_above_threshold": "过多疑似结果被排除，需核对是否漏提",
+                "document_has_no_pages": "未读到有效页面",
+                "processed_page_not_in_document": "处理页码与原文件不一致"}.get(limitation, "解析器报告了尚未解决的读取限制")
+            parts.append(f"{name}：{label}")
+        if report.get("truncation_signals"):
+            parts.append(f"{name}：提取输出被截断")
+    return "来源或覆盖检查未完成：" + "；".join(parts or ["存在尚未解决的读取限制"]) + "。请核对解析检查明细后重试"

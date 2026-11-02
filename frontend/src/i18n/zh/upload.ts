@@ -13,7 +13,7 @@ export default {
   openTaskNewTab: '在新标签页打开 {filename} 的解析详情',
 
 
-  readingStates: {"ir_ready": "文档结构已就绪", "claims_ready": "科学候选已生成，正在核对来源", "coverage_checked": "来源定位与覆盖检查已完成", "needs_review": "存在无法定位或未覆盖的内容，需要核对后重试"},
+  readingStates: {"ir_ready": "文档结构已就绪", "claims_ready": "科学候选已生成，正在核对来源", "coverage_checked": "文字来源定位与覆盖检查已完成", "needs_review": "来源或覆盖检查未完成，具体原因见下方提示"},
 
   parserProfile: "PDF 解析方案",
   parserProfileHelp: "方案不可用时会报告失败，不会自动切换；TXT/MD 和结构附件保持原处理方式。",
@@ -168,6 +168,8 @@ export default {
 
   // ── UploadParsingDetail ──
   detailLoadFailed: '解析详情加载失败',
+  visualReadingPending: '有 {count} 个图片／公式区域尚未由文字步骤读取。已保留原文位置供后续图像处理，图像内容尚未核对。',
+  visualReadingPendingPages: '{filename} · PDF 第 {pages} 页',
   operationFailed: '操作失败',
   summarizingNote: '正在汇总全文草稿，表单内容实时更新；生成完成后即可校对。',
   previewNotes: {

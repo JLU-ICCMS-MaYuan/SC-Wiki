@@ -11,7 +11,7 @@ export default {
   openTaskNewTab: 'Open parsing details for {filename} in a new tab',
 
 
-  readingStates: {"ir_ready": "Document structure is ready", "claims_ready": "Scientific candidates are ready; checking sources", "coverage_checked": "Source and coverage checks completed", "needs_review": "Some content is unlocated or uncovered; review before retrying"},
+  readingStates: {"ir_ready": "Document structure is ready", "claims_ready": "Scientific candidates are ready; checking sources", "coverage_checked": "Text source and coverage checks completed", "needs_review": "Source or coverage checks are incomplete; see the reason below"},
 
   parserProfile: "PDF parsing method",
   parserProfileHelp: "Unavailable methods report a failure without switching. Text and structure attachments keep their existing handling.",
@@ -166,6 +166,8 @@ export default {
 
   // ── UploadParsingDetail ──
   detailLoadFailed: 'Failed to load parsing details',
+  visualReadingPending: '{count} image/formula regions were not read by the text step. Their source locations are retained for image processing; image content has not been verified.',
+  visualReadingPendingPages: '{filename} · PDF pages {pages}',
   operationFailed: 'Operation failed',
   summarizingNote: 'Summarizing the full-text draft; the form updates in real time and is ready for review once finished.',
   previewNotes: {
