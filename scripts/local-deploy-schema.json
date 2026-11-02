@@ -1,8 +1,7 @@
 {
-  "deferred_source_heads": [
-    "20261102_0160"
-  ],
+  "deferred_source_heads": [],
   "schema_heads": [
+    "20261102_0160",
     "20261102_0204"
   ],
   "tables": {
@@ -1764,6 +1763,66 @@
           "state_key"
         ]
       ]
+    },
+    "news_feed_candidates": {
+      "checks": [
+        "(statusin('pending','running','related','unrelated','insufficient','failed'))"
+      ],
+      "columns": {
+        "attempt_token": {
+          "nullable": false,
+          "type": "varchar(32)"
+        },
+        "attempts": {
+          "nullable": false,
+          "type": "integer"
+        },
+        "content_hash": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "first_seen_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "key": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "last_seen_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        },
+        "model": {
+          "nullable": false,
+          "type": "varchar(200)"
+        },
+        "reason": {
+          "nullable": false,
+          "type": "text"
+        },
+        "record_json": {
+          "nullable": false,
+          "type": "mediumtext"
+        },
+        "rule_version": {
+          "nullable": false,
+          "type": "varchar(64)"
+        },
+        "status": {
+          "nullable": false,
+          "type": "varchar(16)"
+        },
+        "updated_at": {
+          "nullable": false,
+          "type": "varchar(20)"
+        }
+      },
+      "foreign_keys": [],
+      "primary_key": [
+        "key"
+      ],
+      "unique": []
     },
     "news_feed_classifications": {
       "checks": [

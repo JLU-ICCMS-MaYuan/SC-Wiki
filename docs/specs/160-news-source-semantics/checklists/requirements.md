@@ -15,3 +15,12 @@
 - [x] IMG-003原图、Crossref真实输入、首次模型失败及修正重测均保留；见assets与relevance-validation.md。
 - [x] 新行为在隔离源码、MySQL/RQ/Go与真实模型中核验；业务部署与并行工作限制独立说明。
 - [ ] 本轮补充文档的远程链接待明确推送授权后核验，不因本地完成勾选。
+
+
+## 本机迁移补充核对
+
+- [x] 环境选择及原话追加于 spec.md，本机地址明确；不借用其他任务或上次阿里云授权。[FR-014至016]
+- [x] 完整备份恢复到独立 MySQL，逐列编码、73 张原表结构/行数/内容摘要一致；真实迁移只新增候选表和版本头。[SC-009；local-migration-validation.md、私有 rehearsal-report.json/applied-report.json]
+- [x] 严格清单只新增候选表，原表描述保持；Linux/Mac 两头一致，未知头及结构差异仍拒绝。[FR-015；48 项部署/结构测试通过，11 项环境依赖跳过]
+- [x] 资讯进程和依赖启动头清单的 Go 已恢复，/readyz 全部依赖 true，资讯 API/Python/Vite 200，隔离库清理、备份保留。[SC-010；assets/verification/local-migration.json]
+- [ ] 远程文档访问及原 T005 外站确认仍按既有关闭门核验；本机迁移不代表这些检查通过。

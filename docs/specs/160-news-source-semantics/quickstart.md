@@ -53,3 +53,22 @@ Go：go test ./handlers -run TestNews -count=1；隔离预览仅在 NEWS_SEMANTI
 ## 2026-11-02 增量
 
 富氢检索、候选与模型相关性验收见 [relevance-validation.md](relevance-validation.md)。这一增量需要新候选表迁移，旧记录的“不引入迁移”只描述10月23日交付。
+
+
+## 本机迁移验收（2026-11-02）
+
+用户已明确本机原生环境。已完成 `127.0.0.1:3307/scwiki` 的资讯候选表迁移，现有两个头为 `20261102_0160`、`20261102_0204`。完整步骤、备份及恢复差异处理见 [本机迁移验收](local-migration-validation.md)。以下命令仅重读核验，不再次执行迁移：
+
+```sh
+/Users/mayuan/software/miniconda3/envs/sc-wiki/bin/python - <<'PYVERIFY'
+from pathlib import Path
+from scripts.local_deploy.config import read_config
+from scripts.local_deploy.schema import verify_schema
+root = Path.cwd()
+verify_schema(root, read_config(root)['DATABASE_URL'])
+print('本机实际结构与已受测清单一致')
+PYVERIFY
+curl --noproxy '*' --fail 'http://127.0.0.1:8080/readyz'
+```
+
+核验必须在仓库根目录执行；只在已确认的本机环境使用。私有备份保留于 `.data/backups/issue160-local-20261102/`，隔离库已清理。不执行历史回填，不将本机结果视为远程发布或外站直达确认。

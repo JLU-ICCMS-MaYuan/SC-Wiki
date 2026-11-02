@@ -218,6 +218,6 @@ Go 安装器和启动脚本共用 GOPATH/GOCACHE/GOPROXY，默认沿用项目既
 
 本机科学表单契约迁移使用scripts/migrate_fixed_form_contract.py，目标限定127.0.0.1:3307/scwiki及配套草稿缓存。执行真实SQL备份、JSON精确数字补档、隔离恢复和迁移演练，再在停写窗口转换当前工作稿及正式记录；不使用stamp，不改原始PDF或冻结历史。科学值、结构、谱、来源和缓存均须重读核验。MySQL DDL恢复依靠完整备份，不能宣称事务回滚可以撤销DDL。步骤及本次证据见[操作说明](../../specs/203-fixed-form-field-contract/quickstart.md)。
 
-受测本机版本清单固定已执行的20261102_0204。并行资讯任务20261102_0160未在本次执行，逐项登记在local-deploy-schema.json的deferred_source_heads；此清单不代表该任务完成。启动核验要求源码迁移头恰好等于“受测头+明确暂缓头”、数据库头恰好等于受测头，并核对各表列、约束及外键；未登记的新头、额外数据库头或结构差异仍阻止启动。Linux与Mac的受测头清单保持一致。
+受测本机版本清单固定已执行的20261102_0204及20261102_0160。资讯迁移经单独目标确认、完整备份及隔离恢复演练后已在本机执行，local-deploy-schema.json仅新增候选表描述，原表描述保持，deferred_source_heads当前为空；没有重跑科学表单迁移或重录其契约摘要。启动核验仍要求源码迁移头恰好等于“受测头+明确暂缓头”、数据库头恰好等于受测头，并核对各表列、约束及外键；未登记的新头、额外数据库头或结构差异仍阻止启动。Linux与Mac的受测头清单保持一致。Go就绪检查在进程启动时读取SCWIKI_SCHEMA_HEADS，实际迁移后须重启本机Go API加载新清单，/readyz已核验全部依赖通过。范围与备份记录见[资讯本机迁移验收](../../specs/160-news-source-semantics/local-migration-validation.md)。
 
 这次恢复的是本机原生Python、Go、Vite及原先运行的相关worker，不涉及Git推送、镜像或阿里云发布。私有SQL/Redis备份和凭据不进入Git；冻结快照仍使用其原定义读取。

@@ -1,0 +1,102 @@
+{
+  "verified_at": "2026-11-02T22:40:25+08:00",
+  "target": "127.0.0.1:3307/scwiki",
+  "source_base_commit": "b07676e64c9d1a4d60498a52d098e388447fe790",
+  "before_heads": [
+    "20261102_0204"
+  ],
+  "after_heads": [
+    "20261102_0160",
+    "20261102_0204"
+  ],
+  "existing_business_tables_preserved": 73,
+  "allowed_changes": [
+    "new news_feed_candidates table",
+    "alembic_version"
+  ],
+  "rehearsal_passed": true,
+  "applied_passed": true,
+  "strict_schema_passed": true,
+  "isolated_database_removed": "scwiki_news160_rehearsal_20261102223334",
+  "backup_directory": "/Users/mayuan/Codes/SC-Wiki/.data/backups/issue160-local-20261102",
+  "backup_sha256": {
+    "rehearsal": "b8c8af7f7dd62b3c4cdadb899517c7f0b418d63f46d565ad2de6b6c9c2fd7e2c",
+    "applied": "8cfc352b2ec6a4bc53c172e67cb7067a57357e39ea6fc435530c0be0963288f7"
+  },
+  "source_sha256": {
+    "scripts/local-deploy-versions.json": "2796c7745b7169d2c054c8204e590645597874f1c7f03da52d14519f9d0e72c1",
+    "scripts/local-deploy-macos.json": "32aa95459f634d922c685b0c428b64a76eac7bcdf3ae9960f14a3fd70ef91df7",
+    "scripts/local-deploy-schema.json": "4e2ec4da5d25979d9bfce273e614565426618acb7f73976f11f4ed0d8fa0a35c",
+    "alembic/versions/20261102_0160_news_candidates.py": "c7dc6344d3051e7ca6e976956956c8f065c23b675e52e68500c8a1e63a1cc25e"
+  },
+  "private_report_sha256": {
+    "rehearsal-report.json": "b42eb7dcdebb1d686a3295173b6a0e47beb03f19f4285295ee6d61c05309265d",
+    "applied-report.json": "26dc0bf333279e58fa096d4d2ffa187bb57144d6525bd859ad2e45e038fce412",
+    "health-report.json": "3755b491bec8492eeb76c2b16114df9700af7795efe4aa455b8934814e937b17"
+  },
+  "health": {
+    "processes": {
+      "news-scheduler": 22923,
+      "news-worker": 22827,
+      "goserver": 22656,
+      "python": 83041,
+      "frontend": 82121,
+      "worker": 81875
+    },
+    "endpoints": {
+      "http://127.0.0.1:8080/readyz": {
+        "status": 200,
+        "result": {
+          "dependencies": {
+            "mysql": true,
+            "redis": true,
+            "schema": true,
+            "storage": true
+          },
+          "ready": true
+        }
+      },
+      "http://127.0.0.1:8080/api/news/feed?kind=journal_article&period=history&page=1&page_size=2": {
+        "status": 200,
+        "total": 1246,
+        "returned": 2
+      },
+      "http://127.0.0.1:8000/health": {
+        "status": 200
+      },
+      "http://127.0.0.1:5173/": {
+        "status": 200
+      }
+    },
+    "heads": [
+      "20261102_0160",
+      "20261102_0204"
+    ],
+    "candidate_rows": 0,
+    "candidate_indexes": [
+      {
+        "name": "ix_news_candidate_status_updated",
+        "column_names": [
+          "status",
+          "updated_at"
+        ],
+        "unique": false
+      }
+    ],
+    "candidate_statuses": []
+  },
+  "regression": {
+    "news": {
+      "passed": 101,
+      "skipped": 0
+    },
+    "deployment_and_schema": {
+      "passed": 48,
+      "skipped": 11
+    }
+  },
+  "ddl_comparison_note": "消除重复打印的相同CHARACTER SET，仅文本形式差异；全部列实际字符集/排序规则另行逐项比较一致",
+  "git_pushed": false,
+  "aliyun_deployed": false,
+  "historical_backfill": false
+}

@@ -20,3 +20,16 @@
 - [x] T011 更新 Overview/验证记录并回写 Issue；仅提交本次文件，不推送或部署（SC-008）。
 
 US5验收依据：relevance-validation.md及assets/verification/relevance-*；业务迁移/部署与本轮新增文档远程链接仍未执行，原T005保持未完成。
+
+
+## 本机迁移补充任务
+
+目标已明确为本机原生 `127.0.0.1:3307/scwiki`。以下更新原先“目标未确认、业务迁移未执行”的当前结论，历史记录不改写。
+
+- [x] T012 在私有备份与隔离恢复中验证 `alembic/versions/20261102_0160_news_candidates.py`，比较全部既有数据与结构，记录 `local-migration-validation.md`（FR-014、SC-009）。
+- [x] T013 只增加候选表结构描述并更新 `scripts/local-deploy-schema.json`、`scripts/local-deploy-versions.json`、`scripts/local-deploy-macos.json`，准确执行本机资讯迁移并严格核验（FR-015、SC-010）。
+- [x] T014 恢复已核实的资讯进程，验证本机资讯 API 与服务健康，清理隔离库，同步 Overview/Issue 并仅提交本次文件（FR-016、SC-010）。
+
+顺序 T012 → T013 → T014。不得把本机完成宣称为 Git 推送、远程部署或原 T005 全部通过。
+
+T012-T014证据：local-migration-validation.md及assets/verification/local-migration.json；73张既有业务表保持，实际双头/严格核验/健康通过，101项资讯与48项部署回归通过、11项跳过。Go因启动时读取迁移头清单一并重启。原T005保持未完成；Git提交按仓库自动提交要求执行。
