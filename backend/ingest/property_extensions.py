@@ -4,6 +4,8 @@ import math
 
 def normalize_extracted_conditions(record):
     """仅整理新提取候选；未知结构拒绝，不猜测阶段或丢弃字段。"""
+    from .vibrational_terms import normalize_extracted_vibrational_treatment
+    normalize_extracted_vibrational_treatment(record)
     conditions = record.get("payload", {}).get("calculation_conditions")
     if conditions is None:
         return

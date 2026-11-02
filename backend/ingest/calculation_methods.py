@@ -3,6 +3,8 @@ from copy import deepcopy
 import re
 import unicodedata
 
+from .vibrational_terms import canonical_vibrational_wording
+
 
 METHOD_SEMANTICS_PROMPT = """
 CALCULATION METHOD SEMANTICS: electronic_method means the underlying electronic-structure
@@ -31,6 +33,10 @@ Never infer a functional from DFPT, software defaults, or another software's set
 VASP-PBE does NOT justify QE-PBE. Require an applicable report for the specific software or leave empty.
 When reviewing evidence, matching a word in the source is insufficient: its scientific
 category and calculation stage must match the target field as well.
+
+For vibrational_treatment only, the reported phrase "harmonic approximation" has the canonical
+value "harmonic". Preserve the exact original wording in evidence quotes; do not rewrite quotes.
+Do not infer this value from DFT, DFPT, software, or 0 K, and do not discard extra physical qualifiers.
 """
 
 
@@ -68,10 +74,14 @@ def method_field_issue(path, value):
             or re.search(r"\bharmonic\b|\banharmonic\b|简谐近似|非谐近似", text)
             and not re.search(r"self consistent harmonic|\bsscha\b|自洽谐", text)):
         return "声子计算技术应与电子理论、振动处理层次分开。"
-    if key == "vibrational_treatment" and text and text not in {
-            "unknown", "harmonic", "quasi harmonic", "anharmonic",
-            "anharmonic quantum", "anharmonic classical", "简谐", "准简谐", "量子非谐", "经典非谐"}:
-        return "振动处理层次不能填写DFT、HF、DFPT等电子理论或响应技术。"
+    if key == "vibrational_treatment" and text:
+        canonical = canonical_vibrational_wording(text)
+        if canonical in {"unknown", "harmonic", "quasi harmonic", "anharmonic",
+                         "anharmonic quantum", "anharmonic classical", "简谐", "准简谐", "量子非谐", "经典非谐"}:
+            return None
+        if re.search(r"\bdft\b|\bdfpt\b|\bhf\b|hartree|density functional|电子结构", text):
+            return "振动处理层次不能填写DFT、HF、DFPT等电子理论或响应技术。"
+        return "未识别的振动处理层次写法；请按原文核对规范表达，不要改成另一种物理近似。"
     return None
 
 
