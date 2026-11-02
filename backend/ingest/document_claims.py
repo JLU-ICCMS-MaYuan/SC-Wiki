@@ -21,6 +21,9 @@ def _locators(raw_evidences, documents, default_file=None):
             if file_id is not None and str(file_id) != ir.source_file_id:
                 continue
             for block in ir.blocks:
+                # 无明确块编号时沿用解析主备选择；显式来源仍须通过完整定位校验。
+                if not evidence.get("block_id") and block.metadata.get("selected_for_reading") is False:
+                    continue
                 if requested_page is not None and str(block.pdf_page) != str(requested_page):
                     continue
                 if evidence.get("block_id") and evidence["block_id"] != block.block_id:
