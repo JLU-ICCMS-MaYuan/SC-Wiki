@@ -7,9 +7,9 @@
 
 ## 当前行为
 - arXiv 使用 cond-mat.supr-con 分类 API，按更新时间分页；去除版本编号形成稳定身份，版本升级更新原条目。
-- Crossref 使用最近至少 30 天的发表日期窗口，分别查询 superconductivity、superconducting、superconductor、Josephson，按索引顺序完成游标分页，公开列表仍按发表时间排序。期刊原始在线发表日期优先，保留日期精度；仅保存书目信息，不存 Crossref 摘要。APS/ACS/Nature/Science 使用正确的 DOI 注册前缀，NSR/CPL/CPB/Materials Today 使用 ISSN 并逐条校验范围，避免将期刊 DOI 片段误当出版社前缀。
-- APS 的 PRL/PRB/PRX，Nature 的 Nature/Nature Physics/Nature Materials/Nature Communications，Science 的当期和提前发表，以及 Materials Today 已有官方 RSS 适配，和 Crossref 补充组合使用。RSS仅保存元数据与原文链接，不抓取全文；没有可用官方RSS的来源继续通过索引获取，不声称逐家官网完整抓取。
-- OpenAlex 至少滚动回看 30 天内、主来源为期刊的 `article/review`，本地拒绝明确未发表、未接收及 Zenodo 仓储 DOI。题名可证明相关性；自动关键词/主题有置信度门槛，摘要命中还需超导学术上下文。可选 NEWS_OPENALEX_API_KEY 使用 Bearer 头；无Key且有后续页时保留首批结果并记 partial/openalex_key_required，不把第一页200当完整成功。匿名共享预算耗尽可能返回429。
+- Crossref 使用最近至少 30 天的发表日期窗口，分别查询 superconductivity、superconducting、superconductor、Josephson 以及 hydride/hydrides、superhydride/superhydrides、polyhydride/polyhydrides、hydrogen-rich、hydrogen，按索引顺序完成游标分页，公开列表仍按发表时间排序。期刊原始在线发表日期优先，保留日期精度；公开资讯仅保存书目信息，不转载 Crossref 摘要；候选内部保留摘要用于相关性判断。APS/ACS/Nature/Science 使用正确的 DOI 注册前缀，NSR/CPL/CPB/Materials Today 使用 ISSN 并逐条校验范围，避免将期刊 DOI 片段误当出版社前缀。
+- APS 的 PRL/PRB/PRX，Nature 的 Nature/Nature Physics/Nature Materials/Nature Communications，Science 的当期和提前发表，以及 Materials Today 已有官方 RSS 适配，和 Crossref 补充组合使用。RSS公开条目仅保存元数据与原文链接；摘要和关键词用于内部候选判断，不抓取全文；没有可用官方RSS的来源继续通过索引获取，不声称逐家官网完整抓取。
+- OpenAlex 至少滚动回看 30 天内、主来源为期刊的 `article/review`，本地拒绝明确未发表、未接收及 Zenodo 仓储 DOI。先保留原 superconduct 查询，再独立补充氢相关查询；每个查询分别统计分页进度，最终按 DOI/URL 去重。自动关键词/主题保留置信度门槛；词表只发现候选，收录由独立模型任务决定。可选 NEWS_OPENALEX_API_KEY 使用 Bearer 头；无Key且有后续页时保留首批结果并记 partial/openalex_key_required，不把第一页200当完整成功。匿名共享预算耗尽可能返回429。
 - Phys.org 读取官方超导 RSS，保留原标题与原文链接，只展示订阅摘要，不抓文章全文。
 - Google News RSS 用固定查询 `superconduct OR 超导` 发现公开索引的社会、产业、政策或股票资讯。它不保证覆盖未被搜索服务收录的网页或微信公众号内容。
 - 相同 DOI 或规范化原文 URL 的条目在事务内合并，保留来源链接；两个已知不同 DOI 不因错误复用同一URL而合并，不按相似标题猜测。预印本补充信息不把已经发表的条目退回预印本；聚合索引笼统的 journal-article 类型也不覆盖出版商明确的新闻标识。
@@ -38,6 +38,18 @@ macOS 的资讯 Worker 使用 RQ SpawnWorker，以新解释器执行任务，避
 
 期刊入口或后续页部分失败时，保留已经取得的有效记录，来源记为 partial，不推进 last_success_at；
 partial 和 failed 均按一小时重试。401/403/429 和错误请求分别记录稳定错误码，日志不包含私有Key。
+
+## 收录前相关性判断
+
+新期刊候选先写入独立的 `news_feed_candidates`，不直接进入公开列表。模型只读取可用的标题、摘要、关键词；不读取正文或用户调查截图，不借背景知识编造本文结论。新增的氢相关检索只扩大发现范围，不把氢化物或一般氢技术自动当作超导研究。
+
+服务端默认模型返回 `related`（相关）、`unrelated`（无关）或 `insufficient`（信息不足）及中文依据。相关/无关决定必须带输入中的连续原文引用；相关引用还须有明确超导或配对物理上下文。引用没有支持时降为信息不足并保留原判断，不因缺少直接超导词丢弃候选。仅 related 原子写入公开资讯，再沿用下方分类标签任务。无关和信息不足保留内部记录，不对外展示；既有公开条目不追溯删除。
+
+来源 accepted 数统计接纳的候选及直接收录条目，不能当作新增公开论文数。新闻和 arXiv 路径保持；出版社新闻仍按原相关性规则筛选，避免宽泛 hydrogen 查询把产业制氢报道直接发布。
+
+资讯调度每轮在采集后、标签分类前追加一个相关性短任务，每批至多三条。模型调用不占数据库事务；输入指纹和规则不变时复用。信息不足待新标题、摘要或关键词到达后重判；失败一小时后重试，最多三次，五分钟过期租约可恢复。写回核验尝试标识和输入版本，旧结果不能覆盖新输入；按待判时间处理，重复采集不改变其排队位置。相同 DOI 的发现入口及链接仍合并保留。
+
+启用此代码需要迁移 `20261102_0160` 并更新目标环境的资讯进程。本轮只完成代码及隔离验证，未执行业务库迁移、生产回填、推送或部署。范围和证据见 [#160 增量验收](../specs/160-news-source-semantics/relevance-validation.md)。
 
 ## 自动研究分类
 

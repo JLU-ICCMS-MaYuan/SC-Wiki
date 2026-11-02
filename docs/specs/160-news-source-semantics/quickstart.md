@@ -48,3 +48,8 @@ Python：test_news_collection.py、test_news_publishers.py、test_news_scheduler
 Go：go test ./handlers -run TestNews -count=1；隔离预览仅在 NEWS_SEMANTICS_PREVIEW_ADDRESS 显式设置时启动SQLite夹具。
 前端：news-feed、news-classification、news-page-layout三个测试文件，测试模式排除已复现的旧诺奖断言。
 源码与调用链均未引入新依赖或服务，生产期刊来源以 backend/news/publishers.py 为实际目录。
+
+
+## 2026-11-02 增量
+
+富氢检索、候选与模型相关性验收见 [relevance-validation.md](relevance-validation.md)。这一增量需要新候选表迁移，旧记录的“不引入迁移”只描述10月23日交付。

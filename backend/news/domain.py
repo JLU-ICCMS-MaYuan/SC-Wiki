@@ -130,6 +130,28 @@ def scholarly_relevance_evidence(title: str, abstract: str = "", keywords: str =
     return ""
 
 
+_HYDROGEN_PATTERN = re.compile(
+    r"\b(?:superhydrides?|polyhydrides?|hydrides?|hydrogen(?:[ -]rich)?)\b|氢化物|富氢|储氢|氢", re.I
+)
+
+
+def candidate_evidence(title: str, abstract: str = "", keywords: str = "") -> str:
+    """发现词仅决定进入模型候选，不能作为公开收录或超导性质的证明。"""
+    evidence = scholarly_relevance_evidence(title, abstract, keywords)
+    if evidence:
+        return evidence
+    for name, value in (("title", title), ("abstract", abstract), ("keywords", keywords)):
+        match = _RELEVANCE_PATTERN.search(value) or _HYDROGEN_PATTERN.search(value)
+        if match:
+            return f"candidate_{name}: {match.group(0).lower()}"
+    return ""
+
+
+def has_superconducting_context(text: str) -> bool:
+    """相关决定的引用须有显式超导或配对物理上下文，氢字本身不够。"""
+    return bool(_RELEVANCE_PATTERN.search(text) or _SCHOLARLY_CONTEXT_PATTERN.search(text))
+
+
 @dataclass(frozen=True)
 class Record:
     source: str
@@ -152,6 +174,8 @@ class Record:
     discovery_source: str = ""
     original_source: str = ""
     relevance_evidence: str = ""
+    screening_abstract: str = ""
+    screening_keywords: str = ""
 
     def validate(self):
         if self.source not in SOURCES or self.kind not in DISPLAY_KINDS:
@@ -166,6 +190,8 @@ class Record:
         if self.display_kind and self.display_kind not in DISPLAY_KINDS:
             raise CollectionError("invalid_record")
         if any(len(value) > 64 for value in (self.discovery_source, self.original_source)) or len(self.relevance_evidence) > 500:
+            raise CollectionError("invalid_record")
+        if len(self.screening_abstract) > 16000 or len(self.screening_keywords) > 4000:
             raise CollectionError("invalid_record")
         if self.published_at:
             parse_time(self.published_at)

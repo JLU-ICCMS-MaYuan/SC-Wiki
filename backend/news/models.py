@@ -1,6 +1,7 @@
 """跨 Python/Go 共享的资讯表；不引用正式论文表。"""
 from sqlalchemy import CheckConstraint, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.mysql import MEDIUMTEXT
 from backend.database import Base
 
 
@@ -78,3 +79,24 @@ class NewsFeedMaterialFamily(Base):
     __tablename__ = "news_feed_material_families"
     item_id: Mapped[str] = mapped_column(ForeignKey("news_feed_items.id", ondelete="CASCADE"), primary_key=True)
     material_family_id: Mapped[int] = mapped_column(ForeignKey("material_families.id", ondelete="RESTRICT"), primary_key=True)
+
+
+class NewsFeedCandidate(Base):
+    """收录前候选和相关性决定，不属于公开资讯或科学审核。"""
+    __tablename__ = "news_feed_candidates"
+    key: Mapped[str] = mapped_column(String(64), primary_key=True)
+    record_json: Mapped[str] = mapped_column(Text().with_variant(MEDIUMTEXT(), "mysql"))
+    content_hash: Mapped[str] = mapped_column(String(64))
+    rule_version: Mapped[str] = mapped_column(String(64), default="")
+    status: Mapped[str] = mapped_column(String(16), default="pending")
+    model: Mapped[str] = mapped_column(String(200), default="")
+    reason: Mapped[str] = mapped_column(Text, default="")
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    attempt_token: Mapped[str] = mapped_column(String(32), default="")
+    first_seen_at: Mapped[str] = mapped_column(String(20))
+    last_seen_at: Mapped[str] = mapped_column(String(20))
+    updated_at: Mapped[str] = mapped_column(String(20))
+    __table_args__ = (
+        CheckConstraint("status IN ('pending','running','related','unrelated','insufficient','failed')", name="ck_news_candidate_status"),
+        Index("ix_news_candidate_status_updated", "status", "updated_at"),
+    )

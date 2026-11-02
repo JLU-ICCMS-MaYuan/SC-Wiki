@@ -336,6 +336,52 @@ func TestNewsFeedMySQLContract(t *testing.T) {
 	}
 }
 
+func TestNewsFeedCandidatePrivacyMySQL(t *testing.T) {
+	dsn := os.Getenv("NEWS_TEST_MYSQL_DSN")
+	if dsn == "" {
+		t.Skip("需要显式隔离 MySQL")
+	}
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	old := database.DB
+	database.DB = db
+	sqlDB, _ := db.DB()
+	t.Cleanup(func() { database.DB = old; sqlDB.Close() })
+	for _, period := range []string{"all", "week", "history"} {
+		router := gin.New()
+		router.GET("/api/news/feed", func(c *gin.Context) {
+			listNewsFeedAt(c, time.Date(2026, 11, 2, 8, 0, 0, 0, time.UTC))
+		})
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/api/news/feed?kind=journal_article&period="+period+"&week=2026-11-02", nil))
+		if response.Code != 200 {
+			t.Fatalf("%d %s", response.Code, response.Body.String())
+		}
+		var result struct {
+			Items []newsFeedView
+			Total int
+		}
+		if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
+			t.Fatal(err)
+		}
+		want := 1
+		if period == "week" {
+			want = 0
+		}
+		if result.Total != want || len(result.Items) != want {
+			t.Fatalf("候选不应进入公开计数: %s %+v", period, result)
+		}
+		if want == 1 && (result.Items[0].DOI != "10.1002/relevance0" || result.Items[0].Summary != "") {
+			t.Fatalf("公开记录或摘要边界错误: %+v", result.Items)
+		}
+		if strings.Contains(response.Body.String(), "screening_abstract") || strings.Contains(response.Body.String(), "内部筛选摘要") {
+			t.Fatal("候选私有输入泄露到API")
+		}
+	}
+}
+
 // 仅供本地浏览器验证。生产路由有分支既有编译问题时，不伪称已验证完整服务。
 func TestNewsFeedBrowserPreview(t *testing.T) {
 	address := os.Getenv("NEWS_TEST_PREVIEW_ADDRESS")

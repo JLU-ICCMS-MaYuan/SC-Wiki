@@ -1,0 +1,25 @@
+{
+  "date": "2026-11-02",
+  "query": "superhydrides",
+  "window": [
+    "2026-10-03",
+    "2026-11-02"
+  ],
+  "max_pages": 3,
+  "fetched": 3,
+  "candidates": 3,
+  "partial_error": "",
+  "target_found": true,
+  "target": [
+    {
+      "doi": "10.1002/anie.8236450",
+      "title": "Compositional and Structural Diversity in Cesium Superhydrides at High Pressure",
+      "candidate_evidence": "candidate_title: superhydrides"
+    }
+  ],
+  "initial_singular_probe": {
+    "query": "superhydride",
+    "fetched": 0,
+    "target_found": false
+  }
+}

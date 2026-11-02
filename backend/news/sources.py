@@ -11,7 +11,7 @@ import feedparser
 import httpx
 
 from .domain import (CollectionError, PUBLISHER_SOURCES, Record, canonical_url, content_kind, iso, normalize_doi, parse_time, plain,
-                     publisher_for_doi, relevance_evidence, relevant, safe_url, scholarly_relevance_evidence)
+                     publisher_for_doi, relevance_evidence, relevant, safe_url, scholarly_relevance_evidence, candidate_evidence)
 from .publishers import PUBLISHER_FEEDS, PUBLISHER_FILTERS, SEARCH_TERMS, matches_publisher, original_url, publisher_records
 
 ENDPOINTS = {
@@ -267,7 +267,9 @@ class Sources:
                 if not title:
                     self.partial_error = "invalid_record"
                     continue
-                evidence = scholarly_relevance_evidence(title, plain(item.get("abstract", "")))
+                abstract = plain(item.get("abstract", ""))
+                keywords = plain(" ".join(item.get("subject", [])), 4000)
+                evidence = candidate_evidence(title, abstract, keywords)
                 if item.get("type") != "journal-article" or not evidence:
                     continue
                 if source in PUBLISHER_FILTERS and not matches_publisher(item, source):
@@ -292,6 +294,8 @@ class Sources:
                 except CollectionError:
                     url = "https://doi.org/" + doi
                 kind = content_kind("journal_article", doi=doi, url=url)
+                if kind == "news" and not scholarly_relevance_evidence(title, abstract, keywords):
+                    continue
                 result.append(Record(
                     source=source, external_id=doi, kind=kind,
                     title=title, doi=doi, url=url,
@@ -301,6 +305,7 @@ class Sources:
                     published_at=published, date_precision=precision, source_updated_at=updated,
                     content_type="research_report" if kind == "news" else "journal_article", display_kind=kind, discovery_source="crossref",
                     original_source=publisher_for_doi(doi) or (source if source in PUBLISHER_SOURCES else ""), relevance_evidence=evidence,
+                    screening_abstract=abstract, screening_keywords=keywords,
                 ))
             if len(items) < 100:
                 return result
@@ -313,13 +318,30 @@ class Sources:
         return result
 
     def openalex(self, since, until):
-        result, cursor = [], "*"
+        result, successes = [], 0
+        # 先保留原超导查询，再补充氢体系，避免无Key的首批结果被宽泛氢查询挤掉。
+        for query in ("superconduct", "superhydride OR superhydrides OR polyhydride OR polyhydrides OR hydride OR hydrogen"):
+            try:
+                result.extend(self._openalex(since, until, query))
+                successes += 1
+            except CollectionError as exc:
+                self.partial_error = str(exc)
+                if str(exc) == "rate_limited":
+                    if not successes:
+                        raise
+                    break
+        if not successes:
+            raise CollectionError(self.partial_error)
+        return self._unique(result)
+
+    def _openalex(self, since, until, query):
+        result, cursor, fetched = [], "*", 0
         # 免费 OpenAlex API 不提供 updated_date 增量过滤。滚动回看出版日期并依靠本地身份键
         # 去重，避免新近收录但出版已超过通用两天重叠窗口的论文永久漏失。
         since = min(since, until - timedelta(days=OPENALEX_MIN_LOOKBACK_DAYS))
         for _ in range(self.max_pages):
             params = {
-                "search": "superconduct",
+                "search": query,
                 "filter": (f"from_publication_date:{since.date()},to_publication_date:{until.date()},"
                            "type:article|review,primary_location.source.type:journal"),
                 "per-page": 100,
@@ -343,6 +365,7 @@ class Sources:
                     return result
                 raise CollectionError("invalid_feed")
             self.fetched += len(items)
+            fetched += len(items)
             for item in items:
                 location = item.get("primary_location") or {}
                 source = location.get("source") or {}
@@ -351,9 +374,8 @@ class Sources:
                     continue
                 title = plain(item.get("title", ""), 4000)
                 abstract = openalex_abstract(item.get("abstract_inverted_index"))
-                evidence = scholarly_relevance_evidence(
-                    title, abstract, openalex_metadata_text(item), source.get("display_name", "")
-                )
+                keywords = plain(openalex_metadata_text(item), 4000)
+                evidence = candidate_evidence(title, abstract, keywords)
                 if not title or not evidence:
                     continue
                 doi = normalize_doi(item.get("doi", ""))
@@ -384,16 +406,19 @@ class Sources:
                     self.partial_error = "invalid_record"
                     continue
                 kind = content_kind("journal_article", doi=doi, url=url)
+                if kind == "news" and not scholarly_relevance_evidence(title, abstract, keywords):
+                    continue
                 result.append(Record(
                     source="openalex", external_id=external_id, kind=kind, title=title, url=url,
                     summary=abstract, summary_source="openalex" if abstract else "", doi=doi, authors=authors,
                     journal=journal, published_at=published + "T00:00:00Z", source_updated_at=updated,
                     content_type="research_report" if kind == "news" else "journal_article", display_kind=kind, discovery_source="openalex",
                     original_source=publisher_for_doi(doi), relevance_evidence=evidence,
+                    screening_abstract=abstract, screening_keywords=keywords,
                 ))
             next_cursor = (body.get("meta") or {}).get("next_cursor")
             total = (body.get("meta") or {}).get("count")
-            if not next_cursor or not items or (isinstance(total, int) and self.fetched >= total):
+            if not next_cursor or not items or (isinstance(total, int) and fetched >= total):
                 return result
             if not self.openalex_key:
                 self.partial_error = "openalex_key_required"

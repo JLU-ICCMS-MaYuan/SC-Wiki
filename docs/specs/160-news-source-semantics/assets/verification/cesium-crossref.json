@@ -1,0 +1,55 @@
+{
+  "retrieved_at": "2026-11-02",
+  "source": "https://api.crossref.org/works/10.1002/anie.8236450",
+  "message": {
+    "DOI": "10.1002/anie.8236450",
+    "type": "journal-article",
+    "title": [
+      "Compositional and Structural Diversity in Cesium Superhydrides at High Pressure"
+    ],
+    "abstract": "<jats:title>ABSTRACT</jats:title>\n                  <jats:p>The alkali metals have a propensity to form hydrides with unusually high hydrogen content, hosting a wide variety of hydrogenic species under high pressure conditions. We demonstrate that cesium exhibits unusually diverse hydride chemistry, culminating in the formation of , the most hydrogen‐rich metal hydride reported to date. Synthesized through laser‐heated diamond anvil cell experiments at pressures of 46 GPa,  features icosahedral assemblies of quasi‐molecular  units stabilized within an ionic  framework. At lower pressures, room‐temperature compression yields , which remains stable down to 7.8 GPa, the lowest stability pressure known for any superhydride. We also identify two polymorphs of  containing linear  anions and a body‐centered tetragonal . These results demonstrate unprecedented chemical complexity in the cesium–hydrogen system and establish cesium as a unique host for extreme hydrogenation.</jats:p>",
+    "subject": [],
+    "container-title": [
+      "Angewandte Chemie International Edition"
+    ],
+    "published-online": {
+      "date-parts": [
+        [
+          2026,
+          10,
+          22
+        ]
+      ]
+    },
+    "published": {
+      "date-parts": [
+        [
+          2026,
+          10,
+          22
+        ]
+      ]
+    },
+    "indexed": {
+      "date-parts": [
+        [
+          2026,
+          10,
+          22
+        ]
+      ],
+      "date-time": "2026-10-22T10:41:51Z",
+      "timestamp": 1792665711804,
+      "version": "4.5.0"
+    },
+    "resource": {
+      "primary": {
+        "URL": "https://onlinelibrary.wiley.com/doi/10.1002/anie.8236450"
+      }
+    },
+    "ISSN": [
+      "1433-7851",
+      "1521-3773"
+    ]
+  }
+}

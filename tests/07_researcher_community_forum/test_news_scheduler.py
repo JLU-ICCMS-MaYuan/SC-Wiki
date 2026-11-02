@@ -60,3 +60,18 @@ def test_worker_restarts_after_rq_returns_from_idle_timeout():
 
     assert len(calls) == 2
     assert sleeps == [5]
+
+
+def test_schedule_includes_relevance_before_post_publication_labels(monkeypatch):
+    import pytest
+    import backend.news.scheduler as scheduler
+    calls = []
+    monkeypatch.setattr(scheduler, "enqueue_due", lambda *a, **kw: calls.append("collection"))
+    monkeypatch.setattr(scheduler, "enqueue_relevance", lambda *a: calls.append("relevance"))
+    monkeypatch.setattr(scheduler, "enqueue_classification", lambda *a: calls.append("classification"))
+    def stop(_):
+        raise SystemExit()
+    monkeypatch.setattr(scheduler.time, "sleep", stop)
+    with pytest.raises(SystemExit):
+        scheduler.schedule_forever(None, None)
+    assert calls == ["collection", "relevance", "classification"]

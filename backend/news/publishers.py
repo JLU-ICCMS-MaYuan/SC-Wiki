@@ -7,7 +7,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 import feedparser
 
 from .domain import (CollectionError, Record, content_kind, iso, normalize_doi,
-                     plain, safe_url, scholarly_relevance_evidence)
+                     plain, safe_url, candidate_evidence, scholarly_relevance_evidence)
 
 PUBLISHER_FEEDS = {
     "aps": tuple((name, f"https://feeds.aps.org/rss/recent/{code}.xml") for code, name in (
@@ -27,7 +27,9 @@ JOURNAL_DOI_PREFIXES = {
     "nsr": ("10.1093/nsr/",), "cpl": ("10.1088/0256-307x/",),
     "cpb": ("10.1088/1674-1056/",), "materials_today": ("10.1016/j.mattod.", "10.1016/s1369-7021"),
 }
-SEARCH_TERMS = ("superconductivity", "superconducting", "superconductor", "Josephson")
+SEARCH_TERMS = ("superconductivity", "superconducting", "superconductor", "Josephson",
+                "superhydride", "superhydrides", "polyhydride", "polyhydrides",
+                "hydride", "hydrides", "hydrogen-rich", "hydrogen")
 
 
 def matches_publisher(item, source):
@@ -72,7 +74,8 @@ def publisher_records(content, source, journal, since):
     for entry in parsed.entries:
         title = plain(entry.get("title", ""), 4000)
         excerpt = plain(entry.get("summary", ""))
-        evidence = scholarly_relevance_evidence(title, excerpt)
+        keywords = plain(" ".join(str(tag.get("term", "")) for tag in entry.get("tags", [])), 4000)
+        evidence = candidate_evidence(title, excerpt, keywords)
         if not title or not evidence:
             continue
         url = original_url(entry.get("link", ""))
@@ -94,9 +97,12 @@ def publisher_records(content, source, journal, since):
         genre = str(entry.get("dc_type", "")).casefold().strip()
         report = genre in {"news", "news article", "news & views", "research highlight", "editorial", "book review"}
         kind = content_kind("news" if report else "journal_article", doi=doi, source=source, url=url)
+        if kind == "news" and not scholarly_relevance_evidence(title, excerpt, keywords):
+            continue
         records.append(Record(source=source, external_id=doi or url, kind=kind, title=title, url=url, doi=doi,
                               authors=[plain(a.get("name", ""), 400) for a in entry.get("authors", []) if a.get("name")],
                               journal=journal, published_at=published, date_precision=precision,
                               source_updated_at=published, content_type="research_report" if kind == "news" else "journal_article",
-                              display_kind=kind, discovery_source=source, original_source=source, relevance_evidence=evidence))
+                              display_kind=kind, discovery_source=source, original_source=source, relevance_evidence=evidence,
+                              screening_abstract=excerpt, screening_keywords=keywords))
     return records, len(parsed.entries)

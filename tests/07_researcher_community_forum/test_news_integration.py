@@ -1,6 +1,7 @@
 """仅在显式提供独立 MySQL/Redis 地址时运行，不读取生产配置。"""
 from datetime import datetime, timedelta, timezone
 import importlib.util
+import json
 import os
 from pathlib import Path
 
@@ -16,6 +17,7 @@ from sqlalchemy.orm import Session
 from backend.news.domain import CollectionError, Record, SOURCES
 from backend.news.models import NewsFeedItem, NewsFeedSource
 from backend.news.scheduler import QUEUE_NAME, enqueue_due
+from backend.news.relevance import review_batch
 
 pytestmark = pytest.mark.skipif(not os.getenv("NEWS_TEST_MYSQL_URL") or not os.getenv("NEWS_TEST_REDIS_URL"),
                                 reason="需要明确的隔离 MySQL 与 Redis 地址")
@@ -32,12 +34,12 @@ def test_mysql_migration_rq_worker_and_recovery(monkeypatch):
     assert inspect(engine).get_table_names() == [], "拒绝迁移非空数据库"
     with engine.begin() as conn:
         with Operations.context(MigrationContext.configure(conn)):
-            for filename in ("20260831_0063_news_feed.py", "20260903_0003_networked_news_discovery.py"):
+            for filename in ("20260831_0063_news_feed.py", "20260903_0003_networked_news_discovery.py", "20261102_0160_news_candidates.py"):
                 spec = importlib.util.spec_from_file_location("news_migration", Path(__file__).parents[2] / "alembic/versions" / filename)
                 migration = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(migration)
                 migration.upgrade()
-    assert set(inspect(engine).get_table_names()) == {"news_feed_items", "news_feed_identities", "news_feed_sources"}
+    assert set(inspect(engine).get_table_names()) == {"news_feed_items", "news_feed_identities", "news_feed_sources", "news_feed_candidates"}
     assert {"content_type", "display_kind", "discovery_source", "original_source", "relevance_evidence"} <= {
         column["name"] for column in inspect(engine).get_columns("news_feed_items")
     }
@@ -83,6 +85,8 @@ def test_mysql_migration_rq_worker_and_recovery(monkeypatch):
     assert enqueue_due(engine, connection, now) == []
     worker = Worker([QUEUE_NAME], connection=connection)
     worker.work(burst=True, logging_level="WARNING")
+    while review_batch(engine, complete=lambda _, body: {"decision": "related", "reason": "隔离超导样本", "evidence": json.loads(body)["title"]}):
+        pass
     with Session(engine) as db:
         assert db.get(NewsFeedSource, "physorg").status == "failed"
         assert db.get(NewsFeedSource, "arxiv").status == "success"

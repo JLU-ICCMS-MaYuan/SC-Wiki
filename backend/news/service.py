@@ -1,4 +1,4 @@
-"""采集事务和幂等合并；此模块只写 news_feed_* 三表。"""
+"""采集事务和幂等合并；此模块只写独立 news_feed_* 表。"""
 from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import json
@@ -120,7 +120,11 @@ def collect_source(engine, source, sources, now=None, initial_days=7, before_com
             for record in records:
                 if record.source != source:
                     raise CollectionError("invalid_record")
-                upsert(db, record, iso(started))
+                if record.kind == "journal_article":
+                    from .relevance import stage_candidate
+                    stage_candidate(db, record, iso(started))
+                else:
+                    upsert(db, record, iso(started))
             state = db.get(NewsFeedSource, source)
             partial = getattr(sources, "partial_error", "")
             state.status, state.error_code = ("partial", partial) if partial else ("success", "")

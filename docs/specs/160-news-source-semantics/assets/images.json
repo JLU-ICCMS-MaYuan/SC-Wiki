@@ -36,5 +36,23 @@
       1948
     ],
     "verification": "2026-10-23 读取原图并核验尺寸和SHA256，无派生替代"
+  },
+  {
+    "id": "IMG-003",
+    "upload_order": 3,
+    "original_name": "codex-clipboard-6f552b19-346d-45b5-903a-5db4e12598c7.png",
+    "locator": "docs/specs/160-news-source-semantics/assets/IMG-003.png",
+    "status": "local_verified",
+    "user_context": "富氢化物正文超导关联与漏收",
+    "related": [
+      "US5"
+    ],
+    "sha256": "e73faf503ec752686dfaf26253f356c7533d5089e41466e55ec67f0b7204d8b7",
+    "media_type": "image/png",
+    "dimensions_px": [
+      657,
+      239
+    ],
+    "verification": "2026-11-02 原始截图已读取，复制后核对SHA256；正文不作为生产模型输入"
   }
 ]

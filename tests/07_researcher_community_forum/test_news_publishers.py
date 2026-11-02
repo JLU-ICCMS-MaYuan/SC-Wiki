@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from backend.news.domain import CollectionError, Record, content_kind, iso
-from backend.news.models import NewsFeedItem, NewsFeedIdentity, NewsFeedSource
+from backend.news.models import NewsFeedItem, NewsFeedIdentity, NewsFeedSource, NewsFeedCandidate
 from backend.news.publishers import PUBLISHER_FILTERS, SEARCH_TERMS, publisher_records
 from backend.news.sources import Sources, Transport, crossref_date
 from backend.news.service import collect_source, upsert
@@ -39,7 +39,7 @@ def test_diagnostic_http_codes_do_not_include_upstream_body(status, code):
 @pytest.fixture
 def engine():
     db = create_engine("sqlite://")
-    for model in (NewsFeedItem, NewsFeedIdentity, NewsFeedSource):
+    for model in (NewsFeedItem, NewsFeedIdentity, NewsFeedSource, NewsFeedCandidate):
         model.__table__.create(db)
     yield db
     db.dispose()
@@ -59,12 +59,13 @@ def test_no_key_retains_first_page_without_claiming_complete(engine, caplog):
         return httpx.Response(200, json=oa_page())
     src = Sources(transport(get), openalex_key="")
     assert not collect_source(engine, "openalex", src, now=NOW)
-    assert len(calls) == 1
+    assert len(calls) == 2
     with Session(engine) as db:
         state = db.get(NewsFeedSource, "openalex")
         assert state.status == "partial" and state.error_code == "openalex_key_required"
         assert state.last_success_at == "" and state.accepted == 1
-        assert len(list(db.scalars(select(NewsFeedItem)))) == 1
+        assert len(list(db.scalars(select(NewsFeedCandidate)))) == 1
+        assert db.scalar(select(NewsFeedItem)) is None
         assert not due(state, NOW, NOW + timedelta(minutes=30))
         assert due(state, NOW, NOW + timedelta(hours=1))
 
@@ -81,17 +82,19 @@ def test_key_allows_full_paging_and_failure_does_not_discard_first_page(engine, 
     with Session(engine) as db, db.begin():
         db.add(NewsFeedSource(source="openalex", status="success", last_success_at=iso(NOW - timedelta(days=1))))
     assert not collect_source(engine, "openalex", src, now=NOW)
-    assert len(calls) == 2 and "fixture-private-key" not in caplog.text
+    assert len(calls) == 4 and "fixture-private-key" not in caplog.text
     with Session(engine) as db:
         state = db.get(NewsFeedSource, "openalex")
         assert state.last_success_at == iso(NOW - timedelta(days=1))
         assert state.error_code == "authentication_required"
-        assert len(list(db.scalars(select(NewsFeedItem)))) == 1
+        assert len(list(db.scalars(select(NewsFeedCandidate)))) == 1
+        assert db.scalar(select(NewsFeedItem)) is None
     src.transport = transport(lambda req: httpx.Response(200, json=oa_page() if req.url.params["cursor"] == "*" else {"results": [], "meta": {}}))
     assert collect_source(engine, "openalex", src, now=NOW + timedelta(hours=1))
     with Session(engine) as db:
         assert db.get(NewsFeedSource, "openalex").status == "success"
-        assert len(list(db.scalars(select(NewsFeedItem)))) == 1
+        assert len(list(db.scalars(select(NewsFeedCandidate)))) == 1
+        assert db.scalar(select(NewsFeedItem)) is None
 
 
 def test_no_key_is_complete_when_all_results_fit_one_page():
@@ -120,6 +123,12 @@ def test_publisher_website_is_not_enough_to_claim_journal(doi, genre, kind):
     assert records[0].summary == ""  # 新期刊订阅源只保存元数据。
 
 
+def test_hydrogen_expansion_does_not_publish_unreviewed_publisher_news():
+    body = rss("10.1038/test", "www.nature.com", "News Article").replace(b"Superconductivity in a material", b"Hydrogen fuel market").replace(b"Superconducting critical temperature.", b"Fuel industry market trends")
+    records, count = publisher_records(body, "nature", "Nature", NOW - timedelta(days=7))
+    assert count == 1 and records == []
+
+
 def test_rss_failure_does_not_discard_other_endpoint_records(engine):
     def get(req):
         if req.url.host == "feeds.aps.org":
@@ -130,8 +139,10 @@ def test_rss_failure_does_not_discard_other_endpoint_records(engine):
     with Session(engine) as db:
         state = db.get(NewsFeedSource, "aps")
         assert state.status == "partial" and state.error_code == "publisher_partial"
-        item = db.scalar(select(NewsFeedItem))
-        assert item.discovery_source == "aps" and item.kind == "journal_article"
+        item = json.loads(db.scalar(select(NewsFeedCandidate)).record_json)["record"]
+        assert item["discovery_source"] == "aps" and item["kind"] == "journal_article"
+        assert item["screening_abstract"] == "Superconducting critical temperature."
+        assert db.scalar(select(NewsFeedItem)) is None
 
 
 @pytest.mark.parametrize("source,doi,issn", [("nsr", "10.1093/nsr/nwag001", "2095-5138"),

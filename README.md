@@ -160,7 +160,7 @@ Go 提供公开读取与首答治理，Python AI API 和独立 RQ 队列负责�
 
 `/news` 定时从 arXiv、Crossref、OpenAlex、Phys.org 和 Google News RSS 发现超导资讯，按内容类型和自然周分页；保留人工快讯与诺奖展陈。APS、Nature、Science、Materials Today 接入官方期刊 RSS；八组来源均由 Crossref 补充发现，NSR、CPL、CPB、Materials Today 使用期刊 ISSN 过滤并逐条校验，其余使用出版商 DOI 前缀。页面保留实际发现来源与原文来源。
 自动资讯标注“自动采集，未经本站审核”，只进入独立资讯表，不进入正式论文、材料或 PDF 解析队列。
-Crossref 使用最近至少 30 天的发表日期窗口及多种超导词形，避免将旧论文重新索引误当新发表；在线发表日期优先。OpenAlex 同样至少回看 30 天，接受期刊 `article/review`，拒绝明确未发表及 Zenodo 仓储 DOI；保留既有相关性证据规则。Phys.org 科研报道、出版社新闻和社会/产业资讯进入新闻栏，不能因出版商网站或 DOI 就归入期刊论文。详情只展示一个原文入口，后台多来源记录保留。
+Crossref 使用最近至少 30 天的发表日期窗口及多种超导、氢化物和氢相关词形，避免将旧论文重新索引误当新发表；在线发表日期优先。OpenAlex 同样至少回看 30 天，接受期刊 `article/review`，拒绝明确未发表及 Zenodo 仓储 DOI；先查询超导再补充氢相关查询，保留各自分页结果。新期刊条目先进入独立候选表，由默认大模型依据标题、摘要和关键词判断；相关才公开，无关与信息不足保留内部记录。Phys.org 科研报道、出版社新闻和社会/产业资讯进入新闻栏，不能因出版商网站或 DOI 就归入期刊论文。详情只展示一个原文入口，后台多来源记录保留。
 
 Python 进程使用统一的 `requirements.txt`，不复制外部项目仓库：
 
@@ -214,7 +214,9 @@ Feature #153 为全部自动资讯增加研究类型、理论子类和材料家�
 分类表的 `status`、`attempts`、`reason` 可用于诊断；过期的最后一次运行会标为失败。
 页面保留“未经本站审核”说明，标签不是正式科研审核结果。部署前准备和本地验收边界见
 [分类标签验证说明](docs/specs/153-news-classification-labels/quickstart.md)。
-Phys.org 只能补回当前 RSS 窗口；Crossref 不转载摘要；该版本不计算热度或生成 AI 摘要。
+期刊候选流程需先迁移 `20261102_0160`，再在已明确的目标环境更新资讯 Worker/Scheduler；本轮实现没有执行业务迁移或部署。相关性任务每批最多三条，输入不变复用，信息不足等待新信息，失败最多尝试三次。详见 [#160 增量验收](docs/specs/160-news-source-semantics/relevance-validation.md)。
+
+Phys.org 只能补回当前 RSS 窗口；Crossref 摘要仅用于内部筛选，不转载到公开资讯；该版本不计算热度或生成 AI 摘要。
 
 完整测试、启动、恢复说明见 [Quickstart](docs/specs/88-networked-superconductivity-discovery/quickstart.md)，当前行为见 [资讯功能总览](docs/overview/news.md)。
 

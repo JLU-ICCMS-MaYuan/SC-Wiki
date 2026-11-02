@@ -1,0 +1,24 @@
+{
+  "date": "2026-11-02",
+  "base_commit": "dcd07a29a180c427e8e5719b3fe29677bfbc5ec9",
+  "python_targeted": "101 passed",
+  "mysql_rq_go": "1 integration passed; invokes all TestNews Go tests",
+  "shared_file_projection": "goserver/handlers/news_feed_test.go uses tested snapshot; subsequent pagination edits remain uncommitted by this task",
+  "source_sha256": {
+    "backend/news/domain.py": "7a1212f297fa9e84509541e54ff69ff9604fb84279a2145382755d1fe1cde406",
+    "backend/news/models.py": "88883a1e237cee28a1ae9fcd17c2998ce517b7aea35d1e2fdf472d113aceac3d",
+    "backend/news/publishers.py": "19df6bc5b241fbf705f786827130ee122cbdc7a717617b4477bd2143ef7388b4",
+    "backend/news/sources.py": "7c70bcd3c749dc3cec2faafd3e9b2dd71766c6c185271989c72d0b359dfaca12",
+    "backend/news/service.py": "84b21adb083d033d24e6f1d1356290d720afd9d221d47921f24a73a4020311ed",
+    "backend/news/relevance.py": "c2e1e55b805bc1d4c06c0346c40126ce153c2f4e395928467c8457cf8e169113",
+    "backend/news/scheduler.py": "0df7d657c48da326340762e79ee13478249e8a3747ad6896e71068b17811382a",
+    "alembic/versions/20261102_0160_news_candidates.py": "c7dc6344d3051e7ca6e976956956c8f065c23b675e52e68500c8a1e63a1cc25e",
+    "goserver/handlers/news_feed_test.go": "2b0a1e77ecb79744a08f23086d237e6f57d72dd2b6654c5ad974df4342f91205",
+    "tests/07_researcher_community_forum/test_news_relevance.py": "b03b8f1460a0d29c3ef02ea9688992a91c19c018aefe045ba814f078eeff6845",
+    "tests/07_researcher_community_forum/test_news_relevance_mysql.py": "63c272d07cff92cae9e90145826c572a66370b109bf56cb0808e4913adc32f5c",
+    "tests/07_researcher_community_forum/test_news_collection.py": "045c00c97232cbc909ae953557fce4c25491f3700c87fe39247de7d5bcd90c87",
+    "tests/07_researcher_community_forum/test_news_publishers.py": "2296caae94c2531f184dc57a0d0bd9e31b9e3a424efccf3dc69d56461c2b1c68",
+    "tests/07_researcher_community_forum/test_news_scheduler.py": "82836e0353357e49a6891288e9a66e119be996e78a6b78d285811bf4a9ae4b01",
+    "tests/07_researcher_community_forum/test_news_integration.py": "e3b80c4bd0a118950b44b95321b4fde30bdfdff0c127abf8f1a48b67a7658c58"
+  }
+}

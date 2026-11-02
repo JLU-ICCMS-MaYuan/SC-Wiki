@@ -8,9 +8,11 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
 from backend.news.domain import Record, CollectionError, iso, normalize_doi, relevant
-from backend.news.models import NewsFeedItem, NewsFeedIdentity, NewsFeedSource
+from backend.news.models import NewsFeedItem, NewsFeedIdentity, NewsFeedSource, NewsFeedCandidate
 from backend.news.sources import Sources, Transport
 from backend.news.service import collect_source
+from backend.news.relevance import review_batch
+from backend.news.publishers import SEARCH_TERMS
 
 NOW = datetime(2026, 8, 31, tzinfo=timezone.utc)
 ATOM = b'''<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"
@@ -84,7 +86,7 @@ OPENALEX_RELEVANCE_BOUNDARY = {"results": [
 @pytest.fixture
 def engine():
     db = create_engine("sqlite:///:memory:")
-    for table in (NewsFeedItem.__table__, NewsFeedIdentity.__table__, NewsFeedSource.__table__):
+    for table in (NewsFeedItem.__table__, NewsFeedIdentity.__table__, NewsFeedSource.__table__, NewsFeedCandidate.__table__):
         table.create(db)
     yield db
     db.dispose()
@@ -159,15 +161,18 @@ def test_google_news_is_social_industry_content():
     assert item.display_kind == "news"
 
 
-def test_openalex_requires_journal_article_and_strong_abstract_evidence():
+def test_openalex_keeps_weak_candidates_for_model_but_excludes_non_journals():
     requests = []
     def handler(request):
         requests.append(request)
         return httpx.Response(200, json=OPENALEX_RELEVANCE_BOUNDARY)
     src = Sources(transport(handler))
     items = src.fetch("openalex", NOW - timedelta(days=1), NOW)
-    assert [item.external_id for item in items] == ["W-accepted"]
-    assert items[0].relevance_evidence == "abstract: superconducting + vortices"
+    assert [item.external_id for item in items] == ["W-rejected", "W-accepted"]
+    assert items[0].relevance_evidence == "candidate_abstract: superconducting"
+    assert items[1].relevance_evidence == "abstract: superconducting + vortices"
+    assert requests[0].url.params["search"] == "superconduct"
+    assert "hydrogen" in requests[1].url.params["search"]
     query = requests[0].url.params
     assert "from_publication_date:2026-08-01" in query["filter"]
     assert "type:article|review,primary_location.source.type:journal" in query["filter"]
@@ -215,6 +220,8 @@ def test_dedupe_version_and_late_doi_merge(engine):
     for src, rows in [("arxiv", [a]), ("arxiv", [a]), ("crossref", [c]),
                       ("arxiv", [replace(a, doi=c.doi, version=2)])]:
         assert collect_source(engine, src, FixedSources({src: rows}), NOW)
+        if src == "crossref":
+            assert review_batch(engine, complete=lambda _, body: {"decision": "related", "reason": "测试超导研究", "evidence": json.loads(body)["title"]}, now=NOW) == ["related"]
     with Session(engine) as db:
         items = db.scalars(select(NewsFeedItem)).all()
         assert len(items) == 1
@@ -282,7 +289,7 @@ def test_crossref_cursor_and_filtered_count():
         return httpx.Response(200, json={"message": {"items": items, "next-cursor": "cursor-token"}})
     src = Sources(transport(handler))
     assert len(src.fetch("crossref", NOW, NOW)) == 1
-    assert src.fetched == 404 and seen == ["*", "cursor-token"] * 4
+    assert src.fetched == 101 * len(SEARCH_TERMS) and seen == ["*", "cursor-token"] * len(SEARCH_TERMS)
 
 
 def test_publisher_source_uses_crossref_prefix_and_preserves_provenance():

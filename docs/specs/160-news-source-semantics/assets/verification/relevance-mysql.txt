@@ -1,0 +1,3 @@
+已提交基线dcd07a29加本次文件的独立源码副本；独立临时MySQL与Redis；全新news_test_relevance（utf8mb4_0900_ai_ci）；迁移往返、RQ、Python→MySQL→Go资讯专项。测试后清理。
+.                                                                        [100%]
+1 passed in 3.56s

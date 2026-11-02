@@ -93,13 +93,14 @@ def run_job(source):
     transport = None
     try:
         started = time.monotonic()
-        def guard():
-            if time.monotonic() - started > JOB_TIMEOUT - 30 or not lock.owned():
+        def guard(reserve=30):
+            if time.monotonic() - started > JOB_TIMEOUT - reserve or not lock.owned():
                 raise CollectionError("collection_timeout")
         sources = Sources(max_pages=int(os.environ.get("NEWS_MAX_PAGES", "100")),
                           contact=os.environ.get("NEWS_CONTACT_EMAIL", ""))
         transport = sources.transport
-        transport.guard = guard
+        # 网络提前结束，为已经取得的候选留出独立写库时间。
+        transport.guard = lambda: guard(60)
         return collect_source(engine, source, sources, initial_days=int(os.environ.get("NEWS_INITIAL_DAYS", "7")),
                               before_commit=guard)
     finally:
@@ -115,6 +116,7 @@ def schedule_forever(engine, connection, hour=8, zone="Asia/Shanghai"):
     while True:
         try:
             enqueue_due(engine, connection, hour=hour, zone=zone)
+            enqueue_relevance(connection)
             enqueue_classification(connection)
         except Exception as exc:
             logging.getLogger(__name__).error("news scheduler failed: %s", type(exc).__name__)
@@ -125,25 +127,35 @@ def enqueue_classification(connection):
     """每轮采集入队之后最多追加一个短分类任务，独立锁避免并发调度重复。"""
     from .classification import JOB_TIMEOUT as classification_timeout
 
-    lock = connection.lock("scwiki-news:classification-schedule", timeout=30, blocking_timeout=0)
+    return _enqueue_short_job(connection, "classification", classification_timeout)
+
+
+def enqueue_relevance(connection):
+    from .relevance import JOB_TIMEOUT as relevance_timeout
+
+    return _enqueue_short_job(connection, "relevance", relevance_timeout)
+
+
+def _enqueue_short_job(connection, kind, timeout):
+    lock = connection.lock("scwiki-news:" + kind + "-schedule", timeout=30, blocking_timeout=0)
     if not lock.acquire(blocking=False):
         return False
     try:
         queue = Queue(QUEUE_NAME, connection=connection)
-        job_id = "scwiki-news-classification"
+        job_id = "scwiki-news-" + kind
         previous = queue.fetch_job(job_id)
         if previous and previous.get_status(refresh=True) in ACTIVE:
             return False
         if previous:
             previous.delete()
-        queue.enqueue("backend.news.scheduler.run_classification_job", job_id=job_id,
-                      job_timeout=classification_timeout, result_ttl=86400, failure_ttl=86400)
+        queue.enqueue("backend.news.scheduler.run_" + kind + "_job", job_id=job_id,
+                      job_timeout=timeout, result_ttl=86400, failure_ttl=86400)
         return True
     finally:
         try:
             lock.release()
         except LockError:
-            logging.getLogger(__name__).warning("news classification schedule lock expired")
+            logging.getLogger(__name__).warning("news %s schedule lock expired", kind)
 
 
 def run_classification_job():
@@ -152,3 +164,11 @@ def run_classification_job():
 
     engine.dispose(close=False)
     return classify_batch(engine)
+
+
+def run_relevance_job():
+    from backend.database import engine
+    from .relevance import review_batch
+
+    engine.dispose(close=False)
+    return review_batch(engine)
