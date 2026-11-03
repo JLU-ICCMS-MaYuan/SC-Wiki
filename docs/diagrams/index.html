@@ -11,7 +11,7 @@
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / SC-Wiki 全站主流程</nav>
   <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>SC-Wiki 全站主流程</h1><p class="intro">先看全站主干与七大功能的关系，再通过右侧链接打开各功能主干、分支和展开细节。所有页面独立存放，可直接用浏览器打开，不进入 SC-Wiki 应用。</p></header>
-  <nav class="page-links" aria-label="流程页面导航"><a href="01-upload-parse.html">01 上传与解析</a><a href="02-review-audit.html">02 审核与维护</a><a href="03-search.html">03 检索与发现</a><a href="04-knowledge-graph.html">04 引用知识图谱</a><a href="05-rag-qa.html">05 检索增强问答</a><a href="06-community.html">06 研究社区</a><a href="07-tc-predict.html">07 Tc 估算</a></nav>
+  <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
       <div class="toolbar"><div><h2 id="chart-title">七大功能与数据流向</h2><p>箭头表示标注的处理或数据关系；各功能按入口选择，不必逐个执行。</p></div><span class="mode-label">本机实际源码</span></div>
@@ -38,6 +38,7 @@
   "main": [
     {
       "id": "entry",
+      "step": "总入口",
       "title": "访问 SC-Wiki",
       "summary": "默认检索；按目标进入各功能",
       "description": "应用根路径默认进入公开检索。上传需合法账号；公开读取无需先上传或逐个运行所有功能。社区与 Tc 估算是独立入口。",
@@ -52,7 +53,8 @@
     },
     {
       "id": "upload",
-      "title": "01 上传与解析",
+      "module": "01",
+      "title": "上传与解析",
       "summary": "原文 → 科学工作稿",
       "description": "读取本机当前解析链路，先处理原文及材料状态，再整理固定字段、核对来源并完成适用自动谱处理，之后 ready。上传者校对并正式提交才创建待审论文。",
       "code": "backend/ingest/upload_jobs.py；backend/api/rag.py",
@@ -66,7 +68,8 @@
     },
     {
       "id": "review",
-      "title": "02 审核与维护",
+      "module": "02",
+      "title": "审核与维护",
       "summary": "独立工作稿 → 正式审核交接",
       "description": "审核员接手当前工作稿，按字段保存和核对，显式提交后在事务内校验版本、来源及权限，禁止自审。失败或退回的详情在独立页面。",
       "code": "backend/services/field_review_commit.py；backend/services/manuscript_handoffs.py",
@@ -81,6 +84,7 @@
     },
     {
       "id": "public",
+      "step": "数据出口",
       "title": "当前批准版与发布索引",
       "summary": "主库事实与向量发布分别生效",
       "description": "合法批准原子切换主库科学内容与正式快照，事务提交后更新外部向量索引；发布失败另记待处理。公开检索、引用图和问答按各自入口读取批准事实。",
@@ -96,7 +100,8 @@
     },
     {
       "id": "search",
-      "title": "03 检索与发现",
+      "module": "03",
+      "title": "检索与发现",
       "summary": "从当前批准版查论文、材料与结构",
       "description": "Go 查询主库并校验批准版本，按论文或状态展示结果；详情、统计和导出为用户选择的出口，不强制串行进入知识图谱或问答。",
       "code": "goserver/handlers/search_results.go；frontend/src/components/SearchResults.tsx",
@@ -113,7 +118,8 @@
   "branches": [
     {
       "id": "community",
-      "title": "06 研究社区",
+      "module": "06",
+      "title": "研究社区",
       "summary": "账号、贡献统计与 AI 讨论",
       "description": "账号与会话支持受保护操作；榜单、统计和公开讨论按入口读取，超级管理员才可管理问题并排队模型回答。与上传审核流程分别进入。",
       "code": "goserver/handlers/auth.go；backend/api/community_ai.py",
@@ -131,7 +137,8 @@
     },
     {
       "id": "predict",
-      "title": "07 Tc 估算",
+      "module": "07",
+      "title": "Tc 估算",
       "summary": "计算文件或参数 → 实验性结果",
       "description": "用户选择模型，提供结构、计算文件或参数，按路线进行经验公式或隔离模型推理；结果保留在页面，不自动写入主业务库。",
       "code": "backend/api/tc_predict.py；backend/api/tc_models.py",
@@ -149,7 +156,8 @@
     },
     {
       "id": "graph",
-      "title": "04 引用知识图谱",
+      "module": "04",
+      "title": "引用知识图谱",
       "summary": "批准论文与匹配引用 → 有向关系",
       "description": "上传期解析引文，提交保存到 MySQL；公开查询仅投影双方当前均批准的匹配引用，前端按需分页展开，不依赖 Neo4j。",
       "code": "backend/services/citation_graph.py；goserver/handlers/knowledge_graph.go",
@@ -167,7 +175,8 @@
     },
     {
       "id": "rag",
-      "title": "05 检索增强问答",
+      "module": "05",
+      "title": "检索增强问答",
       "summary": "问题 → 检索工具 → 带来源回答",
       "description": "Mentor 根据问题调用结构化或语义检索，来源与归因随工具结果进入回答，经 SSE 展示；依赖当前数据库、向量与请求级模型配置。",
       "code": "backend/rag/agent/mentor.py；backend/rag/search/engine.py",

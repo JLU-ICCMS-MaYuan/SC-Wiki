@@ -7,6 +7,27 @@
   if (!source) return;
   const data = JSON.parse(source.textContent);
 
+  // 功能模块编号的唯一来源：顶部陈列与节点徽标都从这里取编号。
+  const MODULES = [
+    { no: '01', name: '上传与解析', href: '01-upload-parse.html' },
+    { no: '02', name: '审核与维护', href: '02-review-audit.html' },
+    { no: '03', name: '检索与发现', href: '03-search.html' },
+    { no: '04', name: '引用知识图谱', href: '04-knowledge-graph.html' },
+    { no: '05', name: '检索增强问答', href: '05-rag-qa.html' },
+    { no: '06', name: '研究社区', href: '06-community.html' },
+    { no: '07', name: 'Tc 估算', href: '07-tc-predict.html' }
+  ];
+
+  function moduleOf(node) {
+    if (node.module) return MODULES.find(item => item.no === String(node.module)) || null;
+    for (const link of node.links || []) {
+      const target = String(link.href || '').split('#')[0];
+      const found = MODULES.find(item => item.href === target);
+      if (found) return found;
+    }
+    return null;
+  }
+
   const GEO = {
     width: 1050,
     top: 56,
@@ -28,11 +49,13 @@
 
   const nodes = new Map();
   data.main.forEach((node, index) => {
+    const mod = moduleOf(node);
     nodes.set(node.id, {
       ...node,
       col: 'main',
       index,
-      step: node.step || `主干 ${String(index + 1).padStart(2, '0')}`,
+      module: mod,
+      step: node.step || (mod ? `功能 ${mod.no}` : `主干 ${String(index + 1).padStart(2, '0')}`),
       x: GEO.main.x,
       y: GEO.top + index * GEO.rowGap,
       w: GEO.main.w
@@ -55,7 +78,8 @@
       ...branch,
       col: side,
       kind: branch.kind || 'wait',
-      step: branch.step || `支线 · ${anchor.title}`,
+      module: moduleOf(branch),
+      step: branch.step || (moduleOf(branch) ? `功能 ${moduleOf(branch).no}` : `支线 · ${anchor.title}`),
       x: GEO[side].x,
       y,
       w: GEO[side].w,
@@ -182,16 +206,27 @@
   host.setAttribute('aria-label', '流程节点');
 
   for (const node of nodes.values()) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.id = node.id;
-    button.className = 'node' + (node.col === 'main' ? '' : ' branch') + (node.kind ? ' ' + node.kind : '');
-    button.style.left = node.x + 'px';
-    button.style.top = node.y + 'px';
-    button.style.width = node.w + 'px';
-    button.style.minHeight = GEO.nodeHeight + 'px';
-    button.setAttribute('aria-pressed', 'false');
-    button.setAttribute('aria-controls', 'detail-title detail-description');
+    const target = (node.links || [])[0];
+    // 有展开页面的节点整块可点击跳转；悬停或聚焦先展示该节点详情。
+    const control = document.createElement(target ? 'a' : 'button');
+    control.id = node.id;
+    control.className = 'node' + (node.col === 'main' ? '' : ' branch') + (node.kind ? ' ' + node.kind : '') + (target ? ' linked' : '');
+    control.style.left = node.x + 'px';
+    control.style.top = node.y + 'px';
+    control.style.width = node.w + 'px';
+    control.style.minHeight = GEO.nodeHeight + 'px';
+    if (target) {
+      control.setAttribute('href', target.href);
+      control.setAttribute('aria-label', `${node.step} ${node.title}：打开${target.label}`);
+      control.setAttribute('data-active', 'false');
+      control.addEventListener('mouseenter', () => select(node.id, false));
+      control.addEventListener('focus', () => select(node.id, false));
+    } else {
+      control.type = 'button';
+      control.setAttribute('aria-pressed', 'false');
+      control.setAttribute('aria-controls', 'detail-title detail-description');
+      control.addEventListener('click', () => select(node.id));
+    }
     const step = document.createElement('span');
     step.className = 'step';
     step.textContent = node.step;
@@ -200,16 +235,21 @@
     const summary = document.createElement('span');
     summary.className = 'summary';
     summary.textContent = node.summary || '';
-    button.append(step, title, summary);
+    control.append(step, title, summary);
     if (node.kind === 'check') {
       const flag = document.createElement('span');
       flag.className = 'flag';
       flag.textContent = '判断';
-      button.append(flag);
+      control.append(flag);
     }
-    button.addEventListener('click', () => select(node.id));
-    controls.set(node.id, button);
-    host.append(button);
+    if (target) {
+      const go = document.createElement('span');
+      go.className = 'go';
+      go.textContent = '打开 ↗';
+      control.append(go);
+    }
+    controls.set(node.id, control);
+    host.append(control);
   }
 
   canvas.append(lane, svg, host);
@@ -246,7 +286,9 @@
     const node = nodes.get(id);
     if (!node) return;
     for (const [key, control] of controls) {
-      control.setAttribute('aria-pressed', String(key === id));
+      const active = String(key === id);
+      if (control.tagName === 'A') control.setAttribute('data-active', active);
+      else control.setAttribute('aria-pressed', active);
     }
     for (const edge of edges) {
       const active = edge.from === id || edge.to === id;
@@ -269,7 +311,24 @@
     document.querySelector('#detail-code').textContent = node.code || '同一流程内的状态或控制分支';
     branchButtons(node);
     document.querySelector('.details').scrollTop = 0;
-    if (writeHash) history.replaceState(null, '', '#' + id);
+    if (writeHash) {
+      try { history.replaceState(null, '', '#' + id); }
+      catch { location.hash = id; }
+    }
+  }
+
+  // 顶部功能陈列由 MODULES 生成，编号与节点徽标同源，新增模块只改一处。
+  function renderModuleNav() {
+    const nav = document.querySelector('nav[data-module-nav]');
+    if (!nav) return;
+    const here = (location.pathname.split('/').pop() || 'index.html');
+    nav.replaceChildren(...MODULES.map(item => {
+      const link = document.createElement('a');
+      link.href = item.href;
+      link.textContent = `${item.no} ${item.name}`;
+      if (item.href === here) link.setAttribute('aria-current', 'page');
+      return link;
+    }));
   }
 
   function fitCanvas() {
@@ -281,6 +340,7 @@
 
   const initial = location.hash.slice(1);
   select(nodes.has(initial) ? initial : data.main[0].id, false);
+  renderModuleNav();
   window.addEventListener('hashchange', () => {
     const id = location.hash.slice(1);
     if (nodes.has(id)) select(id, false);
