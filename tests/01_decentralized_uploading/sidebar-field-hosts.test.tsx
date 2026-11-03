@@ -13,14 +13,15 @@ import defs from '../fixtures/issue176/form-definitions.json'
 const auth=vi.hoisted(()=>({role:'admin'}))
 vi.mock('../../frontend/src/context/AuthContext',()=>({useAuth:()=>({user:{id:7,role:auth.role,is_admin:true,is_approved:true}})}))
 vi.mock('../../frontend/src/lib/api',()=>({api:{get:vi.fn(),post:vi.fn(),patch:vi.fn(),put:vi.fn(),del:vi.fn()}}))
+let sourceOverrides:any = {}
 const item='a'.repeat(64)
 const field='material_states[0].property_modules[0].records[0].payload.parameters.mu_star'
 let draft:any,manual:any,order:string[],finishJob:(value:any)=>void,poll:Promise<any>,failSave=false
 const record=()=>({key:item,item_key:item,field,fields:[field],label:'μ*',state_key:'s',module_key:'m',record_key:'r',
  record_field:'payload.parameters.mu_star',current_value:draft.material_states[0].property_modules[0].records[0].payload.parameters.mu_star,
- status:'uncertain',reason:'需核对',evidences:[],human_modified:true,required:true})
+ status:'uncertain',reason:'需核对',evidences:[],human_modified:true,required:true,...sourceOverrides})
 beforeEach(()=>{
- failSave=false;order=[];manual={changed:true,reason:'',no_evidence_reason:'',items:[]}
+ sourceOverrides={};failSave=false;order=[];manual={changed:true,reason:'',no_evidence_reason:'',items:[]}
  draft={paper:{id:177,title:'Original title',authors:[],year:2026,paper_type:'theoretical',
   material_families:[],review_status:'pending',uploaded_by_user_id:8},
  material_states:[{id:1,state_key:'s',material:'CaH6',material_name:'CaH6',state_kind:'theoretical',pressure_value_gpa:150,
@@ -135,4 +136,35 @@ it.each(['upload','revision','admin','superadmin'])('%s 技术失败落在原字
  await screen.findByText('隔离模型超时，请重试当前字段')
  await waitFor(()=>expect(document.querySelector(`[data-evidence-key="${item}"]`)).toHaveAttribute('data-evidence-status','failed'))
  expect(document.querySelector('[data-evidence-pending-navigation]')).toBeNull()
+})
+
+it.each(['upload','revision','admin','superadmin'])('%s 原文区只显示当前字段相关依据且不显示整包兜底与信息框',async kind=>{
+ sourceOverrides={stale:true,pending_review:true,reason:'当前字段的独立核对理由',
+  evidences:[],legacy_evidences:[{file_id:'main',quote:'Unrelated Tc and cutoff paragraph'}]}
+ await open(kind)
+ const drawer=document.querySelector('.evidence-review-drawer') as HTMLElement
+ const source=within(drawer).getByText('系统找到的原文',{selector:'summary'}).parentElement!
+ expect(within(source).queryByText(/Unrelated Tc and cutoff paragraph/)).not.toBeInTheDocument()
+ expect(within(source).queryByText(/旧整条记录原文/)).not.toBeInTheDocument()
+ expect(source.querySelector('[data-evidence-review-summary]')).toBeNull()
+ expect(drawer.querySelector('.MuiAlert-standardInfo')).toBeNull()
+ expect(within(drawer).getByText('当前字段的独立核对理由',{exact:true})).toBeVisible()
+ expect(within(drawer).getByRole('button',{name:'大模型核对',exact:true})).toBeVisible()
+ expect(within(drawer).getByRole('button',{name:'人工审核通过',exact:true})).toBeVisible()
+ expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.endsWith('/jobs'))).toHaveLength(0)
+})
+
+it.each(['upload','revision','admin','superadmin'])('%s 相关反证的长原文直接可读，不再内嵌展开标签',async kind=>{
+ const quote=('The reported mu-star is 0.13 for this result. ').repeat(16)
+ sourceOverrides={status:'unsupported',reason:'原文不支持当前配对',
+  source_associations:[{target_path:'payload.parameters.mu_star',stage:'superconductivity',basis_kind:'paper_quote',explanation:'当前结果的适用范围',fact_evidences:[],scope_evidences:[]}],evidences:[{file_id:'main',source_name:'正文',quote}],legacy_evidences:[{file_id:'si',quote:'Unrelated record source'}]}
+ await open(kind)
+ const drawer=document.querySelector('.evidence-review-drawer') as HTMLElement
+ const source=within(drawer).getByText('系统找到的原文',{selector:'summary'}).parentElement!
+ expect(source).toHaveTextContent(quote.trim())
+ expect(source.querySelector('details')).toBeNull()
+ expect(within(source).queryByText(/Unrelated record source/)).not.toBeInTheDocument()
+ expect(within(drawer).getByText('原文不支持当前配对',{exact:true})).toBeVisible()
+ expect(drawer.querySelector('.MuiAlert-standardInfo')).toBeNull()
+ expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.endsWith('/jobs'))).toHaveLength(0)
 })

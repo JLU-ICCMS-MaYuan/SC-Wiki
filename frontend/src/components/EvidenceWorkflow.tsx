@@ -1,11 +1,9 @@
 import ReviewSection from './ReviewSection'
-import EvidenceReviewSummary from './EvidenceReviewSummary'
 import ReviewFieldSettings from './ReviewFieldSettings'
 import FieldAICandidate, { type FieldCandidate } from './FieldAICandidate'
 import type { EvidencePatch } from '../lib/evidenceProposals'
 import type { AuditEvent } from './EvidenceHistoryTimeline'
 import { EvidenceRegion } from './EvidenceRegion'
-import EvidenceReadableValue from './EvidenceReadableValue'
 import ManualEvidenceSection from './ManualEvidenceSection'
 import ScientificAssociations, { type ScientificAssociation } from './ScientificAssociations'
 import DosFermiConflict, { dosRecordForEvidence } from './DosFermiConflict'
@@ -930,7 +928,6 @@ export function useEvidenceWorkflow(options?: {
   const activeDos = activeRecord ? dosRecordForEvidence(activeRecord) : undefined
   const activeDosConflict = Boolean(activeDos && hasDosConflict(activeDos))
   const activeCurrent = activeRecord ? options?.getCurrentValue?.(activeRecord) : undefined
-  const completionBlockers = (saving || confirming) ? [t('evidence.completeBusy')] : []
   const draftSaveFailed = Boolean(targetRef.current && queueFor(targetRef.current).error())
   const editCurrent = (record: EvidenceRecord) => {
     const field = optionsRef.current?.getCurrentValue?.(record)?.field || record.field
@@ -1014,39 +1011,18 @@ export function useEvidenceWorkflow(options?: {
         <ReviewSection title={t('evidence.foundSources')} initialOpen>
           <DosFermiConflict record={activeRecord} target={targetRef.current}
             onEdit={dosValueInput(activeRecord) && !dosValueInput(activeRecord)?.disabled ? () => editCurrent(activeRecord) : undefined} />
-          {activeRecord.field === 'paper.theoretical_subtype' && <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.subtypeSynthesisHint')}</Alert>}
-          {activeRecord.field === 'paper.summary' && !activeRecord.stale && <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.summarySynthesisHint')}</Alert>}
-          {activeRecord.field === 'paper.keywords_tags' && activeRecord.provenance?.kind === 'author_keywords' &&
-            <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.authorKeywordsSource')}</Alert>}
-          {activeRecord.field === 'paper.keywords_tags' && activeRecord.provenance?.kind === 'paper_synthesis' &&
-            <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.fulltextKeywordsSource')}</Alert>}
           {currentDetail?.error ? <Alert severity="error" action={<Button onClick={() => setDetailReload(n => n + 1)}>{t('evidence.retrySource')}</Button>}>{t('evidence.sourceLoadFailed')} {currentDetail.error}</Alert>
             : !currentDetail?.data && !activeRecord.placeholder ? <Typography role="status">{t('evidence.sourceLoading')}</Typography>
             : activeDosConflict ? null : activeGroup.some(r => r.evidences.length)
             ? activeGroup.flatMap(r => r.evidences)
               .filter((source, index, all) => all.findIndex(item => item.file_id === source.file_id && item.quote === source.quote) === index)
-              .map((source, index) => <EvidenceRegion key={`${source.file_id}:${source.page_start}:${index}`} target={targetRef.current} source={source} />)
-            : activeRecord.provenance?.kind === 'derived'
-              ? <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.derivedSource')}
-                  <Typography>{t('evidence.derivedRule')}：{activeRecord.provenance.rule}</Typography>
-                  <EvidenceReadableValue value={activeRecord.provenance.input} />
-                </Alert>
-              : <Alert severity="info" sx={{ mt: 1 }}>{t('evidence.noPaperSource')}</Alert>}
-          {activeRecord.provenance?.kind === 'contributor_structure' && <Alert severity="info" sx={{ mt: 1 }}>
-            <Typography>{t('evidence.providerLabel')}：{activeRecord.provenance.submitted_by_name || t('evidence.unknownProvider')}</Typography>
-            <Typography>{activeRecord.provenance.filename} · {activeRecord.provenance.method}</Typography>
-            {activeRecord.provenance.original_text && <Box component="details"><Box component="summary">{t('evidence.originalStructure')}</Box><Typography component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{activeRecord.provenance.original_text}</Typography></Box>}
-          </Alert>}
-          {currentDetail?.data?.source_state === 'historical' && <Alert severity="info">{t('evidence.historicalSource')}</Alert>}
-          {!activeRecord.placeholder && activeGroup.map(r => <EvidenceReviewSummary key={r.key} record={r} readOnly={optionsRef.current?.readOnly} />)}
-          {Boolean(activeRecord.legacy_evidences?.length) && !activeRecord.evidences.length && <ReviewSection title={t('evidence.legacySources')}>
-            {activeRecord.legacy_evidences!.map((source, index) => <EvidenceRegion key={index} target={targetRef.current} source={source} />)}
-          </ReviewSection>}
+              .map((source, index) => <EvidenceRegion plain key={`${source.file_id}:${source.page_start}:${index}`} target={targetRef.current} source={source} />)
+            : null}
+          {activeRecord.provenance?.kind === 'contributor_structure' && activeRecord.provenance.original_text &&
+            <Typography component="pre" sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{activeRecord.provenance.original_text}</Typography>}
         </ReviewSection>
         <ReviewSection title={t('evidence.aiReasonLabel')} initialOpen>
-        {activeGroup.map(r => <Box key={r.key} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
-          {(r.adopted_basis || r.proposal?.basis_kind) && <Alert severity="info">{t(`evidence.basis.${r.adopted_basis || r.proposal?.basis_kind}`)}</Alert>}
-            {(r.pending_review || r.stale) && <Alert severity="info">当前内容待提交核对；下方仅显示已有核对结论。</Alert>}
+        {activeGroup.map(r => <Box key={r.key} data-field-ai-reason data-evidence-status={evidenceStatus(r)} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
             <Typography sx={{ whiteSpace: 'pre-wrap' }}>{aiReasonText(r, t) || t('evidence.noAiReason')}</Typography>
             <ScientificAssociations associations={r.source_associations} target={targetRef.current} />
             {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
@@ -1056,7 +1032,7 @@ export function useEvidenceWorkflow(options?: {
         </Box>)}
         </ReviewSection>
         {settingsPending && <Typography color="text.secondary">{t('evidence.settingsPending')}</Typography>}
-        {currentDetail?.data?.approval_message && <Alert severity={approvalState === 'modification_required' || approvalState === 'blocked' ? 'warning' : 'info'}>
+        {currentDetail?.data?.approval_message && (approvalState === 'modification_required' || approvalState === 'blocked') && <Alert severity="warning">
           {currentDetail.data.approval_message}
         </Alert>}
         {!options?.readOnly && !activeRecord.placeholder && <Box data-field-review-actions sx={{display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: .75, my: 2, '& .MuiButton-root': {minWidth: 0, px: .5, overflowWrap: 'anywhere'}}}>
@@ -1078,10 +1054,8 @@ export function useEvidenceWorkflow(options?: {
           drafts={manualDrafts} value={manualCurrentValue(activeRecord)}
           localChanged={hasLocalManualEdit(activeRecord)}
           prepare={() => prepareManual(activeRecord)} />
-        {dirty.current && options?.saveCurrent && <Alert severity="info">{t('evidence.saveBeforeConfirm')}</Alert>}
         </ReviewSection>}
         {saveError && <Alert severity="error" sx={{ mt: 1 }} action={draftSaveFailed ? <Button disabled={saving} onClick={() => void retryDrafts().catch(() => undefined)}>{t('evidence.retrySave')}</Button> : undefined}>{saveError} {draftSaveFailed && t('evidence.saveFailureRetained')}</Alert>}
-        {!activeRecord.placeholder && completionBlockers.length > 0 && <Alert severity="info" sx={{ mt: 1 }}>{completionBlockers.map(message => <Typography key={message} variant="body2">{message}</Typography>)}</Alert>}
         </Box>
       </>}
     </Drawer>

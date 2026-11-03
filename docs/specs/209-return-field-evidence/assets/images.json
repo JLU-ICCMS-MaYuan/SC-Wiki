@@ -1,0 +1,26 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-4ad93808-c3f9-41b4-b7c8-a108618cc047.png",
+      "locator": "IMG-001.png",
+      "status": "local_verified",
+      "user_context": "退回后字段标红，侧栏蓝底提示及旧整条记录原文",
+      "related": [
+        "US1",
+        "US2",
+        "FR-001",
+        "FR-003",
+        "FR-005"
+      ],
+      "sha256": "62784ed0a3937f10758d677075795e50c19bcc916d3297af0973930dfeffca0a",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3840,
+        1952
+      ],
+      "verification": "2026-11-03原字节复制并解码核验；远程未发布"
+    }
+  ]
+}

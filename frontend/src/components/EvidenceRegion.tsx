@@ -22,7 +22,7 @@ function CropView({ crop, label, onClick, onFailure }: { crop: Crop; label: stri
 }
 
 // 直接按PDF块定位时没有RAG分段编号，不编造chunk_index。
-export function EvidenceRegion({ target, source, hideQuote = false }: { target?: EvidenceTarget; source: Omit<EvidenceSource, 'chunk_index'> & { chunk_index?: number }; hideQuote?: boolean }) {
+export function EvidenceRegion({ target, source, hideQuote = false, plain = false }: { target?: EvidenceTarget; source: Omit<EvidenceSource, 'chunk_index'> & { chunk_index?: number }; hideQuote?: boolean; plain?: boolean }) {
   const { t } = useLanguage()
   const [result, setResult] = useState<Region | null>(null)
   const [busy, setBusy] = useState(false)
@@ -73,18 +73,18 @@ export function EvidenceRegion({ target, source, hideQuote = false }: { target?:
   }
   return <Box sx={{ my: 1 }}>
     {source.snapshot_file_url&&<SnapshotFileButton url={source.snapshot_file_url} name={source.source_name||source.file_id}/>}
-    <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {page ? t('evidence.page', { page }) : t('evidence.pageUnknown')}{quote ? `：${quote.length > 500 ? quote.slice(0, 360) + '…' : quote}` : ''}</Typography>
-    {quote.length > 500 && <Box component="details" sx={{ my: 1 }}><Typography component="summary" variant="caption" sx={{ cursor: 'pointer' }}>{t('evidence.fullQuote')}</Typography>
+    <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{source.source_name || source.file_id} · {page ? t('evidence.page', { page }) : t('evidence.pageUnknown')}{quote ? `：${!plain && quote.length > 500 ? quote.slice(0, 360) + '…' : quote}` : ''}</Typography>
+    {!plain && quote.length > 500 && <Box component="details" sx={{ my: 1 }}><Typography component="summary" variant="caption" sx={{ cursor: 'pointer' }}>{t('evidence.fullQuote')}</Typography>
       <Typography sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{quote}</Typography>
     </Box>}
     {target && (source.quote || source.block_id) && source.evidence_kind !== 'pdf_image' && <Button disabled={busy} onClick={() => void open()}>{t('evidence.viewRegion')}</Button>}
     {busy && <LinearProgress aria-label={t('evidence.regionLoading')} />}
     {error && <Alert severity="warning">{t('evidence.regionUnavailable')}</Alert>}
     {source.evidence_kind === 'pdf_image' && (error || result && result.status !== 'located') && <Button disabled={busy} onClick={() => void open()}>{t('evidence.retryRegion')}</Button>}
-    {result && result.status !== 'located' && <Alert severity="info">{unavailable}</Alert>}
+    {result && result.status !== 'located' && <Typography role="status" color="text.secondary">{unavailable}</Typography>}
     {crops.length > 0 && <>
-      <Typography>{result?.parser?.mode === 'legacy_text' ? t('evidence.legacyTextLocator') : result?.parser?.name}{result?.printed_page != null ? ` · ${t('evidence.printedPage', { page: result.printed_page })}` : ''}{result?.dpi ? ` · ${result.dpi} DPI` : ''}</Typography>
-      <Typography variant="caption" color="text.secondary">{t('evidence.scrollRegionHint')}</Typography>
+      {!plain && <Typography>{result?.parser?.mode === 'legacy_text' ? t('evidence.legacyTextLocator') : result?.parser?.name}{result?.printed_page != null ? ` · ${t('evidence.printedPage', { page: result.printed_page })}` : ''}{result?.dpi ? ` · ${result.dpi} DPI` : ''}</Typography>}
+      {!plain && <Typography variant="caption" color="text.secondary">{t('evidence.scrollRegionHint')}</Typography>}
       {crops.map((crop, index) => <Box key={index} sx={{ my: 1 }}>
         {crop.pdf_page && crops.length > 1 && <Typography variant="caption">{t('evidence.page', { page: crop.pdf_page })}</Typography>}
         {crop.source_raster_dpi && <Alert severity="warning">{t('evidence.sourceRasterLowDpi', { dpi: crop.source_raster_dpi })}</Alert>}

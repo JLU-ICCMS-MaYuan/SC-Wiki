@@ -33,6 +33,14 @@ condition_additions只在allow_condition_additions=true时使用，只补原文�
 软件参数写入qe/epw/sscha固定组，不创建阶段扩展，不生成method_scope或同义字段。
 标准设置使用现有字段名calculation_code、electronic_method、exchange_correlation_functional、
 energy_cutoff、charge_density_cutoff、k_grid、q_grid、k_spacing，避免software/functional等同义键。
+source_ids是最终显示在当前字段原文区的依据，不是阅读清单或整条记录的资料包。
+每个result独立选择source_ids，不把本批其他字段的引句复制过来。只返回直接支持／反驳当前
+字段的事实，或确认其软件、阶段、材料、物相及真实适用范围所必需的原文。其他已读资料
+仍可作为背景帮助理解，但不要放进该字段的source_ids，也不要用它解释本字段已通过。
+例如核对QE波函数截断能90 Ry，应引用报告90 Ry的段落及必要的QE/EPC适用范围；
+只报告Tc=235 K、μ*=0.1或讨论超导温度前景的段落是该条件的背景，不是截断能依据。
+计算条件不因同属一个Tc结果就需要重新证明Tc／μ*配对；配对原文留给Tc／μ*字段。
+同段确实支持多个字段时可分别引用；相关反证也保留，不按supported状态隐藏。
 source_index只是目录，不代表已读；只能引用sources或工具实际返回的source_id。
 read_page/read_document只返回文字，不能据此声称看过曲线或插图。需要看图时使用read_original_page，
 填写实际file_id和PDF页码；不得猜figure_id或把图号当作块编号。工具不可用或读取失败时说明原因，

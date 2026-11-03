@@ -1,0 +1,507 @@
+{
+  "issue": 209,
+  "verified_at": "2026-11-03T13:41:55.556107+08:00",
+  "base_head": "7e26744a18c4213aac9c345e208d566785c9d6d7",
+  "branch": "mayuan",
+  "code_sha256": {
+    "backend/api/evidence.py": "796f3b81b318ff675cb9254b3b983018eeaf832be8803195852016aa9a0abb65",
+    "backend/api/rag.py": "eb1fac48598a66a79dab7c52bd441dad1c86cd3c7d11e38e7a2da67e34e6ce3a",
+    "backend/ingest/field_source_metadata.py": "eb32ee135519b0357f7f5ea3585ba1a1cc6bd4d8a2f0cde583e4e067711d7071",
+    "backend/ingest/model_review.py": "7142fdfce97cc96b1dbd67b11e8ebe5a2d4875cf2eaf8af9528f4dbf8fb09bd2",
+    "backend/ingest/property_evidence.py": "eab9a3d7dcb3001dc06f38580a0482241469082e1510309b2dc27f317f31cb73",
+    "backend/ingest/property_field_review.py": "e8d1fc7462b4945f214d189cd7b30475caab6a59bd5d667e0fd0d04bc00ddadd",
+    "backend/services/field_review_commit.py": "395ffca6e2a608a246cff80925f95e773dcdfbd668da06fedcad326607a1e3fd",
+    "backend/services/manuscript_handoffs.py": "fd8646e6ea52a28925f398c60d33dcc4f13bcc75a22983f6777d9aa93b01f544",
+    "backend/services/paper_revisions.py": "da2a3dadb6e7233cdb9fc6aa4dd63424e1ab6a0fd82abf758272156f978c002c",
+    "backend/tests/test_property_field_review.py": "eac9ad00f59fc65d22e92f82c64c17eecea71cec52f174b9732c6bb83e9be651",
+    "frontend/src/components/DosFermiConflict.tsx": "c747badb9eaf20351002cc0d6d38e9a00f341119511008f73c61f1ac98d8ebf0",
+    "frontend/src/components/EvidenceRegion.tsx": "3d8e3c0aa595150b1adafeef92760dbc9e91a595033c73d778ff6cd4925064ad",
+    "frontend/src/components/EvidenceWorkflow.tsx": "d951a110c8c7635556bd8627c3364ae45bc249ba369481d37e1b29e11fbe4742",
+    "frontend/src/components/EvidenceReviewSummary.tsx": null,
+    "frontend/src/components/ManualEvidenceSection.tsx": "d37a38e8adedaf3ba6c46a1270cad880c0f64f627cd84592ed622838e4c6093b",
+    "frontend/src/components/ScientificAssociations.tsx": "74e3d233e00aa1e6fefd2e53b624493eebc12b74292a04c9245805f43805161f",
+    "scripts/verify-upload-submit.py": "4a54ee75a3364c3a90cbb16d6f5ba0b86a875c786f86ec8f0369097886e25190",
+    "tests/01_decentralized_uploading/field-review-automation-browser.mjs": "5c5c96ea6270b840d62118cad24edc986b9955503ddcb580245083efbf0005fd",
+    "tests/01_decentralized_uploading/field-sidebar-ownership.test.tsx": "739c823b88c2592c5e28fe119d93a070057ad0c4fd1eeed24c8181891d6dbb98",
+    "tests/01_decentralized_uploading/form-contract.test.tsx": "108ed9c6a2a100883e39c9fbcaf0bf351eb96205cb85e885ba57e55dff5a3ab1",
+    "tests/01_decentralized_uploading/graph-title-form.test.tsx": "cbdcce57ee106f4182780fc71101c594fbf057c6bb28df361717d24b2fbd1701",
+    "tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx": "85bb1aa54b0048160b9b7d53645f864563f971a593d6fee9338bc53d6eae630d",
+    "tests/01_decentralized_uploading/test_return_field_sources_mysql.py": "43c0967cd1ec7ff359199371cd9252dbcda2e3f5abe49ff83867c968a04ee0f2"
+  },
+  "source_files": [
+    {
+      "client_id": "main",
+      "role": "main",
+      "filename": "2012 CaH6-王晖.pdf",
+      "size": 1091729,
+      "media_type": "application/pdf",
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "client_id": "supplementary",
+      "role": "supplementary",
+      "filename": "2012 CaH6--suppliment-王晖.pdf",
+      "size": 2925397,
+      "media_type": "application/pdf",
+      "sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348"
+    }
+  ],
+  "scientific_contract_sha256": "d4f8e5fe53038f7d103bc468c60ad022c1109f44b91b730b5ab29f52c13fe86a",
+  "final_run": {
+    "task_id": "31553f611829461180eefb234f634ae6",
+    "status": "ready",
+    "model": "gpt-6.1-sol",
+    "catalog_id": "LLM2",
+    "model_calls": 61,
+    "review_passes": [
+      {
+        "pass": 1,
+        "fields": 268,
+        "batches": 23
+      },
+      {
+        "pass": 2,
+        "fields": 115,
+        "batches": 10
+      }
+    ],
+    "technical_errors": 0,
+    "states": 14,
+    "property_records": 5,
+    "structures": 11,
+    "points": [
+      {
+        "pressure": 150.0,
+        "tc": 235,
+        "mu": 0.1,
+        "lambda": 2.69,
+        "omega_log": null,
+        "method": "unknown"
+      },
+      {
+        "pressure": 150.0,
+        "tc": 220,
+        "mu": 0.13,
+        "lambda": 2.69,
+        "omega_log": null,
+        "method": "unknown"
+      },
+      {
+        "pressure": 200.0,
+        "tc": 201,
+        "mu": 0.13,
+        "lambda": null,
+        "omega_log": null,
+        "method": "unknown"
+      },
+      {
+        "pressure": 250.0,
+        "tc": 187,
+        "mu": 0.13,
+        "lambda": null,
+        "omega_log": null,
+        "method": "unknown"
+      }
+    ],
+    "condition_source_checks": [
+      {
+        "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.qe.k_grid",
+        "key": "69a31f3537ef802a0bde038d196403e6a32c67a3fdaf8d1252e9e9b7d49710ce",
+        "value": [
+          48,
+          48,
+          48
+        ],
+        "evidence_count": 1,
+        "source_pages": [
+          {
+            "file": "2012 CaH6--suppliment-王晖.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.qe.q_grid",
+        "key": "4107f822535f910901a83d3a7f0a6b4ba6d3fe6037e1a8be6d760031ea87250c",
+        "value": [
+          12,
+          12,
+          12
+        ],
+        "evidence_count": 1,
+        "source_pages": [
+          {
+            "file": "2012 CaH6--suppliment-王晖.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "field": "material_states[0].property_modules[0].records[0].payload.calculation_conditions.qe.energy_cutoff",
+        "key": "0d42f7b136c4f5e7251fd33aa645ffdf098f4fcea710bed90349c675cb66aed7",
+        "value": {
+          "reported": true,
+          "unit_raw": "Ry",
+          "evidences": null,
+          "value_max": null,
+          "value_min": null,
+          "value_raw": "90 Ry",
+          "value_kind": "number",
+          "value_text": null,
+          "value_number": 90,
+          "value_boolean": null
+        },
+        "evidence_count": 1,
+        "source_pages": [
+          {
+            "file": "2012 CaH6--suppliment-王晖.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "field": "material_states[1].property_modules[0].records[0].payload.calculation_conditions.qe.k_grid",
+        "key": "ac372996f11cd6985b775ea352788d7c888e1f858bdbfe7c85f71a7c263edbbc",
+        "value": [
+          48,
+          48,
+          48
+        ],
+        "evidence_count": 1,
+        "source_pages": [
+          {
+            "file": "2012 CaH6--suppliment-王晖.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "field": "material_states[1].property_modules[0].records[0].payload.calculation_conditions.qe.q_grid",
+        "key": "b3483f0caa68ec7bb6100b8277e2b1757d9957e474f16d682299920c7f448a7d",
+        "value": [
+          12,
+          12,
+          12
+        ],
+        "evidence_count": 1,
+        "source_pages": [
+          {
+            "file": "2012 CaH6--suppliment-王晖.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "field": "material_states[1].property_modules[0].records[0].payload.calculation_conditions.qe.energy_cutoff",
+        "key": "a2ad72edb863ab14e7426ceca51e3f1443826e9576b7f52dfbe2187f1ab15de5",
+        "value": {
+          "reported": true,
+          "unit_raw": "Ry",
+          "evidences": null,
+          "value_max": null,
+          "value_min": null,
+          "value_raw": "90 Ry",
+          "value_kind": "number",
+          "value_text": null,
+          "value_number": 90,
+          "value_boolean": null
+        },
+        "evidence_count": 1,
+        "source_pages": [
+          {
+            "file": "2012 CaH6--suppliment-王晖.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "field": "material_states[2].property_modules[0].records[0].payload.calculation_conditions.qe.k_grid",
+        "key": "39ba7ecb495e692d7eccccadd12ff517fad15398f399e92ddd97ae271501de5e",
+        "value": [
+          48,
+          48,
+          48
+        ],
+        "evidence_count": 1,
+        "source_pages": [
+          {
+            "file": "2012 CaH6--suppliment-王晖.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "field": "material_states[2].property_modules[0].records[0].payload.calculation_conditions.qe.q_grid",
+        "key": "c8cb506840bdccc802a54721bb2b1db3d19a938554aee78efcbc063367d4be1b",
+        "value": [
+          12,
+          12,
+          12
+        ],
+        "evidence_count": 1,
+        "source_pages": [
+          {
+            "file": "2012 CaH6--suppliment-王晖.pdf",
+            "page": 3
+          }
+        ]
+      },
+      {
+        "field": "material_states[2].property_modules[0].records[0].payload.calculation_conditions.qe.energy_cutoff",
+        "key": "488b91a3eaee6e9bb156af577947c11d1d87af5407f166f2ff3fa573ed925c40",
+        "value": {
+          "reported": true,
+          "unit_raw": "Ry",
+          "evidences": null,
+          "value_max": null,
+          "value_min": null,
+          "value_raw": "90 Ry",
+          "value_kind": "number",
+          "value_text": null,
+          "value_number": 90,
+          "value_boolean": null
+        },
+        "evidence_count": 1,
+        "source_pages": [
+          {
+            "file": "2012 CaH6--suppliment-王晖.pdf",
+            "page": 3
+          }
+        ]
+      }
+    ]
+  },
+  "lifecycle": {
+    "actual_paper_submitted": false,
+    "model_calls": 0,
+    "material_states": 14,
+    "property_records": 5,
+    "structures": 11,
+    "paper_evidence": 268,
+    "required_value_changes": [],
+    "reviewed_property_quotes_preserved": true,
+    "condition_source_transfer_changes": [],
+    "artifact_reader_verified": true,
+    "idempotent": true,
+    "formal_blocked": [],
+    "approval_roles": [
+      "admin",
+      "superadmin"
+    ],
+    "return_roles": [
+      "admin",
+      "superadmin"
+    ],
+    "return_checks": [
+      {
+        "role": "admin",
+        "preserved_supported": 288,
+        "lost_supported": 0,
+        "summary_pending_supported": 0,
+        "reused_snapshot": false,
+        "cutoffs": [
+          {
+            "reported": true,
+            "unit_raw": "Ry",
+            "evidences": null,
+            "value_max": null,
+            "value_min": null,
+            "value_raw": "90 Ry",
+            "value_kind": "number",
+            "value_text": null,
+            "value_number": 90,
+            "value_boolean": null
+          },
+          {
+            "reported": true,
+            "unit_raw": "Ry",
+            "evidences": null,
+            "value_max": null,
+            "value_min": null,
+            "value_raw": "90 Ry",
+            "value_kind": "number",
+            "value_text": null,
+            "value_number": 90,
+            "value_boolean": null
+          },
+          {
+            "reported": true,
+            "unit_raw": "Ry",
+            "evidences": null,
+            "value_max": null,
+            "value_min": null,
+            "value_raw": "90 Ry",
+            "value_kind": "number",
+            "value_text": null,
+            "value_number": 90,
+            "value_boolean": null
+          }
+        ]
+      },
+      {
+        "role": "superadmin",
+        "preserved_supported": 288,
+        "lost_supported": 0,
+        "summary_pending_supported": 0,
+        "reused_snapshot": false,
+        "cutoffs": [
+          {
+            "reported": true,
+            "unit_raw": "Ry",
+            "evidences": null,
+            "value_max": null,
+            "value_min": null,
+            "value_raw": "90 Ry",
+            "value_kind": "number",
+            "value_text": null,
+            "value_number": 90,
+            "value_boolean": null
+          },
+          {
+            "reported": true,
+            "unit_raw": "Ry",
+            "evidences": null,
+            "value_max": null,
+            "value_min": null,
+            "value_raw": "90 Ry",
+            "value_kind": "number",
+            "value_text": null,
+            "value_number": 90,
+            "value_boolean": null
+          },
+          {
+            "reported": true,
+            "unit_raw": "Ry",
+            "evidences": null,
+            "value_max": null,
+            "value_min": null,
+            "value_raw": "90 Ry",
+            "value_kind": "number",
+            "value_text": null,
+            "value_number": 90,
+            "value_boolean": null
+          }
+        ]
+      }
+    ],
+    "original_preserved": true
+  },
+  "browser": {
+    "info": 0,
+    "nested": 0,
+    "images": 1,
+    "model_jobs": 0,
+    "exceptions": [],
+    "source_key": "0d42f7b136c4f5e7251fd33aa645ffdf098f4fcea710bed90349c675cb66aed7"
+  },
+  "cleanup": {
+    "old_caH6": {
+      "paper_id": 1151,
+      "targets": [
+        [
+          "paper",
+          "1151"
+        ],
+        [
+          "revision",
+          "8462b812211d4935ba4d261571edb6d3"
+        ],
+        [
+          "revision",
+          "877ba04bb85d4eea99c57d42b73ea499"
+        ],
+        [
+          "upload",
+          "8d147f415a7b44a1abad6c971ac174cd"
+        ]
+      ],
+      "source_candidates": 1035,
+      "file_candidates": [
+        "manuscript_snapshots/files/0103118c9e71829dab7729229ab998a2da78867de9a473e10e35876162c84bdf.png",
+        "manuscript_snapshots/files/03700ded01a105cb374c95a4c613dc18174c84545c2d702a1ab52d5da84e92b4.png",
+        "manuscript_snapshots/files/0424288227a4ed431e21a536b2e6913cc7237dcec0a2184efee498d96f6685a4.png",
+        "manuscript_snapshots/files/06cc2ddde9e4827cabb827a9a48b83877c3a38b708665e38bf1408c28c48870c.png",
+        "manuscript_snapshots/files/09a7f1fdd93574022880dcf56fcfd7b05b325dcc3bc82ae546c4d32ffa6ea541.png",
+        "manuscript_snapshots/files/0eaf45846f79f285caf6df2f6993718433ef05b14ec85c870c677890e218c418.png",
+        "manuscript_snapshots/files/0f1edd8a938caaeffd4ad6f9ca223f4778befd2235b036bd9bdf332bee597b81.png",
+        "manuscript_snapshots/files/10a7bfbf000211290c266f0cf7eda97a6fcb45d592aa56d580cf24309ac6b281.png",
+        "manuscript_snapshots/files/29b5ca76c9aa0fc559105b9d197e8f4a1c0f2bed28b1b1d8c1eae2289211f6a9.png",
+        "manuscript_snapshots/files/30d56710377b45e4b795af424a8d9352be29a1ea99de7dcd6815ae513ebf49c4.png",
+        "manuscript_snapshots/files/30dd6d6e2182115afeebb696493bc0e412e10a75bee7238bafaafdd8bee7f244.png",
+        "manuscript_snapshots/files/3858e47d45825e38f02574f6d8c960e50e551782063572d1427d62a3a66d705c.png",
+        "manuscript_snapshots/files/507f11ca0de09d1415d972bf39b610832872c602b5d351a960c10ce5103d8c60.png",
+        "manuscript_snapshots/files/52dfd3fcbd8c8d8ab3dd63d9e0c82625ed77eef67239348738f19ffb9aaa13fe.png",
+        "manuscript_snapshots/files/5509ad0423b0eb665d59b7a67a9b370bed1d9fc9ba1ad589363f9cd92ed9ef52.png",
+        "manuscript_snapshots/files/5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da.pdf",
+        "manuscript_snapshots/files/5b22794b22528864bb09a47fce68e2de523483dd4dddbda6098287bc7f421e06.png",
+        "manuscript_snapshots/files/5f49e2895f8cd21c439c68eedac62dc1930211b8693ff76efc942b33b84c353f.png",
+        "manuscript_snapshots/files/630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348.pdf",
+        "manuscript_snapshots/files/6424cd4d8847a1f1a9b469888ad2fe23e439e0cbe1914b2f7075cd99da52bd9a.png",
+        "manuscript_snapshots/files/651cb7274f2c38146b78c6794d2da1f0f213becb569e609128198bc96d2f34e7.png",
+        "manuscript_snapshots/files/86544a590d5a9da32650e9acbf2aae7c219bd333e37310e66f096c0cdade8a9b.png",
+        "manuscript_snapshots/files/901a26542d32641e8165fa6294dee6a02b975887dd0fa5906d0dfdc134357440.png",
+        "manuscript_snapshots/files/993bb8372dfd6eecd214811d0cd49f3db9803e2d764c82d4f404e5c1f6f13b95.png",
+        "manuscript_snapshots/files/b26db1d7cac37d572f38fd6c9086676cffae44034e5267c911732216936703ee.png",
+        "manuscript_snapshots/files/b84f0e0f74bbf559753674f725e9d3aaf79b986049ea628ca198d6295ca026cf.png",
+        "manuscript_snapshots/files/b8eedaf5c518256d152b7ab58e77673921ebe0d17af56e87a437ff7b1cca5fc6.png",
+        "manuscript_snapshots/files/b9a726522bf6365f3250d17675163aa73ddedacd926a143704f27b2783c5f8af.png",
+        "manuscript_snapshots/files/c9e2427ec2e8d5d5569b90d6a4f673f36d78c6e4ad9be7d8d1f59944edcb091e.png",
+        "manuscript_snapshots/files/caa6e594eca9f49492248c96f22da803bddd59468328092dd0ac659bddafb4cf.png",
+        "manuscript_snapshots/files/d0f3452f60715b2e192d97888f30866cd6a864cfc2470096068ce884feab2be4.png",
+        "manuscript_snapshots/files/d75b5af95552f43a9a370d40557e35821517125c504f574a909c026ce1ca38f6.png",
+        "manuscript_snapshots/files/e55b5635a7ed910897d12b9f97e34e0c6e258ac0e96ab881fbc43380e2077342.png",
+        "manuscript_snapshots/files/e671babd6c77c44fde5b1975d6bef204c88a5b254e5192036d79f3007f4c9f28.png",
+        "manuscript_snapshots/files/ede76ce5a69ca5dbe38689cd1d49b72e6fb264bfbac6af1f6119a611017f6880.png",
+        "manuscript_snapshots/files/fb1429589a158a2a3a0299d704223b56a8870449be45ff08f7584441edc137af.png",
+        "manuscript_snapshots/files/fd5daed891a306880c9abae2c44088b9d344a27d55f79d153d4aa9c4c627d198.png",
+        "upload_PDFs/8d147f415a7b44a1abad6c971ac174cd/1e81d04d671b451382f2805a8d7618c7/01798b49de42489ababa3c2a9a98ead7.pdf",
+        "upload_PDFs/8d147f415a7b44a1abad6c971ac174cd/a252a1d82afa455db887aff32b3e8cb0/c5fd0e44bde748798b2649533fac1d9e.pdf"
+      ],
+      "protected_paper": 271,
+      "source_items_deleted": 1035,
+      "files_deleted": 39,
+      "leftovers": {},
+      "complete": true
+    },
+    "intermediate": {
+      "task": "df4bf66b2d0e47868d1ac7e7836dea29",
+      "removed_source_items": 56,
+      "removed_spectrum_collections": 36,
+      "H3S_preserved": true,
+      "complete": true
+    },
+    "old_forms_removed": true,
+    "paper271_preserved": true,
+    "H3S_preserved_by_this_task": true,
+    "H3S_current_tasks": [
+      "a3c040f6e5bb4ef8a74d869bf1678087"
+    ],
+    "H3S_note": "用户确认保留；最初f5任务被并发操作替换，当前a3任务不在本次清理范围。"
+  },
+  "tests": {
+    "backend_focused": 42,
+    "backend_field_scope": 1,
+    "form_contract": 140,
+    "mutation_detected": 8,
+    "field_contract": "passed",
+    "manual_and_dos_adjacent_passed": 22,
+    "association_adjacent_passed": 1,
+    "build": "passed",
+    "baseline_only_failures": {
+      "python": 7,
+      "frontend": 11,
+      "baseline_head": "4e70dc0ca1b3bafdb638090892d74b8b465f19fe"
+    }
+  },
+  "limits": [
+    "真实新稿未正式送审；提交、批准、退回在MySQL外层回滚并隔离文件／任务状态。",
+    "退回生成新整稿快照的观察保留；本轮不宣称#192全部快照去重验收。",
+    "Eliashberg各向同性／各向异性细分未强推，method_code=unknown，原method_raw保留。",
+    "原文未报告omega_log保持空；谱曲线处理不作为本轮字段修复的整篇科学验收。",
+    "DeepSeek接口拒绝严格输出，未降级；本轮显式使用LLM2，全站默认配置不改。"
+  ],
+  "qa_images": {
+    "verified-sidebar.png": "4a20252cd85bf98f542106d98f4bbad155c246e2e48f5144bb6f08316c31c3dc",
+    "verified-source-region.png": "e3646f0f3d638296101acf787a72a9a554c983cc3995b4b1a884798fbd1ea29a"
+  }
+}

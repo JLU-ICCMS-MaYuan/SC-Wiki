@@ -2119,7 +2119,7 @@ async def _create_pending_paper(
                         for chunk in source_locations]
                     provenance = {r['field']: science.rebind_source_references(r.get('provenance'), formal_chunks, file_mapping)
                                   for r in evidence_checks if r['field'] in {'paper.theoretical_subtype', 'paper.keywords_tags'}}
-                    persisted = await session.run_sync(lambda sync: paper_snapshot(sync, paper.id, 0, '', check_access=False, review_provenance=provenance))
+                    persisted = await session.run_sync(lambda sync: paper_snapshot(sync, paper.id, 0, '', check_access=False, review_provenance=provenance, submission=draft))
                     if manual_snapshot is not None and manual_baseline is not None:
                         manual_snapshot['_workdraft_current']=True
                         await session.run_sync(lambda sync: manual_evidence.transfer_to_paper(
@@ -2145,7 +2145,8 @@ async def _create_pending_paper(
                     await session.run_sync(lambda sync: remember(sync, persisted, int(state['user_id'])))
                     from backend.services import manuscript_handoffs as handoffs
                     from backend.services.paper_revisions import current_draft
-                    formal_draft = await session.run_sync(lambda sync: current_draft(sync, paper))
+                    # 首次交接事件尚未写入；待确认分类和作者角色仍由本次已验证上传稿持有。
+                    formal_draft = await session.run_sync(lambda sync: current_draft(sync, paper, submission=draft))
                     frozen = await session.run_sync(lambda sync: handoffs.capture(sync, paper, formal_draft,
                         persisted, science.load_results(sync, persisted, int(state['user_id'])).values()))
                     from types import SimpleNamespace

@@ -240,7 +240,7 @@ def current_review_content(session, paper, user):
     from backend.ingest.field_review import bind_support_versions
     draft,_=authorized_draft(session,'paper',str(paper.id),user,lock=True)
     formal=ev.paper_snapshot(session,paper.id,user.id,user.role)
-    snapshot={**formal,**ev.complete_snapshot('paper',str(paper.id),ev.draft_records(draft,{}),formal['chunks'],draft)}
+    snapshot=ev.working_snapshot(formal,'paper',str(paper.id),draft)
     snapshot['_field_change_events']=current_change_events(draft)
     bind_support_versions(snapshot,session)
     cached=science.load_results(session,snapshot,user.id,include_stale=True)
@@ -271,8 +271,7 @@ def author_working_copy(session, paper, author_id, draft, records):
     copy_to_revision_sync(session,paper,saved.revision_id,source_target='revision' if spectrum_source else 'paper',
         source_id=spectrum_source,preserve_review=True)
     formal=ev.paper_snapshot(session,paper.id,0,'',check_access=False)
-    snapshot={**formal,**ev.complete_snapshot('revision',saved.revision_id,
-        ev.draft_records(draft,{}),formal['chunks'],saved.draft)}
+    snapshot=ev.working_snapshot(formal,'revision',saved.revision_id,draft)
     snapshot['_field_change_events']=current_change_events(saved.draft)
     from backend.ingest.manual_evidence import ScientificManualEvidence,table_available
     if table_available(session):
@@ -306,6 +305,8 @@ def author_working_copy(session, paper, author_id, draft, records):
         source_transfer_verified=True) for r in snapshot['records'] if r['item_key'] in previous}
     snapshot['_handoff_transfer'] = True
     science.save_results(session,snapshot,transferred,author_id)
+    from backend.ingest.field_source_metadata import remember
+    remember(session,snapshot,author_id)
     session.flush()
     return saved
 

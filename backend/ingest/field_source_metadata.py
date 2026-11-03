@@ -29,10 +29,19 @@ def remember(session, snapshot, actor):
     for field, key in [('paper.theoretical_subtype', 'theoretical_subtype_assessment'), ('paper.keywords_tags', 'keyword_assessment')]:
         record = next((r for r in snapshot['records'] if r['field'] == field), {})
         metadata[key] = (record.get('provenance') or {}).get('assessment')
-    stmt = insert(models.ScientificEvidenceCheck).values(target=snapshot['target'], target_id=snapshot['target_id'],
+    values = dict(target=snapshot['target'], target_id=snapshot['target_id'],
         item_key=KEY, content_hash=token, source_hash=token, rule_version='field-source-metadata-v1',
         result=metadata, resolutions={}, actor_user_id=actor)
-    session.execute(stmt.on_duplicate_key_update(result=stmt.inserted.result))
+    if session.get_bind().dialect.name == 'sqlite':
+        # 隔离交接回归使用SQLite，保持与MySQL相同的唯一版本更新语义。
+        from sqlalchemy.dialects.sqlite import insert as sqlite_insert
+        stmt = sqlite_insert(models.ScientificEvidenceCheck).values(**values)
+        session.execute(stmt.on_conflict_do_update(
+            index_elements=['target', 'target_id', 'item_key', 'content_hash', 'source_hash', 'rule_version'],
+            set_={'result': stmt.excluded.result}))
+    else:
+        stmt = insert(models.ScientificEvidenceCheck).values(**values)
+        session.execute(stmt.on_duplicate_key_update(result=stmt.inserted.result))
 
 
 def read(session, target, target_id):
@@ -43,15 +52,21 @@ def read(session, target, target_id):
         models.ScientificEvidenceCheck.source_hash == token))
 
 
+def with_assessments(draft, metadata):
+    """重建字段时复用当前来源中的归纳依据，值是否匹配仍由字段构造判断。"""
+    result = dict(draft)
+    for key in ('theoretical_subtype_assessment', 'keyword_assessment'):
+        if key not in result and (metadata or {}).get(key) is not None:
+            result[key] = metadata[key]
+    return result
+
+
 def field_snapshot(session, target, target_id, user, item_key, metadata, *, draft_override=None):
     from .field_drafts import authorized_draft, draft_version
     draft, saved = authorized_draft(session, target, target_id, user)
     if draft_override is not None:
         draft = draft_override
-    draft = dict(draft)
-    for key in ('theoretical_subtype_assessment', 'keyword_assessment'):
-        if key not in draft and metadata.get(key) is not None:
-            draft[key] = metadata[key]
+    draft = with_assessments(draft, metadata)
     chunks = [{'file_id': file_id, 'content': '来源已读取', 'chunk_index': 0} for file_id in metadata.get('_source_readable') or []]
     context = {**draft, '_source_digest': metadata['_source_digest']}
     snapshot = ev.complete_snapshot(target, target_id, ev.draft_records(draft, science.origins_for(session, target, target_id)), chunks, context, metadata_only=True)

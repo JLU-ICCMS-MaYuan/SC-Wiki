@@ -24,11 +24,11 @@ export default function ScientificAssociations({ associations, target }: { assoc
     electronic_method:'电子结构方法', exchange_correlation_functional:'交换关联泛函', k_broadening:'k 展宽', q_broadening:'q 展宽',
     lambda_ep:'电声耦合强度 λ', omega_log:'ωlog', mu_star:'μ*' } : {}
   return <>{(associations || []).map((a, index) => <Box key={a.target_path + ':' + index} sx={{ my: 1 }}>
-    <Alert severity={a.stale ? 'warning' : 'info'}>
-      {a.stale ? (zh ? '旧关联已失效，请重新核对' : 'Association is stale; review again') :
-        a.basis_kind === 'paper_inference' ? (zh ? '由本文推断共用范围，待人工核对' : 'Shared scope inferred from this paper; review required') :
+    {a.stale ? <Alert severity="warning">{zh ? '旧关联已失效，请重新核对' : 'Association is stale; review again'}</Alert>
+      : <Typography variant="body2" color="text.secondary">
+        {a.basis_kind === 'paper_inference' ? (zh ? '由本文推断共用范围，待人工核对' : 'Shared scope inferred from this paper; review required') :
           (zh ? '作者明确报告的共用范围' : 'Shared scope explicitly reported by the authors')}
-    </Alert>
+      </Typography>}
     <Typography variant="body2">{stages[a.stage] || a.stage} · {fields[a.target_path.split('/').at(-1) || ''] ||
       (zh ? '补充参数' : 'Additional setting')}{a.reported_value_raw ? ' — ' + a.reported_value_raw : ''}</Typography>
     <Typography sx={{ whiteSpace: 'pre-wrap' }}>{a.explanation}</Typography>

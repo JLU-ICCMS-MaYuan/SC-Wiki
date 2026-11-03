@@ -6,6 +6,7 @@ import asyncio
 from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 import json
+import hashlib
 import os
 from pathlib import Path
 import shutil
@@ -18,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 
-async def verify(task_id, output, *, allow_model_results=False, review_cycle=False):
+async def verify(task_id, output, *, allow_model_results=False, review_cycle=False, return_cycle=False):
     from sqlalchemy import select, func
     from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
     from sqlalchemy.pool import NullPool
@@ -138,6 +139,15 @@ async def verify(task_id, output, *, allow_model_results=False, review_cycle=Fal
                             ('spectra', models.SpectrumCollection)]:
                             report[name] = await db.scalar(select(func.count()).select_from(table).where(table.paper_id == paper_id))
                         report['formal_fields'] = len(formal['records'])
+                        formal_by_item = {r['item_key']: r for r in formal['records']}
+                        report['required_value_changes'] = [
+                            {'field': old['field'], 'before': old.get('current_value'),
+                             'after': formal_by_item.get(old['item_key'], {}).get('current_value')}
+                            for old in snapshot['records'] if old.get('required', True)
+                            and science.canonical(old.get('current_value')) != science.canonical(
+                                formal_by_item.get(old['item_key'], {}).get('current_value'))]
+                        assert not report['required_value_changes'], {
+                            'required_values_changed': [r['field'] for r in report['required_value_changes']]}
                         report['formal_supported'] = sum(r.get('status') == 'supported' and not r.get('stale') for r in restored.values())
                         from backend.api import evidence as evidence_api
                         from backend.ingest.field_review import valid_field_decision
@@ -149,6 +159,33 @@ async def verify(task_id, output, *, allow_model_results=False, review_cycle=Fal
                             models.PaperEvidence.paper_id == paper_id))).all())
                         report['reviewed_property_quotes_preserved'] = not bool(expected_quotes - saved_quotes)
                         assert report['reviewed_property_quotes_preserved']
+                        # 字段核对采用的条件依据不能在落库时被整条记录的资料重新扩张。
+                        condition_paths = {'payload.calculation_conditions.calculation_code',
+                            'payload.calculation_conditions.qe.energy_cutoff',
+                            'payload.calculation_conditions.qe.k_grid',
+                            'payload.calculation_conditions.qe.q_grid'}
+                        def source_signature(source):
+                            return (source.get('source_name'), source.get('page_start'), source.get('quote'))
+                        report['condition_source_transfer_changes'] = []
+                        for old in checks:
+                            if old.get('record_field') not in condition_paths or not old.get('required', True):
+                                continue
+                            saved = restored.get(next((r['key'] for r in formal['records']
+                                if r['item_key'] == old['item_key']), ''), {})
+                            expected_sources = {source_signature(e) for e in old.get('evidences') or []}
+                            actual_sources = {source_signature(e) for e in saved.get('evidences') or []}
+                            if expected_sources != actual_sources:
+                                report['condition_source_transfer_changes'].append({
+                                    'field': old['field'], 'expected': len(expected_sources),
+                                    'actual': len(actual_sources), 'added': len(actual_sources - expected_sources),
+                                    'lost': len(expected_sources - actual_sources),
+                                    'expected_refs': [{'name': e.get('source_name'), 'page': e.get('page_start'),
+                                        'quote_hash': hashlib.sha256(str(e.get('quote')).encode()).hexdigest()}
+                                        for e in old.get('evidences') or []],
+                                    'actual_refs': [{'name': e.get('source_name'), 'page': e.get('page_start'),
+                                        'quote_hash': hashlib.sha256(str(e.get('quote')).encode()).hexdigest()}
+                                        for e in saved.get('evidences') or []]})
+                        assert not report['condition_source_transfer_changes'], report['condition_source_transfer_changes']
                         def read_summary(session):
                             @contextmanager
                             def same_session(): yield session
@@ -206,6 +243,62 @@ async def verify(task_id, output, *, allow_model_results=False, review_cycle=Fal
                                 report['approval_roles'].append(role)
                             finally:
                                 await nested.rollback()
+                    if return_cycle:
+                        from backend.api.evidence import FieldReviewCommit
+                        from backend.services.field_review_commit import commit_review
+                        from backend.services import paper_revisions as revisions
+                        from uuid import uuid4
+                        supported = {r['item_key'] for r in public['records']
+                                     if r.get('status') == 'supported' and not r.get('stale')}
+                        report['return_roles'] = []
+                        report['return_checks'] = []
+                        for role in ('admin', 'superadmin'):
+                            nested = await connection.begin_nested()
+                            try:
+                                async with factory() as db:
+                                    reviewer_row = await db.scalar(select(models.User).where(
+                                        models.User.id != actor.id, models.User.role == role))
+                                    assert reviewer_row is not None
+                                    reviewer = SimpleNamespace(id=reviewer_row.id,
+                                        username=reviewer_row.username, role=role)
+                                    result = await commit_review(db, FieldReviewCommit(
+                                        paper_id=paper_id, status='rejected', comment='隔离测试原样退回',
+                                        review_request_id=uuid4().hex), reviewer)
+                                    assert result['review_status'] == 'rejected'
+                                    saved = await db.get(models.PaperRevisionDraft, paper_id)
+                                    revision = await db.run_sync(lambda s: revisions.revision_snapshot(
+                                        s, saved.revision_id, actor.id))
+                                    returned = await db.run_sync(lambda s: science.load_results(
+                                        s, revision, actor.id, include_stale=True))
+                                    rows = ev.public_snapshot(revision, returned)['records']
+                                    by_item = {r['item_key']: r for r in rows}
+                                    lost = [key for key in supported if key not in by_item
+                                        or by_item[key].get('status') != 'supported'
+                                        or by_item[key].get('stale')]
+                                    assert not lost, {'return_lost_supported': lost}
+                                    def revision_summary(session):
+                                        @contextmanager
+                                        def same_session():
+                                            yield session
+                                        with patch.object(evidence_api, 'SessionLocal', same_session):
+                                            return evidence_api.field_summary(evidence_api.Target(
+                                                target='revision', target_id=saved.revision_id), actor)
+                                    shown = await db.run_sync(revision_summary)
+                                    summary_rows = {r['item_key']: r for r in shown['records']}
+                                    pending = [key for key in supported if key not in summary_rows
+                                        or summary_rows[key].get('status') != 'supported'
+                                        or summary_rows[key].get('pending_review')]
+                                    assert not pending, {'return_summary_lost_supported': pending}
+                                    report['return_checks'].append({'role': role,
+                                        'preserved_supported': len(supported), 'lost_supported': len(lost),
+                                        'summary_pending_supported': len(pending),
+                                        'reused_snapshot': result.get('handoff', {}).get('reused'),
+                                        'cutoffs': [r.get('current_value') for r in rows if
+                                            r.get('record_field') == 'payload.calculation_conditions.qe.energy_cutoff']})
+                                    await db.commit()
+                                report['return_roles'].append(role)
+                            finally:
+                                await nested.rollback()
             except Exception as error:
                 report['failure'] = {'type': type(error).__name__, 'detail': getattr(error, 'detail', str(error))}
                 import traceback
@@ -229,11 +322,12 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--allow-model-results', action='store_true', help='允许同版本模型通过结果，不要求全部人工确认')
     parser.add_argument('--review-cycle', action='store_true', help='在隔离事务内分别验证两管理员角色批准')
+    parser.add_argument('--return-cycle', action='store_true', help='隔离验证两管理员退回、返修重开及摘要状态一致')
     args = parser.parse_args()
     from scripts.local_deploy.config import read_config, validate_local
     values = read_config(ROOT); validate_local(values, ROOT); os.environ.update(values)
     report = asyncio.run(verify(args.task, args.output.resolve(), allow_model_results=args.allow_model_results,
-                               review_cycle=args.review_cycle))
+                               review_cycle=args.review_cycle, return_cycle=args.return_cycle))
     if report.get('failure'):
         raise SystemExit(1)
 

@@ -61,7 +61,7 @@ def term(row, **extra):
                 status='confirmed', **extra)
 
 
-def current_draft(session, paper):
+def current_draft(session, paper, *, submission=None):
     """完整读取当前科学图，不借用已清理任务，也不暴露路径或管理员字段。"""
     data = {key: getattr(paper, key) for key in PAPER_FIELDS}
     for key in LIST_FIELDS:
@@ -72,7 +72,8 @@ def current_draft(session, paper):
                 data[key] = [data[key]] if data[key].strip() else []
         data[key] = data[key] or []
     from .submission_metadata import submitted_metadata, pending_selections
-    submission = submitted_metadata(session, paper)
+    if submission is None:
+        submission = submitted_metadata(session, paper)
     saved_paper = submission.get('paper', {})
     for key in AUTHOR_ROLE_FIELDS:
         data[key] = [author for author in (saved_paper.get(key) or []) if author in data['authors']]
@@ -228,7 +229,11 @@ def revision_snapshot(session, revision_id, owner, *, legacy=False):
         chunk_index=c.chunk_index, content=c.content, page_start=c.page_start, page_end=c.page_end, section=c.section_name)
         for c in rows(session, models.PaperChunk, paper.id)]
     from backend.ingest.tc_contexts import map_draft
-    expanded_draft = map_draft(saved.draft)
+    from backend.ingest.field_source_metadata import read, with_assessments
+    metadata = read(session, 'revision', revision_id)
+    if metadata is None:
+        metadata = read(session, 'paper', str(paper.id))
+    expanded_draft = with_assessments(map_draft(saved.draft), metadata)
     records = ev.draft_records(expanded_draft, science.origins_for(session, 'revision', revision_id))
     snapshot = ev.complete_snapshot('revision', revision_id, records, chunks, expanded_draft, split_fields=not legacy)
     from backend.ingest.scientific_context import bind_snapshot_source_documents, source_documents
@@ -326,7 +331,7 @@ async def submit_draft(session, paper_id, user, payload):
             staged.base_fingerprint=draft_version(baseline)
         await session.flush()
         formal=await session.run_sync(lambda s:ev.paper_snapshot(s,paper.id,0,'',check_access=False))
-        pending={**formal,**ev.complete_snapshot('paper',str(paper.id),ev.draft_records(draft,{}),formal['chunks'],draft)}
+        pending=ev.working_snapshot(formal,'paper',str(paper.id),draft)
         snapshot['_workdraft_current']=True
         try:
             await session.run_sync(lambda s:manual_evidence.transfer_to_paper(s,snapshot,manual_baseline,
@@ -340,6 +345,8 @@ async def submit_draft(session, paper_id, user, payload):
             source_transfer_verified=True) for r in pending['records'] if r['item_key'] in old}
         pending['_handoff_transfer'] = True
         await session.run_sync(lambda s:science.save_results(s,pending,transferred,user.id))
+        from backend.ingest.field_source_metadata import remember
+        await session.run_sync(lambda s:remember(s,pending,user.id))
         content=await session.run_sync(lambda s:handoffs.capture(s,paper,draft,pending,
             ev.public_snapshot(pending,transferred)['records']))
         await session.run_sync(lambda s:handoffs.record_handoff(s,paper,user,action='submit',holder='review',

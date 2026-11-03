@@ -446,8 +446,8 @@ def snapshot_for(body, user):
         if staged:
             from backend.ingest.field_drafts import authorized_draft
             draft, _ = authorized_draft(session, body.target, body.target_id, user)
-            snapshot = {**snapshot, **ev.complete_snapshot('paper', body.target_id,
-                ev.draft_records(draft, science.origins_for(session, 'paper', body.target_id)), snapshot['chunks'], draft)}
+            snapshot = ev.working_snapshot(snapshot, 'paper', body.target_id, draft,
+                science.origins_for(session, 'paper', body.target_id))
             snapshot['_field_change_events'] = current_change_events(draft)
             from backend.ingest.field_review import bind_support_versions
             bind_support_versions(snapshot, session)

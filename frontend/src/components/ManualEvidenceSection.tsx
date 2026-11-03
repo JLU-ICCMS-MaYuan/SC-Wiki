@@ -201,7 +201,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
         {entry.files.map((file, i) => <Typography key={i}>{file.name}</Typography>)}
         <Button type="button" disabled={readOnly || entry.busy} onClick={() => store.discard(oldKey)}>{t('evidence.manualDiscardPrevious')}</Button></Box>)}
     </Box>}
-    {localChanged && !saved?.changed && <Alert severity="info">{t('evidence.manualSyncPending')}</Alert>}
+    {localChanged && !saved?.changed && <Typography role="status" color="text.secondary">{t('evidence.manualSyncPending')}</Typography>}
     {!changed && readOnly ? <>{loading ? <Typography role="status">{t('evidence.manualLoading')}</Typography>
       : !error && !history.length && <Typography color="text.secondary">{t('evidence.noManualEdits')}</Typography>}</> : <>
       {(saved?.status === 'submitted' && !localChanged) || readOnly ? <>
@@ -241,9 +241,9 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
           <PendingImage file={file} alt={t('evidence.manualImage')} />
           <Button type="button" size="small" disabled={busy} onClick={() => store.edit(key, { files: files.filter(entry => entry !== file) })}>{t('evidence.removeManualItem')}</Button>
         </Box>)}
-        {(saveBlockers().length > 0 || loading || busy) && <Alert severity="info" role="status">
+        {(saveBlockers().length > 0 || loading || busy) && <Box role="status" sx={{ color: 'text.secondary' }}>
           {loading ? t('evidence.manualLoading') : busy ? t('evidence.manualSaving') : saveBlockers().map(message => <Typography key={message} variant="body2">{message}</Typography>)}
-        </Alert>}
+        </Box>}
         <Button type="button" size="small" variant="contained" disabled={loading || busy || saveBlockers().length > 0} onClick={() => void save(true)}>{busy ? t('evidence.manualSaving') : t('evidence.saveAndComplete')}</Button>
       </>}
     </>}
@@ -255,7 +255,7 @@ export default function ManualEvidenceSection({ target, record, version, drafts,
       {(item.kind === 'image' || item.kind === 'pdf') && item.ai_read_status !== 'read' && <Typography variant="caption" display="block">{t('evidence.fileNotRead')}</Typography>}
     </Box>)}
     {previewView}
-    {notice && <Alert severity="info">{notice}</Alert>}
+    {notice && <Typography role="status" color="text.secondary">{notice}</Typography>}
     {error && <Alert severity="error">{error}</Alert>}
     {error && !saved && <Button type="button" disabled={loading} onClick={() => { store.patch(key, { error: '' }); setReload(value => value + 1) }}>{t('evidence.manualRetryLoad')}</Button>}
     {showHistory && historyView}

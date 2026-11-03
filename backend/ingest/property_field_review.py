@@ -191,7 +191,8 @@ def expand_property_fields(records):
             for association in source_associations:
                 pointer = str(association.get('target_path') or '').strip('/').replace('/', '.')
                 if pointer == path or pointer.startswith(path + '.') or path.startswith(pointer + '.'):
-                    evs.extend(deepcopy(association.get('fact_evidences') or []))
+                    evs.extend(deepcopy([*(association.get('fact_evidences') or []),
+                                         *(association.get('scope_evidences') or [])]))
                     associations.append(association)
             context = review_context(source, parent['claim'].get('state') or {}, path)
             if associations:

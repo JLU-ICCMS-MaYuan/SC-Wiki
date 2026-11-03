@@ -54,9 +54,9 @@ for(const mode of ["upload","revision","admin","superadmin"]){
  assert.equal(await page.locator("[data-evidence-pending-navigation]").count(),0);
  await field.click();
  await page.getByRole("tab",{name:"来源核对"}).click();
- const summary=page.locator("[data-evidence-review-summary]");
+ const summary=page.locator("[data-field-ai-reason]");
  await summary.getByText("文档补查技术失败，输入已保留。",{exact:true}).waitFor();
- assert.match(await summary.innerText(),/重试/);
+ assert.equal(await page.getByRole("button",{name:"大模型核对",exact:true}).isEnabled(),true);
  await page.screenshot({path:output+"/field-review-"+mode+".png"});
  assert.equal(requests.filter(r=>r.path.endsWith("/jobs")).length,0);
  assert.deepEqual(errors,[]);

@@ -72,8 +72,7 @@ async def commit_review(session, body, user):
         baseline = await session.run_sync(lambda sync: current_draft(sync, paper))
         if draft_version(baseline) != staged.base_fingerprint:
             ev.fail('draft_version_conflict', '正式论文已被其他操作修改，未覆盖当前内容')
-        snapshot = {**formal, **ev.complete_snapshot('paper', str(paper.id),
-            ev.draft_records(draft, {}), formal['chunks'], draft)}
+        snapshot = ev.working_snapshot(formal, 'paper', str(paper.id), draft)
         snapshot['_field_change_events'] = current_change_events(draft)
         from backend.ingest.field_review import bind_support_versions
         await session.run_sync(lambda sync: bind_support_versions(snapshot, sync))

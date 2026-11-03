@@ -363,7 +363,28 @@ def draft_records(draft, origins):
     return records
 
 
-def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_access: bool = True, legacy=False, review_provenance=None) -> dict:
+def working_snapshot(formal, target, target_id, draft, origins=None):
+    """工作稿重建保留完整来源合同；不把正式值或旧审核结论复制成当前事实。"""
+    context = dict(draft)
+    for field, name in (('paper.theoretical_subtype', 'theoretical_subtype_assessment'),
+                        ('paper.keywords_tags', 'keyword_assessment')):
+        prior = next((r for r in formal['records'] if r['field'] == field), {})
+        assessment = (prior.get('provenance') or {}).get('assessment')
+        if name not in context and assessment is not None:
+            context[name] = copy.deepcopy(assessment)
+    context['_source_digest'] = formal['_source_digest']
+    snapshot = {**formal, **complete_snapshot(target, str(target_id),
+        draft_records(context, origins or {}), formal['chunks'], context)}
+    # 重建后的字段可能有新的归纳来源，不能沿用正式字段的旧base缓存。
+    snapshot.pop('_association_source_base_hashes', None)
+    from .scientific_context import bind_snapshot_source_documents
+    bind_snapshot_source_documents(snapshot, formal.get('_source_documents') or {},
+                                   set(formal.get('_source_expected') or []))
+    snapshot['_field_change_events'] = current_change_events(draft)
+    return snapshot
+
+
+def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_access: bool = True, legacy=False, review_provenance=None, submission=None) -> dict:
     paper = session.get(models.Paper, paper_id)
     if paper is None:
         raise HTTPException(404, detail='论文不存在')
@@ -403,7 +424,7 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             e = source_evidences.get(link.paper_evidence_id)
             if e and e.paper_chunk_id in chunk_map:
                 c = chunk_map[e.paper_chunk_id]
-                evs.append(dict(paper_evidence_id=e.id, file_id=c['file_id'], chunk_id=c['chunk_id'], chunk_index=c['chunk_index'], quote=e.quote,
+                evs.append(dict(paper_evidence_id=e.id, file_id=c['file_id'], source_name=c.get('source_name'), chunk_id=c['chunk_id'], chunk_index=c['chunk_index'], quote=e.quote,
                                 page_start=e.page_start, page_end=e.page_end, section=e.section, field_path=link.field_path))
         state_data = row_dict(states[record.material_state_id])
         material = next((x['chemical_formula'] for x in contexts['superconductors'] if x['id'] == state_data['superconductor_id']), '')
@@ -423,7 +444,8 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
             tc_method_key=((record.payload_json or {}).get('tc_group') or {}).get('method_key')))
     paper_data = row_dict(paper)
     from backend.services.submission_metadata import submitted_metadata, pending_selections, AUTHOR_ROLES
-    submission = submitted_metadata(session, paper)
+    if submission is None:
+        submission = submitted_metadata(session, paper)
     for name in AUTHOR_ROLES:
         paper_data[name] = [author for author in (submission.get('paper', {}).get(name) or []) if author in (paper.authors or [])]
     families = session.execute(select(models.MaterialFamily.name_zh).join(models.PaperMaterialFamily, models.PaperMaterialFamily.material_family_id == models.MaterialFamily.id).where(models.PaperMaterialFamily.paper_id == paper_id)).scalars().all()

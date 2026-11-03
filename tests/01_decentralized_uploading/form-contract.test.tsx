@@ -61,8 +61,9 @@ it.each(['upload', 'revision', 'admin', 'superadmin'])('191 四类宿主：%s �
   expect(caption).toHaveAttribute('data-evidence-caption-problem', 'true')
   fireEvent.click(caption)
   fireEvent.click(await screen.findByRole('tab', { name: '来源核对' }))
-  await waitFor(() => expect(document.querySelector('[data-evidence-review-summary]')).toHaveTextContent(record.reason))
-  expect(document.querySelector('[data-evidence-review-summary]')).toHaveTextContent('重试')
+  await waitFor(() => expect(document.querySelector('[data-field-ai-reason]')).toHaveTextContent(record.reason))
+  expect(screen.getByRole('button', { name: '大模型核对', exact: true })).toBeEnabled()
+  expect(document.querySelector('[data-field-ai-reason]')).toHaveAttribute('data-evidence-status', 'failed')
   expect(vi.mocked(api.post).mock.calls.filter(([path]) => path.endsWith('/jobs'))).toHaveLength(0)
 })
 async function host(kind: string) {

@@ -178,3 +178,23 @@ def test_only_successful_model_evaluation_creates_ai_review_event(monkeypatch):
     result = ev.aggregate_candidates([record], {record['key']: evaluated}, {record['key']: []}, 'actual-model')
     assert result[record['key']]['_audit_action'] == 'ai_review'
     assert result[record['key']]['model'] == 'actual-model'
+
+
+def test_explicit_field_association_keeps_fact_and_scope_without_unrelated_record_sources():
+    d = draft()
+    record = d['material_states'][0]['property_modules'][0]['records'][0]
+    fact = {'file_id':'main','chunk_index':0,'quote':'QE uses an energy cutoff of 90 Ry.'}
+    scope = {'file_id':'si','chunk_index':0,'quote':'These settings apply to CaH6 electron-phonon calculations.'}
+    unrelated = {'file_id':'main','chunk_index':1,'quote':'Tc is 235 K.'}
+    record['evidences'] = [unrelated]
+    record['payload']['calculation_conditions']['qe'] = {
+        'energy_cutoff':{'value_kind':'number','value_number':90,'value_raw':'90 Ry','unit_raw':'Ry'}}
+    record['payload']['source_associations'] = [{
+        'target_path':'payload.calculation_conditions.qe.energy_cutoff',
+        'fact_evidences':[fact],'scope_evidences':[scope],
+        'scope':{'material':'LaSc2H24','stage':'electron_phonon'}}]
+    rows = leaves(d)
+    cutoff = rows['payload.calculation_conditions.qe.energy_cutoff']
+    assert cutoff['evidences'] == [fact,scope]
+    assert unrelated not in cutoff['evidences']
+    assert rows['payload.parameters.mu_star']['evidences'] == []
