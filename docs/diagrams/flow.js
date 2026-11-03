@@ -17,6 +17,10 @@
     right: { x: 756, w: 248 },
     branchGap: 118
   };
+  if (!(data.branches || []).length) {
+    GEO.width = 640;
+    GEO.main = { x: 110, w: 420 };
+  }
   const NS = 'http://www.w3.org/2000/svg';
   const canvas = document.querySelector('.canvas');
   const wrap = document.querySelector('.canvas-wrap');
@@ -36,6 +40,7 @@
   });
 
   const slots = new Map();
+  const laneBottom = new Map();
   for (const branch of data.branches || []) {
     const anchor = nodes.get(branch.attachTo);
     if (!anchor) continue;
@@ -43,19 +48,22 @@
     const key = `${branch.attachTo}:${side}`;
     const slot = slots.get(key) || 0;
     slots.set(key, slot + 1);
+    const y = Math.max(anchor.y + (anchor.col === 'main' ? slot * GEO.branchGap : GEO.rowGap),
+      laneBottom.get(side) || 0);
+    laneBottom.set(side, y + GEO.nodeHeight + 40);
     nodes.set(branch.id, {
       ...branch,
       col: side,
       kind: branch.kind || 'wait',
       step: branch.step || `支线 · ${anchor.title}`,
       x: GEO[side].x,
-      y: anchor.y + slot * GEO.branchGap,
+      y,
       w: GEO[side].w,
       anchor: branch.attachTo
     });
   }
 
-  const height = GEO.top + data.main.length * GEO.rowGap + 40;
+  const height = Math.max(...Array.from(nodes.values(), node => node.y + GEO.nodeHeight)) + 80;
   canvas.style.width = GEO.width + 'px';
   canvas.style.height = height + 'px';
 
@@ -100,17 +108,23 @@
     edges.push({ from, to, path, branch: !!options.branch, ret: !!options.ret });
   }
 
-  data.main.forEach((node, index) => {
-    const next = data.main[index + 1];
-    if (!next) return;
-    const from = nodes.get(node.id);
-    const to = nodes.get(next.id);
-    addEdge(node.id, next.id, {
-      start: [from.x + from.w / 2, from.y + GEO.nodeHeight],
-      end: [to.x + to.w / 2, to.y],
-      label: next.label,
-      labelX: from.x + from.w / 2 + 46,
-      labelY: from.y + GEO.nodeHeight + 26
+  const mainEdges = data.edges || data.main.slice(1).map((node, index) => ({
+    from: data.main[index].id, to: node.id, label: node.label
+  }));
+  mainEdges.forEach(edge => {
+    const from = nodes.get(edge.from);
+    const to = nodes.get(edge.to);
+    if (!from || !to) return;
+    const skipped = to.index !== from.index + 1;
+    const start = skipped ? [from.x, from.y + 64] : [from.x + from.w / 2, from.y + GEO.nodeHeight];
+    const end = skipped ? [to.x, to.y + 64] : [to.x + to.w / 2, to.y];
+    const laneX = GEO.main.x - 28 - (edge.lane || 0) * 12;
+    addEdge(from.id, to.id, {
+      start, end,
+      points: skipped ? [start, [laneX, start[1]], [laneX, end[1]], end] : [start, end],
+      label: edge.label,
+      labelX: skipped ? laneX : from.x + from.w / 2 + 55,
+      labelY: skipped ? (start[1] + end[1]) / 2 : from.y + GEO.nodeHeight + 26
     });
   });
 
@@ -119,26 +133,36 @@
     const anchor = nodes.get(branch.attachTo);
     if (!target || !anchor) continue;
     const toRight = target.x > anchor.x;
-    const startX = toRight ? anchor.x + anchor.w : anchor.x;
-    const startY = anchor.y + GEO.nodeHeight / 2;
-    const endX = toRight ? target.x : target.x + target.w;
-    const endY = target.y + GEO.nodeHeight / 2;
-    const midX = toRight ? startX + 48 : startX - 48;
-    addEdge(anchor.id, target.id, {
-      branch: true,
-      start: [startX, startY],
-      end: [endX, endY],
-      points: [[startX, startY], [midX, startY], [midX, endY], [endX, endY]],
-      label: branch.label,
-      labelX: target.x + target.w / 2,
-      labelY: target.y - 8
-    });
-    // 回边只走画布右外侧通道；左列没有可用通道，避免连线穿过节点。
-    if (branch.returnTo && nodes.has(branch.returnTo) && toRight) {
+    if (target.col === anchor.col) {
+      addEdge(anchor.id, target.id, {
+        branch: true,
+        start: [anchor.x + anchor.w / 2, anchor.y + GEO.nodeHeight],
+        end: [target.x + target.w / 2, target.y],
+        label: branch.label
+      });
+    } else {
+      const startX = toRight ? anchor.x + anchor.w : anchor.x;
+      const startY = anchor.y + GEO.nodeHeight / 2;
+      const endX = toRight ? target.x : target.x + target.w;
+      const endY = target.y + GEO.nodeHeight / 2;
+      const midX = toRight ? startX + 48 : startX - 48;
+      addEdge(anchor.id, target.id, {
+        branch: true,
+        start: [startX, startY],
+        end: [endX, endY],
+        points: [[startX, startY], [midX, startY], [midX, endY], [endX, endY]],
+        label: branch.label,
+        labelX: target.x + target.w / 2,
+        labelY: target.y - 8
+      });
+    }
+    // 两侧回边各走画布外沿，避免连线穿过节点。
+    if (branch.returnTo && nodes.has(branch.returnTo)) {
       const back = nodes.get(branch.returnTo);
-      const backX = back.x + back.w;
-      const outX = target.x + target.w;
-      const laneX = GEO.width - 14;
+      const right = target.col === 'right';
+      const backX = right ? back.x + back.w : back.x;
+      const outX = right ? target.x + target.w : target.x;
+      const laneX = right ? GEO.width - 14 : 5;
       addEdge(branch.id, branch.returnTo, {
         branch: true,
         ret: true,
@@ -160,6 +184,7 @@
   for (const node of nodes.values()) {
     const button = document.createElement('button');
     button.type = 'button';
+    button.id = node.id;
     button.className = 'node' + (node.col === 'main' ? '' : ' branch') + (node.kind ? ' ' + node.kind : '');
     button.style.left = node.x + 'px';
     button.style.top = node.y + 'px';
@@ -207,8 +232,14 @@
       button.addEventListener('click', () => select(item.id));
       box.append(button);
     }
-    box.hidden = related.length === 0;
-    box.parentElement.hidden = related.length === 0;
+    for (const item of node.links || []) {
+      const link = document.createElement('a');
+      link.href = item.href;
+      link.textContent = item.label;
+      box.append(link);
+    }
+    box.hidden = box.childElementCount === 0;
+    box.parentElement.hidden = box.hidden;
   }
 
   function select(id, writeHash = true) {

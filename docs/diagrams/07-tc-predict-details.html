@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tc 估算：展开细节与分支 · SC-Wiki 独立流程图</title>
+<link rel="stylesheet" href="flow.css">
+<script defer src="flow.js"></script>
+</head>
+<body>
+<main class="page">
+  <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / Tc 估算：展开细节与分支</nav>
+  <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>Tc 估算：展开细节与分支</h1><p class="intro">本页完整展开本功能的处理、判断、失败与返回路径。点击节点查看当前实现依据；主干页面保留入口与概要。</p></header>
+  <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="07-tc-predict.html">← Tc 估算主干</a><a href="../overview/07_AI_Assisted_Tc_Estimation/model-lab-demo.md">文字说明与实现依据</a></nav>
+  <div class="layout">
+    <section class="diagram" aria-labelledby="chart-title">
+      <div class="toolbar"><div><h2 id="chart-title">程序控制流</h2><p>箭头表示标注的处理或数据关系；各功能按入口选择，不必逐个执行。</p></div><span class="mode-label">本机实际源码</span></div>
+      <div class="legend" aria-label="图例"><span><i></i>处理</span><span><i class="check"></i>判断</span><span><i class="stop"></i>拒绝或失败</span><span><i class="result"></i>结果或独立出口</span></div>
+      <noscript>请启用 JavaScript 查看本地流程图；本页仅使用同目录静态资源。</noscript>
+      <div class="viewport" tabindex="0" role="region" aria-label="Tc 估算：展开细节与分支流程图，窄屏可横向滚动"><div class="canvas-wrap"><div class="canvas"></div></div></div>
+    </section>
+    <aside class="details" aria-label="所选节点说明" aria-live="polite" aria-atomic="true">
+      <div class="detail-head"><p class="eyebrow" id="detail-step"></p><h2 id="detail-title"></h2></div>
+      <div class="detail-body">
+        <h3>执行方</h3><p id="detail-owner"></p>
+        <h3>程序行为</h3><p id="detail-description"></p>
+        <section><h3>边界与分支</h3><ul id="detail-notes"></ul></section>
+        <h3>源码定位</h3><code id="detail-code"></code>
+        <div><h3>展开页面与相关支线</h3><div class="branch-links" id="detail-branches"></div></div>
+      </div>
+    </aside>
+  </div>
+  <p class="boundary">这是独立静态说明图，不连接业务 API，不读取用户草稿，不执行模型请求、保存或审核操作。</p>
+  <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
+</main>
+<script type="application/json" id="flow-data">
+{
+  "main": [
+    {
+      "id": "page-entry",
+      "title": "打开预测页",
+      "summary": "主站 /tc-predict 入口",
+      "owner": "前端 PredictionWorkspace",
+      "description": "主站左侧「预测」纵向列出两类模型，顶部横排对应模型，所选类别写入 URL 并支持刷新与返回。",
+      "notes": [
+        "代码明确标记为实验页面。",
+        "不写业务数据库。"
+      ],
+      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx",
+      "links": [
+        {
+          "href": "07-tc-predict.html#page-entry",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "pick-model",
+      "title": "选择模型",
+      "summary": "常压 BCS 或高压氢化物分组",
+      "owner": "前端",
+      "description": "在常压 BCS 与高压氢化物两类下选择 BETE-NET、Xie 2019／2022 或 Tc assessment model。",
+      "notes": [
+        "2022 公式需 λ、ωlog、ω₂、μ*。",
+        "原站经验估算仍在同页可用。"
+      ],
+      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx",
+      "kind": "check",
+      "links": [
+        {
+          "href": "07-tc-predict.html#pick-model",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "submit-input",
+      "title": "提交输入",
+      "summary": "上传或粘贴结构与参数",
+      "owner": "前端 → FastAPI",
+      "description": "上传或粘贴 CIF／POSCAR／CONTCAR，结构默认按内容自动识别也可手动指定；Tc assessment model 需 CONTCAR 与多份电子 PDOS。",
+      "notes": [
+        "支持 1–80 个原子三维周期结构。",
+        "结构推理一次只运行一个请求。"
+      ],
+      "code": "frontend/src/pages/TcPredictPage.tsx",
+      "links": [
+        {
+          "href": "07-tc-predict.html#submit-input",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "input-check",
+      "kind": "check",
+      "title": "输入与文件校验",
+      "summary": "必要文件、格式与数值检查",
+      "owner": "FastAPI",
+      "description": "按所选模型分别验证：assessment 路线要求 CONTCAR 与 PDOS_H 等；结构模型验证模型标识、结构类型、大小及可解析性；参数模型验证其 λ、ωlog、μ* 等输入。不同路线不互相要求文件。",
+      "notes": [
+        "结构输入上限 256 KiB。",
+        "金属 PDOS 数量补齐或截断为四项。"
+      ],
+      "code": "backend/api/tc_predict.py；backend/api/tc_models.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#input-check",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "feature-extract",
+      "title": "结构与电子特征",
+      "summary": "H 子晶格、键长与态密度",
+      "owner": "Python 后端",
+      "description": "用 pymatgen 解析结构，统计氢原子与 H-H 键长分布，读取 PDOS_H.dat 与最多四份金属 PDOS 计算态密度与耦合特征。",
+      "notes": [
+        "BETE 使用作者权重与近邻归一化。",
+        "谱按作者 51 点网格后处理。"
+      ],
+      "code": "backend/api/tc_predict.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#feature-extract",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "tc-formula",
+      "title": "经验公式估 Tc",
+      "summary": "固定参数返回 Tc 与特征",
+      "owner": "Python 后端",
+      "description": "Tc assessment 按当前特征与经验参数计算 Tc 并返回解释量；Xie SISSO 2019／2022 按各自公开参数公式求值。具体参数和适用性由所选入口决定。",
+      "notes": [
+        "原 API 与公式保持不变。",
+        "公式不适用不返回假结果。"
+      ],
+      "code": "backend/api/tc_predict.py；backend/prediction/inference.py::sisso",
+      "links": [
+        {
+          "href": "07-tc-predict.html#tc-formula",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "model-dispatch",
+      "title": "分派模型推理",
+      "summary": "BETE 子进程，SISSO 直算",
+      "owner": "FastAPI",
+      "description": "/api/tc-models/ 根据模型分派。BETE-NET 请求隔离解释器执行结构推理；SISSO 2019／2022 走参数公式，不启动结构推理子进程。",
+      "notes": [
+        "不依赖 Demo 的 5189／8192。",
+        "SISSO 2019 仅提供实际使用的训练输入。"
+      ],
+      "code": "backend/api/tc_models.py",
+      "kind": "check",
+      "links": [
+        {
+          "href": "07-tc-predict.html#model-dispatch",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "isolated-worker",
+      "title": "隔离子进程推理",
+      "summary": "按需启动单任务独立解释器",
+      "owner": "后端 runner",
+      "description": "主站按需启动固定独立解释器，先校验制品再执行结构推理，一次只运行一个结构任务。",
+      "notes": [
+        "第二个请求返回 429。",
+        "缺环境或制品返回 503。"
+      ],
+      "code": "backend/prediction/runner.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#isolated-worker",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "result-assemble",
+      "title": "组装结果",
+      "summary": "Tc、参数与谱图合并成条",
+      "owner": "后端 + 前端",
+      "description": "将 Tc、EPC 参数、解释特征与谱图组装为一条结果，逐次保留且不自动平均。",
+      "notes": [
+        "结构模型参数可带入 SISSO 对比。",
+        "逐次保留不做数据库持久化。"
+      ],
+      "code": "backend/prediction/inference.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#result-assemble",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "result-bar",
+      "title": "横条展示",
+      "summary": "等高横条默认收起详情",
+      "owner": "前端",
+      "description": "结果自上而下以等高横条显示，默认收起谱图与详细说明，每条可独立展开或折叠。",
+      "notes": [
+        "展开不改变原数据。",
+        "新结果默认折叠，旧条目保持展开。"
+      ],
+      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx",
+      "links": [
+        {
+          "href": "07-tc-predict.html#result-bar",
+          "label": "返回本功能主干"
+        }
+      ]
+    }
+  ],
+  "branches": [
+    {
+      "id": "lab-boundary",
+      "attachTo": "page-entry",
+      "side": "left",
+      "kind": "result",
+      "label": "实验边界",
+      "title": "实验页免责",
+      "summary": "不代表科学验证的通用模型",
+      "owner": "前端",
+      "description": "页面由代码明确标记为实验页面，结果不代表经过科学验证的通用预测模型。",
+      "notes": [
+        "不宣称高压或非谐体系有效。",
+        "BETE 数据仅覆盖当前公开版本。"
+      ],
+      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx",
+      "links": [
+        {
+          "href": "07-tc-predict.html#page-entry",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "missing-file",
+      "attachTo": "input-check",
+      "side": "left",
+      "kind": "stop",
+      "label": "缺少文件",
+      "title": "缺少必要文件",
+      "summary": "缺 CONTCAR 或 PDOS_H 返回 400",
+      "owner": "FastAPI",
+      "description": "缺少可解析的 CONTCAR 或 PDOS_H.dat、列数不足或关键数值为零时返回 400，不进入计算。",
+      "notes": [
+        "金属 PDOS 缺失会补齐，不因此报错。"
+      ],
+      "code": "backend/api/tc_predict.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#input-check",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "parse-fail",
+      "attachTo": "input-check",
+      "side": "right",
+      "kind": "stop",
+      "label": "解析失败",
+      "title": "结构无法解析",
+      "summary": "格式不符时提示切换类型",
+      "owner": "FastAPI",
+      "description": "结构无法解析或所选格式与内容不匹配时明确提示切换，不把有效 POSCAR 按默认 CIF 判为无效。",
+      "notes": [
+        "上传或粘贴后恢复自动识别。"
+      ],
+      "code": "backend/api/tc_predict.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#input-check",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "formula-invalid",
+      "attachTo": "tc-formula",
+      "side": "left",
+      "kind": "stop",
+      "label": "参数越界",
+      "title": "公式不适用",
+      "summary": "参数越界即报错不造假结果",
+      "owner": "Python 后端",
+      "description": "输入非法或所填参数超出公式适用范围时明确报错，不返回看似有效的 Tc。",
+      "notes": [
+        "经验公式范围与不确定度未形成模型说明。"
+      ],
+      "code": "backend/api/tc_predict.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#tc-formula",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "env-missing",
+      "attachTo": "isolated-worker",
+      "side": "left",
+      "kind": "stop",
+      "label": "环境缺失",
+      "title": "模型环境缺失",
+      "summary": "503，其他接口仍可用",
+      "owner": "后端 runner",
+      "description": "缺少独立环境或模型制品时返回 503，主站其他 API 与参数模型仍可正常使用。",
+      "notes": [
+        "制品摘要校验失败则拒绝供应下载。"
+      ],
+      "code": "backend/prediction/runner.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#isolated-worker",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "task-busy",
+      "attachTo": "isolated-worker",
+      "side": "right",
+      "kind": "wait",
+      "label": "任务占用",
+      "title": "单任务占用",
+      "summary": "第二个请求返回 429 需重试",
+      "owner": "后端 runner",
+      "description": "同一时间只执行一个结构任务，运行期间后续请求直接返回 429，需稍后重试。",
+      "notes": [
+        "超时后自动清理释放名额。"
+      ],
+      "code": "backend/prediction/runner.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#isolated-worker",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "no-persist",
+      "attachTo": "result-assemble",
+      "side": "right",
+      "kind": "result",
+      "label": "不回写主库",
+      "title": "结果仅留页面",
+      "summary": "不自动写入主业务数据库",
+      "owner": "FastAPI",
+      "description": "预测结果逐次保留在当前页面，没有数据库持久化，也不自动写入主业务数据。",
+      "notes": [
+        "与主材料检索、RAG 数据相互独立。"
+      ],
+      "code": "backend/api/tc_models.py；backend/api/tc_predict.py",
+      "links": [
+        {
+          "href": "07-tc-predict.html#result-assemble",
+          "label": "返回本功能主干"
+        }
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "page-entry",
+      "to": "pick-model"
+    },
+    {
+      "from": "pick-model",
+      "to": "submit-input"
+    },
+    {
+      "from": "submit-input",
+      "to": "input-check"
+    },
+    {
+      "from": "input-check",
+      "to": "feature-extract"
+    },
+    {
+      "from": "feature-extract",
+      "to": "tc-formula"
+    },
+    {
+      "from": "tc-formula",
+      "to": "result-assemble"
+    },
+    {
+      "from": "input-check",
+      "to": "model-dispatch"
+    },
+    {
+      "from": "model-dispatch",
+      "to": "isolated-worker"
+    },
+    {
+      "from": "isolated-worker",
+      "to": "result-assemble"
+    },
+    {
+      "from": "result-assemble",
+      "to": "result-bar"
+    },
+    {
+      "from": "model-dispatch",
+      "to": "tc-formula",
+      "label": "SISSO 参数公式",
+      "lane": 1
+    }
+  ]
+}
+</script>
+</body>
+</html>
