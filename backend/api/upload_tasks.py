@@ -197,15 +197,18 @@ async def upload_task_file(
             with destination.open("rb") as source:
                 reference = create_storage().put(key, source, file.content_type or "application/octet-stream")
             stored_path = reference.key
-        state = update_task_file(
-            task_id,
-            file_id,
-            upload_status="completed",
-            size=total,
-            sha256=digest,
-            stored_path=stored_path,
-            source_file_path=key,
-        )
+        try:
+            state = update_task_file(
+                task_id,
+                file_id,
+                upload_status="completed",
+                size=total,
+                sha256=digest,
+                stored_path=stored_path,
+                source_file_path=key,
+            )
+        except ValueError as exc:
+            raise _error(409, "UPLOAD_FILE_CONFLICT", str(exc)) from exc
         referenced = True
     except FileConflict as exc:
         raise _error(409, "FILE_REFERENCE_CONFLICT", "文件标识已被不同内容占用") from exc

@@ -62,3 +62,15 @@
 FR-001—003/SC-001：前后端数量/格式、三个区域、完整宿主。FR-006—007/SC-002、005：Worker 来源/策略及历史角色/identity 回归。FR-004—005、008/SC-003—004：固定重放、真实定向来源、ASE 与文件保存重读。FR-009—011/SC-006：队列/锁定/权限与有界历史恢复，扩展历史失败单列。FR-012/SC-007：两个规定入口、完整宿主及入口清单。
 
 尚未完成：远程 Spec 链接验证、远端 CI/分支保护、生产部署、真实业务数据库端到端提交。本轮不承诺这些范围；Issue 保持开放。概览同步按全局维护技能进行；该技能引用的辅助分析技能未提供，使用代码搜索、文件读取和可信验证结果完成等价核查。
+
+## 2026-11-03 H3S 黑盒测试发现的重复文件错误封装
+
+用户授权使用 Safari 用户账号和 Chrome 超级管理员账号，对 2014 H3S 正文及补充材料运行真实流程；生成可校对草稿后发现问题，修复并取消清理未送审任务，再重传原文件。辅助代码、来源清单和私有运行记录放在 `tests/TestForRealScenario/`。
+
+本次首次操作误将补充材料重复放入同一清单。任务 `09d4706303144efdb7dec6a1461c1c36` 的重复文件 PUT 返回 500，Python 日志明确为 `update_task_file` 的重复哈希 `ValueError` 未转换；该错误任务已通过网页取消并清理。之后仅含一个正文、一个补充材料的任务 `c9385ff5287c4a258e18ca6b2b642d86` 正常进入解析。两条记录源于两次创建任务，不是正文、补充材料被分成两篇论文。
+
+修复只在上传接口将文件更新的 `ValueError` 转换成 409 `UPLOAD_FILE_CONFLICT`，继续经过原失败清理。隔离回归 `tests/TestForRealScenario/verify_upload_conflict.py` 使用独立真实 Redis、真实哈希判重、本地文件和隔离对象存储；修复前两项均以 `500 != 409` 失败，修复后两项通过，验证拒绝副本被删除、原文件仍可读、未完成不入队、补传不同内容后同任务只入队一次。未调用科学模型或修改科学字段。
+
+影响回归合计 33 通过、3 失败。将未修改 HEAD 的 backend/tests/scripts/alembic 导出至独立目录运行同一既有套件，得到 31 通过、相同 3 失败：`test_formal_chunk_extraction_keeps_supplement_and_correction_values` 仍使用已退役 `experimental_conditions`；`test_submitted_review_snapshot_survives_state_expiry` 仍断言旧 `result.json` 路径；`test_review_artifact_storage_failure_is_desensitized` 的替身不接收当前 `paper_id` 参数。三项是独立基线已复现的既有失败，不计为本次通过。辅助工具 8 项自检通过。日志在本机忽略的 `tests/TestForRealScenario/runs/{duplicate-before,duplicate-after,head-baseline}.txt`，不声称为已推送证据。
+
+此处只确认重复文件错误处理修复及范围内回归；H3S 的送审、退回、返修、批准和公开搜索需继续按真实页面结果逐项记录，不因工具自检或局部回归通过宣称全流程通过。本次不修改科学表单或共享表单组件；#174 的既有完整宿主与变异要求继续适用于后续表单修复。原“同一任务内直接拒绝重复文件”的 Overview 行为描述仍适用，无需改写为新规则。未推送、未部署，Issue 保持开放。

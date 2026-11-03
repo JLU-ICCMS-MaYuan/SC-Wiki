@@ -1,0 +1,22 @@
+{
+  "name": "2014-H3S",
+  "accounts": {
+    "user": {"email": "myth620137018@163.com", "browser": "safari", "origin": "http://127.0.0.1:5173"},
+    "superadmin": {"email": "mayuan_mark@163.com", "browser": "chrome", "origin": "http://localhost:5173"}
+  },
+  "files": [
+    {"role": "main", "path": "/Users/mayuan/Downloads/TheoryPDF/2014 H3S-段德芳.pdf"},
+    {"role": "supplementary", "path": "/Users/mayuan/Downloads/TheoryPDF/2014 H3S supplymentary.pdf"}
+  ],
+  "search": "H3S",
+  "phases": [
+    {"id": "parse", "actor": "user", "action": "按指定角色上传两份 PDF，生成并校对解析草稿；暂不提交审核。"},
+    {"id": "reparse", "actor": "user", "action": "发现问题先使用 big-project-investigator；旧逻辑或旧需求未落实则直接修复并更新原 Issue 与 Spec，需要颠覆既有逻辑则先给方案征求用户意见。验证后取消并清理本轮未送审草稿，重新上传相同 PDF 并解析；重复至无阻塞问题。"},
+    {"id": "submit", "actor": "user", "action": "完成校对后提交审核，记录任务与正式论文身份。"},
+    {"id": "reject", "actor": "superadmin", "action": "找到一处真实需要用户修改的地方，填写具体意见并拒绝退回；记录论文身份、字段、原文依据与交接记录。"},
+    {"id": "revise", "actor": "user", "action": "打开退回稿，按意见修改、保存、重读并重新提交；核对本轮论文身份及修改内容。"},
+    {"id": "approve", "actor": "superadmin", "action": "复核修改和依据，填写通过日志并批准；重读核对批准状态与正式交接记录。"},
+    {"id": "search", "actor": "user", "action": "在探索中搜索 H3S，打开本轮论文并核对论文身份、标题、DOI、批准版本和材料状态；不能以其他同体系旧论文命中代替本轮验收。"}
+  ],
+  "references": [179, 174, 147, 176, 192, 178, 35]
+}
