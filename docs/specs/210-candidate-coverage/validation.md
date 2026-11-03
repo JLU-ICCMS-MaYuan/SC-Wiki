@@ -17,6 +17,16 @@
 
 私有本轮目录：tests/TestForRealScenario/runs/20261103T080636Z-e999ee01/。isolated-backend.log与baseline-backend.log区分改动/独立基线；validation-snapshot.json及tested-upload_jobs.py保存仅本任务代码投影；initial-reextract-080834-41a4fc3b/保存新提取、整理、模型请求/响应、结果及重读。原失败制品继续保留，不覆盖用户草稿。
 
+## 完整提交的隔离复核与实际黑盒进度
+
+已从完整提交5d50c321新建独立副本再次执行上述后端集合：81项通过、1项环境跳过、相同3项#139旧k_grid失败；日志final-commit-backend.log与final-commit-snapshot.json对应，避免把共享目录后续修改算作本提交验证。实际14字段模型请求逐项确认均携带organization_context，未仅在报告里保存原候选。
+
+首轮真实网页任务6afb536b0f324968add4f15cb77463cf在来源定位失败：#211状态规划入口使用Markdown临时块，与最终原PDF IR不一致，6个状态无有效定位；4条Tc有效。已归档全部失败资料，复用已有form_sources接回原IR，真实Worker交接回归先失败、后与相邻17项通过；新模型状态规划及正式整理得到6状态、10条Claim全部可定位、Tc零遗漏。该接线属于共享工作区尚未提交的#211入口，未将整个#211混入#210提交。
+
+随后只清理该失败H3S任务，重新上传相同正文/SI为单任务d287126aadb040b9982856feba798450。H3S与CaH6同时提取，容量设置未退回单并发。本轮实际含5条原Tc候选（包括概述200 K），最终为155–166、191–204、184、179 K四条记录；10条最终Claim全部定位，候选完整性关口通过，现有统一字段核对正在运行。未计送审或整篇通过。
+
+旧verify-scientific-form-filling.py同步调用missing_tc_after_filling，使用同一个正式最终关口；语法检查通过，不另保留旧模型整理后数字裁决。
+
 ## 尚待完成
 
 H3S实际网页完整流程另行记录：新解析、用户送审、超管真实退回、返修重提、批准日志和探索精确检索。在这些实际结果完成前，不宣称整篇、双角色流程或公开数据库验收通过。未推送、未部署；远程Spec链接待授权推送后核验。

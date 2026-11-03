@@ -34,7 +34,7 @@ def main():
     from backend.ingest.domain_extraction import COMPLEMENTARY_SYSTEM_PROMPT, structured_chunks, normalize_extraction
     from backend.ingest.state_optimization import assemble_candidates
     from backend.ingest.scientific_form_filling import fill_scientific_forms
-    from backend.ingest.document_claims import claims_from_candidates, missing_tc_measurements
+    from backend.ingest.document_claims import claims_from_candidates, missing_tc_after_filling
     from backend.ingest.upload_jobs import _normalize_draft
     from backend.rag.llm import complete_json
     from backend.rag.llm_context import get_llm_config
@@ -113,7 +113,8 @@ def main():
         final = claims_from_candidates({"material_states": filled}, all_documents)
         dump(args.output / "claims.json", [c.model_dump(mode="json") for c in final])
         assert all(c.status == "validated" for c in final), "最终来源未全部定位"
-        assert not missing_tc_measurements(initial, final, allow_paired_range=True)
+        assert not missing_tc_after_filling(initial, final, input_states=before, output_states=filled,
+            filling_report=audit, documents=all_documents)
         draft = _normalize_draft({"paper": {"title": "Isolated field validation"}, "material_states": filled})
         shadow = uuid4().hex
         keys = [tasks.task_key(shadow), tasks.draft_key(shadow)]
