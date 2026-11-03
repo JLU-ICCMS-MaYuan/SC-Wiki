@@ -6,9 +6,9 @@ import json
 import re
 import unicodedata
 
-RULE_VERSION = 'document-identity-v2'
+RULE_VERSION = 'document-identity-v3'
 _SI = re.compile(r'(?i)^(?:supporting|supplementary|supplemental)\s+(?:information|materials?|data)(?:\s+(?:for|to))?\s*[:：–—-]?\s*')
-_SECTION = re.compile(r'(?i)^(?:abstract|significance|introduction|references|bibliography|methods|results|discussion|conclusions?|acknowledg\w*|author contributions|supporting information|supplementary information|research article|open access|contents|keywords|table of contents|computational methods)\b')
+_SECTION = re.compile(r'(?i)^(?:subject\s+areas?\s*[:：]|(?:abstract|significance|introduction|references|bibliography|methods|results|discussion|conclusions?|acknowledg\w*|author contributions|supporting information|supplementary information|research article|open access|contents|keywords|table of contents|computational methods)\b)')
 _DOI = re.compile(r'(?i)\b10\.\d{4,9}/[^\s<>"\]]+')
 _AUTHOR = re.compile(r'[,;@]|\b(?:university|institute|department|laboratory)\b', re.I)
 
@@ -53,17 +53,17 @@ def extract_identity(file_item, markdown):
         prior_si = index > 0 and _SI.match(lines[index - 1][2])
         byline = bool(following and _AUTHOR.search(following[0][2]))
         heading = text.startswith('#')
-        if candidate and (si or prior_si or (heading and byline) or (index < 5 and byline)):
-            title = candidate
-            evidence['title'] = {'line': number, 'quote': text}
-            break
         # 多行标题：连接标题头及下一行，再由紧随的署名确认。
-        if heading and candidate and len(following) >= 2 and not _AUTHOR.search(following[0][2]) and _AUTHOR.search(following[1][2]):
+        if (heading or si or prior_si or index < 5) and candidate and len(following) >= 2 and not _AUTHOR.search(following[0][2]) and _AUTHOR.search(following[1][2]):
             joined = _title(candidate + ' ' + following[0][2])
             if joined and not _SECTION.match(following[0][2]):
                 title = joined
                 evidence['title'] = {'line': number, 'quote': text + '\n' + following[0][1]}
                 break
+        if candidate and (si or prior_si or (heading and byline) or (index < 5 and byline)):
+            title = candidate
+            evidence['title'] = {'line': number, 'quote': text}
+            break
     dois = {}
     for number, text, plain in lines:
         # 单独标识行或出版页眉页脚；拒绝含引用编号/叙述句子的任意段落 DOI。
