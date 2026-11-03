@@ -1,0 +1,40 @@
+{
+  "before": {
+    "collections": 6,
+    "footer": false,
+    "links": [
+      {
+        "text": "查看 α²F",
+        "href": "/spectra/f7984f47b4714c3ea3d094476540b7e3?target=upload&target_id=2ccc1b39f11f4cda810b9fc0c147d6bc&state_key=state-bcc51525bdb07e820aed&collection_version=2&run=5fc0bbf7fa774a8d8f240952849ef611&return=%2Fupload%2Ftasks%2F2ccc1b39f11f4cda810b9fc0c147d6bc%23material-state-state-bcc51525bdb07e820aed&curve=fig4_right_alpha2f&kind=alpha2f"
+      },
+      {
+        "text": "查看声子 DOS",
+        "href": "/spectra/b3246b1f82d745ca918613dcbe41c21d?target=upload&target_id=2ccc1b39f11f4cda810b9fc0c147d6bc&state_key=state-bcc51525bdb07e820aed&collection_version=2&run=ef422e0ae45a4f07b7dd5b721825a969&return=%2Fupload%2Ftasks%2F2ccc1b39f11f4cda810b9fc0c147d6bc%23material-state-state-bcc51525bdb07e820aed&curve=S15_150GPa_total_phonon_dos&kind=phonon_dos"
+      },
+      {
+        "text": "查看声子 DOS",
+        "href": "/spectra/e84999b02c014c44b11e3b8bdac5aeb9?target=upload&target_id=2ccc1b39f11f4cda810b9fc0c147d6bc&state_key=state-1e8427cef05dd3bc84e1&collection_version=2&run=367bcac23b564c64a318decb1524bd5c&return=%2Fupload%2Ftasks%2F2ccc1b39f11f4cda810b9fc0c147d6bc%23material-state-state-1e8427cef05dd3bc84e1&curve=S15_200GPa_total_phonon_dos&kind=phonon_dos"
+      },
+      {
+        "text": "查看声子 DOS",
+        "href": "/spectra/a085bf83941647bd8f615ee7d16a30b4?target=upload&target_id=2ccc1b39f11f4cda810b9fc0c147d6bc&state_key=state-7e29162640063da6e442&collection_version=2&run=21ac749e97d84bd0af8b90823351aac8&return=%2Fupload%2Ftasks%2F2ccc1b39f11f4cda810b9fc0c147d6bc%23material-state-state-7e29162640063da6e442&curve=S6_bottom_phonon_dos_black&kind=phonon_dos"
+      },
+      {
+        "text": "查看声子 DOS",
+        "href": "/spectra/6eabbcb603864c8e834bdbef91d4008c?target=upload&target_id=2ccc1b39f11f4cda810b9fc0c147d6bc&state_key=state-7da2d7a42587c6de0d23&collection_version=2&run=409da79a39ad4b1f9467331c3b6102af&return=%2Fupload%2Ftasks%2F2ccc1b39f11f4cda810b9fc0c147d6bc%23material-state-state-7da2d7a42587c6de0d23&curve=S6_middle_phonon_dos_black&kind=phonon_dos"
+      },
+      {
+        "text": "查看声子 DOS",
+        "href": "/spectra/c3aa6848e07d4c47827ddae71e144821?target=upload&target_id=2ccc1b39f11f4cda810b9fc0c147d6bc&state_key=state-e75115b3abb5c3148a46&collection_version=2&run=7d45ba4d571a491f91b8d78899630fef&return=%2Fupload%2Ftasks%2F2ccc1b39f11f4cda810b9fc0c147d6bc%23material-state-state-e75115b3abb5c3148a46&curve=S6_top_phonon_dos_black&kind=phonon_dos"
+      }
+    ]
+  },
+  "after": {
+    "loadingAdded": 0,
+    "removed": 0,
+    "collections": 6
+  },
+  "additionalSpectrumReads": 0,
+  "errors": [],
+  "modelWrites": []
+}

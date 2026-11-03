@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest'
 import React, { useState } from 'react'
-import { cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react'
+import { act, cleanup, fireEvent, render, screen, within, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 
@@ -29,7 +29,7 @@ beforeEach(() => {
   vi.mocked(api.download).mockResolvedValue(new Blob(['image']))
   vi.stubGlobal('URL', class extends URL { static createObjectURL = vi.fn(() => 'blob:source'); static revokeObjectURL = vi.fn() })
 })
-afterEach(() => { cleanup(); clearFormDefinitionCache(); vi.clearAllMocks(); vi.unstubAllGlobals() })
+afterEach(() => { vi.useRealTimers(); cleanup(); clearFormDefinitionCache(); vi.clearAllMocks(); vi.unstubAllGlobals() })
 const address = (extra = '') => `/spectra/collection?target=upload&target_id=task&state_key=sample&curve=dos&collection_version=2&run=run1&return=%2Fupload${extra}`
 function mountEdit(saveResult = true) {
   let saved = 'old'
@@ -241,19 +241,16 @@ it('未归属候选只显示摘要，点击才读取原图和点表', async () =
   expect(api.download).not.toHaveBeenCalled()
 })
 
-it('六条失败记录不计入一组待确认谱，保留原因及详情入口', async () => {
+it('非目标空记录不在表单末尾显示，实际未归属谱仍保持独立', async () => {
   const spectrum = listing.items[0]
   spectrum.state_key = null
   for (let index = 0; index < 6; index++) listing.items.push({ ...structuredClone(spectrum), id: `failed-${index}`,
     run: { id: `run-${index}`, status: 'needs_review' }, result: { curves: [], failures: [`第 ${index} 次标定 HTTP 503`] } })
   render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}><UnassignedPropertySpectra /></PropertySpectraProvider></MemoryRouter>)
   expect(await screen.findByText('待确认归属 · 1 组谱数据')).toBeVisible()
-  expect(screen.getByText('谱提取记录 · 6 条未生成曲线或标定')).toBeVisible()
+  expect(screen.queryByText(/谱提取记录 ·/)).not.toBeInTheDocument()
   expect(screen.getAllByRole('link', { name: '核对归属' })).toHaveLength(1)
-  const history = screen.getByText('谱提取记录 · 6 条未生成曲线或标定')
-  fireEvent.click(history)
-  expect(screen.getByText('第 0 次标定 HTTP 503')).toBeVisible()
-  expect(screen.getAllByRole('link', { name: '查看提取记录' })).toHaveLength(6)
+  expect(screen.queryByRole('link', { name: '查看提取记录' })).not.toBeInTheDocument()
   expect(api.download).not.toHaveBeenCalled()
 })
 
@@ -261,7 +258,8 @@ it('只有失败记录时不声称存在待分配谱；有真实标定但未生�
   listing.items[0].state_key = null
   listing.items[0].result = { curves: [], failures: ['未发现谱图'] }
   const view = render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}><UnassignedPropertySpectra /></PropertySpectraProvider></MemoryRouter>)
-  await screen.findByText('谱提取记录 · 1 条未生成曲线或标定')
+  await waitFor(() => expect(api.get).toHaveBeenCalled())
+  expect(screen.queryByText(/谱提取记录 ·/)).not.toBeInTheDocument()
   expect(screen.queryByText(/待确认归属 ·/)).not.toBeInTheDocument()
   view.unmount()
   listing.items[0].result.calibration = { curves: [{ id: 'a', kind: 'alpha2f' }] }
@@ -408,4 +406,60 @@ it.each(['source_changed','state_missing'])('来源或材料已丢失时不提�
   await waitFor(()=>expect(screen.queryByText('正在读取材料条件…')).toBeNull())
   expect(screen.getByRole('button',{name:'编辑',exact:true})).toBeDisabled()
   expect(screen.queryByRole('button',{name:'核对材料条件并继续编辑'})).toBeNull()
+})
+
+
+it('同目标刷新和读取失败都保留已显示谱，不卸载成加载提示', async () => {
+  render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}>
+    <PropertySpectrumControls /><PropertySpectrumState stateKey="sample" summary="sample">
+      <PropertySpectrumSection moduleCode="dynamical_properties" />
+    </PropertySpectrumState>
+  </PropertySpectraProvider></MemoryRouter>)
+  const link = await screen.findByRole('link', { name: '查看声子 DOS' })
+  let reject: (error: Error) => void = () => {}
+  vi.mocked(api.get).mockImplementationOnce(() => new Promise((_resolve, fail) => { reject = fail }))
+  fireEvent.click(screen.getByRole('button', { name: '刷新谱状态' }))
+  expect(link).toBeInTheDocument()
+  expect(screen.queryByText('正在读取谱解析结果…')).not.toBeInTheDocument()
+  await act(async () => reject(new Error('网络暂不可用')))
+  expect(screen.getByRole('link', { name: '查看声子 DOS' })).toBe(link)
+  expect(await screen.findByText('网络暂不可用', { exact: true })).toBeVisible()
+})
+
+it('运行结束即停止自动读取，零曲线待核对不会继续请求', async () => {
+  vi.useFakeTimers()
+  listing.jobs = [{ id: 'job', status: 'running' }]
+  render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}>
+    <PropertySpectrumState stateKey="sample" summary="sample"><PropertySpectrumSection moduleCode="dynamical_properties" /></PropertySpectrumState>
+  </PropertySpectraProvider></MemoryRouter>)
+  await act(async () => { await Promise.resolve() })
+  expect(screen.getByRole('link', {name:'查看声子 DOS'})).toBeVisible()
+  listing.jobs = [{ id: 'job', status: 'needs_review' }]
+  listing.items = []
+  await act(async () => { await vi.advanceTimersByTimeAsync(4000) })
+  const count = vi.mocked(api.get).mock.calls.length
+  expect(count).toBe(2)
+  await act(async () => { await vi.advanceTimersByTimeAsync(30000) })
+  expect(vi.mocked(api.get).mock.calls).toHaveLength(count)
+})
+
+it('目标谱标定失败保留材料和类型，在对应性质模块给出原因', async () => {
+  listing.items[0].result = { curves: [], calibration: {kind:'phonon_dos',curves:[]}, failures:['坐标遮挡，待核对原图'] }
+  render(<MemoryRouter><PropertySpectraProvider context={{ target: { target: 'upload', target_id: 'task' } }}>
+    <PropertySpectrumState stateKey="sample" summary="sample"><PropertySpectrumSection moduleCode="dynamical_properties" /></PropertySpectrumState>
+    <UnassignedPropertySpectra />
+  </PropertySpectraProvider></MemoryRouter>)
+  expect(await screen.findByRole('link', {name:'查看声子 DOS'})).toHaveAttribute('href', expect.stringContaining('state_key=sample'))
+  expect(screen.getByText('坐标遮挡，待核对原图')).toBeVisible()
+  expect(screen.queryByText(/谱提取记录 ·/)).not.toBeInTheDocument()
+})
+
+it('超导族身份不能把仅累计λ的数值冒充已有α²F', async () => {
+  listing.items[0].result = {curves:[{...listing.items[0].result.curves[1],id:'lambda',kind:'cumulative_lambda'}],
+    calibration:{kind:'alpha2f',curves:[{id:'lambda',kind:'cumulative_lambda'}]}}
+  render(<MemoryRouter><PropertySpectraProvider context={{target:{target:'upload',target_id:'task'}}}>
+    <PropertySpectrumState stateKey="sample" summary="sample"><PropertySpectrumSection moduleCode="superconductive_properties" /></PropertySpectrumState>
+  </PropertySpectraProvider></MemoryRouter>)
+  expect(await screen.findByRole('link',{name:'查看累计 λ'})).toBeVisible()
+  expect(screen.queryByRole('link',{name:'查看 α²F'})).not.toBeInTheDocument()
 })

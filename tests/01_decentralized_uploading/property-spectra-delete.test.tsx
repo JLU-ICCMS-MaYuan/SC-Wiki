@@ -29,10 +29,10 @@ function mount(readOnly = false, target: 'upload' | 'paper' | 'revision' = 'uplo
   </PropertySpectraProvider></MemoryRouter>)
 }
 
-it('两类均有删除入口，取消不写入，确认后更新计数且重新挂载不恢复', async () => {
+it('非目标空记录不进入表单；真实谱取消不写入、删除后重挂载不恢复', async () => {
   const view = mount()
-  fireEvent.click(await screen.findByText('谱提取记录 · 1 条未生成曲线或标定'))
-  expect(screen.getByRole('button', { name: '删除提取记录' })).toBeVisible()
+  await screen.findByText('待确认归属 · 1 组谱数据')
+  expect(screen.queryByText(/谱提取记录 ·/)).not.toBeInTheDocument()
   fireEvent.click(screen.getByRole('button', { name: '删除谱数据' }))
   expect(screen.getByText(/不会随论文提交审核/)).toBeVisible()
   fireEvent.click(screen.getByRole('button', { name: '取消' }))
@@ -41,11 +41,9 @@ it('两类均有删除入口，取消不写入，确认后更新计数且重新�
   fireEvent.click(screen.getByRole('button', { name: '确认删除' }))
   await waitFor(() => expect(screen.queryByText('待确认归属 · 1 组谱数据')).not.toBeInTheDocument())
   expect(api.del).toHaveBeenCalledWith('/api/rag/spectra/spectrum?target=upload&target_id=task&expected_version=v1&expected_collection_version=2')
-  fireEvent.click(screen.getByRole('button', { name: '删除提取记录' }))
-  fireEvent.click(screen.getByRole('button', { name: '确认删除' }))
-  await waitFor(() => expect(screen.queryByText('谱提取记录 · 1 条未生成曲线或标定')).not.toBeInTheDocument())
+  expect(listing.items.map(item => item.id)).toEqual(['attempt'])
   view.unmount(); mount()
-  await waitFor(() => expect(api.get).toHaveBeenCalledTimes(4))
+  await waitFor(() => expect(api.get).toHaveBeenCalledTimes(3))
   expect(screen.queryByRole('button', { name: /删除/ })).not.toBeInTheDocument()
 })
 

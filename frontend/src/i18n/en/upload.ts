@@ -175,6 +175,7 @@ export default {
   operationFailed: 'Operation failed',
   summarizingNote: 'Summarizing the full-text draft; the form updates in real time and is ready for review once finished.',
   previewNotes: {
+    spectra: 'Extracting α²F and phonon DOS; editing and the final parsing duration become available after spectra processing ends.',
     assembling: 'Showing extracted content read-only while assembling the draft; unfinished sections remain empty.',
     organizing: 'Organizing materials and properties; available content is shown read-only.',
     reviewing: 'Reviewing sources and calculation conditions; available content is read-only and is not yet fully verified.',

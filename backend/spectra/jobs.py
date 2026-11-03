@@ -29,6 +29,9 @@ def enqueue(session, ctx, *, expected_version, config, row=None, calibration=Non
         if calibration.get("state_key") and state is None:
             service.fail("spectra_state_invalid", "材料状态不属于当前草稿", 422)
     run, pending = service.new_run(session, row, calibration, state, model_name=config.model)
+    if pending and run.status != 'running':
+        # 重试的运行不能继承上一个父任务的执行归属，自动入口稍后绑定新父job。
+        run.calibration_json = calibration
     service.activate(row, run, state)
     session.flush()
     if not pending or run.status == "running":
@@ -129,7 +132,7 @@ def discover(ctx, user_id, version):
         supported = verify_image_capability()
     except Exception:
         supported = False
-    count, extracted, curve_count, issues = 0, 0, 0, []
+    count, extracted, curve_count, issues, technical_errors, skipped = 0, 0, 0, [], [], []
     for source in ctx["files"]:
         path = resolve_file(source["stored_path"], size=int(source.get("size") or 0),
                             sha256=str(source.get("sha256") or ""), media_type="application/pdf", namespace=ctx["target_id"])
@@ -164,26 +167,29 @@ def discover(ctx, user_id, version):
                 try:
                     panels, panel_issues = calibrate(figure, ctx["states"])
                 except Exception as exc:
+                    technical_errors.append(type(exc).__name__)
                     status_code = getattr(exc, "status_code", None)
                     status_text = f"HTTP {status_code}，" if status_code else ""
                     panel_issues = [f"自动标定失败：{status_text}{type(exc).__name__}；待重试"]
             else:
                 panel_issues = ["当前模型读图校验未成功（能力或服务可用性未证实），谱待处理；其他解析不受影响"]
-            issues.extend(dict(file_id=source["file_id"], page=figure["pdf_page"], reason=str(issue)) for issue in panel_issues)
-            if not panels and panel_issues:
-                panels = [None]
+            diagnostics = issues if panels else skipped
+            diagnostics.extend(dict(file_id=source["file_id"], page=figure["pdf_page"], reason=str(issue)) for issue in panel_issues)
+            # 非目标排除属于后台发现诊断，不生成没有谱身份的空集合。
             for panel in panels:
-                state = states.get(panel.get("state_key")) if panel else None
-                result = (extract_panel(np.asarray(Image.open(io.BytesIO(figure["image"])).convert("RGB")), panel,
-                            references=references_for(state), primitive=primitive_for(state, ctx["draft"]), composition=composition_for(state)) if panel else
-                          dict(curves=[], candidates={}, quality=dict(limitations=panel_issues), failures=panel_issues))
+                state = states.get(panel.get("state_key"))
+                result = extract_panel(np.asarray(Image.open(io.BytesIO(figure["image"])).convert("RGB")), panel,
+                    references=references_for(state), primitive=primitive_for(state, ctx["draft"]), composition=composition_for(state))
+                if not panel.get('curves'):
+                    result.update(status='needs_review', failures=panel_issues or ['目标谱标定未完成'],
+                                  calibration=panel)
                 with SessionLocal.begin() as session:
                     fresh = service.context(session, ctx["target"], ctx["target_id"], session.get(models.User, user_id), write=True)
                     service.assert_version(fresh["version"], version)
                     row = service.collection(session, fresh, source_key,
-                        panel_identity(panel) if panel else "__unavailable__", source_info)
+                        panel_identity(panel), source_info)
                     from backend.rag.llm_context import get_llm_config
-                    run, pending = service.new_run(session, row, panel or dict(issues=panel_issues), state,
+                    run, pending = service.new_run(session, row, panel, state,
                                                    model_name=get_llm_config().model)
                     if pending:
                         service.complete_run(run, result)
@@ -193,8 +199,8 @@ def discover(ctx, user_id, version):
                         extracted += 1
                         curve_count += len(result["curves"])
     return dict(collections=count, extracted_collections=extracted, curve_count=curve_count,
-                issues=issues, image_capability_verified=supported,
-                status="needs_review" if issues or not supported else "completed")
+                issues=issues, skipped=skipped, image_capability_verified=supported, technical_errors=technical_errors,
+                status="needs_review" if issues or technical_errors or not supported else "completed")
 
 
 def fingerprint_bytes(path):
@@ -223,3 +229,47 @@ def enqueue_upload(task_id):
         dispatch(job, state["user_id"])
     except Exception as exc:
         log.warning("上传谱任务未能启动 task=%s type=%s", task_id, type(exc).__name__)
+
+
+def run_upload(task_id):
+    """自动谱属于同一次上传；独立手动重提仍走原异步入口。"""
+    from backend.ingest.upload_tasks import get_state
+    from backend.rag.llm_context import get_llm_config
+    state = get_state(task_id)
+    if not state or state.get('is_shadow'):
+        return
+    with SessionLocal.begin() as session:
+        service.require_tables(session)
+        ctx = service.context(session, 'upload', task_id, session.get(models.User, state['user_id']), write=True)
+        job = enqueue(session, ctx, expected_version=ctx['version'], config=get_llm_config())
+        if job.get('dispatch'):
+            run = session.get(models.SpectrumRun, job['job_id'])
+            run.calibration_json = {**(run.calibration_json or {}), 'automatic_upload_job_id': state.get('job_id')}
+    if job.get('dispatch'):
+        run_job(job['job_id'], 'upload', task_id, state['user_id'], job['version'])
+    with SessionLocal() as session:
+        run = session.get(models.SpectrumRun, job['job_id'])
+        if run is None or run.status in {'failed', 'queued', 'running'}:
+            raise RuntimeError('自动谱处理未完成：' + ((run.error_message or run.status) if run else '运行记录缺失'))
+        detail = run.result_json or {}
+        if not detail.get('image_capability_verified', True) or detail.get('technical_errors'):
+            raise RuntimeError('自动谱读图或标定服务失败，请查看谱任务原因')
+        return detail
+
+
+def fail_upload_runs(task_id, job_id, reason):
+    """父Worker中断只终止该父任务拥有的自动谱；手动提取及其他任务不受影响。"""
+    with SessionLocal.begin() as session:
+        if not service.available(session):
+            return
+        runs = session.scalars(select(models.SpectrumRun).join(models.SpectrumCollection,
+            models.SpectrumCollection.id == models.SpectrumRun.collection_id).where(
+                models.SpectrumCollection.target == 'upload', models.SpectrumCollection.target_id == task_id,
+                models.SpectrumRun.status.in_(['queued', 'running'])))
+        for run in runs:
+            if (run.calibration_json or {}).get('automatic_upload_job_id') == job_id:
+                run.status = 'failed'
+                run.error_code = 'automatic_spectra_interrupted'
+                run.error_message = reason
+                from datetime import datetime, timezone
+                run.completed_at = datetime.now(timezone.utc)

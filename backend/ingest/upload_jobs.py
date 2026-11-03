@@ -1789,7 +1789,7 @@ def _handle_duplicate_locked(task_id: str, state: dict[str, Any], existing: Any)
     return duplicate
 
 
-def complete_parsing_state(task_id, draft, **changes):
+def complete_parsing_state(task_id, draft, *, include_spectra=False, **changes):
     """填写和自动核对均完成才发布ready；技术失败保留已有预览和结果。"""
     filling = draft.get('form_filling_report') or {}
     errors = [draft.get('field_suggestions_error')]
@@ -1802,6 +1802,11 @@ def complete_parsing_state(task_id, draft, **changes):
         return update_state(task_id, **changes, status='failed', processing_status='failed',
             processing_error='自动整理或核对未完成：' + '；'.join(errors),
             error_code='automatic_review_incomplete', failed_stage='summarizing')
+    if include_spectra:
+        update_state(task_id, processing_stage='spectra', reading_state='extracting_spectra', preview_phase='spectra')
+        from backend.spectra.jobs import run_upload
+        with call_phase('automatic_spectra'):
+            run_upload(task_id)
     return update_state(task_id, **changes, status='ready', stage='ready', stage_index=5,
         processing_status='succeeded', processing_error=None, error_code=None, failed_stage=None,
         partial_draft=None)
@@ -1835,6 +1840,10 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
     started = time.monotonic()
     cpu_started = time.process_time()
     try:
+        from .upload_resume import resume_spectra
+        resumed = resume_spectra(task_id)
+        if resumed is not None:
+            return resumed
         return _process_upload_task(task_id)
     finally:
         try:
@@ -2428,6 +2437,14 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
         # 模型负责科学关系与主动查缺，程序保留每个候选的去向及最终来源门。
         from .fixed_form_contract import finalize_current_draft
         finalize_current_draft(draft, model_output=True, legacy=not bool(document_set))
+        from .state_inventory import plan_states
+        from .scientific_form_filling import form_sources
+        with call_phase("material_state_inventory"):
+            plan_states(draft, [
+                {**source, "file_role": source.get("file_role", source.get("role", "main"))}
+                for source in form_sources(document_set, scientific_sources)], complete_json, files=state.get('files') or [], target_id=task_id,
+                on_response=lambda response: _atomic_write_json(
+                    artifact_directory(task_id) / "material_state_inventory.json", response))
         publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='organizing')
         from backend.ingest.scientific_form_filling import fill_scientific_forms, form_sources
         from backend.ingest.scientific_output_schema import filling_schema, decode_optional_containers
@@ -2651,13 +2668,9 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                               task_id=task_id, run_id=run_id),
             ]
         ready = complete_parsing_state(
-            task_id, draft, completed_chunks=len(all_chunks), total_chunks=len(all_chunks),
+            task_id, draft, include_spectra=not state.get('is_shadow'), completed_chunks=len(all_chunks), total_chunks=len(all_chunks),
             duplicate=False, artifact_manifest=artifact_manifest, reparse_expected_draft_hash=None,
         )
-        if ready.get('status') == 'ready' and not state.get("is_shadow"):
-            # 解析中的字段核对已完成；ready后不再排队重复检查。
-            from backend.spectra.jobs import enqueue_upload
-            enqueue_upload(task_id)
         _schedule_terminal_cleanup(task_id)
         return ready
     except UploadCancelled:

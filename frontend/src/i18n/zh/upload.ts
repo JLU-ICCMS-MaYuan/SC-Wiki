@@ -177,6 +177,7 @@ export default {
   operationFailed: '操作失败',
   summarizingNote: '正在汇总全文草稿，表单内容实时更新；生成完成后即可校对。',
   previewNotes: {
+    spectra: '正在提取 α²F 和声子态密度；谱处理结束后才进入校对并结束解析计时。',
     assembling: '已提取的内容只读展示，正在组装全文草稿；尚未生成的区域暂时留空。',
     organizing: '正在整理材料与物性关系；已有内容只读展示。',
     reviewing: '正在核对来源与计算条件；已有内容只读展示，尚不代表全部通过。',

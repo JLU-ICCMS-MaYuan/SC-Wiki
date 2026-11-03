@@ -49,6 +49,7 @@ class LinearAxis:
 def color_mask(rgb: np.ndarray, color: str) -> np.ndarray:
     r, g, b = np.asarray(rgb, dtype=float).transpose(2, 0, 1)
     masks = {
+        "black": (np.maximum.reduce([r, g, b]) < 205) & (np.maximum.reduce([r, g, b]) - np.minimum.reduce([r, g, b]) < 30),
         "blue": (b > 120) & (b > 1.4 * r) & (b > 1.4 * g),
         "red": (r > 150) & (g < .55 * r) & (b < .55 * r),
         "green": (g > 45) & (g > 1.35 * r) & (g > 1.35 * b),
@@ -63,6 +64,8 @@ def color_mask(rgb: np.ndarray, color: str) -> np.ndarray:
 
 def chromatic_mask(rgb: np.ndarray, color: str) -> np.ndarray:
     """补读与黑色坐标轴混合的暗色像素；无色灰线不能成为曲线证据。"""
+    if color == 'black':
+        return color_mask(rgb, color)
     r, g, b = np.asarray(rgb, dtype=float).transpose(2, 0, 1)
     masks = {
         "red": (r > 35) & (r > g + 15) & (r > b + 15),
@@ -75,6 +78,37 @@ def chromatic_mask(rgb: np.ndarray, color: str) -> np.ndarray:
     if color not in masks:
         raise ValueError(f"未知颜色：{color}")
     return masks[color]
+
+
+def without_frame_ticks(mask, roi):
+    """只排除边缘长框线及与边框相连的短细刻度，延伸进图内的真实轨迹保留。"""
+    from scipy.ndimage import label
+    result = mask.copy()
+    x0, y0, x1, y1 = roi
+    region = result[y0:y1 + 1, x0:x1 + 1]
+    for axis in (0, 1):
+        for reverse in (False, True):
+            view = np.flip(region, axis=axis) if reverse else region
+            width = min(32, max(12, round(view.shape[axis] * .025)))
+            frame = [i for i in range(width) if np.mean(np.take(view, i, axis=axis)) > .65]
+            for i in frame:
+                selector = [slice(None), slice(None)]; selector[axis] = i
+                view[tuple(selector)] = False
+            start = max(frame) + 1 if frame else 0
+            stop = min(view.shape[axis], start + width)
+            selector = [slice(None), slice(None)]; selector[axis] = slice(start, stop)
+            band = view[tuple(selector)]
+            if not band.size:
+                continue
+            labels, count = label(band, structure=np.ones((3, 3)))
+            for index in range(1, count + 1):
+                positions = np.argwhere(labels == index)
+                near, far = positions[:, axis].min(), positions[:, axis].max()
+                thickness = np.ptp(positions[:, 1 - axis]) + 1
+                # 只处理触边、未延伸至内侧、细而长的线段；不删除整条低幅值带。
+                if near <= 2 and far < band.shape[axis] - 1 and thickness <= 4 and far - near + 1 >= thickness:
+                    band[labels == index] = False
+    return result
 
 
 def continue_frame_plateau(rows: list[dict], *, max_pixels: int, tolerance: float) -> None:
@@ -136,6 +170,12 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
     recovered_mask = chromatic_mask(rgb, spec["color"])
     allowed = np.zeros(mask.shape, dtype=bool)
     allowed[y0:y1 + 1, x0:x1 + 1] = True
+    if spec['color'] == 'black':
+        # 黑灰图框与曲线同色，图框边界不能当作谱值；保留边界缺口。
+        allowed[y0:y0 + 2, x0:x1 + 1] = False
+        allowed[y1 - 1:y1 + 1, x0:x1 + 1] = False
+        allowed[y0:y1 + 1, x0:x0 + 2] = False
+        allowed[y0:y1 + 1, x1 - 1:x1 + 1] = False
     for box in spec.get("exclude", []):
         a, b, c, d = box
         if not (0 <= a <= c < w and 0 <= b <= d < h):
@@ -143,6 +183,12 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
         allowed[b:d + 1, a:c + 1] = False
     mask &= allowed
     recovered_mask &= allowed
+    removed_frame = np.zeros(mask.shape, dtype=bool)
+    if spec['color'] == 'black':
+        filtered = without_frame_ticks(mask, spec['roi'])
+        removed_frame = mask & ~filtered
+        mask = filtered
+        recovered_mask &= filtered
     # 暗但色相纯净的真线不能因亮度低被删除；归一化仅用于判色，不修改原图或数值。
     normalized_rgb = np.asarray(rgb, dtype=float) * 255 / np.maximum(np.max(rgb, axis=2, keepdims=True), 1)
     chromatic_core = color_mask(normalized_rgb, spec["color"]) & recovered_mask
@@ -152,6 +198,8 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
     pixels = list(range(y0, y1 + 1) if orientation == "y" else range(x0, x1 + 1))
     rows: list[dict[str, Any]] = []
     clipped = []
+    anchors = sorted((y, x) if orientation == 'y' else (x, y)
+                     for x, y in spec.get('trace_anchors', []))
     for pos in pixels:
         direct = mask[pos, :] if orientation == "y" else mask[:, pos]
         raw_recovered = recovered_mask[pos, :] if orientation == "y" else recovered_mask[:, pos]
@@ -161,6 +209,8 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
         detection_mode = "strict_color" if len(coords) else None
         rejected = 0
         blocked = False
+        if not len(coords) and np.any(removed_frame[pos, :] if orientation == 'y' else removed_frame[:, pos]):
+            blocked = True
         if not len(coords):
             rejected = int(np.count_nonzero(raw_recovered & ~recovered))
             coords = np.flatnonzero(recovered)
@@ -170,6 +220,20 @@ def extract_curve(rgb: np.ndarray, spec: dict, frequency_axis: LinearAxis) -> di
                 detection_mode = "unsupported_chromatic"
                 blocked = True
         components = int(1 + np.count_nonzero(np.diff(coords) > 1)) if len(coords) else 0
+        if spec['color'] == 'black' and anchors and len(coords):
+            # 锚点只选择原图实际像素分支；不按插值锚点生成任何幅值。
+            parts = np.split(coords, np.flatnonzero(np.diff(coords) > 1) + 1)
+            guide = float(np.interp(pos, [a[0] for a in anchors], [a[1] for a in anchors]))
+            distances = [abs(float(part.mean()) - guide) for part in parts]
+            order = np.argsort(distances)
+            if distances[order[0]] <= 14 and (len(order) == 1 or distances[order[1]] - distances[order[0]] > 3):
+                coords = parts[order[0]]
+                components = 1
+                detection_mode = 'source_anchor_pixels'
+            else:
+                coords = np.array([], dtype=int)
+                blocked = True
+                detection_mode = 'ambiguous_components'
         if components > 1:
             # 可能是曲线/文字混入，也可能是真实遮挡；不能平均到没有像素的位置。
             coords = np.array([], dtype=int)

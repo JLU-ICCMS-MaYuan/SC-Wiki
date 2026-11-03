@@ -29,6 +29,8 @@ status描述final_value（未给则当前值）。有唯一纠正时直接核实
 只答给定字段；科学分类和身份不可随意新建。叙述字段按现有英文数据约定填写。
 condition_additions只在allow_condition_additions=true时使用，只补原文报告且适用于该记录的
 空缺固定字段，不覆盖原值；同组设置共用，但不能跨材料、软件或谐波/非谐范围广播。
+固定表单已为每个参数列出独立key；allow_condition_additions=false时只通过给定key的
+final_value补空，不返回整包条件。网格可用数值数组或文本；数量对象value_kind仅用number/range/text，不能用array。
 只查证当前超导结果实际使用的QE/EPW/SSCHA设置，排除VASP结构优化设置。
 软件参数写入qe/epw/sscha固定组，不创建阶段扩展，不生成method_scope或同义字段。
 标准设置使用现有字段名calculation_code、electronic_method、exchange_correlation_functional、
@@ -62,6 +64,8 @@ organization_context为当前记录整理前的原候选、原文和合并理由
 结合原文核实这些候选是否确为同一结果，详细值、压力、方法及独立μ*配对有无被错误合并。
 约数或概述可以对应详细范围，但不能只因数字接近就认可；独立结果被合并须标为不支持或不确定，
 在当前字段reason说明具体遗漏、原候选和依据。最终source_ids仍只选本字段事实及必要范围来源。
+若当前材料状态由原文结构表或谱图条件明确建立，某条暂填物性与该状态不符时，
+应指出该记录的归属问题及实际状态，不能修改已有明确依据的宿主压力来迁就该记录。
 未知或空分类也需要查证。超导类型根据本文实际配对机制判断，明确的声子介导机制可支持
 conventional，按论文推断保留依据；不能仅凭Eliashberg、DFT或材料化学式猜测。
 元素数、晶系、空间群号的provenance包含计算或查表依据，仍由你结合已读原文核实输入。
@@ -186,6 +190,7 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
     from .field_candidates import patched_draft
     from .tc_contexts import map_draft
     current = map_draft(draft)
+    allow_additions = draft.get('_form_contract_version') != 1
     from .scientific_drafts import _property_modules_for_state
     from .material_state_contract import ensure_state_keys
     ensure_state_keys(current.get('material_states') or [])
@@ -216,7 +221,7 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
                 if context:
                     row['organization_context'] = context
             reviewed = review_fields(batch, snapshot['chunks'], model_name=model_name, cancelled=cancelled,
-                manifest=snapshot.get('pdf_manifest') or [], allow_condition_additions=True, additions=additions,
+                manifest=snapshot.get('pdf_manifest') or [], allow_condition_additions=allow_additions, additions=additions,
                 on_response=on_response)
             batch_count += 1
             for row in batch:
@@ -229,7 +234,8 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
                     result = {**result, 'status': 'supported', 'proposal': None, 'auto_corrected': True}
                 results[row['key']] = result
             try:
-                _add_conditions(current, additions, batch)
+                if allow_additions:
+                    _add_conditions(current, additions, batch)
             except (ValueError, TypeError, KeyError) as exc:
                 errors.append({'step': 'condition_type', 'message': str(exc)[:300]})
             snapshot = current_snapshot()
@@ -399,6 +405,8 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                            **({'tool_history': tool_history} if tool_history else {}),
                            **({'on_partial': on_partial} if on_partial else {}),
                            **({'images': [*human_images, *images]} if human_images or images else {}))
+            if not allow_condition_additions and answer.get('condition_additions'):
+                raise ValueError('固定字段核对不接受额外条件包，请通过给定key填写')
             if human_images or images:
                 images_received = True
             if on_response:

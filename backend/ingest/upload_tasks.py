@@ -316,6 +316,8 @@ def handle_upload_job_failure(
         state = get_state(task_id)
         if not state or state.get("status") not in RUNNING_STATUSES:
             return True
+        if state.get('job_id') and getattr(job, 'id', None) and state['job_id'] != job.id:
+            return True  # 旧轮次迟到的失败不能覆盖已经开始的新轮次。
         failed_stage = state.get("stage")
         update_state(
             task_id,
@@ -326,6 +328,9 @@ def handle_upload_job_failure(
             failed_stage=failed_stage,
             partial_draft=state.get('partial_draft'),
         )
+        if state.get('reading_state') == 'extracting_spectra' and getattr(job, 'id', None):
+            from backend.spectra.jobs import fail_upload_runs
+            fail_upload_runs(task_id, job.id, '上传Worker中断，自动谱已停止，可续跑谱阶段')
         schedule_cleanup(task_id)
         from .document_shadow import refresh_comparison
         refresh_comparison(task_id)

@@ -6,7 +6,7 @@ import json
 import math
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-ALGORITHM_VERSION = "spectra-production-sampled-range-v1"
+ALGORITHM_VERSION = "spectra-production-state-first-v3"
 FREQUENCY_FACTORS = {"THz": 1., "cm-1": .0299792458, "meV": .2417989242084918}
 
 
@@ -33,7 +33,8 @@ class CurveCalibration(BaseModel):
     id: str = Field(min_length=1, max_length=96)
     kind: Literal["phonon_dos", "alpha2f", "cumulative_lambda"]
     projection: str | None = None
-    color: Literal["red", "blue", "green", "magenta", "olive"]
+    color: Literal["red", "blue", "green", "magenta", "olive", "black"]
+    trace_anchors: list[tuple[float, float]] = Field(default_factory=list)
     roi: tuple[int, int, int, int]
     display_bbox: tuple[int, int, int, int] | None = None
     frequency_direction: Literal["x", "y"]
@@ -67,6 +68,11 @@ class CurveCalibration(BaseModel):
 
     @model_validator(mode="after")
     def validate_axes(self):
+        if any(not math.isfinite(value) for point in self.trace_anchors for value in point):
+            raise ValueError('原图轨迹锚点必须是有限像素')
+        if any(not (self.roi[0] <= x <= self.roi[2] and self.roi[1] <= y <= self.roi[3])
+               for x, y in self.trace_anchors):
+            raise ValueError('原图轨迹锚点超出当前谱区域')
         if self.display_bbox is not None:
             x0, y0, x1, y1 = self.display_bbox
             rx0, ry0, rx1, ry1 = self.roi
@@ -88,12 +94,16 @@ class PanelCalibration(BaseModel):
     panel_id: str = Field(min_length=1, max_length=96)
     state_key: str | None = None
     caption: str = ""
-    curves: list[CurveCalibration] = Field(min_length=1, max_length=32)
+    kind: Literal["phonon_dos", "alpha2f"] | None = None
+    assignment_reason: str | None = None
+    curves: list[CurveCalibration] = Field(max_length=32)
     projection_scale_confirmed: bool = False
     projection_complete: bool = False
 
     @model_validator(mode="after")
     def unique_curves(self):
+        if not self.curves and self.kind is None:
+            raise ValueError("没有目标谱身份，不能把非目标图作为失败谱保存")
         if len({c.id for c in self.curves}) != len(self.curves):
             raise ValueError("曲线身份不能重复")
         for kind in ("alpha2f", "cumulative_lambda"):

@@ -1,0 +1,14 @@
+{
+  "field": "material_states[1].property_modules[0].records[0].payload.calculation_conditions.qe.q_grid",
+  "value": [
+    12,
+    12,
+    12
+  ],
+  "model": "gpt-6.1-sol",
+  "status": "supported",
+  "reason": "SI第3页计算细节明确说明，cI14-CaH6的声子及电子—声子耦合计算使用Quantum ESPRESSO，且CaH6（Im-3m）的声子动力学矩阵在第一布里渊区采用12×12×12 q网格。该设置按材料与物相报告，未限定仅用于150 GPa，适用于当前200 GPa同相的QE电子—声子耦合计算。当前值与原文一致；此处是声子q网格，而不是同段报告的48×48×48电子k网格。",
+  "source_count": 1,
+  "sqlite_roundtrip": true,
+  "human_confirmed": false
+}

@@ -117,7 +117,7 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
   const statusNote = (value: ParsingDetail): string => {
     switch (value.status) {
       case 'summarizing':
-        if (value.preview_phase && ['assembling', 'organizing', 'reviewing', 'saving'].includes(value.preview_phase)) {
+        if (value.preview_phase && ['assembling', 'organizing', 'reviewing', 'saving', 'spectra'].includes(value.preview_phase)) {
           return t(`upload.previewNotes.${value.preview_phase}`)
         }
         return t('upload.summarizingNote')

@@ -758,6 +758,13 @@ def delete_target(session, target, target_id):
     for model in (models.ScientificEvidenceCheck, models.ScientificStructureOrigin):
         session.execute(delete(model).where(model.target == target, model.target_id == str(target_id)))
     if target == 'upload':
+        from backend.services.spectra import available
+        if available(session):
+            collections = select(models.SpectrumCollection.id).where(
+                models.SpectrumCollection.target == target, models.SpectrumCollection.target_id == str(target_id))
+            session.execute(delete(models.SpectrumRun).where(models.SpectrumRun.collection_id.in_(collections)))
+            session.execute(delete(models.SpectrumCollection).where(
+                models.SpectrumCollection.target == target, models.SpectrumCollection.target_id == str(target_id)))
         from backend.workdraft_models import ScientificWorkDraft, ScientificFieldSourceUse
         session.execute(delete(ScientificFieldSourceUse).where(ScientificFieldSourceUse.work_key == 'upload:' + str(target_id)))
         session.execute(delete(ScientificWorkDraft).where(

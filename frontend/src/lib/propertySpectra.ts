@@ -15,7 +15,7 @@ export interface PropertySpectrumListing { items: PropertySpectrumItem[]; jobs: 
 export const SPECTRUM_API = '/api/rag/spectra'
 /** 无曲线且无可用标定的是提取记录，不能计作等待分配的谱。 */
 export function hasSpectrumData(item: PropertySpectrumItem): boolean {
-  return Boolean(item.result.curves.length || item.result.calibration?.curves?.length)
+  return Boolean(item.result.curves.length || item.result.calibration?.curves?.length || item.result.calibration?.kind)
 }
 export const spectrumQuery = (target: PropertySpectrumTarget) => new URLSearchParams(target).toString()
 export const spectrumNames: Record<string, string> = { phonon_dos: '声子 DOS', alpha2f: 'α²F 谱函数', cumulative_lambda: '累计 λ', manual_adjusted: '人工调整', needs_review: '待核对', accepted: '已采纳', accepted_limited: '限定频段采纳', excluded: '已排除', queued: '排队中', running: '解析中', succeeded: '解析完成', failed: '解析失败', observed: '原图观测', interpolated: '短缺口插值', baseline_inferred: '近轴推断', boundary_assumption: '边界假设', edge_continuation: '平台延续', missing: '缺失' }
@@ -33,7 +33,7 @@ export function spectrumGroups(items: PropertySpectrumItem[], stateKey: string):
     const candidates = items.filter(item => item.state_key === stateKey).flatMap(item => {
       const curves = item.result.curves.filter(curve => kind === 'phonon_dos'
         ? curve.kind === kind : ['alpha2f', 'cumulative_lambda'].includes(curve.kind))
-      const calibrated = item.result.calibration?.curves?.some((curve: { kind: string }) => kind === 'phonon_dos'
+      const calibrated = item.result.calibration?.kind === kind || item.result.calibration?.curves?.some((curve: { kind: string }) => kind === 'phonon_dos'
         ? curve.kind === kind : ['alpha2f', 'cumulative_lambda'].includes(curve.kind))
       return curves.length || calibrated ? [{ item, kind, curves }] : []
     }).sort((a, b) => Number(Boolean(b.curves.length)) - Number(Boolean(a.curves.length))
@@ -73,10 +73,11 @@ export function usePropertySpectra(target?: PropertySpectrumTarget) {
   const [state, setState] = useState<{ key: string; listing: PropertySpectrumListing | null; error: string; loading: boolean }>({ key: '', listing: null, error: '', loading: false })
   useEffect(() => {
     const controller = new AbortController()
-    setState({ key, listing: null, error: '', loading: !!key })
+    setState(previous => previous.key === key ? { ...previous, error: '', loading: !!key }
+      : { key, listing: null, error: '', loading: !!key })
     if (key) void loadPropertySpectra(Object.fromEntries(new URLSearchParams(key)) as PropertySpectrumTarget, controller.signal)
       .then(listing => { if (!controller.signal.aborted) setState({ key, listing, error: '', loading: false }) })
-      .catch(error => { if (!controller.signal.aborted) setState({ key, listing: null, error: error.message || '谱服务不可用', loading: false }) })
+      .catch(error => { if (!controller.signal.aborted) setState(previous => ({ key, listing: previous.key === key ? previous.listing : null, error: error.message || '谱服务不可用', loading: false })) })
     return () => controller.abort()
   }, [key, reloadKey])
   const replaceListing = useCallback((listing: PropertySpectrumListing) => setState({key,listing,error:'',loading:false}),[key])

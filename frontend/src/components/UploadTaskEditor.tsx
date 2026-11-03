@@ -135,6 +135,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
   const { t, lang, dict } = useLanguage()
   const [loadedSpectra,setLoadedSpectra] = useState<PropertySpectrumListing | undefined>(undefined)
   const frozenSnapshot = frozenEvidenceRecords !== undefined
+  const parsingPreview = readOnly && draftOverride !== undefined && !frozenSnapshot && !frozenSpectra
   const [draft, setDraft] = useState<UploadDraft | null>(null)
   const [loading, setLoading] = useState(true)
   const [dirty, setDirty] = useState(false)
@@ -839,7 +840,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
       <MaterialStatesEditor fixedContract={draft._form_contract_version === 1} beforeStructureUpload={() => saveDraft(false)}
         independentStructureWorkspace
-        propertySpectra={{ frozenListing: frozenSpectra, initialListing: loadedSpectra, target: revisionPaperId && revisionMeta.current
+        propertySpectra={parsingPreview ? undefined : { frozenListing: frozenSpectra, initialListing: loadedSpectra, target: revisionPaperId && revisionMeta.current
           ? { target: 'revision', target_id: revisionMeta.current.revision_id }
           : { target: 'upload', target_id: taskId }, beforeNavigate: async () => {
             if (readOnly) return true
@@ -849,7 +850,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
             const saved = await saveDraft(true, true, true)
             return saved && version === revisionRef.current
           } }}
-        spectrumTarget={revisionPaperId && revisionMeta.current
+        spectrumTarget={parsingPreview ? undefined : revisionPaperId && revisionMeta.current
           ? { target: 'revision', target_id: revisionMeta.current.revision_id }
           : { target: 'upload', target_id: taskId }}
         beforeSpectrumEdit={() => saveDraft(false)}

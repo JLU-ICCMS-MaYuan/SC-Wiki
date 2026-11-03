@@ -1,0 +1,162 @@
+{
+  "task_id": "2ccc1b39f11f4cda810b9fc0c147d6bc",
+  "status": "ready",
+  "timing": {
+    "started_at": 1793712380,
+    "finished_at": 1793712564,
+    "running_since": null,
+    "elapsed_seconds": 184
+  },
+  "last_spectrum_completed": 1793712564.0,
+  "states": 14,
+  "scalar": [
+    [
+      50,
+      0.02234
+    ]
+  ],
+  "curves": [
+    {
+      "collection": "a085bf83941647bd8f615ee7d16a30b4",
+      "run": "21ac749e97d84bd0af8b90823351aac8",
+      "material": "CaH4",
+      "pressure": 50,
+      "group": "I4/mmm",
+      "kind": "phonon_dos",
+      "page": 10,
+      "points": 555,
+      "counts": {
+        "missing": 372,
+        "observed": 183,
+        "interpolated": 0,
+        "baseline_inferred": 0,
+        "edge_continuation": 0,
+        "boundary_assumption": 0
+      },
+      "algorithm": "spectra-production-state-first-v3"
+    },
+    {
+      "collection": "c3aa6848e07d4c47827ddae71e144821",
+      "run": "7d45ba4d571a491f91b8d78899630fef",
+      "material": "CaH4",
+      "pressure": 200,
+      "group": "Cmcm",
+      "kind": "phonon_dos",
+      "page": 10,
+      "points": 555,
+      "counts": {
+        "missing": 308,
+        "observed": 230,
+        "interpolated": 4,
+        "baseline_inferred": 13,
+        "edge_continuation": 0,
+        "boundary_assumption": 0
+      },
+      "algorithm": "spectra-production-state-first-v3"
+    },
+    {
+      "collection": "6eabbcb603864c8e834bdbef91d4008c",
+      "run": "409da79a39ad4b1f9467331c3b6102af",
+      "material": "CaH4",
+      "pressure": 150,
+      "group": "I4/mmm",
+      "kind": "phonon_dos",
+      "page": 10,
+      "points": 555,
+      "counts": {
+        "missing": 350,
+        "observed": 179,
+        "interpolated": 11,
+        "baseline_inferred": 15,
+        "edge_continuation": 0,
+        "boundary_assumption": 0
+      },
+      "algorithm": "spectra-production-state-first-v3"
+    },
+    {
+      "collection": "f7984f47b4714c3ea3d094476540b7e3",
+      "run": "5fc0bbf7fa774a8d8f240952849ef611",
+      "material": "CaH6",
+      "pressure": 150,
+      "group": "Im-3m",
+      "kind": "alpha2f",
+      "page": 3,
+      "points": 628,
+      "counts": {
+        "missing": 270,
+        "observed": 358,
+        "interpolated": 0,
+        "baseline_inferred": 0,
+        "edge_continuation": 0,
+        "boundary_assumption": 0
+      },
+      "algorithm": "spectra-production-state-first-v3"
+    },
+    {
+      "collection": "e84999b02c014c44b11e3b8bdac5aeb9",
+      "run": "367bcac23b564c64a318decb1524bd5c",
+      "material": "CaH6",
+      "pressure": 200,
+      "group": "Im-3m",
+      "kind": "phonon_dos",
+      "page": 17,
+      "points": 876,
+      "counts": {
+        "missing": 202,
+        "observed": 674,
+        "interpolated": 0,
+        "baseline_inferred": 0,
+        "edge_continuation": 0,
+        "boundary_assumption": 0
+      },
+      "algorithm": "spectra-production-state-first-v3"
+    },
+    {
+      "collection": "b3246b1f82d745ca918613dcbe41c21d",
+      "run": "ef422e0ae45a4f07b7dd5b721825a969",
+      "material": "CaH6",
+      "pressure": 150,
+      "group": "Im-3m",
+      "kind": "phonon_dos",
+      "page": 17,
+      "points": 876,
+      "counts": {
+        "missing": 194,
+        "observed": 680,
+        "interpolated": 2,
+        "baseline_inferred": 0,
+        "edge_continuation": 0,
+        "boundary_assumption": 0
+      },
+      "algorithm": "spectra-production-state-first-v3"
+    }
+  ],
+  "model_review": {
+    "errors": [],
+    "passes": [],
+    "batches": 0,
+    "contract": "unified-model-review-v1",
+    "completed_fields": 215,
+    "unfinished_fields": 0
+  },
+  "reread_equal": true,
+  "files": [
+    {
+      "name": "2012 CaH6-王晖.pdf",
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da"
+    },
+    {
+      "name": "2012 CaH6--suppliment-王晖.pdf",
+      "sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348"
+    }
+  ],
+  "active_tasks": [
+    {
+      "id": "2ccc1b39f11f4cda810b9fc0c147d6bc",
+      "filename": "2012 CaH6-王晖.pdf",
+      "status": "ready"
+    }
+  ],
+  "previous_tasks_deleted": true,
+  "h3s_paper_1204_preserved": true
+}
