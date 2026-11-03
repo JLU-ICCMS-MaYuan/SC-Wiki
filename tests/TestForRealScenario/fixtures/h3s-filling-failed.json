@@ -1,0 +1,1335 @@
+{
+  "origin": {
+    "task_id": "f5cf58ab69e646dda1d53dd523a5e121",
+    "model": "gpt-6.1-sol",
+    "failure": "整理丢失原数值、方法或 μ* 配对",
+    "source_files": [
+      {
+        "role": "main",
+        "path": "/Users/mayuan/Downloads/TheoryPDF/2014 H3S-段德芳.pdf",
+        "size": 1757541,
+        "sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef"
+      },
+      {
+        "role": "supplementary",
+        "path": "/Users/mayuan/Downloads/TheoryPDF/2014 H3S supplymentary.pdf",
+        "size": 583061,
+        "sha256": "2c04b51e2cb57259fe8f8e5c8a464871647b5a0a7a731ee636f42cc406efb396"
+      }
+    ],
+    "raw_report_sha256": "0dcb3462f4c313ce44689fe26ddcc4b5a6563170eef79d7a975b00b58dea1728"
+  },
+  "states": [
+    {
+      "material": "(H2S)2H2",
+      "material_name": "H3S",
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static",
+      "pressure_value_gpa": 130.0,
+      "reported_space_group_symbol": "R3m",
+      "reported_space_group_number": 160,
+      "material_dimensionality": "unknown",
+      "structure_families": [],
+      "basis_kind": "paper_quote",
+      "schema_version": 2,
+      "element_count": 2,
+      "crystal_system": "trigonal",
+      "structure": null,
+      "calculation_context": null,
+      "experimental_context": null,
+      "tc_results": [],
+      "properties": []
+    },
+    {
+      "material": "(H2S)2H2",
+      "material_name": "H3S",
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static",
+      "pressure_value_gpa": 200.0,
+      "reported_space_group_symbol": "Im-3m",
+      "reported_space_group_number": 229,
+      "material_dimensionality": "unknown",
+      "structure_families": [],
+      "basis_kind": "paper_quote",
+      "schema_version": 2,
+      "element_count": 2,
+      "crystal_system": "cubic",
+      "structure": null,
+      "calculation_context": null,
+      "experimental_context": null,
+      "tc_results": [],
+      "properties": []
+    },
+    {
+      "material": "(H2S)2H2",
+      "material_name": "H3S",
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static",
+      "pressure_value_gpa": 250.0,
+      "reported_space_group_symbol": "Im-3m",
+      "reported_space_group_number": 229,
+      "material_dimensionality": "unknown",
+      "structure_families": [],
+      "basis_kind": "paper_quote",
+      "schema_version": 2,
+      "element_count": 2,
+      "crystal_system": "cubic",
+      "structure": null,
+      "calculation_context": null,
+      "experimental_context": null,
+      "tc_results": [],
+      "properties": []
+    },
+    {
+      "material": "(H2S)2H2",
+      "material_name": "H3S",
+      "state_kind": "theoretical",
+      "structure_optimization": "classical_static",
+      "pressure_value_gpa": 300.0,
+      "reported_space_group_symbol": "Im-3m",
+      "reported_space_group_number": 229,
+      "material_dimensionality": "unknown",
+      "structure_families": [],
+      "basis_kind": "paper_quote",
+      "schema_version": 2,
+      "element_count": 2,
+      "crystal_system": "cubic",
+      "structure": null,
+      "calculation_context": null,
+      "experimental_context": null,
+      "tc_results": [],
+      "properties": []
+    }
+  ],
+  "candidates": [
+    {
+      "candidate_id": "s0:m0:r0",
+      "state_index": 0,
+      "record": {
+        "record_key": "assembled-0-superconductive_properties-0",
+        "module_code": "superconductive_properties",
+        "record_type": "predicted_tc",
+        "property_code": "tc",
+        "custom_property_key": null,
+        "definition_key": "record.superconductive_properties.predicted_tc.allen_dynes",
+        "definition_version": 2,
+        "name_raw": "superconducting transition temperature",
+        "value_kind": "range",
+        "value_raw": "155 K to 166 K",
+        "value_number": null,
+        "value_min": 155.0,
+        "value_max": 166.0,
+        "value_text": null,
+        "value_boolean": null,
+        "uncertainty": null,
+        "unit_raw": "K",
+        "canonical_unit": "K",
+        "method_code": "allen_dynes",
+        "method_raw": "Allen-Dynes-modified McMillan equation",
+        "criterion_code": null,
+        "criterion_raw": null,
+        "structure_key": null,
+        "payload": {
+          "calculation_conditions": {
+            "calculation_code": "QUANTUM-ESPRESSO",
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": "density functional perturbation theory",
+            "qe": {
+              "atoms": null,
+              "charge_density_cutoff": null,
+              "convergence_energy": null,
+              "convergence_force": null,
+              "energy_cutoff": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 80,
+                "value_raw": "80",
+                "value_text": null
+              },
+              "k_broadening": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.03,
+                "value_raw": "0.03",
+                "value_text": null
+              },
+              "k_grid": "16 × 16 × 24",
+              "q_grid": "3 × 3 × 5",
+              "q_grid_interpolated": null,
+              "supercell": null,
+              "temperature_k": null
+            },
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "method_variant_status": null,
+          "parameters": {
+            "extensions": [
+              {
+                "evidences": [
+                  {
+                    "block_id": "0f0b927feb64fb4d2d47bb8fc26e660273b80fa97930ebef65554b671ff3eca8",
+                    "file_id": "23bc5a90648048fb9e603b3929803ab8",
+                    "pdf_page": 3,
+                    "quote": null,
+                    "quote_id": "0f0b927feb64fb4d2d47bb8fc26e660273b80fa97930ebef65554b671ff3eca8"
+                  },
+                  {
+                    "block_id": "01a6a88c3d900a443fb45b334d18a06becdbe56a58537b992d63f01ef17dde8d",
+                    "file_id": "23bc5a90648048fb9e603b3929803ab8",
+                    "pdf_page": 4,
+                    "quote": null,
+                    "quote_id": "01a6a88c3d900a443fb45b334d18a06becdbe56a58537b992d63f01ef17dde8d"
+                  }
+                ],
+                "key": "mu_star_reported_range",
+                "reported": true,
+                "unit_raw": "1",
+                "value_boolean": null,
+                "value_kind": "range",
+                "value_max": 0.13,
+                "value_min": 0.1,
+                "value_number": null,
+                "value_raw": "0.1-0.13",
+                "value_text": null
+              },
+              {
+                "key": "omega_log_reported",
+                "value_kind": "text",
+                "value_raw": "1125.1",
+                "unit_raw": "K",
+                "reported": {
+                  "evidences": null,
+                  "reported": true,
+                  "unit_raw": "K",
+                  "value_boolean": null,
+                  "value_kind": "number",
+                  "value_max": null,
+                  "value_min": null,
+                  "value_number": 1125.1,
+                  "value_raw": "1125.1",
+                  "value_text": null
+                }
+              }
+            ],
+            "lambda_ep": 2.07,
+            "omega_log": 1125.1
+          }
+        },
+        "evidences": [
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 3,
+            "printed_page": null,
+            "block_id": "0f0b927feb64fb4d2d47bb8fc26e660273b80fa97930ebef65554b671ff3eca8",
+            "bbox": [
+              300.0191044921875,
+              611.0247216186524,
+              555.3925089111328,
+              749.5027955322265
+            ],
+            "polygon": null,
+            "quote": "The calculated phonon dispersion curves and projected phonon DOS for R3m and Im-3m structures are presented in Fig. 5. The absence of any imaginary frequency indicates their dynamical stability. The low-frequency bands come mainly from the vibrations of the S atom, whereas higher-frequency modes are mostly related to the H atoms. The electron phonon coupling (EPC) λ, logarithmic average phonon frequency \\omega _ { \\mathrm { l o g ^ { \\star } } } and the Eliashberg phonon spectral function \\propto   ^ { 2 }   F ( \\omega ) ^ { 3 9 } are investigated to explore the possible superconductivity of ( \\mathrm { H } _ { 2 } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } . The resulting λ of R3m is 2.07 at 130 GPa, indicating a fairly strong EPC; the \\omega _ { \\mathrm { l o g } } calculated from the phonon spectrum is 1125.1 K. The calculated λ of Im-3m is 2.19 at 200 GPa, whereas the \\omega _ { \\mathrm { l o g } } is 1334.6 K. Using the calculated \\omega _ { \\mathrm { l o g } } and commonly accepted values of the Coulomb pseudopotential \\mu ^ { * } (0.1-",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 3
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 4,
+            "printed_page": null,
+            "block_id": "01a6a88c3d900a443fb45b334d18a06becdbe56a58537b992d63f01ef17dde8d",
+            "bbox": [
+              39.88349206542969,
+              388.0515517578125,
+              294.06634448242187,
+              463.9406657104492
+            ],
+            "polygon": null,
+            "quote": "0 . 1 3 ) ^ { 4 0 } from the Allen-Dynes-modified McMillan equation⁴1, the superconducting transition temperature T _ { c } for R3m was obtained in the range of 155 K to 166 K at 130 GPa. Similarly, the calculated T _ { c } for the Im-3m structure at 200 GPa reaches high values of 191 K to 204 K. T _ { c } decreases nearly linearly with pressure (184 K at 250 GPa and 179 K at 300 GPa for \\mu ^ { * } = 0 . 1 3 ) at an approximate rate (dT/dP) of —0.12 K/GPa for the Im-3m structure.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 4
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 6,
+            "printed_page": null,
+            "block_id": "ee8276ffae475a40658c37b71661e9204c0f11ef6fa389d6ce337a1f0c654198",
+            "bbox": [
+              39.88349206542969,
+              125.96028192138672,
+              294.06634448242187,
+              211.23773986816408
+            ],
+            "polygon": null,
+            "quote": "Lattice dynamics and superconducting properties were calculated using density functional perturbation theory46 and the plane-wave pseudopotential method with Vanderbilt-type ultrasoft potentials47, as implemented in the QUANTUM-ESPRESSO code48. Convergence tests provide a suitable value of 80 Ry kinetic energy cutoff. The q-point mesh in the first BZof 3 × 3 × 5 for R3m and 8 × 8 × 8 for Im-3m structures are used in the interpolation of the force constants for the phonon dispersion curve calculations.A denser k-point mesh 16 × 16 × 24 for R3m and32 × 32 × 32 for Im-3m structures are adopted to ensure k-point sampling convergence with a Gaussians width of 0.03 Ry, which approximates the zero width limits in the calculation of EPC parameter λ.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 6
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "quote": "the superconducting transition temperature T _ { c } for R3m was obtained in the range of 155 K to 166 K at 130 GPa."
+          }
+        ],
+        "is_representative": true,
+        "basis_kind": "paper_quote"
+      }
+    },
+    {
+      "candidate_id": "s1:m0:r0",
+      "state_index": 1,
+      "record": {
+        "record_key": "assembled-1-superconductive_properties-0",
+        "module_code": "superconductive_properties",
+        "record_type": "predicted_tc",
+        "property_code": "tc",
+        "custom_property_key": null,
+        "definition_key": "record.superconductive_properties.predicted_tc.allen_dynes",
+        "definition_version": 2,
+        "name_raw": "superconducting transition temperature",
+        "value_kind": "range",
+        "value_raw": "191 K to 204 K",
+        "value_number": null,
+        "value_min": 191.0,
+        "value_max": 204.0,
+        "value_text": null,
+        "value_boolean": null,
+        "uncertainty": null,
+        "unit_raw": "K",
+        "canonical_unit": "K",
+        "method_code": "allen_dynes",
+        "method_raw": "Allen-Dynes-modified McMillan equation",
+        "criterion_code": null,
+        "criterion_raw": null,
+        "structure_key": null,
+        "payload": {
+          "calculation_conditions": {
+            "calculation_code": "QUANTUM-ESPRESSO",
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": "density functional perturbation theory",
+            "qe": {
+              "atoms": null,
+              "charge_density_cutoff": null,
+              "convergence_energy": null,
+              "convergence_force": null,
+              "energy_cutoff": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 80,
+                "value_raw": "80",
+                "value_text": null
+              },
+              "k_broadening": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.03,
+                "value_raw": "0.03",
+                "value_text": null
+              },
+              "k_grid": "32 × 32 × 32",
+              "q_grid": "8 × 8 × 8",
+              "q_grid_interpolated": null,
+              "supercell": null,
+              "temperature_k": null
+            },
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "method_variant_status": null,
+          "parameters": {
+            "extensions": [
+              {
+                "evidences": [
+                  {
+                    "block_id": "0f0b927feb64fb4d2d47bb8fc26e660273b80fa97930ebef65554b671ff3eca8",
+                    "file_id": "23bc5a90648048fb9e603b3929803ab8",
+                    "pdf_page": 3,
+                    "quote": null,
+                    "quote_id": "0f0b927feb64fb4d2d47bb8fc26e660273b80fa97930ebef65554b671ff3eca8"
+                  },
+                  {
+                    "block_id": "01a6a88c3d900a443fb45b334d18a06becdbe56a58537b992d63f01ef17dde8d",
+                    "file_id": "23bc5a90648048fb9e603b3929803ab8",
+                    "pdf_page": 4,
+                    "quote": null,
+                    "quote_id": "01a6a88c3d900a443fb45b334d18a06becdbe56a58537b992d63f01ef17dde8d"
+                  }
+                ],
+                "key": "mu_star_reported_range",
+                "reported": true,
+                "unit_raw": "1",
+                "value_boolean": null,
+                "value_kind": "range",
+                "value_max": 0.13,
+                "value_min": 0.1,
+                "value_number": null,
+                "value_raw": "0.1-0.13",
+                "value_text": null
+              },
+              {
+                "key": "omega_log_reported",
+                "value_kind": "text",
+                "value_raw": "1334.6",
+                "unit_raw": "K",
+                "reported": {
+                  "evidences": null,
+                  "reported": true,
+                  "unit_raw": "K",
+                  "value_boolean": null,
+                  "value_kind": "number",
+                  "value_max": null,
+                  "value_min": null,
+                  "value_number": 1334.6,
+                  "value_raw": "1334.6",
+                  "value_text": null
+                }
+              }
+            ],
+            "lambda_ep": 2.19,
+            "omega_log": 1334.6
+          }
+        },
+        "evidences": [
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 1,
+            "printed_page": null,
+            "block_id": "422b9329653c01f389e1ceb9c048c7a458c92769da7da93c0bd2a5548ebc0ab0",
+            "bbox": [
+              139.88986022949217,
+              291.0386638183594,
+              555.3925089111328,
+              406.82823974609374
+            ],
+            "polygon": null,
+            "quote": "The high pressure structures, metallization, and superconductivity of recently synthesized \\mathbf { H } _ { 2 ^ { - } } containing compounds ( \\mathrm { H } _ { 2 } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } are elucidated by ab initio calculations. The ordered crystal structure with P1 symmetry is determined, supported by the good agreement between theoretical and experimental X-ray diffraction data, equation of states, and Raman spectra. The Cccm structure is favorable with partial hydrogen bond symmetrization above 37 GPa. Upon further compression, \\mathbf { H } _ { 2 } molecules disappear and two intriguing metallic structures with R3m and Im-3m symmetries are reconstructive above 111 and 180 GPa, respectively. The predicted metallization pressure is 111 GPa, which is approximately one-third of the currently suggested metallization pressure of bulk molecular hydrogen. Application of the Allen-Dynes-modified McMillan equation for the Im-3m structure yields high T _ { \\mathrm { c } } values of 191 K to 204 K at 200 GPa, which is among the highest values reported for \\mathbf { H } _ { 2 } \\cdot -rich van der Waals compounds and \\mathbf { M H } _ { 3 } type hydride thus far.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 1
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 3,
+            "printed_page": null,
+            "block_id": "0f0b927feb64fb4d2d47bb8fc26e660273b80fa97930ebef65554b671ff3eca8",
+            "bbox": [
+              300.0191044921875,
+              611.0247216186524,
+              555.3925089111328,
+              749.5027955322265
+            ],
+            "polygon": null,
+            "quote": "The calculated phonon dispersion curves and projected phonon DOS for R3m and Im-3m structures are presented in Fig. 5. The absence of any imaginary frequency indicates their dynamical stability. The low-frequency bands come mainly from the vibrations of the S atom, whereas higher-frequency modes are mostly related to the H atoms. The electron phonon coupling (EPC) λ, logarithmic average phonon frequency \\omega _ { \\mathrm { l o g ^ { \\star } } } and the Eliashberg phonon spectral function \\propto   ^ { 2 }   F ( \\omega ) ^ { 3 9 } are investigated to explore the possible superconductivity of ( \\mathrm { H } _ { 2 } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } . The resulting λ of R3m is 2.07 at 130 GPa, indicating a fairly strong EPC; the \\omega _ { \\mathrm { l o g } } calculated from the phonon spectrum is 1125.1 K. The calculated λ of Im-3m is 2.19 at 200 GPa, whereas the \\omega _ { \\mathrm { l o g } } is 1334.6 K. Using the calculated \\omega _ { \\mathrm { l o g } } and commonly accepted values of the Coulomb pseudopotential \\mu ^ { * } (0.1-",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 3
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 4,
+            "printed_page": null,
+            "block_id": "01a6a88c3d900a443fb45b334d18a06becdbe56a58537b992d63f01ef17dde8d",
+            "bbox": [
+              39.88349206542969,
+              388.0515517578125,
+              294.06634448242187,
+              463.9406657104492
+            ],
+            "polygon": null,
+            "quote": "0 . 1 3 ) ^ { 4 0 } from the Allen-Dynes-modified McMillan equation⁴1, the superconducting transition temperature T _ { c } for R3m was obtained in the range of 155 K to 166 K at 130 GPa. Similarly, the calculated T _ { c } for the Im-3m structure at 200 GPa reaches high values of 191 K to 204 K. T _ { c } decreases nearly linearly with pressure (184 K at 250 GPa and 179 K at 300 GPa for \\mu ^ { * } = 0 . 1 3 ) at an approximate rate (dT/dP) of —0.12 K/GPa for the Im-3m structure.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 4
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 6,
+            "printed_page": null,
+            "block_id": "ee8276ffae475a40658c37b71661e9204c0f11ef6fa389d6ce337a1f0c654198",
+            "bbox": [
+              39.88349206542969,
+              125.96028192138672,
+              294.06634448242187,
+              211.23773986816408
+            ],
+            "polygon": null,
+            "quote": "Lattice dynamics and superconducting properties were calculated using density functional perturbation theory46 and the plane-wave pseudopotential method with Vanderbilt-type ultrasoft potentials47, as implemented in the QUANTUM-ESPRESSO code48. Convergence tests provide a suitable value of 80 Ry kinetic energy cutoff. The q-point mesh in the first BZof 3 × 3 × 5 for R3m and 8 × 8 × 8 for Im-3m structures are used in the interpolation of the force constants for the phonon dispersion curve calculations.A denser k-point mesh 16 × 16 × 24 for R3m and32 × 32 × 32 for Im-3m structures are adopted to ensure k-point sampling convergence with a Gaussians width of 0.03 Ry, which approximates the zero width limits in the calculation of EPC parameter λ.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 6
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "quote": "Similarly, the calculated T _ { c } for the Im-3m structure at 200 GPa reaches high values of 191 K to 204 K."
+          }
+        ],
+        "is_representative": true,
+        "basis_kind": "paper_quote"
+      }
+    },
+    {
+      "candidate_id": "s1:m0:r1",
+      "state_index": 1,
+      "record": {
+        "record_key": "assembled-1-superconductive_properties-1",
+        "module_code": "superconductive_properties",
+        "record_type": "predicted_tc",
+        "property_code": "tc",
+        "custom_property_key": null,
+        "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+        "definition_version": 2,
+        "name_raw": "high T _ { c }",
+        "value_kind": "number",
+        "value_raw": "200 K",
+        "value_number": 200.0,
+        "value_min": null,
+        "value_max": null,
+        "value_text": null,
+        "value_boolean": null,
+        "uncertainty": null,
+        "unit_raw": "K",
+        "canonical_unit": "K",
+        "method_code": "unknown",
+        "method_raw": "unknown",
+        "criterion_code": null,
+        "criterion_raw": null,
+        "structure_key": null,
+        "payload": {
+          "calculation_conditions": {
+            "calculation_code": null,
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": null,
+            "qe": null,
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "method_variant_status": null,
+          "parameters": {}
+        },
+        "evidences": [
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 2,
+            "printed_page": null,
+            "block_id": "85769f912afdd5914b9bf92d5c599c5689d8e6fba2c790d759aea272f54084da",
+            "bbox": [
+              39.88349206542969,
+              49.28880596923828,
+              293.4710684814453,
+              93.88343994140625
+            ],
+            "polygon": null,
+            "quote": "extensively explored. Our calculations reveal a metallization pressure of 111 GPa and a high T _ { c } of 200 K at 200 GPa. The lower metallization pressure is within the reach of current diamond-anvil techniques, which will inevitably stimulate extensive experiments.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 2
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 1,
+            "printed_page": null,
+            "block_id": "422b9329653c01f389e1ceb9c048c7a458c92769da7da93c0bd2a5548ebc0ab0",
+            "bbox": [
+              139.88986022949217,
+              291.0386638183594,
+              555.3925089111328,
+              406.82823974609374
+            ],
+            "polygon": null,
+            "quote": "The high pressure structures, metallization, and superconductivity of recently synthesized \\mathbf { H } _ { 2 ^ { - } } containing compounds ( \\mathrm { H } _ { 2 } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } are elucidated by ab initio calculations. The ordered crystal structure with P1 symmetry is determined, supported by the good agreement between theoretical and experimental X-ray diffraction data, equation of states, and Raman spectra. The Cccm structure is favorable with partial hydrogen bond symmetrization above 37 GPa. Upon further compression, \\mathbf { H } _ { 2 } molecules disappear and two intriguing metallic structures with R3m and Im-3m symmetries are reconstructive above 111 and 180 GPa, respectively. The predicted metallization pressure is 111 GPa, which is approximately one-third of the currently suggested metallization pressure of bulk molecular hydrogen. Application of the Allen-Dynes-modified McMillan equation for the Im-3m structure yields high T _ { \\mathrm { c } } values of 191 K to 204 K at 200 GPa, which is among the highest values reported for \\mathbf { H } _ { 2 } \\cdot -rich van der Waals compounds and \\mathbf { M H } _ { 3 } type hydride thus far.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 1
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "quote": "Similarly, the calculated T _ { c } for the Im-3m structure at 200 GPa reaches high values of 191 K to 204 K."
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "quote": "Our calculations reveal a metallization pressure of 111 GPa and a high T _ { c } of 200 K at 200 GPa."
+          }
+        ],
+        "is_representative": false,
+        "basis_kind": "paper_quote"
+      }
+    },
+    {
+      "candidate_id": "s2:m0:r0",
+      "state_index": 2,
+      "record": {
+        "record_key": "assembled-2-superconductive_properties-0",
+        "module_code": "superconductive_properties",
+        "record_type": "predicted_tc",
+        "property_code": "tc",
+        "custom_property_key": null,
+        "definition_key": "record.superconductive_properties.predicted_tc.allen_dynes",
+        "definition_version": 2,
+        "name_raw": "T _ { c }",
+        "value_kind": "number",
+        "value_raw": "184 K",
+        "value_number": 184.0,
+        "value_min": null,
+        "value_max": null,
+        "value_text": null,
+        "value_boolean": null,
+        "uncertainty": null,
+        "unit_raw": "K",
+        "canonical_unit": "K",
+        "method_code": "allen_dynes",
+        "method_raw": "Allen-Dynes-modified McMillan equation",
+        "criterion_code": null,
+        "criterion_raw": null,
+        "structure_key": null,
+        "payload": {
+          "calculation_conditions": {
+            "calculation_code": "QUANTUM-ESPRESSO",
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": "density functional perturbation theory",
+            "qe": {
+              "atoms": null,
+              "charge_density_cutoff": null,
+              "convergence_energy": null,
+              "convergence_force": null,
+              "energy_cutoff": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 80,
+                "value_raw": "80",
+                "value_text": null
+              },
+              "k_broadening": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.03,
+                "value_raw": "0.03",
+                "value_text": null
+              },
+              "k_grid": "32 × 32 × 32",
+              "q_grid": "8 × 8 × 8",
+              "q_grid_interpolated": null,
+              "supercell": null,
+              "temperature_k": null
+            },
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "method_variant_status": null,
+          "parameters": {
+            "mu_star": 0.13
+          }
+        },
+        "evidences": [
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 4,
+            "printed_page": null,
+            "block_id": "01a6a88c3d900a443fb45b334d18a06becdbe56a58537b992d63f01ef17dde8d",
+            "bbox": [
+              39.88349206542969,
+              388.0515517578125,
+              294.06634448242187,
+              463.9406657104492
+            ],
+            "polygon": null,
+            "quote": "0 . 1 3 ) ^ { 4 0 } from the Allen-Dynes-modified McMillan equation⁴1, the superconducting transition temperature T _ { c } for R3m was obtained in the range of 155 K to 166 K at 130 GPa. Similarly, the calculated T _ { c } for the Im-3m structure at 200 GPa reaches high values of 191 K to 204 K. T _ { c } decreases nearly linearly with pressure (184 K at 250 GPa and 179 K at 300 GPa for \\mu ^ { * } = 0 . 1 3 ) at an approximate rate (dT/dP) of —0.12 K/GPa for the Im-3m structure.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 4
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 6,
+            "printed_page": null,
+            "block_id": "ee8276ffae475a40658c37b71661e9204c0f11ef6fa389d6ce337a1f0c654198",
+            "bbox": [
+              39.88349206542969,
+              125.96028192138672,
+              294.06634448242187,
+              211.23773986816408
+            ],
+            "polygon": null,
+            "quote": "Lattice dynamics and superconducting properties were calculated using density functional perturbation theory46 and the plane-wave pseudopotential method with Vanderbilt-type ultrasoft potentials47, as implemented in the QUANTUM-ESPRESSO code48. Convergence tests provide a suitable value of 80 Ry kinetic energy cutoff. The q-point mesh in the first BZof 3 × 3 × 5 for R3m and 8 × 8 × 8 for Im-3m structures are used in the interpolation of the force constants for the phonon dispersion curve calculations.A denser k-point mesh 16 × 16 × 24 for R3m and32 × 32 × 32 for Im-3m structures are adopted to ensure k-point sampling convergence with a Gaussians width of 0.03 Ry, which approximates the zero width limits in the calculation of EPC parameter λ.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 6
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "quote": "T _ { c } decreases nearly linearly with pressure (184 K at 250 GPa and 179 K at 300 GPa for \\mu ^ { * } = 0 . 1 3 ) at an approximate rate (dT/dP) of —0.12 K/GPa for the Im-3m structure."
+          }
+        ],
+        "is_representative": true,
+        "basis_kind": "paper_quote"
+      }
+    },
+    {
+      "candidate_id": "s3:m0:r0",
+      "state_index": 3,
+      "record": {
+        "record_key": "assembled-3-superconductive_properties-0",
+        "module_code": "superconductive_properties",
+        "record_type": "predicted_tc",
+        "property_code": "tc",
+        "custom_property_key": null,
+        "definition_key": "record.superconductive_properties.predicted_tc.allen_dynes",
+        "definition_version": 2,
+        "name_raw": "T _ { c }",
+        "value_kind": "number",
+        "value_raw": "179 K",
+        "value_number": 179.0,
+        "value_min": null,
+        "value_max": null,
+        "value_text": null,
+        "value_boolean": null,
+        "uncertainty": null,
+        "unit_raw": "K",
+        "canonical_unit": "K",
+        "method_code": "allen_dynes",
+        "method_raw": "Allen-Dynes-modified McMillan equation",
+        "criterion_code": null,
+        "criterion_raw": null,
+        "structure_key": null,
+        "payload": {
+          "calculation_conditions": {
+            "calculation_code": "QUANTUM-ESPRESSO",
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": "density functional perturbation theory",
+            "qe": {
+              "atoms": null,
+              "charge_density_cutoff": null,
+              "convergence_energy": null,
+              "convergence_force": null,
+              "energy_cutoff": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 80,
+                "value_raw": "80",
+                "value_text": null
+              },
+              "k_broadening": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.03,
+                "value_raw": "0.03",
+                "value_text": null
+              },
+              "k_grid": "32 × 32 × 32",
+              "q_grid": "8 × 8 × 8",
+              "q_grid_interpolated": null,
+              "supercell": null,
+              "temperature_k": null
+            },
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "method_variant_status": null,
+          "parameters": {
+            "mu_star": 0.13
+          }
+        },
+        "evidences": [
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 4,
+            "printed_page": null,
+            "block_id": "01a6a88c3d900a443fb45b334d18a06becdbe56a58537b992d63f01ef17dde8d",
+            "bbox": [
+              39.88349206542969,
+              388.0515517578125,
+              294.06634448242187,
+              463.9406657104492
+            ],
+            "polygon": null,
+            "quote": "0 . 1 3 ) ^ { 4 0 } from the Allen-Dynes-modified McMillan equation⁴1, the superconducting transition temperature T _ { c } for R3m was obtained in the range of 155 K to 166 K at 130 GPa. Similarly, the calculated T _ { c } for the Im-3m structure at 200 GPa reaches high values of 191 K to 204 K. T _ { c } decreases nearly linearly with pressure (184 K at 250 GPa and 179 K at 300 GPa for \\mu ^ { * } = 0 . 1 3 ) at an approximate rate (dT/dP) of —0.12 K/GPa for the Im-3m structure.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 4
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "source_version": 1,
+            "pdf_page": 6,
+            "printed_page": null,
+            "block_id": "ee8276ffae475a40658c37b71661e9204c0f11ef6fa389d6ce337a1f0c654198",
+            "bbox": [
+              39.88349206542969,
+              125.96028192138672,
+              294.06634448242187,
+              211.23773986816408
+            ],
+            "polygon": null,
+            "quote": "Lattice dynamics and superconducting properties were calculated using density functional perturbation theory46 and the plane-wave pseudopotential method with Vanderbilt-type ultrasoft potentials47, as implemented in the QUANTUM-ESPRESSO code48. Convergence tests provide a suitable value of 80 Ry kinetic energy cutoff. The q-point mesh in the first BZof 3 × 3 × 5 for R3m and 8 × 8 × 8 for Im-3m structures are used in the interpolation of the force constants for the phonon dispersion curve calculations.A denser k-point mesh 16 × 16 × 24 for R3m and32 × 32 × 32 for Im-3m structures are adopted to ensure k-point sampling convergence with a Gaussians width of 0.03 Ry, which approximates the zero width limits in the calculation of EPC parameter λ.",
+            "parser": "complementary",
+            "parser_version": "1",
+            "source_kind": "ocr",
+            "table_id": null,
+            "figure_id": null,
+            "page": 6
+          },
+          {
+            "file_id": "23bc5a90648048fb9e603b3929803ab8",
+            "quote": "T _ { c } decreases nearly linearly with pressure (184 K at 250 GPa and 179 K at 300 GPa for \\mu ^ { * } = 0 . 1 3 ) at an approximate rate (dT/dP) of —0.12 K/GPa for the Im-3m structure."
+          }
+        ],
+        "is_representative": true,
+        "basis_kind": "paper_quote"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "file_id": "23bc5a90648048fb9e603b3929803ab8",
+      "file_role": "main",
+      "source_sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+      "source_version": 1,
+      "block_id": "422b9329653c01f389e1ceb9c048c7a458c92769da7da93c0bd2a5548ebc0ab0",
+      "page_start": 1,
+      "page_end": 1,
+      "content": "The high pressure structures, metallization, and superconductivity of recently synthesized \\mathbf { H } _ { 2 ^ { - } } containing compounds ( \\mathrm { H } _ { 2 } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } are elucidated by ab initio calculations. The ordered crystal structure with P1 symmetry is determined, supported by the good agreement between theoretical and experimental X-ray diffraction data, equation of states, and Raman spectra. The Cccm structure is favorable with partial hydrogen bond symmetrization above 37 GPa. Upon further compression, \\mathbf { H } _ { 2 } molecules disappear and two intriguing metallic structures with R3m and Im-3m symmetries are reconstructive above 111 and 180 GPa, respectively. The predicted metallization pressure is 111 GPa, which is approximately one-third of the currently suggested metallization pressure of bulk molecular hydrogen. Application of the Allen-Dynes-modified McMillan equation for the Im-3m structure yields high T _ { \\mathrm { c } } values of 191 K to 204 K at 200 GPa, which is among the highest values reported for \\mathbf { H } _ { 2 } \\cdot -rich van der Waals compounds and \\mathbf { M H } _ { 3 } type hydride thus far.",
+      "source_id": "source-8"
+    },
+    {
+      "file_id": "23bc5a90648048fb9e603b3929803ab8",
+      "file_role": "main",
+      "source_sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+      "source_version": 1,
+      "block_id": "85769f912afdd5914b9bf92d5c599c5689d8e6fba2c790d759aea272f54084da",
+      "page_start": 2,
+      "page_end": 2,
+      "content": "extensively explored. Our calculations reveal a metallization pressure of 111 GPa and a high T _ { c } of 200 K at 200 GPa. The lower metallization pressure is within the reach of current diamond-anvil techniques, which will inevitably stimulate extensive experiments.",
+      "source_id": "source-15"
+    },
+    {
+      "file_id": "23bc5a90648048fb9e603b3929803ab8",
+      "file_role": "main",
+      "source_sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+      "source_version": 1,
+      "block_id": "0f0b927feb64fb4d2d47bb8fc26e660273b80fa97930ebef65554b671ff3eca8",
+      "page_start": 3,
+      "page_end": 3,
+      "content": "The calculated phonon dispersion curves and projected phonon DOS for R3m and Im-3m structures are presented in Fig. 5. The absence of any imaginary frequency indicates their dynamical stability. The low-frequency bands come mainly from the vibrations of the S atom, whereas higher-frequency modes are mostly related to the H atoms. The electron phonon coupling (EPC) λ, logarithmic average phonon frequency \\omega _ { \\mathrm { l o g ^ { \\star } } } and the Eliashberg phonon spectral function \\propto   ^ { 2 }   F ( \\omega ) ^ { 3 9 } are investigated to explore the possible superconductivity of ( \\mathrm { H } _ { 2 } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } . The resulting λ of R3m is 2.07 at 130 GPa, indicating a fairly strong EPC; the \\omega _ { \\mathrm { l o g } } calculated from the phonon spectrum is 1125.1 K. The calculated λ of Im-3m is 2.19 at 200 GPa, whereas the \\omega _ { \\mathrm { l o g } } is 1334.6 K. Using the calculated \\omega _ { \\mathrm { l o g } } and commonly accepted values of the Coulomb pseudopotential \\mu ^ { * } (0.1-",
+      "source_id": "source-36"
+    },
+    {
+      "file_id": "23bc5a90648048fb9e603b3929803ab8",
+      "file_role": "main",
+      "source_sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+      "source_version": 1,
+      "block_id": "01a6a88c3d900a443fb45b334d18a06becdbe56a58537b992d63f01ef17dde8d",
+      "page_start": 4,
+      "page_end": 4,
+      "content": "0 . 1 3 ) ^ { 4 0 } from the Allen-Dynes-modified McMillan equation⁴1, the superconducting transition temperature T _ { c } for R3m was obtained in the range of 155 K to 166 K at 130 GPa. Similarly, the calculated T _ { c } for the Im-3m structure at 200 GPa reaches high values of 191 K to 204 K. T _ { c } decreases nearly linearly with pressure (184 K at 250 GPa and 179 K at 300 GPa for \\mu ^ { * } = 0 . 1 3 ) at an approximate rate (dT/dP) of —0.12 K/GPa for the Im-3m structure.",
+      "source_id": "source-41"
+    },
+    {
+      "file_id": "23bc5a90648048fb9e603b3929803ab8",
+      "file_role": "main",
+      "source_sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+      "source_version": 1,
+      "block_id": "ee8276ffae475a40658c37b71661e9204c0f11ef6fa389d6ce337a1f0c654198",
+      "page_start": 6,
+      "page_end": 6,
+      "content": "Lattice dynamics and superconducting properties were calculated using density functional perturbation theory46 and the plane-wave pseudopotential method with Vanderbilt-type ultrasoft potentials47, as implemented in the QUANTUM-ESPRESSO code48. Convergence tests provide a suitable value of 80 Ry kinetic energy cutoff. The q-point mesh in the first BZof 3 × 3 × 5 for R3m and 8 × 8 × 8 for Im-3m structures are used in the interpolation of the force constants for the phonon dispersion curve calculations.A denser k-point mesh 16 × 16 × 24 for R3m and32 × 32 × 32 for Im-3m structures are adopted to ensure k-point sampling convergence with a Gaussians width of 0.03 Ry, which approximates the zero width limits in the calculation of EPC parameter λ.",
+      "source_id": "source-58"
+    },
+    {
+      "file_id": "23bc5a90648048fb9e603b3929803ab8",
+      "file_role": "main",
+      "source_sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+      "source_version": 1,
+      "block_id": "34c1129fb5e5dcc3c70649f6410725d8ebf67ef1b1666086b58d3acac9dcca84",
+      "page_start": 4,
+      "page_end": 4,
+      "content": "Motivated by the metallization and potential high-temperature superconductivity in hydrogen-rich materials of ( \\widetilde { \\mathrm { H } _ { 2 } \\mathrm { S } } ) _ { 2 } \\mathrm { H } _ { 2 } or \\mathrm { H } _ { 3 } \\mathrm { S } _ { 3 } high-pressure structures at a wide pressure range of 20 GPa to 300 GPa were extensively explored. Four order structures under high pressure have been predicted: P1 (stable below 37 GPa), Cccm (stable at 37 GPa-111 GPa), R3m (stable at 111 GPa-180 GPa), and Im-3m (stable above 180 GPa). The R3m and Im-3m structures are good metals above 111 GPa. The estimated T _ { c } of the Im-3m phase at 200 GPa is 191 K-204 K, which are among the highest values reported for H₂-rich van der Waals compounds28,29and \\mathrm { M H } _ { 3 } (M = Ga, Ge, Si)-type hydride¹7-19 thus far. In a survey of literature, many similarities in structures, metallization, and superconductivity for the \\mathrm { M H } _ { 3 } { } ^ { 1 7 - 1 9 } are observed. They all have a high-symmetry cubic structure under high pressure, with high superconducting transition temperature. The lowest T _ { c } value is 86 K for \\mathrm { G a H } _ { 3 } . They are also good metals at an experimentally accessible pressure, with the highest metallization pressure at 190 GPa for Si2H6. Although the crystal structure-predicting methods implemented by USPEX code are efficient for global structural convergence, it is limited by the sizes of the simulation cell employed. Given that the number of energy minima on the potential-energy surface grows exponentially with increasing cell size, making an extensive structural search is impossible. Thus, we cannot rule out the possibility that the actual high-pressure phase of ( \\mathrm { H } _ { 2 } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } with larger unit cells may exist.",
+      "source_id": "source-43"
+    },
+    {
+      "file_id": "23bc5a90648048fb9e603b3929803ab8",
+      "file_role": "main",
+      "source_sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+      "source_version": 1,
+      "block_id": "edd3ee0c60fd2dba77bdf33217ff52df86b7d3e2602d30e59b55656b65050921",
+      "page_start": 4,
+      "page_end": 4,
+      "content": "The predicted high T _ { c } for ( \\mathrm { H } _ { 2 } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } or \\mathrm { H } _ { 3 } \\mathrm { S } in the order of ~200 K is very encouraging, which prompted us to study the underlying superconducting mechanism. The corresponding Eliashberg spectral function α²F(ω) and integrated λ as a function of the frequency for the R3m at 130 GPa and Im-3m at 200 GPa are presented in Fig. 5. S vibrations in the frequency region below 15 THz contribute approximately 33.1% in total λ for the R3m structure, whereas H vibrations above 18 THz contribute 66.9% of λ. The low-frequency S vibrations (< 18 THz) and high-frequency H vibrational mode (> 20 THz) contribute 18.4% and 82.6% to the EPC, respectively, for the Im-3m structure. This result highlights that the H atoms play a significant role in superconductivity, although the S vibrations at low frequencies are also contributors. This physical mechanism is similar to \\mathrm { G a H } _ { 3 } { } ^ { 1 8 } and \\mathrm { G e H _ { 4 } ( H _ { 2 } ) _ { 2 } } ^ { 2 9 } , but different from \\mathrm { S i H _ { 4 } ( H _ { 2 } ) _ { 2 } } ^ { 2 8 } where the strong interactions between \\mathrm { H } _ { 2 } and \\mathrm { S i H _ { 4 } } molecules vibrations dominate the superconductivity.",
+      "source_id": "source-45"
+    },
+    {
+      "file_id": "23bc5a90648048fb9e603b3929803ab8",
+      "file_role": "main",
+      "source_sha256": "22ebd3113ca0cd514ee1c92d3d22e7da5374f2ba682f582350f5b10508d379ef",
+      "source_version": 1,
+      "block_id": "d1165c5f407d3ebcd9eb2b04868b4dae02a8ffba789ce0752f447c2e3862eb0e",
+      "page_start": 5,
+      "page_end": 5,
+      "content": "Notably, the calculated metallization pressure of ( \\mathrm { H } _ { 2 } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } (111 GPa) is within the diamond anvil cell capability. The DFT calculation is well known to underestimate the band gap because of its systematic defects for treating the excited states. Thus, the actual metallization pressure for ( \\bar { \\mathrm { H } _ { 2 } } \\mathrm { S } ) _ { 2 } \\mathrm { H } _ { 2 } is likely higher than the DFT estimated values in this study. Nevertheless, the calculated metallization pressure for \\mathrm { ( H _ { 2 } S ) _ { 2 } H _ { 2 } } is approximately one-third of the suggested pressure for the metallization of solid hydrogen³8. The estimated maximal T _ { c } of 200 K in \\mathrm { ( H _ { 2 } S ) _ { 2 } H _ { 2 } } is higher than those predicted for most hydrogencontaining compounds, such as \\mathrm{SnH_{4}(H_{2})_{2}^{28}, GeH_{4}(H_{2})_{2}^{29}} and \\dot { \\mathrm { M H } } _ { 3 } ( \\mathrm{M} = \\mathrm{Ga}, \\mathrm{Ge}, \\mathrm{Si} )^{17-19} . Our findings represent a significant step toward the understanding of the high pressure behavior of metallic hydrogen and hydrogen-rich hydrides, which can stimulate future high-pressure experiments on structural and conductivity measurements.",
+      "source_id": "source-51"
+    }
+  ],
+  "response": {
+    "done": true,
+    "excluded": [],
+    "read_source_ids": [],
+    "records": [
+      {
+        "candidate_ids": [
+          "s0:m0:r0"
+        ],
+        "group": "H3S-R3m-130GPa-classical-static",
+        "method": "allen_dynes",
+        "reason": "Retain the reported 130 GPa R3m temperature range and its associated Coulomb-pseudopotential range. The supplied text does not explicitly pair each temperature endpoint with a specific mu_star endpoint, so no individual endpoint assignments are invented. QE settings are reported for R3m; neither its exchange-correlation functional nor a vibrational approximation is explicitly established.",
+        "source_ids": [
+          "source-36",
+          "source-41",
+          "source-58"
+        ],
+        "values": {
+          "calculation_conditions": {
+            "calculation_code": "QUANTUM-ESPRESSO",
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": "density functional perturbation theory",
+            "qe": {
+              "atoms": null,
+              "charge_density_cutoff": null,
+              "convergence_energy": null,
+              "convergence_force": null,
+              "energy_cutoff": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 80,
+                "value_raw": "80 Ry",
+                "value_text": null
+              },
+              "k_broadening": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.03,
+                "value_raw": "Gaussians width of 0.03 Ry",
+                "value_text": null
+              },
+              "k_grid": "16 × 16 × 24",
+              "q_grid": "3 × 3 × 5",
+              "q_grid_interpolated": null,
+              "supercell": null,
+              "temperature_k": null
+            },
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "canonical_unit": "K",
+          "method_code": "allen_dynes",
+          "method_raw": "Allen-Dynes-modified McMillan equation",
+          "parameters": {
+            "extensions": [],
+            "lambda_ep": 2.07,
+            "mu_star": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": null,
+              "value_boolean": null,
+              "value_kind": "range",
+              "value_max": 0.13,
+              "value_min": 0.1,
+              "value_number": null,
+              "value_raw": "0.1-0.13",
+              "value_text": null
+            },
+            "omega_log": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "K",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 1125.1,
+              "value_raw": "1125.1 K",
+              "value_text": null
+            }
+          },
+          "uncertainty": null,
+          "unit_raw": "K",
+          "value_boolean": null,
+          "value_kind": "range",
+          "value_max": 166,
+          "value_min": 155,
+          "value_number": null,
+          "value_raw": "155 K to 166 K",
+          "value_text": null
+        }
+      },
+      {
+        "candidate_ids": [
+          "s1:m0:r0",
+          "s1:m0:r1"
+        ],
+        "group": "H3S-Im-3m-200GPa-classical-static",
+        "method": "allen_dynes",
+        "reason": "The abstract, results and discussion repeat the same 191–204 K prediction for Im-3m at 200 GPa. The introductory 200 K statement is a rounded summary of this result, also described as approximately 200 K and a maximal 200 K in the discussion and conclusion; it is not an independent unknown-method calculation. Merge that candidate and its sources rather than create a duplicate 200 K point. Preserve the reported mu_star range without inventing explicit endpoint pairings. The 200 GPa lambda_ep and omega_log are not transferred to higher pressures.",
+        "source_ids": [
+          "source-8",
+          "source-15",
+          "source-36",
+          "source-41",
+          "source-43",
+          "source-45",
+          "source-51",
+          "source-58"
+        ],
+        "values": {
+          "calculation_conditions": {
+            "calculation_code": "QUANTUM-ESPRESSO",
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": "density functional perturbation theory",
+            "qe": {
+              "atoms": null,
+              "charge_density_cutoff": null,
+              "convergence_energy": null,
+              "convergence_force": null,
+              "energy_cutoff": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 80,
+                "value_raw": "80 Ry",
+                "value_text": null
+              },
+              "k_broadening": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.03,
+                "value_raw": "Gaussians width of 0.03 Ry",
+                "value_text": null
+              },
+              "k_grid": "32 × 32 × 32",
+              "q_grid": "8 × 8 × 8",
+              "q_grid_interpolated": null,
+              "supercell": null,
+              "temperature_k": null
+            },
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "canonical_unit": "K",
+          "method_code": "allen_dynes",
+          "method_raw": "Allen-Dynes-modified McMillan equation",
+          "parameters": {
+            "extensions": [],
+            "lambda_ep": 2.19,
+            "mu_star": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": null,
+              "value_boolean": null,
+              "value_kind": "range",
+              "value_max": 0.13,
+              "value_min": 0.1,
+              "value_number": null,
+              "value_raw": "0.1-0.13",
+              "value_text": null
+            },
+            "omega_log": {
+              "evidences": null,
+              "reported": true,
+              "unit_raw": "K",
+              "value_boolean": null,
+              "value_kind": "number",
+              "value_max": null,
+              "value_min": null,
+              "value_number": 1334.6,
+              "value_raw": "1334.6 K",
+              "value_text": null
+            }
+          },
+          "uncertainty": null,
+          "unit_raw": "K",
+          "value_boolean": null,
+          "value_kind": "range",
+          "value_max": 204,
+          "value_min": 191,
+          "value_number": null,
+          "value_raw": "191 K to 204 K; summarized as 200 K and ~200 K",
+          "value_text": null
+        }
+      },
+      {
+        "candidate_ids": [
+          "s2:m0:r0"
+        ],
+        "group": "H3S-Im-3m-250GPa-classical-static",
+        "method": "allen_dynes",
+        "reason": "The results explicitly report 184 K at 250 GPa for mu_star = 0.13 within the Allen-Dynes calculation. Keep this pressure separate from the 200 and 300 GPa results. Im-3m QE settings apply, but lambda_ep and omega_log at 250 GPa are not reported in the supplied evidence.",
+        "source_ids": [
+          "source-41",
+          "source-58"
+        ],
+        "values": {
+          "calculation_conditions": {
+            "calculation_code": "QUANTUM-ESPRESSO",
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": "density functional perturbation theory",
+            "qe": {
+              "atoms": null,
+              "charge_density_cutoff": null,
+              "convergence_energy": null,
+              "convergence_force": null,
+              "energy_cutoff": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 80,
+                "value_raw": "80 Ry",
+                "value_text": null
+              },
+              "k_broadening": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.03,
+                "value_raw": "Gaussians width of 0.03 Ry",
+                "value_text": null
+              },
+              "k_grid": "32 × 32 × 32",
+              "q_grid": "8 × 8 × 8",
+              "q_grid_interpolated": null,
+              "supercell": null,
+              "temperature_k": null
+            },
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "canonical_unit": "K",
+          "method_code": "allen_dynes",
+          "method_raw": "Allen-Dynes-modified McMillan equation",
+          "parameters": {
+            "extensions": [],
+            "lambda_ep": null,
+            "mu_star": 0.13,
+            "omega_log": null
+          },
+          "uncertainty": null,
+          "unit_raw": "K",
+          "value_boolean": null,
+          "value_kind": "number",
+          "value_max": null,
+          "value_min": null,
+          "value_number": 184,
+          "value_raw": "184 K",
+          "value_text": null
+        }
+      },
+      {
+        "candidate_ids": [
+          "s3:m0:r0"
+        ],
+        "group": "H3S-Im-3m-300GPa-classical-static",
+        "method": "allen_dynes",
+        "reason": "The results explicitly report 179 K at 300 GPa for mu_star = 0.13 within the Allen-Dynes calculation. Keep this pressure separate from the 200 and 250 GPa results. Im-3m QE settings apply, but lambda_ep and omega_log at 300 GPa are not reported in the supplied evidence.",
+        "source_ids": [
+          "source-41",
+          "source-58"
+        ],
+        "values": {
+          "calculation_conditions": {
+            "calculation_code": "QUANTUM-ESPRESSO",
+            "electronic_method": null,
+            "epw": null,
+            "exchange_correlation_functional": null,
+            "phonon_method": "density functional perturbation theory",
+            "qe": {
+              "atoms": null,
+              "charge_density_cutoff": null,
+              "convergence_energy": null,
+              "convergence_force": null,
+              "energy_cutoff": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 80,
+                "value_raw": "80 Ry",
+                "value_text": null
+              },
+              "k_broadening": {
+                "evidences": null,
+                "reported": true,
+                "unit_raw": "Ry",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 0.03,
+                "value_raw": "Gaussians width of 0.03 Ry",
+                "value_text": null
+              },
+              "k_grid": "32 × 32 × 32",
+              "q_grid": "8 × 8 × 8",
+              "q_grid_interpolated": null,
+              "supercell": null,
+              "temperature_k": null
+            },
+            "sscha": null,
+            "vibrational_treatment": null
+          },
+          "canonical_unit": "K",
+          "method_code": "allen_dynes",
+          "method_raw": "Allen-Dynes-modified McMillan equation",
+          "parameters": {
+            "extensions": [],
+            "lambda_ep": null,
+            "mu_star": 0.13,
+            "omega_log": null
+          },
+          "uncertainty": null,
+          "unit_raw": "K",
+          "value_boolean": null,
+          "value_kind": "number",
+          "value_max": null,
+          "value_min": null,
+          "value_number": 179,
+          "value_raw": "179 K",
+          "value_text": null
+        }
+      }
+    ],
+    "search": [],
+    "unresolved": []
+  }
+}

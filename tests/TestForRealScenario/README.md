@@ -79,3 +79,11 @@ python3 -m unittest discover -s "tests/TestForRealScenario" -p "test_*.py"
 ```
 
 工具自检通过、文件哈希通过、网站可访问，都不代表真实业务流程已通过。上传解析、退回返修、批准及搜索必须分别保留本轮实际结果；中断或无法操作时明确记录未完成。后续修改科学表单、PDF 字段或标准键时，继续执行仓库要求的专项回归与真实来源重跑。
+
+固定失败重放使用项目 Python 环境执行（包含真实 Redis 的隔离实例和隔离对象存储，不操作业务库）：
+
+```sh
+/Users/mayuan/software/miniconda3/envs/sc-wiki/bin/python -m pytest "tests/TestForRealScenario" -o "python_files=test_*.py verify_*.py"
+```
+
+`fixtures/h3s-filling-failed.json` 保留真实失败响应；概述对应关系的构造测试只验证程序边界，真实模型重跑另存各轮证据。`verify_review_failure.py` 验证技术错误不被依赖变化提示覆盖；成功字段和真实未核对状态分别保留。

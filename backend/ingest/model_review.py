@@ -234,7 +234,12 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
         row = final.get(key)
         if row is None:
             continue
-        if not reusable(row, result):
+        if result.get('review_error'):
+            # 未完成本就不可复用；保留实际技术错误，不能一律改写为依赖变化。
+            output[key] = bind_result(row, {**deepcopy(result), 'status': 'unchecked',
+                'proposal': None, 'human_confirmed': False,
+                'failed_review_version': deepcopy(result.get('model_review'))}, snapshot['chunks'])
+        elif not reusable(row, result):
             output[key] = bind_result(row, {'status': 'unchecked', 'evidences': [],
                 'reason': '相关值或依据变化后尚未完成核实；已保留当前内容。',
                 'review_error': 'review_dependencies_changed', 'human_confirmed': False,
