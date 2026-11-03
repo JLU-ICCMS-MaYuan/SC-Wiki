@@ -1,0 +1,86 @@
+{
+  "verified_at": "2026-11-03T10:21:05.082273+08:00",
+  "issue": {
+    "number": 208,
+    "url": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/208",
+    "type": "type:bug",
+    "state": "OPEN",
+    "body_matches": true
+  },
+  "implementation_commit": "b1fc93be2f5406793cc40334352ad48bd3c8e976",
+  "original_requests_exact_match": true,
+  "original_requests_compared_to": "git b1fc93be original record and current explicit user requests",
+  "requirements": [
+    "FR-001",
+    "FR-002",
+    "FR-003",
+    "FR-004",
+    "FR-005",
+    "FR-006",
+    "FR-007",
+    "FR-008",
+    "FR-009",
+    "FR-010",
+    "FR-011",
+    "FR-012",
+    "FR-013"
+  ],
+  "success_criteria": [
+    "SC-001",
+    "SC-002",
+    "SC-003",
+    "SC-004",
+    "SC-005",
+    "SC-006",
+    "SC-007"
+  ],
+  "classification": {
+    "旧要求漏接": 8,
+    "普通代码错误": 4,
+    "新增技术处理": 1
+  },
+  "relative_links_checked": 26,
+  "source_code_hashes_checked": 14,
+  "historical_report_checked": true,
+  "images": [
+    {
+      "path": "docs/specs/176-scientific-form-filling/assets/full-reparse-form-20261103.png",
+      "sha256": "d249311e411379537a22db6199b5ce7cb42b83fb9998153b8e6a5d33fcda02da",
+      "dimensions_px": [
+        1680,
+        1080
+      ],
+      "status": "local_verified",
+      "origin": "browser_generated"
+    },
+    {
+      "path": "docs/specs/176-scientific-form-filling/assets/full-reparse-tc-20261103.png",
+      "sha256": "77c9f552676e3f6b67d934f73dd6087692c83234206ba860c49296ac1a5b049e",
+      "dimensions_px": [
+        1410,
+        1652
+      ],
+      "status": "local_verified",
+      "origin": "browser_generated"
+    }
+  ],
+  "new_spec_full_text_approval": false,
+  "record_authorization": "为这次成功修改代码新建 issue 和 spec。进行记录",
+  "new_business_decisions": 0,
+  "remote_spec": {
+    "url": "https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/blob/mayuan/docs/specs/208-cah6-parse-regression/spec.md",
+    "api": "https://api.github.com/repos/JLU-ICCMS-MaYuan/SC-Wiki/contents/docs/specs/208-cah6-parse-regression/spec.md?ref=mayuan",
+    "ref": "mayuan",
+    "identity": "JLU-ICCMS-MaYuan",
+    "checked_at": "2026-11-03T10:21:05.082273+08:00",
+    "observed_status": 404,
+    "status": "not_published",
+    "both_remote_links_verified": false
+  },
+  "reexecuted_pdf_models": false,
+  "changed_runtime_or_database": false,
+  "pending": [
+    "remote_spec_publication_and_verification",
+    "no_claim_of_user_full_text_signoff"
+  ]
+}
