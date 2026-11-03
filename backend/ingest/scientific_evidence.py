@@ -602,7 +602,8 @@ def transfer_result(record, result, chunks, file_ids=None, *, source_transfer_ve
         return {**finish(rebound.get('evidences') or record.get('evidences') or []), 'source_kind': rebound.get('source_kind', 'paper_synthesis'),
                 'ai_reason': rebound.get('ai_reason'),
                 'evidences': rebound.get('evidences') or record.get('evidences') or []}
-    return finish(record.get('evidences') or rebound.get('evidences', []))
+    # 交接沿用已审核字段所选的引用，候选记录的背景资料不能覆盖它。
+    return finish(rebound.get('evidences', []))
 
 
 def _review_time(value):
