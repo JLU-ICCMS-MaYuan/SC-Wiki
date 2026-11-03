@@ -105,7 +105,11 @@ async def commit_review(session, body, user):
                     and r.get('structure_field') == record['structure_field'] and r.get('state_key') == record.get('state_key')), None)
             if not old or science.canonical(record.get('current_value')) != science.canonical(old.get('current_value')):
                 if record.get('required', True):
-                    ev.fail('draft_materialization_changed', '正式保存改变了字段内容，事务已取消，输入保留')
+                    field = record['field']
+                    label = record.get('label') or field
+                    ev.fail('draft_materialization_changed',
+                        f'正式保存改变了字段「{label}」（{field}）的内容，事务已取消，输入保留',
+                        issues=[{'field': field, 'message': '正式保存前后字段内容不一致'}])
                 old = {'status': 'unchecked', 'evidences': []}
             rebound.append({**deepcopy(old), **record, 'status': old['status'],
                 'evidences': deepcopy(old.get('evidences') or []), 'materialized_from': old.get('item_key')})

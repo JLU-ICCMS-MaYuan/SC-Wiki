@@ -1444,6 +1444,7 @@ def resolve_results(snapshot: dict, cached: dict, user_id: int, job_id: str | No
         if record['item_key'] in changed:
             record = {**record, 'human_modified': True}
         records.append({**record, **(result or {}), 'field': record['field'], 'fields': record['fields'],
+                        'current_value': record.get('current_value'),
                         'status': (result or {}).get('status', 'unchecked'),
                         'evidences': (result or {}).get('evidences', [])})
     for record in records:

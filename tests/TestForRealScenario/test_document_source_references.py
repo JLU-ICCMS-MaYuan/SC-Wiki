@@ -37,3 +37,21 @@ def test_missing_reviewed_reference_cannot_fall_back_to_candidate_context():
     chunks=[{"file_id":"218","chunk_id":1,"chunk_index":0,"content":"Readable background"}]
     with pytest.raises(SourceReferenceError):
         science.transfer_result(record,result,chunks,source_transfer_verified=True)
+
+
+def test_submit_uses_exact_current_subject_instead_of_rounded_cache_copy():
+    from backend.ingest import property_evidence as ev
+    from backend.ingest.model_review import bind_result
+    current = 119.99999999999999
+    chunks = [{'file_id': '218', 'chunk_index': 0, 'content': 'Reviewed R3m structure.'}]
+    snap = ev.complete_snapshot('paper', 'isolated-r3m', [{'key': 'gamma', 'item_key': 'gamma',
+        'field': 'material_states[0].structure.cell_parameters.gamma', 'kind': 'field',
+        'current_value': current, 'claim': {'value': current}, 'required': True}], chunks, {})
+    row = snap['records'][0]
+    result = bind_result(row, {'status': 'supported', 'reason': '从同一CIF派生的晶胞角',
+        'evidences': [{'file_id': '218', 'chunk_index': 0, 'quote': 'Reviewed R3m structure.'}]}, chunks)
+    # 实际H3S的同版本结果副本为120.0，当前CIF派生值仍保持精确原值。
+    result['current_value'] = 120.0
+    accepted = ev.resolve_results(snap, {'gamma': result}, 1, None, snap['version'])
+    assert accepted[0]['current_value'] == current
+    assert accepted[0]['current_value'] != result['current_value']
