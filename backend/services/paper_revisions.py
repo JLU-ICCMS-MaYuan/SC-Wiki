@@ -129,7 +129,10 @@ def current_draft(session, paper, *, submission=None):
                 'validation': validate_structure_text(structure.structure_format, structure.structure_text),
                 **(structure.metadata_json or {}),
             }
-    return jsonable_encoder(dict(paper=data, material_states=states, _form_contract_version=1))
+    result = dict(paper=data, material_states=states, _form_contract_version=1)
+    from backend.ingest.parsing_workflows import preserve_binding
+    preserve_binding(result, submission)
+    return jsonable_encoder(result)
 
 
 
@@ -263,6 +266,8 @@ async def save_draft(session, paper_id, user, payload):
         error(400, 'retired_material_relations', 'material_relations 已退役，请重新打开草稿')
     _reject_legacy_classification_contract(payload.draft)
     draft = _normalize_draft(copy.deepcopy(payload.draft))
+    from backend.ingest.parsing_workflows import preserve_binding
+    preserve_binding(draft, saved.draft)
     draft.pop('theoretical_subtype_assessment', None)
     draft['paper'] = {k: v for k, v in draft['paper'].items() if k in {*PAPER_FIELDS, 'material_families', 'corresponding_authors', 'co_first_authors'}}
     draft['paper']['research_materials'] = _derived_research_materials(draft['material_states'])
@@ -409,6 +414,8 @@ async def submit_draft(session, paper_id, user, payload):
         error(409, exc.code, str(exc))
     classifications = dict(paper={k: data.get(k) for k in ('material_families', 'superconductor_kind', *AUTHOR_ROLE_FIELDS)},
         material_states=[{k: s.get(k) for k in ('state_key', 'element_count', 'material_dimensionality', 'structure_families')} for s in draft['material_states']])
+    from backend.ingest.parsing_workflows import preserve_binding
+    preserve_binding(classifications, draft)
     await append_paper_history_event(session, paper_id=paper.id, paper_revision=paper.content_revision,
         event_type='modified', actor_user_id=user.id, actor_username_snapshot=user.username,
         operation_id=operation_id, classification_snapshot=jsonable_encoder({

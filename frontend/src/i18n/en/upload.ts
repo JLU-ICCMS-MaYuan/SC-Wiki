@@ -2,6 +2,9 @@
 // 推导，缺键或多键会在 `tsc -b` 阶段报错。处理阶段/任务状态/文件角色/晶胞表示等
 // 枚举标签与后端 value 对齐，仅展示文案随语言变化。
 export default {
+  workflowPaused: 'No matching parsing and review workflow. Files and general information are retained; specialized parsing is paused.',
+  workflowConventional: 'Conventional superconductivity calculations',
+  workflowIdentity: 'Parsing and review workflow: {name} · Form v{version}',
   extractionTime: 'Extraction time: {duration}',
   extractionDuration: '{minutes}m {seconds}s',
   extractionNotStarted: 'Not started',
@@ -49,6 +52,7 @@ export default {
     queued: 'Queued',
     extracting: 'Extracting text',
     needs_role_review: 'Confirm main article',
+    needs_workflow: 'Awaiting matching workflow',
     reading: 'Reading chunks',
     summarizing: 'Summarizing',
     ready: 'Ready for review',

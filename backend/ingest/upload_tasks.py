@@ -193,6 +193,7 @@ def create_task(
         "state_schema_version": UPLOAD_STATE_SCHEMA_VERSION,
         "parser_profile": parser_profile,
         "file_role_policy": USER_FILE_ROLE_POLICY,
+        "workflow_policy": "typed-parsing-v1",
         "parser_runs": [],
         "reading_state": None,
     }
@@ -507,6 +508,9 @@ def save_draft(task_id: str, draft: dict[str, Any], *, editor=None, changes=None
     if not raw_state:
         raise KeyError("上传任务不存在或已过期")
     state = apply_user_activity(authoritative_state(task_id, work_session) or json.loads(raw_state), now=int(time.time()))
+    from .parsing_workflows import require_task_workflow, preserve_binding
+    require_task_workflow(state)
+    preserve_binding(draft, state)
     if editor is not None:
         from .evidence_audit import draft_change_events
         previous = client.get(draft_key(task_id))

@@ -7,7 +7,7 @@ from typing import Any, Literal
 from uuid import uuid4
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel, Field
 from backend.ingest.upload_contracts import (
     MAX_UPLOAD_BYTES,
@@ -150,6 +150,27 @@ def record_upload_activity(task_id: str, current_user: User = Depends(get_curren
 
     _owned_state(task_id, current_user)
     return {"ok": True, "data": public_task_state(touch_user_activity(task_id))}
+
+
+@router.get("/{task_id}/files/{file_id}/download")
+def download_original_file(task_id: str, file_id: str, current_user: User = Depends(get_current_user)):
+    """暂停任务也能访问自己的原文件，不依赖专用科学表单。"""
+    from backend.storage.paths import resolve_file
+    state = _owned_state(task_id, current_user)
+    item = next((f for f in state.get('files') or [] if f.get('file_id') == file_id), None)
+    if not item or not item.get('stored_path'):
+        raise _error(404, 'UPLOAD_FILE_NOT_FOUND', '原文件不存在')
+    try:
+        path = resolve_file(item['stored_path'], size=int(item.get('size') or 0),
+            sha256=item.get('sha256') or '', media_type=item.get('media_type') or 'application/octet-stream')
+        if not path.is_file():
+            raise FileNotFoundError
+    except FileNotFoundError as exc:
+        raise _error(404, 'UPLOAD_FILE_NOT_FOUND', '原文件不存在') from exc
+    except FileStorageUnavailable as exc:
+        raise _error(503, 'UPLOAD_FILE_UNAVAILABLE', '原文件暂时无法读取') from exc
+    return FileResponse(path, filename=item.get('original_filename') or 'source',
+                        media_type=item.get('media_type') or 'application/octet-stream')
 
 
 @router.put("/{task_id}/files/{file_id}")

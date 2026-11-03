@@ -25,7 +25,7 @@ function countdownParts(
 
 // 任务状态 → upload.status.<value> 字典键（UploadTaskStatus 的可显示子集）
 const STATUS_KEYS = [
-  'uploading', 'queued', 'extracting', 'needs_role_review', 'reading', 'summarizing', 'ready',
+  'uploading', 'queued', 'extracting', 'needs_role_review', 'needs_workflow', 'reading', 'summarizing', 'ready',
   'submitting', 'failed', 'duplicate', 'cancelling', 'cancelled',
 ] as const
 

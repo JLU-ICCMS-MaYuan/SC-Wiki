@@ -28,7 +28,10 @@ const states = Array.from({ length: 5 }, (_, i) => ({ id: i + 1, state_key: `s${
   superconductor: { chemical_formula: 'Sn', material_name: `State ${i}` }, structure_families: [], property_modules: [] }))
 const paper = { id: 174, title: 'Original title', knowledge_graph_title: 'Graph title', authors: [], year: 2026,
   paper_type: 'review', material_families: [], review_status: 'pending', uploaded_by_user_id: 8 }
-const draft = { paper, material_states: states, structure_candidates: [] }
+const draft = { paper, material_states: states, structure_candidates: [], _parsing_workflow: {
+  workflow_key: 'conventional-theory-calculation', workflow_version: 1,
+  form_key: 'scientific-form-contract', form_version: 1, form_sha256: 'a'.repeat(64),
+} }
 beforeEach(() => {
   counters.cards = []; counters.role = 'admin'
   vi.mocked(api.get).mockImplementation(async path => {
@@ -78,6 +81,10 @@ async function host(kind: string) {
   await act(async () => { await new Promise(resolve => setTimeout(resolve, 30)) })
   counters.cards = []
 }
+it.each(['upload', 'revision', 'admin', 'superadmin'])('%s 完整宿主：保持解析流程和表单身份', async kind => {
+  await host(kind)
+  expect(screen.getByText('解析审核流程：常规超导理论计算 · 表单 v1')).toBeVisible()
+})
 it.each(['upload', 'revision', 'admin', 'superadmin'])('%s 完整宿主：论文标题编辑不重绘无关材料卡片', async kind => {
   await host(kind)
   fireEvent.change(screen.getByDisplayValue('Original title'), { target: { value: 'Changed title' } })

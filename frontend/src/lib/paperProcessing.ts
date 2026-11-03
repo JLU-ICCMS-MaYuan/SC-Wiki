@@ -8,7 +8,7 @@ import { convertLegacyPropertyModules, PROPERTY_SCHEMA_VERSION } from './propert
 export type ProcessingStage = 'saving_file' | 'queued' | 'extracting' | 'reading' | 'summarizing' | 'ready'
 export type ProcessingStatus = 'processing' | 'succeeded' | 'failed' | 'cancelled'
 export type UploadTaskStatus = 'uploading' | 'queued' | 'extracting' | 'reading' | 'summarizing' |
-  'ready' | 'needs_role_review' | 'submitting' | 'submitted' | 'failed' | 'duplicate' | 'cancelling' | 'cancelled'
+  'ready' | 'needs_role_review' | 'needs_workflow' | 'submitting' | 'submitted' | 'failed' | 'duplicate' | 'cancelling' | 'cancelled'
 
 export interface UploadTaskFile {
   file_id: string
@@ -195,7 +195,22 @@ export interface PaperDraftFields {
   builds_on?: unknown[]
 }
 
+export interface ParsingWorkflowBinding {
+  workflow_key: string
+  workflow_version: number
+  form_key: string
+  form_version: number
+  form_sha256: string
+}
+
+export interface WorkflowAssessment {
+  status: 'matched' | 'unmatched' | 'uncertain' | 'failed'
+  reason: string
+  paper: { title?: string | null; doi?: string | null; year?: number | null; authors?: string[] }
+}
+
 export interface UploadDraft {
+  _parsing_workflow?: ParsingWorkflowBinding
   _form_contract_version?: number
   // 原始解析账本及历史扩展原样随草稿保存，不产生派生分类或用户待办。
   parsing_conflicts?: Array<{
@@ -237,6 +252,8 @@ export interface UploadExtractionTiming {
 }
 
 export interface UploadTaskState {
+  _parsing_workflow?: ParsingWorkflowBinding
+  workflow_assessment?: WorkflowAssessment
   task_id: string
   filename?: string
   stage: ProcessingStage

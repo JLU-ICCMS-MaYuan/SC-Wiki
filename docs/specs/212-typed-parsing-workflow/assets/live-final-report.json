@@ -1,0 +1,102 @@
+{
+  "source_task": "13b305089295441ba3c1da0c0162f0d5",
+  "model": "gpt-6.1-sol",
+  "provider": "server:LLM2",
+  "started": 1793697385.89951,
+  "source_commit": "205d6918d1a3348d43a3f86c7451c5bd8e400dbe",
+  "source_hashes": {
+    "parsing_workflows.py": "8d40a46e568c5ee2ac6879024fd0a95bdb6693b0a20b0a493f07a0ad0a86b780",
+    "upload_jobs.py": "866b7bec4410a4b843f94620333f89b7ad549ed5938f3ea191190626efff874a"
+  },
+  "sources": [
+    {
+      "file_id": "720360966fe843289e99faeee32631c5",
+      "role": "main",
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "ir_sha256": "d43e668ecd12fc2cccebc4ebcbc8ae7018db3639a294144b945827f3fa9f0dcc",
+      "pages": 4
+    },
+    {
+      "file_id": "2669006a990846ec985aa5f8690b346d",
+      "role": "supplementary",
+      "sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "ir_sha256": "4cdb8be8bb0df12aea492e34030c9f496176d8d85a85b11cd967ac37a607b2a3",
+      "pages": 30
+    }
+  ],
+  "reused": [
+    "摘要核实的原PDF及通用IR/文本"
+  ],
+  "rerun": [
+    "真实模型流程适用性判断",
+    "严格结构科学字段AI提取",
+    "正式表单整理与查缺",
+    "原文定位与候选覆盖",
+    "隔离Redis草稿精确保存重读"
+  ],
+  "not_run": [
+    "原任务写入",
+    "数据库业务提交",
+    "整篇重新解析"
+  ],
+  "source_chars": 106135,
+  "status": "matched",
+  "binding": {
+    "workflow_key": "conventional-theory-calculation",
+    "workflow_version": 1,
+    "form_key": "scientific-form-contract",
+    "form_version": 1,
+    "form_sha256": "d4f8e5fe53038f7d103bc468c60ad022c1109f44b91b730b5ab29f52c13fe86a"
+  },
+  "passed": true,
+  "downstream": {
+    "passed": true,
+    "selection": [
+      {
+        "file_id": "720360966fe843289e99faeee32631c5",
+        "pages_reextracted": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      {
+        "file_id": "2669006a990846ec985aa5f8690b346d",
+        "pages_reextracted": [
+          1,
+          2,
+          3,
+          19
+        ]
+      }
+    ],
+    "claims_validated": 7,
+    "roundtrip_equal": true,
+    "binding_preserved": true,
+    "checked_values": {
+      "material": "CaH6",
+      "pressure_gpa": 150,
+      "tc_mu_star": [
+        [
+          220,
+          0.13
+        ],
+        [
+          235,
+          0.1
+        ]
+      ],
+      "lambda_ep": 2.69
+    },
+    "rerun": [
+      "严格结构科学字段AI提取",
+      "正式表单整理与查缺",
+      "原文定位与候选覆盖",
+      "隔离Redis草稿精确保存重读"
+    ]
+  },
+  "elapsed_seconds": 211.6821162700653,
+  "report_scope": "路由、相邻Tc字段真实重提及隔离保存重读；非整篇与谱终态验收",
+  "scientific_restored_sha256": "b5d23abc14ab2e2a0e1003b571d1620faf274069917d723032e201f4d77cb171"
+}

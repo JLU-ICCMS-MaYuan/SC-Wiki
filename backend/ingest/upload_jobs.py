@@ -941,7 +941,7 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
                 public["status"] = "failed"
                 public["error"] = "分段结果不可读取"
         chunks.append(public)
-    stable = state.get("status") in {"ready", "failed", "duplicate", "cancelled", "submitted"}
+    stable = state.get("status") in {"ready", "failed", "duplicate", "cancelled", "submitted", "needs_workflow"}
     task_status = state.get("status")
     if task_status in {"summarizing", "failed"}:
         partial_draft = state.get("partial_draft")
@@ -979,6 +979,9 @@ def public_parsing_detail(task_id: str) -> dict[str, Any]:
         "pending_visual_regions": pending_visual_regions,
         "partial_draft": partial_draft,
         "preview_phase": state.get('preview_phase'),
+        "workflow_assessment": state.get('workflow_assessment'),
+        "workflow_policy": state.get('workflow_policy'),
+        "_parsing_workflow": state.get('_parsing_workflow'),
         "summary": {
             "status": "completed" if state.get("status") == "ready" else state.get("stage"),
             "completed": state.get("completed_chunks", 0),
@@ -1563,6 +1566,8 @@ def _normalize_draft(
         "classification_evidence": _as_list(raw.get("classification_evidence")),
         "field_evidence": field_evidence,
     }
+    if preserve_citation_extraction and '_parsing_workflow' in raw:
+        normalized['_parsing_workflow'] = deepcopy(raw['_parsing_workflow'])
     for field in ("structural_extraction_version", "structural_extraction_issues"):
         if field in raw:
             normalized[field] = raw[field]
@@ -1810,7 +1815,7 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
     config = load_llm_config(task_id)
     state = (get_state(task_id) or {}) if config is None else {}
     if config is None and str(state.get("llm_provider", "")).startswith("server:"):
-        if state.get("status") in {"completed", "submitted", "cancelled", "failed", "duplicate"}:
+        if state.get("status") in {"completed", "submitted", "cancelled", "failed", "duplicate", "needs_workflow"}:
             return state
         if state.get("status") == "cancelling":
             cancelled = update_state(task_id, status="cancelled", processing_status="cancelled", processing_error=None)
@@ -1859,10 +1864,93 @@ def process_upload_task(task_id: str) -> dict[str, Any]:
 
 
 def _process_upload_task(task_id: str) -> dict[str, Any]:
+    """先通用读取和选择流程，再调用已登记的类型专用入口。"""
+    from .parsing_workflows import POLICY, BINDING, assess, require_workflow
+    from .upload_source_bundle import task_source_chunks
+    from backend.rag.llm_context import get_llm_config
+
+    state = get_state(task_id)
+    if not state:
+        raise RuntimeError('上传任务不存在或已过期')
+    if state.get('status') == 'needs_workflow':
+        return state
+    try:
+        _ensure_not_cancelled(task_id)
+        update_state(task_id, status='extracting', stage='extracting', stage_index=2,
+            processing_status='processing', processing_error=None, error_code=None,
+            workflow_policy=POLICY, workflow_assessment=None, **{BINDING: None})
+        source = _original_path(state)
+        files = state.get('files') or [dict(file_id='main', role='main',
+            kind=state.get('file_kind'), original_filename=state.get('filename'),
+            sha256=state.get('file_sha256'))]
+        root = data_path('parsed_markdown')
+        directory = root / task_id
+        directory.mkdir(parents=True, exist_ok=True)
+        combined = []
+        for item in files:
+            if item.get('role') not in {'main', 'supplementary'}:
+                continue
+            _ensure_not_cancelled(task_id)
+            path = _source_path(state, item, source)
+            file_state = dict(state, file_id=item['file_id'],
+                file_kind=item.get('kind') or path.suffix.lstrip('.'),
+                file_sha256=item.get('sha256') or state.get('file_sha256'))
+            text = _extract_markdown(file_state, path)
+            (directory / f"{item['file_id']}.md").write_text(text, encoding='utf-8')
+            combined.append(text)
+            item.update(extraction_status='completed', error=None)
+        markdown_path(task_id).write_text('\n\n'.join(combined), encoding='utf-8')
+        update_state(task_id, files=files if state.get('files') else [],
+                     reading_state='selecting_workflow')
+        with call_phase('workflow_selection'):
+            report = assess(task_source_chunks(task_id, state, root, trim_references=True),
+                complete=complete_json, model=get_llm_config().model,
+                cancelled=lambda: _ensure_not_cancelled(task_id))
+        _ensure_not_cancelled(task_id)
+        _atomic_write_json(artifact_directory(task_id) / 'workflow_assessment.json', report)
+        binding = report.get('binding')
+        if report['status'] == 'matched':
+            workflow = require_workflow({BINDING: binding}, required=True)
+            update_state(task_id, workflow_assessment=report, **{BINDING: binding})
+            return workflow.execute(task_id)
+        artifact_manifest = None
+        from backend.storage.paths import object_mode, publish_tree
+        if object_mode():
+            from backend.rag.config import settings
+            from uuid import uuid4
+            run_id = uuid4().hex
+            artifact_manifest = [entry for path in (artifact_directory(task_id), directory, markdown_path(task_id))
+                for entry in publish_tree(path, data_root=settings.sc_wiki_data_dir,
+                                           task_id=task_id, run_id=run_id)]
+        paused = update_state(task_id, status='needs_workflow', stage='extracting',
+            processing_status='needs_input', processing_error=None,
+            workflow_assessment=report, artifact_manifest=artifact_manifest,
+            partial_draft=None, reading_state='workflow_unavailable')
+        _schedule_terminal_cleanup(task_id)
+        return paused
+    except UploadCancelled:
+        cancelled = update_state(task_id, status='cancelled', processing_status='cancelled',
+                                 processing_error=None, partial_draft=None)
+        _schedule_terminal_cleanup(task_id)
+        return cancelled
+    except Exception as exc:
+        current = get_state(task_id) or {}
+        if current.get('status') != 'failed':
+            update_state(task_id, status='failed', processing_status='failed',
+                processing_error=str(exc), error_code=getattr(exc, 'code', 'paper_processing_failed'),
+                failed_stage=current.get('stage'))
+            _schedule_terminal_cleanup(task_id)
+        raise
+
+
+
+def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
     """Extract, read every chunk, and build an editable draft."""
     state = get_state(task_id)
     if not state:
         raise RuntimeError("上传任务不存在或已过期")
+    from .parsing_workflows import require_workflow
+    require_workflow(state, required=True)
     try:
         _ensure_not_cancelled(task_id)
         source = _original_path(state)
@@ -1957,7 +2045,8 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                     )
                 elif state.get("parser_profile", "legacy") == "legacy" and not multi_file and md_path.exists():
                     markdown = md_path.read_text(encoding="utf-8")
-                elif file_md.exists() and (state.get("parser_profile", "legacy") == "legacy" or resume_role_review):
+                elif file_md.exists() and (state.get("parser_profile", "legacy") == "legacy" or resume_role_review
+                                           or state.get('_parsing_workflow')):
                     markdown = file_md.read_text(encoding="utf-8")
                 else:
                     markdown = _extract_markdown(file_state, file_source)
@@ -2333,6 +2422,9 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
             excluded_properties = _prune_generated_properties(draft)
             if excluded_properties:
                 _atomic_write_json(artifact_directory(task_id) / "unclassified_properties.json", excluded_properties)
+        # 类型绑定由前置选择生成，不接受科学整理模型创建或替换。
+        if state.get('_parsing_workflow'):
+            draft['_parsing_workflow'] = deepcopy(state['_parsing_workflow'])
         # 模型负责科学关系与主动查缺，程序保留每个候选的去向及最终来源门。
         from .fixed_form_contract import finalize_current_draft
         finalize_current_draft(draft, model_output=True, legacy=not bool(document_set))

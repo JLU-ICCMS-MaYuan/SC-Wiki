@@ -4,6 +4,8 @@
 
 入口来源：`frontend/src/App.tsx`、`frontend/src/LazyRoutes.tsx`。搜索范围包含 pages、components 及路由委托的功能目录；下表按用户入口合并共享子控件，不把每个输入框当成独立表单。
 
+#212：`/upload/tasks/:taskId` 增加未匹配流程时的通用结果暂停视图，没有新增科学编辑表单。上传、返修和两种管理员角色共用 `ParsingWorkflowIdentity` 展示服务端流程/表单身份；绑定不属于可编辑科学字段，输入和普通保存不重新判断。四宿主及暂停停止轮询的覆盖见[验证记录](../212-typed-parsing-workflow/validation.md)。
+
 | 用户入口 | 主要代码 | 本轮覆盖状态 |
 | --- | --- | --- |
 | `/upload/tasks/:taskId` 上传校对 | UploadTaskPage、UploadTaskEditor、MaterialStatesEditor、PropertyModuleEditor | 完整宿主及大草稿浏览器验证通过 |

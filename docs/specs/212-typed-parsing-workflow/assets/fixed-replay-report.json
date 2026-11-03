@@ -1,0 +1,48 @@
+{
+  "passed": true,
+  "selection": [
+    {
+      "file_id": "720360966fe843289e99faeee32631c5",
+      "pages_reextracted": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "file_id": "2669006a990846ec985aa5f8690b346d",
+      "pages_reextracted": [
+        1,
+        2,
+        3,
+        19
+      ]
+    }
+  ],
+  "claims_validated": 7,
+  "roundtrip_equal": true,
+  "binding_preserved": true,
+  "checked_values": {
+    "material": "CaH6",
+    "pressure_gpa": 150,
+    "tc_mu_star": [
+      [
+        220,
+        0.13
+      ],
+      [
+        235,
+        0.1
+      ]
+    ],
+    "lambda_ep": 2.69
+  },
+  "rerun": [
+    "严格结构科学字段AI提取",
+    "正式表单整理与查缺",
+    "原文定位与候选覆盖",
+    "隔离Redis草稿精确保存重读"
+  ],
+  "mode": "fixed_response_replay_only"
+}

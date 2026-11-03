@@ -479,6 +479,8 @@ def _derived_research_materials(material_states: list[dict[str, Any]]) -> list[s
 def _validate_draft(
     draft: dict[str, Any], *, partial: bool = False
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+    from backend.ingest.parsing_workflows import require_workflow
+    require_workflow(draft)
     paper, material_states = _draft_values(draft)
     _validate_tc_method_invariants(material_states, partial=partial)
     _validate_property_module_contract(material_states, partial=partial)
@@ -1576,7 +1578,10 @@ async def put_upload_draft(
                 with SessionLocal() as evidence_session:
                     proposals.validate_save(evidence_session, evidence.upload_snapshot(task_id, current_user.id), current_user.id, preparation_id, 'upload')
             previous = get_draft(task_id) or {}
+            from backend.ingest.parsing_workflows import preserve_binding, require_task_workflow
+            require_task_workflow(state, previous)
             normalized = _normalize_draft(draft)
+            preserve_binding(normalized, previous)
             # 全文分类和关键词来源分析只由服务端生成；浏览器只能编辑正式字段值。
             if isinstance(previous.get('theoretical_subtype_assessment'), dict):
                 normalized['theoretical_subtype_assessment'] = previous['theoretical_subtype_assessment']
@@ -1824,7 +1829,10 @@ async def use_manual_upload_draft(
     state = _task_for_user(task_id, current_user)
     if state.get("processing_status") != "failed":
         raise _upload_error(409, "manual_not_allowed", "只有解析失败的任务可以改为手动填写")
+    from backend.ingest.parsing_workflows import require_task_workflow, preserve_binding
+    require_task_workflow(state)
     draft = empty_draft()
+    preserve_binding(draft, state)
     save_draft(task_id, draft)
     artifact_path(task_id).write_text(
         json.dumps(
@@ -1886,6 +1894,8 @@ async def _create_pending_paper(
         draft = _normalize_draft(convert_legacy_scientific_draft(draft))
     except UploadContractError as exc:
         raise _upload_error(400, exc.code, str(exc), field=exc.field) from exc
+    from backend.ingest.parsing_workflows import require_task_workflow
+    require_task_workflow(state, draft)
     paper_data, material_states = _validate_draft(draft)
     doi = normalize_doi(paper_data.get("doi"))
     md_path = markdown_path(task_id)
@@ -1960,6 +1970,7 @@ async def _create_pending_paper(
                         actor_username_snapshot=(uploader.username if uploader else None),
                         operation_id=task_id,
                         classification_snapshot={'upload_submission': {
+                            **({'_parsing_workflow': draft['_parsing_workflow']} if '_parsing_workflow' in draft else {}),
                             'paper': {key: paper_data.get(key) for key in ('material_families', 'co_first_authors', 'corresponding_authors')},
                             'material_states': [{key: st.get(key) for key in ('state_key', 'structure_families')} for st in material_states]}},
                     )
@@ -2333,6 +2344,8 @@ async def _submit_upload_draft_locked(
     draft = get_draft(task_id)
     if draft is None:
         raise _upload_error(409, "draft_not_found", "草稿不存在或已过期")
+    from backend.ingest.parsing_workflows import require_task_workflow
+    require_task_workflow(state, draft)
 
     from backend.ingest.property_evidence import upload_snapshot, resolve_results
     import copy

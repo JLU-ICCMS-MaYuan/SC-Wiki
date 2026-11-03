@@ -1,6 +1,8 @@
 import { canonicalStructureFromCandidate } from '../lib/canonicalStructure'
 import type { PropertySpectrumListing } from '../lib/propertySpectra'
 import WorkdraftRefresh, { useWorkdraftRefresh } from '../components/WorkdraftRefresh'
+import ParsingWorkflowIdentity from '../components/ParsingWorkflowIdentity'
+import type { ParsingWorkflowBinding } from '../lib/paperProcessing'
 import { createFieldDraftSaver } from '../lib/fieldDrafts'
 import { currentEvidenceField, evidenceFieldsForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
@@ -61,6 +63,7 @@ const AdminPaperEditPage: React.FC = () => {
 
   /* ── 论文级字段 ─────────────────────────────── */
   const [editForm, setEditForm] = useState<Record<string, any>>({})
+  const [parsingWorkflow, setParsingWorkflow] = useState<ParsingWorkflowBinding>()
   const [authorInput, setAuthorInput] = useState('')
   const [editListText, setEditListText] = useState<Partial<Record<'keywords_tags' | 'methodology', string>>>({})
   const changeListText = (field: 'keywords_tags' | 'methodology', value: string) => {
@@ -229,6 +232,7 @@ const AdminPaperEditPage: React.FC = () => {
           materialStates.length > 0 || structureCandidates.length > 0 || classifications.materialFamilies.length > 0,
         )
         const staged = await api.get<{ staged: boolean; draft: any }>(`/api/rag/evidence/draft-state?target=paper&target_id=${paperId}`)
+        setParsingWorkflow(staged.draft?._parsing_workflow)
         if (staged.staged) {
           setEditForm(staged.draft.paper)
           setEditMaterialFamilies(staged.draft.paper.material_families || [])
@@ -277,6 +281,7 @@ const AdminPaperEditPage: React.FC = () => {
       setLoadedSpectra(spectra)
       fieldSaver.current = createFieldDraftSaver({target:'paper',target_id:String(paperId)})
       fieldSaver.current.initialize(draft)
+      setParsingWorkflow(draft._parsing_workflow)
       setEditForm(draft.paper); setEditMaterialFamilies(draft.paper.material_families || [])
       setEditMaterialStates(draft.material_states || []); setEditStructureCandidates(draft.structure_candidates || [])
       setEditStructuralObservations(draft.structural_observations || [])
@@ -308,7 +313,7 @@ const AdminPaperEditPage: React.FC = () => {
   // 科学数据段仅当论文原本有科学数据或当前编辑区有内容时执行——纯论文级编辑
   // （如无材料状态的综述）不需要触发整体替换。
   const fieldSaver = useRef<ReturnType<typeof createFieldDraftSaver> | null>(null)
-  const editableDraft = () => ({ paper: { ...editForm, material_families: editMaterialFamilies },
+  const editableDraft = () => ({ _parsing_workflow: parsingWorkflow, paper: { ...editForm, material_families: editMaterialFamilies },
     material_states: editMaterialStates, ...(fixedContract ? { _form_contract_version: 1 } : {
       structure_candidates: editStructureCandidates, structural_observations: editStructuralObservations }) })
   useEffect(() => {
@@ -356,6 +361,7 @@ const AdminPaperEditPage: React.FC = () => {
 
   return (
     <Container component="fieldset" disabled={editReviewSaving} maxWidth={false} disableGutters sx={{ py: 3, border: 0, minWidth: 0 }}>
+      <ParsingWorkflowIdentity binding={parsingWorkflow} />
       {/* 标题栏 + 返回列表 */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
         <IconButton aria-label={t('admin.editBackToList')} onClick={() => navigate(workspacePath)}>

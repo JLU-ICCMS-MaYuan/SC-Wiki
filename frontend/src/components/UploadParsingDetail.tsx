@@ -6,7 +6,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import { api } from '../lib/api'
-import { CitationExtractionStatus, PROCESSING_STAGES, UploadDraft, unwrapData } from '../lib/paperProcessing'
+import { CitationExtractionStatus, PROCESSING_STAGES, UploadDraft, unwrapData, type WorkflowAssessment, type ParsingWorkflowBinding } from '../lib/paperProcessing'
 import { useLanguage } from '../context/LanguageContext'
 import UploadTaskEditor from './UploadTaskEditor'
 
@@ -23,6 +23,9 @@ interface ChunkDetail {
 }
 
 interface ParsingDetail {
+  workflow_policy?: string
+  _parsing_workflow?: ParsingWorkflowBinding
+  workflow_assessment?: WorkflowAssessment
   status: string
   stage: string
   processing_error?: string | null
@@ -57,6 +60,19 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
   const [tab, setTab] = useState(0)
   const [reload, setReload] = useState(0)
   const [actionPending, setActionPending] = useState(false)
+
+  const downloadOriginal = async (fileId: string, filename: string) => {
+    try {
+      const blob = await api.download(`/api/upload-tasks/${taskId}/files/${encodeURIComponent(fileId)}/download`)
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url; link.download = filename
+      link.click()
+      URL.revokeObjectURL(url)
+    } catch (reason: any) {
+      setError(reason.message || t('upload.operationFailed'))
+    }
+  }
 
   useEffect(() => {
     let stopped = false
@@ -139,9 +155,9 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
                   <Button color="inherit" size="small" disabled={actionPending} onClick={() => void runAction('retry')}>
                     {t('upload.retryParse')}
                   </Button>
-                  <Button color="inherit" size="small" disabled={actionPending} onClick={() => void runAction('manual')}>
+                  {(detail.workflow_policy !== 'typed-parsing-v1' || detail._parsing_workflow) && <Button color="inherit" size="small" disabled={actionPending} onClick={() => void runAction('manual')}>
                     {t('upload.manualFill')}
-                  </Button>
+                  </Button>}
                 </Box>
               }
             >
@@ -176,7 +192,18 @@ const UploadParsingDetail: React.FC<Props> = ({ taskId, onSubmitted = () => unde
 
           {tab === 0 && (
             <Box role="tabpanel" aria-label={t('upload.tabAiForm')}>
-              {detail.status === 'ready' ? (
+              {detail.status === 'needs_workflow' ? (
+                <Box data-workflow-paused>
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    {t('upload.workflowPaused')} {detail.workflow_assessment?.reason}
+                  </Alert>
+                  <Typography variant="subtitle1">{detail.workflow_assessment?.paper?.title}</Typography>
+                  <Typography variant="body2">{detail.workflow_assessment?.paper?.authors?.join(', ')}</Typography>
+                  <Typography variant="body2">{detail.workflow_assessment?.paper?.year} {detail.workflow_assessment?.paper?.doi}</Typography>
+                  {detail.files?.map(file => <Button key={file.file_id}
+                    onClick={() => void downloadOriginal(file.file_id, file.original_filename)}>{file.original_filename}</Button>)}
+                </Box>
+              ) : detail.status === 'ready' ? (
                 <UploadTaskEditor taskId={taskId} onSubmitted={onSubmitted} />
               ) : detail.status === 'failed' && !detail.partial_draft ? (
                 <Typography variant="body2" color="text.secondary">

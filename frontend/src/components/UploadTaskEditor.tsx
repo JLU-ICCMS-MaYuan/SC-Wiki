@@ -1,6 +1,7 @@
 import { canonicalStructureFromCandidate } from '../lib/canonicalStructure'
 import type { PropertySpectrumListing } from '../lib/propertySpectra'
 import WorkdraftRefresh, { useWorkdraftRefresh } from './WorkdraftRefresh'
+import ParsingWorkflowIdentity from './ParsingWorkflowIdentity'
 import { createFieldDraftSaver, preserveRawNumbers } from '../lib/fieldDrafts'
 import { currentEvidenceField, evidenceFieldsForStates } from '../lib/evidenceFields'
 import { materialIdentityMissing } from '../lib/materialIdentity'
@@ -575,6 +576,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
   return (
     <Box component="fieldset" data-evidence-scope="upload-editor" disabled={submitting || applyingCandidate || Boolean(revision?.conflict)} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
+      <ParsingWorkflowIdentity binding={draft._parsing_workflow} />
       {revision && <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.revisionNotice')}</Alert>}
       {revision?.review_comment && <Alert severity="warning" sx={{ mb: 2 }}>{revision.review_comment}</Alert>}
       {revision?.warnings?.map(warning => <Alert key={warning} severity="warning" sx={{ mb: 2 }}>{warning}</Alert>)}

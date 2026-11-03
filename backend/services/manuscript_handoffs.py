@@ -126,6 +126,8 @@ def _freeze_files(files):
 def record_handoff(session, paper, user, *, action, draft, records, operation_id, files=(), manual=(),
                    holder='review', comment='', initial=False, spectra=None):
     """调用方持有论文行锁，并与业务修改处在同一事务内。"""
+    from backend.ingest.parsing_workflows import require_workflow
+    require_workflow(draft)
     if not operation_id or len(operation_id) > 64:
         error('handoff_operation_required', '正式交接需要有效的操作身份', 400)
     existing = session.scalar(select(models.PaperHistoryEvent).where(
@@ -159,6 +161,8 @@ def record_handoff(session, paper, user, *, action, draft, records, operation_id
             for k in ('material_families','co_first_authors','corresponding_authors')},
             'material_states':[{k:s.get(k) for k in ('state_key','structure_families')}
                                for s in draft.get('material_states') or []]}
+        from backend.ingest.parsing_workflows import preserve_binding
+        preserve_binding(payload['upload_submission'], draft)
     if not reused:
         payload['manuscript_snapshot'] = {**content, 'files': _freeze_files(files)}
     event = models.PaperHistoryEvent(paper_id=paper.id, paper_revision=paper.content_revision,

@@ -1,0 +1,30 @@
+{
+  "parent": "205d6918d1a3348d43a3f86c7451c5bd8e400dbe",
+  "scope": "独立源码快照；排除#211工作区改动",
+  "files": {
+    "backend/api/rag.py": "5177837290c1cf5c172a50bfdbae8a030846c778108f5d0de82bcbd920049b8a",
+    "backend/api/upload_tasks.py": "e83babb3786ee5f2b5a7aa812cfc350147d7ef66620097bab761884a5f24203b",
+    "backend/ingest/field_drafts.py": "d369d1cdfdcb7d6d709249f7647f2d632ecb3c538d877b0611dce391065d9be7",
+    "backend/ingest/property_evidence.py": "902a5745fa849b100e1aa6ba947bfbf0d7871a673cd185e9a100a8d075c3de65",
+    "backend/ingest/upload_contracts.py": "5bf0a1f0ac8ee1178cf12c601c903c4d93322bfa771f06f2deea4c458949640a",
+    "backend/ingest/upload_jobs.py": "3520c0e9417e58388b5c4f8df0db96b6fa895d91589ab56f58c008cad81f3467",
+    "backend/ingest/upload_preview.py": "c5d85226feaac9261a5ac19c3c2b2fadb267785ee04699d1b3e882769b7942fb",
+    "backend/ingest/upload_tasks.py": "f6d673220bfc58f6c724c16a8d7061841197a3794c780cf8000234bea92eb05e",
+    "backend/services/manuscript_handoffs.py": "f7beab10ad6fbc091c045d02e0306d4c235cf8ecb957d7b8582bbe912e9ef37a",
+    "backend/services/paper_revisions.py": "f15726887ac975158da6ea3394c0e2db0b3c5db0c01825f5fa9f8b48cfcfe874",
+    "frontend/src/lib/paperProcessing.ts": "343f449a34a326efba2e85c6446222b14030257ce445302aa695da4d96bbaf74",
+    "frontend/src/components/UploadParsingDetail.tsx": "fc8860ceb9c46bec3964bb5f39a0d9fee593fec68d23ef925e5799106389e6a8",
+    "frontend/src/components/UploadTaskCenter.tsx": "fc4e7cb8d9bbdb7ae9960d0da85d5ec8233c2861731705af83479b4ef1c7a0ca",
+    "frontend/src/components/UploadTaskEditor.tsx": "664fc9b72bc578662025dbab1157ac1c93c893e99de5748e84a2b4c6aee3c589",
+    "frontend/src/pages/AdminPaperEditPage.tsx": "b54d20654ca77c6ab71613b7f1560fa01b2f13f81e25b381180c394a22950e96",
+    "frontend/src/i18n/zh/upload.ts": "3036d71cc1dc82c8dc3524396711372bfb2e3150848a941eac8c438062390f19",
+    "frontend/src/i18n/en/upload.ts": "7d889e1d93a2a9008955fd10ec0239cee56b4d154bcdfc160f8cb99b8fe1b571",
+    "tests/01_decentralized_uploading/form-contract.test.tsx": "0c4bfc3cb1f7f62c2200c2072f3f0c821bf1186e159a192349de7193bd7b4f98",
+    "backend/ingest/parsing_workflows.py": "8d40a46e568c5ee2ac6879024fd0a95bdb6693b0a20b0a493f07a0ad0a86b780",
+    "backend/tests/test_parsing_workflows.py": "e68ea67244f480879c5bc88eade05e6d13a14bf86fb85ca4114d1fbc8136f301",
+    "frontend/src/components/ParsingWorkflowIdentity.tsx": "695a06b2df50c10bff1e675e0eb8e978497c962c5059b48f0654970957e27092",
+    "scripts/verify-typed-parsing-workflow.py": "116a91f93ee579eab8525a4d99c3fe34ce9784bb37a443cb76141d6fb0fbe65c",
+    "tests/01_decentralized_uploading/test_workflow_binding.py": "4b02ad88eddf29c31718883ce4f3493f3f743f3227d30a515723f3ed877457af",
+    "tests/01_decentralized_uploading/typed-parsing-workflow.test.tsx": "101f51c82a066dbb4f74983519953aaf502d087c8d1b2b29eca00b836c3499ea"
+  }
+}

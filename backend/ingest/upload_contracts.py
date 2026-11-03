@@ -25,6 +25,7 @@ FILE_ROLES = {"main", "supplementary", "attachment"}
 USER_FILE_ROLE_POLICY = "user-specified-v1"
 FILE_SUFFIXES = {".pdf", ".txt", ".md", ".cif", ".poscar", ".vasp"}
 PUBLIC_TASK_FIELDS = {"task_id", "status", "stage", "progress", "processing_status", "processing_error", "error_code", "created_at", "updated_at", "cleanup_at", "filename", "file_kind", "files", "revision", "state_schema_version", "duplicate", "existing_paper_id", "existing_paper_status", "allowed_actions", "duplicate_reason", "paper_id", "llm_provider", "consistency", "completed_chunks", "total_chunks", "stage_index", "stage_total", "parser_profile", "parser_runs", "reading_state", "role_assessment", "extraction_timing"}
+PUBLIC_TASK_FIELDS |= {"workflow_policy", "workflow_assessment", "_parsing_workflow"}
 PUBLIC_FILE_FIELDS = {"file_id", "role", "declared_role", "original_filename", "media_type", "kind", "size", "sha256", "sort_order", "upload_status", "extraction_status", "error"}
 
 
@@ -46,7 +47,7 @@ def _advance_extraction_timing(state: dict[str, Any], target: str, now: int) -> 
     timing = dict(timing)
     running_since = timing["running_since"]
     stopped = target in {"ready", "failed", "cancelled", "duplicate"}
-    paused = target in {"needs_role_review", "queued"}
+    paused = target in {"needs_role_review", "needs_workflow", "queued"}
     if running_since is not None and (stopped or paused):
         timing["elapsed_seconds"] += max(0, now - running_since)
         timing["running_since"] = None
@@ -84,7 +85,7 @@ def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> d
         _advance_extraction_timing(result, target, now)
     if target != current:
         result["revision"] = int(state.get("revision") or 0) + 1
-        if target in {"ready", "needs_role_review"}:
+        if target in {"ready", "needs_role_review", "needs_workflow"}:
             result["last_user_activity_at"] = now; result["cleanup_at"] = now + TASK_TTL; result.pop("terminal_at", None)
         elif target in FIXED_TERMINAL_STATUSES:
             result["terminal_at"] = now; result["cleanup_at"] = now + TASK_TTL
@@ -95,7 +96,7 @@ def apply_state_changes(state: dict[str, Any], *, now: int, **changes: Any) -> d
 
 def apply_user_activity(state: dict[str, Any], *, now: int) -> dict[str, Any]:
     result = dict(state); result["updated_at"] = now
-    if result.get("status") in {"ready", "needs_role_review"}: result["last_user_activity_at"] = now; result["cleanup_at"] = now + TASK_TTL
+    if result.get("status") in {"ready", "needs_role_review", "needs_workflow"}: result["last_user_activity_at"] = now; result["cleanup_at"] = now + TASK_TTL
     return result
 
 def structure_format_for_filename(filename: str) -> str | None:

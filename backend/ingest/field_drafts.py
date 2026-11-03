@@ -19,6 +19,8 @@ def authorized_draft(session, target, target_id, user, *, lock=False, allow_new_
             fail('draft_forbidden', '无权编辑此草稿', 403)
         if state.get('paper_id'):
             fail('draft_already_submitted', '草稿已提交')
+        from .parsing_workflows import require_task_workflow
+        require_task_workflow(state)
         from backend.services.workdrafts import row, require
         work = row(session,target,target_id,lock)
         if work is not None:
@@ -330,6 +332,8 @@ def apply_changes(draft, changes):
 
 def save_fields(session, target, target_id, user, expected_version, changes, *, field_scope=False):
     draft, saved = authorized_draft(session, target, target_id, user, lock=True)
+    from .parsing_workflows import require_workflow
+    require_workflow(draft)
     from backend.services import workdrafts
     epoch, _, content_version = expected_version.partition(':')
     lease = workdrafts.require(session, target, target_id, user, epoch if content_version else None)

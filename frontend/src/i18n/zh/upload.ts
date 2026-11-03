@@ -4,6 +4,9 @@
 // PROCESSING_STAGES（处理阶段）与 UploadTaskStatus（任务状态）的显示标签，
 // 键与后端 value 对齐；`role` 是上传文件角色，`cell` 是晶胞表示。
 export default {
+  workflowPaused: '暂无匹配的解析审核流程，已保留文件与通用信息，专用解析暂停。',
+  workflowConventional: '常规超导理论计算',
+  workflowIdentity: '解析审核流程：{name} · 表单 v{version}',
   extractionTime: '提取内容用时：{duration}',
   extractionDuration: '{minutes} 分 {seconds} 秒',
   extractionNotStarted: '尚未开始',
@@ -50,6 +53,7 @@ export default {
     queued: '等待解析',
     extracting: '提取正文',
     needs_role_review: '等待确认正文',
+    needs_workflow: '等待适用流程',
     reading: '分段阅读',
     summarizing: '全文汇总',
     ready: '等待校对',

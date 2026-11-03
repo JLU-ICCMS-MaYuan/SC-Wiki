@@ -313,6 +313,8 @@ def upload_snapshot(task_id: str, user_id: int, *, parsing_draft: dict | None = 
     state, draft = get_state(task_id), parsing_draft if parsing_draft is not None else get_draft(task_id)
     if not state or state.get('is_shadow') or int(state.get('user_id') or 0) != user_id:
         raise HTTPException(403, detail='只有上传者可以核对该草稿')
+    from .parsing_workflows import require_task_workflow
+    require_task_workflow(state, draft)
     if not draft or state.get('paper_id') or (parsing_draft is None and (state.get('stage') != 'ready' or state.get('processing_status') != 'succeeded')):
         fail('draft_not_ready', '草稿尚未准备完成或已经提交')
     chunks = task_source_chunks(task_id, state, markdown_path(task_id).parent)
