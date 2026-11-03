@@ -33,8 +33,7 @@
   <p class="boundary">流程图独立于应用；所有细节仍完整保留在本功能的详情页，源码中存在实现不等于真实服务或科学结果已验收。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
-<script type="application/json" id="flow-data">
-{
+<script type="application/json" id="flow-data">{
   "main": [
     {
       "id": "page-entry",
@@ -218,7 +217,156 @@
       ]
     }
   ],
-  "branches": [],
+  "branches": [
+    {
+      "id": "lab-boundary",
+      "attachTo": "page-entry",
+      "side": "left",
+      "kind": "result",
+      "label": "实验边界",
+      "title": "实验页免责",
+      "summary": "不代表科学验证的通用模型",
+      "owner": "前端",
+      "description": "页面由代码明确标记为实验页面，结果不代表经过科学验证的通用预测模型。",
+      "notes": [
+        "不宣称高压或非谐体系有效。",
+        "BETE 数据仅覆盖当前公开版本。"
+      ],
+      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx",
+      "links": [
+        {
+          "href": "07-tc-predict-details.html#page-entry",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "missing-file",
+      "attachTo": "input-check",
+      "side": "left",
+      "kind": "stop",
+      "label": "缺少文件",
+      "title": "缺少必要文件",
+      "summary": "缺 CONTCAR 或 PDOS_H 返回 400",
+      "owner": "FastAPI",
+      "description": "缺少可解析的 CONTCAR 或 PDOS_H.dat、列数不足或关键数值为零时返回 400，不进入计算。",
+      "notes": [
+        "金属 PDOS 缺失会补齐，不因此报错。"
+      ],
+      "code": "backend/api/tc_predict.py",
+      "links": [
+        {
+          "href": "07-tc-predict-details.html#input-check",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "parse-fail",
+      "attachTo": "input-check",
+      "side": "right",
+      "kind": "stop",
+      "label": "解析失败",
+      "title": "结构无法解析",
+      "summary": "格式不符时提示切换类型",
+      "owner": "FastAPI",
+      "description": "结构无法解析或所选格式与内容不匹配时明确提示切换，不把有效 POSCAR 按默认 CIF 判为无效。",
+      "notes": [
+        "上传或粘贴后恢复自动识别。"
+      ],
+      "code": "backend/api/tc_predict.py",
+      "links": [
+        {
+          "href": "07-tc-predict-details.html#input-check",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "formula-invalid",
+      "attachTo": "tc-formula",
+      "side": "left",
+      "kind": "stop",
+      "label": "参数越界",
+      "title": "公式不适用",
+      "summary": "参数越界即报错不造假结果",
+      "owner": "Python 后端",
+      "description": "输入非法或所填参数超出公式适用范围时明确报错，不返回看似有效的 Tc。",
+      "notes": [
+        "经验公式范围与不确定度未形成模型说明。"
+      ],
+      "code": "backend/api/tc_predict.py",
+      "links": [
+        {
+          "href": "07-tc-predict-details.html#tc-formula",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "env-missing",
+      "attachTo": "isolated-worker",
+      "side": "left",
+      "kind": "stop",
+      "label": "环境缺失",
+      "title": "模型环境缺失",
+      "summary": "503，其他接口仍可用",
+      "owner": "后端 runner",
+      "description": "缺少独立环境或模型制品时返回 503，主站其他 API 与参数模型仍可正常使用。",
+      "notes": [
+        "制品摘要校验失败则拒绝供应下载。"
+      ],
+      "code": "backend/prediction/runner.py",
+      "links": [
+        {
+          "href": "07-tc-predict-details.html#isolated-worker",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "task-busy",
+      "attachTo": "isolated-worker",
+      "side": "right",
+      "kind": "wait",
+      "label": "任务占用",
+      "title": "单任务占用",
+      "summary": "第二个请求返回 429 需重试",
+      "owner": "后端 runner",
+      "description": "同一时间只执行一个结构任务，运行期间后续请求直接返回 429，需稍后重试。",
+      "notes": [
+        "超时后自动清理释放名额。"
+      ],
+      "code": "backend/prediction/runner.py",
+      "links": [
+        {
+          "href": "07-tc-predict-details.html#isolated-worker",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "no-persist",
+      "attachTo": "result-assemble",
+      "side": "right",
+      "kind": "result",
+      "label": "不回写主库",
+      "title": "结果仅留页面",
+      "summary": "不自动写入主业务数据库",
+      "owner": "FastAPI",
+      "description": "预测结果逐次保留在当前页面，没有数据库持久化，也不自动写入主业务数据。",
+      "notes": [
+        "与主材料检索、RAG 数据相互独立。"
+      ],
+      "code": "backend/api/tc_models.py；backend/api/tc_predict.py",
+      "links": [
+        {
+          "href": "07-tc-predict-details.html#result-assemble",
+          "label": "返回本功能主干"
+        }
+      ]
+    }
+  ],
   "edges": [
     {
       "from": "page-entry",
@@ -267,7 +415,6 @@
       "lane": 1
     }
   ]
-}
-</script>
+}</script>
 </body>
 </html>

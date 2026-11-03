@@ -33,8 +33,7 @@
   <p class="boundary">流程图独立于应用；所有细节仍完整保留在本功能的详情页，源码中存在实现不等于真实服务或科学结果已验收。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
-<script type="application/json" id="flow-data">
-{
+<script type="application/json" id="flow-data">{
   "main": [
     {
       "id": "community-entry",
@@ -251,7 +250,180 @@
       ]
     }
   ],
-  "branches": [],
+  "branches": [
+    {
+      "id": "password-reset",
+      "attachTo": "submit-credentials",
+      "side": "left",
+      "kind": "wait",
+      "label": "忘记密码",
+      "title": "找回密码",
+      "summary": "邮箱验证码换一次性改密令牌",
+      "owner": "Go API",
+      "description": "依次请求验证码、校验 6 位码、提交新密码；验证成功原子消费并签发 32 字节一次性改密令牌，改密后回到登录页重新登录。",
+      "notes": [
+        "验证码 5 分钟、最多错 5 次。",
+        "成功递增版本且不自动登录。"
+      ],
+      "code": "goserver/handlers/password_reset.go",
+      "links": [
+        {
+          "href": "06-community-details.html#submit-credentials",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "email-unverified",
+      "attachTo": "credential-check",
+      "side": "left",
+      "kind": "stop",
+      "label": "邮箱未验证",
+      "title": "邮箱未验证",
+      "summary": "返回 403 并给继续验证入口",
+      "owner": "Go API",
+      "description": "未验证邮箱登录返回 403／email_not_verified，前端提供继续验证入口，本次不签发会话。",
+      "notes": [
+        "历史已验证账号不重新验证。"
+      ],
+      "code": "goserver/handlers/auth.go",
+      "links": [
+        {
+          "href": "06-community-details.html#credential-check",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "account-blocked",
+      "attachTo": "credential-check",
+      "side": "right",
+      "kind": "stop",
+      "label": "账号封禁",
+      "title": "封禁或注销",
+      "summary": "不可登录但保留榜单标识",
+      "owner": "Go API",
+      "description": "封禁或注销账号不能登录，也不能通过验证码签发会话；榜单保留「已封禁」，注销账号统一显示「已注销用户」。",
+      "notes": [
+        "注销保留历史贡献。",
+        "注销后不再链接公开主页。"
+      ],
+      "code": "goserver/handlers/stats.go",
+      "links": [
+        {
+          "href": "06-community-details.html#credential-check",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "cache-hit",
+      "attachTo": "contrib-rank",
+      "side": "left",
+      "kind": "result",
+      "label": "缓存命中",
+      "title": "一小时快照",
+      "summary": "命中缓存直接返回榜单",
+      "owner": "Redis",
+      "description": "普通请求读取一小时 Redis 快照直接返回，页面保持打开时每小时自动重新获取一次。",
+      "notes": [
+        "登录用户仍附加本人全量排名。"
+      ],
+      "code": "goserver/handlers/stats.go",
+      "links": [
+        {
+          "href": "06-community-details.html#contrib-rank",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "force-refresh",
+      "attachTo": "contrib-rank",
+      "side": "right",
+      "kind": "check",
+      "label": "手动刷新",
+      "title": "手动刷新",
+      "summary": "带 refresh 参数绕过缓存重建",
+      "owner": "Go API",
+      "description": "点击「刷新榜单」带 refresh=true 绕过缓存重建快照，统计卡片的「刷新论文统计」同样强制重建。",
+      "notes": [
+        "刷新保留仍存在的家族选择。",
+        "失败保留旧结果并可重试。"
+      ],
+      "code": "goserver/handlers/stats.go",
+      "links": [
+        {
+          "href": "06-community-details.html#contrib-rank",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "redis-down",
+      "attachTo": "contrib-rank",
+      "side": "right",
+      "kind": "check",
+      "label": "缓存失效",
+      "title": "缓存不可用",
+      "summary": "直连数据库聚合后返回",
+      "owner": "Go API",
+      "description": "Redis 不可用时直接查询数据库聚合；数据库聚合失败则不返回不完整榜单。",
+      "notes": [
+        "不使用残缺结果兜底。"
+      ],
+      "code": "goserver/handlers/stats.go",
+      "links": [
+        {
+          "href": "06-community-details.html#contrib-rank",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "not-superadmin",
+      "attachTo": "superadmin-gov",
+      "side": "left",
+      "kind": "stop",
+      "label": "非超管",
+      "title": "无治理权限",
+      "summary": "访客与普通管理员只读",
+      "owner": "Python API",
+      "description": "非超级管理员或未满足正常有效状态的请求返回 403 superadmin_required，只能阅读问题与答案。",
+      "notes": [
+        "普通管理员也不能排队或编辑。"
+      ],
+      "code": "backend/api/community_ai.py",
+      "links": [
+        {
+          "href": "06-community-details.html#superadmin-gov",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "answer-rejected",
+      "attachTo": "ai-generate",
+      "side": "left",
+      "kind": "stop",
+      "label": "内容重复",
+      "title": "未回应前文",
+      "summary": "重复或未引用则拒绝发布",
+      "owner": "Python 生成器",
+      "description": "完全重复已有正文或没有引用前文标识的回答不发布；纠正重试一次仍失败即保留失败项、后续继续。",
+      "notes": [
+        "失败项保留且不阻塞队列。",
+        "重试排到队尾。"
+      ],
+      "code": "backend/community/generation.py",
+      "links": [
+        {
+          "href": "06-community-details.html#ai-generate",
+          "label": "返回本功能主干"
+        }
+      ]
+    }
+  ],
   "edges": [
     {
       "from": "community-entry",
@@ -302,7 +474,6 @@
       "lane": 1
     }
   ]
-}
-</script>
+}</script>
 </body>
 </html>

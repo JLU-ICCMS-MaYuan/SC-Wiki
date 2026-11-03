@@ -33,8 +33,7 @@
   <p class="boundary">流程图独立于应用；所有细节仍完整保留在本功能的详情页，源码中存在实现不等于真实服务或科学结果已验收。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
-<script type="application/json" id="flow-data">
-{
+<script type="application/json" id="flow-data">{
   "main": [
     {
       "id": "upload-worker",
@@ -216,8 +215,161 @@
       ]
     }
   ],
-  "branches": []
-}
-</script>
+  "branches": [
+    {
+      "id": "grobid-down",
+      "attachTo": "grobid-parse",
+      "side": "right",
+      "kind": "stop",
+      "label": "解析失败",
+      "title": "解析失败留空",
+      "summary": "只记 unavailable 状态",
+      "owner": "GROBID / Python Worker",
+      "description": "GROBID 不可用或解析失败时，只记录 unavailable／failed 状态，不创建任何引用边，也不阻断论文人工校对。",
+      "notes": [
+        "新版本文档不保留旧引用。",
+        "缺少主 PDF 时同样记可观察状态。"
+      ],
+      "code": "backend/ingest/upload_jobs.py",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#grobid-parse",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "unmatched-wait",
+      "attachTo": "match-ref",
+      "side": "left",
+      "kind": "wait",
+      "label": "匹配未命中",
+      "title": "未匹配留库",
+      "summary": "等待目标论文入库",
+      "owner": "Python 引用服务 / MySQL",
+      "description": "未命中记录以 unmatched 保存在库，目标论文以后审核通过时由审核后重试流程再次匹配成边。",
+      "notes": [
+        "解析原文与失败信息一并保留。",
+        "不人工创建引用边。"
+      ],
+      "code": "backend/services/citation_graph.py",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#match-ref",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "ambiguous-wait",
+      "attachTo": "match-ref",
+      "side": "right",
+      "kind": "wait",
+      "label": "题名歧义",
+      "title": "多候选歧义",
+      "summary": "记为 ambiguous 待重扫",
+      "owner": "Python 引用服务",
+      "description": "题名匹配到多个候选时记入 ambiguous，与 unmatched 一起进入审核后的历史重扫范围。",
+      "notes": [
+        "不按相似度猜选唯一目标。"
+      ],
+      "code": "backend/services/citation_graph.py",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#match-ref",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "mark-denied",
+      "attachTo": "review-approve",
+      "side": "left",
+      "kind": "stop",
+      "label": "非管理员",
+      "title": "非管理员拒绝",
+      "summary": "无标记权限被拦截",
+      "owner": "Go 中间件",
+      "description": "标记接口挂 AdminRequired 中间件，非管理员请求被拒绝；未登录或用户不存在返回 401。",
+      "notes": [
+        "只能标记已审核论文。",
+        "普通用户仍可只读查看标记。"
+      ],
+      "code": "goserver/handlers/paper_graph_marks.go",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#review-approve",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "mark-admin",
+      "attachTo": "review-approve",
+      "side": "right",
+      "kind": "result",
+      "label": "人工标记",
+      "title": "人工里程碑标记",
+      "summary": "维护源头与突破标记",
+      "owner": "管理员 / Go 标记接口",
+      "description": "管理员与超级管理员可整体替换 origin、breakthrough 标记，系统不会用引用数自动认定里程碑。",
+      "notes": [
+        "marks 只允许 origin 或 breakthrough。",
+        "引用边不允许人工写入。"
+      ],
+      "code": "goserver/handlers/paper_graph_marks.go",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#review-approve",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "title-fallback",
+      "attachTo": "go-graph-api",
+      "side": "right",
+      "kind": "result",
+      "label": "标题缺失",
+      "title": "标题缺失回退",
+      "summary": "退回论文原标题",
+      "owner": "Go API / MySQL",
+      "description": "节点 label 优先取非空 knowledge_graph_title，为 NULL 或空串时回退 title，同时返回完整原标题。",
+      "notes": [
+        "重新发布不会为缺失标题再调 AI。",
+        "历史论文由管理员编辑页补充。"
+      ],
+      "code": "goserver/handlers/knowledge_graph.go",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#go-graph-api",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "cycle-dedupe",
+      "attachTo": "frontend-graph",
+      "side": "left",
+      "kind": "result",
+      "label": "循环去重",
+      "title": "循环引用去重",
+      "summary": "合并节点不重复展开",
+      "owner": "React 前端",
+      "description": "真实文献即使成环也不删除，前端按 paper_id 合并节点、避免重复展开，服务端不递归加载整图。",
+      "notes": [
+        "当前无环检测与异常核验流程。",
+        "去重不代表异常已核验。"
+      ],
+      "code": "frontend/src/pages/KnowledgeGraphPage.tsx",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#frontend-graph",
+          "label": "返回本功能主干"
+        }
+      ]
+    }
+  ]
+}</script>
 </body>
 </html>

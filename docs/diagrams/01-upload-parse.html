@@ -33,8 +33,7 @@
   <p class="boundary">流程图独立于应用；所有细节仍完整保留在本功能的详情页，源码中存在实现不等于真实服务或科学结果已验收。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
-<script type="application/json" id="flow-data">
-{
+<script type="application/json" id="flow-data">{
   "main": [
     {
       "id": "files",
@@ -369,8 +368,219 @@
       ]
     }
   ],
-  "branches": []
-}
-</script>
+  "branches": [
+    {
+      "id": "failed",
+      "attachTo": "text",
+      "side": "left",
+      "kind": "stop",
+      "label": "否",
+      "title": "解析失败，记录阶段",
+      "summary": "保留错误，按现有入口重试",
+      "owner": "上传 Worker",
+      "description": "记录 failed、failed_stage 与安全错误信息，保留可追查产物。重试受原文件有效性和当前任务状态限制。",
+      "notes": [
+        "不是科学字段不通过，也不伪造 ready。",
+        "有界处理仍失败时不会无限循环调用模型。"
+      ],
+      "code": "backend/ingest/upload_jobs.py::process_upload_task / _process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#text",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "role-wait",
+      "attachTo": "role-check",
+      "side": "right",
+      "kind": "wait",
+      "label": "仅旧任务歧义",
+      "returnTo": "roles",
+      "returnLabel": "确认后恢复",
+      "title": "仅旧任务：恢复角色确认",
+      "summary": "历史 needs_role_review",
+      "owner": "上传者",
+      "description": "只为已有历史任务保留带版本的人工恢复，复用已有提取文本。新任务不会进入此步骤。",
+      "notes": [
+        "不批量改写旧分类，也不把历史入口用作新任务常规流程。"
+      ],
+      "code": "backend/api/upload_tasks.py；backend/ingest/upload_jobs.py::_process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#role-check",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "repair",
+      "attachTo": "coverage",
+      "side": "left",
+      "kind": "wait",
+      "label": "否",
+      "title": "执行有限补证与分类",
+      "summary": "保留当前候选及原始诊断",
+      "owner": "程序 / 必要模型调用",
+      "description": "按现有预算补足可靠定位或分类未覆盖内容，再重新检查；不是新增无限重试或重写科学值。",
+      "notes": [
+        "补证只在可核实的来源范围内进行。"
+      ],
+      "code": "backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/coverage_audit.py",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#coverage",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "recheck",
+      "attachTo": "repair",
+      "side": "left",
+      "kind": "check",
+      "title": "补证后满足要求？",
+      "summary": "仍不满足则失败；通过则回汇总",
+      "owner": "程序检查",
+      "description": "对补证后的候选和覆盖情况重新判断。满足要求回到主干汇总，仍未满足必要检查时保留诊断并进入失败终态。",
+      "notes": [
+        "不通过增加重试次数掩盖缺失。"
+      ],
+      "code": "backend/ingest/upload_jobs.py::_process_upload_task",
+      "returnTo": "summary",
+      "returnLabel": "满足后汇总",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "uncertain-assignment",
+      "title": "材料归属仍有疑问",
+      "summary": "保留记录、理由与来源，等待核对",
+      "description": "当前规划将存疑候选放入最可能的已有状态并记录生成问题；后续模型可查原图核实并更正该记录，不能用复制整张卡解决一个字段的疑问。",
+      "code": "backend/ingest/state_inventory.py::apply_inventory；backend/ingest/model_review.py",
+      "owner": "规划模型 / 人工",
+      "attachTo": "state-inventory",
+      "side": "left",
+      "kind": "wait",
+      "label": "存疑",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#state-inventory",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "duplicate",
+      "attachTo": "duplicate-check",
+      "side": "right",
+      "kind": "stop",
+      "label": "是",
+      "title": "提示已有论文",
+      "summary": "duplicate；不重复新建",
+      "owner": "上传 Worker",
+      "description": "返回已有论文信息或权限提示，结束本次新建任务。",
+      "notes": [
+        "已有论文仍按账号权限控制可见性。"
+      ],
+      "code": "backend/ingest/upload_jobs.py::_handle_duplicate",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#duplicate-check",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "native-page",
+      "title": "需要查看 PDF 原页",
+      "summary": "实际图像送入下一轮模型请求",
+      "description": "read_original_page / inspect_figure 先核验文件身份、大小与 SHA，再渲染指定原页；原生 assistant tool_calls 与 role=tool 使用同一 tool_call_id 配对。",
+      "code": "backend/ingest/model_review.py::_read_original_page / review_fields；backend/ingest/review_tool_contract.py",
+      "owner": "模型工具 / 存储层",
+      "attachTo": "evidence",
+      "side": "right",
+      "kind": "wait",
+      "label": "需查图",
+      "notes": [
+        "仅渲染成功或模型请求超时不能算模型已读原页。",
+        "review_images_read 只在带真实图像的模型请求成功后为 true。"
+      ],
+      "returnTo": "evidence",
+      "returnLabel": "继续核对",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#evidence",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "conflict",
+      "attachTo": "save",
+      "side": "left",
+      "kind": "stop",
+      "label": "草稿已修改",
+      "title": "保留已有人工草稿",
+      "summary": "并发修改时不覆盖",
+      "owner": "草稿版本保护程序",
+      "description": "受控重跑发现原草稿在解析期间已变化时拒绝覆盖，保留当前人工编辑供核对。",
+      "notes": [
+        "该分支适用于带预期草稿哈希的受控重跑。"
+      ],
+      "code": "backend/ingest/upload_jobs.py::_process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#save",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "suggestion-error",
+      "attachTo": "automatic-complete",
+      "side": "right",
+      "kind": "wait",
+      "label": "技术未完成",
+      "title": "保留草稿并标记失败",
+      "summary": "failed；不会继续发布 ready",
+      "owner": "上传 Worker",
+      "description": "自动整理或字段核对技术未完成时，complete_parsing_state 返回 failed，错误码为 automatic_review_incomplete；已提取内容、部分核对结果和预览继续保留。",
+      "notes": [
+        "科学存疑与程序技术失败分开，不能把失败伪装为 ready。"
+      ],
+      "code": "backend/ingest/upload_jobs.py::complete_parsing_state",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#automatic-complete",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "spectra-failed",
+      "title": "谱处理技术失败",
+      "summary": "保留谱运行原因，不发布 ready",
+      "description": "run_upload 发现运行缺失、未结束、failed，或读图能力未证实、technical_errors 非空时抛出错误，上传任务进入失败终态；有明确目标谱身份但标定待核对不等同于此技术故障。",
+      "code": "backend/spectra/jobs.py::run_upload；backend/ingest/upload_jobs.py::_process_upload_task",
+      "owner": "上传 Worker",
+      "attachTo": "automatic-spectra",
+      "side": "right",
+      "kind": "stop",
+      "label": "技术失败",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#automatic-spectra",
+          "label": "返回本功能主干"
+        }
+      ]
+    }
+  ]
+}</script>
 </body>
 </html>

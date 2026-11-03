@@ -33,8 +33,7 @@
   <p class="boundary">流程图独立于应用；所有细节仍完整保留在本功能的详情页，源码中存在实现不等于真实服务或科学结果已验收。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
-<script type="application/json" id="flow-data">
-{
+<script type="application/json" id="flow-data">{
   "main": [
     {
       "id": "search-entry",
@@ -239,7 +238,184 @@
       ]
     }
   ],
-  "branches": [],
+  "branches": [
+    {
+      "id": "stale-drop",
+      "attachTo": "api-route",
+      "side": "left",
+      "kind": "wait",
+      "label": "快速切换",
+      "title": "过期响应丢弃",
+      "summary": "只采用最后一次请求的结果",
+      "owner": "React / SearchResults",
+      "description": "查询键变化时以 300ms 定时重发，组件只接受当前活跃请求的响应，先发后至的结果被丢弃。",
+      "notes": [
+        "快速切换视图或筛选时不产生错序展示。",
+        "失败由 retry 计数递增后重新发起请求。"
+      ],
+      "code": "frontend/src/components/SearchResults.tsx",
+      "links": [
+        {
+          "href": "03-search-details.html#api-route",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "empty-result",
+      "attachTo": "dedup-assemble",
+      "side": "right",
+      "kind": "result",
+      "label": "零命中",
+      "title": "无匹配结果",
+      "summary": "返回空列表与零计数",
+      "owner": "Go API / React",
+      "description": "命中为 0 时 items 为空且 total／papers_total／states_total 为 0，前端渲染空列表，不补造状态或结构。",
+      "notes": [
+        "没有状态的伴随模型不被虚构为材料状态。",
+        "缺原子位置的几何资料不生成完整模型入口。"
+      ],
+      "code": "goserver/handlers/search_results.go",
+      "links": [
+        {
+          "href": "03-search-details.html#dedup-assemble",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "source-invalid",
+      "attachTo": "detail-preview",
+      "side": "left",
+      "kind": "stop",
+      "label": "来源非法",
+      "title": "非法来源兜底",
+      "summary": "非站内来源退回检索入口",
+      "owner": "React / searchNavigation",
+      "description": "详情与结构的返回来源仅接受合法站内地址，直接访问或携带非法来源时统一以检索入口兜底，不再固定返回上传列表。",
+      "notes": [
+        "合法来源地址在打开来源论文或结构时保留。",
+        "来源校验失败不阻断结构详情本身的打开。"
+      ],
+      "code": "frontend/src/lib/searchNavigation.ts",
+      "links": [
+        {
+          "href": "03-search-details.html#detail-preview",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "perm-denied",
+      "attachTo": "detail-preview",
+      "side": "right",
+      "kind": "stop",
+      "label": "无权限",
+      "title": "结构下载受限",
+      "summary": "非批准非本人非管理员被拒",
+      "owner": "Python / structures.py",
+      "description": "GET /api/structures/{structure_id}/raw 在结构未批准、且非提交者、且非管理员时返回 403；representative 与 raw 端点均要求登录用户。",
+      "notes": [
+        "未批准结构不会作为普通公开代表结构。",
+        "缺少匹配结构返回空结果或未找到错误，不自动生成结构。"
+      ],
+      "code": "backend/api/structures.py",
+      "links": [
+        {
+          "href": "03-search-details.html#detail-preview",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "chart-unclassified",
+      "attachTo": "chart-stats",
+      "side": "left",
+      "kind": "result",
+      "label": "无家族",
+      "title": "未分类归入其他",
+      "summary": "无家族标签的点进 ID 0",
+      "owner": "Go API / Recharts",
+      "description": "API 为每个数据点返回所属论文的 family_ids[]，没有论文级 family 时归入 ID 0 的「其他」单列。",
+      "notes": [
+        "单个点命中多个已选 family 也只绘制一次。",
+        "scdft／other／unknown 没有对应 tc_field，不会出现在图表。"
+      ],
+      "code": "goserver/handlers/stats.go",
+      "links": [
+        {
+          "href": "03-search-details.html#chart-stats",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "chart-empty",
+      "attachTo": "chart-stats",
+      "side": "right",
+      "kind": "result",
+      "label": "无数据",
+      "title": "图表无数据点",
+      "summary": "保留坐标系仅提示暂无数据",
+      "owner": "React / ChartScatter",
+      "description": "没有数据点时仍渲染坐标系、背景分区与图例，只在图内提示无数据点；查询失败与空数据被明确区分。",
+      "notes": [
+        "查询失败返回 HTTP 503 且不写缓存，不返回空数组。",
+        "两张图分别呈现加载失败状态。"
+      ],
+      "code": "frontend/src/components/ChartScatter.tsx",
+      "links": [
+        {
+          "href": "03-search-details.html#chart-stats",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "export-format",
+      "attachTo": "export-path",
+      "side": "left",
+      "kind": "result",
+      "label": "格式选择",
+      "title": "导出格式分支",
+      "summary": "JSON 离线包，RIS 仅前端提示",
+      "owner": "Go API / React",
+      "description": "结构化离线数据走材料状态导出接口返回 JSON 包；RIS 按钮当前只触发前端提示，图表组合导出入口已随社区页改版移除。",
+      "notes": [
+        "前端存在的导出按钮不等同于后端接口已闭环。",
+        "离线全量导出由 backend/scripts/export_data.py 生成，不属于前端交互。"
+      ],
+      "code": "goserver/handlers/material_state_export.go（JSON）＋文档依据：share-and-export.md#当前行为",
+      "links": [
+        {
+          "href": "03-search-details.html#export-path",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "export-incomplete",
+      "attachTo": "export-path",
+      "side": "right",
+      "kind": "stop",
+      "label": "证据缺失",
+      "title": "导出不完整拦截",
+      "summary": "证据缺失返回 409 不导出",
+      "owner": "Go API",
+      "description": "已批准材料状态导出要求每条物性记录至少一条当前 revision 的 Evidence，且 structure_key 精确匹配 structure-{id}，否则返回 409 export_incomplete；revision 不一致返回 409 export_revision_conflict。",
+      "notes": [
+        "跨 revision 关联无效。",
+        "查询按 paper_id + revision + state_key 精确定位。"
+      ],
+      "code": "goserver/handlers/material_state_export.go",
+      "links": [
+        {
+          "href": "03-search-details.html#export-path",
+          "label": "返回本功能主干"
+        }
+      ]
+    }
+  ],
   "edges": [
     {
       "from": "search-entry",
@@ -289,7 +465,6 @@
       "label": "图表出口"
     }
   ]
-}
-</script>
+}</script>
 </body>
 </html>

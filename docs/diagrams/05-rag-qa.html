@@ -33,8 +33,7 @@
   <p class="boundary">流程图独立于应用；所有细节仍完整保留在本功能的详情页，源码中存在实现不等于真实服务或科学结果已验收。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
-<script type="application/json" id="flow-data">
-{
+<script type="application/json" id="flow-data">{
   "main": [
     {
       "id": "q-submit",
@@ -226,7 +225,201 @@
       ]
     }
   ],
-  "branches": [],
+  "branches": [
+    {
+      "id": "data-unavailable",
+      "attachTo": "availability",
+      "side": "left",
+      "kind": "stop",
+      "label": "数据不可用",
+      "title": "数据不可用",
+      "summary": "检索与问答一并失败",
+      "owner": "Python RAG 服务",
+      "description": "缺少 RAG 数据根目录或 Qdrant 不可达时抛出数据不可用错误，检索能力与聊天能力同时不可用。",
+      "notes": [
+        "健康状态由数据库与向量库共同决定。",
+        "缺失时返回明确不可用信息而非空结果。"
+      ],
+      "code": "backend/rag/service.py",
+      "links": [
+        {
+          "href": "05-rag-qa-details.html#availability",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "llm-missing",
+      "attachTo": "availability",
+      "side": "right",
+      "kind": "stop",
+      "label": "LLM 未配置",
+      "title": "LLM 未配置",
+      "summary": "聊天不可用但可检索",
+      "owner": "Python RAG 服务",
+      "description": "数据可用但当前请求没有有效 LLM 凭据时报告 LLM 问答未配置，检索能力仍保持可用。",
+      "notes": [
+        "不静默回退服务端密钥。",
+        "登录用户匿名不能绕过编号校验。"
+      ],
+      "code": "backend/rag/service.py",
+      "links": [
+        {
+          "href": "05-rag-qa-details.html#availability",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "explore-review",
+      "attachTo": "mode-route",
+      "side": "right",
+      "kind": "result",
+      "label": "灵感评审",
+      "title": "灵感评审",
+      "summary": "想法卡片加可行性评价",
+      "owner": "灵感 Agent / LLM reviewer",
+      "description": "探索路由确定路径后收集候选证据、生成想法卡片，再由 reviewer 依据证据输出可行性评分并逐步推送事件。",
+      "notes": [
+        "想法与评审属检索证据加模型生成，不构成科研结论。",
+        "缺少聊天配置或证据时不可用或降级。"
+      ],
+      "code": "backend/rag/inspiration/reviewer.py",
+      "links": [
+        {
+          "href": "05-rag-qa-details.html#mode-route",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "no-token-done",
+      "attachTo": "llm-generate",
+      "side": "right",
+      "kind": "result",
+      "label": "无增量输出",
+      "title": "无增量输出",
+      "summary": "done 仍带完整答案",
+      "owner": "LLM 供应商 / Python RAG 引擎",
+      "description": "供应商不支持 token 流时，流程以最终图状态取最后一条无工具调用的 AI 消息，done 事件仍提供完整答案。",
+      "notes": [
+        "工具调用前的思考文本不当作最终回答。"
+      ],
+      "code": "backend/rag/agent/mentor.py",
+      "links": [
+        {
+          "href": "05-rag-qa-details.html#llm-generate",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "neo4j-tools",
+      "title": "按需使用旧 Neo4j 工具",
+      "summary": "历史论文上下文、关系遍历与路径",
+      "description": "Mentor 的 search_papers、paper_context、explore_graph、paper_path 仍调用既有 Neo4j 适配工具。它们与 04 基于 MySQL 的公开引用图不是同一实现，部署需分别核验。",
+      "code": "backend/rag/agent/tools.py；backend/rag/tools/neo4j.py",
+      "owner": "Mentor 工具",
+      "attachTo": "llm-generate",
+      "side": "left",
+      "kind": "wait",
+      "label": "模型选择",
+      "returnTo": "fuse-rank",
+      "returnLabel": "工具返回",
+      "links": [
+        {
+          "href": "05-rag-qa-details.html#llm-generate",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "db-fail",
+      "attachTo": "sql-search",
+      "side": "left",
+      "kind": "stop",
+      "label": "数据库失败",
+      "title": "数据库失败",
+      "summary": "与无记录分开报错",
+      "owner": "MySQL / Python RAG 引擎",
+      "description": "结构化模型工具捕获查询异常后返回明确失败说明，不能把数据库故障解释为没有材料或物性记录；直接检索 API 继续按对应异常路径返回错误。",
+      "notes": [
+        "独立 RAG 库与主业务库不自动同步。"
+      ],
+      "code": "backend/rag/agent/tools.py::_query_properties / _material_info；backend/rag/service.py::search",
+      "links": [
+        {
+          "href": "05-rag-qa-details.html#sql-search",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "empty-result",
+      "attachTo": "fuse-rank",
+      "side": "left",
+      "kind": "result",
+      "label": "检索为空",
+      "title": "检索为空",
+      "summary": "返回空结果不造假",
+      "owner": "Python RAG 引擎",
+      "description": "没有匹配记录时返回空结果集，与数据库失败分开处理；SQL 为空时语义检索仍可补充召回。",
+      "notes": [
+        "引文与证据只来自实际检索结果。"
+      ],
+      "code": "backend/rag/search/engine.py",
+      "links": [
+        {
+          "href": "05-rag-qa-details.html#fuse-rank",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "empty-answer",
+      "attachTo": "sse-stream",
+      "side": "left",
+      "kind": "stop",
+      "label": "空回答",
+      "title": "空回答报错",
+      "summary": "无正文即返回错误",
+      "owner": "Python API",
+      "description": "云端会话在 done 前正文为空或未收到完成事件时抛出错误，SSE 依次返回 error 与 end(ok=false)。",
+      "notes": [
+        "失败轮次不作为完成轮次保存。",
+        "错误文本不拼接上游异常原文。"
+      ],
+      "code": "backend/api/rag.py",
+      "links": [
+        {
+          "href": "05-rag-qa-details.html#sse-stream",
+          "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "stream-interrupt",
+      "attachTo": "conv-save",
+      "side": "left",
+      "kind": "stop",
+      "label": "流式中断",
+      "title": "中断不保存",
+      "summary": "中断回答不落库",
+      "owner": "React / Python API",
+      "description": "流式中断、账号切换或请求失败的回答不作为完成轮次保存，前端保留当前草稿与错误提示。",
+      "notes": [
+        "轮次版本阻止旧请求覆盖新消息。",
+        "登出切换时主动取消读取。"
+      ],
+      "code": "frontend/src/lib/useStreamingChat.ts",
+      "links": [
+        {
+          "href": "05-rag-qa-details.html#conv-save",
+          "label": "返回本功能主干"
+        }
+      ]
+    }
+  ],
   "edges": [
     {
       "from": "q-submit",
@@ -278,7 +471,6 @@
       "label": "done 前保存完成轮次"
     }
   ]
-}
-</script>
+}</script>
 </body>
 </html>
