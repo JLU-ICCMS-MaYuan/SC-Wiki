@@ -134,6 +134,17 @@ def apply_claim_evidence(root: dict, claims: list[Claim]) -> None:
             node["evidences"] = [e.model_dump(mode="json") | {"page":e.pdf_page} for e in claim.evidences]
 
 
+def missing_tc_after_filling(before, after, *, input_states, output_states, filling_report, documents, legacy_sources=None):
+    """整理后的完整性按候选去向检查；提取到确定性组装之间仍检查真实丢失。"""
+    from .scientific_form_filling import validate_filling_coverage
+    if filling_report.get("status") != "completed":
+        return missing_tc_measurements(before, after)
+    validate_filling_coverage(input_states, output_states, filling_report)
+    assembled = claims_from_candidates({"material_states": input_states}, documents,
+                                      legacy_sources=legacy_sources)
+    return missing_tc_measurements(before, assembled)
+
+
 def missing_tc_measurements(before: list[Claim], after: list[Claim], *, allow_paired_range=False) -> list[str]:
     """防止汇总丢掉同一段落中的不同 Tc、压力或方法；未知条件允许后续补全。"""
     from decimal import Decimal, InvalidOperation

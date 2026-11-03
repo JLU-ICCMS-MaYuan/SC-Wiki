@@ -9,6 +9,7 @@ import logging
 import re
 import shutil
 import time
+from copy import deepcopy
 from contextlib import nullcontext
 from pathlib import Path
 from typing import Any
@@ -2340,6 +2341,7 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         from backend.ingest.scientific_output_schema import filling_schema, decode_optional_containers
         def fill_existing_fields(prompt, content):
             return decode_optional_containers(complete_json(prompt, content, response_schema=filling_schema()))
+        filling_input_states = deepcopy(draft["material_states"])
         with call_phase("scientific_form_filling"):
             draft["material_states"], form_filling = fill_scientific_forms(
                 draft["material_states"], form_sources(document_set, scientific_sources), fill_existing_fields,
@@ -2396,7 +2398,10 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
                 raise ParserError("document_review_required", "汇总草稿含无法在原文定位的科学字段，请重新核对",
                                   profile=state["parser_profile"], parser="claim_validator")
         if document_set:
-            if missing_tc_measurements(claims, final_claims, allow_paired_range=form_filling["status"] == "completed"):
+            from .document_claims import missing_tc_after_filling
+            if missing_tc_after_filling(claims, final_claims, input_states=filling_input_states,
+                                       output_states=draft["material_states"], filling_report=form_filling,
+                                       documents=document_set, legacy_sources=legacy_sources):
                 raise ParserError("summary_records_missing", "汇总遗漏了已识别的 Tc、压力或方法记录，请重新核对",
                                   profile=state["parser_profile"], parser="coverage_audit")
             apply_claim_evidence(draft, final_claims)

@@ -142,12 +142,9 @@ def filling_schema():
     record = obj({"candidate_ids": array(TEXT), "group": TEXT, "method": TEXT, "values": obj(fields),
                   "source_ids": array(TEXT), "reason": TEXT})
     disposition = obj({"candidate_id": TEXT, "category": TEXT, "source_ids": array(TEXT), "reason": TEXT})
-    relation = obj({"summary_candidate_id": TEXT, "canonical_candidate_id": TEXT,
-                    "relation": {"type": "string", "enum": ["summary_of_range"]},
-                    "source_ids": array(TEXT), "reason": TEXT})
     return obj({"done": BOOLEAN, "read_source_ids": array(TEXT), "search": array(TEXT),
-                "records": array(record), "excluded": array(disposition), "unresolved": array(disposition),
-                "candidate_relations": array(relation)}) | {"$defs": definitions()}
+                "records": array(record), "excluded": array(disposition), "unresolved": array(disposition)}) | {"$defs": definitions()}
+
 
 
 def decode_optional_containers(value):

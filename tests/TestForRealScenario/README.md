@@ -86,6 +86,6 @@ python3 -m unittest discover -s "tests/TestForRealScenario" -p "test_*.py"
 /Users/mayuan/software/miniconda3/envs/sc-wiki/bin/python -m pytest "tests/TestForRealScenario" -o "python_files=test_*.py verify_*.py"
 ```
 
-`fixtures/h3s-filling-failed.json` 保留真实失败响应；概述对应关系的构造测试只验证程序边界，真实模型重跑另存各轮证据。`verify_review_failure.py` 验证技术错误不被依赖变化提示覆盖；成功字段和真实未核对状态分别保留。
+`fixtures/h3s-filling-failed.json` 保留真实失败响应；`test_candidate_coverage.py`验证通用候选去向、正式最终关口、既有模型上下文和保存重读；真实模型重跑另存各轮证据，不以构造响应代替科学验收。`verify_review_failure.py` 验证技术错误不被依赖变化提示覆盖；成功字段和真实未核对状态分别保留。
 
 `verify_worker_capacity.py` 执行真实本地启动函数验证并发配置透传，并用独立TCP Redis及正式RQ启动入口验证“10项同时执行、第11项排队”。`worker_capacity_probe.py` 只占用隔离任务槽，不解析PDF、不调用模型；它验证容量，不能作为十篇论文科学解析通过的证据。本机当前 `.env` 的 `UPLOAD_LLM_CONCURRENCY=10` 已通过实际进程注册核对，恢复容量后再继续正文／补充材料的单任务黑盒流程。

@@ -58,6 +58,10 @@ explanation:"具体理由"}；仅说我确认不证明数值正确。Tc/μ*结�
 每次行动（含失败）都计入预算；无法完成时保留具体疑问，不伪造通过。'''
 
 PROMPT += '''
+organization_context为当前记录整理前的原候选、原文和合并理由，只是待查证背景，不是通过结论。
+结合原文核实这些候选是否确为同一结果，详细值、压力、方法及独立μ*配对有无被错误合并。
+约数或概述可以对应详细范围，但不能只因数字接近就认可；独立结果被合并须标为不支持或不确定，
+在当前字段reason说明具体遗漏、原候选和依据。最终source_ids仍只选本字段事实及必要范围来源。
 未知或空分类也需要查证。超导类型根据本文实际配对机制判断，明确的声子介导机制可支持
 conventional，按论文推断保留依据；不能仅凭Eliashberg、DFT或材料化学式猜测。
 元素数、晶系、空间群号的provenance包含计算或查表依据，仍由你结合已读原文核实输入。
@@ -206,6 +210,11 @@ def review_draft(draft, rebuild, *, model_name='', cancelled=lambda: False, skip
             if cancelled():
                 raise InterruptedError('模型核对已取消')
             additions = []
+            from .scientific_form_filling import filling_review_context
+            for row in batch:
+                context = filling_review_context(current.get('form_filling_report') or {}, row.get('record_key'))
+                if context:
+                    row['organization_context'] = context
             reviewed = review_fields(batch, snapshot['chunks'], model_name=model_name, cancelled=cancelled,
                 manifest=snapshot.get('pdf_manifest') or [], allow_condition_additions=True, additions=additions,
                 on_response=on_response)
@@ -369,7 +378,8 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
         request = {'records': [{k: deepcopy(v) for k, v in r.items() if k in {
                        'key', 'field', 'label', 'claim', 'current_value', 'editable_fields', 'required',
                        'state_key', 'module_key', 'record_key', 'record_field', 'record_group_key',
-                       'provenance', 'state_review_context', 'state_results', 'scientific_record', 'extension_context'}} |
+                       'provenance', 'state_review_context', 'state_results', 'scientific_record', 'extension_context',
+                       'organization_context'}} |
                        ({'structure_input': deepcopy(r['_structure_model_input'])} if r.get('_structure_model_input') else {})
                        for r in pending.values()],
                    'sources': list(read.values()),

@@ -53,14 +53,13 @@ def test_real_four_candidates_become_one_group_two_points_with_all_origins():
     assert state == original
 
 
-@pytest.mark.parametrize('bad', ['missing_candidate', 'unknown_source', 'lost_point', 'mixed_method', 'invented_candidate', 'lost_parameter'])
+@pytest.mark.parametrize('bad', ['missing_candidate', 'unknown_source', 'mixed_method', 'invented_candidate', 'lost_parameter'])
 def test_invalid_plan_cannot_drop_or_misplace_results(bad):
     from backend.ingest.scientific_form_filling import apply_plan
     state, sources = fixture()
     plan = response(sources)
     if bad == 'missing_candidate': plan['excluded'] = []
     if bad == 'unknown_source': plan['records'][0]['source_ids'] = ['source-not-real']
-    if bad == 'lost_point': plan['records'][1]['values']['value_number'] = 221
     if bad == 'mixed_method': plan['records'][0]['values']['method_code'] = 'Eliashberg and McMillan'
     if bad == 'invented_candidate': plan['records'][0]['candidate_ids'] += ['imaginary']
     if bad == 'lost_parameter': plan['records'][0]['values']['parameters'].pop('lambda_ep')
@@ -96,6 +95,8 @@ def test_llm_requests_unread_block_then_fills_missing_value():
     from backend.ingest.scientific_form_filling import fill_scientific_forms
     state, _ = fixture()
     state['property_modules'][0]['records'] = state['property_modules'][0]['records'][:1]
+    # 本例使用下面的合成文档，不携带另一份真实PDF的旧块身份。
+    state['property_modules'][0]['records'][0]['evidences'] = []
     chunks = [{'file_id':'main','content': 'x' * 39000},
               {'file_id':'si','content': 'The missing result is 12 K with mu*=0.15. ' + 'y' * 39000}]
     calls = []

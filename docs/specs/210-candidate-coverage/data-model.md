@@ -1,0 +1,7 @@
+# 数据模型
+
+candidate_dispositions沿用原候选ID为键。每项保存原record、state_index、module_index、action、输出records及reasons；排除/未解决保留原category/reason。原记录与双方原文保存在报告及输出来源，不进入新科学键。
+
+最终检查使用整理前后草稿及该报告，检查键集合完整、原记录一致、目标存在/归属、来源身份保留。报告不代替字段科学结论。只读organization_context按当前record_key选择相关候选，传入现有模型字段批次；不新增独立审查状态或数据库表。
+
+历史V3报告仅作历史证据，当前新解析不再生成candidate_relations；无完整当前报告时不自动放宽防遗漏。

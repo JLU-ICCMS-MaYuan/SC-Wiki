@@ -7,7 +7,7 @@ import json
 from .scientific_context import build_context, fingerprint
 from .property_modules import THEORETICAL_METHODS, EXPERIMENTAL_METHODS, validate_record
 
-VERSION = "scientific-form-filling-v3-source-summary-relations"
+VERSION = "scientific-form-filling-v4-candidate-dispositions"
 SUPPORTED = {"tc", "dos_fermi"}
 VALUE_FIELDS = {"value_number", "value_min", "value_max", "value_text", "value_boolean"}
 PATCH_FIELDS = VALUE_FIELDS | {"value_kind", "value_raw", "method_code", "method_raw",
@@ -54,19 +54,13 @@ review decisions, new property types or UI definitions. values may contain value
 value_max/value_text/value_boolean/value_raw/method_code/method_raw/unit_raw/canonical_unit/uncertainty,
 parameters/calculation_conditions/approximation only. Always supply the numeric value for the declared kind.
 Sources must have been READ, not merely listed in the index. Cite source_ids, never rewrite quotations.
-For merged candidates preserve numeric results and known method/mu assignments. All relevant origins
+For merged candidates preserve distinct scientific results and known method/mu assignments. All relevant origins
 (including repeated abstract ranges) must be listed in candidate_ids. Reuse no unrelated state or record.
 Newly found points may cite the relevant existing range or incomplete candidate as their origin.
-For an introductory numeric summary of a detailed reported Tc range, explicitly declare its relation in
-candidate_relations: {summary_candidate_id, canonical_candidate_id, relation:"summary_of_range",
-source_ids, reason}. Use this ONLY for a numeric summary with no independent parameters or calculation
-conditions, within the detailed candidate's reported range in the SAME state/module. Its method must be
-unknown or identical to the detailed candidate's method; never merge distinct known methods.
-This is a source-based scientific judgment, never an automatic numeric-containment deduplication.
-Cite actual blocks for BOTH original expressions, merge those sources into every linked output, and include
-BOTH candidate_ids in those outputs. Preserve the detailed candidate's endpoints and all known assignments.
-The server archives the original summary; do not invent a separate result solely to preserve its rounded number.
-Otherwise preserve each numeric result as before or mark it unresolved. candidate_relations is [] when unused.
+Use the existing candidate_ids and reason for ALL supported merges, including a rounded summary and a
+more detailed range. Do not invent an independent result just to repeat a rounded summary number.
+Preserve genuinely distinct pressures, methods and mu_star pairings; explain each relationship using
+both original expressions. The existing scientific field review will check these originals and your reason.
 """ + METHOD_SEMANTICS_PROMPT
 
 
@@ -112,64 +106,63 @@ def _evidence(ids, sources):
     return result
 
 
-def _method_matches(before, after):
-    method = before.get("method_code")
-    return (method in (None, "", "unknown") or method == after.get("method_code")) and (
-        method != "other" or before.get("method_raw") == after.get("method_raw"))
+def _source_identity(evidence):
+    return (evidence.get("file_id"), evidence.get("block_id"),
+            evidence.get("pdf_page", evidence.get("page_start", evidence.get("page"))))
 
 
-def _has_fact(value):
-    if isinstance(value, dict):
-        return any(_has_fact(child) for child in value.values())
-    if isinstance(value, list):
-        return any(_has_fact(child) for child in value)
-    return value is not None and value != ""
+def filling_review_context(report, record_key):
+    """仅传当前记录的原科学值和来源位置，原始大块全文仍通过现有来源工具读取。"""
+    def scientific_value(value):
+        if isinstance(value, list):
+            return [scientific_value(v) for v in value]
+        if isinstance(value, dict):
+            return {k: scientific_value(v) for k, v in value.items() if k not in {
+                "evidence", "evidences", "source_associations", "tc_group", "legacy_method_labels"}}
+        return value
+    return [{"candidate_id": key, "original_record": scientific_value(entry["original_record"]),
+             "reasons": entry.get("reasons") or [],
+             "sources": [{k: e[k] for k in ("file_id", "block_id", "pdf_page") if e.get(k) is not None}
+                         for e in entry["original_record"].get("evidences") or [] if e.get("block_id")]}
+            for key, entry in (report.get("candidate_dispositions") or {}).items()
+            if record_key and record_key in (entry.get("records") or []) and entry.get("original_record")]
 
 
-def _summary_relations(entries, original, dispositions, outputs, sources):
-    """模型声明语义；程序只核对同状态、已读双方来源及未丢独立科学条件。"""
-    if not isinstance(entries, list):
-        raise ValueError("概述对应关系必须是列表")
-    by_output = {record["record_key"]: record for _, _, record in outputs}
-    def refs(evidences):
-        return {(e.get("file_id"), e["block_id"]) for e in evidences if e.get("block_id")}
-    accepted = {}
-    for entry in entries:
-        if not isinstance(entry, dict) or set(entry) != {
-                "summary_candidate_id", "canonical_candidate_id", "relation", "source_ids", "reason"}:
-            raise ValueError("概述对应关系字段无效")
-        summary_id, canonical_id = entry["summary_candidate_id"], entry["canonical_candidate_id"]
-        if (summary_id not in original or canonical_id not in original or summary_id == canonical_id
-                or summary_id in accepted or entry["relation"] != "summary_of_range"
-                or not str(entry["reason"] or "").strip()):
-            raise ValueError("概述缺少唯一且有效的原候选对应关系")
-        si, mi, summary = original[summary_id]
-        cs, cm, canonical = original[canonical_id]
-        if ((si, mi) != (cs, cm) or summary.get("record_type") != "predicted_tc"
-                or canonical.get("record_type") != "predicted_tc"
-                or summary.get("property_code") != "tc" or canonical.get("property_code") != "tc"
-                or summary.get("value_kind") != "number" or len(_numeric(summary)) != 1
-                or canonical.get("value_kind") != "range" or len(_numeric(canonical)) != 2):
-            raise ValueError("概述只能对应同状态同模块的 Tc 详细范围")
-        payload = summary.get("payload") or {}
-        if (not _method_matches(summary, canonical)
-                or summary.get("uncertainty") is not None
-                or _has_fact(payload.get("parameters")) or _has_fact(payload.get("calculation_conditions"))):
-            raise ValueError("方法不同或具有独立参数、条件的结果不能作为数值概述归并")
-        if not canonical["value_min"] <= summary["value_number"] <= canonical["value_max"]:
-            raise ValueError("概述数值不在所声明的原详细范围内")
-        summary_disposition, canonical_disposition = dispositions[summary_id], dispositions[canonical_id]
-        if (summary_disposition["action"] != "mapped" or canonical_disposition["action"] != "mapped"
-                or not set(summary_disposition["records"]) <= set(canonical_disposition["records"])):
-            raise ValueError("概述和详细候选必须显式映射到相同输出结果")
-        proof = refs(_evidence(entry["source_ids"], sources))
-        if (len(proof) < 2 or not proof & refs(summary.get("evidences") or [])
-                or not proof & refs(canonical.get("evidences") or [])
-                or any(not proof <= refs(by_output[key].get("evidences") or [])
-                       for key in summary_disposition["records"])):
-            raise ValueError("概述归并必须保留双方已读原文块并合并到输出来源")
-        accepted[summary_id] = {**deepcopy(entry), "original_record": deepcopy(summary)}
-    return accepted
+def validate_filling_coverage(before, after, report):
+    """核对既有去向与实际草稿；科学等价由后续统一模型核对判断。"""
+    original = candidates(before)
+    dispositions = report.get("candidate_dispositions") or {}
+    if set(dispositions) != set(original):
+        raise ValueError("整理遗漏原候选，禁止以部分结果替换")
+    targets = {}
+    for si, state in enumerate(after):
+        for mi, module in enumerate(state.get("property_modules") or []):
+            for record in module.get("records") or []:
+                key = record.get("record_key")
+                if key in targets:
+                    raise ValueError("整理输出身份重复")
+                targets[key] = (si, mi, record)
+    for key, (si, mi, record) in original.items():
+        entry = dispositions[key]
+        if entry.get("original_record") != record or (entry.get("state_index"), entry.get("module_index")) != (si, mi):
+            raise ValueError("候选去向与本次输入不一致")
+        if entry.get("action") == "excluded":
+            if _numeric(record) or not entry.get("reason") or not entry.get("source_ids"):
+                raise ValueError("数值候选不能无声排除，排除须有理由和来源")
+            continue
+        linked = entry.get("records") or []
+        if entry.get("action") not in {"mapped", "unresolved"} or not linked or not entry.get("reasons"):
+            raise ValueError("候选缺少有效去向或理由")
+        for target in linked:
+            if target not in targets or targets[target][:2] != (si, mi):
+                raise ValueError("候选去向的实际输出不存在或归属不一致")
+            actual = targets[target][2]
+            if (actual.get("record_type"), actual.get("property_code")) != (record.get("record_type"), record.get("property_code")):
+                raise ValueError("候选去向改变物性身份")
+            required = {_source_identity(e) for e in record.get("evidences") or [] if e.get("block_id")}
+            available = {_source_identity(e) for e in actual.get("evidences") or []}
+            if not actual.get("evidences") or not required <= available:
+                raise ValueError("候选去向丢失原文来源")
 
 
 def apply_plan(states, sources, response):
@@ -203,6 +196,18 @@ def apply_plan(states, sources, response):
         record.update({k: v for k, v in values.items() if k not in {"parameters", "calculation_conditions", "approximation"}})
         record.pop("evidence", None)
         record["evidences"] = _evidence(entry.get("source_ids"), by_source)
+        for _, _, origin in origins:
+            for evidence in origin.get("evidences") or []:
+                # 无定位的历史原表达留在original_record，交统一模型查证；不伪造原文块。
+                if not evidence.get("block_id"):
+                    continue
+                matched = [sid for sid, source in by_source.items()
+                           if _source_identity(source) == _source_identity(evidence)]
+                if not matched:
+                    raise ValueError("原候选来源未读取或不存在")
+                for original_evidence in _evidence(matched, by_source):
+                    if original_evidence not in record["evidences"]:
+                        record["evidences"].append(original_evidence)
         # 新版本不能继承旧来源关联或人工决定；原候选保存在报告中。
         payload = record.setdefault("payload", {})
         legacy_labels = deepcopy(payload.pop("legacy_method_labels", []))
@@ -290,29 +295,11 @@ def apply_plan(states, sources, response):
             dispositions[key] = {"action": action, **entry}
     if set(dispositions) != set(original):
         raise ValueError("整理遗漏原候选，禁止以部分结果替换")
-    summary_relations = _summary_relations(response.get("candidate_relations", []), original,
-                                           dispositions, outputs, by_source)
-    for key, (_, _, old) in original.items():
-        if dispositions[key]["action"] != "mapped":
-            continue
-        if key in summary_relations:
-            continue
-        linked = [r for _, _, r in outputs if r["record_key"] in dispositions[key]["records"]]
-        # 模型先给出等价关系；此处只验证已报告数值、方法与 μ* 没有在转换中丢失。
-        for value in _numeric(old):
-            found = [r for r in linked if _method_matches(old, r) and value in _numeric(r)]
-            mu = (old.get("payload", {}).get("parameters") or {}).get("mu_star")
-            if isinstance(mu, dict):
-                mu = mu.get("value_number")
-            if not found or (mu is not None and not any((r.get("payload", {}).get("parameters") or {}).get("mu_star") == mu for r in found)):
-                raise ValueError("整理丢失原数值、方法或 μ* 配对")
-            for parameter in ("lambda_ep", "omega_log", "omega_log_k"):
-                known = (old.get("payload", {}).get("parameters") or {}).get(parameter)
-                if isinstance(known, dict):
-                    known = known.get("value_number")
-                canonical = "omega_log" if parameter == "omega_log_k" else parameter
-                if known is not None and any((r.get("payload", {}).get("parameters") or {}).get(canonical) != known for r in found):
-                    raise ValueError("整理丢失已报告共同参数：" + canonical)
+    for key, (si, mi, record) in original.items():
+        entry = dispositions[key]
+        entry.update(original_record=deepcopy(record), state_index=si, module_index=mi)
+        if entry["action"] == "unresolved":
+            entry.update(records=[record["record_key"]], reasons=[entry["reason"]])
     result = deepcopy(states)
     for si, state in enumerate(result):
         for mi, module in enumerate(state.get("property_modules") or []):
@@ -333,7 +320,9 @@ def apply_plan(states, sources, response):
                 if (group, method) in methods and methods[group, method] != identity:
                     raise ValueError("同一方法行不能混用不同自定义方法")
                 approximations[group], methods[group, method] = approximation, identity
-    return result, {"candidate_dispositions": dispositions, "summary_relations": summary_relations, "issues": issues}
+    audit = {"candidate_dispositions": dispositions, "issues": issues}
+    validate_filling_coverage(states, result, audit)
+    return result, audit
 
 
 def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=None, max_rounds=4):
