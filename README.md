@@ -19,6 +19,8 @@ Embedding 与聊天模型独立配置。百炼 `text-embedding-v4` 的接入参�
 
 ## macOS 原生本地开发（#117）
 
+上传表单并发数由本机 `.env` 的 `UPLOAD_LLM_CONCURRENCY` 决定；本机当前配置为 `10`。本地启动脚本继承该配置，上传 Worker 重启后生效。排队中的活动记录数量与同时解析数量分别统计，详见[部署与运行时](docs/overview/02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md)。
+
 Apple Silicon Mac 在项目根目录直接使用以下命令，无需 Lima 或 Docker：
 
 ```bash
