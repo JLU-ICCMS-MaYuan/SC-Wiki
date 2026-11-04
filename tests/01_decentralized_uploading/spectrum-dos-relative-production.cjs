@@ -89,6 +89,23 @@ async function main(){
      const response=await fetch(backend+"/api/rag/spectra/"+total.id+"/export?"+query+"&format=csv");
      assert.equal(response.status,200);const csv=await response.text();
      assert(csv.includes("normalized_dos_candidate"));assert(csv.includes("modes/THz/primitive_cell"));
+     if(stateKey==="dos-real-source"){
+       assert(Math.abs(rel.components[0].area-6.308648445665745)<1e-9);
+       assert.equal(rel.components[0].unit,"arbitrary_units·THz");
+       assert(Math.abs(rel.normalization.coefficient-3.32876370919475)<1e-9);
+       await table.getByRole("cell",{name:/^6.30865/}).waitFor();
+       await table.getByText("任意单位·THz · 纵轴刻度",{exact:true}).waitFor();
+       const lines=csv.trim().split("\n"),headers=lines[0].replace("\r","").split(","),first=lines[1].split(",");
+       assert(Math.abs(Number(first[headers.indexOf("dos_integral")])-rel.components[0].area)<1e-9);
+       assert.equal(first[headers.indexOf("dos_integral_unit")],"arbitrary_units·THz");
+       assert.equal(first[headers.indexOf("dos_amplitude_basis")],"calibrated_values");
+       const pathBefore=await page.locator('[data-curve="S15_150GPa_total_phonon_dos"]').getAttribute("d"),writesBefore=report.writes.length;
+       await button("纵轴原始幅值").click();
+       assert.equal(await page.locator('[data-curve="S15_150GPa_total_phonon_dos"]').getAttribute("d"),pathBefore);
+       await button("按 3N 归一化").click();assert.equal(report.writes.length,writesBefore);
+       await page.getByText("2.3232",{exact:true}).waitFor();
+       check("原纵轴积分6.30865、单位与CSV一致；原刻度/归一化切换无写请求且几何不变");
+     }
      await shot(stateKey+"-desktop");
      await page.reload();await ready();await recalc();
      const repeated=(await listing()).items.find(i=>i.id===total.id);
@@ -97,6 +114,17 @@ async function main(){
      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
      await shot(stateKey+"-mobile");await page.setViewportSize({width:1440,height:1100});
      check(stateKey+"：元素标记均未确认仍归一化，元素列空白，原始描线/范围不变，刷新重算和CSV/窄屏通过");
+   }
+   const unknown=items.find(i=>i.state_key==="dos-real-unknown");
+   if(unknown){
+     await page.goto(address(unknown));await ready();await recalc();
+     const current=(await listing()).items.find(i=>i.id===unknown.id),rel=current.result.quality.dos_relative;
+     assert.equal(rel.normalization.status,"unavailable");assert.equal(rel.spectrum_type,"projected");
+     assert.equal(rel.normalization.primitive_atoms,undefined);
+     assert(Math.abs(rel.components[0].area-6.308648445665745)<1e-9);
+     await page.getByRole("table",{name:"DOS 相对面积"}).getByRole("cell",{name:/^6.30865/}).waitFor();
+     await shot("dos-real-unknown");
+     check("未知TDOS身份且无N，原纵轴数值积分6.30865仍独立显示");
    }
    assert.deepEqual(report.errors,[]);
  } finally {fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'browser-report.json'),JSON.stringify(report,null,2));await browser.close()}

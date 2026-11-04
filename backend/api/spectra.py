@@ -201,7 +201,8 @@ def csv_export(item):
     fields = ["collection_id", "run_id", "algorithm_version", "state_key", "curve_id", "kind", "projection",
               "frequency_thz", "observed_amplitude", "reconstructed_amplitude", "status", "detection_mode",
               "pixel_low", "pixel_high", "unit", "frequency_unit", "source_frequency_unit",
-              "normalized_dos_candidate", "normalized_dos_unit", "zero_baseline_candidate", "joint_candidate",
+              "normalized_dos_candidate", "normalized_dos_unit", "dos_integral", "dos_integral_unit",
+              "dos_amplitude_basis", "zero_baseline_candidate", "joint_candidate",
               "joint_cumulative_lambda", "boundary_mask", "review_status", "review_reason", "pdf_page", "source_sha256",
               "rejected_chromatic_pixels", "candidate_components", "reconstruction_blocked",
               "point_id", "frequency_pixel", "amplitude_pixel", "manual", "segment", "break_before", "connect_to", "join_to",
@@ -217,9 +218,11 @@ def csv_export(item):
     norm=candidates.get("dos_relative_normalized") or candidates.get("dos_normalization") or {}
     for c in payload.get("curves") or []:
         normalized=dict(zip(norm.get("frequency_thz") or [], norm.get("components",{}).get(c["projection"] or c["id"],[])))
-        if norm.get("method") in {"dos-relative-v1", "dos-relative-v2", "dos-relative-v3", "dos-relative-v4"}:
+        if norm.get("method") in {"dos-relative-v1", "dos-relative-v2", "dos-relative-v3", "dos-relative-v4", "dos-relative-v5"}:
             component = norm.get("curves", {}).get(c["id"], {})
             normalized = dict(zip(component.get("frequency_thz", []), component.get("density", [])))
+        report = payload.get("quality", {}).get("dos_relative") or {}
+        integral = next((row for row in report.get("components", []) if row["curve_id"] == c["id"]), {}) if report.get("method") == "dos-relative-v5" else {}
         decision = item["review"].get(c["id"], {})
         for p in c["points"]:
             freq = p["frequency_thz"]; alpha = c["kind"] == "alpha2f"
@@ -230,6 +233,8 @@ def csv_export(item):
                 "rejected_chromatic_pixels", "candidate_components", "reconstruction_blocked")},
                 unit=c["unit"], frequency_unit="THz", source_frequency_unit=c.get("source_frequency_unit"),
                 normalized_dos_candidate=normalized.get(freq), normalized_dos_unit=norm.get("unit") if normalized else None,
+                dos_integral=integral.get("area"), dos_integral_unit=integral.get("unit"),
+                dos_amplitude_basis=(integral.get("amplitude_basis") or {}).get("kind"),
                 zero_baseline_candidate=bmap.get(freq) if alpha else None,
                 joint_candidate=jmap.get(freq) if alpha else None, joint_cumulative_lambda=cmap.get(freq) if alpha else None,
                 boundary_mask=freq in c["clipped_frequencies_thz"], review_status=decision.get("status", "needs_review"),

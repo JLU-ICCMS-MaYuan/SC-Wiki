@@ -2,7 +2,7 @@
 
 日期：2026-10-27（Asia/Shanghai）。Issue：[#164](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/164)。
 
-本文保留各次历史验证；最新有效规则见文末“TDOS 独立归一化”。此前关于频段确认的行为描述已被该修订取代。
+本文保留各次历史验证；最新有效规则见文末“纵轴刻度优先的代码实现与验收”。此前关于频段确认的行为描述已被该修订取代。
 
 ## 自动验证
 
@@ -108,3 +108,25 @@
 只读复用[固定人工描线夹具](validation/tdos/source-fixture.json)，SHA-256为1b14baa15dc6b9f13bcbb84a88205e16952e12ec3c59a4f8139669ef90d2c19c。按当前已保存纵轴标定及同一连线，用connected_samples和梯形积分复核：来源积分6.308648445665745任意单位·THz；像素面积2596.0318316798316像素·THz。N=7时对应系数分别为3.32876370919475和0.008089269069713752；归一化谱点最大绝对差8.881784197001252e-16。
 
 用户选中的“6.30865 任意单位·THz”是上述来源积分按显示精度呈现，不是原论文直接报告值，不是原始绝对模式数，也不是模型新描线成功的证据。本轮未调用模型或写业务库。T016–T019的代码、页面及端到端验收仍待执行。
+
+
+## 纵轴刻度优先的代码实现与验收（2026-11-04）
+
+用户在文档确认后明确要求“开始落地代码”。实现新报告/候选dos-relative-v5和重算版本spectra-recalculate-axis-v3：当前人工纵轴标定优先，其次来源刻度，无可用数值刻度时才用像素。每条曲线先独立积分，任意单位、缺N或身份未知不再阻止有效来源数值积分。单位不一致时保留独立结果，禁止直接相加。α²F、原始点、独立绝对积分、历史/公开权限及科学采纳边界保留。
+
+### 回归和正式路径
+
+- 修改前新增5项失败，见[失败输出](validation/axis-calibration/before-fix.txt)；修复后DOS专项77项通过。后端谱/α²F总回归296 passed、6项需授权MySQL跳过；未宣称MySQL验收。
+- 前端相关5文件57项通过；表单契约11文件150项通过，四类宿主8项变异全部检出；科学字段契约v1及TypeScript/生产构建通过。既有大包/3Dmol eval提示保留。
+- 正式HTTP/SQLite测试覆盖像素与当前标定两种路径的新运行保存、重读、旧运行及原点不变、CSV来源积分/单位/依据与候选密度；不是只测试计算子函数。
+- 正式React+HTTP+隔离SQLite浏览器10项检查、0页面异常；包括纵轴来源积分6.30865、CSV一致、原刻度/归一化切换无写请求且描线几何不变、刷新重算不累乘、1440px/390px无整页溢出；身份未知且无N仍显示独立来源积分。见[browser-report.json](validation/axis-calibration/browser-report.json)。
+
+### 真实来源与复用边界
+
+从原PDF重新取得第17页内嵌图，PDF/图像哈希与既有source-fixture来源一致。真实调用gpt-6.1-sol，按当前发现提示重新标定上下两个相邻压力面板；均将纵轴识别为arbitrary_units并执行正式extract_panel。新自动描线仍有缺失点（上图202、下图194），未声称新自动提取可积分。原模型响应和失败结果分别保留在[fresh-model-response.json](validation/axis-calibration/fresh-model-response.json)、[source-report.json](validation/axis-calibration/source-report.json)。
+
+成功数值验证明确复用validation/tdos/source-fixture.json中原有人工描线、连线与当前标定，不重画曲线。独立积分为6.308648445665745任意单位·THz，按显示精度为6.30865；确认标准TDOS、N=7后系数3.32876370919475、总模式21；与像素路径归一化谱点差在1e-9以内。原图为任意单位，未把该来源积分称为原始模式数。
+
+已实际查看[桌面](validation/axis-calibration/desktop.png)及[窄屏](validation/axis-calibration/mobile.png)截图；另保留[未知身份且无N](validation/axis-calibration/unknown-identity.png)页面。02显示原纵轴幅值与按3N刻度，03显示每条曲线实际积分单位和幅值依据。CSV增加dos_integral、dos_integral_unit、dos_amplitude_basis，保留原始点值。
+
+本轮不写用户业务草稿或来源身份，不迁移、不回填、不推送、不部署。旧v1–v4报告需点“重新计算”生成v5；独立来源积分无需TDOS确认，但3N归一化仍需要。Issue保持OPEN，远程文档链接待另行推送后实际核验。

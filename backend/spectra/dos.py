@@ -2,11 +2,12 @@
 from __future__ import annotations
 
 import math
+import copy
 from .relative import pixel_curve
 from .samples import connected_samples
 from .topology import finite
 
-METHOD = "dos-relative-v4"
+METHOD = "dos-relative-v5"
 
 
 def unavailable(reason):
@@ -67,6 +68,38 @@ def is_total_dos(curves):
     return len(curves) == 1 and projection_label(curves[0]) == "total"
 
 
+def dos_curve(payload, curve):
+    """优先当前纵轴标定；无可用数值刻度时沿用像素零基线。"""
+    doc = payload.get("manual_documents", {}).get(curve["id"])
+    axis = curve.get("axis_calibration", {}).get("amplitude") or {}
+    unit = curve.get("unit") or "unknown"
+    if doc:
+        a = doc["calibration"]["amplitude"]
+        slope = (a["values"][1]-a["values"][0])/(a["pixels"][1]-a["pixels"][0])
+        axis = dict(slope=slope, intercept=a["values"][0]-slope*a["pixels"][0])
+        unit = a.get("unit") or unit
+    if unit != "pixel" and finite(axis.get("slope")) and axis["slope"] != 0 and finite(axis.get("intercept")):
+        result = copy.deepcopy(curve)
+        result["unit"] = unit
+        result.setdefault("axis_calibration", {})["amplitude"] = dict(axis)
+        for point in result["points"]:
+            pixel = point.get("amplitude_pixel")
+            if finite(pixel):
+                point["reconstructed_amplitude"] = axis["slope"]*pixel+axis["intercept"]
+            elif doc:
+                point["reconstructed_amplitude"] = None
+        baseline = -axis["intercept"]/axis["slope"]
+        demand(finite(baseline), "当前幅值零基线无效")
+        return result, dict(kind="calibrated_values", unit=unit, slope=axis["slope"],
+                            intercept=axis["intercept"], baseline_pixel=baseline,
+                            direction=1 if axis["slope"]>0 else -1,
+                            source="manual_calibration" if doc else "source_calibration")
+    result, basis = pixel_curve(payload, curve)
+    demand(basis["kind"] != "stored_relative_values", "缺少可用纵轴标定或像素零基线，不能积分")
+    basis["unit"] = "pixel"
+    return result, basis
+
+
 def calculate_dos(payload, primitive=None, composition=None):
     curves = [c for c in payload.get("curves", []) if c["kind"] == "phonon_dos"]
     panel = payload.get("calibration") or {}
@@ -76,8 +109,8 @@ def calculate_dos(payload, primitive=None, composition=None):
         row = dict(curve_id=curve["id"], projection=curve.get("projection") or curve["id"],
                    unit="pixel·THz")
         try:
-            relative, basis = pixel_curve(payload, curve)
-            demand(basis["kind"] != "stored_relative_values", "缺少幅值零基线或像素换算，不能计算像素面积")
+            relative, basis = dos_curve(payload, curve)
+            row["unit"] = basis["unit"]+"·THz"
             f, p = connected_samples(relative, payload.get("manual_documents", {}).get(curve["id"]))
             value = area(f, p)
             row.update(status="available", area=value, frequency_interval_thz=[f[0], f[-1]],
@@ -109,11 +142,13 @@ def calculate_dos(payload, primitive=None, composition=None):
         # 识别提取失败的隐藏分波，不因余下曲线有值就声称完整集合。
         expected_ids = {c["id"] for c in panel.get("curves", []) if c.get("kind") == "phonon_dos"}
         demand(not expected_ids or expected_ids == {c["id"] for c in curves}, "部分标定分波提取失败，投影不完整")
+        units = {c["unit"] for c in components}
+        demand(len(units) == 1, "各曲线幅值单位不一致，不能相加或计算共同系数")
         total = math.fsum(c["area"] for c in components)
-        demand(finite(total) and total > 0, "全部像素面积为零或溢出，不能确定占比或共同系数")
+        demand(finite(total) and total > 0, "全部面积为零或溢出，不能确定占比或共同系数")
         standard = all(c.get("physical_definition_confirmed") for c in curves)
         if not total_dos:
-            shares = dict(status="available", total_area=total, unit="pixel·THz",
+            shares = dict(status="available", total_area=total, unit=components[0]["unit"],
                           fractions={c["curve_id"]: c["area"]/total for c in components},
                           expected_fractions={}, composition_source=source)
             if standard:

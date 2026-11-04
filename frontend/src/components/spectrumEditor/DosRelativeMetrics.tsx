@@ -1,13 +1,13 @@
 import { Box, Table, TableBody, TableCell, TableHead, TableRow, Typography } from '@mui/material'
 
 type Status = { status: string; reason?: string }
-type Component = Status & { curve_id: string; projection: string; area?: number; frequency_interval_thz?: number[] }
+type Component = Status & { curve_id: string; projection: string; area?: number; unit?: string; amplitude_basis?: { kind?: string }; frequency_interval_thz?: number[] }
 type ElementRatio = Status & { elements?: string[]; estimated_ratio?: number[]; expected_ratio?: number[]; reference_element?: string; reference_label?: string; formula?: string; max_share_difference_pp?: number }
 export type DosRelativeReport = {
   method: string
   spectrum_type?: 'total' | 'projected'
   components: Component[]
-  shares: Status & { total_area?: number; fractions?: Record<string, number>; expected_fractions?: Record<string, number>; expected_reason?: string; element_ratio?: ElementRatio }
+  shares: Status & { total_area?: number; unit?: string; fractions?: Record<string, number>; expected_fractions?: Record<string, number>; expected_reason?: string; element_ratio?: ElementRatio }
   normalization: Status & {
     coefficient?: number; primitive_atoms?: number; target_modes?: number; total_mode_integral?: number
     component_mode_integrals?: Record<string, number>; expected_modes?: Record<string, number>
@@ -19,26 +19,27 @@ const percent = (v: number | undefined) => v == null ? '—' : number(v * 100, 4
 
 export default function DosRelativeMetrics({ report, restricted }: { report?: DosRelativeReport; restricted: boolean }) {
   if (restricted) return <Typography color="text.secondary" sx={{my:1}}>当前为历史、失效或限定频段版本，不展示完整谱计算结果。</Typography>
-  if (report?.method !== 'dos-relative-v4') return <Typography color="text.secondary" sx={{my:1}}>请点击重新计算，查看相对面积与按 3N 归一化结果。</Typography>
+  if (report?.method !== 'dos-relative-v5') return <Typography color="text.secondary" sx={{my:1}}>请点击重新计算，查看相对面积与按 3N 归一化结果。</Typography>
   const { components, shares, normalization: norm } = report
   const comparable = shares.status === 'available', normalized = norm.status === 'available'
   const ratio = shares.element_ratio
   const total = report.spectrum_type === 'total'
+  const unit = (value?: string) => value?.replace('arbitrary_units', '任意单位').replace('pixel', '像素').replace('unknown', '原纵轴单位（未说明）') || '像素·THz'
   return <Box data-testid="dos-relative-metrics" sx={{mt:2}}>
-    <Typography fontWeight={600}>相对面积与元素占比</Typography>
-    <Typography variant="caption" color="text.secondary">面积单位：像素·THz；表示相对面积，不是振动模式数。</Typography>
+    <Typography fontWeight={600}>积分结果与元素占比</Typography>
+    <Typography variant="caption" color="text.secondary">有可用纵轴刻度时按刻度积分，否则使用像素；单位随各曲线显示，任意单位或像素积分不是振动模式数。</Typography>
     <Box sx={{overflowX:'auto',maxWidth:'100%'}}>
       <Table size="small" aria-label="DOS 相对面积" sx={{minWidth:430}}>
-        <TableHead><TableRow>{[total?'谱线 / 积分范围':'元素 / 积分范围','相对面积','面积占比','原子数占比'].map(s=><TableCell key={s}>{s}</TableCell>)}</TableRow></TableHead>
+        <TableHead><TableRow>{[total?'谱线 / 积分范围':'元素 / 积分范围','积分值','面积占比','原子数占比'].map(s=><TableCell key={s}>{s}</TableCell>)}</TableRow></TableHead>
         <TableBody>{components.map(c=><TableRow key={c.curve_id}>
           <TableCell>{total?'TDOS（总态密度）':c.projection}{c.frequency_interval_thz&&<Typography variant="caption" display="block">{c.frequency_interval_thz.map(v=>number(v)).join('–')} THz</Typography>}</TableCell>
-          <TableCell>{c.status==='available'?number(c.area):'—'}{c.reason&&<Typography variant="caption" display="block" color="text.secondary">{c.reason}</Typography>}</TableCell>
+          <TableCell>{c.status==='available'?number(c.area,6):'—'}{c.status==='available'&&<Typography variant="caption" display="block">{unit(c.unit)} · {c.amplitude_basis?.kind==='calibrated_values'?'纵轴刻度':'相对像素'}</Typography>}{c.reason&&<Typography variant="caption" display="block" color="text.secondary">{c.reason}</Typography>}</TableCell>
           <TableCell>{comparable&&!total?percent(shares.fractions?.[c.curve_id]):'—'}</TableCell>
           <TableCell>{comparable&&!total?percent(shares.expected_fractions?.[c.curve_id]):'—'}</TableCell>
         </TableRow>)}</TableBody>
       </Table>
     </Box>
-    {comparable&&!total&&<Typography variant="body2" sx={{mt:1}}>全部分波相对面积：{number(shares.total_area)} 像素·THz</Typography>}
+    {comparable&&!total&&<Typography variant="body2" sx={{mt:1}}>全部分波积分：{number(shares.total_area,6)} {unit(shares.unit)}</Typography>}
     {comparable&&!total&&ratio?.status==='available'&&<Box data-testid="dos-element-ratio" sx={{mt:2}}>
       <Typography fontWeight={600}>面积推算的近似元素比</Typography>
       <Typography variant="body2">元素顺序：{ratio.elements?.join(' : ')}（以 {ratio.reference_element} = 1）</Typography>

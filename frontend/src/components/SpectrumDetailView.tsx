@@ -32,15 +32,16 @@ export function SpectrumResult({ item, curves, image, retryImage, onEdit, editin
   const dosBases=selected.map(c=>normalization?.curves?.[c.id]?.amplitude_basis)
   const basis=dos?dosBases[0]:normalization?.amplitude_basis||relative
   const dosAllowed=!history&&!item.stale&&!selected.some(c=>item.review[c.id]?.status==='accepted_limited')
-  const commonBasis=!dos||dosBases.every(b=>b&&b.baseline_pixel===basis?.baseline_pixel&&b.direction===basis?.direction)
-  const canShowNormalized=Boolean((!dos||dosAllowed)&&commonBasis&&normalization?.status==='available'&&normalization.coefficient>0&&Number.isFinite(basis?.baseline_pixel))
+  const calibrated=dos&&basis?.kind==='calibrated_values'
+  const commonBasis=!dos||dosBases.every(b=>b&&b.baseline_pixel===basis?.baseline_pixel&&b.direction===basis?.direction&&b.slope===basis?.slope&&b.intercept===basis?.intercept&&b.unit===basis?.unit)
+  const canShowNormalized=Boolean((!dos||dosAllowed&&item.result.quality?.dos_relative?.method==='dos-relative-v5')&&commonBasis&&normalization?.status==='available'&&normalization.coefficient>0&&Number.isFinite(basis?.baseline_pixel))
   const originalDocument=displayDocument(item,selected,image)
   const useNormalized=canShowNormalized&&amplitudeView==='normalized'
   const multiplier=useNormalized?normalization.coefficient:1
   const transform=(!dos||canShowNormalized)&&originalDocument&&Number.isFinite(basis?.baseline_pixel)
   const document=transform?{...originalDocument,calibration:{...originalDocument.calibration,
-    amplitude:{...originalDocument.calibration.amplitude,unit:useNormalized?(dos?'modes/THz/primitive_cell':'dimensionless'):'pixel',
-      values:originalDocument.calibration.amplitude.pixels.map(p=>multiplier*basis.direction*(p-basis.baseline_pixel)) as [number,number]}}}:originalDocument
+    amplitude:{...originalDocument.calibration.amplitude,unit:useNormalized?(dos?'modes/THz/primitive_cell':'dimensionless'):calibrated?basis.unit:'pixel',
+      values:originalDocument.calibration.amplitude.pixels.map(p=>multiplier*(calibrated?basis.slope*p+basis.intercept:basis.direction*(p-basis.baseline_pixel))) as [number,number]}}}:originalDocument
   return <DetailSection title="02 · 原图与提取结果">
     {onEdit && <Box sx={{textAlign:'right',mb:1}}><Button variant="contained" disabled={editingDisabled} onClick={()=>onEdit(selected[0]?.id)}>编辑</Button></Box>}
     {editingDisabled && editingDisabledReason && <Typography role="status" variant="body2" color="text.secondary" sx={{mb:1}}>{editingDisabledReason}</Typography>}
@@ -51,7 +52,7 @@ export function SpectrumResult({ item, curves, image, retryImage, onEdit, editin
       <SpectrumViewSwitch value={mode} onChange={setMode} />
     </Box>
     {canShowNormalized&&<Box sx={{display:'flex',gap:1,mb:1,flexWrap:'wrap'}} data-testid="amplitude-display">
-      <Button size="small" variant={amplitudeView==='relative'?'contained':'outlined'} onClick={()=>setAmplitudeView('relative')}>相对像素幅值</Button>
+      <Button size="small" variant={amplitudeView==='relative'?'contained':'outlined'} onClick={()=>setAmplitudeView('relative')}>{calibrated?'纵轴原始幅值':'相对像素幅值'}</Button>
       <Button size="small" variant={amplitudeView==='normalized'?'contained':'outlined'} onClick={()=>setAmplitudeView('normalized')}>{dos?'按 3N 归一化':'依据论文 λ 归一化'}</Button>
     </Box>}
     {document ? <div className="spectrum-manual-editor"><div className="detail-plot-body"><ImageOpacityControl value={opacity} onChange={setOpacity} disabled={mode==='data'}/><div className="detail-plot-content"><SourceCanvas doc={document} active={selected[0].id} selected={[]} display={mode} imageOpacity={opacity}/></div></div></div>
@@ -80,7 +81,7 @@ export function SpectrumMetrics({ item, curves, history, onRecalculate, onLocate
   const anyAlphaAvailable=!restricted&&raw.method==='alpha2f-relative-v2'&&(raw.parameters?.omega_log?.status==='available'||raw.pixel_integral_status==='available')
   const diagnostics=q.trace_diagnostics?.[dos?'phonon_dos':'alpha2f']
   const repairs=q.automatic_repairs?.[dos?'phonon_dos':'alpha2f']||[]
-  const reasons=restricted?[calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。']:dos&&(mode.status==='available'||dosRelative?.method==='dos-relative-v4')?[mode.reason].filter(Boolean):[]
+  const reasons=restricted?[calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。']:dos&&(mode.status==='available'||dosRelative?.method==='dos-relative-v5')?[mode.reason].filter(Boolean):[]
   return <DetailSection title={dos ? '03 · 频段与数据完整性' : '03 · 积分结果与参考值对比'} action={onRecalculate && <Button variant="outlined" onClick={onRecalculate} disabled={calculationDisabled||recalculating} aria-busy={recalculating}>{recalculating?'计算中…':'重新计算'}</Button>}>
     <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', mb: 2 }}><Box><Typography variant="caption" color="text.secondary">实际提取频率范围</Typography><Typography fontWeight={600}>{spectrumInterval(curves)}</Typography></Box>
       <Box><Typography variant="caption" color="text.secondary">{dos ? '原胞原子数 N / 目标 3N' : '实际积分范围'}</Typography><Typography fontWeight={600}>{dos ? `${restricted?'—':spectrumNumber(displayedAtoms, 0)} / ${restricted?'—':spectrumNumber(displayedTarget, 0)}` : anyAlphaAvailable && raw.minimum_integrated_thz != null ? `${spectrumNumber(raw.minimum_integrated_thz)}–${spectrumNumber(raw.maximum_integrated_thz ?? Math.max(...(alpha?.points.map(p=>p.frequency_thz)||[])))} THz` : '暂不可计算'}</Typography></Box></Box>

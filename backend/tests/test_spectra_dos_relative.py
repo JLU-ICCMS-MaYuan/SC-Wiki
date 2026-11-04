@@ -175,6 +175,8 @@ def test_actual_extraction_converts_frequency_and_density_together():
     wave = extract_panel(image, cal, primitive=primitive)
     for result in (thz, wave):
         assert result["quality"]["dos_relative"]["normalization"]["status"] == "available"
+    assert thz["quality"]["dos_relative"]["components"][0]["area"] == pytest.approx(
+        wave["quality"]["dos_relative"]["components"][0]["area"], rel=1e-9)
     assert thz["quality"]["dos_mode_integral"]["integral"] == pytest.approx(
         wave["quality"]["dos_mode_integral"]["integral"], rel=1e-9)
     assert thz["candidates"]["dos_relative_normalized"]["curves"]["a"]["density"] == pytest.approx(
@@ -313,7 +315,7 @@ def test_frequency_metadata_cannot_block_current_samples(marker, upper):
     before = copy.deepcopy(p)
     result = calculate_dos(p, PRIMITIVE)
     relative = result["relative"]
-    assert relative["method"] == "dos-relative-v4"
+    assert relative["method"] == "dos-relative-v5"
     assert relative["normalization"]["status"] == "available"
     assert relative["normalization"]["total_mode_integral"] == pytest.approx(9)
     assert relative["components"][0]["frequency_interval_thz"] == [0., .9]
@@ -425,7 +427,8 @@ def test_tdos_absolute_integral_stays_independent_and_requires_absolute_units():
 
 
 
-def test_tdos_real_recalculate_persists_rereads_exports_and_preserves_history(manual_http):
+@pytest.mark.parametrize("calibrated", [False, True])
+def test_tdos_real_recalculate_persists_rereads_exports_and_preserves_history(manual_http, calibrated):
     import csv
     import io
     from ase import Atoms
@@ -436,7 +439,7 @@ def test_tdos_real_recalculate_persists_rereads_exports_and_preserves_history(ma
     write(buffer, Atoms("H", scaled_positions=[[.1,.2,.3]], cell=[4,5,6], pbc=True), format="cif")
     state = e["draft"]["material_states"][0]
     state.update(material="H", structure=dict(structure_format="cif",structure_text=buffer.getvalue().decode()))
-    p = total_payload()
+    p = calibrated_payload() if calibrated else total_payload()
     p["curves"][0].update(roi=[0,0,1,20], color="green")
     p["calibration"].update(panel_id="p",state_key="s1")
     with Session(e["engine"]) as session:
@@ -465,6 +468,9 @@ def test_tdos_real_recalculate_persists_rereads_exports_and_preserves_history(ma
     rows = list(csv.DictReader(io.StringIO(exported.text)))
     assert float(rows[1]["normalized_dos_candidate"]) == pytest.approx(6)
     assert float(rows[1]["reconstructed_amplitude"]) == pytest.approx(8)
+    assert float(rows[1]["dos_integral"]) == pytest.approx(.4 if calibrated else 4)
+    assert rows[1]["dos_integral_unit"] == ("arbitrary_units·THz" if calibrated else "pixel·THz")
+    assert rows[1]["dos_amplitude_basis"] == ("calibrated_values" if calibrated else "source_pixels")
     with Session(e["engine"]) as session:
         assert session.get(models.SpectrumRun,e["old_run"]).result_json == p
         assert session.get(models.SpectrumRun,current["run"]["id"]).result_json == current["result"]
@@ -504,6 +510,76 @@ def test_real_source_identity_replay_and_saved_manual_trace_are_distinct():
     saved = copy.deepcopy(bundle["result"])
     normalized = calculate_dos(saved,report["primitive"])["relative"]
     assert normalized["normalization"]["total_mode_integral"] == pytest.approx(21)
-    assert normalized["normalization"]["coefficient"] == pytest.approx(.008089269069713752)
+    assert normalized["normalization"]["coefficient"] == pytest.approx(3.32876370919475)
     assert normalized["components"][0]["frequency_interval_thz"] == pytest.approx([3.6556,58.648],rel=1e-4)
     assert saved == bundle["result"]
+
+
+
+def calibrated_payload():
+    p = total_payload()
+    p["curves"][0]["unit"] = "arbitrary_units"
+    p["curves"][0]["axis_calibration"]["amplitude"] = dict(slope=-.1,intercept=2.)
+    # 重算必须用当前标定；旧数值故意与新标定不一致。
+    return p
+
+
+def test_calibrated_arbitrary_units_precede_pixels_without_n_or_identity():
+    p = calibrated_payload();p["curves"][0].update(projection=None,physical_definition_confirmed=False)
+    before = copy.deepcopy(p)
+    r = calculate_dos(p)["relative"]
+    c = r["components"][0]
+    assert c["area"] == pytest.approx(.4)
+    assert c["unit"] == "arbitrary_units·THz"
+    assert c["amplitude_basis"]["kind"] == "calibrated_values"
+    assert r["normalization"]["status"] == "unavailable"
+    assert p == before
+
+
+def test_current_manual_calibration_overrides_stored_axis_for_integral():
+    p = calibrated_payload()
+    p["manual_documents"]={"La":{"calibration":{"amplitude":{
+        "pixels":[20,10],"values":[0,2],"unit":"arbitrary_units"}}}}
+    c = calculate_dos(p)["relative"]["components"][0]
+    assert c["area"] == pytest.approx(.8)
+    assert c["amplitude_basis"]["source"] == "manual_calibration"
+
+
+def test_calibrated_and_pixel_normalization_are_equivalent_with_distinct_coefficients():
+    p = calibrated_payload();cal = calculate_dos(p,PRIMITIVE)
+    p["curves"][0]["unit"]="pixel";pix=calculate_dos(p,PRIMITIVE)
+    assert cal["relative"]["normalization"]["coefficient"] == pytest.approx(22.5)
+    assert pix["relative"]["normalization"]["coefficient"] == pytest.approx(2.25)
+    assert cal["candidate"]["curves"]["La"]["density"] == pytest.approx(pix["candidate"]["curves"]["La"]["density"],rel=1e-9)
+
+
+def test_incompatible_amplitude_units_keep_independent_areas_only():
+    p = payload();p["curves"][0]["unit"]="arbitrary_units"
+    r = calculate_dos(p,PRIMITIVE)["relative"]
+    assert all(c["status"]=="available" for c in r["components"])
+    assert r["shares"]["status"] == r["normalization"]["status"] == "unavailable"
+    assert "幅值单位" in r["normalization"]["reason"]
+
+
+def test_real_saved_calibration_integral_is_not_relabelled_pixel_area():
+    from pathlib import Path
+    evidence=Path(__file__).resolve().parents[2]/"docs/specs/164-dos-relative-normalization/validation/tdos"
+    p=json.loads((evidence/"source-fixture.json").read_text())["result"]
+    before=copy.deepcopy(p)
+    r=calculate_dos(p,dict(primitive_atoms=7,species_counts={"Ca":1,"H":6}))
+    assert r["relative"]["components"][0]["area"] == pytest.approx(6.308648445665745,rel=1e-9)
+    assert r["relative"]["components"][0]["unit"] == "arbitrary_units·THz"
+    assert r["relative"]["normalization"]["coefficient"] == pytest.approx(3.32876370919475,rel=1e-9)
+    assert r["relative"]["normalization"]["total_mode_integral"] == pytest.approx(21)
+    assert p==before
+
+
+
+def test_no_numeric_axis_keeps_stored_pixel_integral_available():
+    p=total_payload()
+    p["curves"][0].pop("axis_calibration")
+    r=calculate_dos(p)["relative"]
+    assert r["components"][0]["area"] == pytest.approx(4)
+    assert r["components"][0]["unit"] == "pixel·THz"
+    assert r["components"][0]["amplitude_basis"]["kind"] == "stored_pixels"
+    assert r["normalization"]["status"] == "unavailable"

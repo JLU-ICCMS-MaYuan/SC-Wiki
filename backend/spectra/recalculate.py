@@ -16,7 +16,7 @@ from .samples import connected_samples
 from .relative import calculate_alpha, pixel_curve
 from .dos import calculate_dos, dos_integrals, apply_dos
 
-VERSION = "spectra-recalculate-tdos-v2"
+VERSION = "spectra-recalculate-axis-v3"
 
 
 def alpha_integrals(payload, references=None):

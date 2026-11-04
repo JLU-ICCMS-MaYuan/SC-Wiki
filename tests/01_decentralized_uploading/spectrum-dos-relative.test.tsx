@@ -7,7 +7,7 @@ import { SpectrumMetrics } from '../../frontend/src/components/SpectrumDetailVie
 
 afterEach(cleanup)
 const report = (): DosRelativeReport => ({
-  method:'dos-relative-v4',
+  method:'dos-relative-v5',
   components:[{curve_id:'La',projection:'La',status:'available',area:4,frequency_interval_thz:[0,1]},
     {curve_id:'H',projection:'H',status:'available',area:5,frequency_interval_thz:[0,1]}],
   shares:{status:'available',total_area:9,fractions:{La:4/9,H:5/9},expected_fractions:{La:1/3,H:2/3}},
@@ -107,4 +107,28 @@ it("旧 v3 的元素门槛提示只要求重算，不冒充 v4 总谱规则",()=
   render(<DosRelativeMetrics report={r} restricted={false}/>)
   expect(screen.getByText(/请点击重新计算/)).toBeVisible()
   expect(screen.queryByText("元素投影完整性尚待核对")).toBeNull()
+})
+
+
+it("当前纵轴任意单位积分独立显示，缺N和未知身份不隐藏结果",()=>{
+  const r=report()
+  r.components=[{curve_id:"source",projection:"source",status:"available",area:6.308648445665745,
+    unit:"arbitrary_units·THz",amplitude_basis:{kind:"calibrated_values"},frequency_interval_thz:[3.6556,58.648]}]
+  r.shares={status:"unavailable",reason:"元素投影完整性尚待核对"}
+  r.normalization={status:"unavailable",reason:"缺少可信原胞原子数 N"}
+  render(<DosRelativeMetrics report={r} restricted={false}/>)
+  const table=screen.getByRole("table",{name:"DOS 相对面积"})
+  expect(within(table).getByText("6.30865")).toBeVisible()
+  expect(within(table).getByText("任意单位·THz · 纵轴刻度")).toBeVisible()
+  expect(screen.getByText("缺少可信原胞原子数 N")).toBeVisible()
+  expect(within(table).queryByText(/像素·THz/)).toBeNull()
+})
+
+it("无刻度的像素积分明确保留单位，v4旧结果要求重算",()=>{
+  const r=report();r.components[0].unit="pixel·THz";r.components[0].amplitude_basis={kind:"source_pixels"}
+  const {rerender}=render(<DosRelativeMetrics report={r} restricted={false}/>)
+  expect(screen.getAllByText("像素·THz · 相对像素").length).toBeGreaterThan(0)
+  r.method="dos-relative-v4";rerender(<DosRelativeMetrics report={r} restricted={false}/>)
+  expect(screen.queryByRole("table")).toBeNull()
+  expect(screen.getByText(/请点击重新计算/)).toBeVisible()
 })

@@ -95,3 +95,19 @@ if os.environ.get("SCWIKI_TDOS_SOURCE_FIXTURE"):
         run,_=service.new_run(session,row,result["calibration"],current_state)
         service.complete_run(run,result);service.activate(row,run,current_state)
         session.commit()
+
+    unknown_state=copy.deepcopy(real_state)
+    unknown_state.update(state_key="dos-real-unknown",property_modules=[])
+    unknown_state.pop("structure",None)
+    base.states.append(unknown_state)
+    unknown_result=copy.deepcopy(bundle["result"])
+    unknown_result["calibration"]["state_key"]=unknown_state["state_key"]
+    for group in (unknown_result["curves"],unknown_result["calibration"]["curves"]):
+        for curve in group:curve.update(projection=None,physical_definition_confirmed=False)
+    with Session(base.engine) as session:
+        ctx=service.context(session,"upload",base.task,base.owner,write=True)
+        state=next(s for s in ctx["states"] if s["state_key"]==unknown_state["state_key"])
+        row=service.collection(session,ctx,"tdos-real-unknown","tdos-real-unknown",source)
+        run,_=service.new_run(session,row,unknown_result["calibration"],state)
+        service.complete_run(run,unknown_result);service.activate(row,run,state)
+        session.commit()

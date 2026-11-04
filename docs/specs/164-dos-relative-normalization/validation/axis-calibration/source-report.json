@@ -1,0 +1,297 @@
+{
+  "model": "gpt-6.1-sol",
+  "pdf_sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+  "image_sha256": "03700ded01a105cb374c95a4c613dc18174c84545c2d702a1ab52d5da84e92b4",
+  "page": 17,
+  "prompt_sha256": "a6b80364072efdb6fcc465ade0548ca4ba0c775e92176f9fbd1e51a53ceaceba",
+  "business_writes": false,
+  "panels": [
+    {
+      "panel_id": "S15_top_200GPa",
+      "state_key": "adjacent-200",
+      "caption": "Figure S15，上面板：cI14-CaH6 在 200 GPa 的声子 DOS。",
+      "kind": "phonon_dos",
+      "assignment_reason": "图内标注“cI14 at 200 GPa”，结合 Figure S15 图注中的 CaH6 材料身份，归属于给定的 adjacent-200 状态，而非 150 GPa 状态。",
+      "curves": [
+        {
+          "id": "S15_200GPa_phonon_dos_total",
+          "kind": "phonon_dos",
+          "projection": "total",
+          "color": "black",
+          "trace_anchors": [],
+          "roi": [
+            121,
+            3,
+            996,
+            290
+          ],
+          "display_bbox": [
+            65,
+            0,
+            1009,
+            309
+          ],
+          "frequency_direction": "x",
+          "frequency_ticks": [
+            [
+              120.0,
+              0.0
+            ],
+            [
+              255.0,
+              10.0
+            ],
+            [
+              390.0,
+              20.0
+            ],
+            [
+              525.0,
+              30.0
+            ],
+            [
+              660.0,
+              40.0
+            ],
+            [
+              795.0,
+              50.0
+            ],
+            [
+              929.0,
+              60.0
+            ]
+          ],
+          "amplitude_ticks": [
+            [
+              291.0,
+              0.0
+            ],
+            [
+              208.0,
+              0.2
+            ],
+            [
+              126.0,
+              0.4
+            ],
+            [
+              43.0,
+              0.6
+            ]
+          ],
+          "frequency_unit": "THz",
+          "frequency_scale": "linear",
+          "amplitude_scale": "linear",
+          "unit": "arbitrary_units",
+          "physical_definition_confirmed": true,
+          "amplitude_evidence": "共享纵轴标为 Phonon DOS (Arbitrary units)，本面板可见 0.0、0.2、0.4、0.6 数值刻度。图注及纵轴将其标识为声子 DOS，未标示元素或方向分波，按总声子 DOS 识别。",
+          "exclude": [
+            [
+              217,
+              36,
+              407,
+              65
+            ]
+          ],
+          "zero_boundaries_thz": [
+            null,
+            null
+          ],
+          "zero_reference_band_thz": null
+        }
+      ],
+      "projection_scale_confirmed": false,
+      "projection_complete": false
+    },
+    {
+      "panel_id": "S15_bottom_150GPa",
+      "state_key": "state-bcc51525bdb07e820aed",
+      "caption": "Figure S15，下面板：cI14-CaH6 在 150 GPa 的声子 DOS。",
+      "kind": "phonon_dos",
+      "assignment_reason": "图内标注“cI14 at 150 GPa”，结合 Figure S15 图注中的 CaH6 材料身份，归属于给定的 150 GPa 状态 state-bcc51525bdb07e820aed。",
+      "curves": [
+        {
+          "id": "S15_150GPa_phonon_dos_total",
+          "kind": "phonon_dos",
+          "projection": "total",
+          "color": "black",
+          "trace_anchors": [],
+          "roi": [
+            121,
+            334,
+            996,
+            620
+          ],
+          "display_bbox": [
+            65,
+            329,
+            1009,
+            725
+          ],
+          "frequency_direction": "x",
+          "frequency_ticks": [
+            [
+              120.0,
+              0.0
+            ],
+            [
+              255.0,
+              10.0
+            ],
+            [
+              390.0,
+              20.0
+            ],
+            [
+              525.0,
+              30.0
+            ],
+            [
+              660.0,
+              40.0
+            ],
+            [
+              795.0,
+              50.0
+            ],
+            [
+              929.0,
+              60.0
+            ]
+          ],
+          "amplitude_ticks": [
+            [
+              621.0,
+              0.0
+            ],
+            [
+              539.0,
+              0.2
+            ],
+            [
+              456.0,
+              0.4
+            ],
+            [
+              374.0,
+              0.6
+            ]
+          ],
+          "frequency_unit": "THz",
+          "frequency_scale": "linear",
+          "amplitude_scale": "linear",
+          "unit": "arbitrary_units",
+          "physical_definition_confirmed": true,
+          "amplitude_evidence": "共享纵轴标为 Phonon DOS (Arbitrary units)，本面板可见 0.0、0.2、0.4、0.6 数值刻度。图注及纵轴将其标识为声子 DOS，未标示元素或方向分波，按总声子 DOS 识别。",
+          "exclude": [
+            [
+              217,
+              370,
+              405,
+              400
+            ]
+          ],
+          "zero_boundaries_thz": [
+            null,
+            null
+          ],
+          "zero_reference_band_thz": null
+        }
+      ],
+      "projection_scale_confirmed": false,
+      "projection_complete": false
+    }
+  ],
+  "issues": [
+    "所有坐标均使用给定 1010×726 原图的绝对像素坐标；曲线取数须排除图框、刻度及文字。",
+    "上面板没有独立的频率数值标签，使用下面板的共享 Frequency (THz) 轴及上下对齐的刻度标定；上面板显示框未包含下面板。",
+    "200 GPa 面板约 40 THz 附近的峰超出上边框，峰顶被裁切；不可重建被裁掉的峰顶。",
+    "两面板均为任意单位声子 DOS，不提供绝对模式数密度；未提供元素分波，因此不声明元素投影完整性或跨分波共同尺度。",
+    "部分低幅值轨迹与黑色零轴或刻度重合，不能可靠分离的位置应留作缺口。未指定零边界或近零参考带，也不外推不可见尾部。",
+    "显示框以各面板边框、局部刻度及图内压力标注为范围；跨越两行的共享纵轴标题未完整纳入任一单独显示框。"
+  ],
+  "results": [
+    {
+      "panel_id": "S15_top_200GPa",
+      "curves": [
+        {
+          "id": "S15_200GPa_phonon_dos_total",
+          "unit": "arbitrary_units",
+          "projection": "total",
+          "points": 876,
+          "missing": 202
+        }
+      ],
+      "relative": {
+        "method": "dos-relative-v5",
+        "spectrum_type": "total",
+        "components": [
+          {
+            "curve_id": "S15_200GPa_phonon_dos_total",
+            "projection": "total",
+            "unit": "arbitrary_units·THz",
+            "status": "unavailable",
+            "reason": "曲线含缺失或非有限数值"
+          }
+        ],
+        "shares": {
+          "status": "unavailable",
+          "reason": "当前为 TDOS，未提供元素分波，暂不计算元素占比"
+        },
+        "normalization": {
+          "status": "unavailable",
+          "reason": "总谱不能形成有效积分，暂不归一化"
+        }
+      },
+      "failures": []
+    },
+    {
+      "panel_id": "S15_bottom_150GPa",
+      "curves": [
+        {
+          "id": "S15_150GPa_phonon_dos_total",
+          "unit": "arbitrary_units",
+          "projection": "total",
+          "points": 876,
+          "missing": 194
+        }
+      ],
+      "relative": {
+        "method": "dos-relative-v5",
+        "spectrum_type": "total",
+        "components": [
+          {
+            "curve_id": "S15_150GPa_phonon_dos_total",
+            "projection": "total",
+            "unit": "arbitrary_units·THz",
+            "status": "unavailable",
+            "reason": "曲线含缺失或非有限数值"
+          }
+        ],
+        "shares": {
+          "status": "unavailable",
+          "reason": "当前为 TDOS，未提供元素分波，暂不计算元素占比"
+        },
+        "normalization": {
+          "status": "unavailable",
+          "reason": "总谱不能形成有效积分，暂不归一化",
+          "primitive_atoms": 7,
+          "target_modes": 21,
+          "structure_evidence": {
+            "primitive_atoms": 7,
+            "species_counts": {
+              "Ca": 1,
+              "H": 6
+            },
+            "structure_hash": "757d845f8c322b549933651e06a49a90194468b16f6c929151e33c66f4b64e29",
+            "method": "ASE/spglib",
+            "symprec_angstrom": 0.0001,
+            "source": null
+          }
+        }
+      },
+      "failures": []
+    }
+  ]
+}
