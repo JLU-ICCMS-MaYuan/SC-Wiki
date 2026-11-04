@@ -28,3 +28,10 @@
 | FR-006 | complete_parsing_state/run_upload/upload_resume/Worker失败回调 | ready/耗时顺序、中断收敛、仅谱续跑、旧job不覆盖新job |
 | FR-007 | usePropertySpectra/PropertySpectra/UploadTaskEditor/UploadParsingDetail | 读取失败不卸载、终态停止、预览不请求、四宿主契约及变异 |
 | FR-008 | 官方上传API与delete_task_record | CaH6任务及关联谱清理；原两PDF全新上传；其他材料保留 |
+
+## 已填压力候选的引用图与单记录归属
+
+1. 从候选原依据定位正文及SI所引用的图页，按文件/页精确去重，实际校验原PDF大小与摘要后在同一规划调用传图。定位图号只提供工具，不由程序判断物理量或借用相邻图的条件；模型须核对图例、子图、坐标轴、单位及材料。已填初步压力也进入该路径。
+2. 保留原states/assignments；内部协议增加record_assignments，仅引用原候选state_key、module_key、record_key及已有target_index，附来源和理由。程序对指定记录复制原数值与身份并保留旧依据、追加实际纠正来源；不搬整卡，不复制新的科学值。原父候选仍完整分配，各记录只出现一次。
+3. 原宿主已知条件保护继续保留。只有全部原记录都有明确逐记录去向时，才允许纠正父候选压力初猜，避免制造空占位卡。记录纠正不得借用不同材料、已知不同物相或优化条件。无效身份、重复覆盖、未知来源和模型新增数值拒绝。
+4. 上传Worker保存material_state_inventory_request.json的实际输入、原页摘要和image_count，响应仍独立留档。后续填写与统一科学核对不因规划声明已纠正而自动通过。

@@ -165,6 +165,20 @@ def complete_json(
         format_options["tool_definitions"] = tool_definitions
     if tool_history:
         format_options["tool_history"] = tool_history
+    def record_failure(exc, attempt, started):
+        # 只记录类型和HTTP状态；异常文本/响应正文可能包含凭据，不进入回执。
+        event = {**_call_stats.get(), "attempt": attempt + 1, "status": "failed",
+                 "error_type": type(exc).__name__, "elapsed_seconds": time.monotonic() - started}
+        if isinstance(exc, APIStatusError):
+            event["status_code"] = exc.status_code
+        if on_call:
+            on_call(dict(event))
+        observer = _call_observer.get()
+        if observer:
+            observer({**event, "phase": _call_phase.get(), "model": get_llm_config().model,
+                      "prompt_hash": hashlib.sha256(system_prompt.encode()).hexdigest(),
+                      "input_chars": len(system_prompt) + len(user_prompt), "tokens": None,
+                      "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4})
     last_error: Exception | None = None
     for attempt in range(retries + 1):
         started = time.monotonic()
@@ -190,21 +204,13 @@ def complete_json(
                           "output_tokens_estimate": (output_chars + 3) // 4})
             return result
         except APIStatusError as exc:
+            record_failure(exc, attempt, started)
             if (response_schema is not None or tool_definitions) and exc.status_code in (400, 422):
                 raise StructuredOutputError("当前模型接口拒绝严格输出结构；未降级或自动重试") from exc
             raise
         # 流式响应中途断开（httpx.TransportError）不经 OpenAI 包装，同样按可重试处理。
         except (APITimeoutError, APIConnectionError, httpx.TransportError, json.JSONDecodeError, RuntimeError) as exc:
-            if on_call:
-                on_call({**_call_stats.get(), "attempt": attempt + 1, "status": "failed",
-                         "error_type": type(exc).__name__, "elapsed_seconds": time.monotonic() - started})
-            observer = _call_observer.get()
-            if observer:
-                observer({**_call_stats.get(), "phase": _call_phase.get(), "model": get_llm_config().model, "prompt_hash": hashlib.sha256(system_prompt.encode()).hexdigest(),
-                          "attempt": attempt + 1, "status": "failed", "error_type": type(exc).__name__,
-                          "elapsed_seconds": time.monotonic() - started,
-                          "input_chars": len(system_prompt) + len(user_prompt), "tokens": None,
-                          "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4})
+            record_failure(exc, attempt, started)
             last_error = exc
             if (response_schema is not None or tool_definitions) and isinstance(exc, (json.JSONDecodeError, RuntimeError)):
                 raise StructuredOutputError("严格输出未返回完整有效JSON；原响应保留，未自动纠错") from exc

@@ -14,3 +14,5 @@ flowchart TD
 预算及工具范围保留。见[#194](../../specs/194-unified-model-review/spec.md)。
 
 已登记的软件参数组为空时，候选回填仅按实际目标建立所需容器，其他空软件组保持为空；不把空父级误作可直接写入的对象，也不覆盖非空错误内容。此项修复及真实网页验证边界见[#194验收](../../specs/194-unified-model-review/validation.md)。
+
+统一JSON调用的HTTP失败回执保留错误类型和状态码，不记录可能含凭据的异常文本或响应正文；APIStatusError继续按原逻辑抛出，不新增自动重试。字段技术失败、真实依赖变化与科学判断继续区分。见[#194验收](../../specs/194-unified-model-review/validation.md)。
