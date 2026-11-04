@@ -491,7 +491,10 @@ def _read_chunk(
     system_prompt = CHUNK_SYSTEM_PROMPT
     if structured:
         from backend.ingest.domain_extraction import DOMAIN_SYSTEM_PROMPT, COMPLEMENTARY_SYSTEM_PROMPT, normalize_extraction, EXTRACTION_OUTPUT_SCHEMA
+        from backend.ingest.scientific_output_schema import bind_extraction_sources
         system_prompt = COMPLEMENTARY_SYSTEM_PROMPT if profile == "complementary" else DOMAIN_SYSTEM_PROMPT
+        generation_schema = bind_extraction_sources(EXTRACTION_OUTPUT_SCHEMA, json.loads(chunk.content),
+                                                    allow_block_references=profile == "complementary")
     from backend.ingest.scientific_context import CONTEXT_VERSION
     from backend.rag.llm_context import get_llm_config
     config = get_llm_config()
@@ -499,7 +502,7 @@ def _read_chunk(
     signature = hashlib.sha256(json.dumps({
         "profile": profile, "content": chunk.content, "model": model_metadata,
         "endpoint": config.base_url, "prompt": system_prompt, "thinking_policy": "disabled-v1", "scientific_context":CONTEXT_VERSION,
-        "output_schema": EXTRACTION_OUTPUT_SCHEMA if structured else None,
+        "output_schema": generation_schema if structured else None,
     }, sort_keys=True).encode("utf-8")).hexdigest()
 
     if result_path.exists():
@@ -518,16 +521,20 @@ def _read_chunk(
         attempt_directory.mkdir(parents=True, exist_ok=False)
         _atomic_write_json(attempt_directory / "input.json", {"system_prompt": system_prompt, "prompt": prompt,
                             "model": model_metadata, "thinking": "disabled", "signature": signature,
-                            "response_schema": EXTRACTION_OUTPUT_SCHEMA})
+                            "response_schema": generation_schema})
     def archive_partial(text):
         (attempt_directory / "response.txt").write_text(text, encoding="utf-8")
     def archive_call(event):
         _atomic_write_json(attempt_directory / f"call-{event['attempt']}.json", event)
         response = attempt_directory / "response.txt"
         if response.exists():
-            response.replace(attempt_directory / f"call-{event['attempt']}.response.txt")
+            archived = attempt_directory / f"call-{event['attempt']}.response.txt"
+            if event.get('error_type') == 'StructuredOutputError':
+                shutil.copyfile(response, archived)  # 保留既有结构拒绝入口；该错误不自动重试。
+            else:
+                response.replace(archived)
     callbacks = {"on_partial":archive_partial,"on_call":archive_call} if profile == "complementary" else {}
-    schema_options = {"response_schema": EXTRACTION_OUTPUT_SCHEMA} if structured else {}
+    schema_options = {"response_schema": generation_schema} if structured else {}
     result = complete_json(system_prompt, prompt, **schema_options, **callbacks)
     if attempt_directory:
         _atomic_write_json(attempt_directory / "raw.json", result)

@@ -28,3 +28,9 @@ SC-004→T006→字段/表单/变异及同环境基线。
 ## 合法缺省投影
 
 normalize_extraction在模型字段验证后、记录级校验前，为predicted_tc合法省略的calculation_conditions建立固定空对象。值、未知状态、原引句和未解决理由保持；非法键、非空错类型继续由原门拒绝，不改变服务端validate_record的Conditions要求。
+
+## 当前请求的来源约束
+
+_read_chunk依据其已提供Document IR绑定生成schema：非空原文块身份使用共享定义中的受限选择，按当前file_id及页码约束；空表格/图容器仍保留在原输入作结构背景和table_row_ref，不允许充作文字引句。source quote的逐字模式为quote非空、quote_id=null；整块模式为quote=null、quote_id引用当前可读块。没有新增来源字段；非互补入口只使用既有逐字模式。
+
+后处理的真实组合、位置、连续引句及科学检查继续保留，拒绝原因区分空容器/身份组合/两模式冲突。不删除失败响应或修补科学值，不增加纠错轮数。结构输出被拒的调用也记为失败，原失败response.txt入口和逐尝试归档同时保留；可重试传输错误按尝试移走原片段，后续无正文HTTP错误不能冒用上一轮片段。

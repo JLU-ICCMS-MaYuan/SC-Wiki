@@ -1,5 +1,6 @@
 """#205：将已审定业务字段用于模型生成；人工扩展不经过此入口。"""
 from copy import deepcopy
+import json
 
 from .fixed_form_contract import CONTRACT
 
@@ -126,6 +127,60 @@ def extraction_schema(base):
     defs.pop("JsonValue", None)
     defs.update(definitions())
     result = _strict(schema)
+    from backend.rag.structured_output import output_format
+    output_format(result)
+    return result
+
+
+def bind_extraction_sources(base, context, *, allow_block_references=True):
+    """把既有来源范围和引用互斥规则前移到生成；原IR、表格及旧响应不改。"""
+    blocks = [block for page in context.get("pages") or [] for block in page.get("blocks") or []
+              if str(block.get("text") or "").strip()]
+    if not blocks:
+        return deepcopy(base)
+    identities = sorted({block["block_id"] for block in blocks})
+    pages = sorted({block["pdf_page"] for block in blocks})
+    definitions = {
+        "CurrentSourceFile": {"type": "string", "enum": [context["file_id"]]},
+        "CurrentSourcePage": {"type": "integer", "enum": pages},
+    }
+    # 枚举只出现一次；长列表分组，避免在每个引句对象中重复复制身份目录。
+    if len(identities) <= 200:
+        definitions["CurrentSourceBlock"] = {"type": "string", "enum": identities}
+    else:
+        names = []
+        for offset in range(0, len(identities), 200):
+            name = f"CurrentSourceBlockSet{len(names)}"
+            definitions[name] = {"type": "string", "enum": identities[offset:offset + 200]}
+            names.append(name)
+        definitions["CurrentSourceBlock"] = {"anyOf": [{"$ref": f"#/$defs/{name}"} for name in names]}
+    identity = {key: {"$ref": f"#/$defs/{name}"} for key, name in
+                (("file_id", "CurrentSourceFile"), ("pdf_page", "CurrentSourcePage"), ("block_id", "CurrentSourceBlock"))}
+    quotes, seen = {}, {}
+    def bind(node):
+        if isinstance(node, list):
+            return [bind(value) for value in node]
+        if not isinstance(node, dict):
+            return node
+        result = {key: bind(value) for key, value in node.items()}
+        properties = result.get("properties") or {}
+        if {"file_id", "pdf_page", "block_id", "quote", "quote_id"} <= set(properties):
+            literal = obj(properties | identity | {
+                "quote": {"type": "string", "minLength": 1}, "quote_id": {"type": "null"}})
+            selected = literal
+            if allow_block_references:
+                reference = obj(properties | identity | {
+                    "quote": {"type": "null"}, "quote_id": {"$ref": "#/$defs/CurrentSourceBlock"}})
+                selected = {"anyOf": [reference, literal]}
+            signature = json.dumps(selected, sort_keys=True)
+            if signature not in seen:
+                name = f"CurrentSourceQuote{len(seen)}"
+                seen[signature] = name
+                quotes[name] = selected
+            return {"$ref": f"#/$defs/{seen[signature]}"}
+        return result
+    result = bind(deepcopy(base))
+    result.setdefault("$defs", {}).update(definitions | quotes)
     from backend.rag.structured_output import output_format
     output_format(result)
     return result

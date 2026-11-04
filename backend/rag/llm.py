@@ -203,6 +203,9 @@ def complete_json(
                           "input_tokens_estimate": (len(system_prompt) + len(user_prompt) + 3) // 4,
                           "output_tokens_estimate": (output_chars + 3) // 4})
             return result
+        except StructuredOutputError as exc:
+            record_failure(exc, attempt, started)
+            raise
         except APIStatusError as exc:
             record_failure(exc, attempt, started)
             if (response_schema is not None or tool_definitions) and exc.status_code in (400, 422):

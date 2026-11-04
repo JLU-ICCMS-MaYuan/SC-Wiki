@@ -398,10 +398,14 @@ def normalize_extraction(raw: dict, *, allowed_blocks: set[tuple[str, int, str]]
                 quote_id = evidence.pop("quote_id", None)
                 if quote_id is not None:
                     identity = (evidence["file_id"], evidence["pdf_page"], evidence["block_id"])
-                    if quote_id != evidence["block_id"] or not allowed_quote_text or not allowed_quote_text.get(identity):
+                    if quote_id != evidence["block_id"]:
+                        raise ValueError("quote_id必须原样使用当前block_id，不能引用另一块")
+                    if not allowed_quote_text or identity not in allowed_quote_text:
                         raise ValueError("原文块引用不属于本次模型输入")
+                    if not allowed_quote_text[identity].strip():
+                        raise ValueError("无文字的结构容器不能用作引句；请选择带原文text的表头、单元格或图注块")
                     if evidence.get("quote") is not None:
-                        raise ValueError("原文块引用不能同时改写 quote")
+                        raise ValueError("整块引用的quote必须为null；逐字摘录时quote_id必须为null")
                     evidence["quote"] = allowed_quote_text[identity]
                 elif allowed_quote_text is not None:
                     identity = (evidence["file_id"], evidence["pdf_page"], evidence["block_id"])
