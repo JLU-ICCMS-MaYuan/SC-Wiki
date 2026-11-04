@@ -93,7 +93,7 @@ it("TDOS 独立显示归一化，保留范围且元素列留空",()=>{
   render(<DosRelativeMetrics report={r} restricted={false}/>)
   const row=within(screen.getByRole("table",{name:"DOS 相对面积"})).getAllByRole("row")[1]
   expect(within(row).getByText("TDOS（总态密度）")).toBeVisible()
-  expect(within(row).getByText("3.6556–58.648 THz")).toBeVisible()
+  expect(within(row).getByText("3.6556–58.648")).toBeVisible()
   expect(within(row).getAllByText("—")).toHaveLength(2)
   expect(screen.getByText("归一化系数 C：5.25 · 总模式数：21（目标 3N：21）")).toBeVisible()
   expect(screen.queryByTestId("dos-element-ratio")).toBeNull()
@@ -119,7 +119,7 @@ it("当前纵轴任意单位积分独立显示，缺N和未知身份不隐藏结
   render(<DosRelativeMetrics report={r} restricted={false}/>)
   const table=screen.getByRole("table",{name:"DOS 相对面积"})
   expect(within(table).getByText("6.30865")).toBeVisible()
-  expect(within(table).getByText("任意单位·THz · 纵轴刻度")).toBeVisible()
+  expect(within(table).getByRole("columnheader",{name:"积分值（任意单位·THz · 纵轴刻度）"})).toBeVisible()
   expect(screen.getByText("缺少可信原胞原子数 N")).toBeVisible()
   expect(within(table).queryByText(/像素·THz/)).toBeNull()
 })
@@ -127,7 +127,7 @@ it("当前纵轴任意单位积分独立显示，缺N和未知身份不隐藏结
 it("无刻度的像素积分明确保留单位，v4旧结果要求重算",()=>{
   const r=report();r.components[0].unit="pixel·THz";r.components[0].amplitude_basis={kind:"source_pixels"}
   const {rerender}=render(<DosRelativeMetrics report={r} restricted={false}/>)
-  expect(screen.getAllByText("像素·THz · 相对像素").length).toBeGreaterThan(0)
+  expect(screen.getByRole("columnheader",{name:"积分值（像素·THz · 相对像素）"})).toBeVisible()
   r.method="dos-relative-v4";rerender(<DosRelativeMetrics report={r} restricted={false}/>)
   expect(screen.queryByRole("table")).toBeNull()
   expect(screen.getByText(/请点击重新计算/)).toBeVisible()
@@ -142,14 +142,14 @@ it("总谱五列表格列出所有材料元素，无分波不伪造积分",()=>{
   r.shares={status:"unavailable",reason:"未提供元素分波"}
   const {rerender}=render(<DosRelativeMetrics report={r} restricted={false}/>)
   const table=screen.getByRole("table",{name:"DOS 相对面积"})
-  expect(within(table).getAllByRole("columnheader").map(e=>e.textContent)).toEqual(["元素 / TDOS","积分范围","积分值","面积占比","原子数占比"])
+  expect(within(table).getAllByRole("columnheader").map(e=>e.textContent)).toEqual(["元素 / TDOS","积分范围（THz）","积分值（任意单位·THz · 纵轴刻度）","面积占比","原子数占比"])
   const rows=within(table).getAllByRole("row")
   expect(rows).toHaveLength(4)
   const total=within(rows[1]).getAllByRole("cell")
   expect(total[0]).toHaveTextContent("TDOS（总态密度）")
-  expect(total[1]).toHaveTextContent("3.6556–58.648 THz")
-  expect(total[2]).toHaveTextContent("6.30865 任意单位·THz · 纵轴刻度")
-  expect(total[2].querySelector("span")).not.toHaveStyle({display:"block"})
+  expect(total[1]).toHaveTextContent("3.6556–58.648")
+  expect(total[2]).toHaveTextContent(/^6\.30865$/)
+  expect(total[2].querySelector("span")).toBeNull()
   expect(within(table).queryByText("S15_150GPa_total_phonon_dos")).toBeNull()
   for(const [index,element,share] of [[2,"Ca","14.29%"],[3,"H","85.71%"]] as const){
     const cells=within(rows[index]).getAllByRole("cell")
@@ -174,4 +174,24 @@ it("旧v5可靠结构计数也能列全元素，投影不完整仍显示已知�
   expect(within(table).getByText("66.67%")).toBeVisible()
   const h=within(table).getByText("H").closest("tr")!
   expect(within(h).getAllByRole("cell").slice(1,4).map(e=>e.textContent)).toEqual(["—","—","—"])
+})
+
+
+it("不同积分单位分别放入对应表头，不混用单位或丢失独立数值",()=>{
+  const r=report()
+  r.components[0].unit="arbitrary_units·THz";r.components[0].amplitude_basis={kind:"calibrated_values"}
+  r.components[1].unit="pixel·THz";r.components[1].amplitude_basis={kind:"source_pixels"}
+  r.shares={status:"unavailable",reason:"各曲线幅值单位不一致"}
+  r.normalization={status:"unavailable",reason:"各曲线幅值单位不一致"}
+  render(<DosRelativeMetrics report={r} restricted={false}/>)
+  const tables=screen.getAllByRole("table",{name:"DOS 相对面积"})
+  expect(tables).toHaveLength(2)
+  for(const [index,label,value] of [[0,"任意单位·THz · 纵轴刻度","4"],[1,"像素·THz · 相对像素","5"]] as const){
+    expect(within(tables[index]).getByRole("columnheader",{name:"积分值（"+label+"）"})).toBeVisible()
+    expect(within(tables[index]).getByRole("columnheader",{name:"积分范围（THz）"})).toBeVisible()
+    const cells=within(within(tables[index]).getAllByRole("row")[1]).getAllByRole("cell")
+    expect(cells[1]).toHaveTextContent(/^0–1$/)
+    expect(cells[2]).toHaveTextContent(value)
+    expect(cells[2]).not.toHaveTextContent(/像素|任意单位|THz/)
+  }
 })

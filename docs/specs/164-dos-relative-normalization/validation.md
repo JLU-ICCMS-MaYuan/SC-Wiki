@@ -2,7 +2,7 @@
 
 日期：2026-10-27（Asia/Shanghai）。Issue：[#164](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/164)。
 
-本文保留各次历史验证；最新有效规则见文末“五列结果与独立元素清单”。此前关于频段确认的行为描述已被该修订取代。
+本文保留各次历史验证；最新有效规则见文末“单位置于列标题”。此前关于频段确认的行为描述已被该修订取代。
 
 ## 自动验证
 
@@ -149,3 +149,14 @@
 已实际查看[桌面截图](validation/five-column-table/desktop.png)和[窄屏截图](validation/five-column-table/mobile.png)，另保留[未知投影页面](validation/five-column-table/unknown-projection.png)。截图原材料IMG-005按原始字节归档、哈希及尺寸核验完成。
 
 本轮只暴露已有化学式/结构计数和调整展示，没有修改PDF/模型提取、标定或积分算法，因此未重提PDF或调用模型；复用已核验原图及人工描线夹具，不宣称新自动描线通过。没有业务写入、迁移、批量回填、推送或部署；Issue保持OPEN，远程Spec链接待另行推送后实际核验。
+
+
+## 单位置于列标题（2026-11-04）
+
+用户明确纠正为积分值（实际单位 · 幅值依据）、积分范围（实际频率单位）的表头格式，取代上一轮将单位跟随每个数值的显示。当前示例为积分值（任意单位·THz · 纵轴刻度）、积分范围（THz），数据格仅显示6.30865和3.6556–58.648。像素单位同样移入列标题；混合积分单位/幅值依据分别成表，避免同一个标题错误套用所有数值；材料元素空行保留且不重复。
+
+本轮只修改前端展示，现有范围字段frequency_interval_thz仍为规范THz，不将原图cm-1或meV重标到未换算的数值。后端、原始描线、积分、CSV及科学身份不变，无模型调用或业务数据写入。
+
+验证：前端相关5文件60项通过（含混合单位独立数值/表头回归）；表单契约11文件150项通过，四类宿主8项变异均检出，TypeScript与生产构建通过。正式React+HTTP+隔离SQLite浏览器11项检查、0页面异常，实际检查列标题与数值格文本、元素空行、原刻度切换/重复重算/CSV及1440px/390px。不是后端数值算法变更，本轮未重跑后端或PDF提取，不沿用历史回归宣称重新执行。
+
+已查看[桌面截图](validation/unit-headings/desktop.png)及[窄屏截图](validation/unit-headings/mobile.png)，单位在表头括号，数据格没有重复单位；局部横向滚动保留、无整页溢出。报告见[browser-report.json](validation/unit-headings/browser-report.json)。未推送、未部署；Issue保持OPEN，远程Spec链接仍待另行核验。

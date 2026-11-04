@@ -1,0 +1,61 @@
+{
+  "checks": [
+    "面积比换算为近似元素比，与当前化学式对照",
+    "正式重新计算保存新版本，N=3且模式4/5保留偏差；原始描线不变",
+    "归一化/相对切换仅改变数值刻度，无写请求或几何变化",
+    "刷新后重复计算仍使用原始数据，共同系数不累乘",
+    "390px 页面无整体横向溢出，结果表可局部滚动",
+    "只有化学式时面积与实测/预期占比可用，N与模式归一化保持未知",
+    "dos-total：元素标记均未确认仍归一化，无分波积分为空且原子数占比已列出，原始描线/范围不变，刷新重算和CSV/窄屏通过",
+    "五列结果：TDOS和Ca/H独立列出，缺分波三项留空，单位在表头且数值格无重复单位和内部ID",
+    "原纵轴积分6.30865、单位与CSV一致；原刻度/归一化切换无写请求且几何不变",
+    "dos-real-source：元素标记均未确认仍归一化，无分波积分为空且原子数占比已列出，原始描线/范围不变，刷新重算和CSV/窄屏通过",
+    "未知TDOS身份且无N，原纵轴数值积分6.30865仍独立显示"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/90c87c24df0d431094f680b6b4ace369/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/90c87c24df0d431094f680b6b4ace369/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/c508013d1de54c07bcb71d5dd67bf028/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/60be3735d8a74d4c8003dd0a6da2e5b8/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/60be3735d8a74d4c8003dd0a6da2e5b8/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ac65ee5dc1694abc8b65878f4c766b42/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/ac65ee5dc1694abc8b65878f4c766b42/recalculate"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/1addc68099434a2f9168720a6e5092e8/recalculate"
+    }
+  ],
+  "screenshots": [
+    "dos-desktop.png",
+    "dos-mobile.png",
+    "dos-mobile.png",
+    "dos-no-n.png",
+    "dos-total-desktop.png",
+    "dos-total-mobile.png",
+    "dos-real-source-desktop.png",
+    "dos-real-source-mobile.png",
+    "dos-real-unknown.png"
+  ]
+}

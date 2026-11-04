@@ -82,7 +82,7 @@ async function main(){
      assert.deepEqual(fresh.result.curves,oldCurves);assert.notEqual(fresh.run.id,oldId);
      const table=page.getByRole("table",{name:"DOS 相对面积"});
      await table.getByRole("cell",{name:/TDOS（总态密度）/}).waitFor();
-     assert.deepEqual(await table.getByRole("columnheader").allTextContents(),["元素 / TDOS","积分范围","积分值","面积占比","原子数占比"]);
+     assert.deepEqual(await table.getByRole("columnheader").allTextContents(),["元素 / TDOS","积分范围（THz）",stateKey==="dos-total"?"积分值（像素·THz · 相对像素）":"积分值（任意单位·THz · 纵轴刻度）","面积占比","原子数占比"]);
      const counts=stateKey==="dos-total"?[["La","33.33%"],["H","66.67%"]]:[["Ca","14.29%"],["H","85.71%"]];
      assert.equal(await table.getByRole("row").count(),4);
      for(const [element,share] of counts){
@@ -103,13 +103,11 @@ async function main(){
        assert.equal(rel.components[0].unit,"arbitrary_units·THz");
        assert(Math.abs(rel.normalization.coefficient-3.32876370919475)<1e-9);
        await table.getByRole("cell",{name:/^6.30865/}).waitFor();
-       await table.getByText("任意单位·THz · 纵轴刻度",{exact:true}).waitFor();
+       await table.getByRole("columnheader",{name:"积分值（任意单位·THz · 纵轴刻度）",exact:true}).waitFor();
        assert(!await table.innerText().then(t=>t.includes("S15_150GPa_total_phonon_dos")));
-       const sameLine=await table.getByRole("cell",{name:/^6.30865/}).evaluate(cell=>{
-         const span=cell.querySelector("span"),range=document.createRange();range.selectNodeContents(cell.firstChild);
-         return Boolean(span&&Math.abs(range.getBoundingClientRect().top-span.getBoundingClientRect().top)<4);
-       });assert(sameLine,"积分数值与单位应在同一行");
-       check("五列结果：TDOS和Ca/H独立列出，缺分波三项留空，积分值与单位同行且无内部ID");
+       assert.equal((await table.getByRole("cell",{name:/^6.30865/}).innerText()).trim(),"6.30865");
+       assert.equal((await totalRow.getByRole("cell").allTextContents())[1],"3.6556–58.648");
+       check("五列结果：TDOS和Ca/H独立列出，缺分波三项留空，单位在表头且数值格无重复单位和内部ID");
        const lines=csv.trim().split("\n"),headers=lines[0].replace("\r","").split(","),first=lines[1].split(",");
        assert(Math.abs(Number(first[headers.indexOf("dos_integral")])-rel.components[0].area)<1e-9);
        assert.equal(first[headers.indexOf("dos_integral_unit")],"arbitrary_units·THz");

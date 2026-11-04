@@ -38,21 +38,26 @@ export default function DosRelativeMetrics({ report, restricted }: { report?: Do
     curve_id: 'element:' + element, projection: element, status: 'not_provided',
   }))]
   const unit = (value?: string) => value?.replace('arbitrary_units', '任意单位').replace('pixel', '像素').replace('unknown', '原纵轴单位（未说明）') || '像素·THz'
+  const integralUnit = (c: Component) => unit(c.unit) + ' · ' + (c.amplitude_basis?.kind==='calibrated_values'?'纵轴刻度':'相对像素')
+  const units = [...new Set(components.filter(c => c.status === 'available').map(integralUnit))]
+  const groups = units.length > 1 ? units.map((value, index) => ({ unit: value,
+    rows: rows.filter(c => c.status === 'available' ? integralUnit(c) === value : index === 0),
+  })) : [{ unit: units[0], rows }]
   return <Box data-testid="dos-relative-metrics" sx={{mt:2}}>
     <Typography fontWeight={600}>积分结果与元素占比</Typography>
-    <Typography variant="caption" color="text.secondary">有可用纵轴刻度时按刻度积分，否则使用像素；单位随各曲线显示，任意单位或像素积分不是振动模式数。</Typography>
-    <Box sx={{overflowX:'auto',maxWidth:'100%'}}>
+    <Typography variant="caption" color="text.secondary">有可用纵轴刻度时按刻度积分，否则使用像素；单位在列标题中显示，任意单位或像素积分不是振动模式数。</Typography>
+    {groups.map((group,index)=><Box key={group.unit || index} sx={{overflowX:'auto',maxWidth:'100%'}}>
       <Table size="small" aria-label="DOS 相对面积" sx={{minWidth:430}}>
-        <TableHead><TableRow>{['元素 / TDOS','积分范围','积分值','面积占比','原子数占比'].map(s=><TableCell key={s}>{s}</TableCell>)}</TableRow></TableHead>
-        <TableBody>{rows.map(c=><TableRow key={(c.status==='not_provided'?'missing:':'curve:')+c.curve_id}>
+        <TableHead><TableRow>{['元素 / TDOS','积分范围（THz）',group.unit?'积分值（'+group.unit+'）':'积分值','面积占比','原子数占比'].map(s=><TableCell key={s}>{s}</TableCell>)}</TableRow></TableHead>
+        <TableBody>{group.rows.map(c=><TableRow key={(c.status==='not_provided'?'missing:':'curve:')+c.curve_id}>
           <TableCell>{name(c)}</TableCell>
-          <TableCell>{c.frequency_interval_thz?c.frequency_interval_thz.map(v=>number(v)).join('–')+' THz':'—'}</TableCell>
-          <TableCell sx={{whiteSpace:'nowrap'}}>{c.status==='available'?number(c.area,6):'—'}{c.status==='available'&&<Typography component="span" variant="caption">{' '+unit(c.unit)} · {c.amplitude_basis?.kind==='calibrated_values'?'纵轴刻度':'相对像素'}</Typography>}{c.reason&&<Typography variant="caption" display="block" color="text.secondary">{c.reason}</Typography>}</TableCell>
+          <TableCell>{c.frequency_interval_thz?c.frequency_interval_thz.map(v=>number(v)).join('–'):'—'}</TableCell>
+          <TableCell sx={{whiteSpace:'nowrap'}}>{c.status==='available'?number(c.area,6):'—'}{c.reason&&<Typography variant="caption" display="block" color="text.secondary">{c.reason}</Typography>}</TableCell>
           <TableCell>{comparable&&!isTotal(c)?percent(shares.fractions?.[c.curve_id]):'—'}</TableCell>
           <TableCell>{!isTotal(c)?percent(fractions[c.projection.trim()] ?? (comparable?shares.expected_fractions?.[c.curve_id]:undefined)):'—'}</TableCell>
         </TableRow>)}</TableBody>
       </Table>
-    </Box>
+    </Box>)}
     {comparable&&!total&&<Typography variant="body2" sx={{mt:1}}>全部分波积分：{number(shares.total_area,6)} {unit(shares.unit)}</Typography>}
     {comparable&&!total&&ratio?.status==='available'&&<Box data-testid="dos-element-ratio" sx={{mt:2}}>
       <Typography fontWeight={600}>面积推算的近似元素比</Typography>
