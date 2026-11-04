@@ -9,6 +9,7 @@
 </head>
 <body>
 <main class="page">
+  <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
   <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / 上传与解析：功能主干</nav>
   <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>上传与解析：功能主干</h1><p class="intro">本页只画本功能的主要步骤。需要展开的步骤及分支细节均在其他 HTML 页面；选择节点后通过右侧链接进入对应位置。</p></header>
   <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="01-upload-parse-details.html">完整细节与分支 →</a><a href="../overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md">文字说明与实现依据</a></nav>
@@ -37,10 +38,10 @@
   "main": [
     {
       "id": "files",
-      "title": "接收已上传的文件任务",
-      "summary": "原文件、文件角色、哈希与任务状态",
+      "title": "接收文件并加入 RQ",
+      "summary": "保存原文件、用户角色、哈希与任务状态",
       "owner": "上传 API / RQ Worker",
-      "description": "原文件、文件角色、哈希与任务状态。详细行为、边界和来源见独立详情页。",
+      "description": "保存原文件、用户指定角色、哈希与任务状态，全部文件完成后锁定清单并入队。入队失败、取消、重试和删除等边界见详情页。",
       "notes": [],
       "code": "backend/api/upload_tasks.py → backend/ingest/upload_jobs.py::process_upload_task",
       "links": [
@@ -52,10 +53,10 @@
     },
     {
       "id": "extract",
-      "title": "提取正文与结构候选",
-      "summary": "PDF 转正文；结构附件单独校验",
-      "owner": "上传 Worker / 本地解析工具",
-      "description": "PDF 转正文；结构附件单独校验。详细行为、边界和来源见独立详情页。",
+      "title": "通用读取正文与补充材料",
+      "summary": "先保存基础文本，再选择解析审核流程",
+      "owner": "通用上传 Worker / 本地解析工具",
+      "description": "typed-parsing-v1 先通用读取 main 与 supplementary，保存基础 Markdown 和来源块；此阶段尚未进入任何类型专用科学表单。",
       "notes": [],
       "code": "backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/pdf_extractor.py",
       "links": [
@@ -66,14 +67,35 @@
       ]
     },
     {
+      "id": "workflow-check",
+      "kind": "check",
+      "title": "适用性判断：匹配哪类流程？",
+      "summary": "matched / unmatched / uncertain / failed",
+      "owner": "typed-parsing-v1 / 适用性判断模型",
+      "description": "综合本文目标、贡献和机制判断；只有 matched 且绑定 conventional-theory-calculation 才进入专用管线，其余三种结果均暂停为 needs_workflow。",
+      "notes": [],
+      "code": "backend/ingest/parsing_workflows.py::POLICY / assess / CURRENT；backend/ingest/upload_jobs.py::_process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#workflow-check",
+          "label": "展开此步骤的完整细节"
+        },
+        {
+          "href": "01-upload-parse-details.html#workflow-paused",
+          "label": "分支：未匹配、存疑或判断失败"
+        }
+      ]
+    },
+    {
       "id": "text",
       "kind": "check",
-      "title": "有效正文是否可用？",
+      "label": "matched：常规专用管线",
+      "title": "常规管线：有效正文是否可用？",
       "summary": "空正文不能生成可校对草稿",
       "owner": "程序检查",
       "description": "空正文不能生成可校对草稿。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task",
       "links": [
         {
           "href": "01-upload-parse-details.html#text",
@@ -93,7 +115,7 @@
       "owner": "上传者 / 清单校验程序",
       "description": "新任务按上传区域指定，不重新判断。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/ingest/upload_jobs.py::_process_upload_task；backend/api/upload_tasks.py",
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task；backend/api/upload_tasks.py",
       "links": [
         {
           "href": "01-upload-parse-details.html#roles",
@@ -109,7 +131,7 @@
       "owner": "程序检查",
       "description": "新任务直接继续；仅旧任务可能歧义。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task",
       "links": [
         {
           "href": "01-upload-parse-details.html#role-check",
@@ -129,7 +151,7 @@
       "owner": "上传 Worker",
       "description": "文件、页码、片段和正文关联。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/ingest/document_identity.py；backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/ingest/document_identity.py；backend/ingest/upload_jobs.py::_process_conventional_upload_task",
       "links": [
         {
           "href": "01-upload-parse-details.html#sources",
@@ -160,7 +182,7 @@
       "owner": "来源定位与覆盖检查程序",
       "description": "核查候选、原文及未覆盖结果。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/ingest/coverage_audit.py；backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/ingest/coverage_audit.py；backend/ingest/upload_jobs.py::_process_conventional_upload_task",
       "links": [
         {
           "href": "01-upload-parse-details.html#coverage",
@@ -180,7 +202,7 @@
       "owner": "汇总模型 / 程序",
       "description": "题录、论文信息与科学实体分开组装。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/upload_preview.py",
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task；backend/ingest/upload_preview.py",
       "links": [
         {
           "href": "01-upload-parse-details.html#summary",
@@ -214,7 +236,9 @@
       "description": "保留候选去向、来源与数值。详细行为、边界和来源见独立详情页。",
       "code": "backend/ingest/scientific_form_filling.py::fill_scientific_forms；backend/ingest/scientific_output_schema.py::filling_schema",
       "owner": "固定表单整理模型 / 程序",
-      "notes": [],
+      "notes": [
+        "材料状态先建立再填表；整理最多 4 轮，并受上下文与输入字符预算限制，不能用无限重试掩盖缺失。"
+      ],
       "links": [
         {
           "href": "01-upload-parse-details.html#form-fill",
@@ -264,8 +288,10 @@
       "summary": "统一工具循环，分批保留结果",
       "owner": "共享科学核对程序 / LLM",
       "description": "统一工具循环，分批保留结果。详细行为、边界和来源见独立详情页。",
-      "notes": [],
       "code": "backend/ingest/property_evidence.py::generate_upload_suggestions；backend/ingest/model_review.py::review_draft / review_fields",
+      "notes": [
+        "字段核对使用有界工具循环，最多 13 轮；分批上限和部分成功保留规则见详情页。"
+      ],
       "links": [
         {
           "href": "01-upload-parse-details.html#evidence",
@@ -284,7 +310,7 @@
       "owner": "上传 Worker / 草稿存储",
       "description": "保留快照、来源和产物清单。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/upload_tasks.py::save_draft",
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task；backend/ingest/upload_tasks.py::save_draft",
       "links": [
         {
           "href": "01-upload-parse-details.html#save",
@@ -323,7 +349,9 @@
       "description": "α²F、phDOS 及附属累计 λ。详细行为、边界和来源见独立详情页。",
       "code": "backend/ingest/upload_jobs.py::complete_parsing_state；backend/spectra/jobs.py::run_upload / discover",
       "owner": "谱处理程序 / 读图模型",
-      "notes": [],
+      "notes": [
+        "自动谱在 ready 前由当前 Worker 同步执行 run_job；手动谱重提才通过独立 RQ dispatch，二者不能混为同一调度路径。"
+      ],
       "links": [
         {
           "href": "01-upload-parse-details.html#automatic-spectra",
@@ -338,10 +366,10 @@
     {
       "id": "ready",
       "kind": "result",
-      "title": "标记 ready，等待校对",
-      "summary": "谱处理已结束；冻结本轮耗时",
+      "title": "标记 ready：技术处理完成",
+      "summary": "不代表科学核对或人工批准完成",
       "owner": "上传 Worker",
-      "description": "谱处理已结束；冻结本轮耗时。详细行为、边界和来源见独立详情页。",
+      "description": "只有表单整理、字段核对和适用的自动谱处理技术完成才写 ready；科学存疑、人工校对和正式审核仍是后续独立步骤。",
       "notes": [],
       "code": "backend/ingest/upload_jobs.py::complete_parsing_state；backend/spectra/jobs.py::run_upload",
       "links": [
@@ -354,10 +382,10 @@
     {
       "id": "handoff",
       "kind": "result",
-      "title": "转入用户校对与提交",
-      "summary": "回到主流程的校对阶段",
-      "owner": "上传者",
-      "description": "回到主流程的校对阶段。详细行为、边界和来源见独立详情页。",
+      "title": "用户校对并正式送审",
+      "summary": "校验流程绑定、来源版本与当前草稿",
+      "owner": "上传者 / Python 提交事务",
+      "description": "ready 后由用户校对并显式提交；正式送审再次校验 typed-parsing-v1 绑定、来源与证据版本，在事务中创建待审论文并冻结交接快照。",
       "notes": [],
       "code": "frontend/src/components/UploadTaskEditor.tsx；backend/api/rag.py::_submit_upload_draft_locked；backend/services/manuscript_handoffs.py::record_handoff",
       "links": [
@@ -369,6 +397,71 @@
     }
   ],
   "branches": [
+    {
+      "id": "queue-failed",
+      "attachTo": "files",
+      "side": "left",
+      "kind": "stop",
+      "label": "RQ 入队失败",
+      "title": "文件已保存，任务启动失败",
+      "summary": "503 UPLOAD_QUEUE_UNAVAILABLE",
+      "owner": "上传 API",
+      "description": "清单锁定后 RQ 入队异常时，任务写 failed / upload_queue_unavailable，并返回 503；已保存文件和错误状态保留，可按失败任务入口重试。",
+      "notes": [],
+      "code": "backend/api/upload_tasks.py::upload_task_file",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#queue-failed",
+          "label": "展开入队失败与重试细节"
+        }
+      ]
+    },
+    {
+      "id": "workflow-paused",
+      "attachTo": "workflow-check",
+      "side": "right",
+      "kind": "wait",
+      "label": "非 matched",
+      "title": "暂停为 needs_workflow",
+      "summary": "保留基础读取和原文件下载",
+      "owner": "通用上传 Worker / 上传者",
+      "description": "unmatched、uncertain、failed 都不进入专用管线；保留 workflow_assessment、基础文本与产物清单。没有可用流程时手工填写和正式送审也不能绕过绑定。",
+      "notes": [],
+      "code": "backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/parsing_workflows.py::require_task_workflow；backend/api/upload_tasks.py::download_original_file",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#workflow-paused",
+          "label": "展开暂停状态与不可绕过边界"
+        }
+      ]
+    },
+    {
+      "id": "task-lifecycle",
+      "attachTo": "files",
+      "side": "right",
+      "kind": "result",
+      "label": "任务操作",
+      "title": "取消、重试或删除",
+      "summary": "各入口有独立状态限制",
+      "owner": "上传者 / 上传 API",
+      "description": "取消区分未开始与运行中任务；只有 failed 可重试；只有 failed、duplicate、cancelled 且未生成正式论文可删除。",
+      "notes": [],
+      "code": "backend/api/upload_tasks.py::cancel_upload_task / retry_upload_task / delete_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#cancel-task",
+          "label": "展开取消细节"
+        },
+        {
+          "href": "01-upload-parse-details.html#retry-task",
+          "label": "展开重试细节"
+        },
+        {
+          "href": "01-upload-parse-details.html#delete-task",
+          "label": "展开删除细节"
+        }
+      ]
+    },
     {
       "id": "failed",
       "attachTo": "text",
@@ -383,7 +476,7 @@
         "不是科学字段不通过，也不伪造 ready。",
         "有界处理仍失败时不会无限循环调用模型。"
       ],
-      "code": "backend/ingest/upload_jobs.py::process_upload_task / _process_upload_task",
+      "code": "backend/ingest/upload_jobs.py::process_upload_task / _process_conventional_upload_task",
       "links": [
         {
           "href": "01-upload-parse-details.html#text",
@@ -406,7 +499,7 @@
       "notes": [
         "不批量改写旧分类，也不把历史入口用作新任务常规流程。"
       ],
-      "code": "backend/api/upload_tasks.py；backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/api/upload_tasks.py；backend/ingest/upload_jobs.py::_process_conventional_upload_task",
       "links": [
         {
           "href": "01-upload-parse-details.html#role-check",
@@ -427,7 +520,7 @@
       "notes": [
         "补证只在可核实的来源范围内进行。"
       ],
-      "code": "backend/ingest/upload_jobs.py::_process_upload_task；backend/ingest/coverage_audit.py",
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task；backend/ingest/coverage_audit.py",
       "links": [
         {
           "href": "01-upload-parse-details.html#coverage",
@@ -447,7 +540,7 @@
       "notes": [
         "不通过增加重试次数掩盖缺失。"
       ],
-      "code": "backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task",
       "returnTo": "summary",
       "returnLabel": "满足后汇总",
       "links": [
@@ -500,16 +593,16 @@
       "id": "native-page",
       "title": "需要查看 PDF 原页",
       "summary": "实际图像送入下一轮模型请求",
-      "description": "read_original_page / inspect_figure 先核验文件身份、大小与 SHA，再渲染指定原页；原生 assistant tool_calls 与 role=tool 使用同一 tool_call_id 配对。",
-      "code": "backend/ingest/model_review.py::_read_original_page / review_fields；backend/ingest/review_tool_contract.py",
+      "description": "read_original_page 核验 PDF 文件身份、大小与 SHA，渲染并返回指定真实 PDF 页的 PNG 图像，下一轮模型请求携带该图像；inspect_figure 只返回图块文字和定位，不返回像素。原生 assistant tool_calls 与 role=tool 使用同一 tool_call_id 配对。",
+      "code": "backend/ingest/model_review.py::_read_original_page / review_fields；backend/ingest/document_agent.py::DocumentTools.call；backend/ingest/review_tool_contract.py",
       "owner": "模型工具 / 存储层",
       "attachTo": "evidence",
       "side": "right",
       "kind": "wait",
       "label": "需查图",
       "notes": [
-        "仅渲染成功或模型请求超时不能算模型已读原页。",
-        "review_images_read 只在带真实图像的模型请求成功后为 true。"
+        "inspect_figure 的文本定位不能替代真实页图像；仅渲染成功或模型请求超时也不能算模型已读原页。",
+        "review_images_read 只有在带真实图像的模型请求成功返回、确认请求已接收图像后才为 true，不表示模型理解一定正确。"
       ],
       "returnTo": "evidence",
       "returnLabel": "继续核对",
@@ -529,11 +622,11 @@
       "title": "保留已有人工草稿",
       "summary": "并发修改时不覆盖",
       "owner": "草稿版本保护程序",
-      "description": "受控重跑发现原草稿在解析期间已变化时拒绝覆盖，保留当前人工编辑供核对。",
+      "description": "带 reparse_expected_draft_hash 的受控重跑在锁内比较当前草稿 SHA-256；不一致抛出 draft_changed_during_parsing，拒绝覆盖并保留当前人工编辑供核对。",
       "notes": [
-        "该分支适用于带预期草稿哈希的受控重跑。"
+        "该分支适用于带预期草稿哈希的受控重跑；不是普通并发保存的通用锁说明。"
       ],
-      "code": "backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/ingest/upload_jobs.py::_process_conventional_upload_task",
       "links": [
         {
           "href": "01-upload-parse-details.html#save",
@@ -563,11 +656,30 @@
       ]
     },
     {
+      "id": "spectra-resume",
+      "attachTo": "automatic-spectra",
+      "side": "left",
+      "kind": "wait",
+      "label": "失败后重试",
+      "title": "满足严格条件才只续跑谱",
+      "summary": "不重建或覆盖用户草稿",
+      "owner": "上传恢复程序",
+      "description": "只有科学整理与核对已完成、草稿和来源未变且任务停在 extracting_spectra 的重试，才跳过通用与专用草稿管线，仅再次完成自动谱；否则走正常重试路径。",
+      "notes": [],
+      "code": "backend/ingest/upload_resume.py::resume_spectra；backend/ingest/upload_jobs.py::process_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#spectra-resume",
+          "label": "展开谱续跑全部前置条件"
+        }
+      ]
+    },
+    {
       "id": "spectra-failed",
       "title": "谱处理技术失败",
       "summary": "保留谱运行原因，不发布 ready",
       "description": "run_upload 发现运行缺失、未结束、failed，或读图能力未证实、technical_errors 非空时抛出错误，上传任务进入失败终态；有明确目标谱身份但标定待核对不等同于此技术故障。",
-      "code": "backend/spectra/jobs.py::run_upload；backend/ingest/upload_jobs.py::_process_upload_task",
+      "code": "backend/spectra/jobs.py::run_upload；backend/ingest/upload_jobs.py::_process_conventional_upload_task",
       "owner": "上传 Worker",
       "attachTo": "automatic-spectra",
       "side": "right",

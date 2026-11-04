@@ -11,6 +11,7 @@
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / 检索与发现：功能主干</nav>
   <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>检索与发现：功能主干</h1><p class="intro">本页只画本功能的主要步骤。需要展开的步骤及分支细节均在其他 HTML 页面；选择节点后通过右侧链接进入对应位置。</p></header>
+  <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
   <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="03-search-details.html">完整细节与分支 →</a><a href="../overview/03_Superconductivity_Data_Search_and_Database_Discovery/local-material-search.md">文字说明与实现依据</a></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
@@ -62,6 +63,55 @@
         {
           "href": "03-search-details.html#url-restore",
           "label": "展开此步骤的完整细节"
+        }
+      ]
+    },
+    {
+      "id": "structure-python-query",
+      "title": "独立结构 Python 并行查询",
+      "summary": "与 Go 双视图结果并行发起独立结构检索",
+      "owner": "React / FastAPI",
+      "description": "StructuralResults 与 Go 论文／状态结果并行调用 POST /api/rag/structural-records/search，沿用元素、化学式及通用筛选，但不发送 Tc 与 chart_only 条件。",
+      "notes": [],
+      "code": "frontend/src/components/PaperStructuralCollection.tsx；backend/api/structural_records.py",
+      "links": [
+        {
+          "href": "03-search-details.html#structure-python-query",
+          "label": "展开此步骤的完整细节"
+        }
+      ]
+    },
+    {
+      "id": "structure-public-page",
+      "title": "retained 模型与独立分页",
+      "summary": "state_key 为空，按独立总数单独翻页",
+      "owner": "FastAPI / MySQL",
+      "description": "仅查询当前已批准版本的 retained 完整 model，independent_only 限定 state_key 为 NULL 或空串；每页 20 条，以 structure_page 和独立 total 执行 offset／limit 分页。",
+      "notes": [],
+      "code": "backend/api/structural_records.py；frontend/src/components/PaperStructuralCollection.tsx",
+      "links": [
+        {
+          "href": "03-search-details.html#structure-public-page",
+          "label": "展开此步骤的完整细节"
+        }
+      ]
+    },
+    {
+      "id": "structure-detail-download",
+      "title": "当前结构详情与匿名下载",
+      "summary": "公开 retained 模型可匿名查看并下载",
+      "owner": "React / FastAPI",
+      "description": "结构卡片打开 /structures/:recordId，读取当前版本结构详情；当前已批准论文的 retained 模型无需登录即可下载 JSON、CIF 或 POSCAR，不经过旧 /api/structures/* 权限链。",
+      "notes": [],
+      "code": "frontend/src/pages/StructuralRecordPage.tsx；backend/api/structural_records.py",
+      "links": [
+        {
+          "href": "03-search-details.html#structure-detail-download",
+          "label": "展开此步骤的完整细节"
+        },
+        {
+          "href": "03-search-details.html#perm-denied",
+          "label": "分支：不可见或表示不可用"
         }
       ]
     },
@@ -169,9 +219,9 @@
       "id": "detail-preview",
       "kind": "check",
       "title": "详情与结构预览",
-      "summary": "按论文 ID 加载物性与结构",
+      "summary": "按论文 ID 读取当前 content_revision",
       "owner": "Go API / React",
-      "description": "按论文 ID 加载物性与结构。详细行为、边界和来源见独立详情页。",
+      "description": "按论文 ID 读取当前 content_revision 的物性与结构，并按审核状态和身份判断可读性。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "goserver/handlers/papers.go；backend/services/paper_revisions.py",
       "links": [
@@ -184,8 +234,8 @@
           "label": "分支：非法来源兜底"
         },
         {
-          "href": "03-search-details.html#perm-denied",
-          "label": "分支：结构下载受限"
+          "href": "03-search-details.html#detail-permissions",
+          "label": "分支：论文详情读取权限"
         }
       ]
     },
@@ -193,9 +243,9 @@
       "id": "chart-stats",
       "kind": "check",
       "title": "Tc 图表统计读取",
-      "summary": "按 Tc 字段聚合已批准物性点",
+      "summary": "读取代表 Tc，单值优先、区间取中点",
       "owner": "Go API / Recharts",
-      "description": "按 Tc 字段聚合已批准物性点。详细行为、边界和来源见独立详情页。",
+      "description": "从 property_records 连接 property_modules，筛选代表 Tc 记录并取单值或区间中点。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "goserver/handlers/stats.go",
       "links": [
@@ -217,9 +267,9 @@
       "id": "export-path",
       "kind": "check",
       "title": "导出与分享出口",
-      "summary": "JSON 离线包为主，RIS 仅提示",
-      "owner": "Go API / React",
-      "description": "JSON 离线包为主，RIS 仅提示。详细行为、边界和来源见独立详情页。",
+      "summary": "PaperEditView 状态卡片导出 JSON",
+      "owner": "Go API / React PaperEditView",
+      "description": "论文详情的材料状态卡片提供 JSON 离线包导出；RIS 与图表组合导出当前没有活动入口。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "goserver/handlers/material_state_export.go",
       "links": [
@@ -229,7 +279,7 @@
         },
         {
           "href": "03-search-details.html#export-format",
-          "label": "分支：导出格式分支"
+          "label": "边界：当前无 RIS／组合导出入口"
         },
         {
           "href": "03-search-details.html#export-incomplete",
@@ -306,24 +356,45 @@
       ]
     },
     {
-      "id": "perm-denied",
+      "id": "detail-permissions",
       "attachTo": "detail-preview",
       "side": "right",
-      "kind": "stop",
-      "label": "无权限",
-      "title": "结构下载受限",
-      "summary": "非批准非本人非管理员被拒",
-      "owner": "Python / structures.py",
-      "description": "GET /api/structures/{structure_id}/raw 在结构未批准、且非提交者、且非管理员时返回 403；representative 与 raw 端点均要求登录用户。",
+      "kind": "check",
+      "label": "身份与状态",
+      "title": "论文详情读取权限",
+      "summary": "approved 匿名；pending 已认证；rejected 上传者或管理员",
+      "owner": "Go API / canViewPaper",
+      "description": "approved 论文允许匿名读取；pending 允许任意已认证用户；rejected 仅上传者或管理员；管理员可读取各状态。无权限返回 403，不以此规则替代独立结构接口的 404 可见性规则。",
       "notes": [
-        "未批准结构不会作为普通公开代表结构。",
-        "缺少匹配结构返回空结果或未找到错误，不自动生成结构。"
+        "详情直接读取当前 content_revision，不能统一宣称公开旧批准版。"
       ],
-      "code": "backend/api/structures.py",
+      "code": "goserver/handlers/papers.go::canViewPaper",
       "links": [
         {
           "href": "03-search-details.html#detail-preview",
           "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "perm-denied",
+      "attachTo": "structure-detail-download",
+      "side": "right",
+      "kind": "stop",
+      "label": "不可见或不可用",
+      "title": "结构读取与下载边界",
+      "summary": "非公开或旧版本返回 404，缺失表示返回 400",
+      "owner": "FastAPI / structural_records.py",
+      "description": "匿名仅可读当前已批准论文的 retained 模型；上传者与已批准管理员可读其权限范围内的当前记录。不可见、非当前版本或匿名访问非 retained 记录返回 404，所需晶胞表示缺失返回 400。",
+      "notes": [
+        "读取与下载使用可选认证，不要求登录，也不套用旧 /api/structures/* 的 403 规则。",
+        "存储迁移未就绪返回 503 structural_migration_required。"
+      ],
+      "code": "backend/api/structural_records.py",
+      "links": [
+        {
+          "href": "03-search-details.html#structure-detail-download",
+          "label": "返回独立结构主链"
         }
       ]
     },
@@ -375,21 +446,21 @@
       "id": "export-format",
       "attachTo": "export-path",
       "side": "left",
-      "kind": "result",
-      "label": "格式选择",
-      "title": "导出格式分支",
-      "summary": "JSON 离线包，RIS 仅前端提示",
-      "owner": "Go API / React",
-      "description": "结构化离线数据走材料状态导出接口返回 JSON 包；RIS 按钮当前只触发前端提示，图表组合导出入口已随社区页改版移除。",
+      "kind": "stop",
+      "label": "当前无入口",
+      "title": "RIS 与图表组合导出未实现",
+      "summary": "没有按钮或处理函数，不形成活动路径",
+      "owner": "React 当前源码",
+      "description": "当前 React 源码没有 RIS 按钮或处理函数，图表也没有组合导出入口；仅 PaperEditView 的材料状态卡片提供 JSON 导出。此处只记录未实现边界，不是可执行分支。",
       "notes": [
-        "前端存在的导出按钮不等同于后端接口已闭环。",
+        "残留 RIS 文案不等于存在交互或后端接口。",
         "离线全量导出由 backend/scripts/export_data.py 生成，不属于前端交互。"
       ],
-      "code": "goserver/handlers/material_state_export.go（JSON）＋文档依据：share-and-export.md#当前行为",
+      "code": "frontend/src/components/PaperEditView.tsx；frontend/src/pages/share.tsx",
       "links": [
         {
           "href": "03-search-details.html#export-path",
-          "label": "返回本功能主干"
+          "label": "返回材料状态 JSON 出口"
         }
       ]
     },
@@ -423,7 +494,21 @@
     },
     {
       "from": "url-restore",
-      "to": "api-route"
+      "to": "structure-python-query",
+      "label": "并行：独立结构"
+    },
+    {
+      "from": "structure-python-query",
+      "to": "structure-public-page"
+    },
+    {
+      "from": "structure-public-page",
+      "to": "structure-detail-download"
+    },
+    {
+      "from": "url-restore",
+      "to": "api-route",
+      "label": "并行：论文与状态"
     },
     {
       "from": "api-route",
@@ -447,22 +532,18 @@
     },
     {
       "from": "dual-view",
-      "to": "detail-preview"
+      "to": "detail-preview",
+      "label": "查看论文"
     },
     {
       "from": "dual-view",
       "to": "chart-stats",
-      "label": "选择统计图表"
+      "label": "独立统计图表入口"
     },
     {
       "from": "detail-preview",
       "to": "export-path",
-      "label": "导出或分享"
-    },
-    {
-      "from": "chart-stats",
-      "to": "export-path",
-      "label": "图表出口"
+      "label": "状态卡片导出 JSON"
     }
   ]
 }</script>

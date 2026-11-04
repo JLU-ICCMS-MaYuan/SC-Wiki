@@ -30,7 +30,7 @@
       </div>
     </aside>
   </div>
-  <p class="boundary">上传与审核形成批准数据；检索、引用图和问答分别使用其公开来源。社区与预测独立进入；预测不回写主库。</p>
+  <p class="boundary">上传与审核形成批准数据；公开检索与引用图读取当前批准事实，问答按工具分别读取 MySQL、Qdrant 或旧 Neo4j。社区与预测独立进入；预测不回写主库。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
 <script type="application/json" id="flow-data">
@@ -55,9 +55,9 @@
       "id": "upload",
       "module": "01",
       "title": "上传与解析",
-      "summary": "原文 → 科学工作稿",
-      "description": "读取本机当前解析链路，先处理原文及材料状态，再整理固定字段、核对来源并完成适用自动谱处理，之后 ready。上传者校对并正式提交才创建待审论文。",
-      "code": "backend/ingest/upload_jobs.py；backend/api/rag.py",
+      "summary": "通用读取 → 适用性门禁 → 专用工作稿",
+      "description": "Worker 先通用读取并执行 typed-parsing-v1 适用性判断；只有常规超导理论计算进入专用科学管线，其他类型、证据不足或判断失败进入 needs_workflow 暂停。技术处理完成后 ready，上传者校对并正式提交才创建待审论文。",
+      "code": "backend/ingest/parsing_workflows.py；backend/ingest/upload_jobs.py；backend/api/rag.py",
       "owner": "上传者 / Worker",
       "links": [
         {
@@ -71,7 +71,7 @@
       "module": "02",
       "title": "审核与维护",
       "summary": "独立工作稿 → 正式审核交接",
-      "description": "审核员接手当前工作稿，按字段保存和核对，显式提交后在事务内校验版本、来源及权限，禁止自审。失败或退回的详情在独立页面。",
+      "description": "审核员接手当前工作稿，经 Python 接口按字段保存和核对，显式提交后在 Python/MySQL 事务内校验版本、来源及权限，禁止自审。批准、退回和转交是不同分支，失败与返修详情在独立页面。",
       "code": "backend/services/field_review_commit.py；backend/services/manuscript_handoffs.py",
       "owner": "管理员 / 超级管理员",
       "kind": "check",
@@ -87,8 +87,8 @@
       "step": "数据出口",
       "title": "当前批准版与发布索引",
       "summary": "主库事实与向量发布分别生效",
-      "description": "合法批准原子切换主库科学内容与正式快照，事务提交后更新外部向量索引；发布失败另记待处理。公开检索、引用图和问答按各自入口读取批准事实。",
-      "code": "backend/api/evidence.py::commit_field_review；goserver/handlers/search_results.go",
+      "description": "合法批准在 MySQL 事务内切换科学内容与正式快照；事务提交后分别执行引用匹配、向量嵌入和旧 Neo4j 同步。发布异常不撤销已提交批准，publication_pending 仅是当次响应标志，不是持久重试队列。",
+      "code": "backend/api/evidence.py；backend/api/rag.py::publish_approved_paper；goserver/handlers/search_results.go",
       "owner": "MySQL / 发布服务",
       "kind": "result",
       "links": [
@@ -102,9 +102,9 @@
       "id": "search",
       "module": "03",
       "title": "检索与发现",
-      "summary": "从当前批准版查论文、材料与结构",
-      "description": "Go 查询主库并校验批准版本，按论文或状态展示结果；详情、统计和导出为用户选择的出口，不强制串行进入知识图谱或问答。",
-      "code": "goserver/handlers/search_results.go；frontend/src/components/SearchResults.tsx",
+      "summary": "从当前批准版查论文、材料状态与独立结构",
+      "description": "Go 查询主库并按论文或材料状态去重分页；前端并行查询 Python 独立结构。详情、Tc 图表和材料状态导出是可选出口，不强制串行进入知识图谱或问答。",
+      "code": "goserver/handlers/search_results.go；backend/api/structural_records.py；frontend/src/components/SearchResults.tsx",
       "owner": "Go API / 前端",
       "kind": "result",
       "links": [
@@ -121,7 +121,7 @@
       "module": "06",
       "title": "研究社区",
       "summary": "账号、贡献统计与 AI 讨论",
-      "description": "账号与会话支持受保护操作；榜单、统计和公开讨论按入口读取，超级管理员才可管理问题并排队模型回答。与上传审核流程分别进入。",
+      "description": "榜单、统计和公开 AI 讨论可分别读取；普通用户与普通管理员只读。超级管理员创建问题不会自动回答，须在问题详情再次显式选择模型才排队。与上传审核流程分别进入。",
       "code": "goserver/handlers/auth.go；backend/api/community_ai.py",
       "owner": "访客 / 用户 / 超级管理员",
       "attachTo": "entry",
@@ -140,7 +140,7 @@
       "module": "07",
       "title": "Tc 估算",
       "summary": "计算文件或参数 → 实验性结果",
-      "description": "用户选择模型，提供结构、计算文件或参数，按路线进行经验公式或隔离模型推理；结果保留在页面，不自动写入主业务库。",
+      "description": "用户选择模型，提供结构、计算文件或参数，按三条路线进行经验公式或隔离模型推理；当前页面最多保留八条结果，不自动写入主业务库。",
       "code": "backend/api/tc_predict.py；backend/api/tc_models.py",
       "owner": "预测接口 / 隔离推理",
       "attachTo": "entry",
@@ -177,9 +177,9 @@
       "id": "rag",
       "module": "05",
       "title": "检索增强问答",
-      "summary": "问题 → 检索工具 → 带来源回答",
-      "description": "Mentor 根据问题调用结构化或语义检索，来源与归因随工具结果进入回答，经 SSE 展示；依赖当前数据库、向量与请求级模型配置。",
-      "code": "backend/rag/agent/mentor.py；backend/rag/search/engine.py",
+      "summary": "问题 → Mentor 按需工具 → 流式回答",
+      "description": "普通问答由 Mentor 按需调用 MySQL 结构化、Qdrant 语义或旧 Neo4j 工具，灵感探索走独立图。SSE 输出回答后，前端另行解析可访问来源链接；旧 Neo4j 工具不具备公开 MySQL 图的当前批准版本条件。",
+      "code": "backend/rag/agent/mentor.py；backend/rag/agent/graph.py；backend/rag/agent/tools.py",
       "owner": "Python RAG / 模型",
       "attachTo": "public",
       "side": "right",

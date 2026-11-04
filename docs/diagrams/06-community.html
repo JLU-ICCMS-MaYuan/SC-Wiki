@@ -10,6 +10,7 @@
 <body>
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / 研究社区：功能主干</nav>
+  <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
   <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>研究社区：功能主干</h1><p class="intro">本页只画本功能的主要步骤。需要展开的步骤及分支细节均在其他 HTML 页面；选择节点后通过右侧链接进入对应位置。</p></header>
   <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="06-community-details.html">完整细节与分支 →</a><a href="../overview/06_Researcher_Community_Forum/community-discussion.md">文字说明与实现依据</a></nav>
   <div class="layout">
@@ -37,216 +38,186 @@
   "main": [
     {
       "id": "community-entry",
-      "title": "进入社区或账号入口",
-      "summary": "公开阅读与身份操作分流",
-      "description": "公开阅读与身份操作分流。详细行为、边界和来源见独立详情页。",
-      "code": "frontend/src/LazyRoutes.tsx；backend/api/community_ai.py；goserver/main.go",
-      "owner": "访客 / 已登录用户",
       "kind": "check",
-      "links": [
-        {
-          "href": "06-community-details.html#community-entry",
-          "label": "展开此步骤的完整细节"
-        }
-      ],
-      "notes": []
+      "title": "进入社区或账号入口",
+      "summary": "公开平行读取与身份操作分流",
+      "owner": "访客 / 已登录用户",
+      "description": "公众可平行读取贡献榜、论文统计、AI 问题与答案；认证和超管治理不是公开读取的必经步骤。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/community.go；backend/api/community_ai.py",
+      "links": [{"href": "06-community-details.html#community-entry", "label": "展开此步骤的完整细节"}]
     },
     {
       "id": "auth-entry",
       "title": "进入认证页",
-      "summary": "侧栏登录按钮统一跳 /auth",
+      "summary": "登录与注册共用 /auth 入口",
       "owner": "前端 AuthPage",
-      "description": "侧栏登录按钮统一跳 /auth。详细行为、边界和来源见独立详情页。",
+      "description": "登录与注册从同一认证页进入，但注册必须先经过邮箱验证码验证。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "frontend/src/pages/AuthPage.tsx",
-      "links": [
-        {
-          "href": "06-community-details.html#auth-entry",
-          "label": "展开此步骤的完整细节"
-        }
-      ]
+      "links": [{"href": "06-community-details.html#auth-entry", "label": "展开此步骤的完整细节"}]
     },
     {
       "id": "submit-credentials",
-      "title": "提交邮箱密码",
-      "summary": "登录或注册资料提交后端",
+      "title": "提交登录或注册资料",
+      "summary": "注册返回202，等待邮箱验证",
       "owner": "前端 → Go API",
-      "description": "登录或注册资料提交后端。详细行为、边界和来源见独立详情页。",
+      "description": "登录提交邮箱密码；注册创建未验证账号并返回 202，不在注册提交时直接签发 JWT。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "goserver/handlers/auth.go",
+      "code": "goserver/handlers/auth.go::loginHandler / registerHandler",
       "links": [
-        {
-          "href": "06-community-details.html#submit-credentials",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "06-community-details.html#password-reset",
-          "label": "分支：找回密码"
-        }
+        {"href": "06-community-details.html#submit-credentials", "label": "展开此步骤的完整细节"},
+        {"href": "06-community-details.html#register-verify", "label": "分支：注册邮箱验证"}
       ]
     },
     {
       "id": "credential-check",
       "kind": "check",
-      "title": "凭据与账号校验",
-      "summary": "校验密码、邮箱验证与状态",
+      "title": "登录凭据与账号校验",
+      "summary": "密码正确且 active＋邮箱已验证",
       "owner": "Go API",
-      "description": "校验密码、邮箱验证与状态。详细行为、边界和来源见独立详情页。",
+      "description": "登录必须同时满足密码正确、账号 active、邮箱已验证才进入 JWT 签发。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "goserver/handlers/auth.go",
+      "code": "goserver/handlers/auth.go::loginHandler",
       "links": [
-        {
-          "href": "06-community-details.html#credential-check",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "06-community-details.html#email-unverified",
-          "label": "分支：邮箱未验证"
-        },
-        {
-          "href": "06-community-details.html#account-blocked",
-          "label": "分支：封禁或注销"
-        }
+        {"href": "06-community-details.html#credential-check", "label": "展开此步骤的完整细节"},
+        {"href": "06-community-details.html#email-unverified", "label": "分支：邮箱未验证"},
+        {"href": "06-community-details.html#account-blocked", "label": "分支：封禁或注销"}
       ]
     },
     {
       "id": "issue-jwt",
-      "title": "签发 JWT",
-      "summary": "HS256 会话携带版本号",
+      "title": "验证或登录后签发 JWT",
+      "summary": "仅 sub邮箱、sv会话版本与标准声明",
       "owner": "Go API",
-      "description": "HS256 会话携带版本号。详细行为、边界和来源见独立详情页。",
+      "description": "JWT 不含用户名和角色；注册只在邮箱验证码验证成功后签发，登录则在全部账号检查通过后签发。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "goserver/handlers/auth.go",
-      "links": [
-        {
-          "href": "06-community-details.html#issue-jwt",
-          "label": "展开此步骤的完整细节"
-        }
-      ]
+      "code": "goserver/middleware/auth.go::Claims / GenerateTokenForUser",
+      "links": [{"href": "06-community-details.html#issue-jwt", "label": "展开此步骤的完整细节"}]
     },
     {
       "id": "session-store",
-      "title": "保存会话",
-      "summary": "token 与用户信息存本地",
+      "title": "保存前端会话",
+      "summary": "token 与安全用户信息存本地",
       "owner": "前端 AuthContext",
-      "description": "token 与用户信息存本地。详细行为、边界和来源见独立详情页。",
+      "description": "前端保存 token 和不含实名的用户展示信息，通用客户端附加 Bearer。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "frontend/src/context/AuthContext.tsx",
-      "links": [
-        {
-          "href": "06-community-details.html#session-store",
-          "label": "展开此步骤的完整细节"
-        }
-      ]
+      "links": [{"href": "06-community-details.html#session-store", "label": "展开此步骤的完整细节"}]
     },
     {
       "id": "session-guard",
-      "title": "请求鉴权",
-      "summary": "中间件校验签名与账号状态",
-      "owner": "Go 中间件",
-      "description": "中间件校验签名与账号状态。详细行为、边界和来源见独立详情页。",
+      "kind": "check",
+      "title": "请求鉴权与路由授权",
+      "summary": "角色由独立中间件按路由查库",
+      "owner": "Go / Python 权限中间件",
+      "description": "认证校验签名、sub、sv 与账号状态；角色不取自 JWT，而由独立授权中间件按受保护路由从数据库用户记录判断。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "goserver/middleware/auth.go",
-      "links": [
-        {
-          "href": "06-community-details.html#session-guard",
-          "label": "展开此步骤的完整细节"
-        }
-      ]
-    },
-    {
-      "id": "contrib-rank",
-      "title": "贡献排行",
-      "summary": "参与人数与上传审核双榜",
-      "owner": "Go API",
-      "description": "参与人数与上传审核双榜。详细行为、边界和来源见独立详情页。",
-      "notes": [],
-      "code": "goserver/handlers/stats.go",
-      "links": [
-        {
-          "href": "06-community-details.html#contrib-rank",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "06-community-details.html#cache-hit",
-          "label": "分支：一小时快照"
-        },
-        {
-          "href": "06-community-details.html#force-refresh",
-          "label": "分支：手动刷新"
-        },
-        {
-          "href": "06-community-details.html#redis-down",
-          "label": "分支：缓存不可用"
-        }
-      ]
-    },
-    {
-      "id": "pub-stats",
-      "title": "家族论文统计",
-      "summary": "按家族去重统计篇数与年度",
-      "owner": "Go API",
-      "description": "按家族去重统计篇数与年度。详细行为、边界和来源见独立详情页。",
-      "notes": [],
-      "code": "goserver/handlers/publication_stats.go",
-      "links": [
-        {
-          "href": "06-community-details.html#pub-stats",
-          "label": "展开此步骤的完整细节"
-        }
-      ]
+      "code": "goserver/middleware/auth.go；backend/security.py",
+      "links": [{"href": "06-community-details.html#session-guard", "label": "展开此步骤的完整细节"}]
     },
     {
       "id": "superadmin-gov",
-      "title": "内容治理",
-      "summary": "超管提问、编辑、下架与恢复",
+      "kind": "check",
+      "title": "超级管理员治理入口",
+      "summary": "普通用户与普通管理员只读",
       "owner": "Go / Python API",
-      "description": "超管提问、编辑、下架与恢复。详细行为、边界和来源见独立详情页。",
+      "description": "只有 active、邮箱已验证的超级管理员能创建问题、选择模型入队、编辑和下架恢复；普通用户及普通管理员只读。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/api/community_ai.py",
+      "code": "backend/api/community_ai.py::authorized；goserver/handlers/community.go",
       "links": [
-        {
-          "href": "06-community-details.html#superadmin-gov",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "06-community-details.html#not-superadmin",
-          "label": "分支：无治理权限"
-        }
+        {"href": "06-community-details.html#superadmin-gov", "label": "展开此步骤的完整细节"},
+        {"href": "06-community-details.html#not-superadmin", "label": "分支：无治理权限"},
+        {"href": "06-community-details.html#edit-governance", "label": "分支：编辑治理"}
       ]
     },
     {
-      "id": "ai-queue",
-      "title": "AI 讨论入队",
-      "summary": "多模型按勾选顺序入队",
-      "owner": "Python 队列",
-      "description": "多模型按勾选顺序入队。详细行为、边界和来源见独立详情页。",
+      "id": "question-create",
+      "title": "独立动作一：创建问题",
+      "summary": "手动／AI建题均不自动回答",
+      "owner": "超级管理员 / Python 选题服务",
+      "description": "手动创建直接保存问题，AI 创建只生成问题；两者都不会自动创建答案请求。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/community/worker.py",
+      "code": "backend/api/community_ai.py::manual_question / generate_question；backend/community/service.py::submit",
+      "links": [{"href": "06-community-details.html#question-create", "label": "展开独立建题动作"}]
+    },
+    {
+      "id": "ai-queue",
+      "title": "独立动作二：答案入队",
+      "summary": "问题详情显式选模型才原子入队",
+      "owner": "超级管理员 / Python 队列",
+      "description": "必须在问题详情显式选择一个或多个模型，服务端才原子创建有序任务组；建题不会自动走到这里。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "backend/api/community_ai.py::add_answer_group；backend/community/answers.py::enqueue_answers",
       "links": [
-        {
-          "href": "06-community-details.html#ai-queue",
-          "label": "展开此步骤的完整细节"
-        }
+        {"href": "06-community-details.html#ai-queue", "label": "展开答案入队动作"},
+        {"href": "06-community-details.html#capacity-busy", "label": "分支：capacity_busy"}
       ]
     },
     {
       "id": "ai-generate",
-      "title": "生成并核验",
-      "summary": "读全部前文后生成再校验",
+      "title": "读取前文、检索并生成",
+      "summary": "任务开始读前文；每次检索至多8片段",
       "owner": "Python 生成器",
-      "description": "读全部前文后生成再校验。详细行为、边界和来源见独立详情页。",
+      "description": "同题 FIFO 任务开始时读取当时可用前文，每次新语义检索最多8片段，再按来源与前文引用规则生成。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/community/generation.py",
+      "code": "backend/community/answers.py::run；backend/community/generation.py",
       "links": [
-        {
-          "href": "06-community-details.html#ai-generate",
-          "label": "展开此步骤的完整细节"
-        },
-        {
-          "href": "06-community-details.html#answer-rejected",
-          "label": "分支：未回应前文"
-        }
+        {"href": "06-community-details.html#ai-generate", "label": "展开生成与检索细节"},
+        {"href": "06-community-details.html#empty-corpus", "label": "分支：空公开库"},
+        {"href": "06-community-details.html#retrieval-failed", "label": "分支：retrieval_failed"},
+        {"href": "06-community-details.html#answer-rejected", "label": "分支：一次纠正"}
+      ]
+    },
+    {
+      "id": "ai-publish",
+      "title": "发布前复核并写入",
+      "summary": "复核 revision/source/lease；建卡或追加",
+      "owner": "Python 生成器 / 主应用库",
+      "description": "发布前复核问题 revision、前文快照、来源有效性和租约；首答建模型卡，同模型后续追加到同卡。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "backend/community/answers.py::run",
+      "links": [
+        {"href": "06-community-details.html#ai-publish", "label": "展开发布复核与写入"},
+        {"href": "06-community-details.html#queue-failure", "label": "分支：失败继续与重试队尾"}
+      ]
+    },
+    {
+      "id": "contrib-rank",
+      "title": "公众读取贡献排行",
+      "summary": "参与人数与上传审核双榜",
+      "owner": "Go API / Redis",
+      "description": "公众无需登录即可读取榜单快照，登录时可附加本人排名。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/stats.go",
+      "links": [
+        {"href": "06-community-details.html#contrib-rank", "label": "展开贡献榜细节"},
+        {"href": "06-community-details.html#cache-hit", "label": "分支：一小时快照"},
+        {"href": "06-community-details.html#redis-down", "label": "分支：缓存不可用"}
+      ]
+    },
+    {
+      "id": "pub-stats",
+      "title": "公众读取论文统计",
+      "summary": "缓存键 community:publication-stats:v1",
+      "owner": "Go API / Redis",
+      "description": "公众平行读取家族论文统计；其批准谓词与搜索、AI 来源筛选不完全相同。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/publication_stats.go",
+      "links": [{"href": "06-community-details.html#pub-stats", "label": "展开统计谓词与缓存细节"}]
+    },
+    {
+      "id": "public-qa",
+      "title": "公众读取 AI 问题与答案",
+      "summary": "平行公开阅读；来源失效由DTO屏蔽",
+      "owner": "Go API",
+      "description": "公开问题与答案不需要先登录或进入治理链；来源或前文依赖失效时公开 DTO 屏蔽正文与引用。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/community_entries.go；goserver/handlers/community_ai.go",
+      "links": [
+        {"href": "06-community-details.html#public-qa", "label": "展开公开读取细节"},
+        {"href": "06-community-details.html#comments-retired", "label": "分支：评论读取410与通知保留"},
+        {"href": "06-community-details.html#source-unavailable", "label": "分支：来源失效屏蔽"}
       ]
     }
   ],
@@ -258,20 +229,28 @@
       "kind": "wait",
       "label": "忘记密码",
       "title": "找回密码",
-      "summary": "邮箱验证码换一次性改密令牌",
+      "summary": "一次性改密令牌，完成后重新登录",
       "owner": "Go API",
-      "description": "依次请求验证码、校验 6 位码、提交新密码；验证成功原子消费并签发 32 字节一次性改密令牌，改密后回到登录页重新登录。",
-      "notes": [
-        "验证码 5 分钟、最多错 5 次。",
-        "成功递增版本且不自动登录。"
-      ],
+      "description": "邮箱验证码换取一次性改密令牌，改密后递增会话版本且不自动登录。详细行为、边界和来源见独立详情页。",
+      "notes": [],
       "code": "goserver/handlers/password_reset.go",
-      "links": [
-        {
-          "href": "06-community-details.html#submit-credentials",
-          "label": "返回本功能主干"
-        }
-      ]
+      "links": [{"href": "06-community-details.html#password-reset", "label": "展开找回密码分支"}]
+    },
+    {
+      "id": "register-verify",
+      "attachTo": "submit-credentials",
+      "side": "right",
+      "kind": "wait",
+      "label": "注册202",
+      "title": "邮箱验证码验证后才签发",
+      "summary": "注册提交本身不返回 JWT",
+      "owner": "Go API / 邮件服务",
+      "description": "注册先创建未验证账号并发送验证码，验证成功才签发 JWT。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/auth.go::registerHandler / VerifyEmail",
+      "returnTo": "issue-jwt",
+      "returnLabel": "验证成功",
+      "links": [{"href": "06-community-details.html#register-verify", "label": "展开注册验证分支"}]
     },
     {
       "id": "email-unverified",
@@ -280,41 +259,26 @@
       "kind": "stop",
       "label": "邮箱未验证",
       "title": "邮箱未验证",
-      "summary": "返回 403 并给继续验证入口",
+      "summary": "登录403，不签发会话",
       "owner": "Go API",
-      "description": "未验证邮箱登录返回 403／email_not_verified，前端提供继续验证入口，本次不签发会话。",
-      "notes": [
-        "历史已验证账号不重新验证。"
-      ],
-      "code": "goserver/handlers/auth.go",
-      "links": [
-        {
-          "href": "06-community-details.html#credential-check",
-          "label": "返回本功能主干"
-        }
-      ]
+      "description": "登录时未验证邮箱返回 email_not_verified，前端可继续验证。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/auth.go::loginHandler",
+      "links": [{"href": "06-community-details.html#email-unverified", "label": "展开邮箱未验证分支"}]
     },
     {
       "id": "account-blocked",
       "attachTo": "credential-check",
       "side": "right",
       "kind": "stop",
-      "label": "账号封禁",
+      "label": "账号不可用",
       "title": "封禁或注销",
-      "summary": "不可登录但保留榜单标识",
+      "summary": "不可登录，历史公开标识另行处理",
       "owner": "Go API",
-      "description": "封禁或注销账号不能登录，也不能通过验证码签发会话；榜单保留「已封禁」，注销账号统一显示「已注销用户」。",
-      "notes": [
-        "注销保留历史贡献。",
-        "注销后不再链接公开主页。"
-      ],
-      "code": "goserver/handlers/stats.go",
-      "links": [
-        {
-          "href": "06-community-details.html#credential-check",
-          "label": "返回本功能主干"
-        }
-      ]
+      "description": "非 active 账号不能登录或通过验证码取得会话。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/auth.go；goserver/handlers/stats.go",
+      "links": [{"href": "06-community-details.html#account-blocked", "label": "展开账号状态分支"}]
     },
     {
       "id": "cache-hit",
@@ -322,20 +286,13 @@
       "side": "left",
       "kind": "result",
       "label": "缓存命中",
-      "title": "一小时快照",
-      "summary": "命中缓存直接返回榜单",
-      "owner": "Redis",
-      "description": "普通请求读取一小时 Redis 快照直接返回，页面保持打开时每小时自动重新获取一次。",
-      "notes": [
-        "登录用户仍附加本人全量排名。"
-      ],
+      "title": "一小时榜单快照",
+      "summary": "命中缓存直接返回",
+      "owner": "Redis / Go API",
+      "description": "普通榜单请求优先读取一小时快照。详细行为、边界和来源见独立详情页。",
+      "notes": [],
       "code": "goserver/handlers/stats.go",
-      "links": [
-        {
-          "href": "06-community-details.html#contrib-rank",
-          "label": "返回本功能主干"
-        }
-      ]
+      "links": [{"href": "06-community-details.html#cache-hit", "label": "展开榜单缓存分支"}]
     },
     {
       "id": "force-refresh",
@@ -343,21 +300,13 @@
       "side": "right",
       "kind": "check",
       "label": "手动刷新",
-      "title": "手动刷新",
-      "summary": "带 refresh 参数绕过缓存重建",
+      "title": "强制重建统计快照",
+      "summary": "refresh=true 绕过缓存",
       "owner": "Go API",
-      "description": "点击「刷新榜单」带 refresh=true 绕过缓存重建快照，统计卡片的「刷新论文统计」同样强制重建。",
-      "notes": [
-        "刷新保留仍存在的家族选择。",
-        "失败保留旧结果并可重试。"
-      ],
-      "code": "goserver/handlers/stats.go",
-      "links": [
-        {
-          "href": "06-community-details.html#contrib-rank",
-          "label": "返回本功能主干"
-        }
-      ]
+      "description": "榜单和论文统计均可显式刷新并重建快照。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/stats.go；goserver/handlers/publication_stats.go",
+      "links": [{"href": "06-community-details.html#force-refresh", "label": "展开手动刷新分支"}]
     },
     {
       "id": "redis-down",
@@ -366,19 +315,40 @@
       "kind": "check",
       "label": "缓存失效",
       "title": "缓存不可用",
-      "summary": "直连数据库聚合后返回",
+      "summary": "直连数据库，失败不返回残缺榜单",
       "owner": "Go API",
-      "description": "Redis 不可用时直接查询数据库聚合；数据库聚合失败则不返回不完整榜单。",
-      "notes": [
-        "不使用残缺结果兜底。"
-      ],
+      "description": "Redis 不可用时直接聚合数据库，数据库失败则不返回不完整结果。详细行为、边界和来源见独立详情页。",
+      "notes": [],
       "code": "goserver/handlers/stats.go",
-      "links": [
-        {
-          "href": "06-community-details.html#contrib-rank",
-          "label": "返回本功能主干"
-        }
-      ]
+      "links": [{"href": "06-community-details.html#redis-down", "label": "展开缓存降级分支"}]
+    },
+    {
+      "id": "comments-retired",
+      "attachTo": "public-qa",
+      "side": "left",
+      "kind": "stop",
+      "label": "评论退役",
+      "title": "评论读取也返回410",
+      "summary": "普通用户不能新建举报；非评论通知保留",
+      "owner": "Go API",
+      "description": "评论列表和单条读取均为 410 comments_retired，举报写入为只读拒绝；通知接口仍保留并过滤不可用目标。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/community.go；goserver/handlers/community_entries.go；goserver/handlers/community_notifications.go",
+      "links": [{"href": "06-community-details.html#comments-retired", "label": "展开评论与通知边界"}]
+    },
+    {
+      "id": "source-unavailable",
+      "attachTo": "public-qa",
+      "side": "right",
+      "kind": "stop",
+      "label": "来源失效",
+      "title": "公开 DTO 屏蔽失效内容",
+      "summary": "屏蔽相应公开正文、引用与回复",
+      "owner": "Go API",
+      "description": "论文批准状态、revision 或前文依赖失效时，公开 DTO 不继续展示原正文与引用。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/community.go::communityDTO；goserver/handlers/community_ai.go",
+      "links": [{"href": "06-community-details.html#source-unavailable", "label": "展开公开来源屏蔽分支"}]
     },
     {
       "id": "not-superadmin",
@@ -387,92 +357,127 @@
       "kind": "stop",
       "label": "非超管",
       "title": "无治理权限",
-      "summary": "访客与普通管理员只读",
-      "owner": "Python API",
-      "description": "非超级管理员或未满足正常有效状态的请求返回 403 superadmin_required，只能阅读问题与答案。",
-      "notes": [
-        "普通管理员也不能排队或编辑。"
-      ],
-      "code": "backend/api/community_ai.py",
-      "links": [
-        {
-          "href": "06-community-details.html#superadmin-gov",
-          "label": "返回本功能主干"
-        }
-      ]
+      "summary": "普通用户与普通管理员只读",
+      "owner": "Go / Python API",
+      "description": "普通用户和普通管理员不能建题、答案入队、编辑或新建举报，只能使用保留的读取与本人通知能力。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "backend/community/service.py::actor_allowed；goserver/handlers/community.go",
+      "links": [{"href": "06-community-details.html#not-superadmin", "label": "展开只读权限分支"}]
+    },
+    {
+      "id": "edit-governance",
+      "attachTo": "superadmin-gov",
+      "side": "right",
+      "kind": "wait",
+      "label": "编辑治理",
+      "title": "乐观 revision 与修订历史",
+      "summary": "公开屏蔽与追加段编辑权限分别判断",
+      "owner": "Go / Python API",
+      "description": "首答 can_edit 只在源码特定失效条件下关闭；追加段 edit_turn 检查超管、visible答案卡和 turn revision，不重新检查 sources_current。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "goserver/handlers/community_entries.go::communityEdit；backend/community/answers.py::edit_turn",
+      "links": [{"href": "06-community-details.html#edit-governance", "label": "展开编辑治理分支"}]
+    },
+    {
+      "id": "capacity-busy",
+      "attachTo": "ai-queue",
+      "side": "right",
+      "kind": "stop",
+      "label": "全局两租约占满",
+      "title": "capacity_busy 快速失败",
+      "summary": "非阻塞获取，不无限等待",
+      "owner": "Python Worker / Redis",
+      "description": "选题与回答 Worker 共用全局两个租约，均以非阻塞方式获取；占满时任务失败而不是无限等待。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "backend/community/jobs.py::capacity",
+      "links": [{"href": "06-community-details.html#capacity-busy", "label": "展开容量失败分支"}]
+    },
+    {
+      "id": "empty-corpus",
+      "attachTo": "ai-generate",
+      "side": "left",
+      "kind": "result",
+      "label": "空公开库",
+      "title": "空库返回无来源状态",
+      "summary": "不要求 Embedding 凭据，可按通用知识回答",
+      "owner": "Python 生成器",
+      "description": "没有当前批准的公开论文时直接返回空来源，与检索异常 retrieval_failed 不同。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "backend/community/generation.py::retrieve_sources",
+      "links": [{"href": "06-community-details.html#empty-corpus", "label": "展开空库分支"}]
+    },
+    {
+      "id": "retrieval-failed",
+      "attachTo": "ai-generate",
+      "side": "right",
+      "kind": "stop",
+      "label": "检索异常",
+      "title": "retrieval_failed",
+      "summary": "检索失败，不冒充空库",
+      "owner": "Python 生成器 / Qdrant",
+      "description": "公开库非空但语义检索发生异常时以 retrieval_failed 失败，不按无资料继续生成。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "backend/community/generation.py::retrieve_sources",
+      "links": [{"href": "06-community-details.html#retrieval-failed", "label": "展开检索失败分支"}]
     },
     {
       "id": "answer-rejected",
       "attachTo": "ai-generate",
       "side": "left",
       "kind": "stop",
-      "label": "内容重复",
-      "title": "未回应前文",
-      "summary": "重复或未引用则拒绝发布",
+      "label": "引用或前文校验失败",
+      "title": "引用规则与一次纠正",
+      "summary": "追加未回应前文或重复才纠正一次",
       "owner": "Python 生成器",
-      "description": "完全重复已有正文或没有引用前文标识的回答不发布；纠正重试一次仍失败即保留失败项、后续继续。",
-      "notes": [
-        "失败项保留且不阻塞队列。",
-        "重试排到队尾。"
-      ],
-      "code": "backend/community/generation.py",
-      "links": [
-        {
-          "href": "06-community-details.html#ai-generate",
-          "label": "返回本功能主干"
-        }
-      ]
+      "description": "来源和前文的编号必须来自提供集合；追加回答未引用前文或重复时纠正一次，仍失败则不发布。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "backend/community/generation.py::create_answer",
+      "links": [{"href": "06-community-details.html#answer-rejected", "label": "展开引用校验分支"}]
+    },
+    {
+      "id": "queue-failure",
+      "attachTo": "ai-publish",
+      "side": "left",
+      "kind": "stop",
+      "label": "单项失败",
+      "title": "失败继续，重试排队尾",
+      "summary": "不阻塞同题后续 FIFO 项",
+      "owner": "Python 队列",
+      "description": "失败项保留错误并继续投递同题下一项；显式重试创建新序号到队尾，不原地抢占。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "backend/community/answers.py::finish_failure / retry_answer / dispatch",
+      "links": [{"href": "06-community-details.html#queue-failure", "label": "展开失败与重试分支"}]
+    },
+    {
+      "id": "publish-conflict",
+      "attachTo": "ai-publish",
+      "side": "right",
+      "kind": "stop",
+      "label": "复核不通过",
+      "title": "发布冲突或来源变化",
+      "summary": "revision/source/lease 任一变化即不发布",
+      "owner": "Python 生成器 / 主应用库",
+      "description": "问题或前文 revision 变化、来源失效、任务状态或租约不匹配时拒绝本次发布。详细行为、边界和来源见独立详情页。",
+      "notes": [],
+      "code": "backend/community/answers.py::run；backend/community/generation.py::sources_current",
+      "links": [{"href": "06-community-details.html#publish-conflict", "label": "展开发布冲突分支"}]
     }
   ],
   "edges": [
-    {
-      "from": "community-entry",
-      "to": "auth-entry"
-    },
-    {
-      "from": "auth-entry",
-      "to": "submit-credentials"
-    },
-    {
-      "from": "submit-credentials",
-      "to": "credential-check"
-    },
-    {
-      "from": "credential-check",
-      "to": "issue-jwt"
-    },
-    {
-      "from": "issue-jwt",
-      "to": "session-store"
-    },
-    {
-      "from": "session-store",
-      "to": "session-guard"
-    },
-    {
-      "from": "session-guard",
-      "to": "superadmin-gov"
-    },
-    {
-      "from": "superadmin-gov",
-      "to": "ai-queue"
-    },
-    {
-      "from": "ai-queue",
-      "to": "ai-generate"
-    },
-    {
-      "from": "community-entry",
-      "to": "contrib-rank",
-      "label": "公开榜单",
-      "lane": 0
-    },
-    {
-      "from": "community-entry",
-      "to": "pub-stats",
-      "label": "论文统计",
-      "lane": 1
-    }
+    {"from": "community-entry", "to": "auth-entry", "label": "注册 / 登录"},
+    {"from": "auth-entry", "to": "submit-credentials"},
+    {"from": "submit-credentials", "to": "credential-check", "label": "登录"},
+    {"from": "credential-check", "to": "issue-jwt", "label": "active＋邮箱已验证"},
+    {"from": "issue-jwt", "to": "session-store"},
+    {"from": "session-store", "to": "session-guard"},
+    {"from": "session-guard", "to": "superadmin-gov", "label": "受保护治理路由"},
+    {"from": "superadmin-gov", "to": "question-create", "label": "独立动作一：只建题"},
+    {"from": "superadmin-gov", "to": "ai-queue", "label": "独立动作二：详情选模型", "lane": 1},
+    {"from": "ai-queue", "to": "ai-generate", "label": "同题 FIFO"},
+    {"from": "ai-generate", "to": "ai-publish"},
+    {"from": "community-entry", "to": "contrib-rank", "label": "公众平行读取", "lane": 0},
+    {"from": "community-entry", "to": "pub-stats", "label": "公众平行读取", "lane": 1},
+    {"from": "community-entry", "to": "public-qa", "label": "公众平行读取", "lane": 2}
   ]
 }</script>
 </body>

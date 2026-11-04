@@ -326,7 +326,8 @@
       const link = document.createElement('a');
       link.href = item.href;
       link.textContent = `${item.no} ${item.name}`;
-      if (item.href === here) link.setAttribute('aria-current', 'page');
+      const detailsHref = item.href.replace(/\.html$/, '-details.html');
+      if (item.href === here || detailsHref === here) link.setAttribute('aria-current', 'page');
       return link;
     }));
   }

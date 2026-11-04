@@ -9,6 +9,7 @@
 </head>
 <body>
 <main class="page">
+  <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
   <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / 审核与维护：功能主干</nav>
   <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>审核与维护：功能主干</h1><p class="intro">本页只画本功能的主要步骤。需要展开的步骤及分支细节均在其他 HTML 页面；选择节点后通过右侧链接进入对应位置。</p></header>
   <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="02-review-audit-details.html">完整细节与分支 →</a><a href="../overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md">文字说明与实现依据</a></nav>
@@ -58,7 +59,7 @@
       "id": "open-review-page",
       "title": "打开论文编辑页",
       "summary": "读取详情、核对结果与分类",
-      "owner": "React 独立编辑页 / Go 详情接口",
+      "owner": "React 编辑页 / Python open-workdraft",
       "description": "读取详情、核对结果与分类。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "frontend/src/pages/AdminPaperEditPage.tsx；backend/api/evidence.py::open_workdraft；backend/services/workdrafts.py::open_draft",
@@ -71,12 +72,14 @@
     },
     {
       "id": "save-edit",
-      "title": "按字段保存审核工作稿",
-      "summary": "不直接替换公开批准内容",
-      "owner": "Python 科学保存 / Go 字段 PATCH",
-      "description": "不直接替换公开批准内容。详细行为、边界和来源见独立详情页。",
-      "notes": [],
-      "code": "frontend/src/pages/AdminPaperEditPage.tsx；backend/ingest/field_drafts.py；backend/services/workdrafts.py；backend/services/paper_revisions.py",
+      "title": "局部保存审核工作稿",
+      "summary": "Python PATCH /api/rag/evidence/draft",
+      "owner": "React 编辑页 / Python 局部保存",
+      "description": "当前 React 主链按字段调用 Python PATCH /api/rag/evidence/draft，以 expected_version 和 write_epoch 保护局部修改，不直接替换公开批准内容。",
+      "notes": [
+        "工作稿以 holder 确认当前经手人，write_epoch 区分页面周期，revision 随保存递增；旧公开批准版在新稿批准前保持可见。"
+      ],
+      "code": "frontend/src/pages/AdminPaperEditPage.tsx；backend/api/evidence.py::patch_field_draft（PATCH /api/rag/evidence/draft）；backend/ingest/field_drafts.py::save_fields；backend/services/workdrafts.py",
       "links": [
         {
           "href": "02-review-audit-details.html#save-edit",
@@ -122,10 +125,11 @@
     {
       "id": "submit-gate",
       "kind": "check",
-      "title": "提交前检查",
-      "summary": "保存后复用有效结果，必要时核对",
+      "label": "approved 专用",
+      "title": "approved 专用提交前检查",
+      "summary": "仅批准路径；return / forward 绕过",
       "owner": "React 编辑页 / Python submit-check",
-      "description": "保存后复用有效结果，必要时核对。详细行为、边界和来源见独立详情页。",
+      "description": "仅 approved 批准请求在保存后复用有效结果并执行必要核对；return / forward 不经过此检查，沿绕过分支直接进入服务端准入。",
       "notes": [],
       "code": "frontend/src/pages/AdminPaperEditPage.tsx::handleEditReview；backend/api/evidence.py::submit_check / enqueue_review",
       "links": [
@@ -144,9 +148,11 @@
       "kind": "check",
       "title": "服务端准入校验",
       "summary": "Python 接口验证角色与禁止自审",
-      "owner": "Go 审核事务",
-      "description": "Python 接口验证角色与禁止自审。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "owner": "Python 审核事务",
+      "description": "approved 经专用 submit-gate 到达；return / forward 绕过该门直接进入。Python 接口统一验证角色与禁止自审，再进入后续行锁。",
+      "notes": [
+        "后端 approve / return / forward 映射仍发生在 commit_review 锁后，不因前端绕过分支而提前。"
+      ],
       "code": "frontend/src/pages/AdminPaperEditPage.tsx::handleEditReview；backend/api/evidence.py::commit_field_review；backend/services/field_review_commit.py::commit_review",
       "links": [
         {
@@ -167,8 +173,8 @@
       "id": "lock-idempotency",
       "kind": "check",
       "title": "行锁与幂等校验",
-      "summary": "锁论文行并核对请求与版本",
-      "owner": "Go 审核事务 / MySQL",
+      "summary": "MySQL FOR UPDATE 锁论文行并核对请求与版本",
+      "owner": "Python 审核事务 / MySQL",
       "description": "锁论文行并核对请求与版本。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::require_writer",
@@ -179,7 +185,7 @@
         },
         {
           "href": "02-review-audit-details.html#reject-or-return",
-          "label": "分支：拒绝交还或转交审核"
+          "label": "分支：return 退回或 forward 转交"
         },
         {
           "href": "02-review-audit-details.html#version-conflict",
@@ -188,11 +194,32 @@
       ]
     },
     {
+      "id": "review-action",
+      "kind": "check",
+      "title": "选择审核动作",
+      "summary": "approve / return / forward 三分支",
+      "owner": "React 编辑页 / Python commit_review",
+      "description": "review-commit 将 approved 映射为 approve，rejected 映射为 return，pending 映射为 forward；只有 approve 继续进入批准专用证据门。",
+      "notes": [],
+      "code": "backend/api/evidence.py::FieldReviewCommit / commit_field_review；backend/services/field_review_commit.py::commit_review",
+      "links": [
+        {
+          "href": "02-review-audit-details.html#review-action",
+          "label": "展开三种审核动作"
+        },
+        {
+          "href": "02-review-audit-details.html#reject-or-return",
+          "label": "分支：return 退回或 forward 转交"
+        }
+      ]
+    },
+    {
       "id": "classification-evidence-gate",
       "kind": "check",
+      "label": "approve",
       "title": "分类与证据完整性",
       "summary": "应用裁决后校验关联完整性",
-      "owner": "Go 审核事务",
+      "owner": "Python 审核事务",
       "description": "应用裁决后校验关联完整性。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/services/field_review_commit.py::commit_review；backend/ingest/property_evidence.py::resolve_results；backend/api/rag.py::_validate_draft",
@@ -212,7 +239,7 @@
       "kind": "result",
       "title": "批准事务落库",
       "summary": "科学内容、来源、批准和交接原子切换",
-      "owner": "Go 审核事务 / MySQL",
+      "owner": "Python 审核事务 / MySQL",
       "description": "科学内容、来源、批准和交接原子切换。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::record_handoff / capture",
@@ -229,11 +256,13 @@
     },
     {
       "id": "publish-index",
-      "title": "发布与索引重建",
-      "summary": "批准后走既有 publish 链路",
-      "owner": "Go → Python /publish",
-      "description": "批准后走既有 publish 链路。详细行为、边界和来源见独立详情页。",
-      "notes": [],
+      "title": "事务后发布：分别记录三项结果",
+      "summary": "引用匹配、向量嵌入、Neo4j 同步；不是完整索引重建",
+      "owner": "Python publish_approved_paper",
+      "description": "Python 在批准事务提交后调用 publish_approved_paper，分别记录引用匹配、向量嵌入与 Neo4j 同步结果，不把该过程描述为完整索引重建。",
+      "notes": [
+        "引用匹配失败独立记录日志；向量嵌入返回 indexed_chunks；Neo4j 返回 kg_synced / kg_error。"
+      ],
       "code": "backend/api/evidence.py::commit_field_review；backend/api/rag.py::publish_approved_paper",
       "links": [
         {
@@ -242,7 +271,7 @@
         },
         {
           "href": "02-review-audit-details.html#publication-pending",
-          "label": "分支：批准已提交，发布待处理"
+          "label": "分支：本次响应 publication_pending"
         }
       ]
     }
@@ -322,7 +351,7 @@
       "label": "自审请求",
       "title": "禁止审核自提交",
       "summary": "无权或自审均不批准",
-      "owner": "Go 审核事务",
+      "owner": "Python 审核事务",
       "description": "当前 get_current_admin 与 commit_review 拒绝缺少管理员身份或操作者等于原上传者的请求，不产生批准或正式交接。",
       "notes": [
         "Go 存量审核同样禁止自审，不能通过更换接口绕过。"
@@ -339,7 +368,7 @@
       "id": "legacy-go-review",
       "title": "存量 Go 审核兼容入口",
       "summary": "已有交接合同则拒绝旁路",
-      "description": "旧 ReviewPaper 仍保留角色、自审、锁行、分类与证据校验。paperUsesHandoffs 命中时返回 workdraft_required，要求通过当前工作稿正式交接。",
+      "description": "Go ReviewPaper 只作为存量兼容入口，不是当前 React 主链的审核事务。paperUsesHandoffs 命中时返回 workdraft_required，必须改用 Python 工作稿与 commit_review 正式交接。",
       "code": "goserver/handlers/admin.go::ReviewPaper；goserver/handlers/manuscript_handoffs.go",
       "owner": "Go 审核兼容层",
       "attachTo": "server-guard",
@@ -355,22 +384,22 @@
     },
     {
       "id": "reject-or-return",
-      "attachTo": "lock-idempotency",
+      "attachTo": "review-action",
       "side": "left",
       "kind": "result",
-      "label": "拒绝或退回",
-      "title": "拒绝交还或转交审核",
-      "summary": "不校验分类与来源直接落库",
-      "owner": "Go 审核事务",
-      "description": "review-commit 对 rejected 记录 return 交接，holder 交还作者并创建作者工作稿；pending 记录 forward 并继续交给其他合法审核人员。已批准论文交还修订时继续公开旧批准版。",
+      "label": "return / forward",
+      "title": "return 退回作者或 forward 转交",
+      "summary": "不经过批准专用证据与分类门",
+      "owner": "Python 审核事务 / MySQL",
+      "description": "rejected 映射 return，holder 交还作者并创建作者工作稿；pending 映射 forward，holder 保持 review 以交接给其他合法审核人员。已批准论文交还修订时继续公开旧批准版。",
       "notes": [
         "这些动作不经过批准专用证据与分类门。",
         "作者须等待其他合法审核员正式退回，不能通过角色变化自行取回。"
       ],
-      "code": "backend/services/field_review_commit.py::commit_review；backend/api/manuscript_handoffs.py::return_to_author",
+      "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::record_handoff / author_working_copy",
       "links": [
         {
-          "href": "02-review-audit-details.html#lock-idempotency",
+          "href": "02-review-audit-details.html#review-action",
           "label": "返回本功能主干"
         }
       ]
@@ -383,7 +412,7 @@
       "label": "版本失效",
       "title": "版本失效冲突",
       "summary": "内容或来源已变则不写入",
-      "owner": "Go 审核事务 / Python 证据服务",
+      "owner": "Python 审核事务 / Python 证据服务",
       "description": "当前工作稿的基线、写凭证、内容或来源与请求不符时拒绝批准，返回对应版本冲突；物化改变字段内容则 draft_materialization_changed 并整体回滚，保留暂存输入。",
       "notes": [
         "同一次重试复用原操作身份，迟到响应不能覆盖当前稿。"
@@ -404,7 +433,7 @@
       "label": "证据不完整",
       "title": "证据门禁拦截",
       "summary": "缺出处或未核对则拒绝批准",
-      "owner": "Go 审核事务",
+      "owner": "Python 审核事务",
       "description": "批准所需的来源、核对结果、预期版本或必填分类不满足时返回明确错误，resolve_results / _validate_draft 阻止正式物化与批准。技术故障与科学问题分别显示。",
       "notes": [
         "Go 存量接口的关联完整性防线继续存在，但不是当前编辑页的主提交入口。"
@@ -426,7 +455,7 @@
       "title": "事务整体回滚",
       "summary": "正式论文不变，暂存保留",
       "owner": "Python 审核事务 / MySQL",
-      "description": "工作稿物化、字段归档、谱绑定、批准状态或正式交接任一步失败，数据库事务整体回滚，保留旧正式论文与暂存输入；事务提交后的发布失败另记 publication_pending。",
+      "description": "工作稿物化、字段归档、谱绑定、批准状态或正式交接任一步失败，数据库事务整体回滚，保留旧正式论文与暂存输入；事务提交后的发布异常只在本次响应带 publication_pending。",
       "notes": [
         "审核失败时正式论文不变，暂存输入保留。",
         "重复批准不重复写历史。"
@@ -441,14 +470,17 @@
     },
     {
       "id": "publication-pending",
-      "title": "批准已提交，发布待处理",
-      "summary": "publication_pending，不回滚批准",
-      "description": "外部索引发布失败时响应带 publication_pending。数据库批准、正式交接和旧向量索引更新是不同结果，需要按实际发布状态处理。",
-      "code": "backend/api/evidence.py::commit_field_review",
-      "owner": "Python 发布接口",
+      "title": "发布异常仅写入本次响应",
+      "summary": "publication_pending 不回滚批准",
+      "description": "publish_approved_paper 抛出未处理异常时，commit_field_review 只在本次响应 result 中添加 publication_pending=true；已提交的数据库批准和正式交接不回滚。",
+      "notes": [
+        "没有证据表明该字段会持久化为待办，也没有证据表明存在自动重试队列；不得画成后台待办或自动重试。"
+      ],
+      "code": "backend/api/evidence.py::commit_field_review；backend/api/rag.py::publish_approved_paper",
+      "owner": "Python review-commit 响应",
       "attachTo": "publish-index",
       "side": "right",
-      "kind": "wait",
+      "kind": "result",
       "label": "发布异常",
       "links": [
         {
@@ -477,11 +509,19 @@
     },
     {
       "from": "manual-decision",
-      "to": "submit-gate"
+      "to": "submit-gate",
+      "label": "approved"
+    },
+    {
+      "from": "manual-decision",
+      "to": "server-guard",
+      "label": "return / forward：绕过 approved 专用检查",
+      "lane": 2
     },
     {
       "from": "submit-gate",
-      "to": "server-guard"
+      "to": "server-guard",
+      "label": "approved：检查通过"
     },
     {
       "from": "server-guard",
@@ -489,7 +529,12 @@
     },
     {
       "from": "lock-idempotency",
-      "to": "classification-evidence-gate"
+      "to": "review-action"
+    },
+    {
+      "from": "review-action",
+      "to": "classification-evidence-gate",
+      "label": "approve"
     },
     {
       "from": "classification-evidence-gate",
@@ -502,12 +547,12 @@
     {
       "from": "save-edit",
       "to": "submit-gate",
-      "label": "有效结果可复用"
+      "label": "approved：有效结果可复用"
     },
     {
       "from": "run-evidence",
       "to": "submit-gate",
-      "label": "无需人工补充",
+      "label": "approved：无需人工补充",
       "lane": 1
     }
   ]

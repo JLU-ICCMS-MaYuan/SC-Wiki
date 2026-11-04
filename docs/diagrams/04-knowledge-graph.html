@@ -11,6 +11,7 @@
 <main class="page">
   <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / 引用知识图谱：功能主干</nav>
   <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>引用知识图谱：功能主干</h1><p class="intro">本页只画本功能的主要步骤。需要展开的步骤及分支细节均在其他 HTML 页面；选择节点后通过右侧链接进入对应位置。</p></header>
+  <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
   <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="04-knowledge-graph-details.html">完整细节与分支 →</a><a href="../overview/04_Superconductivity_Development_Knowledge_Graph/superconductivity-knowledge-graph.md">文字说明与实现依据</a></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
@@ -105,7 +106,7 @@
       "title": "DOI／题名匹配",
       "summary": "精确或唯一题名命中",
       "owner": "Python 引用服务",
-      "description": "精确或唯一题名命中。详细行为、边界和来源见独立详情页。",
+      "description": "有 DOI 时按规范化 DOI 精确匹配；无 DOI 时才按唯一题名与不冲突年份匹配。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/services/citation_graph.py",
       "links": [
@@ -127,8 +128,8 @@
       "id": "review-approve",
       "title": "论文审核通过",
       "summary": "进入公开图查询范围",
-      "owner": "管理员 / Go 审核接口",
-      "description": "进入公开图查询范围。详细行为、边界和来源见独立详情页。",
+      "owner": "管理员 / Go 审核兼容入口 → Python 发布",
+      "description": "当前 React 主链由 Python 保存引用事实并匹配；Go 审核兼容入口先提交审核，再调用 Python 发布与重扫。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "goserver/handlers/admin.go",
       "links": [
@@ -143,15 +144,19 @@
         {
           "href": "04-knowledge-graph-details.html#mark-admin",
           "label": "分支：人工里程碑标记"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#review-post-error",
+          "label": "边界：审核保存与发布后处理分离"
         }
       ]
     },
     {
       "id": "reconcile",
       "title": "审核后重试匹配",
-      "summary": "重扫未匹配引文",
+      "summary": "重试当前出边并扫描历史未匹配记录",
       "owner": "Python 引用服务",
-      "description": "重扫未匹配引文。详细行为、边界和来源见独立详情页。",
+      "description": "批准后重试当前论文出边，并重扫历史 unmatched／ambiguous；匹配异常只记录日志并继续发布。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/services/citation_graph.py",
       "links": [
@@ -179,9 +184,9 @@
     {
       "id": "go-graph-api",
       "title": "Go 图查询接口",
-      "summary": "概览／邻居／搜索／统计",
+      "summary": "MySQL 当前公开图，非 Neo4j 旧同步",
       "owner": "Go API / MySQL",
-      "description": "概览／邻居／搜索／统计。详细行为、边界和来源见独立详情页。",
+      "description": "概览／邻居／搜索／统计直接查询 MySQL 当前公开引用图，不读取 Neo4j 旧同步结果。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "goserver/handlers/knowledge_graph.go",
       "links": [
@@ -192,15 +197,23 @@
         {
           "href": "04-knowledge-graph-details.html#title-fallback",
           "label": "分支：标题缺失回退"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#graph-api-error",
+          "label": "分支：图 API 400／404／500"
+        },
+        {
+          "href": "04-knowledge-graph-details.html#self-reference-scope",
+          "label": "边界：自引用与概览内部边"
         }
       ]
     },
     {
       "id": "frontend-graph",
       "title": "前端筛选与展开",
-      "summary": "筛选固定节点并分页",
+      "summary": "家族多选 OR，节点／边去重并手动分页",
       "owner": "React / vis-network",
-      "description": "筛选固定节点并分页。详细行为、边界和来源见独立详情页。",
+      "description": "家族多选按 OR 过滤，搜索可固定节点；节点与边按稳定键去重，用户点击后才分页加载邻居，不自动递归。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "frontend/src/pages/KnowledgeGraphPage.tsx",
       "links": [
@@ -210,7 +223,7 @@
         },
         {
           "href": "04-knowledge-graph-details.html#cycle-dedupe",
-          "label": "分支：循环引用去重"
+          "label": "分支：节点／边去重与手动分页"
         }
       ]
     }
@@ -223,7 +236,7 @@
       "kind": "stop",
       "label": "解析失败",
       "title": "解析失败留空",
-      "summary": "只记 unavailable 状态",
+      "summary": "只记 unavailable／failed 状态",
       "owner": "GROBID / Python Worker",
       "description": "GROBID 不可用或解析失败时，只记录 unavailable／failed 状态，不创建任何引用边，也不阻断论文人工校对。",
       "notes": [
@@ -235,6 +248,28 @@
         {
           "href": "04-knowledge-graph-details.html#grobid-parse",
           "label": "返回本功能主干"
+        }
+      ]
+    },
+    {
+      "id": "history-backfill",
+      "attachTo": "grobid-parse",
+      "side": "left",
+      "kind": "result",
+      "label": "独立历史入口",
+      "title": "历史引文回填 CLI",
+      "summary": "支持 dry-run、逐篇事务与版本变化跳过",
+      "owner": "运维人员 / Python CLI",
+      "description": "backfill_citation_references.py 按 --paper-id 或 --all-approved 选择当前已批准论文；--dry-run 只核对范围与主 PDF。正式执行逐篇调用 GROBID、逐篇开启写事务，解析期间版本或审核状态变化则跳过该篇。",
+      "notes": [
+        "单篇失败或跳过不会回滚其他论文，也不改变论文版本或审核状态。",
+        "这是历史数据运维入口，不是每次上传或图查询都会执行的自动递归任务。"
+      ],
+      "code": "backend/scripts/backfill_citation_references.py；backend/services/citation_backfill.py",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#grobid-parse",
+          "label": "返回 GROBID 解析主链"
         }
       ]
     },
@@ -269,7 +304,7 @@
       "title": "多候选歧义",
       "summary": "记为 ambiguous 待重扫",
       "owner": "Python 引用服务",
-      "description": "题名匹配到多个候选时记入 ambiguous，与 unmatched 一起进入审核后的历史重扫范围。",
+      "description": "DOI 或题名匹配到多个候选时记入 ambiguous，与 unmatched 一起进入审核后的历史重扫范围。",
       "notes": [
         "不按相似度猜选唯一目标。"
       ],
@@ -292,7 +327,7 @@
       "owner": "Go 中间件",
       "description": "标记接口挂 AdminRequired 中间件，非管理员请求被拒绝；未登录或用户不存在返回 401。",
       "notes": [
-        "只能标记已审核论文。",
+        "只能标记 approved_revision=content_revision 的当前已批准论文。",
         "普通用户仍可只读查看标记。"
       ],
       "code": "goserver/handlers/paper_graph_marks.go",
@@ -326,6 +361,28 @@
       ]
     },
     {
+      "id": "review-post-error",
+      "attachTo": "review-approve",
+      "side": "right",
+      "kind": "stop",
+      "label": "后处理失败",
+      "title": "审核保存与发布后处理分离",
+      "summary": "后处理失败不回滚已保存审核",
+      "owner": "Go 审核兼容入口 / Python 发布",
+      "description": "Go 审核事务提交后才调用 Python 发布或清理；发布、清理失败返回 502 并明确审核已保存。Python 的引用重扫异常则被捕获并记录日志，随后继续向量发布，不把匹配异常回滚成审核失败。",
+      "notes": [
+        "当前 React 上传、提交、引用匹配主链在 Python；Go 路径是审核兼容与后处理编排。",
+        "引用匹配失败可在后续论文批准时重试，不等于已成功成边。"
+      ],
+      "code": "goserver/handlers/admin.go::finalizeReviewArtifacts；backend/api/rag.py::publish_approved_paper",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#review-approve",
+          "label": "返回审核主链"
+        }
+      ]
+    },
+    {
       "id": "title-fallback",
       "attachTo": "go-graph-api",
       "side": "right",
@@ -348,18 +405,60 @@
       ]
     },
     {
+      "id": "graph-api-error",
+      "attachTo": "go-graph-api",
+      "side": "left",
+      "kind": "stop",
+      "label": "请求或查询失败",
+      "title": "图 API 400／404／500",
+      "summary": "参数无效 400，中心论文不可公开 404，查询异常 500",
+      "owner": "Go API / graphError",
+      "description": "非法 limit／offset／direction／family／kind、空搜索词或非法论文 ID 返回 400 invalid_graph_filter；邻居中心论文不存在或并非当前已批准版本返回 404 paper_not_found；数据库查询与节点装饰失败返回 500 graph_query_failed。",
+      "notes": [
+        "错误不会伪装成空图；前端在对应加载区域展示错误。"
+      ],
+      "code": "goserver/handlers/knowledge_graph.go",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#go-graph-api",
+          "label": "返回图查询主链"
+        }
+      ]
+    },
+    {
+      "id": "self-reference-scope",
+      "attachTo": "go-graph-api",
+      "side": "right",
+      "kind": "result",
+      "label": "自引用边界",
+      "title": "邻居排除自己，概览不必然排除自边",
+      "summary": "两种查询范围的自引用处理不同",
+      "owner": "Go API / MySQL",
+      "description": "邻居查询以 p.id <> center.id 排除中心论文自身；概览 graphEdgesBetween 只要求边两端都在当前节点集合且为当前已批准论文，并未额外排除 citing=cited，因此概览内部边不必然排除自引用。",
+      "notes": [
+        "这里只描述 SQL 行为，不把自引用或年份异常自动判为科学错误。"
+      ],
+      "code": "goserver/handlers/knowledge_graph.go::graphNeighborRows；graphEdgesBetween",
+      "links": [
+        {
+          "href": "04-knowledge-graph-details.html#go-graph-api",
+          "label": "返回图查询主链"
+        }
+      ]
+    },
+    {
       "id": "cycle-dedupe",
       "attachTo": "frontend-graph",
       "side": "left",
       "kind": "result",
-      "label": "循环去重",
-      "title": "循环引用去重",
-      "summary": "合并节点不重复展开",
+      "label": "合并与手动加载",
+      "title": "节点／边去重与手动分页",
+      "summary": "稳定键去重，不自动递归展开",
       "owner": "React 前端",
-      "description": "真实文献即使成环也不删除，前端按 paper_id 合并节点、避免重复展开，服务端不递归加载整图。",
+      "description": "前端以 paper_id 更新节点，以 citing>cited 稳定键新增边；只有用户点击上下游按钮才按 offset 请求下一页，服务端与前端均不自动递归加载整图。",
       "notes": [
-        "当前无环检测与异常核验流程。",
-        "去重不代表异常已核验。"
+        "实现没有 visited 集合；DataSet 与 Map 的身份去重不等于循环检测。",
+        "当前没有循环或年份异常治理流程，去重不代表异常已核验。"
       ],
       "code": "frontend/src/pages/KnowledgeGraphPage.tsx",
       "links": [

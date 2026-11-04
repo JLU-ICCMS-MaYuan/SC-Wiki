@@ -12,6 +12,7 @@
   <nav class="breadcrumb" aria-label="文档导航"><a href="index.html">全站主流程</a> / Tc 估算：功能主干</nav>
   <header><p class="eyebrow">SC-WIKI · 独立 HTML 程序流程图</p><h1>Tc 估算：功能主干</h1><p class="intro">本页只画本功能的主要步骤。需要展开的步骤及分支细节均在其他 HTML 页面；选择节点后通过右侧链接进入对应位置。</p></header>
   <nav class="page-links" aria-label="流程页面导航"><a href="index.html">← 全站主流程</a><a href="07-tc-predict-details.html">完整细节与分支 →</a><a href="../overview/07_AI_Assisted_Tc_Estimation/model-lab-demo.md">文字说明与实现依据</a></nav>
+  <nav class="page-links" aria-label="功能模块切换" data-module-nav></nav>
   <div class="layout">
     <section class="diagram" aria-labelledby="chart-title">
       <div class="toolbar"><div><h2 id="chart-title">程序控制流</h2><p>箭头表示标注的处理或数据关系；各功能按入口选择，不必逐个执行。</p></div><span class="mode-label">本机实际源码</span></div>
@@ -50,18 +51,18 @@
         },
         {
           "href": "07-tc-predict-details.html#lab-boundary",
-          "label": "分支：实验页免责"
+          "label": "分支：模型级实验边界"
         }
       ]
     },
     {
       "id": "pick-model",
       "title": "选择模型",
-      "summary": "常压 BCS 或高压氢化物分组",
+      "summary": "四个目录模型，三条执行路线",
       "owner": "前端",
-      "description": "常压 BCS 或高压氢化物分组。详细行为、边界和来源见独立详情页。",
+      "description": "BETE-NET、SISSO Xie 2019／2022 与 Tc assessment model 按 structure、parameters、legacy 三条路线执行。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx",
+      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx；backend/prediction/catalog.json",
       "kind": "check",
       "links": [
         {
@@ -73,11 +74,11 @@
     {
       "id": "submit-input",
       "title": "提交输入",
-      "summary": "上传或粘贴结构与参数",
+      "summary": "结构、EPC 参数或 POSCAR＋PDOS",
       "owner": "前端 → FastAPI",
-      "description": "上传或粘贴结构与参数。详细行为、边界和来源见独立详情页。",
+      "description": "按模型提交结构、EPC 参数或 POSCAR＋PDOS；前端 180 秒 Abort 只是本地取消等待，不是 HTTP 状态。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "frontend/src/pages/TcPredictPage.tsx",
+      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx",
       "links": [
         {
           "href": "07-tc-predict-details.html#submit-input",
@@ -111,10 +112,10 @@
     },
     {
       "id": "feature-extract",
-      "title": "结构与电子特征",
-      "summary": "H 子晶格、键长与态密度",
+      "title": "legacy 特征提取",
+      "summary": "POSCAR、H 子晶格与 PDOS",
       "owner": "Python 后端",
-      "description": "H 子晶格、键长与态密度。详细行为、边界和来源见独立详情页。",
+      "description": "legacy 路线解析 POSCAR，提取 H 子晶格、H-H 键长与电子 PDOS；BETE 不走此路线。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/api/tc_predict.py",
       "links": [
@@ -126,10 +127,10 @@
     },
     {
       "id": "tc-formula",
-      "title": "经验公式估 Tc",
-      "summary": "固定参数返回 Tc 与特征",
+      "title": "公式计算 Tc",
+      "summary": "legacy 与 SISSO 2019／2022",
       "owner": "Python 后端",
-      "description": "固定参数返回 Tc 与特征。详细行为、边界和来源见独立详情页。",
+      "description": "legacy 使用 E_couple 经验式；SISSO 2019／2022 在主进程按公开公式求值。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/api/tc_predict.py；backend/prediction/inference.py::sisso",
       "links": [
@@ -146,9 +147,9 @@
     {
       "id": "model-dispatch",
       "title": "分派模型推理",
-      "summary": "BETE 子进程，SISSO 直算",
+      "summary": "BETE 子进程，SISSO 主进程",
       "owner": "FastAPI",
-      "description": "BETE 子进程，SISSO 直算。详细行为、边界和来源见独立详情页。",
+      "description": "BETE 交给独立子进程，SISSO 在主进程直算；legacy 使用独立 multipart 接口。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/api/tc_models.py",
       "kind": "check",
@@ -161,12 +162,12 @@
     },
     {
       "id": "isolated-worker",
-      "title": "隔离子进程推理",
-      "summary": "按需启动单任务独立解释器",
-      "owner": "后端 runner",
-      "description": "按需启动单任务独立解释器。详细行为、边界和来源见独立详情页。",
+      "title": "BETE 隔离子进程推理",
+      "summary": "制品校验、100 网络与 51 点谱",
+      "owner": "后端 runner → 独立 Python 子进程",
+      "description": "BETE 在独立 Python 子进程校验制品并用 ASE 识别结构，运行 100 个网络得到 51 点平均谱；120 秒超时返回 504，锁仅约束单个 Python 进程。",
       "notes": [],
-      "code": "backend/prediction/runner.py",
+      "code": "backend/prediction/runner.py；backend/prediction/worker.py；backend/prediction/inference.py",
       "links": [
         {
           "href": "07-tc-predict-details.html#isolated-worker",
@@ -174,22 +175,26 @@
         },
         {
           "href": "07-tc-predict-details.html#env-missing",
-          "label": "分支：模型环境缺失"
+          "label": "分支：模型环境或制品缺失"
         },
         {
           "href": "07-tc-predict-details.html#task-busy",
-          "label": "分支：单任务占用"
+          "label": "分支：单进程任务占用"
+        },
+        {
+          "href": "07-tc-predict-details.html#client-timeout",
+          "label": "分支：前端 180 秒 Abort"
         }
       ]
     },
     {
       "id": "result-assemble",
       "title": "组装结果",
-      "summary": "Tc、参数与谱图合并成条",
+      "summary": "最多 8 条，Tc／参数／可选谱",
       "owner": "后端 + 前端",
-      "description": "Tc、参数与谱图合并成条。详细行为、边界和来源见独立详情页。",
+      "description": "新结果置于页首并最多保留 8 条；每条包含 Tc 与参数，谱为可选项，并非每条都有谱。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/prediction/inference.py",
+      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx；backend/prediction/inference.py；backend/api/tc_predict.py",
       "links": [
         {
           "href": "07-tc-predict-details.html#result-assemble",
@@ -223,16 +228,16 @@
       "attachTo": "page-entry",
       "side": "left",
       "kind": "result",
-      "label": "实验边界",
-      "title": "实验页免责",
-      "summary": "不代表科学验证的通用模型",
-      "owner": "前端",
-      "description": "页面由代码明确标记为实验页面，结果不代表经过科学验证的通用预测模型。",
+      "label": "模型边界",
+      "title": "模型级实验边界",
+      "summary": "按所选模型展示 boundary",
+      "owner": "模型目录 + 前端",
+      "description": "前端在所选模型工作区展示该模型的 boundary；各模型适用边界不同，不宣称存在前端统一的实验页声明。",
       "notes": [
-        "不宣称高压或非谐体系有效。",
-        "BETE 数据仅覆盖当前公开版本。"
+        "BETE 与 SISSO 不保证高压或非谐体系精度。",
+        "legacy 仅作笼状超氢化物初步评估，预测不等于实验结果。"
       ],
-      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx",
+      "code": "backend/prediction/catalog.json；frontend/src/features/prediction/PredictionWorkspace.tsx",
       "links": [
         {
           "href": "07-tc-predict-details.html#page-entry",
@@ -245,13 +250,14 @@
       "attachTo": "input-check",
       "side": "left",
       "kind": "stop",
-      "label": "缺少文件",
-      "title": "缺少必要文件",
-      "summary": "缺 CONTCAR 或 PDOS_H 返回 400",
+      "label": "legacy 输入失败",
+      "title": "legacy 缺少文件或输入无效",
+      "summary": "multipart 缺字段通常 422；函数内检查 400",
       "owner": "FastAPI",
-      "description": "缺少可解析的 CONTCAR 或 PDOS_H.dat、列数不足或关键数值为零时返回 400，不进入计算。",
+      "description": "legacy 整个 contcar 或 pdos_files multipart 字段缺失通常由 FastAPI 返回 422；进入函数后，缺 H PDOS、POSCAR／H 子晶格／PDOS 无效等返回 400。",
       "notes": [
-        "金属 PDOS 缺失会补齐，不因此报错。"
+        "金属 PDOS 缺失会补齐；零值只检查 h_value＋total_metal==0。",
+        "legacy 不具备 SISSO 同等的有限正数、范围与分母防护。"
       ],
       "code": "backend/api/tc_predict.py",
       "links": [
@@ -266,15 +272,15 @@
       "attachTo": "input-check",
       "side": "right",
       "kind": "stop",
-      "label": "解析失败",
-      "title": "结构无法解析",
+      "label": "BETE 解析失败",
+      "title": "BETE 结构无法解析",
       "summary": "格式不符时提示切换类型",
-      "owner": "FastAPI",
-      "description": "结构无法解析或所选格式与内容不匹配时明确提示切换，不把有效 POSCAR 按默认 CIF 判为无效。",
+      "owner": "BETE 独立 Python 子进程",
+      "description": "BETE 由 ASE 识别 CIF／POSCAR／CONTCAR；显式格式与内容不匹配且另一格式可读时提示切换。此提示不属于 legacy POSCAR 路线。",
       "notes": [
-        "上传或粘贴后恢复自动识别。"
+        "上传或粘贴后前端恢复自动识别。"
       ],
-      "code": "backend/api/tc_predict.py",
+      "code": "backend/prediction/inference.py::parse_structure；frontend/src/features/prediction/PredictionWorkspace.tsx",
       "links": [
         {
           "href": "07-tc-predict-details.html#input-check",
@@ -287,15 +293,16 @@
       "attachTo": "tc-formula",
       "side": "left",
       "kind": "stop",
-      "label": "参数越界",
-      "title": "公式不适用",
-      "summary": "参数越界即报错不造假结果",
-      "owner": "Python 后端",
-      "description": "输入非法或所填参数超出公式适用范围时明确报错，不返回看似有效的 Tc。",
+      "label": "SISSO 参数无效",
+      "title": "SISSO 公式不适用",
+      "summary": "有限正数、范围与分母防护",
+      "owner": "主进程 Python 后端",
+      "description": "SISSO 2019／2022 拒绝非有限正数、超出服务范围的参数，以及 2022 公式的非正分母、修正项奇点和非正修正因子，返回 400。",
       "notes": [
-        "经验公式范围与不确定度未形成模型说明。"
+        "输入范围是服务约束，不是模型精度保证范围。",
+        "legacy 不具有这些 SISSO 同等防护。"
       ],
-      "code": "backend/api/tc_predict.py",
+      "code": "backend/prediction/inference.py::parameters；backend/prediction/inference.py::sisso",
       "links": [
         {
           "href": "07-tc-predict-details.html#tc-formula",
@@ -308,15 +315,15 @@
       "attachTo": "isolated-worker",
       "side": "left",
       "kind": "stop",
-      "label": "环境缺失",
-      "title": "模型环境缺失",
-      "summary": "503，其他接口仍可用",
-      "owner": "后端 runner",
-      "description": "缺少独立环境或模型制品时返回 503，主站其他 API 与参数模型仍可正常使用。",
+      "label": "环境或制品不可用",
+      "title": "BETE 环境或制品不可用",
+      "summary": "环境、制品或运行输出无效返回 503",
+      "owner": "后端 runner + BETE 子进程",
+      "description": "缺少独立环境、BETE 制品未就绪或校验失败、子进程运行失败或 stdout 不是有效 JSON 时返回 503；SISSO 与 legacy 不经过 BETE 子进程。",
       "notes": [
-        "制品摘要校验失败则拒绝供应下载。"
+        "模型制品校验与公开数据文件下载校验是两条不同子流程。"
       ],
-      "code": "backend/prediction/runner.py",
+      "code": "backend/prediction/runner.py；backend/prediction/worker.py；backend/prediction/artifacts.py",
       "links": [
         {
           "href": "07-tc-predict-details.html#isolated-worker",
@@ -330,14 +337,15 @@
       "side": "right",
       "kind": "wait",
       "label": "任务占用",
-      "title": "单任务占用",
-      "summary": "第二个请求返回 429 需重试",
+      "title": "单 Python 进程内任务占用",
+      "summary": "同进程第二个 BETE 请求返回 429",
       "owner": "后端 runner",
-      "description": "同一时间只执行一个结构任务，运行期间后续请求直接返回 429，需稍后重试。",
+      "description": "模块级 asyncio.Lock 只约束当前 Python 进程；同进程运行 BETE 时后续请求返回 429，不构成跨进程全局锁。",
       "notes": [
-        "超时后自动清理释放名额。"
+        "BETE 后端 120 秒超时终止子进程并返回 504。",
+        "前端 180 秒 Abort 不是 HTTP 状态，服务器可能仍在计算。"
       ],
-      "code": "backend/prediction/runner.py",
+      "code": "backend/prediction/runner.py；frontend/src/features/prediction/PredictionWorkspace.tsx",
       "links": [
         {
           "href": "07-tc-predict-details.html#isolated-worker",
@@ -353,12 +361,12 @@
       "label": "不回写主库",
       "title": "结果仅留页面",
       "summary": "不自动写入主业务数据库",
-      "owner": "FastAPI",
-      "description": "预测结果逐次保留在当前页面，没有数据库持久化，也不自动写入主业务数据。",
+      "owner": "前端 PredictionWorkspace",
+      "description": "预测结果仅保存在 PredictionWorkspace 的页面状态中，最新结果在前且最多 8 条；没有数据库持久化，也不回写主材料数据库。",
       "notes": [
-        "与主材料检索、RAG 数据相互独立。"
+        "刷新或清空页面状态不写入主库，与主材料检索、RAG 数据相互独立。"
       ],
-      "code": "backend/api/tc_models.py；backend/api/tc_predict.py",
+      "code": "frontend/src/features/prediction/PredictionWorkspace.tsx；backend/api/tc_models.py；backend/api/tc_predict.py",
       "links": [
         {
           "href": "07-tc-predict-details.html#result-assemble",
@@ -382,7 +390,8 @@
     },
     {
       "from": "input-check",
-      "to": "feature-extract"
+      "to": "feature-extract",
+      "label": "legacy POSCAR＋PDOS"
     },
     {
       "from": "feature-extract",
@@ -398,7 +407,8 @@
     },
     {
       "from": "model-dispatch",
-      "to": "isolated-worker"
+      "to": "isolated-worker",
+      "label": "BETE structure"
     },
     {
       "from": "isolated-worker",
