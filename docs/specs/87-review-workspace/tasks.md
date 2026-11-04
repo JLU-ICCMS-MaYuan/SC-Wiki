@@ -6,7 +6,7 @@
 
 **目标**：审核入口可见上传者并提供历史入口。
 
-**独立验收**：列表夹具中的上传者和历史入口显示在红框操作区域，空上传者有稳定回退。
+字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 - [x] T001 [US1] 在 `tests/01_decentralized_uploading/admin-paper-classification-review.test.tsx` 增加列表上传者、历史入口和无记录列的回归测试。
 - [x] T002 [US1] 在 `frontend/src/pages/AdminPage.tsx` 的论文列表操作区域渲染上传者和“历史”按钮，不显示物性记录数量。
@@ -100,8 +100,7 @@
 
 ## Phase 4: Convergence - 元数据区收敛为上传者与历史
 
-**差距来源**：用户确认红框位于管理工作台论文列表每行的操作区域；原有 `record_count` 统计和
-“物性记录”展示不是所需功能，且容易被误认为处理历史。历史入口应从列表直接打开。
+字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 - [x] T028 在 `goserver/handlers/admin.go`、`frontend/src/pages/{AdminPage,AdminPaperEditPage}.tsx`、中英文文案与目标测试中移除列表/详情 `record_count`、所有物性记录数量展示和“处理记录”文案；将“历史”入口放到论文列表每行操作区域，保留历史 API 和时间线，并验证新契约。
 

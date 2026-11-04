@@ -1,0 +1,5613 @@
+{
+  "issue": 220,
+  "source_head": "a1a7106a7685c8a9559c2161777653cf8741ac8e",
+  "documents": [
+    {
+      "path": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md",
+      "before_sha256": "f50553978a355aabb3e7940fea7ebca23bd7a0ea252f707ec86440d398d607ba",
+      "after_sha256": "648f72d4aaa2defa57c4fa882d86cc6e041584d941300c2f14a007de1ac63804",
+      "fragment_ids": [
+        "M001",
+        "M002",
+        "M003",
+        "M004"
+      ]
+    },
+    {
+      "path": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/source-association-review.md",
+      "before_sha256": "b70ddab6d309a1d6405db67e0919add9d3a98302c926b32a4779d828f6383cd2",
+      "after_sha256": "563a82930f264ebd13d485035d66af5c8b19544643742c12d8556b6cbe88a224",
+      "fragment_ids": [
+        "M005",
+        "M006",
+        "M007"
+      ]
+    },
+    {
+      "path": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/upload-llm-workflow-and-agent-analysis.md",
+      "before_sha256": "4d682994501a4aa27ccbc80139915956e79c2e6d2be45010c9bd53b6f5d1d465",
+      "after_sha256": "8840d934d7a3bcf351b6c55812d75ce804f166d20b76f5f851f0b7f8ecdbeb0c",
+      "fragment_ids": [
+        "M008"
+      ]
+    },
+    {
+      "path": "docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md",
+      "before_sha256": "683e0e565de1c6dd0d30fb761ac9362fa4aa7001e42fb62dfef6142859aeb28e",
+      "after_sha256": "42b8e50f46b467798ab6421d1203d844552eee3ff3141f8ba63d1e27e1017253",
+      "fragment_ids": [
+        "M009",
+        "M010",
+        "M011",
+        "M012",
+        "M013",
+        "M014",
+        "M015"
+      ]
+    },
+    {
+      "path": "docs/overview/README.md",
+      "before_sha256": "33800a00a165e86f3758b8a5e3cfa73a65654dcf59b38e4dcf304318ee7a82ad",
+      "after_sha256": "ebecee28971fe918df2b2bb72ca5fb4a4a5396cb46d3d268fdc9fed84dbb0e10",
+      "fragment_ids": [
+        "M016"
+      ]
+    },
+    {
+      "path": "docs/specs/103-property-evidence-review/checklists/requirements.md",
+      "before_sha256": "12fe7e91737c8216e0f10c9dfa8a169af7329aea4cdcaa48784efc7425adbd55",
+      "after_sha256": "be531266d415f0e8d332a423495430237b9a5ee7675c1ee91c2dccb07a63b0a4",
+      "fragment_ids": [
+        "M017",
+        "M018"
+      ]
+    },
+    {
+      "path": "docs/specs/103-property-evidence-review/quickstart.md",
+      "before_sha256": "5b87bd28d7fbbbe7383558b78d37b43289e6d0cb21f43e476df776bb3607957e",
+      "after_sha256": "8f6fabb3fb2581678f3d00bef259d9f0886320c4ab0f2b3ca8fb24450a1ff323",
+      "fragment_ids": [
+        "M019",
+        "M020",
+        "M282",
+        "M283",
+        "M284",
+        "M285",
+        "M286",
+        "M287",
+        "M288",
+        "M289"
+      ]
+    },
+    {
+      "path": "docs/specs/103-property-evidence-review/spec.md",
+      "before_sha256": "04fc9fdcb886e83637c230256073d686095be1d2ad39161f3d92d8ea69b47abe",
+      "after_sha256": "52d2460d978eb696b8bfe1e0644c91a873368e08a2a5fee48ccbf84bdf6af4d8",
+      "fragment_ids": [
+        "M021",
+        "M022",
+        "M023",
+        "M024",
+        "M025",
+        "M026",
+        "M290"
+      ]
+    },
+    {
+      "path": "docs/specs/103-property-evidence-review/tasks.md",
+      "before_sha256": "48e745ac0d08f571fe294ab050bb38dddaac5fd467b082dbc9aaec062c06a427",
+      "after_sha256": "e99cf6f8db01943c3fb58def8daeec6cd32de8c864bb78b2a15086848b2afa05",
+      "fragment_ids": [
+        "M027",
+        "M291"
+      ]
+    },
+    {
+      "path": "docs/specs/109-field-evidence-and-ai-suggestions/assets/field-review-history-issue-draft.md",
+      "before_sha256": "880d4fb0b80aee05e27fdc90993579ecde6df96bb6308e8dd1a62db2e4de71a6",
+      "after_sha256": "269197362291e9bbe1a6112ee74c3a72fdd5ce0a3d9e8821c2ac36704025cabb",
+      "fragment_ids": [
+        "M028",
+        "M029"
+      ]
+    },
+    {
+      "path": "docs/specs/109-field-evidence-and-ai-suggestions/field-review-history-demo.md",
+      "before_sha256": "77520a87249afd6014ef16c1d7c894d8f6521c66d6a49b7791ccb6beb4ce2ee0",
+      "after_sha256": "02d05c2eaa1d057724e14f164abc5a47bcfc658b4c23902da160525b7fee7e79",
+      "fragment_ids": [
+        "M030",
+        "M031",
+        "M032",
+        "M033",
+        "M034"
+      ]
+    },
+    {
+      "path": "docs/specs/109-field-evidence-and-ai-suggestions/quickstart.md",
+      "before_sha256": "291f2f8d0f27880bbd174b6d1ac8d6bbd247ff0c7510577d83e418d2fa647bb8",
+      "after_sha256": "a92cc82c365a748df31f42d575fcf11a82f6bc0012dd835b453738b852893371",
+      "fragment_ids": [
+        "M035"
+      ]
+    },
+    {
+      "path": "docs/specs/109-field-evidence-and-ai-suggestions/research.md",
+      "before_sha256": "03f36623e6f85ad2bb4f2d387ba32e454af58d15ae6eb6f8dd22f7bdb617b308",
+      "after_sha256": "effcbf7a1eee7cf0ff7b7cb8f98de85d1401f998e5accf2bca606977b75d93e2",
+      "fragment_ids": [
+        "M036"
+      ]
+    },
+    {
+      "path": "docs/specs/109-field-evidence-and-ai-suggestions/spec.md",
+      "before_sha256": "a282df74fc8aae3b66b3f91f63967e8ad124460608ebf670a42467c7e194a5ce",
+      "after_sha256": "2e17654d4cf35ae05066343c58aa2a1c57e0c1976db92d98f53981ab320a7a7d",
+      "fragment_ids": [
+        "M037",
+        "M038",
+        "M039",
+        "M040"
+      ]
+    },
+    {
+      "path": "docs/specs/109-field-evidence-and-ai-suggestions/state-review-convergence-20261020.md",
+      "before_sha256": "b27bcb0b3286739b8403954ec2e24e693930cf2d85caff382af3eab73e9f6e8e",
+      "after_sha256": "ab71d42c2cd5061dc2dfdce6c690939aa11e7d05f926f93f7b257c63cefae950",
+      "fragment_ids": [
+        "M041",
+        "M042"
+      ]
+    },
+    {
+      "path": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "before_sha256": "9f1b0cf7d68e3080a6d8ef9407447d9215bc73c3ed6f1f0de59572c049d85d2e",
+      "after_sha256": "8b87c37abd36cb86ccf411b97d537cc7daf25e2ce8b3fe6b0aa840544eba6ae8",
+      "fragment_ids": [
+        "M043",
+        "M044",
+        "M292",
+        "M293",
+        "M294",
+        "M295",
+        "M296",
+        "M297",
+        "M298",
+        "M299",
+        "M300",
+        "M301",
+        "M302",
+        "M303",
+        "M304",
+        "M305",
+        "M306",
+        "M307",
+        "M308",
+        "M309",
+        "M310",
+        "M311",
+        "M312",
+        "M313",
+        "M314",
+        "M315",
+        "M316",
+        "M317",
+        "M318",
+        "M319",
+        "M320",
+        "M321",
+        "M322",
+        "M323",
+        "M324",
+        "M325",
+        "M326"
+      ]
+    },
+    {
+      "path": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "before_sha256": "ff95eff79c61ca7db0833541d9f3c05891432d073cb232c40fd93ab64a5d96d7",
+      "after_sha256": "80cbd821697a3be275f54ce69dd83df4e4bcc6fcbb36989ab50f280d0da708c9",
+      "fragment_ids": [
+        "M045",
+        "M046",
+        "M047",
+        "M048",
+        "M049",
+        "M050",
+        "M051",
+        "M327",
+        "M328",
+        "M329",
+        "M330",
+        "M331",
+        "M332",
+        "M333",
+        "M334",
+        "M335",
+        "M336",
+        "M337",
+        "M338",
+        "M339",
+        "M340",
+        "M341",
+        "M342",
+        "M343",
+        "M344",
+        "M345",
+        "M346",
+        "M347",
+        "M348",
+        "M349",
+        "M350",
+        "M351",
+        "M352",
+        "M353",
+        "M354",
+        "M355",
+        "M356",
+        "M357",
+        "M358",
+        "M359",
+        "M360",
+        "M361",
+        "M362",
+        "M363",
+        "M364",
+        "M365",
+        "M366",
+        "M367",
+        "M368",
+        "M369",
+        "M370",
+        "M371",
+        "M372",
+        "M373",
+        "M374",
+        "M375",
+        "M376",
+        "M377",
+        "M378",
+        "M379",
+        "M380",
+        "M381",
+        "M382",
+        "M383",
+        "M384",
+        "M385",
+        "M386",
+        "M387",
+        "M388",
+        "M389",
+        "M390",
+        "M391",
+        "M392",
+        "M393",
+        "M394",
+        "M395",
+        "M396",
+        "M397",
+        "M398",
+        "M399",
+        "M400",
+        "M401",
+        "M402",
+        "M403",
+        "M404",
+        "M405",
+        "M406",
+        "M407",
+        "M408",
+        "M409",
+        "M410",
+        "M411",
+        "M412",
+        "M413",
+        "M414",
+        "M415",
+        "M416",
+        "M417"
+      ]
+    },
+    {
+      "path": "docs/specs/120-upload-llm-extraction-quality/state-review-convergence-20261020.md",
+      "before_sha256": "b6e15710a1dbad1d5258462920eee66f1f3e029ef93aa4124d6e4ed219c1e773",
+      "after_sha256": "748aa99a70a32fe2c4eb12625898bf51d8fac08e964110e7aee88d3e964e6a06",
+      "fragment_ids": [
+        "M052",
+        "M053"
+      ]
+    },
+    {
+      "path": "docs/specs/120-upload-llm-extraction-quality/tasks.md",
+      "before_sha256": "fb176518079978a6557049dc50c6c129610630abfecc4bdb016229a4955dd330",
+      "after_sha256": "4842211d42706e2f35f962ac6027d789e27d2f87018c6a13b613533761378582",
+      "fragment_ids": [
+        "M054"
+      ]
+    },
+    {
+      "path": "docs/specs/137-phonon-spectra-digitization/spec.md",
+      "before_sha256": "7968afc8f93df282654ded44f63dbfc31d64253a5a2b7903cbdc114c934d64a3",
+      "after_sha256": "eb8d59298e8cb6f00e30b015ace2dd11eeeeaf38c3f14c3dbbf70fdacf40d1fb",
+      "fragment_ids": [
+        "M055",
+        "M056"
+      ]
+    },
+    {
+      "path": "docs/specs/139-table-parameters-shared-methods/association-recheck-validation.md",
+      "before_sha256": "b4b4cb8578ae68981f6f74ea576b09894b1c9ac552a842b6dcc1f98ebc3a4dcc",
+      "after_sha256": "ea052b9532c99934e70d7a8bae7fb90cb9aa6c8e9db3d29f51e2100f5e539c2e",
+      "fragment_ids": [
+        "M057"
+      ]
+    },
+    {
+      "path": "docs/specs/139-table-parameters-shared-methods/association-recheck.md",
+      "before_sha256": "4ef3c9e8cc3c9a7e728caa29c81ccbd51add2d8c66b0896ef723931c2593fa32",
+      "after_sha256": "54af40416bc4dedada37fc134928c5f002457478c169c2546d7bde3e8e87b258",
+      "fragment_ids": [
+        "M058",
+        "M059",
+        "M060"
+      ]
+    },
+    {
+      "path": "docs/specs/139-table-parameters-shared-methods/condition-auto-review.md",
+      "before_sha256": "6f44cf2e7a656be03dbb44034f38cb87378f22026b62ba7c05c421c54075149d",
+      "after_sha256": "07e68ee5789fd432b9580845babb14aeb5bf81c73aa26775aff7d8bbfcc1bc17",
+      "fragment_ids": [
+        "M061"
+      ]
+    },
+    {
+      "path": "docs/specs/141-upload-expand-collapse-all/spec.md",
+      "before_sha256": "1423fb7598dc5adfa0de7b45dd0c1856291a16e7844074ab849670c4c1a245fa",
+      "after_sha256": "fa1013ba0c697ad5dc5a490689f8215dd47ca44739cc9f4289b041f8be8f1381",
+      "fragment_ids": [
+        "M062",
+        "M063",
+        "M064"
+      ]
+    },
+    {
+      "path": "docs/specs/141-upload-expand-collapse-all/validation.md",
+      "before_sha256": "8d0a3117b1f60d51c5c7d2df85222bf05108a371516848e85d24b87d0fb8d139",
+      "after_sha256": "7693f267b256b0080778c31168e6931291ca63a3c5ff32a2c6bc0f781d2c053c",
+      "fragment_ids": [
+        "M065"
+      ]
+    },
+    {
+      "path": "docs/specs/144-review-save-lifecycle/checklists/requirements.md",
+      "before_sha256": "d2c3b9d98a11ca8780f6d1be2742971d7603f355791c21492278f00c2ce349cf",
+      "after_sha256": "06ce69f20010820f5c3ee075ff11479e1e0467f3b7b2ff7f683f36464e9f89a5",
+      "fragment_ids": [
+        "M066"
+      ]
+    },
+    {
+      "path": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "before_sha256": "6d8e261a577ab22afd8b2b07e86659056e4ad9866359eb3136b1dc5d4eea1806",
+      "after_sha256": "8e094ab117e32c649e4116da86077284f313d74f6543cde36b456a2f7d2ed187",
+      "fragment_ids": [
+        "M067",
+        "M068",
+        "M069",
+        "M070",
+        "M418",
+        "M419",
+        "M420",
+        "M421",
+        "M422",
+        "M423",
+        "M424",
+        "M425",
+        "M426",
+        "M427",
+        "M428"
+      ]
+    },
+    {
+      "path": "docs/specs/144-review-save-lifecycle/plan.md",
+      "before_sha256": "754e60f5f3d24ea71823a92331e8bcfa5d53d65fa267d629419888fa6f5e6814",
+      "after_sha256": "18dd2ead2ce344544a72a6e812d8590e94f7624764113c68abc50c9f91601a37",
+      "fragment_ids": [
+        "M071"
+      ]
+    },
+    {
+      "path": "docs/specs/144-review-save-lifecycle/research.md",
+      "before_sha256": "a8b14de19da2e8852fe6c05d947881b937f4138a832f9cb4eb099ffb0de71d7c",
+      "after_sha256": "c97a4c8547ce739264458a025103f1f6e6566055335ed0fcea4e0c3378cebc6e",
+      "fragment_ids": [
+        "M072"
+      ]
+    },
+    {
+      "path": "docs/specs/144-review-save-lifecycle/spec.md",
+      "before_sha256": "56bf843553cf053a15b56aa93083f385c10d9ef83433096fcb1333178d82cd5c",
+      "after_sha256": "fb9ca8f5d558f4bbad2b27c3187081189dfa71922ed58e35b54ae01a367b20a3",
+      "fragment_ids": [
+        "M073",
+        "M074",
+        "M075",
+        "M076",
+        "M077",
+        "M078",
+        "M079",
+        "M080",
+        "M081"
+      ]
+    },
+    {
+      "path": "docs/specs/145-field-review-efficiency/audit.md",
+      "before_sha256": "90922028675947c9d1ceb131d1866110edbde2771daa41b3074ce13349ac80a9",
+      "after_sha256": "f38cd99130c903973aba010a61dd9069dc8d555abdbca34240361ef5ccee0307",
+      "fragment_ids": [
+        "M082",
+        "M083"
+      ]
+    },
+    {
+      "path": "docs/specs/145-field-review-efficiency/checklists/requirements.md",
+      "before_sha256": "66d33290b44f78d6b72b176522c4b98380b21d836f6b37db1b9bdd91e1682b4f",
+      "after_sha256": "3f5a7ca9adc1dea4b1791e0485d1f685151e5e4af8fb75608809b55e0881425b",
+      "fragment_ids": [
+        "M084"
+      ]
+    },
+    {
+      "path": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "before_sha256": "76ba5fd91f112486cf91fba3dd798633f73129a8f30bf76e9f0c6555975094be",
+      "after_sha256": "7821660e24ba569216c8adbe345e97a28545599ce70c986ec80a2e3b165b9638",
+      "fragment_ids": [
+        "M085",
+        "M086",
+        "M087",
+        "M088",
+        "M089",
+        "M090",
+        "M091",
+        "M092",
+        "M093",
+        "M429"
+      ]
+    },
+    {
+      "path": "docs/specs/145-field-review-efficiency/spec.md",
+      "before_sha256": "4373551171b687825805fe28db4b1b2f398a3aebd78ad87366740cb31026f852",
+      "after_sha256": "b75ed4b7c24b36339a360cbc7057743811581489ebc18be2bf5f1d98e19b61d6",
+      "fragment_ids": [
+        "M094",
+        "M095",
+        "M096",
+        "M097"
+      ]
+    },
+    {
+      "path": "docs/specs/145-field-review-efficiency/validation.md",
+      "before_sha256": "fd62ee8c51720af3413eedb9f32e2b26ed26c25b88049647b649d96816d62d21",
+      "after_sha256": "760bfc4b8769523f308e57f8948314450ca2b06ecea6dd8e2b8e52f5383d4021",
+      "fragment_ids": [
+        "M098",
+        "M430"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/2026-10-29-flow-and-review-diagnosis.md",
+      "before_sha256": "6f79c050ce36451e1ee539738bcc5671276acfb0388ce59c8a0ed034ee3b3fca",
+      "after_sha256": "cd70549862ff6eec336dc2dfc6005801d2bde25e51bfd4f0c756f5cb728ac80f",
+      "fragment_ids": [
+        "M099",
+        "M100"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "before_sha256": "a3a68342cd22da8792d57490c4e5458fc0b6aaafeea93cd673d1e8e38c4d6851",
+      "after_sha256": "f096700f3055702408702031735244f422f52d48c9e8bbda762290755fc372c2",
+      "fragment_ids": [
+        "M101",
+        "M102",
+        "M103",
+        "M104",
+        "M105",
+        "M106",
+        "M107",
+        "M108",
+        "M109",
+        "M110",
+        "M431",
+        "M432",
+        "M433",
+        "M434",
+        "M435",
+        "M436",
+        "M437",
+        "M438",
+        "M439",
+        "M440"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/approval-submit-consistency.md",
+      "before_sha256": "f47bb3f2c5e355e84e36b5d892175e58273f704db31d141f2eb6b700edd7eeee",
+      "after_sha256": "2aae77e359cb5dd4911eebcde9fee7a11560c1e1c7f0c63507a28c2088c0e9e2",
+      "fragment_ids": [
+        "M111",
+        "M112"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/contracts/review.md",
+      "before_sha256": "c3b3c348b921d0fa3221579533b1c1bc191452d10265832e4f3b9790f04a7b7c",
+      "after_sha256": "7ee8ddf556f91d886195fd2b634de300fb3b257970fc8a0a21291a9fd6c399ce",
+      "fragment_ids": [
+        "M113",
+        "M114"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/new-state-review.md",
+      "before_sha256": "f00012497f4a3538b6d37c9b1f2d7e9128fafc976a1cd14ae3f7cb5a5159b09e",
+      "after_sha256": "19346e1b33d2025015063572ee8a2d91c8aa47d450bafed1dee770181e616634",
+      "fragment_ids": [
+        "M115",
+        "M116"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/plan.md",
+      "before_sha256": "d36f228dfa0e4fb5a6989eabd057f41c335bb4efd00af555d2a54d65647cb89f",
+      "after_sha256": "8eab9390bdc6db9cf2673abbff66b0095c083e6feac25f346baa8578beda194e",
+      "fragment_ids": [
+        "M117",
+        "M118"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/quickstart.md",
+      "before_sha256": "1d7c88f8b2809cb3f1ba6ed98af1e37001d4fcf23e5bb50c7b7ceb77cfa32a88",
+      "after_sha256": "dae372e69c64ca8f0db5029690774dc19278e89234b8e812205b569743140d07",
+      "fragment_ids": [
+        "M119",
+        "M120"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/research.md",
+      "before_sha256": "9102da66e31994be8b89f7eb3c261aede0c65769fd9eab8db138ccefc886e1ef",
+      "after_sha256": "28293b0623c1b04c4391b45701b599d39138ece9bba3772bda7178c8789f8c07",
+      "fragment_ids": [
+        "M121",
+        "M122"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "before_sha256": "be39f2236086ce0e298f1e5a57cedd7ad38c93dd1758aa33dbf439104276092f",
+      "after_sha256": "c714b6c1b5675bef26fe81b8e8dc44f2a17179bd18f93c62a889a728f457875b",
+      "fragment_ids": [
+        "M123",
+        "M124",
+        "M125",
+        "M126",
+        "M127",
+        "M128",
+        "M129",
+        "M130",
+        "M131"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/spec.md",
+      "before_sha256": "0b059c4d268c2ea518a705dc56013ffce13d104afe2ee1a6f4ac7ee1429e3887",
+      "after_sha256": "efa56b2448b6f31a97c988b36f28334f10b0e58d886e983e103031a4c2cb366e",
+      "fragment_ids": [
+        "M132",
+        "M133",
+        "M134",
+        "M135",
+        "M136",
+        "M137",
+        "M138",
+        "M139",
+        "M140",
+        "M141",
+        "M142",
+        "M143",
+        "M144",
+        "M145",
+        "M146",
+        "M147",
+        "M441",
+        "M442",
+        "M443"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/sscha-state-review-fix.md",
+      "before_sha256": "7373ed40a290bbda0c1cc9faf3c5f85de442484c4805dd6eb78609ea0baae7ef",
+      "after_sha256": "0cec25af0f786f9f89152f5f8fa193891103780221d754eb50bac7f35f573149",
+      "fragment_ids": [
+        "M148"
+      ]
+    },
+    {
+      "path": "docs/specs/147-two-stage-field-review/tasks.md",
+      "before_sha256": "a561c2664edff0f5c181e7c3b1d3c5bc77ee0cb85b0244cc8a3a65a359209423",
+      "after_sha256": "375199abaae309f965553c1ffb9309eb8262f7dfde1f2f6e0e45e7e97a6b272e",
+      "fragment_ids": [
+        "M149",
+        "M150",
+        "M151"
+      ]
+    },
+    {
+      "path": "docs/specs/148-sidebar-field-editing/validation.md",
+      "before_sha256": "dca0b48394409a7a3f273dd64b16854eb15d48f712e78f41f5dd2af14840f1c2",
+      "after_sha256": "46cfaa997a0faae724cc420f4600234f5fc13d438e67696a78b1d84ee93096cb",
+      "fragment_ids": [
+        "M152"
+      ]
+    },
+    {
+      "path": "docs/specs/176-scientific-form-filling/full-reparse-20261102.md",
+      "before_sha256": "2d83415042ece539d0bfaf2968b66886b22d424abdff41060d4de7e49c911ab3",
+      "after_sha256": "980c86b9359d3d36eabe277d96ad2146f92f62f68b7bcf39079096c8fab41091",
+      "fragment_ids": [
+        "M153"
+      ]
+    },
+    {
+      "path": "docs/specs/191-field-sidebar-status/spec.md",
+      "before_sha256": "7f345f761653125c9c677dba69a1171a402089b0166094fefe2d76b9fa65f3ff",
+      "after_sha256": "50df55971b4a00b125372d230cc367762ec1132c1fd13a23b47525be346de84d",
+      "fragment_ids": [
+        "M154"
+      ]
+    },
+    {
+      "path": "docs/specs/199-basic-field-model-review/assets/investigation/goal-4.md",
+      "before_sha256": "8a66d4153693e098faa63fe10384dfa6e79eb58bc67c4de00145825140a7b070",
+      "after_sha256": "b6921475c782cf88e54825ae1748b4af3993cbf4590f1888e0669799f371bed7",
+      "fragment_ids": [
+        "M155",
+        "M156"
+      ]
+    },
+    {
+      "path": "docs/specs/200-field-color-only/assets/investigation/goal-5.md",
+      "before_sha256": "c46f4aab96fa96d730f586ee3d1c1c41f5122fa8619aa90fa204227062ea58a6",
+      "after_sha256": "701c8623fdee66e336f6ad1b37b8d7d668b3b7516193a028f6464d723d1558ee",
+      "fragment_ids": [
+        "M157",
+        "M158"
+      ]
+    },
+    {
+      "path": "docs/specs/200-field-color-only/contracts/behavior.md",
+      "before_sha256": "92032712140da3aff972350669ff00abb2dc451599de69963a59c072cb95da3d",
+      "after_sha256": "ea9c933c9c41784d76314e8046cf919bbc4b6264ab4ced08eef4eda38d884219",
+      "fragment_ids": [
+        "M159"
+      ]
+    },
+    {
+      "path": "docs/specs/200-field-color-only/plan.md",
+      "before_sha256": "569a5f6fc13b7a8fc2eb011f28fed6e1947eae3c2e62de960f84e01422de8217",
+      "after_sha256": "6dd20b429317d5ec1f70e0dda4bad886824bd4fd2690e68e399a40b66072b63a",
+      "fragment_ids": [
+        "M160"
+      ]
+    },
+    {
+      "path": "docs/specs/200-field-color-only/spec.md",
+      "before_sha256": "c293ebfe45d6cc3c57a011524499e8e7dd900abdd1680aac813d2b4227c7a6e3",
+      "after_sha256": "5c66f2baf733ade3c4237b508cd09a12f842a505cb6cd25bd03811683e2c51be",
+      "fragment_ids": [
+        "M161"
+      ]
+    },
+    {
+      "path": "docs/specs/201-field-sidebar-ownership/plan.md",
+      "before_sha256": "f92027422fd65bf8d9da59a3619e9f08ac39b25f67f9a8993e58e4d45994c2bb",
+      "after_sha256": "b4252af762fc168c4171388d38eafeea80d133a43f723300c9ce040369571e39",
+      "fragment_ids": [
+        "M162"
+      ]
+    },
+    {
+      "path": "docs/specs/201-field-sidebar-ownership/quickstart.md",
+      "before_sha256": "f2a2cf87b6020bc0484e57364b02d5c3c041a90e0e207eb0b9bedecba8966600",
+      "after_sha256": "e6ba13c5249f24d83468a85ed047040b5d972310af3aad073266badb2680a39e",
+      "fragment_ids": [
+        "M163"
+      ]
+    },
+    {
+      "path": "docs/specs/201-field-sidebar-ownership/spec.md",
+      "before_sha256": "73888668948904cd61c5bb9d0eac254aa58b2bac5a39bf2a74ed826c7ddc785f",
+      "after_sha256": "f1b128cba29426c2d1bd522ae71e57500982b083a1c563c4a15e15a0eab43f46",
+      "fragment_ids": [
+        "M164",
+        "M165",
+        "M166",
+        "M167",
+        "M168"
+      ]
+    },
+    {
+      "path": "docs/specs/201-field-sidebar-ownership/tasks.md",
+      "before_sha256": "db1758716bb916cf0015028a505f7ea77a7a41db7c66b6af1bdf7a246fb52a87",
+      "after_sha256": "17dbe7fb7c22fbe1c27eaa5ef2d513e40ce92c58b5f7d43ad9ce140f9325e28e",
+      "fragment_ids": [
+        "M169",
+        "M170"
+      ]
+    },
+    {
+      "path": "docs/specs/201-field-sidebar-ownership/validation.md",
+      "before_sha256": "a4c0e809acb66e46a689680f52aaa7159d35c0139a47e8cd3850d8e9bedff7dc",
+      "after_sha256": "742535d952843881fac5ee8d07057cfa5bfc18a1b11aa12ea098a8c33ef4c675",
+      "fragment_ids": [
+        "M171",
+        "M172"
+      ]
+    },
+    {
+      "path": "docs/specs/208-cah6-parse-regression/plan.md",
+      "before_sha256": "112fe50afa6c5f54f3db6461e427aca41bf345f78bbd2ebc4a4d8ab849ea9bfe",
+      "after_sha256": "38fd7d3c75ac107dcccde8e78f1158c1abac18960c5c50f4040fc2cd59e32461",
+      "fragment_ids": [
+        "M173"
+      ]
+    },
+    {
+      "path": "docs/specs/208-cah6-parse-regression/quickstart.md",
+      "before_sha256": "e2c3867e8b3147c118191f1a413f3a3f4675c4c593c12b286e4b0f1e51761c33",
+      "after_sha256": "0d0bc2995b68794d7938f3cce266bd93a08b1cd71b9f6de4951dcf42aa77dcb1",
+      "fragment_ids": [
+        "M174"
+      ]
+    },
+    {
+      "path": "docs/specs/208-cah6-parse-regression/research.md",
+      "before_sha256": "66a7b1e33b7a92696ca9363d036972e5890217f0452e23e853278d6dd44acdcc",
+      "after_sha256": "ddb64b1d026553542ff0b0c4f102ca7850641115662ba14b332c76ae3feca1de",
+      "fragment_ids": [
+        "M175",
+        "M176"
+      ]
+    },
+    {
+      "path": "docs/specs/208-cah6-parse-regression/spec.md",
+      "before_sha256": "b2eeb1012e4068f5ac72ae3d47c31dc97f0da266b9ab9130bf6459cd8f857e1f",
+      "after_sha256": "6977971d019fcc72c4b9eece9879ab7b6745a95a0483550669a7b1fb521a9873",
+      "fragment_ids": [
+        "M177",
+        "M178",
+        "M179",
+        "M180",
+        "M181"
+      ]
+    },
+    {
+      "path": "docs/specs/208-cah6-parse-regression/tasks.md",
+      "before_sha256": "c52434b3978d0820f734da2cba8717f3cc115751077ce72e6f3ae956cfe6fd22",
+      "after_sha256": "8a9ffb13bc83ab74dc8594de892e8260f5bdf96229e8536866fe5d982646fc59",
+      "fragment_ids": [
+        "M182"
+      ]
+    },
+    {
+      "path": "docs/specs/208-cah6-parse-regression/validation.md",
+      "before_sha256": "7eb96b60c969674425936de5d6366f2c0d00b7e114b5291b13e14118941303f7",
+      "after_sha256": "edc5b30feb2df7b65e5c457c42c90304faeeee350eb3fd777d751bdeb3a7ba09",
+      "fragment_ids": [
+        "M183",
+        "M184"
+      ]
+    },
+    {
+      "path": "docs/specs/209-return-field-evidence/spec.md",
+      "before_sha256": "1693b88c57a667467590e5d70358615cd94789d650db4dfd8c6241c1557374e0",
+      "after_sha256": "80f5ae0cad6f4e7c98d6be1a0f62dc66e5901bde653527e51a08feb9d08e541d",
+      "fragment_ids": [
+        "M185",
+        "M186"
+      ]
+    },
+    {
+      "path": "docs/specs/211-state-first-spectra/spec.md",
+      "before_sha256": "f41143bcb42012736771646e411cd26eb454fee8fbc0bedbd4f3f3382cb334ee",
+      "after_sha256": "a82c5d70d25fba18eef136540960945bde0ac4ea4e130fe3b924c800439a91b8",
+      "fragment_ids": [
+        "M187",
+        "M188"
+      ]
+    },
+    {
+      "path": "docs/specs/211-state-first-spectra/validation.md",
+      "before_sha256": "74f3651cae01b821e10be416b08c8e38201bc8cc453396e32dc0072e40302924",
+      "after_sha256": "08060f3e5165398b12eed77eb0e001ebbb29d1f07fdde6e24c0761ecd6aaa690",
+      "fragment_ids": [
+        "M189"
+      ]
+    },
+    {
+      "path": "docs/specs/213-review-workspace-navigation/spec.md",
+      "before_sha256": "2e982aed6d3eabc4cd0343707fbb37a47587dd92e3bf27df179d609f1573d8e2",
+      "after_sha256": "bd1657a2c37891c3b8beb7ffe2f4738799fefd5fead719e26b1dbb90205098d3",
+      "fragment_ids": [
+        "M190"
+      ]
+    },
+    {
+      "path": "docs/specs/219-material-state-outline/spec.md",
+      "before_sha256": "0f5eff0efa28b426f1803c72aa4ef42405e74f3bd1c2835c680584263dd79ed0",
+      "after_sha256": "6e99c6bd1bfab5199904485f5aaacaedb0343ccaa51a518e3c2c7c1bc8a92afa",
+      "fragment_ids": [
+        "M191"
+      ]
+    },
+    {
+      "path": "docs/specs/49-pdf-crystal-structure-extraction/state-review-convergence-20261020.md",
+      "before_sha256": "3a7e018e97ba9d4c665221635430087ebd0860cdc74ac2e7c8ba07c82eb14883",
+      "after_sha256": "8f43716e221da127e4bcba31768f9ea55ffd261dfc0aeb884b9c1432a31f5e47",
+      "fragment_ids": [
+        "M192",
+        "M193"
+      ]
+    },
+    {
+      "path": "docs/specs/58-submit-failure-diagnostics/plan.md",
+      "before_sha256": "9b50f9d430256ea15261a8269562bfee2ab1c3740a1bd835f2d5cde7bac03c18",
+      "after_sha256": "77bf6638fefe92614a79776eb265266d8a001433e2ba9582aae75c9cb7557aa6",
+      "fragment_ids": [
+        "M194"
+      ]
+    },
+    {
+      "path": "docs/specs/58-submit-failure-diagnostics/spec.md",
+      "before_sha256": "7238b8330708a8dbc54dce6fcef4ee8ca58fe21e34b385b34fcaadd6d02f4369",
+      "after_sha256": "5cc41660e9ab206bce0984d6133e3a34252e07e35ea6580092193d0f9420360a",
+      "fragment_ids": [
+        "M195",
+        "M196"
+      ]
+    },
+    {
+      "path": "docs/specs/58-submit-failure-diagnostics/tasks.md",
+      "before_sha256": "2b3518055fecc4b3030faedfde82d1bff43029e2a3cf7113f1c129bcd9c47633",
+      "after_sha256": "9bae99eafd06e4da2f9d1647d9d84a93dc074615dc1fbccaf5d5c364a1d4ed41",
+      "fragment_ids": [
+        "M197",
+        "M198"
+      ]
+    },
+    {
+      "path": "docs/specs/87-review-workspace/checklists/requirements.md",
+      "before_sha256": "543840ef8d12bbeab0a0b0cef19e643c0e2048d7b27579ce221b196699100ce3",
+      "after_sha256": "96bca0378c8ec2861a3efdfa740ac6872581536d824a6b612672ba0b16263857",
+      "fragment_ids": [
+        "M199"
+      ]
+    },
+    {
+      "path": "docs/specs/87-review-workspace/quickstart.md",
+      "before_sha256": "dfc97b9c03939730dfba5e681432d2e2b7feb7482a99f896af075f5580d127dd",
+      "after_sha256": "2baed0c4bbb6d1e4dfad1864db6b83bb2374bfb190bba0f94a6f328506438add",
+      "fragment_ids": [
+        "M200"
+      ]
+    },
+    {
+      "path": "docs/specs/87-review-workspace/spec.md",
+      "before_sha256": "bc57763e434ac30c55d40d94e826ac946515556e6c5db26ce08aca18af7aaf10",
+      "after_sha256": "3eda70cd7c60c970644961801d6adade230009e9802aa485618261eb240bf233",
+      "fragment_ids": [
+        "M201",
+        "M202",
+        "M203",
+        "M204"
+      ]
+    },
+    {
+      "path": "docs/specs/87-review-workspace/tasks.md",
+      "before_sha256": "3a09250462932c72cbfa63eba0e9f0fcef314113a9b8c4a75d2052ad067cd5c4",
+      "after_sha256": "fb9cf259bcb4c4dea292ec773257477bb17b42c1b6bc75991f06a63e85f34705",
+      "fragment_ids": [
+        "M205",
+        "M206"
+      ]
+    },
+    {
+      "path": "docs/specs/94-property-record-editor/contracts/record-form.md",
+      "before_sha256": "d65642b2edd6df152efc919aa23612c22d5cb627ca97d6f49124faadd4273802",
+      "after_sha256": "3aa974305ff76ef40d395724d9008d4100beb910d34badd397847780498e9b06",
+      "fragment_ids": [
+        "M207"
+      ]
+    },
+    {
+      "path": "docs/specs/94-property-record-editor/module-add-bottom-demo.md",
+      "before_sha256": "075392cb971f0bc81e07d069348981ba2cb6beb750e80bfb333345b31abcb8ae",
+      "after_sha256": "73ae88c20a4e3385e98ddee9fa968d0aa9558e7098447d3058dbfc770790f3e2",
+      "fragment_ids": [
+        "M208"
+      ]
+    },
+    {
+      "path": "docs/specs/94-property-record-editor/spec.md",
+      "before_sha256": "bdc6c6272dd1512df1e5a58f3898c32af0d426556885d8010ae08ed4a1f74a87",
+      "after_sha256": "63cc3484fc87b8248528535f269065832a6214096668ac68cbaa804748bee935",
+      "fragment_ids": [
+        "M209",
+        "M210"
+      ]
+    },
+    {
+      "path": "docs/specs/94-property-record-editor/structure-collapse-demo.md",
+      "before_sha256": "ba911d9e3ad1c095c0d7a43046547614803041427ac9365902784463d3570550",
+      "after_sha256": "6a34f625f4486001e46705f686a30f1cae901e2cd75d1e39ee84d98c4db0d28d",
+      "fragment_ids": [
+        "M211"
+      ]
+    },
+    {
+      "path": "docs/specs/97-property-definition-switch-cleanup/contracts/submit-errors.md",
+      "before_sha256": "3fad6f6b8e311f83f2e7b1e79793e7f5efc818749c666c8b807769e0ddf82dbc",
+      "after_sha256": "3851523430310bfe7e1a1e1172be59d643bbc5cf9355b79f413801514b44bb28",
+      "fragment_ids": [
+        "M212"
+      ]
+    },
+    {
+      "path": "docs/specs/103-property-evidence-review/research.md",
+      "before_sha256": "b64547c93c2b42d3f5b417054eefb25a5dac67d06b81f700d95b19d484ee48c9",
+      "after_sha256": "0829bd067acfda7d3889882f984d6aaf21f9f7f33013a65d3333c155767ff1ef",
+      "fragment_ids": [
+        "M481"
+      ]
+    }
+  ],
+  "issues": [
+    {
+      "number": 219,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "54fd196d88797ed6ac808816adbe2577459a4c962f015e23df744abba8a05b32",
+      "after_sha256": "4d8adf217a870fd5f5900a856aba100f612a5f65c12a9b44e2c7940ead361bcf",
+      "fragment_ids": [
+        "M213"
+      ]
+    },
+    {
+      "number": 211,
+      "state": "OPEN",
+      "labels": [
+        "type:bug"
+      ],
+      "before_sha256": "37c091e440e535a0e48e5687d2008e37fe54972f03c2e938ef6d0de55822477f",
+      "after_sha256": "5e4079be8932f3c4d05e7f8dc913f24935a30df12a446245c4bf35beaa6362c9",
+      "fragment_ids": [
+        "M214"
+      ]
+    },
+    {
+      "number": 209,
+      "state": "OPEN",
+      "labels": [
+        "type:bug"
+      ],
+      "before_sha256": "284f0aa46d830e338d434b2392a1f635c00a668b24e9995b91c6fbbd8339dde9",
+      "after_sha256": "f628ac3bfed0ceb1a9789c6715037668c4c9eac19f778c9aed5c49d2fa3d3a96",
+      "fragment_ids": [
+        "M215"
+      ]
+    },
+    {
+      "number": 208,
+      "state": "OPEN",
+      "labels": [
+        "type:bug"
+      ],
+      "before_sha256": "7eaebba92ddcbaf7d5fa18c32894612025f4f0c9f022bba0c798bd4d42a5fd68",
+      "after_sha256": "a13ecf52d274735cf82ba6a0e4c3b1fc2e06589bd5998cd070a6eb7777764694",
+      "fragment_ids": [
+        "M216"
+      ]
+    },
+    {
+      "number": 201,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "c1d78963c1a7a06e5bad6fc8e98cf22737fc01d39bad5a0cf8a10ca339cd01df",
+      "after_sha256": "bface26204d684c76fe4e837946f12ce1f6ca66354384848f8ac0d0c5131857a",
+      "fragment_ids": [
+        "M217",
+        "M218",
+        "M219"
+      ]
+    },
+    {
+      "number": 200,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "a2299fc62ec3f6317c401c05b9faa5a6d40ebec0ca186a1c71a303d20e054636",
+      "after_sha256": "6056ef6209f26e124e8279d05ff28668ca1a914640f06822b92ba86d259aa957",
+      "fragment_ids": [
+        "M220",
+        "M221",
+        "M222"
+      ]
+    },
+    {
+      "number": 147,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "ae0c727f8355e7ae975c43cfccbf26798ff0317121cfea090f854b04a95c997a",
+      "after_sha256": "00ecb1d28d57c6e5fc16f79bd40fa1af3b845641be910bfc8bc928d20e93c146",
+      "fragment_ids": [
+        "M223",
+        "M224",
+        "M225",
+        "M226",
+        "M227",
+        "M228",
+        "M229",
+        "M230",
+        "M231",
+        "M232",
+        "M233",
+        "M234",
+        "M235",
+        "M236",
+        "M237",
+        "M238",
+        "M239",
+        "M240",
+        "M241",
+        "M242",
+        "M243",
+        "M244",
+        "M444",
+        "M445",
+        "M446",
+        "M447",
+        "M448",
+        "M449",
+        "M450",
+        "M451",
+        "M452",
+        "M453",
+        "M454",
+        "M455",
+        "M456"
+      ]
+    },
+    {
+      "number": 145,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "d933f33a6da0ce8320cd1610df77683e7ec6794cfb2494afc9c48038597f7618",
+      "after_sha256": "da6d12de7781964a9fbe1e9a58473f16e3a080d3a0cf045df795cf5d739b80a2",
+      "fragment_ids": [
+        "M245",
+        "M246",
+        "M247",
+        "M248",
+        "M457"
+      ]
+    },
+    {
+      "number": 144,
+      "state": "OPEN",
+      "labels": [
+        "type:bug"
+      ],
+      "before_sha256": "c327308ad91b96a34be4375b2a1d14c679352cf08f8c0f98f600f603f15fed37",
+      "after_sha256": "585af06c8e41a15cc01fe2e0344e9712b883e5c9b61af89b70e2d11bd055366e",
+      "fragment_ids": [
+        "M249",
+        "M250",
+        "M251",
+        "M252",
+        "M253",
+        "M254",
+        "M255",
+        "M458",
+        "M459"
+      ]
+    },
+    {
+      "number": 141,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "2bfdfed24e8bfdbbe608a25436b8fe96fb576453722ef876845e10bbfc193f8e",
+      "after_sha256": "4c91db15b2337a3480bf200095bd1c81899eb2de229848708670e22a2c6aea67",
+      "fragment_ids": [
+        "M256",
+        "M257"
+      ]
+    },
+    {
+      "number": 139,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "e7d818b4889e96806070db2a6c6c73f4d5d5e39a64a1d6e4546bb891b3039413",
+      "after_sha256": "846bbf0fc65cb1ae52c7169c7d015b18a497ebd17a92d17299e88d7e206e48b8",
+      "fragment_ids": [
+        "M258",
+        "M259",
+        "M260",
+        "M261"
+      ]
+    },
+    {
+      "number": 120,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "bb43f29125621d2d9bf0cd4c9d6f74354c83482cd3c77e6ec8021316c3fca09c",
+      "after_sha256": "b8532e9e7ee69dc97d31ba941da1eacca79f4c3c54e4213b31ca13146ef66d82",
+      "fragment_ids": [
+        "M262",
+        "M263",
+        "M264",
+        "M265",
+        "M266",
+        "M267",
+        "M268"
+      ]
+    },
+    {
+      "number": 109,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "116074b3e4c14091151dbcfc05e31e850534a7fc95c87a4f3ac3a5761a2bc657",
+      "after_sha256": "7103375fb89dbc3e20c559a4c3862cdbd99637602961b82246dc12d32d34c3d7",
+      "fragment_ids": [
+        "M269",
+        "M270",
+        "M271",
+        "M272",
+        "M273",
+        "M274",
+        "M460",
+        "M461",
+        "M462",
+        "M463",
+        "M464",
+        "M465",
+        "M466",
+        "M467",
+        "M468",
+        "M469",
+        "M470",
+        "M471",
+        "M472",
+        "M473",
+        "M474",
+        "M475",
+        "M476",
+        "M477",
+        "M478",
+        "M479",
+        "M480"
+      ]
+    },
+    {
+      "number": 103,
+      "state": "CLOSED",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "adac3cc6a15bf34f452468dafb2cc17341238a96b53fab1cb7a6760f7ea55e3f",
+      "after_sha256": "c16697c3ff615dbdf2ddbba9a310d4c0a90dc2c5a09e2e719356db9781aa0d89",
+      "fragment_ids": [
+        "M275",
+        "M276"
+      ]
+    },
+    {
+      "number": 97,
+      "state": "CLOSED",
+      "labels": [
+        "type:bug"
+      ],
+      "before_sha256": "c04f5db61b048fd66e11881e7a910c95667248eb7a3d95818ca22d18497f1f5f",
+      "after_sha256": "a97d342144bea23fd02feda6fbb2f7bfdfe2f9789fbe2e757f1fe0efb21fee6f",
+      "fragment_ids": [
+        "M277"
+      ]
+    },
+    {
+      "number": 87,
+      "state": "CLOSED",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "e5140953f052db69f608e3edb740edb8b7aac9e54c4b4384dc6fa9e72aef6ec2",
+      "after_sha256": "2c5a63f95065d8465bd593c560594c8ed660013d059237808f7fc5040102377d",
+      "fragment_ids": [
+        "M278"
+      ]
+    },
+    {
+      "number": 58,
+      "state": "CLOSED",
+      "labels": [
+        "type:bug"
+      ],
+      "before_sha256": "734492ec5bf40f845941b8218442027447b3e5fa267e5f207a381530b93de1cc",
+      "after_sha256": "af4d67b2bdbd1d7437ba7cae40e1c535f57d9bdd0bd3e55c7db0e3ab36bfaf11",
+      "fragment_ids": [
+        "M279"
+      ]
+    },
+    {
+      "number": 49,
+      "state": "OPEN",
+      "labels": [
+        "type:feature"
+      ],
+      "before_sha256": "a896bb3a9f8f4c98062bf89fe31f3d9176c198122b700b2578906f0feb195bae",
+      "after_sha256": "c721dcc7ae71cf46f0638235aa606ea871c13a3bfa1ec5fda4ae71e06699cbd1",
+      "fragment_ids": [
+        "M280",
+        "M281"
+      ]
+    }
+  ],
+  "fragments": [
+    {
+      "source": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md",
+      "kind": "item",
+      "start_line": 193,
+      "sha256": "3ff9a87604f26b6d4e866b87aeaf5decbf5cbf3e2f0e2aff88d51fc755c2aff6",
+      "id": "M001",
+      "archive_char_start": 353,
+      "archive_char_length": 55
+    },
+    {
+      "source": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md",
+      "kind": "paragraph",
+      "start_line": 204,
+      "sha256": "c32b9f7c165ee038863f3ecd490468068d22f8a7be23a77630860b47590bb07e",
+      "id": "M002",
+      "archive_char_start": 615,
+      "archive_char_length": 415
+    },
+    {
+      "source": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md",
+      "kind": "paragraph",
+      "start_line": 364,
+      "sha256": "f89ae939cd803ec903a8b84136514fb2eed98a23701df0a87f519c408a718172",
+      "id": "M003",
+      "archive_char_start": 1237,
+      "archive_char_length": 323
+    },
+    {
+      "source": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md",
+      "kind": "paragraph",
+      "start_line": 393,
+      "sha256": "16320ffb0b8f841a32b5b4e02eda7ef2f728ea868cd64eab04b6e0e796e89653",
+      "id": "M004",
+      "archive_char_start": 1767,
+      "archive_char_length": 472
+    },
+    {
+      "source": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/source-association-review.md",
+      "kind": "paragraph",
+      "start_line": 7,
+      "sha256": "ebfb12a8f8d1d0a84b0107428d9b84eae99ddb833bd2069f649f5d057abee8b8",
+      "id": "M005",
+      "archive_char_start": 2449,
+      "archive_char_length": 170
+    },
+    {
+      "source": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/source-association-review.md",
+      "kind": "paragraph",
+      "start_line": 23,
+      "sha256": "ca7df5f6b09b05178a7c3cac23623d25fbbbcc5d64da6027b724055eae985d66",
+      "id": "M006",
+      "archive_char_start": 2830,
+      "archive_char_length": 65
+    },
+    {
+      "source": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/source-association-review.md",
+      "kind": "paragraph",
+      "start_line": 59,
+      "sha256": "5c383f234c5da5756f596b321d2fcfd255fa2b91a980dc40f2f99d4f82b9e0c4",
+      "id": "M007",
+      "archive_char_start": 3106,
+      "archive_char_length": 169
+    },
+    {
+      "source": "docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/upload-llm-workflow-and-agent-analysis.md",
+      "kind": "item",
+      "start_line": 45,
+      "sha256": "94897050da2678e5531a398cf1bf854847056eb964efd0245f2012e7f30e426c",
+      "id": "M008",
+      "archive_char_start": 3499,
+      "archive_char_length": 158
+    },
+    {
+      "source": "docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md",
+      "kind": "paragraph",
+      "start_line": 72,
+      "sha256": "bddddff7c1f8e7290f34f05b04d300089ece6cd0b085b530b2a74df0bac63db7",
+      "id": "M009",
+      "archive_char_start": 3864,
+      "archive_char_length": 431
+    },
+    {
+      "source": "docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md",
+      "kind": "paragraph",
+      "start_line": 229,
+      "sha256": "1582291c90d7ba688bb770bcf1c05a75f9ff5a6a9e5b14d30e105143e6049a46",
+      "id": "M010",
+      "archive_char_start": 4503,
+      "archive_char_length": 330
+    },
+    {
+      "source": "docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md",
+      "kind": "fence",
+      "start_line": 312,
+      "sha256": "93240e2dacce4a99698c9fa5e860a268c2583d14b908c780ed80eda09871f430",
+      "id": "M011",
+      "archive_char_start": 5041,
+      "archive_char_length": 513
+    },
+    {
+      "source": "docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md",
+      "kind": "fence",
+      "start_line": 332,
+      "sha256": "8ebd76260748614a540317c48b885641dc3dd2237b7bb94364f101f40a368dbc",
+      "id": "M012",
+      "archive_char_start": 5762,
+      "archive_char_length": 777
+    },
+    {
+      "source": "docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md",
+      "kind": "fence",
+      "start_line": 356,
+      "sha256": "1cab808da454b13bcd36b256e0dbe8f5400348dfce34aac65a08fdfd63eb31c2",
+      "id": "M013",
+      "archive_char_start": 6747,
+      "archive_char_length": 457
+    },
+    {
+      "source": "docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md",
+      "kind": "paragraph",
+      "start_line": 369,
+      "sha256": "bfdfa0d401bf152c85a7cf4a98dd852bc55a4e9fb5ceda06c43d596f27004d8d",
+      "id": "M014",
+      "archive_char_start": 7412,
+      "archive_char_length": 105
+    },
+    {
+      "source": "docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md",
+      "kind": "paragraph",
+      "start_line": 381,
+      "sha256": "e6aedc9b206ab62ca19a820306e549ebbe3bef00c8f06c89ebe1fddd9bf78dce",
+      "id": "M015",
+      "archive_char_start": 7725,
+      "archive_char_length": 242
+    },
+    {
+      "source": "docs/overview/README.md",
+      "kind": "paragraph",
+      "start_line": 77,
+      "sha256": "27058d7dcaa1f2ccc13aade1ec55cb3618c5609e397ed72f6f0a9661cd297691",
+      "id": "M016",
+      "archive_char_start": 8106,
+      "archive_char_length": 181
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/checklists/requirements.md",
+      "kind": "item",
+      "start_line": 13,
+      "sha256": "d5a34047b36020a92ecc4f91bf93b74f01003a1528679fba52b42d333361ec94",
+      "id": "M017",
+      "archive_char_start": 8469,
+      "archive_char_length": 40
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/checklists/requirements.md",
+      "kind": "item",
+      "start_line": 27,
+      "sha256": "5d185b0477dc0fe7d63ebac9ea5a7ba0f6e25bc6326125e504bd7490a75f8b66",
+      "id": "M018",
+      "archive_char_start": 8691,
+      "archive_char_length": 74
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "paragraph",
+      "start_line": 49,
+      "sha256": "3536e4bbc2191cac184796ed13e4a353a871417f0768b5cb34656765d8409009",
+      "id": "M019",
+      "archive_char_start": 8934,
+      "archive_char_length": 149
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "item",
+      "start_line": 100,
+      "sha256": "c608ebe6336e4e2daf71241e2ad9e0d30b43ee610b38ac4b5ec5c003e4623b04",
+      "id": "M020",
+      "archive_char_start": 9253,
+      "archive_char_length": 197
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/spec.md",
+      "kind": "item",
+      "start_line": 35,
+      "sha256": "773da509a0d47993939c45f0b709ff773432952a548d80e659581c7be175003d",
+      "id": "M021",
+      "archive_char_start": 9613,
+      "archive_char_length": 73
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/spec.md",
+      "kind": "item",
+      "start_line": 80,
+      "sha256": "5ad2f2f62e506181141f942c9f4bb81ede1a77d4d90aad0511e50c95cbd5ae2e",
+      "id": "M022",
+      "archive_char_start": 9849,
+      "archive_char_length": 90
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/spec.md",
+      "kind": "item",
+      "start_line": 89,
+      "sha256": "4d76c3f4dcfd66e71b914843fdab1b53c265f1d95e396cefdee10ff75951bcc7",
+      "id": "M023",
+      "archive_char_start": 10102,
+      "archive_char_length": 56
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/spec.md",
+      "kind": "item",
+      "start_line": 92,
+      "sha256": "60b4532adb999cc2e2084cc054596510bea49217af57f590312e948ff79534c3",
+      "id": "M024",
+      "archive_char_start": 10321,
+      "archive_char_length": 69
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/spec.md",
+      "kind": "paragraph",
+      "start_line": 120,
+      "sha256": "200801436865d806f5fb49177a9222b46c63d94c12c57f5ebb895a836c8aa4c6",
+      "id": "M025",
+      "archive_char_start": 10554,
+      "archive_char_length": 76
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/spec.md",
+      "kind": "item",
+      "start_line": 135,
+      "sha256": "84a8238f0e641b11ce81dffb6ea707e349c28ed4eb537fde003c7e8217e1f650",
+      "id": "M026",
+      "archive_char_start": 10794,
+      "archive_char_length": 65
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/tasks.md",
+      "kind": "paragraph",
+      "start_line": 135,
+      "sha256": "994d67f88da76afb06bb1ce3d500803dc001857729690fc5a6364d220ea17948",
+      "id": "M027",
+      "archive_char_start": 11024,
+      "archive_char_length": 35
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/assets/field-review-history-issue-draft.md",
+      "kind": "quote",
+      "start_line": 5,
+      "sha256": "66f1ab939e012ec9fa31b61ce2970a4773cf537807df5fc9d39276b8fa789743",
+      "id": "M028",
+      "archive_char_start": 11265,
+      "archive_char_length": 344
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/assets/field-review-history-issue-draft.md",
+      "kind": "paragraph",
+      "start_line": 12,
+      "sha256": "55a4ce3aee411f11935723c23b5d0c002054d4d47dae95985c52c87dee39983c",
+      "id": "M029",
+      "archive_char_start": 11816,
+      "archive_char_length": 168
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/field-review-history-demo.md",
+      "kind": "quote",
+      "start_line": 5,
+      "sha256": "81e2cce3dbccc63dee7ec693b968101b60632162694b6e459bd92e9272006034",
+      "id": "M030",
+      "archive_char_start": 12176,
+      "archive_char_length": 94
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/field-review-history-demo.md",
+      "kind": "item",
+      "start_line": 27,
+      "sha256": "b31b9f8dae370fac205ed74920136255e6987415fd293ea1995bca615ac6bb9c",
+      "id": "M031",
+      "archive_char_start": 12463,
+      "archive_char_length": 76
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/field-review-history-demo.md",
+      "kind": "item",
+      "start_line": 32,
+      "sha256": "84c99fea2b766fc379f8486ee2657cf05388f05d228bd97bcfbb5cb2e4804454",
+      "id": "M032",
+      "archive_char_start": 12732,
+      "archive_char_length": 89
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/field-review-history-demo.md",
+      "kind": "paragraph",
+      "start_line": 51,
+      "sha256": "6028a5cbf76a93bf79075c2cb51150c515198b4612c3ece7ee801ba1b378ef8b",
+      "id": "M033",
+      "archive_char_start": 13014,
+      "archive_char_length": 155
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/field-review-history-demo.md",
+      "kind": "paragraph",
+      "start_line": 60,
+      "sha256": "bcba6e3f6ae6bd994bfefc232675e063f6f518c911572c3ddca2fd2e60d9b1b7",
+      "id": "M034",
+      "archive_char_start": 13362,
+      "archive_char_length": 395
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/quickstart.md",
+      "kind": "paragraph",
+      "start_line": 243,
+      "sha256": "53f809f09fda3bc1100e4c04903f54f15da9bd768a225c5cc7508430b3f31048",
+      "id": "M035",
+      "archive_char_start": 13936,
+      "archive_char_length": 194
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/research.md",
+      "kind": "item",
+      "start_line": 32,
+      "sha256": "f5d0c0d8ed19ff2a71ea407258ce8100497eb50755a5dab6504c950ba18d15c7",
+      "id": "M036",
+      "archive_char_start": 14306,
+      "archive_char_length": 95
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/spec.md",
+      "kind": "item",
+      "start_line": 15,
+      "sha256": "43c4939325b5ddc0ea183c460c21d841007165e275bfdabab8108875c4062cd7",
+      "id": "M037",
+      "archive_char_start": 14573,
+      "archive_char_length": 60
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/spec.md",
+      "kind": "paragraph",
+      "start_line": 224,
+      "sha256": "ce268606c53e4d736b10fb1c771e3c69ab70b3e13f86d8ebf254bbc16ba9d0bf",
+      "id": "M038",
+      "archive_char_start": 14806,
+      "archive_char_length": 131
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/spec.md",
+      "kind": "item",
+      "start_line": 235,
+      "sha256": "4cd0b5313df47c1f8619eb0c9f91739d38ca5c1e2aed643faa2f3ee3cc953304",
+      "id": "M039",
+      "archive_char_start": 15110,
+      "archive_char_length": 90
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/spec.md",
+      "kind": "quote",
+      "start_line": 269,
+      "sha256": "81e2cce3dbccc63dee7ec693b968101b60632162694b6e459bd92e9272006034",
+      "id": "M040",
+      "archive_char_start": 15373,
+      "archive_char_length": 94
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/state-review-convergence-20261020.md",
+      "kind": "item",
+      "start_line": 27,
+      "sha256": "07bdcda1e9e49ada28be32ec9f26b358b9aa393aca42b794dcfc1d968189ead9",
+      "id": "M041",
+      "archive_char_start": 15668,
+      "archive_char_length": 150
+    },
+    {
+      "source": "docs/specs/109-field-evidence-and-ai-suggestions/state-review-convergence-20261020.md",
+      "kind": "item",
+      "start_line": 75,
+      "sha256": "0763ed83ffae1943111c2b5f1af755e618fb6146f0562e121421bcde068b8a78",
+      "id": "M042",
+      "archive_char_start": 16019,
+      "archive_char_length": 93
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "item",
+      "start_line": 17,
+      "sha256": "4dd344ee48253a104b5aa597a5d43a0596473dfccc2a4f43afb92c8880dff9cf",
+      "id": "M043",
+      "archive_char_start": 16298,
+      "archive_char_length": 37
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "table",
+      "start_line": 59,
+      "sha256": "b182f9272a8c79dfbb31f830f23d722f2889798b1cf5ed6e1e700002cc08de66",
+      "id": "M044",
+      "archive_char_start": 16521,
+      "archive_char_length": 37
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "paragraph",
+      "start_line": 13,
+      "sha256": "c1564c8519e735c77d8969a94b8ec1d704561c5f453fc9f88cb15640b9df7fb7",
+      "id": "M045",
+      "archive_char_start": 16726,
+      "archive_char_length": 114
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "paragraph",
+      "start_line": 28,
+      "sha256": "3b8ecf17bee3788d4740e22a808515b51e219234b5b215474f2bc5d52683ae62",
+      "id": "M046",
+      "archive_char_start": 17008,
+      "archive_char_length": 68
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "paragraph",
+      "start_line": 35,
+      "sha256": "28253f730cb923977b84de82348623cec9b0e1c6881e4ee61d713397e3405aac",
+      "id": "M047",
+      "archive_char_start": 17244,
+      "archive_char_length": 36
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "paragraph",
+      "start_line": 37,
+      "sha256": "aa9dfb9e6ae8cb8d7fd10c9de31d430ac782c6f561180dee03d61c5e592b07db",
+      "id": "M048",
+      "archive_char_start": 17448,
+      "archive_char_length": 118
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "item",
+      "start_line": 103,
+      "sha256": "f80810f4804e3c59ce6a5fc2bdad8b208c940aab9237ccb44853fe41be965103",
+      "id": "M049",
+      "archive_char_start": 17735,
+      "archive_char_length": 338
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "item",
+      "start_line": 123,
+      "sha256": "bdc4c5ff77a56afe0b9cdb9afca64ee83a0a64ce50c1dcd74e79804f3ba83460",
+      "id": "M050",
+      "archive_char_start": 18242,
+      "archive_char_length": 73
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "item",
+      "start_line": 124,
+      "sha256": "024ef249ffb120ef23cfa21625ebe5e69f918f1d5343e8ae6ba240b4c31e22d0",
+      "id": "M051",
+      "archive_char_start": 18484,
+      "archive_char_length": 48
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/state-review-convergence-20261020.md",
+      "kind": "item",
+      "start_line": 27,
+      "sha256": "07bdcda1e9e49ada28be32ec9f26b358b9aa393aca42b794dcfc1d968189ead9",
+      "id": "M052",
+      "archive_char_start": 18729,
+      "archive_char_length": 150
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/state-review-convergence-20261020.md",
+      "kind": "item",
+      "start_line": 75,
+      "sha256": "0763ed83ffae1943111c2b5f1af755e618fb6146f0562e121421bcde068b8a78",
+      "id": "M053",
+      "archive_char_start": 19076,
+      "archive_char_length": 93
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/tasks.md",
+      "kind": "item",
+      "start_line": 28,
+      "sha256": "32710342700915618e524fbaabc57e99936c278e43dbf219fd9417ec4c8d27be",
+      "id": "M054",
+      "archive_char_start": 19338,
+      "archive_char_length": 101
+    },
+    {
+      "source": "docs/specs/137-phonon-spectra-digitization/spec.md",
+      "kind": "paragraph",
+      "start_line": 164,
+      "sha256": "19b268f857862f9b6f5e08acabaf4258cb76c07ab6c543464252bf7e933d7359",
+      "id": "M055",
+      "archive_char_start": 19606,
+      "archive_char_length": 87
+    },
+    {
+      "source": "docs/specs/137-phonon-spectra-digitization/spec.md",
+      "kind": "paragraph",
+      "start_line": 302,
+      "sha256": "edb3c571a87d94ce369a04b51342b1b232388da6137ccb3172224144b23a07e8",
+      "id": "M056",
+      "archive_char_start": 19860,
+      "archive_char_length": 69
+    },
+    {
+      "source": "docs/specs/139-table-parameters-shared-methods/association-recheck-validation.md",
+      "kind": "paragraph",
+      "start_line": 24,
+      "sha256": "5928723af3b955cee9afd381e411449b62f2c71d1ab5853f1e2eea7e3e77ffed",
+      "id": "M057",
+      "archive_char_start": 20125,
+      "archive_char_length": 129
+    },
+    {
+      "source": "docs/specs/139-table-parameters-shared-methods/association-recheck.md",
+      "kind": "quote",
+      "start_line": 7,
+      "sha256": "36e08296fd35e5879f149608f264790c833163548482d357d25687e61619d4f9",
+      "id": "M058",
+      "archive_char_start": 20438,
+      "archive_char_length": 112
+    },
+    {
+      "source": "docs/specs/139-table-parameters-shared-methods/association-recheck.md",
+      "kind": "item",
+      "start_line": 19,
+      "sha256": "f2957d34221d0447b86f9d43cac70db8e6cf9abb1e22b6f167de340ce43429d5",
+      "id": "M059",
+      "archive_char_start": 20735,
+      "archive_char_length": 57
+    },
+    {
+      "source": "docs/specs/139-table-parameters-shared-methods/association-recheck.md",
+      "kind": "paragraph",
+      "start_line": 54,
+      "sha256": "827b0fc822c5d830cadc84b79655626feba75c4dedbdf5caef46a4d24268b9d2",
+      "id": "M060",
+      "archive_char_start": 20977,
+      "archive_char_length": 112
+    },
+    {
+      "source": "docs/specs/139-table-parameters-shared-methods/condition-auto-review.md",
+      "kind": "quote",
+      "start_line": 14,
+      "sha256": "b44baf49430844ae7ef04a2f2e1f8cd8e1146df368282e879804557e57b98cdb",
+      "id": "M061",
+      "archive_char_start": 21276,
+      "archive_char_length": 1410
+    },
+    {
+      "source": "docs/specs/141-upload-expand-collapse-all/spec.md",
+      "kind": "quote",
+      "start_line": 11,
+      "sha256": "70106eeeba5aa34a057422da0959a032dc3c36650c781aca74d44139be6ed179",
+      "id": "M062",
+      "archive_char_start": 22851,
+      "archive_char_length": 111
+    },
+    {
+      "source": "docs/specs/141-upload-expand-collapse-all/spec.md",
+      "kind": "paragraph",
+      "start_line": 17,
+      "sha256": "609bc470a44a38d3f9ee32a254781f51cf2eed409e2d0d5ad229a3764a9aefb9",
+      "id": "M063",
+      "archive_char_start": 23127,
+      "archive_char_length": 72
+    },
+    {
+      "source": "docs/specs/141-upload-expand-collapse-all/spec.md",
+      "kind": "fence",
+      "start_line": 21,
+      "sha256": "ddb5e136350934c1a51aa8a957df9ae8b44785092c47245066f78e9efb4b3b07",
+      "id": "M064",
+      "archive_char_start": 23364,
+      "archive_char_length": 640
+    },
+    {
+      "source": "docs/specs/141-upload-expand-collapse-all/validation.md",
+      "kind": "paragraph",
+      "start_line": 45,
+      "sha256": "c9fbcfc2678db31479b78d3a609f94e90313b28d172874610f3f5f2aba383cf6",
+      "id": "M065",
+      "archive_char_start": 24175,
+      "archive_char_length": 60
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/checklists/requirements.md",
+      "kind": "item",
+      "start_line": 19,
+      "sha256": "b0734fa73c3e745abfd94df396ae342b8c25176e5f0854a30afbc02bfa7d3aa7",
+      "id": "M066",
+      "archive_char_start": 24414,
+      "archive_char_length": 108
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "paragraph",
+      "start_line": 56,
+      "sha256": "04f34dfa26afdd00477197fda497aef19c92b4681ed225d2f6a2e5df868c1d29",
+      "id": "M067",
+      "archive_char_start": 24691,
+      "archive_char_length": 119
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "paragraph",
+      "start_line": 106,
+      "sha256": "78dbf4a7c5a9560863f4880aebd80a5698cbf260479a0d928fec83c37b7542a8",
+      "id": "M068",
+      "archive_char_start": 24980,
+      "archive_char_length": 124
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "paragraph",
+      "start_line": 118,
+      "sha256": "ec53059745fc134a9d2330ec265fc4f01341765a636b8ef1a566a4670eac1811",
+      "id": "M069",
+      "archive_char_start": 25274,
+      "archive_char_length": 94
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "paragraph",
+      "start_line": 124,
+      "sha256": "9812370af9ed3f6a4fbcf7bc4dff91e825393d187913eecf9b8cd02fb14c527d",
+      "id": "M070",
+      "archive_char_start": 25538,
+      "archive_char_length": 168
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/plan.md",
+      "kind": "item",
+      "start_line": 11,
+      "sha256": "2a4848331d15b1700ab6f8f8d364b70365e6a7580c2b1380a3a1db57f924468a",
+      "id": "M071",
+      "archive_char_start": 25866,
+      "archive_char_length": 86
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/research.md",
+      "kind": "item",
+      "start_line": 11,
+      "sha256": "f00e81ffb9f4dda01867a204cd95eebd818e6bb0b848003f6474f6a29c216ff2",
+      "id": "M072",
+      "archive_char_start": 26116,
+      "archive_char_length": 42
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/spec.md",
+      "kind": "quote",
+      "start_line": 17,
+      "sha256": "57f88fc23b17857c558ee3c19d2f559d89a6c0363a54e74b3bc843086675a514",
+      "id": "M073",
+      "archive_char_start": 26318,
+      "archive_char_length": 286
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/spec.md",
+      "kind": "quote",
+      "start_line": 25,
+      "sha256": "cdf37a8b970e335d2ac88c4b7bdb5b3e0cb303aee5c27bab57839c095544fabb",
+      "id": "M074",
+      "archive_char_start": 26764,
+      "archive_char_length": 158
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/spec.md",
+      "kind": "fence",
+      "start_line": 37,
+      "sha256": "d9c953431a8e644590279a21833174b180900b9d6e9155dc0e3b8cef51d59462",
+      "id": "M075",
+      "archive_char_start": 27082,
+      "archive_char_length": 4137
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/spec.md",
+      "kind": "paragraph",
+      "start_line": 170,
+      "sha256": "a4f991fe4f15af41130629b8d07ea96c65565bf770ed09078d9044db9a661959",
+      "id": "M076",
+      "archive_char_start": 31380,
+      "archive_char_length": 234
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/spec.md",
+      "kind": "paragraph",
+      "start_line": 172,
+      "sha256": "c630e50ff4ccb28488ac2f7074ac3dcd586b2386c4d9660ffc68ee4df555cdc2",
+      "id": "M077",
+      "archive_char_start": 31775,
+      "archive_char_length": 117
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/spec.md",
+      "kind": "item",
+      "start_line": 187,
+      "sha256": "7dbdc4761f767ccc4c32b8c905dd2e5b8567aa1089bd53022ea93533daeb2e93",
+      "id": "M078",
+      "archive_char_start": 32053,
+      "archive_char_length": 43
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/spec.md",
+      "kind": "item",
+      "start_line": 281,
+      "sha256": "81a5176adaf469b26bb643870086557e579237cd04dc759a41f87d3cf0f357a5",
+      "id": "M079",
+      "archive_char_start": 32257,
+      "archive_char_length": 92
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/spec.md",
+      "kind": "paragraph",
+      "start_line": 292,
+      "sha256": "29e6ab6699258818e6424d85a0280838d3411d1209218d7193122c07077a4acb",
+      "id": "M080",
+      "archive_char_start": 32510,
+      "archive_char_length": 245
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/spec.md",
+      "kind": "item",
+      "start_line": 304,
+      "sha256": "17902906c4d9c190d869312bf3adc5ec9505ecb999c5862a8220391fde3adf42",
+      "id": "M081",
+      "archive_char_start": 32916,
+      "archive_char_length": 90
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/audit.md",
+      "kind": "item",
+      "start_line": 80,
+      "sha256": "ace916547885a707c25053f03f5ede8225e4c02eab27044cbb7a2a8817c45b29",
+      "id": "M082",
+      "archive_char_start": 33169,
+      "archive_char_length": 54
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/audit.md",
+      "kind": "paragraph",
+      "start_line": 102,
+      "sha256": "da0d6b025b1a9a55a461302e11c04e60fe10d116a8c74adac7687968e7bcbe6b",
+      "id": "M083",
+      "archive_char_start": 33387,
+      "archive_char_length": 123
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/checklists/requirements.md",
+      "kind": "item",
+      "start_line": 18,
+      "sha256": "5134c04e12277ee210933672bc378eced3988f06c833457ff8bfc21d157aecbd",
+      "id": "M084",
+      "archive_char_start": 33691,
+      "archive_char_length": 153
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "paragraph",
+      "start_line": 3,
+      "sha256": "0b6a53cce59e617cca2f227430149b3ea24b8044636942b64271b6655dab7f1a",
+      "id": "M085",
+      "archive_char_start": 34012,
+      "archive_char_length": 89
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "paragraph",
+      "start_line": 5,
+      "sha256": "e6d9741278be33eaeadad9f21cd87f7e682ae51e9b6de2bc8c2efd00d5a493ef",
+      "id": "M086",
+      "archive_char_start": 34269,
+      "archive_char_length": 124
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "paragraph",
+      "start_line": 34,
+      "sha256": "97619842fd09d3b38ce0956cde297cb97a81004133d51ea880ae167921042ab1",
+      "id": "M087",
+      "archive_char_start": 34562,
+      "archive_char_length": 143
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "paragraph",
+      "start_line": 62,
+      "sha256": "eb7315abceb6c1f060e6d3b2e6f8a1540301a098d9052ce74b8d8c7e8cb1f8d3",
+      "id": "M088",
+      "archive_char_start": 34874,
+      "archive_char_length": 67
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "table",
+      "start_line": 72,
+      "sha256": "5c259fadd24c764c79dd14b51a6bd8794e3d482f4fe13ffe1f8d5ad883cbf28b",
+      "id": "M089",
+      "archive_char_start": 35110,
+      "archive_char_length": 82
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "paragraph",
+      "start_line": 74,
+      "sha256": "591888b02023cbb3e09185346ff4b44f739b7130aad131ecb2e9b1f7e3881e23",
+      "id": "M090",
+      "archive_char_start": 35361,
+      "archive_char_length": 153
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "item",
+      "start_line": 82,
+      "sha256": "990803157747442befb56349c9e3490611823c5fbdfab2e2225e45cccaa4cb74",
+      "id": "M091",
+      "archive_char_start": 35683,
+      "archive_char_length": 77
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "item",
+      "start_line": 83,
+      "sha256": "1dc487fa627311588403df74872856e7f2dbfbbc9f77c06ac5ff62f0ae10d92e",
+      "id": "M092",
+      "archive_char_start": 35929,
+      "archive_char_length": 62
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "paragraph",
+      "start_line": 95,
+      "sha256": "ce06b78fec31a6749be1f40c55f15df0488452c7fbfe1397a506ed295415244e",
+      "id": "M093",
+      "archive_char_start": 36160,
+      "archive_char_length": 106
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/spec.md",
+      "kind": "quote",
+      "start_line": 19,
+      "sha256": "4535355b9383afcebda38cd5aeff44e9ae79736afc9816965f7dd23e6c276da7",
+      "id": "M094",
+      "archive_char_start": 36428,
+      "archive_char_length": 74
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/spec.md",
+      "kind": "item",
+      "start_line": 118,
+      "sha256": "5d8a132f16320c604002f7838ebc11e4ae09b57ef3df0ca2f0374399c5d8d7ed",
+      "id": "M095",
+      "archive_char_start": 36665,
+      "archive_char_length": 102
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/spec.md",
+      "kind": "item",
+      "start_line": 133,
+      "sha256": "9b6f829c14501c7da0ad24b40f4c65afc5de0543923248205c8b038135bac169",
+      "id": "M096",
+      "archive_char_start": 36930,
+      "archive_char_length": 106
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/spec.md",
+      "kind": "paragraph",
+      "start_line": 157,
+      "sha256": "220dce610827c1c32dc03b60e2a7f6561401f69031a3303aece2e46ba396817a",
+      "id": "M097",
+      "archive_char_start": 37199,
+      "archive_char_length": 93
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/validation.md",
+      "kind": "paragraph",
+      "start_line": 47,
+      "sha256": "5cb9fd0be5f6d6ff59dd218b3560fd4344be186f269c3a9c592911fcdef11671",
+      "id": "M098",
+      "archive_char_start": 37460,
+      "archive_char_length": 267
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/2026-10-29-flow-and-review-diagnosis.md",
+      "kind": "quote",
+      "start_line": 7,
+      "sha256": "d69d1d53f5b5ee9847d11bec7f80610f015244936ea9caa1811217a499387669",
+      "id": "M099",
+      "archive_char_start": 37919,
+      "archive_char_length": 225
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/2026-10-29-flow-and-review-diagnosis.md",
+      "kind": "item",
+      "start_line": 17,
+      "sha256": "a84544a64cde1dab0289c966dc84d1535b376e419654a3f22bfc7bc70111c1a4",
+      "id": "M100",
+      "archive_char_start": 38337,
+      "archive_char_length": 332
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "paragraph",
+      "start_line": 7,
+      "sha256": "657367094bd32e8e6ded36ede53fd1b1c5f91ccec7b4a8d6a4575f7e9d5418a4",
+      "id": "M101",
+      "archive_char_start": 38850,
+      "archive_char_length": 241
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "item",
+      "start_line": 22,
+      "sha256": "9d292b952941db8ffe0cfa61949157ab103e3ed2a9555ae2206b17e469734291",
+      "id": "M102",
+      "archive_char_start": 39273,
+      "archive_char_length": 122
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "item",
+      "start_line": 23,
+      "sha256": "a4d470274b95e00ae4e938c3574934c0e125bca429d961d7a9367705252eb97e",
+      "id": "M103",
+      "archive_char_start": 39577,
+      "archive_char_length": 117
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "item",
+      "start_line": 24,
+      "sha256": "529f1f459ecb2b6464d9f121fe950f57bd2533874ca9ef5be78183b371a5095a",
+      "id": "M104",
+      "archive_char_start": 39876,
+      "archive_char_length": 63
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "item",
+      "start_line": 25,
+      "sha256": "291c4c99774e8f26bfd2d8ea9fa5b9728e6afd270748b905e7923c6d4295da9b",
+      "id": "M105",
+      "archive_char_start": 40121,
+      "archive_char_length": 54
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "table",
+      "start_line": 31,
+      "sha256": "1ede2da78ed52f35f74fada4d34f2092336e63abd7257ea6341d2eb4537d788f",
+      "id": "M106",
+      "archive_char_start": 40357,
+      "archive_char_length": 70
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "paragraph",
+      "start_line": 40,
+      "sha256": "6fa37eeec142969a334e8f3f12aabc34c57f7ff72fb8b501d7367d96fdaefc0f",
+      "id": "M107",
+      "archive_char_start": 40609,
+      "archive_char_length": 111
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "paragraph",
+      "start_line": 42,
+      "sha256": "7abd9554a2800f6bdf2562fc0bb3505f39386f05eba337ec0bf57147c9694004",
+      "id": "M108",
+      "archive_char_start": 40902,
+      "archive_char_length": 182
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "item",
+      "start_line": 46,
+      "sha256": "01ea7b9e5b339c846a39a757aafa9868dae4d89da1bd32ec8595d99ed13ca133",
+      "id": "M109",
+      "archive_char_start": 41266,
+      "archive_char_length": 154
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "item",
+      "start_line": 48,
+      "sha256": "4dbacb003eae6c4c82b61e0147b75be4cb886e760271f7c291ee893237935dca",
+      "id": "M110",
+      "archive_char_start": 41602,
+      "archive_char_length": 116
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-submit-consistency.md",
+      "kind": "item",
+      "start_line": 44,
+      "sha256": "96c825876136e608557bb2160fd1015cc944eedbadb2e74de174854ed373b0a3",
+      "id": "M111",
+      "archive_char_start": 41902,
+      "archive_char_length": 163
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-submit-consistency.md",
+      "kind": "item",
+      "start_line": 85,
+      "sha256": "8d6db5ccaa63336abc3c8b9a09e60ebb7eea10ed1f3c10bec9f48216aec513d7",
+      "id": "M112",
+      "archive_char_start": 42249,
+      "archive_char_length": 59
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/contracts/review.md",
+      "kind": "item",
+      "start_line": 27,
+      "sha256": "efbc173d7a529ac7e24813884d2dacc13de22cfb0f93cde970a0633c02e754d9",
+      "id": "M113",
+      "archive_char_start": 42481,
+      "archive_char_length": 72
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/contracts/review.md",
+      "kind": "paragraph",
+      "start_line": 34,
+      "sha256": "6ca9e186f735c39b27690fd84d8c5f3fbed0e2221ced0f5c4bd75c0dd2ab52d2",
+      "id": "M114",
+      "archive_char_start": 42726,
+      "archive_char_length": 205
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/new-state-review.md",
+      "kind": "table",
+      "start_line": 122,
+      "sha256": "a2741393ddcf5097f61415fd1f142790704cfea91957139fa80f5d4fa7d80e09",
+      "id": "M115",
+      "archive_char_start": 43105,
+      "archive_char_length": 136
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/new-state-review.md",
+      "kind": "item",
+      "start_line": 142,
+      "sha256": "fcefa5bc9b457c100782af85ed7b5210647b3679c572b81dfb2b46e06821bc7f",
+      "id": "M116",
+      "archive_char_start": 43415,
+      "archive_char_length": 83
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/plan.md",
+      "kind": "paragraph",
+      "start_line": 36,
+      "sha256": "06635dfb79b38def96d6821bd78d031a520b7156b87c734774dc7fa3e11d7ede",
+      "id": "M117",
+      "archive_char_start": 43659,
+      "archive_char_length": 148
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/plan.md",
+      "kind": "paragraph",
+      "start_line": 86,
+      "sha256": "80e8bba85cd8c0da647d7ee4bdce944be8a7af72b63e81f0f641a0d71e8df8e5",
+      "id": "M118",
+      "archive_char_start": 43968,
+      "archive_char_length": 180
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/quickstart.md",
+      "kind": "item",
+      "start_line": 12,
+      "sha256": "ec7da4efb46e5b89cc7ae7536436c54815218828ab01d721a33f174c3d5f0d80",
+      "id": "M119",
+      "archive_char_start": 44315,
+      "archive_char_length": 33
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/quickstart.md",
+      "kind": "item",
+      "start_line": 14,
+      "sha256": "028c854a0791f66f206a4630cec20f8606599b06761458213fa37106839fd846",
+      "id": "M120",
+      "archive_char_start": 44515,
+      "archive_char_length": 34
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/research.md",
+      "kind": "paragraph",
+      "start_line": 5,
+      "sha256": "b788e534e937d991fde15bbb236203f4c8200df90b0640b3793567dba660ad04",
+      "id": "M121",
+      "archive_char_start": 44713,
+      "archive_char_length": 141
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/research.md",
+      "kind": "item",
+      "start_line": 17,
+      "sha256": "92f7a39cf8745d7a6ba4f3fd96a824bb69ced5610461f2738c87043b372bf960",
+      "id": "M122",
+      "archive_char_start": 45019,
+      "archive_char_length": 60
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "kind": "paragraph",
+      "start_line": 7,
+      "sha256": "8581e9ff6d83caad281d8f185e8adb9feef9caba91e3cb7a39106e37733d6b54",
+      "id": "M123",
+      "archive_char_start": 45246,
+      "archive_char_length": 213
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "kind": "paragraph",
+      "start_line": 11,
+      "sha256": "1aac5f89b5676a1021996ca44834d8328fff882ffb84cb55bfe4899f91e76fd5",
+      "id": "M124",
+      "archive_char_start": 45627,
+      "archive_char_length": 100
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "kind": "fence",
+      "start_line": 19,
+      "sha256": "82a58581685df9312e6a3eef856342c592ba0e940a1ee90bc0e2b8c4d92df45d",
+      "id": "M125",
+      "archive_char_start": 45895,
+      "archive_char_length": 769
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "kind": "fence",
+      "start_line": 48,
+      "sha256": "a8fc6f7eafa79bb60cff4aa578edbd487c824fde08065facc03633198b26a566",
+      "id": "M126",
+      "archive_char_start": 46832,
+      "archive_char_length": 979
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "kind": "paragraph",
+      "start_line": 76,
+      "sha256": "4ba8129af9297f853d3e9f480248eb4dfa20c0956eec863801a60422c08b543b",
+      "id": "M127",
+      "archive_char_start": 47979,
+      "archive_char_length": 124
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "kind": "fence",
+      "start_line": 94,
+      "sha256": "eda83736816dc44da4649495134ed1eabc88c836a3c560fbfe15a5102231d698",
+      "id": "M128",
+      "archive_char_start": 48271,
+      "archive_char_length": 903
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "kind": "item",
+      "start_line": 156,
+      "sha256": "79312367dabaa0ec24e34a4c54b3707edf13b2c45f4c14b2a1abbf345db7d3c6",
+      "id": "M129",
+      "archive_char_start": 49343,
+      "archive_char_length": 82
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "kind": "paragraph",
+      "start_line": 170,
+      "sha256": "9770abcd1481a31b7abaddd3a713563b932e179ff918ef8132c459f1788332f7",
+      "id": "M130",
+      "archive_char_start": 49594,
+      "archive_char_length": 249
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/review-flow.md",
+      "kind": "paragraph",
+      "start_line": 189,
+      "sha256": "fdc266cd7a129af62a448a0898a31e11dc3d01fff04f0c6177bd03fd314d9a94",
+      "id": "M131",
+      "archive_char_start": 50012,
+      "archive_char_length": 55
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "paragraph",
+      "start_line": 15,
+      "sha256": "cb0403dce3bc655f6eb4e037661d832e98e869600abd9a5c0d5615128bc44aa4",
+      "id": "M132",
+      "archive_char_start": 50228,
+      "archive_char_length": 146
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "paragraph",
+      "start_line": 19,
+      "sha256": "1a5531d55921b3fe591fb1b7b85ca8dd5bb0fcdc61cd601d12a45573e15edcf2",
+      "id": "M133",
+      "archive_char_start": 50535,
+      "archive_char_length": 202
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "paragraph",
+      "start_line": 37,
+      "sha256": "1133e0900924faf9a62e3238daa4aec143dd43f74fdc22ba3f71578e74624673",
+      "id": "M134",
+      "archive_char_start": 50898,
+      "archive_char_length": 111
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "item",
+      "start_line": 58,
+      "sha256": "71b15a61323e4c1bdf58ccae3a2a8ce0b88996e74db78844327de23835ae7864",
+      "id": "M135",
+      "archive_char_start": 51170,
+      "archive_char_length": 52
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "paragraph",
+      "start_line": 60,
+      "sha256": "cacd01ee001137f3b41d10f9c559b323f71c1459177d70171b49fb2787c32d03",
+      "id": "M136",
+      "archive_char_start": 51383,
+      "archive_char_length": 152
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "item",
+      "start_line": 66,
+      "sha256": "72274a29b656504e05e043ea93a51ec2549558f29ab0e8cffd08501b739d4288",
+      "id": "M137",
+      "archive_char_start": 51696,
+      "archive_char_length": 41
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "paragraph",
+      "start_line": 78,
+      "sha256": "9e4a0678c4b28a159641ce06d8584a8058655a1d47e809a6cd94c7ae2eb9ef58",
+      "id": "M138",
+      "archive_char_start": 51898,
+      "archive_char_length": 76
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "table",
+      "start_line": 165,
+      "sha256": "e027083629bb82c9a5468cf9110b37fe42a8f040d12d846e7e14b8b09e6188d9",
+      "id": "M139",
+      "archive_char_start": 52136,
+      "archive_char_length": 76
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "table",
+      "start_line": 167,
+      "sha256": "ebf8cae520586d4433fc43b23cc401b1bbe6cc579d4ba9418a0bfa906af6e683",
+      "id": "M140",
+      "archive_char_start": 52374,
+      "archive_char_length": 75
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "paragraph",
+      "start_line": 186,
+      "sha256": "d1f3b84e7dbef341db4f9f040ed586458ac1e86ddaeaab04d543e57acb9672ea",
+      "id": "M141",
+      "archive_char_start": 52611,
+      "archive_char_length": 40
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "item",
+      "start_line": 215,
+      "sha256": "55c26b31d47e592687ea052bad4a5dd9adf45894069a596f56781185c905807e",
+      "id": "M142",
+      "archive_char_start": 52813,
+      "archive_char_length": 60
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "item",
+      "start_line": 223,
+      "sha256": "f2f34c9511fdcddb56d2ed4058770f6c8f0305aee7e28b2b89921a4174c6b2ab",
+      "id": "M143",
+      "archive_char_start": 53035,
+      "archive_char_length": 67
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "item",
+      "start_line": 230,
+      "sha256": "ef4554fe46331fc01c1f8a4e036b2c2ecbd72e2f933dcc3ff896762ecc40ff34",
+      "id": "M144",
+      "archive_char_start": 53264,
+      "archive_char_length": 90
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "item",
+      "start_line": 237,
+      "sha256": "ce584868074a28df809f10c96b421bfe5b164c13738f598883b35c419ac724a7",
+      "id": "M145",
+      "archive_char_start": 53516,
+      "archive_char_length": 38
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "item",
+      "start_line": 239,
+      "sha256": "cb7adb8feff09def0cf2764e45beb7d4b3421c6d7fb502e3017b9909ecfd0418",
+      "id": "M146",
+      "archive_char_start": 53716,
+      "archive_char_length": 42
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "item",
+      "start_line": 240,
+      "sha256": "4ab202664ec9a56f8fc66fd678605981f67e6d34b2f0b07117d2b3daa855ef43",
+      "id": "M147",
+      "archive_char_start": 53920,
+      "archive_char_length": 32
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/sscha-state-review-fix.md",
+      "kind": "item",
+      "start_line": 35,
+      "sha256": "74b1b8f66618630bed09507eb2f704bbf680bf507322a43cd0d2ed95af1353b6",
+      "id": "M148",
+      "archive_char_start": 54131,
+      "archive_char_length": 143
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/tasks.md",
+      "kind": "item",
+      "start_line": 36,
+      "sha256": "997c62306b753353c3e66c07e77e2ae31c8b8c1b0142af4f95bb002f2df5e087",
+      "id": "M149",
+      "archive_char_start": 54436,
+      "archive_char_length": 93
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/tasks.md",
+      "kind": "item",
+      "start_line": 55,
+      "sha256": "a9a100c7788e49c2cbc3e141c7ff109057265806508c8afce3fdc09f7fd6adfc",
+      "id": "M150",
+      "archive_char_start": 54691,
+      "archive_char_length": 137
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/tasks.md",
+      "kind": "item",
+      "start_line": 57,
+      "sha256": "37c5a095184d9d79554fff6b628d6ac7eba9cbbfe37a6b2a69bf637d23c8ad26",
+      "id": "M151",
+      "archive_char_start": 54990,
+      "archive_char_length": 183
+    },
+    {
+      "source": "docs/specs/148-sidebar-field-editing/validation.md",
+      "kind": "paragraph",
+      "start_line": 32,
+      "sha256": "5d25ce6d0ad01e132a0a675fae5944af2bf5178ac4b7e15961614a5e5aa32374",
+      "id": "M152",
+      "archive_char_start": 55339,
+      "archive_char_length": 262
+    },
+    {
+      "source": "docs/specs/176-scientific-form-filling/full-reparse-20261102.md",
+      "kind": "table",
+      "start_line": 45,
+      "sha256": "ce50f5f7e318d45e70033c8c186a6b61c846fd8ce75afb3e50e5cc121c1d180a",
+      "id": "M153",
+      "archive_char_start": 55780,
+      "archive_char_length": 69
+    },
+    {
+      "source": "docs/specs/191-field-sidebar-status/spec.md",
+      "kind": "quote",
+      "start_line": 3,
+      "sha256": "ae792d2813d9b4a6604d7e60b39bf2c6a99159a14ba5864042fb199db669d61e",
+      "id": "M154",
+      "archive_char_start": 56007,
+      "archive_char_length": 115
+    },
+    {
+      "source": "docs/specs/199-basic-field-model-review/assets/investigation/goal-4.md",
+      "kind": "paragraph",
+      "start_line": 5,
+      "sha256": "c2158215c1b9eb44f08fe7b43a6e08d5ce8665e01e1b8a3094f3907283241bd5",
+      "id": "M155",
+      "archive_char_start": 56307,
+      "archive_char_length": 42
+    },
+    {
+      "source": "docs/specs/199-basic-field-model-review/assets/investigation/goal-4.md",
+      "kind": "fence",
+      "start_line": 7,
+      "sha256": "9fdb407cb643b0dea8b31b69713a5c0dfd0633a0d31661d939105d12b6e58497",
+      "id": "M156",
+      "archive_char_start": 56534,
+      "archive_char_length": 103
+    },
+    {
+      "source": "docs/specs/200-field-color-only/assets/investigation/goal-5.md",
+      "kind": "paragraph",
+      "start_line": 5,
+      "sha256": "5067ca3f03f6da4f9f987769cdf110b134dbbc1068709d913a5cbf17d1cb2a4e",
+      "id": "M157",
+      "archive_char_start": 56814,
+      "archive_char_length": 58
+    },
+    {
+      "source": "docs/specs/200-field-color-only/assets/investigation/goal-5.md",
+      "kind": "fence",
+      "start_line": 7,
+      "sha256": "3fcccdd55f7569666d9712c49823c2e6b1cf0049af359c449bdb15cae0df200f",
+      "id": "M158",
+      "archive_char_start": 57049,
+      "archive_char_length": 85
+    },
+    {
+      "source": "docs/specs/200-field-color-only/contracts/behavior.md",
+      "kind": "paragraph",
+      "start_line": 3,
+      "sha256": "2ac66ce3d840fc45c56387f410df51134f1e0bd4cbaa5b655db69db4b45070c5",
+      "id": "M159",
+      "archive_char_start": 57302,
+      "archive_char_length": 62
+    },
+    {
+      "source": "docs/specs/200-field-color-only/plan.md",
+      "kind": "paragraph",
+      "start_line": 3,
+      "sha256": "d1c5ecaca3633c278667f417ae9f69a691fa93a3fad2ead3a1fba8f8d72e0cdb",
+      "id": "M160",
+      "archive_char_start": 57518,
+      "archive_char_length": 64
+    },
+    {
+      "source": "docs/specs/200-field-color-only/spec.md",
+      "kind": "paragraph",
+      "start_line": 7,
+      "sha256": "217f40ffce1e29dd494c533930c4b017f264968acf83695bcb8f919243437bd5",
+      "id": "M161",
+      "archive_char_start": 57736,
+      "archive_char_length": 149
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/plan.md",
+      "kind": "item",
+      "start_line": 12,
+      "sha256": "956642381598ec75ce257f3ff6eeb51c7858982706470fbfadff7438baf01bd2",
+      "id": "M162",
+      "archive_char_start": 58047,
+      "archive_char_length": 70
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/quickstart.md",
+      "kind": "paragraph",
+      "start_line": 12,
+      "sha256": "7d268692f1043b063c8a8eba5cc9d6f30f8dbe08cc6ec2993f9a611d8f7d0cbf",
+      "id": "M163",
+      "archive_char_start": 58285,
+      "archive_char_length": 136
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/spec.md",
+      "kind": "quote",
+      "start_line": 8,
+      "sha256": "e3c4b54f671bca3f09ba49041f972a02f2a8057e5df7418ff44378f4f02d49fb",
+      "id": "M164",
+      "archive_char_start": 58582,
+      "archive_char_length": 32
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/spec.md",
+      "kind": "paragraph",
+      "start_line": 26,
+      "sha256": "f8e42c13f732d7317ff3987157fc945315944c80cb43343733cc32e1e11d3077",
+      "id": "M165",
+      "archive_char_start": 58776,
+      "archive_char_length": 84
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/spec.md",
+      "kind": "paragraph",
+      "start_line": 30,
+      "sha256": "9014090b4c462ea3d0570e36ea3697e159036e7e82a5a93d2c877a8b2c761c74",
+      "id": "M166",
+      "archive_char_start": 59022,
+      "archive_char_length": 64
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/spec.md",
+      "kind": "item",
+      "start_line": 39,
+      "sha256": "8c9e89089525ca89b3da3d3716435804558d5cfc4257fd4ac354472ddb7dc67e",
+      "id": "M167",
+      "archive_char_start": 59248,
+      "archive_char_length": 52
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/spec.md",
+      "kind": "item",
+      "start_line": 48,
+      "sha256": "f6243dc24e3fad58b653509ae209d05d77f74ffccecc86f57a2669ba002fe10e",
+      "id": "M168",
+      "archive_char_start": 59462,
+      "archive_char_length": 58
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/tasks.md",
+      "kind": "item",
+      "start_line": 5,
+      "sha256": "d15a9c270efba247bc91f7415d2f31b74aa48a6a8358b86f1a6aaa22cb17dc17",
+      "id": "M169",
+      "archive_char_start": 59682,
+      "archive_char_length": 106
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/tasks.md",
+      "kind": "item",
+      "start_line": 7,
+      "sha256": "dffcf7ff8bf2d73b9eda8f18c1bbdac2e04690275b1135bb4ffdc68be8c8b35a",
+      "id": "M170",
+      "archive_char_start": 59950,
+      "archive_char_length": 83
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/validation.md",
+      "kind": "paragraph",
+      "start_line": 3,
+      "sha256": "fe0fa53813109abcbf3ec3930d2eb0dce41045e035000c1e2e5f836edfc3e4b4",
+      "id": "M171",
+      "archive_char_start": 60200,
+      "archive_char_length": 78
+    },
+    {
+      "source": "docs/specs/201-field-sidebar-ownership/validation.md",
+      "kind": "item",
+      "start_line": 11,
+      "sha256": "e57437dd5ad9dcfb6ac14dc764d0a72a49efabb2986093a8c14da76835ae4a42",
+      "id": "M172",
+      "archive_char_start": 60446,
+      "archive_char_length": 99
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/plan.md",
+      "kind": "table",
+      "start_line": 32,
+      "sha256": "187996681f6bb648ed117f0ccabb5a4a9db5e2214247d1244432c4aa2caa8dc7",
+      "id": "M173",
+      "archive_char_start": 60705,
+      "archive_char_length": 102
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/quickstart.md",
+      "kind": "paragraph",
+      "start_line": 35,
+      "sha256": "afe5fb89eab9f38e7a4dd67ecc359ccdf816e8985bf338ce8a12baefd4826c9c",
+      "id": "M174",
+      "archive_char_start": 60973,
+      "archive_char_length": 144
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/research.md",
+      "kind": "table",
+      "start_line": 37,
+      "sha256": "99060d1d649f6792dfc47055f606ac6fdb9dbb88aa2ce9876b5ad62161a5e148",
+      "id": "M175",
+      "archive_char_start": 61281,
+      "archive_char_length": 53
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/research.md",
+      "kind": "paragraph",
+      "start_line": 43,
+      "sha256": "d70bfa2661d35fa2ad0d5aa02bfae01302c607999a942c84cc0623e2b2bf639a",
+      "id": "M176",
+      "archive_char_start": 61498,
+      "archive_char_length": 131
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/spec.md",
+      "kind": "paragraph",
+      "start_line": 33,
+      "sha256": "02bc17debcf0a90f51f72c181d400bfc0ff4a54a7b3608235d3d7b1bae7b99cf",
+      "id": "M177",
+      "archive_char_start": 61789,
+      "archive_char_length": 85
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/spec.md",
+      "kind": "paragraph",
+      "start_line": 62,
+      "sha256": "dda8beb6c3de684b55ca4f0a38b7c8d350a6e524993555a2c0eae68f5f0c24d2",
+      "id": "M178",
+      "archive_char_start": 62034,
+      "archive_char_length": 33
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/spec.md",
+      "kind": "paragraph",
+      "start_line": 64,
+      "sha256": "44d37ce7f5cb4a1d56b78a4716287b8da2047d250e0a5ff6b3b391fa33b2f8bb",
+      "id": "M179",
+      "archive_char_start": 62227,
+      "archive_char_length": 51
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/spec.md",
+      "kind": "item",
+      "start_line": 86,
+      "sha256": "2e4a064f3188a1f91d73b43099a5d31d382cddf4ae49dec6dc47188ebdfd27f7",
+      "id": "M180",
+      "archive_char_start": 62438,
+      "archive_char_length": 31
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/spec.md",
+      "kind": "item",
+      "start_line": 120,
+      "sha256": "3ce8982098ad7e1a0531213f93047d2ea167dfa52efc5b790baacacfd50ca5b9",
+      "id": "M181",
+      "archive_char_start": 62630,
+      "archive_char_length": 57
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/tasks.md",
+      "kind": "item",
+      "start_line": 24,
+      "sha256": "0bbdf8d45ae94a0cbc3ddeafc491733762d2dec79840bb85e7208ede2960df86",
+      "id": "M182",
+      "archive_char_start": 62848,
+      "archive_char_length": 120
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/validation.md",
+      "kind": "table",
+      "start_line": 22,
+      "sha256": "a56b0bf07e33702c9f5fbf2f1ee2a92a0c5457a400885466f76ef59615ba9b50",
+      "id": "M183",
+      "archive_char_start": 63134,
+      "archive_char_length": 91
+    },
+    {
+      "source": "docs/specs/208-cah6-parse-regression/validation.md",
+      "kind": "item",
+      "start_line": 41,
+      "sha256": "fab233eb5196bc25740f2f7df9cdfd4f0743f2e05e74d424cdfc99ff9802501e",
+      "id": "M184",
+      "archive_char_start": 63391,
+      "archive_char_length": 81
+    },
+    {
+      "source": "docs/specs/209-return-field-evidence/spec.md",
+      "kind": "paragraph",
+      "start_line": 18,
+      "sha256": "7566bf43fc064a3c9a30250e9ec3654d7e79d3ff17955957905a64c63922e3a2",
+      "id": "M185",
+      "archive_char_start": 63632,
+      "archive_char_length": 125
+    },
+    {
+      "source": "docs/specs/209-return-field-evidence/spec.md",
+      "kind": "item",
+      "start_line": 112,
+      "sha256": "88520f45fdf4816578344f62cb7a7ab98b372dbac75086c147da692f03b586bc",
+      "id": "M186",
+      "archive_char_start": 63918,
+      "archive_char_length": 76
+    },
+    {
+      "source": "docs/specs/211-state-first-spectra/spec.md",
+      "kind": "quote",
+      "start_line": 12,
+      "sha256": "393a04db4aada41429f46e3c19622076bededf43a519c8b4a9bf7ed4e6c5dadc",
+      "id": "M187",
+      "archive_char_start": 64152,
+      "archive_char_length": 190
+    },
+    {
+      "source": "docs/specs/211-state-first-spectra/spec.md",
+      "kind": "item",
+      "start_line": 42,
+      "sha256": "b8a40f8c9742b381cba35f4c25a90602d56a5f90f213ac76cab4c2adaf01384e",
+      "id": "M188",
+      "archive_char_start": 64500,
+      "archive_char_length": 107
+    },
+    {
+      "source": "docs/specs/211-state-first-spectra/validation.md",
+      "kind": "item",
+      "start_line": 35,
+      "sha256": "b826ffa7ef435f4b988dcd113aedb8efdc0f290995794c1893f6f91dd2a7fc9e",
+      "id": "M189",
+      "archive_char_start": 64771,
+      "archive_char_length": 74
+    },
+    {
+      "source": "docs/specs/213-review-workspace-navigation/spec.md",
+      "kind": "item",
+      "start_line": 18,
+      "sha256": "540cabaa79586c8a633deaa6470e316529f02453a008920d2c4244a572ce19c4",
+      "id": "M190",
+      "archive_char_start": 65011,
+      "archive_char_length": 111
+    },
+    {
+      "source": "docs/specs/219-material-state-outline/spec.md",
+      "kind": "item",
+      "start_line": 10,
+      "sha256": "540cabaa79586c8a633deaa6470e316529f02453a008920d2c4244a572ce19c4",
+      "id": "M191",
+      "archive_char_start": 65283,
+      "archive_char_length": 111
+    },
+    {
+      "source": "docs/specs/49-pdf-crystal-structure-extraction/state-review-convergence-20261020.md",
+      "kind": "item",
+      "start_line": 27,
+      "sha256": "07bdcda1e9e49ada28be32ec9f26b358b9aa393aca42b794dcfc1d968189ead9",
+      "id": "M192",
+      "archive_char_start": 65593,
+      "archive_char_length": 150
+    },
+    {
+      "source": "docs/specs/49-pdf-crystal-structure-extraction/state-review-convergence-20261020.md",
+      "kind": "item",
+      "start_line": 75,
+      "sha256": "0763ed83ffae1943111c2b5f1af755e618fb6146f0562e121421bcde068b8a78",
+      "id": "M193",
+      "archive_char_start": 65942,
+      "archive_char_length": 93
+    },
+    {
+      "source": "docs/specs/58-submit-failure-diagnostics/plan.md",
+      "kind": "item",
+      "start_line": 15,
+      "sha256": "08a9ef99db819aa39c5a4d9f812e1039bb8c805fa99726fdcddb8d5dbec877bb",
+      "id": "M194",
+      "archive_char_start": 66199,
+      "archive_char_length": 109
+    },
+    {
+      "source": "docs/specs/58-submit-failure-diagnostics/spec.md",
+      "kind": "paragraph",
+      "start_line": 57,
+      "sha256": "986a08684bd5a4ad4b97052572ebde2869cef6bd2626afc33fb76a18416f91d3",
+      "id": "M195",
+      "archive_char_start": 66472,
+      "archive_char_length": 53
+    },
+    {
+      "source": "docs/specs/58-submit-failure-diagnostics/spec.md",
+      "kind": "item",
+      "start_line": 103,
+      "sha256": "e00719373a7b7ce318430e1aecf643baa6019648c048deb58fa4f1389d833c26",
+      "id": "M196",
+      "archive_char_start": 66690,
+      "archive_char_length": 57
+    },
+    {
+      "source": "docs/specs/58-submit-failure-diagnostics/tasks.md",
+      "kind": "paragraph",
+      "start_line": 52,
+      "sha256": "95142f800bfe0fe775d20b418a4072134e731316d6d9553e7caf5433048c7a91",
+      "id": "M197",
+      "archive_char_start": 66912,
+      "archive_char_length": 43
+    },
+    {
+      "source": "docs/specs/58-submit-failure-diagnostics/tasks.md",
+      "kind": "paragraph",
+      "start_line": 54,
+      "sha256": "87c2044023458ec6328a53db164f2a8882ba18aaa6d85e471a24164dda785be2",
+      "id": "M198",
+      "archive_char_start": 67120,
+      "archive_char_length": 64
+    },
+    {
+      "source": "docs/specs/87-review-workspace/checklists/requirements.md",
+      "kind": "item",
+      "start_line": 8,
+      "sha256": "70262878d647b724bccae9944e7460724045bbbd770a7bd0ee3461ce848dc9b3",
+      "id": "M199",
+      "archive_char_start": 67356,
+      "archive_char_length": 53
+    },
+    {
+      "source": "docs/specs/87-review-workspace/quickstart.md",
+      "kind": "item",
+      "start_line": 16,
+      "sha256": "238802bb1d3ca4ad18409eb7124307166c5374c9cd5bd859aef2446e6f280fdb",
+      "id": "M200",
+      "archive_char_start": 67569,
+      "archive_char_length": 33
+    },
+    {
+      "source": "docs/specs/87-review-workspace/spec.md",
+      "kind": "paragraph",
+      "start_line": 11,
+      "sha256": "f003c3a1c5c7ac3ce9ac5d31d8d68a0b6ecc3639d6e11cd47dcbe7fe3f6f341b",
+      "id": "M201",
+      "archive_char_start": 67756,
+      "archive_char_length": 121
+    },
+    {
+      "source": "docs/specs/87-review-workspace/spec.md",
+      "kind": "paragraph",
+      "start_line": 42,
+      "sha256": "11775c0a079b034dbd1080aa95a092aebe361282b83a51504d303922a2bc78cd",
+      "id": "M202",
+      "archive_char_start": 68031,
+      "archive_char_length": 55
+    },
+    {
+      "source": "docs/specs/87-review-workspace/spec.md",
+      "kind": "item",
+      "start_line": 95,
+      "sha256": "21b0e68ed8d8a85128a4332810635162ff6cc89c954c323737c77b355509a67e",
+      "id": "M203",
+      "archive_char_start": 68240,
+      "archive_char_length": 161
+    },
+    {
+      "source": "docs/specs/87-review-workspace/spec.md",
+      "kind": "item",
+      "start_line": 170,
+      "sha256": "36e5476db75669c170a6d0a7cadee01d2893bee84dce21a763aa143ddf42d74b",
+      "id": "M204",
+      "archive_char_start": 68556,
+      "archive_char_length": 93
+    },
+    {
+      "source": "docs/specs/87-review-workspace/tasks.md",
+      "kind": "paragraph",
+      "start_line": 9,
+      "sha256": "7509c7f3dcc5d21407f91ae358863a56d905358cca55a02eec2e94c4f1041069",
+      "id": "M205",
+      "archive_char_start": 68803,
+      "archive_char_length": 44
+    },
+    {
+      "source": "docs/specs/87-review-workspace/tasks.md",
+      "kind": "paragraph",
+      "start_line": 103,
+      "sha256": "550104298ffd8dd9d43e93aa21d9f33b86eeec4cf283ec828156f0322b2ac52f",
+      "id": "M206",
+      "archive_char_start": 69003,
+      "archive_char_length": 97
+    },
+    {
+      "source": "docs/specs/94-property-record-editor/contracts/record-form.md",
+      "kind": "paragraph",
+      "start_line": 49,
+      "sha256": "1868928597c864566423972d9d5a45c575dbc39a209f54dac0bf0590a26a780e",
+      "id": "M207",
+      "archive_char_start": 69277,
+      "archive_char_length": 172
+    },
+    {
+      "source": "docs/specs/94-property-record-editor/module-add-bottom-demo.md",
+      "kind": "paragraph",
+      "start_line": 13,
+      "sha256": "86743844ab44dba67a46f09edc776535d52739ef35eb3e0c6f1c0c3b9fa7d426",
+      "id": "M208",
+      "archive_char_start": 69627,
+      "archive_char_length": 134
+    },
+    {
+      "source": "docs/specs/94-property-record-editor/spec.md",
+      "kind": "item",
+      "start_line": 145,
+      "sha256": "fb5e5377294af94df7b793861fa593149cb645c74a2b0d80785ab74c878cb55c",
+      "id": "M209",
+      "archive_char_start": 69922,
+      "archive_char_length": 110
+    },
+    {
+      "source": "docs/specs/94-property-record-editor/spec.md",
+      "kind": "paragraph",
+      "start_line": 292,
+      "sha256": "b92b17dbf35c5461eb5a85d22d0269bf3b7f7059628ba63b3e25c42d5c0ea607",
+      "id": "M210",
+      "archive_char_start": 70193,
+      "archive_char_length": 94
+    },
+    {
+      "source": "docs/specs/94-property-record-editor/structure-collapse-demo.md",
+      "kind": "paragraph",
+      "start_line": 13,
+      "sha256": "0ee8fc37c138c07328ce22655c02a860b2baf2f22118b4a93dad08291ee812f0",
+      "id": "M211",
+      "archive_char_start": 70466,
+      "archive_char_length": 133
+    },
+    {
+      "source": "docs/specs/97-property-definition-switch-cleanup/contracts/submit-errors.md",
+      "kind": "paragraph",
+      "start_line": 18,
+      "sha256": "ac5b1ad65abe0a28dd2491b696dda490ba278ff71accd1a2af55643d10ac1a4d",
+      "id": "M212",
+      "archive_char_start": 70790,
+      "archive_char_length": 88
+    },
+    {
+      "source": "GitHub Issue #219",
+      "kind": "item",
+      "start_line": 34,
+      "sha256": "540cabaa79586c8a633deaa6470e316529f02453a008920d2c4244a572ce19c4",
+      "id": "M213",
+      "archive_char_start": 71011,
+      "archive_char_length": 111
+    },
+    {
+      "source": "GitHub Issue #211",
+      "kind": "quote",
+      "start_line": 8,
+      "sha256": "393a04db4aada41429f46e3c19622076bededf43a519c8b4a9bf7ed4e6c5dadc",
+      "id": "M214",
+      "archive_char_start": 71254,
+      "archive_char_length": 190
+    },
+    {
+      "source": "GitHub Issue #209",
+      "kind": "paragraph",
+      "start_line": 44,
+      "sha256": "7566bf43fc064a3c9a30250e9ec3654d7e79d3ff17955957905a64c63922e3a2",
+      "id": "M215",
+      "archive_char_start": 71577,
+      "archive_char_length": 125
+    },
+    {
+      "source": "GitHub Issue #208",
+      "kind": "item",
+      "start_line": 18,
+      "sha256": "b2a36e202564b7366e3f930caab22a6e03f5fbde824cb57c5395135ddf97fbb8",
+      "id": "M216",
+      "archive_char_start": 71835,
+      "archive_char_length": 49
+    },
+    {
+      "source": "GitHub Issue #201",
+      "kind": "paragraph",
+      "start_line": 3,
+      "sha256": "f24e60b660358752160e86d193e45e4dc82d08511770224db0f660f2aa89ed3d",
+      "id": "M217",
+      "archive_char_start": 72016,
+      "archive_char_length": 109
+    },
+    {
+      "source": "GitHub Issue #201",
+      "kind": "quote",
+      "start_line": 7,
+      "sha256": "e3c4b54f671bca3f09ba49041f972a02f2a8057e5df7418ff44378f4f02d49fb",
+      "id": "M218",
+      "archive_char_start": 72257,
+      "archive_char_length": 32
+    },
+    {
+      "source": "GitHub Issue #201",
+      "kind": "item",
+      "start_line": 15,
+      "sha256": "61caf85187ac21589cc1d79df154eb86e93b5950559f481ebc0612b3406774c5",
+      "id": "M219",
+      "archive_char_start": 72422,
+      "archive_char_length": 51
+    },
+    {
+      "source": "GitHub Issue #200",
+      "kind": "paragraph",
+      "start_line": 3,
+      "sha256": "2ac66ce3d840fc45c56387f410df51134f1e0bd4cbaa5b655db69db4b45070c5",
+      "id": "M220",
+      "archive_char_start": 72605,
+      "archive_char_length": 62
+    },
+    {
+      "source": "GitHub Issue #200",
+      "kind": "quote",
+      "start_line": 7,
+      "sha256": "8800600c6a7b9e7375ed7b593e759ee664a3333f233d6faa411a9b52b3e63ec4",
+      "id": "M221",
+      "archive_char_start": 72799,
+      "archive_char_length": 82
+    },
+    {
+      "source": "GitHub Issue #200",
+      "kind": "paragraph",
+      "start_line": 15,
+      "sha256": "3f424dfc48b32f46019bef04f093f4166d2adf83a2d7d93a522945824507792a",
+      "id": "M222",
+      "archive_char_start": 73014,
+      "archive_char_length": 41
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "paragraph",
+      "start_line": 9,
+      "sha256": "1aac5f89b5676a1021996ca44834d8328fff882ffb84cb55bfe4899f91e76fd5",
+      "id": "M223",
+      "archive_char_start": 73187,
+      "archive_char_length": 100
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "fence",
+      "start_line": 17,
+      "sha256": "93240e2dacce4a99698c9fa5e860a268c2583d14b908c780ed80eda09871f430",
+      "id": "M224",
+      "archive_char_start": 73420,
+      "archive_char_length": 513
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "fence",
+      "start_line": 39,
+      "sha256": "8ebd76260748614a540317c48b885641dc3dd2237b7bb94364f101f40a368dbc",
+      "id": "M225",
+      "archive_char_start": 74066,
+      "archive_char_length": 777
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "paragraph",
+      "start_line": 63,
+      "sha256": "4ba8129af9297f853d3e9f480248eb4dfa20c0956eec863801a60422c08b543b",
+      "id": "M226",
+      "archive_char_start": 74976,
+      "archive_char_length": 124
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "fence",
+      "start_line": 81,
+      "sha256": "1cab808da454b13bcd36b256e0dbe8f5400348dfce34aac65a08fdfd63eb31c2",
+      "id": "M227",
+      "archive_char_start": 75233,
+      "archive_char_length": 457
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "item",
+      "start_line": 133,
+      "sha256": "79312367dabaa0ec24e34a4c54b3707edf13b2c45f4c14b2a1abbf345db7d3c6",
+      "id": "M228",
+      "archive_char_start": 75824,
+      "archive_char_length": 82
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "paragraph",
+      "start_line": 146,
+      "sha256": "9770abcd1481a31b7abaddd3a713563b932e179ff918ef8132c459f1788332f7",
+      "id": "M229",
+      "archive_char_start": 76040,
+      "archive_char_length": 249
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "paragraph",
+      "start_line": 165,
+      "sha256": "fdc266cd7a129af62a448a0898a31e11dc3d01fff04f0c6177bd03fd314d9a94",
+      "id": "M230",
+      "archive_char_start": 76423,
+      "archive_char_length": 55
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "table",
+      "start_line": 251,
+      "sha256": "e027083629bb82c9a5468cf9110b37fe42a8f040d12d846e7e14b8b09e6188d9",
+      "id": "M231",
+      "archive_char_start": 76612,
+      "archive_char_length": 76
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "table",
+      "start_line": 253,
+      "sha256": "ebf8cae520586d4433fc43b23cc401b1bbe6cc579d4ba9418a0bfa906af6e683",
+      "id": "M232",
+      "archive_char_start": 76822,
+      "archive_char_length": 75
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "paragraph",
+      "start_line": 272,
+      "sha256": "d1f3b84e7dbef341db4f9f040ed586458ac1e86ddaeaab04d543e57acb9672ea",
+      "id": "M233",
+      "archive_char_start": 77031,
+      "archive_char_length": 40
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "item",
+      "start_line": 301,
+      "sha256": "55c26b31d47e592687ea052bad4a5dd9adf45894069a596f56781185c905807e",
+      "id": "M234",
+      "archive_char_start": 77205,
+      "archive_char_length": 60
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "item",
+      "start_line": 309,
+      "sha256": "f2f34c9511fdcddb56d2ed4058770f6c8f0305aee7e28b2b89921a4174c6b2ab",
+      "id": "M235",
+      "archive_char_start": 77399,
+      "archive_char_length": 67
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "item",
+      "start_line": 316,
+      "sha256": "ef4554fe46331fc01c1f8a4e036b2c2ecbd72e2f933dcc3ff896762ecc40ff34",
+      "id": "M236",
+      "archive_char_start": 77600,
+      "archive_char_length": 90
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "item",
+      "start_line": 323,
+      "sha256": "ce584868074a28df809f10c96b421bfe5b164c13738f598883b35c419ac724a7",
+      "id": "M237",
+      "archive_char_start": 77824,
+      "archive_char_length": 38
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "item",
+      "start_line": 325,
+      "sha256": "cb7adb8feff09def0cf2764e45beb7d4b3421c6d7fb502e3017b9909ecfd0418",
+      "id": "M238",
+      "archive_char_start": 77996,
+      "archive_char_length": 42
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "item",
+      "start_line": 326,
+      "sha256": "4ab202664ec9a56f8fc66fd678605981f67e6d34b2f0b07117d2b3daa855ef43",
+      "id": "M239",
+      "archive_char_start": 78172,
+      "archive_char_length": 32
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "paragraph",
+      "start_line": 389,
+      "sha256": "657367094bd32e8e6ded36ede53fd1b1c5f91ccec7b4a8d6a4575f7e9d5418a4",
+      "id": "M240",
+      "archive_char_start": 78338,
+      "archive_char_length": 241
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "paragraph",
+      "start_line": 402,
+      "sha256": "35adc06c43832f52ebe76dbd74e6fb736aed4f5ded94157e06d67ed0dc04fecc",
+      "id": "M241",
+      "archive_char_start": 78713,
+      "archive_char_length": 138
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "paragraph",
+      "start_line": 404,
+      "sha256": "67edf96810ea8ea94d76b173482a283f78f41d0e065adea4fc612c0fa655841c",
+      "id": "M242",
+      "archive_char_start": 78985,
+      "archive_char_length": 131
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "item",
+      "start_line": 461,
+      "sha256": "96c825876136e608557bb2160fd1015cc944eedbadb2e74de174854ed373b0a3",
+      "id": "M243",
+      "archive_char_start": 79250,
+      "archive_char_length": 163
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "item",
+      "start_line": 502,
+      "sha256": "8d6db5ccaa63336abc3c8b9a09e60ebb7eea10ed1f3c10bec9f48216aec513d7",
+      "id": "M244",
+      "archive_char_start": 79547,
+      "archive_char_length": 59
+    },
+    {
+      "source": "GitHub Issue #145",
+      "kind": "quote",
+      "start_line": 82,
+      "sha256": "4535355b9383afcebda38cd5aeff44e9ae79736afc9816965f7dd23e6c276da7",
+      "id": "M245",
+      "archive_char_start": 79739,
+      "archive_char_length": 74
+    },
+    {
+      "source": "GitHub Issue #145",
+      "kind": "paragraph",
+      "start_line": 86,
+      "sha256": "a973b48e7ca46cf29b9dbb17972bfb6f7d4e9f585a8655921e0b26a67d20c3de",
+      "id": "M246",
+      "archive_char_start": 79946,
+      "archive_char_length": 162
+    },
+    {
+      "source": "GitHub Issue #145",
+      "kind": "paragraph",
+      "start_line": 88,
+      "sha256": "53dbf53eaf3ff9ca86e0b783faba987c7d20d22fd010f23daa1f0f3c49dbd725",
+      "id": "M247",
+      "archive_char_start": 80241,
+      "archive_char_length": 121
+    },
+    {
+      "source": "GitHub Issue #145",
+      "kind": "paragraph",
+      "start_line": 90,
+      "sha256": "92a84a73891db02b8e6700667789ec8c702bb8244fc7659197a0f5a8cccf4030",
+      "id": "M248",
+      "archive_char_start": 80495,
+      "archive_char_length": 127
+    },
+    {
+      "source": "GitHub Issue #144",
+      "kind": "paragraph",
+      "start_line": 37,
+      "sha256": "f3433efdd75670a5fabe7c99c5df5f9eefcb9b0538d167a0b5ce3d540b0c4502",
+      "id": "M249",
+      "archive_char_start": 80755,
+      "archive_char_length": 157
+    },
+    {
+      "source": "GitHub Issue #144",
+      "kind": "quote",
+      "start_line": 80,
+      "sha256": "57f88fc23b17857c558ee3c19d2f559d89a6c0363a54e74b3bc843086675a514",
+      "id": "M250",
+      "archive_char_start": 81045,
+      "archive_char_length": 286
+    },
+    {
+      "source": "GitHub Issue #144",
+      "kind": "paragraph",
+      "start_line": 90,
+      "sha256": "f9cf0f33a0a9c64d20e0722e471762773809fba5ac21b4362bdf56b7fff61d87",
+      "id": "M251",
+      "archive_char_start": 81464,
+      "archive_char_length": 223
+    },
+    {
+      "source": "GitHub Issue #144",
+      "kind": "paragraph",
+      "start_line": 92,
+      "sha256": "dad23544b5a1d68d5a3883ae265a63f3fb03370448b71b5b88b125421c5e77c3",
+      "id": "M252",
+      "archive_char_start": 81820,
+      "archive_char_length": 129
+    },
+    {
+      "source": "GitHub Issue #144",
+      "kind": "paragraph",
+      "start_line": 94,
+      "sha256": "e3f98e3e7708f6647c98b6f6394003e8f7dda73795a667d62a36a32ef1f6a34a",
+      "id": "M253",
+      "archive_char_start": 82082,
+      "archive_char_length": 90
+    },
+    {
+      "source": "GitHub Issue #144",
+      "kind": "paragraph",
+      "start_line": 100,
+      "sha256": "6f0bdafeb325b511b5f555a05d567667d7bf8b93a817db20a5c80bb707d85e69",
+      "id": "M254",
+      "archive_char_start": 82306,
+      "archive_char_length": 82
+    },
+    {
+      "source": "GitHub Issue #144",
+      "kind": "quote",
+      "start_line": 109,
+      "sha256": "cdf37a8b970e335d2ac88c4b7bdb5b3e0cb303aee5c27bab57839c095544fabb",
+      "id": "M255",
+      "archive_char_start": 82522,
+      "archive_char_length": 158
+    },
+    {
+      "source": "GitHub Issue #141",
+      "kind": "quote",
+      "start_line": 3,
+      "sha256": "70106eeeba5aa34a057422da0959a032dc3c36650c781aca74d44139be6ed179",
+      "id": "M256",
+      "archive_char_start": 82812,
+      "archive_char_length": 111
+    },
+    {
+      "source": "GitHub Issue #141",
+      "kind": "paragraph",
+      "start_line": 29,
+      "sha256": "609be1169560ece6d4fc5deecba1b8e6a881d8846d8a327cd5d1fb3ca74d8305",
+      "id": "M257",
+      "archive_char_start": 83056,
+      "archive_char_length": 325
+    },
+    {
+      "source": "GitHub Issue #139",
+      "kind": "quote",
+      "start_line": 203,
+      "sha256": "36e08296fd35e5879f149608f264790c833163548482d357d25687e61619d4f9",
+      "id": "M258",
+      "archive_char_start": 83515,
+      "archive_char_length": 112
+    },
+    {
+      "source": "GitHub Issue #139",
+      "kind": "paragraph",
+      "start_line": 213,
+      "sha256": "8d58f30b40224158d399a650c10b620c3d766c95a2e24b598fc6aebdadab6f6b",
+      "id": "M259",
+      "archive_char_start": 83761,
+      "archive_char_length": 125
+    },
+    {
+      "source": "GitHub Issue #139",
+      "kind": "paragraph",
+      "start_line": 234,
+      "sha256": "f3cb7486141901bbc8f7b9a4fa80e6167c876a7a3388ba9d440545b6a506a1d6",
+      "id": "M260",
+      "archive_char_start": 84020,
+      "archive_char_length": 99
+    },
+    {
+      "source": "GitHub Issue #139",
+      "kind": "quote",
+      "start_line": 255,
+      "sha256": "b44baf49430844ae7ef04a2f2e1f8cd8e1146df368282e879804557e57b98cdb",
+      "id": "M261",
+      "archive_char_start": 84253,
+      "archive_char_length": 1410
+    },
+    {
+      "source": "GitHub Issue #120",
+      "kind": "paragraph",
+      "start_line": 3,
+      "sha256": "ab0e345bd649cc8c0c411f55700af44a1c9ab23a7639a89d08b482a120ec3371",
+      "id": "M262",
+      "archive_char_start": 85795,
+      "archive_char_length": 193
+    },
+    {
+      "source": "GitHub Issue #120",
+      "kind": "paragraph",
+      "start_line": 15,
+      "sha256": "ebe60e15fd9f39747b252102efd4f9a46dec994e834163347c81292e77bebe61",
+      "id": "M263",
+      "archive_char_start": 86121,
+      "archive_char_length": 84
+    },
+    {
+      "source": "GitHub Issue #120",
+      "kind": "item",
+      "start_line": 35,
+      "sha256": "8a2d41f059853077bbe9bd2bd6360c264442b4a35afe07d8dfc253328b8114a4",
+      "id": "M264",
+      "archive_char_start": 86338,
+      "archive_char_length": 44
+    },
+    {
+      "source": "GitHub Issue #120",
+      "kind": "item",
+      "start_line": 36,
+      "sha256": "2ecb54f90596a2293fe8da6322708cad4795c61e61b8421ed0f5a54968b6269e",
+      "id": "M265",
+      "archive_char_start": 86515,
+      "archive_char_length": 89
+    },
+    {
+      "source": "GitHub Issue #120",
+      "kind": "item",
+      "start_line": 37,
+      "sha256": "b6be82f6f6ed2071e4c8c372173cc3730f427d83ac6bf8ace8d607b14d96b052",
+      "id": "M266",
+      "archive_char_start": 86737,
+      "archive_char_length": 48
+    },
+    {
+      "source": "GitHub Issue #120",
+      "kind": "item",
+      "start_line": 207,
+      "sha256": "07bdcda1e9e49ada28be32ec9f26b358b9aa393aca42b794dcfc1d968189ead9",
+      "id": "M267",
+      "archive_char_start": 86919,
+      "archive_char_length": 150
+    },
+    {
+      "source": "GitHub Issue #120",
+      "kind": "item",
+      "start_line": 239,
+      "sha256": "2f209f7d65aa980bd226e376ee99287fbebe0e7b32b6d5a77cd4b9faab17b965",
+      "id": "M268",
+      "archive_char_start": 87203,
+      "archive_char_length": 58
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "paragraph",
+      "start_line": 227,
+      "sha256": "3bed190171872b52292b610654c55c3b7260d5a81a40f6cd49df79961324bd5f",
+      "id": "M269",
+      "archive_char_start": 87395,
+      "archive_char_length": 88
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "item",
+      "start_line": 233,
+      "sha256": "4dab929b53c9b9030af7967ca041f02c2fc6a67aea8c458110422a9d531d912d",
+      "id": "M270",
+      "archive_char_start": 87617,
+      "archive_char_length": 48
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "item",
+      "start_line": 277,
+      "sha256": "4c2acca57f71a477de53f5ce5662cafdf6ce0e5202cff5f0e3fa9a3f3da67086",
+      "id": "M271",
+      "archive_char_start": 87799,
+      "archive_char_length": 71
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "item",
+      "start_line": 372,
+      "sha256": "07bdcda1e9e49ada28be32ec9f26b358b9aa393aca42b794dcfc1d968189ead9",
+      "id": "M272",
+      "archive_char_start": 88004,
+      "archive_char_length": 150
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "paragraph",
+      "start_line": 399,
+      "sha256": "497b448d3ea8cc37cd4d8ebd7b84bdadd27db8da87c7ff41a1d1a662a3a3362e",
+      "id": "M273",
+      "archive_char_start": 88288,
+      "archive_char_length": 78
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "item",
+      "start_line": 404,
+      "sha256": "2f209f7d65aa980bd226e376ee99287fbebe0e7b32b6d5a77cd4b9faab17b965",
+      "id": "M274",
+      "archive_char_start": 88500,
+      "archive_char_length": 58
+    },
+    {
+      "source": "GitHub Issue #103",
+      "kind": "paragraph",
+      "start_line": 99,
+      "sha256": "13a49f2f578328f2c6a4793b169147757c12cbbd454aeb592fa7a5a711a48bc0",
+      "id": "M275",
+      "archive_char_start": 88691,
+      "archive_char_length": 111
+    },
+    {
+      "source": "GitHub Issue #103",
+      "kind": "paragraph",
+      "start_line": 163,
+      "sha256": "e698d6535f461254478570b210ddbb6cf00eb8bde6a9c32c077533b1ffa6b7a7",
+      "id": "M276",
+      "archive_char_start": 88936,
+      "archive_char_length": 151
+    },
+    {
+      "source": "GitHub Issue #97",
+      "kind": "item",
+      "start_line": 62,
+      "sha256": "f35e69c30c288c5705fd192acd393639779c2d93dc4d15c9e4456e3b9100190b",
+      "id": "M277",
+      "archive_char_start": 89219,
+      "archive_char_length": 57
+    },
+    {
+      "source": "GitHub Issue #87",
+      "kind": "item",
+      "start_line": 8,
+      "sha256": "b0e2acf7c7de96904699d8aa0548ae44cc1d1d18cad3ecb082b1c46c4d6af7fb",
+      "id": "M278",
+      "archive_char_start": 89407,
+      "archive_char_length": 73
+    },
+    {
+      "source": "GitHub Issue #58",
+      "kind": "item",
+      "start_line": 69,
+      "sha256": "b0c00b651a07b2d6daa24c26159c7545ec77ebac42c3fe5b5e0e343268262638",
+      "id": "M279",
+      "archive_char_start": 89612,
+      "archive_char_length": 43
+    },
+    {
+      "source": "GitHub Issue #49",
+      "kind": "item",
+      "start_line": 106,
+      "sha256": "07bdcda1e9e49ada28be32ec9f26b358b9aa393aca42b794dcfc1d968189ead9",
+      "id": "M280",
+      "archive_char_start": 89788,
+      "archive_char_length": 150
+    },
+    {
+      "source": "GitHub Issue #49",
+      "kind": "item",
+      "start_line": 138,
+      "sha256": "2f209f7d65aa980bd226e376ee99287fbebe0e7b32b6d5a77cd4b9faab17b965",
+      "id": "M281",
+      "archive_char_start": 90071,
+      "archive_char_length": 58
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "context",
+      "start_line": 51,
+      "sha256": "0bbedeb327047a92deecde43b394f78b80b130c069d78caf0e3f2e4335aca9fb",
+      "id": "M282",
+      "archive_char_start": 90303,
+      "archive_char_length": 604
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "context",
+      "start_line": 63,
+      "sha256": "9edff38be452c3dbd51e880362fa2b696074349c42726ae67fccb429c9220232",
+      "id": "M283",
+      "archive_char_start": 91081,
+      "archive_char_length": 150
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "context",
+      "start_line": 67,
+      "sha256": "b1d7ad946027539be45d30115ea8f3592f6b1c1b72b7214c2decfbfab3566052",
+      "id": "M284",
+      "archive_char_start": 91405,
+      "archive_char_length": 48
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "context",
+      "start_line": 68,
+      "sha256": "2ecedd35bc95d4d224c2026d05d8d9d15c0c07f5ff45e43421965fe6134fb19a",
+      "id": "M285",
+      "archive_char_start": 91627,
+      "archive_char_length": 107
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "context",
+      "start_line": 70,
+      "sha256": "117f6e21555dc56066996b2da3f6c6f2af2c0413de0ab61da7c22aa856683b4b",
+      "id": "M286",
+      "archive_char_start": 91908,
+      "archive_char_length": 55
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "context",
+      "start_line": 71,
+      "sha256": "27944fbc46158f419dad0047b6e0e72a2c805f307c54c3d86c2515ae2e112d00",
+      "id": "M287",
+      "archive_char_start": 92137,
+      "archive_char_length": 87
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "context",
+      "start_line": 73,
+      "sha256": "6bb8e15ee25dac5de2ea796603971b52083ecfbea6951097e52048e73c0d8df0",
+      "id": "M288",
+      "archive_char_start": 92398,
+      "archive_char_length": 36
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/quickstart.md",
+      "kind": "context",
+      "start_line": 75,
+      "sha256": "64d1a09ebf8b9e3d8fe78e18e24d1fb6df72b762c1fab18e13b26ae9d51d8ece",
+      "id": "M289",
+      "archive_char_start": 92608,
+      "archive_char_length": 168
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/spec.md",
+      "kind": "context",
+      "start_line": 36,
+      "sha256": "a997967ad6a44be7dfbab65628463ec585e991582dbf98bd6071cd22babab8c3",
+      "id": "M290",
+      "archive_char_start": 92944,
+      "archive_char_length": 80
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/tasks.md",
+      "kind": "context",
+      "start_line": 133,
+      "sha256": "527cabd35eb451954ea1e1c0b085dc8047f3f755774a7337f92d0c889b2e93b9",
+      "id": "M291",
+      "archive_char_start": 93194,
+      "archive_char_length": 249
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 12,
+      "sha256": "7c110ef1380fde1bcc9d06f7bd02be5ce95722cba9ca8a65f0799886b6af56a0",
+      "id": "M292",
+      "archive_char_start": 93634,
+      "archive_char_length": 20
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 14,
+      "sha256": "23689d78fef871f870d40521ddc86a4db59eae13691b05a42e556b2643d222e7",
+      "id": "M293",
+      "archive_char_start": 93845,
+      "archive_char_length": 96
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 15,
+      "sha256": "a1a6fb23825a7e567c8ffc64ebd4d78e3ee22fe054ca11b5ac5ca881d46b3c27",
+      "id": "M294",
+      "archive_char_start": 94132,
+      "archive_char_length": 66
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 16,
+      "sha256": "9b726b51d36edcc374d9c5ece5ef223f9fed6105936bba333504a1997f6d3758",
+      "id": "M295",
+      "archive_char_start": 94389,
+      "archive_char_length": 67
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 18,
+      "sha256": "a63be6640c40e54bfe4c8bf31e10220cf4a85e0c40c3447ece638ecf1eb122ba",
+      "id": "M296",
+      "archive_char_start": 94647,
+      "archive_char_length": 53
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 20,
+      "sha256": "3ca064e4aa67460790884e6bdbc9cd32fab4f8f2fec967c3664d7c467ea673e4",
+      "id": "M297",
+      "archive_char_start": 94891,
+      "archive_char_length": 21
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 24,
+      "sha256": "688d2dab78650f9184c1d851db005e4872aafc783f778bb676217e682b3db6d6",
+      "id": "M298",
+      "archive_char_start": 95103,
+      "archive_char_length": 56
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 26,
+      "sha256": "3d37c1828879a40365b2a48999cafce9752f33f28c26589ddf2fc8095d3335b3",
+      "id": "M299",
+      "archive_char_start": 95350,
+      "archive_char_length": 86
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 27,
+      "sha256": "fe00d72619feffb45f69af530f6810c5fd64cada54dd3c826b57b9cea2d9b098",
+      "id": "M300",
+      "archive_char_start": 95627,
+      "archive_char_length": 62
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 28,
+      "sha256": "db29b1e1df5ce18c31d500a5f341218965b5ff9344874c6ae5e764588b018b8d",
+      "id": "M301",
+      "archive_char_start": 95880,
+      "archive_char_length": 43
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 29,
+      "sha256": "6d5039ce21003ed4c8f327a90540bcd7063238fc024300249c6c727251e4a95e",
+      "id": "M302",
+      "archive_char_start": 96114,
+      "archive_char_length": 13
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 36,
+      "sha256": "c7c13b93c85275f00be65c42b15413750cb5ac93bb7846c0b0985df6c9f97b07",
+      "id": "M303",
+      "archive_char_start": 96318,
+      "archive_char_length": 16
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 43,
+      "sha256": "01a3007978d7ca5d8bd2b1b3fcdf360cd8b827f4bf023d1a7e31dcbec6727375",
+      "id": "M304",
+      "archive_char_start": 96525,
+      "archive_char_length": 86
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 47,
+      "sha256": "be1e1d5ff422f355832f362ff46b50f2ca9abada9e4f0a8963a97f0d630b3b1c",
+      "id": "M305",
+      "archive_char_start": 96802,
+      "archive_char_length": 55
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 49,
+      "sha256": "b1ff4402ce246f2609689d80aa1e094aa53b2763d611a5d22d4c9f380afabd9f",
+      "id": "M306",
+      "archive_char_start": 97048,
+      "archive_char_length": 77
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 51,
+      "sha256": "3e4260a3cb7f3f835a99276567811ec4570aee223da79de8976ffb167e5d551b",
+      "id": "M307",
+      "archive_char_start": 97316,
+      "archive_char_length": 17
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 61,
+      "sha256": "62109d2450ba33032d0c45aa63e94324eb9587238cb82ce599606249e4378be1",
+      "id": "M308",
+      "archive_char_start": 97524,
+      "archive_char_length": 11
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 63,
+      "sha256": "1210fc755dbfa41ef23945f17aea3cec6ffe092132b46c86b302f1dfe3b5c8cb",
+      "id": "M309",
+      "archive_char_start": 97726,
+      "archive_char_length": 48
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 64,
+      "sha256": "208c7599e4accad8b81e3af7f2add26705832d2d821d060bb0b062b85baf71fa",
+      "id": "M310",
+      "archive_char_start": 97965,
+      "archive_char_length": 38
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 65,
+      "sha256": "83a323778689f7b22de466f1652f98650d6780efec2c89d0bb4af9697bbc95b8",
+      "id": "M311",
+      "archive_char_start": 98194,
+      "archive_char_length": 49
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 66,
+      "sha256": "929cba3053ce001f6ee15f63892c3253bcaaab3749439269eee68602aa60b659",
+      "id": "M312",
+      "archive_char_start": 98434,
+      "archive_char_length": 48
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 70,
+      "sha256": "6cf9d1761b20a80db4fa557c9599ca9358e66c1e0e5a8ce0d3a3e03fcfbc7183",
+      "id": "M313",
+      "archive_char_start": 98673,
+      "archive_char_length": 42
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 72,
+      "sha256": "012fe4a00898ee85accd6c6b67b7bf1e5b1bf6ae9cf3482cf6d4d5c932d478b4",
+      "id": "M314",
+      "archive_char_start": 98906,
+      "archive_char_length": 46
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 73,
+      "sha256": "1783d8412bee0ec343cf365d2a067cc5f9a6ceac477afe15c63db87bf77eb45b",
+      "id": "M315",
+      "archive_char_start": 99143,
+      "archive_char_length": 32
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 74,
+      "sha256": "9c8efc4df761ce772ee7700b336e19657303c1bc3b1a32abb353497f5f49a4c2",
+      "id": "M316",
+      "archive_char_start": 99366,
+      "archive_char_length": 41
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 75,
+      "sha256": "f3adcf119b2ae6656e09155ea7a153f2b9075882090a82aa4cb2129e16170b03",
+      "id": "M317",
+      "archive_char_start": 99598,
+      "archive_char_length": 52
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 76,
+      "sha256": "aae5ee0bfe57ab835a9744a70774c65f8223c585fa813246b8e4558420ea7729",
+      "id": "M318",
+      "archive_char_start": 99841,
+      "archive_char_length": 61
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 80,
+      "sha256": "5f45b0dfc6f5d1e8240b1396241f5a2a87739dc1b2007b5fcdba434aeefa8007",
+      "id": "M319",
+      "archive_char_start": 100093,
+      "archive_char_length": 69
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 82,
+      "sha256": "9fba54ea508c9dcd0adc6ed8f7cd3663f8cc2421ac10ddbb4395ba81e0fa5955",
+      "id": "M320",
+      "archive_char_start": 100353,
+      "archive_char_length": 8
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 84,
+      "sha256": "eb7fc3d89f44fced31cac603ead23f012655006551914fe90497f9c7fb8a078c",
+      "id": "M321",
+      "archive_char_start": 100552,
+      "archive_char_length": 59
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 85,
+      "sha256": "1707c0ef4fa4f05d5cf871824e036a500b5855ecfc8db3667488f2e9d4a0be8e",
+      "id": "M322",
+      "archive_char_start": 100802,
+      "archive_char_length": 49
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 86,
+      "sha256": "2796dbb57a57c708a44db3bf37f2bdda170c35e128196601df32e995bd2c25ef",
+      "id": "M323",
+      "archive_char_start": 101042,
+      "archive_char_length": 55
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 87,
+      "sha256": "ecd6809a6b515fef3f0f4a20eb78848a8b0c140c9e2c83eff12ca34c1bd418f5",
+      "id": "M324",
+      "archive_char_start": 101288,
+      "archive_char_length": 44
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 88,
+      "sha256": "8dc1ca9839dfcf110dbe6031335823c41e1a047364466794c7cac20369e99700",
+      "id": "M325",
+      "archive_char_start": 101523,
+      "archive_char_length": 49
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/approved-plan-20261020.md",
+      "kind": "context",
+      "start_line": 89,
+      "sha256": "3ef3f596d4a78be1dde68973dd60dbaa09cca580e165eb5575290984f816069c",
+      "id": "M326",
+      "archive_char_start": 101763,
+      "archive_char_length": 57
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 3,
+      "sha256": "427c6b2856af7ad084e91fab0268021da86861ff6ae541c12d0671eabfb07179",
+      "id": "M327",
+      "archive_char_start": 101992,
+      "archive_char_length": 80
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 5,
+      "sha256": "1586963248652910d4339402ae802fb46715d16f2a5a34069501c6b450147eec",
+      "id": "M328",
+      "archive_char_start": 102244,
+      "archive_char_length": 135
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 7,
+      "sha256": "fda9b3591cf00f97053ec5463ccfda7fd8df5815155b8de8f43c1955fd2b1501",
+      "id": "M329",
+      "archive_char_start": 102551,
+      "archive_char_length": 20
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 9,
+      "sha256": "4ff9879996d14165118a57a4e049b1b066c470dc6f8ca583353f4af66e66d830",
+      "id": "M330",
+      "archive_char_start": 102743,
+      "archive_char_length": 11
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 15,
+      "sha256": "3cdba6af48cd8c182bda93715133ef2d534cdb7422c7b9198298a3468c50b4b0",
+      "id": "M331",
+      "archive_char_start": 102927,
+      "archive_char_length": 94
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 18,
+      "sha256": "50472d05b88238c9970c3c023a463a555572fd324787b6f5a86c98f5f730a2f4",
+      "id": "M332",
+      "archive_char_start": 103194,
+      "archive_char_length": 103
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 20,
+      "sha256": "d865a97033505f388bbc14d99c4737aa6ebccc24702ffa66abcaffc79b86a72f",
+      "id": "M333",
+      "archive_char_start": 103470,
+      "archive_char_length": 47
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 21,
+      "sha256": "3d1c8b33c16388074e3e69a2b5a069abafdc6e999833ab2b38a57e366e02dd1c",
+      "id": "M334",
+      "archive_char_start": 103690,
+      "archive_char_length": 74
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 23,
+      "sha256": "93fb042aab100ba2ea3a1acb7e0cfdffae5cfbb96e37926fc41066b2d18aa80f",
+      "id": "M335",
+      "archive_char_start": 103937,
+      "archive_char_length": 72
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 25,
+      "sha256": "80177f575d0b5f58ba9f96089bc269f0a42f258b824c07a85f99bcbc03e936eb",
+      "id": "M336",
+      "archive_char_start": 104182,
+      "archive_char_length": 41
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 37,
+      "sha256": "a7e6c55b77428bd853897a7919fccf593341adb1657ecf549bc2c467dc621d22",
+      "id": "M337",
+      "archive_char_start": 104396,
+      "archive_char_length": 58
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 38,
+      "sha256": "06b7b6ad2add6f481cdb403257c690360f00be4c58cbb98d997de2dd25c03906",
+      "id": "M338",
+      "archive_char_start": 104627,
+      "archive_char_length": 70
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 39,
+      "sha256": "f39caf3333abf922baefea25e9603a5d4a9a4972ce694d48ad77145f3dfae015",
+      "id": "M339",
+      "archive_char_start": 104870,
+      "archive_char_length": 73
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 43,
+      "sha256": "f49baae6ef8cab6e1f40371004944f0f21c97708d34b0464bfc4c2398f1420fc",
+      "id": "M340",
+      "archive_char_start": 105116,
+      "archive_char_length": 37
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 45,
+      "sha256": "22b24f8eec13228491cbacfe34ba3523e7db0ba5be555afbb2a76def70824c76",
+      "id": "M341",
+      "archive_char_start": 105326,
+      "archive_char_length": 73
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 46,
+      "sha256": "39aef667fd36cac9d2c21bae561d96748d540324194cbde8591a77f9a6565db2",
+      "id": "M342",
+      "archive_char_start": 105572,
+      "archive_char_length": 57
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 47,
+      "sha256": "f075552644c4ec5ce7bc11c7510216e762a31a845b2fe81318e7d67b3b342371",
+      "id": "M343",
+      "archive_char_start": 105802,
+      "archive_char_length": 60
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 51,
+      "sha256": "81b75c670170cd3f30132cda1b3945d392767a6f46051635fa17ffe639315bbf",
+      "id": "M344",
+      "archive_char_start": 106035,
+      "archive_char_length": 61
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 53,
+      "sha256": "80705003fac084d2f0da981af57cf7a7375ef36c548e3badbe17fd6398d59546",
+      "id": "M345",
+      "archive_char_start": 106269,
+      "archive_char_length": 110
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 54,
+      "sha256": "03a79d75dc24b7f49eb058c00602f8847d7899f2ef5b2e27e8eb11e38780c579",
+      "id": "M346",
+      "archive_char_start": 106552,
+      "archive_char_length": 60
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 55,
+      "sha256": "bedfd440e6c62a5d6a3890c0184834bb719a02d2fe307f5b6b07c98d0e9f2040",
+      "id": "M347",
+      "archive_char_start": 106785,
+      "archive_char_length": 70
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 56,
+      "sha256": "a919c2274944bcb3fadab661900a3c4c898cfb16f1f1d840fe7a72698bc2c4f2",
+      "id": "M348",
+      "archive_char_start": 107028,
+      "archive_char_length": 69
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 57,
+      "sha256": "08d7143bd275a46fffdffad91069b8d9c8fbdafac0a0a0fdb0ba36d4442e39f1",
+      "id": "M349",
+      "archive_char_start": 107270,
+      "archive_char_length": 55
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 61,
+      "sha256": "77886f1a41be434b526d75370adb768d1b13aecac6bfef2bff3cdca579b050d2",
+      "id": "M350",
+      "archive_char_start": 107498,
+      "archive_char_length": 162
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 65,
+      "sha256": "1c884054926dd0f3b6e1a7b9f0541475f9056cee3880b17c51034f58442122c7",
+      "id": "M351",
+      "archive_char_start": 107833,
+      "archive_char_length": 70
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 67,
+      "sha256": "d158bb7d7293e2ce1f220a505e92aed42c3c4177a9588792d917d9f1ef3c89bf",
+      "id": "M352",
+      "archive_char_start": 108076,
+      "archive_char_length": 112
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 68,
+      "sha256": "774fb61d6f80c56dba3fd4f6d95d1cab58e24ef81689c83b92e799e38919f744",
+      "id": "M353",
+      "archive_char_start": 108361,
+      "archive_char_length": 111
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 69,
+      "sha256": "81154e9d4d80062e9b4be40485a1b2e84e2618efd5bc009126e89de0c592f596",
+      "id": "M354",
+      "archive_char_start": 108645,
+      "archive_char_length": 84
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 73,
+      "sha256": "0524e5f7a5c0bc94c0c679a19b480944301f978c6f2b0beda52e9a180397a317",
+      "id": "M355",
+      "archive_char_start": 108902,
+      "archive_char_length": 44
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 74,
+      "sha256": "c22af6db2003aceb1e5fb35c2b547503bd32d71e4af3eb1b41ca29eb726d98af",
+      "id": "M356",
+      "archive_char_start": 109119,
+      "archive_char_length": 44
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 75,
+      "sha256": "6661c0643b8cee337a639678ab1b2519e238e483579e709846008934fe2ed35b",
+      "id": "M357",
+      "archive_char_start": 109336,
+      "archive_char_length": 44
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 76,
+      "sha256": "3ccd086ed8312b65be973079a4f510620a7d09a5a9c7ab2d91eac517d66297bc",
+      "id": "M358",
+      "archive_char_start": 109553,
+      "archive_char_length": 58
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 77,
+      "sha256": "61e7de3ae21233698a8f883f818e336703fc1e6aac88d2f700648b66f42425e7",
+      "id": "M359",
+      "archive_char_start": 109784,
+      "archive_char_length": 39
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 78,
+      "sha256": "d3ef3925a346e85efcfe09fa72a9c23dac68e2660a7248d0993d8632fc435e1f",
+      "id": "M360",
+      "archive_char_start": 109996,
+      "archive_char_length": 59
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 79,
+      "sha256": "7decc78459c6e1f0901cae14296ead8309b16d081c3729aed2177fd538bf7194",
+      "id": "M361",
+      "archive_char_start": 110228,
+      "archive_char_length": 31
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 80,
+      "sha256": "d91eb741d327a3f0021f8ae52855cdcf3915685f5511c45454d91f91371f8d60",
+      "id": "M362",
+      "archive_char_start": 110432,
+      "archive_char_length": 423
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 86,
+      "sha256": "32bcfc9f6e85eac7eb40e3aab3bd6f2c2c22fa2148a7f8c1c7daa912b543e618",
+      "id": "M363",
+      "archive_char_start": 111028,
+      "archive_char_length": 84
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 88,
+      "sha256": "641189bf2119a204b0478801e7b6962ac3718f94dc723a4a909847242ef3c79c",
+      "id": "M364",
+      "archive_char_start": 111285,
+      "archive_char_length": 130
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 89,
+      "sha256": "2e40be571c12f22480963eb803833e16a05b67371898061f7c6b23fa1bb83de7",
+      "id": "M365",
+      "archive_char_start": 111588,
+      "archive_char_length": 133
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 90,
+      "sha256": "4d28e759e09994963037c2a8db1693551bb81c03ebdf30aaab76c2409d4067b4",
+      "id": "M366",
+      "archive_char_start": 111894,
+      "archive_char_length": 137
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 91,
+      "sha256": "5dbfc1305f25ed0b1f8e38e2f526298272d185325e28c59d9164384a0b91a4d8",
+      "id": "M367",
+      "archive_char_start": 112204,
+      "archive_char_length": 96
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 92,
+      "sha256": "af1ad2dbf210b38d65dedcf339da2978556595a42949fd8c69295a1f2fb505c9",
+      "id": "M368",
+      "archive_char_start": 112473,
+      "archive_char_length": 116
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 93,
+      "sha256": "09d5b72498286e1927a4aa49840b9e76a1f3fdf564ae92f71dce39497721cf37",
+      "id": "M369",
+      "archive_char_start": 112762,
+      "archive_char_length": 165
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 94,
+      "sha256": "a59e29551d0a156319715f94ab7cbabe7f21d97081254fd3b40e6a296c3d64e7",
+      "id": "M370",
+      "archive_char_start": 113100,
+      "archive_char_length": 158
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 95,
+      "sha256": "6b733485c246b6225a38ac976b2bb1ddd6fdbf7944e6d687f725813b281a1a83",
+      "id": "M371",
+      "archive_char_start": 113431,
+      "archive_char_length": 141
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 96,
+      "sha256": "73f3554662e2a6f0a03e843f4efa0046c138eeaa4bcd69b1d4aa7b1fbb13f42c",
+      "id": "M372",
+      "archive_char_start": 113745,
+      "archive_char_length": 94
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 101,
+      "sha256": "4b24d18918e4e5c7497504f0605ec802740fb0f83f2097e997913ba59000f474",
+      "id": "M373",
+      "archive_char_start": 114013,
+      "archive_char_length": 112
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 103,
+      "sha256": "456ca45ca23e55a5bd4e8d7ef47ae19a7f0f3641f527aa854618540bb8fe5bd9",
+      "id": "M374",
+      "archive_char_start": 114299,
+      "archive_char_length": 183
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 104,
+      "sha256": "2e7907097d16cddfde78f909539aea4485ec9783f9dfa6bfebe43388aeaf0ffc",
+      "id": "M375",
+      "archive_char_start": 114656,
+      "archive_char_length": 119
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 108,
+      "sha256": "0b670de3c9960cf5da8c1a7a3da295fb0be0fe5289ab501670bf9783a0557721",
+      "id": "M376",
+      "archive_char_start": 114949,
+      "archive_char_length": 81
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 110,
+      "sha256": "728942d7c8b406d92339037cb0d5f765011a83f8b8aa249d2f30664fce24c573",
+      "id": "M377",
+      "archive_char_start": 115204,
+      "archive_char_length": 53
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 111,
+      "sha256": "4fa38db9694abee1e9c3a33435337c4726b93b2e25e37b68cc7ad74611960ba1",
+      "id": "M378",
+      "archive_char_start": 115431,
+      "archive_char_length": 64
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 117,
+      "sha256": "37e54e72b1a5708334a988b8ce60559ed50516216159e88e90549f2af815afe1",
+      "id": "M379",
+      "archive_char_start": 115669,
+      "archive_char_length": 37
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 118,
+      "sha256": "f7072e76b3567642e0e0c2aa622a96b1722959f40192c35711a81e085d69691c",
+      "id": "M380",
+      "archive_char_start": 115880,
+      "archive_char_length": 106
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 119,
+      "sha256": "fdd91c73a3c6bcea0c7bea0c62e6df63e72f80ef8021f447ff67c68de48f3fe6",
+      "id": "M381",
+      "archive_char_start": 116160,
+      "archive_char_length": 80
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 120,
+      "sha256": "a59ff6174cf75d700bcc2ce175bde611691ba227c965fdf54756849cc9dad002",
+      "id": "M382",
+      "archive_char_start": 116414,
+      "archive_char_length": 73
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 121,
+      "sha256": "b74f0db299eb0a25fcb9debdadd0e0abb09e5477c84db56aa60477930f79bfb6",
+      "id": "M383",
+      "archive_char_start": 116661,
+      "archive_char_length": 80
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 122,
+      "sha256": "826a76b28cd7509b9d1cebf96557ee42b99060f98c2078b4373539a2d667dbeb",
+      "id": "M384",
+      "archive_char_start": 116915,
+      "archive_char_length": 73
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 128,
+      "sha256": "6008b18cc8c7bef705d5b4fc9e6d63432ead7accb68dfb51c5cb239ce1c6c30c",
+      "id": "M385",
+      "archive_char_start": 117162,
+      "archive_char_length": 219
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 130,
+      "sha256": "8f3060cf98d4b09bbe3580040922d811976af478073752feabf385c215403677",
+      "id": "M386",
+      "archive_char_start": 117555,
+      "archive_char_length": 106
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 131,
+      "sha256": "4aaa1ec7ebe8bbe2150bd1b6fb1b17ce262dd9d2d01caae255f1d40cdc80efc5",
+      "id": "M387",
+      "archive_char_start": 117835,
+      "archive_char_length": 88
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 132,
+      "sha256": "b3ea59324a20831c85e982c90d93784470059e8d55a3e8d2764a1e80ab45ec0b",
+      "id": "M388",
+      "archive_char_start": 118097,
+      "archive_char_length": 77
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 134,
+      "sha256": "e268c153c8e2cb7f6d8e0da69905f615e90e5474ef017ced159bb12866b99b17",
+      "id": "M389",
+      "archive_char_start": 118348,
+      "archive_char_length": 105
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 135,
+      "sha256": "effa4f090a6a661a0d7f7ca99be9bb5aebccbd717ccfe1570d82f0ab05dc3ef8",
+      "id": "M390",
+      "archive_char_start": 118627,
+      "archive_char_length": 134
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 136,
+      "sha256": "6c9e9638da8c883849b647f05ae161f5c00cecf5e15e256c0516be0031900935",
+      "id": "M391",
+      "archive_char_start": 118935,
+      "archive_char_length": 92
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 138,
+      "sha256": "391ee780edd500a4ba80b8277d06d0862110a7a2d11ecb73642a795d76844e49",
+      "id": "M392",
+      "archive_char_start": 119201,
+      "archive_char_length": 68
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 139,
+      "sha256": "b3772cbc94033fd033834f099ac6fb4c3dfacf1b07108f4191c3d20fd9c48d40",
+      "id": "M393",
+      "archive_char_start": 119443,
+      "archive_char_length": 83
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 143,
+      "sha256": "a14c671f1a67d8e8208bcce0c30227c3d1c86e9ced9d40d996c8ccc37231a35b",
+      "id": "M394",
+      "archive_char_start": 119700,
+      "archive_char_length": 118
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 155,
+      "sha256": "3ec8350b77f20d87fdeb217389b6dfb9223feb186c83168acd26cdce8584c25c",
+      "id": "M395",
+      "archive_char_start": 119992,
+      "archive_char_length": 2089
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 189,
+      "sha256": "f74a1070acd74d65b11abf5bb166a35087e1a5f0f236162ffc2ea75c55c2ab04",
+      "id": "M396",
+      "archive_char_start": 122255,
+      "archive_char_length": 152
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 205,
+      "sha256": "bf87245c2087d41bc32010fbf1d64e885c36081dafb8ee30c853d042ab860aaf",
+      "id": "M397",
+      "archive_char_start": 122581,
+      "archive_char_length": 117
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 209,
+      "sha256": "d294af95dec65cc0ccaf89bf15307e57d02f3f8caae60c6edd9272cb713d98db",
+      "id": "M398",
+      "archive_char_start": 122872,
+      "archive_char_length": 65
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 210,
+      "sha256": "87b43c0aee1376af65e63c92d9b9b5d45a7a3fa87dc26d243245c192a91abe4a",
+      "id": "M399",
+      "archive_char_start": 123111,
+      "archive_char_length": 68
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 211,
+      "sha256": "73885cf32051d6d08f2774d556e2b9aa0ad6cf93cab008acaaa3dc8ce816a819",
+      "id": "M400",
+      "archive_char_start": 123353,
+      "archive_char_length": 56
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 215,
+      "sha256": "0e2eb1a2e952956761ca06fc0253ce079d37bb7d82223330b908cb537eefcf7b",
+      "id": "M401",
+      "archive_char_start": 123583,
+      "archive_char_length": 120
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 216,
+      "sha256": "c48a81b935f7f4479a256d8c1bd599a7ffde0fbd96ac1de39daa72b5a88f9a90",
+      "id": "M402",
+      "archive_char_start": 123877,
+      "archive_char_length": 84
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 220,
+      "sha256": "9328e841205a877670d99e75c53c0fc521c2c35221018d633c7312e9d07712b1",
+      "id": "M403",
+      "archive_char_start": 124135,
+      "archive_char_length": 68
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 221,
+      "sha256": "7e53a268382855524e0d38b13a5bad9ead1ebd588d5372ed5f8f71d415d1850a",
+      "id": "M404",
+      "archive_char_start": 124377,
+      "archive_char_length": 77
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 223,
+      "sha256": "8bcf14a6972b0cd65f6e5879ac3f6182ac01d2d77147b0ac6bcd36b07cf7b68d",
+      "id": "M405",
+      "archive_char_start": 124628,
+      "archive_char_length": 117
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 224,
+      "sha256": "8980fb423d56a5f981ae4636f51b2a2b043c234dcd827d2a8d50550641598c57",
+      "id": "M406",
+      "archive_char_start": 124919,
+      "archive_char_length": 107
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 225,
+      "sha256": "b1414622d77fe4e00b5562e9ddeccbc0fc5cada7bec0fb4e07c446f6542d8a71",
+      "id": "M407",
+      "archive_char_start": 125200,
+      "archive_char_length": 114
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 226,
+      "sha256": "1b25b4c94b6bb30260a9188645f18a62ecbd973553981948694be0a452f968ce",
+      "id": "M408",
+      "archive_char_start": 125488,
+      "archive_char_length": 106
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 227,
+      "sha256": "0ddb78d76c74c62a1d9dfc61cf4eaee0de14f76197098fc90003ee7519de78b9",
+      "id": "M409",
+      "archive_char_start": 125768,
+      "archive_char_length": 108
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 228,
+      "sha256": "8ee3c00bbff13bd4e972a45cb45814a5cc263e227b4cade9b7a3340d10707c95",
+      "id": "M410",
+      "archive_char_start": 126050,
+      "archive_char_length": 115
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 229,
+      "sha256": "195b855943186eae300845b5ca619ecf833c3c88ebeca77174d6dd88ebd9a3c1",
+      "id": "M411",
+      "archive_char_start": 126339,
+      "archive_char_length": 107
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 231,
+      "sha256": "cc28176432f00c9538a4d1f45f12b811744c563a4970e47e8de817e4a10d484b",
+      "id": "M412",
+      "archive_char_start": 126620,
+      "archive_char_length": 73
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 232,
+      "sha256": "2945e9d994afaf335c6d57be0acad1efeeecfed24ae95c734e5a58f63003c42b",
+      "id": "M413",
+      "archive_char_start": 126867,
+      "archive_char_length": 49
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 233,
+      "sha256": "cbf5404822a0ec5c248a6daf827ff028eeda2a8d72d071c234182d95ca7b0e35",
+      "id": "M414",
+      "archive_char_start": 127090,
+      "archive_char_length": 84
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 234,
+      "sha256": "8971d7af37576fbe88392410a5dae75b9dd7887067fcb7331aac6015a91423c3",
+      "id": "M415",
+      "archive_char_start": 127348,
+      "archive_char_length": 63
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 238,
+      "sha256": "004c0c071506c069ea45355bb3f26eb40b2894806e426a35eaf2d36c7d3b2f7c",
+      "id": "M416",
+      "archive_char_start": 127585,
+      "archive_char_length": 111
+    },
+    {
+      "source": "docs/specs/120-upload-llm-extraction-quality/spec.md",
+      "kind": "context",
+      "start_line": 242,
+      "sha256": "a96593c126525acd1f0189a92a3b97b53d6bc1042930f75566ec860a8c64795b",
+      "id": "M417",
+      "archive_char_start": 127870,
+      "archive_char_length": 100
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 110,
+      "sha256": "fd01f6b1978ab9d18c9569f370dae59778da0a07b9a82ae83a11607d95e08405",
+      "id": "M418",
+      "archive_char_start": 128145,
+      "archive_char_length": 188
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 112,
+      "sha256": "afef251eabe439572cfa265022086bc36c8ac932f1c60a92f7870d569612a85e",
+      "id": "M419",
+      "archive_char_start": 128508,
+      "archive_char_length": 95
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 114,
+      "sha256": "23cbe60b94d71bc3634cfb04656aac624af64f81a5bb61d4058480ef78dc1349",
+      "id": "M420",
+      "archive_char_start": 128778,
+      "archive_char_length": 44
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 115,
+      "sha256": "0a59f5229644539ef3c41a3e52d21d60e5dcfdd43e27cfc649f17a20f2766e2d",
+      "id": "M421",
+      "archive_char_start": 128997,
+      "archive_char_length": 90
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 116,
+      "sha256": "ccc33ecff9dbaf67303e3e5e91ba8a1e277be429a2d9c6cc520890c1f0012a3a",
+      "id": "M422",
+      "archive_char_start": 129262,
+      "archive_char_length": 37
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 122,
+      "sha256": "8727ce86ffcf347d7ca784d5bf660427d1e552f1eb6f6b5d8735fd7686a69b9e",
+      "id": "M423",
+      "archive_char_start": 129474,
+      "archive_char_length": 256
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 126,
+      "sha256": "22e08b2c09558b42c089224e47c09b87c0f2895d5a6db09e540b8d9b5d8ad38f",
+      "id": "M424",
+      "archive_char_start": 129905,
+      "archive_char_length": 99
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 130,
+      "sha256": "c3fa35b66940cc947777d955ac7920a3137edc495ef1026bab5971aa46000b7a",
+      "id": "M425",
+      "archive_char_start": 130179,
+      "archive_char_length": 88
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 132,
+      "sha256": "d5adefd810a7d7c5793b3a7c7a19b932da08ff03bf8e8255696e1df61d12334a",
+      "id": "M426",
+      "archive_char_start": 130442,
+      "archive_char_length": 132
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 134,
+      "sha256": "7ce5fdd239109f29f6aee52dd8f9ea047e4415d52bda94bbdeae06ce84907b90",
+      "id": "M427",
+      "archive_char_start": 130749,
+      "archive_char_length": 139
+    },
+    {
+      "source": "docs/specs/144-review-save-lifecycle/investigation.md",
+      "kind": "context",
+      "start_line": 136,
+      "sha256": "4b9d30df4cb9205714c831ebef0ff6ba64708fc6083d07852c5f29084eb55f3c",
+      "id": "M428",
+      "archive_char_start": 131063,
+      "archive_char_length": 56
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/red-marking.md",
+      "kind": "context",
+      "start_line": 1,
+      "sha256": "76ba5fd91f112486cf91fba3dd798633f73129a8f30bf76e9f0c6555975094be",
+      "id": "M429",
+      "archive_char_start": 131292,
+      "archive_char_length": 4761
+    },
+    {
+      "source": "docs/specs/145-field-review-efficiency/validation.md",
+      "kind": "context",
+      "start_line": 49,
+      "sha256": "2a66413a4f46b289b0649637a39b4d70464a0e2100e7a3f1c2809ab92bbd4561",
+      "id": "M430",
+      "archive_char_start": 136226,
+      "archive_char_length": 145
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 3,
+      "sha256": "29ebbab29642ded585072f2ce24bdacb099b682f82748fba44e0cebf1ade1f76",
+      "id": "M431",
+      "archive_char_start": 136557,
+      "archive_char_length": 143
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 9,
+      "sha256": "4ed186a3ebbb0bcd0078c6885b5bb9d37606feddd85b17264e0d871590b7d8a6",
+      "id": "M432",
+      "archive_char_start": 136886,
+      "archive_char_length": 38
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 13,
+      "sha256": "8c4d892439a50d194bd0cbade915ff0029829b8bb377351aabd371b3d516c25d",
+      "id": "M433",
+      "archive_char_start": 137111,
+      "archive_char_length": 163
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 17,
+      "sha256": "4cc5c9abf7ba5d4bbb9b441296b52798c520c898d43dbf9748011806fe13ffaf",
+      "id": "M434",
+      "archive_char_start": 137461,
+      "archive_char_length": 114
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 33,
+      "sha256": "babbc31ef80153079b976f09d441a0a6ea3f553a5b56cb9e6a08bd6f4cac1ab9",
+      "id": "M435",
+      "archive_char_start": 137762,
+      "archive_char_length": 98
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 37,
+      "sha256": "b0a3a480f0bcb76c0e5829fec7f651fc6ab40c011ed154f03ec7e3626e034a8d",
+      "id": "M436",
+      "archive_char_start": 138047,
+      "archive_char_length": 177
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 46,
+      "sha256": "2166c7d35757728646e96a6030433ee64dd481251ce6da2c534a3327ff4a221b",
+      "id": "M437",
+      "archive_char_start": 138411,
+      "archive_char_length": 161
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 48,
+      "sha256": "553541a7d23ded524c73d6b7a3c0c858bde0d6e9299ba0856a9e131595a04a73",
+      "id": "M438",
+      "archive_char_start": 138759,
+      "archive_char_length": 76
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 50,
+      "sha256": "7af1ea39d6b70fe3f4fcdc9ab55c0526996cd42379dac7986417607f7100b2fb",
+      "id": "M439",
+      "archive_char_start": 139022,
+      "archive_char_length": 114
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/approval-state-regression.md",
+      "kind": "context",
+      "start_line": 52,
+      "sha256": "821b18eab5d738c7077f321162b9c1a2dbeddd2d7046fcfabb0cf2feb9faacfa",
+      "id": "M440",
+      "archive_char_start": 139323,
+      "archive_char_length": 74
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "context",
+      "start_line": 164,
+      "sha256": "d6f69bb5fc78c7f07a59e17de08cd6ebb01a7bf9341d6770ec3ea8fa529fc8c7",
+      "id": "M441",
+      "archive_char_start": 139564,
+      "archive_char_length": 75
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "context",
+      "start_line": 166,
+      "sha256": "0199e4103427dfca542deb0e600a37f3ef686be08d42888006cde3d5e7c72757",
+      "id": "M442",
+      "archive_char_start": 139806,
+      "archive_char_length": 55
+    },
+    {
+      "source": "docs/specs/147-two-stage-field-review/spec.md",
+      "kind": "context",
+      "start_line": 168,
+      "sha256": "a48ce7cca2b2672da928adcd0306e88e5638d912bbeb3c40f9f3e6c275c553fd",
+      "id": "M443",
+      "archive_char_start": 140028,
+      "archive_char_length": 83
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 202,
+      "sha256": "d6f69bb5fc78c7f07a59e17de08cd6ebb01a7bf9341d6770ec3ea8fa529fc8c7",
+      "id": "M444",
+      "archive_char_start": 140250,
+      "archive_char_length": 75
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 204,
+      "sha256": "0199e4103427dfca542deb0e600a37f3ef686be08d42888006cde3d5e7c72757",
+      "id": "M445",
+      "archive_char_start": 140464,
+      "archive_char_length": 55
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 206,
+      "sha256": "a48ce7cca2b2672da928adcd0306e88e5638d912bbeb3c40f9f3e6c275c553fd",
+      "id": "M446",
+      "archive_char_start": 140658,
+      "archive_char_length": 83
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 343,
+      "sha256": "4ed186a3ebbb0bcd0078c6885b5bb9d37606feddd85b17264e0d871590b7d8a6",
+      "id": "M447",
+      "archive_char_start": 140880,
+      "archive_char_length": 38
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 347,
+      "sha256": "8c4d892439a50d194bd0cbade915ff0029829b8bb377351aabd371b3d516c25d",
+      "id": "M448",
+      "archive_char_start": 141057,
+      "archive_char_length": 163
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 349,
+      "sha256": "7aa6b0baaaa2b3bfd519f53f5fd9d6a575f16aff337642bb8ccc587b4a00d267",
+      "id": "M449",
+      "archive_char_start": 141359,
+      "archive_char_length": 56
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 351,
+      "sha256": "3f76892bcabd232141b2d6531935720ccef4f3cbb65dbc48d05db3e04b109452",
+      "id": "M450",
+      "archive_char_start": 141554,
+      "archive_char_length": 115
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 357,
+      "sha256": "ea45718a043a0deb58a10a51fd15fb7e67035fc26fea92495ebaf69174fd8b34",
+      "id": "M451",
+      "archive_char_start": 141808,
+      "archive_char_length": 154
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 361,
+      "sha256": "b7a8fc20c337ebe70c29e314c4760f53e15d0781648cc14664b3a94575a0480d",
+      "id": "M452",
+      "archive_char_start": 142101,
+      "archive_char_length": 55
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 362,
+      "sha256": "c2a7eddcec018285e0dd481cb4e40f050dc91e7daca6f94fd891a7890c4a07e1",
+      "id": "M453",
+      "archive_char_start": 142295,
+      "archive_char_length": 30
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 363,
+      "sha256": "8011c7fc29c373c1200d79af7c5a527c45692c21e8412c12909841db1af71eea",
+      "id": "M454",
+      "archive_char_start": 142464,
+      "archive_char_length": 48
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 364,
+      "sha256": "f01aa5afa27a92b1ede988e56ea62e1c6946d10f7fcd58d4a3984d74fd025f69",
+      "id": "M455",
+      "archive_char_start": 142651,
+      "archive_char_length": 28
+    },
+    {
+      "source": "GitHub Issue #147",
+      "kind": "context",
+      "start_line": 367,
+      "sha256": "f52d711103d50a437830c6fbcd04fb4bab49a0f82f6d26d1c791c6e8488dd090",
+      "id": "M456",
+      "archive_char_start": 142818,
+      "archive_char_length": 4
+    },
+    {
+      "source": "GitHub Issue #145",
+      "kind": "context",
+      "start_line": 92,
+      "sha256": "77deaa69d319f7888deb4e7fb58d64b4dda5749b81fc5cf0912045fb0c4a0304",
+      "id": "M457",
+      "archive_char_start": 142960,
+      "archive_char_length": 55
+    },
+    {
+      "source": "GitHub Issue #144",
+      "kind": "context",
+      "start_line": 92,
+      "sha256": "dfe732143256ab84c63aab742aec03a03339c2285260325f2156feeb6fca1683",
+      "id": "M458",
+      "archive_char_start": 143153,
+      "archive_char_length": 128
+    },
+    {
+      "source": "GitHub Issue #144",
+      "kind": "context",
+      "start_line": 96,
+      "sha256": "c476638de19c0daffc9f2830349dccb17cdc9dbeb549e76799973f327a084a64",
+      "id": "M459",
+      "archive_char_start": 143419,
+      "archive_char_length": 234
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 220,
+      "sha256": "4284e1e656a1fd04705db3cf75d1110d3d10df14e572341e7dc07728620b897c",
+      "id": "M460",
+      "archive_char_start": 143792,
+      "archive_char_length": 258
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 225,
+      "sha256": "aef34ff2ca63da7299d5806e3accf80d05e295e04a0d353f357e069e68a32c54",
+      "id": "M461",
+      "archive_char_start": 144189,
+      "archive_char_length": 88
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 229,
+      "sha256": "005e5a6049e34945fb8a95d6314c9966dccc8d3352d4f7f38c176eb7d600d505",
+      "id": "M462",
+      "archive_char_start": 144416,
+      "archive_char_length": 52
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 234,
+      "sha256": "a7b19c6031ef39c000307a470b44bca808060b5d154d1ffe000eaaa7df21160e",
+      "id": "M463",
+      "archive_char_start": 144607,
+      "archive_char_length": 41
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 235,
+      "sha256": "33132514a0982a2bcfc512cd2a1009bb0dd58a1f165a95301af61cc79657f7e3",
+      "id": "M464",
+      "archive_char_start": 144787,
+      "archive_char_length": 48
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 236,
+      "sha256": "ff872d595193ebe021d4f5474cb348233e1c8c3544e245aab4de6a12951e3eb3",
+      "id": "M465",
+      "archive_char_start": 144974,
+      "archive_char_length": 55
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 240,
+      "sha256": "bcc013092bae328cfcd96606d870269c4bb87bec859df42b734ce54f60a3cbea",
+      "id": "M466",
+      "archive_char_start": 145168,
+      "archive_char_length": 60
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 241,
+      "sha256": "ce40f63133c11d8e6cd7cfcf56fe361dd004b02a0bd6fadd43acba2e8bb975d3",
+      "id": "M467",
+      "archive_char_start": 145367,
+      "archive_char_length": 43
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 242,
+      "sha256": "64411506c9caea8051209873042473d2b8af2fb4df15dc3026e1c04fc4385866",
+      "id": "M468",
+      "archive_char_start": 145549,
+      "archive_char_length": 53
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 243,
+      "sha256": "2c2e30b28b9108b3455ed804dcb71c61a2e65a87b1c978965b5d0a2f0eba6390",
+      "id": "M469",
+      "archive_char_start": 145741,
+      "archive_char_length": 51
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 244,
+      "sha256": "9ec1b1a102ffbeb50a6954534cebbab10853b60ebf9d6ee90ee11861be656c13",
+      "id": "M470",
+      "archive_char_start": 145931,
+      "archive_char_length": 44
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 248,
+      "sha256": "617891707734ba1e57a84af246e50ba3546b12402e5a0780c8b4f4999b5ca3b7",
+      "id": "M471",
+      "archive_char_start": 146114,
+      "archive_char_length": 95
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 250,
+      "sha256": "bcaef591e94ed259b2caa1fae8b1ce82e42d7b177a8cdcadb6bc9edadeead9d6",
+      "id": "M472",
+      "archive_char_start": 146348,
+      "archive_char_length": 47
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 254,
+      "sha256": "10510ac87c033c82bf237f321bdf733222981425449185c81a41d48d48725f82",
+      "id": "M473",
+      "archive_char_start": 146534,
+      "archive_char_length": 86
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 255,
+      "sha256": "8f622a1ca1a9cd4645d83012fb3122859db663bb9c38feef9f25f19975d5aed6",
+      "id": "M474",
+      "archive_char_start": 146759,
+      "archive_char_length": 41
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 256,
+      "sha256": "01b30eb6a0be8a5b20bd5d8b66b9144e4ffd78a966a296cfd87e10b579815b87",
+      "id": "M475",
+      "archive_char_start": 146939,
+      "archive_char_length": 35
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 257,
+      "sha256": "6a3355ae5fcf8a729c6057ec929efa272022239f48f9a38c2ba0786c56d89dbc",
+      "id": "M476",
+      "archive_char_start": 147113,
+      "archive_char_length": 65
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 259,
+      "sha256": "ab730547e09f59c11b36fc8181afe80f9de7efb3e803e703e72ca16757af0fb9",
+      "id": "M477",
+      "archive_char_start": 147317,
+      "archive_char_length": 162
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 261,
+      "sha256": "3fc0683ac336c6192915fbb2d2af9bc4556d309824f0aba010fca68bb6e2dcb4",
+      "id": "M478",
+      "archive_char_start": 147618,
+      "archive_char_length": 25
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 265,
+      "sha256": "b2c9241e7ac21756b41f934c0dd4e5fdd53bfbfc1660114806a93b479d33837a",
+      "id": "M479",
+      "archive_char_start": 147782,
+      "archive_char_length": 37
+    },
+    {
+      "source": "GitHub Issue #109",
+      "kind": "context",
+      "start_line": 267,
+      "sha256": "e073d91de235a65fad6ffb84fc3bacbb1594954a6caa63ca37afb882fcb14a27",
+      "id": "M480",
+      "archive_char_start": 147958,
+      "archive_char_length": 5
+    },
+    {
+      "source": "docs/specs/103-property-evidence-review/research.md",
+      "kind": "context",
+      "start_line": 26,
+      "sha256": "38c8d39d143bb5ad69f0203c987a7c40a102eaaaf263c1f8ecbdc07817843475",
+      "id": "M481",
+      "archive_char_start": 148135,
+      "archive_char_length": 152
+    }
+  ]
+}

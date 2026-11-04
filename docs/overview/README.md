@@ -74,7 +74,7 @@ flowchart LR
 
 ## 文档维护
 
-字段名称、类型、单位等核对子项通过所属主字段进入同一侧栏，独立查看与操作；计算适用关系从所属记录的计算条件入口查看。计数按子项统计，红框按主字段汇总。见[字段子项归属](01_Decentralized_Uploading_of_Superconductivity_Data/source-association-review.md#字段子项归属与侧栏入口)。
+字段提示规则及相关历史已迁移至 [#220](../specs/220-field-red-marking/spec.md)，本处不再独立定义。
 
 全站表单的局部更新、稳定身份及回归入口见[表单更新与回归检查](form-processing.md)。当前完整验证优先覆盖四类科学表单，其他页面按入口清单标注覆盖，不扩大宣称全站验收。
 

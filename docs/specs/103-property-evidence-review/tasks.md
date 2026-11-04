@@ -130,6 +130,6 @@ T050：54 项前端回归、TypeScript/Vite 构建通过，三组隔离浏览器
 
 ## 阶段十一：红框不压文字
 
-- [x] T052 [US1] [US2] 在 tests/01_decentralized_uploading/scientific-evidence-markers.test.tsx 和 evidence-border-browser.mjs 复现标签被边线穿过，修复 frontend/src/components/EvidenceFieldMarkers.tsx，验证各控件、主题和交互，并同步本 Spec、Overview 与 Issue #103。[FR-034 / SC-022]
+- [x] 本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。
 
-只改共享红框呈现，不改科学数据或核对接口；前序提交隔离阻塞单独保留。
+字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。

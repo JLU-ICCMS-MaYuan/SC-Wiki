@@ -29,7 +29,7 @@
 | FR-008 / US3 | `model_review.py::review_fields` | 候选差异比较复用科学数值规范化；同值固定失败回放 |
 | FR-009 / US2 | `scientific_evidence.py`、`model_review.py`、`property_evidence.py`、`services/manuscript_handoffs.py` | 临时传完整结构并在公开、保存、交接处剥离；`test_structure_review_input.py` |
 | FR-010 / US2 | `material_state_contract.py::research_materials`、`model_review.py`、`api/rag.py`、`evidence_proposals.py` | 复用旧汇总算法，当前卡片产生只读材料汇总；统一核对回归与真实最终列表 |
-| FR-011 / US2 | `backend/api/evidence.py::field_summary` | 轻量摘要复用apply_derived；MySQL结构派生回归及实际页面0红框 |
+| 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。 | — | — |
 | FR-012 / US3 | 同上 | 对投影小行在程序中排序，不改变当前版本优先；真实大型表单提交后读取通过 |
 | FR-013 / US3 | `backend/services/spectra.py::context` | 首次创建后重读持久body再计算版本；`test_spectrum_initial_workdraft_mysql.py`及真实谱发现任务结束 |
 

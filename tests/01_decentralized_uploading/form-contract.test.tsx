@@ -293,3 +293,27 @@ it.each(['admin', 'superadmin'])('213 %s 完整宿主：失权统一一条警告
   expect(screen.getByRole('button', { name: '提交审核', exact: true })).toBeDisabled()
   expect(api.patch).not.toHaveBeenCalled()
 })
+
+
+it.each(["upload", "revision", "admin", "superadmin"])("220 %s 宿主标红：原免审项实际输入立即红，同值及未改空项不红，保存不消红", async kind => {
+  const record = {key:"empty-doi",item_key:"empty-doi",field:"paper.doi",label:"DOI",current_value:null,
+    status:"unchecked",required:false,human_modified:false,pending_review:false,evidences:[],reason:""}
+  const original = vi.mocked(api.post).getMockImplementation()!
+  vi.mocked(api.post).mockImplementation(async (path, body) => path.endsWith("/summary")
+    ? {version:"v1",records:[record],needs_check:false} as never : original(path,body))
+  await host(kind)
+  const caption = await screen.findByRole("button",{name:"DOI"})
+  expect(caption).toHaveAttribute("data-evidence-caption-problem","false")
+  const input=screen.getByRole("textbox",{name:"DOI"})
+  fireEvent.input(input,{target:{value:""}})
+  expect(caption).toHaveAttribute("data-evidence-caption-problem","false")
+  counters.cards=[]
+  fireEvent.input(input,{target:{value:"10.1234/manual"}})
+  await waitFor(()=>expect(caption).toHaveAttribute("data-evidence-caption-problem","true"))
+  expect(counters.cards).toEqual([])
+  expect(vi.mocked(api.post).mock.calls.filter(([path])=>/jobs|submit-check|preflight/.test(path))).toHaveLength(0)
+  const save=screen.getByRole("button",{name:/立即保存|保存修改|保存更改/})
+  fireEvent.click(save)
+  await waitFor(()=>expect(api.patch).toHaveBeenCalled())
+  expect(caption).toHaveAttribute("data-evidence-caption-problem","true")
+})

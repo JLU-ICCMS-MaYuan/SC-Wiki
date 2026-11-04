@@ -21,7 +21,7 @@
 - [x] T007 [US2] 在`backend/ingest/material_state_contract.py`、`backend/ingest/canonical_structure.py`及`backend/ingest/model_review.py`统一归属前身份，运行`tests/01_decentralized_uploading/test_parsing_state_identity.py`及结构归属回归（FR-006）。
 - [x] T008 [US2] 在`backend/ingest/scientific_evidence.py`、`backend/ingest/model_review.py`、`backend/ingest/property_evidence.py`和`backend/services/manuscript_handoffs.py`传入并剥离临时结构输入，运行`tests/01_decentralized_uploading/test_structure_review_input.py`（FR-009）。
 - [x] T009 [US2] 在`backend/ingest/material_state_contract.py`、`backend/api/rag.py`及`backend/ingest/model_review.py`共用当前材料汇总，在`backend/ingest/evidence_proposals.py`保持其派生只读语义（FR-010）。
-- [x] T010 [US2] 在`backend/api/evidence.py`摘要复用派生规则，以`test_field_decisions_mysql.py`结构场景及真实Chrome证明0误标红和文件变更失效（FR-011）。
+- [x] 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 ## 用户故事3：保存、清理与持久版本
 

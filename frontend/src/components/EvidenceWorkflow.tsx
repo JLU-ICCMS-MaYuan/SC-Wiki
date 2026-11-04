@@ -8,7 +8,7 @@ import ManualEvidenceSection from './ManualEvidenceSection'
 import ScientificAssociations, { type ScientificAssociation } from './ScientificAssociations'
 import DosFermiConflict, { dosRecordForEvidence } from './DosFermiConflict'
 import { hasDosConflict, sameDosValue } from '../lib/fermiDos'
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 import { Alert, Box, Button, LinearProgress, Dialog, DialogActions, DialogContent, DialogTitle, Drawer, IconButton, Snackbar, Tabs, Tab, TextField, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import { api } from '../lib/api'
@@ -37,7 +37,7 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { review_error?: string; review_failure_message?: string; review_in_progress?: boolean; review_followup?: { actions: number; reason: string }; detail_ref?: string; field_decision?: {contract: string; action: 'approve' | 'reject'; actor_user_id: number; actor_name?: string; occurred_at: string}; settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+export interface EvidenceRecord { local_modified?: boolean; manual_pending?: boolean; review_error?: string; review_failure_message?: string; review_in_progress?: boolean; review_followup?: { actions: number; reason: string }; detail_ref?: string; field_decision?: {contract: string; action: 'approve' | 'reject'; actor_user_id: number; actor_name?: string; occurred_at: string}; settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
 interface FieldDetail { record?: Partial<EvidenceRecord>; history?: EvidenceHistory[]; review_token?: string; can_approve?: boolean; approval_state?: 'human_approved' | 'supported' | 'exempt' | 'ready' | 'modification_required' | 'blocked'; approval_message?: string; source_state?: string; candidate?: FieldCandidate | null }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; records?: EvidenceRecord[]; error?: { code: string; message: string } }
@@ -163,6 +163,13 @@ export function useEvidenceWorkflow(options?: {
       && manualValueIdentity(current.value) !== manualValueIdentity(record.current_value))
   }
   const [manualDrafts] = useState(createManualEvidenceDrafts)
+  const manualPendingSignature = useSyncExternalStore(manualDrafts.subscribe, manualDrafts.pendingFieldSignature, () => '[]')
+  const displayRecords = useMemo(() => {
+    if (options?.frozenRecords) return records
+    const pending = new Set<string>(JSON.parse(manualPendingSignature))
+    return records.map(record => pending.has(manualFieldIdentity(options?.target, record))
+      ? { ...record, manual_pending: true } : record)
+  }, [records, manualPendingSignature, options?.target?.target, options?.target?.target_id, options?.frozenRecords])
   useEffect(() => {
     const protect = (event: BeforeUnloadEvent) => {
       if (manualDrafts.hasPending()) { event.preventDefault(); event.returnValue = '' }
@@ -471,7 +478,11 @@ export function useEvidenceWorkflow(options?: {
     try {
       await flushDrafts()
       if (current !== generation.current) return null
-      if (manualDrafts.hasPending(target)) throw new Error(t('evidence.saveManualBeforeSubmit'))
+      if (manualDrafts.hasPending(target)) {
+        const pending = recordsRef.current.find(record => manualDrafts.hasPendingForField(target, record))
+        if (pending) { openIssue(pending.key); setManualOpenKey(pending.key) }
+        throw new Error((pending ? pending.label + '：' : '') + t('evidence.saveManualBeforeSubmit'))
+      }
       let result = await prepare<Job & Preflight & { program_issues?: Array<{field: string; message: string}> }>(`${base}/submit-check`, target, current)
       if (current !== generation.current) return null
       if (result.program_issues?.length) { setRecords(result.records || []); throw new Error(result.program_issues.map(i => '程序检查：' + i.message).join('；')) }
@@ -777,15 +788,16 @@ export function useEvidenceWorkflow(options?: {
         return
       }
       dirty.current = true
-      // 编辑只移除当前键旧问题；读取上下文不意味着修改上下文字段的结果。
+      // 只更新实际编辑字段的提醒；不改后端人工归因或无关字段的资格。
       const affected = new Set(currentRecords.filter(record => removed.has(record.key)
         || [...changes].some(path => path === record.field || path.startsWith(record.field + '.')
           || path.startsWith(record.field + '['))).map(record => record.key))
       const next = currentRecords.filter(r => !removed.has(r.key)).map(r => {
         if (!affected.has(r.key)) return r
         const current = readCurrent(r)
-        const pending_review = r.status !== 'supported' || manualValueIdentity(current?.value) !== manualValueIdentity(r.current_value)
-        return r.pending_review === pending_review ? r : { ...r, pending_review }
+        const local_modified = changedScientificFields(r.current_value, current?.value, r.field).length > 0
+        const pending_review = r.status !== 'supported' || local_modified
+        return Boolean(r.local_modified) === local_modified && r.pending_review === pending_review ? r : { ...r, pending_review, local_modified }
       })
       const locations = new Map(next.map(record => [record.key, record]))
       setRecords(old => {
@@ -797,8 +809,9 @@ export function useEvidenceWorkflow(options?: {
           const row = relocated ? { ...record, field: location.field, record_key: location.record_key } : record
           if (!affected.has(record.key)) return row
           const latest = readCurrent(row)
-          const pending = row.status !== 'supported' || manualValueIdentity(latest?.value) !== manualValueIdentity(row.current_value)
-          return row.pending_review === pending ? row : { ...row, pending_review: pending }
+          const local_modified = changedScientificFields(row.current_value, latest?.value, row.field).length > 0
+          const pending = row.status !== 'supported' || local_modified
+          return Boolean(row.local_modified) === local_modified && row.pending_review === pending ? row : { ...row, pending_review: pending, local_modified }
         })
         recordsRef.current = merged
         return old.length === merged.length && old.every((record, i) => record === merged[i]) ? old : merged
@@ -807,13 +820,13 @@ export function useEvidenceWorkflow(options?: {
     if (!optionsRef.current?.getCurrentValue) flush()
     else if (invalidationTimer.current === undefined) invalidationTimer.current = setTimeout(flush, 0)
   }, [])
-  const issues = useMemo(() => records.filter(problematic), [records])
-  const summaryRecord = records.find(r => r.key === selected) || (fallbackRecord?.key === selected ? fallbackRecord : undefined)
+  const issues = useMemo(() => displayRecords.filter(problematic), [displayRecords])
+  const summaryRecord = displayRecords.find(r => r.key === selected) || (fallbackRecord?.key === selected ? fallbackRecord : undefined)
   const currentDetail = sourceDetail?.key === selected && sourceDetail?.ref === summaryRecord?.detail_ref ? sourceDetail : undefined
   const activeRecord = summaryRecord && currentDetail?.data?.record ? {...summaryRecord, ...currentDetail.data.record,
     key: summaryRecord.key, field: summaryRecord.field, fields: summaryRecord.fields,
     pending_review: summaryRecord.pending_review || currentDetail.data.record.pending_review} : summaryRecord
-  const siblingRecords = useMemo(() => summaryRecord ? evidenceSiblings(summaryRecord, records) : [], [summaryRecord, records])
+  const siblingRecords = useMemo(() => summaryRecord ? evidenceSiblings(summaryRecord, displayRecords) : [], [summaryRecord, displayRecords])
   const selectSibling = (record: EvidenceRecord) => {
     if (record.key === selected) return
     if (settingsPending || confirming || saving) {
@@ -823,7 +836,7 @@ export function useEvidenceWorkflow(options?: {
     setSelected(record.key); setFallbackRecord(undefined); setSaveError('')
   }
   const manualVisible = Boolean(activeRecord && (manualOpenKey === activeRecord.key || activeRecord.field_decision?.action === 'reject'
-    || activeRecord.human_modified || hasLocalManualEdit(activeRecord)))
+    || activeRecord.human_modified || activeRecord.manual_pending || hasLocalManualEdit(activeRecord)))
   const approvalState = currentDetail?.data?.approval_state
   const canApprove = Boolean(summaryRecord && activeRecord && currentDetail?.data?.review_token
     && (approvalState ? !['human_approved', 'supported', 'exempt'].includes(approvalState)
@@ -863,7 +876,7 @@ export function useEvidenceWorkflow(options?: {
       decisionEpoch.current += 1
       fieldDecisionEpoch.current.set(record.key, (fieldDecisionEpoch.current.get(record.key) || 0) + 1)
       observedValues.current.set(item_key, copyValue(optionsRef.current?.getCurrentValue?.(record)?.comparisonValue ?? result.record.current_value))
-      const update = (old: EvidenceRecord[]) => old.map(r => r.key === record.key ? { ...r, ...result.record, pending_review: false } : r)
+      const update = (old: EvidenceRecord[]) => old.map(r => r.key === record.key ? { ...r, ...result.record, pending_review: false, local_modified: false } : r)
       recordsRef.current = update(recordsRef.current); setRecords(update)
       if (drawerSession.current === session) {
         setSourceDetail({ key: record.key, ref: summaryRecord?.detail_ref, data: result })
@@ -896,7 +909,7 @@ export function useEvidenceWorkflow(options?: {
       if (target?.target !== targetRef.current?.target || target?.target_id !== targetRef.current?.target_id || currentValue() !== value) return
       decisionEpoch.current += 1
       fieldDecisionEpoch.current.set(record.key, (fieldDecisionEpoch.current.get(record.key) || 0) + 1)
-      const update = (old: EvidenceRecord[]) => old.map(r => r.key === record.key ? {...r, ...result.record, pending_review: false} : r)
+      const update = (old: EvidenceRecord[]) => old.map(r => r.key === record.key ? {...r, ...result.record, pending_review: false, local_modified: false} : r)
       recordsRef.current = update(recordsRef.current)
       setRecords(update)
       if (drawerSession.current !== session) return
@@ -1068,5 +1081,5 @@ export function useEvidenceWorkflow(options?: {
   return {
     getRefreshRevision: () => editRevision.current + ':' + manualDrafts.revision() + ':' + settingsInputRevision.current,
     hasUnsavedRefreshInput: () => settingsPendingRef.current || manualDrafts.hasPending() || dirty.current || [...queues.current.values()].some(queue => queue.hasPending()),
-    hasPendingWrites: () => confirmingRef.current || manualDrafts.isWriting() || [...queues.current.values()].some(queue => queue.isRunning()), hasManualDrafts: manualDrafts.hasPending, refreshAfterSave, getEditRevision: () => editRevision.current, hasUnsavedChanges: () => dirty.current, hasAccepted: records.some(r => !r.stale && r.proposal_draft?.accepted), run, runAutomatic, automaticView: automatic ? view : null, gate, applyAccepted, dialog, busy: view !== null, issues, records, restore, invalidate, openIssue, clearIssues: () => finish(null), saveError }
+    hasPendingWrites: () => confirmingRef.current || manualDrafts.isWriting() || [...queues.current.values()].some(queue => queue.isRunning()), hasManualDrafts: manualDrafts.hasPending, refreshAfterSave, getEditRevision: () => editRevision.current, hasUnsavedChanges: () => dirty.current, hasAccepted: records.some(r => !r.stale && r.proposal_draft?.accepted), run, runAutomatic, automaticView: automatic ? view : null, gate, applyAccepted, dialog, busy: view !== null, issues, records: displayRecords, restore, invalidate, openIssue, clearIssues: () => finish(null), saveError }
 }

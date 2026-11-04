@@ -1,0 +1,21 @@
+{
+  "issue": 220,
+  "form_contract_passed": 163,
+  "mutation_render_failures_detected": 8,
+  "mutation_red_marking_failures_detected": 4,
+  "field_contract": "passed; schema and locked hash unchanged",
+  "build": "passed",
+  "adjacent_passed": 33,
+  "adjacent_existing_failures": 10,
+  "adjacent_baseline_identical": true,
+  "browser_variants": 2,
+  "browser_hosts_per_variant": 4,
+  "live_business_writes": 0,
+  "model_calls": 0,
+  "migration_documents": 85,
+  "migration_issues": 18,
+  "migration_fragments": 481,
+  "remote_spec_link_verified": false,
+  "pushed": false,
+  "deployed": false
+}

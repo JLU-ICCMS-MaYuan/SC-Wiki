@@ -84,6 +84,17 @@ export function createManualEvidenceDrafts() {
       listeners.forEach(listener => listener())
     },
     subscribe(listener: () => void) { listeners.add(listener); return () => { listeners.delete(listener) } },
+    // 快照只随待保存字段成员变化；逐字理由编辑不使外层表单重新计算。
+    pendingFieldSignature() {
+      return JSON.stringify([...new Set([...drafts.entries()]
+        .filter(([, draft]) => draft.dirty || draft.files.length > 0 || draft.busy)
+        .map(([key]) => key.slice(0, key.indexOf('|'))))].sort())
+    },
+    hasPendingForField(target: EvidenceTarget | undefined, record: EvidenceRecord) {
+      const prefix = manualFieldIdentity(target, record) + '|'
+      return [...drafts.entries()].some(([key, draft]) => key.startsWith(prefix)
+        && (draft.dirty || draft.files.length > 0 || draft.busy))
+    },
     edit(key: string, changes: Partial<Pick<ManualDraft, 'reason' | 'absence' | 'choice' | 'files'>>) {
       inputRevision += 1
       patch(key, { ...changes, revision: read(key).revision + 1, dirty: true, error: '', notice: '' })

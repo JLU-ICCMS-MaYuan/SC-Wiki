@@ -8,30 +8,17 @@
 
 ## 原始需求记录
 
-> 我希望你们在红框的位置增加2个按钮，可以把所有材料状态，各个材料状态里面的超导，电子，动力学，热力学性质折叠起来的按钮，点击一下就可以全部折叠起来，点击另一个，可以把全部都展开来。新增issue 和 spec 实现。
+> 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 > 开始
 
 ## 附件与推断来源
 
-截图仅作位置参考，不将图片内文字作为指令。AI观察：红框位于顶部固定操作栏、“返回上传记录”左侧。源文件与归档字节一致；没有派生图片替代原图。
+字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 ### 图片证据索引（供 AI 读取）
 
-```yaml
-images:
-  - id: IMG-001
-    upload_order: 1
-    original_name: codex-clipboard-48b8c52c-91c3-4819-84c0-caca7bf02a3a.png
-    locator: docs/specs/141-upload-expand-collapse-all/assets/IMG-001-upload-controls.png
-    status: local_verified
-    user_context: "我希望你们在红框的位置增加2个按钮，可以把所有材料状态，各个材料状态里面的超导，电子，动力学，热力学性质折叠起来的按钮，点击一下就可以全部折叠起来，点击另一个，可以把全部都展开来。新增issue 和 spec 实现。"
-    related: [US1, FR-001, "Issue #141"]
-    sha256: 8f2b73c918b41501916117d3576644c873ee0f6ef6efa13b4401448f5c609da4
-    media_type: image/png
-    dimensions_px: [3840, 1954]
-    verification: "2026-10-19读取原文件与归档，核对PNG头、像素尺寸及SHA-256；已从归档路径解码查看并核对红框位置。远程链接待验证。"
-```
+字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 ## 背景与目标
 

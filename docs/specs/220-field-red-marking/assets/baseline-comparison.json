@@ -1,0 +1,27 @@
+{
+  "baseline": {
+    "真实编辑器只改核处理时，三个派生项及其人工说明保持有效；重复通知不误标": "TestingLibraryElementError: Unable to find a label with the text of: 结构优化核处理",
+    "迟到核对不能覆盖请求之后的编辑，失败恢复也保留无关项": "AssertionError: expected undefined to be true // Object.is equality",
+    "部分文件上传失败只保留失败项，重试不再上传已成功项": "TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+    "拖拽/图片粘贴共用校验，普通文本粘贴不拦截，待上传图片可预览": "TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+    "保存响应和旧读取都不能清除在途请求期间的新输入": "TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+    "立即打开未保存字段即可填写说明，显式保存先保存主值并使用新版本": "Error: Unable to find a label with the text of: 人工修改判断理由（必填）",
+    "主表单保存失败保留人工输入且不发送说明请求": "TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+    "作者标签合并作者角色证据，隐藏菜单不使证据失去入口": "AssertionError: expected \"spy\" to be called with arguments: [ 'roles', [ 'roles' ] ]",
+    "排序后按稳定身份标记原记录，修改仍映射到对应核对项": "AssertionError: expected \"spy\" to be called with arguments: [ …(2) ]",
+    "同框问题聚合为一个文字入口，已接受后仍可查看": "Error: expect(element).not.toHaveAttribute(\"data-evidence-problem\") // element.hasAttribute(\"data-evidence-problem\")"
+  },
+  "current": {
+    "真实编辑器只改核处理时，三个派生项及其人工说明保持有效；重复通知不误标": "TestingLibraryElementError: Unable to find a label with the text of: 结构优化核处理",
+    "迟到核对不能覆盖请求之后的编辑，失败恢复也保留无关项": "AssertionError: expected undefined to be true // Object.is equality",
+    "部分文件上传失败只保留失败项，重试不再上传已成功项": "TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+    "拖拽/图片粘贴共用校验，普通文本粘贴不拦截，待上传图片可预览": "TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+    "保存响应和旧读取都不能清除在途请求期间的新输入": "TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+    "立即打开未保存字段即可填写说明，显式保存先保存主值并使用新版本": "Error: Unable to find a label with the text of: 人工修改判断理由（必填）",
+    "主表单保存失败保留人工输入且不发送说明请求": "TestingLibraryElementError: Unable to find an element with the text: 保存并完成. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.",
+    "作者标签合并作者角色证据，隐藏菜单不使证据失去入口": "AssertionError: expected \"spy\" to be called with arguments: [ 'roles', [ 'roles' ] ]",
+    "排序后按稳定身份标记原记录，修改仍映射到对应核对项": "AssertionError: expected \"spy\" to be called with arguments: [ …(2) ]",
+    "同框问题聚合为一个文字入口，已接受后仍可查看": "Error: expect(element).not.toHaveAttribute(\"data-evidence-problem\") // element.hasAttribute(\"data-evidence-problem\")"
+  },
+  "identical": true
+}

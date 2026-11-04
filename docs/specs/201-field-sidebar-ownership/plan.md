@@ -9,7 +9,7 @@ React/TypeScript、MUI、Vitest与现有字段工作流；不新增存储或公�
 ## 实现
 
 1. frontend/src/lib/evidenceOwnership.ts统一设置父字段地址与稳定所属键，包含状态、模块、记录或共同组及扩展field_key。不按仅相同标签合并。
-2. EvidenceFieldMarkers使用所属地址定位同一控件，任一子项问题标红；名称与圆点携带同组键。状态更新复用现有拓扑缓存。
+2. 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 3. EvidenceWorkflow在原侧栏增加轻量子项选择，按所属关系分组，来源和操作仍只读取activeRecord；切换时保护未应用设置，不发写入或模型请求。
 4. CalculationConditionFields对有method_scope的超导记录，将计算条件标题作为关系入口，保留现有电子结果关系选择控件；无数据不创造待核对项。
 

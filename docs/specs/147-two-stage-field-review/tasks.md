@@ -33,7 +33,7 @@
 - [x] T003 [US1] 在backend/api/evidence.py及现有草稿存储实现统一局部保存、版本检查、原始输入、说明和定向读取。
 - [x] T004 [US3] 在backend/ingest/property_evidence.py、upload_jobs.py收拢解析并实现任务去重、逐字段科学判断、技术失败与一致性异常保护。
 - [x] T005 [US2] 在frontend/src/components/EvidenceWorkflow.tsx、EvidenceFieldMarkers.tsx拆开入口、摘要/历史与主动模型核对。
-- [x] T006 [US1] 在frontend/src/components/UploadTaskEditor.tsx及共用表单取消编辑重核、无变化写入与连带红框，保存中间输入。
+- [x] 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 - [x] T007 [US3] 在backend/api/rag.py、backend/services/paper_revisions.py和goserver/handlers/paper_evidence.go接入统一严格门禁及原子版本校验；前端提交冻结并自动完成。
 - [x] T008 在tests/01_decentralized_uploading覆盖全部SC，运行MySQL回滚、浏览器与447项性能验证，写validation.md。
 - [x] T009 用Overview技能回写已实现行为，README操作说明、Issue证据和任务范围本地提交；不推送。
@@ -52,6 +52,6 @@ T001→T002→T003/T004→T005/T006→T007→T008→T009。FR/SC完整映射见p
 
 T013—T017 的具体实现、测试命令和未覆盖边界见 [human-review-validation.md](human-review-validation.md)；本轮已回写 Overview 审核流程图，不推送。
 
-- [x] T018 仅文档：把用户新增状态和“全部核对”作为红框红字草案接入原三个流程图，补充逐字段分类及完整图四；记录“只核对已填值，空字段不自动补全”和十二条批注。四图真实渲染及颜色检查通过；本项不表示新流程已确认实施或业务代码已实现，当前 Overview 不改。
+- [x] 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 - [x] T019 按独立 #149 的已确认两步方案修复状态范围、整行创建来源和原文定位，再对目标 SSCHA 状态 7 项未通过字段定向查证；实际字段详情、浏览器与数据不变性已验证。证据见 sscha-state-review-fix.md。整表批量入口不纳入本项完成声明。
-- [x] T020 [US2,US3] 修复人工通过按钮与红框状态不一致：未标红不能重复通过但保留不通过；保存成功后更新状态、关闭侧栏和消红；保护迟到摘要／详情及后来打开的其他字段。39 项前端、7 项 MySQL 回滚与上传路由浏览器回归通过，证据见 approval-state-regression.md（FR-025—026 / SC-020—021）。
+- [x] 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。

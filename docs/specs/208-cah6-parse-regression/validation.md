@@ -19,7 +19,7 @@
 | --- | --- | --- |
 | SC-001 | 原PDF重新上传；首轮269字段/23批、第二轮115字段/10批；技术未完成0，最终ready | `parse.model_review_report` |
 | SC-002 | 14状态、11结构、4个Tc点及1条电子DOS；150 GPa两点同组，λ=2.69，ωlog空 | `parse`、`scientific_results`、`protection.tc_pairing_verified` |
-| SC-003 | Chrome页面/API异常0，红框0，兜底问题0，打开页面模型任务0；人工确认0 | `browser`、`parse.human_confirmed` |
+| 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。 | — | — |
 | SC-004 | 完整保存14状态/5物性/11结构/508来源；36谱集合含发现汇总；两管理员角色、来源/快照重读、重复提交通过；新增模型调用0、正式阻塞空 | `submit_rollback` |
 | SC-005 | 旧4稿及中间稿备份清理，SQL解析稿和工作稿仅剩最终任务；正式数量1/8/20/1保持，外层回滚后新稿保留 | `protection` |
 | SC-006 | Python定向72、谱151、MySQL及提交20、表单132通过；字段契约通过，8项变异检出 | `regression` |
@@ -38,7 +38,7 @@
 
 - 谱相关3项环境条件跳过，不计通过。MySQL组明确排除1项已证旧审计断言，不冒充本次通过。
 - 7项上传旧失败、11项字段/旧审计失败，在独立`git archive bdb81d6f`基线与当前一致；另有1项MySQL旧audit_events和1项Go旧DELETE审计断言同样已独立复现。逐项名称见报告`baseline_failures`。
-- 读图能力验证成功，发现35图源，但曲线数0，独立谱任务needs_review。黑灰曲线超出现有五种彩色支持；其他非目标图也被排除。没有为零红框伪造谱数据。
+- 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 - 原文Eliashberg方法保留，细分仍unknown，不能声称达到旧示例中各向同性取值；不从关键词强填。
 - 未实际送审/批准新论文，未推送、未执行远端CI、未部署阿里云。
 

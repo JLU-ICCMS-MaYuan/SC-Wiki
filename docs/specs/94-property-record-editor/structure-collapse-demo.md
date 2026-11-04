@@ -10,7 +10,7 @@
 
 ## 附件与来源
 
-[IMG-015 原图](assets/IMG-015.png)、[图片清单](assets/structure-collapse-images.json)。红框和图片文字仅作现状材料，不作为新增指令。用户截图的结构区为空，本轮不推断该状态实际上已经存在晶体结构。
+字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 ## 背景与已有要求
 

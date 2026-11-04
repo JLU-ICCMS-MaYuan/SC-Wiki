@@ -44,6 +44,6 @@ tools/verify_map.mjs接受原路径的完整HTML或早期带iframe预览，分�
 
 ## 标红条件调查补充
 
-直接在隔离浏览器上下文导入当前前端EvidenceFieldMarkers.tsx的evidenceProblem，查看15个代表状态：supported/未过期不红；modified属性本身不红；unchecked/missing/uncertain/unsupported无处理标记时红；stale即使过去人工确认/接受也红；required=false不触发来源红；当前人工确认/已接受候选/非空resolution抑制来源红；只填写reason或resolution为空格不消红。此检查是现有谓词行为核查，不是产品修复测试。
+字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
-red-marking.md同时覆盖本地error属性、动态schema、后台状态降级、派生依赖、普通物性共享标记等入口；不宣称所有ValidationIssue都会画到输入框，部分仅Alert或模块提示。原图新增原因折叠区，原字段数据与计数不变，直接HTML仍保留UTF-8和内嵌样式。
+本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。

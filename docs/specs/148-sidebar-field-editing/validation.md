@@ -29,7 +29,7 @@
 
 ## 扩展回归的已存在失败
 
-另运行 `field-review-layout.test.tsx`、`source-review-presentation.test.tsx`、`evidence-field-isolation.test.tsx`。本轮有 15 项失败；从修改前 `ac6ec8b` 导出源码至临时目录重跑，同样 15 项失败，逐项失败集合完全一致。部分断言仍按旧 `/preflight`、旧“完成”按钮及旧红框状态构造夹具，与 #147 当前合同不同。此处如实保留失败，未为使测试变绿而改回旧行为或改写无关测试。具体名称见机器记录。
+字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 ## 截图与验证限制
 

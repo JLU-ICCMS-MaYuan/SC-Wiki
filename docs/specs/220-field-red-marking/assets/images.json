@@ -1,0 +1,44 @@
+{
+  "images": [
+    {
+      "id": "IMG-001",
+      "upload_order": 1,
+      "original_name": "codex-clipboard-4641514d-5d2d-4b12-aa6f-0c1730f53a61.png",
+      "locator": "docs/specs/220-field-red-marking/assets/IMG-001.png",
+      "status": "local_verified",
+      "sha256": "02fe2cb075019343beed4d54d43456cd7fbb33e4cbf20925735efd73bcd77cba",
+      "media_type": "image/png",
+      "dimensions_px": [
+        3840,
+        1946
+      ],
+      "user_context": "我刚刚手动修改了几个内容，但是为什么修改之后，没有自动标红提醒我要人工核对。",
+      "related": [
+        "US1",
+        "FR-001",
+        "FR-002"
+      ],
+      "verification": "读取原始字节，PIL解码并核对尺寸及SHA256；仅本地，远程未推送。"
+    },
+    {
+      "id": "IMG-002",
+      "upload_order": 2,
+      "original_name": "revision-marked.png",
+      "locator": "docs/specs/220-field-red-marking/assets/IMG-002.png",
+      "status": "local_verified",
+      "sha256": "d9c8a670f9ffbf72c56e124728618a6c83d7c6fd129953f6b9bca99c24ad1141",
+      "media_type": "image/png",
+      "dimensions_px": [
+        1500,
+        1100
+      ],
+      "user_context": "隔离正式返修页面，改写原免审 DOI 并保存，红框保留。",
+      "related": [
+        "FR-001",
+        "FR-002",
+        "SC-001"
+      ],
+      "verification": "Chrome生产React页面、隔离API；重新解码核验尺寸与SHA256。AI测试派生截图，不是用户原图。"
+    }
+  ]
+}

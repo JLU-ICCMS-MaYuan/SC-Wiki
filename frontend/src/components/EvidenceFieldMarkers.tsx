@@ -4,7 +4,7 @@ import { Box, Button, Typography } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import type { EvidenceRecord } from './EvidenceWorkflow'
 import type { PropertyRecordDraft } from '../lib/propertyModules'
-import { evidenceStatus } from '../lib/evidenceStatus'
+import { evidenceStatus, evidenceNeedsAttention } from '../lib/evidenceStatus'
 
 interface Props {
   records: EvidenceRecord[]
@@ -34,7 +34,7 @@ function recordOwner(record: EvidenceRecord, state?: HTMLElement) {
   return [name, index == null ? `材料状态 ${record.state_key}` : `材料状态 ${Number(index) + 1}${state ? '' : '（已移除）'}`].filter(Boolean).join(' · ')
 }
 
-export const evidenceProblem = (record: EvidenceRecord) => ['attention', 'failed'].includes(evidenceStatus(record))
+export const evidenceProblem = evidenceNeedsAttention
 
 /** 优先复用控件自己的标签，不把整个输入框变成按钮。 */
 function fieldCaption(node: HTMLElement) {

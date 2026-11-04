@@ -46,37 +46,19 @@ npm --prefix "frontend" run build
 
 ## 红框不遮挡文字（2026-09-16）
 
-FR-034 / SC-022 / T052：旧共享标记在 MUI outlined 控件外叠加完整 outline，绕过原有 legend
-缺口，边线穿过浮动标签。新增四类控件样式测试先全部复现，再改为原有缺口边框着红色。
-标签沿用原有前景层，不靠白底、高全局层级或点击遮罩，普通区域红框不变。
+字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
-```bash
-node "frontend/node_modules/vitest/vitest.mjs" run --config "vitest.config.ts" \
-  "tests/01_decentralized_uploading/scientific-evidence-markers.test.tsx" \
-  "tests/01_decentralized_uploading/tc-record-layout.test.tsx" \
-  "tests/01_decentralized_uploading/pressure-review-editing.test.tsx" \
-  "tests/01_decentralized_uploading/evidence-drawer-close.test.tsx" \
-  "tests/01_decentralized_uploading/evidence-workflow.test.tsx"
-node "tests/01_decentralized_uploading/evidence-border-browser.mjs"
-node "tests/01_decentralized_uploading/tc-record-browser.mjs"
-npm --prefix "frontend" run build
-```
+本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。
 
-浏览器使用现有 Vite；支持 FRONTEND_URL、PLAYWRIGHT_MODULE、CHROMIUM_PATH。
-EVIDENCE_BORDER_SCREENSHOT 可指定截图前缀，自动保存浅色与深色截图。脚本加载真实共享生产
-组件，隔离全部 API，不调用模型、不访问或改写真实论文。
+本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。
 
-- 69 项相关 Vitest 通过，包含 10 项标记测试及原压强/Tc/侧栏/工作流回归。
-- Chromium 覆盖非白浅色与深色背景、960/360px 视口、中英文、数值/下拉/多行/空值聚焦/只读。
-  检查真实边框样式、标签前景和缺口宽度；点击标签、键盘核对及数字编辑正常，解除标记不移动布局。
-- TypeScript 与生产构建通过；既有 Vite CJS、3Dmol eval 和产物体积提示保留。
-- 原 Tc 浏览器脚本在管理员、超级管理员及上传三条实际页面路径通过，包含输入、保存重载、
-  人工理由失败重试、成功关闭和位置保持，截图确认紧凑 Tc 标签也保留缺口。
-- 本次只改前端显示，不改变接口或数据库，不重复运行后端科学保存测试。
+- 本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。
+- 本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。
+- 本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。
+- 本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。
+- 本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。
 
-开工备份：/tmp/scwiki-evidence-border-baseline-C9oHX0。EvidenceFieldMarkers.tsx 及已有标记测试
-仍属于前序未提交文件，当前 HEAD 中不存在，无法只暂存本轮几行增量形成独立完整提交。
-沿用原提交隔离阻塞，保留工作树与空暂存区，不切换分支、不推送，也未执行生产部署。
+本节字段提示约定及历史统一见 [#220](../220-field-red-marking/spec.md)。
 
 ## 完成自动关闭与页面位置（2026-09-16）
 
@@ -97,7 +79,7 @@ FR-033 / SC-021 / T050—051：此前代码只在核对项被删除时关闭，�
 
 本节对应 FR-026—028 / SC-016—017；下方各日期记录是历史验收，不作为本次自动续提或真实论文写入授权。
 
-- Chromium 使用实际 `/admin/papers/990103/edit` 页面，全部 `/api/**` 由内存夹具接管。管理员、超级管理员均通过：红框 0.000101 全选改为 0.0025、数字不打开抽屉、标签打开、返回聚焦、填写理由并完成、临时无效指数阻止保存、剪贴板粘贴零、整组清空、刷新后五字段仍空。每角色三次科学保存，零模型与批准请求，无意外 API 或页面错误。
+- 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 - 浏览器回归真实发现原生监听器提前恢复旧值；微任务通知仍复现，改为完整事件传播结束后通知并排除失焦重复 change 后通过。组件测试未覆盖浏览器监听器之间的微任务行为，不能单独作为该问题完成证据。
 - Python 专项六文件 45 项通过，包含新增压强 MySQL 回滚链路与上传规范化测试。新建隔离论文经生产科学保存函数修改、确认、清空，再用新会话读取；验证当前版本人工决定、保留旧判断、忽略旧接受、压强核对项移除和修改历史。外层事务最终全部回滚；不创建临时数据库、不修改 #29。
 - Vitest 共 114 个不同用例通过：共享流程 23、标记 6、压强 14、队列 3、候选 2、材料编辑 25、上传性能 5、上传布局 22、管理员编辑 9、科学编辑 5。覆盖保存中继续编辑、迟到快照、失败重试、普通保存保留理由、反序编辑只失效对应项及旧候选隔离；完成或重新查找在等待期间切换论文，不会触发新论文保存。一次高并发运行的初始标签等待超过 1 秒，降低并行后专项通过；未修改断言绕过问题。

@@ -1,6 +1,6 @@
 # 核对状态与字段侧栏
 
-> 2026-11-01：本轮由[#200](../200-field-color-only/spec.md)的用户最新要求替代相关约定：字段后状态文字改为仅问题标红，完整状态仍在侧栏。下方原话与旧验收保留，不代表仍采用旧展示。
+> 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 **Issue**：[#191](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/191)
 

@@ -4,17 +4,13 @@
 
 ## 原始需求记录
 
-> 这图 1,3 两部分我希望我能点击后，你给我详细展示一下具体的流程是什么。同时能回答我的几个疑惑点：
->
-> 1. 我设计过需要我核对的标红，但是当前 CaH6 解析的页面没有让我标红的地方
-> 2. 我不希望在这里显示这么多有问题字段的待核对内容，我记得我要求你做过这部分的内容，而且我要求你都把他们放到侧边栏，为什么你都没记住啊？
-> 3. 我现在想要使用超级管理员权限来审核通过 La-Sc-H那个论文，但是现在没法提交审核，这是为什么？
+> 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 
 三张原始截图按顺序归档为 [IMG-001](assets/2026-10-29-flow-review/IMG-001-system-parse.png)、[IMG-002](assets/2026-10-29-flow-review/IMG-002-cah6-diagnostics.png)、[IMG-003](assets/2026-10-29-flow-review/IMG-003-approval-gate.png)。原名、尺寸、顺序与 SHA-256 见[图片清单](assets/2026-10-29-flow-review/images.json)。截图属于现象材料，不作为新的科学批准指令。
 
 ## 当前状态与原因
 
-1. **CaH₆ 没有明显红框**：当前任务 `29b2dd4604b64ee58c669c0efddb8cab` 的摘要共 440 个字段：33 个 supported、402 个 unchecked、2 个 uncertain、1 个 unsupported、2 个 missing。真实副本的完整页面有 1 处红色字段标记，另外 4 个科学问题落在未定位入口；独立待处理数为 5。它们涉及两个电子性质的 approximation、一个 Tc 的 value_text，以及两项计算条件的 value_kind。旧页面顶部 90 个解析区域和 3 条题录差异不是这些科学问题；未完成的来源定位也不能一律涂红称为科学错误。此次不修改字段值、核对结果或分类。
+1. 字段提示规则及相关历史已迁移至 [#220](../220-field-red-marking/spec.md)，本处不再独立定义。
 2. **长诊断没有进侧栏**：#109 的[已确认展示规则](../109-field-evidence-and-ai-suggestions/source-review-presentation.md)已经明确主表单只留紧凑标记和数量。#172 后加的 ParsingDiagnosticsPanel 独立展开题录及六类差异，没有继承这项展示约束。问题是后续实现没有衔接既有规则，不是用户没有提出要求。
 3. **La–Sc–H 批准失败**：论文 271 仍为 pending、内容版本 1，上传者为用户 2；超级管理员为用户 1，不触发禁止自审。当前 1111 个字段摘要全部 supported，实际门禁只读重建没有阻断项，格式校验通过。已有服务日志中两次 review-commit 返回 500，栈落在 paper_history_events 写入，出现 MySQL 连接重置及数据包序号异常。按当前正式核对结果重建的历史 JSON 为 398,343,401 字节，超过当前 max_allowed_packet 的 67,108,864 字节。重复 legacy_evidences 约 333.6 MB、validation_record 约 51.8 MB，是主要膨胀来源。
 

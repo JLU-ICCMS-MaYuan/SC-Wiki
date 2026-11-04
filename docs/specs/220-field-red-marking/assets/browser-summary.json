@@ -1,0 +1,178 @@
+[
+  {
+    "variant": "before",
+    "role": "upload",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 41.5,
+    "paintMaxMs": 41.5,
+    "doiMarked": false,
+    "markedAfterSave": false,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "GET",
+        "path": "/api/rag/evidence/draft-state"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "before",
+    "role": "revision",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 43,
+    "paintMaxMs": 43,
+    "doiMarked": false,
+    "markedAfterSave": false,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "GET",
+        "path": "/api/rag/evidence/draft-state"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "before",
+    "role": "admin",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 46.799999999813735,
+    "paintMaxMs": 46.799999999813735,
+    "doiMarked": false,
+    "markedAfterSave": false,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "before",
+    "role": "superadmin",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 49.699999999953434,
+    "paintMaxMs": 49.699999999953434,
+    "doiMarked": false,
+    "markedAfterSave": false,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "after",
+    "role": "upload",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 44,
+    "paintMaxMs": 44,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "GET",
+        "path": "/api/rag/evidence/draft-state"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "after",
+    "role": "revision",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 43.800000000046566,
+    "paintMaxMs": 43.800000000046566,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "GET",
+        "path": "/api/rag/evidence/draft-state"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "after",
+    "role": "admin",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 47.89999999990687,
+    "paintMaxMs": 47.89999999990687,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "variant": "after",
+    "role": "superadmin",
+    "states": 15,
+    "fields": 200,
+    "rootScans": 0,
+    "paintSamples": 11,
+    "paintP95Ms": 46.699999999953434,
+    "paintMaxMs": 46.699999999953434,
+    "doiMarked": true,
+    "markedAfterSave": true,
+    "requestsWhileTyping": [],
+    "requestsIncludingSave": [
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      }
+    ],
+    "errors": []
+  }
+]

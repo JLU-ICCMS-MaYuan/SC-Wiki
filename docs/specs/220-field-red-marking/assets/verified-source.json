@@ -1,0 +1,9 @@
+{
+  "head": "a1a7106a7685c8a9559c2161777653cf8741ac8e",
+  "files": {
+    "frontend/src/components/EvidenceWorkflow.tsx": "f7768ed0fdd207e460517e59ac759687bf58b343351e0ff901f8bf33f58a508b",
+    "frontend/src/components/EvidenceFieldMarkers.tsx": "dc6bf31545731f8a10c489e151e2379b22430c493994ca2170eb2bb1f61325d4",
+    "frontend/src/lib/evidenceStatus.ts": "526e39cc57bbdb10b5e87f7e592c7b8158e4cd586cdea43d2cec48452eaf55ab",
+    "frontend/src/lib/manualEvidenceDrafts.ts": "18c7616deb937e2d191eb04f09931f335c4c3488c4963323bfd4b956c4192c73"
+  }
+}
