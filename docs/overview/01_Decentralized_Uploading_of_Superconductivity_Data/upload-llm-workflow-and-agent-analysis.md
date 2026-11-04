@@ -1033,3 +1033,7 @@ OpenAI 官方 PDF 与工具调用文档在本次环境返回 403；部分其他�
 - [旧提取器](../../../backend/ingest/extractor.py)、[旧摄入流程](../../../backend/ingest/pipeline.py)、[旧保存模块](../../../backend/ingest/store_papers.py)及[旧富化脚本](../../../backend/ingest/enrich_papers.py)。
 
 本次没有改业务代码、数据库结构或运行中数据，也没有运行真实模型基准。上述设计要求如进入实施，应按项目规则建立或关联 GitHub Issue 和对应 Spec；本文不替代正式验收契约。
+
+## 2026-11-04 科学整理输入去重
+
+科学整理的模型输入将完全相同的候选证据集中一次，候选通过证据编号关联；不同来源身份仍分开，服务器保留完整原记录和引句用于处理与审计。来源目录只列未读块，已读原块仍完整传递。250000字符限制按实际紧凑JSON字符串检查，并记录input_chars；没有按材料状态分批或放宽上限。输入保真回归通过，La-H真实完整业务流程边界见[#176验收](../../specs/176-scientific-form-filling/validation.md)。

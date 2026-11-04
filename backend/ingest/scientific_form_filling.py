@@ -7,7 +7,7 @@ import json
 from .scientific_context import build_context, fingerprint
 from .property_modules import THEORETICAL_METHODS, EXPERIMENTAL_METHODS, validate_record
 
-VERSION = "scientific-form-filling-v4-candidate-dispositions"
+VERSION = "scientific-form-filling-v5-pooled-input"
 SUPPORTED = {"tc", "dos_fermi"}
 VALUE_FIELDS = {"value_number", "value_min", "value_max", "value_text", "value_boolean"}
 PATCH_FIELDS = VALUE_FIELDS | {"value_kind", "value_raw", "method_code", "method_raw",
@@ -53,6 +53,10 @@ The server copies the original record identity/type/state and source text. Do no
 review decisions, new property types or UI definitions. values may contain value_kind/value_number/value_min/
 value_max/value_text/value_boolean/value_raw/method_code/method_raw/unit_raw/canonical_unit/uncertainty,
 parameters/calculation_conditions/approximation only. Always supply the numeric value for the declared kind.
+Candidate record.evidences are evidence_id references into candidate_evidences, which preserves the
+original quotations and file/page/block identities once. These are original candidate evidence, not new
+scientific conclusions. Do not use evidence_id as source_id; request further source blocks when needed.
+source_index lists only blocks not already supplied in sources.
 Sources must have been READ, not merely listed in the index. Cite source_ids, never rewrite quotations.
 For merged candidates preserve distinct scientific results and known method/mu assignments. All relevant origins
 (including repeated abstract ranges) must be listed in candidate_ids. Reuse no unrelated state or record.
@@ -325,6 +329,27 @@ def apply_plan(states, sources, response):
     return result, audit
 
 
+
+def _model_candidates(indexed):
+    """仅投影模型输入：完全相同的证据集中一次，原记录及不同来源身份不变。"""
+    rows, evidence_pool, identities = [], {}, {}
+    for key, (si, _, original) in indexed.items():
+        record = deepcopy(original)
+        references = []
+        for evidence in record.get("evidences") or []:
+            identity = fingerprint(evidence)
+            if identity not in identities:
+                evidence_id = f"evidence-{len(identities)}"
+                identities[identity] = evidence_id
+                evidence_pool[evidence_id] = evidence
+            reference = {"evidence_id": identities[identity]}
+            if reference not in references:
+                references.append(reference)
+        record["evidences"] = references
+        rows.append({"candidate_id": key, "state_index": si, "record": record})
+    return rows, evidence_pool
+
+
 def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=None, max_rounds=4):
     """复用原块读源，模型可定向查缺；无新增信息停止，不写业务数据。"""
     context = build_context(chunks, max_chars=60000)
@@ -345,9 +370,11 @@ def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=N
         if size + length <= 65000:
             read[s["source_id"]] = s
             size += length
+    model_candidates, candidate_evidences = _model_candidates(indexed)
     payload = {
         "states": [{k: v for k, v in state.items() if k not in {"property_modules", "structures", "evidences", "field_evidence"}} for state in states],
-        "candidates": [{"candidate_id": key, "state_index": si, "record": record} for key, (si, _, record) in indexed.items()],
+        "candidates": model_candidates,
+        "candidate_evidences": candidate_evidences,
         "source_index": [{k: s.get(k) for k in ("source_id", "file_id", "page_start", "block_id")} |
                          {"preview": s["content"][:180]} for s in sources],
         "source_gaps": context["gaps"],
@@ -356,16 +383,20 @@ def fill_scientific_forms(states, chunks, model, *, on_attempt=None, cancelled=N
     for number in range(max_rounds):
         if cancelled:
             cancelled()
-        request = {**payload, "sources": list(read.values()), "previous_error": error,
+        request = {**payload,
+                   "source_index": [s for s in payload["source_index"] if s["source_id"] not in read],
+                   "sources": list(read.values()), "previous_error": error,
                    "must_finalize": finalizing or number == max_rounds - 1,
                    "remaining_rounds": max_rounds - number}
-        if len(json.dumps(request, ensure_ascii=False)) > 250000:
+        content = json.dumps(request, ensure_ascii=False, separators=(",", ":"))
+        report["input_chars"] = len(content)
+        if len(content) > 250000:
             error = "整理输入超过预算，保留候选；未假装完成全文阅读"
             report["stop_reason"] = "context_budget"
             break
-        attempt = {"round": number + 1, "read_source_ids": list(read), "input": request}
+        attempt = {"round": number + 1, "read_source_ids": list(read), "input_chars": len(content), "input": request}
         try:
-            response = model(PROMPT, json.dumps(request, ensure_ascii=False))
+            response = model(PROMPT, content)
             if cancelled:
                 cancelled()
             attempt["response"] = deepcopy(response)

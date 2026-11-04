@@ -24,7 +24,10 @@ def write_path(value, path, replacement):
         if isinstance(value, list):
             value = value[int(key)]
         else:
-            value = value.setdefault(key, [] if keys[index + 1].isdigit() else {})
+            # 已登记但尚未填写的软件组可为null；仅在实际写入子字段时建立容器。
+            if value.get(key) is None:
+                value[key] = [] if keys[index + 1].isdigit() else {}
+            value = value[key]
     if isinstance(value, list):
         value[int(keys[-1])] = deepcopy(replacement)
     else:

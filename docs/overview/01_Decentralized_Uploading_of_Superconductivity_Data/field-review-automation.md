@@ -12,3 +12,5 @@ flowchart TD
 ```
 
 预算及工具范围保留。见[#194](../../specs/194-unified-model-review/spec.md)。
+
+已登记的软件参数组为空时，候选回填仅按实际目标建立所需容器，其他空软件组保持为空；不把空父级误作可直接写入的对象，也不覆盖非空错误内容。此项修复及真实网页验证边界见[#194验收](../../specs/194-unified-model-review/validation.md)。
