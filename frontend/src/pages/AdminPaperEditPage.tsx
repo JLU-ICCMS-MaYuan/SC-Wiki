@@ -10,7 +10,7 @@ import { materialIdentityMissing } from '../lib/materialIdentity'
 import { materialStateFromDetail, candidateFromStructureModel, remapScientificIdentities, type ScientificIdentityMap } from '../lib/paperEditing'
 import { applyEvidencePatches, type EvidencePatch } from '../lib/evidenceProposals'
 import EvidenceFieldMarkers from '../components/EvidenceFieldMarkers'
-import PaperMaterialsSection from '../components/PaperMaterialsSection'
+import PaperMaterialsSection, { MaterialOutlineLayout } from '../components/PaperMaterialsSection'
 import { researchMaterials } from '../lib/paperMaterials'
 import { useEvidenceWorkflow } from '../components/EvidenceWorkflow'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
@@ -394,6 +394,8 @@ const AdminPaperEditPage: React.FC = () => {
 
       {editForm.id != null ? (
         <Box data-evidence-scope="paper-edit" sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+          <MaterialOutlineLayout>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
           {/* 核对提示和审核操作随页面滚动，避免遮挡下方表单。 */}
           <Box sx={{
             bgcolor: 'background.paper',
@@ -679,6 +681,8 @@ const AdminPaperEditPage: React.FC = () => {
             <Button variant="outlined" onClick={() => navigate(workspacePath)}>{t('common.cancel')}</Button>
             <Button variant="contained" onClick={() => void handleEditSave()}>{t('admin.saveChanges')}</Button>
           </Box>
+          </Box>
+          </MaterialOutlineLayout>
         </Box>
       ) : (
         !loadError && (

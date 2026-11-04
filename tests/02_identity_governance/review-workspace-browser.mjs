@@ -21,7 +21,7 @@ const draft = { paper, material_states: states, structure_candidates: [] }
 const items = Array.from({ length: 45 }, (_, i) => ({ ...paper, id: i + 1, title: i ? '检查论文 ' + (i + 1) : longTitle,
   workflow_status: 'pending', checked_status: 'approved', checked_at: '2026-11-04T00:00:00Z' }))
 
-async function contextFor(role, denied = false, stateCount = 14) {
+async function contextFor(role, denied = false, stateCount = 14, processing = false) {
   const localStates = states.slice(0, stateCount)
   const localPaper = { ...paper, material_states: localStates }
   const localDraft = { ...draft, paper: localPaper, material_states: localStates }
@@ -60,8 +60,8 @@ async function contextFor(role, denied = false, stateCount = 14) {
     if (p.endsWith('/draft-revision')) return json({ write_epoch: 'isolated', revision: 1 })
     if (p.endsWith('/summary')) return json({ version: 'isolated', records: [], needs_check: false })
     if (p.endsWith('/draft')) return json({ ok: true, data: localDraft })
-    if (p.includes('/upload-tasks/') && p.endsWith('/parsing')) return json({ data: { status: 'ready', stage: 'ready', files: [], chunks: [], summary: { status: 'ready' }, next_poll_ms: null } })
-    if (/\/upload-tasks\/[^/]+$/.test(p)) return json({ data: { task_id: '2'.repeat(32), filename: '隔离验收.pdf', processing_status: 'succeeded', stage: 'ready', stage_index: 5, stage_total: 5 } })
+    if (p.includes('/upload-tasks/') && p.endsWith('/parsing')) return json({ data: { status: processing ? 'summarizing' : 'ready', stage: processing ? 'summarizing' : 'ready', partial_draft: processing ? localDraft : undefined, files: [], chunks: [], summary: { status: 'ready' }, next_poll_ms: null } })
+    if (/\/upload-tasks\/[^/]+$/.test(p)) return json({ data: { task_id: '2'.repeat(32), filename: '隔离验收.pdf', processing_status: processing ? 'processing' : 'succeeded', stage: processing ? 'summarizing' : 'ready', stage_index: processing ? 4 : 5, stage_total: 5 } })
     return json({ data: [], items: [], jobs: [], total: 0 })
   })
   const page = await context.newPage()
@@ -71,23 +71,30 @@ async function contextFor(role, denied = false, stateCount = 14) {
 
 
 async function checkOutlineGeometry(page, nav, label) {
+  await page.evaluate(() => window.scrollTo(0, 0))
   const metrics = await nav.evaluate(node => {
     const rect = node.getBoundingClientRect()
-    const host = node.closest('[data-evidence-scope], [data-paper-detail]')
-    const card = host?.hasAttribute('data-paper-detail') ? host.querySelector('.MuiCard-root') : host?.querySelector('[data-material-state-index]')
-    const cardRect = card?.getBoundingClientRect()
-    const list = node.querySelector('[data-issue-field="paper.research_materials"]')
-    return { top: rect.top, bottom: innerHeight - rect.bottom, height: rect.height, viewport: innerHeight,
-      gap: cardRect ? rect.left - cardRect.right : null, hostPadding: host ? getComputedStyle(host).paddingRight : null,
-      hostMargin: host ? getComputedStyle(host).marginRight : null,
+    const layout = node.closest('[data-material-outline-layout]')
+    const content = layout?.querySelector(':scope > [data-material-outline-content]')
+    const list = node.querySelector('[data-material-outline-list]')
+    return { top: rect.top, height: rect.height, viewport: innerHeight, position: getComputedStyle(node).position,
+      gap: content ? rect.left - content.getBoundingClientRect().right : null,
+      layoutCount: document.querySelectorAll('[data-material-outline-layout]').length,
       listHeight: list?.clientHeight, listScrollHeight: list?.scrollHeight }
   })
   outlineGeometry.push({ label, ...metrics })
   if (process.env.OUTLINE_LAYOUT_RECORD_ONLY === '1') return
-  assert.ok(Math.abs(metrics.top - 4) <= 1, label + ' 顶部留白：' + JSON.stringify(metrics))
-  assert.ok(Math.abs(metrics.bottom - 4) <= 1, label + ' 底部留白：' + JSON.stringify(metrics))
-  assert.ok(Math.abs(metrics.height - (metrics.viewport - 8)) <= 1, label + ' 目录未铺满')
-  assert.ok(metrics.gap !== null && Math.abs(metrics.gap - 4) <= 1, label + ' 表单缝隙：' + JSON.stringify(metrics))
+  assert.equal(metrics.position, 'static', label + ' 目录应随页面排版')
+  assert.equal(metrics.layoutCount, 1, label + ' 不应重复分栏')
+  assert.ok(Math.abs(metrics.height - (metrics.viewport - 8)) <= 1, label + ' 桌面目录高度')
+  assert.ok(metrics.gap !== null && Math.abs(metrics.gap - 4) <= 1, label + ' 两栏间距：' + JSON.stringify(metrics))
+  const before = await nav.boundingBox()
+  const start = await page.evaluate(() => window.scrollY)
+  await page.evaluate(() => window.scrollBy(0, 280))
+  const distance = await page.evaluate(() => window.scrollY) - start
+  assert.ok(distance > 100, label + ' 页面应可滚动')
+  assert.ok(Math.abs((await nav.boundingBox()).y - before.y + distance) <= 1, label + ' 目录必须随页面滚走')
+  await page.evaluate(() => window.scrollTo(0, 0))
 }
 
 try {
@@ -168,8 +175,7 @@ try {
     if (process.env.OUTLINE_LAYOUT_RECORD_ONLY !== '1') {
       await nav.getByRole('button', { name: '收起研究材料大纲' }).click()
       assert.ok((await nav.boundingBox()).height < 100)
-      const reserve = await nav.evaluate(node => getComputedStyle(node.closest('[data-evidence-scope]')).paddingRight)
-      assert.equal(reserve, '0px')
+      assert.ok(Math.abs((await nav.boundingBox()).width - 40) <= 1)
       await nav.getByRole('button', { name: '展开研究材料大纲' }).click()
       await checkOutlineGeometry(page, nav, 'restored-revision-count-' + stateCount)
     }
@@ -178,6 +184,39 @@ try {
     await checkOutlineGeometry(page, nav, 'grown-revision-count-' + stateCount)
     await page.screenshot({ path: output + '/height-count-' + stateCount + '.png' })
     reports.push({ height_case: stateCount, full_height: process.env.OUTLINE_LAYOUT_RECORD_ONLY !== '1' })
+    await context.close()
+  }
+  {
+    const { context, page, calls } = await contextFor('user', false, 14, true)
+    await page.goto(origin + '/upload/tasks/' + '2'.repeat(32))
+    const nav = page.getByRole('navigation', { name: '研究材料大纲', exact: true })
+    await nav.getByRole('button', { name: /#14 ·/ }).waitFor()
+    await checkOutlineGeometry(page, nav, 'processing-preview')
+    const header = page.getByRole('region')
+    const before = await header.boundingBox()
+    const headerStyle = await header.evaluate(node => getComputedStyle(node).position)
+    assert.equal(headerStyle, 'static')
+    assert.ok(Math.abs(before.y - (await nav.boundingBox()).y) <= 1, '任务栏与目录在同一行起始')
+    await page.evaluate(() => window.scrollBy(0, 500))
+    assert.ok((await header.boundingBox()).y < 0, '文件及阶段横条应滚出视口')
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await page.screenshot({ path: output + '/processing-desktop.png' })
+    for (const width of [1000, 390]) {
+      await page.setViewportSize({ width, height: 900 })
+      await page.waitForFunction(() => innerWidth >= 600 || document.querySelector('main')?.getBoundingClientRect().left === 64)
+      await page.evaluate(() => window.scrollTo(0, 0))
+      const overflow = await page.evaluate(() => ({ width: innerWidth, scrollWidth: document.documentElement.scrollWidth,
+        nodes: Array.from(document.querySelectorAll('body *')).filter(node => node.getBoundingClientRect().right > innerWidth + 1)
+          .slice(0, 15).map(node => ({ tag: node.tagName, class: node.className, width: node.getBoundingClientRect().width, text: node.textContent?.slice(0, 60) })) }))
+      await page.screenshot({ path: output + '/processing-' + width + '.png' })
+      assert.equal(overflow.scrollWidth <= overflow.width, true, '窄屏页面不溢出：' + JSON.stringify(overflow))
+      assert.ok((await nav.boundingBox()).height <= 450)
+      await nav.getByRole('button', { name: '收起研究材料大纲' }).click()
+      await nav.getByRole('button', { name: '展开研究材料大纲' }).click()
+      await page.screenshot({ path: output + '/processing-' + width + '.png' })
+    }
+    assert.deepEqual(calls.filter(call => call.method !== 'GET' && !call.path.endsWith('/activity')), [])
+    reports.push({ host: 'processing-preview', task_bar_scrolls: true, outline_in_flow: true, narrow_widths: [1000, 390], writes: 0 })
     await context.close()
   }
   const { context, page } = await contextFor('superadmin', true)

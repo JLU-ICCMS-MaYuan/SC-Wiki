@@ -1,3 +1,4 @@
+import { MaterialOutlineLayout } from '../components/PaperMaterialsSection'
 import React, { useState, useRef, useEffect } from 'react'
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom'
 import {
@@ -388,11 +389,11 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
               <Card variant="outlined" sx={{ overflow: 'visible' }}>
                 <MaterialStateControlsContext.Provider value={materialControlsContainer}>
                 <CardContent>
+                <MaterialOutlineLayout>
                   <Box role="region" aria-label={t('upload.taskActionsAria')} sx={{
-                    position: 'sticky', top: 0, zIndex: theme => theme.zIndex.appBar - 1,
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1,
                     flexWrap: { xs: 'wrap', sm: 'nowrap' },
-                    mx: -2, mt: -2, mb: 2, px: 2, py: 0.5,
+                    mb: 2, px: 1, py: 0.5,
                     bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider',
                     boxShadow: '0 1px 2px rgba(15,23,42,0.08)',
                   }}>
@@ -496,6 +497,7 @@ const UploadPage: React.FC<{ taskId?: string }> = ({ taskId }) => {
                   )}
                   {activeTaskId && taskState?.status !== 'needs_role_review' &&
                     <UploadParsingDetail key={`${activeTaskId}:${taskPollTick}`} taskId={activeTaskId} onSubmitted={handleTaskSubmitted} />}
+                </MaterialOutlineLayout>
                 </CardContent>
                 </MaterialStateControlsContext.Provider>
               </Card>

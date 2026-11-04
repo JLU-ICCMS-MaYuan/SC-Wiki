@@ -9,7 +9,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import DownloadIcon from '@mui/icons-material/Download'
 import CrystalStructureView from './CrystalStructureView'
-import PaperMaterialsSection from './PaperMaterialsSection'
+import PaperMaterialsSection, { MaterialOutlineLayout } from './PaperMaterialsSection'
 import { useLanguage } from '../context/LanguageContext'
 import { familyName } from '../lib/classifications'
 import { api } from '../lib/api'
@@ -97,6 +97,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
   return (
     <PropertySpectraProvider context={{ target: { target: 'paper', target_id: String(paper.id) } }}>
     <Box data-paper-detail>
+    <MaterialOutlineLayout>
       <PaperStructuralCollection paperId={paper.id} />
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 2, mb: 3 }}>
@@ -335,6 +336,7 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
         </Card>
       </Box>
 
+    </MaterialOutlineLayout>
     </Box>
     </PropertySpectraProvider>
   )

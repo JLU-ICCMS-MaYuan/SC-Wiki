@@ -29,7 +29,7 @@ import {
 } from '../lib/paperProcessing'
 import { validateRecordClient, validateTcRecords } from '../lib/formDefinitions'
 import EvidenceFieldMarkers, { readOnlyEvidenceFormSx } from './EvidenceFieldMarkers'
-import PaperMaterialsSection from './PaperMaterialsSection'
+import PaperMaterialsSection, { MaterialOutlineLayout } from './PaperMaterialsSection'
 import { researchMaterials } from '../lib/paperMaterials'
 import PaperStructuralWorkspace from './PaperStructuralWorkspace'
 import { mergeStructuralPreview } from '../lib/structuralRecords'
@@ -577,6 +577,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
 
   return (
     <Box component="fieldset" data-evidence-scope="upload-editor" disabled={submitting || applyingCandidate || Boolean(revision?.conflict)} sx={{ mt: 3, border: 0, p: 0, minWidth: 0 }}>
+      <MaterialOutlineLayout>
       <ParsingWorkflowIdentity binding={draft._parsing_workflow} />
       {revision && <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.revisionNotice')}</Alert>}
       {revision?.review_comment && <Alert severity="warning" sx={{ mb: 2 }}>{revision.review_comment}</Alert>}
@@ -904,6 +905,7 @@ const UploadTaskEditor: React.FC<UploadTaskEditorProps> = ({
           }))
         }} /> : null}
     </Box>
+      </MaterialOutlineLayout>
     </Box>
   )
 }

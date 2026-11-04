@@ -1,0 +1,757 @@
+{
+  "source_head": "33cd0cbf6daa4a6cd3fb88a5e3583b3447fa14b4",
+  "source_sha256": {
+    "frontend/src/pages/UploadPage.tsx": "10efa4dcc0be13578201c238da052923d42c59d900ca08f51d314635e5141e2a",
+    "frontend/src/pages/AdminPaperEditPage.tsx": "895b0d96e3c551621e395591000f5d762272cd4fa136723f18133f5a0857b471",
+    "frontend/src/components/PaperEditView.tsx": "7aef9aa5ba41ef5c91c0585f97a951dbdb4058f959336c41b6e129ad6e0aa490",
+    "frontend/src/components/UploadTaskEditor.tsx": "d34b3d2adddbe4e5e534d1cf23097d4fddecfd9b6e87aad6f198b776598a8d36",
+    "frontend/src/components/PaperMaterialsSection.tsx": "c8eaf0b360f8875c83d4c2b88e72e2acd7d1f017d4f4e75a0a4d37073f5b9c0b",
+    "tests/02_identity_governance/review-workspace-browser.mjs": "fa1bfa2d94c3cd2eee50d4ff2aa06352f372631c1b3279374a2b587a5f4c4a5e"
+  },
+  "browser": {
+    "reports": [
+      {
+        "role": "user",
+        "contribution_name": true,
+        "revision_entry": true,
+        "compact_page_size": null,
+        "readonly_outline": true,
+        "zero_pressure": true,
+        "narrow_no_page_overflow": true
+      },
+      {
+        "role": "admin",
+        "contribution_name": true,
+        "revision_entry": true,
+        "compact_page_size": 3,
+        "readonly_outline": true,
+        "zero_pressure": true,
+        "narrow_no_page_overflow": true
+      },
+      {
+        "role": "superadmin",
+        "contribution_name": true,
+        "revision_entry": true,
+        "compact_page_size": 3,
+        "readonly_outline": true,
+        "zero_pressure": true,
+        "narrow_no_page_overflow": true
+      },
+      {
+        "workspace_tab": "history",
+        "page_size": 20,
+        "internal_scroll": true
+      },
+      {
+        "workspace_tab": "pending",
+        "page_size": 20,
+        "internal_scroll": true
+      },
+      {
+        "host": "/upload/tasks/22222222222222222222222222222222",
+        "role": "user",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "host": "/papers/213/revise",
+        "role": "user",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "host": "/admin/papers/213/edit",
+        "role": "admin",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "host": "/admin/papers/213/edit",
+        "role": "superadmin",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "height_case": 1,
+        "full_height": true
+      },
+      {
+        "height_case": 14,
+        "full_height": true
+      },
+      {
+        "host": "processing-preview",
+        "task_bar_scrolls": true,
+        "outline_in_flow": true,
+        "narrow_widths": [
+          1000,
+          390
+        ],
+        "writes": 0
+      },
+      {
+        "denied_message_count": 1,
+        "review_disabled": true
+      }
+    ],
+    "errors": [],
+    "outlineGeometry": [
+      {
+        "label": "user-detail",
+        "top": 32,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "admin-detail",
+        "top": 32,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "superadmin-detail",
+        "top": 32,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "user-/upload/tasks/22222222222222222222222222222222",
+        "top": 146.890625,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "user-/papers/213/revise",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "admin-/admin/papers/213/edit",
+        "top": 108,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "superadmin-/admin/papers/213/edit",
+        "top": 108,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "revision-count-1",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "low-revision-count-1",
+        "top": 96,
+        "height": 412,
+        "viewport": 420,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 368,
+        "listScrollHeight": 368
+      },
+      {
+        "label": "restored-revision-count-1",
+        "top": 96,
+        "height": 412,
+        "viewport": 420,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 368,
+        "listScrollHeight": 368
+      },
+      {
+        "label": "grown-revision-count-1",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "revision-count-14",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "low-revision-count-14",
+        "top": 96,
+        "height": 412,
+        "viewport": 420,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 368,
+        "listScrollHeight": 632
+      },
+      {
+        "label": "restored-revision-count-14",
+        "top": 96,
+        "height": 412,
+        "viewport": 420,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 368,
+        "listScrollHeight": 632
+      },
+      {
+        "label": "grown-revision-count-14",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "processing-preview",
+        "top": 146.890625,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      }
+    ]
+  },
+  "form_contract": {
+    "files": 12,
+    "passed": 163
+  },
+  "mutations": {
+    "render_regressions_detected": 8,
+    "red_marking_regressions_detected": 4
+  },
+  "field_contract": "passed",
+  "production_build": "passed",
+  "targeted": {
+    "current": [
+      {
+        "name": "上传校对页布局与材料状态折叠 重新获得焦点时显示后台补入的 AI 关键词，不覆盖未保存编辑",
+        "status": "failed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 六项书目信息按序显示，文本期号和历史页码保存后可重载",
+        "status": "failed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 历史建议副本不显示，正式表单值保持英文",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 仅为非空论文片段显示折叠证据，空证据不产生空框",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 上传审核文案不再将解析草稿称为 AI 草稿或 AI 建议",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 研究驱动力按独立行显示，生成失败时提示人工逐行填写",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 历史候选不再堆在表单顶部，原值保留",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 论文级 Material family 与 Superconductor type 在同一分类网格行",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 参考文献解析默认只展示前五条，展开后才显示其余原始引文",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 不显示研究材料输入框，关键词与研究方法在同一并排容器中且等高",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 所有材料默认展开，支持全部折叠/全部展开与单卡折叠",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 不超过 2 张卡片时默认全部展开",
+        "status": "passed"
+      },
+      {
+        "name": "超导类型与条件化 Tc 字段 每条 Tc 方法独立控制计算字段，论文级超导类型不再影响字段集",
+        "status": "passed"
+      },
+      {
+        "name": "超导类型与条件化 Tc 字段 非常规类型添加测量 Tc 不生成计算参数字段",
+        "status": "passed"
+      },
+      {
+        "name": "超导类型与条件化 Tc 字段 新增预测 Tc 按定义创建空参数，不从其他字段复制旧值",
+        "status": "passed"
+      },
+      {
+        "name": "超导类型与条件化 Tc 字段 论文级超导类型下拉含完整单选值域",
+        "status": "passed"
+      },
+      {
+        "name": "空间群标准表自动补全 选中标准符号 Fm-3m 自动带出群号 225，自由输入原样保留",
+        "status": "passed"
+      },
+      {
+        "name": "文案、类型标签与模块顺序 显示压强文案与新类型标签，无主结构家族字段，结构附件先于物性模块",
+        "status": "passed"
+      },
+      {
+        "name": "energy above hull 统一物性记录 通过电子性质模块新增自定义记录",
+        "status": "passed"
+      },
+      {
+        "name": "energy above hull 统一物性记录 已存在同名目标记录时直接回填，不再提供旧预置按钮",
+        "status": "passed"
+      },
+      {
+        "name": "晶系与空间群三方联动 仅改晶系为四方后，空间群符号下拉仅含 75–142 号符号，已填符号与群号不被清除",
+        "status": "passed"
+      },
+      {
+        "name": "晶系与空间群三方联动 选中标准符号 I4/mmm 自动带出群号 139 且晶系变为四方",
+        "status": "passed"
+      },
+      {
+        "name": "晶系与空间群三方联动 输入合法群号 227 自动带出标准符号 Fd-3m 且晶系变为立方",
+        "status": "passed"
+      },
+      {
+        "name": "保存/提交失败的后端错误提示 保存失败时展示后端 detail.message 并附 code",
+        "status": "failed"
+      },
+      {
+        "name": "保存/提交失败的后端错误提示 提交失败且响应无 detail 时回退通用文案",
+        "status": "failed"
+      },
+      {
+        "name": "独立解析标签页未保存保护 仅在主表单未保存或保存中阻止离页，保存完成后解除",
+        "status": "failed"
+      },
+      {
+        "name": "独立解析标签页未保存保护 只读处理中预览不注册主表单未保存阻断",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 地址任务优先于旧活动任务缓存，直达和重新挂载恢复同一任务",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 详情读取 401 时没有旧表单，提供返回入口",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 详情读取 403 时没有旧表单，提供返回入口",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 详情读取 404 时没有旧表单，提供返回入口",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 切换任务后迟到的旧响应不能覆盖新任务",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 原有正式提交回调仍进入正式论文页面",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 任务详情地址在已提交=true 时跳转论文或明确提示",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 任务详情地址在已提交=false 时跳转论文或明确提示",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 只展示未提交任务，不请求或显示旧版 MySQL 上传记录",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 把一次拖入的多个文件保留在同一个可清空的任务草稿中",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 把 .vasp 结构文件作为 POSCAR 附件接受",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 分段尚未生成时仍显示解析草稿和解析证据入口",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 解析完成后在临时表单页签原地切换为可编辑草稿",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 作者保持单行并可标记通讯作者和共同第一作者",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 按材料状态显示压强与空间群，并以新契约保存",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 晶体结构只在所属材料状态内显示且材料状态列表占满页面",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 分段解析页签并列显示各分段来源与解析结果",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 只读预览展示局部草稿字段但不提供编辑操作",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 只读预览中字段内容可见且点击不改变",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 切换上传任务后只读预览重置为新任务的局部草稿",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 轮询更新局部草稿时只读预览实时刷新内容",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 分段阅读中的只读预览展示局部草稿的分类与材料状态",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 新标签页任务入口保留上传文件与多选状态，不恢复旧的内联任务",
+        "status": "passed"
+      },
+      {
+        "name": "admin 个人页两页签每页3篇，无内部滚动并承接页签",
+        "status": "passed"
+      },
+      {
+        "name": "superadmin 个人页两页签每页3篇，无内部滚动并承接页签",
+        "status": "passed"
+      },
+      {
+        "name": "独立工作区承接history页签，每页20篇并内部滚动",
+        "status": "passed"
+      },
+      {
+        "name": "独立工作区承接pending页签，每页20篇并内部滚动",
+        "status": "passed"
+      },
+      {
+        "name": "已批准稿从小锤子拒绝，不先领取已交出的工作稿",
+        "status": "passed"
+      },
+      {
+        "name": "标题仅实际截断时悬停显示完整题目",
+        "status": "passed"
+      },
+      {
+        "name": "大纲删除前项后按稳定身份定位，压力更新同步显示",
+        "status": "passed"
+      }
+    ],
+    "baseline": [
+      {
+        "name": "上传校对页布局与材料状态折叠 重新获得焦点时显示后台补入的 AI 关键词，不覆盖未保存编辑",
+        "status": "failed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 六项书目信息按序显示，文本期号和历史页码保存后可重载",
+        "status": "failed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 历史建议副本不显示，正式表单值保持英文",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 仅为非空论文片段显示折叠证据，空证据不产生空框",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 上传审核文案不再将解析草稿称为 AI 草稿或 AI 建议",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 研究驱动力按独立行显示，生成失败时提示人工逐行填写",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 历史候选不再堆在表单顶部，原值保留",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 论文级 Material family 与 Superconductor type 在同一分类网格行",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 参考文献解析默认只展示前五条，展开后才显示其余原始引文",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 不显示研究材料输入框，关键词与研究方法在同一并排容器中且等高",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 所有材料默认展开，支持全部折叠/全部展开与单卡折叠",
+        "status": "passed"
+      },
+      {
+        "name": "上传校对页布局与材料状态折叠 不超过 2 张卡片时默认全部展开",
+        "status": "passed"
+      },
+      {
+        "name": "超导类型与条件化 Tc 字段 每条 Tc 方法独立控制计算字段，论文级超导类型不再影响字段集",
+        "status": "passed"
+      },
+      {
+        "name": "超导类型与条件化 Tc 字段 非常规类型添加测量 Tc 不生成计算参数字段",
+        "status": "passed"
+      },
+      {
+        "name": "超导类型与条件化 Tc 字段 新增预测 Tc 按定义创建空参数，不从其他字段复制旧值",
+        "status": "passed"
+      },
+      {
+        "name": "超导类型与条件化 Tc 字段 论文级超导类型下拉含完整单选值域",
+        "status": "passed"
+      },
+      {
+        "name": "空间群标准表自动补全 选中标准符号 Fm-3m 自动带出群号 225，自由输入原样保留",
+        "status": "passed"
+      },
+      {
+        "name": "文案、类型标签与模块顺序 显示压强文案与新类型标签，无主结构家族字段，结构附件先于物性模块",
+        "status": "passed"
+      },
+      {
+        "name": "energy above hull 统一物性记录 通过电子性质模块新增自定义记录",
+        "status": "passed"
+      },
+      {
+        "name": "energy above hull 统一物性记录 已存在同名目标记录时直接回填，不再提供旧预置按钮",
+        "status": "passed"
+      },
+      {
+        "name": "晶系与空间群三方联动 仅改晶系为四方后，空间群符号下拉仅含 75–142 号符号，已填符号与群号不被清除",
+        "status": "passed"
+      },
+      {
+        "name": "晶系与空间群三方联动 选中标准符号 I4/mmm 自动带出群号 139 且晶系变为四方",
+        "status": "passed"
+      },
+      {
+        "name": "晶系与空间群三方联动 输入合法群号 227 自动带出标准符号 Fd-3m 且晶系变为立方",
+        "status": "passed"
+      },
+      {
+        "name": "保存/提交失败的后端错误提示 保存失败时展示后端 detail.message 并附 code",
+        "status": "failed"
+      },
+      {
+        "name": "保存/提交失败的后端错误提示 提交失败且响应无 detail 时回退通用文案",
+        "status": "failed"
+      },
+      {
+        "name": "独立解析标签页未保存保护 仅在主表单未保存或保存中阻止离页，保存完成后解除",
+        "status": "failed"
+      },
+      {
+        "name": "独立解析标签页未保存保护 只读处理中预览不注册主表单未保存阻断",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 地址任务优先于旧活动任务缓存，直达和重新挂载恢复同一任务",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 详情读取 401 时没有旧表单，提供返回入口",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 详情读取 403 时没有旧表单，提供返回入口",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 详情读取 404 时没有旧表单，提供返回入口",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 切换任务后迟到的旧响应不能覆盖新任务",
+        "status": "passed"
+      },
+      {
+        "name": "上传任务详情地址 原有正式提交回调仍进入正式论文页面",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 任务详情地址在已提交=true 时跳转论文或明确提示",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 任务详情地址在已提交=false 时跳转论文或明确提示",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 只展示未提交任务，不请求或显示旧版 MySQL 上传记录",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 把一次拖入的多个文件保留在同一个可清空的任务草稿中",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 把 .vasp 结构文件作为 POSCAR 附件接受",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 分段尚未生成时仍显示解析草稿和解析证据入口",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 解析完成后在临时表单页签原地切换为可编辑草稿",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 作者保持单行并可标记通讯作者和共同第一作者",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 按材料状态显示压强与空间群，并以新契约保存",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 晶体结构只在所属材料状态内显示且材料状态列表占满页面",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 分段解析页签并列显示各分段来源与解析结果",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 只读预览展示局部草稿字段但不提供编辑操作",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 只读预览中字段内容可见且点击不改变",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 切换上传任务后只读预览重置为新任务的局部草稿",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 轮询更新局部草稿时只读预览实时刷新内容",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 分段阅读中的只读预览展示局部草稿的分类与材料状态",
+        "status": "passed"
+      },
+      {
+        "name": "论文上传工作区 新标签页任务入口保留上传文件与多选状态，不恢复旧的内联任务",
+        "status": "passed"
+      },
+      {
+        "name": "admin 个人页两页签每页3篇，无内部滚动并承接页签",
+        "status": "passed"
+      },
+      {
+        "name": "superadmin 个人页两页签每页3篇，无内部滚动并承接页签",
+        "status": "passed"
+      },
+      {
+        "name": "独立工作区承接history页签，每页20篇并内部滚动",
+        "status": "passed"
+      },
+      {
+        "name": "独立工作区承接pending页签，每页20篇并内部滚动",
+        "status": "passed"
+      },
+      {
+        "name": "已批准稿从小锤子拒绝，不先领取已交出的工作稿",
+        "status": "passed"
+      },
+      {
+        "name": "标题仅实际截断时悬停显示完整题目",
+        "status": "passed"
+      },
+      {
+        "name": "大纲删除前项后按稳定身份定位，压力更新同步显示",
+        "status": "passed"
+      }
+    ]
+  },
+  "baseline_browser_failure": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: user-detail 目录应随页面排版\n\n'fixed' !== 'static'\n\n    at checkOutlineGeometry (file:///private/tmp/scwiki219-flow.m22TT7/tests/02_identity_governance/review-workspace-browser.mjs:87:10)\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at process.processImmediate (node:internal/timers:541:9)\n    at async file:///private/tmp/scwiki219-flow.m22TT7/tests/02_identity_governance/review-workspace-browser.mjs:119:5 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 'fixed',\n  expected: 'static',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.9.0\n",
+  "limits": [
+    "隔离HEAD副本只叠加本次源码，不包含共享工作区其他任务改动",
+    "生产构建配隔离API夹具，未操作用户真实稿件",
+    "系统Chrome，未实测Safari",
+    "相邻用例52通过、5项失败，未修改HEAD同样52通过、相同5项失败",
+    "未推送、部署或调用模型"
+  ]
+}

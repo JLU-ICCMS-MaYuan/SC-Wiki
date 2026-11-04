@@ -73,8 +73,14 @@ spec.md、plan.md、research.md、tasks.md、quickstart.md、validation.md、con
 - `docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md`
 本轮只修正文档引用归属，不改变这些说明中的业务事实。
 
-## 2026-11-04 全高与4px留白实施
+## 2026-11-04 全高与4px留白实施（历史方案，后续已取消悬浮）
 
 目录使用固定定位，顶部/底部各4px；不同宿主存在额外容器留白，仅在横向边界或材料状态数量变化时测量当前首卡片边界，以CSS变量统一计算正文留位，不扫描表单字段；外框用纵向flex布局，标题不收缩，条目区使用剩余高度并内部滚动。桌面正文留位与目录宽度统一计算，以浏览器实际卡片边界验证4px缝隙；折叠后只留箭头并回收正文宽度。材料卡片和导航数据职责保持。
 
 FR-006/007、SC-004→PaperMaterialsSection→T006～T009→真实浏览器边界测量与四宿主表单/变异回归。没有标准键、后端、数据库或模型变更。
+
+## 取消悬浮的实施变更
+
+采用MaterialOutlineLayout统一正常网格排版，桌面左侧内容加右侧240px目录，间隔4px；折叠为40px，未挂载目录不留空栏，窄屏按纵向排列。UploadPage在整个任务内容外提供栏位，内层UploadTaskEditor复用它；返修、审核与详情提供同一布局。PaperMaterialsSection通过React portal把只读导航放入当前工作区栏位，数据仍读取当前宿主，定位锚点留在原宿主，既有科学字段组件不换key、不换状态归属。
+移除fixed定位、全局padding规则、ResizeObserver及卡片几何测量。目录高度使用窗口高度计算并限制条目滚动，随整页滚动；任务横条恢复正常排版。
+FR-006/008、SC-005 → 两个布局组件及四个宿主 → T010～T013 → 更新的浏览器几何/滚动断言、四宿主表单门与变异门。无API、标准键或持久化变更。

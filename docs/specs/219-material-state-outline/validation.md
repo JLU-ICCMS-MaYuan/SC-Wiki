@@ -52,3 +52,23 @@
 机器测量、源码哈希与场景见[full-height-checks.json](assets/full-height-checks.json)，用户新图及批注见[full-height-request.json](assets/full-height-request.json)。本轮实际截图以assets/qa-full-*.png单独保存，旧证据保留原归属。
 
 原邻接基线失败沿上文记录保留，本次布局没有修改相关科学流程或重跑旧模型/后端用例。不操作用户真实草稿、不调用模型、不推送或部署。
+
+## 2026-11-04 取消目录悬浮及任务横条吸顶
+
+当前用户结论覆盖此前固定顶底4px的目录和吸顶横条；两栏间距4px、材料卡片及导航功能保留。任务信息、进度、草稿统一参与正常分栏；目录和横条随整页滚走。移除原固定定位、全局padding、ResizeObserver和卡片边界测量，不改变数据/接口。
+
+隔离HEAD副本只叠加本次五个生产源码和浏览器脚本，避开共享工作区其他任务改动；最终五个源码与测试副本逐字比较一致。新浏览器断言在旧源码生产构建上先失败：目录position为fixed，而预期static。
+
+实际运行：
+
+- TypeScript及生产构建通过；字段契约通过。
+- npm run test:form-contract --prefix frontend：12文件、163项通过。
+- npm run test:form-contract:mutation --prefix frontend：8项完整宿主渲染回退、4项原免审字段漏红回退均检出。
+- 相邻上传工作区、任务导航、编辑布局及review-workspace四文件：52通过、5失败；独立未修改HEAD同样52通过、相同5项失败。具体名称和逐项结果保存在机器证据，失败不算本轮通过。
+- Node 26默认Web Storage影响旧测试的localStorage，定向测试通过进程级NODE_OPTIONS=--no-experimental-webstorage使用jsdom存储；未改系统环境或测试断言。相同设置用于基线。
+- 系统Chrome生产构建配隔离API：13组、16次几何检查，页面错误0。覆盖上传处理中预览、四编辑宿主、三角色只读详情；桌面正常分栏、4px间距、窗口高度响应、折叠恢复、点击定位、目录随页面滚走均通过。处理中横条与目录同起始行，横条能滚出视口，390px/1000px无页面水平溢出，导航无科学写请求。
+- 初次窄屏检查在AppShell尚未完成响应式折叠时失败；现等待侧栏实际达到窄屏宽度后再检查。未隐藏溢出或放宽尺寸断言。
+
+证据：[机器结果](assets/normal-flow-checks.json)、[桌面完整解析页](assets/qa-normal-flow-processing-desktop.png)、[390px页面](assets/qa-normal-flow-processing-390.png)、[用户截图登记](assets/normal-flow-request.json)。原全高悬浮截图仍是历史证据，不能用作当前行为。
+
+未实测Safari，未调查内存重载；未修改用户真实论文/草稿、未调用模型、未推送或部署。
