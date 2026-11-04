@@ -132,3 +132,46 @@ it("无刻度的像素积分明确保留单位，v4旧结果要求重算",()=>{
   expect(screen.queryByRole("table")).toBeNull()
   expect(screen.getByText(/请点击重新计算/)).toBeVisible()
 })
+
+
+it("总谱五列表格列出所有材料元素，无分波不伪造积分",()=>{
+  const r=report();r.spectrum_type="total"
+  r.components=[{curve_id:"S15_150GPa_total_phonon_dos",projection:"total",status:"available",area:6.308648445665745,
+    unit:"arbitrary_units·THz",amplitude_basis:{kind:"calibrated_values"},frequency_interval_thz:[3.6556,58.648]}]
+  r.composition={fractions:{Ca:1/7,H:6/7}}
+  r.shares={status:"unavailable",reason:"未提供元素分波"}
+  const {rerender}=render(<DosRelativeMetrics report={r} restricted={false}/>)
+  const table=screen.getByRole("table",{name:"DOS 相对面积"})
+  expect(within(table).getAllByRole("columnheader").map(e=>e.textContent)).toEqual(["元素 / TDOS","积分范围","积分值","面积占比","原子数占比"])
+  const rows=within(table).getAllByRole("row")
+  expect(rows).toHaveLength(4)
+  const total=within(rows[1]).getAllByRole("cell")
+  expect(total[0]).toHaveTextContent("TDOS（总态密度）")
+  expect(total[1]).toHaveTextContent("3.6556–58.648 THz")
+  expect(total[2]).toHaveTextContent("6.30865 任意单位·THz · 纵轴刻度")
+  expect(total[2].querySelector("span")).not.toHaveStyle({display:"block"})
+  expect(within(table).queryByText("S15_150GPa_total_phonon_dos")).toBeNull()
+  for(const [index,element,share] of [[2,"Ca","14.29%"],[3,"H","85.71%"]] as const){
+    const cells=within(rows[index]).getAllByRole("cell")
+    expect(cells).toHaveLength(5);expect(cells[0]).toHaveTextContent(element)
+    expect(cells.slice(1,4).map(e=>e.textContent)).toEqual(["—","—","—"])
+    expect(cells[4]).toHaveTextContent(share)
+  }
+  r.components[0].projection=r.components[0].curve_id;r.spectrum_type="projected"
+  rerender(<DosRelativeMetrics report={r} restricted={false}/>)
+  expect(within(table).getByText("待确认")).toBeVisible()
+  expect(within(table).queryByText("S15_150GPa_total_phonon_dos")).toBeNull()
+})
+
+it("旧v5可靠结构计数也能列全元素，投影不完整仍显示已知原子数占比",()=>{
+  const r=report();r.components=r.components.slice(0,1)
+  r.shares={status:"unavailable",reason:"元素投影完整性尚待核对"}
+  r.normalization={status:"unavailable",reason:"元素投影完整性尚待核对",structure_evidence:{species_counts:{La:1,H:2}}}
+  render(<DosRelativeMetrics report={r} restricted={false}/>)
+  const table=screen.getByRole("table",{name:"DOS 相对面积"})
+  expect(within(table).getAllByRole("row")).toHaveLength(3)
+  expect(within(table).getByText("33.33%")).toBeVisible()
+  expect(within(table).getByText("66.67%")).toBeVisible()
+  const h=within(table).getByText("H").closest("tr")!
+  expect(within(h).getAllByRole("cell").slice(1,4).map(e=>e.textContent)).toEqual(["—","—","—"])
+})

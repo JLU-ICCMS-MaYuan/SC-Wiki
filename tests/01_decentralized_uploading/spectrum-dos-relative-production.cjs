@@ -82,7 +82,16 @@ async function main(){
      assert.deepEqual(fresh.result.curves,oldCurves);assert.notEqual(fresh.run.id,oldId);
      const table=page.getByRole("table",{name:"DOS 相对面积"});
      await table.getByRole("cell",{name:/TDOS（总态密度）/}).waitFor();
-     assert.equal(await table.getByText("—",{exact:true}).count(),2);
+     assert.deepEqual(await table.getByRole("columnheader").allTextContents(),["元素 / TDOS","积分范围","积分值","面积占比","原子数占比"]);
+     const counts=stateKey==="dos-total"?[["La","33.33%"],["H","66.67%"]]:[["Ca","14.29%"],["H","85.71%"]];
+     assert.equal(await table.getByRole("row").count(),4);
+     for(const [element,share] of counts){
+       const row=table.getByRole("row").filter({has:page.getByRole("cell",{name:element,exact:true})});
+       assert.deepEqual((await row.getByRole("cell").allTextContents()).slice(1,4),["—","—","—"]);
+       await row.getByRole("cell",{name:share,exact:true}).waitFor();
+     }
+     const totalRow=table.getByRole("row").filter({has:page.getByRole("cell",{name:"TDOS（总态密度）",exact:true})});
+     assert.equal((await totalRow.getByRole("cell").allTextContents()).length,5);
      assert.equal(await page.getByTestId("dos-element-ratio").count(),0);
      assert.equal(await page.getByRole("table",{name:"DOS 归一化模式积分"}).count(),0);
      assert(!/元素投影完整性|各分波共同幅值尺度/.test(await page.locator("body").innerText()));
@@ -95,6 +104,12 @@ async function main(){
        assert(Math.abs(rel.normalization.coefficient-3.32876370919475)<1e-9);
        await table.getByRole("cell",{name:/^6.30865/}).waitFor();
        await table.getByText("任意单位·THz · 纵轴刻度",{exact:true}).waitFor();
+       assert(!await table.innerText().then(t=>t.includes("S15_150GPa_total_phonon_dos")));
+       const sameLine=await table.getByRole("cell",{name:/^6.30865/}).evaluate(cell=>{
+         const span=cell.querySelector("span"),range=document.createRange();range.selectNodeContents(cell.firstChild);
+         return Boolean(span&&Math.abs(range.getBoundingClientRect().top-span.getBoundingClientRect().top)<4);
+       });assert(sameLine,"积分数值与单位应在同一行");
+       check("五列结果：TDOS和Ca/H独立列出，缺分波三项留空，积分值与单位同行且无内部ID");
        const lines=csv.trim().split("\n"),headers=lines[0].replace("\r","").split(","),first=lines[1].split(",");
        assert(Math.abs(Number(first[headers.indexOf("dos_integral")])-rel.components[0].area)<1e-9);
        assert.equal(first[headers.indexOf("dos_integral_unit")],"arbitrary_units·THz");
@@ -113,7 +128,7 @@ async function main(){
      await page.setViewportSize({width:390,height:900});await page.waitForTimeout(300);
      assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
      await shot(stateKey+"-mobile");await page.setViewportSize({width:1440,height:1100});
-     check(stateKey+"：元素标记均未确认仍归一化，元素列空白，原始描线/范围不变，刷新重算和CSV/窄屏通过");
+     check(stateKey+"：元素标记均未确认仍归一化，无分波积分为空且原子数占比已列出，原始描线/范围不变，刷新重算和CSV/窄屏通过");
    }
    const unknown=items.find(i=>i.state_key==="dos-real-unknown");
    if(unknown){
@@ -123,6 +138,11 @@ async function main(){
      assert.equal(rel.normalization.primitive_atoms,undefined);
      assert(Math.abs(rel.components[0].area-6.308648445665745)<1e-9);
      await page.getByRole("table",{name:"DOS 相对面积"}).getByRole("cell",{name:/^6.30865/}).waitFor();
+     const unknownTable=page.getByRole("table",{name:"DOS 相对面积"});
+     await unknownTable.getByRole("cell",{name:"待确认",exact:true}).waitFor();
+     await unknownTable.getByRole("cell",{name:"Ca",exact:true}).waitFor();
+     await unknownTable.getByRole("cell",{name:"14.29%",exact:true}).waitFor();
+     assert(!(await unknownTable.innerText()).includes("S15_150GPa_total_phonon_dos"));
      await shot("dos-real-unknown");
      check("未知TDOS身份且无N，原纵轴数值积分6.30865仍独立显示");
    }

@@ -2,7 +2,7 @@
 
 日期：2026-10-27（Asia/Shanghai）。Issue：[#164](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/164)。
 
-本文保留各次历史验证；最新有效规则见文末“纵轴刻度优先的代码实现与验收”。此前关于频段确认的行为描述已被该修订取代。
+本文保留各次历史验证；最新有效规则见文末“五列结果与独立元素清单”。此前关于频段确认的行为描述已被该修订取代。
 
 ## 自动验证
 
@@ -130,3 +130,22 @@
 已实际查看[桌面](validation/axis-calibration/desktop.png)及[窄屏](validation/axis-calibration/mobile.png)截图；另保留[未知身份且无N](validation/axis-calibration/unknown-identity.png)页面。02显示原纵轴幅值与按3N刻度，03显示每条曲线实际积分单位和幅值依据。CSV增加dos_integral、dos_integral_unit、dos_amplitude_basis，保留原始点值。
 
 本轮不写用户业务草稿或来源身份，不迁移、不回填、不推送、不部署。旧v1–v4报告需点“重新计算”生成v5；独立来源积分无需TDOS确认，但3N归一化仍需要。Issue保持OPEN，远程文档链接待另行推送后实际核验。
+
+
+## 五列结果与独立元素清单（2026-11-04）
+
+本轮按用户要求将积分结果固定为五列：元素／TDOS、积分范围、积分值、面积占比、原子数占比。内部曲线ID不再作为名称或范围显示；数值后紧接单位与幅值依据，并保持同行。明确总谱显示TDOS，明确元素显示元素名，未确认投影显示待确认，不根据ID或单线数量改写科学身份。
+
+材料原子数占比现在由独立composition提供：优先已知化学式，缺少时沿用可信结构计数，不依赖元素分波完整性、N或归一化成功。表格据此补齐无分波元素行，范围、积分、面积占比为—，不会将占位行保存为曲线或送入积分。旧v5无composition时只读取已有normalization.structure_evidence.species_counts；原始点、旧结果与业务草稿均不改写。
+
+### 自动与正式页面验证
+
+- 修改前新增后端2项、组件2项失败，见[后端失败](validation/five-column-table/before-backend.txt)、[组件失败](validation/five-column-table/before-ui.txt)。修复后DOS专项79项通过，谱/α²F后端298 passed、6项需授权MySQL跳过；不是MySQL验收。
+- 前端相关5文件59项通过，表单契约11文件150项通过；四类宿主8项变异全部检出；科学字段契约v1与TypeScript/生产构建通过。没有修改标准科学表单键或摘要。
+- 后端验证在缺少元素分波、身份未确认和无N时仍返回已知化学计量，化学式优先于结构；公开过滤只保留可见曲线，组成不包含隐藏曲线ID或派生值，不扩大可见范围。
+- 正式React+HTTP+隔离SQLite浏览器11项检查通过、0页面异常。CaH6仅总谱时显示TDOS、Ca、H三行；Ca/H原子数占比14.29%/85.71%，未提供分波的范围/积分/面积比为—。实测总谱积分仍为6.30865任意单位·THz；无额外曲线或数值生成。
+- 浏览器实际检查五列表头、未知投影名称、ID隐藏，以及文本边界框确认积分数值和单位同行；1440px与390px均无整页横向溢出，表格局部滚动。原始描线与重复重算、CSV回归保持。报告见[browser-report.json](validation/five-column-table/browser-report.json)。
+
+已实际查看[桌面截图](validation/five-column-table/desktop.png)和[窄屏截图](validation/five-column-table/mobile.png)，另保留[未知投影页面](validation/five-column-table/unknown-projection.png)。截图原材料IMG-005按原始字节归档、哈希及尺寸核验完成。
+
+本轮只暴露已有化学式/结构计数和调整展示，没有修改PDF/模型提取、标定或积分算法，因此未重提PDF或调用模型；复用已核验原图及人工描线夹具，不宣称新自动描线通过。没有业务写入、迁移、批量回填、推送或部署；Issue保持OPEN，远程Spec链接待另行推送后实际核验。

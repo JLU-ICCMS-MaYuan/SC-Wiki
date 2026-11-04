@@ -6,9 +6,11 @@ type ElementRatio = Status & { elements?: string[]; estimated_ratio?: number[]; 
 export type DosRelativeReport = {
   method: string
   spectrum_type?: 'total' | 'projected'
+  composition?: { fractions: Record<string, number>; source?: unknown }
   components: Component[]
   shares: Status & { total_area?: number; unit?: string; fractions?: Record<string, number>; expected_fractions?: Record<string, number>; expected_reason?: string; element_ratio?: ElementRatio }
   normalization: Status & {
+    structure_evidence?: { species_counts?: Record<string, number> }
     coefficient?: number; primitive_atoms?: number; target_modes?: number; total_mode_integral?: number
     component_mode_integrals?: Record<string, number>; expected_modes?: Record<string, number>
     deviations?: Record<string, { absolute_difference: number; relative_difference_pct: number }>
@@ -24,18 +26,30 @@ export default function DosRelativeMetrics({ report, restricted }: { report?: Do
   const comparable = shares.status === 'available', normalized = norm.status === 'available'
   const ratio = shares.element_ratio
   const total = report.spectrum_type === 'total'
+  const counts = norm.structure_evidence?.species_counts || {}
+  const countTotal = Object.values(counts).reduce((sum, value) => sum + value, 0)
+  const countFractions = Number.isFinite(countTotal) && countTotal > 0 && Object.values(counts).every(value => Number.isFinite(value) && value > 0)
+    ? Object.fromEntries(Object.entries(counts).map(([element, value]) => [element, value / countTotal])) : {}
+  const fractions = report.composition?.fractions ?? countFractions
+  const isTotal = (c: Component) => (total && c.status !== 'not_provided') || /^(total|tdos)$/i.test(c.projection.trim())
+  const name = (c: Component) => isTotal(c) ? 'TDOS（总态密度）' : /^[A-Z][a-z]?$/.test(c.projection.trim()) ? c.projection.trim() : '待确认'
+  const projections = new Set(components.filter(c => !isTotal(c)).map(c => c.projection.trim()))
+  const rows: Component[] = [...components, ...Object.keys(fractions).filter(element => !projections.has(element)).map(element => ({
+    curve_id: 'element:' + element, projection: element, status: 'not_provided',
+  }))]
   const unit = (value?: string) => value?.replace('arbitrary_units', '任意单位').replace('pixel', '像素').replace('unknown', '原纵轴单位（未说明）') || '像素·THz'
   return <Box data-testid="dos-relative-metrics" sx={{mt:2}}>
     <Typography fontWeight={600}>积分结果与元素占比</Typography>
     <Typography variant="caption" color="text.secondary">有可用纵轴刻度时按刻度积分，否则使用像素；单位随各曲线显示，任意单位或像素积分不是振动模式数。</Typography>
     <Box sx={{overflowX:'auto',maxWidth:'100%'}}>
       <Table size="small" aria-label="DOS 相对面积" sx={{minWidth:430}}>
-        <TableHead><TableRow>{[total?'谱线 / 积分范围':'元素 / 积分范围','积分值','面积占比','原子数占比'].map(s=><TableCell key={s}>{s}</TableCell>)}</TableRow></TableHead>
-        <TableBody>{components.map(c=><TableRow key={c.curve_id}>
-          <TableCell>{total?'TDOS（总态密度）':c.projection}{c.frequency_interval_thz&&<Typography variant="caption" display="block">{c.frequency_interval_thz.map(v=>number(v)).join('–')} THz</Typography>}</TableCell>
-          <TableCell>{c.status==='available'?number(c.area,6):'—'}{c.status==='available'&&<Typography variant="caption" display="block">{unit(c.unit)} · {c.amplitude_basis?.kind==='calibrated_values'?'纵轴刻度':'相对像素'}</Typography>}{c.reason&&<Typography variant="caption" display="block" color="text.secondary">{c.reason}</Typography>}</TableCell>
-          <TableCell>{comparable&&!total?percent(shares.fractions?.[c.curve_id]):'—'}</TableCell>
-          <TableCell>{comparable&&!total?percent(shares.expected_fractions?.[c.curve_id]):'—'}</TableCell>
+        <TableHead><TableRow>{['元素 / TDOS','积分范围','积分值','面积占比','原子数占比'].map(s=><TableCell key={s}>{s}</TableCell>)}</TableRow></TableHead>
+        <TableBody>{rows.map(c=><TableRow key={(c.status==='not_provided'?'missing:':'curve:')+c.curve_id}>
+          <TableCell>{name(c)}</TableCell>
+          <TableCell>{c.frequency_interval_thz?c.frequency_interval_thz.map(v=>number(v)).join('–')+' THz':'—'}</TableCell>
+          <TableCell sx={{whiteSpace:'nowrap'}}>{c.status==='available'?number(c.area,6):'—'}{c.status==='available'&&<Typography component="span" variant="caption">{' '+unit(c.unit)} · {c.amplitude_basis?.kind==='calibrated_values'?'纵轴刻度':'相对像素'}</Typography>}{c.reason&&<Typography variant="caption" display="block" color="text.secondary">{c.reason}</Typography>}</TableCell>
+          <TableCell>{comparable&&!isTotal(c)?percent(shares.fractions?.[c.curve_id]):'—'}</TableCell>
+          <TableCell>{!isTotal(c)?percent(fractions[c.projection.trim()] ?? (comparable?shares.expected_fractions?.[c.curve_id]:undefined)):'—'}</TableCell>
         </TableRow>)}</TableBody>
       </Table>
     </Box>
@@ -59,7 +73,7 @@ export default function DosRelativeMetrics({ report, restricted }: { report?: Do
           <Table size="small" aria-label="DOS 归一化模式积分" sx={{minWidth:450}}>
             <TableHead><TableRow>{['元素','模式积分','预期 3Nₛ','绝对偏差','相对偏差'].map(s=><TableCell key={s}>{s}</TableCell>)}</TableRow></TableHead>
             <TableBody>{components.map(c=><TableRow key={c.curve_id}>
-              <TableCell>{c.projection}</TableCell>
+              <TableCell>{name(c)}</TableCell>
               <TableCell>{number(norm.component_mode_integrals?.[c.curve_id])}</TableCell>
               <TableCell>{number(norm.expected_modes?.[c.curve_id])}</TableCell>
               <TableCell>{number(norm.deviations?.[c.curve_id]?.absolute_difference)}</TableCell>

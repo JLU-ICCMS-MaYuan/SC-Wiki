@@ -1,0 +1,64 @@
+
+> sc-wiki-frontend@1.0.0 test:upload-ui
+> vitest run --config ../vitest.config.ts tests/01_decentralized_uploading/spectrum-dos-relative.test.tsx
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /Users/mayuan/Codes/SC-Wiki
+
+ ❯ tests/01_decentralized_uploading/spectrum-dos-relative.test.tsx (13 tests | 2 failed) 103ms
+   × 总谱五列表格列出所有材料元素，无分波不伪造积分 6ms
+     → expected [ '谱线 / 积分范围', '积分值', '面积占比', '原子数占比' ] to deeply equal [ '元素 / TDOS', '积分范围', '积分值', …(2) ]
+   × 旧v5可靠结构计数也能列全元素，投影不完整仍显示已知原子数占比 4ms
+     → expected [ <tr …(1)>…(4)</tr>, …(1) ] to have a length of 3 but got 2
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/01_decentralized_uploading/spectrum-dos-relative.test.tsx > 总谱五列表格列出所有材料元素，无分波不伪造积分
+AssertionError: expected [ '谱线 / 积分范围', '积分值', '面积占比', '原子数占比' ] to deeply equal [ '元素 / TDOS', '积分范围', '积分值', …(2) ]
+
+- Expected
++ Received
+
+  Array [
+-   "元素 / TDOS",
+-   "积分范围",
++   "谱线 / 积分范围",
+    "积分值",
+    "面积占比",
+    "原子数占比",
+  ]
+
+ ❯ tests/01_decentralized_uploading/spectrum-dos-relative.test.tsx:145:76
+    143|   const {rerender}=render(<DosRelativeMetrics report={r} restricted={f…
+    144|   const table=screen.getByRole("table",{name:"DOS 相对面积"})
+    145|   expect(within(table).getAllByRole("columnheader").map(e=>e.textConte…
+       |                                                                            ^
+    146|   const rows=within(table).getAllByRole("row")
+    147|   expect(rows).toHaveLength(4)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  tests/01_decentralized_uploading/spectrum-dos-relative.test.tsx > 旧v5可靠结构计数也能列全元素，投影不完整仍显示已知原子数占比
+AssertionError: expected [ <tr …(1)>…(4)</tr>, …(1) ] to have a length of 3 but got 2
+
+- Expected
++ Received
+
+- 3
++ 2
+
+ ❯ tests/01_decentralized_uploading/spectrum-dos-relative.test.tsx:172:45
+    170|   render(<DosRelativeMetrics report={r} restricted={false}/>)
+    171|   const table=screen.getByRole("table",{name:"DOS 相对面积"})
+    172|   expect(within(table).getAllByRole("row")).toHaveLength(3)
+       |                                             ^
+    173|   expect(within(table).getByText("33.33%")).toBeVisible()
+    174|   expect(within(table).getByText("66.67%")).toBeVisible()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  15:42:48
+   Duration  1.06s (transform 93ms, setup 0ms, collect 449ms, tests 103ms, environment 254ms, prepare 72ms)

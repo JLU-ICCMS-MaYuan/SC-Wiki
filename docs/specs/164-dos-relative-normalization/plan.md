@@ -73,3 +73,9 @@ T009：删除频段元数据门槛、输入字段/控件及派生 coverage_note�
 T015为前轮文档修订；用户随后授权落地，T016–T019已实施。dos.dos_curve优先当前人工标定，其次来源轴标定；unit=pixel表示没有来源数值刻度，继续使用原像素零基线路径。独立曲线先按真实连线积分，再检查共同单位及原有归一化条件。新报告/候选为dos-relative-v5，重算版本为spectra-recalculate-axis-v3，旧v1–v4报告提示重算，不改旧运行。
 
 候选的amplitude_basis记录原幅值到像素的线性映射，02展示使用coefficient×(slope×pixel+intercept)，避免把来源倍率误当每像素倍率。CSV新增dos_integral、dos_integral_unit、dos_amplitude_basis并保留原始点值；页面和CSV只读服务器派生报告。单曲线处理线性遍历，无模型调用、数据库迁移或科学表单键变化。
+
+## 五列结果与元素清单
+
+FR-014/015、SC-012/013对应T020–T022。calculate_dos复用已解析的化学计量或可信结构比例，将composition（fractions、source）作为独立报告信息提供，不放在shares成功门槛之后。前端将真实components与组成元素合并为表格行，不把占位行放入曲线或积分器。旧v5报告缺少composition时，仅从已有normalization.structure_evidence.species_counts恢复可靠组成，不做前端化学式猜测，也不改变报告版本或旧数值。
+
+表格明确五列；范围列不再兼任名称。真实曲线按明确projection标识TDOS/元素，未知投影标待确认；缺少分波的材料元素显示空值。原子数占比由组成独立读取，面积占比仍依赖原shares条件。完整/限定公开过滤沿既有行为，组成仅包含材料计量，不包含隐藏曲线ID。

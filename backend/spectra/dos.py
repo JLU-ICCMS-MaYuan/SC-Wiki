@@ -120,7 +120,7 @@ def calculate_dos(payload, primitive=None, composition=None):
             row.update(unavailable(exc))
         components.append(row)
 
-    shares = unavailable("当前为 TDOS，未提供元素分波，暂不计算元素占比" if total_dos else "缺少完整共同尺度投影")
+    shares = unavailable("当前为 TDOS，未提供元素分波，暂不计算元素积分和面积占比" if total_dos else "缺少完整共同尺度投影")
     normalization = unavailable("缺少完整共同尺度投影")
     candidate = None
     atoms = (primitive or {}).get("primitive_atoms")
@@ -204,6 +204,7 @@ def calculate_dos(payload, primitive=None, composition=None):
     if valid_atoms:
         normalization.update(primitive_atoms=atoms, target_modes=3*atoms, structure_evidence=primitive)
     relative = dict(method=METHOD, spectrum_type="total" if total_dos else "projected",
+                    composition=dict(fractions=expected, source=source),
                     components=components, shares=shares, normalization=normalization)
     return dict(relative=relative, absolute=dos_integrals(payload, primitive), candidate=candidate)
 

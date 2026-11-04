@@ -583,3 +583,23 @@ def test_no_numeric_axis_keeps_stored_pixel_integral_available():
     assert r["components"][0]["unit"] == "pixel·THz"
     assert r["components"][0]["amplitude_basis"]["kind"] == "stored_pixels"
     assert r["normalization"]["status"] == "unavailable"
+
+
+
+def test_material_composition_available_without_element_dos_or_normalization():
+    p=total_payload(None);p["curves"][0]["physical_definition_confirmed"]=False
+    r=calculate_dos(p,composition=composition_for({"material":"CaH6"}))["relative"]
+    assert r["composition"]["fractions"] == pytest.approx({"Ca":1/7,"H":6/7})
+    assert r["composition"]["source"]["kind"] == "material_formula"
+    assert len(r["components"]) == 1
+    assert r["shares"]["status"] == r["normalization"]["status"] == "unavailable"
+
+
+def test_material_composition_prefers_formula_and_public_mask_does_not_invent_curves():
+    p=payload();r=calculate_dos(p,PRIMITIVE,composition_for({"material":"LaH3"}))
+    assert r["relative"]["composition"]["fractions"] == {"La":.25,"H":.75}
+    p["quality"]["dos_relative"]=r["relative"]
+    public=mask_public(p,{"La":{"status":"accepted"}})
+    assert [c["curve_id"] for c in public["quality"]["dos_relative"]["components"]] == ["La"]
+    assert public["quality"]["dos_relative"]["composition"] == r["relative"]["composition"]
+    assert len(public["curves"])==1

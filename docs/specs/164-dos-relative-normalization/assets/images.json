@@ -76,5 +76,26 @@
       "FR-011"
     ],
     "verification": "2026-11-04 原始PNG字节复制并重新读取，完整解码、尺寸和SHA-256核验；图片仅作材料。"
+  },
+  {
+    "id": "IMG-005",
+    "upload_order": 5,
+    "original_name": "codex-clipboard-14fcc77c-3368-4c68-b442-f6eb2e87b3fa.png",
+    "locator": "docs/specs/164-dos-relative-normalization/assets/IMG-005.png",
+    "status": "local_verified",
+    "sha256": "c82e2aa642eed77b7b61936da5ffab7111aed365051f26d7f1aa9c88dfe0f6e6",
+    "media_type": "image/png",
+    "dimensions_px": [
+      1914,
+      1070
+    ],
+    "user_context": "展&#x793A; &#xA0;积分范围 就不要展示S15_150GPa_total_phonon_dos。任意单位·THz · 纵轴刻度放在积分值的后面表示单位。而且应该分为 5 列，第一列指明计算的是分波元素哪个元素，还是 tdos。而且元素应该是从一开始就能获取的，只不过如果图里面没有元素态密度就不需要计算，但是表格里面必须列出来",
+    "related": [
+      "FR-014",
+      "FR-015",
+      "SC-012",
+      "SC-013"
+    ],
+    "verification": "原始PNG字节复制后重新读取，完整解码、尺寸及SHA-256核验通过；仅作材料"
   }
 ]
