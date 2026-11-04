@@ -255,3 +255,41 @@ it.each(['upload', 'revision', 'admin', 'superadmin'])('#176 %s 固定 Tc 表单
     clearFormDefinitionCache()
   }
 })
+
+it.each(['upload', 'revision', 'admin', 'superadmin'])('213 %s 完整宿主：材料大纲可折叠、定位且不写入', async kind => {
+  await host(kind)
+  const outline = screen.getByRole('navigation', { name: '研究材料大纲' })
+  const target = document.querySelector('[data-state-key="s1"]') as HTMLElement
+  const scroll = vi.fn()
+  target.scrollIntoView = scroll
+  fireEvent.click(within(outline).getByRole('button', { name: /#2 · 空间群未填写 · Sn · 压强未填写/ }))
+  expect(scroll).toHaveBeenCalled()
+  fireEvent.click(within(outline).getByRole('button', { name: '收起研究材料大纲' }))
+  expect(within(outline).queryByRole('button', { name: /#2 ·/ })).not.toBeInTheDocument()
+  fireEvent.click(within(outline).getByRole('button', { name: '展开研究材料大纲' }))
+  expect(within(outline).getByRole('button', { name: /#2 ·/ })).toBeVisible()
+  expect(api.patch).not.toHaveBeenCalled()
+  expect(vi.mocked(api.post).mock.calls.some(([path]) => /jobs|submit-check/.test(path))).toBe(false)
+})
+
+it.each(['admin', 'superadmin'])('213 %s 完整宿主：失权统一一条警告且写入口不可用', async kind => {
+  const fail = Object.assign(new Error('稿件已交出，当前没有编辑权；须由其他合法经手人正式退回'), { code: 'manuscript_handed_off', status: 409 })
+  const get = vi.mocked(api.get).getMockImplementation()!
+  const post = vi.mocked(api.post).getMockImplementation()!
+  vi.mocked(api.get).mockImplementation(async path => {
+    if (path.includes('/draft-state')) throw fail
+    if (path.includes('/structural-records/paper/')) throw new Error('独立结构读取失败213')
+    return get(path)
+  })
+  vi.mocked(api.post).mockImplementation(async path => {
+    if (path.endsWith('/summary') || path.endsWith('/open-workdraft')) throw fail
+    return post(path)
+  })
+  await host(kind)
+  expect(screen.getAllByText('稿件已交出，当前账号没有编辑权。')).toHaveLength(1)
+  expect(screen.queryByText(/加载失败.*稿件已交出/)).not.toBeInTheDocument()
+  expect(screen.getByText(/独立结构读取失败213/)).toBeVisible()
+  expect(screen.getByDisplayValue('Original title')).toBeDisabled()
+  expect(screen.getByRole('button', { name: '提交审核', exact: true })).toBeDisabled()
+  expect(api.patch).not.toHaveBeenCalled()
+})

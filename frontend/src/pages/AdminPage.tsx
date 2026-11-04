@@ -1,3 +1,4 @@
+import PaperTitle from '../components/PaperTitle'
 import { rememberWorkdraft } from '../lib/workdraftSession'
 import ManuscriptHistoryLink from '../components/ManuscriptHistoryLink'
 
@@ -48,6 +49,7 @@ interface UsernameAuditEvent {
 interface PaperRecord {
   id: number; doi: string | null; title: string | null; authors: unknown
   journal: string | null; year: number | null; review_status: string
+  workflow_status?: string
   review_comment: string | null; reviewer_name: string | null
   uploader_name: string | null; created_at: string | null
   show_in_chart: boolean
@@ -97,9 +99,9 @@ const WORKSPACE_CARDS: Array<{
   { key: 'news', labelKey: 'admin.newsTitle', hintKey: 'admin.cardHintManage', accent: 'error.main', tab: 4, metric: 'none', superOnly: true },
 ]
 /* ═══════════════════════════════════════════════ */
-interface AdminPageProps { mode?: 'admin' | 'superadmin'; embedded?: boolean }
+interface AdminPageProps { mode?: 'admin' | 'superadmin'; embedded?: boolean; pageSize?: number; scrollable?: boolean }
 
-const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false }) => {
+const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false, pageSize = 20, scrollable = true }) => {
   const { user, replaceUser } = useAuth()
   const { t, lang, dict } = useLanguage()
   const isSuper = mode === 'superadmin'
@@ -131,6 +133,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
   const [papersTotal, setPapersTotal] = useState(0)
   const [papersPage, setPapersPage] = useState(1)
   const [papersStatus, setPapersStatus] = useState(embedded ? 'pending' : '')
+  const papersRequest = useRef(0)
   const [papersKeyword, setPapersKeyword] = useState('')
   const [papersMaterial, setPapersMaterial] = useState('')
   const [papersYearMin, setPapersYearMin] = useState('')
@@ -139,6 +142,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
   const [filterTick, setFilterTick] = useState(0)
   const [reviewDlg, setReviewDlg] = useState<{paper:PaperRecord,open:boolean}>({paper:null!,open:false})
   const [reviewStatus, setReviewStatus] = useState('')
+  const rejectionOnly = (reviewDlg.paper?.workflow_status || reviewDlg.paper?.review_status) === 'approved'
   const [reviewSaving, setReviewSaving] = useState(false)
   const reviewOperation=useRef<{key:string;id:string}|undefined>(undefined)
   const evidenceWorkflow = useEvidenceWorkflow()
@@ -183,21 +187,23 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
   }, [isSuper])
 
   const loadPapers = useCallback(async () => {
+    const request = ++papersRequest.current
     setPapersLoading(true)
     try {
       const params = new URLSearchParams()
-      params.set('limit','20'); params.set('offset', String((papersPage-1)*20))
+      params.set('limit',String(pageSize)); params.set('offset', String((papersPage-1)*pageSize))
       if (papersStatus) params.set('review_status', papersStatus)
       if (papersKeyword) params.set('keyword', papersKeyword)
       if (papersMaterial) params.set('material', papersMaterial)
       if (papersYearMin) params.set('year_min', papersYearMin)
       if (papersYearMax) params.set('year_max', papersYearMax)
       const res = await api.get<{items:PaperRecord[],total:number}>(`/api/admin/papers/all?${params}`)
+      if (request !== papersRequest.current) return
       setPapers(res.items || [])
       setPapersTotal(res.total || 0)
-    } catch { setPapers([]); setPapersTotal(0) }
-    finally { setPapersLoading(false) }
-  }, [papersPage, papersStatus, papersKeyword, papersMaterial, papersYearMin, papersYearMax, filterTick])
+    } catch { if (request === papersRequest.current) { setPapers([]); setPapersTotal(0) } }
+    finally { if (request === papersRequest.current) setPapersLoading(false) }
+  }, [papersPage, papersStatus, papersKeyword, papersMaterial, papersYearMin, papersYearMax, filterTick, pageSize])
 
   const loadUsers = useCallback(async () => {
     if (!isSuper) return
@@ -217,11 +223,18 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
   }, [])
 
   useEffect(() => { if (!embedded && tab === 0) void loadStats() }, [loadStats, embedded, tab])
-  useEffect(() => { if (tab === 1 || tab === 0) void loadPapers() }, [loadPapers, tab])
+  useEffect(() => { if (tab === 1 || tab === 0) void loadPapers(); return () => { papersRequest.current++ } }, [loadPapers, tab])
   useEffect(() => { if (isSuper && !embedded && (tab === 0 || tab === 3)) void loadChartGroups() }, [isSuper, embedded, tab, loadChartGroups])
 
   /* ── Review actions ──────────────────────────── */
   const openReview = async (paper: PaperRecord) => {
+    if ((paper.workflow_status || paper.review_status) === 'approved') {
+      setReviewDlg({ paper, open: true })
+      reviewOperation.current = undefined
+      setReviewStatus('rejected')
+      setReviewComment('')
+      return
+    }
     const target={target:'paper' as const,target_id:String(paper.id)}
     try {
       const lease=await api.post<{write_epoch:string;paper_header?:Partial<PaperRecord>}>('/api/rag/evidence/open-workdraft',target)
@@ -506,14 +519,14 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
 
           {/* Table */}
           {papersLoading && <LinearProgress sx={{ mb: 1 }} />}
-          <TableContainer component={Paper} variant="outlined">
-            <Table size="small">
+          <TableContainer component={Paper} variant="outlined" data-paper-list-scroll={scrollable || undefined} sx={scrollable ? { maxHeight: 'calc(100dvh - 340px)', overflowY: 'auto', minHeight: 120 } : {}}>
+            <Table size="small" stickyHeader sx={{ tableLayout: 'fixed', minWidth: 700 }}>
               <TableHead>
                 <TableRow>
                   <TableCell padding="checkbox" sx={{ width: 40 }}>#</TableCell>
                   <TableCell sx={{ minWidth: 260 }}>{t('admin.thTitle')}</TableCell>
                   <TableCell sx={{ width: 80 }}>{t('admin.thYear')}</TableCell>
-                  <TableCell sx={{ width: 80 }}>{t('admin.thStatus')}</TableCell>
+                  <TableCell sx={{ width: 100 }}>{t('admin.thStatus')}</TableCell>
                   <TableCell sx={{ width: 330 }} align="right">{t('common.operations')}</TableCell>
                 </TableRow>
               </TableHead>
@@ -525,17 +538,15 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
                         style={{ cursor: 'pointer' }} />
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" fontWeight={600} noWrap sx={{ maxWidth: 300 }}>
-                        {p.title || t('admin.noTitle')}
-                      </Typography>
+                      <PaperTitle title={p.title || t('admin.noTitle')} />
                       <Typography variant="caption" color="text.secondary">
                         {p.doi || p.journal || ''}
                       </Typography>
                     </TableCell>
                     <TableCell>{p.year || '-'}</TableCell>
                     <TableCell>
-                      <Chip size="small" label={reviewStatusLabel(p.review_status)}
-                        color={STATUS_COLORS[p.review_status] || 'default'} />
+                      <Chip size="small" label={reviewStatusLabel(p.workflow_status || p.review_status)}
+                        color={STATUS_COLORS[p.workflow_status || p.review_status] || 'default'} />
                     </TableCell>
                     <TableCell align="right">
                       <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -576,9 +587,9 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
               </TableBody>
             </Table>
           </TableContainer>
-          {papersTotal > 20 && (
+          {papersTotal > pageSize && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-              <Pagination count={Math.ceil(papersTotal/20)} page={papersPage}
+              <Pagination count={Math.ceil(papersTotal/pageSize)} page={papersPage}
                 onChange={(_,p)=>setPapersPage(p)} color="primary" />
             </Box>
           )}
@@ -768,10 +779,12 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false 
             <Chip size="small" label={t('admin.doiChip', { value: reviewDlg.paper?.doi || '-' })} variant="outlined" />
             <Chip size="small" label={t('admin.yearChip', { value: reviewDlg.paper?.year || '-' })} variant="outlined" />
           </Box>
-          <EvidenceRecordList records={evidenceWorkflow.records} onOpen={evidenceWorkflow.openIssue} />
+          {rejectionOnly ? <Typography variant="body2">
+            {lang === 'zh' ? '拒绝后，原上传者可返修；新版批准前继续展示旧批准版。' : 'Reject to request a revision. The approved version stays public until the revision is approved.'}
+          </Typography> : <EvidenceRecordList records={evidenceWorkflow.records} onOpen={evidenceWorkflow.openIssue} />}
           <PaperReviewStatusSelect id="paper-review-status" value={reviewStatus}
-            onChange={setReviewStatus} disabled={reviewSaving} />
-          <Typography variant="caption" color="text.secondary">{t('admin.quickReviewHint')}</Typography>
+            onChange={setReviewStatus} disabled={reviewSaving || rejectionOnly} />
+          {!rejectionOnly && <Typography variant="caption" color="text.secondary">{t('admin.quickReviewHint')}</Typography>}
           <TextField label={t('admin.reviewComment')} multiline rows={3} size="small" fullWidth
             disabled={reviewSaving} value={reviewComment} onChange={e=>setReviewComment(e.target.value)} />
         </DialogContent>

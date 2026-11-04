@@ -62,7 +62,7 @@ func GetPapers(c *gin.Context) {
 	query := database.DB.Model(&models.Paper{})
 
 	if status != "" {
-		query = query.Where("review_status = ?", status)
+		query = query.Where(workflowStatusSQL(database.DB)+" = ?", status)
 	}
 	if keyword != "" {
 		like := "%" + keyword + "%"
@@ -97,11 +97,17 @@ func GetPapers(c *gin.Context) {
 		Limit(limit).Offset(offset).
 		Find(&papers)
 
+	workflows, err := paperWorkflows(database.DB, papers)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "稿件状态读取失败"})
+		return
+	}
 	items := make([]adminPaperListItemResponse, 0, len(papers))
 	for _, paper := range papers {
 		items = append(items, adminPaperListItemResponse{
-			Paper:        paper,
-			UploaderName: uploaderNameForPaper(paper),
+			Paper:          paper,
+			UploaderName:   uploaderNameForPaper(paper),
+			WorkflowStatus: workflows[paper.ID].Status,
 		})
 	}
 
@@ -114,7 +120,8 @@ func GetPapers(c *gin.Context) {
 
 type adminPaperListItemResponse struct {
 	models.Paper
-	UploaderName *string `json:"uploader_name"`
+	UploaderName   *string `json:"uploader_name"`
+	WorkflowStatus string  `json:"workflow_status"`
 }
 
 func uploaderNameForPaper(paper models.Paper) *string {
@@ -432,7 +439,7 @@ func ReviewPaper(c *gin.Context) {
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&paper, paper.ID).Error; err != nil {
 			return err
 		}
-		if paperUsesHandoffs(tx, paper.ID) {
+		if paperUsesHandoffs(tx, paper.ID) || paper.ReviewStatus == reviewStatusApproved && body.Status != reviewStatusApproved {
 			return &evidencePrepareError{409, json.RawMessage(`{"code":"workdraft_required","message":"请通过当前工作稿保存并正式交接"}`)}
 		}
 		if body.ReviewRequestID != "" {
@@ -770,7 +777,7 @@ func GetMyUploads(c *gin.Context) {
 		query = query.Where("(title LIKE ? OR doi LIKE ? OR journal LIKE ?)", like, like, like)
 	}
 	if status := c.Query("review_status"); status != "" {
-		query = query.Where("review_status = ?", status)
+		query = query.Where(workflowStatusSQL(database.DB)+" = ?", status)
 	}
 	if query.Count(&total).Error != nil {
 		c.JSON(500, gin.H{"error": "论文加载失败"})
@@ -783,9 +790,14 @@ func GetMyUploads(c *gin.Context) {
 		return
 	}
 
+	workflows, err := paperWorkflows(database.DB, papers)
+	if err != nil {
+		c.JSON(500, gin.H{"error": "稿件状态读取失败"})
+		return
+	}
 	items := make([]gin.H, 0, len(papers))
 	for _, paper := range papers {
-		items = append(items, paperForViewer(paper, &user))
+		items = append(items, paperForViewer(paper, &user, workflows[paper.ID]))
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"items":     items,

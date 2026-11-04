@@ -7,6 +7,7 @@ import type { EvidenceTarget } from './EvidenceWorkflow'
 type Metadata = { revision: number | null; write_epoch: string | null }
 /** 仅焦点检查小型修订号。整稿响应先暂存，宿主验证没有新输入后才采用。 */
 export function useWorkdraftRefresh(target: EvidenceTarget | undefined, options: {
+  onAccessError?: (error: unknown) => boolean
   enabled: boolean; busy: () => boolean; dirty: () => boolean; editVersion: () => unknown
   apply: (draft: any, fieldState?: any, spectra?: any) => Promise<void> | void
 }) {
@@ -28,7 +29,7 @@ export function useWorkdraftRefresh(target: EvidenceTarget | undefined, options:
         metadata.current = result; rememberWorkdraft(target,result.write_epoch)
         window.dispatchEvent(new CustomEvent('workdraft-opened',{detail:target}))
       }
-    }).catch(reason => { if (epoch === generation.current) setError(reason.message) })
+    }).catch(reason => { if (epoch === generation.current && !current.current.onAccessError?.(reason)) setError(reason.message) })
     const check = async () => {
       if (document.visibilityState === 'hidden' || running || !metadata.current || Date.now()-lastCheck<100) return
       running = true; lastCheck = Date.now()
@@ -37,14 +38,16 @@ export function useWorkdraftRefresh(target: EvidenceTarget | undefined, options:
           target.target + '&target_id=' + encodeURIComponent(target.target_id))
         if (epoch !== generation.current) return
         if (metadata.current.write_epoch && result.write_epoch !== metadata.current.write_epoch) {
-          setError('当前工作稿已交出或归属已变化，请重新打开稿件。'); return
+          const failure = Object.assign(new Error('当前工作稿已交出或归属已变化，请重新打开稿件。'), { code: 'manuscript_handed_off' })
+          if (!current.current.onAccessError?.(failure)) setError(failure.message)
+          return
         }
         if (!metadata.current.write_epoch) {
           metadata.current = {...metadata.current,write_epoch:result.write_epoch}
           rememberWorkdraft(target,result.write_epoch)
         }
         if (result.revision !== metadata.current.revision) setAvailable(true)
-      } catch (reason) { if (epoch === generation.current) setError((reason as Error).message) }
+      } catch (reason) { if (epoch === generation.current && !current.current.onAccessError?.(reason)) setError((reason as Error).message) }
       finally { running = false }
     }
     const visible = () => { if (document.visibilityState === 'visible') void check() }
@@ -68,7 +71,7 @@ export function useWorkdraftRefresh(target: EvidenceTarget | undefined, options:
       if (result.write_epoch !== metadata.current?.write_epoch) throw new Error('工作稿周期已变化，请重新打开稿件。')
       await current.current.apply(result.draft,result.field_state,result.spectra)
       metadata.current = result; setAvailable(false)
-    } catch (reason) { if (epoch === generation.current) setError((reason as Error).message) }
+    } catch (reason) { if (epoch === generation.current && !current.current.onAccessError?.(reason)) setError((reason as Error).message) }
     finally { if (epoch === generation.current) setLoading(false) }
   }
   return { available, loading, error, load }

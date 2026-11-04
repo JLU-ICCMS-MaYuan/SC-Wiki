@@ -43,9 +43,11 @@ async def exercise():
             content=h.capture(session,paper,revisions.current_draft(session,paper),snapshot,ev.public_snapshot(snapshot,cached)['records'])
             return h.record_handoff(session,paper,first,action='approve',holder='published',initial=True,operation_id=uuid.uuid4().hex,**content)
         published=await db.run_sync(initial);await db.commit()
-        from backend.api.manuscript_handoffs import return_to_author,ReturnRevision
-        returned=await db.run_sync(lambda session:return_to_author(paper.id,ReturnRevision(operation_id=uuid.uuid4().hex,
-            expected_snapshot_id=published['snapshot_id']),user=other,session=session))
+        from backend.services.field_review_commit import commit_review
+        from backend.api.evidence import FieldReviewCommit
+        returned=await commit_review(db,FieldReviewCommit(paper_id=paper.id,status='rejected',
+            comment='请返修',review_request_id=uuid.uuid4().hex),other)
+        await db.commit()
         assert returned['handoff']['reused']
         saved=await db.get(models.PaperRevisionDraft,paper.id)
         lease=await db.run_sync(lambda session:w.open_draft(session,'revision',saved.revision_id,author))
@@ -68,6 +70,20 @@ async def exercise():
         from backend.ingest.field_drafts import authorized_draft
         with pytest.raises(HTTPException):
             await db.run_sync(lambda session:authorized_draft(session,'paper',str(paper.id),other))
+        # 再次拒绝修订稿仍保留旧批准版，原上传者重新送审后才恢复审核归属。
+        await commit_review(db,FieldReviewCommit(paper_id=paper.id,status='rejected',
+            comment='请继续修订',review_request_id=uuid.uuid4().hex),first)
+        await db.commit();await db.refresh(paper);await db.refresh(saved)
+        assert paper.title=='公开原稿' and paper.review_status=='approved'
+        assert (await db.run_sync(lambda session:h.latest(session,paper.id)))['published_snapshot_id']==published['snapshot_id']
+        await db.run_sync(lambda session:w.open_draft(session,'revision',saved.revision_id,author))
+        returned_snapshot=await db.run_sync(lambda session:revisions.revision_snapshot(session,saved.revision_id,author.id))
+        current_checks={r['key']:{'status':'supported','reason':'隔离测试预置当前结果','source_kind':'paper_quote'} for r in returned_snapshot['records']}
+        await db.run_sync(lambda session:science.save_results(session,returned_snapshot,current_checks,author.id));await db.flush()
+        await revisions.submit_draft(db,paper.id,author,SimpleNamespace(revision_id=saved.revision_id,
+            draft_version=saved.draft_version,evidence_job_id=None,expected_evidence_version=returned_snapshot['version']))
+        await db.commit()
+        await db.run_sync(lambda session:w.open_draft(session,'paper',str(paper.id),first));await db.commit()
         snapshot=await db.run_sync(lambda session:__import__('backend.services.manuscript_handoffs',fromlist=['current_review_content']).current_review_content(session,paper,first))
         from backend.api.evidence import snapshot_for,Target,FieldReviewCommit
         # 使用同一会话内的暂存稿构建当前提交检查，避免连接读取旧事务。
@@ -82,6 +98,7 @@ async def exercise():
         await commit_review(db,FieldReviewCommit(paper_id=paper.id,expected_evidence_version=current['version'],review_request_id=uuid.uuid4().hex),first)
         await db.commit();await db.refresh(paper)
         assert paper.title=='修订新稿' and paper.review_status=='approved'
+        assert (await db.run_sync(lambda session:h.latest(session,paper.id)))['published_snapshot_id']!=published['snapshot_id']
         events=await db.run_sync(lambda session:h.event_headers(session,paper.id))
         assert events[-1]['reused'] and events[-1]['snapshot_id']==events[-2]['snapshot_id']
         frozen=await db.run_sync(lambda session:h.public_snapshot(session,paper,author,published['snapshot_id']))

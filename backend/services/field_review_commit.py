@@ -47,22 +47,13 @@ async def commit_review(session, body, user):
         if previous.paper_id!=paper.id or previous.actor_user_id!=user.id or saved.get('action')!=action:
             ev.fail('handoff_operation_conflict','操作身份已用于其他交接')
         return {'ok':True,'paper_id':paper.id,'review_status':paper.review_status}
-    await session.run_sync(lambda s:handoffs.require_writer(s,paper,user))
-    draft, staged = await session.run_sync(lambda sync: authorized_draft(sync, 'paper', str(paper.id), user, lock=True))
     if getattr(body,'status','approved')!='approved':
-        content=await session.run_sync(lambda s:handoffs.current_review_content(s,paper,user))
-        holder='author' if body.status=='rejected' else 'review'
-        result=await session.run_sync(lambda s:handoffs.record_handoff(s,paper,user,action=action,
-            holder=holder,operation_id=operation_id,comment=body.comment,**content))
-        if holder=='author':
-            if paper.review_status!='approved':
-                paper.review_status='rejected'
-                paper.review_comment=body.comment
-            await session.run_sync(lambda s:handoffs.author_working_copy(s,paper,paper.uploaded_by_user_id,
-                content['draft'],content['records']))
-            if isinstance(staged,models.ScientificReviewDraft):await session.delete(staged)
+        result=await session.run_sync(lambda s:handoffs.review_handoff(s,paper,user,status=body.status,
+            operation_id=operation_id,comment=body.comment))
         await session.flush()
         return {'ok':True,'paper_id':paper.id,'review_status':paper.review_status,'handoff':result}
+    await session.run_sync(lambda s:handoffs.require_writer(s,paper,user))
+    draft, staged = await session.run_sync(lambda sync: authorized_draft(sync, 'paper', str(paper.id), user, lock=True))
     from backend.api.evidence import Target, snapshot_for
     # 同一事务的正式论文行锁阻止其他管理员完成提交；局部保存也按论文→暂存行顺序加锁。
     formal = await session.run_sync(lambda sync: ev.paper_snapshot(sync, paper.id, user.id, user.role))

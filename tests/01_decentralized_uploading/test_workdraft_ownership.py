@@ -99,3 +99,32 @@ def test_multiple_states_methods_and_points_keep_source_ownership_after_reorder(
     for row in reversed(rows):
         value=expand(session,{'evidences':[{'source_ref':row.source_id,'binding':row.binding_json['bindings'][0]}]})
         assert value==expected[row.item_key]
+
+
+def test_213_rejection_of_published_paper_preserves_public_and_returns_only_author(context):
+    session,paper,(author,reviewer,other)=context
+    paper.review_status='approved'
+    paper.approved_revision=paper.content_revision
+    published=h.record_handoff(session,paper,reviewer,action='approve',holder='published',
+        operation_id='213-publish',draft={'paper':{'title':paper.title},'material_states':[]},records=[])
+    session.commit()
+    from sqlalchemy import select,func
+    before=session.scalar(select(func.count()).select_from(models.PaperHistoryEvent))
+    with pytest.raises(HTTPException):
+        h.review_handoff(session,paper,author,status='rejected',operation_id='213-self')
+    assert session.scalar(select(func.count()).select_from(models.PaperHistoryEvent))==before
+    returned=h.review_handoff(session,paper,other,status='rejected',operation_id='213-reject',comment='请核对')
+    session.commit()
+    session.refresh(paper)
+    assert paper.review_status=='approved' and paper.approved_revision==paper.content_revision
+    assert paper.title=='已交出'
+    assert returned['holder']=='author'
+    assert returned['published_snapshot_id']==published['snapshot_id']
+    saved=session.get(models.PaperRevisionDraft,paper.id)
+    assert saved.owner_id==author.id and saved.draft['paper']['title']=='已交出'
+    h.require_writer(session,paper,author,author=True)
+    with pytest.raises(HTTPException): h.require_writer(session,paper,reviewer)
+    assert h.review_handoff(session,paper,other,status='rejected',operation_id='213-reject')['snapshot_id']==returned['snapshot_id']
+    assert session.scalar(select(func.count()).select_from(models.PaperHistoryEvent))==before+1
+    frozen=h.public_snapshot(session,paper,author,published['snapshot_id'])
+    assert frozen['content']['draft']['paper']['title']=='已交出'

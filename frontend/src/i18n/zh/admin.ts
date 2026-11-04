@@ -146,7 +146,7 @@ export default {
   // 升版成功提示（T045）：论文已从公开状态退回待审核
   scientificSavedRevisionBumped: '论文已保存并退回待审核，审核通过前不对外公开',
   // 编辑已通过论文时的升版警告（T044）
-  revisionBumpWarning: '该论文已通过审核。保存超导性质会递增版本号并退回待审核，审核通过前不对外公开。',
+  revisionBumpWarning: '修改保存至审核工作稿，不影响当前公开批准版；新版审核通过并入库后才更新公开内容。',
   // 结构表示生成失败降级提示（Issue #78，FR-007）：保留落库惯用胞 CIF，不阻塞编辑
   representationsLoadFailed: '部分结构表示生成失败，已降级为仅显示落库的 CIF。',
 

@@ -16,6 +16,7 @@ interface MyPaper {
   review_status: string | null
   created_at: string | null
   can_revise?: boolean
+  workflow_status?: string
   checked_status?: string
   checked_at?: string
 }
@@ -27,7 +28,7 @@ const STATUS_COLORS: Record<string, 'warning' | 'success' | 'error' | 'info'> = 
 
 // 已提交论文永久保存在 MySQL，与上传页那份 24 小时后清理、受活动任务配额限制的
 // 「上传解析记录」性质不同，因此单独放在用户中心，不混入上传工作区。
-const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews' }> = ({ kind = 'uploads' }) => {
+const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews'; pageSize?: number; scrollable?: boolean }> = ({ kind = 'uploads', pageSize = 20, scrollable = false }) => {
   const location = useLocation()
   const { t, dict } = useLanguage()
   const [items, setItems] = useState<MyPaper[] | null>(null)
@@ -46,7 +47,7 @@ const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews' }> = ({ kind = 'uplo
     setError('')
     try {
       const params = new URLSearchParams()
-      if (page > 1) { params.set('offset', String((page - 1) * 20)); params.set('limit', '20') }
+      params.set('offset', String((page - 1) * pageSize)); params.set('limit', String(pageSize))
       if (query) params.set('keyword', query)
       if (status) params.set('review_status', status)
       const endpoint = kind === 'reviews' ? '/api/account/reviewed-papers' : '/api/papers/my-uploads'
@@ -59,7 +60,7 @@ const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews' }> = ({ kind = 'uplo
     } finally {
       if (request === requestID.current) setLoading(false)
     }
-  }, [t, kind, query, status, page])
+  }, [t, kind, query, status, page, pageSize])
 
   useEffect(() => { void load(); return () => { requestID.current++ } }, [load])
 
@@ -88,7 +89,7 @@ const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews' }> = ({ kind = 'uplo
       <Button type="submit" variant="outlined">{t('common.search')}</Button>
     </Box>
     {!items?.length && <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>{query || status ? t('account.noMatchingContributions') : kind === 'reviews' ? t('account.noChecks') : t('paperDetail.emptyMyPapers')}</Typography>}
-    <Stack spacing={1} sx={{ mt: 1 }}>
+    <Stack spacing={1} data-paper-list-scroll={scrollable || undefined} sx={{ mt: 1, ...(scrollable ? { maxHeight: 'calc(100dvh - 340px)', overflowY: 'auto', minHeight: 120 } : {}) }}>
       {(items || []).map(paper => (
         <Box
           key={paper.id}
@@ -110,15 +111,15 @@ const MyPapersList: React.FC<{ kind?: 'uploads' | 'reviews' }> = ({ kind = 'uplo
             <Chip
               size="small"
               variant="outlined"
-              label={(dict.enums.reviewStatus as Record<string, string>)[paper.checked_status || paper.review_status || ''] || paper.checked_status || paper.review_status || (dict.enums.reviewStatus as Record<string, string>).pending}
-              color={STATUS_COLORS[paper.checked_status || paper.review_status || ''] || 'default'}
+              label={(dict.enums.reviewStatus as Record<string, string>)[paper.checked_status || paper.workflow_status || paper.review_status || ''] || paper.checked_status || paper.workflow_status || paper.review_status || (dict.enums.reviewStatus as Record<string, string>).pending}
+              color={STATUS_COLORS[paper.checked_status || paper.workflow_status || paper.review_status || ''] || 'default'}
             />
           </Stack></Box>
           {paper.can_revise && <Button size="small" component={Link} to={`/papers/${paper.id}/revise`} target="_blank" rel="noopener noreferrer">{t('paperDetail.revise')}</Button>}
         </Box>
       ))}
     </Stack>
-    <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" sx={{ mt: 2 }}><Typography variant="caption" color="text.secondary">{t('account.contributionCount', { count: total })}</Typography>{total > 20 && <Pagination count={Math.ceil(total / 20)} page={page} onChange={(_, value) => setPage(value)} size="small" />}</Stack>
+    <Stack direction="row" justifyContent="space-between" alignItems="center" flexWrap="wrap" sx={{ mt: 2 }}><Typography variant="caption" color="text.secondary">{t('account.contributionCount', { count: total })}</Typography>{total > pageSize && <Pagination count={Math.ceil(total / pageSize)} page={page} onChange={(_, value) => setPage(value)} size="small" />}</Stack>
     </>
   )
 }

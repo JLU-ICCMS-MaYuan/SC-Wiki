@@ -116,3 +116,15 @@ def test_frozen_file_survives_working_attachment_replacement(context,tmp_path,mo
 def test_absent_optional_review_metadata_is_not_a_content_change():
     assert h.content_hash({'records':[{'status':'supported','state_review_context':None}]}) == h.content_hash({'records':[{'status':'supported'}]})
     assert h.content_hash({'mu_star':0}) != h.content_hash({'mu_star':None})
+
+
+def test_213_handoff_listing_has_no_independent_revision_write_route(monkeypatch):
+    monkeypatch.setenv('JWT_SECRET_KEY', 'isolated-handoff-read-only-test')
+    from fastapi import FastAPI
+    from fastapi.testclient import TestClient
+    from backend.api.manuscript_handoffs import router
+    app = FastAPI()
+    app.include_router(router)
+    with TestClient(app) as client:
+        response = client.post('/api/rag/handoffs/1/return', json={'operation_id': 'removed-return'})
+    assert response.status_code == 404

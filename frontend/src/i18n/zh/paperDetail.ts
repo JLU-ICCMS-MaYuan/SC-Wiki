@@ -12,7 +12,7 @@ export default {
   revisionConflict: '论文已被修改或重新审核。你的草稿仍保留，请先返回详情核对最新内容。',
   // ── 页面框架 ──
   backToUpload: '返回上传列表',
-  myPapers: '我的论文',
+  myPapers: '他帮助 SC-Wiki 收录的论文',
   readOnlyMode: '只读模式',
   paperDetailTitle: '论文详情',
   submittedNotice: '论文已提交审核。普通用户不能在这里直接修改正式记录。',
@@ -97,9 +97,9 @@ export default {
   renderFailed: '3D 渲染失败',
   renderFailedDetail: '3D 结构渲染失败：{error}',
 
-  // ── 我的论文列表（MyPapersList）──
-  loadMyPapersFailed: '加载我的论文失败',
-  emptyMyPapers: '还没有提交过论文。上传并提交审核后，论文会出现在这里，可随时只读复查。',
+  // ── 收录贡献论文列表（MyPapersList）──
+  loadMyPapersFailed: '加载收录贡献论文失败',
+  emptyMyPapers: '暂无帮助 SC-Wiki 收录的论文。上传并提交审核后，可在这里查看。',
   paperIndexFallback: '论文 #{n}',
 
   // ── lib/paperDetailView 表格标签 ──

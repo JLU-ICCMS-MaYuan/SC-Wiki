@@ -1,6 +1,6 @@
 import React from 'react'
-import AdminPage from './AdminPage'
+import AdminWorkspacePage from './AdminWorkspacePage'
 
-const SuperAdminPage: React.FC = () => <AdminPage mode="superadmin" />
+const SuperAdminPage: React.FC = () => <AdminWorkspacePage mode="superadmin" />
 
 export default SuperAdminPage

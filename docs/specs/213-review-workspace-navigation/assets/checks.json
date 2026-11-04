@@ -1,0 +1,235 @@
+{
+  "base_head": "b6d73bd29c72025d825d777a7800018b22693236",
+  "source_sha256": {
+    "backend/api/manuscript_handoffs.py": "06ea1282b41f60cbc5d42133dafb1c422a118d16381b4dfe6f1db85adc7745b4",
+    "backend/services/field_review_commit.py": "be86ba1b968d3833738f9ae3b24df0ad5d81af4d94b87aa191b7b4b43a882dcc",
+    "backend/services/manuscript_handoffs.py": "0493fdfb290d33ce0693b61e2cca26d800248b6b199146c4314903c0401bc10e",
+    "frontend/src/LazyRoutes.tsx": "ad9d206ac8f09f834ad4eeae5de893276d1497a417b20ce5f255554160fff1bc",
+    "frontend/src/components/AccountReviews.tsx": "d692d092f31b07348ea7a32c062b4f6fe68840693bd1d7ab575116336f4f70d4",
+    "frontend/src/components/EvidenceWorkflow.tsx": "bd124d49e04c06cfd1f955a38bdfbd5ec1c4419861daf8c7c7c8aa726cdab9c8",
+    "frontend/src/components/MyPapersList.tsx": "20d0dce6d3613c0185c983b648517890d1ad5aebe2445f43192c2995305bab4a",
+    "frontend/src/components/PaperMaterialsSection.tsx": "edf51855968d9c4be05db107add87eea0171e7db72dead8ee15c382c34361bb4",
+    "frontend/src/components/PaperTitle.tsx": "c0aaa1e20142b038b62742a631689a28a203292cee8a625b735f30bb88a7bc57",
+    "frontend/src/components/WorkdraftRefresh.tsx": "bf20cd5bbe45544a6bc42bac6218ee8da927eeb6d92efdf795cc34aadf38ebe2",
+    "frontend/src/i18n/en/admin.ts": "ac8c92252ae69911aede19bf20bb6a288110e448f11bd60e6d498095c6bb92fc",
+    "frontend/src/i18n/zh/admin.ts": "bf528fc3202c30e33159878865c85431ff177a3865f255bc5a0fa91665abdda6",
+    "frontend/src/i18n/en/paperDetail.ts": "afec3cb5d08bb3c8a5b2fd0e4659e1c13cc69c765eebbc1bf6bf3cde5a7fab7a",
+    "frontend/src/i18n/zh/paperDetail.ts": "09b80d0970f0d097cc75b0da9a7abbde5853f139c0b1e951c47b3990d4fa1c59",
+    "frontend/src/lib/materialStateSummary.ts": "8a3a727aab09e4ad28916902fe73875b4cf4532b015475d3c8b982b9e7594863",
+    "frontend/src/lib/paperMaterials.ts": "6e85423263516bddb1517778d4a01642b78061904bb8146693cb390241a5b446",
+    "frontend/src/lib/workdraftAccess.ts": "566a154497cb7a7ac07be3259ef2da321829a0111a3f33bbd92fe19c16e75190",
+    "frontend/src/pages/AdminPage.tsx": "67f6c29452d8fd92b1ad84b1e92cfce14ea3caae5b226e4a9144060669372976",
+    "frontend/src/pages/AdminPaperEditPage.tsx": "f84a927dde769b9946f542920630f1acf5204316a9f73e35541d41e16126bf08",
+    "frontend/src/pages/AdminWorkspacePage.tsx": "148b8744772e68e7ed275484f2d915c16bbe508135219a89cb6586db03630ed4",
+    "frontend/src/pages/ManuscriptHandoffsPage.tsx": "f2088a3e70b0bcad635b18da0c684e2b9692674f33ce286797609a74556c4259",
+    "frontend/src/pages/SuperAdminPage.tsx": "75e974f67c7f2c37a476c160bff5f50887efacbefad9920fa764a099013539f1",
+    "goserver/handlers/admin.go": "98419836d57edd8c0cb67564d5cb80bc2bb953d502315abb59e3e18a966b2b0a",
+    "goserver/handlers/papers.go": "537bfe9006dac030c955b7aab0b957b0e3e167aa57d70f327acc92bb38fc3723",
+    "goserver/handlers/stats.go": "7f8b2a35f9cdebef0310660cfbe36abd48f8bcecc21f2a9d2459bd2a6efdb567",
+    "goserver/handlers/paper_workflow.go": "0253a0ffeca20a21c03975a32cf8f77227b40f26ea9079a558152319878e4598",
+    "goserver/handlers/paper_workflow_test.go": "a58ac1e022f3b85b27b51cab48b17df957d23bad640b7e1aaaa5c9d3bf2f1bc0",
+    "goserver/handlers/paper_workflow_mysql_test.go": "09137071c2e8ef4b4fe5db2e7d2f0589a027fe97091b41bd668126e866e0ceef",
+    "tests/01_decentralized_uploading/form-contract.test.tsx": "2ee68a32df0c9e3db9150a508a047da5fd3f2e68424d170fd7d6845386edb567",
+    "tests/01_decentralized_uploading/test_handoff_lifecycle_mysql.py": "98e180937a59c80be075a5c9eb6d865006af44a0ec82cc26e8c32d0cb71ee843",
+    "tests/01_decentralized_uploading/test_handoff_spectra.py": "2b8ca2c96cc3dec49b8ccfc99de2c498470d1215ad0f92b4f37166219dcd090c",
+    "tests/01_decentralized_uploading/test_workdraft_ownership.py": "c8540ae4e1beb91a543fe7a1af8fd92b8234b304637575447f79905fe3172a85",
+    "tests/01_decentralized_uploading/test_manuscript_handoffs.py": "5a611ae592e933fa987abfcf18215474664051752687541f3bc884471d23601e",
+    "tests/02_identity_governance/account-center.test.tsx": "cc41f1588f1e3e4f34ec2f82a6e2e8f794c36d2d68d881ed7ab7ec3a769cc583",
+    "tests/02_identity_governance/review-workspace.test.tsx": "33cbed06de3c96aad05433948a0599c4e56c3e3330e5e5284add6a54f2df7c8b",
+    "tests/02_identity_governance/review-workspace-browser.mjs": "c866028cafb9d866d591aa496f58712f07e698eb0b3790c7fc498c9d7e308449"
+  },
+  "confirmed_scope": "六目标逐项认可；个人页检查区每页3篇且无滚轮；拒绝后继续公开旧批准版。",
+  "mandatory": {
+    "form_contract": {
+      "passed": 150,
+      "files": 11,
+      "isolated_candidate_passed": 150
+    },
+    "mutation": {
+      "detected_regressions": 8,
+      "hosts": 4
+    },
+    "field_contract": {
+      "passed": true,
+      "paper_fields": 21,
+      "state_fields": 11,
+      "software_groups": 3
+    },
+    "production_build": {
+      "workspace": true,
+      "isolated_candidate": true
+    }
+  },
+  "frontend_scoped": {
+    "passed": 20,
+    "files": 4,
+    "includes": "三角色、3/20分页、页签承接、拒绝、标题悬停、稳定大纲、工作稿更新"
+  },
+  "backend_scoped": {
+    "passed": 29,
+    "skipped_without_mysql": 15,
+    "note": "28项来源/谱/工作稿/权限回归后新增只读交接HTTP路由回归；MySQL另列"
+  },
+  "mysql": {
+    "lifecycle_and_rr": 3,
+    "revision_http_passed": 15,
+    "revision_http_skipped": 1,
+    "go_large_snapshot_status_filter": 1,
+    "data_isolation": "只复制本机DDL与公开表单/家族目录；未复制业务论文/用户，测试用户和论文为隔离创建；Go大JSON测试事务回滚。"
+  },
+  "browser": {
+    "reports": [
+      {
+        "role": "user",
+        "contribution_name": true,
+        "revision_entry": true,
+        "compact_page_size": null,
+        "readonly_outline": true,
+        "zero_pressure": true,
+        "narrow_no_page_overflow": true
+      },
+      {
+        "role": "admin",
+        "contribution_name": true,
+        "revision_entry": true,
+        "compact_page_size": 3,
+        "readonly_outline": true,
+        "zero_pressure": true,
+        "narrow_no_page_overflow": true
+      },
+      {
+        "role": "superadmin",
+        "contribution_name": true,
+        "revision_entry": true,
+        "compact_page_size": 3,
+        "readonly_outline": true,
+        "zero_pressure": true,
+        "narrow_no_page_overflow": true
+      },
+      {
+        "workspace_tab": "history",
+        "page_size": 20,
+        "internal_scroll": true
+      },
+      {
+        "workspace_tab": "pending",
+        "page_size": 20,
+        "internal_scroll": true
+      },
+      {
+        "host": "/upload/tasks/22222222222222222222222222222222",
+        "role": "user",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "host": "/papers/213/revise",
+        "role": "user",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "host": "/admin/papers/213/edit",
+        "role": "admin",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "host": "/admin/papers/213/edit",
+        "role": "superadmin",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "denied_message_count": 1,
+        "review_disabled": true
+      }
+    ],
+    "errors": []
+  },
+  "baseline_failures": {
+    "frontend": {
+      "baseline": {
+        "公开详情使用材料名和化学式：Tin / ": "passed",
+        "公开详情使用材料名和化学式： / Sn": "passed",
+        "公开详情使用材料名和化学式：Tin / Sn": "passed",
+        "材料名修改只使对应状态及派生项失效": "passed",
+        "重新查找先保存，删除的化学式不再作为模型重查目标": "failed",
+        "清空化学式后保留材料名，失败保留理由，成功移除旧项再确认当前名称": "failed",
+        "已拒绝论文的返修入口 只根据服务端返修能力显示入口，并展示拒绝意见": "passed",
+        "返修共享表单 暂存只保存草稿；重新提交使用最新草稿版本并回到同一篇论文": "failed",
+        "返修共享表单 保存冲突保留用户输入，不继续送审": "failed",
+        "返修共享表单 恢复基线已过期的草稿时保留展示并禁止保存和送审": "passed"
+      },
+      "candidate": {
+        "公开详情使用材料名和化学式：Tin / ": "passed",
+        "公开详情使用材料名和化学式： / Sn": "passed",
+        "公开详情使用材料名和化学式：Tin / Sn": "passed",
+        "材料名修改只使对应状态及派生项失效": "passed",
+        "重新查找先保存，删除的化学式不再作为模型重查目标": "failed",
+        "清空化学式后保留材料名，失败保留理由，成功移除旧项再确认当前名称": "failed",
+        "已拒绝论文的返修入口 只根据服务端返修能力显示入口，并展示拒绝意见": "passed",
+        "返修共享表单 暂存只保存草稿；重新提交使用最新草稿版本并回到同一篇论文": "failed",
+        "返修共享表单 保存冲突保留用户输入，不继续送审": "failed",
+        "返修共享表单 恢复基线已过期的草稿时保留展示并禁止保存和送审": "passed"
+      },
+      "identical": true,
+      "failed": [
+        "重新查找先保存，删除的化学式不再作为模型重查目标",
+        "清空化学式后保留材料名，失败保留理由，成功移除旧项再确认当前名称",
+        "返修共享表单 暂存只保存草稿；重新提交使用最新草稿版本并回到同一篇论文",
+        "返修共享表单 保存冲突保留用户输入，不继续送审"
+      ]
+    },
+    "revision_http": {
+      "baseline": [
+        "backend/tests/test_paper_revisions.py::test_failure_after_revision_bump_rolls_back_everything",
+        "backend/tests/test_paper_revisions.py::test_full_graph_roundtrip_preserves_structures_sources_and_history",
+        "backend/tests/test_paper_revisions.py::test_structure_metadata_change_conflicts_even_without_paper_revision_change",
+        "backend/tests/test_paper_revisions.py::test_revision_structure_upload_uses_server_provenance_and_owner_check",
+        "backend/tests/test_paper_revisions.py::test_invalid_definition_returns_field_error_and_preserves_saved_draft"
+      ],
+      "candidate": [
+        "backend/tests/test_paper_revisions.py::test_failure_after_revision_bump_rolls_back_everything",
+        "backend/tests/test_paper_revisions.py::test_full_graph_roundtrip_preserves_structures_sources_and_history",
+        "backend/tests/test_paper_revisions.py::test_structure_metadata_change_conflicts_even_without_paper_revision_change",
+        "backend/tests/test_paper_revisions.py::test_revision_structure_upload_uses_server_provenance_and_owner_check",
+        "backend/tests/test_paper_revisions.py::test_invalid_definition_returns_field_error_and_preserves_saved_draft"
+      ],
+      "identical": true
+    },
+    "go": {
+      "full_pass": 216,
+      "full_skip": 23,
+      "baseline_and_candidate_failed": [
+        "TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction"
+      ],
+      "scoped_handler_top_level_passed": 142,
+      "scoped_handler_top_level_skipped": 22,
+      "scoped_handler_exit_code": 0
+    }
+  },
+  "fixed_failure_replays": [
+    {
+      "boundary": "四类完整宿主大纲缺失",
+      "before": "4失败",
+      "after": "4通过"
+    },
+    {
+      "boundary": "已拒绝修订稿因正式论文approved而在筛选中丢失",
+      "before": "独立HEAD真实Go请求total=0",
+      "after": "真实存储请求及隔离MySQL派生筛选通过"
+    },
+    {
+      "boundary": "拒绝时内容差异误换公开批准快照指针",
+      "before": "当前新增真实SQL回归失败，指针发生变化",
+      "after": "指针保持，冻结原稿可读，幂等通过"
+    }
+  ],
+  "boundaries": [
+    "未推送、未部署",
+    "未更改业务库结构、未迁移真实稿件",
+    "本轮不涉及PDF提取或科学值修改，未调用模型",
+    "远程Spec链接待推送后验证，Issue保持开放"
+  ]
+}

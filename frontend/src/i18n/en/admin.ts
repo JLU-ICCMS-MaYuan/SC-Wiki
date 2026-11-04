@@ -148,7 +148,7 @@ export default {
   // Revision-bump success notice (T045): the paper was sent back to pending review
   scientificSavedRevisionBumped: 'Paper saved and sent back to pending review; it stays non-public until re-approved',
   // Revision-bump warning when editing an approved paper (T044)
-  revisionBumpWarning: 'This paper is approved. Saving superconducting properties will bump the revision, send it back to pending review, and keep it non-public until re-approved.',
+  revisionBumpWarning: 'Changes are saved to the review draft. The approved version stays public until the new revision is approved and stored.',
   // Structure-representation failure fallback (Issue #78, FR-007): keep the stored CIF, editing continues
   representationsLoadFailed: 'Some structure representations could not be generated; showing the stored CIF only.',
 

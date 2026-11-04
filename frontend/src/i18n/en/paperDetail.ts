@@ -11,7 +11,7 @@ export default {
   revisionConflict: 'The paper has changed or been reviewed again. Your draft is preserved. Return to the paper to check the latest content.',
   // ── Page frame ──
   backToUpload: 'Back to upload list',
-  myPapers: 'My papers',
+  myPapers: 'Papers they contributed to SC-Wiki',
   readOnlyMode: 'Read-only mode',
   paperDetailTitle: 'Paper Details',
   submittedNotice: 'This paper has been submitted for review. Regular users cannot edit the official record here.',
@@ -97,8 +97,8 @@ export default {
   renderFailedDetail: '3D structure rendering failed: {error}',
 
   // ── My papers list (MyPapersList) ──
-  loadMyPapersFailed: 'Failed to load my papers',
-  emptyMyPapers: 'You have not submitted any papers yet. Once uploaded and submitted for review, your papers will appear here and can be reviewed in read-only mode at any time.',
+  loadMyPapersFailed: 'Failed to load contribution papers',
+  emptyMyPapers: 'No papers contributed to SC-Wiki yet. Uploaded papers appear here after submission for review.',
   paperIndexFallback: 'Paper #{n}',
 
   // ── lib/paperDetailView table labels ──

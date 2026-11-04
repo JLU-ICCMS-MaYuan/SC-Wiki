@@ -15,6 +15,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 var paperPatchFields = map[string]bool{
@@ -63,7 +64,16 @@ func GetPaper(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "无权查看该论文"})
 		return
 	}
-	c.JSON(http.StatusOK, paperForViewer(paper, user))
+	workflows := map[uint]paperWorkflowInfo{}
+	if paperOwner(&paper, user) || paperAdmin(user) {
+		var err error
+		workflows, err = paperWorkflows(database.DB, []models.Paper{paper})
+		if err != nil {
+			c.JSON(500, gin.H{"error": "稿件状态读取失败"})
+			return
+		}
+	}
+	c.JSON(http.StatusOK, paperForViewer(paper, user, workflows[paper.ID]))
 }
 
 // targetPaperGraphQuery 集中声明 #90 读取契约，避免公开、管理和上传者详情各自漏载关联。
@@ -134,7 +144,7 @@ func canViewPaper(paper *models.Paper, user *models.User) bool {
 	return paper.ReviewStatus == reviewStatusRejected && paperOwner(paper, user)
 }
 
-func paperForViewer(paper models.Paper, user *models.User) gin.H {
+func paperForViewer(paper models.Paper, user *models.User, workflow ...paperWorkflowInfo) gin.H {
 	result := paperToDict(paper)
 	if paperOwner(&paper, user) || paperAdmin(user) {
 		result["review_comment"] = paper.ReviewComment
@@ -145,7 +155,17 @@ func paperForViewer(paper models.Paper, user *models.User) gin.H {
 		result["reviewed_by_user_id"] = paper.ReviewedBy
 	}
 	result["can_edit"] = (paperOwner(&paper, user) && paper.ReviewStatus != reviewStatusRejected) || paperAdmin(user)
-	result["can_revise"] = paperOwner(&paper, user) && paper.ReviewStatus == reviewStatusRejected
+	status := paper.ReviewStatus
+	if len(workflow) > 0 && workflow[0].Status != "" {
+		status = workflow[0].Status
+	}
+	if paperOwner(&paper, user) || paperAdmin(user) {
+		result["workflow_status"] = status
+		if len(workflow) > 0 && workflow[0].Status != "" {
+			result["review_comment"] = workflow[0].Comment
+		}
+	}
+	result["can_revise"] = paperOwner(&paper, user) && status == reviewStatusRejected
 	return result
 }
 
@@ -175,9 +195,24 @@ func ListPapers(c *gin.Context) {
 	query.Count(&total)
 	var papers []models.Paper
 	query.Order("created_at DESC").Limit(limit).Offset(offset).Find(&papers)
+	workflows := map[uint]paperWorkflowInfo{}
+	privatePapers := make([]models.Paper, 0)
+	for _, paper := range papers {
+		if paperOwner(&paper, user) || paperAdmin(user) {
+			privatePapers = append(privatePapers, paper)
+		}
+	}
+	if len(privatePapers) > 0 {
+		var err error
+		workflows, err = paperWorkflows(database.DB, privatePapers)
+		if err != nil {
+			c.JSON(500, gin.H{"error": "稿件状态读取失败"})
+			return
+		}
+	}
 	items := make([]gin.H, 0, len(papers))
 	for _, paper := range papers {
-		items = append(items, paperForViewer(paper, user))
+		items = append(items, paperForViewer(paper, user, workflows[paper.ID]))
 	}
 	c.JSON(http.StatusOK, gin.H{"items": items, "total": total})
 }
@@ -216,7 +251,21 @@ func PatchPaper(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "没有可修改字段"})
 		return
 	}
-	query := database.DB.Model(&paper)
+	tx := database.DB.Begin()
+	if tx.Error != nil {
+		c.JSON(500, gin.H{"error": "保存失败"})
+		return
+	}
+	defer tx.Rollback()
+	if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&paper, paper.ID).Error; err != nil {
+		c.JSON(409, gin.H{"error": "论文状态已变化，请重新打开"})
+		return
+	}
+	if paperUsesHandoffs(tx, paper.ID) {
+		c.JSON(409, gin.H{"code": "workdraft_required", "error": "请通过当前返修或审核工作稿修改，正式批准内容保持只读"})
+		return
+	}
+	query := tx.Model(&paper)
 	if !paperAdmin(user) {
 		query = query.Where("review_status <> ?", reviewStatusRejected)
 	}
@@ -226,14 +275,27 @@ func PatchPaper(c *gin.Context) {
 		return
 	}
 	if result.RowsAffected == 0 && !paperAdmin(user) {
-		database.DB.First(&paper, paper.ID)
+		tx.First(&paper, paper.ID)
 		if paper.ReviewStatus == reviewStatusRejected {
 			c.JSON(http.StatusConflict, gin.H{"code": "revision_required", "error": "论文已被拒绝，请通过返修草稿修改"})
 			return
 		}
 	}
-	database.DB.First(&paper, paper.ID)
-	c.JSON(http.StatusOK, paperForViewer(paper, user))
+	tx.First(&paper, paper.ID)
+	workflows := map[uint]paperWorkflowInfo{}
+	if paperOwner(&paper, user) || paperAdmin(user) {
+		var err error
+		workflows, err = paperWorkflows(tx, []models.Paper{paper})
+		if err != nil {
+			c.JSON(500, gin.H{"error": "稿件状态读取失败"})
+			return
+		}
+	}
+	if tx.Commit().Error != nil {
+		c.JSON(500, gin.H{"error": "保存失败"})
+		return
+	}
+	c.JSON(http.StatusOK, paperForViewer(paper, user, workflows[paper.ID]))
 }
 
 // SearchRecords 扁平记录搜索（替代 Python POST /api/papers/search/records）

@@ -497,7 +497,7 @@ func BatchReview(c *gin.Context) {
 			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&papers[i], papers[i].ID).Error; err != nil {
 				return err
 			}
-			if paperUsesHandoffs(tx, papers[i].ID) {
+			if paperUsesHandoffs(tx, papers[i].ID) || papers[i].ReviewStatus == reviewStatusApproved {
 				return &evidencePrepareError{409, json.RawMessage(`{"code":"workdraft_required","message":"请逐份通过当前工作稿正式交接"}`)}
 			}
 			requestID := body.ReviewRequestID

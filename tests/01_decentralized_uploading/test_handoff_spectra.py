@@ -34,10 +34,9 @@ def test_private_spectrum_copy_return_and_frozen_points(context,monkeypatch):
     assert spectra.listing(session,received)['items'][0]['result']['curves'][0]['points'][0]['value']==2
     with pytest.raises(HTTPException):spectra.context(session,'paper',str(paper.id),other,write=True)
     monkeypatch.setenv('JWT_SECRET_KEY','isolated-handoff-spectra-secret')
-    from backend.api.manuscript_handoffs import return_to_author,ReturnRevision
-    returned=return_to_author(paper.id,ReturnRevision(operation_id='spectra-return',
-        expected_snapshot_id=h.latest(session,paper.id)['snapshot_id']),user=reviewer,session=session)
-    snapshot=returned['handoff']['snapshot_id']
+    result=h.review_handoff(session,paper,reviewer,status='rejected',operation_id='spectra-return')
+    session.commit()
+    snapshot=result['snapshot_id']
     saved=session.get(models.PaperRevisionDraft,paper.id)
     author_context=spectra.context(session,'revision',saved.revision_id,author,write=True)
     returned_collection=session.scalar(select(models.SpectrumCollection).where(models.SpectrumCollection.target_id==saved.revision_id))

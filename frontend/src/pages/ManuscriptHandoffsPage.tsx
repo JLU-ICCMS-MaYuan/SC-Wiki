@@ -1,8 +1,7 @@
-import { useEffect,useRef,useState } from 'react'
+import { useEffect,useState } from 'react'
 import { Link,useParams } from 'react-router-dom'
 import { Alert,Box,Button,Chip,CircularProgress,Paper,Typography } from '@mui/material'
 import { api } from '../lib/api'
-import { useAuth } from '../context/AuthContext'
 import { useLanguage } from '../context/LanguageContext'
 
 export interface Handoff {
@@ -10,15 +9,14 @@ export interface Handoff {
   snapshot_id:string;snapshot_number:number;reused:boolean;action:string;
   receiver:string;holder:'author'|'review'|'published';published_snapshot_id?:string;comment?:string
 }
-interface Listing {paper_id:number|null;events:Handoff[];state:Handoff|null;has_more?:boolean;can_return?:boolean;legacy_public?:boolean}
+interface Listing {paper_id:number|null;events:Handoff[];state:Handoff|null;has_more?:boolean;legacy_public?:boolean}
 
 export default function ManuscriptHandoffsPage() {
   const {target,targetId}=useParams()
-  const {user}=useAuth(),{lang}=useLanguage()
+  const {lang}=useLanguage()
   const [data,setData]=useState<Listing>(),[error,setError]=useState(''),[loading,setLoading]=useState(true)
-  const [retry,setRetry]=useState(0),[returning,setReturning]=useState(false)
+  const [retry,setRetry]=useState(0)
   const [offset,setOffset]=useState(0)
-  const operation=useRef<string | undefined>(undefined)
   useEffect(()=>{
     const abort=new AbortController();setLoading(true);setError('')
     if(!target||!['upload','paper','revision'].includes(target)||!targetId){setError('无效的稿件入口');setLoading(false);return}
@@ -28,16 +26,6 @@ export default function ManuscriptHandoffsPage() {
       .finally(()=>{if(!abort.signal.aborted)setLoading(false)})
     return()=>abort.abort()
   },[target,targetId,retry,offset])
-  const returnRevision=async()=>{
-    if(!data?.paper_id||returning)return
-    operation.current??=crypto.randomUUID()
-    setReturning(true);setError('')
-    try{
-      await api.post(`/api/rag/handoffs/${data.paper_id}/return`,{
-        operation_id:operation.current,expected_snapshot_id:data.state?.snapshot_id})
-      operation.current=undefined;setRetry(n=>n+1)
-    }catch(e){setError((e as Error).message)}finally{setReturning(false)}
-  }
   const state=data?.state
   return <Box sx={{maxWidth:1100,mx:'auto',py:3}}>
     <Typography variant="h4">{lang==='zh'?'交接记录与快照':'Handoffs and snapshots'}</Typography>
@@ -49,8 +37,6 @@ export default function ManuscriptHandoffsPage() {
         {state&&<Chip label={`最新交出快照：S${state.snapshot_number}`}/>}
         <Chip label={`公开批准版：${state?.published_snapshot_id?'见下方标记':data.legacy_public?'存量批准版，尚无新快照':'无'}`}/>
       </Box>
-      {user&&['admin','superadmin'].includes(user.role)&&data.paper_id&&data.can_return&&
-        <Button variant="outlined" disabled={returning} onClick={()=>void returnRevision()}>正式交还原上传者修订</Button>}
       <Box><Button disabled={!offset} onClick={()=>setOffset(n=>Math.max(0,n-20))}>上一页</Button>
         <Button disabled={!data.has_more} onClick={()=>setOffset(n=>n+20)}>下一页</Button></Box>
       {!data.events.length&&<Typography sx={{my:2}}>当前尚无新合同的正式交接快照；已有旧历史没有删除。</Typography>}

@@ -1,3 +1,4 @@
+import { isHandedOff, handedOffMessage } from '../lib/workdraftAccess'
 import { canonicalStructureFromCandidate } from '../lib/canonicalStructure'
 import type { PropertySpectrumListing } from '../lib/propertySpectra'
 import WorkdraftRefresh, { useWorkdraftRefresh } from '../components/WorkdraftRefresh'
@@ -81,6 +82,12 @@ const AdminPaperEditPage: React.FC = () => {
   }
   const [editLoading, setEditLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
+  const [accessDenied, setAccessDenied] = useState(false)
+  const handleAccessError = (error: unknown) => {
+    if (!isHandedOff(error)) return false
+    setAccessDenied(true)
+    return true
+  }
 
   /* ── 审核区（论文级 family 与状态级标签均可在本页确认后批准）─ */
   const [editReviewStatus, setEditReviewStatus] = useState('')
@@ -93,12 +100,14 @@ const AdminPaperEditPage: React.FC = () => {
   const [editMaterialStates, setEditMaterialStates] = useState<DraftMaterialState[]>([])
   const [editMaterialFamilies, setEditMaterialFamilies] = useState<FamilySelection[]>([])
   const evidenceWorkflow = useEvidenceWorkflow({
+    readOnly: accessDenied,
+    onAccessError: handleAccessError,
     target: paperId ? { target: 'paper', target_id: String(paperId) } : undefined,
     getCurrentValue: record => currentEvidenceField(record, {...editForm, material_families: editMaterialFamilies}, editMaterialStates),
     saveCurrent: () => handleEditSave([], undefined, undefined, false),
     hasUnsavedFields: () => Boolean(fieldSaver.current?.hasChanges(editableDraft())),
     saveField: async record => {
-      if (!fieldSaver.current) return false
+      if (accessDenied || !fieldSaver.current) return false
       const saver = fieldSaver.current
       const field = currentEvidenceField(record, {...editForm, material_families: editMaterialFamilies}, editMaterialStates)
       if (!field) {
@@ -110,7 +119,7 @@ const AdminPaperEditPage: React.FC = () => {
       finally { if (fieldSaver.current === saver) setEditReviewSaving(false) }
     },
     saveCandidate: async patches => {
-      if (!fieldSaver.current || editReviewSaving) return false
+      if (accessDenied || !fieldSaver.current || editReviewSaving) return false
       const next = applyEvidencePatches(editableDraft(), patches)
       setEditReviewSaving(true)
       try {
@@ -184,6 +193,7 @@ const AdminPaperEditPage: React.FC = () => {
     const loadDetail = async () => {
       scientificIdentityMap.current = {}
       setEditLoading(true)
+      setLoadError(''); setAccessDenied(false)
       fieldSaver.current = null
       try {
         const { detail, pendingValues } = await loadPaperReviewSource(paperId)
@@ -256,7 +266,7 @@ const AdminPaperEditPage: React.FC = () => {
         // 已落库结构表示：异步拉取完整表示并入候选，不阻塞表单渲染
         void loadStructureRepresentations(detailStates)
       } catch (e: unknown) {
-        setLoadError(t('admin.loadFailedReason', { reason: (e as Error).message }))
+        if (!handleAccessError(e)) setLoadError(t('admin.loadFailedReason', { reason: (e as Error).message }))
       } finally {
         setEditLoading(false)
       }
@@ -273,7 +283,8 @@ const AdminPaperEditPage: React.FC = () => {
     form: editForm, states: editMaterialStates, families: editMaterialFamilies,
     structures: editStructureCandidates, observations: editStructuralObservations, revision: previousRefresh.revision + 1 }
   const refreshState = useWorkdraftRefresh(paperId ? { target:'paper', target_id:String(paperId) } : undefined, {
-    enabled: !editLoading && Boolean(paperId),
+    enabled: !editLoading && Boolean(paperId) && !accessDenied,
+    onAccessError: handleAccessError,
     busy: () => editReviewSaving || evidenceWorkflow.busy || evidenceWorkflow.hasPendingWrites(),
     dirty: () => Boolean(fieldSaver.current?.hasChanges(editableDraft())) || evidenceWorkflow.hasUnsavedRefreshInput(),
     editVersion: () => refreshIdentity.current.revision + ':' + evidenceWorkflow.getRefreshRevision(),
@@ -291,6 +302,7 @@ const AdminPaperEditPage: React.FC = () => {
 
   // 编辑页内提交审核；批准时由后端校验当前论文级 family 和状态分类完整性。
   const handleEditReview = async () => {
+    if (accessDenied) return
     setEditReviewSaving(true)
     try {
       if (editReviewStatus === 'approved' && evidenceWorkflow.hasUnsavedChanges() && !(await handleEditSave())) return
@@ -305,7 +317,7 @@ const AdminPaperEditPage: React.FC = () => {
         review_request_id:reviewOperation.current.id })
       navigate(workspacePath)
     } catch (e: unknown) {
-      setSnackbar(t('admin.reviewFailed', { reason: (e as Error).message }))
+      if (!handleAccessError(e)) setSnackbar(t('admin.reviewFailed', { reason: (e as Error).message }))
     } finally { setEditReviewSaving(false) }
   }
 
@@ -323,12 +335,13 @@ const AdminPaperEditPage: React.FC = () => {
     }
   }, [editLoading, paperId])
   const handleEditSave = async (_patches: EvidencePatch[] = [], _preparationId?: string, _resumeStage?: 'scientific' | 'finalize', _refreshEvidence = true) => {
+    if (accessDenied) return false
     try {
       if (!fieldSaver.current) return false
       await fieldSaver.current.save(editableDraft())
       setSnackbar(t('common.saved'))
       return true
-    } catch (error) { setSnackbar(t('admin.saveFailedReason', { reason: (error as Error).message })); return false }
+    } catch (error) { if (!handleAccessError(error)) setSnackbar(t('admin.saveFailedReason', { reason: (error as Error).message })); return false }
   }
 
   // 论文结构补传（契约 C2）：只产出并校验候选、不落库；成功后并入本地候选，
@@ -360,7 +373,7 @@ const AdminPaperEditPage: React.FC = () => {
   }
 
   return (
-    <Container component="fieldset" disabled={editReviewSaving} maxWidth={false} disableGutters sx={{ py: 3, border: 0, minWidth: 0 }}>
+    <Container component="fieldset" disabled={editReviewSaving || accessDenied} maxWidth={false} disableGutters sx={{ py: 3, border: 0, minWidth: 0 }}>
       <ParsingWorkflowIdentity binding={parsingWorkflow} />
       {/* 标题栏 + 返回列表 */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
@@ -373,6 +386,7 @@ const AdminPaperEditPage: React.FC = () => {
         {editLoading && <CircularProgress size={20} />}
       </Box>
 
+      {accessDenied && <Alert severity="warning" sx={{ mb: 2 }}>{lang === 'zh' ? handedOffMessage : 'This manuscript has been handed off. Your account cannot edit it.'}</Alert>}
       {loadError && <Alert severity="error" sx={{ mb: 2 }}>{loadError}</Alert>}
       {representationLoadFailed && (
         <Alert severity="warning" sx={{ mb: 2 }}>{t('admin.representationsLoadFailed')}</Alert>
@@ -391,11 +405,11 @@ const AdminPaperEditPage: React.FC = () => {
             <Box sx={{ display: 'flex', gap: 1.5, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <Box sx={{ minWidth: 170 }}>
                 <PaperReviewStatusSelect id="edit-review-status" value={editReviewStatus}
-                  onChange={setEditReviewStatus} disabled={editReviewSaving} />
+                  onChange={setEditReviewStatus} disabled={editReviewSaving || accessDenied} />
               </Box>
               <TextField label={t('admin.reviewComment')} size="small" multiline rows={2} sx={{ flex: 1, minWidth: 180 }}
-                disabled={editReviewSaving} value={editReviewComment} onChange={e => setEditReviewComment(e.target.value)} />
-              <Button variant="contained" size="small" disabled={editReviewSaving}
+                disabled={editReviewSaving || accessDenied} value={editReviewComment} onChange={e => setEditReviewComment(e.target.value)} />
+              <Button variant="contained" size="small" disabled={editReviewSaving || accessDenied}
                 onClick={handleEditReview} sx={{ mt: 0.5 }}>
                 {t('admin.submitReview')}
               </Button>
@@ -405,7 +419,7 @@ const AdminPaperEditPage: React.FC = () => {
             </Typography></Box>
           </Box>
 
-          <ReviewPaperTextField data-issue-field="paper.title" label={t('admin.fieldTitle')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving}
+          <ReviewPaperTextField data-issue-field="paper.title" label={t('admin.fieldTitle')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving || accessDenied}
             value={editForm.title || ''} onValueChange={value => setEditForm(current => ({ ...current, title: value }))} />
           <PaperMetadataRow
             journal={<TextField data-issue-field="paper.journal" label={t('admin.fieldJournal')} size="small" value={editForm.journal || ''}
@@ -449,9 +463,9 @@ const AdminPaperEditPage: React.FC = () => {
             )}
           />
           <PaperMaterialsSection states={editMaterialStates} historicalMaterials={editForm.research_materials} />
-          <ReviewPaperTextField label={t('admin.fieldAbstract')} size="small" fullWidth multiline rows={3} disabled={editReviewSaving}
+          <ReviewPaperTextField label={t('admin.fieldAbstract')} size="small" fullWidth multiline rows={3} disabled={editReviewSaving || accessDenied}
             data-issue-field="paper.abstract" value={editForm.abstract || ''} onValueChange={value => setEditForm(current => ({ ...current, abstract: value }))} />
-          <ReviewPaperTextField label={t('admin.fieldLlmSummary')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving}
+          <ReviewPaperTextField label={t('admin.fieldLlmSummary')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving || accessDenied}
             data-issue-field="paper.summary" value={editForm.summary || ''} onValueChange={value => setEditForm(current => ({ ...current, summary: value }))} />
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: 'minmax(0, 1fr)', md: 'repeat(3, minmax(0, 1fr))' }, gap: 1.5 }}>
             <TextField label={t('admin.fieldPaperType')} size="small" data-issue-field="paper.paper_type" value={editForm.paper_type || ''}
@@ -505,7 +519,7 @@ const AdminPaperEditPage: React.FC = () => {
           </Box>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '1fr 1fr' }, gap: 1.5 }}>
             {(['keywords_tags', 'methodology'] as const).map(field => (
-              <ReviewPaperTextField key={field} data-issue-field={`paper.${field}`} disabled={editReviewSaving}
+              <ReviewPaperTextField key={field} data-issue-field={`paper.${field}`} disabled={editReviewSaving || accessDenied}
                 label={t(field === 'keywords_tags' ? 'admin.fieldKeywordsTags' : 'admin.fieldMethodology')}
                 size="small" fullWidth multiline minRows={3}
                 helperText={t('admin.listOnePerLine')}
@@ -513,9 +527,9 @@ const AdminPaperEditPage: React.FC = () => {
                 onValueChange={value => changeListText(field, value)} />
             ))}
           </Box>
-          <ReviewPaperTextField label={t('admin.fieldKeyFinding')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving}
+          <ReviewPaperTextField label={t('admin.fieldKeyFinding')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving || accessDenied}
             data-issue-field="paper.key_finding" value={editForm.key_finding || ''} onValueChange={value => setEditForm(current => ({ ...current, key_finding: value }))} />
-          <ReviewPaperTextField label={t('admin.fieldResearchMotivation')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving}
+          <ReviewPaperTextField label={t('admin.fieldResearchMotivation')} size="small" fullWidth multiline rows={2} disabled={editReviewSaving || accessDenied}
             data-issue-field="paper.research_motivation" value={editForm.research_motivation || ''} onValueChange={value => setEditForm(current => ({ ...current, research_motivation: value }))} />
           {/* 知识图谱标题：单栏英文输入，随 editForm 一并提交（T046）。 */}
           <TextField data-issue-field="paper.knowledge_graph_title" label={t('admin.fieldKnowledgeGraphTitle')} size="small" fullWidth
@@ -628,7 +642,7 @@ const AdminPaperEditPage: React.FC = () => {
           {/* 科学数据编辑区（Issue #76）：材料状态、物性模块、结构候选与补传。
               数据来自 /api/admin/papers/:id 的 material_states（含 property_modules/structures），
               编辑结果随保存时的 C1 请求整体替换（T020/T030/T034）。 */}
-          <MaterialStatesEditor fixedContract={fixedContract}
+          <MaterialStatesEditor readOnly={accessDenied} fixedContract={fixedContract}
             independentStructureWorkspace
             propertySpectra={{ initialListing: loadedSpectra, target: { target: 'paper', target_id: String(paperId) }, beforeNavigate: async () => {
               if (evidenceWorkflow.hasManualDrafts()) throw new Error('请先保存或处理来源核对中的人工修改草稿，再打开谱详情。')
@@ -658,7 +672,7 @@ const AdminPaperEditPage: React.FC = () => {
             onError={setSnackbar}
           />
           {structuralLoadError && <Alert severity="warning">论文独立结构资料暂不可读取：{structuralLoadError}。当前未加载的资料会由服务端保留。</Alert>}
-          <PaperStructuralWorkspace candidates={editStructureCandidates} observations={editStructuralObservations}
+          <PaperStructuralWorkspace readOnly={accessDenied} candidates={editStructureCandidates} observations={editStructuralObservations}
             onCandidates={setEditStructureCandidates} onObservations={setEditStructuralObservations} />
 
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1, mt: 1 }}>

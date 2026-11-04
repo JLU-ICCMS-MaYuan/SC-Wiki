@@ -78,6 +78,7 @@ export function aiReasonText(record: EvidenceRecord, t: (key: string) => string)
 export function useEvidenceWorkflow(options?: {
   target?: EvidenceTarget
   readOnly?: boolean
+  onAccessError?: (error: unknown) => boolean
   frozenRecords?: EvidenceRecord[]
   frozenManualEvidence?: FrozenManualEvidence[]
   getCurrentValue?: (record: EvidenceRecord) => { value: unknown; field: string; record_key?: string; manualValue?: unknown; comparisonValue?: unknown } | undefined
@@ -119,6 +120,10 @@ export function useEvidenceWorkflow(options?: {
   const localReasons = useRef(new Map<string, string>())
   const optionsRef = useRef(options)
   optionsRef.current = options
+  const reportSaveFailure = (error: unknown) => {
+    if (optionsRef.current?.onAccessError?.(error)) { setSaveError(''); return }
+    setSaveError((error as Error).message)
+  }
   const observedValues = useRef(new Map<string, unknown>())
   const observedRecords = useRef(new Map<string, EvidenceRecord>())
   const invalidationTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -198,7 +203,7 @@ export function useEvidenceWorkflow(options?: {
       queue = createEvidenceDraftQueue(state => {
         if (!mounted.current || targetIdentity.current !== identity) return
         setSaving(state.saving)
-        if (state.error) setSaveError(state.error.message)
+        if (state.error) reportSaveFailure(state.error)
         else if (state.saving) setSaveError('')
       })
       queues.current.set(identity, queue)
@@ -249,7 +254,7 @@ export function useEvidenceWorkflow(options?: {
           if (drawerSession.current !== session) return
           setRecords(old => [...old.filter(r => r.key !== record.key), record])
           setSelected(record.key); setSelectedKeys([record.key]); setFallbackRecord(undefined)
-        } catch (error) { if (drawerSession.current === session) setSaveError((error as Error).message) }
+        } catch (error) { if (drawerSession.current === session) reportSaveFailure(error) }
       })()
     }
 
@@ -392,7 +397,7 @@ export function useEvidenceWorkflow(options?: {
         setReasons(Object.fromEntries((result.records || []).map(r => [r.key, localReasons.current.get(r.item_key || r.key) ?? (r.stale ? '' : r.proposal_draft?.reason ?? r.resolution ?? '')])))
       }
       return result
-    } catch (error) { if (generation.current === current) setSaveError((error as Error).message); return undefined }
+    } catch (error) { if (generation.current === current && !optionsRef.current?.onAccessError?.(error)) reportSaveFailure(error); return undefined }
   }, [])
   // 普通保存与侧栏确认共用；刷新不能覆盖请求之后发生的编辑。
   const refreshAfterSave = async (revision: number) => {
@@ -864,7 +869,7 @@ export function useEvidenceWorkflow(options?: {
         setSourceDetail({ key: record.key, ref: summaryRecord?.detail_ref, data: result })
         setManualNotice(t('evidence.candidateApplied')); closeDrawer()
       }
-    } catch (error) { setSaveError((error as Error).message) }
+    } catch (error) { reportSaveFailure(error) }
     finally { confirmingRef.current = false; if (mounted.current) setConfirming(false) }
   }
   const decideField = async (action: 'approve' | 'reject') => {
@@ -898,7 +903,7 @@ export function useEvidenceWorkflow(options?: {
       setSourceDetail({key: record.key, ref: summaryRecord?.detail_ref, data: result})
       if (action === 'approve') { setManualNotice(t('evidence.humanApprovalSaved')); closeDrawer() }
       else setManualOpenKey(record.key)
-    } catch (error) { setSaveError((error as Error).message) }
+    } catch (error) { reportSaveFailure(error) }
     finally { confirmingRef.current = false; if (mounted.current) setConfirming(false) }
   }
   const restoreDrawerFocus = () => {

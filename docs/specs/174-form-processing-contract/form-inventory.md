@@ -6,6 +6,8 @@
 
 #212：`/upload/tasks/:taskId` 增加未匹配流程时的通用结果暂停视图，没有新增科学编辑表单。上传、返修和两种管理员角色共用 `ParsingWorkflowIdentity` 展示服务端流程/表单身份；绑定不属于可编辑科学字段，输入和普通保存不重新判断。四宿主及暂停停止轮询的覆盖见[验证记录](../212-typed-parsing-workflow/validation.md)。
 
+#213：四类科学宿主共享 PaperMaterialsSection 右侧大纲、稳定身份定位；管理员失权由页面汇总，EvidenceWorkflow 与 WorkdraftRefresh 报告错误标识，禁止写入但保留查看。完整宿主和浏览器验证见[本轮验收](../213-review-workspace-navigation/validation.md)。个人页检查区和独立工作区只改变列表分页与导航，不新增科学值输入入口。
+
 | 用户入口 | 主要代码 | 本轮覆盖状态 |
 | --- | --- | --- |
 | `/upload/tasks/:taskId` 上传校对 | UploadTaskPage、UploadTaskEditor、MaterialStatesEditor、PropertyModuleEditor | 完整宿主及大草稿浏览器验证通过 |

@@ -148,7 +148,7 @@ def record_handoff(session, paper, user, *, action, draft, records, operation_id
     snapshot_id = previous['snapshot_id'] if reused else uuid.uuid4().hex
     number = previous['snapshot_number'] if reused else 1 + (previous['snapshot_number'] if previous else 0)
     public_id = (previous or {}).get('published_snapshot_id')
-    if action == 'approve' or initial and paper.review_status == 'approved':
+    if action == 'approve' or initial and previous is None and paper.review_status == 'approved':
         public_id = snapshot_id
     handoff = dict(contract=CONTRACT, action=action, snapshot_id=snapshot_id, snapshot_number=number,
         content_hash=fingerprint, reused=reused, holder=holder,
@@ -250,6 +250,48 @@ def current_review_content(session, paper, user):
     cached=science.load_results(session,snapshot,user.id,include_stale=True)
     # 所有读取使用交接事务的会话，不另开连接读取尚未提交的旧稿。
     return capture(session,paper,draft,snapshot,ev.public_snapshot(snapshot,cached)['records'])
+
+
+def review_handoff(session, paper, user, *, status, operation_id, comment=''):
+    """拒绝是唯一返修入口；公开批准图保持，工作稿归属在调用方事务内交接。"""
+    if user.role not in {'admin', 'superadmin'} or user.id == paper.uploaded_by_user_id:
+        error('review_forbidden', '需要管理员权限且不能审核自己的论文', 403)
+    if status not in {'rejected', 'pending'}:
+        error('review_status_invalid', '无效的审核状态', 400)
+    previous = session.scalar(select(models.PaperHistoryEvent).where(models.PaperHistoryEvent.operation_id == operation_id))
+    action = 'return' if status == 'rejected' else 'forward'
+    if previous is not None:
+        saved = (previous.classification_snapshot or {}).get('handoff') or {}
+        if previous.paper_id != paper.id or previous.actor_user_id != user.id or saved.get('action') != action:
+            error('handoff_operation_conflict', '操作身份已用于其他交接')
+        return saved
+    state = latest(session, paper.id, current_read=True)
+    published = paper.review_status == 'approved' and paper.approved_revision == paper.content_revision and (
+        state is None or state['holder'] == 'published')
+    if published:
+        if status != 'rejected':
+            error('manuscript_handed_off', '已批准稿需要拒绝后由原上传者返修')
+        if session.get(models.ScientificReviewDraft, paper.id) is not None:
+            error('workdraft_claimed', '已有尚未交出的暂存稿，已保留；请先完成当前稿件处理')
+        from backend.ingest import property_evidence as ev, scientific_evidence as science
+        from backend.services.paper_revisions import current_draft
+        snapshot = ev.paper_snapshot(session, paper.id, 0, '', check_access=False)
+        cached = science.load_results(session, snapshot, user.id, include_stale=True)
+        content = capture(session, paper, current_draft(session, paper), snapshot, ev.public_snapshot(snapshot, cached)['records'])
+    else:
+        require_writer(session, paper, user)
+        content = current_review_content(session, paper, user)
+    result = record_handoff(session, paper, user, action=action, holder='author' if status == 'rejected' else 'review',
+        operation_id=operation_id, comment=comment, initial=published, **content)
+    if status == 'rejected':
+        if paper.review_status != 'approved':
+            paper.review_status, paper.review_comment = 'rejected', comment
+        author_working_copy(session, paper, paper.uploaded_by_user_id, content['draft'], content['records'])
+        staged = session.get(models.ScientificReviewDraft, paper.id)
+        if staged is not None:
+            session.delete(staged)
+    session.flush()
+    return result
 
 
 def author_working_copy(session, paper, author_id, draft, records):

@@ -60,7 +60,7 @@ describe('正式用户中心', () => {
   it('管理员有本人检查贡献和复用待检查入口，超级管理员入口直达新标签页', async () => {
     auth.user.role = 'superadmin'; show(<AccountPage />)
     await screen.findByText('他帮助检查的 SC-Wiki 收录的论文')
-    await waitFor(() => expect(mocked.get).toHaveBeenCalledWith('/api/account/reviewed-papers'))
+    await waitFor(() => expect(mocked.get).toHaveBeenCalledWith('/api/account/reviewed-papers?offset=0&limit=3'))
     fireEvent.click(screen.getByRole('tab', { name: '待检查' }))
     expect(screen.getByTestId('review-workspace')).toBeInTheDocument()
     for (const section of ['users', 'applications', 'charts', 'news', 'models', 'audit']) {
