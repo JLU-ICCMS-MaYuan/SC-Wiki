@@ -313,7 +313,7 @@ def test_frequency_metadata_cannot_block_current_samples(marker, upper):
     before = copy.deepcopy(p)
     result = calculate_dos(p, PRIMITIVE)
     relative = result["relative"]
-    assert relative["method"] == "dos-relative-v3"
+    assert relative["method"] == "dos-relative-v4"
     assert relative["normalization"]["status"] == "available"
     assert relative["normalization"]["total_mode_integral"] == pytest.approx(9)
     assert relative["components"][0]["frequency_interval_thz"] == [0., .9]
@@ -334,3 +334,176 @@ def test_retired_confirmation_is_ignored_without_loosening_other_schema_checks()
     cal["curves"][0]["unexpected_key"] = True
     with pytest.raises(ValidationError):
         PanelCalibration.model_validate(cal)
+
+
+# TDOS 与元素分波必须分别决定计算条件，不能因只有一条线就猜总谱。
+def total_payload(projection="total"):
+    p = payload()
+    p["curves"] = p["curves"][:1]
+    p["curves"][0]["projection"] = projection
+    p["calibration"]["curves"] = p["calibration"]["curves"][:1]
+    p["calibration"].update(projection_complete=False, projection_scale_confirmed=False)
+    return p
+
+
+@pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+@pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+    p = total_payload(projection)
+    p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+    before = copy.deepcopy(p)
+    primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+    r = calculate_dos(p, primitive)
+    rel = r["relative"]
+    assert rel["normalization"]["status"] == "available"
+    assert rel["spectrum_type"] == "total"
+    assert rel["components"][0]["frequency_interval_thz"] == [0., 1.]
+    assert rel["components"][0]["area"] == 4
+    assert rel["normalization"]["status"] == "available"
+    assert rel["normalization"]["coefficient"] == pytest.approx(5.25)
+    assert rel["normalization"]["total_mode_integral"] == pytest.approx(21)
+    assert rel["normalization"]["expected_modes"] == rel["normalization"]["deviations"] == {}
+    assert rel["shares"]["status"] == "unavailable"
+    assert not any(k in rel["shares"] for k in ("fractions", "expected_fractions", "element_ratio"))
+    assert r["absolute"]["status"] == "unavailable"
+    assert "独立绝对密度刻度" in r["absolute"]["reason"]
+    assert p == before
+
+
+@pytest.mark.parametrize("problem", ["n", "definition", "clipped", "gap", "backtrack", "negative", "zero", "hidden", "counts", "formula"])
+def test_tdos_keeps_independent_safety_checks(problem):
+    p = total_payload()
+    primitive = copy.deepcopy(PRIMITIVE)
+    composition = None
+    c = p["curves"][0]
+    if problem == "n": primitive = None
+    if problem == "definition": c["physical_definition_confirmed"] = False
+    if problem == "clipped": c["clipped_frequencies_thz"] = [.5]
+    if problem == "gap": c["points"][1]["breakBefore"] = True
+    if problem == "backtrack": c["points"][1]["frequency_thz"] = 2
+    if problem == "negative": c["points"][1]["amplitude_pixel"] = 30
+    if problem == "zero":
+        for point in c["points"]: point.update(amplitude_pixel=20, reconstructed_amplitude=0)
+    if problem == "hidden": p["calibration"]["curves"].append(dict(id="missing", kind="phonon_dos"))
+    if problem == "counts": primitive["species_counts"]["H"] = 3
+    if problem == "formula": composition = composition_for({"material": "LaH3"})
+    r = calculate_dos(p, primitive, composition)
+    assert r["relative"]["normalization"]["status"] == "unavailable"
+    assert r["candidate"] is None
+
+
+@pytest.mark.parametrize("projection", [None, "La"])
+def test_single_unknown_or_element_curve_is_not_inferred_to_be_tdos(projection):
+    p = total_payload(projection)
+    # ID 中出现 total 也不是总谱的物理依据。
+    p["curves"][0]["id"] = "source_total_phonon_dos"
+    p["calibration"]["curves"][0]["id"] = "source_total_phonon_dos"
+    r = calculate_dos(p, PRIMITIVE)
+    assert r["relative"]["spectrum_type"] == "projected"
+    assert r["relative"]["normalization"]["status"] == "unavailable"
+    assert "元素投影完整性" in r["relative"]["normalization"]["reason"]
+
+
+@pytest.mark.parametrize("projection", ["total", "TDOS"])
+def test_total_and_projected_curves_cannot_be_added(projection):
+    p = payload()
+    p["curves"][0]["projection"] = projection
+    r = calculate_dos(p, PRIMITIVE)
+    assert r["candidate"] is None
+    assert "不能相加" in r["relative"]["normalization"]["reason"]
+
+
+def test_tdos_absolute_integral_stays_independent_and_requires_absolute_units():
+    p = total_payload()
+    p["curves"][0]["unit"] = "modes/THz/primitive_cell"
+    r = calculate_dos(p, PRIMITIVE)
+    assert r["relative"]["normalization"]["total_mode_integral"] == pytest.approx(9)
+    assert r["absolute"]["integral"] == pytest.approx(4)
+    assert r["absolute"]["absolute_difference"] == pytest.approx(5)
+    p["curves"][0]["physical_definition_confirmed"] = False
+    assert calculate_dos(p, PRIMITIVE)["absolute"]["status"] == "unavailable"
+
+
+
+def test_tdos_real_recalculate_persists_rereads_exports_and_preserves_history(manual_http):
+    import csv
+    import io
+    from ase import Atoms
+    from ase.io import write
+    from backend.services import spectra as service
+    e = manual_http
+    buffer = io.BytesIO()
+    write(buffer, Atoms("H", scaled_positions=[[.1,.2,.3]], cell=[4,5,6], pbc=True), format="cif")
+    state = e["draft"]["material_states"][0]
+    state.update(material="H", structure=dict(structure_format="cif",structure_text=buffer.getvalue().decode()))
+    p = total_payload()
+    p["curves"][0].update(roi=[0,0,1,20], color="green")
+    p["calibration"].update(panel_id="p",state_key="s1")
+    with Session(e["engine"]) as session:
+        run = session.get(models.SpectrumRun, e["old_run"])
+        run.result_json = p
+        ctx = service.context(session,**e["query"],user=e["actor"][0],write=True)
+        e["body"]["expected_version"] = ctx["version"]
+        service.activate(session.get(models.SpectrumCollection,e["identity"]),run,ctx["states"][0])
+        session.commit()
+    body = recalc_body(e); body["kind"] = "phonon_dos"
+    url = f"/api/rag/spectra/{e['identity']}"
+    response = e["client"].post(url+"/recalculate",json=body)
+    assert response.status_code == 200,response.text
+    current = response.json()["items"][0]
+    norm = current["result"]["quality"]["dos_relative"]["normalization"]
+    assert norm["status"] == "available"
+    assert norm["total_mode_integral"] == pytest.approx(3)
+    assert current["result"]["curves"] == p["curves"]
+    assert current["run"]["id"] != e["old_run"]
+    assert current["review"] == {}
+    reread = e["client"].get("/api/rag/spectra",params=e["query"])
+    assert reread.status_code == 200,reread.text
+    assert reread.json()["items"][0]["result"] == current["result"]
+    exported = e["client"].get(url+"/export",params={**e["query"],"format":"csv"})
+    assert exported.status_code == 200,exported.text
+    rows = list(csv.DictReader(io.StringIO(exported.text)))
+    assert float(rows[1]["normalized_dos_candidate"]) == pytest.approx(6)
+    assert float(rows[1]["reconstructed_amplitude"]) == pytest.approx(8)
+    with Session(e["engine"]) as session:
+        assert session.get(models.SpectrumRun,e["old_run"]).result_json == p
+        assert session.get(models.SpectrumRun,current["run"]["id"]).result_json == current["result"]
+    public = mask_public(current["result"],{"La":{"status":"accepted_limited","frequency_intervals_thz":[[0,.5]]}})
+    assert "dos_relative_normalized" not in public["candidates"]
+
+
+
+def test_real_source_identity_replay_and_saved_manual_trace_are_distinct():
+    from pathlib import Path
+    from PIL import Image
+    import io
+    import numpy as np
+    from backend.spectra.discovery import calibrate
+    from backend.spectra.engine import extract_panel
+    evidence = Path(__file__).resolve().parents[2]/"docs/specs/164-dos-relative-normalization/validation/tdos"
+    report = json.loads((evidence/"source-report.json").read_text())
+    response = json.loads((evidence/"fresh-model-response.json").read_text())
+    bundle = json.loads((evidence/"source-fixture.json").read_text())
+    image = (evidence/"source.png").read_bytes()
+    import hashlib
+    assert hashlib.sha256(image).hexdigest() == report["source_image_sha256"]
+    states = [dict(state_key=p["state_key"]) for p in report["panels"]]
+    panels, _ = calibrate(dict(image=image,size_px=list(Image.open(io.BytesIO(image)).size),text=report["context"]),
+                          states,complete=lambda *args,**kwargs: copy.deepcopy(response))
+    assert panels
+    for panel in panels:
+        assert panel["curves"][0]["projection"] == "total"
+        assert panel["curves"][0]["physical_definition_confirmed"]
+        panel.update(projection_complete=False,projection_scale_confirmed=False)
+        result = extract_panel(np.asarray(Image.open(io.BytesIO(image)).convert("RGB")),panel,primitive=report["primitive"])
+        rel = result["quality"]["dos_relative"]
+        assert rel["spectrum_type"] == "total"
+        # 真实提取失败原因不能被元素完整性或尺度门槛取代。
+        assert "元素投影完整性" not in rel["normalization"].get("reason","")
+        assert "共同幅值尺度" not in rel["normalization"].get("reason","")
+    saved = copy.deepcopy(bundle["result"])
+    normalized = calculate_dos(saved,report["primitive"])["relative"]
+    assert normalized["normalization"]["total_mode_integral"] == pytest.approx(21)
+    assert normalized["normalization"]["coefficient"] == pytest.approx(.008089269069713752)
+    assert normalized["components"][0]["frequency_interval_thz"] == pytest.approx([3.6556,58.648],rel=1e-4)
+    assert saved == bundle["result"]

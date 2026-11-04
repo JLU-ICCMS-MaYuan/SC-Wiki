@@ -2,7 +2,7 @@
 
 日期：2026-10-27（Asia/Shanghai）。Issue：[#164](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/164)。
 
-本文保留各次历史验证；最新有效规则见文末“删除频段确认门槛”。此前关于频段确认的行为描述已被该修订取代。
+本文保留各次历史验证；最新有效规则见文末“TDOS 独立归一化”。此前关于频段确认的行为描述已被该修订取代。
 
 ## 自动验证
 
@@ -64,3 +64,38 @@
 - 旧方法 dos-relative-v1 的已保存失败原因不再渲染，提示重新计算；dos-relative-v2 按新规则计算。CSV 两版候选兼容。
 - 本轮未重复运行浏览器；已有浏览器截图属于此前版本，不能作为移除门槛后的界面截图。当前变更通过实际 HTTP 路由回归、组件测试及构建核验。
 - 未回填、未重新提取业务谱，未推送或部署。
+
+
+## TDOS 独立归一化（2026-11-04）
+
+### 结论与验收范围
+
+本轮修订 #164 原设计对 TDOS 共用元素门槛的缺陷。明确总谱及标准定义后，不再要求元素完整性和分波共同尺度；未知单线、单元素分波和总谱/分波混合不能借此放行。保留 N、结构一致性、数值/连线和裁峰条件。元素比较留空，总谱实际范围保留，独立绝对检查不使用归一化结果。报告与候选使用 dos-relative-v4，重算版本为 spectra-recalculate-tdos-v2；旧报告要求重算，历史源数据未批量改写。
+
+### 修复前与自动验证
+
+- 新增用例在修复前为 13 failed；原始输出见 [before-fix.txt](validation/tdos/before-fix.txt)。另用起始提交的原始计算器独立复现“元素完整性 → 共同尺度”两次阻断，见 [baseline-probe.json](validation/tdos/baseline-probe.json)。
+- 最终后端谱/α²F 回归 289 passed、6 skipped；其中 DOS 专项 70 passed。跳过项需授权 MySQL，未宣称 MySQL 验收。
+- 前端相关 5 文件 55 项通过；表单契约 11 文件 150 项通过；8 项变异行为全部检出；科学字段契约 v1 基线通过，未改标准字段或摘要。
+- TypeScript 与前端生产构建通过；既有 3Dmol eval 和大包提示仍存在。
+- 正式 React + HTTP + 隔离 SQLite 浏览器检查 8 项通过，0 页面异常；包括元素分波原回归、TDOS、真实保存描线、刷新重复重算、CSV、1440px/390px。仅对专用 127.0.0.1:8194 服务写入，没有业务API写入。见 [browser-report.json](validation/tdos/browser-report.json)。
+
+### 原始来源重新识别与数值提取
+
+来源为《2012 CaH6--suppliment-王晖.pdf》第17页 Figure S15，PDF SHA-256 为 630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348。从原PDF重新取得原生内嵌图，字节哈希 03700ded01a105cb374c95a4c613dc18174c84545c2d702a1ab52d5da84e92b4 与业务来源一致。
+
+本轮真实调用 gpt-6.1-sol，从原图与该页文字重新识别上下两个相邻压力面板，再执行正式 calibrate → extract_panel。两者均明确 projection=total、physical_definition_confirmed=true；新数值描线仍有缺失点，未形成有效积分，程序继续阻断，未伪称新提取通过。响应及结果分别保存在 [fresh-model-response.json](validation/tdos/fresh-model-response.json)、[source-report.json](validation/tdos/source-report.json)，并有固定重放测试。原始图为 [source.png](validation/tdos/source.png)。这不是整篇解析通过，也不是自动描线缺失问题已修复。
+
+### 已保存人工描线的独立重算
+
+截图对应旧记录 projection=null、physical_definition_confirmed=false，不能只凭名称中有 total 就确认身份。只读取得原记录后，在隔离副本中仅依据本轮新读图确认身份，沿用原人工描线、像素坐标及连线。实际重算：N=7，总面积约2596像素·THz，C=0.008089269069713752，归一化总模式21，范围3.6556–58.648 THz；逐元素占比/模式比较未生成。源图只有任意单位，原始绝对密度积分仍不可用。
+
+该副本经过正式HTTP重算保存新运行、数据库重读与CSV导出，原始曲线不变、重复重算系数不累乘；历史与限定频段回归保留。可复现输入见 [source-fixture.json](validation/tdos/source-fixture.json)。已实际查看 [桌面截图](validation/tdos/dos-real-source-desktop.png) 和 [窄屏截图](validation/tdos/dos-real-source-mobile.png)，结果可读，窄屏表格局部滚动、无整页横向溢出。
+
+### 来源、复用和边界
+
+- 原PDF、原图及页文字已核对；不重做无关文字提取，未重提整篇字段。
+- 新模型重跑的是受影响的总谱身份/标定；实际新数值提取失败保持失败。人工描线明确复用，未冒充模型重新提取。
+- 原胞 N 来自当前已保存结构，经 ASE/spglib 验证为7；不从 CaH6 化学式推断原胞倍数。
+- 用户业务库与返修草稿未写入；截图旧业务记录仍保留未确认身份，不会因升级源码自动转为总谱。本轮不包含业务数据修复、推送、部署或历史回填。
+- Issue 保持 OPEN，远程 Spec 双向链接仍待另行授权推送后核验。汇总见 [checks.json](validation/tdos/checks.json)。

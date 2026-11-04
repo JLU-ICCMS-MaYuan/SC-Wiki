@@ -7,7 +7,7 @@ import { SpectrumMetrics } from '../../frontend/src/components/SpectrumDetailVie
 
 afterEach(cleanup)
 const report = (): DosRelativeReport => ({
-  method:'dos-relative-v3',
+  method:'dos-relative-v4',
   components:[{curve_id:'La',projection:'La',status:'available',area:4,frequency_interval_thz:[0,1]},
     {curve_id:'H',projection:'H',status:'available',area:5,frequency_interval_thz:[0,1]}],
   shares:{status:'available',total_area:9,fractions:{La:4/9,H:5/9},expected_fractions:{La:1/3,H:2/3}},
@@ -80,4 +80,31 @@ it('旧方法保存的频段失败提示不再展示，提示重新计算当前�
   render(<DosRelativeMetrics report={r} restricted={false}/>)
   expect(screen.queryByText(/原图完整频段尚待核对/)).toBeNull()
   expect(screen.getByText(/请点击重新计算/)).toBeVisible()
+})
+
+
+it("TDOS 独立显示归一化，保留范围且元素列留空",()=>{
+  const r=report()
+  r.spectrum_type="total"
+  r.components=[{curve_id:"tdos",projection:"total",status:"available",area:4,frequency_interval_thz:[3.6556,58.648]}]
+  r.shares={status:"unavailable",reason:"当前为 TDOS，未提供元素分波，暂不计算元素占比"}
+  r.normalization={status:"available",coefficient:5.25,primitive_atoms:7,target_modes:21,total_mode_integral:21,
+    component_mode_integrals:{tdos:21},expected_modes:{},deviations:{}}
+  render(<DosRelativeMetrics report={r} restricted={false}/>)
+  const row=within(screen.getByRole("table",{name:"DOS 相对面积"})).getAllByRole("row")[1]
+  expect(within(row).getByText("TDOS（总态密度）")).toBeVisible()
+  expect(within(row).getByText("3.6556–58.648 THz")).toBeVisible()
+  expect(within(row).getAllByText("—")).toHaveLength(2)
+  expect(screen.getByText("归一化系数 C：5.25 · 总模式数：21（目标 3N：21）")).toBeVisible()
+  expect(screen.queryByTestId("dos-element-ratio")).toBeNull()
+  expect(screen.queryByRole("table",{name:"DOS 归一化模式积分"})).toBeNull()
+  expect(screen.queryByText(/元素投影完整性|共同幅值尺度|所有元素共用/)).toBeNull()
+})
+
+it("旧 v3 的元素门槛提示只要求重算，不冒充 v4 总谱规则",()=>{
+  const r=report();r.method="dos-relative-v3"
+  r.normalization={status:"unavailable",reason:"元素投影完整性尚待核对"}
+  render(<DosRelativeMetrics report={r} restricted={false}/>)
+  expect(screen.getByText(/请点击重新计算/)).toBeVisible()
+  expect(screen.queryByText("元素投影完整性尚待核对")).toBeNull()
 })

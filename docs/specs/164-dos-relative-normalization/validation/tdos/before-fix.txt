@@ -1,0 +1,262 @@
+FFFFFFFFFFFFF                                                            [100%]
+=================================== FAILURES ===================================
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[False-False-total] _
+
+projection = 'total', complete = False, scale = False
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[False-False-TDOS] _
+
+projection = 'TDOS', complete = False, scale = False
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[False-False- Total ] _
+
+projection = ' Total ', complete = False, scale = False
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[False-True-total] _
+
+projection = 'total', complete = False, scale = True
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[False-True-TDOS] _
+
+projection = 'TDOS', complete = False, scale = True
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[False-True- Total ] _
+
+projection = ' Total ', complete = False, scale = True
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[True-False-total] _
+
+projection = 'total', complete = True, scale = False
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[True-False-TDOS] _
+
+projection = 'TDOS', complete = True, scale = False
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[True-False- Total ] _
+
+projection = ' Total ', complete = True, scale = False
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[True-True-total] _
+
+projection = 'total', complete = True, scale = True
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[True-True-TDOS] _
+
+projection = 'TDOS', complete = True, scale = True
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+_ test_confirmed_tdos_normalizes_independently_of_element_flags[True-True- Total ] _
+
+projection = ' Total ', complete = True, scale = True
+
+    @pytest.mark.parametrize("projection", ["total", "TDOS", " Total "])
+    @pytest.mark.parametrize("complete,scale", [(False, False), (False, True), (True, False), (True, True)])
+    def test_confirmed_tdos_normalizes_independently_of_element_flags(projection, complete, scale):
+        p = total_payload(projection)
+        p["calibration"].update(projection_complete=complete, projection_scale_confirmed=scale)
+        before = copy.deepcopy(p)
+        primitive = dict(primitive_atoms=7, species_counts={"Ca": 1, "H": 6})
+        r = calculate_dos(p, primitive)
+        rel = r["relative"]
+>       assert rel["spectrum_type"] == "total"
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'spectrum_type'
+
+backend/tests/test_spectra_dos_relative.py:358: KeyError
+__ test_tdos_absolute_integral_stays_independent_and_requires_absolute_units ___
+
+    def test_tdos_absolute_integral_stays_independent_and_requires_absolute_units():
+        p = total_payload()
+        p["curves"][0]["unit"] = "modes/THz/primitive_cell"
+        r = calculate_dos(p, PRIMITIVE)
+>       assert r["relative"]["normalization"]["total_mode_integral"] == pytest.approx(9)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'total_mode_integral'
+
+backend/tests/test_spectra_dos_relative.py:419: KeyError
+=============================== warnings summary ===============================
+../../software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854
+  /Users/mayuan/software/miniconda3/envs/sc-wiki/lib/python3.12/site-packages/passlib/utils/__init__.py:854: DeprecationWarning: 'crypt' is deprecated and slated for removal in Python 3.13
+    from crypt import crypt as _crypt
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyPacked has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type SwigPyObject has no __module__ attribute
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: builtin type swigvarlink has no __module__ attribute
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[False-False-total]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[False-False-TDOS]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[False-False- Total ]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[False-True-total]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[False-True-TDOS]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[False-True- Total ]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[True-False-total]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[True-False-TDOS]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[True-False- Total ]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[True-True-total]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[True-True-TDOS]
+FAILED backend/tests/test_spectra_dos_relative.py::test_confirmed_tdos_normalizes_independently_of_element_flags[True-True- Total ]
+FAILED backend/tests/test_spectra_dos_relative.py::test_tdos_absolute_integral_stays_independent_and_requires_absolute_units
+13 failed, 55 deselected, 6 warnings in 1.46s
+sys:1: DeprecationWarning: builtin type swigvarlink has no __module__ attribute

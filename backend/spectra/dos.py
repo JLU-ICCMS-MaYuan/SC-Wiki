@@ -6,7 +6,7 @@ from .relative import pixel_curve
 from .samples import connected_samples
 from .topology import finite
 
-METHOD = "dos-relative-v3"
+METHOD = "dos-relative-v4"
 
 
 def unavailable(reason):
@@ -57,9 +57,20 @@ def element_ratio(components, expected, source):
                 share_difference_pp=differences, max_share_difference_pp=max(abs(v) for v in differences.values()))
 
 
+def projection_label(curve):
+    # 只兼容明确的总谱标签，不依据曲线数量、ID 或元素数量猜身份。
+    label = (curve.get("projection") or "").strip().lower()
+    return "total" if label in {"total", "tdos"} else label
+
+
+def is_total_dos(curves):
+    return len(curves) == 1 and projection_label(curves[0]) == "total"
+
+
 def calculate_dos(payload, primitive=None, composition=None):
     curves = [c for c in payload.get("curves", []) if c["kind"] == "phonon_dos"]
     panel = payload.get("calibration") or {}
+    total_dos = is_total_dos(curves)
     components, samples = [], {}
     for curve in curves:
         row = dict(curve_id=curve["id"], projection=curve.get("projection") or curve["id"],
@@ -76,7 +87,7 @@ def calculate_dos(payload, primitive=None, composition=None):
             row.update(unavailable(exc))
         components.append(row)
 
-    shares = unavailable("缺少完整共同尺度投影")
+    shares = unavailable("当前为 TDOS，未提供元素分波，暂不计算元素占比" if total_dos else "缺少完整共同尺度投影")
     normalization = unavailable("缺少完整共同尺度投影")
     candidate = None
     atoms = (primitive or {}).get("primitive_atoms")
@@ -87,10 +98,12 @@ def calculate_dos(payload, primitive=None, composition=None):
     source = (composition or {}).get("source") if formula_fractions else primitive
     try:
         demand(curves, "当前没有声子 DOS 曲线")
-        demand(all(c["status"] == "available" for c in components), "部分曲线不能积分，不能计算全部分波占比")
-        demand(panel.get("projection_complete"), "元素投影完整性尚待核对")
-        demand(panel.get("projection_scale_confirmed"), "各分波共同幅值尺度尚待核对")
-        labels = [c["projection"].strip().lower() for c in components]
+        demand(all(c["status"] == "available" for c in components),
+               "总谱不能形成有效积分，暂不归一化" if total_dos else "部分曲线不能积分，不能计算全部分波占比")
+        if not total_dos:
+            demand(panel.get("projection_complete"), "元素投影完整性尚待核对")
+            demand(panel.get("projection_scale_confirmed"), "各分波共同幅值尺度尚待核对")
+        labels = [projection_label(c) or c["id"].strip().lower() for c in curves]
         demand(len(set(labels)) == len(labels) and not (len(labels) > 1 and "total" in labels),
                "投影重复或总谱与分波同时存在，不能相加")
         # 识别提取失败的隐藏分波，不因余下曲线有值就声称完整集合。
@@ -98,19 +111,21 @@ def calculate_dos(payload, primitive=None, composition=None):
         demand(not expected_ids or expected_ids == {c["id"] for c in curves}, "部分标定分波提取失败，投影不完整")
         total = math.fsum(c["area"] for c in components)
         demand(finite(total) and total > 0, "全部像素面积为零或溢出，不能确定占比或共同系数")
-        shares = dict(status="available", total_area=total, unit="pixel·THz",
-                      fractions={c["curve_id"]: c["area"]/total for c in components},
-                      expected_fractions={}, composition_source=source)
         standard = all(c.get("physical_definition_confirmed") for c in curves)
-        if standard:
-            shares["expected_fractions"] = {c["curve_id"]: expected[c["projection"]]
-                                           for c in components if c["projection"] in expected}
-            shares["element_ratio"] = element_ratio(components, expected, source)
-        else:
-            shares["expected_reason"] = "标准原子振动投影定义尚待核对，暂不套用原子数占比"
-        if not expected:
-            shares["expected_reason"] = "缺少明确的化学计量或结构计数依据"
-        demand(standard, "标准原子振动投影定义尚待核对，不能套用 3N")
+        if not total_dos:
+            shares = dict(status="available", total_area=total, unit="pixel·THz",
+                          fractions={c["curve_id"]: c["area"]/total for c in components},
+                          expected_fractions={}, composition_source=source)
+            if standard:
+                shares["expected_fractions"] = {c["curve_id"]: expected[c["projection"]]
+                                               for c in components if c["projection"] in expected}
+                shares["element_ratio"] = element_ratio(components, expected, source)
+            else:
+                shares["expected_reason"] = "标准原子振动投影定义尚待核对，暂不套用原子数占比"
+            if not expected:
+                shares["expected_reason"] = "缺少明确的化学计量或结构计数依据"
+        demand(standard, "标准总声子 DOS 定义尚待核对，不能套用 3N" if total_dos
+               else "标准原子振动投影定义尚待核对，不能套用 3N")
         clipped = [c.get("projection") or c["id"] for c in curves if c.get("clipped_frequencies_thz")]
         demand(not clipped, "、".join(clipped) + "：曲线存在已记录的抵框裁峰，无法确定完整模式面积")
         demand(valid_atoms, "缺少可信原胞原子数 N；化学式比例不能确定原胞倍数")
@@ -148,12 +163,13 @@ def calculate_dos(payload, primitive=None, composition=None):
         candidate = dict(status="available", method=METHOD, coefficient=coefficient,
                          curves=normalized, unit="modes/THz/primitive_cell", structure_evidence=primitive)
     except (ValueError, OverflowError, ZeroDivisionError) as exc:
-        if shares["status"] != "available":
+        if not total_dos and shares["status"] != "available":
             shares = unavailable(exc)
         normalization = unavailable(exc)
     if valid_atoms:
         normalization.update(primitive_atoms=atoms, target_modes=3*atoms, structure_evidence=primitive)
-    relative = dict(method=METHOD, components=components, shares=shares, normalization=normalization)
+    relative = dict(method=METHOD, spectrum_type="total" if total_dos else "projected",
+                    components=components, shares=shares, normalization=normalization)
     return dict(relative=relative, absolute=dos_integrals(payload, primitive), candidate=candidate)
 
 
@@ -174,9 +190,12 @@ def dos_integrals(payload, primitive):
         curves = [c for c in payload["curves"] if c["kind"] == "phonon_dos"]
         demand(curves, "当前没有声子DOS曲线")
         panel = payload.get("calibration", {})
-        demand(panel.get("projection_complete") and panel.get("projection_scale_confirmed"),
-               "声子DOS的完整投影与共同幅值尺度尚待核对")
-        labels = [(c.get("projection") or c["id"]).strip().lower() for c in curves]
+        if is_total_dos(curves):
+            demand(curves[0].get("physical_definition_confirmed"), "标准总声子 DOS 定义尚待核对")
+        else:
+            demand(panel.get("projection_complete") and panel.get("projection_scale_confirmed"),
+                   "声子DOS的完整投影与共同幅值尺度尚待核对")
+        labels = [projection_label(c) or c["id"].strip().lower() for c in curves]
         demand(len(set(labels)) == len(labels) and not (len(labels) > 1 and "total" in labels),
                "投影重复或总谱与分波同时存在，不能相加")
         units = {c.get("unit") for c in curves}

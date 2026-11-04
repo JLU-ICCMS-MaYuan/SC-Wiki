@@ -1,0 +1,15 @@
+{
+  "backend": "289 passed, 6 skipped",
+  "frontend": "55 passed",
+  "form_contract": "150 passed",
+  "mutation": "8/8 detected",
+  "field_contract": "passed",
+  "frontend_build": "passed",
+  "browser_checks": 8,
+  "browser_errors": [],
+  "source_extraction": "fresh model total identity confirmed; fresh numerical traces have missing points and remain unavailable",
+  "saved_manual_trace": "reused without changing points; fresh total identity applied only in isolated fixture; N=7, normalized modes=21",
+  "business_writes": false,
+  "git_push": false,
+  "deployment": false
+}

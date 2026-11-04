@@ -80,13 +80,13 @@ export function SpectrumMetrics({ item, curves, history, onRecalculate, onLocate
   const anyAlphaAvailable=!restricted&&raw.method==='alpha2f-relative-v2'&&(raw.parameters?.omega_log?.status==='available'||raw.pixel_integral_status==='available')
   const diagnostics=q.trace_diagnostics?.[dos?'phonon_dos':'alpha2f']
   const repairs=q.automatic_repairs?.[dos?'phonon_dos':'alpha2f']||[]
-  const reasons=restricted?[calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。']:dos&&(mode.status==='available'||dosRelative?.method==='dos-relative-v3')?[mode.reason].filter(Boolean):[]
+  const reasons=restricted?[calculationDisabledReason||'当前为历史、失效或限定频段版本，不展示完整谱计算结果。']:dos&&(mode.status==='available'||dosRelative?.method==='dos-relative-v4')?[mode.reason].filter(Boolean):[]
   return <DetailSection title={dos ? '03 · 频段与数据完整性' : '03 · 积分结果与参考值对比'} action={onRecalculate && <Button variant="outlined" onClick={onRecalculate} disabled={calculationDisabled||recalculating} aria-busy={recalculating}>{recalculating?'计算中…':'重新计算'}</Button>}>
     <Box sx={{ display: 'flex', gap: 4, flexWrap: 'wrap', mb: 2 }}><Box><Typography variant="caption" color="text.secondary">实际提取频率范围</Typography><Typography fontWeight={600}>{spectrumInterval(curves)}</Typography></Box>
       <Box><Typography variant="caption" color="text.secondary">{dos ? '原胞原子数 N / 目标 3N' : '实际积分范围'}</Typography><Typography fontWeight={600}>{dos ? `${restricted?'—':spectrumNumber(displayedAtoms, 0)} / ${restricted?'—':spectrumNumber(displayedTarget, 0)}` : anyAlphaAvailable && raw.minimum_integrated_thz != null ? `${spectrumNumber(raw.minimum_integrated_thz)}–${spectrumNumber(raw.maximum_integrated_thz ?? Math.max(...(alpha?.points.map(p=>p.frequency_thz)||[])))} THz` : '暂不可计算'}</Typography></Box></Box>
     {dos&&<DosRelativeMetrics report={dosRelative} restricted={Boolean(restricted)}/>}
     {dos&&<Typography fontWeight={600} sx={{mt:2}}>原始绝对密度积分（独立检查）</Typography>}
-    {dos?<Box sx={{overflowX:'auto'}}><Table size="small" sx={{minWidth:540}}><TableHead><TableRow>{['全部分波积分','目标 3N','绝对偏差','相对偏差（%）'].map(label=><TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>
+    {dos?<Box sx={{overflowX:'auto'}}><Table size="small" sx={{minWidth:540}}><TableHead><TableRow>{[dosRelative?.spectrum_type==='total'?'总谱积分':'全部分波积分','目标 3N','绝对偏差','相对偏差（%）'].map(label=><TableCell key={label}>{label}</TableCell>)}</TableRow></TableHead><TableBody>
       <TableRow><TableCell>{modeAvailable?spectrumNumber(mode.integral):'—'}</TableCell><TableCell>{restricted?'—':spectrumNumber(mode.target_modes)}</TableCell><TableCell>{modeComparable?spectrumNumber(mode.absolute_difference):'—'}</TableCell><TableCell>{modeComparable&&mode.relative_difference_pct!=null?spectrumNumber(mode.relative_difference_pct,2)+'%':'—'}</TableCell></TableRow>
     </TableBody></Table></Box>:<AlphaRelativeMetrics raw={raw} comparison={comparisons.omega_log} restricted={Boolean(restricted)}/>}
     {!restricted && calculationDisabled && calculationDisabledReason && <Typography variant="body2" color="text.secondary" sx={{mt:1}}>{calculationDisabledReason}</Typography>}

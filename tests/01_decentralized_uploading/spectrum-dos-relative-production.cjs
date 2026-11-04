@@ -68,6 +68,36 @@ async function main(){
    await page.getByText(/缺少可信原胞原子数/).waitFor();
    await page.getByRole('table',{name:'DOS 相对面积'}).getByText('44.44%',{exact:true}).waitFor();
    await shot('dos-no-n');check('只有化学式时面积与实测/预期占比可用，N与模式归一化保持未知');
+   await page.setViewportSize({width:1440,height:1100});
+   for(const stateKey of ["dos-total","dos-real-source"]){
+     const total=items.find(i=>i.state_key===stateKey);
+     if(!total){assert.notEqual(stateKey,"dos-total");continue}
+     const oldCurves=structuredClone(total.result.curves),oldId=total.run.id;
+     await page.goto(address(total));await ready();await recalc();
+     const fresh=(await listing()).items.find(i=>i.id===total.id);
+     const rel=fresh.result.quality.dos_relative;
+     assert.equal(rel.spectrum_type,"total");assert.equal(rel.normalization.status,"available");
+     assert.equal(rel.shares.status,"unavailable");assert(!rel.shares.fractions);
+     assert(Math.abs(rel.normalization.total_mode_integral-(stateKey==="dos-total"?9:21))<1e-9);
+     assert.deepEqual(fresh.result.curves,oldCurves);assert.notEqual(fresh.run.id,oldId);
+     const table=page.getByRole("table",{name:"DOS 相对面积"});
+     await table.getByRole("cell",{name:/TDOS（总态密度）/}).waitFor();
+     assert.equal(await table.getByText("—",{exact:true}).count(),2);
+     assert.equal(await page.getByTestId("dos-element-ratio").count(),0);
+     assert.equal(await page.getByRole("table",{name:"DOS 归一化模式积分"}).count(),0);
+     assert(!/元素投影完整性|各分波共同幅值尺度/.test(await page.locator("body").innerText()));
+     const response=await fetch(backend+"/api/rag/spectra/"+total.id+"/export?"+query+"&format=csv");
+     assert.equal(response.status,200);const csv=await response.text();
+     assert(csv.includes("normalized_dos_candidate"));assert(csv.includes("modes/THz/primitive_cell"));
+     await shot(stateKey+"-desktop");
+     await page.reload();await ready();await recalc();
+     const repeated=(await listing()).items.find(i=>i.id===total.id);
+     assert.equal(repeated.result.quality.dos_relative.normalization.coefficient,rel.normalization.coefficient);
+     await page.setViewportSize({width:390,height:900});await page.waitForTimeout(300);
+     assert(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
+     await shot(stateKey+"-mobile");await page.setViewportSize({width:1440,height:1100});
+     check(stateKey+"：元素标记均未确认仍归一化，元素列空白，原始描线/范围不变，刷新重算和CSV/窄屏通过");
+   }
    assert.deepEqual(report.errors,[]);
  } finally {fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'browser-report.json'),JSON.stringify(report,null,2));await browser.close()}
 }

@@ -1,0 +1,64 @@
+{
+  "source_commit": "53c32542bca1f7ea80143d563db13498ba210812",
+  "results": [
+    {
+      "projection_complete": false,
+      "projection_scale_confirmed": false,
+      "normalization": {
+        "status": "unavailable",
+        "reason": "元素投影完整性尚待核对",
+        "primitive_atoms": 7,
+        "target_modes": 21,
+        "structure_evidence": {
+          "primitive_atoms": 7,
+          "species_counts": {
+            "Ca": 1,
+            "H": 6
+          }
+        }
+      }
+    },
+    {
+      "projection_complete": true,
+      "projection_scale_confirmed": false,
+      "normalization": {
+        "status": "unavailable",
+        "reason": "各分波共同幅值尺度尚待核对",
+        "primitive_atoms": 7,
+        "target_modes": 21,
+        "structure_evidence": {
+          "primitive_atoms": 7,
+          "species_counts": {
+            "Ca": 1,
+            "H": 6
+          }
+        }
+      }
+    },
+    {
+      "projection_complete": true,
+      "projection_scale_confirmed": true,
+      "normalization": {
+        "status": "available",
+        "label": "按 3N 归一化",
+        "coefficient": 5.25,
+        "primitive_atoms": 7,
+        "target_modes": 21,
+        "component_mode_integrals": {
+          "total": 21.0
+        },
+        "expected_modes": {},
+        "deviations": {},
+        "structure_evidence": {
+          "primitive_atoms": 7,
+          "species_counts": {
+            "Ca": 1,
+            "H": 6
+          }
+        },
+        "total_mode_integral": 21.0,
+        "unit": "modes/THz/primitive_cell"
+      }
+    }
+  ]
+}

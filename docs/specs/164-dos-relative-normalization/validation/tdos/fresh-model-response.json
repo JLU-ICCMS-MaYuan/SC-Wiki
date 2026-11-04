@@ -1,0 +1,258 @@
+{
+  "panels": [
+    {
+      "panel_id": "S15_top_200GPa",
+      "state_key": "state-1e8427cef05dd3bc84e1",
+      "kind": "phonon_dos",
+      "caption": "Figure S15，上方面板：cI14-CaH6 at 200 GPa，声子 DOS。",
+      "assignment_reason": "图内标注“cI14 at 200 GPa”，图注明确材料为 CaH6；对应给定的 200 GPa、Im-3m CaH6 状态。",
+      "projection_scale_confirmed": false,
+      "projection_complete": false,
+      "curves": [
+        {
+          "id": "S15_200GPa_total",
+          "kind": "phonon_dos",
+          "projection": "total",
+          "color": "black",
+          "roi": [
+            121,
+            3,
+            996,
+            290
+          ],
+          "display_bbox": [
+            65,
+            0,
+            1009,
+            300
+          ],
+          "frequency_direction": "x",
+          "frequency_ticks": [
+            [
+              187,
+              5
+            ],
+            [
+              255,
+              10
+            ],
+            [
+              322,
+              15
+            ],
+            [
+              390,
+              20
+            ],
+            [
+              457,
+              25
+            ],
+            [
+              525,
+              30
+            ],
+            [
+              592,
+              35
+            ],
+            [
+              659,
+              40
+            ],
+            [
+              727,
+              45
+            ],
+            [
+              794,
+              50
+            ],
+            [
+              862,
+              55
+            ],
+            [
+              929,
+              60
+            ],
+            [
+              997,
+              65
+            ]
+          ],
+          "amplitude_ticks": [
+            [
+              291,
+              0
+            ],
+            [
+              208,
+              0.2
+            ],
+            [
+              126,
+              0.4
+            ],
+            [
+              43,
+              0.6
+            ]
+          ],
+          "frequency_unit": "THz",
+          "frequency_scale": "linear",
+          "amplitude_scale": "linear",
+          "unit": "arbitrary_units",
+          "physical_definition_confirmed": true,
+          "amplitude_evidence": "共享纵轴标题为 Phonon DOS (Arbitrary units)；本面板可见 0.0、0.2、0.4、0.6 幅值刻度。图注将其标识为声子 DOS，无元素分波或加权说明，按总声子 DOS 识别。",
+          "exclude": [
+            [
+              218,
+              35,
+              406,
+              65
+            ]
+          ],
+          "zero_boundaries_thz": [
+            null,
+            null
+          ],
+          "zero_reference_band_thz": null
+        }
+      ]
+    },
+    {
+      "panel_id": "S15_bottom_150GPa",
+      "state_key": "state-bcc51525bdb07e820aed",
+      "kind": "phonon_dos",
+      "caption": "Figure S15，下方面板：cI14-CaH6 at 150 GPa，声子 DOS。",
+      "assignment_reason": "图内标注“cI14 at 150 GPa”，图注明确材料为 CaH6；对应给定的 150 GPa、Im-3m CaH6 状态。",
+      "projection_scale_confirmed": false,
+      "projection_complete": false,
+      "curves": [
+        {
+          "id": "S15_150GPa_total",
+          "kind": "phonon_dos",
+          "projection": "total",
+          "color": "black",
+          "roi": [
+            121,
+            333,
+            996,
+            621
+          ],
+          "display_bbox": [
+            65,
+            329,
+            1009,
+            725
+          ],
+          "frequency_direction": "x",
+          "frequency_ticks": [
+            [
+              120,
+              0
+            ],
+            [
+              187,
+              5
+            ],
+            [
+              255,
+              10
+            ],
+            [
+              322,
+              15
+            ],
+            [
+              390,
+              20
+            ],
+            [
+              457,
+              25
+            ],
+            [
+              525,
+              30
+            ],
+            [
+              592,
+              35
+            ],
+            [
+              659,
+              40
+            ],
+            [
+              727,
+              45
+            ],
+            [
+              794,
+              50
+            ],
+            [
+              862,
+              55
+            ],
+            [
+              929,
+              60
+            ],
+            [
+              997,
+              65
+            ]
+          ],
+          "amplitude_ticks": [
+            [
+              622,
+              0
+            ],
+            [
+              539,
+              0.2
+            ],
+            [
+              456,
+              0.4
+            ],
+            [
+              374,
+              0.6
+            ]
+          ],
+          "frequency_unit": "THz",
+          "frequency_scale": "linear",
+          "amplitude_scale": "linear",
+          "unit": "arbitrary_units",
+          "physical_definition_confirmed": true,
+          "amplitude_evidence": "共享纵轴标题为 Phonon DOS (Arbitrary units)；本面板可见 0.0、0.2、0.4、0.6 幅值刻度。图注将其标识为声子 DOS，无元素分波或加权说明，按总声子 DOS 识别。",
+          "exclude": [
+            [
+              218,
+              369,
+              404,
+              399
+            ]
+          ],
+          "zero_boundaries_thz": [
+            null,
+            null
+          ],
+          "zero_reference_band_thz": null
+        }
+      ]
+    }
+  ],
+  "issues": [
+    "上方面板使用下方面板的共享频率刻度标定；两个取数 ROI 分别限定在各自坐标框内。",
+    "200 GPa 面板约 40 THz 的尖峰被上边框截断；不可补造其峰顶或截断部分。",
+    "黑色曲线与零幅值边框重合的位置不能独立辨认，不将图框当作 DOS，也不据此指定严格零端点或零参考带。",
+    "幅值为图示任意单位，不是已知的模式数密度单位；没有元素分波，故不确认元素投影完整性或跨元素共同尺度。",
+    "共享纵轴标题跨越两个压力面板，未为了包含整段标题而把另一压力面板纳入 display_bbox。下方面板横轴标题在原图底部略有裁切。",
+    "所给图像仅包含 Figure S15 的声子 DOS；未见 Figure S14 结构图、α²F 或累计 λ。"
+  ]
+}

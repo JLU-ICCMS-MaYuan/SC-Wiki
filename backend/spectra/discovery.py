@@ -21,7 +21,7 @@ CALIBRATION_PROMPT = """你为科学谱图生成图像数字化标定，不生�
 目标谱即使不能标定也保留kind、caption、state_key和空curves；电子DOS、色散、结构图等非目标只说明跳过，不输出任何面板。
 黑灰曲线必须排除图框、刻度、文字和其他轨迹。同色多线时trace_anchors提供约15至30个沿目标曲线实际可见的[x,y]像素位置，用于选择真实像素分支，不输出重建数值。
 不能分辨的交叉或遮挡留作缺口。α²F与虚线累计λ必须分开，不可把同一串黑像素同时命名为两条曲线；无法独立追踪累计λ时不输出该附属曲线。
-每个曲线对象严格包含：id、kind(phonon_dos|alpha2f|cumulative_lambda)、projection(元素字符串或null)、color、roi([x0,y0,x1,y1]整数且包含边框内侧)、display_bbox([x0,y0,x1,y1]或null)、frequency_direction(x|y)、frequency_ticks([[频率轴像素,刻度值],...])、amplitude_ticks([[幅值轴像素,刻度值],...])、frequency_unit(THz|cm-1|meV)、frequency_scale(linear)、amplitude_scale(linear)、unit、physical_definition_confirmed、amplitude_evidence、exclude(图例框数组)、zero_boundaries_thz([低端,高端])、zero_reference_band_thz([低,高]或null)。
+每个曲线对象严格包含：id、kind(phonon_dos|alpha2f|cumulative_lambda)、projection(元素字符串、总谱用total、未知为null)、color、roi([x0,y0,x1,y1]整数且包含边框内侧)、display_bbox([x0,y0,x1,y1]或null)、frequency_direction(x|y)、frequency_ticks([[频率轴像素,刻度值],...])、amplitude_ticks([[幅值轴像素,刻度值],...])、frequency_unit(THz|cm-1|meV)、frequency_scale(linear)、amplitude_scale(linear)、unit、physical_definition_confirmed、amplitude_evidence、exclude(图例框数组)、zero_boundaries_thz([低端,高端])、zero_reference_band_thz([低,高]或null)。
 先按材料、压力和面板标签定位一行，再按谱类型定位该行子图，最后读取坐标，不把整张组合图当作一个子图。
 roi 是完整坐标框内的取数区域，不能只围住有色曲线或最大峰；display_bbox 是供用户查看的最小完整子图，包含该子图边框、刻度与图例，不包含其他压力行、相邻声子色散或其他谱种类。α²F 与同框累计 λ 可共用显示框，同一 DOS 的各分波共用显示框。
 共享频率轴位于相邻子图时，从共享轴读取频率标定，但不要为了把该轴裁进来而包含相邻子图。所有矩形都使用同一原图绝对像素坐标，不把裁切后坐标混入标定。不能确认显示框时返回 null，保留 roi 并说明限制，不猜框。
@@ -31,6 +31,7 @@ DOS 无幅值刻度时以幅值零轴为0，幅值方向一个像素为1，unit=
 频率标定使用可见刻度，至少两个不同值，不要求包含0刻度。按真实取数区域读取，不为覆盖零频扩展ROI，不补造低频点。
 physical_definition_confirmed=true 仅限图注/坐标明确支持普通频率和标准 α²F/累计λ，或标准未加权的原子振动DOS投影（每种元素合计所有原子及三个方向，非每原子平均）；不按目标值推断。
 声子DOS没有幅值刻度时同样使用零基线为0、每像素为1的pixel单位。
+原图/坐标/图注明确支持标准未加权总声子DOS时，projection=total，physical_definition_confirmed可为true；不需要存在元素分波。只有一条线仅是总谱候选，不能凭曲线数量或ID推断总谱，也不能把单元素分波或提取失败后剩余曲线当总谱。总谱不能与元素分波相加；元素完整性和跨分波共同尺度标记不作为单条已确认TDOS的计算条件。
 projection_complete 与 projection_scale_confirmed 仅在完整元素合计、同一坐标框依据明确时为true。
 exclude 必须屏蔽同色图例和文字，尤其是图内“λ=…”数值注记、面板字母和压力文字；这些文字绝不能作为曲线或累计 λ 终点。分别圈住文字/图例，不用覆盖整行的大框误删真实轨迹；与真实线重叠而无法分离时在 issues 记录限制。
 exclude 还必须屏蔽其他颜色的图例示意线以及全部图例文字（例如 λ(ω)、α²F(ω)）。黑字和其他颜色的抗锯齿彩边也可能落入本色通道，不能因为主色不同就不排除；遮挡处保留未知，不根据曲线应平滑或论文目标值补点。

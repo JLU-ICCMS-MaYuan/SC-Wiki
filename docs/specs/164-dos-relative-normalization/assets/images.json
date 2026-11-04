@@ -35,5 +35,25 @@
       "FR-001"
     ],
     "verification": "2026-10-27 原字节复制并重新读取，校验 PNG 签名、尺寸与 SHA-256；临时原文件与归档字节相同；Pillow 完整解码通过"
+  },
+  {
+    "id": "IMG-003",
+    "upload_order": 3,
+    "original_name": "codex-clipboard-d0e2f764-ff72-440e-867a-26129469a6b7.png",
+    "locator": "docs/specs/164-dos-relative-normalization/assets/IMG-003.png",
+    "status": "local_verified",
+    "sha256": "300faa060cc0b490f6b96105165c0d9ac7daae09fef7993eecda310d1c2ce5f9",
+    "media_type": "image/png",
+    "dimensions_px": [
+      3840,
+      1948
+    ],
+    "user_context": "如果态密度只有一条，那么多半这个态密度是 TDOS，就是总态密度，那么计算**按 3N 归一化就不需要元素投影完整性尚待核对，只需要 TDOS 没问题就能计算。元素 / 积分范围肯定就没法计算了。这个可以空着。&#x20;**",
+    "related": [
+      "US5",
+      "FR-010",
+      "FR-011"
+    ],
+    "verification": "2026-11-04 原字节复制并重新读取；Pillow完整解码、尺寸和SHA-256核验通过"
   }
 ]
