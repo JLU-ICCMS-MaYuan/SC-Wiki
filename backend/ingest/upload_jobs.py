@@ -1952,7 +1952,6 @@ def _process_upload_task(task_id: str) -> dict[str, Any]:
         raise
 
 
-
 def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
     """Extract, read every chunk, and build an editable draft."""
     state = get_state(task_id)
@@ -2443,6 +2442,8 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
             plan_states(draft, [
                 {**source, "file_role": source.get("file_role", source.get("role", "main"))}
                 for source in form_sources(document_set, scientific_sources)], complete_json, files=state.get('files') or [], target_id=task_id,
+                on_request=lambda request: _atomic_write_json(
+                    artifact_directory(task_id) / "material_state_inventory_request.json", request),
                 on_response=lambda response: _atomic_write_json(
                     artifact_directory(task_id) / "material_state_inventory.json", response))
         publish_preview(task_id, paper=draft.get('paper'), states=draft['material_states'], phase='organizing')
