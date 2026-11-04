@@ -1,0 +1,56 @@
+{
+  "issue_number": 217,
+  "original_goal": 4,
+  "implementation_commit": "53c32542bca1f7ea80143d563db13498ba210812",
+  "original_requirements": [
+    "FR-005"
+  ],
+  "original_success_criteria": [
+    "SC-002"
+  ],
+  "shared_validation": "docs/specs/213-review-workspace-navigation/validation.md",
+  "shared_checks": "docs/specs/213-review-workspace-navigation/assets/checks.json",
+  "source_sha256": {
+    "frontend/src/i18n/zh/paperDetail.ts": "09b80d0970f0d097cc75b0da9a7abbde5853f139c0b1e951c47b3990d4fa1c59",
+    "frontend/src/i18n/en/paperDetail.ts": "afec3cb5d08bb3c8a5b2fd0e4659e1c13cc69c765eebbc1bf6bf3cde5a7fab7a",
+    "frontend/src/components/MyPapersList.tsx": "20d0dce6d3613c0185c983b648517890d1ad5aebe2445f43192c2995305bab4a",
+    "tests/02_identity_governance/account-center.test.tsx": "cc41f1588f1e3e4f34ec2f82a6e2e8f794c36d2d68d881ed7ab7ec3a769cc583",
+    "tests/02_identity_governance/review-workspace-browser.mjs": "c866028cafb9d866d591aa496f58712f07e698eb0b3790c7fc498c9d7e308449"
+  },
+  "images": [
+    {
+      "id": "IMG-003",
+      "upload_order": 3,
+      "original_name": "codex-clipboard-a5ea05a2-f6a5-4de1-83f0-f2afe4e33c07.png",
+      "locator": "docs/specs/213-review-workspace-navigation/assets/IMG-003.png",
+      "status": "local_verified",
+      "sha256": "571d1d0896d1bf134ff899c1442bf99190adae6e34b4148bf3790d7993a15e3d",
+      "dimensions_px": [
+        3840,
+        1948
+      ],
+      "media_type": "image/png",
+      "user_context": "收录贡献命名",
+      "verification": "2026-11-04 读取原文件并验证PNG签名、尺寸和SHA-256，原样复制；2026-11-04拆分时重新读取核对一致，原图继续共用。",
+      "related": [
+        "US1",
+        "FR-001"
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "locator": "docs/specs/213-review-workspace-navigation/assets/qa-account-superadmin.png",
+      "sha256": "6c769a80833fbc7538db974552d0c0f12890dac316e7a6025669f950ab6c8715",
+      "media_type": "image/png",
+      "kind": "原实施阶段隔离API界面截图，本轮未重拍"
+    }
+  ],
+  "selected_test_cases": [
+    "三角色浏览器contribution_name场景"
+  ],
+  "related_existing_baseline_failures": [],
+  "scope_evidence": "原浏览器user/admin/superadmin三条contribution_name=true，正式用户中心组件回归通过；既有账号标题已正确，不冒称重新实现。",
+  "business_tests_rerun_in_this_split": false,
+  "verification": "拆分时校验原图、代码/用例哈希及原验收对应关系；未重新执行业务测试，不将共用套件总数重复算成本项独立通过数。"
+}

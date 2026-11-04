@@ -10,7 +10,7 @@ SC-Wiki 是面向超导材料研究的数据检索与知识服务应用。当前
 
 了解 PDF 上传后如何校对、送审和最终成为已批准数据，先看[从 PDF 上传到审核入库的 HTML 交互流程图](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-review-flow.html)。点击“01 解析与草稿”或“批准前检查”，进入对应的独立程序流程图页面，查看内部判断、分支和返回路径；其他节点保留概要说明。图中区分待审入库与最终批准，并保留字段处理、拒绝返修和批准后向量发布。对应[文字说明与实现依据](01_Decentralized_Uploading_of_Superconductivity_Data/pdf-parsing-pipeline.md#从-pdf-上传到审核入库的主流程)保留在解析管线文档。
 
-论文返修统一从管理员“拒绝”进入，原上传者在收录贡献列表按“已拒绝”查找；新版批准前旧批准版继续公开。个人页检查区每页3篇，独立工作区每页20篇；材料状态从右侧可折叠大纲定位。操作与边界见[论文审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)、[账号工作区](02_Decentralized_Maintenance_and_Verification/roles-and-administrator-approval.md)和[材料展示](01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md)。
+[论文返修](../specs/214-rejected-paper-revision/spec.md)统一从管理员“拒绝”进入，原上传者在收录贡献列表按“已拒绝”查找；新版批准前旧批准版继续公开。[检查列表](../specs/216-review-list-pagination/spec.md)个人页每页3篇，独立工作区每页20篇；材料状态从[右侧可折叠大纲](../specs/219-material-state-outline/spec.md)定位。操作与边界见[论文审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)、[账号工作区](02_Decentralized_Maintenance_and_Verification/roles-and-administrator-approval.md)和[材料展示](01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md)。
 
 上传与管理员编辑共用材料名/化学式至少一项规则；命名材料可没有化学式，当前编辑保存后可逐项填写人工理由确认。详见[上传数据结构](01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md)与[论文审核](02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md)。
 

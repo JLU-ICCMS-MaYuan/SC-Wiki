@@ -1,0 +1,67 @@
+{
+  "issue_number": 216,
+  "original_goal": 3,
+  "implementation_commit": "53c32542bca1f7ea80143d563db13498ba210812",
+  "original_requirements": [
+    "FR-004"
+  ],
+  "original_success_criteria": [
+    "SC-002"
+  ],
+  "shared_validation": "docs/specs/213-review-workspace-navigation/validation.md",
+  "shared_checks": "docs/specs/213-review-workspace-navigation/assets/checks.json",
+  "source_sha256": {
+    "frontend/src/components/AccountReviews.tsx": "d692d092f31b07348ea7a32c062b4f6fe68840693bd1d7ab575116336f4f70d4",
+    "frontend/src/components/MyPapersList.tsx": "20d0dce6d3613c0185c983b648517890d1ad5aebe2445f43192c2995305bab4a",
+    "frontend/src/pages/AdminWorkspacePage.tsx": "148b8744772e68e7ed275484f2d915c16bbe508135219a89cb6586db03630ed4",
+    "frontend/src/pages/AdminPage.tsx": "67f6c29452d8fd92b1ad84b1e92cfce14ea3caae5b226e4a9144060669372976",
+    "frontend/src/pages/SuperAdminPage.tsx": "75e974f67c7f2c37a476c160bff5f50887efacbefad9920fa764a099013539f1",
+    "frontend/src/LazyRoutes.tsx": "ad9d206ac8f09f834ad4eeae5de893276d1497a417b20ce5f255554160fff1bc",
+    "tests/02_identity_governance/review-workspace.test.tsx": "33cbed06de3c96aad05433948a0599c4e56c3e3330e5e5284add6a54f2df7c8b",
+    "tests/02_identity_governance/account-center.test.tsx": "cc41f1588f1e3e4f34ec2f82a6e2e8f794c36d2d68d881ed7ab7ec3a769cc583",
+    "tests/02_identity_governance/review-workspace-browser.mjs": "c866028cafb9d866d591aa496f58712f07e698eb0b3790c7fc498c9d7e308449"
+  },
+  "images": [
+    {
+      "id": "IMG-002",
+      "upload_order": 2,
+      "original_name": "codex-clipboard-2479e357-16db-48f6-85ec-cb1876e2f49f.png",
+      "locator": "docs/specs/213-review-workspace-navigation/assets/IMG-002.png",
+      "status": "local_verified",
+      "sha256": "53c2535b86e49552affaa844576cc944f183762da5efdaed30e7ba12294115e1",
+      "dimensions_px": [
+        3374,
+        1108
+      ],
+      "media_type": "image/png",
+      "user_context": "检查区列表高度",
+      "verification": "2026-11-04 读取原文件并验证PNG签名、尺寸和SHA-256，原样复制；2026-11-04拆分时重新读取核对一致，原图继续共用。",
+      "related": [
+        "US1",
+        "FR-001"
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "locator": "docs/specs/213-review-workspace-navigation/assets/qa-account-superadmin.png",
+      "sha256": "6c769a80833fbc7538db974552d0c0f12890dac316e7a6025669f950ab6c8715",
+      "media_type": "image/png",
+      "kind": "原实施阶段隔离API界面截图，本轮未重拍"
+    },
+    {
+      "locator": "docs/specs/213-review-workspace-navigation/assets/qa-workspace-pending.png",
+      "sha256": "113cdc1dd7a9664903412b2f00218f6869c8b95ccbc204e4c1801e8a32523907",
+      "media_type": "image/png",
+      "kind": "原实施阶段隔离API界面截图，本轮未重拍"
+    }
+  ],
+  "selected_test_cases": [
+    "个人页两页签每页3篇，无内部滚动并承接页签",
+    "独立工作区承接%s页签，每页20篇并内部滚动"
+  ],
+  "related_existing_baseline_failures": [],
+  "scope_evidence": "原定向用例覆盖两角色紧凑页和两个独立页签；原浏览器报告中的compact_page_size=3和两个workspace_tab/page_size=20场景通过。",
+  "business_tests_rerun_in_this_split": false,
+  "verification": "拆分时校验原图、代码/用例哈希及原验收对应关系；未重新执行业务测试，不将共用套件总数重复算成本项独立通过数。"
+}

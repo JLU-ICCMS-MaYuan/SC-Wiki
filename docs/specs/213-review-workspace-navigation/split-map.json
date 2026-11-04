@@ -1,0 +1,178 @@
+{
+  "parent_issue": 213,
+  "implementation_commit": "53c32542bca1f7ea80143d563db13498ba210812",
+  "original_directory": "docs/specs/213-review-workspace-navigation",
+  "entries": [
+    {
+      "original_goal": 1,
+      "issue_number": 214,
+      "title": "统一拒绝返修流程，保持旧批准版公开",
+      "type": "type:feature",
+      "spec": "docs/specs/214-rejected-paper-revision/spec.md",
+      "original_requirements": [
+        "FR-001",
+        "FR-002"
+      ],
+      "original_success_criteria": [
+        "SC-001"
+      ],
+      "source_files": [
+        "backend/api/manuscript_handoffs.py",
+        "backend/services/manuscript_handoffs.py",
+        "backend/services/field_review_commit.py",
+        "goserver/handlers/paper_workflow.go",
+        "goserver/handlers/admin.go",
+        "goserver/handlers/papers.go",
+        "goserver/handlers/stats.go",
+        "frontend/src/pages/AdminPage.tsx",
+        "frontend/src/components/MyPapersList.tsx",
+        "frontend/src/i18n/zh/admin.ts",
+        "frontend/src/i18n/en/admin.ts"
+      ],
+      "test_files": [
+        "tests/01_decentralized_uploading/test_handoff_lifecycle_mysql.py",
+        "tests/01_decentralized_uploading/test_workdraft_ownership.py",
+        "tests/01_decentralized_uploading/test_manuscript_handoffs.py",
+        "tests/01_decentralized_uploading/test_handoff_spectra.py",
+        "goserver/handlers/paper_workflow_test.go",
+        "goserver/handlers/paper_workflow_mysql_test.go",
+        "tests/02_identity_governance/review-workspace.test.tsx"
+      ],
+      "evidence": "docs/specs/214-rejected-paper-revision/assets/evidence.json",
+      "parent_relation": "native"
+    },
+    {
+      "original_goal": 2,
+      "issue_number": 215,
+      "title": "审核列表标题自适应宽度并支持悬停全文",
+      "type": "type:feature",
+      "spec": "docs/specs/215-paper-title-display/spec.md",
+      "original_requirements": [
+        "FR-003"
+      ],
+      "original_success_criteria": [
+        "SC-002"
+      ],
+      "source_files": [
+        "frontend/src/components/PaperTitle.tsx",
+        "frontend/src/pages/AdminPage.tsx"
+      ],
+      "test_files": [
+        "tests/02_identity_governance/review-workspace.test.tsx",
+        "tests/02_identity_governance/review-workspace-browser.mjs"
+      ],
+      "evidence": "docs/specs/215-paper-title-display/assets/evidence.json",
+      "parent_relation": "native"
+    },
+    {
+      "original_goal": 3,
+      "issue_number": 216,
+      "title": "检查列表分页与独立工作区",
+      "type": "type:feature",
+      "spec": "docs/specs/216-review-list-pagination/spec.md",
+      "original_requirements": [
+        "FR-004"
+      ],
+      "original_success_criteria": [
+        "SC-002"
+      ],
+      "source_files": [
+        "frontend/src/components/AccountReviews.tsx",
+        "frontend/src/components/MyPapersList.tsx",
+        "frontend/src/pages/AdminWorkspacePage.tsx",
+        "frontend/src/pages/AdminPage.tsx",
+        "frontend/src/pages/SuperAdminPage.tsx",
+        "frontend/src/LazyRoutes.tsx"
+      ],
+      "test_files": [
+        "tests/02_identity_governance/review-workspace.test.tsx",
+        "tests/02_identity_governance/account-center.test.tsx",
+        "tests/02_identity_governance/review-workspace-browser.mjs"
+      ],
+      "evidence": "docs/specs/216-review-list-pagination/assets/evidence.json",
+      "parent_relation": "native"
+    },
+    {
+      "original_goal": 4,
+      "issue_number": 217,
+      "title": "统一收录贡献名称，消除作者身份歧义",
+      "type": "type:bug",
+      "spec": "docs/specs/217-contribution-paper-labels/spec.md",
+      "original_requirements": [
+        "FR-005"
+      ],
+      "original_success_criteria": [
+        "SC-002"
+      ],
+      "source_files": [
+        "frontend/src/i18n/zh/paperDetail.ts",
+        "frontend/src/i18n/en/paperDetail.ts",
+        "frontend/src/components/MyPapersList.tsx"
+      ],
+      "test_files": [
+        "tests/02_identity_governance/account-center.test.tsx",
+        "tests/02_identity_governance/review-workspace-browser.mjs"
+      ],
+      "evidence": "docs/specs/217-contribution-paper-labels/assets/evidence.json",
+      "parent_relation": "native"
+    },
+    {
+      "original_goal": 5,
+      "issue_number": 218,
+      "title": "合并重复权限提示并统一禁写状态",
+      "type": "type:bug",
+      "spec": "docs/specs/218-workdraft-permission-feedback/spec.md",
+      "original_requirements": [
+        "FR-006"
+      ],
+      "original_success_criteria": [
+        "SC-003"
+      ],
+      "source_files": [
+        "frontend/src/lib/workdraftAccess.ts",
+        "frontend/src/pages/AdminPaperEditPage.tsx",
+        "frontend/src/components/WorkdraftRefresh.tsx",
+        "frontend/src/components/EvidenceWorkflow.tsx"
+      ],
+      "test_files": [
+        "tests/01_decentralized_uploading/form-contract.test.tsx",
+        "tests/01_decentralized_uploading/workdraft-refresh.test.tsx",
+        "tests/02_identity_governance/review-workspace-browser.mjs"
+      ],
+      "evidence": "docs/specs/218-workdraft-permission-feedback/assets/evidence.json",
+      "parent_relation": "native"
+    },
+    {
+      "original_goal": 6,
+      "issue_number": 219,
+      "title": "研究材料右侧可折叠大纲",
+      "type": "type:feature",
+      "spec": "docs/specs/219-material-state-outline/spec.md",
+      "original_requirements": [
+        "FR-007",
+        "FR-008"
+      ],
+      "original_success_criteria": [
+        "SC-004"
+      ],
+      "source_files": [
+        "frontend/src/components/PaperMaterialsSection.tsx",
+        "frontend/src/lib/paperMaterials.ts",
+        "frontend/src/lib/materialStateSummary.ts"
+      ],
+      "test_files": [
+        "tests/01_decentralized_uploading/form-contract.test.tsx",
+        "tests/02_identity_governance/review-workspace.test.tsx",
+        "tests/02_identity_governance/review-workspace-browser.mjs"
+      ],
+      "evidence": "docs/specs/219-material-state-outline/assets/evidence.json",
+      "parent_relation": "native"
+    }
+  ],
+  "shared_success_criteria": {
+    "SC-005": {
+      "evidence": "docs/specs/213-review-workspace-navigation/assets/checks.json",
+      "rule": "六项沿用原共享表单/字段/变异与回归保护，不将总通过数重复计入每个子Issue。"
+    }
+  }
+}

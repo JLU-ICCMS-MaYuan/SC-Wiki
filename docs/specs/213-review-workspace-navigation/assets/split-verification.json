@@ -1,0 +1,68 @@
+{
+  "operation": "按功能拆分Issue与Spec，无业务代码变更",
+  "implementation_commit": "53c32542bca1f7ea80143d563db13498ba210812",
+  "verified_date": "2026-11-04",
+  "parent": {
+    "number": 213,
+    "type": "type:epic",
+    "title": "论文审核与浏览导航改进：六项功能跟踪"
+  },
+  "children": [
+    {
+      "number": 214,
+      "type": "type:feature",
+      "title": "统一拒绝返修流程，保持旧批准版公开",
+      "spec": "docs/specs/214-rejected-paper-revision/spec.md",
+      "parent_relation": "native"
+    },
+    {
+      "number": 215,
+      "type": "type:feature",
+      "title": "审核列表标题自适应宽度并支持悬停全文",
+      "spec": "docs/specs/215-paper-title-display/spec.md",
+      "parent_relation": "native"
+    },
+    {
+      "number": 216,
+      "type": "type:feature",
+      "title": "检查列表分页与独立工作区",
+      "spec": "docs/specs/216-review-list-pagination/spec.md",
+      "parent_relation": "native"
+    },
+    {
+      "number": 217,
+      "type": "type:bug",
+      "title": "统一收录贡献名称，消除作者身份歧义",
+      "spec": "docs/specs/217-contribution-paper-labels/spec.md",
+      "parent_relation": "native"
+    },
+    {
+      "number": 218,
+      "type": "type:bug",
+      "title": "合并重复权限提示并统一禁写状态",
+      "spec": "docs/specs/218-workdraft-permission-feedback/spec.md",
+      "parent_relation": "native"
+    },
+    {
+      "number": 219,
+      "type": "type:feature",
+      "title": "研究材料右侧可折叠大纲",
+      "spec": "docs/specs/219-material-state-outline/spec.md",
+      "parent_relation": "native"
+    }
+  ],
+  "checks": {
+    "original_requirement_coverage": 8,
+    "original_success_criteria_coverage": 5,
+    "baseline_failures_assigned_once": 10,
+    "relative_links": true,
+    "original_images_reverified": 6,
+    "archive_bodies_preserved": true,
+    "source_unchanged": true,
+    "business_tests_rerun": false
+  },
+  "limitations": [
+    "远程Spec未推送，双向远程链接未验证",
+    "新独立文档没有逐份全文确认记录；本轮按已认可业务边界拆分，不开启新实现"
+  ]
+}

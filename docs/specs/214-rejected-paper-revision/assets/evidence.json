@@ -1,0 +1,76 @@
+{
+  "issue_number": 214,
+  "original_goal": 1,
+  "implementation_commit": "53c32542bca1f7ea80143d563db13498ba210812",
+  "original_requirements": [
+    "FR-001",
+    "FR-002"
+  ],
+  "original_success_criteria": [
+    "SC-001"
+  ],
+  "shared_validation": "docs/specs/213-review-workspace-navigation/validation.md",
+  "shared_checks": "docs/specs/213-review-workspace-navigation/assets/checks.json",
+  "source_sha256": {
+    "backend/api/manuscript_handoffs.py": "06ea1282b41f60cbc5d42133dafb1c422a118d16381b4dfe6f1db85adc7745b4",
+    "backend/services/manuscript_handoffs.py": "0493fdfb290d33ce0693b61e2cca26d800248b6b199146c4314903c0401bc10e",
+    "backend/services/field_review_commit.py": "be86ba1b968d3833738f9ae3b24df0ad5d81af4d94b87aa191b7b4b43a882dcc",
+    "goserver/handlers/paper_workflow.go": "0253a0ffeca20a21c03975a32cf8f77227b40f26ea9079a558152319878e4598",
+    "goserver/handlers/admin.go": "98419836d57edd8c0cb67564d5cb80bc2bb953d502315abb59e3e18a966b2b0a",
+    "goserver/handlers/papers.go": "537bfe9006dac030c955b7aab0b957b0e3e167aa57d70f327acc92bb38fc3723",
+    "goserver/handlers/stats.go": "7f8b2a35f9cdebef0310660cfbe36abd48f8bcecc21f2a9d2459bd2a6efdb567",
+    "frontend/src/pages/AdminPage.tsx": "67f6c29452d8fd92b1ad84b1e92cfce14ea3caae5b226e4a9144060669372976",
+    "frontend/src/components/MyPapersList.tsx": "20d0dce6d3613c0185c983b648517890d1ad5aebe2445f43192c2995305bab4a",
+    "frontend/src/i18n/zh/admin.ts": "bf528fc3202c30e33159878865c85431ff177a3865f255bc5a0fa91665abdda6",
+    "frontend/src/i18n/en/admin.ts": "ac8c92252ae69911aede19bf20bb6a288110e448f11bd60e6d498095c6bb92fc",
+    "tests/01_decentralized_uploading/test_handoff_lifecycle_mysql.py": "98e180937a59c80be075a5c9eb6d865006af44a0ec82cc26e8c32d0cb71ee843",
+    "tests/01_decentralized_uploading/test_workdraft_ownership.py": "c8540ae4e1beb91a543fe7a1af8fd92b8234b304637575447f79905fe3172a85",
+    "tests/01_decentralized_uploading/test_manuscript_handoffs.py": "5a611ae592e933fa987abfcf18215474664051752687541f3bc884471d23601e",
+    "tests/01_decentralized_uploading/test_handoff_spectra.py": "2b8ca2c96cc3dec49b8ccfc99de2c498470d1215ad0f92b4f37166219dcd090c",
+    "goserver/handlers/paper_workflow_test.go": "a58ac1e022f3b85b27b51cab48b17df957d23bad640b7e1aaaa5c9d3bf2f1bc0",
+    "goserver/handlers/paper_workflow_mysql_test.go": "09137071c2e8ef4b4fe5db2e7d2f0589a027fe97091b41bd668126e866e0ceef",
+    "tests/02_identity_governance/review-workspace.test.tsx": "33cbed06de3c96aad05433948a0599c4e56c3e3330e5e5284add6a54f2df7c8b"
+  },
+  "images": [
+    {
+      "id": "IMG-003",
+      "upload_order": 3,
+      "original_name": "codex-clipboard-a5ea05a2-f6a5-4de1-83f0-f2afe4e33c07.png",
+      "locator": "docs/specs/213-review-workspace-navigation/assets/IMG-003.png",
+      "status": "local_verified",
+      "sha256": "571d1d0896d1bf134ff899c1442bf99190adae6e34b4148bf3790d7993a15e3d",
+      "dimensions_px": [
+        3840,
+        1948
+      ],
+      "media_type": "image/png",
+      "user_context": "收录贡献命名",
+      "verification": "2026-11-04 读取原文件并验证PNG签名、尺寸和SHA-256，原样复制；2026-11-04拆分时重新读取核对一致，原图继续共用。",
+      "related": [
+        "US1",
+        "FR-001"
+      ]
+    }
+  ],
+  "screenshots": [],
+  "selected_test_cases": [
+    "test_213_rejection_of_published_paper_preserves_public_and_returns_only_author",
+    "test_213_handoff_listing_has_no_independent_revision_write_route",
+    "TestRejectedRevisionAppearsInPrivateFilterWhileApprovedPaperStaysPublic",
+    "TestWorkflowPrivateStatusWithLargeSnapshotsMySQL",
+    "已批准稿从小锤子拒绝，不先领取已交出的工作稿"
+  ],
+  "related_existing_baseline_failures": [
+    "返修共享表单 暂存只保存草稿；重新提交使用最新草稿版本并回到同一篇论文",
+    "返修共享表单 保存冲突保留用户输入，不继续送审",
+    "backend/tests/test_paper_revisions.py::test_failure_after_revision_bump_rolls_back_everything",
+    "backend/tests/test_paper_revisions.py::test_full_graph_roundtrip_preserves_structures_sources_and_history",
+    "backend/tests/test_paper_revisions.py::test_structure_metadata_change_conflicts_even_without_paper_revision_change",
+    "backend/tests/test_paper_revisions.py::test_revision_structure_upload_uses_server_provenance_and_owner_check",
+    "backend/tests/test_paper_revisions.py::test_invalid_definition_returns_field_error_and_preserves_saved_draft",
+    "TestApplyPaperEvidenceArchivesManualReasonInReviewTransaction"
+  ],
+  "scope_evidence": "原提交的隔离MySQL公开稿生命周期与RR并发3项、Go大JSON MySQL1项，实际Go筛选/公开保护及拒绝入口用例；共享计数不等于本项独立计数。",
+  "business_tests_rerun_in_this_split": false,
+  "verification": "拆分时校验原图、代码/用例哈希及原验收对应关系；未重新执行业务测试，不将共用套件总数重复算成本项独立通过数。"
+}

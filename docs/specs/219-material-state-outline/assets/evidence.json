@@ -1,0 +1,81 @@
+{
+  "issue_number": 219,
+  "original_goal": 6,
+  "implementation_commit": "53c32542bca1f7ea80143d563db13498ba210812",
+  "original_requirements": [
+    "FR-007",
+    "FR-008"
+  ],
+  "original_success_criteria": [
+    "SC-004"
+  ],
+  "shared_validation": "docs/specs/213-review-workspace-navigation/validation.md",
+  "shared_checks": "docs/specs/213-review-workspace-navigation/assets/checks.json",
+  "source_sha256": {
+    "frontend/src/components/PaperMaterialsSection.tsx": "edf51855968d9c4be05db107add87eea0171e7db72dead8ee15c382c34361bb4",
+    "frontend/src/lib/paperMaterials.ts": "6e85423263516bddb1517778d4a01642b78061904bb8146693cb390241a5b446",
+    "frontend/src/lib/materialStateSummary.ts": "8a3a727aab09e4ad28916902fe73875b4cf4532b015475d3c8b982b9e7594863",
+    "tests/01_decentralized_uploading/form-contract.test.tsx": "2ee68a32df0c9e3db9150a508a047da5fd3f2e68424d170fd7d6845386edb567",
+    "tests/02_identity_governance/review-workspace.test.tsx": "33cbed06de3c96aad05433948a0599c4e56c3e3330e5e5284add6a54f2df7c8b",
+    "tests/02_identity_governance/review-workspace-browser.mjs": "c866028cafb9d866d591aa496f58712f07e698eb0b3790c7fc498c9d7e308449"
+  },
+  "images": [
+    {
+      "id": "IMG-005",
+      "upload_order": 5,
+      "original_name": "codex-clipboard-77f8d462-31a3-4f42-80be-e8e0a394cd02.png",
+      "locator": "docs/specs/213-review-workspace-navigation/assets/IMG-005.png",
+      "status": "local_verified",
+      "sha256": "4702a3d4f328a6c6d9133447c0c1f3a6a6ea60099f291dfa7795bacf16d1bf4b",
+      "dimensions_px": [
+        1762,
+        1266
+      ],
+      "media_type": "image/png",
+      "user_context": "研究材料命名",
+      "verification": "2026-11-04 读取原文件并验证PNG签名、尺寸和SHA-256，原样复制；2026-11-04拆分时重新读取核对一致，原图继续共用。",
+      "related": [
+        "US1",
+        "FR-001"
+      ]
+    },
+    {
+      "id": "IMG-006",
+      "upload_order": 6,
+      "original_name": "codex-clipboard-00953284-4c09-40f1-98a3-cbfda3f6d993.png",
+      "locator": "docs/specs/213-review-workspace-navigation/assets/IMG-006.png",
+      "status": "local_verified",
+      "sha256": "5dd02f7a5c38516b259826a4dc70ad551e9d0371f5b10fb5fdd4c31216499b5b",
+      "dimensions_px": [
+        3840,
+        1948
+      ],
+      "media_type": "image/png",
+      "user_context": "右侧大纲位置",
+      "verification": "2026-11-04 读取原文件并验证PNG签名、尺寸和SHA-256，原样复制；2026-11-04拆分时重新读取核对一致，原图继续共用。",
+      "related": [
+        "US1",
+        "FR-001"
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "locator": "docs/specs/213-review-workspace-navigation/assets/qa-outline-superadmin-admin.png",
+      "sha256": "7e1ff5132faad1287afdaa6d803bb507f1cd0a318005024538a768927f4f63b2",
+      "media_type": "image/png",
+      "kind": "原实施阶段隔离API界面截图，本轮未重拍"
+    }
+  ],
+  "selected_test_cases": [
+    "213 %s 完整宿主：材料大纲可折叠、定位且不写入",
+    "大纲删除前项后按稳定身份定位，压力更新同步显示"
+  ],
+  "related_existing_baseline_failures": [
+    "重新查找先保存，删除的化学式不再作为模型重查目标",
+    "清空化学式后保留材料名，失败保留理由，成功移除旧项再确认当前名称"
+  ],
+  "scope_evidence": "原四类完整编辑宿主大纲用例通过，稳定删除/压力更新用例通过；浏览器四类编辑和三角色只读详情均定位成功，零压与窄屏通过，导航无科学写请求。",
+  "business_tests_rerun_in_this_split": false,
+  "verification": "拆分时校验原图、代码/用例哈希及原验收对应关系；未重新执行业务测试，不将共用套件总数重复算成本项独立通过数。"
+}
