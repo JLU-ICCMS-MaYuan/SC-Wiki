@@ -263,6 +263,23 @@ def _ensure_not_cancelled(task_id: str) -> dict[str, Any]:
     return state
 
 
+def _structure_reading_cancelled(task_id: str) -> bool:
+    _ensure_not_cancelled(task_id)
+    return False
+
+
+def _extract_pdf_structure_candidates(task_id, markdown, file_source, file_item):
+    def save_structure_reading(event):
+        directory = artifact_directory(task_id) / 'structure_reading' / str(file_item['file_id'])
+        directory.mkdir(parents=True, exist_ok=True)
+        _atomic_write_json(directory / f"call-{event['iteration']}-{event['status']}.json", event)
+    return extract_structure_candidates(markdown, pdf_path=file_source,
+        source={'file_id': file_item.get('file_id'),
+                'filename': file_item.get('original_filename') or file_source.name,
+                'role': file_item.get('role'), 'sha256': file_item.get('sha256')},
+        on_event=save_structure_reading, cancelled=lambda: _structure_reading_cancelled(task_id))
+
+
 def _original_path(state: dict[str, Any]) -> Path:
     value = state.get("file_path")
     if not value:
@@ -2067,21 +2084,7 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                     markdown = _extract_markdown(file_state, file_source)
                     file_md.write_text(markdown, encoding="utf-8")
                 if not structure_format and str(file_item.get("kind") or file_state.get("file_kind") or "").lower() == "pdf":
-                    def save_structure_reading(event):
-                        directory = artifact_directory(task_id) / 'structure_reading' / str(file_item['file_id'])
-                        _atomic_write_json(directory / f"call-{event['iteration']}-{event['status']}.json", event)
-                    structure_candidates.extend(extract_structure_candidates(
-                        markdown,
-                        pdf_path=file_source,
-                        source={
-                            "file_id": file_item.get("file_id"),
-                            "filename": file_item.get("original_filename") or file_source.name,
-                            "role": file_item.get("role"),
-                            "sha256": file_item.get("sha256"),
-                        },
-                        on_event=save_structure_reading,
-                        cancelled=lambda: bool(_ensure_not_cancelled(task_id)),
-                    ))
+                    structure_candidates.extend(_extract_pdf_structure_candidates(task_id, markdown, file_source, file_item))
 
             except Exception as extraction_exc:
                 if multi_file:

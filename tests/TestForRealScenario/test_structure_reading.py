@@ -17,12 +17,16 @@ def test_pdf_positions_table_reaches_content_reader_before_legacy_filter(tmp_pat
     def read(*args, **kwargs):
         called.append(kwargs);raise Observed()
     monkeypatch.setattr(llm,"complete_json",read)
+    monkeypatch.setattr(upload_jobs,"_ensure_not_cancelled",lambda _:{"status":"extracting"})
+    monkeypatch.setattr(upload_jobs,"artifact_directory",lambda _:tmp_path/"artifacts")
     try:
-        upload_jobs.extract_structure_candidates("Lattice parameters and atomic positions",pdf_path=pdf,
-            source={"file_id":"actual-pdf","role":"supplementary","filename":"positions.pdf","sha256":hashlib.sha256(pdf.read_bytes()).hexdigest()})
+        upload_jobs._extract_pdf_structure_candidates('live',"Lattice parameters and atomic positions",pdf,
+            {"file_id":"actual-pdf","role":"supplementary","original_filename":"positions.pdf","sha256":hashlib.sha256(pdf.read_bytes()).hexdigest()})
     except Observed:
         pass
     assert called, "实际PDF被旧关键词筛选直接忽略，AI没有机会识别结构内容"
+    assert (tmp_path/'artifacts/structure_reading/actual-pdf/call-0-started.json').is_file()
+    assert (tmp_path/'artifacts/structure_reading/actual-pdf/call-0-failed.json').is_file()
 
 
 def reported():
@@ -153,3 +157,12 @@ def test_ai_discovery_does_not_remove_existing_explicit_geometry_decoder(tmp_pat
         return {'action':{'name':'report_structures','arguments':{'structures':[],'uncertainties':[],'reason':'读取完成'}}}
     result=extract_structure_candidates(text,pdf_path=pdf,source={**source(),'sha256':hashlib.sha256(pdf.read_bytes()).hexdigest()},model=model)
     assert calls and any(c['status']=='valid' for c in result)
+
+
+def test_upload_structure_callback_checks_cancellation_without_using_state_truthiness(monkeypatch):
+    from backend.ingest import upload_jobs
+    monkeypatch.setattr(upload_jobs, '_ensure_not_cancelled', lambda _: {'status':'extracting','task_id':'live'})
+    assert upload_jobs._structure_reading_cancelled('live') is False
+    def cancelled(_): raise upload_jobs.UploadCancelled()
+    monkeypatch.setattr(upload_jobs, '_ensure_not_cancelled', cancelled)
+    with pytest.raises(upload_jobs.UploadCancelled): upload_jobs._structure_reading_cancelled('live')
