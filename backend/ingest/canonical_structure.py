@@ -107,13 +107,27 @@ def _source_rows(candidates, sources):
     # 有独立原文目录时只从目录引用，候选中的摘录不能自证为原文。
     original_sources = list(sources or [])
     available = original_sources or [source for candidate in candidates for source in candidate.get('sources') or []]
+    expanded = []
+    for value in available:
+        content = value.get('content') if isinstance(value, dict) else None
+        try:
+            context = json.loads(content) if isinstance(content, str) else None
+        except (ValueError, TypeError):
+            context = None
+        if isinstance(context, dict) and context.get('file_id') and isinstance(context.get('pages'), list):
+            from .scientific_context import build_context
+            expanded.extend(build_context([value])['sources'])
+        else:
+            expanded.append(value)
+    available = expanded
     for value in available:
         if not isinstance(value, dict):
             continue
         content = value.get('quote') or value.get('text') or value.get('content')
         if not isinstance(content, str) or not content.strip():
             continue
-        identity = (str(value.get('file_id') or ''), str(value.get('page') or value.get('pdf_page') or ''), content)
+        identity = (str(value.get('file_id') or ''), str(value.get('page') or value.get('pdf_page') or value.get('page_start') or ''),
+                    value.get('block_id'), content)
         if identity in seen:
             continue
         seen.add(identity)
@@ -196,6 +210,8 @@ def assign_structures(draft, candidates, sources=(), model=None, *, on_response=
                 except (ValueError, TypeError):
                     failure = '晶格参数依据格式无效，未自动采用'
         try:
+            if candidate.get('status') == 'blocked':
+                raise ValueError((candidate.get('validation') or {}).get('message') or '原文结构不完整，需核对')
             structure = structure_from_candidate(candidate)
         except (ValueError, TypeError, KeyError) as error:
             failure = str(error)
@@ -235,11 +251,13 @@ def assign_structures(draft, candidates, sources=(), model=None, *, on_response=
             except ValueError as error:
                 failure = str(error)
             if valid_evidence:
-                structure['sources'] = [{**{key: deepcopy(value) for key, value in source_lookup[source_id].items()
+                original_sources = deepcopy(structure.get('sources') or [])
+                assigned_sources = [{**{key: deepcopy(value) for key, value in source_lookup[source_id].items()
                     if key in {'file_id', 'filename', 'source_name', 'role', 'file_role', 'page', 'pdf_page',
                                'page_start', 'page_end', 'block_id', 'sha256', 'source_sha256', 'bbox', 'polygon',
                                'parser', 'parser_version', 'source_kind', 'source_version', 'table_id', 'figure_id'}},
                     'quote': source_lookup[source_id]['content']} for source_id in cited]
+                structure['sources'] = original_sources + [value for value in assigned_sources if value not in original_sources]
             from pymatgen.core import Composition
             material = (candidate.get('reported_structure') or {}).get('material')
             try:
@@ -248,6 +266,11 @@ def assign_structures(draft, candidates, sources=(), model=None, *, on_response=
             except ValueError:
                 failure = '结构或材料化学式无法核对'
             reported = candidate.get('reported_structure') or {}
+            from backend.services.space_groups import lookup_number
+            candidate_group = lookup_number(reported.get('space_group_symbol'))
+            target_group = lookup_number(state.get('reported_space_group_symbol'))
+            if candidate_group is not None and target_group is not None and candidate_group != target_group:
+                failure = '结构报告空间群与目标材料物相不一致'
             if reported.get('pressure_value_gpa') is not None and state.get('pressure_value_gpa') is not None:
                 if abs(float(reported['pressure_value_gpa']) - float(state['pressure_value_gpa'])) >= 0.01:
                     failure = '结构压力与目标材料状态不一致'

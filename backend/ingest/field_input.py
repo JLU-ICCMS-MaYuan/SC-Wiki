@@ -49,6 +49,8 @@ def bind(snapshot, session):
             canonical(record.get('current_value')),record.get('paper_source_hash',record['source_hash']),evidence]
         context=(record.get('claim') or {}).get('context') or {}
         definition=context.get('definition') or []
+        if record.get('record_field') == 'method_code':
+            inputs.append(['tc-method-dependencies-v1', record['content_hash']])
         if (record.get('record_field') in {'value_number','payload.parameters.mu_star'} and
                 definition and '.predicted_tc.' in str(definition[0])):
             if record['record_field']=='value_number':
@@ -56,7 +58,7 @@ def bind(snapshot, session):
             else:
                 # μ* 本身沿用单字段背景合同，但不能借用另一 Tc／方法点的通过结论。
                 inputs.append(['mu-point-dependencies-v1',canonical(context.get('paired_tc')),
-                    context.get('method_code'),definition])
+                    context.get('method_code'),definition,context.get('method_identity')])
         record['field_input_token']=digest(inputs)
     return snapshot
 

@@ -99,12 +99,19 @@ def patched_draft(draft, record, values):
             if target is None:
                 ev.fail('evidence_stale', '候选对应的科学记录已变化')
             if record.get('record_group_key'):
-                targets = [r for r in module['records'] if (r.get('payload', {}).get('tc_group') or {}).get('group_key') == record['record_group_key']]
+                from .tc_methods import field_owns_record
+                targets = [r for r in module['records'] if field_owns_record(record, r)]
+                if not targets:
+                    ev.fail('evidence_stale', '共同组或方法身份已变化')
     for path, value in values.items():
         if record.get('record_field') and path == '':
             from .property_field_review import write_path
             for member in targets or [target]:
-                write_path(member, record['record_field'], deepcopy(value))
+                if record['record_field'] in {'method_code', 'method_raw'}:
+                    from .tc_methods import write_method_value
+                    write_method_value(member, record['record_field'], deepcopy(value))
+                else:
+                    write_path(member, record['record_field'], deepcopy(value))
         else:
             name = path or record['field'].rsplit('.', 1)[-1]
             if name in {'material_families', 'structure_families'}:
@@ -113,10 +120,16 @@ def patched_draft(draft, record, values):
                                     {'name': v, 'name_zh': v, 'status': 'pending',
                                      **({'is_primary': False} if name == 'structure_families' else {})}) for v in value]
             else:
-                target[name] = deepcopy(value)
+                for member in targets if record.get('record_method_key') and name in {'method_code', 'method_raw'} else [target]:
+                    if name in {'method_code', 'method_raw'}:
+                        from .tc_methods import write_method_value
+                        write_method_value(member, name, deepcopy(value))
+                    else:
+                        member[name] = deepcopy(value)
     if record.get('record_key'):
         from .property_modules import normalize_current_tc_value
-        target.update(normalize_current_tc_value(target))
+        for member in targets or [target]:
+            member.update(normalize_current_tc_value(member))
     return updated
 
 
@@ -142,7 +155,7 @@ def prepare(session, snapshot, cached, draft, user, token, project):
         return stored['response']
     preparation_id = uuid4().hex
     patch = {k: record.get(k) for k in ('key', 'item_key', 'field', 'state_key', 'module_key',
-                                      'record_key', 'record_field', 'record_field_key', 'record_group_key')}
+                                      'record_key', 'record_field', 'record_field_key', 'record_group_key', 'record_method_key')}
     response = {'preparation_id': preparation_id, 'patches': [{**patch, 'values': candidate['values']}]}
     preparation = {'id': preparation_id, 'candidate_token': token, 'candidate': deepcopy(candidate),
                    'created_at': datetime.now(timezone.utc).isoformat(),

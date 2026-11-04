@@ -73,7 +73,13 @@ func expandTcContexts(metadata json.RawMessage, records []gin.H) {
 		delete(payload, "tc_context_ref")
 		record["payload"] = payload
 		record["method_code"] = method["method_code"]
-		record["method_raw"] = method["method_raw"]
+		if ref["version"] == float64(1) && ref["method_raw_owner"] != "point" {
+			record["method_raw"] = method["method_raw"]
+		} else if ref["method_name_present"] == true {
+			if identity, ok := payload["tc_group"].(map[string]interface{}); ok {
+				identity["method_name"] = method["method_name"]
+			}
+		}
 	}
 }
 

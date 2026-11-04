@@ -435,13 +435,14 @@ def paper_snapshot(session, paper_id: int, user_id: int, role: str, *, check_acc
         ri = record_indexes.get(module.id, 0)
         record_indexes[module.id] = ri + 1
         field = f'material_states[{state_indexes[record.material_state_id]}].property_modules[{module_indexes[module.id]}].records[{ri}]'
+        expanded = expanded_record(record)
         records.append(dict(key=str(record.id), record_id=record.id, state_id=record.material_state_id, kind='property',
             item_key=science.record_identity(state_data['state_key'], module.module_key, record.record_key),
             state_key=state_data['state_key'], module_code=module.module_code, module_key=module.module_key, record_key=record.record_key,
             field=field, label=f'{state_data.get("material_name") or material or "材料状态 " + str(record.material_state_id)} · {record.name_raw} · {record.value_raw} {record.unit_raw or ""}',
-            claim=science.record_claim(expanded_record(record), state_data), evidences=evs,
+            claim=science.record_claim(expanded, state_data), evidences=evs,
             tc_group_key=((record.payload_json or {}).get('tc_group') or {}).get('group_key'),
-            tc_group_meta=copy.deepcopy((record.payload_json or {}).get('tc_group')),
+            tc_group_meta=copy.deepcopy((expanded.get('payload') or {}).get('tc_group')),
             tc_range_origin_kind=((record.payload_json or {}).get('tc_range_origin') or {}).get('value_kind'),
             tc_method_key=((record.payload_json or {}).get('tc_group') or {}).get('method_key')))
     paper_data = row_dict(paper)

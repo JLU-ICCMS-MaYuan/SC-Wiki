@@ -342,7 +342,7 @@ def prepare(session, snapshot, actor):
                 stage = 'scientific'
             if stage:
                 return {'preparation_id': previous[0]['id'], 'resume_stage': stage, 'version': snapshot['version'], 'patches': [
-                    {key: records[k].get(key) for key in ('key', 'item_key', 'field', 'state_key', 'module_key', 'record_key', 'record_field', 'record_field_key', 'record_group_key')} | {'values': d['values']}
+                    {key: records[k].get(key) for key in ('key', 'item_key', 'field', 'state_key', 'module_key', 'record_key', 'record_field', 'record_field_key', 'record_group_key', 'record_method_key')} | {'values': d['values']}
                     for k, (_, d) in selected.items()]}
     def projected_claim(record, values):
         claim = expected_claim(record, values)
@@ -357,9 +357,16 @@ def prepare(session, snapshot, actor):
                 if not other or not other.get('record_field') or '' not in other_draft['values']:
                     continue
                 same = other.get('state_key') == record.get('state_key') and other.get('module_key') == record.get('module_key')
-                group = (candidate.get('payload', {}).get('tc_group') or {}).get('group_key')
-                if same and (other.get('record_key') == record.get('record_key') or other.get('record_group_key') and other['record_group_key'] == group):
-                    write_path(candidate, other['record_field'], other_draft['values'][''])
+                from .tc_methods import field_owns_record
+                if same and field_owns_record(other, candidate):
+                    from .tc_methods import write_method_value
+                    if other['record_field'] in {'method_code', 'method_raw'}:
+                        write_method_value(candidate, other['record_field'], other_draft['values'][''])
+                    else:
+                        write_path(candidate, other['record_field'], other_draft['values'][''])
+                    for key in ('method_code', 'method_raw'):
+                        if key in other_draft['values']:
+                            write_method_value(candidate, key, other_draft['values'][key])
             original = record['claim'].get('context') or {}
             state = {k: v for k, v in original.items() if k not in {'definition', 'field_settings', 'paired_mu_star', 'paired_tc', 'method_code', 'calculation_conditions', 'approximation'}}
             claim['context'] = review_context(candidate, state, record['record_field'])
@@ -397,7 +404,7 @@ def prepare(session, snapshot, actor):
         updated['preparation'] = {'id': prepared_id, 'expected_claim': science.canonical(projected_claim(record, draft['values'])),
                                   'source_hash': record['source_hash'], 'before': before, 'after_paper': after_paper}
         row.resolutions = json.loads(json.dumps({**row.resolutions, PREFIX + str(actor): updated}, default=str))
-        patches.append({k: record.get(k) for k in ('key', 'item_key', 'field', 'state_key', 'module_key', 'record_key', 'record_field', 'record_field_key', 'record_group_key')} | {'values': draft['values']})
+        patches.append({k: record.get(k) for k in ('key', 'item_key', 'field', 'state_key', 'module_key', 'record_key', 'record_field', 'record_field_key', 'record_group_key', 'record_method_key')} | {'values': draft['values']})
     return {'preparation_id': prepared_id if patches else None, 'patches': patches, 'version': snapshot['version']}
 
 
@@ -460,7 +467,15 @@ def validate_domain_values(session, record, values):
         from .property_field_review import write_path
         candidate = copy.deepcopy(record['validation_record'])
         if '' in values:
-            write_path(candidate, record['record_field'], values[''])
+            if record['record_field'] in {'method_code', 'method_raw'}:
+                from .tc_methods import write_method_value
+                write_method_value(candidate, record['record_field'], values[''])
+            else:
+                write_path(candidate, record['record_field'], values[''])
+        for key in ('method_code', 'method_raw'):
+            if key in values:
+                from .tc_methods import write_method_value
+                write_method_value(candidate, key, values[key])
         candidate.update(module_code=record.get('module_code'), record_key=record.get('record_key'))
     else:
         candidate = {**record['claim']['record'], **values, 'module_code': record.get('module_code'),

@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add'
 import type { FormDefinition, FormIssue } from '../lib/formDefinitions'
 import { newStableKey, type PropertyRecordDraft } from '../lib/propertyModules'
 import { muRangeIndex, readTcParameter, setTcParameter } from '../lib/tcParameters'
-import { completeTcNumber, completeTcMu, expandTcPoints, newTcPoint, selectTcPoint, tcMethodKey, tcPointKey, tcPointViews, updateTcCommon, updateTcPoint } from '../lib/predictedTcGroups'
+import { completeTcNumber, completeTcMu, expandTcPoints, newTcPoint, selectTcPoint, setTcMethodValue, tcGroupMeta, tcMethodKey, tcPointKey, tcPointViews, updateTcCommon, updateTcPoint } from '../lib/predictedTcGroups'
 import TcScientificField from './TcScientificField'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
 import PropertyRecordRow from './PropertyRecordRow'
@@ -35,8 +35,12 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
   const replaceMethod = (method: string, value: string) => {
     const d = choices.find(item => item.method_code === value)
     if (!d) return
-    onChange(expandTcPoints(records).map(record => tcMethodKey(record) === method ? { ...record, method_code: value,
-      method_raw: null, definition_key: d.definition_key, definition_version: d.version } : record))
+    onChange(records.flatMap(record => {
+      if (tcMethodKey(record) !== method) return [record]
+      return expandTcPoints([record]).map(point => ({
+        ...setTcMethodValue(point, 'method_code', value), definition_key: d.definition_key, definition_version: d.version,
+      }))
+    }))
   }
   const parameter = (key: 'lambda_ep' | 'omega_log', label: string, unit?: string) => <Box sx={{ width: 170, flex: '0 0 auto' }}>
     <TcScientificField label={label} value={readTcParameter(root, key)} readOnly={readOnly} field={`${rootPath}.payload.parameters.${key}`} unit={unit}
@@ -78,10 +82,10 @@ export default function PredictedTcGroupEditor({ records, definitions, definitio
                 {Object.entries(names).map(([code, label]) => <MenuItem key={code} value={code}>{label}</MenuItem>)}
               </Select>
             </FormControl>
-            {first.method_code === 'other' && <TextField size="small" label="具体方法名称" value={first.method_raw || ''}
+            {first.method_code === 'other' && <TextField size="small" label="具体方法名称" value={tcGroupMeta(first)?.method_name ?? first.method_raw ?? ''}
               disabled={readOnly} sx={{ width: 220 }} data-issue-field={`${path(first)}.method_raw`}
               onChange={event => onChange(records.map(record => tcMethodKey(record) === method
-                ? { ...record, method_raw: event.target.value } : record))} />}
+                ? setTcMethodValue(record, 'method_raw', event.target.value) : record))} />}
             {!readOnly && <Button size="small" aria-label="添加 Tc／μ* 组合" startIcon={<AddIcon />} onClick={() => {
               const expanded = expandTcPoints(records), template = expanded.find(r => tcMethodKey(r) === method)!
               onChange([...expanded, newTcPoint(template, method)])

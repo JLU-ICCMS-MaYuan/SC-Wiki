@@ -459,7 +459,7 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
 
     from .tc_groups import tc_collection_issues
     retained_tc = [{"record_key": r.record_key, "record_type": r.record_type, "value_kind": r.value_kind,
-                    "value_number": r.value_number, "method_code": r.method_code, "definition_key": r.definition_key,
+                    "value_number": r.value_number, "method_code": r.method_code, "method_raw": r.method_raw, "definition_key": r.definition_key,
                     "definition_version": r.definition_version, "payload": r.payload_json, "is_representative": r.is_representative}
                    for r in existing_records_list if r.record_key not in deleted_record_keys
                    and (module_key_by_id.get(r.module_id), r.record_key) not in submitted_record_keys]
@@ -578,9 +578,13 @@ async def persist_property_modules(session: Any, *, paper_id: int, paper_revisio
         new_directory = incoming_metadata.get("tc_contexts") or {}
         if old_directory:
             directory = deepcopy(old_directory)
+            directory['version'] = max(directory.get('version', 1), new_directory.get('version', 1))
             directory.setdefault('groups', {}).update(new_directory.get('groups') or {})
             for group_key, methods in (new_directory.get('methods') or {}).items():
-                directory.setdefault('methods', {}).setdefault(group_key, {}).update(methods)
+                shared = directory.setdefault('methods', {}).setdefault(group_key, {})
+                for method_key, method in methods.items():
+                    # 局部提交仍可能保留 v1 点引用，其原文名称必须继续可读。
+                    shared[method_key] = {**shared.get(method_key, {}), **method}
             incoming_metadata['tc_contexts'] = directory
         db_module.metadata_json = {**previous_metadata, **incoming_metadata}
         for record in module["records"]:

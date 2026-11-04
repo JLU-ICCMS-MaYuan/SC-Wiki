@@ -50,6 +50,12 @@ def record_inputs(record, path):
     )
     if is_value or is_mu:
         dependencies.append("method_code")
+    if path == 'method_code' or is_value or is_mu:
+        if record.get('method_code') in {'other', 'unknown'} or path == 'method_code':
+            dependencies.append('method_raw')
+        if payload.get('tc_group'):
+            dependencies.extend(['payload.tc_group.group_key', 'payload.tc_group.method_key',
+                                 'payload.tc_group.method_name'])
     if is_value and record.get("record_type") == "predicted_tc":
         conditions = payload.get("calculation_conditions") or {}
         if conditions.get("vibrational_treatment") is not None:

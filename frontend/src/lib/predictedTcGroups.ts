@@ -1,7 +1,7 @@
 import { emptyPropertyRecord, newStableKey, normalizeCurrentTcValue, type PropertyRecordDraft } from './propertyModules'
 import { muRangeIndex, readTcPairs, readTcParameter, setTcParameter, tcParameters, type ParameterValue } from './tcParameters'
 
-export interface TcGroupMeta { version: 1; group_key: string; method_key: string; point_key?: string }
+export interface TcGroupMeta { version: 1; group_key: string; method_key: string; point_key?: string; method_name?: string }
 export interface TcPointView { key: string; record: PropertyRecordDraft; tc: number | null; mu: ParameterValue; selected: boolean }
 export const isGroupedTc = (r: PropertyRecordDraft) => r.record_type === 'predicted_tc'
 export const tcGroupMeta = (r: PropertyRecordDraft): TcGroupMeta | undefined => {
@@ -11,6 +11,17 @@ export const tcGroupMeta = (r: PropertyRecordDraft): TcGroupMeta | undefined => 
 export const tcGroupKey = (r: PropertyRecordDraft) => tcGroupMeta(r)?.group_key || r.record_key
 export const tcMethodKey = (r: PropertyRecordDraft) => tcGroupMeta(r)?.method_key || r.record_key
 export const tcPointKey = (r: PropertyRecordDraft) => tcGroupMeta(r)?.point_key || r.record_key
+
+/** 方法修正与原文写法分开；保持组、方法和点的稳定身份。 */
+export function setTcMethodValue(record: PropertyRecordDraft, field: 'method_code' | 'method_raw', value: string | null): PropertyRecordDraft {
+  const metadata = tcGroupMeta(record)
+  if (!metadata) return { ...record, [field]: value }
+  const next = { ...metadata }
+  if (field === 'method_raw') next.method_name = value || ''
+  else if (record.method_code !== value) delete next.method_name
+  return { ...record, ...(field === 'method_raw' ? { method_raw: record.method_raw || value } : { method_code: value }),
+    payload: { ...record.payload, tc_group: next } }
+}
 export const completeTcNumber = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v) && v >= 0
 export const completeTcMu = (record: PropertyRecordDraft, value: unknown) => completeTcNumber(value) ||
   (record.method_code === 'scdft' && value == null && (record.payload.parameters as any)?.mu_star_status === 'not_applicable')
@@ -47,7 +58,7 @@ export function expandTcPoints(records: PropertyRecordDraft[]): PropertyRecordDr
         value_number: record.value_number, value_min: record.value_min, value_max: record.value_max, value_text: record.value_text,
         parameters: structuredClone(tcParameters(record)), is_representative: Boolean(record.is_representative) }
     }
-    payload.tc_group = { version: 1, group_key: group, method_key: tcMethodKey(record), point_key: point.key } satisfies TcGroupMeta
+    payload.tc_group = { ...tcGroupMeta(record), version: 1, group_key: group, method_key: tcMethodKey(record), point_key: point.key } satisfies TcGroupMeta
     return normalizeCurrentTcValue({ ...structuredClone(record), record_key: index === 0 ? record.record_key : newStableKey('tc-point'),
       value_kind: 'number', value_number: point.tc, value_min: null, value_max: null, value_text: null, value_boolean: null,
       is_representative: point.selected, payload })
@@ -62,11 +73,13 @@ export function newTcPoint(template: PropertyRecordDraft, methodKey: string, def
     definition_key: definition?.definition_key || template.definition_key,
     definition_version: definition?.version || template.definition_version,
     method_code: definition?.method_code || template.method_code, name_raw: 'critical temperature',
+    method_raw: !definition && template.method_code === 'other' ? template.method_raw : null,
     value_number: null, unit_raw: 'K', canonical_unit: 'K', is_representative: false,
     payload: { parameters: { ...sharedTcParameters(template), mu_star: null },
       calculation_conditions: structuredClone(template.payload.calculation_conditions || {}),
       ...(template.payload.approximation ? { approximation: template.payload.approximation } : {}),
-      tc_group: { version: 1, group_key: tcGroupKey(template), method_key: methodKey, point_key: record.record_key } satisfies TcGroupMeta } }
+      tc_group: { ...(!definition && tcMethodKey(template) === methodKey ? tcGroupMeta(template) : {}),
+        version: 1, group_key: tcGroupKey(template), method_key: methodKey, point_key: record.record_key } satisfies TcGroupMeta } }
 }
 
 export function updateTcPoint(records: PropertyRecordDraft[], key: string, field: 'tc' | 'mu', value: ParameterValue): PropertyRecordDraft[] {

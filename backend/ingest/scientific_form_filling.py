@@ -7,7 +7,7 @@ import json
 from .scientific_context import build_context, fingerprint
 from .property_modules import THEORETICAL_METHODS, EXPERIMENTAL_METHODS, validate_record
 
-VERSION = "scientific-form-filling-v5-pooled-input"
+VERSION = "scientific-form-filling-v6-method-identity"
 SUPPORTED = {"tc", "dos_fermi"}
 VALUE_FIELDS = {"value_number", "value_min", "value_max", "value_text", "value_boolean"}
 PATCH_FIELDS = VALUE_FIELDS | {"value_kind", "value_raw", "method_code", "method_raw",
@@ -25,6 +25,11 @@ anisotropic_eliashberg, scdft, other, unknown. other MUST have the actual report
 Do not guess a specific Eliashberg variant. unknown means not established, NOT a combined method.
 Keep distinct methods and their own Tc/mu_star points. Share a group only if lambda_ep, omega_log,
 calculation conditions and approximation agree. Use one method label per method row within that group.
+method_raw preserves EACH result's actual reported spelling, not a shared normalized name. Keep its
+own source_ids. If different spellings denote one other/unknown method, supply the SAME method_name
+beside group/method on each entry, explain the equivalence in reason and cite its supporting sources.
+method_name describes that shared method; it is relationship metadata, NEVER a values field.
+Equal other/unknown codes alone NEVER establish the same method. Keep unsupported relations separate.
 IMPORTANT FORM MEANING: group is a COMMON-PARAMETER GROUP, NOT a result point. Tc and mu_star
 MUST NOT be part of the group identity. If ONLY Tc/mu_star differs, reuse the EXACT SAME group string
 and the EXACT SAME method string. Different methods can occupy separate rows in that SAME common
@@ -241,6 +246,11 @@ def apply_plan(states, sources, response):
             identity = fingerprint([VERSION, si, mi, sorted(ids), values])[:24]
             group_metadata = {"version": 1, "group_key": "fill-" + fingerprint([si, mi, group])[:24],
                               "method_key": "fill-" + fingerprint([si, mi, group, method])[:24]}
+            if entry.get('method_name') is not None:
+                name = entry['method_name']
+                if not isinstance(name, str) or not name.strip() or len(name) > 180:
+                    raise ValueError('Tc 共同方法名称无效')
+                group_metadata['method_name'] = name
             if record["value_kind"] == "number":
                 group_metadata["point_key"] = identity
         elif record.get("record_type") == "measured_tc" and record.get("method_code") not in EXPERIMENTAL_METHODS:
@@ -318,7 +328,8 @@ def apply_plan(states, sources, response):
                 meta = r["payload"]["tc_group"]
                 group, method = meta["group_key"], meta["method_key"]
                 approximation = (r["payload"].get("calculation_conditions") or {}).get("vibrational_treatment") or r["payload"].get("approximation")
-                identity = (r["method_code"], r.get("method_raw") if r["method_code"] == "other" else None)
+                from .tc_methods import method_identity
+                identity = method_identity(r)
                 if group in approximations and approximations[group] != approximation:
                     raise ValueError("同组不能混用不同近似")
                 if (group, method) in methods and methods[group, method] != identity:

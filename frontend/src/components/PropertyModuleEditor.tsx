@@ -17,7 +17,7 @@ import PropertyModuleSection from './PropertyModuleSection'
 import SchemaDrivenRecordForm from './SchemaDrivenRecordForm'
 import { isFermiDos, normalizeDosModules } from '../lib/fermiDos'
 import PredictedTcGroupEditor from './PredictedTcGroupEditor'
-import { isGroupedTc, predictedTcGroups, tcGroupKey } from '../lib/predictedTcGroups'
+import { isGroupedTc, predictedTcGroups, tcGroupKey, tcPointViews } from '../lib/predictedTcGroups'
 
 export interface ModuleDeletion {
   deletedModuleKey?: string
@@ -272,10 +272,10 @@ const PropertyModuleEditor: React.FC<Props> = ({
                 if (isGroupedTc(record)) {
                   const group = tcGroups.find(items => tcGroupKey(items[0]) === tcGroupKey(record))!
                   if (group[0].record_key !== record.record_key) return null
-                  const summary = [definitionLabel(record), record.name_raw, propertyRecordSummaryValue(record)].filter(Boolean).join(' · ')
+                  const summary = `计算方法 · ${group.flatMap(tcPointViews).length} 个温度`
                   return <Accordion key={tcGroupKey(record)} defaultExpanded disableGutters elevation={0} square sx={{ bgcolor: 'transparent', '&:before': { display: 'none' } }}>
                     <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-label={`记录 ${recordIndex + 1} · ${summary}`}>
-                      <Typography>{group.length > 1 ? `超导转变温度 Tc · ${group.length} 条结果` : summary}</Typography>
+                      <Typography>{summary}</Typography>
                     </AccordionSummary>
                     <AccordionDetails sx={{ px: 0 }}><PredictedTcGroupEditor records={group}
                     definitions={choices as FormDefinition[]} definition={boundDefinitions[group[0].record_key]}

@@ -55,7 +55,7 @@ from backend.ingest.language_contract import (
 )
 from backend.ingest.paper_summary import SUMMARY_RULES, choose_summary
 from backend.ingest.research_motivation import choose_motivation, task_chunks as motivation_chunks
-from backend.ingest.structure_extractor import extract_structure_candidates
+from backend.ingest.structure_reading import extract_structure_candidates
 from backend.models import Paper, PaperFile
 from backend.rag.llm import call_phase, complete_json
 from backend.services.space_groups import CRYSTAL_SYSTEMS, crystal_system_for_number, lookup_number
@@ -2067,6 +2067,9 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                     markdown = _extract_markdown(file_state, file_source)
                     file_md.write_text(markdown, encoding="utf-8")
                 if not structure_format and str(file_item.get("kind") or file_state.get("file_kind") or "").lower() == "pdf":
+                    def save_structure_reading(event):
+                        directory = artifact_directory(task_id) / 'structure_reading' / str(file_item['file_id'])
+                        _atomic_write_json(directory / f"call-{event['iteration']}-{event['status']}.json", event)
                     structure_candidates.extend(extract_structure_candidates(
                         markdown,
                         pdf_path=file_source,
@@ -2076,6 +2079,8 @@ def _process_conventional_upload_task(task_id: str) -> dict[str, Any]:
                             "role": file_item.get("role"),
                             "sha256": file_item.get("sha256"),
                         },
+                        on_event=save_structure_reading,
+                        cancelled=lambda: bool(_ensure_not_cancelled(task_id)),
                     ))
 
             except Exception as extraction_exc:

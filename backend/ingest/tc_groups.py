@@ -5,6 +5,7 @@ import json
 import math
 import re
 from decimal import Decimal
+from .tc_methods import method_identity
 
 
 def _number(value):
@@ -73,7 +74,11 @@ def tc_collection_issues(records, *, strict_representative=False):
             continue
         group, method = metadata["group_key"], metadata["method_key"]
         shared = _shared(record)
-        identity = (record.get("method_code"), record.get("definition_key"), record.get("definition_version"))
+        try:
+            identity = (method_identity(record), record.get("definition_key"), record.get("definition_version"))
+        except ValueError as exc:
+            issues.append((f"records[{index}].payload.tc_group", "invalid_tc_group", str(exc)))
+            continue
         if group in groups and groups[group] != shared:
             issues.append((f"records[{index}].payload.tc_group", "tc_group_conditions_conflict", "同一共同参数组的 λ、ωlog 或计算条件不一致，请分组"))
         groups[group] = shared

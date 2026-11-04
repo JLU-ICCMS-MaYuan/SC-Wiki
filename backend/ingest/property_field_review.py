@@ -1,5 +1,6 @@
 """预测记录按科学子项构造断言；旧整条结论不向子项授信。"""
 from copy import deepcopy
+import json
 
 LABELS = {'method_code': '预测方法', 'lambda_ep': '电声耦合强度 λ', 'omega_log': 'ωlog', 'mu_star': 'μ*',
           'phonon_method': '声子计算技术', 'vibrational_treatment': '振动处理层次', 'calculation_code': '计算软件', 'electronic_method': '电子结构方法', 'exchange_correlation_functional': '交换关联泛函',
@@ -79,6 +80,9 @@ def review_context(record, state, path):
                                 [record.get('value_min'), record.get('value_max')])
     if path.startswith(('value_', 'payload.parameters.mu_star')) or '.extensions.' in path and path.startswith('payload.parameters.'):
         context['method_code'] = record.get('method_code')
+    if path == 'method_code' or path.startswith('value_') or is_mu:
+        from .tc_methods import method_review_identity
+        context['method_identity'] = method_review_identity(record)
     context['direct_inputs'] = {key: deepcopy(read_path(record, key)) for key in record_inputs(record, path)}
     if '.sscha.' in path:
         context['approximation'] = vibrational_treatment(record)
@@ -87,6 +91,18 @@ def review_context(record, state, path):
 
 def expand_property_fields(records):
     from .scientific_evidence import item_identity, populated
+    # 一条方法行的核对必须覆盖所有原文写法；不能只取数组中的第一个结果。
+    method_sources = {}
+    def method_owner(parent):
+        return (parent.get('state_key'), parent.get('module_key'), parent.get('tc_group_key'), parent.get('tc_method_key'))
+    for parent in records:
+        if not parent.get('tc_method_key') or not parent.get('evidences'):
+            continue
+        original = (parent.get('claim') or {}).get('record') or {}
+        observation = {'method_raw': original.get('method_raw'),
+                       'evidences': deepcopy(parent.get('evidences') or [])}
+        if observation not in method_sources.setdefault(method_owner(parent), []):
+            method_sources[method_owner(parent)].append(observation)
     result, shared = [], set()
     for parent in records:
         original = (parent.get('claim') or {}).get('record') or {}
@@ -197,7 +213,16 @@ def expand_property_fields(records):
                     evs.extend(deepcopy([*(association.get('fact_evidences') or []),
                                          *(association.get('scope_evidences') or [])]))
                     associations.append(association)
-            context = review_context(source, parent['claim'].get('state') or {}, path)
+            context = review_context(validation, parent['claim'].get('state') or {}, path)
+            observations = method_sources.get(method_owner(parent), []) if path == 'method_code' else []
+            if observations:
+                from .scientific_evidence import canonical
+                context['method_observations'] = sorted(observations, key=lambda item: json.dumps(canonical(item), sort_keys=True, ensure_ascii=False))
+                context['direct_inputs'].pop('method_raw', None)
+                for observation in observations:
+                    for evidence in observation['evidences']:
+                        if evidence.get('field_path') in {'method_code', 'method_raw'} and evidence not in evs:
+                            evs.append(deepcopy(evidence))
             if associations:
                 from .association_review import field_binding
                 context['association_dependencies'] = [field_binding(source, parent['claim'].get('state') or {}, a)
@@ -215,7 +240,8 @@ def expand_property_fields(records):
                     field_schema = {**deepcopy(declared), 'nullable': True}
             result.append({k: deepcopy(v) for k, v in parent.items() if k not in {'key', 'item_key', 'claim', 'evidences', 'current_value', 'fields', 'field', 'kind', 'label'}} | {
                 'key': key, 'item_key': key, 'kind': 'field', 'record_field': path,
-                'record_group_key': group if common and path != 'method_code' else None,
+                'record_group_key': group if common and (path != 'method_code' or parent.get('tc_method_key')) else None,
+                'record_method_key': parent.get('tc_method_key') if path == 'method_code' else None,
                 'record_dependencies': dependencies,
                 'state_dependencies': state_paths(associations),
                 'dependency_policy_version': 1,
@@ -236,5 +262,6 @@ def expand_property_fields(records):
                 'source_associations': associations,
                 'claim': {'value': deepcopy(value), 'field': 'Tc' if semantic == 'tc' else 'μ*' if semantic == 'mu_star' else label, 'context': context},
                 'field_schema': field_schema,
-                'legacy_evidences': deepcopy(parent.get('evidences') or [])})
+                'legacy_evidences': [deepcopy(e) for observation in observations for e in observation['evidences']]
+                    if observations else deepcopy(parent.get('evidences') or [])})
     return result

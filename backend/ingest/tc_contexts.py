@@ -1,6 +1,7 @@
 """显式Tc组的规范存储与有界读取投影；不猜测旧记录的分组。"""
 from copy import deepcopy
-VERSION = 1
+from .tc_methods import field_owns_record, method_identity
+VERSION = 2
 KEY = 'tc_contexts'
 
 def expand_module(module):
@@ -8,15 +9,18 @@ def expand_module(module):
     metadata=module.setdefault('metadata',{})
     directory=metadata.pop(KEY,None)
     if directory is None:return module
-    if directory.get('version')!=VERSION:raise ValueError('未知Tc共同资料版本')
+    if directory.get('version') not in (1, VERSION):raise ValueError('未知Tc共同资料版本')
     groups=directory.get('groups') or {}
     methods=directory.get('methods') or {}
     for record in module.get('records') or []:
         payload=record.setdefault('payload',{})
         ref=payload.pop('tc_context_ref',None)
         if ref is None:continue
-        if not isinstance(ref,dict) or ref.get('version')!=VERSION:
+        if not isinstance(ref,dict) or ref.get('version') not in (1, VERSION) or ref['version']>directory['version']:
             raise ValueError('未知Tc共同资料引用版本')
+        identity=payload.get('tc_group') or {}
+        if any(identity.get(key) is not None and identity[key]!=ref.get(key) for key in ('group_key','method_key')):
+            raise ValueError('Tc共同资料引用与显式方法身份不一致')
         group=groups.get(ref.get('group_key'));method=methods.get(ref.get('group_key'),{}).get(ref.get('method_key'))
         if group is None or method is None:raise ValueError('Tc共同资料引用不存在')
         own=deepcopy(payload.get('parameters') or {})
@@ -43,12 +47,16 @@ def expand_module(module):
                     raise ValueError('共同来源使用位置不存在')
                 restored.append(deepcopy(values[position]))
             payload['source_associations']=restored
-        record['method_code']=method.get('method_code');record['method_raw']=method.get('method_raw')
+        record['method_code']=method.get('method_code')
+        if ref['version']==1 and ref.get('method_raw_owner')!='point':
+            record['method_raw']=method.get('method_raw')
+        elif ref.get('method_name_present'):
+            payload['tc_group']['method_name']=method['method_name']
     return module
 
 def compact_module(module):
     module=expand_module(module)
-    groups,methods={},{}
+    groups,methods,method_records={},{},{}
     candidates={}
     def common_association(item):
         path=str(item.get('target_path') or '').replace('/','.').lstrip('.')
@@ -79,19 +87,33 @@ def compact_module(module):
         shared_associations=candidates.get(group_key) or []
         group={'parameters':parameters,'calculation_conditions':conditions}
         if shared_associations:group['source_associations']=deepcopy(shared_associations)
-        method={'method_code':record.get('method_code'),'method_raw':record.get('method_raw')}
+        code,name=method_identity(record)
+        method={'method_code':code}
+        if code in {'other','unknown'}:
+            method['method_name']=name
+        elif 'method_name' in identity:
+            method['method_name']=identity['method_name']
         if group_key in groups and groups[group_key]!=group:
             raise ValueError('同一Tc组的共同条件不一致，不能静默合并')
         groups[group_key]=group
         methods.setdefault(group_key,{})
         if method_key in methods[group_key] and methods[group_key][method_key]!=method:
-            raise ValueError('同一Tc方法身份对应不同方法')
+            previous=method_records[group_key,method_key]
+            raise ValueError(f'同一Tc方法身份对应不同方法：组 {group_key}，方法 {method_key}，'
+                             f'记录 {previous} 与 {record.get("record_key")}；'
+                             f'{methods[group_key][method_key]} 与 {method}')
         methods[group_key][method_key]=method
+        method_records.setdefault((group_key,method_key),record.get('record_key'))
         payload['parameters']=point
         payload.pop('calculation_conditions',None)
-        payload['tc_context_ref']={'version':VERSION,'group_key':group_key,'method_key':method_key,
+        # 引用的组/方法寻址协议仍为 v1，保持既有数据库约束；v2 目录单独声明原文归点。
+        payload['tc_context_ref']={'version':1,'group_key':group_key,'method_key':method_key,'method_raw_owner':'point',
             **({'empty_parameter_extensions':True} if extensions==[] else {}),
             **({'empty_condition_extensions':True} if empty_conditions else {})}
+        if 'method_name' in identity:
+            # 共同描述只存一次；投影标记保留调用方原本是否显式携带该描述。
+            payload['tc_context_ref']['method_name_present']=True
+            method['method_name']=identity.pop('method_name')
         if shared_associations:
             own_associations=[];layout=[]
             for item in payload.get('source_associations') or []:
@@ -100,7 +122,7 @@ def compact_module(module):
                     layout.append({'point':len(own_associations)});own_associations.append(item)
             payload['source_associations']=own_associations
             payload['tc_context_ref']['association_layout']=layout
-        record['payload']=payload;record['method_code']=None;record['method_raw']=None
+        record['payload']=payload;record['method_code']=None
     if groups:module.setdefault('metadata',{})[KEY]={'version':VERSION,'groups':groups,'methods':methods}
     return module
 

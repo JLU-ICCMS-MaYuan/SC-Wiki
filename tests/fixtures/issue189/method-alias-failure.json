@@ -1,0 +1,1692 @@
+{
+  "original_task_id": "41112aa1cedb49b9a737934b9fc698f6",
+  "original_error": "同一Tc方法身份对应不同方法",
+  "state": {
+    "material": "LaH8",
+    "pressure_value_gpa": 300,
+    "reported_space_group_number": 12,
+    "reported_space_group_symbol": "C2/m",
+    "state_kind": "theoretical",
+    "structure_optimization": "classical_static",
+    "state_key": "state-1",
+    "property_modules": [
+      {
+        "module_code": "superconductive_properties",
+        "records": [
+          {
+            "record_key": "fill-a9b009f4865f90f302d6e21a48f7",
+            "module_code": "superconductive_properties",
+            "record_type": "predicted_tc",
+            "property_code": "tc",
+            "custom_property_key": null,
+            "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+            "definition_version": 2,
+            "name_raw": "Tc",
+            "value_kind": "number",
+            "value_raw": "131",
+            "value_number": 131,
+            "value_min": null,
+            "value_max": null,
+            "value_text": null,
+            "value_boolean": null,
+            "uncertainty": null,
+            "unit_raw": "K",
+            "canonical_unit": "K",
+            "method_code": "mcmillan",
+            "method_raw": "McMillan equation",
+            "criterion_code": null,
+            "criterion_raw": null,
+            "structure_key": null,
+            "payload": {
+              "calculation_conditions": {
+                "calculation_code": "Quantum-ESPRESSO",
+                "electronic_method": "DFT",
+                "epw": null,
+                "exchange_correlation_functional": null,
+                "phonon_method": "density functional perturbation theory",
+                "qe": {
+                  "atoms": null,
+                  "charge_density_cutoff": null,
+                  "convergence_energy": null,
+                  "convergence_force": null,
+                  "energy_cutoff": {
+                    "evidences": null,
+                    "reported": true,
+                    "unit_raw": "Ry",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 80,
+                    "value_raw": "80",
+                    "value_text": null
+                  },
+                  "k_broadening": null,
+                  "k_grid": null,
+                  "q_grid": null,
+                  "q_grid_interpolated": null,
+                  "supercell": null,
+                  "temperature_k": null
+                },
+                "sscha": null,
+                "vibrational_treatment": "harmonic"
+              },
+              "method_variant_status": null,
+              "parameters": {
+                "extensions": [
+                  {
+                    "key": "omega_log_reported",
+                    "value_kind": "text",
+                    "value_raw": "1,591",
+                    "unit_raw": "K",
+                    "reported": {
+                      "evidences": null,
+                      "reported": true,
+                      "unit_raw": "K",
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 1591,
+                      "value_raw": "1,591",
+                      "value_text": null
+                    }
+                  }
+                ],
+                "lambda_ep": 1.12,
+                "mu_star": 0.1,
+                "omega_log": 1591.0
+              },
+              "table_row_ref": {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "group": null,
+                "row_index": 2,
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9"
+              },
+              "tc_group": {
+                "version": 1,
+                "group_key": "fill-2535c6149559f666c5842b89",
+                "method_key": "fill-4d16cece914ee0771dd4857c",
+                "point_key": "f40fa50ba72616c32e8e97fa"
+              }
+            },
+            "evidences": [
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 3,
+                "printed_page": null,
+                "block_id": "2d2394200ff66162493cc4b4dc1ca6203efec1c8f3e43a8e5924f37cfebde19a",
+                "bbox": [
+                  298.3280548095703,
+                  342.9478780517578,
+                  547.5197241210938,
+                  367.2204447631836
+                ],
+                "polygon": null,
+                "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 3
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 4,
+                "printed_page": null,
+                "block_id": "0c35370c512d96bd18b4b2f9160a0121219946cfcfff09b26e656e8f69195cd1",
+                "bbox": [
+                  34.512461242675776,
+                  402.45481579589847,
+                  284.8740444946289,
+                  436.9062008056641
+                ],
+                "polygon": null,
+                "quote": "assuming \\mu ^ { * } = 0 . 1 – 0 . 1 3 (Eq. 1). That result encouraged us to calculate the T _ { c } of \\mathrm { L a H _ { 1 0 } } . Previous theoretical studies also found that sodalite-structured hydrides (e.g., \\mathrm { C a H _ { 6 } } and \\mathrm { Y H _ { 6 } ) } were associated",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 4
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 2,
+                "printed_page": null,
+                "block_id": "f28b2b61e30c515e51d68098d8391512a432f6d41f278a1ce51fa638c9f4547e",
+                "bbox": [
+                  293.64839904785157,
+                  688.2447141723633,
+                  544.0099822998047,
+                  729.7429733886719
+                ],
+                "polygon": null,
+                "quote": "Electron-coupling calculations for LaH4 give a relatively small λ of 0.43. The estimated T _ { c } \\mathrm { ~ i s ~ } 5 \\mathrm { - 1 0 } K at 300 GPa with the typical choice of the Coulomb potential of \\mu ^ { * }   =   0 . 1  –  0 . 1 3 . Using the McMillan equation (44), we calculated T _ { c } using the spectral",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 2
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 3,
+                "printed_page": null,
+                "block_id": "c4e398803538cea92d685346b7690281054eb764a32852bb31dedfd15774d9ba",
+                "bbox": [
+                  39.77707397460938,
+                  342.1648920288086,
+                  288.9687432861328,
+                  375.833291015625
+                ],
+                "polygon": null,
+                "quote": "function [ \\alpha ^ { 2 } F ( \\omega ) ] , again with \\mu ^ { * } = 0 . 1  –  0 . 1 3 , as previously used in superconductivity calculations for Y (15), La (45, 46), SH3 (24), CaH6 (17), YH6 (30), and other superconductors.",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 3
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "833e9fc07f8ca0decf856adb652f4528011d38c291c419efb3228207bb75b9dc",
+                "bbox": [
+                  259.99375,
+                  511.8809836,
+                  308.8103231999999,
+                  528.6178736544
+                ],
+                "polygon": null,
+                "quote": "Tc, K; μ* = 0.1 McMillan",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "b8cb306ec4eb7ed6fd1da34cf8f3493aa5ab7b7c0a7f0525397bc5fcadeb9fe1",
+                "bbox": [
+                  145.2472,
+                  547.7675836,
+                  157.62199515999998,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "300",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "8a77ad5683d76a787c07b5aa006a84027ec16e0d3b1ca0106f521ef52e9108d5",
+                "bbox": [
+                  190.37537763999998,
+                  547.7675836,
+                  204.76830597999995,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "1.12",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "61986d848c1d54ad99d648807936c9d6d9ed8d97bcfddb1c8755baa1f129eacd",
+                "bbox": [
+                  223.08841239999995,
+                  547.7675836,
+                  241.60652151999992,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "1,591",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "9c150f984aa8499a6e9937354be99e5cbb6ba650c783b6e251a488c308ba1741",
+                "bbox": [
+                  278.1951789399999,
+                  547.7675836,
+                  290.56997409999985,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "131",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "2047cb439ea1d205ba3c5571d16eccb8b568112e4e54106d478c19d7931eda71",
+                "bbox": [
+                  220.42142,
+                  521.8589836,
+                  244.3336014,
+                  529.3505111439999
+                ],
+                "polygon": null,
+                "quote": "wlog, K",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 1,
+                "printed_page": null,
+                "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+                "bbox": [
+                  297.15814086914065,
+                  177.73782720947267,
+                  549.8595520019531,
+                  470.57459979248046
+                ],
+                "polygon": null,
+                "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17).",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 1
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "d562424546ebe7b1ec282ee3d51acd14b550d7fcb387b655861cd6f2e722ad88",
+                "bbox": [
+                  297.74309783935547,
+                  299.10066076660155,
+                  548.6896380615234,
+                  380.5312071533203
+                ],
+                "polygon": null,
+                "quote": "consistent with previous theoretical (15) and experimental studies ( T _ { c } = 1 7 \\; \\dot { \\bf K } at 89 GPa) (49).All of our calculations were carried out using the harmonic approximation. It is well known that in many hydrides anharmonicity tends to lower \\overline { { [ T _ { c } ] ( 5 0 ) } } . For the well-studied \\overline { { \\mathrm { S H } _ { 3 } } } system, however, such an effect is weak: T _ { c } is lowered from its harmonic 204 K value (24) only to 194 K (21) at 250 GPa, and both are close to the reported experiment T _ { c } at that pressure (20).",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 5
+              }
+            ],
+            "is_representative": false,
+            "basis_kind": "paper_quote"
+          },
+          {
+            "record_key": "fill-f64bc1a2c55e025fd64fe09ec52f",
+            "module_code": "superconductive_properties",
+            "record_type": "predicted_tc",
+            "property_code": "tc",
+            "custom_property_key": null,
+            "definition_key": "record.superconductive_properties.predicted_tc.mcmillan",
+            "definition_version": 2,
+            "name_raw": "Tc",
+            "value_kind": "number",
+            "value_raw": "114",
+            "value_number": 114,
+            "value_min": null,
+            "value_max": null,
+            "value_text": null,
+            "value_boolean": null,
+            "uncertainty": null,
+            "unit_raw": "K",
+            "canonical_unit": "K",
+            "method_code": "mcmillan",
+            "method_raw": "McMillan",
+            "criterion_code": null,
+            "criterion_raw": null,
+            "structure_key": null,
+            "payload": {
+              "calculation_conditions": {
+                "calculation_code": "Quantum-ESPRESSO",
+                "electronic_method": "DFT",
+                "epw": null,
+                "exchange_correlation_functional": null,
+                "phonon_method": "density functional perturbation theory",
+                "qe": {
+                  "atoms": null,
+                  "charge_density_cutoff": null,
+                  "convergence_energy": null,
+                  "convergence_force": null,
+                  "energy_cutoff": {
+                    "evidences": null,
+                    "reported": true,
+                    "unit_raw": "Ry",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 80,
+                    "value_raw": "80",
+                    "value_text": null
+                  },
+                  "k_broadening": null,
+                  "k_grid": null,
+                  "q_grid": null,
+                  "q_grid_interpolated": null,
+                  "supercell": null,
+                  "temperature_k": null
+                },
+                "sscha": null,
+                "vibrational_treatment": "harmonic"
+              },
+              "method_variant_status": null,
+              "parameters": {
+                "extensions": [
+                  {
+                    "key": "omega_log_reported",
+                    "value_kind": "text",
+                    "value_raw": "1,591",
+                    "unit_raw": "K",
+                    "reported": {
+                      "evidences": null,
+                      "reported": true,
+                      "unit_raw": "K",
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 1591,
+                      "value_raw": "1,591",
+                      "value_text": null
+                    }
+                  }
+                ],
+                "lambda_ep": 1.12,
+                "mu_star": 0.13,
+                "omega_log": 1591.0
+              },
+              "table_row_ref": {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "group": null,
+                "row_index": 2,
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9"
+              },
+              "tc_group": {
+                "version": 1,
+                "group_key": "fill-2535c6149559f666c5842b89",
+                "method_key": "fill-4d16cece914ee0771dd4857c",
+                "point_key": "26913ae11a9b08559d1f90bb"
+              }
+            },
+            "evidences": [
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 3,
+                "printed_page": null,
+                "block_id": "2d2394200ff66162493cc4b4dc1ca6203efec1c8f3e43a8e5924f37cfebde19a",
+                "bbox": [
+                  298.3280548095703,
+                  342.9478780517578,
+                  547.5197241210938,
+                  367.2204447631836
+                ],
+                "polygon": null,
+                "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 3
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 4,
+                "printed_page": null,
+                "block_id": "0c35370c512d96bd18b4b2f9160a0121219946cfcfff09b26e656e8f69195cd1",
+                "bbox": [
+                  34.512461242675776,
+                  402.45481579589847,
+                  284.8740444946289,
+                  436.9062008056641
+                ],
+                "polygon": null,
+                "quote": "assuming \\mu ^ { * } = 0 . 1 – 0 . 1 3 (Eq. 1). That result encouraged us to calculate the T _ { c } of \\mathrm { L a H _ { 1 0 } } . Previous theoretical studies also found that sodalite-structured hydrides (e.g., \\mathrm { C a H _ { 6 } } and \\mathrm { Y H _ { 6 } ) } were associated",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 4
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "26b6be8f0637e5754eb2bf2449eca6cd7d2ad608061d4b15e49c69f962d6d7bd",
+                "bbox": [
+                  324.45254,
+                  511.8809836,
+                  377.4505967999999,
+                  528.6178736544
+                ],
+                "polygon": null,
+                "quote": "Tc, K; μ* = 0.13 McMillan",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "b8cb306ec4eb7ed6fd1da34cf8f3493aa5ab7b7c0a7f0525397bc5fcadeb9fe1",
+                "bbox": [
+                  145.2472,
+                  547.7675836,
+                  157.62199515999998,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "300",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "8a77ad5683d76a787c07b5aa006a84027ec16e0d3b1ca0106f521ef52e9108d5",
+                "bbox": [
+                  190.37537763999998,
+                  547.7675836,
+                  204.76830597999995,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "1.12",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "61986d848c1d54ad99d648807936c9d6d9ed8d97bcfddb1c8755baa1f129eacd",
+                "bbox": [
+                  223.08841239999995,
+                  547.7675836,
+                  241.60652151999992,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "1,591",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "5ecfd14a30d8914413817f111d8ea1610d19661fbd15866ff70ca0ebe671b791",
+                "bbox": [
+                  344.7532261599999,
+                  547.7675836,
+                  357.1272741399998,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "114",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "2047cb439ea1d205ba3c5571d16eccb8b568112e4e54106d478c19d7931eda71",
+                "bbox": [
+                  220.42142,
+                  521.8589836,
+                  244.3336014,
+                  529.3505111439999
+                ],
+                "polygon": null,
+                "quote": "wlog, K",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 1,
+                "printed_page": null,
+                "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+                "bbox": [
+                  297.15814086914065,
+                  177.73782720947267,
+                  549.8595520019531,
+                  470.57459979248046
+                ],
+                "polygon": null,
+                "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17).",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 1
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "d562424546ebe7b1ec282ee3d51acd14b550d7fcb387b655861cd6f2e722ad88",
+                "bbox": [
+                  297.74309783935547,
+                  299.10066076660155,
+                  548.6896380615234,
+                  380.5312071533203
+                ],
+                "polygon": null,
+                "quote": "consistent with previous theoretical (15) and experimental studies ( T _ { c } = 1 7 \\; \\dot { \\bf K } at 89 GPa) (49).All of our calculations were carried out using the harmonic approximation. It is well known that in many hydrides anharmonicity tends to lower \\overline { { [ T _ { c } ] ( 5 0 ) } } . For the well-studied \\overline { { \\mathrm { S H } _ { 3 } } } system, however, such an effect is weak: T _ { c } is lowered from its harmonic 204 K value (24) only to 194 K (21) at 250 GPa, and both are close to the reported experiment T _ { c } at that pressure (20).",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 2,
+                "printed_page": null,
+                "block_id": "f28b2b61e30c515e51d68098d8391512a432f6d41f278a1ce51fa638c9f4547e",
+                "bbox": [
+                  293.64839904785157,
+                  688.2447141723633,
+                  544.0099822998047,
+                  729.7429733886719
+                ],
+                "polygon": null,
+                "quote": "Electron-coupling calculations for LaH4 give a relatively small λ of 0.43. The estimated T _ { c } \\mathrm { ~ i s ~ } 5 \\mathrm { - 1 0 } K at 300 GPa with the typical choice of the Coulomb potential of \\mu ^ { * }   =   0 . 1  –  0 . 1 3 . Using the McMillan equation (44), we calculated T _ { c } using the spectral",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 2
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 3,
+                "printed_page": null,
+                "block_id": "c4e398803538cea92d685346b7690281054eb764a32852bb31dedfd15774d9ba",
+                "bbox": [
+                  39.77707397460938,
+                  342.1648920288086,
+                  288.9687432861328,
+                  375.833291015625
+                ],
+                "polygon": null,
+                "quote": "function [ \\alpha ^ { 2 } F ( \\omega ) ] , again with \\mu ^ { * } = 0 . 1  –  0 . 1 3 , as previously used in superconductivity calculations for Y (15), La (45, 46), SH3 (24), CaH6 (17), YH6 (30), and other superconductors.",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 3
+              }
+            ],
+            "is_representative": false,
+            "basis_kind": "paper_quote"
+          },
+          {
+            "record_key": "fill-3b5af113cc473be4091961bb3d43",
+            "module_code": "superconductive_properties",
+            "record_type": "predicted_tc",
+            "property_code": "tc",
+            "custom_property_key": null,
+            "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+            "definition_version": 2,
+            "name_raw": "Tc",
+            "value_kind": "number",
+            "value_raw": "150",
+            "value_number": 150,
+            "value_min": null,
+            "value_max": null,
+            "value_text": null,
+            "value_boolean": null,
+            "uncertainty": null,
+            "unit_raw": "K",
+            "canonical_unit": "K",
+            "method_code": "unknown",
+            "method_raw": "Eliashberg",
+            "criterion_code": null,
+            "criterion_raw": null,
+            "structure_key": null,
+            "payload": {
+              "calculation_conditions": {
+                "calculation_code": "Quantum-ESPRESSO",
+                "electronic_method": "DFT",
+                "epw": null,
+                "exchange_correlation_functional": null,
+                "phonon_method": "density functional perturbation theory",
+                "qe": {
+                  "atoms": null,
+                  "charge_density_cutoff": null,
+                  "convergence_energy": null,
+                  "convergence_force": null,
+                  "energy_cutoff": {
+                    "evidences": null,
+                    "reported": true,
+                    "unit_raw": "Ry",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 80,
+                    "value_raw": "80",
+                    "value_text": null
+                  },
+                  "k_broadening": null,
+                  "k_grid": null,
+                  "q_grid": null,
+                  "q_grid_interpolated": null,
+                  "supercell": null,
+                  "temperature_k": null
+                },
+                "sscha": null,
+                "vibrational_treatment": "harmonic"
+              },
+              "method_variant_status": "Eliashberg variant not specified",
+              "parameters": {
+                "extensions": [
+                  {
+                    "key": "omega_log_reported",
+                    "value_kind": "text",
+                    "value_raw": "1,591",
+                    "unit_raw": "K",
+                    "reported": {
+                      "evidences": null,
+                      "reported": true,
+                      "unit_raw": "K",
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 1591,
+                      "value_raw": "1,591",
+                      "value_text": null
+                    }
+                  }
+                ],
+                "lambda_ep": 1.12,
+                "mu_star": 0.1,
+                "omega_log": 1591.0
+              },
+              "table_row_ref": {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "group": null,
+                "row_index": 2,
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9"
+              },
+              "tc_group": {
+                "version": 1,
+                "group_key": "fill-2535c6149559f666c5842b89",
+                "method_key": "fill-0ceca6bb04ff6391a1aa2309",
+                "point_key": "7d5200bfdadb6d2b4cc64e66"
+              }
+            },
+            "evidences": [
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "c62fa4e49a6479e708830bee348b205c03afbc2e30cd7f0aa351392cb115421a",
+                "bbox": [
+                  71.36475036621094,
+                  494.84716650390624,
+                  506.5727362060547,
+                  505.80897082519533
+                ],
+                "polygon": null,
+                "quote": "Table S1. T _ { c } of La-H and Y-H systems at different pressures calculated using the McMillan and Eliashberg equations",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "7bbcc317d6b86b47b4bbccd9a1ced8b4417cd3c38b0dd50282abbba28bc7410d",
+                "bbox": [
+                  393.10701,
+                  511.8809836,
+                  441.92522319999995,
+                  528.6178736544
+                ],
+                "polygon": null,
+                "quote": "Tc, K; μ* = 0.1 Eliashberg",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "b8cb306ec4eb7ed6fd1da34cf8f3493aa5ab7b7c0a7f0525397bc5fcadeb9fe1",
+                "bbox": [
+                  145.2472,
+                  547.7675836,
+                  157.62199515999998,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "300",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "8a77ad5683d76a787c07b5aa006a84027ec16e0d3b1ca0106f521ef52e9108d5",
+                "bbox": [
+                  190.37537763999998,
+                  547.7675836,
+                  204.76830597999995,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "1.12",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "61986d848c1d54ad99d648807936c9d6d9ed8d97bcfddb1c8755baa1f129eacd",
+                "bbox": [
+                  223.08841239999995,
+                  547.7675836,
+                  241.60652151999992,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "1,591",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "e85f9728362f4bbd45e7f6f2ff41336fd2ceb4250869232e0559868ee11f2ed8",
+                "bbox": [
+                  411.3673118799999,
+                  547.7675836,
+                  423.74210703999984,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "150",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "2047cb439ea1d205ba3c5571d16eccb8b568112e4e54106d478c19d7931eda71",
+                "bbox": [
+                  220.42142,
+                  521.8589836,
+                  244.3336014,
+                  529.3505111439999
+                ],
+                "polygon": null,
+                "quote": "wlog, K",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 1,
+                "printed_page": null,
+                "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+                "bbox": [
+                  297.15814086914065,
+                  177.73782720947267,
+                  549.8595520019531,
+                  470.57459979248046
+                ],
+                "polygon": null,
+                "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17).",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 1
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "d562424546ebe7b1ec282ee3d51acd14b550d7fcb387b655861cd6f2e722ad88",
+                "bbox": [
+                  297.74309783935547,
+                  299.10066076660155,
+                  548.6896380615234,
+                  380.5312071533203
+                ],
+                "polygon": null,
+                "quote": "consistent with previous theoretical (15) and experimental studies ( T _ { c } = 1 7 \\; \\dot { \\bf K } at 89 GPa) (49).All of our calculations were carried out using the harmonic approximation. It is well known that in many hydrides anharmonicity tends to lower \\overline { { [ T _ { c } ] ( 5 0 ) } } . For the well-studied \\overline { { \\mathrm { S H } _ { 3 } } } system, however, such an effect is weak: T _ { c } is lowered from its harmonic 204 K value (24) only to 194 K (21) at 250 GPa, and both are close to the reported experiment T _ { c } at that pressure (20).",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 5
+              }
+            ],
+            "is_representative": false,
+            "basis_kind": "paper_quote"
+          },
+          {
+            "record_key": "fill-5f39df46ca676dfef41bbc856bcf",
+            "module_code": "superconductive_properties",
+            "record_type": "predicted_tc",
+            "property_code": "tc",
+            "custom_property_key": null,
+            "definition_key": "record.superconductive_properties.predicted_tc.unknown",
+            "definition_version": 2,
+            "name_raw": "Tc",
+            "value_kind": "number",
+            "value_raw": "138",
+            "value_number": 138,
+            "value_min": null,
+            "value_max": null,
+            "value_text": null,
+            "value_boolean": null,
+            "uncertainty": null,
+            "unit_raw": "K",
+            "canonical_unit": "K",
+            "method_code": "unknown",
+            "method_raw": "Eliashberg",
+            "criterion_code": null,
+            "criterion_raw": null,
+            "structure_key": null,
+            "payload": {
+              "calculation_conditions": {
+                "calculation_code": "Quantum-ESPRESSO",
+                "electronic_method": "DFT",
+                "epw": null,
+                "exchange_correlation_functional": null,
+                "phonon_method": "density functional perturbation theory",
+                "qe": {
+                  "atoms": null,
+                  "charge_density_cutoff": null,
+                  "convergence_energy": null,
+                  "convergence_force": null,
+                  "energy_cutoff": {
+                    "evidences": null,
+                    "reported": true,
+                    "unit_raw": "Ry",
+                    "value_boolean": null,
+                    "value_kind": "number",
+                    "value_max": null,
+                    "value_min": null,
+                    "value_number": 80,
+                    "value_raw": "80",
+                    "value_text": null
+                  },
+                  "k_broadening": null,
+                  "k_grid": null,
+                  "q_grid": null,
+                  "q_grid_interpolated": null,
+                  "supercell": null,
+                  "temperature_k": null
+                },
+                "sscha": null,
+                "vibrational_treatment": "harmonic"
+              },
+              "method_variant_status": "Eliashberg variant not specified",
+              "parameters": {
+                "extensions": [
+                  {
+                    "key": "omega_log_reported",
+                    "value_kind": "text",
+                    "value_raw": "1,591",
+                    "unit_raw": "K",
+                    "reported": {
+                      "evidences": null,
+                      "reported": true,
+                      "unit_raw": "K",
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 1591,
+                      "value_raw": "1,591",
+                      "value_text": null
+                    }
+                  }
+                ],
+                "lambda_ep": 1.12,
+                "mu_star": 0.13,
+                "omega_log": 1591.0
+              },
+              "table_row_ref": {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "group": null,
+                "row_index": 2,
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9"
+              },
+              "tc_group": {
+                "version": 1,
+                "group_key": "fill-2535c6149559f666c5842b89",
+                "method_key": "fill-0ceca6bb04ff6391a1aa2309",
+                "point_key": "8f6aef235969e89cc4c14d84"
+              }
+            },
+            "evidences": [
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "e722a1a8773d8472c9e9008b35fc718a5dff946ddb3cc40e6d0b57b689b5558b",
+                "bbox": [
+                  457.62423,
+                  511.8809836,
+                  510.5655167999999,
+                  528.6178736544
+                ],
+                "polygon": null,
+                "quote": "Tc, K; μ* = 0.13 Eliashberg",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "b8cb306ec4eb7ed6fd1da34cf8f3493aa5ab7b7c0a7f0525397bc5fcadeb9fe1",
+                "bbox": [
+                  145.2472,
+                  547.7675836,
+                  157.62199515999998,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "300",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "8a77ad5683d76a787c07b5aa006a84027ec16e0d3b1ca0106f521ef52e9108d5",
+                "bbox": [
+                  190.37537763999998,
+                  547.7675836,
+                  204.76830597999995,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "1.12",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "61986d848c1d54ad99d648807936c9d6d9ed8d97bcfddb1c8755baa1f129eacd",
+                "bbox": [
+                  223.08841239999995,
+                  547.7675836,
+                  241.60652151999992,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "1,591",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "8b9712f1cf9827f441d3a50419d675edad39cd6cef6ad71d2204de232bad2adf",
+                "bbox": [
+                  477.92535909999987,
+                  547.7675836,
+                  490.2994070799998,
+                  554.5266336544
+                ],
+                "polygon": null,
+                "quote": "138",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "2047cb439ea1d205ba3c5571d16eccb8b568112e4e54106d478c19d7931eda71",
+                "bbox": [
+                  220.42142,
+                  521.8589836,
+                  244.3336014,
+                  529.3505111439999
+                ],
+                "polygon": null,
+                "quote": "wlog, K",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "text_layer",
+                "table_id": "a1c8abd1c0323eed522894600a0df5cd48916aea4a2ec3e7d284d4c6195f34e9",
+                "figure_id": null,
+                "page": 5
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 1,
+                "printed_page": null,
+                "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+                "bbox": [
+                  297.15814086914065,
+                  177.73782720947267,
+                  549.8595520019531,
+                  470.57459979248046
+                ],
+                "polygon": null,
+                "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17).",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 1
+              },
+              {
+                "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+                "source_version": 1,
+                "pdf_page": 5,
+                "printed_page": null,
+                "block_id": "d562424546ebe7b1ec282ee3d51acd14b550d7fcb387b655861cd6f2e722ad88",
+                "bbox": [
+                  297.74309783935547,
+                  299.10066076660155,
+                  548.6896380615234,
+                  380.5312071533203
+                ],
+                "polygon": null,
+                "quote": "consistent with previous theoretical (15) and experimental studies ( T _ { c } = 1 7 \\; \\dot { \\bf K } at 89 GPa) (49).All of our calculations were carried out using the harmonic approximation. It is well known that in many hydrides anharmonicity tends to lower \\overline { { [ T _ { c } ] ( 5 0 ) } } . For the well-studied \\overline { { \\mathrm { S H } _ { 3 } } } system, however, such an effect is weak: T _ { c } is lowered from its harmonic 204 K value (24) only to 194 K (21) at 250 GPa, and both are close to the reported experiment T _ { c } at that pressure (20).",
+                "parser": "complementary",
+                "parser_version": "1",
+                "source_kind": "ocr",
+                "table_id": null,
+                "figure_id": null,
+                "page": 5
+              }
+            ],
+            "is_representative": false,
+            "basis_kind": "paper_quote"
+          }
+        ],
+        "module_key": "module-superconductive_properties",
+        "definition_key": "module.superconductive_properties",
+        "definition_version": 1,
+        "metadata": {}
+      }
+    ],
+    "schema_version": 2,
+    "evidences": [
+      {
+        "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+        "source_version": 1,
+        "pdf_page": 1,
+        "printed_page": null,
+        "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+        "bbox": [
+          297.15814086914065,
+          177.73782720947267,
+          549.8595520019531,
+          470.57459979248046
+        ],
+        "polygon": null,
+        "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17).",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null,
+        "page": 1
+      },
+      {
+        "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+        "source_version": 1,
+        "pdf_page": 3,
+        "printed_page": null,
+        "block_id": "2d2394200ff66162493cc4b4dc1ca6203efec1c8f3e43a8e5924f37cfebde19a",
+        "bbox": [
+          298.3280548095703,
+          342.9478780517578,
+          547.5197241210938,
+          367.2204447631836
+        ],
+        "polygon": null,
+        "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "ocr",
+        "table_id": null,
+        "figure_id": null,
+        "page": 3
+      },
+      {
+        "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+        "source_version": 1,
+        "pdf_page": 6,
+        "printed_page": null,
+        "block_id": "d52880ec112b0fc99ca7573cb075c37112b79d43ba0896049415a9822fd5aac6",
+        "bbox": [
+          111.18095290102065,
+          529.3750786781311,
+          129.87680566310883,
+          537.1994128227234
+        ],
+        "polygon": null,
+        "quote": "LaH8",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "209f26e292994b4118d6a4e134f6d21998e6eafb6f65f730e4cbf9594edb2c66",
+        "figure_id": null,
+        "page": 6
+      },
+      {
+        "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+        "source_version": 1,
+        "pdf_page": 6,
+        "printed_page": null,
+        "block_id": "ec6b349ec1df5ea435f94412f54b97bc7f3e9f538e528a8578e828976040d143",
+        "bbox": [
+          181.47836610674858,
+          529.3671221733093,
+          194.52477514743805,
+          537.3097996711731
+        ],
+        "polygon": null,
+        "quote": "300",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "209f26e292994b4118d6a4e134f6d21998e6eafb6f65f730e4cbf9594edb2c66",
+        "figure_id": null,
+        "page": 6
+      },
+      {
+        "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+        "source_version": 1,
+        "pdf_page": 6,
+        "printed_page": null,
+        "block_id": "14cae66c8c420ab9425660810fc1ef23e3a9a948a98cb8b1844b4b1d5a097e1f",
+        "bbox": [
+          235.1126529276371,
+          529.0594835281372,
+          254.65744093060493,
+          537.3348665237427
+        ],
+        "polygon": null,
+        "quote": "C2/m",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "209f26e292994b4118d6a4e134f6d21998e6eafb6f65f730e4cbf9594edb2c66",
+        "figure_id": null,
+        "page": 6
+      },
+      {
+        "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+        "source_version": 1,
+        "pdf_page": 6,
+        "printed_page": null,
+        "block_id": "fa1c28c933261e6f99f61f75151d6c8241af807d0682f2632cdd3f2be526231c",
+        "bbox": [
+          391.52177000045776,
+          524.550733089447,
+          469.3724822998047,
+          706.9150036544
+        ],
+        "polygon": null,
+        "quote": "La 0.508 0.508 0.221 H 0.731 0.233 0.413 H 0.766 0.268 0.586 H 0.268 0.766 0.586 H 0.233 0.731 0.413 H 0.738 0.738 0.133 H 0.998 0.998 0.639 H 0.932 0.932 0.874 H 0.241 0.241 0.419 H 0.701 0.701 0.670 H 0.261 0.261 0.866 H 0.001 0.001 0.360 H 0.067 0.067 0.125 H 0.758 0.758 0.580 H 0.298 0.298 0.329 H 0.252 0.747-0.000 H 0.747 0.252-0.000",
+        "parser": "complementary",
+        "parser_version": "1",
+        "source_kind": "text_layer",
+        "table_id": "209f26e292994b4118d6a4e134f6d21998e6eafb6f65f730e4cbf9594edb2c66",
+        "figure_id": null,
+        "page": 6
+      }
+    ],
+    "field_evidence": {
+      "material": [
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+          "source_version": 1,
+          "pdf_page": 1,
+          "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17)."
+        },
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2d2394200ff66162493cc4b4dc1ca6203efec1c8f3e43a8e5924f37cfebde19a",
+          "source_version": 1,
+          "pdf_page": 3,
+          "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "d52880ec112b0fc99ca7573cb075c37112b79d43ba0896049415a9822fd5aac6",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "LaH8"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "ec6b349ec1df5ea435f94412f54b97bc7f3e9f538e528a8578e828976040d143",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "300"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "14cae66c8c420ab9425660810fc1ef23e3a9a948a98cb8b1844b4b1d5a097e1f",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "C2/m"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "fa1c28c933261e6f99f61f75151d6c8241af807d0682f2632cdd3f2be526231c",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "La 0.508 0.508 0.221 H 0.731 0.233 0.413 H 0.766 0.268 0.586 H 0.268 0.766 0.586 H 0.233 0.731 0.413 H 0.738 0.738 0.133 H 0.998 0.998 0.639 H 0.932 0.932 0.874 H 0.241 0.241 0.419 H 0.701 0.701 0.670 H 0.261 0.261 0.866 H 0.001 0.001 0.360 H 0.067 0.067 0.125 H 0.758 0.758 0.580 H 0.298 0.298 0.329 H 0.252 0.747-0.000 H 0.747 0.252-0.000"
+        }
+      ],
+      "pressure_value_gpa": [
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+          "source_version": 1,
+          "pdf_page": 1,
+          "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17)."
+        },
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2d2394200ff66162493cc4b4dc1ca6203efec1c8f3e43a8e5924f37cfebde19a",
+          "source_version": 1,
+          "pdf_page": 3,
+          "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "d52880ec112b0fc99ca7573cb075c37112b79d43ba0896049415a9822fd5aac6",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "LaH8"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "ec6b349ec1df5ea435f94412f54b97bc7f3e9f538e528a8578e828976040d143",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "300"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "14cae66c8c420ab9425660810fc1ef23e3a9a948a98cb8b1844b4b1d5a097e1f",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "C2/m"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "fa1c28c933261e6f99f61f75151d6c8241af807d0682f2632cdd3f2be526231c",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "La 0.508 0.508 0.221 H 0.731 0.233 0.413 H 0.766 0.268 0.586 H 0.268 0.766 0.586 H 0.233 0.731 0.413 H 0.738 0.738 0.133 H 0.998 0.998 0.639 H 0.932 0.932 0.874 H 0.241 0.241 0.419 H 0.701 0.701 0.670 H 0.261 0.261 0.866 H 0.001 0.001 0.360 H 0.067 0.067 0.125 H 0.758 0.758 0.580 H 0.298 0.298 0.329 H 0.252 0.747-0.000 H 0.747 0.252-0.000"
+        }
+      ],
+      "reported_space_group_symbol": [
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+          "source_version": 1,
+          "pdf_page": 1,
+          "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17)."
+        },
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2d2394200ff66162493cc4b4dc1ca6203efec1c8f3e43a8e5924f37cfebde19a",
+          "source_version": 1,
+          "pdf_page": 3,
+          "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "d52880ec112b0fc99ca7573cb075c37112b79d43ba0896049415a9822fd5aac6",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "LaH8"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "ec6b349ec1df5ea435f94412f54b97bc7f3e9f538e528a8578e828976040d143",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "300"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "14cae66c8c420ab9425660810fc1ef23e3a9a948a98cb8b1844b4b1d5a097e1f",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "C2/m"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "fa1c28c933261e6f99f61f75151d6c8241af807d0682f2632cdd3f2be526231c",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "La 0.508 0.508 0.221 H 0.731 0.233 0.413 H 0.766 0.268 0.586 H 0.268 0.766 0.586 H 0.233 0.731 0.413 H 0.738 0.738 0.133 H 0.998 0.998 0.639 H 0.932 0.932 0.874 H 0.241 0.241 0.419 H 0.701 0.701 0.670 H 0.261 0.261 0.866 H 0.001 0.001 0.360 H 0.067 0.067 0.125 H 0.758 0.758 0.580 H 0.298 0.298 0.329 H 0.252 0.747-0.000 H 0.747 0.252-0.000"
+        }
+      ],
+      "reported_space_group_number": [
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+          "source_version": 1,
+          "pdf_page": 1,
+          "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17)."
+        },
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2d2394200ff66162493cc4b4dc1ca6203efec1c8f3e43a8e5924f37cfebde19a",
+          "source_version": 1,
+          "pdf_page": 3,
+          "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "d52880ec112b0fc99ca7573cb075c37112b79d43ba0896049415a9822fd5aac6",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "LaH8"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "ec6b349ec1df5ea435f94412f54b97bc7f3e9f538e528a8578e828976040d143",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "300"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "14cae66c8c420ab9425660810fc1ef23e3a9a948a98cb8b1844b4b1d5a097e1f",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "C2/m"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "fa1c28c933261e6f99f61f75151d6c8241af807d0682f2632cdd3f2be526231c",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "La 0.508 0.508 0.221 H 0.731 0.233 0.413 H 0.766 0.268 0.586 H 0.268 0.766 0.586 H 0.233 0.731 0.413 H 0.738 0.738 0.133 H 0.998 0.998 0.639 H 0.932 0.932 0.874 H 0.241 0.241 0.419 H 0.701 0.701 0.670 H 0.261 0.261 0.866 H 0.001 0.001 0.360 H 0.067 0.067 0.125 H 0.758 0.758 0.580 H 0.298 0.298 0.329 H 0.252 0.747-0.000 H 0.747 0.252-0.000"
+        }
+      ],
+      "state_kind": [
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+          "source_version": 1,
+          "pdf_page": 1,
+          "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17)."
+        },
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2d2394200ff66162493cc4b4dc1ca6203efec1c8f3e43a8e5924f37cfebde19a",
+          "source_version": 1,
+          "pdf_page": 3,
+          "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "d52880ec112b0fc99ca7573cb075c37112b79d43ba0896049415a9822fd5aac6",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "LaH8"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "ec6b349ec1df5ea435f94412f54b97bc7f3e9f538e528a8578e828976040d143",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "300"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "14cae66c8c420ab9425660810fc1ef23e3a9a948a98cb8b1844b4b1d5a097e1f",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "C2/m"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "fa1c28c933261e6f99f61f75151d6c8241af807d0682f2632cdd3f2be526231c",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "La 0.508 0.508 0.221 H 0.731 0.233 0.413 H 0.766 0.268 0.586 H 0.268 0.766 0.586 H 0.233 0.731 0.413 H 0.738 0.738 0.133 H 0.998 0.998 0.639 H 0.932 0.932 0.874 H 0.241 0.241 0.419 H 0.701 0.701 0.670 H 0.261 0.261 0.866 H 0.001 0.001 0.360 H 0.067 0.067 0.125 H 0.758 0.758 0.580 H 0.298 0.298 0.329 H 0.252 0.747-0.000 H 0.747 0.252-0.000"
+        }
+      ],
+      "structure_optimization": [
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2ffedbcb745e9d602239f9f6eec7c330942766e0b19158842066629fea82ae1d",
+          "source_version": 1,
+          "pdf_page": 1,
+          "quote": "predicted superconducting T _ { c } s are MgH6(271 K at 300 GPa) (29), CaH6 (235 K at 150 GPa) ( 1 7 ) , and \\mathrm { Y H _ { 6 } } (264 K at 120 GPa) (30). In searching for other high-Tc superconducting hydrides, here we investigated theoretically possible high-pressure crystal structures of La-H and Y-H. We predict the existence of new stable hydride phases of these elements, with remarkably high T _ { c } s at attainable pressures. The search for low-energy crystalline structures of La-H was performed using particle swarm optimization methodology implemented in the CALYPSO code (31, 32). This method has been applied successfully to a wide range of crystalline systems ranging from elemental solids to binary and ternary compounds (33–35) and has proven to be a powerful tool for predicting crystal structures at high pressures (36–39). Structure searches were performed in the pressure range of 150–300 GPa using models consisting of 1–4 formula units. In general, the structure search was terminated after the generation of 1,500 structures. Structural optimizations, enthalpies, electronic structures, and phonons were calculated using density-functional theory (DFT). Structure relaxations were performed using DFT using the Perdew-Burke-Ernzerhof (40) generalized gradient approximation. Phonon dispersion and electron-phonon coupling (EPC) calculations were performed with density functional perturbation theory. Ultrasoft pseudopotentials for La and H were used with a kinetic energy cutoff of 80 Ry. A q mesh of 6 × 6 × 6 and k mesh of 24 × 24 × 24 for fcc-LaH10 structure in the first Brillouin zone (BZ) was used in the EPC calculations. The superconductivity calculations were performed with the Quantum-ESPRESSO package (17)."
+        },
+        {
+          "file_id": "86658ceedbbf4d2f9f6d43b81f9cb8a8",
+          "block_id": "2d2394200ff66162493cc4b4dc1ca6203efec1c8f3e43a8e5924f37cfebde19a",
+          "source_version": 1,
+          "pdf_page": 3,
+          "quote": "The calculated electron-coupling parameter for Laß \\mathrm { I _ { 8 } } at 300 GPa is relatively large ( \\lambda   =   1 . 1 2 ) , and the calculated T _ { c } is 114–131 K,"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "d52880ec112b0fc99ca7573cb075c37112b79d43ba0896049415a9822fd5aac6",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "LaH8"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "ec6b349ec1df5ea435f94412f54b97bc7f3e9f538e528a8578e828976040d143",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "300"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "14cae66c8c420ab9425660810fc1ef23e3a9a948a98cb8b1844b4b1d5a097e1f",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "C2/m"
+        },
+        {
+          "file_id": "7800f5713ac44ba38f32739cb1eb46aa",
+          "block_id": "fa1c28c933261e6f99f61f75151d6c8241af807d0682f2632cdd3f2be526231c",
+          "source_version": 1,
+          "pdf_page": 6,
+          "quote": "La 0.508 0.508 0.221 H 0.731 0.233 0.413 H 0.766 0.268 0.586 H 0.268 0.766 0.586 H 0.233 0.731 0.413 H 0.738 0.738 0.133 H 0.998 0.998 0.639 H 0.932 0.932 0.874 H 0.241 0.241 0.419 H 0.701 0.701 0.670 H 0.261 0.261 0.866 H 0.001 0.001 0.360 H 0.067 0.067 0.125 H 0.758 0.758 0.580 H 0.298 0.298 0.329 H 0.252 0.747-0.000 H 0.747 0.252-0.000"
+        }
+      ]
+    },
+    "material_dimensionality": "unknown",
+    "structure_families": [],
+    "crystal_system": "monoclinic",
+    "element_count": 2
+  }
+}

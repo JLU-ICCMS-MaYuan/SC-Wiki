@@ -27,3 +27,15 @@ test_tc_contexts.py；test_tc_groups_mysql.py；predicted-tc-groups.test.tsx；�
 最终候选独立于共享工作区导出；TypeScript 与生产构建通过。汇总见 [联合验证](../192-handoff-snapshots/assets/verification.json)。Tc 的配对缓存、首次保存基线、事务回滚和批量审核均有故障回放；RR 两会话覆盖与陈旧交接检查使用真实 MySQL。冻结谱只读取提供的数据，人工资料在合法经手人之间覆盖，原提供者与旧附件保持。
 
 [独立旧回归基线](../192-handoff-snapshots/assets/legacy-baseline.json)记录两套旧管理端用例在 a871fbbd 与本轮均为 6 通过／18 失败，逐项状态一致；旧 human 用例两侧均因重复审批当前已通过字段而失败。原测试保留，没有将其计入本轮通过或删除断言掩盖失败。
+
+## 2026-11-04 黑盒衔接复核
+
+验证脚本原先把空列表传入form_sources，导致没有整理来源；接入真实文件角色和IR块后，LLM2/gpt-6.1-sol正式整理完成，LaH8/300GPa的McMillan两点131/.1、114/.13及相邻Eliashberg结果均保留。此前新提取响应来自本轮真实调用，续接时未重复提取，来源/响应摘要在本轮tc-identity-handoff及tc-live-correct-sources目录。
+
+第一次隔离比较只差模块metadata缺省到空对象；按原正式map_draft读取投影建立明确预期后，全部科学值、方法、原文、来源和关系严格相等。第二次并行状态比较只有任务updated_at变化，不计为原任务不变通过；之后对本轮真实完整请求逐字相等的固定重放、来源定位、防遗漏和隔离SQL重读通过，原任务缓存完整字节未变。证据为tests/TestForRealScenario/runs/20261104T043104Z-lah-324f7fe6/tc-live-roundtrip-replay/report.json；该重放未调用模型，不能冒充另一轮真实AI。
+
+标题单点/两点回归先失败后通过，名称均保持solver A；Go用例已改为实际引用版本1及method_raw_owner=point。最终候选重新导出、共享回归及真实网页五阶段仍在执行，未推送或部署其他环境。
+
+最终候选已按allowlist重新导出并补入property_evidence.py，基础提交及逐文件SHA见本轮final-isolated-candidate-manifest.json。最终102项后端、13项前端定向、163项四宿主、科学字段契约、Go实际引用版本1/逐点标记及构建通过。清空具体名称保留空输入及原文，按既有必填校验不冒充有效方法；切换标准方法仅展开当前方法，另一方法记录完整不变。真实源后处理/整理和严格重放另明确验证Eliashberg的150/.1、138/.13，不推断各向同性。
+
+交接扩展检查的7项后端、8项MySQL及1项Go图表失败，已在其独立未修改基线上复现，日志归档在tc-identity-handoff；不把这些扩展失败计作本轮通过。当前定向102项及真实业务网页范围分别计数，不把隔离SQL、未执行的扩展范围或构建等同于完整黑盒。第五轮新上传和五阶段仍未完成。
