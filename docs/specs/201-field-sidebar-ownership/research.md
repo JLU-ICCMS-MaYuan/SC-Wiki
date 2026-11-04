@@ -1,6 +1,6 @@
 # 设计依据与取舍
 
-主路径遗漏，不是历史数据兼容或数据库问题。调查代码和重放见[依据](../../investigations/2026-11-02-pending-count/sidebar-evidence.json)。
+主路径遗漏，不是历史数据兼容或数据库问题。调查代码和重放见[依据](assets/investigation/sidebar-evidence.json)。
 
 后台已有settings_field/settings_part与扩展field_key，前端需使用它们，不增加永久父字段数据。旧数据无设置地址时沿用原精确匹配与兜底，不猜归属。
 

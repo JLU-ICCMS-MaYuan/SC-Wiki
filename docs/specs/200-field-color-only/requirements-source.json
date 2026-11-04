@@ -4,14 +4,14 @@
     "认可。开始为每个目标新建 issue，spec。然后开始落地实现所有的代码。"
   ],
   "实施授权": "认可。开始为每个目标新建 issue，spec。然后开始落地实现所有的代码。",
-  "已确认方案": "docs/investigations/2026-11-01-field-status-text/goal-5.md",
+  "已确认方案": "docs/specs/200-field-color-only/assets/investigation/goal-5.md",
   "确认": "各目标逐一讨论并获得认可；本轮授权为每项目标新建Issue、Spec并实施。",
   "images": [
     {
       "id": "IMG-001",
       "upload_order": 1,
       "original_name": "codex-clipboard-15863996-77cf-4704-ada8-a247dda3310e.png",
-      "locator": "docs/investigations/2026-11-01-basic-field-review/screenshot.png",
+      "locator": "docs/specs/199-basic-field-model-review/assets/investigation/screenshot.png",
       "status": "local_verified",
       "sha256": "e118c92c0e67da09cb15ac85873852a2ae0db5a64d56d7c5552b62378985d753",
       "related": [
@@ -24,7 +24,7 @@
       ],
       "media_type": "image/png",
       "user_context": "另外这里每个待核对的字段后面都带上了“待核对”三个字，我之前没有要求过这个内容，为什么你要给我加上？我什么时候要求了，只需要按照之前的要求标红带核对项就行了。",
-      "verification": "原字节解码、尺寸与SHA-256验证；仅本地可读，远程未推送。"
+      "verification": "原字节解码、尺寸与SHA-256验证；仅本地可读，远程未推送。 2026-11-04归档到既有Spec后重新核验，原始字节及摘要不变。"
     }
   ],
   "后续运行授权原话": [

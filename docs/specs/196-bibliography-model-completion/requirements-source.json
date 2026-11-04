@@ -5,7 +5,7 @@
     "认可，这样就能在核对的时候通过大模型补全。"
   ],
   "实施授权": "认可。开始为每个目标新建 issue，spec。然后开始落地实现所有的代码。",
-  "已确认方案": "docs/investigations/2026-11-01-bibliography/goal-1.md",
+  "已确认方案": "docs/specs/196-bibliography-model-completion/assets/investigation/goal-1.md",
   "确认": "各目标逐一讨论并获得认可；本轮授权为每项目标新建Issue、Spec并实施。",
   "images": [],
   "后续运行授权原话": [

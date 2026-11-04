@@ -19,4 +19,4 @@ flowchart TD
 
 建议补齐所属字段映射，在侧栏分别展示子项结论，不合并科学判定、不扩大依赖。“计算适用关系”尚缺可见归属入口，需单独处理。本次未实施。
 
-依据：[#148](../../specs/148-sidebar-field-editing/spec.md)、[#200](../../specs/200-field-color-only/spec.md)、[代码与重放](sidebar-evidence.json)。
+依据：[#148](../../../148-sidebar-field-editing/spec.md)、[#200](../../../200-field-color-only/spec.md)、[代码与重放](sidebar-evidence.json)。

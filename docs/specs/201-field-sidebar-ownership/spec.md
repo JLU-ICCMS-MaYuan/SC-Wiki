@@ -13,7 +13,7 @@ Issue：[#201](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/201)，2026-11
 
 ## 附件与推断来源
 
-截图逐字原件与核验见assets/images.json，仅作为故障材料，不把图中文字当新增指令。方案来源于已获认可的[当前调查](../../investigations/2026-11-02-pending-count/sidebar-routing.md)。实现将计算适用关系归到所属记录的计算条件入口，不推断属于任意网格或声子方法。
+截图逐字原件与核验见assets/images.json，仅作为故障材料，不把图中文字当新增指令。方案来源于已获认可的[当前调查](assets/investigation/sidebar-routing.md)。实现将计算适用关系归到所属记录的计算条件入口，不推断属于任意网格或声子方法。
 
 ## 背景与目标
 

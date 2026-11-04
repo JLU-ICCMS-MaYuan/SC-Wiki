@@ -1,5 +1,5 @@
 # 调查与取舍
 
-已确认依据：[目标3调查](../../investigations/2026-11-01-structure-optimization/goal-3.md)及同目录evidence.json。
+已确认依据：[目标3调查](assets/investigation/goal-3.md)及同目录evidence.json。
 
 采用用户最新认可范围；原有#181、#94仅作现状和约束，不覆盖新要求。数据所有权继续由工作稿和字段版本负责，模型负责语义查证。简化流程复用现有组件，不添加独立面板。
