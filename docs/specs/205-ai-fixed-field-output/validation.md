@@ -38,3 +38,9 @@
 ## 后续验收闭合（#206）
 
 用户另行批准新建Issue/Spec实施查图方案，已由#206完成。真实PDF第10页送入LLM2，两次调用得到50 GPa候选与具体原图依据；正式审核结果隔离保存重读保持来源、理由及human_confirmed=false。此前未完成的压力理由路径现已验证，不改写上面的失败历史。详见[验收记录](../206-pdf-page-tool-contract/validation.md)。
+
+## 2026-11-04 La-H空条件投影故障
+
+本机真实任务4d639f2fc0384cba9550db7cb31f9fea的SI首次响应通过当前EXTRACTION_OUTPUT_SCHEMA；decode_optional_containers按原协议将null解码为缺省后，normalize_extraction→validate_record以invalid_condition_type拒绝，错误消息仅为“科学数据校验失败”，触发既有一次重试。完整原响应、原始schema/输入与调用记录已保存在tests/TestForRealScenario/runs/20261104T043104Z-lah-324f7fe6/si-initial-failure/。
+
+最小化真实单记录夹具先证明1失败、2保护项通过；修复后合法缺省仅建立空容器，原数字、参数和原引用保留，非法键与错类型仍拒绝。原始完整8状态响应另在隔离内存沿正式后处理重放通过，不写业务数据、不调用模型。定向71项通过，含#176/#194相邻回归。完整新PDF网页重跑和五阶段流程继续；本次回放不算真实重新提取或黑盒完成。

@@ -389,6 +389,9 @@ def normalize_extraction(raw: dict, *, allowed_blocks: set[tuple[str, int, str]]
         for module in state["property_modules"]:
             for record in module["records"]:
                 normalize_extracted_conditions(record)
+                # #205的合法可选容器缺省仅投影为空表单，不补任何科学条件。
+                if record["record_type"] == "predicted_tc":
+                    record["payload"].setdefault("calculation_conditions", {})
     for state in result["material_states"]:
         for node in [state, *(r for m in state["property_modules"] for r in m["records"])]:
             for evidence in node["evidences"]:

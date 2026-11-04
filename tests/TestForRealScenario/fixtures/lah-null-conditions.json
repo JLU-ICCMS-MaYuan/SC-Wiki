@@ -1,0 +1,309 @@
+{
+  "source": "4d639f2fc0384cba9550db7cb31f9fea SI首次真实响应的单记录最小化固定回放，不是新提取",
+  "response": {
+    "coverage_exclusions": [],
+    "extraction_version": "1",
+    "key_findings": [
+      {
+        "evidences": [
+          {
+            "block_id": "7405f2ead527e2076feaee33bb24eafb1550f9e5f381655bd90f5997d1ec781d",
+            "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+            "pdf_page": 1,
+            "quote": null,
+            "quote_id": "7405f2ead527e2076feaee33bb24eafb1550f9e5f381655bd90f5997d1ec781d"
+          }
+        ],
+        "scope": "current_paper",
+        "value": "McMillan and Eliashberg calculations give similar transition temperatures at small electron–phonon coupling, whereas Eliashberg calculations predict higher temperatures at larger coupling."
+      }
+    ],
+    "material_states": [
+      {
+        "basis_kind": "paper_quote",
+        "evidences": [
+          {
+            "block_id": "d5bdf5ea3052231e6d8d10f0f8c14bfabc6fe3e24eae2bb0d8b5d3430f85486e",
+            "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+            "pdf_page": 5,
+            "quote": "LaH4",
+            "quote_id": null
+          },
+          {
+            "block_id": "366282374770277db0555753c6bdce2da0b144204e4a955a93d958fc60924bc2",
+            "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+            "pdf_page": 5,
+            "quote": "300",
+            "quote_id": null
+          },
+          {
+            "block_id": "477e1443bb6b2565cd749ea11f83b38f1eea13a90b62776371076b1b6faad6e4",
+            "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+            "pdf_page": 6,
+            "quote": "I4/mmm",
+            "quote_id": null
+          }
+        ],
+        "material": "LaH4",
+        "material_dimensionality": "unknown",
+        "material_family": null,
+        "material_name": null,
+        "pressure_value_gpa": 300,
+        "property_modules": [
+          {
+            "module_code": "superconductive_properties",
+            "records": [
+              {
+                "basis_kind": "paper_quote",
+                "canonical_unit": "K",
+                "criterion_code": null,
+                "criterion_raw": null,
+                "evidences": [
+                  {
+                    "block_id": "d2744e54c35d19e9a171eac5a5c95d7031953adf86e9062305eb27dcf90f482d",
+                    "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+                    "pdf_page": 5,
+                    "quote": "10",
+                    "quote_id": null
+                  },
+                  {
+                    "block_id": "db2ded680ee91529f42ded1c044ff767d46e4b28b1ea7d184269754a988eb8fc",
+                    "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+                    "pdf_page": 5,
+                    "quote": null,
+                    "quote_id": "db2ded680ee91529f42ded1c044ff767d46e4b28b1ea7d184269754a988eb8fc"
+                  },
+                  {
+                    "block_id": "8a59682e298faead222e1eff069a0f8c4000a347f9bdcbfd947e01b3682d20c8",
+                    "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+                    "pdf_page": 5,
+                    "quote": "0.43",
+                    "quote_id": null
+                  },
+                  {
+                    "block_id": "38b0ccd9695fdbed64f9f2069b4af6f92655a1e9de8c1b0a3154335b6c63eb6b",
+                    "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+                    "pdf_page": 5,
+                    "quote": "1,624",
+                    "quote_id": null
+                  },
+                  {
+                    "block_id": "a163bb2ecc48f91ca70f3032691ed77c4a7a941cce12821336e46f8dbed5488c",
+                    "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+                    "pdf_page": 5,
+                    "quote": "wlog, K",
+                    "quote_id": null
+                  }
+                ],
+                "is_representative": false,
+                "method_code": "mcmillan",
+                "method_raw": "McMillan",
+                "module_code": "superconductive_properties",
+                "name_raw": "Tc",
+                "payload": {
+                  "calculation_conditions": null,
+                  "method_variant_status": null,
+                  "parameters": {
+                    "extensions": [],
+                    "lambda_ep": 0.43,
+                    "mu_star": 0.1,
+                    "omega_log": {
+                      "evidences": null,
+                      "reported": true,
+                      "unit_raw": "K",
+                      "value_boolean": null,
+                      "value_kind": "number",
+                      "value_max": null,
+                      "value_min": null,
+                      "value_number": 1624,
+                      "value_raw": "1,624",
+                      "value_text": null
+                    }
+                  },
+                  "table_row_ref": {
+                    "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+                    "group": null,
+                    "row_index": 1,
+                    "table_id": "cd8beb732d8858eb3706f7ac3622e2eeb8f7c0c0dfbbfbbb7cf234bf87279962"
+                  },
+                  "thermodynamic_stability": null
+                },
+                "property_code": "tc",
+                "record_type": "predicted_tc",
+                "uncertainty": null,
+                "unit_raw": "K",
+                "value_boolean": null,
+                "value_kind": "number",
+                "value_max": null,
+                "value_min": null,
+                "value_number": 10,
+                "value_raw": "10",
+                "value_text": null
+              }
+            ]
+          }
+        ],
+        "reported_space_group_number": null,
+        "reported_space_group_symbol": "I4/mmm",
+        "scope": "current_paper",
+        "state_kind": "theoretical",
+        "structure_families": [],
+        "structure_optimization": "unknown"
+      }
+    ],
+    "metadata": {
+      "abstract": null,
+      "authors": null,
+      "co_first_authors": null,
+      "corresponding_authors": null,
+      "doi": "10.1073/pnas.1704505114",
+      "issue_number": null,
+      "journal": null,
+      "key_finding": "Table S1 reports McMillan and Eliashberg transition temperatures for LaH4, LaH8, LaH10, and YH10 at high pressures.",
+      "keywords_tags": [
+        "high-pressure hydrides",
+        "superconductivity",
+        "electron–phonon coupling"
+      ],
+      "knowledge_graph_title": null,
+      "material_families": null,
+      "methodology": [
+        "McMillan equation",
+        "Eliashberg equations",
+        "Density-of-states calculations"
+      ],
+      "pages": null,
+      "paper_type": "theoretical",
+      "research_motivation": null,
+      "summary": "Supporting information reports 28 calculated transition temperatures across seven material–pressure rows, together with electron–phonon coupling constants and logarithmic phonon frequencies. Structural relaxation workflows and the Eliashberg variant are not specified in the supplied text.",
+      "superconductor_kind": "unknown",
+      "theoretical_subtype": "calculation",
+      "volume": null,
+      "year": null
+    },
+    "methodology": [
+      {
+        "evidences": [
+          {
+            "block_id": "77ff781672e778fb1f9cab92ea6df797b6f9413694b0749d33deb01230b32b9d",
+            "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+            "pdf_page": 5,
+            "quote": null,
+            "quote_id": "77ff781672e778fb1f9cab92ea6df797b6f9413694b0749d33deb01230b32b9d"
+          }
+        ],
+        "scope": "current_paper",
+        "value": "Transition temperatures calculated using McMillan and Eliashberg equations."
+      }
+    ],
+    "paper_type_evidence": [
+      {
+        "block_id": "77ff781672e778fb1f9cab92ea6df797b6f9413694b0749d33deb01230b32b9d",
+        "candidate": "theoretical",
+        "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+        "pdf_page": 5,
+        "quote": null,
+        "quote_id": "77ff781672e778fb1f9cab92ea6df797b6f9413694b0749d33deb01230b32b9d",
+        "scope": "current_paper"
+      }
+    ],
+    "referenced_materials": [
+      {
+        "evidences": [
+          {
+            "block_id": "302dc447428183eea11eef3571bd94f49ebfe2b47a7a69af6866ae8f9a28019d",
+            "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+            "pdf_page": 1,
+            "quote": null,
+            "quote_id": "302dc447428183eea11eef3571bd94f49ebfe2b47a7a69af6866ae8f9a28019d"
+          }
+        ],
+        "scope": "referenced_work",
+        "value": "SH3: a previous work reports a Fermi-level DOS of 6.93 states/Ry; this is not a current-paper result."
+      }
+    ],
+    "research_materials": [
+      {
+        "evidences": [
+          {
+            "block_id": "7405f2ead527e2076feaee33bb24eafb1550f9e5f381655bd90f5997d1ec781d",
+            "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+            "pdf_page": 1,
+            "quote": null,
+            "quote_id": "7405f2ead527e2076feaee33bb24eafb1550f9e5f381655bd90f5997d1ec781d"
+          }
+        ],
+        "scope": "current_paper",
+        "value": "LaH4, LaH8, LaH10, and YH10"
+      }
+    ]
+  },
+  "blocks": [
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 1,
+      "block_id": "7405f2ead527e2076feaee33bb24eafb1550f9e5f381655bd90f5997d1ec781d",
+      "text": "Table S1 presents calculated { T _ { c } } \\mathbf { s } of \\mathrm { L a H _ { n } }   ( n = 4 ,   8 , and 10) and \\mathrm { Y H _ { 1 0 } } at high pressures for different models and parameters. It is seen that the McMillan and Eliashberg equations lead to similar results for small λ. For larger λ, however, the Eliashberg equation predicts higher Tc values. Table S2 contains the lattice parameters and atomic coordinates for the predicted structures."
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 1,
+      "block_id": "302dc447428183eea11eef3571bd94f49ebfe2b47a7a69af6866ae8f9a28019d",
+      "text": "We compare the calculated density of states (DOS) for \\mathrm { L a H _ { 1 0 } , } \\mathbf { Y H } _ { 1 0 } , and \\mathbf { \\bar { S } H } _ { 3 } in Fig. S3. In the case of \\mathrm { S H } _ { 3 , } we found a DOS at the Fermi level of 7.1 states/Ry which is close to the value of 6.93 states/Ry found in the previous work (42). The calculated N ( E _ { f } ) of \\mathrm { L a \\dot { H } _ { 1 0 } } and \\mathrm { Y H _ { 1 0 } } at 250 GPa is larger than that of \\mathrm { S H } _ { 3 }"
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 5,
+      "block_id": "77ff781672e778fb1f9cab92ea6df797b6f9413694b0749d33deb01230b32b9d",
+      "text": "Table S1. T _ { c } of La-H and Y-H systems at different pressures calculated using the McMillan and Eliashberg equations"
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 5,
+      "block_id": "a163bb2ecc48f91ca70f3032691ed77c4a7a941cce12821336e46f8dbed5488c",
+      "text": "wlog, K"
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 5,
+      "block_id": "db2ded680ee91529f42ded1c044ff767d46e4b28b1ea7d184269754a988eb8fc",
+      "text": "Tc, K; μ* = 0.1 McMillan"
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 5,
+      "block_id": "d5bdf5ea3052231e6d8d10f0f8c14bfabc6fe3e24eae2bb0d8b5d3430f85486e",
+      "text": "LaH4"
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 5,
+      "block_id": "366282374770277db0555753c6bdce2da0b144204e4a955a93d958fc60924bc2",
+      "text": "300"
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 5,
+      "block_id": "8a59682e298faead222e1eff069a0f8c4000a347f9bdcbfd947e01b3682d20c8",
+      "text": "0.43"
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 5,
+      "block_id": "38b0ccd9695fdbed64f9f2069b4af6f92655a1e9de8c1b0a3154335b6c63eb6b",
+      "text": "1,624"
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 5,
+      "block_id": "d2744e54c35d19e9a171eac5a5c95d7031953adf86e9062305eb27dcf90f482d",
+      "text": "10"
+    },
+    {
+      "file_id": "f6f4a7b83ac743fd8b42e369c7aca904",
+      "pdf_page": 6,
+      "block_id": "477e1443bb6b2565cd749ea11f83b38f1eea13a90b62776371076b1b6faad6e4",
+      "text": "I4/mmm"
+    }
+  ]
+}
