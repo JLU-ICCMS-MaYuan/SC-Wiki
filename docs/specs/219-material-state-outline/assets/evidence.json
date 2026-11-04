@@ -77,5 +77,10 @@
   ],
   "scope_evidence": "原四类完整编辑宿主大纲用例通过，稳定删除/压力更新用例通过；浏览器四类编辑和三角色只读详情均定位成功，零压与窄屏通过，导航无科学写请求。",
   "business_tests_rerun_in_this_split": false,
-  "verification": "拆分时校验原图、代码/用例哈希及原验收对应关系；未重新执行业务测试，不将共用套件总数重复算成本项独立通过数。"
+  "verification": "拆分时校验原图、代码/用例哈希及原验收对应关系；未重新执行业务测试，不将共用套件总数重复算成本项独立通过数。",
+  "layout_update": {
+    "request": "docs/specs/219-material-state-outline/assets/full-height-request.json",
+    "checks": "docs/specs/219-material-state-outline/assets/full-height-checks.json",
+    "note": "本JSON原source_sha256及实现提交记录初始53c32542证据；最新全高布局源码与新运行结果独立保存在full-height-checks.json，不改写旧验收事实。"
+  }
 }

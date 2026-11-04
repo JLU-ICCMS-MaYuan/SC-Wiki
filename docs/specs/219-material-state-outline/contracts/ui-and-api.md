@@ -20,3 +20,7 @@ PaperMaterialsSection复用materialStateSummary与locateMaterialState；桌面�
 ## 验证对应
 
 FR-001～FR-005对应US1与SC-001/002，实际案例及原运行边界见[验收记录](../validation.md)。
+
+## 2026-11-04 布局约束
+
+展开目录顶部、底部各4px，桌面表单卡片与目录外框缝隙4px；外框不随条目多少收缩，条目区在剩余高度滚动。收起后保留箭头并释放正文留位。窗口高度变化及时响应，卡片样式与所有写入/审核契约不变。

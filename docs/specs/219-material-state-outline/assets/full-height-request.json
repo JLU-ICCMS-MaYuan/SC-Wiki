@@ -1,0 +1,20 @@
+{
+  "id": "IMG-007",
+  "original_name": "codex-clipboard-971ecc6c-c19f-431e-a71a-a80e422914fd.png",
+  "locator": "docs/specs/219-material-state-outline/assets/IMG-007-full-height-request.png",
+  "sha256": "d9b438f102f014372c1fbecccb88e06399170142b2763fe5cb4a243f67ca09e5",
+  "media_type": "image/png",
+  "dimensions_px": [
+    3840,
+    1948
+  ],
+  "status": "local_verified",
+  "user_context": "我要夸奖的是：材料状态变成分割好的卡片，这样很好，方便阅读。但是右侧的研究材料目录我希望能铺满整个纵向的方向，同时和左侧的草稿表单的缝隙尽可能再小一点。",
+  "annotation": "留 4px",
+  "related": [
+    "FR-006",
+    "FR-007",
+    "SC-004"
+  ],
+  "verification": "2026-11-04读取用户原图并核对PNG签名、尺寸、SHA-256后原样归档。"
+}

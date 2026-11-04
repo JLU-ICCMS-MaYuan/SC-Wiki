@@ -8,7 +8,7 @@ const output = process.env.REVIEW_BROWSER_OUTPUT || '/tmp/scwiki213-browser'
 await mkdir(output, { recursive: true })
 const definitions = JSON.parse(await readFile(new URL('../../backend/data/form_definitions.v1.json', import.meta.url)))
 const browser = await chromium.launch({ channel: 'chrome', headless: true })
-const reports = [], errors = []
+const reports = [], errors = [], outlineGeometry = []
 const longTitle = 'Superconductive sodalite-like clathrate calcium hydride at high pressures with detailed superconducting properties and electron phonon coupling measurements under several experimental conditions'
 const states = Array.from({ length: 14 }, (_, i) => ({ id: i + 1, state_key: 'state-' + i, material: 'CaH6', material_name: 'Calcium hydride',
   superconductor: { chemical_formula: 'CaH6' }, state_kind: 'theoretical', material_dimensionality: 'bulk',
@@ -21,7 +21,10 @@ const draft = { paper, material_states: states, structure_candidates: [] }
 const items = Array.from({ length: 45 }, (_, i) => ({ ...paper, id: i + 1, title: i ? '检查论文 ' + (i + 1) : longTitle,
   workflow_status: 'pending', checked_status: 'approved', checked_at: '2026-11-04T00:00:00Z' }))
 
-async function contextFor(role, denied = false) {
+async function contextFor(role, denied = false, stateCount = 14) {
+  const localStates = states.slice(0, stateCount)
+  const localPaper = { ...paper, material_states: localStates }
+  const localDraft = { ...draft, paper: localPaper, material_states: localStates }
   const user = { id: 7, username: 'isolated-213', email: 'isolated@example.test', role, is_approved: true,
     is_email_verified: true, account_status: 'active', real_name: '隔离界面验收', research_interests: [] }
   const context = await browser.newContext({ viewport: { width: 1600, height: 1000 } })
@@ -50,13 +53,13 @@ async function contextFor(role, denied = false) {
     if (p.startsWith('/api/form-definitions/')) return json(definitions.find(d => decodeURIComponent(p).includes(d.definition_key)) || {})
     if (p.includes('/classification-catalogs')) return json({ material_families: [], structure_families: [], material_dimensionalities: [] })
     if (p.endsWith('/space-groups')) return json({ space_groups: [] })
-    if (/\/api\/(admin\/)?papers\/\d+$/.test(p)) return json(paper)
-    if (p.endsWith('/revision-draft')) return json({ ok: true, data: draft, revision_id: 'a'.repeat(32), draft_version: 1 })
+    if (/\/api\/(admin\/)?papers\/\d+$/.test(p)) return json(localPaper)
+    if (p.endsWith('/revision-draft')) return json({ ok: true, data: localDraft, revision_id: 'a'.repeat(32), draft_version: 1 })
     if (p.endsWith('/open-workdraft')) return json({ write_epoch: 'isolated', revision: 1 })
-    if (p.endsWith('/draft-state')) return json({ draft, staged: true, write_epoch: 'isolated', revision: 1 })
+    if (p.endsWith('/draft-state')) return json({ draft: localDraft, staged: true, write_epoch: 'isolated', revision: 1 })
     if (p.endsWith('/draft-revision')) return json({ write_epoch: 'isolated', revision: 1 })
     if (p.endsWith('/summary')) return json({ version: 'isolated', records: [], needs_check: false })
-    if (p.endsWith('/draft')) return json({ ok: true, data: draft })
+    if (p.endsWith('/draft')) return json({ ok: true, data: localDraft })
     if (p.includes('/upload-tasks/') && p.endsWith('/parsing')) return json({ data: { status: 'ready', stage: 'ready', files: [], chunks: [], summary: { status: 'ready' }, next_poll_ms: null } })
     if (/\/upload-tasks\/[^/]+$/.test(p)) return json({ data: { task_id: '2'.repeat(32), filename: '隔离验收.pdf', processing_status: 'succeeded', stage: 'ready', stage_index: 5, stage_total: 5 } })
     return json({ data: [], items: [], jobs: [], total: 0 })
@@ -64,6 +67,27 @@ async function contextFor(role, denied = false) {
   const page = await context.newPage()
   page.on('pageerror', error => errors.push({ role, message: error.message }))
   return { context, page, calls }
+}
+
+
+async function checkOutlineGeometry(page, nav, label) {
+  const metrics = await nav.evaluate(node => {
+    const rect = node.getBoundingClientRect()
+    const host = node.closest('[data-evidence-scope], [data-paper-detail]')
+    const card = host?.hasAttribute('data-paper-detail') ? host.querySelector('.MuiCard-root') : host?.querySelector('[data-material-state-index]')
+    const cardRect = card?.getBoundingClientRect()
+    const list = node.querySelector('[data-issue-field="paper.research_materials"]')
+    return { top: rect.top, bottom: innerHeight - rect.bottom, height: rect.height, viewport: innerHeight,
+      gap: cardRect ? rect.left - cardRect.right : null, hostPadding: host ? getComputedStyle(host).paddingRight : null,
+      hostMargin: host ? getComputedStyle(host).marginRight : null,
+      listHeight: list?.clientHeight, listScrollHeight: list?.scrollHeight }
+  })
+  outlineGeometry.push({ label, ...metrics })
+  if (process.env.OUTLINE_LAYOUT_RECORD_ONLY === '1') return
+  assert.ok(Math.abs(metrics.top - 4) <= 1, label + ' 顶部留白：' + JSON.stringify(metrics))
+  assert.ok(Math.abs(metrics.bottom - 4) <= 1, label + ' 底部留白：' + JSON.stringify(metrics))
+  assert.ok(Math.abs(metrics.height - (metrics.viewport - 8)) <= 1, label + ' 目录未铺满')
+  assert.ok(metrics.gap !== null && Math.abs(metrics.gap - 4) <= 1, label + ' 表单缝隙：' + JSON.stringify(metrics))
 }
 
 try {
@@ -85,6 +109,7 @@ try {
     await page.getByRole('link', { name: '修改并重新提交', exact: true }).waitFor()
     const nav = page.getByRole('navigation', { name: '研究材料大纲', exact: true })
     await nav.getByRole('button', { name: '#1 · Im-3m · CaH₆ · 0 GPa', exact: true }).waitFor()
+    await checkOutlineGeometry(page, nav, role + '-detail')
     await nav.getByRole('button', { name: /#14 ·/ }).click()
     await page.waitForFunction(() => { const target = document.querySelector('[data-state-key="state-13"]'); if (!target) return false; const rect = target.getBoundingClientRect(); return rect.top < innerHeight - 80 && rect.bottom > 80 })
     await nav.getByRole('button', { name: '收起研究材料大纲' }).click()
@@ -121,12 +146,38 @@ try {
     const nav = page.getByRole('navigation', { name: '研究材料大纲', exact: true })
     await nav.getByRole('button', { name: /#14 ·/ }).waitFor()
     await page.waitForTimeout(200)
+    await checkOutlineGeometry(page, nav, role + '-' + path)
     const count = calls.length
     await nav.getByRole('button', { name: /#14 ·/ }).click()
     await page.waitForFunction(() => { const target = document.querySelector('[data-state-key="state-13"]'); if (!target) return false; const rect = target.getBoundingClientRect(); return rect.top < innerHeight - 80 && rect.bottom > 80 })
     assert.deepEqual(calls.slice(count).filter(call => call.method !== 'GET' && !call.path.endsWith('/activity')), [])
     await page.screenshot({ path: output + '/outline-' + role + '-' + (path.includes('revise') ? 'revision' : path.includes('upload') ? 'upload' : 'admin') + '.png' })
     reports.push({ host: path, role, outline_jump: true, navigation_writes: 0 })
+    await context.close()
+  }
+  for (const stateCount of [1, 14]) {
+    const { context, page, calls } = await contextFor('user', false, stateCount)
+    await page.goto(origin + '/papers/213/revise')
+    const nav = page.getByRole('navigation', { name: '研究材料大纲', exact: true })
+    await nav.getByRole('button', { name: /#1 ·/ }).waitFor()
+    await checkOutlineGeometry(page, nav, 'revision-count-' + stateCount)
+    await page.setViewportSize({ width: 1600, height: 420 })
+    await checkOutlineGeometry(page, nav, 'low-revision-count-' + stateCount)
+    const list = nav.locator('[data-issue-field="paper.research_materials"]')
+    if (stateCount === 14) assert.ok(await list.evaluate(node => node.scrollHeight > node.clientHeight))
+    if (process.env.OUTLINE_LAYOUT_RECORD_ONLY !== '1') {
+      await nav.getByRole('button', { name: '收起研究材料大纲' }).click()
+      assert.ok((await nav.boundingBox()).height < 100)
+      const reserve = await nav.evaluate(node => getComputedStyle(node.closest('[data-evidence-scope]')).paddingRight)
+      assert.equal(reserve, '0px')
+      await nav.getByRole('button', { name: '展开研究材料大纲' }).click()
+      await checkOutlineGeometry(page, nav, 'restored-revision-count-' + stateCount)
+    }
+    await page.screenshot({ path: output + '/low-height-count-' + stateCount + '.png' })
+    await page.setViewportSize({ width: 1600, height: 1000 })
+    await checkOutlineGeometry(page, nav, 'grown-revision-count-' + stateCount)
+    await page.screenshot({ path: output + '/height-count-' + stateCount + '.png' })
+    reports.push({ height_case: stateCount, full_height: process.env.OUTLINE_LAYOUT_RECORD_ONLY !== '1' })
     await context.close()
   }
   const { context, page } = await contextFor('superadmin', true)
@@ -140,6 +191,6 @@ try {
   reports.push({ denied_message_count: 1, review_disabled: true })
   await context.close()
   assert.deepEqual(errors, [])
-  await writeFile(output + '/report.json', JSON.stringify({ reports, errors }, null, 2))
+  await writeFile(output + '/report.json', JSON.stringify({ reports, errors, outlineGeometry }, null, 2))
   console.log(JSON.stringify({ cases: reports.length, errors }))
 } finally { await browser.close() }

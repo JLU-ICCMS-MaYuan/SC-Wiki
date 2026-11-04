@@ -5,13 +5,13 @@
 ## 摘要
 
 PaperMaterialsSection复用materialStateSummary与locateMaterialState；桌面为右侧大纲留宽，来源侧栏位于更高层；按state_key在当前宿主定位，历史无key保留显式位置兼容。
-本项已随53c32542实现，本轮将设计与实施依据拆分归档；不安排新的业务代码开发。
+基础大纲已随53c32542实现并完成独立拆分。本轮按用户确认的FR-006/007更新展示布局，科学数据与卡片样式保持。
 
 ## 技术上下文
 
 - 语言与依赖：现有TypeScript、React 19、MUI 7、Vite 5；涉及服务端的既有部分为Python 3.12/FastAPI/SQLAlchemy及Go 1.25/Gin/GORM。
 - 数据事实来源：状态字段由当前宿主草稿/只读版本提供；state_key是定位身份，#编号只是展示；大纲折叠仅属于界面状态。
-- 测试体系：原提交中的Vitest、pytest、Go测试和正式构建隔离API浏览器；本轮只校验文档、哈希和关系，不重新执行业务套件。
+- 测试体系：原提交中的Vitest、pytest、Go测试和正式构建隔离API浏览器；拆分阶段只校验文档、哈希和关系；本次布局修改重新执行受影响表单门、变异门、定向用例及浏览器测量。
 - 目标平台：现有网页的用户/管理员/超级管理员入口；不改变部署方式。
 - 性能目标：保持原功能的局部更新与零无意义写入约束；不新增性能指标或宣称性能优化。
 - 规模：限本项目标和实际共用宿主，不扩到其他功能。
@@ -72,3 +72,9 @@ spec.md、plan.md、research.md、tasks.md、quickstart.md、validation.md、con
 
 - `docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/data-structure-and-form-mapping.md`
 本轮只修正文档引用归属，不改变这些说明中的业务事实。
+
+## 2026-11-04 全高与4px留白实施
+
+目录使用固定定位，顶部/底部各4px；不同宿主存在额外容器留白，仅在横向边界或材料状态数量变化时测量当前首卡片边界，以CSS变量统一计算正文留位，不扫描表单字段；外框用纵向flex布局，标题不收缩，条目区使用剩余高度并内部滚动。桌面正文留位与目录宽度统一计算，以浏览器实际卡片边界验证4px缝隙；折叠后只留箭头并回收正文宽度。材料卡片和导航数据职责保持。
+
+FR-006/007、SC-004→PaperMaterialsSection→T006～T009→真实浏览器边界测量与四宿主表单/变异回归。没有标准键、后端、数据库或模型变更。
