@@ -39,11 +39,11 @@
     {
       "id": "workbench-entry",
       "title": "进入审核工作台",
-      "summary": "角色校验后装载论文列表",
+      "summary": "用户中心检查入口或独立工作区",
       "owner": "Go 权限中间件 / React 工作台",
-      "description": "角色校验后装载论文列表。详细行为、边界和来源见独立详情页。",
+      "description": "角色校验后进入独立工作台，或从用户中心“检查记录 / 待检查”进入对应列表与独立检查页；个人页每页 3 条、独立页每页 20 条，筛选、分页与旧响应保护见详情。超管统计还读取用户和管理员申请，并非只请求论文。",
       "notes": [],
-      "code": "goserver/middleware/auth.go；文档依据：roles-and-administrator-approval.md#当前行为",
+      "code": "frontend/src/components/AccountReviews.tsx；frontend/src/pages/AdminWorkspacePage.tsx / AdminPage.tsx；goserver/middleware/auth.go",
       "links": [
         {
           "href": "02-review-audit-details.html#workbench-entry",
@@ -278,6 +278,65 @@
   ],
   "branches": [
     {
+      "id": "quick-review-modal",
+      "attachTo": "workbench-entry",
+      "side": "right",
+      "kind": "wait",
+      "label": "列表快速审核",
+      "title": "打开快速审核弹窗",
+      "summary": "与独立编辑汇合到 Python 工作稿和 review-commit",
+      "owner": "React AdminPage / Python 证据与审核服务",
+      "description": "非 approved 论文先 open-workdraft 取得工作稿与写周期；已 approved 论文的快速审核仅允许 rejected 拒绝返修，无须先领取已交出的编辑工作稿。审核动作 approved 经 submit-check，return / forward 绕过该专用门，最终均进入 Python review-commit。",
+      "notes": [
+        "快速弹窗不是 Go ReviewPaper 或 BatchReview，也不是另一条批准事务。"
+      ],
+      "code": "frontend/src/pages/AdminPage.tsx::openReview / handleReview；frontend/src/components/EvidenceWorkflow.tsx::gate；backend/api/evidence.py::open_workdraft / submit_check / commit_field_review",
+      "links": [
+        {
+          "href": "02-review-audit-details.html#quick-review-modal",
+          "label": "展开快速审核与独立编辑汇合路径"
+        }
+      ]
+    },
+    {
+      "id": "batch-reject",
+      "attachTo": "workbench-entry",
+      "side": "right",
+      "kind": "check",
+      "label": "批量拒绝",
+      "title": "Go BatchReview 批量拒绝准入",
+      "summary": "禁止批量批准和自审；工作稿条件使整批失败",
+      "owner": "React 列表 / Go BatchReview / MySQL",
+      "description": "仅存量兼容稿件可批量 rejected；禁止批量 approved，任一篇自审即拒绝。事务中任一篇已有 handoff 或已为 approved，整批返回 409 workdraft_required，必须逐篇走 Python 工作稿，不在此创建 Python 作者返修稿。",
+      "notes": [],
+      "code": "frontend/src/pages/AdminPage.tsx::handleBatchReview；goserver/handlers/stats.go::BatchReview",
+      "links": [
+        {
+          "href": "02-review-audit-details.html#batch-reject",
+          "label": "展开整批准入与回滚边界"
+        }
+      ]
+    },
+    {
+      "id": "superadmin-delete",
+      "attachTo": "workbench-entry",
+      "side": "left",
+      "kind": "stop",
+      "label": "超管维护",
+      "title": "单篇或批量删除论文",
+      "summary": "维护动作，不属于审核 approve / return / forward",
+      "owner": "超级管理员 / Go 删除接口",
+      "description": "SuperAdminRequired 保护单篇 DELETE 与批量 batch-delete。批量删除逐篇 best-effort 执行；部分失败继续处理其余论文，并返回 HTTP 206 与 failed_ids，前端据此提示部分失败。",
+      "notes": [],
+      "code": "goserver/main.go；goserver/handlers/admin.go::DeletePaper；goserver/handlers/stats.go::BatchDelete；frontend/src/pages/AdminPage.tsx",
+      "links": [
+        {
+          "href": "02-review-audit-details.html#superadmin-delete",
+          "label": "展开删除维护与部分失败响应"
+        }
+      ]
+    },
+    {
       "id": "admin-application-approval",
       "attachTo": "workbench-entry",
       "side": "left",
@@ -367,8 +426,8 @@
     {
       "id": "legacy-go-review",
       "title": "存量 Go 审核兼容入口",
-      "summary": "已有交接合同则拒绝旁路",
-      "description": "Go ReviewPaper 只作为存量兼容入口，不是当前 React 主链的审核事务。paperUsesHandoffs 命中时返回 workdraft_required，必须改用 Python 工作稿与 commit_review 正式交接。",
+      "summary": "已有 handoff，或 approved 的旧接口非 approved 动作均拒绝旁路",
+      "description": "Go ReviewPaper 只作为存量兼容入口。paperUsesHandoffs 命中，或论文已 approved 且旧接口请求动作不是 approved 时，返回 409 workdraft_required；必须改用 Python 工作稿与 commit_review 正式交接。",
       "code": "goserver/handlers/admin.go::ReviewPaper；goserver/handlers/manuscript_handoffs.go",
       "owner": "Go 审核兼容层",
       "attachTo": "server-guard",
@@ -389,18 +448,62 @@
       "kind": "result",
       "label": "return / forward",
       "title": "return 退回作者或 forward 转交",
-      "summary": "不经过批准专用证据与分类门",
+      "summary": "return 进入完整返修闭环；forward 继续审核交接",
       "owner": "Python 审核事务 / MySQL",
-      "description": "rejected 映射 return，holder 交还作者并创建作者工作稿；pending 映射 forward，holder 保持 review 以交接给其他合法审核人员。已批准论文交还修订时继续公开旧批准版。",
+      "description": "rejected 映射 return，holder 交还作者并创建作者工作稿；pending 映射 forward，holder 保持 review。作者在 /papers/:id/revise 局部保存、AI 核对和人工处理后显式重交，冻结新快照并 holder=review 再审核；未批准稿 rejected→pending，已批准旧版在新批准前持续公开。",
       "notes": [
-        "这些动作不经过批准专用证据与分类门。",
+        "这些动作不经过批准专用证据与分类门；返修保存也不会自动重交。",
         "作者须等待其他合法审核员正式退回，不能通过角色变化自行取回。"
       ],
-      "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::record_handoff / author_working_copy",
+      "code": "backend/services/field_review_commit.py::commit_review；backend/services/manuscript_handoffs.py::record_handoff / author_working_copy；backend/services/paper_revisions.py::submit_draft",
       "links": [
         {
-          "href": "02-review-audit-details.html#review-action",
-          "label": "返回本功能主干"
+          "href": "02-review-audit-details.html#reject-or-return",
+          "label": "展开 return / forward 与返修闭环"
+        },
+        {
+          "href": "02-review-audit-details.html#author-revision",
+          "label": "查看作者返修和显式重交"
+        }
+      ]
+    },
+    {
+      "id": "author-revision",
+      "attachTo": "reject-or-return",
+      "side": "left",
+      "kind": "wait",
+      "label": "return 后作者返修",
+      "returnTo": "workbench-entry",
+      "returnLabel": "显式重交后再审核",
+      "title": "作者编辑返修稿并重新送审",
+      "summary": "/papers/:id/revise → 保存 / 核对 / 人工处理 → 重交",
+      "owner": "原上传者 / React 返修页 / Python 返修事务",
+      "description": "本 return 分支的作者在 holder=author 后进入返修；局部保存、AI 核对和人工处理均发生在独立 revision 工作稿。显式重交才冻结新审核快照并把 holder 转为 review；未批准稿转为 pending，已批准旧版在新批准前保持公开。存量 rejected 稿件的兼容返修入口见详情。",
+      "notes": [],
+      "code": "frontend/src/pages/PaperRevisionPage.tsx；frontend/src/components/UploadTaskEditor.tsx；backend/services/paper_revisions.py::open_draft / save_draft / submit_draft",
+      "links": [
+        {
+          "href": "02-review-audit-details.html#author-revision",
+          "label": "展开完整返修闭环"
+        }
+      ]
+    },
+    {
+      "id": "workdraft-access-lost",
+      "attachTo": "save-edit",
+      "side": "right",
+      "kind": "stop",
+      "label": "失权 / 他页新修订",
+      "title": "焦点或可见性检查发现工作稿变化",
+      "summary": "epoch 变化禁写；revision 变化显式载入最新稿",
+      "owner": "React WorkdraftRefresh / 各编辑宿主",
+      "description": "focus / visibilitychange 查询 draft-revision。write_epoch 变化时独立编辑页统一提示并禁写，保留未保存输入，generation 与编辑版本检查使迟到响应无效；其他页面保存产生新 revision 时只提示，用户显式载入最新稿，应用前再次核对周期、编辑版本和 busy 状态。",
+      "notes": [],
+      "code": "frontend/src/components/WorkdraftRefresh.tsx；frontend/src/pages/AdminPaperEditPage.tsx；frontend/src/components/UploadTaskEditor.tsx",
+      "links": [
+        {
+          "href": "02-review-audit-details.html#workdraft-access-lost",
+          "label": "展开失权禁写与安全载入细节"
         }
       ]
     },
@@ -554,6 +657,18 @@
       "to": "submit-gate",
       "label": "approved：无需人工补充",
       "lane": 1
+    },
+    {
+      "from": "quick-review-modal",
+      "to": "submit-gate",
+      "label": "approved：汇合 submit-check",
+      "lane": 1
+    },
+    {
+      "from": "quick-review-modal",
+      "to": "server-guard",
+      "label": "return / forward：直接 review-commit",
+      "lane": 2
     }
   ]
 }</script>

@@ -115,13 +115,17 @@
       "title": "legacy 特征提取",
       "summary": "POSCAR、H 子晶格与 PDOS",
       "owner": "Python 后端",
-      "description": "legacy 路线解析 POSCAR，提取 H 子晶格、H-H 键长与电子 PDOS；BETE 不走此路线。详细行为、边界和来源见独立详情页。",
+      "description": "legacy 路线先加载 NumPy/Pymatgen，缺依赖独立返回 503；随后解析 POSCAR，提取 H 子晶格、H-H 键长与电子 PDOS。BETE 不走此路线。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/api/tc_predict.py",
       "links": [
         {
           "href": "07-tc-predict-details.html#feature-extract",
           "label": "展开此步骤的完整细节"
+        },
+        {
+          "href": "07-tc-predict-details.html#legacy-dependencies",
+          "label": "分支：legacy 缺 NumPy/Pymatgen 503"
         }
       ]
     },
@@ -287,6 +291,20 @@
           "label": "返回本功能主干"
         }
       ]
+    },
+    {
+      "id": "legacy-dependencies",
+      "attachTo": "feature-extract",
+      "side": "right",
+      "kind": "stop",
+      "label": "legacy 依赖缺失",
+      "title": "legacy 缺 NumPy/Pymatgen 独立503",
+      "summary": "依赖导入失败返回503，不是输入400/422",
+      "owner": "主进程 Python 后端",
+      "description": "legacy 在 predict_tc 入口调用 _load_numeric_dependencies；NumPy 或 Pymatgen 导入失败独立返回 503，提示安装 requirements.txt。它与 multipart 缺字段 422、函数内输入/解析 400 以及 BETE 环境/制品/运行 503 不同。详细行为、边界和来源见独立详情页。",
+      "notes": ["该 503 不属于 BETE 子进程，也不表示输入格式错误。"],
+      "code": "backend/api/tc_predict.py:28-37,130",
+      "links": [{"href": "07-tc-predict-details.html#legacy-dependencies", "label": "展开 legacy 依赖缺失分支"}]
     },
     {
       "id": "formula-invalid",

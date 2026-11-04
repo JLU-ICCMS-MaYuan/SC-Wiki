@@ -148,8 +148,9 @@
       "title": "legacy 特征提取",
       "summary": "POSCAR、H 子晶格与电子 PDOS",
       "owner": "主进程 Python 后端",
-      "description": "legacy 固定用 pymatgen 按 POSCAR 解析 contcar，提取 H 子晶格与 1.4 Å 内 H-H 距离；读取文件名含 PDOS_H 或以 H.DAT 结尾的氢 PDOS，其余作为金属 PDOS，最多使用四个金属值。",
+      "description": "legacy 在 predict_tc 入口先调用 _load_numeric_dependencies 导入 NumPy 与 Pymatgen，再固定用 pymatgen 按 POSCAR 解析 contcar，提取 H 子晶格与 1.4 Å 内 H-H 距离；读取文件名含 PDOS_H 或以 H.DAT 结尾的氢 PDOS，其余作为金属 PDOS，最多使用四个金属值。",
       "notes": [
+        "NumPy 或 Pymatgen 导入失败独立返回 503，并提示安装 requirements.txt；这是 legacy 依赖不可用，不是输入 400/422 或 BETE 环境/制品 503。",
         "没有 H、没有合格 H-H 键、H 数与化学式不匹配、PDOS 无法解析或列数不足均在函数内返回 400。",
         "BETE 不使用此 H 子晶格／PDOS 路线，而在独立子进程构建 ASE 近邻图。"
       ],
@@ -162,6 +163,10 @@
         {
           "href": "07-tc-predict-details.html#missing-file",
           "label": "legacy 输入失败分支"
+        },
+        {
+          "href": "07-tc-predict-details.html#legacy-dependencies",
+          "label": "legacy 缺 NumPy/Pymatgen 503"
         }
       ]
     },
@@ -447,6 +452,27 @@
           "href": "07-tc-predict-details.html#input-check",
           "label": "返回输入与文件校验"
         }
+      ]
+    },
+    {
+      "id": "legacy-dependencies",
+      "attachTo": "feature-extract",
+      "side": "right",
+      "kind": "stop",
+      "label": "legacy 依赖缺失",
+      "title": "legacy 缺 NumPy/Pymatgen 独立503",
+      "summary": "依赖导入失败返回503，与输入及 BETE 503 分离",
+      "owner": "主进程 Python 后端",
+      "description": "predict_tc 在读取上传内容前调用 _load_numeric_dependencies；NumPy 或 Pymatgen 的 ImportError 被转换为独立 503，提示安装 requirements.txt 后再使用实验功能。该分支不同于整个 multipart 字段缺失的 422、进入函数后的输入/解析 400，也不同于 BETE 独立环境、制品或运行输出失败的 503。",
+      "notes": [
+        "依赖检查在 legacy 主进程执行，不启动 BETE 子进程。",
+        "缺 NumPy/Pymatgen 时不应伪装成 POSCAR/PDOS 输入错误，也不应归入 BETE 制品未就绪。"
+      ],
+      "code": "backend/api/tc_predict.py:28-37,130",
+      "links": [
+        {"href": "07-tc-predict.html#legacy-dependencies", "label": "返回主干 legacy 依赖缺失"},
+        {"href": "07-tc-predict-details.html#missing-file", "label": "对比 legacy 输入 400/422"},
+        {"href": "07-tc-predict-details.html#env-missing", "label": "对比 BETE 环境/制品 503"}
       ]
     },
     {

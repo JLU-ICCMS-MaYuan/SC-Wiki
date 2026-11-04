@@ -115,7 +115,7 @@
       "title": "普通 SSE 与探索回放",
       "summary": "普通业务事件不主动推送引用卡片",
       "owner": "FastAPI / React",
-      "description": "普通 Mentor 仅产生 status/token/tool_start/tool_end/done 业务事件；探索的完整设计评审回放与 ideas 完成返回仅限 READY 路径，clarify 提前结束另列。详细行为、边界和来源见独立详情页。",
+      "description": "普通 Mentor 仅产生 status/token/tool_start/tool_end/done 业务事件；探索仅在 READY 路径的完整设计与 discuss 完成后逐字符回放，并由 done 返回 ideas，clarify 提前结束另列。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/api/rag.py::rag_chat_stream；backend/rag/service.py::chat_stream",
       "links": [
@@ -200,9 +200,9 @@
       "kind": "check",
       "label": "explore=true",
       "title": "Inspiration clarify 分流",
-      "summary": "信息不足先澄清；READY 才设计评审",
+      "summary": "信息不足先澄清；READY 才设计与 discuss",
       "owner": "Inspiration Agent / LLM reviewer",
-      "description": "clarify 先判断信息是否足够；只有 READY 才进入设计检索、想法与评审，完整路径结束后逐字符回放并由 done 返回 ideas。详细行为、边界和来源见独立详情页。",
+      "description": "clarify 先判断信息是否足够；只有 READY 才进入设计检索、想法生成和 discuss。reviewer 仅在 ideas 与 evidence_text 均非空时额外调用；跳过 reviewer 仍执行 discuss，并在完整设计与 discuss 完成后逐字符回放、由 done 返回 ideas。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/rag/agent/graph.py::clarify_node / clarify_router；backend/rag/service.py::chat_stream",
       "links": [
@@ -219,7 +219,7 @@
       "title": "clarify_end 返回澄清问题",
       "summary": "不检索、不生成想法或评审，ideas通常为空",
       "owner": "Inspiration Agent",
-      "description": "信息不足时经 clarify_end 返回澄清问题并结束，不执行设计检索、想法生成或 reviewer；澄清路径 ideas 通常为空。详细行为、边界和来源见独立详情页。",
+      "description": "信息不足时经 clarify_end 返回澄清问题并结束，不执行设计检索、想法生成、discuss 或 reviewer；澄清路径 ideas 通常为空。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/rag/agent/graph.py::clarify_router / build_graph / run",
       "links": [{"href": "05-rag-qa-details.html#explore-clarify", "label": "展开澄清提前结束分支"}]

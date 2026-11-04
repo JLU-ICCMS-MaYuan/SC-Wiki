@@ -124,6 +124,25 @@
       ]
     },
     {
+      "id": "structure-reading",
+      "title": "读取 PDF/附件结构候选",
+      "summary": "逐文件发现几何，暂不分配材料状态",
+      "owner": "结构读取模型 / 几何校验程序",
+      "description": "逐文件读取结构附件和原 PDF，形成带真实来源的结构候选与未决诊断；此前置阶段不同于后续 structure-assign 的材料状态归属。",
+      "notes": [],
+      "code": "backend/ingest/structure_reading.py::extract_structure_candidates；backend/ingest/upload_jobs.py::_extract_pdf_structure_candidates / _process_conventional_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse-details.html#structure-reading",
+          "label": "展开逐文件读取、工具循环与几何合并"
+        },
+        {
+          "href": "01-upload-parse-details.html#structure-reading-incomplete",
+          "label": "分支：预算耗尽或读取失败"
+        }
+      ]
+    },
+    {
       "id": "role-check",
       "kind": "check",
       "title": "指定角色可直接使用？",
@@ -213,15 +232,21 @@
     {
       "id": "state-inventory",
       "title": "先建立材料状态",
-      "summary": "联合正文、SI、表格和图中条件",
-      "description": "联合正文、SI、表格和图中条件。详细行为、边界和来源见独立详情页。",
+      "summary": "候选级 assignments + 记录级 record_assignments",
+      "description": "联合正文、SI、表格和本次读取的真实原页规划状态；候选级归属覆盖每个原候选，记录级归属只重分配指定记录，保留兄弟记录、材料卡、稳定身份和科学值。",
       "code": "backend/ingest/state_inventory.py::plan_states / apply_inventory",
       "owner": "材料状态规划模型 / 程序",
-      "notes": [],
+      "notes": [
+        "不确定性只落在实际受影响的归属或记录，不扩散到无关兄弟属性。"
+      ],
       "links": [
         {
           "href": "01-upload-parse-details.html#state-inventory",
-          "label": "展开此步骤的完整细节"
+          "label": "展开候选级与记录级归属细节"
+        },
+        {
+          "href": "01-upload-parse-details.html#record-reassignment",
+          "label": "分支：仅重分配一条科学记录"
         },
         {
           "href": "01-upload-parse-details.html#uncertain-assignment",
@@ -554,13 +579,16 @@
       "id": "uncertain-assignment",
       "title": "材料归属仍有疑问",
       "summary": "保留记录、理由与来源，等待核对",
-      "description": "当前规划将存疑候选放入最可能的已有状态并记录生成问题；后续模型可查原图核实并更正该记录，不能用复制整张卡解决一个字段的疑问。",
-      "code": "backend/ingest/state_inventory.py::apply_inventory；backend/ingest/model_review.py",
-      "owner": "规划模型 / 人工",
+      "description": "当前规划将存疑候选或记录放入有来源理由的目标状态，并只给实际受影响记录生成问题；本次 plan_states 已可读取真实原页核实，不能用复制整张卡或扩散不确定性解决一个字段的疑问。",
+      "code": "backend/ingest/state_inventory.py::plan_states / apply_inventory",
+      "owner": "规划模型 / 程序",
       "attachTo": "state-inventory",
       "side": "left",
       "kind": "wait",
       "label": "存疑",
+      "notes": [
+        "记录级重分配不改科学值，兄弟记录仍按各自归属保留。"
+      ],
       "links": [
         {
           "href": "01-upload-parse-details.html#state-inventory",

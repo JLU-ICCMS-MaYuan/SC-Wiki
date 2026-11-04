@@ -137,6 +137,38 @@
       ]
     },
     {
+      "id": "structure-reading",
+      "title": "读取 PDF/附件结构候选",
+      "summary": "逐文件发现几何，暂不分配材料状态",
+      "owner": "结构读取模型 / 几何校验程序",
+      "description": "专用管线在逐文件读取阶段处理结构来源：CIF/POSCAR 等结构附件直接校验并生成候选；非结构附件 PDF 由 extract_structure_candidates 核验 SHA-256、按真实 PDF 文字行建立只读 IR，再进入最多 13 轮的有界模型工具循环。模型以 report_structures 返回全部已报告几何及未决疑点；此步尚未调用 assign_structures，不决定候选属于哪个材料状态。",
+      "notes": [
+        "每个 PDF 分别读取并保存 structure_reading 事件；结构附件读取与 PDF 内容发现都先于后续科学候选整理和 structure-assign。",
+        "read_original_page 对坐标表及续页渲染指定真实 PDF 页的 PNG，并在下一轮模型请求中携带图像；文本行定位不能替代坐标表的视觉核对。",
+        "report_structures 经严格结构与原文行数值校验后，仍调用既有完整坐标/Wyckoff 几何解码；有效结果按结构哈希及材料、压力、空间群、优化范围合并，重复项补充来源，不同几何继续分别保留。",
+        "未读覆盖或解释疑点写入 uncertainties / blocked 候选；技术失败或预算耗尽不得用空 structures 冒充整份文件没有结构。"
+      ],
+      "code": "backend/ingest/structure_reading.py::extract_structure_candidates / _reading_result；backend/ingest/upload_jobs.py::_extract_pdf_structure_candidates / _process_conventional_upload_task",
+      "links": [
+        {
+          "href": "01-upload-parse.html#structure-reading",
+          "label": "返回本功能主干"
+        },
+        {
+          "href": "#structure-original-page",
+          "label": "查看真实原页读取"
+        },
+        {
+          "href": "#structure-reading-incomplete",
+          "label": "查看预算耗尽与失败边界"
+        },
+        {
+          "href": "#structure-assign",
+          "label": "继续查看后续结构归属"
+        }
+      ]
+    },
+    {
       "id": "role-check",
       "kind": "check",
       "title": "指定角色可直接使用？",
@@ -232,18 +264,30 @@
     {
       "id": "state-inventory",
       "title": "先建立材料状态",
-      "summary": "联合正文、SI、表格和图中条件",
-      "description": "以当前来源先规划实际材料状态，再将原候选逐一归入状态。不同材料、压力、物相或实际优化几何分别保留；不能因为某个数值压力未知便额外创建占位卡。",
-      "code": "backend/ingest/state_inventory.py::plan_states / apply_inventory",
+      "summary": "候选级 assignments + 记录级 record_assignments",
+      "description": "plan_states 以当前来源规划实际材料状态，响应同时包含候选级 assignments 和记录级 record_assignments。apply_inventory 要求每个 candidate_state_key 在候选级归属中恰好出现一次；记录级覆盖再以 candidate_state_key、module_key、record_key 定位单条记录，把它放入指定的已有目标状态。不同材料、压力、物相或实际优化几何分别保留，不能因一个数值压力未知便额外创建占位卡。",
+      "code": "backend/ingest/state_inventory.py::plan_states / apply_inventory / referenced_pages",
       "owner": "材料状态规划模型 / 程序",
       "notes": [
+        "单记录重分配只复制该记录并补充已验证来源；未覆盖的兄弟记录仍按候选级 assignments 落位，不能为修正一条记录搬走兄弟记录或整张材料卡。",
+        "状态字段完全相同时沿用原 state_key；记录的 module_key、record_key、科学值和原来源由程序从原候选带入。规划模型只提供去向、supported/uncertain、理由与 source_ids，不能输出替代科学值。",
+        "uncertain 只对实际受影响的记录生成 state_assignment_uncertain；一个记录的疑问不自动扩散到兄弟属性或无关材料卡。",
+        "referenced_pages 在本次 plan_states 前定位引用图页，plan_states 随即核验文件 SHA-256、渲染真实 PDF 原页，并把 images 与 original_pages 一并交给本次规划模型；不是等后续字段核对模型才读图。",
         "材料状态规划先于固定表单整理；源码实现不等于真实论文已经科学验收。",
-        "存疑归属暂放最可能已有状态并保留 uncertain、理由和来源，不把宿主条件当成已证实归属。"
+        "存疑归属保留 uncertain、理由和来源，不把宿主条件当成已证实归属。"
       ],
       "links": [
         {
           "href": "01-upload-parse.html#state-inventory",
           "label": "返回本功能主干"
+        },
+        {
+          "href": "#record-reassignment",
+          "label": "查看单记录重分配边界"
+        },
+        {
+          "href": "#uncertain-assignment",
+          "label": "查看局部不确定性"
         }
       ]
     },
@@ -274,6 +318,7 @@
       "code": "backend/ingest/canonical_structure.py::assign_structures；backend/ingest/upload_jobs.py::_bind_structure_candidates",
       "owner": "结构归属模型 / 程序",
       "notes": [
+        "本步消费前置 structure-reading 已形成的候选并判断归属；它不替代此前的逐文件 PDF 内容发现与几何校验。",
         "结构属于对应材料状态，不能把旧 structure_candidates 当作当前规范表单。",
         "人工仍须核对模型候选，未确认不会自动成为已批准科学事实。"
       ],
@@ -632,16 +677,93 @@
       ]
     },
     {
+      "id": "structure-original-page",
+      "attachTo": "structure-reading",
+      "side": "right",
+      "kind": "wait",
+      "label": "坐标表需查原页",
+      "returnTo": "structure-reading",
+      "returnLabel": "继续有界读取",
+      "title": "read_original_page 读取真实 PDF 页",
+      "summary": "实际 PNG 进入下一轮结构读取请求",
+      "owner": "结构读取工具 / 存储层",
+      "description": "工具只接受当前 PDF 的 file_id 和真实页码，消耗既有动作预算并渲染该页 PNG；下一轮模型请求携带 page_images。成功响应后才把相应页计入 imaged_pages，用于判断全部坐标表原页是否已读。",
+      "notes": [
+        "图像渲染成功不等于模型已经理解正确；请求失败不能记为已完成视觉读取。",
+        "坐标表续页也需读取；不能靠 inspect_figure 的文字或数值范围猜测 fractional / Cartesian。"
+      ],
+      "code": "backend/ingest/structure_reading.py::extract_structure_candidates；backend/ingest/document_agent.py::DocumentTools.call",
+      "links": [
+        {
+          "href": "#structure-reading",
+          "label": "返回结构候选读取"
+        }
+      ]
+    },
+    {
+      "id": "structure-reading-incomplete",
+      "attachTo": "structure-reading",
+      "side": "left",
+      "kind": "stop",
+      "label": "预算耗尽 / 读取失败",
+      "title": "保留未决状态，不伪造无结构",
+      "summary": "技术异常与未读覆盖都不能变成空结构结论",
+      "owner": "结构读取程序 / 上传 Worker",
+      "description": "13 轮工具循环耗尽、模型调用异常、文件身份或响应 Schema 校验失败会抛出错误并由上传流程记录失败；单项结构的来源、原子坐标或晶格等校验失败则转为该结构的 blocked 候选，不抹掉其他有效几何。任何情况都不会以空 structures 宣称全文没有结构；模型已 report_structures 但覆盖或解释仍不完整时，_reading_result 另保留 uncertainties 对应的 blocked 诊断候选。",
+      "notes": [
+        "有效几何、单项科学校验失败与文件级读取疑点分别保留，不用一个失败项抹掉其他候选。",
+        "失败不是后续 structure-assign 的“无候选可分配”正常路径。"
+      ],
+      "code": "backend/ingest/structure_reading.py::extract_structure_candidates / _reading_result / _candidates；backend/ingest/upload_jobs.py::_process_conventional_upload_task",
+      "links": [
+        {
+          "href": "#structure-reading",
+          "label": "返回结构候选读取"
+        }
+      ]
+    },
+    {
+      "id": "record-reassignment",
+      "attachTo": "state-inventory",
+      "side": "right",
+      "kind": "wait",
+      "label": "单记录改派",
+      "returnTo": "form-fill",
+      "returnLabel": "继续固定表单整理",
+      "title": "仅重分配一条科学记录",
+      "summary": "兄弟记录与材料卡不随单条修正搬迁",
+      "owner": "材料状态规划模型 / apply_inventory",
+      "description": "record_assignments 以原 candidate_state_key、module_key、record_key 和目标 target_index 指定一条记录的新归属。程序校验目标、来源、理由及已知材料/物相/优化条件，只复制该记录到目标模块；其余兄弟记录仍走候选级 assignments，记录值与稳定身份不从模型响应替换。",
+      "notes": [
+        "如果只有该记录不确定，只在该记录上写 state_assignment_uncertain；不把不确定性扩散到兄弟属性。",
+        "如果原候选的所有记录都确需纠正，响应必须逐一列出全部记录；不能为保留初始误读而新建空状态。"
+      ],
+      "code": "backend/ingest/state_inventory.py::SCHEMA / apply_inventory",
+      "links": [
+        {
+          "href": "#state-inventory",
+          "label": "返回候选级与记录级规划"
+        },
+        {
+          "href": "#uncertain-assignment",
+          "label": "查看局部不确定性"
+        }
+      ]
+    },
+    {
       "id": "uncertain-assignment",
-      "title": "材料归属仍有疑问",
-      "summary": "保留记录、理由与来源，等待核对",
-      "description": "当前规划将存疑候选放入最可能的已有状态并记录生成问题；后续模型可查原图核实并更正该记录，不能用复制整张卡解决一个字段的疑问。",
-      "code": "backend/ingest/state_inventory.py::apply_inventory；backend/ingest/model_review.py",
-      "owner": "规划模型 / 人工",
+      "title": "材料或记录归属仍有疑问",
+      "summary": "只标记实际受影响记录，保留理由与来源",
+      "description": "候选级 assignments 或记录级 record_assignments 可标 uncertain；apply_inventory 只对最终落到该决策的记录生成 state_assignment_uncertain。真实原页已在本次 plan_states 请求中提供，后续人工核对继续依据所保留的理由和来源，不能复制整张卡或把疑问扩散到兄弟属性。",
+      "code": "backend/ingest/state_inventory.py::plan_states / apply_inventory",
+      "owner": "规划模型 / 程序 / 人工",
       "attachTo": "state-inventory",
       "side": "left",
       "kind": "wait",
       "label": "存疑",
+      "notes": [
+        "uncertain 表示归属尚未解决，不证明另一个物理状态，也不改写科学值。"
+      ],
       "links": [
         {
           "href": "01-upload-parse.html#state-inventory",

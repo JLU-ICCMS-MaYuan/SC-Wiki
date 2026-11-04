@@ -488,12 +488,13 @@
       "attachTo": "export-path",
       "side": "right",
       "kind": "stop",
-      "label": "证据缺失",
+      "label": "完整性校验失败",
       "title": "导出不完整拦截",
-      "summary": "证据缺失返回 409 不导出",
+      "summary": "证据或结构关联不完整返回 409 不导出",
       "owner": "Go API",
-      "description": "已批准材料状态导出要求每条物性记录至少一条当前 revision 的 Evidence，且 structure_key 精确匹配 structure-{id}，否则返回 409 export_incomplete；revision 不一致返回 409 export_revision_conflict。",
+      "description": "已批准材料状态导出要求每条物性记录至少一条当前 revision 的 Evidence；仅当记录提供 structure_key 时，才校验其匹配本状态的 structure-{id}。证据或已提供的结构关联不完整返回 409 export_incomplete；revision 不一致返回 409 export_revision_conflict。",
       "notes": [
+        "未提供 structure_key 的物性记录不要求具备结构关联。",
         "跨 revision 关联无效。",
         "查询按 paper_id + revision + state_key 精确定位。"
       ],

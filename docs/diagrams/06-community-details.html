@@ -43,13 +43,14 @@
       "title": "进入社区或账号入口",
       "summary": "公开平行读取与身份操作分流",
       "owner": "访客 / 已登录用户",
-      "description": "贡献排行、论文统计、公开 AI 问题与答案分别通过各自读取接口访问，访客可平行进入，不必先注册、登录或经过超管治理。注册登录、本人通知与超管生成编辑是另外的身份路径。",
+      "description": "贡献排行、论文统计、公开问题与答案（含AI与真人来源）分别通过各自读取接口访问，访客可平行进入，不必先注册、登录或经过超管治理。注册登录、本人通知与超管生成编辑是另外的身份路径。",
       "notes": [
-        "公开读取使用 OptionalAuth；匿名可读，携带 token 时仍须通过认证。",
-        "公开 AI 讨论不是只有超级管理员才能读取。",
+        "贡献榜以及 questions/entries 等社区公开读取使用 OptionalAuth：匿名可读，携带 token 时仍须通过认证。",
+        "/api/community/publication-stats 未挂身份中间件，不校验随附 token；不能把它与 OptionalAuth 路由混为一谈。",
+        "公开问题与答案（含AI与真人来源）不是只有超级管理员才能读取。",
         "受保护的生成、编辑和治理路由不改变公众三条平行读取入口。"
       ],
-      "code": "goserver/handlers/community.go::RegisterCommunityRoutes；goserver/handlers/stats.go；goserver/handlers/publication_stats.go",
+      "code": "goserver/main.go:148-150；goserver/middleware/auth.go::OptionalAuth；goserver/handlers/community.go::RegisterCommunityRoutes；goserver/handlers/stats.go；goserver/handlers/publication_stats.go",
       "links": [{"href": "06-community.html#community-entry", "label": "返回本功能主干"}]
     },
     {
@@ -150,21 +151,29 @@
         "非评论通知读取与已读标记仍按登录用户保留。"
       ],
       "code": "backend/api/community_ai.py::authorized；backend/community/service.py::actor_allowed；goserver/handlers/community.go::RegisterCommunityRoutes",
-      "links": [{"href": "06-community.html#superadmin-gov", "label": "返回本功能主干"}]
+      "links": [
+        {"href": "06-community.html#superadmin-gov", "label": "返回本功能主干"},
+        {"href": "06-community-details.html#content-management-ui", "label": "内容管理 UI＋API"},
+        {"href": "06-community-details.html#moderation-api-only", "label": "历史举报与 dismiss 仅 API"}
+      ]
     },
     {
       "id": "question-create",
       "title": "独立动作一：创建问题",
-      "summary": "手动／AI建题均不自动回答",
+      "summary": "手动直接 succeeded；AI queued→running→succeeded|failed",
       "owner": "超级管理员 / Python 选题服务",
-      "description": "POST /questions 由超管手动提交标题与背景，直接保存可见问题并完成该建题批次；POST /questions/generate 只选择模型生成一个问题。两种建题方式都不调用答案入队，也不自动产生答案。",
+      "description": "POST /questions 由超管手动提交标题与背景，直接保存 origin=human、status=visible 的问题并将批次置为 succeeded，不投递 RQ。POST /questions/generate 创建 queued 批次并投递 RQ，Worker 认领后置 running，最终进入 succeeded 或 failed；两种建题成功都不调用答案入队，也不自动产生答案。",
       "notes": [
-        "AI 选题任务只负责问题生成与去重，不是回答任务组。",
-        "手动建题成功不意味着已有 AI 回答。",
+        "AI 每次执行最多进行 3 次候选生成与精确/语义去重；均未得到可用新问题时以 duplicate_question 失败。",
+        "failed 且 sources 为空的建题批次可由 retry_batch 增加 attempt、更换 job_id、重置 queued 并重新入队；旧 task retry 固定返回 workflow_changed。",
+        "AI 成功仅保存 origin=ai、visible 问题并完成建题批次，不是回答任务组；手动建题成功也不意味着已有 AI 回答。",
         "要生成答案，必须另到问题详情执行显式选模型动作。"
       ],
-      "code": "backend/api/community_ai.py::manual_question / generate_question；backend/community/service.py::submit；backend/community/jobs.py::prepare",
-      "links": [{"href": "06-community.html#question-create", "label": "返回本功能主干"}]
+      "code": "backend/api/community_ai.py::manual_question / generate_question / retry_batch / retry_task；backend/community/service.py::submit / retry_batch / retry_task；backend/community/jobs.py::prepare；backend/community/generation.py::create_question",
+      "links": [
+        {"href": "06-community.html#question-create", "label": "返回本功能主干"},
+        {"href": "06-community-details.html#question-lifecycle", "label": "查看 AI 建题状态机"}
+      ]
     },
     {
       "id": "ai-queue",
@@ -176,7 +185,7 @@
         "建题接口不会自动调用此动作。",
         "同 UUID 重试复用原任务组，异参数返回 request_conflict。",
         "同题按 sequence FIFO，每次只投递队首 queued 项；不同问题不受同一条 FIFO 串联。",
-        "Worker 执行容量是全局两租约，与任务组原子创建是两个阶段。"
+        "入队本身不获取租约；Worker 认领前才非阻塞获取全局两槽容量，与任务组原子创建是两个阶段。"
       ],
       "code": "backend/api/community_ai.py::add_answer_group；backend/community/answers.py::enqueue_answers / dispatch",
       "links": [{"href": "06-community.html#ai-queue", "label": "返回本功能主干"}]
@@ -186,8 +195,9 @@
       "title": "读取前文、检索并生成",
       "summary": "任务开始读前文；每次检索至多8片段",
       "owner": "Python 生成器",
-      "description": "Worker 取得容量租约并认领同题队首后，在任务开始时读取当时所有可用公开首答与追加段，保存前文 manifest 快照，而不是使用入队时旧前文。每次新语义检索以 top_k=8 最多取 8 个片段，再过滤当前批准且 revision 匹配的来源，并可合并历史引用。",
+      "description": "Worker 取得容量租约并认领同题队首后，在任务开始时只读取当时 origin=ai 且 status=visible 的可用公开首答与追加段，保存前文 manifest 快照，而不是使用入队时旧前文；公开真人答案不进入模型前文。每次新语义检索以 top_k=8 最多取 8 个片段，再过滤当前批准且 revision 匹配的来源，并可合并历史引用。",
       "notes": [
+        "context_rows 明确限定 Entry.origin='ai' 与 Entry.status='visible'；即使真人答案公开可读，也不会成为 [A...] 前文。",
         "前文是待回应观点，不是论文证据；读取时排除来源或祖先依赖已失效的内容。",
         "top_k=8 限制每次新检索片段数，合并历史来源后的提示来源总数不应误称为始终只有 8。",
         "回答只能引用提供的 [S...] 与 [A...] 标识，禁止虚构 DOI、URL 或参考文献。",
@@ -218,11 +228,12 @@
       "owner": "Go API / Redis",
       "description": "贡献榜聚合审核通过上传与 reviewed 审核事件形成稳定全量排名，公开返回裁剪后的 Top 20；可选登录身份用于附加本人全量排名，不是公开读取的前提。",
       "notes": [
+        "路由使用 OptionalAuth：匿名可读；携带 token 必须认证成功，登录身份仅用于附加本人排名。",
         "公开快照缓存一小时，页面保持打开时每小时重新获取。",
         "封禁和注销账号的历史贡献按各自公开标识规则处理。",
         "缓存不可用时可直接查库，但不以残缺榜单兜底。"
       ],
-      "code": "goserver/handlers/stats.go",
+      "code": "goserver/main.go:148；goserver/middleware/auth.go::OptionalAuth；goserver/handlers/stats.go",
       "links": [{"href": "06-community.html#contrib-rank", "label": "返回本功能主干"}]
     },
     {
@@ -232,23 +243,26 @@
       "owner": "Go API / Redis",
       "description": "统计各材料家族审核通过论文的去重篇数与年度分布，未知年份单列，多家族论文分别计入各家族，未分类另行统计。普通请求读取一小时快照，refresh=true 强制重建，缓存键精确为 community:publication-stats:v1。",
       "notes": [
+        "该路由没有 OptionalAuth/AuthRequired 等身份中间件，也不校验随附 token；匿名与带 token 请求都直接进入统计处理器。",
         "统计 SQL 的论文批准谓词是 review_status='approved'，家族关联要求 pmf.paper_revision=p.content_revision。",
         "该谓词不与搜索或社区 AI 来源筛选完全相同；后者还检查 approved_revision=content_revision 等条件。",
         "统计不关联材料状态或物性，没有 Tc 的批准论文也可计入。"
       ],
-      "code": "goserver/handlers/publication_stats.go::publicationCacheKey / publicationCountsSQL",
+      "code": "goserver/main.go:149；goserver/handlers/publication_stats.go::publicationCacheKey / publicationCountsSQL",
       "links": [{"href": "06-community.html#pub-stats", "label": "返回本功能主干"}]
     },
     {
       "id": "public-qa",
-      "title": "公众读取 AI 问题与答案",
-      "summary": "平行公开阅读；来源失效由DTO屏蔽",
+      "title": "公开问题与答案（含AI与真人来源）",
+      "summary": "不按 origin 过滤；来源失效由DTO屏蔽",
       "owner": "Go API",
-      "description": "问题列表、答案列表和答案详情通过公开读取路由返回 visible 内容，并组成首答与同模型追加段。该路径与贡献榜、论文统计平行，不要求调用超管批次或队列接口。",
+      "description": "问题列表、答案列表和答案详情通过 OptionalAuth 公开读取路由返回 visible 内容，并组成首答与同模型追加段。公开查询不按 origin 过滤，历史真人和超管 human 建题均可见；该路径与贡献榜、论文统计平行，不要求调用超管批次或队列接口。",
       "notes": [
+        "communityQuestions 与 communityEntries 按 kind/status 等条件筛选，不设 origin='ai' 条件；真人来源内容不会因公开查询被排除。",
+        "匿名可读，携带 token 时仍须通过 OptionalAuth 认证。",
         "公开 DTO 只返回可公开引用元数据，不返回内部前文快照或模型凭据。",
         "来源或前文依赖失效时屏蔽相应正文、引用与回复关系。",
-        "评论读取已 410 退役；普通用户不能新建举报，非评论通知仍保留。"
+        "历史 votes/voted 与 votes 排序只读；评论读取已 410 退役，互动写入拒绝，非评论通知仍保留。"
       ],
       "code": "goserver/handlers/community_entries.go::communityQuestions / communityEntries；goserver/handlers/community_ai.go::communityAnswerDetail / communityAnswerTurns",
       "links": [{"href": "06-community.html#public-qa", "label": "返回本功能主干"}]
@@ -382,17 +396,17 @@
       "attachTo": "public-qa",
       "side": "left",
       "kind": "stop",
-      "label": "评论退役",
-      "title": "评论读取也返回410",
-      "summary": "普通用户不能新建举报；非评论通知保留",
+      "label": "历史互动只读",
+      "title": "历史 votes/voted 可读，互动写入拒绝",
+      "summary": "visible answer 支持 votes 排序；评论读取410",
       "owner": "Go API",
-      "description": "GET /entries?kind=comment 直接返回 410 comments_retired，单条评论 GET /entries/{id} 也经 communityAccess 返回 410。POST /entries/{id}/reports 由 communityReadOnly 返回 403 community_read_only，普通用户不能新建举报。",
+      "description": "visible answer 的 DTO 返回历史 votes 与当前可选身份的 voted，答案列表支持 sort=votes；PUT/DELETE /entries/{id}/vote 均由 communityReadOnly 拒绝，不能新增或取消点赞。POST /entries、DELETE /entries/{id} 等一般 entries 写入以及 POST /entries/{id}/reports 同样返回 403 community_read_only；评论列表与单条读取返回 410 comments_retired。",
       "notes": [
+        "历史票数与 voted 只读不代表恢复投票；匿名 voted=false，携带 token 的公开读取须经 OptionalAuth。",
         "退役评论记录不因此被物理删除。",
-        "通知列表、未读数和已读标记接口仍保留。",
-        "通知读取会跳过评论、已隐藏或当前用户无权访问的目标；保留的是非评论通知能力，不是恢复评论。"
+        "通知列表、未读数和已读标记接口仍保留；读取会跳过评论、已隐藏或当前用户无权访问的目标，保留的是非评论通知能力。"
       ],
-      "code": "goserver/handlers/community.go::RegisterCommunityRoutes / communityAccess；goserver/handlers/community_entries.go::communityEntries；goserver/handlers/community_notifications.go",
+      "code": "goserver/handlers/community.go::RegisterCommunityRoutes / communityAccess / communityDTO；goserver/handlers/community_entries.go::communityEntries；goserver/handlers/community_ai.go::communityReadOnly；goserver/handlers/community_notifications.go",
       "links": [{"href": "06-community.html#comments-retired", "label": "返回主干对应支线"}]
     },
     {
@@ -450,18 +464,75 @@
       "links": [{"href": "06-community.html#edit-governance", "label": "返回主干对应支线"}]
     },
     {
+      "id": "question-lifecycle",
+      "attachTo": "question-create",
+      "side": "left",
+      "kind": "check",
+      "label": "AI建题状态机",
+      "title": "AI 建题 queued→running→succeeded|failed",
+      "summary": "最多3次生成/去重；失败批次可重试",
+      "owner": "Python 选题服务 / RQ Worker",
+      "description": "AI 建题提交后批次为 queued 并投递 RQ；Worker 获取容量后将批次置为 running，生成与去重成功则保存 visible 问题并置为 succeeded，异常或 duplicate_question 则置为 failed。failed 批次可重试重新入队；旧 task retry 固定 workflow_changed。成功仍不自动回答。",
+      "notes": [
+        "手动建题不经过此状态机：直接 visible、succeeded，且不投递 RQ。",
+        "单次执行最多进行 3 次候选生成与去重；重复结果耗尽后错误为 duplicate_question。"
+      ],
+      "code": "backend/community/service.py::submit / retry_batch / retry_task；backend/community/jobs.py::run / prepare；backend/community/generation.py::create_question",
+      "links": [{"href": "06-community.html#question-create", "label": "返回主干独立建题动作"}]
+    },
+    {
+      "id": "content-management-ui",
+      "attachTo": "superadmin-gov",
+      "side": "right",
+      "kind": "wait",
+      "label": "内容管理 UI＋API",
+      "title": "hidden|visible 的 question/answer 管理",
+      "summary": "hide/restore 有现有 UI 与 API",
+      "owner": "超管前端 / Go API",
+      "description": "现有 /admin/community UI 仅列出 hidden|visible 的 question/answer；EntryCard 提供 hide/restore，并调用 POST /entries/{id}/moderate。hide 仅允许 visible→hidden，restore 仅允许 hidden→visible；两者递增 revision、写治理事件并解决 pending 举报。",
+      "notes": [
+        "reason 去除首尾空白后须为 5–1000 字；revision 不匹配返回 409 community_revision_conflict。",
+        "hide/restore 的非法状态转换返回 409 invalid_moderation_transition。"
+      ],
+      "code": "frontend/src/pages/CommunityModerationPage.tsx；frontend/src/components/community/EntryCard.tsx；goserver/handlers/community_ai.go::communityManagedEntries；goserver/handlers/community_moderation.go::communityModerate",
+      "links": [
+        {"href": "06-community.html#superadmin-gov", "label": "返回主干治理入口"},
+        {"href": "06-community-details.html#moderation-api-only", "label": "查看仅 API 的举报队列与 dismiss"}
+      ]
+    },
+    {
+      "id": "moderation-api-only",
+      "attachTo": "superadmin-gov",
+      "side": "left",
+      "kind": "result",
+      "label": "历史举报仅 API",
+      "title": "举报队列与 dismiss 仅后端 API",
+      "summary": "pending|resolved＋治理事件；不是完整现有UI",
+      "owner": "Go API",
+      "description": "GET /moderation/reports 仅由后端 API 提供 pending|resolved 历史举报队列，并返回目标最近治理事件；现有内容管理 UI 不包含该队列。dismiss 也仅由 API 支持：不改 entry.status，但仍递增 revision、写治理事件并解决 pending 举报。",
+      "notes": [
+        "dismiss 与 hide/restore 共用 reason 5–1000 和 revision 校验；revision 不匹配返回 409。",
+        "不能把举报队列或 dismiss 的 API 能力描述成现有完整 UI。"
+      ],
+      "code": "goserver/handlers/community.go::RegisterCommunityRoutes；goserver/handlers/community_moderation.go::communityReports / communityModerate；frontend/src/pages/CommunityModerationPage.tsx",
+      "links": [
+        {"href": "06-community.html#superadmin-gov", "label": "返回主干治理入口"},
+        {"href": "06-community-details.html#content-management-ui", "label": "对比现有内容管理 UI"}
+      ]
+    },
+    {
       "id": "capacity-busy",
-      "attachTo": "ai-queue",
+      "attachTo": "ai-generate",
       "side": "right",
       "kind": "stop",
-      "label": "全局两租约占满",
+      "label": "Worker 认领前两槽占满",
       "title": "capacity_busy 快速失败",
-      "summary": "非阻塞获取，不无限等待",
+      "summary": "非阻塞获取，当前请求失败",
       "owner": "Python Worker / Redis",
-      "description": "选题和回答 Worker 执行前共享尝试 community-ai:slot:0 与 slot:1 两个全局租约，每个都以 blocking=False 非阻塞获取；两个都占用时立即抛 GenerationError('capacity_busy') 并标记任务失败，不会无限等待容量。",
+      "description": "选题和回答 Worker 都在认领前共享尝试 community-ai:slot:0 与 slot:1 两个全局租约，每个都以 blocking=False 非阻塞获取；两个都占用时立即抛 GenerationError('capacity_busy')，当前请求标记失败，不会无限等待容量。",
       "notes": [
         "租约超时长于硬任务超时，死亡进程不会永久占槽。",
-        "capacity_busy 是 Worker 容量结果，不是任务组原子创建失败。",
+        "入队本身不获取租约；capacity_busy 是 Worker 容量结果，不是任务组原子创建失败。",
         "容量失败后保留错误，可按对应重试路径重新排队。"
       ],
       "code": "backend/community/jobs.py::capacity / run；backend/community/answers.py::run",

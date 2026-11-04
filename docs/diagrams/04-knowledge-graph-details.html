@@ -42,8 +42,9 @@
       "title": "上传论文 PDF",
       "summary": "Worker 定位正文文件",
       "owner": "Python 上传 Worker",
-      "description": "论文 PDF 上传后由后台 Worker 任务定位正文文件，作为引文解析的输入，不经过 Neo4j 同步链路。",
+      "description": "上传后由后台 Worker 任务定位正文文件；只有主文件为 PDF 时才调用引用提取。新上传缺少主 PDF 时跳过提取，citation_extraction 保持 None，不写 unavailable／failed，也不经过 Neo4j 同步链路。",
       "notes": [
+        "citation_extraction 为 None 时，提交阶段不调用 persist_reference_extraction。",
         "引用图不依赖 Neo4j 同步。",
         "Worker 与 Python 共用 GROBID_URL。"
       ],
@@ -154,7 +155,7 @@
       "description": "reconcile_after_paper_approval 先重新评估当前论文 content_revision 的全部出边，再扫描全库 match_status 为 unmatched／ambiguous 的历史记录；目标论文成为当前已批准版本后，后续匹配可将其更新为 matched。",
       "notes": [
         "发布入口捕获整个重扫异常并记录 [citation-graph] 日志，随后继续向量发布；失败不被写成 matched，可在后续批准时重试。",
-        "旧直接升版分支会读取旧版主 PDF 重新解析；主 PDF 不可用只记 unavailable／failed 状态。"
+        "旧直接升版分支会读取旧版主 PDF 重新解析；缺主文件或主文件非 PDF 记 unavailable，GROBID 解析异常记 failed。"
       ],
       "code": "backend/services/citation_graph.py",
       "links": [
@@ -228,12 +229,12 @@
       "kind": "stop",
       "label": "解析失败",
       "title": "解析失败留空",
-      "summary": "只记 unavailable／failed 状态",
+      "summary": "GROBID 失败记 unavailable／failed 状态",
       "owner": "GROBID / Python Worker",
       "description": "GROBID 不可用或解析失败时，只记录 unavailable／failed 状态，不创建任何引用边，也不阻断论文人工校对。",
       "notes": [
         "新版本文档不保留旧引用。",
-        "缺少主 PDF 时同样记可观察状态。"
+        "旧直接升版缺主文件或主文件非 PDF 时才记 unavailable。"
       ],
       "code": "backend/ingest/upload_jobs.py",
       "links": [

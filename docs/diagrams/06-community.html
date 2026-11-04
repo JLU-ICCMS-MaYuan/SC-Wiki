@@ -42,7 +42,7 @@
       "title": "进入社区或账号入口",
       "summary": "公开平行读取与身份操作分流",
       "owner": "访客 / 已登录用户",
-      "description": "公众可平行读取贡献榜、论文统计、AI 问题与答案；认证和超管治理不是公开读取的必经步骤。详细行为、边界和来源见独立详情页。",
+      "description": "公众可平行读取贡献榜、论文统计、公开问题与答案（含AI与真人来源）；认证和超管治理不是公开读取的必经步骤。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "goserver/handlers/community.go；backend/api/community_ai.py",
       "links": [{"href": "06-community-details.html#community-entry", "label": "展开此步骤的完整细节"}]
@@ -128,42 +128,45 @@
       "links": [
         {"href": "06-community-details.html#superadmin-gov", "label": "展开此步骤的完整细节"},
         {"href": "06-community-details.html#not-superadmin", "label": "分支：无治理权限"},
-        {"href": "06-community-details.html#edit-governance", "label": "分支：编辑治理"}
+        {"href": "06-community-details.html#edit-governance", "label": "分支：编辑治理"},
+        {"href": "06-community-details.html#content-management-ui", "label": "分支：内容管理 UI＋API"},
+        {"href": "06-community-details.html#moderation-api-only", "label": "分支：历史举报与 dismiss 仅 API"}
       ]
     },
     {
       "id": "question-create",
       "title": "独立动作一：创建问题",
-      "summary": "手动／AI建题均不自动回答",
+      "summary": "手动直接成功；AI queued→running→succeeded|failed",
       "owner": "超级管理员 / Python 选题服务",
-      "description": "手动创建直接保存问题，AI 创建只生成问题；两者都不会自动创建答案请求。详细行为、边界和来源见独立详情页。",
+      "description": "手动建题直接保存 visible 问题且批次 succeeded，不投递 RQ；AI 建题经 queued→running→succeeded|failed，最多进行 3 次生成/去重，可因 duplicate_question 失败。failed 批次可重试重新入队，旧 task retry 固定 workflow_changed；两种成功都不自动回答。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/api/community_ai.py::manual_question / generate_question；backend/community/service.py::submit",
-      "links": [{"href": "06-community-details.html#question-create", "label": "展开独立建题动作"}]
+      "code": "backend/api/community_ai.py::manual_question / generate_question；backend/community/service.py::submit / retry_batch / retry_task；backend/community/jobs.py::prepare；backend/community/generation.py::create_question",
+      "links": [
+        {"href": "06-community-details.html#question-create", "label": "展开独立建题动作"},
+        {"href": "06-community-details.html#question-lifecycle", "label": "分支：AI建题状态机与重试"}
+      ]
     },
     {
       "id": "ai-queue",
       "title": "独立动作二：答案入队",
       "summary": "问题详情显式选模型才原子入队",
       "owner": "超级管理员 / Python 队列",
-      "description": "必须在问题详情显式选择一个或多个模型，服务端才原子创建有序任务组；建题不会自动走到这里。详细行为、边界和来源见独立详情页。",
+      "description": "必须在问题详情显式选择一个或多个模型，服务端才原子创建有序任务组；建题不会自动走到这里，入队本身不获取容量租约。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/api/community_ai.py::add_answer_group；backend/community/answers.py::enqueue_answers",
-      "links": [
-        {"href": "06-community-details.html#ai-queue", "label": "展开答案入队动作"},
-        {"href": "06-community-details.html#capacity-busy", "label": "分支：capacity_busy"}
-      ]
+      "links": [{"href": "06-community-details.html#ai-queue", "label": "展开答案入队动作"}]
     },
     {
       "id": "ai-generate",
       "title": "读取前文、检索并生成",
       "summary": "任务开始读前文；每次检索至多8片段",
       "owner": "Python 生成器",
-      "description": "同题 FIFO 任务开始时读取当时可用前文，每次新语义检索最多8片段，再按来源与前文引用规则生成。详细行为、边界和来源见独立详情页。",
+      "description": "Worker 认领前非阻塞获取全局容量；同题 FIFO 任务开始时只把 origin=ai 且 visible 的可用答案纳入前文，公开真人答案不进入模型前文。每次新语义检索最多8片段，再按来源与前文引用规则生成。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/community/answers.py::run；backend/community/generation.py",
       "links": [
         {"href": "06-community-details.html#ai-generate", "label": "展开生成与检索细节"},
+        {"href": "06-community-details.html#capacity-busy", "label": "分支：capacity_busy"},
         {"href": "06-community-details.html#empty-corpus", "label": "分支：空公开库"},
         {"href": "06-community-details.html#retrieval-failed", "label": "分支：retrieval_failed"},
         {"href": "06-community-details.html#answer-rejected", "label": "分支：一次纠正"}
@@ -208,10 +211,10 @@
     },
     {
       "id": "public-qa",
-      "title": "公众读取 AI 问题与答案",
-      "summary": "平行公开阅读；来源失效由DTO屏蔽",
+      "title": "公开问题与答案（含AI与真人来源）",
+      "summary": "不按 origin 过滤；来源失效由DTO屏蔽",
       "owner": "Go API",
-      "description": "公开问题与答案不需要先登录或进入治理链；来源或前文依赖失效时公开 DTO 屏蔽正文与引用。详细行为、边界和来源见独立详情页。",
+      "description": "公开查询不按 origin 过滤，历史真人和超管 human 建题均可见，不需要先登录或进入治理链；来源或前文依赖失效时公开 DTO 屏蔽正文与引用。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "goserver/handlers/community_entries.go；goserver/handlers/community_ai.go",
       "links": [
@@ -327,11 +330,11 @@
       "attachTo": "public-qa",
       "side": "left",
       "kind": "stop",
-      "label": "评论退役",
-      "title": "评论读取也返回410",
-      "summary": "普通用户不能新建举报；非评论通知保留",
+      "label": "历史互动只读",
+      "title": "历史互动只读，评论读取410",
+      "summary": "votes/voted 可读；点赞、举报与一般 entries 写入拒绝",
       "owner": "Go API",
-      "description": "评论列表和单条读取均为 410 comments_retired，举报写入为只读拒绝；通知接口仍保留并过滤不可用目标。详细行为、边界和来源见独立详情页。",
+      "description": "visible answer 保留历史 votes/voted 并支持 votes 排序，但不能新增或取消点赞；投票、举报和一般 entries 写入均为只读拒绝。评论列表和单条读取为 410 comments_retired，非评论通知读取与已读仍保留。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "goserver/handlers/community.go；goserver/handlers/community_entries.go；goserver/handlers/community_notifications.go",
       "links": [{"href": "06-community-details.html#comments-retired", "label": "展开评论与通知边界"}]
@@ -380,14 +383,14 @@
     },
     {
       "id": "capacity-busy",
-      "attachTo": "ai-queue",
+      "attachTo": "ai-generate",
       "side": "right",
       "kind": "stop",
-      "label": "全局两租约占满",
+      "label": "Worker 认领前两槽占满",
       "title": "capacity_busy 快速失败",
-      "summary": "非阻塞获取，不无限等待",
+      "summary": "非阻塞获取，当前请求失败",
       "owner": "Python Worker / Redis",
-      "description": "选题与回答 Worker 共用全局两个租约，均以非阻塞方式获取；占满时任务失败而不是无限等待。详细行为、边界和来源见独立详情页。",
+      "description": "选题与回答 Worker 在认领前非阻塞获取共用的全局两个租约；两槽占满时当前请求以 capacity_busy 失败。入队本身不获取租约，也不无限等待容量。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/community/jobs.py::capacity",
       "links": [{"href": "06-community-details.html#capacity-busy", "label": "展开容量失败分支"}]

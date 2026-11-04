@@ -74,7 +74,7 @@
       "description": "chat 通过 chat_stream 收集普通 Mentor 的 done；chat_stream 在 explore=false 时调用 mentor.run_stream。service.search 则调用 search.engine 的规则模式识别与检索；explore=true 才在线程中运行 Inspiration 图，并先经 clarify 判断是提前澄清结束还是进入 READY 完整路径。",
       "notes": [
         "直接 search 的 formula、elements、paper、semantic 规则路由不是普通 Mentor 每轮的固定前置步骤。",
-        "Inspiration 的证据收集、想法生成和评审不属于直接 search API。",
+        "Inspiration 的证据收集、想法生成、discuss 与按需 reviewer 不属于直接 search API。",
         "普通 Mentor 的 ROUTE_PROMPT 路由发生在文本之后，与 search engine 的规则路由不同。"
       ],
       "code": "backend/rag/service.py::chat / chat_stream / search；backend/rag/search/engine.py::detect_search_mode",
@@ -133,7 +133,7 @@
       "notes": [
         "tool_start/tool_end 只报告工具名称、输入或截断输出，不等于检索结果已作为引用证据发布。",
         "没有增量 token 时，done 仍可从最终图状态提供完整 answer。",
-        "explore=true 的完整设计评审回放与 ideas 完成返回仅限 READY 路径；clarify_end 提前返回澄清问题走另一分支，不能据此推断普通 Mentor 也发送 ideas 或评审事件。"
+        "explore=true 仅在 READY 路径的完整设计与 discuss 完成后逐字符回放，并由 done 返回 ideas；clarify_end 提前返回澄清问题走另一分支，不能据此推断普通 Mentor 也发送 ideas 或评审事件。"
       ],
       "code": "backend/rag/agent/mentor.py::run_stream；backend/rag/service.py::chat_stream；backend/api/rag.py::rag_chat_stream",
       "links": [{"href": "05-rag-qa.html#sse-stream", "label": "返回本功能主干"}]
@@ -228,8 +228,10 @@
       "title": "直接 /api/rag/search",
       "summary": "独立规则路由与 SQL／语义检索",
       "owner": "Python search engine / MySQL / Qdrant",
-      "description": "search engine 自动或按 mode 选择 formula、elements_exact、elements_combination、elements_contained、paper、semantic。结构化模式查询 MySQL；semantic 或 superconductors 未命中时调用 Qdrant 语义补召回，top_k 控制相应检索数量。",
+      "description": "search engine 自动或按 mode 选择 formula、elements_exact、elements_combination、elements_contained、paper、semantic。top_k 仅作为 paper 模式的 SQL limit，以及实际执行的 Qdrant 语义检索数量；formula／elements 结构化 SQL 本身不按 top_k 截断，但未命中后的语义补召回仍使用 top_k。",
       "notes": [
+        "paper 模式调用 search_papers(..., limit=top_k)；formula／elements 的 SQL 搜索函数不接收 top_k。",
+        "semantic 或 superconductors 未命中时实际调用 search_by_semantics(..., top_k=top_k)，因此 formula／elements 未命中后的语义补召回仍受 top_k 控制。",
         "这条路径不运行 Mentor 工具选择、ROUTE_PROMPT 或 Inspiration 评审。",
         "结构化检索命中不保证还会执行向量检索；paper 结果为空且没有 superconductors 时可进入语义补召回。",
         "此处不能根据 fusion.py 或 core/engine.py 的存在宣称每次直接搜索都执行 RRF 与重排。"
@@ -278,13 +280,13 @@
       "kind": "check",
       "label": "explore=true",
       "title": "Inspiration clarify 分流",
-      "summary": "信息不足先澄清；READY 才设计评审",
+      "summary": "信息不足先澄清；READY 才设计与 discuss",
       "owner": "Inspiration Agent / LLM reviewer",
-      "description": "explore=true 时，service 在线程中运行 Inspiration run，初始 stage=clarify、ideas=[]。clarify_node 根据当前对话判断信息是否足够：回复含 READY: 才把 stage 置为 design 并进入设计检索、想法生成和 reviewer；否则经 clarify_end 提前结束。它不是直接 /api/rag/search，也不是普通 Mentor 的一次工具调用。",
+      "description": "explore=true 时，service 在线程中运行 Inspiration run，初始 stage=clarify、ideas=[]。clarify_node 根据当前对话判断信息是否足够：回复含 READY: 才把 stage 置为 design 并进入设计检索、想法生成和 discuss；否则经 clarify_end 提前结束。reviewer 仅在 ideas 与 evidence_text 均非空时于 discuss 内额外调用，跳过不妨碍 discuss。它不是直接 /api/rag/search，也不是普通 Mentor 的一次工具调用。",
       "notes": [
-        "信息不足时只问一个关键澄清问题，不执行后续设计与评审。",
+        "信息不足时只问一个关键澄清问题，不执行后续设计、discuss 或 reviewer。",
         "只有 READY 才进入 design_router→design_search→design_curator→design_evidence→discuss 的完整路径。",
-        "想法与评审是检索证据加模型生成，不构成科研结论；完整路径执行期间不逐步推送 review verdict。"
+        "想法与 discuss 由检索证据加模型生成，reviewer 仅按条件额外执行；这些输出不构成科研结论，完整路径执行期间不逐步推送 review verdict。"
       ],
       "code": "backend/rag/agent/graph.py::clarify_node / clarify_router / build_graph / run；backend/rag/service.py::chat_stream",
       "links": [{"href": "05-rag-qa.html#explore-review", "label": "返回主干对应支线"}]
@@ -300,7 +302,7 @@
       "owner": "Inspiration Agent / Python RAG 服务",
       "description": "clarify 未判定 READY 时，clarify_router 返回 clarify_end，图中该节点直接到 END。run 取澄清问题作为 answer，初始 ideas 保持为空；不会执行 design_router、设计检索、证据与想法生成、discuss 或 reviewer。",
       "notes": [
-        "service 仍会把澄清 answer 逐字符回放并发送 done，但这不是 READY 完整路径的设计评审回放。",
+        "service 仍会把澄清 answer 逐字符回放并发送 done，但这不是 READY 路径在完整设计与 discuss 完成后的回放。",
         "澄清路径 done 的 ideas 通常为空，不能宣称已生成想法卡片或评审结论。",
         "下一轮需根据补充信息重新经过 clarify，READY 后才进入完整路径。"
       ],
@@ -314,9 +316,9 @@
       "kind": "result",
       "label": "READY 完整路径结束",
       "title": "READY 路径回放与 ideas 完成返回",
-      "summary": "完整设计评审后才回放并返回 ideas",
+      "summary": "完整设计与 discuss 完成后才回放并返回 ideas",
       "owner": "Python RAG 服务 / React",
-      "description": "仅限 READY 进入的完整路径：设计检索、筛选、想法生成和 discuss/reviewer 全部返回后，service 才遍历 answer 逐字符产生 token，最后 done 返回 answer、source、ideas、provider、model。前端虽保留旧事件类型兼容处理，当前这条服务路径不逐步推送 evidence_card 或 review_verdict。",
+      "description": "仅限 READY 进入的完整路径：设计检索、筛选、想法生成和 discuss 完成后，service 才遍历 answer 逐字符产生 token，最后 done 返回 answer、source、ideas、provider、model。reviewer 仅在 ideas 与 evidence_text 均非空时于 discuss 节点内、生成讨论回复前额外调用，跳过不妨碍 discuss、逐字符回放或 done。前端虽保留旧事件类型兼容处理，当前这条服务路径不逐步推送 evidence_card 或 review_verdict。",
       "notes": [
         "ideas 在 READY 完整路径的 done 中一次返回，不能把逐字符 token 说成想法卡片逐步生成。",
         "review verdict 不逐步推送；正文或想法中的可行性信息也不等于独立流事件。",
