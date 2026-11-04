@@ -78,22 +78,25 @@ async function checkOutlineGeometry(page, nav, label) {
     const content = layout?.querySelector(':scope > [data-material-outline-content]')
     const list = node.querySelector('[data-material-outline-list]')
     return { top: rect.top, height: rect.height, viewport: innerHeight, position: getComputedStyle(node).position,
+      slotPosition: getComputedStyle(node.parentElement).position,
       gap: content ? rect.left - content.getBoundingClientRect().right : null,
       layoutCount: document.querySelectorAll('[data-material-outline-layout]').length,
       listHeight: list?.clientHeight, listScrollHeight: list?.scrollHeight }
   })
   outlineGeometry.push({ label, ...metrics })
   if (process.env.OUTLINE_LAYOUT_RECORD_ONLY === '1') return
-  assert.equal(metrics.position, 'static', label + ' 目录应随页面排版')
+  assert.equal(metrics.position, 'static', label + ' 目录应属于右栏')
+  assert.equal(metrics.slotPosition, 'sticky', label + ' 桌面右栏应常驻')
   assert.equal(metrics.layoutCount, 1, label + ' 不应重复分栏')
   assert.ok(Math.abs(metrics.height - (metrics.viewport - 8)) <= 1, label + ' 桌面目录高度')
   assert.ok(metrics.gap !== null && Math.abs(metrics.gap - 4) <= 1, label + ' 两栏间距：' + JSON.stringify(metrics))
   const before = await nav.boundingBox()
   const start = await page.evaluate(() => window.scrollY)
-  await page.evaluate(() => window.scrollBy(0, 280))
+  await page.evaluate(amount => window.scrollBy(0, amount), Math.max(360, before.y + 100))
   const distance = await page.evaluate(() => window.scrollY) - start
   assert.ok(distance > 100, label + ' 页面应可滚动')
-  assert.ok(Math.abs((await nav.boundingBox()).y - before.y + distance) <= 1, label + ' 目录必须随页面滚走')
+  assert.ok(Math.abs((await nav.boundingBox()).y - 4) <= 1, label + ' 目录应吸附到顶部4px')
+  assert.ok(Math.abs((await nav.boundingBox()).x - before.x) <= 1, label + ' 目录应留在原右栏')
   await page.evaluate(() => window.scrollTo(0, 0))
 }
 
@@ -157,6 +160,14 @@ try {
     const count = calls.length
     await nav.getByRole('button', { name: /#14 ·/ }).click()
     await page.waitForFunction(() => { const target = document.querySelector('[data-state-key="state-13"]'); if (!target) return false; const rect = target.getBoundingClientRect(); return rect.top < innerHeight - 80 && rect.bottom > 80 })
+    assert.ok(Math.abs((await nav.boundingBox()).y - 4) <= 1, '跳到材料后目录仍常驻')
+    await nav.getByRole('button', { name: /#1 ·/ }).click()
+    await page.waitForFunction(() => { const target = document.querySelector('[data-state-key="state-0"]'); const r = target?.getBoundingClientRect(); return r && r.top < innerHeight - 80 && r.bottom > 0 })
+    await page.evaluate(() => window.scrollBy(0, 600))
+    await nav.getByRole('button', { name: '收起研究材料大纲' }).click()
+    assert.ok(Math.abs((await nav.boundingBox()).y - 4) <= 1, '折叠箭头也应常驻')
+    await nav.getByRole('button', { name: '展开研究材料大纲' }).click()
+    assert.ok(Math.abs((await nav.boundingBox()).y - 4) <= 1, '恢复后目录仍常驻')
     assert.deepEqual(calls.slice(count).filter(call => call.method !== 'GET' && !call.path.endsWith('/activity')), [])
     await page.screenshot({ path: output + '/outline-' + role + '-' + (path.includes('revise') ? 'revision' : path.includes('upload') ? 'upload' : 'admin') + '.png' })
     reports.push({ host: path, role, outline_jump: true, navigation_writes: 0 })
@@ -199,6 +210,8 @@ try {
     assert.ok(Math.abs(before.y - (await nav.boundingBox()).y) <= 1, '任务栏与目录在同一行起始')
     await page.evaluate(() => window.scrollBy(0, 500))
     assert.ok((await header.boundingBox()).y < 0, '文件及阶段横条应滚出视口')
+    assert.ok(Math.abs((await nav.boundingBox()).y - 4) <= 1, '任务栏滚走后目录仍常驻')
+    await page.screenshot({ path: output + '/processing-sticky-scrolled.png' })
     await page.evaluate(() => window.scrollTo(0, 0))
     await page.screenshot({ path: output + '/processing-desktop.png' })
     for (const width of [1000, 390]) {
@@ -216,7 +229,7 @@ try {
       await page.screenshot({ path: output + '/processing-' + width + '.png' })
     }
     assert.deepEqual(calls.filter(call => call.method !== 'GET' && !call.path.endsWith('/activity')), [])
-    reports.push({ host: 'processing-preview', task_bar_scrolls: true, outline_in_flow: true, narrow_widths: [1000, 390], writes: 0 })
+    reports.push({ host: 'processing-preview', task_bar_scrolls: true, outline_in_flow: true, outline_stays_visible: true, narrow_widths: [1000, 390], writes: 0 })
     await context.close()
   }
   const { context, page } = await contextFor('superadmin', true)

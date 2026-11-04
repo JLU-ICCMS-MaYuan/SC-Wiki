@@ -1,0 +1,306 @@
+{
+  "source_head": "eceee7445a525372832903a9a471c3d57f0b073a",
+  "source_sha256": {
+    "frontend/src/components/PaperMaterialsSection.tsx": "aa633e5c23f8cf9dedf2e0aad157d763e870af57a0a88f3c4ee6c5824da75460",
+    "tests/02_identity_governance/review-workspace-browser.mjs": "497119dd488ac4640d28646d69f6fe033cb918332d5689607b62b3fa15540523"
+  },
+  "browser": {
+    "reports": [
+      {
+        "role": "user",
+        "contribution_name": true,
+        "revision_entry": true,
+        "compact_page_size": null,
+        "readonly_outline": true,
+        "zero_pressure": true,
+        "narrow_no_page_overflow": true
+      },
+      {
+        "role": "admin",
+        "contribution_name": true,
+        "revision_entry": true,
+        "compact_page_size": 3,
+        "readonly_outline": true,
+        "zero_pressure": true,
+        "narrow_no_page_overflow": true
+      },
+      {
+        "role": "superadmin",
+        "contribution_name": true,
+        "revision_entry": true,
+        "compact_page_size": 3,
+        "readonly_outline": true,
+        "zero_pressure": true,
+        "narrow_no_page_overflow": true
+      },
+      {
+        "workspace_tab": "history",
+        "page_size": 20,
+        "internal_scroll": true
+      },
+      {
+        "workspace_tab": "pending",
+        "page_size": 20,
+        "internal_scroll": true
+      },
+      {
+        "host": "/upload/tasks/22222222222222222222222222222222",
+        "role": "user",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "host": "/papers/213/revise",
+        "role": "user",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "host": "/admin/papers/213/edit",
+        "role": "admin",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "host": "/admin/papers/213/edit",
+        "role": "superadmin",
+        "outline_jump": true,
+        "navigation_writes": 0
+      },
+      {
+        "height_case": 1,
+        "full_height": true
+      },
+      {
+        "height_case": 14,
+        "full_height": true
+      },
+      {
+        "host": "processing-preview",
+        "task_bar_scrolls": true,
+        "outline_in_flow": true,
+        "outline_stays_visible": true,
+        "narrow_widths": [
+          1000,
+          390
+        ],
+        "writes": 0
+      },
+      {
+        "denied_message_count": 1,
+        "review_disabled": true
+      }
+    ],
+    "errors": [],
+    "outlineGeometry": [
+      {
+        "label": "user-detail",
+        "top": 32,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "admin-detail",
+        "top": 32,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "superadmin-detail",
+        "top": 32,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "user-/upload/tasks/22222222222222222222222222222222",
+        "top": 146.890625,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "user-/papers/213/revise",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "admin-/admin/papers/213/edit",
+        "top": 108,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "superadmin-/admin/papers/213/edit",
+        "top": 108,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "revision-count-1",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "low-revision-count-1",
+        "top": 96,
+        "height": 412,
+        "viewport": 420,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 368,
+        "listScrollHeight": 368
+      },
+      {
+        "label": "restored-revision-count-1",
+        "top": 96,
+        "height": 412,
+        "viewport": 420,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 368,
+        "listScrollHeight": 368
+      },
+      {
+        "label": "grown-revision-count-1",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "revision-count-14",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "low-revision-count-14",
+        "top": 96,
+        "height": 412,
+        "viewport": 420,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 368,
+        "listScrollHeight": 632
+      },
+      {
+        "label": "restored-revision-count-14",
+        "top": 96,
+        "height": 412,
+        "viewport": 420,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 368,
+        "listScrollHeight": 632
+      },
+      {
+        "label": "grown-revision-count-14",
+        "top": 96,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      },
+      {
+        "label": "processing-preview",
+        "top": 146.890625,
+        "height": 992,
+        "viewport": 1000,
+        "position": "static",
+        "slotPosition": "sticky",
+        "gap": 4,
+        "layoutCount": 1,
+        "listHeight": 948,
+        "listScrollHeight": 948
+      }
+    ]
+  },
+  "baseline_browser_failure": "node:internal/modules/run_main:107\n    triggerUncaughtException(\n    ^\n\nAssertionError [ERR_ASSERTION]: user-detail 桌面右栏应常驻\n\n'static' !== 'sticky'\n\n    at checkOutlineGeometry (file:///private/tmp/scwiki219-sticky.SUc8Ng/tests/02_identity_governance/review-workspace-browser.mjs:89:10)\n    at runNextTicks (node:internal/process/task_queues:65:5)\n    at process.processImmediate (node:internal/timers:541:9)\n    at async file:///private/tmp/scwiki219-sticky.SUc8Ng/tests/02_identity_governance/review-workspace-browser.mjs:122:5 {\n  generatedMessage: false,\n  code: 'ERR_ASSERTION',\n  actual: 'static',\n  expected: 'sticky',\n  operator: 'strictEqual',\n  diff: 'simple'\n}\n\nNode.js v26.9.0\n",
+  "checks": {
+    "form_files": 12,
+    "form_passed": 163,
+    "render_mutations_detected": 8,
+    "red_marking_mutations_detected": 4,
+    "targeted_passed": 7,
+    "field_contract": "passed",
+    "production_build": "passed"
+  },
+  "limits": [
+    "隔离HEAD副本仅叠加本次组件和浏览器脚本",
+    "系统Chrome生产构建配隔离API，未实测Safari",
+    "未写真实稿件、未调用模型、未推送或部署",
+    "原相邻5项失败仍见上一轮基线记录；本轮未重跑该组"
+  ]
+}

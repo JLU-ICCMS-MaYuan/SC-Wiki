@@ -35,6 +35,7 @@ function OutlineColumns({ children }: { children: ReactNode }) {
       <Box data-material-outline-content sx={{ minWidth: 0, gridColumn: 1 }}>{children}</Box>
       <Box ref={setSlot} data-material-outline-slot sx={{
         display: 'contents', minWidth: 0, gridColumn: { xs: 1, lg: 2 }, gridRow: 1,
+        position: { xs: 'static', lg: 'sticky' }, top: 4, alignSelf: 'start',
       }} />
     </Box>
   </OutlineSlot.Provider>

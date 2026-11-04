@@ -84,3 +84,9 @@ FR-006/007、SC-004→PaperMaterialsSection→T006～T009→真实浏览器边�
 采用MaterialOutlineLayout统一正常网格排版，桌面左侧内容加右侧240px目录，间隔4px；折叠为40px，未挂载目录不留空栏，窄屏按纵向排列。UploadPage在整个任务内容外提供栏位，内层UploadTaskEditor复用它；返修、审核与详情提供同一布局。PaperMaterialsSection通过React portal把只读导航放入当前工作区栏位，数据仍读取当前宿主，定位锚点留在原宿主，既有科学字段组件不换key、不换状态归属。
 移除fixed定位、全局padding规则、ResizeObserver及卡片几何测量。目录高度使用窗口高度计算并限制条目滚动，随整页滚动；任务横条恢复正常排版。
 FR-006/008、SC-005 → 两个布局组件及四个宿主 → T010～T013 → 更新的浏览器几何/滚动断言、四宿主表单门与变异门。无API、标准键或持久化变更。
+
+## 右栏常驻的后续调整
+
+保留MaterialOutlineLayout网格和既有portal栏位，仅将桌面栏位设为position:sticky、top:4px、align-self:start，使目录在自身右栏内吸附；展开高度仍为窗口减8px，折叠保留窄箭头，条目内部滚动。窄屏单列继续正常排版，避免整块目录遮挡正文。文件／阶段横条不改，继续随页面滚走。无新事件监听、测量、数据或接口。
+
+FR-006、SC-006 → OutlineColumns右侧栏位 → T014～T016 → 真实浏览器滚动、连续跳转及折叠测量，完整宿主表单和变异门。

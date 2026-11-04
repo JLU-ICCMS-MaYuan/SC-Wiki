@@ -72,3 +72,16 @@
 证据：[机器结果](assets/normal-flow-checks.json)、[桌面完整解析页](assets/qa-normal-flow-processing-desktop.png)、[390px页面](assets/qa-normal-flow-processing-390.png)、[用户截图登记](assets/normal-flow-request.json)。原全高悬浮截图仍是历史证据，不能用作当前行为。
 
 未实测Safari，未调查内存重载；未修改用户真实论文/草稿、未调用模型、未推送或部署。
+
+## 2026-11-04 右栏目录常驻
+
+用户最新要求右侧目录常驻，覆盖上一轮目录随页面滚走的决定。仅将现有右栏栏位设为桌面sticky、top=4px、align-self=start；保留网格留宽、4px间隔、目录高度和内部滚动、卡片及任务横条不吸顶。窄屏原纵向布局保持。
+
+使用隔离HEAD副本，仅叠加本次组件与浏览器脚本，逐字核对与提交源相同。新增右栏常驻断言在未修改生产构建上先失败（static != sticky）。修改后：
+
+- TypeScript/生产构建及字段契约通过。
+- 表单契约12文件、163项通过；8项渲染及4项漏红变异均检出。
+- review-workspace定向7项通过。
+- 系统Chrome配隔离API，13组浏览器、16次几何检查通过，页面错误0。四编辑宿主、三角色只读详情及处理中上传预览均覆盖；滚动后目录顶部4px且横坐标保持，点击末项再返回首项、折叠箭头与恢复后仍常驻，导航无科学写请求；横条滚出视口而目录保持可见。低窗口、短/长目录内部滚动、390px/1000px不溢出继续通过。
+
+[机器结果](assets/sticky-outline-checks.json)；[滚动后目录常驻截图](assets/qa-sticky-outline-scrolled.png)。上一轮5项既有相邻失败的独立基线证据继续保留，本轮未重跑该组，不计为通过。未实测Safari，未改用户草稿、未调用模型、未推送或部署。
