@@ -29,6 +29,16 @@ it.each([1, 2])('计算方法标题对%d个温度使用同一格式，方法名�
   expect(await screen.findByLabelText('具体方法名称')).toHaveValue('solver A')
 })
 
+it.each([1, 2])('未知具体类别的%d个温度仍显示已有方法描述，不改分类或逐点原文', async count => {
+  const value=module();value.records=value.records.slice(0,count)
+  for(const r of value.records){r.method_code='unknown';r.definition_key=definitions[2].definition_key;(r.payload.tc_group as any).method_name='Eliashberg equations, variant unspecified'}
+  const change=vi.fn();render(<PropertyModuleEditor modules={[value]} onChange={change}/>);fireEvent.click(screen.getByText('超导性质'))
+  expect(await screen.findByLabelText('方法描述')).toHaveValue('Eliashberg equations, variant unspecified')
+  expect(screen.getByRole('combobox',{name:'预测方法'})).toHaveTextContent('未说明方法')
+  expect(value.records.map(r=>r.method_code)).toEqual(Array(count).fill('unknown'))
+  expect(change).not.toHaveBeenCalled()
+})
+
 it('清空共同名称保留空输入，切换标准方法保持原文、来源与方法编号', async () => {
   const original=module();let latest=original
   function Host(){const [value,setValue]=useState(original);latest=value;return <PropertyModuleEditor modules={[value]} onChange={values=>setValue(values[0])}/>}
