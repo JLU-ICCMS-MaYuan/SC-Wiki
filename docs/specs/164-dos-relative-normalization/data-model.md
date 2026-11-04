@@ -14,3 +14,9 @@ shares.element_ratio 保存 elements、reference_element、estimated_ratio、exp
 ## 当前 TDOS 修订
 
 当前 quality.dos_relative.method=dos-relative-v4，新增 spectrum_type=total|projected。total 仅表示明确总谱身份，不自动确认科学正确；physical_definition_confirmed 仍是归一化前提。components 保留总谱 curve_id、projection、面积和实际范围。TDOS 的 shares.status=unavailable，reason 说明未提供元素分波，不生成 fractions、expected_fractions、element_ratio；normalization 可独立 available。TDOS component_mode_integrals 保留总谱积分，expected_modes/deviations 为空，不伪造逐元素值。候选 method 同为 v4，原始点、旧记录与科学表单标准键不变。
+
+## 纵轴刻度优先的结果语义（已确认，待实施）
+
+后续继续用 components.area、unit、frequency_interval_thz 和 amplitude_basis 表达独立积分。area含义随明确记录的幅值依据：有可信标定时为纵轴数值积分，unit为原纵轴单位乘THz；无可用刻度时才为像素面积，unit为pixel·THz。不能只把旧像素结果改成任意单位标签。人工标定存在时依据当前人工值，原始描线和原始标定仍保留。
+
+normalization.coefficient对应本次选用的幅值单位，候选密度由该幅值乘系数生成。任意单位面积不填入dos_mode_integral冒充绝对模式数；原始绝对积分及逐曲线稳定身份沿用。v4是既有实现，本轮只修订后续语义，未升级方法版本或改动标准科学表单键。
