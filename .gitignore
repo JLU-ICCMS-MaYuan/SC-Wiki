@@ -38,6 +38,7 @@ wheels/
 .worktrees/
 .claude
 .superpowers/
+/.workbuddy/
 .play*
 
 # 目录：临时数据
