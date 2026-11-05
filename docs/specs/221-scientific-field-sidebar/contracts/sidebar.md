@@ -1,6 +1,6 @@
 # 右侧栏 UI 与接口契约
 
-唯一功能条款为 spec.md FR-001—021；本文件只登记对应接口职责，不复制功能规则。
+唯一功能条款为 spec.md FR-001—023；本文件只登记对应接口职责，不复制功能规则。
 
 入口与字段详情：复用 summary、identify-field、field-detail 及稳定字段归属。
 局部写入：复用 draft-state、draft PATCH、manual-context 与 manual 资料接口；当前字段值、理由和附件保存顺序保持。
@@ -24,3 +24,5 @@ activity 包含 stage/message 及可选 tool/file_id/page/summary；文本限长
 这些字段来自当前 evidence API、fieldDrafts、review_progress 和 ManualEvidenceSection。科学通过、候选及来源持久化继续使用原契约；小投影不能赋予核对资格。
 
 PDF正文每份最多100,000字符，沿现有人工附件输入传入当前字段核对；成功模型调用的读取回执和科学结论分别表达，不新增标准科学键或API入口。其他文本上限保持20,000字符。
+
+field-decision的confirm_empty操作沿原target/item_key/review_token；决定持久化仍为approve+mode=empty。响应提供当前字段empty_allowed及人工确认留空资格。主值/资料先保存，新令牌只绑定当前字段，不放宽其他人工修改。科学状态supported代表当前版本获合法通过，UI明确其人工来源，不能冒充AI支持。

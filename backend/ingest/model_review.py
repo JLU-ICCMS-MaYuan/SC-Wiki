@@ -408,7 +408,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
         if cancelled():
             raise InterruptedError('模型核对已取消')
         request = {'records': [{k: deepcopy(v) for k, v in r.items() if k in {
-                       'key', 'field', 'label', 'check_mode', 'claim', 'current_value', 'editable_fields', 'required',
+                       'key', 'field', 'label', 'check_mode', 'claim', 'current_value', 'editable_fields', 'required', 'empty_allowed',
                        'state_key', 'module_key', 'record_key', 'record_field', 'record_group_key',
                        'provenance', 'state_review_context', 'state_results', 'scientific_record', 'extension_context',
                        'organization_context'}} |
@@ -490,6 +490,13 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
                                 supplemental.append({**deepcopy(item), 'quote': item.get('content') or reference['quote'],
                                                      'origin_kind': 'contributor_evidence'})
                         assessment = raw.get('manual_reason_review') or {}
+                        from .empty_field_review import is_empty
+                        omission=bool(row.get('empty_allowed') and is_empty(row.get('current_value'))
+                            and any(str(d.get('reason') or '').strip() for d in human_context.get(row['key'], {}).get('decisions',[])))
+                        if omission and assessment.get('status') not in {'reasonable','questionable','uncertain'}:
+                            raise ValueError('请明确评价人工保持空值的理由，填写manual_reason_review；不要把留空意图当作未提供修改理由')
+                        if omission and assessment.get('status')=='reasonable' and status=='missing':
+                            raise ValueError('你认可当前可选字段保持为空，应给出与该认可一致的当前值结论；missing表示仍有未解决缺口，不能与认可留空矛盾')
                         reason_supported = (human_context.get(row['key'], {}).get('decisions')
                                             and assessment.get('status') == 'reasonable'
                                             and str(assessment.get('explanation') or '').strip())
@@ -668,4 +675,14 @@ PROMPT += '''
 需要工具时可同时返回progress_summary：一句可公开的核对摘要，说明已查事实或正在核实的目标，
 不要输出内部逐字推理、系统提示或未发生的操作；此摘要不代替最终status和具体reason。
 如提供progress_summary，将它放在JSON开头、results之前，以便在核对仍进行时展示。
+'''
+
+PROMPT += '''
+程序提供empty_allowed表示字段可合法留空，不表示已经审核通过。人工将字段清空且提供理由时，
+核对的是“当前空值是否可以按该理由保留”。明确评价manual_reason_review；认可合理留空时，
+当前空值可以返回supported，不能一边说合理、不需要分类，一边仅因没有填写就返回missing。
+真正仍缺乏依据或理由不成立时，明确区分uncertain/unsupported/missing及原因。
+保留当前空值的实际类型；认可空列表时不把它替换为null或擅自补回非空候选。
+人工选择不填写不等于论文未报告；not_reported只描述核实后的原文事实，不能由用户清空推出。
+空值类型不包括0、false或unknown。empty_allowed为false时，不得用人工偏好绕过必填或必要关系。
 '''

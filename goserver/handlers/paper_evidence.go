@@ -25,40 +25,44 @@ type evidenceCitation struct {
 	PageEnd    *int    `json:"page_end"`
 }
 type evidenceReviewRecord struct {
-	FieldDecision         json.RawMessage    `json:"field_decision,omitempty"`
-	HumanModified         bool               `json:"human_modified,omitempty"`
-	SupplementalEvidences json.RawMessage    `json:"supplemental_evidences,omitempty"`
-	History               json.RawMessage    `json:"history,omitempty"`
-	Required              *bool              `json:"required,omitempty"`
-	AdoptedBasis          string             `json:"adopted_basis,omitempty"`
-	AutoFilled            bool               `json:"auto_filled,omitempty"`
-	AIReason              string             `json:"ai_reason,omitempty"`
-	AutoFilledContentHash string             `json:"auto_filled_content_hash,omitempty"`
-	AutoFilledSourceHash  string             `json:"auto_filled_source_hash,omitempty"`
-	ProposalReview        json.RawMessage    `json:"proposal_review,omitempty"`
-	Proposal              json.RawMessage    `json:"proposal"`
-	Decision              json.RawMessage    `json:"decision"`
-	SourceKind            string             `json:"source_kind"`
-	ManualEvidenceID      string             `json:"manual_evidence_id,omitempty"`
-	ManualEvidenceVersion int                `json:"manual_evidence_version,omitempty"`
-	ItemKey               string             `json:"item_key"`
-	Kind                  string             `json:"kind"`
-	Suggestion            string             `json:"suggestion"`
-	CurrentValue          json.RawMessage    `json:"current_value"`
-	Provenance            json.RawMessage    `json:"provenance"`
-	Fields                []string           `json:"fields"`
-	Key                   string             `json:"key"`
-	RecordID              uint               `json:"record_id"`
-	Field                 string             `json:"field"`
-	Label                 string             `json:"label"`
-	ContentHash           string             `json:"content_hash"`
-	SourceHash            string             `json:"source_hash"`
-	RuleVersion           string             `json:"rule_version"`
-	Status                string             `json:"status"`
-	Reason                string             `json:"reason"`
-	Model                 string             `json:"model"`
-	Resolution            string             `json:"resolution"`
-	Evidences             []evidenceCitation `json:"evidences"`
+	EmptyAllowed           bool               `json:"empty_allowed,omitempty"`
+	ManualEvidenceHash     string             `json:"manual_evidence_hash,omitempty"`
+	ManualEvidenceComplete bool               `json:"manual_evidence_complete,omitempty"`
+	HumanConfirmed         bool               `json:"human_confirmed,omitempty"`
+	FieldDecision          json.RawMessage    `json:"field_decision,omitempty"`
+	HumanModified          bool               `json:"human_modified,omitempty"`
+	SupplementalEvidences  json.RawMessage    `json:"supplemental_evidences,omitempty"`
+	History                json.RawMessage    `json:"history,omitempty"`
+	Required               *bool              `json:"required,omitempty"`
+	AdoptedBasis           string             `json:"adopted_basis,omitempty"`
+	AutoFilled             bool               `json:"auto_filled,omitempty"`
+	AIReason               string             `json:"ai_reason,omitempty"`
+	AutoFilledContentHash  string             `json:"auto_filled_content_hash,omitempty"`
+	AutoFilledSourceHash   string             `json:"auto_filled_source_hash,omitempty"`
+	ProposalReview         json.RawMessage    `json:"proposal_review,omitempty"`
+	Proposal               json.RawMessage    `json:"proposal"`
+	Decision               json.RawMessage    `json:"decision"`
+	SourceKind             string             `json:"source_kind"`
+	ManualEvidenceID       string             `json:"manual_evidence_id,omitempty"`
+	ManualEvidenceVersion  int                `json:"manual_evidence_version,omitempty"`
+	ItemKey                string             `json:"item_key"`
+	Kind                   string             `json:"kind"`
+	Suggestion             string             `json:"suggestion"`
+	CurrentValue           json.RawMessage    `json:"current_value"`
+	Provenance             json.RawMessage    `json:"provenance"`
+	Fields                 []string           `json:"fields"`
+	Key                    string             `json:"key"`
+	RecordID               uint               `json:"record_id"`
+	Field                  string             `json:"field"`
+	Label                  string             `json:"label"`
+	ContentHash            string             `json:"content_hash"`
+	SourceHash             string             `json:"source_hash"`
+	RuleVersion            string             `json:"rule_version"`
+	Status                 string             `json:"status"`
+	Reason                 string             `json:"reason"`
+	Model                  string             `json:"model"`
+	Resolution             string             `json:"resolution"`
+	Evidences              []evidenceCitation `json:"evidences"`
 }
 type evidencePrepareError struct {
 	Status int
@@ -68,13 +72,37 @@ type evidencePrepareError struct {
 // 新字段决定由 Python 校验和持久化；普通理由或旧人工标记不能冒充。
 func validFieldDecision(r evidenceReviewRecord) bool {
 	var decision struct {
+		Mode        string `json:"mode"`
+		ManualHash  string `json:"manual_evidence_hash"`
 		Contract    string `json:"contract"`
 		Action      string `json:"action"`
 		Actor       uint   `json:"actor_user_id"`
 		ContentHash string `json:"content_hash"`
 		SourceHash  string `json:"source_hash"`
 	}
-	return json.Unmarshal(r.FieldDecision, &decision) == nil && decision.Contract == "field-review-v2" &&
+	if json.Unmarshal(r.FieldDecision, &decision) != nil {
+		return false
+	}
+	if decision.Mode == "empty" {
+		var value any
+		if !r.EmptyAllowed || !r.ManualEvidenceComplete || decision.ManualHash == "" || decision.ManualHash != r.ManualEvidenceHash ||
+			json.Unmarshal(r.CurrentValue, &value) != nil {
+			return false
+		}
+		empty := value == nil
+		switch v := value.(type) {
+		case string:
+			empty = strings.TrimSpace(v) == ""
+		case []any:
+			empty = len(v) == 0
+		case map[string]any:
+			empty = len(v) == 0
+		}
+		if !empty {
+			return false
+		}
+	}
+	return decision.Contract == "field-review-v2" &&
 		decision.Action == "approve" && decision.Actor != 0 && r.Status == "supported" &&
 		decision.ContentHash != "" && decision.ContentHash == r.ContentHash &&
 		decision.SourceHash != "" && decision.SourceHash == r.SourceHash

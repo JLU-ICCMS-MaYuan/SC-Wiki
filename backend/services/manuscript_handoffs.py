@@ -39,7 +39,7 @@ def content_hash(content):
     def comparison(value,path=()):
         if isinstance(value,dict):
             return {k:comparison(v,(*path,k)) for k,v in value.items() if v is not None and not (
-                len(path)==2 and path[0]=='records' and k in {'content_hash','source_hash','paper_source_hash','state_review_context'})}
+                len(path)==2 and path[0]=='records' and k in {'content_hash','source_hash','paper_source_hash','state_review_context','empty_allowed','manual_evidence_hash','manual_evidence_complete'})}
         if isinstance(value,list):return [comparison(v,(*path,index)) for index,v in enumerate(value)]
         return value
     encoded = json.dumps(comparison(current_content(content)), sort_keys=True, ensure_ascii=False,
@@ -203,7 +203,7 @@ def capture(session, paper, draft, snapshot, checks):
         'record_field','record_field_key','record_group_key','state_key','module_key','record_key',
         'structure_hash','structure_field','settings_field','settings_part','owner_label','check_mode','field_decision',
         'claim','state_review_context','paper_source_hash','association_review','rule_review',
-        'manual_reason_review','point_binding','condition_window','dependency_policy_version','record_dependencies','state_dependencies'}
+        'manual_reason_review','manual_evidence_hash','manual_evidence_complete','empty_allowed','point_binding','condition_window','dependency_policy_version','record_dependencies','state_dependencies'}
     records = [{k:v for k,v in row.items() if k in keys} for row in checks]
     files, manual = paper_files(session,paper), []
     from backend.ingest.manual_evidence import ScientificManualEvidence, table_available

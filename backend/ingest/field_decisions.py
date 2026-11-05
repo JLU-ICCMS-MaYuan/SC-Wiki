@@ -12,7 +12,7 @@ def display_reason(value):
 
 
 def review_token(snapshot, record, result):
-    return ev.digest([snapshot['target'], snapshot['target_id'], field_version(record), {key: result.get(key) for key in
+    return ev.digest([snapshot['target'], snapshot['target_id'], field_version(record), record.get('manual_evidence_hash'), {key: result.get(key) for key in
         ('status', 'reason', 'ai_reason', 'evidences', 'supplemental_evidences', 'source_associations',
          'proposal', 'provenance', 'field_decision', 'review_started_at')}])
 
@@ -27,6 +27,8 @@ def detail(snapshot, cached):
     if len(snapshot['records']) != 1:
         ev.fail('evidence_field_missing', '字段已删除或无法唯一定位，请重新打开')
     record = snapshot['records'][0]
+    from .empty_field_review import is_empty,allowed
+    empty_allowed=allowed(record) and is_empty(record.get('current_value'))
     previous = cached.get(record['key']) or {}
     exact = reusable(record, previous)
     same_value = science.canonical(previous.get('current_value')) == science.canonical(record.get('current_value'))
@@ -39,6 +41,7 @@ def detail(snapshot, cached):
                  'stale': bool(previous) and not exact,
                  'evidences': deepcopy(previous.get('evidences') or record.get('evidences') or []),
                  'reason': previous.get('reason') or '', 'ai_reason': previous.get('ai_reason') or previous.get('reason') or ''}
+    displayed['empty_allowed'] = allowed(record)
     displayed['human_confirmed'] = valid_field_decision(record, previous, 'approve')
     if displayed['human_confirmed']:
         displayed['human_modified'] = False  # 当前确认后未变；旧编辑事件继续保留在历史中。
@@ -50,6 +53,8 @@ def detail(snapshot, cached):
     # 处理日志不作为科学解释；原始文字仍留在数据库与历史。
     displayed['ai_reason'] = display_reason(displayed['ai_reason'])
     displayed['reason'] = display_reason(displayed['reason'])
+    if (previous.get('field_decision') or {}).get('mode')=='empty':
+        displayed['ai_reason']=''  # 人工决定不改写为AI科学判断。
     invalid_derived = record.get('kind') == 'derived' and not (record.get('provenance') or {}).get('verified')
     if displayed['human_confirmed']:
         approval_state, message = 'human_approved', '已人工审核通过，当前版本无需重复审核。'
@@ -66,7 +71,10 @@ def detail(snapshot, cached):
         approval_state, message = 'blocked', '此字段存在程序校验错误或适用范围变化，请先修正并核对；当前尚未通过。'
     else:
         approval_state, message = 'ready', '当前内容尚待确认；认可后可直接人工审核通过，无需修改理由。'
-    return {'record': displayed, 'review_token': review_token(snapshot, record, previous),
+    if empty_allowed and approval_state=='modification_required':
+        message='当前字段允许留空；请保存人工理由及证据或缺证说明，可人工确认留空，也可使用大模型核对。'
+    return {'record': displayed, 'can_confirm_empty': bool(empty_allowed and record.get('manual_evidence_complete')),
+            'review_token': review_token(snapshot, record, previous),
             'can_approve': approval_state == 'ready', 'approval_state': approval_state, 'approval_message': message,
             'source_state': 'historical' if previous and not exact else 'available' if displayed['evidences'] else 'empty'}
 
@@ -75,35 +83,51 @@ def decide(session, snapshot, cached, actor, action, expected_token):
     view = detail(snapshot, cached)
     record = snapshot['records'][0]
     previous = cached.get(record['key']) or {}
-    if valid_field_decision(record, previous, action):
+    confirm_empty=action=='confirm_empty'
+    stored_action='approve' if confirm_empty else action
+    if valid_field_decision(record, previous, stored_action) and (not confirm_empty or (previous.get('field_decision') or {}).get('mode')=='empty'):
         return view  # 同一版本重复点击不追加决定、不重新保存科学数据。
     if expected_token != view['review_token']:
         ev.fail('evidence_stale', '当前字段或依据已变化，请重新打开后审核；输入已保留')
+    if confirm_empty and not view['can_confirm_empty']:
+        ev.fail('empty_confirmation_invalid','当前字段不允许留空，或人工理由及证据／缺证说明尚未保存完整')
     if action == 'approve' and not view['can_approve']:
         ev.fail('evidence_review_required', view['approval_message'])
-    if action == 'approve':
+    if stored_action == 'approve':
         from .evidence_proposals import valid_value
         if record.get('field_schema') and not valid_value(record.get('current_value'), record['field_schema']):
             ev.fail('evidence_invalid_value', '程序检查：当前字段格式不合法，请先修正输入')
     now = datetime.now(timezone.utc).isoformat()
-    decision = {'contract': 'field-review-v2', 'action': action, 'actor_user_id': actor.id,
+    decision = {'contract': 'field-review-v2', 'action': stored_action, 'actor_user_id': actor.id,
                 'actor_name': getattr(actor, 'username', ''), 'occurred_at': now,
                 'content_hash': record['content_hash'], 'source_hash': record['source_hash']}
     result = {**previous, 'current_value': deepcopy(record.get('current_value')),
               'content_hash': record['content_hash'], 'source_hash': record['source_hash'],
-              'claim': deepcopy(record.get('claim')), 'status': 'supported' if action == 'approve' else 'uncertain',
+              'claim': deepcopy(record.get('claim')), 'status': 'supported' if stored_action == 'approve' else 'uncertain',
               'stale': False, 'pending_review': False, 'field_decision': decision,
-              'human_confirmed': action == 'approve', 'check_method': 'human',
+              'human_confirmed': stored_action == 'approve', 'check_method': 'human',
               'state_review_context': record.get('state_review_context'),
               'machine_status': previous.get('machine_status', previous.get('status', 'unchecked')),
               'reason': previous.get('reason') or '', 'ai_reason': view['record']['ai_reason'],
               'evidences': view['record']['evidences'],
               'source_kind': previous.get('source_kind') or 'unknown',
-              'resolved_generation_issue': deepcopy(record.get('generation_issue')) if action == 'approve' else None}
+              'resolved_generation_issue': deepcopy(record.get('generation_issue')) if stored_action == 'approve' else None}
+    if confirm_empty:
+        from .field_input import current_manual
+        row=current_manual(session,snapshot,record,for_update=True)
+        if row is None or not row.reason.strip() or not (row.items or row.no_evidence_reason.strip()):
+            ev.fail('manual_evidence_incomplete','请先保存人工理由及证据或缺证说明')
+        decision.update(mode='empty',manual_evidence_hash=record['manual_evidence_hash'],
+                        reason=row.reason,no_evidence_reason=row.no_evidence_reason)
+        result.update(reason='人工确认留空：'+row.reason,ai_reason='',source_kind='human_review',
+                      check_method='human',not_reported=False)
+        for key in ('review_error','review_failure_message','review_followup','review_started_at',
+                    'model_review','proposal','proposal_draft','adopted_basis'):
+            result.pop(key,None)
     result['audit_events'] = [*previous.get('audit_events', []), {
         'id': uuid4().hex, 'kind': 'human_review', 'occurred_at': now,
         'actor': {'kind': 'human', 'user_id': actor.id, 'name': getattr(actor, 'username', '')},
-        'summary': '人工审核通过，保留现有值及依据' if action == 'approve' else '人工审核不通过，待修改',
+        'summary': '人工确认留空' if confirm_empty else '人工审核通过，保留现有值及依据' if action == 'approve' else '人工审核不通过，待修改',
         'content_hash': record['content_hash'], 'source_hash': record['source_hash'], 'decision': decision}]
     science.save_results(session, snapshot, {record['key']: result}, actor.id, update_decision=True)
     return detail(snapshot, {record['key']: {**record, **result, 'stored_result': True}})

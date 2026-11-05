@@ -1,0 +1,93 @@
+{
+  "date": "2026-11-05",
+  "branch": "mayuan",
+  "scope": "#221 FR-022/023、SC-007；#220 FR-015/SC-009",
+  "before": {
+    "backend_failed": 12,
+    "backend_limit": "包含新接口尚不存在，不能全部当作独立用户故障",
+    "host_failed": 10
+  },
+  "checks": {
+    "form_contract": {
+      "files": 14,
+      "passed": 198
+    },
+    "empty_hosts": {
+      "passed": 10
+    },
+    "mutation": {
+      "render_detected": 8,
+      "missing_red_detected": 4
+    },
+    "field_contract": "v1基线通过，未改标准JSON和lock",
+    "build": "TypeScript/Vite通过，保留原大包提示",
+    "go": "handlers聚焦测试通过",
+    "backend": {
+      "passed": 76,
+      "failed": 1,
+      "baseline_failed": 1,
+      "failure": "test_field_decisions_mysql.py::test_human_approval_survives_summary_reopen_and_submission_without_model",
+      "first_error": "KeyError: audit_events",
+      "baseline": "独立改前副本同名同错，10通过1失败；未放宽断言"
+    }
+  },
+  "browser": {
+    "scenarios": 8,
+    "roles": [
+      "upload",
+      "revision",
+      "admin",
+      "superadmin"
+    ],
+    "business_api": "独立会话拦截",
+    "model_jobs_human": 0,
+    "model_jobs_model": 1
+  },
+  "real_source": {
+    "manual": "隔离SQLite，0模型，supported，mode=empty，保存重读",
+    "model": "gpt-6.1-sol，CaH4空值及CaH6相邻非空各1次新调用，均supported，保存重读，human_confirmed=false",
+    "business_writes": 0,
+    "text": "原PDF SHA核验，复用107块文本，未重OCR或整篇解析"
+  },
+  "runtime": {
+    "go": "监听器19:48:31检测变更、重新编译，19:48:34启动8080健康正常",
+    "python": "正式Go代理GET返回empty_allowed=true、can_confirm_empty=true",
+    "original_draft_unchanged": true,
+    "human_confirmed": false
+  },
+  "source_sha256": {
+    "backend/api/evidence.py": "bc97c53edae53914e2134e910ce04b923b78cdc0da941fd1e7e6b894a95dfd72",
+    "backend/ingest/empty_field_review.py": "2f5cb6568150e5db91e2c18dde2f89eb5db9bfd0c9d210a3652479e3baeeb693",
+    "backend/ingest/field_decisions.py": "fd0f23b2b5cf71e54bc863d48c495e205d08997e8709e52f3ee0f0fec8f221d0",
+    "backend/ingest/field_input.py": "ec73bb5aace542222f4d98d31e55c04e61adb13d3b7945a2584f10aca61e80f5",
+    "backend/ingest/field_review.py": "ec126338dcddfe2b77f0f61d19ce973ee2e967f2e6b428069da957aecfb1305f",
+    "backend/ingest/model_review.py": "6b0d41c70a49a7750851c8b14826c51af21a0da43ae06c083a6515f9f9df439b",
+    "backend/ingest/property_evidence.py": "921651d8278fea6470f7718d69eaa1801c097085545025f2f7624eaf1498c337",
+    "backend/services/manuscript_handoffs.py": "7af2235725daef6cf80fdb4c2491a518ba1cabcae1ea1b70e235e03f1fbc51b4",
+    "frontend/src/components/EvidenceWorkflow.tsx": "3e035f4e235304ae530920fe5151667c1aff73586d6e0a74b9ab3620a271d0c9",
+    "frontend/src/components/FieldReviewFeedback.tsx": "c307e07e7afa6d84d3c160d1c788128e317ccabcbe491ace5a2c32927dd1d687",
+    "frontend/src/i18n/en/evidence.ts": "0276d633ee83379157c818e542d211931cf8c79dfd4cee2033378dfeabd1d378",
+    "frontend/src/i18n/zh/evidence.ts": "383eb174c5328b01e37ddee3e5ae5c80738fbf02dcc66bbe1310948a14a0214c",
+    "frontend/src/lib/emptyFields.ts": "ec28c4d315a19b01e860aed0cdfe00742be6fe3dd816f168f410ad1427df72dc",
+    "frontend/src/lib/evidenceStatus.ts": "d6998dd22906c3c32287db58d700580a5f153a473d6936d4ba4b8edd661ac033",
+    "goserver/handlers/empty_field_decision_test.go": "d161106be3aaa372c2f4545b272df7d8684134ba768d3728953cc7fc3d0becde",
+    "goserver/handlers/paper_evidence.go": "117507a34e97df319f1006191b6f51820a64c73886baf67c513a3f63f3b97ecf",
+    "scripts/check-form-contract.mjs": "b2143ccd9036e8539af4a89a803cfeaa16852855813a1b022f985d866df230e4",
+    "tests/01_decentralized_uploading/empty-confirmation-browser.mjs": "d578db7aafc19447c253d82f7fe584ffbc061507158245cc767805c065603846",
+    "tests/01_decentralized_uploading/empty-confirmation-hosts.test.tsx": "f45dd8ba05f8d52bc9542496dcf6a41376474e269f60db739bd63bb2a028fc6f",
+    "tests/01_decentralized_uploading/test_empty_confirmation_mysql.py": "b3d90262ed04982306154ecfd93e597179ed94d7aa4b539f65676cc9f6d7299f",
+    "tests/01_decentralized_uploading/test_empty_field_confirmation.py": "a316737032b56a561c6ad4c7489f5884cbd93b3a18e7579cfbb84debe1f6b003"
+  },
+  "image": {
+    "path": "assets/empty-human.png",
+    "kind": "隔离Chrome派生截图，非用户原图",
+    "sha256": "c683889bc3ea6e0d6688667254bb6ac45974a23766cc07f58e781103ccd39965",
+    "note": "仅证明四宿主交互外观，不代替正式权限、保存重读和真实科学来源验证"
+  },
+  "limits": [
+    "未替用户确认真实CaH4稿件",
+    "未推送或远端部署",
+    "远程Spec链接仍待核验，Issue保持OPEN",
+    "通用工具调用格式故障不属于本轮"
+  ]
+}

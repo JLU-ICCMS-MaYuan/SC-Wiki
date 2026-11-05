@@ -1,0 +1,266 @@
+[
+  {
+    "role": "upload",
+    "mode": "human",
+    "model_jobs": 0,
+    "write_paths": [
+      {
+        "method": "POST",
+        "path": "/api/upload-tasks/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/activity"
+      },
+      {
+        "method": "POST",
+        "path": "/api/upload-tasks/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/activity"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/summary"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/rag/evidence/upload/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/manual/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/field-decision"
+      }
+    ],
+    "passed": true,
+    "reopened": true,
+    "other_value_unchanged": true,
+    "errors": []
+  },
+  {
+    "role": "upload",
+    "mode": "model",
+    "model_jobs": 1,
+    "write_paths": [
+      {
+        "method": "POST",
+        "path": "/api/upload-tasks/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/activity"
+      },
+      {
+        "method": "POST",
+        "path": "/api/upload-tasks/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/activity"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/summary"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/rag/evidence/upload/eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee/manual/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/jobs"
+      }
+    ],
+    "passed": true,
+    "reopened": true,
+    "other_value_unchanged": true,
+    "errors": []
+  },
+  {
+    "role": "revision",
+    "mode": "human",
+    "model_jobs": 0,
+    "write_paths": [
+      {
+        "method": "POST",
+        "path": "/api/rag/papers/177/revision-draft"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/papers/177/revision-draft"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/summary"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/rag/evidence/revision/revision-empty/manual/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/field-decision"
+      }
+    ],
+    "passed": true,
+    "reopened": true,
+    "other_value_unchanged": true,
+    "errors": []
+  },
+  {
+    "role": "revision",
+    "mode": "model",
+    "model_jobs": 1,
+    "write_paths": [
+      {
+        "method": "POST",
+        "path": "/api/rag/papers/177/revision-draft"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/papers/177/revision-draft"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/summary"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/rag/evidence/revision/revision-empty/manual/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/jobs"
+      }
+    ],
+    "passed": true,
+    "reopened": true,
+    "other_value_unchanged": true,
+    "errors": []
+  },
+  {
+    "role": "admin",
+    "mode": "human",
+    "model_jobs": 0,
+    "write_paths": [
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/summary"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/open-workdraft"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/rag/evidence/paper/177/manual/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/field-decision"
+      }
+    ],
+    "passed": true,
+    "reopened": true,
+    "other_value_unchanged": true,
+    "errors": []
+  },
+  {
+    "role": "admin",
+    "mode": "model",
+    "model_jobs": 1,
+    "write_paths": [
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/summary"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/open-workdraft"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/rag/evidence/paper/177/manual/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/jobs"
+      }
+    ],
+    "passed": true,
+    "reopened": true,
+    "other_value_unchanged": true,
+    "errors": []
+  },
+  {
+    "role": "superadmin",
+    "mode": "human",
+    "model_jobs": 0,
+    "write_paths": [
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/summary"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/open-workdraft"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/rag/evidence/paper/177/manual/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/field-decision"
+      }
+    ],
+    "passed": true,
+    "reopened": true,
+    "other_value_unchanged": true,
+    "errors": []
+  },
+  {
+    "role": "superadmin",
+    "mode": "model",
+    "model_jobs": 1,
+    "write_paths": [
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/summary"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/open-workdraft"
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/rag/evidence/draft"
+      },
+      {
+        "method": "PUT",
+        "path": "/api/rag/evidence/paper/177/manual/cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      },
+      {
+        "method": "POST",
+        "path": "/api/rag/evidence/jobs"
+      }
+    ],
+    "passed": true,
+    "reopened": true,
+    "other_value_unchanged": true,
+    "errors": []
+  }
+]

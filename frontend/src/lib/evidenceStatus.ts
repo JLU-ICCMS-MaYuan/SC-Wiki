@@ -7,6 +7,7 @@ function resultStatus(record: EvidenceRecord): EvidenceStatus {
   const rejected = record.field_decision?.action === 'reject'
   if (record.review_error && record.status !== 'supported') return 'failed'
   if (record.local_modified || record.manual_pending) return 'attention'
+  if (record.field_decision?.mode === 'empty' && (record.stale || record.pending_review)) return 'attention'
   if (record.required === false && !record.human_modified && !rejected) return 'passed'
   if (record.status === 'supported' && !record.stale && !record.pending_review && !rejected) return 'passed'
   if (record.review_error || record.status === 'unchecked'

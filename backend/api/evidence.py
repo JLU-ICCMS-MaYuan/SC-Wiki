@@ -278,7 +278,7 @@ def field_detail(target: str, target_id: str, item_key: str, history: bool = Fal
 
 class FieldDecision(Target):
     item_key: str
-    action: Literal['approve', 'reject']
+    action: Literal['approve', 'reject', 'confirm_empty']
     review_token: str
 
 

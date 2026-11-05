@@ -45,6 +45,14 @@ def bind(snapshot, session):
         evidence = [(r.id, r.reason, r.no_evidence_reason,
                      [(i.get('id'), i.get('sha256'), i.get('kind'), i.get('source_description'), i.get('text')) for i in r.items or []])
                     for r in manual]
+        current_materials=manual[-1:]
+        basis=digest([(r.reason,r.no_evidence_reason,
+            [(i.get('sha256'),i.get('kind'),i.get('source_description'),i.get('text')) for i in r.items or []])
+            for r in current_materials])
+        if manual:record['manual_evidence_hash']=basis
+        else:record.pop('manual_evidence_hash',None)
+        record['manual_evidence_complete']=bool(manual and all(r.reason.strip()
+            and (r.items or r.no_evidence_reason.strip()) for r in current_materials))
         inputs=[CONTRACT, snapshot['target'], snapshot['target_id'],record['item_key'],
             canonical(record.get('current_value')),record.get('paper_source_hash',record['source_hash']),evidence]
         context=(record.get('claim') or {}).get('context') or {}

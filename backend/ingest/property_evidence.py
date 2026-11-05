@@ -286,6 +286,8 @@ def complete_snapshot(target: str, target_id: str, records: list[dict], chunks: 
                 r['generation_issue'] = {'code': issue['code'], 'message': str(issue.get('message') or '')}
         from .evidence_proposals import editable_fields
         r['editable_fields'] = editable_fields(r)
+        from .empty_field_review import allowed
+        r['empty_allowed'] = allowed(r, context)
         from .condition_rules import descriptor
         condition = descriptor(r)
         if condition:
@@ -531,6 +533,16 @@ def cached_results(session, snapshot: dict) -> dict:
 def checked_result(record: dict, result: dict, chunks: list[dict]) -> dict:
     from .scientific_evidence import populated
     from .model_review import current_result
+    if (result.get('field_decision') or {}).get('mode')=='empty':
+        from .field_review import valid_field_decision
+        valid=valid_field_decision(record,result,'approve')
+        return {**record,**result,'field':record['field'],'fields':record['fields'],
+            'current_value':record.get('current_value'),'empty_allowed':record.get('empty_allowed',False),
+            'manual_evidence_hash':record.get('manual_evidence_hash'),
+            'manual_evidence_complete':record.get('manual_evidence_complete',False),
+            'status':'supported' if valid else 'unchecked','stale':not valid,'pending_review':not valid,
+            'human_confirmed':valid,'source_kind':'human_review','ai_reason':'',
+            'reason':result.get('reason','') if valid else '之前的人工留空确认已失效，请按当前内容与资料重新核对。'}
     if not result.get('field_decision') and current_result(record, result, chunks):
         # 模型已核实最终内容，程序只接受绑定本字段和实际来源版本的结论。
         return {**{k: v for k, v in record.items() if k != 'validation_record'}, **result,

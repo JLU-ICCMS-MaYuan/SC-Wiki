@@ -12,6 +12,7 @@ export interface FieldReviewProgress {
 export function fieldReviewVerdict(record: EvidenceRecord) {
   if (record.review_error && record.status !== 'supported') return 'failed'
   if (record.local_modified || record.manual_pending || record.stale) return 'pending'
+  if (record.human_confirmed && record.field_decision?.mode === 'empty' && !record.pending_review) return 'passed'
   if (record.required === false && !record.human_modified && record.field_decision?.action !== 'reject') return 'exempt'
   if (record.status === 'supported' && !record.pending_review && record.field_decision?.action !== 'reject') return 'passed'
   if (['unsupported', 'uncertain', 'missing'].includes(record.status) || record.field_decision?.action === 'reject') return 'rejected'
@@ -41,6 +42,6 @@ export default function FieldReviewFeedback({record, progress, onCancel, onRetry
   const labels={passed:'evidence.reviewPassed',rejected:'evidence.reviewRejected',failed:'evidence.reviewIncomplete',pending:'evidence.reviewPending',exempt:'evidence.reviewExempt'} as const
   return <Typography role="status" data-field-review-result={verdict} fontWeight={600}
     color={['failed','rejected'].includes(verdict)?'error.main':verdict==='passed'?'success.main':'text.secondary'} sx={{mb:1}}>
-    {t(labels[verdict])}
+    {t(verdict === 'passed' && record.field_decision?.mode === 'empty' ? 'evidence.emptyHumanPassed' : labels[verdict])}
   </Typography>
 }

@@ -1,4 +1,11 @@
 export default {
+  "humanConfirmEmpty": "Confirm empty value",
+  "emptyHumanPassed": "Empty value confirmed by human (saved)",
+  "emptyHumanReason": "This empty-value confirmation was a human action and did not call a model. See the manual record for the omission reason and evidence or explanation for not providing evidence.",
+  "emptyNeedsReview": "The value or evidence has changed. The previous empty-value confirmation no longer applies.",
+  "emptySourcesContext": "Original sources remain for comparison. They do not establish support for deleting the value or imply that the paper did not report it. Keeping this field empty is a human decision.",
+  "emptyMaterialsRequired": "Save the omission reason and supporting evidence or an explanation for not providing evidence. This field must allow an empty value.",
+
   "candidateTitle": "AI candidate",
   "candidateLoading": "Loading this field's candidate…",
   "candidateReason": "AI explanation",

@@ -1,0 +1,89 @@
+{
+  "sources": [
+    {
+      "name": "2012 CaH6-王晖.pdf",
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "text_reused": true
+    },
+    {
+      "name": "2012 CaH6--suppliment-王晖.pdf",
+      "sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "text_reused": true
+    }
+  ],
+  "cases": [
+    {
+      "case": "empty_cah4",
+      "field": "material_states[3].structure_families",
+      "value": [],
+      "status": "supported",
+      "reason": "当前空列表可保留。SI明确将50–150 GPa的CaH4归为I4/mmm、Pearson符号tI10结构，与当前50 GPa状态一致。正文描述该结构中分子H2与单原子H共存，而将sodalite笼状框架明确归于CaH6，不能把CaH6的结构家族移填给CaH4。空间群、Pearson符号及氢物种描述并不要求另行建立结构家族分类；本字段为可选项，现有资料没有要求采用某个唯一的家族标签，因此认可保留[]，但不将人工不分类的选择等同于论文没有报告结构信息。",
+      "manual_reason_review": {
+        "status": "reasonable",
+        "explanation": "该字段允许为空，人工选择暂不采用结构家族分类是合理的；论文已提供的I4/mmm和tI10属于明确的结构标识，不必为填充可选家族字段而重复归类或引入未经确立的标签。"
+      },
+      "human_confirmed": false,
+      "calls": [
+        {
+          "fields": [
+            "material_states[3].structure_families"
+          ],
+          "empty_allowed": true,
+          "value": [],
+          "manual_reasons": [
+            "不需要填写任何内容。"
+          ]
+        }
+      ],
+      "model": "gpt-6.1-sol",
+      "persisted_reread": true,
+      "elapsed_seconds": 11.98
+    },
+    {
+      "case": "adjacent_cah6",
+      "field": "material_states[0].structure_families",
+      "value": [
+        "Sodalite-like clathrate",
+        "cI14"
+      ],
+      "status": "supported",
+      "reason": "正文第1页讨论150 GPa下的结构时，直接将CaH6描述为立方Im-3m结构，Pearson符号为cI14，并说明方形H4单元相互连接成方钠石框架，Ca原子包合在每个笼的中心，因此支持“Sodalite-like clathrate”和“cI14”两项。SI第12页进一步明确Im-3m（cI14）对应150–200 GPa的CaH6，且在150 GPa扩大搜索晶胞后仍确认该结构。两项指向当前150 GPa的同一物相；其中cI14是原文明确报告的Pearson结构标识，而不是另一种独立笼型。",
+      "manual_reason_review": null,
+      "human_confirmed": false,
+      "calls": [
+        {
+          "fields": [
+            "material_states[0].structure_families"
+          ],
+          "empty_allowed": true,
+          "value": [
+            "Sodalite-like clathrate",
+            "cI14"
+          ],
+          "manual_reasons": []
+        }
+      ],
+      "model": "gpt-6.1-sol",
+      "persisted_reread": true,
+      "elapsed_seconds": 10.78
+    }
+  ],
+  "manual": {
+    "source": "本机CaH4 50GPa当前空值和人工说明的隔离SQLite副本",
+    "value": [],
+    "status": "supported",
+    "mode": "empty",
+    "reason": "人工确认留空：不需要填写任何内容。",
+    "ai_reason": "",
+    "model_calls": 0,
+    "persisted_reread": true,
+    "real_business_writes": 0
+  },
+  "original_draft_hash": "2cdcc7934a751be0bcb57d4642639bb06da6d8e2228dbf7f886d57527618135c",
+  "real_business_writes": 0,
+  "source_files": {
+    "backend/ingest/model_review.py": "6b0d41c70a49a7750851c8b14826c51af21a0da43ae06c083a6515f9f9df439b",
+    "backend/ingest/field_decisions.py": "fd0f23b2b5cf71e54bc863d48c495e205d08997e8709e52f3ee0f0fec8f221d0",
+    "backend/ingest/empty_field_review.py": "2f5cb6568150e5db91e2c18dde2f89eb5db9bfd0c9d210a3652479e3baeeb693"
+  }
+}

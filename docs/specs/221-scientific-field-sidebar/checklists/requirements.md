@@ -7,3 +7,5 @@
 - [x] #220 增量与本 Issue 双向引用一致；新增产品待办未误标已完成，任务及验证范围已分开。
 - [x] 四宿主新增产品交互及性能验收完成；见 validation.md 产品实现验收和 assets/implementation.json，旧失败及范围限制单列。
 - [ ] 远程 Spec 链接已实际验证；未推送保持未完成。
+
+- [x] 最新用户授权的人工/模型留空两条路径均落地，必填、资料版本、旧AI区分及四宿主反例有证据；见validation.md合法空值两条路径验收和assets/empty-implementation.json。远程链接仍未核验。

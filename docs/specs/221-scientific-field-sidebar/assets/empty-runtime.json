@@ -1,0 +1,13 @@
+{
+  "request": "GET 本机8080正式代理 /api/rag/evidence/field-detail",
+  "http_status": 200,
+  "field": "material_states[3].structure_families",
+  "current_value": [],
+  "empty_allowed": true,
+  "can_confirm_empty": true,
+  "human_confirmed": false,
+  "original_draft_hash": "2cdcc7934a751be0bcb57d4642639bb06da6d8e2228dbf7f886d57527618135c",
+  "draft_unchanged": true,
+  "model_calls": 0,
+  "confirmation_requests": 0
+}

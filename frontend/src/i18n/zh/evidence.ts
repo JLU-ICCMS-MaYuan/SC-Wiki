@@ -1,4 +1,11 @@
 export default {
+  "humanConfirmEmpty": "人工确认留空",
+  "emptyHumanPassed": "已人工确认留空（结果已保存）",
+  "emptyHumanReason": "当前空值由人工确认，此项人工操作未调用大模型；留空理由及证据／缺证说明见人工修改记录。",
+  "emptyNeedsReview": "当前内容或依据已变化，之前的人工留空确认不再适用，请重新核对。",
+  "emptySourcesContext": "原文保留作对照，不代表原文支持删除内容，也不表示论文未报告。当前留空依据为人工决定。",
+  "emptyMaterialsRequired": "请先保存完整的人工留空理由及证据或不提供证据的原因；当前字段也必须允许留空。",
+
   "candidateTitle": "AI 候选值",
   "candidateLoading": "正在加载此字段的候选…",
   "candidateReason": "AI 给出的理由",

@@ -12,6 +12,12 @@ def field_version(record):
 def valid_field_decision(record, result, action=None):
     from .state_field_review import scope_matches
     decision = (result or {}).get('field_decision') or {}
+    if decision.get('mode')=='empty':
+        from .empty_field_review import is_empty,allowed
+        if (not is_empty(record.get('current_value')) or not allowed(record)
+                or not record.get('manual_evidence_complete')
+                or decision.get('manual_evidence_hash')!=record.get('manual_evidence_hash')):
+            return False
     return bool(decision.get('contract') == 'field-review-v2' and decision.get('actor_user_id')
                 and decision.get('action') in {'approve', 'reject'}
                 and (action is None or decision['action'] == action)
@@ -30,12 +36,16 @@ def reusable(record, result):
 
 
 def needs_review(record, result):
+    if ((result or {}).get('field_decision') or {}).get('mode')=='empty' and not valid_field_decision(record,result):
+        return True
     if reusable(record, result):
         return False
     return record.get('required', True) or bool(record.get('human_modified'))
 
 
 def blocking(record, result):
+    if ((result or {}).get('field_decision') or {}).get('mode')=='empty' and not valid_field_decision(record,result):
+        return True
     if valid_field_decision(record, result, 'reject'):
         return True
     if not record.get('required', True) and not record.get('human_modified'):
@@ -61,7 +71,7 @@ def compact_result(result):
     keys = ('key', 'item_key', 'field', 'fields', 'label', 'current_value', 'status', 'reason',
             'ai_reason', 'resolution', 'required', 'stale', 'pending_review', 'human_modified', 'content_hash',
             'source_hash', 'field_decision', 'human_confirmed', 'detail_ref', 'record_field', 'record_field_key', 'record_group_key', 'state_key',
-            'module_key', 'record_key', 'structure_hash', 'structure_field', 'settings_field', 'settings_part', 'owner_label', 'source_kind', 'check_mode', 'review_error', 'review_followup', 'auto_corrected')
+            'module_key', 'record_key', 'structure_hash', 'structure_field', 'settings_field', 'settings_part', 'owner_label', 'source_kind', 'check_mode', 'review_error', 'review_followup', 'auto_corrected', 'empty_allowed', 'manual_evidence_hash', 'manual_evidence_complete')
     return {key: deepcopy(result[key]) for key in keys if key in result} | {'evidences': []}
 
 

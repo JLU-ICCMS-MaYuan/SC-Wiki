@@ -21,3 +21,6 @@ npm run build --prefix frontend
 
 
 补充PDF回归：运行 tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py，覆盖长PDF、超限、PDF与文本共同输入、实际worker成功／未通过／技术失败／取消、读取反馈幂等及令牌。真实CaH6补证验收见 validation.md 的“补充PDF实际读取验收”。
+
+
+合法空值回归：test_empty_field_confirmation.py、test_empty_confirmation_mysql.py（显式SCWIKI_CURRENT_MYSQL=1、回滚夹具）、empty-confirmation-hosts.test.tsx和empty-confirmation-browser.mjs。前端四宿主测试已纳入完整表单命令。Chrome脚本使用FRONTEND_URL、PLAYWRIGHT_MODULE、CHROMIUM_PATH、EMPTY_CONFIRM_OUTPUT，所有业务API隔离；人工路径断言零jobs，模型路径保留。Go执行go test ./handlers -run 'TestEmptyFieldDecision|TestPaper|TestScientificEvidence|TestFieldSuggestions' -count=1。原PDF定向模型核对和真实服务只读回执见validation.md的“合法空值两条路径验收”，不要替用户点击真实人工确认。

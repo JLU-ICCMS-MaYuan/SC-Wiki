@@ -1,3 +1,4 @@
+import { isEmptyFieldValue } from '../lib/emptyFields'
 import FieldReviewFeedback, {type ReviewActivity} from './FieldReviewFeedback'
 import ReviewSection from './ReviewSection'
 import ReviewFieldSettings from './ReviewFieldSettings'
@@ -38,9 +39,9 @@ export interface EvidenceHistory {
   proposal?: EvidenceRecord['proposal']
   decision?: EvidenceRecord['decision']
 }
-export interface EvidenceRecord { local_modified?: boolean; manual_pending?: boolean; review_error?: string; review_failure_message?: string; review_in_progress?: boolean; review_followup?: { actions: number; reason: string }; detail_ref?: string; field_decision?: {contract: string; action: 'approve' | 'reject'; actor_user_id: number; actor_name?: string; occurred_at: string}; settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
+export interface EvidenceRecord { empty_allowed?: boolean; local_modified?: boolean; manual_pending?: boolean; review_error?: string; review_failure_message?: string; review_in_progress?: boolean; review_followup?: { actions: number; reason: string }; detail_ref?: string; field_decision?: {mode?: 'empty'; reason?: string; no_evidence_reason?: string; contract: string; action: 'approve' | 'reject'; actor_user_id: number; actor_name?: string; occurred_at: string}; settings_field?: string; settings_part?: 'name' | 'kind' | 'raw' | 'unit'; structure_field?: string; human_modified?: boolean; pending_review?: boolean; content_hash?: string; source_hash?: string; record_group_key?: string; audit_events?: AuditEvent[]; record_field?: string; record_field_key?: string; record_dependencies?: string[]; state_dependencies?: string[]; dependency_policy_version?: number; owner_label?: string; legacy_evidences?: EvidenceSource[]; dependency?: string; module_code?: string; dos_fermi_conflict?: boolean; source_associations?: ScientificAssociation[]; history?: EvidenceHistory[]; placeholder?: boolean; required?: boolean; adopted_basis?: EvidenceBasis; auto_filled?: boolean; ai_reason?: string; check_mode?: 'synthesis'; proposal_review?: {status: string; explanation: string}; human_confirmed?: boolean; source_kind?: string; proposal?: { basis_kind?: EvidenceBasis; explanation?: string; values: Record<string, unknown>; supported: boolean; evidences: EvidenceSource[] }; proposal_draft?: ProposalDraft; decision?: { actor_user_id: number; reason: string; supported?: boolean; accepted?: boolean; basis_kind?: EvidenceBasis }; editable_fields?: ProposalField[]; key: string; item_key?: string; field: string; fields?: string[]; label: string; current_value?: unknown; status: 'unchecked' | 'supported' | 'unsupported' | 'uncertain' | 'missing'; reason: string; suggestion?: string; evidences: EvidenceSource[]; stale?: boolean; resolution?: string; structure_hash?: string; state_key?: string; module_key?: string; record_key?: string; provenance?: { kind: string; submitted_by_name?: string; filename?: string; original_text?: string; method?: string; rule?: string; input?: unknown; verified?: boolean; paper_supported?: boolean } }
 interface Preflight { job_id?: string; version: string; needs_check: boolean; records: EvidenceRecord[]; manual_pending_keys?: string[] }
-interface FieldDetail { record?: Partial<EvidenceRecord>; history?: EvidenceHistory[]; review_token?: string; can_approve?: boolean; approval_state?: 'human_approved' | 'supported' | 'exempt' | 'ready' | 'modification_required' | 'blocked'; approval_message?: string; source_state?: string; candidate?: FieldCandidate | null }
+interface FieldDetail { can_confirm_empty?: boolean; record?: Partial<EvidenceRecord>; history?: EvidenceHistory[]; review_token?: string; can_approve?: boolean; approval_state?: 'human_approved' | 'supported' | 'exempt' | 'ready' | 'modification_required' | 'blocked'; approval_message?: string; source_state?: string; candidate?: FieldCandidate | null }
 interface Job { timeout_seconds?: number; id: string; status: string; version?: string; progress?: string; completed_batches?: number; total_batches?: number; current_batch?: number; activity?: ReviewActivity; activity_log?: ReviewActivity[]; records?: EvidenceRecord[]; error?: { code: string; message: string } }
 export interface EvidencePayload { evidence_job_id?: string; expected_evidence_version: string; evidence_resolutions: Record<string, string> }
 export interface EvidenceTarget { target: 'upload' | 'paper' | 'revision'; target_id: string }
@@ -56,6 +57,10 @@ function dosValueInput(record: EvidenceRecord) {
 }
 
 export function aiReasonText(record: EvidenceRecord, t: (key: string) => string): string {
+  if (record.field_decision?.mode === 'empty') return t(
+    record.human_confirmed && !record.stale && !record.local_modified && !record.manual_pending
+      ? 'evidence.emptyHumanReason' : 'evidence.emptyNeedsReview')
+
   if (record.provenance?.kind === 'author_keywords' || record.source_kind === 'author_keywords') {
     return record.ai_reason || record.reason || t('evidence.authorKeywordsSource')
   }
@@ -864,6 +869,44 @@ export function useEvidenceWorkflow(options?: {
       || hasLocalManualEdit(activeRecord) || settingsPending
       : problematic(summaryRecord) && problematic(activeRecord) && currentDetail?.data?.can_approve
         && !hasLocalManualEdit(activeRecord) && !settingsPending))
+  const emptyCurrent = Boolean(activeRecord?.empty_allowed && isEmptyFieldValue(manualCurrentValue(activeRecord)))
+  const confirmEmpty = async () => {
+    if (!activeRecord || !emptyCurrent || confirmingRef.current || fieldRun.current !== null
+        || settingsPendingRef.current || optionsRef.current?.readOnly) return
+    const record = activeRecord, target = targetRef.current, session = drawerSession.current
+    if (!target) return
+    const currentValue = () => manualValueIdentity(manualCurrentValue(record))
+    const value = currentValue(), manualKey = manualDraftKey(target, record, manualCurrentValue(record))
+    const revision = manualDrafts.read(manualKey).revision
+    const same = () => targetRef.current?.target === target.target && targetRef.current.target_id === target.target_id
+      && currentValue() === value && manualDrafts.read(manualKey).revision === revision
+    confirmingRef.current = true; setConfirming(true); setSaveError('')
+    try {
+      if (!optionsRef.current?.saveField || !(await optionsRef.current.saveField(record))) throw new Error(t('evidence.saveFirstFailed'))
+      if (saveManualBeforeReview.current && !(await saveManualBeforeReview.current())) {
+        throw new Error(manualDrafts.read(manualKey).error || t('evidence.emptyMaterialsRequired'))
+      }
+      if (!same()) throw new Error(t('evidence.changedDuringSave'))
+      const fresh = await api.get<FieldDetail>(base+'/field-detail?'+new URLSearchParams({...target,item_key:record.item_key || record.key}))
+      if (!same()) throw new Error(t('evidence.changedDuringSave'))
+      if (!fresh.review_token || !fresh.can_confirm_empty) throw new Error(t('evidence.emptyMaterialsRequired'))
+      const result = await api.post<FieldDetail>(base+'/field-decision',{...target,item_key:record.item_key || record.key,
+        action:'confirm_empty',review_token:fresh.review_token})
+      if (!result.record || result.record.field_decision?.mode !== 'empty' || result.record.status !== 'supported') {
+        throw new Error(t('evidence.decisionResponseInvalid'))
+      }
+      if (!same()) return
+      decisionEpoch.current += 1
+      fieldDecisionEpoch.current.set(record.key,(fieldDecisionEpoch.current.get(record.key) || 0)+1)
+      observedValues.current.set(record.item_key || record.key,copyValue(optionsRef.current?.getCurrentValue?.(record)?.comparisonValue ?? manualCurrentValue(record)))
+      const update = (old: EvidenceRecord[]) => old.map(r => r.key === record.key
+        ? {...r,...result.record,local_modified:false,manual_pending:false,pending_review:false} : r)
+      recordsRef.current = update(recordsRef.current); setRecords(update)
+      setView(null); setFieldViewKey(null)
+      if (drawerSession.current === session) setSourceDetail({key:record.key,ref:summaryRecord?.detail_ref,data:result})
+    } catch (error) { reportSaveFailure(error) }
+    finally { confirmingRef.current = false; if (mounted.current) setConfirming(false) }
+  }
   const applyCandidate = async () => {
     const record = activeRecord, target = targetRef.current
     if (!record || !target || confirmingRef.current || optionsRef.current?.readOnly || settingsPendingRef.current) return
@@ -1056,6 +1099,7 @@ export function useEvidenceWorkflow(options?: {
         </Box>
         <Box hidden={drawerTab !== 'source'} key={'source:' + activeRecord.key}>
         <ReviewSection title={t('evidence.foundSources')} initialOpen>
+          {activeRecord.field_decision?.mode === 'empty' && <Typography variant="body2">{t('evidence.emptySourcesContext')}</Typography>}
           <DosFermiConflict record={activeRecord} target={targetRef.current}
             onEdit={dosValueInput(activeRecord) && !dosValueInput(activeRecord)?.disabled ? () => editCurrent(activeRecord) : undefined} />
           {currentDetail?.error ? <Alert severity="error" action={<Button onClick={() => setDetailReload(n => n + 1)}>{t('evidence.retrySource')}</Button>}>{t('evidence.sourceLoadFailed')} {currentDetail.error}</Alert>
@@ -1077,7 +1121,7 @@ export function useEvidenceWorkflow(options?: {
         <Box hidden={Boolean(activeFieldView)}>
         {activeGroup.map(r => <Box key={r.key} data-field-ai-reason data-evidence-status={evidenceStatus(r)} sx={{ display: 'grid', gap: 1.5, mb: 2 }}>
             <Typography sx={{ whiteSpace: 'pre-wrap' }}>{aiReasonText(r, t) || t('evidence.noAiReason')}</Typography>
-            <ScientificAssociations associations={r.source_associations} target={targetRef.current} />
+            {r.field_decision?.mode !== 'empty' && <ScientificAssociations associations={r.source_associations} target={targetRef.current} />}
             {r.proposal_review && <Typography>{t('evidence.proposalReview')}：{r.proposal_review.explanation}</Typography>}
             {Boolean(r.proposal?.evidences?.length) && <Box component="details"><Typography component="summary">{t('evidence.aiReasonSources')}</Typography>
               {r.proposal!.evidences.map((source, index) => <EvidenceRegion key={`${source.file_id}:${index}`} target={targetRef.current} source={source} />)}
@@ -1093,8 +1137,12 @@ export function useEvidenceWorkflow(options?: {
         {!options?.readOnly && !activeRecord.placeholder && <Box data-field-review-actions sx={{display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: .75, my: 2, '& .MuiButton-root': {minWidth: 0, px: .5, overflowWrap: 'anywhere'}}}>
           <Button disabled={fieldWaiting || settingsPending || confirming || !currentDetail?.data?.review_token || hasLocalManualEdit(activeRecord)}
             onClick={() => void decideField('reject')}>{t('evidence.humanReject')}</Button>
-          <Button variant="contained" disabled={fieldWaiting || confirming || !canApprove}
-            onClick={() => void decideField('approve')}>{t('evidence.humanApprove')}</Button>
+          {emptyCurrent ? <Button variant="contained" disabled={fieldWaiting || confirming || settingsPending
+              || Boolean(activeRecord.human_confirmed && activeRecord.field_decision?.mode === 'empty' && !activeRecord.stale
+                && !hasLocalManualEdit(activeRecord) && !activeRecord.manual_pending)}
+            onClick={() => void confirmEmpty()}>{t('evidence.humanConfirmEmpty')}</Button>
+          : <Button variant="contained" disabled={fieldWaiting || confirming || !canApprove}
+            onClick={() => void decideField('approve')}>{t('evidence.humanApprove')}</Button>}
           <Button variant="outlined" disabled={fieldWaiting || settingsPending || confirming || (activeRecord.stale && dirty.current && !options?.saveCurrent)}
             onClick={() => void execute(targetRef.current!, activeGroup.map(r => r.key))}>{t('evidence.reviewCurrentField')}</Button>
         </Box>}
