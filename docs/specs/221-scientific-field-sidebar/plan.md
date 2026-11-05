@@ -29,3 +29,12 @@ Issue：[#221](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/221)。用户�
 | FR-020、SC-001 | 文档、Issue、专属 Demo | T001—003；原字节守恒与链接 |
 
 遵守 mayuan、逐文件写入前核对分支、明确路径提交。科学字段标准及锁定摘要不变，无数据库迁移。本轮生产实现与技术任务按实际验证勾选，历史迁移证据保留原摘要。
+
+
+## 补充 PDF 读取修复（T010—T012）
+
+本次为既有综合核对主路径缺失及读取边界调整。沿用 manual_evidence.review_context 读取和校验附件；仅新增 PDF 专属100,000字符常量，普通文字继续20,000字符。字段身份、文件SHA和来源版本保持，模型不改变核对门槛。
+
+model_review 在成功返回且通过取消检查的模型调用后，为确实携带可读PDF的字段返回读取回执；worker只更新对应字段PDF的已读状态，不以任务completed或科学supported替代是否实际送达。保持图片读取规则，取消不写入读取状态。读取状态自身变化不改变科学依据内容。
+
+FR-021/SC-006 → 专属长度边界、实际模型回执 → manual_evidence/model_review/worker → T010—T012 → 长PDF旧失败、真实worker隔离保存、CaH6真实PDF调用及正式主动任务重读。仅更新本地实时开发核对worker以加载源码；不推送／容器发布或改变其他服务配置。

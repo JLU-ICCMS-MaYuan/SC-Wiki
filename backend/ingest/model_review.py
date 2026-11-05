@@ -395,6 +395,7 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
     output, error, observation, images = {}, None, None, []
     tool_history = []
     images_received = False
+    pdfs_received = False
     tool_failures = {}
     last_error = None
     repeated_error = 0
@@ -446,6 +447,8 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
             native_call = answer.get('_tool_call')
             if cancelled():
                 raise InterruptedError('模型核对已取消')
+            # PDF正文已随human_provided_evidence进入本次成功调用；取消不出具读取回执。
+            pdfs_received = True
             if isinstance(answer.get('results'), list):
                 errors = []
                 for raw in answer['results']:
@@ -635,6 +638,9 @@ def review_fields(records, chunks, *, model=None, cancelled=lambda: False, on_pa
     if human_images or images:
         for result in output.values():
             result['review_images_read'] = images_received
+    for key, result in output.items():
+        if human_context.get(key, {}).get('pdf_refs'):
+            result['review_pdfs_read'] = pdfs_received
     return output
 
 

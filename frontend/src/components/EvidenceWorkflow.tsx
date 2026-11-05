@@ -844,7 +844,9 @@ export function useEvidenceWorkflow(options?: {
   const currentDetail = sourceDetail?.key === selected && sourceDetail?.ref === summaryRecord?.detail_ref ? sourceDetail : undefined
   const activeRecord = summaryRecord && currentDetail?.data?.record ? {...summaryRecord, ...currentDetail.data.record,
     key: summaryRecord.key, field: summaryRecord.field, fields: summaryRecord.fields,
-    pending_review: summaryRecord.pending_review || currentDetail.data.record.pending_review} : summaryRecord
+    pending_review: Boolean(summaryRecord.local_modified || summaryRecord.manual_pending
+      || hasLocalManualEdit({...summaryRecord, ...currentDetail.data.record})
+      || (currentDetail.data.record.pending_review ?? summaryRecord.pending_review))} : summaryRecord
   const siblingRecords = useMemo(() => summaryRecord ? evidenceSiblings(summaryRecord, displayRecords) : [], [summaryRecord, displayRecords])
   const selectSibling = (record: EvidenceRecord) => {
     if (record.key === selected) return

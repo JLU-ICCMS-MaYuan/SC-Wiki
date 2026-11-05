@@ -13,7 +13,7 @@ import defs from '../fixtures/issue176/form-definitions.json'
 const auth=vi.hoisted(()=>({role:'admin'}))
 vi.mock('../../frontend/src/context/AuthContext',()=>({useAuth:()=>({user:{id:7,role:auth.role,is_admin:true,is_approved:true}})}))
 vi.mock('../../frontend/src/lib/api',()=>({api:{get:vi.fn(),post:vi.fn(),patch:vi.fn(),put:vi.fn(),del:vi.fn()}}))
-let sourceOverrides:any = {}
+let sourceOverrides:any = {},detailOverrides:any = {}
 const item='a'.repeat(64)
 const field='material_states[0].property_modules[0].records[0].payload.parameters.mu_star'
 let draft:any,manual:any,order:string[],finishJob:(value:any)=>void,poll:Promise<any>,failSave=false
@@ -22,7 +22,7 @@ const record=()=>({key:item,item_key:item,field,fields:[field],label:'μ*',state
  status:'uncertain',reason:'需核对',evidences:[],human_modified:true,required:true,...sourceOverrides})
 beforeEach(()=>{
  vi.mocked(api.del).mockResolvedValue({status:'cancelled'} as never)
- sourceOverrides={};failSave=false;order=[];manual={changed:true,reason:'',no_evidence_reason:'',items:[]}
+ sourceOverrides={};detailOverrides={};failSave=false;order=[];manual={changed:true,reason:'',no_evidence_reason:'',items:[]}
  draft={paper:{id:177,title:'Original title',authors:[],year:2026,paper_type:'theoretical',
   material_families:[],review_status:'pending',uploaded_by_user_id:8},
  material_states:[{id:1,state_key:'s',material:'CaH6',material_name:'CaH6',state_kind:'theoretical',pressure_value_gpa:150,
@@ -44,7 +44,7 @@ beforeEach(()=>{
   if(path.includes('/form-definitions/'))return defs.find(d=>path.includes(d.definition_key)) as never
   if(path.includes('/draft-state'))return {version:'draft-before',draft:structuredClone(draft),staged:false} as never
   if(path.endsWith('/draft'))return {data:structuredClone(draft)} as never
-  if(path.includes('/field-detail'))return {record:record(),review_token:'review',approval_state:'modification_required',source_state:'empty'} as never
+  if(path.includes('/field-detail'))return {record:{...record(),...detailOverrides},review_token:'review',approval_state:'modification_required',source_state:'empty'} as never
   if(path.includes('/manual-context'))return {version:'manual-field-v1:fixture',record:record()} as never
   if(path.includes('/manual/'))return {data:manual} as never
   if(path.includes('/field-input')){
@@ -109,19 +109,21 @@ it.each(['admin','superadmin'])('%s 恢复不含程序身份的审核工作稿�
  expect(vi.mocked(api.put)).not.toHaveBeenCalled()
 })
 
-async function open(kind:string){
+async function open(kind:string,edit=true){
  auth.role=kind==='superadmin'?'superadmin':'admin'
  render(<LanguageProvider><MemoryRouter initialEntries={['/admin/papers/177/edit']}>
   {['admin','superadmin'].includes(kind)?<Routes><Route path="/admin/papers/:id/edit" element={<AdminPaperEditPage/>}/></Routes>
    :<UploadTaskEditor taskId="task177" revisionPaperId={kind==='revision'?177:undefined} onSubmitted={()=>{}}/>}
  </MemoryRouter></LanguageProvider>)
  await screen.findByDisplayValue('Original title')
- fireEvent.change(screen.getByDisplayValue('Original title'),{target:{value:'Local title'}})
+ if(edit)fireEvent.change(screen.getByDisplayValue('Original title'),{target:{value:'Local title'}})
  fireEvent.click(screen.getAllByText('超导性质').find(n=>n.closest('[data-property-module-toggle]'))!)
  await screen.findByLabelText('μ*')
- fireEvent.change(screen.getByLabelText('μ*'),{target:{value:'0.12'}})
+ if(edit)fireEvent.change(screen.getByLabelText('μ*'),{target:{value:'0.12'}})
  await waitFor(()=>expect(document.querySelector(`[data-evidence-key="${item}"]`)).not.toBeNull())
  fireEvent.click(document.querySelector(`[data-evidence-key="${item}"]`)!)
+ await screen.findByLabelText('人工修改判断理由（必填）')
+ if(!edit)return
  fireEvent.change(await screen.findByLabelText('人工修改判断理由（必填）'),{target:{value:'最新人工理由'}})
  fireEvent.click(screen.getByLabelText('不提供证据'))
  fireEvent.change(screen.getByLabelText('不提供证据的理由（必填）'),{target:{value:'沿用原文'}})
@@ -241,4 +243,18 @@ it.each(['upload','revision','admin','superadmin'])('%s 相关反证的长原文
  expect(within(drawer).getByText('原文不支持当前配对',{exact:true})).toBeVisible()
  expect(drawer.querySelector('.MuiAlert-standardInfo')).toBeNull()
  expect(vi.mocked(api.post).mock.calls.filter(([path])=>path.endsWith('/jobs'))).toHaveLength(0)
+})
+
+
+it.each(['upload','revision','admin','superadmin'])('221 %s 重开详情通过覆盖旧摘要待核对，未保存新值仍提醒',async kind=>{
+ sourceOverrides={status:'supported',pending_review:true,human_modified:true}
+ detailOverrides={pending_review:false,stale:false}
+ await open(kind,false)
+ expect(await screen.findByText('核对通过（结果已保存）')).toBeVisible()
+ fireEvent.click(screen.getByLabelText('关闭来源详情'))
+ await waitFor(()=>expect(document.querySelector('.evidence-review-drawer')).toBeNull())
+ fireEvent.change(screen.getByLabelText('μ*'),{target:{value:'0.12'}})
+ fireEvent.click(document.querySelector(`[data-evidence-key="${item}"]`)!)
+ expect(await screen.findByText('当前版本待核对')).toBeVisible()
+ await waitFor(()=>expect(screen.queryByText('核对通过（结果已保存）')).not.toBeInTheDocument())
 })

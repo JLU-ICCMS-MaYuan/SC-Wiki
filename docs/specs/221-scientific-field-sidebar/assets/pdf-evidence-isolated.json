@@ -1,0 +1,45 @@
+{
+  "model": "gpt-6.1-sol",
+  "provider": "server:LLM2",
+  "source_files": {
+    "backend/ingest/manual_evidence.py": "0665039a6a79a86cfab9702f10e365bb202f94706e1b9c54c8739acc93b95a49",
+    "backend/ingest/model_review.py": "8ca4c68cf31ca8ab25d9bc0172ea244484392e1428c96d643d702f641e4632d6",
+    "backend/ingest/property_evidence.py": "6a2813fb08ae3f366c9ce9b2a4d8f6966f28fed76394b75f855e63afe5a08fa8"
+  },
+  "input_receipts": [
+    {
+      "characters": 49527,
+      "sha256": "30d8afd6b82ca0c788c7460ffa441c86941315f36b1ce206a0953ee204a57d85",
+      "record_count": 1,
+      "kind": "pdf"
+    }
+  ],
+  "field": "paper.knowledge_graph_title",
+  "current_value": "The first theoretically predicted HTSC-clathrate hydride CaH6",
+  "status": "supported",
+  "reason": "该标题可作为科学贡献概括保留，其中“first”的范围应理解为理论预测的高温超导笼型氢化物，而非所有高温超导氢化物。正文第1页明确报告通过结构搜索预测CaH6的氢方钠石笼及笼内Ca，并给出150 GPa下220–235 K的理论Tc；同页结构讨论确认H4单元连接形成包合Ca的三维笼架。原论文本身强调这一结构的新颖性及当时最高的氢化物Tc，但并未直接作出完整的历史优先权声明。人工提供的2021年综述第5–6页则明确称Im-3m CaH6为首个预测的Tc > 200 K的笼型超氢化物，并将其归于当前2012年论文。因此，结合原论文和另存综述，当前标题的材料、理论预测性质、笼型结构及高温超导优先权均有依据；不应将“first”扩大为首个理论预测的超导氢化物。",
+  "human_confirmed": false,
+  "supplemental_sources": [
+    {
+      "kind": "pdf",
+      "sha256": "30d8afd6b82ca0c788c7460ffa441c86941315f36b1ce206a0953ee204a57d85",
+      "source_description": "068201_1_online.pdf",
+      "origin_kind": "contributor_evidence"
+    }
+  ],
+  "review_pdfs_read": true,
+  "persisted_reread": true,
+  "elapsed_seconds": 18.2,
+  "real_business_writes": 0,
+  "activities": [
+    {
+      "stage": "model",
+      "message": "模型正在结合当前字段与已读依据核对"
+    },
+    {
+      "stage": "result",
+      "message": "模型判断已返回，正在校验并保存当前字段结果",
+      "summary": "该标题可作为科学贡献概括保留，其中“first”的范围应理解为理论预测的高温超导笼型氢化物，而非所有高温超导氢化物。正文第1页明确报告通过结构搜索预测CaH6的氢方钠石笼及笼内Ca，并给出150 GPa下220–235 K的理论Tc；同页结构讨论确认H4单元连接形成包合Ca的三维笼架。原论文本身强调这一结构的新颖性及当时最高的氢化物Tc，但并未直接作出完整的历史优先权声明。人工提供的2021年综述第5–6页则明确称Im-3m CaH6为首个预测的Tc > 200 K的笼型超氢化物，并将其归于当前2012年论文。因此，结合原论文和另存综述，当前标题的材料、理论预测性质、笼型结构及高温超导优先权均有依据；不应将“first”扩大为首个理论预测的超导氢化物。"
+    }
+  ]
+}

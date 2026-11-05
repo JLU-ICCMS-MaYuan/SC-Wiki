@@ -29,6 +29,7 @@ MAX_ITEMS = 5
 MAX_TEXT_CHARS = 20_000
 MAX_REVIEW_IMAGE_BYTES = 20 * 1024 * 1024
 MAX_REVIEW_PDF_PAGES = 20
+MAX_REVIEW_PDF_TEXT_CHARS = 100_000
 EMPTY_HASH = hashlib.sha256(b"null").hexdigest()
 IMAGE_FORMATS = {"PNG": "image/png", "JPEG": "image/jpeg", "WEBP": "image/webp"}
 
@@ -530,7 +531,7 @@ def review_context(session, snapshot: dict) -> dict[str, dict[str, Any]]:
                                     else:
                                         pages = [page.get_text("text").strip() for page in pdf]
                                         content = "\n".join(page for page in pages if page)
-                                        if content and len(content) <= MAX_TEXT_CHARS:
+                                        if content and len(content) <= MAX_REVIEW_PDF_TEXT_CHARS:
                                             visible["content"] = content
                                             pdf_refs.append({"row_id": row.id, "item_id": item["id"]})
                                         else:
@@ -563,7 +564,8 @@ def mark_ai_read(session, refs: list[dict[str, str]], *, read: bool) -> None:
         items = copy.deepcopy(row.items or [])
         matched = False
         for item in items:
-            if item.get("id") == ref["item_id"] and item.get("kind") in {"image", "pdf"}:
+            if (item.get("id") == ref["item_id"] and item.get("kind") in {"image", "pdf"}
+                    and item.get("ai_read_status") != ("read" if read else "not_read")):
                 item["ai_read_status"] = "read" if read else "not_read"
                 matched = True
         if matched:

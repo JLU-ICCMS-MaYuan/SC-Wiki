@@ -1,0 +1,26 @@
+{
+  "job_id": "69a8d11bbc214bc3a5ba05482aa16e1b",
+  "field": "paper.knowledge_graph_title",
+  "value": "The first theoretically predicted HTSC-clathrate hydride CaH6",
+  "status": "supported",
+  "stale": false,
+  "approval_state": "supported",
+  "reason": "该标题可作为科学贡献概括保留。正文第1页明确报道理论预测的CaH6具有包合Ca的氢方钠石笼状结构，并预测其在150 GPa下的Tc为220–235 K，支持“theoretically predicted”“HTSC”和“clathrate hydride CaH6”。“first”的历史优先性还得到人工提供的2021年综述直接支持：其第5–6页明确称Im-3m CaH6为首个预测Tc超过200 K的笼型超氢化物，并将该结论归于当前2012年论文。这里的“first”应限定为高温超导笼型氢化物这一类别，不能扩大为首个理论预测的超导氢化物；原文引言已指出此前其他氢化物存在10–139 K的理论预测。",
+  "supplemental_sources": [
+    {
+      "kind": "pdf",
+      "sha256": "30d8afd6b82ca0c788c7460ffa441c86941315f36b1ce206a0953ee204a57d85",
+      "source_description": "068201_1_online.pdf",
+      "origin_kind": "contributor_evidence"
+    }
+  ],
+  "pdf_read_status": [
+    {
+      "filename": "068201_1_online.pdf",
+      "status": "read",
+      "sha256": "30d8afd6b82ca0c788c7460ffa441c86941315f36b1ce206a0953ee204a57d85"
+    }
+  ],
+  "human_confirmed": false,
+  "draft_unchanged": true
+}

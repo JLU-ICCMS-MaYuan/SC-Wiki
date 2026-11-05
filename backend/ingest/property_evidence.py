@@ -1348,12 +1348,19 @@ def run_evidence_job(job_id: str):
                 on_partial=evidence_stream_guard(job_id, job['owner'], started, deadline_seconds),
                 manifest=snapshot.get('pdf_manifest') or [], human_context=human_context,
                 review_started_at=job.get('review_started_at'), **({'on_activity': progress} if progress else {}))
+            if cancelled():
+                return
             if human_context:
                 with SessionLocal.begin() as session:
                     refs = [image for value in human_context.values() for image in value.get('images', [])]
                     if refs:
                         manual_evidence.mark_ai_read(session, refs,
                             read=any(r.get('review_images_read') for r in fresh.values()))
+                    for key, materials in human_context.items():
+                        pdf_refs = materials.get('pdf_refs') or []
+                        if pdf_refs:
+                            manual_evidence.mark_ai_read(session, pdf_refs,
+                                read=bool(fresh.get(key, {}).get('review_pdfs_read')))
             if job.get('purpose') == 'field':
                 from .field_candidates import capture
                 for record in batch_records:

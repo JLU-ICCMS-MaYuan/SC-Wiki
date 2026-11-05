@@ -1,0 +1,27 @@
+{
+  "job_id": "69a8d11bbc214bc3a5ba05482aa16e1b",
+  "passed": true,
+  "pdf_visible": true,
+  "pdf_not_read_visible": false,
+  "title_unchanged": true,
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/papers/1208/revision-draft"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/papers/1208/revision-draft"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/evidence/summary"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/evidence/identify-field"
+    }
+  ],
+  "errors": [],
+  "final_text": "图谱科学标题\n字段设置\n来源核对\n系统找到的原文\n\n2012 CaH6-王晖.pdf · 第 1 页：Hydrogen-rich compounds hold promise as high-temperature superconductors under high pressures. Recent theoretical hydride structures on achieving high-pressure superconductivity are composed mainly of \\mathbf { H _ { 2 } } fragments. Through a systematic investigation of Ca hydrides with different hydrogen contents using particleswam optimization structural search, we show that in the stoichiometry \\mathsf { C a H _ { 6 } } a body-centered cubic structure with hydrogen that forms unusual“sodalite\" cagescontainingenclathratedCa stabilizes above pressure 150 GPa. The stability of this structure is derived from the acceptance bytwo \\mathbf { H _ { 2 } } of electrons donated by Ca forming an \\mathbf { H _ { 4 } } unitas the building block in the construction of the three-dimensional sodalite cage. This unique structure has a partial occupationof thedegenerated orbitals at the zone center. The resultant dynamicJahn–Teller effecthelps to enhance electronphonon coupling and leads to superconductivity of \\mathbf { C a H _ { 6 } } . A superconducting critical temperature ( \\mathbf { I } _ { c } ) of 220–235 K at 150 GPa obtained from the solution of the Eliashberg equations is the highest among all hydrides studied thus far.\n\n\ncalcium hydride | sodalite structure\n\n查看原 PDF 区域\n\n2012 CaH6-王晖.pdf · 第 1 页：The structures of the stable phases for each stoichiometry at 150 GPa are shown in Fig. 1 B)–(D. Three types of hydrogen species, \\text{\" H}_{4} \\text{\" } units, monatomic \\mathbf { H } + \\mathbf { H } _ { 2 } , and molecular \\mathbf { H } _ { 2 } , were observed. CaH4 had a tetragonal (I4/mmm, Pearson symbol tI10) structure and included a body-centered arrangement of Ca and two molecular and four monatomic hydrogen units ( \\mathrm { C a } _ { 2 } ( \\mathrm { H } _ { 2 } ) _ { 2 } ( \\mathrm { H } ) _ { 4 } ) _ { ; } The structure of \\mathrm { C a H _ { 6 } } adopted a remarkable cubic form ( I m 3   m , Pearson symbol cI14), with body-centered Ca atoms and, on each face, squared \\mathrm { H } _ { 4 } units tilted 4 5 ^ { \\circ } with respect to the plane of the Ca atoms. These \\mathrm { H } _ { 4 } units were interlinked to form asodalite frameworkwith a Ca atom enclathrated at the center of each cage. The next stablepolymorph, \\mathrm { C a H } _ { 1 2 } , had a rhombohedral (R3, Pearson symbol hR13) structure consisting entirely of molecular H2\n\n查看原 PDF 区域\n\n2012 CaH6-王晖.pdf · 第 1 页：urrent studies of the hydrides of simple elements at high pressures are motivated by the proposition that a high T _ { \\mathrm { c } } may be achieved from “precompressed\" \\mathbf { H } _ { 2 } indense hydrogen-dominant hydrides (1). Superconductivity has been reported in \\underline { { \\mathrm { S i H _ { 4 } } ( 2 ) } } , although controversy surroundsmodels of the origin of superconductivityand the structure of the superconducting state (3 - 5) Many theoretical structures have the predicted T _ { \\mathrm { c } } values ranging from 10 to 139 K (6–12). Except for \\mathrm { A l H } _ { 3 } (13), in which superconductivity was predicted but not observed, a common feature of these structures is theubiquitous presence of molecular hydrogen fragments. At high pressures, unfavorable electron-electron repulsion in the atomic valence shells can be reduced by migration and localization in the empty interstitial regions (14, 15) Introduction of anelectronegative element, as was demonstrated in the case of \\mathbf { K } \\mathbf { - } \\mathbf { A } \\mathbf { g } (16), increases the ability of the electronegative Ag atoms to accommodate electrons from K into theoutermost \\check { 5 } s and 5 p valence shells, thereby forming a bonding network and stabilizing the alloy structures that otherwise would not be observed under ambient pressures. Recently, Zurek et al. (17, 18) demonstrated that charge transfer from lithium or sodium to hydrogen molecules under high pressures could lead to the formation of newmetallic lithium- or sodium-hydride alloys. Depending on the stoichiometry, the structures consist of “pre-dissociated\"molecular \\mathrm { H } _ { 2 } and/or monoatomic hydrogen.\n\n\nResults and Discussion\n\n查看原 PDF 区域\nAI 理由\n\n核对通过（结果已保存）\n\n该标题可作为科学贡献概括保留。正文第1页明确报道理论预测的CaH6具有包合Ca的氢方钠石笼状结构，并预测其在150 GPa下的Tc为220–235 K，支持“theoretically predicted”“HTSC”和“clathrate hydride CaH6”。“first”的历史优先性还得到人工提供的2021年综述直接支持：其第5–6页明确称Im-3m CaH6为首个预测Tc超过200 K的笼型超氢化物，并将该结论归于当前2012年论文。这里的“first”应限定为高温超导笼型氢化物这一类别，不能扩大为首个理论预测的超导氢化物；原文引言已指出此前其他氢化物存在10–139 K的理论预测。\n\n人工审核不通过\n人工审核通过\n大模型核对\n人工修改记录\n人工修改判断理由（必填）\n人工修改判断理由（必填）\n提供证据\n不提供证据\n\n拖入图片、文本或 PDF，或在此处粘贴截图（Cmd/Ctrl+V）\n\nPNG/JPEG/WebP、TXT/MD、PDF；每份最大 10 MiB，每字段最多 5 项。\n选择图片、文本或 PDF\n保存\n\n已保存\n\n人工提供，非论文原文 · 068201_1_online.pdf068201_1_online.pdf移除待提交证据"
+}

@@ -1,0 +1,70 @@
+{
+  "baseline_failure_names": [
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py::test_pdf_character_limit_and_full_content[400-True]",
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py::test_pdf_character_limit_and_full_content[1200-True]",
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py::test_pdf_character_limit_and_full_content[1300-False]",
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py::test_real_worker_pdf_and_text_input_read_receipt[supported-20]",
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py::test_real_worker_pdf_and_text_input_read_receipt[supported-400]",
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py::test_real_worker_pdf_and_text_input_read_receipt[unsupported-20]",
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py::test_real_worker_pdf_and_text_input_read_receipt[unsupported-400]",
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py::test_real_worker_pdf_and_text_input_read_receipt[cancelled-400]"
+  ],
+  "note": "其中超限反例原行为通过，但检查PDF专属常量时旧实现缺少接口；短PDF成功两项证明真实worker未标已读，长PDF两项证明正文被整体排除。不是所有失败都算独立用户行为。",
+  "old_adjacent_failures": [
+    "tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_transfer_rechecks_explanation_after_preflight",
+    "tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_pdf_is_validated_and_only_actual_review_marks_it_read",
+    "tests/01_decentralized_uploading/test_issue109_manual_evidence.py::test_reviewer_reason_does_not_overwrite_uploader_evidence"
+  ],
+  "new_pdf_tests": 12,
+  "backend_focused_passed": 45,
+  "business_scope": "仅CaH6返修稿图谱标题主动核对及PDF读取反馈；标题和整稿正文保持原样",
+  "source_files": {
+    "backend/ingest/manual_evidence.py": "0665039a6a79a86cfab9702f10e365bb202f94706e1b9c54c8739acc93b95a49",
+    "backend/ingest/model_review.py": "8ca4c68cf31ca8ab25d9bc0172ea244484392e1428c96d643d702f641e4632d6",
+    "backend/ingest/property_evidence.py": "6a2813fb08ae3f366c9ce9b2a4d8f6966f28fed76394b75f855e63afe5a08fa8",
+    "frontend/src/components/EvidenceWorkflow.tsx": "c208f9ef4946383db05a2e0fd40c950596a56816383a2c7ee64d9795dbc8ec47",
+    "tests/01_decentralized_uploading/test_sidebar_pdf_evidence.py": "e77e96a5ba9826e0564d3fcba7f76d9397216307927963663a7630fa4332f6ec",
+    "tests/01_decentralized_uploading/sidebar-field-hosts.test.tsx": "dd9e270d13c06e2582b8f015822c6c18d553b108ad23e3790f803a0df601fe40"
+  },
+  "sources": [
+    {
+      "name": "2012 CaH6-王晖.pdf",
+      "sha256": "5a8f5279732264dc218b9ab865778768e37623127b8bd64bbce6135da101c8da",
+      "size": 1091729,
+      "text_reused": true
+    },
+    {
+      "name": "2012 CaH6--suppliment-王晖.pdf",
+      "sha256": "630283a3cbfb7d8fb8624c957de2b9958f9ece57a28b3a78830647b32535d348",
+      "size": 2925397,
+      "text_reused": true
+    },
+    {
+      "name": "068201_1_online.pdf",
+      "sha256": "30d8afd6b82ca0c788c7460ffa441c86941315f36b1ce206a0953ee204a57d85",
+      "size": 3769452,
+      "text_reused": false
+    }
+  ],
+  "browser_reopened_passed": true,
+  "pdf_read_status": "read",
+  "current_model_status": "supported",
+  "business_job": "69a8d11bbc214bc3a5ba05482aa16e1b",
+  "screenshots": [
+    {
+      "path": "assets/pdf-evidence-passed.png",
+      "sha256": "42f5e9662562b4669f632f7c949e6151c80dd4ab5c191cc7d0f2e9adc442cedf",
+      "source": "本机真实当前字段主动核对后重新打开侧栏"
+    }
+  ],
+  "form_tests_passed": 188,
+  "field_contract": "通过，未改契约",
+  "mutation": {
+    "render_regressions": 8,
+    "red_marking_regressions": 4
+  },
+  "build": "通过",
+  "reopen_hosts_passed": 4,
+  "pushed": false,
+  "deployed": false
+}
