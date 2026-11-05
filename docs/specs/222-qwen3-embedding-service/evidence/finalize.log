@@ -1,0 +1,13 @@
+No broken requirements found.
+{"torch": "2.9.0+cu128", "vllm": "0.11.2", "cuda": "12.8", "gpu": "NVIDIA GeForce RTX 4090", "bf16": true}
+{"model": "Qwen/Qwen3-Embedding-4B", "revision": "5cf2132abc99cad020ac570b19d031efec650f2b", "files_verified": 14}
+health_ready
+health_ready
+{"openai_sdk": true, "dimensions": 1536, "seconds": 0.0367}
+name, memory.used [MiB], memory.free [MiB], utilization.gpu [%]
+NVIDIA GeForce RTX 4090, 15579 MiB, 8504 MiB, 0 %
+MainPID=59550
+NRestarts=0
+ActiveState=active
+SubState=running
+DEPLOYMENT_LOCAL_VERIFIED

@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "before": {
+    "MainPID": "59550",
+    "NRestarts": "0",
+    "ActiveState": "active"
+  },
+  "after": {
+    "MainPID": "59738",
+    "NRestarts": "1",
+    "ActiveState": "active"
+  },
+  "recovery_seconds": 42.289,
+  "dimensions": 1536
+}

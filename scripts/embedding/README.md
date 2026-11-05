@@ -20,7 +20,11 @@
 
 初始参数：BF16、8192 Token、4 个并发序列、0.65 显存利用率，禁用请求与访问日志。
 调用模型名固定为 `Qwen/Qwen3-Embedding-4B`，原生输出 2560 维，可请求 1536 维。
+引擎原生配置限定官方 32–2560 维范围，越界请求会被拒绝。
 检索问题由调用者添加模型卡推荐的任务指令；文献正文直接编码。
 
 详细部署、启停及访问方式见 [#222 运维说明](../../docs/specs/222-qwen3-embedding-service/quickstart.md)。
 运行状态及性能以 [真实验证记录](../../docs/specs/222-qwen3-embedding-service/validation.md) 为准。
+
+`aliyun-Caddyfile.proposed`、`relay-sshd.conf.proposed`、`embedding-relay.service.proposed`
+仅为待选择、待授权的阿里云中转配置草案，不属于当前已启用服务。

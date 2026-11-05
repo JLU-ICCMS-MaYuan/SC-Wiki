@@ -8,7 +8,7 @@
 
 ## 功能说明
 
-说明 SC-Wiki 的生产 Docker 部署与本地开发运行时两条链路：服务组成、配置入口、数据挂载和启动边界。本文不替代部署包中的数据导入操作说明。
+说明 SC-Wiki 的生产 Docker 部署、本地开发运行时，以及独立 GPU 嵌入服务的组成、配置入口、数据挂载和启动边界。本文不替代部署包中的数据导入操作说明。
 
 镜像积累原因、只读占用快照、清理边界和服务器开发建议见[部署技术分析](../00_deploy_technical/docker-storage-and-development.md)。
 
@@ -51,6 +51,14 @@ Docker/containerd 引擎存储未移动。迁移完成后，按用户要求删�
 及已停止的旧演练容器；原数据卷和镜像继续保留，不接收线上写入，也不能直接覆盖新数据。
 迁移证据位于新发布根的 `backups/relocation-20261022/`；清理记录、旧配置和迁移工作区归档在
 `backups/cleanup-opt-20261022/`。运行中的 14 个服务未因清理而重启。
+
+### 独立 GPU 嵌入服务（#222）
+
+- `gpu-single4090` 上的 `Qwen/Qwen3-Embedding-4B` 使用独立 Python 环境与 vLLM 0.11.2，模型文件按固定 HF revision 和 Git/LFS 哈希核验，部署材料位于 `scripts/embedding/`。
+- 服务由 systemd 用户单元 `qwen3-embedding` 管理，监听目标机器 `127.0.0.1:8000`，使用私有 Bearer 密钥；BF16、最大 8192 Token、4 个并发序列和 0.65 显存利用率为受测配置。
+- 真实单条/批量中英文编码、32/1536/2560 维、鉴权、非法输入拒绝、服务重启、异常自动恢复及退出 SSH 后常驻已验证。主机开机自启配置已设置，但未执行主机重启验收。
+- 该服务当前只在目标机器内可用，本地与阿里云 SC-Wiki 尚未接入，旧向量索引未迁移。平台 SSH TCP 转发受限，外部 HTTPS 入口仍未交付，不能把机器内测试当作跨机调用通过。
+- 运维方式与运行版本见 [#222 使用说明](../../specs/222-qwen3-embedding-service/quickstart.md)，实测边界与原始记录见 [部署验证](../../specs/222-qwen3-embedding-service/validation.md)。
 
 ### 本地开发：宿主机进程（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)）
 

@@ -1,0 +1,11 @@
+No broken requirements found.
+{"torch": "2.9.0+cu128", "vllm": "0.11.2", "cuda": "12.8", "gpu": "NVIDIA GeForce RTX 4090", "bf16": true}
+{"model": "Qwen/Qwen3-Embedding-4B", "revision": "5cf2132abc99cad020ac570b19d031efec650f2b", "files_verified": 14}
+health_ready
+Traceback (most recent call last):
+  File "/home/singeuser/qwen3-embedding/source/smoke.py", line 101, in <module>
+    main()
+  File "/home/singeuser/qwen3-embedding/source/smoke.py", line 95, in main
+    assert 400 <= status < 500, f"非法输入未被拒绝: HTTP {status}"
+           ^^^^^^^^^^^^^^^^^^^
+AssertionError: 非法输入未被拒绝: HTTP 200

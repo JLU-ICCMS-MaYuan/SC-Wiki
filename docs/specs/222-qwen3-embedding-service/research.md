@@ -29,3 +29,25 @@ HF 主站不可达时可使用 HF 镜像或 ModelScope 官方 Qwen 仓库传输�
 - Docker/TEI：目标未安装 Docker，本次原生环境即可满足，不增加全局容器运行时。
 - 自写 FastAPI 推理服务：标准引擎已满足接口，无需另写批调度与鉴权。
 - 直接更改网站模型名：新旧向量空间不同，不符合现有索引约束。
+
+## 实际安装与传输调整
+
+Ubuntu 未安装 ensurepip。先创建不带 pip 的独立虚拟环境，再使用 PyPA 官方 get-pip.py 引导 pip，没有安装全局软件包。串行下载 CUDA 大文件较慢，保留已下载 wheel，改用经 PyPI SHA256 核对的 uv 0.9.10 和镜像并发安装；vLLM 仍固定 0.11.2，最终以 freeze、pip check 和真实 GPU 验收为准。
+
+模型下载保留已完成前缀，通过 ModelScope HTTP Range 并行传输剩余部分，拼装后仍按固定 HF 清单核对最终 SHA256。传输加速不改变 revision 或放宽哈希条件，成功后清理临时分片。
+
+## 阿里云入口只读核查与备选设计
+
+用户提供连接信息并授权检查阿里云，凭据独立保管，不归档。实际核查到：SSH 允许 TCP 转发，GatewayPorts 默认 no；Caddy 2.10.2 在现有 80/443 提供 HTTPS，scwiki_internal 网桥网关为 172.19.0.1，网站健康返回 200。
+
+拟由 4090 主动建立受限反向隧道，仅监听阿里云 Docker 私有网桥的 18080；Caddy 只增加 `/embedding/v1/embeddings` 和 `/embedding/v1/models` 两个入口，vLLM 仍只监听 GPU 回环地址。无需算力平台开放入站端口，也不开放阿里云新的公网端口。
+
+`aliyun-Caddyfile.proposed` 已用实际 Caddy 版本校验；`relay-sshd.conf.proposed` 已通过 sshd -t 和指定用户有效配置检查，root 等既有用户仍 GatewayPorts=no。只是配置校验，没有启用。
+
+GPU 出站 SSH 测试触发算力平台“工单命令执行复核”，尚未执行。不得通过重新包装命令、后台启动等方式绕过审核。阿里云入口变更另已向用户提出授权请求，未取得答复及平台放行前不实施依赖变更。
+
+本次等待最后已取消，未执行该出站 SSH 命令。用户随后只询问本地直连与阿里云中转的区别，没有授权阿里云配置变更；中转保持备选。
+
+## 输出维度边界修复
+
+真实接口复现了 vLLM 0.11.2 在仅设置 is_matryoshka=true 时未校验维度上界的问题。通过引擎原生 matryoshka_dimensions 配置全部官方支持的 32–2560 维范围，恢复已定义接口约束；原始失败与修复后的 GPU 回归分别保留，不改变模型权重或隐藏失败。

@@ -1,0 +1,15 @@
+{
+  "source_commit": "9cd8548954ca3f057ea61633ea6c16132c37da35",
+  "observed": [
+    {
+      "requested_dimensions": 31,
+      "status": 200,
+      "returned_dimensions": 31
+    },
+    {
+      "requested_dimensions": 2561,
+      "status": 200,
+      "returned_dimensions": 2560
+    }
+  ]
+}

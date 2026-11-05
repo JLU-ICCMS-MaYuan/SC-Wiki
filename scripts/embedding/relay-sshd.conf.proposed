@@ -1,0 +1,14 @@
+# 待授权配置，仅限制专用隧道账号，不改变其他 SSH 用户行为。
+Match User embedding-relay
+    AuthenticationMethods publickey
+    PubkeyAuthentication yes
+    PasswordAuthentication no
+    AllowTcpForwarding remote
+    AllowStreamLocalForwarding no
+    GatewayPorts clientspecified
+    PermitListen 172.19.0.1:18080
+    PermitTTY no
+    AllowAgentForwarding no
+    X11Forwarding no
+    ForceCommand /usr/sbin/nologin
+Match all
