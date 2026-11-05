@@ -70,7 +70,7 @@ async function main(){
    check('刷新仍保持恢复后的新版本，幅值依据缺失时编辑和重算按钮可用');
 
    await btn('编辑').click();await page.getByRole('application').waitFor();
-   await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('8');await btn('应用坐标到此点').click();
+   await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('8');await btn('确认坐标').click();
    await btn('保存调整').click();await page.waitForFunction(()=>!document.querySelector('.editor-app'));await ready();
    current=(await listing()).items.find(i=>i.id===alpha.id);
    assert.equal(current.result.curves[0].points[50].reconstructed_amplitude,8);

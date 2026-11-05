@@ -1,20 +1,21 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react'
+import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from 'react'
 import AxisOverlay from './AxisOverlay'
 import { recognizedAxes } from './axisGeometry'
 import { fitViewport, zoomViewport, wheelPixels, wheelFactor } from './viewport'
 import { appendPoint, insertDrawnPoints, snapTarget, joinExistingPoint, hasPointConnection, SNAP_RADIUS_PX, curvePath, prepareMove, movePrepared, type PreparedMove, type Document, type Rect } from './engine'
 
-export type Tool = 'idle' | 'dragLinked' | 'dragSingle' | 'pan' | 'add' | 'box' | 'calibrate'
+export type Tool = 'idle' | 'select' | 'dragLinked' | 'dragSingle' | 'pan' | 'add' | 'box' | 'calibrate'
 type Props = {
   focusPointId?: string; doc: Document; active: string; selected: string[]; editing?: boolean; tool?: Tool; imageOpacity?: number
   dragMode?: 'amplitude' | 'free'; display?: string; all?: boolean
   referenceCurves?: Document["curves"]; onSelect?: (ids: string[]) => void; onChange?: (doc: Document, detail?: string) => void
   onFinishAdd?: (message?:string) => void; onAdded?: (id: string) => void
   onPick?: (x: number, y: number) => void; onError?: (error: string) => void
+  toolbarControls?: ReactNode
 }
 type Gesture = { kind: 'point' | 'pan' | 'box'; start: DOMPoint; view: Rect; doc: Document; pointerId?: number; clientStart?: {x:number;y:number}; screenScale?: number; id?: string; prepared?: PreparedMove | null; moved?: Document }
 
-export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'idle', dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onFinishAdd, referenceCurves=[], focusPointId }: Props) {
+export default function SourceCanvas({ doc, active, selected, editing = false, tool = 'idle', dragMode = 'free', display = 'overlay', all = true, imageOpacity = 100, onSelect, onChange, onPick, onError, onAdded, onFinishAdd, referenceCurves=[], focusPointId, toolbarControls }: Props) {
   const linked = tool === 'dragLinked', dragging = linked || tool === 'dragSingle'
   const focused=useRef('')
   const svg = useRef<SVGSVGElement>(null), gesture = useRef<Gesture | null>(null)
@@ -109,7 +110,7 @@ export default function SourceCanvas({ doc, active, selected, editing = false, t
     <div className="canvas-toolbar"><button className="axis-toggle" aria-pressed={showAxes} onClick={() => setShowAxes(v => !v)}>轴与刻度</button>
     <div className="canvas-controls">
       <button aria-label="缩小" title="缩小约5%" onClick={() => zoom(1.05)}>−</button><span>{Number((fit[2] / view[2] * 100).toFixed(1))}%</span>
-      <button aria-label="放大" title="放大约5%" onClick={() => zoom(1 / 1.05)}>＋</button><button onClick={fitWindow}>适应窗口</button>
+      <button aria-label="放大" title="放大约5%" onClick={() => zoom(1 / 1.05)}>＋</button>{toolbarControls ? <div className="canvas-view-controls">{toolbarControls}<button onClick={fitWindow}>适应窗口</button></div> : <button onClick={fitWindow}>适应窗口</button>}
     </div>
     </div>
     {showAxes && <div className="axis-legend"><span>蓝：当前标定</span><span>灰：已有识别 / {recognizedAxes(doc)?.frequencyUnit || '待核对'}</span>{Boolean(recognizedAxes(doc)?.lambdaTicks.length) && <span>棕：累计 λ 参考</span>}</div>}

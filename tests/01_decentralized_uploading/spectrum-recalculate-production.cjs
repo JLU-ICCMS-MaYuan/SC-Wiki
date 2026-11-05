@@ -42,7 +42,7 @@ async function main(){
 
   await btn('编辑').click();await page.getByRole('application').waitFor();
   assert(await page.getByText('逐点数据',{exact:true}).isVisible());
-  await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.08');await btn('应用坐标到此点').click();
+  await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.08');await btn('确认坐标').click();
   await save();
   assert.equal(await page.getByText('零频位置核对完成',{exact:true}).count(),0);
   assert.equal(await page.getByText(/本版本计算时间/).count(),0);

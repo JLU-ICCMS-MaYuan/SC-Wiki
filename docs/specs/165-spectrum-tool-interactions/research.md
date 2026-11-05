@@ -1,6 +1,6 @@
 # 调研与设计决策
 
-## 当前事实
+## 2026-10-27 实施前事实（历史）
 
 - SpectrumManualEditor默认tool='select'、linked=true；工具按钮重复点击只重复设置同一值。add按钮校验必须唯一选点。右侧linked复选框提供已有单点/联动能力。
 - SourceCanvas在add状态下寻找tail或唯一selected作为anchor；只有目标和parent都存在才进入插点/补接，其余调用appendPoint。仅放宽按钮校验不能完成先选工具后选起点。
@@ -25,3 +25,11 @@
 
 ## 实施补充
 浏览器发现MUI全屏Dialog会在冒泡阶段拦截Escape，正式编辑器改在捕获阶段处理退出，并加入全屏Dialog测试。撤销标定时同时退出工具，避免已清空pick但calibrate仍激活。业务数据与权限契约未改变。
+
+## 2026-11-05 现状核对与实现决策
+
+原五工具为 dragLinked/dragSingle/pan/add/box，idle 已支持只选不拖。新增 select 复用该路径，区分按钮高亮与未激活状态。显示开关原在 tool-strip-end，移入 Canvas 适应窗口前的可选槽，避免在 Editor 复制缩放状态。
+
+图 4：dragMode 按钮实际在 amplitude/free 间切换，movePrepared 使用其限制方向；邻点数量及衰减说明只是读取 DRAG_INFLUENCE，不是参数输入。图 5：curvePicker 调用 selectCurve，在同文档多曲线时切换 active；正式 API 当前按分波返回独立文档，顶部 production-curve-tabs 切文档并处理未保存修改，单曲线侧栏按钮没有额外作用。用户答复保留方向切换、隐藏联动范围说明；单曲线隐藏、多曲线保留切换。实现按当前文档曲线数量判定，不因参考分波存在而显示。
+
+按用户“快捷键选择”的要求，重复 Alt 数字保持目标工具；按钮沿用再次点击退出。映射和按钮来自同一列表，使用物理数字键避免 macOS Option 改写 key；不引入全局快捷键系统。显示与工具操作不写 Document、请求或撤销历史。

@@ -33,3 +33,15 @@
 T001→T002→T003；T004、T005/T006、T007/T008共享组件，按顺序执行，最后T009/T010。FR/SC到任务映射见plan.md，测试先于对应实现。MVP先完成统一工具和双按钮，再加入先选工具的加点与主题状态，最终共同验收。
 
 完成证据：T002–T008见validation.md自动验证与行为说明；T009见6组浏览器报告及95项回归/构建；T010已同步Overview及Issue。远程文档链接未验证，不关闭Issue。
+
+## 2026-11-05 界面调整收敛任务
+
+- [x] T011 [US1] 在本目录 spec.md、plan.md、research.md、data-model.md、contracts/interactions.md 更新原话、图片索引、FR/SC及图4/5的用户决策，按原Issue回写范围。
+- [x] T012 [US1] 在 frontend/src/components/spectrumEditor/SpectrumManualEditor.tsx、SourceCanvas.tsx、styles.css 实现六工具竖排、Alt快捷键、滑条下置和显示开关移位；复用既有手势及主题。
+- [x] T013 [US3] 在 frontend/src/components/spectrumEditor/SpectrumManualEditor.tsx 精简坐标区、改名确认坐标，并按用户答复处理图4/5；不改变保存和坐标事实来源。
+- [x] T014 在 tests/01_decentralized_uploading/spectrum-tool-interactions.test.tsx 和 spectrum-tool-interactions-production.cjs 回归新增交互、方向与曲线边界、桌面/窄屏、保存重读，运行谱线、表单契约、变异门和构建，在本目录 validation.md 留存证据。
+- [x] T015 在 docs/overview/01_Decentralized_Uploading_of_Superconductivity_Data/spectrum-manual-editor-demo.md 按实际实现回写，并更新原Issue验证结果、范围和Documentation Impact。
+
+顺序：T011原话、图片及图4/5实际答复→T012/T013，随后T014→T015。不为本次调整另建Issue或Spec，不更改独立Demo。
+
+本轮T011～T015证据：validation.md的2026-11-05节、四份自动检查日志、浏览器报告与源码摘要；图4/5实际答复见spec.md。Overview、#174入口清单同步当前已验证范围；Issue已更新原话与实现结果，远程文档链接仍未核验。

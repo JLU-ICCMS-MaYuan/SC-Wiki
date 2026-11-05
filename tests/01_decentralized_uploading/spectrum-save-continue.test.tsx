@@ -29,7 +29,7 @@ function setup(save?: (doc:Document)=>Promise<Document[]|void>){
 const button=(name:string)=>screen.getByRole('button',{name,exact:true})
 const modal=()=>screen.getByRole('dialog',{name:'保留这次调整吗？'})
 function select(name:string){fireEvent.click(document.querySelector('[data-row="'+name+':p1"]')!)}
-function edit(name:string,amplitude:number){select(name);fireEvent.change(screen.getByLabelText('选中点幅值'),{target:{value:String(amplitude)}});fireEvent.click(button('应用坐标到此点'))}
+function edit(name:string,amplitude:number){select(name);fireEvent.change(screen.getByLabelText('选中点幅值'),{target:{value:String(amplitude)}});fireEvent.click(button('确认坐标'))}
 async function saveAndSwitch(name:string){
  fireEvent.click(button(name));expect(within(modal()).getByText(/保存后将继续编辑/)).toBeVisible()
  fireEvent.click(button('保存并继续编辑'))

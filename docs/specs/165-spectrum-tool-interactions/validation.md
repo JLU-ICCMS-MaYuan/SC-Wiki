@@ -48,3 +48,43 @@ frontend下npm run build通过；现有大包与3Dmol eval提示仍存在，未�
 本轮没有后端算法改动或数据库迁移；浏览器测试使用实际HTTP/SQLite，但身份由测试夹具注入，不代表生产JWT/业务库/网关验收。现有旧浏览器手工编辑脚本的起点与按钮名称断言同步更新，未将其整套重跑算入本轮结果。
 
 未推送、未部署；源码已实现不等于生产环境已发布。远程Spec链接待推送授权后验证，Issue保持开放。
+
+## 2026-11-05 六工具界面调整验证
+
+本轮按新增原话及图4/5核对后的实际答复实现。下方记录本轮结果；上文2026-10-27记录是历史证据。
+
+### 实际行为与覆盖
+
+- 六工具按选点、移动、批量拖动、单点拖动、增加新点、批量框选竖排，滑条在下；Alt+1～6 选择对应工具，重复快捷键保持选中，按钮再次点击仍退出。物理数字键兼容 macOS Option 特殊字符。
+- 选点拖动不改变数据；移动只改变视口；批量和单点保持原算法。组合输入、额外修饰键、保存中及离开确认期间不切换工具；工具高亮与画布一致。
+- 显示其他分波、原图开关紧邻适应窗口左侧，隐藏原图禁用滑条。桌面1440×1000与窄屏390×844实际测量竖排、控件顺序、画布空间和横向溢出，截图已目视检查；窄屏滑条完整显示。
+- 确认坐标修改真实所选点，可撤销重做；正式HTTP保存后重新读取manual文档坐标一致。图3像素卡和状态换算说明不展示。
+- 方向切换保留，α²F纵频率轴及DOS横频率轴均验证“只改幅值”不改变频率方向；联动范围说明隐藏。单曲线隐藏编辑曲线；正式组件交互回归保留同文档多曲线切换及清理旧锚点。
+- 原直连插点、断口补接、8屏幕像素吸附、先选工具再选起点、保存刷新及分波隔离通过。原有版本和权限边界沿用谱线回归；本轮浏览器身份由隔离夹具注入，不冒称生产鉴权验收。
+
+### 自动验证结果
+
+| 检查 | 本轮结果 | 证据 |
+| --- | --- | --- |
+| 谱线、详情导航及保存入口回归 | 15文件124项通过；工作区和隔离归档均通过 | [谱线日志](validation/2026-11-05-six-tools/spectrum-tests.log) |
+| form-contract | 13文件188项通过，含上传、返修、管理员、超级管理员 | [表单日志](validation/2026-11-05-six-tools/form-contract.log) |
+| form-contract:mutation | 8项渲染回退、4项漏红回退全部检出 | [变异日志](validation/2026-11-05-six-tools/mutation.log) |
+| TypeScript + Vite生产构建 | 通过；保留原大包及3Dmol eval提示 | [构建日志](validation/2026-11-05-six-tools/build.log) |
+| 正式React/HTTP/SQLite浏览器 | 8组检查通过，pageerror为0，写请求仅隔离manual接口 | [浏览器报告](validation/2026-11-05-six-tools/tool-interactions-browser.json) |
+
+命令沿用本目录quickstart；谱线测试为
+`npm run test:upload-ui --prefix frontend -- tests/01_decentralized_uploading/spectrum-*.test.tsx tests/01_decentralized_uploading/property-spectra-navigation.test.tsx tests/01_decentralized_uploading/upload-spectrum-save-navigation.test.tsx`。
+另执行 `npm run test:form-contract --prefix frontend`、`npm run test:form-contract:mutation --prefix frontend`、`npm run build --prefix frontend`。
+浏览器使用本轮更新的 `tests/01_decentralized_uploading/spectrum-tool-interactions-production.cjs`，前端5175、后端8195均为本轮临时隔离进程。
+
+首次新增坐标测试使用1.1换算后做浮点严格相等，得到89.99999999999999而非90；改用可精确表示的幅值1作为测试数据后，完整124项通过，没有改生产计算或降低有效精度。窄屏滑条检查后缩短其轨道并以全新SQLite重新运行全部浏览器场景，通过后保留最终截图。
+
+- [桌面六工具与精简侧栏](validation/2026-11-05-six-tools/six-tools-desktop.png)
+- [390px六工具与完整滑条](validation/2026-11-05-six-tools/six-tools-mobile.png)
+- [验证源码及保持不变的联动/Demo文件摘要](validation/2026-11-05-six-tools/source-snapshot.json)
+
+### 需求映射与边界
+
+FR-001/010/011、SC-007由六工具快捷键、选点/移动及布局实测覆盖；FR-012/013、SC-008由开关交互、坐标确认、撤销重做及保存重读覆盖；FR-014、SC-009由双轴方向限制、单曲线隐藏与多曲线组件交互覆盖；原SC-001～006由本轮谱线和浏览器回归覆盖。无需恢复已由#167移除的零频工具。
+
+五张用户原图已保留原字节并重新解码校验，索引见spec.md；图片仅作材料。独立Demo、联动参数、后端算法和接口未修改；其他任务的工作树改动未纳入本次提交。旧浏览器脚本仅同步新按钮名称，未将其所有套件冒称重新运行。无业务数据迁移、推送或部署；远程Spec链接继续待验证，Issue保持开放。

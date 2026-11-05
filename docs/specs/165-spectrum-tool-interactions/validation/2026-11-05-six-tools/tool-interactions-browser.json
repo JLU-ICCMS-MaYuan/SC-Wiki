@@ -1,0 +1,204 @@
+{
+  "checks": [
+    "六工具竖排、滑条下置、Alt+1至6选择及重复保持；选点不拖动，显示按钮移位有效，侧栏精简",
+    "默认无工具只选不拖；两个按钮直接进入单点/联动，单点其余坐标不变，撤销重做有效",
+    "联动沿原权重影响邻点；选中主题深紫/白字，未选中浅紫，反选退出",
+    "增加点可先激活，缩放后8px吸附，首次只确定起点；再次点按钮退出并保留已加点",
+    "纵轴α²F：先选工具后的插点替换原直连，结束回到无工具，保存刷新保留连线",
+    "确认坐标修改真实选中点，可撤销重做，正式HTTP保存和重读坐标一致",
+    "原有未连接点加点补接保留，按钮退出后正常保存",
+    "横轴DOS方向切换与参考分波开关有效，保存不影响其他分波；390px六工具竖排可达且无整体溢出"
+  ],
+  "errors": [],
+  "writes": [
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/c7c6393c61ec49d48a5907c189ee407d/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/c7c6393c61ec49d48a5907c189ee407d/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/c7c6393c61ec49d48a5907c189ee407d/manual"
+    },
+    {
+      "method": "POST",
+      "path": "/api/rag/spectra/2af62507d5aa4b31bfea05ecda1e8245/manual"
+    }
+  ],
+  "screenshots": [
+    "six-tools-desktop.png",
+    "linked-dark-single-light.png",
+    "mobile-two-buttons.png",
+    "six-tools-mobile.png"
+  ],
+  "desktopLayout": {
+    "tools": [
+      {
+        "x": 23,
+        "y": 115.640625,
+        "width": 94,
+        "height": 47.5
+      },
+      {
+        "x": 23,
+        "y": 169.140625,
+        "width": 94,
+        "height": 47.5
+      },
+      {
+        "x": 23,
+        "y": 222.640625,
+        "width": 94,
+        "height": 47.5
+      },
+      {
+        "x": 23,
+        "y": 276.140625,
+        "width": 94,
+        "height": 47.5
+      },
+      {
+        "x": 23,
+        "y": 329.640625,
+        "width": 94,
+        "height": 47.5
+      },
+      {
+        "x": 23,
+        "y": 383.140625,
+        "width": 94,
+        "height": 47.5
+      }
+    ],
+    "opacity": {
+      "x": 50,
+      "y": 448.640625,
+      "width": 40,
+      "height": 309.984375
+    },
+    "plot": {
+      "x": 131,
+      "y": 184.984375,
+      "width": 948,
+      "height": 743.015625
+    },
+    "display": {
+      "x": 945,
+      "y": 125.640625,
+      "width": 60,
+      "height": 26.5
+    },
+    "fit": {
+      "x": 1007,
+      "y": 125.640625,
+      "width": 60,
+      "height": 26.5
+    }
+  },
+  "colors": [
+    {
+      "label": "选点Alt+1",
+      "pressed": "false",
+      "background": "rgba(79, 70, 229, 0.08)",
+      "color": "rgb(79, 70, 229)"
+    },
+    {
+      "label": "移动Alt+2",
+      "pressed": "false",
+      "background": "rgba(79, 70, 229, 0.08)",
+      "color": "rgb(79, 70, 229)"
+    },
+    {
+      "label": "批量拖动Alt+3",
+      "pressed": "true",
+      "background": "rgb(79, 70, 229)",
+      "color": "rgb(255, 255, 255)"
+    },
+    {
+      "label": "单点拖动Alt+4",
+      "pressed": "false",
+      "background": "rgba(79, 70, 229, 0.08)",
+      "color": "rgb(79, 70, 229)"
+    },
+    {
+      "label": "增加新点Alt+5",
+      "pressed": "false",
+      "background": "rgba(79, 70, 229, 0.08)",
+      "color": "rgb(79, 70, 229)"
+    },
+    {
+      "label": "批量框选Alt+6",
+      "pressed": "false",
+      "background": "rgba(79, 70, 229, 0.08)",
+      "color": "rgb(79, 70, 229)"
+    }
+  ],
+  "mobileLayout": {
+    "tools": [
+      {
+        "x": 13,
+        "y": 185,
+        "width": 72,
+        "height": 42
+      },
+      {
+        "x": 13,
+        "y": 231,
+        "width": 72,
+        "height": 42
+      },
+      {
+        "x": 13,
+        "y": 277,
+        "width": 72,
+        "height": 42
+      },
+      {
+        "x": 13,
+        "y": 323,
+        "width": 72,
+        "height": 42
+      },
+      {
+        "x": 13,
+        "y": 369,
+        "width": 72,
+        "height": 42
+      },
+      {
+        "x": 13,
+        "y": 415,
+        "width": 72,
+        "height": 42
+      }
+    ],
+    "opacity": {
+      "x": 30.921875,
+      "y": 469,
+      "width": 36.15625,
+      "height": 225.265625
+    },
+    "plot": {
+      "x": 95,
+      "y": 315.84375,
+      "width": 284,
+      "height": 346.609375
+    },
+    "display": {
+      "x": 245,
+      "y": 256.5,
+      "width": 60,
+      "height": 26.5
+    },
+    "fit": {
+      "x": 307,
+      "y": 256.5,
+      "width": 60,
+      "height": 26.5
+    }
+  },
+  "status": "passed"
+}

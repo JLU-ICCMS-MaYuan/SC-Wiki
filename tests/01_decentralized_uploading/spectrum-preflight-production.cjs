@@ -47,7 +47,7 @@ async function main(){
   assert.equal(await page.getByLabel('高频末端依据').count(),0);
   assert.equal(await btn('确认选中点为真实高频末端').count(),0);
   await page.locator('[data-row="a:p120"]').click();
-  await page.getByLabel('选中点频率').fill('5.975');await btn('应用坐标到此点').click();
+  await page.getByLabel('选中点频率').fill('5.975');await btn('确认坐标').click();
   await save();await recalc();
   current=(await listing()).items.find(i=>i.id===alpha.id);
   assert.equal(current.result.quality.integrals.raw.parameters.lambda.status,'available');

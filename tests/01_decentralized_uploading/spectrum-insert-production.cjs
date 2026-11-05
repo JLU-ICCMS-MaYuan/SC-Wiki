@@ -23,7 +23,7 @@ async function main(){
  const pixel=async(x,y,double=false)=>{if(editingVertical){const oldX=x;x=y;y=159-oldX}const p=await canvas.evaluate((el,c)=>{const p=new DOMPoint(c.x,c.y).matrixTransform(el.getScreenCTM());return {x:p.x,y:p.y}},{x,y});if(double)await page.mouse.dblclick(p.x,p.y);else await page.mouse.click(p.x,p.y)};
  const settled=()=>canvas.evaluate(async el=>{let last='',same=0;for(let i=0;i<40;i++){await new Promise(r=>requestAnimationFrame(r));const m=el.getScreenCTM(),b=el.getBoundingClientRect(),key=JSON.stringify([m.a,m.e,m.f,b.width,b.height,el.getAttribute('viewBox')]);same=key===last?same+1:0;last=key;if(same>=3)return}throw Error('画布未稳定')});
  const zoomAt=async(x,y)=>{await settled();const p=await canvas.evaluate((el,c)=>{const p=new DOMPoint(c.x,c.y).matrixTransform(el.getScreenCTM());return {x:p.x,y:p.y}},{x,y});await page.mouse.move(p.x,p.y);for(let i=0;i<4;i++){await page.mouse.wheel(0,-2000);await settled()}};
- const begin=async(cid,a,b)=>{editingVertical=cid==='a'&&process.env.SCWIKI_INSERT_VERTICAL_FIXTURES==='1';await btn('编辑').click();await canvas.waitFor();if(cid!=='a')await btn(cid).click();const before=await points();await page.locator('[data-row="'+a+'"]').click();await btn('＋ 增加点').click();await zoomAt((before[a].x+before[b].x)/2,(before[a].y+before[b].y)/2);return before};
+ const begin=async(cid,a,b)=>{editingVertical=cid==='a'&&process.env.SCWIKI_INSERT_VERTICAL_FIXTURES==='1';await btn('编辑').click();await canvas.waitFor();if(cid!=='a')await btn(cid).click();const before=await points();await page.locator('[data-row="'+a+'"]').click();await btn('增加新点').click();await zoomAt((before[a].x+before[b].x)/2,(before[a].y+before[b].y)/2);return before};
  const save=async()=>{await btn('保存调整').click();await page.waitForFunction(()=>!document.querySelector('.editor-app'));await ready()};
  const recalc=async()=>{const old=page.url();await btn('重新计算').click();await page.waitForURL(u=>u.href!==old);await ready()};
  const seed=async(item,kind,cid,edit)=>{
@@ -71,7 +71,7 @@ async function main(){
   assert.equal(alpha.result.quality.integrals.raw.parameters.lambda.status,'available');
   check('原本不连接的A/B仍可加点补接，旧断边标记不被误替换，保持原吸附/双击结束并成功积分');
 
-  await btn('编辑').click();await canvas.waitFor();before=await points();await page.locator('[data-row="a:p100"]').click();await btn('＋ 增加点').click();await settled();
+  await btn('编辑').click();await canvas.waitFor();before=await points();await page.locator('[data-row="a:p100"]').click();await btn('增加新点').click();await settled();
   await pixel(122,50);await pixel(124,48,true);assert.equal(Object.keys(await points()).length,Object.keys(before).length+2);
   assert.equal(await editor.locator('.tool-add').count(),0);await btn('← 返回详情').click();await btn('放弃修改').click();await ready();
   check('自由连续描线和空白处双击结束继续可用，没有被限制为只能插点');

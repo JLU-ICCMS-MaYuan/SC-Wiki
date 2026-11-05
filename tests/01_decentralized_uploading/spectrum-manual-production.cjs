@@ -38,14 +38,14 @@ async function main(){
   const currentPoints=()=>editor.locator('[data-point]').evaluateAll(nodes=>Object.fromEntries(nodes.map(n=>[n.dataset.point,{x:Number(n.dataset.x),y:Number(n.dataset.y)}])));
   const clickPixel=async(x,y,double=false)=>{const p=await canvas.evaluate((el,v)=>{const p=new DOMPoint(v.x,v.y).matrixTransform(el.getScreenCTM());return {x:p.x,y:p.y}},{x,y});if(double)await page.mouse.dblclick(p.x,p.y);else await page.mouse.click(p.x,p.y)};
   const beforeChain=await currentPoints(),beforePath=await editor.locator('[data-curve="a"]').getAttribute('d');
-  await btn('＋ 增加点').click();assert.equal(await btn('＋ 增加点').getAttribute('aria-pressed'),'true');assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length);check('没有起点时也可激活增加点，等待选择已有点且数据不变');
+  await btn('增加新点').click();assert.equal(await btn('增加新点').getAttribute('aria-pressed'),'true');assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length);check('没有起点时也可激活增加点，等待选择已有点且数据不变');
   await clickPixel(beforeChain['a:p50'].x,beforeChain['a:p50'].y);assert.deepEqual(await currentPoints(),beforeChain);await clickPixel(65,40);let added=Object.keys(await currentPoints()).filter(id=>!beforeChain[id]);assert.equal(added.length,1);const firstId=added[0];
   await clickPixel(72,38);await clickPixel(75,35,true);added=Object.keys(await currentPoints()).filter(id=>!beforeChain[id]);assert.equal(added.length,3);assert.equal(await editor.locator('.tool-add').count(),0);
   const trace=await editor.locator('[data-curve="a"]').getAttribute('d');assert(trace.startsWith(beforePath));const drawn=await currentPoints();for(let i=1;i<added.length;i++){const parent=drawn[added[i-1]],child=drawn[added[i]];assert(trace.includes('M'+parent.x+','+parent.y+' L'+child.x+','+child.y))}
   await clickPixel(82,33);assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length+3);assert.equal(report.writes.length,0);check('连续加点只连前驱，双击仅加入一个末点并退出，不自动提交或继续加点');
   await btn('↶ 撤销').click();assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length+2);await btn('↷ 重做').click();assert.equal(Object.keys(await currentPoints()).length,Object.keys(beforeChain).length+3);await shot('chain-ended');check('连续描线可逐点撤销重做，原路径保留');
   const chainPoints=await currentPoints(),lastId=added.at(-1),targetId='a:p100',snapCoordinates=chainPoints[targetId];
-  await page.locator(`[data-row="${lastId}"]`).click();await btn('＋ 增加点').click();
+  await page.locator(`[data-row="${lastId}"]`).click();await btn('增加新点').click();
   await stableCanvas();const targetScreen=await canvas.evaluate((el,p)=>{const c=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:c.x,y:c.y,scale:el.getScreenCTM().a}},snapCoordinates);
   const previewPosition=await canvas.evaluate((el,p)=>{const c=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:c.x,y:c.y}},chainPoints[added[0]]);
   await page.mouse.move(previewPosition.x+9,previewPosition.y);assert.equal(await editor.getByTestId('snap-target').count(),0);
@@ -55,11 +55,11 @@ async function main(){
   assert.deepEqual(await currentPoints(),chainPoints);assert.equal(report.writes.length,0);
   const snappedPath=await editor.locator('[data-curve="a"]').getAttribute('d');assert(snappedPath.includes('M'+chainPoints[lastId].x+','+chainPoints[lastId].y+' L'+snapCoordinates.x+','+snapCoordinates.y));check('双击吸附复用已有目标，坐标和点数不变，只新增连接且不自动提交');
   await btn('↶ 撤销').click();assert(!(await editor.locator('[data-curve="a"]').getAttribute('d')).includes('M'+chainPoints[lastId].x+','+chainPoints[lastId].y+' L'+snapCoordinates.x+','+snapCoordinates.y));await btn('↷ 重做').click();assert.equal(await editor.locator('[data-curve="a"]').getAttribute('d'),snappedPath);check('吸附连接可独立撤销/重做');
-  await page.locator(`[data-row="${lastId}"]`).click();await btn('＋ 增加点').click();await page.mouse.move(previewPosition.x,previewPosition.y);await page.mouse.wheel(0,-1200);await page.waitForTimeout(100);
-  const zoomed=await canvas.evaluate((el,p)=>{const c=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:c.x,y:c.y}},chainPoints[added[0]]);await page.mouse.move(zoomed.x+7,zoomed.y);await editor.getByTestId('snap-target').waitFor();assert.equal(await editor.getByTestId('snap-target').getAttribute('data-point-id'),added[0]);await btn('单点选点／拖动').click();await editor.getByRole('button',{name:'适应窗口',exact:true}).click();check('缩放后仍按屏幕8px吸附，切工具不生成点或连接');
+  await page.locator(`[data-row="${lastId}"]`).click();await btn('增加新点').click();await page.mouse.move(previewPosition.x,previewPosition.y);await page.mouse.wheel(0,-1200);await page.waitForTimeout(100);
+  const zoomed=await canvas.evaluate((el,p)=>{const c=new DOMPoint(p.x,p.y).matrixTransform(el.getScreenCTM());return {x:c.x,y:c.y}},chainPoints[added[0]]);await page.mouse.move(zoomed.x+7,zoomed.y);await editor.getByTestId('snap-target').waitFor();assert.equal(await editor.getByTestId('snap-target').getAttribute('data-point-id'),added[0]);await btn('单点拖动').click();await editor.getByRole('button',{name:'适应窗口',exact:true}).click();check('缩放后仍按屏幕8px吸附，切工具不生成点或连接');
 
 
-  await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.08');await btn('应用坐标到此点').click();
+  await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.08');await btn('确认坐标').click();
   await btn('保存调整').click();
   await page.waitForFunction(()=>!document.querySelector('.editor-app'));assert.equal(await page.getByTestId('saved-zero-check').count(),0);
   const after=await listing(),saved=after.items.find(i=>i.id===alpha.id);assert.notEqual(saved.run.id,alpha.run.id);assert.equal(saved.version,alpha.version+1);assert.equal(saved.result.curves[0].points[50].reconstructed_amplitude,.08);assert.deepEqual(saved.review,{});assert(page.url().includes(saved.run.id));assert.equal(await page.getByRole('slider',{name:'原图不透明度'}).inputValue(),'100');
@@ -67,14 +67,14 @@ async function main(){
   await page.reload();await btn('编辑').waitFor();assert.equal(await page.getByTestId('saved-zero-check').count(),0);
   const history=(await api('/api/rag/spectra/'+alpha.id+'/runs/'+alpha.run.id+'?'+query)).data;assert.deepEqual(history.result.curves,JSON.parse(old).curves);assert.deepEqual(history.result.calibration,JSON.parse(old).calibration);check('刷新从持久数据库恢复人工结果，原始运行数值未被覆盖');
   await btn('查看提取历史').click();await page.getByRole('button',{name:/合成|时间未记录/}).count(); // 历史载入仍走正式接口。
-  await btn('编辑').click();await page.getByRole('application').waitFor();await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.09');await btn('应用坐标到此点').click();
+  await btn('编辑').click();await page.getByRole('application').waitFor();await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.09');await btn('确认坐标').click();
   const current=await listing(),item=current.items.find(i=>i.id===alpha.id);
   const input=(await api('/api/rag/spectra/'+item.id+'/manual?'+query+'&kind=alpha2f&collection_version='+item.version+'&run_id='+item.run.id)).data;
   const competing=await api('/api/rag/spectra/'+item.id+'/manual',{...target,expected_version:input.version,expected_collection_version:input.collection_version,base_run_id:input.base_run_id,document:input.documents[0]});assert.equal(competing.status,200,JSON.stringify(competing.data));
   await btn('保存调整').click();await page.getByRole('alert').filter({hasText:'保存失败'}).waitFor();assert(await page.getByRole('application').isVisible());assert.equal(await page.getByLabel('选中点幅值').inputValue(),'0.09');check('并发新版本产生409冲突，编辑器保留用户坐标而不覆盖数据库');await shot('conflict');
   await btn('← 返回详情').click();await btn('放弃修改').click();
   const dos=(await listing()).items.find(i=>i.result.curves[0].kind==='phonon_dos');await page.goto(address(dos));await btn('编辑').click();await page.getByRole('application').waitFor();
-  await page.getByRole('button',{name:'H',exact:true}).click();assert.equal(await page.locator('.editor-app [data-curve]').count(),3);await page.locator('[data-row="H:p50"]').click();await page.getByLabel('选中点幅值').fill('18');await btn('应用坐标到此点').click();await btn('保存调整').click();await page.waitForFunction(()=>!document.querySelector('.editor-app'));
+  await page.getByRole('button',{name:'H',exact:true}).click();assert.equal(await page.locator('.editor-app [data-curve]').count(),3);await page.locator('[data-row="H:p50"]').click();await page.getByLabel('选中点幅值').fill('18');await btn('确认坐标').click();await btn('保存调整').click();await page.waitForFunction(()=>!document.querySelector('.editor-app'));
   const dosAfter=(await listing()).items.find(i=>i.id===dos.id);assert.equal(dosAfter.result.curves.find(c=>c.id==='H').points[50].reconstructed_amplitude,18);assert.deepEqual(dosAfter.result.curves.find(c=>c.id==='La'),dos.result.curves.find(c=>c.id==='La'));check('PhDOS分波使用自身标定保存，未编辑的La曲线逐点保持');
   await page.setViewportSize({width:390,height:844});await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);await shot('mobile-detail');await btn('编辑').click();await page.getByRole('application').waitFor();await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth);await shot('mobile-editor');check('正式页面及全屏编辑器在390px无水平溢出');
   assert.equal(await page.evaluate(()=>Object.keys(localStorage).filter(k=>k.startsWith('scwiki-spectrum-manual')).length),0);assert.deepEqual(report.errors,[]);assert(report.writes.every(w=>w.path.endsWith('/manual')));check('正式保存不访问Demo草稿、不重提取，所有写入仅到隔离manual路由');

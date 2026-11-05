@@ -30,6 +30,19 @@ async function main(){
  const drag=async p=>{await settled();const s=await screenPoint(p);await page.mouse.move(s.x,s.y);await page.mouse.down();await page.mouse.move(s.x+10,s.y-10,{steps:5});await page.mouse.up()};
  const idle=async()=>{assert.equal(await editor.locator('button.editor-tool[aria-pressed=true]').count(),0);assert(await canvas.evaluate(e=>e.classList.contains('tool-idle')))};
  const unchanged=(before,after)=>{for(const [id,p] of Object.entries(before))assert.deepEqual(after[id],p)};
+ const toolNames=['选点','移动','批量拖动','单点拖动','增加新点','批量框选'];
+ const layout=async()=>{
+  const boxes=await Promise.all(toolNames.map(name=>btn(name).boundingBox()));
+  assert(boxes.every(Boolean));
+  for(let i=1;i<boxes.length;i++){assert(Math.abs(boxes[i].x-boxes[0].x)<1);assert(boxes[i].y>=boxes[i-1].y+boxes[i-1].height)}
+  const opacity=await editor.getByTestId('image-opacity-control').boundingBox();
+  assert(opacity.y>=boxes.at(-1).y+boxes.at(-1).height);
+  const toggle=await btn('隐藏原图').boundingBox(),fit=await btn('适应窗口').boundingBox();
+  assert(toggle.x+toggle.width<=fit.x+1);assert(Math.abs(toggle.y-fit.y)<1);
+  const plot=await canvas.boundingBox();assert(plot.width>100&&plot.height>100);
+  assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  return {tools:boxes,opacity,plot,display:toggle,fit};
+ };
  const save=async()=>{await btn('保存调整').click();await page.waitForFunction(()=>!document.querySelector('.editor-app'));await ready()};
  const seed=async(item,kind,cid,edit)=>{
   const input=await api('/api/rag/spectra/'+item.id+'/manual?'+query+'&kind='+kind+'&collection_version='+item.version+'&run_id='+item.run.id);
@@ -45,25 +58,45 @@ async function main(){
   await page.goto(address(alpha));await ready();await btn('编辑').click();await canvas.waitFor();await settled();await idle();
   const before=await points(),origin=before['a:p50'];
   await drag(origin);assert.deepEqual(await points(),before);assert(await btn('↶ 撤销').isDisabled());
-  await btn('单点选点／拖动').click();await zoomAt(origin);await drag(origin);
+  for(let i=0;i<toolNames.length;i++){
+   await page.keyboard.press('Alt+'+(i+1));assert.equal(await btn(toolNames[i]).getAttribute('aria-pressed'),'true');
+   await page.keyboard.press('Alt+'+(i+1));assert.equal(await btn(toolNames[i]).getAttribute('aria-pressed'),'true');
+  }
+  await page.keyboard.press('Alt+1');await drag(origin);assert.deepEqual(await points(),before);assert(await btn('↶ 撤销').isDisabled());
+  assert.equal(await editor.getByText('原图像素 X',{exact:true}).count(),0);
+  assert.equal(await editor.getByText('主要影响区',{exact:true}).count(),0);
+  assert.equal(await editor.getByText('编辑曲线',{exact:true}).count(),0);
+  await page.getByLabel('显示其他分波',{exact:true}).uncheck();await page.getByLabel('显示其他分波',{exact:true}).check();
+  await btn('隐藏原图').click();assert.equal(await editor.getByTestId('source-image').count(),0);
+  assert(await editor.getByRole('slider',{name:'原图不透明度'}).isDisabled());await btn('显示原图').click();
+  const viewBeforePan=await canvas.getAttribute('viewBox');await page.keyboard.press('Alt+2');await drag(origin);
+  assert.notEqual(await canvas.getAttribute('viewBox'),viewBeforePan);assert.deepEqual(await points(),before);
+  await btn('适应窗口').click();await settled();await page.keyboard.press('Alt+1');
+  report.desktopLayout=await layout();await shot('six-tools-desktop');
+  await page.keyboard.press('Escape');await idle();
+  check('六工具竖排、滑条下置、Alt+1至6选择及重复保持；选点不拖动，显示按钮移位有效，侧栏精简');
+  await btn('只改幅值').click();await page.keyboard.press('Alt+4');await drag(origin);
+  const verticalLocked=(await points())['a:p50'];assert.equal(verticalLocked.y,origin.y);assert.notEqual(verticalLocked.x,origin.x);
+  await btn('↶ 撤销').click();await btn('自由移动（X / Y）').click();await page.keyboard.press('Escape');
+  await btn('单点拖动').click();await zoomAt(origin);await drag(origin);
   let after=await points();assert.notDeepEqual(after['a:p50'],origin);
   for(const id of Object.keys(before))if(id!=='a:p50')assert.deepEqual(after[id],before[id]);
   await btn('↶ 撤销').click();assert.deepEqual(await points(),before);
   await btn('↷ 重做').click();assert.deepEqual(await points(),after);await btn('↶ 撤销').click();
   check('默认无工具只选不拖；两个按钮直接进入单点/联动，单点其余坐标不变，撤销重做有效');
 
-  await btn('联动选点／拖动').click();await drag(origin);
+  await btn('批量拖动').click();await drag(origin);
   after=await points();assert(Object.keys(before).filter(id=>JSON.stringify(before[id])!==JSON.stringify(after[id])).length>1);
   await page.mouse.move(10,10);
-  await page.waitForFunction(()=>{const b=Array.from(document.querySelectorAll('.editor-tool')).find(b=>b.textContent==='联动选点／拖动');return getComputedStyle(b).backgroundColor==='rgb(79, 70, 229)'});
+  await page.waitForFunction(()=>{const b=document.querySelector('[aria-keyshortcuts="Alt+3"]');return getComputedStyle(b).backgroundColor==='rgb(79, 70, 229)'});
   const colors=await editor.locator('.tool-strip .editor-tool').evaluateAll(nodes=>nodes.map(n=>({label:n.textContent,pressed:n.getAttribute('aria-pressed'),background:getComputedStyle(n).backgroundColor,color:getComputedStyle(n).color})));
   assert.equal(colors.find(c=>c.pressed==='true').color,'rgb(255, 255, 255)');
   assert(colors.filter(c=>c.pressed==='false').every(c=>c.background==='rgba(79, 70, 229, 0.08)'));
   report.colors=colors;await shot('linked-dark-single-light');
-  await btn('↶ 撤销').click();await btn('联动选点／拖动').click();await idle();
+  await btn('↶ 撤销').click();await btn('批量拖动').click();await idle();
   check('联动沿原权重影响邻点；选中主题深紫/白字，未选中浅紫，反选退出');
 
-  await page.keyboard.press('Escape');await btn('＋ 增加点').click();await settled();
+  await page.keyboard.press('Escape');await btn('增加新点').click();await settled();
   const s=await screenPoint(origin);
   await page.mouse.move(s.x+9,s.y);assert.equal(await editor.getByTestId('snap-target').count(),0);
   await page.mouse.move(s.x+7,s.y);await editor.getByTestId('snap-target').waitFor();
@@ -72,13 +105,13 @@ async function main(){
   await page.mouse.click(s.x+7,s.y);assert.deepEqual(await points(),before);assert(await btn('↶ 撤销').isDisabled());
   const next=before['a:p51'],addedPosition={x:origin.x+4,y:(origin.y+next.y)/2};
   await pixel(addedPosition);after=await points();const added=Object.keys(after).filter(id=>!before[id]);assert.equal(added.length,1);
-  await btn('＋ 增加点').click();await idle();await pixel({x:addedPosition.x+2,y:addedPosition.y-.1});assert.deepEqual(await points(),after);
-  await btn('＋ 增加点').click(); // 新会话沿用当前选中点，不能延续旧插入会话。
-  await btn('＋ 增加点').click();await btn('↶ 撤销').click();assert.deepEqual(await points(),before);
+  await btn('增加新点').click();await idle();await pixel({x:addedPosition.x+2,y:addedPosition.y-.1});assert.deepEqual(await points(),after);
+  await btn('增加新点').click(); // 新会话沿用当前选中点，不能延续旧插入会话。
+  await btn('增加新点').click();await btn('↶ 撤销').click();assert.deepEqual(await points(),before);
   check('增加点可先激活，缩放后8px吸附，首次只确定起点；再次点按钮退出并保留已加点');
 
   // 用同一新入口完成原直连边插点，并验证正式保存回读。
-  await page.keyboard.press('Escape');await btn('＋ 增加点').click();await pixel(origin);await pixel(addedPosition);await pixel(next);
+  await page.keyboard.press('Escape');await btn('增加新点').click();await pixel(origin);await pixel(addedPosition);await pixel(next);
   await page.waitForFunction(()=>document.querySelector('.tool-idle'));
   after=await points();const inserted=Object.keys(after).filter(id=>!before[id]);assert.equal(inserted.length,1);unchanged(before,after);
   await save();alpha=(await listing()).items.find(i=>i.id===alpha.id);
@@ -86,12 +119,25 @@ async function main(){
   assert.equal(alpha.result.curves[0].points.length,historic[0].points.length+1);
   await page.reload();await ready();check('纵轴α²F：先选工具后的插点替换原直连，结束回到无工具，保存刷新保留连线');
 
+  await btn('编辑').click();await canvas.waitFor();await editor.locator('[data-row="a:p50"]').click();
+  const coordinateBefore=(await points())['a:p50'];
+  const amplitudeInput=page.getByLabel('选中点幅值',{exact:true});
+  await amplitudeInput.fill(String(Number(await amplitudeInput.inputValue())+.001));await btn('确认坐标').click();
+  const coordinateAfter=(await points())['a:p50'];assert.notDeepEqual(coordinateAfter,coordinateBefore);
+  await btn('↶ 撤销').click();assert.deepEqual((await points())['a:p50'],coordinateBefore);
+  await btn('↷ 重做').click();assert.deepEqual((await points())['a:p50'],coordinateAfter);
+  await save();alpha=(await listing()).items.find(i=>i.id===alpha.id);
+  const persisted=await api('/api/rag/spectra/'+alpha.id+'/manual?'+query+'&kind=alpha2f&collection_version='+alpha.version+'&run_id='+alpha.run.id);
+  const stored=persisted.documents.find(d=>d.curves[0].id==='a').curves[0].points.find(p=>p.id==='a:p50');
+  assert.deepEqual({x:stored.x,y:stored.y},coordinateAfter);
+  await page.reload();await ready();check('确认坐标修改真实选中点，可撤销重做，正式HTTP保存和重读坐标一致');
+
   alpha=await seed(alpha,'alpha2f','a',doc=>{const p=doc.curves[0].points.find(p=>p.id==='a:p71');p.breakBefore=true;delete p.connectTo});
   await page.goto(address(alpha));await ready();await btn('编辑').click();await canvas.waitFor();
   let bridgeBefore=await points(),a=bridgeBefore['a:p70'],b=bridgeBefore['a:p71'];await zoomAt(a);
-  await btn('＋ 增加点').click();await pixel(a);await pixel({x:a.x+3,y:(a.y+b.y)/2});await pixel(b);
+  await btn('增加新点').click();await pixel(a);await pixel({x:a.x+3,y:(a.y+b.y)/2});await pixel(b);
   const bridgeId=Object.keys(await points()).find(id=>!bridgeBefore[id]);assert(bridgeId);
-  await btn('＋ 增加点').click();await idle();await save();
+  await btn('增加新点').click();await idle();await save();
   alpha=(await listing()).items.find(i=>i.id===alpha.id);
   assert.equal(alpha.result.curves[0].points.find(p=>p.id===bridgeId).joinTo,'a:p71');
   check('原有未连接点加点补接保留，按钮退出后正常保存');
@@ -100,15 +146,23 @@ async function main(){
   const other=dos.result.curves.filter(c=>c.id!=='Sc');
   await page.goto(address(dos));await ready();await btn('编辑').click();await canvas.waitFor();await btn('Sc').click();await idle();
   const dosBefore=await points(),d=dosBefore['Sc:p50'];await zoomAt(d);
-  await btn('单点选点／拖动').click();await drag(d);
+  assert.equal(await editor.getByText('编辑曲线',{exact:true}).count(),0);
+  assert.equal(await editor.locator('[data-curve]').count(),3);
+  await editor.getByRole('checkbox',{name:'显示其他分波'}).uncheck();assert.equal(await editor.locator('[data-curve]').count(),1);
+  await editor.getByRole('checkbox',{name:'显示其他分波'}).check();assert.equal(await editor.locator('[data-curve]').count(),3);
+  await btn('只改幅值').click();await page.keyboard.press('Alt+4');await drag(d);
+  const locked=(await points())['Sc:p50'];assert.equal(locked.x,d.x);assert.notEqual(locked.y,d.y);
+  await btn('↶ 撤销').click();await btn('自由移动（X / Y）').click();await page.keyboard.press('Escape');
+  await btn('单点拖动').click();await drag(d);
   const dosAfter=await points();assert.notDeepEqual(dosBefore['Sc:p50'],dosAfter['Sc:p50']);
   await page.setViewportSize({width:390,height:844});await page.waitForTimeout(500);
   await page.waitForFunction(()=>document.documentElement.scrollWidth<=innerWidth+1);
-  await btn('单点选点／拖动').scrollIntoViewIfNeeded();await shot('mobile-two-buttons');
-  assert.equal(await btn('单点选点／拖动').getAttribute('aria-pressed'),'true');
+  await btn('单点拖动').scrollIntoViewIfNeeded();await shot('mobile-two-buttons');
+  await btn('适应窗口').click();await settled();report.mobileLayout=await layout();await shot('six-tools-mobile');
+  assert.equal(await btn('单点拖动').getAttribute('aria-pressed'),'true');
   await save();dos=(await listing()).items.find(i=>i.id===dos.id);
   assert.deepEqual(dos.result.curves.filter(c=>c.id!=='Sc'),other);
-  check('横轴DOS单点拖动保存不影响其他分波；390px双按钮可达且无整体溢出');
+  check('横轴DOS方向切换与参考分波开关有效，保存不影响其他分波；390px六工具竖排可达且无整体溢出');
   assert.deepEqual(report.errors,[]);assert(report.writes.every(w=>w.path.endsWith('/manual')));
   report.status='passed';
  }catch(e){report.status='failed';report.failure=e.stack;await shot('failure');throw e}

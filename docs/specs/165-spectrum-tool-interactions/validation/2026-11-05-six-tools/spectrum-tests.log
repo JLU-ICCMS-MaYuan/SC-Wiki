@@ -1,0 +1,37 @@
+
+> sc-wiki-frontend@1.0.0 test:upload-ui
+> vitest run --config ../vitest.config.ts tests/01_decentralized_uploading/spectrum-chain.test.tsx tests/01_decentralized_uploading/spectrum-diagnostics.test.tsx tests/01_decentralized_uploading/spectrum-dos-relative.test.tsx tests/01_decentralized_uploading/spectrum-endpoint.test.tsx tests/01_decentralized_uploading/spectrum-frequency-repair.test.tsx tests/01_decentralized_uploading/spectrum-geometry.test.tsx tests/01_decentralized_uploading/spectrum-insert.test.tsx tests/01_decentralized_uploading/spectrum-manual-editor.test.tsx tests/01_decentralized_uploading/spectrum-recalculate.test.tsx tests/01_decentralized_uploading/spectrum-relative.test.tsx tests/01_decentralized_uploading/spectrum-save-continue.test.tsx tests/01_decentralized_uploading/spectrum-tool-interactions.test.tsx tests/01_decentralized_uploading/spectrum-workspace.test.tsx tests/01_decentralized_uploading/property-spectra-navigation.test.tsx tests/01_decentralized_uploading/upload-spectrum-save-navigation.test.tsx
+
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+ RUN  v2.1.9 /private/tmp/scwiki-manual-test-ui-upfhigd1/source
+
+ ✓ tests/01_decentralized_uploading/spectrum-insert.test.tsx (8 tests) 5ms
+ ✓ tests/01_decentralized_uploading/spectrum-manual-editor.test.tsx (6 tests) 4ms
+ ✓ tests/01_decentralized_uploading/spectrum-chain.test.tsx (10 tests) 5ms
+ ✓ tests/01_decentralized_uploading/spectrum-geometry.test.tsx (4 tests) 2ms
+ ✓ tests/01_decentralized_uploading/spectrum-endpoint.test.tsx (1 test) 6ms
+ ✓ tests/01_decentralized_uploading/spectrum-frequency-repair.test.tsx (7 tests) 42ms
+ ✓ tests/01_decentralized_uploading/spectrum-relative.test.tsx (4 tests) 90ms
+ ✓ tests/01_decentralized_uploading/spectrum-diagnostics.test.tsx (4 tests) 141ms
+ ✓ tests/01_decentralized_uploading/spectrum-recalculate.test.tsx (5 tests) 89ms
+ ✓ tests/01_decentralized_uploading/spectrum-workspace.test.tsx (2 tests) 183ms
+ ✓ tests/01_decentralized_uploading/spectrum-dos-relative.test.tsx (14 tests) 189ms
+stderr | tests/01_decentralized_uploading/property-spectra-navigation.test.tsx > 新标签链接不保存主表单，保留未保存输入并携带谱身份
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/01_decentralized_uploading/spectrum-save-continue.test.tsx (6 tests) 748ms
+   ✓ 连续保存H/Sc后直接编辑目标元素，回切仍是新保存坐标 330ms
+ ✓ tests/01_decentralized_uploading/spectrum-tool-interactions.test.tsx (16 tests) 1124ms
+ ✓ tests/01_decentralized_uploading/property-spectra-navigation.test.tsx (35 tests) 968ms
+stderr | tests/01_decentralized_uploading/upload-spectrum-save-navigation.test.tsx > 新标签页查看谱不会触发保存，已有改动=false
+⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.
+⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.
+
+ ✓ tests/01_decentralized_uploading/upload-spectrum-save-navigation.test.tsx (2 tests) 425ms
+
+ Test Files  15 passed (15)
+      Tests  124 passed (124)
+   Start at  16:35:20
+   Duration  3.30s (transform 1.22s, setup 0ms, collect 9.32s, tests 4.02s, environment 5.30s, prepare 773ms)

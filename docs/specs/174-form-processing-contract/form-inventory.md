@@ -28,7 +28,7 @@
 | `/systems/:systemKey` 体系社区入口 | SystemCommunityPage 及社区共享组件 | 已定位，未做本轮性能验收 |
 | `/admin/community` 社区管理 | CommunityModerationPage | 已定位，未做本轮性能验收 |
 | `/admin`、`/superadmin` 管理筛选和治理 | AdminPage、SuperAdminPage、SuperAdminGovernance、NewsManager、DefaultLlmConfigPanel | 已定位，未做本轮性能验收 |
-| `/spectra/:collectionId` 谱线编辑与标定 | SpectrumDetailPage、SpectrumWorkspace、SpectrumManualEditor | 已定位，独立谱线交互未做本轮性能验收 |
+| `/spectra/:collectionId` 谱线编辑与标定 | SpectrumDetailPage、SpectrumWorkspace、SpectrumManualEditor | #165于2026-11-05完成六工具、快捷键、方向/曲线边界与坐标保存回读；124项谱线回归、188项form-contract、12项变异检出及隔离桌面/窄屏浏览器通过，见[验证记录](../165-spectrum-tool-interactions/validation.md)。未做固定性能基准验收 |
 | `/structures/:recordId` 结构查看与编辑入口 | StructuralRecordPage | 已定位，未做本轮性能验收 |
 | 跨页面共享配置及目录控件 | LlmProviderSwitcher、ClassificationAutocomplete、PaperReviewStatusSelect | 已定位，按实际使用页面关联验收，不单独宣称全站通过 |
 

@@ -20,7 +20,7 @@ async function main(){
  const recalc=async()=>{const old=page.url();await btn("重新计算").click();await page.waitForURL(u=>u.href!==old);await ready()};
  const noReview=async()=>{assert.equal(await page.getByText(/零频位置核对|继续核对|确认蓝色零频|确认选中点为零频|补选曲线零频|标记原图 0 频率/).count(),0);assert.equal(await page.locator(".zero-steps,[data-testid=zero-frequency-check]").count(),0)};
  const current=async id=>(await listing()).items.find(i=>i.id===id);
- const edit=async(index,value)=>{await page.locator("[data-row]").nth(index).click();await page.getByLabel("选中点幅值",{exact:true}).fill(String(value));await btn("应用坐标到此点").click()};
+ const edit=async(index,value)=>{await page.locator("[data-row]").nth(index).click();await page.getByLabel("选中点幅值",{exact:true}).fill(String(value));await btn("确认坐标").click()};
  try{
   let alpha=(await listing()).items.find(i=>i.state_key==="s1"),oldUrl=address(alpha);
   const source=structuredClone(alpha.result.curves);

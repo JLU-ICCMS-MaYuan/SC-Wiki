@@ -74,14 +74,14 @@ async function main(){
   await editor.locator('[data-row="a:p50"]').click();
   const value=Number(await page.getByLabel('选中点频率',{exact:true}).inputValue());
   await page.getByLabel('选中点频率',{exact:true}).fill(String(value+.001));
-  await btn('应用坐标到此点').click();await save();await recalc();
+  await btn('确认坐标').click();await save();await recalc();
   item=await current(alpha.id);
   assert.equal(item.result.quality.frequency_repairs.alpha2f[0].new_point_count,2);
   await btn('编辑').click();await editor.waitFor();
   await editor.locator('[data-row="a:p50"]').click();
   const f=Number(await page.getByLabel('选中点频率',{exact:true}).inputValue());
   await page.getByLabel('选中点频率',{exact:true}).fill(String(f+.002));
-  await btn('应用坐标到此点').click();
+  await btn('确认坐标').click();
   assert(await btn('撤销自动频率微调').isDisabled());
   await btn('← 返回详情').click();await btn('放弃修改').click();await ready();
   check('继续人工编辑后允许新一轮修正；随后改动频率时禁用直接撤销，避免覆盖新编辑');

@@ -4,25 +4,26 @@ import ImageOpacityControl from './ImageOpacityControl'
 import SourceCanvas, { type Tool } from './SourceCanvas'
 import './styles.css'
 import { latestFrequencyRepair, undoFrequencyRepair } from './frequencyRepairs'
-import { DRAG_INFLUENCE } from './dragInfluence'
-import { pointReadout, recognizedAxes } from './axisGeometry'
+import { recognizedAxes } from './axisGeometry'
 import { amplitude, axisValid, automaticConnections, undoAutomaticConnections, clone, commit, frequency, move, restoreManualMarkers, reconnectManualPoints, ordered, pixelAt, record, redo, removePoints, undo, validateDocument, type Document, type History, type Point } from './engine'
 
 const number = (n: number) => Number.isFinite(n) ? Number(n.toFixed(4)).toString() : '—'
+const primaryTools: { value: Tool; label: string }[] = [
+  { value: 'select', label: '选点' },
+  { value: 'pan', label: '移动' },
+  { value: 'dragLinked', label: '批量拖动' },
+  { value: 'dragSingle', label: '单点拖动' },
+  { value: 'add', label: '增加新点' },
+  { value: 'box', label: '批量框选' },
+]
 
 function PointForm({ doc, point, onApply }: { doc: Document; point: Point; onApply: (f: number, a: number) => void }) {
-  const reading = pointReadout(doc, point)
   const initialF = String(Number(frequency(doc, point).toFixed(6))), initialA = String(Number(amplitude(doc, point).toFixed(6)))
   const [f, setF] = useState(initialF), [a, setA] = useState(initialA)
   return <form onSubmit={e => { e.preventDefault(); onApply(f === initialF ? frequency(doc, point) : Number(f), a === initialA ? amplitude(doc, point) : Number(a)) }} className="coordinate-form">
     <label>频率 / {doc.calibration.frequency.unit}<input aria-label="选中点频率" type="number" step="any" required value={f} onChange={e => setF(e.target.value)} /></label>
     <label>幅值 / {doc.calibration.amplitude.unit === 'pixel' ? '相对像素' : doc.calibration.amplitude.unit}<input aria-label="选中点幅值" type="number" step="any" required value={a} onChange={e => setA(e.target.value)} /></label>
-    <div className="point-readout" data-testid="point-readout">
-      <div><span>原图像素 X</span><output data-testid="point-x">{number(reading.x)}</output></div>
-      <div><span>原图像素 Y</span><output data-testid="point-y">{number(reading.y)}</output></div>
-    </div>
-    <p className="muted">{point.status} · 频率与幅值按当前标定换算</p>
-    <button className="secondary" type="submit">应用坐标到此点</button>
+    <button className="secondary" type="submit">确认坐标</button>
   </form>
 }
 function PointTable({ doc, active, selected, onSelect, compact = false }: { doc: Document; active: string; selected: string[]; onSelect: (ids: string[]) => void; compact?: boolean }) {
@@ -53,9 +54,9 @@ export default function SpectrumManualEditor({documents:initialDocuments,onSave,
   const [exitIntent, setExitIntent] = useState<LeaveIntent|null>(null)
   const [calibration, setCalibration] = useState(clone(doc.calibration)), [pick, setPick] = useState<{ axis: 'frequency' | 'amplitude'; index: 0 | 1 } | null>(null)
   const exitTool = () => { setTool('idle'); setPick(null) }
-  const chooseTool = (next: Tool, target: typeof pick = null) => {
+  const chooseTool = (next: Tool, target: typeof pick = null, toggle = true) => {
     const same = tool === next && (next !== 'calibrate' || pick?.axis === target?.axis && pick?.index === target?.index)
-    setTool(same ? 'idle' : next); setPick(!same && next === 'calibrate' ? target : null)
+    setTool(same && toggle ? 'idle' : next); setPick(!(same && toggle) && next === 'calibrate' ? target : null)
     setError(''); setNotice('')
   }
   const curve = doc.curves.find(c => c.id === active)!, point = curve.points.find(p => p.id === selected[0])
@@ -91,13 +92,18 @@ export default function SpectrumManualEditor({documents:initialDocuments,onSave,
         return
       }
       if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); exitTool(); setSelected([]); return }
-      if ((e.target as HTMLElement).closest('input,select,textarea')) return
+      if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey && !e.isComposing) {
+        // macOS Option+数字的 key 可能是特殊字符，按物理数字键识别。
+        const shortcut = /^Digit([1-6])$/.exec(e.code)
+        if (shortcut) { e.preventDefault(); chooseTool(primaryTools[Number(shortcut[1]) - 1].value, null, false); return }
+      }
+      if ((e.target as HTMLElement).closest('input,select,textarea,[contenteditable="true"]')) return
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); setHistory(h => e.shiftKey ? redo(h) : undo(h)) }
       if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); remove() }
     }
     // 全屏 Dialog 会在冒泡阶段截获 Esc；先处理编辑器的工具退出。
     window.addEventListener('keydown', key, true); return () => window.removeEventListener('keydown', key, true)
-  }, [doc, selected, active, saving, exitIntent])
+  }, [doc, selected, active, saving, exitIntent, tool, pick])
   const selectCurve = (id: string) => { setActive(id); setSelected([]);exitTool() }
   const save = async (nextId?: string): Promise<boolean> => {
     if(saveLock.current)return false
@@ -157,10 +163,9 @@ export default function SpectrumManualEditor({documents:initialDocuments,onSave,
     {error && !exitIntent && <div role="alert" className="callout error">{error}</div>}{notice && <div role="status" className="callout success">{notice}</div>}
     <fieldset className="production-editor-fields" disabled={saving}>
 <div className="editor-layout"><section className="workbench">
-        <div className="tool-strip">{([['dragLinked','联动选点／拖动'],['dragSingle','单点选点／拖动'],['pan','✥ 平移'],['add','＋ 增加点'],['box','▣ 框选']] as [Tool,string][]).map(([value,label]) => <button key={value} className="editor-tool" aria-pressed={tool === value} onClick={() => chooseTool(value)}>{label}</button>)}<div className="tool-strip-end"><label><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></div></div>
-        {!['dragLinked','dragSingle','pan'].includes(tool) && <div className="tool-hint">{tool === 'idle' ? '请选择工具；当前可选点查看坐标，不会拖动或增加点。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? (selected.length===1 && point ? '从选中点继续单击加点；点原直连另一端可插入，未连接点可补接。双击或再次点击“增加点”退出。' : '靠近当前曲线已有点可吸附，点击它作为起点；再次点击“增加点”退出。') : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : ''}</div>}
-        <div className="editor-canvas-row"><ImageOpacityControl value={imageOpacity} onChange={setImageOpacity} disabled={display === 'data'}/>
-        <SourceCanvas focusPointId={sampleId===samples[0].id?focusPointId:undefined} doc={doc} active={active} selected={selected} referenceCurves={samples.filter(s=>s.id!==sampleId).flatMap(s=>s.curves)} imageOpacity={imageOpacity} editing tool={tool} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onFinishAdd={message => {exitTool();setError('');setNotice(message||'连续加点已结束，已加点保留在当前编辑中。请点击保存调整提交。')}} onAdded={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
+        <div className="tool-hint">{tool === 'idle' ? '请选择工具；当前可选点查看坐标，不会拖动或增加点。' : tool === 'select' ? '点击选择点并查看坐标，拖动不会移动点。' : tool === 'calibrate' ? `在原图上点选${pick?.axis === 'frequency' ? '频率' : '幅值'}轴的第 ${(pick?.index || 0) + 1} 个刻度位置，然后输入对应值。` : tool === 'add' ? (selected.length===1 && point ? '从选中点继续单击加点；点原直连另一端可插入，未连接点可补接。双击或再次点击“增加新点”退出。' : '靠近当前曲线已有点可吸附，点击它作为起点；再次点击“增加新点”退出。') : tool === 'box' ? '拖出选区后点击“删除选中点”，误识别区域将保留为空缺。' : '\u00a0'}</div>
+        <div className="editor-canvas-row"><div className="editor-tool-rail"><div className="tool-strip" role="group" aria-label="人工调整工具">{primaryTools.map(({value,label}, index) => <button key={value} className="editor-tool" aria-pressed={tool === value} aria-keyshortcuts={`Alt+${index + 1}`} title={`${label}（Alt+${index + 1}）`} onClick={() => chooseTool(value)}>{label}<small aria-hidden="true">Alt+{index + 1}</small></button>)}</div><ImageOpacityControl value={imageOpacity} onChange={setImageOpacity} disabled={display === 'data'}/></div>
+        <SourceCanvas toolbarControls={<><label className="reference-curves-toggle"><input type="checkbox" checked={all} onChange={e => setAll(e.target.checked)}/>显示其他分波</label><button onClick={() => setDisplay(display === 'overlay' ? 'data' : 'overlay')}>{display === 'overlay' ? '隐藏原图' : '显示原图'}</button></>} focusPointId={sampleId===samples[0].id?focusPointId:undefined} doc={doc} active={active} selected={selected} referenceCurves={samples.filter(s=>s.id!==sampleId).flatMap(s=>s.curves)} imageOpacity={imageOpacity} editing tool={tool} dragMode={dragMode} display={display} all={all} onSelect={setSelected} onFinishAdd={message => {exitTool();setError('');setNotice(message||'连续加点已结束，已加点保留在当前编辑中。请点击保存调整提交。')}} onAdded={focusCoordinates} onChange={change} onError={setError} onPick={(x,y) => {
           if (!pick) return
           const direction = pick.axis === 'frequency' ? calibration.direction : calibration.direction === 'x' ? 'y' : 'x'
           axisEdit(pick.axis, 'pixels', pick.index, direction === 'x' ? x : y); exitTool()
@@ -174,11 +179,9 @@ export default function SpectrumManualEditor({documents:initialDocuments,onSave,
           {!frequencyRepair.canUndo&&<p className="muted">这些点的频率、标定或点身份已改变，不能直接撤销覆盖后续修改。</p>}
         </section>}
         {automaticConnections(doc).length>0&&<section className="panel-section"><h3>自动连接记录</h3><button className="secondary" onClick={()=>change(undoAutomaticConnections(doc))}>撤销已记录的自动连接</button></section>}
-        <section className="panel-section"><div className="section-heading"><h3>编辑曲线</h3><span className="tag">单条编辑</span></div>{curvePicker}<p className="muted">{kind === 'phonon_dos' ? '其他分波只作参照，不随当前曲线移动。' : '累计 λ 只在原图中参照，不作为 α²F 幅值刻度。'}</p></section>
-        <section className="panel-section"><div className="section-heading"><h3>拖动方向与联动范围</h3></div>
-          <div className="segmented"><button className={dragMode === 'amplitude' ? 'active' : ''} onClick={() => setDragMode('amplitude')}>只改幅值</button><button className={dragMode === 'free' ? 'active' : ''} onClick={() => setDragMode('free')}>自由移动（X / Y）</button></div>
-          <p className="range-label">主要影响区 <strong>两侧各 {DRAG_INFLUENCE.coreNeighbors} 个点</strong></p>
-          <p className="muted">按描线顺序计数。前 {DRAG_INFLUENCE.coreNeighbors} 个邻点明显跟随，之后指数衰减；很远的点不动。未连接的断口和其他分波不受影响。{dragMode === 'amplitude' && `当前频率沿${doc.calibration.direction === 'y' ? '竖轴，左右' : '横轴，上下'}拖动改变幅值。`}</p>
+        {doc.curves.length > 1 && <section className="panel-section"><div className="section-heading"><h3>编辑曲线</h3><span className="tag">单条编辑</span></div>{curvePicker}<p className="muted">{kind === 'phonon_dos' ? '其他分波只作参照，不随当前曲线移动。' : '累计 λ 只在原图中参照，不作为 α²F 幅值刻度。'}</p></section>}
+        <section className="panel-section"><div className="section-heading"><h3>拖动方向</h3></div>
+          <div className="segmented"><button aria-pressed={dragMode === 'amplitude'} className={dragMode === 'amplitude' ? 'active' : ''} onClick={() => setDragMode('amplitude')}>只改幅值</button><button aria-pressed={dragMode === 'free'} className={dragMode === 'free' ? 'active' : ''} onClick={() => setDragMode('free')}>自由移动（X / Y）</button></div>
         </section>
         <section className="panel-section"><details><summary>坐标标定 <span>线性 · 两点</span></summary><div className="calibration-form">
           <p className="muted">{reference ? '灰色刻度来自该运行的原识别记录；蓝色为当前标定，二者独立显示。' : '没有可匹配的识别记录，当前只显示两点标定。'}{kind === 'alpha2f' ? ' 未经证实的刻度不能用作α²F幅值。' : ' 原图没有DOS数字幅值刻度，当前使用相对像素。'}</p>

@@ -29,7 +29,7 @@ async function main(){
  const address=i=>frontend+'/spectra/'+i.id+'?'+query+'&'+new URLSearchParams({state_key:i.state_key,collection_version:i.version,run:i.run.id,curve:i.result.curves[0].id,return:'/upload'});
  const ready=()=>page.waitForFunction(()=>{const b=Array.from(document.querySelectorAll('button')).find(b=>b.textContent==='编辑');return b&&!b.disabled});
  const active=async name=>{assert(await btn(name).evaluate(e=>e.classList.contains('active')))};
- const edit=async(name,value)=>{await editor.locator('[data-row="'+name+':p50"]').click();await page.getByLabel('选中点幅值',{exact:true}).fill(String(value));await btn('应用坐标到此点').click()};
+ const edit=async(name,value)=>{await editor.locator('[data-row="'+name+':p50"]').click();await page.getByLabel('选中点幅值',{exact:true}).fill(String(value));await btn('确认坐标').click()};
  const selectValue=async(name,value)=>{await btn(name).click();await active(name);await editor.locator('[data-row="'+name+':p50"]').click();assert.equal(Number(await page.getByLabel('选中点幅值',{exact:true}).inputValue()),value)};
  const continuation=async name=>{await btn(name).click();await modal.waitFor();await btn('保存并继续编辑').click();await modal.waitFor({state:'hidden'});await active(name);assert(await editor.isVisible())};
  try{

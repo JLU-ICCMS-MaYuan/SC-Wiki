@@ -56,7 +56,7 @@ async function main(){
 
   // 人工保存使用真编辑器，检查生成的新地址刷新稳定。
   await btn(page,'编辑').click();await page.getByRole('application').waitFor();
-  await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.08');await btn(page,'应用坐标到此点').click();
+  await page.locator('[data-row="a:p50"]').click();await page.getByLabel('选中点幅值').fill('0.08');await btn(page,'确认坐标').click();
   await btn(page,'保存调整').click();await page.waitForFunction(()=>!document.querySelector('.editor-app'));await ready(page);
   const savedUrl=page.url();await page.reload();await ready(page);assert.equal(page.url(),savedUrl);
   const saved=(await listing()).items.find(i=>i.id===alpha.id);assert.equal(saved.result.curves[0].points[50].reconstructed_amplitude,.08);
@@ -66,7 +66,7 @@ async function main(){
 
   // 编辑器打开后竞争写入，必须保持未保存输入。
   await btn(other,'编辑').click();await other.getByRole('application').waitFor();
-  await other.locator('[data-row="a:p50"]').click();await other.getByLabel('选中点幅值').fill('0.09');await btn(other,'应用坐标到此点').click();
+  await other.locator('[data-row="a:p50"]').click();await other.getByLabel('选中点幅值').fill('0.09');await btn(other,'确认坐标').click();
   await recalc(page);
   await btn(other,'保存调整').click();await other.getByRole('alert').filter({hasText:'保存失败'}).waitFor();
   assert.equal(await other.getByLabel('选中点幅值').inputValue(),'0.09');assert(await other.getByRole('application').isVisible());
