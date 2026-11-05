@@ -1,0 +1,18 @@
+[
+  {
+    "path": "/health",
+    "status": 200
+  },
+  {
+    "path": "/",
+    "status": 200
+  },
+  {
+    "path": "/embedding/pooling",
+    "status": 404
+  },
+  {
+    "path": "/embedding/tokenize",
+    "status": 404
+  }
+]

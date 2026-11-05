@@ -1,0 +1,30 @@
+{
+  "long_input": {
+    "initial_limit": 8192,
+    "observed_request_tokens": 13010,
+    "status": 400,
+    "completed_before_failure": 70,
+    "source_unchanged": true,
+    "source_id": 3903,
+    "fixed_limit": 16384,
+    "final_rebuilt_points": 1072
+  },
+  "caddy_bind": {
+    "initial_external_status": 200,
+    "initial_content_type": "text/html",
+    "actual_bind_was_older_release": true,
+    "fixed_bind_and_current_file": true,
+    "final_https_checks": 18
+  },
+  "network_diagnostics": {
+    "observed": "TCP connection timeouts on individual new public connections",
+    "final_application_http_status": 200,
+    "final_persistent_http_checks": [
+      200,
+      200,
+      404,
+      404
+    ],
+    "timeouts_not_increased": true
+  }
+}

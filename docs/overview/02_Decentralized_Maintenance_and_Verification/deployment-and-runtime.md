@@ -55,9 +55,11 @@ Docker/containerd 引擎存储未移动。迁移完成后，按用户要求删�
 ### 独立 GPU 嵌入服务（#222）
 
 - `gpu-single4090` 上的 `Qwen/Qwen3-Embedding-4B` 使用独立 Python 环境与 vLLM 0.11.2，模型文件按固定 HF revision 和 Git/LFS 哈希核验，部署材料位于 `scripts/embedding/`。
-- 服务由 systemd 用户单元 `qwen3-embedding` 管理，监听目标机器 `127.0.0.1:8000`，使用私有 Bearer 密钥；BF16、最大 8192 Token、4 个并发序列和 0.65 显存利用率为受测配置。
+- 服务由 systemd 用户单元 `qwen3-embedding` 管理，监听目标机器 `127.0.0.1:8000`，使用私有 Bearer 密钥；当前受测配置为 BF16、最大 16384 Token、2 个并发序列及 0.65 显存利用率。全量已有片段最大 13010 Token，不截断原文。
 - 真实单条/批量中英文编码、32/1536/2560 维、鉴权、非法输入拒绝、服务重启、异常自动恢复及退出 SSH 后常驻已验证。主机开机自启配置已设置，但未执行主机重启验收。
-- 该服务当前只在目标机器内可用，本地与阿里云 SC-Wiki 尚未接入，旧向量索引未迁移。平台 SSH TCP 转发受限，外部 HTTPS 入口仍未交付，不能把机器内测试当作跨机调用通过。
+- 本地原生 SC-Wiki 已通过 `https://www.sc-wiki.com/embedding/v1` 接入。GPU 的 `embedding-relay` 用户单元主动连接阿里云受限账号，仅监听阿里云 Docker 私有网桥 `172.19.0.1:18080`，Caddy 复用 HTTPS 443；阿里云站点自身的模型与索引没有切换。
+- Caddy 入口片段位于持久配置卷的 `/config/embedding/`，项目 `docker/Caddyfile` 可选导入；没有片段时仍保持原网站行为。实际容器单文件绑定仍为 ea300d3 发布目录，current 指向 e2560d1f-actions，本次已同步两处配置，后续发布需保留导入行与配置卷。
+- 本地原 `paper_chunks` 的 1072 条索引保留，新模型在独立集合重建后切换配置，ID 与 payload 逐条一致；实际前端入口语义检索、嵌入写入重读、退出交互 SSH 及隧道故障自动恢复均通过。含正文、旧向量及旧配置的备份仅在本机私有目录。
 - 运维方式与运行版本见 [#222 使用说明](../../specs/222-qwen3-embedding-service/quickstart.md)，实测边界与原始记录见 [部署验证](../../specs/222-qwen3-embedding-service/validation.md)。
 
 ### 本地开发：宿主机进程（[Issue #71](https://github.com/JLU-ICCMS-MaYuan/SC-Wiki/issues/71)）

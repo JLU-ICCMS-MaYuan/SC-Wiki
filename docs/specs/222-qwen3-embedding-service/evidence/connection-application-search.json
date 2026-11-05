@@ -1,0 +1,13 @@
+{
+  "http_status": 200,
+  "ok": true,
+  "mode": "semantic",
+  "approved_papers": 4,
+  "chunk_count": 10,
+  "paper_count": 0,
+  "related_paper_ids": [
+    1429
+  ],
+  "seconds": 0.741,
+  "entrypoint": "Vite->Go->Python->HTTPS embedding->4090->Qdrant"
+}

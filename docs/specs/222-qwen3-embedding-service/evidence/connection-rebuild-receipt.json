@@ -1,0 +1,11 @@
+{
+  "source": "paper_chunks",
+  "target": "paper_chunks_qwen3_4b_20261105_v2",
+  "points": 1072,
+  "source_sha256": "83b38c056d41bcb04c73900d04cf30de56f041d51d2c6e9e84d95be7010d1b64",
+  "model": "Qwen/Qwen3-Embedding-4B",
+  "dimensions": 1536,
+  "payloads_preserved": true,
+  "source_unchanged": true,
+  "passed": true
+}

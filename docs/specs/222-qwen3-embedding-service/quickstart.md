@@ -1,87 +1,60 @@
 # 使用与运维
 
-服务器内服务已部署并通过真实推理、重启、异常恢复及退出 SSH 后常驻验证。外部入口尚未交付，本地应用目前不能直接使用下方回环地址。
+**当前本地 SC-Wiki 已使用 4090 的 Qwen3-Embedding-4B，无需用户再手动填写连接配置。**
 
-## 实例与身份
+## 当前配置与数据
 
-- 主机：`gpu-single4090`；系统用户：`singeuser`。
-- 运行方式：用户独立 Python 虚拟环境与 systemd 用户服务。
-- 根目录：`/home/singeuser/qwen3-embedding`。
-- 模型：`Qwen/Qwen3-Embedding-4B`，固定 revision 见 `scripts/embedding/model-manifest.json`。
-- 实际运行源码：`4d00dfbc4fe529695d1c9b1742078774b2a05e0e`；vLLM 0.11.2、PyTorch 2.9.0+cu128。完整依赖见 [冻结清单](evidence/dependencies.freeze.txt)。
-- 服务地址：机器内 `http://127.0.0.1:8000/v1`；当前不代表外部地址。
-- 密钥文件：服务器根目录下 `api-key`；配置文件 `config.env`，均为 0600，真实内容不写入仓库。
+- 本地 Base URL：`https://www.sc-wiki.com/embedding/v1`。
+- 模型名：`Qwen/Qwen3-Embedding-4B`；本地输出维度：1536；原生支持 2560 维。
+- 主集合：`paper_chunks_qwen3_4b_20261105_v2`，1072 条。
+- 原集合：`paper_chunks`，1072 条，保留未改；旧向量不能与新模型查询混用。
+- 私有备份：本机 `.local/embedding-backups/20261105-qwen3-4b-v2/`，包含 source.jsonl、env.before、receipt.json，权限限制为本用户读取。
+- 运行源码：GPU 模型启动器来自 `629af7e0b9709c69cbfcc29d5db913ce3925ac86`；vLLM 0.11.2、PyTorch 2.9.0+cu128；完整依赖见[冻结清单](evidence/dependencies.freeze.txt)。
 
-## 登录与启停
+本地到阿里云为 HTTPS，阿里云到 GPU 为 SSH 加密通道，访问需要独立模型密钥。阿里云站点自身的模型和索引仍未切换。
 
-使用用户已提供的 SSH 网关登录；密码独立保管，不写入文档。
+## GPU 服务与隧道
+
+登录 GPU 后执行：
 
 ```bash
-ssh -p 10086 -l 'singeuser@singeuser@gsinge' 'cloud.mzq.cn'
-systemctl --user status qwen3-embedding
-systemctl --user start qwen3-embedding
+systemctl --user status qwen3-embedding embedding-relay
 systemctl --user restart qwen3-embedding
-systemctl --user stop qwen3-embedding
-journalctl --user -u qwen3-embedding -n 80 --no-pager
+systemctl --user restart embedding-relay
+journalctl --user -u qwen3-embedding -u embedding-relay -n 60 --no-pager
 ```
 
-用户 linger 已开启，服务已配置 enable，退出 SSH 后运行与异常恢复均已验证；未执行主机重启。完整边界见 [验证记录](validation.md)。
+根目录 `/home/singeuser/qwen3-embedding`，模型仅监听 `127.0.0.1:8000`。API 密钥位于该目录 api-key/config.env，权限 0600；SSH 私钥 relay_ed25519 也仅由本用户读取。不要把真实密钥提交 Git 或写入命令行。
 
-## 机器内验证
+当前 BF16、16384 Token、2 个并发序列、0.65 显存利用率。全量已有片段最大 13010 Token；超限拒绝，不截断原文。后台、自启配置、异常恢复及退出 SSH 后运行均验证；没有执行主机重启验收。
 
-```bash
-set -a
-. "/home/singeuser/qwen3-embedding/config.env"
-set +a
-"/home/singeuser/qwen3-embedding/.venv/bin/python" "/home/singeuser/qwen3-embedding/source/smoke.py"
-```
+## 阿里云入口
 
-SDK 调用示例：
+专用账号 embedding-relay 只允许远端监听 `172.19.0.1:18080`，不允许交互 shell、密码登录或本地转发；root 原 GatewayPorts=no 保持。当前不开放新的公网端口，复用 443。
+
+Caddy 基础配置为 `docker/Caddyfile`，通过可选 import 读取 `/config/embedding/*.caddy`。当前片段保存在 Docker 持久配置卷 `/var/lib/docker/volumes/scwiki-home_caddy-config/_data/embedding/embedding-gateway.caddy`；部署材料为 `scripts/embedding/embedding-gateway.caddy`。后续网站发布需保留这条 import 和配置卷。
+
+原文件及 SSH 配置备份在阿里云 `/home/mayuan/sc-wiki/embedding-gateway/backups/`。现有 Caddy 单文件挂载实际对应 `releases/ea300d3/docker/Caddyfile`，current 对应 e2560d1f-actions；本次两处均已更新。后续更新不能只看 current 字符串，需核对容器实际读取的文件和哈希。
+
+## 本地验证
+
+在项目根目录使用当前 sc-wiki Python 环境：
 
 ```python
-import os
-from openai import OpenAI
+from backend.ingest.embedder import embed_texts
 
-client = OpenAI(base_url="http://127.0.0.1:8000/v1", api_key=os.environ["VLLM_API_KEY"])
-result = client.embeddings.create(
-    model="Qwen/Qwen3-Embedding-4B",
-    input=["Hydrogen-rich materials may exhibit high-temperature superconductivity."],
-    dimensions=1536,
-    encoding_format="float",
-)
-print(len(result.data[0].embedding))
+query_vector = embed_texts(["高压富氢材料的超导临界温度"], purpose="query")[0]
+print(len(query_vector))  # 1536
 ```
 
-原生输出 2560 维，指定 dimensions=1536 时缩短并重新归一化。
-允许范围为 32–2560 维；越界请求被拒绝，不会静默返回不同长度。
-检索问题添加 `Instruct: Given a research paper query, retrieve relevant scientific passages that answer the query` 与换行后的 `Query: <问题>`；文献直接编码。
+查询使用 `EMBEDDING_QUERY_INSTRUCTION`，文献正文保持原文。没有配置该指令的其他供应商继续原请求行为。已有逻辑 paper_chunks 查询会解析到当前配置的新物理集合。
 
-## 外部访问边界
+## 更新、重建与回退
 
-2026-11-05 实测平台 SSH 网关拒绝普通 TCP 转发，返回 `administratively prohibited: port forwarding is disabled`。
-因此 `ssh -L` 当前不可用，不能将本地创建的监听端口当成已通的隧道。
-需要平台提供端口映射、固定服务地址或内网/VPN 接入；已向用户询问具体条件。
-当前服务仅回环监听，不因转发失败自动开放公网或建立随机第三方隧道。
+新版本先验证权重、依赖和源码身份；索引切换使用 `scripts/embedding/rebuild_collection.py` 新建尚不存在的独立集合。工具私有导出旧记录和向量，逐条核验 ID/payload、目标向量及源数据摘要，失败不修改原集合或应用配置。
 
-## 更新与回退
+当前仅重启了本地原已运行的 Python 和上传 Worker。变更模型或集合后须确保所有实际消费者加载相同设置，不能混用旧进程。
 
-1. 核对新源码提交、模型清单与依赖，不覆盖未核验权重。
-2. 保留旧环境、模型身份和私有配置；先离线验证新制品，再停止本次服务切换。
-3. 使用新源码更新本服务，重新执行 smoke 并记录 GPU、依赖及源码身份。
-4. 回退时停止本次服务、恢复旧部署材料后重启；临时停用可执行 `systemctl --user disable --now qwen3-embedding`。
+回退时先核对切换后有无新发布，仅恢复备份中六项 Embedding/集合设置，不覆盖后来其他配置，恢复必要角色。保留的新旧集合不删除；如需停止模型，执行 `systemctl --user stop qwen3-embedding`，不会删除论文或草稿。
 
-本服务不持有业务论文或索引，停止不会删除 SC-Wiki 数据。启停只影响本次模型服务。
-
-## SC-Wiki 接入边界
-
-本次没有修改网站配置和旧向量索引。接入前需确认实际消费实例的网络、查询指令、模型与维度，并以新模型重建文献索引；不能把现有 v4 向量与新模型向量混用。
-
-## 阿里云入口备选检查
-
-已登录用户指定阿里云实例做只读核查；现有 HTTPS、SSH 转发及 Docker 网桥具备设计条件。候选 Base URL 为 `https://www.sc-wiki.com/embedding/v1`，目前未启用，不能按已可用地址调用。
-
-4090 出站 SSH 测试需要算力平台工单复核，本次等待已取消且未执行该命令。先由平台放行通道，再在获得用户授权后设置阿里云专用隧道账号与 Caddy 入口，不能重新包装命令绕过审核。
-
-草案位于 `scripts/embedding/aliyun-Caddyfile.proposed`、`relay-sshd.conf.proposed`、`embedding-relay.service.proposed`；仅配置校验已经通过，不代表端到端连接通过。
-
-本地不必须经阿里云。平台若提供固定 HTTPS 映射或 VPN，本地和未来阿里云均可直接访问 GPU；当前仅有 SSH 登录能力不等于模型端口开放。用户正在讨论直连与中转，尚未授权阿里云配置变更。
+真实结果见[接入验收](validation.md)。PDF 字段提取仍走既有解析程序和聊天模型；生成检索向量、问答检索时才使用这里的嵌入模型。

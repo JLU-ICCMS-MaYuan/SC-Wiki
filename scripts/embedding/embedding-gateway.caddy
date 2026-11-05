@@ -1,0 +1,18 @@
+# 放入 Caddy 持久配置卷的 /config/embedding/，与应用发布目录分离。
+@embedding path /embedding/v1/embeddings /embedding/v1/models
+handle @embedding {
+    request_body {
+        max_size 2MiB
+    }
+    uri strip_prefix /embedding
+    reverse_proxy 172.19.0.1:18080 {
+        transport http {
+            dial_timeout 5s
+            response_header_timeout 60s
+        }
+    }
+}
+@embeddingOther path /embedding /embedding/*
+handle @embeddingOther {
+    respond "Not found" 404
+}

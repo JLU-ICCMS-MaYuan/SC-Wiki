@@ -1,59 +1,48 @@
-# 部署验证记录
+# 部署与本地接入验收
 
-日期：2026-11-05（Asia/Shanghai）。状态：服务器内部署与验收完成；外部入口尚未交付。
+日期：2026-11-05（Asia/Shanghai）。**本地原生 SC-Wiki 已接上 4090，采用阿里云 HTTPS 中转。**
 
-## 已核实的准备条件
+## 当前实际链路
 
-Ubuntu 24.04.5、Python 3.12.3、4090 24564MiB、驱动 595.99.02、32 逻辑核心，/home 数据盘可用约 956GB。systemd 用户管理器运行；初始 linger=no。
+本地 Vite 5173 → Go 8080 → Python 8000 → `https://www.sc-wiki.com/embedding/v1` → 阿里云 Caddy → 私有网桥 172.19.0.1:18080 → 4090 主动建立的受限 SSH 隧道 → GPU 上的 Qwen3-Embedding-4B。
 
-## 权重与部署材料
+阿里云只增加中转入口和专用隧道账号，其网站自身的模型配置、业务数据和向量索引未切换。本次没有构建或发布应用镜像。
 
-- 当前部署源码为 `4d00dfbc4fe529695d1c9b1742078774b2a05e0e`，初版为 `9cd8548954ca3f057ea61633ea6c16132c37da35`；没有推送 Git。
-- 当前启动器 SHA256：`a7a50895d3f634ae8ae6f4bea6f4812b78c5256dc937920d92c5dd39c88d8573`；验收脚本 SHA256：`e6f12a63778ebf7ceac5422e6517fe4c41afd6f526580eaba1b12c3d51cd5de0`，与当前部署源码及本地文件一致。
-- 模型清单 SHA256：`fe39bea0babcfc0f8cf441a897aa2b3a2c069dcf2980a861622c8d2bd1385a27`。
-- 固定 HF revision：`5cf2132abc99cad020ac570b19d031efec650f2b`。
-- 2026-11-05 16:13 左右，权重下载、拼装及全量文件验证完成，日志为服务器 `download-fast.log`，结果 `ALL_FIXED_REVISION_FILES_VERIFIED`，共 14 个文件、8,059,521,975 字节。
-- 两块权重 SHA256 分别为 `e70bfe3c970523fb7ef4eddffed2254ce3f1e7150c3de2af4342de129dd756f8`、`ed1b87c8e9eb7e535a1a155e4fd00d9f4dba80e58a6db48a4c9f82cede7079c1`。
-- systemd 用户单元已安装、enable，linger=yes；密钥和环境文件均为 0600。主机开机启动仅验证配置，未重启主机。
+## 真实结果与证据
 
-## 真实推理与生命周期验收
-
-| 验收 | 实际结果 | 原始证据 |
+| 验收 | 实际结果 | 依据 |
 | --- | --- | --- |
-| 依赖一致性与设备 | pip check 通过；vLLM 0.11.2、PyTorch 2.9.0+cu128、CUDA 运行时 12.8、4090 支持 BF16 | [运行记录](evidence/finalize.log)、[171 项依赖冻结](evidence/dependencies.freeze.txt) |
-| 首轮完整接口回归 | 18 项检查通过，包括模型身份、中英文单条/批量、索引、有限数值、L2 范数、32/1536/2560 维、鉴权与错误输入 | [首轮结果](evidence/smoke-initial.json) |
-| 重启后的完整回归 | 同样 18 项检查通过，真实重新加载模型后完成 | [重启后结果](evidence/smoke-after-restart.json) |
-| 跨语言相关性冒烟 | 2560 维：相关英文片段 0.755168，无关片段 0.024268；1536 维亦通过 | [固定输入结果](evidence/smoke-initial.json) |
-| OpenAI SDK | 实际调用返回 1536 维，固定短输入样本约 0.0367 秒 | [运行记录](evidence/finalize.log) |
-| 异常自动恢复 | 主动 SIGKILL 本单元主进程后自动恢复，PID 59550→59738，NRestarts 0→1，42.289 秒后向量调用成功 | [恢复结果](evidence/recovery.json) |
-| SSH 全部退出后常驻 | 断开所有交互 SSH，再连接时 PID 59738 与重启计数保持，1536 维请求成功 | [退出后验证](evidence/logout-verification.json) |
-| 资源与私有配置 | 显存使用 15577MiB、空闲 8506MiB；服务 active/running，私有文件 0600 | [运行事实](evidence/runtime-facts.json) |
+| 外部 HTTPS | 18 项通过，正常验证证书；单条/批量、维度、鉴权、错误输入及相关性通过 | [外部接口](evidence/connection-https-smoke.json) |
+| 全量重建 | 1072 条，ID、payload 逐条相等，源集合前后摘要一致 | [重建回执](evidence/connection-rebuild-receipt.json) |
+| 原集合保留 | paper_chunks 仍为 1072 条，未更新、未删除 | [数据核验](evidence/connection-data-preservation.json) |
+| 新主集合 | paper_chunks_qwen3_4b_20261105_v2，1536 维 | [配置与写入](evidence/connection-data-preservation.json) |
+| 实际向量写入 | embed_and_index_chunks 经真实模型生成向量，在隔离临时 Qdrant 集合写入、重读后清理 | [实际写入](evidence/connection-data-preservation.json) |
+| 网站同一接口链路 | Vite→Go→Python 的语义检索 HTTP 200，返回 10 条片段，关联已批准论文 1429 | [检索结果](evidence/connection-application-search.json) |
+| 进程配置 | Python API、上传 Worker 均加载新模型、地址及集合；其他原停止角色未启动 | [白名单配置](evidence/connection-process-config.json) |
+| 退出全部交互 SSH | 网站检索仍 HTTP 200，返回 10 条片段 | [退出后调用](evidence/connection-after-ssh-logout.json) |
+| 隧道故障恢复 | 主动终止 relay 单元后，约 10.453 秒恢复真实 1536 维调用，重启计数为 1 | [恢复结果](evidence/connection-relay-recovery.json) |
+| 网站及路径隔离 | 原首页、/health 为 200，/embedding/pooling、/embedding/tokenize 为 404 | [路径检查](evidence/connection-route-checks.json) |
+| 代码回归 | RAG 单元目录 34 项通过 | [测试输出](evidence/connection-unit-tests.txt) |
+| 制品与权限 | GPU 源码 629af7e0，Caddy、片段、SSH 限制配置均有 SHA256；root GatewayPorts 保持 no | [运行事实](evidence/connection-infrastructure.json) |
 
-固定三条短文本批次在机器内约 0.067 秒。以上延迟不包含公网链路，也不等于长论文或高并发基准；相关性只覆盖固定冒烟样本，不宣称全库检索质量通过。
+本次验证不代表整篇 PDF 科学字段解析或全库相关性评测通过。文字及字段提取继续使用既有程序、聊天模型；改变的是 Embedding 与检索向量。
 
-## 首次失败、修复与重跑
+## 真实失败及修复
 
-初版只设置 is_matryoshka=true，vLLM 0.11.2 对请求 2561 维返回 HTTP 200 与 2560 维，未按既有接口约束拒绝；请求 31 维也被接受。原始失败保留于 [失败日志](evidence/finalize-first-failure.log) 和 [固定边界响应](evidence/dimension-failure.json)。
+1. 初次公网收到前端 HTML，发现 Caddy 单文件挂载实际指向 ea300d3 发布目录，而 current 已指向 e2560d1f-actions。修复实际绑定文件并重载；最终将规则放入独立持久卷，基础 Caddyfile 只保留可选 import。有/无片段两种配置均以实际 Caddy validate 验证，缺片段时保留原网站行为。
+2. 首轮重建在第 70 条后收到 HTTP 400：已有片段为 13010 Token，超过初始 8192。固定模型 tokenizer 核查全量 1072 条后，运行上限改为 16384、并发序列 2、批 Token 上限 16384；BF16 与 0.65 显存利用率保持。不截断、不跳过、不放宽输出断言；超长拒绝回归使用新上限之外的文本。完整重建成功后，已清理 70 条记录的失败临时集合，原集合一直保留。
+3. 公网诊断中曾出现个别 TCP 建连超时，后续相同入口的实际应用、SDK 和持久连接检查通过。保留既有有限重试，没有提高超时掩盖失败；未进行持续可用性压测。
 
-这属于恢复本 Feature 已写明的维度边界，不改变模型或产品设计。使用引擎原生 matryoshka_dimensions 明确允许官方 32–2560 维范围，拒绝越界值；没有自行填充向量、修改权重、放宽断言或另外实现推理 API。修复源码为 4d00dfbc，随后重新加载并完成两轮完整回归。
+见 [失败观测](evidence/connection-failures.json)、[tokenizer 核查](evidence/connection-token-audit.json)。含原文本、旧向量和旧配置的备份只在本机 `.local/embedding-backups/`，不进入 Git。
 
-## 网络检查与未启用草案
+## 切换、回退与范围
 
-- 算力平台拒绝普通 SSH TCP 转发，报 `administratively prohibited: port forwarding is disabled`。
-- GPU 到用户指定阿里云 22 端口 TCP 可达，读到 OpenSSH banner；真正的出站 SSH 命令触发平台工单复核，未获放行，本次等待已取消，测试命令未执行。
-- 阿里云 Caddy 2.10.2 与受限账号配置草案均通过语法/有效配置校验；root 的 GatewayPorts 仍为 no，网站健康为 HTTP 200。没有加载草案或重启网站。
-- 用户继续询问直连与中转区别，尚未授权阿里云入口变更；两条访问方案仍在讨论中。
+切换前队列为空、Worker 空闲，仅停止并恢复本地原本运行的 Python 与上传 Worker。只修改六项 Embedding/主集合配置，其他配置字典核验一致，.env 和备份均为 0600。MySQL、Redis、Go、前端和其他角色保持。
 
-## 清理与验证边界
+回退时恢复原模型与集合设置，不覆盖后来无关配置。若切换后已有新增发布，需要先核对新增记录，不能把恢复旧设置当成所有新索引都已回退。主机开机自启仅检查配置，没有重启主机验收。
 
-已清理本次模型下载分片、拼装临时文件、独立安装缓存、重复 wheel 和引导脚本；保留运行环境、正式权重、私有配置和验收证据。缓存清理后又完成退出 SSH 后的真实向量调用。
+此前审核提示不能代表所有出站 SSH 不可用。本次单独执行标准嵌入转发命令成功，再使用受限专用公钥连接，没有伪造审核或包装被拒命令绕过权限。
 
-本次没有修改科学表单、PDF 解析字段、网站模型配置或业务索引；不将这些测试写成整站或生产业务验收。跨机 HTTP、真实本地 SC-Wiki 接入、阿里云模型配置切换及旧向量索引重建均未完成。
+## 历史与远程文档
 
-## 待完成的外部入口
-
-直接访问需要平台提供固定 HTTPS 映射或 VPN。阿里云中转只是备选，需要平台允许出站通道及用户另行授权入口配置变更；当前没有可供本地应用直接填写的外部 Base URL。
-
-## 文档远程链接
-
-Issue #222 已创建，类型 type:feature。2026-11-05 以 JLU-ICCMS-MaYuan 身份检查 mayuan 分支 Spec URL，实际为 HTTP 404，见[原始访问记录](evidence/remote-spec-link.json)。Spec 已保存在本地，双向远程可达尚未完成；本次没有 Git 推送授权。
+[首次部署记录](initial-deployment-validation.md)保留初次成功、维度失败及修复；其中未接入状态只代表当时阶段。未获得 Git 推送授权，不为关闭 Issue 自动 push，远程文档可达性单独核查。

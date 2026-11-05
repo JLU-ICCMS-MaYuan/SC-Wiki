@@ -1,4 +1,4 @@
-# 待平台放行出站 SSH 且用户授权阿里云入口变更后启用。
+# 当前受限反向隧道服务模板，历史文件名保留。
 [Unit]
 Description=Private reverse tunnel for Qwen3 embedding
 After=network-online.target

@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "model": "Qwen/Qwen3-Embedding-4B",
+  "collection": "paper_chunks_qwen3_4b_20261105_v2",
+  "dimensions": 1536,
+  "source_points": 1072,
+  "active_points": 1072,
+  "source_unchanged": true,
+  "actual_embed_and_index_write_reread": 1,
+  "failed_partial_collection_removed": 70
+}

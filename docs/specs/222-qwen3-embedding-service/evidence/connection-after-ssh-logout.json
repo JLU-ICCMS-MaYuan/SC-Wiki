@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "http_status": 200,
+  "mode": "semantic",
+  "chunks": 10,
+  "related_paper_ids": [
+    1429
+  ],
+  "seconds": 0.341,
+  "after_interactive_ssh_logout": true,
+  "checked_at": "2026-11-05T10:03:23.270471+00:00"
+}

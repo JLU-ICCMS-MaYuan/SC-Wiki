@@ -12,7 +12,7 @@
 - [x] T003 在 scripts/embedding/ 建立固定版本启动、下载、systemd 模板与真实接口冒烟脚本，检查 CLI 及结构；实际运行见 evidence/runtime-facts.json。
 - [x] T004 在 /home/singeuser/qwen3-embedding 安装隔离环境、验证权重、生成私有密钥并启用本次服务；模型校验与 pip check 见 evidence/finalize.log。
 - [x] T005 执行真实 GPU 单条/批量、2560/1536/32 维、鉴权、错误输入、相似度、重启及异常自动恢复；见 evidence/smoke-*.json、recovery.json。
-- [ ] T006 验证 SSH 转发后的外部客户端调用及 SSH 退出后常驻；不支持时在 Issue 记录外部依赖。
+- [x] T006 验证受限反向隧道后的外部 HTTPS 与退出全部交互 SSH 后的应用调用，见 evidence/connection-https-smoke.json、connection-after-ssh-logout.json。
 
 ## 阶段 3：交付
 
@@ -34,16 +34,16 @@ T001 → T002 → T003 → T004 → T005 → T006 → T007。同一文件串行�
 
 ## 澄清补充：外部 HTTPS 入口
 
-- [ ] T008 [US2] 取得平台映射信息，或在平台审核放行且用户授权后配置阿里云受限反向隧道及 Caddy HTTPS 入口，并验证本地客户端。记录未来阿里云消费方式，不提前切换生产模型。
+- [x] T008 [US2] 用户最新接入指令后，单条标准 SSH 命令实际成功，部署专用公钥账号与 Caddy 持久片段；外部 HTTPS、受限路径、隧道重启恢复通过。没有绕过审核，也没有切换阿里云站点自身模型。
 
 FR-007 / SC-006 由 T008 覆盖；依赖 T004–T005、可用网络通道及相应授权。本项以 Issue 记录外部依赖，不另建本地协作状态。
 
-T006 的 SSH 退出后常驻部分已通过 evidence/logout-verification.json；跨机 HTTP 入口尚未交付，所以整项保持未勾选。T008 的阿里云草案只通过配置校验，尚未获部署授权，不能以草案代替实际连接。
+T006/T008 的最初未完成状态已被最新授权及真实接入验证替代，保留初始验收文件供历史对照，不再以当时的等待状态描述当前链路。
 
 ## 本次新增授权：接入本地 SC-Wiki
 
 用户明确要求开始接入，既有待授权说明保留为历史；本次不再以原先仅检查的授权范围阻止必要接入工作。
 
-- [ ] T009 在 backend/rag/config.py、backend/ingest/embedder.py、backend/rag/vectordb.py、backend/rag/search/vector_search.py 实现可选查询指令和独立主集合，验证默认行为不变及逻辑主集合解析一致。
-- [ ] T010 在 scripts/embedding/ 新增保留源数据的独立集合重建工具，私有备份并验证 1072 条记录的 ID、payload、向量及源数据一致性，失败不切换。
-- [ ] T011 打通专用反向隧道与 HTTPS 入口，再切换本地私有配置和必要 Python 角色，验证实际向量化和检索；回写运行事实。
+- [x] T009 在 backend/rag/config.py、backend/ingest/embedder.py、backend/rag/vectordb.py、backend/rag/search/vector_search.py 实现查询指令与独立集合；RAG 单元目录 34 项通过，见 evidence/connection-unit-tests.txt。
+- [x] T010 新增 scripts/embedding/rebuild_collection.py，私有备份并实际重建 1072 条，核验源/目标 ID、payload 及源摘要，见 evidence/connection-rebuild-receipt.json、connection-data-preservation.json。
+- [x] T011 专用隧道、HTTPS、本地六项配置及原运行的 Python/Worker 切换完成；实际向量写入、前端入口查询及断开交互 SSH 后查询通过，见 evidence/connection-*.json。

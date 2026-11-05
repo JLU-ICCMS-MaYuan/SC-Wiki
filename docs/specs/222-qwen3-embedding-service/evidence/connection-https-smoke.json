@@ -1,0 +1,98 @@
+{
+  "model": "Qwen/Qwen3-Embedding-4B",
+  "checks": [
+    {
+      "name": "authentication_rejected",
+      "route": "/v1/models",
+      "status": 401
+    },
+    {
+      "name": "authentication_rejected",
+      "route": "/v1/embeddings",
+      "status": 401
+    },
+    {
+      "name": "authentication_rejected",
+      "route": "/v1/models",
+      "status": 401
+    },
+    {
+      "name": "authentication_rejected",
+      "route": "/v1/embeddings",
+      "status": 401
+    },
+    {
+      "name": "embedding",
+      "count": 3,
+      "dimensions": 2560,
+      "elapsed_seconds": 0.4773
+    },
+    {
+      "name": "embedding",
+      "count": 3,
+      "dimensions": 1536,
+      "elapsed_seconds": 0.3331
+    },
+    {
+      "name": "embedding",
+      "count": 1,
+      "dimensions": 32,
+      "elapsed_seconds": 0.2387
+    },
+    {
+      "name": "embedding",
+      "count": 1,
+      "dimensions": 2560,
+      "elapsed_seconds": 0.3696
+    },
+    {
+      "name": "embedding",
+      "count": 1,
+      "dimensions": 2560,
+      "elapsed_seconds": 0.3171
+    },
+    {
+      "name": "embedding",
+      "count": 1,
+      "dimensions": 2560,
+      "elapsed_seconds": 0.3631
+    },
+    {
+      "name": "cross_language_relevance_smoke",
+      "dimensions": 2560,
+      "related": 0.755886,
+      "unrelated": 0.025452
+    },
+    {
+      "name": "cross_language_relevance_smoke",
+      "dimensions": 1536,
+      "related": 0.75741,
+      "unrelated": 0.023654
+    },
+    {
+      "name": "invalid_input_rejected",
+      "status": 400
+    },
+    {
+      "name": "invalid_input_rejected",
+      "status": 400
+    },
+    {
+      "name": "invalid_input_rejected",
+      "status": 400
+    },
+    {
+      "name": "invalid_input_rejected",
+      "status": 404
+    },
+    {
+      "name": "invalid_input_rejected",
+      "status": 400
+    },
+    {
+      "name": "invalid_input_rejected",
+      "status": 400
+    }
+  ],
+  "passed": true
+}

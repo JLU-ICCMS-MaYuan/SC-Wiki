@@ -13,7 +13,8 @@
   同一次调用按响应索引还原原文顺序，校验数量、维度及有限数值；全部批次成功后才进入索引写入。
   百炼 `text-embedding-v4` 已通过合成文本的真实 API、Qdrant 写入与查询验证；配置 1536 维用于匹配当前实例既有集合。
   模型或维度变化需核对并重建相应索引，不自动删除旧集合，也不将不同模型向量混用。
-- 独立 `Qwen3-Embedding-4B` 服务已在用户指定 4090 上完成机器内推理与恢复验证；外部入口尚未交付，SC-Wiki 未切换到该服务。部署与接入边界见[独立 GPU 嵌入服务](../02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md#独立-gpu-嵌入服务222)。
+- 本地原生实例已使用 4090 的 `Qwen3-Embedding-4B`，经阿里云 HTTPS 中转。`QDRANT_COLLECTION_NAME` 管理物理主集合，旧逻辑 paper_chunks 查询解析到当前配置集合，默认仍为 paper_chunks；`EMBEDDING_QUERY_INSTRUCTION` 仅为检索问题添加任务指令，文献正文不变，默认空值保持其他供应商行为。
+- 本机 1072 条旧索引在独立集合重建并核验后已切换，原集合与私有配置备份保留；阿里云网站自身模型和索引未切换。实际链路及边界见[独立 GPU 嵌入服务](../02_Decentralized_Maintenance_and_Verification/deployment-and-runtime.md#独立-gpu-嵌入服务222)。
 - 默认数据根指向仓库外的相邻数据集目录。
 - 健康检查分别判断数据库、向量库和聊天配置，检索可用与聊天可用不是同一状态。
 - 服务层在缺少数据或 LLM 时返回明确的不可用错误或降级信息。

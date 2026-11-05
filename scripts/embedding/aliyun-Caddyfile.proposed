@@ -1,4 +1,4 @@
-# 待授权启用的入口配置；原网站路由保持现有内容。
+# 初始完整配置模板；当前部署使用基础 Caddyfile 的可选持久片段导入。
 {$SITE_DOMAIN} {
     encode zstd gzip
     @embedding path /embedding/v1/embeddings /embedding/v1/models

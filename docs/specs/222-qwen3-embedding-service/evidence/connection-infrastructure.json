@@ -1,0 +1,21 @@
+{
+  "checked_at": "2026-11-05T11:29:00.924786+00:00",
+  "model_source_commit": "629af7e0b9709c69cbfcc29d5db913ce3925ac86",
+  "model_source_sha256": "3882632ad54abc995aca58133a5587c88bc7c1ac28cda623c669ab1b2a97c55d",
+  "max_model_len": 16384,
+  "max_num_seqs": 2,
+  "model_pid": 60225,
+  "relay_pid": 60406,
+  "relay_restarts": 1,
+  "gpu_used_MiB": 16541,
+  "gpu_free_MiB": 7542,
+  "relay_listen": "172.19.0.1:18080",
+  "root_gatewayports": "no",
+  "caddy_base_sha256": "77d95dde6a5c26f07685d0d0d3c3fa3600fa4d66e06ab6ced37df56ee58a4b58",
+  "caddy_fragment_sha256": "98a82f0a016205e15fee5ffced3c57dfb4ac154a49331930b9259cd19619cbf9",
+  "sshd_relay_sha256": "f5d584e2c1dd7b701171c1ccdb2f6ee1118a8edd041128ccae7092a1191e41dc",
+  "actual_caddy_bind": "/home/mayuan/sc-wiki/releases/ea300d3/docker/Caddyfile",
+  "current_release": "/home/mayuan/sc-wiki/releases/e2560d1f-actions",
+  "app_images_changed": false,
+  "non_embedding_private_config_preserved": true
+}

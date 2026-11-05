@@ -1,4 +1,4 @@
-# 待授权配置，仅限制专用隧道账号，不改变其他 SSH 用户行为。
+# 专用账号限制模板，历史文件名保留；不改变其他 SSH 用户行为。
 Match User embedding-relay
     AuthenticationMethods publickey
     PubkeyAuthentication yes

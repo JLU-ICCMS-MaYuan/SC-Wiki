@@ -1,0 +1,14 @@
+{
+  "python": {
+    "pid": 74623,
+    "model": "Qwen/Qwen3-Embedding-4B",
+    "base_url": "https://www.sc-wiki.com/embedding/v1",
+    "collection": "paper_chunks_qwen3_4b_20261105_v2"
+  },
+  "worker": {
+    "pid": 74663,
+    "model": "Qwen/Qwen3-Embedding-4B",
+    "base_url": "https://www.sc-wiki.com/embedding/v1",
+    "collection": "paper_chunks_qwen3_4b_20261105_v2"
+  }
+}

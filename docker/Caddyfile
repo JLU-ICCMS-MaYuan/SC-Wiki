@@ -1,5 +1,6 @@
 {$SITE_DOMAIN} {
     encode zstd gzip
+    import /config/embedding/*.caddy
     @api path /api/* /health
     handle @api {
         request_body {
