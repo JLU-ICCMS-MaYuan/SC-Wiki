@@ -39,3 +39,11 @@ T001 → T002 → T003 → T004 → T005 → T006 → T007。同一文件串行�
 FR-007 / SC-006 由 T008 覆盖；依赖 T004–T005、可用网络通道及相应授权。本项以 Issue 记录外部依赖，不另建本地协作状态。
 
 T006 的 SSH 退出后常驻部分已通过 evidence/logout-verification.json；跨机 HTTP 入口尚未交付，所以整项保持未勾选。T008 的阿里云草案只通过配置校验，尚未获部署授权，不能以草案代替实际连接。
+
+## 本次新增授权：接入本地 SC-Wiki
+
+用户明确要求开始接入，既有待授权说明保留为历史；本次不再以原先仅检查的授权范围阻止必要接入工作。
+
+- [ ] T009 在 backend/rag/config.py、backend/ingest/embedder.py、backend/rag/vectordb.py、backend/rag/search/vector_search.py 实现可选查询指令和独立主集合，验证默认行为不变及逻辑主集合解析一致。
+- [ ] T010 在 scripts/embedding/ 新增保留源数据的独立集合重建工具，私有备份并验证 1072 条记录的 ID、payload、向量及源数据一致性，失败不切换。
+- [ ] T011 打通专用反向隧道与 HTTPS 入口，再切换本地私有配置和必要 Python 角色，验证实际向量化和检索；回写运行事实。

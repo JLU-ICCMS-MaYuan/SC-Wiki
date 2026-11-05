@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument("--key-file", type=Path)
     parser.add_argument("--timeout", type=float, default=120)
+    parser.add_argument("--max-model-len", type=int, default=16384)
     args = parser.parse_args()
     key = args.key_file.read_text().strip() if args.key_file else os.environ["VLLM_API_KEY"]
     checks = []
@@ -90,7 +91,7 @@ def main():
         {"model": MODEL, "input": "test", "dimensions": 2561},
         {"model": "wrong-model", "input": "test"},
         {"model": MODEL, "input": []},
-        {"model": MODEL, "input": "hello " * 9000},
+        {"model": MODEL, "input": "hello " * (args.max_model_len + 1)},
     ]
     for payload in invalids:
         status, _, _ = request("POST", "/v1/embeddings", payload)

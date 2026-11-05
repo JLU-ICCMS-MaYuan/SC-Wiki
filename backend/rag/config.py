@@ -35,6 +35,7 @@ class RagSettings(BaseSettings):
     qdrant_grpc_port: int = 6334
     qdrant_url: str = ""
     qdrant_api_key: str = ""
+    qdrant_collection_name: str = "paper_chunks"
 
     deepseek_api_key: str = ""
     deepseek_base_url: str = "https://api.deepseek.com"
@@ -52,6 +53,7 @@ class RagSettings(BaseSettings):
     embedding_base_url: str = ""
     embedding_dimensions: int | None = Field(default=None, gt=0)
     embedding_batch_size: int = Field(default=10, gt=0)
+    embedding_query_instruction: str = ""
 
     debug: bool = False
 

@@ -19,7 +19,7 @@ from backend.rag.config import settings as rag_settings
 from backend.rag.qdrant_connection import create_qdrant_client
 
 # ── 默认集合名 ───────────────────────────────────────────────────────────
-COLLECTION_NAME = "paper_chunks"
+COLLECTION_NAME = rag_settings.qdrant_collection_name
 REVIEW_COLLECTION_NAME = "review_chunks"
 
 # ── Qdrant 客户端（全局单例，线程安全）───────────────────────────────────

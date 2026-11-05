@@ -102,3 +102,31 @@ def test_failure_in_later_batch_does_not_partially_index_or_leak_key(monkeypatch
 def test_invalid_configuration_is_rejected(values):
     with pytest.raises(ValueError):
         RagSettings(_env_file=None, **values)
+
+
+def test_query_instruction_does_not_change_document_inputs(monkeypatch):
+    requests = []
+
+    def handler(request):
+        body = json.loads(request.content)
+        requests.append(body["input"])
+        return response([{"index": 0, "embedding": [1.0, 0.0]}])
+
+    configure(monkeypatch, handler)
+    embedder.settings.embedding_query_instruction = "Retrieve scientific passages."
+    embedder.embed_texts(["Tc under pressure"], purpose="query")
+    embedder.embed_texts(["Tc under pressure"])
+    assert requests == [["Instruct: Retrieve scientific passages.\nQuery: Tc under pressure"],
+                        ["Tc under pressure"]]
+
+
+def test_empty_query_instruction_preserves_provider_input(monkeypatch):
+    requests = []
+
+    def handler(request):
+        requests.append(json.loads(request.content)["input"])
+        return response([{"index": 0, "embedding": [1.0, 0.0]}])
+
+    configure(monkeypatch, handler)
+    embedder.embed_texts(["原查询"], purpose="query")
+    assert requests == [["原查询"]]

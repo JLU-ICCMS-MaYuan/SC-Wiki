@@ -47,9 +47,9 @@ async def search_by_semantics(
     """
     from backend.rag.vectordb import COLLECTION_NAME, REVIEW_COLLECTION_NAME
 
-    col = collection or COLLECTION_NAME
+    col = COLLECTION_NAME if not collection or collection == "paper_chunks" else collection
     # 1. 将用户问题向量化
-    query_vec = embed_texts([query])[0]
+    query_vec = embed_texts([query], purpose="query")[0]
 
     # 2. Qdrant 搜索
     where = {"paper_id": str(paper_id)} if paper_id else None
@@ -100,7 +100,7 @@ async def search_by_keywords_in_chunks(
         return []
 
     # 向量化 query 和 chunks，排序
-    query_vec = embed_texts([query])[0]
+    query_vec = embed_texts([query], purpose="query")[0]
     texts = [c.content for c in chunks]
     chunk_vecs = embed_texts(texts)
 

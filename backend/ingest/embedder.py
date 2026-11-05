@@ -11,6 +11,7 @@ Embedding 方案：
 from __future__ import annotations
 
 from math import isfinite
+from typing import Literal
 
 from openai import OpenAI, OpenAIError
 
@@ -18,7 +19,7 @@ from backend.rag.config import settings
 from backend.rag.vectordb import add_chunks
 
 
-def embed_texts(texts: list[str]) -> list[list[float]]:
+def embed_texts(texts: list[str], *, purpose: Literal["document", "query"] = "document") -> list[list[float]]:
     """将文本列表批量向量化。
 
     Args:
@@ -29,6 +30,9 @@ def embed_texts(texts: list[str]) -> list[list[float]]:
     """
     if not texts:
         return []
+    instruction = getattr(settings, "embedding_query_instruction", "").strip()
+    if purpose == "query" and instruction:
+        texts = [f"Instruct: {instruction}\nQuery: {text}" for text in texts]
     if not settings.embedding_key:
         raise RuntimeError(
             "Embedding API key 未配置。请设置 EMBEDDING_API_KEY 或 OPENAI_API_KEY。\n"
