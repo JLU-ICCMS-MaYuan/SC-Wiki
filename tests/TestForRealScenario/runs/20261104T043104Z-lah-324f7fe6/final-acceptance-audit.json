@@ -1,0 +1,301 @@
+{
+  "paper": {
+    "id": 1429,
+    "title": "Potential high-Tc superconducting lanthanum and yttrium hydrides at high pressure",
+    "doi": "10.1073/pnas.1704505114",
+    "review_status": "approved",
+    "content_revision": 1,
+    "approved_revision": 1,
+    "uploaded_by_user_id": 2,
+    "reviewed_by_user_id": 1,
+    "review_comment": "复核同一论文1429，DOI 10.1073/pnas.1704505114。原用户已按正文首页将题名 high-T c 规范为 high-Tc，人工修改理由和已有正文依据保留，当前题名单字段模型核对通过。正文和SI共同收录La-H与Y-H；Table S1的28组Tc/μ*与McMillan、Eliashberg方法、λ、ωlog逐项核验一致，19材料状态、32物性及3份完整结构保持。LaH10 DOS=10.0 states/Ry归250 GPa，依据正文数值联合SI图S3；图6不作电子DOS压力依据。LaH10/250 λ=2.29、YH10/250 λ=2.58采用表值，同时保留正文2.2/2.56差异。LaH2/300 P6/mmm、YH10/300 Im-3m保留Table S2报告标签与正文C2/m/fcc冲突，派生群号/晶系只作标签映射，不作为实际对称性唯一裁决；YH10/250空间群留空，不借用300 GPa，不据冲突标签生成完整结构。计算软件条件按各自原文保存，未报告值留空；原PDF与SI的角色及哈希核验一致。批准当前修订稿，保留全部来源与真实疑点。",
+    "reviewed_at": "2026-11-05 06:28:01",
+    "upload_task_id": "826fc1ae0fb24af6a95325ec991c9d74"
+  },
+  "checks": {
+    "approved": true,
+    "title_correct": true,
+    "table_s1_28_matches": true,
+    "all_32_records_retained": true,
+    "three_structures_exact": true,
+    "required_current_checks_valid": true,
+    "manual_title_reason_retained": true,
+    "pdf_roles_hashes_correct": true,
+    "four_handoffs": true,
+    "sources_resolved": true,
+    "selected_citations_preserved": true
+  },
+  "record_problems": [],
+  "required_problems": [],
+  "table_rows": [
+    [
+      "LaH8",
+      300.0,
+      "McMillan",
+      0.13,
+      114.0,
+      1.12,
+      1591
+    ],
+    [
+      "LaH8",
+      300.0,
+      "McMillan",
+      0.1,
+      131.0,
+      1.12,
+      1591
+    ],
+    [
+      "LaH8",
+      300.0,
+      "Eliashberg",
+      0.1,
+      150.0,
+      1.12,
+      1591
+    ],
+    [
+      "LaH8",
+      300.0,
+      "Eliashberg",
+      0.13,
+      138.0,
+      1.12,
+      1591
+    ],
+    [
+      "LaH10",
+      210.0,
+      "Eliashberg",
+      0.13,
+      274.0,
+      3.41,
+      848
+    ],
+    [
+      "LaH10",
+      210.0,
+      "McMillan",
+      0.13,
+      219.0,
+      3.41,
+      848
+    ],
+    [
+      "LaH10",
+      210.0,
+      "McMillan",
+      0.1,
+      238.0,
+      3.41,
+      848
+    ],
+    [
+      "LaH10",
+      210.0,
+      "Eliashberg",
+      0.1,
+      286.0,
+      3.41,
+      848
+    ],
+    [
+      "LaH10",
+      250.0,
+      "Eliashberg",
+      0.1,
+      274.0,
+      2.29,
+      1253
+    ],
+    [
+      "LaH10",
+      250.0,
+      "McMillan",
+      0.1,
+      232.0,
+      2.29,
+      1253
+    ],
+    [
+      "LaH10",
+      250.0,
+      "McMillan",
+      0.13,
+      212.0,
+      2.29,
+      1253
+    ],
+    [
+      "LaH10",
+      250.0,
+      "Eliashberg",
+      0.13,
+      257.0,
+      2.29,
+      1253
+    ],
+    [
+      "YH10",
+      250.0,
+      "McMillan",
+      0.13,
+      244.0,
+      2.58,
+      1282
+    ],
+    [
+      "YH10",
+      250.0,
+      "Eliashberg",
+      0.1,
+      326.0,
+      2.58,
+      1282
+    ],
+    [
+      "YH10",
+      250.0,
+      "Eliashberg",
+      0.13,
+      305.0,
+      2.58,
+      1282
+    ],
+    [
+      "YH10",
+      250.0,
+      "McMillan",
+      0.1,
+      265.0,
+      2.58,
+      1282
+    ],
+    [
+      "LaH4",
+      300.0,
+      "Eliashberg",
+      0.13,
+      5.0,
+      0.43,
+      1624
+    ],
+    [
+      "LaH4",
+      300.0,
+      "Eliashberg",
+      0.1,
+      10.0,
+      0.43,
+      1624
+    ],
+    [
+      "LaH4",
+      300.0,
+      "McMillan",
+      0.1,
+      10.0,
+      0.43,
+      1624
+    ],
+    [
+      "LaH4",
+      300.0,
+      "McMillan",
+      0.13,
+      5.0,
+      0.43,
+      1624
+    ],
+    [
+      "LaH10",
+      300.0,
+      "Eliashberg",
+      0.1,
+      254.0,
+      1.78,
+      1488
+    ],
+    [
+      "LaH10",
+      300.0,
+      "Eliashberg",
+      0.13,
+      241.0,
+      1.78,
+      1488
+    ],
+    [
+      "LaH10",
+      300.0,
+      "McMillan",
+      0.1,
+      215.0,
+      1.78,
+      1488
+    ],
+    [
+      "LaH10",
+      300.0,
+      "McMillan",
+      0.13,
+      196.0,
+      1.78,
+      1488
+    ],
+    [
+      "YH10",
+      300.0,
+      "McMillan",
+      0.13,
+      233.0,
+      2.06,
+      1511
+    ],
+    [
+      "YH10",
+      300.0,
+      "Eliashberg",
+      0.1,
+      308.0,
+      2.06,
+      1511
+    ],
+    [
+      "YH10",
+      300.0,
+      "McMillan",
+      0.1,
+      255.0,
+      2.06,
+      1511
+    ],
+    [
+      "YH10",
+      300.0,
+      "Eliashberg",
+      0.13,
+      286.0,
+      2.06,
+      1511
+    ]
+  ],
+  "manual_title": [
+    {
+      "items": [],
+      "reason": "按超级管理员退回意见，对照关联正文 PDF 第1页正式题名，去除 high-Tc 中排版提取产生的额外空格。仅规范题名表示，不改变 DOI、作者和科学数据。依据为已关联正文首页，不另上传附件。",
+      "item_key": "74dcc981a3062ce9d815c3fc2f4a390bbfaf207719e0a43bf00419845cae2b6e",
+      "actor_user_id": 2,
+      "no_evidence_reason": "依据已关联正文 PDF 第1页正式题名，现有系统原文已完整显示正确 high-Tc；仅删除提取造成的空格，无需另传重复附件。"
+    }
+  ],
+  "counts": {
+    "states": 19,
+    "records": 32,
+    "structures": 3,
+    "formal_field_sources": 1636,
+    "handoffs": 4
+  },
+  "scope": "真实SQL正式图、当前来源、冻结快照及文件；未写数据库。"
+}

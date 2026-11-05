@@ -21,7 +21,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useNavigate, useParams } from 'react-router-dom'
 import PaperReviewStatusSelect from '../components/PaperReviewStatusSelect'
-import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, paperEditorFromWorkdraft, type ReviewClassifications } from '../lib/paperReview'
+import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, commitPaperReview, paperEditorFromWorkdraft, type ReviewClassifications } from '../lib/paperReview'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -319,7 +319,7 @@ const AdminPaperEditPage: React.FC = () => {
       if (!evidence) return
       const key=JSON.stringify([paperId,editReviewStatus,editReviewComment])
       if(reviewOperation.current?.key!==key)reviewOperation.current={key,id:crypto.randomUUID()}
-      await api.post('/api/rag/evidence/review-commit', { ...payload, ...evidence, paper_id: Number(paperId),
+      await commitPaperReview({ ...payload, ...evidence, paper_id: Number(paperId),
         review_request_id:reviewOperation.current.id })
       navigate(workspacePath)
     } catch (e: unknown) {

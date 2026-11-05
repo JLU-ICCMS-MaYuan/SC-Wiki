@@ -1,0 +1,98 @@
+{
+  "paper_id": 1429,
+  "doi": "10.1073/pnas.1704505114",
+  "status": "approved",
+  "upload_task_id": "826fc1ae0fb24af6a95325ec991c9d74",
+  "source_head": "a080ac87be1fec64296c7e1f951875f5ff7ebc67",
+  "working_source_manifest": "final-lifecycle-candidate.json",
+  "model": "LLM2 / gpt-6.1-sol",
+  "reviewer": "mayuan_mark@163.com",
+  "uploader": "myth620137018@163.com",
+  "completed_steps": [
+    "real_upload_parse_submit",
+    "superadmin_reject",
+    "author_revise_recheck_resubmit",
+    "superadmin_logged_approval",
+    "explore_and_formal_sql_readback"
+  ],
+  "handoff_events": [
+    429,
+    430,
+    431,
+    433
+  ],
+  "checks_passed": {
+    "approved": true,
+    "title_correct": true,
+    "table_s1_28_matches": true,
+    "all_32_records_retained": true,
+    "three_structures_exact": true,
+    "required_current_checks_valid": true,
+    "manual_title_reason_retained": true,
+    "pdf_roles_hashes_correct": true,
+    "four_handoffs": true,
+    "sources_resolved": true,
+    "selected_citations_preserved": true
+  },
+  "artifacts": {
+    "final-acceptance-audit.json": {
+      "sha256": "7df1d0272cb24d454bffaa703443a4f14d0dcda5709a22d085ac32a9f9f17207",
+      "bytes": 5738
+    },
+    "final-citation-transfer-audit.json": {
+      "sha256": "a62a6368a887589db6c671bb812856282ea5434839b17d6eddb193a11f2035eb",
+      "bytes": 39
+    },
+    "final-frozen-snapshots.json": {
+      "sha256": "268d3d056a661ad78d9cf1a569abdf92a503e5c43402124daa7a31e094b820f9",
+      "bytes": 23928900
+    },
+    "final-expanded-sources.json": {
+      "sha256": "7cca5a96bfbbf1e6d50a9efc4cd00473ff477c2f13f046c38839b754b7339522",
+      "bytes": 106313520
+    },
+    "phase4-after-502.json": {
+      "sha256": "f159a0cd49ae950ae07e984690e7b4303fd682a19538e9f321d0b7332a3a1df6",
+      "bytes": 111157674
+    },
+    "final-lifecycle-isolated-ui.txt": {
+      "sha256": "7946466e301a14886695aa1dadd5cc8f141e483235963a23f3148bc14f854da9",
+      "bytes": 2641
+    },
+    "final-form-contract.txt": {
+      "sha256": "2147e723018d342a48aba1da1eefd88641b8466c5b54a368cd23494026af377e",
+      "bytes": 144872
+    },
+    "final-mutation.txt": {
+      "sha256": "ce8862c6532cebe0548866a17624875ff939a59cd2da61d13adf565a06cd3f2f",
+      "bytes": 215
+    },
+    "final-field-contract.txt": {
+      "sha256": "dca5472aaa353c5a13006a4ec152bb3bda7425c62ba05cf9e9668c5d99a79188",
+      "bytes": 183
+    },
+    "final-build.txt": {
+      "sha256": "73aff8308e5a0b2d7e3b005d5d0c2398af806922fdf49ae9682d6464c527f18c",
+      "bytes": 12965
+    },
+    "approval-proxy-before.txt": {
+      "sha256": "ae7c5a53ccdf534f37f70863689072fbc8c9727f5a8ddccc7241ff3669358298",
+      "bytes": 61368
+    },
+    "approval-ui-regression.txt": {
+      "sha256": "56223d574f4cb2a18ca55514b717b14f4f11a0b81fbc0ff5d71d9bfa788f2cfa",
+      "bytes": 2493
+    },
+    "phase4-proxy-failure-log.txt": {
+      "sha256": "66bcb81b14841488b2783e3860291e1a7472bd45d1628fa21a3fe8d5c5e763aa",
+      "bytes": 191
+    }
+  },
+  "limitations": [
+    "502 recovery branch passed isolated UI replay; not naturally retriggered on approved paper",
+    "No remote CI or push",
+    "Historical unrelated failed regressions baseline-proven and separately reported",
+    "Fourth-round full successful raw/IR archival gap retained"
+  ],
+  "time": "2026-11-05T06:41:54.317574+00:00"
+}

@@ -27,6 +27,17 @@ export function paperEditorFromWorkdraft(current: Record<string, any>, content: 
   return { ...editable, ...metadata, id: paperId }
 }
 
+/** 交接响应超时可重试同一次幂等操作，不能重新核对或生成另一个操作编号。 */
+export async function commitPaperReview(payload: Record<string, unknown>) {
+  try {
+    return await api.post('/api/rag/evidence/review-commit', payload)
+  } catch (error) {
+    const status = (error as ApiError).status
+    if (!payload.review_request_id || (status !== 502 && status !== 504)) throw error
+    return api.post('/api/rag/evidence/review-commit', payload)
+  }
+}
+
 export interface ReviewClassifications {
   superconductorKind: string
   materialFamilies: FamilySelection[]

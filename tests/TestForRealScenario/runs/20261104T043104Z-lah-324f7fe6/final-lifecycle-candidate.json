@@ -1,0 +1,22 @@
+{
+  "path": "/var/folders/j8/21skwz6d3c1810rwvq3kpjf00000gn/T/lah-lifecycle-final-qzjf343l",
+  "head": "a080ac87be1fec64296c7e1f951875f5ff7ebc67",
+  "files": {
+    "docs/overview/02_Decentralized_Maintenance_and_Verification/literature-and-record-review.md": "2096dda7c3c5320b32e9d878c4dc0a9c705cb84a1eeda72bc876e8a88172e49b",
+    "docs/specs/176-scientific-form-filling/validation.md": "07bd33b64063a99afc82bcd055396f761139e67a122d315db80d76870f21fdee",
+    "docs/specs/189-tc-shared-context/tasks.md": "71450ebc06d851ff34b25b8020902ae283f195785cabea9a6d94c48090395a8f",
+    "docs/specs/189-tc-shared-context/validation.md": "76e29017f09d47bab337953f923bd31f7c6e33a237d11424a37becba597c2f4c",
+    "docs/specs/192-handoff-snapshots/plan.md": "04984141fdf4c3c18c261cc61ac77f8d543954c507232a09c3b8ac6f7e445cb7",
+    "docs/specs/192-handoff-snapshots/tasks.md": "4391e6b83436851238407fbb2a6c1a1261fd8c5cc6c8d710b7fd8ff35e528d45",
+    "docs/specs/192-handoff-snapshots/validation.md": "f7a910b66b86a988ef73634dd87c63609c4192e3f21068e6c299c9b03ed6359b",
+    "docs/specs/194-unified-model-review/validation.md": "b0886dbbfcb3c866f6888bbb02c5a841a68a05eca534554a47ae9a6f2e3083de",
+    "frontend/src/components/PaperEditView.tsx": "f00ef5635896281da65eae3f176522776c1359c324d580b9a60a4f8e472fb87d",
+    "frontend/src/lib/paperReview.ts": "e85c672145e2d256f6d8133e2ecb6a01db306b2bfcd0fa42a46d1e5d15ddbdc6",
+    "frontend/src/pages/AdminPage.tsx": "84da1e2e2b657965edd8b68c8f281cce4a4d160fe8c0397925ae7176bdd3459e",
+    "frontend/src/pages/AdminPaperEditPage.tsx": "f97177c341be28cb2a2e86990684ec0b258d08167442f38864da0b3e36d08f78",
+    "tests/01_decentralized_uploading/handoff-admin-dialog.test.tsx": "96242e7f0c2cf671fad0e035b80a0abdd5c51fa7722cf7e5c3ef4bd82dfda486",
+    "tests/TestForRealScenario/LaH-20261104-result.md": "9f7c6a3185ea780374d9d2c99e89c2226b33c1ace0ad1e0cdaae59f7cd9ca0c9",
+    "tests/01_decentralized_uploading/paper-review-transport.test.tsx": "7714fb3c21e0f9482470f77285baf7e1adbcdabc17a7b205ab82502178df0b95",
+    "tests/01_decentralized_uploading/paper-detail-review-notice.test.tsx": "be2fe19d704bb401bf01373059b06ee8606de6f275aea75342f325ea8bfadef1"
+  }
+}

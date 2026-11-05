@@ -23,7 +23,7 @@ import {
 import { type User, useAuth } from '../context/AuthContext'
 import { api } from '../lib/api'
 import PaperReviewStatusSelect from '../components/PaperReviewStatusSelect'
-import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload } from '../lib/paperReview'
+import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, commitPaperReview } from '../lib/paperReview'
 import { Link as RouterLink, useSearchParams } from 'react-router-dom'
 import ChartGroupEditor from '../components/ChartGroupEditor'
 import NewsManager from '../components/NewsManager'
@@ -258,7 +258,7 @@ const AdminPage: React.FC<AdminPageProps> = ({ mode = 'admin', embedded = false,
       if (!evidence) return
       const key=JSON.stringify([reviewDlg.paper.id,reviewStatus,reviewComment])
       if(reviewOperation.current?.key!==key)reviewOperation.current={key,id:crypto.randomUUID()}
-      await api.post('/api/rag/evidence/review-commit', { ...payload, ...evidence, paper_id: reviewDlg.paper.id,
+      await commitPaperReview({ ...payload, ...evidence, paper_id: reviewDlg.paper.id,
         review_request_id:reviewOperation.current.id })
       setSnackbar(t('admin.reviewDone'))
       setReviewDlg({paper:null!,open:false})

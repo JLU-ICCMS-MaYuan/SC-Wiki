@@ -118,7 +118,11 @@ const PaperEditView: React.FC<PaperEditViewProps> = ({ paper, onBack, onOpenMyPa
         <Alert severity="info" sx={{ mb: 1 }}>{t('paperDetail.revisionAvailable')}</Alert>
         {paper.review_comment && <Alert severity="warning" sx={{ mb: 1 }}>{paper.review_comment}</Alert>}
         <Button component={Link} variant="contained" to={`/papers/${paper.id}/revise`} target="_blank" rel="noopener noreferrer">{t('paperDetail.revise')}</Button>
-      </Box> : <Alert severity="info" sx={{ mb: 2 }}>{t('paperDetail.submittedNotice')}</Alert>}
+      </Box> : <Alert severity={paper.review_status === 'approved' ? 'success' : 'info'} sx={{ mb: 2 }}>
+        {paper.review_status && paper.review_status !== 'pending'
+          ? `${t('paperDetail.reviewStatus')}: ${reviewStatusLabel(dict, paper.review_status)}`
+          : t('paperDetail.submittedNotice')}
+      </Alert>}
 
       <Box sx={{
         display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: 3, alignItems: 'start',
