@@ -74,6 +74,7 @@ def main():
     assert status == 200 and MODEL in [item["id"] for item in models["data"]]
     native = embed(TEXTS)
     reduced = embed(TEXTS, 1536)
+    embed(TEXTS[1], 32)
     for index, text in enumerate(TEXTS):
         single = embed(text)[0]
         assert sum(x * y for x, y in zip(single, native[index])) > 0.999
@@ -85,6 +86,7 @@ def main():
                        "related": round(related, 6), "unrelated": round(unrelated, 6)})
     invalids = [
         {"model": MODEL, "input": "test", "dimensions": 0},
+        {"model": MODEL, "input": "test", "dimensions": 31},
         {"model": MODEL, "input": "test", "dimensions": 2561},
         {"model": "wrong-model", "input": "test"},
         {"model": MODEL, "input": []},

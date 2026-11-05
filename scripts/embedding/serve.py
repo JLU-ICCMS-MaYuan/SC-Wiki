@@ -28,7 +28,8 @@ def main():
         "--max-model-len", "8192", "--max-num-seqs", "4",
         "--max-num-batched-tokens", "8192", "--gpu-memory-utilization", "0.65",
         "--pooler-config", json.dumps({"pooling_type": "LAST", "normalize": True}),
-        "--hf-overrides", json.dumps({"is_matryoshka": True}),
+        "--hf-overrides", json.dumps({"is_matryoshka": True,
+                                      "matryoshka_dimensions": list(range(32, 2561))}),
         "--enforce-eager", "--disable-log-requests", "--disable-uvicorn-access-log",
     ]
     os.execv(sys.executable, command)
