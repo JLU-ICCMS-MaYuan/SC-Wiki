@@ -21,7 +21,7 @@ import {
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { useNavigate, useParams } from 'react-router-dom'
 import PaperReviewStatusSelect from '../components/PaperReviewStatusSelect'
-import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, type ReviewClassifications } from '../lib/paperReview'
+import { initialPaperReviewStatus, loadPaperReviewSource, resolveReviewClassifications, paperReviewPayload, paperEditorFromWorkdraft, type ReviewClassifications } from '../lib/paperReview'
 import { api } from '../lib/api'
 import { useAuth } from '../context/AuthContext'
 import {
@@ -130,7 +130,7 @@ const AdminPaperEditPage: React.FC = () => {
       setEditReviewSaving(true)
       try {
         await fieldSaver.current.save(next)
-        setEditForm(next.paper); setEditMaterialFamilies(next.paper.material_families)
+        setEditForm(current => paperEditorFromWorkdraft(current, next.paper, paperId)); setEditMaterialFamilies(next.paper.material_families)
         setEditMaterialStates(next.material_states)
         return true
       } finally { setEditReviewSaving(false) }
@@ -250,14 +250,14 @@ const AdminPaperEditPage: React.FC = () => {
         const staged = await api.get<{ staged: boolean; draft: any }>(`/api/rag/evidence/draft-state?target=paper&target_id=${paperId}`)
         setParsingWorkflow(staged.draft?._parsing_workflow)
         if (staged.staged) {
-          setEditForm(staged.draft.paper)
+          setEditForm(current => paperEditorFromWorkdraft(current, staged.draft.paper, paperId))
           setEditMaterialFamilies(staged.draft.paper.material_families || [])
           setEditMaterialStates(staged.draft.material_states || [])
           setFixedContract(staged.draft._form_contract_version === 1)
           setEditStructureCandidates(staged.draft.structure_candidates || [])
           setEditStructuralObservations(staged.draft.structural_observations || [])
         } else if (staged.draft?._form_contract_version === 1) {
-          setEditForm(current => ({ ...current, ...staged.draft.paper }))
+          setEditForm(current => paperEditorFromWorkdraft(current, staged.draft.paper, paperId))
           setEditMaterialStates(staged.draft.material_states || [])
           setFixedContract(true)
           setEditStructureCandidates([])
@@ -299,7 +299,7 @@ const AdminPaperEditPage: React.FC = () => {
       fieldSaver.current = createFieldDraftSaver({target:'paper',target_id:String(paperId)})
       fieldSaver.current.initialize(draft)
       setParsingWorkflow(draft._parsing_workflow)
-      setEditForm(draft.paper); setEditMaterialFamilies(draft.paper.material_families || [])
+      setEditForm(current => paperEditorFromWorkdraft(current, draft.paper, paperId)); setEditMaterialFamilies(draft.paper.material_families || [])
       setEditMaterialStates(draft.material_states || []); setEditStructureCandidates(draft.structure_candidates || [])
       setEditStructuralObservations(draft.structural_observations || [])
       await evidenceWorkflow.restore({target:'paper',target_id:String(paperId)}, true, fieldState)

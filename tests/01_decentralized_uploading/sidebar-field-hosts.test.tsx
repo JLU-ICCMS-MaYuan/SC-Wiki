@@ -83,6 +83,32 @@ beforeEach(()=>{
 })
 afterEach(()=>{cleanup();clearFormDefinitionCache();vi.clearAllMocks()})
 
+it.each(['admin','superadmin'])('%s 恢复不含程序身份的审核工作稿仍显示整稿，当前空值不回退正式缓存',async role=>{
+ auth.role=role
+ delete draft.paper.id
+ delete draft.paper.review_status
+ delete draft.paper.uploaded_by_user_id
+ draft.paper.title='Saved working title'
+ draft.paper.summary=null
+ const original=vi.mocked(api.get).getMockImplementation()!
+ vi.mocked(api.get).mockImplementation(async path=>{
+  if(path==='/api/admin/papers/177')return {...structuredClone(draft.paper),id:177,
+   title:'Formal cached title',summary:'Old summary',review_status:'pending',created_at:'2026-11-05T00:00:00Z',
+   material_states:structuredClone(draft.material_states)} as never
+  if(path.includes('/draft-state'))return {version:'staged-current',draft:structuredClone(draft),staged:true} as never
+  return original(path)
+ })
+ render(<LanguageProvider><MemoryRouter initialEntries={['/admin/papers/177/edit']}>
+  <Routes><Route path="/admin/papers/:id/edit" element={<AdminPaperEditPage/>}/></Routes>
+ </MemoryRouter></LanguageProvider>)
+ expect(await screen.findByDisplayValue('Saved working title')).toBeVisible()
+ expect(screen.getByText('ID: 177')).toBeVisible()
+ expect(screen.getByText(/^创建:/)).toHaveTextContent('2026')
+ expect(document.querySelector('[data-issue-field="paper.summary"] textarea')).toHaveValue('')
+ expect(vi.mocked(api.patch)).not.toHaveBeenCalled()
+ expect(vi.mocked(api.put)).not.toHaveBeenCalled()
+})
+
 async function open(kind:string){
  auth.role=kind==='superadmin'?'superadmin':'admin'
  render(<LanguageProvider><MemoryRouter initialEntries={['/admin/papers/177/edit']}>

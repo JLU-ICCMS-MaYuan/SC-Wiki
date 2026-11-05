@@ -27,3 +27,9 @@ test_manuscript_handoffs.py、test_workdraft_ownership.py、test_handoff_lifecyc
 最终候选独立于共享工作区导出；TypeScript 与生产构建通过。汇总见 [联合验证](../192-handoff-snapshots/assets/verification.json)。Tc 的配对缓存、首次保存基线、事务回滚和批量审核均有故障回放；RR 两会话覆盖与陈旧交接检查使用真实 MySQL。冻结谱只读取提供的数据，人工资料在合法经手人之间覆盖，原提供者与旧附件保持。
 
 [独立旧回归基线](../192-handoff-snapshots/assets/legacy-baseline.json)记录两套旧管理端用例在 a871fbbd 与本轮均为 6 通过／18 失败，逐项状态一致；旧 human 用例两侧均因重复审批当前已通过字段而失败。原测试保留，没有将其计入本轮通过或删除断言掩盖失败。
+
+## 2026-11-05：真实 La-H 交接页恢复补验
+
+论文 1429 在 pending 状态打开审核编辑页，接口成功但主体缺失：staged.draft.paper 不含程序 ID，恢复后 editForm.id 门槛阻止渲染。按既有数据所有权修复四个恢复入口，当前科学内容来自工作稿，身份和版本来自服务端，ID来自路由；显式空值保留。
+
+管理员、超级管理员完整宿主反例修复前 2 失败、修复后 2 通过；整个侧栏宿主 31 通过，四宿主表单契约 184 通过，12 项变异均检出，科学字段契约及前端构建通过。真实 Chrome 同一 1429／DOI 刷新后主体、ID、审核控件和当前题名恢复。日志位于 tests/TestForRealScenario/runs/20261104T043104Z-lah-324f7fe6/admin-identity-*.txt，网页事件 20261105T060701017033Z-a7068df9.json。此处尚未执行退回，不将页面修好视为业务验收完成。

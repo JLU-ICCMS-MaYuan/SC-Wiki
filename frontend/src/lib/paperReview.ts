@@ -10,6 +10,23 @@ export const PAPER_REVIEW_OPTIONS = [
 
 export const initialPaperReviewStatus = (status?: string) => status === 'rejected' ? 'rejected' : 'pending'
 
+const REVIEW_SERVER_FIELDS = ['id', 'created_at', 'updated_at', 'review_status', 'content_revision',
+  'approved_revision', 'uploaded_by_user_id', 'reviewed_by_user_id'] as const
+
+export function paperEditorFromWorkdraft(current: Record<string, any>, content: Record<string, any>, paperId: number) {
+  // 工作稿拥有可编辑内容；路由和正式详情拥有身份、权限状态及版本元数据。
+  const editable = { ...content }
+  const metadata: Record<string, any> = {}
+  for (const key of REVIEW_SERVER_FIELDS) {
+    delete editable[key]
+    if (Object.prototype.hasOwnProperty.call(current, key)) metadata[key] = current[key]
+  }
+  if (!Object.prototype.hasOwnProperty.call(content, 'source_file_path') && 'source_file_path' in current) {
+    metadata.source_file_path = current.source_file_path
+  }
+  return { ...editable, ...metadata, id: paperId }
+}
+
 export interface ReviewClassifications {
   superconductorKind: string
   materialFamilies: FamilySelection[]
