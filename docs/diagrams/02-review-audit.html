@@ -41,9 +41,9 @@
       "title": "进入审核工作台",
       "summary": "用户中心检查入口或独立工作区",
       "owner": "Go 权限中间件 / React 工作台",
-      "description": "角色校验后进入独立工作台，或从用户中心“检查记录 / 待检查”进入对应列表与独立检查页；个人页每页 3 条、独立页每页 20 条，筛选、分页与旧响应保护见详情。超管统计还读取用户和管理员申请，并非只请求论文。",
+      "description": "角色校验后进入独立工作台，或从用户中心“检查记录 / 待检查”进入对应列表与独立检查页；同一论文在当前用户的检查记录中只保留一个入口，当前 pending 只在待检查队列跟踪。列表按最新正式交接派生的 workflow_status 筛选和展示，checked_status 仅表示本人历史决定。个人页每页 3 条、独立页每页 20 条，分页与旧响应保护见详情。超管统计还读取用户和管理员申请。",
       "notes": [],
-      "code": "frontend/src/components/AccountReviews.tsx；frontend/src/pages/AdminWorkspacePage.tsx / AdminPage.tsx；goserver/middleware/auth.go",
+      "code": "frontend/src/components/AccountReviews.tsx / MyPapersList.tsx；frontend/src/pages/AdminWorkspacePage.tsx / AdminPage.tsx；goserver/handlers/account_contributions.go；goserver/middleware/auth.go",
       "links": [
         {
           "href": "02-review-audit-details.html#workbench-entry",
@@ -112,9 +112,9 @@
       "title": "逐条人工裁决",
       "summary": "理由绑定当前值与来源版本",
       "owner": "React 侧栏 / Python field-decision",
-      "description": "理由绑定当前值与来源版本。详细行为、边界和来源见独立详情页。",
+      "description": "认可具备人工通过资格的当前内容可直接人工审核通过，不填理由、不调用模型；普通非空修改按字段规则保存理由、证据或缺证说明并完成必要核对。允许留空的字段在人工资料完整时可人工确认留空，也可主动进行单字段模型核对；决定绑定当前版本，详细边界见详情页。",
       "notes": [],
-      "code": "backend/api/evidence.py#/field-decision；文档依据：literature-and-record-review.md#保存与人工审核决定",
+      "code": "backend/api/evidence.py#/field-decision；backend/ingest/field_decisions.py；backend/ingest/empty_field_review.py；文档依据：literature-and-record-review.md#保存与人工审核决定",
       "links": [
         {
           "href": "02-review-audit-details.html#manual-decision",

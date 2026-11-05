@@ -58,6 +58,7 @@
       "owner": "Python RAG 服务",
       "description": "health 分别检查 RAG 数据库和 Qdrant，并以 bool(get_llm_config().api_key) 得出 chat_available。该字段只表示当前请求上下文里的 API key 非空，不验证密钥有效、模型可访问或供应商可用。",
       "notes": [
+        "health 不主动探测独立 Embedding 服务或 HTTPS 中转；available=true 不代表语义检索所用 Embedding 已验证可用，实际调用失败仍进入各入口既有异常分支。",
         "主应用数据库正常不代表独立 RAG 数据库正常。",
         "个人配置与服务端模型目录按请求解析，不把匿名或登录身份当作绕过配置校验的方式。",
         "真实供应商连通性由独立 /llm/test-connection 请求验证。"
@@ -197,7 +198,8 @@
       "description": "当前请求解析后的 API key 为空时，chat_available=false，聊天入口报告 LLM 问答未配置；直接 search 不依赖聊天 key。key 非空也不代表凭据有效，后续真实模型调用仍可能失败。",
       "notes": [
         "不要把 chat_available=true 写成凭据已经验证。",
-        "独立 test-connection 才会实际请求供应商。"
+        "独立 test-connection 才会实际请求聊天供应商。",
+        "直接检索不依赖聊天 key，不等于语义检索不需要独立 Embedding 密钥或服务；聊天 LLM 与 Embedding 是两套配置。"
       ],
       "code": "backend/rag/service.py::health / _ensure_chat_available",
       "links": [{"href": "05-rag-qa.html#llm-missing", "label": "返回主干对应支线"}]
@@ -231,7 +233,8 @@
       "description": "search engine 自动或按 mode 选择 formula、elements_exact、elements_combination、elements_contained、paper、semantic。top_k 仅作为 paper 模式的 SQL limit，以及实际执行的 Qdrant 语义检索数量；formula／elements 结构化 SQL 本身不按 top_k 截断，但未命中后的语义补召回仍使用 top_k。",
       "notes": [
         "paper 模式调用 search_papers(..., limit=top_k)；formula／elements 的 SQL 搜索函数不接收 top_k。",
-        "semantic 或 superconductors 未命中时实际调用 search_by_semantics(..., top_k=top_k)，因此 formula／elements 未命中后的语义补召回仍受 top_k 控制。",
+        "semantic 或 superconductors 未命中时实际调用 search_by_semantics(..., top_k=top_k)，因此 formula／elements 未命中后的语义补召回仍受 top_k 控制。问题先经 embed_texts(..., purpose=query) 向量化，再查 Qdrant；空指令保持原请求，配置指令仅包装 query。",
+        "默认或逻辑 paper_chunks 解析到 QDRANT_COLLECTION_NAME 指定的当前主集合；显式传入的其他集合仍按原名查询。",
         "这条路径不运行 Mentor 工具选择、ROUTE_PROMPT 或 Inspiration 评审。",
         "结构化检索命中不保证还会执行向量检索；paper 结果为空且没有 superconductors 时可进入语义补召回。",
         "此处不能根据 fusion.py 或 core/engine.py 的存在宣称每次直接搜索都执行 RRF 与重排。"
@@ -285,7 +288,7 @@
       "description": "explore=true 时，service 在线程中运行 Inspiration run，初始 stage=clarify、ideas=[]。clarify_node 根据当前对话判断信息是否足够：回复含 READY: 才把 stage 置为 design 并进入设计检索、想法生成和 discuss；否则经 clarify_end 提前结束。reviewer 仅在 ideas 与 evidence_text 均非空时于 discuss 内额外调用，跳过不妨碍 discuss。它不是直接 /api/rag/search，也不是普通 Mentor 的一次工具调用。",
       "notes": [
         "信息不足时只问一个关键澄清问题，不执行后续设计、discuss 或 reviewer。",
-        "只有 READY 才进入 design_router→design_search→design_curator→design_evidence→discuss 的完整路径。",
+        "只有 READY 才进入 design_router→design_search→design_curator→design_evidence→discuss 的完整路径。设计检索同样调用 search_by_semantics，默认或逻辑 paper_chunks 使用当前配置主集合；显式传入的其他集合仍按原名查询，不能宣称这些集合均已由 #222 重建。",
         "想法与 discuss 由检索证据加模型生成，reviewer 仅按条件额外执行；这些输出不构成科研结论，完整路径执行期间不逐步推送 review verdict。"
       ],
       "code": "backend/rag/agent/graph.py::clarify_node / clarify_router / build_graph / run；backend/rag/service.py::chat_stream",
@@ -354,15 +357,15 @@
       "kind": "wait",
       "label": "按需选语义工具",
       "title": "Qdrant 语义工具",
-      "summary": "search_literature 召回文献片段",
-      "owner": "Mentor 工具 / Qdrant",
-      "description": "search_literature 以完整自然语言问题调用 search_chunks，从 Qdrant 取回文献片段并把结果文本交回 Mentor。它自己的 top_k 是工具参数，不代表普通 chat 请求级 rerank_top_k 已执行重排。",
+      "summary": "问题经独立 Embedding 向量化，再查当前 Qdrant 主集合",
+      "owner": "Mentor 工具 / Embedding / Qdrant",
+      "description": "search_literature 将完整问题交给 search_by_semantics；问题经独立 OpenAI 兼容 Embedding 接口向量化，可按 EMBEDDING_QUERY_INSTRUCTION 添加仅用于 query 的任务指令，再查询当前 Qdrant 主集合。当前本机验收链使用 Qwen3-Embedding-4B，经阿里云 HTTPS 入口及受限常驻 SSH 反向隧道调用 4090；文献正文不加 query 指令。工具自己的 top_k 不代表普通 chat 请求级 rerank_top_k 已执行重排。",
       "notes": [
         "空片段返回未找到文本；异常返回搜索失败文本。",
         "是否调用以及传入何种工具参数由模型决定。",
         "直接 search API 的语义补召回是另一入口，不能与此混成固定串联。"
       ],
-      "code": "backend/rag/agent/tools.py::search_literature；backend/rag/tools/chroma.py；backend/rag/search/vector_search.py",
+      "code": "backend/rag/agent/tools.py::search_literature；backend/rag/tools/chroma.py；backend/ingest/embedder.py；backend/rag/search/vector_search.py；backend/rag/config.py；docs/specs/222-qwen3-embedding-service/validation.md",
       "returnTo": "fuse-rank",
       "returnLabel": "工具返回",
       "links": [{"href": "05-rag-qa.html#vector-search", "label": "返回主干对应支线"}]

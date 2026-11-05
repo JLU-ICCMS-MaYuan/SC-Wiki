@@ -159,11 +159,11 @@
     {
       "id": "ai-generate",
       "title": "读取前文、检索并生成",
-      "summary": "任务开始读前文；每次检索至多8片段",
+      "summary": "任务开始读前文；问题经独立 Embedding 检索至多8片段",
       "owner": "Python 生成器",
-      "description": "Worker 认领前非阻塞获取全局容量；同题 FIFO 任务开始时只把 origin=ai 且 visible 的可用答案纳入前文，公开真人答案不进入模型前文。每次新语义检索最多8片段，再按来源与前文引用规则生成。详细行为、边界和来源见独立详情页。",
+      "description": "Worker 认领前非阻塞获取全局容量；同题 FIFO 任务开始时只把 origin=ai 且 visible 的可用答案纳入前文，公开真人答案不进入模型前文。问题经独立 Embedding 向量化后查询当前 Qdrant 主集合，每次新检索最多8片段，再按来源与前文引用规则生成。详细行为、边界和来源见独立详情页。",
       "notes": [],
-      "code": "backend/community/answers.py::run；backend/community/generation.py",
+      "code": "backend/community/answers.py::run；backend/community/generation.py；backend/ingest/embedder.py；backend/rag/search/vector_search.py",
       "links": [
         {"href": "06-community-details.html#ai-generate", "label": "展开生成与检索细节"},
         {"href": "06-community-details.html#capacity-busy", "label": "分支：capacity_busy"},
@@ -417,8 +417,8 @@
       "label": "检索异常",
       "title": "retrieval_failed",
       "summary": "检索失败，不冒充空库",
-      "owner": "Python 生成器 / Qdrant",
-      "description": "公开库非空但语义检索发生异常时以 retrieval_failed 失败，不按无资料继续生成。详细行为、边界和来源见独立详情页。",
+      "owner": "Python 生成器 / Embedding / Qdrant",
+      "description": "公开库非空但数据库检查、Embedding 请求、中转或 Qdrant 查询发生异常时以 retrieval_failed 失败，不按无资料继续生成，也不自动回退付费 Embedding。详细行为、边界和来源见独立详情页。",
       "notes": [],
       "code": "backend/community/generation.py::retrieve_sources",
       "links": [{"href": "06-community-details.html#retrieval-failed", "label": "展开检索失败分支"}]

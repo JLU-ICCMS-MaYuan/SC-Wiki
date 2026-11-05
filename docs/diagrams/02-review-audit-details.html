@@ -44,6 +44,8 @@
       "owner": "Go 权限中间件 / React 工作台",
       "description": "后端路由组按角色校验 active admin 或 active superadmin。AccountReviews 在用户中心提供“检查记录 / 待检查”标签：前者复用 MyPapersList，后者嵌入 AdminPage；“打开检查”通过 AdminWorkspacePage 的 section=papers&review_tab=... 进入独立检查工作区，独立路由壳不会再递归嵌入自身。",
       "notes": [
+        "检查记录按当前用户每篇论文只取最近一次审核事件作为列表入口，但当前状态由最新正式交接派生为 workflow_status；当前 pending 被排除，只进入待检查队列，筛选和总数在分页前使用同一状态口径。",
+        "前端状态显示优先 workflow_status，checked_status 不再覆盖当前状态；返修或再审核期间，旧批准版的公开状态与私有工作流状态分开。",
         "个人页嵌入列表 pageSize=3，fullPage 独立页 pageSize=20；检查记录与待检查均按筛选条件、limit/offset 和页码加载，AdminPage 另支持关键词、材料、年份与审核状态筛选。",
         "AdminPage.papersRequest 与 MyPapersList.requestID 在每次加载时递增，只有最新请求能更新列表、总数和加载状态；卸载或新筛选后的旧响应不能覆盖当前页。",
         "loadStats 对所有角色读取 /api/admin/papers/all?limit=1&offset=0 取得论文总数；superadmin 还读取 /api/superadmin/users 与 /api/superadmin/admin-applications?status=pending，分别统计用户和待审管理员申请，因此不是只请求论文数据。",
@@ -132,12 +134,14 @@
       "title": "逐条人工裁决",
       "summary": "理由绑定当前值与来源版本",
       "owner": "React 侧栏 / Python field-decision",
-      "description": "认可当前内容时可直接点击人工审核通过，不填理由、不调用模型；人工修改理由与补充来源按实际字段规则保存，并绑定当前值和依据版本。",
+      "description": "未修改且具备人工通过资格的当前内容可直接人工审核通过，不填理由、不调用模型。普通非空修改须保存人工理由及证据或缺证说明，并完成所需模型核对；允许留空的字段清空后，在人工资料完整时可人工确认留空，后端保存为 field_decision.action=approve、mode=empty，人工路径不调用模型，也可主动进行单字段模型核对。人工决定绑定当前值、来源与适用范围；留空决定另绑定 manual_evidence_hash，相关版本变化后旧决定失效。",
       "notes": [
         "人工确认与修改值是两个独立动作。",
+        "空值仅包括 None、空白字符串、空数组或空对象；0、false、unknown 不属于空值。必填、派生只读、结构及必要关系不能通过清空字段绕过。",
+        "合法当前留空结果保存成功且没有其他问题时才消红；普通保存、资料不全、处理中或技术失败均不授予通过。",
         "未保存输入、失效结果和必要人工材料缺失仍会阻止正式批准。"
       ],
-      "code": "backend/api/evidence.py#/field-decision；文档依据：literature-and-record-review.md#保存与人工审核决定",
+      "code": "backend/api/evidence.py#/field-decision；backend/ingest/field_decisions.py；backend/ingest/empty_field_review.py；backend/ingest/field_review.py；文档依据：literature-and-record-review.md#保存与人工审核决定",
       "links": [
         {
           "href": "02-review-audit.html#manual-decision",

@@ -30,7 +30,7 @@
       </div>
     </aside>
   </div>
-  <p class="boundary">上传与审核形成批准数据；公开检索与引用图读取当前批准事实，问答按工具分别读取 MySQL、Qdrant 或旧 Neo4j。社区与预测独立进入；预测不回写主库。</p>
+  <p class="boundary">上传与审核形成批准数据；普通身份的公开检索与引用图读取当前批准事实，管理员检索扩展不改变引用图范围。问答按工具分别读取 MySQL、Qdrant 或旧 Neo4j。社区、热点与预测独立进入；热点不进入正式论文库，预测不回写主库。</p>
   <footer><span>依据本机实际源码（含工作区改动）静态核对；不代表模型科学结果或运行服务已验收。</span><a href="index.html">返回全站主流程 ↑</a></footer>
 </main>
 <script type="application/json" id="flow-data">
@@ -41,7 +41,7 @@
       "step": "总入口",
       "title": "访问 SC-Wiki",
       "summary": "默认检索；按目标进入各功能",
-      "description": "应用根路径默认进入公开检索。上传需合法账号；公开读取无需先上传或逐个运行所有功能。社区与 Tc 估算是独立入口。",
+      "description": "应用根路径默认进入公开检索。上传需合法账号；公开读取无需先上传或逐个运行所有功能。社区、热点与 Tc 估算均有独立入口，引用图和问答也可直接进入。",
       "code": "frontend/src/App.tsx；frontend/src/LazyRoutes.tsx",
       "owner": "访客 / 用户",
       "links": [
@@ -102,8 +102,8 @@
       "id": "search",
       "module": "03",
       "title": "检索与发现",
-      "summary": "从当前批准版查论文、材料状态与独立结构",
-      "description": "Go 查询主库并按论文或材料状态去重分页；前端并行查询 Python 独立结构。详情、Tc 图表和材料状态导出是可选出口，不强制串行进入知识图谱或问答。",
+      "summary": "按身份查当前版本论文、材料状态与独立结构",
+      "description": "Go 查询主库并按论文或材料状态去重分页；前端并行查询 Python 独立结构。普通身份仅限当前批准版，已批准管理员和超级管理员可按 approved、pending、rejected 检索当前版本。详情、Tc 图表和材料状态导出是可选出口。",
       "code": "goserver/handlers/search_results.go；backend/api/structural_records.py；frontend/src/components/SearchResults.tsx",
       "owner": "Go API / 前端",
       "kind": "result",
@@ -120,8 +120,8 @@
       "id": "community",
       "module": "06",
       "title": "研究社区",
-      "summary": "账号、贡献统计与 AI 讨论",
-      "description": "榜单、统计和公开 AI 讨论可分别读取；普通用户与普通管理员只读。超级管理员创建问题不会自动回答，须在问题详情再次显式选择模型才排队。与上传审核流程分别进入。",
+      "summary": "账号、贡献统计与公开问答",
+      "description": "榜单、统计和公开问题与答案（含 AI 与真人来源）可分别读取；普通用户与普通管理员只读。超级管理员创建问题不会自动回答，须在问题详情再次显式选择模型才排队。与上传审核流程分别进入。",
       "code": "goserver/handlers/auth.go；backend/api/community_ai.py",
       "owner": "访客 / 用户 / 超级管理员",
       "attachTo": "entry",
@@ -132,6 +132,24 @@
         {
           "label": "展开社区主干",
           "href": "06-community.html"
+        }
+      ]
+    },
+    {
+      "id": "news",
+      "title": "超导快讯与最新论文",
+      "summary": "独立采集与资讯库 → 公开三栏及诺奖展陈",
+      "description": "/news 从主导航直接进入。独立调度与资讯 Worker 采集、规范化并保存公开资讯，前端读取 News、Preprints、Articles 三栏及人工快讯，并提供诺奖人物展陈。自动发现不等于论文入库，不进入正式审核、引用图或 PDF 解析主链。",
+      "code": "backend/news/scheduler.py；backend/news/service.py；goserver/handlers/news_feed.go；frontend/src/pages/NewsPage.tsx",
+      "owner": "资讯调度与 Worker / Go API / 前端",
+      "attachTo": "entry",
+      "side": "left",
+      "kind": "result",
+      "label": "独立热点入口",
+      "links": [
+        {
+          "label": "文字说明与实现依据",
+          "href": "../overview/news.md"
         }
       ]
     },
@@ -178,8 +196,8 @@
       "module": "05",
       "title": "检索增强问答",
       "summary": "问题 → Mentor 按需工具 → 流式回答",
-      "description": "普通问答由 Mentor 按需调用 MySQL 结构化、Qdrant 语义或旧 Neo4j 工具，灵感探索走独立图。SSE 输出回答后，前端另行解析可访问来源链接；旧 Neo4j 工具不具备公开 MySQL 图的当前批准版本条件。",
-      "code": "backend/rag/agent/mentor.py；backend/rag/agent/graph.py；backend/rag/agent/tools.py",
+      "description": "普通问答由 Mentor 按需调用 MySQL 结构化、Qdrant 语义或旧 Neo4j 工具，灵感探索走独立图。语义检索共用独立 Embedding；当前本机已接入 Qwen3-Embedding-4B，经阿里云 HTTPS 与受限常驻 SSH 中转，阿里云生产站点自身模型和索引未切换。SSE 输出回答后，前端另行解析可访问来源链接；旧 Neo4j 工具不具备公开 MySQL 图的当前批准版本条件。",
+      "code": "backend/rag/agent/mentor.py；backend/rag/agent/graph.py；backend/rag/agent/tools.py；backend/ingest/embedder.py；backend/rag/search/vector_search.py",
       "owner": "Python RAG / 模型",
       "attachTo": "public",
       "side": "right",

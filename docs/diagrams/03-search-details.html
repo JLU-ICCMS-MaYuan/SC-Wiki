@@ -81,7 +81,7 @@
       "owner": "React StructuralResults / FastAPI",
       "description": "SearchPage 在同一结果页同时渲染 SearchResults 与 StructuralResults。后者直接调用 POST /api/rag/structural-records/search，并强制 independent_only=true；它不走 Go 的 /api/papers/search/results，也不经过 RAG 搜索层。",
       "notes": [
-        "沿用元素／化学式、关键词、压力、年份、超导类型和审核口径；发送前剔除 tc_min、tc_max、chart_only。",
+        "沿用元素／化学式、关键词、压力、年份和身份对应的审核口径；material_family_id 使用正式材料家族目录，并兼容旧 superconductor_type 别名。发送前剔除 tc_min、tc_max、chart_only。",
         "元素或化学式无效返回 422；结构资料表迁移未就绪返回 503 structural_migration_required。",
         "独立结构请求失败只在本区域显示警告与重试，不清空 Go 论文／状态结果。"
       ],
@@ -98,9 +98,9 @@
       "title": "retained 模型与独立分页",
       "summary": "state_key 为空，按独立总数单独翻页",
       "owner": "FastAPI / SQLAlchemy / MySQL",
-      "description": "查询 paper_structural_records 并 JOIN papers，固定 kind='model'、retention='retained'、paper_revision=content_revision、review_status='approved'、approved_revision=content_revision；independent_only 再限定 state_key IS NULL OR state_key=''。",
+      "description": "查询 paper_structural_records 并 JOIN papers，固定 kind='model'、retention='retained'、paper_revision=content_revision；普通身份另要求 review_status='approved' 且 approved_revision=content_revision，已批准 admin／superadmin 默认覆盖当前版本的 approved、pending、rejected，并可按 review_status 筛选。independent_only 再限定 state_key IS NULL OR state_key=''。",
       "notes": [
-        "Python 分支同样实现组合、精确、化学式、包含四种元素集合匹配；非 approved 审核筛选得到空结果。",
+        "Python 分支同样实现组合、精确、化学式、包含四种元素集合匹配；独立结构与 Go 论文／材料状态查询采用一致的角色范围。",
         "先对完整候选查询 COUNT 得 total，再按 year DESC、paper_id、record_key 排序并应用独立 offset／limit。",
         "前端固定每页 20 条，以 URL structure_page 保存页码；它与 paper_page／state_page 互不共用 total 或翻页状态。"
       ],
@@ -161,11 +161,11 @@
       "owner": "Go API",
       "description": "服务端接收 elements／formula／mode／view 与压力、年份、Tc、关键词等筛选，物性条件只通过状态相关存在查询收紧结果，不成为结果主体。",
       "notes": [
-        "review_status 非 approved 时以 1=0 得到空的公开结果；默认数值范围不额外过滤缺失值。",
+        "普通身份不应用审核状态放宽参数，始终限制在当前批准版本；已批准 admin／superadmin 可使用 approved、pending、rejected 审核筛选。普通前端不发送审核状态参数，服务端仍独立执行权限限制。默认数值范围不额外过滤缺失值。",
         "非法 JSON、模式、元素、上下限、limit／offset 或超过 118 个元素返回 400。",
         "system_key 读取、计数或结果查询失败返回 503，不把数据库错误伪装成空结果；前端可重试。"
       ],
-      "code": "goserver/handlers/search_results.go",
+      "code": "goserver/handlers/search_results.go；frontend/src/pages/SearchPage.tsx；frontend/src/lib/searchNavigation.ts",
       "links": [
         {
           "href": "03-search.html#param-validate",
@@ -175,12 +175,12 @@
     },
     {
       "id": "perm-scope",
-      "title": "公开范围硬约束",
-      "summary": "仅已批准同版本内容可被检索",
+      "title": "身份对应的检索范围",
+      "summary": "普通身份限当前批准版；已批准管理员可按审核状态检索",
       "owner": "Go API / MySQL",
-      "description": "候选查询固定附加 review_status='approved' 与 approved_revision=content_revision，登录用户及管理员也不会经由公开搜索扩大范围。",
+      "description": "普通身份（包括普通登录用户）的候选查询固定附加 review_status='approved' 与 approved_revision=content_revision；已批准 admin／superadmin 可检索当前版本的 approved、pending、rejected，并按审核状态筛选。可见范围由服务端认证身份决定，不能由请求参数越权扩大。",
       "notes": [
-        "审核状态不能放宽到待审／拒绝。",
+        "检索可见范围扩大不等于详情、工作稿或下载权限同步放宽，仍由各自身份检查控制。",
         "superconductor_records 不属于当前运行模型，任何读取路径不得查询该表。"
       ],
       "code": "goserver/handlers/search_results.go",

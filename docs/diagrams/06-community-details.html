@@ -193,17 +193,18 @@
     {
       "id": "ai-generate",
       "title": "读取前文、检索并生成",
-      "summary": "任务开始读前文；每次检索至多8片段",
+      "summary": "任务开始读前文；问题经独立 Embedding 检索至多8片段",
       "owner": "Python 生成器",
-      "description": "Worker 取得容量租约并认领同题队首后，在任务开始时只读取当时 origin=ai 且 status=visible 的可用公开首答与追加段，保存前文 manifest 快照，而不是使用入队时旧前文；公开真人答案不进入模型前文。每次新语义检索以 top_k=8 最多取 8 个片段，再过滤当前批准且 revision 匹配的来源，并可合并历史引用。",
+      "description": "Worker 取得容量租约并认领同题队首后，在任务开始时只读取当时 origin=ai 且 status=visible 的可用公开首答与追加段，保存前文 manifest 快照，而不是使用入队时旧前文；公开真人答案不进入模型前文。retrieve_sources 调用 search_by_semantics(question, top_k=8)，问题先由独立 Embedding 以 purpose=query 向量化，再查当前 Qdrant 主集合；之后过滤当前批准且 revision 匹配的来源，并可合并历史引用。",
       "notes": [
         "context_rows 明确限定 Entry.origin='ai' 与 Entry.status='visible'；即使真人答案公开可读，也不会成为 [A...] 前文。",
         "前文是待回应观点，不是论文证据；读取时排除来源或祖先依赖已失效的内容。",
         "top_k=8 限制每次新检索片段数，合并历史来源后的提示来源总数不应误称为始终只有 8。",
+        "当前本机验收链为 Qwen3-Embedding-4B，经阿里云 HTTPS 与受限常驻 SSH 中转；该变化不改变聊天模型、前文、来源过滤或发布复核，阿里云生产站点自身模型和索引未切换。",
         "回答只能引用提供的 [S...] 与 [A...] 标识，禁止虚构 DOI、URL 或参考文献。",
         "空公开库与 retrieval_failed 走不同分支。"
       ],
-      "code": "backend/community/answers.py::run / context_rows / manifest；backend/community/generation.py::retrieve_sources / approved_sources / create_answer",
+      "code": "backend/community/answers.py::run / context_rows / manifest；backend/community/generation.py::retrieve_sources / approved_sources / create_answer；backend/ingest/embedder.py；backend/rag/search/vector_search.py",
       "links": [{"href": "06-community.html#ai-generate", "label": "返回本功能主干"}]
     },
     {
@@ -564,8 +565,8 @@
       "label": "检索异常",
       "title": "retrieval_failed",
       "summary": "检索失败，不冒充空库",
-      "owner": "Python 生成器 / Qdrant",
-      "description": "公开库非空时，每次新语义检索最多取 8 个片段；数据库检查或 search_by_semantics 等检索过程发生异常会转换为 GenerationError('retrieval_failed')，当前任务失败，不按空库继续生成。",
+      "owner": "Python 生成器 / Embedding / Qdrant",
+      "description": "公开库非空时，每次新语义检索最多取 8 个片段；数据库检查、Embedding 请求、HTTPS／SSH 中转或 Qdrant 查询等检索过程发生异常会转换为 GenerationError('retrieval_failed')，当前任务失败，不按空库继续生成，也不自动回退付费 Embedding。",
       "notes": [
         "retrieval_failed 与空公开库返回 [] 是不同结果。",
         "失败不会伪造空来源回答，也不会阻塞同题后续任务永久等待。"

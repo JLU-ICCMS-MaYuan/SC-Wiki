@@ -86,7 +86,7 @@
       "title": "retained 模型与独立分页",
       "summary": "state_key 为空，按独立总数单独翻页",
       "owner": "FastAPI / MySQL",
-      "description": "仅查询当前已批准版本的 retained 完整 model，independent_only 限定 state_key 为 NULL 或空串；每页 20 条，以 structure_page 和独立 total 执行 offset／limit 分页。",
+      "description": "查询当前版本的 retained 完整 model，independent_only 限定 state_key 为 NULL 或空串；普通身份仅限当前批准版，已批准管理员和超级管理员可查询 approved、pending、rejected 并按状态筛选。每页 20 条，以 structure_page 和独立 total 分页。",
       "notes": [],
       "code": "backend/api/structural_records.py；frontend/src/components/PaperStructuralCollection.tsx",
       "links": [
@@ -152,10 +152,10 @@
     },
     {
       "id": "perm-scope",
-      "title": "公开范围硬约束",
-      "summary": "仅已批准同版本内容可被检索",
+      "title": "身份对应的检索范围",
+      "summary": "普通身份限当前批准版；已批准管理员可按审核状态检索",
       "owner": "Go API / MySQL",
-      "description": "仅已批准同版本内容可被检索。详细行为、边界和来源见独立详情页。",
+      "description": "普通身份仅检索当前批准版本；已批准管理员和超级管理员可检索当前版本的 approved、pending、rejected 内容。范围由服务端认证身份决定，详细边界见独立详情页。",
       "notes": [],
       "code": "goserver/handlers/search_results.go",
       "links": [
